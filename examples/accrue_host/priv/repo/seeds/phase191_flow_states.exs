@@ -313,24 +313,239 @@ _one_row_customer =
     }
   )
 
+# Realistic fictional book-of-business for the 26 page customers (Part C).
+#
+# Every stable identifier is preserved EXACTLY — id, owner_id, and the
+# `cus_phase191_host_page_NN` processor_id (asserted + counted by the host
+# seed tests). Only name/email/owner_type/metadata/data and the NEW linked
+# payment-method / subscription / invoice / charge rows are realistic.
+#
+# IDEMPOTENCY: every new row routes through `upsert_processor` keyed on a
+# deterministic processor_id derived from the page index, so re-seeding is a
+# no-op. Faker output is non-deterministic, but the idempotency test asserts
+# COUNTS (not names) and `upsert_processor` keeps first-insert values stable.
+#
+# Card brands cycle deterministically for visual variety.
+card_brands = {"Visa", "Mastercard", "American Express", "Discover"}
+
+# Owner-type variety so the /admin/customers owner-type filter has real options.
+owner_type_for = fn index ->
+  cond do
+    rem(index, 9) == 0 -> "Team"
+    rem(index, 5) == 0 -> "Workspace"
+    rem(index, 3) == 0 -> "User"
+    true -> "Organization"
+  end
+end
+
+# A page customer gets a payment method on file UNLESS rem(index, 7) == 0,
+# leaving a few intentionally "Missing" so the column shows both states.
+# (indices 7, 14, 21 → 3 missing, 23 with a PM on file.)
+page_has_payment_method? = fn index -> rem(index, 7) != 0 end
+
+# Bounded linked billing graph: the first N page customers each get a coherent
+# subscription + invoice + charge so their detail pages, KPIs, and signals
+# populate. N kept small to keep reset time bounded (T-knk-03).
+linked_graph_count = 10
+page_has_linked_graph? = fn index -> index <= linked_graph_count end
+
 Enum.each(1..26, fn index ->
   padded = String.pad_leading(Integer.to_string(index), 2, "0")
   suffix = String.pad_leading(Integer.to_string(index), 12, "0")
 
-  upsert_processor.(
-    Customer,
-    &Customer.changeset/2,
-    "19100000-0000-4000-8000-#{suffix}",
-    "cus_phase191_host_page_#{padded}",
-    %{
-      owner_type: "Organization",
-      owner_id: "19100000-0000-4001-8000-#{suffix}",
-      name: "Phase 191 Page Customer #{padded}",
-      email: "phase191-page-#{padded}@example.com",
-      metadata: %{"phase191_boundary" => "more-than-one-page"},
+  owner_type = owner_type_for.(index)
+
+  display_name =
+    case owner_type do
+      "User" -> Faker.Person.name()
+      _ -> Faker.Company.name()
+    end
+
+  customer_id = "19100000-0000-4000-8000-#{suffix}"
+
+  page_customer =
+    upsert_processor.(
+      Customer,
+      &Customer.changeset/2,
+      customer_id,
+      "cus_phase191_host_page_#{padded}",
+      %{
+        owner_type: owner_type,
+        owner_id: "19100000-0000-4001-8000-#{suffix}",
+        name: display_name,
+        email: Faker.Internet.email(),
+        metadata: %{
+          "phase191_boundary" => "more-than-one-page",
+          "phase191_persona" => "demo-book-of-business"
+        },
+        data: %{"phase191_index" => index}
+      }
+    )
+
+  # --- Payment method on file (drives the "With payment method" KPI) --------
+  if page_has_payment_method?.(index) do
+    brand = elem(card_brands, rem(index, tuple_size(card_brands)))
+    last4 = padded <> padded
+    pm_id = "19100000-0000-4002-8000-#{suffix}"
+
+    payment_method =
+      upsert_processor.(
+        Accrue.Billing.PaymentMethod,
+        &Accrue.Billing.PaymentMethod.changeset/2,
+        pm_id,
+        "pm_phase191_host_page_#{padded}",
+        %{
+          customer_id: page_customer.id,
+          type: "card",
+          is_default: true,
+          fingerprint: "fp_phase191_host_page_#{padded}",
+          card_brand: brand,
+          card_last4: last4,
+          card_exp_month: rem(index, 12) + 1,
+          card_exp_year: 2030 + rem(index, 4),
+          exp_month: rem(index, 12) + 1,
+          exp_year: 2030 + rem(index, 4),
+          metadata: %{"phase191_persona" => "demo-book-of-business"},
+          data: %{"phase191_index" => index}
+        }
+      )
+
+    if page_customer.default_payment_method_id != payment_method.id do
+      page_customer
+      |> Customer.changeset(%{default_payment_method_id: payment_method.id})
+      |> Repo.update!()
+    end
+  end
+
+  # --- Coherent linked subscription + invoice + charge (bounded subset) ------
+  #
+  # Status / currency mix across the first 10: mostly active USD, a couple
+  # trialing, one past_due (with a dunning anchor so the recovery signal
+  # lights up), and one JPY zero-decimal invoice for currency variety.
+  if page_has_linked_graph?.(index) do
+    {sub_status, charge_status, invoice_status, currency} =
+      cond do
+        index == 3 -> {:past_due, "failed", :open, "usd"}
+        index == 6 -> {:trialing, "succeeded", :open, "usd"}
+        index == 9 -> {:trialing, "succeeded", :paid, "usd"}
+        index == 10 -> {:active, "succeeded", :paid, "jpy"}
+        true -> {:active, "succeeded", :paid, "usd"}
+      end
+
+    # Internally-consistent amounts. JPY is zero-decimal (no ×100).
+    amount_minor =
+      case currency do
+        "jpy" -> 50_000
+        _ -> 4900 + index * 100
+      end
+
+    sub_attrs = %{
+      customer_id: page_customer.id,
+      status: sub_status,
+      current_period_start: days_ago.(rem(index, 20) + 1),
+      current_period_end: days_from_now.(28 - rem(index, 10)),
+      cancel_at_period_end: false,
+      lock_version: 1,
+      metadata: %{"phase191_persona" => "demo-book-of-business"},
       data: %{"phase191_index" => index}
     }
-  )
+
+    sub_attrs =
+      if sub_status == :past_due do
+        Map.merge(sub_attrs, %{
+          past_due_since: days_ago.(5),
+          dunning_campaign_started_at: days_ago.(5)
+        })
+      else
+        sub_attrs
+      end
+
+    sub_attrs =
+      if sub_status == :trialing do
+        Map.merge(sub_attrs, %{
+          trial_start: days_ago.(3),
+          trial_end: days_from_now.(11)
+        })
+      else
+        sub_attrs
+      end
+
+    sub_changeset_fun =
+      if sub_status == :active do
+        &Subscription.changeset/2
+      else
+        &Subscription.force_status_changeset/2
+      end
+
+    page_subscription =
+      upsert_processor.(
+        Subscription,
+        sub_changeset_fun,
+        "19100000-0000-4003-8000-#{suffix}",
+        "sub_phase191_host_page_#{padded}",
+        sub_attrs
+      )
+
+    {amount_paid_minor, amount_remaining_minor, paid_at} =
+      case invoice_status do
+        :paid -> {amount_minor, 0, days_ago.(rem(index, 10) + 1)}
+        _ -> {0, amount_minor, nil}
+      end
+
+    _page_invoice =
+      upsert_processor.(
+        Invoice,
+        &Invoice.force_status_changeset/2,
+        "19100000-0000-4004-8000-#{suffix}",
+        "in_phase191_host_page_#{padded}",
+        %{
+          customer_id: page_customer.id,
+          subscription_id: page_subscription.id,
+          status: invoice_status,
+          number: "PHASE191-PAGE-#{padded}",
+          currency: currency,
+          subtotal_minor: amount_minor,
+          tax_minor: 0,
+          total_minor: amount_minor,
+          total_cents: amount_minor,
+          amount_due_minor: amount_minor,
+          amount_paid_minor: amount_paid_minor,
+          amount_remaining_minor: amount_remaining_minor,
+          collection_method: "charge_automatically",
+          billing_reason: "subscription_cycle",
+          finalized_at: days_ago.(rem(index, 10) + 2),
+          paid_at: paid_at,
+          period_start: days_ago.(31),
+          period_end: days_ago.(1),
+          metadata: %{"phase191_persona" => "demo-book-of-business"},
+          data: %{"phase191_index" => index}
+        }
+      )
+
+    _page_charge =
+      upsert_processor.(
+        Charge,
+        &Charge.changeset/2,
+        "19100000-0000-4005-8000-#{suffix}",
+        "ch_phase191_host_page_#{padded}",
+        %{
+          customer_id: page_customer.id,
+          subscription_id: page_subscription.id,
+          status: charge_status,
+          currency: currency,
+          amount_cents: amount_minor,
+          metadata: %{"phase191_persona" => "demo-book-of-business"},
+          data: %{"phase191_index" => index}
+        }
+      )
+  end
 end)
+
+# Fixture-count totals AFTER this loop (for seeds_idempotency_test.exs):
+#   subscriptions sub_phase191_host%: 2 existing (active + at_risk) + 10 page = 12
+#   invoices      in_phase191_host%:  1 existing (boundary)        + 10 page = 11
+#   charges       ch_phase191_host%:  1 existing (boundary)        + 10 page = 11
+#   payment_methods pm_phase191_host_page%: 23 (NOT asserted by any test)
+#   customers cus_phase191_host%: unchanged at 28
 
 :ok
