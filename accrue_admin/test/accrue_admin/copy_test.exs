@@ -102,10 +102,7 @@ defmodule AccrueAdmin.CopyTest do
         owner_scope: "organization org_phase191"
       )
 
-    bulk_webhooks =
-      Copy.webhooks_bulk_replay_confirm_question(3,
-        owner_scope: "organization org_phase191"
-      )
+    bulk_webhooks = Copy.webhooks_retry_confirm_question(3)
 
     assert invoice =~ "Void invoice"
     assert invoice =~ "invoice in_phase191"
@@ -128,9 +125,8 @@ defmodule AccrueAdmin.CopyTest do
     assert single_webhook =~ "organization org_phase191"
     assert single_webhook =~ "admin audit event"
 
-    assert bulk_webhooks =~ "Replay 3 failed or dead webhook rows"
-    assert bulk_webhooks =~ "organization org_phase191"
-    assert bulk_webhooks =~ "admin audit event"
+    assert bulk_webhooks =~ "Retry 3 webhook events"
+    assert bulk_webhooks =~ "failed every automatic retry"
 
     refute_vague_copy!([
       invoice,

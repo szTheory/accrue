@@ -48,40 +48,38 @@ defmodule AccrueAdmin.Live.WebhooksLive do
   end
 
   @impl true
-  def handle_event("prepare_bulk_replay", _params, socket) do
-    filter = dlq_filter(socket.assigns.params)
-    count = Webhooks.bulk_replay_count(socket.assigns.current_owner_scope, Map.new(filter))
-
-    if count == 0 do
-      {:noreply, push_flash(socket, :warning, Copy.webhooks_bulk_no_rows_warning())}
+  def handle_info({:data_table_bulk_action, "retry_selected", ids}, socket) do
+    if ids == [] do
+      {:noreply, push_flash(socket, :warning, Copy.webhooks_retry_no_selection_warning())}
     else
-      {:noreply, assign(socket, :pending_bulk_replay, %{count: count, filter: filter})}
+      {:noreply, assign(socket, :pending_bulk_replay, %{ids: ids, count: length(ids)})}
     end
   end
 
+  @impl true
   def handle_event("cancel_bulk_replay", _params, socket) do
     {:noreply, assign(socket, :pending_bulk_replay, nil)}
   end
 
-  def handle_event("confirm_bulk_replay", _params, socket) do
-    %{count: count, filter: filter} = socket.assigns.pending_bulk_replay
+  def handle_event("confirm_retry_selected", _params, socket) do
+    %{ids: ids, count: count} = socket.assigns.pending_bulk_replay
 
-    case replay_scope(socket.assigns.current_owner_scope, filter) do
+    case scope_selected_ids(socket.assigns.current_owner_scope, ids) do
       [] ->
         {:noreply,
          socket
          |> assign(:pending_bulk_replay, nil)
          |> push_flash(:warning, Copy.Locked.replay_blocked())}
 
-      ids ->
-        case replay_scoped_rows(ids) do
+      scoped_ids ->
+        case replay_scoped_rows(scoped_ids) do
           {:ok, result} ->
             socket =
               socket
-              |> record_bulk_replay(filter, count, result)
+              |> record_bulk_replay(scoped_ids, count, result)
               |> assign(:pending_bulk_replay, nil)
               |> assign(:summary, webhook_summary(socket.assigns.current_owner_scope))
-              |> push_flash(:info, bulk_replay_success(socket.assigns.current_owner_scope))
+              |> push_flash(:info, Copy.webhooks_retry_success(count))
 
             {:noreply, socket}
 
@@ -100,17 +98,12 @@ defmodule AccrueAdmin.Live.WebhooksLive do
     end)
   end
 
-  defp replay_scope(nil, filter) do
-    filter
-    |> DLQ.list()
-    |> Enum.map(& &1.id)
-  end
+  # Keep only the selected ids that resolve inside the active owner scope, mirroring
+  # the per-row ownership check the filtered flow used.
+  defp scope_selected_ids(nil, ids), do: ids
 
-  defp replay_scope(owner_scope, filter) do
-    filter
-    |> DLQ.list()
-    |> Enum.map(& &1.id)
-    |> Enum.filter(fn id ->
+  defp scope_selected_ids(owner_scope, ids) do
+    Enum.filter(ids, fn id ->
       match?({:ok, _}, Webhooks.detail(id, owner_scope))
     end)
   end
@@ -136,8 +129,8 @@ defmodule AccrueAdmin.Live.WebhooksLive do
           />
           <h1 class="ax-display">Replay, inspect, and trace webhook delivery</h1>
           <p class="ax-body ax-page-copy">
-            Operators can filter inbound webhook rows, jump into forensic payload detail, and
-            bulk requeue the current dead-letter slice without adding a second replay system.
+            Filter inbound webhook events, open any event for full payload detail, and select
+            the ones that need a re-run.
           </p>
         </header>
 
@@ -167,48 +160,31 @@ defmodule AccrueAdmin.Live.WebhooksLive do
           </KpiCard.kpi_card>
         </section>
 
-        <section class="ax-card">
-          <header class="ax-page-header">
-            <p class="ax-eyebrow">DLQ bulk replay</p>
-            <h3 class="ax-heading">Requeue the filtered dead-letter slice</h3>
-            <p class="ax-body">
-              Bulk replay respects the existing DLQ caps and records one admin audit event for the
-              whole intent.
-            </p>
-          </header>
+        <p class="ax-body ax-page-copy" data-role="webhooks-retry-helper">
+          <%= Copy.webhooks_retry_selected_helper() %>
+        </p>
 
-          <button
-            type="button"
-            phx-click="prepare_bulk_replay"
-            class="ax-button ax-button-secondary"
-            data-role="prepare-bulk-replay"
-          >
-            Replay filtered DLQ rows
-          </button>
-
-          <section :if={@pending_bulk_replay} class="ax-card" data-role="bulk-replay-confirm">
-            <p class="ax-label">Confirm bulk replay</p>
-            <p class="ax-body">
-              <%= bulk_replay_confirmation(@pending_bulk_replay.count, @current_owner_scope) %>
-            </p>
-            <div class="ax-page-header">
-              <button
-                type="button"
-                phx-click="confirm_bulk_replay"
-                class="ax-button ax-button-primary"
-                data-role="confirm-bulk-replay"
-              >
-                Confirm bulk replay
-              </button>
-              <button
-                type="button"
-                phx-click="cancel_bulk_replay"
-                class="ax-button ax-button-ghost"
-              >
-                Cancel
-              </button>
-            </div>
-          </section>
+        <section :if={@pending_bulk_replay} class="ax-card" data-role="bulk-replay-confirm">
+          <p class="ax-body">
+            <%= Copy.webhooks_retry_confirm_question(@pending_bulk_replay.count) %>
+          </p>
+          <div class="ax-page-header">
+            <button
+              type="button"
+              phx-click="confirm_retry_selected"
+              class="ax-button ax-button-primary"
+              data-role="confirm-retry-selected"
+            >
+              <%= Copy.webhooks_retry_selected_label() %>
+            </button>
+            <button
+              type="button"
+              phx-click="cancel_bulk_replay"
+              class="ax-button ax-button-ghost"
+            >
+              Cancel
+            </button>
+          </div>
         </section>
 
         <.live_component
@@ -218,6 +194,10 @@ defmodule AccrueAdmin.Live.WebhooksLive do
           current_owner_scope={@current_owner_scope}
           path={@table_path}
           params={@params}
+          selectable={true}
+          row_label={{"event", "events"}}
+          bulk_action_label={Copy.webhooks_retry_selected_label()}
+          bulk_action_event="retry_selected"
           columns={[
             %{label: "Webhook", render: &webhook_link(&1, @admin_mount_path, @current_owner_scope)},
             %{id: :type, label: "Type"},
@@ -282,24 +262,21 @@ defmodule AccrueAdmin.Live.WebhooksLive do
     }
   end
 
-  defp record_bulk_replay(socket, filter, count, result) do
+  defp record_bulk_replay(socket, ids, count, result) do
     current_admin = socket.assigns.current_admin
 
     {:ok, _event} =
       Events.record(%{
         type: "admin.webhook.bulk_replay.completed",
         subject_type: "WebhookBatch",
-        subject_id: "filtered",
+        subject_id: "selected",
         actor_type: "admin",
         actor_id: Auth.actor_id(current_admin),
         data: %{
           "count" => count,
           "requeued" => result.requeued,
           "skipped" => Map.get(result, :skipped, 0),
-          "filter" =>
-            Enum.into(filter, %{}, fn {key, value} ->
-              {to_string(key), normalize_filter_value(value)}
-            end)
+          "ids" => ids
         }
       })
 
@@ -313,27 +290,6 @@ defmodule AccrueAdmin.Live.WebhooksLive do
     socket
   end
 
-  defp dlq_filter(params) do
-    decoded = Webhooks.decode_filter(params)
-
-    Enum.reduce(decoded, [], fn
-      {:status, status}, acc when status in [:failed, :dead] -> [{:status, status} | acc]
-      {:type, type}, acc -> [{:type, type} | acc]
-      {:livemode, livemode}, acc -> [{:livemode, livemode} | acc]
-      {_key, _value}, acc -> acc
-    end)
-    |> Enum.reverse()
-  end
-
-  defp normalize_filter_value(value) when is_atom(value), do: Atom.to_string(value)
-  defp normalize_filter_value(value), do: value
-
-  defp bulk_replay_confirmation(count, owner_scope) do
-    Copy.webhooks_bulk_replay_confirm_question(count,
-      owner_scope: owner_scope_copy(owner_scope)
-    )
-  end
-
   defp bulk_replay_error_copy(socket) do
     Copy.page_state_copy(:recoverable_error,
       resource: "webhook bulk replay",
@@ -341,11 +297,6 @@ defmodule AccrueAdmin.Live.WebhooksLive do
       recovery: "retry from the filtered webhook queue"
     ).body
   end
-
-  defp bulk_replay_success(%{mode: :organization}),
-    do: Copy.Locked.bulk_replay_success_organization()
-
-  defp bulk_replay_success(_owner_scope), do: Copy.Locked.bulk_replay_success_global()
 
   defp push_flash(socket, kind, message) do
     assign(socket, :flashes, [%{kind: kind, message: message} | socket.assigns.flashes])

@@ -27,8 +27,4 @@ defmodule AccrueAdmin.Copy.Locked do
 
     "Replay webhook #{webhook_id} for #{owner_scope}: This will requeue the webhook delivery and record an admin audit event. Continue?"
   end
-
-  def bulk_replay_success_organization, do: replay_success_organization()
-
-  def bulk_replay_success_global, do: "Bulk webhook replay requested."
 end

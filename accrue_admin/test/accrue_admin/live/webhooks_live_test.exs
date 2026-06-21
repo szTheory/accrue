@@ -55,7 +55,7 @@ defmodule AccrueAdmin.WebhooksLiveTest do
     :ok
   end
 
-  test "filters webhook rows and renders organization-scoped bulk replay confirmation", %{
+  test "filters webhook rows and runs a selection-driven retry with plain-language confirm", %{
     conn: conn
   } do
     conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
@@ -72,9 +72,51 @@ defmodule AccrueAdmin.WebhooksLiveTest do
     assert html =~ "evt_dead"
     refute html =~ "evt_ok"
 
-    html = render_click(element(view, "[data-role='prepare-bulk-replay']"))
-    assert html =~ "Confirm bulk replay"
-    assert html =~ "Replay 1 failed or dead webhook rows for"
+    # Plain-language helper line, no jargon, and the old card/jargon is gone.
+    assert html =~ "Events that failed every automatic retry land here"
+    refute html =~ "DLQ bulk replay"
+    refute html =~ "dead-letter slice"
+    refute html =~ "Replay filtered DLQ rows"
+
+    # Select the visible dead-lettered row, then click the primary Retry selected.
+    render_click(element(view, "[data-role='toggle-all']"))
+    render_click(element(view, "[data-role='bulk-action']"))
+    # bulk-action notifies the parent via send/2 -> handle_info; render/1 picks it up.
+    html = render(view)
+
+    assert html =~ "Retry 1 webhook event?"
+    assert html =~ "failed every automatic retry"
+
+    html = render_click(element(view, "[data-role='confirm-retry-selected']"))
+    assert html =~ "Retrying 1 event"
+  end
+
+  test "selection-driven retry records an audit event of the selected ids and count", %{
+    conn: conn
+  } do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+
+    dead = TestRepo.one!(from(e in WebhookEvent, where: e.processor_event_id == "evt_dead"))
+
+    {:ok, view, _html} = live(conn, "/billing/webhooks?status=dead")
+
+    render_click(element(view, "[data-role='toggle-all']"))
+    render_click(element(view, "[data-role='bulk-action']"))
+    render_click(element(view, "[data-role='confirm-retry-selected']"))
+
+    event =
+      TestRepo.one!(
+        from(e in Event,
+          where: e.type == "admin.webhook.bulk_replay.completed",
+          order_by: [desc: e.inserted_at],
+          limit: 1
+        )
+      )
+
+    assert event.subject_type == "WebhookBatch"
+    assert event.subject_id == "selected"
+    assert event.data["count"] == 1
+    assert event.data["ids"] == [dead.id]
   end
 
   test "scoped bulk replay counts ignore rows outside the active organization" do
@@ -146,11 +188,12 @@ defmodule AccrueAdmin.WebhooksLiveTest do
         admin_organization_ids: ["org_allowed"]
       )
 
-    {:ok, view, _html} =
+    {:ok, _view, html} =
       live(conn, "/billing/webhooks?status=dead&type=invoice.payment_failed&org=allowed-org")
 
-    html = render_click(element(view, "[data-role='prepare-bulk-replay']"))
-    assert html =~ "No failed or dead-lettered webhook rows match the current filters."
+    # The out-of-scope dead row is filtered out of the org-scoped list entirely, so
+    # it is never selectable and never retried — no replay event is emitted for it.
+    refute html =~ denied_webhook.id
 
     refute TestRepo.exists?(
              from(event in Event,

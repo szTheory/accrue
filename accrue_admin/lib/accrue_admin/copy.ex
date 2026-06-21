@@ -663,17 +663,34 @@ defmodule AccrueAdmin.Copy do
     do:
       "Webhook deliveries appear here after Stripe events are recorded for this organization. If you expected deliveries, check filters or confirm your endpoint is receiving traffic."
 
-  def webhooks_bulk_replay_confirm_question(count),
-    do: webhooks_bulk_replay_confirm_question(count, owner_scope: "the active organization scope")
+  @doc "Helper line above the webhooks table — plain-language JTBD framing."
+  def webhooks_retry_selected_helper,
+    do:
+      "Events that failed every automatic retry land here. Filter, select the ones to re-run, then Retry selected."
 
-  def webhooks_bulk_replay_confirm_question(count, opts) do
-    owner_scope = option(opts, :owner_scope, "the active organization")
+  @doc "Primary selection action on the webhooks list."
+  def webhooks_retry_selected_label, do: "Retry selected"
 
-    "Replay #{count} failed or dead webhook rows for #{owner_scope}: This will requeue matching webhook deliveries and record an admin audit event. Continue?"
+  @doc """
+  Plural-aware confirm question for retrying selected webhook events.
+  `opts` is accepted for symmetry with scoped copy but currently unused.
+  """
+  def webhooks_retry_confirm_question(count), do: webhooks_retry_confirm_question(count, [])
+
+  def webhooks_retry_confirm_question(count, _opts) do
+    word = if count == 1, do: "webhook event", else: "webhook events"
+
+    "Retry #{count} #{word}? They failed every automatic retry — retrying runs them through processing again."
   end
 
-  def webhooks_bulk_no_rows_warning,
-    do: "No failed or dead-lettered webhook rows match the current filters."
+  @doc "Guard flash when Retry selected is triggered with nothing selected."
+  def webhooks_retry_no_selection_warning, do: "Select at least one event to retry first."
+
+  @doc "Success flash after retrying selected events (plural-aware)."
+  def webhooks_retry_success(count) do
+    word = if count == 1, do: "event", else: "events"
+    "Retrying #{count} #{word}…"
+  end
 
   def step_up_submit_label, do: "Verify identity"
 
