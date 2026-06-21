@@ -379,6 +379,17 @@ defmodule AccrueAdmin.NavigationComponentsTest do
       assert html =~ "ax-badge ax-badge-danger"
     end
 
+    test "nav links use live navigation (data-phx-link redirect)" do
+      html =
+        render_component(&Sidebar.sidebar/1, %{
+          brand: %{logo_url: nil, app_name: "Test"},
+          current_path: "/billing/",
+          items: make_items()
+        })
+
+      assert html =~ ~s(data-phx-link="redirect")
+    end
+
     test "link list div has hidden=true for collapsed group with no badge" do
       # Catalog group has badge: nil and collapsible: true → should be hidden initially
       html =

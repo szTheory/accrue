@@ -23,7 +23,7 @@ topbar.config({
 });
 const reduce = window.matchMedia("(prefers-reduced-motion: reduce)");
 window.addEventListener("phx:page-loading-start", () =>
-  topbar.show(reduce.matches ? 0 : 300)
+  topbar.show(reduce.matches ? 0 : 120)
 );
 window.addEventListener("phx:page-loading-stop", () => topbar.hide());
 
