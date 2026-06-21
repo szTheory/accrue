@@ -490,6 +490,12 @@ defmodule AccrueAdmin.Copy do
   # but offer a way back when a filter is what emptied the list.
   def data_table_clear_filters_label, do: "Clear filters"
 
+  def customers_index_heading, do: "Customers"
+
+  def customers_index_description,
+    do:
+      "Everyone you bill through Accrue for this organization. Search by name, email, or customer ID."
+
   def customers_index_empty_title, do: "No customers for this organization yet"
 
   def customers_index_empty_copy,
@@ -706,7 +712,7 @@ defmodule AccrueAdmin.Copy do
   @doc "Step-up dismiss control label."
   def step_up_cancel_label, do: "Cancel"
 
-  def customers_index_table_caption, do: "Searchable customer projections"
+  def customers_index_table_caption, do: "Customers"
 
   def webhooks_index_table_caption, do: "Replay, inspect, and trace webhook delivery"
 

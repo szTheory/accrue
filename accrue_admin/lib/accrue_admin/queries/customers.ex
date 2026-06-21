@@ -57,6 +57,24 @@ defmodule AccrueAdmin.Queries.Customers do
     |> Repo.aggregate(:count)
   end
 
+  @doc """
+  Distinct customer `owner_type` values visible in the active owner scope, sorted.
+
+  Mirrors `Queries.Webhooks.distinct_types/1` but pushes scoping into SQL via
+  `scope_query/2` (customers are SQL-scopable, unlike webhooks whose ownership is
+  proven per-row in Elixir). Powers the customers list owner-type dropdown filter.
+  """
+  def distinct_owner_types(owner_scope) do
+    Customer
+    |> scope_query(owner_scope)
+    |> select([customer], customer.owner_type)
+    |> distinct(true)
+    |> Repo.all()
+    |> Enum.reject(&is_nil/1)
+    |> Enum.uniq()
+    |> Enum.sort()
+  end
+
   def detail(id, owner_scope) when is_binary(id) do
     Customer
     |> scope_query(owner_scope)

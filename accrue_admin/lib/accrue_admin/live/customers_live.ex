@@ -7,8 +7,7 @@ defmodule AccrueAdmin.Live.CustomersLive do
 
   alias Accrue.Billing.Customer
   alias Accrue.Repo
-  alias AccrueAdmin.BillingPresentation
-  alias AccrueAdmin.Components.{AppShell, Breadcrumbs, DataTable, FlashGroup, KpiCard}
+  alias AccrueAdmin.Components.{AppShell, Breadcrumbs, DataTable, FlashGroup, IdBadge, KpiCard}
   alias AccrueAdmin.Copy
   alias AccrueAdmin.Queries.Customers
 
@@ -36,7 +35,11 @@ defmodule AccrueAdmin.Live.CustomersLive do
          socket.assigns.current_owner_scope
        )
      )
-     |> assign(:summary, customer_summary(socket.assigns.current_owner_scope))}
+     |> assign(:summary, customer_summary(socket.assigns.current_owner_scope))
+     |> assign(
+       :owner_type_options,
+       Customers.distinct_owner_types(socket.assigns.current_owner_scope)
+     )}
   end
 
   @impl true
@@ -73,11 +76,8 @@ defmodule AccrueAdmin.Live.CustomersLive do
               %{label: "Customers"}
             ]}
           />
-          <h1 class="ax-display">Searchable customer projections</h1>
-          <p class="ax-body ax-page-copy">
-            Customer rows come from the shared admin query layer and stay backed by local billing
-            projections only.
-          </p>
+          <h1 class="ax-display"><%= Copy.customers_index_heading() %></h1>
+          <p class="ax-body ax-page-copy"><%= Copy.customers_index_description() %></p>
         </header>
 
         <FlashGroup.flash_group flashes={flash_messages(@flash)} />
@@ -93,10 +93,6 @@ defmodule AccrueAdmin.Live.CustomersLive do
           >
             <:meta>Default payment method present</:meta>
           </KpiCard.kpi_card>
-
-          <KpiCard.kpi_card label="Owner types" value={Integer.to_string(@summary.owner_type_count)}>
-            <:meta>Distinct host billable types</:meta>
-          </KpiCard.kpi_card>
         </section>
 
         <.live_component
@@ -108,25 +104,25 @@ defmodule AccrueAdmin.Live.CustomersLive do
           params={@params}
           columns={[
             %{label: "Customer", render: &customer_link(&1, @admin_mount_path, @current_owner_scope)},
-            %{id: :owner_type, label: "Owner type"},
-            %{id: :owner_id, label: "Owner id"},
-            %{label: "Billing signals", render: &billing_signals_cell/1},
-            %{id: :processor_id, label: "Processor id"},
-            %{label: "Default PM", render: &default_payment_method_label/1}
+            %{label: "Payment method", render: &default_payment_method_label/1},
+            %{label: "ID", render: &id_badge_cell/1}
           ]}
           card_title={&card_title/1}
           card_fields={[
-            %{id: :owner_type, label: "Owner type"},
-            %{id: :owner_id, label: "Owner id"},
-            %{label: "Billing signals", render: &billing_signals_cell/1},
-            %{label: "Default PM", render: &default_payment_method_label/1}
+            %{label: "Payment method", render: &default_payment_method_label/1},
+            %{label: "ID", render: &id_badge_cell/1}
           ]}
           filter_fields={[
             %{id: :q, label: "Search"},
-            %{id: :owner_type, label: "Owner type"},
+            %{
+              id: :owner_type,
+              label: "Owner type",
+              type: :select,
+              options: @owner_type_options
+            },
             %{
               id: :has_default_payment_method,
-              label: "Default PM",
+              label: "Payment method",
               type: :select,
               options: [{"true", "On file"}, {"false", "Missing"}]
             }
@@ -161,11 +157,7 @@ defmodule AccrueAdmin.Live.CustomersLive do
       with_default_payment_method_count:
         customers
         |> where([customer], not is_nil(customer.default_payment_method_id))
-        |> Repo.aggregate(:count, :id),
-      owner_type_count:
-        customers
-        |> select([customer], count(fragment("distinct ?", customer.owner_type)))
-        |> Repo.one()
+        |> Repo.aggregate(:count, :id)
     }
   end
 
@@ -179,28 +171,40 @@ defmodule AccrueAdmin.Live.CustomersLive do
 
   defp scoped_customers(_owner_scope), do: Customer
 
-  defp billing_signals_cell(row) do
-    ownership = BillingPresentation.ownership_label(row)
-    tax = BillingPresentation.tax_health_label(BillingPresentation.tax_health(row))
-    escaped_o = ownership |> Phoenix.HTML.html_escape() |> Phoenix.HTML.safe_to_string()
-    escaped_t = tax |> Phoenix.HTML.html_escape() |> Phoenix.HTML.safe_to_string()
+  # Customer cell: primary name/identifier as a link, with email stacked beneath it
+  # so the column reads as a find-and-open target (name + contact at a glance).
+  defp customer_link(row, mount_path, owner_scope) do
+    label = row.name || row.email || row.processor_id || row.id
+    href = scoped_path(mount_path, "/customers/#{row.id}", owner_scope)
+    escaped = label |> Phoenix.HTML.html_escape() |> Phoenix.HTML.safe_to_string()
+
+    email_line =
+      if row.email && row.email != label do
+        escaped_email = row.email |> Phoenix.HTML.html_escape() |> Phoenix.HTML.safe_to_string()
+        ~s(<span class="ax-body ax-text-muted ax-type-code-xs">#{escaped_email}</span>)
+      else
+        ""
+      end
 
     Phoenix.HTML.raw(
-      ~s(<span class="ax-chip ax-label">#{escaped_o}</span> <span class="ax-chip ax-label">#{escaped_t}</span>)
+      ~s(<span class="ax-stack-xs"><a href="#{href}" class="ax-link">#{escaped}</a>#{email_line}</span>)
     )
   end
 
-  defp customer_link(row, mount_path, owner_scope) do
-    label =
-      row.name || row.email || row.processor_id || row.id
+  # Click-to-copy processor (or local) id chip, rendered via the shared IdBadge
+  # component. A unique DOM id per row gives each chip its own Clipboard hook
+  # instance, so copy keeps working on infinite-scroll-appended/filter-re-rendered rows.
+  defp id_badge_cell(row) do
+    id_value = row.processor_id || to_string(row.id)
+    assigns = %{__changed__: %{}, dom_id: "ax-id-badge-" <> to_string(row.id), id_value: id_value}
 
-    href = scoped_path(mount_path, "/customers/#{row.id}", owner_scope)
-    escaped = label |> Phoenix.HTML.html_escape() |> Phoenix.HTML.safe_to_string()
-    Phoenix.HTML.raw(~s(<a href="#{href}" class="ax-link">#{escaped}</a>))
+    ~H"""
+    <IdBadge.id_badge id={@dom_id} id_value={@id_value} />
+    """
   end
 
   defp default_payment_method_label(%{default_payment_method_id: nil}), do: "Missing"
-  defp default_payment_method_label(%{default_payment_method_id: id}), do: "On file (#{id})"
+  defp default_payment_method_label(%{default_payment_method_id: _id}), do: "On file"
 
   defp card_title(row), do: row.name || row.email || row.processor_id || row.id
 
