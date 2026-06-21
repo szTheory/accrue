@@ -272,7 +272,7 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 
 ### Blockers/Concerns
 
-- 190-05: admin-baseline.spec.js hung before reporting either test under bounded retry; rerun or debug before approving Phase 190 validation.
+- None. (Resolved/obsolete: the 190-05 `admin-baseline.spec.js` hang note was cleared 2026-06-21 — Phase 190 and the full v1.53 milestone subsequently shipped & verified, so the bounded-retry concern no longer applies.)
 
 ### Quick Tasks Completed
 
