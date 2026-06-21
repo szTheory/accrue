@@ -206,18 +206,57 @@ defmodule AccrueHostWeb.AdminWebhookReplayTest do
     assert ambiguous_html =~
              "Ownership couldn&#39;t be verified for this webhook. Replay is unavailable until the linked billing owner is resolved."
 
-    {:ok, bulk_view, _html} =
+    # Layer 1 — list scoping (black-box): the org-scoped filtered list must not
+    # surface the outsider/ambiguous rows, so there is no selectable affordance.
+    {:ok, bulk_view, bulk_html} =
       live(
         conn,
         "/admin/webhooks?status=dead&type=invoice.payment_failed&org=#{allowed_org.slug}"
       )
 
-    bulk_html = render_click(element(bulk_view, "[data-role='prepare-bulk-replay']"))
-    assert bulk_html =~ "No failed or dead-lettered webhook rows match the current filters."
+    refute bulk_html =~ outsider_webhook.id
+    refute bulk_html =~ ambiguous_webhook.id
+    assert bulk_html =~ AccrueAdmin.Copy.webhooks_index_empty_title()
+    refute bulk_html =~ ~s(data-role="bulk-action")
 
+    # Layer 2 — retry-handler defense-in-depth: inject the hostile ids directly
+    # into the LiveView process (mirroring the DataTable's
+    # `send(self(), {:data_table_bulk_action, event, ids})` notification), surface
+    # the confirm card, then confirm. scope_selected_ids drops both ids
+    # (Webhooks.detail/2 fails owner-scope resolution) → [] → replay_blocked
+    # warning, no requeue, no audit.
+    send(
+      bulk_view.pid,
+      {:data_table_bulk_action, "retry_selected", [outsider_webhook.id, ambiguous_webhook.id]}
+    )
+
+    _ = render(bulk_view)
+
+    blocked_html = render_click(element(bulk_view, "[data-role='confirm-retry-selected']"))
+
+    # FlashGroup HTML-escapes the message, so the apostrophe in "isn't" renders as
+    # `isn&#39;t`; compare against the escaped form (matching the ambiguous assertion above).
+    expected_blocked_copy =
+      AccrueAdmin.Copy.Locked.replay_blocked()
+      |> Phoenix.HTML.html_escape()
+      |> Phoenix.HTML.safe_to_string()
+
+    assert blocked_html =~ expected_blocked_copy
+
+    # The original load-bearing zero-success-audit assertion (must not be removed).
     assert Repo.aggregate(
              from(event in Event,
                where: event.type == "admin.webhook.replay.completed"
+             ),
+             :count,
+             :id
+           ) == 0
+
+    # Defense-in-depth: the NEW selection-driven success event must also be zero,
+    # proving the new code path recorded no success audit for the blocked replay.
+    assert Repo.aggregate(
+             from(event in Event,
+               where: event.type == "admin.webhook.bulk_replay.completed"
              ),
              :count,
              :id
