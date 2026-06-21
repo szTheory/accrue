@@ -150,8 +150,13 @@ defmodule AccrueAdmin.Components.AppShellTest do
         %{}
       )
 
-    assert html =~ ~s(href="/billing/webhooks" class="ax-sidebar-link ax-sidebar-link-active")
-    refute html =~ ~s(href="/billing" class="ax-sidebar-link ax-sidebar-link-active")
+    # Live-nav links render data-phx-link attrs between href and class, so match
+    # each independently rather than asserting href/class adjacency.
+    assert html =~
+             ~r/href="\/billing\/webhooks"[^>]*class="ax-sidebar-link ax-sidebar-link-active"/
+
+    refute html =~
+             ~r/href="\/billing"[^>]*class="ax-sidebar-link ax-sidebar-link-active"/
   end
 
   test "sidebar customers link preserves org query from current_path" do

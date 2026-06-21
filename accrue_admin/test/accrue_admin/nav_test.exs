@@ -46,30 +46,27 @@ defmodule AccrueAdmin.NavTest do
     assert Enum.find(items, &(&1.label == "Recovery")).href == "/billing/analytics/recovery"
   end
 
-  # --- Phase 175-02: badge/collapsible contract ---
+  # --- Phase 175-02: badge contract (collapsible removed 260621-nr8) ---
 
-  test "items/3 with recovery > 0 returns Recovery group item with badge and collapsible: true" do
+  test "items/3 with recovery > 0 returns Recovery group item with badge" do
     items = Nav.items("/billing", "/billing", %{recovery: 2, developer: 0})
     recovery = Enum.find(items, &(&1.label == "Recovery"))
     assert recovery.badge == 2
-    assert recovery.collapsible == true
   end
 
   test "items/3 with recovery == 0 returns Recovery group item with badge: nil" do
     items = Nav.items("/billing", "/billing", %{recovery: 0, developer: 0})
     recovery = Enum.find(items, &(&1.label == "Recovery"))
     assert recovery.badge == nil
-    assert recovery.collapsible == true
   end
 
   test "items/2 backward compat call still works" do
     items = Nav.items("/billing", "/billing")
     assert is_list(items)
     assert [_ | _] = items
-    # All items must have badge and collapsible keys
+    # All items must have a badge key
     Enum.each(items, fn item ->
       assert Map.has_key?(item, :badge)
-      assert Map.has_key?(item, :collapsible)
     end)
   end
 
@@ -78,16 +75,5 @@ defmodule AccrueAdmin.NavTest do
     payments = Enum.find(items, &(&1.label == "Payments"))
     assert String.contains?(payments.href, "/payments")
     refute String.contains?(payments.href, "/charges")
-  end
-
-  test "Billing group items have collapsible: false" do
-    items = Nav.items("/billing", "/billing", %{recovery: 5, developer: 3})
-    billing_items = Enum.filter(items, &(&1.group == "Billing"))
-    assert [_ | _] = billing_items
-
-    Enum.each(billing_items, fn item ->
-      assert item.collapsible == false,
-             "Expected Billing item '#{item.label}' to have collapsible: false"
-    end)
   end
 end

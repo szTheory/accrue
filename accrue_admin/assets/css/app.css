@@ -666,6 +666,9 @@ button {
 
 .ax-sidebar-group-label {
   /* ax-type-exception: component-local typography is documented until this selector is migrated to a composed role utility in markup. */
+  display: flex;
+  align-items: center;
+  gap: var(--ax-space-xs);
   margin: 0 0 var(--ax-space-xs);
   padding: 0 var(--ax-space-sm);
   color: var(--ax-muted);
@@ -2010,8 +2013,8 @@ a.ax-kpi-card--linked:focus-visible {
 
 /* ============================================================================
    Phase 175 (v1.51 IA-02) — Status-toned badge modifiers + sidebar IA chrome
-   Token gap closures: ax-badge-warning, ax-badge-danger, ax-sidebar-group-chevron,
-   ax-sidebar-group-toggle, ax-tab-more-menu. All values from ax-* tokens.
+   Token gap closures: ax-badge-warning, ax-badge-danger, ax-tab-more-menu.
+   All values from ax-* tokens.
    ========================================================================== */
 
 /* Warning-toned badge (Recovery group — at-risk subscriptions) */
@@ -2036,47 +2039,6 @@ a.ax-kpi-card--linked:focus-visible {
       transform: scale(var(--ax-press-scale));
     }
   }
-}
-
-/* Chevron icon inside a collapsible sidebar group toggle.
-   Rotates 90deg via --ax-transition-transform bundle (Phase D — wired)
-   when the parent [aria-expanded="true"] is set by the SidebarCollapse JS hook. */
-.ax-sidebar-group-chevron {
-  color: var(--ax-muted);
-  flex: none;
-  transition: var(--ax-transition-transform);
-}
-
-[aria-expanded="true"] > .ax-sidebar-group-toggle .ax-sidebar-group-chevron,
-.ax-sidebar-group-toggle[aria-expanded="true"] .ax-sidebar-group-chevron {
-  transform: rotate(90deg);
-}
-
-/* Strip button chrome from collapsible group header toggle so it inherits
-   the existing ax-sidebar-group-label visual appearance exactly. */
-.ax-sidebar-group-toggle {
-  /* ax-type-exception: component-local typography is documented until this selector is migrated to a composed role utility in markup. */
-  display: flex;
-  align-items: center;
-  gap: var(--ax-space-xs);
-  width: 100%;
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 0 var(--ax-space-sm);
-  margin: 0 0 var(--ax-space-xs);
-  color: var(--ax-muted);
-  font-size: var(--ax-type-xs);
-  font-weight: 700;
-  letter-spacing: var(--ax-tracking-caps);
-  text-transform: uppercase;
-  text-align: left;
-}
-
-.ax-sidebar-group-toggle:focus-visible {
-  outline: 2px solid var(--ax-focus-ring);
-  border-radius: var(--ax-radius-sm);
-  outline-offset: var(--ax-space-2xs);
 }
 
 /* "More ▾" overflow menu — positioning context + item styles (IA-05).
@@ -3867,24 +3829,6 @@ html.accrue-admin::-webkit-scrollbar-thumb:hover {
 .ax-foundation-type-stack > :last-child {
   padding-bottom: 0;
   border-bottom: none;
-}
-
-/* ============================================================================
-   Phase 177 (v1.51 MOT-02) — Collapsible nav link list reveal
-   .ax-sidebar-group-links always has an opacity transition. The JS hook
-   (sidebar_collapse.js) adds .ax-collapsed to trigger the exit animation and
-   removes it (+ unhides) to trigger the enter. set list.hidden only fires
-   AFTER the exit transitionend so assistive technology still skips it when
-   closed.
-   ========================================================================== */
-.ax-sidebar-group-links {
-  transition: opacity var(--ax-dur-2) var(--ax-ease-out);
-}
-
-.ax-collapsed {
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity var(--ax-dur-exit) var(--ax-ease-in);
 }
 
 /* ============================================================================

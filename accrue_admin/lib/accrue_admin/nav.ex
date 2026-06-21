@@ -10,15 +10,15 @@ defmodule AccrueAdmin.Nav do
     # Grouped by the operator's mental model, not by internal module. Home stands
     # alone (group: nil → no label). Eyebrow sublabels dropped (Phase 169): they
     # added jargon without prediction value. Icons via AccrueAdmin.Components.Icon.
-    # Phase 175-02: added :badge and :collapsible fields for sidebar tiering.
-    # Billing = always-expanded (collapsible: false). Specialist zones = collapsible.
+    # Phase 175-02 added :badge for sidebar attention counts. The :collapsible
+    # field was removed (260621-nr8): all groups now render static, always-visible
+    # link lists — no collapse toggles.
     [
       %{
         label: "Home",
         href: nav_href(mount_path, "", org),
         icon: :home,
         group: nil,
-        collapsible: false,
         badge: nil
       },
       %{
@@ -26,7 +26,6 @@ defmodule AccrueAdmin.Nav do
         href: nav_href(mount_path, "/customers", org),
         icon: :users,
         group: "Billing",
-        collapsible: false,
         badge: nil
       },
       %{
@@ -34,7 +33,6 @@ defmodule AccrueAdmin.Nav do
         href: nav_href(mount_path, "/subscriptions", org),
         icon: :subscriptions,
         group: "Billing",
-        collapsible: false,
         badge: nil
       },
       %{
@@ -42,7 +40,6 @@ defmodule AccrueAdmin.Nav do
         href: nav_href(mount_path, "/invoices", org),
         icon: :invoices,
         group: "Billing",
-        collapsible: false,
         badge: nil
       },
       %{
@@ -50,7 +47,6 @@ defmodule AccrueAdmin.Nav do
         href: nav_href(mount_path, "/payments", org),
         icon: :payments,
         group: "Billing",
-        collapsible: false,
         badge: nil
       },
       %{
@@ -58,7 +54,6 @@ defmodule AccrueAdmin.Nav do
         href: nav_href(mount_path, "/analytics/recovery", org),
         icon: :recovery,
         group: "Recovery",
-        collapsible: true,
         badge: if(recovery_badge > 0, do: recovery_badge, else: nil)
       },
       %{
@@ -66,7 +61,6 @@ defmodule AccrueAdmin.Nav do
         href: nav_href(mount_path, "/webhooks", org),
         icon: :webhooks,
         group: "Developer",
-        collapsible: true,
         badge: if(developer_badge > 0, do: developer_badge, else: nil)
       },
       %{
@@ -74,7 +68,6 @@ defmodule AccrueAdmin.Nav do
         href: nav_href(mount_path, "/events", org),
         icon: :events,
         group: "Developer",
-        collapsible: true,
         badge: nil
       },
       %{
@@ -82,7 +75,6 @@ defmodule AccrueAdmin.Nav do
         href: nav_href(mount_path, "/coupons", org),
         icon: :coupons,
         group: "Catalog",
-        collapsible: true,
         badge: nil
       },
       %{
@@ -90,7 +82,6 @@ defmodule AccrueAdmin.Nav do
         href: nav_href(mount_path, "/promotion-codes", org),
         icon: :promotions,
         group: "Catalog",
-        collapsible: true,
         badge: nil
       },
       %{
@@ -98,7 +89,6 @@ defmodule AccrueAdmin.Nav do
         href: nav_href(mount_path, "/connect", org),
         icon: :connect,
         group: "Connect",
-        collapsible: false,
         badge: nil
       }
     ]

@@ -308,7 +308,7 @@ defmodule AccrueAdmin.NavigationComponentsTest do
     end
   end
 
-  describe "Sidebar collapsible groups" do
+  describe "Sidebar static groups" do
     defp make_items(mount_path \\ "/billing") do
       AccrueAdmin.Nav.items(mount_path, mount_path <> "/", %{
         recovery: 3,
@@ -316,7 +316,7 @@ defmodule AccrueAdmin.NavigationComponentsTest do
       })
     end
 
-    test "collapsible group (Recovery) renders a <button> with aria-expanded" do
+    test "no group renders a collapse toggle (no aria-expanded, no toggle button)" do
       html =
         render_component(&Sidebar.sidebar/1, %{
           brand: %{logo_url: nil, app_name: "Test"},
@@ -324,13 +324,14 @@ defmodule AccrueAdmin.NavigationComponentsTest do
           items: make_items()
         })
 
-      # The Recovery group should have a collapsible button toggle
-      assert html =~ ~s(aria-expanded)
-      # The button should mention Recovery
+      # Collapse removed: Recovery (and every group) renders a static label only.
+      refute html =~ "aria-expanded"
+      refute html =~ ~s(data-collapse-toggle)
+      # Recovery still appears as a static group label.
       assert html =~ "Recovery"
     end
 
-    test "non-collapsible Billing group does NOT render a toggle <button>" do
+    test "every group label is a static <p>, not a <button>" do
       html =
         render_component(&Sidebar.sidebar/1, %{
           brand: %{logo_url: nil, app_name: "Test"},
@@ -338,8 +339,11 @@ defmodule AccrueAdmin.NavigationComponentsTest do
           items: make_items()
         })
 
-      # The Billing group label should be a <p> element, not inside a <button>
-      assert html =~ ~s(<p class="ax-sidebar-group-label">Billing</p>)
+      # Group labels render as <p class="ax-sidebar-group-label"> (no toggle button).
+      assert html =~ ~s(<p :if class="ax-sidebar-group-label">) or
+               html =~ ~s(<p class="ax-sidebar-group-label">)
+
+      assert html =~ "Billing"
     end
 
     test "badge renders only when group_meta.badge is a positive integer" do
@@ -390,8 +394,8 @@ defmodule AccrueAdmin.NavigationComponentsTest do
       assert html =~ ~s(data-phx-link="redirect")
     end
 
-    test "link list div has hidden=true for collapsed group with no badge" do
-      # Catalog group has badge: nil and collapsible: true → should be hidden initially
+    test "Catalog link list is always rendered and never hidden" do
+      # Collapse removed: Catalog (badge: nil) links are always visible — no hidden attr.
       html =
         render_component(&Sidebar.sidebar/1, %{
           brand: %{logo_url: nil, app_name: "Test"},
@@ -399,16 +403,13 @@ defmodule AccrueAdmin.NavigationComponentsTest do
           items: make_items()
         })
 
-      # The Catalog group links div should be hidden (collapsed, no badge)
-      # ax-sidebar-group-links class is now present between id and hidden attrs
       assert html =~ ~s(id="sidebar-group-links-catalog")
       assert html =~ ~s(ax-sidebar-group-links)
-      # Check the catalog section is present with hidden (attribute may appear after class)
-      assert html =~ ~r/id="sidebar-group-links-catalog"[^>]*hidden/
+      # The links div must NOT carry a hidden attribute.
+      refute html =~ ~r/id="sidebar-group-links-catalog"[^>]*hidden/
     end
 
-    test "link list div is NOT hidden for group with badge > 0" do
-      # Recovery has badge: 3 → should be expanded (not hidden)
+    test "Recovery link list is always rendered and never hidden" do
       html =
         render_component(&Sidebar.sidebar/1, %{
           brand: %{logo_url: nil, app_name: "Test"},
@@ -416,8 +417,8 @@ defmodule AccrueAdmin.NavigationComponentsTest do
           items: make_items()
         })
 
-      # Recovery group links should be visible (not hidden)
-      refute html =~ ~s(id="sidebar-group-links-recovery" hidden)
+      assert html =~ ~s(id="sidebar-group-links-recovery")
+      refute html =~ ~r/id="sidebar-group-links-recovery"[^>]*hidden/
     end
   end
 

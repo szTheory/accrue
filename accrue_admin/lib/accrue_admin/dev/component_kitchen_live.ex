@@ -437,13 +437,6 @@ if Mix.env() != :prod do
                   <td class="ax-body">Affordance — same grammar as any dropdown (consistency)</td>
                 </tr>
                 <tr>
-                  <td class="ax-body">collapsible nav group</td>
-                  <td class="ax-body"><code>.ax-sidebar-nav-group</code></td>
-                  <td class="ax-body"><code>aria-expanded</code> toggle</td>
-                  <td class="ax-body"><code>--ax-transition-transform</code> (chevron) + <code>--ax-dur-2</code></td>
-                  <td class="ax-body">Feedback — chevron confirms toggle; reveal shows where items went</td>
-                </tr>
-                <tr>
                   <td class="ax-body">command palette</td>
                   <td class="ax-body"><code>.ax-command-palette</code></td>
                   <td class="ax-body">Cmd-K / Esc (<code>data-open</code>)</td>

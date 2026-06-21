@@ -2,17 +2,16 @@ defmodule AccrueAdmin.Components.Sidebar do
   @moduledoc """
   Sidebar navigation for the admin shell.
 
-  Supports collapsible specialist-zone groups (Recovery, Developer, Catalog) and
-  status-toned attention-count badges on group headers. The primary Billing group
-  is always expanded (no toggle, no chevron).
+  Renders static, always-visible nav groups (Billing, Recovery, Developer,
+  Catalog, Connect) with status-toned attention-count badges on group headers.
+  There are no collapse toggles or chevrons — every group's link list is always
+  shown, and navigation is client-side live navigation via `<.link navigate>`.
 
   ## Group rendering rules
-  - `collapsible: false` (nil group, Billing, Connect) → static `<p>` label or no label.
-  - `collapsible: true` (Recovery, Developer, Catalog) → `<button>` toggle with
-    `aria-expanded`, `aria-controls`, chevron icon, and optional status-toned badge.
-  - Badge renders only when `group_meta.badge` is a positive integer.
-  - Link list wraps in `<div id="sidebar-group-links-{slug}" hidden={collapsed?}>`.
-  - Default expanded state: true when collapsible is false OR badge > 0.
+  - Each group renders a static `<p>` label (nil group → no label).
+  - The label carries an optional status-toned badge when `group_meta.badge`
+    is a positive integer.
+  - Link list always renders in `<div id="sidebar-group-links-{slug}">`.
   """
 
   use Phoenix.Component
@@ -46,33 +45,19 @@ defmodule AccrueAdmin.Components.Sidebar do
           <section
             id={"sidebar-group-section-#{slugify(group)}"}
             class="ax-sidebar-nav-group"
-            phx-hook={if group_meta.collapsible, do: "SidebarCollapse"}
-            data-group={if group_meta.collapsible, do: slugify(group)}
-            data-controls={if group_meta.collapsible, do: "sidebar-group-links-#{slugify(group)}"}
           >
-            <%= if group_meta.collapsible do %>
-              <button
-                class="ax-sidebar-group-label ax-sidebar-group-toggle"
-                type="button"
-                aria-expanded={to_string(group_initially_expanded?(group_meta))}
-                aria-controls={"sidebar-group-links-#{slugify(group)}"}
-                data-collapse-toggle="true"
+            <p :if={group} class="ax-sidebar-group-label">
+              <%= group %>
+              <span
+                :if={group_meta.badge}
+                class={badge_class(group_meta.tone)}
+                aria-label={badge_aria_label(group, group_meta.badge)}
               >
-                <%= group %>
-                <span
-                  :if={group_meta.badge}
-                  class={badge_class(group_meta.tone)}
-                  aria-label={badge_aria_label(group, group_meta.badge)}
-                >
-                  <%= group_meta.badge %>
-                </span>
-                <Icon.icon name={:chevron_right} size="sm" class="ax-sidebar-group-chevron" />
-              </button>
-            <% else %>
-              <p :if={group} class="ax-sidebar-group-label"><%= group %></p>
-            <% end %>
+                <%= group_meta.badge %>
+              </span>
+            </p>
 
-            <div id={"sidebar-group-links-#{slugify(group)}"} class="ax-sidebar-group-links" hidden={not group_initially_expanded?(group_meta)}>
+            <div id={"sidebar-group-links-#{slugify(group)}"} class="ax-sidebar-group-links">
               <.link :for={item <- items} navigate={item.href} class={nav_class(item, @current_path)}>
                 <Icon.icon name={item.icon} size="sm" class="ax-sidebar-link-icon" />
                 <span class="ax-sidebar-link-label"><%= item.label %></span>
@@ -86,7 +71,7 @@ defmodule AccrueAdmin.Components.Sidebar do
   end
 
   # Returns {group, items, group_meta} 3-tuples. group_meta is derived from the first item
-  # in each group (all items in a group share :collapsible and :badge per nav.ex convention).
+  # in each group (all items in a group share :badge per nav.ex convention).
   #
   # Uses Enum.group_by (order-independent) followed by a deterministic sort so
   # duplicate groups are merged even if Nav.items/3 ever returns them
@@ -105,18 +90,12 @@ defmodule AccrueAdmin.Components.Sidebar do
     Enum.map(group_order, fn group ->
       group_items = Map.fetch!(grouped, group)
       [first | _] = group_items
-      collapsible = Map.get(first, :collapsible, false)
       badge = Map.get(first, :badge)
       tone = badge_tone(group)
-      group_meta = %{collapsible: collapsible, badge: badge, tone: tone}
+      group_meta = %{badge: badge, tone: tone}
       {group, group_items, group_meta}
     end)
   end
-
-  # True when group is always-expanded (collapsible: false) OR has badge work to show.
-  defp group_initially_expanded?(%{collapsible: false}), do: true
-  defp group_initially_expanded?(%{badge: badge}) when is_integer(badge) and badge > 0, do: true
-  defp group_initially_expanded?(_), do: false
 
   # Returns the full CSS class string for a badge based on tone.
   defp badge_class(:warning), do: "ax-badge ax-badge-warning"
