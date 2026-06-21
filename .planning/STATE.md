@@ -32,7 +32,7 @@ See: `.planning/PROJECT.md` (updated 2026-06-14 — v1.53 Admin UI Design-System
 Phase: Milestone v1.53 complete
 Plan: —
 Status: Awaiting next milestone
-Last activity: 2026-06-20 — Completed quick task 260620-qkx: de-duplicate admin orientation chrome (utility-bar topbar, single page H1) + navigation loading bar
+Last activity: 2026-06-21 — Completed quick task 260621-h72: webhooks DLQ design-system tightening + selection-driven retry (focus-ring fix, KpiCard footer, DataTable selection-emit, filter overhaul + segmented primitive)
 
 ## Post-v1.48 Pause Rule
 
@@ -287,6 +287,7 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 | 260620-n4q | Redesign theme picker as on-brand segmented control (icon+text, radiogroup+arrow-keys); extract `ThemePicker` component + register in component lab | 2026-06-20 | ec45880e | [260620-n4q-theme-picker-segmented](./quick/260620-n4q-theme-picker-segmented/) |
 | 260620-ps2 | Elevate Timeline into a proper on-brand timeline — continuous vertical rail + threaded-feed entries (borderless, hover surface), reuse `StatusBadge` (tone passthrough), `<time>` tabular figures, dedicated empty state; register `timeline` family in component lab | 2026-06-20 | f6cda082 | [260620-ps2-elevate-the-timeline-component-into-a-pr](./quick/260620-ps2-elevate-the-timeline-component-into-a-pr/) |
 | 260620-qkx | De-duplicate admin orientation chrome (topbar → utility bar: search/menu/theme only; drop eyebrow + brand chip; remove redundant page-header eyebrows; promote each page hero to a single `<h1>`) + add a Turbo-style navigation loading bar (vendored MIT `topbar`, `--ax-accent`-colored, reduced-motion aware; no CSP weakening — CSSOM setters are style-src-exempt) | 2026-06-20 | c16eca09 | [260620-qkx-de-duplicate-admin-orientation-chrome-ut](./quick/260620-qkx-de-duplicate-admin-orientation-chrome-ut/) |
+| 260621-h72 | Webhooks DLQ page — design-system tightening + selection-driven retry (`--validate`, 6 atomic commits): suppress UA focus ring on programmatic `main` focus (no dark-mode blue box); tidy `KpiCard` footer (no-wrap pill + `.ax-kpi-meta` caption) + define `--ax-accent-contrast`; emit `DataTable` selection to parent (`{:data_table_bulk_action, …}`) + plural footer "Showing N events" + flip `selectable` default to false (drops orphaned checkboxes on 8 pages); webhooks selection-driven Retry-selected + jargon-free confirm/audit; filter overhaul (Type `:datalist` autocomplete, Status counts+disabled, Live-mode `:segmented` primitive) + admin `distinct_types/1`+`status_counts/1` queries + `segmented` lab family. 329 tests/0 failures. Verify=Needs Review (3 browser-only visuals) | 2026-06-21 | 745462ec | [260621-h72-webhooks-dlq-design-system-tightening-an](./quick/260621-h72-webhooks-dlq-design-system-tightening-an/) |
 
 ### Milestone Intake Rules
 
