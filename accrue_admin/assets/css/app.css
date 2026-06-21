@@ -1071,13 +1071,14 @@ a.ax-kpi-card--linked:focus-visible {
   align-items: center;
   width: fit-content;
   max-width: 100%;
-  min-height: 1.75rem;
-  padding: 0.125rem 0.6875rem;
+  min-height: 1.5rem;
+  padding: 0.0625rem 0.5rem;
   border-radius: 999px;
   font-size: 0.8125rem;
   font-weight: 600;
   line-height: 1.2;
-  overflow-wrap: anywhere;
+  /* Secondary stats like "1 dead-lettered" must read on one line — never break mid-word. */
+  white-space: nowrap;
 }
 
 .ax-kpi-delta-moss {
@@ -1099,6 +1100,21 @@ a.ax-kpi-card--linked:focus-visible {
 .ax-kpi-delta-ink {
   color: var(--ax-primary);
   background: color-mix(in srgb, var(--ax-muted) 12%, transparent);
+}
+
+/* KPI footer is a vertical stack: secondary-stat pill, then the muted caption on
+   its own full-width line. Override the shared header/footer `space-between` (which
+   pulls pill and caption apart in column layout) so they stack tightly at the start. */
+.ax-kpi-card-footer {
+  justify-content: flex-start;
+  gap: var(--ax-space-sm);
+}
+
+.ax-kpi-meta {
+  width: 100%;
+  margin: 0;
+  color: var(--ax-muted);
+  font-size: var(--ax-type-sm);
 }
 
 .ax-kpi-sparkline svg {

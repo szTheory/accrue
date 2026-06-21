@@ -52,7 +52,7 @@ defmodule AccrueAdmin.Components.KpiCard do
       <span :if={@delta} class={["ax-kpi-delta", "ax-kpi-delta-" <> normalize_tone(@delta_tone)]}>
         <%= @delta %>
       </span>
-      <%= render_slot(@meta) %>
+      <p :if={@meta != []} class="ax-kpi-meta"><%= render_slot(@meta) %></p>
     </div>
 
     <div :if={@sparkline != []} class="ax-kpi-sparkline">
