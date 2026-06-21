@@ -2252,6 +2252,14 @@ a.ax-kpi-card--linked:focus-visible {
   overflow-x: auto;
 }
 
+/* Base vertical rhythm: filters, selection bar, results/empty card stack with a
+   consistent gap instead of sitting flush. Spacing tokens only. */
+.ax-data-table {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ax-space-lg);
+}
+
 .ax-data-table,
 .ax-data-table-cards,
 .ax-data-table-card,
@@ -2264,19 +2272,31 @@ a.ax-kpi-card--linked:focus-visible {
   min-width: 0;
 }
 
-/* Filter toolbar: coherent gap + bottom alignment so the Apply/Clear actions
-   no longer sit flush against the field above them. Spacing tokens only. */
+/* Filter toolbar: mobile-first single-column grid that fans out to auto-fit
+   columns with end-aligned actions at md+. Spacing tokens only. */
 .ax-data-table-filters {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
   gap: var(--ax-space-md);
-  align-items: end;
+  grid-template-columns: 1fr;
 }
 
 .ax-data-table-filter-actions {
   display: flex;
   gap: var(--ax-space-sm);
   align-items: center;
+  width: 100%;
+}
+
+@media (min-width: 768px) { /* --ax-bp-md ↑ */
+  .ax-data-table-filters {
+    grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr)) auto;
+    align-items: end;
+  }
+
+  .ax-data-table-filter-actions {
+    width: auto;
+    justify-self: end;
+  }
 }
 
 .ax-data-table-cards {

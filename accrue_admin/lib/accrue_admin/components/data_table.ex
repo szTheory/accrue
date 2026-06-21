@@ -241,7 +241,7 @@ defmodule AccrueAdmin.Components.DataTable do
           aria-live="polite"
           data-role="selected-count"
         ><%= "#{MapSet.size(@selected_ids)} selected" %></p>
-        <label class="ax-data-table-toggle-all">
+        <label class="ax-field-inline">
           <input
             type="checkbox"
             class="ax-checkbox"
