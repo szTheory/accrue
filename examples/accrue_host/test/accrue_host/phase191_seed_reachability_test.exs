@@ -94,6 +94,75 @@ defmodule AccrueHost.Phase191SeedReachabilityTest do
     assert paginated_count() == 26
   end
 
+  test "Phase 191 page customers carry realistic identities, payment methods, and linked billing" do
+    Code.eval_file(@seed_path)
+
+    # Page customers are humanized: the first page customer no longer carries
+    # the placeholder "Phase 191 Page Customer NN" name (Faker output is
+    # non-deterministic, so assert the negative, not a specific value).
+    page_one =
+      Repo.get_by!(Customer, processor: "fake", processor_id: "cus_phase191_host_page_01")
+
+    refute page_one.name =~ ~r/Phase 191 Page Customer/
+
+    # At least one page customer has a default payment method on file (drives
+    # the "With payment method" KPI + the "On file" list column).
+    customers_with_pm =
+      Repo.aggregate(
+        from(c in Customer,
+          where:
+            like(c.processor_id, "cus_phase191_host_page_%") and
+              not is_nil(c.default_payment_method_id)
+        ),
+        :count
+      )
+
+    assert customers_with_pm > 0
+
+    # Payment-method rows exist in the page namespace (not asserted elsewhere).
+    page_payment_methods =
+      Repo.aggregate(
+        from(p in Accrue.Billing.PaymentMethod,
+          where: like(p.processor_id, "pm_phase191_host_page_%")
+        ),
+        :count
+      )
+
+    assert page_payment_methods > 0
+
+    # A coherent linked billing graph populates the demo detail pages.
+    page_subscriptions =
+      Repo.aggregate(
+        from(s in Subscription, where: like(s.processor_id, "sub_phase191_host_page_%")),
+        :count
+      )
+
+    assert page_subscriptions > 0
+
+    # The at-risk case lights up the recovery signal: at least one page
+    # subscription is past_due with a dunning campaign anchor.
+    assert Repo.aggregate(
+             from(s in Subscription,
+               where:
+                 like(s.processor_id, "sub_phase191_host_page_%") and
+                   s.status == :past_due and not is_nil(s.dunning_campaign_started_at)
+             ),
+             :count
+           ) > 0
+
+    # Owner-type variety exists for the owner-type filter dropdown.
+    owner_types =
+      Repo.all(
+        from(c in Customer,
+          where: like(c.processor_id, "cus_phase191_host_page_%"),
+          distinct: true,
+          select: c.owner_type
+        )
+      )
+
+    assert length(owner_types) > 1
+  end
+
   test "Phase 191 seed expansion preserves pre-existing edge-state anchors" do
     Code.eval_file(@seed_path)
 

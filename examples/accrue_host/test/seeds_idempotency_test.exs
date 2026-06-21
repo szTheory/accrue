@@ -105,11 +105,18 @@ defmodule AccrueHost.SeedsIdempotencyTest do
       first_counts = phase191_fixture_counts()
       first_route_ids = phase191_route_ids()
 
+      # Part C added a coherent linked billing graph for the first 10 page
+      # customers (sub + invoice + charge each), on top of the pre-existing
+      # primary/at-risk rows. Customers stay at 28 (no new customers);
+      # coupons/promos/connect/webhooks/events are untouched.
+      #   subscriptions: 2 existing (active + at_risk) + 10 page = 12
+      #   invoices:      1 existing (boundary)          + 10 page = 11
+      #   charges:       1 existing (boundary)          + 10 page = 11
       assert first_counts == %{
                customers: 28,
-               subscriptions: 2,
-               invoices: 1,
-               charges: 1,
+               subscriptions: 12,
+               invoices: 11,
+               charges: 11,
                coupons: 1,
                promotion_codes: 1,
                connect_accounts: 1,
