@@ -2264,6 +2264,21 @@ a.ax-kpi-card--linked:focus-visible {
   min-width: 0;
 }
 
+/* Filter toolbar: coherent gap + bottom alignment so the Apply/Clear actions
+   no longer sit flush against the field above them. Spacing tokens only. */
+.ax-data-table-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ax-space-md);
+  align-items: end;
+}
+
+.ax-data-table-filter-actions {
+  display: flex;
+  gap: var(--ax-space-sm);
+  align-items: center;
+}
+
 .ax-data-table-cards {
   display: grid;
   gap: var(--ax-space-md);

@@ -57,6 +57,15 @@ defmodule AccrueAdmin.Live.WebhooksLive do
   end
 
   @impl true
+  def handle_event("data_table_filter", params, socket) do
+    {:noreply,
+     AccrueAdmin.DataTableNav.patch_with_filters(
+       socket,
+       socket.assigns.table_path,
+       Map.drop(params, ["_target", "_csrf_token"])
+     )}
+  end
+
   def handle_event("cancel_bulk_replay", _params, socket) do
     {:noreply, assign(socket, :pending_bulk_replay, nil)}
   end

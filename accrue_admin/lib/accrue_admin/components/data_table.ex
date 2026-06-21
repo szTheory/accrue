@@ -144,8 +144,8 @@ defmodule AccrueAdmin.Components.DataTable do
     >
       <header class="ax-data-table-header">
         <form
-          action={@path}
-          method="get"
+          phx-change="data_table_filter"
+          phx-submit="data_table_filter"
           class="ax-data-table-filters"
           data-role="filter-form"
           data-phase191-focus="filter-form"
@@ -162,12 +162,14 @@ defmodule AccrueAdmin.Components.DataTable do
           <div :for={{key, value} <- @filter_params} :if={!field_defined?(@filter_fields, key)}>
             <input type="hidden" name={key} value={value} />
           </div>
-          <button type="submit" class="ax-button ax-button-primary" data-phase191-focus="filter-submit">
-            <%= @filter_submit_label %>
-          </button>
-          <a href={@path} class="ax-button ax-button-ghost" data-phase191-focus="clear-filters">
-            <%= Copy.data_table_clear_filters_label() %>
-          </a>
+          <div class="ax-data-table-filter-actions" data-role="filter-actions">
+            <button type="submit" class="ax-button ax-button-primary" data-phase191-focus="filter-submit">
+              <%= @filter_submit_label %>
+            </button>
+            <.link patch={@path} class="ax-button ax-button-ghost" data-phase191-focus="clear-filters">
+              <%= Copy.data_table_clear_filters_label() %>
+            </.link>
+          </div>
         </form>
       </header>
 
@@ -194,15 +196,15 @@ defmodule AccrueAdmin.Components.DataTable do
         <Icon.icon name={:inbox} size="lg" class="ax-empty-icon ax-empty-icon-muted" />
         <p class="ax-empty-title"><%= @empty_title %></p>
         <p class="ax-body ax-empty-copy"><%= @empty_copy %></p>
-        <a
+        <.link
           :if={any_filter_active?(@filter_params)}
-          href={@path}
+          patch={@path}
           class="ax-button ax-button-secondary"
           data-role="clear-filters"
           data-phase191-focus="clear-filters"
         >
           <%= Copy.data_table_clear_filters_label() %>
-        </a>
+        </.link>
       </div>
 
       <div :if={!Enum.empty?(@rows) and @selectable} class="ax-data-table-selection" data-role="selection-bar">
@@ -319,6 +321,12 @@ defmodule AccrueAdmin.Components.DataTable do
         >
           Load more
         </button>
+        <div
+          :if={@next_cursor && length(@rows) < @dom_limit}
+          phx-viewport-bottom={Phoenix.LiveView.JS.push("load-more", target: @myself)}
+          data-role="viewport-sentinel"
+          aria-hidden="true"
+        />
       </footer>
     </section>
     """
@@ -362,6 +370,7 @@ defmodule AccrueAdmin.Components.DataTable do
       list={@list_id}
       class="ax-input"
       autocomplete="off"
+      phx-debounce="300"
       data-phase191-focus={"filter-#{@focus_key}"}
     />
     <datalist id={@list_id}>
@@ -412,6 +421,7 @@ defmodule AccrueAdmin.Components.DataTable do
       name={field_param(@field)}
       value={@value}
       class="ax-input"
+      phx-debounce="300"
       data-phase191-focus={"filter-#{@focus_key}"}
     />
     """

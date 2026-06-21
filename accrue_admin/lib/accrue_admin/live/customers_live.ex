@@ -40,6 +40,16 @@ defmodule AccrueAdmin.Live.CustomersLive do
   end
 
   @impl true
+  def handle_event("data_table_filter", params, socket) do
+    {:noreply,
+     AccrueAdmin.DataTableNav.patch_with_filters(
+       socket,
+       socket.assigns.table_path,
+       Map.drop(params, ["_target", "_csrf_token"])
+     )}
+  end
+
+  @impl true
   def handle_params(params, _uri, socket) do
     {:noreply, assign(socket, :params, params)}
   end
