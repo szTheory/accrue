@@ -96,6 +96,36 @@ defmodule AccrueAdmin.Queries.Webhooks do
     |> length()
   end
 
+  @doc """
+  Distinct webhook event types visible in the active owner scope, sorted.
+
+  Post-fetch distinct (after `scope_rows/2`) keeps owner scoping correct — consistent
+  with `count/2` and `bulk_replay_count/2`. Do NOT push DISTINCT into SQL: ownership is
+  proven per-row in Elixir, not expressible in the base query.
+  """
+  def distinct_types(owner_scope) do
+    WebhookEvent
+    |> Repo.all()
+    |> scope_rows(owner_scope)
+    |> Enum.map(& &1.type)
+    |> Enum.reject(&is_nil/1)
+    |> Enum.uniq()
+    |> Enum.sort()
+  end
+
+  @doc """
+  Map of `status => count` for webhook events in the active owner scope.
+
+  Post-fetch frequency (after `scope_rows/2`), same owner-scoping rationale as
+  `distinct_types/1`.
+  """
+  def status_counts(owner_scope) do
+    WebhookEvent
+    |> Repo.all()
+    |> scope_rows(owner_scope)
+    |> Enum.frequencies_by(& &1.status)
+  end
+
   defp row_projection(event) do
     %{
       id: event.id,

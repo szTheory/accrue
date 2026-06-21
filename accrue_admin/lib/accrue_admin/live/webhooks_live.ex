@@ -217,17 +217,19 @@ defmodule AccrueAdmin.Live.WebhooksLive do
               id: :status,
               label: "Status",
               type: :select,
-              options:
-                Enum.map(WebhookEvent.statuses(), fn status ->
-                  {Atom.to_string(status), humanize(status)}
-                end)
+              options: status_filter_options(@current_owner_scope)
             },
-            %{id: :type, label: "Type"},
+            %{
+              id: :type,
+              label: "Type",
+              type: :datalist,
+              options: Webhooks.distinct_types(@current_owner_scope)
+            },
             %{
               id: :livemode,
               label: "Live mode",
-              type: :select,
-              options: [{"true", "Live"}, {"false", "Test"}]
+              type: :segmented,
+              options: [{"", "All"}, {"true", "Live"}, {"false", "Test"}]
             }
           ]}
           empty_title={Copy.webhooks_index_empty_title()}
@@ -250,6 +252,22 @@ defmodule AccrueAdmin.Live.WebhooksLive do
     |> assign(:assets_js_path, admin["assets_js_path"])
     |> assign(:admin_mount_path, admin["mount_path"] || "/billing")
     |> assign(:current_path, admin_path(admin, "/webhooks"))
+  end
+
+  # Status filter options carry their live count in the label and disable zero-count
+  # statuses (the active value is never disabled — handled in DataTable.filter_input/1).
+  defp status_filter_options(owner_scope) do
+    counts = Webhooks.status_counts(owner_scope)
+
+    Enum.map(WebhookEvent.statuses(), fn status ->
+      count = Map.get(counts, status, 0)
+
+      %{
+        value: Atom.to_string(status),
+        label: "#{humanize(status)} (#{count})",
+        disabled: count == 0
+      }
+    end)
   end
 
   defp webhook_summary(owner_scope) do

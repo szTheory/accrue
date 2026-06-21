@@ -942,6 +942,7 @@ if Mix.env() != :prod do
     defp family_label("inline-id"), do: "Inline code / ID"
     defp family_label("empty-state"), do: "Empty state"
     defp family_label("theme-picker"), do: "Theme picker"
+    defp family_label("segmented"), do: "Segmented filter"
     defp family_label("timeline"), do: "Timeline"
 
     defp family_label(family) when is_binary(family) do
@@ -1335,6 +1336,27 @@ if Mix.env() != :prod do
 
       ~H"""
       <ThemePicker.theme_picker theme="system" />
+      """
+    end
+
+    # ── Segmented filter ─────────────────────────────────────────────────────────
+    # Mirrors the DataTable.filter_input/1 :segmented rendering. The "active" specimen
+    # highlights "Live"; the default specimen highlights "All". Both render the variant
+    # class `ax-segmented-option` (render-coverage guardrail).
+    defp do_render_specimen("segmented", state, _specimen, _theme) do
+      active = if state == "active", do: "true", else: ""
+      assigns = %{active: active, __changed__: %{}}
+
+      ~H"""
+      <div class="ax-segmented" role="radiogroup" aria-label="Live mode">
+        <label
+          :for={{value, label} <- [{"", "All"}, {"true", "Live"}, {"false", "Test"}]}
+          class={["ax-segmented-option", value == @active && "ax-segmented-option-active"]}
+        >
+          <input type="radio" name="lab-segmented" value={value} checked={value == @active} class="ax-visually-hidden" />
+          <span><%= label %></span>
+        </label>
+      </div>
       """
     end
 

@@ -964,6 +964,54 @@ if Mix.env() != :prod do
           ]
         },
 
+        # ── Segmented filter family ───────────────────────────────────────────────────
+        # Reusable DataTable filter segmented control (e.g. All/Live/Test). Shares the
+        # theme-picker visual language as new shared .ax-segmented* classes. The default
+        # specimen MUST render the variant class `ax-segmented-option` (render-coverage
+        # guardrail splits ax_class on space and asserts the variant class appears).
+        %{
+          family: "segmented",
+          variant: "filter",
+          ax_class: "ax-segmented ax-segmented-option",
+          tokens: [
+            "--ax-sunken",
+            "--ax-elevated",
+            "--ax-accent-border",
+            "--ax-border",
+            "--ax-primary",
+            "--ax-muted",
+            "--ax-focus-ring",
+            "--ax-transition-colors"
+          ],
+          applicable_states: ["default", "active"],
+          na_states: [
+            %{
+              state: "hover",
+              reason:
+                "inactive-segment hover is a CSS background shift only — not a distinct rendered specimen"
+            },
+            %{
+              state: "focus",
+              reason:
+                "focus ring shows on keyboard focus (focus-within) — a live state, not a forced static specimen"
+            },
+            %{state: "selected", reason: "active is the selection state for a segmented radiogroup"},
+            %{state: "pressed", reason: "selection is instant — no separate pressed visual"},
+            %{state: "disabled", reason: "filter segments are always enabled"},
+            %{state: "loading", reason: "filter toggles submit a GET form — no async loading state"},
+            %{state: "error", reason: "no validation — a segment cannot be in an error state"},
+            %{state: "empty", reason: "one segment is always active — there is no empty state"},
+            %{
+              state: "overflow",
+              reason: "segment labels are short fixed words (All/Live/Test) — no overflow case"
+            }
+          ],
+          specimens: [
+            %{label: "All (default)", props: %{value: ""}, content: nil},
+            %{label: "Live active", props: %{value: "true"}, content: nil}
+          ]
+        },
+
         # ── Timeline family ──────────────────────────────────────────────────────────
         # Threaded event feed. The default specimen MUST be non-empty so the rendered
         # HTML contains `ax-timeline-item` (render-coverage guardrail needs two tokens

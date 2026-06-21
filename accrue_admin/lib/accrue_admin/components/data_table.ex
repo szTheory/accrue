@@ -335,10 +335,57 @@ defmodule AccrueAdmin.Components.DataTable do
     ~H"""
     <select id={@id} name={field_param(@field)} class="ax-select" data-phase191-focus={"filter-#{@focus_key}"}>
       <option value="">All</option>
-      <option :for={option <- @options} value={option_value(option)} selected={option_selected?(@value, option)}>
+      <option
+        :for={option <- @options}
+        value={option_value(option)}
+        selected={option_selected?(@value, option)}
+        disabled={option_disabled?(option) and not option_selected?(@value, option)}
+      >
         <%= option_label(option) %>
       </option>
     </select>
+    """
+  end
+
+  defp filter_input(%{field: %{type: :datalist} = field} = assigns) do
+    assigns =
+      assigns
+      |> assign(:options, Map.get(field, :options, []))
+      |> assign(:list_id, "#{assigns.id}-datalist")
+
+    ~H"""
+    <input
+      id={@id}
+      type="text"
+      name={field_param(@field)}
+      value={@value}
+      list={@list_id}
+      class="ax-input"
+      autocomplete="off"
+      data-phase191-focus={"filter-#{@focus_key}"}
+    />
+    <datalist id={@list_id}>
+      <option :for={option <- @options} value={option_value(option)}><%= option_label(option) %></option>
+    </datalist>
+    """
+  end
+
+  defp filter_input(%{field: %{type: :segmented} = field} = assigns) do
+    assigns = assign(assigns, :options, Map.get(field, :options, []))
+
+    ~H"""
+    <div class="ax-segmented" role="radiogroup" aria-label={field_label(@field)} data-phase191-focus={"filter-#{@focus_key}"}>
+      <label :for={option <- @options} class={["ax-segmented-option", option_selected?(@value, option) && "ax-segmented-option-active"]}>
+        <input
+          type="radio"
+          name={field_param(@field)}
+          value={option_value(option)}
+          checked={option_selected?(@value, option)}
+          class="ax-visually-hidden"
+        />
+        <span><%= option_label(option) %></span>
+      </label>
+    </div>
     """
   end
 
@@ -552,6 +599,9 @@ defmodule AccrueAdmin.Components.DataTable do
   defp option_label(option), do: option
 
   defp option_selected?(value, option), do: to_string(value) == to_string(option_value(option))
+
+  defp option_disabled?(option) when is_map(option), do: Map.get(option, :disabled, false) == true
+  defp option_disabled?(_option), do: false
 
   defp column_label(column), do: Map.get(column, :label) || humanize(Map.get(column, :id))
 

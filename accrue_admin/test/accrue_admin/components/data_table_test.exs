@@ -184,6 +184,61 @@ defmodule AccrueAdmin.DataTableTest do
     end
   end
 
+  defmodule FilterLive do
+    use Phoenix.LiveView
+
+    alias AccrueAdmin.Components.DataTable
+
+    @impl true
+    def mount(_params, session, socket) do
+      {:ok,
+       socket
+       |> Phoenix.Component.assign(:table_params, Map.get(session, "params", %{}))
+       |> Phoenix.Component.assign(:path, "/admin/fixtures")}
+    end
+
+    @impl true
+    def render(assigns) do
+      ~H"""
+      <.live_component
+        module={DataTable}
+        id="filters"
+        query_module={AccrueAdmin.DataTableTest.FixtureQuery}
+        path={@path}
+        params={@table_params}
+        limit={2}
+        dom_limit={4}
+        poll_interval_ms={5_000}
+        columns={[%{id: :label, label: "Label"}]}
+        card_title={& &1.label}
+        filter_fields={[
+          %{
+            id: :type,
+            label: "Type",
+            type: :datalist,
+            options: ["invoice.paid", "invoice.payment_failed"]
+          },
+          %{
+            id: :status,
+            label: "Status",
+            type: :select,
+            options: [
+              %{value: "dead", label: "Dead (2)", disabled: false},
+              %{value: "open", label: "Open (0)", disabled: true}
+            ]
+          },
+          %{
+            id: :livemode,
+            label: "Live mode",
+            type: :segmented,
+            options: [{"", "All"}, {"true", "Live"}, {"false", "Test"}]
+          }
+        ]}
+      />
+      """
+    end
+  end
+
   setup do
     start_supervised!(FixtureStore)
 
@@ -390,6 +445,37 @@ defmodule AccrueAdmin.DataTableTest do
 
     assert_receive {:bulk_action_received, "retry_selected", ids}
     assert Enum.sort(ids) == ["row-4", "row-5"]
+  end
+
+  test "renders :datalist, counted/disabled :select, and :segmented filter inputs", %{conn: conn} do
+    {:ok, _view, html} =
+      live_isolated(conn, FilterLive, session: %{"params" => %{}})
+
+    # :datalist — free-text input wired to a native <datalist> of real options.
+    assert html =~ ~s(list="filters-filter-type-datalist")
+    assert html =~ ~s(<datalist id="filters-filter-type-datalist">)
+    assert html =~ ~s(<option value="invoice.payment_failed">)
+
+    # :select — count in the label; zero-count option disabled.
+    assert html =~ "Dead (2)"
+    assert html =~ "Open (0)"
+    assert html =~ ~s(<option value="open" disabled="")
+
+    # :segmented — radiogroup of segments using the shared .ax-segmented* classes.
+    assert html =~ ~s(class="ax-segmented")
+    assert html =~ "ax-segmented-option"
+    assert html =~ ~s(role="radiogroup")
+  end
+
+  test "does not disable the active :select value even at zero count", %{conn: conn} do
+    {:ok, _view, html} =
+      live_isolated(conn, FilterLive, session: %{"params" => %{"status" => "open"}})
+
+    # "open" is zero-count (disabled in the spec) but is the active value — it must
+    # stay selectable so the active filter is not stranded.
+    assert html =~ ~s(<option value="open" selected="">)
+    refute html =~ ~s(<option value="open" selected="" disabled="")
+    refute html =~ ~s(<option value="open" disabled="" selected="")
   end
 
   test "renders default empty state copy from AccrueAdmin.Copy when no rows match", %{conn: conn} do
