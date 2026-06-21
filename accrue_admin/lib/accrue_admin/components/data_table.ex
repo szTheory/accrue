@@ -241,17 +241,19 @@ defmodule AccrueAdmin.Components.DataTable do
           aria-live="polite"
           data-role="selected-count"
         ><%= "#{MapSet.size(@selected_ids)} selected" %></p>
-        <button
-          type="button"
-          phx-click="toggle-all"
-          phx-target={@myself}
-          class="ax-button ax-button-ghost"
-          data-role="toggle-all"
-          data-phase191-focus="toggle-all"
-          aria-label={toggle_all_label(assigns)}
-        >
-          <%= if all_visible_selected?(assigns), do: "Clear visible", else: "Select visible" %>
-        </button>
+        <label class="ax-data-table-toggle-all">
+          <input
+            type="checkbox"
+            class="ax-checkbox"
+            phx-click="toggle-all"
+            phx-target={@myself}
+            checked={all_visible_selected?(assigns)}
+            data-role="toggle-all"
+            data-phase191-focus="toggle-all"
+            aria-label={toggle_all_label(assigns)}
+          />
+          <span><%= if all_visible_selected?(assigns), do: "Clear visible", else: "Select visible" %></span>
+        </label>
         <button
           :if={@bulk_action_event && MapSet.size(@selected_ids) > 0}
           type="button"
@@ -273,27 +275,25 @@ defmodule AccrueAdmin.Components.DataTable do
           <caption :if={@table_caption} class="ax-visually-hidden"><%= @table_caption %></caption>
           <thead>
             <tr>
-              <th :if={@selectable} scope="col" class="ax-label">Select</th>
+              <th :if={@selectable} scope="col" class="ax-label"><span class="ax-visually-hidden">Select</span></th>
               <th :for={column <- @columns} scope="col" class="ax-label"><%= column_label(column) %></th>
             </tr>
           </thead>
           <tbody>
             <tr :for={row <- @rows} id={row_dom_id(@id, row, @row_id)} data-row-id={row_identity(row, @row_id)}>
               <td :if={@selectable}>
-                <button
-                  type="button"
+                <input
+                  type="checkbox"
+                  class="ax-checkbox"
                   phx-click="toggle-row"
                   phx-value-id={row_identity(row, @row_id)}
                   phx-target={@myself}
-                  class="ax-button ax-button-ghost"
+                  checked={selected?(@selected_ids, row_identity(row, @row_id))}
                   data-role="toggle-row"
-                  data-phase191-focus="toggle-row"
                   data-row-id={row_identity(row, @row_id)}
-                  aria-pressed={selected?(@selected_ids, row_identity(row, @row_id))}
+                  data-phase191-focus="toggle-row"
                   aria-label={selection_label(@selected_ids, row, @row_id, @card_title, @columns)}
-                >
-                  <%= if selected?(@selected_ids, row_identity(row, @row_id)), do: "Selected", else: "Select" %>
-                </button>
+                />
               </td>
               <td :for={column <- @columns}><%= cell_value(column, row) %></td>
             </tr>
@@ -308,21 +308,19 @@ defmodule AccrueAdmin.Components.DataTable do
               <p class="ax-eyebrow">Row</p>
               <p class="ax-heading"><%= card_title(@card_title, row, @columns) %></p>
             </div>
-            <button
+            <input
               :if={@selectable}
-              type="button"
+              type="checkbox"
+              class="ax-checkbox"
               phx-click="toggle-row"
               phx-value-id={row_identity(row, @row_id)}
               phx-target={@myself}
-              class="ax-button ax-button-ghost"
+              checked={selected?(@selected_ids, row_identity(row, @row_id))}
               data-role="toggle-row"
-              data-phase191-focus="toggle-row"
               data-row-id={row_identity(row, @row_id)}
-              aria-pressed={selected?(@selected_ids, row_identity(row, @row_id))}
+              data-phase191-focus="toggle-row"
               aria-label={selection_label(@selected_ids, row, @row_id, @card_title, @columns)}
-            >
-              <%= if selected?(@selected_ids, row_identity(row, @row_id)), do: "Selected", else: "Select" %>
-            </button>
+            />
           </header>
 
           <dl class="ax-data-table-card-fields">
