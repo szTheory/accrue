@@ -12,6 +12,19 @@ defmodule AccrueAdmin.Queries.CursorTest do
     assert {:ok, {^timestamp, ^id}} = Cursor.decode(cursor)
   end
 
+  test "round-trips signed timestamp and integer id tuples" do
+    # The append-only event ledger uses an integer primary key, so the cursor
+    # must accept integer ids (not just binary UUIDs) and round-trip them intact.
+    timestamp = ~U[2026-04-15 12:00:00.123456Z]
+    id = 16
+
+    cursor = Cursor.encode(timestamp, id)
+
+    assert {:ok, {^timestamp, decoded_id}} = Cursor.decode(cursor)
+    assert is_integer(decoded_id)
+    assert decoded_id == 16
+  end
+
   test "rejects tampered payloads" do
     cursor = Cursor.encode(~U[2026-04-15 12:00:00Z], Ecto.UUID.generate())
 

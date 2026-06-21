@@ -9,10 +9,10 @@ defmodule AccrueAdmin.Queries.Cursor do
   @secret_key {__MODULE__, :secret}
   @salt "accrue_admin:queries:cursor"
 
-  @type value :: {DateTime.t(), Ecto.UUID.t()}
+  @type value :: {DateTime.t(), Ecto.UUID.t() | integer()}
 
-  @spec encode(DateTime.t(), Ecto.UUID.t()) :: binary()
-  def encode(%DateTime{} = timestamp, id) when is_binary(id) do
+  @spec encode(DateTime.t(), Ecto.UUID.t() | integer()) :: binary()
+  def encode(%DateTime{} = timestamp, id) when is_binary(id) or is_integer(id) do
     payload =
       {DateTime.to_iso8601(DateTime.truncate(timestamp, :microsecond)), id}
       |> :erlang.term_to_binary()
@@ -34,7 +34,7 @@ defmodule AccrueAdmin.Queries.Cursor do
          true <- Plug.Crypto.secure_compare(signature, sign(payload)),
          {timestamp, id} <- :erlang.binary_to_term(payload, [:safe]),
          {:ok, datetime, _offset} <- DateTime.from_iso8601(timestamp),
-         true <- is_binary(id) do
+         true <- is_binary(id) or is_integer(id) do
       {:ok, {DateTime.truncate(datetime, :microsecond), id}}
     else
       _ -> :error

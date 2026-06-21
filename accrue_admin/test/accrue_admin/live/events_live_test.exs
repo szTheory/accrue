@@ -105,6 +105,50 @@ defmodule AccrueAdmin.EventsLiveTest do
 
   # --- end Plan 175-06 tests ---
 
+  # --- Quick 260621-idn: >25-event pagination regression (integer-PK cursor) ---
+
+  test "renders 'Load more' and appends rows for >25 events without crashing", %{conn: conn} do
+    # Seed 30 globally-visible events so the feed overflows the 25-row page
+    # limit. Pre-fix, mounting raised FunctionClauseError in Cursor.encode/2
+    # because the event primary key is an integer, not a UUID.
+    for n <- 1..30 do
+      {:ok, _} =
+        Events.record(%{
+          type: "subscription.created.page#{n}",
+          subject_type: "Subscription",
+          subject_id: "sub_page_#{n}",
+          actor_type: "admin",
+          actor_id: "admin_1"
+        })
+    end
+
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+
+    assert {:ok, view, html} = live(conn, "/billing/events")
+    assert html =~ "Load more"
+
+    first_page_rows = page_row_count(html)
+
+    next_html =
+      view
+      |> element("#events [data-role=\"load-more\"]")
+      |> render_click()
+
+    assert page_row_count(next_html) > first_page_rows
+  end
+
+  defp page_row_count(html) do
+    # Every rendered row (table `<tr>` and responsive card `<article>`) carries a
+    # `data-row-id` attribute, regardless of whether the table is selectable, so
+    # counting these is a stable proxy for "how many rows are on the page".
+    html
+    |> String.split("data-row-id=")
+    |> length()
+    |> Kernel.-(1)
+  end
+
+  # --- end Quick 260621-idn tests ---
+
   test "renders the active-organization event feed without out-of-scope rows", %{
     conn: conn,
     webhook_id: webhook_id,
