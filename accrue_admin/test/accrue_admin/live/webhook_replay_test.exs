@@ -84,7 +84,7 @@ defmodule AccrueAdmin.WebhookReplayTest do
     assert audit_event.caused_by_webhook_event_id == webhook.id
   end
 
-  test "bulk replay confirms once and records one admin audit event", %{
+  test "selection-driven retry confirms once and records one admin audit event", %{
     conn: conn,
     bulk_webhooks: bulk_webhooks
   } do
@@ -99,9 +99,13 @@ defmodule AccrueAdmin.WebhookReplayTest do
         :id
       )
 
-    _ = render_click(element(view, "[data-role='prepare-bulk-replay']"))
-    html = render_click(element(view, "[data-role='confirm-bulk-replay']"))
-    assert html =~ "replay requested"
+    # Select all visible matching rows, click Retry selected, confirm.
+    render_click(element(view, "[data-role='toggle-all']"))
+    render_click(element(view, "[data-role='bulk-action']"))
+    # bulk-action notifies the parent via send/2 -> handle_info.
+    _ = render(view)
+    html = render_click(element(view, "[data-role='confirm-retry-selected']"))
+    assert html =~ "Retrying"
 
     audit_count_after =
       TestRepo.aggregate(
