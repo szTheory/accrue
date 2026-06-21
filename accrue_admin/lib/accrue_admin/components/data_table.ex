@@ -31,6 +31,8 @@ defmodule AccrueAdmin.Components.DataTable do
       |> assign_new(:card_title, fn -> nil end)
       |> assign_new(:empty_title, fn -> Copy.data_table_default_empty_title() end)
       |> assign_new(:empty_copy, fn -> Copy.data_table_default_empty_copy() end)
+      |> assign_new(:filtered_empty_title, fn -> nil end)
+      |> assign_new(:filtered_empty_copy, fn -> nil end)
       |> assign_new(:cursor_field, fn -> :inserted_at end)
       |> assign_new(:row_id, fn -> :id end)
       |> assign_new(:resource_plural, fn -> "rows" end)
@@ -62,7 +64,31 @@ defmodule AccrueAdmin.Components.DataTable do
           socket
       end
 
+    socket = resolve_empty_state(socket)
+
     {:ok, maybe_schedule_poll(socket)}
+  end
+
+  # Derive the empty-state title/copy: when filters are active AND the page opted
+  # into filtered-empty copy, use it; otherwise fall back to the truly-empty copy.
+  # Defaulting filter_params to %{} keeps poll/first-render falling back safely.
+  defp resolve_empty_state(socket) do
+    filtered? = any_filter_active?(socket.assigns[:filter_params] || %{})
+
+    resolved_empty_title =
+      if filtered? and socket.assigns.filtered_empty_title,
+        do: socket.assigns.filtered_empty_title,
+        else: socket.assigns.empty_title
+
+    resolved_empty_copy =
+      if filtered? and socket.assigns.filtered_empty_copy,
+        do: socket.assigns.filtered_empty_copy,
+        else: socket.assigns.empty_copy
+
+    assign(socket,
+      resolved_empty_title: resolved_empty_title,
+      resolved_empty_copy: resolved_empty_copy
+    )
   end
 
   @impl true
@@ -194,8 +220,8 @@ defmodule AccrueAdmin.Components.DataTable do
 
       <div :if={Enum.empty?(@rows)} class="ax-card ax-empty ax-data-table-empty" data-role="empty-state">
         <Icon.icon name={:inbox} size="lg" class="ax-empty-icon ax-empty-icon-muted" />
-        <p class="ax-empty-title"><%= @empty_title %></p>
-        <p class="ax-body ax-empty-copy"><%= @empty_copy %></p>
+        <p class="ax-empty-title"><%= @resolved_empty_title %></p>
+        <p class="ax-body ax-empty-copy"><%= @resolved_empty_copy %></p>
         <.link
           :if={any_filter_active?(@filter_params)}
           patch={@path}

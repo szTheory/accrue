@@ -170,6 +170,8 @@ defmodule AccrueAdmin.DataTableTest do
           %{id: :status, label: "Status", type: :select, options: [{"open", "Open"}, {"closed", "Closed"}]}
         ]}
         table_caption={@table_caption}
+        filtered_empty_title="No fixtures match these filters"
+        filtered_empty_copy="Adjust the filters above."
       />
       """
     end
@@ -404,11 +406,13 @@ defmodule AccrueAdmin.DataTableTest do
 
     assert html =~ "Nothing in this list yet"
     refute html =~ ~s(data-role="clear-filters")
+    refute html =~ "No fixtures match these filters"
 
     {:ok, _view, html} =
       live_isolated(conn, TableLive, session: %{"params" => %{"status" => "closed"}})
 
-    assert html =~ "Nothing in this list yet"
+    refute html =~ "Nothing in this list yet"
+    assert html =~ "No fixtures match these filters"
     assert html =~ ~s(data-role="clear-filters")
     assert html =~ "Clear filters"
   end

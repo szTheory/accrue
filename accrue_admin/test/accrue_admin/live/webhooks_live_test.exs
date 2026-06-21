@@ -91,6 +91,17 @@ defmodule AccrueAdmin.WebhooksLiveTest do
     assert html =~ "Retrying 1 event"
   end
 
+  test "filtered-to-zero shows the filtered-empty copy, not the truly-empty hero", %{conn: conn} do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+
+    # The org genuinely HAS deliveries (evt_dead + evt_ok from setup); this filter
+    # matches no type, so zero rows are the result of filtering — not an empty org.
+    {:ok, _view, html} = live(conn, "/billing/webhooks?type=does-not-exist-zzz")
+
+    assert html =~ "No webhook deliveries match these filters"
+    refute html =~ "No webhook deliveries for this organization yet"
+  end
+
   test "selection-driven retry records an audit event of the selected ids and count", %{
     conn: conn
   } do

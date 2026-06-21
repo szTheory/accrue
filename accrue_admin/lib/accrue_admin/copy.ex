@@ -486,6 +486,10 @@ defmodule AccrueAdmin.Copy do
     do:
       "Billing records appear here when they match this view. If you expected rows, check filters or organization scope."
 
+  def data_table_filtered_empty_title, do: "No results match these filters"
+
+  def data_table_filtered_empty_copy, do: "Clear or adjust the filters above to see results."
+
   # Filtered-to-zero affordance (Phase 171): keep the screen's tailored empty copy,
   # but offer a way back when a filter is what emptied the list.
   def data_table_clear_filters_label, do: "Clear filters"
@@ -668,6 +672,12 @@ defmodule AccrueAdmin.Copy do
   def webhooks_index_empty_copy,
     do:
       "Webhook deliveries appear here after Stripe events are recorded for this organization. If you expected deliveries, check filters or confirm your endpoint is receiving traffic."
+
+  def webhooks_index_filtered_empty_title, do: "No webhook deliveries match these filters"
+
+  def webhooks_index_filtered_empty_copy,
+    do:
+      "Adjust or clear the status, type, or live-mode filters above to see matching deliveries."
 
   @doc "Helper line above the webhooks table — plain-language JTBD framing."
   def webhooks_retry_selected_helper,
