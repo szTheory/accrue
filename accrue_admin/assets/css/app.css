@@ -916,6 +916,15 @@ html.accrue-admin[data-theme="dark"] .ax-theme-picker-option-active {
   box-sizing: border-box;
 }
 
+/* <main id="main-content" tabindex="-1"> is programmatically focused on mount/nav
+   by connection_state.js ensurePageFocus() (moves the AT cursor into content). It is
+   never keyboard-tabbable, so the UA outline only ever paints on this programmatic
+   focus — and in dark mode it reads as a bright blue box via --ax-focus-ring. Suppress
+   the UA ring on non-keyboard focus only; genuine keyboard focus keeps :focus-visible. */
+.ax-shell-content:focus:not(:focus-visible) {
+  outline: none;
+}
+
 .ax-breadcrumbs-list,
 .ax-flash-group {
   display: flex;
