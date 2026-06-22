@@ -884,7 +884,7 @@ html.accrue-admin[data-theme="dark"] .ax-sidebar-link.ax-sidebar-link-active {
   box-shadow: inset 0 0 0 1px var(--ax-accent-border);
 }
 
-@media (max-width: 767px) {
+@media (max-width: 767.98px) { /* --ax-bp-md ↓ */
   /* Collapse to icon-only; aria-label/title keep the segment's accessible name. */
   .ax-theme-picker-label {
     position: absolute;
@@ -1155,6 +1155,7 @@ a.ax-kpi-card--linked:focus-visible {
 }
 
 .ax-kpi-meta {
+  /* ax-type-exception: component-local caption type, documented until migrated to a composed role utility in markup. */
   width: 100%;
   margin: 0;
   color: var(--ax-muted);
@@ -1205,6 +1206,7 @@ a.ax-kpi-card--linked:focus-visible {
 }
 
 .ax-stat-value {
+  /* ax-type-exception: component-local metric-value type, documented until migrated to a composed role utility in markup. */
   margin: 0;
   font-size: var(--ax-type-lg);
   font-weight: 600;
@@ -1588,6 +1590,12 @@ a.ax-kpi-card--linked:focus-visible {
 /* Threaded-feed elevation: a continuous rail threading calm node-anchored entries.
    Scoped overrides placed AFTER the shared grouped selectors so KPI/json rules stay intact. */
 
+/* Scope the rail/node micro-stack to each timeline row so its 0/1 z-indexes never
+   leak into the page stacking order (FND-02 isolated micro-stack owner). */
+.ax-timeline-item {
+  isolation: isolate;
+}
+
 /* (a) RAIL — drawn only BETWEEN consecutive nodes, never above the first or below the last.
    Anchored at the node-column center (dot is 0.6875rem wide, in an auto column), running from
    just below the dot down through the inter-item gap (--ax-space-lg) into the next node. */
@@ -1600,7 +1608,7 @@ a.ax-kpi-card--linked:focus-visible {
   height: calc(100% - 0.6875rem - 0.5rem + var(--ax-space-lg));
   background: var(--ax-border-strong);
   transform: translateX(-0.5px);
-  z-index: 0;
+  z-index: 0; /* ax-z-micro-stack: rail behind the node inside the isolated timeline row */
 }
 
 /* (b) NODE — calmer, smaller dot with a surface-colored ring so the rail reads as passing behind. */
@@ -1609,7 +1617,7 @@ a.ax-kpi-card--linked:focus-visible {
   height: 0.6875rem;
   margin-top: 0.5rem;
   box-shadow: 0 0 0 3px var(--ax-elevated);
-  z-index: 1;
+  z-index: 1; /* ax-z-micro-stack: node above the rail inside the isolated timeline row */
 }
 
 /* (c) ENTRY — borderless, transparent threaded-feed row with a quiet hover surface.
@@ -1628,6 +1636,7 @@ a.ax-kpi-card--linked:focus-visible {
 
 /* (d) TIMESTAMP — semantic <time>, tabular figures, muted. */
 .ax-timeline-time {
+  /* ax-type-exception: component-local timestamp type, documented until migrated to a composed role utility in markup. */
   display: block;
   font-variant-numeric: tabular-nums;
   font-size: var(--ax-type-sm);
