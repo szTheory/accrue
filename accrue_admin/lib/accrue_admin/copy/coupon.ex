@@ -5,11 +5,11 @@ defmodule AccrueAdmin.Copy.Coupon do
 
   def coupon_index_eyebrow, do: "Discount management"
 
-  def coupon_index_headline, do: "Coupons backed by local discount projections"
+  def coupon_index_headline, do: "Coupons"
 
   def coupon_index_body_primary,
     do:
-      "Coupon filters, validity, and redemption counts stay server-side and separate from promotion-code operations."
+      "Discounts you can apply to subscriptions and invoices. Filter by validity or search to find a coupon and see how often it's been redeemed."
 
   def coupon_index_body_link_prefix, do: "Promotion codes have their own list and detail surface:"
 

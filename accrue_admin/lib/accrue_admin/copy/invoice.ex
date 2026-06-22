@@ -21,11 +21,11 @@ defmodule AccrueAdmin.Copy.Invoice do
 
   def invoices_index_eyebrow, do: "Invoices"
 
-  def invoices_index_headline, do: "Collections and invoice review"
+  def invoices_index_headline, do: "Invoices"
 
   def invoices_index_body,
     do:
-      "Inspect invoice state, open detail pages, and route high-risk state changes through the shared billing workflow and audit seams."
+      "Open and uncollectible invoices first — your collections queue. Switch status or search by customer to widen the view."
 
   def invoices_kpi_section_aria_label, do: "Invoice summary"
 

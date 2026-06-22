@@ -9,11 +9,11 @@ defmodule AccrueAdmin.Copy.Connect do
 
   def connect_accounts_eyebrow, do: "Marketplace operations"
 
-  def connect_accounts_headline, do: "Connected accounts and payout readiness"
+  def connect_accounts_headline, do: "Connected accounts"
 
   def connect_accounts_page_copy_primary,
     do:
-      "Operators can filter connected-account projections, inspect onboarding state, and jump into per-account platform-fee configuration."
+      "Stripe Connect accounts on this platform. Check onboarding and payout readiness, or open an account to configure its platform fees."
 
   def connect_accounts_kpi_section_aria_label, do: "Connect summary"
 

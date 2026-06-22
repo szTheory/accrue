@@ -56,17 +56,17 @@ defmodule AccrueAdmin.Copy.BillingEvent do
 
   def billing_events_eyebrow_global, do: "Global activity feed"
 
-  def billing_events_heading_organization, do: "Billing activity for the active organization"
+  def billing_events_heading_organization, do: "Event log"
 
-  def billing_events_heading_global, do: "Append-only billing and admin activity"
+  def billing_events_heading_global, do: "Event log"
 
   def billing_events_copy_organization,
     do:
-      "This feed stays scoped to the active organization so linked webhook and admin activity can't reveal other billing owners."
+      "An append-only record of every billing and admin action in this organization. Filter by actor or subject to trace who did what, and when."
 
   def billing_events_copy_global,
     do:
-      "This complements the scoped subject timelines with one operations-wide ledger view over `accrue_events`."
+      "An append-only record of every billing and admin action across all organizations. Filter by actor or subject to trace who did what, and when."
 
   def billing_events_webhook_source_direct, do: "Direct"
 

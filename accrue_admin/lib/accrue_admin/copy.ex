@@ -518,6 +518,32 @@ defmodule AccrueAdmin.Copy do
     do:
       "Charges appear when payments are recorded for this organization. If you expected charges, adjust filters or confirm organization scope."
 
+  # --- Index page headers (h1 + subtitle) for inline-literal pages
+
+  def subscriptions_index_heading, do: "Subscriptions"
+
+  def subscriptions_index_subtitle,
+    do:
+      "Every subscription for this organization and where it sits in its lifecycle. Filter by status or search by customer to find the ones that need attention."
+
+  def charges_index_heading, do: "Payments"
+
+  def charges_index_subtitle,
+    do:
+      "Every charge and refund for this organization. Filter by status, or open a charge to see its fees, payment method, and any failure."
+
+  def webhooks_index_heading, do: "Webhooks"
+
+  def webhooks_index_subtitle,
+    do:
+      "Inbound webhook deliveries, the failed ones first. Open a delivery for its full payload, or select deliveries to replay."
+
+  def recovery_index_heading, do: "Revenue Recovery"
+
+  def recovery_index_subtitle,
+    do:
+      "Track the dunning funnel and customers at risk of churn — how many recover after a failed payment, and which are nearing cancellation."
+
   def subscription_select_action_warning, do: "Select an action before confirming."
 
   def subscription_action_recorded_info, do: "Subscription action recorded."

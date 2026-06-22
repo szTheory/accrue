@@ -5,11 +5,11 @@ defmodule AccrueAdmin.Copy.PromotionCode do
 
   def promotion_codes_index_eyebrow, do: "Discount management"
 
-  def promotion_codes_index_headline, do: "Promotion codes as a dedicated admin surface"
+  def promotion_codes_index_headline, do: "Promotion codes"
 
   def promotion_codes_index_body_primary,
     do:
-      "Promotion codes are searchable independently from coupons, with direct links back to their parent discount definition."
+      "Customer-facing codes that apply a coupon at checkout. Search by code, or open one to see its coupon and redemptions."
 
   def promotion_codes_index_kpi_section_aria_label, do: "Promotion code summary"
 
