@@ -7,7 +7,7 @@ defmodule AccrueAdmin.Live.ConnectAccountsLive do
 
   alias Accrue.Connect.Account
   alias Accrue.Repo
-  alias AccrueAdmin.Components.{AppShell, Breadcrumbs, DataTable, KpiCard}
+  alias AccrueAdmin.Components.{AppShell, Breadcrumbs, DataTable, StatStrip}
   alias AccrueAdmin.Queries.ConnectAccounts
 
   @impl true
@@ -62,29 +62,22 @@ defmodule AccrueAdmin.Live.ConnectAccountsLive do
           </p>
         </header>
 
-        <section class="ax-kpi-grid" aria-label={AccrueAdmin.Copy.connect_accounts_kpi_section_aria_label()}>
-          <KpiCard.kpi_card label={AccrueAdmin.Copy.connect_accounts_kpi_label_accounts()} value={Integer.to_string(@summary.total_count)}>
-            <:meta><%= AccrueAdmin.Copy.connect_accounts_kpi_meta_all_accounts() %></:meta>
-          </KpiCard.kpi_card>
-
-          <KpiCard.kpi_card
+        <StatStrip.stat_strip label={AccrueAdmin.Copy.connect_accounts_kpi_section_aria_label()}>
+          <:stat
+            label={AccrueAdmin.Copy.connect_accounts_kpi_label_accounts()}
+            value={Integer.to_string(@summary.total_count)}
+          />
+          <:stat
             label={AccrueAdmin.Copy.connect_accounts_kpi_label_charges_enabled()}
             value={Integer.to_string(@summary.charges_enabled_count)}
-            delta={Integer.to_string(@summary.details_submitted_count) <> AccrueAdmin.Copy.connect_accounts_kpi_delta_submitted_suffix()}
-            delta_tone="cobalt"
-          >
-            <:meta><%= AccrueAdmin.Copy.connect_accounts_kpi_meta_capability_onboarding() %></:meta>
-          </KpiCard.kpi_card>
-
-          <KpiCard.kpi_card
+            tone="cobalt"
+          />
+          <:stat
             label={AccrueAdmin.Copy.connect_accounts_kpi_label_overrides()}
             value={Integer.to_string(@summary.override_count)}
-            delta={Integer.to_string(@summary.deauthorized_count) <> AccrueAdmin.Copy.connect_accounts_kpi_delta_deauthorized_suffix()}
-            delta_tone="amber"
-          >
-            <:meta><%= AccrueAdmin.Copy.connect_accounts_kpi_meta_platform_fee_override() %></:meta>
-          </KpiCard.kpi_card>
-        </section>
+            tone="amber"
+          />
+        </StatStrip.stat_strip>
 
         <.live_component
           module={DataTable}

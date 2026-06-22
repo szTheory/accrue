@@ -7,7 +7,7 @@ defmodule AccrueAdmin.Live.EventsLive do
 
   alias Accrue.Events.Event
   alias Accrue.Repo
-  alias AccrueAdmin.Components.{AppShell, Breadcrumbs, DataTable, FilterChipBar, KpiCard}
+  alias AccrueAdmin.Components.{AppShell, Breadcrumbs, DataTable, FilterChipBar, StatStrip}
   alias AccrueAdmin.OwnerScope
   alias AccrueAdmin.Queries.Events
   alias AccrueAdmin.ScopedPath
@@ -99,29 +99,22 @@ defmodule AccrueAdmin.Live.EventsLive do
           </p>
         </header>
 
-        <section class="ax-kpi-grid" aria-label={AccrueAdmin.Copy.billing_events_kpi_section_aria_label()}>
-          <KpiCard.kpi_card label={AccrueAdmin.Copy.billing_events_kpi_label_ledger_rows()} value={Integer.to_string(@summary.total_count)}>
-            <:meta><%= AccrueAdmin.Copy.billing_events_kpi_meta_total_append_only() %></:meta>
-          </KpiCard.kpi_card>
-
-          <KpiCard.kpi_card
+        <StatStrip.stat_strip label={AccrueAdmin.Copy.billing_events_kpi_section_aria_label()}>
+          <:stat
+            label={AccrueAdmin.Copy.billing_events_kpi_label_ledger_rows()}
+            value={Integer.to_string(@summary.total_count)}
+          />
+          <:stat
             label={AccrueAdmin.Copy.billing_events_kpi_label_webhook_sourced()}
             value={Integer.to_string(@summary.webhook_linked_count)}
-            delta={Integer.to_string(@summary.admin_count) <> AccrueAdmin.Copy.billing_events_kpi_delta_admin_suffix()}
-            delta_tone="cobalt"
-          >
-            <:meta><%= AccrueAdmin.Copy.billing_events_kpi_meta_webhook_cause_chain() %></:meta>
-          </KpiCard.kpi_card>
-
-          <KpiCard.kpi_card
+            tone="cobalt"
+          />
+          <:stat
             label={AccrueAdmin.Copy.billing_events_kpi_label_last_24h()}
             value={Integer.to_string(@summary.last_day_count)}
-            delta={Integer.to_string(@summary.unique_subject_types) <> AccrueAdmin.Copy.billing_events_kpi_delta_subject_types_suffix()}
-            delta_tone="moss"
-          >
-            <:meta><%= AccrueAdmin.Copy.billing_events_kpi_meta_recent_cross_resource() %></:meta>
-          </KpiCard.kpi_card>
-        </section>
+            tone="moss"
+          />
+        </StatStrip.stat_strip>
 
         <FilterChipBar.filter_chip_bar
           items={compliance_chips(@params, @table_path)}

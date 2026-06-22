@@ -8,7 +8,7 @@ defmodule AccrueAdmin.Live.ChargesLive do
   alias Accrue.Billing.Charge
   alias Accrue.Repo
   alias AccrueAdmin.BillingPresentation
-  alias AccrueAdmin.Components.{AppShell, Breadcrumbs, DataTable, FilterChipBar, KpiCard}
+  alias AccrueAdmin.Components.{AppShell, Breadcrumbs, DataTable, FilterChipBar, StatStrip}
   alias AccrueAdmin.Copy
   alias AccrueAdmin.Queries.Charges
 
@@ -82,24 +82,15 @@ defmodule AccrueAdmin.Live.ChargesLive do
           </p>
         </header>
 
-        <section class="ax-kpi-grid" aria-label="Charge summary">
-          <KpiCard.kpi_card label="Succeeded" value={Integer.to_string(@summary.succeeded_count)}>
-            <:meta>Charges already settled locally</:meta>
-          </KpiCard.kpi_card>
-
-          <KpiCard.kpi_card
+        <StatStrip.stat_strip label="Charge summary">
+          <:stat label="Succeeded" value={Integer.to_string(@summary.succeeded_count)} />
+          <:stat
             label="Fees settled"
             value={Integer.to_string(@summary.fees_settled_count)}
-            delta={Integer.to_string(@summary.refund_count) <> " refunds"}
-            delta_tone="cobalt"
-          >
-            <:meta>Stripe fee detail available for refund review</:meta>
-          </KpiCard.kpi_card>
-
-          <KpiCard.kpi_card label="Refunded" value={Integer.to_string(@summary.refunded_count)}>
-            <:meta>Charges with at least one refund row</:meta>
-          </KpiCard.kpi_card>
-        </section>
+            tone="cobalt"
+          />
+          <:stat label="Refunded" value={Integer.to_string(@summary.refunded_count)} />
+        </StatStrip.stat_strip>
 
         <FilterChipBar.filter_chip_bar
           items={work_queue_chips(@params, @table_path)}

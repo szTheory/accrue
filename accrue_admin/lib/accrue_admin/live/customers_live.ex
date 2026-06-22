@@ -7,7 +7,7 @@ defmodule AccrueAdmin.Live.CustomersLive do
 
   alias Accrue.Billing.Customer
   alias Accrue.Repo
-  alias AccrueAdmin.Components.{AppShell, Breadcrumbs, DataTable, FlashGroup, IdBadge, KpiCard}
+  alias AccrueAdmin.Components.{AppShell, Breadcrumbs, DataTable, FlashGroup, IdBadge, StatStrip}
   alias AccrueAdmin.Copy
   alias AccrueAdmin.Queries.Customers
 
@@ -82,18 +82,13 @@ defmodule AccrueAdmin.Live.CustomersLive do
 
         <FlashGroup.flash_group flashes={flash_messages(@flash)} />
 
-        <section class="ax-kpi-grid" aria-label="Customer summary">
-          <KpiCard.kpi_card label="Customers" value={Integer.to_string(@summary.customer_count)}>
-            <:meta>All local customer records</:meta>
-          </KpiCard.kpi_card>
-
-          <KpiCard.kpi_card
+        <StatStrip.stat_strip label="Customer summary">
+          <:stat label="Customers" value={Integer.to_string(@summary.customer_count)} />
+          <:stat
             label="With payment method"
             value={Integer.to_string(@summary.with_default_payment_method_count)}
-          >
-            <:meta>Default payment method present</:meta>
-          </KpiCard.kpi_card>
-        </section>
+          />
+        </StatStrip.stat_strip>
 
         <.live_component
           module={DataTable}

@@ -7,7 +7,7 @@ defmodule AccrueAdmin.Live.PromotionCodesLive do
 
   alias Accrue.Billing.PromotionCode
   alias Accrue.Repo
-  alias AccrueAdmin.Components.{AppShell, Breadcrumbs, DataTable, KpiCard}
+  alias AccrueAdmin.Components.{AppShell, Breadcrumbs, DataTable, StatStrip}
   alias AccrueAdmin.Queries.PromotionCodes
 
   @impl true
@@ -62,29 +62,22 @@ defmodule AccrueAdmin.Live.PromotionCodesLive do
           </p>
         </header>
 
-        <section class="ax-kpi-grid" aria-label={AccrueAdmin.Copy.promotion_codes_index_kpi_section_aria_label()}>
-          <KpiCard.kpi_card label={AccrueAdmin.Copy.promotion_codes_kpi_label_codes()} value={Integer.to_string(@summary.total_count)}>
-            <:meta><%= AccrueAdmin.Copy.promotion_codes_kpi_meta_all_local_rows() %></:meta>
-          </KpiCard.kpi_card>
-
-          <KpiCard.kpi_card
+        <StatStrip.stat_strip label={AccrueAdmin.Copy.promotion_codes_index_kpi_section_aria_label()}>
+          <:stat
+            label={AccrueAdmin.Copy.promotion_codes_kpi_label_codes()}
+            value={Integer.to_string(@summary.total_count)}
+          />
+          <:stat
             label={AccrueAdmin.Copy.promotion_codes_kpi_label_active()}
             value={Integer.to_string(@summary.active_count)}
-            delta={Integer.to_string(@summary.inactive_count) <> AccrueAdmin.Copy.promotion_codes_kpi_inactive_suffix()}
-            delta_tone="amber"
-          >
-            <:meta><%= AccrueAdmin.Copy.promotion_codes_kpi_meta_activation_state() %></:meta>
-          </KpiCard.kpi_card>
-
-          <KpiCard.kpi_card
+            tone="amber"
+          />
+          <:stat
             label={AccrueAdmin.Copy.promotion_codes_kpi_label_expiring()}
             value={Integer.to_string(@summary.expiring_count)}
-            delta={Integer.to_string(@summary.redeemed_count) <> AccrueAdmin.Copy.promotion_codes_kpi_redemptions_suffix()}
-            delta_tone="cobalt"
-          >
-            <:meta><%= AccrueAdmin.Copy.promotion_codes_kpi_meta_expiring() %></:meta>
-          </KpiCard.kpi_card>
-        </section>
+            tone="cobalt"
+          />
+        </StatStrip.stat_strip>
 
         <.live_component
           module={DataTable}

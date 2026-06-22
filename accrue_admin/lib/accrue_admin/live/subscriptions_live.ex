@@ -15,7 +15,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
     DataTable,
     FilterChipBar,
     FlashGroup,
-    KpiCard
+    StatStrip
   }
 
   alias AccrueAdmin.Copy
@@ -108,24 +108,16 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
 
         <FlashGroup.flash_group flashes={flash_messages(@flash)} />
 
-        <section class="ax-kpi-grid" aria-label="Subscription summary">
-          <KpiCard.kpi_card label="Active" value={Integer.to_string(@summary.active_count)}>
-            <:meta>Active and trialing subscriptions</:meta>
-          </KpiCard.kpi_card>
-
-          <KpiCard.kpi_card
+        <StatStrip.stat_strip label="Subscription summary">
+          <:stat label="Active" value={Integer.to_string(@summary.active_count)} />
+          <:stat
             label="Canceling"
             value={Integer.to_string(@summary.canceling_count)}
-            delta={Integer.to_string(@summary.paused_count) <> " paused"}
-            delta_tone="amber"
-          >
-            <:meta>Canonical canceling and paused predicates</:meta>
-          </KpiCard.kpi_card>
-
-          <KpiCard.kpi_card label="Past due" value={Integer.to_string(@summary.past_due_count)}>
-            <:meta>Subscriptions in dunning territory</:meta>
-          </KpiCard.kpi_card>
-        </section>
+            tone="amber"
+          />
+          <:stat label="Paused" value={Integer.to_string(@summary.paused_count)} tone="amber" />
+          <:stat label="Past due" value={Integer.to_string(@summary.past_due_count)} />
+        </StatStrip.stat_strip>
 
         <FilterChipBar.filter_chip_bar
           items={work_queue_chips(@params, @table_path)}

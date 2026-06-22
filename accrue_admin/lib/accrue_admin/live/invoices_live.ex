@@ -8,7 +8,7 @@ defmodule AccrueAdmin.Live.InvoicesLive do
   alias Accrue.Billing.Invoice
   alias Accrue.Repo
   alias AccrueAdmin.BillingPresentation
-  alias AccrueAdmin.Components.{AppShell, Breadcrumbs, DataTable, FilterChipBar, KpiCard}
+  alias AccrueAdmin.Components.{AppShell, Breadcrumbs, DataTable, FilterChipBar, StatStrip}
   alias AccrueAdmin.Copy
   alias AccrueAdmin.Queries.Invoices
 
@@ -81,24 +81,15 @@ defmodule AccrueAdmin.Live.InvoicesLive do
           </p>
         </header>
 
-        <section class="ax-kpi-grid" aria-label={Copy.invoices_kpi_section_aria_label()}>
-          <KpiCard.kpi_card label={Copy.invoices_kpi_open_label()} value={Integer.to_string(@summary.open_count)}>
-            <:meta><%= Copy.invoices_kpi_open_meta() %></:meta>
-          </KpiCard.kpi_card>
-
-          <KpiCard.kpi_card label={Copy.invoices_kpi_paid_label()} value={Integer.to_string(@summary.paid_count)}>
-            <:meta><%= Copy.invoices_kpi_paid_meta() %></:meta>
-          </KpiCard.kpi_card>
-
-          <KpiCard.kpi_card
+        <StatStrip.stat_strip label={Copy.invoices_kpi_section_aria_label()}>
+          <:stat label={Copy.invoices_kpi_open_label()} value={Integer.to_string(@summary.open_count)} />
+          <:stat label={Copy.invoices_kpi_paid_label()} value={Integer.to_string(@summary.paid_count)} />
+          <:stat
             label={Copy.invoices_kpi_uncollectible_label()}
             value={Integer.to_string(@summary.uncollectible_count)}
-            delta={Integer.to_string(@summary.void_count) <> Copy.invoices_kpi_uncollectible_void_delta_suffix()}
-            delta_tone="amber"
-          >
-            <:meta><%= Copy.invoices_kpi_uncollectible_meta() %></:meta>
-          </KpiCard.kpi_card>
-        </section>
+            tone="amber"
+          />
+        </StatStrip.stat_strip>
 
         <FilterChipBar.filter_chip_bar
           items={work_queue_chips(@params, @table_path)}

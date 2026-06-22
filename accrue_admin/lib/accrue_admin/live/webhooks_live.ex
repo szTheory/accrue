@@ -6,7 +6,7 @@ defmodule AccrueAdmin.Live.WebhooksLive do
   alias Accrue.{Auth, Events}
   alias Accrue.Webhook.WebhookEvent
   alias Accrue.Webhooks.DLQ
-  alias AccrueAdmin.Components.{AppShell, Breadcrumbs, DataTable, FlashGroup, KpiCard}
+  alias AccrueAdmin.Components.{AppShell, Breadcrumbs, DataTable, FlashGroup, StatStrip}
   alias AccrueAdmin.Copy
   alias AccrueAdmin.Queries.Webhooks
 
@@ -145,29 +145,19 @@ defmodule AccrueAdmin.Live.WebhooksLive do
 
         <FlashGroup.flash_group flashes={@flashes} />
 
-        <section class="ax-kpi-grid" aria-label="Webhook summary">
-          <KpiCard.kpi_card label="Received" value={Integer.to_string(@summary.received_count)}>
-            <:meta>Total persisted webhook rows</:meta>
-          </KpiCard.kpi_card>
-
-          <KpiCard.kpi_card
+        <StatStrip.stat_strip label="Webhook summary">
+          <:stat label="Received" value={Integer.to_string(@summary.received_count)} />
+          <:stat
             label="Blocked"
             value={Integer.to_string(@summary.blocked_count)}
-            delta={Integer.to_string(@summary.dead_count) <> " dead-lettered"}
-            delta_tone="amber"
-          >
-            <:meta>Rows waiting on operator replay or investigation</:meta>
-          </KpiCard.kpi_card>
-
-          <KpiCard.kpi_card
+            tone="amber"
+          />
+          <:stat
             label="Replayed"
             value={Integer.to_string(@summary.replayed_count)}
-            delta={Integer.to_string(@summary.livemode_count) <> " live mode"}
-            delta_tone="cobalt"
-          >
-            <:meta>Replay cycles recorded through the shared DLQ primitives</:meta>
-          </KpiCard.kpi_card>
-        </section>
+            tone="cobalt"
+          />
+        </StatStrip.stat_strip>
 
         <p class="ax-body ax-page-copy" data-role="webhooks-retry-helper">
           <%= Copy.webhooks_retry_selected_helper() %>

@@ -7,7 +7,7 @@ defmodule AccrueAdmin.Live.CouponsLive do
 
   alias Accrue.Billing.{Coupon, PromotionCode}
   alias Accrue.Repo
-  alias AccrueAdmin.Components.{AppShell, Breadcrumbs, DataTable, KpiCard}
+  alias AccrueAdmin.Components.{AppShell, Breadcrumbs, DataTable, StatStrip}
   alias AccrueAdmin.Queries.Coupons
 
   @impl true
@@ -67,29 +67,22 @@ defmodule AccrueAdmin.Live.CouponsLive do
           </p>
         </header>
 
-        <section class="ax-kpi-grid" aria-label={AccrueAdmin.Copy.coupon_index_kpi_section_aria_label()}>
-          <KpiCard.kpi_card label={AccrueAdmin.Copy.coupon_kpi_label_coupons()} value={Integer.to_string(@summary.total_count)}>
-            <:meta><%= AccrueAdmin.Copy.coupon_kpi_meta_all_local_coupons() %></:meta>
-          </KpiCard.kpi_card>
-
-          <KpiCard.kpi_card
+        <StatStrip.stat_strip label={AccrueAdmin.Copy.coupon_index_kpi_section_aria_label()}>
+          <:stat
+            label={AccrueAdmin.Copy.coupon_kpi_label_coupons()}
+            value={Integer.to_string(@summary.total_count)}
+          />
+          <:stat
             label={AccrueAdmin.Copy.coupon_kpi_label_valid()}
             value={Integer.to_string(@summary.valid_count)}
-            delta={Integer.to_string(@summary.invalid_count) <> AccrueAdmin.Copy.coupon_kpi_invalid_suffix()}
-            delta_tone="amber"
-          >
-            <:meta><%= AccrueAdmin.Copy.coupon_kpi_meta_validity_projection() %></:meta>
-          </KpiCard.kpi_card>
-
-          <KpiCard.kpi_card
+            tone="amber"
+          />
+          <:stat
             label={AccrueAdmin.Copy.coupon_kpi_label_promotion_codes()}
             value={Integer.to_string(@summary.promotion_code_count)}
-            delta={Integer.to_string(@summary.redeemed_count) <> AccrueAdmin.Copy.coupon_kpi_redemptions_suffix()}
-            delta_tone="cobalt"
-          >
-            <:meta><%= AccrueAdmin.Copy.coupon_kpi_meta_promotion_codes_child() %></:meta>
-          </KpiCard.kpi_card>
-        </section>
+            tone="cobalt"
+          />
+        </StatStrip.stat_strip>
 
         <.live_component
           module={DataTable}
