@@ -6,6 +6,7 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLive do
   @known_currency_atoms ~w(usd eur gbp jpy kwd)a
 
   alias Accrue.Analytics.Dunning
+  alias AccrueAdmin.Copy
 
   alias AccrueAdmin.Components.{
     AppShell,
@@ -100,7 +101,7 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLive do
         <header class="ax-page-header">
           <Breadcrumbs.breadcrumbs items={[%{label: "Analytics"}, %{label: "Recovery"}]} />
           <div class="ax-heading-row">
-            <h1 class="ax-display">Revenue Recovery</h1>
+            <h1 class="ax-display"><%= Copy.recovery_index_heading() %></h1>
             <a
               href="https://hexdocs.pm/accrue/analytics.html#cutoff-semantics"
               target="_blank"
@@ -110,6 +111,7 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLive do
               Showing data since 2024-01-01
             </a>
           </div>
+          <p class="ax-body ax-page-copy"><%= Copy.recovery_index_subtitle() %></p>
           <WindowSelector.window_selector
             current_window={@window}
             base_path={@window_selector_base_path}

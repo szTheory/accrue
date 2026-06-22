@@ -136,11 +136,8 @@ defmodule AccrueAdmin.Live.WebhooksLive do
               %{label: "Webhooks"}
             ]}
           />
-          <h1 class="ax-display">Replay, inspect, and trace webhook delivery</h1>
-          <p class="ax-body ax-page-copy">
-            Filter inbound webhook events, open any event for full payload detail, and select
-            the ones that need a re-run.
-          </p>
+          <h1 class="ax-display"><%= Copy.webhooks_index_heading() %></h1>
+          <p class="ax-body ax-page-copy"><%= Copy.webhooks_index_subtitle() %></p>
         </header>
 
         <FlashGroup.flash_group flashes={@flashes} />

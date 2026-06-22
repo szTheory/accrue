@@ -99,11 +99,8 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
               %{label: "Subscriptions"}
             ]}
           />
-          <h1 class="ax-display">Lifecycle-safe subscription search</h1>
-          <p class="ax-body ax-page-copy">
-            Subscription list filters run on the shared query layer and expose canonical lifecycle
-            states without requiring raw status checks in the UI.
-          </p>
+          <h1 class="ax-display"><%= Copy.subscriptions_index_heading() %></h1>
+          <p class="ax-body ax-page-copy"><%= Copy.subscriptions_index_subtitle() %></p>
         </header>
 
         <FlashGroup.flash_group flashes={flash_messages(@flash)} />

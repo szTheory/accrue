@@ -75,11 +75,8 @@ defmodule AccrueAdmin.Live.ChargesLive do
               %{label: "Charges"}
             ]}
           />
-          <h1 class="ax-display">Payment and refund review</h1>
-          <p class="ax-body ax-page-copy">
-            Inspect payment fee settlement, jump into charge detail, and start fee-aware refunds
-            through the existing billing facade.
-          </p>
+          <h1 class="ax-display"><%= Copy.charges_index_heading() %></h1>
+          <p class="ax-body ax-page-copy"><%= Copy.charges_index_subtitle() %></p>
         </header>
 
         <StatStrip.stat_strip label="Charge summary">
