@@ -168,7 +168,7 @@ test.describe("VERIFY-01 admin Connect index (auxiliary)", () => {
     await waitForLiveView(page);
     await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
 
-    await expect(page.getByText(copyStrings.connect_accounts_headline)).toBeVisible();
+    await expect(page.getByRole("heading", { name: copyStrings.connect_accounts_headline })).toBeVisible();
     await expect(page.getByRole("button", { name: copyStrings.connect_accounts_apply_filters })).toBeVisible();
 
     const violations = await scanAxe(page);
@@ -286,7 +286,7 @@ test.describe("VERIFY-01 admin coupons index (auxiliary)", () => {
     await waitForLiveView(page);
     await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
 
-    await expect(page.getByText(copyStrings.coupon_index_headline)).toBeVisible();
+    await expect(page.getByRole("heading", { name: copyStrings.coupon_index_headline })).toBeVisible();
 
     const violations = await scanAxe(page);
     expect(violations, JSON.stringify(violations, null, 2)).toEqual([]);
@@ -324,7 +324,7 @@ test.describe("VERIFY-01 admin promotion codes index (auxiliary)", () => {
     await waitForLiveView(page);
     await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
 
-    await expect(page.getByText(copyStrings.promotion_codes_index_headline)).toBeVisible();
+    await expect(page.getByRole("heading", { name: copyStrings.promotion_codes_index_headline })).toBeVisible();
 
     const violations = await scanAxe(page);
     expect(violations, JSON.stringify(violations, null, 2)).toEqual([]);
@@ -357,7 +357,7 @@ test.describe("core-admin-invoices-index", () => {
 
     await expect(page.locator("html")).toHaveClass(/accrue-admin/);
 
-    await expect(page.getByText(copyStrings.invoices_index_headline)).toBeVisible();
+    await expect(page.getByRole("heading", { name: copyStrings.invoices_index_headline })).toBeVisible();
 
     const lightBtn = page.locator('button[data-theme-target="light"]');
     await expect(lightBtn).toBeVisible();
