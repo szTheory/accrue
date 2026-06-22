@@ -24,12 +24,12 @@ test("mounted admin customers index shows tenant chrome and billing signals", as
   await expect(page.getByText("Active organization", { exact: true })).toBeVisible({ timeout: 15_000 });
 
   if (testInfo.project.name.includes("mobile")) {
-    // Card rows wrap label/value pairs in generic groups; assert the card shows the billing chip pair.
-    await expect(page.locator("article").filter({ hasText: "Billing signals" }).filter({ hasText: "Org" })).toBeVisible({
+    // Card rows wrap label/value pairs in generic groups; assert the card shows the Payment method field.
+    await expect(page.locator("article").filter({ hasText: "Payment method" })).toBeVisible({
       timeout: 15_000
     });
   } else {
-    await expect(page.getByRole("columnheader", { name: "Billing signals", exact: true })).toBeVisible({
+    await expect(page.getByRole("columnheader", { name: "Payment method", exact: true })).toBeVisible({
       timeout: 15_000
     });
   }
