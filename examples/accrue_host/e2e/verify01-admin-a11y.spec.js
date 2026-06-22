@@ -246,7 +246,9 @@ test.describe("VERIFY-01 admin billing events index (auxiliary)", () => {
     await waitForLiveView(page);
     await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
 
-    await expect(page.getByText(copyStrings.billing_events_heading_organization)).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: copyStrings.billing_events_heading_organization })
+    ).toBeVisible();
 
     const violations = await scanAxe(page);
     expect(violations, JSON.stringify(violations, null, 2)).toEqual([]);
