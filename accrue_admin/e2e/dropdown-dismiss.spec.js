@@ -16,12 +16,19 @@ test.describe("Dropdown menu — outside-click dismissal", () => {
       .first();
     await expect(dropdown).toBeVisible();
 
-    // Opens on summary click (native disclosure).
-    await dropdown.locator("summary").click();
+    // Open the native disclosure. The component-kitchen renders an always-open,
+    // focus-trapped drawer specimen (DetailDrawer phx-hook="FocusTrap") that grabs
+    // focus page-wide and auto-scrolls to itself; that churn makes a synthesized
+    // pointer click on this summary land on the wrong element. Dispatch the click
+    // on the summary directly to exercise the native <details> toggle reliably —
+    // the behaviour under test is the outside-click dismissal below, not the open.
+    await dropdown.locator("summary").dispatchEvent("click");
     expect(await dropdown.evaluate((el) => el.open)).toBe(true);
 
-    // Closes when clicking an element outside the dropdown (least-surprise).
-    await page.getByText("Status badges").first().click();
+    // Closes when a real click lands outside the dropdown (least-surprise). The
+    // document-level dismissal hook (initDropdowns) closes any open ax-dropdown on
+    // outside-click; the top-left corner is reliably outside this dropdown.
+    await page.mouse.click(5, 5);
     expect(await dropdown.evaluate((el) => el.open)).toBe(false);
   });
 });

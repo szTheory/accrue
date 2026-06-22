@@ -12,7 +12,7 @@
  * SURFACES COVERED:
  *   1. Command palette  — #search-trigger (phx-click="open")
  *   2. Dropdown         — details.ax-dropdown > summary (native <details> disclosure)
- *   3. Nav group collapse — [data-collapse-toggle="true"] (sidebar group toggle)
+ *   3. Mobile sidebar overlay — [data-sidebar-toggle="true"] (ax-shell-nav-open)
  *   4. Webhook replay drawer — [data-role="replay-single"] (phx-click="prepare_replay")
  *
  * trace: "on" is FILE-SCOPED via test.use() — does NOT modify playwright.config.js.
@@ -107,45 +107,36 @@ test.describe("Motion trace — animated surface capture", () => {
   // Surface: sidebar.ex — ax-sidebar-group-toggle, aria-controls → sidebar-group-links-{slug}
   // Trigger: [data-collapse-toggle="true"] button (Recovery, Developer, or Catalog groups)
   // --------------------------------------------------------------------------
-  test("motion trace — nav group collapse/expand", async ({ page, request }) => {
-    // Trace artifact: test-results/motion-trace-nav-group-collapse-expand/trace.zip
+  test("motion trace — mobile sidebar overlay open/close", async ({ page, request }) => {
+    // Trace artifact: test-results/motion-trace-mobile-sidebar-overlay-open-close/trace.zip
     // Review with: npx playwright show-trace test-results/.../trace.zip
+    //
+    // The cordoned-hybrid nav redesign removed per-group collapse toggles
+    // (data-collapse-toggle); the always-visible sidebar groups no longer
+    // expand/collapse. The remaining animated nav surface is the mobile sidebar
+    // overlay: the topbar Menu button (data-sidebar-toggle) toggles
+    // html.ax-shell-nav-open, sliding the .ax-sidebar in/out below the lg
+    // breakpoint. Drive it at a sub-lg width so the Menu toggle renders (it is
+    // display:none at >=1024px) and the overlay surface is exercised in both
+    // projects.
+    await page.setViewportSize({ width: 414, height: 896 });
 
     await seed(request, "operator-flows");
     await login(page, "/billing");
     await expect(page.locator("#main-content")).toBeVisible();
 
-    const toggleButton = page.locator('[data-collapse-toggle="true"]').first();
-    if (!(await toggleButton.isVisible())) {
-      await page.locator('[data-sidebar-toggle="true"]').click();
-      await expect(page.locator(".ax-sidebar")).toBeVisible();
-    }
+    const menuToggle = page.locator('[data-sidebar-toggle="true"]');
+    await expect(menuToggle).toBeVisible();
 
-    await expect(toggleButton).toBeVisible();
+    // Open: Menu toggle adds ax-shell-nav-open and slides the sidebar overlay in.
+    await menuToggle.click();
+    await expect(page.locator("html")).toHaveClass(/ax-shell-nav-open/);
+    await expect(page.locator(".ax-sidebar")).toBeVisible();
 
-    // Read which list element this toggle controls
-    const controlledId = await toggleButton.getAttribute("aria-controls");
-    // Fail loudly if the attribute is absent rather than silently skipping assertions
-    expect(controlledId, "collapse toggle must have data-controls attribute").toBeTruthy();
-
-    const controlledList = page.locator(`#${controlledId}`);
-
-    if ((await toggleButton.getAttribute("aria-expanded")) !== "true") {
-      await toggleButton.click();
-      await expect(toggleButton).toHaveAttribute("aria-expanded", "true");
-      await expect(controlledList).toBeVisible();
-    }
-
-    // Collapse the group; the hook applies hidden after the short opacity
-    // transition so assistive technology skips the links once closed.
-    await toggleButton.click();
-    await expect(toggleButton).toHaveAttribute("aria-expanded", "false");
-    await expect(controlledList).toBeHidden();
-
-    // Re-expand the group (second click reveals the link list)
-    await toggleButton.click();
-
-    await expect(controlledList).toBeVisible();
+    // Close: clicking the toggle again removes the overlay and hides the sidebar.
+    await menuToggle.click();
+    await expect(page.locator("html")).not.toHaveClass(/ax-shell-nav-open/);
+    await expect(page.locator(".ax-sidebar")).toBeHidden();
   });
 
   // --------------------------------------------------------------------------

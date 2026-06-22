@@ -1069,17 +1069,24 @@ test.describe("Phase 189: component-kitchen probes", () => {
   test("focus ring: interactive primitives have outline >= 2px on :focus-visible", async ({ page }, testInfo) => {
     const recorder = makeRecorder(testInfo.project.name);
 
-    // Probe each interactive primitive in the (single) state-matrix column.
+    // Probe the canonical forced-focus specimens. Chromium's :focus-visible
+    // heuristic does not activate on programmatic focus inside the nested
+    // state-matrix grid (WR-07), so reading the live computed style after .focus()
+    // returns the UA ring (3px / 0 offset / no shadow) and false-negatives. The
+    // component lab renders a purpose-built focus cell (data-ax-force="focus")
+    // whose specimens carry the real shared :focus-visible ring (2px outline,
+    // 2px offset, --ax-focus-shadow) deterministically — that is the affordance
+    // this probe exists to verify.
     await focusRingProbe(
       page,
-      '.ax-dev-state-grid-col .ax-button',
+      '.ax-dev-state-cell[data-ax-state="focus"] .ax-button',
       recorder,
       "component-kitchen",
       "interactive-open"
     );
     await focusRingProbe(
       page,
-      '.ax-dev-state-grid-col .ax-field-control',
+      '.ax-dev-state-cell[data-ax-state="focus"] .ax-field-control',
       recorder,
       "component-kitchen",
       "interactive-open"

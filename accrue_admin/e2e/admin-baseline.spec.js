@@ -582,6 +582,11 @@ test.describe("Admin static baseline", () => {
   });
 
   test("captures manifest-driven static cells for admin routes", async ({ page, request }, testInfo) => {
+    // Full per-route screenshot + axe sweep over the admin route set; the mobile
+    // project in particular runs longer than the 30s default, so keep the generous
+    // budget this sweep had before it was split by route set (regression: the
+    // 240s setTimeout was dropped in the route-set split).
+    test.setTimeout(240_000);
     await captureBaselineRouteSet({
       page,
       request,
@@ -591,6 +596,7 @@ test.describe("Admin static baseline", () => {
   });
 
   test("captures manifest-driven static cells for the component kitchen", async ({ page, request }, testInfo) => {
+    test.setTimeout(240_000);
     await captureBaselineRouteSet({
       page,
       request,
