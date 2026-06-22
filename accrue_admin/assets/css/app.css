@@ -999,6 +999,9 @@ html.accrue-admin[data-theme="dark"] .ax-theme-picker-option-active {
 .ax-kpi-card {
   border: 1px solid var(--ax-border);
   background: var(--ax-elevated);
+  /* Allow the card to shrink below its content's intrinsic width so long delta
+     captions wrap instead of forcing the KPI grid past a narrow viewport. */
+  min-width: 0;
 }
 
 .ax-filter-chip-bar,
@@ -1121,8 +1124,14 @@ a.ax-kpi-card--linked:focus-visible {
   font-size: 0.8125rem;
   font-weight: 600;
   line-height: 1.2;
-  /* Secondary stats like "1 dead-lettered" must read on one line — never break mid-word. */
-  white-space: nowrap;
+  /* Short secondary stats like "1 dead-lettered" stay on one line because they
+     fit; sentence-length deltas (e.g. "No disabled recurring tax or finalization
+     failures" on the customer-summary Tax-risk card) must be allowed to wrap so
+     their min-content width does not force the KPI grid past the 320px viewport
+     (Phase 191 customer-detail clipping). overflow-wrap keeps unbreakable tokens
+     from escaping the card. */
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
 
 .ax-kpi-delta-moss {
