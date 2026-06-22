@@ -94,9 +94,10 @@ defmodule AccrueAdmin.CustomersLiveTest do
     # Owner-types KPI dropped; the two clean KPIs remain.
     refute html =~ "Distinct host billable types"
 
-    # owner_type filter renders as a derived select (not a free-text input).
+    # owner_type filter renders from the derived distinct types. With <= 3 seeded
+    # owner types it is a segmented toggle (radiogroup), not a free-text input or select.
     assert html =~ ~s(name="owner_type")
-    assert html =~ "<select"
+    assert html =~ ~s(class="ax-segmented")
 
     # Copyable ID chip rendered via the registered Clipboard hook.
     assert html =~ "ax-id-badge"

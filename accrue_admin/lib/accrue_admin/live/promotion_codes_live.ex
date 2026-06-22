@@ -101,17 +101,26 @@ defmodule AccrueAdmin.Live.PromotionCodesLive do
             %{label: AccrueAdmin.Copy.promotion_codes_table_column_expires(), render: &expires_summary/1}
           ]}
           filter_fields={[
-            %{id: :q, label: AccrueAdmin.Copy.promotion_codes_filter_label_search()},
+            %{
+              id: :q,
+              label: AccrueAdmin.Copy.promotion_codes_filter_label_search(),
+              placeholder: AccrueAdmin.Copy.promotion_codes_filter_label_search()
+            },
             %{
               id: :active,
               label: AccrueAdmin.Copy.promotion_codes_filter_label_status(),
-              type: :select,
+              type: :segmented,
               options: [
+                {"", "All"},
                 {"true", AccrueAdmin.Copy.promotion_codes_filter_option_active()},
                 {"false", AccrueAdmin.Copy.promotion_codes_filter_option_inactive()}
               ]
             },
-            %{id: :coupon_id, label: AccrueAdmin.Copy.promotion_codes_filter_label_coupon_id()}
+            %{
+              id: :coupon_id,
+              label: AccrueAdmin.Copy.promotion_codes_filter_label_coupon_id(),
+              placeholder: AccrueAdmin.Copy.promotion_codes_filter_label_coupon_id()
+            }
           ]}
           empty_title={AccrueAdmin.Copy.promotion_codes_table_empty_title()}
           empty_copy={AccrueAdmin.Copy.promotion_codes_table_empty_copy()}

@@ -120,11 +120,12 @@ defmodule AccrueAdmin.Live.InvoicesLive do
             %{id: :collection_method, label: Copy.invoices_column_collection()}
           ]}
           filter_fields={[
-            %{id: :q, label: Copy.invoices_filter_search()},
+            %{id: :q, label: Copy.invoices_filter_search(), placeholder: Copy.invoices_filter_search()},
             %{
               id: :status,
               label: Copy.invoices_filter_status(),
               type: :select,
+              all_label: "All statuses",
               options: [
                 {"draft", Copy.invoices_filter_status_draft()},
                 {"open", Copy.invoices_filter_status_open()},
@@ -133,12 +134,13 @@ defmodule AccrueAdmin.Live.InvoicesLive do
                 {"void", Copy.invoices_filter_status_void()}
               ]
             },
-            %{id: :customer_id, label: Copy.invoices_filter_customer_id()},
+            %{id: :customer_id, label: Copy.invoices_filter_customer_id(), placeholder: Copy.invoices_filter_customer_id()},
             %{
               id: :collection_method,
               label: Copy.invoices_filter_collection(),
-              type: :select,
+              type: :segmented,
               options: [
+                {"", "All"},
                 {"charge_automatically", Copy.invoices_filter_collection_automatic()},
                 {"send_invoice", Copy.invoices_filter_collection_send_invoice()}
               ]

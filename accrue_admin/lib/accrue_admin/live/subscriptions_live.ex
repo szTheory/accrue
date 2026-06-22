@@ -149,11 +149,12 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
             %{id: :current_period_end, label: "Current period end"}
           ]}
           filter_fields={[
-            %{id: :q, label: "Search"},
+            %{id: :q, label: "Search", placeholder: "Search subscriptions"},
             %{
               id: :status,
               label: "Status",
               type: :select,
+              all_label: "All statuses",
               options: [
                 {"active", "Active"},
                 {"trialing", "Trialing"},
@@ -163,7 +164,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
                 {"canceled", "Canceled"}
               ]
             },
-            %{id: :customer_id, label: "Customer id"}
+            %{id: :customer_id, label: "Customer id", placeholder: "Customer id"}
           ]}
           empty_title={queue_empty_title(@params)}
           empty_copy={queue_empty_copy(@params)}

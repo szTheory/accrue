@@ -102,12 +102,17 @@ defmodule AccrueAdmin.Live.ConnectAccountsLive do
             %{label: AccrueAdmin.Copy.connect_accounts_table_column_status(), render: &status_summary/1}
           ]}
           filter_fields={[
-            %{id: :q, label: AccrueAdmin.Copy.connect_accounts_filter_label_search()},
+            %{
+              id: :q,
+              label: AccrueAdmin.Copy.connect_accounts_filter_label_search(),
+              placeholder: AccrueAdmin.Copy.connect_accounts_filter_label_search()
+            },
             %{
               id: :type,
               label: AccrueAdmin.Copy.connect_accounts_filter_label_type(),
-              type: :select,
+              type: :segmented,
               options: [
+                {"", "All"},
                 {"standard", AccrueAdmin.Copy.connect_accounts_filter_option_type_standard()},
                 {"express", AccrueAdmin.Copy.connect_accounts_filter_option_type_express()},
                 {"custom", AccrueAdmin.Copy.connect_accounts_filter_option_type_custom()}
@@ -116,8 +121,9 @@ defmodule AccrueAdmin.Live.ConnectAccountsLive do
             %{
               id: :charges_enabled,
               label: AccrueAdmin.Copy.connect_accounts_filter_label_charges(),
-              type: :select,
+              type: :segmented,
               options: [
+                {"", "All"},
                 {"true", AccrueAdmin.Copy.connect_accounts_filter_option_charges_enabled()},
                 {"false", AccrueAdmin.Copy.connect_accounts_filter_option_charges_disabled()}
               ]
@@ -125,8 +131,9 @@ defmodule AccrueAdmin.Live.ConnectAccountsLive do
             %{
               id: :payouts_enabled,
               label: AccrueAdmin.Copy.connect_accounts_filter_label_payouts(),
-              type: :select,
+              type: :segmented,
               options: [
+                {"", "All"},
                 {"true", AccrueAdmin.Copy.connect_accounts_filter_option_payouts_enabled()},
                 {"false", AccrueAdmin.Copy.connect_accounts_filter_option_payouts_disabled()}
               ]
@@ -134,8 +141,9 @@ defmodule AccrueAdmin.Live.ConnectAccountsLive do
             %{
               id: :details_submitted,
               label: AccrueAdmin.Copy.connect_accounts_filter_label_onboarding(),
-              type: :select,
+              type: :segmented,
               options: [
+                {"", "All"},
                 {"true", AccrueAdmin.Copy.connect_accounts_filter_option_onboarding_submitted()},
                 {"false", AccrueAdmin.Copy.connect_accounts_filter_option_onboarding_pending()}
               ]
@@ -143,8 +151,9 @@ defmodule AccrueAdmin.Live.ConnectAccountsLive do
             %{
               id: :deauthorized,
               label: AccrueAdmin.Copy.connect_accounts_filter_label_authorization(),
-              type: :select,
+              type: :segmented,
               options: [
+                {"", "All"},
                 {"true", AccrueAdmin.Copy.connect_accounts_filter_option_authorization_deauthorized()},
                 {"false", AccrueAdmin.Copy.connect_accounts_filter_option_authorization_active()}
               ]

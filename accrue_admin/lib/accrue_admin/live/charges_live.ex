@@ -121,14 +121,14 @@ defmodule AccrueAdmin.Live.ChargesLive do
             %{label: "Fees", render: &fee_summary/1}
           ]}
           filter_fields={[
-            %{id: :q, label: "Search"},
-            %{id: :status, label: "Status"},
-            %{id: :customer_id, label: "Customer id"},
+            %{id: :q, label: "Search", placeholder: "Search charges"},
+            %{id: :status, label: "Status", placeholder: "Status"},
+            %{id: :customer_id, label: "Customer id", placeholder: "Customer id"},
             %{
               id: :fees_settled,
               label: "Fees settled",
-              type: :select,
-              options: [{"true", "Yes"}, {"false", "No"}]
+              type: :segmented,
+              options: [{"", "All"}, {"true", "Settled"}, {"false", "Pending"}]
             }
           ]}
           empty_title={queue_empty_title(@params)}

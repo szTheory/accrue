@@ -106,12 +106,17 @@ defmodule AccrueAdmin.Live.CouponsLive do
             %{label: AccrueAdmin.Copy.coupon_table_column_redeem_by(), render: &redeem_by_summary/1}
           ]}
           filter_fields={[
-            %{id: :q, label: AccrueAdmin.Copy.coupon_filter_label_search()},
+            %{
+              id: :q,
+              label: AccrueAdmin.Copy.coupon_filter_label_search(),
+              placeholder: AccrueAdmin.Copy.coupon_filter_label_search()
+            },
             %{
               id: :valid,
               label: AccrueAdmin.Copy.coupon_filter_label_validity(),
-              type: :select,
+              type: :segmented,
               options: [
+                {"", "All"},
                 {"true", AccrueAdmin.Copy.coupon_filter_option_valid()},
                 {"false", AccrueAdmin.Copy.coupon_filter_option_invalid()}
               ]

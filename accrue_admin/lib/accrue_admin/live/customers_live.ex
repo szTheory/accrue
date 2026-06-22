@@ -36,10 +36,26 @@ defmodule AccrueAdmin.Live.CustomersLive do
        )
      )
      |> assign(:summary, customer_summary(socket.assigns.current_owner_scope))
-     |> assign(
-       :owner_type_options,
+     |> assign_owner_type_filter(
        Customers.distinct_owner_types(socket.assigns.current_owner_scope)
      )}
+  end
+
+  # owner_type cardinality is data-driven: with <= 3 distinct owner types a segmented
+  # toggle reads best (prepend an "All" segment); beyond that fall back to a select.
+  defp assign_owner_type_filter(socket, owner_type_options) do
+    owner_type_type = if length(owner_type_options) <= 3, do: :segmented, else: :select
+
+    owner_type_options =
+      if owner_type_type == :segmented do
+        [{"", "All"} | owner_type_options]
+      else
+        owner_type_options
+      end
+
+    socket
+    |> assign(:owner_type_options, owner_type_options)
+    |> assign(:owner_type_type, owner_type_type)
   end
 
   @impl true
@@ -108,18 +124,19 @@ defmodule AccrueAdmin.Live.CustomersLive do
             %{label: "ID", render: &id_badge_cell/1}
           ]}
           filter_fields={[
-            %{id: :q, label: "Search"},
+            %{id: :q, label: "Search", placeholder: "Search customers"},
             %{
               id: :owner_type,
               label: "Owner type",
-              type: :select,
+              type: @owner_type_type,
+              all_label: "All owner types",
               options: @owner_type_options
             },
             %{
               id: :has_default_payment_method,
               label: "Payment method",
-              type: :select,
-              options: [{"true", "On file"}, {"false", "Missing"}]
+              type: :segmented,
+              options: [{"", "All"}, {"true", "On file"}, {"false", "Missing"}]
             }
           ]}
           empty_title={Copy.customers_index_empty_title()}
