@@ -2315,30 +2315,30 @@ a.ax-kpi-card--linked:focus-visible {
   min-width: 0;
 }
 
-/* Filter toolbar: mobile-first single-column grid that fans out to auto-fit
-   columns with end-aligned actions at md+. Spacing tokens only. */
+/* Filter toolbar: mobile-first single column that fans out to a wrapping flex
+   row at md+. Search grows; categorical controls stay intrinsic; Clear pushes
+   to the row end. Spacing tokens only. */
 .ax-data-table-filters {
-  display: grid;
-  gap: var(--ax-space-md);
-  grid-template-columns: 1fr;
+  display: flex;
+  flex-direction: column;
+  gap: var(--ax-space-sm);
 }
 
-.ax-data-table-filter-actions {
-  display: flex;
-  gap: var(--ax-space-sm);
-  align-items: center;
-  width: 100%;
+.ax-data-table-filter-grow {
+  flex: 1 1 16rem;
+  min-width: 12rem;
 }
 
 @media (min-width: 768px) { /* --ax-bp-md ↑ */
   .ax-data-table-filters {
-    grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr)) auto;
-    align-items: end;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--ax-space-md);
   }
 
-  .ax-data-table-filter-actions {
-    width: auto;
-    justify-self: end;
+  .ax-data-table-filter-clear {
+    margin-inline-start: auto;
   }
 }
 

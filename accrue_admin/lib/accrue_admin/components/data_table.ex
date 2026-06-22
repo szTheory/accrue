@@ -176,8 +176,11 @@ defmodule AccrueAdmin.Components.DataTable do
           data-role="filter-form"
           data-phase191-focus="filter-form"
         >
-          <div :for={field <- @filter_fields} class="ax-data-table-filter">
-            <label for={field_id(@id, field)} class="ax-label"><%= field_label(field) %></label>
+          <div
+            :for={field <- @filter_fields}
+            class={["ax-data-table-filter", filter_field_class(field)]}
+          >
+            <label for={field_id(@id, field)} class="ax-visually-hidden"><%= field_label(field) %></label>
             <.filter_input
               id={field_id(@id, field)}
               field={field}
@@ -188,14 +191,26 @@ defmodule AccrueAdmin.Components.DataTable do
           <div :for={{key, value} <- @filter_params} :if={!field_defined?(@filter_fields, key)}>
             <input type="hidden" name={key} value={value} />
           </div>
-          <div class="ax-data-table-filter-actions" data-role="filter-actions">
-            <button type="submit" class="ax-button ax-button-primary" data-phase191-focus="filter-submit">
-              <%= @filter_submit_label %>
-            </button>
-            <.link patch={@path} class="ax-button ax-button-ghost" data-phase191-focus="clear-filters">
-              <%= Copy.data_table_clear_filters_label() %>
-            </.link>
-          </div>
+          <%!-- Instant-apply toolbar: phx-change submits on every edit (text debounced
+                300ms), so the primary Apply button is hidden but kept for keyboard submit
+                and the data-phase191-focus contract. --%>
+          <button
+            type="submit"
+            class="ax-visually-hidden"
+            data-phase191-focus="filter-submit"
+            tabindex="-1"
+          >
+            <%= @filter_submit_label %>
+          </button>
+          <.link
+            :if={any_filter_active?(@filter_params)}
+            patch={@path}
+            class="ax-button ax-button-ghost ax-data-table-filter-clear"
+            data-role="clear-filters"
+            data-phase191-focus="clear-filters"
+          >
+            <%= Copy.data_table_clear_filters_label() %>
+          </.link>
         </form>
       </header>
 
@@ -362,11 +377,14 @@ defmodule AccrueAdmin.Components.DataTable do
   attr(:focus_key, :string, required: true)
 
   defp filter_input(%{field: %{type: :select} = field} = assigns) do
-    assigns = assign(assigns, :options, Map.get(field, :options, []))
+    assigns =
+      assigns
+      |> assign(:options, Map.get(field, :options, []))
+      |> assign(:all_label, Map.get(field, :all_label, "All"))
 
     ~H"""
     <select id={@id} name={field_param(@field)} class="ax-select" data-phase191-focus={"filter-#{@focus_key}"}>
-      <option value="">All</option>
+      <option value=""><%= @all_label %></option>
       <option
         :for={option <- @options}
         value={option_value(option)}
@@ -438,6 +456,8 @@ defmodule AccrueAdmin.Components.DataTable do
   end
 
   defp filter_input(assigns) do
+    assigns = assign(assigns, :placeholder, Map.get(assigns.field, :placeholder, field_label(assigns.field)))
+
     ~H"""
     <input
       id={@id}
@@ -445,6 +465,7 @@ defmodule AccrueAdmin.Components.DataTable do
       name={field_param(@field)}
       value={@value}
       class="ax-input"
+      placeholder={@placeholder}
       phx-debounce="300"
       data-phase191-focus={"filter-#{@focus_key}"}
     />
@@ -616,6 +637,13 @@ defmodule AccrueAdmin.Components.DataTable do
   defp field_id(table_id, field), do: "#{table_id}-filter-#{field_param(field)}"
   defp field_param(field), do: Map.get(field, :param, Map.get(field, :id) |> to_string())
   defp field_label(field), do: Map.get(field, :label) || Map.get(field, :id) |> to_string()
+
+  # The free-text search field (param "q", or any :text/datalist field flagged grow:
+  # true) grows to fill the toolbar; categorical controls stay intrinsic width.
+  defp filter_field_class(field) do
+    grows? = Map.get(field, :grow, field_param(field) == "q")
+    if grows?, do: "ax-data-table-filter-grow", else: nil
+  end
 
   defp field_defined?(fields, key) do
     Enum.any?(fields, fn field -> field_param(field) == to_string(key) end)
