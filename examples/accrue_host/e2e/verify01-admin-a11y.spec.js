@@ -169,7 +169,7 @@ test.describe("VERIFY-01 admin Connect index (auxiliary)", () => {
     await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
 
     await expect(page.getByRole("heading", { name: copyStrings.connect_accounts_headline })).toBeVisible();
-    await expect(page.getByRole("button", { name: copyStrings.connect_accounts_apply_filters })).toBeVisible();
+    await expect(page.locator("[data-role='filter-form']")).toBeVisible();
 
     const violations = await scanAxe(page);
     expect(violations, JSON.stringify(violations, null, 2)).toEqual([]);

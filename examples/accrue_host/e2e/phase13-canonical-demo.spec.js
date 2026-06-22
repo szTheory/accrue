@@ -234,7 +234,7 @@ test("@phase15-trust canonical first-run and admin replay walkthrough stays rele
       label: "replay audit row"
     },
     {
-      locator: page.getByText("Append-only billing and admin activity"),
+      locator: page.getByRole("heading", { name: "Event log" }),
       label: "audit heading"
     }
   ]);
