@@ -6,7 +6,16 @@ defmodule AccrueAdmin.DisplayComponentsTest do
   import Phoenix.LiveViewTest
 
   alias Accrue.Money
-  alias AccrueAdmin.Components.{Detail, DetailDrawer, FilterChipBar, JsonViewer, KpiCard, StatStrip}
+
+  alias AccrueAdmin.Components.{
+    Detail,
+    DetailDrawer,
+    FilterChipBar,
+    JsonViewer,
+    KpiCard,
+    StatStrip
+  }
+
   alias AccrueAdmin.Components.{MoneyFormatter, RelatedResources, Timeline}
   alias AccrueAdmin.Components.StepUpAuthModal
 

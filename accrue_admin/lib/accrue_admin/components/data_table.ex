@@ -456,7 +456,12 @@ defmodule AccrueAdmin.Components.DataTable do
   end
 
   defp filter_input(assigns) do
-    assigns = assign(assigns, :placeholder, Map.get(assigns.field, :placeholder, field_label(assigns.field)))
+    assigns =
+      assign(
+        assigns,
+        :placeholder,
+        Map.get(assigns.field, :placeholder, field_label(assigns.field))
+      )
 
     ~H"""
     <input

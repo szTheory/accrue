@@ -702,8 +702,7 @@ defmodule AccrueAdmin.Copy do
   def webhooks_index_filtered_empty_title, do: "No webhook deliveries match these filters"
 
   def webhooks_index_filtered_empty_copy,
-    do:
-      "Adjust or clear the status, type, or live-mode filters above to see matching deliveries."
+    do: "Adjust or clear the status, type, or live-mode filters above to see matching deliveries."
 
   @doc "Helper line above the webhooks table — plain-language JTBD framing."
   def webhooks_retry_selected_helper,

@@ -507,7 +507,9 @@ defmodule AccrueAdmin.DataTableTest do
   end
 
   describe "SPA filters + infinite-scroll contract (260621-io6)" do
-    test "filter form is parent-targeted with debounced text inputs (no phx-target)", %{conn: conn} do
+    test "filter form is parent-targeted with debounced text inputs (no phx-target)", %{
+      conn: conn
+    } do
       {:ok, _view, html} =
         live_isolated(conn, TableLive, session: %{"params" => %{"status" => "open"}})
 

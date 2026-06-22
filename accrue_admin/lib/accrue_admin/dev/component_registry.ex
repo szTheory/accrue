@@ -948,7 +948,10 @@ if Mix.env() != :prod do
             },
             %{state: "active", reason: "selection is instant — no persistent pressed visual"},
             %{state: "pressed", reason: "no press-scale state separate from the click"},
-            %{state: "disabled", reason: "the theme picker is always enabled — no disabled state"},
+            %{
+              state: "disabled",
+              reason: "the theme picker is always enabled — no disabled state"
+            },
             %{state: "loading", reason: "preference toggles instantly — no async loading state"},
             %{state: "error", reason: "no validation — the control cannot be in an error state"},
             %{state: "empty", reason: "one segment is always active — there is no empty state"},
@@ -995,10 +998,16 @@ if Mix.env() != :prod do
               reason:
                 "focus ring shows on keyboard focus (focus-within) — a live state, not a forced static specimen"
             },
-            %{state: "selected", reason: "active is the selection state for a segmented radiogroup"},
+            %{
+              state: "selected",
+              reason: "active is the selection state for a segmented radiogroup"
+            },
             %{state: "pressed", reason: "selection is instant — no separate pressed visual"},
             %{state: "disabled", reason: "filter segments are always enabled"},
-            %{state: "loading", reason: "filter toggles submit a GET form — no async loading state"},
+            %{
+              state: "loading",
+              reason: "filter toggles submit a GET form — no async loading state"
+            },
             %{state: "error", reason: "no validation — a segment cannot be in an error state"},
             %{state: "empty", reason: "one segment is always active — there is no empty state"},
             %{
@@ -1040,16 +1049,40 @@ if Mix.env() != :prod do
           ],
           applicable_states: ["default"],
           na_states: [
-            %{state: "hover", reason: "only linked stats have a hover underline — a CSS shift, not a distinct static specimen"},
-            %{state: "focus", reason: "focus ring shows on keyboard focus of a linked stat — a live state, not a forced static specimen"},
+            %{
+              state: "hover",
+              reason:
+                "only linked stats have a hover underline — a CSS shift, not a distinct static specimen"
+            },
+            %{
+              state: "focus",
+              reason:
+                "focus ring shows on keyboard focus of a linked stat — a live state, not a forced static specimen"
+            },
             %{state: "selected", reason: "a read-only metric strip has no selection state"},
             %{state: "active", reason: "a read-only metric strip has no active/pressed state"},
-            %{state: "pressed", reason: "metrics are not interactive controls — no pressed visual"},
+            %{
+              state: "pressed",
+              reason: "metrics are not interactive controls — no pressed visual"
+            },
             %{state: "disabled", reason: "a display-only strip is never disabled"},
-            %{state: "loading", reason: "metrics are server-rendered with the page — no async loading state"},
-            %{state: "error", reason: "no validation — a metric strip cannot be in an error state"},
-            %{state: "empty", reason: "list pages always render at least one metric — no empty state"},
-            %{state: "overflow", reason: "values are short counts; the strip wraps via flex-wrap rather than overflowing"}
+            %{
+              state: "loading",
+              reason: "metrics are server-rendered with the page — no async loading state"
+            },
+            %{
+              state: "error",
+              reason: "no validation — a metric strip cannot be in an error state"
+            },
+            %{
+              state: "empty",
+              reason: "list pages always render at least one metric — no empty state"
+            },
+            %{
+              state: "overflow",
+              reason:
+                "values are short counts; the strip wraps via flex-wrap rather than overflowing"
+            }
           ],
           specimens: [
             %{label: "Default", props: %{}, content: nil}
@@ -1084,8 +1117,7 @@ if Mix.env() != :prod do
             },
             %{
               state: "focus",
-              reason:
-                "details summary focus is a live keyboard state, not a static specimen"
+              reason: "details summary focus is a live keyboard state, not a static specimen"
             },
             %{
               state: "active",
@@ -1896,10 +1928,14 @@ if Mix.env() != :prod do
             %{state: "pressed", reason: "no press-scale state separate from the click"},
             %{
               state: "selected",
-              reason: "copy success (data-copied) is a transient JS feedback, not a selection state"
+              reason:
+                "copy success (data-copied) is a transient JS feedback, not a selection state"
             },
             %{state: "disabled", reason: "the copy chip is always enabled"},
-            %{state: "loading", reason: "clipboard write is synchronous-feeling — no loading state"},
+            %{
+              state: "loading",
+              reason: "clipboard write is synchronous-feeling — no loading state"
+            },
             %{state: "error", reason: "no validation — the chip cannot be in an error state"},
             %{
               state: "empty",
@@ -1907,7 +1943,8 @@ if Mix.env() != :prod do
             },
             %{
               state: "overflow",
-              reason: "long ids truncate within the chip max-width via ellipsis — not a distinct specimen"
+              reason:
+                "long ids truncate within the chip max-width via ellipsis — not a distinct specimen"
             }
           ],
           specimens: [
