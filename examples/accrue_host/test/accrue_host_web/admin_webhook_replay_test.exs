@@ -133,9 +133,9 @@ defmodule AccrueHostWeb.AdminWebhookReplayTest do
     assert {:ok, _events_view, events_html} =
              live(conn, "/admin/events?source_webhook_event_id=#{webhook.id}")
 
-    assert events_html =~ "Append-only billing and admin activity"
+    assert events_html =~ AccrueAdmin.Copy.billing_events_heading_global()
     assert events_html =~ "invoice.payment_failed"
-    assert events_html =~ "activity"
+    assert events_html =~ "append-only record of every billing and admin action"
   end
 
   test "ambiguous or out-of-scope webhook replay blocks single and bulk replay without success audits",
@@ -216,7 +216,7 @@ defmodule AccrueHostWeb.AdminWebhookReplayTest do
 
     refute bulk_html =~ outsider_webhook.id
     refute bulk_html =~ ambiguous_webhook.id
-    assert bulk_html =~ AccrueAdmin.Copy.webhooks_index_empty_title()
+    assert bulk_html =~ AccrueAdmin.Copy.webhooks_index_filtered_empty_title()
     refute bulk_html =~ ~s(data-role="bulk-action")
 
     # Layer 2 — retry-handler defense-in-depth: inject the hostile ids directly
