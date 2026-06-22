@@ -63,7 +63,8 @@ defmodule AccrueAdmin.WebhooksLiveTest do
     {:ok, view, html} =
       live(conn, "/billing/webhooks?status=dead&type=invoice.payment_failed&livemode=true")
 
-    assert html =~ "Replay, inspect, and trace webhook delivery"
+    assert html =~ Copy.webhooks_index_heading()
+    assert html =~ Copy.webhooks_index_subtitle()
     assert html =~ ~s(<caption)
     assert html =~ Copy.webhooks_index_table_caption()
     # UX-03: table cells use ax-body like money index DataTable rhythm

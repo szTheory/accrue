@@ -57,7 +57,8 @@ defmodule AccrueAdmin.ChargesLiveTest do
 
     assert {:ok, _view, html} = live(conn, "/billing/payments?fees_settled=true")
 
-    assert html =~ "Payment and refund review"
+    assert html =~ Copy.charges_index_heading()
+    assert html =~ Copy.charges_index_subtitle()
     assert html =~ "Succeeded"
     assert html =~ "/billing/payments/"
     assert html =~ "ax-chip ax-label"

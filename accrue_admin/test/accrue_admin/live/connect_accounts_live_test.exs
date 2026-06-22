@@ -2,6 +2,7 @@ defmodule AccrueAdmin.ConnectAccountsLiveTest do
   use AccrueAdmin.LiveCase, async: false
 
   alias Accrue.Connect.Account
+  alias AccrueAdmin.Copy
   alias AccrueAdmin.TestRepo
 
   defmodule AuthAdapter do
@@ -61,7 +62,8 @@ defmodule AccrueAdmin.ConnectAccountsLiveTest do
     assert {:ok, _view, html} =
              live(conn, "/billing/connect?type=express&charges_enabled=true&q=acct_match")
 
-    assert html =~ "Connected accounts and payout readiness"
+    assert html =~ Copy.connect_accounts_headline()
+    assert html =~ Copy.connect_accounts_page_copy_primary()
     assert html =~ "acct_match"
     assert html =~ "Override saved"
     assert html =~ "/billing/connect/"

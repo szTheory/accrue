@@ -2,6 +2,7 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLiveTest do
   use AccrueAdmin.LiveCase, async: false
 
   alias Accrue.Events
+  alias AccrueAdmin.Copy
 
   defmodule AuthAdapter do
     @behaviour Accrue.Auth
@@ -59,7 +60,8 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLiveTest do
 
     assert {:ok, _view, html} = live(conn, "/billing/analytics/recovery")
 
-    assert html =~ "Revenue Recovery"
+    assert html =~ Copy.recovery_index_heading()
+    assert html =~ Copy.recovery_index_subtitle()
     assert html =~ "Recovered MRR (USD)"
     assert html =~ "$50.00"
     assert html =~ "Exhausted MRR (USD)"

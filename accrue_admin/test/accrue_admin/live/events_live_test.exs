@@ -4,6 +4,7 @@ defmodule AccrueAdmin.EventsLiveTest do
   alias Accrue.Billing.{Customer, Invoice}
   alias Accrue.Events
   alias Accrue.Webhook.WebhookEvent
+  alias AccrueAdmin.Copy
   alias AccrueAdmin.TestRepo
 
   defmodule AuthAdapter do
@@ -169,7 +170,7 @@ defmodule AccrueAdmin.EventsLiveTest do
                "/billing/events?org=allowed-org&source_webhook_event_id=#{webhook_id}&actor_type=admin"
              )
 
-    assert html =~ "Billing activity for the active organization"
+    assert html =~ Copy.billing_events_copy_organization()
     assert html =~ "invoice.payment_failed.in_scope"
     assert html =~ in_scope_invoice.id
     refute html =~ "invoice.payment_failed.out_of_scope"
