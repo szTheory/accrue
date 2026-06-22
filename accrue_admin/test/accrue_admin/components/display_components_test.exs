@@ -6,7 +6,7 @@ defmodule AccrueAdmin.DisplayComponentsTest do
   import Phoenix.LiveViewTest
 
   alias Accrue.Money
-  alias AccrueAdmin.Components.{Detail, DetailDrawer, FilterChipBar, JsonViewer, KpiCard}
+  alias AccrueAdmin.Components.{Detail, DetailDrawer, FilterChipBar, JsonViewer, KpiCard, StatStrip}
   alias AccrueAdmin.Components.{MoneyFormatter, RelatedResources, Timeline}
   alias AccrueAdmin.Components.StepUpAuthModal
 
@@ -225,6 +225,47 @@ defmodule AccrueAdmin.DisplayComponentsTest do
       assert html =~ "Recovered MRR"
       assert html =~ "Money saved"
       assert html =~ "<svg"
+    end
+  end
+
+  describe "StatStrip" do
+    test "renders an inline metric dl with values, tone class, and group locator" do
+      html =
+        render_component(fn assigns ->
+          assigns = assigns
+
+          ~H"""
+          <StatStrip.stat_strip label="Customer summary" component_group="kpi-chart-table">
+            <:stat label="Customers" value="1,284" />
+            <:stat label="With payment method" value="972" tone="moss" />
+          </StatStrip.stat_strip>
+          """
+        end)
+
+      assert html =~ "<dl"
+      assert html =~ "ax-stat-strip"
+      assert html =~ ~s(aria-label="Customer summary")
+      assert html =~ "Customers"
+      assert html =~ "1,284"
+      assert html =~ "ax-stat-value--moss"
+      assert html =~ ~s(data-component-group="kpi-chart-table")
+    end
+
+    test "wraps a stat in a link when href is provided" do
+      html =
+        render_component(fn assigns ->
+          assigns = assigns
+
+          ~H"""
+          <StatStrip.stat_strip label="Webhook summary">
+            <:stat label="Blocked" value="3" tone="amber" href="/billing/webhooks?status=blocked" />
+          </StatStrip.stat_strip>
+          """
+        end)
+
+      assert html =~ ~s(class="ax-stat-link")
+      assert html =~ ~s(href="/billing/webhooks?status=blocked")
+      assert html =~ "ax-stat-value--amber"
     end
   end
 

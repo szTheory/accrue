@@ -1173,6 +1173,87 @@ a.ax-kpi-card--linked:focus-visible {
   stroke-width: 2;
 }
 
+/* Stat strip: compact inline metric <dl> for list/index pages. Quiet baseline
+   row, hairline-separated, wraps on narrow viewports. Tokens only. */
+.ax-stat-strip {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--ax-space-sm) var(--ax-space-lg);
+  padding: var(--ax-space-sm) 0;
+}
+
+.ax-stat {
+  display: flex;
+  align-items: baseline;
+  gap: var(--ax-space-sm);
+  min-width: 0;
+}
+
+.ax-stat + .ax-stat::before {
+  content: "";
+  align-self: stretch;
+  width: 1px;
+  margin-right: var(--ax-space-md);
+  background: var(--ax-border);
+}
+
+.ax-stat-label {
+  margin: 0;
+  font: var(--ax-type-label-font);
+  color: var(--ax-muted);
+}
+
+.ax-stat-value {
+  margin: 0;
+  font-size: var(--ax-type-lg);
+  font-weight: 600;
+  line-height: var(--ax-leading-tight);
+  color: var(--ax-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+.ax-stat-value--moss {
+  color: var(--ax-success-readable);
+}
+
+.ax-stat-value--cobalt {
+  color: var(--ax-accent-readable);
+}
+
+.ax-stat-value--amber {
+  color: var(--ax-warning-readable);
+}
+
+.ax-stat-link {
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--ax-space-sm);
+  text-decoration: none;
+  color: inherit;
+  border-radius: var(--ax-radius-2xs);
+}
+
+.ax-stat-link:hover .ax-stat-value {
+  text-decoration: underline;
+}
+
+.ax-stat-link:focus-visible {
+  outline: 2px solid var(--ax-focus-ring);
+  outline-offset: 2px;
+}
+
+@media (max-width: 30rem) {
+  .ax-stat-strip {
+    flex-direction: column;
+    gap: var(--ax-space-xs);
+  }
+
+  .ax-stat + .ax-stat::before {
+    display: none;
+  }
+}
+
 .ax-funnel-chart {
   display: grid;
   gap: var(--ax-space-md);

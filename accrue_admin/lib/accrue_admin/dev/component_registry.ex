@@ -1012,6 +1012,50 @@ if Mix.env() != :prod do
           ]
         },
 
+        # ── Stat strip family ─────────────────────────────────────────────────────────
+        # Compact inline metric <dl> for list/index pages. The default specimen MUST
+        # render the variant class `ax-stat-value` (render-coverage guardrail splits
+        # ax_class on space and asserts the second class appears in the markup) — the
+        # dedicated do_render_specimen("stat-strip", …) clause emits it.
+        %{
+          family: "stat-strip",
+          variant: "inline",
+          ax_class: "ax-stat-strip ax-stat-value",
+          tokens: [
+            "--ax-space-sm",
+            "--ax-space-md",
+            "--ax-space-lg",
+            "--ax-space-xs",
+            "--ax-border",
+            "--ax-muted",
+            "--ax-primary",
+            "--ax-type-label-font",
+            "--ax-type-lg",
+            "--ax-leading-tight",
+            "--ax-success-readable",
+            "--ax-accent-readable",
+            "--ax-warning-readable",
+            "--ax-radius-2xs",
+            "--ax-focus-ring"
+          ],
+          applicable_states: ["default"],
+          na_states: [
+            %{state: "hover", reason: "only linked stats have a hover underline — a CSS shift, not a distinct static specimen"},
+            %{state: "focus", reason: "focus ring shows on keyboard focus of a linked stat — a live state, not a forced static specimen"},
+            %{state: "selected", reason: "a read-only metric strip has no selection state"},
+            %{state: "active", reason: "a read-only metric strip has no active/pressed state"},
+            %{state: "pressed", reason: "metrics are not interactive controls — no pressed visual"},
+            %{state: "disabled", reason: "a display-only strip is never disabled"},
+            %{state: "loading", reason: "metrics are server-rendered with the page — no async loading state"},
+            %{state: "error", reason: "no validation — a metric strip cannot be in an error state"},
+            %{state: "empty", reason: "list pages always render at least one metric — no empty state"},
+            %{state: "overflow", reason: "values are short counts; the strip wraps via flex-wrap rather than overflowing"}
+          ],
+          specimens: [
+            %{label: "Default", props: %{}, content: nil}
+          ]
+        },
+
         # ── Timeline family ──────────────────────────────────────────────────────────
         # Threaded event feed. The default specimen MUST be non-empty so the rendered
         # HTML contains `ax-timeline-item` (render-coverage guardrail needs two tokens

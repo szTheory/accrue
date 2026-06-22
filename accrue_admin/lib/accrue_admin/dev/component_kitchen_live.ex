@@ -1628,6 +1628,28 @@ if Mix.env() != :prod do
       """
     end
 
+    # ── Stat strip ─────────────────────────────────────────────────────────────────
+    defp do_render_specimen("stat-strip", _state, _specimen, _theme) do
+      assigns = %{__changed__: %{}}
+
+      ~H"""
+      <dl class="ax-stat-strip" aria-label="Customer summary">
+        <div class="ax-stat">
+          <dt class="ax-stat-label">Customers</dt>
+          <dd class="ax-stat-value">1,284</dd>
+        </div>
+        <div class="ax-stat">
+          <dt class="ax-stat-label">With payment method</dt>
+          <dd class="ax-stat-value ax-stat-value--moss">972</dd>
+        </div>
+        <div class="ax-stat">
+          <dt class="ax-stat-label">Canceling</dt>
+          <dd class="ax-stat-value ax-stat-value--amber">18</dd>
+        </div>
+      </dl>
+      """
+    end
+
     # ── Fallback ──────────────────────────────────────────────────────────────────
     defp do_render_specimen(family, state, _specimen, _theme) do
       assigns = %{family: family, state: state, __changed__: %{}}
