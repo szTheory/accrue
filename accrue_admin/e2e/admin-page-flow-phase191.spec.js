@@ -341,12 +341,16 @@ test.describe("Phase 191 page-flow regression harness", () => {
     await expect(confirmPanel).toContainText(/refund ledger row|admin audit row/i);
 
     await login(page, "/billing/webhooks");
-    await page.locator('[data-role="prepare-bulk-replay"]').click();
+    // Bulk replay is selection-driven (h72): select rows, then the bulk-action
+    // button appears, which opens the confirm panel. The old prepare-bulk-replay /
+    // confirm-bulk-replay roles and the "failed or dead webhook rows" / scope /
+    // audit-event copy were removed in the redesign.
+    await page.locator('[data-role="toggle-all"]').click();
+    await page.locator('[data-role="bulk-action"]').click();
     const bulkReplayConfirm = page.locator('[data-role="bulk-replay-confirm"]');
     await expect(bulkReplayConfirm).toBeVisible();
-    await expect(bulkReplayConfirm).toContainText(/failed or dead webhook rows/i);
-    await expect(bulkReplayConfirm).toContainText(/(active organization|global owner) scope/i);
-    await expect(bulkReplayConfirm).toContainText(/admin audit event/i);
+    await expect(bulkReplayConfirm).toContainText(/failed every automatic retry/i);
+    await expect(bulkReplayConfirm.locator('[data-role="confirm-retry-selected"]')).toBeVisible();
   });
 
   test("AX187-340 AX187-341 AX187-342 AX187-343 AX187-344 AX187-345 AX187-346 AX187-347 AX187-348 AX187-349 AX187-350 AX187-351 AX187-352 AX187-353 AX187-354 AX187-355 AX187-356 AX187-357 AX187-358 AX187-359 AX187-360 AX187-361 AX187-362 AX187-363 AX187-364 AX187-365 AX187-366 AX187-367 AX187-368 AX187-369 AX187-370 AX187-371 AX187-372 AX187-373 AX187-374 AX187-375 AX187-376 AX187-377 AX187-378 AX187-379 AX187-380 AX187-381 AX187-382 AX187-383 AX187-384 AX187-385 AX187-386 AX187-387 AX187-388 AX187-389 AX187-390 AX187-391 AX187-392 AX187-393 AX187-394 AX187-395 AX187-396 AX187-397 AX187-398 AX187-399 AX187-400 AX187-401 AX187-402 AX187-403 AX187-404 AX187-405 AX187-406 AX187-407 AX187-408 AX187-409 AX187-410 AX187-411 AX187-412 AX187-413 AX187-414 AX187-415 AX187-416 AX187-417 AX187-418 AX187-419 AX187-420 AX187-421 AX187-422 AX187-423 AX187-424 AX187-425 AX187-426 AX187-427 AX187-428 AX187-429 AX187-430 AX187-431 AX187-432 AX187-433 AX187-434 AX187-435 AX187-440 AX187-441 AX187-442 AX187-443 state copy is recoverable and object-specific @copy @fixtures @ax187", async ({
@@ -356,7 +360,9 @@ test.describe("Phase 191 page-flow regression harness", () => {
     await reset(request);
     const fixtureData = await seedPhase191Matrix(request);
 
-    await login(page, "/billing/customers?status=no-records");
+    // Customers has no status filter (io6); drive the filtered empty/recovery
+    // state via a no-match q so the DataTable empty-state renders.
+    await login(page, "/billing/customers?q=zzz-no-such-customer-xyz");
     await expect(page.locator("body")).toContainText(COPY_RECOVERY_PATTERN);
 
     await login(page, resolvePhase191Route("subscription-detail", fixtureData));

@@ -34,7 +34,10 @@ test.describe("Phase 7 browser UAT", () => {
     await seed(request, "dashboard");
     await login(page);
 
-    await expect(page.getByRole("heading", { name: DASHBOARD_BREADCRUMB_HOME })).toBeVisible();
+    // The dashboard h1 is the "Billing operations" home intro headline; "Dashboard"
+    // is now only a breadcrumb crumb, not a heading (redesign IA).
+    await expect(page.getByRole("heading", { name: "Billing operations" })).toBeVisible();
+    await expect(page.getByText(DASHBOARD_BREADCRUMB_HOME).first()).toBeVisible();
     await expect(page.getByText(DASHBOARD_DISPLAY_HEADLINE)).toBeVisible();
     await expect(page.getByText(DASHBOARD_KPI_OPEN_INVOICE_BALANCE_LABEL)).toBeVisible();
     await expect(page.getByText("$42.50")).toBeVisible();
@@ -47,7 +50,8 @@ test.describe("Phase 7 browser UAT", () => {
         document.cookie = "accrue_theme=dark; path=/; max-age=31536000; samesite=lax";
       });
     } else {
-      await page.getByRole("button", { name: "Dark" }).click();
+      // The theme picker is a radiogroup; "Dark" is a role="radio" segment.
+      await page.getByRole("radio", { name: "Dark" }).click();
       await expect
         .poll(() => page.evaluate(() => window.localStorage.getItem("accrue_theme")))
         .toBe("dark");
@@ -61,7 +65,9 @@ test.describe("Phase 7 browser UAT", () => {
       await expect(page.getByRole("button", { name: "Menu" })).toBeVisible();
     } else {
       await expect(page.getByRole("complementary", { name: "Admin navigation" })).toBeVisible();
-      await expect(page.getByText("Accrue Admin")).toBeVisible();
+      // The sidebar brand renders as a logo with the app name as its accessible
+      // name (e2e brand "Accrue Ops"), not literal "Accrue Admin" body text.
+      await expect(page.getByRole("img", { name: "Accrue Ops" })).toBeVisible();
     }
   });
 
@@ -81,18 +87,21 @@ test.describe("Phase 7 browser UAT", () => {
     await seed(request, "operator-flows");
     await login(page, "/billing/webhooks?type=customer.subscription.updated&status=failed");
 
-    await expect(
-      page.getByRole("heading", { name: /Replay, inspect, and trace webhook delivery/ })
-    ).toBeVisible();
-    await page.locator("[data-role='prepare-bulk-replay']").click();
+    // Webhooks index h1 is "Webhooks"; the old "Replay, inspect, and trace
+    // webhook delivery" string is now the (visually-hidden) table caption.
+    await expect(page.getByRole("heading", { name: "Webhooks", level: 1 })).toBeVisible();
+
+    // Bulk replay is selection-driven (h72): select the visible failed rows, then
+    // the bulk-action button appears and opens the confirm panel. The old
+    // prepare-bulk-replay / confirm-bulk-replay roles were removed.
+    await page.locator("[data-role='toggle-all']").click();
+    await page.locator("[data-role='bulk-action']").click();
     await expect(page.locator("[data-role='bulk-replay-confirm']")).toBeVisible();
     await expect(page.locator("[data-role='bulk-replay-confirm']")).toContainText(
-      /failed or dead webhook rows for the active organization/
+      /failed every automatic retry/
     );
-    await page.locator("[data-role='confirm-bulk-replay']").click();
-    await expect(
-      page.getByText(/Replay requested for the active organization\.|Bulk replay requested/)
-    ).toBeVisible({ timeout: 15_000 });
+    await page.locator("[data-role='confirm-retry-selected']").click();
+    await expect(page.getByText(/Retrying \d+ events?…/)).toBeVisible({ timeout: 15_000 });
 
     const countsResponse = await request.get("/__e2e__/counts");
     const counts = await countsResponse.json();
