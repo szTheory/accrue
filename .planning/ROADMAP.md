@@ -93,7 +93,7 @@ Plans:
 **Wave 1**
 
 - [x] 194-01-PLAN.md — Dashboard additive data-ax-* markers + non-interactive empty-rail hero + light KPI demotion CSS + rebuilt bundle
-- [ ] 194-02-PLAN.md — Recovery re-grammar (AtRiskTable above FunnelChart) + honest zone markers
+- [x] 194-02-PLAN.md — Recovery re-grammar (AtRiskTable above FunnelChart) + honest zone markers
 - [ ] 194-03-PLAN.md — Empty-rail non-interactivity source guard (Guard D) + D-08 ExUnit mirror
 
 **Wave 2** *(blocked on Wave 1 completion)*
@@ -303,7 +303,7 @@ Full details: [v1.48 roadmap archive](milestones/v1.48-ROADMAP.md)
 | 191. Page & flow interaction pass + fixture stress + microcopy | v1.53 | 7/7 | Complete | 2026-06-19 |
 | 192. Idempotent verification & sign-off | v1.53 | 6/6 | Complete   | 2026-06-20 |
 | 193. Research, re-baseline & pattern lock | v1.54 | 5/5 | Complete    | 2026-06-25 |
-| 194. Exemplar A — Dashboard | v1.54 | 1/4 | In Progress|  |
+| 194. Exemplar A — Dashboard | v1.54 | 2/4 | In Progress|  |
 | 195. Exemplar B — Subscription detail | v1.54 | 0/? | Not started | - |
 | 196. Exemplar C — Subscriptions list + PageHeader | v1.54 | 0/? | Not started | - |
 | 197. Propagate LIST | v1.54 | 0/? | Not started | - |
