@@ -411,17 +411,19 @@ Fully mapped above ("The Two Target LiveViews"). Confirmed:
 | A3 | The JS bundle (`accrue_admin.js`) does not need rebuilding because no `app.js`/`command_palette.js` change occurs (D-04). | Q4 | If any JS marker requires a hook change, the JS bundle would also need rebuild+commit. D-04 forbids touching the JS hook, so this holds. |
 | A4 | The scorecard maps `p193__<surface>__...` page-flow cells to their `p187__<surface>__...` baseline counterparts by matching surface/mode/theme/state/dimension. | Q3 / Open Q-B | If the prefix mismatch means page-flow cells have no baseline counterpart, the `score-downgrade` check is a no-op and SC3 is unverifiable. Confirm the scorecard's baseline-lookup keying before relying on it. |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **Q-A: Recovery zone-marker mapping.**
    - What we know: Recovery has no exception/attention rail; its leading zone is the hero metric pair. The load-bearing machine check is at-risk-table-before-funnel (D-01).
    - What's unclear: whether to apply the full `data-ax-zone="attention-rail|task-launcher|kpi-cluster|recent-activity"` enum to Recovery or only the markers the assertion needs.
    - Recommendation: mark the hero pair `<section>` and the at-risk table; assert table-index < funnel-index. Don't force an `attention-rail` marker onto a page with no rail. Let the planner decide the exact enum mapping (it is explicit CONTEXT discretion).
+   - **RESOLVED:** delegated to discretion; implemented in 194-02 (Task 2) — the hero metric pair is marked `data-ax-zone="kpi-cluster"` and the promoted at-risk table is wrapped `data-ax-zone="task-launcher"`; no `attention-rail` marker is forced onto Recovery.
 
 2. **Q-B: `p193`↔`p187` baseline lookup in the scorecard.**
    - What we know: page-flow cells are `p193__`-prefixed; the v1.53 baseline is `p187__`. The scorecard union-loads both and runs a `score-downgrade` check.
    - What's unclear: the exact keying the scorecard uses to pair a `p193` cell with its `p187` baseline (prefix-stripped surface/mode/theme/state/dimension tuple, presumably).
    - Recommendation: the planner should read `phase192-scorecard.mjs` baseline-lookup (around L401, L457) to confirm the pairing before writing the SC3 verification step. Not a blocker for implementation, only for the gate assertion wording.
+   - **RESOLVED:** carried as 194-04 Task 1 (an explicit early scorecard-inspection step that confirms the `contractedCell` / `compareCells` keying before the SC3 gate wording is finalized); resolution recorded in the 194-04 summary.
 
 ## Sources
 

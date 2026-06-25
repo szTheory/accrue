@@ -90,10 +90,16 @@ Plans:
   3. Both pages score ≥ their page-flow baseline cells across viewport × theme × state with zero regressions.
 
 **Plans**: 4 plans
+**Wave 1**
+
 - [ ] 194-01-PLAN.md — Dashboard additive data-ax-* markers + non-interactive empty-rail hero + light KPI demotion CSS + rebuilt bundle
 - [ ] 194-02-PLAN.md — Recovery re-grammar (AtRiskTable above FunnelChart) + honest zone markers
 - [ ] 194-03-PLAN.md — Empty-rail non-interactivity source guard (Guard D) + D-08 ExUnit mirror
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
 - [ ] 194-04-PLAN.md — SPEC-OVERVIEW invariant assertion e2e spec + SC3 scoring confirmation (Open Q-B)
+
 **UI hint**: yes
 
 ### Phase 195: Exemplar B — Subscription detail
