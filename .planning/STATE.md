@@ -5,15 +5,15 @@ milestone_name: Admin UI Page-Level Streamlining & Storybook
 current_phase: 193
 current_phase_name: research-re-baseline-pattern-lock
 status: executing
-stopped_at: Phase 193 UI-SPEC approved
-last_updated: "2026-06-25T17:52:41.991Z"
+stopped_at: Completed 193-04-PLAN.md
+last_updated: "2026-06-25T18:05:13.280Z"
 last_activity: 2026-06-25
 last_activity_desc: Phase 193 execution started
 progress:
   total_phases: 8
   completed_phases: 0
   total_plans: 5
-  completed_plans: 3
+  completed_plans: 4
   percent: 0
 ---
 
@@ -30,7 +30,7 @@ See: `.planning/PROJECT.md` (updated 2026-06-24 — v1.54 Admin UI Page-Level St
 ## Current Position
 
 Phase: 193 (research-re-baseline-pattern-lock) — EXECUTING
-Plan: 4 of 5
+Plan: 5 of 5
 Status: Ready to execute
 Last activity: 2026-06-25 — Phase 193 execution started
 
@@ -191,6 +191,7 @@ Coverage: 22/22 v1.51 requirements mapped (each REQ-ID → exactly one phase). D
 | Phase 193 P01 | 15m | 2 tasks | 4 files |
 | Phase 193 P02 | 2m | 1 tasks | 1 files |
 | Phase 193 P03 | 15 | 1 tasks | 2 files |
+| Phase 193 P04 | 526s | 2 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -305,6 +306,10 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - [Phase ?]: D-01 portal-primary confirmed
 - [Phase ?]: D-01 portal-primary confirmed by D-05 spike: body-level #ax-overlay-root escapes transform ancestors, survives LiveView navigation, hit-testable above scrim (RES-03 Spike A resolved)
 - [Phase ?]: Proof 3 gutter-jump delta = 0px without ScrollLock hook — Phase 199 to enforce delta == 0
+- [Phase ?]: D-17 spike B: CSS class shim (.psb-sandbox.accrue-admin.ax-theme-dark-shim) chosen over JS hook for Storybook dark-mode
+- [Phase ?]: D-17 spike C: inert attribute chosen for background-suppression in overlays; browser floor (Chrome 102+/Firefox 112+/Safari 15.5+) satisfied by target audience
+- [Phase ?]: D-17 spike D: Storybook CSS/JS served via AccrueAdmin.Assets committed-bundle route; no Tailwind rebuild required
+- [Phase ?]: Code.ensure_loaded?(PhoenixStorybook.Router) mandatory in router wrap — host apps without the dep compile clean in dev and prod
 
 ### Pending Todos
 
@@ -394,9 +399,9 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 
 ## Session Continuity
 
-Last session: 2026-06-25T17:52:15.591Z
-Stopped at: Phase 193 UI-SPEC approved
-Resume file: .planning/phases/193-research-re-baseline-pattern-lock/193-UI-SPEC.md
+Last session: 2026-06-25T18:05:13.272Z
+Stopped at: Completed 193-04-PLAN.md
+Resume file: None
 
 ## Operator Next Steps
 
