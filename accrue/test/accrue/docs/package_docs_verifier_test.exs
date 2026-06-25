@@ -701,6 +701,11 @@ defmodule Accrue.Docs.PackageDocsVerifierTest do
     File.mkdir_p!(Path.join(tmp_dir, "accrue_admin/guides"))
     copy_fixture!("accrue_admin/guides/admin_ui.md", tmp_dir)
     copy_fixture!("accrue_admin/guides/motion.md", tmp_dir)
+    copy_fixture!("accrue_admin/guides/spec-overview.md", tmp_dir)
+    copy_fixture!("accrue_admin/guides/spec-list.md", tmp_dir)
+    copy_fixture!("accrue_admin/guides/spec-detail.md", tmp_dir)
+    File.mkdir_p!(Path.join(tmp_dir, "accrue_admin/lib/accrue_admin"))
+    copy_fixture!("accrue_admin/lib/accrue_admin/router.ex", tmp_dir)
     copy_fixture!("accrue_portal/mix.exs", tmp_dir)
     copy_fixture!("accrue_portal/README.md", tmp_dir)
     copy_fixture!("examples/accrue_host/README.md", tmp_dir)
@@ -829,6 +834,49 @@ defmodule Accrue.Docs.PackageDocsVerifierTest do
     assert status != 0
     assert output =~ "[verify_package_docs]"
     assert output =~ "CMP-05"
+  end
+
+  test "package docs verifier rejects raw px spacing (RES-04 spacing-literal guard)" do
+    tmp_dir = tmp_dir!()
+    seed_tmp_dir!(tmp_dir)
+    # Append a violation to the seeded app.css so earlier guards (token consumption etc.) still pass.
+    # Trailing newline is required: Guard A uses /([^\n]+)\n/g which skips lines without a terminating \n.
+    app_css_path = Path.join(tmp_dir, "accrue_admin/assets/css/app.css")
+    File.write!(app_css_path, "\n.ax-foo { padding: 16px; }\n", [:append])
+
+    {output, status} = run_verifier(tmp_dir)
+
+    assert status != 0
+    assert output =~ "[verify_package_docs]"
+    assert output =~ "spacing-literal guard"
+  end
+
+  test "package docs verifier rejects :focus without :focus-visible (RES-04 focus-visible guard)" do
+    tmp_dir = tmp_dir!()
+    seed_tmp_dir!(tmp_dir)
+    # Append a violation to the seeded app.css so earlier guards (token consumption etc.) still pass
+    app_css_path = Path.join(tmp_dir, "accrue_admin/assets/css/app.css")
+    File.write!(app_css_path, "\n.ax-bar:focus { outline: 2px solid red; }\n", [:append])
+
+    {output, status} = run_verifier(tmp_dir)
+
+    assert status != 0
+    assert output =~ "[verify_package_docs]"
+    assert output =~ "focus-visible guard"
+  end
+
+  test "package docs verifier rejects truncation without min-width:0 (RES-04 truncation guard)" do
+    tmp_dir = tmp_dir!()
+    seed_tmp_dir!(tmp_dir)
+    # Append a violation to the seeded app.css so earlier guards (token consumption etc.) still pass
+    app_css_path = Path.join(tmp_dir, "accrue_admin/assets/css/app.css")
+    File.write!(app_css_path, "\n.ax-baz { overflow: hidden; text-overflow: ellipsis; }\n", [:append])
+
+    {output, status} = run_verifier(tmp_dir)
+
+    assert status != 0
+    assert output =~ "[verify_package_docs]"
+    assert output =~ "truncation without min-width"
   end
 
   defp extract_version!(relative_path) do
