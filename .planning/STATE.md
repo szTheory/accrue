@@ -5,8 +5,8 @@ milestone_name: Admin UI Page-Level Streamlining & Storybook
 current_phase: 194
 current_phase_name: Exemplar A — Dashboard
 status: verifying
-stopped_at: Completed 193-04-PLAN.md
-last_updated: "2026-06-25T18:23:32.386Z"
+stopped_at: Phase 194 context gathered
+last_updated: "2026-06-25T18:53:30.063Z"
 last_activity: 2026-06-25
 last_activity_desc: Phase 193 complete, transitioned to Phase 194
 progress:
@@ -402,9 +402,9 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 
 ## Session Continuity
 
-Last session: 2026-06-25T18:17:31.049Z
-Stopped at: Completed 193-04-PLAN.md
-Resume file: None
+Last session: 2026-06-25T18:53:30.050Z
+Stopped at: Phase 194 context gathered
+Resume file: .planning/phases/194-exemplar-a-dashboard/194-CONTEXT.md
 
 ## Operator Next Steps
 
