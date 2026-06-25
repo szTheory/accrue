@@ -60,7 +60,13 @@ Coverage: 23/23 requirements mapped (each REQ-ID → exactly one phase). Per-pha
   3. A host dev compile of `examples/accrue_host` succeeds with `phoenix_storybook` absent and exposes no `/dev/storybook` route, proving the `Code.ensure_loaded?`-guarded sibling-scope mount has zero adopter-runtime leak.
   4. Each of the four Phase-193 spikes (overlay portal-vs-`<dialog>` with a Playwright hit-test; Storybook `data-theme` dark-mode shim; `inert` vs `aria-hidden` browser-floor; Storybook asset-serving without a Tailwind rebuild) is resolved with a recorded decision.
   5. Three new CSS source guards (spacing-literal ban, `:focus-visible` enforcement, truncation-without-`min-width:0`) ship in `verify_package_docs.sh`/CI and fail on a planted violation.
-**Plans**: TBD
+**Plans**: 5 plans
+Plans:
+- [ ] 193-01-PLAN.md — Three archetype spec guides (spec-overview/list/detail) + mix.exs wiring (dep, elixirc_paths, extras, groups)
+- [ ] 193-02-PLAN.md — Forward-only baseline extension: additive sibling baseline.page-flow.cells.json (~9,504 page-flow cells)
+- [ ] 193-03-PLAN.md — Overlay portal spike: four D-05 Playwright proofs + recorded decision (RES-03 Spike A)
+- [ ] 193-04-PLAN.md — Storybook scaffold: storybook.ex backend + router wrap + assets.ex extension + RegistryStory + button.story.exs + committed bundles + D-17 spike decisions
+- [ ] 193-05-PLAN.md — CSS source guards (3) + spec doc-needles (6) + PackageDocsVerifierTest seed_tmp_dir! extension + 3 negative guard tests
 **UI hint**: yes
 
 ### Phase 194: Exemplar A — Dashboard
