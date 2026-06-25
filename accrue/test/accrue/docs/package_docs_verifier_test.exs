@@ -879,6 +879,28 @@ defmodule Accrue.Docs.PackageDocsVerifierTest do
     assert output =~ "truncation without min-width"
   end
 
+  # D-08 coupling (MEMORY: verify_package_docs ↔ test coupling): this mirror MUST stay in sync
+  # with Guard D in verify_package_docs.sh. If Guard D's fail message changes, update the
+  # `output =~ "empty-rail"` assertion below to match the new stable substring.
+  test "package docs verifier rejects cursor:pointer on .ax-attention-rail--empty (Phase 194)" do
+    tmp_dir = tmp_dir!()
+    seed_tmp_dir!(tmp_dir)
+
+    app_css_path = Path.join(tmp_dir, "accrue_admin/assets/css/app.css")
+
+    File.write!(
+      app_css_path,
+      File.read!(app_css_path) <> "\n.ax-attention-rail--empty { cursor: pointer; }\n"
+    )
+
+    {output, status} = run_verifier(tmp_dir)
+
+    assert status != 0
+    assert output =~ "[verify_package_docs]"
+    # match the stable substring from Guard D's fail message (SPEC-OVERVIEW non-interactive-empty-rail guard)
+    assert output =~ "empty-rail"
+  end
+
   defp extract_version!(relative_path) do
     "../../../../#{relative_path}"
     |> Path.expand(__DIR__)
