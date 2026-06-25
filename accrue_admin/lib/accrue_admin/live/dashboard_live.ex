@@ -54,7 +54,7 @@ defmodule AccrueAdmin.Live.DashboardLive do
         </header>
 
         <%!-- Zone 1 — Attention rail: exceptions first, only non-zero rows --%>
-        <section class="ax-home-section" aria-label="Billing exceptions">
+        <section class="ax-home-section" aria-label="Billing exceptions" data-ax-zone="attention-rail">
           <header class="ax-section-head">
             <h3 class="ax-heading"><%= Copy.dashboard_display_headline() %></h3>
             <a
@@ -90,7 +90,7 @@ defmodule AccrueAdmin.Live.DashboardLive do
         </section>
 
         <%!-- Zone 2 — Task launchers: one door per JTBD --%>
-        <section class="ax-home-section" aria-label="Tasks">
+        <section class="ax-home-section" aria-label="Tasks" data-ax-zone="task-launcher">
           <header class="ax-section-head">
             <h3 class="ax-heading"><%= Copy.home_tasks_heading() %></h3>
           </header>
@@ -103,6 +103,7 @@ defmodule AccrueAdmin.Live.DashboardLive do
               role="search"
               aria-label="Search"
               data-command-palette-trigger="true"
+              data-ax-command-palette-trigger="true"
             >
               <AccrueAdmin.Components.Icon.icon name={:search} size="md" class="ax-input-icon" />
               <span class="ax-input-placeholder">Search customers, invoices… ⌘K</span>
@@ -146,7 +147,7 @@ defmodule AccrueAdmin.Live.DashboardLive do
         </section>
 
         <%!-- Zone 3 — At a glance: demoted KPIs --%>
-        <section class="ax-home-section" aria-label={Copy.dashboard_kpi_section_aria_label()}>
+        <section class="ax-home-section" aria-label={Copy.dashboard_kpi_section_aria_label()} data-ax-zone="kpi-cluster">
           <header class="ax-section-head">
             <h3 class="ax-heading"><%= Copy.home_kpi_heading() %></h3>
           </header>
@@ -195,7 +196,7 @@ defmodule AccrueAdmin.Live.DashboardLive do
         </section>
 
         <%!-- Zone 4 — Recent activity --%>
-        <section class="ax-grid ax-grid-2" aria-label={Copy.dashboard_activity_section_aria_label()}>
+        <section class="ax-grid ax-grid-2" aria-label={Copy.dashboard_activity_section_aria_label()} data-ax-zone="recent-activity">
           <article class="ax-card">
             <header class="ax-section-head">
               <h3 class="ax-heading"><%= Copy.dashboard_activity_recent_local_heading() %></h3>
