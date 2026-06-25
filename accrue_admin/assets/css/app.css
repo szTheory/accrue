@@ -233,7 +233,7 @@ button {
 .ax-dev-state-grid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 1px;
+  gap: 1px; /* ax-spacing-exception: structural hairline separator — background bleeds through 1px gap to form the grid rule */
   border: 1px solid var(--ax-border);
   border-radius: var(--ax-radius-md);
   overflow: hidden;
@@ -243,7 +243,7 @@ button {
 .ax-dev-state-grid-col {
   display: flex;
   flex-direction: column;
-  gap: 1px;
+  gap: 1px; /* ax-spacing-exception: structural hairline separator — same technique as parent grid */
   background: var(--ax-border);
 }
 
@@ -853,8 +853,8 @@ html.accrue-admin[data-theme="dark"] .ax-sidebar-link.ax-sidebar-link-active {
 .ax-theme-picker {
   display: inline-flex;
   align-items: center;
-  gap: 2px;
-  padding: 3px;
+  gap: 2px; /* ax-spacing-exception: segmented-control internal thumb gap — sub-token precision spacing for the raised-thumb segmented UI */
+  padding: 3px; /* ax-spacing-exception: segmented-control track inset — matches the thumb border-radius inner bleed */
   border: 1px solid var(--ax-border);
   border-radius: var(--ax-radius-md);
   background: var(--ax-sunken);
@@ -891,7 +891,7 @@ html.accrue-admin[data-theme="dark"] .ax-sidebar-link.ax-sidebar-link-active {
     width: 1px;
     height: 1px;
     padding: 0;
-    margin: -1px;
+    margin: -1px; /* ax-spacing-exception: visually-hidden clip pattern — standard -1px clip-rect technique */
     overflow: hidden;
     clip: rect(0 0 0 0);
     white-space: nowrap;
@@ -918,8 +918,8 @@ html.accrue-admin[data-theme="dark"] .ax-theme-picker-option-active {
 .ax-segmented {
   display: inline-flex;
   align-items: center;
-  gap: 2px;
-  padding: 3px;
+  gap: 2px; /* ax-spacing-exception: segmented-control internal thumb gap — sub-token precision for the raised-thumb UI */
+  padding: 3px; /* ax-spacing-exception: segmented-control track inset — matches the thumb border-radius inner bleed */
   border: 1px solid var(--ax-border);
   border-radius: var(--ax-radius-md);
   background: var(--ax-sunken);
@@ -2873,7 +2873,7 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
   left: -9999px;
 }
 
-.ax-skip-link:focus {
+.ax-skip-link:focus-visible {
   left: 1rem;
   top: 1rem;
   z-index: var(--ax-z-sticky);
@@ -2934,7 +2934,7 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
   width: 1px;
   height: 1px;
   padding: 0;
-  margin: -1px;
+  margin: -1px; /* ax-spacing-exception: visually-hidden clip pattern — standard -1px clip-rect technique */
   overflow: hidden;
   clip: rect(0, 0, 0, 0);
   white-space: nowrap;
@@ -3967,6 +3967,7 @@ html.accrue-admin::-webkit-scrollbar-thumb:hover {
 /* FIX 4 — Inline ID: monospace chip with overflow protection (CMP-01). */
 .ax-inline-id {
   display: inline-block;
+  min-width: 0;
   font: var(--ax-type-code-font);
   letter-spacing: var(--ax-type-code-tracking); /* ax-type-exception: letter-spacing supplements the composed code font shorthand. */
   color: var(--ax-primary);
@@ -4013,6 +4014,7 @@ html.accrue-admin::-webkit-scrollbar-thumb:hover {
 
 .ax-id-badge-text {
   font: var(--ax-type-code-xs-font);
+  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;

@@ -549,5 +549,53 @@ inline_style_hit=$(
 ) || true
 [[ -z "$inline_style_hit" ]] || fail "raw inline style= on primitive ax-* elements is not allowed (CMP-05): $inline_style_hit"
 
+# Phase 193 CSS source guards (RES-04)
+
+# Guard A — Spacing-literal ban (no raw px on padding/margin/gap outside --ax-space-* tokens)
+spacing_literal_hit=$(
+  perl -0ne '
+    while (/([^\n]+)\n/g) {
+      my $line = $1;
+      next if $line =~ /\/\*/;
+      next if $line =~ /ax-spacing-exception:/;
+      if ($line =~ /\b(padding|margin|gap)\s*:[^;]*\b\d+px\b/ && $line !~ /var\(--ax-/) {
+        print "$line\n";
+        last;
+      }
+    }
+  ' "$app_css" || true
+)
+[[ -z "$spacing_literal_hit" ]] || fail "$app_css must not use raw px spacing outside --ax-space-* tokens (RES-04 spacing-literal guard)"
+
+# Guard B — :focus-visible enforcement (focus styles must target :focus-visible not bare :focus)
+focus_ring_hit=$(grep -En ':focus[^-]' "$app_css" | grep -v ':focus-visible' | head -n 1 || true)
+[[ -z "$focus_ring_hit" ]] || fail "$app_css contains :focus selector without :focus-visible (RES-04 focus-visible guard)"
+
+# Guard C — Truncation without min-width:0 (text-overflow:ellipsis must have min-width:0 in same CSS block)
+truncation_hit=$(
+  perl -0ne '
+    while (/\{([^}]*text-overflow\s*:\s*ellipsis[^}]*)\}/gs) {
+      my $block = $1;
+      unless ($block =~ /min-width\s*:\s*0/) {
+        print "found truncation without min-width:0\n";
+        last;
+      }
+    }
+  ' "$app_css" || true
+)
+[[ -z "$truncation_hit" ]] || fail "$app_css has truncation without min-width:0 in same block (RES-04 truncation guard)"
+
+# Archetype spec guide existence (Phase 193, RES-01 / D-07)
+require_fixed "$ROOT_DIR/accrue_admin/mix.exs" '"guides/spec-overview.md"'
+require_fixed "$ROOT_DIR/accrue_admin/mix.exs" '"guides/spec-list.md"'
+require_fixed "$ROOT_DIR/accrue_admin/mix.exs" '"guides/spec-detail.md"'
+require_fixed "$ROOT_DIR/accrue_admin/guides/spec-overview.md" "## SPEC-OVERVIEW — "
+require_fixed "$ROOT_DIR/accrue_admin/guides/spec-list.md" "## SPEC-LIST — "
+require_fixed "$ROOT_DIR/accrue_admin/guides/spec-detail.md" "## SPEC-DETAIL — summary-then-drill"
+
+# Storybook dep + router guard presence (Phase 193, STY-01 / D-07)
+require_fixed "$ROOT_DIR/accrue_admin/mix.exs" ':phoenix_storybook'
+require_fixed "$ROOT_DIR/accrue_admin/lib/accrue_admin/router.ex" 'Code.ensure_loaded?(PhoenixStorybook.Router)'
+
 echo "package docs verified for accrue $accrue_version, accrue_admin $accrue_admin_version, and accrue_portal $accrue_portal_version"
 echo "fixed invariants checked: README.md, RELEASING.md, CONTRIBUTING.md, quickstart.md, 15-TRUST-REVIEW.md, STRIPE_TEST_SECRET_KEY, release-gate, host-integration, retain-on-failure, only-on-failure, First run, Seeded history, mix verify, mix verify.full"
