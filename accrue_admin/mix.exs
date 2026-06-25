@@ -28,7 +28,8 @@ defmodule AccrueAdmin.MixProject do
     ]
   end
 
-  defp elixirc_paths(:test), do: ["lib", "test/support"]
+  defp elixirc_paths(:dev), do: ["lib", "storybook/_support"]
+  defp elixirc_paths(:test), do: ["lib", "storybook/_support", "test/support"]
   defp elixirc_paths(_env), do: ["lib"]
 
   def cli do
@@ -42,6 +43,7 @@ defmodule AccrueAdmin.MixProject do
       {:phoenix_live_view, "~> 1.1"},
       {:phoenix_html, "~> 4.2"},
       {:mailglass_admin, "~> 1.0", only: [:dev, :test]},
+      {:phoenix_storybook, "~> 1.2", only: [:dev, :test]},
       {:plug_cowboy, "~> 2.7", only: :test},
       {:lazy_html, ">= 0.1.0", only: :test},
       {:ex_doc, "~> 0.40", only: [:dev, :test], runtime: false},
@@ -68,7 +70,10 @@ defmodule AccrueAdmin.MixProject do
         "guides/local_demo.md",
         "guides/core-admin-parity.md",
         "guides/theme-exceptions.md",
-        "guides/motion.md"
+        "guides/motion.md",
+        "guides/spec-overview.md",
+        "guides/spec-list.md",
+        "guides/spec-detail.md"
       ],
       groups_for_extras: [
         Guides: [
@@ -76,7 +81,10 @@ defmodule AccrueAdmin.MixProject do
           "guides/local_demo.md",
           "guides/core-admin-parity.md",
           "guides/theme-exceptions.md",
-          "guides/motion.md"
+          "guides/motion.md",
+          "guides/spec-overview.md",
+          "guides/spec-list.md",
+          "guides/spec-detail.md"
         ]
       ],
       # `AccrueAdmin.Copy` defdelegates and README route tables mention implementation/hidden
@@ -96,7 +104,10 @@ defmodule AccrueAdmin.MixProject do
         "guides/admin_ui.md",
         "guides/local_demo.md",
         "guides/core-admin-parity.md",
-        "guides/motion.md"
+        "guides/motion.md",
+        "guides/spec-overview.md",
+        "guides/spec-list.md",
+        "guides/spec-detail.md"
       ]
     ]
   end
