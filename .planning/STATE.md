@@ -6,14 +6,14 @@ current_phase: 193
 current_phase_name: research-re-baseline-pattern-lock
 status: executing
 stopped_at: Phase 193 UI-SPEC approved
-last_updated: "2026-06-25T17:43:27.897Z"
+last_updated: "2026-06-25T17:46:37.393Z"
 last_activity: 2026-06-25
 last_activity_desc: Phase 193 execution started
 progress:
   total_phases: 8
   completed_phases: 0
   total_plans: 5
-  completed_plans: 1
+  completed_plans: 2
   percent: 0
 ---
 
@@ -30,7 +30,7 @@ See: `.planning/PROJECT.md` (updated 2026-06-24 — v1.54 Admin UI Page-Level St
 ## Current Position
 
 Phase: 193 (research-re-baseline-pattern-lock) — EXECUTING
-Plan: 2 of 5
+Plan: 3 of 5
 Status: Ready to execute
 Last activity: 2026-06-25 — Phase 193 execution started
 
@@ -189,6 +189,7 @@ Coverage: 22/22 v1.51 requirements mapped (each REQ-ID → exactly one phase). D
 | Phase 191 P07 | 12m | 2 tasks | 3 files |
 | Phase 188 P08 | 68 | 3 tasks | 11 files |
 | Phase 193 P01 | 15m | 2 tasks | 4 files |
+| Phase 193 P02 | 2m | 1 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -299,6 +300,7 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - [Phase ?]: Production copy fix in subscription.ex preferred over relaxing CPY-02 assertions
 - [Phase ?]: Stale webhook test assertions aligned with current copy functions
 - [Phase ?]: Three archetype spec guides (SPEC-OVERVIEW/LIST/DETAIL) authored as ExDoc guides with GOV.UK-style machine invariant tables; phoenix_storybook dep added as Plan 04 prerequisite
+- [Phase ?]: 21 PAGE_FLOWS surfaces in baseline-manifest.js (not 22 as estimated); 9,072 p193-prefixed page-flow cells generated as additive sibling to baseline.cells.json for Phase 200 zero-regression gate
 
 ### Pending Todos
 
@@ -388,7 +390,7 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 
 ## Session Continuity
 
-Last session: 2026-06-25T17:42:53.884Z
+Last session: 2026-06-25T17:46:30.259Z
 Stopped at: Phase 193 UI-SPEC approved
 Resume file: .planning/phases/193-research-re-baseline-pattern-lock/193-UI-SPEC.md
 
