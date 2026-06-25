@@ -142,14 +142,14 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLive do
           </section>
         <% end %>
 
+        <AtRiskTable.at_risk_table rows={@at_risk} base_path={@admin_mount_path} />
+
         <FunnelChart.funnel_chart
           entered={@funnel.entered}
           recovered={@funnel.recovered}
           exhausted={@funnel.exhausted}
           active={@funnel.active}
         />
-
-        <AtRiskTable.at_risk_table rows={@at_risk} base_path={@admin_mount_path} />
       </section>
     </AppShell.app_shell>
     """
