@@ -89,7 +89,11 @@ Plans:
   2. The Recovery analytics page is re-grammared to `hero metric pair → at-risk work-queue table → supporting trend` and surfaces at-risk work first rather than a wall of charts.
   3. Both pages score ≥ their page-flow baseline cells across viewport × theme × state with zero regressions.
 
-**Plans**: TBD
+**Plans**: 4 plans
+- [ ] 194-01-PLAN.md — Dashboard additive data-ax-* markers + non-interactive empty-rail hero + light KPI demotion CSS + rebuilt bundle
+- [ ] 194-02-PLAN.md — Recovery re-grammar (AtRiskTable above FunnelChart) + honest zone markers
+- [ ] 194-03-PLAN.md — Empty-rail non-interactivity source guard (Guard D) + D-08 ExUnit mirror
+- [ ] 194-04-PLAN.md — SPEC-OVERVIEW invariant assertion e2e spec + SC3 scoring confirmation (Open Q-B)
 **UI hint**: yes
 
 ### Phase 195: Exemplar B — Subscription detail
