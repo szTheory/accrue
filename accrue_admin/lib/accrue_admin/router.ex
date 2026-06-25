@@ -105,6 +105,7 @@ defmodule AccrueAdmin.Router do
       end
     end
     |> wrap_with_mailglass_dev_routes(dev_routes?, mount_path)
+    |> wrap_with_storybook_dev_routes(dev_routes?, mount_path)
   end
 
   # Mailglass dev-preview dashboard (MG-02 / Phase 88).
@@ -136,6 +137,41 @@ defmodule AccrueAdmin.Router do
   end
 
   defp wrap_with_mailglass_dev_routes(base_ast, _dev_routes?, _mount_path), do: base_ast
+
+  # PhoenixStorybook dev dashboard (STY-01 / Phase 193).
+  #
+  # Mounted as a SIBLING scope (same pattern as Mailglass above).
+  #
+  # MANDATORY Code.ensure_loaded? guard inside the true-branch quote block:
+  # Unlike Mailglass (which relies on its dep being :only [:dev, :test] to prevent
+  # runtime exposure), PhoenixStorybook's `live_storybook/2` macro is injected via
+  # `import PhoenixStorybook.Router` which runs at compile time. If a host app does
+  # NOT have phoenix_storybook in its deps at all (e.g. the accrue_host example),
+  # the import would fail to resolve and `live_storybook` would be an undefined
+  # function. Code.ensure_loaded? provides a second compile-time guard that skips
+  # the entire block when PhoenixStorybook.Router is not available — ensuring host
+  # apps without the dep compile cleanly in both dev and prod. (T-193-07 mitigation)
+  defp wrap_with_storybook_dev_routes(base_ast, true, mount_path) do
+    if Code.ensure_loaded?(PhoenixStorybook.Router) do
+      dev_ast =
+        quote bind_quoted: [mount_path: mount_path] do
+          scope mount_path do
+            pipe_through(:accrue_admin_browser)
+            import PhoenixStorybook.Router
+            live_storybook("/dev/storybook", backend_module: AccrueAdmin.Dev.Storybook)
+          end
+        end
+
+      quote do
+        unquote(base_ast)
+        unquote(dev_ast)
+      end
+    else
+      base_ast
+    end
+  end
+
+  defp wrap_with_storybook_dev_routes(base_ast, _dev_routes?, _mount_path), do: base_ast
 
   @spec __session__(Plug.Conn.t(), [atom() | String.t()], String.t()) :: map()
   def __session__(conn, session_keys, mount_path)

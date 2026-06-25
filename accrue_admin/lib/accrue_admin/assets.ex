@@ -13,34 +13,43 @@ defmodule AccrueAdmin.Assets do
   @font_sans_file Application.app_dir(:accrue_admin, "priv/static/fonts/geist-sans-vf.woff2")
   @font_mono_file Application.app_dir(:accrue_admin, "priv/static/fonts/geist-mono-vf.woff2")
 
+  @storybook_css_file Application.app_dir(:accrue_admin, "priv/static/storybook.css")
+  @storybook_js_file Application.app_dir(:accrue_admin, "priv/static/storybook.js")
+
   @external_resource @brand_file
   @external_resource @css_file
   @external_resource @js_file
   @external_resource @font_sans_file
   @external_resource @font_mono_file
+  @external_resource @storybook_css_file
+  @external_resource @storybook_js_file
 
   @brand_body File.read!(@brand_file)
   @css_body File.read!(@css_file)
   @js_body File.read!(@js_file)
   @font_sans_body File.read!(@font_sans_file)
   @font_mono_body File.read!(@font_mono_file)
+  @storybook_css_body File.read!(@storybook_css_file)
+  @storybook_js_body File.read!(@storybook_js_file)
 
   @brand_hash :md5 |> :crypto.hash(@brand_body) |> Base.encode16(case: :lower)
   @css_hash :md5 |> :crypto.hash(@css_body) |> Base.encode16(case: :lower)
   @js_hash :md5 |> :crypto.hash(@js_body) |> Base.encode16(case: :lower)
   @font_sans_hash :md5 |> :crypto.hash(@font_sans_body) |> Base.encode16(case: :lower)
   @font_mono_hash :md5 |> :crypto.hash(@font_mono_body) |> Base.encode16(case: :lower)
+  @storybook_css_hash :md5 |> :crypto.hash(@storybook_css_body) |> Base.encode16(case: :lower)
+  @storybook_js_hash :md5 |> :crypto.hash(@storybook_js_body) |> Base.encode16(case: :lower)
 
   # Variable WOFF2 faces (Geist Sans/Mono, OFL). Referenced via a relative `url()`
   # from the admin stylesheet, so they resolve to `<mount>/assets/geist-*.woff2`
   # regardless of host mount path — no runtime mount-path threading required.
-  @type kind :: :brand | :css | :js | :font_sans | :font_mono
+  @type kind :: :brand | :css | :js | :font_sans | :font_mono | :storybook_css | :storybook_js
 
   @spec init(kind()) :: kind()
-  def init(kind) when kind in [:brand, :css, :js, :font_sans, :font_mono], do: kind
+  def init(kind) when kind in [:brand, :css, :js, :font_sans, :font_mono, :storybook_css, :storybook_js], do: kind
 
   @spec call(Plug.Conn.t(), kind()) :: Plug.Conn.t()
-  def call(conn, kind) when kind in [:brand, :css, :js, :font_sans, :font_mono] do
+  def call(conn, kind) when kind in [:brand, :css, :js, :font_sans, :font_mono, :storybook_css, :storybook_js] do
     {body, content_type, etag} = asset(kind)
 
     conn
@@ -59,6 +68,12 @@ defmodule AccrueAdmin.Assets do
   @spec brand_hash() :: String.t()
   def brand_hash, do: @brand_hash
 
+  @spec storybook_css_hash() :: String.t()
+  def storybook_css_hash, do: @storybook_css_hash
+
+  @spec storybook_js_hash() :: String.t()
+  def storybook_js_hash, do: @storybook_js_hash
+
   @spec hashed_path(kind()) :: String.t()
   def hashed_path(kind), do: hashed_path(kind, "")
 
@@ -74,6 +89,19 @@ defmodule AccrueAdmin.Assets do
       end
 
     normalized_mount <> "/assets/" <> suffix
+  end
+
+  def hashed_path(kind, mount_path)
+      when kind in [:storybook_css, :storybook_js] and is_binary(mount_path) do
+    normalized = normalize_mount_path(mount_path)
+
+    suffix =
+      case kind do
+        :storybook_css -> "storybook-css-#{@storybook_css_hash}"
+        :storybook_js -> "storybook-js-#{@storybook_js_hash}"
+      end
+
+    normalized <> "/assets/" <> suffix
   end
 
   @spec normalize_mount_path(String.t()) :: String.t()
@@ -98,4 +126,6 @@ defmodule AccrueAdmin.Assets do
   def asset(:js), do: {@js_body, "application/javascript", @js_hash}
   def asset(:font_sans), do: {@font_sans_body, "font/woff2", @font_sans_hash}
   def asset(:font_mono), do: {@font_mono_body, "font/woff2", @font_mono_hash}
+  def asset(:storybook_css), do: {@storybook_css_body, "text/css", @storybook_css_hash}
+  def asset(:storybook_js), do: {@storybook_js_body, "application/javascript", @storybook_js_hash}
 end
