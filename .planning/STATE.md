@@ -1,20 +1,16 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.53
-milestone_name: Admin UI Design-System Hardening
-current_phase: 53
-status: Awaiting next milestone
-stopped_at: Completed 188-08-PLAN.md
-last_updated: "2026-06-20T15:24:38.192Z"
-last_activity: 2026-06-20
-last_activity_desc: Milestone v1.53 completed and archived
+milestone: v1.54
+milestone_name: Admin UI Page-Level Streamlining & Storybook
+status: planning
+last_updated: "2026-06-25T02:31:13.429Z"
+last_activity: 2026-06-25
 progress:
-  total_phases: 6
-  completed_phases: 6
-  total_plans: 39
-  completed_plans: 39
-  percent: 100
-current_phase_name: (none — v1.53 complete)
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
 ---
 
 # Project State
@@ -29,12 +25,10 @@ See: `.planning/PROJECT.md` (updated 2026-06-14 — v1.53 Admin UI Design-System
 
 ## Current Position
 
-Phase: Milestone v1.53 complete
+Phase: Not started (defining requirements)
 Plan: —
-Status: Awaiting next milestone
-Last activity: 2026-06-22 — Completed quick task 260622-nob: finished the host Playwright e2e CI green-up (the last red gate on main). Two code commits (c0353d02, 0a2f25ba): repointed the apply-filters `.toBeVisible()` assert (button now `ax-visually-hidden`/auto-applies) → `[data-role='filter-form']`, and the phase13 dead `getByText("Append-only billing and admin activity")` → `getByRole('heading',"Event log")` (root cause of the "Target page closed" + Ecto `Sandbox :checkin` crash). Local full-suite run caught 2 more drifts the handoff under-scoped: the committed `e2e/generated/copy_strings.json` was STALE (5 fql headline keys — `host-integration` regenerates it at runtime so it masked the failure there, but the `playwright-e2e` shard reads the committed file), regenerated via `mix accrue_admin.export_copy_strings`; and the customers index "Billing signals" columnheader (removed in redesign) → "Payment method". Verified `npx playwright test` 19/0 (+3 intentional skips). FIRST-HAND CONFIRMED the long-flagged staleness: path-mode `mix deps.get` rewrites `examples/accrue_host/mix.lock` (bumps phoenix 1.8.7→1.8.8, LV 1.1.31→1.1.32, req, finch) — left the committed hex-mode lock untouched (restored after run; required by `accrue_host_hex_smoke.sh`). Remaining: push + confirm CI; Release Please's `RELEASE_PLEASE_TOKEN` failure is infra-only (flag to maintainer). Prior task 260622-fql: admin page headers — one consistent JTBD-oriented voice across every section. Every section page's h1 + subtitle had inconsistent voice + internal-jargon leakage, and Recovery had no subtitle. Rewrote all to the /admin/customers philosophy (plain-noun h1 = nav label + two-part job-oriented subtitle, implementation-hidden), added the Recovery subtitle, extracted 4 inline headers into copy.ex helpers. Copy + tiny markup only — no CSS/JS, bundles untouched. `--validate` plan-check PASS (caught a missed events test assertion) + verify PASS 7/7, 350 tests/0 failures. Closed/superseded todo 260622-admin-page-header-microcopy-audit. Browser-only: confirm all 11 headers read consistently on demo. Earlier reminder still open: examples/accrue_host/mix.lock is environmentally stale on main (clean deps-bump re-pin is a good future task; also unblocks the host admin_webhook_replay_test.exs).
-Prior activity: 2026-06-22 — Completed quick task 260621-olr: admin list pages — compact metrics ("stat strip") + condensed instant-apply filter toolbar across all 9 list pages. Research-backed (2 design sweeps + brand/JTBD). NEW StatStrip `<dl>` component (chromeless, tone-on-value, dev-lab registered) replaces the ~200px KPI card grid (→~48-56px); filter form condensed to a single self-labeling toolbar (dropped redundant Apply button; `:select` `all_label`; Clear-when-active); 2-3-value selects → segmented toggles incl. owner_type dynamic ≤3⇒segmented (fixes the 2-value-dropdown complaint). KpiCard untouched on dashboard/recovery/detail. `--validate` plan-check PASS 1st iter (3 corrections folded in) + verify PASS 7/7, 350 tests/0 failures, css bundle rebuilt. 4 browser-only visuals to confirm. NEW TODO captured: 260622-admin-page-header-microcopy-audit (per-section h1+subtitle microcopy consistency, JTBD-oriented, modeled on /admin/customers; recovery page currently has no subtitle) — `.planning/todos/`. Earlier reminder still open: `examples/accrue_host/mix.lock` is environmentally stale on main (a clean deps-bump re-pin remains a good future task; also blocks re-running the host admin_webhook_replay_test.exs).
-Prior activity: 2026-06-21 — Completed quick task 260621-nr8: admin nav — live navigation + visible loading stripe + remove sidebar collapse. One root cause for both complaints: sidebar links were plain `<a href>` → full page reloads (no `phx:page-loading-*` so the wired `topbar` stripe never fired; LiveView re-mount replayed the `SidebarCollapse` opacity flash). Fix = `<.link navigate>` (all admin pages share one `live_session`) → stripe fires + morphdom keeps the sidebar; topbar delay 300→120ms; collapse feature removed entirely (badges kept), `sidebar_collapse.js` deleted, bundles rebuilt. `--validate` plan-check PASS 1st iter + verify PASS 7/7, 348 tests/0 failures, spec-gap proven. 3 browser-only visuals to confirm on the demo (stripe on nav, no sidebar flash, badges still show). Reminder still open: `examples/accrue_host/mix.lock` is environmentally stale on main (published deps moved past pins) — a clean deps-bump re-pin is a good future task (also blocks re-running the host `admin_webhook_replay_test.exs`).
+Status: Defining requirements
+Last activity: 2026-06-25 — Milestone v1.54 started
 
 ## Post-v1.48 Pause Rule
 
