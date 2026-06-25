@@ -74,7 +74,7 @@ Plans:
 **Wave 2** *(blocked on Wave 1 completion)*
 
 - [x] 193-04-PLAN.md — Storybook scaffold: storybook.ex backend + router wrap + assets.ex extension + RegistryStory + button.story.exs + committed bundles + D-17 spike decisions
-- [ ] 193-05-PLAN.md — CSS source guards (3) + spec doc-needles (6) + PackageDocsVerifierTest seed_tmp_dir! extension + 3 negative guard tests
+- [x] 193-05-PLAN.md — CSS source guards (3) + spec doc-needles (6) + PackageDocsVerifierTest seed_tmp_dir! extension + 3 negative guard tests
 
 **UI hint**: yes
 
@@ -292,7 +292,7 @@ Full details: [v1.48 roadmap archive](milestones/v1.48-ROADMAP.md)
 | 190. Navigation, data-display & meta-component cohesion | v1.53 | 6/6 | Complete | 2026-06-18 |
 | 191. Page & flow interaction pass + fixture stress + microcopy | v1.53 | 7/7 | Complete | 2026-06-19 |
 | 192. Idempotent verification & sign-off | v1.53 | 6/6 | Complete   | 2026-06-20 |
-| 193. Research, re-baseline & pattern lock | v1.54 | 4/5 | In Progress|  |
+| 193. Research, re-baseline & pattern lock | v1.54 | 5/5 | Complete   | 2026-06-25 |
 | 194. Exemplar A — Dashboard | v1.54 | 0/? | Not started | - |
 | 195. Exemplar B — Subscription detail | v1.54 | 0/? | Not started | - |
 | 196. Exemplar C — Subscriptions list + PageHeader | v1.54 | 0/? | Not started | - |
