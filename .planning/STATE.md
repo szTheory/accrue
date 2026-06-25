@@ -3,16 +3,17 @@ gsd_state_version: 1.0
 milestone: v1.54
 milestone_name: Admin UI Page-Level Streamlining & Storybook
 current_phase: 193
-status: Roadmap created; awaiting `/gsd-plan-phase 193`
+current_phase_name: research-re-baseline-pattern-lock
+status: executing
 stopped_at: Phase 193 UI-SPEC approved
-last_updated: "2026-06-25T15:57:50.311Z"
+last_updated: "2026-06-25T17:43:27.897Z"
 last_activity: 2026-06-25
-last_activity_desc: v1.54 roadmap created (Phases 193–200)
+last_activity_desc: Phase 193 execution started
 progress:
   total_phases: 8
   completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
+  total_plans: 5
+  completed_plans: 1
   percent: 0
 ---
 
@@ -24,14 +25,14 @@ See: `.planning/PROJECT.md` (updated 2026-06-24 — v1.54 Admin UI Page-Level St
 
 **Core value:** A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic Elixir DX, strong domain modeling, tamper-evident audit ledger, great observability, and zero breaking-change pain through v1.x.
 
-**Current focus:** v1.54 Admin UI Page-Level Streamlining & Storybook — roadmap created (8 phases, 193–200, 23/23 requirements mapped); ready to plan Phase 193.
+**Current focus:** Phase 193 — research-re-baseline-pattern-lock
 
 ## Current Position
 
-Phase: 193 — Research, re-baseline & pattern lock (not started)
-Plan: —
-Status: Roadmap created; awaiting `/gsd-plan-phase 193`
-Last activity: 2026-06-25 — v1.54 roadmap created (Phases 193–200)
+Phase: 193 (research-re-baseline-pattern-lock) — EXECUTING
+Plan: 2 of 5
+Status: Ready to execute
+Last activity: 2026-06-25 — Phase 193 execution started
 
 ## Post-v1.48 Pause Rule
 
@@ -187,6 +188,7 @@ Coverage: 22/22 v1.51 requirements mapped (each REQ-ID → exactly one phase). D
 | Phase 191 P05 | 16m 34s | 2 tasks | 13 files |
 | Phase 191 P07 | 12m | 2 tasks | 3 files |
 | Phase 188 P08 | 68 | 3 tasks | 11 files |
+| Phase 193 P01 | 15m | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -296,6 +298,7 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - [Phase ?]: data-ax-force=focus detached DOM probe for headless Chromium focus-ring e2e
 - [Phase ?]: Production copy fix in subscription.ex preferred over relaxing CPY-02 assertions
 - [Phase ?]: Stale webhook test assertions aligned with current copy functions
+- [Phase ?]: Three archetype spec guides (SPEC-OVERVIEW/LIST/DETAIL) authored as ExDoc guides with GOV.UK-style machine invariant tables; phoenix_storybook dep added as Plan 04 prerequisite
 
 ### Pending Todos
 
@@ -385,7 +388,7 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 
 ## Session Continuity
 
-Last session: 2026-06-25T15:57:50.304Z
+Last session: 2026-06-25T17:42:53.884Z
 Stopped at: Phase 193 UI-SPEC approved
 Resume file: .planning/phases/193-research-re-baseline-pattern-lock/193-UI-SPEC.md
 

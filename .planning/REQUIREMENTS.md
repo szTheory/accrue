@@ -41,14 +41,14 @@ v1.54-storybook-and-forward-only-qa). Phases 193–200.
 
 ### RES — Research, baseline & foundation
 
-- [ ] **RES-01**: Maintainer can read three locked archetype pattern specs (SPEC-OVERVIEW / SPEC-LIST / SPEC-DETAIL) that serve as the design contracts every page is built or conformed against.
+- [x] **RES-01**: Maintainer can read three locked archetype pattern specs (SPEC-OVERVIEW / SPEC-LIST / SPEC-DETAIL) that serve as the design contracts every page is built or conformed against.
 - [ ] **RES-02**: The Phase-187 scored cell baseline is extended with `surface_type:"page-flow"` cells over the ~20 admin routes (additive sibling `baseline.page-flow.cells.json`), wired into the forward-only zero-regression gate.
 - [ ] **RES-03**: The four Phase-193 spikes are resolved with recorded decisions: overlay portal-vs-native-`<dialog>` (+ Playwright hit-test), `data-theme` dark-mode shim for Storybook color-mode, `inert` vs `aria-hidden` browser-floor, and Storybook asset-serving without a Tailwind rebuild.
 - [ ] **RES-04**: Three new CSS source guards ship in `verify_package_docs.sh`/CI — spacing-literal ban (no raw px on padding/margin/gap outside allowlist), `:focus-visible` enforcement, and truncation-without-`min-width:0` — mirroring the proven FND-01/MOT-01 guard shape.
 
 ### STY — PhoenixStorybook (dev/test-only)
 
-- [ ] **STY-01**: `phoenix_storybook` is added `only: [:dev, :test]` and mounted via a sibling-scope router wrap guarded by `Code.ensure_loaded?/1`, so `examples/accrue_host` compiles in `:dev` and `:prod` with the dep absent and exposes no storybook route (proves zero adopter-runtime leak).
+- [x] **STY-01**: `phoenix_storybook` is added `only: [:dev, :test]` and mounted via a sibling-scope router wrap guarded by `Code.ensure_loaded?/1`, so `examples/accrue_host` compiles in `:dev` and `:prod` with the dep absent and exposes no storybook route (proves zero adopter-runtime leak).
 - [ ] **STY-02**: Every `ComponentRegistry` family and all 8 group contracts have a generated (registry-driven) story — the registry stays the single source of truth; the in-app `/dev/components` kitchen and the Phase-189/190 drift tests stay green.
 - [ ] **STY-03**: Stories render correctly in both color modes against the shipped committed `ax-*` bundle (not a Tailwind rebuild), with the `html.accrue-admin[data-theme]` scoping bridged into Storybook's sandbox.
 
@@ -95,11 +95,11 @@ REQ-ID → phase mapping (each REQ-ID maps to exactly one phase; 23/23 mapped, n
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| RES-01 | Phase 193 | Pending |
+| RES-01 | Phase 193 | Complete |
 | RES-02 | Phase 193 | Pending |
 | RES-03 | Phase 193 | Pending |
 | RES-04 | Phase 193 | Pending |
-| STY-01 | Phase 193 | Pending |
+| STY-01 | Phase 193 | Complete |
 | EXE-01 | Phase 194 | Pending |
 | EXE-02 | Phase 195 | Pending |
 | PGH-01 | Phase 196 | Pending |
@@ -120,6 +120,7 @@ REQ-ID → phase mapping (each REQ-ID maps to exactly one phase; 23/23 mapped, n
 | STY-03 | Phase 200 | Pending |
 
 **Notes on mapping decisions:**
+
 - **IXN-01 (canonical overlay primitive)** is *instantiated* for the Subscription-detail side-drawer in Phase 195 (its action-menu/side-drawer action-hosting groundwork is a cross-phase dependency) but is **owned/assigned to Phase 199** — the full cross-cutting overlay sweep across all pages. Single-phase assignment is Phase 199 to avoid a duplicate REQ; the Phase 195 dependency is recorded in the ROADMAP.md phase detail and STATE.md.
 - **STY-02 / STY-03 (Storybook story-completeness + theming)** are scaffolded in Phase 193 (STY-01 stands up the dependency, sibling-scope mount, registry generator, and asset serving). Story *completeness* (all families + 8 group contracts) and *theming verification* (both color modes against the shipped `ax-*` bundle) are **delivered and verified in Phase 200** alongside the final forward-only re-score — so STY-02/STY-03 map to Phase 200, with the Phase 193 scaffold as the verification touchpoint.
 
