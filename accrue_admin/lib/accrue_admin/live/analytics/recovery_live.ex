@@ -119,7 +119,7 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLive do
         </header>
 
         <%= for kpi <- @kpi_pairs do %>
-          <section class="ax-kpi-grid ax-section-gap">
+          <section class="ax-kpi-grid ax-section-gap" data-ax-zone="kpi-cluster">
             <KpiCard.kpi_card
               label={"Recovered MRR (#{String.upcase(kpi.currency)})"}
               value={kpi.recovered_str}
@@ -142,7 +142,9 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLive do
           </section>
         <% end %>
 
-        <AtRiskTable.at_risk_table rows={@at_risk} base_path={@admin_mount_path} />
+        <section data-ax-zone="task-launcher">
+          <AtRiskTable.at_risk_table rows={@at_risk} base_path={@admin_mount_path} />
+        </section>
 
         <FunnelChart.funnel_chart
           entered={@funnel.entered}
