@@ -2,6 +2,7 @@
 created: 2026-06-21T15:54:29.309Z
 title: Shared page_header component for accrue_admin list pages
 area: ui
+resolves_phase: 196
 files:
   - accrue_admin/lib/accrue_admin/components/detail.ex (summary_card — the detail-page analog)
   - accrue_admin/lib/accrue_admin/live/subscriptions_live.ex (representative list page)
