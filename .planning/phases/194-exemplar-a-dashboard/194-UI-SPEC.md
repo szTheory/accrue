@@ -1,10 +1,11 @@
 ---
 phase: 194
 slug: exemplar-a-dashboard
-status: draft
+status: approved
 shadcn_initialized: false
 preset: none
 created: 2026-06-25
+reviewed_at: 2026-06-25
 ---
 
 # Phase 194 — UI Design Contract
