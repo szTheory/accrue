@@ -705,22 +705,19 @@ Each spike resolves one of the four D-05/D-17 recorded decisions (RES-03). Each 
 
 ---
 
-## Open Questions
+## Open Questions (RESOLVED)
 
-1. **`storybook.css` build tooling: how to regenerate?**
+1. **`storybook.css` build tooling: how to regenerate?** — RESOLVED by Plan 04
    - What we know: `mix accrue_admin.assets.build` rebuilds `accrue_admin.css`/`.js`. Storybook's PhoenixStorybook sandbox CSS is in `deps/phoenix_storybook/priv/static/`.
-   - What's unclear: Whether to extend `accrue_admin.assets.build` task to also produce `storybook.css`, or use a separate Mix task.
-   - Recommendation: Add a `mix accrue_admin.storybook.build` task that concatenates: psb static CSS + `priv/static/accrue_admin.css` + dark shim CSS. Documented in guides, not run automatically.
+   - **Resolution:** Plan 04 Task 1 builds the committed bundle by concatenating in order: (1) PhoenixStorybook sandbox CSS from `deps/phoenix_storybook/priv/static/`, (2) the committed `priv/static/accrue_admin.css`, (3) the D-17 Spike B dark-mode shim block. The result is written directly to `accrue_admin/priv/static/storybook.css` as a committed file. `AccrueAdmin.Assets` reads it at compile time via `File.read!` + `@external_resource`; the hash route updates automatically on recompile. A separate `mix accrue_admin.storybook.build` Mix task serves as the documented rebuild command (documented in guides, not run automatically). No Tailwind integration required — Spike D confirmed.
 
-2. **Baseline merge tooling: where does the merge gate live?**
+2. **Baseline merge tooling: where does the merge gate live?** — RESOLVED by Plan 02
    - What we know: `regressions.ndjson` gate runs over `baseline.cells.json`. Adding `baseline.page-flow.cells.json` requires the gate to load both files.
-   - What's unclear: Whether `admin-baseline.spec.js` already supports loading multiple baseline files or needs a union-merge step.
-   - Recommendation: Planner should inspect `admin-baseline.spec.js` to determine how to wire the additive sibling; may require a small merge helper function.
+   - **Resolution:** Plan 02 stores the additive sibling at `.planning/milestones/v1.53-phases/187-audit-baseline/baseline.page-flow.cells.json`. The union-load is wired via `accrue_admin/e2e/phase192-scorecard.mjs` — the `baselinePath` key in the scorecard config is updated to include both the existing `baseline.cells.json` and the new `baseline.page-flow.cells.json`. At gate time, the scorecard mjs performs a union merge (concatenating both JSON arrays) before computing `regressions.ndjson`. The key_link in Plan 02 frontmatter (`baseline.page-flow.cells.json → phase192-scorecard.mjs baselinePath`) documents this coupling. The page-flow cells ship with `coverage_status: "pending"` in Phase 193; Phase 200 scores them and folds them into the active regression gate.
 
-3. **`RegistryStory` module location in Mix elixirc_paths:**
+3. **`RegistryStory` module location in Mix elixirc_paths:** — RESOLVED by Plan 01
    - What we know: `elixirc_paths(:test)` returns `["lib", "test/support"]`; `elixirc_paths(_env)` returns `["lib"]`.
-   - What's unclear: `storybook/_support/registry_story.ex` is NOT under `lib/` — it will NOT be compiled automatically.
-   - Recommendation: Add `storybook/_support` to `elixirc_paths(:dev)` → `["lib", "storybook/_support"]`. This is a concrete mix.exs change the planner must include. The `.exs` story shims call `AccrueAdmin.Storybook.RegistryStory` which must exist as a compiled module.
+   - **Resolution:** Plan 01 extends `elixirc_paths(:dev)` to `["lib", "storybook/_support"]` in `accrue_admin/mix.exs`. This makes `storybook/_support/registry_story.ex` a compiled module in dev (and test, via its own `elixirc_paths` clause). The `.story.exs` shims call `AccrueAdmin.Storybook.RegistryStory.variations_for/1` which resolves at story-eval time against the compiled module. No additional `elixirc_paths` changes needed beyond this one extension.
 
 ---
 
