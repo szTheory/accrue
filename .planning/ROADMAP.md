@@ -51,101 +51,131 @@ Coverage: 23/23 requirements mapped (each REQ-ID → exactly one phase). Per-pha
 ## Phase Details
 
 ### Phase 193: Research, re-baseline & pattern lock
+
 **Goal**: The three archetype pattern specs are locked as design contracts, the forward-only baseline can see composed pages, PhoenixStorybook is stood up dev/test-only with the four spike decisions recorded, and the three new source guards are merge-blocking.
 **Depends on**: Nothing (first phase of v1.54; builds on shipped v1.53 baseline)
 **Requirements**: RES-01, RES-02, RES-03, RES-04, STY-01
 **Success Criteria** (what must be TRUE):
+
   1. A maintainer can open and read three locked archetype pattern specs (SPEC-OVERVIEW / SPEC-LIST / SPEC-DETAIL) and use each as the design contract every page is built or conformed against.
   2. The forward-only zero-regression gate now scores `surface_type:"page-flow"` cells over the ~20 admin routes (additive sibling `baseline.page-flow.cells.json`), reusing the Phase-191 page-flow Playwright driver and the 12-dimension rubric.
   3. A host dev compile of `examples/accrue_host` succeeds with `phoenix_storybook` absent and exposes no `/dev/storybook` route, proving the `Code.ensure_loaded?`-guarded sibling-scope mount has zero adopter-runtime leak.
   4. Each of the four Phase-193 spikes (overlay portal-vs-`<dialog>` with a Playwright hit-test; Storybook `data-theme` dark-mode shim; `inert` vs `aria-hidden` browser-floor; Storybook asset-serving without a Tailwind rebuild) is resolved with a recorded decision.
   5. Three new CSS source guards (spacing-literal ban, `:focus-visible` enforcement, truncation-without-`min-width:0`) ship in `verify_package_docs.sh`/CI and fail on a planted violation.
+
 **Plans**: 5 plans
 Plans:
+**Wave 1**
+
 - [ ] 193-01-PLAN.md — Three archetype spec guides (spec-overview/list/detail) + mix.exs wiring (dep, elixirc_paths, extras, groups)
 - [ ] 193-02-PLAN.md — Forward-only baseline extension: additive sibling baseline.page-flow.cells.json (~9,504 page-flow cells)
 - [ ] 193-03-PLAN.md — Overlay portal spike: four D-05 Playwright proofs + recorded decision (RES-03 Spike A)
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
 - [ ] 193-04-PLAN.md — Storybook scaffold: storybook.ex backend + router wrap + assets.ex extension + RegistryStory + button.story.exs + committed bundles + D-17 spike decisions
 - [ ] 193-05-PLAN.md — CSS source guards (3) + spec doc-needles (6) + PackageDocsVerifierTest seed_tmp_dir! extension + 3 negative guard tests
+
 **UI hint**: yes
 
 ### Phase 194: Exemplar A — Dashboard
+
 **Goal**: The Dashboard is the locked gold-standard for the overview archetype, and Recovery analytics reads as a work-queue, not a chart wall.
 **Depends on**: Phase 193 (SPEC-OVERVIEW locked; page-flow baseline in place)
 **Requirements**: EXE-01
 **Success Criteria** (what must be TRUE):
+
   1. An operator landing on the Dashboard sees the locked four-zone overview grammar — attention-rail (exceptions-only, prominent healthy empty-state) → verb task-launchers (visible ⌘K) → demoted clickable KPIs → recent activity — refined, not rebuilt.
   2. The Recovery analytics page is re-grammared to `hero metric pair → at-risk work-queue table → supporting trend` and surfaces at-risk work first rather than a wall of charts.
   3. Both pages score ≥ their page-flow baseline cells across viewport × theme × state with zero regressions.
+
 **Plans**: TBD
 **UI hint**: yes
 
 ### Phase 195: Exemplar B — Subscription detail
+
 **Goal**: The worst info-dump page becomes the gold-standard for the object-detail archetype, and the reusable action-menu + side-drawer action-hosting primitives exist for propagation.
 **Depends on**: Phase 194 (overview exemplar shipped; SPEC-DETAIL locked in 193)
 **Requirements**: EXE-02, IXN-01
 **Success Criteria** (what must be TRUE):
+
   1. The Subscription detail page is converted from ~25 always-visible flat zones to ~6 bands: a GOV.UK summary-list header with row-level "Change", ≤2 primary actions plus an overflow action-menu, collapsible drill sections (most-relevant open), one related-resources strip, and lazy activity/raw-JSON.
   2. Operator actions open in a side-drawer (destructive actions hand off to a step-up modal) hosted by the canonical overlay primitive — never reintroducing modal-behind-scrim — and the action-menu + side-drawer primitives land in Storybook.
   3. The duplicate related-resources card is deleted and card-in-card double-border nesting is flattened.
   4. The overlay primitive backing the side-drawer demonstrably scroll-locks, portals to a body-level root so it is never painted behind its scrim, marks the background `inert`, and dismisses cleanly on backdrop-click + Escape (the IXN-01 contract, instantiated here for the detail exemplar and swept across all pages in Phase 199).
+
 **Plans**: TBD
 **UI hint**: yes
 
 ### Phase 196: Exemplar C — Subscriptions list + PageHeader
+
 **Goal**: The Subscriptions list is the locked gold-standard for the list archetype, and the shared `PageHeader` slot contract is extracted and locked before any propagation.
 **Depends on**: Phase 195 (detail exemplar shipped; SPEC-LIST locked in 193)
 **Requirements**: EXE-03, PGH-01
 **Success Criteria** (what must be TRUE):
+
   1. The Subscriptions list is table-first with row→card mobile degradation, persistent filter chips + result count + clear-all, a work-queue default ("All" one chip away), and four visually-distinct states (populated / first-run-empty / filtered-empty / loading-skeleton).
   2. A shared `AccrueAdmin.Components.PageHeader` (breadcrumb + title + stat-strip + actions + filter-toolbar slots) is extracted with its slot contract locked, proven on the Subscriptions list, and rendering exactly one `<h1>` per page.
   3. Identity·state·money·time columns are prioritized with plumbing IDs de-emphasized, and truncation uses `min-width:0` discipline (the new guard passes).
+
 **Plans**: TBD
 **UI hint**: yes
 
 ### Phase 197: Propagate LIST
+
 **Goal**: Every remaining list page is internally consistent with the locked list spec and adopts the shared `PageHeader`.
 **Depends on**: Phase 196 (SPEC-LIST exemplar + `PageHeader` slot contract locked)
 **Requirements**: PRP-01
 **Success Criteria** (what must be TRUE):
+
   1. All 8 remaining list pages (customers · invoices · payments · coupons · promotion-codes · webhooks · events · connect) conform to SPEC-LIST — table-first, chips + count + clear-all, work-queue default, row→card degradation.
   2. Every one of those pages adopts `PageHeader` and renders exactly one `<h1>`.
   3. Each page carries per-page JTBD microcopy and covers all four list states (populated / first-run-empty / filtered-empty / loading).
+
 **Plans**: TBD
 **UI hint**: yes
 
 ### Phase 198: Propagate DETAIL + analytics
+
 **Goal**: Every remaining detail and analytics page is internally consistent with the locked detail/overview specs.
 **Depends on**: Phase 197 (LIST propagation complete; SPEC-DETAIL exemplar locked in 195)
 **Requirements**: PRP-02
 **Success Criteria** (what must be TRUE):
+
   1. All remaining detail pages (customer · invoice · charge · coupon · promotion-code · connect-account · webhook · event) conform to SPEC-DETAIL — summary-then-drill, ≤2 primary + overflow menu, side-drawer actions, one related strip, lazy timeline/JSON.
   2. The Recovery and Campaign analytics pages conform to the locked overview spec (work-queue first, no chart wall).
   3. Tabs appear only for peer record-sets (e.g. Customer-360 Subscriptions/Invoices/Payments), never hiding primary state or critical actions behind a horizontal tab.
+
 **Plans**: TBD
 **UI hint**: yes
 
 ### Phase 199: Cross-cutting interaction/overlay correctness + fixture stress + microcopy
+
 **Goal**: One canonical overlay primitive backs every modal/drawer/popover across all pages with structurally-correct behavior, edge fixtures surface no squish/clipping/overflow, and all page-level copy speaks one brand voice.
 **Depends on**: Phase 198 (all pages conformed; overlay primitive groundwork from 195)
 **Requirements**: IXN-01, IXN-02, IXN-03, IXN-04, FIX-01, FIX-02, CPY-01
 **Success Criteria** (what must be TRUE):
+
   1. Every modal/drawer routes through the single canonical overlay primitive — ref-counted iOS-safe body scroll-lock (no scrollbar-gutter jump), body-level portal so an overlay is never painted behind its scrim and is always hit-testable, `inert`/`aria-hidden` background, and a unified backdrop+Escape dismissal that settles cleanly on rapid double-toggle (IXN-01).
   2. Overlay motion is geometry-correct — drawer edge-docks on desktop (translateX from the right), is a bottom-sheet on mobile (translateY), popovers are origin-aware, focus moves into/traps/restores with an instant focus ring, the ≤240ms band holds, and reduced-motion is preserved (extending `reduced-motion.spec.js`) (IXN-02); non-interactive empty-state heroes carry no hover/cursor, disabled looks disabled, absent affordances are hidden, floats stay in viewport bounds, and theme switching has no flash-of-wrong-theme with correct persistence + system emulation (IXN-03); and a transformed/filtered/`contain` ancestor audit confirms no LiveView page wrapper re-roots a `position:fixed` shell (IXN-04).
   3. Deterministic multi-step workflow fixtures (list → detail → nested detail → drill-down → back) exercise focus and scroll integrity across every transition (FIX-01), and long-content/boundary fixtures (zero-decimal currency, past-due dunning, very long names, overflow) surface no squish/clipping/overflow on real seeded data and remain idempotent (FIX-02).
   4. A full brand-voice microcopy sweep covers all page-level copy with distinct first-run-empty vs filtered-empty messages and action/"Change" labels carrying visually-hidden context that names the object and the next useful action (CPY-01).
+
 **Plans**: TBD
 **UI hint**: yes
 
 ### Phase 200: Idempotent verification & sign-off
+
 **Goal**: The whole surface is proven forward-only ≥ baseline with zero regressions, Storybook story coverage and theming are complete and verified, accessibility/no-FOUC checks are green, and the milestone has explicit ACCEPT sign-off.
 **Depends on**: Phase 199 (all correctness + copy work landed)
 **Requirements**: VER-01, VER-02, VER-03, STY-02, STY-03
 **Success Criteria** (what must be TRUE):
+
   1. The merged `regressions.ndjson` shows zero regressions versus the union baseline (component + group + page-flow cells) across viewport × theme × state — every inherited cell scores ≥ its baseline (VER-01).
   2. Every `ComponentRegistry` family and all 8 group contracts have a generated (registry-driven) story with the registry staying SSOT and the `/dev/components` kitchen + Phase-189/190 drift tests green (STY-02), and stories render correctly in both color modes against the shipped committed `ax-*` bundle with the `html.accrue-admin[data-theme]` scoping bridged into Storybook's sandbox (STY-03). (Storybook is scaffolded in Phase 193; story completeness + theming are completed/verified here.)
   3. axe-core color-contrast + name/role passes over rendered stories and page-flow routes; no-FOUC/persistence/system-emulation checks are green; and the reduced-motion + group-contract + a11y guardrail suites pass in CI (VER-02).
   4. An adversarial multi-lens judge (correctness · a11y · brand · interaction) plus a maintainer photographic/interaction checkpoint sign off ACCEPT at the final boundary (VER-03).
+
 **Plans**: TBD
 **UI hint**: yes
 
