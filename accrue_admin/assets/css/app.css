@@ -3335,6 +3335,30 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
 .ax-empty-copy { font: var(--ax-type-body-sm-font); color: var(--ax-muted); max-width: 28rem; }
 .ax-empty-actions { margin-top: var(--ax-space-sm); }
 
+/* SPEC-OVERVIEW (Phase 194): elevated healthy "all clear" hero — NON-INTERACTIVE.
+   No cursor:pointer, no :hover rule on .ax-attention-rail--empty (D-06 guard).
+   Elevates hierarchy via larger gap/padding and stronger icon color using existing tokens. */
+.ax-attention-rail--empty {
+  gap: var(--ax-space-lg);
+  padding: var(--ax-space-3xl) var(--ax-space-2xl);
+}
+.ax-attention-rail--empty .ax-empty-icon {
+  color: var(--ax-success, var(--ax-accent));
+}
+.ax-attention-rail--empty .ax-empty-title {
+  font: var(--ax-type-heading-font);
+  color: var(--ax-primary);
+}
+
+/* KPI cluster demotion (Phase 194, D-03): reads subordinate to attention rail.
+   Reduce card border prominence and mute labels; no type-scale rework. */
+[data-ax-zone="kpi-cluster"] .ax-kpi-card {
+  border-color: color-mix(in srgb, var(--ax-border) 60%, var(--ax-base));
+}
+[data-ax-zone="kpi-cluster"] .ax-label {
+  color: var(--ax-muted);
+}
+
 /* Task launchers — JTBD doors */
 .ax-launchers {
   display: grid;

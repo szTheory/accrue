@@ -82,7 +82,7 @@ defmodule AccrueAdmin.Live.DashboardLive do
             </a>
           </div>
 
-          <div :if={@attention == []} class="ax-card ax-empty">
+          <div :if={@attention == []} class="ax-card ax-empty ax-attention-rail--empty">
             <Icon.icon name={:check_circle} size="lg" class="ax-empty-icon" />
             <p class="ax-empty-title"><%= Copy.home_attention_empty_title() %></p>
             <p class="ax-body ax-empty-copy"><%= Copy.home_attention_empty_copy() %></p>
