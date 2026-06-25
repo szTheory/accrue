@@ -54,7 +54,7 @@ v1.54-storybook-and-forward-only-qa). Phases 193–200.
 
 ### EXE — Gold-standard exemplars (one per archetype)
 
-- [ ] **EXE-01**: The Dashboard is refined to the locked four-zone overview spec (refine-not-rebuild) and the Recovery analytics page is re-grammared to `hero metric pair → at-risk work-queue → trend`.
+- [x] **EXE-01**: The Dashboard is refined to the locked four-zone overview spec (refine-not-rebuild) and the Recovery analytics page is re-grammared to `hero metric pair → at-risk work-queue → trend`.
 - [ ] **EXE-02**: The Subscription detail page is converted to summary-then-drill (~25 always-visible zones → ~6 bands): GOV.UK summary-list header, ≤2 primary actions + an overflow action-menu, action forms hosted in a side-drawer with step-up handoff, the duplicate related-resources card deleted, and card-in-card nesting flattened.
 - [ ] **EXE-03**: The Subscriptions list is converted to the locked list spec: table-first with row→card mobile degradation, persistent filter chips + result count + clear-all, work-queue default, and four distinct states (populated / first-run-empty / filtered-empty / loading).
 
@@ -100,7 +100,7 @@ REQ-ID → phase mapping (each REQ-ID maps to exactly one phase; 23/23 mapped, n
 | RES-03 | Phase 193 | Complete |
 | RES-04 | Phase 193 | Complete |
 | STY-01 | Phase 193 | Complete |
-| EXE-01 | Phase 194 | Pending |
+| EXE-01 | Phase 194 | Complete |
 | EXE-02 | Phase 195 | Pending |
 | PGH-01 | Phase 196 | Pending |
 | EXE-03 | Phase 196 | Pending |
