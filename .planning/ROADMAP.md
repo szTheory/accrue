@@ -9,6 +9,7 @@
 - ✅ **v1.51 Admin UI: Depth Pass [SHIPPED 2026-06-04 — see milestones/v1.51-ROADMAP.md] (IA + Systematic Polish)** — Phases 174-179 (planning 2026-06-03; second, depth-oriented pass on the same `accrue_admin` surface; persona-driven IA reshape + token gap-closure + systematic rubric uplift + motion + seed expressiveness + screenshot-driven visual-QA; no new billing primitives)
 - ✅ **v1.52 Brand System** — Phases 180-186 (shipped 2026-06-14; brand audit + DNA lock, SVG logo tournament, design tokens, voice/copy, standalone HTML brand book; no billing primitives) — [archive](milestones/v1.52-ROADMAP.md)
 - ✅ **v1.53 Admin UI Design-System Hardening** — Phases 187-192 (shipped 2026-06-20; fractal design-system audit foundations→primitives→groups→pages→flows + interaction-defect remediation + component-level systematization + idempotent only-forward verification on `accrue_admin`; no new billing primitives, no breaking API/route changes, no Tailwind migration) — [archive](milestones/v1.53-ROADMAP.md)
+- 🔵 **v1.54 Admin UI Page-Level Streamlining & Storybook** — Phases 193-200 (opened 2026-06-24; page-level excellence on `accrue_admin` — lock 3 archetype pattern specs, nail one gold-standard exemplar per archetype then propagate, fix firsthand-observed page-composition usability defects via one canonical overlay primitive + a rendered state-matrix gate, adopt PhoenixStorybook dev/test-only; no new billing primitives, no breaking API/route changes, no Tailwind migration, core stays LiveView-runtime-free)
 
 ## Planning Doctrine
 
@@ -22,11 +23,125 @@ Accrue is in **stable core / demand-driven expansion** posture as of 2026-05-31.
 
 After v1.48, broad feature milestones remain closed by default unless reopened by concrete adopter failure, correctness/security/data-loss risk, repeated support issue, operational failure, or explicit strategy change.
 
-No broad feature milestone is currently open. (v1.53 Admin UI Design-System Hardening shipped 2026-06-20 as a quality / design-system / interaction-correctness investment in the already-shipped `accrue_admin` surface — it added no new billing primitives and did not reopen broad feature scope.) Reopen justification (recorded in `PROJECT.md`): explicit strategy change (design quality of the flagship adopter-facing surface elevated to a strategic priority — same class as v1.50/v1.51/v1.52) **plus firsthand-observed interaction defects** in the running demo (concrete failure evidence). With v1.53 shipped, the project returns to stable-core / demand-driven posture.
+v1.54 Admin UI Page-Level Streamlining & Storybook is the currently-open milestone — a quality / page-level-design / interaction-correctness investment in the already-shipped `accrue_admin` operator UI (continues v1.53's design-system hardening). It is **not** a broad feature milestone (no new billing primitives, no breaking API/route changes, no Tailwind migration; core `accrue` stays LiveView-runtime-free — PhoenixStorybook is `accrue_admin` dev/test-only). Reopen justification (recorded in `PROJECT.md`): explicit strategy change (page-level design quality of the flagship adopter-facing surface elevated to a strategic priority — same class as v1.50/v1.51/v1.52/v1.53) **plus firsthand-observed page-level usability defects** in the running demo (modal-behind-scrim, scroll traps, floating/mispositioned overlays, won't-dismiss, hover-on-non-interactive empty states, disabled-looks-enabled — concrete failure evidence).
 
 Stop rule: if proposed work is polish-only with a documented workaround and no release/adopter failure mode, record it as deferred with a revisit trigger and do not create a milestone for it.
 
 ## Phases
+
+### v1.54 Admin UI Page-Level Streamlining & Storybook (Phases 193-200) — ACTIVE (deps strictly linear 193→194→195→196→197→198→199→200)
+
+**Posture:** Quality / page-level-design / interaction-correctness investment in the already-shipped `accrue_admin` operator UI — **not** a broad feature milestone. Takes the surface from *interaction-correct building blocks* (v1.53) to *page-level excellence*: drive every page from its operator job-to-be-done, eliminate the "info dump" density, lock three archetype pattern specs (overview / list / detail), nail one gold-standard exemplar per archetype, then propagate the locked patterns across all ~20 pages. The structural backbone is two things: (a) one hardened canonical overlay primitive every modal/drawer/popover routes through; and (b) a rendered state-matrix gate — PhoenixStorybook (dev/test-only) + axe-core + a Playwright interaction battery, folded into v1.53's forward-only cell-baseline as new `surface_type:"page-flow"` cells under the unchanged `regressions.ndjson` zero-regression rule.
+
+**Guardrails (honored):** scope is the `accrue_admin` operator UI only — no `accrue_portal` work; no new billing primitives, domain features, or breaking API/route changes (component public APIs stay backward-compatible; internal moves ship with redirects); no Tailwind migration (custom `ax-*` CSS + tokens stay SSOT); core `accrue` stays LiveView-runtime-free (PhoenixStorybook is `accrue_admin` dev/test-only and must not reach adopter runtime); no pixel-diff / SaaS visual-regression (TOOL-02 stays deferred — the scored-cell forward-only gate is the mechanism); the in-app `/dev/components` kitchen stays as a second renderer backing the Phase-189/190 drift tests.
+
+**Dependency shape:** strictly **linear** — 193 → 194 → 195 → 196 → 197 → 198 → 199 → 200. Foundations + the three locked pattern specs (193) must precede exemplar work; the three exemplars (194 Dashboard / 195 Subscription detail / 196 Subscriptions list + PageHeader) lock the patterns that propagation (197 LIST / 198 DETAIL) applies; cross-cutting overlay correctness + fixture stress + microcopy (199) and idempotent verification + sign-off (200) come last. **Cross-phase primitive dependency:** the canonical overlay primitive is decided as a spike in 193 (portal-vs-`<dialog>`, `inert` floor, theming bridge) and the action-menu/side-drawer action-hosting groundwork is built in 195 to serve the detail exemplar; the **full** cross-cutting overlay sweep (scroll-lock, portal, `inert`, dismissal contract, drawer geometry, origin-aware popovers, transformed-ancestor audit) lands in 199 and is verified in 200.
+
+- [ ] **Phase 193: Research, re-baseline & pattern lock** — Lock the three archetype pattern specs (SPEC-OVERVIEW/LIST/DETAIL) as design contracts, extend the Phase-187 baseline with `surface_type:"page-flow"` cells, stand up PhoenixStorybook (dev/test-only) + run the four spikes, add the three new CSS source guards.
+- [ ] **Phase 194: Exemplar A — Dashboard** — Refine the four-zone overview (refine-not-rebuild) and re-grammar Recovery analytics to `hero metric pair → at-risk work-queue → trend`.
+- [ ] **Phase 195: Exemplar B — Subscription detail** — Convert the worst info-dump (~25 always-visible zones → ~6 bands) to summary-then-drill + ≤2 primary actions + an overflow action-menu hosting actions in a side-drawer; build the action-menu primitive + side-drawer action hosting.
+- [ ] **Phase 196: Exemplar C — Subscriptions list + PageHeader** — Convert the Subscriptions list to the table-first list spec (chips + count + clear-all, work-queue default, four distinct states) and extract + lock the shared `PageHeader` component slot contract.
+- [ ] **Phase 197: Propagate LIST** — Conform all 8 remaining list pages to SPEC-LIST, adopt `PageHeader`, with per-page JTBD microcopy + four-state coverage.
+- [ ] **Phase 198: Propagate DETAIL + analytics** — Conform all remaining detail/analytics pages to SPEC-DETAIL / the overview spec.
+- [ ] **Phase 199: Cross-cutting interaction/overlay correctness + fixture stress + microcopy** — Land the canonical overlay primitive (scroll-lock, portal, `inert`, dismissal, geometry, origin-aware popovers, transformed-ancestor audit), exercise multi-step + edge fixtures, and run the full brand-voice microcopy sweep.
+- [ ] **Phase 200: Idempotent verification & sign-off** — Re-score all cells (component + group + page-flow) viewport × theme × state with zero regressions; complete + verify Storybook story coverage and theming; axe-core + no-FOUC/persistence/system-emulation checks; adversarial multi-lens judge + maintainer sign-off.
+
+Coverage: 23/23 requirements mapped (each REQ-ID → exactly one phase). Per-phase counts: 193→5 · 194→1 · 195→2 · 196→2 · 197→1 · 198→1 · 199→7 · 200→4 = 23. Design source: `.planning/research/SUMMARY.md` (synthesizing FEATURES.md, ARCHITECTURE.md, PITFALLS.md, v1.54-storybook-and-forward-only-qa.md). Reuses v1.53's forward-only machinery (rubric `187-RUBRIC.md`, `baseline.cells.json`, `regressions.ndjson` zero-regression gate).
+
+## Phase Details
+
+### Phase 193: Research, re-baseline & pattern lock
+**Goal**: The three archetype pattern specs are locked as design contracts, the forward-only baseline can see composed pages, PhoenixStorybook is stood up dev/test-only with the four spike decisions recorded, and the three new source guards are merge-blocking.
+**Depends on**: Nothing (first phase of v1.54; builds on shipped v1.53 baseline)
+**Requirements**: RES-01, RES-02, RES-03, RES-04, STY-01
+**Success Criteria** (what must be TRUE):
+  1. A maintainer can open and read three locked archetype pattern specs (SPEC-OVERVIEW / SPEC-LIST / SPEC-DETAIL) and use each as the design contract every page is built or conformed against.
+  2. The forward-only zero-regression gate now scores `surface_type:"page-flow"` cells over the ~20 admin routes (additive sibling `baseline.page-flow.cells.json`), reusing the Phase-191 page-flow Playwright driver and the 12-dimension rubric.
+  3. A host dev compile of `examples/accrue_host` succeeds with `phoenix_storybook` absent and exposes no `/dev/storybook` route, proving the `Code.ensure_loaded?`-guarded sibling-scope mount has zero adopter-runtime leak.
+  4. Each of the four Phase-193 spikes (overlay portal-vs-`<dialog>` with a Playwright hit-test; Storybook `data-theme` dark-mode shim; `inert` vs `aria-hidden` browser-floor; Storybook asset-serving without a Tailwind rebuild) is resolved with a recorded decision.
+  5. Three new CSS source guards (spacing-literal ban, `:focus-visible` enforcement, truncation-without-`min-width:0`) ship in `verify_package_docs.sh`/CI and fail on a planted violation.
+**Plans**: TBD
+**UI hint**: yes
+
+### Phase 194: Exemplar A — Dashboard
+**Goal**: The Dashboard is the locked gold-standard for the overview archetype, and Recovery analytics reads as a work-queue, not a chart wall.
+**Depends on**: Phase 193 (SPEC-OVERVIEW locked; page-flow baseline in place)
+**Requirements**: EXE-01
+**Success Criteria** (what must be TRUE):
+  1. An operator landing on the Dashboard sees the locked four-zone overview grammar — attention-rail (exceptions-only, prominent healthy empty-state) → verb task-launchers (visible ⌘K) → demoted clickable KPIs → recent activity — refined, not rebuilt.
+  2. The Recovery analytics page is re-grammared to `hero metric pair → at-risk work-queue table → supporting trend` and surfaces at-risk work first rather than a wall of charts.
+  3. Both pages score ≥ their page-flow baseline cells across viewport × theme × state with zero regressions.
+**Plans**: TBD
+**UI hint**: yes
+
+### Phase 195: Exemplar B — Subscription detail
+**Goal**: The worst info-dump page becomes the gold-standard for the object-detail archetype, and the reusable action-menu + side-drawer action-hosting primitives exist for propagation.
+**Depends on**: Phase 194 (overview exemplar shipped; SPEC-DETAIL locked in 193)
+**Requirements**: EXE-02, IXN-01
+**Success Criteria** (what must be TRUE):
+  1. The Subscription detail page is converted from ~25 always-visible flat zones to ~6 bands: a GOV.UK summary-list header with row-level "Change", ≤2 primary actions plus an overflow action-menu, collapsible drill sections (most-relevant open), one related-resources strip, and lazy activity/raw-JSON.
+  2. Operator actions open in a side-drawer (destructive actions hand off to a step-up modal) hosted by the canonical overlay primitive — never reintroducing modal-behind-scrim — and the action-menu + side-drawer primitives land in Storybook.
+  3. The duplicate related-resources card is deleted and card-in-card double-border nesting is flattened.
+  4. The overlay primitive backing the side-drawer demonstrably scroll-locks, portals to a body-level root so it is never painted behind its scrim, marks the background `inert`, and dismisses cleanly on backdrop-click + Escape (the IXN-01 contract, instantiated here for the detail exemplar and swept across all pages in Phase 199).
+**Plans**: TBD
+**UI hint**: yes
+
+### Phase 196: Exemplar C — Subscriptions list + PageHeader
+**Goal**: The Subscriptions list is the locked gold-standard for the list archetype, and the shared `PageHeader` slot contract is extracted and locked before any propagation.
+**Depends on**: Phase 195 (detail exemplar shipped; SPEC-LIST locked in 193)
+**Requirements**: EXE-03, PGH-01
+**Success Criteria** (what must be TRUE):
+  1. The Subscriptions list is table-first with row→card mobile degradation, persistent filter chips + result count + clear-all, a work-queue default ("All" one chip away), and four visually-distinct states (populated / first-run-empty / filtered-empty / loading-skeleton).
+  2. A shared `AccrueAdmin.Components.PageHeader` (breadcrumb + title + stat-strip + actions + filter-toolbar slots) is extracted with its slot contract locked, proven on the Subscriptions list, and rendering exactly one `<h1>` per page.
+  3. Identity·state·money·time columns are prioritized with plumbing IDs de-emphasized, and truncation uses `min-width:0` discipline (the new guard passes).
+**Plans**: TBD
+**UI hint**: yes
+
+### Phase 197: Propagate LIST
+**Goal**: Every remaining list page is internally consistent with the locked list spec and adopts the shared `PageHeader`.
+**Depends on**: Phase 196 (SPEC-LIST exemplar + `PageHeader` slot contract locked)
+**Requirements**: PRP-01
+**Success Criteria** (what must be TRUE):
+  1. All 8 remaining list pages (customers · invoices · payments · coupons · promotion-codes · webhooks · events · connect) conform to SPEC-LIST — table-first, chips + count + clear-all, work-queue default, row→card degradation.
+  2. Every one of those pages adopts `PageHeader` and renders exactly one `<h1>`.
+  3. Each page carries per-page JTBD microcopy and covers all four list states (populated / first-run-empty / filtered-empty / loading).
+**Plans**: TBD
+**UI hint**: yes
+
+### Phase 198: Propagate DETAIL + analytics
+**Goal**: Every remaining detail and analytics page is internally consistent with the locked detail/overview specs.
+**Depends on**: Phase 197 (LIST propagation complete; SPEC-DETAIL exemplar locked in 195)
+**Requirements**: PRP-02
+**Success Criteria** (what must be TRUE):
+  1. All remaining detail pages (customer · invoice · charge · coupon · promotion-code · connect-account · webhook · event) conform to SPEC-DETAIL — summary-then-drill, ≤2 primary + overflow menu, side-drawer actions, one related strip, lazy timeline/JSON.
+  2. The Recovery and Campaign analytics pages conform to the locked overview spec (work-queue first, no chart wall).
+  3. Tabs appear only for peer record-sets (e.g. Customer-360 Subscriptions/Invoices/Payments), never hiding primary state or critical actions behind a horizontal tab.
+**Plans**: TBD
+**UI hint**: yes
+
+### Phase 199: Cross-cutting interaction/overlay correctness + fixture stress + microcopy
+**Goal**: One canonical overlay primitive backs every modal/drawer/popover across all pages with structurally-correct behavior, edge fixtures surface no squish/clipping/overflow, and all page-level copy speaks one brand voice.
+**Depends on**: Phase 198 (all pages conformed; overlay primitive groundwork from 195)
+**Requirements**: IXN-01, IXN-02, IXN-03, IXN-04, FIX-01, FIX-02, CPY-01
+**Success Criteria** (what must be TRUE):
+  1. Every modal/drawer routes through the single canonical overlay primitive — ref-counted iOS-safe body scroll-lock (no scrollbar-gutter jump), body-level portal so an overlay is never painted behind its scrim and is always hit-testable, `inert`/`aria-hidden` background, and a unified backdrop+Escape dismissal that settles cleanly on rapid double-toggle (IXN-01).
+  2. Overlay motion is geometry-correct — drawer edge-docks on desktop (translateX from the right), is a bottom-sheet on mobile (translateY), popovers are origin-aware, focus moves into/traps/restores with an instant focus ring, the ≤240ms band holds, and reduced-motion is preserved (extending `reduced-motion.spec.js`) (IXN-02); non-interactive empty-state heroes carry no hover/cursor, disabled looks disabled, absent affordances are hidden, floats stay in viewport bounds, and theme switching has no flash-of-wrong-theme with correct persistence + system emulation (IXN-03); and a transformed/filtered/`contain` ancestor audit confirms no LiveView page wrapper re-roots a `position:fixed` shell (IXN-04).
+  3. Deterministic multi-step workflow fixtures (list → detail → nested detail → drill-down → back) exercise focus and scroll integrity across every transition (FIX-01), and long-content/boundary fixtures (zero-decimal currency, past-due dunning, very long names, overflow) surface no squish/clipping/overflow on real seeded data and remain idempotent (FIX-02).
+  4. A full brand-voice microcopy sweep covers all page-level copy with distinct first-run-empty vs filtered-empty messages and action/"Change" labels carrying visually-hidden context that names the object and the next useful action (CPY-01).
+**Plans**: TBD
+**UI hint**: yes
+
+### Phase 200: Idempotent verification & sign-off
+**Goal**: The whole surface is proven forward-only ≥ baseline with zero regressions, Storybook story coverage and theming are complete and verified, accessibility/no-FOUC checks are green, and the milestone has explicit ACCEPT sign-off.
+**Depends on**: Phase 199 (all correctness + copy work landed)
+**Requirements**: VER-01, VER-02, VER-03, STY-02, STY-03
+**Success Criteria** (what must be TRUE):
+  1. The merged `regressions.ndjson` shows zero regressions versus the union baseline (component + group + page-flow cells) across viewport × theme × state — every inherited cell scores ≥ its baseline (VER-01).
+  2. Every `ComponentRegistry` family and all 8 group contracts have a generated (registry-driven) story with the registry staying SSOT and the `/dev/components` kitchen + Phase-189/190 drift tests green (STY-02), and stories render correctly in both color modes against the shipped committed `ax-*` bundle with the `html.accrue-admin[data-theme]` scoping bridged into Storybook's sandbox (STY-03). (Storybook is scaffolded in Phase 193; story completeness + theming are completed/verified here.)
+  3. axe-core color-contrast + name/role passes over rendered stories and page-flow routes; no-FOUC/persistence/system-emulation checks are green; and the reduced-motion + group-contract + a11y guardrail suites pass in CI (VER-02).
+  4. An adversarial multi-lens judge (correctness · a11y · brand · interaction) plus a maintainer photographic/interaction checkpoint sign off ACCEPT at the final boundary (VER-03).
+**Plans**: TBD
+**UI hint**: yes
 
 <details>
 <summary>✅ v1.53 Admin UI Design-System Hardening (Phases 187-192) — SHIPPED 2026-06-20 (deps strictly linear 187→188→189→190→191→192)</summary>
@@ -141,6 +256,14 @@ Full details: [v1.48 roadmap archive](milestones/v1.48-ROADMAP.md)
 | 190. Navigation, data-display & meta-component cohesion | v1.53 | 6/6 | Complete | 2026-06-18 |
 | 191. Page & flow interaction pass + fixture stress + microcopy | v1.53 | 7/7 | Complete | 2026-06-19 |
 | 192. Idempotent verification & sign-off | v1.53 | 6/6 | Complete   | 2026-06-20 |
+| 193. Research, re-baseline & pattern lock | v1.54 | 0/? | Not started | - |
+| 194. Exemplar A — Dashboard | v1.54 | 0/? | Not started | - |
+| 195. Exemplar B — Subscription detail | v1.54 | 0/? | Not started | - |
+| 196. Exemplar C — Subscriptions list + PageHeader | v1.54 | 0/? | Not started | - |
+| 197. Propagate LIST | v1.54 | 0/? | Not started | - |
+| 198. Propagate DETAIL + analytics | v1.54 | 0/? | Not started | - |
+| 199. Cross-cutting interaction/overlay correctness + fixture stress + microcopy | v1.54 | 0/? | Not started | - |
+| 200. Idempotent verification & sign-off | v1.54 | 0/? | Not started | - |
 
 ## Historical Backlog Anchors (not active scope)
 
@@ -154,12 +277,10 @@ These v1.17 FRG anchors are retained for traceability only as historical, non-ac
 
 | Item | Status | Reason | Future owner/category | Revisit trigger |
 |------|--------|--------|-----------------------|-----------------|
-| TOOL-01 (PhoenixStorybook) | deferred (v1.53) | v1.53 extends the in-app `/dev/components` kitchen to avoid a shipped-lib dependency. | Component-lab tooling | concrete adopter/contributor failure where the in-app kitchen is insufficient, or explicit strategy change |
-| TOOL-02 (pixel-diff visual-regression) | deferred (v1.53) | Percy/Applitools-style pixel-diff tooling deferred in favor of the screenshot + adversarial-judge loop. | Visual-regression tooling | flaky/insufficient screenshot+judge loop, or explicit strategy change |
-| TOOL-03 (publish tokens.css distributable) | deferred (v1.53) | Standalone npm/CDN token distributable not needed for the admin hardening pass. | Brand/token distribution | external doc/marketing-site need for distributable tokens |
+| TOOL-01 (PhoenixStorybook) | adopted (v1.54) | v1.53 deferred it; v1.54 reverses the deferral — PhoenixStorybook is adopted `only: [:dev, :test]` (STY-01..03) so adopters never carry it. | Component-lab tooling | n/a — adopted |
+| TOOL-02 (pixel-diff visual-regression) | deferred (v1.53/v1.54) | Percy/Applitools-style pixel-diff tooling deferred in favor of the scored-cell forward-only gate over real composed routes (it would flag every intentional v1.54 improvement as a regression). | Visual-regression tooling | flaky/insufficient scored-cell + judge loop, or explicit strategy change |
+| TOOL-03 (publish tokens.css distributable) | deferred (v1.53) | Standalone npm/CDN token distributable not needed for the admin hardening/streamlining passes. | Brand/token distribution | external doc/marketing-site need for distributable tokens |
 | SEED-001 | resolved historical context | Linked-release purpose was superseded by later linked publish work and Phase 159 release-readiness proof. | Release readiness / archive traceability | operational failure in linked release proof or explicit strategy change in release process |
 | SEED-002 | dormant future roadmap | Ecosystem integrations are useful blueprints but are not v1.48 closeout blockers and do not create default milestone scope. | Future roadmap / ecosystem integrations | concrete adopter failure requiring one listed integration, repeated support issue, or explicit strategy change |
 | ENT-EXT-01 | deferred | Rich metered, tiered, and range entitlement math is beyond current seat-count support and lacks a sourced adopter contract. | Entitlements extension | concrete adopter failure or explicit adopter contract requiring richer entitlement math |
 | FIN-03 | standing non-goal | App-owned finance exports remain outside Accrue's declared billing-library scope. | Strategy non-goal / finance exports | explicit strategy change or correctness/security/data-loss risk that cannot be solved by host-owned exports |
-</content>
-</invoke>

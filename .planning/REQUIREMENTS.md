@@ -91,7 +91,37 @@ v1.54-storybook-and-forward-only-qa). Phases 193–200.
 
 ### Traceability (v1.54)
 
-REQ-ID → phase mapping is filled by `.planning/ROADMAP.md` when the roadmap is created.
+REQ-ID → phase mapping (each REQ-ID maps to exactly one phase; 23/23 mapped, no orphans, no duplicates):
+
+| Requirement | Phase | Status |
+|-------------|-------|--------|
+| RES-01 | Phase 193 | Pending |
+| RES-02 | Phase 193 | Pending |
+| RES-03 | Phase 193 | Pending |
+| RES-04 | Phase 193 | Pending |
+| STY-01 | Phase 193 | Pending |
+| EXE-01 | Phase 194 | Pending |
+| EXE-02 | Phase 195 | Pending |
+| PGH-01 | Phase 196 | Pending |
+| EXE-03 | Phase 196 | Pending |
+| PRP-01 | Phase 197 | Pending |
+| PRP-02 | Phase 198 | Pending |
+| IXN-01 | Phase 199 | Pending |
+| IXN-02 | Phase 199 | Pending |
+| IXN-03 | Phase 199 | Pending |
+| IXN-04 | Phase 199 | Pending |
+| FIX-01 | Phase 199 | Pending |
+| FIX-02 | Phase 199 | Pending |
+| CPY-01 | Phase 199 | Pending |
+| VER-01 | Phase 200 | Pending |
+| VER-02 | Phase 200 | Pending |
+| VER-03 | Phase 200 | Pending |
+| STY-02 | Phase 200 | Pending |
+| STY-03 | Phase 200 | Pending |
+
+**Notes on mapping decisions:**
+- **IXN-01 (canonical overlay primitive)** is *instantiated* for the Subscription-detail side-drawer in Phase 195 (its action-menu/side-drawer action-hosting groundwork is a cross-phase dependency) but is **owned/assigned to Phase 199** — the full cross-cutting overlay sweep across all pages. Single-phase assignment is Phase 199 to avoid a duplicate REQ; the Phase 195 dependency is recorded in the ROADMAP.md phase detail and STATE.md.
+- **STY-02 / STY-03 (Storybook story-completeness + theming)** are scaffolded in Phase 193 (STY-01 stands up the dependency, sibling-scope mount, registry generator, and asset serving). Story *completeness* (all families + 8 group contracts) and *theming verification* (both color modes against the shipped `ax-*` bundle) are **delivered and verified in Phase 200** alongside the final forward-only re-score — so STY-02/STY-03 map to Phase 200, with the Phase 193 scaffold as the verification touchpoint.
 
 ## Out of Scope
 
