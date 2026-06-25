@@ -43,7 +43,7 @@ v1.54-storybook-and-forward-only-qa). Phases 193–200.
 
 - [x] **RES-01**: Maintainer can read three locked archetype pattern specs (SPEC-OVERVIEW / SPEC-LIST / SPEC-DETAIL) that serve as the design contracts every page is built or conformed against.
 - [x] **RES-02**: The Phase-187 scored cell baseline is extended with `surface_type:"page-flow"` cells over the ~20 admin routes (additive sibling `baseline.page-flow.cells.json`), wired into the forward-only zero-regression gate.
-- [ ] **RES-03**: The four Phase-193 spikes are resolved with recorded decisions: overlay portal-vs-native-`<dialog>` (+ Playwright hit-test), `data-theme` dark-mode shim for Storybook color-mode, `inert` vs `aria-hidden` browser-floor, and Storybook asset-serving without a Tailwind rebuild.
+- [x] **RES-03**: The four Phase-193 spikes are resolved with recorded decisions: overlay portal-vs-native-`<dialog>` (+ Playwright hit-test), `data-theme` dark-mode shim for Storybook color-mode, `inert` vs `aria-hidden` browser-floor, and Storybook asset-serving without a Tailwind rebuild.
 - [ ] **RES-04**: Three new CSS source guards ship in `verify_package_docs.sh`/CI — spacing-literal ban (no raw px on padding/margin/gap outside allowlist), `:focus-visible` enforcement, and truncation-without-`min-width:0` — mirroring the proven FND-01/MOT-01 guard shape.
 
 ### STY — PhoenixStorybook (dev/test-only)
@@ -97,7 +97,7 @@ REQ-ID → phase mapping (each REQ-ID maps to exactly one phase; 23/23 mapped, n
 |-------------|-------|--------|
 | RES-01 | Phase 193 | Complete |
 | RES-02 | Phase 193 | Complete |
-| RES-03 | Phase 193 | Pending |
+| RES-03 | Phase 193 | Complete |
 | RES-04 | Phase 193 | Pending |
 | STY-01 | Phase 193 | Complete |
 | EXE-01 | Phase 194 | Pending |
