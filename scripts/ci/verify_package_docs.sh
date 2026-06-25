@@ -585,6 +585,17 @@ truncation_hit=$(
 )
 [[ -z "$truncation_hit" ]] || fail "$app_css has truncation without min-width:0 in same block (RES-04 truncation guard)"
 
+# Guard D — Empty-rail non-interactivity (Phase 194, SPEC-OVERVIEW)
+empty_rail_pointer_hit=$(
+  perl -0ne '
+    while (/\.ax-attention-rail--empty[^{]*\{([^}]*)\}/gs) {
+      my $block = $1;
+      if ($block =~ /cursor\s*:\s*pointer/) { print "found cursor:pointer on empty rail\n"; last; }
+    }
+  ' "$app_css" || true
+)
+[[ -z "$empty_rail_pointer_hit" ]] || fail "$app_css must not put cursor:pointer on .ax-attention-rail--empty (SPEC-OVERVIEW non-interactive empty-rail guard)"
+
 # Archetype spec guide existence (Phase 193, RES-01 / D-07)
 require_fixed "$ROOT_DIR/accrue_admin/mix.exs" '"guides/spec-overview.md"'
 require_fixed "$ROOT_DIR/accrue_admin/mix.exs" '"guides/spec-list.md"'
