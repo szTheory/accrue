@@ -12,5 +12,11 @@ defmodule AccrueAdmin.Storybook.Components.Button do
 
   def function, do: &AccrueAdmin.Components.Button.button/1
 
-  def variations, do: AccrueAdmin.Storybook.RegistryStory.variations_for("button")
+  def variations do
+    if Code.ensure_loaded?(AccrueAdmin.Storybook.RegistryStory) do
+      AccrueAdmin.Storybook.RegistryStory.variations_for("button")
+    else
+      []
+    end
+  end
 end
