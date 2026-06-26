@@ -173,7 +173,7 @@ Plans:
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
-- [ ] 196-05-PLAN.md — Phase 196 Playwright LIST contract and final verification gates
+- [x] 196-05-PLAN.md — Phase 196 Playwright LIST contract and final verification gates
 
 **UI hint**: yes
 
@@ -351,7 +351,7 @@ Full details: [v1.48 roadmap archive](milestones/v1.48-ROADMAP.md)
 | 193. Research, re-baseline & pattern lock | v1.54 | 5/5 | Complete    | 2026-06-25 |
 | 194. Exemplar A — Dashboard | v1.54 | 4/4 | Complete    | 2026-06-26 |
 | 195. Exemplar B — Subscription detail | v1.54 | 8/8 | Complete    | 2026-06-26 |
-| 196. Exemplar C — Subscriptions list + PageHeader | v1.54 | 4/5 | In Progress|  |
+| 196. Exemplar C — Subscriptions list + PageHeader | v1.54 | 5/5 | Complete   | 2026-06-26 |
 | 197. Propagate LIST | v1.54 | 0/? | Not started | - |
 | 198. Propagate DETAIL + analytics | v1.54 | 0/? | Not started | - |
 | 199. Cross-cutting interaction/overlay correctness + fixture stress + microcopy | v1.54 | 0/? | Not started | - |

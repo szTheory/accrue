@@ -4,16 +4,16 @@ milestone: v1.54
 milestone_name: Admin UI Page-Level Streamlining & Storybook
 current_phase: 196
 current_phase_name: exemplar-c-subscriptions-list-pageheader
-status: executing
-stopped_at: Completed 196-04-PLAN.md
-last_updated: "2026-06-26T21:35:12.365Z"
+status: verifying
+stopped_at: Completed 196-05-PLAN.md
+last_updated: "2026-06-26T21:49:36.827Z"
 last_activity: 2026-06-26
 progress:
   total_phases: 8
-  completed_phases: 3
+  completed_phases: 4
   total_plans: 22
-  completed_plans: 21
-  percent: 38
+  completed_plans: 22
+  percent: 50
 ---
 
 # Project State
@@ -28,9 +28,9 @@ See: `.planning/PROJECT.md` (updated 2026-06-24 — v1.54 Admin UI Page-Level St
 
 ## Current Position
 
-Phase: 196 (exemplar-c-subscriptions-list-pageheader) — EXECUTING
+Phase: 196 (exemplar-c-subscriptions-list-pageheader) — VERIFYING
 Plan: 5 of 5
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-06-26
 
 ## Post-v1.48 Pause Rule
@@ -48,7 +48,7 @@ v1.54 Admin UI Page-Level Streamlining & Storybook is open as a quality / page-l
 | 193 | Research, re-baseline & pattern lock | RES-01, RES-02, RES-03, RES-04, STY-01 | Complete (2026-06-25) |
 | 194 | Exemplar A — Dashboard | EXE-01 | Complete (2026-06-26) |
 | 195 | Exemplar B — Subscription detail | EXE-02, IXN-01 | Complete (2026-06-26) |
-| 196 | Exemplar C — Subscriptions list + PageHeader | EXE-03, PGH-01 | Not started |
+| 196 | Exemplar C — Subscriptions list + PageHeader | EXE-03, PGH-01 | Complete (2026-06-26) |
 | 197 | Propagate LIST | PRP-01 | Not started |
 | 198 | Propagate DETAIL + analytics | PRP-02 | Not started |
 | 199 | Cross-cutting interaction/overlay correctness + fixture stress + microcopy | IXN-01, IXN-02, IXN-03, IXN-04, FIX-01, FIX-02, CPY-01 | Not started |
@@ -208,6 +208,7 @@ Coverage: 22/22 v1.51 requirements mapped (each REQ-ID → exactly one phase). D
 | Phase 196 P02 | 4min | 2 tasks | 2 files |
 | Phase 196 P03 | 9min | 3 tasks | 4 files |
 | Phase 196 P04 | 12m | 3 tasks | 4 files |
+| Phase 196 P05 | 9m | 2 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -357,6 +358,8 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - [Phase 196]: 196-03: DataTable.filter_toolbar remains parent-targeted for data_table_filter so PageHeader can host filters without owning state.
 - [Phase 196]: 196-03: FilterChipBar renders caller-supplied result counts and clear-all hrefs without mutating URLs.
 - [Phase 196]: Phase 196 Plan 04 keeps PageHeader slot-only; SubscriptionsLive and DataTableNav own list state and filter mutation. — Preserves D-02 and D-10 by letting PageHeader host slots without owning list/filter state.
+- [Phase 196]: Phase 196 Playwright contract remains scoped to Subscriptions LIST; Phase 197 propagation, overlay flows, portal UI, and Storybook-wide sweeps stay out of scope. — Preserves the 196-05 ownership boundary while proving EXE-03/PGH-01 on the exemplar.
+- [Phase 196]: DataTable loading status supports page-specific copy through loading_label while preserving a generic default. — Browser validation required exact Subscriptions loading copy without breaking existing DataTable callers.
 
 ### Pending Todos
 
@@ -366,7 +369,8 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 
 ### Blockers/Concerns
 
-- None. (Resolved/obsolete: the 190-05 `admin-baseline.spec.js` hang note was cleared 2026-06-21 — Phase 190 and the full v1.53 milestone subsequently shipped & verified, so the bounded-retry concern no longer applies.)
+- (Resolved/obsolete: the 190-05 `admin-baseline.spec.js` hang note was cleared 2026-06-21 — Phase 190 and the full v1.53 milestone subsequently shipped & verified, so the bounded-retry concern no longer applies.)
+- Phase 196 final full-suite gate: cd accrue_admin && mix test --warnings-as-errors fails outside Phase 196 in dashboard_live_test.exs:91 (missing $42.50) and webhooks_live_test.exs:106 (audit count expected 1, observed 2). Focused Phase 196 tests, package docs, assets, and e2e:phase196 pass.
 
 ### Quick Tasks Completed
 
@@ -446,8 +450,8 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 
 ## Session Continuity
 
-Last session: 2026-06-26T21:35:12.357Z
-Stopped at: Completed 196-04-PLAN.md
+Last session: 2026-06-26T21:49:36.819Z
+Stopped at: Completed 196-05-PLAN.md
 Resume file: None
 
 ## Operator Next Steps
