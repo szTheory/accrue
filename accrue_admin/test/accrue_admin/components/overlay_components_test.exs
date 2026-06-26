@@ -191,6 +191,7 @@ defmodule AccrueAdmin.OverlayComponentsTest do
       assert html =~ ~s(<span class="ax-visually-hidden"> for subscription sub_123</span>)
       assert html =~ ~s(href="#dunning-recovery")
       assert html =~ ~s(<span>View</span>)
+
       assert html =~
                ~s(<span class="ax-visually-hidden"> dunning activity for subscription sub_123</span>)
     end
@@ -215,7 +216,8 @@ defmodule AccrueAdmin.OverlayComponentsTest do
     test "defines canonical shell, backdrop, and panel local ordering" do
       app_css = File.read!(app_css_path())
 
-      assert app_css =~ ~r/\.ax-overlay-shell\s*\{[^}]*position: fixed;[^}]*inset: 0;[^}]*isolation: isolate;/s
+      assert app_css =~
+               ~r/\.ax-overlay-shell\s*\{[^}]*position: fixed;[^}]*inset: 0;[^}]*isolation: isolate;/s
 
       assert app_css =~
                ~r/\.ax-overlay-backdrop,\s*\.ax-detail-drawer-backdrop,\s*\.ax-step-up-modal-backdrop\s*\{[^}]*z-index: 0;/s

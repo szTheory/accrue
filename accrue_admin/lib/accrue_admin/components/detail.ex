@@ -56,6 +56,53 @@ defmodule AccrueAdmin.Components.Detail do
   end
 
   @doc """
+  GOV.UK-style summary list for object detail headers. `rows` is a list of maps
+  with `:label`, `:value`, and optional action keys:
+
+    * `:action_label` - visible action text, usually "Change" or "View"
+    * `:action_context` - visually hidden context appended after the label
+    * `:action_event`, `:action_value`, `:action_target` - LiveView button action
+    * `:action_href` - link action
+
+  Use this for row-level actions in the page summary. Keep `detail_field_list/1`
+  for read-only drill-section field groups.
+  """
+  attr(:rows, :list, required: true)
+  attr(:class, :any, default: nil)
+
+  def summary_list(assigns) do
+    ~H"""
+    <dl class={["ax-summary-list", @class]} data-ax-summary-list>
+      <div :for={row <- @rows} class="ax-summary-list-row">
+        <dt class="ax-summary-list-key"><%= row_value(row, :label) %></dt>
+        <dd class="ax-summary-list-value"><%= row_value(row, :value) %></dd>
+        <dd :if={row_action?(row)} class="ax-summary-list-actions">
+          <a
+            :if={row_action_href(row)}
+            href={row_action_href(row)}
+            class="ax-summary-list-action"
+          >
+            <span><%= row_action_label(row) %></span>
+            <span :if={row_action_context(row)} class="ax-visually-hidden"><%= " " <> row_action_context(row) %></span>
+          </a>
+          <button
+            :if={!row_action_href(row) and row_action_event(row)}
+            type="button"
+            class="ax-summary-list-action"
+            phx-click={row_action_event(row)}
+            phx-target={row_action_target(row)}
+            phx-value-action_type={row_action_value(row)}
+          >
+            <span><%= row_action_label(row) %></span>
+            <span :if={row_action_context(row)} class="ax-visually-hidden"><%= " " <> row_action_context(row) %></span>
+          </button>
+        </dd>
+      </div>
+    </dl>
+    """
+  end
+
+  @doc """
   Summary header for a detail page: an eyebrow + identifier title, an optional
   status pill, and a primary-facts row, with an `:actions` slot on the right.
   """
@@ -80,4 +127,17 @@ defmodule AccrueAdmin.Components.Detail do
     </header>
     """
   end
+
+  defp row_value(row, key), do: Map.get(row, key) || Map.get(row, to_string(key))
+
+  defp row_action?(row) do
+    row_action_label(row) && (row_action_href(row) || row_action_event(row))
+  end
+
+  defp row_action_label(row), do: row_value(row, :action_label)
+  defp row_action_context(row), do: row_value(row, :action_context)
+  defp row_action_event(row), do: row_value(row, :action_event)
+  defp row_action_href(row), do: row_value(row, :action_href)
+  defp row_action_target(row), do: row_value(row, :action_target)
+  defp row_action_value(row), do: row_value(row, :action_value)
 end
