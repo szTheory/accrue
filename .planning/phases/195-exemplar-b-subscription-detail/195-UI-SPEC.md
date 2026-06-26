@@ -48,7 +48,7 @@ Reuse the existing `--ax-space-*` ladder. Do not introduce raw `px` values for `
 | `--ax-space-3xl` | 64px | Page-level breathing room only; do not use inside dense drawer forms |
 
 Exceptions:
-- `--ax-space-2xs` = 2px is pre-existing and allowed only for dense field-label/value micro-rhythm, chips, and table-like rows.
+- No spacing exceptions are allowed for padding, margin, or gap in this phase. Dense field-label/value rhythm, chips, and table-like rows must use the standard 4px floor via `--ax-space-xs`.
 - Interactive touch targets must remain at least 44px on narrow viewports where controls are finger-tappable.
 - Drawer geometry may use structural dimensions such as `width: min(34rem, 92vw)` and `translateX(100%)` / `translateY(100%)`; those are not spacing tokens.
 
