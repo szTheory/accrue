@@ -1,7 +1,7 @@
 defmodule AccrueAdmin.SubscriptionLiveTest do
   use AccrueAdmin.LiveCase, async: false
 
-  alias Accrue.Billing.{Customer, Subscription}
+  alias Accrue.Billing.{Customer, Subscription, SubscriptionItem}
   alias Accrue.Events
   alias Accrue.Events.Event
   alias Accrue.Repo
@@ -239,6 +239,45 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
     assert Accrue.Billing.Subscription.canceled?(canceled)
   end
 
+  test "drawer-hosted item removal requires step-up before deleting the item", %{
+    conn: conn,
+    subscription: subscription
+  } do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    item = List.first(subscription.subscription_items)
+    Application.put_env(:accrue_admin, :expected_step_up_subject_id, subscription.id)
+
+    {:ok, view, _html} = live(conn, "/billing/subscriptions/#{subscription.id}")
+
+    render_click(element(view, "button[role='menuitem']", "Remove item"))
+
+    html =
+      render_submit(
+        element(
+          view,
+          "[data-ax-overlay-panel][data-presentation='drawer'] form[phx-submit='prepare_action']"
+        ),
+        %{
+          "action_type" => "remove_item",
+          "item_id" => item.id,
+          "proration" => "create_prorations"
+        }
+      )
+
+    assert html =~ "Confirm action"
+
+    html =
+      render_click(
+        element(
+          view,
+          "[data-ax-overlay-panel][data-presentation='drawer'] [data-role='confirm-action']"
+        )
+      )
+
+    assert html =~ "Step-up required"
+    assert TestRepo.get!(SubscriptionItem, item.id)
+  end
+
   test "subscription loader denies rows outside the active organization" do
     allowed_customer = insert_customer(%{owner_type: "Organization", owner_id: "org_allowed"})
     denied_customer = insert_customer(%{owner_type: "Organization", owner_id: "org_denied"})
@@ -367,6 +406,12 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
       "subscription_action_swap_plan" => "Change plan",
       "subscription_action_cancel_at_period_end" => "Cancel renewal",
       "subscription_action_cancel_now" => "Cancel immediately",
+      "subscription_action_resume" => "Resume",
+      "subscription_action_update_quantity" => "Update quantity",
+      "subscription_action_add_item" => "Add item",
+      "subscription_action_update_item_quantity" => "Update item quantity",
+      "subscription_action_remove_item" => "Remove item",
+      "subscription_action_pause_collection" => "Pause collection",
       "subscription_action_create_comp_replacement" => "Comp this subscription"
     }
 
@@ -387,11 +432,27 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
              "subscription_action_swap_plan",
              "subscription_action_cancel_at_period_end",
              "subscription_action_cancel_now",
+             "subscription_action_resume",
+             "subscription_action_update_quantity",
+             "subscription_action_add_item",
+             "subscription_action_update_item_quantity",
+             "subscription_action_remove_item",
+             "subscription_action_pause_collection",
+             "subscription_proration_none",
+             "subscription_proration_always_invoice",
              "subscription_action_create_comp_replacement"
            ]) == %{
              "subscription_action_swap_plan" => "Change plan",
              "subscription_action_cancel_at_period_end" => "Cancel renewal",
              "subscription_action_cancel_now" => "Cancel immediately",
+             "subscription_action_resume" => "Resume",
+             "subscription_action_update_quantity" => "Update quantity",
+             "subscription_action_add_item" => "Add item",
+             "subscription_action_update_item_quantity" => "Update item quantity",
+             "subscription_action_remove_item" => "Remove item",
+             "subscription_action_pause_collection" => "Pause collection",
+             "subscription_proration_none" => "No proration",
+             "subscription_proration_always_invoice" => "Always invoice",
              "subscription_action_create_comp_replacement" => "Comp this subscription"
            }
   end
@@ -458,6 +519,8 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
     refute html =~ "Add item"
     refute html =~ "Update item quantity"
     refute html =~ "Remove item"
+    refute html =~ ~s(phx-value-action_type="swap_plan")
+    refute html =~ ~s(phx-value-action_type="update_quantity")
     refute has_element?(view, "[data-role='swap-plan-unavailable']")
     refute has_element?(view, "[data-role='quantity-item-unsupported']")
 

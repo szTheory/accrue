@@ -30,7 +30,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
   alias AccrueAdmin.StepUp
   alias AccrueAdmin.TaxOwnershipRow
 
-  @destructive_actions ~w(cancel_now comp_subscription)
+  @destructive_actions ~w(cancel_now comp_subscription remove_item)
 
   @impl true
   def mount(%{"id" => subscription_id}, session, socket) do
@@ -619,12 +619,14 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
       },
       %{
         label: "Plan / price",
-        value: current_price_id(subscription) || "-",
+        value: current_price_id(subscription) || "-"
+      }
+      |> maybe_put_summary_action(swap_plan_available?(subscription), %{
         action_label: "Change",
         action_context: "plan for subscription #{subscription_label}",
         action_event: "open_action_drawer",
         action_value: "swap_plan"
-      },
+      }),
       %{label: "Current period", value: current_period_summary(subscription)},
       renews_or_ends_row(subscription),
       %{label: "Amount (MRR)", value: money_or_dash(nil)}
@@ -645,17 +647,22 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
               subscription.subscription_items
               |> List.first()
               |> Map.get(:quantity, 1)
-              |> to_string(),
+              |> to_string()
+          }
+          |> maybe_put_summary_action(quantity_change_available?(subscription), %{
             action_label: "Change",
             action_context: "quantity for subscription #{subscription_label}",
             action_event: "open_action_drawer",
             action_value: "update_quantity"
-          }
+          })
         ]
     else
       rows
     end
   end
+
+  defp maybe_put_summary_action(row, true, attrs), do: Map.merge(row, attrs)
+  defp maybe_put_summary_action(row, _available?, _attrs), do: row
 
   defp maybe_add_dunning_row(rows, subscription, subscription_label) do
     if subscription.dunning_campaign_started_at do

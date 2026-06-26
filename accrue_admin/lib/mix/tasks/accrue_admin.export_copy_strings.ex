@@ -25,9 +25,17 @@ defmodule Mix.Tasks.AccrueAdmin.ExportCopyStrings do
     subscription_breadcrumb_subscriptions
     subscription_detail_eyebrow
     subscription_proration_create
+    subscription_proration_none
+    subscription_proration_always_invoice
     subscription_action_swap_plan
     subscription_action_cancel_at_period_end
     subscription_action_cancel_now
+    subscription_action_resume
+    subscription_action_update_quantity
+    subscription_action_add_item
+    subscription_action_update_item_quantity
+    subscription_action_remove_item
+    subscription_action_pause_collection
     subscription_action_create_comp_replacement
     subscriptions_index_empty_title
     connect_accounts_headline
