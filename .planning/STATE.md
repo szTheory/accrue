@@ -5,16 +5,16 @@ milestone_name: Admin UI Page-Level Streamlining & Storybook
 current_phase: 195
 current_phase_name: exemplar-b-subscription-detail
 status: executing
-stopped_at: Completed 195-02-PLAN.md
-last_updated: "2026-06-26T08:32:35.576Z"
+stopped_at: Completed 195-03-PLAN.md
+last_updated: "2026-06-26T08:48:10.949Z"
 last_activity: 2026-06-26
 last_activity_desc: Phase 195 execution started
 progress:
   total_phases: 8
   completed_phases: 2
   total_plans: 17
-  completed_plans: 11
-  percent: 25
+  completed_plans: 12
+  percent: 71
 ---
 
 # Project State
@@ -30,7 +30,7 @@ See: `.planning/PROJECT.md` (updated 2026-06-24 — v1.54 Admin UI Page-Level St
 ## Current Position
 
 Phase: 195 (exemplar-b-subscription-detail) — EXECUTING
-Plan: 3 of 8
+Plan: 4 of 8
 Status: Ready to execute
 Last activity: 2026-06-26 — Phase 195 execution started
 
@@ -199,6 +199,7 @@ Coverage: 22/22 v1.51 requirements mapped (each REQ-ID → exactly one phase). D
 | Phase 194 P04 | 624s | 3 tasks | 2 files |
 | Phase 195 P01 | 9m 15s | 3 tasks | 4 files |
 | Phase 195 P02 | 9m 50s | 3 tasks | 1 files |
+| Phase 195 P03 | 10m 35s | 3 tasks | 8 files |
 
 ## Accumulated Context
 
@@ -325,6 +326,8 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - [Phase 195]: EXE-02 and IXN-01 remain pending after 195-01; this plan addresses them with RED coverage only. — The underlying Subscription detail conversion and full overlay implementation are split across later Phase 195 and Phase 199 plans.
 - [Phase 195]: Plan 195-02 intentionally remains RED-only; implementation is owned by later Phase 195 plans. — The plan objective is Wave 0 RED LiveView validation coverage; later plans green the Subscription detail implementation.
 - [Phase 195]: EXE-02 and IXN-01 remain pending after 195-02; this plan addresses them with RED coverage only. — The underlying Subscription detail conversion and overlay interaction implementation are split across later Phase 195 and Phase 199 plans.
+- [Phase 195-03]: Use pinned LiveView .portal with #ax-overlay-root as the canonical overlay transport for modal/drawer/popover presentations.
+- [Phase 195-03]: Keep IXN-01 requirement completion pending for Phase 199; 195-03 ships the prerequisite overlay API/root/wrapper slice.
 
 ### Pending Todos
 
@@ -414,8 +417,8 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 
 ## Session Continuity
 
-Last session: 2026-06-26T08:32:35.568Z
-Stopped at: Completed 195-02-PLAN.md
+Last session: 2026-06-26T08:48:10.941Z
+Stopped at: Completed 195-03-PLAN.md
 Resume file: None
 
 ## Operator Next Steps
