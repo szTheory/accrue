@@ -1060,6 +1060,49 @@ a.ax-kpi-card--linked:focus-visible {
   flex-wrap: wrap;
 }
 
+.ax-filter-chip-content,
+.ax-filter-chip-meta {
+  display: flex;
+  gap: var(--ax-space-md);
+  min-width: 0;
+}
+
+.ax-filter-chip-content {
+  flex-direction: column;
+}
+
+.ax-filter-chip-meta {
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.ax-filter-chip-count {
+  margin: 0;
+  color: var(--ax-muted);
+  min-width: 0;
+}
+
+.ax-filter-chip-clear-all {
+  color: var(--ax-accent-readable);
+  font: var(--ax-type-label-font);
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}
+
+.ax-filter-chip-clear-all:focus-visible {
+  outline: 2px solid var(--ax-focus-ring);
+  outline-offset: 2px;
+}
+
+@media (min-width: 768px) { /* --ax-bp-md ↑ */
+  .ax-filter-chip-content {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+}
+
 .ax-filter-chip {
   /* ax-type-exception: component-local typography is documented until this selector is migrated to a composed role utility in markup. */
   display: inline-flex;
@@ -2399,6 +2442,85 @@ a.ax-kpi-card--linked:focus-visible {
   min-width: 12rem;
 }
 
+.ax-data-table-list-status,
+.ax-data-table-loading,
+.ax-data-table-skeleton-cards,
+.ax-data-table-skeleton-card,
+.ax-data-table-skeleton-card .ax-data-table-card-header,
+.ax-data-table-skeleton-card .ax-data-table-card-field {
+  min-width: 0;
+}
+
+.ax-data-table-list-status {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ax-space-md);
+}
+
+.ax-data-table-loading {
+  display: grid;
+  gap: var(--ax-space-md);
+}
+
+.ax-data-table-skeleton-shell {
+  display: none;
+  overflow: hidden;
+}
+
+.ax-data-table-skeleton-cell,
+.ax-data-table-skeleton-title,
+.ax-data-table-skeleton-value {
+  inline-size: 100%;
+}
+
+.ax-data-table-skeleton-cell-wide {
+  inline-size: 72%;
+}
+
+.ax-data-table-skeleton-cell-medium {
+  inline-size: 56%;
+}
+
+.ax-data-table-skeleton-cell-narrow {
+  inline-size: 40%;
+}
+
+.ax-data-table-skeleton-check {
+  inline-size: 1.25rem;
+  block-size: 1.25rem;
+  border-radius: var(--ax-radius-sm);
+}
+
+.ax-data-table-skeleton-cards {
+  display: grid;
+  gap: var(--ax-space-md);
+}
+
+.ax-data-table-skeleton-eyebrow {
+  inline-size: 6ch;
+}
+
+.ax-data-table-skeleton-title {
+  margin-block-start: var(--ax-space-xs);
+  max-inline-size: 18ch;
+  block-size: 1.25rem;
+}
+
+.ax-data-table-skeleton-label {
+  inline-size: 8ch;
+}
+
+.ax-data-table-skeleton-value {
+  max-inline-size: 24ch;
+}
+
+.ax-data-table[data-ax-state="first-run-empty"] .ax-data-table-empty,
+.ax-data-table[data-ax-state="filtered-empty"] .ax-data-table-empty {
+  cursor: default;
+}
+
 @media (min-width: 768px) { /* --ax-bp-md ↑ */
   .ax-data-table-filters {
     flex-direction: row;
@@ -2429,6 +2551,14 @@ a.ax-kpi-card--linked:focus-visible {
   }
 
   .ax-data-table-cards {
+    display: none;
+  }
+
+  .ax-data-table-skeleton-shell {
+    display: block;
+  }
+
+  .ax-data-table-skeleton-cards {
     display: none;
   }
 }
