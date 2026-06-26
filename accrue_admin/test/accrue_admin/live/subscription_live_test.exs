@@ -176,7 +176,7 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
     assert html =~ ~s(aria-label="Cancel renewal for subscription #{subscription_label}")
   end
 
-  test "cancel now requires step-up and records admin audit linkage", %{
+  test "drawer-hosted destructive action preserves step-up and records admin audit linkage", %{
     conn: conn,
     subscription: subscription,
     source_event: source_event
@@ -186,15 +186,37 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
 
     {:ok, view, _html} = live(conn, "/billing/subscriptions/#{subscription.id}")
 
+    render_click(element(view, "button[role='menuitem']", "Cancel immediately"))
+
+    assert has_element?(
+             view,
+             "[data-ax-overlay-panel][data-presentation='drawer'] form[phx-submit='prepare_action']"
+           )
+
     html =
       render_submit(
-        element(view, "[data-role='cancel-now-form']"),
+        element(
+          view,
+          "[data-ax-overlay-panel][data-presentation='drawer'] form[phx-submit='prepare_action']"
+        ),
         %{"action_type" => "cancel_now", "source_event_id" => Integer.to_string(source_event.id)}
       )
 
     assert html =~ "Confirm action"
 
-    html = render_click(element(view, "[data-role='confirm-action']"))
+    assert has_element?(
+             view,
+             "[data-ax-overlay-panel][data-presentation='drawer'] [data-role='confirm-action']"
+           )
+
+    html =
+      render_click(
+        element(
+          view,
+          "[data-ax-overlay-panel][data-presentation='drawer'] [data-role='confirm-action']"
+        )
+      )
+
     assert html =~ "Step-up required"
 
     html =
@@ -299,7 +321,7 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
     assert redirect
   end
 
-  test "renders provider-honest confirmation copy for cancel now and cancel at period end", %{
+  test "safe action selection opens drawer-hosted form and keeps confirm_action confirmation", %{
     conn: conn,
     subscription: subscription
   } do
@@ -307,17 +329,92 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
 
     {:ok, view, _html} = live(conn, "/billing/subscriptions/#{subscription.id}")
 
-    html =
-      render_submit(element(view, "[data-role='cancel-now-form']"), %{
-        "action_type" => "cancel_now"
-      })
+    render_click(element(view, "[data-ax-primary-action]", "Change plan"))
 
-    assert html =~ "Cancel now will execute against the local billing projection"
+    assert has_element?(
+             view,
+             "[data-ax-overlay-panel][data-presentation='drawer'] form[phx-submit='prepare_action']"
+           )
 
     html =
       render_submit(
-        element(view, "[data-role='cancel-at-period-end-form']"),
-        %{"action_type" => "cancel_at_period_end"}
+        element(
+          view,
+          "[data-ax-overlay-panel][data-presentation='drawer'] form[phx-submit='prepare_action']"
+        ),
+        %{
+          "action_type" => "swap_plan",
+          "new_price_id" => "price_pro",
+          "proration" => "create_prorations"
+        }
+      )
+
+    assert html =~
+             "Swap plan stages a preview before commit where the provider supports upcoming-invoice previews."
+
+    assert html =~ "Preview upcoming invoice"
+    assert html =~ "Preview total"
+    assert html =~ "preview line(s) captured before commit."
+
+    assert has_element?(
+             view,
+             "[data-ax-overlay-panel][data-presentation='drawer'] [data-role='confirm-action']"
+           )
+  end
+
+  test "subscription action relabels route through Copy and exported fixture" do
+    labels = %{
+      "subscription_action_swap_plan" => "Change plan",
+      "subscription_action_cancel_at_period_end" => "Cancel renewal",
+      "subscription_action_cancel_now" => "Cancel immediately",
+      "subscription_action_create_comp_replacement" => "Comp this subscription"
+    }
+
+    fixture = copy_fixture()
+
+    for {function_name, expected} <- labels do
+      function = String.to_existing_atom(function_name)
+
+      assert apply(Copy, function, []) == expected
+      assert fixture[function_name] == expected
+    end
+  end
+
+  test "copy fixture exposes all drawer action labels for browser anti-drift checks" do
+    fixture = copy_fixture()
+
+    assert Map.take(fixture, [
+             "subscription_action_swap_plan",
+             "subscription_action_cancel_at_period_end",
+             "subscription_action_cancel_now",
+             "subscription_action_create_comp_replacement"
+           ]) == %{
+             "subscription_action_swap_plan" => "Change plan",
+             "subscription_action_cancel_at_period_end" => "Cancel renewal",
+             "subscription_action_cancel_now" => "Cancel immediately",
+             "subscription_action_create_comp_replacement" => "Comp this subscription"
+           }
+  end
+
+  test "cancel renewal action still renders provider-honest confirmation copy in the drawer", %{
+    conn: conn,
+    subscription: subscription
+  } do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+
+    {:ok, view, _html} = live(conn, "/billing/subscriptions/#{subscription.id}")
+
+    render_click(element(view, "[data-ax-primary-action]", "Cancel renewal"))
+
+    html =
+      render_submit(
+        element(
+          view,
+          "[data-ax-overlay-panel][data-presentation='drawer'] form[phx-submit='prepare_action']"
+        ),
+        %{
+          "action_type" => "cancel_at_period_end"
+        }
       )
 
     assert html =~ "turn off renewal now and preserve access through the current billing period"
@@ -376,35 +473,25 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
              "Braintree does not expose first-party quantity or subscription-item mutations through Accrue."
   end
 
-  describe "read-only dunning-state panel (DUN-07)" do
-    test "always renders the dunning-state panel as a state surface", %{
+  describe "dunning state inside summary and drill sections" do
+    test "subscription with no campaign renders the dunning drill without a standalone card", %{
       conn: conn,
       subscription: subscription
     } do
       conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+
+      refute Subscription.dunning_campaign_active?(subscription)
 
       {:ok, view, html} = live(conn, "/billing/subscriptions/#{subscription.id}")
 
-      assert has_element?(view, "[data-role='subscription-dunning-state']")
-      assert html =~ Copy.dunning_panel_title()
-      assert html =~ Copy.dunning_panel_eyebrow()
+      assert has_element?(view, "[data-ax-drill-section='dunning-recovery']")
+      refute has_element?(view, "[data-role='subscription-dunning-state']")
+      assert html =~ "Dunning &amp; recovery"
+      assert html =~ Copy.dunning_empty_state_body()
+      assert html =~ Copy.dunning_state_none()
     end
 
-    test "the dunning-state panel is strictly read-only (no mutating controls)", %{
-      conn: conn,
-      subscription: subscription
-    } do
-      conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
-
-      {:ok, view, _html} = live(conn, "/billing/subscriptions/#{subscription.id}")
-
-      refute has_element?(view, "[data-role='subscription-dunning-state'] button")
-      refute has_element?(view, "[data-role='subscription-dunning-state'] form")
-      refute has_element?(view, "[data-role='subscription-dunning-state'] [phx-click]")
-      refute has_element?(view, "[data-role='subscription-dunning-state'] [phx-submit]")
-    end
-
-    test "active campaign shows the active badge and a resolver-derived next action", %{
+    test "active campaign opens dunning recovery drill with resolver-derived next action", %{
       conn: conn,
       subscription: subscription
     } do
@@ -417,40 +504,15 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
 
       assert Subscription.dunning_campaign_active?(active)
 
-      {:ok, _view, html} = live(conn, "/billing/subscriptions/#{active.id}")
+      {:ok, view, html} = live(conn, "/billing/subscriptions/#{active.id}")
 
+      assert has_element?(view, "[data-ax-drill-section='dunning-recovery'][open]")
+      refute has_element?(view, "[data-role='subscription-dunning-state']")
+      assert html =~ "Dunning &amp; recovery"
       assert html =~ Copy.dunning_state_active()
       assert html =~ Copy.dunning_next_action_label()
-      # Day-0 active campaign resolves the first configured step (key surfaced).
       assert html =~ "reminder"
       refute html =~ Copy.dunning_empty_state_body()
-    end
-
-    test "subscription with no campaign renders the empty-state body", %{
-      conn: conn,
-      subscription: subscription
-    } do
-      conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
-
-      refute Subscription.dunning_campaign_active?(subscription)
-
-      {:ok, view, html} = live(conn, "/billing/subscriptions/#{subscription.id}")
-
-      assert has_element?(view, "[data-role='subscription-dunning-state']")
-      assert html =~ Copy.dunning_empty_state_body()
-      assert html =~ Copy.dunning_state_none()
-    end
-
-    test "every visible panel string routes through Copy (Started + Next scheduled action)", %{
-      conn: conn,
-      subscription: subscription
-    } do
-      conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
-
-      {:ok, _view, html} = live(conn, "/billing/subscriptions/#{subscription.id}")
-
-      assert html =~ Copy.dunning_started_label()
-      assert html =~ Copy.dunning_next_action_label()
     end
   end
 
@@ -526,6 +588,13 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
       assert left_position < right_position,
              "expected #{inspect(left_label)} to render before #{inspect(right_label)}"
     end)
+  end
+
+  defp copy_fixture do
+    "../../../../examples/accrue_host/e2e/generated/copy_strings.json"
+    |> Path.expand(__DIR__)
+    |> File.read!()
+    |> Jason.decode!()
   end
 
   defp organization_owner_scope(organization_id) do
