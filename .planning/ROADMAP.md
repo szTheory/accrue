@@ -114,7 +114,35 @@ Plans:
   3. The duplicate related-resources card is deleted and card-in-card double-border nesting is flattened.
   4. The overlay primitive backing the side-drawer demonstrably scroll-locks, portals to a body-level root so it is never painted behind its scrim, marks the background `inert`, and dismisses cleanly on backdrop-click + Escape (the IXN-01 contract, instantiated here for the detail exemplar and swept across all pages in Phase 199).
 
-**Plans**: TBD
+**Plans**: 8 plans
+**Wave 0 — validation scaffolding**
+
+- [ ] 195-01-PLAN.md — Overlay/action-hosting RED coverage: component tests, scroll-lock JS tests, and Phase 195 Playwright script
+- [ ] 195-02-PLAN.md — Subscription detail RED coverage: six-band LiveView contract, provider gating, copy fixture, and StepUp preservation
+
+**Wave 1**
+
+- [ ] 195-03-PLAN.md — Canonical Overlay component API, body-level `#ax-overlay-root`, and drawer/modal wrapper migration
+
+**Wave 2**
+
+- [ ] 195-04-PLAN.md — Overlay JS behavior: ref-counted scroll lock, inert background, FocusTrap composition, and committed JS bundle
+
+**Wave 3**
+
+- [ ] 195-05-PLAN.md — Overlay CSS geometry: tokenized layers, desktop drawer, mobile bottom sheet, and committed CSS bundle
+
+**Wave 4**
+
+- [ ] 195-06-PLAN.md — Reusable DETAIL primitives: `Detail.summary_list/1`, `DropdownMenu.action_menu/1`, primitive CSS, and component coverage
+
+**Wave 5**
+
+- [ ] 195-07-PLAN.md — Subscription detail conversion: six bands, drawer-hosted action forms, copy relabels, one related strip, and lazy Activity/JSON
+
+**Wave 6**
+
+- [ ] 195-08-PLAN.md — Storybook stories for primitives/exemplar and final Phase 195 Playwright/page-flow gate
 **UI hint**: yes
 
 ### Phase 196: Exemplar C — Subscriptions list + PageHeader
