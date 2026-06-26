@@ -133,6 +133,11 @@ defmodule AccrueAdmin.DataTableTest do
        socket
        |> Phoenix.Component.assign(:table_params, Map.get(session, "params", %{}))
        |> Phoenix.Component.assign(:path, "/admin/fixtures")
+       |> Phoenix.Component.assign(:list_id, Map.get(session, "list_id", "fixtures"))
+       |> Phoenix.Component.assign(:list_state, Map.get(session, "list_state"))
+       |> Phoenix.Component.assign(:empty_reason, Map.get(session, "empty_reason"))
+       |> Phoenix.Component.assign(:loading_state?, Map.get(session, "loading_state?", false))
+       |> Phoenix.Component.assign(:clear_filters_patch, Map.get(session, "clear_filters_patch"))
        |> Phoenix.Component.assign(:poll_interval_ms, Map.get(session, "poll_interval_ms", 5_000))
        |> Phoenix.Component.assign(:table_caption, Map.get(session, "table_caption"))
        |> Phoenix.Component.assign(:test_pid, Map.get(session, "test_pid"))}
@@ -147,6 +152,11 @@ defmodule AccrueAdmin.DataTableTest do
         query_module={AccrueAdmin.DataTableTest.FixtureQuery}
         path={@path}
         params={@table_params}
+        list_id={@list_id}
+        list_state={@list_state}
+        empty_reason={@empty_reason}
+        loading_state?={@loading_state?}
+        clear_filters_patch={@clear_filters_patch}
         limit={2}
         dom_limit={4}
         poll_interval_ms={@poll_interval_ms}
@@ -415,6 +425,104 @@ defmodule AccrueAdmin.DataTableTest do
     assert html =~ "No fixtures match these filters"
     assert html =~ ~s(data-role="clear-filters")
     assert html =~ "Clear filters"
+  end
+
+  test "emits Phase 196 list markers for populated rows", %{conn: conn} do
+    {:ok, _view, html} =
+      live_isolated(conn, TableLive, session: %{"params" => %{"status" => "open"}})
+
+    assert html =~ ~s(data-ax-list="fixtures")
+    assert html =~ ~s(data-ax-state="populated")
+    refute html =~ ~s(data-ax-empty-reason)
+  end
+
+  test "emits first-run, filtered, and queue empty reason markers", %{conn: conn} do
+    FixtureStore.put_rows([])
+
+    {:ok, _view, html} =
+      live_isolated(conn, TableLive, session: %{"params" => %{}})
+
+    assert html =~ ~s(data-ax-list="fixtures")
+    assert html =~ ~s(data-ax-state="first-run-empty")
+    assert html =~ ~s(data-ax-empty-reason="first-run")
+    refute html =~ ~s(data-role="clear-filters")
+
+    {:ok, _view, html} =
+      live_isolated(conn, TableLive, session: %{"params" => %{"status" => "closed"}})
+
+    assert html =~ ~s(data-ax-state="filtered-empty")
+    assert html =~ ~s(data-ax-empty-reason="filter")
+    assert html =~ ~s(data-role="clear-filters")
+
+    {:ok, _view, html} =
+      live_isolated(conn, TableLive,
+        session: %{
+          "params" => %{"status" => "past_due,canceling"},
+          "empty_reason" => "queue",
+          "clear_filters_patch" => "/admin/fixtures?view=all&org=acme"
+        }
+      )
+
+    assert html =~ ~s(data-ax-state="filtered-empty")
+    assert html =~ ~s(data-ax-empty-reason="queue")
+    assert html =~ ~s(data-role="clear-filters")
+    assert html =~ ~s(data-phx-link="patch")
+    assert html =~ ~s(href="/admin/fixtures?view=all&amp;org=acme")
+  end
+
+  test "renders loading skeleton as an accessible fixture state", %{conn: conn} do
+    {:ok, _view, html} =
+      live_isolated(conn, TableLive, session: %{"params" => %{}, "loading_state?" => true})
+
+    assert html =~ ~s(data-ax-state="loading-skeleton")
+    assert html =~ ~s(aria-busy="true")
+    assert Regex.scan(~r/role="status"/, html) |> length() == 1
+    assert html =~ "Loading"
+    assert html =~ "ax-skeleton"
+    assert html =~ ~s(aria-hidden="true")
+
+    app_css = File.read!(app_css_path())
+    assert app_css =~ ".ax-skeleton"
+    assert app_css =~ "@media (prefers-reduced-motion: reduce)"
+  end
+
+  test "does not add production-only fake delay hooks for the loading skeleton" do
+    source = File.read!("lib/accrue_admin/components/data_table.ex")
+
+    refute source =~ "Process.sleep"
+    refute source =~ ":timer.sleep"
+    refute source =~ "fake_delay"
+    refute source =~ "phase196_fake_delay"
+  end
+
+  test "exposes a DataTable-owned filter toolbar API for PageHeader slots" do
+    html =
+      render_component(&DataTable.filter_toolbar/1, %{
+        id: "subscriptions",
+        path: "/billing/subscriptions?org=acme",
+        filter_params: %{"q" => "northwind", "org" => "acme"},
+        filter_fields: [
+          %{id: :q, label: "Search", placeholder: "Search subscriptions"},
+          %{
+            id: :status,
+            label: "Status",
+            type: :select,
+            options: [{"At risk", "past_due,canceling"}]
+          }
+        ],
+        filter_submit_label: "Apply filters",
+        clear_filters_patch: "/billing/subscriptions?view=all&org=acme"
+      })
+
+    assert html =~ ~s(phx-change="data_table_filter")
+    assert html =~ ~s(phx-submit="data_table_filter")
+    refute html =~ ~s(phx-target=)
+    refute html =~ ~s(action="/billing/subscriptions)
+    assert html =~ ~s(name="q" value="northwind")
+    assert html =~ ~s(name="org" value="acme")
+    assert html =~ ~s(data-role="clear-filters")
+    assert html =~ ~s(data-phx-link="patch")
+    assert html =~ ~s(href="/billing/subscriptions?view=all&amp;org=acme")
   end
 
   test "renders card mode fields and contextual selection controls", %{conn: conn} do

@@ -79,6 +79,35 @@ defmodule AccrueAdmin.Components.FilterChipBarTest do
     assert html =~ ~s(data-phase191-focus="filter-chip-clear")
   end
 
+  test "emits Phase 196 chips, result count, and clear-all markers together" do
+    html =
+      render_component(&FilterChipBar.filter_chip_bar/1,
+        items: [
+          %{
+            id: :status_queue,
+            label: "At risk",
+            value: "past due · canceling",
+            tone: :cobalt,
+            active: true,
+            remove_href: "/billing/subscriptions?view=all&org=acme"
+          }
+        ],
+        label: "Subscription filters",
+        result_count: 2,
+        result_label: {"subscription", "subscriptions"},
+        clear_all_href: "/billing/subscriptions?view=all&org=acme"
+      )
+
+    assert html =~ ~s(data-ax-filter-chips)
+    assert html =~ ~s(data-ax-result-count)
+    assert html =~ "Showing 2 subscriptions"
+    assert html =~ ~s(data-ax-clear-all)
+    assert html =~ ~s(href="/billing/subscriptions?view=all&amp;org=acme")
+    assert html =~ "At risk"
+    assert html =~ "past due · canceling"
+    assert html =~ ~s(data-phase191-focus="filter-chip-bar")
+  end
+
   test "does not render Clear link when remove_href is absent" do
     html =
       render_component(&FilterChipBar.filter_chip_bar/1,
