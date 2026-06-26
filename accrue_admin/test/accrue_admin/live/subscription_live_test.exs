@@ -134,7 +134,7 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
              "Update the customer tax location in the host app, then retry recurring tax on this subscription."
   end
 
-  test "stages preview-backed swap-plan confirmation and exposes supported quantity and item actions",
+  test "renders default action hierarchy with two primary actions and grouped overflow",
        %{
          conn: conn,
          subscription: subscription
@@ -142,27 +142,38 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
     conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
 
     {:ok, view, html} = live(conn, "/billing/subscriptions/#{subscription.id}")
+    subscription_label = subscription.processor_id || subscription.id
 
-    assert has_element?(view, "[data-role='swap-plan-form']")
-    assert has_element?(view, "[data-role='quantity-update-form']")
-    assert has_element?(view, "[data-role='item-add-form']")
-    assert has_element?(view, "[data-role='item-quantity-form']")
-    assert has_element?(view, "[data-role='item-remove-form']")
-    assert html =~ "Quantity changes apply to the single-item subscription lane."
+    assert data_attr_count(html, "data-ax-primary-action") == 2
+    assert data_attr_count(html, "data-ax-action-overflow-menu") == 1
 
-    html =
-      render_submit(element(view, "[data-role='swap-plan-form']"), %{
-        "action_type" => "swap_plan",
-        "new_price_id" => "price_pro",
-        "proration" => "create_prorations"
-      })
+    assert has_element?(view, "[data-ax-primary-action]", "Change plan")
+    assert has_element?(view, "[data-ax-primary-action]", "Cancel renewal")
+    refute has_element?(view, "[data-ax-primary-action]", "Cancel immediately")
+    refute has_element?(view, "[data-ax-primary-action]", "Comp this subscription")
 
-    assert html =~
-             "Swap plan stages a preview before commit where the provider supports upcoming-invoice previews."
+    assert html =~ "Edit billing"
+    assert html =~ "Collection"
+    assert html =~ "Danger zone"
+    assert html =~ "Cancel immediately"
+    assert html =~ "Comp this subscription"
 
-    assert html =~ "Preview upcoming invoice"
-    assert html =~ "Preview total"
-    assert html =~ "preview line(s) captured before commit."
+    assert_text_order(html, [
+      "Edit billing",
+      AccrueAdmin.Copy.Subscription.subscription_action_update_quantity(),
+      AccrueAdmin.Copy.Subscription.subscription_action_add_item(),
+      AccrueAdmin.Copy.Subscription.subscription_action_update_item_quantity(),
+      AccrueAdmin.Copy.Subscription.subscription_action_remove_item(),
+      "Collection",
+      AccrueAdmin.Copy.Subscription.subscription_action_pause_collection(),
+      AccrueAdmin.Copy.Subscription.subscription_action_resume(),
+      "Danger zone",
+      "Cancel immediately",
+      "Comp this subscription"
+    ])
+
+    assert html =~ ~s(aria-label="Change plan for subscription #{subscription_label}")
+    assert html =~ ~s(aria-label="Cancel renewal for subscription #{subscription_label}")
   end
 
   test "cancel now requires step-up and records admin audit linkage", %{
@@ -335,21 +346,23 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
 
     {:ok, view, html} = live(conn, "/billing/subscriptions/#{subscription.id}")
 
-    assert html =~ "Cancel now"
+    assert data_attr_count(html, "data-ax-action-overflow-menu") == 1
+    assert html =~ "Cancel immediately"
+    assert html =~ "Danger zone"
+
+    refute has_element?(view, "[data-ax-primary-action]", "Cancel renewal")
     refute html =~ "Cancel at period end"
+    refute html =~ "Cancel renewal"
+    refute html =~ "Change plan"
+    refute html =~ "Swap plan"
     refute html =~ "Pause collection"
     refute html =~ "Resume"
-    assert has_element?(view, "[data-role='cancel-now-form']")
-    refute has_element?(view, "[data-role='cancel-at-period-end-form']")
-    refute has_element?(view, "[data-role='pause-form']")
-    refute has_element?(view, "[data-role='resume-form']")
-    refute has_element?(view, "[data-role='swap-plan-form']")
-    refute has_element?(view, "[data-role='quantity-update-form']")
-    refute has_element?(view, "[data-role='item-add-form']")
-    refute has_element?(view, "[data-role='item-quantity-form']")
-    refute has_element?(view, "[data-role='item-remove-form']")
-    assert has_element?(view, "[data-role='swap-plan-unavailable']")
-    assert has_element?(view, "[data-role='quantity-item-unsupported']")
+    refute html =~ "Update quantity"
+    refute html =~ "Add item"
+    refute html =~ "Update item quantity"
+    refute html =~ "Remove item"
+    refute has_element?(view, "[data-role='swap-plan-unavailable']")
+    refute has_element?(view, "[data-role='quantity-item-unsupported']")
 
     assert html =~
              "Braintree supports immediate cancellation through Accrue.Billing.cancel/2 and bounded first-party plan swaps when the host configures :plan_resolver."
@@ -496,6 +509,23 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
     |> then(&Regex.compile!("<" <> &1 <> "\\b"))
     |> Regex.scan(html)
     |> length()
+  end
+
+  defp assert_text_order(html, labels) do
+    positions =
+      Enum.map(labels, fn label ->
+        case :binary.match(html, label) do
+          :nomatch -> flunk("expected #{inspect(label)} to be present in rendered HTML")
+          {position, _length} -> {label, position}
+        end
+      end)
+
+    positions
+    |> Enum.chunk_every(2, 1, :discard)
+    |> Enum.each(fn [{left_label, left_position}, {right_label, right_position}] ->
+      assert left_position < right_position,
+             "expected #{inspect(left_label)} to render before #{inspect(right_label)}"
+    end)
   end
 
   defp organization_owner_scope(organization_id) do
