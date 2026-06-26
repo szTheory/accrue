@@ -4,9 +4,9 @@ milestone: v1.54
 milestone_name: Admin UI Page-Level Streamlining & Storybook
 current_phase: 194
 current_phase_name: exemplar-a-dashboard
-status: verifying
-stopped_at: Completed Phase 194-03
-last_updated: "2026-06-26T01:45:57.859Z"
+status: ready_to_plan
+stopped_at: Phase 194 complete (4/4) — ready to discuss Phase 195
+last_updated: 2026-06-26T01:52:32.971Z
 last_activity: 2026-06-26
 progress:
   total_phases: 8
@@ -24,13 +24,13 @@ See: `.planning/PROJECT.md` (updated 2026-06-24 — v1.54 Admin UI Page-Level St
 
 **Core value:** A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic Elixir DX, strong domain modeling, tamper-evident audit ledger, great observability, and zero breaking-change pain through v1.x.
 
-**Current focus:** Phase 194 — exemplar-a-dashboard
+**Current focus:** Phase 195 — exemplar b — subscription detail
 
 ## Current Position
 
-Phase: 194 (exemplar-a-dashboard) — EXECUTING
-Plan: 4 of 4
-Status: Phase complete — ready for verification
+Phase: 195
+Plan: Not started
+Status: Ready to plan
 Last activity: 2026-06-26
 
 ## Post-v1.48 Pause Rule
@@ -153,7 +153,7 @@ Coverage: 22/22 v1.51 requirements mapped (each REQ-ID → exactly one phase). D
 
 **Velocity:**
 
-- Total plans completed: 129
+- Total plans completed: 133
 - Average duration: 1m
 - Total execution time: 1m
 
