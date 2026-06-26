@@ -9,12 +9,19 @@ defmodule AccrueAdmin.Components.FilterChipBar do
   attr(:label, :string, default: "Active filters")
   attr(:empty_label, :string, default: "No filters applied")
   attr(:class, :string, default: nil)
+  attr(:result_count, :integer, default: nil)
+  attr(:result_label, :any, default: nil)
+  attr(:result_singular_label, :string, default: "result")
+  attr(:result_plural_label, :string, default: "results")
+  attr(:clear_all_href, :string, default: nil)
+  attr(:clear_all_label, :string, default: "Clear filters")
 
   def filter_chip_bar(assigns) do
     assigns =
       assigns
       |> assign(:active_items, Enum.filter(assigns.items, &chip_active?/1))
       |> assign(:has_items, Enum.any?(assigns.items, &chip_active?/1))
+      |> assign(:result_label_pair, result_label_pair(assigns))
 
     ~H"""
     <section class={["ax-filter-chip-bar", @class]} aria-label={@label} data-phase191-focus="filter-chip-bar">
@@ -23,8 +30,25 @@ defmodule AccrueAdmin.Components.FilterChipBar do
         <p class="ax-body"><%= @label %></p>
       </header>
 
-      <div :if={@has_items} class="ax-filter-chip-list">
-        <.chip :for={item <- @active_items} item={item} />
+      <div :if={@has_items} class="ax-filter-chip-content">
+        <div class="ax-filter-chip-list" data-ax-filter-chips>
+          <.chip :for={item <- @active_items} item={item} />
+        </div>
+
+        <div class="ax-filter-chip-meta">
+          <p :if={!is_nil(@result_count)} class="ax-body ax-filter-chip-count" data-ax-result-count>
+            <%= result_count_label(@result_count, @result_label_pair) %>
+          </p>
+          <a
+            :if={@clear_all_href}
+            href={@clear_all_href}
+            class="ax-filter-chip-clear-all"
+            data-ax-clear-all
+            data-phase191-focus="filter-chip-clear-all"
+          >
+            <%= @clear_all_label %>
+          </a>
+        </div>
       </div>
 
       <p :if={!@has_items} class="ax-body ax-filter-chip-empty"><%= @empty_label %></p>
@@ -95,6 +119,15 @@ defmodule AccrueAdmin.Components.FilterChipBar do
     |> Enum.reject(&is_nil/1)
     |> Enum.join(" ")
   end
+
+  defp result_label_pair(%{result_label: {singular, plural}}), do: {singular, plural}
+  defp result_label_pair(%{result_label: label}) when is_binary(label), do: {label, label}
+
+  defp result_label_pair(assigns),
+    do: {assigns.result_singular_label, assigns.result_plural_label}
+
+  defp result_count_label(1, {singular, _plural}), do: "Showing 1 #{singular}"
+  defp result_count_label(count, {_singular, plural}), do: "Showing #{count} #{plural}"
 
   defp present_value(nil), do: nil
   defp present_value(""), do: nil

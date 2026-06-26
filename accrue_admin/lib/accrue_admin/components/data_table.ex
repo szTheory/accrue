@@ -28,8 +28,10 @@ defmodule AccrueAdmin.Components.DataTable do
       |> assign(:list_id, Map.get(assigns, :list_id) || Map.get(assigns, :id))
       |> assign(:loading_fixture, loading_fixture?(assigns))
       |> assign(:clear_href, clear_href(assigns))
+      |> assign(:render_filter_toolbar, Map.get(assigns, :render_filter_toolbar, true))
       |> assign_new(:selected_ids, fn -> MapSet.new() end)
       |> assign_new(:filter_fields, fn -> [] end)
+      |> assign_new(:list_status, fn -> [] end)
       |> assign_new(:card_fields, fn -> [] end)
       |> assign_new(:card_title, fn -> nil end)
       |> assign_new(:empty_title, fn -> Copy.data_table_default_empty_title() end)
@@ -214,6 +216,8 @@ defmodule AccrueAdmin.Components.DataTable do
      |> assign(:newer_count, 0)}
   end
 
+  slot(:list_status)
+
   @impl true
   def render(assigns) do
     ~H"""
@@ -228,50 +232,16 @@ defmodule AccrueAdmin.Components.DataTable do
       data-ax-empty-reason={empty_reason_marker(@list_state, @empty_reason)}
       aria-busy={@render_loading_fixture && "true"}
     >
-      <header class="ax-data-table-header">
-        <form
-          phx-change="data_table_filter"
-          phx-submit="data_table_filter"
-          class="ax-data-table-filters"
-          data-role="filter-form"
-          data-phase191-focus="filter-form"
-        >
-          <div
-            :for={field <- @filter_fields}
-            class={["ax-data-table-filter", filter_field_class(field)]}
-          >
-            <label for={field_id(@id, field)} class="ax-visually-hidden"><%= field_label(field) %></label>
-            <.filter_input
-              id={field_id(@id, field)}
-              field={field}
-              value={Map.get(@filter_params, field_param(field))}
-              focus_key={field_param(field)}
-            />
-          </div>
-          <div :for={{key, value} <- @filter_params} :if={!field_defined?(@filter_fields, key)}>
-            <input type="hidden" name={key} value={value} />
-          </div>
-          <%!-- Instant-apply toolbar: phx-change submits on every edit (text debounced
-                300ms), so the primary Apply button is hidden but kept for keyboard submit
-                and the data-phase191-focus contract. --%>
-          <button
-            type="submit"
-            class="ax-visually-hidden"
-            data-phase191-focus="filter-submit"
-            tabindex="-1"
-          >
-            <%= @filter_submit_label %>
-          </button>
-          <.link
-            :if={any_filter_active?(@filter_params)}
-            patch={@clear_href}
-            class="ax-button ax-button-ghost ax-data-table-filter-clear"
-            data-role="clear-filters"
-            data-phase191-focus="clear-filters"
-          >
-            <%= Copy.data_table_clear_filters_label() %>
-          </.link>
-        </form>
+      <header :if={@render_filter_toolbar} class="ax-data-table-header">
+        <.filter_toolbar
+          id={@id}
+          filter_fields={@filter_fields}
+          filter_params={@filter_params}
+          filter_submit_label={@filter_submit_label}
+          path={@path}
+          clear_href={@clear_href}
+          clear_visible={any_filter_active?(@filter_params)}
+        />
       </header>
 
       <div
@@ -291,6 +261,10 @@ defmodule AccrueAdmin.Components.DataTable do
         >
           Load newer rows
         </button>
+      </div>
+
+      <div :if={@list_status != []} class="ax-data-table-list-status" data-role="list-status">
+        <%= render_slot(@list_status, %{visible_count: length(@rows), list_state: @list_state}) %>
       </div>
 
       <div :if={@render_loading_fixture} class="ax-data-table-loading" data-role="loading-skeleton">
