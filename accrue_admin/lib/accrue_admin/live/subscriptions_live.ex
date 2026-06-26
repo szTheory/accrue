@@ -18,6 +18,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
     StatStrip
   }
 
+  alias AccrueAdmin.Components.StatusBadge
   alias AccrueAdmin.Copy
   alias AccrueAdmin.Queries.Subscriptions
 
@@ -247,9 +248,16 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
   defp state_cell(row) do
     {status, label} = lifecycle_status(row)
 
-    Phoenix.HTML.raw(
-      ~s(<span class="ax-status-badge ax-status-badge-#{status_tone(status)}"><span class="ax-status-dot" aria-hidden="true"></span><span>#{escape(label)}</span></span>)
-    )
+    %{
+      status: status,
+      label: label,
+      tone: status_tone(status),
+      __changed__: %{}
+    }
+    |> StatusBadge.status_badge()
+    |> Phoenix.HTML.Safe.to_iodata()
+    |> IO.iodata_to_binary()
+    |> Phoenix.HTML.raw()
   end
 
   defp lifecycle_status(%{cancel_at_period_end: true}), do: {:warning, "Canceling at period end"}
