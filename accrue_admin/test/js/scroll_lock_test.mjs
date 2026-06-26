@@ -1,0 +1,181 @@
+import assert from "node:assert/strict";
+import { afterEach, beforeEach, test } from "node:test";
+
+import { ScrollLock, resetScrollLockForTests } from "../../assets/js/hooks/scroll_lock.js";
+
+function styleDeclaration() {
+  const customProperties = new Map();
+
+  return {
+    position: "",
+    top: "",
+    left: "",
+    right: "",
+    width: "",
+    overflow: "",
+    paddingRight: "",
+    setProperty(name, value) {
+      customProperties.set(name, String(value));
+    },
+    getPropertyValue(name) {
+      return customProperties.get(name) || "";
+    },
+    removeProperty(name) {
+      customProperties.delete(name);
+    }
+  };
+}
+
+function shellElement() {
+  const attributes = new Map();
+
+  return {
+    inert: false,
+    setAttribute(name, value = "") {
+      attributes.set(name, String(value));
+      if (name === "inert") this.inert = true;
+    },
+    removeAttribute(name) {
+      attributes.delete(name);
+      if (name === "inert") this.inert = false;
+    },
+    hasAttribute(name) {
+      return attributes.has(name);
+    }
+  };
+}
+
+function fakeBrowser({ scrollY = 0, innerWidth = 1024, clientWidth = 1008 } = {}) {
+  const shell = shellElement();
+  const documentElement = {
+    style: styleDeclaration(),
+    clientWidth
+  };
+  const body = {
+    style: styleDeclaration()
+  };
+
+  const documentLike = {
+    documentElement,
+    body,
+    querySelector(selector) {
+      return selector === "#accrue-admin-shell" ? shell : null;
+    }
+  };
+
+  const windowLike = {
+    innerWidth,
+    scrollY,
+    scrollCalls: [],
+    scrollTo(x, y) {
+      this.scrollCalls.push([x, y]);
+      this.scrollY = y;
+    }
+  };
+
+  return { documentLike, shell, windowLike };
+}
+
+function withBrowserGlobals(browser, callback) {
+  const priorDocument = globalThis.document;
+  const priorWindow = globalThis.window;
+
+  globalThis.document = browser.documentLike;
+  globalThis.window = browser.windowLike;
+
+  try {
+    callback(browser);
+  } finally {
+    if (priorDocument === undefined) {
+      delete globalThis.document;
+    } else {
+      globalThis.document = priorDocument;
+    }
+
+    if (priorWindow === undefined) {
+      delete globalThis.window;
+    } else {
+      globalThis.window = priorWindow;
+    }
+  }
+}
+
+beforeEach(() => {
+  resetScrollLockForTests();
+});
+
+afterEach(() => {
+  resetScrollLockForTests();
+});
+
+test("lock is ref-counted and restores only after the final unlock", () => {
+  const browser = fakeBrowser({ scrollY: 240 });
+
+  withBrowserGlobals(browser, ({ documentLike, shell }) => {
+    ScrollLock.lock();
+    ScrollLock.lock();
+
+    assert.equal(documentLike.documentElement.style.position, "fixed");
+    assert.equal(shell.hasAttribute("inert"), true);
+
+    ScrollLock.unlock();
+    assert.equal(documentLike.documentElement.style.position, "fixed");
+    assert.equal(shell.hasAttribute("inert"), true);
+
+    ScrollLock.unlock();
+    assert.equal(documentLike.documentElement.style.position, "");
+    assert.equal(shell.hasAttribute("inert"), false);
+  });
+});
+
+test("lock saves scroll position with an iOS-safe fixed top offset and restores exactly", () => {
+  const browser = fakeBrowser({ scrollY: 512 });
+
+  withBrowserGlobals(browser, ({ documentLike, windowLike }) => {
+    ScrollLock.lock();
+
+    assert.equal(documentLike.documentElement.style.position, "fixed");
+    assert.equal(documentLike.documentElement.style.top, "-512px");
+
+    windowLike.scrollY = 0;
+    ScrollLock.unlock();
+
+    assert.deepEqual(windowLike.scrollCalls.at(-1), [0, 512]);
+    assert.equal(windowLike.scrollY, 512);
+    assert.equal(documentLike.documentElement.style.top, "");
+  });
+});
+
+test("accrue admin shell remains inert until the final unlock", () => {
+  const browser = fakeBrowser();
+
+  withBrowserGlobals(browser, ({ shell }) => {
+    assert.equal(shell.hasAttribute("inert"), false);
+
+    ScrollLock.lock();
+    assert.equal(shell.hasAttribute("inert"), true);
+
+    ScrollLock.lock();
+    ScrollLock.unlock();
+    assert.equal(shell.hasAttribute("inert"), true);
+
+    ScrollLock.unlock();
+    assert.equal(shell.hasAttribute("inert"), false);
+  });
+});
+
+test("scrollbar compensation is set while locked and cleared after unlock", () => {
+  const browser = fakeBrowser({ innerWidth: 1200, clientWidth: 1183 });
+
+  withBrowserGlobals(browser, ({ documentLike }) => {
+    ScrollLock.lock();
+
+    assert.equal(
+      documentLike.documentElement.style.getPropertyValue("--ax-scrollbar-comp"),
+      "17px"
+    );
+
+    ScrollLock.unlock();
+    assert.equal(documentLike.documentElement.style.getPropertyValue("--ax-scrollbar-comp"), "");
+  });
+});
