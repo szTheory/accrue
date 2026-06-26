@@ -12,11 +12,14 @@ defmodule AccrueAdmin.Components.Overlay do
   attr(:open, :boolean, default: false)
   attr(:presentation, :atom, default: :modal)
   attr(:title, :string, required: true)
+  attr(:title_id, :string, default: nil)
   attr(:subtitle, :string, default: nil)
+  attr(:description_id, :string, default: nil)
   attr(:close_label, :string, default: "Close")
   attr(:close_event, :string, default: nil)
   attr(:close_target, :string, default: nil)
   attr(:initial_focus, :string, default: nil)
+  attr(:component_group, :string, default: nil)
   attr(:class, :any, default: nil)
   attr(:rest, :global, include: ~w(phx-click phx-target))
 
@@ -29,11 +32,11 @@ defmodule AccrueAdmin.Components.Overlay do
       assigns
       |> assign(:presentation_name, presentation_name(assigns.presentation))
       |> assign(:portal_id, "#{assigns.id}-portal")
-      |> assign(:title_id, "#{assigns.id}-title")
-      |> assign(:description_id, if(assigns.subtitle, do: "#{assigns.id}-description", else: nil))
+      |> assign(:resolved_title_id, assigns.title_id || "#{assigns.id}-title")
+      |> assign(:resolved_description_id, description_id(assigns))
       |> assign(:focus_trap_close_event, focus_trap_close_event(assigns))
       |> assign(:focus_trap_close_target, focus_trap_close_target(assigns))
-      |> assign(:focus_trap_fallback, "##{assigns.id}-title")
+      |> assign(:focus_trap_fallback, "##{assigns.title_id || "#{assigns.id}-title"}")
       |> assign(:role, role_for(assigns.presentation))
       |> assign(:aria_modal, aria_modal_for(assigns.presentation))
       |> assign(:scroll_lock, scroll_lock?(assigns.presentation))
@@ -53,6 +56,7 @@ defmodule AccrueAdmin.Components.Overlay do
         id={@id}
         class={@shell_class}
         data-ax-overlay-shell
+        data-component-group={@component_group}
         data-presentation={@presentation_name}
         data-scroll-lock={@scroll_lock}
         phx-hook="Overlay"
@@ -80,21 +84,21 @@ defmodule AccrueAdmin.Components.Overlay do
           data-presentation={@presentation_name}
           role={@role}
           aria-modal={@aria_modal}
-          aria-labelledby={@title_id}
-          aria-describedby={@description_id}
+          aria-labelledby={@resolved_title_id}
+          aria-describedby={@resolved_description_id}
         >
           <header class={@header_class}>
             <div>
-              <h2 id={@title_id} class="ax-heading" tabindex="-1" data-focus-trap-fallback>
+              <h2 id={@resolved_title_id} class="ax-heading" tabindex="-1" data-focus-trap-fallback>
                 <%= @title %>
               </h2>
-              <p :if={@subtitle} id={@description_id} class="ax-body"><%= @subtitle %></p>
+              <p :if={@subtitle} id={@resolved_description_id} class="ax-body"><%= @subtitle %></p>
             </div>
 
-            <div :if={@actions != [] || @close_label} class={@actions_class}>
+            <div :if={@actions != [] || close_label?(@close_label)} class={@actions_class}>
               <%= render_slot(@actions) %>
               <button
-                :if={@close_label}
+                :if={close_label?(@close_label)}
                 type="button"
                 class="ax-button ax-button-ghost"
                 phx-click={@focus_trap_close_event}
@@ -120,6 +124,13 @@ defmodule AccrueAdmin.Components.Overlay do
 
   defp presentation_name(presentation), do: presentation |> normalize_presentation() |> Atom.to_string()
 
+  defp description_id(%{description_id: description_id}) when is_binary(description_id),
+    do: description_id
+
+  defp description_id(%{subtitle: subtitle, id: id}) when is_binary(subtitle), do: "#{id}-description"
+
+  defp description_id(_assigns), do: nil
+
   defp normalize_presentation(presentation) when presentation in [:modal, :drawer, :popover],
     do: presentation
 
@@ -142,8 +153,8 @@ defmodule AccrueAdmin.Components.Overlay do
   defp shell_class(:popover, extra_class), do: ["ax-overlay-shell", "ax-overlay-popover-shell", extra_class]
   defp shell_class(_presentation, extra_class), do: shell_class(:modal, extra_class)
 
-  defp backdrop_class(:drawer), do: ["ax-overlay-backdrop", "ax-detail-drawer-backdrop"]
-  defp backdrop_class(:modal), do: ["ax-overlay-backdrop", "ax-step-up-modal-backdrop"]
+  defp backdrop_class(:drawer), do: "ax-detail-drawer-backdrop"
+  defp backdrop_class(:modal), do: "ax-step-up-modal-backdrop"
   defp backdrop_class(_presentation), do: "ax-overlay-backdrop"
 
   defp panel_class(:drawer), do: ["ax-overlay-panel", "ax-detail-drawer"]
@@ -170,6 +181,9 @@ defmodule AccrueAdmin.Components.Overlay do
   defp footer_class(:drawer), do: "ax-detail-drawer-footer"
   defp footer_class(:modal), do: "ax-step-up-modal-actions"
   defp footer_class(_presentation), do: "ax-overlay-popover-footer"
+
+  defp close_label?(label) when is_binary(label), do: String.trim(label) != ""
+  defp close_label?(_label), do: false
 
   defp mounted_transition(:drawer) do
     Phoenix.LiveView.JS.show(

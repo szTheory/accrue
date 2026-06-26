@@ -45,6 +45,7 @@ defmodule AccrueAdmin.Layouts do
       </head>
       <body class="accrue-admin-shell">
         <%= @inner_content %>
+        <div id="ax-overlay-root"></div>
         <style nonce={@csp_nonce}><%= Phoenix.HTML.raw(@runtime_theme_style) %></style>
         <script :if={@assets_js_path} defer src={@assets_js_path}></script>
       </body>
