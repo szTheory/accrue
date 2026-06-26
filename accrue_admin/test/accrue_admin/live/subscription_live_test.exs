@@ -536,6 +536,52 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
              "Braintree does not expose first-party quantity or subscription-item mutations through Accrue."
   end
 
+  test "crafted Braintree action events are rejected server-side", %{conn: conn} do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+
+    customer =
+      insert_customer(%{
+        owner_id: "subscription-detail-braintree-crafted",
+        processor: "braintree",
+        processor_id: "cus_bt_crafted"
+      })
+
+    subscription =
+      insert_subscription(customer, %{
+        processor: "braintree",
+        processor_id: "sub_bt_crafted"
+      })
+
+    item =
+      %SubscriptionItem{}
+      |> SubscriptionItem.changeset(%{
+        subscription_id: subscription.id,
+        processor: "braintree",
+        processor_id: "si_bt_crafted",
+        price_id: "price_bt_basic",
+        quantity: 1
+      })
+      |> TestRepo.insert!()
+
+    {:ok, view, _html} = live(conn, "/billing/subscriptions/#{subscription.id}")
+
+    html = render_click(view, "open_action_drawer", %{"action_type" => "update_quantity"})
+
+    refute html =~ ~s(data-action-type="update_quantity")
+    refute html =~ ~s(data-ax-action-drawer-form)
+
+    html =
+      render_submit(view, "prepare_action", %{
+        "action_type" => "remove_item",
+        "item_id" => item.id,
+        "proration" => "create_prorations"
+      })
+
+    refute html =~ "Confirm Remove item"
+    refute html =~ ~s(data-role="confirm-action")
+    assert TestRepo.get!(SubscriptionItem, item.id)
+  end
+
   describe "dunning state inside summary and drill sections" do
     test "subscription with no campaign renders the dunning drill without a standalone card", %{
       conn: conn,

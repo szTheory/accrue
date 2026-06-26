@@ -72,17 +72,27 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
 
   @impl true
   def handle_event("open_action_drawer", %{"action_type" => action_type}, socket) do
-    {:noreply,
-     socket
-     |> ensure_timeline_events()
-     |> assign(:drawer_action_type, action_type)
-     |> assign(:pending_action, nil)}
+    socket = ensure_timeline_events(socket)
+
+    if action_available?(socket.assigns.subscription, action_type) do
+      {:noreply,
+       socket
+       |> assign(:drawer_action_type, action_type)
+       |> assign(:pending_action, nil)}
+    else
+      {:noreply, reject_unavailable_action(socket)}
+    end
   end
 
   def handle_event("prepare_action", params, socket) do
     socket = ensure_timeline_events(socket)
     action = pending_action(params, socket)
-    {:noreply, assign(socket, :pending_action, maybe_attach_preview(socket, action))}
+
+    if action_available?(socket.assigns.subscription, action.type) do
+      {:noreply, assign(socket, :pending_action, maybe_attach_preview(socket, action))}
+    else
+      {:noreply, reject_unavailable_action(socket)}
+    end
   end
 
   def handle_event("cancel_pending_action", _params, socket) do
@@ -916,6 +926,34 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
       source_event_id: source_event && source_event.id,
       source_webhook_event_id: source_event && source_event.caused_by_webhook_event_id
     }
+  end
+
+  defp action_available?(subscription, "swap_plan"), do: swap_plan_available?(subscription)
+
+  defp action_available?(subscription, "cancel_at_period_end"),
+    do: not braintree_processor?(subscription)
+
+  defp action_available?(subscription, "pause"), do: not braintree_processor?(subscription)
+  defp action_available?(subscription, "resume"), do: not braintree_processor?(subscription)
+
+  defp action_available?(subscription, "update_quantity"),
+    do: quantity_change_available?(subscription)
+
+  defp action_available?(subscription, action)
+       when action in ["add_item", "update_item_quantity", "remove_item"],
+       do: quantity_item_changes_available?(subscription)
+
+  defp action_available?(_subscription, action)
+       when action in ["cancel_now", "comp_subscription"],
+       do: true
+
+  defp action_available?(_subscription, _action), do: false
+
+  defp reject_unavailable_action(socket) do
+    socket
+    |> assign(:drawer_action_type, nil)
+    |> assign(:pending_action, nil)
+    |> push_flash(:error, AccrueAdmin.Copy.Subscription.subscription_action_braintree_guidance())
   end
 
   defp selected_source_event(%{"source_event_id" => event_id}, events)
