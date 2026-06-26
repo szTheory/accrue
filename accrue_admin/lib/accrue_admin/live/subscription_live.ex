@@ -546,6 +546,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
 
       <button type="submit" class="ax-button ax-button-primary">
         <%= action_label(@action_type) %>
+        <span class="ax-visually-hidden"> Continue</span>
       </button>
     </form>
     """
