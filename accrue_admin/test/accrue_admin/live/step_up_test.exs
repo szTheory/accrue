@@ -186,7 +186,7 @@ defmodule AccrueAdmin.StepUpTest do
 
     assert render_click(element(view, "button")) =~ "Step-up required"
 
-    assert render_submit(element(view, "form"), %{"code" => "123456"}) =~
+    assert render_submit(view, "step_up_submit", %{"code" => "123456"}) =~
              ~s(data-role="executed">1<)
 
     assert render_click(element(view, "button")) =~ ~s(data-role="executed">2<)
@@ -217,7 +217,7 @@ defmodule AccrueAdmin.StepUpTest do
       )
 
     assert render_click(element(view, "button")) =~ "Step-up required"
-    html = render_submit(element(view, "form"), %{"code" => "000000"})
+    html = render_submit(view, "step_up_submit", %{"code" => "000000"})
 
     assert html =~ "invalid_code"
     assert html =~ "Step-up required"
@@ -248,7 +248,7 @@ defmodule AccrueAdmin.StepUpTest do
 
     assert render_click(element(view, "button")) =~ "Step-up required"
 
-    assert render_click(element(view, "button[phx-click='step_up_dismiss']")) =~
+    assert render_click(view, "step_up_dismiss") =~
              ~s(data-role="executed">0<)
 
     refute render(view) =~ "Step-up required"

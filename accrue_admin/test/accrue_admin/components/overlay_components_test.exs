@@ -8,6 +8,7 @@ defmodule AccrueAdmin.OverlayComponentsTest do
   alias AccrueAdmin.Components.DetailDrawer
   alias AccrueAdmin.Components.Overlay
   alias AccrueAdmin.Components.StepUpAuthModal
+  alias AccrueAdmin.Layouts
 
   describe "Overlay portal and focus contract" do
     test "renders drawer presentation through the body-level overlay root" do
@@ -74,6 +75,51 @@ defmodule AccrueAdmin.OverlayComponentsTest do
       assert html =~ ~s(phx-hook="Overlay")
       assert html =~ ~s(data-focus-trap-close-event="step_up_dismiss")
       assert html =~ ~s(data-focus-trap-fallback="#subscription-step-up-title")
+    end
+
+    test "renders popover presentation without modal semantics" do
+      html =
+        render_component(fn assigns ->
+          assigns = assigns
+
+          ~H"""
+          <Overlay.overlay
+            id="subscription-actions-popover"
+            open
+            presentation={:popover}
+            title="More actions"
+            close_label="Close actions"
+            close_event="close_subscription_actions"
+          >
+            <button type="button" role="menuitem">Pause collection</button>
+          </Overlay.overlay>
+          """
+        end)
+
+      assert html =~ ~s(data-phx-portal="#ax-overlay-root")
+      assert html =~ ~s(data-presentation="popover")
+      assert html =~ ~s(data-ax-overlay-shell)
+      assert html =~ ~s(data-ax-overlay-panel)
+      assert html =~ ~s(role="menu")
+      assert html =~ ~s(phx-hook="Overlay")
+      refute html =~ ~s(aria-modal="true")
+      refute html =~ ~s(data-scroll-lock)
+      refute html =~ ~s(data-ax-overlay-backdrop)
+    end
+  end
+
+  describe "root portal target" do
+    test "renders exactly one body-level overlay root after inner content" do
+      html =
+        render_component(&Layouts.root/1, %{
+          inner_content: Phoenix.HTML.raw(~s(<main id="admin-content">Billing</main>)),
+          page_title: "Billing"
+        })
+
+      assert Regex.scan(~r/id="ax-overlay-root"/, html) |> length() == 1
+
+      assert html =~
+               ~r/<body[^>]*>.*<main id="admin-content">Billing<\/main>.*<div id="ax-overlay-root"><\/div>.*<style/s
     end
   end
 

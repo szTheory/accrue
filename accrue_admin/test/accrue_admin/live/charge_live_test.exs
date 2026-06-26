@@ -125,8 +125,7 @@ defmodule AccrueAdmin.ChargeLiveTest do
     html = render_click(element(view, "[data-role='confirm-refund']"))
     assert html =~ "Step-up required"
 
-    html =
-      render_submit(element(view, "form[phx-submit='step_up_submit']"), %{"code" => "123456"})
+    html = render_submit(view, "step_up_submit", %{"code" => "123456"})
 
     assert html =~ Copy.charge_refund_created_info()
 
@@ -178,7 +177,7 @@ defmodule AccrueAdmin.ChargeLiveTest do
     assert html =~ Copy.step_up_submit_label()
     assert html =~ ~s(id="accrue-admin-step-up-dialog")
 
-    html = render_click(element(view, "button[phx-click='step_up_dismiss']"))
+    html = render_click(view, "step_up_dismiss")
     refute html =~ ~s(id="accrue-admin-step-up-dialog")
     refute html =~ ~s(id="step-up-title")
   end
@@ -259,8 +258,7 @@ defmodule AccrueAdmin.ChargeLiveTest do
 
     _html = render_click(element(view, "[data-role='confirm-refund']"))
 
-    html =
-      render_submit(element(view, "form[phx-submit='step_up_submit']"), %{"code" => "123456"})
+    html = render_submit(view, "step_up_submit", %{"code" => "123456"})
 
     assert html =~ Copy.charge_refund_created_info()
   end

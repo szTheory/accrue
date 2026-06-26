@@ -167,8 +167,7 @@ defmodule AccrueAdmin.InvoiceLiveTest do
     html = render_click(element(view, "[data-role='confirm-action']"))
     assert html =~ Copy.step_up_title()
 
-    html =
-      render_submit(element(view, "form[phx-submit='step_up_submit']"), %{"code" => "123456"})
+    html = render_submit(view, "step_up_submit", %{"code" => "123456"})
 
     assert html =~ Copy.invoice_action_recorded_info()
 
