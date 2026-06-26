@@ -41,7 +41,7 @@ Declared values (must be multiples of 4):
 | 2xl | 48px | Empty-state vertical padding |
 | 3xl | 64px | Major page scroll margins and large empty-state treatment |
 
-Exceptions: `--ax-space-2xs` / 2px is allowed only for documented dense-table hairlines and segmented-control internal thumb gaps. Icon-only controls keep the existing 44px minimum target (`2.75rem`) when used in header actions. Do not add raw px spacing outside the existing source-guard allowlist.
+Exceptions: none for spacing values below 4px. Dense-table hairlines must be expressed as border treatment, not spacing scale. Segmented-control internal thumb separation must use the 4px `xs` token or border treatment. Icon-only controls keep the existing 44px minimum target (`2.75rem`) when used in header actions. Do not add raw px spacing outside the existing source-guard allowlist.
 
 ---
 
