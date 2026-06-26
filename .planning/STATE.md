@@ -2,17 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.54
 milestone_name: Admin UI Page-Level Streamlining & Storybook
-current_phase: 196
 status: executing
-stopped_at: Phase 196 UI-SPEC approved
-last_updated: "2026-06-26T20:28:36.936Z"
+stopped_at: Completed 196-01-PLAN.md
+last_updated: "2026-06-26T20:50:09.948Z"
 last_activity: 2026-06-26
-last_activity_desc: Phase 196 planning complete
 progress:
   total_phases: 8
   completed_phases: 3
-  total_plans: 17
-  completed_plans: 17
+  total_plans: 22
+  completed_plans: 18
   percent: 38
 ---
 
@@ -24,14 +22,14 @@ See: `.planning/PROJECT.md` (updated 2026-06-24 — v1.54 Admin UI Page-Level St
 
 **Core value:** A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic Elixir DX, strong domain modeling, tamper-evident audit ledger, great observability, and zero breaking-change pain through v1.x.
 
-**Current focus:** Phase 196 — exemplar c — subscriptions list + pageheader
+**Current focus:** Phase 196 — exemplar-c-subscriptions-list-pageheader
 
 ## Current Position
 
-Phase: 196
-Plan: Not started
+Phase: 196 (exemplar-c-subscriptions-list-pageheader) — EXECUTING
+Plan: 2 of 5
 Status: Ready to execute
-Last activity: 2026-06-26 — Phase 196 planning complete
+Last activity: 2026-06-26
 
 ## Post-v1.48 Pause Rule
 
@@ -204,6 +202,7 @@ Coverage: 22/22 v1.51 requirements mapped (each REQ-ID → exactly one phase). D
 | Phase 195 P06 | 7m 52s | 3 tasks | 6 files |
 | Phase 195 P07 | 21m | 3 tasks | 4 files |
 | Phase 195 P08 | 10m 38s | 4 tasks | 7 files |
+| Phase 196 P01 | 13min | 3 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -344,6 +343,9 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - [Phase 195-08]: Storybook coverage is additive and keeps `/dev/components` untouched.
 - [Phase 195-08]: Subscription detail action-menu remains non-portaled in Phase 195; Phase 199 owns transformed-ancestor, overflow clipping, and stacking-context audit before any portal exception.
 - [Phase 195-08]: Task 4 was verification-only because the final Phase 195 gate passed without additional code changes.
+- [Phase 196]: 196-01 kept Wave 0 test-only: no PageHeader/DataTable/Subscriptions runtime behavior was implemented.
+- [Phase 196]: 196-01 scoped propagation coverage to Subscriptions; broader LIST rollout remains Phase 197 work.
+- [Phase 196]: 196-01 owner-scope clear-all is asserted in LiveView tests with an authorized organization session.
 
 ### Pending Todos
 
@@ -433,9 +435,9 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 
 ## Session Continuity
 
-Last session: 2026-06-26T17:25:02.652Z
-Stopped at: Phase 196 UI-SPEC approved
-Resume file: .planning/phases/196-exemplar-c-subscriptions-list-pageheader/196-UI-SPEC.md
+Last session: 2026-06-26T20:50:09.941Z
+Stopped at: Completed 196-01-PLAN.md
+Resume file: None
 
 ## Operator Next Steps
 
