@@ -2,15 +2,17 @@
 gsd_state_version: 1.0
 milestone: v1.54
 milestone_name: Admin UI Page-Level Streamlining & Storybook
+current_phase: 196
+current_phase_name: exemplar-c-subscriptions-list-pageheader
 status: executing
-stopped_at: Completed 196-02-PLAN.md
-last_updated: "2026-06-26T20:58:39.315Z"
+stopped_at: Completed 196-03-PLAN.md
+last_updated: "2026-06-26T21:12:48.823Z"
 last_activity: 2026-06-26
 progress:
   total_phases: 8
   completed_phases: 3
   total_plans: 22
-  completed_plans: 19
+  completed_plans: 20
   percent: 38
 ---
 
@@ -27,7 +29,7 @@ See: `.planning/PROJECT.md` (updated 2026-06-24 — v1.54 Admin UI Page-Level St
 ## Current Position
 
 Phase: 196 (exemplar-c-subscriptions-list-pageheader) — EXECUTING
-Plan: 3 of 5
+Plan: 4 of 5
 Status: Ready to execute
 Last activity: 2026-06-26
 
@@ -204,6 +206,7 @@ Coverage: 22/22 v1.51 requirements mapped (each REQ-ID → exactly one phase). D
 | Phase 195 P08 | 10m 38s | 4 tasks | 7 files |
 | Phase 196 P01 | 13min | 3 tasks | 6 files |
 | Phase 196 P02 | 4min | 2 tasks | 2 files |
+| Phase 196 P03 | 9min | 3 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -349,6 +352,9 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - [Phase 196]: 196-01 owner-scope clear-all is asserted in LiveView tests with an authorized organization session.
 - [Phase 196]: PageHeader composes Breadcrumbs and renders caller-owned description, stat_strip, actions, and filter_toolbar slots without owning list/resource state. — Locks PGH-01 before Subscriptions adoption and Phase 197 propagation.
 - [Phase 196]: Storybook coverage stays focused and static for the PageHeader contract; runtime page adoption remains deferred to later Phase 196 plans. — Keeps D-16 and D-17 propagation and Storybook boundaries intact.
+- [Phase 196]: 196-03: DataTable keeps backward-compatible derived state defaults while allowing explicit list_state and empty_reason for LIST pages.
+- [Phase 196]: 196-03: DataTable.filter_toolbar remains parent-targeted for data_table_filter so PageHeader can host filters without owning state.
+- [Phase 196]: 196-03: FilterChipBar renders caller-supplied result counts and clear-all hrefs without mutating URLs.
 
 ### Pending Todos
 
@@ -438,8 +444,8 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 
 ## Session Continuity
 
-Last session: 2026-06-26T20:58:10.763Z
-Stopped at: Completed 196-02-PLAN.md
+Last session: 2026-06-26T21:11:48.835Z
+Stopped at: Completed 196-03-PLAN.md
 Resume file: None
 
 ## Operator Next Steps
