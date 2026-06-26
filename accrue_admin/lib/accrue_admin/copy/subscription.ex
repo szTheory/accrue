@@ -90,6 +90,8 @@ defmodule AccrueAdmin.Copy.Subscription do
   def subscriptions_list_filtered_empty_body,
     do: "Clear filters or adjust the search to see subscriptions."
 
+  def subscriptions_list_loading_label, do: "Loading subscriptions."
+
   def subscriptions_list_plan_amount_unavailable, do: "Plan and amount unavailable"
 
   defp subscription_action_label("cancel_now"), do: "Cancel immediately"

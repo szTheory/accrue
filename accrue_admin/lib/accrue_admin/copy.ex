@@ -56,6 +56,7 @@ defmodule AccrueAdmin.Copy do
   defdelegate subscriptions_list_queue_empty_body(), to: Subscription
   defdelegate subscriptions_list_filtered_empty_title(), to: Subscription
   defdelegate subscriptions_list_filtered_empty_body(), to: Subscription
+  defdelegate subscriptions_list_loading_label(), to: Subscription
   defdelegate subscriptions_list_plan_amount_unavailable(), to: Subscription
 
   defdelegate dunning_panel_eyebrow(), to: Dunning

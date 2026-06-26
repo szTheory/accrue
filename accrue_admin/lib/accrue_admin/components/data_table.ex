@@ -38,6 +38,7 @@ defmodule AccrueAdmin.Components.DataTable do
       |> assign_new(:empty_copy, fn -> Copy.data_table_default_empty_copy() end)
       |> assign_new(:filtered_empty_title, fn -> nil end)
       |> assign_new(:filtered_empty_copy, fn -> nil end)
+      |> assign_new(:loading_label, fn -> "Loading" end)
       |> assign_new(:cursor_field, fn -> :inserted_at end)
       |> assign_new(:row_id, fn -> :id end)
       |> assign_new(:resource_plural, fn -> "rows" end)
@@ -268,7 +269,7 @@ defmodule AccrueAdmin.Components.DataTable do
       </div>
 
       <div :if={@render_loading_fixture} class="ax-data-table-loading" data-role="loading-skeleton">
-        <p class="ax-visually-hidden" role="status">Loading</p>
+        <p class="ax-visually-hidden" role="status"><%= @loading_label %></p>
 
         <div class="ax-card ax-data-table-shell ax-data-table-skeleton-shell" aria-hidden="true">
           <table class="ax-data-table-grid">
@@ -361,7 +362,6 @@ defmodule AccrueAdmin.Components.DataTable do
       <div
         :if={@render_rows}
         class="ax-card ax-data-table-shell"
-        phx-mounted={Phoenix.LiveView.JS.show(transition: {"ax-content-entering", "ax-content-enter-from", "ax-content-enter-to"}, time: 180)}
       >
         <table class="ax-data-table-grid">
           <caption :if={@table_caption} class="ax-visually-hidden"><%= @table_caption %></caption>

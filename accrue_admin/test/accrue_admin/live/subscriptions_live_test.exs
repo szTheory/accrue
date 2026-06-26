@@ -210,6 +210,8 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
            |> Floki.parse_document!()
            |> Floki.find(~s([data-role="loading-skeleton"] [role="status"]))
            |> length() == 1
+
+    assert loading_html =~ Copy.subscriptions_list_loading_label()
   end
 
   test "loading skeleton fixture is ignored outside test runtime", %{conn: conn} do

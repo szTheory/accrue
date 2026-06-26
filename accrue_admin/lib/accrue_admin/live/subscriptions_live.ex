@@ -142,6 +142,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
           list_state={list_state(@params, @summary)}
           empty_reason={empty_reason(@params, @summary)}
           loading_fixture={phase196_loading_fixture?(@params)}
+          loading_label={Copy.subscriptions_list_loading_label()}
           render_filter_toolbar={false}
           clear_href={clear_all_href(@params, @table_path)}
           columns={[
