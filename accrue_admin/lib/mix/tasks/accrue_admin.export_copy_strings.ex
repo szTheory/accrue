@@ -37,6 +37,18 @@ defmodule Mix.Tasks.AccrueAdmin.ExportCopyStrings do
     subscription_action_remove_item
     subscription_action_pause_collection
     subscription_action_create_comp_replacement
+    subscription_action_default_guidance
+    subscription_action_exception_guidance
+    subscription_action_braintree_guidance
+    subscription_action_braintree_swap_setup_guidance
+    subscription_action_braintree_quantity_item_guidance
+    subscription_action_stripe_guidance
+    subscription_action_supported_change_guidance
+    subscription_action_preview_heading
+    subscription_action_preview_total_label
+    subscription_action_item_id_label
+    subscription_action_quantity_label
+    subscription_action_single_item_quantity_guidance
     subscriptions_index_empty_title
     connect_accounts_headline
     connect_accounts_table_empty_title

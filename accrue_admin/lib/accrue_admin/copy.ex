@@ -39,7 +39,14 @@ defmodule AccrueAdmin.Copy do
   defdelegate subscription_action_exception_guidance(), to: Subscription
   defdelegate subscription_action_braintree_guidance(), to: Subscription
   defdelegate subscription_action_braintree_swap_setup_guidance(), to: Subscription
+  defdelegate subscription_action_braintree_quantity_item_guidance(), to: Subscription
   defdelegate subscription_action_stripe_guidance(), to: Subscription
+  defdelegate subscription_action_supported_change_guidance(), to: Subscription
+  defdelegate subscription_action_preview_heading(), to: Subscription
+  defdelegate subscription_action_preview_total_label(), to: Subscription
+  defdelegate subscription_action_item_id_label(), to: Subscription
+  defdelegate subscription_action_quantity_label(), to: Subscription
+  defdelegate subscription_action_single_item_quantity_guidance(), to: Subscription
   defdelegate subscription_confirm_workflow_message(action_type, opts), to: Subscription
   defdelegate subscription_lifecycle_ended_label(), to: Subscription
   defdelegate subscription_page_title(), to: Subscription

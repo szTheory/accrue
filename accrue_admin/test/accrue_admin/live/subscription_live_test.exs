@@ -428,33 +428,41 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
   test "copy fixture exposes all drawer action labels for browser anti-drift checks" do
     fixture = copy_fixture()
 
-    assert Map.take(fixture, [
-             "subscription_action_swap_plan",
-             "subscription_action_cancel_at_period_end",
-             "subscription_action_cancel_now",
-             "subscription_action_resume",
-             "subscription_action_update_quantity",
-             "subscription_action_add_item",
-             "subscription_action_update_item_quantity",
-             "subscription_action_remove_item",
-             "subscription_action_pause_collection",
-             "subscription_proration_none",
-             "subscription_proration_always_invoice",
-             "subscription_action_create_comp_replacement"
-           ]) == %{
-             "subscription_action_swap_plan" => "Change plan",
-             "subscription_action_cancel_at_period_end" => "Cancel renewal",
-             "subscription_action_cancel_now" => "Cancel immediately",
-             "subscription_action_resume" => "Resume",
-             "subscription_action_update_quantity" => "Update quantity",
-             "subscription_action_add_item" => "Add item",
-             "subscription_action_update_item_quantity" => "Update item quantity",
-             "subscription_action_remove_item" => "Remove item",
-             "subscription_action_pause_collection" => "Pause collection",
-             "subscription_proration_none" => "No proration",
-             "subscription_proration_always_invoice" => "Always invoice",
-             "subscription_action_create_comp_replacement" => "Comp this subscription"
-           }
+    expected = %{
+      "subscription_action_swap_plan" => Copy.subscription_action_swap_plan(),
+      "subscription_action_cancel_at_period_end" =>
+        Copy.subscription_action_cancel_at_period_end(),
+      "subscription_action_cancel_now" => Copy.subscription_action_cancel_now(),
+      "subscription_action_resume" => Copy.subscription_action_resume(),
+      "subscription_action_update_quantity" => Copy.subscription_action_update_quantity(),
+      "subscription_action_add_item" => Copy.subscription_action_add_item(),
+      "subscription_action_update_item_quantity" =>
+        Copy.subscription_action_update_item_quantity(),
+      "subscription_action_remove_item" => Copy.subscription_action_remove_item(),
+      "subscription_action_pause_collection" => Copy.subscription_action_pause_collection(),
+      "subscription_proration_none" => Copy.subscription_proration_none(),
+      "subscription_proration_always_invoice" => Copy.subscription_proration_always_invoice(),
+      "subscription_action_create_comp_replacement" =>
+        Copy.subscription_action_create_comp_replacement(),
+      "subscription_action_default_guidance" => Copy.subscription_action_default_guidance(),
+      "subscription_action_exception_guidance" => Copy.subscription_action_exception_guidance(),
+      "subscription_action_braintree_guidance" => Copy.subscription_action_braintree_guidance(),
+      "subscription_action_braintree_swap_setup_guidance" =>
+        Copy.subscription_action_braintree_swap_setup_guidance(),
+      "subscription_action_braintree_quantity_item_guidance" =>
+        Copy.subscription_action_braintree_quantity_item_guidance(),
+      "subscription_action_stripe_guidance" => Copy.subscription_action_stripe_guidance(),
+      "subscription_action_supported_change_guidance" =>
+        Copy.subscription_action_supported_change_guidance(),
+      "subscription_action_preview_heading" => Copy.subscription_action_preview_heading(),
+      "subscription_action_preview_total_label" => Copy.subscription_action_preview_total_label(),
+      "subscription_action_item_id_label" => Copy.subscription_action_item_id_label(),
+      "subscription_action_quantity_label" => Copy.subscription_action_quantity_label(),
+      "subscription_action_single_item_quantity_guidance" =>
+        Copy.subscription_action_single_item_quantity_guidance()
+    }
+
+    assert Map.take(fixture, Map.keys(expected)) == expected
   end
 
   test "cancel renewal action still renders provider-honest confirmation copy in the drawer", %{
@@ -570,6 +578,11 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
     refute html =~ ~s(data-action-type="update_quantity")
     refute html =~ ~s(data-ax-action-drawer-form)
 
+    html = render_click(view, "open_action_drawer", %{})
+
+    refute html =~ ~s(data-ax-action-drawer-form)
+    refute html =~ ~s(data-role="confirm-action")
+
     html =
       render_submit(view, "prepare_action", %{
         "action_type" => "remove_item",
@@ -578,6 +591,11 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
       })
 
     refute html =~ "Confirm Remove item"
+    refute html =~ ~s(data-role="confirm-action")
+
+    html = render_submit(view, "prepare_action", %{})
+
+    refute html =~ "Confirm action"
     refute html =~ ~s(data-role="confirm-action")
     assert TestRepo.get!(SubscriptionItem, item.id)
   end

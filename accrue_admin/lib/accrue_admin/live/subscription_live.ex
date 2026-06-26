@@ -71,7 +71,8 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
   end
 
   @impl true
-  def handle_event("open_action_drawer", %{"action_type" => action_type}, socket) do
+  def handle_event("open_action_drawer", %{"action_type" => action_type}, socket)
+      when is_binary(action_type) do
     socket = ensure_timeline_events(socket)
 
     if action_available?(socket.assigns.subscription, action_type) do
@@ -84,7 +85,11 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
     end
   end
 
-  def handle_event("prepare_action", params, socket) do
+  def handle_event("open_action_drawer", _params, socket),
+    do: {:noreply, reject_unavailable_action(socket)}
+
+  def handle_event("prepare_action", %{"action_type" => action_type} = params, socket)
+      when is_binary(action_type) do
     socket = ensure_timeline_events(socket)
     action = pending_action(params, socket)
 
@@ -94,6 +99,9 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
       {:noreply, reject_unavailable_action(socket)}
     end
   end
+
+  def handle_event("prepare_action", _params, socket),
+    do: {:noreply, reject_unavailable_action(socket)}
 
   def handle_event("cancel_pending_action", _params, socket) do
     {:noreply,
@@ -243,7 +251,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
           <div :if={braintree_processor?(@subscription)} class="ax-stack-sm">
             <p class="ax-body"><%= provider_action_guidance(@subscription) %></p>
             <p class="ax-body"><%= Copy.subscription_action_braintree_swap_setup_guidance() %></p>
-            <p class="ax-body"><%= AccrueAdmin.Copy.Subscription.subscription_action_braintree_quantity_item_guidance() %></p>
+            <p class="ax-body"><%= Copy.subscription_action_braintree_quantity_item_guidance() %></p>
           </div>
         </section>
 
@@ -429,10 +437,10 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
         class="ax-stack-md"
         data-role="swap-plan-preview"
       >
-        <p class="ax-label"><%= AccrueAdmin.Copy.Subscription.subscription_action_preview_heading() %></p>
+        <p class="ax-label"><%= Copy.subscription_action_preview_heading() %></p>
         <p class="ax-body"><%= preview_summary(@pending_action.preview) %></p>
         <p class="ax-body">
-          <%= AccrueAdmin.Copy.Subscription.subscription_action_preview_total_label() %>:
+          <%= Copy.subscription_action_preview_total_label() %>:
           <%= money_or_dash(@pending_action.preview.total) %>
         </p>
         <ul class="ax-stack-sm">
@@ -521,7 +529,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
 
       <%= if @action_type in ["update_quantity", "add_item", "update_item_quantity"] do %>
         <label class="ax-label" for={@action_type <> "-new-quantity" <> @id_suffix}>
-          <%= AccrueAdmin.Copy.Subscription.subscription_action_quantity_label() %>
+          <%= Copy.subscription_action_quantity_label() %>
         </label>
         <input
           id={@action_type <> "-new-quantity" <> @id_suffix}
@@ -534,7 +542,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
       <% end %>
 
       <p :if={@action_type == "update_quantity"} class="ax-body">
-        <%= AccrueAdmin.Copy.Subscription.subscription_action_single_item_quantity_guidance() %>
+        <%= Copy.subscription_action_single_item_quantity_guidance() %>
       </p>
 
       <%= if @action_type in ["update_item_quantity", "remove_item"] do %>
@@ -569,7 +577,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
   defp subscription_item_select(assigns) do
     ~H"""
     <label class="ax-label" for={@input_id}>
-      <%= AccrueAdmin.Copy.Subscription.subscription_action_item_id_label() %>
+      <%= Copy.subscription_action_item_id_label() %>
     </label>
     <select id={@input_id} name={@input_name} class="ax-select">
       <option :for={item <- @subscription.subscription_items || []} value={item.id}>
@@ -856,15 +864,15 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
   defp action_label("resume"), do: Copy.subscription_action_resume()
 
   defp action_label("update_quantity"),
-    do: AccrueAdmin.Copy.Subscription.subscription_action_update_quantity()
+    do: Copy.subscription_action_update_quantity()
 
-  defp action_label("add_item"), do: AccrueAdmin.Copy.Subscription.subscription_action_add_item()
+  defp action_label("add_item"), do: Copy.subscription_action_add_item()
 
   defp action_label("update_item_quantity"),
-    do: AccrueAdmin.Copy.Subscription.subscription_action_update_item_quantity()
+    do: Copy.subscription_action_update_item_quantity()
 
   defp action_label("remove_item"),
-    do: AccrueAdmin.Copy.Subscription.subscription_action_remove_item()
+    do: Copy.subscription_action_remove_item()
 
   defp action_label(nil), do: "Subscription action"
   defp action_label(action_type), do: humanize(action_type)
@@ -953,7 +961,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
     socket
     |> assign(:drawer_action_type, nil)
     |> assign(:pending_action, nil)
-    |> push_flash(:error, AccrueAdmin.Copy.Subscription.subscription_action_braintree_guidance())
+    |> push_flash(:error, Copy.subscription_action_braintree_guidance())
   end
 
   defp selected_source_event(%{"source_event_id" => event_id}, events)
@@ -1373,7 +1381,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
       Copy.subscription_action_braintree_guidance()
     else
       Copy.subscription_action_stripe_guidance() <>
-        " " <> AccrueAdmin.Copy.Subscription.subscription_action_supported_change_guidance()
+        " " <> Copy.subscription_action_supported_change_guidance()
     end
   end
 
