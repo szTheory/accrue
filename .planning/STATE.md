@@ -5,14 +5,14 @@ milestone_name: Admin UI Page-Level Streamlining & Storybook
 current_phase: 196
 current_phase_name: exemplar-c-subscriptions-list-pageheader
 status: executing
-stopped_at: Completed 196-03-PLAN.md
-last_updated: "2026-06-26T21:12:48.823Z"
+stopped_at: Completed 196-04-PLAN.md
+last_updated: "2026-06-26T21:35:12.365Z"
 last_activity: 2026-06-26
 progress:
   total_phases: 8
   completed_phases: 3
   total_plans: 22
-  completed_plans: 20
+  completed_plans: 21
   percent: 38
 ---
 
@@ -29,7 +29,7 @@ See: `.planning/PROJECT.md` (updated 2026-06-24 — v1.54 Admin UI Page-Level St
 ## Current Position
 
 Phase: 196 (exemplar-c-subscriptions-list-pageheader) — EXECUTING
-Plan: 4 of 5
+Plan: 5 of 5
 Status: Ready to execute
 Last activity: 2026-06-26
 
@@ -207,6 +207,7 @@ Coverage: 22/22 v1.51 requirements mapped (each REQ-ID → exactly one phase). D
 | Phase 196 P01 | 13min | 3 tasks | 6 files |
 | Phase 196 P02 | 4min | 2 tasks | 2 files |
 | Phase 196 P03 | 9min | 3 tasks | 4 files |
+| Phase 196 P04 | 12m | 3 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -355,6 +356,7 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - [Phase 196]: 196-03: DataTable keeps backward-compatible derived state defaults while allowing explicit list_state and empty_reason for LIST pages.
 - [Phase 196]: 196-03: DataTable.filter_toolbar remains parent-targeted for data_table_filter so PageHeader can host filters without owning state.
 - [Phase 196]: 196-03: FilterChipBar renders caller-supplied result counts and clear-all hrefs without mutating URLs.
+- [Phase 196]: Phase 196 Plan 04 keeps PageHeader slot-only; SubscriptionsLive and DataTableNav own list state and filter mutation. — Preserves D-02 and D-10 by letting PageHeader host slots without owning list/filter state.
 
 ### Pending Todos
 
@@ -444,8 +446,8 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 
 ## Session Continuity
 
-Last session: 2026-06-26T21:11:48.835Z
-Stopped at: Completed 196-03-PLAN.md
+Last session: 2026-06-26T21:35:12.357Z
+Stopped at: Completed 196-04-PLAN.md
 Resume file: None
 
 ## Operator Next Steps
