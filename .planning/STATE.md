@@ -3,16 +3,17 @@ gsd_state_version: 1.0
 milestone: v1.54
 milestone_name: Admin UI Page-Level Streamlining & Storybook
 current_phase: 195
+current_phase_name: exemplar-b-subscription-detail
 status: executing
-stopped_at: Phase 195 context gathered
-last_updated: "2026-06-26T03:49:31.569Z"
+stopped_at: Completed 195-01-PLAN.md
+last_updated: "2026-06-26T08:17:28.294Z"
 last_activity: 2026-06-26
-last_activity_desc: Phase 195 planning complete
+last_activity_desc: Phase 195 execution started
 progress:
   total_phases: 8
   completed_phases: 2
-  total_plans: 9
-  completed_plans: 9
+  total_plans: 17
+  completed_plans: 10
   percent: 25
 ---
 
@@ -24,14 +25,14 @@ See: `.planning/PROJECT.md` (updated 2026-06-24 — v1.54 Admin UI Page-Level St
 
 **Core value:** A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic Elixir DX, strong domain modeling, tamper-evident audit ledger, great observability, and zero breaking-change pain through v1.x.
 
-**Current focus:** Phase 195 — exemplar b — subscription detail
+**Current focus:** Phase 195 — exemplar-b-subscription-detail
 
 ## Current Position
 
-Phase: 195
-Plan: Not started
+Phase: 195 (exemplar-b-subscription-detail) — EXECUTING
+Plan: 2 of 8
 Status: Ready to execute
-Last activity: 2026-06-26 — Phase 195 planning complete
+Last activity: 2026-06-26 — Phase 195 execution started
 
 ## Post-v1.48 Pause Rule
 
@@ -196,6 +197,7 @@ Coverage: 22/22 v1.51 requirements mapped (each REQ-ID → exactly one phase). D
 | Phase 194 P02 | 191s | 2 tasks | 1 files |
 | Phase 194 P03 | 234s | 2 tasks | 2 files |
 | Phase 194 P04 | 624s | 3 tasks | 2 files |
+| Phase 195 P01 | 9m 15s | 3 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -318,6 +320,8 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - [Phase ?]: Planted CSS violations in PackageDocsVerifier tests use append+trailing-newline to preserve seeded app.css coverage for earlier guards
 - [Phase ?]: Guard D (empty-rail non-interactivity source lint) bans cursor:pointer on .ax-attention-rail--empty; D-08 ExUnit mirror keeps guard and test suite coupled
 - [Phase ?]: Phase 194 Plan 04: p193↔p187 scorecard pairing structural no-op — SC3 redefined as e2e:phase194 pass + source guards
+- [Phase 195]: Plan 195-01 intentionally remains RED-only; implementation is owned by later Phase 195 plans. — The plan objective is Wave 0 RED validation coverage; later plans green the implementation.
+- [Phase 195]: EXE-02 and IXN-01 remain pending after 195-01; this plan addresses them with RED coverage only. — The underlying Subscription detail conversion and full overlay implementation are split across later Phase 195 and Phase 199 plans.
 
 ### Pending Todos
 
@@ -407,9 +411,9 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 
 ## Session Continuity
 
-Last session: 2026-06-26T02:13:20.948Z
-Stopped at: Phase 195 context gathered
-Resume file: .planning/phases/195-exemplar-b-subscription-detail/195-CONTEXT.md
+Last session: 2026-06-26T08:17:28.287Z
+Stopped at: Completed 195-01-PLAN.md
+Resume file: None
 
 ## Operator Next Steps
 
