@@ -31,6 +31,13 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
   alias AccrueAdmin.TaxOwnershipRow
 
   @destructive_actions ~w(cancel_now comp_subscription remove_item)
+  @pause_behaviors ~w(void mark_uncollectible keep_as_draft)
+  @proration_atoms %{
+    "create_prorations" => :create_prorations,
+    "none" => :none,
+    "always_invoice" => :always_invoice
+  }
+  @proration_values Map.keys(@proration_atoms)
 
   @impl true
   def mount(%{"id" => subscription_id}, session, socket) do
@@ -91,12 +98,17 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
   def handle_event("prepare_action", %{"action_type" => action_type} = params, socket)
       when is_binary(action_type) do
     socket = ensure_timeline_events(socket)
-    action = pending_action(params, socket)
 
-    if action_available?(socket.assigns.subscription, action.type) do
-      {:noreply, assign(socket, :pending_action, maybe_attach_preview(socket, action))}
-    else
-      {:noreply, reject_unavailable_action(socket)}
+    case pending_action(params, socket) do
+      {:ok, action} ->
+        if action_available?(socket.assigns.subscription, action.type) do
+          {:noreply, assign(socket, :pending_action, maybe_attach_preview(socket, action))}
+        else
+          {:noreply, reject_unavailable_action(socket)}
+        end
+
+      :error ->
+        {:noreply, reject_unavailable_action(socket)}
     end
   end
 
@@ -924,17 +936,39 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
   defp pending_action(params, socket) do
     source_event = selected_source_event(params, socket.assigns.timeline_events)
 
-    %{
-      type: Map.fetch!(params, "action_type"),
-      new_price_id: blank_to_nil(params["new_price_id"]),
-      new_quantity: integer_param(params["new_quantity"]),
-      item_id: blank_to_nil(params["item_id"]),
-      pause_behavior: blank_to_nil(params["pause_behavior"]) || "void",
-      proration: blank_to_nil(params["proration"]) || "create_prorations",
-      source_event_id: source_event && source_event.id,
-      source_webhook_event_id: source_event && source_event.caused_by_webhook_event_id
-    }
+    with {:ok, new_price_id} <- optional_string(params["new_price_id"]),
+         {:ok, item_id} <- optional_string(params["item_id"]),
+         {:ok, pause_behavior} <- pause_behavior_param(params["pause_behavior"]),
+         {:ok, proration} <- proration_param(params["proration"]) do
+      {:ok,
+       %{
+         type: Map.fetch!(params, "action_type"),
+         new_price_id: new_price_id,
+         new_quantity: integer_param(params["new_quantity"]),
+         item_id: item_id,
+         pause_behavior: pause_behavior,
+         proration: proration,
+         source_event_id: source_event && source_event.id,
+         source_webhook_event_id: source_event && source_event.caused_by_webhook_event_id
+       }}
+    else
+      _ -> :error
+    end
   end
+
+  defp optional_string(value) when value in [nil, ""], do: {:ok, nil}
+  defp optional_string(value) when is_binary(value), do: {:ok, value}
+  defp optional_string(_value), do: :error
+
+  defp pause_behavior_param(value) when value in [nil, ""], do: {:ok, "void"}
+  defp pause_behavior_param(value) when value in @pause_behaviors, do: {:ok, value}
+  defp pause_behavior_param(_value), do: :error
+
+  defp proration_param(value) when value in [nil, ""], do: {:ok, "create_prorations"}
+  defp proration_param(value) when value in @proration_values, do: {:ok, value}
+  defp proration_param(_value), do: :error
+
+  defp proration_atom(value), do: Map.fetch(@proration_atoms, value)
 
   defp action_available?(subscription, "swap_plan"), do: swap_plan_available?(subscription)
 
@@ -1063,10 +1097,14 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
          %{type: "swap_plan", new_price_id: new_price_id, proration: proration},
          operation_id
        ) do
-    Billing.swap_plan(subscription, new_price_id,
-      proration: String.to_existing_atom(proration),
-      operation_id: operation_id
-    )
+    with {:ok, proration} <- proration_atom(proration) do
+      Billing.swap_plan(subscription, new_price_id,
+        proration: proration,
+        operation_id: operation_id
+      )
+    else
+      :error -> {:error, :invalid_proration}
+    end
   rescue
     ArgumentError -> {:error, :invalid_proration}
   end
@@ -1118,11 +1156,15 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
          },
          operation_id
        ) do
-    Billing.add_item(subscription, new_price_id,
-      quantity: new_quantity,
-      proration: String.to_existing_atom(proration),
-      operation_id: operation_id
-    )
+    with {:ok, proration} <- proration_atom(proration) do
+      Billing.add_item(subscription, new_price_id,
+        quantity: new_quantity,
+        proration: proration,
+        operation_id: operation_id
+      )
+    else
+      :error -> {:error, :invalid_proration}
+    end
   rescue
     ArgumentError -> {:error, :invalid_proration}
   end
@@ -1156,11 +1198,15 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
          },
          operation_id
        ) do
-    with {:ok, item} <- subscription_item(subscription, item_id) do
+    with {:ok, proration} <- proration_atom(proration),
+         {:ok, item} <- subscription_item(subscription, item_id) do
       Billing.update_item_quantity(item, new_quantity,
-        proration: String.to_existing_atom(proration),
+        proration: proration,
         operation_id: operation_id
       )
+    else
+      :error -> {:error, :invalid_proration}
+      other -> other
     end
   rescue
     ArgumentError -> {:error, :invalid_proration}
@@ -1181,11 +1227,15 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
          %{type: "remove_item", item_id: item_id, proration: proration},
          operation_id
        ) do
-    with {:ok, item} <- subscription_item(subscription, item_id) do
+    with {:ok, proration} <- proration_atom(proration),
+         {:ok, item} <- subscription_item(subscription, item_id) do
       Billing.remove_item(item,
-        proration: String.to_existing_atom(proration),
+        proration: proration,
         operation_id: operation_id
       )
+    else
+      :error -> {:error, :invalid_proration}
+      other -> other
     end
   rescue
     ArgumentError -> {:error, :invalid_proration}
@@ -1299,10 +1349,6 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
     }
   end
 
-  defp blank_to_nil(nil), do: nil
-  defp blank_to_nil(""), do: nil
-  defp blank_to_nil(value), do: value
-
   defp humanize(value) when is_atom(value), do: value |> Atom.to_string() |> humanize()
 
   defp humanize(value) when is_binary(value) do
@@ -1391,12 +1437,16 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
        )
        when is_binary(new_price_id) do
     if preview_supported?(socket.assigns.subscription) do
-      case Billing.preview_upcoming_invoice(socket.assigns.subscription,
-             new_price_id: new_price_id,
-             proration: String.to_existing_atom(proration)
-           ) do
-        {:ok, %UpcomingInvoice{} = preview} -> Map.put(action, :preview, preview)
-        {:error, _reason} -> Map.put(action, :preview_error, preview_error_copy())
+      with {:ok, proration} <- proration_atom(proration) do
+        case Billing.preview_upcoming_invoice(socket.assigns.subscription,
+               new_price_id: new_price_id,
+               proration: proration
+             ) do
+          {:ok, %UpcomingInvoice{} = preview} -> Map.put(action, :preview, preview)
+          {:error, _reason} -> Map.put(action, :preview_error, preview_error_copy())
+        end
+      else
+        :error -> Map.put(action, :preview_error, preview_error_copy())
       end
     else
       action

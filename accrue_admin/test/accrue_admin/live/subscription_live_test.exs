@@ -401,6 +401,57 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
            )
   end
 
+  test "crafted supported action params are rejected before staging", %{
+    conn: conn,
+    subscription: subscription
+  } do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    item = List.first(subscription.subscription_items)
+
+    {:ok, view, _html} = live(conn, "/billing/subscriptions/#{subscription.id}")
+
+    malformed_payloads = [
+      %{
+        "action_type" => "swap_plan",
+        "new_price_id" => ["price_pro"],
+        "proration" => "create_prorations"
+      },
+      %{
+        "action_type" => "swap_plan",
+        "new_price_id" => "price_pro",
+        "proration" => "invalid"
+      },
+      %{
+        "action_type" => "swap_plan",
+        "new_price_id" => "price_pro",
+        "proration" => ["create_prorations"]
+      },
+      %{"action_type" => "pause", "pause_behavior" => "invalid"},
+      %{"action_type" => "pause", "pause_behavior" => ["void"]},
+      %{
+        "action_type" => "remove_item",
+        "item_id" => [item.id],
+        "proration" => "create_prorations"
+      },
+      %{
+        "action_type" => "add_item",
+        "new_price_id" => %{"id" => "price_addon"},
+        "new_quantity" => "1",
+        "proration" => "create_prorations"
+      }
+    ]
+
+    for params <- malformed_payloads do
+      html = render_submit(view, "prepare_action", params)
+
+      refute html =~ "Confirm action"
+      refute html =~ ~s(data-role="confirm-action")
+      refute html =~ ~s(data-ax-action-drawer-form)
+    end
+
+    assert TestRepo.get!(SubscriptionItem, item.id)
+  end
+
   test "subscription action relabels route through Copy and exported fixture" do
     labels = %{
       "subscription_action_swap_plan" => "Change plan",
