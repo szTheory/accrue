@@ -1,14 +1,15 @@
 ---
 phase: 195-exemplar-b-subscription-detail
-reviewed: 2026-06-26T12:28:28Z
+reviewed: 2026-06-26T12:34:47Z
 depth: standard
-files_reviewed: 31
+files_reviewed: 32
 files_reviewed_list:
   - accrue_admin/assets/css/app.css
   - accrue_admin/assets/js/app.js
   - accrue_admin/assets/js/hooks/overlay.js
   - accrue_admin/assets/js/hooks/scroll_lock.js
   - accrue_admin/e2e/admin-spec-detail-phase195.spec.js
+  - accrue_admin/e2e/spike-overlay-portal.spec.js
   - accrue_admin/lib/accrue_admin/components/detail.ex
   - accrue_admin/lib/accrue_admin/components/detail_drawer.ex
   - accrue_admin/lib/accrue_admin/components/dropdown_menu.ex
@@ -47,9 +48,9 @@ approval: approved
 
 # Phase 195: Code Review Report
 
-**Reviewed:** 2026-06-26T12:28:28Z
+**Reviewed:** 2026-06-26T12:34:47Z
 **Depth:** standard
-**Files Reviewed:** 31
+**Files Reviewed:** 32
 **Status:** approved
 
 ## Narrative Findings (AI reviewer)
@@ -58,7 +59,7 @@ No Critical, Warning, or Info findings remain in the reviewed Phase 195 scope.
 
 ## Summary
 
-Re-reviewed Phase 195 after commits `9de92260` and `5c063330`. The prior malformed action event blockers are resolved:
+Re-reviewed Phase 195 after commits `9de92260`, `5c063330`, and `c4e196b0`. The prior malformed action event blockers are resolved:
 
 - Missing, non-binary, and unsupported `action_type` payloads now fail closed through guarded `handle_event/3` clauses.
 - Supported action payloads now validate optional string params, `pause_behavior`, and `proration` before staging.
@@ -66,6 +67,8 @@ Re-reviewed Phase 195 after commits `9de92260` and `5c063330`. The prior malform
 - Regression coverage exercises crafted supported action params with valid `action_type` and malformed auxiliary values.
 
 The prior copy export warning is also resolved: the public `AccrueAdmin.Copy` delegates exist, the export allowlist includes the drawer/provider/preview/item copy used by this phase, the generated fixture JSON contains those keys, and fixture tests compare the generated strings against `Copy`.
+
+The Phase 193 overlay spike regression gate is aligned with Phase 195's permanent layout-level portal root: Proof 2 now expects exactly one empty `#ax-overlay-root` to persist after navigation while asserting injected `#ax-spike-*` children and `data-spike-fixture` state do not orphan.
 
 ## Verification Reviewed
 
@@ -91,8 +94,15 @@ npm run e2e:phase195
 8/8 passed
 ```
 
+Additional verification reported after commit `c4e196b0`:
+
+```text
+env -u NO_COLOR npx playwright test e2e/spike-overlay-portal.spec.js --timeout=60000 --workers=1
+8 passed
+```
+
 ---
 
-_Reviewed: 2026-06-26T12:28:28Z_
+_Reviewed: 2026-06-26T12:34:47Z_
 _Reviewer: the agent (gsd-code-reviewer)_
 _Depth: standard_
