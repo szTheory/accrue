@@ -2,11 +2,9 @@
 gsd_state_version: 1.0
 milestone: v1.54
 milestone_name: Admin UI Page-Level Streamlining & Storybook
-current_phase: 196
-current_phase_name: exemplar-c-—-subscriptions-list-+-pageheader
-status: ready_to_plan
-stopped_at: Phase 195 complete (8/8) — ready to discuss Phase 196
-last_updated: 2026-06-26T12:49:41.200Z
+status: planning
+stopped_at: Phase 196 context gathered
+last_updated: "2026-06-26T16:23:39.276Z"
 last_activity: 2026-06-26
 progress:
   total_phases: 8
@@ -433,9 +431,9 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 
 ## Session Continuity
 
-Last session: 2026-06-26T10:03:09.749Z
-Stopped at: Completed 195-08-PLAN.md
-Resume file: None
+Last session: 2026-06-26T16:23:39.269Z
+Stopped at: Phase 196 context gathered
+Resume file: .planning/phases/196-exemplar-c-subscriptions-list-pageheader/196-CONTEXT.md
 
 ## Operator Next Steps
 
