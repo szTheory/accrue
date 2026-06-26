@@ -1,10 +1,12 @@
 /**
- * Phase 195 — SPEC-DETAIL and IXN-01 RED assertions.
+ * Phase 195 — SPEC-DETAIL and IXN-01 final gate.
  *
- * This spec intentionally lands before the Subscription detail exemplar and
- * canonical overlay implementation. It must reach the seeded detail route, then
- * fail on missing Phase 195 selectors or drawer/overlay behavior.
+ * Exercises the Subscription detail exemplar against the locked DETAIL
+ * invariants and the canonical overlay behavior instantiated in Phase 195.
  */
+
+const fs = require("fs");
+const path = require("path");
 
 const { test, expect } = require("@playwright/test");
 
@@ -15,6 +17,12 @@ const {
 } = require("./phase191-page-flow-helpers.js");
 
 test.use({ trace: "retain-on-failure" });
+
+const REPO_ROOT = path.resolve(__dirname, "..", "..");
+const BASELINE_PAGE_FLOW_CELLS = path.join(
+  REPO_ROOT,
+  ".planning/milestones/v1.53-phases/187-audit-baseline/baseline.page-flow.cells.json"
+);
 
 async function reset(request) {
   const response = await request.post("/__e2e__/reset");
@@ -120,23 +128,47 @@ async function assertDrawerInteractive(page, drawer) {
   await assertFocusWithin(page, drawer, "Phase 195 action drawer");
 }
 
+async function assertInitialDetailInvariants(page, label) {
+  await expect(page.locator("h1"), `${label}: exactly one h1`).toHaveCount(1);
+
+  const actionBand = page.locator("[data-ax-action-band]");
+  await expect(actionBand, `${label}: action band`).toBeVisible();
+  await expect(actionBand.locator("form:visible"), `${label}: no action-band forms`).toHaveCount(0);
+  await expect(page.locator("[data-ax-action-drawer-form]:visible"), `${label}: no drawer forms on load`).toHaveCount(0);
+
+  const primaryActions = page.locator("[data-ax-primary-action]");
+  expect(await primaryActions.count(), `${label}: DETAIL pages may expose at most two primary actions`).toBeLessThanOrEqual(2);
+
+  await expect(page.locator("[data-ax-action-overflow-menu]"), `${label}: overflow menu`).toHaveCount(1);
+  await expect(page.locator("[data-ax-related-resources]"), `${label}: one related strip`).toHaveCount(1);
+  await expect(page.locator("[data-role='subscription-related-billing']"), `${label}: duplicate related card removed`).toHaveCount(0);
+  await expect(page.locator("[data-ax-summary-list]"), `${label}: summary list`).toHaveCount(1);
+  await expect(page.locator("[data-ax-drill-section]"), `${label}: drill sections`).toHaveCount(3);
+  await expect(page.locator("[data-ax-lazy-activity]"), `${label}: lazy activity`).toHaveCount(1);
+  await expect(page.locator("[data-ax-lazy-json]"), `${label}: lazy raw JSON`).toHaveCount(1);
+}
+
+function subscriptionDetailBaselineRows() {
+  const source = fs.readFileSync(BASELINE_PAGE_FLOW_CELLS, "utf8");
+  return (source.match(/p193__subscription-detail/g) || []).length;
+}
+
 test.describe("Phase 195 SPEC-DETAIL and overlay invariants", () => {
-  test("Subscription detail initial render has one h1, capped primary actions, overflow menu, and no pre-expanded forms", async ({
+  test("Page-flow baseline includes p193 subscription-detail rows", async () => {
+    expect(fs.existsSync(BASELINE_PAGE_FLOW_CELLS), "baseline.page-flow.cells.json should exist").toBeTruthy();
+    expect(subscriptionDetailBaselineRows(), "p193__subscription-detail rows should be present").toBeGreaterThan(0);
+  });
+
+  test("Subscription detail initial render holds SPEC-DETAIL structure in light and dark themes", async ({
     page,
     request,
   }) => {
     await openSubscriptionDetail(page, request);
 
-    await expect(page.locator("h1")).toHaveCount(1);
-
-    const actionBand = page.locator("[data-ax-action-band]");
-    await expect(actionBand).toBeVisible();
-    await expect(actionBand.locator("form:visible")).toHaveCount(0);
-
-    const primaryActions = page.locator("[data-ax-primary-action]");
-    expect(await primaryActions.count(), "DETAIL pages may expose at most two primary actions").toBeLessThanOrEqual(2);
-
-    await expect(page.locator("[data-ax-action-overflow-menu]")).toHaveCount(1);
+    for (const theme of ["light", "dark"]) {
+      await setPhase191Theme(page, theme);
+      await assertInitialDetailInvariants(page, theme);
+    }
   });
 
   test("Subscription action drawer portals, locks background scroll, traps focus, and closes by Escape", async ({
