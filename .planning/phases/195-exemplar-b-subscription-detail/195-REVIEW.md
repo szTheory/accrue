@@ -1,8 +1,8 @@
 ---
 phase: 195-exemplar-b-subscription-detail
-reviewed: 2026-06-26T10:13:38Z
+reviewed: 2026-06-26T12:28:28Z
 depth: standard
-files_reviewed: 30
+files_reviewed: 31
 files_reviewed_list:
   - accrue_admin/assets/css/app.css
   - accrue_admin/assets/js/app.js
@@ -14,6 +14,7 @@ files_reviewed_list:
   - accrue_admin/lib/accrue_admin/components/dropdown_menu.ex
   - accrue_admin/lib/accrue_admin/components/overlay.ex
   - accrue_admin/lib/accrue_admin/components/step_up_auth_modal.ex
+  - accrue_admin/lib/accrue_admin/copy.ex
   - accrue_admin/lib/accrue_admin/copy/subscription.ex
   - accrue_admin/lib/accrue_admin/layouts.ex
   - accrue_admin/lib/accrue_admin/live/subscription_live.ex
@@ -21,6 +22,7 @@ files_reviewed_list:
   - accrue_admin/package.json
   - accrue_admin/priv/static/accrue_admin.css
   - accrue_admin/priv/static/accrue_admin.js
+  - accrue_admin/storybook/_support/registry_story.ex
   - accrue_admin/test/accrue_admin/components/overlay_components_test.exs
   - accrue_admin/test/accrue_admin/live/charge_live_test.exs
   - accrue_admin/test/accrue_admin/live/invoice_live_test.exs
@@ -29,113 +31,68 @@ files_reviewed_list:
   - accrue_admin/test/js/dropdown_test.mjs
   - accrue_admin/test/js/scroll_lock_test.mjs
   - examples/accrue_host/e2e/generated/copy_strings.json
-  - storybook/_support/registry_story.ex
   - storybook/components/action_menu.story.exs
   - storybook/components/detail.story.exs
   - storybook/components/overlay.story.exs
   - storybook/components/subscription_detail.story.exs
 findings:
-  critical: 1
-  warning: 3
+  critical: 0
+  warning: 0
   info: 0
-  total: 4
-status: issues_found
+  total: 0
+status: clean
+result: pass
+approval: approved
 ---
 
 # Phase 195: Code Review Report
 
-**Reviewed:** 2026-06-26T10:13:38Z
+**Reviewed:** 2026-06-26T12:28:28Z
 **Depth:** standard
-**Files Reviewed:** 30
-**Status:** issues_found
-
-## Summary
-
-Reviewed the Phase 195 Subscription detail exemplar, overlay component and hooks, CSS/static bundles, copy export fixture, tests, and Storybook stories. The overlay substrate generally compiles and the scoped component/LiveView/JS tests pass, but the implementation still ships one security-relevant billing action gap plus several runtime/test-fixture drift risks.
-
-Verification run during review:
-
-```bash
-cd accrue_admin && mix test test/accrue_admin/components/overlay_components_test.exs test/accrue_admin/live/subscription_live_test.exs
-cd accrue_admin && node --test test/js/dropdown_test.mjs test/js/scroll_lock_test.mjs
-```
-
-The Mix run passed but emitted a warning that `AccrueAdmin.Storybook.RegistryStory.variations_for/1` is undefined.
+**Files Reviewed:** 31
+**Status:** approved
 
 ## Narrative Findings (AI reviewer)
 
-## Critical Issues
+No Critical, Warning, or Info findings remain in the reviewed Phase 195 scope.
 
-### CR-01: [BLOCKER] Subscription item deletion bypasses step-up auth
+## Summary
 
-**File:** `accrue_admin/lib/accrue_admin/live/subscription_live.ex:33`
+Re-reviewed Phase 195 after commits `9de92260` and `5c063330`. The prior malformed action event blockers are resolved:
 
-**Issue:** The destructive action set only includes `cancel_now` and `comp_subscription`, but the new action menu exposes `remove_item` and the executor deletes the selected subscription item through `Billing.remove_item/2` at lines 1125-1136. That means an admin can remove a subscription item after only the drawer confirmation, without the fresh-auth challenge required for destructive admin actions.
+- Missing, non-binary, and unsupported `action_type` payloads now fail closed through guarded `handle_event/3` clauses.
+- Supported action payloads now validate optional string params, `pause_behavior`, and `proration` before staging.
+- Proration conversion now uses the explicit `@proration_atoms` allowlist instead of `String.to_existing_atom/1`.
+- Regression coverage exercises crafted supported action params with valid `action_type` and malformed auxiliary values.
 
-**Fix:**
+The prior copy export warning is also resolved: the public `AccrueAdmin.Copy` delegates exist, the export allowlist includes the drawer/provider/preview/item copy used by this phase, the generated fixture JSON contains those keys, and fixture tests compare the generated strings against `Copy`.
 
-```elixir
-@destructive_actions ~w(cancel_now comp_subscription remove_item)
+## Verification Reviewed
+
+Post-fix verification reported after commit `5c063330`:
+
+```text
+mix test test/accrue_admin/live/subscription_live_test.exs
+17 tests, 0 failures
+
+mix test test/accrue_admin/live/subscription_live_test.exs test/accrue_admin/components/overlay_components_test.exs test/accrue_admin/live/step_up_test.exs
+37 tests, 0 failures
+
+node --test test/js/dropdown_test.mjs test/js/scroll_lock_test.mjs
+8 tests passed
+
+mix compile --warnings-as-errors
+passed
+
+bash scripts/ci/verify_package_docs.sh
+passed
+
+npm run e2e:phase195
+8/8 passed
 ```
-
-Add a LiveView test that opens the `Remove item` drawer, submits the form, clicks confirm, and asserts the step-up modal appears before the item is removed.
-
-## Warnings
-
-### WR-01: [WARNING] Summary-row actions bypass provider capability gates
-
-**File:** `accrue_admin/lib/accrue_admin/live/subscription_live.ex:621`
-
-**Issue:** The summary list always renders a `Plan / price` Change action for `swap_plan`, and the quantity row only checks `single_item_subscription?/1`. Those rows do not reuse `swap_plan_available?/1` or `quantity_change_available?/1`, so Braintree subscriptions can still expose unsupported "Change" affordances even when the primary buttons and overflow menu correctly hide those actions.
-
-**Fix:** Gate the summary row actions with the same capability predicates used by the action band.
-
-```elixir
-%{
-  label: "Plan / price",
-  value: current_price_id(subscription) || "-"
-}
-|> maybe_put_summary_action(swap_plan_available?(subscription), %{
-  action_label: "Change",
-  action_context: "plan for subscription #{subscription_label}",
-  action_event: "open_action_drawer",
-  action_value: "swap_plan"
-})
-```
-
-Apply the same pattern to the quantity row with `quantity_change_available?/1`, and add a Braintree test that refutes `phx-value-action_type="swap_plan"` and `phx-value-action_type="update_quantity"` in the summary list when unsupported.
-
-### WR-02: [WARNING] Copy export fixture omits visible Phase 195 action strings
-
-**File:** `accrue_admin/lib/mix/tasks/accrue_admin.export_copy_strings.ex:27`
-
-**Issue:** The export allowlist adds only some Subscription action labels. Visible Phase 195 drawer/menu strings such as `subscription_action_update_quantity`, `subscription_action_add_item`, `subscription_action_update_item_quantity`, `subscription_action_remove_item`, `subscription_action_pause_collection`, `subscription_action_resume`, `subscription_proration_none`, and `subscription_proration_always_invoice` are used by the UI but absent from the exported JSON fixture. Browser anti-drift checks can no longer catch drift in those labels.
-
-**Fix:**
-
-```elixir
-subscription_proration_none
-subscription_proration_always_invoice
-subscription_action_resume
-subscription_action_update_quantity
-subscription_action_add_item
-subscription_action_update_item_quantity
-subscription_action_remove_item
-subscription_action_pause_collection
-```
-
-Add those atoms to `@allowlist`, regenerate `examples/accrue_host/e2e/generated/copy_strings.json`, and extend the fixture test to assert all drawer action labels and proration labels.
-
-### WR-03: [WARNING] RegistryStory helper is not compiled from its current path
-
-**File:** `storybook/_support/registry_story.ex:1`
-
-**Issue:** The helper was added at repo-root `storybook/_support/registry_story.ex`, but the `accrue_admin` Mix project compiles `storybook/_support` relative to `accrue_admin`. During the scoped test run the compiler warned that `AccrueAdmin.Storybook.RegistryStory.variations_for/1` is undefined, and stories guarded by `Code.ensure_loaded?/1` will silently return no variations.
-
-**Fix:** Move the helper under a compiled path such as `accrue_admin/storybook/_support/registry_story.ex` or `accrue_admin/lib/accrue_admin/storybook/registry_story.ex`, or update the Mix `elixirc_paths` to include `../storybook/_support`. Then run compilation with warnings treated as failures to prove the story helper is available.
 
 ---
 
-_Reviewed: 2026-06-26T10:13:38Z_
+_Reviewed: 2026-06-26T12:28:28Z_
 _Reviewer: the agent (gsd-code-reviewer)_
 _Depth: standard_
