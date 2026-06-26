@@ -7,6 +7,7 @@ defmodule AccrueAdmin.OverlayComponentsTest do
 
   alias AccrueAdmin.Components.Detail
   alias AccrueAdmin.Components.DetailDrawer
+  alias AccrueAdmin.Components.DropdownMenu
   alias AccrueAdmin.Components.Overlay
   alias AccrueAdmin.Components.StepUpAuthModal
   alias AccrueAdmin.Layouts
@@ -209,6 +210,87 @@ defmodule AccrueAdmin.OverlayComponentsTest do
       assert html =~ "ax-field-list"
       assert html =~ ~s(class="ax-field-label")
       assert html =~ ~s(class="ax-field-value")
+    end
+  end
+
+  describe "DropdownMenu action menu" do
+    test "renders a non-modal disclosure menu with button menuitems" do
+      html =
+        render_component(fn assigns ->
+          assigns =
+            assign(assigns, :groups, [
+              %{
+                label: "Edit billing",
+                items: [
+                  %{
+                    label: "Update quantity",
+                    event: "prepare_action",
+                    value: "update_quantity",
+                    target: "#subscription-live",
+                    description: "Adjust the single subscription item",
+                    hidden_context: "for subscription sub_123"
+                  }
+                ]
+              },
+              %{
+                label: "Collection",
+                items: [
+                  %{
+                    label: "Pause collection",
+                    event: "prepare_action",
+                    value: "pause",
+                    target: "#subscription-live"
+                  }
+                ]
+              },
+              %{
+                label: "Danger zone",
+                items: [
+                  %{
+                    label: "Cancel immediately",
+                    event: "prepare_action",
+                    value: "cancel_now",
+                    target: "#subscription-live",
+                    danger?: true,
+                    hidden_context: "for subscription sub_123"
+                  }
+                ]
+              }
+            ])
+
+          ~H"""
+          <DropdownMenu.action_menu label="More actions" groups={@groups} />
+          """
+        end)
+
+      assert html =~ ~s(<details)
+      assert html =~ ~s(data-ax-action-overflow-menu)
+      assert html =~ ~s(aria-haspopup="menu")
+      assert html =~ ~s(role="menu")
+      assert html =~ ~s(<button)
+      assert html =~ ~s(role="menuitem")
+      assert html =~ ~s(phx-click="prepare_action")
+      assert html =~ ~s(phx-target="#subscription-live")
+      assert html =~ ~s(phx-value-action_type="update_quantity")
+      assert html =~ ~s(<span class="ax-visually-hidden"> for subscription sub_123</span>)
+      assert html =~ "Adjust the single subscription item"
+      assert html =~ ~r/Edit billing.*Collection.*Danger zone/s
+      assert html =~ ~r/Danger zone.*ax-dropdown-item-danger/s
+      refute html =~ ~s(aria-modal="true")
+      refute html =~ ~s(data-scroll-lock)
+      refute html =~ ~s(data-ax-overlay-shell)
+    end
+
+    test "keeps link dropdown_menu separate from LiveView action_menu" do
+      html =
+        render_component(&DropdownMenu.dropdown_menu/1, %{
+          label: "Invoice actions",
+          items: [%{label: "Open PDF", href: "/billing/invoices/in_123/pdf"}]
+        })
+
+      assert html =~ ~s(href="/billing/invoices/in_123/pdf")
+      refute html =~ ~s(data-ax-action-overflow-menu)
+      refute html =~ ~s(role="menuitem")
     end
   end
 
