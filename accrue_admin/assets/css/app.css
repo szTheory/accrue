@@ -2569,6 +2569,49 @@ a.ax-kpi-card--linked:focus-visible {
   background: var(--ax-status-danger-bg);
 }
 
+.ax-action-menu-panel {
+  transform-origin: top right;
+}
+
+.ax-action-menu-group {
+  display: grid;
+  gap: var(--ax-space-2xs);
+  min-width: 0;
+}
+
+.ax-action-menu-group-separated {
+  margin-top: var(--ax-space-sm);
+  padding-top: var(--ax-space-sm);
+  border-top: 1px solid var(--ax-border);
+}
+
+.ax-action-menu-group-label {
+  /* ax-type-exception: menu group labels use the established caps-label rhythm inside a dense disclosure surface. */
+  margin: 0;
+  padding: 0 var(--ax-space-sm);
+  font-size: var(--ax-type-xs);
+  font-weight: 600;
+  line-height: var(--ax-leading-normal);
+  letter-spacing: var(--ax-tracking-wide);
+  text-transform: uppercase;
+  color: var(--ax-muted);
+}
+
+.ax-action-menu-item {
+  width: 100%;
+  border: 0;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+}
+
+.ax-action-menu-item .ax-dropdown-item-label {
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--ax-space-2xs);
+  min-width: 0;
+}
+
 /* ============================================================================
    Phase 177 (v1.51 MOT-02) — Dropdown motion
    Native <details> removes [open] synchronously on close — exit transition does
@@ -3653,6 +3696,79 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
   flex-wrap: wrap;
 }
 
+/* GOV.UK-style detail summary list */
+.ax-summary-list {
+  display: grid;
+  width: 100%;
+  margin: var(--ax-space-md) 0 0;
+  border-top: 1px solid var(--ax-border);
+}
+
+.ax-summary-list-row {
+  display: grid;
+  grid-template-columns: minmax(0, 12rem) minmax(0, 1fr) max-content;
+  align-items: start;
+  gap: var(--ax-space-sm) var(--ax-space-md);
+  min-width: 0;
+  padding: var(--ax-space-md) 0;
+  border-bottom: 1px solid var(--ax-border);
+}
+
+.ax-summary-list-key,
+.ax-summary-list-value,
+.ax-summary-list-actions {
+  margin: 0;
+}
+
+.ax-summary-list-key {
+  /* ax-type-exception: summary-list keys match the established dense field-label rhythm. */
+  font-size: var(--ax-type-xs);
+  font-weight: 600;
+  line-height: var(--ax-leading-normal);
+  letter-spacing: var(--ax-tracking-wide);
+  text-transform: uppercase;
+  color: var(--ax-muted);
+}
+
+.ax-summary-list-value {
+  /* ax-type-exception: component-local detail values keep the existing field-list body scale. */
+  min-width: 0;
+  font-size: var(--ax-type-sm);
+  line-height: var(--ax-leading-normal);
+  color: var(--ax-primary);
+  overflow-wrap: anywhere;
+}
+
+.ax-summary-list-actions {
+  display: inline-flex;
+  justify-content: flex-end;
+  gap: var(--ax-space-xs);
+  min-width: 0;
+}
+
+.ax-summary-list-action {
+  /* ax-type-exception: row action labels intentionally use the compact label role without extra markup. */
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ax-space-2xs);
+  padding: 0;
+  border: 0;
+  border-radius: var(--ax-radius-2xs);
+  background: transparent;
+  color: var(--ax-accent-readable);
+  font-size: var(--ax-type-sm);
+  font-weight: 600;
+  line-height: var(--ax-leading-normal);
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: var(--ax-space-2xs);
+}
+
+.ax-summary-list-action:hover,
+.ax-summary-list-action:focus-visible {
+  color: var(--ax-primary);
+}
+
 /* Detail section */
 .ax-detail-section {
   display: grid;
@@ -3713,6 +3829,16 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
 @media (min-width: 640px) { /* --ax-bp-content ↑ */
   .ax-field-list {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 599.98px) { /* --ax-bp-sm ↓ */
+  .ax-summary-list-row {
+    grid-template-columns: 1fr;
+  }
+
+  .ax-summary-list-actions {
+    justify-content: flex-start;
   }
 }
 
@@ -3785,6 +3911,7 @@ html.accrue-admin::-webkit-scrollbar-thumb:hover {
 .ax-attention-row:focus-visible,
 .ax-launcher:focus-visible,
 .ax-related-item:focus-visible,
+.ax-summary-list-action:focus-visible,
 [data-ax-force~="focus"] {
   border-color: var(--ax-focus-ring);
   outline: 2px solid var(--ax-focus-ring);
@@ -3835,7 +3962,8 @@ html.accrue-admin::-webkit-scrollbar-thumb:hover {
 .ax-search-trigger:hover,
 .ax-attention-row:hover,
 .ax-launcher:hover,
-.ax-related-item:hover {
+.ax-related-item:hover,
+.ax-summary-list-action:hover {
   background: var(--ax-interactive-hover);
 }
 
@@ -3844,7 +3972,8 @@ html.accrue-admin::-webkit-scrollbar-thumb:hover {
 .ax-dropdown-item:active,
 .ax-tab-more-item:active,
 .ax-search-trigger:active,
-.ax-attention-row:active {
+.ax-attention-row:active,
+.ax-summary-list-action:active {
   background: var(--ax-interactive-active);
 }
 
