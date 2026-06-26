@@ -455,16 +455,16 @@ Source: Phase 195 added the same one-spec, one-worker, sixty-second pattern for 
 |---|-------|---------|---------------|
 | — | All actionable claims in this research were verified from the codebase, phase context, project planning docs, Hex registry output, or official documentation. [VERIFIED: source list below] | — | — |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
-1. **Where should the filter-toolbar extraction live?**  
+1. **Where should the filter-toolbar extraction live? (RESOLVED)**  
    - What we know: It may be a DataTable helper, sibling component, or narrow internal slot, but PageHeader must remain state-free. [VERIFIED: 196-CONTEXT.md]  
-   - What's unclear: The lowest-churn implementation depends on how much markup must move out of `DataTable.render/1`. [VERIFIED: accrue_admin/lib/accrue_admin/components/data_table.ex]  
+   - Resolution (RESOLVED): Final filter-toolbar seam is DataTable-owned/stateless `filter_toolbar/1` (or equivalently narrow DataTable helper) rendered through PageHeader's `:filter_toolbar` slot; PageHeader remains state-free and does not own query/filter behavior. [VERIFIED: 196-CONTEXT.md]  
    - Recommendation: Start with the smallest extraction that renders the existing filter form through PageHeader while preserving tests for parent-targeted `phx-change`. [VERIFIED: accrue_admin/test/accrue_admin/components/data_table_test.exs]
 
-2. **Can plan/amount be derived honestly from current list projection?**  
+2. **Can plan/amount be derived honestly from current list projection? (RESOLVED)**  
    - What we know: Current query selects status, customer, tax/ownership signals, period/end fields, and IDs, but no plan/amount fields. [VERIFIED: accrue_admin/lib/accrue_admin/queries/subscriptions.ex]  
-   - What's unclear: Whether a resolver-backed amount/plan projection can be added cheaply without widening domain scope. [VERIFIED: 196-CONTEXT.md]  
+   - Resolution (RESOLVED): Final plan/amount policy is to show plan/amount only from existing projection/resolver-backed facts; if exact money is unavailable, use honest plan/quantity fallback copy and do not fake MRR. [VERIFIED: 196-CONTEXT.md]  
    - Recommendation: Add plan/amount only if available from existing local projection/resolver; otherwise use honest plan/quantity fallback copy. [VERIFIED: 196-CONTEXT.md]
 
 ## Environment Availability
