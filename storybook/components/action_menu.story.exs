@@ -4,10 +4,11 @@ defmodule AccrueAdmin.Storybook.Components.ActionMenu do
   """
 
   use PhoenixStorybook.Story, :component
+  use Phoenix.Component
 
   alias AccrueAdmin.Components.DropdownMenu
   alias Phoenix.LiveView.JS
-  alias PhoenixStorybook.Story.Variation
+  alias PhoenixStorybook.Stories.Variation
 
   def function, do: &__MODULE__.action_menu_story/1
 

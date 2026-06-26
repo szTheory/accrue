@@ -4,9 +4,10 @@ defmodule AccrueAdmin.Storybook.Components.Detail do
   """
 
   use PhoenixStorybook.Story, :component
+  use Phoenix.Component
 
   alias AccrueAdmin.Components.Detail
-  alias PhoenixStorybook.Story.Variation
+  alias PhoenixStorybook.Stories.Variation
 
   def function, do: &__MODULE__.summary_list_story/1
 

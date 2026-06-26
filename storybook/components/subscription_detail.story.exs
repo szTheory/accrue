@@ -4,12 +4,13 @@ defmodule AccrueAdmin.Storybook.Components.SubscriptionDetail do
   """
 
   use PhoenixStorybook.Story, :component
+  use Phoenix.Component
 
   alias AccrueAdmin.Components.Detail
   alias AccrueAdmin.Components.DropdownMenu
   alias AccrueAdmin.Components.RelatedResources
   alias AccrueAdmin.Components.StatusBadge
-  alias PhoenixStorybook.Story.Variation
+  alias PhoenixStorybook.Stories.Variation
 
   def function, do: &__MODULE__.subscription_detail_story/1
 

@@ -4,9 +4,10 @@ defmodule AccrueAdmin.Storybook.Components.Overlay do
   """
 
   use PhoenixStorybook.Story, :component
+  use Phoenix.Component
 
   alias AccrueAdmin.Components.Overlay
-  alias PhoenixStorybook.Story.Variation
+  alias PhoenixStorybook.Stories.Variation
 
   def function, do: &__MODULE__.overlay_story/1
 

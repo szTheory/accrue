@@ -9,7 +9,7 @@ if Mix.env() != :prod do
     # into %PhoenixStorybook.Story.Variation{} structs for Storybook rendering.
     # The ComponentRegistry remains the single source of truth (D-15 constraint honored).
 
-    alias PhoenixStorybook.Story.Variation
+    alias PhoenixStorybook.Stories.Variation
 
     @doc """
     Returns a list of `%PhoenixStorybook.Story.Variation{}` structs for the given
