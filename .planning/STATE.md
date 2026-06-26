@@ -2,11 +2,11 @@
 gsd_state_version: 1.0
 milestone: v1.54
 milestone_name: Admin UI Page-Level Streamlining & Storybook
-current_phase: 195
-current_phase_name: exemplar-b-subscription-detail
-status: verifying
-stopped_at: Completed 195-08-PLAN.md
-last_updated: "2026-06-26T10:03:09.757Z"
+current_phase: 196
+current_phase_name: exemplar-c-—-subscriptions-list-+-pageheader
+status: ready_to_plan
+stopped_at: Phase 195 complete (8/8) — ready to discuss Phase 196
+last_updated: 2026-06-26T12:49:41.200Z
 last_activity: 2026-06-26
 progress:
   total_phases: 8
@@ -24,13 +24,13 @@ See: `.planning/PROJECT.md` (updated 2026-06-24 — v1.54 Admin UI Page-Level St
 
 **Core value:** A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic Elixir DX, strong domain modeling, tamper-evident audit ledger, great observability, and zero breaking-change pain through v1.x.
 
-**Current focus:** Phase 195 — exemplar-b-subscription-detail
+**Current focus:** Phase 196 — exemplar c — subscriptions list + pageheader
 
 ## Current Position
 
-Phase: 195 (exemplar-b-subscription-detail) — EXECUTING
-Plan: 8 of 8
-Status: Phase complete — ready for verification
+Phase: 196
+Plan: Not started
+Status: Ready to plan
 Last activity: 2026-06-26
 
 ## Post-v1.48 Pause Rule
@@ -45,9 +45,9 @@ v1.54 Admin UI Page-Level Streamlining & Storybook is open as a quality / page-l
 
 | Phase | Name | Requirements | Status |
 |-------|------|--------------|--------|
-| 193 | Research, re-baseline & pattern lock | RES-01, RES-02, RES-03, RES-04, STY-01 | Not started |
-| 194 | Exemplar A — Dashboard | EXE-01 | Not started |
-| 195 | Exemplar B — Subscription detail | EXE-02, IXN-01 | Not started |
+| 193 | Research, re-baseline & pattern lock | RES-01, RES-02, RES-03, RES-04, STY-01 | Complete (2026-06-25) |
+| 194 | Exemplar A — Dashboard | EXE-01 | Complete (2026-06-26) |
+| 195 | Exemplar B — Subscription detail | EXE-02, IXN-01 | Complete (2026-06-26) |
 | 196 | Exemplar C — Subscriptions list + PageHeader | EXE-03, PGH-01 | Not started |
 | 197 | Propagate LIST | PRP-01 | Not started |
 | 198 | Propagate DETAIL + analytics | PRP-02 | Not started |
@@ -153,7 +153,7 @@ Coverage: 22/22 v1.51 requirements mapped (each REQ-ID → exactly one phase). D
 
 **Velocity:**
 
-- Total plans completed: 133
+- Total plans completed: 141
 - Average duration: 1m
 - Total execution time: 1m
 

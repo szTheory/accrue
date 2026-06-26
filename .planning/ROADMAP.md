@@ -38,8 +38,8 @@ Stop rule: if proposed work is polish-only with a documented workaround and no r
 **Dependency shape:** strictly **linear** — 193 → 194 → 195 → 196 → 197 → 198 → 199 → 200. Foundations + the three locked pattern specs (193) must precede exemplar work; the three exemplars (194 Dashboard / 195 Subscription detail / 196 Subscriptions list + PageHeader) lock the patterns that propagation (197 LIST / 198 DETAIL) applies; cross-cutting overlay correctness + fixture stress + microcopy (199) and idempotent verification + sign-off (200) come last. **Cross-phase primitive dependency:** the canonical overlay primitive is decided as a spike in 193 (portal-vs-`<dialog>`, `inert` floor, theming bridge) and the action-menu/side-drawer action-hosting groundwork is built in 195 to serve the detail exemplar; the **full** cross-cutting overlay sweep (scroll-lock, portal, `inert`, dismissal contract, drawer geometry, origin-aware popovers, transformed-ancestor audit) lands in 199 and is verified in 200.
 
 - [x] **Phase 193: Research, re-baseline & pattern lock** — Lock the three archetype pattern specs (SPEC-OVERVIEW/LIST/DETAIL) as design contracts, extend the Phase-187 baseline with `surface_type:"page-flow"` cells, stand up PhoenixStorybook (dev/test-only) + run the four spikes, add the three new CSS source guards. (completed 2026-06-25)
-- [ ] **Phase 194: Exemplar A — Dashboard** — Refine the four-zone overview (refine-not-rebuild) and re-grammar Recovery analytics to `hero metric pair → at-risk work-queue → trend`.
-- [ ] **Phase 195: Exemplar B — Subscription detail** — Convert the worst info-dump (~25 always-visible zones → ~6 bands) to summary-then-drill + ≤2 primary actions + an overflow action-menu hosting actions in a side-drawer; build the action-menu primitive + side-drawer action hosting.
+- [x] **Phase 194: Exemplar A — Dashboard** — Refine the four-zone overview (refine-not-rebuild) and re-grammar Recovery analytics to `hero metric pair → at-risk work-queue → trend`. (completed 2026-06-26)
+- [x] **Phase 195: Exemplar B — Subscription detail** — Convert the worst info-dump (~25 always-visible zones → ~6 bands) to summary-then-drill + ≤2 primary actions + an overflow action-menu hosting actions in a side-drawer; build the action-menu primitive + side-drawer action hosting. (completed 2026-06-26)
 - [ ] **Phase 196: Exemplar C — Subscriptions list + PageHeader** — Convert the Subscriptions list to the table-first list spec (chips + count + clear-all, work-queue default, four distinct states) and extract + lock the shared `PageHeader` component slot contract.
 - [ ] **Phase 197: Propagate LIST** — Conform all 8 remaining list pages to SPEC-LIST, adopt `PageHeader`, with per-page JTBD microcopy + four-state coverage.
 - [ ] **Phase 198: Propagate DETAIL + analytics** — Conform all remaining detail/analytics pages to SPEC-DETAIL / the overview spec.
@@ -333,7 +333,7 @@ Full details: [v1.48 roadmap archive](milestones/v1.48-ROADMAP.md)
 | 192. Idempotent verification & sign-off | v1.53 | 6/6 | Complete   | 2026-06-20 |
 | 193. Research, re-baseline & pattern lock | v1.54 | 5/5 | Complete    | 2026-06-25 |
 | 194. Exemplar A — Dashboard | v1.54 | 4/4 | Complete    | 2026-06-26 |
-| 195. Exemplar B — Subscription detail | v1.54 | 8/8 | Complete   | 2026-06-26 |
+| 195. Exemplar B — Subscription detail | v1.54 | 8/8 | Complete    | 2026-06-26 |
 | 196. Exemplar C — Subscriptions list + PageHeader | v1.54 | 0/? | Not started | - |
 | 197. Propagate LIST | v1.54 | 0/? | Not started | - |
 | 198. Propagate DETAIL + analytics | v1.54 | 0/? | Not started | - |
