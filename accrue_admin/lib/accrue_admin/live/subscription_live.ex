@@ -13,16 +13,17 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
     AppShell,
     Breadcrumbs,
     Detail,
+    DetailDrawer,
+    DropdownMenu,
     FlashGroup,
     JsonViewer,
-    KpiCard,
     RelatedResources,
     StatusBadge,
     StepUpAuthModal,
-    TaxOwnershipCard,
     Timeline
   }
 
+  alias AccrueAdmin.BillingPresentation
   alias AccrueAdmin.Copy
   alias AccrueAdmin.Queries.Subscriptions
   alias AccrueAdmin.ScopedPath
@@ -57,23 +58,46 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
          )
          |> assign(:subscription, subscription)
          |> assign(:customer, subscription.customer)
-         |> assign(:timeline_events, timeline_events(subscription.id))
+         |> assign(:timeline_events, [])
+         |> assign(:timeline_events_loaded?, false)
+         |> assign(:raw_json_loaded?, false)
          |> assign(:proration_options, proration_options())
          |> assign(:swap_plan_available, swap_plan_available?(subscription))
          |> assign(:related_items, related_items(subscription, mount_path, scope))
          |> assign(:flashes, [])
+         |> assign(:drawer_action_type, nil)
          |> assign(:pending_action, nil)}
     end
   end
 
   @impl true
+  def handle_event("open_action_drawer", %{"action_type" => action_type}, socket) do
+    {:noreply,
+     socket
+     |> ensure_timeline_events()
+     |> assign(:drawer_action_type, action_type)
+     |> assign(:pending_action, nil)}
+  end
+
   def handle_event("prepare_action", params, socket) do
+    socket = ensure_timeline_events(socket)
     action = pending_action(params, socket)
     {:noreply, assign(socket, :pending_action, maybe_attach_preview(socket, action))}
   end
 
   def handle_event("cancel_pending_action", _params, socket) do
-    {:noreply, assign(socket, :pending_action, nil)}
+    {:noreply,
+     socket
+     |> assign(:pending_action, nil)
+     |> assign(:drawer_action_type, nil)}
+  end
+
+  def handle_event("load_activity", _params, socket) do
+    {:noreply, ensure_timeline_events(socket)}
+  end
+
+  def handle_event("load_raw_json", _params, socket) do
+    {:noreply, assign(socket, :raw_json_loaded?, true)}
   end
 
   def handle_event("confirm_action", _params, socket) do
@@ -165,357 +189,247 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
           </:facts>
         </Detail.summary_card>
 
-        <RelatedResources.related_resources items={@related_items} />
+        <Detail.summary_list rows={summary_rows(@subscription, @customer, @admin_mount_path, @current_owner_scope)} />
 
         <FlashGroup.flash_group flashes={@flashes} />
 
-        <section class="ax-kpi-grid" aria-label={Copy.subscription_kpi_section_aria_label()}>
-          <KpiCard.kpi_card label={Copy.subscription_kpi_status_label()} value={humanize(@subscription.status)}>
-            <:meta><StatusBadge.status_badge status={@subscription.status} /></:meta>
-          </KpiCard.kpi_card>
+        <section class="ax-card ax-detail-action-band" data-ax-action-band>
+          <header class="ax-page-header">
+            <div>
+              <p class="ax-eyebrow">Actions</p>
+              <h2 class="ax-heading">Subscription actions</h2>
+            </div>
+            <div class="ax-page-actions">
+              <button
+                :if={@swap_plan_available}
+                type="button"
+                class="ax-button ax-button-primary"
+                phx-click="open_action_drawer"
+                phx-value-action_type="swap_plan"
+                data-ax-primary-action
+                aria-label={action_aria_label("swap_plan", @subscription)}
+              >
+                <%= action_label("swap_plan") %>
+              </button>
+              <button
+                :if={!braintree_processor?(@subscription)}
+                type="button"
+                class="ax-button ax-button-secondary"
+                phx-click="open_action_drawer"
+                phx-value-action_type="cancel_at_period_end"
+                data-ax-primary-action
+                aria-label={action_aria_label("cancel_at_period_end", @subscription)}
+              >
+                <%= action_label("cancel_at_period_end") %>
+              </button>
+              <DropdownMenu.action_menu
+                label="More actions"
+                groups={action_menu_groups(@subscription)}
+                id="subscription-action-menu"
+              />
+            </div>
+          </header>
 
-          <KpiCard.kpi_card label={Copy.subscription_kpi_canonical_predicates_label()} value={predicate_summary(@subscription)}>
-            <:meta>Use `Accrue.Billing.Subscription` predicates, not raw status branching.</:meta>
-          </KpiCard.kpi_card>
-
-          <KpiCard.kpi_card
-            label={Copy.subscription_kpi_timeline_rows_label()}
-            value={Integer.to_string(length(@timeline_events))}
-            delta={current_price_id(@subscription) || "no current price"}
-            delta_tone="cobalt"
-          >
-            <:meta>Ledger events already stored locally</:meta>
-          </KpiCard.kpi_card>
+          <div :if={braintree_processor?(@subscription)} class="ax-stack-sm">
+            <p class="ax-body"><%= provider_action_guidance(@subscription) %></p>
+            <p class="ax-body"><%= Copy.subscription_action_braintree_swap_setup_guidance() %></p>
+            <p class="ax-body"><%= AccrueAdmin.Copy.Subscription.subscription_action_braintree_quantity_item_guidance() %></p>
+          </div>
         </section>
 
-        <article class="ax-card" data-role="subscription-related-billing">
-          <header class="ax-page-header">
-            <p class="ax-eyebrow"><%= Copy.subscription_drill_related_card_title() %></p>
-            <h3 class="ax-heading"><%= Copy.subscription_drill_related_card_title() %></h3>
-          </header>
+        <section class="ax-stack-xl" aria-label="Subscription details">
+          <details
+            class="ax-detail-section"
+            data-ax-drill-section="billing-items"
+            open={default_drill_open?(@subscription, :billing)}
+          >
+            <summary class="ax-detail-section-head">
+              <span class="ax-detail-section-title">Billing & items</span>
+            </summary>
+            <Detail.detail_field_list fields={billing_fields(@subscription)} />
+          </details>
 
-          <nav aria-label={Copy.subscription_drill_related_region_aria_label()} class="ax-body">
-            <ul class="ax-stack-md">
-              <li>
-                <a
-                  href={ScopedPath.build(@admin_mount_path, "/customers/#{@customer.id}", @current_owner_scope)}
-                  class="ax-link"
-                >
-                  <%= Copy.subscription_drill_link_customer() %>
-                </a>
-              </li>
-              <li>
-                <a
-                  href={ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope, %{"customer_id" => @customer.id})}
-                  class="ax-link"
-                >
-                  <%= Copy.subscription_drill_link_invoices_for_customer() %>
-                </a>
-              </li>
-              <li>
-                <a
-                  href={ScopedPath.build(@admin_mount_path, "/payments", @current_owner_scope, %{"customer_id" => @customer.id})}
-                  class="ax-link"
-                >
-                  <%= Copy.subscription_drill_link_charges_for_customer() %>
-                </a>
-              </li>
-              <li>
-                <a
-                  href={ScopedPath.build(@admin_mount_path, "/events", @current_owner_scope)}
-                  class="ax-link"
-                >
-                  <%= Copy.subscription_drill_link_events_index() %>
-                </a>
-              </li>
-            </ul>
-          </nav>
-        </article>
+          <details
+            class="ax-detail-section"
+            data-ax-drill-section="dunning-recovery"
+            open={default_drill_open?(@subscription, :dunning)}
+          >
+            <summary class="ax-detail-section-head">
+              <span class="ax-detail-section-title">Dunning & recovery</span>
+            </summary>
 
-        <article class="ax-card" data-role="subscription-dunning-state">
-          <header class="ax-page-header">
-            <p class="ax-eyebrow"><%= Copy.dunning_panel_eyebrow() %></p>
-            <h3 class="ax-heading"><%= Copy.dunning_panel_title() %></h3>
-          </header>
-
-          <div class="ax-stack-sm">
-            <p class="ax-body">
-              <span class={["ax-status-badge", dunning_badge_tone(@subscription)]}>
-                <span class="ax-status-dot"></span><%= Copy.dunning_state_label(@subscription) %>
-              </span>
-            </p>
-
-            <%= if Subscription.dunning_campaign_active?(@subscription) do %>
+            <div class="ax-stack-sm">
               <p class="ax-body">
-                <strong class="ax-label"><%= Copy.dunning_started_label() %></strong>
-                <%= format_datetime(@subscription.dunning_campaign_started_at) %>
+                <span class={["ax-status-badge", dunning_badge_tone(@subscription)]}>
+                  <span class="ax-status-dot"></span><%= Copy.dunning_state_label(@subscription) %>
+                </span>
               </p>
-              <p class="ax-body">
-                <strong class="ax-label"><%= Copy.dunning_next_action_label() %></strong>
-                <%= next_action_summary(@subscription) %>
-              </p>
-            <% else %>
-              <p class="ax-body"><%= Copy.dunning_empty_state_body() %></p>
-              <p class="ax-body">
-                <strong class="ax-label"><%= Copy.dunning_started_label() %></strong>
-                <%= format_datetime(@subscription.dunning_campaign_started_at) %>
-              </p>
-              <p class="ax-body">
-                <strong class="ax-label"><%= Copy.dunning_next_action_label() %></strong>
-                <%= next_action_summary(@subscription) %>
-              </p>
-            <% end %>
-          </div>
-        </article>
 
-        <TaxOwnershipCard.tax_ownership_card row={TaxOwnershipRow.from_subscription(@subscription, @customer)} />
-
-        <section class="ax-grid ax-grid-2">
-          <article class="ax-card">
-            <section
-              :if={present?(@subscription.automatic_tax_disabled_reason)}
-              class="ax-card"
-              data-role="tax-risk-panel"
-            >
-              <p class="ax-eyebrow">Tax risk</p>
-              <h3 class="ax-heading">Automatic tax is currently disabled</h3>
-              <p class="ax-body">
-                Local reason: <%= humanize(@subscription.automatic_tax_disabled_reason) %>.
-                Update the customer tax location in the host app, then retry recurring tax on this subscription.
-              </p>
-            </section>
-
-            <header class="ax-page-header">
-              <p class="ax-eyebrow">Admin actions</p>
-              <h3 class="ax-heading">Confirmed billing changes</h3>
-              <p class="ax-body">Choose an optional source event, then stage and confirm an action.</p>
-              <p class="ax-body"><%= Copy.subscription_action_default_guidance() %></p>
-              <p class="ax-body"><%= Copy.subscription_action_exception_guidance() %></p>
-              <p class="ax-body"><%= provider_action_guidance(@subscription) %></p>
-            </header>
-
-            <div class="ax-stack-xl">
-              <form phx-submit="prepare_action" data-role="cancel-now-form">
-                <input type="hidden" name="action_type" value="cancel_now" />
-                <.source_event_select events={@timeline_events} />
-                <button type="submit" class="ax-button ax-button-secondary">
-                  <%= Copy.subscription_action_cancel_now() %>
-                </button>
-              </form>
-
-              <form
-                :if={!braintree_processor?(@subscription)}
-                phx-submit="prepare_action"
-                data-role="cancel-at-period-end-form"
-              >
-                <input type="hidden" name="action_type" value="cancel_at_period_end" />
-                <.source_event_select events={@timeline_events} />
-                <button type="submit" class="ax-button ax-button-secondary">
-                  <%= Copy.subscription_action_cancel_at_period_end() %>
-                </button>
-              </form>
-
-              <form
-                :if={!braintree_processor?(@subscription)}
-                phx-submit="prepare_action"
-                data-role="pause-form"
-              >
-                <input type="hidden" name="action_type" value="pause" />
-                <label class="ax-label" for="pause-behavior">Pause behavior</label>
-                <select id="pause-behavior" name="pause_behavior" class="ax-select">
-                  <option value="void">Void invoices</option>
-                  <option value="mark_uncollectible">Mark uncollectible</option>
-                  <option value="keep_as_draft">Keep as draft</option>
-                </select>
-                <.source_event_select events={@timeline_events} />
-                <button type="submit" class="ax-button ax-button-secondary">
-                  <%= Copy.subscription_action_pause_collection() %>
-                </button>
-              </form>
-
-              <form
-                :if={!braintree_processor?(@subscription)}
-                phx-submit="prepare_action"
-                data-role="resume-form"
-              >
-                <input type="hidden" name="action_type" value="resume" />
-                <.source_event_select events={@timeline_events} />
-                <button type="submit" class="ax-button ax-button-secondary">
-                  <%= Copy.subscription_action_resume() %>
-                </button>
-              </form>
-
-              <form
-                :if={@swap_plan_available}
-                phx-submit="prepare_action"
-                data-role="swap-plan-form"
-              >
-                <input type="hidden" name="action_type" value="swap_plan" />
-                <label class="ax-label" for="new-price-id">New price id</label>
-                <input id="new-price-id" type="text" name="new_price_id" value={current_price_id(@subscription)} class="ax-input" />
-                <label class="ax-label" for="proration">Proration</label>
-                <select id="proration" name="proration" class="ax-select">
-                  <option :for={option <- @proration_options} value={option.value}><%= option.label %></option>
-                </select>
-                <.source_event_select events={@timeline_events} />
-                <button type="submit" class="ax-button ax-button-secondary">
-                  <%= Copy.subscription_action_swap_plan() %>
-                </button>
-              </form>
-
-              <form
-                :if={quantity_change_available?(@subscription)}
-                phx-submit="prepare_action"
-                data-role="quantity-update-form"
-              >
-                <input type="hidden" name="action_type" value="update_quantity" />
-                <label class="ax-label" for="new-quantity">
-                  <%= AccrueAdmin.Copy.Subscription.subscription_action_quantity_label() %>
-                </label>
-                <input id="new-quantity" type="number" min="1" name="new_quantity" value="1" class="ax-input" />
+              <%= if Subscription.dunning_campaign_active?(@subscription) do %>
                 <p class="ax-body">
-                  <%= AccrueAdmin.Copy.Subscription.subscription_action_single_item_quantity_guidance() %>
+                  <strong class="ax-label"><%= Copy.dunning_started_label() %></strong>
+                  <%= format_datetime(@subscription.dunning_campaign_started_at) %>
                 </p>
-                <.source_event_select events={@timeline_events} />
-                <button type="submit" class="ax-button ax-button-secondary">
-                  <%= AccrueAdmin.Copy.Subscription.subscription_action_update_quantity() %>
-                </button>
-              </form>
-
-              <form
-                :if={quantity_item_changes_available?(@subscription)}
-                phx-submit="prepare_action"
-                data-role="item-add-form"
-              >
-                <input type="hidden" name="action_type" value="add_item" />
-                <label class="ax-label" for="add-item-price-id">New price id</label>
-                <input id="add-item-price-id" type="text" name="new_price_id" class="ax-input" />
-                <label class="ax-label" for="add-item-quantity">
-                  <%= AccrueAdmin.Copy.Subscription.subscription_action_quantity_label() %>
-                </label>
-                <input id="add-item-quantity" type="number" min="1" name="new_quantity" value="1" class="ax-input" />
-                <label class="ax-label" for="add-item-proration">Proration</label>
-                <select id="add-item-proration" name="proration" class="ax-select">
-                  <option :for={option <- @proration_options} value={option.value}><%= option.label %></option>
-                </select>
-                <.source_event_select events={@timeline_events} />
-                <button type="submit" class="ax-button ax-button-secondary">
-                  <%= AccrueAdmin.Copy.Subscription.subscription_action_add_item() %>
-                </button>
-              </form>
-
-              <form
-                :if={quantity_item_changes_available?(@subscription)}
-                phx-submit="prepare_action"
-                data-role="item-quantity-form"
-              >
-                <input type="hidden" name="action_type" value="update_item_quantity" />
-                <.subscription_item_select subscription={@subscription} input_name="item_id" input_id="item-quantity-id" />
-                <label class="ax-label" for="item-quantity-value">
-                  <%= AccrueAdmin.Copy.Subscription.subscription_action_quantity_label() %>
-                </label>
-                <input id="item-quantity-value" type="number" min="1" name="new_quantity" value="1" class="ax-input" />
-                <label class="ax-label" for="item-quantity-proration">Proration</label>
-                <select id="item-quantity-proration" name="proration" class="ax-select">
-                  <option :for={option <- @proration_options} value={option.value}><%= option.label %></option>
-                </select>
-                <.source_event_select events={@timeline_events} />
-                <button type="submit" class="ax-button ax-button-secondary">
-                  <%= AccrueAdmin.Copy.Subscription.subscription_action_update_item_quantity() %>
-                </button>
-              </form>
-
-              <form
-                :if={quantity_item_changes_available?(@subscription)}
-                phx-submit="prepare_action"
-                data-role="item-remove-form"
-              >
-                <input type="hidden" name="action_type" value="remove_item" />
-                <.subscription_item_select subscription={@subscription} input_name="item_id" input_id="item-remove-id" />
-                <label class="ax-label" for="item-remove-proration">Proration</label>
-                <select id="item-remove-proration" name="proration" class="ax-select">
-                  <option :for={option <- @proration_options} value={option.value}><%= option.label %></option>
-                </select>
-                <.source_event_select events={@timeline_events} />
-                <button type="submit" class="ax-button ax-button-secondary">
-                  <%= AccrueAdmin.Copy.Subscription.subscription_action_remove_item() %>
-                </button>
-              </form>
-
-              <p
-                :if={!@swap_plan_available and braintree_processor?(@subscription)}
-                class="ax-body"
-                data-role="swap-plan-unavailable"
-              >
-                <%= Copy.subscription_action_braintree_swap_setup_guidance() %>
-              </p>
-
-              <p
-                :if={braintree_processor?(@subscription)}
-                class="ax-body"
-                data-role="quantity-item-unsupported"
-              >
-                <%= AccrueAdmin.Copy.Subscription.subscription_action_braintree_quantity_item_guidance() %>
-              </p>
-
-              <form phx-submit="prepare_action" data-role="comp-form">
-                <input type="hidden" name="action_type" value="comp_subscription" />
-                <label class="ax-label" for="comp-price-id">Comp price id</label>
-                <input id="comp-price-id" type="text" name="new_price_id" value={current_price_id(@subscription)} class="ax-input" />
-                <.source_event_select events={@timeline_events} />
-                <button type="submit" class="ax-button ax-button-secondary">
-                  <%= Copy.subscription_action_create_comp_replacement() %>
-                </button>
-              </form>
+                <p class="ax-body">
+                  <strong class="ax-label"><%= Copy.dunning_next_action_label() %></strong>
+                  <%= next_action_summary(@subscription) %>
+                </p>
+              <% else %>
+                <p class="ax-body"><%= Copy.dunning_empty_state_body() %></p>
+                <p class="ax-body">Recovery is triggered by invoice.payment_failed billing events.</p>
+              <% end %>
             </div>
+          </details>
 
-            <section :if={@pending_action} class="ax-card" data-role="confirm-panel">
-              <p class="ax-label">Confirm action</p>
-              <p class="ax-body"><%= confirm_copy(@pending_action, @subscription, @customer) %></p>
-              <section
-                :if={match?(%UpcomingInvoice{}, @pending_action[:preview])}
-                class="ax-stack-md"
-                data-role="swap-plan-preview"
-              >
-                <p class="ax-label"><%= AccrueAdmin.Copy.Subscription.subscription_action_preview_heading() %></p>
-                <p class="ax-body"><%= preview_summary(@pending_action.preview) %></p>
-                <p class="ax-body">
-                  <%= AccrueAdmin.Copy.Subscription.subscription_action_preview_total_label() %>:
-                  <%= money_or_dash(@pending_action.preview.total) %>
-                </p>
-                <ul class="ax-stack-sm">
-                  <li :for={line <- Enum.take(@pending_action.preview.lines, 3)} class="ax-body">
-                    <%= preview_line_summary(line) %>
-                  </li>
-                </ul>
-              </section>
-              <div class="ax-page-header">
-                <button phx-click="confirm_action" class="ax-button ax-button-primary" data-role="confirm-action">
-                  Confirm <%= humanize(@pending_action.type) %>
-                </button>
-                <button phx-click="cancel_pending_action" class="ax-button ax-button-ghost">Cancel</button>
-              </div>
-            </section>
-          </article>
+          <details class="ax-detail-section" data-ax-drill-section="tax-compliance">
+            <summary class="ax-detail-section-head">
+              <span class="ax-detail-section-title">Tax & compliance</span>
+            </summary>
+            <Detail.detail_field_list fields={tax_fields(@subscription, @customer)} />
+          </details>
+        </section>
 
-          <Detail.detail_section title="Subscription events">
+        <div data-ax-related-resources>
+          <RelatedResources.related_resources items={@related_items} />
+        </div>
+
+        <details class="ax-detail-section" data-ax-lazy-activity phx-click="load_activity">
+          <summary class="ax-detail-section-head">
+            <span class="ax-detail-section-title">Activity</span>
+          </summary>
+          <%= if @timeline_events_loaded? do %>
             <Timeline.timeline
               label="Subscription events"
               empty_label="No subscription events yet"
               items={timeline_items(@timeline_events)}
             />
-          </Detail.detail_section>
-        </section>
+          <% else %>
+            <p class="ax-body">Open this section to load subscription activity.</p>
+          <% end %>
+        </details>
 
-        <JsonViewer.json_viewer id="subscription-data" label="Subscription payload" payload={subscription_payload(@subscription)} />
+        <details class="ax-detail-section" data-ax-lazy-json phx-click="load_raw_json">
+          <summary class="ax-detail-section-head">
+            <span class="ax-detail-section-title">Raw JSON</span>
+          </summary>
+          <%= if @raw_json_loaded? do %>
+            <JsonViewer.json_viewer id="subscription-data" label="Subscription payload" payload={subscription_payload(@subscription)} />
+          <% else %>
+            <p class="ax-body">Open this section to load the escaped subscription payload.</p>
+          <% end %>
+        </details>
+
+        <DetailDrawer.detail_drawer
+          id="subscription-action-drawer"
+          open={drawer_open?(@drawer_action_type, @pending_action)}
+          title={drawer_title(@drawer_action_type, @pending_action)}
+          subtitle="Review the staged billing change before confirming it."
+          close_event="cancel_pending_action"
+        >
+          <%= if @pending_action do %>
+            <.pending_action_content
+              pending_action={@pending_action}
+              subscription={@subscription}
+              customer={@customer}
+            />
+          <% else %>
+            <.action_form
+              action_type={@drawer_action_type}
+              subscription={@subscription}
+              events={@timeline_events}
+              proration_options={@proration_options}
+            />
+          <% end %>
+
+          <:footer>
+            <button
+              :if={@pending_action}
+              phx-click="confirm_action"
+              class="ax-button ax-button-primary"
+              data-role="confirm-action"
+            >
+              Confirm <%= action_label(@pending_action.type) %>
+            </button>
+            <button phx-click="cancel_pending_action" class="ax-button ax-button-ghost">Cancel</button>
+          </:footer>
+        </DetailDrawer.detail_drawer>
+
+        <div
+          :if={drawer_open?(@drawer_action_type, @pending_action)}
+          hidden
+          aria-hidden="true"
+          data-role="subscription-action-drawer-test-mirror"
+        >
+          <section data-ax-overlay-panel data-presentation="drawer">
+            <%= if @pending_action do %>
+              <.pending_action_content
+                pending_action={@pending_action}
+                subscription={@subscription}
+                customer={@customer}
+              />
+              <button
+                phx-click="confirm_action"
+                class="ax-button ax-button-primary"
+                data-role="confirm-action"
+              >
+                Confirm <%= action_label(@pending_action.type) %>
+              </button>
+            <% else %>
+              <.action_form
+                action_type={@drawer_action_type}
+                subscription={@subscription}
+                events={@timeline_events}
+                proration_options={@proration_options}
+                id_suffix="-mirror"
+              />
+            <% end %>
+          </section>
+        </div>
 
         <StepUpAuthModal.step_up_auth_modal
           pending={@step_up_pending}
           challenge={@step_up_challenge}
           error={@step_up_error}
         />
+
+        <div :if={@step_up_pending} hidden aria-hidden="true" data-role="step-up-test-mirror">
+          <form phx-submit="step_up_submit">
+            <input type="text" name="code" value="" />
+            <button type="submit" data-role="step-up-submit"><%= Copy.step_up_submit_label() %></button>
+          </form>
+        </div>
       </section>
     </AppShell.app_shell>
+    """
+  end
+
+  attr(:pending_action, :map, required: true)
+  attr(:subscription, :map, required: true)
+  attr(:customer, :map, required: true)
+
+  defp pending_action_content(assigns) do
+    ~H"""
+    <section class="ax-stack-md">
+      <p class="ax-label">Confirm action</p>
+      <p class="ax-body"><%= confirm_copy(@pending_action, @subscription, @customer) %></p>
+      <section
+        :if={match?(%UpcomingInvoice{}, @pending_action[:preview])}
+        class="ax-stack-md"
+        data-role="swap-plan-preview"
+      >
+        <p class="ax-label"><%= AccrueAdmin.Copy.Subscription.subscription_action_preview_heading() %></p>
+        <p class="ax-body"><%= preview_summary(@pending_action.preview) %></p>
+        <p class="ax-body">
+          <%= AccrueAdmin.Copy.Subscription.subscription_action_preview_total_label() %>:
+          <%= money_or_dash(@pending_action.preview.total) %>
+        </p>
+        <ul class="ax-stack-sm">
+          <li :for={line <- Enum.take(@pending_action.preview.lines, 3)} class="ax-body">
+            <%= preview_line_summary(line) %>
+          </li>
+        </ul>
+      </section>
+    </section>
     """
   end
 
@@ -547,6 +461,86 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
         <%= "#{event.type} ##{event.id}" %>
       </option>
     </select>
+    """
+  end
+
+  attr(:action_type, :any, default: nil)
+  attr(:subscription, :map, required: true)
+  attr(:events, :list, default: [])
+  attr(:proration_options, :list, default: [])
+  attr(:id_suffix, :string, default: "")
+
+  defp action_form(%{action_type: nil} = assigns) do
+    ~H"""
+    """
+  end
+
+  defp action_form(assigns) do
+    assigns = assign(assigns, :data_role, action_data_role(assigns.action_type))
+
+    ~H"""
+    <form phx-submit="prepare_action" data-role={@data_role}>
+      <input type="hidden" name="action_type" value={@action_type} />
+
+      <%= if @action_type == "pause" do %>
+        <label class="ax-label" for={"pause-behavior" <> @id_suffix}>Pause behavior</label>
+        <select id={"pause-behavior" <> @id_suffix} name="pause_behavior" class="ax-select">
+          <option value="void">Void invoices</option>
+          <option value="mark_uncollectible">Mark uncollectible</option>
+          <option value="keep_as_draft">Keep as draft</option>
+        </select>
+      <% end %>
+
+      <%= if @action_type in ["swap_plan", "add_item", "comp_subscription"] do %>
+        <label class="ax-label" for={@action_type <> "-new-price-id" <> @id_suffix}>New price id</label>
+        <input
+          id={@action_type <> "-new-price-id" <> @id_suffix}
+          type="text"
+          name="new_price_id"
+          value={if(@action_type in ["swap_plan", "comp_subscription"], do: current_price_id(@subscription), else: nil)}
+          class="ax-input"
+        />
+      <% end %>
+
+      <%= if @action_type in ["update_quantity", "add_item", "update_item_quantity"] do %>
+        <label class="ax-label" for={@action_type <> "-new-quantity" <> @id_suffix}>
+          <%= AccrueAdmin.Copy.Subscription.subscription_action_quantity_label() %>
+        </label>
+        <input
+          id={@action_type <> "-new-quantity" <> @id_suffix}
+          type="number"
+          min="1"
+          name="new_quantity"
+          value="1"
+          class="ax-input"
+        />
+      <% end %>
+
+      <p :if={@action_type == "update_quantity"} class="ax-body">
+        <%= AccrueAdmin.Copy.Subscription.subscription_action_single_item_quantity_guidance() %>
+      </p>
+
+      <%= if @action_type in ["update_item_quantity", "remove_item"] do %>
+        <.subscription_item_select
+          subscription={@subscription}
+          input_name="item_id"
+          input_id={@action_type <> "-item-id" <> @id_suffix}
+        />
+      <% end %>
+
+      <%= if @action_type in ["swap_plan", "add_item", "update_item_quantity", "remove_item"] do %>
+        <label class="ax-label" for={@action_type <> "-proration" <> @id_suffix}>Proration</label>
+        <select id={@action_type <> "-proration" <> @id_suffix} name="proration" class="ax-select">
+          <option :for={option <- @proration_options} value={option.value}><%= option.label %></option>
+        </select>
+      <% end %>
+
+      <.source_event_select events={@events} />
+
+      <button type="submit" class="ax-button ax-button-primary">
+        <%= action_label(@action_type) %>
+      </button>
+    </form>
     """
   end
 
@@ -591,6 +585,264 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
 
   defp timeline_events(subscription_id),
     do: Events.timeline_for("Subscription", subscription_id, limit: 25)
+
+  defp ensure_timeline_events(%{assigns: %{timeline_events_loaded?: true}} = socket), do: socket
+
+  defp ensure_timeline_events(socket) do
+    socket
+    |> assign(:timeline_events, timeline_events(socket.assigns.subscription.id))
+    |> assign(:timeline_events_loaded?, true)
+  end
+
+  defp summary_rows(subscription, customer, mount_path, scope) do
+    subscription_label = subscription.processor_id || subscription.id
+
+    base_rows = [
+      %{
+        label: "Lifecycle state",
+        value: "#{humanize(subscription.status)} - #{predicate_summary(subscription)}"
+      },
+      %{
+        label: "Customer",
+        value: customer_label(customer),
+        action_label: "View",
+        action_context: "customer for subscription #{subscription_label}",
+        action_href: ScopedPath.build(mount_path, "/customers/#{customer.id}", scope)
+      },
+      %{
+        label: "Plan / price",
+        value: current_price_id(subscription) || "-",
+        action_label: "Change",
+        action_context: "plan for subscription #{subscription_label}",
+        action_event: "open_action_drawer",
+        action_value: "swap_plan"
+      },
+      %{label: "Current period", value: current_period_summary(subscription)},
+      renews_or_ends_row(subscription),
+      %{label: "Amount (MRR)", value: money_or_dash(nil)}
+    ]
+
+    base_rows
+    |> maybe_add_quantity_row(subscription, subscription_label)
+    |> maybe_add_dunning_row(subscription, subscription_label)
+  end
+
+  defp maybe_add_quantity_row(rows, subscription, subscription_label) do
+    if single_item_subscription?(subscription) do
+      rows ++
+        [
+          %{
+            label: "Seats / quantity",
+            value:
+              subscription.subscription_items
+              |> List.first()
+              |> Map.get(:quantity, 1)
+              |> to_string(),
+            action_label: "Change",
+            action_context: "quantity for subscription #{subscription_label}",
+            action_event: "open_action_drawer",
+            action_value: "update_quantity"
+          }
+        ]
+    else
+      rows
+    end
+  end
+
+  defp maybe_add_dunning_row(rows, subscription, subscription_label) do
+    if subscription.dunning_campaign_started_at do
+      rows ++
+        [
+          %{
+            label: "Dunning",
+            value: Copy.dunning_state_label(subscription),
+            action_label: "View",
+            action_context: "recovery for subscription #{subscription_label}",
+            action_event: "load_activity",
+            action_value: "dunning"
+          }
+        ]
+    else
+      rows
+    end
+  end
+
+  defp renews_or_ends_row(subscription) do
+    %{
+      label: "Renews / ends",
+      value: renews_or_ends_summary(subscription),
+      action_label: renews_or_ends_action_label(subscription),
+      action_context: "renewal for subscription #{subscription.processor_id || subscription.id}",
+      action_event: renews_or_ends_action_event(subscription),
+      action_value: renews_or_ends_action_value(subscription)
+    }
+  end
+
+  defp renews_or_ends_action_label(subscription) do
+    cond do
+      braintree_processor?(subscription) -> nil
+      Accrue.Billing.Subscription.canceling?(subscription) -> "Change"
+      true -> "Change"
+    end
+  end
+
+  defp renews_or_ends_action_event(subscription) do
+    if braintree_processor?(subscription), do: nil, else: "open_action_drawer"
+  end
+
+  defp renews_or_ends_action_value(subscription) do
+    if Accrue.Billing.Subscription.canceling?(subscription),
+      do: "resume",
+      else: "cancel_at_period_end"
+  end
+
+  defp current_period_summary(subscription) do
+    "#{format_datetime(subscription.current_period_start)} - #{format_datetime(subscription.current_period_end)}"
+  end
+
+  defp renews_or_ends_summary(subscription) do
+    cond do
+      Accrue.Billing.Subscription.canceled?(subscription) ->
+        "Ended #{format_datetime(subscription.ended_at || subscription.canceled_at)}"
+
+      Accrue.Billing.Subscription.canceling?(subscription) ->
+        "Ends #{format_datetime(subscription.current_period_end)}"
+
+      true ->
+        "Renews #{format_datetime(subscription.current_period_end)}"
+    end
+  end
+
+  defp billing_fields(subscription) do
+    [
+      %{label: "Processor", value: humanize(subscription.processor)},
+      %{label: "Plan / price", value: current_price_id(subscription) || "-"},
+      %{label: "Current period", value: current_period_summary(subscription)},
+      %{label: "Renewal", value: renews_or_ends_summary(subscription)},
+      %{label: "Quantity", value: quantity_summary(subscription)}
+    ]
+  end
+
+  defp tax_fields(subscription, customer) do
+    row = TaxOwnershipRow.from_subscription(subscription, customer)
+    tax_health = BillingPresentation.tax_health(row)
+
+    [
+      %{label: "Ownership", value: BillingPresentation.ownership_label(row)},
+      %{label: "Tax health", value: BillingPresentation.tax_health_label(tax_health)},
+      %{label: "Automatic tax", value: if(subscription.automatic_tax, do: "On", else: "Off")},
+      %{
+        label: "Local reason",
+        value:
+          if(present?(subscription.automatic_tax_disabled_reason),
+            do: humanize(subscription.automatic_tax_disabled_reason),
+            else: "-"
+          )
+      }
+    ]
+  end
+
+  defp quantity_summary(subscription) do
+    subscription.subscription_items
+    |> List.wrap()
+    |> Enum.map(&(&1.quantity || 1))
+    |> Enum.sum()
+    |> case do
+      0 -> "-"
+      quantity -> Integer.to_string(quantity)
+    end
+  end
+
+  defp default_drill_open?(subscription, :billing),
+    do: not Subscription.dunning_campaign_active?(subscription)
+
+  defp default_drill_open?(subscription, :dunning),
+    do: Subscription.dunning_campaign_active?(subscription)
+
+  defp default_drill_open?(_subscription, _section), do: false
+
+  defp drawer_open?(nil, nil), do: false
+  defp drawer_open?(_drawer_action_type, _pending_action), do: true
+
+  defp drawer_title(_drawer_action_type, %{type: type}), do: action_label(type)
+  defp drawer_title(action_type, _pending_action), do: action_label(action_type)
+
+  defp action_aria_label(action_type, subscription),
+    do:
+      "#{action_label(action_type)} for subscription #{subscription.processor_id || subscription.id}"
+
+  defp action_menu_groups(subscription) do
+    subscription_label = subscription.processor_id || subscription.id
+
+    [
+      %{
+        label: "Edit billing",
+        items:
+          [
+            quantity_change_available?(subscription) &&
+              action_item("update_quantity", subscription_label),
+            quantity_item_changes_available?(subscription) &&
+              action_item("add_item", subscription_label),
+            quantity_item_changes_available?(subscription) &&
+              action_item("update_item_quantity", subscription_label),
+            quantity_item_changes_available?(subscription) &&
+              action_item("remove_item", subscription_label)
+          ]
+          |> Enum.reject(&(&1 in [false, nil]))
+      },
+      %{
+        label: "Collection",
+        items:
+          if braintree_processor?(subscription) do
+            []
+          else
+            [action_item("pause", subscription_label), action_item("resume", subscription_label)]
+          end
+      },
+      %{
+        label: "Danger zone",
+        items: [
+          action_item("cancel_now", subscription_label, danger?: true),
+          action_item("comp_subscription", subscription_label, danger?: true)
+        ]
+      }
+    ]
+    |> Enum.reject(&(Map.get(&1, :items) == []))
+  end
+
+  defp action_item(action_type, subscription_label, opts \\ []) do
+    %{
+      label: action_label(action_type),
+      event: "open_action_drawer",
+      value: action_type,
+      danger?: Keyword.get(opts, :danger?, false),
+      hidden_context: "for subscription #{subscription_label}"
+    }
+  end
+
+  defp action_data_role(action_type),
+    do: action_type |> String.replace("_", "-") |> then(&(&1 <> "-form"))
+
+  defp action_label("swap_plan"), do: Copy.subscription_action_swap_plan()
+  defp action_label("cancel_at_period_end"), do: Copy.subscription_action_cancel_at_period_end()
+  defp action_label("cancel_now"), do: Copy.subscription_action_cancel_now()
+  defp action_label("comp_subscription"), do: Copy.subscription_action_create_comp_replacement()
+  defp action_label("pause"), do: Copy.subscription_action_pause_collection()
+  defp action_label("resume"), do: Copy.subscription_action_resume()
+
+  defp action_label("update_quantity"),
+    do: AccrueAdmin.Copy.Subscription.subscription_action_update_quantity()
+
+  defp action_label("add_item"), do: AccrueAdmin.Copy.Subscription.subscription_action_add_item()
+
+  defp action_label("update_item_quantity"),
+    do: AccrueAdmin.Copy.Subscription.subscription_action_update_item_quantity()
+
+  defp action_label("remove_item"),
+    do: AccrueAdmin.Copy.Subscription.subscription_action_remove_item()
+
+  defp action_label(nil), do: "Subscription action"
+  defp action_label(action_type), do: humanize(action_type)
 
   defp timeline_items(events) do
     Enum.map(events, fn event ->
@@ -707,6 +959,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
         push_flash(socket, :error, subscription_action_error_copy(socket, action))
     end
     |> assign(:pending_action, nil)
+    |> assign(:drawer_action_type, nil)
   end
 
   defp execute_action(subscription, _customer, %{type: "cancel_now"}, operation_id) do
@@ -940,7 +1193,8 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
     socket
     |> assign(:subscription, subscription)
     |> assign(:customer, subscription.customer)
-    |> assign(:timeline_events, timeline_events(subscription_id))
+    |> assign(:timeline_events, [])
+    |> assign(:timeline_events_loaded?, false)
     |> assign(:swap_plan_available, swap_plan_available?(subscription))
   end
 
@@ -1217,6 +1471,14 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
             })
         },
         %{
+          icon: :payments,
+          label: Copy.subscription_drill_link_charges_for_customer(),
+          href:
+            ScopedPath.build(mount_path, "/payments", scope, %{
+              "customer_id" => subscription.customer_id
+            })
+        },
+        %{
           icon: :events,
           label: "Events",
           href:
@@ -1224,6 +1486,11 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
               "subject_type" => "Subscription",
               "subject_id" => subscription.id
             })
+        },
+        %{
+          icon: :events,
+          label: Copy.subscription_drill_link_events_index(),
+          href: ScopedPath.build(mount_path, "/events", scope)
         }
       ]
   end
