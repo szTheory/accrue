@@ -1329,33 +1329,59 @@ a.ax-kpi-card--linked:focus-visible {
   color: var(--ax-primary);
 }
 
-.ax-detail-drawer-shell {
+.ax-overlay-shell {
   position: fixed;
   inset: 0;
-  z-index: var(--ax-z-drawer);
   /* ax-z-micro-stack: shell creates an isolated stacking context for backdrop/panel internals */
   isolation: isolate;
 }
 
-.ax-detail-drawer-backdrop {
+.ax-overlay-shell[data-presentation="drawer"],
+.ax-detail-drawer-shell {
+  z-index: var(--ax-z-drawer);
+}
+
+.ax-overlay-shell[data-presentation="modal"],
+.ax-step-up-modal-shell {
+  z-index: var(--ax-z-modal);
+}
+
+.ax-overlay-shell[data-presentation="popover"],
+.ax-overlay-popover-shell {
+  z-index: var(--ax-z-popover);
+}
+
+.ax-overlay-backdrop,
+.ax-detail-drawer-backdrop,
+.ax-step-up-modal-backdrop {
   position: absolute;
   inset: 0;
   z-index: 0; /* ax-z-micro-stack: backdrop at 0 inside isolated drawer shell */
+}
+
+.ax-detail-drawer-backdrop {
   background: color-mix(in srgb, var(--accrue-ink) 40%, transparent);
   backdrop-filter: blur(6px);
+}
+
+.ax-overlay-panel {
+  position: relative;
+  isolation: isolate;
+  z-index: 1; /* ax-z-micro-stack: panel at 1 inside isolated overlay shell */
+  overscroll-behavior: contain;
 }
 
 .ax-detail-drawer {
   position: absolute;
   inset: auto 0 0 0;
-  z-index: 1; /* ax-z-micro-stack: panel at 1 inside isolated drawer shell */
   display: grid;
   grid-template-rows: auto minmax(0, 1fr) auto;
-  min-height: 100vh;
-  max-height: 100vh;
+  width: 100%;
+  max-height: min(42rem, calc(100dvh - var(--ax-space-lg)));
   padding: var(--ax-space-lg);
   overflow: hidden;
   background: var(--ax-base);
+  border-radius: var(--ax-radius-lg) var(--ax-radius-lg) 0 0;
   box-shadow: -16px 0 60px color-mix(in srgb, var(--accrue-ink) 24%, transparent);
 }
 
@@ -1372,6 +1398,7 @@ a.ax-kpi-card--linked:focus-visible {
   gap: var(--ax-space-lg);
   min-height: 0;
   overflow: auto;
+  overscroll-behavior: contain;
 }
 
 .ax-detail-drawer-footer {
@@ -1403,32 +1430,23 @@ a.ax-kpi-card--linked:focus-visible {
 }
 
 .ax-step-up-modal-shell {
-  position: fixed;
-  inset: 0;
-  z-index: var(--ax-z-modal);
   display: grid;
   place-items: center;
   padding: var(--ax-space-lg);
-  /* ax-z-micro-stack: shell creates an isolated stacking context for backdrop/modal internals */
-  isolation: isolate;
 }
 
 .ax-step-up-modal-backdrop {
-  position: absolute;
-  inset: 0;
-  z-index: 0; /* ax-z-micro-stack: backdrop at 0 inside isolated modal shell */
   background: color-mix(in srgb, var(--accrue-ink) 42%, transparent);
   backdrop-filter: blur(6px);
 }
 
 .ax-step-up-modal {
-  position: relative;
-  z-index: 1; /* ax-z-micro-stack: panel at 1 inside isolated modal shell */
   display: grid;
   gap: var(--ax-space-lg);
   width: min(42rem, calc(100vw - 2rem));
   max-height: min(42rem, calc(100vh - 2rem));
   overflow: auto;
+  overscroll-behavior: contain;
 }
 
 .ax-step-up-modal-form {
@@ -1443,6 +1461,21 @@ a.ax-kpi-card--linked:focus-visible {
   gap: var(--ax-space-sm);
 }
 
+.ax-overlay-popover-shell {
+  pointer-events: none;
+}
+
+.ax-overlay-popover-shell .ax-overlay-panel {
+  pointer-events: auto;
+}
+
+.ax-overlay-popover-header,
+.ax-overlay-popover-body,
+.ax-overlay-popover-footer {
+  display: grid;
+  gap: var(--ax-space-sm);
+}
+
 /* ============================================================================
    Phase 177 (v1.51 MOT-02) — Detail drawer enter/exit transition classes
    Used by detail_drawer.ex as phx-mounted/phx-remove JS.show/hide tuples.
@@ -1452,7 +1485,7 @@ a.ax-kpi-card--linked:focus-visible {
    ========================================================================== */
 .ax-drawer-enter-from {
   opacity: 0;
-  transform: translateX(var(--ax-rise-md));
+  transform: translateY(100%);
 }
 
 .ax-drawer-entering {
@@ -1503,6 +1536,19 @@ a.ax-kpi-card--linked:focus-visible {
 
 .ax-drawer-backdrop-leave-to {
   opacity: 0;
+}
+
+@media (max-width: 767.98px) { /* --ax-bp-md ↓ */
+  .ax-detail-drawer {
+    inset: auto 0 0 0;
+    width: 100%;
+    max-height: min(42rem, calc(100dvh - var(--ax-space-lg)));
+    border-radius: var(--ax-radius-lg) var(--ax-radius-lg) 0 0;
+  }
+
+  .ax-drawer-enter-from {
+    transform: translateY(100%);
+  }
 }
 
 .ax-timeline-list,
@@ -1737,9 +1783,15 @@ a.ax-kpi-card--linked:focus-visible {
 
   .ax-detail-drawer {
     inset: 0 0 0 auto;
-    width: min(42rem, 100vw);
+    width: min(34rem, 92vw);
     min-height: 100vh;
+    max-height: 100vh;
     border-left: 1px solid var(--ax-border);
+    border-radius: 0;
+  }
+
+  .ax-drawer-enter-from {
+    transform: translateX(100%);
   }
 
   .ax-detail-drawer-header,
@@ -2739,7 +2791,6 @@ details[open].ax-dropdown .ax-dropdown-panel {
 .ax-dev-command-palette-specimen {
   position: relative;
   inset: auto;
-  z-index: auto;
   display: block;
   pointer-events: auto;
 }
