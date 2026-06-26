@@ -55,7 +55,7 @@ v1.54-storybook-and-forward-only-qa). Phases 193–200.
 ### EXE — Gold-standard exemplars (one per archetype)
 
 - [x] **EXE-01**: The Dashboard is refined to the locked four-zone overview spec (refine-not-rebuild) and the Recovery analytics page is re-grammared to `hero metric pair → at-risk work-queue → trend`.
-- [ ] **EXE-02**: The Subscription detail page is converted to summary-then-drill (~25 always-visible zones → ~6 bands): GOV.UK summary-list header, ≤2 primary actions + an overflow action-menu, action forms hosted in a side-drawer with step-up handoff, the duplicate related-resources card deleted, and card-in-card nesting flattened.
+- [x] **EXE-02**: The Subscription detail page is converted to summary-then-drill (~25 always-visible zones → ~6 bands): GOV.UK summary-list header, ≤2 primary actions + an overflow action-menu, action forms hosted in a side-drawer with step-up handoff, the duplicate related-resources card deleted, and card-in-card nesting flattened.
 - [ ] **EXE-03**: The Subscriptions list is converted to the locked list spec: table-first with row→card mobile degradation, persistent filter chips + result count + clear-all, work-queue default, and four distinct states (populated / first-run-empty / filtered-empty / loading).
 
 ### PGH — Shared PageHeader component
@@ -69,7 +69,7 @@ v1.54-storybook-and-forward-only-qa). Phases 193–200.
 
 ### IXN — Interaction & overlay correctness
 
-- [ ] **IXN-01**: A single canonical overlay primitive backs every modal/drawer — ref-counted iOS-safe body scroll-lock (no scrollbar-gutter jump), a body-level portal/stacking model so an overlay is never painted behind its scrim and is always hit-testable, an `inert`/`aria-hidden` background, and a unified backdrop+Escape dismissal that settles cleanly on rapid double-toggle.
+- [x] **IXN-01**: A single canonical overlay primitive backs every modal/drawer — ref-counted iOS-safe body scroll-lock (no scrollbar-gutter jump), a body-level portal/stacking model so an overlay is never painted behind its scrim and is always hit-testable, an `inert`/`aria-hidden` background, and a unified backdrop+Escape dismissal that settles cleanly on rapid double-toggle.
 - [ ] **IXN-02**: Overlay motion is geometry-correct — drawer edge-docks on desktop (translateX from the right) and is a bottom-sheet on mobile (translateY), popovers are origin-aware, focus moves into the panel / traps / restores with an instant focus ring, the ≤240ms duration band is held, and reduced-motion behavior is preserved (extending `reduced-motion.spec.js`).
 - [ ] **IXN-03**: Non-interactive elements carry no hover/cursor affordance (empty-state heroes), disabled controls look disabled, absent affordances are hidden (no empty pagination), floating elements stay within viewport bounds, and theme switching has no flash-of-wrong-theme with correct persistence and system emulation.
 - [ ] **IXN-04**: A transformed/filtered/`contain` ancestor audit confirms no LiveView page wrapper re-roots a `position:fixed` overlay shell (the root cause of modal-behind-scrim).
@@ -101,12 +101,12 @@ REQ-ID → phase mapping (each REQ-ID maps to exactly one phase; 23/23 mapped, n
 | RES-04 | Phase 193 | Complete |
 | STY-01 | Phase 193 | Complete |
 | EXE-01 | Phase 194 | Complete |
-| EXE-02 | Phase 195 | Pending |
+| EXE-02 | Phase 195 | Complete |
 | PGH-01 | Phase 196 | Pending |
 | EXE-03 | Phase 196 | Pending |
 | PRP-01 | Phase 197 | Pending |
 | PRP-02 | Phase 198 | Pending |
-| IXN-01 | Phase 199 | Pending |
+| IXN-01 | Phase 199 | Complete |
 | IXN-02 | Phase 199 | Pending |
 | IXN-03 | Phase 199 | Pending |
 | IXN-04 | Phase 199 | Pending |
