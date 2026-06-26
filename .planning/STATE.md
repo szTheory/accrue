@@ -5,15 +5,15 @@ milestone_name: Admin UI Page-Level Streamlining & Storybook
 current_phase: 195
 current_phase_name: exemplar-b-subscription-detail
 status: executing
-stopped_at: Completed 195-01-PLAN.md
-last_updated: "2026-06-26T08:17:28.294Z"
+stopped_at: Completed 195-02-PLAN.md
+last_updated: "2026-06-26T08:32:35.576Z"
 last_activity: 2026-06-26
 last_activity_desc: Phase 195 execution started
 progress:
   total_phases: 8
   completed_phases: 2
   total_plans: 17
-  completed_plans: 10
+  completed_plans: 11
   percent: 25
 ---
 
@@ -30,7 +30,7 @@ See: `.planning/PROJECT.md` (updated 2026-06-24 — v1.54 Admin UI Page-Level St
 ## Current Position
 
 Phase: 195 (exemplar-b-subscription-detail) — EXECUTING
-Plan: 2 of 8
+Plan: 3 of 8
 Status: Ready to execute
 Last activity: 2026-06-26 — Phase 195 execution started
 
@@ -198,6 +198,7 @@ Coverage: 22/22 v1.51 requirements mapped (each REQ-ID → exactly one phase). D
 | Phase 194 P03 | 234s | 2 tasks | 2 files |
 | Phase 194 P04 | 624s | 3 tasks | 2 files |
 | Phase 195 P01 | 9m 15s | 3 tasks | 4 files |
+| Phase 195 P02 | 9m 50s | 3 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -322,6 +323,8 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - [Phase ?]: Phase 194 Plan 04: p193↔p187 scorecard pairing structural no-op — SC3 redefined as e2e:phase194 pass + source guards
 - [Phase 195]: Plan 195-01 intentionally remains RED-only; implementation is owned by later Phase 195 plans. — The plan objective is Wave 0 RED validation coverage; later plans green the implementation.
 - [Phase 195]: EXE-02 and IXN-01 remain pending after 195-01; this plan addresses them with RED coverage only. — The underlying Subscription detail conversion and full overlay implementation are split across later Phase 195 and Phase 199 plans.
+- [Phase 195]: Plan 195-02 intentionally remains RED-only; implementation is owned by later Phase 195 plans. — The plan objective is Wave 0 RED LiveView validation coverage; later plans green the Subscription detail implementation.
+- [Phase 195]: EXE-02 and IXN-01 remain pending after 195-02; this plan addresses them with RED coverage only. — The underlying Subscription detail conversion and overlay interaction implementation are split across later Phase 195 and Phase 199 plans.
 
 ### Pending Todos
 
@@ -411,8 +414,8 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 
 ## Session Continuity
 
-Last session: 2026-06-26T08:17:28.287Z
-Stopped at: Completed 195-01-PLAN.md
+Last session: 2026-06-26T08:32:35.568Z
+Stopped at: Completed 195-02-PLAN.md
 Resume file: None
 
 ## Operator Next Steps
