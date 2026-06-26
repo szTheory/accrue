@@ -11,10 +11,10 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
 
   alias AccrueAdmin.Components.{
     AppShell,
-    Breadcrumbs,
     DataTable,
     FilterChipBar,
     FlashGroup,
+    PageHeader,
     StatStrip
   }
 
@@ -92,29 +92,43 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
     active_organization_name={@active_organization_name}
     >
       <section class="ax-page">
-        <header class="ax-page-header">
-          <Breadcrumbs.breadcrumbs
-            items={[
-              %{label: "Dashboard", href: scoped_path(@admin_mount_path, "", @current_owner_scope)},
-              %{label: "Subscriptions"}
-            ]}
-          />
-          <h1 class="ax-display"><%= Copy.subscriptions_index_heading() %></h1>
-          <p class="ax-body ax-page-copy"><%= Copy.subscriptions_index_subtitle() %></p>
-        </header>
+        <PageHeader.page_header
+          breadcrumbs={[
+            %{label: "Dashboard", href: scoped_path(@admin_mount_path, "", @current_owner_scope)},
+            %{label: "Subscriptions"}
+          ]}
+          title={Copy.subscriptions_index_heading()}
+        >
+          <:description>
+            <p class="ax-body"><%= Copy.subscriptions_index_subtitle() %></p>
+          </:description>
+
+          <:stat_strip>
+            <StatStrip.stat_strip label="Subscription summary">
+              <:stat label="Active" value={Integer.to_string(@summary.active_count)} />
+              <:stat
+                label="Canceling"
+                value={Integer.to_string(@summary.canceling_count)}
+                tone="amber"
+              />
+              <:stat label="Paused" value={Integer.to_string(@summary.paused_count)} tone="amber" />
+              <:stat label="Past due" value={Integer.to_string(@summary.past_due_count)} />
+            </StatStrip.stat_strip>
+          </:stat_strip>
+
+          <:filter_toolbar>
+            <DataTable.filter_toolbar
+              id="subscriptions"
+              filter_fields={subscription_filter_fields()}
+              filter_params={filter_params(@params)}
+              path={@table_path}
+              clear_href={clear_all_href(@params, @table_path)}
+              clear_visible={filter_active?(@params)}
+            />
+          </:filter_toolbar>
+        </PageHeader.page_header>
 
         <FlashGroup.flash_group flashes={flash_messages(@flash)} />
-
-        <StatStrip.stat_strip label="Subscription summary">
-          <:stat label="Active" value={Integer.to_string(@summary.active_count)} />
-          <:stat
-            label="Canceling"
-            value={Integer.to_string(@summary.canceling_count)}
-            tone="amber"
-          />
-          <:stat label="Paused" value={Integer.to_string(@summary.paused_count)} tone="amber" />
-          <:stat label="Past due" value={Integer.to_string(@summary.past_due_count)} />
-        </StatStrip.stat_strip>
 
         <FilterChipBar.filter_chip_bar
           items={work_queue_chips(@params, @table_path)}
@@ -128,6 +142,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
           current_owner_scope={@current_owner_scope}
           path={@table_path}
           params={@params}
+          render_filter_toolbar={false}
           columns={[
             %{
               label: "Subscription",
@@ -145,24 +160,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
             %{label: "Lifecycle", render: &lifecycle_summary/1},
             %{id: :current_period_end, label: "Current period end"}
           ]}
-          filter_fields={[
-            %{id: :q, label: "Search", placeholder: "Search subscriptions"},
-            %{
-              id: :status,
-              label: "Status",
-              type: :select,
-              all_label: "All statuses",
-              options: [
-                {"active", "Active"},
-                {"trialing", "Trialing"},
-                {"canceling", "Canceling"},
-                {"paused", "Paused"},
-                {"past_due", "Past due"},
-                {"canceled", "Canceled"}
-              ]
-            },
-            %{id: :customer_id, label: "Customer id", placeholder: "Customer id"}
-          ]}
+          filter_fields={subscription_filter_fields()}
           empty_title={queue_empty_title(@params)}
           empty_copy={queue_empty_copy(@params)}
         />
@@ -256,6 +254,34 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
 
   defp card_title(row), do: row.processor_id || row.id
 
+  defp subscription_filter_fields do
+    [
+      %{id: :q, label: "Search", placeholder: "Search subscriptions"},
+      %{
+        id: :status,
+        label: "Status",
+        type: :select,
+        all_label: "All statuses",
+        options: [
+          {"active", "Active"},
+          {"trialing", "Trialing"},
+          {"canceling", "Canceling"},
+          {"paused", "Paused"},
+          {"past_due", "Past due"},
+          {"canceled", "Canceled"}
+        ]
+      },
+      %{id: :customer_id, label: "Customer id", placeholder: "Customer id"}
+    ]
+  end
+
+  defp filter_params(params) do
+    params
+    |> Subscriptions.decode_filter()
+    |> Subscriptions.encode_filter()
+    |> Map.new(fn {key, value} -> {to_string(key), to_string(value)} end)
+  end
+
   defp flash_messages(flash) do
     Enum.flat_map([:error, :info], fn kind ->
       case Phoenix.Flash.get(flash, kind) do
@@ -287,6 +313,19 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
       }
     ]
   end
+
+  defp clear_all_href(_params, table_path) do
+    AccrueAdmin.DataTableNav.merge_query(table_path, %{
+      "view" => "all",
+      "q" => nil,
+      "status" => nil,
+      "customer_id" => nil,
+      "cursor" => nil,
+      "phase196_state" => nil
+    })
+  end
+
+  defp filter_active?(params), do: filter_params(params) != %{}
 
   defp build_default_params(%{mode: :organization, organization_slug: slug}, status)
        when is_binary(slug) do

@@ -84,8 +84,13 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert html =~ ~s(data-ax-page-title)
     assert html =~ ~s(data-component-group="page-header-actions-breadcrumbs")
     assert html =~ ~s(data-ax-page-filter-toolbar)
-    assert html =~ ~s(data-ax-page-actions)
+    refute html =~ ~s(data-ax-page-actions)
     assert_one_h1(html)
+
+    assert html
+           |> Floki.parse_document!()
+           |> Floki.find(~s([data-role="filter-form"]))
+           |> length() == 1
   end
 
   test "bare subscriptions route represents the default At risk queue without first-run flash", %{
