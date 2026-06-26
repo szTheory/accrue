@@ -347,6 +347,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
               phx-click="confirm_action"
               class="ax-button ax-button-primary"
               data-role="confirm-action"
+              data-ax-action-drawer-confirm
             >
               Confirm <%= action_label(@pending_action.type) %>
             </button>
@@ -371,6 +372,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
                 phx-click="confirm_action"
                 class="ax-button ax-button-primary"
                 data-role="confirm-action"
+                data-ax-action-drawer-confirm
               >
                 Confirm <%= action_label(@pending_action.type) %>
               </button>
@@ -479,7 +481,12 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
     assigns = assign(assigns, :data_role, action_data_role(assigns.action_type))
 
     ~H"""
-    <form phx-submit="prepare_action" data-role={@data_role}>
+    <form
+      phx-submit="prepare_action"
+      data-role={@data_role}
+      data-ax-action-drawer-form
+      data-action-type={@action_type}
+    >
       <input type="hidden" name="action_type" value={@action_type} />
 
       <%= if @action_type == "pause" do %>
