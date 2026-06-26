@@ -123,6 +123,43 @@ defmodule AccrueAdmin.OverlayComponentsTest do
     end
   end
 
+  describe "Overlay CSS layer and geometry contract" do
+    test "defines canonical shell, backdrop, and panel local ordering" do
+      app_css = File.read!(app_css_path())
+
+      assert app_css =~ ~r/\.ax-overlay-shell\s*\{[^}]*position: fixed;[^}]*inset: 0;[^}]*isolation: isolate;/s
+
+      assert app_css =~
+               ~r/\.ax-overlay-backdrop,\s*\.ax-detail-drawer-backdrop,\s*\.ax-step-up-modal-backdrop\s*\{[^}]*z-index: 0;/s
+
+      assert app_css =~
+               ~r/\.ax-overlay-panel\s*\{[^}]*z-index: 1;[^}]*overscroll-behavior: contain;/s
+    end
+
+    test "maps overlay presentations to the existing z-token scale" do
+      app_css = File.read!(app_css_path())
+
+      assert app_css =~
+               ~r/\.ax-overlay-shell\[data-presentation="drawer"\],\s*\.ax-detail-drawer-shell\s*\{[^}]*z-index: var\(--ax-z-drawer\);/s
+
+      assert app_css =~
+               ~r/\.ax-overlay-shell\[data-presentation="modal"\],\s*\.ax-step-up-modal-shell\s*\{[^}]*z-index: var\(--ax-z-modal\);/s
+
+      assert app_css =~
+               ~r/\.ax-overlay-shell\[data-presentation="popover"\],\s*\.ax-overlay-popover-shell\s*\{[^}]*z-index: var\(--ax-z-popover\);/s
+    end
+
+    test "keeps drawer right-docked on desktop and bottom-sheeted below md" do
+      app_css = File.read!(app_css_path())
+
+      assert app_css =~
+               ~r/@media \(min-width: 768px\).*?\.ax-detail-drawer\s*\{.*?inset: 0 0 0 auto;.*?width: min\(34rem, 92vw\);.*?border-left: 1px solid var\(--ax-border\);.*?border-radius: 0;.*?\}.*?\.ax-drawer-enter-from\s*\{.*?transform: translateX\(100%\);/s
+
+      assert app_css =~
+               ~r/@media \(max-width: 767\.98px\).*?\.ax-detail-drawer\s*\{.*?inset: auto 0 0 0;.*?width: 100%;.*?max-height: min\(42rem, calc\(100dvh - var\(--ax-space-lg\)\)\);.*?border-radius: var\(--ax-radius-lg\) var\(--ax-radius-lg\) 0 0;.*?\}.*?\.ax-drawer-enter-from\s*\{.*?transform: translateY\(100%\);/s
+    end
+  end
+
   describe "DetailDrawer focus and layer contract" do
     test "renders through Overlay with stable labels and fallback focus target" do
       html =
