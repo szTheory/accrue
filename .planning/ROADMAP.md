@@ -126,7 +126,7 @@ Plans:
 
 **Wave 2**
 
-- [ ] 195-04-PLAN.md — Overlay JS behavior: ref-counted scroll lock, inert background, FocusTrap composition, and committed JS bundle
+- [x] 195-04-PLAN.md — Overlay JS behavior: ref-counted scroll lock, inert background, FocusTrap composition, and committed JS bundle
 
 **Wave 3**
 
@@ -333,7 +333,7 @@ Full details: [v1.48 roadmap archive](milestones/v1.48-ROADMAP.md)
 | 192. Idempotent verification & sign-off | v1.53 | 6/6 | Complete   | 2026-06-20 |
 | 193. Research, re-baseline & pattern lock | v1.54 | 5/5 | Complete    | 2026-06-25 |
 | 194. Exemplar A — Dashboard | v1.54 | 4/4 | Complete    | 2026-06-26 |
-| 195. Exemplar B — Subscription detail | v1.54 | 3/8 | In Progress|  |
+| 195. Exemplar B — Subscription detail | v1.54 | 4/8 | In Progress|  |
 | 196. Exemplar C — Subscriptions list + PageHeader | v1.54 | 0/? | Not started | - |
 | 197. Propagate LIST | v1.54 | 0/? | Not started | - |
 | 198. Propagate DETAIL + analytics | v1.54 | 0/? | Not started | - |
