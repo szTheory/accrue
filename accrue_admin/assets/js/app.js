@@ -7,6 +7,7 @@ import { initDropdowns } from "./hooks/dropdown";
 import { CommandPalette } from "./hooks/command_palette";
 import { ConnectionState } from "./hooks/connection_state";
 import { FocusTrap } from "./hooks/focus_trap";
+import { Overlay } from "./hooks/overlay";
 import topbar from "../vendor/topbar.js";
 
 // Navigation loading bar. Runs at deferred-load time, after the runtime brand
@@ -44,7 +45,7 @@ ready(() => {
 const csrfToken = document.querySelector("meta[name='csrf-token']")?.getAttribute("content");
 const liveSocket = new LiveSocket("/live", Socket, {
   params: csrfToken ? { _csrf_token: csrfToken } : {},
-  hooks: { CommandPalette, ConnectionState, FocusTrap, Clipboard }
+  hooks: { CommandPalette, ConnectionState, FocusTrap, Overlay, Clipboard }
 });
 
 liveSocket.connect();
