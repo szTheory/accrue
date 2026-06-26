@@ -6,10 +6,79 @@ defmodule AccrueAdmin.OverlayComponentsTest do
   import Phoenix.LiveViewTest
 
   alias AccrueAdmin.Components.DetailDrawer
+  alias AccrueAdmin.Components.Overlay
   alias AccrueAdmin.Components.StepUpAuthModal
 
+  describe "Overlay portal and focus contract" do
+    test "renders drawer presentation through the body-level overlay root" do
+      html =
+        render_component(fn assigns ->
+          assigns = assigns
+
+          ~H"""
+          <Overlay.overlay
+            id="subscription-action-drawer"
+            open
+            presentation={:drawer}
+            title="Change plan"
+            subtitle="Subscription sub_123"
+            close_label="Close action drawer"
+            close_event="close_subscription_drawer"
+            close_target="#subscription-live"
+          >
+            <button type="button" data-focus-trap-initial>Save change</button>
+          </Overlay.overlay>
+          """
+        end)
+
+      assert html =~ ~s(data-phx-portal="#ax-overlay-root")
+      assert html =~ ~s(data-ax-overlay-shell)
+      assert html =~ ~s(data-ax-overlay-panel)
+      assert html =~ ~s(data-ax-overlay-backdrop)
+      assert html =~ ~s(data-presentation="drawer")
+      assert html =~ ~s(role="dialog")
+      assert html =~ ~s(aria-modal="true")
+      assert html =~ ~s(phx-hook="Overlay")
+      assert html =~ ~s(data-focus-trap-close-event="close_subscription_drawer")
+      assert html =~ ~s(data-focus-trap-close-target="#subscription-live")
+      assert html =~ ~s(data-focus-trap-fallback="#subscription-action-drawer-title")
+      assert html =~ ~s(data-scroll-lock)
+    end
+
+    test "renders modal presentation with the same overlay substrate" do
+      html =
+        render_component(fn assigns ->
+          assigns = assigns
+
+          ~H"""
+          <Overlay.overlay
+            id="subscription-step-up"
+            open
+            presentation={:modal}
+            title="Confirm your identity"
+            close_label="Cancel"
+            close_event="step_up_dismiss"
+          >
+            <input id="step-up-code" data-focus-trap-initial />
+          </Overlay.overlay>
+          """
+        end)
+
+      assert html =~ ~s(data-phx-portal="#ax-overlay-root")
+      assert html =~ ~s(data-presentation="modal")
+      assert html =~ ~s(data-ax-overlay-shell)
+      assert html =~ ~s(data-ax-overlay-panel)
+      assert html =~ ~s(data-ax-overlay-backdrop)
+      assert html =~ ~s(role="dialog")
+      assert html =~ ~s(aria-modal="true")
+      assert html =~ ~s(phx-hook="Overlay")
+      assert html =~ ~s(data-focus-trap-close-event="step_up_dismiss")
+      assert html =~ ~s(data-focus-trap-fallback="#subscription-step-up-title")
+    end
+  end
+
   describe "DetailDrawer focus and layer contract" do
-    test "renders FocusTrap attributes with stable labels and fallback focus target" do
+    test "renders through Overlay with stable labels and fallback focus target" do
       html =
         render_component(fn assigns ->
           assigns = assigns
@@ -29,12 +98,17 @@ defmodule AccrueAdmin.OverlayComponentsTest do
           """
         end)
 
+      assert html =~ ~s(data-phx-portal="#ax-overlay-root")
+      assert html =~ ~s(data-ax-overlay-shell)
+      assert html =~ ~s(data-ax-overlay-panel)
+      assert html =~ ~s(data-ax-overlay-backdrop)
+      assert html =~ ~s(data-presentation="drawer")
       assert html =~ ~s(data-component-group="drawer-form")
       assert html =~ ~s(role="dialog")
       assert html =~ ~s(aria-modal="true")
       assert html =~ ~s(aria-labelledby="webhook-drawer-title")
       assert html =~ ~s(aria-describedby="webhook-drawer-description")
-      assert html =~ ~s(phx-hook="FocusTrap")
+      assert html =~ ~s(phx-hook="Overlay")
       assert html =~ ~s(data-focus-trap-close-event="close_webhook_drawer")
       assert html =~ ~s(data-focus-trap-close-target="#webhook-live")
       assert html =~ ~s(data-focus-trap-fallback="#webhook-drawer-title")
@@ -59,7 +133,7 @@ defmodule AccrueAdmin.OverlayComponentsTest do
   end
 
   describe "StepUpAuthModal focus and dismissal contract" do
-    test "renders FocusTrap dialog shell, labelled input, cancel-before-submit order, and explicit dismissal target" do
+    test "renders through Overlay as a modal with labelled input, cancel-before-submit order, and explicit dismissal target" do
       html =
         render_component(&StepUpAuthModal.step_up_auth_modal/1, %{
           pending: true,
@@ -67,13 +141,18 @@ defmodule AccrueAdmin.OverlayComponentsTest do
           error: nil
         })
 
+      assert html =~ ~s(data-phx-portal="#ax-overlay-root")
+      assert html =~ ~s(data-ax-overlay-shell)
+      assert html =~ ~s(data-ax-overlay-panel)
+      assert html =~ ~s(data-ax-overlay-backdrop)
+      assert html =~ ~s(data-presentation="modal")
       assert html =~ ~s(id="accrue-admin-step-up-dialog")
       assert html =~ ~s(data-component-group="modal-confirm")
       assert html =~ ~s(role="dialog")
       assert html =~ ~s(aria-modal="true")
       assert html =~ ~s(aria-labelledby="step-up-title")
       assert html =~ ~s(aria-describedby="step-up-description")
-      assert html =~ ~s(phx-hook="FocusTrap")
+      assert html =~ ~s(phx-hook="Overlay")
       assert html =~ ~s(data-focus-trap-close-event="step_up_dismiss")
       assert html =~ ~s(data-focus-trap-fallback="#step-up-title")
       assert html =~ ~s(class="ax-step-up-modal-backdrop")
