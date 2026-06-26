@@ -532,6 +532,8 @@ zero blockers; non-critical follow-ups + partial Nyquist 123–125 deferred).
 
 ## Current State
 
+**v1.54 — Admin UI Page-Level Streamlining & Storybook in progress (opened 2026-06-24; Phases 193–200).** Phases 193 (SPEC-OVERVIEW/LIST/DETAIL contracts locked, page-flow baseline, PhoenixStorybook stood up dev/test-only) and **194 (Exemplar A — Dashboard)** are complete: the Dashboard is now the locked gold-standard for the overview archetype (additive `data-ax-*` machine hooks, non-interactive "all clear" empty-rail hero, KPI demotion) and Recovery analytics reads as a work-queue (at-risk table above the funnel chart). The SPEC-OVERVIEW invariant set is enforced by both a `verify_package_docs.sh` source guard and a Playwright spec (`admin-spec-overview-phase194.spec.js`). Next: Phase 195 (Exemplar B — Subscription detail).
+
 **v1.53 — Admin UI Design-System Hardening shipped & archived 2026-06-20 (Phases 187–192, 39/39 plans, 33/33 requirements).** The fourth pass on the `accrue_admin` surface is complete: the operator UI is now *interaction-correct and component-systematic*, with a final scorecard ≥ the Phase-187 baseline across 21,276 cells (zero regressions), merge-blocking CI regression guardrails, and maintainer sign-off. With v1.53 shipped, the project returns to **stable-core / demand-driven expansion** posture — no milestone currently open.
 
 The v1.50→v1.53 arc (Admin UI Foundation → Depth Pass → Brand System → Design-System Hardening) closed out the adopter-facing presentation/DX investment: a coherent, distinctly-branded, interaction-correct operator UI plus a committed standalone brand book (`brandbook/`), logo system, design tokens, and voice/copy.
@@ -660,4 +662,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-06-20 after v1.53 milestone — Admin UI Design-System Hardening shipped & archived (Phases 187–192, 39 plans, 33/33 requirements). Final scorecard ≥ Phase-187 baseline across 21,276 cells with zero regressions; merge-blocking CI guardrails; maintainer sign-off ACCEPT (discharged v1.51 photographic-sign-off tech-debt). Milestone-audit doc/traceability gaps closed inline at close. Project returned to stable core / demand-driven posture; no milestone open. Prior: v1.52 Brand System (Phases 180–186).*
+*Last updated: 2026-06-26 after Phase 194 (Exemplar A — Dashboard) completed in v1.54 — Admin UI Page-Level Streamlining & Storybook (opened 2026-06-24; Phases 193–200). Dashboard locked as the overview gold-standard and Recovery re-grammared to work-queue-first; SPEC-OVERVIEW invariants enforced via source guard + Playwright spec; 4/4 plans, verification 10/10. Prior milestone: v1.53 Admin UI Design-System Hardening (Phases 187–192, shipped & archived 2026-06-20). Prior: v1.52 Brand System (Phases 180–186).*
