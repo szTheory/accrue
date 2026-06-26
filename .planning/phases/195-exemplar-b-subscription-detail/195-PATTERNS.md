@@ -1184,7 +1184,7 @@ Use existing `--ax-space-*`, `--ax-dur-*`, `--ax-ease-*`, and `--ax-z-*` tokens.
 **Source:** `copy/subscription.ex`, `copy.ex`
 **Apply to:** action labels, summary row labels, error/empty copy
 
-Copy goes through `AccrueAdmin.Copy` / `AccrueAdmin.Copy.Subscription`. After copy changes, run `mix accrue_admin.export_copy_strings` and commit `examples/accrue_host/e2e/generated/copy_strings.json`. Research mentions `accrue_admin/e2e/generated/copy_strings.json`, but the existing fixture path found in this workspace is under `examples/accrue_host/e2e/generated/`.
+Copy goes through `AccrueAdmin.Copy` / `AccrueAdmin.Copy.Subscription`. After copy changes, run `mix accrue_admin.export_copy_strings` and commit `examples/accrue_host/e2e/generated/copy_strings.json`.
 
 ### Testing
 **Source:** `overlay_components_test.exs`, `subscription_live_test.exs`, `focus_trap_test.mjs`, Phase 191 helpers

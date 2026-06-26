@@ -97,7 +97,7 @@ Accent must not be used for status badges, dunning severity, danger actions, raw
 
 ## Copywriting Contract
 
-All copy changes go through `AccrueAdmin.Copy` / `AccrueAdmin.Copy.Subscription`, followed by regenerating and committing `accrue_admin/e2e/generated/copy_strings.json`.
+All copy changes go through `AccrueAdmin.Copy` / `AccrueAdmin.Copy.Subscription`, followed by regenerating and committing `examples/accrue_host/e2e/generated/copy_strings.json`.
 
 | Element | Copy |
 |---------|------|
@@ -263,7 +263,7 @@ No third-party blocks are authorized by this UI-SPEC.
 | Coupling | Contract |
 |----------|----------|
 | CSS bundle | Any `app.css` / `theme.css` change requires `mix accrue_admin.assets.build` and committed generated assets. |
-| Copy fixture | Any `AccrueAdmin.Copy` change requires regenerated and committed `accrue_admin/e2e/generated/copy_strings.json`. |
+| Copy fixture | Any `AccrueAdmin.Copy` change requires regenerated and committed `examples/accrue_host/e2e/generated/copy_strings.json`. |
 | Guards | Do not weaken Phase 193 guards: spacing literal, `:focus-visible`, truncation `min-width:0`, empty-rail non-interactivity. |
 | Page-flow baseline | Add subscription-detail page-flow cells under the existing zero-regression `regressions.ndjson` mechanism; do not introduce pixel-diff gating. |
 | Public API | Freeze `<.overlay>`, `Detail.summary_list/1`, and `DropdownMenu.action_menu/1` enough for Phase 198 propagation. |

@@ -20,7 +20,7 @@ created: 2026-06-26
 | **Framework** | ExUnit/Mix for LiveView and component tests; Node `node --test` for JS hook tests; Playwright for browser page-flow |
 | **Config file** | `accrue_admin/test`, `accrue_admin/package.json`, existing Playwright config |
 | **Quick run command** | `cd accrue_admin && mix test test/accrue_admin/components/overlay_components_test.exs test/accrue_admin/live/subscription_live_test.exs` |
-| **Full suite command** | `cd accrue_admin && mix test && node --test test/js/scroll_lock_test.mjs && npm run e2e:phase195` |
+| **Full suite command** | `cd accrue_admin && mix test && node --test test/js/scroll_lock_test.mjs test/js/dropdown_test.mjs && npm run e2e:phase195` |
 | **Estimated runtime** | ~180 seconds targeted; full suite depends on Playwright browser startup |
 
 ---
@@ -30,7 +30,7 @@ created: 2026-06-26
 - **After every task commit:** Run the targeted ExUnit file for the component or LiveView touched by the task.
 - **After JS hook tasks:** Run `cd accrue_admin && node --test test/js/scroll_lock_test.mjs`.
 - **After every plan wave:** Run the targeted ExUnit pair plus the Phase 195 Playwright spec.
-- **Before `/gsd:verify-work`:** `cd accrue_admin && mix test && node --test test/js/scroll_lock_test.mjs && npm run e2e:phase195` must pass, or the failure must be explicitly documented with environment evidence.
+- **Before `/gsd:verify-work`:** `cd accrue_admin && mix test && node --test test/js/scroll_lock_test.mjs test/js/dropdown_test.mjs && npm run e2e:phase195` must pass, or the failure must be explicitly documented with environment evidence.
 - **Max feedback latency:** 180 seconds for targeted runs.
 
 ---

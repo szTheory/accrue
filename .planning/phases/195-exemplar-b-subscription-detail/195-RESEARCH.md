@@ -476,7 +476,7 @@ The current duplicate `data-role="subscription-related-billing"` card should be 
 | Framework | ExUnit/Mix for LiveView/component tests; Node `node --test` for JS hooks; Playwright for browser page-flow. [VERIFIED: codebase grep] |
 | Config file | `accrue_admin/playwright.config.js`; ExUnit standard project config; existing Node hook tests under `accrue_admin/test/js`. [VERIFIED: codebase grep] |
 | Quick run command | `cd accrue_admin && mix test test/accrue_admin/components/overlay_components_test.exs test/accrue_admin/live/subscription_live_test.exs` [VERIFIED: filesystem probe] |
-| JS hook command | `cd accrue_admin && node --test test/js/focus_trap_test.mjs test/js/scroll_lock_test.mjs` after adding `scroll_lock_test.mjs`. [VERIFIED: filesystem probe] |
+| JS hook command | `cd accrue_admin && node --test test/js/focus_trap_test.mjs test/js/scroll_lock_test.mjs test/js/dropdown_test.mjs` after adding the Phase 195 scroll-lock and dropdown tests. [VERIFIED: filesystem probe + 195-06/195-08 plans] |
 | Full suite command | `cd accrue_admin && mix test && npm run e2e:phase195` after adding the Phase 195 script/spec; keep existing page-flow suites green. [VERIFIED: package.json/codebase grep + ASSUMED for new script name] |
 
 ### Phase Requirements → Test Map
