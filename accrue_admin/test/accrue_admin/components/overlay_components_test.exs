@@ -5,6 +5,7 @@ defmodule AccrueAdmin.OverlayComponentsTest do
 
   import Phoenix.LiveViewTest
 
+  alias AccrueAdmin.Components.Detail
   alias AccrueAdmin.Components.DetailDrawer
   alias AccrueAdmin.Components.Overlay
   alias AccrueAdmin.Components.StepUpAuthModal
@@ -120,6 +121,93 @@ defmodule AccrueAdmin.OverlayComponentsTest do
 
       assert html =~
                ~r/<body[^>]*>.*<main id="admin-content">Billing<\/main>.*<div id="ax-overlay-root"><\/div>.*<style/s
+    end
+  end
+
+  describe "Detail summary list" do
+    test "renders a semantic summary-list dl with read-only and long value rows" do
+      html =
+        render_component(fn assigns ->
+          assigns =
+            assign(assigns, :rows, [
+              %{label: "Status", value: "Active, renews normally"},
+              %{
+                label: "Customer",
+                value:
+                  Phoenix.HTML.raw(
+                    ~s(<a class="ax-link" href="/billing/customers/cus_123">Acme Billing Operations With A Long Account Name</a>)
+                  )
+              }
+            ])
+
+          ~H"""
+          <Detail.summary_list rows={@rows} />
+          """
+        end)
+
+      assert html =~ ~s(<dl)
+      assert html =~ ~s(data-ax-summary-list)
+      assert html =~ ~s(<dt class="ax-summary-list-key">Status</dt>)
+      assert html =~ "Active, renews normally"
+      assert html =~ "Acme Billing Operations With A Long Account Name"
+      assert html =~ ~s(href="/billing/customers/cus_123")
+      refute html =~ ~s(class="ax-summary-list-actions")
+    end
+
+    test "renders Change and View row actions with hidden context" do
+      html =
+        render_component(fn assigns ->
+          assigns =
+            assign(assigns, :rows, [
+              %{
+                label: "Plan / price",
+                value: "Growth / $49",
+                action_label: "Change",
+                action_event: "prepare_action",
+                action_value: "swap_plan",
+                action_target: "#subscription-live",
+                action_context: "for subscription sub_123"
+              },
+              %{
+                label: "Dunning",
+                value: "No recovery campaign",
+                action_label: "View",
+                action_href: "#dunning-recovery",
+                action_context: "dunning activity for subscription sub_123"
+              }
+            ])
+
+          ~H"""
+          <Detail.summary_list rows={@rows} />
+          """
+        end)
+
+      assert html =~ ~s(data-ax-summary-list)
+      assert html =~ ~s(<button type="button")
+      assert html =~ ~s(phx-click="prepare_action")
+      assert html =~ ~s(phx-target="#subscription-live")
+      assert html =~ ~s(phx-value-action_type="swap_plan")
+      assert html =~ ~s(<span>Change</span>)
+      assert html =~ ~s(<span class="ax-visually-hidden"> for subscription sub_123</span>)
+      assert html =~ ~s(href="#dunning-recovery")
+      assert html =~ ~s(<span>View</span>)
+      assert html =~
+               ~s(<span class="ax-visually-hidden"> dunning activity for subscription sub_123</span>)
+    end
+
+    test "keeps detail_field_list available for read-only drill groups" do
+      html =
+        render_component(fn assigns ->
+          assigns = assign(assigns, :fields, [%{label: "Processor", value: "stripe"}])
+
+          ~H"""
+          <Detail.detail_field_list fields={@fields} />
+          """
+        end)
+
+      assert html =~ "ax-field-list"
+      assert html =~ ~s(class="ax-field-label")
+      assert html =~ ~s(class="ax-field-value")
     end
   end
 
