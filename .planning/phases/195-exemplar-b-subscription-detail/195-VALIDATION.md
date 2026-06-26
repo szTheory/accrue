@@ -2,8 +2,8 @@
 phase: 195
 slug: exemplar-b-subscription-detail
 status: draft
-nyquist_compliant: false
-wave_0_complete: false
+nyquist_compliant: true
+wave_0_complete: true
 created: 2026-06-26
 ---
 
@@ -39,10 +39,10 @@ created: 2026-06-26
 
 | Task ID | Plan | Wave | Requirement | Threat Ref | Secure Behavior | Test Type | Automated Command | File Exists | Status |
 |---------|------|------|-------------|------------|-----------------|-----------|-------------------|-------------|--------|
-| 195-W0-01 | TBD | 0 | IXN-01 | T-195-overlay | Drawer overlay portals above scrim, traps focus, inerts background, locks/restores scroll, dismisses on backdrop/Escape | component + JS + browser | `cd accrue_admin && mix test test/accrue_admin/components/overlay_components_test.exs && node --test test/js/scroll_lock_test.mjs && npm run e2e:phase195` | W0 creates missing JS/E2E files | pending |
-| 195-W0-02 | TBD | 0 | EXE-02 | N/A | Subscription detail renders summary-list header, <=2 primary actions, one overflow menu, one related strip, no duplicate related card | LiveView + browser | `cd accrue_admin && mix test test/accrue_admin/live/subscription_live_test.exs && npm run e2e:phase195` | LiveView test exists; E2E file missing | pending |
-| 195-W0-03 | TBD | 0 | EXE-02, IXN-01 | T-195-action-hosting | Action forms are absent on initial load and render only inside the drawer after selecting an allowed action | LiveView + browser | `cd accrue_admin && mix test test/accrue_admin/live/subscription_live_test.exs && npm run e2e:phase195` | LiveView test exists; E2E file missing | pending |
-| 195-W0-04 | TBD | 0 | EXE-02 | N/A | Action relabels use `AccrueAdmin.Copy` and regenerated copy fixture includes `Change plan`, `Cancel renewal`, `Cancel immediately`, and `Comp this subscription` | source + fixture | `cd accrue_admin && mix accrue_admin.export_copy_strings && git diff --check accrue_admin/e2e/generated/copy_strings.json` | Fixture exists | pending |
+| 195-W0-01 | 195-01 | 0 | IXN-01 | T-195-overlay | Drawer overlay portals above scrim, traps focus, inerts background, locks/restores scroll, dismisses on backdrop/Escape | component + JS + browser | `cd accrue_admin && mix test test/accrue_admin/components/overlay_components_test.exs && node --test test/js/scroll_lock_test.mjs && npm run e2e:phase195` | Plan 195-01 creates missing JS/E2E files | pending |
+| 195-W0-02 | 195-02 | 0 | EXE-02 | N/A | Subscription detail renders summary-list header, <=2 primary actions, one overflow menu, one related strip, no duplicate related card | LiveView + browser | `cd accrue_admin && mix test test/accrue_admin/live/subscription_live_test.exs && npm run e2e:phase195` | LiveView test exists; E2E file created by Plan 195-01 | pending |
+| 195-W0-03 | 195-02 | 0 | EXE-02, IXN-01 | T-195-action-hosting | Action forms are absent on initial load and render only inside the drawer after selecting an allowed action | LiveView + browser | `cd accrue_admin && mix test test/accrue_admin/live/subscription_live_test.exs && npm run e2e:phase195` | LiveView test exists; E2E file created by Plan 195-01 | pending |
+| 195-W0-04 | 195-02, 195-07 | 0, 5 | EXE-02 | N/A | Action relabels use `AccrueAdmin.Copy` and regenerated copy fixture includes `Change plan`, `Cancel renewal`, `Cancel immediately`, and `Comp this subscription` | source + fixture | `cd accrue_admin && mix accrue_admin.export_copy_strings && git diff --check ../examples/accrue_host/e2e/generated/copy_strings.json` | Fixture exists | pending |
 
 *Status: pending, green, red, flaky.*
 
@@ -67,11 +67,11 @@ created: 2026-06-26
 
 ## Validation Sign-Off
 
-- [ ] All tasks have automated verify commands or Wave 0 dependencies.
-- [ ] Sampling continuity: no 3 consecutive tasks without automated verification.
-- [ ] Wave 0 covers all missing references.
-- [ ] No watch-mode flags.
-- [ ] Feedback latency under 180 seconds for targeted runs.
-- [ ] Set `nyquist_compliant: true` after the planner assigns concrete task IDs and Wave 0 coverage exists.
+- [x] All tasks have automated verify commands or Wave 0 dependencies.
+- [x] Sampling continuity: no 3 consecutive tasks without automated verification.
+- [x] Wave 0 covers all missing references.
+- [x] No watch-mode flags.
+- [x] Feedback latency under 180 seconds for targeted runs.
+- [x] `nyquist_compliant: true` set after the planner assigned concrete task IDs and Wave 0 coverage exists.
 
-**Approval:** pending
+**Approval:** approved 2026-06-26 for planning; execution status rows remain pending until the Wave 0 plans run.

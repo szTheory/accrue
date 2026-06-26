@@ -438,22 +438,16 @@ The current duplicate `data-role="subscription-related-billing"` card should be 
 |---|-------|---------|---------------|
 | A1 | Scroll-lock behavior can mount as a companion hook/module while `FocusTrap` remains the focus containment hook, without needing to merge them into one hook. [ASSUMED] | Architecture Patterns | If LiveView hook placement makes this awkward, executor should create one `Overlay` hook that delegates the existing FocusTrap behavior instead of adding two hooks to one element. |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
-1. **Exact MRR/amount formatter for the summary row**
-   - What we know: The locked header requires an Amount/MRR row. [VERIFIED: 195-CONTEXT.md]
-   - What's unclear: Research did not identify the final helper to derive and format MRR from all subscription item shapes. [ASSUMED]
-   - Recommendation: Planner should add a short code-reading task before implementation and reuse existing money/price formatting helpers, not create a new billing primitive. [VERIFIED: CLAUDE.md + 195-CONTEXT.md]
+1. **Exact MRR/amount formatter for the summary row — resolved**
+   - Resolution: Plan 195-07 owns the code-reading and implementation work for the Amount/MRR row. It must reuse existing money/date helpers and current subscription item data; if a complete MRR cannot be derived from the current shape, it must render a truthful dash/unknown state through existing formatting rather than create new billing logic. [VERIFIED: 195-07-PLAN.md + CLAUDE.md + 195-CONTEXT.md]
 
-2. **Step-up modal migration timing**
-   - What we know: D-03b allows deferring `step_up_auth_modal.ex` migration to Phase 199 if Phase 195 budget is tight. [VERIFIED: 195-CONTEXT.md]
-   - What's unclear: The planner must decide whether the Phase 195 task budget can include the modal wrapper migration. [VERIFIED: 195-CONTEXT.md]
-   - Recommendation: Plan the `:modal` presentation API now; make the StepUp wrapper migration a separate task that can be cut without compromising drawer correctness. [VERIFIED: 195-CONTEXT.md]
+2. **Step-up modal migration timing — resolved**
+   - Resolution: Phase 195 plans include the StepUp wrapper migration now. Plan 195-03 routes `StepUpAuthModal.step_up_auth_modal/1` through `Overlay.overlay/1` with `presentation={:modal}` while preserving `step_up_dismiss`, `step_up_submit`, input labels, and cancel-before-submit ordering. Phase 199 still owns the broader overlay sweep, not this wrapper migration. [VERIFIED: 195-03-PLAN.md + 195-CONTEXT.md]
 
-3. **Arrow-key roving for action menu**
-   - What we know: Locked discretion says roving tabindex is optional and should not be front-loaded unless UAT asks. [VERIFIED: 195-CONTEXT.md]
-   - What's unclear: The final UAT expectation may ask for richer keyboard behavior than Tab-through. [VERIFIED: 195-CONTEXT.md]
-   - Recommendation: Ship APG-compatible roles, Escape close, and focus restore first; add roving only if UAT rejects Tab-through. [CITED: https://www.w3.org/WAI/ARIA/apg/patterns/menu-button/ + VERIFIED: 195-CONTEXT.md]
+3. **Arrow-key roving for action menu — resolved**
+   - Resolution: Phase 195 does not implement roving tabindex. Plans 195-06 and 195-08 ship the locked lightweight disclosure/menu behavior: button menu items, APG-compatible roles, Escape/outside-click dismissal, focus restore to trigger, danger grouping, and no modal overlay semantics. Roving remains deferred unless UAT explicitly rejects Tab-through behavior. [VERIFIED: 195-06-PLAN.md + 195-08-PLAN.md + 195-CONTEXT.md]
 
 ## Environment Availability
 
