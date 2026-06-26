@@ -5,16 +5,16 @@ milestone_name: Admin UI Page-Level Streamlining & Storybook
 current_phase: 195
 current_phase_name: exemplar-b-subscription-detail
 status: executing
-stopped_at: Completed 195-04-PLAN.md
-last_updated: "2026-06-26T08:57:40.935Z"
+stopped_at: Completed 195-05-PLAN.md
+last_updated: "2026-06-26T09:08:44.195Z"
 last_activity: 2026-06-26
 last_activity_desc: Phase 195 execution started
 progress:
   total_phases: 8
   completed_phases: 2
   total_plans: 17
-  completed_plans: 13
-  percent: 76
+  completed_plans: 14
+  percent: 82
 ---
 
 # Project State
@@ -30,7 +30,7 @@ See: `.planning/PROJECT.md` (updated 2026-06-24 — v1.54 Admin UI Page-Level St
 ## Current Position
 
 Phase: 195 (exemplar-b-subscription-detail) — EXECUTING
-Plan: 5 of 8
+Plan: 6 of 8
 Status: Ready to execute
 Last activity: 2026-06-26 — Phase 195 execution started
 
@@ -201,6 +201,7 @@ Coverage: 22/22 v1.51 requirements mapped (each REQ-ID → exactly one phase). D
 | Phase 195 P02 | 9m 50s | 3 tasks | 1 files |
 | Phase 195 P03 | 10m 35s | 3 tasks | 8 files |
 | Phase 195 P04 | 4m 10s | 3 tasks | 4 files |
+| Phase 195 P05 | 6m 54s | 3 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -331,6 +332,8 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - [Phase 195-03]: Keep IXN-01 requirement completion pending for Phase 199; 195-03 ships the prerequisite overlay API/root/wrapper slice.
 - [Phase 195]: Phase 195-04: Overlay composes FocusTrap lifecycle and gates ScrollLock to modal/drawer presentations.
 - [Phase 195]: Phase 195-04: IXN-01 remains pending for the Phase 199 cross-page overlay sweep; this plan ships the Phase 195 JS prerequisite.
+- [Phase 195]: 195-05: Overlay CSS presentation layers use existing --ax-z-drawer, --ax-z-modal, and --ax-z-popover tokens; IXN-01 remains pending for Phase 199 sweep.
+- [Phase 195]: 195-05: Drawer CSS is mobile-first bottom sheet below md and right-docked at min(34rem, 92vw) for md+ desktop geometry.
 
 ### Pending Todos
 
@@ -420,8 +423,8 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 
 ## Session Continuity
 
-Last session: 2026-06-26T08:57:40.926Z
-Stopped at: Completed 195-04-PLAN.md
+Last session: 2026-06-26T09:08:44.187Z
+Stopped at: Completed 195-05-PLAN.md
 Resume file: None
 
 ## Operator Next Steps
