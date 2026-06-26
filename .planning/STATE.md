@@ -5,16 +5,15 @@ milestone_name: Admin UI Page-Level Streamlining & Storybook
 current_phase: 195
 current_phase_name: exemplar-b-subscription-detail
 status: executing
-stopped_at: Completed 195-05-PLAN.md
-last_updated: "2026-06-26T09:08:44.195Z"
+stopped_at: Completed 195-06-PLAN.md
+last_updated: "2026-06-26T09:22:31.495Z"
 last_activity: 2026-06-26
-last_activity_desc: Phase 195 execution started
 progress:
   total_phases: 8
   completed_phases: 2
   total_plans: 17
-  completed_plans: 14
-  percent: 82
+  completed_plans: 15
+  percent: 88
 ---
 
 # Project State
@@ -30,9 +29,9 @@ See: `.planning/PROJECT.md` (updated 2026-06-24 — v1.54 Admin UI Page-Level St
 ## Current Position
 
 Phase: 195 (exemplar-b-subscription-detail) — EXECUTING
-Plan: 6 of 8
+Plan: 7 of 8
 Status: Ready to execute
-Last activity: 2026-06-26 — Phase 195 execution started
+Last activity: 2026-06-26
 
 ## Post-v1.48 Pause Rule
 
@@ -202,6 +201,7 @@ Coverage: 22/22 v1.51 requirements mapped (each REQ-ID → exactly one phase). D
 | Phase 195 P03 | 10m 35s | 3 tasks | 8 files |
 | Phase 195 P04 | 4m 10s | 3 tasks | 4 files |
 | Phase 195 P05 | 6m 54s | 3 tasks | 3 files |
+| Phase 195 P06 | 7m 52s | 3 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -334,6 +334,9 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - [Phase 195]: Phase 195-04: IXN-01 remains pending for the Phase 199 cross-page overlay sweep; this plan ships the Phase 195 JS prerequisite.
 - [Phase 195]: 195-05: Overlay CSS presentation layers use existing --ax-z-drawer, --ax-z-modal, and --ax-z-popover tokens; IXN-01 remains pending for Phase 199 sweep.
 - [Phase 195]: 195-05: Drawer CSS is mobile-first bottom sheet below md and right-docked at min(34rem, 92vw) for md+ desktop geometry.
+- [Phase 195-06]: Detail.summary_list/1 uses row maps for strings, rendered HTML values, and optional Change/View actions while detail_field_list/1 remains read-only drill UI. — Keeps header row actions separate from drill-section read-only fields for Phase 198 propagation.
+- [Phase 195-06]: DropdownMenu.action_menu/1 stays non-modal details/menu UI; drawer and StepUp surfaces remain the overlay/modal boundary. — Matches D-04: action menus are lightweight disclosure menus and must not inherit scroll-lock, inert, or aria-modal behavior.
+- [Phase 195-06]: EXE-02 and IXN-01 remain pending after prerequisite primitives; 195-07 owns the page conversion and Phase 199 owns the cross-page overlay sweep. — Prevents a prerequisite primitive plan from closing broader page-conversion and cross-page overlay requirements early.
 
 ### Pending Todos
 
@@ -423,8 +426,8 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 
 ## Session Continuity
 
-Last session: 2026-06-26T09:08:44.187Z
-Stopped at: Completed 195-05-PLAN.md
+Last session: 2026-06-26T09:21:17.298Z
+Stopped at: Completed 195-06-PLAN.md
 Resume file: None
 
 ## Operator Next Steps
