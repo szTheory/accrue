@@ -157,7 +157,24 @@ Plans:
   2. A shared `AccrueAdmin.Components.PageHeader` (breadcrumb + title + stat-strip + actions + filter-toolbar slots) is extracted with its slot contract locked, proven on the Subscriptions list, and rendering exactly one `<h1>` per page.
   3. Identity·state·money·time columns are prioritized with plumbing IDs de-emphasized, and truncation uses `min-width:0` discipline (the new guard passes).
 
-**Plans**: TBD
+**Plans**: 5 plans
+**Wave 0 — validation scaffolding**
+
+- [ ] 196-01-PLAN.md — Validation scaffolding: RED PageHeader/component contracts, Subscriptions LIST tests, and Phase 196 Playwright script
+
+**Wave 1**
+
+- [ ] 196-02-PLAN.md — PageHeader function component contract and focused Storybook story
+- [ ] 196-03-PLAN.md — DataTable/FilterChipBar LIST primitives: state markers, filter toolbar, chips/count/clear-all, skeleton, and CSS bundle
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
+- [ ] 196-04-PLAN.md — Subscriptions PageHeader adoption, default queue/All/clear-all, state copy, and column priority
+
+**Wave 3** *(blocked on Wave 2 completion)*
+
+- [ ] 196-05-PLAN.md — Phase 196 Playwright LIST contract and final verification gates
+
 **UI hint**: yes
 
 ### Phase 197: Propagate LIST
