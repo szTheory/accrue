@@ -54,14 +54,14 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert html =~ "ax-chip ax-label"
   end
 
-  test "renders Copy-backed empty index when search excludes all subscriptions", %{conn: conn} do
+  test "renders filtered-empty copy when search excludes all subscriptions", %{conn: conn} do
     conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
 
     assert {:ok, _view, html} =
              live(conn, "/billing/subscriptions?q=___accrue_empty_fixture___")
 
-    assert html =~ Copy.subscriptions_index_empty_title()
-    assert html =~ Copy.subscriptions_index_empty_copy()
+    assert html =~ Copy.subscriptions_list_filtered_empty_title()
+    assert html =~ Copy.subscriptions_list_filtered_empty_body()
   end
 
   test "bare navigation push_patches to default queue status past_due,canceling", %{conn: conn} do
@@ -98,9 +98,8 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
   } do
     conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
 
-    assert {:ok, view, html} = live(conn, "/billing/subscriptions")
+    assert {:ok, _view, html} = live(conn, "/billing/subscriptions")
 
-    assert_patch(view, "/billing/subscriptions?status=past_due%2Ccanceling")
     assert html =~ ~s(data-ax-filter-chips)
     assert html =~ "At risk"
     assert html =~ "All"

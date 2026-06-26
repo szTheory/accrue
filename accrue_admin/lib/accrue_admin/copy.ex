@@ -50,6 +50,12 @@ defmodule AccrueAdmin.Copy do
   defdelegate subscription_confirm_workflow_message(action_type, opts), to: Subscription
   defdelegate subscription_lifecycle_ended_label(), to: Subscription
   defdelegate subscription_page_title(), to: Subscription
+  defdelegate subscriptions_list_first_run_empty_title(), to: Subscription
+  defdelegate subscriptions_list_first_run_empty_body(), to: Subscription
+  defdelegate subscriptions_list_queue_empty_title(), to: Subscription
+  defdelegate subscriptions_list_queue_empty_body(), to: Subscription
+  defdelegate subscriptions_list_filtered_empty_title(), to: Subscription
+  defdelegate subscriptions_list_filtered_empty_body(), to: Subscription
 
   defdelegate dunning_panel_eyebrow(), to: Dunning
   defdelegate dunning_panel_title(), to: Dunning

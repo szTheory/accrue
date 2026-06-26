@@ -75,6 +75,21 @@ defmodule AccrueAdmin.Copy.Subscription do
 
   def subscription_page_title, do: "Subscription"
 
+  def subscriptions_list_first_run_empty_title, do: "No subscriptions yet."
+
+  def subscriptions_list_first_run_empty_body,
+    do: "Subscriptions appear after a customer completes checkout."
+
+  def subscriptions_list_queue_empty_title, do: "Nothing at risk."
+
+  def subscriptions_list_queue_empty_body,
+    do: "No past-due or canceling subscriptions. View All to see every subscription."
+
+  def subscriptions_list_filtered_empty_title, do: "No subscriptions match these filters."
+
+  def subscriptions_list_filtered_empty_body,
+    do: "Clear filters or adjust the search to see subscriptions."
+
   defp subscription_action_label("cancel_now"), do: "Cancel immediately"
   defp subscription_action_label("cancel_at_period_end"), do: "Cancel renewal"
   defp subscription_action_label("pause"), do: "Pause subscription collection"

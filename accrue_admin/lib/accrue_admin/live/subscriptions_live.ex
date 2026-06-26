@@ -65,19 +65,19 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
     {:noreply, assign(socket, :params, params)}
   end
 
-  def handle_params(params, _uri, socket) when map_size(params) == 0 do
-    if connected?(socket) do
+  def handle_params(params, _uri, socket) do
+    if map_size(params) == 0 or map_only_scope?(params) do
       default = build_default_params(socket.assigns[:current_owner_scope], @default_queue_status)
+      to = AccrueAdmin.DataTableNav.merge_query(socket.assigns.table_path, default)
 
-      {:noreply,
-       push_patch(socket, to: socket.assigns.table_path <> "?" <> URI.encode_query(default))}
+      if connected?(socket) do
+        {:noreply, push_patch(socket, to: to)}
+      else
+        {:noreply, assign(socket, :params, default)}
+      end
     else
       {:noreply, assign(socket, :params, params)}
     end
-  end
-
-  def handle_params(params, _uri, socket) do
-    {:noreply, assign(socket, :params, params)}
   end
 
   @impl true
@@ -130,11 +130,6 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
 
         <FlashGroup.flash_group flashes={flash_messages(@flash)} />
 
-        <FilterChipBar.filter_chip_bar
-          items={work_queue_chips(@params, @table_path)}
-          label="Work queue"
-        />
-
         <.live_component
           module={DataTable}
           id="subscriptions"
@@ -143,6 +138,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
           path={@table_path}
           params={@params}
           render_filter_toolbar={false}
+          clear_href={clear_all_href(@params, @table_path)}
           columns={[
             %{
               label: "Subscription",
@@ -161,9 +157,22 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
             %{id: :current_period_end, label: "Current period end"}
           ]}
           filter_fields={subscription_filter_fields()}
-          empty_title={queue_empty_title(@params)}
-          empty_copy={queue_empty_copy(@params)}
-        />
+          empty_title={empty_title(@params, @summary)}
+          empty_copy={empty_copy(@params, @summary)}
+          filtered_empty_title={empty_title(@params, @summary)}
+          filtered_empty_copy={empty_copy(@params, @summary)}
+        >
+          <:list_status :let={status}>
+            <FilterChipBar.filter_chip_bar
+              items={work_queue_chips(@params, @table_path)}
+              label="Work queue"
+              result_count={status.visible_count}
+              result_label={{"subscription", "subscriptions"}}
+              clear_all_href={active_clear_all_href(@params, @table_path)}
+              clear_all_label={Copy.data_table_clear_filters_label()}
+            />
+          </:list_status>
+        </.live_component>
       </section>
     </AppShell.app_shell>
     """
@@ -189,7 +198,8 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
       active_count: subscriptions |> Query.active() |> Repo.aggregate(:count, :id),
       canceling_count: subscriptions |> Query.canceling() |> Repo.aggregate(:count, :id),
       paused_count: subscriptions |> Query.paused() |> Repo.aggregate(:count, :id),
-      past_due_count: subscriptions |> Query.past_due() |> Repo.aggregate(:count, :id)
+      past_due_count: subscriptions |> Query.past_due() |> Repo.aggregate(:count, :id),
+      total_count: subscriptions |> Repo.aggregate(:count, :id)
     }
   end
 
@@ -294,25 +304,48 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
   defp work_queue_chips(params, table_path) do
     queue_active = Map.get(params, "status") == @default_queue_status
     all_active = Map.get(params, "view") == "all"
+    clear_href = clear_all_href(params, table_path)
+
+    filter_chips =
+      params
+      |> filter_params()
+      |> Enum.reject(fn {key, _value} -> key == "status" and queue_active end)
+      |> Enum.map(fn {key, value} ->
+        %{
+          id: String.to_atom(key),
+          label: filter_chip_label(key),
+          value: filter_chip_value(key, value),
+          tone: :slate,
+          active: true,
+          remove_href: AccrueAdmin.DataTableNav.merge_query(table_path, %{key => nil})
+        }
+      end)
 
     [
       %{
         id: :status_queue,
-        label: "Queue",
-        value: "past due · canceling",
+        label: "At risk",
         tone: :cobalt,
         active: queue_active,
-        remove_href: if(queue_active, do: table_path <> "?view=all", else: nil)
+        remove_href: if(queue_active, do: clear_href, else: nil)
       },
       %{
         id: :view_all,
         label: "All",
         tone: :slate,
         active: queue_active or all_active,
-        remove_href: if(all_active, do: table_path, else: nil)
+        href: if(queue_active, do: clear_href, else: nil)
       }
-    ]
+    ] ++ filter_chips
   end
+
+  defp filter_chip_label("q"), do: "Search"
+  defp filter_chip_label("status"), do: "Status"
+  defp filter_chip_label("customer_id"), do: "Customer"
+  defp filter_chip_label(key), do: humanize(key)
+
+  defp filter_chip_value("status", value), do: humanize(value)
+  defp filter_chip_value(_key, value), do: value
 
   defp clear_all_href(_params, table_path) do
     AccrueAdmin.DataTableNav.merge_query(table_path, %{
@@ -327,6 +360,10 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
 
   defp filter_active?(params), do: filter_params(params) != %{}
 
+  defp active_clear_all_href(params, table_path) do
+    if filter_active?(params), do: clear_all_href(params, table_path)
+  end
+
   defp build_default_params(%{mode: :organization, organization_slug: slug}, status)
        when is_binary(slug) do
     %{"status" => status, "org" => slug}
@@ -340,17 +377,26 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
   defp queue_active?(params),
     do: Map.get(params, "status") == @default_queue_status and Map.get(params, "view") != "all"
 
-  defp queue_empty_title(params) do
-    if queue_active?(params),
-      do: "Nothing at risk",
-      else: Copy.subscriptions_index_empty_title()
+  defp empty_title(params, summary) do
+    cond do
+      first_run_empty?(params, summary) -> Copy.subscriptions_list_first_run_empty_title()
+      queue_active?(params) -> Copy.subscriptions_list_queue_empty_title()
+      filter_active?(params) -> Copy.subscriptions_list_filtered_empty_title()
+      true -> Copy.subscriptions_list_first_run_empty_title()
+    end
   end
 
-  defp queue_empty_copy(params) do
-    if queue_active?(params),
-      do: "No past-due or canceling subscriptions. View All to see every subscription.",
-      else: Copy.subscriptions_index_empty_copy()
+  defp empty_copy(params, summary) do
+    cond do
+      first_run_empty?(params, summary) -> Copy.subscriptions_list_first_run_empty_body()
+      queue_active?(params) -> Copy.subscriptions_list_queue_empty_body()
+      filter_active?(params) -> Copy.subscriptions_list_filtered_empty_body()
+      true -> Copy.subscriptions_list_first_run_empty_body()
+    end
   end
+
+  defp first_run_empty?(params, summary),
+    do: Map.get(params, "view") == "all" and summary.total_count == 0 and !filter_active?(params)
 
   defp scoped_path(mount_path, suffix, %{mode: :organization, organization_slug: slug})
        when is_binary(slug) do
@@ -358,6 +404,21 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
   end
 
   defp scoped_path(mount_path, suffix, _owner_scope), do: mount_path <> suffix
+
+  defp map_only_scope?(params) do
+    params != %{} and Map.keys(params) -- ["org"] == []
+  end
+
+  defp humanize(value) when is_atom(value), do: value |> Atom.to_string() |> humanize()
+
+  defp humanize(value) when is_binary(value) do
+    value
+    |> String.replace("_", " ")
+    |> String.split()
+    |> Enum.map_join(" ", &String.capitalize/1)
+  end
+
+  defp humanize(_value), do: "Unknown"
 
   defp default_brand do
     %{app_name: "Billing", logo_url: nil, accent_hex: "#5D79F6", accent_contrast_hex: "#FAFBFC"}
