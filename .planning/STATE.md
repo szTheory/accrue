@@ -4,16 +4,16 @@ milestone: v1.54
 milestone_name: Admin UI Page-Level Streamlining & Storybook
 current_phase: 195
 current_phase_name: exemplar-b-subscription-detail
-status: executing
-stopped_at: Completed 195-07-PLAN.md
-last_updated: "2026-06-26T09:47:54.048Z"
+status: verifying
+stopped_at: Completed 195-08-PLAN.md
+last_updated: "2026-06-26T10:03:09.757Z"
 last_activity: 2026-06-26
 progress:
   total_phases: 8
-  completed_phases: 2
+  completed_phases: 3
   total_plans: 17
-  completed_plans: 16
-  percent: 25
+  completed_plans: 17
+  percent: 38
 ---
 
 # Project State
@@ -30,7 +30,7 @@ See: `.planning/PROJECT.md` (updated 2026-06-24 — v1.54 Admin UI Page-Level St
 
 Phase: 195 (exemplar-b-subscription-detail) — EXECUTING
 Plan: 8 of 8
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-06-26
 
 ## Post-v1.48 Pause Rule
@@ -203,6 +203,7 @@ Coverage: 22/22 v1.51 requirements mapped (each REQ-ID → exactly one phase). D
 | Phase 195 P05 | 6m 54s | 3 tasks | 3 files |
 | Phase 195 P06 | 7m 52s | 3 tasks | 6 files |
 | Phase 195 P07 | 21m | 3 tasks | 4 files |
+| Phase 195 P08 | 10m 38s | 4 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -340,6 +341,9 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - [Phase 195-06]: EXE-02 and IXN-01 remain pending after prerequisite primitives; 195-07 owns the page conversion and Phase 199 owns the cross-page overlay sweep. — Prevents a prerequisite primitive plan from closing broader page-conversion and cross-page overlay requirements early.
 - [Phase 195]: Subscription detail uses the six-band DETAIL spine with drawer-hosted actions and lazy Activity/JSON. — Plan 195-07 converted SubscriptionLive into the Phase 195 exemplar.
 - [Phase 195]: Subscription drawer labels are routed through AccrueAdmin.Copy and exported for anti-drift checks. — Keeps LiveView and browser fixture labels aligned.
+- [Phase 195-08]: Storybook coverage is additive and keeps `/dev/components` untouched.
+- [Phase 195-08]: Subscription detail action-menu remains non-portaled in Phase 195; Phase 199 owns transformed-ancestor, overflow clipping, and stacking-context audit before any portal exception.
+- [Phase 195-08]: Task 4 was verification-only because the final Phase 195 gate passed without additional code changes.
 
 ### Pending Todos
 
@@ -429,8 +433,8 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 
 ## Session Continuity
 
-Last session: 2026-06-26T09:47:54.041Z
-Stopped at: Completed 195-07-PLAN.md
+Last session: 2026-06-26T10:03:09.749Z
+Stopped at: Completed 195-08-PLAN.md
 Resume file: None
 
 ## Operator Next Steps
