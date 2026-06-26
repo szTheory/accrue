@@ -25,6 +25,9 @@ defmodule AccrueAdmin.Components.DataTable do
         Map.get(assigns, :filter_submit_label) || Copy.data_table_filter_submit_label()
       )
       |> assign(:table_caption, Map.get(assigns, :table_caption))
+      |> assign(:list_id, Map.get(assigns, :list_id) || Map.get(assigns, :id))
+      |> assign(:loading_fixture, loading_fixture?(assigns))
+      |> assign(:clear_href, clear_href(assigns))
       |> assign_new(:selected_ids, fn -> MapSet.new() end)
       |> assign_new(:filter_fields, fn -> [] end)
       |> assign_new(:card_fields, fn -> [] end)
@@ -64,16 +67,69 @@ defmodule AccrueAdmin.Components.DataTable do
           socket
       end
 
-    socket = resolve_empty_state(socket)
+    socket =
+      socket
+      |> resolve_list_state()
+      |> resolve_empty_state()
+      |> assign_render_flags()
 
     {:ok, maybe_schedule_poll(socket)}
+  end
+
+  defp resolve_list_state(socket) do
+    list_state = normalize_marker(socket.assigns[:list_state]) || derive_list_state(socket)
+
+    empty_reason =
+      normalize_marker(socket.assigns[:empty_reason]) ||
+        derive_empty_reason(list_state, socket)
+
+    assign(socket, list_state: list_state, empty_reason: empty_reason)
+  end
+
+  defp derive_list_state(socket) do
+    cond do
+      socket.assigns[:loading_fixture] == true ->
+        "loading-skeleton"
+
+      !Enum.empty?(socket.assigns[:rows] || []) ->
+        "populated"
+
+      any_filter_active?(socket.assigns[:filter_params] || %{}) ->
+        "filtered-empty"
+
+      true ->
+        "first-run-empty"
+    end
+  end
+
+  defp derive_empty_reason("first-run-empty", _socket), do: "first-run"
+
+  defp derive_empty_reason("filtered-empty", socket) do
+    if any_filter_active?(socket.assigns[:filter_params] || %{}), do: "filter", else: nil
+  end
+
+  defp derive_empty_reason(_list_state, _socket), do: nil
+
+  defp assign_render_flags(socket) do
+    rows = socket.assigns[:rows] || []
+    loading? = loading_fixture_enabled?(socket.assigns)
+    empty? = Enum.empty?(rows) and !loading?
+    populated? = !Enum.empty?(rows) and !loading?
+
+    assign(socket,
+      render_loading_fixture: loading?,
+      render_empty_state: empty?,
+      render_rows: populated?
+    )
   end
 
   # Derive the empty-state title/copy: when filters are active AND the page opted
   # into filtered-empty copy, use it; otherwise fall back to the truly-empty copy.
   # Defaulting filter_params to %{} keeps poll/first-render falling back safely.
   defp resolve_empty_state(socket) do
-    filtered? = any_filter_active?(socket.assigns[:filter_params] || %{})
+    filtered? =
+      socket.assigns[:list_state] == "filtered-empty" or
+        any_filter_active?(socket.assigns[:filter_params] || %{})
 
     resolved_empty_title =
       if filtered? and socket.assigns.filtered_empty_title,
@@ -167,6 +223,10 @@ defmodule AccrueAdmin.Components.DataTable do
       data-role="data-table"
       data-phase191-focus="data-table"
       data-component-group="table-empty-loading-error-pagination"
+      data-ax-list={@list_id}
+      data-ax-state={@list_state}
+      data-ax-empty-reason={empty_reason_marker(@list_state, @empty_reason)}
+      aria-busy={@render_loading_fixture && "true"}
     >
       <header class="ax-data-table-header">
         <form
@@ -204,7 +264,7 @@ defmodule AccrueAdmin.Components.DataTable do
           </button>
           <.link
             :if={any_filter_active?(@filter_params)}
-            patch={@path}
+            patch={@clear_href}
             class="ax-button ax-button-ghost ax-data-table-filter-clear"
             data-role="clear-filters"
             data-phase191-focus="clear-filters"
@@ -233,13 +293,56 @@ defmodule AccrueAdmin.Components.DataTable do
         </button>
       </div>
 
-      <div :if={Enum.empty?(@rows)} class="ax-card ax-empty ax-data-table-empty" data-role="empty-state">
+      <div :if={@render_loading_fixture} class="ax-data-table-loading" data-role="loading-skeleton">
+        <p class="ax-visually-hidden" role="status">Loading</p>
+
+        <div class="ax-card ax-data-table-shell ax-data-table-skeleton-shell" aria-hidden="true">
+          <table class="ax-data-table-grid">
+            <caption :if={@table_caption} class="ax-visually-hidden"><%= @table_caption %></caption>
+            <thead>
+              <tr>
+                <th :if={@selectable} scope="col" class="ax-label"><span class="ax-visually-hidden">Select</span></th>
+                <th :for={column <- @columns} scope="col" class="ax-label"><%= column_label(column) %></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr :for={row_index <- 1..3} data-skeleton-row={row_index}>
+                <td :if={@selectable}>
+                  <span class="ax-skeleton ax-data-table-skeleton-check" aria-hidden="true"></span>
+                </td>
+                <td :for={{_column, column_index} <- Enum.with_index(@columns)}>
+                  <span class={["ax-skeleton ax-data-table-skeleton-cell", skeleton_width_class(column_index)]} aria-hidden="true"></span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="ax-data-table-cards ax-data-table-skeleton-cards" aria-hidden="true">
+          <article :for={row_index <- 1..2} class="ax-card ax-data-table-card ax-data-table-skeleton-card" data-skeleton-card={row_index}>
+            <header class="ax-data-table-card-header">
+              <div>
+                <span class="ax-skeleton ax-data-table-skeleton-eyebrow" aria-hidden="true"></span>
+                <span class="ax-skeleton ax-data-table-skeleton-title" aria-hidden="true"></span>
+              </div>
+            </header>
+            <dl class="ax-data-table-card-fields">
+              <div :for={field_index <- 1..3} class="ax-data-table-card-field">
+                <dt><span class="ax-skeleton ax-data-table-skeleton-label" aria-hidden="true"></span></dt>
+                <dd><span class="ax-skeleton ax-data-table-skeleton-value" aria-hidden="true"></span></dd>
+              </div>
+            </dl>
+          </article>
+        </div>
+      </div>
+
+      <div :if={@render_empty_state} class="ax-card ax-empty ax-data-table-empty" data-role="empty-state">
         <Icon.icon name={:inbox} size="lg" class="ax-empty-icon ax-empty-icon-muted" />
         <p class="ax-empty-title"><%= @resolved_empty_title %></p>
         <p class="ax-body ax-empty-copy"><%= @resolved_empty_copy %></p>
         <.link
           :if={any_filter_active?(@filter_params)}
-          patch={@path}
+          patch={@clear_href}
           class="ax-button ax-button-secondary"
           data-role="clear-filters"
           data-phase191-focus="clear-filters"
@@ -248,7 +351,7 @@ defmodule AccrueAdmin.Components.DataTable do
         </.link>
       </div>
 
-      <div :if={!Enum.empty?(@rows) and @selectable} class="ax-data-table-selection" data-role="selection-bar">
+      <div :if={@render_rows and @selectable} class="ax-data-table-selection" data-role="selection-bar">
         <p
           class="ax-body"
           data-phase191-focus="selection-status"
@@ -282,7 +385,7 @@ defmodule AccrueAdmin.Components.DataTable do
       </div>
 
       <div
-        :if={!Enum.empty?(@rows)}
+        :if={@render_rows}
         class="ax-card ax-data-table-shell"
         phx-mounted={Phoenix.LiveView.JS.show(transition: {"ax-content-entering", "ax-content-enter-from", "ax-content-enter-to"}, time: 180)}
       >
@@ -316,7 +419,7 @@ defmodule AccrueAdmin.Components.DataTable do
         </table>
       </div>
 
-      <div :if={!Enum.empty?(@rows)} class="ax-data-table-cards" data-role="card-list">
+      <div :if={@render_rows} class="ax-data-table-cards" data-role="card-list">
         <article :for={row <- @rows} class="ax-card ax-data-table-card" data-row-id={row_identity(row, @row_id)}>
           <header class="ax-data-table-card-header">
             <div>
@@ -347,7 +450,7 @@ defmodule AccrueAdmin.Components.DataTable do
         </article>
       </div>
 
-      <footer :if={!Enum.empty?(@rows)} class="ax-data-table-footer">
+      <footer :if={@render_rows} class="ax-data-table-footer">
         <p class="ax-body" data-role="row-count"><%= Copy.data_table_row_count(length(@rows), @row_label) %></p>
         <button
           :if={@next_cursor}
@@ -368,6 +471,78 @@ defmodule AccrueAdmin.Components.DataTable do
         />
       </footer>
     </section>
+    """
+  end
+
+  attr(:id, :string, required: true)
+  attr(:filter_fields, :list, default: [])
+  attr(:filter_params, :map, default: %{})
+  attr(:filter_submit_label, :string, default: nil)
+  attr(:path, :string, required: true)
+  attr(:clear_href, :string, default: nil)
+  attr(:clear_filters_patch, :string, default: nil)
+  attr(:clear_visible, :any, default: nil)
+
+  def filter_toolbar(assigns) do
+    assigns =
+      assigns
+      |> assign(
+        :filter_submit_label,
+        assigns.filter_submit_label || Copy.data_table_filter_submit_label()
+      )
+      |> assign(:clear_href, assigns.clear_href || assigns.clear_filters_patch || assigns.path)
+      |> assign(
+        :clear_visible,
+        case assigns.clear_visible do
+          value when is_boolean(value) -> value
+          _ -> any_filter_active?(assigns.filter_params)
+        end
+      )
+
+    ~H"""
+    <form
+      phx-change="data_table_filter"
+      phx-submit="data_table_filter"
+      class="ax-data-table-filters"
+      data-role="filter-form"
+      data-phase191-focus="filter-form"
+    >
+      <div
+        :for={field <- @filter_fields}
+        class={["ax-data-table-filter", filter_field_class(field)]}
+      >
+        <label for={field_id(@id, field)} class="ax-visually-hidden"><%= field_label(field) %></label>
+        <.filter_input
+          id={field_id(@id, field)}
+          field={field}
+          value={Map.get(@filter_params, field_param(field))}
+          focus_key={field_param(field)}
+        />
+      </div>
+      <div :for={{key, value} <- @filter_params} :if={!field_defined?(@filter_fields, key)}>
+        <input type="hidden" name={key} value={value} />
+      </div>
+      <%!-- Instant-apply toolbar: phx-change submits on every edit (text debounced
+            300ms), so the primary Apply button is hidden but kept for keyboard submit
+            and the data-phase191-focus contract. --%>
+      <button
+        type="submit"
+        class="ax-visually-hidden"
+        data-phase191-focus="filter-submit"
+        tabindex="-1"
+      >
+        <%= @filter_submit_label %>
+      </button>
+      <.link
+        :if={@clear_visible}
+        patch={@clear_href}
+        class="ax-button ax-button-ghost ax-data-table-filter-clear"
+        data-role="clear-filters"
+        data-phase191-focus="clear-filters"
+      >
+        <%= Copy.data_table_clear_filters_label() %>
+      </.link>
+    </form>
     """
   end
 
@@ -609,6 +784,42 @@ defmodule AccrueAdmin.Components.DataTable do
     end
 
     socket
+  end
+
+  defp loading_fixture?(assigns) do
+    Map.get(assigns, :loading_fixture, false) == true or
+      Map.get(assigns, :loading_state?, false) == true
+  end
+
+  defp loading_fixture_enabled?(assigns) do
+    assigns[:loading_fixture] == true and assigns[:list_state] == "loading-skeleton"
+  end
+
+  defp clear_href(assigns) do
+    Map.get(assigns, :clear_href) ||
+      Map.get(assigns, :clear_filters_patch) ||
+      Map.get(assigns, :clear_all_href) ||
+      Map.get(assigns, :path)
+  end
+
+  defp normalize_marker(nil), do: nil
+  defp normalize_marker(""), do: nil
+  defp normalize_marker(value) when is_atom(value), do: Atom.to_string(value)
+  defp normalize_marker(value) when is_binary(value), do: value
+  defp normalize_marker(value), do: to_string(value)
+
+  defp empty_reason_marker(list_state, empty_reason)
+       when list_state in ["first-run-empty", "filtered-empty"],
+       do: empty_reason
+
+  defp empty_reason_marker(_list_state, _empty_reason), do: nil
+
+  defp skeleton_width_class(index) do
+    case rem(index, 3) do
+      0 -> "ax-data-table-skeleton-cell-wide"
+      1 -> "ax-data-table-skeleton-cell-medium"
+      _ -> "ax-data-table-skeleton-cell-narrow"
+    end
   end
 
   defp normalize_positive(value, _fallback) when is_integer(value) and value > 0, do: value
