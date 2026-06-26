@@ -122,7 +122,7 @@ async function injectPortalFixture(page) {
 }
 
 /**
- * Remove the spike portal fixture and #ax-overlay-root from the DOM.
+ * Remove the spike portal fixture root from the DOM.
  */
 async function removePortalFixture(page) {
   await page.evaluate(() => {
@@ -172,14 +172,27 @@ test.describe("D-05 overlay portal spike", () => {
     await page.goto("/__e2e__/login?to=%2Fbilling");
     await expect(page.locator("#main-content, main").first()).toBeVisible();
 
-    // After navigation, #ax-overlay-root should NOT be present (the fixture is
-    // gone because we navigated away — the portal was not orphaned into a
-    // persistent state). This confirms the portal teardown contract: the portal
-    // root must be cleaned up on navigate-away, not re-mounted stale.
+    // Phase 195 made #ax-overlay-root a permanent layout-level portal target.
+    // After navigation, the root should still exist exactly once, but the
+    // injected fixture children must be gone.
     const rootCountAfter = await page.evaluate(() =>
       document.querySelectorAll("#ax-overlay-root").length
     );
-    expect(rootCountAfter, "ax-overlay-root absent after navigation — no orphan").toBe(0);
+    expect(rootCountAfter, "ax-overlay-root persists once after navigation").toBe(1);
+
+    const orphanedFixtureAfter = await page.evaluate(() => {
+      const root = document.getElementById("ax-overlay-root");
+      return {
+        fixtureRoot: root?.getAttribute("data-spike-fixture") === "true",
+        fixtureChildren: document.querySelectorAll("#ax-spike-scrim, #ax-spike-dialog").length,
+      };
+    });
+    expect(orphanedFixtureAfter.fixtureRoot, "spike fixture root not orphaned after nav").toBe(
+      false
+    );
+    expect(orphanedFixtureAfter.fixtureChildren, "spike fixture children removed after nav").toBe(
+      0
+    );
 
     // Navigate back and inject again to confirm a clean mount cycle.
     await login(page, "/billing");
