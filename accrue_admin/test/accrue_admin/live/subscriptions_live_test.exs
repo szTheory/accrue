@@ -49,7 +49,7 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
 
     assert html =~ Copy.subscriptions_index_heading()
     assert html =~ Copy.subscriptions_index_subtitle()
-    assert html =~ "cancel at period end"
+    assert html =~ "Canceling at period end"
     assert html =~ "/billing/subscriptions/"
     assert html =~ "ax-chip ax-label"
   end
@@ -205,7 +205,25 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
 
     assert loading_html =~ ~s(data-ax-state="loading-skeleton")
     assert loading_html =~ ~s(aria-busy="true")
-    assert Regex.scan(~r/role="status"/, loading_html) |> length() == 1
+
+    assert loading_html
+           |> Floki.parse_document!()
+           |> Floki.find(~s([data-role="loading-skeleton"] [role="status"]))
+           |> length() == 1
+  end
+
+  test "loading skeleton fixture is ignored outside test runtime", %{conn: conn} do
+    prior = Application.get_env(:accrue_admin, :env)
+    Application.put_env(:accrue_admin, :env, :prod)
+    on_exit(fn -> Application.put_env(:accrue_admin, :env, prior) end)
+
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+
+    assert {:ok, _view, html} =
+             live(conn, "/billing/subscriptions?phase196_state=loading-skeleton")
+
+    refute html =~ ~s(data-ax-state="loading-skeleton")
+    refute html =~ ~s(aria-busy="true")
   end
 
   test "prioritizes identity, state, plan amount, time, and signals columns", %{conn: conn} do

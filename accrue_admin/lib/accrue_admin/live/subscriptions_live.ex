@@ -137,24 +137,32 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
           current_owner_scope={@current_owner_scope}
           path={@table_path}
           params={@params}
+          list_id="subscriptions"
+          list_state={list_state(@params, @summary)}
+          empty_reason={empty_reason(@params, @summary)}
+          loading_fixture={phase196_loading_fixture?(@params)}
           render_filter_toolbar={false}
           clear_href={clear_all_href(@params, @table_path)}
           columns={[
             %{
-              label: "Subscription",
-              render: &subscription_link(&1, @admin_mount_path, @current_owner_scope)
+              label: "Customer / subscription",
+              render: &identity_cell(&1, @admin_mount_path, @current_owner_scope)
             },
-            %{label: "Customer", render: &customer_link(&1, @admin_mount_path, @current_owner_scope)},
-            %{label: "Billing signals", render: &billing_signals_cell/1},
-            %{label: "Lifecycle", render: &lifecycle_summary/1},
-            %{id: :current_period_end, label: "Current period end"}
+            %{label: "State", render: &state_cell/1},
+            %{label: "Plan / amount", render: &plan_amount_cell/1},
+            %{label: "Renews / ends", render: &time_cell/1},
+            %{label: "Signals", render: &billing_signals_cell/1}
           ]}
-          card_title={&card_title/1}
+          card_title={&customer_label/1}
           card_fields={[
-            %{label: "Customer", render: &customer_label/1},
-            %{label: "Billing signals", render: &billing_signals_cell/1},
-            %{label: "Lifecycle", render: &lifecycle_summary/1},
-            %{id: :current_period_end, label: "Current period end"}
+            %{
+              label: "Customer / subscription",
+              render: &identity_cell(&1, @admin_mount_path, @current_owner_scope)
+            },
+            %{label: "State", render: &state_cell/1},
+            %{label: "Plan / amount", render: &plan_amount_cell/1},
+            %{label: "Renews / ends", render: &time_cell/1},
+            %{label: "Signals", render: &billing_signals_cell/1}
           ]}
           filter_fields={subscription_filter_fields()}
           empty_title={empty_title(@params, @summary)}
@@ -225,44 +233,61 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
     )
   end
 
-  defp subscription_link(row, mount_path, owner_scope),
-    do:
-      safe_link(
-        scoped_path(mount_path, "/subscriptions/#{row.id}", owner_scope),
-        row.processor_id || row.id
-      )
+  defp identity_cell(row, mount_path, owner_scope) do
+    customer_href = scoped_path(mount_path, "/customers/#{row.customer_id}", owner_scope)
+    subscription_href = scoped_path(mount_path, "/subscriptions/#{row.id}", owner_scope)
 
-  defp customer_link(row, mount_path, owner_scope),
-    do:
-      safe_link(
-        scoped_path(mount_path, "/customers/#{row.customer_id}", owner_scope),
-        customer_label(row)
-      )
-
-  defp safe_link(href, label) do
-    escaped = label |> Phoenix.HTML.html_escape() |> Phoenix.HTML.safe_to_string()
-    Phoenix.HTML.raw(~s(<a href="#{href}" class="ax-link">#{escaped}</a>))
+    Phoenix.HTML.raw(
+      ~s(<span class="ax-stack-sm"><a href="#{customer_href}" class="ax-link">#{escape(customer_label(row))}</a><a href="#{subscription_href}" class="ax-label ax-muted">#{escape(row.processor_id || row.id)}</a></span>)
+    )
   end
 
   defp customer_label(row), do: row.customer_name || row.customer_email || row.customer_id
 
-  defp lifecycle_summary(row) do
-    row
-    |> lifecycle_flags()
-    |> Enum.join(" · ")
+  defp state_cell(row) do
+    {status, label} = lifecycle_status(row)
+
+    Phoenix.HTML.raw(
+      ~s(<span class="ax-status-badge ax-status-badge-#{status_tone(status)}"><span class="ax-status-dot" aria-hidden="true"></span><span>#{escape(label)}</span></span>)
+    )
   end
 
-  defp lifecycle_flags(row) do
-    [
-      row.status && to_string(row.status),
-      row.cancel_at_period_end && "cancel at period end",
-      row.ended_at && "ended"
-    ]
-    |> Enum.reject(&is_nil/1)
-    |> Enum.reject(&(&1 == false))
-  end
+  defp lifecycle_status(%{cancel_at_period_end: true}), do: {:warning, "Canceling at period end"}
+  defp lifecycle_status(%{status: :past_due}), do: {:warning, "At risk"}
+  defp lifecycle_status(%{status: :unpaid}), do: {:warning, "At risk"}
+  defp lifecycle_status(%{status: :trialing}), do: {:trialing, "Trialing"}
+  defp lifecycle_status(%{status: :active}), do: {:active, "Active"}
+  defp lifecycle_status(%{status: :paused}), do: {:neutral, "Paused"}
 
-  defp card_title(row), do: row.processor_id || row.id
+  defp lifecycle_status(%{ended_at: ended_at}) when not is_nil(ended_at),
+    do: {:neutral, "Canceled"}
+
+  defp lifecycle_status(%{status: :canceled}), do: {:neutral, "Canceled"}
+  defp lifecycle_status(%{status: status}), do: {status, humanize(status)}
+
+  defp status_tone(status) when status in [:active, :success, :ok], do: "moss"
+  defp status_tone(status) when status in [:trialing, :info], do: "cobalt"
+  defp status_tone(status) when status in [:warning, :past_due, :unpaid], do: "amber"
+  defp status_tone(status) when status in [:neutral, :canceled, :paused], do: "slate"
+  defp status_tone(_status), do: "ink"
+
+  defp plan_amount_cell(_row), do: Copy.subscriptions_list_plan_amount_unavailable()
+
+  defp time_cell(%{ended_at: %DateTime{} = ended_at}), do: "Ended #{format_date(ended_at)}"
+
+  defp time_cell(%{ended_at: ended_at}) when not is_nil(ended_at),
+    do: "Ended #{to_string(ended_at)}"
+
+  defp time_cell(%{cancel_at_period_end: true, current_period_end: %DateTime{} = ends_at}),
+    do: "Ends #{format_date(ends_at)}"
+
+  defp time_cell(%{current_period_end: %DateTime{} = renews_at}),
+    do: "Renews #{format_date(renews_at)}"
+
+  defp time_cell(%{trial_end: %DateTime{} = trial_end}),
+    do: "Trial ends #{format_date(trial_end)}"
+
+  defp time_cell(_row), do: "No renewal date"
 
   defp subscription_filter_fields do
     [
@@ -364,6 +389,20 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
     if filter_active?(params), do: clear_all_href(params, table_path)
   end
 
+  defp list_state(params, _summary) do
+    if phase196_loading_fixture?(params), do: "loading-skeleton", else: nil
+  end
+
+  defp empty_reason(params, summary) do
+    cond do
+      phase196_loading_fixture?(params) -> nil
+      first_run_empty?(params, summary) -> "first-run"
+      queue_active?(params) -> "queue"
+      filter_active?(params) -> "filter"
+      true -> nil
+    end
+  end
+
   defp build_default_params(%{mode: :organization, organization_slug: slug}, status)
        when is_binary(slug) do
     %{"status" => status, "org" => slug}
@@ -398,6 +437,11 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
   defp first_run_empty?(params, summary),
     do: Map.get(params, "view") == "all" and summary.total_count == 0 and !filter_active?(params)
 
+  defp phase196_loading_fixture?(params) do
+    Application.get_env(:accrue_admin, :env) == :test and
+      Map.get(params, "phase196_state") == "loading-skeleton"
+  end
+
   defp scoped_path(mount_path, suffix, %{mode: :organization, organization_slug: slug})
        when is_binary(slug) do
     mount_path <> suffix <> "?org=" <> URI.encode_www_form(slug)
@@ -408,6 +452,10 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
   defp map_only_scope?(params) do
     params != %{} and Map.keys(params) -- ["org"] == []
   end
+
+  defp escape(value), do: value |> Phoenix.HTML.html_escape() |> Phoenix.HTML.safe_to_string()
+
+  defp format_date(%DateTime{} = value), do: Calendar.strftime(value, "%b %-d, %Y")
 
   defp humanize(value) when is_atom(value), do: value |> Atom.to_string() |> humanize()
 
