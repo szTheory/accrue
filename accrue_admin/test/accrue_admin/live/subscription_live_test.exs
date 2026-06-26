@@ -77,26 +77,40 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
      source_event: source_event}
   end
 
-  test "renders RelatedResources card with customer and events links", %{
+  test "renders the six-band detail structure with one related resources strip", %{
     conn: conn,
     subscription: subscription
   } do
     conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
 
-    assert {:ok, _view, html} = live(conn, "/billing/subscriptions/#{subscription.id}")
+    assert {:ok, view, html} = live(conn, "/billing/subscriptions/#{subscription.id}")
 
-    # Related resources card must be present
-    assert html =~ ~s(class="ax-card ax-related")
-    # Customer link in related resources
+    assert page_wrapper_count(html) == 1
+    assert heading_count(html, "h1") == 1
+
+    assert data_attr_count(html, "data-ax-summary-list") == 1
+    assert data_attr_count(html, "data-ax-action-band") == 1
+    assert data_attr_count(html, "data-ax-primary-action") <= 2
+    assert data_attr_count(html, "data-ax-action-overflow-menu") >= 1
+    assert data_attr_count(html, "data-ax-related-resources") == 1
+    assert data_attr_count(html, "data-ax-lazy-activity") == 1
+    assert data_attr_count(html, "data-ax-lazy-json") == 1
+    assert data_attr_count(html, "data-ax-drill-section") >= 3
+
+    refute has_element?(view, "[data-ax-action-band] form")
+    refute has_element?(view, "[data-role='subscription-related-billing']")
+    refute has_element?(view, "[data-role='subscription-dunning-state']")
+    refute has_element?(view, "[data-role='confirm-panel']")
+    refute html =~ ~s(class="ax-kpi-grid")
+    refute html =~ Copy.subscription_kpi_canonical_predicates_label()
+
     assert html =~ "/billing/customers/#{subscription.customer_id}"
-    # Invoices filtered by subscription_id in related resources
     assert html =~ "subscription_id=#{subscription.id}"
-    # Events filtered by Subscription subject in related resources
     assert html =~ "subject_type=Subscription"
     assert html =~ "subject_id=#{subscription.id}"
   end
 
-  test "renders canonical predicate summary and subscription timeline", %{
+  test "summary and drill bands replace page-level KPI and predicate noise", %{
     conn: conn,
     subscription: subscription
   } do
@@ -104,23 +118,19 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
 
     assert {:ok, _view, html} = live(conn, "/billing/subscriptions/#{subscription.id}")
 
-    # UX-02: one outer ax-page only (Regex counts HEEx class="ax-page" occurrences in rendered HTML)
-    assert Regex.scan(~r/class="ax-page"/, html) |> length() == 1
-
-    assert html =~ "Tax &amp; ownership"
-    assert html =~ "Canonical predicates"
-    assert html =~ "active"
+    assert html =~ "Billing &amp; items"
+    assert html =~ "Dunning &amp; recovery"
+    assert html =~ "Tax &amp; compliance"
     assert html =~ "invoice.payment_failed"
-    assert html =~ "Automatic tax is currently disabled"
-    assert html =~ "Local reason: Requires Location Inputs."
-    assert html =~ "Default to cancel renewal and keep access through the paid-through date."
-    assert html =~ "Use Cancel now only for explicit hard-stop, support-led, or compliance flows."
-    assert html =~ "Stripe can natively schedule end-of-period cancellation"
 
-    assert html =~
-             "Stripe and Fake support preview-backed plan swaps plus operator-managed quantity and subscription-item changes"
+    refute html =~ Copy.subscription_kpi_status_label() <> "</"
+    refute html =~ Copy.subscription_kpi_canonical_predicates_label()
+    refute html =~ Copy.subscription_kpi_timeline_rows_label()
+    refute html =~ Copy.dunning_panel_title()
+    refute html =~ "Default to cancel renewal and keep access through the paid-through date."
+    refute html =~ "Use Cancel now only for explicit hard-stop, support-led, or compliance flows."
 
-    assert html =~
+    refute html =~
              "Update the customer tax location in the host app, then retry recurring tax on this subscription."
   end
 
@@ -466,6 +476,26 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
       )
     )
     |> TestRepo.insert!()
+  end
+
+  defp data_attr_count(html, attr) do
+    attr
+    |> Regex.escape()
+    |> then(&Regex.compile!("\\b" <> &1 <> "(?:\\s|=|>)"))
+    |> Regex.scan(html)
+    |> length()
+  end
+
+  defp page_wrapper_count(html) do
+    Regex.scan(~r/class="ax-page"/, html) |> length()
+  end
+
+  defp heading_count(html, tag) do
+    tag
+    |> Regex.escape()
+    |> then(&Regex.compile!("<" <> &1 <> "\\b"))
+    |> Regex.scan(html)
+    |> length()
   end
 
   defp organization_owner_scope(organization_id) do
