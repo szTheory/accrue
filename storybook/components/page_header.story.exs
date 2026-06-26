@@ -6,6 +6,7 @@ defmodule AccrueAdmin.Storybook.Components.PageHeader do
   use PhoenixStorybook.Story, :component
   use Phoenix.Component
 
+  alias AccrueAdmin.Components.DataTable
   alias AccrueAdmin.Components.PageHeader
   alias AccrueAdmin.Components.StatStrip
   alias PhoenixStorybook.Stories.Variation
@@ -89,32 +90,14 @@ defmodule AccrueAdmin.Storybook.Components.PageHeader do
         </:actions>
 
         <:filter_toolbar :if={@state in [:filter_toolbar, :combined_controls]}>
-          <form
+          <DataTable.filter_toolbar
             id={"storybook-page-header-filter-#{@state}"}
-            class="ax-filter-toolbar"
-            phx-change="data_table_filter"
-            phx-submit="data_table_filter"
-          >
-            <label class="ax-form-field">
-              <span class="ax-label">Search</span>
-              <input
-                class="ax-input"
-                type="search"
-                name="q"
-                value="northwind"
-                placeholder="Search subscriptions"
-              />
-            </label>
-            <label class="ax-form-field">
-              <span class="ax-label">Status</span>
-              <select class="ax-input" name="status">
-                <option value="past_due,canceling" selected>At risk</option>
-                <option value="active">Active</option>
-                <option value="canceled">Canceled</option>
-              </select>
-            </label>
-            <button type="submit" class="ax-button ax-button-secondary">Apply filters</button>
-          </form>
+            path="/billing/subscriptions"
+            filter_fields={filter_fields()}
+            filter_params={filter_params()}
+            clear_href="/billing/subscriptions?view=all"
+            clear_visible={true}
+          />
         </:filter_toolbar>
       </PageHeader.page_header>
     </section>
@@ -149,15 +132,39 @@ defmodule AccrueAdmin.Storybook.Components.PageHeader do
     "A deliberately long page title and breadcrumb trail exercise the shared header's truncation-friendly layout without moving list state into the component."
   end
 
-  defp description(:actions), do: "Header actions are caller-owned and stay separate from resource query state."
+  defp description(:actions),
+    do: "Header actions are caller-owned and stay separate from resource query state."
 
-  defp description(:stat_strip), do: "Stat-strip content is supplied by the page and rendered inside the bounded slot."
+  defp description(:stat_strip),
+    do: "Stat-strip content is supplied by the page and rendered inside the bounded slot."
 
   defp description(:filter_toolbar),
-    do: "Filter controls keep their LiveView event contract while PageHeader only provides placement."
+    do:
+      "Filter controls keep their LiveView event contract while PageHeader only provides placement."
 
   defp description(:combined_controls),
     do: "Actions and filter toolbar can coexist without PageHeader knowing what the filters mean."
 
-  defp description(_state), do: "At-risk subscriptions first, with every subscription one click away."
+  defp description(_state),
+    do: "At-risk subscriptions first, with every subscription one click away."
+
+  defp filter_fields do
+    [
+      %{id: :q, label: "Search", placeholder: "Search subscriptions"},
+      %{
+        id: :status,
+        label: "Status",
+        type: :select,
+        options: [
+          {"past_due,canceling", "At risk"},
+          {"active", "Active"},
+          {"canceled", "Canceled"}
+        ]
+      }
+    ]
+  end
+
+  defp filter_params do
+    %{"q" => "northwind", "status" => "past_due,canceling"}
+  end
 end

@@ -13,6 +13,7 @@ defmodule AccrueAdmin.Components.DataTable do
 
   @impl true
   def update(assigns, socket) do
+    previous = socket.assigns
     params = Map.get(assigns, :params, %{})
     params_signature = signature(params)
     action = Map.get(assigns, :action, :sync)
@@ -22,13 +23,21 @@ defmodule AccrueAdmin.Components.DataTable do
       |> assign(assigns)
       |> assign(
         :filter_submit_label,
-        Map.get(assigns, :filter_submit_label) || Copy.data_table_filter_submit_label()
+        Map.get(assigns, :filter_submit_label) ||
+          previous[:filter_submit_label] ||
+          Copy.data_table_filter_submit_label()
       )
-      |> assign(:table_caption, Map.get(assigns, :table_caption))
-      |> assign(:list_id, Map.get(assigns, :list_id) || Map.get(assigns, :id))
-      |> assign(:loading_fixture, loading_fixture?(assigns))
-      |> assign(:clear_href, clear_href(assigns))
-      |> assign(:render_filter_toolbar, Map.get(assigns, :render_filter_toolbar, true))
+      |> assign(:table_caption, Map.get(assigns, :table_caption, previous[:table_caption]))
+      |> assign(
+        :list_id,
+        Map.get(assigns, :list_id) || previous[:list_id] || Map.get(assigns, :id)
+      )
+      |> assign(:loading_fixture, loading_fixture?(assigns, previous))
+      |> assign(:clear_href, clear_href(assigns, previous))
+      |> assign(
+        :render_filter_toolbar,
+        Map.get(assigns, :render_filter_toolbar, Map.get(previous, :render_filter_toolbar, true))
+      )
       |> assign_new(:selected_ids, fn -> MapSet.new() end)
       |> assign_new(:filter_fields, fn -> [] end)
       |> assign_new(:list_status, fn -> [] end)
@@ -51,11 +60,17 @@ defmodule AccrueAdmin.Components.DataTable do
       |> assign_new(:newer_count, fn -> 0 end)
       |> assign(
         :limit,
-        normalize_positive(Map.get(assigns, :limit, @default_limit), @default_limit)
+        normalize_positive(
+          Map.get(assigns, :limit, previous[:limit] || @default_limit),
+          @default_limit
+        )
       )
       |> assign(
         :dom_limit,
-        normalize_positive(Map.get(assigns, :dom_limit, @default_dom_limit), @default_dom_limit)
+        normalize_positive(
+          Map.get(assigns, :dom_limit, previous[:dom_limit] || @default_dom_limit),
+          @default_dom_limit
+        )
       )
 
     socket =
@@ -760,20 +775,36 @@ defmodule AccrueAdmin.Components.DataTable do
     socket
   end
 
-  defp loading_fixture?(assigns) do
-    Map.get(assigns, :loading_fixture, false) == true or
-      Map.get(assigns, :loading_state?, false) == true
+  defp loading_fixture?(assigns, previous) do
+    cond do
+      Map.has_key?(assigns, :loading_fixture) ->
+        Map.get(assigns, :loading_fixture) == true
+
+      Map.has_key?(assigns, :loading_state?) ->
+        Map.get(assigns, :loading_state?) == true
+
+      true ->
+        previous[:loading_fixture] == true
+    end
   end
 
   defp loading_fixture_enabled?(assigns) do
     assigns[:loading_fixture] == true and assigns[:list_state] == "loading-skeleton"
   end
 
-  defp clear_href(assigns) do
-    Map.get(assigns, :clear_href) ||
-      Map.get(assigns, :clear_filters_patch) ||
-      Map.get(assigns, :clear_all_href) ||
-      Map.get(assigns, :path)
+  defp clear_href(assigns, previous) do
+    if Enum.any?(
+         [:clear_href, :clear_filters_patch, :clear_all_href, :path],
+         &Map.has_key?(assigns, &1)
+       ) do
+      Map.get(assigns, :clear_href) ||
+        Map.get(assigns, :clear_filters_patch) ||
+        Map.get(assigns, :clear_all_href) ||
+        Map.get(assigns, :path) ||
+        previous[:clear_href]
+    else
+      previous[:clear_href]
+    end
   end
 
   defp normalize_marker(nil), do: nil

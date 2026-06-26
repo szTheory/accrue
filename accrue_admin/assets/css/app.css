@@ -2115,6 +2115,66 @@ a.ax-kpi-card--linked:focus-visible {
   box-sizing: border-box;
 }
 
+.ax-page-header-main,
+.ax-page-header-title-row,
+.ax-page-header-title-copy,
+.ax-page-header-stat-strip,
+.ax-page-header-filter-toolbar {
+  min-width: 0;
+}
+
+.ax-page-header-main {
+  display: grid;
+  gap: var(--ax-space-sm);
+}
+
+.ax-page-header-title-row {
+  display: grid;
+  gap: var(--ax-space-md);
+  align-items: start;
+}
+
+.ax-page-header-title-copy {
+  display: grid;
+  gap: var(--ax-space-xs);
+}
+
+.ax-page-header-title-copy .ax-display {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.ax-page-header-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--ax-space-sm);
+  min-width: 0;
+}
+
+.ax-page-header-actions > * {
+  min-width: 0;
+}
+
+.ax-page-header-filter-toolbar {
+  display: grid;
+  gap: var(--ax-space-sm);
+}
+
+.ax-page-header-filter-toolbar .ax-data-table-filters {
+  max-width: 100%;
+}
+
+@media (min-width: 768px) { /* --ax-bp-md ↑ */
+  .ax-page-header-title-row {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .ax-page-header-actions {
+    justify-content: flex-end;
+  }
+}
+
 .ax-heading-row {
   display: flex;
   flex-wrap: wrap;

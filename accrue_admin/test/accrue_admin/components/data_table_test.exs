@@ -138,6 +138,10 @@ defmodule AccrueAdmin.DataTableTest do
        |> Phoenix.Component.assign(:empty_reason, Map.get(session, "empty_reason"))
        |> Phoenix.Component.assign(:loading_state?, Map.get(session, "loading_state?", false))
        |> Phoenix.Component.assign(:clear_filters_patch, Map.get(session, "clear_filters_patch"))
+       |> Phoenix.Component.assign(
+         :render_filter_toolbar,
+         Map.get(session, "render_filter_toolbar", true)
+       )
        |> Phoenix.Component.assign(:poll_interval_ms, Map.get(session, "poll_interval_ms", 5_000))
        |> Phoenix.Component.assign(:table_caption, Map.get(session, "table_caption"))
        |> Phoenix.Component.assign(:test_pid, Map.get(session, "test_pid"))}
@@ -157,6 +161,7 @@ defmodule AccrueAdmin.DataTableTest do
         empty_reason={@empty_reason}
         loading_state?={@loading_state?}
         clear_filters_patch={@clear_filters_patch}
+        render_filter_toolbar={@render_filter_toolbar}
         limit={2}
         dom_limit={4}
         poll_interval_ms={@poll_interval_ms}
@@ -500,14 +505,18 @@ defmodule AccrueAdmin.DataTableTest do
       render_component(&DataTable.filter_toolbar/1, %{
         id: "subscriptions",
         path: "/billing/subscriptions?org=acme",
-        filter_params: %{"q" => "northwind", "org" => "acme"},
+        filter_params: %{
+          "q" => "northwind",
+          "org" => "acme",
+          "status" => "past_due,canceling"
+        },
         filter_fields: [
           %{id: :q, label: "Search", placeholder: "Search subscriptions"},
           %{
             id: :status,
             label: "Status",
             type: :select,
-            options: [{"At risk", "past_due,canceling"}]
+            options: [{"past_due,canceling", "At risk"}]
           }
         ],
         filter_submit_label: "Apply filters",
@@ -520,6 +529,8 @@ defmodule AccrueAdmin.DataTableTest do
     refute html =~ ~s(action="/billing/subscriptions)
     assert html =~ ~s(name="q" value="northwind")
     assert html =~ ~s(name="org" value="acme")
+    assert html =~ ~s(<option value="past_due,canceling" selected>)
+    assert html =~ "At risk"
     assert html =~ ~s(data-role="clear-filters")
     assert html =~ ~s(data-phx-link="patch")
     assert html =~ ~s(href="/billing/subscriptions?view=all&amp;org=acme")
@@ -787,8 +798,7 @@ defmodule AccrueAdmin.DataTableTest do
       | FixtureStore.rows()
     ])
 
-    Process.sleep(60)
-    html = render(view)
+    html = render_until(view, &String.contains?(&1, "2 new rows - click to load"))
 
     assert html =~ "2 new rows - click to load"
     assert FixtureStore.count_calls() != []
@@ -798,5 +808,59 @@ defmodule AccrueAdmin.DataTableTest do
     assert html =~ "Brand new open"
     assert html =~ "Another new open"
     refute html =~ "2 new rows - click to load"
+  end
+
+  test "poll updates preserve caller-positioned toolbar configuration", %{
+    conn: conn
+  } do
+    {:ok, view, html} =
+      live_isolated(conn, TableLive,
+        session: %{
+          "params" => %{"status" => "open"},
+          "clear_filters_patch" => "/admin/fixtures?view=all&org=acme",
+          "render_filter_toolbar" => false,
+          "poll_interval_ms" => 15
+        }
+      )
+
+    refute html =~ ~s(data-role="filter-form")
+
+    html = render_until(view, fn _html -> FixtureStore.count_calls() != [] end)
+
+    refute html =~ ~s(data-role="filter-form")
+  end
+
+  test "poll updates preserve caller-provided clear href configuration", %{conn: conn} do
+    {:ok, view, html} =
+      live_isolated(conn, TableLive,
+        session: %{
+          "params" => %{"status" => "open"},
+          "clear_filters_patch" => "/admin/fixtures?view=all&org=acme",
+          "poll_interval_ms" => 15
+        }
+      )
+
+    assert html =~ ~s(href="/admin/fixtures?view=all&amp;org=acme")
+
+    html = render_until(view, fn _html -> FixtureStore.count_calls() != [] end)
+
+    assert html =~ ~s(href="/admin/fixtures?view=all&amp;org=acme")
+  end
+
+  defp render_until(view, predicate, attempts \\ 20)
+
+  defp render_until(view, predicate, attempts) when attempts > 0 do
+    html = render(view)
+
+    if predicate.(html) do
+      html
+    else
+      Process.sleep(25)
+      render_until(view, predicate, attempts - 1)
+    end
+  end
+
+  defp render_until(_view, _predicate, 0) do
+    flunk("condition was not rendered before timeout")
   end
 end
