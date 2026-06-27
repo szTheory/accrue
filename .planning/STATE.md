@@ -2,9 +2,10 @@
 gsd_state_version: 1.0
 milestone: v1.54
 milestone_name: Admin UI Page-Level Streamlining & Storybook
+current_phase: 197
 status: planning
-stopped_at: Phase 197 context gathered
-last_updated: "2026-06-27T01:19:23.100Z"
+stopped_at: Phase 197 UI-SPEC approved
+last_updated: "2026-06-27T02:07:07.039Z"
 last_activity: 2026-06-26
 progress:
   total_phases: 8
@@ -448,9 +449,9 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 
 ## Session Continuity
 
-Last session: 2026-06-27T01:17:53.432Z
-Stopped at: Phase 197 context gathered
-Resume file: .planning/phases/197-propagate-list/197-CONTEXT.md
+Last session: 2026-06-27T02:07:07.031Z
+Stopped at: Phase 197 UI-SPEC approved
+Resume file: .planning/phases/197-propagate-list/197-UI-SPEC.md
 
 ## Operator Next Steps
 
