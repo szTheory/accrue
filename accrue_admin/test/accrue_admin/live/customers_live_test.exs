@@ -77,7 +77,7 @@ defmodule AccrueAdmin.CustomersLiveTest do
 
     # New find-and-open surface: plain heading + description, no projections jargon.
     assert html =~ Copy.customers_index_heading()
-    assert html =~ Copy.customers_index_description()
+    assert html =~ Copy.customers_list_subtitle()
     refute html =~ "Searchable customer projections"
 
     assert html =~ ~s(<caption)
@@ -114,8 +114,8 @@ defmodule AccrueAdmin.CustomersLiveTest do
     assert {:ok, _view, html} =
              live(conn, "/billing/customers?q=___accrue_empty_fixture___")
 
-    assert html =~ "No customers for this organization yet"
-    assert html =~ Copy.customers_index_empty_copy()
+    assert html =~ Copy.customers_list_filtered_empty_title()
+    assert html =~ Copy.customers_list_filtered_empty_body()
   end
 
   test "renders Customers through PageHeader with the Phase 197 LIST chrome", %{conn: conn} do
