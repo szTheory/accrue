@@ -410,16 +410,16 @@ async function assertPageHeaderContract(page, label) {
 | A4 | Put the hand-authored LIST contract manifest in `accrue_admin/test/support/list_contracts.ex` or an equivalent test-only support module. | Validation Architecture | Wrong location could create test-support churn, but runtime behavior is unaffected. |
 | A5 | Treat this research as valid until 2026-07-27 unless dependency versions or Phase 196/197 decisions change sooner. | Metadata | Planner should re-run version/context checks if execution happens after that date or after relevant upstream changes. |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **Should page-specific loading fixture params share a generic name?**
    - What we know: Subscriptions uses `phase196_state=loading-skeleton`; `DataTable` accepts `loading_fixture`/`loading_state?`. [VERIFIED: subscriptions_live.ex] [VERIFIED: data_table.ex]
-   - What's unclear: Whether Phase 197 should use one cross-page test param such as `phase197_state=loading-skeleton` or page-specific params. [ASSUMED]
+   - RESOLVED: Use the shared test-only `phase197_state=loading-skeleton` fixture param across target pages unless a page needs a narrower local fixture during execution.
    - Recommendation: Use a single test-only `phase197_state=loading-skeleton` helper pattern across target pages to simplify Playwright coverage, and strip it in clear-all targets. [ASSUMED]
 
 2. **Should Charges query gain owner-scope SQL support in this phase?**
    - What we know: `ChargesLive` passes `current_owner_scope` to `DataTable`, but `Queries.Charges.list/1` currently ignores `owner_scope`; Invoices and Subscriptions do scope through customer joins. [VERIFIED: charges_live.ex] [VERIFIED: charges.ex] [VERIFIED: invoices.ex]
-   - What's unclear: Whether this was intentionally deferred or simply missed. [ASSUMED]
+   - RESOLVED: Implement Charges owner-scope filtering in this phase as part of Payments migration.
    - Recommendation: Add owner-scope filtering for Charges while migrating Payments, because clear-all preservation without query scoping is incomplete for org mode. [ASSUMED]
 
 ## Environment Availability
