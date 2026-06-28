@@ -5,6 +5,8 @@ defmodule AccrueAdmin.Queries.QueryModulesTest do
 
   alias Accrue.Billing.{Charge, Coupon, Customer, Invoice, PromotionCode, Subscription}
   alias Accrue.Connect.Account
+  alias Accrue.Webhook.WebhookEvent
+  alias AccrueAdmin.OwnerScope
 
   alias AccrueAdmin.Queries.{
     Charges,
@@ -13,6 +15,7 @@ defmodule AccrueAdmin.Queries.QueryModulesTest do
     Customers,
     Invoices,
     PromotionCodes,
+    Webhooks,
     Subscriptions
   }
 
@@ -297,6 +300,167 @@ defmodule AccrueAdmin.Queries.QueryModulesTest do
       assert "pending" in statuses
       assert "succeeded" in statuses
     end
+
+    test "Webhooks.decode_filter/1 allowlists comma-separated replay statuses" do
+      filter = Webhooks.decode_filter(%{"status" => "failed,dead,Elixir.String"})
+
+      assert filter.status == [:failed, :dead]
+    end
+
+    test "Webhooks.list/1 with replay statuses returns failed or dead deliveries only" do
+      insert_webhook(%{
+        processor_event_id: "evt_phase197_failed",
+        status: :failed,
+        received_at: ~U[2026-04-11 17:00:00Z]
+      })
+
+      insert_webhook(%{
+        processor_event_id: "evt_phase197_dead",
+        status: :dead,
+        received_at: ~U[2026-04-11 17:01:00Z]
+      })
+
+      insert_webhook(%{
+        processor_event_id: "evt_phase197_succeeded",
+        status: :succeeded,
+        received_at: ~U[2026-04-11 17:02:00Z]
+      })
+
+      {rows, _cursor} =
+        Webhooks.list(filter: Webhooks.decode_filter(%{"status" => "failed,dead"}))
+
+      processor_event_ids = Enum.map(rows, & &1.processor_event_id)
+
+      assert "evt_phase197_failed" in processor_event_ids
+      assert "evt_phase197_dead" in processor_event_ids
+      refute "evt_phase197_succeeded" in processor_event_ids
+      assert Enum.all?(rows, &(&1.status in [:failed, :dead]))
+    end
+  end
+
+  describe "phase 197 query semantics" do
+    test "ConnectAccounts.decode_filter/1 emits a named attention lens" do
+      filter = ConnectAccounts.decode_filter(%{"needs_attention" => "true"})
+
+      assert filter.needs_attention == true
+    end
+
+    test "ConnectAccounts.list/1 needs_attention matches any readiness blocker" do
+      insert_connect_account(%{
+        stripe_account_id: "acct_attention_deauthorized",
+        email: "deauthorized@example.com",
+        charges_enabled: true,
+        payouts_enabled: true,
+        details_submitted: true,
+        deauthorized_at: ~U[2026-04-11 17:10:00Z],
+        inserted_at: ~U[2026-04-11 17:10:00Z]
+      })
+
+      insert_connect_account(%{
+        stripe_account_id: "acct_attention_charges",
+        email: "charges-disabled@example.com",
+        charges_enabled: false,
+        payouts_enabled: true,
+        details_submitted: true,
+        inserted_at: ~U[2026-04-11 17:11:00Z]
+      })
+
+      insert_connect_account(%{
+        stripe_account_id: "acct_attention_payouts",
+        email: "payouts-disabled@example.com",
+        charges_enabled: true,
+        payouts_enabled: false,
+        details_submitted: true,
+        inserted_at: ~U[2026-04-11 17:12:00Z]
+      })
+
+      insert_connect_account(%{
+        stripe_account_id: "acct_attention_onboarding",
+        email: "onboarding@example.com",
+        charges_enabled: true,
+        payouts_enabled: true,
+        details_submitted: false,
+        inserted_at: ~U[2026-04-11 17:13:00Z]
+      })
+
+      insert_connect_account(%{
+        stripe_account_id: "acct_attention_healthy",
+        email: "healthy@example.com",
+        charges_enabled: true,
+        payouts_enabled: true,
+        details_submitted: true,
+        inserted_at: ~U[2026-04-11 17:14:00Z]
+      })
+
+      {rows, _cursor} =
+        ConnectAccounts.list(
+          filter: ConnectAccounts.decode_filter(%{"needs_attention" => "true"}),
+          limit: 20
+        )
+
+      account_ids = Enum.map(rows, & &1.stripe_account_id)
+
+      assert "acct_attention_deauthorized" in account_ids
+      assert "acct_attention_charges" in account_ids
+      assert "acct_attention_payouts" in account_ids
+      assert "acct_attention_onboarding" in account_ids
+      refute "acct_attention_healthy" in account_ids
+    end
+
+    test "Charges.list/1 applies organization owner scope through customers" do
+      allowed_customer =
+        insert_customer(%{
+          owner_type: "Organization",
+          owner_id: "org_allowed",
+          email: "allowed-scope@example.com",
+          name: "Allowed Scope"
+        })
+
+      denied_customer =
+        insert_customer(%{
+          owner_type: "Organization",
+          owner_id: "org_denied",
+          email: "denied-scope@example.com",
+          name: "Denied Scope"
+        })
+
+      allowed_subscription =
+        insert_subscription(allowed_customer, %{
+          status: :active,
+          processor_id: "sub_allowed_scope",
+          inserted_at: ~U[2026-04-11 18:00:00Z]
+        })
+
+      denied_subscription =
+        insert_subscription(denied_customer, %{
+          status: :active,
+          processor_id: "sub_denied_scope",
+          inserted_at: ~U[2026-04-11 18:01:00Z]
+        })
+
+      insert_charge(allowed_customer, allowed_subscription, %{
+        status: "failed",
+        processor_id: "ch_allowed_scope",
+        inserted_at: ~U[2026-04-11 18:02:00Z]
+      })
+
+      insert_charge(denied_customer, denied_subscription, %{
+        status: "failed",
+        processor_id: "ch_denied_scope",
+        inserted_at: ~U[2026-04-11 18:03:00Z]
+      })
+
+      {rows, _cursor} =
+        Charges.list(
+          filter: Charges.decode_filter(%{"status" => "failed"}),
+          owner_scope: organization_owner_scope("org_allowed")
+        )
+
+      processor_ids = Enum.map(rows, & &1.processor_id)
+
+      assert "ch_allowed_scope" in processor_ids
+      refute "ch_denied_scope" in processor_ids
+    end
   end
 
   test "phase 7 admin indexes exist" do
@@ -438,5 +602,49 @@ defmodule AccrueAdmin.Queries.QueryModulesTest do
     %Account{}
     |> Account.changeset(Map.merge(defaults, attrs))
     |> AccrueAdmin.TestRepo.insert!()
+  end
+
+  defp insert_webhook(attrs) do
+    defaults = %{
+      processor: "stripe",
+      processor_event_id: "evt_" <> Integer.to_string(System.unique_integer([:positive])),
+      type: "invoice.payment_failed",
+      livemode: false,
+      endpoint: :default,
+      status: :received,
+      raw_body:
+        Jason.encode!(%{
+          "id" => "evt_seed",
+          "object" => "event",
+          "type" => "invoice.payment_failed"
+        }),
+      received_at: DateTime.utc_now(),
+      data: %{"id" => "evt_seed", "object" => "event", "type" => "invoice.payment_failed"}
+    }
+
+    Map.merge(defaults, attrs)
+    |> WebhookEvent.ingest_changeset()
+    |> AccrueAdmin.TestRepo.insert!()
+    |> then(fn webhook ->
+      webhook
+      |> Ecto.Changeset.change(%{
+        status: Map.get(attrs, :status, :received),
+        processed_at: Map.get(attrs, :processed_at)
+      })
+      |> AccrueAdmin.TestRepo.update!()
+    end)
+  end
+
+  defp organization_owner_scope(organization_id) do
+    %OwnerScope{
+      mode: :organization,
+      current_admin: %{id: "admin_1", role: :admin},
+      organization_id: organization_id,
+      organization_slug: "allowed-org",
+      platform_admin?: false,
+      admin_org_ids: [organization_id],
+      active_organization_id: organization_id,
+      active_organization_slug: "allowed-org"
+    }
   end
 end
