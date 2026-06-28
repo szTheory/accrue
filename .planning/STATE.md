@@ -2,10 +2,13 @@
 gsd_state_version: 1.0
 milestone: v1.54
 milestone_name: Admin UI Page-Level Streamlining & Storybook
-status: verifying
-stopped_at: Completed 197-07-PLAN.md
-last_updated: "2026-06-28T18:47:27.927Z"
+current_phase: 198
+current_phase_name: Propagate DETAIL + analytics
+status: ready_to_plan
+stopped_at: Phase 197 complete (7/7) — ready to discuss Phase 198
+last_updated: "2026-06-28T19:38:49.341Z"
 last_activity: 2026-06-28
+last_activity_desc: Phase 197 complete, transitioned to Phase 198
 progress:
   total_phases: 8
   completed_phases: 5
@@ -22,14 +25,14 @@ See: `.planning/PROJECT.md` (updated 2026-06-24 — v1.54 Admin UI Page-Level St
 
 **Core value:** A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic Elixir DX, strong domain modeling, tamper-evident audit ledger, great observability, and zero breaking-change pain through v1.x.
 
-**Current focus:** Phase 197 — propagate-list
+**Current focus:** Phase 198 — Propagate DETAIL + analytics
 
 ## Current Position
 
-Phase: 197 (propagate-list) — EXECUTING
-Plan: 7 of 7
-Status: Phase complete — ready for verification
-Last activity: 2026-06-28
+Phase: 198 — Propagate DETAIL + analytics
+Plan: Not started
+Status: Ready to plan
+Last activity: 2026-06-28 — Phase 197 complete, transitioned to Phase 198
 
 ## Post-v1.48 Pause Rule
 
@@ -151,7 +154,7 @@ Coverage: 22/22 v1.51 requirements mapped (each REQ-ID → exactly one phase). D
 
 **Velocity:**
 
-- Total plans completed: 146
+- Total plans completed: 153
 - Average duration: 1m
 - Total execution time: 1m
 

@@ -532,9 +532,9 @@ zero blockers; non-critical follow-ups + partial Nyquist 123–125 deferred).
 
 ## Current State
 
-**v1.54 — Admin UI Page-Level Streamlining & Storybook in progress (opened 2026-06-24; Phases 193–200).** Phases 193 (SPEC-OVERVIEW/LIST/DETAIL contracts locked, page-flow baseline, PhoenixStorybook stood up dev/test-only), **194 (Exemplar A — Dashboard)**, and **195 (Exemplar B — Subscription detail)** are complete. Dashboard is the overview archetype gold-standard, Recovery analytics reads as a work-queue, and Subscription detail is now the object-detail gold standard: a six-band DETAIL spine, <=2 primary actions, overflow action-menu, drawer-hosted operator actions, StepUp-preserving destructive flow, canonical overlay primitive instantiation, Storybook coverage, and a Phase 199 overlay handoff. Phase 195 verification passed 12/12 must-haves with ExUnit, Node hook tests, docs guards, Phase 195 Playwright, and prior-phase regression gates green. Next: Phase 196 (Exemplar C — Subscriptions list + PageHeader).
+**v1.54 — Admin UI Page-Level Streamlining & Storybook in progress (opened 2026-06-24; Phases 193–200).** Phases 193–197 are complete. The milestone has locked SPEC-OVERVIEW/LIST/DETAIL, extended the page-flow baseline, stood up PhoenixStorybook dev/test-only, delivered the Dashboard and Subscription detail archetype exemplars, extracted the shared `PageHeader`, converted the Subscriptions list, and propagated the locked LIST pattern to the remaining eight list pages (customers, invoices, payments, coupons, promotion codes, webhooks, events, connect). Phase 197 verified PRP-01 with 28/28 must-haves, clean code review, Nyquist validation passed, `threats_open: 0`, and UI review 23/24 with only a non-blocking shared-brand-fallback warning. Next: Phase 198 (Propagate DETAIL + analytics).
 
-**v1.53 — Admin UI Design-System Hardening shipped & archived 2026-06-20 (Phases 187–192, 39/39 plans, 33/33 requirements).** The fourth pass on the `accrue_admin` surface is complete: the operator UI is now *interaction-correct and component-systematic*, with a final scorecard ≥ the Phase-187 baseline across 21,276 cells (zero regressions), merge-blocking CI regression guardrails, and maintainer sign-off. With v1.53 shipped, the project returns to **stable-core / demand-driven expansion** posture — no milestone currently open.
+**v1.53 — Admin UI Design-System Hardening shipped & archived 2026-06-20 (Phases 187–192, 39/39 plans, 33/33 requirements).** The fourth pass on the `accrue_admin` surface is complete: the operator UI is now *interaction-correct and component-systematic*, with a final scorecard ≥ the Phase-187 baseline across 21,276 cells (zero regressions), merge-blocking CI regression guardrails, and maintainer sign-off. v1.54 is the currently open, explicitly justified follow-on page-level streamlining milestone.
 
 The v1.50→v1.53 arc (Admin UI Foundation → Depth Pass → Brand System → Design-System Hardening) closed out the adopter-facing presentation/DX investment: a coherent, distinctly-branded, interaction-correct operator UI plus a committed standalone brand book (`brandbook/`), logo system, design tokens, and voice/copy.
 
@@ -559,7 +559,15 @@ The v1.50→v1.53 arc (Admin UI Foundation → Depth Pass → Brand System → D
 
 ### Active
 
-**None.** No milestone is currently open. The project is in stable core / demand-driven expansion posture as of 2026-06-20 (after v1.53 shipped). The next milestone is defined via `/gsd-new-milestone` and requires a concrete adopter failure, correctness/security/data-loss risk, repeated support issue, operational failure, or explicit strategy change per the post-v1.48 pause rule.
+**v1.54 remains active.** Completed requirements are tracked in `.planning/REQUIREMENTS.md`; remaining open scope is Phase 198 (PRP-02), Phase 199 (IXN-02..04, FIX-01..02, CPY-01), and Phase 200 (VER-01..03, STY-02..03). The post-v1.48 pause rule still applies after this milestone closes.
+
+### Validated v1.54 (in progress; active milestone opened 2026-06-24)
+
+- ✓ **RES-01..RES-04, STY-01** — Research, page-flow baseline, spike decisions, CSS source guards, and PhoenixStorybook dev/test-only foundation — Phase 193.
+- ✓ **EXE-01** — Dashboard overview exemplar and Recovery analytics overview grammar — Phase 194.
+- ✓ **EXE-02** — Subscription detail summary-then-drill object-detail exemplar with drawer-hosted actions and overlay handoff — Phase 195.
+- ✓ **EXE-03, PGH-01** — Subscriptions list exemplar plus shared `PageHeader` contract — Phase 196.
+- ✓ **PRP-01** — All eight remaining list pages conform to SPEC-LIST, adopt `PageHeader`, carry per-page JTBD microcopy, and have four-state coverage — Phase 197.
 
 ### Validated v1.53 (archived in `.planning/milestones/v1.53-REQUIREMENTS.md`; milestone shipped & archived 2026-06-20)
 
@@ -662,4 +670,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-06-26 after Phase 195 (Exemplar B — Subscription detail) completed in v1.54 — Admin UI Page-Level Streamlining & Storybook (opened 2026-06-24; Phases 193–200). Subscription detail locked as the object-detail gold standard with summary-then-drill structure, drawer-hosted actions, canonical overlay instantiation, Storybook coverage, and verification 12/12. Next: Phase 196 (Subscriptions list + PageHeader). Prior milestone: v1.53 Admin UI Design-System Hardening (Phases 187–192, shipped & archived 2026-06-20). Prior: v1.52 Brand System (Phases 180–186).*
+*Last updated: 2026-06-28 after Phase 197 (Propagate LIST) completed in v1.54 — Admin UI Page-Level Streamlining & Storybook (opened 2026-06-24; Phases 193–200). LIST propagation is verified across customers, invoices, payments, coupons, promotion codes, webhooks, events, and connect with 28/28 must-haves, clean review, Nyquist validation passed, `threats_open: 0`, and UI review 23/24. Next: Phase 198 (Propagate DETAIL + analytics). Prior milestone: v1.53 Admin UI Design-System Hardening (Phases 187–192, shipped & archived 2026-06-20). Prior: v1.52 Brand System (Phases 180–186).*

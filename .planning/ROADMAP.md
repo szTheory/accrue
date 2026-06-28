@@ -41,7 +41,7 @@ Stop rule: if proposed work is polish-only with a documented workaround and no r
 - [x] **Phase 194: Exemplar A — Dashboard** — Refine the four-zone overview (refine-not-rebuild) and re-grammar Recovery analytics to `hero metric pair → at-risk work-queue → trend`. (completed 2026-06-26)
 - [x] **Phase 195: Exemplar B — Subscription detail** — Convert the worst info-dump (~25 always-visible zones → ~6 bands) to summary-then-drill + ≤2 primary actions + an overflow action-menu hosting actions in a side-drawer; build the action-menu primitive + side-drawer action hosting. (completed 2026-06-26)
 - [ ] **Phase 196: Exemplar C — Subscriptions list + PageHeader** — Convert the Subscriptions list to the table-first list spec (chips + count + clear-all, work-queue default, four distinct states) and extract + lock the shared `PageHeader` component slot contract.
-- [ ] **Phase 197: Propagate LIST** — Conform all 8 remaining list pages to SPEC-LIST, adopt `PageHeader`, with per-page JTBD microcopy + four-state coverage.
+- [x] **Phase 197: Propagate LIST** — Conform all 8 remaining list pages to SPEC-LIST, adopt `PageHeader`, with per-page JTBD microcopy + four-state coverage. (completed 2026-06-28)
 - [ ] **Phase 198: Propagate DETAIL + analytics** — Conform all remaining detail/analytics pages to SPEC-DETAIL / the overview spec.
 - [ ] **Phase 199: Cross-cutting interaction/overlay correctness + fixture stress + microcopy** — Land the canonical overlay primitive (scroll-lock, portal, `inert`, dismissal, geometry, origin-aware popovers, transformed-ancestor audit), exercise multi-step + edge fixtures, and run the full brand-voice microcopy sweep.
 - [ ] **Phase 200: Idempotent verification & sign-off** — Re-score all cells (component + group + page-flow) viewport × theme × state with zero regressions; complete + verify Storybook story coverage and theming; axe-core + no-FOUC/persistence/system-emulation checks; adversarial multi-lens judge + maintainer sign-off.
@@ -352,7 +352,7 @@ Full details: [v1.48 roadmap archive](milestones/v1.48-ROADMAP.md)
 | 194. Exemplar A — Dashboard | v1.54 | 4/4 | Complete    | 2026-06-26 |
 | 195. Exemplar B — Subscription detail | v1.54 | 8/8 | Complete    | 2026-06-26 |
 | 196. Exemplar C — Subscriptions list + PageHeader | v1.54 | 5/5 | Complete    | 2026-06-26 |
-| 197. Propagate LIST | v1.54 | 7/7 | Complete   | 2026-06-28 |
+| 197. Propagate LIST | v1.54 | 7/7 | Complete    | 2026-06-28 |
 | 198. Propagate DETAIL + analytics | v1.54 | 0/? | Not started | - |
 | 199. Cross-cutting interaction/overlay correctness + fixture stress + microcopy | v1.54 | 0/? | Not started | - |
 | 200. Idempotent verification & sign-off | v1.54 | 0/? | Not started | - |
