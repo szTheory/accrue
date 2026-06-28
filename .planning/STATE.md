@@ -5,15 +5,15 @@ milestone_name: Admin UI Page-Level Streamlining & Storybook
 current_phase: 198
 current_phase_name: propagate-detail-analytics
 status: executing
-stopped_at: Completed 198-02-PLAN.md
-last_updated: "2026-06-28T23:32:46.171Z"
+stopped_at: Completed 198-03-PLAN.md
+last_updated: "2026-06-28T23:46:04.667Z"
 last_activity: 2026-06-28
 last_activity_desc: Phase 198 execution started
 progress:
   total_phases: 8
   completed_phases: 5
   total_plans: 38
-  completed_plans: 31
+  completed_plans: 32
   percent: 63
 ---
 
@@ -30,7 +30,7 @@ See: `.planning/PROJECT.md` (updated 2026-06-24 — v1.54 Admin UI Page-Level St
 ## Current Position
 
 Phase: 198 (propagate-detail-analytics) — EXECUTING
-Plan: 3 of 9
+Plan: 4 of 9
 Status: Ready to execute
 Last activity: 2026-06-28 -- Phase 198 execution started
 
@@ -219,6 +219,7 @@ Coverage: 22/22 v1.51 requirements mapped (each REQ-ID → exactly one phase). D
 | Phase 197 P07 | 12m32s | 3 tasks | 3 files |
 | Phase 198 P01 | 10m 39s | 3 tasks | 2 files |
 | Phase 198 P02 | 10m | 3 tasks | 5 files |
+| Phase 198 P03 | 7m 47s | 3 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -393,6 +394,8 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - [Phase 198]: Plan 198-02 intentionally ships RED LiveView contract tests only; runtime migrations remain in later Phase 198 plans. — The plan objective was to lock high-risk detail contracts before implementation, and user scope explicitly forbade production migrations.
 - [Phase 198]: High-risk action contracts assert intent-opened drawers and StepUp challenge behavior instead of visible initial forms. — Sensitive invoice, charge, webhook, connect, and customer payment-method flows must stay server-owned and challenge fresh identity before execution.
 - [Phase 198]: Customer-360 peer navigation is locked to Subscriptions, Invoices, and Payments, with payments and charges URLs resolving to Payments. — D-05 through D-07 remove the broad More bucket and keep Customer peer record sets explicit.
+- [Phase 198]: Kept 198-03 test-only: runtime DETAIL and analytics rewrites remain owned by later Phase 198 implementation plans. — This plan is Wave 0 contract coverage; production runtime rewrites are intentionally deferred to later Phase 198 plans.
+- [Phase 198]: Documented focused RED verification failures as expected conformance gaps, not setup or fixture failures. — Each focused verification command reached the intended tests and failed only on missing contract markers/docs owned by later implementation work.
 
 ### Pending Todos
 
@@ -483,8 +486,8 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 
 ## Session Continuity
 
-Last session: 2026-06-28T23:32:46.165Z
-Stopped at: Completed 198-02-PLAN.md
+Last session: 2026-06-28T23:46:04.662Z
+Stopped at: Completed 198-03-PLAN.md
 Resume file: None
 
 ## Operator Next Steps
