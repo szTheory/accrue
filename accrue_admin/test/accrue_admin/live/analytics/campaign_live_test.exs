@@ -29,6 +29,76 @@ defmodule AccrueAdmin.Live.Analytics.CampaignLiveTest do
   end
 
   describe "Dunning Timeline" do
+    test "D-20 D-21 renders Campaign as a detail drill-down with summary rows and primary timeline",
+         %{conn: conn} do
+      subscription_id = Ecto.UUID.generate()
+
+      Accrue.Repo.insert!(%Accrue.Events.Event{
+        type: "dunning.campaign_started",
+        subject_type: "Subscription",
+        subject_id: subscription_id,
+        actor_id: Ecto.UUID.generate(),
+        actor_type: "system",
+        data: %{"campaign_anchor" => "iso_anchor_contract", "invoice_id" => "in_contract"}
+      })
+
+      Accrue.Repo.insert!(%Accrue.Events.Event{
+        type: "dunning.step_sent",
+        subject_type: "Subscription",
+        subject_id: subscription_id,
+        actor_id: Ecto.UUID.generate(),
+        actor_type: "system",
+        data: %{
+          "campaign_anchor" => "iso_anchor_contract",
+          "invoice_id" => "in_contract",
+          "step" => "email_1"
+        }
+      })
+
+      {:ok, _view, html} =
+        conn
+        |> init_test_session(%{
+          "admin_token" => "admin",
+          "accrue_admin" => %{"mount_path" => "/billing"}
+        })
+        |> live("/billing/analytics/recovery/subscriptions/#{subscription_id}")
+
+      assert heading_count(html, "h1") == 1
+      assert html =~ ~s(class="ax-card ax-summary-card")
+      assert data_attr_count(html, "data-ax-summary-list") == 1
+
+      assert html =~ "Subscription"
+      assert html =~ subscription_id
+      assert html =~ "Campaign state"
+      assert html =~ "Timeline events"
+      assert html =~ "Invoice count"
+      assert html =~ "ax-campaign-timeline"
+      assert html =~ "Campaign started"
+
+      refute html =~ ~s(class="ax-kpi-grid")
+      refute html =~ ~s(data-ax-zone="kpi-cluster")
+    end
+
+    test "D-20 renders Campaign empty state inside the detail drill-down contract", %{conn: conn} do
+      subscription_id = Ecto.UUID.generate()
+
+      {:ok, _view, html} =
+        conn
+        |> init_test_session(%{
+          "admin_token" => "admin",
+          "accrue_admin" => %{"mount_path" => "/billing"}
+        })
+        |> live("/billing/analytics/recovery/subscriptions/#{subscription_id}")
+
+      assert heading_count(html, "h1") == 1
+      assert html =~ ~s(class="ax-card ax-summary-card")
+      assert data_attr_count(html, "data-ax-summary-list") == 1
+      assert html =~ "No dunning history found"
+      assert html =~ "ax-campaign-timeline"
+
+      refute html =~ ~s(class="ax-kpi-grid")
+    end
+
     test "renders dunning timeline for subscription with 2 campaign arcs", %{conn: conn} do
       subscription_id = Ecto.UUID.generate()
       # Seed events via Repo directly or Events
@@ -98,6 +168,7 @@ defmodule AccrueAdmin.Live.Analytics.CampaignLiveTest do
       refute source =~ "import Ecto.Query"
       refute source =~ "Accrue.Repo"
       refute source =~ "Accrue.Billing."
+      refute source =~ "AnalyticsPage"
     end
 
     # Phase 176-06 uplift assertions (dims ②④⑦⑧)
@@ -176,5 +247,21 @@ defmodule AccrueAdmin.Live.Analytics.CampaignLiveTest do
       # The page hero title must use ax-summary-title (Detail.summary_card renders h2.ax-summary-title)
       assert html =~ "ax-summary-title"
     end
+  end
+
+  defp data_attr_count(html, attr) do
+    attr
+    |> Regex.escape()
+    |> then(&Regex.compile!("\\b" <> &1 <> "(?:\\s|=|>)"))
+    |> Regex.scan(html)
+    |> length()
+  end
+
+  defp heading_count(html, tag) do
+    tag
+    |> Regex.escape()
+    |> then(&Regex.compile!("<" <> &1 <> "\\b"))
+    |> Regex.scan(html)
+    |> length()
   end
 end
