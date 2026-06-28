@@ -630,17 +630,19 @@ end
 |---|-------|---------|---------------|
 | A1 | Phase 198 will not install or upgrade dependencies. [ASSUMED] | Standard Stack / Package Legitimacy Audit | If implementation chooses to add packages, the planner must run package-legitimacy checks and update this research. |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **Should webhook replay and connect platform-fee override step-up be mandatory or documented as lower-risk?**
    - What we know: locked D-12 says add step-up for both unless planning records a specific lower-risk reason. [VERIFIED: .planning/phases/198-propagate-detail-analytics/198-CONTEXT.md]
    - What's unclear: no lower-risk reason was found in current code or context. [VERIFIED: codebase rg]
    - Recommendation: plan them as step-up gated. [VERIFIED: accrue_admin/lib/accrue_admin/step_up.ex]
+   - Resolution: webhook replay and connect platform-fee override are StepUp-gated in Phase 198 plans; no lower-risk exception is recorded.
 
 2. **Where should the Phase 198 Playwright contract live?**
    - What we know: Phase 194/195/197 have separate npm scripts and specs. [VERIFIED: accrue_admin/package.json]
    - What's unclear: planner can extend `admin-spec-detail-phase195.spec.js` or add `admin-spec-detail-phase198.spec.js`. [VERIFIED: current file layout]
    - Recommendation: add a Phase 198 spec and npm script to avoid mutating exemplar-only intent. [VERIFIED: existing script pattern]
+   - Resolution: the Phase 198 Playwright contract lives in `accrue_admin/e2e/admin-spec-detail-phase198.spec.js` and is registered as `e2e:phase198`.
 
 ## Environment Availability
 
