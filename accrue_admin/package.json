@@ -10,6 +10,7 @@
     "e2e:phase195": "env -u NO_COLOR playwright test e2e/admin-spec-detail-phase195.spec.js --timeout=60000 --workers=1",
     "e2e:phase196": "env -u NO_COLOR playwright test e2e/admin-spec-list-phase196.spec.js --timeout=60000 --workers=1",
     "e2e:phase197": "env -u NO_COLOR playwright test e2e/admin-spec-list-phase197.spec.js --timeout=60000 --workers=1",
+    "e2e:phase198": "env -u NO_COLOR playwright test e2e/admin-spec-detail-phase198.spec.js --timeout=60000 --workers=1",
     "e2e:a11y": "env -u NO_COLOR playwright test e2e/admin-a11y.spec.js",
     "e2e:install": "playwright install chromium",
     "score-visuals": "node e2e/score-visuals.mjs",
