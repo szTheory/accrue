@@ -2,18 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.54
 milestone_name: Admin UI Page-Level Streamlining & Storybook
-current_phase: 197
-current_phase_name: propagate-list
-status: executing
-stopped_at: Completed 197-05-PLAN.md
-last_updated: "2026-06-28T17:51:10.578Z"
+status: verifying
+stopped_at: Completed 197-07-PLAN.md
+last_updated: "2026-06-28T18:47:27.927Z"
 last_activity: 2026-06-28
 progress:
   total_phases: 8
-  completed_phases: 4
+  completed_phases: 5
   total_plans: 29
-  completed_plans: 28
-  percent: 50
+  completed_plans: 29
+  percent: 63
 ---
 
 # Project State
@@ -30,7 +28,7 @@ See: `.planning/PROJECT.md` (updated 2026-06-24 — v1.54 Admin UI Page-Level St
 
 Phase: 197 (propagate-list) — EXECUTING
 Plan: 7 of 7
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-06-28
 
 ## Post-v1.48 Pause Rule
@@ -215,6 +213,7 @@ Coverage: 22/22 v1.51 requirements mapped (each REQ-ID → exactly one phase). D
 | Phase 197 P04 | 14m | 3 tasks | 4 files |
 | Phase 197 P05 | 9m 38s | 2 tasks | 4 files |
 | Phase 197 P06 | 1044 | 3 tasks | 7 files |
+| Phase 197 P07 | 12m32s | 3 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -381,6 +380,8 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - [Phase 197]: Plan 197-06 keeps Webhooks replay page-local while making status=failed,dead the default Needs replay lens. — Replay selected IDs cross into DLQ.requeue side effects, so scoped selection/detail guards stayed in WebhooksLive instead of being generalized.
 - [Phase 197]: Plan 197-06 keeps Events as an all-ledger default and exposes Admin changes via actor_type=admin. — Events is an append-only audit ledger, so bare /events must not manufacture a queue or hide rows.
 - [Phase 197]: Plan 197-06 uses Connect needs_attention=true as the OR readiness lens instead of composing readiness filters. — The Plan 03 query seam owns the OR semantics for deauthorized, onboarding, charges, and payouts attention states.
+- [Phase 197]: Phase 197 browser smoke waits for LiveView default URL push_patch before asserting queue params. — The final Playwright gate exposed a timing-only failure when URL params were sampled immediately after login.
+- [Phase 197]: Phase 197 query contract tests assert filtered inclusion/exclusion instead of singleton global fixture lists. — The focused gate can run after E2E fixtures seed additional valid rows, so tests must prove semantics rather than database exclusivity.
 
 ### Pending Todos
 
@@ -471,8 +472,8 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 
 ## Session Continuity
 
-Last session: 2026-06-28T17:50:44.953Z
-Stopped at: Completed 197-05-PLAN.md
+Last session: 2026-06-28T18:47:27.921Z
+Stopped at: Completed 197-07-PLAN.md
 Resume file: None
 
 ## Operator Next Steps
