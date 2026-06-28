@@ -169,6 +169,159 @@ defmodule AccrueAdmin.CopyTest do
     refute_vague_copy!(strings)
   end
 
+  test "Phase 197 list copy helpers expose JTBD headings and state-specific copy" do
+    pages = [
+      %{
+        heading: Copy.customers_list_heading(),
+        subtitle: Copy.customers_list_subtitle(),
+        expected_heading: "Find a customer",
+        expected_subtitle: "Look up a customer and inspect their billing state.",
+        states: [
+          Copy.customers_list_first_run_empty_title(),
+          Copy.customers_list_filtered_empty_title(),
+          Copy.customers_list_loading_label()
+        ],
+        labels: [
+          Copy.customers_list_default_lens_label(),
+          Copy.customers_list_all_lens_label(),
+          Copy.customers_list_missing_payment_method_label()
+        ],
+        result_label: Copy.customers_list_result_label_pair()
+      },
+      %{
+        heading: Copy.invoices_list_heading(),
+        subtitle: Copy.invoices_list_subtitle(),
+        expected_heading: "Clear open receivables",
+        expected_subtitle: "Work invoices that need collection.",
+        states: [
+          Copy.invoices_list_first_run_empty_title(),
+          Copy.invoices_list_queue_empty_title(),
+          Copy.invoices_list_filtered_empty_title(),
+          Copy.invoices_list_loading_label()
+        ],
+        labels: [
+          Copy.invoices_list_default_lens_label(),
+          Copy.invoices_list_all_lens_label()
+        ],
+        result_label: Copy.invoices_list_result_label_pair()
+      },
+      %{
+        heading: Copy.payments_list_heading(),
+        subtitle: Copy.payments_list_subtitle(),
+        expected_heading: "Recover failed payments",
+        expected_subtitle: "Inspect charges that need follow-up.",
+        states: [
+          Copy.payments_list_first_run_empty_title(),
+          Copy.payments_list_queue_empty_title(),
+          Copy.payments_list_filtered_empty_title(),
+          Copy.payments_list_loading_label()
+        ],
+        labels: [
+          Copy.payments_list_default_lens_label(),
+          Copy.payments_list_all_lens_label()
+        ],
+        result_label: Copy.payments_list_result_label_pair()
+      },
+      %{
+        heading: Copy.coupons_list_heading(),
+        subtitle: Copy.coupons_list_subtitle(),
+        expected_heading: "Review usable discounts",
+        expected_subtitle: "Check which coupon definitions can still be applied.",
+        states: [
+          Copy.coupons_list_first_run_empty_title(),
+          Copy.coupons_list_queue_empty_title(),
+          Copy.coupons_list_filtered_empty_title(),
+          Copy.coupons_list_loading_label()
+        ],
+        labels: [
+          Copy.coupons_list_default_lens_label(),
+          Copy.coupons_list_all_lens_label()
+        ],
+        result_label: Copy.coupons_list_result_label_pair()
+      },
+      %{
+        heading: Copy.promotion_codes_list_heading(),
+        subtitle: Copy.promotion_codes_list_subtitle(),
+        expected_heading: "Find active codes",
+        expected_subtitle: "Review customer-facing codes tied to coupons.",
+        states: [
+          Copy.promotion_codes_list_first_run_empty_title(),
+          Copy.promotion_codes_list_queue_empty_title(),
+          Copy.promotion_codes_list_filtered_empty_title(),
+          Copy.promotion_codes_list_loading_label()
+        ],
+        labels: [
+          Copy.promotion_codes_list_default_lens_label(),
+          Copy.promotion_codes_list_all_lens_label()
+        ],
+        result_label: Copy.promotion_codes_list_result_label_pair()
+      },
+      %{
+        heading: Copy.webhooks_list_heading(),
+        subtitle: Copy.webhooks_list_subtitle(),
+        expected_heading: "Replay failed deliveries",
+        expected_subtitle: "Inspect webhook deliveries that need operator action.",
+        states: [
+          Copy.webhooks_list_first_run_empty_title(),
+          Copy.webhooks_list_queue_empty_title(),
+          Copy.webhooks_list_filtered_empty_title(),
+          Copy.webhooks_list_loading_label()
+        ],
+        labels: [
+          Copy.webhooks_list_default_lens_label(),
+          Copy.webhooks_list_all_lens_label()
+        ],
+        result_label: Copy.webhooks_list_result_label_pair()
+      },
+      %{
+        heading: Copy.events_list_heading(),
+        subtitle: Copy.events_list_subtitle(),
+        expected_heading: "Trace billing activity",
+        expected_subtitle: "Read the append-only billing event ledger.",
+        states: [
+          Copy.events_list_first_run_empty_title(),
+          Copy.events_list_filtered_empty_title(),
+          Copy.events_list_loading_label()
+        ],
+        labels: [
+          Copy.events_list_default_lens_label(),
+          Copy.events_list_all_lens_label(),
+          Copy.events_list_admin_changes_label()
+        ],
+        result_label: Copy.events_list_result_label_pair()
+      },
+      %{
+        heading: Copy.connect_accounts_list_heading(),
+        subtitle: Copy.connect_accounts_list_subtitle(),
+        expected_heading: "Finish account readiness",
+        expected_subtitle: "Find connected accounts that need onboarding or capability work.",
+        states: [
+          Copy.connect_accounts_list_first_run_empty_title(),
+          Copy.connect_accounts_list_queue_empty_title(),
+          Copy.connect_accounts_list_filtered_empty_title(),
+          Copy.connect_accounts_list_loading_label()
+        ],
+        labels: [
+          Copy.connect_accounts_list_default_lens_label(),
+          Copy.connect_accounts_list_all_lens_label()
+        ],
+        result_label: Copy.connect_accounts_list_result_label_pair()
+      }
+    ]
+
+    for page <- pages do
+      assert page.heading == page.expected_heading
+      assert page.subtitle == page.expected_subtitle
+      assert Enum.uniq(page.states) == page.states
+      assert Enum.all?(page.states, &(&1 != ""))
+      assert Enum.all?(page.labels, &(&1 != ""))
+      assert {singular, plural} = page.result_label
+      assert singular != plural
+
+      refute_vague_copy!([page.heading, page.subtitle | page.states ++ page.labels])
+    end
+  end
+
   test "not-found copy names recovery instead of ending at a bare missing state" do
     samples = [
       Invoice.invoice_not_found(),
