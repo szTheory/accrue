@@ -3,16 +3,17 @@ gsd_state_version: 1.0
 milestone: v1.54
 milestone_name: Admin UI Page-Level Streamlining & Storybook
 current_phase: 197
+current_phase_name: propagate-list
 status: executing
-stopped_at: Phase 197 UI-SPEC approved
-last_updated: "2026-06-28T01:38:27.962Z"
+stopped_at: Completed 197-01-PLAN.md
+last_updated: "2026-06-28T16:24:27.571Z"
 last_activity: 2026-06-28
-last_activity_desc: Phase 197 planning complete
+last_activity_desc: Phase 197 execution started
 progress:
   total_phases: 8
   completed_phases: 4
-  total_plans: 22
-  completed_plans: 22
+  total_plans: 29
+  completed_plans: 23
   percent: 50
 ---
 
@@ -24,14 +25,14 @@ See: `.planning/PROJECT.md` (updated 2026-06-24 — v1.54 Admin UI Page-Level St
 
 **Core value:** A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic Elixir DX, strong domain modeling, tamper-evident audit ledger, great observability, and zero breaking-change pain through v1.x.
 
-**Current focus:** Phase 197 — propagate list
+**Current focus:** Phase 197 — propagate-list
 
 ## Current Position
 
-Phase: 197
-Plan: Not started
+Phase: 197 (propagate-list) — EXECUTING
+Plan: 2 of 7
 Status: Ready to execute
-Last activity: 2026-06-28 — Phase 197 planning complete
+Last activity: 2026-06-28 -- Phase 197 execution started
 
 ## Post-v1.48 Pause Rule
 
@@ -209,6 +210,7 @@ Coverage: 22/22 v1.51 requirements mapped (each REQ-ID → exactly one phase). D
 | Phase 196 P03 | 9min | 3 tasks | 4 files |
 | Phase 196 P04 | 12m | 3 tasks | 4 files |
 | Phase 196 P05 | 9m | 2 tasks | 6 files |
+| Phase 197 P01 | 16min | 3 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -360,6 +362,8 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - [Phase 196]: Phase 196 Plan 04 keeps PageHeader slot-only; SubscriptionsLive and DataTableNav own list state and filter mutation. — Preserves D-02 and D-10 by letting PageHeader host slots without owning list/filter state.
 - [Phase 196]: Phase 196 Playwright contract remains scoped to Subscriptions LIST; Phase 197 propagation, overlay flows, portal UI, and Storybook-wide sweeps stay out of scope. — Preserves the 196-05 ownership boundary while proving EXE-03/PGH-01 on the exemplar.
 - [Phase 196]: DataTable loading status supports page-specific copy through loading_label while preserving a generic default. — Browser validation required exact Subscriptions loading copy without breaking existing DataTable callers.
+- [Phase 197]: Phase 197 Wave 0 remains validation-only: RED contracts define required LIST propagation behavior before runtime migrations. — 197-01 created test/support, ExUnit, and Playwright contracts only; runtime LIST changes are intentionally deferred to later Phase 197 plans.
+- [Phase 197]: Phase 197 browser coverage is project-scoped instead of an exhaustive matrix. — Desktop all-page and representative deep checks run on chromium-desktop, while mobile all-page card smoke runs on chromium-mobile.
 
 ### Pending Todos
 
@@ -450,9 +454,9 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 
 ## Session Continuity
 
-Last session: 2026-06-27T02:07:07.031Z
-Stopped at: Phase 197 UI-SPEC approved
-Resume file: .planning/phases/197-propagate-list/197-UI-SPEC.md
+Last session: 2026-06-28T16:24:27.560Z
+Stopped at: Completed 197-01-PLAN.md
+Resume file: None
 
 ## Operator Next Steps
 
