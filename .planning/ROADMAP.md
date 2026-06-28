@@ -202,7 +202,34 @@ Plans:
   2. The Recovery and Campaign analytics pages conform to the locked overview spec (work-queue first, no chart wall).
   3. Tabs appear only for peer record-sets (e.g. Customer-360 Subscriptions/Invoices/Payments), never hiding primary state or critical actions behind a horizontal tab.
 
-**Plans**: TBD
+**Plans**: 9 plans
+Plans:
+**Wave 0 — validation scaffolding**
+
+- [ ] 198-01-PLAN.md — Phase 198 Playwright DETAIL/analytics contract and `e2e:phase198`
+- [ ] 198-02-PLAN.md — High-risk Customer/Invoice/Charge/Webhook/Connect RED LiveView contracts
+- [ ] 198-03-PLAN.md — Reference-detail and analytics RED LiveView/component contracts
+
+**Wave 1**
+
+- [ ] 198-04-PLAN.md — Customer-360 DETAIL propagation and peer record-set policy
+- [ ] 198-08-PLAN.md — Recovery/Campaign analytics conformance and AtRiskTable doc posture
+
+**Wave 2**
+
+- [ ] 198-05-PLAN.md — Invoice/Charge DETAIL propagation with drawer-hosted money-moving actions
+
+**Wave 3**
+
+- [ ] 198-06-PLAN.md — Coupon/Promotion-code/Event read-only DETAIL propagation
+
+**Wave 4**
+
+- [ ] 198-07-PLAN.md — Webhook/Connect operational DETAIL propagation with StepUp-gated actions
+
+**Wave 5**
+
+- [ ] 198-09-PLAN.md — Final Phase 198 focused browser, LiveView, compile, and package-doc gates
 **UI hint**: yes
 
 ### Phase 199: Cross-cutting interaction/overlay correctness + fixture stress + microcopy
