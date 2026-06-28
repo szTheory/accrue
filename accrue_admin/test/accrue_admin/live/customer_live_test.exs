@@ -208,6 +208,16 @@ defmodule AccrueAdmin.CustomerLiveTest do
     end
   end
 
+  test "D-05 D-06 D-08 source keeps Customer peer nav to record-set loads only" do
+    source = File.read!("lib/accrue_admin/live/customer_live.ex")
+
+    refute source =~ "@more_tabs"
+    refute source =~ ~r/More\s*</
+    refute source =~ ~s(role="tab")
+    refute source =~ ~r/events:\s*length\(Events\.timeline_for/
+    refute source =~ ~r/metadata:\s*map_size/
+  end
+
   test "related_items uses /payments href not /charges", %{conn: conn, customer: customer} do
     conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
     assert {:ok, _view, html} = live(conn, "/billing/customers/#{customer.id}")
