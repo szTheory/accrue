@@ -5,15 +5,15 @@ milestone_name: Admin UI Page-Level Streamlining & Storybook
 current_phase: 198
 current_phase_name: propagate-detail-analytics
 status: executing
-stopped_at: Completed 198-01-PLAN.md
-last_updated: "2026-06-28T23:18:26.542Z"
+stopped_at: Completed 198-02-PLAN.md
+last_updated: "2026-06-28T23:32:46.171Z"
 last_activity: 2026-06-28
 last_activity_desc: Phase 198 execution started
 progress:
   total_phases: 8
   completed_phases: 5
   total_plans: 38
-  completed_plans: 30
+  completed_plans: 31
   percent: 63
 ---
 
@@ -30,7 +30,7 @@ See: `.planning/PROJECT.md` (updated 2026-06-24 — v1.54 Admin UI Page-Level St
 ## Current Position
 
 Phase: 198 (propagate-detail-analytics) — EXECUTING
-Plan: 2 of 9
+Plan: 3 of 9
 Status: Ready to execute
 Last activity: 2026-06-28 -- Phase 198 execution started
 
@@ -218,6 +218,7 @@ Coverage: 22/22 v1.51 requirements mapped (each REQ-ID → exactly one phase). D
 | Phase 197 P06 | 1044 | 3 tasks | 7 files |
 | Phase 197 P07 | 12m32s | 3 tasks | 3 files |
 | Phase 198 P01 | 10m 39s | 3 tasks | 2 files |
+| Phase 198 P02 | 10m | 3 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -389,6 +390,9 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - [Phase 198]: Phase 198 contract uses explicit page target matrices and existing seeded fixtures, not generic runtime abstractions. — This keeps the Wave 0 contract concrete and within the plan boundary that forbids DetailPage and AnalyticsPage abstractions.
 - [Phase 198]: Recovery analytics assertions use Phase 198-specific hero, work queue, and supporting funnel markers. — This avoids importing Phase 199 or dashboard zone-order requirements into the Phase 198 browser contract.
 - [Phase 198]: Representative drawer and step-up probes are desktop-only while mobile keeps structural route checks. — The contract still covers mobile invariants without forcing desktop drawer behavior into mobile layouts.
+- [Phase 198]: Plan 198-02 intentionally ships RED LiveView contract tests only; runtime migrations remain in later Phase 198 plans. — The plan objective was to lock high-risk detail contracts before implementation, and user scope explicitly forbade production migrations.
+- [Phase 198]: High-risk action contracts assert intent-opened drawers and StepUp challenge behavior instead of visible initial forms. — Sensitive invoice, charge, webhook, connect, and customer payment-method flows must stay server-owned and challenge fresh identity before execution.
+- [Phase 198]: Customer-360 peer navigation is locked to Subscriptions, Invoices, and Payments, with payments and charges URLs resolving to Payments. — D-05 through D-07 remove the broad More bucket and keep Customer peer record sets explicit.
 
 ### Pending Todos
 
@@ -479,8 +483,8 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 
 ## Session Continuity
 
-Last session: 2026-06-28T23:18:26.525Z
-Stopped at: Completed 198-01-PLAN.md
+Last session: 2026-06-28T23:32:46.165Z
+Stopped at: Completed 198-02-PLAN.md
 Resume file: None
 
 ## Operator Next Steps
