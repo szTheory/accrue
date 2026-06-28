@@ -87,6 +87,58 @@ defmodule AccrueAdmin.ChargeLiveTest do
     {:ok, charge: charge, source_event: source_event}
   end
 
+  test "D-09 D-13 D-14 D-15 D-16 D-17 renders charge summary and refund drawer contract",
+       %{conn: conn, charge: charge} do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+
+    assert {:ok, view, html} = live(conn, "/billing/payments/#{charge.id}")
+
+    assert heading_count(html, "h1") == 1
+    assert data_attr_count(html, "data-ax-summary-list") == 1
+    assert data_attr_count(html, "data-ax-action-band") == 1
+    assert data_attr_count(html, "data-ax-primary-action") == 1
+    assert data_attr_count(html, "data-ax-related-resources") == 1
+    assert data_attr_count(html, "data-ax-lazy-activity") == 1
+    assert data_attr_count(html, "data-ax-lazy-json") == 1
+
+    assert has_element?(view, "[data-ax-primary-action]", "Refund charge")
+
+    refute has_element?(view, "[data-role='refund-form']")
+    refute has_element?(view, "[data-role='confirm-panel']")
+    refute html =~ ~s(class="ax-kpi-grid")
+  end
+
+  test "D-09 D-11 D-12 D-13 charge refund opens drawer after intent and requires step-up",
+       %{
+         conn: conn,
+         charge: charge,
+         source_event: source_event
+       } do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+
+    assert {:ok, view, _html} = live(conn, "/billing/payments/#{charge.id}")
+
+    html = render_click(element(view, "[data-ax-primary-action]", "Refund charge"))
+
+    assert has_element?(view, "[data-ax-action-drawer-form][data-role='refund-form']")
+    assert html =~ "Confirm refund"
+
+    html =
+      render_submit(
+        element(view, "[data-ax-action-drawer-form][data-role='refund-form']"),
+        %{
+          "amount_minor" => "4000",
+          "reason" => "requested_by_customer",
+          "source_event_id" => Integer.to_string(source_event.id)
+        }
+      )
+
+    assert html =~ "Confirm refund"
+
+    html = render_click(element(view, "[data-ax-action-drawer-confirm]", "Confirm refund"))
+    assert html =~ Copy.step_up_title()
+  end
+
   test "renders fee breakdown and existing refund fee fields", %{conn: conn, charge: charge} do
     conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
 
@@ -373,5 +425,21 @@ defmodule AccrueAdmin.ChargeLiveTest do
     %Refund{}
     |> Refund.changeset(Map.merge(defaults, attrs))
     |> TestRepo.insert!()
+  end
+
+  defp data_attr_count(html, attr) do
+    attr
+    |> Regex.escape()
+    |> then(&Regex.compile!("\\b" <> &1 <> "(?:\\s|=|>)"))
+    |> Regex.scan(html)
+    |> length()
+  end
+
+  defp heading_count(html, tag) do
+    tag
+    |> Regex.escape()
+    |> then(&Regex.compile!("<" <> &1 <> "\\b"))
+    |> Regex.scan(html)
+    |> length()
   end
 end

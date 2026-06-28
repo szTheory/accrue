@@ -113,6 +113,66 @@ defmodule AccrueAdmin.InvoiceLiveTest do
     {:ok, invoice: invoice, source_event: source_event}
   end
 
+  test "D-10 D-14 D-15 D-16 D-17 renders invoice summary-first detail contract", %{
+    conn: conn,
+    invoice: invoice
+  } do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+
+    assert {:ok, _view, html} = live(conn, "/billing/invoices/#{invoice.id}")
+
+    assert heading_count(html, "h1") == 1
+    assert data_attr_count(html, "data-ax-summary-list") == 1
+    assert data_attr_count(html, "data-ax-action-band") == 1
+    assert data_attr_count(html, "data-ax-primary-action") <= 2
+    assert data_attr_count(html, "data-ax-action-overflow-menu") == 1
+    assert data_attr_count(html, "data-ax-related-resources") == 1
+    assert data_attr_count(html, "data-ax-lazy-activity") == 1
+    assert data_attr_count(html, "data-ax-lazy-json") == 1
+
+    assert html =~ "Status"
+    assert html =~ "Customer"
+    assert html =~ "Amount due"
+    assert html =~ "Amount remaining"
+    assert html =~ "Amount paid"
+    assert html =~ "Collection method"
+    assert html =~ "Document state"
+    assert html =~ "Tax risk"
+    assert html =~ "Line items"
+
+    refute html =~ ~s(class="ax-kpi-grid")
+  end
+
+  test "D-10 D-11 D-12 D-13 invoice danger actions stay overflow-owned and step-up gated",
+       %{
+         conn: conn,
+         invoice: invoice
+       } do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    Application.put_env(:accrue_admin, :expected_step_up_subject_id, invoice.id)
+
+    assert {:ok, view, html} = live(conn, "/billing/invoices/#{invoice.id}")
+
+    assert has_element?(view, "[data-ax-primary-action]", Copy.Invoice.invoice_action_finalize())
+    assert data_attr_count(html, "data-ax-primary-action") <= 2
+    assert html =~ "Danger zone"
+
+    assert_text_order(html, [
+      "Danger zone",
+      Copy.Invoice.invoice_action_void(),
+      Copy.Invoice.invoice_action_mark_uncollectible()
+    ])
+
+    refute has_element?(view, "[data-ax-action-band] [data-role='void-form']")
+    refute has_element?(view, "[data-ax-action-band] [data-role='mark-uncollectible-form']")
+
+    html =
+      render_click(element(view, "button[role='menuitem']", Copy.Invoice.invoice_action_void()))
+
+    refute TestRepo.get!(Invoice, invoice.id).status == :void
+    assert html =~ Copy.step_up_title()
+  end
+
   test "renders invoice line items and can open the shared PDF render path", %{
     conn: conn,
     invoice: invoice
@@ -324,5 +384,38 @@ defmodule AccrueAdmin.InvoiceLiveTest do
       active_organization_id: organization_id,
       active_organization_slug: "allowed-org"
     }
+  end
+
+  defp data_attr_count(html, attr) do
+    attr
+    |> Regex.escape()
+    |> then(&Regex.compile!("\\b" <> &1 <> "(?:\\s|=|>)"))
+    |> Regex.scan(html)
+    |> length()
+  end
+
+  defp heading_count(html, tag) do
+    tag
+    |> Regex.escape()
+    |> then(&Regex.compile!("<" <> &1 <> "\\b"))
+    |> Regex.scan(html)
+    |> length()
+  end
+
+  defp assert_text_order(html, labels) do
+    positions =
+      Enum.map(labels, fn label ->
+        case :binary.match(html, label) do
+          :nomatch -> flunk("expected #{inspect(label)} to be present in rendered HTML")
+          {position, _length} -> {label, position}
+        end
+      end)
+
+    positions
+    |> Enum.chunk_every(2, 1, :discard)
+    |> Enum.each(fn [{left_label, left_position}, {right_label, right_position}] ->
+      assert left_position < right_position,
+             "expected #{inspect(left_label)} to render before #{inspect(right_label)}"
+    end)
   end
 end
