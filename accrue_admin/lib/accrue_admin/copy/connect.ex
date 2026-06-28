@@ -41,7 +41,7 @@ defmodule AccrueAdmin.Copy.Connect do
 
   def connect_accounts_list_all_lens_label, do: "All accounts"
 
-  def connect_accounts_list_result_label_pair, do: {"account", "accounts"}
+  def connect_accounts_list_result_label_pair, do: {"connected account", "connected accounts"}
 
   def connect_accounts_kpi_section_aria_label, do: "Connect summary"
 

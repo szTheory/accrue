@@ -197,7 +197,7 @@ defmodule AccrueAdmin.ConnectAccountsLiveTest do
     assert {:ok, _view, html} =
              live(conn, "/billing/connect?type=express&charges_enabled=true&q=acct_match")
 
-    assert html =~ Copy.connect_accounts_headline()
+    assert html =~ Copy.connect_accounts_list_heading()
     assert html =~ Copy.connect_accounts_page_copy_primary()
     assert html =~ "acct_match"
     assert html =~ "Override saved"
