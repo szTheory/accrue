@@ -67,14 +67,14 @@ defmodule AccrueAdmin.InvoicesLiveTest do
     refute html =~ "ax-text-12"
   end
 
-  test "renders Copy-backed empty index when search excludes all invoices", %{conn: conn} do
+  test "renders Copy-backed filtered empty list when search excludes all invoices", %{conn: conn} do
     conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
 
     assert {:ok, _view, html} =
              live(conn, "/billing/invoices?q=___accrue_empty_fixture___")
 
-    assert html =~ Copy.invoices_index_empty_title()
-    assert html =~ Copy.invoices_index_empty_copy()
+    assert html =~ Copy.invoices_list_filtered_empty_title()
+    assert html =~ Copy.invoices_list_filtered_empty_body()
   end
 
   test "bare navigation push_patches to default queue status", %{conn: conn} do
