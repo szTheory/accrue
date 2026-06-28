@@ -7,6 +7,7 @@ defmodule AccrueAdmin.WebhooksLiveTest do
   alias Accrue.Events.Event
   alias Accrue.Webhook.WebhookEvent
   alias AccrueAdmin.Copy
+  alias AccrueAdmin.ListContracts
   alias AccrueAdmin.OwnerScope
   alias AccrueAdmin.Queries.Webhooks
   alias AccrueAdmin.TestRepo
@@ -53,6 +54,150 @@ defmodule AccrueAdmin.WebhooksLiveTest do
     })
 
     :ok
+  end
+
+  test "renders Webhooks through PageHeader with exactly one h1", %{conn: conn} do
+    contract = ListContracts.fetch!(:webhooks)
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+
+    assert {:ok, _view, html} = live(conn, contract.route <> "?view=all")
+
+    assert_page_header_contract(html, contract)
+    assert html =~ contract.page_header.title
+    assert html =~ Copy.webhooks_index_subtitle()
+    assert_single_filter_form(html)
+  end
+
+  test "bare webhooks route represents the Needs replay queue", %{conn: conn} do
+    contract = ListContracts.fetch!(:webhooks)
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+
+    assert {:ok, _view, html} = live(conn, contract.route)
+
+    assert html =~ ~s(data-ax-filter-chips)
+    assert html =~ contract.default_lens.label
+    assert html =~ "All deliveries"
+    assert html =~ ~s(data-ax-result-count)
+    assert html =~ "Showing"
+    assert html =~ "webhook deliveries"
+  end
+
+  test "webhook clear-all drops filters and preserves organization scope", %{conn: conn} do
+    org_id = Ecto.UUID.generate()
+
+    conn =
+      conn
+      |> Phoenix.ConnTest.init_test_session(
+        admin_token: "admin",
+        active_organization_id: org_id,
+        active_organization_slug: "allowed-org",
+        admin_organization_ids: [org_id]
+      )
+
+    assert {:ok, _view, html} =
+             live(
+               conn,
+               "/billing/webhooks?org=allowed-org&status=failed,dead&type=invoice.payment_failed&livemode=true&phase197_state=loading-skeleton"
+             )
+
+    assert html =~ ~s(data-ax-clear-all)
+    assert html =~ ~s(href="/billing/webhooks?org=allowed-org&amp;view=all")
+    refute html =~ "status=failed"
+    refute html =~ "type=invoice.payment_failed"
+    refute html =~ "phase197_state=loading-skeleton"
+  end
+
+  test "distinguishes webhook populated, first-run-empty, filtered-empty, queue-empty, and loading states",
+       %{conn: conn} do
+    contract = ListContracts.fetch!(:webhooks)
+    {loading_key, loading_value} = ListContracts.loading_fixture()
+
+    populated_conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    assert {:ok, _view, populated_html} = live(populated_conn, contract.route <> "?view=all")
+    assert_list_state(populated_html, contract, "populated")
+    assert populated_html =~ "evt_dead"
+
+    empty_org = Ecto.UUID.generate()
+
+    first_run_conn =
+      Phoenix.ConnTest.build_conn()
+      |> Phoenix.ConnTest.init_test_session(
+        admin_token: "admin",
+        active_organization_id: empty_org,
+        active_organization_slug: "empty-webhooks",
+        admin_organization_ids: [empty_org]
+      )
+
+    assert {:ok, _view, first_run_html} =
+             live(first_run_conn, contract.route <> "?org=empty-webhooks&view=all")
+
+    assert_list_state(first_run_html, contract, "first-run-empty")
+    assert first_run_html =~ contract.states.first_run_empty
+    refute first_run_html =~ ~s(data-ax-clear-all)
+
+    filtered_conn =
+      Phoenix.ConnTest.init_test_session(Phoenix.ConnTest.build_conn(), admin_token: "admin")
+
+    assert {:ok, _view, filtered_html} =
+             live(filtered_conn, contract.route <> "?view=all&type=does-not-exist-zzz")
+
+    assert_list_state(filtered_html, contract, "filtered-empty")
+    assert filtered_html =~ contract.states.filtered_empty
+    assert filtered_html =~ ~s(data-ax-clear-all)
+
+    queue_org = Ecto.UUID.generate()
+    queue_customer = insert_customer(%{owner_type: "Organization", owner_id: queue_org})
+    queue_invoice = insert_invoice(queue_customer, %{processor_id: "in_queue_webhook"})
+
+    insert_webhook(%{
+      processor_event_id: "evt_queue_succeeded",
+      status: :succeeded,
+      type: "invoice.paid",
+      data: %{"object" => %{"id" => queue_invoice.processor_id}},
+      raw_body:
+        Jason.encode!(%{
+          "id" => "evt_queue_succeeded",
+          "type" => "invoice.paid",
+          "data" => %{"object" => %{"id" => queue_invoice.processor_id}}
+        })
+    })
+
+    queue_conn =
+      Phoenix.ConnTest.build_conn()
+      |> Phoenix.ConnTest.init_test_session(
+        admin_token: "admin",
+        active_organization_id: queue_org,
+        active_organization_slug: "queue-webhooks",
+        admin_organization_ids: [queue_org]
+      )
+
+    assert {:ok, _view, queue_html} =
+             live(queue_conn, contract.route <> "?org=queue-webhooks&status=failed,dead")
+
+    assert_list_state(queue_html, contract, "filtered-empty")
+    assert queue_html =~ ~s(data-ax-empty-reason="queue")
+    assert queue_html =~ contract.states.queue_empty
+    refute queue_html =~ contract.states.first_run_empty
+
+    loading_conn =
+      Phoenix.ConnTest.init_test_session(Phoenix.ConnTest.build_conn(), admin_token: "admin")
+
+    assert {:ok, _view, loading_html} =
+             live(loading_conn, contract.route <> "?#{loading_key}=#{loading_value}")
+
+    assert_list_state(loading_html, contract, "loading-skeleton")
+    assert loading_html =~ ~s(aria-busy="true")
+    assert loading_html =~ contract.states.loading
+  end
+
+  test "preserves selection-driven replay controls inside the webhooks list", %{conn: conn} do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+
+    assert {:ok, _view, html} = live(conn, "/billing/webhooks?status=dead")
+
+    assert html =~ ~s(data-role="toggle-all")
+    assert html =~ ~s(data-role="bulk-action")
+    assert html =~ Copy.webhooks_retry_selected_label()
   end
 
   test "filters webhook rows and runs a selection-driven retry with plain-language confirm", %{
@@ -214,6 +359,31 @@ defmodule AccrueAdmin.WebhooksLiveTest do
                    event.subject_id == ^denied_webhook.id
              )
            )
+  end
+
+  defp assert_page_header_contract(html, contract) do
+    assert html =~ ~s(data-ax-page-header)
+    assert html =~ ~s(data-ax-page-title)
+    assert html =~ ~s(data-component-group="page-header-actions-breadcrumbs")
+    assert html =~ ~s(data-ax-page-filter-toolbar)
+    assert_one_h1(html)
+    assert html =~ ~s(data-ax-list="#{contract.list_id}")
+  end
+
+  defp assert_single_filter_form(html) do
+    assert html
+           |> Floki.parse_document!()
+           |> Floki.find(~s([data-role="filter-form"]))
+           |> length() == 1
+  end
+
+  defp assert_list_state(html, contract, state) do
+    assert html =~ ~s(data-ax-list="#{contract.list_id}")
+    assert html =~ ~s(data-ax-state="#{state}")
+  end
+
+  defp assert_one_h1(html) do
+    assert html |> Floki.parse_document!() |> Floki.find("h1") |> length() == 1
   end
 
   defp insert_webhook(attrs) do

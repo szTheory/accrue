@@ -5,6 +5,7 @@ defmodule AccrueAdmin.EventsLiveTest do
   alias Accrue.Events
   alias Accrue.Webhook.WebhookEvent
   alias AccrueAdmin.Copy
+  alias AccrueAdmin.ListContracts
   alias AccrueAdmin.TestRepo
 
   defmodule AuthAdapter do
@@ -78,6 +79,119 @@ defmodule AccrueAdmin.EventsLiveTest do
      webhook_id: webhook.id,
      in_scope_invoice: in_scope_invoice,
      out_scope_invoice: out_scope_invoice}
+  end
+
+  test "renders Events through PageHeader with exactly one h1", %{conn: conn} do
+    contract = ListContracts.fetch!(:events)
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+
+    assert {:ok, _view, html} = live(conn, contract.route)
+
+    assert_page_header_contract(html, contract)
+    assert html =~ contract.page_header.title
+    assert html =~ Copy.billing_events_copy_global()
+    assert_single_filter_form(html)
+  end
+
+  test "bare events route represents the All ledger lens", %{conn: conn} do
+    contract = ListContracts.fetch!(:events)
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+
+    assert {:ok, _view, html} = live(conn, contract.route)
+
+    assert html =~ ~s(data-ax-filter-chips)
+    assert html =~ contract.default_lens.label
+    assert html =~ "Admin changes"
+    assert html =~ ~s(data-ax-result-count)
+    assert html =~ "Showing"
+    assert html =~ "events"
+  end
+
+  test "events Admin changes lens maps to actor_type=admin", %{conn: conn} do
+    contract = ListContracts.fetch!(:events)
+    admin_changes = List.first(contract.quick_lenses)
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+
+    assert {:ok, _view, html} = live(conn, contract.route <> "?actor_type=admin")
+
+    assert html =~ admin_changes.label
+    assert html =~ ~s(actor_type=admin)
+    assert html =~ "ax-filter-chip-cobalt"
+    refute html =~ ">By actor<"
+  end
+
+  test "events clear-all drops filters and preserves organization scope", %{conn: conn} do
+    org_id = Ecto.UUID.generate()
+
+    conn =
+      conn
+      |> Phoenix.ConnTest.init_test_session(
+        admin_token: "admin",
+        active_organization_id: org_id,
+        active_organization_slug: "allowed-org",
+        admin_organization_ids: [org_id]
+      )
+
+    assert {:ok, _view, html} =
+             live(
+               conn,
+               "/billing/events?org=allowed-org&actor_type=admin&type=invoice.payment_failed.in_scope&q=invoice&phase197_state=loading-skeleton"
+             )
+
+    assert html =~ ~s(data-ax-clear-all)
+    assert html =~ ~s(href="/billing/events?org=allowed-org&amp;view=all")
+    refute html =~ "actor_type=admin"
+    refute html =~ "type=invoice.payment_failed"
+    refute html =~ "phase197_state=loading-skeleton"
+  end
+
+  test "distinguishes event populated, first-run-empty, filtered-empty, and loading states",
+       %{conn: conn} do
+    contract = ListContracts.fetch!(:events)
+    {loading_key, loading_value} = ListContracts.loading_fixture()
+
+    populated_conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    assert {:ok, _view, populated_html} = live(populated_conn, contract.route)
+    assert_list_state(populated_html, contract, "populated")
+    assert populated_html =~ "invoice.payment_failed.in_scope"
+
+    empty_org = Ecto.UUID.generate()
+
+    first_run_conn =
+      Phoenix.ConnTest.build_conn()
+      |> Phoenix.ConnTest.init_test_session(
+        admin_token: "admin",
+        active_organization_id: empty_org,
+        active_organization_slug: "empty-events",
+        admin_organization_ids: [empty_org]
+      )
+
+    assert {:ok, _view, first_run_html} =
+             live(first_run_conn, contract.route <> "?org=empty-events&view=all")
+
+    assert_list_state(first_run_html, contract, "first-run-empty")
+    assert first_run_html =~ contract.states.first_run_empty
+    refute first_run_html =~ ~s(data-ax-clear-all)
+
+    filtered_conn =
+      Phoenix.ConnTest.init_test_session(Phoenix.ConnTest.build_conn(), admin_token: "admin")
+
+    assert {:ok, _view, filtered_html} =
+             live(filtered_conn, contract.route <> "?q=___phase197_no_event___")
+
+    assert_list_state(filtered_html, contract, "filtered-empty")
+    assert filtered_html =~ contract.states.filtered_empty
+    assert filtered_html =~ ~s(data-ax-clear-all)
+
+    loading_conn =
+      Phoenix.ConnTest.init_test_session(Phoenix.ConnTest.build_conn(), admin_token: "admin")
+
+    assert {:ok, _view, loading_html} =
+             live(loading_conn, contract.route <> "?#{loading_key}=#{loading_value}")
+
+    assert_list_state(loading_html, contract, "loading-skeleton")
+    assert loading_html =~ ~s(aria-busy="true")
+    assert loading_html =~ contract.states.loading
   end
 
   # --- Plan 175-06: Compliance actor-lens chip tests ---
@@ -176,6 +290,31 @@ defmodule AccrueAdmin.EventsLiveTest do
     refute html =~ "invoice.payment_failed.out_of_scope"
     refute html =~ out_scope_invoice.id
     assert html =~ webhook_id
+  end
+
+  defp assert_page_header_contract(html, contract) do
+    assert html =~ ~s(data-ax-page-header)
+    assert html =~ ~s(data-ax-page-title)
+    assert html =~ ~s(data-component-group="page-header-actions-breadcrumbs")
+    assert html =~ ~s(data-ax-page-filter-toolbar)
+    assert_one_h1(html)
+    assert html =~ ~s(data-ax-list="#{contract.list_id}")
+  end
+
+  defp assert_single_filter_form(html) do
+    assert html
+           |> Floki.parse_document!()
+           |> Floki.find(~s([data-role="filter-form"]))
+           |> length() == 1
+  end
+
+  defp assert_list_state(html, contract, state) do
+    assert html =~ ~s(data-ax-list="#{contract.list_id}")
+    assert html =~ ~s(data-ax-state="#{state}")
+  end
+
+  defp assert_one_h1(html) do
+    assert html |> Floki.parse_document!() |> Floki.find("h1") |> length() == 1
   end
 
   defp insert_customer(attrs) do
