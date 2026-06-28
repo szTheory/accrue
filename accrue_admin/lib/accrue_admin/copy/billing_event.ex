@@ -7,6 +7,30 @@ defmodule AccrueAdmin.Copy.BillingEvent do
 
   def billing_events_breadcrumb_events, do: "Events"
 
+  def events_list_heading, do: "Trace billing activity"
+
+  def events_list_subtitle, do: "Read the append-only billing event ledger."
+
+  def events_list_first_run_empty_title, do: "No billing events yet."
+
+  def events_list_first_run_empty_body,
+    do: "Events appear when billing state changes are recorded."
+
+  def events_list_filtered_empty_title, do: "No ledger rows match these filters."
+
+  def events_list_filtered_empty_body,
+    do: "Clear filters or adjust actor and source filters to see ledger rows."
+
+  def events_list_loading_label, do: "Loading billing events."
+
+  def events_list_default_lens_label, do: "All ledger"
+
+  def events_list_all_lens_label, do: "All ledger"
+
+  def events_list_admin_changes_label, do: "Admin changes"
+
+  def events_list_result_label_pair, do: {"event", "events"}
+
   def billing_events_kpi_section_aria_label, do: "Event summary"
 
   def billing_events_kpi_label_ledger_rows, do: "Ledger rows"

@@ -83,6 +83,18 @@ defmodule AccrueAdmin.Copy do
   defdelegate invoices_index_eyebrow(), to: Invoice
   defdelegate invoices_index_headline(), to: Invoice
   defdelegate invoices_index_body(), to: Invoice
+  defdelegate invoices_list_heading(), to: Invoice
+  defdelegate invoices_list_subtitle(), to: Invoice
+  defdelegate invoices_list_first_run_empty_title(), to: Invoice
+  defdelegate invoices_list_first_run_empty_body(), to: Invoice
+  defdelegate invoices_list_queue_empty_title(), to: Invoice
+  defdelegate invoices_list_queue_empty_body(), to: Invoice
+  defdelegate invoices_list_filtered_empty_title(), to: Invoice
+  defdelegate invoices_list_filtered_empty_body(), to: Invoice
+  defdelegate invoices_list_loading_label(), to: Invoice
+  defdelegate invoices_list_default_lens_label(), to: Invoice
+  defdelegate invoices_list_all_lens_label(), to: Invoice
+  defdelegate invoices_list_result_label_pair(), to: Invoice
   defdelegate invoices_kpi_section_aria_label(), to: Invoice
   defdelegate invoices_kpi_open_label(), to: Invoice
   defdelegate invoices_kpi_open_meta(), to: Invoice
@@ -181,6 +193,18 @@ defmodule AccrueAdmin.Copy do
   defdelegate coupon_index_eyebrow(), to: Coupon
   defdelegate coupon_index_headline(), to: Coupon
   defdelegate coupon_index_body_primary(), to: Coupon
+  defdelegate coupons_list_heading(), to: Coupon
+  defdelegate coupons_list_subtitle(), to: Coupon
+  defdelegate coupons_list_first_run_empty_title(), to: Coupon
+  defdelegate coupons_list_first_run_empty_body(), to: Coupon
+  defdelegate coupons_list_queue_empty_title(), to: Coupon
+  defdelegate coupons_list_queue_empty_body(), to: Coupon
+  defdelegate coupons_list_filtered_empty_title(), to: Coupon
+  defdelegate coupons_list_filtered_empty_body(), to: Coupon
+  defdelegate coupons_list_loading_label(), to: Coupon
+  defdelegate coupons_list_default_lens_label(), to: Coupon
+  defdelegate coupons_list_all_lens_label(), to: Coupon
+  defdelegate coupons_list_result_label_pair(), to: Coupon
   defdelegate coupon_index_body_link_prefix(), to: Coupon
   defdelegate coupon_index_promotion_codes_link_text(), to: Coupon
   defdelegate coupon_index_kpi_section_aria_label(), to: Coupon
@@ -234,6 +258,18 @@ defmodule AccrueAdmin.Copy do
   defdelegate promotion_codes_index_eyebrow(), to: PromotionCode
   defdelegate promotion_codes_index_headline(), to: PromotionCode
   defdelegate promotion_codes_index_body_primary(), to: PromotionCode
+  defdelegate promotion_codes_list_heading(), to: PromotionCode
+  defdelegate promotion_codes_list_subtitle(), to: PromotionCode
+  defdelegate promotion_codes_list_first_run_empty_title(), to: PromotionCode
+  defdelegate promotion_codes_list_first_run_empty_body(), to: PromotionCode
+  defdelegate promotion_codes_list_queue_empty_title(), to: PromotionCode
+  defdelegate promotion_codes_list_queue_empty_body(), to: PromotionCode
+  defdelegate promotion_codes_list_filtered_empty_title(), to: PromotionCode
+  defdelegate promotion_codes_list_filtered_empty_body(), to: PromotionCode
+  defdelegate promotion_codes_list_loading_label(), to: PromotionCode
+  defdelegate promotion_codes_list_default_lens_label(), to: PromotionCode
+  defdelegate promotion_codes_list_all_lens_label(), to: PromotionCode
+  defdelegate promotion_codes_list_result_label_pair(), to: PromotionCode
   defdelegate promotion_codes_index_kpi_section_aria_label(), to: PromotionCode
   defdelegate promotion_codes_kpi_label_codes(), to: PromotionCode
   defdelegate promotion_codes_kpi_meta_all_local_rows(), to: PromotionCode
@@ -282,6 +318,18 @@ defmodule AccrueAdmin.Copy do
   defdelegate connect_accounts_eyebrow(), to: Connect
   defdelegate connect_accounts_headline(), to: Connect
   defdelegate connect_accounts_page_copy_primary(), to: Connect
+  defdelegate connect_accounts_list_heading(), to: Connect
+  defdelegate connect_accounts_list_subtitle(), to: Connect
+  defdelegate connect_accounts_list_first_run_empty_title(), to: Connect
+  defdelegate connect_accounts_list_first_run_empty_body(), to: Connect
+  defdelegate connect_accounts_list_queue_empty_title(), to: Connect
+  defdelegate connect_accounts_list_queue_empty_body(), to: Connect
+  defdelegate connect_accounts_list_filtered_empty_title(), to: Connect
+  defdelegate connect_accounts_list_filtered_empty_body(), to: Connect
+  defdelegate connect_accounts_list_loading_label(), to: Connect
+  defdelegate connect_accounts_list_default_lens_label(), to: Connect
+  defdelegate connect_accounts_list_all_lens_label(), to: Connect
+  defdelegate connect_accounts_list_result_label_pair(), to: Connect
   defdelegate connect_accounts_kpi_section_aria_label(), to: Connect
   defdelegate connect_accounts_kpi_label_accounts(), to: Connect
   defdelegate connect_accounts_kpi_meta_all_accounts(), to: Connect
@@ -378,6 +426,17 @@ defmodule AccrueAdmin.Copy do
 
   defdelegate billing_events_page_title(), to: BillingEvent
   defdelegate billing_events_breadcrumb_events(), to: BillingEvent
+  defdelegate events_list_heading(), to: BillingEvent
+  defdelegate events_list_subtitle(), to: BillingEvent
+  defdelegate events_list_first_run_empty_title(), to: BillingEvent
+  defdelegate events_list_first_run_empty_body(), to: BillingEvent
+  defdelegate events_list_filtered_empty_title(), to: BillingEvent
+  defdelegate events_list_filtered_empty_body(), to: BillingEvent
+  defdelegate events_list_loading_label(), to: BillingEvent
+  defdelegate events_list_default_lens_label(), to: BillingEvent
+  defdelegate events_list_all_lens_label(), to: BillingEvent
+  defdelegate events_list_admin_changes_label(), to: BillingEvent
+  defdelegate events_list_result_label_pair(), to: BillingEvent
   defdelegate billing_events_kpi_section_aria_label(), to: BillingEvent
   defdelegate billing_events_kpi_label_ledger_rows(), to: BillingEvent
   defdelegate billing_events_kpi_meta_total_append_only(), to: BillingEvent
@@ -519,6 +578,30 @@ defmodule AccrueAdmin.Copy do
     do:
       "Everyone you bill through Accrue for this organization. Search by name, email, or customer ID."
 
+  def customers_list_heading, do: "Find a customer"
+
+  def customers_list_subtitle, do: "Look up a customer and inspect their billing state."
+
+  def customers_list_first_run_empty_title, do: "No customers yet."
+
+  def customers_list_first_run_empty_body,
+    do: "Customers appear after checkout or imported billing activity."
+
+  def customers_list_filtered_empty_title, do: "No customers match these filters."
+
+  def customers_list_filtered_empty_body,
+    do: "Clear filters or adjust the search to inspect matching customers."
+
+  def customers_list_loading_label, do: "Loading customers."
+
+  def customers_list_default_lens_label, do: "All customers"
+
+  def customers_list_all_lens_label, do: "All customers"
+
+  def customers_list_missing_payment_method_label, do: "Missing payment method"
+
+  def customers_list_result_label_pair, do: {"customer", "customers"}
+
   def customers_index_empty_title, do: "No customers for this organization yet"
 
   def customers_index_empty_copy,
@@ -551,11 +634,64 @@ defmodule AccrueAdmin.Copy do
     do:
       "Every charge and refund for this organization. Filter by status, or open a charge to see its fees, payment method, and any failure."
 
+  def payments_list_heading, do: "Recover failed payments"
+
+  def payments_list_subtitle, do: "Inspect charges that need follow-up."
+
+  def payments_list_first_run_empty_title, do: "No payments yet."
+
+  def payments_list_first_run_empty_body, do: "Payments appear after charges are recorded."
+
+  def payments_list_queue_empty_title, do: "No failed payments."
+
+  def payments_list_queue_empty_body,
+    do: "View all payments to inspect settled and pending charges."
+
+  def payments_list_filtered_empty_title, do: "No payments match these filters."
+
+  def payments_list_filtered_empty_body,
+    do: "Clear filters or adjust the search to see payments."
+
+  def payments_list_loading_label, do: "Loading payments."
+
+  def payments_list_default_lens_label, do: "Failed payments"
+
+  def payments_list_all_lens_label, do: "All payments"
+
+  def payments_list_result_label_pair, do: {"payment", "payments"}
+
   def webhooks_index_heading, do: "Webhooks"
 
   def webhooks_index_subtitle,
     do:
       "Inbound webhook deliveries, the failed ones first. Open a delivery for its full payload, or select deliveries to replay."
+
+  def webhooks_list_heading, do: "Replay failed deliveries"
+
+  def webhooks_list_subtitle, do: "Inspect webhook deliveries that need operator action."
+
+  def webhooks_list_first_run_empty_title, do: "No webhook deliveries yet."
+
+  def webhooks_list_first_run_empty_body,
+    do: "Deliveries appear after signed processor events are recorded."
+
+  def webhooks_list_queue_empty_title, do: "Nothing needs replay."
+
+  def webhooks_list_queue_empty_body,
+    do: "View all deliveries to inspect the full delivery log."
+
+  def webhooks_list_filtered_empty_title, do: "No webhook deliveries match these filters."
+
+  def webhooks_list_filtered_empty_body,
+    do: "Clear filters or adjust status and type filters to see deliveries."
+
+  def webhooks_list_loading_label, do: "Loading webhook deliveries."
+
+  def webhooks_list_default_lens_label, do: "Needs replay"
+
+  def webhooks_list_all_lens_label, do: "All deliveries"
+
+  def webhooks_list_result_label_pair, do: {"webhook delivery", "webhook deliveries"}
 
   def recovery_index_heading, do: "Revenue Recovery"
 

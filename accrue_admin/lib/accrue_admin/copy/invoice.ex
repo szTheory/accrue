@@ -27,6 +27,33 @@ defmodule AccrueAdmin.Copy.Invoice do
     do:
       "Open and uncollectible invoices first — your collections queue. Switch status or search by customer to widen the view."
 
+  def invoices_list_heading, do: "Clear open receivables"
+
+  def invoices_list_subtitle, do: "Work invoices that need collection."
+
+  def invoices_list_first_run_empty_title, do: "No invoices yet."
+
+  def invoices_list_first_run_empty_body,
+    do: "Invoices appear when subscriptions activate or renew."
+
+  def invoices_list_queue_empty_title, do: "No invoices need collection."
+
+  def invoices_list_queue_empty_body,
+    do: "View all invoices to review the ledger."
+
+  def invoices_list_filtered_empty_title, do: "No invoices match these filters."
+
+  def invoices_list_filtered_empty_body,
+    do: "Clear filters or adjust the search to see invoices."
+
+  def invoices_list_loading_label, do: "Loading invoices."
+
+  def invoices_list_default_lens_label, do: "Needs collection"
+
+  def invoices_list_all_lens_label, do: "All invoices"
+
+  def invoices_list_result_label_pair, do: {"invoice", "invoices"}
+
   def invoices_kpi_section_aria_label, do: "Invoice summary"
 
   def invoices_kpi_open_label, do: "Open"

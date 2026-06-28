@@ -11,6 +11,33 @@ defmodule AccrueAdmin.Copy.PromotionCode do
     do:
       "Customer-facing codes that apply a coupon at checkout. Search by code, or open one to see its coupon and redemptions."
 
+  def promotion_codes_list_heading, do: "Find active codes"
+
+  def promotion_codes_list_subtitle, do: "Review customer-facing codes tied to coupons."
+
+  def promotion_codes_list_first_run_empty_title, do: "No promotion codes yet."
+
+  def promotion_codes_list_first_run_empty_body,
+    do: "Codes appear after customer-facing discounts sync locally."
+
+  def promotion_codes_list_queue_empty_title, do: "No active codes."
+
+  def promotion_codes_list_queue_empty_body,
+    do: "View all promotion codes to inspect inactive or expired codes."
+
+  def promotion_codes_list_filtered_empty_title, do: "No promotion codes match these filters."
+
+  def promotion_codes_list_filtered_empty_body,
+    do: "Clear filters or adjust the search to see promotion codes."
+
+  def promotion_codes_list_loading_label, do: "Loading promotion codes."
+
+  def promotion_codes_list_default_lens_label, do: "Active codes"
+
+  def promotion_codes_list_all_lens_label, do: "All promotion codes"
+
+  def promotion_codes_list_result_label_pair, do: {"promotion code", "promotion codes"}
+
   def promotion_codes_index_kpi_section_aria_label, do: "Promotion code summary"
 
   def promotion_codes_kpi_label_codes, do: "Codes"

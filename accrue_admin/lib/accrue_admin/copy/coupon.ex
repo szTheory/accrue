@@ -11,6 +11,33 @@ defmodule AccrueAdmin.Copy.Coupon do
     do:
       "Discounts you can apply to subscriptions and invoices. Filter by validity or search to find a coupon and see how often it's been redeemed."
 
+  def coupons_list_heading, do: "Review usable discounts"
+
+  def coupons_list_subtitle, do: "Check which coupon definitions can still be applied."
+
+  def coupons_list_first_run_empty_title, do: "No coupons yet."
+
+  def coupons_list_first_run_empty_body,
+    do: "Coupons appear after discount definitions sync locally."
+
+  def coupons_list_queue_empty_title, do: "No valid coupons."
+
+  def coupons_list_queue_empty_body,
+    do: "View all coupons to inspect invalid or expired definitions."
+
+  def coupons_list_filtered_empty_title, do: "No coupons match these filters."
+
+  def coupons_list_filtered_empty_body,
+    do: "Clear filters or adjust the search to see coupons."
+
+  def coupons_list_loading_label, do: "Loading coupons."
+
+  def coupons_list_default_lens_label, do: "Valid coupons"
+
+  def coupons_list_all_lens_label, do: "All coupons"
+
+  def coupons_list_result_label_pair, do: {"coupon", "coupons"}
+
   def coupon_index_body_link_prefix, do: "Promotion codes have their own list and detail surface:"
 
   def coupon_index_promotion_codes_link_text, do: "open promotion codes"

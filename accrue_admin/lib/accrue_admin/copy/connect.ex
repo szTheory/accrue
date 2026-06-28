@@ -15,6 +15,34 @@ defmodule AccrueAdmin.Copy.Connect do
     do:
       "Stripe Connect accounts on this platform. Check onboarding and payout readiness, or open an account to configure its platform fees."
 
+  def connect_accounts_list_heading, do: "Finish account readiness"
+
+  def connect_accounts_list_subtitle,
+    do: "Find connected accounts that need onboarding or capability work."
+
+  def connect_accounts_list_first_run_empty_title, do: "No connected accounts yet."
+
+  def connect_accounts_list_first_run_empty_body,
+    do: "Accounts appear after onboarding starts."
+
+  def connect_accounts_list_queue_empty_title, do: "No accounts need attention."
+
+  def connect_accounts_list_queue_empty_body,
+    do: "View all accounts to inspect onboarded accounts."
+
+  def connect_accounts_list_filtered_empty_title, do: "No connected accounts match these filters."
+
+  def connect_accounts_list_filtered_empty_body,
+    do: "Clear filters or adjust readiness filters to see connected accounts."
+
+  def connect_accounts_list_loading_label, do: "Loading connected accounts."
+
+  def connect_accounts_list_default_lens_label, do: "Needs attention"
+
+  def connect_accounts_list_all_lens_label, do: "All accounts"
+
+  def connect_accounts_list_result_label_pair, do: {"account", "accounts"}
+
   def connect_accounts_kpi_section_aria_label, do: "Connect summary"
 
   def connect_accounts_kpi_label_accounts, do: "Accounts"
