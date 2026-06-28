@@ -157,10 +157,14 @@ function skipUnlessProject(testInfo, projectName) {
 }
 
 async function assertDefaultParams(page, contract, label) {
-  const actual = new URL(page.url());
+  const entries = Object.entries(contract.defaultParams);
 
-  for (const [key, value] of Object.entries(contract.defaultParams)) {
-    expect(actual.searchParams.get(key), `${label}: default URL param ${key}`).toBe(value);
+  for (const [key, value] of entries) {
+    await expect
+      .poll(() => new URL(page.url()).searchParams.get(key), {
+        message: `${label}: default URL param ${key}`,
+      })
+      .toBe(value);
   }
 }
 

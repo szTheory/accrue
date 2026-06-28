@@ -259,7 +259,13 @@ defmodule AccrueAdmin.WebhooksLiveTest do
 
     {:ok, view, _html} = live(conn, "/billing/webhooks?status=dead")
 
-    render_click(element(view, "[data-role='toggle-all']"))
+    render_click(
+      element(
+        view,
+        ~s([data-role="card-list"] [data-role="toggle-row"][data-row-id="#{dead.id}"])
+      )
+    )
+
     render_click(element(view, "[data-role='bulk-action']"))
     render_click(element(view, "[data-role='confirm-retry-selected']"))
 

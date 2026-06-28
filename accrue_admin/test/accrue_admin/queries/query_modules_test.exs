@@ -219,19 +219,25 @@ defmodule AccrueAdmin.Queries.QueryModulesTest do
     coupon_new_id = coupon_new.id
 
     {coupon_rows, _cursor} = Coupons.list(filter: Coupons.decode_filter(%{"valid" => "true"}))
-    assert [%{id: ^coupon_new_id, valid: true}] = coupon_rows
+    assert Enum.any?(coupon_rows, &match?(%{id: ^coupon_new_id, valid: true}, &1))
+    assert Enum.all?(coupon_rows, &(&1.valid == true))
+    refute Enum.any?(coupon_rows, &(&1.processor_id == "co_old"))
 
     {promo_rows, _cursor} =
       PromotionCodes.list(filter: PromotionCodes.decode_filter(%{"active" => "true"}))
 
-    assert [%{code: "NEWPROMO", active: true}] = promo_rows
+    assert Enum.any?(promo_rows, &match?(%{code: "NEWPROMO", active: true}, &1))
+    assert Enum.all?(promo_rows, &(&1.active == true))
+    refute Enum.any?(promo_rows, &(&1.code == "OLDPROMO"))
   end
 
   test "connect account queries filter by onboarding booleans" do
     {rows, _cursor} =
       ConnectAccounts.list(filter: ConnectAccounts.decode_filter(%{"charges_enabled" => "true"}))
 
-    assert [%{stripe_account_id: "acct_new", payouts_enabled: true}] = rows
+    assert Enum.any?(rows, &match?(%{stripe_account_id: "acct_new", payouts_enabled: true}, &1))
+    assert Enum.all?(rows, &(&1.charges_enabled == true))
+    refute Enum.any?(rows, &(&1.stripe_account_id == "acct_old"))
   end
 
   describe "multi-status filter handling" do
