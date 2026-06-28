@@ -5,14 +5,14 @@ milestone_name: Admin UI Page-Level Streamlining & Storybook
 current_phase: 197
 current_phase_name: propagate-list
 status: executing
-stopped_at: Completed 197-02-PLAN.md
-last_updated: "2026-06-28T16:43:16.893Z"
+stopped_at: Completed 197-03-PLAN.md
+last_updated: "2026-06-28T16:57:33.235Z"
 last_activity: 2026-06-28
 progress:
   total_phases: 8
   completed_phases: 4
   total_plans: 29
-  completed_plans: 24
+  completed_plans: 25
   percent: 50
 ---
 
@@ -29,7 +29,7 @@ See: `.planning/PROJECT.md` (updated 2026-06-24 — v1.54 Admin UI Page-Level St
 ## Current Position
 
 Phase: 197 (propagate-list) — EXECUTING
-Plan: 3 of 7
+Plan: 4 of 7
 Status: Ready to execute
 Last activity: 2026-06-28
 
@@ -211,6 +211,7 @@ Coverage: 22/22 v1.51 requirements mapped (each REQ-ID → exactly one phase). D
 | Phase 196 P05 | 9m | 2 tasks | 6 files |
 | Phase 197 P01 | 16min | 3 tasks | 4 files |
 | Phase 197-propagate-list P02 | approximately 45 minutes | 3 tasks | 8 files |
+| Phase 197 P03 | 9min | 3 tasks | 10 files |
 
 ## Accumulated Context
 
@@ -366,6 +367,9 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - [Phase 197]: Phase 197 browser coverage is project-scoped instead of an exhaustive matrix. — Desktop all-page and representative deep checks run on chromium-desktop, while mobile all-page card smoke runs on chromium-mobile.
 - [Phase 197-propagate-list]: 197-02 reused AccrueAdmin.ListContracts from 197-01 as the source of RED LiveView contract assertions. — Keeps route, list id, lens, state, and copy expectations aligned across ExUnit and browser validation.
 - [Phase 197-propagate-list]: 197-02 remained test-only; runtime LIST propagation is intentionally left RED for follow-up implementation plans. — The plan objective was to lock LiveView contracts before runtime propagation work.
+- [Phase 197]: Webhooks replay defaults decode through an allowlisted multi-status status param instead of atom conversion from raw URL text. — Prevents arbitrary existing atoms from URL input while preserving failed/dead replay queue semantics.
+- [Phase 197]: Connect Needs attention is a query-owned OR lens; individual readiness filters remain explicit AND filters. — Default queue behavior now matches operator intent without changing explicit filter composition.
+- [Phase 197]: Payments owner scope is enforced in Charges.list/1 and count_newer_than/1 through the joined customer owner relation. — Charges already joins Customers for list projection, matching the existing Invoices tenant-boundary pattern.
 
 ### Pending Todos
 
@@ -456,8 +460,8 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 
 ## Session Continuity
 
-Last session: 2026-06-28T16:43:16.884Z
-Stopped at: Completed 197-02-PLAN.md
+Last session: 2026-06-28T16:57:33.226Z
+Stopped at: Completed 197-03-PLAN.md
 Resume file: None
 
 ## Operator Next Steps
