@@ -48,20 +48,47 @@ defmodule AccrueAdmin.PromotionCodeLiveTest do
     {:ok, promotion_code: promotion_code}
   end
 
-  test "renders promotion code detail with a parent coupon link", %{
-    conn: conn,
-    promotion_code: promotion_code
-  } do
+  test "D-02 D-14 D-15 D-16 D-17 renders promotion code summary-first read-only detail contract",
+       %{
+         conn: conn,
+         promotion_code: promotion_code
+       } do
     conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
 
     assert {:ok, _view, html} = live(conn, "/billing/promotion-codes/#{promotion_code.id}")
 
+    assert heading_count(html, "h1") == 1
+    assert data_attr_count(html, "data-ax-summary-list") == 1
+    assert data_attr_count(html, "data-ax-related-resources") == 1
+    assert data_attr_count(html, "data-ax-lazy-activity") == 1
+    assert data_attr_count(html, "data-ax-lazy-json") == 1
+    assert data_attr_count(html, "data-ax-action-overflow-menu") == 0
+
     assert html =~ "REFER15"
+    assert html =~ "Active state"
+    assert html =~ "Code"
+    assert html =~ "Parent coupon"
+    assert html =~ "Expiry"
+    assert html =~ "Redemption count"
+    assert html =~ "Redemption limit"
+    assert html =~ "Customer restriction"
     assert html =~ Copy.promotion_code_section_navigate_heading()
     assert html =~ "Referral coupon"
     assert html =~ "/billing/coupons/"
-    assert html =~ "campaign"
-    assert html =~ "processor"
+    assert html =~ "Open this section to load"
+
+    refute html =~ ~s(class="ax-kpi-grid")
+    refute html =~ "campaign"
+    refute html =~ "processor"
+
+    assert major_band_order(html) == [
+             :summary_card,
+             :summary_list,
+             :drill_section,
+             :related_resources,
+             :lazy_activity,
+             :lazy_json
+           ]
   end
 
   test "renders RelatedResources card with coupon link and events link", %{
@@ -163,5 +190,41 @@ defmodule AccrueAdmin.PromotionCodeLiveTest do
     %PromotionCode{}
     |> PromotionCode.changeset(Map.merge(defaults, attrs))
     |> TestRepo.insert!()
+  end
+
+  defp data_attr_count(html, attr) do
+    attr
+    |> Regex.escape()
+    |> then(&Regex.compile!("\\b" <> &1 <> "(?:\\s|=|>)"))
+    |> Regex.scan(html)
+    |> length()
+  end
+
+  defp heading_count(html, tag) do
+    tag
+    |> Regex.escape()
+    |> then(&Regex.compile!("<" <> &1 <> "\\b"))
+    |> Regex.scan(html)
+    |> length()
+  end
+
+  defp major_band_order(html) do
+    [
+      summary_card: ~s(class="ax-card ax-summary-card"),
+      summary_list: "data-ax-summary-list",
+      drill_section: ~s(class="ax-detail-section"),
+      related_resources: "data-ax-related-resources",
+      lazy_activity: "data-ax-lazy-activity",
+      lazy_json: "data-ax-lazy-json",
+      kpi_grid: ~s(class="ax-kpi-grid")
+    ]
+    |> Enum.flat_map(fn {band, marker} ->
+      case :binary.match(html, marker) do
+        :nomatch -> []
+        {position, _length} -> [{position, band}]
+      end
+    end)
+    |> Enum.sort()
+    |> Enum.map(fn {_position, band} -> band end)
   end
 end

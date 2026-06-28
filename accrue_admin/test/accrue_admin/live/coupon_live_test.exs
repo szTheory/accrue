@@ -52,7 +52,7 @@ defmodule AccrueAdmin.CouponLiveTest do
     {:ok, coupon: coupon}
   end
 
-  test "renders coupon detail with linked promotion codes and payload", %{
+  test "D-02 D-14 D-15 D-16 D-17 renders coupon summary-first read-only detail contract", %{
     conn: conn,
     coupon: coupon
   } do
@@ -60,12 +60,38 @@ defmodule AccrueAdmin.CouponLiveTest do
 
     assert {:ok, _view, html} = live(conn, "/billing/coupons/#{coupon.id}")
 
+    assert heading_count(html, "h1") == 1
+    assert data_attr_count(html, "data-ax-summary-list") == 1
+    assert data_attr_count(html, "data-ax-related-resources") == 1
+    assert data_attr_count(html, "data-ax-lazy-activity") == 1
+    assert data_attr_count(html, "data-ax-lazy-json") == 1
+    assert data_attr_count(html, "data-ax-action-overflow-menu") == 0
+
     assert html =~ "Annual discount"
+    assert html =~ "Valid state"
+    assert html =~ "Discount"
+    assert html =~ "Duration"
+    assert html =~ "Redeem by"
+    assert html =~ "Max redemptions"
+    assert html =~ "Current redemptions"
+    assert html =~ "Promotion codes"
     assert html =~ Copy.coupon_detail_section_codes_heading()
     assert html =~ "ANNUAL15"
     assert html =~ "/billing/promotion-codes/"
-    assert html =~ "channel"
-    assert html =~ "remote"
+    assert html =~ "Open this section to load"
+
+    refute html =~ ~s(class="ax-kpi-grid")
+    refute html =~ "channel"
+    refute html =~ "remote"
+
+    assert major_band_order(html) == [
+             :summary_card,
+             :summary_list,
+             :drill_section,
+             :related_resources,
+             :lazy_activity,
+             :lazy_json
+           ]
   end
 
   test "renders RelatedResources card with promotion codes and events links", %{
@@ -183,5 +209,41 @@ defmodule AccrueAdmin.CouponLiveTest do
     %PromotionCode{}
     |> PromotionCode.changeset(Map.merge(defaults, attrs))
     |> TestRepo.insert!()
+  end
+
+  defp data_attr_count(html, attr) do
+    attr
+    |> Regex.escape()
+    |> then(&Regex.compile!("\\b" <> &1 <> "(?:\\s|=|>)"))
+    |> Regex.scan(html)
+    |> length()
+  end
+
+  defp heading_count(html, tag) do
+    tag
+    |> Regex.escape()
+    |> then(&Regex.compile!("<" <> &1 <> "\\b"))
+    |> Regex.scan(html)
+    |> length()
+  end
+
+  defp major_band_order(html) do
+    [
+      summary_card: ~s(class="ax-card ax-summary-card"),
+      summary_list: "data-ax-summary-list",
+      drill_section: ~s(class="ax-detail-section"),
+      related_resources: "data-ax-related-resources",
+      lazy_activity: "data-ax-lazy-activity",
+      lazy_json: "data-ax-lazy-json",
+      kpi_grid: ~s(class="ax-kpi-grid")
+    ]
+    |> Enum.flat_map(fn {band, marker} ->
+      case :binary.match(html, marker) do
+        :nomatch -> []
+        {position, _length} -> [{position, band}]
+      end
+    end)
+    |> Enum.sort()
+    |> Enum.map(fn {_position, band} -> band end)
   end
 end

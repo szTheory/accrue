@@ -58,7 +58,8 @@ defmodule AccrueAdmin.EventLiveTest do
         subject_id: to_string(invoice.id),
         actor_type: "webhook",
         actor_id: webhook.processor_event_id,
-        caused_by_webhook_event_id: webhook.id
+        caused_by_webhook_event_id: webhook.id,
+        data: %{"payload" => %{"livemode" => false, "failure_code" => "card_declined"}}
       })
 
     {:ok, event: event, webhook: webhook, invoice: invoice}
@@ -74,6 +75,67 @@ defmodule AccrueAdmin.EventLiveTest do
 
     assert html =~ "invoice.payment_failed"
     assert html =~ "webhook"
+  end
+
+  test "D-02 D-14 D-15 D-16 D-17 renders event summary-first read-only detail contract",
+       %{
+         conn: conn,
+         event: event,
+         webhook: webhook,
+         invoice: invoice
+       } do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+
+    assert {:ok, _view, html} = live(conn, "/billing/events/#{event.id}")
+
+    assert heading_count(html, "h1") == 1
+    assert data_attr_count(html, "data-ax-summary-list") == 1
+    assert data_attr_count(html, "data-ax-related-resources") == 1
+    assert data_attr_count(html, "data-ax-lazy-activity") == 1
+    assert data_attr_count(html, "data-ax-lazy-json") == 1
+    assert data_attr_count(html, "data-ax-action-overflow-menu") == 0
+
+    assert html =~ "Type"
+    assert html =~ "Actor"
+    assert html =~ "Subject"
+    assert html =~ "Source webhook"
+    assert html =~ "Recorded time"
+    assert html =~ "Livemode"
+    assert html =~ "/billing/webhooks/#{webhook.id}"
+    assert html =~ "/billing/invoices/#{invoice.id}"
+    assert html =~ "Open this section to load"
+
+    refute html =~ ~s(class="ax-kpi-grid")
+    refute html =~ "failure_code"
+    refute html =~ "card_declined"
+
+    assert major_band_order(html) == [
+             :summary_card,
+             :summary_list,
+             :drill_section,
+             :related_resources,
+             :lazy_activity,
+             :lazy_json
+           ]
+  end
+
+  test "D-15 event detail keeps one related-resources wrapper with quiet empty state when no links exist",
+       %{conn: conn} do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+
+    {:ok, event} =
+      Events.record(%{
+        type: "system.note",
+        subject_type: "Unknown",
+        subject_id: "detached",
+        actor_type: "system",
+        data: %{"note" => "no related resources"}
+      })
+
+    assert {:ok, _view, html} = live(conn, "/billing/events/#{event.id}")
+
+    assert data_attr_count(html, "data-ax-related-resources") == 1
+    assert html =~ "No related resources"
   end
 
   test "EventLive Related card links to source webhook when caused_by_webhook_event_id present",
@@ -221,5 +283,41 @@ defmodule AccrueAdmin.EventLiveTest do
     %Invoice{}
     |> Invoice.force_status_changeset(Map.merge(defaults, attrs))
     |> TestRepo.insert!()
+  end
+
+  defp data_attr_count(html, attr) do
+    attr
+    |> Regex.escape()
+    |> then(&Regex.compile!("\\b" <> &1 <> "(?:\\s|=|>)"))
+    |> Regex.scan(html)
+    |> length()
+  end
+
+  defp heading_count(html, tag) do
+    tag
+    |> Regex.escape()
+    |> then(&Regex.compile!("<" <> &1 <> "\\b"))
+    |> Regex.scan(html)
+    |> length()
+  end
+
+  defp major_band_order(html) do
+    [
+      summary_card: ~s(class="ax-card ax-summary-card"),
+      summary_list: "data-ax-summary-list",
+      drill_section: ~s(class="ax-detail-section"),
+      related_resources: "data-ax-related-resources",
+      lazy_activity: "data-ax-lazy-activity",
+      lazy_json: "data-ax-lazy-json",
+      kpi_grid: ~s(class="ax-kpi-grid")
+    ]
+    |> Enum.flat_map(fn {band, marker} ->
+      case :binary.match(html, marker) do
+        :nomatch -> []
+        {position, _length} -> [{position, band}]
+      end
+    end)
+    |> Enum.sort()
+    |> Enum.map(fn {_position, band} -> band end)
   end
 end
