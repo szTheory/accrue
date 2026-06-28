@@ -65,7 +65,7 @@ v1.54-storybook-and-forward-only-qa). Phases 193–200.
 ### PRP — Propagation across all pages
 
 - [x] **PRP-01**: All 8 remaining list pages (customers · invoices · payments · coupons · promotion-codes · webhooks · events · connect) conform to SPEC-LIST, adopt `PageHeader`, and carry per-page JTBD microcopy + four-state coverage.
-- [ ] **PRP-02**: All remaining detail/analytics pages (customer · invoice · charge · coupon · promotion-code · connect-account · webhook · event detail + Recovery + Campaign) conform to SPEC-DETAIL / the overview spec.
+- [x] **PRP-02**: All remaining detail/analytics pages (customer · invoice · charge · coupon · promotion-code · connect-account · webhook · event detail + Recovery + Campaign) conform to SPEC-DETAIL / the overview spec.
 
 ### IXN — Interaction & overlay correctness
 
@@ -105,7 +105,7 @@ REQ-ID → phase mapping (each REQ-ID maps to exactly one phase; 23/23 mapped, n
 | PGH-01 | Phase 196 | Complete |
 | EXE-03 | Phase 196 | Complete |
 | PRP-01 | Phase 197 | Complete |
-| PRP-02 | Phase 198 | Pending |
+| PRP-02 | Phase 198 | Complete |
 | IXN-01 | Phase 199 | Complete |
 | IXN-02 | Phase 199 | Pending |
 | IXN-03 | Phase 199 | Pending |

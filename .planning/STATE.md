@@ -3,17 +3,17 @@ gsd_state_version: 1.0
 milestone: v1.54
 milestone_name: Admin UI Page-Level Streamlining & Storybook
 current_phase: 198
-current_phase_name: Propagate DETAIL + analytics
+current_phase_name: propagate-detail-analytics
 status: executing
-stopped_at: Phase 198 UI-SPEC approved
-last_updated: "2026-06-28T22:47:14.726Z"
+stopped_at: Completed 198-01-PLAN.md
+last_updated: "2026-06-28T23:18:26.542Z"
 last_activity: 2026-06-28
-last_activity_desc: Phase 197 complete, transitioned to Phase 198
+last_activity_desc: Phase 198 execution started
 progress:
   total_phases: 8
   completed_phases: 5
-  total_plans: 29
-  completed_plans: 29
+  total_plans: 38
+  completed_plans: 30
   percent: 63
 ---
 
@@ -25,14 +25,14 @@ See: `.planning/PROJECT.md` (updated 2026-06-24 — v1.54 Admin UI Page-Level St
 
 **Core value:** A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic Elixir DX, strong domain modeling, tamper-evident audit ledger, great observability, and zero breaking-change pain through v1.x.
 
-**Current focus:** Phase 198 — Propagate DETAIL + analytics
+**Current focus:** Phase 198 — propagate-detail-analytics
 
 ## Current Position
 
-Phase: 198 — Propagate DETAIL + analytics
-Plan: Not started
+Phase: 198 (propagate-detail-analytics) — EXECUTING
+Plan: 2 of 9
 Status: Ready to execute
-Last activity: 2026-06-28 — Phase 197 complete, transitioned to Phase 198
+Last activity: 2026-06-28 -- Phase 198 execution started
 
 ## Post-v1.48 Pause Rule
 
@@ -217,6 +217,7 @@ Coverage: 22/22 v1.51 requirements mapped (each REQ-ID → exactly one phase). D
 | Phase 197 P05 | 9m 38s | 2 tasks | 4 files |
 | Phase 197 P06 | 1044 | 3 tasks | 7 files |
 | Phase 197 P07 | 12m32s | 3 tasks | 3 files |
+| Phase 198 P01 | 10m 39s | 3 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -385,6 +386,9 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - [Phase 197]: Plan 197-06 uses Connect needs_attention=true as the OR readiness lens instead of composing readiness filters. — The Plan 03 query seam owns the OR semantics for deauthorized, onboarding, charges, and payouts attention states.
 - [Phase 197]: Phase 197 browser smoke waits for LiveView default URL push_patch before asserting queue params. — The final Playwright gate exposed a timing-only failure when URL params were sampled immediately after login.
 - [Phase 197]: Phase 197 query contract tests assert filtered inclusion/exclusion instead of singleton global fixture lists. — The focused gate can run after E2E fixtures seed additional valid rows, so tests must prove semantics rather than database exclusivity.
+- [Phase 198]: Phase 198 contract uses explicit page target matrices and existing seeded fixtures, not generic runtime abstractions. — This keeps the Wave 0 contract concrete and within the plan boundary that forbids DetailPage and AnalyticsPage abstractions.
+- [Phase 198]: Recovery analytics assertions use Phase 198-specific hero, work queue, and supporting funnel markers. — This avoids importing Phase 199 or dashboard zone-order requirements into the Phase 198 browser contract.
+- [Phase 198]: Representative drawer and step-up probes are desktop-only while mobile keeps structural route checks. — The contract still covers mobile invariants without forcing desktop drawer behavior into mobile layouts.
 
 ### Pending Todos
 
@@ -475,9 +479,9 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 
 ## Session Continuity
 
-Last session: 2026-06-28T21:44:01.808Z
-Stopped at: Phase 198 UI-SPEC approved
-Resume file: .planning/phases/198-propagate-detail-analytics/198-UI-SPEC.md
+Last session: 2026-06-28T23:18:26.525Z
+Stopped at: Completed 198-01-PLAN.md
+Resume file: None
 
 ## Operator Next Steps
 
