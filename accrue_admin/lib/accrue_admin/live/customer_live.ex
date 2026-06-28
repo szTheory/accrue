@@ -548,13 +548,7 @@ defmodule AccrueAdmin.Live.CustomerLive do
       charges:
         Charge
         |> where([charge], charge.customer_id == ^customer.id)
-        |> Repo.aggregate(:count, :id),
-      payment_methods:
-        PaymentMethod
-        |> where([pm], pm.customer_id == ^customer.id)
-        |> Repo.aggregate(:count, :id),
-      events: length(Events.timeline_for("Customer", customer.id, limit: 25)),
-      metadata: map_size(customer.metadata || %{})
+        |> Repo.aggregate(:count, :id)
     }
   end
 
