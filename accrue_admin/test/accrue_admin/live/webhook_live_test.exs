@@ -7,6 +7,7 @@ defmodule AccrueAdmin.WebhookLiveTest do
   alias Accrue.Events
   alias Accrue.Events.Event
   alias Accrue.Webhook.WebhookEvent
+  alias AccrueAdmin.Copy
   alias AccrueAdmin.OwnerScope
   alias AccrueAdmin.Queries.Webhooks
   alias AccrueAdmin.TestRepo
@@ -29,12 +30,30 @@ defmodule AccrueAdmin.WebhookLiveTest do
 
     @impl Accrue.Auth
     def actor_id(user), do: user[:id]
+
+    @impl Accrue.Auth
+    def step_up_challenge(_user, _action), do: %{kind: :totp, message: "Verify webhook replay"}
+
+    @impl Accrue.Auth
+    def verify_step_up(_user, %{"code" => "123456"}, action) do
+      case Application.get_env(:accrue_admin, :expected_step_up_subject_id) do
+        nil -> :ok
+        expected when action.subject_id == expected -> :ok
+        _expected -> {:error, :wrong_subject_id}
+      end
+    end
+
+    def verify_step_up(_user, _params, _action), do: {:error, :invalid_code}
   end
 
   setup do
     prior = Application.get_env(:accrue, :auth_adapter)
     Application.put_env(:accrue, :auth_adapter, AuthAdapter)
-    on_exit(fn -> Application.put_env(:accrue, :auth_adapter, prior) end)
+
+    on_exit(fn ->
+      Application.put_env(:accrue, :auth_adapter, prior)
+      Application.delete_env(:accrue_admin, :expected_step_up_subject_id)
+    end)
 
     customer = insert_customer(%{processor_id: "cus_123"})
     invoice = insert_invoice(customer, %{processor_id: "in_123"})
@@ -67,6 +86,54 @@ defmodule AccrueAdmin.WebhookLiveTest do
     insert_attempt_job(webhook.id)
 
     {:ok, webhook: webhook}
+  end
+
+  test "D-12 D-13 D-14 D-15 D-16 D-17 renders replayable webhook detail contract", %{
+    conn: conn,
+    webhook: webhook
+  } do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    Application.put_env(:accrue_admin, :expected_step_up_subject_id, webhook.id)
+
+    assert {:ok, view, html} = live(conn, "/billing/webhooks/#{webhook.id}")
+
+    assert heading_count(html, "h1") == 1
+    assert data_attr_count(html, "data-ax-summary-list") == 1
+    assert data_attr_count(html, "data-ax-action-band") == 1
+    assert data_attr_count(html, "data-ax-primary-action") == 1
+    assert data_attr_count(html, "data-ax-related-resources") == 1
+    assert data_attr_count(html, "data-ax-lazy-activity") == 1
+    assert data_attr_count(html, "data-ax-lazy-json") == 1
+
+    assert has_element?(view, "[data-ax-primary-action]", "Replay webhook")
+    refute has_element?(view, "[data-role='replay-confirm']")
+
+    html = render_click(element(view, "[data-ax-primary-action]", "Replay webhook"))
+
+    assert has_element?(view, "[data-ax-action-drawer-form][data-role='replay-confirm']")
+    assert html =~ "Confirm replay"
+
+    html = render_click(element(view, "[data-ax-action-drawer-confirm]", "Confirm replay"))
+    assert html =~ Copy.step_up_title()
+  end
+
+  test "D-13 non-replayable webhook rows omit replay-looking controls and show state copy", %{
+    conn: conn
+  } do
+    webhook =
+      insert_webhook(%{
+        processor_event_id: "evt_received_no_replay",
+        status: :received,
+        type: "invoice.payment_succeeded"
+      })
+
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+
+    assert {:ok, view, html} = live(conn, "/billing/webhooks/#{webhook.id}")
+
+    refute has_element?(view, "[data-role='replay-single']")
+    refute html =~ ~r/<button[^>]+data-role="replay-single"[^>]+disabled/
+    assert html =~ "Replay is unavailable while this webhook is Received."
   end
 
   test "renders forensic payload, verification summary, attempt history, and derived events", %{
@@ -140,11 +207,15 @@ defmodule AccrueAdmin.WebhookLiveTest do
       })
 
     {:ok, view, _html} = live(conn, "/billing/webhooks/#{webhook.id}?org=allowed-org")
+    Application.put_env(:accrue_admin, :expected_step_up_subject_id, webhook.id)
 
-    html = render_click(element(view, "[data-role='replay-single']"))
+    html = render_click(element(view, "[data-ax-primary-action]", "Replay webhook"))
     assert html =~ "requeue the webhook delivery and record an admin audit event"
 
-    html = render_click(element(view, "[data-role='confirm-replay']"))
+    html = render_click(element(view, "[data-ax-action-drawer-confirm]", "Confirm replay"))
+    assert html =~ Copy.step_up_title()
+
+    html = render_submit(view, "step_up_submit", %{"code" => "123456"})
     assert html =~ "Replay requested for the active organization."
   end
 
@@ -443,5 +514,21 @@ defmodule AccrueAdmin.WebhookLiveTest do
       attempted_at: ~U[2026-04-15 10:02:00.000000Z],
       discarded_at: ~U[2026-04-15 10:03:00.000000Z]
     })
+  end
+
+  defp data_attr_count(html, attr) do
+    attr
+    |> Regex.escape()
+    |> then(&Regex.compile!("\\b" <> &1 <> "(?:\\s|=|>)"))
+    |> Regex.scan(html)
+    |> length()
+  end
+
+  defp heading_count(html, tag) do
+    tag
+    |> Regex.escape()
+    |> then(&Regex.compile!("<" <> &1 <> "\\b"))
+    |> Regex.scan(html)
+    |> length()
   end
 end

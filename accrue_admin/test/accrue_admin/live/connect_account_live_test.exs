@@ -25,12 +25,30 @@ defmodule AccrueAdmin.ConnectAccountLiveTest do
 
     @impl Accrue.Auth
     def actor_id(user), do: user[:id]
+
+    @impl Accrue.Auth
+    def step_up_challenge(_user, _action), do: %{kind: :totp, message: "Verify fee override"}
+
+    @impl Accrue.Auth
+    def verify_step_up(_user, %{"code" => "123456"}, action) do
+      case Application.get_env(:accrue_admin, :expected_step_up_subject_id) do
+        nil -> :ok
+        expected when action.subject_id == expected -> :ok
+        _expected -> {:error, :wrong_subject_id}
+      end
+    end
+
+    def verify_step_up(_user, _params, _action), do: {:error, :invalid_code}
   end
 
   setup do
     prior = Application.get_env(:accrue, :auth_adapter)
     Application.put_env(:accrue, :auth_adapter, AuthAdapter)
-    on_exit(fn -> Application.put_env(:accrue, :auth_adapter, prior) end)
+
+    on_exit(fn ->
+      Application.put_env(:accrue, :auth_adapter, prior)
+      Application.delete_env(:accrue_admin, :expected_step_up_subject_id)
+    end)
 
     account =
       insert_account(%{
@@ -46,6 +64,26 @@ defmodule AccrueAdmin.ConnectAccountLiveTest do
       })
 
     {:ok, account: account}
+  end
+
+  test "D-09 D-13 D-14 D-15 D-16 D-17 renders connect summary and fee drawer contract",
+       %{conn: conn, account: account} do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+
+    assert {:ok, view, html} = live(conn, "/billing/connect/#{account.id}")
+
+    assert heading_count(html, "h1") == 1
+    assert data_attr_count(html, "data-ax-summary-list") == 1
+    assert data_attr_count(html, "data-ax-action-band") == 1
+    assert data_attr_count(html, "data-ax-primary-action") == 1
+    assert data_attr_count(html, "data-ax-related-resources") == 1
+    assert data_attr_count(html, "data-ax-lazy-activity") == 1
+    assert data_attr_count(html, "data-ax-lazy-json") == 1
+
+    assert has_element?(view, "[data-ax-primary-action]", "Edit platform fee override")
+    refute has_element?(view, "form[phx-submit='save_override']")
+    refute has_element?(view, "[data-role='save-override']")
+    refute html =~ ~s(class="ax-kpi-grid")
   end
 
   test "renders RelatedResources card with events link", %{
@@ -68,37 +106,50 @@ defmodule AccrueAdmin.ConnectAccountLiveTest do
     account: account
   } do
     conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    Application.put_env(:accrue_admin, :expected_step_up_subject_id, account.id)
 
-    {:ok, view, html} = live(conn, "/billing/connect/#{account.id}")
+    {:ok, view, _html} = live(conn, "/billing/connect/#{account.id}")
+
+    html = render_click(element(view, "[data-ax-primary-action]", "Edit platform fee override"))
 
     assert html =~ "Save a per-account fee policy"
     assert html =~ "Default policy"
 
     html =
-      render_change(element(view, "form[phx-submit=\"save_override\"]"), %{
-        "override" => %{
-          "percent" => "1.9",
-          "fixed_cents" => "30",
-          "min_cents" => "",
-          "max_cents" => "",
-          "preview_amount_minor" => "10000",
-          "preview_currency" => "usd"
+      render_change(
+        element(view, "form[data-ax-action-drawer-form][phx-submit=\"save_override\"]"),
+        %{
+          "override" => %{
+            "percent" => "1.9",
+            "fixed_cents" => "30",
+            "min_cents" => "",
+            "max_cents" => "",
+            "preview_amount_minor" => "10000",
+            "preview_currency" => "usd"
+          }
         }
-      })
+      )
 
     assert html =~ "$2.20"
 
     html =
-      render_submit(element(view, "form[phx-submit=\"save_override\"]"), %{
-        "override" => %{
-          "percent" => "1.9",
-          "fixed_cents" => "30",
-          "min_cents" => "",
-          "max_cents" => "",
-          "preview_amount_minor" => "10000",
-          "preview_currency" => "usd"
+      render_submit(
+        element(view, "form[data-ax-action-drawer-form][phx-submit=\"save_override\"]"),
+        %{
+          "override" => %{
+            "percent" => "1.9",
+            "fixed_cents" => "30",
+            "min_cents" => "",
+            "max_cents" => "",
+            "preview_amount_minor" => "10000",
+            "preview_currency" => "usd"
+          }
         }
-      })
+      )
+
+    assert html =~ "Step-up required"
+
+    html = render_submit(view, "step_up_submit", %{"code" => "123456"})
 
     assert html =~ "Platform fee override saved."
     assert html =~ "1.9% percent"
@@ -130,17 +181,22 @@ defmodule AccrueAdmin.ConnectAccountLiveTest do
     assert html =~ ~s(class="ax-body ax-measure")
   end
 
-  test "preserves save_override form phx-submit and data-role button after prose change", %{
+  test "D-09 preserves save_override form only after Edit platform fee override intent", %{
     conn: conn,
     account: account
   } do
     conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
 
-    assert {:ok, _view, html} = live(conn, "/billing/connect/#{account.id}")
+    assert {:ok, view, html} = live(conn, "/billing/connect/#{account.id}")
 
-    # Both the form event and the button role must be present unchanged
+    refute html =~ ~s(phx-submit="save_override")
+    refute html =~ ~s(data-role="save-override")
+
+    html = render_click(element(view, "[data-ax-primary-action]", "Edit platform fee override"))
+
     assert html =~ ~s(phx-submit="save_override")
     assert html =~ ~s(data-role="save-override")
+    assert html =~ ~s(data-ax-action-drawer-form)
   end
 
   defp insert_account(attrs) do
@@ -159,5 +215,21 @@ defmodule AccrueAdmin.ConnectAccountLiveTest do
     %Account{}
     |> Account.changeset(Map.merge(defaults, attrs))
     |> TestRepo.insert!()
+  end
+
+  defp data_attr_count(html, attr) do
+    attr
+    |> Regex.escape()
+    |> then(&Regex.compile!("\\b" <> &1 <> "(?:\\s|=|>)"))
+    |> Regex.scan(html)
+    |> length()
+  end
+
+  defp heading_count(html, tag) do
+    tag
+    |> Regex.escape()
+    |> then(&Regex.compile!("<" <> &1 <> "\\b"))
+    |> Regex.scan(html)
+    |> length()
   end
 end
