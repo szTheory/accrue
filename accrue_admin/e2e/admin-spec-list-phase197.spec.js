@@ -46,6 +46,10 @@ const LIST_CONTRACTS = Object.freeze([
     activeChip: "Failed payments",
     allChip: "All payments",
     defaultParams: { status: "failed" },
+    rowParams: { view: "all" },
+    mobileParams: { view: "all" },
+    allowQueueEmpty: true,
+    queueEmptyText: "No failed payments.",
     clearAllOnDefault: true,
     loadingText: "Loading payments.",
   },
@@ -86,7 +90,8 @@ const LIST_CONTRACTS = Object.freeze([
     name: "Events",
     route: "/billing/events",
     listId: "events",
-    resourceLabel: "billing events",
+    resourceLabel: "events",
+    resultLabelPattern: /Showing \d+ (billing\s+)?events?/,
     activeChip: "All ledger",
     quickChip: "Admin changes",
     defaultParams: {},
@@ -101,6 +106,10 @@ const LIST_CONTRACTS = Object.freeze([
     activeChip: "Needs attention",
     allChip: "All accounts",
     defaultParams: { needs_attention: "true" },
+    rowParams: { view: "all" },
+    mobileParams: { view: "all" },
+    allowQueueEmpty: true,
+    queueEmptyText: "No accounts need attention.",
     clearAllOnDefault: true,
     loadingText: "Loading connected accounts.",
   },
@@ -165,7 +174,16 @@ async function assertPageHeaderContract(page, label) {
 async function assertListChrome(page, contract, label) {
   const list = listLocator(page, contract);
   await expect(list, `${label}: list marker`).toBeVisible();
-  await expect(list, `${label}: populated state`).toHaveAttribute("data-ax-state", "populated");
+  const listState = await list.getAttribute("data-ax-state");
+
+  if (listState !== "populated") {
+    expect(
+      contract.allowQueueEmpty && listState === "filtered-empty",
+      `${label}: default queue may be empty only when contract allows it`
+    ).toBeTruthy();
+    await expect(list, `${label}: queue empty reason`).toHaveAttribute("data-ax-empty-reason", "queue");
+    await expect(list, `${label}: queue empty copy`).toContainText(contract.queueEmptyText);
+  }
 
   const chips = page.locator("[data-ax-filter-chips]").first();
   await expect(chips, `${label}: filter chip row`).toBeVisible();
@@ -179,9 +197,10 @@ async function assertListChrome(page, contract, label) {
     await expect(chips, `${label}: All escape hatch`).toContainText(contract.allChip);
   }
 
-  await expect(page.locator("[data-ax-result-count]"), `${label}: result count`).toContainText(
-    new RegExp(`Showing \\d+ ${contract.resourceLabel.replace(/\s+/g, "\\s+")}?`)
-  );
+  const resultLabelPattern =
+    contract.resultLabelPattern ||
+    new RegExp(`Showing \\d+ ${contract.resourceLabel.replace(/\s+/g, "\\s+")}?`);
+  await expect(page.locator("[data-ax-result-count]"), `${label}: result count`).toContainText(resultLabelPattern);
 
   const clearAll = page.locator("[data-ax-clear-all]").first();
   if (contract.clearAllOnDefault) {
@@ -190,6 +209,8 @@ async function assertListChrome(page, contract, label) {
   } else {
     await expect(clearAll, `${label}: no default clear-all`).toHaveCount(0);
   }
+
+  return listState;
 }
 
 async function assertDesktopListRendering(page, contract, label) {
@@ -216,15 +237,26 @@ test.describe("Phase 197 propagated LIST contract", () => {
       await page.setViewportSize({ width: 1280, height: 900 });
       await reset(request);
       await seedListBaseline(request);
-      await login(page, contract.route);
-      await assertDefaultParams(page, contract, `${contract.name} default`);
-
       for (const theme of ["light", "dark"]) {
+        await login(page, contract.route);
+        await assertDefaultParams(page, contract, `${contract.name} default`);
         await setPhase191Theme(page, theme);
 
         await assertPageHeaderContract(page, `${contract.name} ${theme}`);
-        await assertListChrome(page, contract, `${contract.name} ${theme}`);
-        await assertDesktopListRendering(page, contract, `${contract.name} ${theme}`);
+        const state = await assertListChrome(page, contract, `${contract.name} ${theme}`);
+
+        if (state === "populated") {
+          await assertDesktopListRendering(page, contract, `${contract.name} ${theme}`);
+        } else {
+          await assertNoHorizontalClip(page, "#main-content, main, [data-role='empty-state']", `${contract.name} ${theme} empty`);
+        }
+
+        if (contract.rowParams) {
+          await login(page, targetWithQuery(contract.route, contract.rowParams));
+          await setPhase191Theme(page, theme);
+          await assertPageHeaderContract(page, `${contract.name} ${theme} row route`);
+          await assertDesktopListRendering(page, contract, `${contract.name} ${theme} row route`);
+        }
       }
     });
   }
@@ -237,8 +269,14 @@ test.describe("Phase 197 propagated LIST contract", () => {
     await seedListBaseline(request);
 
     for (const contract of LIST_CONTRACTS) {
-      await login(page, contract.route);
-      await assertDefaultParams(page, contract, `${contract.name} mobile default`);
+      const mobileParams = contract.mobileParams || {};
+      await login(page, targetWithQuery(contract.route, mobileParams));
+
+      if (contract.mobileParams) {
+        await assertDefaultParams(page, { defaultParams: contract.mobileParams }, `${contract.name} mobile row route`);
+      } else {
+        await assertDefaultParams(page, contract, `${contract.name} mobile default`);
+      }
 
       for (const theme of ["light", "dark"]) {
         await setPhase191Theme(page, theme);
@@ -297,7 +335,11 @@ test.describe("Phase 197 propagated LIST contract", () => {
     await expect(page.locator("[data-ax-filter-chips]")).toContainText("Needs replay");
     await expect(listLocator(page, webhooks)).toContainText("evt_e2e_bulk");
     await expect(listLocator(page, webhooks)).toContainText("evt_e2e_single");
-    await expect(page.getByRole("button", { name: /Retry selected/i })).toBeVisible();
+    await page.locator('[data-role="toggle-all"]').click();
+    await expect(page.locator('[data-role="bulk-action"]')).toBeVisible();
+    await page.locator('[data-role="bulk-action"]').click();
+    await expect(page.locator('[data-role="bulk-replay-confirm"]')).toBeVisible();
+    await expect(page.locator('[data-role="confirm-retry-selected"]')).toBeVisible();
   });
 
   test("events keep the full ledger default and expose the Admin changes lens", async ({
@@ -323,12 +365,12 @@ test.describe("Phase 197 propagated LIST contract", () => {
     const connect = LIST_CONTRACTS.find((contract) => contract.listId === "connect-accounts");
 
     await reset(request);
-    await seedScenario(request, "edge-states");
+    await seedScenario(request, "phase191-matrix");
     await login(page, connect.route);
 
     await assertDefaultParams(page, connect, "Connect attention");
     await expect(page.locator("[data-ax-filter-chips]")).toContainText("Needs attention");
-    await expect(listLocator(page, connect)).toContainText("acct_e2e_edge");
+    await expect(listLocator(page, connect)).toContainText("acct_e2e_phase191");
   });
 
   test("loading fixture exposes skeleton markers and accessible status copy", async ({ page, request }, testInfo) => {
