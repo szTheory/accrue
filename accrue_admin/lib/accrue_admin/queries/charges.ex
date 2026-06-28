@@ -9,6 +9,7 @@ defmodule AccrueAdmin.Queries.Charges do
 
   alias Accrue.Billing.{Charge, Customer}
   alias Accrue.Repo
+  alias AccrueAdmin.OwnerScope
   alias AccrueAdmin.Queries.Behaviour
 
   @time_field :inserted_at
@@ -18,9 +19,11 @@ defmodule AccrueAdmin.Queries.Charges do
     filter = Keyword.get(opts, :filter, %{})
     limit = Behaviour.normalize_limit(opts)
     cursor = Behaviour.decode_cursor(opts)
+    owner_scope = Keyword.get(opts, :owner_scope)
 
     Charge
     |> join(:inner, [charge], customer in Customer, on: customer.id == charge.customer_id)
+    |> scope_query(owner_scope)
     |> filter_query(filter)
     |> Behaviour.apply_cursor(@time_field, cursor)
     |> order_by([charge, _customer], desc: charge.inserted_at, desc: charge.id)
@@ -51,9 +54,11 @@ defmodule AccrueAdmin.Queries.Charges do
   def count_newer_than(opts \\ []) do
     filter = Keyword.get(opts, :filter, %{})
     cursor = Behaviour.decode_cursor(opts)
+    owner_scope = Keyword.get(opts, :owner_scope)
 
     Charge
     |> join(:inner, [charge], customer in Customer, on: customer.id == charge.customer_id)
+    |> scope_query(owner_scope)
     |> filter_query(filter)
     |> Behaviour.count_newer(@time_field, cursor)
     |> Repo.aggregate(:count)
@@ -117,5 +122,16 @@ defmodule AccrueAdmin.Queries.Charges do
       multiple ->
         where(query, [charge, _customer], charge.status in ^multiple)
     end
+  end
+
+  defp scope_query(query, nil), do: query
+  defp scope_query(query, %OwnerScope{mode: :global}), do: query
+
+  defp scope_query(query, %OwnerScope{mode: :organization, organization_id: organization_id}) do
+    where(
+      query,
+      [_charge, customer],
+      customer.owner_type == "Organization" and customer.owner_id == ^organization_id
+    )
   end
 end
