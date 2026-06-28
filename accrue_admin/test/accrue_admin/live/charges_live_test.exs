@@ -58,22 +58,22 @@ defmodule AccrueAdmin.ChargesLiveTest do
 
     assert {:ok, _view, html} = live(conn, "/billing/payments?fees_settled=true")
 
-    assert html =~ Copy.charges_index_heading()
-    assert html =~ Copy.charges_index_subtitle()
+    assert html =~ Copy.payments_list_heading()
+    assert html =~ Copy.payments_list_subtitle()
     assert html =~ "Succeeded"
     assert html =~ "/billing/payments/"
     assert html =~ "ax-chip ax-label"
     refute html =~ "ax-text-12"
   end
 
-  test "renders Copy-backed empty index when search excludes all charges", %{conn: conn} do
+  test "renders Copy-backed filtered empty index when search excludes all payments", %{conn: conn} do
     conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
 
     assert {:ok, _view, html} =
              live(conn, "/billing/payments?q=___accrue_empty_fixture___")
 
-    assert html =~ Copy.charges_index_empty_title()
-    assert html =~ Copy.charges_index_empty_copy()
+    assert html =~ Copy.payments_list_filtered_empty_title()
+    assert html =~ Copy.payments_list_filtered_empty_body()
   end
 
   test "bare navigation push_patches to default queue status failed", %{conn: conn} do
