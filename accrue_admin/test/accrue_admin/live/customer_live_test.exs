@@ -155,71 +155,45 @@ defmodule AccrueAdmin.CustomerLiveTest do
      deletable_payment_method: deletable_payment_method}
   end
 
-  # --- Plan 175-06: Customer-360 tab tiering tests ---
+  # --- Phase 198: Customer-360 DETAIL contract tests ---
 
-  test "renders 3 primary tab links (Subscriptions, Invoices, Payments)", %{
+  test "D-05 D-06 D-14 D-15 D-16 renders Customer-360 peer nav and lazy detail contract", %{
     conn: conn,
     customer: customer
   } do
     conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
     assert {:ok, _view, html} = live(conn, "/billing/customers/#{customer.id}")
 
-    assert html =~ ~r/class="[^"]*ax-tab[^"]*"[^>]*>\s*<span>Subscriptions<\/span>/
-    assert html =~ ~r/class="[^"]*ax-tab[^"]*"[^>]*>\s*<span>Invoices<\/span>/
-    assert html =~ ~r/class="[^"]*ax-tab[^"]*"[^>]*>\s*<span>Payments<\/span>/
+    assert heading_count(html, "h1") == 1
+    assert data_attr_count(html, "data-ax-summary-list") == 1
+    assert data_attr_count(html, "data-ax-related-resources") == 1
+    assert data_attr_count(html, "data-ax-lazy-activity") == 1
+    assert data_attr_count(html, "data-ax-lazy-json") == 1
+    assert data_attr_count(html, "data-ax-primary-action") <= 2
+
+    assert peer_nav_labels(html) == ["Subscriptions", "Invoices", "Payments"]
+
+    refute html =~ ~s(aria-haspopup="menu")
+    refute html =~ "More"
     refute html =~ ~r/class="[^"]*ax-tab[^"]*"[^>]*>\s*<span>Payment methods<\/span>/
+    refute html =~ ~r/class="[^"]*ax-tab[^"]*"[^>]*>\s*<span>Entitlements<\/span>/
+    refute html =~ ~r/class="[^"]*ax-tab[^"]*"[^>]*>\s*<span>Events<\/span>/
+    refute html =~ ~r/class="[^"]*ax-tab[^"]*"[^>]*>\s*<span>Metadata<\/span>/
+    refute html =~ ~s(class="ax-kpi-grid")
   end
 
-  test "renders More button with aria-haspopup=menu", %{conn: conn, customer: customer} do
-    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
-    assert {:ok, _view, html} = live(conn, "/billing/customers/#{customer.id}")
-
-    assert html =~ ~s(aria-haspopup="menu")
-    assert html =~ ~s(aria-expanded="false")
-    assert html =~ "More"
-  end
-
-  test "toggle_more_tabs event reveals 4 recessed tab links", %{conn: conn, customer: customer} do
-    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
-    assert {:ok, view, html} = live(conn, "/billing/customers/#{customer.id}")
-    refute html =~ "Payment methods"
-    render_click(view, "toggle_more_tabs")
-    html = render(view)
-    assert html =~ "Payment methods"
-    assert html =~ "Entitlements"
-    assert html =~ "Events"
-    assert html =~ "Metadata"
-  end
-
-  test "handle_params resets more_tabs_open to false on tab navigation", %{
+  test "D-07 ?tab=charges and ?tab=payments both resolve to visible Payments peer nav", %{
     conn: conn,
     customer: customer
   } do
     conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
-    assert {:ok, view, _html} = live(conn, "/billing/customers/#{customer.id}")
-    render_click(view, "toggle_more_tabs")
-    html = render(view)
-    assert html =~ ~s(aria-expanded="true")
-    assert {:ok, _view, html2} = live(conn, "/billing/customers/#{customer.id}?tab=invoices")
-    assert html2 =~ ~s(aria-expanded="false")
-  end
 
-  test "?tab=charges uses charges tab (Payments label), normalize_tab compat", %{
-    conn: conn,
-    customer: customer
-  } do
-    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
-    assert {:ok, _view, html} = live(conn, "/billing/customers/#{customer.id}?tab=charges")
-    assert html =~ "Payments"
-  end
-
-  test "?tab=payments normalizes to charges tab via normalize_tab/1", %{
-    conn: conn,
-    customer: customer
-  } do
-    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
-    assert {:ok, _view, html} = live(conn, "/billing/customers/#{customer.id}?tab=payments")
-    assert html =~ "Payments"
+    for tab <- ["charges", "payments"] do
+      assert {:ok, _view, html} = live(conn, "/billing/customers/#{customer.id}?tab=#{tab}")
+      assert peer_nav_labels(html) == ["Subscriptions", "Invoices", "Payments"]
+      assert html =~ ~r/class="[^"]*ax-tab[^"]*ax-tab-active[^"]*"[^>]*>\s*<span>Payments<\/span>/
+      refute html =~ ~r/class="[^"]*ax-tab[^"]*"[^>]*>\s*<span>More<\/span>/
+    end
   end
 
   test "related_items uses /payments href not /charges", %{conn: conn, customer: customer} do
@@ -229,9 +203,27 @@ defmodule AccrueAdmin.CustomerLiveTest do
     refute html =~ ~s(href="/billing/charges)
   end
 
-  # --- end Plan 175-06 tests ---
+  test "D-08 D-09 customer payment-method actions do not render visible initial forms", %{
+    conn: conn,
+    customer: customer
+  } do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
 
-  test "renders customer tabs for subscriptions, events, and metadata", %{
+    assert {:ok, view, html} = live(conn, "/billing/customers/#{customer.id}")
+
+    refute has_element?(view, "[data-role='set-default-payment-method']")
+    refute has_element?(view, "[data-role='prepare-delete-payment-method']")
+    refute has_element?(view, "[data-role='confirm-delete-payment-method']")
+    refute has_element?(view, "[data-role='payment-method-delete-confirmation']")
+    refute has_element?(view, "[data-ax-action-drawer-form]")
+
+    refute html =~
+             ~r/<form\b[^>]*(set_default_payment_method|delete_payment_method|payment-method)/
+  end
+
+  # --- end Phase 198 Customer-360 contract tests ---
+
+  test "renders customer detail summary copy and peer collection rows", %{
     conn: conn,
     customer: customer
   } do
@@ -248,15 +240,6 @@ defmodule AccrueAdmin.CustomerLiveTest do
     assert html =~ "Tax risk detected"
     assert html =~ "1 subscription needs attention"
     assert html =~ "1 invoice needs attention"
-
-    assert {:ok, _view, events_html} = live(conn, "/billing/customers/#{customer.id}?tab=events")
-    assert events_html =~ "customer.updated"
-
-    assert {:ok, _view, metadata_html} =
-             live(conn, "/billing/customers/#{customer.id}?tab=metadata")
-
-    assert metadata_html =~ "enterprise"
-    assert metadata_html =~ "preferred_timezone"
   end
 
   test "customer loader denies rows outside the active organization" do
@@ -338,142 +321,6 @@ defmodule AccrueAdmin.CustomerLiveTest do
     assert html =~ Copy.customer_detail_no_invoices()
   end
 
-  test "payment_methods tab shows Copy-backed heading and fixture card last4", %{
-    conn: conn,
-    customer: customer
-  } do
-    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
-
-    assert {:ok, _view, html} =
-             live(conn, "/billing/customers/#{customer.id}?tab=payment_methods")
-
-    assert html =~ Copy.customer_payment_methods_section_heading()
-    assert html =~ Copy.customer_payment_methods_card_last4_mask()
-    assert html =~ "4242"
-    assert html =~ "visa"
-  end
-
-  test "payment_methods tab exposes only server-driven operator controls and host-handoff copy",
-       %{
-         conn: conn,
-         customer: customer,
-         deletable_payment_method: deletable_payment_method
-       } do
-    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
-
-    assert {:ok, view, html} =
-             live(conn, "/billing/customers/#{customer.id}?tab=payment_methods")
-
-    assert html =~ "Sync payment methods"
-    assert html =~ "Set default payment method"
-    assert html =~ "Delete payment method"
-    assert html =~ "Replace payment method in host billing"
-    refute html =~ "Card number"
-    refute html =~ "Drop-in"
-    refute html =~ "Hosted Fields"
-
-    html =
-      render_click(
-        element(
-          view,
-          "[data-role='prepare-delete-payment-method'][data-payment-method-id='#{deletable_payment_method.id}']"
-        )
-      )
-
-    assert html =~ Copy.customer_payment_methods_cancel_action()
-  end
-
-  test "payment_methods tab runs set default and sync through LiveView events", %{
-    conn: conn,
-    customer: customer,
-    deletable_payment_method: payment_method
-  } do
-    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
-    {:ok, view, _html} = live(conn, "/billing/customers/#{customer.id}?tab=payment_methods")
-
-    html =
-      render_click(
-        element(
-          view,
-          "[data-role='set-default-payment-method'][data-payment-method-id='#{payment_method.id}']"
-        )
-      )
-
-    assert html =~ "Default payment method updated."
-    assert TestRepo.get!(Customer, customer.id).default_payment_method_id == payment_method.id
-
-    html = render_click(element(view, "[data-role='sync-payment-methods']"))
-
-    assert html =~ "Payment methods synced."
-  end
-
-  test "payment_methods tab shows guarded delete states and only confirms safe deletes", %{
-    conn: conn,
-    customer: customer,
-    blocked_payment_method: blocked_payment_method,
-    default_payment_method: default_payment_method,
-    deletable_payment_method: deletable_payment_method
-  } do
-    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
-    {:ok, view, _html} = live(conn, "/billing/customers/#{customer.id}?tab=payment_methods")
-
-    html =
-      render_click(
-        element(
-          view,
-          "[data-role='prepare-delete-payment-method'][data-payment-method-id='#{blocked_payment_method.id}']"
-        )
-      )
-
-    assert html =~ "This payment method still funds an active subscription."
-    refute html =~ ~s(data-role="confirm-delete-payment-method")
-
-    html =
-      render_click(
-        element(
-          view,
-          "[data-role='prepare-delete-payment-method'][data-payment-method-id='#{default_payment_method.id}']"
-        )
-      )
-
-    assert html =~ "Set another default payment method before deleting this one."
-    refute html =~ ~s(data-role="confirm-delete-payment-method")
-
-    html =
-      render_click(
-        element(
-          view,
-          "[data-role='prepare-delete-payment-method'][data-payment-method-id='#{deletable_payment_method.id}']"
-        )
-      )
-
-    assert html =~ "Delete payment method"
-    assert html =~ "Review dependencies before you continue."
-
-    html = render_click(element(view, "[data-role='confirm-delete-payment-method']"))
-
-    assert html =~ "Payment method deleted."
-
-    refute has_element?(
-             view,
-             "[data-role='prepare-delete-payment-method'][data-payment-method-id='#{deletable_payment_method.id}']"
-           )
-
-    assert TestRepo.get(PaymentMethod, deletable_payment_method.id) == nil
-  end
-
-  test "payment_methods tab empty state uses Copy when customer has no payment methods", %{
-    conn: conn
-  } do
-    %{customer: bare_customer} = Factory.customer(%{email: "bare-pm@example.com"})
-    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
-
-    assert {:ok, _view, html} =
-             live(conn, "/billing/customers/#{bare_customer.id}?tab=payment_methods")
-
-    assert html =~ Copy.customer_payment_methods_empty_copy()
-  end
-
   defp insert_customer(attrs) do
     defaults = %{
       owner_type: "User",
@@ -518,5 +365,27 @@ defmodule AccrueAdmin.CustomerLiveTest do
       active_organization_id: organization_id,
       active_organization_slug: "allowed-org"
     }
+  end
+
+  defp data_attr_count(html, attr) do
+    attr
+    |> Regex.escape()
+    |> then(&Regex.compile!("\\b" <> &1 <> "(?:\\s|=|>)"))
+    |> Regex.scan(html)
+    |> length()
+  end
+
+  defp heading_count(html, tag) do
+    tag
+    |> Regex.escape()
+    |> then(&Regex.compile!("<" <> &1 <> "\\b"))
+    |> Regex.scan(html)
+    |> length()
+  end
+
+  defp peer_nav_labels(html) do
+    ~r/<a[^>]*class="[^"]*ax-tab[^"]*"[^>]*>.*?<span>([^<]+)<\/span>/s
+    |> Regex.scan(html)
+    |> Enum.map(fn [_match, label] -> String.trim(label) end)
   end
 end
