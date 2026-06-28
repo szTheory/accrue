@@ -46,7 +46,7 @@ defmodule AccrueAdmin.Live.ConnectAccountsLive do
          socket.assigns.current_owner_scope
        )
      )
-     |> assign(:summary, connect_summary())}
+     |> assign(:summary, connect_summary(socket.assigns.current_owner_scope))}
   end
 
   @impl true
@@ -429,23 +429,25 @@ defmodule AccrueAdmin.Live.ConnectAccountsLive do
       Map.get(params, "phase197_state") == "loading-skeleton"
   end
 
-  defp connect_summary do
+  defp connect_summary(owner_scope) do
+    accounts = scoped_accounts(owner_scope)
+
     %{
-      total_count: Repo.aggregate(Account, :count, :id),
+      total_count: Repo.aggregate(accounts, :count, :id),
       charges_enabled_count:
-        Account
+        accounts
         |> where([account], account.charges_enabled == true)
         |> Repo.aggregate(:count, :id),
       details_submitted_count:
-        Account
+        accounts
         |> where([account], account.details_submitted == true)
         |> Repo.aggregate(:count, :id),
       deauthorized_count:
-        Account
+        accounts
         |> where([account], not is_nil(account.deauthorized_at))
         |> Repo.aggregate(:count, :id),
       override_count:
-        Account
+        accounts
         |> where(
           [account],
           fragment("?->'platform_fee_override' IS NOT NULL", account.data)
@@ -453,6 +455,16 @@ defmodule AccrueAdmin.Live.ConnectAccountsLive do
         |> Repo.aggregate(:count, :id)
     }
   end
+
+  defp scoped_accounts(%{mode: :organization, organization_id: organization_id}) do
+    Account
+    |> where(
+      [account],
+      account.owner_type == "Organization" and account.owner_id == ^organization_id
+    )
+  end
+
+  defp scoped_accounts(_owner_scope), do: Account
 
   defp account_link(row, mount_path, owner_scope),
     do:

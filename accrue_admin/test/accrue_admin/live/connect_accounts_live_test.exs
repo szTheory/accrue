@@ -130,6 +130,60 @@ defmodule AccrueAdmin.ConnectAccountsLiveTest do
     refute html =~ "phase197_state=loading-skeleton"
   end
 
+  test "connect organization scope limits rows and KPI counts", %{conn: conn} do
+    org_id = Ecto.UUID.generate()
+
+    insert_account(%{
+      stripe_account_id: "acct_org_allowed",
+      owner_type: "Organization",
+      owner_id: org_id,
+      charges_enabled: true,
+      payouts_enabled: true,
+      details_submitted: true,
+      data: %{"platform_fee_override" => %{"percent" => "1.0"}}
+    })
+
+    insert_account(%{
+      stripe_account_id: "acct_org_denied",
+      owner_type: "Organization",
+      owner_id: Ecto.UUID.generate(),
+      charges_enabled: true,
+      payouts_enabled: true,
+      details_submitted: true,
+      data: %{"platform_fee_override" => %{"percent" => "2.0"}}
+    })
+
+    conn =
+      conn
+      |> Phoenix.ConnTest.init_test_session(
+        admin_token: "admin",
+        active_organization_id: org_id,
+        active_organization_slug: "allowed-org",
+        admin_organization_ids: [org_id]
+      )
+
+    assert {:ok, _view, html} = live(conn, "/billing/connect?org=allowed-org&view=all")
+
+    assert html =~ "acct_org_allowed"
+    refute html =~ "acct_org_denied"
+
+    stats =
+      html
+      |> Floki.parse_document!()
+      |> Floki.find(".ax-stat")
+      |> Enum.map(fn stat ->
+        {
+          stat |> Floki.find(".ax-stat-label") |> Floki.text() |> String.trim(),
+          stat |> Floki.find(".ax-stat-value") |> Floki.text() |> String.trim()
+        }
+      end)
+      |> Map.new()
+
+    assert stats[Copy.connect_accounts_kpi_label_accounts()] == "1"
+    assert stats[Copy.connect_accounts_kpi_label_charges_enabled()] == "1"
+    assert stats[Copy.connect_accounts_kpi_label_overrides()] == "1"
+  end
+
   test "distinguishes connect populated, first-run-empty, filtered-empty, queue-empty, and loading states",
        %{conn: conn} do
     contract = ListContracts.fetch!(:connect)

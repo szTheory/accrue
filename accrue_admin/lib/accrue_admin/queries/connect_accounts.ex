@@ -9,6 +9,7 @@ defmodule AccrueAdmin.Queries.ConnectAccounts do
 
   alias Accrue.Connect.Account
   alias Accrue.Repo
+  alias AccrueAdmin.OwnerScope
   alias AccrueAdmin.Queries.Behaviour
 
   @time_field :inserted_at
@@ -18,8 +19,10 @@ defmodule AccrueAdmin.Queries.ConnectAccounts do
     filter = Keyword.get(opts, :filter, %{})
     limit = Behaviour.normalize_limit(opts)
     cursor = Behaviour.decode_cursor(opts)
+    owner_scope = Keyword.get(opts, :owner_scope)
 
     Account
+    |> scope_query(owner_scope)
     |> filter_query(filter)
     |> Behaviour.apply_cursor(@time_field, cursor)
     |> order_by([account], desc: account.inserted_at, desc: account.id)
@@ -46,8 +49,10 @@ defmodule AccrueAdmin.Queries.ConnectAccounts do
   def count_newer_than(opts \\ []) do
     filter = Keyword.get(opts, :filter, %{})
     cursor = Behaviour.decode_cursor(opts)
+    owner_scope = Keyword.get(opts, :owner_scope)
 
     Account
+    |> scope_query(owner_scope)
     |> filter_query(filter)
     |> Behaviour.count_newer(@time_field, cursor)
     |> Repo.aggregate(:count)
@@ -82,6 +87,17 @@ defmodule AccrueAdmin.Queries.ConnectAccounts do
 
   @impl true
   def encode_filter(filter) when is_map(filter), do: Behaviour.compact_filter(filter)
+
+  defp scope_query(query, nil), do: query
+  defp scope_query(query, %OwnerScope{mode: :global}), do: query
+
+  defp scope_query(query, %OwnerScope{mode: :organization, organization_id: organization_id}) do
+    where(
+      query,
+      [account],
+      account.owner_type == "Organization" and account.owner_id == ^organization_id
+    )
+  end
 
   defp filter_query(query, filter) do
     Enum.reduce(filter, query, fn

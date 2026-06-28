@@ -413,6 +413,56 @@ defmodule AccrueAdmin.Queries.QueryModulesTest do
       refute "acct_attention_healthy" in account_ids
     end
 
+    test "ConnectAccounts.list/1 applies organization owner scope" do
+      allowed_old =
+        insert_connect_account(%{
+          stripe_account_id: "acct_connect_allowed_old",
+          owner_type: "Organization",
+          owner_id: "org_allowed",
+          charges_enabled: false,
+          inserted_at: ~U[2026-04-11 18:10:00Z]
+        })
+
+      insert_connect_account(%{
+        stripe_account_id: "acct_connect_allowed_new",
+        owner_type: "Organization",
+        owner_id: "org_allowed",
+        charges_enabled: false,
+        inserted_at: ~U[2026-04-11 18:11:00Z]
+      })
+
+      insert_connect_account(%{
+        stripe_account_id: "acct_connect_denied_newer",
+        owner_type: "Organization",
+        owner_id: "org_denied",
+        charges_enabled: false,
+        inserted_at: ~U[2026-04-11 18:12:00Z]
+      })
+
+      owner_scope = organization_owner_scope("org_allowed")
+
+      {rows, _cursor} =
+        ConnectAccounts.list(
+          filter: ConnectAccounts.decode_filter(%{"charges_enabled" => "false"}),
+          owner_scope: owner_scope,
+          limit: 20
+        )
+
+      account_ids = Enum.map(rows, & &1.stripe_account_id)
+
+      assert "acct_connect_allowed_old" in account_ids
+      assert "acct_connect_allowed_new" in account_ids
+      refute "acct_connect_denied_newer" in account_ids
+
+      cursor = AccrueAdmin.Queries.Cursor.encode(allowed_old.inserted_at, allowed_old.id)
+
+      assert ConnectAccounts.count_newer_than(
+               filter: ConnectAccounts.decode_filter(%{"charges_enabled" => "false"}),
+               owner_scope: owner_scope,
+               cursor: cursor
+             ) == 1
+    end
+
     test "Charges.list/1 applies organization owner scope through customers" do
       allowed_customer =
         insert_customer(%{
