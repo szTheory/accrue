@@ -5,15 +5,14 @@ milestone_name: Admin UI Page-Level Streamlining & Storybook
 current_phase: 197
 current_phase_name: propagate-list
 status: executing
-stopped_at: Completed 197-01-PLAN.md
-last_updated: "2026-06-28T16:24:27.571Z"
+stopped_at: Completed 197-02-PLAN.md
+last_updated: "2026-06-28T16:43:16.893Z"
 last_activity: 2026-06-28
-last_activity_desc: Phase 197 execution started
 progress:
   total_phases: 8
   completed_phases: 4
   total_plans: 29
-  completed_plans: 23
+  completed_plans: 24
   percent: 50
 ---
 
@@ -30,9 +29,9 @@ See: `.planning/PROJECT.md` (updated 2026-06-24 — v1.54 Admin UI Page-Level St
 ## Current Position
 
 Phase: 197 (propagate-list) — EXECUTING
-Plan: 2 of 7
+Plan: 3 of 7
 Status: Ready to execute
-Last activity: 2026-06-28 -- Phase 197 execution started
+Last activity: 2026-06-28
 
 ## Post-v1.48 Pause Rule
 
@@ -211,6 +210,7 @@ Coverage: 22/22 v1.51 requirements mapped (each REQ-ID → exactly one phase). D
 | Phase 196 P04 | 12m | 3 tasks | 4 files |
 | Phase 196 P05 | 9m | 2 tasks | 6 files |
 | Phase 197 P01 | 16min | 3 tasks | 4 files |
+| Phase 197-propagate-list P02 | approximately 45 minutes | 3 tasks | 8 files |
 
 ## Accumulated Context
 
@@ -364,6 +364,8 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - [Phase 196]: DataTable loading status supports page-specific copy through loading_label while preserving a generic default. — Browser validation required exact Subscriptions loading copy without breaking existing DataTable callers.
 - [Phase 197]: Phase 197 Wave 0 remains validation-only: RED contracts define required LIST propagation behavior before runtime migrations. — 197-01 created test/support, ExUnit, and Playwright contracts only; runtime LIST changes are intentionally deferred to later Phase 197 plans.
 - [Phase 197]: Phase 197 browser coverage is project-scoped instead of an exhaustive matrix. — Desktop all-page and representative deep checks run on chromium-desktop, while mobile all-page card smoke runs on chromium-mobile.
+- [Phase 197-propagate-list]: 197-02 reused AccrueAdmin.ListContracts from 197-01 as the source of RED LiveView contract assertions. — Keeps route, list id, lens, state, and copy expectations aligned across ExUnit and browser validation.
+- [Phase 197-propagate-list]: 197-02 remained test-only; runtime LIST propagation is intentionally left RED for follow-up implementation plans. — The plan objective was to lock LiveView contracts before runtime propagation work.
 
 ### Pending Todos
 
@@ -454,8 +456,8 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 
 ## Session Continuity
 
-Last session: 2026-06-28T16:24:27.560Z
-Stopped at: Completed 197-01-PLAN.md
+Last session: 2026-06-28T16:43:16.884Z
+Stopped at: Completed 197-02-PLAN.md
 Resume file: None
 
 ## Operator Next Steps
