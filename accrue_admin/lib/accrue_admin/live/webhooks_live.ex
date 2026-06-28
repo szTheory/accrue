@@ -6,9 +6,20 @@ defmodule AccrueAdmin.Live.WebhooksLive do
   alias Accrue.{Auth, Events}
   alias Accrue.Webhook.WebhookEvent
   alias Accrue.Webhooks.DLQ
-  alias AccrueAdmin.Components.{AppShell, Breadcrumbs, DataTable, FlashGroup, StatStrip}
+
+  alias AccrueAdmin.Components.{
+    AppShell,
+    DataTable,
+    FilterChipBar,
+    FlashGroup,
+    PageHeader,
+    StatStrip
+  }
+
   alias AccrueAdmin.Copy
   alias AccrueAdmin.Queries.Webhooks
+
+  @default_queue_status "failed,dead"
 
   @impl true
   def mount(_params, session, socket) do
@@ -40,11 +51,37 @@ defmodule AccrueAdmin.Live.WebhooksLive do
   end
 
   @impl true
-  def handle_params(params, _uri, socket) do
+  def handle_params(%{"view" => "all"} = params, _uri, socket) do
     {:noreply,
      socket
      |> assign(:params, params)
      |> assign(:summary, webhook_summary(socket.assigns.current_owner_scope))}
+  end
+
+  def handle_params(params, _uri, socket) do
+    summary = webhook_summary(socket.assigns.current_owner_scope)
+
+    if map_size(params) == 0 or map_only_scope?(params) do
+      default = build_default_params(socket.assigns[:current_owner_scope], @default_queue_status)
+      to = AccrueAdmin.DataTableNav.merge_query(socket.assigns.table_path, default)
+
+      if connected?(socket) do
+        {:noreply,
+         socket
+         |> assign(:summary, summary)
+         |> push_patch(to: to)}
+      else
+        {:noreply,
+         socket
+         |> assign(:params, default)
+         |> assign(:summary, summary)}
+      end
+    else
+      {:noreply,
+       socket
+       |> assign(:params, params)
+       |> assign(:summary, summary)}
+    end
   end
 
   @impl true
@@ -129,32 +166,46 @@ defmodule AccrueAdmin.Live.WebhooksLive do
     active_organization_name={@active_organization_name}
     >
       <section class="ax-page">
-        <header class="ax-page-header">
-          <Breadcrumbs.breadcrumbs
-            items={[
-              %{label: "Dashboard", href: scoped_path(@admin_mount_path, "", @current_owner_scope)},
-              %{label: "Webhooks"}
-            ]}
-          />
-          <h1 class="ax-display"><%= Copy.webhooks_index_heading() %></h1>
-          <p class="ax-body ax-page-copy"><%= Copy.webhooks_index_subtitle() %></p>
-        </header>
+        <PageHeader.page_header
+          breadcrumbs={[
+            %{label: Copy.dashboard_breadcrumb_home(), href: scoped_path(@admin_mount_path, "", @current_owner_scope)},
+            %{label: Copy.webhooks_index_heading()}
+          ]}
+          title={Copy.webhooks_list_heading()}
+        >
+          <:description>
+            <p class="ax-body"><%= Copy.webhooks_list_subtitle() %></p>
+          </:description>
+
+          <:stat_strip>
+            <StatStrip.stat_strip label="Webhook summary">
+              <:stat label="Received" value={Integer.to_string(@summary.received_count)} />
+              <:stat
+                label="Blocked"
+                value={Integer.to_string(@summary.blocked_count)}
+                tone="amber"
+              />
+              <:stat
+                label="Replayed"
+                value={Integer.to_string(@summary.replayed_count)}
+                tone="cobalt"
+              />
+            </StatStrip.stat_strip>
+          </:stat_strip>
+
+          <:filter_toolbar>
+            <DataTable.filter_toolbar
+              id="webhooks"
+              filter_fields={webhook_filter_fields(@current_owner_scope)}
+              filter_params={filter_params(@params)}
+              path={@table_path}
+              clear_href={clear_all_href(@params, @table_path)}
+              clear_visible={filter_active?(@params)}
+            />
+          </:filter_toolbar>
+        </PageHeader.page_header>
 
         <FlashGroup.flash_group flashes={@flashes} />
-
-        <StatStrip.stat_strip label="Webhook summary">
-          <:stat label="Received" value={Integer.to_string(@summary.received_count)} />
-          <:stat
-            label="Blocked"
-            value={Integer.to_string(@summary.blocked_count)}
-            tone="amber"
-          />
-          <:stat
-            label="Replayed"
-            value={Integer.to_string(@summary.replayed_count)}
-            tone="cobalt"
-          />
-        </StatStrip.stat_strip>
 
         <p class="ax-body ax-page-copy" data-role="webhooks-retry-helper">
           <%= Copy.webhooks_retry_selected_helper() %>
@@ -190,6 +241,13 @@ defmodule AccrueAdmin.Live.WebhooksLive do
           current_owner_scope={@current_owner_scope}
           path={@table_path}
           params={@params}
+          list_id="webhooks"
+          list_state={list_state(@params)}
+          empty_reason={empty_reason(@params, @summary)}
+          loading_fixture={phase197_loading_fixture?(@params)}
+          loading_label={Copy.webhooks_list_loading_label()}
+          render_filter_toolbar={false}
+          clear_href={clear_all_href(@params, @table_path)}
           selectable={true}
           row_label={{"event", "events"}}
           bulk_action_label={Copy.webhooks_retry_selected_label()}
@@ -208,32 +266,24 @@ defmodule AccrueAdmin.Live.WebhooksLive do
             %{label: "Endpoint", render: &endpoint_summary/1},
             %{label: "Received", render: &received_summary/1}
           ]}
-          filter_fields={[
-            %{
-              id: :status,
-              label: "Status",
-              type: :select,
-              options: status_filter_options(@current_owner_scope)
-            },
-            %{
-              id: :type,
-              label: "Type",
-              type: :datalist,
-              options: Webhooks.distinct_types(@current_owner_scope)
-            },
-            %{
-              id: :livemode,
-              label: "Live mode",
-              type: :segmented,
-              options: [{"", "All"}, {"true", "Live"}, {"false", "Test"}]
-            }
-          ]}
-          empty_title={Copy.webhooks_index_empty_title()}
-          empty_copy={Copy.webhooks_index_empty_copy()}
-          filtered_empty_title={Copy.webhooks_index_filtered_empty_title()}
-          filtered_empty_copy={Copy.webhooks_index_filtered_empty_copy()}
+          filter_fields={webhook_filter_fields(@current_owner_scope)}
+          empty_title={empty_title(@params, @summary)}
+          empty_copy={empty_copy(@params, @summary)}
+          filtered_empty_title={empty_title(@params, @summary)}
+          filtered_empty_copy={empty_copy(@params, @summary)}
           table_caption={Copy.webhooks_index_table_caption()}
-        />
+        >
+          <:list_status :let={status}>
+            <FilterChipBar.filter_chip_bar
+              items={work_queue_chips(@params, @table_path)}
+              label="Webhook view"
+              result_count={status.visible_count}
+              result_label={Copy.webhooks_list_result_label_pair()}
+              clear_all_href={active_clear_all_href(@params, @table_path)}
+              clear_all_label={Copy.data_table_clear_filters_label()}
+            />
+          </:list_status>
+        </.live_component>
       </section>
     </AppShell.app_shell>
     """
@@ -254,6 +304,30 @@ defmodule AccrueAdmin.Live.WebhooksLive do
 
   # Status filter options carry their live count in the label and disable zero-count
   # statuses (the active value is never disabled — handled in DataTable.filter_input/1).
+  defp webhook_filter_fields(owner_scope) do
+    [
+      %{
+        id: :status,
+        label: "Status",
+        type: :select,
+        all_label: "All statuses",
+        options: status_filter_options(owner_scope)
+      },
+      %{
+        id: :type,
+        label: "Type",
+        type: :datalist,
+        options: Webhooks.distinct_types(owner_scope)
+      },
+      %{
+        id: :livemode,
+        label: "Live mode",
+        type: :segmented,
+        options: [{"", "All"}, {"true", "Live"}, {"false", "Test"}]
+      }
+    ]
+  end
+
   defp status_filter_options(owner_scope) do
     counts = Webhooks.status_counts(owner_scope)
 
@@ -276,6 +350,134 @@ defmodule AccrueAdmin.Live.WebhooksLive do
       replayed_count: Webhooks.count(owner_scope, %{status: :replayed}),
       livemode_count: Webhooks.count(owner_scope, %{livemode: true})
     }
+  end
+
+  defp filter_params(params) do
+    params
+    |> Webhooks.decode_filter()
+    |> Webhooks.encode_filter()
+    |> Map.new(fn {key, value} -> {to_string(key), to_string(value)} end)
+  end
+
+  defp work_queue_chips(params, table_path) do
+    queue_active = Map.get(params, "status") == @default_queue_status
+    all_active = Map.get(params, "view") == "all"
+    clear_href = clear_all_href(params, table_path)
+
+    filter_chips =
+      params
+      |> filter_params()
+      |> Enum.reject(fn {key, _value} -> key == "status" and queue_active end)
+      |> Enum.map(fn {key, value} ->
+        %{
+          id: String.to_atom(key),
+          label: filter_chip_label(key),
+          value: filter_chip_value(key, value),
+          tone: :slate,
+          active: true,
+          remove_href: AccrueAdmin.DataTableNav.merge_query(table_path, %{key => nil})
+        }
+      end)
+
+    [
+      %{
+        id: :status_queue,
+        label: Copy.webhooks_list_default_lens_label(),
+        tone: :cobalt,
+        active: queue_active,
+        remove_href: if(queue_active, do: clear_href)
+      },
+      %{
+        id: :view_all,
+        label: Copy.webhooks_list_all_lens_label(),
+        tone: :slate,
+        active: queue_active or all_active,
+        href: if(queue_active, do: clear_href)
+      }
+    ] ++ filter_chips
+  end
+
+  defp filter_chip_label("status"), do: "Status"
+  defp filter_chip_label("type"), do: "Type"
+  defp filter_chip_label("livemode"), do: "Live mode"
+  defp filter_chip_label(key), do: humanize(key)
+
+  defp filter_chip_value("status", value) when is_binary(value) do
+    value
+    |> String.split(",", trim: true)
+    |> Enum.map_join(", ", &humanize/1)
+  end
+
+  defp filter_chip_value("livemode", "true"), do: "Live"
+  defp filter_chip_value("livemode", "false"), do: "Test"
+  defp filter_chip_value(_key, value), do: value
+
+  defp clear_all_href(_params, table_path) do
+    AccrueAdmin.DataTableNav.merge_query(table_path, %{
+      "view" => "all",
+      "type" => nil,
+      "status" => nil,
+      "livemode" => nil,
+      "cursor" => nil,
+      "phase197_state" => nil
+    })
+  end
+
+  defp filter_active?(params), do: filter_params(params) != %{}
+
+  defp active_clear_all_href(params, table_path) do
+    if filter_active?(params), do: clear_all_href(params, table_path)
+  end
+
+  defp list_state(params) do
+    if phase197_loading_fixture?(params), do: "loading-skeleton", else: nil
+  end
+
+  defp empty_reason(params, summary) do
+    cond do
+      phase197_loading_fixture?(params) -> nil
+      first_run_empty?(params, summary) -> "first-run"
+      queue_active?(params) -> "queue"
+      filter_active?(params) -> "filter"
+      true -> nil
+    end
+  end
+
+  defp build_default_params(%{mode: :organization, organization_slug: slug}, status)
+       when is_binary(slug) do
+    %{"status" => status, "org" => slug}
+  end
+
+  defp build_default_params(_scope, status), do: %{"status" => status}
+
+  defp queue_active?(params),
+    do: Map.get(params, "status") == @default_queue_status and Map.get(params, "view") != "all"
+
+  defp empty_title(params, summary) do
+    cond do
+      first_run_empty?(params, summary) -> Copy.webhooks_list_first_run_empty_title()
+      queue_active?(params) -> Copy.webhooks_list_queue_empty_title()
+      filter_active?(params) -> Copy.webhooks_list_filtered_empty_title()
+      true -> Copy.webhooks_list_first_run_empty_title()
+    end
+  end
+
+  defp empty_copy(params, summary) do
+    cond do
+      first_run_empty?(params, summary) -> Copy.webhooks_list_first_run_empty_body()
+      queue_active?(params) -> Copy.webhooks_list_queue_empty_body()
+      filter_active?(params) -> Copy.webhooks_list_filtered_empty_body()
+      true -> Copy.webhooks_list_first_run_empty_body()
+    end
+  end
+
+  defp first_run_empty?(params, summary),
+    do:
+      Map.get(params, "view") == "all" and summary.received_count == 0 and !filter_active?(params)
+
+  defp phase197_loading_fixture?(params) do
+    Application.get_env(:accrue_admin, :env) == :test and
+      Map.get(params, "phase197_state") == "loading-skeleton"
   end
 
   defp record_bulk_replay(socket, ids, count, result) do
@@ -373,6 +575,10 @@ defmodule AccrueAdmin.Live.WebhooksLive do
   end
 
   defp scoped_path(mount_path, suffix, _owner_scope), do: mount_path <> suffix
+
+  defp map_only_scope?(params) do
+    params != %{} and Map.keys(params) -- ["org"] == []
+  end
 
   defp owner_scope_copy(%{mode: :organization, organization_slug: slug}) when is_binary(slug),
     do: "organization #{slug}"

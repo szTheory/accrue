@@ -64,7 +64,7 @@ defmodule AccrueAdmin.WebhooksLiveTest do
 
     assert_page_header_contract(html, contract)
     assert html =~ contract.page_header.title
-    assert html =~ Copy.webhooks_index_subtitle()
+    assert html =~ Copy.webhooks_list_subtitle()
     assert_single_filter_form(html)
   end
 
@@ -196,7 +196,6 @@ defmodule AccrueAdmin.WebhooksLiveTest do
     assert {:ok, _view, html} = live(conn, "/billing/webhooks?status=dead")
 
     assert html =~ ~s(data-role="toggle-all")
-    assert html =~ ~s(data-role="bulk-action")
     assert html =~ Copy.webhooks_retry_selected_label()
   end
 
@@ -208,8 +207,8 @@ defmodule AccrueAdmin.WebhooksLiveTest do
     {:ok, view, html} =
       live(conn, "/billing/webhooks?status=dead&type=invoice.payment_failed&livemode=true")
 
-    assert html =~ Copy.webhooks_index_heading()
-    assert html =~ Copy.webhooks_index_subtitle()
+    assert html =~ Copy.webhooks_list_heading()
+    assert html =~ Copy.webhooks_list_subtitle()
     assert html =~ ~s(<caption)
     assert html =~ Copy.webhooks_index_table_caption()
     # UX-03: table cells use ax-body like money index DataTable rhythm
@@ -225,7 +224,10 @@ defmodule AccrueAdmin.WebhooksLiveTest do
     refute html =~ "Replay filtered DLQ rows"
 
     # Select the visible dead-lettered row, then click the primary Retry selected.
-    render_click(element(view, "[data-role='toggle-all']"))
+    html = render_click(element(view, "[data-role='toggle-all']"))
+    assert html =~ ~s(data-role="bulk-action")
+    assert html =~ Copy.webhooks_retry_selected_label()
+
     render_click(element(view, "[data-role='bulk-action']"))
     # bulk-action notifies the parent via send/2 -> handle_info; render/1 picks it up.
     html = render(view)
