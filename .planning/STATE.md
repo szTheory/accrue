@@ -2,9 +2,11 @@
 gsd_state_version: 1.0
 milestone: v1.54
 milestone_name: Admin UI Page-Level Streamlining & Storybook
+current_phase: 197
+current_phase_name: propagate-list
 status: executing
 stopped_at: Completed 197-05-PLAN.md
-last_updated: "2026-06-28T17:30:30.393Z"
+last_updated: "2026-06-28T17:30:50.886Z"
 last_activity: 2026-06-28
 progress:
   total_phases: 8
@@ -373,6 +375,8 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - [Phase 197]: 197-04: Customers stays all-default while exposing Missing payment method as a quick lens.
 - [Phase 197]: 197-04: Coupons and Promotion codes use valid=true/active=true defaults with view=all as the all-records escape hatch.
 - [Phase 197]: 197-04: PageHeader owns list filters while DataTable exposes list_status for FilterChipBar counts and chips.
+- [Phase ?]: Kept payments backed by AccrueAdmin.Queries.Charges while presenting payment terminology in the LIST UI.
+- [Phase ?]: Preserved organization scope through default queue redirects, clear-all links, row links, and summary counts for invoices and payments.
 
 ### Pending Todos
 
