@@ -118,7 +118,7 @@ defmodule AccrueAdmin.Live.EventsLive do
           title={Copy.events_list_heading()}
         >
           <:description>
-            <p class="ax-body"><%= billing_events_copy(@current_owner_scope) %></p>
+            <p class="ax-body"><%= Copy.events_list_subtitle() %></p>
           </:description>
 
           <:stat_strip>
@@ -222,11 +222,6 @@ defmodule AccrueAdmin.Live.EventsLive do
     |> assign(:admin_mount_path, admin["mount_path"] || "/billing")
     |> assign(:current_path, admin_path(admin, "/events"))
   end
-
-  defp billing_events_copy(%OwnerScope{mode: :organization}),
-    do: Copy.billing_events_copy_organization()
-
-  defp billing_events_copy(_owner_scope), do: Copy.billing_events_copy_global()
 
   defp event_summary(owner_scope) do
     day_ago = DateTime.add(DateTime.utc_now(), -86_400, :second)

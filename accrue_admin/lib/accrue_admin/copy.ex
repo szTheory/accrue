@@ -867,6 +867,9 @@ defmodule AccrueAdmin.Copy do
   @doc "Primary selection action on the webhooks list."
   def webhooks_retry_selected_label, do: "Retry selected"
 
+  @doc "Secondary action that dismisses bulk retry confirmation."
+  def webhooks_retry_cancel_label, do: "Cancel"
+
   @doc """
   Plural-aware confirm question for retrying selected webhook events.
   `opts` is accepted for symmetry with scoped copy but currently unused.

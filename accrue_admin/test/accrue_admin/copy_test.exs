@@ -127,13 +127,15 @@ defmodule AccrueAdmin.CopyTest do
 
     assert bulk_webhooks =~ "Retry 3 webhook events"
     assert bulk_webhooks =~ "failed every automatic retry"
+    assert Copy.webhooks_retry_cancel_label() == "Cancel"
 
     refute_vague_copy!([
       invoice,
       subscription,
       charge,
       single_webhook,
-      bulk_webhooks
+      bulk_webhooks,
+      Copy.webhooks_retry_cancel_label()
     ])
   end
 

@@ -99,7 +99,7 @@ defmodule AccrueAdmin.Live.ConnectAccountsLive do
           title={Copy.connect_accounts_list_heading()}
         >
           <:description>
-            <p class="ax-body"><%= Copy.connect_accounts_page_copy_primary() %></p>
+            <p class="ax-body"><%= Copy.connect_accounts_list_subtitle() %></p>
           </:description>
 
           <:stat_strip>

@@ -89,7 +89,7 @@ defmodule AccrueAdmin.EventsLiveTest do
 
     assert_page_header_contract(html, contract)
     assert html =~ contract.page_header.title
-    assert html =~ Copy.billing_events_copy_global()
+    assert html =~ Copy.events_list_subtitle()
     assert_single_filter_form(html)
   end
 
@@ -286,7 +286,7 @@ defmodule AccrueAdmin.EventsLiveTest do
                "/billing/events?org=allowed-org&source_webhook_event_id=#{webhook_id}&actor_type=admin"
              )
 
-    assert html =~ Copy.billing_events_copy_organization()
+    assert html =~ Copy.events_list_subtitle()
     assert html =~ "invoice.payment_failed.in_scope"
     assert html =~ in_scope_invoice.id
     refute html =~ "invoice.payment_failed.out_of_scope"

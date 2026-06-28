@@ -65,7 +65,7 @@ defmodule AccrueAdmin.ConnectAccountsLiveTest do
 
     assert_page_header_contract(html, contract)
     assert html =~ contract.page_header.title
-    assert html =~ Copy.connect_accounts_page_copy_primary()
+    assert html =~ Copy.connect_accounts_list_subtitle()
     assert_single_filter_form(html)
   end
 
@@ -252,7 +252,7 @@ defmodule AccrueAdmin.ConnectAccountsLiveTest do
              live(conn, "/billing/connect?type=express&charges_enabled=true&q=acct_match")
 
     assert html =~ Copy.connect_accounts_list_heading()
-    assert html =~ Copy.connect_accounts_page_copy_primary()
+    assert html =~ Copy.connect_accounts_list_subtitle()
     assert html =~ "acct_match"
     assert html =~ "Override saved"
     assert html =~ "/billing/connect/"

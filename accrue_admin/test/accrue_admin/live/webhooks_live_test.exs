@@ -234,6 +234,7 @@ defmodule AccrueAdmin.WebhooksLiveTest do
 
     assert html =~ "Retry 1 webhook event?"
     assert html =~ "failed every automatic retry"
+    assert html =~ Copy.webhooks_retry_cancel_label()
 
     html = render_click(element(view, "[data-role='confirm-retry-selected']"))
     assert html =~ "Retrying 1 event"

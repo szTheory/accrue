@@ -229,7 +229,7 @@ defmodule AccrueAdmin.Live.WebhooksLive do
               phx-click="cancel_bulk_replay"
               class="ax-button ax-button-ghost"
             >
-              Cancel
+              <%= Copy.webhooks_retry_cancel_label() %>
             </button>
           </div>
         </section>
