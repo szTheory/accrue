@@ -171,6 +171,18 @@ defmodule AccrueAdmin.CustomerLiveTest do
     assert data_attr_count(html, "data-ax-lazy-json") == 1
     assert data_attr_count(html, "data-ax-primary-action") <= 2
 
+    for label <- [
+          "Owner",
+          "Processor customer ID",
+          "Locale / timezone",
+          "Default payment method",
+          "Billing health",
+          "Tax risk",
+          "Access"
+        ] do
+      assert html =~ label
+    end
+
     assert peer_nav_labels(html) == ["Subscriptions", "Invoices", "Payments"]
 
     refute html =~ ~s(aria-haspopup="menu")
