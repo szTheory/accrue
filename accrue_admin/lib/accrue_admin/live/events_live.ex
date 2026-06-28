@@ -7,7 +7,16 @@ defmodule AccrueAdmin.Live.EventsLive do
 
   alias Accrue.Events.Event
   alias Accrue.Repo
-  alias AccrueAdmin.Components.{AppShell, Breadcrumbs, DataTable, FilterChipBar, StatStrip}
+
+  alias AccrueAdmin.Components.{
+    AppShell,
+    DataTable,
+    FilterChipBar,
+    PageHeader,
+    StatStrip
+  }
+
+  alias AccrueAdmin.Copy
   alias AccrueAdmin.OwnerScope
   alias AccrueAdmin.Queries.Events
   alias AccrueAdmin.ScopedPath
@@ -52,7 +61,22 @@ defmodule AccrueAdmin.Live.EventsLive do
      socket
      |> assign_shell(admin)
      |> assign(:params, %{})
-     |> assign(:table_path, admin_path(admin, "/events"))
+     |> assign(
+       :current_path,
+       ScopedPath.build(
+         admin["mount_path"] || "/billing",
+         "/events",
+         socket.assigns.current_owner_scope
+       )
+     )
+     |> assign(
+       :table_path,
+       ScopedPath.build(
+         admin["mount_path"] || "/billing",
+         "/events",
+         socket.assigns.current_owner_scope
+       )
+     )
      |> assign(:summary, event_summary(socket.assigns.current_owner_scope))}
   end
 
@@ -86,40 +110,47 @@ defmodule AccrueAdmin.Live.EventsLive do
     active_organization_name={@active_organization_name}
     >
       <section class="ax-page">
-        <header class="ax-page-header">
-          <Breadcrumbs.breadcrumbs
-            items={[
-              %{label: AccrueAdmin.Copy.dashboard_breadcrumb_home(), href: @admin_mount_path},
-              %{label: AccrueAdmin.Copy.billing_events_breadcrumb_events()}
-            ]}
-          />
-          <h1 class="ax-display"><%= billing_events_heading(@current_owner_scope) %></h1>
-          <p class="ax-body ax-page-copy">
-            <%= billing_events_copy(@current_owner_scope) %>
-          </p>
-        </header>
+        <PageHeader.page_header
+          breadcrumbs={[
+            %{label: Copy.dashboard_breadcrumb_home(), href: ScopedPath.build(@admin_mount_path, "", @current_owner_scope)},
+            %{label: Copy.billing_events_breadcrumb_events()}
+          ]}
+          title={Copy.events_list_heading()}
+        >
+          <:description>
+            <p class="ax-body"><%= billing_events_copy(@current_owner_scope) %></p>
+          </:description>
 
-        <StatStrip.stat_strip label={AccrueAdmin.Copy.billing_events_kpi_section_aria_label()}>
-          <:stat
-            label={AccrueAdmin.Copy.billing_events_kpi_label_ledger_rows()}
-            value={Integer.to_string(@summary.total_count)}
-          />
-          <:stat
-            label={AccrueAdmin.Copy.billing_events_kpi_label_webhook_sourced()}
-            value={Integer.to_string(@summary.webhook_linked_count)}
-            tone="cobalt"
-          />
-          <:stat
-            label={AccrueAdmin.Copy.billing_events_kpi_label_last_24h()}
-            value={Integer.to_string(@summary.last_day_count)}
-            tone="moss"
-          />
-        </StatStrip.stat_strip>
+          <:stat_strip>
+            <StatStrip.stat_strip label={Copy.billing_events_kpi_section_aria_label()}>
+              <:stat
+                label={Copy.billing_events_kpi_label_ledger_rows()}
+                value={Integer.to_string(@summary.total_count)}
+              />
+              <:stat
+                label={Copy.billing_events_kpi_label_webhook_sourced()}
+                value={Integer.to_string(@summary.webhook_linked_count)}
+                tone="cobalt"
+              />
+              <:stat
+                label={Copy.billing_events_kpi_label_last_24h()}
+                value={Integer.to_string(@summary.last_day_count)}
+                tone="moss"
+              />
+            </StatStrip.stat_strip>
+          </:stat_strip>
 
-        <FilterChipBar.filter_chip_bar
-          items={compliance_chips(@params, @table_path)}
-          label="Quick filters"
-        />
+          <:filter_toolbar>
+            <DataTable.filter_toolbar
+              id="events"
+              filter_fields={event_filter_fields()}
+              filter_params={filter_params(@params)}
+              path={@table_path}
+              clear_href={clear_all_href(@params, @table_path)}
+              clear_visible={filter_active?(@params)}
+            />
+          </:filter_toolbar>
+        </PageHeader.page_header>
 
         <.live_component
           module={DataTable}
@@ -128,74 +159,60 @@ defmodule AccrueAdmin.Live.EventsLive do
           current_owner_scope={@current_owner_scope}
           path={@table_path}
           params={@params}
-          filter_submit_label={AccrueAdmin.Copy.billing_events_apply_filters()}
+          list_id="events"
+          list_state={list_state(@params)}
+          empty_reason={empty_reason(@params, @summary)}
+          loading_fixture={phase197_loading_fixture?(@params)}
+          loading_label={Copy.events_list_loading_label()}
+          render_filter_toolbar={false}
+          clear_href={clear_all_href(@params, @table_path)}
+          row_label={Copy.events_list_result_label_pair()}
+          filter_submit_label={Copy.billing_events_apply_filters()}
           columns={[
-            %{id: :type, label: AccrueAdmin.Copy.billing_events_table_column_event()},
+            %{id: :type, label: Copy.billing_events_table_column_event()},
             %{
-              label: AccrueAdmin.Copy.billing_events_table_column_subject(),
+              label: Copy.billing_events_table_column_subject(),
               render: fn row -> subject_cell(row, @admin_mount_path, @current_owner_scope) end
             },
-            %{label: AccrueAdmin.Copy.billing_events_table_column_actor(), render: &actor_summary/1},
-            %{label: AccrueAdmin.Copy.billing_events_table_column_webhook_source(), render: &webhook_source_summary/1},
-            %{label: AccrueAdmin.Copy.billing_events_table_column_when(), render: &when_summary/1}
+            %{label: Copy.billing_events_table_column_actor(), render: &actor_summary/1},
+            %{label: Copy.billing_events_table_column_webhook_source(), render: &webhook_source_summary/1},
+            %{label: Copy.billing_events_table_column_when(), render: &when_summary/1}
           ]}
           card_title={&card_title/1}
           card_fields={[
             %{
-              label: AccrueAdmin.Copy.billing_events_table_column_subject(),
+              label: Copy.billing_events_table_column_subject(),
               render: fn row -> subject_cell(row, @admin_mount_path, @current_owner_scope) end
             },
-            %{label: AccrueAdmin.Copy.billing_events_table_column_actor(), render: &actor_summary/1},
-            %{label: AccrueAdmin.Copy.billing_events_table_column_webhook_source(), render: &webhook_source_summary/1},
-            %{label: AccrueAdmin.Copy.billing_events_table_column_when(), render: &when_summary/1}
+            %{label: Copy.billing_events_table_column_actor(), render: &actor_summary/1},
+            %{label: Copy.billing_events_table_column_webhook_source(), render: &webhook_source_summary/1},
+            %{label: Copy.billing_events_table_column_when(), render: &when_summary/1}
           ]}
-          filter_fields={[
-            %{id: :q, label: AccrueAdmin.Copy.billing_events_filter_label_search()},
-            %{id: :type, label: AccrueAdmin.Copy.billing_events_filter_label_event_type()},
-            %{id: :actor_type, label: AccrueAdmin.Copy.billing_events_filter_label_actor_type()},
-            %{id: :subject_type, label: AccrueAdmin.Copy.billing_events_filter_label_subject_type()},
-            %{id: :source_webhook_event_id, label: AccrueAdmin.Copy.billing_events_filter_label_source_webhook_id()}
-          ]}
-          empty_title={AccrueAdmin.Copy.billing_events_table_empty_title()}
-          empty_copy={AccrueAdmin.Copy.billing_events_table_empty_copy()}
-        />
+          filter_fields={event_filter_fields()}
+          empty_title={empty_title(@params, @summary)}
+          empty_copy={empty_copy(@params, @summary)}
+          filtered_empty_title={empty_title(@params, @summary)}
+          filtered_empty_copy={empty_copy(@params, @summary)}
+        >
+          <:list_status :let={status}>
+            <FilterChipBar.filter_chip_bar
+              items={event_lens_chips(@params, @table_path)}
+              label="Event view"
+              result_count={status.visible_count}
+              result_label={Copy.events_list_result_label_pair()}
+              clear_all_href={active_clear_all_href(@params, @table_path)}
+              clear_all_label={Copy.data_table_clear_filters_label()}
+            />
+          </:list_status>
+        </.live_component>
       </section>
     </AppShell.app_shell>
     """
   end
 
-  # Compliance actor-lens chip — IA-07.
-  # Always rendered (active: true) so Compliance persona sees the lens at all times.
-  # When actor_type param is set, chip is cobalt + shows Clear (remove_href clears filter).
-  # When actor_type param is absent, chip is slate + has activation href via ScopedPath.build/4
-  # so the label renders as <a href> (filter_chip_bar :href extension, Plan 175-06).
-  defp compliance_chips(params, table_path) do
-    actor_active = Map.get(params, "actor_type") not in [nil, ""]
-    # Build activation href using the table_path as the base plus actor_type=admin param.
-    # ScopedPath.build appends org= automatically; for events_live table_path already includes
-    # mount_path so we append query params via URI.
-    activation_href = append_query(table_path, %{"actor_type" => "admin"})
-
-    [
-      %{
-        id: :by_actor,
-        label: "By actor",
-        tone: if(actor_active, do: :cobalt, else: :slate),
-        active: true,
-        value: if(actor_active, do: params["actor_type"], else: nil),
-        remove_href: if(actor_active, do: table_path, else: nil),
-        href: if(actor_active, do: nil, else: activation_href)
-      }
-    ]
-  end
-
-  defp append_query(base_path, params) do
-    base_path <> "?" <> URI.encode_query(params)
-  end
-
   defp assign_shell(socket, admin) do
     socket
-    |> assign(:page_title, AccrueAdmin.Copy.billing_events_page_title())
+    |> assign(:page_title, Copy.billing_events_page_title())
     |> assign(:brand, admin["brand"] || default_brand())
     |> assign(:theme, admin["theme"] || "system")
     |> assign(:csp_nonce, admin["csp_nonce"])
@@ -206,15 +223,10 @@ defmodule AccrueAdmin.Live.EventsLive do
     |> assign(:current_path, admin_path(admin, "/events"))
   end
 
-  defp billing_events_heading(%OwnerScope{mode: :organization}),
-    do: AccrueAdmin.Copy.billing_events_heading_organization()
-
-  defp billing_events_heading(_owner_scope), do: AccrueAdmin.Copy.billing_events_heading_global()
-
   defp billing_events_copy(%OwnerScope{mode: :organization}),
-    do: AccrueAdmin.Copy.billing_events_copy_organization()
+    do: Copy.billing_events_copy_organization()
 
-  defp billing_events_copy(_owner_scope), do: AccrueAdmin.Copy.billing_events_copy_global()
+  defp billing_events_copy(_owner_scope), do: Copy.billing_events_copy_global()
 
   defp event_summary(owner_scope) do
     day_ago = DateTime.add(DateTime.utc_now(), -86_400, :second)
@@ -263,6 +275,153 @@ defmodule AccrueAdmin.Live.EventsLive do
     )
   end
 
+  defp event_filter_fields do
+    [
+      %{id: :q, label: Copy.billing_events_filter_label_search()},
+      %{id: :type, label: Copy.billing_events_filter_label_event_type()},
+      %{id: :actor_type, label: Copy.billing_events_filter_label_actor_type()},
+      %{id: :subject_type, label: Copy.billing_events_filter_label_subject_type()},
+      %{
+        id: :source_webhook_event_id,
+        label: Copy.billing_events_filter_label_source_webhook_id()
+      }
+    ]
+  end
+
+  defp filter_params(params) do
+    params
+    |> Events.decode_filter()
+    |> Events.encode_filter()
+    |> Map.new(fn {key, value} -> {to_string(key), to_string(value)} end)
+  end
+
+  defp event_lens_chips(params, table_path) do
+    admin_active? = Map.get(params, "actor_type") == "admin"
+    clear_href = clear_all_href(params, table_path)
+
+    filter_chips =
+      params
+      |> filter_params()
+      |> Enum.reject(fn {key, value} -> key == "actor_type" and value == "admin" end)
+      |> Enum.map(fn {key, value} ->
+        %{
+          id: String.to_atom(key),
+          label: filter_chip_label(key),
+          value: filter_chip_value(key, value),
+          tone: :slate,
+          active: true,
+          remove_href:
+            AccrueAdmin.DataTableNav.merge_query(table_path, %{
+              key => nil,
+              "cursor" => nil,
+              "phase197_state" => nil
+            })
+        }
+      end)
+
+    [
+      %{
+        id: :all_ledger,
+        label: Copy.events_list_all_lens_label(),
+        tone: if(filter_active?(params), do: :slate, else: :cobalt),
+        active: true,
+        href: if(filter_active?(params), do: clear_href)
+      },
+      %{
+        id: :admin_changes,
+        label: Copy.events_list_admin_changes_label(),
+        tone: if(admin_active?, do: :cobalt, else: :slate),
+        active: true,
+        href:
+          if admin_active? do
+            nil
+          else
+            AccrueAdmin.DataTableNav.merge_query(table_path, %{
+              "actor_type" => "admin",
+              "cursor" => nil,
+              "phase197_state" => nil
+            })
+          end,
+        remove_href:
+          if admin_active? do
+            AccrueAdmin.DataTableNav.merge_query(table_path, %{
+              "actor_type" => nil,
+              "cursor" => nil,
+              "phase197_state" => nil
+            })
+          end
+      }
+    ] ++ filter_chips
+  end
+
+  defp filter_chip_label("q"), do: "Search"
+  defp filter_chip_label("type"), do: Copy.billing_events_filter_label_event_type()
+  defp filter_chip_label("actor_type"), do: Copy.billing_events_filter_label_actor_type()
+  defp filter_chip_label("subject_type"), do: Copy.billing_events_filter_label_subject_type()
+
+  defp filter_chip_label("source_webhook_event_id"),
+    do: Copy.billing_events_filter_label_source_webhook_id()
+
+  defp filter_chip_label(key), do: humanize(key)
+
+  defp filter_chip_value(_key, value), do: value
+
+  defp clear_all_href(_params, table_path) do
+    AccrueAdmin.DataTableNav.merge_query(table_path, %{
+      "view" => "all",
+      "q" => nil,
+      "type" => nil,
+      "actor_type" => nil,
+      "subject_type" => nil,
+      "source_webhook_event_id" => nil,
+      "cursor" => nil,
+      "phase197_state" => nil
+    })
+  end
+
+  defp filter_active?(params), do: filter_params(params) != %{}
+
+  defp active_clear_all_href(params, table_path) do
+    if filter_active?(params), do: clear_all_href(params, table_path)
+  end
+
+  defp list_state(params) do
+    if phase197_loading_fixture?(params), do: "loading-skeleton", else: nil
+  end
+
+  defp empty_reason(params, summary) do
+    cond do
+      phase197_loading_fixture?(params) -> nil
+      first_run_empty?(params, summary) -> "first-run"
+      filter_active?(params) -> "filter"
+      true -> nil
+    end
+  end
+
+  defp empty_title(params, summary) do
+    if first_run_empty?(params, summary) do
+      Copy.events_list_first_run_empty_title()
+    else
+      Copy.events_list_filtered_empty_title()
+    end
+  end
+
+  defp empty_copy(params, summary) do
+    if first_run_empty?(params, summary) do
+      Copy.events_list_first_run_empty_body()
+    else
+      Copy.events_list_filtered_empty_body()
+    end
+  end
+
+  defp first_run_empty?(params, summary),
+    do: summary.total_count == 0 and !filter_active?(params)
+
+  defp phase197_loading_fixture?(params) do
+    Application.get_env(:accrue_admin, :env) == :test and
+      Map.get(params, "phase197_state") == "loading-skeleton"
+  end
+
   defp subject_cell(row, mount_path, owner_scope) do
     label = "#{row.subject_type} #{row.subject_id}"
 
@@ -301,7 +460,7 @@ defmodule AccrueAdmin.Live.EventsLive do
   end
 
   defp webhook_source_summary(%{caused_by_webhook_event_id: nil}),
-    do: AccrueAdmin.Copy.billing_events_webhook_source_direct()
+    do: Copy.billing_events_webhook_source_direct()
 
   defp webhook_source_summary(%{caused_by_webhook_event_id: webhook_id}), do: webhook_id
 
@@ -318,7 +477,7 @@ defmodule AccrueAdmin.Live.EventsLive do
   end
 
   defp format_datetime(%DateTime{} = value), do: Calendar.strftime(value, "%b %d, %Y %H:%M UTC")
-  defp format_datetime(_value), do: AccrueAdmin.Copy.billing_events_when_unknown()
+  defp format_datetime(_value), do: Copy.billing_events_when_unknown()
 
   defp admin_path(admin, suffix), do: (admin["mount_path"] || "/billing") <> suffix
 

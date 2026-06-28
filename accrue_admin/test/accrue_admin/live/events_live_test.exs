@@ -115,7 +115,8 @@ defmodule AccrueAdmin.EventsLiveTest do
     assert {:ok, _view, html} = live(conn, contract.route <> "?actor_type=admin")
 
     assert html =~ admin_changes.label
-    assert html =~ ~s(actor_type=admin)
+    assert html =~ ~s(name="actor_type")
+    assert html =~ ~s(value="admin")
     assert html =~ "ax-filter-chip-cobalt"
     refute html =~ ">By actor<"
   end
@@ -194,25 +195,26 @@ defmodule AccrueAdmin.EventsLiveTest do
     assert loading_html =~ contract.states.loading
   end
 
-  # --- Plan 175-06: Compliance actor-lens chip tests ---
+  # --- Plan 175-06 / 197-06: Compliance actor-lens chip tests ---
 
-  test "events list always renders a 'By actor' chip element", %{conn: conn} do
+  test "events list always renders the Admin changes chip element", %{conn: conn} do
     conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
     assert {:ok, _view, html} = live(conn, "/billing/events")
-    assert html =~ "By actor"
+    assert html =~ Copy.events_list_admin_changes_label()
   end
 
-  test "By actor chip is slate (inactive) when actor_type param is absent", %{conn: conn} do
+  test "Admin changes chip is slate when actor_type param is absent", %{conn: conn} do
     conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
     assert {:ok, _view, html} = live(conn, "/billing/events")
     # chip rendered with slate tone and an activation href
     assert html =~ "ax-filter-chip-slate"
-    assert html =~ "actor_type"
+    assert html =~ "actor_type=admin"
   end
 
-  test "By actor chip is cobalt (active) when actor_type=admin in params", %{conn: conn} do
+  test "Admin changes chip is cobalt when actor_type=admin in params", %{conn: conn} do
     conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
     assert {:ok, _view, html} = live(conn, "/billing/events?actor_type=admin")
+    assert html =~ Copy.events_list_admin_changes_label()
     assert html =~ "ax-filter-chip-cobalt"
     # should have Clear remove_href
     assert html =~ "Clear"
