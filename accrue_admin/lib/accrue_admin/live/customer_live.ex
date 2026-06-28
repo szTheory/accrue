@@ -10,6 +10,7 @@ defmodule AccrueAdmin.Live.CustomerLive do
   alias Accrue.Billing.{Charge, Invoice, PaymentMethod, Subscription}
   alias Accrue.Events
   alias Accrue.Repo
+  alias AccrueAdmin.BillingPresentation
   alias AccrueAdmin.Copy
   alias AccrueAdmin.Queries.Customers
   alias AccrueAdmin.ScopedPath
@@ -20,19 +21,14 @@ defmodule AccrueAdmin.Live.CustomerLive do
     Detail,
     FlashGroup,
     JsonViewer,
-    KpiCard,
     MoneyFormatter,
     RelatedResources,
-    StatusBadge,
-    TaxOwnershipCard,
     Timeline
   }
 
   alias AccrueAdmin.TaxOwnershipRow
 
-  @tabs ~w(subscriptions invoices charges payment_methods entitlements events metadata)
-  @primary_tabs ~w(subscriptions invoices charges)
-  @more_tabs ~w(payment_methods entitlements events metadata)
+  @peer_record_sets ~w(subscriptions invoices charges)
 
   @impl true
   def mount(%{"id" => customer_id}, session, socket) do
@@ -60,39 +56,46 @@ defmodule AccrueAdmin.Live.CustomerLive do
          |> assign(:params, %{})
          |> assign(:pending_payment_method_delete, nil)
          |> assign(:payment_methods, payment_methods(customer))
-         |> assign(:tab, "subscriptions")
-         |> assign(:more_tabs_open, false)
-         |> assign(:more_tabs, @more_tabs)
+         |> assign(
+           :active_subscription_payment_method_ids,
+           active_subscription_payment_method_ids(customer)
+         )
+         |> assign(:entitlements_view, entitlements_view(customer))
+         |> assign(:timeline_events, [])
+         |> assign(:timeline_events_loaded?, false)
+         |> assign(:raw_json_loaded?, false)
          |> assign(:tab_counts, tab_counts(customer))
-         |> assign(:tax_risk, tax_risk_summary(customer))}
+         |> assign(:tax_risk, tax_risk_summary(customer))
+         |> assign(:tax_ownership_row, TaxOwnershipRow.from_customer(customer))
+         |> assign(
+           :related_items,
+           related_items(
+             customer,
+             admin["mount_path"] || "/billing",
+             socket.assigns.current_owner_scope
+           )
+         )
+         |> assign_peer_record_set(%{})}
     end
   end
 
   @impl true
   def handle_params(params, _uri, socket) do
-    tab =
-      params
-      |> Map.get("tab", "subscriptions")
-      |> normalize_tab()
-
     {:noreply,
      socket
      |> assign(:params, params)
-     |> assign(:tab, tab)
-     |> assign(:more_tabs_open, false)
-     |> assign_entitlements_view(tab)}
+     |> assign_peer_record_set(params)}
   end
 
   @impl true
-  def handle_event("toggle_more_tabs", _params, socket) do
-    {:noreply, assign(socket, :more_tabs_open, !socket.assigns.more_tabs_open)}
+  def handle_event("load_activity", _params, socket) do
+    {:noreply, ensure_timeline_events(socket)}
   end
 
-  def handle_event("close_more_tabs", _params, socket) do
-    {:noreply, assign(socket, :more_tabs_open, false)}
+  def handle_event("load_raw_json", _params, socket) do
+    {:noreply, assign(socket, :raw_json_loaded?, true)}
   end
 
-  @impl true
   def handle_event("sync_payment_methods", _params, socket) do
     case Billing.sync_payment_methods(socket.assigns.customer, []) do
       {:ok, _payment_methods} ->
@@ -205,311 +208,117 @@ defmodule AccrueAdmin.Live.CustomerLive do
 
         <FlashGroup.flash_group flashes={@flashes} />
 
-        <section class="ax-kpi-grid" aria-label="Customer summary">
-          <KpiCard.kpi_card label="Owner" value={@customer.owner_type}>
-            <:meta><%= @customer.owner_id %></:meta>
-          </KpiCard.kpi_card>
+        <Detail.summary_list rows={summary_rows(@customer, @payment_methods, @tax_risk, @entitlements_view, @tab_counts)} />
 
-          <KpiCard.kpi_card
-            label="Subscriptions"
-            value={Integer.to_string(@tab_counts.subscriptions)}
-            delta={Integer.to_string(@tab_counts.payment_methods) <> " payment methods"}
-            delta_tone="cobalt"
-          >
-            <:meta>Local subscription and payment method projections</:meta>
-          </KpiCard.kpi_card>
-
-          <KpiCard.kpi_card
-            label="Payments"
-            value={Integer.to_string(@tab_counts.charges)}
-            delta={Integer.to_string(@tab_counts.invoices) <> " invoices"}
-            delta_tone="slate"
-          >
-            <:meta>Payments and invoices tied to this customer</:meta>
-          </KpiCard.kpi_card>
-
-          <KpiCard.kpi_card
-            label="Tax risk"
-            value={@tax_risk.headline}
-            delta={@tax_risk.detail}
-            delta_tone={@tax_risk.tone}
-          >
-            <:meta>Derived from projected subscriptions and invoices only</:meta>
-          </KpiCard.kpi_card>
-        </section>
-
-        <TaxOwnershipCard.tax_ownership_card row={TaxOwnershipRow.from_customer(@customer)} />
-
-        <RelatedResources.related_resources items={related_items(@customer, @admin_mount_path, @current_owner_scope)} />
-
-        <nav class="ax-tabs" aria-label="Customer sections">
-          <a
-            :for={tab <- primary_tab_list(@customer, @tab_counts, @admin_mount_path, @current_owner_scope)}
-            href={tab.href}
-            class={["ax-tab", @tab == tab.id && "ax-tab-active"]}
-            aria-current={if(@tab == tab.id, do: "page", else: nil)}
-          >
-            <span><%= tab.label %></span>
-            <span :if={tab.count} class="ax-tab-count"><%= tab.count %></span>
-          </a>
-          <div
-            class={["ax-tab-more-wrapper", @more_tabs_open && "ax-tab-more-open"]}
-            phx-window-keydown="close_more_tabs"
-            phx-key="Escape"
-          >
-            <button
-              type="button"
-              class={["ax-tab ax-tab-more-trigger", @tab in @more_tabs && "ax-tab-active"]}
-              aria-haspopup="menu"
-              aria-expanded={to_string(@more_tabs_open)}
-              phx-click="toggle_more_tabs"
-            >
-              More <AccrueAdmin.Components.Icon.icon name={:chevron_down} size="sm" />
-            </button>
-            <ul
-              :if={@more_tabs_open}
-              class="ax-tab-more-menu"
-              role="menu"
-              phx-mounted={Phoenix.LiveView.JS.show(transition: {"ax-tab-more-entering", "ax-tab-more-enter-from", "ax-tab-more-enter-to"}, time: 180)}
-              phx-remove={Phoenix.LiveView.JS.hide(transition: {"ax-tab-more-leaving", "ax-tab-more-leave-from", "ax-tab-more-leave-to"}, time: 140)}
-            >
-              <li
-                :for={tab <- more_tab_list(@customer, @tab_counts, @admin_mount_path, @current_owner_scope)}
-                role="none"
-              >
-                <a
-                  href={tab.href}
-                  class="ax-tab-more-item"
-                  role="menuitem"
-                  aria-current={if(@tab == tab.id, do: "page", else: nil)}
-                >
-                  <%= tab.label %>
-                  <span :if={tab.count} class="ax-tab-count"><%= tab.count %></span>
-                </a>
-              </li>
-            </ul>
-          </div>
-        </nav>
-
-        <%= case @tab do %>
-          <% "subscriptions" -> %>
-            <Detail.detail_section title="Subscriptions">
-              <div :for={subscription <- subscriptions(@customer)} class="ax-list-row">
-                <a
-                  href={scoped_mount_path(@admin_mount_path, "/subscriptions/" <> subscription.id, @current_owner_scope)}
-                  class="ax-link"
-                >
-                  <%= subscription.processor_id %>
-                </a>
-                <span class="ax-body"><%= predicate_summary(subscription) %></span>
-              </div>
-              <p :if={subscriptions(@customer) == []} class="ax-body"><%= Copy.customer_detail_no_subscriptions() %></p>
-            </Detail.detail_section>
-
-          <% "invoices" -> %>
-            <Detail.detail_section title="Invoices">
-              <div :for={invoice <- invoices(@customer)} class="ax-list-row">
-                <a
-                  href={ScopedPath.build(@admin_mount_path, "/invoices/#{invoice.id}", @current_owner_scope)}
-                  class="ax-link"
-                >
-                  <%= invoice.number || invoice.processor_id || invoice.id %>
-                </a>
-                <MoneyFormatter.money_formatter amount_minor={invoice.amount_remaining_minor || 0} currency={invoice.currency || "usd"} customer={@customer} />
-              </div>
-              <p :if={invoices(@customer) == []} class="ax-body"><%= Copy.customer_detail_no_invoices() %></p>
-            </Detail.detail_section>
-
-          <% "charges" -> %>
-            <Detail.detail_section title="Payments">
-              <div :for={charge <- charges(@customer)} class="ax-list-row">
-                <span class="ax-body"><%= charge.processor_id || charge.id %> · <%= charge.status %></span>
-                <MoneyFormatter.money_formatter amount_minor={charge.amount_cents || 0} currency={charge.currency || "usd"} customer={@customer} />
-              </div>
-              <p :if={charges(@customer) == []} class="ax-body">No charges projected yet.</p>
-            </Detail.detail_section>
-
-          <% "payment_methods" -> %>
-            <Detail.detail_section title={Copy.customer_payment_methods_section_heading()}>
-              <:actions>
-                <button
-                  type="button"
-                  class="ax-button ax-button-primary"
-                  phx-click="sync_payment_methods"
-                  data-role="sync-payment-methods"
-                >
-                  <%= Copy.customer_payment_methods_sync_action() %>
-                </button>
-              </:actions>
+        <section class="ax-stack-xl" aria-label="Customer details">
+          <details class="ax-detail-section" data-ax-drill-section="payment-methods" open>
+            <summary class="ax-detail-section-head">
+              <span class="ax-detail-section-title"><%= Copy.customer_payment_methods_section_heading() %></span>
+            </summary>
+            <div class="ax-stack-md">
               <p class="ax-body"><%= Copy.customer_payment_methods_section_body() %></p>
-              <div :for={payment_method <- @payment_methods} class="ax-list-row">
-                <div>
-                  <p class="ax-body">
-                    <%= payment_method.card_brand || payment_method.type || Copy.customer_payment_methods_row_fallback_label() %> <%= Copy.customer_payment_methods_card_last4_mask() %> <%= payment_method.card_last4 || "--" %>
-                  </p>
-                  <p class="ax-body">
-                    <%= expiry(payment_method) %>
-                    <span :if={default_payment_method?(@customer, payment_method)}>
-                      · <%= Copy.customer_payment_methods_default_badge() %>
-                    </span>
-                    <span :if={active_subscription_payment_method?(@customer, payment_method)}>
-                      · <%= Copy.customer_payment_methods_in_use_badge() %>
-                    </span>
-                  </p>
-                </div>
-                <div class="ax-page-header">
-                  <button
-                    :if={!default_payment_method?(@customer, payment_method)}
-                    type="button"
-                    class="ax-button ax-button-ghost"
-                    phx-click="set_default_payment_method"
-                    phx-value-payment_method_id={payment_method.id}
-                    data-role="set-default-payment-method"
-                    data-payment-method-id={payment_method.id}
-                  >
-                    <%= Copy.customer_payment_methods_set_default_action() %>
-                  </button>
-                  <button
-                    type="button"
-                    class="ax-button ax-button-ghost"
-                    phx-click="prepare_delete_payment_method"
-                    phx-value-payment_method_id={payment_method.id}
-                    data-role="prepare-delete-payment-method"
-                    data-payment-method-id={payment_method.id}
-                  >
-                    <%= Copy.customer_payment_methods_delete_action() %>
-                  </button>
-                </div>
-              </div>
+              <Detail.detail_field_list fields={payment_method_drill_rows(@customer, @payment_methods, @active_subscription_payment_method_ids)} />
               <p :if={@payment_methods == []} class="ax-body"><%= Copy.customer_payment_methods_empty_copy() %></p>
               <p class="ax-body"><%= Copy.customer_payment_methods_replace_handoff() %></p>
+            </div>
+          </details>
 
-              <section
-                :if={@pending_payment_method_delete}
-                class="ax-card"
-                data-role="payment-method-delete-confirmation"
+          <details class="ax-detail-section" data-ax-drill-section="access-entitlements">
+            <summary class="ax-detail-section-head">
+              <span class="ax-detail-section-title">Access and entitlements</span>
+            </summary>
+            <Detail.detail_field_list fields={access_entitlement_fields(@entitlements_view)} />
+          </details>
+
+          <details class="ax-detail-section" data-ax-drill-section="tax-ownership">
+            <summary class="ax-detail-section-head">
+              <span class="ax-detail-section-title">Tax and ownership</span>
+            </summary>
+            <Detail.detail_field_list fields={tax_ownership_fields(@tax_ownership_row, @tax_risk)} />
+          </details>
+
+          <section class="ax-detail-section" aria-label="Customer record sets">
+            <nav class="ax-tabs" aria-label="Customer peer record sets">
+              <a
+                :for={tab <- peer_record_set_links(@customer, @tab_counts, @admin_mount_path, @current_owner_scope)}
+                href={tab.href}
+                class={["ax-tab", @tab == tab.id && "ax-tab-active"]}
+                aria-current={if(@tab == tab.id, do: "page", else: nil)}
               >
-                <p class="ax-label"><%= Copy.customer_payment_methods_delete_action() %></p>
-                <p class="ax-body"><%= Copy.customer_payment_methods_delete_warning() %></p>
-                <p class="ax-body">
-                  <%= pending_delete_label(@pending_payment_method_delete.payment_method) %>
-                </p>
-                <p :if={@pending_payment_method_delete.blocked_reason} class="ax-body">
-                  <%= blocked_reason_copy(@pending_payment_method_delete.blocked_reason) %>
-                </p>
-                <div class="ax-page-header">
-                  <button
-                    :if={is_nil(@pending_payment_method_delete.blocked_reason)}
-                    type="button"
-                    class="ax-button ax-button-primary"
-                    phx-click="confirm_delete_payment_method"
-                    data-role="confirm-delete-payment-method"
+                <span><%= tab.label %></span>
+                <span :if={tab.count} class="ax-tab-count"><%= tab.count %></span>
+              </a>
+            </nav>
+
+            <%= case @tab do %>
+              <% "subscriptions" -> %>
+                <div :for={subscription <- @peer_records} class="ax-list-row">
+                  <a
+                    href={ScopedPath.build(@admin_mount_path, "/subscriptions/#{subscription.id}", @current_owner_scope)}
+                    class="ax-link"
                   >
-                    <%= Copy.customer_payment_methods_delete_action() %>
-                  </button>
-                  <button
-                    type="button"
-                    class="ax-button ax-button-ghost"
-                    phx-click="cancel_delete_payment_method"
-                  >
-                    <%= Copy.customer_payment_methods_cancel_action() %>
-                  </button>
+                    <%= subscription.processor_id %>
+                  </a>
+                  <span class="ax-body"><%= predicate_summary(subscription) %></span>
                 </div>
-              </section>
-            </Detail.detail_section>
+                <p :if={@peer_records == []} class="ax-body"><%= Copy.customer_detail_no_subscriptions() %></p>
 
-          <% "entitlements" -> %>
-            <%= case @entitlements_view do %>
-              <% :error -> %>
-                <section class="ax-card" data-role="entitlements-error">
-                  <h3 class="ax-heading"><%= Copy.entitlements_section_title() %></h3>
-                  <p class="ax-body"><%= Copy.entitlements_error_copy() %></p>
-                </section>
+              <% "invoices" -> %>
+                <div :for={invoice <- @peer_records} class="ax-list-row">
+                  <a
+                    href={ScopedPath.build(@admin_mount_path, "/invoices/#{invoice.id}", @current_owner_scope)}
+                    class="ax-link"
+                  >
+                    <%= invoice.number || invoice.processor_id || invoice.id %>
+                  </a>
+                  <MoneyFormatter.money_formatter amount_minor={invoice.amount_remaining_minor || 0} currency={invoice.currency || "usd"} customer={@customer} />
+                </div>
+                <p :if={@peer_records == []} class="ax-body"><%= Copy.customer_detail_no_invoices() %></p>
 
-              <% {:ok, resolved, unmapped} -> %>
-                <% active_plans = resolved.active_plans |> MapSet.to_list() |> Enum.sort() %>
-                <% features = resolved.features |> MapSet.to_list() |> Enum.sort() %>
-                <% grace_plans = resolved.grace_plans |> MapSet.to_list() |> Enum.sort() %>
-                <% grace_features = resolved.grace_features |> MapSet.to_list() |> Enum.sort() %>
-                <% expired_grace_plans = resolved.expired_grace_plans |> MapSet.to_list() |> Enum.sort() %>
-                <% any_grace? = grace_plans != [] or grace_features != [] or expired_grace_plans != [] %>
-                <Detail.detail_section title={Copy.entitlements_section_title()}>
-                  <div :if={active_plans != []} class="ax-stack-sm">
-                    <p class="ax-label"><%= Copy.entitlements_active_plans_label() %></p>
-                    <div :for={plan <- active_plans} class="ax-list-row">
-                      <StatusBadge.status_badge status={plan} tone="moss" />
-                    </div>
-                  </div>
-
-                  <div :if={features != []} class="ax-stack-sm">
-                    <p class="ax-label"><%= Copy.entitlements_features_label() %></p>
-                    <div :for={feature <- features} class="ax-list-row">
-                      <StatusBadge.status_badge status={feature} tone="moss" />
-                    </div>
-                  </div>
-
-                  <div :if={resolved.quantities != %{}} class="ax-stack-sm">
-                    <p class="ax-label"><%= Copy.entitlements_quantities_label() %></p>
-                    <div class="ax-kpi-grid">
-                      <KpiCard.kpi_card
-                        :for={{quota_key, count} <- Enum.sort_by(resolved.quantities, &elem(&1, 0))}
-                        label={to_string(quota_key)}
-                        value={Integer.to_string(count)}
-                      />
-                    </div>
-                  </div>
-
-                  <div :if={any_grace?} class="ax-stack-sm">
-                    <p class="ax-label"><%= Copy.entitlements_grace_label() %></p>
-                    <div :for={plan <- grace_plans} class="ax-list-row">
-                      <StatusBadge.status_badge status={plan} tone="amber" />
-                    </div>
-                    <div :for={feature <- grace_features} class="ax-list-row">
-                      <StatusBadge.status_badge status={feature} tone="amber" />
-                    </div>
-                    <div :for={plan <- expired_grace_plans} class="ax-list-row">
-                      <StatusBadge.status_badge status={plan} tone="slate" />
-                    </div>
-                  </div>
-
-                  <p :if={active_plans == [] and features == []} class="ax-body">
-                    <%= Copy.entitlements_empty_title() %> · <%= Copy.entitlements_empty_copy() %>
-                  </p>
-                </Detail.detail_section>
-
-                <Detail.detail_section title={Copy.entitlements_drift_section_title()}>
-                  <div :for={price_id <- unmapped} class="ax-list-row">
-                    <div>
-                      <StatusBadge.status_badge
-                        status={:unmapped}
-                        label={Copy.entitlements_unmapped_badge()}
-                        tone="amber"
-                      />
-                      <p class="ax-muted ax-body"><%= price_id %> · <%= Copy.entitlements_unmapped_hint() %></p>
-                    </div>
-                  </div>
-                  <p :if={unmapped == []} class="ax-body"><%= Copy.entitlements_no_drift_copy() %></p>
-                </Detail.detail_section>
-
-                <JsonViewer.json_viewer
-                  id="customer-entitlements"
-                  label={Copy.entitlements_raw_map_label()}
-                  payload={entitlements_display_map(resolved)}
-                />
+              <% "charges" -> %>
+                <div :for={charge <- @peer_records} class="ax-list-row">
+                  <a
+                    href={ScopedPath.build(@admin_mount_path, "/payments/#{charge.id}", @current_owner_scope)}
+                    class="ax-link"
+                  >
+                    <%= charge.processor_id || charge.id %>
+                  </a>
+                  <MoneyFormatter.money_formatter amount_minor={charge.amount_cents || 0} currency={charge.currency || "usd"} customer={@customer} />
+                </div>
+                <p :if={@peer_records == []} class="ax-body">No payments projected yet.</p>
             <% end %>
+          </section>
+        </section>
 
-          <% "events" -> %>
-            <Detail.detail_section title="Events">
-              <Timeline.timeline
-                label="Customer events"
-                empty_label="No customer-scoped events yet"
-                items={timeline_items(@customer)}
-              />
-            </Detail.detail_section>
+        <div data-ax-related-resources>
+          <RelatedResources.related_resources items={@related_items} />
+        </div>
 
-          <% "metadata" -> %>
-            <JsonViewer.json_viewer id="customer-metadata" label="Customer metadata" payload={metadata_payload(@customer)} />
-        <% end %>
+        <details class="ax-detail-section" data-ax-lazy-activity phx-click="load_activity">
+          <summary class="ax-detail-section-head">
+            <span class="ax-detail-section-title">Activity</span>
+          </summary>
+          <%= if @timeline_events_loaded? do %>
+            <Timeline.timeline
+              label="Customer activity"
+              empty_label="No customer-scoped events yet"
+              items={timeline_items(@timeline_events)}
+            />
+          <% else %>
+            <p class="ax-body">Open this section to load customer activity.</p>
+          <% end %>
+        </details>
+
+        <details class="ax-detail-section" data-ax-lazy-json phx-click="load_raw_json">
+          <summary class="ax-detail-section-head">
+            <span class="ax-detail-section-title">Raw data</span>
+          </summary>
+          <%= if @raw_json_loaded? do %>
+            <JsonViewer.json_viewer id="customer-raw-data" label="Customer raw data" payload={raw_payload(@customer, @entitlements_view)} />
+          <% else %>
+            <p class="ax-body">Open this section to load the escaped customer payload.</p>
+          <% end %>
+        </details>
       </section>
     </AppShell.app_shell>
     """
@@ -527,6 +336,174 @@ defmodule AccrueAdmin.Live.CustomerLive do
     |> assign(:admin_mount_path, admin["mount_path"] || "/billing")
     |> assign(:current_path, admin_path(admin, "/customers"))
   end
+
+  defp summary_rows(customer, payment_methods, tax_risk, entitlements_view, counts) do
+    [
+      %{label: "Owner", value: owner_summary(customer)},
+      %{label: "Processor customer ID", value: customer.processor_id || "-"},
+      %{
+        label: "Locale / timezone",
+        value: "#{customer.preferred_locale || "--"} / #{customer.preferred_timezone || "--"}"
+      },
+      %{
+        label: "Default payment method",
+        value: default_payment_method_label(customer, payment_methods)
+      },
+      %{label: "Billing health", value: billing_health_headline(counts)},
+      %{label: "Tax risk", value: "#{tax_risk.headline} - #{tax_risk.detail}"},
+      %{label: "Access", value: access_headline(entitlements_view)}
+    ]
+  end
+
+  defp payment_method_drill_rows(customer, payment_methods, active_payment_method_ids) do
+    Enum.map(payment_methods, fn payment_method ->
+      %{
+        label: payment_method_label(payment_method),
+        value:
+          [
+            expiry(payment_method),
+            default_payment_method?(customer, payment_method) &&
+              Copy.customer_payment_methods_default_badge(),
+            MapSet.member?(active_payment_method_ids, payment_method.id) &&
+              Copy.customer_payment_methods_in_use_badge()
+          ]
+          |> Enum.reject(&(&1 in [false, nil, ""]))
+          |> Enum.join(" · ")
+      }
+    end)
+  end
+
+  defp owner_summary(customer),
+    do: "#{customer.owner_type || "Owner"} #{customer.owner_id || "-"}"
+
+  defp default_payment_method_label(customer, payment_methods) do
+    payment_methods
+    |> Enum.find(&default_payment_method?(customer, &1))
+    |> case do
+      nil -> "No default payment method"
+      payment_method -> payment_method_label(payment_method)
+    end
+  end
+
+  defp payment_method_label(payment_method) do
+    [
+      payment_method.card_brand || payment_method.type ||
+        Copy.customer_payment_methods_row_fallback_label(),
+      Copy.customer_payment_methods_card_last4_mask(),
+      payment_method.card_last4 || "--"
+    ]
+    |> Enum.join(" ")
+  end
+
+  defp billing_health_headline(counts) do
+    [
+      simple_count_label(counts.subscriptions, "subscription"),
+      simple_count_label(counts.invoices, "invoice"),
+      simple_count_label(counts.charges, "payment")
+    ]
+    |> Enum.join(" · ")
+  end
+
+  defp access_headline(:error), do: Copy.entitlements_error_copy()
+
+  defp access_headline({:ok, resolved, unmapped}) do
+    active_count = MapSet.size(resolved.active_plans) + MapSet.size(resolved.features)
+
+    cond do
+      active_count > 0 and unmapped == [] -> "#{active_count} active access grants"
+      active_count > 0 -> "#{active_count} active access grants · #{length(unmapped)} unmapped"
+      unmapped != [] -> "#{length(unmapped)} unmapped prices"
+      true -> Copy.entitlements_empty_title()
+    end
+  end
+
+  defp list_or_empty([]),
+    do: "#{Copy.entitlements_empty_title()} - #{Copy.entitlements_empty_copy()}"
+
+  defp list_or_empty(values), do: Enum.join(values, ", ")
+
+  defp quantity_summary(quantities) when quantities == %{}, do: "-"
+
+  defp quantity_summary(quantities) do
+    quantities
+    |> Enum.sort_by(&elem(&1, 0))
+    |> Enum.map(fn {key, count} -> "#{key}: #{count}" end)
+    |> Enum.join(", ")
+  end
+
+  defp access_entitlement_fields(:error) do
+    [
+      %{label: "Access", value: Copy.entitlements_error_copy()},
+      %{label: "Drift", value: Copy.entitlements_error_copy()}
+    ]
+  end
+
+  defp access_entitlement_fields({:ok, resolved, unmapped}) do
+    active_plans = resolved.active_plans |> MapSet.to_list() |> Enum.sort()
+    features = resolved.features |> MapSet.to_list() |> Enum.sort()
+    grace_plans = resolved.grace_plans |> MapSet.to_list() |> Enum.sort()
+    grace_features = resolved.grace_features |> MapSet.to_list() |> Enum.sort()
+    expired_grace_plans = resolved.expired_grace_plans |> MapSet.to_list() |> Enum.sort()
+
+    [
+      %{label: Copy.entitlements_active_plans_label(), value: list_or_empty(active_plans)},
+      %{label: Copy.entitlements_features_label(), value: list_or_empty(features)},
+      %{
+        label: Copy.entitlements_quantities_label(),
+        value: quantity_summary(resolved.quantities)
+      },
+      %{
+        label: Copy.entitlements_grace_label(),
+        value: list_or_empty(grace_plans ++ grace_features ++ expired_grace_plans)
+      },
+      %{
+        label: Copy.entitlements_drift_section_title(),
+        value:
+          if(unmapped == [],
+            do: Copy.entitlements_no_drift_copy(),
+            else: Enum.join(Enum.sort(unmapped), ", ")
+          )
+      }
+    ]
+  end
+
+  defp tax_ownership_fields(row, tax_risk) do
+    tax_health = BillingPresentation.tax_health(row)
+
+    [
+      %{label: "Ownership", value: BillingPresentation.ownership_label(row)},
+      %{label: "Owner ID", value: row[:owner_id] || "-"},
+      %{label: "Tax health", value: BillingPresentation.tax_health_label(tax_health)},
+      %{label: "Tax risk", value: "#{tax_risk.headline} - #{tax_risk.detail}"}
+    ]
+  end
+
+  defp ensure_timeline_events(%{assigns: %{timeline_events_loaded?: true}} = socket), do: socket
+
+  defp ensure_timeline_events(socket) do
+    socket
+    |> assign(:timeline_events, timeline_events(socket.assigns.customer.id))
+    |> assign(:timeline_events_loaded?, true)
+  end
+
+  defp timeline_events(customer_id),
+    do: Events.timeline_for("Customer", customer_id, limit: 25)
+
+  defp raw_payload(customer, entitlements_view) do
+    %{
+      "metadata" => customer.metadata || %{},
+      "data" => customer.data || %{},
+      "default_payment_method_id" => customer.default_payment_method_id,
+      "preferred_locale" => customer.preferred_locale,
+      "preferred_timezone" => customer.preferred_timezone,
+      "entitlements" => raw_entitlements_payload(entitlements_view)
+    }
+  end
+
+  defp raw_entitlements_payload({:ok, resolved, _unmapped}),
+    do: entitlements_display_map(resolved)
+
+  defp raw_entitlements_payload(:error), do: %{"error" => Copy.entitlements_error_copy()}
 
   defp related_items(customer, mount_path, scope) do
     [
@@ -581,59 +558,47 @@ defmodule AccrueAdmin.Live.CustomerLive do
     }
   end
 
-  defp primary_tab_list(customer, counts, mount_path, owner_scope) do
-    Enum.map(@primary_tabs, fn tab ->
+  defp peer_record_set_links(customer, counts, mount_path, owner_scope) do
+    Enum.map(@peer_record_sets, fn tab ->
       %{
         id: tab,
-        label: tab_display_label(tab),
+        label: peer_record_set_label(tab),
         href:
           scoped_mount_path(mount_path, "/customers/#{customer.id}", owner_scope, %{
-            "tab" => tab
+            "tab" => peer_record_set_param(tab)
           }),
         count: Map.get(counts, String.to_existing_atom(tab))
       }
     end)
   end
 
-  defp more_tab_list(customer, counts, mount_path, owner_scope) do
-    Enum.map(@more_tabs, fn tab ->
-      %{
-        id: tab,
-        label: tab_display_label(tab),
-        href:
-          scoped_mount_path(mount_path, "/customers/#{customer.id}", owner_scope, %{
-            "tab" => tab
-          }),
-        count: Map.get(counts, String.to_existing_atom(tab))
-      }
-    end)
+  defp peer_record_set_label("charges"), do: "Payments"
+  defp peer_record_set_label(tab), do: humanize(tab)
+
+  defp peer_record_set_param("charges"), do: "payments"
+  defp peer_record_set_param(tab), do: tab
+
+  defp assign_peer_record_set(socket, params) do
+    active = active_peer_record_set(params)
+
+    socket
+    |> assign(:tab, active)
+    |> assign(:peer_records, peer_records(socket.assigns.customer, active))
   end
 
-  # Display label for tab IDs — "charges" tab relabeled to "Payments" per IA-05
-  defp tab_display_label("charges"), do: "Payments"
-  defp tab_display_label(tab), do: humanize(tab)
+  defp active_peer_record_set(%{"tab" => "payments"}), do: "charges"
+  defp active_peer_record_set(%{"tab" => tab}) when tab in @peer_record_sets, do: tab
+  defp active_peer_record_set(_params), do: "subscriptions"
+
+  defp peer_records(customer, "subscriptions"), do: subscriptions(customer)
+  defp peer_records(customer, "invoices"), do: invoices(customer)
+  defp peer_records(customer, "charges"), do: charges(customer)
 
   defp subscriptions(customer) do
     Subscription
     |> where([sub], sub.customer_id == ^customer.id)
     |> order_by([sub], desc: sub.inserted_at, desc: sub.id)
     |> Repo.all()
-  end
-
-  # WR-04: resolve the entitlements diagnostic ONCE into a socket assign in
-  # handle_params (mirroring the :payment_methods assign in mount/3), not inside
-  # the ~H template. This keeps render/1 pure (no DB round-trips per render),
-  # lets CR-01's contained result be computed once and reused across unrelated
-  # re-renders, and is the structural reason the failure can be contained. The
-  # assign is only computed on the entitlements tab; other tabs carry `nil`
-  # (never read by render, which only touches @entitlements_view inside the
-  # "entitlements" case branch).
-  defp assign_entitlements_view(socket, "entitlements") do
-    assign(socket, :entitlements_view, entitlements_view(socket.assigns.customer))
-  end
-
-  defp assign_entitlements_view(socket, _tab) do
-    assign(socket, :entitlements_view, nil)
   end
 
   # Calls the read-only entitlements diagnostic seam ONCE, returning a contained
@@ -696,6 +661,30 @@ defmodule AccrueAdmin.Live.CustomerLive do
   defp default_payment_method?(customer, payment_method),
     do: customer.default_payment_method_id == payment_method.id
 
+  defp active_subscription_payment_method_ids(customer) do
+    tokens =
+      customer
+      |> subscriptions()
+      |> Enum.filter(fn subscription ->
+        subscription.processor == "braintree" and Subscription.active?(subscription)
+      end)
+      |> Enum.map(&get_in(&1.data || %{}, ["payment_method_token"]))
+      |> Enum.reject(&is_nil/1)
+
+    if tokens == [] do
+      MapSet.new()
+    else
+      PaymentMethod
+      |> where(
+        [payment_method],
+        payment_method.customer_id == ^customer.id and payment_method.processor_id in ^tokens
+      )
+      |> select([payment_method], payment_method.id)
+      |> Repo.all()
+      |> MapSet.new()
+    end
+  end
+
   defp active_subscription_payment_method?(customer, payment_method) do
     customer
     |> subscriptions()
@@ -742,16 +731,6 @@ defmodule AccrueAdmin.Live.CustomerLive do
 
   defp blocked_reason_copy(_reason), do: Copy.customer_payment_methods_delete_warning()
 
-  defp pending_delete_label(payment_method) do
-    [
-      payment_method.card_brand || payment_method.type ||
-        Copy.customer_payment_methods_row_fallback_label(),
-      Copy.customer_payment_methods_card_last4_mask(),
-      payment_method.card_last4 || "--"
-    ]
-    |> Enum.join(" ")
-  end
-
   defp refresh_customer_detail(socket) do
     customer_id = socket.assigns.customer.id
 
@@ -760,8 +739,23 @@ defmodule AccrueAdmin.Live.CustomerLive do
         socket
         |> assign(:customer, customer)
         |> assign(:payment_methods, payment_methods(customer))
+        |> assign(
+          :active_subscription_payment_method_ids,
+          active_subscription_payment_method_ids(customer)
+        )
+        |> assign(:entitlements_view, entitlements_view(customer))
         |> assign(:tab_counts, tab_counts(customer))
         |> assign(:tax_risk, tax_risk_summary(customer))
+        |> assign(:tax_ownership_row, TaxOwnershipRow.from_customer(customer))
+        |> assign(
+          :related_items,
+          related_items(
+            customer,
+            socket.assigns.admin_mount_path,
+            socket.assigns.current_owner_scope
+          )
+        )
+        |> assign_peer_record_set(socket.assigns.params)
 
       :not_found ->
         socket
@@ -869,13 +863,14 @@ defmodule AccrueAdmin.Live.CustomerLive do
   defp count_label(1, label), do: "1 #{label} needs attention"
   defp count_label(count, label), do: "#{count} #{label}s need attention"
 
+  defp simple_count_label(1, label), do: "1 #{label}"
+  defp simple_count_label(count, label), do: "#{count} #{label}s"
+
   defp present?(value) when value in [nil, ""], do: false
   defp present?(_value), do: true
 
-  defp timeline_items(customer) do
-    customer
-    |> then(&Events.timeline_for("Customer", &1.id, limit: 25))
-    |> Enum.map(fn event ->
+  defp timeline_items(events) do
+    Enum.map(events, fn event ->
       %{
         title: event.type,
         at: format_datetime(event.inserted_at),
@@ -884,16 +879,6 @@ defmodule AccrueAdmin.Live.CustomerLive do
         tone: if(event.actor_type == "admin", do: :cobalt, else: :slate)
       }
     end)
-  end
-
-  defp metadata_payload(customer) do
-    %{
-      "metadata" => customer.metadata || %{},
-      "data" => customer.data || %{},
-      "default_payment_method_id" => customer.default_payment_method_id,
-      "preferred_locale" => customer.preferred_locale,
-      "preferred_timezone" => customer.preferred_timezone
-    }
   end
 
   defp predicate_summary(subscription) do
@@ -919,10 +904,6 @@ defmodule AccrueAdmin.Live.CustomerLive do
 
     if month && year, do: "#{month}/#{year}", else: "No expiry"
   end
-
-  defp normalize_tab("payments"), do: "charges"
-  defp normalize_tab(tab) when tab in @tabs, do: tab
-  defp normalize_tab(_tab), do: "subscriptions"
 
   defp humanize(value), do: value |> String.replace("_", " ") |> String.capitalize()
 

@@ -245,7 +245,7 @@ defmodule AccrueAdmin.CustomerLiveTest do
     # UX-02: single ax-page shell on customer detail
     assert Regex.scan(~r/class="ax-page"/, html) |> length() == 1
     assert html =~ "Detail Customer"
-    assert html =~ "Tax &amp; ownership"
+    assert html =~ "Tax and ownership"
     assert html =~ "Subscriptions"
     assert html =~ "locale en"
     assert html =~ "Tax risk"
