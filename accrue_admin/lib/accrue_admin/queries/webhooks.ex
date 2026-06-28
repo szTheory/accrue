@@ -15,6 +15,8 @@ defmodule AccrueAdmin.Queries.Webhooks do
   alias AccrueAdmin.Queries.Behaviour
 
   @time_field :received_at
+  @valid_statuses WebhookEvent.statuses()
+  @valid_status_strings MapSet.new(Enum.map(@valid_statuses, &Atom.to_string/1))
 
   @impl true
   def list(opts \\ []) do
@@ -62,9 +64,17 @@ defmodule AccrueAdmin.Queries.Webhooks do
   def encode_filter(filter) when is_map(filter) do
     filter
     |> Enum.into(%{}, fn
-      {:status, value} when is_atom(value) -> {"status", Atom.to_string(value)}
-      {:livemode, value} when is_boolean(value) -> {"livemode", to_string(value)}
-      {key, value} -> {to_string(key), value}
+      {:status, values} when is_list(values) ->
+        {"status", values |> Enum.map(&Atom.to_string/1) |> Enum.join(",")}
+
+      {:status, value} when is_atom(value) ->
+        {"status", Atom.to_string(value)}
+
+      {:livemode, value} when is_boolean(value) ->
+        {"livemode", to_string(value)}
+
+      {key, value} ->
+        {to_string(key), value}
     end)
     |> Behaviour.compact_filter()
   end
@@ -161,22 +171,25 @@ defmodule AccrueAdmin.Queries.Webhooks do
   end
 
   defp decode_status(value) when is_binary(value) do
-    value
-    |> String.trim()
-    |> case do
-      "" ->
-        nil
+    statuses =
+      value
+      |> String.split(",", trim: true)
+      |> Enum.map(&String.trim/1)
+      |> Enum.filter(&MapSet.member?(@valid_status_strings, &1))
+      |> Enum.uniq()
+      |> Enum.map(&String.to_existing_atom/1)
 
-      status ->
-        try do
-          String.to_existing_atom(status)
-        rescue
-          ArgumentError -> nil
-        end
+    case statuses do
+      [] -> nil
+      [status] -> status
+      statuses -> statuses
     end
   end
 
-  defp decode_status(value) when is_atom(value), do: value
+  defp decode_status(value) when is_atom(value) do
+    if value in @valid_statuses, do: value
+  end
+
   defp decode_status(_value), do: nil
 
   defp scope_rows(rows, nil), do: rows

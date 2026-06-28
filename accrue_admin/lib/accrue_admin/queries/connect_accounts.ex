@@ -71,7 +71,11 @@ defmodule AccrueAdmin.Queries.ConnectAccounts do
           Map.get(params, "details_submitted") || Map.get(params, :details_submitted)
         ),
       deauthorized:
-        Behaviour.parse_boolean(Map.get(params, "deauthorized") || Map.get(params, :deauthorized))
+        Behaviour.parse_boolean(Map.get(params, "deauthorized") || Map.get(params, :deauthorized)),
+      needs_attention:
+        Behaviour.parse_boolean(
+          Map.get(params, "needs_attention") || Map.get(params, :needs_attention)
+        )
     }
     |> Behaviour.compact_filter()
   end
@@ -109,6 +113,22 @@ defmodule AccrueAdmin.Queries.ConnectAccounts do
 
       {:deauthorized, false}, query ->
         where(query, [account], is_nil(account.deauthorized_at))
+
+      {:needs_attention, true}, query ->
+        where(
+          query,
+          [account],
+          not is_nil(account.deauthorized_at) or
+            account.details_submitted == false or
+            is_nil(account.details_submitted) or
+            account.charges_enabled == false or
+            is_nil(account.charges_enabled) or
+            account.payouts_enabled == false or
+            is_nil(account.payouts_enabled)
+        )
+
+      {:needs_attention, false}, query ->
+        query
 
       {_unknown, _value}, query ->
         query
