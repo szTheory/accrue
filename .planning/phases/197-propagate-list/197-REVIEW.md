@@ -1,6 +1,6 @@
 ---
 phase: 197-propagate-list
-reviewed: 2026-06-28T18:57:24Z
+reviewed: 2026-06-28T19:05:25Z
 depth: standard
 files_reviewed: 30
 files_reviewed_list:
@@ -35,84 +35,46 @@ files_reviewed_list:
   - accrue_admin/test/accrue_admin/queries/query_modules_test.exs
   - accrue_admin/test/support/list_contracts.ex
 findings:
-  critical: 1
+  critical: 0
   warning: 0
   info: 0
-  total: 1
-status: issues_found
+  total: 0
+status: clean
 ---
 
 # Phase 197: Code Review Report
 
-**Reviewed:** 2026-06-28T18:57:24Z
+**Reviewed:** 2026-06-28T19:05:25Z
 **Depth:** standard
 **Files Reviewed:** 30
-**Status:** issues_found
+**Status:** clean / passed
 
 ## Summary
 
-Reviewed the Phase 197 LIST propagation source, query modules, browser smoke, and focused ExUnit coverage. The Dashboard broad-suite failure documented in `197-07-SUMMARY.md` was not treated as a Phase 197 finding. One blocker remains in the reviewed Connect accounts LIST surface: organization-scoped URLs and page chrome are preserved, but the data query and counters still read global Connect account rows.
+Reviewed the declared Phase 197 LIST propagation source, query modules, browser smoke, and focused ExUnit coverage at standard depth. A remediation review of the Connect accounts owner-scope blocker fix committed as `3f08803e` (`fix(197): scope connect accounts by owner`) confirmed the prior critical finding is resolved: `ConnectAccounts.list/1` and `count_newer_than/1` now apply the active organization owner scope before filtering, cursor handling, ordering, and counting, and `ConnectAccountsLive` now derives KPI summary counts from the same organization-scoped Connect account base query.
+
+All reviewed files meet quality standards. No blocking issues remain.
 
 ## Narrative Findings (AI reviewer)
 
-## Critical Issues
+No actionable bugs, regressions, security issues, or test gaps were found in the reviewed Phase 197 scope.
 
-### CR-01 (BLOCKER): Connect accounts LIST ignores active organization scope
+Prior `CR-01 (BLOCKER): Connect accounts LIST ignores active organization scope` is resolved by commit `3f08803e`. The focused remediation review covered the four changed files:
 
-**File:** `accrue_admin/lib/accrue_admin/queries/connect_accounts.ex:17`
-**Also affects:** `accrue_admin/lib/accrue_admin/live/connect_accounts_live.ex:49`, `accrue_admin/lib/accrue_admin/live/connect_accounts_live.ex:432`
+- `accrue_admin/lib/accrue_admin/queries/connect_accounts.ex`
+- `accrue_admin/lib/accrue_admin/live/connect_accounts_live.ex`
+- `accrue_admin/test/accrue_admin/queries/query_modules_test.exs`
+- `accrue_admin/test/accrue_admin/live/connect_accounts_live_test.exs`
 
-**Issue:** `DataTable` passes `current_owner_scope` into query modules, and `ConnectAccountsLive` now preserves `?org=...` in default/clear-all links, but `ConnectAccounts.list/1` and `count_newer_than/1` never read `:owner_scope`; they query `Account` directly. The page summary also calls `connect_summary()` with no scope and aggregates all `Account` rows. Because Connect accounts carry `owner_type` and `owner_id`, an admin viewing `/billing/connect?org=allowed-org` can see rows, owner ids, poll counts, and KPI counts for other organizations.
+## Verification
 
-**Fix:**
-
-```elixir
-# accrue_admin/lib/accrue_admin/queries/connect_accounts.ex
-alias AccrueAdmin.OwnerScope
-
-def list(opts \\ []) do
-  filter = Keyword.get(opts, :filter, %{})
-  limit = Behaviour.normalize_limit(opts)
-  cursor = Behaviour.decode_cursor(opts)
-  owner_scope = Keyword.get(opts, :owner_scope)
-
-  Account
-  |> scope_query(owner_scope)
-  |> filter_query(filter)
-  |> Behaviour.apply_cursor(@time_field, cursor)
-  # ...
-end
-
-def count_newer_than(opts \\ []) do
-  filter = Keyword.get(opts, :filter, %{})
-  cursor = Behaviour.decode_cursor(opts)
-  owner_scope = Keyword.get(opts, :owner_scope)
-
-  Account
-  |> scope_query(owner_scope)
-  |> filter_query(filter)
-  |> Behaviour.count_newer(@time_field, cursor)
-  |> Repo.aggregate(:count)
-end
-
-defp scope_query(query, nil), do: query
-defp scope_query(query, %OwnerScope{mode: :global}), do: query
-
-defp scope_query(query, %OwnerScope{mode: :organization, organization_id: organization_id}) do
-  organization_id = to_string(organization_id)
-
-  where(
-    query,
-    [account],
-    account.owner_type == "Organization" and account.owner_id == ^organization_id
-  )
-end
-```
-
-Update `ConnectAccountsLive` to build summary counts from the same scoped base query, for example `connect_summary(socket.assigns.current_owner_scope)`, and add query/LiveView tests that insert `org_allowed` and `org_denied` accounts, then assert the org-scoped Connect LIST includes only the allowed row and that KPI counts match the scoped rows.
+- `mix test test/accrue_admin/queries/query_modules_test.exs:416 test/accrue_admin/live/connect_accounts_live_test.exs:133` from `accrue_admin/` passed: 2 tests, 0 failures.
+- `mix test test/accrue_admin/queries/query_modules_test.exs test/accrue_admin/live/connect_accounts_live_test.exs` from `accrue_admin/` passed: 29 tests, 0 failures.
+- `mix format --check-formatted` on the four reviewed files passed.
+- `mix compile --warnings-as-errors` from `accrue_admin/` passed.
 
 ---
 
-_Reviewed: 2026-06-28T18:57:24Z_
+_Reviewed: 2026-06-28T19:05:25Z_
 _Reviewer: the agent (gsd-code-reviewer)_
 _Depth: standard_
