@@ -60,6 +60,14 @@ defmodule AccrueAdmin.Components.AtRiskTableTest do
       assert has_pagination_html =~ "Load more"
     end
 
+    test "module docs describe AtRiskTable as the Recovery work queue before the supporting funnel" do
+      source = File.read!("lib/accrue_admin/components/at_risk_table.ex")
+
+      assert source =~ "Recovery work queue"
+      assert source =~ "before the supporting funnel"
+      refute source =~ "below the Recovery Funnel"
+    end
+
     test "css keeps inactive desktop or mobile layout hidden at each breakpoint" do
       app_css = File.read!(app_css_path())
 

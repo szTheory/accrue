@@ -69,8 +69,31 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLiveTest do
     assert html =~ "$20.00"
   end
 
+  test "D-18 D-19 renders Recovery-specific overview grammar in order", %{conn: conn} do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+
+    assert {:ok, _view, html} = live(conn, "/billing/analytics/recovery?window=30d")
+
+    assert heading_count(html, "h1") == 1
+    assert html =~ Copy.recovery_index_heading()
+    assert active_window_label(html) =~ "30 days"
+
+    assert data_attr_count(html, "data-ax-overview") == 1
+    assert data_attr_count(html, "data-ax-recovery-hero") == 1
+    assert data_attr_count(html, "data-ax-recovery-work-queue") == 1
+    assert data_attr_count(html, "data-ax-recovery-supporting-funnel") == 1
+
+    assert recovery_band_order(html) == [
+             :hero,
+             :work_queue,
+             :supporting_funnel
+           ]
+
+    refute html =~ ~s(data-ax-zone="kpi-cluster")
+  end
+
   describe "funnel rendering (DAN-09)" do
-    test "renders funnel chart below KPI grid", %{conn: conn} do
+    test "renders supporting funnel chart after recovery queue", %{conn: conn} do
       # Seed a cycled-dunning fixture (in addition to the file-level setup) so the
       # funnel has structural strings to render. Distinct campaign_anchor values
       # exercise the DISTINCT-(subject_id, campaign_anchor) tuple semantics of
@@ -226,6 +249,39 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLiveTest do
       [label | _] -> String.trim(label)
       nil -> nil
     end
+  end
+
+  defp data_attr_count(html, attr) do
+    attr
+    |> Regex.escape()
+    |> then(&Regex.compile!("\\b" <> &1 <> "(?:\\s|=|>)"))
+    |> Regex.scan(html)
+    |> length()
+  end
+
+  defp heading_count(html, tag) do
+    tag
+    |> Regex.escape()
+    |> then(&Regex.compile!("<" <> &1 <> "\\b"))
+    |> Regex.scan(html)
+    |> length()
+  end
+
+  defp recovery_band_order(html) do
+    [
+      hero: "data-ax-recovery-hero",
+      work_queue: "data-ax-recovery-work-queue",
+      supporting_funnel: "data-ax-recovery-supporting-funnel",
+      dashboard_kpi_cluster: ~s(data-ax-zone="kpi-cluster")
+    ]
+    |> Enum.flat_map(fn {band, marker} ->
+      case :binary.match(html, marker) do
+        :nomatch -> []
+        {position, _length} -> [{position, band}]
+      end
+    end)
+    |> Enum.sort()
+    |> Enum.map(fn {_position, band} -> band end)
   end
 
   describe "at-risk table (DAN-11)" do
