@@ -58,6 +58,18 @@ defmodule AccrueAdmin.E2EFixturesTest do
     :phase191_at_risk_sub_id
   ]
 
+  @phase199_route_keys [
+    :customer_id,
+    :invoice_id,
+    :charge_id,
+    :webhook_id,
+    :event_id,
+    :connect_account_id,
+    :recovery_subscription_id,
+    :long_name_customer_id,
+    :jpy_charge_id
+  ]
+
   setup do
     # Reset all fixture tables before each test to ensure a clean slate.
     # reset!/0 is already defined and calls TRUNCATE ... RESTART IDENTITY CASCADE.
@@ -313,6 +325,50 @@ defmodule AccrueAdmin.E2EFixturesTest do
     assert payload["namespace"] == "e2e_phase191"
 
     for key <- @phase191_route_keys do
+      assert payload[Atom.to_string(key)], "Expected endpoint payload to include #{key}"
+    end
+  end
+
+  @tag :phase199
+  test "seed_phase199_interaction_matrix!/0 returns deterministic route IDs and edge data" do
+    unless function_exported?(Fixtures, :seed_phase199_interaction_matrix!, 0) do
+      flunk(
+        "Expected Fixtures.seed_phase199_interaction_matrix!/0 for Phase 199 route-flow stress"
+      )
+    end
+
+    first = Fixtures.seed_phase199_interaction_matrix!()
+    first_counts = phase191_fixture_counts()
+    second = Fixtures.seed_phase199_interaction_matrix!()
+    second_counts = phase191_fixture_counts()
+
+    for key <- @phase199_route_keys do
+      assert Map.has_key?(first, key), "Expected Phase 199 fixture result to include #{key}"
+      refute is_nil(first[key]), "Expected Phase 199 fixture result #{key} to be non-nil"
+    end
+
+    assert Map.take(first, @phase199_route_keys) == Map.take(second, @phase199_route_keys)
+    assert first_counts == second_counts
+    assert first.namespace == "e2e_phase199"
+    assert String.starts_with?(first.customer_id, "19900000-")
+    assert first.edge_data.long_email =~ "@"
+    assert first.edge_data.long_processor_id =~ "proc_phase199_"
+  end
+
+  @tag :phase199
+  test "POST /__e2e__/seed/phase199-interaction-matrix returns the Phase 199 route contract" do
+    conn =
+      Plug.Test.conn(:post, "/__e2e__/seed/phase199-interaction-matrix")
+      |> AccrueAdmin.E2E.Plug.call([])
+
+    assert conn.status == 200,
+           "Expected 200 from POST /__e2e__/seed/phase199-interaction-matrix, got #{conn.status}"
+
+    payload = Jason.decode!(conn.resp_body)
+
+    assert payload["namespace"] == "e2e_phase199"
+
+    for key <- @phase199_route_keys do
       assert payload[Atom.to_string(key)], "Expected endpoint payload to include #{key}"
     end
   end

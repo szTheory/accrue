@@ -341,6 +341,41 @@ defmodule AccrueAdmin.CopyTest do
     end
   end
 
+  test "CPY-01 command-palette no-results copy names the billing search domain" do
+    copy = Copy.global_search_no_results_copy("missing-acme")
+
+    assert copy ==
+             ~s(No billing records match "missing-acme". Adjust the search or open the customers list.)
+
+    refute copy =~ ~r/\bno results\b/i
+    refute_vague_copy!(copy)
+  end
+
+  test "CPY-01 repeated action hidden-context helpers name object and next action" do
+    contexts = [
+      Copy.action_hidden_context("Change",
+        resource: "collection method",
+        object: "invoice in_phase199"
+      ),
+      Copy.action_hidden_context("View",
+        resource: "recovery activity",
+        object: "subscription sub_phase199"
+      ),
+      Copy.action_hidden_context("Replay",
+        resource: "webhook delivery",
+        object: "evt_phase199_dead"
+      )
+    ]
+
+    assert contexts == [
+             "Change collection method for invoice in_phase199",
+             "View recovery activity for subscription sub_phase199",
+             "Replay webhook delivery for evt_phase199_dead"
+           ]
+
+    refute_vague_copy!(contexts)
+  end
+
   defp refute_vague_copy!(%{} = copy_map) do
     copy_map
     |> Map.values()

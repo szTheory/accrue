@@ -434,7 +434,89 @@ defmodule AccrueAdmin.OverlayComponentsTest do
     end
   end
 
+  describe "Phase 199 source structure contracts" do
+    test "modal and drawer clients stay on named Overlay wrappers with hidden non-interactive mirrors" do
+      clients = [
+        %{
+          name: "subscription actions",
+          path: "lib/accrue_admin/live/subscription_live.ex",
+          drawer_mirror: "subscription-action-drawer-test-mirror",
+          step_up?: true
+        },
+        %{
+          name: "invoice actions",
+          path: "lib/accrue_admin/live/invoice_live.ex",
+          drawer_mirror: "invoice-action-drawer-test-mirror",
+          step_up?: true
+        },
+        %{
+          name: "charge refund",
+          path: "lib/accrue_admin/live/charge_live.ex",
+          drawer_mirror: "charge-refund-drawer-test-mirror",
+          step_up?: true
+        },
+        %{
+          name: "webhook replay",
+          path: "lib/accrue_admin/live/webhook_live.ex",
+          drawer_mirror: "webhook-replay-drawer-test-mirror",
+          step_up?: true
+        },
+        %{
+          name: "connect platform fee",
+          path: "lib/accrue_admin/live/connect_account_live.ex",
+          drawer_mirror: "connect-platform-fee-drawer-test-mirror",
+          step_up?: true
+        },
+        %{
+          name: "customer payment methods",
+          path: "lib/accrue_admin/live/customer_live.ex",
+          drawer_mirror: "payment-method-action-drawer-test-mirror",
+          step_up?: false
+        }
+      ]
+
+      for client <- clients do
+        source = project_source(client.path)
+
+        assert source =~ "<DetailDrawer.detail_drawer",
+               "#{client.name} must route drawer UI through DetailDrawer"
+
+        assert source =~
+                 ~r/<div\s+:if=.*?hidden\s+aria-hidden="true"\s+data-role="#{client.drawer_mirror}"/s,
+               "#{client.name} test mirror must stay hidden and aria-hidden"
+
+        if client.step_up? do
+          assert source =~ "<StepUpAuthModal.step_up_auth_modal",
+                 "#{client.name} must route sensitive confirmation through StepUpAuthModal"
+
+          assert source =~
+                   ~r/<div\s+:if=\{@step_up_pending\}\s+hidden\s+aria-hidden="true"\s+data-role="step-up-test-mirror"/s,
+                 "#{client.name} step-up mirror must stay hidden and aria-hidden"
+        end
+      end
+    end
+
+    test "overlay root and fixed shell stay outside transformed or contained admin ancestors" do
+      layout_source = project_source("lib/accrue_admin/layouts.ex")
+      app_css = File.read!(app_css_path())
+
+      assert layout_source =~
+               ~r/<body[^>]*class="accrue-admin-shell"[^>]*>.*<div id="ax-overlay-root"><\/div>/s
+
+      refute app_css =~
+               ~r/\.accrue-admin-shell\s*\{[^}]*(?:transform|filter|backdrop-filter|contain|perspective)\s*:/s
+
+      refute app_css =~
+               ~r/#ax-overlay-root\s*\{[^}]*(?:transform|filter|backdrop-filter|contain|perspective)\s*:/s
+    end
+  end
+
   defp app_css_path do
     Path.expand("../../../assets/css/app.css", __DIR__)
+  end
+
+  defp project_source(path) do
+    Path.expand("../../../#{path}", __DIR__)
+    |> File.read!()
   end
 end

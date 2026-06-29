@@ -130,6 +130,28 @@ defmodule AccrueAdmin.ThemeTest do
     assert runtime_style_index < js_index
   end
 
+  test "Phase 199 anti-fouc script resolves cookie before localStorage using production key" do
+    script = AccrueAdmin.Layouts.anti_fouc_script()
+
+    assert script =~ ~s(const key = "accrue_theme";)
+    assert script =~ "document.cookie"
+    assert script =~ "window.localStorage.getItem(key)"
+    refute script =~ "accrue_admin_theme"
+
+    cookie_index = find_index(script, "allowed.has(cookieValue)")
+    local_storage_index = find_index(script, "allowed.has(storedValue)")
+    data_theme_index = find_index(script, "document.documentElement.dataset.theme = theme")
+    persist_index = find_index(script, "window.localStorage.setItem(key, theme)")
+
+    assert cookie_index
+    assert local_storage_index
+    assert data_theme_index
+    assert persist_index
+    assert cookie_index < local_storage_index
+    assert local_storage_index < data_theme_index
+    assert data_theme_index < persist_index
+  end
+
   defp find_index(haystack, needle) do
     case :binary.match(haystack, needle) do
       {index, _length} -> index

@@ -48,4 +48,27 @@ defmodule AccrueAdmin.Components.ThemePickerTest do
     # exactly one active option
     assert html |> String.split("ax-theme-picker-option-active") |> length() == 2
   end
+
+  test "Phase 199 theme hook persists the production accrue_theme key to cookie and localStorage" do
+    source = theme_hook_source()
+
+    assert source =~ ~s(export const THEME_COOKIE = "accrue_theme")
+    assert source =~ "window.localStorage.setItem(THEME_COOKIE, value)"
+    assert source =~ "document.cookie = `${THEME_COOKIE}="
+    refute source =~ "accrue_admin_theme"
+  end
+
+  test "Phase 199 keyboard contract keeps theme picker as a single roving-tabindex radiogroup" do
+    source = theme_hook_source()
+
+    assert source =~ ~S|document.addEventListener("keydown", onThemeTargetKeydown, true)|
+    assert source =~ ~S|querySelectorAll("[data-theme-target]")|
+    assert source =~ ~S|candidate.setAttribute("aria-checked", String(isActive))|
+    assert source =~ ~S|candidate.setAttribute("tabindex", isActive ? "0" : "-1")|
+  end
+
+  defp theme_hook_source do
+    Path.expand("../../../assets/js/hooks/accrue_theme.js", __DIR__)
+    |> File.read!()
+  end
 end

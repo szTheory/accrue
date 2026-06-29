@@ -107,5 +107,43 @@ defmodule AccrueAdmin.Components.GlobalSearchTest do
       assert html =~
                ~s(<a class="ax-command-palette-item" href="/billing/invoices?status=open" data-path="/billing/invoices?status=open")
     end
+
+    test "Phase 199 command palette declares Overlay-backed or overlay-equivalent source markers" do
+      html =
+        render_component(GlobalSearch, %{
+          id: "global-search",
+          mount_path: "/billing",
+          query: "",
+          results: %{customers: [], invoices: [], subscriptions: []},
+          is_open: true,
+          loading: false
+        })
+
+      overlay_backed? =
+        html =~ ~s(data-phx-portal="#ax-overlay-root") and html =~ ~s(phx-hook="Overlay")
+
+      named_wrapper? =
+        html =~ ~s(data-ax-command-palette-shell) and
+          html =~ ~s(data-focus-trap-initial) and
+          html =~ ~s(data-focus-trap-fallback)
+
+      assert overlay_backed? or named_wrapper?,
+             "command palette must either use Overlay or declare equivalent focus/portal markers"
+    end
+
+    test "Phase 199 no-results copy names the billing search domain" do
+      html =
+        render_component(GlobalSearch, %{
+          id: "global-search",
+          mount_path: "/billing",
+          query: "missing-acme",
+          results: %{customers: [], invoices: [], subscriptions: []},
+          is_open: true,
+          loading: false
+        })
+
+      refute html =~ "No results found"
+      assert html =~ ~s(No billing records match "missing-acme")
+    end
   end
 end
