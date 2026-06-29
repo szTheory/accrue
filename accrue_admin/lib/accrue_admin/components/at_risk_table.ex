@@ -2,7 +2,8 @@ defmodule AccrueAdmin.Components.AtRiskTable do
   @moduledoc """
   Table of subscriptions currently in an active dunning campaign.
 
-  Renders below the Recovery Funnel on `/billing/analytics/recovery`.
+  Renders as the Recovery work queue before the supporting funnel on
+  `/billing/analytics/recovery`.
 
   ## Per-row map contract
 
