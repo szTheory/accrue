@@ -64,6 +64,22 @@ defmodule AccrueAdmin.Queries.Charges do
     |> Repo.aggregate(:count)
   end
 
+  def detail(id, owner_scope) when is_binary(id) do
+    Charge
+    |> join(:inner, [charge], customer in Customer, on: customer.id == charge.customer_id)
+    |> scope_query(owner_scope)
+    |> where([charge, _customer], charge.id == ^id)
+    |> select([charge, _customer], charge)
+    |> Repo.one()
+    |> case do
+      nil ->
+        :not_found
+
+      charge ->
+        {:ok, Repo.preload(charge, [:customer, :refunds])}
+    end
+  end
+
   @impl true
   def decode_filter(params) when is_map(params) do
     %{

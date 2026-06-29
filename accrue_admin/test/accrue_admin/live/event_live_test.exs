@@ -276,6 +276,54 @@ defmodule AccrueAdmin.EventLiveTest do
     assert html =~ "Recorded"
   end
 
+  test "out-of-scope event route redirects with denial flash before rendering detail", %{
+    conn: conn
+  } do
+    allowed_customer = insert_customer(%{owner_type: "Organization", owner_id: "org_allowed"})
+    denied_customer = insert_customer(%{owner_type: "Organization", owner_id: "org_denied"})
+    allowed_invoice = insert_invoice(allowed_customer, %{processor_id: "in_event_allowed"})
+    denied_invoice = insert_invoice(denied_customer, %{processor_id: "in_event_denied"})
+
+    {:ok, allowed_event} =
+      Events.record(%{
+        type: "invoice.payment_failed.allowed_org",
+        subject_type: "Invoice",
+        subject_id: allowed_invoice.id,
+        actor_type: "system"
+      })
+
+    {:ok, denied_event} =
+      Events.record(%{
+        type: "invoice.payment_failed.denied_org",
+        subject_type: "Invoice",
+        subject_id: denied_invoice.id,
+        actor_type: "system"
+      })
+
+    conn =
+      Phoenix.ConnTest.init_test_session(conn,
+        admin_token: "admin",
+        active_organization_id: "org_allowed",
+        active_organization_slug: "allowed-org",
+        admin_organization_ids: ["org_allowed"]
+      )
+
+    assert {:ok, _view, allowed_html} =
+             live(conn, "/billing/events/#{allowed_event.id}?org=allowed-org")
+
+    assert allowed_html =~ "invoice.payment_failed.allowed_org"
+
+    assert {:error, {:redirect, %{to: "/billing/events?org=allowed-org", flash: flash_token}}} =
+             redirect =
+             live(conn, "/billing/events/#{denied_event.id}?org=allowed-org")
+
+    assert %{"error" => denied} =
+             Phoenix.LiveView.Utils.verify_flash(AccrueAdmin.TestEndpoint, flash_token)
+
+    assert denied == AccrueAdmin.Copy.Locked.owner_access_denied()
+    assert redirect
+  end
+
   # --- helpers ---
 
   defp insert_webhook(attrs) do

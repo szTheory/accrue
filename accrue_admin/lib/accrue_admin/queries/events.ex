@@ -86,6 +86,24 @@ defmodule AccrueAdmin.Queries.Events do
     |> Repo.aggregate(:count)
   end
 
+  def detail(id, owner_scope) when is_binary(id) do
+    case Integer.parse(id) do
+      {event_id, ""} -> detail(event_id, owner_scope)
+      _ -> :not_found
+    end
+  end
+
+  def detail(id, owner_scope) when is_integer(id) do
+    Event
+    |> scope_query(owner_scope)
+    |> where([event], event.id == ^id)
+    |> Repo.one()
+    |> case do
+      nil -> :not_found
+      event -> {:ok, event}
+    end
+  end
+
   @impl true
   def decode_filter(params) when is_map(params) do
     %{

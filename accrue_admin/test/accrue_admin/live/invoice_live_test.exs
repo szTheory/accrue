@@ -411,6 +411,41 @@ defmodule AccrueAdmin.InvoiceLiveTest do
     assert :not_found = Invoices.detail(denied_invoice.id, owner_scope)
   end
 
+  test "out-of-scope invoice route redirects with denial flash before rendering detail", %{
+    conn: conn
+  } do
+    allowed_customer = insert_customer(%{owner_type: "Organization", owner_id: "org_allowed"})
+    denied_customer = insert_customer(%{owner_type: "Organization", owner_id: "org_denied"})
+
+    allowed_invoice =
+      insert_invoice(allowed_customer, %{status: :open, number: "INV-ORG-ALLOWED"})
+
+    denied_invoice = insert_invoice(denied_customer, %{status: :open, number: "INV-ORG-DENIED"})
+
+    conn =
+      Phoenix.ConnTest.init_test_session(conn,
+        admin_token: "admin",
+        active_organization_id: "org_allowed",
+        active_organization_slug: "allowed-org",
+        admin_organization_ids: ["org_allowed"]
+      )
+
+    assert {:ok, _view, allowed_html} =
+             live(conn, "/billing/invoices/#{allowed_invoice.id}?org=allowed-org")
+
+    assert allowed_html =~ "INV-ORG-ALLOWED"
+
+    assert {:error, {:redirect, %{to: "/billing/invoices?org=allowed-org", flash: flash_token}}} =
+             redirect =
+             live(conn, "/billing/invoices/#{denied_invoice.id}?org=allowed-org")
+
+    assert %{"error" => denied} =
+             Phoenix.LiveView.Utils.verify_flash(AccrueAdmin.TestEndpoint, flash_token)
+
+    assert denied == Copy.Locked.owner_access_denied()
+    assert redirect
+  end
+
   defp insert_customer(attrs) do
     defaults = %{
       owner_type: "User",

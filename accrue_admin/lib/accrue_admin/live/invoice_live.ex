@@ -5,7 +5,6 @@ defmodule AccrueAdmin.Live.InvoiceLive do
 
   alias Accrue.{Actor, Auth, Billing, Events}
   alias Accrue.Billing.Invoice
-  alias Accrue.Repo
 
   alias AccrueAdmin.Components.{
     AppShell,
@@ -25,6 +24,7 @@ defmodule AccrueAdmin.Live.InvoiceLive do
   }
 
   alias AccrueAdmin.Copy
+  alias AccrueAdmin.Queries.Invoices
   alias AccrueAdmin.ScopedPath
   alias AccrueAdmin.{BillingPresentation, StepUp, TaxOwnershipRow}
 
@@ -34,14 +34,21 @@ defmodule AccrueAdmin.Live.InvoiceLive do
   def mount(%{"id" => invoice_id}, session, socket) do
     admin = Map.get(session, "accrue_admin", %{})
 
-    case load_invoice(invoice_id) do
-      nil ->
+    case Invoices.detail(invoice_id, socket.assigns.current_owner_scope) do
+      :not_found ->
         {:ok,
          socket
-         |> put_flash(:error, Copy.invoice_not_found())
-         |> redirect(to: admin_path(admin, "/invoices"))}
+         |> put_flash(:error, Copy.Locked.owner_access_denied())
+         |> redirect(
+           to:
+             ScopedPath.build(
+               admin["mount_path"] || "/billing",
+               "/invoices",
+               socket.assigns.current_owner_scope
+             )
+         )}
 
-      invoice ->
+      {:ok, invoice} ->
         {:ok,
          socket
          |> assign_shell(admin)
@@ -728,15 +735,6 @@ defmodule AccrueAdmin.Live.InvoiceLive do
     )
   end
 
-  defp load_invoice(invoice_id) do
-    Invoice
-    |> Repo.get(invoice_id)
-    |> case do
-      nil -> nil
-      invoice -> Repo.preload(invoice, [:customer, :items])
-    end
-  end
-
   defp timeline_events(invoice_id), do: Events.timeline_for("Invoice", invoice_id, limit: 25)
 
   defp ensure_timeline_events(%{assigns: %{timeline_events_loaded?: true}} = socket), do: socket
@@ -1017,8 +1015,22 @@ defmodule AccrueAdmin.Live.InvoiceLive do
   end
 
   defp refresh_invoice(socket, invoice_id) do
-    invoice = load_invoice(invoice_id)
-    assign_invoice(socket, invoice)
+    case Invoices.detail(invoice_id, socket.assigns.current_owner_scope) do
+      {:ok, invoice} ->
+        assign_invoice(socket, invoice)
+
+      :not_found ->
+        socket
+        |> put_flash(:error, Copy.Locked.owner_access_denied())
+        |> redirect(
+          to:
+            ScopedPath.build(
+              socket.assigns.admin_mount_path,
+              "/invoices",
+              socket.assigns.current_owner_scope
+            )
+        )
+    end
   end
 
   defp related_items(invoice, customer, mount_path, scope) do

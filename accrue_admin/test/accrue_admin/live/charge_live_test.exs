@@ -375,6 +375,54 @@ defmodule AccrueAdmin.ChargeLiveTest do
     assert html =~ ~s(class="ax-body ax-measure")
   end
 
+  test "out-of-scope charge route redirects with denial flash before rendering detail", %{
+    conn: conn
+  } do
+    allowed_customer = insert_customer(%{owner_type: "Organization", owner_id: "org_allowed"})
+    denied_customer = insert_customer(%{owner_type: "Organization", owner_id: "org_denied"})
+    allowed_subscription = insert_subscription(allowed_customer)
+    denied_subscription = insert_subscription(denied_customer)
+
+    allowed_charge =
+      insert_charge(allowed_customer, allowed_subscription, %{
+        processor: "fake",
+        processor_id: "ch_org_allowed",
+        status: "succeeded",
+        amount_cents: 10_000
+      })
+
+    denied_charge =
+      insert_charge(denied_customer, denied_subscription, %{
+        processor: "fake",
+        processor_id: "ch_org_denied",
+        status: "succeeded",
+        amount_cents: 10_000
+      })
+
+    conn =
+      Phoenix.ConnTest.init_test_session(conn,
+        admin_token: "admin",
+        active_organization_id: "org_allowed",
+        active_organization_slug: "allowed-org",
+        admin_organization_ids: ["org_allowed"]
+      )
+
+    assert {:ok, _view, allowed_html} =
+             live(conn, "/billing/payments/#{allowed_charge.id}?org=allowed-org")
+
+    assert allowed_html =~ "ch_org_allowed"
+
+    assert {:error, {:redirect, %{to: "/billing/payments?org=allowed-org", flash: flash_token}}} =
+             redirect =
+             live(conn, "/billing/payments/#{denied_charge.id}?org=allowed-org")
+
+    assert %{"error" => denied} =
+             Phoenix.LiveView.Utils.verify_flash(AccrueAdmin.TestEndpoint, flash_token)
+
+    assert denied == Copy.Locked.owner_access_denied()
+    assert redirect
+  end
+
   defp insert_customer(attrs) do
     defaults = %{
       owner_type: "User",

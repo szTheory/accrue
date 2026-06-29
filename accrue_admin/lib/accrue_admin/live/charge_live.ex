@@ -4,8 +4,7 @@ defmodule AccrueAdmin.Live.ChargeLive do
   use Phoenix.LiveView
 
   alias Accrue.{Actor, Auth, Billing, Events, Money}
-  alias Accrue.Billing.{Charge, Refund}
-  alias Accrue.Repo
+  alias Accrue.Billing.Refund
 
   alias AccrueAdmin.Components.{
     AppShell,
@@ -22,6 +21,7 @@ defmodule AccrueAdmin.Live.ChargeLive do
   }
 
   alias AccrueAdmin.Copy
+  alias AccrueAdmin.Queries.Charges
   alias AccrueAdmin.ScopedPath
   alias AccrueAdmin.StepUp
 
@@ -29,14 +29,21 @@ defmodule AccrueAdmin.Live.ChargeLive do
   def mount(%{"id" => charge_id}, session, socket) do
     admin = Map.get(session, "accrue_admin", %{})
 
-    case load_charge(charge_id) do
-      nil ->
+    case Charges.detail(charge_id, socket.assigns.current_owner_scope) do
+      :not_found ->
         {:ok,
          socket
-         |> put_flash(:error, Copy.charge_not_found())
-         |> redirect(to: admin_path(admin, "/payments"))}
+         |> put_flash(:error, Copy.Locked.owner_access_denied())
+         |> redirect(
+           to:
+             ScopedPath.build(
+               admin["mount_path"] || "/billing",
+               "/payments",
+               socket.assigns.current_owner_scope
+             )
+         )}
 
-      charge ->
+      {:ok, charge} ->
         {:ok,
          socket
          |> assign_shell(admin)
@@ -450,15 +457,6 @@ defmodule AccrueAdmin.Live.ChargeLive do
     )
   end
 
-  defp load_charge(charge_id) do
-    Charge
-    |> Repo.get(charge_id)
-    |> case do
-      nil -> nil
-      charge -> Repo.preload(charge, [:customer, :refunds])
-    end
-  end
-
   defp timeline_events(charge_id), do: Events.timeline_for("Charge", charge_id, limit: 25)
 
   defp ensure_timeline_events(%{assigns: %{timeline_events_loaded?: true}} = socket), do: socket
@@ -600,8 +598,22 @@ defmodule AccrueAdmin.Live.ChargeLive do
   end
 
   defp refresh_charge(socket, charge_id) do
-    charge = load_charge(charge_id)
-    assign_charge(socket, charge)
+    case Charges.detail(charge_id, socket.assigns.current_owner_scope) do
+      {:ok, charge} ->
+        assign_charge(socket, charge)
+
+      :not_found ->
+        socket
+        |> put_flash(:error, Copy.Locked.owner_access_denied())
+        |> redirect(
+          to:
+            ScopedPath.build(
+              socket.assigns.admin_mount_path,
+              "/payments",
+              socket.assigns.current_owner_scope
+            )
+        )
+    end
   end
 
   defp summary_rows(charge, customer, breakdown) do

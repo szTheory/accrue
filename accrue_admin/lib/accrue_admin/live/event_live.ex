@@ -3,9 +3,6 @@ defmodule AccrueAdmin.Live.EventLive do
 
   use Phoenix.LiveView
 
-  alias Accrue.Events.Event
-  alias Accrue.Repo
-
   alias AccrueAdmin.Components.{
     AppShell,
     Breadcrumbs,
@@ -16,20 +13,21 @@ defmodule AccrueAdmin.Live.EventLive do
   }
 
   alias AccrueAdmin.Copy
+  alias AccrueAdmin.Queries.Events
   alias AccrueAdmin.ScopedPath
 
   @impl true
   def mount(%{"id" => event_id}, session, socket) do
     admin = Map.get(session, "accrue_admin", %{})
 
-    case load_event(event_id, socket.assigns.current_owner_scope) do
-      nil ->
+    case Events.detail(event_id, socket.assigns.current_owner_scope) do
+      :not_found ->
         {:ok,
          socket
-         |> put_flash(:error, AccrueAdmin.Copy.billing_event_not_found())
+         |> put_flash(:error, AccrueAdmin.Copy.Locked.owner_access_denied())
          |> redirect(to: scoped_admin_path(admin, socket.assigns.current_owner_scope, "/events"))}
 
-      event ->
+      {:ok, event} ->
         mount_path = admin["mount_path"] || "/billing"
         owner_scope = socket.assigns.current_owner_scope
 
@@ -150,13 +148,6 @@ defmodule AccrueAdmin.Live.EventLive do
   end
 
   # --- private ---
-
-  defp load_event(event_id, _owner_scope) do
-    case Integer.parse(event_id) do
-      {id, ""} -> Repo.get(Event, id)
-      _ -> nil
-    end
-  end
 
   defp summary_rows(event, _mount_path) do
     rows = [
