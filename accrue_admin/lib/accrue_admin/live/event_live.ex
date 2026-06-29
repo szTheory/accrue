@@ -67,7 +67,7 @@ defmodule AccrueAdmin.Live.EventLive do
       <section class="ax-page">
         <Breadcrumbs.breadcrumbs
           items={[
-            %{label: "Dashboard", href: @admin_mount_path},
+            %{label: "Dashboard", href: ScopedPath.build(@admin_mount_path, "", @current_owner_scope)},
             %{label: "Events", href: scoped_events_path(@admin_mount_path, @current_owner_scope)},
             %{label: @event.type}
           ]}

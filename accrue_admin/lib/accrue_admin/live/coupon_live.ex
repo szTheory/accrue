@@ -68,8 +68,11 @@ defmodule AccrueAdmin.Live.CouponLive do
       <section class="ax-page">
         <Breadcrumbs.breadcrumbs
           items={[
-            %{label: "Dashboard", href: @admin_mount_path},
-            %{label: AccrueAdmin.Copy.coupon_breadcrumb_coupons(), href: @admin_mount_path <> "/coupons"},
+            %{label: "Dashboard", href: ScopedPath.build(@admin_mount_path, "", @current_owner_scope)},
+            %{
+              label: AccrueAdmin.Copy.coupon_breadcrumb_coupons(),
+              href: ScopedPath.build(@admin_mount_path, "/coupons", @current_owner_scope)
+            },
             %{label: coupon_label(@coupon)}
           ]}
         />

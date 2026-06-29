@@ -65,8 +65,16 @@ defmodule AccrueAdmin.Live.PromotionCodeLive do
       <section class="ax-page">
         <Breadcrumbs.breadcrumbs
           items={[
-            %{label: "Dashboard", href: @admin_mount_path},
-            %{label: AccrueAdmin.Copy.promotion_codes_breadcrumb_index(), href: @admin_mount_path <> "/promotion-codes"},
+            %{label: "Dashboard", href: ScopedPath.build(@admin_mount_path, "", @current_owner_scope)},
+            %{
+              label: AccrueAdmin.Copy.promotion_codes_breadcrumb_index(),
+              href:
+                ScopedPath.build(
+                  @admin_mount_path,
+                  "/promotion-codes",
+                  @current_owner_scope
+                )
+            },
             %{label: @promotion_code.code || @promotion_code.processor_id || @promotion_code.id}
           ]}
         />

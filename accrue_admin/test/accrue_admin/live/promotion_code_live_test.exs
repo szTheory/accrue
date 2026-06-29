@@ -176,6 +176,25 @@ defmodule AccrueAdmin.PromotionCodeLiveTest do
     assert html =~ "Referral coupon"
   end
 
+  test "breadcrumbs preserve active organization scope", %{
+    conn: conn,
+    promotion_code: promotion_code
+  } do
+    conn =
+      Phoenix.ConnTest.init_test_session(conn,
+        admin_token: "admin",
+        active_organization_id: "org_allowed",
+        active_organization_slug: "allowed-org",
+        admin_organization_ids: ["org_allowed"]
+      )
+
+    assert {:ok, _view, html} =
+             live(conn, "/billing/promotion-codes/#{promotion_code.id}?org=allowed-org")
+
+    assert html =~ ~s(href="/billing?org=allowed-org")
+    assert html =~ ~s(href="/billing/promotion-codes?org=allowed-org")
+  end
+
   test "redirects with flash when promotion_code id is not found", %{conn: conn} do
     conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
 

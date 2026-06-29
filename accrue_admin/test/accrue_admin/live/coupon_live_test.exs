@@ -178,6 +178,9 @@ defmodule AccrueAdmin.CouponLiveTest do
 
     assert html =~
              ~s(href="/billing/promotion-codes/#{promotion_code.id}?org=allowed-org")
+
+    assert html =~ ~s(href="/billing?org=allowed-org")
+    assert html =~ ~s(href="/billing/coupons?org=allowed-org")
   end
 
   test "lazy activity expands to quiet empty state when no coupon activity exists", %{

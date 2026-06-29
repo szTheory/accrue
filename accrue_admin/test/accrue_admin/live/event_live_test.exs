@@ -330,6 +330,8 @@ defmodule AccrueAdmin.EventLiveTest do
              live(conn, "/billing/events/#{allowed_event.id}?org=allowed-org")
 
     assert allowed_html =~ "invoice.payment_failed.allowed_org"
+    assert allowed_html =~ ~s(href="/billing?org=allowed-org")
+    assert allowed_html =~ ~s(href="/billing/events?org=allowed-org")
 
     assert {:ok, _view, allowed_charge_html} =
              live(conn, "/billing/events/#{allowed_charge_event.id}?org=allowed-org")
