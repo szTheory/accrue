@@ -102,6 +102,8 @@ defmodule AccrueAdmin.ChargeLiveTest do
     assert data_attr_count(html, "data-ax-lazy-json") == 1
 
     assert has_element?(view, "[data-ax-primary-action]", "Refund charge")
+    assert html =~ "Created / inserted"
+    assert html =~ "Net / fees / refunds"
 
     refute has_element?(view, "[data-role='refund-form']")
     refute has_element?(view, "[data-role='confirm-panel']")
@@ -161,10 +163,11 @@ defmodule AccrueAdmin.ChargeLiveTest do
     conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
 
     {:ok, view, _html} = live(conn, "/billing/payments/#{charge.id}")
+    open_refund_drawer(view)
 
     html =
       render_submit(
-        element(view, "[data-role='refund-form']"),
+        element(view, "[data-ax-action-drawer-form][data-role='refund-form']"),
         %{
           "amount_minor" => "4000",
           "reason" => "requested_by_customer",
@@ -174,7 +177,7 @@ defmodule AccrueAdmin.ChargeLiveTest do
 
     assert html =~ "Confirm refund"
 
-    html = render_click(element(view, "[data-role='confirm-refund']"))
+    html = render_click(element(view, "[data-ax-action-drawer-confirm]", "Confirm refund"))
     assert html =~ "Step-up required"
 
     html = render_submit(view, "step_up_submit", %{"code" => "123456"})
@@ -212,10 +215,11 @@ defmodule AccrueAdmin.ChargeLiveTest do
     conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
 
     {:ok, view, _html} = live(conn, "/billing/payments/#{charge.id}")
+    open_refund_drawer(view)
 
     _ =
       render_submit(
-        element(view, "[data-role='refund-form']"),
+        element(view, "[data-ax-action-drawer-form][data-role='refund-form']"),
         %{
           "amount_minor" => "4000",
           "reason" => "requested_by_customer",
@@ -223,7 +227,7 @@ defmodule AccrueAdmin.ChargeLiveTest do
         }
       )
 
-    _ = render_click(element(view, "[data-role='confirm-refund']"))
+    _ = render_click(element(view, "[data-ax-action-drawer-confirm]", "Confirm refund"))
 
     html = render(view)
     assert html =~ Copy.step_up_submit_label()
@@ -242,10 +246,11 @@ defmodule AccrueAdmin.ChargeLiveTest do
     conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
 
     {:ok, view, _html} = live(conn, "/billing/payments/#{charge.id}")
+    open_refund_drawer(view)
 
     _ =
       render_submit(
-        element(view, "[data-role='refund-form']"),
+        element(view, "[data-ax-action-drawer-form][data-role='refund-form']"),
         %{
           "amount_minor" => "4000",
           "reason" => "requested_by_customer",
@@ -253,7 +258,7 @@ defmodule AccrueAdmin.ChargeLiveTest do
         }
       )
 
-    _ = render_click(element(view, "[data-role='confirm-refund']"))
+    _ = render_click(element(view, "[data-ax-action-drawer-confirm]", "Confirm refund"))
     assert render(view) =~ "Step-up required"
 
     html = view |> element("section.ax-page") |> render_keydown(%{"key" => "Escape"})
@@ -299,16 +304,18 @@ defmodule AccrueAdmin.ChargeLiveTest do
     # Renders rollups and identity
     assert html =~ "re_bt_seeded_1"
 
+    open_refund_drawer(view)
+
     _html =
       render_submit(
-        element(view, "[data-role='refund-form']"),
+        element(view, "[data-ax-action-drawer-form][data-role='refund-form']"),
         %{
           "amount_minor" => "4000",
           "reason" => "requested_by_customer"
         }
       )
 
-    _html = render_click(element(view, "[data-role='confirm-refund']"))
+    _html = render_click(element(view, "[data-ax-action-drawer-confirm]", "Confirm refund"))
 
     html = render_submit(view, "step_up_submit", %{"code" => "123456"})
 
@@ -350,11 +357,12 @@ defmodule AccrueAdmin.ChargeLiveTest do
     conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
 
     {:ok, view, _html} = live(conn, "/billing/payments/#{charge.id}")
+    open_refund_drawer(view)
 
     # Submit refund to trigger pending_refund state
     html =
       render_submit(
-        element(view, "[data-role='refund-form']"),
+        element(view, "[data-ax-action-drawer-form][data-role='refund-form']"),
         %{
           "amount_minor" => "4000",
           "reason" => "requested_by_customer",
@@ -441,5 +449,9 @@ defmodule AccrueAdmin.ChargeLiveTest do
     |> then(&Regex.compile!("<" <> &1 <> "\\b"))
     |> Regex.scan(html)
     |> length()
+  end
+
+  defp open_refund_drawer(view) do
+    render_click(element(view, "[data-ax-primary-action]", "Refund charge"))
   end
 end
