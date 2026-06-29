@@ -5,14 +5,14 @@ milestone_name: Admin UI Page-Level Streamlining & Storybook
 current_phase: 199
 current_phase_name: cross-cutting-interaction-overlay-correctness-fixture-stress
 status: executing
-stopped_at: Completed 199-03-PLAN.md
-last_updated: "2026-06-29T22:39:39.627Z"
+stopped_at: Completed 199-04-PLAN.md
+last_updated: "2026-06-29T23:24:07.730Z"
 last_activity: 2026-06-29
 progress:
   total_phases: 8
   completed_phases: 6
   total_plans: 53
-  completed_plans: 41
+  completed_plans: 42
   percent: 75
 ---
 
@@ -29,7 +29,7 @@ See: `.planning/PROJECT.md` (updated 2026-06-29 — Phase 198 complete; Phase 19
 ## Current Position
 
 Phase: 199 (cross-cutting-interaction-overlay-correctness-fixture-stress) — EXECUTING
-Plan: 4 of 15
+Plan: 5 of 15
 Status: Ready to execute
 Last activity: 2026-06-29
 
@@ -228,6 +228,7 @@ Coverage: 22/22 v1.51 requirements mapped (each REQ-ID → exactly one phase). D
 | Phase 199 P01 | 10m 31s | 1 tasks | 2 files |
 | Phase 199 P02 | 4m 52s | 1 tasks | 4 files |
 | Phase 199 P03 | 30m 06s | 1 tasks | 6 files |
+| Phase 199 P04 | 16 min | 1 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -427,6 +428,8 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - [Phase 199]: Dropdown Node tests explicitly pin non-modal behavior: no scroll lock, inert state, or aria-modal semantics.
 - [Phase 199]: Plan 199-03 remains validation scaffolding; production component, fixture, and copy changes are left to later Phase 199 implementation plans. — The plan objective was to lock ExUnit source contracts before later production changes.
 - [Phase 199]: The command palette may either migrate to Overlay or declare explicit overlay-equivalent focus/portal markers; the current source satisfies neither contract. — This keeps the Phase 199 command-palette contract implementation-flexible while exposing the current source gap.
+- [Phase 199]: 199-04 kept GlobalSearch as a named overlay-equivalent command-palette wrapper instead of migrating it through Overlay. — The existing CommandPalette hook already owns Escape and focus restoration, and Phase 199 research allowed named wrappers with equivalent markers.
+- [Phase 199]: 199-04 routed touched command-palette no-results copy through AccrueAdmin.Copy with safe query escaping. — The Phase 199 UI contract requires touched page-level copy to use the copy SSOT while preserving safe rendering for user query text.
 
 ### Pending Todos
 
@@ -517,8 +520,8 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 
 ## Session Continuity
 
-Last session: 2026-06-29T22:36:33.537Z
-Stopped at: Completed 199-03-PLAN.md
+Last session: 2026-06-29T23:24:07.721Z
+Stopped at: Completed 199-04-PLAN.md
 Resume file: None
 
 ## Operator Next Steps
