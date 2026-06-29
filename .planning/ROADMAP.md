@@ -245,7 +245,28 @@ Plans:
   3. Deterministic multi-step workflow fixtures (list → detail → nested detail → drill-down → back) exercise focus and scroll integrity across every transition (FIX-01), and long-content/boundary fixtures (zero-decimal currency, past-due dunning, very long names, overflow) surface no squish/clipping/overflow on real seeded data and remain idempotent (FIX-02).
   4. A full brand-voice microcopy sweep covers all page-level copy with distinct first-run-empty vs filtered-empty messages and action/"Change" labels carrying visually-hidden context that names the object and the next useful action (CPY-01).
 
-**Plans**: TBD
+**Plans**: 5 plans
+Plans:
+**Wave 0 — validation scaffolding**
+
+- [ ] 199-01-PLAN.md — Phase 199 browser, JS, ExUnit, fixture, and copy contracts
+
+**Wave 1**
+
+- [ ] 199-02-PLAN.md — Canonical overlay substrate, scroll/focus/dismissal cleanup, and ancestor escape
+
+**Wave 2**
+
+- [ ] 199-03-PLAN.md — Drawer geometry, floating bounds, affordance semantics, reduced motion, and production theme persistence
+
+**Wave 3**
+
+- [ ] 199-04-PLAN.md — Deterministic multi-step workflow and edge-layout fixture stress
+
+**Wave 4**
+
+- [ ] 199-05-PLAN.md — Brand-voice microcopy sweep and focused Phase 199 closeout gates
+
 **UI hint**: yes
 
 ### Phase 200: Idempotent verification & sign-off
@@ -382,7 +403,7 @@ Full details: [v1.48 roadmap archive](milestones/v1.48-ROADMAP.md)
 | 196. Exemplar C — Subscriptions list + PageHeader | v1.54 | 5/5 | Complete    | 2026-06-26 |
 | 197. Propagate LIST | v1.54 | 7/7 | Complete    | 2026-06-28 |
 | 198. Propagate DETAIL + analytics | v1.54 | 9/9 | Complete    | 2026-06-29 |
-| 199. Cross-cutting interaction/overlay correctness + fixture stress + microcopy | v1.54 | 0/? | Not started | - |
+| 199. Cross-cutting interaction/overlay correctness + fixture stress + microcopy | v1.54 | 0/5 | Not started | - |
 | 200. Idempotent verification & sign-off | v1.54 | 0/? | Not started | - |
 
 ## Historical Backlog Anchors (not active scope)
