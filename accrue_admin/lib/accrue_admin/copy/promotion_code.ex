@@ -101,10 +101,27 @@ defmodule AccrueAdmin.Copy.PromotionCode do
 
   def promotion_code_section_navigate_heading, do: "Navigate back to the discount definition"
 
+  def promotion_code_redemption_boundaries_heading, do: "Redemption boundaries"
+
   def promotion_code_detail_no_coupon_projection,
     do: "No coupon projection is linked to this promotion code."
 
   def promotion_code_json_payload_label, do: "Promotion code payload"
+
+  def promotion_code_lazy_activity_heading, do: "Activity"
+
+  def promotion_code_lazy_activity_label, do: "Promotion code activity"
+
+  def promotion_code_lazy_activity_prompt, do: "Open this section to load activity."
+
+  def promotion_code_lazy_activity_empty_label, do: "No activity"
+
+  def promotion_code_lazy_activity_empty_body,
+    do: "This record has no recorded activity yet. Core details remain available above."
+
+  def promotion_code_lazy_raw_data_heading, do: promotion_code_json_payload_label()
+
+  def promotion_code_lazy_raw_data_prompt, do: "Open this section to load raw data."
 
   def promotion_code_page_title_show, do: "Promotion Code"
 

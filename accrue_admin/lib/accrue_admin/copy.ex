@@ -317,8 +317,16 @@ defmodule AccrueAdmin.Copy do
   defdelegate promotion_code_kpi_meta_expiry_boundary(), to: PromotionCode
   defdelegate promotion_code_section_parent_coupon_eyebrow(), to: PromotionCode
   defdelegate promotion_code_section_navigate_heading(), to: PromotionCode
+  defdelegate promotion_code_redemption_boundaries_heading(), to: PromotionCode
   defdelegate promotion_code_detail_no_coupon_projection(), to: PromotionCode
   defdelegate promotion_code_json_payload_label(), to: PromotionCode
+  defdelegate promotion_code_lazy_activity_heading(), to: PromotionCode
+  defdelegate promotion_code_lazy_activity_label(), to: PromotionCode
+  defdelegate promotion_code_lazy_activity_prompt(), to: PromotionCode
+  defdelegate promotion_code_lazy_activity_empty_label(), to: PromotionCode
+  defdelegate promotion_code_lazy_activity_empty_body(), to: PromotionCode
+  defdelegate promotion_code_lazy_raw_data_heading(), to: PromotionCode
+  defdelegate promotion_code_lazy_raw_data_prompt(), to: PromotionCode
   defdelegate promotion_code_page_title_show(), to: PromotionCode
   defdelegate promotion_codes_coupon_none_label(), to: PromotionCode
   defdelegate promotion_codes_status_active(), to: PromotionCode

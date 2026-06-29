@@ -11,8 +11,8 @@ defmodule AccrueAdmin.Live.PromotionCodeLive do
     Breadcrumbs,
     Detail,
     JsonViewer,
-    KpiCard,
-    RelatedResources
+    RelatedResources,
+    Timeline
   }
 
   alias AccrueAdmin.ScopedPath
@@ -36,8 +36,19 @@ defmodule AccrueAdmin.Live.PromotionCodeLive do
          socket
          |> assign_shell(admin)
          |> assign(:promotion_code, promotion_code)
-         |> assign(:related_items, related_items(promotion_code, mount_path, scope))}
+         |> assign(:related_items, related_items(promotion_code, mount_path, scope))
+         |> assign(:activity_loaded?, false)
+         |> assign(:raw_json_loaded?, false)}
     end
+  end
+
+  @impl true
+  def handle_event("load_activity", _params, socket) do
+    {:noreply, assign(socket, :activity_loaded?, true)}
+  end
+
+  def handle_event("load_raw_json", _params, socket) do
+    {:noreply, assign(socket, :raw_json_loaded?, true)}
   end
 
   @impl true
@@ -70,39 +81,74 @@ defmodule AccrueAdmin.Live.PromotionCodeLive do
           </:facts>
         </Detail.summary_card>
 
-        <section class="ax-kpi-grid" aria-label={AccrueAdmin.Copy.promotion_code_detail_kpi_section_aria_label()}>
-          <KpiCard.kpi_card label={AccrueAdmin.Copy.promotion_code_kpi_label_coupon()} value={coupon_label(@promotion_code)}>
-            <:meta><%= AccrueAdmin.Copy.promotion_code_kpi_meta_parent_discount() %></:meta>
-          </KpiCard.kpi_card>
+        <Detail.summary_list rows={summary_rows(@promotion_code, @admin_mount_path)} />
 
-          <KpiCard.kpi_card label={AccrueAdmin.Copy.promotion_code_kpi_label_redemptions()} value={Integer.to_string(@promotion_code.times_redeemed || 0)}>
-            <:meta><%= max_redemptions_summary(@promotion_code) %></:meta>
-          </KpiCard.kpi_card>
+        <section class="ax-stack-xl" aria-label="Promotion code details">
+          <details class="ax-detail-section" data-ax-drill-section="parent-coupon" open>
+            <summary class="ax-detail-section-head">
+              <span class="ax-detail-section-title"><%= AccrueAdmin.Copy.promotion_code_section_navigate_heading() %></span>
+            </summary>
 
-          <KpiCard.kpi_card label={AccrueAdmin.Copy.promotion_code_kpi_label_expires()} value={expires_summary(@promotion_code)}>
-            <:meta><%= AccrueAdmin.Copy.promotion_code_kpi_meta_expiry_boundary() %></:meta>
-          </KpiCard.kpi_card>
+            <Detail.detail_field_list fields={parent_coupon_fields(@promotion_code)} />
+
+            <p :if={@promotion_code.coupon} class="ax-body">
+              <a
+                href={ScopedPath.build(@admin_mount_path, "/coupons/#{@promotion_code.coupon.id}", @current_owner_scope)}
+                class="ax-link"
+              >
+                <%= @promotion_code.coupon.name || @promotion_code.coupon.processor_id || @promotion_code.coupon.id %>
+              </a>
+            </p>
+
+            <p :if={!@promotion_code.coupon} class="ax-body">
+              <%= AccrueAdmin.Copy.promotion_code_detail_no_coupon_projection() %>
+            </p>
+          </details>
+
+          <details class="ax-detail-section" data-ax-drill-section="redemption-boundaries">
+            <summary class="ax-detail-section-head">
+              <span class="ax-detail-section-title"><%= AccrueAdmin.Copy.promotion_code_redemption_boundaries_heading() %></span>
+            </summary>
+            <Detail.detail_field_list fields={redemption_boundary_fields(@promotion_code)} />
+          </details>
         </section>
 
-        <Detail.detail_section title={AccrueAdmin.Copy.promotion_code_section_navigate_heading()}>
-          <p :if={@promotion_code.coupon} class="ax-body">
-            <a href={@admin_mount_path <> "/coupons/" <> @promotion_code.coupon.id} class="ax-link">
-              <%= @promotion_code.coupon.name || @promotion_code.coupon.processor_id || @promotion_code.coupon.id %>
-            </a>
-          </p>
+        <div data-ax-related-resources>
+          <RelatedResources.related_resources items={@related_items} />
+        </div>
 
-          <p :if={!@promotion_code.coupon} class="ax-body">
-            <%= AccrueAdmin.Copy.promotion_code_detail_no_coupon_projection() %>
-          </p>
-        </Detail.detail_section>
+        <details class="ax-detail-section" data-ax-lazy-activity phx-click="load_activity">
+          <summary class="ax-detail-section-head">
+            <span class="ax-detail-section-title"><%= AccrueAdmin.Copy.promotion_code_lazy_activity_heading() %></span>
+          </summary>
+          <%= if @activity_loaded? do %>
+            <Timeline.timeline
+              label={AccrueAdmin.Copy.promotion_code_lazy_activity_label()}
+              empty_label={AccrueAdmin.Copy.promotion_code_lazy_activity_empty_label()}
+              items={activity_items(@promotion_code)}
+            />
+            <p :if={activity_items(@promotion_code) == []} class="ax-body">
+              <%= AccrueAdmin.Copy.promotion_code_lazy_activity_empty_body() %>
+            </p>
+          <% else %>
+            <p class="ax-body"><%= AccrueAdmin.Copy.promotion_code_lazy_activity_prompt() %></p>
+          <% end %>
+        </details>
 
-        <RelatedResources.related_resources items={@related_items} />
-
-        <JsonViewer.json_viewer
-          id="promotion-code-payload"
-          label={AccrueAdmin.Copy.promotion_code_json_payload_label()}
-          payload={payload(@promotion_code)}
-        />
+        <details class="ax-detail-section" data-ax-lazy-json phx-click="load_raw_json">
+          <summary class="ax-detail-section-head">
+            <span class="ax-detail-section-title"><%= AccrueAdmin.Copy.promotion_code_lazy_raw_data_heading() %></span>
+          </summary>
+          <%= if @raw_json_loaded? do %>
+            <JsonViewer.json_viewer
+              id="promotion-code-payload"
+              label={AccrueAdmin.Copy.promotion_code_json_payload_label()}
+              payload={raw_payload(@promotion_code)}
+            />
+          <% else %>
+            <p class="ax-body"><%= AccrueAdmin.Copy.promotion_code_lazy_raw_data_prompt() %></p>
+          <% end %>
+        </details>
       </section>
     </AppShell.app_shell>
     """
@@ -124,7 +170,43 @@ defmodule AccrueAdmin.Live.PromotionCodeLive do
   defp maybe_preload_coupon(nil), do: nil
   defp maybe_preload_coupon(promotion_code), do: Repo.preload(promotion_code, :coupon)
 
-  defp payload(promotion_code) do
+  defp summary_rows(promotion_code, _mount_path) do
+    [
+      %{label: "Active state", value: status_summary(promotion_code)},
+      %{
+        label: "Code",
+        value: promotion_code.code || promotion_code.processor_id || promotion_code.id
+      },
+      %{label: "Parent coupon", value: coupon_label(promotion_code)},
+      %{label: "Expiry", value: expires_summary(promotion_code)},
+      %{label: "Redemption count", value: Integer.to_string(promotion_code.times_redeemed || 0)},
+      %{label: "Redemption limit", value: max_redemptions_summary(promotion_code)},
+      %{label: "Customer restriction", value: customer_restriction_summary(promotion_code)}
+    ]
+  end
+
+  defp parent_coupon_fields(promotion_code) do
+    [
+      %{label: "Coupon", value: coupon_label(promotion_code)},
+      %{
+        label: "Coupon id",
+        value: promotion_code.coupon_id || AccrueAdmin.Copy.promotion_codes_coupon_none_label()
+      }
+    ]
+  end
+
+  defp redemption_boundary_fields(promotion_code) do
+    [
+      %{label: "Active state", value: status_summary(promotion_code)},
+      %{label: "Expiry", value: expires_summary(promotion_code)},
+      %{label: "Redemption count", value: Integer.to_string(promotion_code.times_redeemed || 0)},
+      %{label: "Redemption limit", value: max_redemptions_summary(promotion_code)}
+    ]
+  end
+
+  defp activity_items(_promotion_code), do: []
+
+  defp raw_payload(promotion_code) do
     %{
       "metadata" => promotion_code.metadata || %{},
       "data" => promotion_code.data || %{},
@@ -162,6 +244,16 @@ defmodule AccrueAdmin.Live.PromotionCodeLive do
 
   defp expires_summary(%{expires_at: %DateTime{} = value}), do: format_datetime(value)
   defp expires_summary(_promotion_code), do: AccrueAdmin.Copy.promotion_code_redeem_by_no_expiry()
+
+  defp customer_restriction_summary(%{data: data}) when is_map(data) do
+    case Map.get(data, "customer") || Map.get(data, :customer) || Map.get(data, "customer_id") ||
+           Map.get(data, :customer_id) do
+      customer when is_binary(customer) and customer != "" -> customer
+      _customer -> "None"
+    end
+  end
+
+  defp customer_restriction_summary(_promotion_code), do: "None"
 
   defp format_datetime(%DateTime{} = value), do: Calendar.strftime(value, "%b %d, %Y %H:%M UTC")
 
