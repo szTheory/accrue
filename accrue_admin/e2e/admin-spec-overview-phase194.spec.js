@@ -10,7 +10,7 @@
  *   - SC2: ⌘K trigger visible + focusable (data-ax-command-palette-trigger)
  *   - D-05: Dashboard zone DOM order (attention-rail < task-launcher < kpi-cluster)
  *   - D-06: empty-rail is non-interactive (not top pointer target, no role="button")
- *   - D-01: Recovery at-risk table DOM index < funnel chart DOM index
+ *   - D-01: Recovery hero metric pair < work queue < supporting funnel
  */
 
 const { test, expect } = require("@playwright/test");
@@ -155,7 +155,7 @@ test.describe("Phase 194 SPEC-OVERVIEW invariants", () => {
   // Recovery invariants
   // -------------------------------------------------------------------------
 
-  test("Recovery: one h1, at-risk table DOM index < funnel chart DOM index (D-01)", async ({
+  test("Recovery: one h1, hero metric pair < work queue < supporting funnel (D-01)", async ({
     page,
     request,
   }) => {
@@ -166,42 +166,33 @@ test.describe("Phase 194 SPEC-OVERVIEW invariants", () => {
     // SC1 — one h1 per page
     await expect(page.locator("h1")).toHaveCount(1);
 
-    // D-01 — work-queue table (data-ax-zone="task-launcher") DOM index < funnel chart
-    // The funnel chart renders after the task-launcher section in source order (194-02).
+    await expect(page.locator('[data-ax-overview="recovery"]')).toHaveCount(1);
+    await expect(page.locator("[data-ax-recovery-hero]")).toHaveCount(1);
+    await expect(page.locator("[data-ax-recovery-work-queue]")).toHaveCount(1);
+    await expect(page.locator("[data-ax-recovery-supporting-funnel]")).toHaveCount(1);
+
+    // D-01 — Recovery has its own overview grammar. It is not judged by the
+    // Dashboard attention-rail -> task-launcher -> kpi-cluster order.
     const order = await page.evaluate(() => {
-      const zones = [...document.querySelectorAll("[data-ax-zone]")].map((n) => n.dataset.axZone);
-      // FunnelChart has no data-ax-zone; locate by the canvas/svg it renders or its container.
-      // It renders as a <section> sibling without a zone marker — get its index among all
-      // children of the parent recovery section.
-      const taskLauncher = document.querySelector("[data-ax-zone='task-launcher']");
-      if (!taskLauncher) return { taskLauncherIndex: -1, funnelIndex: -1, zones };
+      const root = document.querySelector('[data-ax-overview="recovery"]');
+      if (!root) return [];
 
-      const parent = taskLauncher.parentElement;
-      if (!parent) return { taskLauncherIndex: -1, funnelIndex: -1, zones };
-
-      const children = [...parent.children];
-      const taskLauncherIndex = children.indexOf(taskLauncher);
-
-      // FunnelChart renders as the next sibling after task-launcher (no zone marker)
-      // Find the first child after task-launcher that does NOT have data-ax-zone
-      let funnelIndex = -1;
-      for (let i = taskLauncherIndex + 1; i < children.length; i++) {
-        if (!children[i].hasAttribute("data-ax-zone")) {
-          funnelIndex = i;
-          break;
-        }
-      }
-
-      return { taskLauncherIndex, funnelIndex, zones };
+      return [
+        ...root.querySelectorAll(
+          "[data-ax-recovery-hero], [data-ax-recovery-work-queue], [data-ax-recovery-supporting-funnel]"
+        ),
+      ].map((node) => {
+        if (node.hasAttribute("data-ax-recovery-hero")) return "hero";
+        if (node.hasAttribute("data-ax-recovery-work-queue")) return "work-queue";
+        if (node.hasAttribute("data-ax-recovery-supporting-funnel")) return "supporting-funnel";
+        return "unknown";
+      });
     });
 
-    expect(order.taskLauncherIndex, "task-launcher zone must be found in DOM").toBeGreaterThanOrEqual(0);
-    expect(order.funnelIndex, "funnel chart element must be found after task-launcher").toBeGreaterThan(
-      order.taskLauncherIndex
-    );
+    expect(order, "Recovery overview DOM order").toEqual(["hero", "work-queue", "supporting-funnel"]);
   });
 
-  test("Recovery: no h2/h3 before the at-risk work-queue (chart does not precede table)", async ({
+  test("Recovery: work queue is Recovery-specific and not a Dashboard task-launcher clone", async ({
     page,
     request,
   }) => {
@@ -209,12 +200,9 @@ test.describe("Phase 194 SPEC-OVERVIEW invariants", () => {
     await seedScenario(request, "phase191-matrix");
     await login(page, "/billing/analytics/recovery");
 
-    // Confirm task-launcher zone exists and precedes any canvas/chart element
-    const taskLauncherExists = await page.locator("[data-ax-zone='task-launcher']").count();
-    expect(taskLauncherExists, "task-launcher zone must exist on Recovery").toBeGreaterThanOrEqual(1);
+    await expect(page.locator('[data-ax-overview="recovery"] [data-ax-zone]')).toHaveCount(0);
 
-    // task-launcher must not be empty
-    const taskLauncherContent = await page.locator("[data-ax-zone='task-launcher']").textContent();
-    expect(taskLauncherContent?.trim().length, "task-launcher zone must not be empty").toBeGreaterThan(0);
+    const workQueueContent = await page.locator("[data-ax-recovery-work-queue]").textContent();
+    expect(workQueueContent?.trim().length, "Recovery work queue must not be empty").toBeGreaterThan(0);
   });
 });
