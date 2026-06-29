@@ -5,15 +5,15 @@ milestone_name: Admin UI Page-Level Streamlining & Storybook
 current_phase: 198
 current_phase_name: propagate-detail-analytics
 status: executing
-stopped_at: Completed 198-04-PLAN.md
-last_updated: "2026-06-29T00:06:58.904Z"
+stopped_at: Completed 198-08-PLAN.md
+last_updated: "2026-06-29T00:38:52.761Z"
 last_activity: 2026-06-28
 last_activity_desc: Phase 198 execution started
 progress:
   total_phases: 8
   completed_phases: 5
   total_plans: 38
-  completed_plans: 33
+  completed_plans: 34
   percent: 63
 ---
 
@@ -30,7 +30,7 @@ See: `.planning/PROJECT.md` (updated 2026-06-24 — v1.54 Admin UI Page-Level St
 ## Current Position
 
 Phase: 198 (propagate-detail-analytics) — EXECUTING
-Plan: 5 of 9
+Plan: 6 of 9
 Status: Ready to execute
 Last activity: 2026-06-28 -- Phase 198 execution started
 
@@ -221,6 +221,7 @@ Coverage: 22/22 v1.51 requirements mapped (each REQ-ID → exactly one phase). D
 | Phase 198 P02 | 10m | 3 tasks | 5 files |
 | Phase 198 P03 | 7m 47s | 3 tasks | 6 files |
 | Phase 198 P04 | 16m 39s | 3 tasks | 4 files |
+| Phase 198 P08 | 8m 23s | 3 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -400,6 +401,9 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - [Phase 198]: 198-04: Kept Customer peer navigation as plain scoped links, not ARIA tabs, because no full tab keyboard component was introduced. — Customer peer record sets remain link/patched subviews and no ARIA tab keyboard implementation was added.
 - [Phase 198]: 198-04: Kept Customer payment-method action state page-owned in CustomerLive and revalidated payment-method ids before mutation. — The Phase 198 threat model required server-side validation for payment-method browser events.
 - [Phase 198]: 198-04: Used the existing DetailDrawer overlay pattern instead of adding a generic DetailPage or action DSL. — Phase 198 D-01 required existing LiveView composition idioms and no generic DetailPage schema.
+- [Phase 198]: Recovery uses Recovery-specific data-ax markers instead of Dashboard data-ax-zone markers. — Plan 198-08 keeps Recovery as a Recovery-specific overview and avoids imposing Dashboard zone grammar on the work queue.
+- [Phase 198]: Campaign facts stay page-local in CampaignLive and use existing Dunning analytics calls. — This keeps Campaign as an explicit detail drill-down and preserves cross-package boundary constraints without a generic AnalyticsPage abstraction.
+- [Phase 198]: AtRiskTable is documented as Recovery's work queue before the supporting funnel. — The component docs now match the locked overview grammar and prevent the stale below-funnel role from returning.
 
 ### Pending Todos
 
@@ -490,8 +494,8 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 
 ## Session Continuity
 
-Last session: 2026-06-29T00:06:58.899Z
-Stopped at: Completed 198-04-PLAN.md
+Last session: 2026-06-29T00:38:52.755Z
+Stopped at: Completed 198-08-PLAN.md
 Resume file: None
 
 ## Operator Next Steps

@@ -213,7 +213,7 @@ Plans:
 **Wave 1**
 
 - [x] 198-04-PLAN.md — Customer-360 DETAIL propagation and peer record-set policy
-- [ ] 198-08-PLAN.md — Recovery/Campaign analytics conformance and AtRiskTable doc posture
+- [x] 198-08-PLAN.md — Recovery/Campaign analytics conformance and AtRiskTable doc posture
 
 **Wave 2**
 
@@ -381,7 +381,7 @@ Full details: [v1.48 roadmap archive](milestones/v1.48-ROADMAP.md)
 | 195. Exemplar B — Subscription detail | v1.54 | 8/8 | Complete    | 2026-06-26 |
 | 196. Exemplar C — Subscriptions list + PageHeader | v1.54 | 5/5 | Complete    | 2026-06-26 |
 | 197. Propagate LIST | v1.54 | 7/7 | Complete    | 2026-06-28 |
-| 198. Propagate DETAIL + analytics | v1.54 | 4/9 | In Progress|  |
+| 198. Propagate DETAIL + analytics | v1.54 | 5/9 | In Progress|  |
 | 199. Cross-cutting interaction/overlay correctness + fixture stress + microcopy | v1.54 | 0/? | Not started | - |
 | 200. Idempotent verification & sign-off | v1.54 | 0/? | Not started | - |
 
