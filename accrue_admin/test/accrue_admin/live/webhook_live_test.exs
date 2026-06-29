@@ -105,6 +105,27 @@ defmodule AccrueAdmin.WebhookLiveTest do
     assert data_attr_count(html, "data-ax-lazy-activity") == 1
     assert data_attr_count(html, "data-ax-lazy-json") == 1
 
+    for label <- [
+          "Status",
+          "Processor event ID",
+          "Endpoint / type",
+          "Received / processed",
+          "Verification",
+          "Attempts",
+          "Livemode",
+          "Derived event count"
+        ] do
+      assert html =~ label
+    end
+
+    for heading <- [
+          "Replay eligibility",
+          "Dispatch / retry lifecycle",
+          "Derived ledger rows"
+        ] do
+      assert html =~ heading
+    end
+
     assert has_element?(view, "[data-ax-primary-action]", "Replay webhook")
     refute has_element?(view, "[data-role='replay-confirm']")
 
