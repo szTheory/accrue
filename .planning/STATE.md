@@ -5,15 +5,14 @@ milestone_name: Admin UI Page-Level Streamlining & Storybook
 current_phase: 198
 current_phase_name: propagate-detail-analytics
 status: executing
-stopped_at: Completed 198-06-PLAN.md
-last_updated: "2026-06-29T01:27:58.698Z"
-last_activity: 2026-06-28
-last_activity_desc: Phase 198 execution started
+stopped_at: Completed 198-07-PLAN.md
+last_updated: "2026-06-29T02:06:41.693Z"
+last_activity: 2026-06-29
 progress:
   total_phases: 8
   completed_phases: 5
   total_plans: 38
-  completed_plans: 36
+  completed_plans: 37
   percent: 63
 ---
 
@@ -30,9 +29,9 @@ See: `.planning/PROJECT.md` (updated 2026-06-24 — v1.54 Admin UI Page-Level St
 ## Current Position
 
 Phase: 198 (propagate-detail-analytics) — EXECUTING
-Plan: 8 of 9
+Plan: 9 of 9
 Status: Ready to execute
-Last activity: 2026-06-28 -- Phase 198 execution started
+Last activity: 2026-06-29
 
 ## Post-v1.48 Pause Rule
 
@@ -224,6 +223,7 @@ Coverage: 22/22 v1.51 requirements mapped (each REQ-ID → exactly one phase). D
 | Phase 198 P08 | 8m 23s | 3 tasks | 4 files |
 | Phase 198 P05 | 21m | 3 tasks | 6 files |
 | Phase 198 P06 | 15m 37s | 3 tasks | 10 files |
+| Phase 198 P07 | 34min | 3 tasks | 8 files |
 
 ## Accumulated Context
 
@@ -411,6 +411,9 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - [Phase 198]: 198-06: Coupon, promotion-code, and event pages remain read-only: no action bands, overflow menus, or mutation events were added. — Preserves reference/ledger semantics and satisfies T-198-22/T-198-24.
 - [Phase 198]: 198-06: Raw payloads render only from bottom lazy sections through JsonViewer; EventLive omits the raw marker when event data is empty. — Mitigates raw projection payload exposure per T-198-21 and keeps empty-payload pages quiet.
 - [Phase 198]: 198-06: Activity sections are lazy and intentionally empty where these pages have no activity source yet. — Matches the plan requirement to render approved quiet empty-state behavior rather than omit activity markers.
+- [Phase 198]: Kept Connect platform fee override and Webhook replay in DetailDrawer flows with server-owned pending action state. — Preserves the plan's intent gating and server-owned action cap for sensitive admin operations.
+- [Phase 198]: Required StepUp.require_fresh for both sensitive saves because the plan recorded no lower-risk exception. — Mitigates T-198-25 and T-198-26 without broadening action behavior.
+- [Phase 198]: Rendered webhook raw payload only through the lazy Raw payload section while keeping summary/drill state visible. — Mitigates T-198-28 and preserves SPEC-DETAIL first-scan hierarchy.
 
 ### Pending Todos
 
@@ -501,8 +504,8 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 
 ## Session Continuity
 
-Last session: 2026-06-29T01:27:58.692Z
-Stopped at: Completed 198-06-PLAN.md
+Last session: 2026-06-29T02:06:41.687Z
+Stopped at: Completed 198-07-PLAN.md
 Resume file: None
 
 ## Operator Next Steps
