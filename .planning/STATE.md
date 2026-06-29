@@ -4,7 +4,7 @@ milestone: v1.54
 milestone_name: Admin UI Page-Level Streamlining & Storybook
 status: executing
 stopped_at: Completed 199-05-PLAN.md
-last_updated: "2026-06-29T23:32:04.582Z"
+last_updated: "2026-06-29T23:32:39.348Z"
 last_activity: 2026-06-29
 progress:
   total_phases: 8
@@ -429,6 +429,7 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - [Phase 199]: The command palette may either migrate to Overlay or declare explicit overlay-equivalent focus/portal markers; the current source satisfies neither contract. — This keeps the Phase 199 command-palette contract implementation-flexible while exposing the current source gap.
 - [Phase 199]: 199-04 kept GlobalSearch as a named overlay-equivalent command-palette wrapper instead of migrating it through Overlay. — The existing CommandPalette hook already owns Escape and focus restoration, and Phase 199 research allowed named wrappers with equivalent markers.
 - [Phase 199]: 199-04 routed touched command-palette no-results copy through AccrueAdmin.Copy with safe query escaping. — The Phase 199 UI contract requires touched page-level copy to use the copy SSOT while preserving safe rendering for user query text.
+- [Phase 199]: Plan 199-05 kept CommandPalette as the named overlay-equivalent wrapper and made backdrop close hook-owned. — This follows Plan 199-04's named-wrapper decision while avoiding duplicate delegated close handling from LiveView's top-level click listener.
 
 ### Pending Todos
 
