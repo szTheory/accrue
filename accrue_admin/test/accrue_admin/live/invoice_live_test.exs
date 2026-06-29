@@ -119,7 +119,7 @@ defmodule AccrueAdmin.InvoiceLiveTest do
   } do
     conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
 
-    assert {:ok, _view, html} = live(conn, "/billing/invoices/#{invoice.id}")
+    assert {:ok, view, html} = live(conn, "/billing/invoices/#{invoice.id}")
 
     assert heading_count(html, "h1") == 1
     assert data_attr_count(html, "data-ax-summary-list") == 1
@@ -130,6 +130,10 @@ defmodule AccrueAdmin.InvoiceLiveTest do
     assert data_attr_count(html, "data-ax-lazy-activity") == 1
     assert data_attr_count(html, "data-ax-lazy-json") == 1
 
+    refute has_element?(view, "[data-ax-action-band] form")
+    refute has_element?(view, "form[phx-submit='add_manual_item']")
+    refute has_element?(view, "[data-role='confirm-panel']")
+
     assert html =~ "Status"
     assert html =~ "Customer"
     assert html =~ "Amount due"
@@ -139,6 +143,8 @@ defmodule AccrueAdmin.InvoiceLiveTest do
     assert html =~ "Document state"
     assert html =~ "Tax risk"
     assert html =~ "Line items"
+    assert html =~ "Collection and actions"
+    assert html =~ "Tax and documents"
 
     refute html =~ ~s(class="ax-kpi-grid")
   end
@@ -216,9 +222,19 @@ defmodule AccrueAdmin.InvoiceLiveTest do
 
     {:ok, view, _html} = live(conn, "/billing/invoices/#{invoice.id}")
 
+    render_click(element(view, "button[role='menuitem']", Copy.Invoice.invoice_action_void()))
+
+    assert has_element?(
+             view,
+             "[data-ax-overlay-panel][data-presentation='drawer'] [data-role='void-form']"
+           )
+
     html =
       render_submit(
-        element(view, "[data-role='void-form']"),
+        element(
+          view,
+          "[data-ax-overlay-panel][data-presentation='drawer'] [data-role='void-form']"
+        ),
         %{"action_type" => "void", "source_event_id" => Integer.to_string(source_event.id)}
       )
 
@@ -253,6 +269,14 @@ defmodule AccrueAdmin.InvoiceLiveTest do
     {:ok, view, html} = live(conn, "/billing/invoices/#{invoice.id}")
 
     assert html =~ Copy.invoice_empty_manual_items_heading()
+    refute has_element?(view, "form[phx-submit='add_manual_item']")
+
+    render_click(element(view, "button", "Add line item"))
+
+    assert has_element?(
+             view,
+             "[data-ax-overlay-panel][data-presentation='drawer'] [data-role='add-line-item-form']"
+           )
 
     html =
       render_submit(
