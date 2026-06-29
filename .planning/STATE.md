@@ -5,16 +5,16 @@ milestone_name: Admin UI Page-Level Streamlining & Storybook
 current_phase: 199
 current_phase_name: cross-cutting-interaction-overlay-correctness-fixture-stress
 status: executing
-stopped_at: Completed 199-01-PLAN.md
-last_updated: "2026-06-29T21:28:10.393Z"
+stopped_at: Completed 199-02-PLAN.md
+last_updated: "2026-06-29T21:37:33.453Z"
 last_activity: 2026-06-29
 last_activity_desc: Phase 199 execution started
 progress:
   total_phases: 8
   completed_phases: 6
   total_plans: 53
-  completed_plans: 39
-  percent: 74
+  completed_plans: 40
+  percent: 75
 ---
 
 # Project State
@@ -30,7 +30,7 @@ See: `.planning/PROJECT.md` (updated 2026-06-29 — Phase 198 complete; Phase 19
 ## Current Position
 
 Phase: 199 (cross-cutting-interaction-overlay-correctness-fixture-stress) — EXECUTING
-Plan: 2 of 15
+Plan: 3 of 15
 Status: Ready to execute
 Last activity: 2026-06-29 — Phase 199 execution started
 
@@ -227,6 +227,7 @@ Coverage: 22/22 v1.51 requirements mapped (each REQ-ID → exactly one phase). D
 | Phase 198 P07 | 34min | 3 tasks | 8 files |
 | Phase 198-propagate-detail-analytics P09 | 16m 56s | 3 tasks | 2 files |
 | Phase 199 P01 | 10m 31s | 1 tasks | 2 files |
+| Phase 199 P02 | 4m 52s | 1 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -422,6 +423,8 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - [Phase 198-propagate-detail-analytics]: Charge browser StepUp coverage proceeds through a constrained DOM click only when the pointer assertion reports the known offscreen confirm gap.
 - [Phase 199]: Phase 199 browser contract uses explicit target arrays for overlay, motion, theme, affordance, fixture, and copy checks — Keeps the Wave 0 browser contract concrete and scoped to test-only scaffolding
 - [Phase 199]: Focused Phase 199 browser gate may stay red only for real behavior gaps after setup passes — Later Phase 199 plans are responsible for driving the browser contract green
+- [Phase 199]: Plan 199-02 remains test-only; command-palette backdrop close is the single intentional RED JS lifecycle contract for later Phase 199 implementation.
+- [Phase 199]: Dropdown Node tests explicitly pin non-modal behavior: no scroll lock, inert state, or aria-modal semantics.
 
 ### Pending Todos
 
@@ -512,8 +515,8 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 
 ## Session Continuity
 
-Last session: 2026-06-29T21:27:37.509Z
-Stopped at: Completed 199-01-PLAN.md
+Last session: 2026-06-29T21:37:14.071Z
+Stopped at: Completed 199-02-PLAN.md
 Resume file: None
 
 ## Operator Next Steps

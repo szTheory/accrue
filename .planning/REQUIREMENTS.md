@@ -70,8 +70,8 @@ v1.54-storybook-and-forward-only-qa). Phases 193–200.
 ### IXN — Interaction & overlay correctness
 
 - [x] **IXN-01**: A single canonical overlay primitive backs every modal/drawer — ref-counted iOS-safe body scroll-lock (no scrollbar-gutter jump), a body-level portal/stacking model so an overlay is never painted behind its scrim and is always hit-testable, an `inert`/`aria-hidden` background, and a unified backdrop+Escape dismissal that settles cleanly on rapid double-toggle.
-- [ ] **IXN-02**: Overlay motion is geometry-correct — drawer edge-docks on desktop (translateX from the right) and is a bottom-sheet on mobile (translateY), popovers are origin-aware, focus moves into the panel / traps / restores with an instant focus ring, the ≤240ms duration band is held, and reduced-motion behavior is preserved (extending `reduced-motion.spec.js`).
-- [ ] **IXN-03**: Non-interactive elements carry no hover/cursor affordance (empty-state heroes), disabled controls look disabled, absent affordances are hidden (no empty pagination), floating elements stay within viewport bounds, and theme switching has no flash-of-wrong-theme with correct persistence and system emulation.
+- [x] **IXN-02**: Overlay motion is geometry-correct — drawer edge-docks on desktop (translateX from the right) and is a bottom-sheet on mobile (translateY), popovers are origin-aware, focus moves into the panel / traps / restores with an instant focus ring, the ≤240ms duration band is held, and reduced-motion behavior is preserved (extending `reduced-motion.spec.js`).
+- [x] **IXN-03**: Non-interactive elements carry no hover/cursor affordance (empty-state heroes), disabled controls look disabled, absent affordances are hidden (no empty pagination), floating elements stay within viewport bounds, and theme switching has no flash-of-wrong-theme with correct persistence and system emulation.
 - [ ] **IXN-04**: A transformed/filtered/`contain` ancestor audit confirms no LiveView page wrapper re-roots a `position:fixed` overlay shell (the root cause of modal-behind-scrim).
 
 ### FIX — Fixture stress for real flows
@@ -107,8 +107,8 @@ REQ-ID → phase mapping (each REQ-ID maps to exactly one phase; 23/23 mapped, n
 | PRP-01 | Phase 197 | Complete |
 | PRP-02 | Phase 198 | Complete |
 | IXN-01 | Phase 199 | Complete |
-| IXN-02 | Phase 199 | Pending |
-| IXN-03 | Phase 199 | Pending |
+| IXN-02 | Phase 199 | Complete |
+| IXN-03 | Phase 199 | Complete |
 | IXN-04 | Phase 199 | Pending |
 | FIX-01 | Phase 199 | Pending |
 | FIX-02 | Phase 199 | Pending |

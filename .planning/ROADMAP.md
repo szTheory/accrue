@@ -250,7 +250,7 @@ Plans:
 **Wave 0 — validation scaffolding**
 
 - [x] 199-01-PLAN.md — Phase 199 browser contract and e2e script
-- [ ] 199-02-PLAN.md — JS overlay and floating lifecycle contracts
+- [x] 199-02-PLAN.md — JS overlay and floating lifecycle contracts
 - [ ] 199-03-PLAN.md — ExUnit source, theme, fixture, and copy contracts
 
 **Wave 1**
@@ -425,7 +425,7 @@ Full details: [v1.48 roadmap archive](milestones/v1.48-ROADMAP.md)
 | 196. Exemplar C — Subscriptions list + PageHeader | v1.54 | 5/5 | Complete    | 2026-06-26 |
 | 197. Propagate LIST | v1.54 | 7/7 | Complete    | 2026-06-28 |
 | 198. Propagate DETAIL + analytics | v1.54 | 9/9 | Complete    | 2026-06-29 |
-| 199. Cross-cutting interaction/overlay correctness + fixture stress + microcopy | v1.54 | 1/15 | In Progress|  |
+| 199. Cross-cutting interaction/overlay correctness + fixture stress + microcopy | v1.54 | 2/15 | In Progress|  |
 | 200. Idempotent verification & sign-off | v1.54 | 0/? | Not started | - |
 
 ## Historical Backlog Anchors (not active scope)
