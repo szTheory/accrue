@@ -95,7 +95,13 @@ defmodule AccrueAdmin.Live.CouponLive do
 
             <div :for={promotion_code <- @promotion_codes} class="ax-list-row">
               <a
-                href={@admin_mount_path <> "/promotion-codes/" <> promotion_code.id}
+                href={
+                  ScopedPath.build(
+                    @admin_mount_path,
+                    "/promotion-codes/#{promotion_code.id}",
+                    @current_owner_scope
+                  )
+                }
                 class="ax-link"
               >
                 <%= promotion_code.code || promotion_code.processor_id || promotion_code.id %>

@@ -160,6 +160,26 @@ defmodule AccrueAdmin.CouponLiveTest do
     assert html =~ "ANNUAL15"
   end
 
+  test "promotion code drilldown links preserve active organization scope", %{
+    conn: conn,
+    coupon: coupon
+  } do
+    promotion_code = TestRepo.get_by!(PromotionCode, coupon_id: coupon.id)
+
+    conn =
+      Phoenix.ConnTest.init_test_session(conn,
+        admin_token: "admin",
+        active_organization_id: "org_allowed",
+        active_organization_slug: "allowed-org",
+        admin_organization_ids: ["org_allowed"]
+      )
+
+    assert {:ok, _view, html} = live(conn, "/billing/coupons/#{coupon.id}?org=allowed-org")
+
+    assert html =~
+             ~s(href="/billing/promotion-codes/#{promotion_code.id}?org=allowed-org")
+  end
+
   test "lazy activity expands to quiet empty state when no coupon activity exists", %{
     conn: conn,
     coupon: coupon
