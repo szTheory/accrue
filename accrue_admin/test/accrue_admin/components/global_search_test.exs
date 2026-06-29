@@ -124,6 +124,10 @@ defmodule AccrueAdmin.Components.GlobalSearchTest do
 
       named_wrapper? =
         html =~ ~s(data-ax-command-palette-shell) and
+          html =~ ~s(data-ax-command-palette-backdrop) and
+          html =~ ~s(data-ax-command-palette-panel) and
+          html =~ ~s(data-focus-trap-close-event="close") and
+          html =~ ~s(data-focus-trap-close-target) and
           html =~ ~s(data-focus-trap-initial) and
           html =~ ~s(data-focus-trap-fallback)
 
