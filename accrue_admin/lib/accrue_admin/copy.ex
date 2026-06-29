@@ -786,6 +786,14 @@ defmodule AccrueAdmin.Copy do
     to: CustomerPaymentMethods,
     as: :set_default_success
 
+  defdelegate customer_payment_methods_set_default_drawer_body(),
+    to: CustomerPaymentMethods,
+    as: :set_default_drawer_body
+
+  defdelegate customer_payment_methods_already_default_warning(),
+    to: CustomerPaymentMethods,
+    as: :already_default_warning
+
   defdelegate customer_payment_methods_delete_action(),
     to: CustomerPaymentMethods,
     as: :delete_action
@@ -794,9 +802,17 @@ defmodule AccrueAdmin.Copy do
     to: CustomerPaymentMethods,
     as: :delete_success
 
+  defdelegate customer_payment_methods_delete_drawer_body(),
+    to: CustomerPaymentMethods,
+    as: :delete_drawer_body
+
   defdelegate customer_payment_methods_delete_warning(),
     to: CustomerPaymentMethods,
     as: :delete_warning
+
+  defdelegate customer_payment_methods_drawer_subtitle(),
+    to: CustomerPaymentMethods,
+    as: :drawer_subtitle
 
   defdelegate customer_payment_methods_cancel_action(),
     to: CustomerPaymentMethods,

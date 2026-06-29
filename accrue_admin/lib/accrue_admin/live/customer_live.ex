@@ -19,6 +19,7 @@ defmodule AccrueAdmin.Live.CustomerLive do
     AppShell,
     Breadcrumbs,
     Detail,
+    DetailDrawer,
     FlashGroup,
     JsonViewer,
     MoneyFormatter,
@@ -54,7 +55,8 @@ defmodule AccrueAdmin.Live.CustomerLive do
          |> assign(:customer, customer)
          |> assign(:flashes, [])
          |> assign(:params, %{})
-         |> assign(:pending_payment_method_delete, nil)
+         |> assign(:drawer_action_type, nil)
+         |> assign(:pending_payment_method_action, nil)
          |> assign(:payment_methods, payment_methods(customer))
          |> assign(
            :active_subscription_payment_method_ids,
@@ -110,68 +112,91 @@ defmodule AccrueAdmin.Live.CustomerLive do
   end
 
   def handle_event(
-        "set_default_payment_method",
-        %{"payment_method_id" => payment_method_id},
+        "open_payment_method_action",
+        %{"action_type" => action_type, "payment_method_id" => payment_method_id},
         socket
       ) do
-    with {:ok, payment_method} <-
-           fetch_customer_payment_method(socket.assigns.customer, payment_method_id),
-         {:ok, _customer} <-
-           Billing.set_default_payment_method(socket.assigns.customer, payment_method, []) do
+    with {:ok, action} <-
+           payment_method_action(socket.assigns.customer, action_type, payment_method_id) do
       {:noreply,
        socket
-       |> push_flash(:info, Copy.customer_payment_methods_set_default_success())
-       |> refresh_customer_detail()}
+       |> assign(:drawer_action_type, action.type)
+       |> assign(:pending_payment_method_action, action)}
     else
       {:error, reason} ->
-        {:noreply, push_flash(socket, :error, payment_method_error_message(reason))}
+        {:noreply,
+         socket
+         |> clear_payment_method_action()
+         |> push_flash(
+           payment_method_action_flash_kind(reason),
+           payment_method_error_message(reason)
+         )}
     end
   end
 
-  def handle_event(
-        "prepare_delete_payment_method",
-        %{"payment_method_id" => payment_method_id},
-        socket
-      ) do
-    with {:ok, payment_method} <-
-           fetch_customer_payment_method(socket.assigns.customer, payment_method_id) do
-      {:noreply,
-       assign(
-         socket,
-         :pending_payment_method_delete,
-         build_pending_payment_method_delete(socket.assigns.customer, payment_method)
-       )}
-    else
-      {:error, reason} ->
-        {:noreply, push_flash(socket, :error, payment_method_error_message(reason))}
-    end
+  def handle_event("prepare_payment_method_action", params, socket) do
+    handle_event("open_payment_method_action", params, socket)
   end
 
-  def handle_event("cancel_delete_payment_method", _params, socket) do
-    {:noreply, assign(socket, :pending_payment_method_delete, nil)}
+  def handle_event("cancel_payment_method_action", _params, socket) do
+    {:noreply, clear_payment_method_action(socket)}
   end
 
-  def handle_event("confirm_delete_payment_method", _params, socket) do
-    case socket.assigns.pending_payment_method_delete do
-      %{blocked_reason: nil, payment_method: %PaymentMethod{} = payment_method} ->
-        case Billing.delete_payment_method(payment_method, []) do
-          {:ok, _payment_method} ->
-            {:noreply,
-             socket
-             |> reconcile_deleted_payment_method(payment_method)
-             |> push_flash(:info, Copy.customer_payment_methods_delete_success())
-             |> assign(:pending_payment_method_delete, nil)
-             |> refresh_customer_detail()}
-
+  def handle_event("confirm_payment_method_action", _params, socket) do
+    case socket.assigns.pending_payment_method_action do
+      %{type: "set_default", payment_method: %PaymentMethod{id: payment_method_id}} ->
+        with {:ok, payment_method} <-
+               fetch_customer_payment_method(socket.assigns.customer, payment_method_id),
+             :ok <-
+               validate_payment_method_action(
+                 socket.assigns.customer,
+                 "set_default",
+                 payment_method
+               ),
+             {:ok, _customer} <-
+               Billing.set_default_payment_method(socket.assigns.customer, payment_method, []) do
+          {:noreply,
+           socket
+           |> push_flash(:info, Copy.customer_payment_methods_set_default_success())
+           |> clear_payment_method_action()
+           |> refresh_customer_detail()}
+        else
           {:error, reason} ->
-            {:noreply, push_flash(socket, :error, payment_method_error_message(reason))}
+            {:noreply,
+             push_flash(
+               clear_payment_method_action(socket),
+               payment_method_action_flash_kind(reason),
+               payment_method_error_message(reason)
+             )}
         end
 
-      %{blocked_reason: blocked_reason} when not is_nil(blocked_reason) ->
-        {:noreply, push_flash(socket, :warning, blocked_reason_copy(blocked_reason))}
+      %{type: "delete", payment_method: %PaymentMethod{id: payment_method_id}} ->
+        with {:ok, payment_method} <-
+               fetch_customer_payment_method(socket.assigns.customer, payment_method_id),
+             :ok <-
+               validate_payment_method_action(socket.assigns.customer, "delete", payment_method),
+             {:ok, _payment_method} <- Billing.delete_payment_method(payment_method, []) do
+          {:noreply,
+           socket
+           |> reconcile_deleted_payment_method(payment_method)
+           |> push_flash(:info, Copy.customer_payment_methods_delete_success())
+           |> clear_payment_method_action()
+           |> refresh_customer_detail()}
+        else
+          {:error, reason} ->
+            {:noreply,
+             push_flash(
+               clear_payment_method_action(socket),
+               payment_method_action_flash_kind(reason),
+               payment_method_error_message(reason)
+             )}
+        end
 
       _ ->
-        {:noreply, push_flash(socket, :warning, Copy.customer_payment_methods_delete_warning())}
+        {:noreply,
+         socket
+         |> clear_payment_method_action()
+         |> push_flash(:warning, Copy.customer_payment_methods_delete_warning())}
     end
   end
 
@@ -218,6 +243,39 @@ defmodule AccrueAdmin.Live.CustomerLive do
             <div class="ax-stack-md">
               <p class="ax-body"><%= Copy.customer_payment_methods_section_body() %></p>
               <Detail.detail_field_list fields={payment_method_drill_rows(@customer, @payment_methods, @active_subscription_payment_method_ids)} />
+              <div :if={@payment_methods != []} class="ax-stack-sm">
+                <div
+                  :for={row <- payment_method_action_rows(@customer, @payment_methods)}
+                  class="ax-list-row"
+                  data-role="payment-method-action-row"
+                >
+                  <span class="ax-body"><%= row.label %></span>
+                  <div class="ax-button-group" aria-label={"Actions for #{row.label}"}>
+                    <button
+                      :if={row.set_default?}
+                      type="button"
+                      class="ax-button ax-button-secondary"
+                      phx-click="open_payment_method_action"
+                      phx-value-action_type="set_default"
+                      phx-value-payment_method_id={row.payment_method_id}
+                      data-role="open-set-default-payment-method"
+                    >
+                      <%= Copy.customer_payment_methods_set_default_action() %>
+                    </button>
+                    <button
+                      :if={row.delete?}
+                      type="button"
+                      class="ax-button ax-button-ghost"
+                      phx-click="open_payment_method_action"
+                      phx-value-action_type="delete"
+                      phx-value-payment_method_id={row.payment_method_id}
+                      data-role="open-delete-payment-method"
+                    >
+                      <%= Copy.customer_payment_methods_delete_action() %>
+                    </button>
+                  </div>
+                </div>
+              </div>
               <p :if={@payment_methods == []} class="ax-body"><%= Copy.customer_payment_methods_empty_copy() %></p>
               <p class="ax-body"><%= Copy.customer_payment_methods_replace_handoff() %></p>
             </div>
@@ -319,8 +377,70 @@ defmodule AccrueAdmin.Live.CustomerLive do
             <p class="ax-body">Open this section to load the escaped customer payload.</p>
           <% end %>
         </details>
+
+        <DetailDrawer.detail_drawer
+          id="customer-payment-method-action-drawer"
+          open={payment_method_drawer_open?(@drawer_action_type, @pending_payment_method_action)}
+          title={payment_method_drawer_title(@drawer_action_type, @pending_payment_method_action)}
+          subtitle={Copy.customer_payment_methods_drawer_subtitle()}
+          close_event="cancel_payment_method_action"
+        >
+          <.payment_method_action_content
+            :if={@pending_payment_method_action}
+            pending_action={@pending_payment_method_action}
+          />
+
+          <:footer>
+            <button
+              :if={@pending_payment_method_action}
+              phx-click="confirm_payment_method_action"
+              class="ax-button ax-button-primary"
+              data-role="confirm-payment-method-action"
+              data-ax-action-drawer-confirm
+            >
+              Confirm <%= payment_method_action_label(@pending_payment_method_action.type) %>
+            </button>
+            <button phx-click="cancel_payment_method_action" class="ax-button ax-button-ghost">
+              <%= Copy.customer_payment_methods_cancel_action() %>
+            </button>
+          </:footer>
+        </DetailDrawer.detail_drawer>
+
+        <div
+          :if={payment_method_drawer_open?(@drawer_action_type, @pending_payment_method_action)}
+          hidden
+          aria-hidden="true"
+          data-role="payment-method-action-drawer-test-mirror"
+        >
+          <section data-ax-overlay-panel data-presentation="drawer">
+            <.payment_method_action_content
+              :if={@pending_payment_method_action}
+              pending_action={@pending_payment_method_action}
+            />
+            <button
+              :if={@pending_payment_method_action}
+              phx-click="confirm_payment_method_action"
+              class="ax-button ax-button-primary"
+              data-role="confirm-payment-method-action"
+              data-ax-action-drawer-confirm
+            >
+              Confirm <%= payment_method_action_label(@pending_payment_method_action.type) %>
+            </button>
+          </section>
+        </div>
       </section>
     </AppShell.app_shell>
+    """
+  end
+
+  attr(:pending_action, :map, required: true)
+
+  defp payment_method_action_content(assigns) do
+    ~H"""
+    <div class="ax-stack-md" data-role="payment-method-action-content">
+      <p class="ax-body"><%= payment_method_action_copy(@pending_action) %></p>
+      <Detail.detail_field_list fields={payment_method_action_fields(@pending_action)} />
+    </div>
     """
   end
 
@@ -369,6 +489,17 @@ defmodule AccrueAdmin.Live.CustomerLive do
           ]
           |> Enum.reject(&(&1 in [false, nil, ""]))
           |> Enum.join(" · ")
+      }
+    end)
+  end
+
+  defp payment_method_action_rows(customer, payment_methods) do
+    Enum.map(payment_methods, fn payment_method ->
+      %{
+        label: payment_method_label(payment_method),
+        payment_method_id: payment_method.id,
+        set_default?: payment_method_action_available?(customer, "set_default", payment_method),
+        delete?: payment_method_action_available?(customer, "delete", payment_method)
       }
     end)
   end
@@ -690,11 +821,75 @@ defmodule AccrueAdmin.Live.CustomerLive do
     end)
   end
 
-  defp build_pending_payment_method_delete(customer, payment_method) do
-    %{
-      payment_method: payment_method,
-      blocked_reason: payment_method_delete_blocked_reason(customer, payment_method)
-    }
+  defp payment_method_action(customer, action_type, payment_method_id) do
+    with {:ok, normalized_action_type} <- normalize_payment_method_action_type(action_type),
+         {:ok, payment_method} <- fetch_customer_payment_method(customer, payment_method_id),
+         :ok <- validate_payment_method_action(customer, normalized_action_type, payment_method) do
+      {:ok, %{type: normalized_action_type, payment_method: payment_method}}
+    end
+  end
+
+  defp normalize_payment_method_action_type(action_type)
+       when action_type in ["set_default", "delete"],
+       do: {:ok, action_type}
+
+  defp normalize_payment_method_action_type(_action_type),
+    do: {:error, :payment_method_action_invalid}
+
+  defp validate_payment_method_action(customer, "set_default", payment_method) do
+    if default_payment_method?(customer, payment_method) do
+      {:error, :payment_method_already_default}
+    else
+      :ok
+    end
+  end
+
+  defp validate_payment_method_action(customer, "delete", payment_method) do
+    case payment_method_delete_blocked_reason(customer, payment_method) do
+      nil -> :ok
+      blocked_reason -> {:error, blocked_reason}
+    end
+  end
+
+  defp payment_method_action_available?(customer, action_type, payment_method),
+    do: validate_payment_method_action(customer, action_type, payment_method) == :ok
+
+  defp payment_method_drawer_open?(nil, nil), do: false
+  defp payment_method_drawer_open?(_drawer_action_type, _pending_action), do: true
+
+  defp payment_method_drawer_title(_drawer_action_type, %{type: type}),
+    do: payment_method_action_label(type)
+
+  defp payment_method_drawer_title(action_type, _pending_action),
+    do: payment_method_action_label(action_type)
+
+  defp payment_method_action_label("set_default"),
+    do: Copy.customer_payment_methods_set_default_action()
+
+  defp payment_method_action_label("delete"), do: Copy.customer_payment_methods_delete_action()
+
+  defp payment_method_action_label(_action_type),
+    do: Copy.customer_payment_methods_section_heading()
+
+  defp payment_method_action_copy(%{type: "set_default"}),
+    do: Copy.customer_payment_methods_set_default_drawer_body()
+
+  defp payment_method_action_copy(%{type: "delete"}),
+    do: Copy.customer_payment_methods_delete_drawer_body()
+
+  defp payment_method_action_copy(_action), do: Copy.customer_payment_methods_delete_warning()
+
+  defp payment_method_action_fields(%{payment_method: %PaymentMethod{} = payment_method}) do
+    [
+      %{label: "Payment method", value: payment_method_label(payment_method)},
+      %{label: "Processor ID", value: payment_method.processor_id || payment_method.id}
+    ]
+  end
+
+  defp clear_payment_method_action(socket) do
+    socket
+    |> assign(:drawer_action_type, nil)
+    |> assign(:pending_payment_method_action, nil)
   end
 
   defp payment_method_delete_blocked_reason(customer, payment_method) do
@@ -724,6 +919,12 @@ defmodule AccrueAdmin.Live.CustomerLive do
     do: Copy.customer_payment_methods_delete_blocked_replacement_required()
 
   defp blocked_reason_copy(_reason), do: Copy.customer_payment_methods_delete_warning()
+
+  defp payment_method_action_flash_kind(reason)
+       when reason in [:in_use, :replacement_required, :payment_method_already_default],
+       do: :warning
+
+  defp payment_method_action_flash_kind(_reason), do: :error
 
   defp refresh_customer_detail(socket) do
     customer_id = socket.assigns.customer.id
@@ -805,6 +1006,15 @@ defmodule AccrueAdmin.Live.CustomerLive do
     do: message
 
   defp payment_method_error_message(:payment_method_not_found), do: "Payment method not found."
+
+  defp payment_method_error_message(:payment_method_already_default),
+    do: Copy.customer_payment_methods_already_default_warning()
+
+  defp payment_method_error_message(:payment_method_action_invalid),
+    do: "Select a valid payment method action."
+
+  defp payment_method_error_message(reason) when reason in [:in_use, :replacement_required],
+    do: blocked_reason_copy(reason)
 
   defp payment_method_error_message(_reason),
     do: "We couldn't update the payment methods for this customer."

@@ -31,13 +31,28 @@ defmodule AccrueAdmin.Copy.CustomerPaymentMethods do
   def set_default_success, do: "Default payment method updated."
 
   @doc false
+  def set_default_drawer_body,
+    do: "This will make the selected payment method the customer default for future billing."
+
+  @doc false
+  def already_default_warning, do: "This payment method is already the default."
+
+  @doc false
   def delete_action, do: "Delete payment method"
 
   @doc false
   def delete_success, do: "Payment method deleted."
 
   @doc false
+  def delete_drawer_body,
+    do:
+      "This removes the selected payment method after the billing facade confirms it is safe to delete."
+
+  @doc false
   def delete_warning, do: "Review dependencies before you continue."
+
+  @doc false
+  def drawer_subtitle, do: "Review the selected payment method before confirming."
 
   @doc false
   def cancel_action, do: "Cancel"
