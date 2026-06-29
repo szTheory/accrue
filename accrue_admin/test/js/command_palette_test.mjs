@@ -3,6 +3,67 @@ import test from "node:test";
 
 import { CommandPalette } from "../../assets/js/hooks/command_palette.js";
 
+function focusable(name, documentLike, { tabIndex = 0 } = {}) {
+  return {
+    name,
+    isConnected: true,
+    tabIndex,
+    attributes: {},
+    focusCalls: [],
+    focus(options) {
+      this.focusCalls.push(options);
+      documentLike.activeElement = this;
+    },
+    hasAttribute(attribute) {
+      return Object.prototype.hasOwnProperty.call(this.attributes, attribute);
+    },
+    setAttribute(attribute, value) {
+      this.attributes[attribute] = String(value);
+    }
+  };
+}
+
+function fakeDocument() {
+  return {
+    activeElement: null,
+    listeners: { click: new Set() },
+    registry: {},
+    addEventListener(type, handler) {
+      if (!this.listeners[type]) this.listeners[type] = new Set();
+      this.listeners[type].add(handler);
+    },
+    removeEventListener(type, handler) {
+      this.listeners[type]?.delete(handler);
+    },
+    querySelector(selector) {
+      return this.registry[selector] || null;
+    },
+    dispatch(type, event) {
+      for (const handler of Array.from(this.listeners[type] || [])) {
+        handler(event);
+      }
+    }
+  };
+}
+
+function fakeWindow() {
+  return {
+    listeners: { keydown: new Set() },
+    addEventListener(type, handler) {
+      if (!this.listeners[type]) this.listeners[type] = new Set();
+      this.listeners[type].add(handler);
+    },
+    removeEventListener(type, handler) {
+      this.listeners[type]?.delete(handler);
+    },
+    dispatch(type, event) {
+      for (const handler of Array.from(this.listeners[type] || [])) {
+        handler(event);
+      }
+    }
+  };
+}
+
 function withWindow(windowLike, callback) {
   const priorWindow = globalThis.window;
   globalThis.window = windowLike;
@@ -16,6 +77,58 @@ function withWindow(windowLike, callback) {
       globalThis.window = priorWindow;
     }
   }
+}
+
+function withBrowser(documentLike, windowLike, callback) {
+  const priorDocument = globalThis.document;
+  const priorWindow = globalThis.window;
+
+  globalThis.document = documentLike;
+  globalThis.window = windowLike;
+
+  try {
+    callback();
+  } finally {
+    if (priorDocument === undefined) {
+      delete globalThis.document;
+    } else {
+      globalThis.document = priorDocument;
+    }
+
+    if (priorWindow === undefined) {
+      delete globalThis.window;
+    } else {
+      globalThis.window = priorWindow;
+    }
+  }
+}
+
+async function withBrowserAsync(documentLike, windowLike, callback) {
+  const priorDocument = globalThis.document;
+  const priorWindow = globalThis.window;
+
+  globalThis.document = documentLike;
+  globalThis.window = windowLike;
+
+  try {
+    await callback();
+  } finally {
+    if (priorDocument === undefined) {
+      delete globalThis.document;
+    } else {
+      globalThis.document = priorDocument;
+    }
+
+    if (priorWindow === undefined) {
+      delete globalThis.window;
+    } else {
+      globalThis.window = priorWindow;
+    }
+  }
+}
+
+function waitForTimers() {
+  return new Promise((resolve) => setTimeout(resolve, 0));
 }
 
 function item(dataset) {
@@ -67,4 +180,206 @@ test("Enter patches to the active command path with LiveSocket's argument order"
   assert.equal(patches[0][1], "/billing/customers");
   assert.equal(patches[0][2], "push");
   assert.equal(patches[0][3], activeItem);
+});
+
+// Phase 199: command palette keyboard lifecycle uses a single configured LiveView target.
+test("Cmd+K opens the palette and Escape closes it through the configured target", () => {
+  const documentLike = fakeDocument();
+  const windowLike = fakeWindow();
+  const pushedEvents = [];
+  let open = false;
+
+  const hook = {
+    ...CommandPalette,
+    activeIndex: 0,
+    el: {
+      dataset: { target: "#global-search" },
+      addEventListener() {},
+      removeEventListener() {},
+      querySelectorAll() {
+        return [];
+      },
+      closest() {
+        return open ? { dataset: { open: "true" } } : { dataset: { open: "false" } };
+      }
+    },
+    pushEventTo(...args) {
+      pushedEvents.push(args);
+    }
+  };
+
+  withBrowser(documentLike, windowLike, () => {
+    hook.mounted();
+
+    const openEvent = {
+      key: "k",
+      metaKey: true,
+      defaultPrevented: false,
+      preventDefault() {
+        this.defaultPrevented = true;
+      }
+    };
+    windowLike.dispatch("keydown", openEvent);
+
+    open = true;
+    const escapeEvent = {
+      key: "Escape",
+      defaultPrevented: false,
+      preventDefault() {
+        this.defaultPrevented = true;
+      }
+    };
+    windowLike.dispatch("keydown", escapeEvent);
+
+    hook.destroyed();
+
+    assert.equal(openEvent.defaultPrevented, true);
+    assert.equal(escapeEvent.defaultPrevented, true);
+    assert.deepEqual(pushedEvents, [
+      ["#global-search", "toggle", {}],
+      ["#global-search", "close", {}]
+    ]);
+  });
+});
+
+test("trigger clicks open the command palette without navigating", () => {
+  const documentLike = fakeDocument();
+  const windowLike = fakeWindow();
+  const pushedEvents = [];
+  const trigger = {
+    closest(selector) {
+      return selector === "[data-command-palette-trigger]" ? this : null;
+    }
+  };
+  const click = {
+    target: trigger,
+    defaultPrevented: false,
+    preventDefault() {
+      this.defaultPrevented = true;
+    }
+  };
+
+  const hook = {
+    ...CommandPalette,
+    activeIndex: 0,
+    el: {
+      dataset: { target: "#global-search" },
+      addEventListener() {},
+      removeEventListener() {},
+      querySelectorAll() {
+        return [];
+      },
+      closest() {
+        return { dataset: { open: "false" } };
+      }
+    },
+    pushEventTo(...args) {
+      pushedEvents.push(args);
+    }
+  };
+
+  withBrowser(documentLike, windowLike, () => {
+    hook.mounted();
+    documentLike.dispatch("click", click);
+    hook.destroyed();
+  });
+
+  assert.equal(click.defaultPrevented, true);
+  assert.deepEqual(pushedEvents, [["#global-search", "open", {}]]);
+});
+
+// Phase 199: closing the palette should restore the invoking trigger, never body.
+test("open and close updates move focus to input then restore the trigger without body fallback", async () => {
+  const documentLike = fakeDocument();
+  const windowLike = fakeWindow();
+  const wrapper = { dataset: { open: "false" } };
+  const trigger = focusable("trigger", documentLike);
+  const input = focusable("search input", documentLike);
+  const body = focusable("body", documentLike);
+
+  documentLike.registry["[data-command-palette-trigger], #main-content, main"] = body;
+  trigger.focus();
+
+  const hook = {
+    ...CommandPalette,
+    activeIndex: 0,
+    wasOpen: false,
+    previousFocus: null,
+    items: [],
+    el: {
+      dataset: { target: "#global-search" },
+      querySelector(selector) {
+        return selector === "input" ? input : null;
+      },
+      querySelectorAll() {
+        return [];
+      },
+      closest() {
+        return wrapper;
+      }
+    }
+  };
+
+  await withBrowserAsync(documentLike, windowLike, async () => {
+    wrapper.dataset.open = "true";
+    hook.updated();
+    await waitForTimers();
+
+    assert.equal(documentLike.activeElement, input);
+
+    wrapper.dataset.open = "false";
+    hook.updated();
+    await waitForTimers();
+
+    assert.equal(documentLike.activeElement, trigger);
+    assert.equal(body.focusCalls.length, 0);
+  });
+});
+
+// Phase 199 RED: backdrop clicks should close through the same hook lifecycle as Escape.
+test("backdrop clicks close the command palette through the hook lifecycle", () => {
+  const documentLike = fakeDocument();
+  const windowLike = fakeWindow();
+  const pushedEvents = [];
+  const backdrop = {
+    closest(selector) {
+      if (selector === ".ax-command-palette-backdrop") return this;
+      return null;
+    }
+  };
+  const click = {
+    target: backdrop,
+    defaultPrevented: false,
+    preventDefault() {
+      this.defaultPrevented = true;
+    }
+  };
+
+  const hook = {
+    ...CommandPalette,
+    activeIndex: 0,
+    el: {
+      dataset: { target: "#global-search" },
+      addEventListener() {},
+      removeEventListener() {},
+      querySelectorAll() {
+        return [];
+      },
+      closest() {
+        return { dataset: { open: "true" } };
+      }
+    },
+    pushEventTo(...args) {
+      pushedEvents.push(args);
+    }
+  };
+
+  withBrowser(documentLike, windowLike, () => {
+    hook.mounted();
+    documentLike.dispatch("click", click);
+    hook.destroyed();
+  });
+
+  assert.deepEqual(pushedEvents, [["#global-search", "close", {}]]);
+  assert.equal(click.defaultPrevented, true);
 });

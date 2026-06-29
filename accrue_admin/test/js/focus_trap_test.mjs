@@ -104,6 +104,55 @@ function withDocument(documentLike, callback) {
   }
 }
 
+async function withDocumentAsync(documentLike, callback) {
+  const priorDocument = globalThis.document;
+  globalThis.document = documentLike;
+
+  try {
+    await callback();
+  } finally {
+    if (priorDocument === undefined) {
+      delete globalThis.document;
+    } else {
+      globalThis.document = priorDocument;
+    }
+  }
+}
+
+function waitForTimers() {
+  return new Promise((resolve) => setTimeout(resolve, 0));
+}
+
+// Phase 199: overlay entry must move focus into the panel before keyboard traversal.
+test("initial focus moves to the configured target after activation", async () => {
+  const documentLike = fakeDocument();
+  const trigger = focusable("trigger", documentLike);
+  const first = focusable("first", documentLike);
+  const initial = focusable("initial", documentLike);
+  initial.selector = "#drawer-primary-action";
+  const root = rootElement([first, initial], {
+    focusTrapInitial: "#drawer-primary-action",
+    focusTrapCloseEvent: "close_drawer"
+  });
+
+  await withDocumentAsync(documentLike, async () => {
+    trigger.focus();
+
+    const hook = {
+      ...FocusTrap,
+      el: root,
+      pushEvent() {}
+    };
+
+    hook.mounted();
+    await waitForTimers();
+
+    assert.equal(documentLike.activeElement, initial);
+
+    hook.destroyed();
+  });
+});
+
 test("Tab and Shift+Tab wrap across active overlay focus targets", () => {
   const documentLike = fakeDocument();
   const trigger = focusable("trigger", documentLike);
@@ -133,6 +182,35 @@ test("Tab and Shift+Tab wrap across active overlay focus targets", () => {
     const forward = keyEvent("Tab");
     documentLike.dispatch("keydown", forward);
     assert.equal(forward.defaultPrevented, true);
+    assert.equal(documentLike.activeElement, first);
+
+    hook.destroyed();
+  });
+});
+
+// Phase 199: focus that escapes an active overlay must be brought back inside.
+test("outside focus is redirected back inside the active trap", () => {
+  const documentLike = fakeDocument();
+  const trigger = focusable("trigger", documentLike);
+  const first = focusable("first", documentLike);
+  const last = focusable("last", documentLike);
+  const outside = focusable("outside", documentLike);
+  const root = rootElement([first, last], {
+    focusTrapCloseEvent: "close_overlay"
+  });
+
+  withDocument(documentLike, () => {
+    trigger.focus();
+
+    const hook = {
+      ...FocusTrap,
+      el: root,
+      pushEvent() {}
+    };
+
+    hook.mounted();
+
+    documentLike.dispatch("focusin", { target: outside });
     assert.equal(documentLike.activeElement, first);
 
     hook.destroyed();
@@ -172,6 +250,66 @@ test("Escape invokes only the configured close event", () => {
     assert.deepEqual(pushed, [["close_step_up", {}]]);
 
     hook.destroyed();
+  });
+});
+
+// Phase 199: Escape must use the same LiveView close target as the rendered backdrop.
+test("Escape dispatches close events through the configured LiveView target", () => {
+  const documentLike = fakeDocument();
+  const cancel = focusable("cancel", documentLike);
+  const root = rootElement([cancel], {
+    focusTrapCloseEvent: "cancel_pending_action",
+    focusTrapCloseTarget: "#invoice-drawer"
+  });
+  const pushed = [];
+
+  withDocument(documentLike, () => {
+    cancel.focus();
+
+    const hook = {
+      ...FocusTrap,
+      el: root,
+      pushEventTo(...args) {
+        pushed.push(args);
+      }
+    };
+
+    hook.mounted();
+
+    const escape = keyEvent("Escape");
+    documentLike.dispatch("keydown", escape);
+
+    assert.equal(escape.defaultPrevented, true);
+    assert.deepEqual(pushed, [["#invoice-drawer", "cancel_pending_action", {}]]);
+
+    hook.destroyed();
+  });
+});
+
+// Phase 199: closing a panel should restore the trigger when it still exists.
+test("Destroy cleanup restores focus to the connected trigger", () => {
+  const documentLike = fakeDocument();
+  const trigger = focusable("trigger", documentLike);
+  const close = focusable("close", documentLike);
+  const root = rootElement([close], {
+    focusTrapCloseEvent: "close_drawer"
+  });
+
+  withDocument(documentLike, () => {
+    trigger.focus();
+
+    const hook = {
+      ...FocusTrap,
+      el: root,
+      pushEvent() {}
+    };
+
+    hook.mounted();
+    close.focus();
+    hook.destroyed();
+
+    assert.equal(documentLike.activeElement, trigger);
+    assert.equal(trigger.focusCount, 2);
   });
 });
 

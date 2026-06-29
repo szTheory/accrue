@@ -10,11 +10,21 @@ function detailsElement() {
       this.focusCalls.push(options);
     }
   };
+  const attributes = new Map();
 
   return {
     open: true,
     insideTarget: {},
     removeCalls: 0,
+    setAttribute(attribute, value = "") {
+      attributes.set(attribute, String(value));
+    },
+    getAttribute(attribute) {
+      return attributes.get(attribute) || null;
+    },
+    hasAttribute(attribute) {
+      return attributes.has(attribute);
+    },
     contains(target) {
       return target === this.insideTarget;
     },
@@ -32,9 +42,20 @@ function detailsElement() {
 
 function fakeDocument(dropdowns) {
   const listeners = { click: new Set(), keydown: new Set() };
+  const bodyStyle = { overflow: "", paddingRight: "" };
+  const rootStyle = {
+    position: "",
+    top: "",
+    overflow: "",
+    getPropertyValue() {
+      return "";
+    }
+  };
 
   return {
     listeners,
+    body: { style: bodyStyle },
+    documentElement: { style: rootStyle },
     addEventListener(type, handler) {
       if (!listeners[type]) listeners[type] = new Set();
       listeners[type].add(handler);
@@ -122,4 +143,24 @@ test("repeated close attempts are safe after the dropdown is already closed", ()
   assert.equal(dropdown.open, false);
   assert.equal(dropdown.removeCalls, 1);
   assert.deepEqual(dropdown.summary.focusCalls, [{ preventScroll: true }]);
+});
+
+// Phase 199: dropdowns are non-modal floating surfaces, not scroll-locking overlays.
+test("dropdown dismissal does not apply modal scroll lock or aria-modal state", () => {
+  const dropdown = detailsElement();
+  const documentLike = fakeDocument([dropdown]);
+
+  withDocument(documentLike, () => {
+    initDropdowns();
+    documentLike.dispatch("keydown", { key: "Escape" });
+  });
+
+  assert.equal(dropdown.open, false);
+  assert.equal(dropdown.hasAttribute("inert"), false);
+  assert.equal(dropdown.hasAttribute("aria-modal"), false);
+  assert.equal(documentLike.documentElement.style.position, "");
+  assert.equal(documentLike.documentElement.style.top, "");
+  assert.equal(documentLike.documentElement.style.overflow, "");
+  assert.equal(documentLike.body.style.overflow, "");
+  assert.equal(documentLike.body.style.paddingRight, "");
 });

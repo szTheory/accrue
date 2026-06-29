@@ -179,3 +179,34 @@ test("scrollbar compensation is set while locked and cleared after unlock", () =
     assert.equal(documentLike.documentElement.style.getPropertyValue("--ax-scrollbar-comp"), "");
   });
 });
+
+// Phase 199: rapid overlay churn must not leave body/root styles or inert state behind.
+test("rapid lock and unlock cycles restore prior styles, inert state, and scroll position", () => {
+  const browser = fakeBrowser({ scrollY: 73, innerWidth: 1000, clientWidth: 990 });
+
+  withBrowserGlobals(browser, ({ documentLike, shell, windowLike }) => {
+    documentLike.documentElement.style.overflow = "clip";
+    documentLike.documentElement.style.setProperty("--ax-scrollbar-comp", "4px");
+    documentLike.body.style.overflow = "visible";
+    documentLike.body.style.paddingRight = "2px";
+    shell.setAttribute("inert", "");
+
+    ScrollLock.lock();
+    ScrollLock.unlock();
+    ScrollLock.unlock();
+    ScrollLock.lock();
+    ScrollLock.unlock();
+
+    assert.equal(documentLike.documentElement.style.position, "");
+    assert.equal(documentLike.documentElement.style.top, "");
+    assert.equal(documentLike.documentElement.style.overflow, "clip");
+    assert.equal(documentLike.documentElement.style.getPropertyValue("--ax-scrollbar-comp"), "4px");
+    assert.equal(documentLike.body.style.overflow, "visible");
+    assert.equal(documentLike.body.style.paddingRight, "2px");
+    assert.equal(shell.hasAttribute("inert"), true);
+    assert.deepEqual(windowLike.scrollCalls, [
+      [0, 73],
+      [0, 73]
+    ]);
+  });
+});
