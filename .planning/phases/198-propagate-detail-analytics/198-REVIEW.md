@@ -1,48 +1,12 @@
 ---
 phase: 198-propagate-detail-analytics
-reviewed: 2026-06-29T17:26:48Z
+reviewed: 2026-06-29T17:32:37Z
 depth: standard
-files_reviewed: 39
+baseline_review_commit: 8453417844c91f2e92342bd3dbf4a0df7dfc8a5b
+head_commit: 1e62b4b1337873f8c7528c5ab00ac1853e1553a9
+files_reviewed: 1
 files_reviewed_list:
   - accrue_admin/e2e/admin-spec-detail-phase198.spec.js
-  - accrue_admin/e2e/admin-spec-overview-phase194.spec.js
-  - accrue_admin/lib/accrue_admin/components/at_risk_table.ex
-  - accrue_admin/lib/accrue_admin/copy.ex
-  - accrue_admin/lib/accrue_admin/copy/billing_event.ex
-  - accrue_admin/lib/accrue_admin/copy/connect.ex
-  - accrue_admin/lib/accrue_admin/copy/coupon.ex
-  - accrue_admin/lib/accrue_admin/copy/customer_payment_methods.ex
-  - accrue_admin/lib/accrue_admin/copy/invoice.ex
-  - accrue_admin/lib/accrue_admin/copy/locked.ex
-  - accrue_admin/lib/accrue_admin/copy/promotion_code.ex
-  - accrue_admin/lib/accrue_admin/live/analytics/campaign_live.ex
-  - accrue_admin/lib/accrue_admin/live/analytics/recovery_live.ex
-  - accrue_admin/lib/accrue_admin/live/charge_live.ex
-  - accrue_admin/lib/accrue_admin/live/connect_account_live.ex
-  - accrue_admin/lib/accrue_admin/live/coupon_live.ex
-  - accrue_admin/lib/accrue_admin/live/customer_live.ex
-  - accrue_admin/lib/accrue_admin/live/event_live.ex
-  - accrue_admin/lib/accrue_admin/live/events_live.ex
-  - accrue_admin/lib/accrue_admin/live/invoice_live.ex
-  - accrue_admin/lib/accrue_admin/live/promotion_code_live.ex
-  - accrue_admin/lib/accrue_admin/live/webhook_live.ex
-  - accrue_admin/lib/accrue_admin/queries/charges.ex
-  - accrue_admin/lib/accrue_admin/queries/dunning.ex
-  - accrue_admin/lib/accrue_admin/queries/events.ex
-  - accrue_admin/package.json
-  - accrue_admin/test/accrue_admin/components/at_risk_table_test.exs
-  - accrue_admin/test/accrue_admin/live/analytics/campaign_live_test.exs
-  - accrue_admin/test/accrue_admin/live/analytics/recovery_live_test.exs
-  - accrue_admin/test/accrue_admin/live/charge_live_test.exs
-  - accrue_admin/test/accrue_admin/live/connect_account_live_test.exs
-  - accrue_admin/test/accrue_admin/live/coupon_live_test.exs
-  - accrue_admin/test/accrue_admin/live/customer_live_test.exs
-  - accrue_admin/test/accrue_admin/live/event_live_test.exs
-  - accrue_admin/test/accrue_admin/live/events_live_test.exs
-  - accrue_admin/test/accrue_admin/live/invoice_live_test.exs
-  - accrue_admin/test/accrue_admin/live/promotion_code_live_test.exs
-  - accrue_admin/test/accrue_admin/live/webhook_live_test.exs
-  - accrue_admin/test/accrue_admin/queries/events_test.exs
 findings:
   critical: 0
   warning: 0
@@ -54,28 +18,19 @@ blocking_status: pass
 
 # Phase 198: Code Review Report
 
-**Reviewed:** 2026-06-29T17:26:48Z
+**Reviewed:** 2026-06-29T17:32:37Z
 **Depth:** standard
-**Files Reviewed:** 39
+**Files Reviewed:** 1
 **Status:** clean
 **Blocking Status:** pass
+**Baseline Review:** `84534178`
+**Current HEAD:** `1e62b4b1`
 
 ## Summary
 
-Reviewed current HEAD `b5876182` after the Phase 198 review-fix commits `5d53147f` and `b5876182`, using the Phase 198 source/test scope from the existing review artifact as the guide.
+Reviewed the only source-scope change since the previous clean Phase 198 review at `84534178`: `1e62b4b1 test(198): stabilize refund drawer e2e after prepare`, which updates `accrue_admin/e2e/admin-spec-detail-phase198.spec.js`.
 
-All reviewed files meet quality standards. No new authorization, scope, correctness, or test-coverage issues were found in the current HEAD changes.
-
-Verified closed findings:
-
-- CR-01: Billing detail routes now enforce owner scope for invoices, charges, and events before rendering detail data.
-- CR-02: Recovery analytics and campaign detail routes now use organization-scoped query paths and deny out-of-scope records.
-- WR-01: Invoice action preparation uses the server-selected drawer action and does not trust submitted `action_type`.
-- WR-02: Coupon detail promotion-code drilldowns preserve the active organization scope.
-- WR-03: Organization-scoped event list/detail queries include in-scope `Charge` subjects and exclude denied organization charge events.
-- WR-04: Events index summary counts and empty-state behavior use the same scoped event relation, including in-scope `Charge` subjects.
-- WR-05: Charge refund preparation has a visible submit button, and browser coverage clicks the visible button rather than using `requestSubmit()`.
-- WR-06: Coupon, promotion code, and event detail breadcrumbs preserve `?org=...` on dashboard and index breadcrumb links.
+Current HEAD remains clean. No new Critical, Warning, or Info findings were found.
 
 ## Narrative Findings (AI reviewer)
 
@@ -83,12 +38,19 @@ No Critical, Warning, or Info findings.
 
 ## Verification Notes
 
-This review was performed by direct source and test inspection at current HEAD. The refund drawer browser path was rechecked specifically: the E2E flow clicks the visible `Review refund` button, and the LiveView markup exposes that visible preparation submit control.
+This refresh used the previous clean report at `84534178` as the Phase 198 baseline and reviewed the current HEAD delta directly. `git diff --name-only 84534178..HEAD` contains only `accrue_admin/e2e/admin-spec-detail-phase198.spec.js`, and `git diff --check 84534178..HEAD` passed.
 
-No additional test suite was rerun during this review pass.
+Refund drawer checks reviewed:
+
+- The Phase 198 helper still fills the visible refund drawer form and clicks the visible `Review refund`/`Continue` role button.
+- The Phase 198 spec does not use `requestSubmit()`.
+- After refund preparation, the helper waits for `#ax-overlay-root [data-presentation='drawer'] [data-role='confirm-panel']` and reacquires the drawer and confirm locators from the portal root, avoiding stale locators after LiveView replaces the preparation form.
+- The target LiveView markup exposes `form[data-role='refund-form']`, a visible `Review refund` submit button, and `[data-role='confirm-panel']`.
+
+The Phase 198 E2E rerun was reported as passing after this commit: 24 passed, 4 skipped.
 
 ---
 
-_Reviewed: 2026-06-29T17:26:48Z_
+_Reviewed: 2026-06-29T17:32:37Z_
 _Reviewer: the agent (gsd-code-reviewer)_
 _Depth: standard_
