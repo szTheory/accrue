@@ -97,7 +97,7 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLive do
       theme={@theme}
       active_organization_name={@active_organization_name}
     >
-      <section class="ax-page">
+      <section class="ax-page" data-ax-overview="recovery">
         <header class="ax-page-header">
           <Breadcrumbs.breadcrumbs items={[%{label: "Analytics"}, %{label: "Recovery"}]} />
           <div class="ax-heading-row">
@@ -118,8 +118,8 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLive do
           />
         </header>
 
-        <%= for kpi <- @kpi_pairs do %>
-          <section class="ax-kpi-grid ax-section-gap" data-ax-zone="kpi-cluster">
+        <section class="ax-kpi-grid ax-section-gap" data-ax-recovery-hero>
+          <%= for kpi <- @kpi_pairs do %>
             <KpiCard.kpi_card
               label={"Recovered MRR (#{String.upcase(kpi.currency)})"}
               value={kpi.recovered_str}
@@ -139,19 +139,21 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLive do
             >
               <:meta>Churned Revenue</:meta>
             </KpiCard.kpi_card>
-          </section>
-        <% end %>
+          <% end %>
+        </section>
 
-        <section data-ax-zone="task-launcher">
+        <section data-ax-recovery-work-queue>
           <AtRiskTable.at_risk_table rows={@at_risk} base_path={@admin_mount_path} />
         </section>
 
-        <FunnelChart.funnel_chart
-          entered={@funnel.entered}
-          recovered={@funnel.recovered}
-          exhausted={@funnel.exhausted}
-          active={@funnel.active}
-        />
+        <section data-ax-recovery-supporting-funnel>
+          <FunnelChart.funnel_chart
+            entered={@funnel.entered}
+            recovered={@funnel.recovered}
+            exhausted={@funnel.exhausted}
+            active={@funnel.active}
+          />
+        </section>
       </section>
     </AppShell.app_shell>
     """
