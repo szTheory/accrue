@@ -383,3 +383,49 @@ test("backdrop clicks close the command palette through the hook lifecycle", () 
   assert.deepEqual(pushedEvents, [["#global-search", "close", {}]]);
   assert.equal(click.defaultPrevented, true);
 });
+
+// Phase 199 RED: route close/destruction should restore the invoking trigger.
+test("destroying an open command palette restores focus to the trigger", async () => {
+  const documentLike = fakeDocument();
+  const windowLike = fakeWindow();
+  const wrapper = { dataset: { open: "true" } };
+  const trigger = focusable("trigger", documentLike);
+  const input = focusable("search input", documentLike);
+
+  trigger.focus();
+
+  const hook = {
+    ...CommandPalette,
+    activeIndex: 0,
+    wasOpen: false,
+    previousFocus: null,
+    el: {
+      dataset: { target: "#global-search" },
+      addEventListener() {},
+      removeEventListener() {},
+      querySelector(selector) {
+        return selector === "input" ? input : null;
+      },
+      querySelectorAll() {
+        return [];
+      },
+      closest() {
+        return wrapper;
+      }
+    },
+    pushEventTo() {}
+  };
+
+  await withBrowserAsync(documentLike, windowLike, async () => {
+    hook.mounted();
+    hook.updated();
+    await waitForTimers();
+
+    assert.equal(documentLike.activeElement, input);
+
+    hook.destroyed();
+    await waitForTimers();
+
+    assert.equal(documentLike.activeElement, trigger);
+  });
+});
