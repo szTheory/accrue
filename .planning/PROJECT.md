@@ -532,7 +532,7 @@ zero blockers; non-critical follow-ups + partial Nyquist 123–125 deferred).
 
 ## Current State
 
-**v1.54 — Admin UI Page-Level Streamlining & Storybook in progress (opened 2026-06-24; Phases 193–200).** Phases 193–197 are complete. The milestone has locked SPEC-OVERVIEW/LIST/DETAIL, extended the page-flow baseline, stood up PhoenixStorybook dev/test-only, delivered the Dashboard and Subscription detail archetype exemplars, extracted the shared `PageHeader`, converted the Subscriptions list, and propagated the locked LIST pattern to the remaining eight list pages (customers, invoices, payments, coupons, promotion codes, webhooks, events, connect). Phase 197 verified PRP-01 with 28/28 must-haves, clean code review, Nyquist validation passed, `threats_open: 0`, and UI review 23/24 with only a non-blocking shared-brand-fallback warning. Next: Phase 198 (Propagate DETAIL + analytics).
+**v1.54 — Admin UI Page-Level Streamlining & Storybook in progress (opened 2026-06-24; Phases 193–200).** Phases 193–198 are complete. The milestone has locked SPEC-OVERVIEW/LIST/DETAIL, extended the page-flow baseline, stood up PhoenixStorybook dev/test-only, delivered the Dashboard and Subscription detail archetype exemplars, extracted the shared `PageHeader`, converted the Subscriptions list, propagated the locked LIST pattern to the remaining eight list pages (customers, invoices, payments, coupons, promotion codes, webhooks, events, connect), and propagated the locked DETAIL + analytics patterns to the remaining detail and Recovery/Campaign surfaces. Phase 198 verified PRP-02 with 3/3 must-haves, clean code review, and final gates passing (`mix compile --warnings-as-errors`, focused ExUnit 123 tests, Phase 198 E2E 24 passed/4 skipped, package docs, Phase 194/195 E2E regressions). Next: Phase 199 (Cross-cutting interaction/overlay correctness + fixture stress + microcopy).
 
 **v1.53 — Admin UI Design-System Hardening shipped & archived 2026-06-20 (Phases 187–192, 39/39 plans, 33/33 requirements).** The fourth pass on the `accrue_admin` surface is complete: the operator UI is now *interaction-correct and component-systematic*, with a final scorecard ≥ the Phase-187 baseline across 21,276 cells (zero regressions), merge-blocking CI regression guardrails, and maintainer sign-off. v1.54 is the currently open, explicitly justified follow-on page-level streamlining milestone.
 
@@ -559,7 +559,7 @@ The v1.50→v1.53 arc (Admin UI Foundation → Depth Pass → Brand System → D
 
 ### Active
 
-**v1.54 remains active.** Completed requirements are tracked in `.planning/REQUIREMENTS.md`; remaining open scope is Phase 198 (PRP-02), Phase 199 (IXN-02..04, FIX-01..02, CPY-01), and Phase 200 (VER-01..03, STY-02..03). The post-v1.48 pause rule still applies after this milestone closes.
+**v1.54 remains active.** Completed requirements are tracked in `.planning/REQUIREMENTS.md`; remaining open scope is Phase 199 (IXN-02..04, FIX-01..02, CPY-01) and Phase 200 (VER-01..03, STY-02..03). The post-v1.48 pause rule still applies after this milestone closes.
 
 ### Validated v1.54 (in progress; active milestone opened 2026-06-24)
 
@@ -670,4 +670,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-06-28 after Phase 197 (Propagate LIST) completed in v1.54 — Admin UI Page-Level Streamlining & Storybook (opened 2026-06-24; Phases 193–200). LIST propagation is verified across customers, invoices, payments, coupons, promotion codes, webhooks, events, and connect with 28/28 must-haves, clean review, Nyquist validation passed, `threats_open: 0`, and UI review 23/24. Next: Phase 198 (Propagate DETAIL + analytics). Prior milestone: v1.53 Admin UI Design-System Hardening (Phases 187–192, shipped & archived 2026-06-20). Prior: v1.52 Brand System (Phases 180–186).*
+*Last updated: 2026-06-29 after Phase 198 (Propagate DETAIL + analytics) completed in v1.54 — Admin UI Page-Level Streamlining & Storybook (opened 2026-06-24; Phases 193–200). DETAIL + analytics propagation is verified across customer, invoice, charge, coupon, promotion-code, connect-account, webhook, event detail, Recovery, and Campaign with 3/3 must-haves, clean review, and final gates passing. Next: Phase 199 (Cross-cutting interaction/overlay correctness + fixture stress + microcopy). Prior milestone: v1.53 Admin UI Design-System Hardening (Phases 187–192, shipped & archived 2026-06-20). Prior: v1.52 Brand System (Phases 180–186).*
