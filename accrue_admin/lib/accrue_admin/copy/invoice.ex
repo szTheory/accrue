@@ -148,7 +148,7 @@ defmodule AccrueAdmin.Copy.Invoice do
 
   def invoice_action_finalize, do: "Finalize invoice"
   def invoice_action_add_line_item, do: "Add line item"
-  def invoice_action_manual_pay, do: "Manual pay"
+  def invoice_action_manual_pay, do: "Pay invoice"
   def invoice_action_void, do: "Void invoice"
   def invoice_action_mark_uncollectible, do: "Mark uncollectible"
   def invoice_action_documents, do: "Review documents"

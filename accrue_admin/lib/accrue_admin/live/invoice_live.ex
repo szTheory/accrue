@@ -814,6 +814,14 @@ defmodule AccrueAdmin.Live.InvoiceLive do
   end
 
   defp action_menu_groups(invoice) do
+    if valid_invoice_action_count(invoice) <= 2 do
+      []
+    else
+      invoice_action_menu_groups(invoice)
+    end
+  end
+
+  defp invoice_action_menu_groups(invoice) do
     primary_values = Enum.map(primary_actions(invoice), & &1.value)
     invoice_label = invoice_label(invoice)
 
@@ -851,6 +859,11 @@ defmodule AccrueAdmin.Live.InvoiceLive do
     |> Enum.reject(&(Map.get(&1, :items) == []))
   end
 
+  defp valid_invoice_action_count(invoice) do
+    ["finalize", "pay", "add_line_item", "documents", "void", "mark_uncollectible"]
+    |> Enum.count(&action_available?(invoice, &1))
+  end
+
   defp invoice_action_item(invoice, action_type, opts \\ []) do
     %{
       label: invoice_action_label(action_type),
@@ -871,7 +884,9 @@ defmodule AccrueAdmin.Live.InvoiceLive do
   defp action_available?(invoice, action) when action in ["void", "mark_uncollectible"],
     do: invoice_status(invoice) in ["draft", "open"]
 
-  defp action_available?(_invoice, "documents"), do: true
+  defp action_available?(invoice, "documents"),
+    do: present?(invoice.pdf_url) or present?(invoice.hosted_url)
+
   defp action_available?(_invoice, _action), do: false
 
   defp reject_unavailable_invoice_action(socket) do
