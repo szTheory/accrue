@@ -93,6 +93,7 @@ defmodule AccrueAdmin.EventLiveTest do
     assert data_attr_count(html, "data-ax-related-resources") == 1
     assert data_attr_count(html, "data-ax-lazy-activity") == 1
     assert data_attr_count(html, "data-ax-lazy-json") == 1
+    assert data_attr_count(html, "data-ax-action-band") == 0
     assert data_attr_count(html, "data-ax-action-overflow-menu") == 0
 
     assert html =~ "Type"
@@ -117,6 +118,58 @@ defmodule AccrueAdmin.EventLiveTest do
              :lazy_activity,
              :lazy_json
            ]
+  end
+
+  test "keeps activity collapsed until the operator opens the marker", %{
+    conn: conn,
+    event: event
+  } do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+
+    assert {:ok, view, html} = live(conn, "/billing/events/#{event.id}")
+
+    assert html =~ "Open this section to load activity."
+    refute html =~ "This record has no recorded activity yet."
+
+    html = render_click(view, "load_activity", %{})
+
+    assert html =~ "This record has no recorded activity yet."
+    assert html =~ "Core details remain available above."
+  end
+
+  test "keeps raw event payload collapsed until the operator opens the marker", %{
+    conn: conn,
+    event: event
+  } do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+
+    assert {:ok, view, html} = live(conn, "/billing/events/#{event.id}")
+
+    assert html =~ "Event payload"
+    refute html =~ "failure_code"
+    refute html =~ "card_declined"
+
+    html = render_click(view, "load_raw_json", %{})
+
+    assert html =~ "failure_code"
+    assert html =~ "card_declined"
+  end
+
+  test "omits the lazy raw marker when the event has no payload", %{conn: conn} do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+
+    {:ok, event} =
+      Events.record(%{
+        type: "system.note",
+        subject_type: "Unknown",
+        subject_id: "no_payload",
+        actor_type: "system"
+      })
+
+    assert {:ok, _view, html} = live(conn, "/billing/events/#{event.id}")
+
+    assert data_attr_count(html, "data-ax-lazy-activity") == 1
+    assert data_attr_count(html, "data-ax-lazy-json") == 0
   end
 
   test "D-15 event detail keeps one related-resources wrapper with quiet empty state when no links exist",
