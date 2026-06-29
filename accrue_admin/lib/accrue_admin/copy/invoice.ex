@@ -147,9 +147,26 @@ defmodule AccrueAdmin.Copy.Invoice do
     do: "Actions run through the existing billing facade and record admin audit rows."
 
   def invoice_action_finalize, do: "Finalize invoice"
+  def invoice_action_add_line_item, do: "Add line item"
   def invoice_action_manual_pay, do: "Manual pay"
   def invoice_action_void, do: "Void invoice"
   def invoice_action_mark_uncollectible, do: "Mark uncollectible"
+  def invoice_action_documents, do: "Review documents"
+
+  def invoice_drill_collection_actions, do: "Collection and actions"
+
+  def invoice_drill_tax_documents, do: "Tax and documents"
+
+  def invoice_drawer_subtitle,
+    do: "Review the staged invoice action before confirming it."
+
+  def invoice_documents_drawer_title, do: "Invoice documents"
+
+  def invoice_lazy_activity_prompt, do: "Open this section to load invoice activity."
+
+  def invoice_lazy_json_prompt, do: "Open this section to load the escaped invoice payload."
+
+  def invoice_json_payload_label, do: "Invoice payload"
 
   def invoice_confirm_panel_label, do: "Confirm action"
 

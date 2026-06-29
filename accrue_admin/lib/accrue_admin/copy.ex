@@ -146,9 +146,18 @@ defmodule AccrueAdmin.Copy do
   defdelegate invoice_actions_heading(), to: Invoice
   defdelegate invoice_actions_body(), to: Invoice
   defdelegate invoice_action_finalize(), to: Invoice
+  defdelegate invoice_action_add_line_item(), to: Invoice
   defdelegate invoice_action_manual_pay(), to: Invoice
   defdelegate invoice_action_void(), to: Invoice
   defdelegate invoice_action_mark_uncollectible(), to: Invoice
+  defdelegate invoice_action_documents(), to: Invoice
+  defdelegate invoice_drill_collection_actions(), to: Invoice
+  defdelegate invoice_drill_tax_documents(), to: Invoice
+  defdelegate invoice_drawer_subtitle(), to: Invoice
+  defdelegate invoice_documents_drawer_title(), to: Invoice
+  defdelegate invoice_lazy_activity_prompt(), to: Invoice
+  defdelegate invoice_lazy_json_prompt(), to: Invoice
+  defdelegate invoice_json_payload_label(), to: Invoice
   defdelegate invoice_confirm_panel_label(), to: Invoice
   defdelegate invoice_confirm_action_verb(), to: Invoice
   defdelegate invoice_confirm_cancel(), to: Invoice
