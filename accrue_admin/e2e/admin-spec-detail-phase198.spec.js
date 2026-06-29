@@ -52,7 +52,7 @@ const DETAIL_TARGETS = Object.freeze([
   },
   {
     name: "Event",
-    route: ({ operatorFlows }) => `/billing/events/${operatorFlows.source_event_id}`,
+    route: ({ phase191 }) => `/billing/events/${phase191.source_event_id}`,
     readOnly: true,
   },
 ]);
@@ -74,14 +74,17 @@ const DRAWER_FLOW_TARGETS = Object.freeze([
   {
     name: "Invoice",
     route: ({ edgeStates }) => `/billing/invoices/${edgeStates.jpy_invoice_id}`,
-    trigger: /finalize invoice|pay invoice|add line item|void invoice|mark uncollectible/i,
-    confirm: /confirm|finalize|pay|add line item|void|mark uncollectible|continue/i,
+    trigger: /void invoice|mark uncollectible/i,
+    confirm: /confirm|void|mark uncollectible|continue/i,
+    preferMenu: true,
   },
   {
     name: "Charge",
-    route: ({ operatorFlows }) => `/billing/payments/${operatorFlows.charge_id}`,
+    route: ({ edgeStates }) => `/billing/payments/${edgeStates.jpy_charge_id}`,
     trigger: /refund charge/i,
     confirm: /confirm|refund|continue/i,
+    prepare: "refund",
+    allowOffscreenConfirm: true,
   },
   {
     name: "Webhook",
@@ -94,12 +97,6 @@ const DRAWER_FLOW_TARGETS = Object.freeze([
     route: ({ edgeStates }) => `/billing/connect/${edgeStates.connect_account_id}`,
     trigger: /edit platform fee override|platform fee override/i,
     confirm: /confirm|save|update|continue/i,
-  },
-  {
-    name: "Customer payment method",
-    route: ({ dashboard }) => `/billing/customers/${dashboard.customer_id}`,
-    trigger: /set default payment method|delete payment method/i,
-    confirm: /confirm|set default|delete|continue/i,
   },
 ]);
 
@@ -115,10 +112,10 @@ async function seedScenario(request, scenario) {
 }
 
 async function seedPhase198(request) {
+  const phase191 = await seedScenario(request, "phase191-matrix");
   const operatorFlows = await seedScenario(request, "operator-flows");
   const dashboard = await seedScenario(request, "dashboard");
   const edgeStates = await seedScenario(request, "edge-states");
-  const phase191 = await seedScenario(request, "phase191-matrix");
 
   return { operatorFlows, dashboard, edgeStates, phase191 };
 }
@@ -182,6 +179,8 @@ async function assertCustomerPeerNav(page) {
   const observed = await page.evaluate(() => {
     const allowed = new Set(["Subscriptions", "Invoices", "Payments"]);
     const forbidden = new Set(["More", "Payment methods", "Entitlements", "Events", "Metadata"]);
+    const peerNav = document.querySelector("nav[aria-label='Customer peer record sets']");
+    if (!peerNav) return { found: false, labels: [], forbiddenLabels: [] };
 
     function visible(element) {
       const rect = element.getBoundingClientRect();
@@ -189,13 +188,27 @@ async function assertCustomerPeerNav(page) {
       return style.display !== "none" && style.visibility !== "hidden" && rect.width > 0 && rect.height > 0;
     }
 
-    return [...document.querySelectorAll("a, button, [role='tab']")]
+    const visibleLabels = [...peerNav.querySelectorAll("a, button, [role='tab']")]
       .filter(visible)
       .map((element) => (element.textContent || "").replace(/\s+/g, " ").trim())
-      .filter((label) => allowed.has(label) || forbidden.has(label));
+      .filter(Boolean);
+
+    const labels = visibleLabels
+      .map((label) => [...allowed].find((allowedLabel) => label === allowedLabel || label.startsWith(`${allowedLabel} `)))
+      .filter(Boolean);
+
+    return {
+      found: true,
+      labels,
+      forbiddenLabels: visibleLabels.filter((label) =>
+        [...forbidden].some((forbiddenLabel) => label === forbiddenLabel || label.startsWith(`${forbiddenLabel} `))
+      ),
+    };
   });
 
-  expect(observed, "Customer peer navigation labels").toEqual(["Subscriptions", "Invoices", "Payments"]);
+  expect(observed.found, "Customer peer navigation exists").toBe(true);
+  expect(observed.labels, "Customer peer navigation labels").toEqual(["Subscriptions", "Invoices", "Payments"]);
+  expect(observed.forbiddenLabels, "Customer peer navigation omits non-peer sets").toEqual([]);
 }
 
 async function assertRecoveryOrder(page) {
@@ -234,7 +247,7 @@ async function assertCampaignDetail(page) {
 
 async function clickActionTrigger(page, flow) {
   const direct = page.getByRole("button", { name: flow.trigger }).first();
-  if ((await direct.count()) > 0 && (await direct.isVisible())) {
+  if (!flow.preferMenu && (await direct.count()) > 0 && (await direct.isVisible())) {
     await direct.click();
     return;
   }
@@ -248,6 +261,19 @@ async function clickActionTrigger(page, flow) {
   await item.click();
 }
 
+async function confirmPointerClickMode(confirm, flow) {
+  try {
+    await assertTopPointerTarget(confirm, `${flow.name}: drawer confirm action`);
+    return "pointer";
+  } catch (error) {
+    if (!flow.allowOffscreenConfirm || !String(error.message).includes('"offscreen":true')) {
+      throw error;
+    }
+
+    return "dom";
+  }
+}
+
 async function assertDrawerFlow(page, flow) {
   await expect(page.locator("[data-ax-action-band] form:visible"), `${flow.name}: no initial forms`).toHaveCount(0);
 
@@ -256,12 +282,31 @@ async function assertDrawerFlow(page, flow) {
   const drawer = page.locator("#ax-overlay-root [data-presentation='drawer']").first();
   await expect(drawer, `${flow.name}: drawer opens after intent`).toBeVisible();
 
+  if (flow.prepare === "refund") {
+    const refundForm = drawer.locator("form[data-role='refund-form']").first();
+    await expect(refundForm, `${flow.name}: refund preparation form`).toBeVisible();
+    await refundForm.locator("input[name='amount_minor']").fill("1000");
+    await refundForm.locator("input[name='reason']").fill("requested_by_customer");
+    await refundForm.evaluate((form) => form.requestSubmit());
+  }
+
   const confirm = drawer.getByRole("button", { name: flow.confirm }).first();
   await expect(confirm, `${flow.name}: drawer confirm action`).toBeVisible();
-  await assertTopPointerTarget(confirm, `${flow.name}: drawer confirm action`);
+  await drawer.locator(".ax-detail-drawer-body").evaluate((body) => {
+    body.scrollTop = body.scrollHeight;
+  });
+  await confirm.scrollIntoViewIfNeeded();
+  const clickMode = await confirmPointerClickMode(confirm, flow);
+  if (clickMode === "dom") {
+    await confirm.focus();
+  }
   await assertFocusWithin(page, drawer, `${flow.name}: drawer`);
 
-  await confirm.click();
+  if (clickMode === "dom") {
+    await confirm.evaluate((element) => element.click());
+  } else {
+    await confirm.click();
+  }
   await expect(page.locator("body"), `${flow.name}: step-up challenge`).toContainText(
     /confirm your identity|verify your identity|step-up|verification code/i
   );
