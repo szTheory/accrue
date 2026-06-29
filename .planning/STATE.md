@@ -5,15 +5,15 @@ milestone_name: Admin UI Page-Level Streamlining & Storybook
 current_phase: 198
 current_phase_name: propagate-detail-analytics
 status: executing
-stopped_at: Completed 198-03-PLAN.md
-last_updated: "2026-06-28T23:46:04.667Z"
+stopped_at: Completed 198-04-PLAN.md
+last_updated: "2026-06-29T00:06:58.904Z"
 last_activity: 2026-06-28
 last_activity_desc: Phase 198 execution started
 progress:
   total_phases: 8
   completed_phases: 5
   total_plans: 38
-  completed_plans: 32
+  completed_plans: 33
   percent: 63
 ---
 
@@ -30,7 +30,7 @@ See: `.planning/PROJECT.md` (updated 2026-06-24 — v1.54 Admin UI Page-Level St
 ## Current Position
 
 Phase: 198 (propagate-detail-analytics) — EXECUTING
-Plan: 4 of 9
+Plan: 5 of 9
 Status: Ready to execute
 Last activity: 2026-06-28 -- Phase 198 execution started
 
@@ -220,6 +220,7 @@ Coverage: 22/22 v1.51 requirements mapped (each REQ-ID → exactly one phase). D
 | Phase 198 P01 | 10m 39s | 3 tasks | 2 files |
 | Phase 198 P02 | 10m | 3 tasks | 5 files |
 | Phase 198 P03 | 7m 47s | 3 tasks | 6 files |
+| Phase 198 P04 | 16m 39s | 3 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -396,6 +397,9 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - [Phase 198]: Customer-360 peer navigation is locked to Subscriptions, Invoices, and Payments, with payments and charges URLs resolving to Payments. — D-05 through D-07 remove the broad More bucket and keep Customer peer record sets explicit.
 - [Phase 198]: Kept 198-03 test-only: runtime DETAIL and analytics rewrites remain owned by later Phase 198 implementation plans. — This plan is Wave 0 contract coverage; production runtime rewrites are intentionally deferred to later Phase 198 plans.
 - [Phase 198]: Documented focused RED verification failures as expected conformance gaps, not setup or fixture failures. — Each focused verification command reached the intended tests and failed only on missing contract markers/docs owned by later implementation work.
+- [Phase 198]: 198-04: Kept Customer peer navigation as plain scoped links, not ARIA tabs, because no full tab keyboard component was introduced. — Customer peer record sets remain link/patched subviews and no ARIA tab keyboard implementation was added.
+- [Phase 198]: 198-04: Kept Customer payment-method action state page-owned in CustomerLive and revalidated payment-method ids before mutation. — The Phase 198 threat model required server-side validation for payment-method browser events.
+- [Phase 198]: 198-04: Used the existing DetailDrawer overlay pattern instead of adding a generic DetailPage or action DSL. — Phase 198 D-01 required existing LiveView composition idioms and no generic DetailPage schema.
 
 ### Pending Todos
 
@@ -486,8 +490,8 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 
 ## Session Continuity
 
-Last session: 2026-06-28T23:46:04.662Z
-Stopped at: Completed 198-03-PLAN.md
+Last session: 2026-06-29T00:06:58.899Z
+Stopped at: Completed 198-04-PLAN.md
 Resume file: None
 
 ## Operator Next Steps
