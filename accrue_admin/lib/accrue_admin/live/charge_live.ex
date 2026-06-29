@@ -420,6 +420,15 @@ defmodule AccrueAdmin.Live.ChargeLive do
         />
 
         <.source_event_select events={@events} />
+
+        <button
+          type="submit"
+          class="ax-button ax-button-primary"
+          data-role="prepare-refund"
+          data-ax-action-drawer-prepare
+        >
+          Review refund
+        </button>
       </form>
     </section>
     """

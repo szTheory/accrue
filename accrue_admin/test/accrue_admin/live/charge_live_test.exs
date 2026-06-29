@@ -123,6 +123,7 @@ defmodule AccrueAdmin.ChargeLiveTest do
     html = render_click(element(view, "[data-ax-primary-action]", "Refund charge"))
 
     assert has_element?(view, "[data-ax-action-drawer-form][data-role='refund-form']")
+    assert has_element?(view, "[data-ax-action-drawer-prepare]", "Review refund")
     assert html =~ "Confirm refund"
 
     html =

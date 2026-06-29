@@ -1,7 +1,7 @@
 defmodule AccrueAdmin.EventsLiveTest do
   use AccrueAdmin.LiveCase, async: false
 
-  alias Accrue.Billing.{Customer, Invoice}
+  alias Accrue.Billing.{Charge, Customer, Invoice}
   alias Accrue.Events
   alias Accrue.Webhook.WebhookEvent
   alias AccrueAdmin.Copy
@@ -294,6 +294,48 @@ defmodule AccrueAdmin.EventsLiveTest do
     assert html =~ webhook_id
   end
 
+  test "active-organization event feed summary counts in-scope charge subjects", %{conn: conn} do
+    allowed_org = "org_charge_allowed"
+    denied_org = "org_charge_denied"
+    allowed_customer = insert_customer(%{owner_type: "Organization", owner_id: allowed_org})
+    denied_customer = insert_customer(%{owner_type: "Organization", owner_id: denied_org})
+    allowed_charge = insert_charge(allowed_customer, %{processor_id: "ch_summary_allowed"})
+    denied_charge = insert_charge(denied_customer, %{processor_id: "ch_summary_denied"})
+
+    {:ok, _allowed_event} =
+      Events.record(%{
+        type: "charge.succeeded.summary_in_scope",
+        subject_type: "Charge",
+        subject_id: allowed_charge.id,
+        actor_type: "system"
+      })
+
+    {:ok, _denied_event} =
+      Events.record(%{
+        type: "charge.succeeded.summary_out_of_scope",
+        subject_type: "Charge",
+        subject_id: denied_charge.id,
+        actor_type: "system"
+      })
+
+    conn =
+      Phoenix.ConnTest.init_test_session(conn,
+        admin_token: "admin",
+        active_organization_id: allowed_org,
+        active_organization_slug: "charge-org",
+        admin_organization_ids: [allowed_org]
+      )
+
+    assert {:ok, _view, html} = live(conn, "/billing/events?org=charge-org&view=all")
+
+    assert html =~ "charge.succeeded.summary_in_scope"
+    assert html =~ allowed_charge.id
+    refute html =~ "charge.succeeded.summary_out_of_scope"
+    refute html =~ denied_charge.id
+    refute html =~ Copy.events_list_first_run_empty_title()
+    assert stat_value(html, Copy.billing_events_kpi_label_ledger_rows()) == "1"
+  end
+
   defp assert_page_header_contract(html, contract) do
     assert html =~ ~s(data-ax-page-header)
     assert html =~ ~s(data-ax-page-title)
@@ -317,6 +359,26 @@ defmodule AccrueAdmin.EventsLiveTest do
 
   defp assert_one_h1(html) do
     assert html |> Floki.parse_document!() |> Floki.find("h1") |> length() == 1
+  end
+
+  defp stat_value(html, label) do
+    html
+    |> Floki.parse_document!()
+    |> Floki.find(".ax-stat")
+    |> Enum.find_value(fn stat ->
+      stat_label =
+        stat
+        |> Floki.find(".ax-stat-label")
+        |> Floki.text()
+        |> String.trim()
+
+      if stat_label == label do
+        stat
+        |> Floki.find(".ax-stat-value")
+        |> Floki.text()
+        |> String.trim()
+      end
+    end)
   end
 
   defp insert_customer(attrs) do
@@ -350,6 +412,24 @@ defmodule AccrueAdmin.EventsLiveTest do
 
     %Invoice{}
     |> Invoice.force_status_changeset(Map.merge(defaults, attrs))
+    |> TestRepo.insert!()
+  end
+
+  defp insert_charge(customer, attrs) do
+    defaults = %{
+      customer_id: customer.id,
+      processor: "stripe",
+      processor_id: "ch_" <> Integer.to_string(System.unique_integer([:positive])),
+      amount_cents: 1_000,
+      currency: "usd",
+      status: "succeeded",
+      metadata: %{},
+      data: %{},
+      lock_version: 1
+    }
+
+    %Charge{}
+    |> Charge.changeset(Map.merge(defaults, attrs))
     |> TestRepo.insert!()
   end
 

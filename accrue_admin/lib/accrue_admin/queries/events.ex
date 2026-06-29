@@ -96,6 +96,11 @@ defmodule AccrueAdmin.Queries.Events do
     |> Repo.aggregate(:count)
   end
 
+  def scoped_base_query(owner_scope) do
+    Event
+    |> scope_query(owner_scope)
+  end
+
   def detail(id, owner_scope) when is_binary(id) do
     case Integer.parse(id) do
       {event_id, ""} -> detail(event_id, owner_scope)

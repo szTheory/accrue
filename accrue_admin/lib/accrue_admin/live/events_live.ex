@@ -5,7 +5,6 @@ defmodule AccrueAdmin.Live.EventsLive do
 
   import Ecto.Query
 
-  alias Accrue.Events.Event
   alias Accrue.Repo
 
   alias AccrueAdmin.Components.{
@@ -17,41 +16,8 @@ defmodule AccrueAdmin.Live.EventsLive do
   }
 
   alias AccrueAdmin.Copy
-  alias AccrueAdmin.OwnerScope
   alias AccrueAdmin.Queries.Events
   alias AccrueAdmin.ScopedPath
-
-  @customers_table Accrue.Migration.qualified_table(:accrue_customers)
-  @subscriptions_table Accrue.Migration.qualified_table(:accrue_subscriptions)
-  @invoices_table Accrue.Migration.qualified_table(:accrue_invoices)
-  @organization_scope_sql """
-  EXISTS (
-    SELECT 1
-    FROM #{@customers_table} customers
-    WHERE ? = 'Customer'
-      AND customers.id::text = ?
-      AND customers.owner_type = 'Organization'
-      AND customers.owner_id = ?
-  )
-  OR EXISTS (
-    SELECT 1
-    FROM #{@subscriptions_table} subscriptions
-    JOIN #{@customers_table} customers ON customers.id = subscriptions.customer_id
-    WHERE ? = 'Subscription'
-      AND subscriptions.id::text = ?
-      AND customers.owner_type = 'Organization'
-      AND customers.owner_id = ?
-  )
-  OR EXISTS (
-    SELECT 1
-    FROM #{@invoices_table} invoices
-    JOIN #{@customers_table} customers ON customers.id = invoices.customer_id
-    WHERE ? = 'Invoice'
-      AND invoices.id::text = ?
-      AND customers.owner_type = 'Organization'
-      AND customers.owner_id = ?
-  )
-  """
 
   @impl true
   def mount(_params, session, socket) do
@@ -225,7 +191,7 @@ defmodule AccrueAdmin.Live.EventsLive do
 
   defp event_summary(owner_scope) do
     day_ago = DateTime.add(DateTime.utc_now(), -86_400, :second)
-    base_query = scoped_events_query(owner_scope)
+    base_query = Events.scoped_base_query(owner_scope)
 
     %{
       total_count: Repo.aggregate(base_query, :count, :id),
@@ -246,28 +212,6 @@ defmodule AccrueAdmin.Live.EventsLive do
         |> select([event], count(fragment("distinct ?", event.subject_type)))
         |> Repo.one()
     }
-  end
-
-  defp scoped_events_query(nil), do: Event
-  defp scoped_events_query(%OwnerScope{mode: :global}), do: Event
-
-  defp scoped_events_query(%OwnerScope{mode: :organization, organization_id: organization_id}) do
-    where(
-      Event,
-      [event],
-      fragment(
-        @organization_scope_sql,
-        event.subject_type,
-        event.subject_id,
-        ^organization_id,
-        event.subject_type,
-        event.subject_id,
-        ^organization_id,
-        event.subject_type,
-        event.subject_id,
-        ^organization_id
-      )
-    )
   end
 
   defp event_filter_fields do

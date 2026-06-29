@@ -287,7 +287,7 @@ async function assertDrawerFlow(page, flow) {
     await expect(refundForm, `${flow.name}: refund preparation form`).toBeVisible();
     await refundForm.locator("input[name='amount_minor']").fill("1000");
     await refundForm.locator("input[name='reason']").fill("requested_by_customer");
-    await refundForm.evaluate((form) => form.requestSubmit());
+    await refundForm.getByRole("button", { name: /review refund|continue/i }).click();
   }
 
   const confirm = drawer.getByRole("button", { name: flow.confirm }).first();
