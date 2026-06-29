@@ -129,7 +129,7 @@ status: complete
 
 None. Stub scan found only intentional form defaults, empty select options, and empty-state checks; no unresolved TODO/FIXME/placeholder UI or mock data wiring remains in modified files.
 
-## Verification
+## Automated Test Results
 
 - `cd accrue_admin && mix test test/accrue_admin/live/invoice_live_test.exs --max-failures 5` - passed (`11 tests, 0 failures`)
 - `cd accrue_admin && mix test test/accrue_admin/live/charge_live_test.exs --max-failures 5` - passed (`9 tests, 0 failures`)
