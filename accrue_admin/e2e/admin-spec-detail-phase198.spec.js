@@ -279,7 +279,7 @@ async function assertDrawerFlow(page, flow) {
 
   await clickActionTrigger(page, flow);
 
-  const drawer = page.locator("#ax-overlay-root [data-presentation='drawer']").first();
+  let drawer = page.locator("#ax-overlay-root [data-presentation='drawer']").first();
   await expect(drawer, `${flow.name}: drawer opens after intent`).toBeVisible();
 
   if (flow.prepare === "refund") {
@@ -288,13 +288,19 @@ async function assertDrawerFlow(page, flow) {
     await refundForm.locator("input[name='amount_minor']").fill("1000");
     await refundForm.locator("input[name='reason']").fill("requested_by_customer");
     await refundForm.getByRole("button", { name: /review refund|continue/i }).click();
+    await expect(
+      page.locator("#ax-overlay-root [data-presentation='drawer'] [data-role='confirm-panel']").first(),
+      `${flow.name}: refund confirmation panel after preparation`
+    ).toBeVisible();
+    drawer = page.locator("#ax-overlay-root [data-presentation='drawer']").first();
   }
 
-  const confirm = drawer.getByRole("button", { name: flow.confirm }).first();
+  let confirm = drawer.getByRole("button", { name: flow.confirm }).first();
   await expect(confirm, `${flow.name}: drawer confirm action`).toBeVisible();
   await drawer.locator(".ax-detail-drawer-body").evaluate((body) => {
     body.scrollTop = body.scrollHeight;
   });
+  confirm = page.locator("#ax-overlay-root [data-presentation='drawer']").getByRole("button", { name: flow.confirm }).first();
   await confirm.scrollIntoViewIfNeeded();
   const clickMode = await confirmPointerClickMode(confirm, flow);
   if (clickMode === "dom") {
