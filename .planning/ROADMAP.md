@@ -245,27 +245,49 @@ Plans:
   3. Deterministic multi-step workflow fixtures (list → detail → nested detail → drill-down → back) exercise focus and scroll integrity across every transition (FIX-01), and long-content/boundary fixtures (zero-decimal currency, past-due dunning, very long names, overflow) surface no squish/clipping/overflow on real seeded data and remain idempotent (FIX-02).
   4. A full brand-voice microcopy sweep covers all page-level copy with distinct first-run-empty vs filtered-empty messages and action/"Change" labels carrying visually-hidden context that names the object and the next useful action (CPY-01).
 
-**Plans**: 5 plans
+**Plans**: 15 plans
 Plans:
 **Wave 0 — validation scaffolding**
 
-- [ ] 199-01-PLAN.md — Phase 199 browser, JS, ExUnit, fixture, and copy contracts
+- [ ] 199-01-PLAN.md — Phase 199 browser contract and e2e script
+- [ ] 199-02-PLAN.md — JS overlay and floating lifecycle contracts
+- [ ] 199-03-PLAN.md — ExUnit source, theme, fixture, and copy contracts
 
 **Wave 1**
 
-- [ ] 199-02-PLAN.md — Canonical overlay substrate, scroll/focus/dismissal cleanup, and ancestor escape
+- [ ] 199-04-PLAN.md — Canonical overlay component/root/client sweep
+- [ ] 199-05-PLAN.md — Overlay JS scroll/focus/dismissal lifecycle
+- [ ] 199-11-PLAN.md — Copy module helpers and deterministic copy guard
 
 **Wave 2**
 
-- [ ] 199-03-PLAN.md — Drawer geometry, floating bounds, affordance semantics, reduced motion, and production theme persistence
+- [ ] 199-06-PLAN.md — Overlay browser proof and ancestor escape
+- [ ] 199-12-PLAN.md — List and recovery page copy call sites
+- [ ] 199-13-PLAN.md — Detail and analytics page copy call sites
 
 **Wave 3**
 
-- [ ] 199-04-PLAN.md — Deterministic multi-step workflow and edge-layout fixture stress
+- [ ] 199-07-PLAN.md — Drawer geometry, motion tokens, and reduced-motion coverage
 
 **Wave 4**
 
-- [ ] 199-05-PLAN.md — Brand-voice microcopy sweep and focused Phase 199 closeout gates
+- [ ] 199-08-PLAN.md — Floating bounds and trigger-aware non-modal panels
+
+**Wave 5**
+
+- [ ] 199-09-PLAN.md — Affordance semantics and production theme persistence
+
+**Wave 6**
+
+- [ ] 199-10-PLAN.md — Deterministic multi-step workflow and edge-layout fixture stress
+
+**Wave 7**
+
+- [ ] 199-14-PLAN.md — Action-context labels and generated copy fixtures
+
+**Wave 8**
+
+- [ ] 199-15-PLAN.md — Focused Phase 199 closeout gates
 
 **UI hint**: yes
 
