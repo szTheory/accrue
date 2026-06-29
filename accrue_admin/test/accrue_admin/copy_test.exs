@@ -14,6 +14,8 @@ defmodule AccrueAdmin.CopyTest do
   }
 
   @vague_standalone ~r/\A(?:failed|forbidden|invalid|not found|could not load|something went wrong|oops)\.?\z/i
+  @raw_generic_guard ~r/No results|Try again|Submit|Continue|Something went wrong/
+  @voice_guard ~r/\b(production-grade|batteries-included|bank-grade|modern alternative|seamless|powerful|robust|effortless|best-in-class|world-class|wallet|funds)\b/i
 
   test "PAGE-02 and CPY-01 page state helpers distinguish state classes" do
     states = %{
@@ -376,6 +378,69 @@ defmodule AccrueAdmin.CopyTest do
     refute_vague_copy!(contexts)
   end
 
+  test "CPY-01 resource state helpers cover required page states for page call sites" do
+    resources = %{
+      customers: "customer",
+      invoices: "invoice",
+      subscriptions: "subscription",
+      payments: "payment",
+      connect_accounts: "connected account",
+      webhooks: "webhook",
+      events: "event",
+      coupons: "coupon",
+      promotion_codes: "promotion code",
+      dunning: "dunning"
+    }
+
+    required_states = [
+      :first_run_empty,
+      :queue_empty,
+      :filtered_empty,
+      :loading,
+      :error,
+      :permission_denied
+    ]
+
+    for {resource, label} <- resources do
+      copies =
+        Map.new(required_states, fn state ->
+          copy =
+            Copy.resource_state_copy(resource, state,
+              object: "#{label} phase199",
+              owner_scope: "organization org_phase199"
+            )
+
+          assert %{heading: heading, body: body} = copy
+          assert heading != ""
+          assert body != ""
+          assert heading != body
+
+          text = String.downcase("#{heading} #{body}")
+          assert text =~ label
+
+          {state, copy}
+        end)
+
+      headings = copies |> Map.values() |> Enum.map(& &1.heading)
+      bodies = copies |> Map.values() |> Enum.map(& &1.body)
+
+      assert Enum.uniq(headings) == headings
+      assert Enum.uniq(bodies) == bodies
+      assert copies.filtered_empty.body =~ "Clear filters"
+      assert copies.permission_denied.body =~ "organization org_phase199"
+
+      refute_vague_copy!(Map.values(copies))
+    end
+  end
+
+  test "CPY-01 copy modules avoid generic fallbacks and bare action terms" do
+    assert copy_module_guard(@raw_generic_guard) == []
+  end
+
+  test "CPY-01 copy modules stay within measured admin voice" do
+    assert copy_module_guard(@voice_guard) == []
+  end
+
   defp refute_vague_copy!(%{} = copy_map) do
     copy_map
     |> Map.values()
@@ -393,5 +458,23 @@ defmodule AccrueAdmin.CopyTest do
 
   defp refute_vague_copy!(string) when is_binary(string) do
     refute string =~ @vague_standalone
+  end
+
+  defp copy_module_guard(pattern) do
+    [Path.expand("../../lib/accrue_admin/copy.ex", __DIR__)]
+    |> Kernel.++(Path.wildcard(Path.expand("../../lib/accrue_admin/copy/*.ex", __DIR__)))
+    |> Enum.flat_map(fn file ->
+      file
+      |> File.read!()
+      |> String.split("\n")
+      |> Enum.with_index(1)
+      |> Enum.flat_map(fn {line, line_number} ->
+        if line =~ pattern do
+          ["#{Path.relative_to_cwd(file)}:#{line_number}:#{String.trim(line)}"]
+        else
+          []
+        end
+      end)
+    end)
   end
 end
