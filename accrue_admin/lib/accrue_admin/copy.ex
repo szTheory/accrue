@@ -17,6 +17,27 @@ defmodule AccrueAdmin.Copy do
   alias AccrueAdmin.Copy.PromotionCode
   alias AccrueAdmin.Copy.Subscription
 
+  @spec global_search_no_results_copy(String.t()) :: String.t()
+  def global_search_no_results_copy(query) do
+    normalized_query = normalize_search_query(query)
+
+    ~s(No billing records match "#{normalized_query}". Adjust the search or open the customers list.)
+  end
+
+  def global_search_no_results_html(query) do
+    escaped_query =
+      query
+      |> normalize_search_query()
+      |> Phoenix.HTML.html_escape()
+      |> Phoenix.HTML.safe_to_string()
+
+    Phoenix.HTML.raw(
+      ~s(No billing records match "#{escaped_query}". Adjust the search or open the customers list.)
+    )
+  end
+
+  defp normalize_search_query(query), do: query |> to_string() |> String.trim()
+
   defdelegate subscription_breadcrumb_subscriptions(), to: Subscription
   defdelegate subscription_detail_eyebrow(), to: Subscription
   defdelegate subscription_kpi_section_aria_label(), to: Subscription

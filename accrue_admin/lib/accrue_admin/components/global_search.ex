@@ -4,6 +4,7 @@ defmodule AccrueAdmin.Components.GlobalSearch do
   """
   use Phoenix.LiveComponent
 
+  alias AccrueAdmin.Copy
   alias Accrue.Billing
   alias AccrueAdmin.Components.Icon
 
@@ -131,12 +132,22 @@ defmodule AccrueAdmin.Components.GlobalSearch do
       id={@id}
       class="ax-command-palette-wrapper"
       data-open={to_string(@is_open)}
+      data-ax-command-palette-shell
       data-component-group="toolbar-search-filter-sort"
     >
-      <div id={"#{@id}-controller"} phx-hook="CommandPalette" data-target={@myself}>
+      <div
+        id={"#{@id}-controller"}
+        phx-hook="CommandPalette"
+        data-target={@myself}
+        data-focus-trap-close-event="close"
+        data-focus-trap-close-target={@myself}
+        data-focus-trap-fallback="#search-trigger"
+      >
         <%= if @is_open do %>
           <div
             class="ax-command-palette-backdrop"
+            data-ax-command-palette-backdrop
+            aria-hidden="true"
             phx-click="close"
             phx-target={@myself}
           >
@@ -145,9 +156,12 @@ defmodule AccrueAdmin.Components.GlobalSearch do
           <div
             class="ax-command-palette"
             id="command-palette-container"
+            data-ax-command-palette-panel
+            data-focus-trap-fallback
             role="dialog"
             aria-modal="true"
             aria-label="Global search"
+            tabindex="-1"
           >
             <form phx-change="search" phx-target={@myself} onsubmit="return false;">
               <div class="ax-command-palette-input-group">
@@ -163,6 +177,7 @@ defmodule AccrueAdmin.Components.GlobalSearch do
                   phx-debounce="150"
                   class="ax-command-palette-input"
                   id="global-search-input"
+                  data-focus-trap-initial
                 />
                 <span id="search-spinner" class="ax-spinner" hidden={not @loading} aria-hidden="true"></span>
               </div>
@@ -199,7 +214,7 @@ defmodule AccrueAdmin.Components.GlobalSearch do
                 <div class="ax-command-palette-results">
                   <%= if Enum.empty?(@results.customers) and Enum.empty?(@results.invoices) and Enum.empty?(@results.subscriptions) do %>
                     <div class="ax-command-palette-no-results">
-                      <p>No results found for "<%= @query %>"</p>
+                      <p><%= Copy.global_search_no_results_html(@query) %></p>
                     </div>
                   <% else %>
                     <%= if not Enum.empty?(@results.customers) do %>
