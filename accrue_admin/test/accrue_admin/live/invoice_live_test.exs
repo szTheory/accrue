@@ -179,6 +179,64 @@ defmodule AccrueAdmin.InvoiceLiveTest do
     assert html =~ Copy.step_up_title()
   end
 
+  test "D-13 collectible invoices prioritize pay and keep danger actions in overflow", %{
+    conn: conn,
+    invoice: invoice
+  } do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    customer = TestRepo.get!(Customer, invoice.customer_id)
+
+    open_invoice =
+      insert_invoice(customer, %{
+        status: :open,
+        number: "INV-OPEN",
+        amount_due_minor: 9_900,
+        amount_paid_minor: 0,
+        amount_remaining_minor: 9_900,
+        total_minor: 9_900,
+        hosted_url: nil,
+        pdf_url: nil
+      })
+
+    assert {:ok, _view, html} = live(conn, "/billing/invoices/#{open_invoice.id}")
+
+    assert data_attr_count(html, "data-ax-primary-action") <= 2
+    assert html =~ "Pay invoice"
+    refute html =~ Copy.Invoice.invoice_action_add_line_item()
+    assert data_attr_count(html, "data-ax-action-overflow-menu") == 1
+
+    assert_text_order(html, [
+      "Danger zone",
+      Copy.Invoice.invoice_action_void(),
+      Copy.Invoice.invoice_action_mark_uncollectible()
+    ])
+  end
+
+  test "D-10 invoice overflow is absent when no valid overflow actions exist", %{
+    conn: conn,
+    invoice: invoice
+  } do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    customer = TestRepo.get!(Customer, invoice.customer_id)
+
+    paid_invoice =
+      insert_invoice(customer, %{
+        status: :paid,
+        number: "INV-PAID",
+        amount_due_minor: 9_900,
+        amount_paid_minor: 9_900,
+        amount_remaining_minor: 0,
+        total_minor: 9_900,
+        hosted_url: nil,
+        pdf_url: nil
+      })
+
+    assert {:ok, _view, html} = live(conn, "/billing/invoices/#{paid_invoice.id}")
+
+    assert data_attr_count(html, "data-ax-primary-action") == 0
+    assert data_attr_count(html, "data-ax-action-overflow-menu") == 0
+  end
+
   test "renders invoice line items and can open the shared PDF render path", %{
     conn: conn,
     invoice: invoice
