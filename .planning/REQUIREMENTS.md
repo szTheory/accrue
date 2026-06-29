@@ -72,16 +72,16 @@ v1.54-storybook-and-forward-only-qa). Phases 193–200.
 - [x] **IXN-01**: A single canonical overlay primitive backs every modal/drawer — ref-counted iOS-safe body scroll-lock (no scrollbar-gutter jump), a body-level portal/stacking model so an overlay is never painted behind its scrim and is always hit-testable, an `inert`/`aria-hidden` background, and a unified backdrop+Escape dismissal that settles cleanly on rapid double-toggle.
 - [x] **IXN-02**: Overlay motion is geometry-correct — drawer edge-docks on desktop (translateX from the right) and is a bottom-sheet on mobile (translateY), popovers are origin-aware, focus moves into the panel / traps / restores with an instant focus ring, the ≤240ms duration band is held, and reduced-motion behavior is preserved (extending `reduced-motion.spec.js`).
 - [x] **IXN-03**: Non-interactive elements carry no hover/cursor affordance (empty-state heroes), disabled controls look disabled, absent affordances are hidden (no empty pagination), floating elements stay within viewport bounds, and theme switching has no flash-of-wrong-theme with correct persistence and system emulation.
-- [ ] **IXN-04**: A transformed/filtered/`contain` ancestor audit confirms no LiveView page wrapper re-roots a `position:fixed` overlay shell (the root cause of modal-behind-scrim).
+- [x] **IXN-04**: A transformed/filtered/`contain` ancestor audit confirms no LiveView page wrapper re-roots a `position:fixed` overlay shell (the root cause of modal-behind-scrim).
 
 ### FIX — Fixture stress for real flows
 
-- [ ] **FIX-01**: Deterministic multi-step workflow fixtures (list → detail → nested detail → drill-down → back) exercise focus and scroll integrity across every transition.
-- [ ] **FIX-02**: Long-content / boundary / edge fixtures (zero-decimal currency, past-due dunning, very long names, overflow) surface squish/clipping/overflow on real seeded data and remain idempotent.
+- [x] **FIX-01**: Deterministic multi-step workflow fixtures (list → detail → nested detail → drill-down → back) exercise focus and scroll integrity across every transition.
+- [x] **FIX-02**: Long-content / boundary / edge fixtures (zero-decimal currency, past-due dunning, very long names, overflow) surface squish/clipping/overflow on real seeded data and remain idempotent.
 
 ### CPY — Microcopy
 
-- [ ] **CPY-01**: A full brand-voice microcopy sweep covers all page-level copy — distinct first-run-empty vs filtered-empty messages, and action/"Change" labels with visually-hidden context that name the affected object and give the next useful action.
+- [x] **CPY-01**: A full brand-voice microcopy sweep covers all page-level copy — distinct first-run-empty vs filtered-empty messages, and action/"Change" labels with visually-hidden context that name the affected object and give the next useful action.
 
 ### VER — Forward-only verification & sign-off
 
@@ -109,10 +109,10 @@ REQ-ID → phase mapping (each REQ-ID maps to exactly one phase; 23/23 mapped, n
 | IXN-01 | Phase 199 | Complete |
 | IXN-02 | Phase 199 | Complete |
 | IXN-03 | Phase 199 | Complete |
-| IXN-04 | Phase 199 | Pending |
-| FIX-01 | Phase 199 | Pending |
-| FIX-02 | Phase 199 | Pending |
-| CPY-01 | Phase 199 | Pending |
+| IXN-04 | Phase 199 | Complete |
+| FIX-01 | Phase 199 | Complete |
+| FIX-02 | Phase 199 | Complete |
+| CPY-01 | Phase 199 | Complete |
 | VER-01 | Phase 200 | Pending |
 | VER-02 | Phase 200 | Pending |
 | VER-03 | Phase 200 | Pending |
