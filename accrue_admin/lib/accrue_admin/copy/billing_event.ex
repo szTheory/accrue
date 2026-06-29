@@ -104,4 +104,23 @@ defmodule AccrueAdmin.Copy.BillingEvent do
   def event_detail_eyebrow, do: "Event detail"
 
   def event_detail_section_heading, do: "Event details"
+
+  def event_detail_related_resources_title, do: "Related resources"
+
+  def event_detail_related_resources_empty, do: "No related resources"
+
+  def event_detail_lazy_activity_heading, do: "Activity"
+
+  def event_detail_lazy_activity_label, do: "Event activity"
+
+  def event_detail_lazy_activity_prompt, do: "Open this section to load activity."
+
+  def event_detail_lazy_activity_empty_label, do: "No activity"
+
+  def event_detail_lazy_activity_empty_body,
+    do: "This record has no recorded activity yet. Core details remain available above."
+
+  def event_detail_json_payload_label, do: "Event payload"
+
+  def event_detail_lazy_raw_data_prompt, do: "Open this section to load raw data."
 end

@@ -494,6 +494,15 @@ defmodule AccrueAdmin.Copy do
   defdelegate billing_event_not_found(), to: BillingEvent
   defdelegate event_detail_eyebrow(), to: BillingEvent
   defdelegate event_detail_section_heading(), to: BillingEvent
+  defdelegate event_detail_related_resources_title(), to: BillingEvent
+  defdelegate event_detail_related_resources_empty(), to: BillingEvent
+  defdelegate event_detail_lazy_activity_heading(), to: BillingEvent
+  defdelegate event_detail_lazy_activity_label(), to: BillingEvent
+  defdelegate event_detail_lazy_activity_prompt(), to: BillingEvent
+  defdelegate event_detail_lazy_activity_empty_label(), to: BillingEvent
+  defdelegate event_detail_lazy_activity_empty_body(), to: BillingEvent
+  defdelegate event_detail_json_payload_label(), to: BillingEvent
+  defdelegate event_detail_lazy_raw_data_prompt(), to: BillingEvent
 
   def page_state_copy(:true_empty, opts) do
     resource = option(opts, :resource, "billing records")

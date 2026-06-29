@@ -10,7 +10,9 @@ defmodule AccrueAdmin.Live.EventLive do
     AppShell,
     Breadcrumbs,
     Detail,
-    RelatedResources
+    JsonViewer,
+    RelatedResources,
+    Timeline
   }
 
   alias AccrueAdmin.Copy
@@ -38,8 +40,19 @@ defmodule AccrueAdmin.Live.EventLive do
          |> assign(
            :related_items,
            related_items(event, mount_path, owner_scope)
-         )}
+         )
+         |> assign(:activity_loaded?, false)
+         |> assign(:raw_json_loaded?, false)}
     end
+  end
+
+  @impl true
+  def handle_event("load_activity", _params, socket) do
+    {:noreply, assign(socket, :activity_loaded?, true)}
+  end
+
+  def handle_event("load_raw_json", _params, socket) do
+    {:noreply, assign(socket, :raw_json_loaded?, true)}
   end
 
   @impl true
@@ -75,18 +88,62 @@ defmodule AccrueAdmin.Live.EventLive do
           </:facts>
         </Detail.summary_card>
 
-        <Detail.detail_section title={Copy.event_detail_section_heading()}>
-          <Detail.detail_field_list fields={[
-            %{label: "Type", value: @event.type},
-            %{label: "Actor type", value: @event.actor_type || "--"},
-            %{label: "Actor ID", value: @event.actor_id || "--"},
-            %{label: "Subject type", value: @event.subject_type || "--"},
-            %{label: "Subject ID", value: @event.subject_id || "--"},
-            %{label: "Recorded", value: format_datetime(@event.inserted_at)}
-          ]} />
-        </Detail.detail_section>
+        <Detail.summary_list rows={summary_rows(@event, @admin_mount_path)} />
 
-        <RelatedResources.related_resources items={@related_items} />
+        <details class="ax-detail-section" data-ax-drill-section="event-details" open>
+          <summary class="ax-detail-section-head">
+            <span class="ax-detail-section-title"><%= Copy.event_detail_section_heading() %></span>
+          </summary>
+          <Detail.detail_field_list fields={event_detail_fields(@event)} />
+        </details>
+
+        <div data-ax-related-resources>
+          <RelatedResources.related_resources items={@related_items} />
+          <section :if={@related_items == []} class="ax-card ax-related" aria-label={Copy.event_detail_related_resources_title()}>
+            <header class="ax-related-head">
+              <h3 class="ax-related-title"><%= Copy.event_detail_related_resources_title() %></h3>
+            </header>
+            <p class="ax-body"><%= Copy.event_detail_related_resources_empty() %></p>
+          </section>
+        </div>
+
+        <details class="ax-detail-section" data-ax-lazy-activity phx-click="load_activity">
+          <summary class="ax-detail-section-head">
+            <span class="ax-detail-section-title"><%= Copy.event_detail_lazy_activity_heading() %></span>
+          </summary>
+          <%= if @activity_loaded? do %>
+            <Timeline.timeline
+              label={Copy.event_detail_lazy_activity_label()}
+              empty_label={Copy.event_detail_lazy_activity_empty_label()}
+              items={activity_items(@event)}
+            />
+            <p :if={activity_items(@event) == []} class="ax-body">
+              <%= Copy.event_detail_lazy_activity_empty_body() %>
+            </p>
+          <% else %>
+            <p class="ax-body"><%= Copy.event_detail_lazy_activity_prompt() %></p>
+          <% end %>
+        </details>
+
+        <details
+          :if={raw_payload_available?(@event)}
+          class="ax-detail-section"
+          data-ax-lazy-json
+          phx-click="load_raw_json"
+        >
+          <summary class="ax-detail-section-head">
+            <span class="ax-detail-section-title"><%= Copy.event_detail_json_payload_label() %></span>
+          </summary>
+          <%= if @raw_json_loaded? do %>
+            <JsonViewer.json_viewer
+              id="event-payload"
+              label={Copy.event_detail_json_payload_label()}
+              payload={raw_payload(@event)}
+            />
+          <% else %>
+            <p class="ax-body"><%= Copy.event_detail_lazy_raw_data_prompt() %></p>
+          <% end %>
+        </details>
       </section>
     </AppShell.app_shell>
     """
@@ -100,6 +157,47 @@ defmodule AccrueAdmin.Live.EventLive do
       _ -> nil
     end
   end
+
+  defp summary_rows(event, _mount_path) do
+    rows = [
+      %{label: "Type", value: event.type},
+      %{label: "Actor", value: actor_summary(event)},
+      %{label: "Subject", value: subject_summary(event)},
+      %{label: "Source webhook", value: source_webhook_summary(event)},
+      %{label: "Recorded time", value: format_datetime(event.inserted_at)}
+    ]
+
+    case livemode_summary(event) do
+      nil -> rows
+      value -> rows ++ [%{label: "Livemode", value: value}]
+    end
+  end
+
+  defp event_detail_fields(event) do
+    [
+      %{label: "Type", value: event.type},
+      %{label: "Actor type", value: event.actor_type || "--"},
+      %{label: "Actor ID", value: event.actor_id || "--"},
+      %{label: "Subject type", value: event.subject_type || "--"},
+      %{label: "Subject ID", value: event.subject_id || "--"},
+      %{label: "Source webhook", value: source_webhook_summary(event)},
+      %{label: "Recorded", value: format_datetime(event.inserted_at)}
+    ]
+  end
+
+  defp activity_items(_event), do: []
+
+  defp raw_payload(%{data: data} = event) do
+    %{
+      "data" => data || %{},
+      "schema_version" => event.schema_version,
+      "trace_id" => event.trace_id,
+      "idempotency_key" => event.idempotency_key
+    }
+  end
+
+  defp raw_payload_available?(%{data: data}) when is_map(data), do: map_size(data) > 0
+  defp raw_payload_available?(_event), do: false
 
   defp assign_shell(socket, admin, event_id) do
     socket
@@ -153,8 +251,30 @@ defmodule AccrueAdmin.Live.EventLive do
           ]
       end
 
-    Enum.take(webhook_items ++ entity_items, 3)
+    actor_items =
+      case actor_href(event, mount_path, scope) do
+        nil ->
+          []
+
+        href ->
+          [
+            %{
+              icon: actor_icon(event.actor_type),
+              label: "Actor",
+              value: event.actor_id,
+              href: href
+            }
+          ]
+      end
+
+    Enum.take(webhook_items ++ actor_items ++ entity_items, 3)
   end
+
+  defp actor_href(%{actor_type: "webhook", caused_by_webhook_event_id: id}, mount_path, scope)
+       when is_binary(id),
+       do: ScopedPath.build(mount_path, "/webhooks/#{id}", scope)
+
+  defp actor_href(_event, _mount_path, _scope), do: nil
 
   defp subject_href(%{subject_type: "Customer", subject_id: id}, mount_path, scope),
     do: ScopedPath.build(mount_path, "/customers/#{id}", scope)
@@ -179,6 +299,34 @@ defmodule AccrueAdmin.Live.EventLive do
   defp subject_icon("Charge"), do: :payments
   defp subject_icon("WebhookEvent"), do: :webhooks
   defp subject_icon(_), do: :events
+
+  defp actor_icon("webhook"), do: :webhooks
+  defp actor_icon(_actor_type), do: :users
+
+  defp actor_summary(%{actor_type: nil, actor_id: nil}), do: "--"
+  defp actor_summary(%{actor_type: type, actor_id: nil}), do: type || "--"
+  defp actor_summary(%{actor_type: nil, actor_id: id}), do: id || "--"
+  defp actor_summary(%{actor_type: type, actor_id: id}), do: "#{type} #{id}"
+
+  defp subject_summary(%{subject_type: nil, subject_id: nil}), do: "--"
+  defp subject_summary(%{subject_type: type, subject_id: nil}), do: type || "--"
+  defp subject_summary(%{subject_type: nil, subject_id: id}), do: id || "--"
+  defp subject_summary(%{subject_type: type, subject_id: id}), do: "#{type} #{id}"
+
+  defp source_webhook_summary(%{caused_by_webhook_event_id: nil}),
+    do: Copy.billing_events_webhook_source_direct()
+
+  defp source_webhook_summary(%{caused_by_webhook_event_id: id}), do: id
+
+  defp livemode_summary(%{data: %{"payload" => %{"livemode" => value}}}),
+    do: livemode_label(value)
+
+  defp livemode_summary(%{data: %{"livemode" => value}}), do: livemode_label(value)
+  defp livemode_summary(_event), do: nil
+
+  defp livemode_label(true), do: "Live"
+  defp livemode_label(false), do: "Test"
+  defp livemode_label(_value), do: nil
 
   defp format_datetime(%DateTime{} = value), do: Calendar.strftime(value, "%b %d, %Y %H:%M UTC")
   defp format_datetime(_value), do: "Unknown"
