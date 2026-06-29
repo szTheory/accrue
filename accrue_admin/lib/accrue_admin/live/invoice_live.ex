@@ -593,9 +593,13 @@ defmodule AccrueAdmin.Live.InvoiceLive do
   attr(:invoice, :map, required: true)
 
   defp pending_action_content(assigns) do
+    assigns =
+      assign(assigns, :requires_step_up?, assigns.pending_action.type in @destructive_actions)
+
     ~H"""
     <section class="ax-stack-md" data-role="confirm-panel">
       <p class="ax-label"><%= Copy.invoice_confirm_panel_label() %></p>
+      <p :if={@requires_step_up?} class="ax-caption"><%= Copy.step_up_title() %></p>
       <p class="ax-body"><%= confirm_copy(@pending_action, @invoice) %></p>
     </section>
     """
