@@ -15,6 +15,10 @@ export const CommandPalette = {
 
     // Initial setup if already open
     this.setupItems();
+    if (this.wasOpen) {
+      this.previousFocus = document.activeElement;
+      this.focusPaletteInput();
+    }
   },
 
   updated() {
@@ -26,11 +30,7 @@ export const CommandPalette = {
     if (isOpen && !this.wasOpen) {
       // Palette just opened: save focus before moving it to the input
       this.previousFocus = document.activeElement;
-      const input = this.el.querySelector("input");
-      if (input && document.activeElement !== input) {
-        // setTimeout to ensure it's visible after LiveView patch
-        setTimeout(() => input.focus(), 0);
-      }
+      this.focusPaletteInput();
     } else if (!isOpen && this.wasOpen) {
       this.restoreFocus();
       this.previousFocus = null;
@@ -40,6 +40,11 @@ export const CommandPalette = {
   },
 
   destroyed() {
+    if (this.wasOpen) {
+      this.restoreFocus();
+      this.previousFocus = null;
+    }
+
     window.removeEventListener("keydown", this.handleGlobalKeydown);
     document.removeEventListener("click", this.handleDocumentClick);
     this.el.removeEventListener("keydown", this.handleInputKeydown);
@@ -71,11 +76,19 @@ export const CommandPalette = {
   },
 
   handleDocumentClick(e) {
-    const trigger = e.target.closest("[data-command-palette-trigger]");
-    if (!trigger) return;
+    const trigger = e.target.closest?.("[data-command-palette-trigger]");
+    if (trigger) {
+      e.preventDefault();
+      this.pushEventTo(this.el.dataset.target, "open", {});
+      return;
+    }
+
+    const backdrop = e.target.closest?.(".ax-command-palette-backdrop");
+    if (!backdrop || !this.isOpen()) return;
 
     e.preventDefault();
-    this.pushEventTo(this.el.dataset.target, "open", {});
+    e.stopPropagation?.();
+    this.pushEventTo(this.el.dataset.target, "close", {});
   },
 
   setupItems() {
@@ -88,6 +101,14 @@ export const CommandPalette = {
   isOpen() {
     const wrapper = this.el.closest(".ax-command-palette-wrapper");
     return wrapper && wrapper.dataset.open === "true";
+  },
+
+  focusPaletteInput() {
+    const input = this.el.querySelector?.("input");
+    if (input && document.activeElement !== input) {
+      // setTimeout to ensure it's visible after LiveView patch
+      setTimeout(() => input.focus(), 0);
+    }
   },
 
   restoreFocus() {
