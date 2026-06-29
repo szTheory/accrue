@@ -1,11 +1,11 @@
 ---
 phase: 198-propagate-detail-analytics
 status: all_fixed
-findings_in_scope: 7
-fixed: 7
+findings_in_scope: 8
+fixed: 8
 skipped: 0
-iteration: 3
-fixed_at: 2026-06-29T17:10:44Z
+iteration: 4
+fixed_at: 2026-06-29T17:21:02Z
 ---
 
 # Phase 198 Review Fix Report
@@ -28,6 +28,8 @@ fixed_at: 2026-06-29T17:10:44Z
   - Commit: `08ef41f4 fix(198): close event summary and refund drawer warnings`
 - WR-05: Charge refund preparation now exposes a visible `Review refund` submit button, with LiveView coverage and Phase 198 browser coverage clicking the user-facing control instead of programmatic form submission.
   - Commit: `08ef41f4 fix(198): close event summary and refund drawer warnings`
+- WR-06: Coupon, promotion code, and event detail breadcrumbs now preserve the active organization scope through `ScopedPath.build/3`, preventing ordinary breadcrumb navigation from dropping `?org=...`.
+  - Commit: `5d53147f fix(198): preserve detail breadcrumb owner scope`
 
 ## Verification
 
@@ -37,6 +39,7 @@ fixed_at: 2026-06-29T17:10:44Z
 - `cd accrue_admin && mix compile --warnings-as-errors && mix test test/accrue_admin/live/coupon_live_test.exs test/accrue_admin/live/promotion_code_live_test.exs --max-failures 10` passed: 16 tests, 0 failures.
 - `cd accrue_admin && mix compile --warnings-as-errors && mix test test/accrue_admin/queries/events_test.exs test/accrue_admin/live/event_live_test.exs --max-failures 10` passed: 14 tests, 0 failures.
 - `cd accrue_admin && mix compile --warnings-as-errors && mix test test/accrue_admin/live/events_live_test.exs test/accrue_admin/live/charge_live_test.exs test/accrue_admin/queries/events_test.exs --max-failures 10` passed: 23 tests, 0 failures.
+- `cd accrue_admin && mix compile --warnings-as-errors && mix test test/accrue_admin/live/coupon_live_test.exs test/accrue_admin/live/promotion_code_live_test.exs test/accrue_admin/live/event_live_test.exs --max-failures 10` passed: 29 tests, 0 failures.
 - `cd accrue_admin && node --check e2e/admin-spec-detail-phase198.spec.js` passed.
 - `git diff --check` passed.
 - `cd accrue_admin && npm run e2e:phase198` passed: 24 passed, 4 skipped.
