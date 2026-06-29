@@ -19,6 +19,15 @@ defmodule AccrueAdmin.Copy.Locked do
     do:
       "Replay is blocked because this webhook isn't linked to a billable row in the active organization."
 
+  def replay_drawer_title, do: "Confirm webhook replay"
+
+  def replay_step_up_unavailable,
+    do: "Webhook replay requires step-up verification before the delivery can be requeued."
+
+  def replay_unavailable_status(status) do
+    "Replay is unavailable while this webhook is #{humanize_status(status)}."
+  end
+
   def single_replay_confirmation,
     do: single_replay_confirmation("this webhook", owner_scope: "the active organization")
 
@@ -27,4 +36,16 @@ defmodule AccrueAdmin.Copy.Locked do
 
     "Replay webhook #{webhook_id} for #{owner_scope}: This will requeue the webhook delivery and record an admin audit event. Continue?"
   end
+
+  defp humanize_status(status) when is_atom(status),
+    do: status |> Atom.to_string() |> humanize_status()
+
+  defp humanize_status(status) when is_binary(status) do
+    status
+    |> String.replace("_", " ")
+    |> String.split()
+    |> Enum.map_join(" ", &String.capitalize/1)
+  end
+
+  defp humanize_status(_status), do: "Unknown"
 end

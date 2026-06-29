@@ -13,6 +13,7 @@ defmodule AccrueAdmin.Copy do
   alias AccrueAdmin.Copy.Dunning
   alias AccrueAdmin.Copy.Entitlements
   alias AccrueAdmin.Copy.Invoice
+  alias AccrueAdmin.Copy.Locked
   alias AccrueAdmin.Copy.PromotionCode
   alias AccrueAdmin.Copy.Subscription
 
@@ -753,6 +754,17 @@ defmodule AccrueAdmin.Copy do
   def webhooks_list_all_lens_label, do: "All deliveries"
 
   def webhooks_list_result_label_pair, do: {"webhook delivery", "webhook deliveries"}
+
+  defdelegate webhook_replay_drawer_title(), to: Locked, as: :replay_drawer_title
+  defdelegate webhook_replay_step_up_unavailable(), to: Locked, as: :replay_step_up_unavailable
+
+  defdelegate webhook_replay_unavailable_status(status),
+    to: Locked,
+    as: :replay_unavailable_status
+
+  defdelegate webhook_single_replay_confirmation(webhook_id, opts),
+    to: Locked,
+    as: :single_replay_confirmation
 
   def recovery_index_heading, do: "Revenue Recovery"
 

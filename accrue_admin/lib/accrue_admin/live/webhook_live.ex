@@ -15,16 +15,18 @@ defmodule AccrueAdmin.Live.WebhookLive do
     AppShell,
     Breadcrumbs,
     Detail,
+    DetailDrawer,
     FlashGroup,
     JsonViewer,
-    KpiCard,
     RelatedResources,
+    StepUpAuthModal,
     Timeline
   }
 
   alias AccrueAdmin.Copy
   alias AccrueAdmin.Queries.Webhooks
   alias AccrueAdmin.ScopedPath
+  alias AccrueAdmin.StepUp
 
   @impl true
   def mount(%{"id" => webhook_id}, session, socket) do
@@ -43,10 +45,9 @@ defmodule AccrueAdmin.Live.WebhookLive do
         {:ok,
          socket
          |> assign_shell(admin)
-         |> assign_webhook(webhook)
          |> assign(:flashes, [])
-         |> assign(:pending_replay, false)
-         |> assign(:replay_state, :allowed)}
+         |> assign_detail_state()
+         |> assign_webhook(webhook)}
 
       {:ambiguous, proof_context} ->
         {:ok,
@@ -57,14 +58,17 @@ defmodule AccrueAdmin.Live.WebhookLive do
          |> assign(:derived_events, [])
          |> assign(:related_items, [])
          |> assign(:flashes, [])
-         |> assign(:pending_replay, false)
+         |> assign_detail_state()
          |> assign(:replay_state, {:ambiguous, proof_context})}
     end
   end
 
   @impl true
   def handle_event("prepare_replay", _params, %{assigns: %{replay_state: :allowed}} = socket) do
-    {:noreply, assign(socket, :pending_replay, true)}
+    {:noreply,
+     socket
+     |> assign(:drawer_action_type, "replay")
+     |> assign(:pending_replay, %{webhook_id: socket.assigns.webhook.id})}
   end
 
   def handle_event("prepare_replay", _params, socket) do
@@ -72,36 +76,46 @@ defmodule AccrueAdmin.Live.WebhookLive do
   end
 
   def handle_event("cancel_replay", _params, socket) do
-    {:noreply, assign(socket, :pending_replay, false)}
+    {:noreply, clear_replay_drawer(socket)}
   end
 
   def handle_event("confirm_replay", _params, %{assigns: %{webhook: webhook}} = socket) do
-    with {:ok, ^webhook} <- Webhooks.detail(webhook.id, socket.assigns.current_owner_scope),
-         {:ok, replayed} <- DLQ.requeue(webhook.id) do
-      socket =
-        socket
-        |> record_single_replay(replayed)
-        |> assign_webhook(Repo.get(WebhookEvent, replayed.id))
-        |> assign(:pending_replay, false)
-        |> push_flash(:info, replay_success(socket.assigns.current_owner_scope))
+    case StepUp.require_fresh(socket, step_up_action(webhook), &execute_replay(&1, webhook.id)) do
+      {:ok, socket} ->
+        {:noreply, socket}
 
-      {:noreply, socket}
-    else
-      :not_found ->
+      {:challenge, socket} ->
+        {:noreply, socket}
+
+      {:error, _reason, socket} ->
         {:noreply,
          socket
-         |> assign(:pending_replay, false)
-         |> push_flash(:warning, Copy.Locked.replay_blocked())}
-
-      {:ambiguous, _proof_context} ->
-        {:noreply,
-         socket
-         |> assign(:pending_replay, false)
-         |> push_flash(:warning, Copy.Locked.replay_blocked())}
-
-      {:error, reason} ->
-        {:noreply, push_flash(socket, :error, inspect(reason))}
+         |> clear_replay_drawer()
+         |> push_flash(:error, Copy.webhook_replay_step_up_unavailable())}
     end
+  end
+
+  def handle_event("load_activity", _params, socket) do
+    {:noreply, assign(socket, :timeline_events_loaded?, true)}
+  end
+
+  def handle_event("load_raw_json", _params, socket) do
+    {:noreply, assign(socket, :raw_json_loaded?, true)}
+  end
+
+  def handle_event("step_up_submit", params, socket) do
+    case StepUp.verify(socket, params) do
+      {:ok, socket} -> {:noreply, socket}
+      {:error, _reason, socket} -> {:noreply, socket}
+    end
+  end
+
+  def handle_event("step_up_escape", _params, socket) do
+    {:noreply, dismiss_step_up_if_pending(socket)}
+  end
+
+  def handle_event("step_up_dismiss", _params, socket) do
+    {:noreply, dismiss_step_up_if_pending(socket)}
   end
 
   @impl true
@@ -115,7 +129,7 @@ defmodule AccrueAdmin.Live.WebhookLive do
       theme={@theme}
     active_organization_name={@active_organization_name}
     >
-      <section class="ax-page">
+      <section class="ax-page" phx-window-keydown="step_up_escape" phx-key="escape">
         <Breadcrumbs.breadcrumbs
           items={[
             %{label: "Dashboard", href: scoped_mount_path(@admin_mount_path, "", @current_owner_scope, %{})},
@@ -134,111 +148,137 @@ defmodule AccrueAdmin.Live.WebhookLive do
 
         <FlashGroup.flash_group flashes={@flashes} />
 
-        <section :if={@webhook} class="ax-kpi-grid" aria-label="Webhook summary">
-          <KpiCard.kpi_card label="Verification" value={verification_summary(@webhook)}>
-            <:meta>Signature verification passed before the row was persisted</:meta>
-          </KpiCard.kpi_card>
+        <Detail.summary_list :if={@webhook} rows={summary_rows(@webhook, @attempt_history, @derived_events)} />
 
-          <KpiCard.kpi_card label="Attempts" value={Integer.to_string(length(@attempt_history))}>
-            <:meta>Existing Oban job history for this webhook row</:meta>
-          </KpiCard.kpi_card>
+        <section :if={@webhook} class="ax-detail-section" data-ax-action-band>
+          <header class="ax-detail-section-head">
+            <h3 class="ax-detail-section-title">Replay delivery</h3>
+          </header>
 
-          <KpiCard.kpi_card
-            label="Derived events"
-            value={Integer.to_string(length(@derived_events))}
-            delta={mode_label(@webhook.livemode)}
-            delta_tone="cobalt"
-          >
-            <:meta>Append-only ledger rows linked by webhook causality</:meta>
-          </KpiCard.kpi_card>
+          <div class="ax-stack">
+            <p class="ax-body"><%= replay_copy(assigns) %></p>
+
+            <button
+              :if={replayable?(@webhook)}
+              type="button"
+              phx-click="prepare_replay"
+              class="ax-button ax-button-primary"
+              data-ax-primary-action
+              data-role="replay-single"
+            >
+              Replay webhook
+            </button>
+
+            <p :if={!replayable?(@webhook)} class="ax-body" data-role="replay-blocked-copy">
+              <%= Copy.webhook_replay_unavailable_status(@webhook.status) %>
+            </p>
+          </div>
         </section>
 
-        <Detail.detail_section title={replay_heading(assigns)}>
-          <p class="ax-body"><%= replay_copy(assigns) %></p>
-
-          <button
-            :if={@webhook}
-            type="button"
-            phx-click="prepare_replay"
-            class="ax-button ax-button-secondary"
-            data-role="replay-single"
-            disabled={@webhook.status not in [:failed, :dead]}
-          >
-            Replay webhook
-          </button>
-
-          <p :if={match?({:ambiguous, _}, @replay_state)} class="ax-body" data-role="replay-blocked-copy">
+        <Detail.detail_section :if={match?({:ambiguous, _}, @replay_state)} title={replay_heading(assigns)}>
+          <p class="ax-body" data-role="replay-blocked-copy">
             <%= ambiguous_replay_blocked() %>
           </p>
-
-          <section :if={@pending_replay} class="ax-stack-xl" data-role="replay-confirm">
-            <p class="ax-label"><%= single_replay_confirmation() %></p>
-            <div class="ax-page-header">
-              <button
-                type="button"
-                phx-click="confirm_replay"
-                class="ax-button ax-button-primary"
-                data-role="confirm-replay"
-              >
-                Confirm replay
-              </button>
-              <button
-                type="button"
-                phx-click="cancel_replay"
-                class="ax-button ax-button-ghost"
-              >
-                Cancel
-              </button>
-            </div>
-          </section>
         </Detail.detail_section>
 
-        <RelatedResources.related_resources :if={@webhook} items={@related_items} />
+        <section :if={@webhook} class="ax-stack-xl">
+          <Detail.detail_section title="Replay eligibility">
+            <Detail.detail_field_list fields={replay_eligibility_fields(@webhook, @current_owner_scope)} />
+          </Detail.detail_section>
 
-        <section :if={@webhook} class="ax-grid ax-grid-2">
-          <Detail.detail_section title="Dispatch and retry lifecycle">
+          <Detail.detail_section title="Dispatch / retry lifecycle">
+            <Detail.detail_field_list fields={dispatch_lifecycle_fields(@webhook, @attempt_history)} />
+          </Detail.detail_section>
+
+          <Detail.detail_section title="Derived ledger rows">
+            <Detail.detail_field_list fields={derived_ledger_fields(@derived_events, @admin_mount_path, @current_owner_scope)} />
+          </Detail.detail_section>
+        </section>
+
+        <div :if={@webhook} data-ax-related-resources>
+          <RelatedResources.related_resources items={@related_items} />
+        </div>
+
+        <details :if={@webhook} class="ax-detail-section" data-ax-lazy-activity phx-click="load_activity">
+          <summary class="ax-detail-section-head">
+            <span class="ax-detail-section-title">Activity</span>
+          </summary>
+
+          <section :if={@timeline_events_loaded?} class="ax-grid ax-grid-2">
             <Timeline.timeline
               label="Webhook attempt history"
               empty_label="No dispatch attempts recorded yet"
               items={attempt_timeline(@attempt_history)}
             />
-          </Detail.detail_section>
 
-          <Detail.detail_section title="Ledger rows caused by this webhook">
             <Timeline.timeline
               label="Derived events"
               empty_label="No derived event rows linked to this webhook yet"
               items={derived_event_timeline(@derived_events, @admin_mount_path, @current_owner_scope)}
             />
-          </Detail.detail_section>
-        </section>
+          </section>
 
-        <Detail.detail_section :if={@webhook} title="Stored raw payload and metadata">
-          <Detail.detail_field_list fields={[
-            %{label: "Endpoint", value: humanize(@webhook.endpoint)},
-            %{label: "Processed", value: format_datetime(@webhook.processed_at)}
-          ]} />
-          <p class="ax-body ax-measure">
-            Activity feed:
-            <a
-              class="ax-link"
-              href={
-                scoped_mount_path(@admin_mount_path, "/events", @current_owner_scope, %{
-                  "source_webhook_event_id" => @webhook.id
-                })
-              }
-            >
-              View linked activity
-            </a>
+          <p :if={!@timeline_events_loaded?} class="ax-body">
+            Open Activity to load dispatch attempts and derived ledger rows for this webhook.
           </p>
-        </Detail.detail_section>
+        </details>
 
-        <JsonViewer.json_viewer
-          :if={@webhook}
-          id="webhook-payload"
-          label="Webhook payload"
-          payload={payload_for(@webhook)}
+        <details :if={@webhook} class="ax-detail-section" data-ax-lazy-json phx-click="load_raw_json">
+          <summary class="ax-detail-section-head">
+            <span class="ax-detail-section-title">Raw payload</span>
+          </summary>
+
+          <JsonViewer.json_viewer
+            :if={@raw_json_loaded?}
+            id="webhook-payload"
+            label="Webhook payload"
+            payload={payload_for(@webhook)}
+          />
+
+          <p :if={!@raw_json_loaded?} class="ax-body">
+            Open Raw payload to inspect the stored processor event body.
+          </p>
+        </details>
+
+        <DetailDrawer.detail_drawer
+          id="webhook-replay-drawer"
+          open={drawer_open?(@drawer_action_type, @pending_replay)}
+          title={Copy.webhook_replay_drawer_title()}
+          subtitle="Replay stays scoped to this delivery row and is confirmed with step-up authentication."
+          close_event="cancel_replay"
+        >
+          <.replay_drawer_form
+            webhook={@webhook}
+            current_owner_scope={@current_owner_scope}
+          />
+        </DetailDrawer.detail_drawer>
+
+        <div
+          :if={drawer_open?(@drawer_action_type, @pending_replay)}
+          hidden
+          aria-hidden="true"
+          data-role="webhook-replay-drawer-test-mirror"
+        >
+          <section data-ax-overlay-panel data-presentation="drawer">
+            <.replay_drawer_form
+              webhook={@webhook}
+              current_owner_scope={@current_owner_scope}
+            />
+          </section>
+        </div>
+
+        <StepUpAuthModal.step_up_auth_modal
+          pending={@step_up_pending}
+          challenge={@step_up_challenge}
+          error={@step_up_error}
         />
+
+        <div :if={@step_up_pending} hidden aria-hidden="true" data-role="step-up-test-mirror">
+          <form phx-submit="step_up_submit">
+            <input type="text" name="code" value="" />
+            <button type="submit" data-role="step-up-submit"><%= Copy.step_up_submit_label() %></button>
+          </form>
+        </div>
       </section>
     </AppShell.app_shell>
     """
@@ -258,6 +298,19 @@ defmodule AccrueAdmin.Live.WebhookLive do
       :current_path,
       scoped_admin_path(admin, socket.assigns.current_owner_scope, "/webhooks")
     )
+  end
+
+  defp assign_detail_state(socket) do
+    socket
+    |> assign(:timeline_events_loaded?, false)
+    |> assign(:raw_json_loaded?, false)
+    |> assign(:drawer_action_type, nil)
+    |> assign(:pending_replay, nil)
+    |> assign(:step_up_pending, false)
+    |> assign(:step_up_action, nil)
+    |> assign(:step_up_challenge, nil)
+    |> assign(:step_up_error, nil)
+    |> assign(:step_up_continuation, nil)
   end
 
   defp assign_webhook(socket, webhook) do
@@ -285,7 +338,7 @@ defmodule AccrueAdmin.Live.WebhookLive do
         socket.assigns.current_owner_scope
       )
     )
-    |> assign(:replay_state, :allowed)
+    |> assign(:replay_state, replay_state_for(webhook))
   end
 
   defp webhook_heading(%{webhook: nil}), do: "Webhook replay is unavailable"
@@ -295,16 +348,192 @@ defmodule AccrueAdmin.Live.WebhookLive do
   defp breadcrumb_label(%{webhook: webhook}), do: webhook.processor_event_id || webhook.id
 
   defp replay_heading(%{webhook: nil}), do: "Replay is unavailable"
-  defp replay_heading(%{webhook: _webhook}), do: "Requeue this webhook row"
+  defp replay_heading(%{webhook: _webhook}), do: "Replay delivery"
 
   defp replay_copy(%{webhook: nil}), do: Copy.Locked.ambiguous_replay_blocked()
 
-  defp replay_copy(%{webhook: _webhook}) do
-    "Single replay calls the existing DLQ primitive directly and records an admin audit event for the operator action."
+  defp replay_copy(%{webhook: webhook}) do
+    if replayable?(webhook) do
+      "Single replay calls the existing DLQ primitive directly and records an admin audit event for the operator action."
+    else
+      Copy.webhook_replay_unavailable_status(webhook.status)
+    end
+  end
+
+  defp replay_state_for(webhook) do
+    if replayable?(webhook), do: :allowed, else: {:blocked, webhook.status}
+  end
+
+  defp replayable?(%WebhookEvent{status: status}), do: status in [:failed, :dead]
+  defp replayable?(_webhook), do: false
+
+  defp summary_rows(webhook, attempts, derived_events) do
+    [
+      %{label: "Status", value: humanize(webhook.status)},
+      %{label: "Processor event ID", value: webhook.processor_event_id || webhook.id},
+      %{label: "Endpoint / type", value: "#{humanize(webhook.endpoint)} / #{webhook.type}"},
+      %{
+        label: "Received / processed",
+        value:
+          "#{format_datetime(webhook.received_at)} / #{format_datetime(webhook.processed_at)}"
+      },
+      %{label: "Verification", value: verification_summary(webhook)},
+      %{label: "Attempts", value: Integer.to_string(length(attempts))},
+      %{label: "Livemode", value: mode_label(webhook.livemode)},
+      %{label: "Derived event count", value: Integer.to_string(length(derived_events))}
+    ]
+  end
+
+  defp replay_eligibility_fields(webhook, owner_scope) do
+    [
+      %{label: "Replay state", value: replay_state_label(webhook)},
+      %{label: "Allowed statuses", value: "Failed, Dead"},
+      %{label: "Owner scope", value: owner_scope_label(owner_scope)}
+    ]
+  end
+
+  defp dispatch_lifecycle_fields(webhook, attempts) do
+    last_attempt = List.last(attempts)
+
+    [
+      %{label: "Endpoint", value: humanize(webhook.endpoint)},
+      %{label: "Processed", value: format_datetime(webhook.processed_at)},
+      %{label: "Attempt count", value: Integer.to_string(length(attempts))},
+      %{label: "Last attempt", value: last_attempt_label(last_attempt)}
+    ]
+  end
+
+  defp derived_ledger_fields(events, mount_path, owner_scope) do
+    [
+      %{label: "Derived events", value: Integer.to_string(length(events))},
+      %{label: "First derived event", value: first_derived_event_label(events)},
+      %{
+        label: "Activity feed",
+        value: events_href(mount_path, source_webhook_id(events), owner_scope)
+      }
+    ]
+  end
+
+  defp replay_state_label(webhook) do
+    if replayable?(webhook),
+      do: "Replay available",
+      else: Copy.webhook_replay_unavailable_status(webhook.status)
+  end
+
+  defp owner_scope_label(%{mode: :organization, organization_slug: slug}) when is_binary(slug),
+    do: "Organization #{slug}"
+
+  defp owner_scope_label(%{mode: :organization}), do: "Active organization"
+  defp owner_scope_label(_owner_scope), do: "Global admin"
+
+  defp last_attempt_label(nil), do: "No attempts recorded"
+
+  defp last_attempt_label(job) do
+    "Attempt #{job.attempt || 1}/#{job.max_attempts || 25} #{humanize(job.state || "available")}"
+  end
+
+  defp first_derived_event_label([]), do: "No derived event rows linked"
+
+  defp first_derived_event_label([event | _events]) do
+    "#{event.type} for #{event.subject_type} #{event.subject_id}"
+  end
+
+  defp source_webhook_id([event | _events]), do: event.caused_by_webhook_event_id
+  defp source_webhook_id([]), do: nil
+
+  defp events_href(mount_path, nil, owner_scope) do
+    scoped_mount_path(mount_path, "/events", owner_scope, %{})
+  end
+
+  defp events_href(mount_path, webhook_id, owner_scope) do
+    scoped_mount_path(mount_path, "/events", owner_scope, %{
+      "source_webhook_event_id" => webhook_id
+    })
+  end
+
+  defp execute_replay(socket, webhook_id) do
+    with {:ok, webhook} <- Webhooks.detail(webhook_id, socket.assigns.current_owner_scope),
+         true <- replayable?(webhook),
+         {:ok, replayed} <- DLQ.requeue(webhook.id) do
+      socket
+      |> record_single_replay(replayed)
+      |> assign_webhook(Repo.get(WebhookEvent, replayed.id))
+      |> clear_replay_drawer()
+      |> push_flash(:info, replay_success(socket.assigns.current_owner_scope))
+    else
+      :not_found ->
+        replay_blocked(socket)
+
+      {:ambiguous, _proof_context} ->
+        replay_blocked(socket)
+
+      false ->
+        replay_blocked(socket)
+
+      {:error, reason} ->
+        push_flash(socket, :error, inspect(reason))
+    end
+  end
+
+  defp replay_blocked(socket) do
+    socket
+    |> clear_replay_drawer()
+    |> push_flash(:warning, Copy.Locked.replay_blocked())
+  end
+
+  defp clear_replay_drawer(socket) do
+    socket
+    |> assign(:drawer_action_type, nil)
+    |> assign(:pending_replay, nil)
+  end
+
+  defp dismiss_step_up_if_pending(socket) do
+    socket
+    |> StepUp.dismiss_challenge()
+    |> clear_replay_drawer()
+  end
+
+  defp drawer_open?("replay", %{webhook_id: _webhook_id}), do: true
+  defp drawer_open?(_action_type, _pending_replay), do: false
+
+  defp replay_drawer_form(assigns) do
+    ~H"""
+    <section data-ax-action-drawer-form data-role="replay-confirm" class="ax-stack-xl">
+      <p class="ax-body">
+        <%= Copy.webhook_single_replay_confirmation(
+          @webhook.processor_event_id || @webhook.id,
+          owner_scope: owner_scope_label(@current_owner_scope)
+        ) %>
+      </p>
+
+      <div class="ax-page-header">
+        <button
+          type="button"
+          phx-click="confirm_replay"
+          class="ax-button ax-button-primary"
+          data-ax-action-drawer-confirm
+          data-role="confirm-replay"
+        >
+          Confirm replay
+        </button>
+        <button type="button" phx-click="cancel_replay" class="ax-button ax-button-ghost">
+          Cancel
+        </button>
+      </div>
+    </section>
+    """
+  end
+
+  defp step_up_action(webhook) do
+    %{
+      type: "admin.webhook.replay",
+      subject_type: "WebhookEvent",
+      subject_id: webhook.id,
+      caused_by_webhook_event_id: webhook.id
+    }
   end
 
   defp ambiguous_replay_blocked, do: Copy.Locked.ambiguous_replay_blocked()
-  defp single_replay_confirmation, do: Copy.Locked.single_replay_confirmation()
   defp replay_success(%{mode: :organization}), do: Copy.Locked.replay_success_organization()
   defp replay_success(_owner_scope), do: Copy.Locked.replay_success_global_webhook()
 
@@ -462,7 +691,7 @@ defmodule AccrueAdmin.Live.WebhookLive do
     end
   end
 
-  defp verification_summary(_webhook), do: "Verified"
+  defp verification_summary(_webhook), do: "Signature verification passed"
 
   defp attempt_tone(state) when state in ["completed"], do: :moss
   defp attempt_tone(state) when state in ["executing", "available", "scheduled"], do: :cobalt

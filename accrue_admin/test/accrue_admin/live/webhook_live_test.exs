@@ -163,17 +163,20 @@ defmodule AccrueAdmin.WebhookLiveTest do
   } do
     conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
 
-    assert {:ok, _view, html} = live(conn, "/billing/webhooks/#{webhook.id}")
+    assert {:ok, view, html} = live(conn, "/billing/webhooks/#{webhook.id}")
 
-    # UX-03: one page shell; KPI band matches invoice-style ax-kpi-grid
+    # UX-03: one page shell; summary rows replace the old KPI band.
     assert Regex.scan(~r/class="ax-page"/, html) |> length() == 1
-    assert html =~ "ax-kpi-grid"
+    assert html =~ "data-ax-summary-list"
+    refute html =~ "ax-kpi-grid"
 
     assert html =~ "Signature verification passed"
     assert html =~ "Attempt 3/25"
     assert html =~ "invoice.payment_failed"
-    assert html =~ "cus_123"
     assert html =~ "/billing/events?source_webhook_event_id=#{webhook.id}"
+
+    html = render_click(element(view, "[data-ax-lazy-json]"))
+    assert html =~ "cus_123"
   end
 
   test "WebhookLive Related card renders event links pointing to /events/:id", %{
@@ -246,30 +249,35 @@ defmodule AccrueAdmin.WebhookLiveTest do
   } do
     conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
 
-    assert {:ok, _view, html} = live(conn, "/billing/webhooks/#{webhook.id}")
+    assert {:ok, view, html} = live(conn, "/billing/webhooks/#{webhook.id}")
 
     # Detail.detail_section renders ax-detail-section class
     assert html =~ "ax-detail-section"
-    # The forensic section content should be present
-    assert html =~ "Stored raw payload and metadata"
+    assert html =~ "data-ax-lazy-json"
+    assert html =~ "Raw payload"
     # Endpoint and processed fields should appear via detail_field_list
     assert html =~ "Endpoint"
     assert html =~ "Processed"
+
+    html = render_click(element(view, "[data-ax-lazy-json]"))
+    assert html =~ "webhook-payload"
+    assert html =~ "evt_detail"
   end
 
-  test "applies ax-measure to Activity-feed prose paragraph in forensic section", %{
+  test "keeps activity feed path and lazy Activity marker in DETAIL layout", %{
     conn: conn,
     webhook: webhook
   } do
     conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
 
-    assert {:ok, _view, html} = live(conn, "/billing/webhooks/#{webhook.id}")
+    assert {:ok, view, html} = live(conn, "/billing/webhooks/#{webhook.id}")
 
-    # ax-measure on the activity-feed prose paragraph
-    assert html =~ ~s(class="ax-body ax-measure")
-    # The activity feed link must still be present
-    assert html =~ "View linked activity"
+    assert html =~ "data-ax-lazy-activity"
     assert html =~ "/billing/events?source_webhook_event_id=#{webhook.id}"
+
+    html = render_click(element(view, "[data-ax-lazy-activity]"))
+    assert html =~ "Webhook attempt history"
+    assert html =~ "Derived events"
   end
 
   test "webhook loader distinguishes in-scope, out-of-scope, and ambiguous ownership" do
