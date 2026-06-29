@@ -5,8 +5,8 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLive do
 
   @known_currency_atoms ~w(usd eur gbp jpy kwd)a
 
-  alias Accrue.Analytics.Dunning
   alias AccrueAdmin.Copy
+  alias AccrueAdmin.Queries.Dunning
 
   alias AccrueAdmin.Components.{
     AppShell,
@@ -27,10 +27,11 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLive do
   def handle_params(params, uri, socket) do
     window = parse_window(params["window"])
     {since, until} = window_bounds(window)
+    owner_scope = socket.assigns.current_owner_scope
 
-    stats = Dunning.recovered_vs_lost_mrr(since: since, until: until)
-    funnel = Dunning.funnel(since: since, until: until)
-    at_risk = Dunning.at_risk_subscriptions(since: since, until: until)
+    stats = Dunning.recovered_vs_lost_mrr(owner_scope, since: since, until: until)
+    funnel = Dunning.funnel(owner_scope, since: since, until: until)
+    at_risk = Dunning.at_risk_subscriptions(owner_scope, since: since, until: until)
 
     locale = Accrue.Config.default_locale()
 
@@ -143,7 +144,11 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLive do
         </section>
 
         <section data-ax-recovery-work-queue>
-          <AtRiskTable.at_risk_table rows={@at_risk} base_path={@admin_mount_path} />
+          <AtRiskTable.at_risk_table
+            rows={@at_risk}
+            base_path={@admin_mount_path}
+            owner_scope={@current_owner_scope}
+          />
         </section>
 
         <section data-ax-recovery-supporting-funnel>

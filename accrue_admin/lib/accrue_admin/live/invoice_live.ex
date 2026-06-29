@@ -81,15 +81,14 @@ defmodule AccrueAdmin.Live.InvoiceLive do
 
   def handle_event("prepare_action", params, socket) do
     socket = ensure_timeline_events(socket)
-    action = pending_action(params, socket.assigns.timeline_events)
 
-    if action_available?(socket.assigns.invoice, action.type) do
-      {:noreply,
-       socket
-       |> assign(:drawer_action_type, action.type)
-       |> assign(:pending_action, action)}
+    with action_type when is_binary(action_type) <- socket.assigns.drawer_action_type,
+         true <- action_available?(socket.assigns.invoice, action_type) do
+      action = pending_action(action_type, params, socket.assigns.timeline_events)
+
+      {:noreply, assign(socket, :pending_action, action)}
     else
-      {:noreply, reject_unavailable_invoice_action(socket)}
+      _unavailable -> {:noreply, reject_unavailable_invoice_action(socket)}
     end
   end
 
@@ -894,11 +893,11 @@ defmodule AccrueAdmin.Live.InvoiceLive do
     |> push_flash(:error, invoice_action_unavailable_copy(socket))
   end
 
-  defp pending_action(params, events) do
+  defp pending_action(action_type, params, events) do
     source_event = selected_source_event(params, events)
 
     %{
-      type: Map.fetch!(params, "action_type"),
+      type: action_type,
       source_event_id: source_event && source_event.id,
       source_webhook_event_id: source_event && source_event.caused_by_webhook_event_id
     }

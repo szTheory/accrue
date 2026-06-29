@@ -1,6 +1,10 @@
 defmodule AccrueAdmin.Live.Analytics.CampaignLiveTest do
   use AccrueAdmin.LiveCase, async: false
 
+  alias Accrue.Billing.{Customer, Subscription}
+  alias AccrueAdmin.Copy
+  alias AccrueAdmin.TestRepo
+
   defmodule AuthAdapter do
     @behaviour Accrue.Auth
 
@@ -31,7 +35,7 @@ defmodule AccrueAdmin.Live.Analytics.CampaignLiveTest do
   describe "Dunning Timeline" do
     test "D-20 D-21 renders Campaign as a detail drill-down with summary rows and primary timeline",
          %{conn: conn} do
-      subscription_id = Ecto.UUID.generate()
+      subscription_id = insert_subscription().id
 
       Accrue.Repo.insert!(%Accrue.Events.Event{
         type: "dunning.campaign_started",
@@ -80,7 +84,7 @@ defmodule AccrueAdmin.Live.Analytics.CampaignLiveTest do
     end
 
     test "D-20 renders Campaign empty state inside the detail drill-down contract", %{conn: conn} do
-      subscription_id = Ecto.UUID.generate()
+      subscription_id = insert_subscription().id
 
       {:ok, _view, html} =
         conn
@@ -100,7 +104,7 @@ defmodule AccrueAdmin.Live.Analytics.CampaignLiveTest do
     end
 
     test "renders dunning timeline for subscription with 2 campaign arcs", %{conn: conn} do
-      subscription_id = Ecto.UUID.generate()
+      subscription_id = insert_subscription().id
       # Seed events via Repo directly or Events
       Accrue.Repo.insert!(%Accrue.Events.Event{
         type: "dunning.campaign_started",
@@ -145,14 +149,16 @@ defmodule AccrueAdmin.Live.Analytics.CampaignLiveTest do
       assert html =~ "Campaign started"
     end
 
-    test "renders empty state for unknown subscription_id", %{conn: conn} do
+    test "renders empty state for subscription without dunning events", %{conn: conn} do
+      subscription_id = insert_subscription().id
+
       {:ok, _view, html} =
         conn
         |> init_test_session(%{
           "admin_token" => "admin",
           "accrue_admin" => %{"mount_path" => "/billing"}
         })
-        |> live("/billing/analytics/recovery/subscriptions/#{Ecto.UUID.generate()}")
+        |> live("/billing/analytics/recovery/subscriptions/#{subscription_id}")
 
       assert html =~ "No dunning history found"
     end
@@ -173,7 +179,7 @@ defmodule AccrueAdmin.Live.Analytics.CampaignLiveTest do
 
     # Phase 176-06 uplift assertions (dims ②④⑦⑧)
     test "renders prominent hero heading via Detail.summary_card (dims ②⑧)", %{conn: conn} do
-      subscription_id = Ecto.UUID.generate()
+      subscription_id = insert_subscription().id
 
       {:ok, _view, html} =
         conn
@@ -191,7 +197,7 @@ defmodule AccrueAdmin.Live.Analytics.CampaignLiveTest do
     end
 
     test "renders semantic aria-label on the timeline section (dim ⑦)", %{conn: conn} do
-      subscription_id = Ecto.UUID.generate()
+      subscription_id = insert_subscription().id
 
       {:ok, _view, html} =
         conn
@@ -205,31 +211,61 @@ defmodule AccrueAdmin.Live.Analytics.CampaignLiveTest do
       assert html =~ ~r/aria-label=/
     end
 
-    test "redirects with flash error for invalid subscription_id format (dim ④)", %{conn: conn} do
-      # An ID that is syntactically invalid cannot match any real subscription —
-      # the not-found path must redirect back to recovery and carry a flash message.
-      # CampaignLive cannot query nil IDs (Dunning just returns empty), so we test
-      # that EMPTY arcs path shows the empty state but valid UUIDs that don't match
-      # just render the empty component (not an error redirect for this specialist screen).
-      # The dim ④ requirement for CampaignLive is: empty branch rendered when no arcs found.
-      subscription_id = Ecto.UUID.generate()
+    test "redirects with denial flash for unknown subscription_id (dim ④)", %{conn: conn} do
+      assert {:error, {:redirect, %{to: "/billing/analytics/recovery", flash: flash}}} =
+               conn
+               |> init_test_session(%{
+                 "admin_token" => "admin",
+                 "accrue_admin" => %{"mount_path" => "/billing"}
+               })
+               |> live("/billing/analytics/recovery/subscriptions/#{Ecto.UUID.generate()}")
 
-      {:ok, _view, html} =
-        conn
-        |> init_test_session(%{
-          "admin_token" => "admin",
+      assert flash["error"] == Copy.Locked.owner_access_denied()
+    end
+
+    test "denies direct campaign route outside the active organization", %{conn: conn} do
+      allowed_customer = insert_customer(%{owner_type: "Organization", owner_id: "org_allowed"})
+      denied_customer = insert_customer(%{owner_type: "Organization", owner_id: "org_denied"})
+      allowed_subscription = insert_subscription(allowed_customer)
+      denied_subscription = insert_subscription(denied_customer)
+
+      conn =
+        init_test_session(conn, %{
+          :admin_token => "admin",
+          :active_organization_id => "org_allowed",
+          :active_organization_slug => "allowed-org",
+          :admin_organization_ids => ["org_allowed"],
           "accrue_admin" => %{"mount_path" => "/billing"}
         })
-        |> live("/billing/analytics/recovery/subscriptions/#{subscription_id}")
 
-      # Empty branch must be rendered (the CampaignTimeline empty state)
-      assert html =~ "No dunning history found"
+      assert {:ok, _view, allowed_html} =
+               live(
+                 conn,
+                 "/billing/analytics/recovery/subscriptions/#{allowed_subscription.id}?org=allowed-org"
+               )
+
+      assert allowed_html =~ allowed_subscription.id
+
+      assert {:error,
+              {:redirect,
+               %{to: "/billing/analytics/recovery?org=allowed-org", flash: flash_token}}} =
+               redirect =
+               live(
+                 conn,
+                 "/billing/analytics/recovery/subscriptions/#{denied_subscription.id}?org=allowed-org"
+               )
+
+      assert %{"error" => denied} =
+               Phoenix.LiveView.Utils.verify_flash(AccrueAdmin.TestEndpoint, flash_token)
+
+      assert denied == Copy.Locked.owner_access_denied()
+      assert redirect
     end
 
     test "uses Detail.summary_card component (ax-summary-card) for the page hero (dim ②)", %{
       conn: conn
     } do
-      subscription_id = Ecto.UUID.generate()
+      subscription_id = insert_subscription().id
 
       {:ok, _view, html} =
         conn
@@ -247,6 +283,42 @@ defmodule AccrueAdmin.Live.Analytics.CampaignLiveTest do
       # The page hero title must use ax-summary-title (Detail.summary_card renders h2.ax-summary-title)
       assert html =~ "ax-summary-title"
     end
+  end
+
+  defp insert_customer(attrs \\ %{}) do
+    defaults = %{
+      owner_type: "User",
+      owner_id: Ecto.UUID.generate(),
+      processor: "stripe",
+      processor_id: "cus_" <> Integer.to_string(System.unique_integer([:positive])),
+      preferred_locale: "en",
+      metadata: %{},
+      data: %{}
+    }
+
+    %Customer{}
+    |> Customer.changeset(Map.merge(defaults, attrs))
+    |> TestRepo.insert!()
+  end
+
+  defp insert_subscription do
+    insert_subscription(insert_customer())
+  end
+
+  defp insert_subscription(customer, attrs \\ %{}) do
+    defaults = %{
+      customer_id: customer.id,
+      processor: "stripe",
+      processor_id: "sub_" <> Integer.to_string(System.unique_integer([:positive])),
+      status: :active,
+      metadata: %{},
+      data: %{},
+      lock_version: 1
+    }
+
+    %Subscription{}
+    |> Subscription.changeset(Map.merge(defaults, attrs))
+    |> TestRepo.insert!()
   end
 
   defp data_attr_count(html, attr) do

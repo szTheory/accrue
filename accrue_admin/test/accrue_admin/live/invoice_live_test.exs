@@ -293,7 +293,10 @@ defmodule AccrueAdmin.InvoiceLiveTest do
           view,
           "[data-ax-overlay-panel][data-presentation='drawer'] [data-role='void-form']"
         ),
-        %{"action_type" => "void", "source_event_id" => Integer.to_string(source_event.id)}
+        %{
+          "action_type" => "mark_uncollectible",
+          "source_event_id" => Integer.to_string(source_event.id)
+        }
       )
 
     assert html =~ AccrueAdmin.Copy.Invoice.invoice_confirm_panel_label()
@@ -315,6 +318,7 @@ defmodule AccrueAdmin.InvoiceLiveTest do
       )
 
     assert audit_event.actor_type == "admin"
+    assert audit_event.data["action_type"] == "void"
     assert TestRepo.get!(Invoice, invoice.id).status == :void
   end
 

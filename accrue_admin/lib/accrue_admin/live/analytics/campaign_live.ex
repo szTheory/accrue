@@ -5,19 +5,40 @@ defmodule AccrueAdmin.Live.Analytics.CampaignLive do
 
   alias Accrue.Analytics.Dunning
   alias AccrueAdmin.Components.{AppShell, Breadcrumbs, CampaignTimeline, Detail}
+  alias AccrueAdmin.Copy
+  alias AccrueAdmin.Queries.Subscriptions
+  alias AccrueAdmin.ScopedPath
 
   @impl true
   def mount(%{"id" => subscription_id}, session, socket) do
     admin = Map.get(session, "accrue_admin", %{})
-    arcs = Dunning.campaign_timeline_grouped(subscription_id)
-    invoice_map = Dunning.invoices_for_campaign(subscription_id)
+    owner_scope = socket.assigns.current_owner_scope
 
-    {:ok,
-     socket
-     |> assign_shell(admin)
-     |> assign(:subscription_id, subscription_id)
-     |> assign(:arcs, arcs)
-     |> assign(:invoice_map, invoice_map)}
+    case Subscriptions.detail(subscription_id, owner_scope) do
+      {:ok, _subscription} ->
+        arcs = Dunning.campaign_timeline_grouped(subscription_id)
+        invoice_map = Dunning.invoices_for_campaign(subscription_id)
+
+        {:ok,
+         socket
+         |> assign_shell(admin, owner_scope)
+         |> assign(:subscription_id, subscription_id)
+         |> assign(:arcs, arcs)
+         |> assign(:invoice_map, invoice_map)}
+
+      :not_found ->
+        {:ok,
+         socket
+         |> put_flash(:error, Copy.Locked.owner_access_denied())
+         |> redirect(
+           to:
+             ScopedPath.build(
+               admin["mount_path"] || "/billing",
+               "/analytics/recovery",
+               owner_scope
+             )
+         )}
+    end
   end
 
   @impl true
@@ -146,7 +167,9 @@ defmodule AccrueAdmin.Live.Analytics.CampaignLive do
 
   defp format_datetime(_value), do: "Unknown time"
 
-  defp assign_shell(socket, admin) do
+  defp assign_shell(socket, admin, owner_scope) do
+    mount_path = admin["mount_path"] || "/billing"
+
     socket
     |> assign(:page_title, "Dunning Timeline")
     |> assign(:brand, admin["brand"] || default_brand())
@@ -155,8 +178,8 @@ defmodule AccrueAdmin.Live.Analytics.CampaignLive do
     |> assign(:brand_css_path, admin["brand_css_path"])
     |> assign(:assets_css_path, admin["assets_css_path"])
     |> assign(:assets_js_path, admin["assets_js_path"])
-    |> assign(:admin_mount_path, admin["mount_path"] || "/billing")
-    |> assign(:current_path, (admin["mount_path"] || "/billing") <> "/analytics/recovery")
+    |> assign(:admin_mount_path, mount_path)
+    |> assign(:current_path, ScopedPath.build(mount_path, "/analytics/recovery", owner_scope))
   end
 
   defp default_brand do

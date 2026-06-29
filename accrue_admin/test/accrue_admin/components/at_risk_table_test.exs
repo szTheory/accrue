@@ -4,6 +4,7 @@ defmodule AccrueAdmin.Components.AtRiskTableTest do
   import Phoenix.LiveViewTest
 
   alias AccrueAdmin.Components.AtRiskTable
+  alias AccrueAdmin.OwnerScope
 
   describe "at_risk_table/1" do
     test "renders desktop table and mobile cards under the shared group contract" do
@@ -22,6 +23,23 @@ defmodule AccrueAdmin.Components.AtRiskTableTest do
       assert html =~ "card_declined"
       assert html =~ ~s(href="/billing/analytics/recovery/subscriptions/sub_123")
       assert html =~ ~s(aria-label="Open recovery campaign for Northwind Finance")
+    end
+
+    test "preserves organization scope in campaign and pagination links" do
+      owner_scope = organization_owner_scope("org_allowed")
+
+      html =
+        render_component(&AtRiskTable.at_risk_table/1,
+          rows: rows(),
+          base_path: "/billing",
+          owner_scope: owner_scope,
+          next_cursor: "cursor-2"
+        )
+
+      assert html =~ ~s(href="/billing/analytics/recovery/subscriptions/sub_123?org=allowed-org")
+
+      assert html =~
+               ~r/href="\/billing\/analytics\/recovery\?(?:cursor=cursor-2&amp;org=allowed-org|org=allowed-org&amp;cursor=cursor-2)"/
     end
 
     test "renders distinct empty, loading, error, no-pagination, and has-pagination states" do
@@ -93,6 +111,19 @@ defmodule AccrueAdmin.Components.AtRiskTableTest do
         failure_reason: %{"failure_code" => "card_declined"}
       }
     ]
+  end
+
+  defp organization_owner_scope(organization_id) do
+    %OwnerScope{
+      mode: :organization,
+      current_admin: %{id: "admin_1", role: :admin},
+      organization_id: organization_id,
+      organization_slug: "allowed-org",
+      platform_admin?: false,
+      admin_org_ids: [organization_id],
+      active_organization_id: organization_id,
+      active_organization_slug: "allowed-org"
+    }
   end
 
   defp app_css_path, do: Path.expand("../../../assets/css/app.css", __DIR__)

@@ -1,8 +1,10 @@
 defmodule AccrueAdmin.Live.Analytics.RecoveryLiveTest do
   use AccrueAdmin.LiveCase, async: false
 
+  alias Accrue.Billing.{Customer, Subscription}
   alias Accrue.Events
   alias AccrueAdmin.Copy
+  alias AccrueAdmin.TestRepo
 
   defmodule AuthAdapter do
     @behaviour Accrue.Auth
@@ -312,6 +314,77 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLiveTest do
       assert html =~ "/analytics/recovery/subscriptions/" or html =~ "No active dunning campaigns"
     end
 
+    test "organization scope excludes out-of-scope recovery metrics and at-risk rows", %{
+      conn: conn
+    } do
+      allowed_customer =
+        insert_customer(%{
+          owner_type: "Organization",
+          owner_id: "org_allowed",
+          email: "allowed-recovery@example.com"
+        })
+
+      denied_customer =
+        insert_customer(%{
+          owner_type: "Organization",
+          owner_id: "org_denied",
+          email: "denied-recovery@example.com"
+        })
+
+      allowed_recovered = insert_subscription(allowed_customer)
+      denied_recovered = insert_subscription(denied_customer)
+
+      allowed_at_risk =
+        insert_subscription(allowed_customer, %{
+          status: :past_due,
+          dunning_campaign_started_at: DateTime.add(DateTime.utc_now(), -2 * 86_400, :second)
+        })
+
+      denied_at_risk =
+        insert_subscription(denied_customer, %{
+          status: :past_due,
+          dunning_campaign_started_at: DateTime.add(DateTime.utc_now(), -3 * 86_400, :second)
+        })
+
+      record_dunning_event("dunning.recovered", allowed_recovered, %{
+        mrr_value_cents: 1_234,
+        currency: "usd"
+      })
+
+      record_dunning_event("dunning.recovered", denied_recovered, %{
+        mrr_value_cents: 9_876,
+        currency: "usd"
+      })
+
+      record_dunning_event("dunning.campaign_started", allowed_at_risk, %{
+        campaign_anchor: DateTime.to_iso8601(allowed_at_risk.dunning_campaign_started_at)
+      })
+
+      record_dunning_event("dunning.campaign_started", denied_at_risk, %{
+        campaign_anchor: DateTime.to_iso8601(denied_at_risk.dunning_campaign_started_at)
+      })
+
+      conn =
+        Phoenix.ConnTest.init_test_session(conn,
+          admin_token: "admin",
+          active_organization_id: "org_allowed",
+          active_organization_slug: "allowed-org",
+          admin_organization_ids: ["org_allowed"]
+        )
+
+      assert {:ok, _view, html} = live(conn, "/billing/analytics/recovery?org=allowed-org")
+
+      assert html =~ "$12.34"
+      refute html =~ "$98.76"
+      assert html =~ "allowed-recovery@example.com"
+      refute html =~ "denied-recovery@example.com"
+      assert html =~ allowed_at_risk.id
+      refute html =~ denied_at_risk.id
+
+      assert html =~
+               ~s(href="/billing/analytics/recovery/subscriptions/#{allowed_at_risk.id}?org=allowed-org")
+    end
+
     test "cross-package boundary: RecoveryLive does not import Ecto.Query, Accrue.Repo, or Accrue.Billing.Subscription" do
       source = File.read!("lib/accrue_admin/live/analytics/recovery_live.ex")
 
@@ -319,5 +392,48 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLiveTest do
       refute source =~ "Accrue.Repo"
       refute source =~ "Accrue.Billing.Subscription"
     end
+  end
+
+  defp insert_customer(attrs) do
+    defaults = %{
+      owner_type: "User",
+      owner_id: Ecto.UUID.generate(),
+      processor: "stripe",
+      processor_id: "cus_" <> Integer.to_string(System.unique_integer([:positive])),
+      preferred_locale: "en",
+      metadata: %{},
+      data: %{}
+    }
+
+    %Customer{}
+    |> Customer.changeset(Map.merge(defaults, attrs))
+    |> TestRepo.insert!()
+  end
+
+  defp insert_subscription(customer, attrs \\ %{}) do
+    defaults = %{
+      customer_id: customer.id,
+      processor: "stripe",
+      processor_id: "sub_" <> Integer.to_string(System.unique_integer([:positive])),
+      status: :active,
+      metadata: %{},
+      data: %{},
+      lock_version: 1
+    }
+
+    %Subscription{}
+    |> Subscription.changeset(Map.merge(defaults, attrs))
+    |> TestRepo.insert!()
+  end
+
+  defp record_dunning_event(type, subscription, data) do
+    {:ok, _event} =
+      Events.record(%{
+        type: type,
+        subject_type: "Subscription",
+        subject_id: subscription.id,
+        actor_type: "system",
+        data: data
+      })
   end
 end

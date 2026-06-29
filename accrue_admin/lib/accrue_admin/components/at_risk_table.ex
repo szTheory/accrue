@@ -29,8 +29,11 @@ defmodule AccrueAdmin.Components.AtRiskTable do
 
   use Phoenix.Component
 
+  alias AccrueAdmin.ScopedPath
+
   attr(:rows, :list, required: true)
   attr(:base_path, :string, default: "/billing")
+  attr(:owner_scope, :any, default: nil)
   attr(:class, :string, default: nil)
   attr(:loading, :boolean, default: false)
   attr(:error, :any, default: nil)
@@ -76,7 +79,7 @@ defmodule AccrueAdmin.Components.AtRiskTable do
           <tr :for={row <- @rows}>
             <td>
               <a
-                href={@base_path <> "/analytics/recovery/subscriptions/" <> row.subscription_id}
+                href={subscription_href(@base_path, row, @owner_scope)}
                 class="ax-link"
               >
                 {row.customer_label || "—"}
@@ -121,7 +124,7 @@ defmodule AccrueAdmin.Components.AtRiskTable do
           </dl>
 
           <a
-            href={subscription_href(@base_path, row)}
+            href={subscription_href(@base_path, row, @owner_scope)}
             class="ax-button ax-button-secondary"
             aria-label={"Open recovery campaign for #{row.customer_label || row.subscription_id}"}
           >
@@ -145,7 +148,7 @@ defmodule AccrueAdmin.Components.AtRiskTable do
         </p>
         <a
           :if={@next_cursor}
-          href={load_more_href(@base_path, @next_cursor, @load_more_href)}
+          href={load_more_href(@base_path, @next_cursor, @load_more_href, @owner_scope)}
           class="ax-button ax-button-secondary"
           data-role="load-more"
         >
@@ -162,15 +165,20 @@ defmodule AccrueAdmin.Components.AtRiskTable do
   defp state(%{next_cursor: cursor}) when cursor not in [nil, ""], do: "has-pagination"
   defp state(_assigns), do: "no-pagination"
 
-  defp subscription_href(base_path, row) do
-    base_path <> "/analytics/recovery/subscriptions/" <> row.subscription_id
+  defp subscription_href(base_path, row, owner_scope) do
+    ScopedPath.build(
+      base_path,
+      "/analytics/recovery/subscriptions/" <> row.subscription_id,
+      owner_scope
+    )
   end
 
-  defp load_more_href(_base_path, _next_cursor, href) when is_binary(href) and href != "",
-    do: href
+  defp load_more_href(_base_path, _next_cursor, href, _owner_scope)
+       when is_binary(href) and href != "",
+       do: href
 
-  defp load_more_href(base_path, next_cursor, _href) do
-    base_path <> "/analytics/recovery?cursor=" <> URI.encode_www_form(next_cursor)
+  defp load_more_href(base_path, next_cursor, _href, owner_scope) do
+    ScopedPath.build(base_path, "/analytics/recovery", owner_scope, %{"cursor" => next_cursor})
   end
 
   defp campaign_age(row), do: "Past due #{row.days_in_campaign} days"
