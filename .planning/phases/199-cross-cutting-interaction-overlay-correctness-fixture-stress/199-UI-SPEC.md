@@ -1,7 +1,8 @@
 ---
 phase: 199
 slug: cross-cutting-interaction-overlay-correctness-fixture-stress
-status: draft
+status: approved
+reviewed_at: 2026-06-29T20:02:40Z
 shadcn_initialized: false
 preset: none
 created: 2026-06-29
@@ -198,9 +199,11 @@ Required surface set for deepest coverage:
 | Popover/tooltip | Non-modal. It must remain adjacent to the trigger, pointer-reachable, viewport-bound, and z-layered through `--ax-z-popover`. |
 | Scroll lock | Modal and drawer presentations set `data-scroll-lock="true"` and use `ScrollLock.lock()`. Popovers/dropdowns do not lock. Locking is ref-counted and restores only after the final overlay closes. |
 | Background isolation | While a modal/drawer is open, `#accrue-admin-shell` is inert and not tabbable/clickable. Add `aria-hidden` fallback only if a failing browser support test proves it is needed. |
+| Visual hierarchy / focal point | Active overlay or floating panel is the first visual target, the focused row/control or primary action inside it is second, and the scrim/background page is third. Non-overlay pages keep the page header/title first, active filter/search context second, and row/action affordances third. |
 | Dismissal | Backdrop click, Escape, and explicit close use one close event/target path per overlay and settle idempotently. Rapid double-toggle and close-while-transition must leave no ghost scrim, stale inert shell, stale focus trap, or locked body. |
 | Focus | Opening moves focus into the overlay, traps Tab/Shift+Tab, and restores focus to the trigger or stable fallback. If trigger disappeared, restore to a meaningful page target, never `document.body`. |
 | Hit testing | The panel and its primary action are top pointer targets above the scrim at desktop and mobile viewports. Scrim is dismissible, panel is not blocked by scrim. |
+| Icon-only labels | Close, overflow, drill-down, theme, copy, reveal, and other icon-only controls keep a visible tooltip/title where the local pattern supports it and always include an accessible name. Repeated compact labels add visually-hidden object context plus next action. |
 | Nested flows | Nested modal/drawer/step-up flows preserve scroll position, lock count, inert state, and focus restoration through every open/close sequence. |
 
 Stable selectors:
@@ -357,4 +360,4 @@ Required script posture:
 - [ ] Dimension 5 Spacing: PASS
 - [ ] Dimension 6 Registry Safety: PASS
 
-**Approval:** pending
+**Approval:** approved by gsd-ui-checker on 2026-06-29T20:02:40Z
