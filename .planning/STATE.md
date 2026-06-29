@@ -4,8 +4,8 @@ milestone: v1.54
 milestone_name: Admin UI Page-Level Streamlining & Storybook
 current_phase: 199
 current_phase_name: Cross-cutting interaction/overlay correctness + fixture stress + microcopy
-status: verifying
-stopped_at: Completed 198-09-PLAN.md
+status: ready
+stopped_at: Phase 198 complete; Phase 199 ready
 last_updated: "2026-06-29T18:28:25.201Z"
 last_activity: 2026-06-29
 last_activity_desc: Phase 198 complete, transitioned to Phase 199
@@ -21,17 +21,17 @@ progress:
 
 ## Project Reference
 
-See: `.planning/PROJECT.md` (updated 2026-06-24 — v1.54 Admin UI Page-Level Streamlining & Storybook opened)
+See: `.planning/PROJECT.md` (updated 2026-06-29 — Phase 198 complete; Phase 199 next)
 
 **Core value:** A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic Elixir DX, strong domain modeling, tamper-evident audit ledger, great observability, and zero breaking-change pain through v1.x.
 
-**Current focus:** Phase 198 — propagate-detail-analytics
+**Current focus:** Phase 199 — Cross-cutting interaction/overlay correctness + fixture stress + microcopy
 
 ## Current Position
 
 Phase: 199 — Cross-cutting interaction/overlay correctness + fixture stress + microcopy
 Plan: Not started
-Status: Phase complete — ready for verification
+Status: Ready to discuss/plan
 Last activity: 2026-06-29 — Phase 198 complete, transitioned to Phase 199
 
 ## Post-v1.48 Pause Rule
@@ -50,8 +50,8 @@ v1.54 Admin UI Page-Level Streamlining & Storybook is open as a quality / page-l
 | 194 | Exemplar A — Dashboard | EXE-01 | Complete (2026-06-26) |
 | 195 | Exemplar B — Subscription detail | EXE-02, IXN-01 | Complete (2026-06-26) |
 | 196 | Exemplar C — Subscriptions list + PageHeader | EXE-03, PGH-01 | Complete (2026-06-26) |
-| 197 | Propagate LIST | PRP-01 | Not started |
-| 198 | Propagate DETAIL + analytics | PRP-02 | Not started |
+| 197 | Propagate LIST | PRP-01 | Complete (2026-06-28) |
+| 198 | Propagate DETAIL + analytics | PRP-02 | Complete (2026-06-29) |
 | 199 | Cross-cutting interaction/overlay correctness + fixture stress + microcopy | IXN-01, IXN-02, IXN-03, IXN-04, FIX-01, FIX-02, CPY-01 | Not started |
 | 200 | Idempotent verification & sign-off | VER-01, VER-02, VER-03, STY-02, STY-03 | Not started |
 
