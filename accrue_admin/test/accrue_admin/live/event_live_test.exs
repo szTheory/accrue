@@ -3,7 +3,7 @@ defmodule AccrueAdmin.EventLiveTest do
 
   use AccrueAdmin.LiveCase, async: false
 
-  alias Accrue.Billing.{Customer, Invoice}
+  alias Accrue.Billing.{Charge, Customer, Invoice}
   alias Accrue.Events
   alias Accrue.Webhook.WebhookEvent
   alias AccrueAdmin.TestRepo
@@ -283,6 +283,8 @@ defmodule AccrueAdmin.EventLiveTest do
     denied_customer = insert_customer(%{owner_type: "Organization", owner_id: "org_denied"})
     allowed_invoice = insert_invoice(allowed_customer, %{processor_id: "in_event_allowed"})
     denied_invoice = insert_invoice(denied_customer, %{processor_id: "in_event_denied"})
+    allowed_charge = insert_charge(allowed_customer, %{processor_id: "ch_event_allowed"})
+    denied_charge = insert_charge(denied_customer, %{processor_id: "ch_event_denied"})
 
     {:ok, allowed_event} =
       Events.record(%{
@@ -300,6 +302,22 @@ defmodule AccrueAdmin.EventLiveTest do
         actor_type: "system"
       })
 
+    {:ok, allowed_charge_event} =
+      Events.record(%{
+        type: "charge.succeeded.allowed_org",
+        subject_type: "Charge",
+        subject_id: allowed_charge.id,
+        actor_type: "system"
+      })
+
+    {:ok, denied_charge_event} =
+      Events.record(%{
+        type: "charge.succeeded.denied_org",
+        subject_type: "Charge",
+        subject_id: denied_charge.id,
+        actor_type: "system"
+      })
+
     conn =
       Phoenix.ConnTest.init_test_session(conn,
         admin_token: "admin",
@@ -313,6 +331,11 @@ defmodule AccrueAdmin.EventLiveTest do
 
     assert allowed_html =~ "invoice.payment_failed.allowed_org"
 
+    assert {:ok, _view, allowed_charge_html} =
+             live(conn, "/billing/events/#{allowed_charge_event.id}?org=allowed-org")
+
+    assert allowed_charge_html =~ "charge.succeeded.allowed_org"
+
     assert {:error, {:redirect, %{to: "/billing/events?org=allowed-org", flash: flash_token}}} =
              redirect =
              live(conn, "/billing/events/#{denied_event.id}?org=allowed-org")
@@ -322,6 +345,17 @@ defmodule AccrueAdmin.EventLiveTest do
 
     assert denied == AccrueAdmin.Copy.Locked.owner_access_denied()
     assert redirect
+
+    assert {:error,
+            {:redirect, %{to: "/billing/events?org=allowed-org", flash: charge_flash_token}}} =
+             charge_redirect =
+             live(conn, "/billing/events/#{denied_charge_event.id}?org=allowed-org")
+
+    assert %{"error" => charge_denied} =
+             Phoenix.LiveView.Utils.verify_flash(AccrueAdmin.TestEndpoint, charge_flash_token)
+
+    assert charge_denied == AccrueAdmin.Copy.Locked.owner_access_denied()
+    assert charge_redirect
   end
 
   # --- helpers ---
@@ -383,6 +417,24 @@ defmodule AccrueAdmin.EventLiveTest do
 
     %Invoice{}
     |> Invoice.force_status_changeset(Map.merge(defaults, attrs))
+    |> TestRepo.insert!()
+  end
+
+  defp insert_charge(customer, attrs) do
+    defaults = %{
+      customer_id: customer.id,
+      processor: "stripe",
+      processor_id: "ch_" <> Integer.to_string(System.unique_integer([:positive])),
+      amount_cents: 1_000,
+      currency: "usd",
+      status: "succeeded",
+      metadata: %{},
+      data: %{},
+      lock_version: 1
+    }
+
+    %Charge{}
+    |> Charge.changeset(Map.merge(defaults, attrs))
     |> TestRepo.insert!()
   end
 

@@ -1,7 +1,10 @@
 defmodule AccrueAdmin.Queries.EventsTest do
   use AccrueAdmin.RepoCase, async: false
 
+  alias Accrue.Billing.{Charge, Customer}
+  alias AccrueAdmin.OwnerScope
   alias AccrueAdmin.Queries.Cursor
+  alias AccrueAdmin.TestRepo
 
   # Note the module-name collision: `Accrue.Events` is the core context that
   # *records* events into the append-only ledger, while
@@ -47,5 +50,94 @@ defmodule AccrueAdmin.Queries.EventsTest do
              MapSet.new(rows1, & &1.id),
              MapSet.new(rows2, & &1.id)
            )
+  end
+
+  test "organization scope includes in-scope Charge subject events in list and detail" do
+    allowed_customer = insert_customer(%{owner_type: "Organization", owner_id: "org_allowed"})
+    denied_customer = insert_customer(%{owner_type: "Organization", owner_id: "org_denied"})
+    allowed_charge = insert_charge(allowed_customer, %{processor_id: "ch_query_allowed"})
+    denied_charge = insert_charge(denied_customer, %{processor_id: "ch_query_denied"})
+
+    {:ok, allowed_event} =
+      Accrue.Events.record(%{
+        type: "charge.succeeded.allowed_org",
+        subject_type: "Charge",
+        subject_id: allowed_charge.id,
+        actor_type: "system"
+      })
+
+    {:ok, denied_event} =
+      Accrue.Events.record(%{
+        type: "charge.succeeded.denied_org",
+        subject_type: "Charge",
+        subject_id: denied_charge.id,
+        actor_type: "system"
+      })
+
+    scope = organization_owner_scope("org_allowed")
+
+    {rows, _next_cursor} =
+      AccrueAdmin.Queries.Events.list(
+        owner_scope: scope,
+        filter: %{subject_type: "Charge"},
+        limit: 25
+      )
+
+    assert Enum.any?(rows, &(&1.id == allowed_event.id))
+    refute Enum.any?(rows, &(&1.id == denied_event.id))
+
+    allowed_event_id = allowed_event.id
+
+    assert {:ok, %{id: ^allowed_event_id}} =
+             AccrueAdmin.Queries.Events.detail(allowed_event_id, scope)
+
+    assert :not_found = AccrueAdmin.Queries.Events.detail(denied_event.id, scope)
+  end
+
+  defp insert_customer(attrs) do
+    defaults = %{
+      owner_type: "User",
+      owner_id: Ecto.UUID.generate(),
+      processor: "stripe",
+      processor_id: "cus_" <> Integer.to_string(System.unique_integer([:positive])),
+      preferred_locale: "en",
+      metadata: %{},
+      data: %{}
+    }
+
+    %Customer{}
+    |> Customer.changeset(Map.merge(defaults, attrs))
+    |> TestRepo.insert!()
+  end
+
+  defp insert_charge(customer, attrs) do
+    defaults = %{
+      customer_id: customer.id,
+      processor: "stripe",
+      processor_id: "ch_" <> Integer.to_string(System.unique_integer([:positive])),
+      amount_cents: 1_000,
+      currency: "usd",
+      status: "succeeded",
+      metadata: %{},
+      data: %{},
+      lock_version: 1
+    }
+
+    %Charge{}
+    |> Charge.changeset(Map.merge(defaults, attrs))
+    |> TestRepo.insert!()
+  end
+
+  defp organization_owner_scope(organization_id) do
+    %OwnerScope{
+      mode: :organization,
+      current_admin: %{id: "admin_1", role: :admin},
+      organization_id: organization_id,
+      organization_slug: "allowed-org",
+      platform_admin?: false,
+      admin_org_ids: [organization_id],
+      active_organization_id: organization_id,
+      active_organization_slug: "allowed-org"
+    }
   end
 end

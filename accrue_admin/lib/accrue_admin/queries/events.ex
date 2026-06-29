@@ -16,6 +16,7 @@ defmodule AccrueAdmin.Queries.Events do
   @customers_table Accrue.Migration.qualified_table(:accrue_customers)
   @subscriptions_table Accrue.Migration.qualified_table(:accrue_subscriptions)
   @invoices_table Accrue.Migration.qualified_table(:accrue_invoices)
+  @charges_table Accrue.Migration.qualified_table(:accrue_charges)
   @organization_scope_sql """
   EXISTS (
     SELECT 1
@@ -40,6 +41,15 @@ defmodule AccrueAdmin.Queries.Events do
     JOIN #{@customers_table} customers ON customers.id = invoices.customer_id
     WHERE ? = 'Invoice'
       AND invoices.id::text = ?
+      AND customers.owner_type = 'Organization'
+      AND customers.owner_id = ?
+  )
+  OR EXISTS (
+    SELECT 1
+    FROM #{@charges_table} charges
+    JOIN #{@customers_table} customers ON customers.id = charges.customer_id
+    WHERE ? = 'Charge'
+      AND charges.id::text = ?
       AND customers.owner_type = 'Organization'
       AND customers.owner_id = ?
   )
@@ -170,6 +180,9 @@ defmodule AccrueAdmin.Queries.Events do
       [event],
       fragment(
         @organization_scope_sql,
+        event.subject_type,
+        event.subject_id,
+        ^organization_id,
         event.subject_type,
         event.subject_id,
         ^organization_id,
