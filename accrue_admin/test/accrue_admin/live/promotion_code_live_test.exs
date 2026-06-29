@@ -62,6 +62,7 @@ defmodule AccrueAdmin.PromotionCodeLiveTest do
     assert data_attr_count(html, "data-ax-related-resources") == 1
     assert data_attr_count(html, "data-ax-lazy-activity") == 1
     assert data_attr_count(html, "data-ax-lazy-json") == 1
+    assert data_attr_count(html, "data-ax-action-band") == 0
     assert data_attr_count(html, "data-ax-action-overflow-menu") == 0
 
     assert html =~ "REFER15"
@@ -106,6 +107,41 @@ defmodule AccrueAdmin.PromotionCodeLiveTest do
     # Events filtered by PromotionCode subject in related resources
     assert html =~ "subject_type=PromotionCode"
     assert html =~ "subject_id=#{promotion_code.id}"
+  end
+
+  test "keeps activity collapsed until the operator opens the marker", %{
+    conn: conn,
+    promotion_code: promotion_code
+  } do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+
+    assert {:ok, view, html} = live(conn, "/billing/promotion-codes/#{promotion_code.id}")
+
+    assert html =~ "Open this section to load activity."
+    refute html =~ "This record has no recorded activity yet."
+
+    html = render_click(view, "load_activity", %{})
+
+    assert html =~ "This record has no recorded activity yet."
+    assert html =~ "Core details remain available above."
+  end
+
+  test "keeps raw promotion code payload collapsed until the operator opens the marker", %{
+    conn: conn,
+    promotion_code: promotion_code
+  } do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+
+    assert {:ok, view, html} = live(conn, "/billing/promotion-codes/#{promotion_code.id}")
+
+    assert html =~ Copy.promotion_code_json_payload_label()
+    refute html =~ "campaign"
+    refute html =~ "processor"
+
+    html = render_click(view, "load_raw_json", %{})
+
+    assert html =~ "campaign"
+    assert html =~ "processor"
   end
 
   test "renders Detail.summary_card hero not a hand-rolled page header", %{
