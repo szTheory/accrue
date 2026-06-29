@@ -13,8 +13,8 @@ defmodule AccrueAdmin.Live.CouponLive do
     Breadcrumbs,
     Detail,
     JsonViewer,
-    KpiCard,
-    RelatedResources
+    RelatedResources,
+    Timeline
   }
 
   alias AccrueAdmin.ScopedPath
@@ -39,8 +39,19 @@ defmodule AccrueAdmin.Live.CouponLive do
          |> assign_shell(admin)
          |> assign(:coupon, coupon)
          |> assign(:promotion_codes, promotion_codes(coupon.id))
-         |> assign(:related_items, related_items(coupon, mount_path, scope))}
+         |> assign(:related_items, related_items(coupon, mount_path, scope))
+         |> assign(:activity_loaded?, false)
+         |> assign(:raw_json_loaded?, false)}
     end
+  end
+
+  @impl true
+  def handle_event("load_activity", _params, socket) do
+    {:noreply, assign(socket, :activity_loaded?, true)}
+  end
+
+  def handle_event("load_raw_json", _params, socket) do
+    {:noreply, assign(socket, :raw_json_loaded?, true)}
   end
 
   @impl true
@@ -74,49 +85,69 @@ defmodule AccrueAdmin.Live.CouponLive do
           </:facts>
         </Detail.summary_card>
 
-        <section class="ax-kpi-grid" aria-label={AccrueAdmin.Copy.coupon_detail_kpi_section_aria_label()}>
-          <KpiCard.kpi_card label={AccrueAdmin.Copy.coupon_kpi_label_redemptions()} value={Integer.to_string(@coupon.times_redeemed || 0)}>
-            <:meta><%= max_redemptions_summary(@coupon) %></:meta>
-          </KpiCard.kpi_card>
+        <Detail.summary_list rows={summary_rows(@coupon, @promotion_codes)} />
 
-          <KpiCard.kpi_card label={AccrueAdmin.Copy.coupon_detail_section_promotion_codes_eyebrow()} value={Integer.to_string(length(@promotion_codes))}>
-            <:meta><%= AccrueAdmin.Copy.coupon_kpi_meta_promotion_codes_linked() %></:meta>
-          </KpiCard.kpi_card>
+        <section class="ax-stack-xl" aria-label="Coupon details">
+          <details class="ax-detail-section" data-ax-drill-section="promotion-codes" open>
+            <summary class="ax-detail-section-head">
+              <span class="ax-detail-section-title"><%= AccrueAdmin.Copy.coupon_detail_section_codes_heading() %></span>
+            </summary>
 
-          <KpiCard.kpi_card label={AccrueAdmin.Copy.coupon_kpi_label_redeem_by()} value={redeem_by_summary(@coupon)}>
-            <:meta><%= AccrueAdmin.Copy.coupon_kpi_meta_redeem_by() %></:meta>
-          </KpiCard.kpi_card>
+            <div :for={promotion_code <- @promotion_codes} class="ax-list-row">
+              <a
+                href={@admin_mount_path <> "/promotion-codes/" <> promotion_code.id}
+                class="ax-link"
+              >
+                <%= promotion_code.code || promotion_code.processor_id || promotion_code.id %>
+              </a>
+              <Detail.detail_field_list fields={promotion_code_drill_fields(promotion_code)} />
+            </div>
+
+            <p :if={@promotion_codes == []} class="ax-body">
+              <%= AccrueAdmin.Copy.coupon_detail_promotion_codes_empty() %>
+            </p>
+          </details>
+
+          <details class="ax-detail-section" data-ax-drill-section="projection-details">
+            <summary class="ax-detail-section-head">
+              <span class="ax-detail-section-title"><%= AccrueAdmin.Copy.coupon_detail_section_projection_heading() %></span>
+            </summary>
+            <Detail.detail_field_list fields={projection_detail_fields(@coupon)} />
+          </details>
         </section>
 
-        <Detail.detail_section title={AccrueAdmin.Copy.coupon_detail_section_codes_heading()}>
-          <div :for={promotion_code <- @promotion_codes} class="ax-list-row">
-            <a
-              href={@admin_mount_path <> "/promotion-codes/" <> promotion_code.id}
-              class="ax-link"
-            >
-              <%= promotion_code.code || promotion_code.processor_id || promotion_code.id %>
-            </a>
-            <span class="ax-body">
-              <%= promotion_code_status(promotion_code) %> · <%= promotion_code_redemptions(promotion_code) %>
-            </span>
-          </div>
+        <div data-ax-related-resources>
+          <RelatedResources.related_resources items={@related_items} />
+        </div>
 
-          <p :if={@promotion_codes == []} class="ax-body">
-            <%= AccrueAdmin.Copy.coupon_detail_promotion_codes_empty() %>
-          </p>
-        </Detail.detail_section>
+        <details class="ax-detail-section" data-ax-lazy-activity phx-click="load_activity">
+          <summary class="ax-detail-section-head">
+            <span class="ax-detail-section-title"><%= AccrueAdmin.Copy.coupon_lazy_activity_heading() %></span>
+          </summary>
+          <%= if @activity_loaded? do %>
+            <Timeline.timeline
+              label={AccrueAdmin.Copy.coupon_lazy_activity_label()}
+              empty_label={AccrueAdmin.Copy.coupon_lazy_activity_empty_label()}
+              items={activity_items(@coupon)}
+            />
+            <p :if={activity_items(@coupon) == []} class="ax-body">
+              <%= AccrueAdmin.Copy.coupon_lazy_activity_empty_body() %>
+            </p>
+          <% else %>
+            <p class="ax-body"><%= AccrueAdmin.Copy.coupon_lazy_activity_prompt() %></p>
+          <% end %>
+        </details>
 
-        <Detail.detail_section title={AccrueAdmin.Copy.coupon_detail_section_projection_heading()}>
-          <Detail.detail_field_list fields={[
-            %{label: AccrueAdmin.Copy.coupon_detail_label_duration(), value: duration_summary(@coupon)},
-            %{label: AccrueAdmin.Copy.coupon_detail_label_currency(), value: @coupon.currency || "--"},
-            %{label: AccrueAdmin.Copy.coupon_detail_label_processor(), value: @coupon.processor || "--"}
-          ]} />
-        </Detail.detail_section>
-
-        <RelatedResources.related_resources items={@related_items} />
-
-        <JsonViewer.json_viewer id="coupon-payload" label={AccrueAdmin.Copy.coupon_json_payload_label()} payload={payload(@coupon)} />
+        <details class="ax-detail-section" data-ax-lazy-json phx-click="load_raw_json">
+          <summary class="ax-detail-section-head">
+            <span class="ax-detail-section-title"><%= AccrueAdmin.Copy.coupon_lazy_raw_data_heading() %></span>
+          </summary>
+          <%= if @raw_json_loaded? do %>
+            <JsonViewer.json_viewer id="coupon-payload" label={AccrueAdmin.Copy.coupon_json_payload_label()} payload={raw_payload(@coupon)} />
+          <% else %>
+            <p class="ax-body"><%= AccrueAdmin.Copy.coupon_lazy_raw_data_prompt() %></p>
+          <% end %>
+        </details>
       </section>
     </AppShell.app_shell>
     """
@@ -142,7 +173,36 @@ defmodule AccrueAdmin.Live.CouponLive do
     |> Repo.all()
   end
 
-  defp payload(coupon) do
+  defp summary_rows(coupon, promotion_codes) do
+    [
+      %{label: "Valid state", value: status_summary(coupon)},
+      %{label: "Discount", value: discount_summary(coupon)},
+      %{label: "Duration", value: duration_summary(coupon)},
+      %{label: "Redeem by", value: redeem_by_summary(coupon)},
+      %{label: "Max redemptions", value: max_redemptions_summary(coupon)},
+      %{label: "Current redemptions", value: Integer.to_string(coupon.times_redeemed || 0)},
+      %{label: "Promotion codes", value: Integer.to_string(length(promotion_codes))}
+    ]
+  end
+
+  defp promotion_code_drill_fields(promotion_code) do
+    [
+      %{label: "Status", value: promotion_code_status(promotion_code)},
+      %{label: "Redemptions", value: promotion_code_redemptions(promotion_code)}
+    ]
+  end
+
+  defp projection_detail_fields(coupon) do
+    [
+      %{label: AccrueAdmin.Copy.coupon_detail_label_duration(), value: duration_summary(coupon)},
+      %{label: AccrueAdmin.Copy.coupon_detail_label_currency(), value: coupon.currency || "--"},
+      %{label: AccrueAdmin.Copy.coupon_detail_label_processor(), value: coupon.processor || "--"}
+    ]
+  end
+
+  defp activity_items(_coupon), do: []
+
+  defp raw_payload(coupon) do
     %{
       "metadata" => coupon.metadata || %{},
       "data" => coupon.data || %{},

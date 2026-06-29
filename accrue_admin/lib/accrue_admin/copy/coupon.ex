@@ -111,6 +111,21 @@ defmodule AccrueAdmin.Copy.Coupon do
 
   def coupon_json_payload_label, do: "Coupon payload"
 
+  def coupon_lazy_activity_heading, do: "Activity"
+
+  def coupon_lazy_activity_label, do: "Coupon activity"
+
+  def coupon_lazy_activity_prompt, do: "Open this section to load activity."
+
+  def coupon_lazy_activity_empty_label, do: "No activity yet"
+
+  def coupon_lazy_activity_empty_body,
+    do: "This record has no recorded activity yet. Core details remain available above."
+
+  def coupon_lazy_raw_data_heading, do: "Raw data"
+
+  def coupon_lazy_raw_data_prompt, do: "Open this section to load the escaped coupon payload."
+
   def coupon_kpi_meta_redemptions_cap, do: "Unlimited cap"
 
   def coupon_kpi_meta_promotion_codes_linked, do: "Explicit child codes linked to this coupon"

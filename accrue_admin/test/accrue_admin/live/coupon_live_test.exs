@@ -168,12 +168,16 @@ defmodule AccrueAdmin.CouponLiveTest do
 
     assert {:ok, view, html} = live(conn, "/billing/coupons/#{coupon.id}")
     assert html =~ "Open this section to load activity."
-    refute html =~ "This record has no recorded activity yet. Core details remain available above."
+
+    refute html =~
+             "This record has no recorded activity yet. Core details remain available above."
 
     html = render_click(view, "load_activity", %{})
 
     assert html =~ "No activity yet"
-    assert html =~ "This record has no recorded activity yet. Core details remain available above."
+
+    assert html =~
+             "This record has no recorded activity yet. Core details remain available above."
   end
 
   test "raw coupon payload renders only after the lazy raw data event", %{

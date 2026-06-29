@@ -249,6 +249,13 @@ defmodule AccrueAdmin.Copy do
   defdelegate coupon_detail_label_currency(), to: Coupon
   defdelegate coupon_detail_label_processor(), to: Coupon
   defdelegate coupon_json_payload_label(), to: Coupon
+  defdelegate coupon_lazy_activity_heading(), to: Coupon
+  defdelegate coupon_lazy_activity_label(), to: Coupon
+  defdelegate coupon_lazy_activity_prompt(), to: Coupon
+  defdelegate coupon_lazy_activity_empty_label(), to: Coupon
+  defdelegate coupon_lazy_activity_empty_body(), to: Coupon
+  defdelegate coupon_lazy_raw_data_heading(), to: Coupon
+  defdelegate coupon_lazy_raw_data_prompt(), to: Coupon
   defdelegate coupon_kpi_meta_redemptions_cap(), to: Coupon
   defdelegate coupon_kpi_meta_promotion_codes_linked(), to: Coupon
   defdelegate coupon_kpi_label_redeem_by(), to: Coupon
