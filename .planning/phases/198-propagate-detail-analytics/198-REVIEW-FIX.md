@@ -1,11 +1,11 @@
 ---
 phase: 198-propagate-detail-analytics
 status: all_fixed
-findings_in_scope: 4
-fixed: 4
+findings_in_scope: 5
+fixed: 5
 skipped: 0
 iteration: 1
-fixed_at: 2026-06-29T15:02:27Z
+fixed_at: 2026-06-29T17:00:36Z
 ---
 
 # Phase 198 Review Fix Report
@@ -22,6 +22,8 @@ fixed_at: 2026-06-29T15:02:27Z
   - Commit: `11237a9e fix(198): keep invoice step-up cue in confirmation`
 - WR-02: Coupon detail child promotion-code drilldown links now preserve the active organization scope through `ScopedPath.build/3`.
   - Commit: `07e84725 fix(198): preserve coupon promotion code scope`
+- WR-03: Organization-scoped event queries now include `Charge` subjects through `accrue_charges.customer_id`, with query/list/detail and EventLive route coverage for allowed and denied organization access.
+  - Commit: `3d805e50 fix(198): include charge events in owner scope`
 
 ## Verification
 
@@ -29,6 +31,7 @@ fixed_at: 2026-06-29T15:02:27Z
 - `cd accrue_admin && mix test test/accrue_admin/live/invoice_live_test.exs test/accrue_admin/live/charge_live_test.exs test/accrue_admin/live/event_live_test.exs --max-failures 10` passed: 34 tests, 0 failures.
 - `cd accrue_admin && mix test test/accrue_admin/live/analytics/recovery_live_test.exs test/accrue_admin/live/analytics/campaign_live_test.exs test/accrue_admin/components/at_risk_table_test.exs --max-failures 10` passed: 31 tests, 0 failures.
 - `cd accrue_admin && mix compile --warnings-as-errors && mix test test/accrue_admin/live/coupon_live_test.exs test/accrue_admin/live/promotion_code_live_test.exs --max-failures 10` passed: 16 tests, 0 failures.
+- `cd accrue_admin && mix compile --warnings-as-errors && mix test test/accrue_admin/queries/events_test.exs test/accrue_admin/live/event_live_test.exs --max-failures 10` passed: 14 tests, 0 failures.
 - `cd accrue_admin && npm run e2e:phase198` passed: 24 passed, 4 skipped.
 
 ## Residual Risk
