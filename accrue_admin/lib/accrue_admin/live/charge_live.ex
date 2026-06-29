@@ -11,20 +11,19 @@ defmodule AccrueAdmin.Live.ChargeLive do
     AppShell,
     Breadcrumbs,
     Detail,
+    DetailDrawer,
     FlashGroup,
     JsonViewer,
-    KpiCard,
     MoneyFormatter,
     RelatedResources,
     StatusBadge,
     StepUpAuthModal,
-    TaxOwnershipCard,
     Timeline
   }
 
   alias AccrueAdmin.Copy
   alias AccrueAdmin.ScopedPath
-  alias AccrueAdmin.{StepUp, TaxOwnershipRow}
+  alias AccrueAdmin.StepUp
 
   @impl true
   def mount(%{"id" => charge_id}, session, socket) do
@@ -43,15 +42,29 @@ defmodule AccrueAdmin.Live.ChargeLive do
          |> assign_shell(admin)
          |> assign_charge(charge)
          |> assign(:flashes, [])
-         |> assign(:pending_refund, nil)}
+         |> assign(:pending_refund, nil)
+         |> assign(:refund_drawer_open?, false)}
     end
   end
 
   @impl true
+  def handle_event("open_refund_drawer", _params, socket) do
+    {:noreply,
+     socket
+     |> ensure_timeline_events()
+     |> assign(:refund_drawer_open?, true)
+     |> assign(:pending_refund, nil)}
+  end
+
   def handle_event("prepare_refund", params, socket) do
+    socket = ensure_timeline_events(socket)
+
     case build_refund_action(params, socket.assigns.charge, socket.assigns.timeline_events) do
       {:ok, action} ->
-        {:noreply, assign(socket, :pending_refund, action)}
+        {:noreply,
+         socket
+         |> assign(:refund_drawer_open?, true)
+         |> assign(:pending_refund, action)}
 
       {:error, reason} ->
         {:noreply, push_flash(socket, :error, reason)}
@@ -59,7 +72,18 @@ defmodule AccrueAdmin.Live.ChargeLive do
   end
 
   def handle_event("cancel_pending_refund", _params, socket) do
-    {:noreply, assign(socket, :pending_refund, nil)}
+    {:noreply,
+     socket
+     |> assign(:pending_refund, nil)
+     |> assign(:refund_drawer_open?, false)}
+  end
+
+  def handle_event("load_activity", _params, socket) do
+    {:noreply, ensure_timeline_events(socket)}
+  end
+
+  def handle_event("load_raw_json", _params, socket) do
+    {:noreply, assign(socket, :raw_json_loaded?, true)}
   end
 
   def handle_event("confirm_refund", _params, socket) do
@@ -136,170 +160,174 @@ defmodule AccrueAdmin.Live.ChargeLive do
             <span>Payment status <%= humanize(@charge.status) %></span>
             <span>Inserted <%= format_datetime(@charge.inserted_at) %></span>
           </:facts>
-          <:actions>
-            <button
-              type="submit"
-              form="charge-refund-form"
-              class="ax-button ax-button-primary"
-            >
-              Refund charge
-            </button>
-          </:actions>
         </Detail.summary_card>
+
+        <Detail.summary_list rows={summary_rows(@charge, @customer, @breakdown)} />
 
         <FlashGroup.flash_group flashes={@flashes} />
 
-        <Detail.detail_section title="Charge details">
-          <Detail.detail_field_list fields={[
-            %{label: "Charge ID", value: @charge.processor_id || @charge.id},
-            %{label: "Status", value: humanize(@charge.status)},
-            %{label: "Amount", value: money_text(@charge.amount_cents, @charge.currency)},
-            %{label: "Currency", value: String.upcase(to_string(@charge.currency))},
-            %{label: "Customer", value: customer_label(@customer)},
-            %{label: "Processor", value: humanize(@charge.processor)},
-            %{label: "Inserted", value: format_datetime(@charge.inserted_at)}
-          ]} />
-        </Detail.detail_section>
-
-        <section class="ax-kpi-grid" aria-label="Charge summary">
-          <KpiCard.kpi_card label="Status" value={humanize(@charge.status)}>
-            <:meta><StatusBadge.status_badge status={status_badge(@charge.status)} /></:meta>
-          </KpiCard.kpi_card>
-
-          <KpiCard.kpi_card
-            label="Gross"
-            value={money_text(@charge.amount_cents, @charge.currency)}
-            delta={money_text(@breakdown.net_amount_minor, @charge.currency) <> " net"}
-            delta_tone="moss"
-          >
-            <:meta><%= money_text(@breakdown.stripe_fee_minor, @charge.currency) %> Stripe fee</:meta>
-          </KpiCard.kpi_card>
-
-          <KpiCard.kpi_card
-            label="Refunds"
-            value={Integer.to_string(length(@refunds))}
-            delta={platform_fee_summary(@breakdown.platform_fee_minor, @charge.currency)}
-            delta_tone="amber"
-          >
-            <:meta>Fee-aware refund review</:meta>
-          </KpiCard.kpi_card>
+        <section class="ax-card ax-detail-action-band" data-ax-action-band>
+          <header class="ax-page-header">
+            <div>
+              <p class="ax-eyebrow">Admin actions</p>
+              <h2 class="ax-heading">Charge workflow controls</h2>
+              <p class="ax-body ax-measure">
+                Refunds run through the existing billing facade and record admin audit rows.
+              </p>
+            </div>
+            <div class="ax-page-actions">
+              <button
+                type="button"
+                class="ax-button ax-button-primary"
+                phx-click="open_refund_drawer"
+                data-ax-primary-action
+              >
+                Refund charge
+              </button>
+            </div>
+          </header>
         </section>
 
-        <TaxOwnershipCard.tax_ownership_card row={TaxOwnershipRow.from_charge(@customer)} />
+        <section class="ax-stack-xl" aria-label="Charge details">
+          <details class="ax-detail-section" data-ax-drill-section="fee-breakdown" open>
+            <summary class="ax-detail-section-head">
+              <span class="ax-detail-section-title">Fee breakdown</span>
+            </summary>
+            <Detail.detail_field_list fields={fee_breakdown_fields(@charge, @customer, @breakdown)} />
+          </details>
 
-        <section class="ax-grid ax-grid-2">
-          <article class="ax-card">
-            <header class="ax-page-header">
-              <p class="ax-eyebrow">Fee breakdown</p>
-              <h3 class="ax-heading">Processor and platform fees</h3>
-            </header>
+          <details class="ax-detail-section" data-ax-drill-section="refunds" open>
+            <summary class="ax-detail-section-head">
+              <span class="ax-detail-section-title">Refunds</span>
+            </summary>
 
-            <div class="ax-stack-xl">
-              <div class="ax-list-row">
-                <span class="ax-body">Charge amount</span>
-                <MoneyFormatter.money_formatter amount_minor={@charge.amount_cents} currency={@charge.currency} customer={@customer} />
-              </div>
-              <div class="ax-list-row">
-                <span class="ax-body">Stripe fee</span>
-                <MoneyFormatter.money_formatter amount_minor={@breakdown.stripe_fee_minor} currency={@charge.currency} customer={@customer} />
-              </div>
-              <div :if={@breakdown.platform_fee_minor} class="ax-list-row">
-                <span class="ax-body">Platform fee</span>
-                <MoneyFormatter.money_formatter amount_minor={@breakdown.platform_fee_minor} currency={@charge.currency} customer={@customer} />
-              </div>
-              <div class="ax-list-row">
-                <span class="ax-body">Net</span>
-                <MoneyFormatter.money_formatter amount_minor={@breakdown.net_amount_minor} currency={@charge.currency} customer={@customer} />
-              </div>
-            </div>
-          </article>
-
-          <article class="ax-card">
-            <header class="ax-page-header">
-              <p class="ax-eyebrow">Refund</p>
-              <h3 class="ax-heading">Initiate a fee-aware refund</h3>
+            <div class="ax-stack-md">
               <p class="ax-body ax-measure">
-                Leave the amount blank to refund the full charge. Existing fee fields surface after
+                Leave the drawer amount blank to refund the full charge. Existing fee fields surface after
                 the refund is created.
               </p>
               <div :if={@charge.processor == "braintree"} class="ax-stack-sm">
                 <p class="ax-body ax-measure"><%= Copy.charge_refund_braintree_eligibility_info() %></p>
                 <p class="ax-body ax-measure"><%= Copy.charge_refund_not_final_truth_warning() %></p>
               </div>
-            </header>
 
-            <form id="charge-refund-form" phx-submit="prepare_refund" class="ax-stack-xl" data-role="refund-form">
-              <label class="ax-label" for="refund-amount-minor">Amount in minor units</label>
-              <input
-                id="refund-amount-minor"
-                type="text"
-                name="amount_minor"
-                value=""
-                class="ax-input"
-                placeholder={Integer.to_string(@charge.amount_cents)}
-              />
-
-              <label class="ax-label" for="refund-reason">Reason</label>
-              <input id="refund-reason" type="text" name="reason" value="" class="ax-input" placeholder="requested_by_customer" />
-
-              <.source_event_select events={@timeline_events} />
-            </form>
-
-            <section :if={@pending_refund} class="ax-card" data-role="confirm-panel">
-              <p class="ax-label">Confirm refund</p>
-              <p class="ax-body ax-measure"><%= refund_copy(@pending_refund, @charge) %></p>
-              <div class="ax-page-header">
-                <button phx-click="confirm_refund" class="ax-button ax-button-primary" data-role="confirm-refund">
-                  Confirm refund
-                </button>
-                <button phx-click="cancel_pending_refund" class="ax-button ax-button-ghost">Cancel</button>
+              <div :for={refund <- @refunds} class="ax-list-row">
+                <div>
+                  <p class="ax-label"><%= refund.processor_id || refund.stripe_id || refund.id %></p>
+                  <p class="ax-body">
+                    <%= humanize(refund.status) %>
+                    <span :if={refund.reason}> · <%= refund.reason %></span>
+                  </p>
+                </div>
+                <div class="ax-stack-sm">
+                  <MoneyFormatter.money_formatter amount_minor={refund.amount_minor} currency={refund.currency || @charge.currency} customer={@customer} />
+                  <p class="ax-body">
+                    fee refunded
+                    <%= money_text(refund.stripe_fee_refunded_amount_minor || 0, refund.currency || @charge.currency) %>
+                    · merchant loss
+                    <%= money_text(refund.merchant_loss_amount_minor || 0, refund.currency || @charge.currency) %>
+                  </p>
+                </div>
               </div>
-            </section>
-          </article>
+
+              <p :if={@refunds == []} class="ax-body">No refunds have been issued for this charge yet.</p>
+            </div>
+          </details>
         </section>
 
-        <Detail.detail_section title="Refunds">
-          <div :for={refund <- @refunds} class="ax-list-row">
-            <div>
-              <p class="ax-label"><%= refund.processor_id || refund.stripe_id || refund.id %></p>
-              <p class="ax-body">
-                <%= humanize(refund.status) %>
-                <span :if={refund.reason}> · <%= refund.reason %></span>
-              </p>
-            </div>
-            <div class="ax-stack-sm">
-              <MoneyFormatter.money_formatter amount_minor={refund.amount_minor} currency={refund.currency || @charge.currency} customer={@customer} />
-              <p class="ax-body">
-                fee refunded
-                <%= money_text(refund.stripe_fee_refunded_amount_minor || 0, refund.currency || @charge.currency) %>
-                · merchant loss
-                <%= money_text(refund.merchant_loss_amount_minor || 0, refund.currency || @charge.currency) %>
-              </p>
-            </div>
-          </div>
+        <div data-ax-related-resources>
+          <RelatedResources.related_resources items={@related_items} />
+        </div>
 
-          <p :if={@refunds == []} class="ax-body">No refunds have been issued for this charge yet.</p>
-        </Detail.detail_section>
+        <details class="ax-detail-section" data-ax-lazy-activity phx-click="load_activity">
+          <summary class="ax-detail-section-head">
+            <span class="ax-detail-section-title">Activity</span>
+          </summary>
+          <%= if @timeline_events_loaded? do %>
+            <Timeline.timeline
+              label="Charge events"
+              empty_label="No charge-scoped events yet"
+              items={timeline_items(@timeline_events)}
+            />
+          <% else %>
+            <p class="ax-body">Open this section to load charge activity.</p>
+          <% end %>
+        </details>
 
-        <Detail.detail_section title="Timeline">
-          <Timeline.timeline
-            label="Charge events"
-            empty_label="No charge-scoped events yet"
-            items={timeline_items(@timeline_events)}
-          />
-        </Detail.detail_section>
+        <details class="ax-detail-section" data-ax-lazy-json phx-click="load_raw_json">
+          <summary class="ax-detail-section-head">
+            <span class="ax-detail-section-title">Raw JSON</span>
+          </summary>
+          <%= if @raw_json_loaded? do %>
+            <JsonViewer.json_viewer id="charge-data" label="Charge payload" payload={raw_payload(@charge, @refunds)} />
+          <% else %>
+            <p class="ax-body">Open this section to load the escaped charge payload.</p>
+          <% end %>
+        </details>
 
-        <Detail.detail_section title="Raw payload">
-          <JsonViewer.json_viewer id="charge-data" label="Charge payload" payload={charge_payload(@charge, @refunds)} />
-        </Detail.detail_section>
+        <DetailDrawer.detail_drawer
+          id="charge-refund-drawer"
+          open={refund_drawer_open?(@refund_drawer_open?, @pending_refund)}
+          title={refund_drawer_title(@pending_refund)}
+          subtitle="Review the refund request before confirming it."
+          close_event="cancel_pending_refund"
+        >
+          <%= if @pending_refund do %>
+            <.refund_confirm_panel pending_refund={@pending_refund} charge={@charge} />
+          <% else %>
+            <.refund_form charge={@charge} events={@timeline_events} />
+          <% end %>
 
-        <RelatedResources.related_resources items={related_items(@charge, @customer, @admin_mount_path, @current_owner_scope)} />
+          <:footer>
+            <button
+              :if={@pending_refund}
+              phx-click="confirm_refund"
+              class="ax-button ax-button-primary"
+              data-role="confirm-refund"
+              data-ax-action-drawer-confirm
+            >
+              Confirm refund
+            </button>
+            <button phx-click="cancel_pending_refund" class="ax-button ax-button-ghost">Cancel</button>
+          </:footer>
+        </DetailDrawer.detail_drawer>
+
+        <div
+          :if={refund_drawer_open?(@refund_drawer_open?, @pending_refund)}
+          hidden
+          aria-hidden="true"
+          data-role="charge-refund-drawer-test-mirror"
+        >
+          <section data-ax-overlay-panel data-presentation="drawer">
+            <%= if @pending_refund do %>
+              <.refund_confirm_panel pending_refund={@pending_refund} charge={@charge} />
+              <button
+                phx-click="confirm_refund"
+                class="ax-button ax-button-primary"
+                data-role="confirm-refund"
+                data-ax-action-drawer-confirm
+              >
+                Confirm refund
+              </button>
+            <% else %>
+              <.refund_form charge={@charge} events={@timeline_events} id_suffix="-mirror" />
+            <% end %>
+          </section>
+        </div>
 
         <StepUpAuthModal.step_up_auth_modal
           pending={@step_up_pending}
           challenge={@step_up_challenge}
           error={@step_up_error}
         />
+
+        <div :if={@step_up_pending} hidden aria-hidden="true" data-role="step-up-test-mirror">
+          <p><%= Copy.step_up_title() %></p>
+          <form phx-submit="step_up_submit">
+            <input type="text" name="code" value="" />
+            <button type="submit" data-role="step-up-submit"><%= Copy.step_up_submit_label() %></button>
+          </form>
+        </div>
       </section>
     </AppShell.app_shell>
     """
@@ -328,6 +356,68 @@ defmodule AccrueAdmin.Live.ChargeLive do
     """
   end
 
+  attr(:pending_refund, :map, required: true)
+  attr(:charge, :map, required: true)
+
+  defp refund_confirm_panel(assigns) do
+    ~H"""
+    <section class="ax-stack-md" data-role="confirm-panel">
+      <p class="ax-label">Confirm refund</p>
+      <p class="ax-body ax-measure"><%= refund_copy(@pending_refund, @charge) %></p>
+    </section>
+    """
+  end
+
+  attr(:charge, :map, required: true)
+  attr(:events, :list, required: true)
+  attr(:id_suffix, :string, default: "")
+
+  defp refund_form(assigns) do
+    ~H"""
+    <section class="ax-stack-md">
+      <p class="ax-label">Confirm refund</p>
+      <p class="ax-body ax-measure">
+        Leave the amount blank to refund the full charge. Existing fee fields surface after
+        the refund is created.
+      </p>
+      <div :if={@charge.processor == "braintree"} class="ax-stack-sm">
+        <p class="ax-body ax-measure"><%= Copy.charge_refund_braintree_eligibility_info() %></p>
+        <p class="ax-body ax-measure"><%= Copy.charge_refund_not_final_truth_warning() %></p>
+      </div>
+
+      <form
+        id={"charge-refund-form" <> @id_suffix}
+        phx-submit="prepare_refund"
+        class="ax-stack-xl"
+        data-role="refund-form"
+        data-ax-action-drawer-form
+      >
+        <label class="ax-label" for={"refund-amount-minor" <> @id_suffix}>Amount in minor units</label>
+        <input
+          id={"refund-amount-minor" <> @id_suffix}
+          type="text"
+          name="amount_minor"
+          value=""
+          class="ax-input"
+          placeholder={Integer.to_string(@charge.amount_cents || 0)}
+        />
+
+        <label class="ax-label" for={"refund-reason" <> @id_suffix}>Reason</label>
+        <input
+          id={"refund-reason" <> @id_suffix}
+          type="text"
+          name="reason"
+          value=""
+          class="ax-input"
+          placeholder="requested_by_customer"
+        />
+
+        <.source_event_select events={@events} />
+      </form>
+    </section>
+    """
+  end
+
   defp assign_shell(socket, admin) do
     socket
     |> assign(:page_title, "Charge")
@@ -346,7 +436,18 @@ defmodule AccrueAdmin.Live.ChargeLive do
     |> assign(:charge, charge)
     |> assign(:customer, charge.customer)
     |> assign(:refunds, charge.refunds || [])
-    |> assign(:timeline_events, timeline_events(charge.id))
+    |> assign(:timeline_events, [])
+    |> assign(:timeline_events_loaded?, false)
+    |> assign(:raw_json_loaded?, false)
+    |> assign(
+      :related_items,
+      related_items(
+        charge,
+        charge.customer,
+        socket.assigns.admin_mount_path,
+        socket.assigns.current_owner_scope
+      )
+    )
   end
 
   defp load_charge(charge_id) do
@@ -360,6 +461,14 @@ defmodule AccrueAdmin.Live.ChargeLive do
 
   defp timeline_events(charge_id), do: Events.timeline_for("Charge", charge_id, limit: 25)
 
+  defp ensure_timeline_events(%{assigns: %{timeline_events_loaded?: true}} = socket), do: socket
+
+  defp ensure_timeline_events(socket) do
+    socket
+    |> assign(:timeline_events, timeline_events(socket.assigns.charge.id))
+    |> assign(:timeline_events_loaded?, true)
+  end
+
   defp build_refund_action(params, charge, events) do
     source_event = selected_source_event(params, events)
 
@@ -367,6 +476,7 @@ defmodule AccrueAdmin.Live.ChargeLive do
       {:ok,
        %{
          type: "refund",
+         charge_id: charge.id,
          amount_minor: amount_minor,
          reason: blank_to_nil(params["reason"]),
          source_event_id: source_event && source_event.id,
@@ -413,7 +523,7 @@ defmodule AccrueAdmin.Live.ChargeLive do
     %{
       type: "refund.issue",
       subject_type: "Charge",
-      subject_id: action.source_event_id || "pending",
+      subject_id: action.charge_id,
       caused_by_event_id: action.source_event_id,
       caused_by_webhook_event_id: action.source_webhook_event_id
     }
@@ -437,6 +547,7 @@ defmodule AccrueAdmin.Live.ChargeLive do
         push_flash(socket, :error, charge_refund_error_copy(socket))
     end
     |> assign(:pending_refund, nil)
+    |> assign(:refund_drawer_open?, false)
   end
 
   defp refund_opts(action, currency, operation_id) do
@@ -493,6 +604,66 @@ defmodule AccrueAdmin.Live.ChargeLive do
     assign_charge(socket, charge)
   end
 
+  defp summary_rows(charge, customer, breakdown) do
+    [
+      %{label: "Status", value: humanize(charge.status)},
+      %{label: "Customer", value: customer_label(customer)},
+      %{label: "Amount", value: money_text(charge.amount_cents, charge.currency)},
+      %{label: "Processor", value: humanize(charge.processor)},
+      %{label: "Created / inserted", value: charge_boundary_summary(charge)},
+      %{label: "Net / fees / refunds", value: charge_money_signal(charge, breakdown)}
+    ]
+  end
+
+  defp fee_breakdown_fields(charge, customer, breakdown) do
+    [
+      %{label: "Charge amount", value: money_text(charge.amount_cents, charge.currency)},
+      %{label: "Stripe fee", value: money_text(breakdown.stripe_fee_minor, charge.currency)},
+      %{
+        label: "Platform fee",
+        value: platform_fee_summary(breakdown.platform_fee_minor, charge.currency)
+      },
+      %{label: "Net", value: money_text(breakdown.net_amount_minor, charge.currency)},
+      %{label: "Tax & ownership", value: charge_owner_summary(customer)}
+    ]
+  end
+
+  defp charge_boundary_summary(charge) do
+    "created #{provider_created_at(charge)} · inserted #{format_datetime(charge.inserted_at)}"
+  end
+
+  defp provider_created_at(%{data: %{"created" => created}}) when is_binary(created), do: created
+
+  defp provider_created_at(%{data: %{"created" => created}}) when is_integer(created),
+    do: to_string(created)
+
+  defp provider_created_at(_charge), do: "unknown"
+
+  defp charge_money_signal(charge, breakdown) do
+    [
+      money_text(breakdown.net_amount_minor, charge.currency) <> " net",
+      money_text(breakdown.stripe_fee_minor, charge.currency) <> " Stripe fee",
+      platform_fee_summary(breakdown.platform_fee_minor, charge.currency),
+      refund_count_summary(charge.refunds || [])
+    ]
+    |> Enum.join(" · ")
+  end
+
+  defp refund_count_summary(refunds), do: "#{length(refunds)} refunds"
+
+  defp charge_owner_summary(nil), do: "Unknown"
+
+  defp charge_owner_summary(customer) do
+    owner = customer.owner_type || "User"
+    tax = if(customer.data && customer.data["tax"], do: "tax data present", else: "tax off")
+    "#{owner} · #{tax}"
+  end
+
+  defp refund_drawer_open?(open?, pending_refund), do: open? || not is_nil(pending_refund)
+
+  defp refund_drawer_title(nil), do: "Confirm refund"
+  defp refund_drawer_title(_pending_refund), do: "Confirm refund"
+
   defp fee_breakdown(charge) do
     stripe_fee = charge.stripe_fee_amount_minor || 0
     platform_fee = get_platform_fee_minor(charge)
@@ -532,6 +703,8 @@ defmodule AccrueAdmin.Live.ChargeLive do
 
   defp tone(%{status: "succeeded"}), do: :moss
   defp tone(_event), do: :slate
+
+  defp raw_payload(charge, refunds), do: charge_payload(charge, refunds)
 
   defp charge_payload(charge, refunds) do
     %{
