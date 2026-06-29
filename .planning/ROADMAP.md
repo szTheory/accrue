@@ -229,7 +229,7 @@ Plans:
 
 **Wave 5**
 
-- [ ] 198-09-PLAN.md — Final Phase 198 focused browser, LiveView, compile, and package-doc gates
+- [x] 198-09-PLAN.md — Final Phase 198 focused browser, LiveView, compile, and package-doc gates
 
 **UI hint**: yes
 
@@ -381,7 +381,7 @@ Full details: [v1.48 roadmap archive](milestones/v1.48-ROADMAP.md)
 | 195. Exemplar B — Subscription detail | v1.54 | 8/8 | Complete    | 2026-06-26 |
 | 196. Exemplar C — Subscriptions list + PageHeader | v1.54 | 5/5 | Complete    | 2026-06-26 |
 | 197. Propagate LIST | v1.54 | 7/7 | Complete    | 2026-06-28 |
-| 198. Propagate DETAIL + analytics | v1.54 | 8/9 | In Progress|  |
+| 198. Propagate DETAIL + analytics | v1.54 | 9/9 | Complete   | 2026-06-29 |
 | 199. Cross-cutting interaction/overlay correctness + fixture stress + microcopy | v1.54 | 0/? | Not started | - |
 | 200. Idempotent verification & sign-off | v1.54 | 0/? | Not started | - |
 

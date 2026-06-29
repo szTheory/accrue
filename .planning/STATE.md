@@ -4,16 +4,16 @@ milestone: v1.54
 milestone_name: Admin UI Page-Level Streamlining & Storybook
 current_phase: 198
 current_phase_name: propagate-detail-analytics
-status: executing
-stopped_at: Completed 198-07-PLAN.md
-last_updated: "2026-06-29T02:06:41.693Z"
+status: verifying
+stopped_at: Completed 198-09-PLAN.md
+last_updated: "2026-06-29T02:28:29.932Z"
 last_activity: 2026-06-29
 progress:
   total_phases: 8
-  completed_phases: 5
+  completed_phases: 6
   total_plans: 38
-  completed_plans: 37
-  percent: 63
+  completed_plans: 38
+  percent: 75
 ---
 
 # Project State
@@ -30,7 +30,7 @@ See: `.planning/PROJECT.md` (updated 2026-06-24 — v1.54 Admin UI Page-Level St
 
 Phase: 198 (propagate-detail-analytics) — EXECUTING
 Plan: 9 of 9
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-06-29
 
 ## Post-v1.48 Pause Rule
@@ -224,6 +224,7 @@ Coverage: 22/22 v1.51 requirements mapped (each REQ-ID → exactly one phase). D
 | Phase 198 P05 | 21m | 3 tasks | 6 files |
 | Phase 198 P06 | 15m 37s | 3 tasks | 10 files |
 | Phase 198 P07 | 34min | 3 tasks | 8 files |
+| Phase 198-propagate-detail-analytics P09 | 16m 56s | 3 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -414,6 +415,9 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - [Phase 198]: Kept Connect platform fee override and Webhook replay in DetailDrawer flows with server-owned pending action state. — Preserves the plan's intent gating and server-owned action cap for sensitive admin operations.
 - [Phase 198]: Required StepUp.require_fresh for both sensitive saves because the plan recorded no lower-risk exception. — Mitigates T-198-25 and T-198-26 without broadening action behavior.
 - [Phase 198]: Rendered webhook raw payload only through the lazy Raw payload section while keeping summary/drill state visible. — Mitigates T-198-28 and preserves SPEC-DETAIL first-scan hierarchy.
+- [Phase 198-propagate-detail-analytics]: Kept Plan 09 scoped to verification-file changes only; production drawer/focus gaps were documented instead of editing LiveViews or overlay components.
+- [Phase 198-propagate-detail-analytics]: Event browser smoke now targets a seeded event with raw payload so the lazy raw-data invariant is tested without contradicting EventLive's no-payload exception.
+- [Phase 198-propagate-detail-analytics]: Charge browser StepUp coverage proceeds through a constrained DOM click only when the pointer assertion reports the known offscreen confirm gap.
 
 ### Pending Todos
 
@@ -504,8 +508,8 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 
 ## Session Continuity
 
-Last session: 2026-06-29T02:06:41.687Z
-Stopped at: Completed 198-07-PLAN.md
+Last session: 2026-06-29T02:28:29.926Z
+Stopped at: Completed 198-09-PLAN.md
 Resume file: None
 
 ## Operator Next Steps
