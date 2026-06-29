@@ -141,6 +141,38 @@ defmodule AccrueAdmin.Copy.Connect do
 
   def connect_account_eyebrow, do: "Connect account detail"
 
+  def connect_account_actions_eyebrow, do: "Actions"
+
+  def connect_account_actions_heading, do: "Platform fee override"
+
+  def connect_account_actions_body,
+    do:
+      "Keep the default platform fee policy unless this connected account needs a local override."
+
+  def connect_account_action_edit_platform_fee_override, do: "Edit platform fee override"
+
+  def connect_account_summary_label_readiness, do: "Account readiness"
+
+  def connect_account_summary_label_owner, do: "Owner"
+
+  def connect_account_summary_label_country, do: "Country"
+
+  def connect_account_summary_label_charges_enabled, do: "Charges enabled"
+
+  def connect_account_summary_label_payouts_enabled, do: "Payouts enabled"
+
+  def connect_account_summary_label_onboarding, do: "Onboarding / details submitted"
+
+  def connect_account_summary_label_override, do: "Platform fee override"
+
+  def connect_account_summary_label_activity, do: "Activity"
+
+  def connect_account_activity_summary, do: "Admin and webhook-sourced account events"
+
+  def connect_account_readiness_ready, do: "Ready"
+
+  def connect_account_readiness_needs_attention, do: "Needs attention"
+
   def connect_account_kpi_section_aria_label, do: "Connect account summary"
 
   def connect_account_kpi_label_charges, do: "Charges"
@@ -161,11 +193,15 @@ defmodule AccrueAdmin.Copy.Connect do
 
   def connect_account_section_capabilities_eyebrow, do: "Capabilities"
 
-  def connect_account_section_capabilities_heading, do: "Operator-safe account readiness"
+  def connect_account_drills_aria_label, do: "Connect account details"
+
+  def connect_account_section_capabilities_heading, do: "Capabilities / requirements"
 
   def connect_account_detail_label_owner, do: "Owner:"
 
   def connect_account_detail_label_email, do: "Email:"
+
+  def connect_account_detail_label_type, do: "Account type:"
 
   def connect_account_detail_label_capabilities, do: "Capabilities:"
 
@@ -173,9 +209,11 @@ defmodule AccrueAdmin.Copy.Connect do
 
   def connect_account_section_effective_fee_eyebrow, do: "Effective fee preview"
 
-  def connect_account_section_effective_fee_heading, do: "Current default plus account override"
+  def connect_account_section_effective_fee_heading, do: "Platform fee policy"
 
   def connect_account_detail_label_stored_override, do: "Stored override:"
+
+  def connect_account_detail_label_default_policy, do: "Default policy:"
 
   def connect_account_detail_label_preview_gross, do: "Preview gross:"
 
@@ -188,6 +226,27 @@ defmodule AccrueAdmin.Copy.Connect do
   def connect_account_section_platform_fee_body,
     do:
       "Empty fields fall back to the global `Accrue.Config` default. Validation and preview both use `Accrue.Connect.platform_fee/2` before anything is persisted."
+
+  def connect_account_drawer_title(_account_label), do: "Save a per-account fee policy"
+
+  def connect_account_drawer_subtitle,
+    do: "Preview the effective fee and verify identity before saving the account override."
+
+  def connect_account_activity_heading, do: "Activity"
+
+  def connect_account_timeline_label, do: "Connect account activity"
+
+  def connect_account_timeline_empty, do: "No connect account activity yet"
+
+  def connect_account_lazy_activity_prompt,
+    do: "Open this section to load account activity."
+
+  def connect_account_raw_data_heading, do: "Raw data"
+
+  def connect_account_json_payload_label, do: "Connect account raw data"
+
+  def connect_account_lazy_json_prompt,
+    do: "Open this section to load the escaped account payload."
 
   def connect_account_label_percent, do: "Percent"
 
@@ -204,6 +263,10 @@ defmodule AccrueAdmin.Copy.Connect do
   def connect_account_save_platform_fee_override, do: "Save platform fee override"
 
   def connect_account_flash_override_saved, do: "Platform fee override saved."
+
+  def connect_account_step_up_unavailable,
+    do:
+      "Platform fee override could not start step-up verification. Confirm admin auth configuration before retrying."
 
   def connect_account_override_state_no_override_saved, do: "No override saved"
 

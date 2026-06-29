@@ -400,6 +400,21 @@ defmodule AccrueAdmin.Copy do
   defdelegate connect_account_page_title(), to: Connect
   defdelegate connect_account_breadcrumb_connect(), to: Connect
   defdelegate connect_account_eyebrow(), to: Connect
+  defdelegate connect_account_actions_eyebrow(), to: Connect
+  defdelegate connect_account_actions_heading(), to: Connect
+  defdelegate connect_account_actions_body(), to: Connect
+  defdelegate connect_account_action_edit_platform_fee_override(), to: Connect
+  defdelegate connect_account_summary_label_readiness(), to: Connect
+  defdelegate connect_account_summary_label_owner(), to: Connect
+  defdelegate connect_account_summary_label_country(), to: Connect
+  defdelegate connect_account_summary_label_charges_enabled(), to: Connect
+  defdelegate connect_account_summary_label_payouts_enabled(), to: Connect
+  defdelegate connect_account_summary_label_onboarding(), to: Connect
+  defdelegate connect_account_summary_label_override(), to: Connect
+  defdelegate connect_account_summary_label_activity(), to: Connect
+  defdelegate connect_account_activity_summary(), to: Connect
+  defdelegate connect_account_readiness_ready(), to: Connect
+  defdelegate connect_account_readiness_needs_attention(), to: Connect
   defdelegate connect_account_kpi_section_aria_label(), to: Connect
   defdelegate connect_account_kpi_label_charges(), to: Connect
   defdelegate connect_account_kpi_meta_payouts_prefix(), to: Connect
@@ -410,19 +425,31 @@ defmodule AccrueAdmin.Copy do
   defdelegate connect_account_override_state_default_only(), to: Connect
   defdelegate connect_account_kpi_meta_default_policy_prefix(), to: Connect
   defdelegate connect_account_section_capabilities_eyebrow(), to: Connect
+  defdelegate connect_account_drills_aria_label(), to: Connect
   defdelegate connect_account_section_capabilities_heading(), to: Connect
   defdelegate connect_account_detail_label_owner(), to: Connect
   defdelegate connect_account_detail_label_email(), to: Connect
+  defdelegate connect_account_detail_label_type(), to: Connect
   defdelegate connect_account_detail_label_capabilities(), to: Connect
   defdelegate connect_account_detail_label_requirements(), to: Connect
   defdelegate connect_account_section_effective_fee_eyebrow(), to: Connect
   defdelegate connect_account_section_effective_fee_heading(), to: Connect
   defdelegate connect_account_detail_label_stored_override(), to: Connect
+  defdelegate connect_account_detail_label_default_policy(), to: Connect
   defdelegate connect_account_detail_label_preview_gross(), to: Connect
   defdelegate connect_account_detail_label_computed_fee(), to: Connect
   defdelegate connect_account_section_platform_fee_eyebrow(), to: Connect
   defdelegate connect_account_section_platform_fee_heading(), to: Connect
   defdelegate connect_account_section_platform_fee_body(), to: Connect
+  defdelegate connect_account_drawer_title(account_label), to: Connect
+  defdelegate connect_account_drawer_subtitle(), to: Connect
+  defdelegate connect_account_activity_heading(), to: Connect
+  defdelegate connect_account_timeline_label(), to: Connect
+  defdelegate connect_account_timeline_empty(), to: Connect
+  defdelegate connect_account_lazy_activity_prompt(), to: Connect
+  defdelegate connect_account_raw_data_heading(), to: Connect
+  defdelegate connect_account_json_payload_label(), to: Connect
+  defdelegate connect_account_lazy_json_prompt(), to: Connect
   defdelegate connect_account_label_percent(), to: Connect
   defdelegate connect_account_label_fixed_minor_units(), to: Connect
   defdelegate connect_account_label_min_minor_units(), to: Connect
@@ -431,6 +458,7 @@ defmodule AccrueAdmin.Copy do
   defdelegate connect_account_label_preview_currency(), to: Connect
   defdelegate connect_account_save_platform_fee_override(), to: Connect
   defdelegate connect_account_flash_override_saved(), to: Connect
+  defdelegate connect_account_step_up_unavailable(), to: Connect
   defdelegate connect_account_override_state_no_override_saved(), to: Connect
   defdelegate connect_account_preview_fee_unable(), to: Connect
   defdelegate connect_account_preview_gross_invalid(), to: Connect
