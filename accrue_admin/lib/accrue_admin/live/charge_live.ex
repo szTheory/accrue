@@ -813,25 +813,12 @@ defmodule AccrueAdmin.Live.ChargeLive do
   defp refund_copy(action, charge) do
     amount = money_text(action.amount_minor, charge.currency)
 
-    source =
-      if action.source_event_id do
-        " Source event ##{action.source_event_id} will be linked."
-      else
-        ""
-      end
-
-    base =
-      Copy.charge_refund_confirm_message(
-        charge_id: charge.id,
-        amount: amount,
-        audit_subject: "a refund ledger row"
-      )
-
-    if source == "" do
-      base
-    else
-      String.replace_suffix(base, " Continue?", ".#{source} Continue?")
-    end
+    Copy.charge_refund_confirm_message(
+      charge_id: charge.id,
+      amount: amount,
+      audit_subject: "a refund ledger row",
+      source_event_id: action.source_event_id
+    )
   end
 
   defp charge_refund_error_copy(socket) do

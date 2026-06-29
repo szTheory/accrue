@@ -191,7 +191,7 @@ defmodule AccrueAdmin.Copy.Invoice do
         audit_consequence,
         source_suffix
       ) do
-    "#{action_label}: This will #{billing_effect} for #{invoice_label} and #{audit_consequence}.#{source_suffix} Continue?"
+    "#{action_label}: This will #{billing_effect} for #{invoice_label} and #{audit_consequence}.#{source_suffix} Confirm invoice action."
   end
 
   def invoice_confirm_source_event_suffix(source_event_id),

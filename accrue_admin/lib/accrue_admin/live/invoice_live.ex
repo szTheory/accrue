@@ -677,6 +677,13 @@ defmodule AccrueAdmin.Live.InvoiceLive do
       assigns
       |> assign(:data_role, action_data_role(assigns.action_type))
       |> assign(:requires_step_up?, assigns.action_type in @destructive_actions)
+      |> assign(
+        :submit_hidden_context,
+        Copy.action_hidden_object_context(
+          resource: "invoice action",
+          object: "invoice #{assigns.invoice.id}"
+        )
+      )
 
     ~H"""
     <form
@@ -691,7 +698,7 @@ defmodule AccrueAdmin.Live.InvoiceLive do
 
       <button type="submit" class="ax-button ax-button-primary">
         <%= invoice_action_label(@action_type) %>
-        <span class="ax-visually-hidden"> Continue</span>
+        <span class="ax-visually-hidden"><%= @submit_hidden_context %></span>
       </button>
     </form>
     """

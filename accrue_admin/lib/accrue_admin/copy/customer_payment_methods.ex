@@ -58,7 +58,7 @@ defmodule AccrueAdmin.Copy.CustomerPaymentMethods do
   def cancel_action, do: "Cancel"
 
   @doc false
-  def delete_blocked_in_use, do: "This payment method still funds an active subscription."
+  def delete_blocked_in_use, do: "This payment method still backs an active subscription."
 
   @doc false
   def delete_blocked_replacement_required,

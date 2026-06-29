@@ -38,6 +38,113 @@ defmodule AccrueAdmin.Copy do
 
   defp normalize_search_query(query), do: query |> to_string() |> String.trim()
 
+  @phase199_resource_states %{
+    customers: %{
+      singular: "customer",
+      plural: "customers",
+      first_run: "checkout or imported billing activity creates customer records",
+      queue: "No customers need billing follow-up.",
+      queue_next: "Open the customers list to inspect the full customer ledger."
+    },
+    invoices: %{
+      singular: "invoice",
+      plural: "invoices",
+      first_run: "subscriptions activate or renew",
+      queue: "No invoices need collection.",
+      queue_next: "Open all invoices to review the ledger."
+    },
+    subscriptions: %{
+      singular: "subscription",
+      plural: "subscriptions",
+      first_run: "a customer completes checkout",
+      queue: "No subscriptions are past due or canceling.",
+      queue_next: "Open all subscriptions to review lifecycle state."
+    },
+    payments: %{
+      singular: "payment",
+      plural: "payments",
+      first_run: "charges are recorded",
+      queue: "No payments need recovery.",
+      queue_next: "Open all payments to inspect settled and pending charges."
+    },
+    connect_accounts: %{
+      singular: "connected account",
+      plural: "connected accounts",
+      first_run: "Connect onboarding starts",
+      queue: "No connected accounts need attention.",
+      queue_next: "Open all connected accounts to inspect readiness."
+    },
+    webhooks: %{
+      singular: "webhook delivery",
+      plural: "webhook deliveries",
+      first_run: "signed processor events are recorded",
+      queue: "No webhook deliveries need replay.",
+      queue_next: "Open all webhook deliveries to inspect the delivery log."
+    },
+    events: %{
+      singular: "event",
+      plural: "billing events",
+      first_run: "billing state changes are recorded",
+      queue: "No billing events need admin review.",
+      queue_next: "Open all billing events to inspect the append-only ledger."
+    },
+    coupons: %{
+      singular: "coupon",
+      plural: "coupons",
+      first_run: "coupon definitions are projected locally",
+      queue: "No coupons need review.",
+      queue_next: "Open all coupons to inspect discount definitions."
+    },
+    promotion_codes: %{
+      singular: "promotion code",
+      plural: "promotion codes",
+      first_run: "promotion code projections arrive from billing activity",
+      queue: "No promotion codes need review.",
+      queue_next: "Open all promotion codes to inspect customer-facing codes."
+    },
+    dunning: %{
+      singular: "dunning campaign",
+      plural: "dunning campaigns",
+      first_run: "a subscription enters the configured past-due campaign",
+      queue: "No dunning campaigns need operator action.",
+      queue_next: "Open recovery analytics to inspect at-risk subscriptions."
+    }
+  }
+
+  @phase199_required_states [
+    :first_run_empty,
+    :queue_empty,
+    :filtered_empty,
+    :loading,
+    :error,
+    :permission_denied
+  ]
+
+  @spec resource_state_copy(atom(), atom(), keyword()) :: %{heading: String.t(), body: String.t()}
+  def resource_state_copy(resource, state, opts \\ [])
+
+  def resource_state_copy(resource, state, opts) when state in @phase199_required_states do
+    resource
+    |> resource_state_meta()
+    |> build_resource_state_copy(state, opts)
+  end
+
+  @spec action_hidden_context(String.t(), keyword()) :: String.t()
+  def action_hidden_context(action_label, opts) do
+    resource = option(opts, :resource, "billing record")
+    object = option(opts, :object, "this record")
+
+    "#{String.trim(to_string(action_label))} #{resource} for #{object}"
+  end
+
+  @spec action_hidden_object_context(keyword()) :: String.t()
+  def action_hidden_object_context(opts) do
+    resource = option(opts, :resource, "billing action")
+    object = option(opts, :object, "this record")
+
+    " for #{resource} on #{object}"
+  end
+
   defdelegate subscription_breadcrumb_subscriptions(), to: Subscription
   defdelegate subscription_detail_eyebrow(), to: Subscription
   defdelegate subscription_kpi_section_aria_label(), to: Subscription
@@ -647,9 +754,10 @@ defmodule AccrueAdmin.Copy do
     do:
       "Billing records appear here when they match this view. If you expected rows, check filters or organization scope."
 
-  def data_table_filtered_empty_title, do: "No results match these filters"
+  def data_table_filtered_empty_title, do: "No billing records match these filters"
 
-  def data_table_filtered_empty_copy, do: "Clear or adjust the filters above to see results."
+  def data_table_filtered_empty_copy,
+    do: "Clear or adjust the filters above to inspect matching billing records."
 
   # Filtered-to-zero affordance (Phase 171): keep the screen's tailored empty copy,
   # but offer a way back when a filter is what emptied the list.
@@ -828,7 +936,12 @@ defmodule AccrueAdmin.Copy do
     amount = option(opts, :amount, "the selected amount")
     audit_subject = option(opts, :audit_subject, "a refund ledger row")
 
-    "Refund charge #{charge_id}: This will create a #{amount} refund, record #{audit_subject}, and record an admin audit row. Continue?"
+    source =
+      opts
+      |> Keyword.get(:source_event_id)
+      |> charge_refund_source_suffix()
+
+    "Refund charge #{charge_id}: This will create a #{amount} refund, record #{audit_subject}, and record an admin audit row.#{source} Confirm refund."
   end
 
   def charge_refund_created_info,
@@ -1153,6 +1266,68 @@ defmodule AccrueAdmin.Copy do
   def home_activity_events_link, do: "Open event log"
 
   def home_activity_webhooks_link, do: "Open webhooks"
+
+  defp resource_state_meta(resource) do
+    Map.fetch!(
+      @phase199_resource_states,
+      resource |> to_string() |> String.to_existing_atom()
+    )
+  end
+
+  defp build_resource_state_copy(meta, :first_run_empty, _opts) do
+    %{
+      heading: "No #{meta.plural} yet",
+      body: "#{sentence_case(meta.plural)} appear after #{meta.first_run}."
+    }
+  end
+
+  defp build_resource_state_copy(meta, :queue_empty, _opts) do
+    %{
+      heading: meta.queue,
+      body: meta.queue_next
+    }
+  end
+
+  defp build_resource_state_copy(meta, :filtered_empty, _opts) do
+    %{
+      heading: "No #{meta.plural} match these filters",
+      body: "Clear filters or adjust the search to inspect matching #{meta.plural}."
+    }
+  end
+
+  defp build_resource_state_copy(meta, :loading, _opts) do
+    %{
+      heading: "Loading #{meta.plural}",
+      body: "Loading #{meta.plural} from the local billing projection."
+    }
+  end
+
+  defp build_resource_state_copy(meta, :error, opts) do
+    owner_scope = option(opts, :owner_scope, "the active organization")
+
+    %{
+      heading: "#{sentence_case(meta.plural)} could not load",
+      body:
+        "Open the #{meta.singular} view and reload #{meta.plural} for #{owner_scope}; if it persists, inspect logs."
+    }
+  end
+
+  defp build_resource_state_copy(meta, :permission_denied, opts) do
+    object = option(opts, :object, "this #{meta.singular}")
+    owner_scope = option(opts, :owner_scope, "the active organization")
+
+    %{
+      heading: "#{sentence_case(meta.plural)} restricted",
+      body:
+        "This admin account cannot view #{object}. Switch #{owner_scope} or ask an administrator for billing admin access."
+    }
+  end
+
+  defp charge_refund_source_suffix(nil), do: ""
+  defp charge_refund_source_suffix(""), do: ""
+
+  defp charge_refund_source_suffix(source_event_id),
+    do: " Source event ##{source_event_id} will be linked."
 
   defp option(opts, key, default) do
     opts

@@ -34,7 +34,7 @@ defmodule AccrueAdmin.Copy.Locked do
   def single_replay_confirmation(webhook_id, opts) do
     owner_scope = opts |> Keyword.get(:owner_scope, "the active organization") |> to_string()
 
-    "Replay webhook #{webhook_id} for #{owner_scope}: This will requeue the webhook delivery and record an admin audit event. Continue?"
+    "Replay webhook #{webhook_id} for #{owner_scope}: This will requeue the webhook delivery and record an admin audit event. Confirm replay."
   end
 
   defp humanize_status(status) when is_atom(status),

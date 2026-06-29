@@ -68,7 +68,7 @@ defmodule AccrueAdmin.Copy.Subscription do
     source_event_id = Keyword.get(opts, :source_event_id)
     source = source_suffix(source_event_id)
 
-    "#{subscription_action_label(action_type)} #{subscription_id}: This will #{subscription_billing_effect(action_type)} for customer #{customer_id} and record an admin audit row.#{source} Continue?"
+    "#{subscription_action_label(action_type)} #{subscription_id}: This will #{subscription_billing_effect(action_type)} for customer #{customer_id} and record an admin audit row.#{source} Confirm subscription change."
   end
 
   def subscription_lifecycle_ended_label, do: "ended"

@@ -508,7 +508,16 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
   end
 
   defp action_form(assigns) do
-    assigns = assign(assigns, :data_role, action_data_role(assigns.action_type))
+    assigns =
+      assigns
+      |> assign(:data_role, action_data_role(assigns.action_type))
+      |> assign(
+        :submit_hidden_context,
+        Copy.action_hidden_object_context(
+          resource: "subscription action",
+          object: "subscription #{assigns.subscription.id}"
+        )
+      )
 
     ~H"""
     <form
@@ -576,7 +585,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
 
       <button type="submit" class="ax-button ax-button-primary">
         <%= action_label(@action_type) %>
-        <span class="ax-visually-hidden"> Continue</span>
+        <span class="ax-visually-hidden"><%= @submit_hidden_context %></span>
       </button>
     </form>
     """

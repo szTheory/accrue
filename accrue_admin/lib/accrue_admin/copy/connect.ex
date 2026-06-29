@@ -97,7 +97,7 @@ defmodule AccrueAdmin.Copy.Connect do
 
   def connect_accounts_filter_label_onboarding, do: "Onboarding"
 
-  def connect_accounts_filter_option_onboarding_submitted, do: "Submitted"
+  def connect_accounts_filter_option_onboarding_submitted, do: "Details received"
 
   def connect_accounts_filter_option_onboarding_pending, do: "Pending"
 
