@@ -65,6 +65,7 @@ defmodule AccrueAdmin.CouponLiveTest do
     assert data_attr_count(html, "data-ax-related-resources") == 1
     assert data_attr_count(html, "data-ax-lazy-activity") == 1
     assert data_attr_count(html, "data-ax-lazy-json") == 1
+    assert data_attr_count(html, "data-ax-action-band") == 0
     assert data_attr_count(html, "data-ax-action-overflow-menu") == 0
 
     assert html =~ "Annual discount"
@@ -157,6 +158,38 @@ defmodule AccrueAdmin.CouponLiveTest do
     assert html =~ Copy.coupon_detail_section_codes_heading()
     # The promotion code link must still be present (content preserved)
     assert html =~ "ANNUAL15"
+  end
+
+  test "lazy activity expands to quiet empty state when no coupon activity exists", %{
+    conn: conn,
+    coupon: coupon
+  } do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+
+    assert {:ok, view, html} = live(conn, "/billing/coupons/#{coupon.id}")
+    assert html =~ "Open this section to load activity."
+    refute html =~ "This record has no recorded activity yet. Core details remain available above."
+
+    html = render_click(view, "load_activity", %{})
+
+    assert html =~ "No activity yet"
+    assert html =~ "This record has no recorded activity yet. Core details remain available above."
+  end
+
+  test "raw coupon payload renders only after the lazy raw data event", %{
+    conn: conn,
+    coupon: coupon
+  } do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+
+    assert {:ok, view, html} = live(conn, "/billing/coupons/#{coupon.id}")
+    refute html =~ "remote"
+
+    html = render_click(view, "load_raw_json", %{})
+
+    assert html =~ Copy.coupon_json_payload_label()
+    assert html =~ "remote"
+    assert html =~ "coupon_annual"
   end
 
   test "redirects with flash when coupon id is not found", %{conn: conn} do
