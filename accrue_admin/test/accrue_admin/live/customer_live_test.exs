@@ -243,6 +243,44 @@ defmodule AccrueAdmin.CustomerLiveTest do
              ~r/<form\b[^>]*(set_default_payment_method|delete_payment_method|payment-method)/
   end
 
+  test "D-09 opens payment-method action drawer only after operator intent", %{
+    conn: conn,
+    customer: customer,
+    deletable_payment_method: deletable_payment_method
+  } do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    assert {:ok, view, _html} = live(conn, "/billing/customers/#{customer.id}")
+
+    refute has_element?(view, "[data-role='payment-method-action-drawer-test-mirror']")
+
+    html =
+      render_click(view, "open_payment_method_action", %{
+        "action_type" => "delete",
+        "payment_method_id" => deletable_payment_method.id
+      })
+
+    assert html =~ Copy.customer_payment_methods_delete_action()
+    assert has_element?(view, "[data-role='payment-method-action-drawer-test-mirror']")
+    assert has_element?(view, "[data-role='confirm-payment-method-action']")
+  end
+
+  test "D-11 rejects stale payment-method action ids before mutation", %{
+    conn: conn,
+    customer: customer
+  } do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    assert {:ok, view, _html} = live(conn, "/billing/customers/#{customer.id}")
+
+    html =
+      render_click(view, "open_payment_method_action", %{
+        "action_type" => "delete",
+        "payment_method_id" => Ecto.UUID.generate()
+      })
+
+    assert html =~ "Payment method not found."
+    refute has_element?(view, "[data-role='payment-method-action-drawer-test-mirror']")
+  end
+
   # --- end Phase 198 Customer-360 contract tests ---
 
   test "renders customer detail summary copy and peer collection rows", %{
