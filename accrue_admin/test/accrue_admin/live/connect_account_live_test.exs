@@ -80,6 +80,21 @@ defmodule AccrueAdmin.ConnectAccountLiveTest do
     assert data_attr_count(html, "data-ax-lazy-activity") == 1
     assert data_attr_count(html, "data-ax-lazy-json") == 1
 
+    for label <- [
+          "Account readiness",
+          "Owner",
+          "Country",
+          "Charges enabled",
+          "Payouts enabled",
+          "Onboarding / details submitted",
+          "Platform fee override"
+        ] do
+      assert html =~ label
+    end
+
+    assert html =~ "Capabilities / requirements"
+    assert html =~ "Platform fee policy"
+
     assert has_element?(view, "[data-ax-primary-action]", "Edit platform fee override")
     refute has_element?(view, "form[phx-submit='save_override']")
     refute has_element?(view, "[data-role='save-override']")
