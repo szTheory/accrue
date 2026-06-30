@@ -426,7 +426,7 @@ Full details: [v1.48 roadmap archive](milestones/v1.48-ROADMAP.md)
 | 197. Propagate LIST | v1.54 | 7/7 | Complete    | 2026-06-28 |
 | 198. Propagate DETAIL + analytics | v1.54 | 9/9 | Complete    | 2026-06-29 |
 | 199. Cross-cutting interaction/overlay correctness + fixture stress + microcopy | v1.54 | 15/15 | Complete    | 2026-06-30 |
-| 200. Idempotent verification & sign-off | v1.54 | 5/6 | In Progress | 2026-06-30 |
+| 200. Idempotent verification & sign-off | v1.54 | 6/6 | Complete   | 2026-06-30 |
 
 ## Historical Backlog Anchors (not active scope)
 
