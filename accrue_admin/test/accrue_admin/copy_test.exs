@@ -455,6 +455,63 @@ defmodule AccrueAdmin.CopyTest do
     end
   end
 
+  test "CPY-01 detail and campaign page call sites use shared copy helpers" do
+    call_sites = %{
+      "lib/accrue_admin/live/customer_live.ex" => [
+        "Copy.resource_state_copy(:subscriptions",
+        "Copy.resource_state_copy(:invoices",
+        "Copy.resource_state_copy(:payments"
+      ],
+      "lib/accrue_admin/live/invoice_live.ex" => [
+        "Copy.action_hidden_context(",
+        "Copy.resource_state_copy(:invoices"
+      ],
+      "lib/accrue_admin/live/charge_live.ex" => [
+        "Copy.action_hidden_context(",
+        "Copy.resource_state_copy(:payments"
+      ],
+      "lib/accrue_admin/live/webhook_live.ex" => [
+        "Copy.action_hidden_context(",
+        "Copy.resource_state_copy(:webhooks",
+        "Copy.resource_state_copy(:events"
+      ],
+      "lib/accrue_admin/live/connect_account_live.ex" => [
+        "Copy.action_hidden_context(",
+        "Copy.resource_state_copy(:connect_accounts"
+      ],
+      "lib/accrue_admin/live/subscription_live.ex" => [
+        "Copy.action_hidden_context(",
+        "Copy.resource_state_copy(:subscriptions",
+        "Copy.resource_state_copy(:dunning"
+      ],
+      "lib/accrue_admin/live/coupon_live.ex" => [
+        "AccrueAdmin.Copy.resource_state_copy(:coupons",
+        "AccrueAdmin.Copy.resource_state_copy(:promotion_codes"
+      ],
+      "lib/accrue_admin/live/promotion_code_live.ex" => [
+        "AccrueAdmin.Copy.resource_state_copy(:promotion_codes",
+        "AccrueAdmin.Copy.resource_state_copy(:coupons"
+      ],
+      "lib/accrue_admin/live/event_live.ex" => [
+        "Copy.resource_state_copy(:events",
+        "Copy.resource_state_copy(:webhooks"
+      ],
+      "lib/accrue_admin/live/analytics/campaign_live.ex" => [
+        "Copy.resource_state_copy(:dunning",
+        "Copy.action_hidden_context("
+      ]
+    }
+
+    for {path, patterns} <- call_sites do
+      source = File.read!(Path.expand("../../#{path}", __DIR__))
+
+      for pattern <- patterns do
+        assert source =~ pattern,
+               "#{path} must include #{pattern} so detail/campaign copy routes through the Copy helper surface"
+      end
+    end
+  end
+
   test "CPY-01 copy modules avoid generic fallbacks and bare action terms" do
     assert copy_module_guard(@raw_generic_guard) == []
   end
