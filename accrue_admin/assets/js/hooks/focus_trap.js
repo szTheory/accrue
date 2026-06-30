@@ -41,7 +41,8 @@ function isFocusable(node) {
 }
 
 function isVisibleForFocus(node) {
-  if (!node || typeof window === "undefined") return false;
+  if (!node) return false;
+  if (typeof window === "undefined") return true;
 
   const style = window.getComputedStyle?.(node);
   const rect = typeof node.getBoundingClientRect === "function" ? node.getBoundingClientRect() : null;
