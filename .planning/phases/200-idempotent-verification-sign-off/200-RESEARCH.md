@@ -848,22 +848,25 @@ if (!finalLine || !/^Final maintainer decision: (ACCEPT|REJECT)\b/.test(finalLin
 |---|-------|---------|---------------|
 | A1 | Exact Storybook story URL discovery should be implemented from the mounted app or PhoenixStorybook route output rather than hardcoded from undocumented internals. [ASSUMED] | Architecture Patterns / Validation Architecture | A hardcoded route format could break if PhoenixStorybook changes route naming; planner should include a discovery/smoke task before final story scans. |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **Should Phase 200 parameterize Phase 192 verifier scripts or copy them into Phase 200-specific files?**
    - What we know: Existing Phase 192 scripts contain useful reducer/verifier logic but hardcode archived and outdated paths. [VERIFIED: codebase grep]
    - What's unclear: Whether maintainers prefer shared parameterized scripts or one-off closeout scripts for audit readability.
    - Recommendation: Use Phase 200-specific entrypoints and factor only small pure helpers if that reduces duplication without obscuring artifact paths.
+   - Resolution: Use Phase 200-specific entrypoints/scripts and factor only small pure helpers when useful; all generated outputs land under `.planning/phases/200-idempotent-verification-sign-off/` or approved `accrue_admin/test-results/phase200/` evidence roots.
 
 2. **How should Storybook story URLs be discovered for scans?**
    - What we know: PhoenixStorybook is mounted at `/dev/storybook`, and existing story modules live under `accrue_admin/storybook`. [VERIFIED: accrue_admin/lib/accrue_admin_web/router.ex] [VERIFIED: filesystem inspection]
    - What's unclear: The most stable route enumeration API for the installed PhoenixStorybook version.
    - Recommendation: Add a Wave 0 Storybook smoke/discovery task that boots the app, enumerates rendered story links from `/dev/storybook`, and stores the resulting story URL list as a Phase 200 evidence input.
+   - Resolution: Discover Storybook URLs from the mounted `/dev/storybook` page at runtime using `accrue_admin/e2e/phase200-storybook-helpers.js` / `discoverStorybookStoryUrls`, not hardcoded PhoenixStorybook internals.
 
 3. **What exact artifact names should the multi-lens judge reference?**
    - What we know: The required top-level Phase 200 artifact names are locked. [VERIFIED: .planning/phases/200-idempotent-verification-sign-off/200-CONTEXT.md]
    - What's unclear: Whether traces/screenshots should live directly under the phase directory or under a nested `artifacts/` folder.
    - Recommendation: Put large interaction evidence under `.planning/phases/200-idempotent-verification-sign-off/artifacts/` and reference it from `artifacts.manifest.json`.
+   - Resolution: Store large interaction evidence under `.planning/phases/200-idempotent-verification-sign-off/artifacts/` and reference all evidence through `.planning/phases/200-idempotent-verification-sign-off/artifacts.manifest.json`; `200-JUDGE.md` and `200-SIGN-OFF.md` reference that manifest and the structured scorecard artifacts.
 
 ## Environment Availability
 
