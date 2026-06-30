@@ -5,15 +5,15 @@ milestone_name: Admin UI Page-Level Streamlining & Storybook
 current_phase: 200
 current_phase_name: idempotent-verification-sign-off
 status: executing
-stopped_at: Completed 200-03-PLAN.md
-last_updated: "2026-06-30T16:44:45.223Z"
+stopped_at: Completed 200-04-PLAN.md
+last_updated: "2026-06-30T17:07:18.445Z"
 last_activity: 2026-06-30
 progress:
   total_phases: 8
   completed_phases: 7
   total_plans: 59
-  completed_plans: 56
-  percent: 88
+  completed_plans: 57
+  percent: 97
 ---
 
 # Project State
@@ -29,7 +29,7 @@ See: `.planning/PROJECT.md` (updated 2026-06-29 — Phase 198 complete; Phase 19
 ## Current Position
 
 Phase: 200 (idempotent-verification-sign-off) — EXECUTING
-Plan: 4 of 6
+Plan: 5 of 6
 Status: Ready to execute
 Last activity: 2026-06-30
 
@@ -243,6 +243,7 @@ Coverage: 22/22 v1.51 requirements mapped (each REQ-ID → exactly one phase). D
 | Phase 200 P01 | 14m 9s | 3 tasks | 8 files |
 | Phase 200 P02 | 17min | 2 tasks | 3 files |
 | Phase 200 P03 | 10m 4s | 2 tasks | 3 files |
+| Phase 200 P04 | 15m | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -470,6 +471,8 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - [Phase 200]: 200-03 keeps Phase 200 scorecard outputs under .planning/phases/200-idempotent-verification-sign-off/ and never writes archived Phase 187 or Phase 192 output paths. - Preserves archive immutability while producing derived union and scorecard artifacts.
 - [Phase 200]: 200-03 verifier rejects absolute refs, backslashes, .. segments, refs outside allowed generated roots, and unmanifested evidence refs. - This makes artifacts.manifest.json the enforceable evidence boundary for final scorecard packages.
 - [Phase 200]: 200-03 p193 rows remain pending in baseline.union.cells.json but must close as covered with score >= 2 and evidence refs in final artifacts. - Baseline-only mode can run before final artifacts while full mode fails stale pending page-flow rows.
+- [Phase 200]: Plan 200-04 leaves VER-03 final ACCEPT pending for Plan 200-06 while delivering verifier-clean judge/sign-off tooling.
+- [Phase 200]: Phase 200 sign-off REJECT drafts are structurally valid with named repairs; ACCEPT is fail-closed on missing artifacts, non-empty regressions, unresolved judge blockers, and stale p193 rows.
 
 ### Pending Todos
 
@@ -560,8 +563,8 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 
 ## Session Continuity
 
-Last session: 2026-06-30T16:44:45.215Z
-Stopped at: Completed 200-03-PLAN.md
+Last session: 2026-06-30T17:07:18.435Z
+Stopped at: Completed 200-04-PLAN.md
 Resume file: None
 
 ## Operator Next Steps
