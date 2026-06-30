@@ -5,14 +5,14 @@ milestone_name: Admin UI Page-Level Streamlining & Storybook
 current_phase: 199
 current_phase_name: cross-cutting-interaction-overlay-correctness-fixture-stress
 status: executing
-stopped_at: Completed 199-06-PLAN.md
-last_updated: "2026-06-30T00:11:40.584Z"
+stopped_at: Completed 199-12-PLAN.md
+last_updated: "2026-06-30T02:02:12.438Z"
 last_activity: 2026-06-30
 progress:
   total_phases: 8
   completed_phases: 6
   total_plans: 53
-  completed_plans: 45
+  completed_plans: 46
   percent: 75
 ---
 
@@ -29,7 +29,7 @@ See: `.planning/PROJECT.md` (updated 2026-06-29 — Phase 198 complete; Phase 19
 ## Current Position
 
 Phase: 199 (cross-cutting-interaction-overlay-correctness-fixture-stress) — EXECUTING
-Plan: 8 of 15
+Plan: 9 of 15
 Status: Ready to execute
 Last activity: 2026-06-30
 
@@ -232,6 +232,7 @@ Coverage: 22/22 v1.51 requirements mapped (each REQ-ID → exactly one phase). D
 | Phase 199 P05 | 3m 12s | 1 tasks | 4 files |
 | Phase 199 P11 | 6m 51s | 1 tasks | 10 files |
 | Phase 199 P06 | 20m | 1 tasks | 7 files |
+| Phase 199 P12 | 1h 45m 41s | 1 tasks | 13 files |
 
 ## Accumulated Context
 
@@ -436,6 +437,8 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - [Phase 199]: Plan 199-05 kept CommandPalette as the named overlay-equivalent wrapper and made backdrop close hook-owned. — This follows Plan 199-04's named-wrapper decision while avoiding duplicate delegated close handling from LiveView's top-level click listener.
 - [Phase 199]: 199-11 added shared Copy.resource_state_copy/3 and hidden action context helpers for CPY-01 list/detail call sites. — Centralizing the messages keeps later Phase 199 list and detail sweeps consistent while allowing deterministic guards to reject generic raw fallback strings.
 - [Phase 199]: Plan 199-06: ScrollLock reconciles against live lockable overlay DOM, and FocusTrap uses a topmost-trap stack for nested drawer-to-step-up flows.
+- [Phase 199]: 199-12: Use Copy.resource_state_copy/3 at each list LiveView state resolver instead of adding page-specific helper sets. — Centralizes list-state microcopy while keeping each page's state classifier local and explicit.
+- [Phase 199]: 199-12: Pass dunning queue copy into AtRiskTable from RecoveryLive so recovery empty-state copy uses the shared Copy surface. — Recovery's queue copy is rendered by a component, so the page must supply Copy-backed text instead of duplicating raw strings inside the component.
 
 ### Pending Todos
 
@@ -526,8 +529,8 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 
 ## Session Continuity
 
-Last session: 2026-06-30T00:11:40.576Z
-Stopped at: Completed 199-06-PLAN.md
+Last session: 2026-06-30T02:02:12.432Z
+Stopped at: Completed 199-12-PLAN.md
 Resume file: None
 
 ## Operator Next Steps
