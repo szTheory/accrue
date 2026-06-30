@@ -43,7 +43,7 @@ Stop rule: if proposed work is polish-only with a documented workaround and no r
 - [x] **Phase 196: Exemplar C — Subscriptions list + PageHeader** — Convert the Subscriptions list to the table-first list spec (chips + count + clear-all, work-queue default, four distinct states) and extract + lock the shared `PageHeader` component slot contract. (completed 2026-06-26)
 - [x] **Phase 197: Propagate LIST** — Conform all 8 remaining list pages to SPEC-LIST, adopt `PageHeader`, with per-page JTBD microcopy + four-state coverage. (completed 2026-06-28)
 - [x] **Phase 198: Propagate DETAIL + analytics** — Conform all remaining detail/analytics pages to SPEC-DETAIL / the overview spec. (completed 2026-06-29)
-- [ ] **Phase 199: Cross-cutting interaction/overlay correctness + fixture stress + microcopy** — Land the canonical overlay primitive (scroll-lock, portal, `inert`, dismissal, geometry, origin-aware popovers, transformed-ancestor audit), exercise multi-step + edge fixtures, and run the full brand-voice microcopy sweep.
+- [x] **Phase 199: Cross-cutting interaction/overlay correctness + fixture stress + microcopy** — Land the canonical overlay primitive (scroll-lock, portal, `inert`, dismissal, geometry, origin-aware popovers, transformed-ancestor audit), exercise multi-step + edge fixtures, and run the full brand-voice microcopy sweep. (completed 2026-06-30)
 - [ ] **Phase 200: Idempotent verification & sign-off** — Re-score all cells (component + group + page-flow) viewport × theme × state with zero regressions; complete + verify Storybook story coverage and theming; axe-core + no-FOUC/persistence/system-emulation checks; adversarial multi-lens judge + maintainer sign-off.
 
 Coverage: 23/23 requirements mapped (each REQ-ID → exactly one phase). Per-phase counts: 193→5 · 194→1 · 195→2 · 196→2 · 197→1 · 198→1 · 199→7 · 200→4 = 23. Design source: `.planning/research/SUMMARY.md` (synthesizing FEATURES.md, ARCHITECTURE.md, PITFALLS.md, v1.54-storybook-and-forward-only-qa.md). Reuses v1.53's forward-only machinery (rubric `187-RUBRIC.md`, `baseline.cells.json`, `regressions.ndjson` zero-regression gate).
@@ -425,7 +425,7 @@ Full details: [v1.48 roadmap archive](milestones/v1.48-ROADMAP.md)
 | 196. Exemplar C — Subscriptions list + PageHeader | v1.54 | 5/5 | Complete    | 2026-06-26 |
 | 197. Propagate LIST | v1.54 | 7/7 | Complete    | 2026-06-28 |
 | 198. Propagate DETAIL + analytics | v1.54 | 9/9 | Complete    | 2026-06-29 |
-| 199. Cross-cutting interaction/overlay correctness + fixture stress + microcopy | v1.54 | 15/15 | Complete   | 2026-06-30 |
+| 199. Cross-cutting interaction/overlay correctness + fixture stress + microcopy | v1.54 | 15/15 | Complete    | 2026-06-30 |
 | 200. Idempotent verification & sign-off | v1.54 | 0/? | Not started | - |
 
 ## Historical Backlog Anchors (not active scope)
