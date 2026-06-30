@@ -179,7 +179,7 @@ defmodule AccrueAdmin.Live.ConnectAccountLive do
                 class="ax-button ax-button-primary"
                 phx-click="open_override_drawer"
                 data-ax-primary-action
-                aria-label={AccrueAdmin.Copy.connect_account_action_edit_platform_fee_override()}
+                aria-label={AccrueAdmin.Copy.action_hidden_context("Change", resource: "platform fee override", object: @account.stripe_account_id || @account.id)}
               >
                 <%= AccrueAdmin.Copy.connect_account_action_edit_platform_fee_override() %>
               </button>
@@ -471,7 +471,11 @@ defmodule AccrueAdmin.Live.ConnectAccountLive do
         label: AccrueAdmin.Copy.connect_account_summary_label_override(),
         value: override_state_label(account),
         action_label: "Change",
-        action_context: "platform fee override for account #{account_label}",
+        action_context:
+          AccrueAdmin.Copy.action_hidden_context("Change",
+            resource: "platform fee override",
+            object: "account #{account_label}"
+          ),
         action_event: "open_override_drawer",
         action_value: "platform_fee_override"
       }
@@ -486,7 +490,11 @@ defmodule AccrueAdmin.Live.ConnectAccountLive do
           label: AccrueAdmin.Copy.connect_account_summary_label_activity(),
           value: AccrueAdmin.Copy.connect_account_activity_summary(),
           action_label: "View",
-          action_context: "events for account #{account_label}",
+          action_context:
+            AccrueAdmin.Copy.action_hidden_context("View",
+              resource: "events",
+              object: "account #{account_label}"
+            ),
           action_href:
             ScopedPath.build(mount_path, "/events", scope, %{
               "subject_type" => "ConnectAccount",
@@ -925,7 +933,7 @@ defmodule AccrueAdmin.Live.ConnectAccountLive do
   end
 
   defp requirements_summary(_requirements),
-    do: AccrueAdmin.Copy.connect_account_requirements_none()
+    do: AccrueAdmin.Copy.resource_state_copy(:connect_accounts, :queue_empty).heading
 
   defp requirement_list(list) when is_list(list) and list != [],
     do:

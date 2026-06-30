@@ -101,7 +101,7 @@ defmodule AccrueAdmin.Live.EventLive do
             <header class="ax-related-head">
               <h3 class="ax-related-title"><%= Copy.event_detail_related_resources_title() %></h3>
             </header>
-            <p class="ax-body"><%= Copy.event_detail_related_resources_empty() %></p>
+            <p class="ax-body"><%= event_related_resources_empty_body() %></p>
           </section>
         </div>
 
@@ -116,7 +116,7 @@ defmodule AccrueAdmin.Live.EventLive do
               items={activity_items(@event)}
             />
             <p :if={activity_items(@event) == []} class="ax-body">
-              <%= Copy.event_detail_lazy_activity_empty_body() %>
+              <%= event_activity_empty_body() %>
             </p>
           <% else %>
             <p class="ax-body"><%= Copy.event_detail_lazy_activity_prompt() %></p>
@@ -177,6 +177,22 @@ defmodule AccrueAdmin.Live.EventLive do
   end
 
   defp activity_items(_event), do: []
+
+  defp event_related_resources_empty_body do
+    [
+      Copy.resource_state_copy(:events, :queue_empty).body,
+      Copy.event_detail_related_resources_empty()
+    ]
+    |> Enum.join(" ")
+  end
+
+  defp event_activity_empty_body do
+    [
+      Copy.resource_state_copy(:events, :queue_empty).body,
+      Copy.event_detail_lazy_activity_empty_body()
+    ]
+    |> Enum.join(" ")
+  end
 
   defp raw_payload(%{data: data} = event) do
     %{
@@ -305,7 +321,9 @@ defmodule AccrueAdmin.Live.EventLive do
   defp subject_summary(%{subject_type: type, subject_id: id}), do: "#{type} #{id}"
 
   defp source_webhook_summary(%{caused_by_webhook_event_id: nil}),
-    do: Copy.billing_events_webhook_source_direct()
+    do:
+      Copy.billing_events_webhook_source_direct() <>
+        " - " <> Copy.resource_state_copy(:webhooks, :queue_empty).heading
 
   defp source_webhook_summary(%{caused_by_webhook_event_id: id}), do: id
 

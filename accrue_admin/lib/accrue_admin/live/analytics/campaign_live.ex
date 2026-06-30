@@ -65,7 +65,7 @@ defmodule AccrueAdmin.Live.Analytics.CampaignLive do
           </:facts>
         </Detail.summary_card>
 
-        <Detail.summary_list rows={summary_rows(@subscription_id, @arcs, @invoice_map)} />
+        <Detail.summary_list rows={summary_rows(@subscription_id, @arcs, @invoice_map, @admin_mount_path, @current_owner_scope)} />
 
         <CampaignTimeline.campaign_timeline arcs={@arcs} invoice_map={@invoice_map} />
       </section>
@@ -73,19 +73,21 @@ defmodule AccrueAdmin.Live.Analytics.CampaignLive do
     """
   end
 
-  defp summary_rows(subscription_id, [], invoice_map) do
-    empty_campaign_summary(subscription_id) ++
-      [
-        %{label: "Invoice count", value: invoice_count_label(invoice_map)}
-      ]
+  defp summary_rows(subscription_id, [], invoice_map, mount_path, owner_scope) do
+    (empty_campaign_summary(subscription_id) ++
+       [
+         %{label: "Invoice count", value: invoice_count_label(invoice_map)}
+       ])
+    |> add_subscription_action(subscription_id, mount_path, owner_scope)
   end
 
-  defp summary_rows(subscription_id, arcs, invoice_map) do
-    campaign_fact_rows(subscription_id, arcs) ++
-      [
-        %{label: "Invoice count", value: invoice_count_label(invoice_map)},
-        %{label: "Last boundary", value: latest_boundary(arcs)}
-      ]
+  defp summary_rows(subscription_id, arcs, invoice_map, mount_path, owner_scope) do
+    (campaign_fact_rows(subscription_id, arcs) ++
+       [
+         %{label: "Invoice count", value: invoice_count_label(invoice_map)},
+         %{label: "Last boundary", value: latest_boundary(arcs)}
+       ])
+    |> add_subscription_action(subscription_id, mount_path, owner_scope)
   end
 
   defp campaign_fact_rows(subscription_id, arcs) do
@@ -97,11 +99,13 @@ defmodule AccrueAdmin.Live.Analytics.CampaignLive do
   end
 
   defp empty_campaign_summary(subscription_id) do
+    copy = Copy.resource_state_copy(:dunning, :first_run_empty)
+
     [
       %{label: "Subscription", value: subscription_id},
-      %{label: "Campaign state", value: "No dunning history"},
+      %{label: "Campaign state", value: copy.heading},
       %{label: "Timeline events", value: "0 events"},
-      %{label: "Last boundary", value: "No campaign boundary recorded"}
+      %{label: "Last boundary", value: copy.body}
     ]
   end
 
@@ -112,7 +116,7 @@ defmodule AccrueAdmin.Live.Analytics.CampaignLive do
       %{type: "dunning.campaign_started"} -> "Campaign started"
       %{type: "dunning.step_sent"} -> "In progress"
       %{type: type} when is_binary(type) -> event_label(type)
-      _event -> "No dunning history"
+      _event -> Copy.resource_state_copy(:dunning, :first_run_empty).heading
     end
   end
 
@@ -135,8 +139,29 @@ defmodule AccrueAdmin.Live.Analytics.CampaignLive do
         "#{event_label(type)} at #{format_datetime(inserted_at)}"
 
       _event ->
-        "No campaign boundary recorded"
+        Copy.resource_state_copy(:dunning, :first_run_empty).body
     end
+  end
+
+  defp add_subscription_action(rows, subscription_id, mount_path, owner_scope) do
+    subscription_href =
+      ScopedPath.build(mount_path, "/subscriptions/#{subscription_id}", owner_scope)
+
+    Enum.map(rows, fn
+      %{label: "Subscription"} = row ->
+        Map.merge(row, %{
+          action_label: "View",
+          action_context:
+            Copy.action_hidden_context("View",
+              resource: "subscription detail",
+              object: "dunning campaign for subscription #{subscription_id}"
+            ),
+          action_href: subscription_href
+        })
+
+      row ->
+        row
+    end)
   end
 
   defp latest_event(arcs) do

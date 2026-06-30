@@ -188,6 +188,7 @@ defmodule AccrueAdmin.Live.ChargeLive do
                 class="ax-button ax-button-primary"
                 phx-click="open_refund_drawer"
                 data-ax-primary-action
+                aria-label={Copy.action_hidden_context("Refund", resource: "charge", object: @charge.processor_id || @charge.id)}
               >
                 Refund charge
               </button>
@@ -237,7 +238,7 @@ defmodule AccrueAdmin.Live.ChargeLive do
                 </div>
               </div>
 
-              <p :if={@refunds == []} class="ax-body">No refunds have been issued for this charge yet.</p>
+              <p :if={@refunds == []} class="ax-body"><%= charge_refunds_empty_copy() %></p>
             </div>
           </details>
         </section>
@@ -822,11 +823,21 @@ defmodule AccrueAdmin.Live.ChargeLive do
   end
 
   defp charge_refund_error_copy(socket) do
-    Copy.page_state_copy(:recoverable_error,
-      resource: "charge #{socket.assigns.charge.id} refund",
-      owner_scope: owner_scope_copy(socket.assigns.current_owner_scope),
-      recovery: "retry from the charge refund panel"
-    ).body
+    [
+      Copy.resource_state_copy(:payments, :error,
+        owner_scope: owner_scope_copy(socket.assigns.current_owner_scope)
+      ).body,
+      "Retry from the charge refund panel."
+    ]
+    |> Enum.join(" ")
+  end
+
+  defp charge_refunds_empty_copy do
+    [
+      Copy.resource_state_copy(:payments, :queue_empty).body,
+      "No refunds have been issued for this charge yet."
+    ]
+    |> Enum.join(" ")
   end
 
   defp owner_scope_copy(%{mode: :organization, organization_slug: slug}) when is_binary(slug),

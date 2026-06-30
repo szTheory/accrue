@@ -319,7 +319,7 @@ defmodule AccrueAdmin.Live.CustomerLive do
                   </a>
                   <span class="ax-body"><%= predicate_summary(subscription) %></span>
                 </div>
-                <p :if={@peer_records == []} class="ax-body"><%= Copy.customer_detail_no_subscriptions() %></p>
+                <p :if={@peer_records == []} class="ax-body"><%= customer_peer_empty_body(:subscriptions) %></p>
 
               <% "invoices" -> %>
                 <div :for={invoice <- @peer_records} class="ax-list-row">
@@ -331,7 +331,7 @@ defmodule AccrueAdmin.Live.CustomerLive do
                   </a>
                   <MoneyFormatter.money_formatter amount_minor={invoice.amount_remaining_minor || 0} currency={invoice.currency || "usd"} customer={@customer} />
                 </div>
-                <p :if={@peer_records == []} class="ax-body"><%= Copy.customer_detail_no_invoices() %></p>
+                <p :if={@peer_records == []} class="ax-body"><%= customer_peer_empty_body(:invoices) %></p>
 
               <% "charges" -> %>
                 <div :for={charge <- @peer_records} class="ax-list-row">
@@ -343,7 +343,7 @@ defmodule AccrueAdmin.Live.CustomerLive do
                   </a>
                   <MoneyFormatter.money_formatter amount_minor={charge.amount_cents || 0} currency={charge.currency || "usd"} customer={@customer} />
                 </div>
-                <p :if={@peer_records == []} class="ax-body">No payments projected yet.</p>
+                <p :if={@peer_records == []} class="ax-body"><%= customer_peer_empty_body(:payments) %></p>
             <% end %>
           </section>
         </section>
@@ -474,6 +474,15 @@ defmodule AccrueAdmin.Live.CustomerLive do
       %{label: "Access", value: access_headline(entitlements_view)}
     ]
   end
+
+  defp customer_peer_empty_body(:subscriptions),
+    do: Copy.resource_state_copy(:subscriptions, :first_run_empty).body
+
+  defp customer_peer_empty_body(:invoices),
+    do: Copy.resource_state_copy(:invoices, :first_run_empty).body
+
+  defp customer_peer_empty_body(:payments),
+    do: Copy.resource_state_copy(:payments, :first_run_empty).body
 
   defp payment_method_drill_rows(customer, payment_methods, active_payment_method_ids) do
     Enum.map(payment_methods, fn payment_method ->

@@ -113,7 +113,7 @@ defmodule AccrueAdmin.Live.CouponLive do
             </div>
 
             <p :if={@promotion_codes == []} class="ax-body">
-              <%= AccrueAdmin.Copy.coupon_detail_promotion_codes_empty() %>
+              <%= coupon_promotion_codes_empty_body() %>
             </p>
           </details>
 
@@ -140,7 +140,7 @@ defmodule AccrueAdmin.Live.CouponLive do
               items={activity_items(@coupon)}
             />
             <p :if={activity_items(@coupon) == []} class="ax-body">
-              <%= AccrueAdmin.Copy.coupon_lazy_activity_empty_body() %>
+              <%= coupon_activity_empty_body() %>
             </p>
           <% else %>
             <p class="ax-body"><%= AccrueAdmin.Copy.coupon_lazy_activity_prompt() %></p>
@@ -199,6 +199,22 @@ defmodule AccrueAdmin.Live.CouponLive do
       %{label: "Status", value: promotion_code_status(promotion_code)},
       %{label: "Redemptions", value: promotion_code_redemptions(promotion_code)}
     ]
+  end
+
+  defp coupon_promotion_codes_empty_body do
+    [
+      AccrueAdmin.Copy.resource_state_copy(:promotion_codes, :first_run_empty).body,
+      AccrueAdmin.Copy.coupon_detail_promotion_codes_empty()
+    ]
+    |> Enum.join(" ")
+  end
+
+  defp coupon_activity_empty_body do
+    [
+      AccrueAdmin.Copy.resource_state_copy(:coupons, :queue_empty).body,
+      AccrueAdmin.Copy.coupon_lazy_activity_empty_body()
+    ]
+    |> Enum.join(" ")
   end
 
   defp projection_detail_fields(coupon) do

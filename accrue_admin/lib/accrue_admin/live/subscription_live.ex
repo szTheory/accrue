@@ -305,7 +305,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
                   <%= next_action_summary(@subscription) %>
                 </p>
               <% else %>
-                <p class="ax-body"><%= Copy.dunning_empty_state_body() %></p>
+                <p class="ax-body"><%= Copy.resource_state_copy(:dunning, :queue_empty).body %></p>
                 <p class="ax-body">Recovery is triggered by invoice.payment_failed billing events.</p>
               <% end %>
             </div>
@@ -653,7 +653,11 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
         label: "Customer",
         value: customer_label(customer),
         action_label: "View",
-        action_context: "customer for subscription #{subscription_label}",
+        action_context:
+          Copy.action_hidden_context("View",
+            resource: "customer",
+            object: "subscription #{subscription_label}"
+          ),
         action_href: ScopedPath.build(mount_path, "/customers/#{customer.id}", scope)
       },
       %{
@@ -662,7 +666,11 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
       }
       |> maybe_put_summary_action(swap_plan_available?(subscription), %{
         action_label: "Change",
-        action_context: "plan for subscription #{subscription_label}",
+        action_context:
+          Copy.action_hidden_context("Change",
+            resource: "plan",
+            object: "subscription #{subscription_label}"
+          ),
         action_event: "open_action_drawer",
         action_value: "swap_plan"
       }),
@@ -690,7 +698,11 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
           }
           |> maybe_put_summary_action(quantity_change_available?(subscription), %{
             action_label: "Change",
-            action_context: "quantity for subscription #{subscription_label}",
+            action_context:
+              Copy.action_hidden_context("Change",
+                resource: "quantity",
+                object: "subscription #{subscription_label}"
+              ),
             action_event: "open_action_drawer",
             action_value: "update_quantity"
           })
@@ -711,7 +723,11 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
             label: "Dunning",
             value: Copy.dunning_state_label(subscription),
             action_label: "View",
-            action_context: "recovery for subscription #{subscription_label}",
+            action_context:
+              Copy.action_hidden_context("View",
+                resource: "recovery",
+                object: "subscription #{subscription_label}"
+              ),
             action_event: "load_activity",
             action_value: "dunning"
           }
@@ -726,7 +742,11 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
       label: "Renews / ends",
       value: renews_or_ends_summary(subscription),
       action_label: renews_or_ends_action_label(subscription),
-      action_context: "renewal for subscription #{subscription.processor_id || subscription.id}",
+      action_context:
+        Copy.action_hidden_context("Change",
+          resource: "renewal",
+          object: "subscription #{subscription.processor_id || subscription.id}"
+        ),
       action_event: renews_or_ends_action_event(subscription),
       action_value: renews_or_ends_action_value(subscription)
     }
@@ -823,7 +843,10 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
 
   defp action_aria_label(action_type, subscription),
     do:
-      "#{action_label(action_type)} for subscription #{subscription.processor_id || subscription.id}"
+      Copy.action_hidden_context("Run",
+        resource: String.downcase(action_label(action_type)),
+        object: "subscription #{subscription.processor_id || subscription.id}"
+      )
 
   defp action_menu_groups(subscription) do
     subscription_label = subscription.processor_id || subscription.id
@@ -1334,11 +1357,13 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
   end
 
   defp subscription_action_error_copy(socket, action) do
-    Copy.page_state_copy(:recoverable_error,
-      resource: "subscription #{socket.assigns.subscription.id} #{humanize(action.type)} action",
-      owner_scope: owner_scope_copy(socket.assigns.current_owner_scope),
-      recovery: "retry from the subscription action panel"
-    ).body
+    [
+      Copy.resource_state_copy(:subscriptions, :error,
+        owner_scope: owner_scope_copy(socket.assigns.current_owner_scope)
+      ).body,
+      "Retry #{humanize(action.type)} from the subscription action panel."
+    ]
+    |> Enum.join(" ")
   end
 
   defp subscription_payload(subscription) do

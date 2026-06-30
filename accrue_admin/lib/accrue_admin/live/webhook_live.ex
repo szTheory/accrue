@@ -165,6 +165,7 @@ defmodule AccrueAdmin.Live.WebhookLive do
               class="ax-button ax-button-primary"
               data-ax-primary-action
               data-role="replay-single"
+              aria-label={Copy.action_hidden_context("Replay", resource: "webhook delivery", object: @webhook.processor_event_id || @webhook.id)}
             >
               Replay webhook
             </button>
@@ -426,13 +427,13 @@ defmodule AccrueAdmin.Live.WebhookLive do
   defp owner_scope_label(%{mode: :organization}), do: "Active organization"
   defp owner_scope_label(_owner_scope), do: "Global admin"
 
-  defp last_attempt_label(nil), do: "No attempts recorded"
+  defp last_attempt_label(nil), do: Copy.resource_state_copy(:webhooks, :queue_empty).heading
 
   defp last_attempt_label(job) do
     "Attempt #{job.attempt || 1}/#{job.max_attempts || 25} #{humanize(job.state || "available")}"
   end
 
-  defp first_derived_event_label([]), do: "No derived event rows linked"
+  defp first_derived_event_label([]), do: Copy.resource_state_copy(:events, :queue_empty).heading
 
   defp first_derived_event_label([event | _events]) do
     "#{event.type} for #{event.subject_type} #{event.subject_id}"

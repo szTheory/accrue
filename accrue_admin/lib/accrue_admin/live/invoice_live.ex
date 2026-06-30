@@ -764,7 +764,11 @@ defmodule AccrueAdmin.Live.InvoiceLive do
         label: "Customer",
         value: customer_label(customer),
         action_label: "View",
-        action_context: "customer for invoice #{invoice_label}",
+        action_context:
+          Copy.action_hidden_context("View",
+            resource: "customer",
+            object: "invoice #{invoice_label}"
+          ),
         action_href: ScopedPath.build(mount_path, "/customers/#{customer.id}", scope)
       },
       %{label: "Amount due", value: money_text(invoice.amount_due_minor, invoice.currency)},
@@ -879,7 +883,11 @@ defmodule AccrueAdmin.Live.InvoiceLive do
       value: action_type,
       danger?: Keyword.get(opts, :danger?, false),
       primary?: Keyword.get(opts, :primary?, false),
-      hidden_context: "#{invoice_action_label(action_type)} for invoice #{invoice_label(invoice)}"
+      hidden_context:
+        Copy.action_hidden_context("Run",
+          resource: String.downcase(invoice_action_label(action_type)),
+          object: "invoice #{invoice_label(invoice)}"
+        )
     }
   end
 
@@ -1166,10 +1174,8 @@ defmodule AccrueAdmin.Live.InvoiceLive do
   end
 
   defp invoice_action_unavailable_copy(socket) do
-    Copy.page_state_copy(:recoverable_error,
-      resource: "invoice #{socket.assigns.invoice.id} action",
-      owner_scope: owner_scope_copy(socket.assigns.current_owner_scope),
-      recovery: "refresh the invoice and choose an available action"
+    Copy.resource_state_copy(:invoices, :error,
+      owner_scope: owner_scope_copy(socket.assigns.current_owner_scope)
     ).body
   end
 
