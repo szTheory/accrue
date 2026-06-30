@@ -330,6 +330,28 @@ defmodule AccrueAdmin.OverlayComponentsTest do
       assert app_css =~
                ~r/@media \(max-width: 767\.98px\).*?\.ax-detail-drawer\s*\{.*?inset: auto 0 0 0;.*?width: 100%;.*?max-height: min\(42rem, calc\(100dvh - var\(--ax-space-lg\)\)\);.*?border-radius: var\(--ax-radius-lg\) var\(--ax-radius-lg\) 0 0;.*?\}.*?\.ax-drawer-enter-from\s*\{.*?transform: translateY\(100%\);/s
     end
+
+    test "uses same-axis drawer enter transforms, reduced-motion no-travel states, and instant focus rings" do
+      app_css = File.read!(app_css_path())
+
+      assert app_css =~
+               ~r/\.ax-drawer-enter-from\s*\{[^}]*transform: translateY\(100%\);/s
+
+      assert app_css =~
+               ~r/\.ax-drawer-enter-to\s*\{[^}]*transform: translateY\(0px\);/s
+
+      assert app_css =~
+               ~r/@media \(min-width: 768px\).*?\.ax-drawer-enter-from\s*\{[^}]*transform: translateX\(100%\);.*?\.ax-drawer-enter-to\s*\{[^}]*transform: translateX\(0px\);/s
+
+      assert app_css =~
+               ~r/@media \(prefers-reduced-motion: reduce\)\s*\{[^}]*\.ax-drawer-enter-from,\s*\.ax-drawer-enter-to\s*\{[^}]*transform: translateY\(0px\);/s
+
+      assert app_css =~
+               ~r/@media \(prefers-reduced-motion: reduce\) and \(min-width: 768px\)\s*\{[^}]*\.ax-drawer-enter-from,\s*\.ax-drawer-enter-to\s*\{[^}]*transform: translateX\(0px\);/s
+
+      assert app_css =~
+               ~r/\.ax-button:focus-visible,.*?\[data-ax-force~="focus"\]\s*\{[^}]*transition: none;/s
+    end
   end
 
   describe "DetailDrawer focus and layer contract" do

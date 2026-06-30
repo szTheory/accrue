@@ -60,6 +60,59 @@ async function readDur3Token(page) {
   );
 }
 
+async function computedStyleForFixtureClass(page, className) {
+  return page.evaluate((fixtureClass) => {
+    const el = document.createElement("div");
+    el.className = fixtureClass;
+    el.textContent = "motion fixture";
+    Object.assign(el.style, {
+      position: "fixed",
+      left: "0",
+      top: "0",
+      width: "120px",
+      height: "80px",
+      pointerEvents: "none",
+    });
+    document.body.appendChild(el);
+
+    const style = window.getComputedStyle(el);
+    const result = {
+      transform: style.transform,
+      transitionDuration: style.transitionDuration.split(",").map((seg) => seg.trim()),
+      transitionProperty: style.transitionProperty.split(",").map((seg) => seg.trim()),
+    };
+
+    el.remove();
+    return result;
+  }, className);
+}
+
+async function forcedFocusRingTransitionDurations(page) {
+  return page.evaluate(() => {
+    const button = document.createElement("button");
+    button.className = "ax-button";
+    button.setAttribute("data-ax-force", "focus");
+    button.textContent = "Focus fixture";
+    document.body.appendChild(button);
+
+    const durations = window
+      .getComputedStyle(button)
+      .transitionDuration.split(",")
+      .map((seg) => seg.trim());
+
+    button.remove();
+    return durations;
+  });
+}
+
+function durationToMs(seg) {
+  return parseFloat(seg) * (seg.endsWith("ms") ? 1 : 1000);
+}
+
+function isIdentityTransform(transform) {
+  return transform === "none" || transform === "matrix(1, 0, 0, 1, 0, 0)";
+}
+
 test.describe("Reduced motion — bundle override collapses transitions to instant (D-15)", () => {
   test("with prefers-reduced-motion:reduce, .ax-button transition-duration collapses to 0s on every segment", async ({ page }) => {
     await page.emulateMedia({ reducedMotion: "reduce" });
@@ -264,4 +317,47 @@ test("structural: no transform travel on dropdown/drawer under prefers-reduced-m
     riseMd,
     `under reduced-motion, --ax-rise-md must be "0px" (no transform travel on drawer) — got "${riseMd}"; theme.css @media reduced-motion override must set --ax-rise-md: 0px`
   ).toBe("0px");
+});
+
+test("with prefers-reduced-motion:reduce, actual drawer enter classes have no desktop or mobile travel", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+
+  await page.setViewportSize({ width: 1024, height: 720 });
+  await login(page, "/billing/dev/components");
+  await expect(page.locator("#main-content")).toBeVisible();
+  const desktop = await computedStyleForFixtureClass(page, "ax-drawer-enter-from");
+
+  expect(
+    isIdentityTransform(desktop.transform),
+    `desktop drawer enter-from should collapse to identity transform under reduced motion, got ${desktop.transform}`
+  ).toBe(true);
+  for (const seg of desktop.transitionDuration) {
+    expect(durationToMs(seg), `desktop drawer transition should be instant, got ${desktop.transitionDuration}`).toBeLessThanOrEqual(1);
+  }
+
+  await page.setViewportSize({ width: 375, height: 667 });
+  const mobile = await computedStyleForFixtureClass(page, "ax-drawer-enter-from");
+
+  expect(
+    isIdentityTransform(mobile.transform),
+    `mobile drawer enter-from should collapse to identity transform under reduced motion, got ${mobile.transform}`
+  ).toBe(true);
+  for (const seg of mobile.transitionDuration) {
+    expect(durationToMs(seg), `mobile drawer transition should be instant, got ${mobile.transitionDuration}`).toBeLessThanOrEqual(1);
+  }
+});
+
+test("focus ring forced state is instant without relying on reduced-motion emulation", async ({ page }) => {
+  await login(page, "/billing/dev/components");
+  await expect(page.locator("#main-content")).toBeVisible();
+
+  const durations = await forcedFocusRingTransitionDurations(page);
+
+  expect(durations.length, "forced focus fixture should expose computed transition durations").toBeGreaterThan(0);
+  for (const seg of durations) {
+    expect(
+      durationToMs(seg),
+      `focus-ring styling must not inherit animated control transitions, got ${JSON.stringify(durations)}`
+    ).toBeLessThanOrEqual(1);
+  }
 });
