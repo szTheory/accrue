@@ -10,9 +10,9 @@ const { test, expect } = require("@playwright/test");
 const {
   assertFocusWithin,
   assertFloatingAdjacentToTrigger,
-  assertNoBodyFocus,
   assertNoHorizontalClip,
-  assertScrollReachable,
+  assertNoStaleOverlayState,
+  assertRouteFocusAndScroll,
   assertTopPointerTarget,
   setPhase191Theme,
 } = require("./phase191-page-flow-helpers.js");
@@ -208,21 +208,6 @@ async function assertOverlayRoot(page) {
   expect(root.nestedInShell, "overlay root should not live inside the inert shell").toBe(false);
 }
 
-async function assertNoGhostOverlay(page, label = "overlay close") {
-  await expect(
-    page.locator("#ax-overlay-root [data-ax-overlay-shell]"),
-    `${label}: no overlay shell remains`
-  ).toHaveCount(0);
-  await expect(
-    page.locator("#ax-overlay-root [data-ax-overlay-backdrop]"),
-    `${label}: no backdrop remains`
-  ).toHaveCount(0);
-  await expect(
-    page.locator("#accrue-admin-shell"),
-    `${label}: shell inert is restored`
-  ).not.toHaveAttribute("inert", "");
-}
-
 async function assertDrawerGeometry(page, drawer, label = "drawer") {
   const geometry = await drawer.locator("[data-ax-overlay-panel]").first().evaluate((panel) => {
     const rect = panel.getBoundingClientRect();
@@ -389,19 +374,6 @@ async function assertThemePickerReloadPersistence(page) {
   );
 }
 
-async function assertRouteFocusAndScroll(page, label) {
-  await assertNoBodyFocus(page, `${label}: route focus`);
-  await assertNoHorizontalClip(page, "#main-content, main, .ax-page", `${label}: route clipping`);
-
-  const scrollContainers = page.locator(
-    ".ax-detail-drawer-body:visible, .ax-data-table-shell:visible, [data-role='card-list']:visible, main:visible"
-  );
-  const first = scrollContainers.first();
-  if ((await first.count()) > 0) {
-    await assertScrollReachable(first, `${label}: primary scroll container`);
-  }
-}
-
 async function assertActionContextLabels(page, label = "action labels") {
   const compactActions = await page.locator("a, button, [role='menuitem']").evaluateAll((elements) =>
     elements
@@ -473,14 +445,14 @@ async function assertDismissalParity(page, target) {
   await assertOverlayPanel(page, target, drawer);
 
   await page.keyboard.press("Escape");
-  await assertNoGhostOverlay(page, `${target.name}: Escape`);
+  await assertNoStaleOverlayState(page, `${target.name}: Escape`);
 
   const reopened = await openDrawerTarget(page, target);
   await assertOverlayPanel(page, target, reopened);
   const backdrop = page.locator("#ax-overlay-root [data-ax-overlay-backdrop]").first();
   await expect(backdrop, `${target.name}: backdrop`).toBeVisible();
   await backdrop.click({ position: { x: 8, y: 8 } });
-  await assertNoGhostOverlay(page, `${target.name}: backdrop`);
+  await assertNoStaleOverlayState(page, `${target.name}: backdrop`);
 }
 
 async function openCommandPalette(page) {
@@ -560,7 +532,7 @@ test.describe("Phase 199 interaction and overlay contract", () => {
     await expect(modal, "step-up modal opens").toBeVisible();
     await assertOverlayPanel(page, { name: "StepUp" }, modal);
     await page.keyboard.press("Escape");
-    await assertNoGhostOverlay(page, "StepUp Escape");
+    await assertNoStaleOverlayState(page, "StepUp Escape");
   });
 
   test("@phase199 @motion drawer geometry matches desktop right-dock and mobile bottom-sheet contracts", async ({
@@ -692,7 +664,7 @@ test.describe("Phase 199 interaction and overlay contract", () => {
         await expect(drawer, `${flow.name}: drawer`).toBeVisible();
         await assertOverlayPanel(page, { name: flow.name }, drawer);
         await page.keyboard.press("Escape");
-        await assertNoGhostOverlay(page, `${flow.name}: drawer close`);
+        await assertNoStaleOverlayState(page, `${flow.name}: drawer close`);
         continue;
       }
 

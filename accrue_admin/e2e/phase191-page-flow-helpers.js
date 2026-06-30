@@ -298,6 +298,61 @@ async function assertNoHorizontalClip(page, selector = "body", label = selector)
   return result;
 }
 
+async function assertNoBodyFocusAfterNavigation(page, label = "route transition") {
+  return assertNoBodyFocus(page, `${label}: active element`);
+}
+
+async function assertRouteFocusAndScroll(page, label, options = {}) {
+  await assertNoBodyFocusAfterNavigation(page, label);
+  await assertNoHorizontalClip(
+    page,
+    options.clipSelector || "#main-content, main, .ax-page",
+    `${label}: route clipping`
+  );
+
+  const scrollContainers = page.locator(
+    options.scrollSelector ||
+      ".ax-detail-drawer-body:visible, .ax-data-table-shell:visible, [data-role='card-list']:visible, main:visible"
+  );
+  const first = scrollContainers.first();
+  if ((await first.count()) > 0) {
+    await assertScrollReachable(first, `${label}: primary scroll container`);
+  }
+}
+
+async function assertNoStaleOverlayState(page, label = "overlay close") {
+  const result = await page.evaluate(() => {
+    const shell = document.querySelector("#accrue-admin-shell");
+    const root = document.documentElement;
+    const body = document.body;
+
+    return {
+      overlayShells: document.querySelectorAll("#ax-overlay-root [data-ax-overlay-shell]").length,
+      overlayBackdrops: document.querySelectorAll("#ax-overlay-root [data-ax-overlay-backdrop]").length,
+      activeScrollLocks: document.querySelectorAll("[data-scroll-lock]").length,
+      shellInert: Boolean(shell?.hasAttribute("inert") || shell?.inert),
+      rootPosition: root?.style?.position || "",
+      rootOverflow: root?.style?.overflow || "",
+      bodyOverflow: body?.style?.overflow || "",
+    };
+  });
+
+  const stale =
+    result.overlayShells > 0 ||
+    result.overlayBackdrops > 0 ||
+    result.activeScrollLocks > 0 ||
+    result.shellInert ||
+    result.rootPosition === "fixed" ||
+    result.rootOverflow === "hidden" ||
+    result.bodyOverflow === "hidden";
+
+  if (stale) {
+    throw new Error(`Phase 191 overlay assertion failed for ${label}: ${JSON.stringify(result)}`);
+  }
+
+  return result;
+}
+
 async function assertFloatingAdjacentToTrigger(page, trigger, panel, label = "floating panel") {
   const result = await page.evaluate(
     ({ triggerSelector, panelSelector }) => {
@@ -389,6 +444,9 @@ module.exports = {
   assertTopPointerTarget,
   assertScrollReachable,
   assertNoHorizontalClip,
+  assertNoBodyFocusAfterNavigation,
+  assertRouteFocusAndScroll,
+  assertNoStaleOverlayState,
   assertFloatingAdjacentToTrigger,
   phase191CoverageRows,
   normalizeTag,
