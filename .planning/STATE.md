@@ -2,17 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.54
 milestone_name: Admin UI Page-Level Streamlining & Storybook
-current_phase: 199
-current_phase_name: cross-cutting-interaction-overlay-correctness-fixture-stress
 status: executing
-stopped_at: Completed 199-08-PLAN.md
-last_updated: "2026-06-30T03:16:30.870Z"
+stopped_at: Completed 199-09-PLAN.md
+last_updated: "2026-06-30T03:27:48.345Z"
 last_activity: 2026-06-30
 progress:
   total_phases: 8
   completed_phases: 6
   total_plans: 53
-  completed_plans: 49
+  completed_plans: 50
   percent: 75
 ---
 
@@ -29,7 +27,7 @@ See: `.planning/PROJECT.md` (updated 2026-06-29 — Phase 198 complete; Phase 19
 ## Current Position
 
 Phase: 199 (cross-cutting-interaction-overlay-correctness-fixture-stress) — EXECUTING
-Plan: 12 of 15
+Plan: 13 of 15
 Status: Ready to execute
 Last activity: 2026-06-30
 
@@ -236,6 +234,7 @@ Coverage: 22/22 v1.51 requirements mapped (each REQ-ID → exactly one phase). D
 | Phase 199 P13 | 11m26s | 1 tasks | 12 files |
 | Phase 199 P07 | 5m 35s | 1 tasks | 4 files |
 | Phase 199 P08 | 40m | 1 tasks | 7 files |
+| Phase 199 P09 | 9 min | 1 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -448,6 +447,8 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - [Phase 199]: 199-13: Read-only Coupon, Promotion Code, and Event detail pages remain action-band-free while their empty and activity copy routes through Copy helpers. — The plan required helper-backed copy without introducing interaction surfaces on read-only reference details.
 - [Phase 199]: Kept dropdowns as native non-modal details disclosures and added viewport clamping in the shared dropdown hook instead of introducing overlay portals or modal behavior. — Preserves the Phase 199 non-modal affordance contract while fixing viewport clipping.
 - [Phase 199]: Applied horizontal clamping through the existing transform pipeline for floating dropdown panels. — Keeps mobile action-menu animation and final geometry aligned across viewport stress cases.
+- [Phase 199]: 199-09: Treat malformed accrue_theme cookies as untrusted input and fall back to localStorage/default theme resolution before CSS loads. — Mitigates T-199-19 and prevents malformed cookies from aborting the anti-FOUC theme boot path.
+- [Phase 199]: 199-09: Keep fixed-shell audit coverage source-level and marker-backed in app.css. — The existing overlay architecture already satisfies the browser contract, so source markers cover transform/filter/backdrop-filter/contain/perspective risks without runtime churn.
 
 ### Pending Todos
 
@@ -538,8 +539,8 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 
 ## Session Continuity
 
-Last session: 2026-06-30T03:16:30.864Z
-Stopped at: Completed 199-08-PLAN.md
+Last session: 2026-06-30T03:27:03.110Z
+Stopped at: Completed 199-09-PLAN.md
 Resume file: None
 
 ## Operator Next Steps
