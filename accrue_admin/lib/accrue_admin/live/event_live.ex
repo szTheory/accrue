@@ -62,6 +62,7 @@ defmodule AccrueAdmin.Live.EventLive do
       mount_path={@admin_mount_path}
       page_title={@page_title}
       theme={@theme}
+      current_owner_scope={assigns[:current_owner_scope]}
       active_organization_name={@active_organization_name}
     >
       <section class="ax-page">

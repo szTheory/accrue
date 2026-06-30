@@ -3,6 +3,7 @@ defmodule AccrueAdmin.Components.GlobalSearchTest do
 
   import Phoenix.LiveViewTest
 
+  alias AccrueAdmin.OwnerScope
   alias AccrueAdmin.Components.GlobalSearch
 
   describe "path/2 nil-guard (regression: WR-03 fix)" do
@@ -46,6 +47,39 @@ defmodule AccrueAdmin.Components.GlobalSearchTest do
       assert html =~ ~s(data-path="/billing/invoices?status=open")
       assert html =~ ~s(data-path="/billing/analytics/recovery")
       assert html =~ ~s(data-path="/billing/webhooks?status=dead")
+    end
+
+    test "preserves organization owner scope in shortcut and result paths" do
+      owner_scope = %OwnerScope{
+        mode: :organization,
+        current_admin: %{id: "admin_1", role: :admin},
+        organization_id: "org_1",
+        organization_slug: "acme",
+        organization_display_name: "Acme",
+        platform_admin?: false,
+        admin_org_ids: ["org_1"],
+        active_organization_id: "org_1",
+        active_organization_slug: "acme"
+      }
+
+      html =
+        render_component(GlobalSearch, %{
+          id: "global-search",
+          mount_path: "/billing",
+          current_owner_scope: owner_scope,
+          query: "acme",
+          results: %{
+            customers: [%{id: "cus_1", name: "Acme", email: "ops@example.com"}],
+            invoices: [%{id: "inv_1", number: "INV-1"}],
+            subscriptions: [%{id: "sub_1", status: :active}]
+          },
+          is_open: true,
+          loading: false
+        })
+
+      assert html =~ ~s(data-path="/billing/customers/cus_1?org=acme")
+      assert html =~ ~s(data-path="/billing/invoices/inv_1?org=acme")
+      assert html =~ ~s(data-path="/billing/subscriptions/sub_1?org=acme")
     end
   end
 
@@ -148,6 +182,21 @@ defmodule AccrueAdmin.Components.GlobalSearchTest do
 
       refute html =~ "No results found"
       assert html =~ ~s(No billing records match "missing-acme")
+    end
+
+    test "Phase 199 search source uses owner-scoped query modules" do
+      source = File.read!("lib/accrue_admin/components/global_search.ex")
+
+      refute source =~ "Billing.search_customers"
+      refute source =~ "Billing.search_invoices"
+      refute source =~ "Billing.search_subscriptions"
+      assert source =~ "Customers.list(filter: %{q: query}, limit: 5, owner_scope: owner_scope)"
+      assert source =~ "Invoices.list(filter: %{q: query}, limit: 5, owner_scope: owner_scope)"
+
+      assert source =~
+               "Subscriptions.list(filter: %{q: query}, limit: 5, owner_scope: owner_scope)"
+
+      assert source =~ "ScopedPath.build(mount_path, suffix, owner_scope, params)"
     end
   end
 end

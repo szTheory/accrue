@@ -5,8 +5,9 @@ defmodule AccrueAdmin.Components.GlobalSearch do
   use Phoenix.LiveComponent
 
   alias AccrueAdmin.Copy
-  alias Accrue.Billing
   alias AccrueAdmin.Components.Icon
+  alias AccrueAdmin.Queries.{Customers, Invoices, Subscriptions}
+  alias AccrueAdmin.ScopedPath
 
   @impl true
   def mount(socket) do
@@ -16,6 +17,7 @@ defmodule AccrueAdmin.Components.GlobalSearch do
        # silently building broken navigation links if update/2 is not called
        # (e.g. during a hot-reload partial update or future refactors).
        mount_path: nil,
+       current_owner_scope: nil,
        query: "",
        results: %{customers: [], invoices: [], subscriptions: []},
        is_open: false,
@@ -92,7 +94,7 @@ defmodule AccrueAdmin.Components.GlobalSearch do
         {:noreply, assign(socket, query: trimmed, results: empty_results(), loading: false)}
 
       true ->
-        results = fetch_results(trimmed)
+        results = fetch_results(trimmed, socket.assigns[:current_owner_scope])
         {:noreply, assign(socket, query: trimmed, results: results, loading: false)}
     end
   end
@@ -107,11 +109,17 @@ defmodule AccrueAdmin.Components.GlobalSearch do
     )
   end
 
-  defp fetch_results(query) do
+  defp fetch_results(query, owner_scope) do
     tasks = [
-      customers: fn -> Billing.search_customers(query) |> Enum.take(5) end,
-      invoices: fn -> Billing.search_invoices(query) |> Enum.take(5) end,
-      subscriptions: fn -> Billing.search_subscriptions(query) |> Enum.take(5) end
+      customers: fn ->
+        Customers.list(filter: %{q: query}, limit: 5, owner_scope: owner_scope) |> page_rows()
+      end,
+      invoices: fn ->
+        Invoices.list(filter: %{q: query}, limit: 5, owner_scope: owner_scope) |> page_rows()
+      end,
+      subscriptions: fn ->
+        Subscriptions.list(filter: %{q: query}, limit: 5, owner_scope: owner_scope) |> page_rows()
+      end
     ]
 
     tasks
@@ -124,6 +132,8 @@ defmodule AccrueAdmin.Components.GlobalSearch do
       {:exit, _}, acc -> acc
     end)
   end
+
+  defp page_rows({rows, _cursor}), do: rows
 
   @impl true
   def render(assigns) do
@@ -189,22 +199,22 @@ defmodule AccrueAdmin.Components.GlobalSearch do
                   <p class="ax-eyebrow">Jump to</p>
                   <ul class="ax-command-palette-list">
                     <li class="ax-command-palette-list-item">
-                      <a class="ax-command-palette-item" href={path(@mount_path, "/customers")} data-path={path(@mount_path, "/customers")}>
+                      <a class="ax-command-palette-item" href={scoped_path(@mount_path, "/customers", @current_owner_scope)} data-path={scoped_path(@mount_path, "/customers", @current_owner_scope)}>
                         <Icon.icon name={:users} size="sm" /> <span>Look up a customer</span>
                       </a>
                     </li>
                     <li class="ax-command-palette-list-item">
-                      <a class="ax-command-palette-item" href={path(@mount_path, "/invoices?status=open")} data-path={path(@mount_path, "/invoices?status=open")}>
+                      <a class="ax-command-palette-item" href={scoped_path(@mount_path, "/invoices", @current_owner_scope, %{"status" => "open"})} data-path={scoped_path(@mount_path, "/invoices", @current_owner_scope, %{"status" => "open"})}>
                         <Icon.icon name={:invoices} size="sm" /> <span>Clear the invoice queue</span>
                       </a>
                     </li>
                     <li class="ax-command-palette-list-item">
-                      <a class="ax-command-palette-item" href={path(@mount_path, "/analytics/recovery")} data-path={path(@mount_path, "/analytics/recovery")}>
+                      <a class="ax-command-palette-item" href={scoped_path(@mount_path, "/analytics/recovery", @current_owner_scope)} data-path={scoped_path(@mount_path, "/analytics/recovery", @current_owner_scope)}>
                         <Icon.icon name={:recovery} size="sm" /> <span>Recover at-risk revenue</span>
                       </a>
                     </li>
                     <li class="ax-command-palette-list-item">
-                      <a class="ax-command-palette-item" href={path(@mount_path, "/webhooks?status=dead")} data-path={path(@mount_path, "/webhooks?status=dead")}>
+                      <a class="ax-command-palette-item" href={scoped_path(@mount_path, "/webhooks", @current_owner_scope, %{"status" => "dead"})} data-path={scoped_path(@mount_path, "/webhooks", @current_owner_scope, %{"status" => "dead"})}>
                         <Icon.icon name={:webhooks} size="sm" /> <span>Investigate an incident</span>
                       </a>
                     </li>
@@ -222,7 +232,7 @@ defmodule AccrueAdmin.Components.GlobalSearch do
                       <ul class="ax-command-palette-list">
                         <%= for customer <- @results.customers do %>
                           <li class="ax-command-palette-list-item">
-                            <a class="ax-command-palette-item" href={path(@mount_path, "/customers/#{customer.id}")} data-path={path(@mount_path, "/customers/#{customer.id}")}>
+                            <a class="ax-command-palette-item" href={scoped_path(@mount_path, "/customers/#{customer.id}", @current_owner_scope)} data-path={scoped_path(@mount_path, "/customers/#{customer.id}", @current_owner_scope)}>
                               <%= customer.name || customer.email %>
                             </a>
                           </li>
@@ -235,8 +245,8 @@ defmodule AccrueAdmin.Components.GlobalSearch do
                       <ul class="ax-command-palette-list">
                         <%= for invoice <- @results.invoices do %>
                           <li class="ax-command-palette-list-item">
-                            <a class="ax-command-palette-item" href={path(@mount_path, "/invoices/#{invoice.id}")} data-path={path(@mount_path, "/invoices/#{invoice.id}")}>
-                              <%= invoice.number %> - <%= invoice.amount_due %>
+                            <a class="ax-command-palette-item" href={scoped_path(@mount_path, "/invoices/#{invoice.id}", @current_owner_scope)} data-path={scoped_path(@mount_path, "/invoices/#{invoice.id}", @current_owner_scope)}>
+                              <%= invoice.number || invoice.id %>
                             </a>
                           </li>
                         <% end %>
@@ -248,7 +258,7 @@ defmodule AccrueAdmin.Components.GlobalSearch do
                       <ul class="ax-command-palette-list">
                         <%= for sub <- @results.subscriptions do %>
                           <li class="ax-command-palette-list-item">
-                            <a class="ax-command-palette-item" href={path(@mount_path, "/subscriptions/#{sub.id}")} data-path={path(@mount_path, "/subscriptions/#{sub.id}")}>
+                            <a class="ax-command-palette-item" href={scoped_path(@mount_path, "/subscriptions/#{sub.id}", @current_owner_scope)} data-path={scoped_path(@mount_path, "/subscriptions/#{sub.id}", @current_owner_scope)}>
                               <%= sub.id %> - <%= sub.status %>
                             </a>
                           </li>
@@ -272,6 +282,9 @@ defmodule AccrueAdmin.Components.GlobalSearch do
     """
   end
 
-  defp path(nil, _suffix), do: "#"
-  defp path(mount_path, suffix), do: mount_path <> suffix
+  defp scoped_path(mount_path, suffix, owner_scope, params \\ %{})
+  defp scoped_path(nil, _suffix, _owner_scope, _params), do: "#"
+
+  defp scoped_path(mount_path, suffix, owner_scope, params),
+    do: ScopedPath.build(mount_path, suffix, owner_scope, params)
 end

@@ -7,9 +7,14 @@ function focusable(name, documentLike, { tabIndex = 0 } = {}) {
   return {
     name,
     isConnected: true,
+    hidden: false,
+    disabled: false,
     tabIndex,
     attributes: {},
     focusCalls: [],
+    getAttribute(attribute) {
+      return this.attributes[attribute] || null;
+    },
     focus(options) {
       this.focusCalls.push(options);
       documentLike.activeElement = this;
@@ -427,5 +432,82 @@ test("destroying an open command palette restores focus to the trigger", async (
     await waitForTimers();
 
     assert.equal(documentLike.activeElement, trigger);
+  });
+});
+
+test("Tab stays contained inside an open command palette dialog", () => {
+  const documentLike = fakeDocument();
+  const windowLike = fakeWindow();
+  const wrapper = { dataset: { open: "true" } };
+  const input = focusable("search input", documentLike);
+  const result = focusable("result link", documentLike);
+  const outside = focusable("outside", documentLike);
+
+  const hook = {
+    ...CommandPalette,
+    activeIndex: 0,
+    wasOpen: true,
+    previousFocus: outside,
+    el: {
+      dataset: { target: "#global-search" },
+      addEventListener() {},
+      removeEventListener() {},
+      querySelector(selector) {
+        return selector === "input" ? input : null;
+      },
+      querySelectorAll(selector) {
+        if (selector.includes("a[href]")) return [input, result];
+        return [];
+      },
+      contains(node) {
+        return node === input || node === result;
+      },
+      closest() {
+        return wrapper;
+      }
+    },
+    pushEventTo() {}
+  };
+
+  withBrowser(documentLike, windowLike, () => {
+    hook.mounted();
+
+    result.focus();
+    const forward = {
+      key: "Tab",
+      shiftKey: false,
+      defaultPrevented: false,
+      stopped: false,
+      preventDefault() {
+        this.defaultPrevented = true;
+      },
+      stopPropagation() {
+        this.stopped = true;
+      }
+    };
+    documentLike.dispatch("keydown", forward);
+
+    assert.equal(forward.defaultPrevented, true);
+    assert.equal(documentLike.activeElement, input);
+
+    input.focus();
+    const reverse = {
+      key: "Tab",
+      shiftKey: true,
+      defaultPrevented: false,
+      stopped: false,
+      preventDefault() {
+        this.defaultPrevented = true;
+      },
+      stopPropagation() {
+        this.stopped = true;
+      }
+    };
+    documentLike.dispatch("keydown", reverse);
+
+    assert.equal(reverse.defaultPrevented, true);
+    assert.equal(documentLike.activeElement, result);
+
+    hook.destroyed();
   });
 });

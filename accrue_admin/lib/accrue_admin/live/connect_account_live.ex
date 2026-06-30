@@ -135,7 +135,8 @@ defmodule AccrueAdmin.Live.ConnectAccountLive do
       mount_path={@admin_mount_path}
       page_title={@page_title}
       theme={@theme}
-    active_organization_name={@active_organization_name}
+      current_owner_scope={assigns[:current_owner_scope]}
+      active_organization_name={@active_organization_name}
     >
       <section class="ax-page" phx-window-keydown="step_up_escape" phx-key="escape">
         <Breadcrumbs.breadcrumbs

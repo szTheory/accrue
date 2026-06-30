@@ -34,7 +34,8 @@ defmodule AccrueAdmin.PageLive do
       mount_path={@admin_mount_path}
       page_title="Billing"
       theme={@theme}
-    active_organization_name={@active_organization_name}
+      current_owner_scope={assigns[:current_owner_scope]}
+      active_organization_name={@active_organization_name}
     >
       <section class="ax-page">
         <header class="ax-page-header">

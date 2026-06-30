@@ -13,6 +13,7 @@ defmodule AccrueAdmin.Components.AppShell do
   attr(:mount_path, :string, required: true)
   attr(:page_title, :string, required: true)
   attr(:theme, :string, default: "system")
+  attr(:current_owner_scope, :any, default: nil)
   attr(:active_organization_name, :any, default: nil)
   attr(:nav_attention_counts, :map, default: %{})
   slot(:inner_block, required: true)
@@ -98,6 +99,7 @@ defmodule AccrueAdmin.Components.AppShell do
         module={AccrueAdmin.Components.GlobalSearch}
         id="global-search"
         mount_path={@mount_path}
+        current_owner_scope={@current_owner_scope}
       />
 
       <.dev_toolbar current_path={@current_path} mount_path={@mount_path} />

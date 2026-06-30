@@ -175,7 +175,7 @@ test("Escape closes an open dropdown and restores focus to the summary trigger",
   assert.deepEqual(dropdown.summary.focusCalls, [{ preventScroll: true }]);
 });
 
-test("outside click closes an open dropdown and restores focus", () => {
+test("outside click closes an open dropdown without stealing focus from the clicked target", () => {
   const dropdown = detailsElement();
   const documentLike = fakeDocument([dropdown]);
 
@@ -186,7 +186,7 @@ test("outside click closes an open dropdown and restores focus", () => {
 
   assert.equal(dropdown.open, false);
   assert.equal(dropdown.removeCalls, 1);
-  assert.deepEqual(dropdown.summary.focusCalls, [{ preventScroll: true }]);
+  assert.deepEqual(dropdown.summary.focusCalls, []);
 });
 
 test("inside click leaves an open dropdown alone", () => {

@@ -1,3 +1,5 @@
+import { FocusTrap } from "./focus_trap.js";
+
 export const CommandPalette = {
   mounted() {
     this.activeIndex = 0;
@@ -7,6 +9,13 @@ export const CommandPalette = {
     this.handleGlobalKeydown = this.handleGlobalKeydown.bind(this);
     this.handleInputKeydown = this.handleInputKeydown.bind(this);
     this.handleDocumentClick = this.handleDocumentClick.bind(this);
+    this.focusTrap = {
+      ...FocusTrap,
+      el: this.el,
+      pushEventTo: (...args) => this.pushEventTo(...args),
+      pushEvent: (...args) => this.pushEvent(...args),
+      isFocusTrapActive: () => Boolean(this.isOpen())
+    };
 
     window.addEventListener("keydown", this.handleGlobalKeydown);
     document.addEventListener("click", this.handleDocumentClick);
@@ -15,6 +24,7 @@ export const CommandPalette = {
 
     // Initial setup if already open
     this.setupItems();
+    FocusTrap.mounted.call(this.focusTrap);
     if (this.wasOpen) {
       this.previousFocus = document.activeElement;
       this.focusPaletteInput();
@@ -24,6 +34,10 @@ export const CommandPalette = {
   updated() {
     this.activeIndex = 0;
     this.setupItems();
+    if (this.focusTrap) {
+      this.focusTrap.el = this.el;
+      FocusTrap.updated.call(this.focusTrap);
+    }
 
     const isOpen = this.isOpen();
 
@@ -40,6 +54,11 @@ export const CommandPalette = {
   },
 
   destroyed() {
+    if (this.focusTrap) {
+      FocusTrap.destroyed.call(this.focusTrap);
+      this.focusTrap = null;
+    }
+
     if (this.wasOpen) {
       this.restoreFocus();
       this.previousFocus = null;

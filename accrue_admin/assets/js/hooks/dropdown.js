@@ -114,15 +114,16 @@ function isDropdownDetails(element) {
 
 // Native <details class="ax-dropdown"> menus only toggle when their <summary> is
 // clicked, so they stay open when the user clicks elsewhere. These document-level
-// listeners dismiss any open dropdown on outside-click or Escape and restore focus
-// to the disclosure trigger, matching the expected menu control loop.
+// listeners dismiss any open dropdown on outside-click or Escape. Escape restores
+// focus to the disclosure trigger; pointer outside-click lets the clicked control
+// keep focus normally.
 export function initDropdowns() {
   document.addEventListener(
     "click",
     (event) => {
       document.querySelectorAll(OPEN_DROPDOWN_SELECTOR).forEach((details) => {
         if (!details.contains(event.target)) {
-          closeDropdown(details, { restoreFocus: true });
+          closeDropdown(details, { restoreFocus: false });
         }
       });
       schedulePositionOpenDropdowns();
