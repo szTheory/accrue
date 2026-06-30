@@ -2,15 +2,17 @@
 gsd_state_version: 1.0
 milestone: v1.54
 milestone_name: Admin UI Page-Level Streamlining & Storybook
+current_phase: 200
+current_phase_name: idempotent-verification-sign-off
 status: executing
-stopped_at: Completed 200-01-PLAN.md
-last_updated: "2026-06-30T16:03:19.431Z"
+stopped_at: Completed 200-02-PLAN.md
+last_updated: "2026-06-30T16:29:06.233Z"
 last_activity: 2026-06-30
 progress:
   total_phases: 8
   completed_phases: 7
   total_plans: 59
-  completed_plans: 54
+  completed_plans: 55
   percent: 88
 ---
 
@@ -27,7 +29,7 @@ See: `.planning/PROJECT.md` (updated 2026-06-29 — Phase 198 complete; Phase 19
 ## Current Position
 
 Phase: 200 (idempotent-verification-sign-off) — EXECUTING
-Plan: 2 of 6
+Plan: 3 of 6
 Status: Ready to execute
 Last activity: 2026-06-30
 
@@ -239,6 +241,7 @@ Coverage: 22/22 v1.51 requirements mapped (each REQ-ID → exactly one phase). D
 | Phase 199 P14 | 14m | 2 tasks | 8 files |
 | Phase 199 P15 | 7m 28s | 1 tasks | 2 files |
 | Phase 200 P01 | 14m 9s | 3 tasks | 8 files |
+| Phase 200 P02 | 17min | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -460,6 +463,9 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - [Phase 199]: 199-15: FocusTrap visibility treats connected focus targets as visible in non-browser lifecycle tests while preserving browser style and rect checks. — The closeout JS lifecycle gate exposed a focus-restore bug in the Node test environment; the runtime bundle was rebuilt with the fix.
 - [Phase 200]: 200-01: Keep ComponentRegistry as the single source of truth for generated Storybook metadata through RegistryStory helpers.
 - [Phase 200]: 200-01: Serve Storybook committed CSS/JS from dev-only /dev/storybook asset routes because the backend config uses absolute Storybook asset paths.
+- [Phase 200]: Storybook browser scans target rendered .psb-sandbox content while asset checks prove committed Storybook CSS/JS delivery. — VER-02 and STY-03 need AccrueAdmin rendered story evidence, not upstream PhoenixStorybook chrome audit results.
+- [Phase 200]: Production theme/no-FOUC proof uses accrue_theme cookie/localStorage/system inputs; direct data-theme forcing is isolated to settled axe scans. — The plan prohibits using direct data-theme forcing as persistence proof, so the production test exercises the actual anti-FOUC boot path.
+- [Phase 200]: Page-flow evidence seeds Phase 191 route ids alongside Phase 199 interaction fixtures to close p193 cells while preserving guardrail linkage. — The Phase 193 baseline route helper requires Phase 191 route ids; Phase 199 remains referenced for overlay/focus/scroll regression continuity.
 
 ### Pending Todos
 
@@ -550,8 +556,8 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 
 ## Session Continuity
 
-Last session: 2026-06-30T16:03:19.424Z
-Stopped at: Completed 200-01-PLAN.md
+Last session: 2026-06-30T16:29:06.224Z
+Stopped at: Completed 200-02-PLAN.md
 Resume file: None
 
 ## Operator Next Steps
