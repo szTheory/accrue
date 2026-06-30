@@ -28,6 +28,31 @@ function isFocusable(node) {
   return typeof node.matches !== "function" || node.matches(FOCUSABLE_SELECTOR);
 }
 
+const focusTrapStack = [];
+
+function removeFocusTrap(hook) {
+  const index = focusTrapStack.indexOf(hook);
+  if (index >= 0) focusTrapStack.splice(index, 1);
+}
+
+function pruneFocusTrapStack() {
+  for (let index = focusTrapStack.length - 1; index >= 0; index -= 1) {
+    const hook = focusTrapStack[index];
+    if (!hook?.focusTrapActive || !isConnected(hook.el) || isHidden(hook.el)) {
+      focusTrapStack.splice(index, 1);
+    }
+  }
+}
+
+function topFocusTrap() {
+  pruneFocusTrapStack();
+  return focusTrapStack[focusTrapStack.length - 1] || null;
+}
+
+function isTopFocusTrap(hook) {
+  return topFocusTrap() === hook;
+}
+
 export const FocusTrap = {
   mounted() {
     this.previouslyFocused = null;
@@ -62,6 +87,8 @@ export const FocusTrap = {
   activateFocusTrap() {
     this.previouslyFocused = document.activeElement;
     this.focusTrapActive = true;
+    removeFocusTrap(this);
+    focusTrapStack.push(this);
     document.addEventListener("keydown", this.handleFocusTrapKeydown);
     document.addEventListener("focusin", this.handleFocusTrapFocusin);
     this.scheduleInitialFocus();
@@ -79,6 +106,7 @@ export const FocusTrap = {
     }
 
     this.focusTrapActive = false;
+    removeFocusTrap(this);
 
     if (restoreFocus) {
       this.restoreFocus();
@@ -89,6 +117,7 @@ export const FocusTrap = {
     this.initialFocusTimer = setTimeout(() => {
       this.initialFocusTimer = null;
       if (!this.focusTrapActive) return;
+      if (!isTopFocusTrap(this)) return;
       if (this.el.contains?.(document.activeElement)) return;
       this.initialFocusTarget()?.focus?.();
     }, 0);
@@ -131,6 +160,7 @@ export const FocusTrap = {
 
   handleFocusTrapKeydown(event) {
     if (!this.focusTrapActive) return;
+    if (!isTopFocusTrap(this)) return;
 
     if (event.key === "Escape") {
       event.preventDefault();
@@ -167,6 +197,7 @@ export const FocusTrap = {
 
   handleFocusTrapFocusin(event) {
     if (!this.focusTrapActive || this.el.contains?.(event.target)) return;
+    if (!isTopFocusTrap(this)) return;
     const first = this.focusableElements()[0] || this.fallbackFocusTarget();
     first?.focus?.();
   },

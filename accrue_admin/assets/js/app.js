@@ -8,6 +8,7 @@ import { CommandPalette } from "./hooks/command_palette";
 import { ConnectionState } from "./hooks/connection_state";
 import { FocusTrap } from "./hooks/focus_trap";
 import { Overlay } from "./hooks/overlay";
+import { initScrollLockReconciler } from "./hooks/scroll_lock";
 import topbar from "../vendor/topbar.js";
 
 // Navigation loading bar. Runs at deferred-load time, after the runtime brand
@@ -40,6 +41,7 @@ ready(() => {
   initThemeControls();
   initShellNav();
   initDropdowns();
+  initScrollLockReconciler();
 });
 
 const csrfToken = document.querySelector("meta[name='csrf-token']")?.getAttribute("content");

@@ -217,6 +217,65 @@ test("outside focus is redirected back inside the active trap", () => {
   });
 });
 
+test("nested traps only enforce focus and Escape from the topmost overlay", () => {
+  const documentLike = fakeDocument();
+  const drawerTrigger = focusable("drawer-trigger", documentLike);
+  const drawerButton = focusable("drawer-button", documentLike);
+  const modalInput = focusable("modal-input", documentLike);
+  const outside = focusable("outside", documentLike);
+  const drawerRoot = rootElement([drawerButton], {
+    focusTrapCloseEvent: "close_drawer"
+  });
+  const modalRoot = rootElement([modalInput], {
+    focusTrapCloseEvent: "close_modal"
+  });
+  const pushed = [];
+
+  withDocument(documentLike, () => {
+    drawerTrigger.focus();
+
+    const drawerHook = {
+      ...FocusTrap,
+      el: drawerRoot,
+      pushEvent(eventName, payload) {
+        pushed.push(["drawer", eventName, payload]);
+      }
+    };
+    const modalHook = {
+      ...FocusTrap,
+      el: modalRoot,
+      pushEvent(eventName, payload) {
+        pushed.push(["modal", eventName, payload]);
+      }
+    };
+
+    drawerHook.mounted();
+    drawerButton.focus();
+    modalHook.mounted();
+
+    modalInput.focus();
+    documentLike.dispatch("focusin", { target: modalInput });
+    assert.equal(documentLike.activeElement, modalInput);
+
+    outside.focus();
+    documentLike.dispatch("focusin", { target: outside });
+    assert.equal(documentLike.activeElement, modalInput);
+
+    const escape = keyEvent("Escape");
+    documentLike.dispatch("keydown", escape);
+    assert.equal(escape.defaultPrevented, true);
+    assert.deepEqual(pushed, [["modal", "close_modal", {}]]);
+
+    modalHook.destroyed();
+
+    outside.focus();
+    documentLike.dispatch("focusin", { target: outside });
+    assert.equal(documentLike.activeElement, drawerButton);
+
+    drawerHook.destroyed();
+  });
+});
+
 test("Escape invokes only the configured close event", () => {
   const documentLike = fakeDocument();
   const cancel = focusable("cancel", documentLike);

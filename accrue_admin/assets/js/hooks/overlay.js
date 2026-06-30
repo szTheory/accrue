@@ -17,6 +17,15 @@ function scrollLockEnabled(element) {
   return attr === "true" || attr === "" || attr === undefined;
 }
 
+function scheduleScrollLockReconcile() {
+  if (typeof window === "undefined") {
+    ScrollLock.reconcileActiveLocks();
+    return;
+  }
+
+  window.setTimeout(() => ScrollLock.reconcileActiveLocks(), 0);
+}
+
 export const Overlay = {
   ...FocusTrap,
 
@@ -24,16 +33,19 @@ export const Overlay = {
     this.overlayScrollLocked = false;
     FocusTrap.mounted.call(this);
     this.syncOverlayScrollLock();
+    scheduleScrollLockReconcile();
   },
 
   updated() {
     FocusTrap.updated.call(this);
     this.syncOverlayScrollLock();
+    scheduleScrollLockReconcile();
   },
 
   destroyed() {
     this.releaseOverlayScrollLock();
     FocusTrap.destroyed.call(this);
+    scheduleScrollLockReconcile();
   },
 
   syncOverlayScrollLock() {

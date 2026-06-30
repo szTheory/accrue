@@ -59,9 +59,10 @@ function fakeBrowser({ scrollY = 0, innerWidth = 1024, clientWidth = 1008 } = {}
   const documentLike = {
     documentElement,
     body,
+    shell,
     activeScrollLocks,
     querySelector(selector) {
-      return selector === "#accrue-admin-shell" ? shell : null;
+      return selector === "#accrue-admin-shell" ? this.shell : null;
     },
     querySelectorAll(selector) {
       return selector === "[data-scroll-lock]" ? activeScrollLocks : [];
@@ -216,7 +217,7 @@ test("rapid lock and unlock cycles restore prior styles, inert state, and scroll
   });
 });
 
-test("reconcile keeps shell inert when a LiveView patch replaces an open drawer with step-up overlays", () => {
+test("reconcile keeps the current shell inert when a LiveView patch replaces it during step-up", () => {
   const browser = fakeBrowser({ scrollY: 128 });
   const drawer = { dataset: { presentation: "drawer", scrollLock: "true" } };
   const modal = { dataset: { presentation: "modal", scrollLock: "true" } };
@@ -227,13 +228,20 @@ test("reconcile keeps shell inert when a LiveView patch replaces an open drawer 
     ScrollLock.lock();
     assert.equal(shell.hasAttribute("inert"), true);
 
+    const replacementShell = shellElement();
+    documentLike.shell = replacementShell;
     activeScrollLocks.push(modal);
-    ScrollLock.unlock();
-    assert.equal(shell.hasAttribute("inert"), false);
+    ScrollLock.lock();
+    assert.equal(replacementShell.hasAttribute("inert"), true);
 
+    ScrollLock.unlock();
+    assert.equal(documentLike.documentElement.style.position, "fixed");
+    assert.equal(replacementShell.hasAttribute("inert"), true);
+
+    activeScrollLocks.splice(0, activeScrollLocks.length);
     ScrollLock.reconcileActiveLocks();
 
-    assert.equal(documentLike.documentElement.style.position, "fixed");
-    assert.equal(shell.hasAttribute("inert"), true);
+    assert.equal(documentLike.documentElement.style.position, "");
+    assert.equal(replacementShell.hasAttribute("inert"), false);
   });
 });

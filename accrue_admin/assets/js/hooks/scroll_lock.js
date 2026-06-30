@@ -1,9 +1,13 @@
 const SHELL_SELECTOR = "#accrue-admin-shell";
+const SCROLL_LOCK_SELECTOR = "[data-scroll-lock]";
 const SCROLLBAR_COMPENSATION_VAR = "--ax-scrollbar-comp";
+const SCROLL_LOCK_PRESENTATIONS = new Set(["modal", "drawer"]);
 
 let lockCount = 0;
 let savedScrollY = 0;
 let previousState = null;
+let reconcileObserver = null;
+let reconcileTimer = null;
 
 function browserDocument() {
   return typeof document === "undefined" ? null : document;
@@ -53,6 +57,17 @@ function setShellInert(shell) {
   }
 
   shell.setAttribute?.("inert", "");
+}
+
+function ensureCurrentShellInert(doc) {
+  const shell = doc?.querySelector?.(SHELL_SELECTOR);
+  if (!shell) return;
+
+  if (previousState && previousState.shellInert?.shell !== shell) {
+    previousState.shellInert = shellInertState(shell);
+  }
+
+  setShellInert(shell);
 }
 
 function restoreShellInert(state) {
@@ -122,18 +137,63 @@ function restoreLock(state, win) {
   win?.scrollTo?.(0, savedScrollY);
 }
 
+function scrollLockElementEnabled(element) {
+  const presentation = element?.dataset?.presentation || "modal";
+  const attr = element?.dataset?.scrollLock;
+
+  if (!SCROLL_LOCK_PRESENTATIONS.has(presentation)) return false;
+  if (attr === "false") return false;
+
+  return attr === "true" || attr === "" || attr === undefined;
+}
+
+function activeScrollLockCount(doc) {
+  const elements = doc?.querySelectorAll?.(SCROLL_LOCK_SELECTOR) || [];
+
+  return Array.from(elements).filter(scrollLockElementEnabled).length;
+}
+
+function applyFirstLock(doc, win) {
+  if (!doc?.documentElement || !doc?.body) return false;
+
+  previousState = captureState(doc, win);
+  applyLock(previousState, win);
+
+  return true;
+}
+
+function scheduleActiveLockReconcile() {
+  const win = browserWindow();
+
+  if (win?.setTimeout) {
+    if (reconcileTimer && win.clearTimeout) {
+      win.clearTimeout(reconcileTimer);
+    }
+
+    reconcileTimer = win.setTimeout(() => {
+      reconcileTimer = null;
+      ScrollLock.reconcileActiveLocks();
+    }, 0);
+
+    return;
+  }
+
+  ScrollLock.reconcileActiveLocks();
+}
+
 export const ScrollLock = {
   lock() {
     lockCount += 1;
-    if (lockCount > 1) return lockCount;
 
     const doc = browserDocument();
     const win = browserWindow();
 
-    if (!doc?.documentElement || !doc?.body) return lockCount;
+    if (lockCount > 1) {
+      ensureCurrentShellInert(doc);
+      return lockCount;
+    }
 
-    previousState = captureState(doc, win);
-    applyLock(previousState, win);
+    applyFirstLock(doc, win);
 
     return lockCount;
   },
@@ -141,22 +201,96 @@ export const ScrollLock = {
   unlock() {
     if (lockCount === 0) return 0;
 
+    const doc = browserDocument();
+    const win = browserWindow();
+
     lockCount -= 1;
-    if (lockCount > 0) return lockCount;
+    if (lockCount > 0) {
+      ensureCurrentShellInert(doc);
+      return lockCount;
+    }
+
+    const activeCount = activeScrollLockCount(doc);
+
+    if (activeCount > 0) {
+      if (!previousState && !applyFirstLock(doc, win)) return lockCount;
+
+      ensureCurrentShellInert(doc);
+      lockCount = activeCount;
+      return lockCount;
+    }
 
     const state = previousState;
     previousState = null;
 
     if (state) {
-      restoreLock(state, browserWindow());
+      restoreLock(state, win);
     }
 
     return lockCount;
+  },
+
+  reconcileActiveLocks() {
+    const doc = browserDocument();
+    const win = browserWindow();
+    const activeCount = activeScrollLockCount(doc);
+
+    if (activeCount > 0) {
+      if (lockCount === 0 || !previousState) {
+        if (!applyFirstLock(doc, win)) return lockCount;
+      }
+
+      ensureCurrentShellInert(doc);
+      lockCount = activeCount;
+      return lockCount;
+    }
+
+    if (lockCount > 0 && previousState) {
+      restoreLock(previousState, win);
+    }
+
+    lockCount = 0;
+    previousState = null;
+
+    return lockCount;
+  },
+
+  initReconciler() {
+    const doc = browserDocument();
+    const win = browserWindow();
+    const Observer = win?.MutationObserver || globalThis.MutationObserver;
+
+    if (!doc?.body || reconcileObserver || !Observer) {
+      this.reconcileActiveLocks();
+      return;
+    }
+
+    reconcileObserver = new Observer(() => scheduleActiveLockReconcile());
+    reconcileObserver.observe(doc.body, {
+      attributes: true,
+      attributeFilter: ["data-scroll-lock", "data-presentation"],
+      childList: true,
+      subtree: true
+    });
+
+    scheduleActiveLockReconcile();
   }
 };
 
 export function resetScrollLockForTests() {
+  reconcileObserver?.disconnect?.();
+  reconcileObserver = null;
+
+  if (reconcileTimer && browserWindow()?.clearTimeout) {
+    browserWindow().clearTimeout(reconcileTimer);
+  }
+
+  reconcileTimer = null;
   lockCount = 0;
   savedScrollY = 0;
   previousState = null;
+}
+
+export function initScrollLockReconciler() {
+  ScrollLock.initReconciler();
 }
