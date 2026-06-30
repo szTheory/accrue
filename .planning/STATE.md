@@ -4,13 +4,13 @@ milestone: v1.54
 milestone_name: Admin UI Page-Level Streamlining & Storybook
 status: executing
 stopped_at: Completed 199-09-PLAN.md
-last_updated: "2026-06-30T03:27:48.345Z"
+last_updated: "2026-06-30T04:41:27.274Z"
 last_activity: 2026-06-30
 progress:
   total_phases: 8
   completed_phases: 6
   total_plans: 53
-  completed_plans: 50
+  completed_plans: 51
   percent: 75
 ---
 
@@ -27,7 +27,7 @@ See: `.planning/PROJECT.md` (updated 2026-06-29 — Phase 198 complete; Phase 19
 ## Current Position
 
 Phase: 199 (cross-cutting-interaction-overlay-correctness-fixture-stress) — EXECUTING
-Plan: 13 of 15
+Plan: 14 of 15
 Status: Ready to execute
 Last activity: 2026-06-30
 
@@ -235,6 +235,7 @@ Coverage: 22/22 v1.51 requirements mapped (each REQ-ID → exactly one phase). D
 | Phase 199 P07 | 5m 35s | 1 tasks | 4 files |
 | Phase 199 P08 | 40m | 1 tasks | 7 files |
 | Phase 199 P09 | 9 min | 1 tasks | 4 files |
+| Phase 199 P10 | 69m30s | 3 tasks | 8 files |
 
 ## Accumulated Context
 
@@ -449,6 +450,8 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - [Phase 199]: Applied horizontal clamping through the existing transform pipeline for floating dropdown panels. — Keeps mobile action-menu animation and final geometry aligned across viewport stress cases.
 - [Phase 199]: 199-09: Treat malformed accrue_theme cookies as untrusted input and fall back to localStorage/default theme resolution before CSS loads. — Mitigates T-199-19 and prevents malformed cookies from aborting the anti-FOUC theme boot path.
 - [Phase 199]: 199-09: Keep fixed-shell audit coverage source-level and marker-backed in app.css. — The existing overlay architecture already satisfies the browser contract, so source markers cover transform/filter/backdrop-filter/contain/perspective risks without runtime churn.
+- [Phase 199]: 199-10: Phase 199 fixture browser checks use a single phase199-interaction-matrix seed with compatibility aliases for existing Phase 199 targets. — Keeps the route-flow stress data deterministic while avoiding duplicate fixture setup across legacy Phase 199 test targets.
+- [Phase 199]: 199-10: Overlay and focus assertions wait for settled LiveView cleanup, and staged drawer teardown restores focus to the stable main region. — Browser failures showed focus and overlay cleanup are asynchronous across route patches and staged action drawers.
 
 ### Pending Todos
 
@@ -539,7 +542,7 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 
 ## Session Continuity
 
-Last session: 2026-06-30T03:27:03.110Z
+Last session: 2026-06-30T04:41:09.299Z
 Stopped at: Completed 199-09-PLAN.md
 Resume file: None
 
