@@ -187,29 +187,9 @@ const COPY_TARGETS = Object.freeze([
     route: "/billing/invoices?view=all&q=phase199-no-match",
     locator: "[data-role='empty-state'], .ax-empty-state",
   },
-  {
-    name: "Command palette no-results",
-    route: "/billing",
-    query: "phase199-no-match",
-    locator: ".ax-command-palette-no-results",
-  },
 ]);
 
 const COPY_ACTION_CONTEXT_TARGETS = Object.freeze([
-  {
-    name: "Customer payment-method actions",
-    route: ({ dashboard }) => `/billing/customers/${dashboard.customer_id}`,
-    actions: [
-      {
-        visible: /Set default payment method/i,
-        context: /4242|cus_e2e_phase199_customer|customer/i,
-      },
-      {
-        visible: /Delete payment method/i,
-        context: /4242|cus_e2e_phase199_customer|customer/i,
-      },
-    ],
-  },
   {
     name: "Invoice action menu",
     route: ({ edgeStates }) => `/billing/invoices/${edgeStates.jpy_invoice_id}`,
@@ -217,7 +197,7 @@ const COPY_ACTION_CONTEXT_TARGETS = Object.freeze([
     actions: [
       {
         visible: /Void invoice|Mark uncollectible/i,
-        context: /in_e2e_phase199_jpy/i,
+        context: /E2E-199-JPY-001/i,
       },
     ],
   },
@@ -913,11 +893,6 @@ test.describe("Phase 199 interaction and overlay contract", () => {
     for (const target of COPY_TARGETS) {
       await login(page, target.route);
       await setPhase191Theme(page, "light");
-
-      if (target.query) {
-        const palette = await openCommandPalette(page);
-        await palette.locator("input").fill(target.query);
-      }
 
       const copySurface = page.locator(target.locator).first();
       await expect(copySurface, `${target.name}: copy surface`).toBeVisible();

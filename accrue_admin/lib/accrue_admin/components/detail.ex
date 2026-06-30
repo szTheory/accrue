@@ -135,7 +135,11 @@ defmodule AccrueAdmin.Components.Detail do
   end
 
   defp row_action_label(row), do: row_value(row, :action_label)
-  defp row_action_context(row), do: row_value(row, :action_context)
+
+  defp row_action_context(row) do
+    row_value(row, :action_context) || row_value(row, :hidden_context) || row_value(row, :context)
+  end
+
   defp row_action_event(row), do: row_value(row, :action_event)
   defp row_action_href(row), do: row_value(row, :action_href)
   defp row_action_target(row), do: row_value(row, :action_target)

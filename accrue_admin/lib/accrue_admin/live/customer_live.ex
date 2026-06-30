@@ -260,7 +260,8 @@ defmodule AccrueAdmin.Live.CustomerLive do
                       phx-value-payment_method_id={row.payment_method_id}
                       data-role="open-set-default-payment-method"
                     >
-                      <%= Copy.customer_payment_methods_set_default_action() %>
+                      <span><%= Copy.customer_payment_methods_set_default_action() %></span>
+                      <span class="ax-visually-hidden"><%= Copy.action_hidden_object_context(resource: "payment method", object: row.label) %></span>
                     </button>
                     <button
                       :if={row.delete?}
@@ -271,7 +272,8 @@ defmodule AccrueAdmin.Live.CustomerLive do
                       phx-value-payment_method_id={row.payment_method_id}
                       data-role="open-delete-payment-method"
                     >
-                      <%= Copy.customer_payment_methods_delete_action() %>
+                      <span><%= Copy.customer_payment_methods_delete_action() %></span>
+                      <span class="ax-visually-hidden"><%= Copy.action_hidden_object_context(resource: "payment method", object: row.label) %></span>
                     </button>
                   </div>
                 </div>
