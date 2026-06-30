@@ -101,7 +101,6 @@ require_fixed "$runner_file" "cd accrue_admin && env -u NO_COLOR npx playwright 
 require_fixed "$runner_file" "cd accrue_admin && npm run e2e:phase199"
 require_fixed "$runner_file" "cd accrue_admin && env -u NO_COLOR npx playwright test e2e/reduced-motion.spec.js --timeout=60000 --workers=1"
 require_fixed "$runner_file" "cd accrue_admin && npm run phase200:scorecard"
-require_fixed "$runner_file" "node scripts/ci/verify_phase200_scorecard.mjs"
 require_fixed "$runner_file" "cd accrue_admin && npm run phase200:signoff"
 
 storybook_script="$(package_script_value "phase200:storybook")"
@@ -118,13 +117,13 @@ printf '%s\n' "$storybook_script" | grep -Fq "test/accrue_admin/theme_test.exs" 
 printf '%s\n' "$storybook_script" | grep -Fq "e2e/admin-storybook-a11y-phase200.spec.js" ||
   fail "phase200:storybook must run rendered Storybook Phase 200 Playwright spec"
 
-printf '%s\n' "$scorecard_script" | grep -Fq "node e2e/phase200-scorecard.mjs --baseline-only" ||
-  fail "phase200:scorecard must regenerate/verify the union baseline deterministically"
-printf '%s\n' "$scorecard_script" | grep -Fq "node ../scripts/ci/verify_phase200_scorecard.mjs --baseline-only" ||
-  fail "phase200:scorecard must run the baseline scorecard verifier"
+printf '%s\n' "$scorecard_script" | grep -Fq "node e2e/phase200-scorecard.mjs" ||
+  fail "phase200:scorecard must regenerate final scorecard artifacts"
+printf '%s\n' "$scorecard_script" | grep -Fq "node ../scripts/ci/verify_phase200_scorecard.mjs" ||
+  fail "phase200:scorecard must run the full scorecard verifier"
 
-printf '%s\n' "$signoff_script" | grep -Fq "node ../scripts/ci/verify_phase200_signoff.mjs" ||
-  fail "phase200:signoff must run the sign-off verifier, not the sign-off generator"
+printf '%s\n' "$signoff_script" | grep -Fq "node ../scripts/ci/verify_phase200_signoff.mjs --require-accept" ||
+  fail "phase200:signoff must require ACCEPT in CI/final guardrails"
 
 printf '%s\n' "$guardrails_script" | grep -Fq "bash ../scripts/ci/verify_phase200_admin_guardrails.sh" ||
   fail "phase200:guardrails must point at ../scripts/ci/verify_phase200_admin_guardrails.sh"

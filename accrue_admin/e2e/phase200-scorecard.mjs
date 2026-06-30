@@ -166,10 +166,12 @@ function scoreValue(value) {
   return number;
 }
 
-function normalizeCoverage(value) {
-  const coverage = String(value || "covered");
-  if (COVERAGE_RANK.has(coverage)) return coverage;
-  return "covered";
+function normalizeCoverage(value, label = "coverage_status") {
+  const coverage = String(value ?? "").trim();
+  if (!COVERAGE_RANK.has(coverage)) {
+    throw new Error(`${label}: invalid coverage_status "${value}"`);
+  }
+  return coverage;
 }
 
 function idDimension(cellId) {
@@ -322,7 +324,7 @@ function contractedCell(row, sourceRef = null, sourceDir = repoRoot) {
     dimension,
     dimension_name: dimensionName,
     score: scoreValue(row.score ?? row.final_score),
-    coverage_status: normalizeCoverage(row.coverage_status),
+    coverage_status: normalizeCoverage(row.coverage_status, `${cellId || "(missing cell_id)"} coverage_status`),
     evidence_refs: allowedEvidenceRefs(row, sourceRef, sourceDir),
     evidence_lenses: rowLenses(row, sourceRef).filter((lens) => ALLOWED_LENSES.has(lens)),
     lens_results: Array.isArray(row.lens_results) ? row.lens_results : [],
@@ -619,7 +621,18 @@ function evidenceInventory(files, outputPaths, referencedRefs = []) {
   };
 }
 
-function renderMarkdown({ finalCells, deltaRows, regressions, manifestContent, dryRun }) {
+function maintainerSignoffState(markdownPath) {
+  const signoffPath = path.join(path.dirname(markdownPath), "200-SIGN-OFF.md");
+  if (!fs.existsSync(signoffPath)) return "pending 200-SIGN-OFF.md";
+  const body = fs.readFileSync(signoffPath, "utf8");
+  const approved = body.match(/^Final maintainer decision: ACCEPT \(maintainer approved (20\d{2}-\d{2}-\d{2})\)\./m);
+  if (approved) return `ACCEPT (approved ${approved[1]} in 200-SIGN-OFF.md)`;
+  if (/^Final maintainer decision: ACCEPT\b/m.test(body)) return "ACCEPT in 200-SIGN-OFF.md";
+  if (/^Final maintainer decision: REJECT\b/m.test(body)) return "REJECT in 200-SIGN-OFF.md";
+  return "pending 200-SIGN-OFF.md";
+}
+
+function renderMarkdown({ finalCells, deltaRows, regressions, manifestContent, dryRun, markdownPath }) {
   const covered = finalCells.filter((cell) => cell.coverage_status === "covered").length;
   const p193Open = regressions.filter((row) => String(row.kind || "").startsWith("p193-")).length;
   const scoreDowngrades = regressions.filter((row) => row.kind === "score-downgrade").length;
@@ -656,7 +669,7 @@ ${blockerLines.join("\n")}
 - Missing evidence rows: ${missingEvidence}
 - Open p193 closure rows: ${p193Open}
 - Manifest evidence entries: ${manifestContent.evidence.length}
-- Maintainer sign-off state: pending 200-SIGN-OFF.md
+- Maintainer sign-off state: ${maintainerSignoffState(markdownPath)}
 
 ## Canonical Artifacts
 
@@ -715,7 +728,7 @@ export function generatePhase200Scorecard(options = {}) {
     ...regressions.flatMap((row) => row.evidence_refs || []),
   ];
   const manifestContent = evidenceInventory(artifactFiles.length > 0 ? artifactFiles : lensFiles, outputPaths, referencedRefs);
-  const markdownContent = renderMarkdown({ finalCells, deltaRows, regressions, manifestContent, dryRun });
+  const markdownContent = renderMarkdown({ finalCells, deltaRows, regressions, manifestContent, dryRun, markdownPath: outputPaths.markdown });
 
   const packageResult = {
     baselineUnion: unionRows,
@@ -874,6 +887,15 @@ function runSelfTest() {
     assertSelfTest(
       "coverage downgrade produces coverage-downgrade row",
       coverageDowngrade.regressions.some((row) => row.kind === "coverage-downgrade")
+    );
+
+    const invalidCoverage = runFixture(path.join(root, "invalid-coverage"), baseline, p193, [
+      fixtureCell({ coverage_status: "failed", evidence_refs: ["accrue_admin/test-results/phase200/fixture-component.json"] }),
+      ...p193Evidence,
+    ]);
+    assertSelfTest(
+      "invalid coverage status produces blocking malformed evidence row",
+      invalidCoverage.regressions.some((row) => row.kind === "new-regression" && /invalid coverage_status/.test(row.message))
     );
 
     const missingEvidence = runFixture(path.join(root, "missing-evidence"), baseline, p193, [

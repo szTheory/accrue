@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import { createHash } from "node:crypto";
 import { fileURLToPath } from "node:url";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -223,6 +224,63 @@ function validArtifactRef(ref) {
   return ALLOWED_ARTIFACT_ROOTS.some((root) => value.startsWith(root));
 }
 
+function artifactRefPath(ref) {
+  const value = String(ref || "");
+  if (value.startsWith("playwright-trace:")) return null;
+  if (new RegExp(`^${PHASE200_DIR.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}/evidence/[^/]+:`).test(value)) return null;
+  if (value.startsWith(`${PHASE200_DIR}/evidence/e2e/`)) return null;
+  return path.join(REPO_ROOT, value);
+}
+
+function shouldRequireDiskArtifact(ref) {
+  const value = String(ref || "");
+  if (!artifactRefPath(value)) return false;
+  return (
+    value.startsWith(`${PHASE200_DIR}/`) ||
+    value.startsWith("accrue_admin/test-results/phase200/") ||
+    value.startsWith("accrue_admin/playwright-report/phase200/")
+  );
+}
+
+function sha256(filePath) {
+  return createHash("sha256").update(fs.readFileSync(filePath)).digest("hex");
+}
+
+function validateArtifactExists(ref, label, failures, manifestEntry = null, { requireNonEmpty = false } = {}) {
+  if (!shouldRequireDiskArtifact(ref)) return;
+  const absPath = artifactRefPath(ref);
+  if (!absPath) return;
+
+  if (!fs.existsSync(absPath)) {
+    failures.missingFiles.push(`${label}: artifact ref "${ref}" does not exist on disk.`);
+    return;
+  }
+  const stat = fs.statSync(absPath);
+  if (!stat.isFile()) {
+    failures.badArtifactRefs.push(`${label}: artifact ref "${ref}" is not a file.`);
+    return;
+  }
+  if (requireNonEmpty && stat.size <= 0) {
+    failures.missingEvidence.push(`${label}: evidence ref "${ref}" is empty.`);
+  }
+
+  const expectedBytes = manifestEntry?.bytes;
+  if (expectedBytes !== undefined && Number(expectedBytes) !== stat.size) {
+    failures.badArtifactRefs.push(`${label}: ${ref} byte count mismatch (manifest ${expectedBytes}, disk ${stat.size}).`);
+  }
+
+  const expectedChecksum = manifestEntry?.sha256 || manifestEntry?.checksum || manifestEntry?.digest;
+  if (expectedChecksum) {
+    const expected = String(expectedChecksum).replace(/^sha256:/, "");
+    if (/^[a-f0-9]{64}$/i.test(expected)) {
+      const actual = sha256(absPath);
+      if (actual !== expected.toLowerCase()) {
+        failures.badArtifactRefs.push(`${label}: ${ref} SHA-256 mismatch.`);
+      }
+    }
+  }
+}
+
 function validateArtifactRef(ref, label, failures) {
   if (!validArtifactRef(ref)) {
     failures.badArtifactRefs.push(`${label}: invalid artifact ref "${ref}" (repo-relative generated roots only).`);
@@ -259,6 +317,7 @@ function validateManifest(manifestPath, failures) {
   const manifest = readJson(manifestPath, failures, "artifacts.manifest.json");
   const entries = manifest ? manifestEntries(manifest) : [];
   const refs = new Set();
+  const byRef = new Map();
 
   if (entries.length === 0) {
     failures.manifest.push("artifacts.manifest.json must list at least one artifact/evidence entry.");
@@ -271,14 +330,16 @@ function validateManifest(manifestPath, failures) {
       continue;
     }
     validateArtifactRef(ref, "artifacts.manifest.json", failures);
+    validateArtifactExists(ref, "artifacts.manifest.json", failures, entry);
     validateChecksum(entry, "artifacts.manifest.json", failures);
     refs.add(String(ref));
+    byRef.set(String(ref), entry);
   }
 
-  return { entries, refs };
+  return { entries, refs, byRef };
 }
 
-function validateEvidence(row, label, failures, manifestRefs) {
+function validateEvidence(row, label, failures, manifestRefs, manifestEntriesByRef = new Map()) {
   const refs = evidenceRefs(row);
   if (refs.length === 0) {
     failures.missingEvidence.push(`${label}: ${row.cell_id || row.id || "(row)"} lacks evidence refs.`);
@@ -290,6 +351,7 @@ function validateEvidence(row, label, failures, manifestRefs) {
     if (manifestRefs.size > 0 && !manifestRefs.has(ref)) {
       failures.unmanifestedEvidence.push(`${label}: ${row.cell_id || row.id || "(row)"} references ${ref} not present in artifacts.manifest.json.`);
     }
+    validateArtifactExists(ref, label, failures, manifestEntriesByRef.get(ref), { requireNonEmpty: true });
   }
 
   for (const lens of rowLenses(row)) {
@@ -299,7 +361,7 @@ function validateEvidence(row, label, failures, manifestRefs) {
   }
 }
 
-function compareFinalCells(baselineRows, finalRows, deltaRows, manifestRefs, failures) {
+function compareFinalCells(baselineRows, finalRows, deltaRows, manifestRefs, manifestEntriesByRef, failures) {
   const baselineById = new Map();
   for (const cell of baselineRows) {
     validateCellShape(cell, failures, "baseline.union.cells.json");
@@ -314,7 +376,7 @@ function compareFinalCells(baselineRows, finalRows, deltaRows, manifestRefs, fai
     if (!baselineById.has(cell.cell_id)) {
       failures.invalidComparableCells.push(`${cell.cell_id} is not present in baseline.union.cells.json.`);
     }
-    validateEvidence(cell, "final.cells.json", failures, manifestRefs);
+    validateEvidence(cell, "final.cells.json", failures, manifestRefs, manifestEntriesByRef);
     finalById.set(cell.cell_id, cell);
   }
   validateUniqueCellIds(finalRows, "final.cells.json", failures);
@@ -356,7 +418,7 @@ function compareFinalCells(baselineRows, finalRows, deltaRows, manifestRefs, fai
   for (const row of deltaRows) {
     const kind = String(row.kind || row.type || row.reason || "").toLowerCase();
     if (/downgrade|regression|correction/.test(kind) || row.baseline_correction || row.regression) {
-      validateEvidence(row, "scorecard.delta.json", failures, manifestRefs);
+      validateEvidence(row, "scorecard.delta.json", failures, manifestRefs, manifestEntriesByRef);
     }
   }
 }
@@ -417,6 +479,7 @@ export function verifyPhase200Scorecard(options = {}) {
 
   const manifestResult = validateManifest(paths.manifestPath, failures);
   const manifestRefs = manifestResult.refs;
+  const manifestEntriesByRef = manifestResult.byRef;
   const finalRows = asArray(readJson(paths.finalCellsPath, failures, "final.cells.json"), "final.cells.json", failures);
   const deltaRows = asArray(readJson(paths.deltaPath, failures, "scorecard.delta.json"), "scorecard.delta.json", failures);
   const regressions = readNdjson(paths.regressionsPath, failures, "regressions.ndjson");
@@ -424,11 +487,11 @@ export function verifyPhase200Scorecard(options = {}) {
   if (regressions.length > 0) {
     for (const row of regressions) {
       failures.regressions.push(`${row.id || row.cell_id || "(regression row)"} blocks sign-off; regressions.ndjson must be empty.`);
-      validateEvidence(row, "regressions.ndjson", failures, manifestRefs);
+      validateEvidence(row, "regressions.ndjson", failures, manifestRefs, manifestEntriesByRef);
     }
   }
 
-  compareFinalCells(baselineRows, finalRows, deltaRows, manifestRefs, failures);
+  compareFinalCells(baselineRows, finalRows, deltaRows, manifestRefs, manifestEntriesByRef, failures);
 
   return {
     ok: failureCount(failures) === 0,
@@ -499,13 +562,22 @@ function fixtureP193(overrides = {}) {
 }
 
 function fixturePackage(root, overrides = {}) {
-  const componentRef = "accrue_admin/test-results/phase200/fixture-component.json";
-  const pageFlowRef = "accrue_admin/test-results/phase200/page-flow-evidence.json";
-  const baseline = overrides.baseline || [fixtureCell(), fixtureP193()];
+  const fixtureScope = `.tmp-scorecard-verifier/${path.basename(path.dirname(root))}-${path.basename(root)}`;
+  const componentRef = `${PHASE200_DIR}/${fixtureScope}/fixture-component.json`;
+  const pageFlowRef = `${PHASE200_DIR}/${fixtureScope}/page-flow-evidence.json`;
+  const componentAbs = path.join(REPO_ROOT, componentRef);
+  const pageFlowAbs = path.join(REPO_ROOT, pageFlowRef);
+  fs.mkdirSync(path.dirname(componentAbs), { recursive: true });
+  fs.mkdirSync(path.dirname(pageFlowAbs), { recursive: true });
+  writeJson(componentAbs, { rows: [{ status: "passed", fixture: "component" }] });
+  writeJson(pageFlowAbs, { rows: [{ status: "passed", fixture: "page-flow" }] });
+  const componentStat = fs.statSync(componentAbs);
+  const pageFlowStat = fs.statSync(pageFlowAbs);
+  const baseline = overrides.baseline || [fixtureCell({ evidence_refs: [componentRef] }), fixtureP193()];
   const final =
     overrides.final ||
     [
-      fixtureCell({ score: 3 }),
+      fixtureCell({ score: 3, evidence_refs: [componentRef] }),
       fixtureP193({
         score: 2,
         coverage_status: "covered",
@@ -526,8 +598,8 @@ function fixturePackage(root, overrides = {}) {
   const regressions = overrides.regressions || "";
   const manifest = overrides.manifest || {
     evidence: [
-      { path: componentRef, sha256: "a".repeat(64), bytes: 42 },
-      { path: pageFlowRef, sha256: "b".repeat(64), bytes: 42 },
+      { path: componentRef, sha256: sha256(componentAbs), bytes: componentStat.size },
+      { path: pageFlowRef, sha256: sha256(pageFlowAbs), bytes: pageFlowStat.size },
       { path: `${PHASE200_DIR}/baseline.union.cells.json`, generated: true },
       { path: `${PHASE200_DIR}/final.cells.json`, generated: true },
       { path: `${PHASE200_DIR}/scorecard.delta.json`, generated: true },
@@ -612,6 +684,37 @@ function runSelfTest() {
     assertSelfTest("unmanifested evidence refs exit non-zero", !unmanifested.ok);
     assertSelfTest("unmanifested evidence section is reported", unmanifested.failures.unmanifestedEvidence.length > 0);
 
+    const phantomRef = `${PHASE200_DIR}/.tmp-scorecard-verifier/missing/does-not-exist.json`;
+    const realPageFlowRef = `${PHASE200_DIR}/.tmp-scorecard-verifier/phantom-real/page-flow-evidence.json`;
+    const realPageFlowAbs = path.join(REPO_ROOT, realPageFlowRef);
+    fs.mkdirSync(path.dirname(realPageFlowAbs), { recursive: true });
+    writeJson(realPageFlowAbs, { rows: [{ status: "passed", fixture: "page-flow" }] });
+    const phantom = verifyPhase200Scorecard(
+      fixturePackage(path.join(root, "phantom"), {
+        final: [
+          fixtureCell({ evidence_refs: [phantomRef] }),
+          fixtureP193({
+            score: 2,
+            coverage_status: "covered",
+            evidence_refs: [realPageFlowRef],
+            evidence_lenses: ["page-flow", "interaction-trace"],
+          }),
+        ],
+        manifest: {
+          evidence: [
+            { path: phantomRef, sha256: "a".repeat(64), bytes: 42 },
+            {
+              path: realPageFlowRef,
+              sha256: sha256(realPageFlowAbs),
+              bytes: fs.statSync(realPageFlowAbs).size,
+            },
+          ],
+        },
+      })
+    );
+    assertSelfTest("manifested but missing evidence file exits non-zero", !phantom.ok);
+    assertSelfTest("phantom evidence is reported as missing file", phantom.failures.missingFiles.some((failure) => failure.includes(phantomRef)));
+
     const staleP193 = verifyPhase200Scorecard(
       fixturePackage(path.join(root, "stale-p193"), {
         final: [fixtureCell({ score: 3 }), fixtureP193()],
@@ -637,6 +740,7 @@ function runSelfTest() {
 
     console.log("Phase 200 scorecard verifier self-test passed.");
   } finally {
+    fs.rmSync(path.join(REPO_ROOT, PHASE200_DIR, ".tmp-scorecard-verifier"), { recursive: true, force: true });
     fs.rmSync(root, { recursive: true, force: true });
   }
 }

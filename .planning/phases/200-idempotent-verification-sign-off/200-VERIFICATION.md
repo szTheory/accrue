@@ -22,12 +22,12 @@
 | `final.cells.json` | present | 37309535 |
 | `scorecard.delta.json` | present | 23866077 |
 | `regressions.ndjson` | present | 0 |
-| `artifacts.manifest.json` | present | 2655535 |
-| `200-SCORECARD.md` | present | 660 |
+| `artifacts.manifest.json` | present | 2653463 |
+| `200-SCORECARD.md` | present | 684 |
 | `200-STORYBOOK-COVERAGE.md` | present | 2149 |
 | `200-VERIFICATION.md` | present | 3111 |
 | `judge.findings.json` | present | 4145 |
-| `200-SIGN-OFF.md` | present | 3447 |
+| `200-SIGN-OFF.md` | present | 3610 |
 
 ## Structured Results
 
@@ -38,7 +38,7 @@
 - Closed p193 rows: 9072/9072
 - Storybook rendered rows: 16
 - Judge blocking findings: 0
-- Manifest evidence entries: 13392
+- Manifest evidence entries before closeout report merge: 13388
 
 ## Guardrail Coverage
 
@@ -60,16 +60,9 @@
 | Item | Result | Evidence |
 | --- | --- | --- |
 | Human verification checkpoint | completed | Maintainer response `approved`, 2026-06-30 |
-| Final decision line | ACCEPT | `200-SIGN-OFF.md` has exactly one `Final maintainer decision: ACCEPT ...` line |
+| Final decision line | ACCEPT | `200-SIGN-OFF.md` has exactly one final ACCEPT decision line |
 | Requirement coverage | complete | VER-01, VER-02, VER-03, STY-02, and STY-03 are complete in `.planning/REQUIREMENTS.md` |
 | Planning state | complete | `.planning/STATE.md` records Phase 200 complete with no Phase 200 `Pending`, `human_needed`, or `Not started` status |
-
-## Final Command Results
-
-| Command | Result | Notes |
-| --- | --- | --- |
-| `node scripts/ci/verify_phase200_scorecard.mjs && node scripts/ci/verify_phase200_signoff.mjs` | passed | Re-run after maintainer ACCEPT and planning reconciliation. |
-| Phase 200 stale-state Node assertion from 200-06 Task 3 | passed | Verified final decision line, completed requirement rows, and no stale Phase 200 state. |
 
 ## Requirement Coverage
 
@@ -84,6 +77,7 @@
 ## Residual Risks
 
 None for Phase 200 closeout. TOOL-02 pixel-diff visual regression remains an explicit milestone-level deferral, not a Phase 200 blocker.
+
 
 ## Canonical Artifacts
 

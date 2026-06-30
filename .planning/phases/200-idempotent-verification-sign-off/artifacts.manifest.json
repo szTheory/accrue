@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-30T18:22:25.324Z",
+  "generated_at": "2026-06-30T19:16:28.604Z",
   "phase": "200-idempotent-verification-sign-off",
   "outputs": {
     "baselineUnion": ".planning/phases/200-idempotent-verification-sign-off/baseline.union.cells.json",
@@ -12,15 +12,14 @@
   "evidence": [
     {
       "path": ".planning/phases/200-idempotent-verification-sign-off/200-SCORECARD.md",
-      "sha256": "84fe4e020cfce476f1f232cd61cbb36907b4762a3e6e420ab331df16beffbc72",
-      "bytes": 660,
+      "sha256": "ad50a56323d826b06b92942e43570034d1a2d67e46cde4e072d604a5decc7f02",
+      "bytes": 684,
       "generated": true
     },
     {
       "path": ".planning/phases/200-idempotent-verification-sign-off/200-SIGN-OFF.md",
-      "sha256": "897aeee81f64b726e9a8796747a966c9544500f5570c041ce2c06a6525576f31",
-      "bytes": 3447,
-      "generated": true
+      "generated": true,
+      "mutable_closeout_report": true
     },
     {
       "path": ".planning/phases/200-idempotent-verification-sign-off/200-STORYBOOK-COVERAGE.md",
@@ -30,8 +29,8 @@
     },
     {
       "path": ".planning/phases/200-idempotent-verification-sign-off/200-VERIFICATION.md",
-      "sha256": "e928a80fd92a4a32444a60c5922f32427d162442d022d134fe5ba3e586bcfc87",
-      "bytes": 3111,
+      "sha256": "1ae6718d5f8a163bc71ffeb4b329feb13eb51827e074699cd89a41fdc9b95989",
+      "bytes": 4548,
       "generated": true
     },
     {
@@ -36344,7 +36343,7 @@
     },
     {
       "path": ".planning/phases/200-idempotent-verification-sign-off/evidence/page-flow-evidence.json",
-      "sha256": "6b2a93d5c99c41a2f09065238058740ac34f001bae5d782b0a14d4c283495cb5",
+      "sha256": "511cc5b08ffff3ca987173c0109e49c5a7a35128ca0f0d35c39eb65c664fc8e3",
       "bytes": 10280585,
       "generated": true
     },
@@ -36602,7 +36601,7 @@
     },
     {
       "path": ".planning/phases/200-idempotent-verification-sign-off/evidence/storybook-a11y.json",
-      "sha256": "54f638c1a3be8e4a948c985b0f4ce38875c7ee08ebf5f79e94fd2f240e1f4272",
+      "sha256": "caa83b83440c65769fed1b74809fab43a3f6b6152d109349359cf1ac70d82da1",
       "bytes": 5321,
       "generated": true
     },
@@ -36612,9 +36611,8 @@
     },
     {
       "path": ".planning/phases/200-idempotent-verification-sign-off/judge.findings.json",
-      "sha256": "94b29326a1f22c9317074196e12931d29a3f9b44bcfbe2536d9566a27912d186",
-      "bytes": 4145,
-      "generated": true
+      "generated": true,
+      "mutable_closeout_report": true
     },
     {
       "path": ".planning/phases/200-idempotent-verification-sign-off/regressions.ndjson",

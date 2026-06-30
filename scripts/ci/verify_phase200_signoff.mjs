@@ -234,6 +234,14 @@ function commandStatusValue(value) {
   return "";
 }
 
+function markdownStatusPass(filePath, label, failures) {
+  if (!fs.existsSync(filePath)) return;
+  const body = readFile(filePath);
+  if (!/^\*\*Status:\*\*\s*pass\b/im.test(body) && !/^Status:\s*pass\b/im.test(body)) {
+    failures.guardrails.push(`ACCEPT requires ${label} to report pass status.`);
+  }
+}
+
 function validateAcceptArtifacts(paths, failures) {
   for (const artifact of REQUIRED_PHASE200_ARTIFACTS) {
     const key = {
@@ -249,6 +257,9 @@ function validateAcceptArtifacts(paths, failures) {
     }[artifact];
     if (!fs.existsSync(paths[key])) failures.missingArtifacts.push(`ACCEPT requires ${artifact}.`);
   }
+  markdownStatusPass(paths.scorecardMarkdown, "200-SCORECARD.md", failures);
+  markdownStatusPass(paths.storybookCoverageMarkdown, "200-STORYBOOK-COVERAGE.md", failures);
+  markdownStatusPass(paths.verificationMarkdown, "200-VERIFICATION.md", failures);
 }
 
 function validateAcceptScorecard(paths, failures) {
@@ -335,6 +346,9 @@ export function verifyPhase200Signoff(options = {}) {
 
   const decision = parseDecisionLine(markdown, failures);
   validateStructure(markdown, failures);
+  if (options.requireAccept && decision.decision !== "ACCEPT") {
+    failures.decision.push("CI sign-off verification requires Final maintainer decision: ACCEPT.");
+  }
 
   if (decision.decision === "ACCEPT") {
     validateAcceptArtifacts(paths, failures);
@@ -412,9 +426,12 @@ function fixturePackage(root, overrides = {}) {
         }
       )
   );
-  writeUnlessOmitted("scorecardMarkdown", () => writeText(paths.scorecardMarkdown, "# Phase 200 Scorecard\n\nStatus: pass\n"));
-  writeUnlessOmitted("storybookCoverageMarkdown", () => writeText(paths.storybookCoverageMarkdown, "# Phase 200 Storybook Coverage\n\nStatus: pass\n"));
-  writeUnlessOmitted("verificationMarkdown", () => writeText(paths.verificationMarkdown, "# Phase 200 Verification\n\nStatus: pass\n"));
+  writeUnlessOmitted("scorecardMarkdown", () => writeText(paths.scorecardMarkdown, overrides.scorecardMarkdown || "# Phase 200 Scorecard\n\nStatus: pass\n"));
+  writeUnlessOmitted(
+    "storybookCoverageMarkdown",
+    () => writeText(paths.storybookCoverageMarkdown, overrides.storybookCoverageMarkdown || "# Phase 200 Storybook Coverage\n\nStatus: pass\n")
+  );
+  writeUnlessOmitted("verificationMarkdown", () => writeText(paths.verificationMarkdown, overrides.verificationMarkdown || "# Phase 200 Verification\n\nStatus: pass\n"));
   writeUnlessOmitted(
     "judgeFindings",
     () =>
@@ -503,6 +520,13 @@ function runSelfTest() {
       signoffPath: path.join(rejectRoot, "200-SIGN-OFF.md"),
     });
     assertSelfTest("verifier-clean REJECT fixture passes with named blocker", reject.ok, JSON.stringify(reject.failures));
+    const rejectRequiredAccept = verifyPhase200Signoff({
+      markdown: signoffMarkdown("REJECT", ["P200-JUDGE-001"]),
+      signoffPath: path.join(rejectRoot, "200-SIGN-OFF.md"),
+      requireAccept: true,
+    });
+    assertSelfTest("REJECT fails when requireAccept is enabled", !rejectRequiredAccept.ok);
+    assertSelfTest("requireAccept reports decision failure", rejectRequiredAccept.failures.decision.length > 0);
 
     const noFinalLine = verifyPhase200Signoff({ markdown: signoffMarkdown("ACCEPT").replace(/^Final maintainer decision:.*$/m, ""), phaseDir: path.join(root, "accept") });
     assertSelfTest("missing final decision line fails", !noFinalLine.ok);
@@ -536,6 +560,16 @@ function runSelfTest() {
     assertSelfTest("ACCEPT with missing Storybook coverage report fails", !acceptMissing.ok);
     assertSelfTest("missing artifacts section reports Storybook coverage", acceptMissing.failures.missingArtifacts.some((failure) => /200-STORYBOOK-COVERAGE/.test(failure)));
 
+    fixturePackage(path.join(root, "failed-storybook"), {
+      storybookCoverageMarkdown: "# Phase 200 Storybook Coverage\n\n**Status:** fail\n",
+    });
+    const acceptFailedStorybook = verifyPhase200Signoff({
+      markdown: signoffMarkdown("ACCEPT"),
+      signoffPath: path.join(root, "failed-storybook/200-SIGN-OFF.md"),
+    });
+    assertSelfTest("ACCEPT with failed Storybook coverage report fails", !acceptFailedStorybook.ok);
+    assertSelfTest("failed Storybook report is treated as guardrail failure", acceptFailedStorybook.failures.guardrails.length > 0);
+
     fixturePackage(path.join(root, "stale"), {
       finalCells: [fixtureFinalCell({ score: null, coverage_status: "pending", evidence_refs: [] })],
     });
@@ -566,6 +600,7 @@ function parseArgs(argv) {
     if (arg === "--self-test") options.selfTest = true;
     else if (arg === "--signoff") options.signoffPath = path.resolve(argv[++index]);
     else if (arg === "--phase-dir") options.phaseDir = path.resolve(argv[++index]);
+    else if (arg === "--require-accept") options.requireAccept = true;
     else throw new Error(`Unknown argument: ${arg}`);
   }
   return options;

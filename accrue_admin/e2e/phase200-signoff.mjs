@@ -313,14 +313,37 @@ function scorecardSummary(evidence) {
   ].join("\n");
 }
 
-function renderMarkdown(evidence) {
+function approvalDateFromEvidence(value) {
+  const match = String(value || "").match(/\b(20\d{2}-\d{2}-\d{2})\b/);
+  return match ? match[1] : null;
+}
+
+function readExistingApprovalCheckpoint(outputPath) {
+  if (!fs.existsSync(outputPath)) return null;
+  const body = readFile(outputPath);
+  const checkpoint = body.match(/^\| Human checkpoint response \| ACCEPT \| (.+?) \|$/m);
+  const finalLine = body.match(/^Final maintainer decision: ACCEPT \(maintainer approved (20\d{2}-\d{2}-\d{2})\)\./m);
+  if (!checkpoint && !finalLine) return null;
+
+  const evidence = checkpoint?.[1] || `User response \`approved\`, ${finalLine[1]}`;
+  return {
+    date: finalLine?.[1] || approvalDateFromEvidence(evidence),
+    evidence,
+  };
+}
+
+function renderMarkdown(evidence, { approvalCheckpoint = null } = {}) {
   const decisionSentence =
-    evidence.decision === "ACCEPT"
+    evidence.decision === "ACCEPT" && approvalCheckpoint?.date
+      ? `ACCEPT - maintainer approval was received on ${approvalCheckpoint.date}, and deterministic Phase 200 artifacts satisfy the all-or-nothing gate.`
+      : evidence.decision === "ACCEPT"
       ? "ACCEPT - deterministic Phase 200 artifacts satisfy the all-or-nothing gate."
       : "REJECT - deterministic Phase 200 artifacts require the named repairs below before ACCEPT.";
 
   const finalLine =
-    evidence.decision === "ACCEPT"
+    evidence.decision === "ACCEPT" && approvalCheckpoint?.date
+      ? `Final maintainer decision: ACCEPT (maintainer approved ${approvalCheckpoint.date}). Evidence source: ${phaseRef("artifacts.manifest.json")} and ${phaseRef("judge.findings.json")}.`
+      : evidence.decision === "ACCEPT"
       ? `Final maintainer decision: ACCEPT. Evidence source: ${phaseRef("artifacts.manifest.json")} and ${phaseRef("judge.findings.json")}.`
       : `Final maintainer decision: REJECT. Required repairs: ${
           evidence.repairItems
@@ -328,6 +351,10 @@ function renderMarkdown(evidence) {
             .map((item) => item.id)
             .join(", ") || "missing artifact package"
         }. Evidence source: ${phaseRef("judge.findings.json")}.`;
+  const approvalRow =
+    evidence.decision === "ACCEPT" && approvalCheckpoint?.evidence
+      ? `| Human checkpoint response | ACCEPT | ${approvalCheckpoint.evidence} |`
+      : "";
 
   return `# Phase 200 Maintainer Sign-Off
 
@@ -372,6 +399,7 @@ ${repairList(evidence.repairItems)}
 | phase199 interaction regression | ${evidence.decision} | \`${phaseRef("artifacts.manifest.json")}\` |
 | reduced-motion guardrail | ${evidence.decision} | \`${phaseRef("artifacts.manifest.json")}\` |
 | host leak guardrail | ${evidence.decision} | \`${phaseRef("artifacts.manifest.json")}\` |
+${approvalRow}
 
 ${finalLine}
 `;
@@ -381,7 +409,7 @@ export function generatePhase200Signoff(options = {}) {
   const root = path.resolve(options.phaseDir || phaseDir);
   const outputPath = path.resolve(options.outputPath || DEFAULT_OUTPUT);
   const evidence = collectEvidence({ phaseDir: root });
-  const markdown = renderMarkdown(evidence);
+  const markdown = renderMarkdown(evidence, { approvalCheckpoint: readExistingApprovalCheckpoint(outputPath) });
   const verification = verifyPhase200Signoff({ markdown, signoffPath: outputPath, phaseDir: root });
   if (!verification.ok) {
     throw new Error(`Generated Phase 200 sign-off failed verifier: ${JSON.stringify(verification.failures)}`);

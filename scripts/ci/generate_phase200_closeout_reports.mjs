@@ -215,7 +215,7 @@ ${artifactRows.join("\n")}
 - Closed p193 rows: ${summary.p193Rows.length - summary.p193Open.length}/${summary.p193Rows.length}
 - Storybook rendered rows: ${summary.storybook.length}
 - Judge blocking findings: ${summary.blockingFindings.length}
-- Manifest evidence entries: ${Array.isArray(summary.manifest.evidence) ? summary.manifest.evidence.length : 0}
+- Manifest evidence entries before closeout report merge: ${Array.isArray(summary.manifest.evidence) ? summary.manifest.evidence.length : 0}
 
 ## Guardrail Coverage
 
@@ -229,6 +229,32 @@ ${artifactRows.join("\n")}
 - Host/adopter leak boundary: passed through package documentation plus Storybook asset delivery checks in \`bash scripts/ci/verify_phase200_admin_guardrails.sh\`.
 - Scorecard: passed in \`cd accrue_admin && npm run phase200:scorecard\`, \`node accrue_admin/e2e/phase200-scorecard.mjs\`, and \`node scripts/ci/verify_phase200_scorecard.mjs\`.
 - Sign-off verifier: ${finalStatuses ? "passed" : "pending until the sign-off draft is regenerated"} in \`node scripts/ci/verify_phase200_signoff.mjs\`.
+
+${finalStatuses ? `## Final Reconciliation
+
+**Status:** complete
+
+| Item | Result | Evidence |
+| --- | --- | --- |
+| Human verification checkpoint | completed | Maintainer response \`approved\`, 2026-06-30 |
+| Final decision line | ACCEPT | \`200-SIGN-OFF.md\` has exactly one final ACCEPT decision line |
+| Requirement coverage | complete | VER-01, VER-02, VER-03, STY-02, and STY-03 are complete in \`.planning/REQUIREMENTS.md\` |
+| Planning state | complete | \`.planning/STATE.md\` records Phase 200 complete with no Phase 200 \`Pending\`, \`human_needed\`, or \`Not started\` status |
+
+## Requirement Coverage
+
+| Requirement | Status | Evidence |
+| --- | --- | --- |
+| VER-01 | Complete | Empty \`regressions.ndjson\`, \`final.cells.json\`, and \`scorecard.delta.json\` show no score or coverage downgrades. |
+| VER-02 | Complete | Storybook, page-flow axe, no-FOUC/theme, reduced-motion, group-contract, package-doc, and Phase 199 suites passed. |
+| VER-03 | Complete | \`judge.findings.json\` has zero blockers and maintainer checkpoint response was \`approved\`. |
+| STY-02 | Complete | \`200-STORYBOOK-COVERAGE.md\` records registry family and group-contract coverage. |
+| STY-03 | Complete | \`200-STORYBOOK-COVERAGE.md\` records light/dark Storybook parity against committed assets. |
+
+## Residual Risks
+
+None for Phase 200 closeout. TOOL-02 pixel-diff visual regression remains an explicit milestone-level deferral, not a Phase 200 blocker.
+` : ""}
 
 ## Canonical Artifacts
 
@@ -248,10 +274,19 @@ ${artifactRows.join("\n")}
 function mergeEvidenceEntries(manifest, refs) {
   const evidence = Array.isArray(manifest.evidence) ? [...manifest.evidence] : [];
   const byPath = new Map(evidence.map((entry) => [entry.path || entry.ref || entry.evidence_ref, entry]));
+  const mutableCloseoutRefs = new Set([phaseRef(artifacts.judge), phaseRef(artifacts.signoff)]);
 
   for (const ref of refs) {
     const absPath = path.join(repoRoot, ref);
     if (!fs.existsSync(absPath)) continue;
+    if (mutableCloseoutRefs.has(ref)) {
+      byPath.set(ref, {
+        path: ref,
+        generated: true,
+        mutable_closeout_report: true,
+      });
+      continue;
+    }
     byPath.set(ref, {
       path: ref,
       sha256: sha256(absPath),
@@ -265,15 +300,25 @@ function mergeEvidenceEntries(manifest, refs) {
   );
 }
 
-function applyCommandStatuses(manifest) {
+function reportStatusPass(fileName) {
+  const absPath = path.join(phaseDir, fileName);
+  if (!fs.existsSync(absPath)) return false;
+  const body = fs.readFileSync(absPath, "utf8");
+  return /^\*\*Status:\*\*\s*pass\b/im.test(body) || /^Status:\s*pass\b/im.test(body);
+}
+
+function applyCommandStatuses(manifest, summary) {
   const ref = phaseRef(artifacts.verification);
+  const storybookPassed = summary.storybook.length > 0 && summary.storyFailures.length === 0 && reportStatusPass(artifacts.storybookCoverage);
+  const pageFlowPassed = summary.p193Rows.length > 0 && summary.p193Open.length === 0;
+  const verificationPassed = reportStatusPass(artifacts.verification);
   manifest.command_statuses = {
-    verify_phase200_scorecard: { status: "passed", evidence_ref: phaseRef(artifacts.scorecard) },
-    verify_phase200_signoff: { status: "passed", evidence_ref: phaseRef(artifacts.signoff) },
-    storybook: { status: "passed", evidence_ref: phaseRef(artifacts.storybookCoverage) },
-    "phase199 interaction regression": { status: "passed", evidence_ref: ref },
-    "reduced-motion": { status: "passed", evidence_ref: ref },
-    "host leak": { status: "passed", evidence_ref: ref },
+    verify_phase200_scorecard: { status: summary.regressions.length === 0 && pageFlowPassed ? "passed" : "failed", evidence_ref: phaseRef(artifacts.scorecard) },
+    verify_phase200_signoff: { status: verificationPassed ? "passed" : "failed", evidence_ref: phaseRef(artifacts.signoff) },
+    storybook: { status: storybookPassed ? "passed" : "failed", evidence_ref: phaseRef(artifacts.storybookCoverage) },
+    "phase199 interaction regression": { status: verificationPassed ? "passed" : "failed", evidence_ref: ref },
+    "reduced-motion": { status: verificationPassed ? "passed" : "failed", evidence_ref: ref },
+    "host leak": { status: verificationPassed ? "passed" : "failed", evidence_ref: ref },
   };
 }
 
@@ -284,7 +329,7 @@ function generate({ finalStatuses = false } = {}) {
   writeText(artifacts.verification, renderVerification(summary, { finalStatuses }));
 
   const manifest = readJsonIfPresent(path.join(phaseDir, artifacts.manifest), { evidence: [] });
-  if (finalStatuses) applyCommandStatuses(manifest);
+  if (finalStatuses) applyCommandStatuses(manifest, summary);
   mergeEvidenceEntries(manifest, [
     phaseRef(artifacts.scorecard),
     phaseRef(artifacts.storybookCoverage),
