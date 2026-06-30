@@ -109,7 +109,7 @@ const LIST_CONTRACTS = Object.freeze([
     rowParams: { view: "all" },
     mobileParams: { view: "all" },
     allowQueueEmpty: true,
-    queueEmptyText: "No accounts need attention.",
+    queueEmptyText: "No connected accounts need attention.",
     clearAllOnDefault: true,
     loadingText: "Loading connected accounts.",
   },

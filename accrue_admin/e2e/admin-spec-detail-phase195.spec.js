@@ -114,9 +114,7 @@ async function assertDrawerGeometry(page, drawer) {
 }
 
 async function assertDrawerInteractive(page, drawer) {
-  const primary = drawer
-    .getByRole("button", { name: /confirm|save|update|change|continue|submit/i })
-    .first();
+  const primary = drawer.locator("form[data-ax-action-drawer-form] button[type='submit']").first();
   const field = drawer.locator("input, select, textarea, button").first();
 
   await expect(primary).toBeVisible();
