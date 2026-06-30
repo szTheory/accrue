@@ -512,6 +512,32 @@ defmodule AccrueAdmin.CopyTest do
     end
   end
 
+  test "CPY-01 generated browser fixture exports copy used by Phase 199 browser checks" do
+    fixture =
+      "../../../examples/accrue_host/e2e/generated/copy_strings.json"
+      |> Path.expand(__DIR__)
+      |> File.read!()
+      |> Jason.decode!()
+
+    exporter_source =
+      "../../lib/mix/tasks/accrue_admin.export_copy_strings.ex"
+      |> Path.expand(__DIR__)
+      |> File.read!()
+
+    required_exports = %{
+      "data_table_clear_filters_label" => Copy.data_table_clear_filters_label(),
+      "customer_payment_methods_set_default_action" =>
+        Copy.customer_payment_methods_set_default_action(),
+      "customer_payment_methods_delete_action" => Copy.customer_payment_methods_delete_action(),
+      "customer_payment_methods_cancel_action" => Copy.customer_payment_methods_cancel_action()
+    }
+
+    for {name, expected} <- required_exports do
+      assert exporter_source =~ name, "#{name} must be allow-listed for browser fixtures"
+      assert fixture[name] == expected, "#{name} must match AccrueAdmin.Copy"
+    end
+  end
+
   test "CPY-01 copy modules avoid generic fallbacks and bare action terms" do
     assert copy_module_guard(@raw_generic_guard) == []
   end
