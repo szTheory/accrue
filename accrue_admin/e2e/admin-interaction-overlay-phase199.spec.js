@@ -258,8 +258,8 @@ async function assertDrawerGeometry(page, drawer, label = "drawer") {
   }
 }
 
-async function assertFloatingBounds(page, target, label = "floating panel") {
-  const result = await target.evaluate((element) => {
+async function floatingBounds(target) {
+  return target.evaluate((element) => {
     const rect = element.getBoundingClientRect();
     const style = window.getComputedStyle(element);
     return {
@@ -272,6 +272,26 @@ async function assertFloatingBounds(page, target, label = "floating panel") {
       transformOrigin: style.transformOrigin,
     };
   });
+}
+
+async function assertFloatingBounds(page, target, label = "floating panel") {
+  await expect
+    .poll(
+      async () => {
+        const result = await floatingBounds(target);
+        return (
+          result.visible &&
+          result.left >= 0 &&
+          result.top >= 0 &&
+          result.right <= result.viewport.width &&
+          result.bottom <= result.viewport.height
+        );
+      },
+      { message: `${label}: geometry settles inside viewport` }
+    )
+    .toBe(true);
+
+  const result = await floatingBounds(target);
 
   expect(result.visible, `${label}: visible`).toBe(true);
   expect(result.left, `${label}: not clipped left`).toBeGreaterThanOrEqual(0);
@@ -285,8 +305,9 @@ async function pinDropdownTriggerNearLowerRight(page, trigger) {
   await trigger.evaluate((element) => {
     Object.assign(element.style, {
       position: "fixed",
-      right: "8px",
+      right: "0",
       bottom: "8px",
+      width: "auto",
       zIndex: "9999",
     });
   });
@@ -582,10 +603,16 @@ test.describe("Phase 199 interaction and overlay contract", () => {
       const trigger = page.locator("[data-ax-action-overflow-menu]").first();
       await expect(trigger, `${viewport.name}: action menu trigger`).toBeVisible();
       await pinDropdownTriggerNearLowerRight(page, trigger);
-      await trigger.click();
+      await trigger.locator("summary").click();
 
       const panel = page.locator("[data-floating-panel='dropdown']").first();
       await expect(panel, `${viewport.name}: dropdown panel`).toBeVisible();
+      await expect
+        .poll(
+          () => trigger.evaluate((element) => element.dataset.floatingPlacement || ""),
+          { message: `${viewport.name}: dropdown placement settles` }
+        )
+        .toMatch(/^(top|bottom)$/);
       await assertFloatingBounds(page, panel, `${viewport.name}: action menu`);
       await assertFloatingAdjacentToTrigger(page, trigger, panel, `${viewport.name}: action menu`);
 

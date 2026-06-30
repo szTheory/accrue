@@ -44,6 +44,7 @@ function detailsElement(options = {}) {
   };
   const attributes = new Map();
   const panelStyle = styleMap();
+  let details;
   const panel = {
     style: panelStyle,
     getBoundingClientRect() {
@@ -61,7 +62,7 @@ function detailsElement(options = {}) {
     }
   };
 
-  return {
+  details = {
     open: true,
     insideTarget: {},
     dataset: {},
@@ -94,6 +95,8 @@ function detailsElement(options = {}) {
     summary,
     panel
   };
+
+  return details;
 }
 
 function fakeDocument(dropdowns) {

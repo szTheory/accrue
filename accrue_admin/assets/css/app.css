@@ -2723,6 +2723,9 @@ a.ax-kpi-card--linked:focus-visible {
   position: relative;
   max-width: 100%;
   width: fit-content;
+  --ax-dropdown-shift-x: 0px;
+  --ax-dropdown-origin-x: right;
+  --ax-dropdown-origin-y: top;
 }
 
 .ax-dropdown-trigger {
@@ -2740,7 +2743,7 @@ a.ax-kpi-card--linked:focus-visible {
   right: 0;
   min-width: 15rem;
   max-width: min(22rem, calc(100vw - 2rem));
-  max-height: min(24rem, calc(100vh - 6rem));
+  max-height: min(24rem, var(--ax-dropdown-max-height, calc(100vh - 6rem)));
   overflow: auto;
   overscroll-behavior: contain;
   padding: var(--ax-space-sm);
@@ -2749,6 +2752,12 @@ a.ax-kpi-card--linked:focus-visible {
   background: var(--ax-elevated);
   box-shadow: var(--ax-shadow-sm);
   z-index: var(--ax-z-dropdown);
+  transform-origin: var(--ax-dropdown-origin-x) var(--ax-dropdown-origin-y);
+}
+
+.ax-dropdown[data-floating-placement="top"] .ax-dropdown-panel {
+  top: auto;
+  bottom: calc(100% + 0.5rem);
 }
 
 .ax-dropdown-item {
@@ -2782,7 +2791,7 @@ a.ax-kpi-card--linked:focus-visible {
 }
 
 .ax-action-menu-panel {
-  transform-origin: top right;
+  transform-origin: var(--ax-dropdown-origin-x) var(--ax-dropdown-origin-y);
 }
 
 .ax-action-menu-group {
@@ -2833,7 +2842,7 @@ a.ax-kpi-card--linked:focus-visible {
    ========================================================================== */
 details.ax-dropdown .ax-dropdown-panel {
   opacity: 0;
-  transform: translateY(calc(-1 * var(--ax-rise-sm)));
+  transform: translate(var(--ax-dropdown-shift-x, 0px), calc(-1 * var(--ax-rise-sm)));
   pointer-events: none;
   transition:
     opacity var(--ax-dur-2) var(--ax-ease-out),
@@ -2843,7 +2852,7 @@ details.ax-dropdown .ax-dropdown-panel {
 /* Exit is instant (native details[open] removes synchronously — no exit transition; accepted per Phase 177 scope) */
 details[open].ax-dropdown .ax-dropdown-panel {
   opacity: 1;
-  transform: translateY(0px);
+  transform: translate(var(--ax-dropdown-shift-x, 0px), 0px);
   pointer-events: auto;
 }
 
