@@ -5,6 +5,8 @@
  * routes and surfaces instead of introducing a broad interaction abstraction.
  */
 
+const fs = require("fs");
+const path = require("path");
 const { test, expect } = require("@playwright/test");
 
 const {
@@ -18,6 +20,22 @@ const {
 } = require("./phase191-page-flow-helpers.js");
 
 test.use({ trace: "retain-on-failure" });
+
+const COPY_STRINGS = JSON.parse(
+  fs.readFileSync(
+    path.join(
+      __dirname,
+      "..",
+      "..",
+      "examples",
+      "accrue_host",
+      "e2e",
+      "generated",
+      "copy_strings.json"
+    ),
+    "utf8"
+  )
+);
 
 const PHASE199_ROUTE_FLOWS = Object.freeze([
   {
@@ -181,11 +199,13 @@ const COPY_TARGETS = Object.freeze([
     name: "Customers filtered empty",
     route: "/billing/customers?q=phase199-no-match",
     locator: "[data-role='empty-state'], .ax-empty-state",
+    fixtureKey: "data_table_clear_filters_label",
   },
   {
     name: "Invoices filtered empty",
     route: "/billing/invoices?view=all&q=phase199-no-match",
     locator: "[data-role='empty-state'], .ax-empty-state",
+    fixtureKey: "data_table_clear_filters_label",
   },
 ]);
 
@@ -899,6 +919,12 @@ test.describe("Phase 199 interaction and overlay contract", () => {
       await expect(copySurface, `${target.name}: avoid generic no-results copy`).not.toContainText(
         /^No results(?: found)?/i
       );
+
+      if (target.fixtureKey) {
+        const expectedCopy = COPY_STRINGS[target.fixtureKey];
+        expect(expectedCopy, `${target.name}: generated copy fixture ${target.fixtureKey}`).toBeTruthy();
+        await expect(copySurface, `${target.name}: generated fixture copy`).toContainText(expectedCopy);
+      }
     }
 
     const fixtures = await seedPhase199(request);

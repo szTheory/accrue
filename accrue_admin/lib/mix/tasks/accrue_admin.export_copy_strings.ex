@@ -58,6 +58,7 @@ defmodule Mix.Tasks.AccrueAdmin.ExportCopyStrings do
     invoice_detail_eyebrow
     invoice_open_pdf_button
     invoices_index_headline
+    data_table_clear_filters_label
     billing_events_heading_organization
     billing_events_table_empty_title
     billing_events_apply_filters
