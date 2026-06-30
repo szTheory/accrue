@@ -8,6 +8,7 @@ defmodule AccrueAdmin.OverlayComponentsTest do
   alias AccrueAdmin.Components.Detail
   alias AccrueAdmin.Components.DetailDrawer
   alias AccrueAdmin.Components.DropdownMenu
+  alias AccrueAdmin.Components.EmptyState
   alias AccrueAdmin.Components.Overlay
   alias AccrueAdmin.Components.StepUpAuthModal
   alias AccrueAdmin.Layouts
@@ -197,6 +198,39 @@ defmodule AccrueAdmin.OverlayComponentsTest do
                ~s(<span class="ax-visually-hidden"> dunning activity for subscription sub_123</span>)
     end
 
+    test "renders summary-list row context from hidden_context and context aliases" do
+      html =
+        render_component(fn assigns ->
+          assigns =
+            assign(assigns, :rows, [
+              %{
+                label: "Default method",
+                value: "Visa ending 4242",
+                action_label: "Change",
+                action_event: "change_payment_method",
+                hidden_context: "default payment method for customer cus_123"
+              },
+              %{
+                label: "Invoice",
+                value: "INV-1024",
+                action_label: "View",
+                action_href: "/billing/invoices/in_1024",
+                context: "invoice INV-1024 for customer cus_123"
+              }
+            ])
+
+          ~H"""
+          <Detail.summary_list rows={@rows} />
+          """
+        end)
+
+      assert html =~
+               ~s(<span class="ax-visually-hidden"> default payment method for customer cus_123</span>)
+
+      assert html =~
+               ~s(<span class="ax-visually-hidden"> invoice INV-1024 for customer cus_123</span>)
+    end
+
     test "keeps detail_field_list available for read-only drill groups" do
       html =
         render_component(fn assigns ->
@@ -291,6 +325,39 @@ defmodule AccrueAdmin.OverlayComponentsTest do
       assert html =~ ~s(href="/billing/invoices/in_123/pdf")
       refute html =~ ~s(data-ax-action-overflow-menu)
       refute html =~ ~s(role="menuitem")
+    end
+  end
+
+  describe "EmptyState wrapper" do
+    test "keeps the wrapper non-interactive while action slots own accessible labels" do
+      html =
+        render_component(fn assigns ->
+          assigns = assigns
+
+          ~H"""
+          <EmptyState.empty_state
+            icon={:inbox}
+            title="No invoices match these filters."
+            body="Clear filters or adjust the search to see invoices."
+          >
+            <:actions>
+              <a
+                href="/billing/invoices?view=all"
+                class="ax-button ax-button-secondary"
+                aria-label="Clear invoice filters and return to all invoices"
+              >
+                Clear filters
+              </a>
+            </:actions>
+          </EmptyState.empty_state>
+          """
+        end)
+
+      assert html =~ ~r/class="ax-empty(?:\s|")/
+      assert html =~ ~s(aria-label="Clear invoice filters and return to all invoices")
+      refute html =~ ~s(role="button")
+      refute html =~ ~r/\stabindex=/
+      refute html =~ ~r/\sphx-click=/
     end
   end
 

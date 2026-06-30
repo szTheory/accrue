@@ -475,6 +475,25 @@ defmodule AccrueAdmin.DataTableTest do
     assert html =~ ~s(href="/admin/fixtures?view=all&amp;org=acme")
   end
 
+  test "keeps the empty-state wrapper non-interactive while clear action remains explicit", %{
+    conn: conn
+  } do
+    FixtureStore.put_rows([])
+
+    {:ok, _view, html} =
+      live_isolated(conn, TableLive, session: %{"params" => %{"status" => "closed"}})
+
+    assert [_, empty_open_tag] = Regex.run(~r/(<div[^>]*data-role="empty-state"[^>]*>)/, html)
+    assert empty_open_tag =~ ~s(class="ax-card ax-empty ax-data-table-empty")
+    refute empty_open_tag =~ ~r/\srole=/
+    refute empty_open_tag =~ ~r/\stabindex=/
+    refute empty_open_tag =~ ~r/\sphx-click=/
+
+    assert html =~ ~s(data-role="clear-filters")
+    assert html =~ ~s(data-phx-link="patch")
+    assert html =~ "Clear filters"
+  end
+
   test "renders loading skeleton as an accessible fixture state", %{conn: conn} do
     {:ok, _view, html} =
       live_isolated(conn, TableLive, session: %{"params" => %{}, "loading_state?" => true})

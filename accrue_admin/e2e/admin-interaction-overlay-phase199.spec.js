@@ -195,6 +195,80 @@ const COPY_TARGETS = Object.freeze([
   },
 ]);
 
+const COPY_ACTION_CONTEXT_TARGETS = Object.freeze([
+  {
+    name: "Customer payment-method actions",
+    route: ({ dashboard }) => `/billing/customers/${dashboard.customer_id}`,
+    actions: [
+      {
+        visible: /Set default payment method/i,
+        context: /4242|cus_e2e_phase199_customer|customer/i,
+      },
+      {
+        visible: /Delete payment method/i,
+        context: /4242|cus_e2e_phase199_customer|customer/i,
+      },
+    ],
+  },
+  {
+    name: "Invoice action menu",
+    route: ({ edgeStates }) => `/billing/invoices/${edgeStates.jpy_invoice_id}`,
+    openMenu: true,
+    actions: [
+      {
+        visible: /Void invoice|Mark uncollectible/i,
+        context: /in_e2e_phase199_jpy/i,
+      },
+    ],
+  },
+  {
+    name: "Charge refund action",
+    route: ({ operatorFlows }) => `/billing/payments/${operatorFlows.charge_id}`,
+    actions: [
+      {
+        visible: /Refund charge/i,
+        context: /ch_e2e_phase199_refund/i,
+      },
+    ],
+  },
+  {
+    name: "Webhook replay action",
+    route: ({ operatorFlows }) => `/billing/webhooks/${operatorFlows.single_webhook_id}`,
+    actions: [
+      {
+        visible: /Replay webhook|Replay delivery/i,
+        context: /evt_e2e_phase199_dead/i,
+      },
+    ],
+  },
+  {
+    name: "Connect platform-fee action",
+    route: ({ edgeStates }) => `/billing/connect/${edgeStates.connect_account_id}`,
+    actions: [
+      {
+        visible: /Edit platform fee override|Change platform fee override/i,
+        context: /acct_e2e_phase199_attention/i,
+      },
+    ],
+  },
+  {
+    name: "Subscription action menu",
+    route: ({ dashboard }) => `/billing/subscriptions/${dashboard.subscription_id}`,
+    openMenu: true,
+    actions: [
+      {
+        visible: /Update quantity|Add item|Pause collection|Cancel renewal/i,
+        context: /sub_e2e_phase199_active/i,
+      },
+    ],
+  },
+  {
+    name: "Read-only event detail",
+    route: ({ phase199 }) => `/billing/events/${phase199.event_id}`,
+    readOnly: true,
+  },
+]);
+
 async function reset(request) {
   const response = await request.post("/__e2e__/reset");
   expect(response.ok()).toBeTruthy();
@@ -425,6 +499,32 @@ async function assertActionContextLabels(page, label = "action labels") {
   );
 
   expect(compactActions, `${label}: compact Change/View labels include hidden or aria context`).toEqual([]);
+}
+
+async function assertActionHasObjectContext(page, action, label = "action") {
+  const candidates = await page.locator("a, button, [role='menuitem']").evaluateAll((elements) =>
+    elements
+      .filter((element) => {
+        const rect = element.getBoundingClientRect();
+        const style = window.getComputedStyle(element);
+        return style.display !== "none" && style.visibility !== "hidden" && rect.width > 0 && rect.height > 0;
+      })
+      .map((element) => ({
+        visibleText: (element.innerText || "").replace(/\s+/g, " ").trim(),
+        fullText: (element.textContent || "").replace(/\s+/g, " ").trim(),
+        aria: element.getAttribute("aria-label") || "",
+      }))
+  );
+
+  const match = candidates.find(
+    (candidate) =>
+      action.visible.test(candidate.visibleText) ||
+      action.visible.test(candidate.fullText) ||
+      action.visible.test(candidate.aria)
+  );
+
+  expect(match, `${label}: visible action ${action.visible} exists`).toBeTruthy();
+  expect(`${match.aria} ${match.fullText}`, `${label}: object/action context`).toMatch(action.context);
 }
 
 async function bodyScrollTop(page) {
@@ -831,5 +931,31 @@ test.describe("Phase 199 interaction and overlay contract", () => {
     await setPhase191Theme(page, "light");
     await page.locator("[data-ax-action-overflow-menu]").first().click();
     await assertActionContextLabels(page, "Subscription repeated actions");
+
+    for (const target of COPY_ACTION_CONTEXT_TARGETS) {
+      await login(page, target.route(fixtures));
+      await setPhase191Theme(page, "light");
+
+      if (target.readOnly) {
+        await expect(page.locator("[data-ax-action-band]"), `${target.name}: no action band`).toHaveCount(0);
+        await expect(page.locator("[data-ax-action-overflow-menu]"), `${target.name}: no action menu`).toHaveCount(0);
+        await assertActionContextLabels(page, target.name);
+        continue;
+      }
+
+      if (target.openMenu) {
+        const menu = page.locator("[data-ax-action-overflow-menu]").first();
+        await expect(menu, `${target.name}: action menu`).toBeVisible();
+        await menu.click();
+      }
+
+      for (const action of target.actions) {
+        await assertActionHasObjectContext(page, action, target.name);
+      }
+
+      if (target.openMenu) {
+        await page.keyboard.press("Escape");
+      }
+    }
   });
 });
