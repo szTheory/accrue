@@ -3,6 +3,9 @@ defmodule AccrueAdmin.ThemeTest do
 
   import Phoenix.LiveViewTest
 
+  alias AccrueAdmin.Dev.ComponentRegistry
+  alias AccrueAdmin.Storybook.RegistryStory
+
   setup do
     branding = Application.get_env(:accrue, :branding)
     admin_branding = Application.get_env(:accrue, :admin_branding)
@@ -179,6 +182,61 @@ defmodule AccrueAdmin.ThemeTest do
     end
   end
 
+  test "Phase 200 Storybook enables color mode with the dark shim bridge" do
+    assert AccrueAdmin.Dev.Storybook.config(:color_mode) == true
+    assert AccrueAdmin.Dev.Storybook.config(:color_mode_sandbox_dark_class) == "ax-theme-dark-shim"
+  end
+
+  test "Phase 200 Storybook dark shim mirrors every dark ax token from theme css" do
+    theme_dark_tokens =
+      theme_css_path()
+      |> File.read!()
+      |> css_block(~r/html\.accrue-admin\[data-theme="dark"\]\s*\{(?<body>.*?)\}/s)
+      |> ax_token_declarations()
+
+    storybook_dark_tokens =
+      storybook_css_path()
+      |> File.read!()
+      |> css_block(~r/\.psb-sandbox\.accrue-admin\.ax-theme-dark-shim\s*\{(?<body>.*?)\}/s)
+      |> ax_token_declarations()
+
+    assert Map.keys(theme_dark_tokens) != []
+
+    for {token, declaration} <- theme_dark_tokens do
+      assert storybook_dark_tokens[token] == declaration
+    end
+  end
+
+  test "Phase 200 registry story variation ids are stable registry-derived slugs" do
+    family = "button"
+
+    expected_ids =
+      family
+      |> ComponentRegistry.variants_for()
+      |> Enum.flat_map(fn entry ->
+        entry
+        |> Map.get(:specimens, [])
+        |> Enum.with_index()
+        |> Enum.map(fn {specimen, idx} ->
+          RegistryStory.slug_id(family, entry.variant, specimen[:label], idx)
+        end)
+      end)
+
+    actual_ids =
+      family
+      |> RegistryStory.variations_for()
+      |> Enum.map(& &1.id)
+
+    assert actual_ids == expected_ids
+    assert Enum.uniq(actual_ids) == actual_ids
+
+    assert Enum.all?(actual_ids, fn id ->
+             id
+             |> Atom.to_string()
+             |> String.match?(~r/^button-[a-z0-9]+(?:-[a-z0-9]+)*-[0-9]+$/)
+           end)
+  end
+
   defp find_index(haystack, needle) do
     case :binary.match(haystack, needle) do
       {index, _length} -> index
@@ -229,5 +287,26 @@ defmodule AccrueAdmin.ThemeTest do
 
   defp app_css_path do
     Path.expand("../../assets/css/app.css", __DIR__)
+  end
+
+  defp theme_css_path do
+    Path.expand("../../assets/css/theme.css", __DIR__)
+  end
+
+  defp storybook_css_path do
+    Path.expand("../../priv/static/storybook.css", __DIR__)
+  end
+
+  defp css_block(css, regex) do
+    case Regex.named_captures(regex, css) do
+      %{"body" => body} -> body
+      _ -> flunk("expected CSS block matching #{inspect(regex)}")
+    end
+  end
+
+  defp ax_token_declarations(block) do
+    ~r/(--ax-[\w-]+):\s*([^;]+);/
+    |> Regex.scan(block, capture: :all_but_first)
+    |> Map.new(fn [token, value] -> {token, String.trim(value)} end)
   end
 end
