@@ -298,6 +298,70 @@ async function assertNoHorizontalClip(page, selector = "body", label = selector)
   return result;
 }
 
+async function assertFloatingAdjacentToTrigger(page, trigger, panel, label = "floating panel") {
+  const result = await page.evaluate(
+    ({ triggerSelector, panelSelector }) => {
+      const triggerElement = document.querySelector(triggerSelector);
+      const panelElement = document.querySelector(panelSelector);
+
+      if (!triggerElement || !panelElement) {
+        return { found: false };
+      }
+
+      const triggerRect = triggerElement.getBoundingClientRect();
+      const panelRect = panelElement.getBoundingClientRect();
+      const verticalGap = Math.min(
+        Math.abs(panelRect.top - triggerRect.bottom),
+        Math.abs(triggerRect.top - panelRect.bottom)
+      );
+      const horizontalGap = Math.min(
+        Math.abs(panelRect.left - triggerRect.right),
+        Math.abs(triggerRect.left - panelRect.right)
+      );
+      const overlapsX = panelRect.left <= triggerRect.right && panelRect.right >= triggerRect.left;
+      const overlapsY = panelRect.top <= triggerRect.bottom && panelRect.bottom >= triggerRect.top;
+
+      return {
+        found: true,
+        adjacent: (overlapsX && verticalGap <= 16) || (overlapsY && horizontalGap <= 16),
+        verticalGap,
+        horizontalGap,
+        overlapsX,
+        overlapsY,
+        transformOrigin: window.getComputedStyle(panelElement).transformOrigin,
+        trigger: {
+          left: triggerRect.left,
+          top: triggerRect.top,
+          right: triggerRect.right,
+          bottom: triggerRect.bottom,
+        },
+        panel: {
+          left: panelRect.left,
+          top: panelRect.top,
+          right: panelRect.right,
+          bottom: panelRect.bottom,
+        },
+      };
+    },
+    {
+      triggerSelector: typeof trigger === "string" ? trigger : await trigger.evaluate((node) => {
+        node.dataset.phase191FloatingTrigger = "true";
+        return "[data-phase191-floating-trigger='true']";
+      }),
+      panelSelector: typeof panel === "string" ? panel : await panel.evaluate((node) => {
+        node.dataset.phase191FloatingPanel = "true";
+        return "[data-phase191-floating-panel='true']";
+      }),
+    }
+  );
+
+  if (!result.found || !result.adjacent || !result.transformOrigin) {
+    throw new Error(`Phase 191 floating assertion failed for ${label}: ${JSON.stringify(result)}`);
+  }
+
+  return result;
+}
+
 function phase191CoverageRows(defects = loadPhase191Defects()) {
   return defects.map((defect) => ({
     id: defect.id,
@@ -325,6 +389,7 @@ module.exports = {
   assertTopPointerTarget,
   assertScrollReachable,
   assertNoHorizontalClip,
+  assertFloatingAdjacentToTrigger,
   phase191CoverageRows,
   normalizeTag,
   cellsForSurface,

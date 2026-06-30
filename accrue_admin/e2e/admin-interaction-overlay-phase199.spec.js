@@ -9,6 +9,7 @@ const { test, expect } = require("@playwright/test");
 
 const {
   assertFocusWithin,
+  assertFloatingAdjacentToTrigger,
   assertNoBodyFocus,
   assertNoHorizontalClip,
   assertScrollReachable,
@@ -113,6 +114,14 @@ const FLOATING_TARGETS = Object.freeze([
     trigger: "[data-command-palette-trigger]",
     panel: ".ax-command-palette",
   },
+]);
+
+const PHASE199_FLOATING_VIEWPORTS = Object.freeze([
+  { name: "phone-320", width: 320, height: 844 },
+  { name: "phone-375", width: 375, height: 844 },
+  { name: "tablet-768", width: 768, height: 1024 },
+  { name: "desktop-1024", width: 1024, height: 900 },
+  { name: "desktop-1440", width: 1440, height: 1000 },
 ]);
 
 const THEME_CASES = Object.freeze([
@@ -270,6 +279,17 @@ async function assertFloatingBounds(page, target, label = "floating panel") {
   expect(result.right, `${label}: not clipped right`).toBeLessThanOrEqual(result.viewport.width);
   expect(result.bottom, `${label}: not clipped bottom`).toBeLessThanOrEqual(result.viewport.height);
   expect(result.transformOrigin, `${label}: transform-origin declared`).not.toBe("");
+}
+
+async function pinDropdownTriggerNearLowerRight(page, trigger) {
+  await trigger.evaluate((element) => {
+    Object.assign(element.style, {
+      position: "fixed",
+      right: "8px",
+      bottom: "8px",
+      zIndex: "9999",
+    });
+  });
 }
 
 async function assertThemePersistence(page, themeCase) {
@@ -544,6 +564,34 @@ test.describe("Phase 199 interaction and overlay contract", () => {
     expect(affordance.role, "empty hero should not masquerade as a button").not.toBe("button");
     expect(affordance.cursor, "empty hero should not use pointer cursor").not.toBe("pointer");
     expect(affordance.phxClick, "empty hero should not carry click handler").toBeNull();
+  });
+
+  test("@phase199 @affordance action menu stays adjacent and bounded at locked viewport edges", async ({
+    page,
+    request,
+  }, testInfo) => {
+    test.skip(testInfo.project.name !== "chromium-desktop", "viewport matrix is driven manually");
+
+    const fixtures = await seedPhase199(request);
+
+    for (const viewport of PHASE199_FLOATING_VIEWPORTS) {
+      await page.setViewportSize({ width: viewport.width, height: viewport.height });
+      await login(page, `/billing/subscriptions/${fixtures.dashboard.subscription_id}`);
+      await setPhase191Theme(page, "light");
+
+      const trigger = page.locator("[data-ax-action-overflow-menu]").first();
+      await expect(trigger, `${viewport.name}: action menu trigger`).toBeVisible();
+      await pinDropdownTriggerNearLowerRight(page, trigger);
+      await trigger.click();
+
+      const panel = page.locator("[data-floating-panel='dropdown']").first();
+      await expect(panel, `${viewport.name}: dropdown panel`).toBeVisible();
+      await assertFloatingBounds(page, panel, `${viewport.name}: action menu`);
+      await assertFloatingAdjacentToTrigger(page, trigger, panel, `${viewport.name}: action menu`);
+
+      await page.keyboard.press("Escape");
+      await expect(panel, `${viewport.name}: dropdown panel closes`).toBeHidden();
+    }
   });
 
   test("@phase199 @fixture deterministic route flows preserve focus, scroll, clipping, and back navigation", async ({

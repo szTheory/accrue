@@ -3,19 +3,72 @@ import test from "node:test";
 
 import { initDropdowns } from "../../assets/js/hooks/dropdown.js";
 
-function detailsElement() {
+function rect({ left, top, width, height }) {
+  return {
+    left,
+    top,
+    width,
+    height,
+    right: left + width,
+    bottom: top + height
+  };
+}
+
+function styleMap() {
+  const values = new Map();
+
+  return {
+    setProperty(name, value) {
+      values.set(name, String(value));
+    },
+    removeProperty(name) {
+      values.delete(name);
+    },
+    getPropertyValue(name) {
+      return values.get(name) || "";
+    }
+  };
+}
+
+function detailsElement(options = {}) {
+  const summaryRect = options.summaryRect || rect({ left: 16, top: 16, width: 96, height: 40 });
+  const panelRect = options.panelRect || rect({ left: 16, top: 64, width: 240, height: 160 });
   const summary = {
     focusCalls: [],
+    getBoundingClientRect() {
+      return summaryRect;
+    },
     focus(options) {
       this.focusCalls.push(options);
     }
   };
   const attributes = new Map();
+  const panelStyle = styleMap();
+  const panel = {
+    style: panelStyle,
+    getBoundingClientRect() {
+      const shiftX = Number.parseFloat(panelStyle.getPropertyValue("--ax-dropdown-shift-x")) || 0;
+      const placement = details.dataset.floatingPlacement || "bottom";
+      const gap = 8;
+      const top = placement === "top" ? summaryRect.top - panelRect.height - gap : summaryRect.bottom + gap;
+
+      return rect({
+        left: panelRect.left + shiftX,
+        top,
+        width: panelRect.width,
+        height: panelRect.height
+      });
+    }
+  };
 
   return {
     open: true,
     insideTarget: {},
+    dataset: {},
     removeCalls: 0,
+    getBoundingClientRect() {
+      return summaryRect;
+    },
     setAttribute(attribute, value = "") {
       attributes.set(attribute, String(value));
     },
@@ -29,14 +82,17 @@ function detailsElement() {
       return target === this.insideTarget;
     },
     querySelector(selector) {
-      return selector === "summary" ? summary : null;
+      if (selector === "summary") return summary;
+      if (selector === ".ax-dropdown-panel") return panel;
+      return null;
     },
     removeAttribute(attribute) {
       assert.equal(attribute, "open");
       this.open = false;
       this.removeCalls += 1;
     },
-    summary
+    summary,
+    panel
   };
 }
 
@@ -83,6 +139,21 @@ function withDocument(documentLike, callback) {
       delete globalThis.document;
     } else {
       globalThis.document = priorDocument;
+    }
+  }
+}
+
+function withWindow(windowLike, callback) {
+  const priorWindow = globalThis.window;
+  globalThis.window = windowLike;
+
+  try {
+    callback();
+  } finally {
+    if (priorWindow === undefined) {
+      delete globalThis.window;
+    } else {
+      globalThis.window = priorWindow;
     }
   }
 }
@@ -163,4 +234,37 @@ test("dropdown dismissal does not apply modal scroll lock or aria-modal state", 
   assert.equal(documentLike.documentElement.style.overflow, "");
   assert.equal(documentLike.body.style.overflow, "");
   assert.equal(documentLike.body.style.paddingRight, "");
+});
+
+test("open dropdown flips above a bottom-edge trigger and keeps transform origin near the trigger", () => {
+  const dropdown = detailsElement({
+    summaryRect: rect({ left: 256, top: 196, width: 56, height: 36 }),
+    panelRect: rect({ left: 72, top: 240, width: 240, height: 152 })
+  });
+  const documentLike = fakeDocument([dropdown]);
+  const windowLike = {
+    innerWidth: 320,
+    innerHeight: 240,
+    addEventListener() {},
+    requestAnimationFrame(callback) {
+      callback();
+    }
+  };
+
+  withWindow(windowLike, () => {
+    withDocument(documentLike, () => {
+      initDropdowns();
+      documentLike.dispatch("toggle", { target: dropdown });
+    });
+  });
+
+  assert.equal(dropdown.dataset.floatingPlacement, "top");
+  assert.match(dropdown.panel.style.getPropertyValue("--ax-dropdown-shift-x"), /^-?\d+px$/);
+  assert.match(dropdown.panel.style.getPropertyValue("--ax-dropdown-origin-x"), /^\d+px$/);
+  assert.equal(dropdown.panel.style.getPropertyValue("--ax-dropdown-origin-y"), "bottom");
+
+  const finalRect = dropdown.panel.getBoundingClientRect();
+  assert.ok(finalRect.left >= 0, "panel should not clip past the left viewport edge");
+  assert.ok(finalRect.right <= windowLike.innerWidth, "panel should not clip past the right viewport edge");
+  assert.ok(finalRect.bottom <= dropdown.summary.getBoundingClientRect().top, "panel should sit above the trigger");
 });
