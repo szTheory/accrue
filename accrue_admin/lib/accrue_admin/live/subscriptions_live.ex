@@ -142,7 +142,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
           list_state={list_state(@params, @summary)}
           empty_reason={empty_reason(@params, @summary)}
           loading_fixture={phase196_loading_fixture?(@params)}
-          loading_label={Copy.subscriptions_list_loading_label()}
+          loading_label={list_state_copy(:loading).heading}
           render_filter_toolbar={false}
           clear_href={clear_all_href(@params, @table_path)}
           columns={[
@@ -426,22 +426,29 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
     do: Map.get(params, "status") == @default_queue_status and Map.get(params, "view") != "all"
 
   defp empty_title(params, summary) do
-    cond do
-      first_run_empty?(params, summary) -> Copy.subscriptions_list_first_run_empty_title()
-      queue_active?(params) -> Copy.subscriptions_list_queue_empty_title()
-      filter_active?(params) -> Copy.subscriptions_list_filtered_empty_title()
-      true -> Copy.subscriptions_list_first_run_empty_title()
-    end
+    params
+    |> empty_state(summary)
+    |> list_state_copy()
+    |> Map.fetch!(:heading)
   end
 
   defp empty_copy(params, summary) do
+    params
+    |> empty_state(summary)
+    |> list_state_copy()
+    |> Map.fetch!(:body)
+  end
+
+  defp empty_state(params, summary) do
     cond do
-      first_run_empty?(params, summary) -> Copy.subscriptions_list_first_run_empty_body()
-      queue_active?(params) -> Copy.subscriptions_list_queue_empty_body()
-      filter_active?(params) -> Copy.subscriptions_list_filtered_empty_body()
-      true -> Copy.subscriptions_list_first_run_empty_body()
+      first_run_empty?(params, summary) -> :first_run_empty
+      queue_active?(params) -> :queue_empty
+      filter_active?(params) -> :filtered_empty
+      true -> :first_run_empty
     end
   end
+
+  defp list_state_copy(state), do: Copy.resource_state_copy(:subscriptions, state)
 
   defp first_run_empty?(params, summary),
     do: Map.get(params, "view") == "all" and summary.total_count == 0 and !filter_active?(params)

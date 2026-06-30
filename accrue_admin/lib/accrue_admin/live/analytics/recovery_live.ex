@@ -109,7 +109,7 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLive do
               rel="noopener noreferrer"
               class="ax-help-link"
             >
-              Showing data since 2024-01-01
+              <%= Copy.recovery_cutoff_link_label() %>
             </a>
           </div>
           <p class="ax-body ax-page-copy"><%= Copy.recovery_index_subtitle() %></p>
@@ -122,23 +122,23 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLive do
         <section class="ax-kpi-grid ax-section-gap" data-ax-recovery-hero>
           <%= for kpi <- @kpi_pairs do %>
             <KpiCard.kpi_card
-              label={"Recovered MRR (#{String.upcase(kpi.currency)})"}
+              label={Copy.recovery_recovered_mrr_label(kpi.currency)}
               value={kpi.recovered_str}
-              delta="Amount saved by successful Dunning"
+              delta={Copy.recovery_recovered_mrr_delta()}
               delta_tone="moss"
               component_group="kpi-chart-table"
             >
-              <:meta>Money Saved</:meta>
+              <:meta><%= Copy.recovery_recovered_mrr_meta() %></:meta>
             </KpiCard.kpi_card>
 
             <KpiCard.kpi_card
-              label={"Exhausted MRR (#{String.upcase(kpi.currency)})"}
+              label={Copy.recovery_exhausted_mrr_label(kpi.currency)}
               value={kpi.exhausted_str}
-              delta="Annualized MRR snapshot at the exhaustion event — e.g., a $120/yr plan contributes $10/mo to Exhausted MRR."
+              delta={Copy.recovery_exhausted_mrr_delta()}
               delta_tone="amber"
               component_group="kpi-chart-table"
             >
-              <:meta>Churned Revenue</:meta>
+              <:meta><%= Copy.recovery_exhausted_mrr_meta() %></:meta>
             </KpiCard.kpi_card>
           <% end %>
         </section>
@@ -148,6 +148,7 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLive do
             rows={@at_risk}
             base_path={@admin_mount_path}
             owner_scope={@current_owner_scope}
+            empty_copy={Copy.resource_state_copy(:dunning, :queue_empty)}
           />
         </section>
 

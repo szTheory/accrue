@@ -39,9 +39,19 @@ defmodule AccrueAdmin.Components.AtRiskTable do
   attr(:error, :any, default: nil)
   attr(:next_cursor, :string, default: nil)
   attr(:load_more_href, :string, default: nil)
+  attr(:empty_copy, :map, default: nil)
 
   def at_risk_table(assigns) do
-    assigns = assign(assigns, :state, state(assigns))
+    assigns =
+      assigns
+      |> assign(:state, state(assigns))
+      |> assign(
+        :empty_copy,
+        normalize_state_copy(assigns[:empty_copy], %{
+          heading: "No active dunning campaigns",
+          body: "All subscriptions in this window have recovered or exhausted their campaign."
+        })
+      )
 
     ~H"""
     <section
@@ -134,8 +144,8 @@ defmodule AccrueAdmin.Components.AtRiskTable do
       </div>
 
       <div :if={@state == "empty"} class="ax-empty-state" data-role="empty-state" data-state="empty">
-        <p class="ax-heading">No active dunning campaigns</p>
-        <p class="ax-body">All subscriptions in this window have recovered or exhausted their campaign.</p>
+        <p class="ax-heading"><%= @empty_copy.heading %></p>
+        <p class="ax-body"><%= @empty_copy.body %></p>
       </div>
 
       <footer :if={@state in ["no-pagination", "has-pagination"]} class="ax-at-risk-footer">
@@ -164,6 +174,12 @@ defmodule AccrueAdmin.Components.AtRiskTable do
   defp state(%{rows: []}), do: "empty"
   defp state(%{next_cursor: cursor}) when cursor not in [nil, ""], do: "has-pagination"
   defp state(_assigns), do: "no-pagination"
+
+  defp normalize_state_copy(%{heading: heading, body: body}, _fallback)
+       when is_binary(heading) and is_binary(body),
+       do: %{heading: heading, body: body}
+
+  defp normalize_state_copy(_copy, fallback), do: fallback
 
   defp subscription_href(base_path, row, owner_scope) do
     ScopedPath.build(

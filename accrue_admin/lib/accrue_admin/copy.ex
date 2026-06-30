@@ -43,71 +43,133 @@ defmodule AccrueAdmin.Copy do
       singular: "customer",
       plural: "customers",
       first_run: "checkout or imported billing activity creates customer records",
+      first_run_heading: "No customers yet.",
+      first_run_body: "Customers appear after checkout or imported billing activity.",
       queue: "No customers need billing follow-up.",
-      queue_next: "Open the customers list to inspect the full customer ledger."
+      queue_next: "Open the customers list to inspect the full customer ledger.",
+      filtered_heading: "No customers match these filters.",
+      filtered_body: "Clear filters or adjust the search to inspect matching customers.",
+      loading_heading: "Loading customers.",
+      loading_body: "Loading customers from the local billing projection."
     },
     invoices: %{
       singular: "invoice",
       plural: "invoices",
       first_run: "subscriptions activate or renew",
+      first_run_heading: "No invoices yet.",
+      first_run_body: "Invoices appear when subscriptions activate or renew.",
       queue: "No invoices need collection.",
-      queue_next: "Open all invoices to review the ledger."
+      queue_next: "View all invoices to review the ledger.",
+      filtered_heading: "No invoices match these filters.",
+      filtered_body: "Clear filters or adjust the search to see invoices.",
+      loading_heading: "Loading invoices.",
+      loading_body: "Loading invoices from the local billing projection."
     },
     subscriptions: %{
       singular: "subscription",
       plural: "subscriptions",
       first_run: "a customer completes checkout",
-      queue: "No subscriptions are past due or canceling.",
-      queue_next: "Open all subscriptions to review lifecycle state."
+      first_run_heading: "No subscriptions yet.",
+      first_run_body: "Subscriptions appear after a customer completes checkout.",
+      queue: "Nothing at risk.",
+      queue_next: "No past-due or canceling subscriptions. View All to see every subscription.",
+      filtered_heading: "No subscriptions match these filters.",
+      filtered_body: "Clear filters or adjust the search to see subscriptions.",
+      loading_heading: "Loading subscriptions.",
+      loading_body: "Loading subscriptions from the local billing projection."
     },
     payments: %{
       singular: "payment",
       plural: "payments",
       first_run: "charges are recorded",
-      queue: "No payments need recovery.",
-      queue_next: "Open all payments to inspect settled and pending charges."
+      first_run_heading: "No payments yet.",
+      first_run_body: "Payments appear after charges are recorded.",
+      queue: "No failed payments.",
+      queue_next: "View all payments to inspect settled and pending charges.",
+      filtered_heading: "No payments match these filters.",
+      filtered_body: "Clear filters or adjust the search to see payments.",
+      loading_heading: "Loading payments.",
+      loading_body: "Loading payments from the local billing projection."
     },
     connect_accounts: %{
       singular: "connected account",
       plural: "connected accounts",
       first_run: "Connect onboarding starts",
+      first_run_heading: "No connected accounts yet.",
+      first_run_body: "Accounts appear after onboarding starts.",
       queue: "No connected accounts need attention.",
-      queue_next: "Open all connected accounts to inspect readiness."
+      queue_next: "View all connected accounts to inspect onboarded accounts.",
+      filtered_heading: "No connected accounts match these filters.",
+      filtered_body: "Clear filters or adjust readiness filters to see connected accounts.",
+      loading_heading: "Loading connected accounts.",
+      loading_body: "Loading connected accounts from the local billing projection."
     },
     webhooks: %{
       singular: "webhook delivery",
       plural: "webhook deliveries",
       first_run: "signed processor events are recorded",
+      first_run_heading: "No webhook deliveries yet.",
+      first_run_body: "Deliveries appear after signed processor events are recorded.",
       queue: "No webhook deliveries need replay.",
-      queue_next: "Open all webhook deliveries to inspect the delivery log."
+      queue_next: "View all webhook deliveries to inspect the full delivery log.",
+      filtered_heading: "No webhook deliveries match these filters.",
+      filtered_body: "Clear filters or adjust status and type filters to see deliveries.",
+      loading_heading: "Loading webhook deliveries.",
+      loading_body: "Loading webhook deliveries from the local billing projection."
     },
     events: %{
       singular: "event",
       plural: "billing events",
       first_run: "billing state changes are recorded",
+      first_run_heading: "No billing events yet.",
+      first_run_body: "Events appear when billing state changes are recorded.",
       queue: "No billing events need admin review.",
-      queue_next: "Open all billing events to inspect the append-only ledger."
+      queue_next: "Open all billing events to inspect the append-only ledger.",
+      filtered_heading: "No event ledger rows match these filters.",
+      filtered_body: "Clear filters or adjust actor and source filters to see ledger rows.",
+      loading_heading: "Loading billing events.",
+      loading_body: "Loading billing events from the local billing projection."
     },
     coupons: %{
       singular: "coupon",
       plural: "coupons",
       first_run: "coupon definitions are projected locally",
-      queue: "No coupons need review.",
-      queue_next: "Open all coupons to inspect discount definitions."
+      first_run_heading: "No coupons yet.",
+      first_run_body: "Coupons appear after discount definitions sync locally.",
+      queue: "No valid coupons.",
+      queue_next: "View all coupons to inspect invalid or expired definitions.",
+      filtered_heading: "No coupons match these filters.",
+      filtered_body: "Clear filters or adjust the search to see coupons.",
+      loading_heading: "Loading coupons.",
+      loading_body: "Loading coupons from the local billing projection."
     },
     promotion_codes: %{
       singular: "promotion code",
       plural: "promotion codes",
       first_run: "promotion code projections arrive from billing activity",
-      queue: "No promotion codes need review.",
-      queue_next: "Open all promotion codes to inspect customer-facing codes."
+      first_run_heading: "No promotion codes yet.",
+      first_run_body: "Codes appear after customer-facing discounts sync locally.",
+      queue: "No active codes.",
+      queue_next: "View all promotion codes to inspect inactive or expired codes.",
+      filtered_heading: "No promotion codes match these filters.",
+      filtered_body: "Clear filters or adjust the search to see promotion codes.",
+      loading_heading: "Loading promotion codes.",
+      loading_body: "Loading promotion codes from the local billing projection."
     },
     dunning: %{
       singular: "dunning campaign",
       plural: "dunning campaigns",
       first_run: "a subscription enters the configured past-due campaign",
-      queue: "No dunning campaigns need operator action.",
-      queue_next: "Open recovery analytics to inspect at-risk subscriptions."
+      first_run_heading: "No dunning campaigns yet.",
+      first_run_body:
+        "Dunning campaigns appear after a subscription enters the configured past-due campaign.",
+      queue: "No active dunning campaigns",
+      queue_next: "All subscriptions in this window have recovered or exhausted their campaign.",
+      filtered_heading: "No dunning campaigns match these filters.",
+      filtered_body:
+        "Clear filters or adjust the recovery window to inspect matching dunning campaigns.",
+      loading_heading: "Loading at-risk subscriptions",
+      loading_body: "Checking active dunning campaigns for this recovery window."
     }
   }
 
@@ -901,6 +963,24 @@ defmodule AccrueAdmin.Copy do
     do:
       "Track the dunning funnel and customers at risk of churn — how many recover after a failed payment, and which are nearing cancellation."
 
+  def recovery_cutoff_link_label, do: "Showing data since 2024-01-01"
+
+  def recovery_recovered_mrr_label(currency),
+    do: "Recovered MRR (#{String.upcase(to_string(currency))})"
+
+  def recovery_recovered_mrr_delta, do: "Amount saved by successful Dunning"
+
+  def recovery_recovered_mrr_meta, do: "Money Saved"
+
+  def recovery_exhausted_mrr_label(currency),
+    do: "Exhausted MRR (#{String.upcase(to_string(currency))})"
+
+  def recovery_exhausted_mrr_delta,
+    do:
+      "Annualized MRR snapshot at the exhaustion event — e.g., a $120/yr plan contributes $10/mo to Exhausted MRR."
+
+  def recovery_exhausted_mrr_meta, do: "Churned Revenue"
+
   def subscription_select_action_warning, do: "Select an action before confirming."
 
   def subscription_action_recorded_info, do: "Subscription action recorded."
@@ -1276,29 +1356,40 @@ defmodule AccrueAdmin.Copy do
 
   defp build_resource_state_copy(meta, :first_run_empty, _opts) do
     %{
-      heading: "No #{meta.plural} yet",
-      body: "#{sentence_case(meta.plural)} appear after #{meta.first_run}."
+      heading: Map.get(meta, :first_run_heading, "No #{meta.plural} yet"),
+      body:
+        Map.get(
+          meta,
+          :first_run_body,
+          "#{sentence_case(meta.plural)} appear after #{meta.first_run}."
+        )
     }
   end
 
   defp build_resource_state_copy(meta, :queue_empty, _opts) do
     %{
-      heading: meta.queue,
-      body: meta.queue_next
+      heading: Map.get(meta, :queue_heading, meta.queue),
+      body: Map.get(meta, :queue_body, meta.queue_next)
     }
   end
 
   defp build_resource_state_copy(meta, :filtered_empty, _opts) do
     %{
-      heading: "No #{meta.plural} match these filters",
-      body: "Clear filters or adjust the search to inspect matching #{meta.plural}."
+      heading: Map.get(meta, :filtered_heading, "No #{meta.plural} match these filters"),
+      body:
+        Map.get(
+          meta,
+          :filtered_body,
+          "Clear filters or adjust the search to inspect matching #{meta.plural}."
+        )
     }
   end
 
   defp build_resource_state_copy(meta, :loading, _opts) do
     %{
-      heading: "Loading #{meta.plural}",
-      body: "Loading #{meta.plural} from the local billing projection."
+      heading: Map.get(meta, :loading_heading, "Loading #{meta.plural}"),
+      body:
+        Map.get(meta, :loading_body, "Loading #{meta.plural} from the local billing projection.")
     }
   end
 

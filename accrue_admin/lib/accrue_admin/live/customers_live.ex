@@ -141,7 +141,7 @@ defmodule AccrueAdmin.Live.CustomersLive do
           list_state={list_state(@params)}
           empty_reason={empty_reason(@params, @summary)}
           loading_fixture={phase197_loading_fixture?(@params)}
-          loading_label={Copy.customers_list_loading_label()}
+          loading_label={list_state_copy(:loading).heading}
           render_filter_toolbar={false}
           clear_href={clear_all_href(@params, @table_path)}
           columns={[
@@ -376,20 +376,24 @@ defmodule AccrueAdmin.Live.CustomersLive do
   end
 
   defp empty_title(params, summary) do
-    if first_run_empty?(params, summary) do
-      Copy.customers_list_first_run_empty_title()
-    else
-      Copy.customers_list_filtered_empty_title()
-    end
+    params
+    |> empty_state(summary)
+    |> list_state_copy()
+    |> Map.fetch!(:heading)
   end
 
   defp empty_copy(params, summary) do
-    if first_run_empty?(params, summary) do
-      Copy.customers_list_first_run_empty_body()
-    else
-      Copy.customers_list_filtered_empty_body()
-    end
+    params
+    |> empty_state(summary)
+    |> list_state_copy()
+    |> Map.fetch!(:body)
   end
+
+  defp empty_state(params, summary) do
+    if first_run_empty?(params, summary), do: :first_run_empty, else: :filtered_empty
+  end
+
+  defp list_state_copy(state), do: Copy.resource_state_copy(:customers, state)
 
   defp first_run_empty?(params, summary),
     do: summary.customer_count == 0 and !filter_active?(params)
