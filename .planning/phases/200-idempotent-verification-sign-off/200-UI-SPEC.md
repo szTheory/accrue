@@ -55,7 +55,7 @@ Declared values (must be multiples of 4):
 
 Exceptions:
 
-- Existing `--ax-space-2xs` (2px) may remain only for existing dense table/chip/underline micro spacing and focus-ring offsets. Do not introduce new 2px layout spacing.
+- Legacy `--ax-space-2xs` may exist in older CSS, but Phase 200 must not use it for layout spacing, gaps, padding, margins, offsets, or new/touched proof surfaces. Use `--ax-space-xs` / `4px` for compact gaps.
 - 1px borders and hairlines remain border treatment, not spacing scale.
 - Every interactive evidence link, Storybook control, disclosure, filter, action, or checklist row must preserve a 44px minimum touch target at 320px and 375px.
 - Evidence tables, coverage matrices, and artifact lists must degrade to stacked rows/cards on mobile. Do not squeeze long artifact columns into unreadable horizontal tables.
