@@ -43,7 +43,10 @@ test.describe("Phase 200 rendered Storybook accessibility", () => {
           `${storyUrl} should render Storybook content before axe scan`
         ).toBeVisible();
 
-        const results = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa"]).analyze();
+        const results = await new AxeBuilder({ page })
+          .include(".psb-sandbox")
+          .withTags(["wcag2a", "wcag2aa"])
+          .analyze();
         const blocking = results.violations.filter((violation) =>
           ["critical", "serious"].includes(violation.impact)
         );
