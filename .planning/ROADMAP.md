@@ -261,7 +261,7 @@ Plans:
 
 **Wave 2**
 
-- [ ] 199-06-PLAN.md — Overlay browser proof and ancestor escape
+- [x] 199-06-PLAN.md — Overlay browser proof and ancestor escape
 - [ ] 199-12-PLAN.md — List and recovery page copy call sites
 - [ ] 199-13-PLAN.md — Detail and analytics page copy call sites
 
@@ -425,7 +425,7 @@ Full details: [v1.48 roadmap archive](milestones/v1.48-ROADMAP.md)
 | 196. Exemplar C — Subscriptions list + PageHeader | v1.54 | 5/5 | Complete    | 2026-06-26 |
 | 197. Propagate LIST | v1.54 | 7/7 | Complete    | 2026-06-28 |
 | 198. Propagate DETAIL + analytics | v1.54 | 9/9 | Complete    | 2026-06-29 |
-| 199. Cross-cutting interaction/overlay correctness + fixture stress + microcopy | v1.54 | 6/15 | In Progress|  |
+| 199. Cross-cutting interaction/overlay correctness + fixture stress + microcopy | v1.54 | 7/15 | In Progress|  |
 | 200. Idempotent verification & sign-off | v1.54 | 0/? | Not started | - |
 
 ## Historical Backlog Anchors (not active scope)
