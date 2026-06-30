@@ -12,6 +12,14 @@ const PHASE200_DIR = ".planning/phases/200-idempotent-verification-sign-off";
 const phaseDir = path.join(repoRoot, PHASE200_DIR);
 const DEFAULT_OUTPUT = path.join(phaseDir, "200-SIGN-OFF.md");
 const BLOCKING_SEVERITIES = new Set(["BLOCKER", "REPAIR-IN-PHASE"]);
+const COVERAGE_RANK = new Map([
+  ["pending", -1],
+  ["missing", -1],
+  ["unreachable", -1],
+  ["gap", 0],
+  ["n/a", 1],
+  ["covered", 2],
+]);
 
 function phaseRef(fileName) {
   return `${PHASE200_DIR}/${fileName}`.replace(/\/+/g, "/");
@@ -60,6 +68,10 @@ function parseScore(value) {
   return Number.isFinite(number) ? number : null;
 }
 
+function coverageRank(value) {
+  return COVERAGE_RANK.get(String(value || "")) ?? -99;
+}
+
 function writeText(absPath, value) {
   fs.mkdirSync(path.dirname(absPath), { recursive: true });
   fs.writeFileSync(absPath, value);
@@ -102,7 +114,7 @@ function downgradeRows(delta) {
     const final = parseScore(row.final_score);
     if (baseline !== null && (final === null || final < baseline)) score.push(row);
     const match = String(row.coverage_change || "").match(/^([^->]+)->(.+)$/);
-    if (match && ["pending", "missing", "unreachable", "gap"].includes(match[2])) coverage.push(row);
+    if (match && coverageRank(match[2]) < coverageRank(match[1])) coverage.push(row);
   }
   return { score, coverage };
 }

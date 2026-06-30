@@ -2,7 +2,14 @@ const fs = require("fs");
 const path = require("path");
 const { expect } = require("@playwright/test");
 
-const PHASE200_EVIDENCE_DIR = path.join(__dirname, "..", "test-results", "phase200");
+const REPO_ROOT = path.resolve(__dirname, "..", "..");
+const PHASE200_EVIDENCE_DIR = path.join(
+  REPO_ROOT,
+  ".planning",
+  "phases",
+  "200-idempotent-verification-sign-off",
+  "evidence"
+);
 const STORYBOOK_PATH_FRAGMENT = "/dev/storybook";
 
 function phase200EvidencePath(fileName) {

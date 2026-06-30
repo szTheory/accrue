@@ -87,22 +87,22 @@ const REQUIRED_ARTIFACTS = [
 const OPTIONAL_STRUCTURED_INPUTS = [
   {
     key: "storybookA11y",
-    defaultPath: path.join(adminRoot, "test-results/phase200/storybook-a11y.json"),
-    ref: "accrue_admin/test-results/phase200/storybook-a11y.json",
+    defaultPath: path.join(phaseDir, "evidence/storybook-a11y.json"),
+    ref: `${PHASE200_DIR}/evidence/storybook-a11y.json`,
     lens: "accessibility",
     lockedReference: "VER-02",
   },
   {
     key: "pageFlowEvidence",
-    defaultPath: path.join(adminRoot, "test-results/phase200/page-flow-evidence.json"),
-    ref: "accrue_admin/test-results/phase200/page-flow-evidence.json",
+    defaultPath: path.join(phaseDir, "evidence/page-flow-evidence.json"),
+    ref: `${PHASE200_DIR}/evidence/page-flow-evidence.json`,
     lens: "interaction",
     lockedReference: "VER-02",
   },
   {
     key: "hostLeakEvidence",
-    defaultPath: path.join(adminRoot, "test-results/phase200/host-leak.json"),
-    ref: "accrue_admin/test-results/phase200/host-leak.json",
+    defaultPath: path.join(phaseDir, "evidence/host-leak.json"),
+    ref: `${PHASE200_DIR}/evidence/host-leak.json`,
     lens: "correctness",
     lockedReference: "VER-03",
   },

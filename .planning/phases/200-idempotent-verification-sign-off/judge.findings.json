@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-30T16:55:18.163Z",
+  "generated_at": "2026-06-30T18:27:12.344Z",
   "phase": "200-idempotent-verification-sign-off",
   "allowed_lenses": [
     "correctness",
@@ -14,159 +14,18 @@
     "DEFERRED"
   ],
   "summary": {
-    "status": "blocked",
-    "findings": 7,
-    "blocking_findings": 7,
+    "status": "clear",
+    "findings": 0,
+    "blocking_findings": 0,
     "counts_by_severity": {
-      "BLOCKER": 7,
+      "BLOCKER": 0,
       "REPAIR-IN-PHASE": 0,
       "ADVISORY": 0,
       "DEFERRED": 0
     },
     "scope_notes": 10
   },
-  "findings": [
-    {
-      "id": "P200-JUDGE-001",
-      "lens": "correctness",
-      "severity": "BLOCKER",
-      "status": "open",
-      "title": "Missing final cell artifact",
-      "summary": "final.cells.json is required before Phase 200 can record ACCEPT.",
-      "locked_reference": "VER-01",
-      "supporting_references": [
-        "D-24",
-        "D-25",
-        "D-28"
-      ],
-      "affected": "final.cells.json",
-      "evidence_refs": [
-        ".planning/phases/200-idempotent-verification-sign-off/final.cells.json"
-      ],
-      "repair": "Generate final.cells.json, rerun the relevant verifier, and regenerate judge.findings.json.",
-      "source": "required-artifact"
-    },
-    {
-      "id": "P200-JUDGE-002",
-      "lens": "correctness",
-      "severity": "BLOCKER",
-      "status": "open",
-      "title": "Missing scorecard delta artifact",
-      "summary": "scorecard.delta.json is required before Phase 200 can record ACCEPT.",
-      "locked_reference": "VER-01",
-      "supporting_references": [
-        "D-24",
-        "D-25",
-        "D-28"
-      ],
-      "affected": "scorecard.delta.json",
-      "evidence_refs": [
-        ".planning/phases/200-idempotent-verification-sign-off/scorecard.delta.json"
-      ],
-      "repair": "Generate scorecard.delta.json, rerun the relevant verifier, and regenerate judge.findings.json.",
-      "source": "required-artifact"
-    },
-    {
-      "id": "P200-JUDGE-003",
-      "lens": "correctness",
-      "severity": "BLOCKER",
-      "status": "open",
-      "title": "Missing regression ledger",
-      "summary": "regressions.ndjson is required before Phase 200 can record ACCEPT.",
-      "locked_reference": "VER-01",
-      "supporting_references": [
-        "D-24",
-        "D-25",
-        "D-28"
-      ],
-      "affected": "regressions.ndjson",
-      "evidence_refs": [
-        ".planning/phases/200-idempotent-verification-sign-off/regressions.ndjson"
-      ],
-      "repair": "Generate regressions.ndjson, rerun the relevant verifier, and regenerate judge.findings.json.",
-      "source": "required-artifact"
-    },
-    {
-      "id": "P200-JUDGE-004",
-      "lens": "correctness",
-      "severity": "BLOCKER",
-      "status": "open",
-      "title": "Missing artifact manifest",
-      "summary": "artifacts.manifest.json is required before Phase 200 can record ACCEPT.",
-      "locked_reference": "VER-03",
-      "supporting_references": [
-        "D-24",
-        "D-25",
-        "D-28"
-      ],
-      "affected": "artifacts.manifest.json",
-      "evidence_refs": [
-        ".planning/phases/200-idempotent-verification-sign-off/artifacts.manifest.json"
-      ],
-      "repair": "Generate artifacts.manifest.json, rerun the relevant verifier, and regenerate judge.findings.json.",
-      "source": "required-artifact"
-    },
-    {
-      "id": "P200-JUDGE-005",
-      "lens": "correctness",
-      "severity": "BLOCKER",
-      "status": "open",
-      "title": "Missing scorecard markdown summary",
-      "summary": "200-SCORECARD.md is required before Phase 200 can record ACCEPT.",
-      "locked_reference": "VER-01",
-      "supporting_references": [
-        "D-24",
-        "D-25",
-        "D-28"
-      ],
-      "affected": "200-SCORECARD.md",
-      "evidence_refs": [
-        ".planning/phases/200-idempotent-verification-sign-off/200-SCORECARD.md"
-      ],
-      "repair": "Generate 200-SCORECARD.md, rerun the relevant verifier, and regenerate judge.findings.json.",
-      "source": "required-artifact"
-    },
-    {
-      "id": "P200-JUDGE-006",
-      "lens": "accessibility",
-      "severity": "BLOCKER",
-      "status": "open",
-      "title": "Missing Storybook coverage report",
-      "summary": "200-STORYBOOK-COVERAGE.md is required before Phase 200 can record ACCEPT.",
-      "locked_reference": "STY-03",
-      "supporting_references": [
-        "D-24",
-        "D-25",
-        "D-28"
-      ],
-      "affected": "200-STORYBOOK-COVERAGE.md",
-      "evidence_refs": [
-        ".planning/phases/200-idempotent-verification-sign-off/200-STORYBOOK-COVERAGE.md"
-      ],
-      "repair": "Generate 200-STORYBOOK-COVERAGE.md, rerun the relevant verifier, and regenerate judge.findings.json.",
-      "source": "required-artifact"
-    },
-    {
-      "id": "P200-JUDGE-007",
-      "lens": "correctness",
-      "severity": "BLOCKER",
-      "status": "open",
-      "title": "Missing verification report",
-      "summary": "200-VERIFICATION.md is required before Phase 200 can record ACCEPT.",
-      "locked_reference": "VER-02",
-      "supporting_references": [
-        "D-24",
-        "D-25",
-        "D-28"
-      ],
-      "affected": "200-VERIFICATION.md",
-      "evidence_refs": [
-        ".planning/phases/200-idempotent-verification-sign-off/200-VERIFICATION.md"
-      ],
-      "repair": "Generate 200-VERIFICATION.md, rerun the relevant verifier, and regenerate judge.findings.json.",
-      "source": "required-artifact"
-    }
-  ],
+  "findings": [],
   "scope_notes": [
     {
       "id": "P200-SCOPE-01",

@@ -16,7 +16,7 @@ const EXPECTED_UNION_COUNT = 30348;
 const DEFAULT_INPUTS = {
   componentBaselinePath: path.join(repoRoot, PHASE187_ARCHIVE_DIR, "baseline.cells.json"),
   pageFlowBaselinePath: path.join(repoRoot, PHASE187_ARCHIVE_DIR, "baseline.page-flow.cells.json"),
-  evidenceRoot: path.join(adminRoot, "test-results/phase200"),
+  evidenceRoot: path.join(phaseDir, "evidence"),
 };
 
 const OUTPUTS = {

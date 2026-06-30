@@ -6,7 +6,7 @@ const { test, expect } = require("@playwright/test");
 const REPO_ROOT = path.resolve(__dirname, "..", "..");
 const LEDGER_PATH = path.join(
   REPO_ROOT,
-  ".planning/phases/190-navigation-data-display-meta-component-cohesion/190-GROUP-CONTRACTS.md"
+  ".planning/milestones/v1.53-phases/190-navigation-data-display-meta-component-cohesion/190-GROUP-CONTRACTS.md"
 );
 
 const REQUIRED_SLUGS = [
@@ -195,10 +195,14 @@ async function assertOperatorStressFindability(page) {
     await expect(root, `${slug} proof root`).toBeVisible();
     await expect(root.locator(".ax-dev-group-header h4.ax-heading"), `${slug} identity heading`).toBeVisible();
     await expect(root.locator(".ax-dev-group-state-chip").first(), `${slug} state summary`).toBeVisible();
-    expect(await visibleFocusableCount(root), `${slug} has an immediately reachable action/control`).toBeGreaterThan(0);
+    expect(
+      await visibleGroupFocusableCount(page, slug, root),
+      `${slug} has an immediately reachable action/control`
+    ).toBeGreaterThan(0);
 
+    const textRoot = groupTextRoot(page, slug, root);
     for (const expectedText of GROUP_FINDABILITY[slug]) {
-      await expect(root, `${slug} exposes ${expectedText}`).toContainText(expectedText);
+      await expect(textRoot, `${slug} exposes ${expectedText}`).toContainText(expectedText);
     }
   }
 }
@@ -464,7 +468,7 @@ async function assertRepresentativeRoute(page, route) {
   if (route.category === "list-table") {
     await expect(groupLocator(page, "table-empty-loading-error-pagination").first()).toBeVisible();
     await expect(page.locator('[data-role="filter-form"]').first()).toBeVisible();
-    await expect(page.getByRole("heading", { name: /Invoices/i }).first()).toBeVisible();
+    await expect(page.getByRole("heading", { name: /Clear open receivables/i }).first()).toBeVisible();
     return;
   }
 
@@ -486,7 +490,7 @@ async function assertRepresentativeRoute(page, route) {
   if (route.category === "overlay-path") {
     await expect(groupLocator(page, "detail-header-metadata-actions").first()).toBeVisible();
     await expect(page.locator('[data-role="replay-single"]').first()).toBeVisible();
-    await expect(page.getByText(/Requeue this webhook row|Replay is unavailable/i).first()).toBeVisible();
+    await expect(page.getByText(/Single replay calls the existing DLQ primitive|Replay is unavailable/i).first()).toBeVisible();
     return;
   }
 
@@ -514,6 +518,23 @@ async function visibleFocusableCount(locator) {
   }
 
   return count;
+}
+
+async function visibleGroupFocusableCount(page, slug, root) {
+  if (slug !== "drawer-form") return visibleFocusableCount(root);
+
+  const drawerShell = drawerPortalShell(page);
+  await expect(drawerShell, "drawer-form portal shell").toBeVisible();
+  return visibleFocusableCount(drawerShell);
+}
+
+function groupTextRoot(page, slug, root) {
+  if (slug !== "drawer-form") return root;
+  return drawerPortalShell(page);
+}
+
+function drawerPortalShell(page) {
+  return page.locator("#grp190-drawer-form-shell[data-component-group='drawer-form']");
 }
 
 async function assertSingleResponsiveMode(page, tableRoot) {
