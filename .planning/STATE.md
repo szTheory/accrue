@@ -4,16 +4,16 @@ milestone: v1.54
 milestone_name: Admin UI Page-Level Streamlining & Storybook
 current_phase: 199
 current_phase_name: cross-cutting-interaction-overlay-correctness-fixture-stress
-status: executing
-stopped_at: Completed 199-14-PLAN.md
-last_updated: "2026-06-30T05:00:27.309Z"
+status: verifying
+stopped_at: Completed 199-15-PLAN.md
+last_updated: "2026-06-30T05:11:45.322Z"
 last_activity: 2026-06-30
 progress:
   total_phases: 8
-  completed_phases: 6
+  completed_phases: 7
   total_plans: 53
-  completed_plans: 52
-  percent: 75
+  completed_plans: 53
+  percent: 88
 ---
 
 # Project State
@@ -30,7 +30,7 @@ See: `.planning/PROJECT.md` (updated 2026-06-29 — Phase 198 complete; Phase 19
 
 Phase: 199 (cross-cutting-interaction-overlay-correctness-fixture-stress) — EXECUTING
 Plan: 15 of 15
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-06-30
 
 ## Post-v1.48 Pause Rule
@@ -239,6 +239,7 @@ Coverage: 22/22 v1.51 requirements mapped (each REQ-ID → exactly one phase). D
 | Phase 199 P09 | 9 min | 1 tasks | 4 files |
 | Phase 199 P10 | 69m30s | 3 tasks | 8 files |
 | Phase 199 P14 | 14m | 2 tasks | 8 files |
+| Phase 199 P15 | 7m 28s | 1 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -457,6 +458,7 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - [Phase 199]: 199-10: Overlay and focus assertions wait for settled LiveView cleanup, and staged drawer teardown restores focus to the stable main region. — Browser failures showed focus and overlay cleanup are asynchronous across route patches and staged action drawers.
 - [Phase 199]: Summary-list row actions accept action_context, hidden_context, and context aliases for accessible object context. — Plan 199-14 needed repeated action labels to carry object context without changing visible layout.
 - [Phase 199]: Phase 199 browser copy checks read generated copy_strings.json for the clear-filter label. — Browser copy assertions should consume the exporter-owned fixture when they depend on allowlisted copy.
+- [Phase 199]: 199-15: FocusTrap visibility treats connected focus targets as visible in non-browser lifecycle tests while preserving browser style and rect checks. — The closeout JS lifecycle gate exposed a focus-restore bug in the Node test environment; the runtime bundle was rebuilt with the fix.
 
 ### Pending Todos
 
@@ -547,8 +549,8 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 
 ## Session Continuity
 
-Last session: 2026-06-30T05:00:27.303Z
-Stopped at: Completed 199-14-PLAN.md
+Last session: 2026-06-30T05:11:45.316Z
+Stopped at: Completed 199-15-PLAN.md
 Resume file: None
 
 ## Operator Next Steps
