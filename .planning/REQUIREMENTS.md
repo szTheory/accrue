@@ -49,8 +49,8 @@ v1.54-storybook-and-forward-only-qa). Phases 193–200.
 ### STY — PhoenixStorybook (dev/test-only)
 
 - [x] **STY-01**: `phoenix_storybook` is added `only: [:dev, :test]` and mounted via a sibling-scope router wrap guarded by `Code.ensure_loaded?/1`, so `examples/accrue_host` compiles in `:dev` and `:prod` with the dep absent and exposes no storybook route (proves zero adopter-runtime leak).
-- [ ] **STY-02**: Every `ComponentRegistry` family and all 8 group contracts have a generated (registry-driven) story — the registry stays the single source of truth; the in-app `/dev/components` kitchen and the Phase-189/190 drift tests stay green.
-- [ ] **STY-03**: Stories render correctly in both color modes against the shipped committed `ax-*` bundle (not a Tailwind rebuild), with the `html.accrue-admin[data-theme]` scoping bridged into Storybook's sandbox.
+- [x] **STY-02**: Every `ComponentRegistry` family and all 8 group contracts have a generated (registry-driven) story — the registry stays the single source of truth; the in-app `/dev/components` kitchen and the Phase-189/190 drift tests stay green.
+- [x] **STY-03**: Stories render correctly in both color modes against the shipped committed `ax-*` bundle (not a Tailwind rebuild), with the `html.accrue-admin[data-theme]` scoping bridged into Storybook's sandbox.
 
 ### EXE — Gold-standard exemplars (one per archetype)
 
@@ -116,8 +116,8 @@ REQ-ID → phase mapping (each REQ-ID maps to exactly one phase; 23/23 mapped, n
 | VER-01 | Phase 200 | Pending |
 | VER-02 | Phase 200 | Pending |
 | VER-03 | Phase 200 | Pending |
-| STY-02 | Phase 200 | Pending |
-| STY-03 | Phase 200 | Pending |
+| STY-02 | Phase 200 | Complete |
+| STY-03 | Phase 200 | Complete |
 
 **Notes on mapping decisions:**
 
