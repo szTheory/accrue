@@ -16,6 +16,7 @@ if Mix.env() != :prod do
       css_path: AccrueAdmin.Assets.hashed_path(:storybook_css, "/dev/storybook"),
       js_path: AccrueAdmin.Assets.hashed_path(:storybook_js, "/dev/storybook"),
       sandbox_class: "accrue-admin",
+      color_mode: true,
       color_mode_sandbox_dark_class: "ax-theme-dark-shim"
   end
 end

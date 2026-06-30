@@ -184,7 +184,9 @@ defmodule AccrueAdmin.ThemeTest do
 
   test "Phase 200 Storybook enables color mode with the dark shim bridge" do
     assert AccrueAdmin.Dev.Storybook.config(:color_mode) == true
-    assert AccrueAdmin.Dev.Storybook.config(:color_mode_sandbox_dark_class) == "ax-theme-dark-shim"
+
+    assert AccrueAdmin.Dev.Storybook.config(:color_mode_sandbox_dark_class) ==
+             "ax-theme-dark-shim"
   end
 
   test "Phase 200 Storybook dark shim mirrors every dark ax token from theme css" do
