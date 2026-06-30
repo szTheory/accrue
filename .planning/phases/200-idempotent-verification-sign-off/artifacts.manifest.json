@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-30T19:16:28.604Z",
+  "generated_at": "2026-06-30T19:29:44.738Z",
   "phase": "200-idempotent-verification-sign-off",
   "outputs": {
     "baselineUnion": ".planning/phases/200-idempotent-verification-sign-off/baseline.union.cells.json",
@@ -29,7 +29,7 @@
     },
     {
       "path": ".planning/phases/200-idempotent-verification-sign-off/200-VERIFICATION.md",
-      "sha256": "1ae6718d5f8a163bc71ffeb4b329feb13eb51827e074699cd89a41fdc9b95989",
+      "sha256": "b0c077d783bd861a44b01191de1d6cb65aa2ce2b9b64891cbbd3a845723d3ad6",
       "bytes": 4548,
       "generated": true
     },
@@ -36343,7 +36343,7 @@
     },
     {
       "path": ".planning/phases/200-idempotent-verification-sign-off/evidence/page-flow-evidence.json",
-      "sha256": "511cc5b08ffff3ca987173c0109e49c5a7a35128ca0f0d35c39eb65c664fc8e3",
+      "sha256": "1b6a022ed1e3c1055acb62772cd3d6dbf1d753082650fb1c2a622d569f39ae29",
       "bytes": 10280585,
       "generated": true
     },
@@ -36601,7 +36601,7 @@
     },
     {
       "path": ".planning/phases/200-idempotent-verification-sign-off/evidence/storybook-a11y.json",
-      "sha256": "caa83b83440c65769fed1b74809fab43a3f6b6152d109349359cf1ac70d82da1",
+      "sha256": "ff83074ac90d9ffe818076cf22bd69f8dbef785ac1281e09648841037e1affde",
       "bytes": 5321,
       "generated": true
     },

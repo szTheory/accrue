@@ -124,6 +124,8 @@ printf '%s\n' "$scorecard_script" | grep -Fq "node ../scripts/ci/verify_phase200
 
 printf '%s\n' "$signoff_script" | grep -Fq "node ../scripts/ci/verify_phase200_signoff.mjs --require-accept" ||
   fail "phase200:signoff must require ACCEPT in CI/final guardrails"
+printf '%s\n' "$signoff_script" | grep -Fq "node ../scripts/ci/generate_phase200_closeout_reports.mjs --record-final-statuses" ||
+  fail "phase200:signoff must regenerate closeout command statuses before final ACCEPT verification"
 
 printf '%s\n' "$guardrails_script" | grep -Fq "bash ../scripts/ci/verify_phase200_admin_guardrails.sh" ||
   fail "phase200:guardrails must point at ../scripts/ci/verify_phase200_admin_guardrails.sh"

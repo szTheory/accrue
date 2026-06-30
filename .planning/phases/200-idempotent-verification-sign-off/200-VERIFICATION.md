@@ -25,7 +25,7 @@
 | `artifacts.manifest.json` | present | 2653463 |
 | `200-SCORECARD.md` | present | 684 |
 | `200-STORYBOOK-COVERAGE.md` | present | 2149 |
-| `200-VERIFICATION.md` | present | 3111 |
+| `200-VERIFICATION.md` | present | 4548 |
 | `judge.findings.json` | present | 4145 |
 | `200-SIGN-OFF.md` | present | 3610 |
 

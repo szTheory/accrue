@@ -23,7 +23,7 @@
     "phase192:signoff": "node e2e/phase192-gallery.mjs",
     "phase200:storybook": "mix test test/accrue_admin/dev/storybook_coverage_test.exs test/accrue_admin/dev/storybook_asset_test.exs test/accrue_admin/theme_test.exs && env -u NO_COLOR playwright test e2e/admin-storybook-a11y-phase200.spec.js --workers=1",
     "phase200:scorecard": "node e2e/phase200-scorecard.mjs && node ../scripts/ci/verify_phase200_scorecard.mjs",
-    "phase200:signoff": "node ../scripts/ci/verify_phase200_signoff.mjs --require-accept",
+    "phase200:signoff": "node ../scripts/ci/generate_phase200_closeout_reports.mjs --record-final-statuses && node ../scripts/ci/verify_phase200_signoff.mjs --require-accept",
     "phase200:guardrails": "bash ../scripts/ci/verify_phase200_admin_guardrails.sh"
   },
   "devDependencies": {

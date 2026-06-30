@@ -48,6 +48,15 @@ const ACCEPT_GUARDRAIL_MARKERS = [
   "host",
 ];
 
+export const REQUIRED_PHASE200_GUARDRAIL_STATUSES = [
+  "verify_phase200_scorecard",
+  "verify_phase200_signoff",
+  "storybook",
+  "phase199 interaction regression",
+  "reduced-motion",
+  "host leak",
+];
+
 function repoRelative(absPath) {
   return path.relative(REPO_ROOT, absPath).split(path.sep).join("/");
 }
@@ -234,6 +243,46 @@ function commandStatusValue(value) {
   return "";
 }
 
+function commandStatusMap(manifest) {
+  if (!manifest || typeof manifest !== "object") return null;
+  const statuses = manifest.command_statuses || manifest.guardrails;
+  if (!statuses || typeof statuses !== "object" || Array.isArray(statuses)) return null;
+  return statuses;
+}
+
+function commandStatusPassed(value) {
+  return /^(pass|passed|ok|green)$/i.test(String(commandStatusValue(value)));
+}
+
+export function guardrailStatusFailures(manifest) {
+  const statuses = commandStatusMap(manifest);
+  return REQUIRED_PHASE200_GUARDRAIL_STATUSES.flatMap((name) => {
+    if (!statuses || !Object.prototype.hasOwnProperty.call(statuses, name)) {
+      return [
+        {
+          name,
+          status: "missing",
+          value: null,
+          message: `${name} is missing from artifacts.manifest.json command_statuses.`,
+        },
+      ];
+    }
+
+    const value = statuses[name];
+    if (!commandStatusPassed(value)) {
+      return [
+        {
+          name,
+          status: "failed",
+          value,
+          message: `${name} is not passed in artifacts.manifest.json command_statuses.`,
+        },
+      ];
+    }
+    return [];
+  });
+}
+
 function markdownStatusPass(filePath, label, failures) {
   if (!fs.existsSync(filePath)) return;
   const body = readFile(filePath);
@@ -310,9 +359,10 @@ function validateAcceptJudge(paths, failures) {
 function validateAcceptManifest(paths, markdown, failures) {
   if (fs.existsSync(paths.manifest)) {
     const manifest = readJson(paths.manifest, failures, "artifacts.manifest.json");
-    const statuses = manifest && typeof manifest === "object" ? manifest.command_statuses || manifest.guardrails || {} : {};
-    const failed = Object.entries(statuses).filter(([, value]) => !/^(pass|passed|ok|green)$/i.test(String(commandStatusValue(value))));
-    if (failed.length > 0) failures.guardrails.push(`ACCEPT rejects failed guardrails in artifacts.manifest.json: ${failed.map(([name]) => name).join(", ")}.`);
+    const failed = guardrailStatusFailures(manifest);
+    if (failed.length > 0) {
+      failures.guardrails.push(`ACCEPT requires passed guardrail statuses in artifacts.manifest.json: ${failed.map((failure) => failure.message).join("; ")}`);
+    }
   }
 
   const guardrailSource = `${sectionSource(markdown, /maintainer checkpoint/i)}\n${sectionSource(markdown, /deterministic artifact summary/i)}`;
@@ -323,7 +373,7 @@ function validateAcceptManifest(paths, markdown, failures) {
 
 function validateReject(markdown, paths, failures) {
   const repairs = sectionSource(markdown, /required repairs/i);
-  if (!/\b(P200-JUDGE-[0-9]+|missing artifact|regressions\.ndjson|final\.cells\.json|scorecard\.delta\.json)\b/i.test(repairs)) {
+  if (!/(P200-JUDGE-[0-9]+|missing artifact|guardrail:|regressions\.ndjson|final\.cells\.json|scorecard\.delta\.json)/i.test(repairs)) {
     failures.rejectRepairs.push("REJECT must name blocking finding IDs or exact missing repair artifacts.");
   }
 
@@ -419,7 +469,7 @@ function fixturePackage(root, overrides = {}) {
             verify_phase200_scorecard: { status: "passed", evidence_ref: "accrue_admin/test-results/phase200/scorecard.log" },
             verify_phase200_signoff: { status: "passed", evidence_ref: "accrue_admin/test-results/phase200/signoff.log" },
             storybook: { status: "passed", evidence_ref: "accrue_admin/test-results/phase200/storybook-a11y.json" },
-            phase199: { status: "passed", evidence_ref: "accrue_admin/test-results/phase200/phase199.log" },
+            "phase199 interaction regression": { status: "passed", evidence_ref: "accrue_admin/test-results/phase200/phase199.log" },
             "reduced-motion": { status: "passed", evidence_ref: "accrue_admin/test-results/phase200/reduced-motion.log" },
             "host leak": { status: "passed", evidence_ref: "accrue_admin/test-results/phase200/host-leak.log" },
           },
@@ -569,6 +619,20 @@ function runSelfTest() {
     });
     assertSelfTest("ACCEPT with failed Storybook coverage report fails", !acceptFailedStorybook.ok);
     assertSelfTest("failed Storybook report is treated as guardrail failure", acceptFailedStorybook.failures.guardrails.length > 0);
+
+    fixturePackage(path.join(root, "missing-guardrail-statuses"), {
+      manifest: { evidence: [] },
+    });
+    const acceptMissingGuardrails = verifyPhase200Signoff({
+      markdown: signoffMarkdown("ACCEPT"),
+      signoffPath: path.join(root, "missing-guardrail-statuses/200-SIGN-OFF.md"),
+      requireAccept: true,
+    });
+    assertSelfTest("ACCEPT with missing guardrail statuses fails", !acceptMissingGuardrails.ok);
+    assertSelfTest(
+      "missing guardrail statuses are reported",
+      acceptMissingGuardrails.failures.guardrails.some((failure) => /command_statuses/.test(failure))
+    );
 
     fixturePackage(path.join(root, "stale"), {
       finalCells: [fixtureFinalCell({ score: null, coverage_status: "pending", evidence_refs: [] })],

@@ -2,7 +2,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { REQUIRED_PHASE200_ARTIFACTS, verifyPhase200Signoff } from "../../scripts/ci/verify_phase200_signoff.mjs";
+import { REQUIRED_PHASE200_ARTIFACTS, guardrailStatusFailures, verifyPhase200Signoff } from "../../scripts/ci/verify_phase200_signoff.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const adminRoot = path.resolve(__dirname, "..");
@@ -133,8 +133,14 @@ function commandStatusValue(value) {
 }
 
 function failedGuardrails(manifest) {
-  const statuses = manifest && typeof manifest === "object" ? manifest.command_statuses || manifest.guardrails || {} : {};
-  return Object.entries(statuses).filter(([, value]) => !/^(pass|passed|ok|green)$/i.test(String(commandStatusValue(value))));
+  return guardrailStatusFailures(manifest).map((failure) => [
+    failure.name,
+    failure.value || {
+      status: failure.status,
+      evidence_ref: phaseRef("artifacts.manifest.json"),
+      message: failure.message,
+    },
+  ]);
 }
 
 function collectEvidence(options = {}) {
@@ -318,18 +324,28 @@ function approvalDateFromEvidence(value) {
   return match ? match[1] : null;
 }
 
-function readExistingApprovalCheckpoint(outputPath) {
-  if (!fs.existsSync(outputPath)) return null;
-  const body = readFile(outputPath);
+function approvalCheckpointFromBody(body) {
   const checkpoint = body.match(/^\| Human checkpoint response \| ACCEPT \| (.+?) \|$/m);
   const finalLine = body.match(/^Final maintainer decision: ACCEPT \(maintainer approved (20\d{2}-\d{2}-\d{2})\)\./m);
-  if (!checkpoint && !finalLine) return null;
+  const verificationLine = body.match(/Maintainer response `approved`, (20\d{2}-\d{2}-\d{2})/);
+  if (!checkpoint && !finalLine && !verificationLine) return null;
 
-  const evidence = checkpoint?.[1] || `User response \`approved\`, ${finalLine[1]}`;
+  const evidence = checkpoint?.[1] || `User response \`approved\`, ${finalLine?.[1] || verificationLine[1]}`;
   return {
-    date: finalLine?.[1] || approvalDateFromEvidence(evidence),
+    date: finalLine?.[1] || verificationLine?.[1] || approvalDateFromEvidence(evidence),
     evidence,
   };
+}
+
+function readExistingApprovalCheckpoint(outputPath) {
+  if (fs.existsSync(outputPath)) {
+    const signoffCheckpoint = approvalCheckpointFromBody(readFile(outputPath));
+    if (signoffCheckpoint) return signoffCheckpoint;
+  }
+
+  const verificationPath = path.join(path.dirname(outputPath), "200-VERIFICATION.md");
+  if (fs.existsSync(verificationPath)) return approvalCheckpointFromBody(readFile(verificationPath));
+  return null;
 }
 
 function renderMarkdown(evidence, { approvalCheckpoint = null } = {}) {
@@ -453,7 +469,7 @@ function writeAcceptFixture(root) {
       verify_phase200_scorecard: { status: "passed", evidence_ref: "accrue_admin/test-results/phase200/scorecard.log" },
       verify_phase200_signoff: { status: "passed", evidence_ref: "accrue_admin/test-results/phase200/signoff.log" },
       storybook: { status: "passed", evidence_ref: "accrue_admin/test-results/phase200/storybook-a11y.json" },
-      phase199: { status: "passed", evidence_ref: "accrue_admin/test-results/phase200/phase199.log" },
+      "phase199 interaction regression": { status: "passed", evidence_ref: "accrue_admin/test-results/phase200/phase199.log" },
       "reduced-motion": { status: "passed", evidence_ref: "accrue_admin/test-results/phase200/reduced-motion.log" },
       "host leak": { status: "passed", evidence_ref: "accrue_admin/test-results/phase200/host-leak.log" },
     },
@@ -513,6 +529,18 @@ function runSelfTest() {
       write: false,
     });
     assertSelfTest("generator can produce verifier-clean ACCEPT for passing fixture", accept.decision === "ACCEPT");
+
+    const missingGuardrailsRoot = path.join(root, "missing-guardrails");
+    writeAcceptFixture(missingGuardrailsRoot);
+    writeJson(artifactPaths(missingGuardrailsRoot)["artifacts.manifest.json"], { evidence: [] });
+    const missingGuardrails = generatePhase200Signoff({
+      phaseDir: missingGuardrailsRoot,
+      outputPath: path.join(missingGuardrailsRoot, "200-SIGN-OFF.md"),
+      dryRun: true,
+      write: false,
+    });
+    assertSelfTest("generator rejects ACCEPT when guardrail statuses are absent", missingGuardrails.decision === "REJECT");
+    assertSelfTest("missing guardrail repair rows are named", missingGuardrails.markdown.includes("guardrail: verify_phase200_scorecard"));
 
     const outputRoot = path.join(root, "write");
     writeRejectFixture(outputRoot);
