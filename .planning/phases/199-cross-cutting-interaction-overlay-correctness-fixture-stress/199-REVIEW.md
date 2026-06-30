@@ -1,11 +1,13 @@
 ---
 phase: 199-cross-cutting-interaction-overlay-correctness-fixture-stress
-reviewed: 2026-06-30T06:10:47Z
+reviewed: 2026-06-30T06:19:46Z
 depth: standard
-files_reviewed: 35
+files_reviewed: 37
 files_reviewed_list:
   - accrue_admin/assets/js/hooks/command_palette.js
   - accrue_admin/assets/js/hooks/dropdown.js
+  - accrue_admin/e2e/admin-spec-detail-phase195.spec.js
+  - accrue_admin/e2e/admin-spec-list-phase197.spec.js
   - accrue_admin/lib/accrue_admin/components/app_shell.ex
   - accrue_admin/lib/accrue_admin/components/global_search.ex
   - accrue_admin/lib/accrue_admin/dev/clock_live.ex
@@ -49,20 +51,25 @@ status: clean
 
 # Phase 199: Code Review Report
 
-**Reviewed:** 2026-06-30T06:10:47Z
+**Reviewed:** 2026-06-30T06:19:46Z
 **Depth:** standard
-**Files Reviewed:** 35
+**Files Reviewed:** 37
 **Status:** clean
 
 ## Summary
 
-Reviewed the Phase 199 remediation committed as `6968b50a` across the global search component, AppShell owner-scope plumbing, command palette and dropdown hooks, generated static bundle, and focused regression tests.
+Reviewed the Phase 199 remediation committed as `6968b50a` across the global search component, AppShell owner-scope plumbing, command palette and dropdown hooks, generated static bundle, and focused regression tests. Refreshed the review for final regression-gate maintenance commit `9101baff`, which repaired expectations in the prior Phase 195 and Phase 197 E2E specs.
 
 All reviewed files meet quality standards. No unresolved Critical, Warning, or Info findings remain.
 
 ## Narrative Findings (AI reviewer)
 
 No unresolved issues found.
+
+## Final Regression-Spec Review Note
+
+- `accrue_admin/e2e/admin-spec-detail-phase195.spec.js`: the repaired drawer primary-action locator now targets the visible submit button inside `form[data-ax-action-drawer-form]`, matching the current subscription action drawer markup while preserving the overlay actionability assertions.
+- `accrue_admin/e2e/admin-spec-list-phase197.spec.js`: the connect-account queue-empty expectation now matches the runtime `Copy.resource_state_copy(:connect_accounts, :queue_empty)` heading rendered by `ConnectAccountsLive`.
 
 ## Resolved Findings Note
 
@@ -74,9 +81,11 @@ No unresolved issues found.
 
 - `mix test test/accrue_admin/components/global_search_test.exs` - 9 tests, 0 failures.
 - `node --test test/js/command_palette_test.mjs test/js/dropdown_test.mjs` - 13 tests, 0 failures.
+- `node --check accrue_admin/e2e/admin-spec-detail-phase195.spec.js` - syntax OK.
+- `node --check accrue_admin/e2e/admin-spec-list-phase197.spec.js` - syntax OK.
 
 ---
 
-_Reviewed: 2026-06-30T06:10:47Z_
+_Reviewed: 2026-06-30T06:19:46Z_
 _Reviewer: the agent (gsd-code-reviewer)_
 _Depth: standard_
