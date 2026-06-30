@@ -21,29 +21,62 @@ test.use({ trace: "retain-on-failure" });
 
 const PHASE199_ROUTE_FLOWS = Object.freeze([
   {
-    name: "Customer to invoice detail and back",
-    route: ({ dashboard }) => `/billing/customers/${dashboard.customer_id}`,
-    beforeLink: /Invoices \d+/i,
-    link: /E2E-001|in_e2e_dashboard/i,
-    expectedAfterClick: /\/billing\/invoices\//,
+    name: "Customer list to detail to invoice detail and back",
+    route: () => "/billing/customers",
+    steps: [
+      { link: /E2E Phase 199 Boundary Customer/i, expectedAfterClick: /\/billing\/customers\/19900000-/ },
+      { assertText: /status past_due/i },
+      { link: /^Invoices 1$/i, expectedAfterClick: /tab=invoices/ },
+      { link: /E2E-199-JPY-001/i, expectedAfterClick: /\/billing\/invoices\/19900000-/ },
+      { assertText: /¥55,000|JPY/i },
+      { back: /tab=invoices/ },
+      { back: /\/billing\/customers\/19900000-/ },
+    ],
   },
   {
-    name: "Webhook to related event drill",
-    route: ({ operatorFlows }) => `/billing/webhooks/${operatorFlows.single_webhook_id}`,
-    link: /charge\.succeeded|Activity feed|Events/i,
-    expectedAfterClick: /\/billing\/events|source_webhook_event_id=/,
-    optionalLink: true,
+    name: "Invoice list to detail to step-up and back",
+    route: () => "/billing/invoices?view=all",
+    steps: [
+      { link: /E2E-199-JPY-001/i, expectedAfterClick: /\/billing\/invoices\/19900000-/ },
+      { assertText: /¥55,000|JPY/i },
+      { drawerStepUp: /Void invoice/i },
+      { back: /\/billing\/invoices/ },
+    ],
   },
   {
-    name: "Recovery to campaign detail",
+    name: "Webhook list to event drill to replay step-up and back",
+    route: () => "/billing/webhooks?view=all",
+    steps: [
+      { link: /evt_e2e_phase199_dead/i, expectedAfterClick: /\/billing\/webhooks\/19900000-/ },
+      { assertText: /Raw payload|Derived ledger rows/i },
+      { link: /Event charge\.succeeded/i, expectedAfterClick: /\/billing\/events\/\d+/ },
+      { assertText: /Source webhook|Charge 19900000-/i },
+      { back: /\/billing\/webhooks\/19900000-/ },
+      { drawerStepUp: /Replay webhook|Replay delivery/i },
+      { back: /\/billing\/webhooks/ },
+    ],
+  },
+  {
+    name: "Recovery list to campaign to subscription detail and back",
     route: () => "/billing/analytics/recovery",
-    linkSelector: "main table a",
-    expectedAfterClick: /\/billing\/analytics\/recovery\/subscriptions\//,
+    steps: [
+      { link: /phase199\.route-edge/i, expectedAfterClick: /\/billing\/analytics\/recovery\/subscriptions\/19900000-/ },
+      { assertText: /Dunning Timeline|No dunning history/i },
+      { link: /subscription detail/i, expectedAfterClick: /\/billing\/subscriptions\/19900000-/ },
+      { assertText: /past_due|Payment methods|Subscription/i },
+      { back: /\/billing\/analytics\/recovery\/subscriptions\/19900000-/ },
+      { back: /\/billing\/analytics\/recovery/ },
+    ],
   },
   {
-    name: "Connect account detail to platform-fee drawer",
-    route: ({ edgeStates }) => `/billing/connect/${edgeStates.connect_account_id}`,
-    openDrawer: /edit platform fee override|platform fee override/i,
+    name: "Connect list to account detail to platform-fee step-up and back",
+    route: () => "/billing/connect?view=all",
+    steps: [
+      { link: /acct_e2e_phase199_attention/i, expectedAfterClick: /\/billing\/connect\/19900000-/ },
+      { assertText: /Needs attention|currently due: external_account/i },
+      { drawerStepUp: /Edit platform fee override|Change platform fee override/i },
+      { back: /\/billing\/connect/ },
+    ],
   },
 ]);
 
@@ -174,14 +207,16 @@ async function seedScenario(request, scenario) {
 }
 
 async function seedPhase199(request) {
-  await reset(request);
-  const phase191 = await seedScenario(request, "phase191-matrix");
-  const operatorFlows = await seedScenario(request, "operator-flows");
-  const dashboard = await seedScenario(request, "dashboard");
-  const edgeStates = await seedScenario(request, "edge-states");
-  const overflow = await seedScenario(request, "overflow");
+  const phase199 = await seedScenario(request, "phase199-interaction-matrix");
 
-  return { dashboard, edgeStates, operatorFlows, overflow, phase191 };
+  return {
+    phase199,
+    dashboard: phase199,
+    edgeStates: phase199,
+    operatorFlows: phase199,
+    overflow: phase199,
+    phase191: phase199,
+  };
 }
 
 async function login(page, target = "/billing") {
@@ -405,9 +440,17 @@ async function assertBodyScrollStable(page, label) {
 
 async function clickActionTrigger(page, target) {
   const direct = page.getByRole("button", { name: target.trigger }).first();
-  if (!target.preferMenu && (await direct.count()) > 0 && (await direct.isVisible())) {
-    await direct.click();
-    return;
+  if (!target.preferMenu) {
+    if ((await direct.count()) > 0 && (await direct.isVisible().catch(() => false))) {
+      await direct.click();
+      return;
+    }
+
+    const textButton = page.locator("button").filter({ hasText: target.trigger }).first();
+    if ((await textButton.count()) > 0 && (await textButton.isVisible().catch(() => false))) {
+      await textButton.click();
+      return;
+    }
   }
 
   const menu = page.locator("[data-ax-action-overflow-menu]").first();
@@ -438,6 +481,103 @@ async function assertOverlayPanel(page, target, overlay) {
   await firstFocusable.focus();
   await assertTopPointerTarget(firstFocusable, `${target.name}: focusable control`);
   await assertFocusWithin(page, overlay, `${target.name}: overlay focus`);
+}
+
+function assertPhase199FixtureContract(fixtures) {
+  expect(fixtures.phase199.namespace, "Phase 199 fixture namespace").toBe("e2e_phase199");
+  expect(fixtures.phase199.edge_data.long_email, "Phase 199 long route email").toContain("route-edge");
+  expect(fixtures.phase199.edge_data.long_processor_id, "Phase 199 long processor id").toContain("proc_phase199_");
+  expect(fixtures.phase199.edge_data.raw_payload_bytes, "Phase 199 overflow payload size").toBeGreaterThan(1024);
+}
+
+async function visible(locator) {
+  return (await locator.count()) > 0 && (await locator.isVisible().catch(() => false));
+}
+
+async function drawerPrimaryAction(drawer, step) {
+  let button = drawer
+    .locator("[data-role='confirm-action'], [data-role='confirm-replay'], [data-ax-action-drawer-confirm]")
+    .first();
+  if (!(await visible(button))) {
+    button = drawer
+      .getByRole("button", {
+        name: step.confirm || /^(?!Close$)(?!Cancel$).+/i,
+      })
+      .first();
+  }
+
+  return button;
+}
+
+async function assertDrawerStepUp(page, flow, step) {
+  await clickActionTrigger(page, {
+    name: flow.name,
+    trigger: step.drawerStepUp,
+  });
+
+  const drawer = page.locator("#ax-overlay-root [data-presentation='drawer']").first();
+  await expect(drawer, `${flow.name}: drawer opens`).toBeVisible();
+  await assertOverlayPanel(page, { name: flow.name }, drawer);
+
+  let confirm = await drawerPrimaryAction(drawer, step);
+  await expect(confirm, `${flow.name}: drawer confirm action`).toBeVisible();
+  await confirm.scrollIntoViewIfNeeded();
+  await confirm.click();
+
+  const modal = page.locator("#ax-overlay-root [data-presentation='modal']").first();
+  let modalOpened = true;
+  try {
+    await expect(modal, `${flow.name}: step-up modal opens`).toBeVisible({ timeout: 1_000 });
+  } catch (_error) {
+    modalOpened = false;
+  }
+
+  if (!modalOpened) {
+    await expect(drawer, `${flow.name}: staged confirmation`).toContainText(/Confirm action|Step-up required/i);
+    confirm = await drawerPrimaryAction(drawer, { confirm: /Confirm|Replay|Void invoice|Save|Update/i });
+    await expect(confirm, `${flow.name}: staged drawer confirm action`).toBeVisible();
+    await confirm.click();
+  }
+  await expect(modal, `${flow.name}: step-up modal opens`).toBeVisible();
+  await assertOverlayPanel(page, { name: `${flow.name}: step-up` }, modal);
+  await page.keyboard.press("Escape");
+  try {
+    await assertNoStaleOverlayState(page, `${flow.name}: step-up close`);
+  } catch (error) {
+    const close = page.locator("#ax-overlay-root").getByRole("button", { name: /Close|Cancel/i }).first();
+    if (!(await visible(close))) throw error;
+
+    await close.click();
+    await assertNoStaleOverlayState(page, `${flow.name}: drawer cleanup`);
+  }
+}
+
+async function runRouteFlowStep(page, flow, step) {
+  if (step.assertText) {
+    await expect(page.locator("main"), `${flow.name}: route text`).toContainText(step.assertText);
+    return;
+  }
+
+  if (step.drawerStepUp) {
+    await assertDrawerStepUp(page, flow, step);
+    await assertRouteFocusAndScroll(page, `${flow.name}: after step-up close`);
+    return;
+  }
+
+  if (step.back) {
+    await page.goBack();
+    await expect(page, `${flow.name}: browser back restores route`).toHaveURL(step.back);
+    await assertRouteFocusAndScroll(page, `${flow.name}: after back`);
+    return;
+  }
+
+  const link = step.linkSelector
+    ? page.locator(step.linkSelector).first()
+    : page.getByRole("link", { name: step.link }).first();
+  await expect(link, `${flow.name}: drill link`).toBeVisible();
+  await link.click();
+  await expect(page, `${flow.name}: routed to related detail`).toHaveURL(step.expectedAfterClick);
+  await assertRouteFocusAndScroll(page, `${flow.name}: related detail`);
 }
 
 async function assertDismissalParity(page, target) {
@@ -649,46 +789,16 @@ test.describe("Phase 199 interaction and overlay contract", () => {
     test.skip(testInfo.project.name !== "chromium-desktop", "fixture route flows run once");
 
     const fixtures = await seedPhase199(request);
+    assertPhase199FixtureContract(fixtures);
 
     for (const flow of PHASE199_ROUTE_FLOWS) {
       await login(page, flow.route(fixtures));
       await setPhase191Theme(page, "light");
       await assertRouteFocusAndScroll(page, flow.name);
 
-      if (flow.openDrawer) {
-        await clickActionTrigger(page, {
-          name: flow.name,
-          trigger: flow.openDrawer,
-        });
-        const drawer = page.locator("#ax-overlay-root [data-presentation='drawer']").first();
-        await expect(drawer, `${flow.name}: drawer`).toBeVisible();
-        await assertOverlayPanel(page, { name: flow.name }, drawer);
-        await page.keyboard.press("Escape");
-        await assertNoStaleOverlayState(page, `${flow.name}: drawer close`);
-        continue;
+      for (const step of flow.steps) {
+        await runRouteFlowStep(page, flow, step);
       }
-
-      if (flow.beforeLink) {
-        const nav = page.getByRole("link", { name: flow.beforeLink }).first();
-        await expect(nav, `${flow.name}: peer navigation`).toBeVisible();
-        await nav.click();
-      }
-
-      const beforeDrillUrl = page.url();
-      const link = flow.linkSelector
-        ? page.locator(flow.linkSelector).first()
-        : page.getByRole("link", { name: flow.link }).first();
-      if (flow.optionalLink && (await link.count()) === 0) continue;
-
-      await expect(link, `${flow.name}: drill link`).toBeVisible();
-      await link.click();
-      await expect(page, `${flow.name}: routed to related detail`).toHaveURL(flow.expectedAfterClick);
-      await assertRouteFocusAndScroll(page, `${flow.name}: related detail`);
-      await page.goBack();
-      await expect(page, `${flow.name}: browser back restores route`).toHaveURL(
-        new RegExp(beforeDrillUrl.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"))
-      );
-      await assertRouteFocusAndScroll(page, `${flow.name}: after back`);
     }
   });
 

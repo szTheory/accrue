@@ -373,6 +373,24 @@ defmodule AccrueAdmin.E2EFixturesTest do
     end
   end
 
+  @tag :phase199
+  test "forwarded POST /seed/phase199-interaction-matrix returns the Phase 199 route contract" do
+    conn =
+      Plug.Test.conn(:post, "/seed/phase199-interaction-matrix")
+      |> AccrueAdmin.E2E.Plug.call([])
+
+    assert conn.status == 200,
+           "Expected 200 from forwarded POST /seed/phase199-interaction-matrix, got #{conn.status}"
+
+    payload = Jason.decode!(conn.resp_body)
+
+    assert payload["namespace"] == "e2e_phase199"
+
+    for key <- @phase199_route_keys do
+      assert payload[Atom.to_string(key)], "Expected forwarded endpoint payload to include #{key}"
+    end
+  end
+
   defp phase191_fixture_counts do
     %{
       customers: TestRepo.aggregate(Customer, :count, :id),

@@ -131,6 +131,10 @@ async function setPhase191Theme(page, theme) {
 }
 
 async function assertNoBodyFocus(page, label = "active element") {
+  await page.waitForFunction(() => document.activeElement && document.activeElement !== document.body, null, {
+    timeout: 5_000,
+  });
+
   const active = await page.evaluate(() => {
     const element = document.activeElement;
     return {
@@ -320,8 +324,8 @@ async function assertRouteFocusAndScroll(page, label, options = {}) {
   }
 }
 
-async function assertNoStaleOverlayState(page, label = "overlay close") {
-  const result = await page.evaluate(() => {
+async function currentOverlayState(page) {
+  return page.evaluate(() => {
     const shell = document.querySelector("#accrue-admin-shell");
     const root = document.documentElement;
     const body = document.body;
@@ -336,17 +340,59 @@ async function assertNoStaleOverlayState(page, label = "overlay close") {
       bodyOverflow: body?.style?.overflow || "",
     };
   });
+}
 
-  const stale =
+function hasStaleOverlayState(result) {
+  return (
     result.overlayShells > 0 ||
     result.overlayBackdrops > 0 ||
     result.activeScrollLocks > 0 ||
     result.shellInert ||
     result.rootPosition === "fixed" ||
     result.rootOverflow === "hidden" ||
-    result.bodyOverflow === "hidden";
+    result.bodyOverflow === "hidden"
+  );
+}
 
-  if (stale) {
+async function assertNoStaleOverlayState(page, label = "overlay close") {
+  try {
+    await page.waitForFunction(
+      () => {
+        const shell = document.querySelector("#accrue-admin-shell");
+        const root = document.documentElement;
+        const body = document.body;
+        const result = {
+          overlayShells: document.querySelectorAll("#ax-overlay-root [data-ax-overlay-shell]").length,
+          overlayBackdrops: document.querySelectorAll("#ax-overlay-root [data-ax-overlay-backdrop]").length,
+          activeScrollLocks: document.querySelectorAll("[data-scroll-lock]").length,
+          shellInert: Boolean(shell?.hasAttribute("inert") || shell?.inert),
+          rootPosition: root?.style?.position || "",
+          rootOverflow: root?.style?.overflow || "",
+          bodyOverflow: body?.style?.overflow || "",
+        };
+
+        return (
+          result.overlayShells === 0 &&
+          result.overlayBackdrops === 0 &&
+          result.activeScrollLocks === 0 &&
+          !result.shellInert &&
+          result.rootPosition !== "fixed" &&
+          result.rootOverflow !== "hidden" &&
+          result.bodyOverflow !== "hidden"
+        );
+      },
+      null,
+      { timeout: 5_000 }
+    );
+  } catch (_error) {
+    const result = await currentOverlayState(page);
+
+    throw new Error(`Phase 191 overlay assertion failed for ${label}: ${JSON.stringify(result)}`);
+  }
+
+  const result = await currentOverlayState(page);
+
+  if (hasStaleOverlayState(result)) {
     throw new Error(`Phase 191 overlay assertion failed for ${label}: ${JSON.stringify(result)}`);
   }
 

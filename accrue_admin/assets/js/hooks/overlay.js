@@ -26,6 +26,20 @@ function scheduleScrollLockReconcile() {
   window.setTimeout(() => ScrollLock.reconcileActiveLocks(), 0);
 }
 
+function schedulePageFocusFallback() {
+  if (typeof window === "undefined") return;
+
+  window.setTimeout(() => {
+    if (document.querySelector("#ax-overlay-root [data-ax-overlay-shell]")) return;
+    if (document.activeElement && document.activeElement !== document.body) return;
+
+    const fallback = document.querySelector("#main-content, main");
+    if (fallback && typeof fallback.focus === "function") {
+      fallback.focus({ preventScroll: true });
+    }
+  }, 0);
+}
+
 export const Overlay = {
   ...FocusTrap,
 
@@ -46,6 +60,7 @@ export const Overlay = {
     this.releaseOverlayScrollLock();
     FocusTrap.destroyed.call(this);
     scheduleScrollLockReconcile();
+    schedulePageFocusFallback();
   },
 
   syncOverlayScrollLock() {

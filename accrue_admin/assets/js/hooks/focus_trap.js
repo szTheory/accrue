@@ -12,6 +12,18 @@ function isConnected(node) {
   return Boolean(node && node.isConnected !== false);
 }
 
+function focusWithoutScroll(node) {
+  if (!node || typeof node.focus !== "function") return false;
+
+  try {
+    node.focus({ preventScroll: true });
+  } catch (_error) {
+    node.focus();
+  }
+
+  return true;
+}
+
 function isHidden(node) {
   return (
     !node ||
@@ -26,6 +38,18 @@ function isFocusable(node) {
   if (node.disabled || node.getAttribute?.("aria-disabled") === "true") return false;
   if (node.getAttribute?.("tabindex") === "-1") return false;
   return typeof node.matches !== "function" || node.matches(FOCUSABLE_SELECTOR);
+}
+
+function isVisibleForFocus(node) {
+  if (!node || typeof window === "undefined") return false;
+
+  const style = window.getComputedStyle?.(node);
+  const rect = typeof node.getBoundingClientRect === "function" ? node.getBoundingClientRect() : null;
+
+  return (
+    (!style || (style.display !== "none" && style.visibility !== "hidden")) &&
+    (!rect || (rect.width > 0 && rect.height > 0))
+  );
 }
 
 const focusTrapStack = [];
@@ -150,12 +174,18 @@ export const FocusTrap = {
     const previous = this.previouslyFocused;
     this.previouslyFocused = null;
 
-    if (isConnected(previous) && typeof previous.focus === "function") {
-      previous.focus();
+    if (isFocusable(previous) && isVisibleForFocus(previous) && typeof previous.focus === "function") {
+      focusWithoutScroll(previous);
       return;
     }
 
-    this.fallbackFocusTarget()?.focus?.();
+    const fallback = this.fallbackFocusTarget();
+    if (fallback && !this.el.contains?.(fallback) && focusWithoutScroll(fallback)) return;
+
+    const pageFallback = document.querySelector?.("#main-content, main");
+    if (focusWithoutScroll(pageFallback)) return;
+
+    focusWithoutScroll(fallback);
   },
 
   handleFocusTrapKeydown(event) {
