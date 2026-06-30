@@ -2,12 +2,14 @@ name: CI
 
 # Job id contract — stable YAML `jobs:` keys relied on by docs, `act`, and anchors:
 # `release-manifest-ssot`, `release-gate`, `phase18-tax-gate`, `admin-drift-docs`,
-# `admin-group-contracts`, `admin-hardening-guardrails`, `host-integration`,
-# `playwright-e2e`, `host-docker-smoke`, `annotation-sweep`, `live-stripe`.
+# `admin-group-contracts`, `admin-hardening-guardrails`,
+# `admin-phase200-guardrails`, `host-integration`, `playwright-e2e`,
+# `host-docker-smoke`, `annotation-sweep`, `live-stripe`.
 # Merge-blocking on pull_request: `release-manifest-ssot`, `docs-contracts-shift-left`,
 # `release-gate`, `phase18-tax-gate`, `admin-drift-docs`, `admin-group-contracts`,
-# `admin-hardening-guardrails`, `host-integration`, `playwright-e2e`,
-# `host-docker-smoke`, `annotation-sweep`.
+# `admin-hardening-guardrails`, `admin-phase200-guardrails`,
+# `host-integration`, `playwright-e2e`, `host-docker-smoke`,
+# `annotation-sweep`.
 # Mandatory periodic: `live-stripe` (Stripe test-mode parity) runs on
 # `workflow_dispatch` and `schedule` only to catch upstream Stripe API drift.
 
@@ -662,6 +664,115 @@ jobs:
             .planning/phases/192-idempotent-verification-sign-off/192-SCORECARD.md
           if-no-files-found: ignore
 
+  admin-phase200-guardrails:
+    name: Admin Phase 200 deterministic guardrails
+    if: github.event_name != 'schedule'
+    runs-on: ubuntu-24.04
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_USER: postgres
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      MIX_ENV: test
+      PGUSER: postgres
+      PGPASSWORD: postgres
+      PGHOST: localhost
+      ACCRUE_ADMIN_E2E_PORT: 4019
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Set up BEAM
+        uses: erlef/setup-beam@v1
+        with:
+          otp-version: '28.0'
+          elixir-version: '1.19.5'
+
+      - name: Install Hex
+        run: mix local.hex --force
+
+      - name: Set up Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: accrue_admin/package-lock.json
+
+      - name: Restore accrue_admin deps cache
+        uses: actions/cache@v5
+        with:
+          path: accrue_admin/deps
+          key: ${{ runner.os }}-otp28-elixir119-phase200-admin-deps-${{ hashFiles('accrue_admin/mix.lock', 'accrue/mix.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-otp28-elixir119-phase200-admin-deps-
+
+      - name: Install admin deps
+        run: cd accrue_admin && mix deps.get
+
+      - name: Compile admin package
+        run: cd accrue_admin && mix compile --warnings-as-errors
+
+      - name: Install browser deps
+        run: cd accrue_admin && npm ci
+
+      - name: Install Chromium
+        run: cd accrue_admin && npx playwright install --with-deps chromium
+
+      - name: Phase 200 CI contract
+        run: bash scripts/ci/verify_phase200_ci_contract.sh
+
+      - name: Phase 200 local guardrail contract
+        run: bash scripts/ci/verify_phase200_guardrail_contract.sh
+
+      - name: Run Phase 200 deterministic guardrails
+        run: bash scripts/ci/verify_phase200_admin_guardrails.sh
+
+      - name: Upload Phase 200 Playwright report
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: phase200-admin-playwright-report
+          path: accrue_admin/playwright-report
+          if-no-files-found: ignore
+
+      - name: Upload Phase 200 Playwright evidence
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: phase200-admin-playwright-evidence
+          path: accrue_admin/test-results
+          if-no-files-found: ignore
+
+      - name: Upload Phase 200 generated evidence
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: phase200-generated-evidence
+          path: |
+            .planning/phases/200-idempotent-verification-sign-off/baseline.union.cells.json
+            .planning/phases/200-idempotent-verification-sign-off/final.cells.json
+            .planning/phases/200-idempotent-verification-sign-off/scorecard.delta.json
+            .planning/phases/200-idempotent-verification-sign-off/regressions.ndjson
+            .planning/phases/200-idempotent-verification-sign-off/artifacts.manifest.json
+            .planning/phases/200-idempotent-verification-sign-off/200-SCORECARD.md
+            .planning/phases/200-idempotent-verification-sign-off/200-STORYBOOK-COVERAGE.md
+            .planning/phases/200-idempotent-verification-sign-off/200-VERIFICATION.md
+            .planning/phases/200-idempotent-verification-sign-off/200-SIGN-OFF.md
+            .planning/phases/200-idempotent-verification-sign-off/judge.findings.json
+          if-no-files-found: ignore
+
   host-integration:
     # Phoenix/LiveView compatibility proof for Phase 15:
     # host-integration proves Phoenix 1.8 / LiveView 1.1 by running the seeded host app
@@ -948,6 +1059,7 @@ jobs:
         admin-drift-docs,
         admin-group-contracts,
         admin-hardening-guardrails,
+        admin-phase200-guardrails,
         host-integration,
         playwright-e2e,
         host-docker-smoke,
@@ -975,7 +1087,7 @@ jobs:
         run: >-
           bash scripts/ci/annotation_sweep.sh release-manifest-ssot docs-contracts-shift-left
           release-gate phase18-tax-gate admin-drift-docs admin-group-contracts admin-hardening-guardrails
-          host-integration playwright-e2e host-docker-smoke
+          admin-phase200-guardrails host-integration playwright-e2e host-docker-smoke
 
   # ---------------------------------------------------------------------
   # Mandatory periodic live-Stripe fidelity job (quick task 260414-l9q).
