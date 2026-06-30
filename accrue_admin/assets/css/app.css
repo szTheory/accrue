@@ -1539,7 +1539,7 @@ a.ax-kpi-card--linked:focus-visible {
 
 .ax-drawer-enter-to {
   opacity: 1;
-  transform: translateX(0px);
+  transform: translateY(0px);
 }
 
 /* Exit fade-only (no travel out) — snappy dismiss per MOT-02 enter/exit asymmetry.
@@ -1837,6 +1837,10 @@ a.ax-kpi-card--linked:focus-visible {
     transform: translateX(100%);
   }
 
+  .ax-drawer-enter-to {
+    transform: translateX(0px);
+  }
+
   .ax-detail-drawer-header,
   .ax-json-viewer-header,
   .ax-kpi-card-header,
@@ -1846,6 +1850,24 @@ a.ax-kpi-card--linked:focus-visible {
 
   .ax-timeline-header {
     flex-direction: row;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ax-drawer-enter-from,
+  .ax-drawer-enter-to {
+    transform: translateY(0px);
+  }
+
+  .ax-command-palette {
+    transform: scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) and (min-width: 768px) {
+  .ax-drawer-enter-from,
+  .ax-drawer-enter-to {
+    transform: translateX(0px);
   }
 }
 
@@ -4107,6 +4129,7 @@ html.accrue-admin::-webkit-scrollbar-thumb:hover {
   outline: 2px solid var(--ax-focus-ring);
   outline-offset: 2px;
   box-shadow: var(--ax-focus-shadow);
+  transition: none;
 }
 
 .ax-button[aria-disabled="true"],
