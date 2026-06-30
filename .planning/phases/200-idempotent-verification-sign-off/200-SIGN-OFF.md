@@ -2,7 +2,7 @@
 
 ## Executive Status
 
-ACCEPT - deterministic Phase 200 artifacts satisfy the all-or-nothing gate.
+ACCEPT - maintainer approval was received on 2026-06-30, and deterministic Phase 200 artifacts satisfy the all-or-nothing gate.
 
 This file is the sole Phase 200 maintainer decision surface. Structured artifacts remain canonical; markdown summarizes the evidence and repair path.
 
@@ -52,5 +52,6 @@ Guardrail evidence named for final ACCEPT: `verify_phase200_scorecard`, `verify_
 | phase199 interaction regression | ACCEPT | `.planning/phases/200-idempotent-verification-sign-off/artifacts.manifest.json` |
 | reduced-motion guardrail | ACCEPT | `.planning/phases/200-idempotent-verification-sign-off/artifacts.manifest.json` |
 | host leak guardrail | ACCEPT | `.planning/phases/200-idempotent-verification-sign-off/artifacts.manifest.json` |
+| Human checkpoint response | ACCEPT | User response `approved`, 2026-06-30 |
 
-Final maintainer decision: ACCEPT. Evidence source: .planning/phases/200-idempotent-verification-sign-off/artifacts.manifest.json and .planning/phases/200-idempotent-verification-sign-off/judge.findings.json.
+Final maintainer decision: ACCEPT (maintainer approved 2026-06-30). Evidence source: .planning/phases/200-idempotent-verification-sign-off/artifacts.manifest.json and .planning/phases/200-idempotent-verification-sign-off/judge.findings.json.

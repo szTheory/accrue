@@ -17,7 +17,7 @@ No blocking regressions recorded.
 - Missing evidence rows: 0
 - Open p193 closure rows: 0
 - Manifest evidence entries: 13388
-- Maintainer sign-off state: pending 200-SIGN-OFF.md
+- Maintainer sign-off state: ACCEPT (approved 2026-06-30 in 200-SIGN-OFF.md)
 
 ## Canonical Artifacts
 

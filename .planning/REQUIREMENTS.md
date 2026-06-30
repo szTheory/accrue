@@ -31,7 +31,7 @@ Shipped 33/33 (FND-01..06, CMP-01..05, GRP-01..04, IXN-01..05, PAGE-01..04, CPY-
 SEED-01..02, VER-01..04) across Phases 187–192. Archived to
 `.planning/milestones/v1.53-REQUIREMENTS.md`; validated summary in `PROJECT.md`.
 
-## Milestone v1.54 Requirements — Admin UI Page-Level Streamlining & Storybook (active, opened 2026-06-24)
+## Milestone v1.54 Requirements — Admin UI Page-Level Streamlining & Storybook (complete, accepted 2026-06-30)
 
 Page-level pass on `accrue_admin`: drive every page from operator JTBD, eliminate "info dump"
 density, fix the structural usability defects (overlay/scroll/focus/contrast), adopt
@@ -87,7 +87,7 @@ v1.54-storybook-and-forward-only-qa). Phases 193–200.
 
 - [x] **VER-01**: The merged `regressions.ndjson` shows zero regressions versus the union baseline (component + group + page-flow cells) across viewport × theme × state — every inherited cell scores ≥ its baseline.
 - [x] **VER-02**: axe-core color-contrast + name/role passes over rendered stories and page-flow routes; no-FOUC/persistence/system-emulation checks are green; and the reduced-motion + group-contract + a11y guardrail suites pass in CI.
-- [ ] **VER-03**: An adversarial multi-lens judge (correctness · a11y · brand · interaction) plus a maintainer photographic/interaction checkpoint sign off ACCEPT at each phase boundary and at final sign-off.
+- [x] **VER-03**: An adversarial multi-lens judge (correctness · a11y · brand · interaction) plus a maintainer photographic/interaction checkpoint sign off ACCEPT at each phase boundary and at final sign-off.
 
 ### Traceability (v1.54)
 
@@ -115,7 +115,7 @@ REQ-ID → phase mapping (each REQ-ID maps to exactly one phase; 23/23 mapped, n
 | CPY-01 | Phase 199 | Complete |
 | VER-01 | Phase 200 | Complete |
 | VER-02 | Phase 200 | Complete |
-| VER-03 | Phase 200 | Pending |
+| VER-03 | Phase 200 | Complete |
 | STY-02 | Phase 200 | Complete |
 | STY-03 | Phase 200 | Complete |
 

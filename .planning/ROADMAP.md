@@ -44,7 +44,7 @@ Stop rule: if proposed work is polish-only with a documented workaround and no r
 - [x] **Phase 197: Propagate LIST** — Conform all 8 remaining list pages to SPEC-LIST, adopt `PageHeader`, with per-page JTBD microcopy + four-state coverage. (completed 2026-06-28)
 - [x] **Phase 198: Propagate DETAIL + analytics** — Conform all remaining detail/analytics pages to SPEC-DETAIL / the overview spec. (completed 2026-06-29)
 - [x] **Phase 199: Cross-cutting interaction/overlay correctness + fixture stress + microcopy** — Land the canonical overlay primitive (scroll-lock, portal, `inert`, dismissal, geometry, origin-aware popovers, transformed-ancestor audit), exercise multi-step + edge fixtures, and run the full brand-voice microcopy sweep. (completed 2026-06-30)
-- [ ] **Phase 200: Idempotent verification & sign-off** — Re-score all cells (component + group + page-flow) viewport × theme × state with zero regressions; complete + verify Storybook story coverage and theming; axe-core + no-FOUC/persistence/system-emulation checks; adversarial multi-lens judge + maintainer sign-off.
+- [x] **Phase 200: Idempotent verification & sign-off** — Re-score all cells (component + group + page-flow) viewport × theme × state with zero regressions; complete + verify Storybook story coverage and theming; axe-core + no-FOUC/persistence/system-emulation checks; adversarial multi-lens judge + maintainer sign-off. (completed 2026-06-30, accepted)
 
 Coverage: 23/23 requirements mapped (each REQ-ID → exactly one phase). Per-phase counts: 193→5 · 194→1 · 195→2 · 196→2 · 197→1 · 198→1 · 199→7 · 200→4 = 23. Design source: `.planning/research/SUMMARY.md` (synthesizing FEATURES.md, ARCHITECTURE.md, PITFALLS.md, v1.54-storybook-and-forward-only-qa.md). Reuses v1.53's forward-only machinery (rubric `187-RUBRIC.md`, `baseline.cells.json`, `regressions.ndjson` zero-regression gate).
 
@@ -303,7 +303,7 @@ Plans:
   3. axe-core color-contrast + name/role passes over rendered stories and page-flow routes; no-FOUC/persistence/system-emulation checks are green; and the reduced-motion + group-contract + a11y guardrail suites pass in CI (VER-02).
   4. An adversarial multi-lens judge (correctness · a11y · brand · interaction) plus a maintainer photographic/interaction checkpoint sign off ACCEPT at the final boundary (VER-03).
 
-**Plans**: TBD
+**Plans**: 200-01-PLAN.md, 200-02-PLAN.md, 200-03-PLAN.md, 200-04-PLAN.md, 200-05-PLAN.md, 200-06-PLAN.md — all complete
 **UI hint**: yes
 
 <details>
