@@ -135,6 +135,7 @@ defmodule AccrueAdmin.ThemeTest do
 
     assert script =~ ~s(const key = "accrue_theme";)
     assert script =~ "document.cookie"
+    assert script =~ "safeDecodeTheme"
     assert script =~ "window.localStorage.getItem(key)"
     refute script =~ "accrue_admin_theme"
 
@@ -152,10 +153,81 @@ defmodule AccrueAdmin.ThemeTest do
     assert data_theme_index < persist_index
   end
 
+  test "Phase 199 anti-fouc script treats malformed theme cookies as untrusted input" do
+    assert %{"stored" => "dark", "theme" => "dark"} =
+             run_anti_fouc_script("accrue_theme=%E0%A4%A", "dark")
+
+    assert %{"stored" => "system", "theme" => "system"} =
+             run_anti_fouc_script("accrue_theme=%E0%A4%A", "neon")
+  end
+
+  test "Phase 199 CSS fixed-shell source audit covers trap-creating properties" do
+    app_css = File.read!(app_css_path())
+
+    for token <- [
+          "phase199-fixed-shell-audit: ax-overlay-shell",
+          "phase199-fixed-shell-audit: ax-command-palette-wrapper",
+          "phase199-fixed-shell-audit: ax-command-palette-backdrop",
+          "phase199-fixed-shell-audit: ax-mobile-sidebar",
+          "transform",
+          "filter",
+          "backdrop-filter",
+          "contain",
+          "perspective"
+        ] do
+      assert app_css =~ token
+    end
+  end
+
   defp find_index(haystack, needle) do
     case :binary.match(haystack, needle) do
       {index, _length} -> index
       :nomatch -> nil
     end
+  end
+
+  defp run_anti_fouc_script(cookie, stored_value) do
+    payload =
+      Jason.encode!(%{
+        cookie: cookie,
+        script: AccrueAdmin.Layouts.anti_fouc_script(),
+        stored: stored_value
+      })
+      |> Base.encode64()
+
+    node = """
+    const vm = require("node:vm");
+    const input = JSON.parse(Buffer.from("#{payload}", "base64").toString("utf8"));
+    const store = new Map();
+    if (input.stored !== null) store.set("accrue_theme", input.stored);
+    const sandbox = {
+      document: {
+        cookie: input.cookie,
+        documentElement: { dataset: {} }
+      },
+      window: {
+        localStorage: {
+          getItem(key) {
+            return store.has(key) ? store.get(key) : null;
+          },
+          setItem(key, value) {
+            store.set(key, value);
+          }
+        }
+      }
+    };
+    vm.runInNewContext(input.script, sandbox);
+    process.stdout.write(JSON.stringify({
+      theme: sandbox.document.documentElement.dataset.theme,
+      stored: store.has("accrue_theme") ? store.get("accrue_theme") : null
+    }));
+    """
+
+    {output, 0} = System.cmd("node", ["-e", node])
+    Jason.decode!(output)
+  end
+
+  defp app_css_path do
+    Path.expand("../../assets/css/app.css", __DIR__)
   end
 end
