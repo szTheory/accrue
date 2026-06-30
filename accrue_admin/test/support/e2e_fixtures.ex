@@ -467,6 +467,193 @@ defmodule AccrueAdmin.E2E.Fixtures do
     }
   end
 
+  def seed_phase199_interactions! do
+    reset!()
+
+    owner_id = "19900000-0000-4000-8000-00000000f001"
+    now = DateTime.utc_now() |> DateTime.truncate(:microsecond)
+    five_days_ago = DateTime.add(now, -5 * 86_400, :second)
+    next_period = DateTime.add(now, 30 * 86_400, :second)
+    long_processor_id = "proc_phase199_" <> String.duplicate("edge-route-overflow-", 4)
+    long_email = "phase199." <> String.duplicate("route-edge-", 8) <> "@example.com"
+
+    customer =
+      insert_customer(%{
+        id: "19900000-0000-4000-8000-000000000001",
+        owner_id: owner_id,
+        name: "E2E Phase 199 Boundary Customer " <> String.duplicate("LongNameCo ", 12),
+        email: long_email,
+        processor_id: "cus_e2e_phase199_customer",
+        preferred_locale: nil,
+        preferred_timezone: nil,
+        metadata: %{
+          "phase199_fixture" => "route-flow",
+          "phase199_boundary" => "long-content"
+        },
+        data: %{
+          "phase199_long_processor_id" => long_processor_id,
+          "phase199_overflow_payload" => String.duplicate("payload-", 64)
+        }
+      })
+
+    subscription =
+      insert_subscription(customer, %{
+        id: "19900000-0000-4000-8000-000000000002",
+        processor_id: "sub_e2e_phase199_active",
+        status: :active,
+        current_period_start: now,
+        current_period_end: next_period,
+        metadata: %{"phase199_fixture" => "subscription-route"},
+        data: %{"phase199_long_processor_id" => long_processor_id}
+      })
+
+    invoice =
+      insert_invoice(customer, subscription, %{
+        id: "19900000-0000-4000-8000-000000000003",
+        processor_id: "in_e2e_phase199_jpy",
+        status: :open,
+        number: "E2E-199-JPY-001",
+        currency: "jpy",
+        total_minor: 55_000,
+        amount_due_minor: 55_000,
+        amount_remaining_minor: 55_000,
+        amount_paid_minor: 0,
+        hosted_url: nil,
+        pdf_url: nil,
+        collection_method: "send_invoice",
+        metadata: %{"phase199_fixture" => "zero-decimal"},
+        data: %{"phase199_long_processor_id" => long_processor_id}
+      })
+
+    charge =
+      insert_charge(customer, subscription, %{
+        id: "19900000-0000-4000-8000-000000000004",
+        processor_id: "ch_e2e_phase199_refund",
+        status: "succeeded",
+        amount_cents: 10_000,
+        stripe_fee_amount_minor: 320,
+        fees_settled_at: ~U[2026-06-30 00:00:00Z],
+        metadata: %{"phase199_fixture" => "charge-route"},
+        data: %{"application_fee_amount" => 200}
+      })
+
+    insert_refund(charge, %{
+      stripe_id: "re_e2e_phase199_seeded",
+      amount_minor: 1_000,
+      status: :succeeded,
+      stripe_fee_refunded_amount_minor: 32,
+      merchant_loss_amount_minor: 18
+    })
+
+    jpy_charge =
+      insert_charge(customer, subscription, %{
+        id: "19900000-0000-4000-8000-000000000005",
+        processor_id: "ch_e2e_phase199_jpy",
+        status: "succeeded",
+        currency: "jpy",
+        amount_cents: 55_000,
+        metadata: %{"phase199_fixture" => "zero-decimal"},
+        data: %{"phase199_long_processor_id" => long_processor_id}
+      })
+
+    webhook =
+      insert_webhook(%{
+        id: "19900000-0000-4000-8000-000000000006",
+        processor_event_id: "evt_e2e_phase199_dead",
+        type: "invoice.payment_failed",
+        status: :dead,
+        data: %{
+          "id" => "evt_e2e_phase199_dead",
+          "object" => "event",
+          "phase199" => true,
+          "payload" => String.duplicate("raw-payload-overflow-", 48)
+        },
+        raw_body:
+          ~s({"id":"evt_e2e_phase199_dead","type":"invoice.payment_failed","phase199":true,"payload":") <>
+            String.duplicate("raw-payload-overflow-", 48) <> ~s("})
+      })
+
+    {:ok, event} =
+      Events.record(%{
+        type: "charge.succeeded",
+        subject_type: "Charge",
+        subject_id: charge.id,
+        actor_type: "admin",
+        actor_id: "e2e_phase199",
+        idempotency_key: "e2e_phase199_event",
+        caused_by_webhook_event_id: webhook.id,
+        data: %{"namespace" => "e2e_phase199", "phase199" => true}
+      })
+
+    recovery_subscription =
+      %Subscription{id: "19900000-0000-4000-8000-000000000007"}
+      |> Subscription.force_status_changeset(%{
+        customer_id: customer.id,
+        processor: "fake",
+        processor_id: "sub_e2e_phase199_recovery",
+        status: :past_due,
+        past_due_since: five_days_ago,
+        dunning_campaign_started_at: five_days_ago,
+        cancel_at_period_end: false,
+        current_period_start: DateTime.add(now, -25 * 86_400, :second),
+        current_period_end: DateTime.add(now, 5 * 86_400, :second),
+        lock_version: 1,
+        metadata: %{"phase199_fixture" => "recovery"},
+        data: %{"recovery_state" => "phase199"}
+      })
+      |> TestRepo.insert!()
+
+    long_name_customer =
+      insert_customer(%{
+        id: "19900000-0000-4000-8000-000000000008",
+        owner_id: "19900000-0000-4000-8000-00000000f008",
+        name: "E2E Phase 199 " <> String.duplicate("Overflow Business ", 10),
+        email: "phase199-long-name@example.com",
+        processor_id: "cus_e2e_phase199_long_name",
+        metadata: %{"phase199_fixture" => "long-name"}
+      })
+
+    connect_account =
+      insert_connect_account(owner_id, %{
+        id: "19900000-0000-4000-8000-000000000009",
+        stripe_account_id: "acct_e2e_phase199_attention",
+        email: "phase199-connect@example.com",
+        charges_enabled: false,
+        payouts_enabled: false,
+        details_submitted: false,
+        requirements: %{
+          "currently_due" => ["external_account", "representative.verification.document"]
+        },
+        capabilities: %{"card_payments" => "pending", "transfers" => "pending"},
+        data: %{"phase199_long_processor_id" => long_processor_id}
+      })
+
+    %{
+      namespace: "e2e_phase199",
+      customer_id: customer.id,
+      subscription_id: subscription.id,
+      invoice_id: invoice.id,
+      jpy_invoice_id: invoice.id,
+      charge_id: charge.id,
+      jpy_charge_id: jpy_charge.id,
+      webhook_id: webhook.id,
+      single_webhook_id: webhook.id,
+      event_id: event.id,
+      source_event_id: event.id,
+      connect_account_id: connect_account.id,
+      recovery_subscription_id: recovery_subscription.id,
+      at_risk_sub_id: recovery_subscription.id,
+      long_name_customer_id: long_name_customer.id,
+      edge_data: %{
+        long_email: long_email,
+        long_processor_id: long_processor_id,
+        raw_payload_bytes: byte_size(webhook.raw_body)
+      }
+    }
+  end
+
+  def seed_phase199_interaction_matrix!, do: seed_phase199_interactions!()
+
   def current_counts do
     %{
       webhook_replayed:
