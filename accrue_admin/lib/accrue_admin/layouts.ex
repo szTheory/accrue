@@ -59,8 +59,15 @@ defmodule AccrueAdmin.Layouts do
     (() => {
       const key = "accrue_theme";
       const allowed = new Set(["light", "dark", "system"]);
+      const safeDecodeTheme = (value) => {
+        try {
+          return decodeURIComponent(value);
+        } catch (_error) {
+          return null;
+        }
+      };
       const fromCookie = document.cookie.split("; ").find((chunk) => chunk.startsWith(`${key}=`));
-      const cookieValue = fromCookie ? decodeURIComponent(fromCookie.split("=").slice(1).join("=")) : null;
+      const cookieValue = fromCookie ? safeDecodeTheme(fromCookie.split("=").slice(1).join("=")) : null;
       const storedValue = window.localStorage.getItem(key);
       const theme = allowed.has(cookieValue) ? cookieValue : allowed.has(storedValue) ? storedValue : "system";
       document.documentElement.dataset.theme = theme;

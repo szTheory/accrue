@@ -1372,6 +1372,9 @@ a.ax-kpi-card--linked:focus-visible {
   color: var(--ax-primary);
 }
 
+/* phase199-fixed-shell-audit: ax-overlay-shell
+   This fixed shell portals into body-level #ax-overlay-root. Keep its ancestor
+   path outside transform/filter/backdrop-filter/contain/perspective traps. */
 .ax-overlay-shell {
   position: fixed;
   inset: 0;
@@ -2983,6 +2986,10 @@ details[open].ax-dropdown .ax-dropdown-panel {
   font-weight: 700;
 }
 
+/* phase199-fixed-shell-audit: ax-command-palette-wrapper
+   Named overlay-equivalent fixed shell. The wrapper itself must stay free of
+   transform/filter/backdrop-filter/contain/perspective so hit testing and focus
+   order are not trapped under page wrappers. */
 .ax-command-palette-wrapper {
   position: fixed;
   inset: 0;
@@ -2994,6 +3001,10 @@ details[open].ax-dropdown .ax-dropdown-panel {
   pointer-events: none;
 }
 
+/* phase199-fixed-shell-audit: ax-command-palette-backdrop
+   Intentional fixed scrim layer. backdrop-filter belongs here only; do not add
+   transform/filter/contain/perspective to the wrapper or panel to mask stacking
+   defects. */
 .ax-command-palette-backdrop {
   position: fixed;
   inset: 0;
@@ -3229,6 +3240,10 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
 }
 
 @media (max-width: 1023.98px) { /* --ax-bp-lg ↓ */
+  /* phase199-fixed-shell-audit: ax-mobile-sidebar
+     Non-overlay fixed navigation shell. It is audited separately from modal
+     fixed shells and must not gain transform/filter/backdrop-filter/contain/
+     perspective while acting as viewport chrome. */
   html.accrue-admin.ax-shell-nav-open .ax-sidebar {
     display: flex;
     flex-direction: column;

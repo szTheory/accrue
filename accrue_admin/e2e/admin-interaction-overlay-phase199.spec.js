@@ -348,6 +348,45 @@ async function assertThemePersistence(page, themeCase) {
       message: `${themeCase.name}: legacy visual-test key is not used`,
     })
     .toBeNull();
+
+  if (themeCase.expected === "system") {
+    await expect
+      .poll(() => page.locator("html").evaluate((element) => getComputedStyle(element).colorScheme), {
+        message: `${themeCase.name}: system dark emulation resolves through CSS`,
+      })
+      .toContain("dark");
+  }
+}
+
+async function assertThemePickerReloadPersistence(page) {
+  await page.context().clearCookies();
+  await login(page, "/billing/customers");
+  await page.evaluate(() => {
+    window.localStorage.removeItem("accrue_admin_theme");
+    window.localStorage.removeItem("accrue_theme");
+    document.cookie = "accrue_theme=; path=/; max-age=0";
+  });
+  await page.reload();
+
+  await page.locator("[data-theme-target='dark']").click();
+  await expect(page.locator("html"), "theme picker sets html data-theme").toHaveAttribute(
+    "data-theme",
+    "dark"
+  );
+  await expect
+    .poll(() => page.evaluate(() => window.localStorage.getItem("accrue_theme")), {
+      message: "theme picker writes production localStorage key",
+    })
+    .toBe("dark");
+
+  const themeCookie = (await page.context().cookies()).find((cookie) => cookie.name === "accrue_theme");
+  expect(themeCookie?.value, "theme picker writes production cookie key").toBe("dark");
+
+  await page.reload();
+  await expect(page.locator("html"), "theme picker choice survives reload").toHaveAttribute(
+    "data-theme",
+    "dark"
+  );
 }
 
 async function assertRouteFocusAndScroll(page, label) {
@@ -547,6 +586,16 @@ test.describe("Phase 199 interaction and overlay contract", () => {
     for (const themeCase of THEME_CASES) {
       await assertThemePersistence(page, themeCase);
     }
+  });
+
+  test("@phase199 @theme theme picker writes accrue_theme and survives reload", async ({
+    page,
+    request,
+  }, testInfo) => {
+    test.skip(testInfo.project.name !== "chromium-desktop", "theme picker persistence runs once");
+
+    await seedPhase199(request);
+    await assertThemePickerReloadPersistence(page);
   });
 
   test("@phase199 @affordance floating panels stay viewport-bound and non-modal controls stay non-interactive", async ({
