@@ -433,6 +433,28 @@ defmodule AccrueAdmin.CopyTest do
     end
   end
 
+  test "CPY-01 list and recovery page call sites use the shared resource-state helpers" do
+    call_sites = %{
+      "lib/accrue_admin/live/customers_live.ex" => :customers,
+      "lib/accrue_admin/live/invoices_live.ex" => :invoices,
+      "lib/accrue_admin/live/charges_live.ex" => :payments,
+      "lib/accrue_admin/live/webhooks_live.ex" => :webhooks,
+      "lib/accrue_admin/live/connect_accounts_live.ex" => :connect_accounts,
+      "lib/accrue_admin/live/subscriptions_live.ex" => :subscriptions,
+      "lib/accrue_admin/live/coupons_live.ex" => :coupons,
+      "lib/accrue_admin/live/promotion_codes_live.ex" => :promotion_codes,
+      "lib/accrue_admin/live/events_live.ex" => :events,
+      "lib/accrue_admin/live/analytics/recovery_live.ex" => :dunning
+    }
+
+    for {path, resource} <- call_sites do
+      source = File.read!(Path.expand("../../#{path}", __DIR__))
+
+      assert source =~ "Copy.resource_state_copy(:#{resource}",
+             "#{path} must route list-state copy through Copy.resource_state_copy/3"
+    end
+  end
+
   test "CPY-01 copy modules avoid generic fallbacks and bare action terms" do
     assert copy_module_guard(@raw_generic_guard) == []
   end
