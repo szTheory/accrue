@@ -5,14 +5,14 @@ milestone_name: Admin UI Page-Level Streamlining & Storybook
 current_phase: 200
 current_phase_name: idempotent-verification-sign-off
 status: executing
-stopped_at: Completed 200-02-PLAN.md
-last_updated: "2026-06-30T16:29:06.233Z"
+stopped_at: Completed 200-03-PLAN.md
+last_updated: "2026-06-30T16:44:45.223Z"
 last_activity: 2026-06-30
 progress:
   total_phases: 8
   completed_phases: 7
   total_plans: 59
-  completed_plans: 55
+  completed_plans: 56
   percent: 88
 ---
 
@@ -29,7 +29,7 @@ See: `.planning/PROJECT.md` (updated 2026-06-29 — Phase 198 complete; Phase 19
 ## Current Position
 
 Phase: 200 (idempotent-verification-sign-off) — EXECUTING
-Plan: 3 of 6
+Plan: 4 of 6
 Status: Ready to execute
 Last activity: 2026-06-30
 
@@ -242,6 +242,7 @@ Coverage: 22/22 v1.51 requirements mapped (each REQ-ID → exactly one phase). D
 | Phase 199 P15 | 7m 28s | 1 tasks | 2 files |
 | Phase 200 P01 | 14m 9s | 3 tasks | 8 files |
 | Phase 200 P02 | 17min | 2 tasks | 3 files |
+| Phase 200 P03 | 10m 4s | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -466,6 +467,9 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - [Phase 200]: Storybook browser scans target rendered .psb-sandbox content while asset checks prove committed Storybook CSS/JS delivery. — VER-02 and STY-03 need AccrueAdmin rendered story evidence, not upstream PhoenixStorybook chrome audit results.
 - [Phase 200]: Production theme/no-FOUC proof uses accrue_theme cookie/localStorage/system inputs; direct data-theme forcing is isolated to settled axe scans. — The plan prohibits using direct data-theme forcing as persistence proof, so the production test exercises the actual anti-FOUC boot path.
 - [Phase 200]: Page-flow evidence seeds Phase 191 route ids alongside Phase 199 interaction fixtures to close p193 cells while preserving guardrail linkage. — The Phase 193 baseline route helper requires Phase 191 route ids; Phase 199 remains referenced for overlay/focus/scroll regression continuity.
+- [Phase 200]: 200-03 keeps Phase 200 scorecard outputs under .planning/phases/200-idempotent-verification-sign-off/ and never writes archived Phase 187 or Phase 192 output paths. - Preserves archive immutability while producing derived union and scorecard artifacts.
+- [Phase 200]: 200-03 verifier rejects absolute refs, backslashes, .. segments, refs outside allowed generated roots, and unmanifested evidence refs. - This makes artifacts.manifest.json the enforceable evidence boundary for final scorecard packages.
+- [Phase 200]: 200-03 p193 rows remain pending in baseline.union.cells.json but must close as covered with score >= 2 and evidence refs in final artifacts. - Baseline-only mode can run before final artifacts while full mode fails stale pending page-flow rows.
 
 ### Pending Todos
 
@@ -556,8 +560,8 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 
 ## Session Continuity
 
-Last session: 2026-06-30T16:29:06.224Z
-Stopped at: Completed 200-02-PLAN.md
+Last session: 2026-06-30T16:44:45.215Z
+Stopped at: Completed 200-03-PLAN.md
 Resume file: None
 
 ## Operator Next Steps

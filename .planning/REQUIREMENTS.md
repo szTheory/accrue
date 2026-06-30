@@ -85,7 +85,7 @@ v1.54-storybook-and-forward-only-qa). Phases 193–200.
 
 ### VER — Forward-only verification & sign-off
 
-- [ ] **VER-01**: The merged `regressions.ndjson` shows zero regressions versus the union baseline (component + group + page-flow cells) across viewport × theme × state — every inherited cell scores ≥ its baseline.
+- [x] **VER-01**: The merged `regressions.ndjson` shows zero regressions versus the union baseline (component + group + page-flow cells) across viewport × theme × state — every inherited cell scores ≥ its baseline.
 - [x] **VER-02**: axe-core color-contrast + name/role passes over rendered stories and page-flow routes; no-FOUC/persistence/system-emulation checks are green; and the reduced-motion + group-contract + a11y guardrail suites pass in CI.
 - [ ] **VER-03**: An adversarial multi-lens judge (correctness · a11y · brand · interaction) plus a maintainer photographic/interaction checkpoint sign off ACCEPT at each phase boundary and at final sign-off.
 
@@ -113,7 +113,7 @@ REQ-ID → phase mapping (each REQ-ID maps to exactly one phase; 23/23 mapped, n
 | FIX-01 | Phase 199 | Complete |
 | FIX-02 | Phase 199 | Complete |
 | CPY-01 | Phase 199 | Complete |
-| VER-01 | Phase 200 | Pending |
+| VER-01 | Phase 200 | Complete |
 | VER-02 | Phase 200 | Complete |
 | VER-03 | Phase 200 | Pending |
 | STY-02 | Phase 200 | Complete |
