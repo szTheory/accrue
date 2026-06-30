@@ -153,7 +153,7 @@ Coverage: 22/22 v1.51 requirements mapped (each REQ-ID → exactly one phase). D
 
 **Velocity:**
 
-- Total plans completed: 189
+- Total plans completed: 183
 - Average duration: 1m
 - Total execution time: 1m
 
