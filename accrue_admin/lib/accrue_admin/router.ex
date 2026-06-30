@@ -155,6 +155,21 @@ defmodule AccrueAdmin.Router do
     if Code.ensure_loaded?(PhoenixStorybook.Router) do
       dev_ast =
         quote bind_quoted: [mount_path: mount_path] do
+          # AccrueAdmin.Dev.Storybook configures absolute css_path/js_path values
+          # under /dev/storybook, so these committed bundle routes live beside the
+          # Storybook root route and stay behind allow_live_reload.
+          get(
+            "/dev/storybook/assets/storybook-css-#{AccrueAdmin.Assets.storybook_css_hash()}",
+            AccrueAdmin.Assets,
+            :storybook_css
+          )
+
+          get(
+            "/dev/storybook/assets/storybook-js-#{AccrueAdmin.Assets.storybook_js_hash()}",
+            AccrueAdmin.Assets,
+            :storybook_js
+          )
+
           scope mount_path do
             pipe_through(:accrue_admin_browser)
             import PhoenixStorybook.Router
