@@ -6,6 +6,10 @@ const { readFixture, reseedFixture, login, workspaceBillingLink, waitForLiveView
 const { expectNoHorizontalOverflow, expectVisibleInViewport } = require("./support/overflow.js");
 const { DASHBOARD_DISPLAY_HEADLINE } = require("./support/copy_dashboard.js");
 
+const copyStrings = JSON.parse(
+  fs.readFileSync(path.join(__dirname, "generated", "copy_strings.json"), "utf8")
+);
+
 async function captureState(page, testInfo, name) {
   const screenshotDir = path.join(process.cwd(), "test-results", "phase15-trust", testInfo.project.name);
   const screenshotPath = path.join(screenshotDir, `${name}.png`);
@@ -204,15 +208,17 @@ test("@phase15-trust canonical first-run and admin replay walkthrough stays rele
   await captureState(page, testInfo, "admin-webhook-detail");
 
   await page.locator("[data-role='replay-single']").click();
+  const replayConfirm = page.getByRole("dialog", { name: "Confirm webhook replay" });
+  await expect(replayConfirm).toBeVisible({ timeout: 15_000 });
   // Confirm copy is AccrueAdmin.Copy.Locked.single_replay_confirmation/2, which embeds the
   // dynamic webhook id ("Replay webhook <id> for the active organization: ..."); match the
   // stable explanatory tail so the assertion can't drift on the id or scope wording.
   await expect(
-    page.getByText(/This will requeue the webhook delivery and record an admin audit event/)
+    replayConfirm.getByText(/This will requeue the webhook delivery and record an admin audit event/)
   ).toBeVisible({
     timeout: 15_000
   });
-  await page.locator("[data-role='confirm-replay']").click();
+  await replayConfirm.locator("[data-role='confirm-replay']").click();
   await waitForLiveView(page);
   await expect(
     page
@@ -234,7 +240,7 @@ test("@phase15-trust canonical first-run and admin replay walkthrough stays rele
       label: "replay audit row"
     },
     {
-      locator: page.getByRole("heading", { name: "Event log" }),
+      locator: page.getByRole("heading", { name: copyStrings.events_list_heading }),
       label: "audit heading"
     }
   ]);

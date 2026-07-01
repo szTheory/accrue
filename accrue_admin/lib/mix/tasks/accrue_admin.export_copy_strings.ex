@@ -51,19 +51,26 @@ defmodule Mix.Tasks.AccrueAdmin.ExportCopyStrings do
     subscription_action_single_item_quantity_guidance
     subscriptions_index_empty_title
     connect_accounts_headline
+    connect_accounts_list_heading
     connect_accounts_table_empty_title
     connect_accounts_apply_filters
     connect_account_eyebrow
+    connect_account_actions_heading
+    connect_account_action_edit_platform_fee_override
     connect_account_save_platform_fee_override
     invoice_detail_eyebrow
     invoice_open_pdf_button
     invoices_index_headline
+    invoices_list_heading
     data_table_clear_filters_label
     billing_events_heading_organization
+    events_list_heading
     billing_events_table_empty_title
     billing_events_apply_filters
     coupon_index_headline
+    coupons_list_heading
     promotion_codes_index_headline
+    promotion_codes_list_heading
     customer_payment_methods_section_heading
     customer_payment_methods_empty_copy
     customer_payment_methods_section_body

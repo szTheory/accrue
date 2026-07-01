@@ -264,6 +264,42 @@ defmodule AccrueAdmin.CustomerLiveTest do
     assert has_element?(view, "[data-role='confirm-payment-method-action']")
   end
 
+  test "D-09 blocks deleting payment methods tied to active subscriptions for any processor", %{
+    conn: conn,
+    customer: customer,
+    blocked_payment_method: blocked_payment_method
+  } do
+    subscription =
+      TestRepo.one!(
+        from(subscription in Subscription,
+          where:
+            subscription.customer_id == ^customer.id and
+              fragment(
+                "?->>'payment_method_token' = ?",
+                subscription.data,
+                ^blocked_payment_method.processor_id
+              )
+        )
+      )
+
+    subscription
+    |> Subscription.changeset(%{processor: "fake"})
+    |> TestRepo.update!()
+
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    assert {:ok, view, _html} = live(conn, "/billing/customers/#{customer.id}")
+
+    html =
+      render_click(view, "open_payment_method_action", %{
+        "action_type" => "delete",
+        "payment_method_id" => blocked_payment_method.id
+      })
+
+    assert html =~ Copy.customer_payment_methods_delete_blocked_in_use()
+    refute has_element?(view, "[data-role='payment-method-action-drawer-test-mirror']")
+    refute has_element?(view, "[data-role='confirm-payment-method-action']")
+  end
+
   test "D-11 rejects stale payment-method action ids before mutation", %{
     conn: conn,
     customer: customer

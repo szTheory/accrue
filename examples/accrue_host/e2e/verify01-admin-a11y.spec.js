@@ -27,13 +27,18 @@ function reseedFixtureIfNeeded() {
  * @param {import('@playwright/test').Page} page
  * @param {string} paymentMethodId
  */
-async function openDeleteConfirmation(page, paymentMethodId) {
-  await page
-    .locator(
-      `[data-role='prepare-delete-payment-method'][data-payment-method-id='${paymentMethodId}']`
-    )
-    .click();
-  await expect(page.locator("[data-role='payment-method-delete-confirmation']")).toBeVisible();
+function paymentMethodRow(page, last4) {
+  return page.locator("[data-role='payment-method-action-row']").filter({ hasText: last4 });
+}
+
+async function openDeleteConfirmation(page, last4) {
+  const row = paymentMethodRow(page, last4);
+  await expect(row).toBeVisible();
+  await row.getByRole("button", { name: new RegExp(copyStrings.customer_payment_methods_delete_action) }).click();
+
+  const dialog = page.getByRole("dialog", { name: copyStrings.customer_payment_methods_delete_action });
+  await expect(dialog).toBeVisible();
+  return dialog;
 }
 
 /**
@@ -168,7 +173,7 @@ test.describe("VERIFY-01 admin Connect index (auxiliary)", () => {
     await waitForLiveView(page);
     await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
 
-    await expect(page.getByRole("heading", { name: copyStrings.connect_accounts_headline })).toBeVisible();
+    await expect(page.getByRole("heading", { name: copyStrings.connect_accounts_list_heading })).toBeVisible();
     await expect(page.locator("[data-role='filter-form']")).toBeVisible();
 
     const violations = await scanAxe(page);
@@ -208,7 +213,10 @@ test.describe("VERIFY-01 admin Connect account detail (auxiliary)", () => {
     await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
 
     await expect(page.getByText(copyStrings.connect_account_eyebrow)).toBeVisible();
-    await expect(page.getByRole("button", { name: copyStrings.connect_account_save_platform_fee_override })).toBeVisible();
+    await expect(page.getByRole("heading", { name: copyStrings.connect_account_actions_heading })).toBeVisible();
+    await expect(
+      page.locator("button", { hasText: copyStrings.connect_account_action_edit_platform_fee_override })
+    ).toBeVisible();
 
     const violations = await scanAxe(page);
     expect(violations, JSON.stringify(violations, null, 2)).toEqual([]);
@@ -247,7 +255,7 @@ test.describe("VERIFY-01 admin billing events index (auxiliary)", () => {
     await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
 
     await expect(
-      page.getByRole("heading", { name: copyStrings.billing_events_heading_organization })
+      page.getByRole("heading", { name: copyStrings.events_list_heading })
     ).toBeVisible();
 
     const violations = await scanAxe(page);
@@ -286,7 +294,7 @@ test.describe("VERIFY-01 admin coupons index (auxiliary)", () => {
     await waitForLiveView(page);
     await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
 
-    await expect(page.getByRole("heading", { name: copyStrings.coupon_index_headline })).toBeVisible();
+    await expect(page.getByRole("heading", { name: copyStrings.coupons_list_heading })).toBeVisible();
 
     const violations = await scanAxe(page);
     expect(violations, JSON.stringify(violations, null, 2)).toEqual([]);
@@ -324,7 +332,7 @@ test.describe("VERIFY-01 admin promotion codes index (auxiliary)", () => {
     await waitForLiveView(page);
     await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
 
-    await expect(page.getByRole("heading", { name: copyStrings.promotion_codes_index_headline })).toBeVisible();
+    await expect(page.getByRole("heading", { name: copyStrings.promotion_codes_list_heading })).toBeVisible();
 
     const violations = await scanAxe(page);
     expect(violations, JSON.stringify(violations, null, 2)).toEqual([]);
@@ -357,7 +365,7 @@ test.describe("core-admin-invoices-index", () => {
 
     await expect(page.locator("html")).toHaveClass(/accrue-admin/);
 
-    await expect(page.getByRole("heading", { name: copyStrings.invoices_index_headline })).toBeVisible();
+    await expect(page.getByRole("heading", { name: copyStrings.invoices_list_heading })).toBeVisible();
 
     const lightBtn = page.locator('button[data-theme-target="light"]');
     await expect(lightBtn).toBeVisible();
@@ -406,8 +414,14 @@ test.describe("core-admin-invoices-detail", () => {
 
     await expect(page.getByText(copyStrings.invoice_detail_eyebrow)).toBeVisible();
 
+    const taxDocuments = page.locator("[data-ax-drill-section='tax-documents']");
+
+    if ((await taxDocuments.getAttribute("open")) === null) {
+      await taxDocuments.locator("summary").click();
+    }
+
     // D-07: primary on-demand PDF affordance is the LiveView button (D-08 download/popup optional).
-    const pdfButton = page.getByRole("button", { name: copyStrings.invoice_open_pdf_button });
+    const pdfButton = taxDocuments.getByRole("button", { name: copyStrings.invoice_open_pdf_button });
     await expect(pdfButton).toBeVisible();
     await expect(pdfButton).toBeEnabled();
   });
@@ -439,12 +453,8 @@ test.describe("VERIFY-01 admin customer detail payment_methods tab (v1.24 ADM-15
 
     await expect(page.locator("html")).toHaveClass(/accrue-admin/);
 
-    await expect(
-      page.getByRole("heading", { name: copyStrings.customer_payment_methods_section_heading })
-    ).toBeVisible();
-    await expect(
-      page.getByRole("button", { name: copyStrings.customer_payment_methods_sync_action })
-    ).toBeVisible();
+    const paymentMethods = page.locator("[data-ax-drill-section='payment-methods']");
+    await expect(paymentMethods.getByText(copyStrings.customer_payment_methods_section_heading)).toBeVisible();
     await expect(
       page.getByText(copyStrings.customer_payment_methods_replace_handoff)
     ).toBeVisible();
@@ -497,27 +507,25 @@ test.describe("VERIFY-01 admin customer detail payment_methods tab (v1.24 ADM-15
     await expect(page.locator("iframe[name*='braintree']")).toHaveCount(0);
     await expect(page.locator("[data-braintree-client-token]")).toHaveCount(0);
 
-    await openDeleteConfirmation(
-      page,
-      fixture.admin_denial_payment_method_ids.replacement_required_default
-    );
-    await expect(page.getByText(copyStrings.customer_payment_methods_delete_warning)).toBeVisible();
+    const inUseRow = paymentMethodRow(page, "1111");
+    await expect(inUseRow).toBeVisible();
     await expect(
-      page.getByText(copyStrings.customer_payment_methods_delete_blocked_replacement_required)
-    ).toBeVisible();
-    await expect(page.locator("[data-role='confirm-delete-payment-method']")).toHaveCount(0);
-
-    await page.getByRole("button", { name: copyStrings.customer_payment_methods_cancel_action }).click();
-    await expect(page.locator("[data-role='payment-method-delete-confirmation']")).toHaveCount(0);
-
-    await openDeleteConfirmation(page, fixture.admin_denial_payment_method_ids.deletable);
-    await expect(page.getByText(copyStrings.customer_payment_methods_delete_warning)).toBeVisible();
-    await expect(page.locator("[data-role='confirm-delete-payment-method']")).toHaveCount(1);
-    await expect(
-      page.getByText(copyStrings.customer_payment_methods_delete_blocked_in_use)
+      inUseRow.getByRole("button", { name: new RegExp(copyStrings.customer_payment_methods_delete_action) })
     ).toHaveCount(0);
+
+    const defaultRow = paymentMethodRow(page, "2222");
+    await expect(defaultRow).toBeVisible();
     await expect(
-      page.getByText(copyStrings.customer_payment_methods_delete_blocked_replacement_required)
+      defaultRow.getByRole("button", { name: new RegExp(copyStrings.customer_payment_methods_delete_action) })
+    ).toHaveCount(0);
+
+    const deleteDialog = await openDeleteConfirmation(page, "3333");
+    await expect(page.getByText(copyStrings.customer_payment_methods_delete_warning)).toHaveCount(0);
+    await expect(deleteDialog.locator("[data-role='payment-method-action-content']")).toBeVisible();
+    await expect(deleteDialog.locator("[data-role='confirm-payment-method-action']")).toHaveCount(1);
+    await expect(deleteDialog.getByText(copyStrings.customer_payment_methods_delete_blocked_in_use)).toHaveCount(0);
+    await expect(
+      deleteDialog.getByText(copyStrings.customer_payment_methods_delete_blocked_replacement_required)
     ).toHaveCount(0);
   });
 });

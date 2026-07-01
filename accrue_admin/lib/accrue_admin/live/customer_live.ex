@@ -251,7 +251,7 @@ defmodule AccrueAdmin.Live.CustomerLive do
                   data-role="payment-method-action-row"
                 >
                   <span class="ax-body"><%= row.label %></span>
-                  <div class="ax-button-group" aria-label={"Actions for #{row.label}"}>
+                  <div class="ax-button-group" role="group" aria-label={"Actions for #{row.label}"}>
                     <button
                       :if={row.set_default?}
                       type="button"
@@ -833,9 +833,7 @@ defmodule AccrueAdmin.Live.CustomerLive do
   defp active_subscription_payment_method?(customer, payment_method) do
     customer
     |> subscriptions()
-    |> Enum.filter(fn subscription ->
-      subscription.processor == "braintree" and Subscription.active?(subscription)
-    end)
+    |> Enum.filter(&Subscription.active?/1)
     |> Enum.any?(fn subscription ->
       get_in(subscription.data || %{}, ["payment_method_token"]) == payment_method.processor_id
     end)
