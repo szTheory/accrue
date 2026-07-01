@@ -2,7 +2,15 @@
 set -euo pipefail
 
 root_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
-phase_dir="$root_dir/.planning/phases/190-navigation-data-display-meta-component-cohesion"
+active_phase_dir="$root_dir/.planning/phases/190-navigation-data-display-meta-component-cohesion"
+archived_phase_dir="$root_dir/.planning/milestones/v1.53-phases/190-navigation-data-display-meta-component-cohesion"
+
+if [ -d "$active_phase_dir" ]; then
+  phase_dir="$active_phase_dir"
+else
+  phase_dir="$archived_phase_dir"
+fi
+
 uat_file="$phase_dir/190-UAT.md"
 verification_file="$phase_dir/190-VERIFICATION.md"
 handoff_file="$phase_dir/190-PHASE-191-HANDOFF.md"
