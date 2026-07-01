@@ -69,7 +69,7 @@ defmodule AccrueAdmin.EntitlementsLiveTest do
     assert {:ok, _view, html} =
              live(conn, "/billing/customers/#{customer.id}?tab=entitlements")
 
-    assert html =~ Copy.entitlements_section_title()
+    assert html =~ "Access and entitlements"
     assert html =~ Copy.entitlements_features_label()
     # granted feature + active plan render by name
     assert html =~ "Reports"

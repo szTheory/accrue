@@ -422,8 +422,6 @@ defmodule AccrueAdmin.Live.CustomersLive do
 
   defp scoped_path(mount_path, suffix, _owner_scope), do: mount_path <> suffix
 
-  defp humanize(value) when is_atom(value), do: value |> Atom.to_string() |> humanize()
-
   defp humanize(value) when is_binary(value) do
     value
     |> String.replace("_", " ")

@@ -117,7 +117,7 @@ for needle in \
   "uses: erlef/setup-beam@v1" \
   "otp-version: '28.0'" \
   "elixir-version: '1.19.5'" \
-  "mix local.hex --force" \
+  "mix local.hex 2.4.2 --force" \
   "uses: actions/setup-node@v6" \
   "node-version: '22'" \
   "cache-dependency-path: accrue_admin/package-lock.json" \

@@ -122,12 +122,14 @@ defmodule AccrueAdmin.Components.Overlay do
     """
   end
 
-  defp presentation_name(presentation), do: presentation |> normalize_presentation() |> Atom.to_string()
+  defp presentation_name(presentation),
+    do: presentation |> normalize_presentation() |> Atom.to_string()
 
   defp description_id(%{description_id: description_id}) when is_binary(description_id),
     do: description_id
 
-  defp description_id(%{subtitle: subtitle, id: id}) when is_binary(subtitle), do: "#{id}-description"
+  defp description_id(%{subtitle: subtitle, id: id}) when is_binary(subtitle),
+    do: "#{id}-description"
 
   defp description_id(_assigns), do: nil
 
@@ -148,9 +150,15 @@ defmodule AccrueAdmin.Components.Overlay do
   defp backdrop?(:popover), do: false
   defp backdrop?(_presentation), do: true
 
-  defp shell_class(:drawer, extra_class), do: ["ax-overlay-shell", "ax-detail-drawer-shell", extra_class]
-  defp shell_class(:modal, extra_class), do: ["ax-overlay-shell", "ax-step-up-modal-shell", extra_class]
-  defp shell_class(:popover, extra_class), do: ["ax-overlay-shell", "ax-overlay-popover-shell", extra_class]
+  defp shell_class(:drawer, extra_class),
+    do: ["ax-overlay-shell", "ax-detail-drawer-shell", extra_class]
+
+  defp shell_class(:modal, extra_class),
+    do: ["ax-overlay-shell", "ax-step-up-modal-shell", extra_class]
+
+  defp shell_class(:popover, extra_class),
+    do: ["ax-overlay-shell", "ax-overlay-popover-shell", extra_class]
+
   defp shell_class(_presentation, extra_class), do: shell_class(:modal, extra_class)
 
   defp backdrop_class(:drawer), do: "ax-detail-drawer-backdrop"
@@ -203,7 +211,8 @@ defmodule AccrueAdmin.Components.Overlay do
 
   defp remove_transition(_presentation), do: Phoenix.LiveView.JS.pop_focus()
 
-  defp focus_trap_close_event(assigns), do: assigns.close_event || rest_value(assigns.rest, "phx-click")
+  defp focus_trap_close_event(assigns),
+    do: assigns.close_event || rest_value(assigns.rest, "phx-click")
 
   defp focus_trap_close_target(assigns) do
     assigns.close_target || rest_value(assigns.rest, "phx-target")

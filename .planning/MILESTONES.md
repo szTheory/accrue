@@ -1,5 +1,11 @@
 # Milestones
 
+## v1.35 : Dual-Provider Supportability Closure (Backfilled: 2026-07-01)
+
+**Note:** Synthesized from archive snapshot by `/gsd-health --backfill`. Original completion date unknown.
+
+---
+
 ## v1.54 Admin UI Page-Level Streamlining & Storybook (Shipped: 2026-07-01; archived 2026-07-01)
 
 **Delivered:** Page-level excellence for the already-shipped `accrue_admin` operator UI: archetype specs, gold-standard overview/list/detail exemplars, pattern propagation across all pages, canonical overlay correctness, dev/test-only PhoenixStorybook, and a zero-regression page-flow sign-off.

@@ -839,6 +839,7 @@ defmodule Accrue.Docs.PackageDocsVerifierTest do
   test "package docs verifier rejects raw px spacing (RES-04 spacing-literal guard)" do
     tmp_dir = tmp_dir!()
     seed_tmp_dir!(tmp_dir)
+
     # Append a violation to the seeded app.css so earlier guards (token consumption etc.) still pass.
     # Trailing newline is required: Guard A uses /([^\n]+)\n/g which skips lines without a terminating \n.
     app_css_path = Path.join(tmp_dir, "accrue_admin/assets/css/app.css")
@@ -854,6 +855,7 @@ defmodule Accrue.Docs.PackageDocsVerifierTest do
   test "package docs verifier rejects :focus without :focus-visible (RES-04 focus-visible guard)" do
     tmp_dir = tmp_dir!()
     seed_tmp_dir!(tmp_dir)
+
     # Append a violation to the seeded app.css so earlier guards (token consumption etc.) still pass
     app_css_path = Path.join(tmp_dir, "accrue_admin/assets/css/app.css")
     File.write!(app_css_path, "\n.ax-bar:focus { outline: 2px solid red; }\n", [:append])
@@ -868,9 +870,13 @@ defmodule Accrue.Docs.PackageDocsVerifierTest do
   test "package docs verifier rejects truncation without min-width:0 (RES-04 truncation guard)" do
     tmp_dir = tmp_dir!()
     seed_tmp_dir!(tmp_dir)
+
     # Append a violation to the seeded app.css so earlier guards (token consumption etc.) still pass
     app_css_path = Path.join(tmp_dir, "accrue_admin/assets/css/app.css")
-    File.write!(app_css_path, "\n.ax-baz { overflow: hidden; text-overflow: ellipsis; }\n", [:append])
+
+    File.write!(app_css_path, "\n.ax-baz { overflow: hidden; text-overflow: ellipsis; }\n", [
+      :append
+    ])
 
     {output, status} = run_verifier(tmp_dir)
 
@@ -897,6 +903,7 @@ defmodule Accrue.Docs.PackageDocsVerifierTest do
 
     assert status != 0
     assert output =~ "[verify_package_docs]"
+
     # match the stable substring from Guard D's fail message (SPEC-OVERVIEW non-interactive-empty-rail guard)
     assert output =~ "empty-rail"
   end

@@ -21,23 +21,23 @@ defmodule AccruePortal.MixProject do
     ]
   end
 
+  def cli do
+    [preferred_envs: [test: :test, "test.ci": :test]]
+  end
+
   defp aliases do
     [
       "test.ci": [
         "format --check-formatted",
         "compile --warnings-as-errors",
         "test --warnings-as-errors",
-        "hex.audit"
+        "cmd env MIX_ENV=dev mix hex.audit"
       ]
     ]
   end
 
   def application do
     [extra_applications: [:logger]]
-  end
-
-  def cli do
-    [preferred_envs: [test: :test]]
   end
 
   defp elixirc_paths(:test), do: ["lib", "test/support"]

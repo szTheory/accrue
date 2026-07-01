@@ -3,8 +3,8 @@ defmodule AccrueAdmin.Components.GlobalSearchTest do
 
   import Phoenix.LiveViewTest
 
-  alias AccrueAdmin.OwnerScope
   alias AccrueAdmin.Components.GlobalSearch
+  alias AccrueAdmin.OwnerScope
 
   describe "path/2 nil-guard (regression: WR-03 fix)" do
     test "renders without crashing when mount_path is nil (pre-update/2 state)" do

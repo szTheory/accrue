@@ -206,7 +206,7 @@ jobs:
           elixir-version: ${{ matrix.elixir }}
 
       - name: Install Hex
-        run: mix local.hex --force
+        run: mix local.hex 2.4.2 --force
 
       - name: Restore accrue deps cache
         uses: actions/cache@v5
@@ -383,7 +383,7 @@ jobs:
           elixir-version: '1.19.5'
 
       - name: Install Hex
-        run: mix local.hex --force
+        run: mix local.hex 2.4.2 --force
 
       - name: Restore accrue deps cache
         uses: actions/cache@v5
@@ -415,7 +415,7 @@ jobs:
           elixir-version: '1.19.5'
 
       - name: Install Hex
-        run: mix local.hex --force
+        run: mix local.hex 2.4.2 --force
 
       - name: Install deps
         run: cd accrue_admin && mix deps.get
@@ -505,7 +505,7 @@ jobs:
 
       - name: Install Hex
         if: steps.phase190_changes.outputs.relevant == 'true'
-        run: mix local.hex --force
+        run: mix local.hex 2.4.2 --force
 
       - name: Set up Node
         if: steps.phase190_changes.outputs.relevant == 'true'
@@ -600,7 +600,7 @@ jobs:
           elixir-version: '1.19.5'
 
       - name: Install Hex
-        run: mix local.hex --force
+        run: mix local.hex 2.4.2 --force
 
       - name: Set up Node
         uses: actions/setup-node@v6
@@ -701,7 +701,7 @@ jobs:
           elixir-version: '1.19.5'
 
       - name: Install Hex
-        run: mix local.hex --force
+        run: mix local.hex 2.4.2 --force
 
       - name: Set up Node
         uses: actions/setup-node@v6
@@ -824,7 +824,7 @@ jobs:
 
       - name: Install Hex
         run: |
-          mix local.hex --force
+          mix local.hex 2.4.2 --force
           mix local.rebar --force
 
       - name: Set up Node
@@ -946,7 +946,7 @@ jobs:
 
       - name: Install Hex
         run: |
-          mix local.hex --force
+          mix local.hex 2.4.2 --force
           mix local.rebar --force
 
       - name: Set up Node
@@ -1144,7 +1144,7 @@ jobs:
           elixir-version: '1.19.5'
 
       - name: Install Hex
-        run: mix local.hex --force
+        run: mix local.hex 2.4.2 --force
 
       - name: Install deps
         run: cd accrue && mix deps.get

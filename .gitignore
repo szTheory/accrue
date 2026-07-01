@@ -19,6 +19,9 @@ cover/
 *.tar
 erl_crash.dump
 
+# Local planning/research cache; generated during research lookups.
+.planning/research/.cache/
+
 # JavaScript browser-test artifacts
 node_modules/
 playwright-report/

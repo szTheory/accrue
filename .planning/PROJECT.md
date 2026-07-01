@@ -12,7 +12,7 @@ Tagline: *"Billing state, modeled clearly."*
 
 ## Development Posture
 
-**Stable core / demand-driven expansion.** As of **2026-05-31**, Accrue is considered **done enough for its declared scope**: the canonical SaaS billing loop is complete, the dual-provider gateway subscription core is bounded and documented, and the remaining work is release readiness, maintenance, support-contract hardening, or explicitly justified strategic expansion.
+**stable-core / demand-driven expansion.** As of **2026-05-31**, Accrue is considered **done enough for its declared scope**: the canonical SaaS billing loop is complete, the dual-provider gateway subscription core is bounded and documented, and the remaining work is release readiness, maintenance, support-contract hardening, or explicitly justified strategic expansion.
 
 Default future milestone posture:
 - Prefer **release-readiness, maintenance, documentation truth, verifier hardening, and adopter-proof closure** over new product surface.

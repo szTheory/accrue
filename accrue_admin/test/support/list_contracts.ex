@@ -189,7 +189,7 @@ defmodule AccrueAdmin.ListContracts do
       states: %{
         first_run_empty: "No billing events yet.",
         queue_empty: nil,
-        filtered_empty: "No ledger rows match these filters.",
+        filtered_empty: "No event ledger rows match these filters.",
         loading: "Loading billing events."
       },
       clear_all_on_default?: false
@@ -221,7 +221,7 @@ defmodule AccrueAdmin.ListContracts do
       },
       states: %{
         first_run_empty: "No connected accounts yet.",
-        queue_empty: "No accounts need attention.",
+        queue_empty: "No connected accounts need attention.",
         filtered_empty: "No connected accounts match these filters.",
         loading: "Loading connected accounts."
       },

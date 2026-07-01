@@ -554,8 +554,6 @@ defmodule AccrueAdmin.Live.ConnectAccountsLive do
     params != %{} and Map.keys(params) -- ["org"] == []
   end
 
-  defp humanize(value) when is_atom(value), do: value |> Atom.to_string() |> humanize()
-
   defp humanize(value) when is_binary(value) do
     value
     |> String.replace("_", " ")

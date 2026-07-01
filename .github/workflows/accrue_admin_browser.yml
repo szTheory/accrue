@@ -53,7 +53,7 @@ jobs:
           elixir-version: "1.19.5"
 
       - name: Install Hex
-        run: mix local.hex --force
+        run: mix local.hex 2.4.2 --force
 
       - name: Set up Node
         uses: actions/setup-node@v6

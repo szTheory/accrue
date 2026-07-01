@@ -35,7 +35,7 @@ jobs:
           otp-version: '28.0'
           elixir-version: '1.19.5'
       - name: Install Hex
-        run: mix local.hex --force
+        run: mix local.hex 2.4.2 --force
       - name: Verify accrue release version
         run: grep -n "@version \"${{ inputs.release_version }}\"" accrue/mix.exs
       - name: Install accrue deps
@@ -65,7 +65,7 @@ jobs:
           otp-version: '28.0'
           elixir-version: '1.19.5'
       - name: Install Hex
-        run: mix local.hex --force
+        run: mix local.hex 2.4.2 --force
       - name: Verify accrue_admin release version
         run: grep -n "@version \"${{ inputs.release_version }}\"" accrue_admin/mix.exs
       - name: Install accrue_admin deps
@@ -97,7 +97,7 @@ jobs:
           otp-version: '28.0'
           elixir-version: '1.19.5'
       - name: Install Hex
-        run: mix local.hex --force
+        run: mix local.hex 2.4.2 --force
       - name: Verify accrue_portal release version
         run: grep -n "@version \"${{ inputs.release_version }}\"" accrue_portal/mix.exs
       - name: Install accrue_portal deps

@@ -46,7 +46,7 @@ defmodule AccrueAdmin.Queries.Dunning do
    LIMIT 1)
   """
 
-  @spec recovered_vs_lost_mrr(OwnerScope.t() | nil, keyword()) :: %{
+  @spec recovered_vs_lost_mrr(map() | nil, keyword()) :: %{
           recovered: [%{currency: String.t(), cents: non_neg_integer()}],
           lost: [%{currency: String.t(), cents: non_neg_integer()}]
         }
@@ -74,7 +74,7 @@ defmodule AccrueAdmin.Queries.Dunning do
     end
   end
 
-  @spec funnel(OwnerScope.t() | nil, keyword()) :: %{
+  @spec funnel(map() | nil, keyword()) :: %{
           entered: non_neg_integer(),
           recovered: non_neg_integer(),
           exhausted: non_neg_integer(),
@@ -106,7 +106,7 @@ defmodule AccrueAdmin.Queries.Dunning do
     end
   end
 
-  @spec at_risk_subscriptions(OwnerScope.t() | nil, keyword()) :: [map()]
+  @spec at_risk_subscriptions(map() | nil, keyword()) :: [map()]
   def at_risk_subscriptions(owner_scope, opts \\ [])
 
   def at_risk_subscriptions(owner_scope, opts) when is_list(opts) do
@@ -123,7 +123,7 @@ defmodule AccrueAdmin.Queries.Dunning do
           job.worker == "Accrue.Workers.DunningStep" and
             fragment("? ->> 'subscription_id' = ?::text", job.args, subscription.id) and
             fragment(
-              "? ->> 'campaign_started_at' = to_char(?, 'YYYY-MM-DD\"T\"HH24:MI:SS.US\"Z\"')",
+              ~S[? ->> 'campaign_started_at' = to_char(?, 'YYYY-MM-DD"T"HH24:MI:SS.US"Z"')],
               job.args,
               subscription.dunning_campaign_started_at
             ) and job.state in ["available", "scheduled", "retryable"],

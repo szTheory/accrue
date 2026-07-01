@@ -15,8 +15,8 @@ defmodule AccrueAdmin.Queries.QueryModulesTest do
     Customers,
     Invoices,
     PromotionCodes,
-    Webhooks,
-    Subscriptions
+    Subscriptions,
+    Webhooks
   }
 
   setup do

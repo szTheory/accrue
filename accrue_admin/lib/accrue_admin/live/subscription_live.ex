@@ -306,7 +306,9 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
                   <%= next_action_summary(@subscription) %>
                 </p>
               <% else %>
-                <p class="ax-body"><%= Copy.resource_state_copy(:dunning, :queue_empty).body %></p>
+                <p class="ax-body">
+                  <%= Copy.resource_state_copy(:dunning, :queue_empty, surface: :subscription_detail).body %>
+                </p>
                 <p class="ax-body">Recovery is triggered by invoice.payment_failed billing events.</p>
               <% end %>
             </div>
@@ -834,8 +836,6 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
   defp default_drill_open?(subscription, :dunning),
     do: Subscription.dunning_campaign_active?(subscription)
 
-  defp default_drill_open?(_subscription, _section), do: false
-
   defp drawer_open?(nil, nil), do: false
   defp drawer_open?(_drawer_action_type, _pending_action), do: true
 
@@ -844,10 +844,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
 
   defp action_aria_label(action_type, subscription),
     do:
-      Copy.action_hidden_context("Run",
-        resource: String.downcase(action_label(action_type)),
-        object: "subscription #{subscription.processor_id || subscription.id}"
-      )
+      "#{action_label(action_type)} for subscription #{subscription.processor_id || subscription.id}"
 
   defp action_menu_groups(subscription) do
     subscription_label = subscription.processor_id || subscription.id

@@ -22,7 +22,7 @@ ENV PATH="/root/.cargo/bin:${PATH}"
 ENV RUSTLER_PRECOMPILATION_EXAMPLE_BUILD=1
 
 # Install hex and rebar
-RUN mix local.hex --force && \
+RUN mix local.hex 2.4.2 --force && \
     mix local.rebar --force
 
 # Set working directory

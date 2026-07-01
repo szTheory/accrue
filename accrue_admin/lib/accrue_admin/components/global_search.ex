@@ -4,8 +4,8 @@ defmodule AccrueAdmin.Components.GlobalSearch do
   """
   use Phoenix.LiveComponent
 
-  alias AccrueAdmin.Copy
   alias AccrueAdmin.Components.Icon
+  alias AccrueAdmin.Copy
   alias AccrueAdmin.Queries.{Customers, Invoices, Subscriptions}
   alias AccrueAdmin.ScopedPath
 

@@ -464,16 +464,12 @@ defmodule AccrueAdmin.Live.PromotionCodesLive do
 
   defp escape(value), do: value |> Phoenix.HTML.html_escape() |> Phoenix.HTML.safe_to_string()
 
-  defp humanize(value) when is_atom(value), do: value |> Atom.to_string() |> humanize()
-
   defp humanize(value) when is_binary(value) do
     value
     |> String.replace("_", " ")
     |> String.split()
     |> Enum.map_join(" ", &String.capitalize/1)
   end
-
-  defp humanize(_value), do: "Unknown"
 
   defp default_brand do
     %{app_name: "Billing", logo_url: nil, accent_hex: "#5D79F6", accent_contrast_hex: "#FAFBFC"}

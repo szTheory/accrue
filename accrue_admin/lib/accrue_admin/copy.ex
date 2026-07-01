@@ -1354,22 +1354,17 @@ defmodule AccrueAdmin.Copy do
     )
   end
 
-  defp build_resource_state_copy(meta, :first_run_empty, _opts) do
+  defp build_resource_state_copy(meta, :first_run_empty, opts) do
     %{
       heading: Map.get(meta, :first_run_heading, "No #{meta.plural} yet"),
-      body:
-        Map.get(
-          meta,
-          :first_run_body,
-          "#{sentence_case(meta.plural)} appear after #{meta.first_run}."
-        )
+      body: first_run_empty_body(meta, opts)
     }
   end
 
-  defp build_resource_state_copy(meta, :queue_empty, _opts) do
+  defp build_resource_state_copy(meta, :queue_empty, opts) do
     %{
       heading: Map.get(meta, :queue_heading, meta.queue),
-      body: Map.get(meta, :queue_body, meta.queue_next)
+      body: queue_empty_body(meta, opts)
     }
   end
 
@@ -1413,6 +1408,40 @@ defmodule AccrueAdmin.Copy do
         "This admin account cannot view #{object}. Switch #{owner_scope} or ask an administrator for billing admin access."
     }
   end
+
+  defp first_run_empty_body(%{singular: "subscription"} = meta, opts) do
+    if Keyword.get(opts, :surface) == :customer_detail,
+      do: customer_detail_no_subscriptions(),
+      else: default_first_run_empty_body(meta)
+  end
+
+  defp first_run_empty_body(%{singular: "invoice"} = meta, opts) do
+    if Keyword.get(opts, :surface) == :customer_detail,
+      do: customer_detail_no_invoices(),
+      else: default_first_run_empty_body(meta)
+  end
+
+  defp first_run_empty_body(meta, _opts) do
+    default_first_run_empty_body(meta)
+  end
+
+  defp default_first_run_empty_body(meta) do
+    Map.get(
+      meta,
+      :first_run_body,
+      "#{sentence_case(meta.plural)} appear after #{meta.first_run}."
+    )
+  end
+
+  defp queue_empty_body(%{singular: "dunning campaign"} = meta, opts) do
+    if Keyword.get(opts, :surface) == :subscription_detail,
+      do: dunning_empty_state_body(),
+      else: default_queue_empty_body(meta)
+  end
+
+  defp queue_empty_body(meta, _opts), do: default_queue_empty_body(meta)
+
+  defp default_queue_empty_body(meta), do: Map.get(meta, :queue_body, meta.queue_next)
 
   defp charge_refund_source_suffix(nil), do: ""
   defp charge_refund_source_suffix(""), do: ""

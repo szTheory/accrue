@@ -289,6 +289,9 @@ defmodule AccrueAdmin.Live.CustomerLive do
               <span class="ax-detail-section-title">Access and entitlements</span>
             </summary>
             <Detail.detail_field_list fields={access_entitlement_fields(@entitlements_view)} />
+            <p :if={@entitlements_view == :error} class="ax-body" data-role="entitlements-error">
+              <%= Copy.entitlements_error_copy() %>
+            </p>
           </details>
 
           <details class="ax-detail-section" data-ax-drill-section="tax-ownership">
@@ -479,10 +482,10 @@ defmodule AccrueAdmin.Live.CustomerLive do
   end
 
   defp customer_peer_empty_body(:subscriptions),
-    do: Copy.resource_state_copy(:subscriptions, :first_run_empty).body
+    do: Copy.resource_state_copy(:subscriptions, :first_run_empty, surface: :customer_detail).body
 
   defp customer_peer_empty_body(:invoices),
-    do: Copy.resource_state_copy(:invoices, :first_run_empty).body
+    do: Copy.resource_state_copy(:invoices, :first_run_empty, surface: :customer_detail).body
 
   defp customer_peer_empty_body(:payments),
     do: Copy.resource_state_copy(:payments, :first_run_empty).body
@@ -563,7 +566,7 @@ defmodule AccrueAdmin.Live.CustomerLive do
   defp list_or_empty([]),
     do: "#{Copy.entitlements_empty_title()} - #{Copy.entitlements_empty_copy()}"
 
-  defp list_or_empty(values), do: Enum.join(values, ", ")
+  defp list_or_empty(values), do: values |> Enum.map(&humanize/1) |> Enum.join(", ")
 
   defp quantity_summary(quantities) when quantities == %{}, do: "-"
 
@@ -604,7 +607,12 @@ defmodule AccrueAdmin.Live.CustomerLive do
         value:
           if(unmapped == [],
             do: Copy.entitlements_no_drift_copy(),
-            else: Enum.join(Enum.sort(unmapped), ", ")
+            else:
+              [
+                Copy.entitlements_unmapped_badge() <> ": " <> Enum.join(Enum.sort(unmapped), ", "),
+                Copy.entitlements_unmapped_hint()
+              ]
+              |> Enum.join(" - ")
           )
       }
     ]
@@ -930,8 +938,6 @@ defmodule AccrueAdmin.Live.CustomerLive do
   defp blocked_reason_copy(:replacement_required),
     do: Copy.customer_payment_methods_delete_blocked_replacement_required()
 
-  defp blocked_reason_copy(_reason), do: Copy.customer_payment_methods_delete_warning()
-
   defp payment_method_action_flash_kind(reason)
        when reason in [:in_use, :replacement_required, :payment_method_already_default],
        do: :warning
@@ -1121,7 +1127,16 @@ defmodule AccrueAdmin.Live.CustomerLive do
     if month && year, do: "#{month}/#{year}", else: "No expiry"
   end
 
-  defp humanize(value), do: value |> String.replace("_", " ") |> String.capitalize()
+  defp humanize(value) when is_atom(value), do: value |> Atom.to_string() |> humanize()
+
+  defp humanize(value) when is_binary(value) do
+    value
+    |> String.replace("_", " ")
+    |> String.split()
+    |> Enum.map_join(" ", &String.capitalize/1)
+  end
+
+  defp humanize(_value), do: "Unknown"
 
   defp format_datetime(%DateTime{} = value), do: Calendar.strftime(value, "%b %d, %Y %H:%M UTC")
   defp format_datetime(_value), do: "Unknown"

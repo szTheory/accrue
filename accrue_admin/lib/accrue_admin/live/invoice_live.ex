@@ -6,6 +6,8 @@ defmodule AccrueAdmin.Live.InvoiceLive do
   alias Accrue.{Actor, Auth, Billing, Events}
   alias Accrue.Billing.Invoice
 
+  alias AccrueAdmin.{BillingPresentation, StepUp, TaxOwnershipRow}
+
   alias AccrueAdmin.Components.{
     AppShell,
     Breadcrumbs,
@@ -26,7 +28,6 @@ defmodule AccrueAdmin.Live.InvoiceLive do
   alias AccrueAdmin.Copy
   alias AccrueAdmin.Queries.Invoices
   alias AccrueAdmin.ScopedPath
-  alias AccrueAdmin.{BillingPresentation, StepUp, TaxOwnershipRow}
 
   @destructive_actions ~w(void mark_uncollectible)
 

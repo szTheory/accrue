@@ -46,10 +46,13 @@ defmodule AccrueAdmin.Assets do
   @type kind :: :brand | :css | :js | :font_sans | :font_mono | :storybook_css | :storybook_js
 
   @spec init(kind()) :: kind()
-  def init(kind) when kind in [:brand, :css, :js, :font_sans, :font_mono, :storybook_css, :storybook_js], do: kind
+  def init(kind)
+      when kind in [:brand, :css, :js, :font_sans, :font_mono, :storybook_css, :storybook_js],
+      do: kind
 
   @spec call(Plug.Conn.t(), kind()) :: Plug.Conn.t()
-  def call(conn, kind) when kind in [:brand, :css, :js, :font_sans, :font_mono, :storybook_css, :storybook_js] do
+  def call(conn, kind)
+      when kind in [:brand, :css, :js, :font_sans, :font_mono, :storybook_css, :storybook_js] do
     {body, content_type, etag} = asset(kind)
 
     conn
