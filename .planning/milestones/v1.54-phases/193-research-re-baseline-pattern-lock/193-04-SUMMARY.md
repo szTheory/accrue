@@ -47,6 +47,8 @@ decisions:
   - "D-17 spike D: Storybook CSS/JS served via AccrueAdmin.Assets committed-bundle route (no Tailwind rebuild required)"
   - "Code.ensure_loaded? guard is mandatory in router (unlike Mailglass) because live_storybook macro resolution fails at compile time when PhoenixStorybook.Router is absent"
   - "PSB asset path warnings at compile time are expected (PSB looks in _build, we serve via AccrueAdmin.Assets routes)"
+requirements-completed:
+  - STY-01
 metrics:
   duration: "~9m"
   completed: "2026-06-25"

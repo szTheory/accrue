@@ -29,25 +29,19 @@ A historical anchor, dormant seed, or deferred idea never opens milestone scope 
 
 v1.49 **Realistic Demo App & Adoption Evidence** shipped on **2026-06-02**. The checked-in host now has rich PingPal-style demo data, Docker-first local evaluation, deterministic Playwright E2E coverage, CI Docker smoke, mandatory periodic live-Stripe parity, and a Start Here documentation path for adopters.
 
-## Current Milestone: v1.54 — Admin UI Page-Level Streamlining & Storybook (**opened 2026-06-24**)
+## Most recently shipped milestone: v1.54 — Admin UI Page-Level Streamlining & Storybook (**shipped & archived 2026-07-01**)
 
-**Goal:** Take the already-component-hardened `accrue_admin` operator UI (v1.53) from *interaction-correct building blocks* to *page-level excellence* — drive every page from its operator job-to-be-done, eliminate the "info dump" density, and make each page award-winning: on-brand, mobile-first, correct in light/dark/system, with purposeful micro-animation, ruthless removal of redundant UI, and the firsthand-observed usability defects fixed (modal-behind-scrim, scroll traps, floating/overlapping elements, focus/hover oddities, disabled-looks-enabled, dark-mode contrast, cramped columns, accidental flush spacing, hover-on-non-interactive empty states). Nail one gold-standard exemplar per page archetype, then propagate those locked patterns across all ~20 pages so the whole surface is internally consistent. Delivered idempotently (forward-only) by extending v1.53's baseline + 12-dimension rubric + zero-regression gate.
+**Goal (ACHIEVED):** Take the already-component-hardened `accrue_admin` operator UI (v1.53) from *interaction-correct building blocks* to *page-level excellence* — every page driven from operator JTBD, the info-dump density reduced, firsthand-observed usability defects fixed, and the surface proven in light/dark/system with a rendered Storybook + page-flow gate.
 
-**Target features (Phases 193–200, continues numbering from v1.53's Phase 192):**
-- **193** Research, re-baseline & pattern lock — subagent research (animation ← emilkowal.ski, IA/progressive-disclosure ← GOV.UK, page-density patterns) with adversarial synthesis; re-score every page on the 12-dim rubric and extend the Phase-187 baseline with page-flow cells; stand up **PhoenixStorybook** (dev/test-only dep) + migration plan from the `/dev/components` kitchen; lock the three archetype pattern specs (overview / list / detail).
-- **194** Exemplar A — **Dashboard** (overview archetype gold standard).
-- **195** Exemplar B — **Subscription detail** (object-detail archetype gold standard; the worst info-dump at 1,234 LOC).
-- **196** Exemplar C — **Subscriptions list** (list archetype gold standard) + extract the shared **`PageHeader`** component (pending todo) adopted by all list pages.
-- **197** Propagate the locked LIST pattern to all remaining list pages (customers · invoices · payments · coupons · promotion-codes · webhooks · events · connect).
-- **198** Propagate the locked DETAIL + overview patterns to all remaining detail/analytics pages (customer · invoice · charge · coupon · promotion-code · connect-account · webhook · event detail + Recovery + Campaign).
-- **199** Cross-cutting interaction/overlay correctness (modal/drawer/scroll/focus across all pages) + multi-step workflow fixture stress + full brand-voice microcopy sweep.
-- **200** Idempotent verification & sign-off — re-score all cells (component + group + page-flow) across viewport × theme × state; forward-only gate ≥ baseline with zero regressions; PhoenixStorybook complete for all components + 8 groups; adversarial multi-lens judge + maintainer photographic/interaction sign-off.
+**Delivered (Phases 193–200, 59/59 plans, 23/23 requirements):** locked SPEC-OVERVIEW/LIST/DETAIL guides plus a page-flow baseline and PhoenixStorybook dev/test-only scaffold (193); Dashboard and Recovery overview exemplar (194); Subscription detail summary-then-drill exemplar with canonical overlay/drawer action hosting (195); Subscriptions list exemplar plus shared `PageHeader` (196); LIST propagation across customers, invoices, payments, coupons, promotion codes, webhooks, events, and connect (197); DETAIL/analytics propagation across customer/invoice/charge/coupon/promotion-code/connect/webhook/event plus Recovery/Campaign (198); cross-cutting overlay/focus/scroll/floating correctness, deterministic fixture stress, and brand-voice microcopy (199); and final Storybook/theming/axe/no-FOUC/reduced-motion/CI guardrail sign-off with a 30,348-cell union baseline and zero regressions (200).
 
-**Reopen decision (recorded per the post-v1.48 pause rule):** Justification class **explicit strategy change** — page-level design quality of the flagship adopter-facing surface elevated to a strategic priority (same class accepted for v1.50/v1.51/v1.52/v1.53) — **plus firsthand-observed page-level usability defects** in the running demo (concrete failure evidence). Scope is the `accrue_admin` operator UI only. **Guardrails (honored):** no new billing primitives, no breaking API/route changes, no Tailwind migration, core stays LiveView-runtime-free (PhoenixStorybook is `accrue_admin` dev/test-only). `accrue_portal` and demo/host chrome remain out of scope.
+**Reopen decision (honored):** explicit strategy change for the flagship adopter-facing admin surface plus concrete firsthand usability defects. Scope stayed within `accrue_admin`: no new billing primitives, no breaking API/route changes, no Tailwind migration, no `accrue_portal` work, and core `accrue` stayed LiveView-runtime-free. PhoenixStorybook is dev/test-only.
 
-**Key context:** Reverses v1.53's TOOL-01 deferral — **PhoenixStorybook is adopted** this milestone (dev/test-only so adopters never carry it). Reuses v1.53's forward-only machinery: rubric `.planning/milestones/v1.53-phases/187-audit-baseline/187-RUBRIC.md`, baseline `baseline.cells.json`, defect ledger `defects.ndjson`, and the `regressions.ndjson` zero-regression gate. Design source for v1.54 will be `.planning/research/` (this milestone's research outputs); prior admin design sources `.planning/research/v1.51-admin-ui-depth-design.md` carried forward.
+**Closeout proof:** Phases 193–200; planning tag `v1.54`; milestone audit `passed` with 23/23 requirements clean, 8/8 phase verifications, 8/8 E2E flows, zero blockers, and one accepted out-of-scope deferral (TOOL-02 pixel-diff visual regression). See `.planning/MILESTONES.md`, `.planning/milestones/v1.54-ROADMAP.md`, `.planning/milestones/v1.54-REQUIREMENTS.md`, `.planning/milestones/v1.54-MILESTONE-AUDIT.md`, and `.planning/milestones/v1.54-phases/`.
 
-## Most recently shipped milestone: v1.53 — Admin UI Design-System Hardening (**shipped & archived 2026-06-20**)
+**Key context:** PhoenixStorybook reverses v1.53's TOOL-01 deferral and is now adopted as a dev/test-only design lab. The in-app `/dev/components` kitchen remains a second renderer backing drift tests. TOOL-02 remains deferred; the scored-cell forward-only page-flow gate is the regression mechanism.
+
+## Prior shipped milestone: v1.53 — Admin UI Design-System Hardening (**shipped & archived 2026-06-20**)
 
 **Goal (ACHIEVED):** Take the already-shipped `accrue_admin` operator UI from *considered* (v1.51) to *interaction-correct and component-systematic* — audit the design system fractally (foundations → primitives → component groups → pages → flows), catch and fix the behavioral defects screenshot scoring can't see (modal-behind-scrim, scroll traps, focus loss, overlay z-index, hover-on-empty-state, disabled-looks-enabled), formalize every component in isolation across its full state matrix, and lock it all behind an idempotent only-forward verification loop.
 
@@ -532,14 +526,14 @@ zero blockers; non-critical follow-ups + partial Nyquist 123–125 deferred).
 
 ## Current State
 
-**v1.54 — Admin UI Page-Level Streamlining & Storybook in progress (opened 2026-06-24; Phases 193–200).** Phases 193–199 are complete. The milestone has locked SPEC-OVERVIEW/LIST/DETAIL, extended the page-flow baseline, stood up PhoenixStorybook dev/test-only, delivered the Dashboard and Subscription detail archetype exemplars, extracted the shared `PageHeader`, converted the Subscriptions list, propagated the locked LIST pattern to the remaining eight list pages (customers, invoices, payments, coupons, promotion codes, webhooks, events, connect), propagated the locked DETAIL + analytics patterns to the remaining detail and Recovery/Campaign surfaces, and shipped the cross-cutting overlay/focus/scroll/floating correctness pass with deterministic fixture stress plus the brand-voice microcopy sweep. Phase 199 verified IXN-01..04, FIX-01..02, and CPY-01 with 4/4 must-haves, clean code review, and final gates passing (`mix compile --warnings-as-errors`, package docs, focused ExUnit/JS lifecycle tests, Phase 199 E2E 17 passed/13 skipped, reduced-motion E2E 22 passed, and representative Phase 194/195/197/198 regressions). Next: Phase 200 (Idempotent verification & sign-off).
+**v1.54 — Admin UI Page-Level Streamlining & Storybook shipped & archived 2026-07-01 (Phases 193–200, 59/59 plans, 23/23 requirements).** The milestone locked SPEC-OVERVIEW/LIST/DETAIL, extended the page-flow baseline, adopted PhoenixStorybook dev/test-only, delivered the Dashboard/Subscription-detail/Subscriptions-list archetype exemplars, extracted `PageHeader`, propagated LIST and DETAIL/analytics patterns across the admin surface, fixed overlay/focus/scroll/floating correctness, completed fixture stress and microcopy sweeps, and closed with Storybook/theming/axe/no-FOUC/reduced-motion/CI guardrail sign-off. The audit passed with 23/23 implementation-verified requirements, 8/8 phase verifications, 8/8 E2E flows, zero blockers, and TOOL-02 pixel-diff visual regression recorded as an accepted out-of-scope deferral.
 
-**v1.53 — Admin UI Design-System Hardening shipped & archived 2026-06-20 (Phases 187–192, 39/39 plans, 33/33 requirements).** The fourth pass on the `accrue_admin` surface is complete: the operator UI is now *interaction-correct and component-systematic*, with a final scorecard ≥ the Phase-187 baseline across 21,276 cells (zero regressions), merge-blocking CI regression guardrails, and maintainer sign-off. v1.54 is the currently open, explicitly justified follow-on page-level streamlining milestone.
+**v1.53 — Admin UI Design-System Hardening shipped & archived 2026-06-20 (Phases 187–192, 39/39 plans, 33/33 requirements).** The fourth pass on the `accrue_admin` surface completed the interaction-correct and component-systematic baseline that v1.54 then lifted to page-level excellence.
 
-The v1.50→v1.53 arc (Admin UI Foundation → Depth Pass → Brand System → Design-System Hardening) closed out the adopter-facing presentation/DX investment: a coherent, distinctly-branded, interaction-correct operator UI plus a committed standalone brand book (`brandbook/`), logo system, design tokens, and voice/copy.
+The v1.50→v1.54 arc (Admin UI Foundation → Depth Pass → Brand System → Design-System Hardening → Page-Level Streamlining) closed out the adopter-facing presentation/DX investment: a coherent, distinctly-branded, interaction-correct, page-level-consistent operator UI plus a committed standalone brand book (`brandbook/`), logo system, design tokens, and voice/copy.
 
-**Last shipped planning milestone:** **v1.53** — Phases **187–192** — **2026-06-20** (Admin UI Design-System Hardening)
-**Hex.pm:** accrue 1.4.0 · accrue_admin 1.4.0 · accrue_portal 1.4.0 (unchanged — v1.50–v1.53 shipped no new core package code; v1.53 was admin-UI/CSS/test-only)
+**Last shipped planning milestone:** **v1.54** — Phases **193–200** — **2026-07-01** (Admin UI Page-Level Streamlining & Storybook)
+**Hex.pm:** accrue 1.4.0 · accrue_admin 1.4.0 · accrue_portal 1.4.0 (unchanged — v1.50–v1.54 shipped no new core package code; v1.54 was admin-UI/CSS/test/dev-tooling only)
 
 ## Prior shipped milestone
 
@@ -559,15 +553,20 @@ The v1.50→v1.53 arc (Admin UI Foundation → Depth Pass → Brand System → D
 
 ### Active
 
-**v1.54 remains active.** Completed requirements are tracked in `.planning/REQUIREMENTS.md`; remaining open scope is Phase 200 (VER-01..03, STY-02..03). The post-v1.48 pause rule still applies after this milestone closes.
+No active milestone-specific requirements. v1.54 is archived; the post-v1.48 pause rule remains in force until a future milestone is opened with a concrete adopter failure mode, correctness/security/data-loss risk, repeated support issue, operational failure, or explicit strategy change.
 
-### Validated v1.54 (in progress; active milestone opened 2026-06-24)
+### Validated v1.54 (archived in `.planning/milestones/v1.54-REQUIREMENTS.md`; milestone shipped & archived 2026-07-01)
+
+Admin UI Page-Level Streamlining & Storybook — 23/23 satisfied across Phases 193–200.
 
 - ✓ **RES-01..RES-04, STY-01** — Research, page-flow baseline, spike decisions, CSS source guards, and PhoenixStorybook dev/test-only foundation — Phase 193.
 - ✓ **EXE-01** — Dashboard overview exemplar and Recovery analytics overview grammar — Phase 194.
 - ✓ **EXE-02** — Subscription detail summary-then-drill object-detail exemplar with drawer-hosted actions and overlay handoff — Phase 195.
 - ✓ **EXE-03, PGH-01** — Subscriptions list exemplar plus shared `PageHeader` contract — Phase 196.
 - ✓ **PRP-01** — All eight remaining list pages conform to SPEC-LIST, adopt `PageHeader`, carry per-page JTBD microcopy, and have four-state coverage — Phase 197.
+- ✓ **PRP-02** — Remaining detail and analytics pages conform to SPEC-DETAIL / overview grammar — Phase 198.
+- ✓ **IXN-01..IXN-04, FIX-01..FIX-02, CPY-01** — Canonical overlay primitive, scroll/focus/floating/theme correctness, deterministic fixture stress, and brand-voice microcopy sweep — Phase 199.
+- ✓ **VER-01..VER-03, STY-02..STY-03** — Zero-regression union scorecard, Storybook coverage/theming, axe/no-FOUC/reduced-motion/CI guardrails, adversarial judge, and maintainer ACCEPT sign-off — Phase 200.
 
 ### Validated v1.53 (archived in `.planning/milestones/v1.53-REQUIREMENTS.md`; milestone shipped & archived 2026-06-20)
 
@@ -670,4 +669,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-06-30 after Phase 199 (Cross-cutting interaction/overlay correctness + fixture stress + microcopy) completed in v1.54 — Admin UI Page-Level Streamlining & Storybook (opened 2026-06-24; Phases 193–200). Overlay/focus/scroll/floating correctness, deterministic fixture stress, and the brand-voice microcopy sweep are verified with 4/4 must-haves, clean review, and final gates passing. Next: Phase 200 (Idempotent verification & sign-off). Prior milestone: v1.53 Admin UI Design-System Hardening (Phases 187–192, shipped & archived 2026-06-20). Prior: v1.52 Brand System (Phases 180–186).*
+*Last updated: 2026-07-01 after v1.54 (Admin UI Page-Level Streamlining & Storybook) shipped and archived. v1.54 is now the most recently shipped milestone; no active milestone-specific requirements remain. Prior milestone: v1.53 Admin UI Design-System Hardening (Phases 187–192, shipped & archived 2026-06-20).*

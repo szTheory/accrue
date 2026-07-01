@@ -40,6 +40,8 @@ decisions:
   - "Anchor headings match require_fixed needle patterns exactly: '## SPEC-OVERVIEW — ', '## SPEC-LIST — ', '## SPEC-DETAIL — summary-then-drill'"
   - "Added spec guides to skip_undefined_reference_warnings_on (guides reference .planning/ paths outside the package tarball, same as motion.md)"
   - "elixirc_paths(:dev) extended to ['lib', 'storybook/_support'] — required for storybook/_support/registry_story.ex to compile in dev"
+requirements-completed:
+  - RES-01
 metrics:
   duration: "~12 minutes"
   completed: "2026-06-25"

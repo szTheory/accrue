@@ -1408,12 +1408,57 @@ A quality / interaction-correctness / design-system hardening pass on the alread
 
 ---
 
+## Milestone: v1.54 — Admin UI Page-Level Streamlining & Storybook
+
+**Shipped:** 2026-07-01  
+**Phases:** 8 (193–200) | **Plans:** 59 | **Tasks:** 97
+
+### What Was Built
+
+A page-level excellence pass on the already-shipped `accrue_admin` operator UI. The milestone locked the three archetype specs, extended v1.53's forward-only baseline to page-flow cells, adopted PhoenixStorybook dev/test-only, built gold-standard Dashboard/Subscription-detail/Subscriptions-list exemplars, propagated LIST and DETAIL/analytics patterns across the surface, hardened every overlay/focus/scroll/floating behavior, stress-tested deterministic multi-step and edge fixtures, swept page-level microcopy, and closed with a 30,348-cell zero-regression Phase 200 sign-off.
+
+### What Worked
+
+- **Exemplar-first propagation.** Locking one overview, one detail, and one list page before broad propagation kept later work coherent and reduced subjective redesign churn.
+- **One canonical overlay primitive.** Routing drawers/modals through one primitive turned repeated modal-behind-scrim, scroll-lock, focus, and geometry bugs into a single contract with browser and source tests.
+- **Storybook as a dev/test design lab.** The dependency stayed out of adopter runtime while giving components and groups a rendered state matrix beyond the in-app kitchen.
+- **Forward-only verification scaled.** The union baseline and strict manifest-bound scorecard made page-level quality measurable without adopting pixel-diff tooling.
+
+### What Was Inefficient
+
+- The generated milestone accomplishment extraction was noisy and needed editorial replacement at close.
+- Several closeout fixes were bookkeeping or copy-contract alignment discovered by the milestone audit rather than caught immediately at phase boundary.
+- Heavy generated evidence artifacts are useful but large; they make archiving essential to keep active planning context manageable.
+
+### Patterns Established
+
+- Pattern specs → exemplar → propagation is now the preferred shape for broad UI quality passes.
+- PhoenixStorybook is acceptable only as dev/test-only tooling with a guarded sibling-scope mount and host compile proof.
+- Page-flow cells are first-class verification surfaces alongside component and group cells.
+- Open-artifact carryover should be acknowledged explicitly in STATE.md at milestone close.
+
+### Key Lessons
+
+1. Keep SUMMARY one-liners written for humans; automation that harvests raw deviations produces poor milestone entries.
+2. Page-level UI quality needs rendered route checks, not only component isolation or screenshots.
+3. If a TODO is satisfied by milestone work, close or annotate the TODO immediately so the next closeout audit does not rediscover it.
+4. Archiving phase trees is mandatory once generated evidence reaches hundreds of thousands of lines.
+
+### Cost Observations
+
+- Model mix: not tracked.
+- Sessions: one long admin-UI milestone with audit closeout.
+- Notable: Phase 200 evidence generation and browser/page-flow gates dominated artifact size and closeout time.
+
+---
+
 ## Cross-Milestone Trends
 
 ### Process Evolution
 
 | Milestone | Sessions | Phases | Key Change |
 |-----------|----------|--------|------------|
+| v1.54 | long | 8 | **RES/STY/EXE/PGH/PRP/IXN/FIX/CPY/VER** — page-level admin streamlining: archetype specs → gold-standard exemplars → LIST/DETAIL propagation, canonical overlay primitive, PhoenixStorybook dev/test-only, deterministic fixture stress, and a 30,348-cell zero-regression Phase 200 sign-off. Audit `passed`; phases archived under **`milestones/v1.54-phases/`**; archives **`milestones/v1.54-*`**. |
 | v1.53 | short | 6 | **VER/FND/CMP/GRP/IXN/PAGE/CPY/SEED** — fractal admin design-system hardening (foundations→primitives→groups→pages→flows): 12-dimension rubric + 21,276-cell only-forward baseline + 800-row AX187 ledger; package-local FocusTrap + regression coverage for behavioral defects screenshots miss; idempotent scorecard ≥ baseline (0 regressions) + merge-blocking CI guardrails; maintainer sign-off discharged v1.51 photographic-sign-off tech-debt. Audit `gaps_found` (doc/traceability only) closed inline at close. Phases **187–192** under **`.planning/phases/`**; archives **`milestones/v1.53-*`**. |
 | v1.29 | short | 3 | **MG-01..MG-07** — Mailglass framework integration replacing `mjml_eex` + `phoenix_swoosh`; explicit `Mailglass.deliver/1` `idempotency_key` replaces Oban `unique: [period: 60]`; `/dev/mail` LiveView replaces `mix accrue.mail.preview`; 13 templates ported, 26 MJML/text assets deleted; `mailglass_cleanup_test` enforces non-regression in CI; phases **88–90** under **`milestones/v1.29-phases/`**; archives **`milestones/v1.29-*`**. |
 | v1.46 | ~2 days | 3 | **MNT-01** — maintenance release: ENT-10 dual-column webhook scope fix, dep updates, @since annotation cleanup, credo wired in accrue_portal, Three Zeros gate green across all 3 packages, 1.3.0 Hex publish. Audit-gap closure phases (152+153) added retroactively to close VERIFICATION.md + REQUIREMENTS gaps. |
@@ -1450,6 +1495,7 @@ A quality / interaction-correctness / design-system hardening pass on the alread
 
 | Milestone | Tests | Coverage | Zero-Dep Additions |
 |-----------|-------|----------|-------------------|
+| v1.54 | Phase 200 union scorecard verifier (30,348 cells, 0 regressions), Storybook coverage/theming checks, axe/no-FOUC/reduced-motion browser guardrails, overlay/floating/focus lifecycle tests, and centralized LIST copy contract alignment | 23/23 requirements archived | PhoenixStorybook dev/test-only in `accrue_admin`; no adopter runtime dependency, no core `accrue` LiveView runtime leak. |
 | v1.29 | New `mailglass_cleanup_test` (5 regression-guard assertions), `email_preview_live_test` fixture sweep (renders every type via admin LiveView), `mailglass_admin_routes/__routes__/0` ExUnit assertion in `accrue_admin`; 128 email tests pass post-cleanup | MG-01..MG-07 (7/7) archived | **Net dep removal:** `mjml_eex` + `phoenix_swoosh` removed from `accrue/mix.exs`; new `:mailglass` path dep replaces them. `accrue/priv/repo/migrations/20260426000000_create_mailglass_poc_tables.exs` for host bootstrap. |
 | v1.26 | Extended **`verify_package_docs.sh`** + **`verify_adoption_proof_matrix.sh`** substring gates; no new ExUnit facade (portal facade shipped **v1.24**) | INT-13 + INV-04 (2/2) archived | Doc + CI needles only; **`milestones/v1.26-*`**; execution trees **`v1.26-phases/`**. |
 | v1.24 | **`billing_portal_session_facade_test.exs`** + existing **VERIFY-01** / **host-integration** / **`verify_package_docs`** gates | ADM + BIL (6/6) archived | Public **`Accrue.Billing`** portal API; customer **PM** Playwright + **axe** row; **`milestones/v1.24-*`**; phases remain under **`.planning/phases/`**. |

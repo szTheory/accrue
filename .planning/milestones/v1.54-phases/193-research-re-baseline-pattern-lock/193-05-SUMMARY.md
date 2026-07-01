@@ -35,6 +35,9 @@ decisions:
   - "Fix violations before adding guards (not allowlist-skip): three Guard A pre-existing violations (ax-spacing-exception comments), one Guard B violation (skip-link :focus → :focus-visible), two Guard C violations (min-width:0 added to .ax-inline-id and .ax-id-badge-text)"
   - "Planted violations use File.write!(path, content, [:append]) not File.write!(path, content) — full replacement breaks earlier token-consumption guards that expect the seeded app.css"
   - "Guard A trailing newline: perl -0ne slurp with /([^\\n]+)\\n/g skips the last line if no \\n — planted violation must end with \\n"
+requirements-completed:
+  - RES-04
+  - STY-01
 metrics:
   duration: "~9 minutes"
   completed: "2026-06-25"

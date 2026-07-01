@@ -1,5 +1,28 @@
 # Milestones
 
+## v1.54 Admin UI Page-Level Streamlining & Storybook (Shipped: 2026-07-01; archived 2026-07-01)
+
+**Delivered:** Page-level excellence for the already-shipped `accrue_admin` operator UI: archetype specs, gold-standard overview/list/detail exemplars, pattern propagation across all pages, canonical overlay correctness, dev/test-only PhoenixStorybook, and a zero-regression page-flow sign-off.
+
+**Phases completed:** 8 phases (193–200), 59 plans, 97 tasks
+
+**Key accomplishments:**
+
+- Locked SPEC-OVERVIEW, SPEC-LIST, and SPEC-DETAIL as design contracts, extended the forward-only baseline to page-flow cells, and stood up PhoenixStorybook as a dev/test-only design lab with no adopter runtime leak.
+- Built three gold-standard exemplars: Dashboard/Recovery overview, Subscription detail object-detail, and Subscriptions list plus the shared `PageHeader` slot contract.
+- Propagated LIST and DETAIL/analytics patterns across the admin surface, replacing page-level inconsistency with summary-first, task-oriented compositions and state-specific copy.
+- Routed overlays through the canonical primitive and verified scroll lock, inert background, focus trap/restore, drawer geometry, floating bounds, theme persistence, and transformed-ancestor safety.
+- Completed deterministic multi-step/edge fixture stress plus brand-voice microcopy, including contextual action labels and first-run vs filtered empty states.
+- Closed Phase 200 with a 30,348-cell union scorecard, zero regressions, Storybook coverage/theming, axe/no-FOUC/reduced-motion/CI guardrails, adversarial judge findings, and maintainer ACCEPT sign-off.
+
+**Verification:** 23/23 requirements complete; milestone audit passed with 8/8 phase verifications, 23/23 implementation-verified requirements, 8/8 E2E flows, zero blockers, and one accepted out-of-scope deferral (TOOL-02 pixel-diff visual regression). Audit close also aligned the Webhooks queue-empty copy with the centralized list contract.
+
+**Known deferred items at close (10):** 7 stale quick tasks and 3 pending todos acknowledged as carryover/future-roadmap items; none v1.54-blocking. See STATE.md Deferred Items.
+
+**Archives:** [`milestones/v1.54-ROADMAP.md`](milestones/v1.54-ROADMAP.md), [`milestones/v1.54-REQUIREMENTS.md`](milestones/v1.54-REQUIREMENTS.md), [`milestones/v1.54-MILESTONE-AUDIT.md`](milestones/v1.54-MILESTONE-AUDIT.md), [`milestones/v1.54-phases/`](milestones/v1.54-phases/). Planning git tag `v1.54`.
+
+---
+
 ## v1.53 Admin UI Design-System Hardening (Shipped: 2026-06-20; archived 2026-06-20)
 
 **Phases completed:** 6 phases (187–192), 39 plans, 68 tasks. Quality / interaction-correctness / design-system investment in the already-shipped `accrue_admin` operator UI — **not** a broad feature milestone (no new billing primitives, no breaking API/route changes, no Tailwind migration). Took the admin UI from *considered* (v1.51) to *interaction-correct and component-systematic* via a fractal audit (foundations → primitives → groups → pages → flows) locked behind an idempotent only-forward verification loop.

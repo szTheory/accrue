@@ -2,46 +2,47 @@
 gsd_state_version: 1.0
 milestone: v1.54
 milestone_name: Admin UI Page-Level Streamlining & Storybook
-current_phase: 200
-current_phase_name: idempotent-verification-sign-off
-status: milestone_complete
-stopped_at: Milestone complete (Phase 200 was final phase)
-last_updated: 2026-06-30T19:35:24.137Z
-last_activity: 2026-06-30
+current_phase: null
+status: Awaiting next milestone
+stopped_at: Completed 200-06-PLAN.md
+last_updated: "2026-07-01T01:50:54.413Z"
+last_activity: 2026-07-01
+last_activity_desc: Milestone v1.54 completed and archived
 progress:
   total_phases: 8
   completed_phases: 8
   total_plans: 59
   completed_plans: 59
   percent: 100
+current_phase_name: null
 ---
 
 # Project State
 
 ## Project Reference
 
-See: `.planning/PROJECT.md` (updated 2026-06-29 — Phase 198 complete; Phase 199 next)
+See: `.planning/PROJECT.md` (updated 2026-07-01 after v1.54 milestone close)
 
 **Core value:** A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic Elixir DX, strong domain modeling, tamper-evident audit ledger, great observability, and zero breaking-change pain through v1.x.
 
-**Current focus:** Milestone complete
+**Current focus:** Planning next milestone
 
 ## Current Position
 
-Phase: 200
-Plan: Not started
-Status: Milestone complete
-Last activity: 2026-06-30
+Phase: Milestone v1.54 complete
+Plan: —
+Status: Awaiting next milestone
+Last activity: 2026-07-01 — Milestone v1.54 completed and archived
 
 ## Post-v1.48 Pause Rule
 
 After v1.48, broad feature milestones remain closed by default unless reopened by concrete adopter failure, correctness/security/data-loss risk, repeated support issue, operational failure, or explicit strategy change.
 
-v1.54 Admin UI Page-Level Streamlining & Storybook is open as a quality / page-level-design / interaction-correctness investment in the already-shipped `accrue_admin` surface — not a broad feature milestone (no new billing primitives, no breaking API/route changes, no Tailwind migration; core `accrue` stays LiveView-runtime-free — PhoenixStorybook is `accrue_admin` dev/test-only). Reopen decision recorded in `PROJECT.md`. Justification class: explicit strategy change (page-level design quality of the flagship adopter-facing surface elevated to a strategic priority — same class as v1.50/v1.51/v1.52/v1.53) **plus firsthand-observed page-level usability defects** in the running demo (modal-behind-scrim, scroll traps, floating/mispositioned overlays, won't-dismiss, hover-on-non-interactive empty states, disabled-looks-enabled).
+v1.54 Admin UI Page-Level Streamlining & Storybook shipped on 2026-07-01 as a quality / page-level-design / interaction-correctness investment in the already-shipped `accrue_admin` surface — not a broad feature milestone (no new billing primitives, no breaking API/route changes, no Tailwind migration; core `accrue` stays LiveView-runtime-free — PhoenixStorybook is `accrue_admin` dev/test-only). Reopen decision recorded in `PROJECT.md`. Justification class: explicit strategy change (page-level design quality of the flagship adopter-facing surface elevated to a strategic priority — same class as v1.50/v1.51/v1.52/v1.53) **plus firsthand-observed page-level usability defects** in the running demo (modal-behind-scrim, scroll traps, floating/mispositioned overlays, won't-dismiss, hover-on-non-interactive empty states, disabled-looks-enabled).
 
 ## Milestone Progress
 
-### v1.54 Phase Summary (ACTIVE — Admin UI Page-Level Streamlining & Storybook; deps strictly linear 193→194→195→196→197→198→199→200)
+### v1.54 Phase Summary (SHIPPED & ARCHIVED 2026-07-01 — Admin UI Page-Level Streamlining & Storybook; phase dirs in `milestones/v1.54-phases/`)
 
 | Phase | Name | Requirements | Status |
 |-------|------|--------------|--------|
@@ -60,7 +61,7 @@ Coverage: 23/23 v1.54 requirements mapped (each REQ-ID → exactly one phase). P
 
 **Dependency shape:** strictly linear — 193 → 194 → 195 → 196 → 197 → 198 → 199 → 200. Foundations + the three locked pattern specs (193) precede the three exemplars (194 Dashboard / 195 Subscription detail / 196 Subscriptions list + PageHeader); exemplars lock the patterns propagation (197 LIST / 198 DETAIL) applies; cross-cutting overlay correctness + fixture stress + microcopy (199) and idempotent verification + sign-off (200) come last.
 
-**Forward-only gate:** the Phase-187 scored-cell baseline is extended (Phase 193) with additive `surface_type:"page-flow"` cells over the ~20 admin routes; Phase 200 must score ≥ the union baseline on every component + group + page-flow cell with zero regressions. No pixel-diff (TOOL-02 stays deferred). PhoenixStorybook is the design lab (dev/test-only), not the regression engine.
+**Forward-only gate:** the Phase-187 scored-cell baseline was extended (Phase 193) with additive `surface_type:"page-flow"` cells over the ~20 admin routes; Phase 200 scored ≥ the union baseline on every component + group + page-flow cell with zero regressions. No pixel-diff (TOOL-02 stays deferred). PhoenixStorybook is the design lab (dev/test-only), not the regression engine.
 
 ### v1.53 Phase Summary (SHIPPED & ARCHIVED 2026-06-20 — Admin UI Design-System Hardening; deps strictly linear 187→188→189→190→191→192)
 
@@ -291,7 +292,7 @@ Coverage: 22/22 v1.51 requirements mapped (each REQ-ID → exactly one phase). D
 - **v1.47 Research:** `.planning/research/SUMMARY.md`
 - **v1.51 Admin UI Depth Design:** `.planning/research/v1.51-admin-ui-depth-design.md` (prior design source carried forward for v1.53/v1.54)
 - **v1.52 Brand System Design:** `.planning/research/v1.52-brand-system-design.md`
-- **v1.54 Research (active):** `.planning/research/SUMMARY.md` (page-level streamlining + Storybook synthesis of FEATURES.md, ARCHITECTURE.md, PITFALLS.md, v1.54-storybook-and-forward-only-qa.md)
+- **v1.54 Research (archived source):** `.planning/research/SUMMARY.md` (page-level streamlining + Storybook synthesis of FEATURES.md, ARCHITECTURE.md, PITFALLS.md, v1.54-storybook-and-forward-only-qa.md)
 
 ### Roadmap Evolution
 
@@ -301,13 +302,13 @@ Coverage: 22/22 v1.51 requirements mapped (each REQ-ID → exactly one phase). D
 - v1.51 shipped and archived 2026-06-04: Phases 174–179
 - v1.52 shipped and archived 2026-06-14: Phases 180–186
 - v1.53 shipped and archived 2026-06-20: Phases 187–192
-- v1.54 opened 2026-06-24: Phases 193–200 (continue-numbering); roadmap created 2026-06-25
+- v1.54 opened 2026-06-24 and shipped 2026-07-01: Phases 193–200 archived under `.planning/milestones/v1.54-phases/`
 
 ### Decisions
 
 Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 
-- **2026-06-24:** Opened v1.54 "Admin UI Page-Level Streamlining & Storybook" (Phases 193–200). Quality / page-level-design / interaction-correctness investment in the already-shipped `accrue_admin` surface; no new billing primitives. Roadmap created with 8 phases, 23/23 requirements mapped.
+- **2026-07-01:** Closed v1.54 "Admin UI Page-Level Streamlining & Storybook" (Phases 193–200). Audit passed; 23/23 requirements complete; phase trees archived under `.planning/milestones/v1.54-phases/`; no active milestone-specific requirements remain.
 - **2026-06-14:** Opened v1.53 "Admin UI Design-System Hardening" (Phases 187–192). Quality / interaction-correctness investment in the already-shipped `accrue_admin` surface; no new billing primitives. Roadmap created with 6 phases, 33/33 requirements mapped.
 - **2026-06-11:** Opened v1.52 "Brand System". This explicitly does not open new broad feature scope, but rather invests in adopter-facing brand presentation surfaces (logo, brand book, design tokens, voice/copy). Roadmap created with 7 phases (180–186).
 - **2026-06-02:** Closed v1.49 after fresh audit passed 11/11 requirements and archived ROADMAP, REQUIREMENTS, MILESTONE-AUDIT, and phase artifacts under `.planning/milestones/`.
@@ -540,6 +541,23 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 | todo | 2026-06-19-brandbook-use-accrue-favicon.md | pending (brandbook follow-up) |
 | todo | 2026-06-19-white-label-billing-portal-design-system.md | pending (future portal design-system pass) |
 
+### Acknowledged at v1.54 milestone close (2026-07-01)
+
+10 open artifacts acknowledged and deferred at milestone close. These are historical carryover or future-roadmap items; none blocked v1.54 closeout.
+
+| Category | Item | Status |
+|----------|------|--------|
+| quick_task | admin-shared-detail-components (20260602) | missing (historical; shared detail/PageHeader work has shipped in later admin milestones) |
+| quick_task | 260413-jri-bump-lattice-stripe-to-1-0-and-unblock-p | unknown (historical) |
+| quick_task | 260414-l9q-automate-phase-3-human-verification-item | unknown (historical) |
+| quick_task | 260602-6xv-seamless-multi-project-docker-dx-for-exa | unknown (v1.49/v1.50 Docker DX carryover; shipped) |
+| quick_task | 260604-tjz-docker-dx-for-accrue-host-admin-ui-ephem | unknown (Docker DX carryover; shipped) |
+| quick_task | 260605-dkx-docker-native-boot-shared-traefik-proxy | unknown (Docker DX carryover; shipped) |
+| quick_task | 260605-gys-add-dedicated-admin-example-com-billing- | unknown (historical) |
+| todo | 2026-06-19-brandbook-use-accrue-favicon.md | pending (brandbook follow-up) |
+| todo | 2026-06-19-white-label-billing-portal-design-system.md | pending (future portal design-system pass) |
+| todo | 2026-06-21-shared-page-header-component-for-accrue-admin.md | pending artifact; PageHeader shipped in v1.54, todo left for manual cleanup |
+
 ### v1.54 tooling note (recorded at milestone open 2026-06-24)
 
 | Category | Item | Status | Note |
@@ -575,4 +593,4 @@ Resume file: None
 
 ## Operator Next Steps
 
-- Phase 200 complete; run milestone closeout or verification follow-up if needed.
+- Start the next milestone with /gsd:new-milestone

@@ -1,10 +1,12 @@
 ---
 phase: 195
 slug: exemplar-b-subscription-detail
-status: draft
+status: passed
 nyquist_compliant: true
 wave_0_complete: true
 created: 2026-06-26
+audited: 2026-07-01
+verification_report: .planning/phases/195-exemplar-b-subscription-detail/195-VERIFICATION.md
 ---
 
 # Phase 195 - Validation Strategy

@@ -928,7 +928,7 @@ defmodule AccrueAdmin.Copy do
   def webhooks_list_first_run_empty_body,
     do: "Deliveries appear after signed processor events are recorded."
 
-  def webhooks_list_queue_empty_title, do: "Nothing needs replay."
+  def webhooks_list_queue_empty_title, do: "No webhook deliveries need replay."
 
   def webhooks_list_queue_empty_body,
     do: "View all deliveries to inspect the full delivery log."

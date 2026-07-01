@@ -25,6 +25,8 @@ decisions:
   - "Cell count: 21 surfaces × 2 projects × 2 themes × 9 FLOW_STATES × 12 dimensions = 9,072"
   - "Used p193 prefix to distinguish provenance from p187 component/group cells"
   - "coverage_status: pending for all cells — Phase 200 will score them against the zero-regression gate"
+requirements-completed:
+  - RES-02
 metrics:
   duration: "2m"
   completed: "2026-06-25"

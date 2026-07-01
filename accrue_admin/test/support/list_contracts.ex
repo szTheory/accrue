@@ -166,7 +166,7 @@ defmodule AccrueAdmin.ListContracts do
       page_header: %{title: "Replay failed deliveries", description_key: :webhooks_index_subtitle},
       states: %{
         first_run_empty: "No webhook deliveries yet.",
-        queue_empty: "Nothing needs replay.",
+        queue_empty: "No webhook deliveries need replay.",
         filtered_empty: "No webhook deliveries match these filters.",
         loading: "Loading webhook deliveries."
       },
