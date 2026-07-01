@@ -6,7 +6,9 @@ import { fileURLToPath } from "node:url";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(__dirname, "..", "..");
 const PHASE200_DIR = ".planning/phases/200-idempotent-verification-sign-off";
+const PHASE200_ARCHIVE_DIR = ".planning/milestones/v1.54-phases/200-idempotent-verification-sign-off";
 const phaseDir = path.join(repoRoot, PHASE200_DIR);
+const archiveDir = path.join(repoRoot, PHASE200_ARCHIVE_DIR);
 const evidenceDir = path.join(phaseDir, "evidence");
 
 const artifacts = {
@@ -89,6 +91,22 @@ function writeText(fileName, body) {
 
 function writeJson(fileName, value) {
   writeText(fileName, `${JSON.stringify(value, null, 2)}\n`);
+}
+
+function hydrateArchivedCloseoutArtifact(fileName) {
+  const activePath = path.join(phaseDir, fileName);
+  if (fs.existsSync(activePath)) return;
+
+  const archivedPath = path.join(archiveDir, fileName);
+  if (!fs.existsSync(archivedPath)) return;
+
+  fs.mkdirSync(phaseDir, { recursive: true });
+  fs.copyFileSync(archivedPath, activePath);
+}
+
+function hydrateArchivedCloseoutArtifacts() {
+  hydrateArchivedCloseoutArtifact(artifacts.judge);
+  hydrateArchivedCloseoutArtifact(artifacts.signoff);
 }
 
 function sha256(absPath) {
@@ -323,6 +341,8 @@ function applyCommandStatuses(manifest, summary) {
 }
 
 function generate({ finalStatuses = false } = {}) {
+  hydrateArchivedCloseoutArtifacts();
+
   const summary = summarize();
 
   writeText(artifacts.storybookCoverage, renderStorybookCoverage(summary));
