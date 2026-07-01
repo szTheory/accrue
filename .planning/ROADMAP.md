@@ -10,6 +10,7 @@
 - ✅ **v1.52 Brand System** — Phases 180-186 (shipped 2026-06-14; brand audit + DNA lock, SVG logo tournament, design tokens, voice/copy, standalone HTML brand book; no billing primitives) — [archive](milestones/v1.52-ROADMAP.md)
 - ✅ **v1.53 Admin UI Design-System Hardening** — Phases 187-192 (shipped 2026-06-20; fractal design-system audit foundations→primitives→groups→pages→flows + interaction-defect remediation + component-level systematization + idempotent only-forward verification on `accrue_admin`; no new billing primitives, no breaking API/route changes, no Tailwind migration) — [archive](milestones/v1.53-ROADMAP.md)
 - ✅ **v1.54 Admin UI Page-Level Streamlining & Storybook** — Phases 193-200 (shipped 2026-07-01; page-level excellence on `accrue_admin` — archetype specs, gold-standard overview/list/detail exemplars, propagation across all pages, canonical overlay correctness, PhoenixStorybook dev/test-only, and zero-regression page-flow gate; no new billing primitives, no breaking API/route changes, no Tailwind migration, core stays LiveView-runtime-free) — [archive](milestones/v1.54-ROADMAP.md)
+- ◆ **v1.55 OSS Quality Evaluation & Hardening Roadmap** — Phases 201-204 (active 2026-07-01; audit-only maintenance milestone to identify weakest software-quality dimensions, measure CI/CD before optimizing, lock DB schema-prefix posture, and rank follow-up hardening work; no product behavior changes)
 
 ## Planning Doctrine
 
@@ -23,13 +24,35 @@ Accrue is in **stable core / demand-driven expansion** posture as of 2026-05-31.
 
 After v1.48, broad feature milestones remain closed by default unless reopened by concrete adopter failure, correctness/security/data-loss risk, repeated support issue, operational failure, or explicit strategy change.
 
-No broad feature milestone is currently open.
+Current milestone v1.55 is open as maintenance / release-readiness / support-contract hardening work. It is not a broad feature milestone and does not add billing primitives, public API surface, new UI flows, or CI topology changes by itself.
 
 v1.54 Admin UI Page-Level Streamlining & Storybook shipped on 2026-07-01 as a quality / page-level-design / interaction-correctness investment in the already-shipped `accrue_admin` operator UI (continuing v1.53's design-system hardening). It was **not** a broad feature milestone: no new billing primitives, no breaking API/route changes, no Tailwind migration, and core `accrue` remains LiveView-runtime-free while PhoenixStorybook is `accrue_admin` dev/test-only. The reopen justification remains recorded in `PROJECT.md`: explicit strategy change for the flagship adopter-facing surface plus firsthand-observed page-level usability defects.
 
 Stop rule: if proposed work is polish-only with a documented workaround and no release/adopter failure mode, record it as deferred with a revisit trigger and do not create a milestone for it.
 
 ## Phases
+
+<details open>
+<summary>◆ v1.55 OSS Quality Evaluation & Hardening Roadmap (Phases 201-204) — ACTIVE 2026-07-01</summary>
+
+**Posture:** Maintenance / release-readiness / support-contract hardening milestone under stable-core. This milestone produces evidence-backed audits and a ranked implementation roadmap. It does **not** change product behavior, public APIs, DB defaults, CI required-check topology, or package release automation.
+
+- [ ] Phase 201: Software quality evaluation — produce `SOFTWARE-QUALITY-AUDIT.md` covering adoption, production, maintainability, supportability, UI, release, upgrade, data, security, architecture, OSS trust, and missing project-specific dimensions (QLT-01..05).
+- [ ] Phase 202: CI/CD performance and determinism audit — produce `CI-CD-PERFORMANCE-AUDIT.md` with workflow topology, static critical path, measurement plan, bottlenecks, flaky/determinism risks, cache risks, and target pipeline recommendations (CI-01..05).
+- [ ] Phase 203: Database schema contract ADR — produce `DB-SCHEMA-CONTRACT-ADR.md`; lock the current `billing` default, preserve explicit `public`, and define future prefix hardening checks without changing defaults now (DB-01..04).
+- [ ] Phase 204: Ranked hardening roadmap — produce `HARDENING-ROADMAP.md` grouping follow-up implementation work by priority, milestone shape, impact, effort, risk reduction, and done criteria (RD-01..04).
+
+**Dependency shape:** 201, 202, and 203 can run in parallel after milestone initialization. Phase 204 consumes all three audits and must run last.
+
+**Success criteria:**
+1. Every low score or hardening recommendation cites concrete repo evidence.
+2. Static CI findings are labeled separately from metrics that require GitHub run history.
+3. DB schema default remains `billing`; switching to `accrue` is explicitly not part of v1.55.
+4. Follow-up implementation work is ranked and sliced; polish-only work is deferred unless it reduces adoption, production, support, or maintenance risk.
+
+Coverage: 18/18 v1.55 requirements mapped.
+
+</details>
 
 <details>
 <summary>✅ v1.54 Admin UI Page-Level Streamlining & Storybook (Phases 193-200) — SHIPPED 2026-07-01</summary>
@@ -172,6 +195,10 @@ Full details: [v1.48 roadmap archive](milestones/v1.48-ROADMAP.md)
 | 198. Propagate DETAIL + analytics | v1.54 | 9/9 | Complete    | 2026-06-29 |
 | 199. Cross-cutting interaction/overlay correctness + fixture stress + microcopy | v1.54 | 15/15 | Complete    | 2026-06-30 |
 | 200. Idempotent verification & sign-off | v1.54 | 6/6 | Complete    | 2026-06-30 |
+| 201. Software quality evaluation | v1.55 | 0/1 | Pending | — |
+| 202. CI/CD performance and determinism audit | v1.55 | 0/1 | Pending | — |
+| 203. Database schema contract ADR | v1.55 | 0/1 | Pending | — |
+| 204. Ranked hardening roadmap | v1.55 | 0/1 | Pending | — |
 
 ## Historical Backlog Anchors (not active scope)
 

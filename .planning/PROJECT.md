@@ -29,6 +29,18 @@ A historical anchor, dormant seed, or deferred idea never opens milestone scope 
 
 v1.49 **Realistic Demo App & Adoption Evidence** shipped on **2026-06-02**. The checked-in host now has rich PingPal-style demo data, Docker-first local evaluation, deterministic Playwright E2E coverage, CI Docker smoke, mandatory periodic live-Stripe parity, and a Start Here documentation path for adopters.
 
+## Current Milestone: v1.55 OSS Quality Evaluation & Hardening Roadmap
+
+**Goal:** Evaluate Accrue as a real OSS billing project end to end, identify the weakest quality dimensions with repo evidence, and produce a ranked hardening roadmap without changing product behavior in this milestone.
+
+**Target features:**
+- Produce a blunt software-quality audit across adoption, production, maintenance, support, UI, release, upgrade, architecture, data, security, and OSS trust dimensions.
+- Produce a focused CI/CD performance and determinism audit that measures before optimizing and separates high-value gates from duplicated or low-signal work.
+- Lock the database schema-prefix posture: keep `billing` as the default dedicated Postgres schema, preserve explicit `public`, and document hardening work instead of changing defaults now.
+- Rank follow-up hardening milestones so future implementation work is coherent, scoped, and tied to adoption/production/support risk.
+
+**Reopen decision:** v1.55 is maintenance / release-readiness / support-contract hardening work under the stable-core posture, not a broad feature milestone. The trigger is an explicit maintainer request to find the weakest quality dimensions before public-adoption/release confidence work, with concrete repo evidence already found around CI critical-path duplication, public-truth drift, evaluator clarity, portal parity, and schema-prefix contract hardening.
+
 ## Most recently shipped milestone: v1.54 — Admin UI Page-Level Streamlining & Storybook (**shipped & archived 2026-07-01**)
 
 **Goal (ACHIEVED):** Take the already-component-hardened `accrue_admin` operator UI (v1.53) from *interaction-correct building blocks* to *page-level excellence* — every page driven from operator JTBD, the info-dump density reduced, firsthand-observed usability defects fixed, and the surface proven in light/dark/system with a rendered Storybook + page-flow gate.

@@ -1,20 +1,16 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.54
-milestone_name: Admin UI Page-Level Streamlining & Storybook
-current_phase: null
-status: Awaiting next milestone
-stopped_at: Completed 200-06-PLAN.md
-last_updated: "2026-07-01T01:50:54.413Z"
+milestone: v1.55
+milestone_name: OSS Quality Evaluation & Hardening Roadmap
+status: planning
+last_updated: "2026-07-01T20:12:53.003Z"
 last_activity: 2026-07-01
-last_activity_desc: Milestone v1.54 completed and archived
 progress:
-  total_phases: 8
-  completed_phases: 8
-  total_plans: 59
-  completed_plans: 59
-  percent: 100
-current_phase_name: null
+  total_phases: 4
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
 ---
 
 # Project State
@@ -25,14 +21,14 @@ See: `.planning/PROJECT.md` (updated 2026-07-01 after v1.54 milestone close)
 
 **Core value:** A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic Elixir DX, strong domain modeling, tamper-evident audit ledger, great observability, and zero breaking-change pain through v1.x.
 
-**Current focus:** Planning next milestone
+**Current focus:** v1.55 OSS Quality Evaluation & Hardening Roadmap
 
 ## Current Position
 
-Phase: Milestone v1.54 complete
+Phase: 201 ready — Software quality evaluation
 Plan: —
-Status: Awaiting next milestone
-Last activity: 2026-07-01 — Milestone v1.54 completed and archived
+Status: Milestone plan opened; audit artifacts seeded; next step is phase execution/review
+Last activity: 2026-07-01 — Milestone v1.55 opened with software-quality, CI/CD, DB-schema, and hardening-roadmap audit artifacts
 
 ## Post-v1.48 Pause Rule
 
@@ -41,6 +37,19 @@ After v1.48, broad feature milestones remain closed by default unless reopened b
 v1.54 Admin UI Page-Level Streamlining & Storybook shipped on 2026-07-01 as a quality / page-level-design / interaction-correctness investment in the already-shipped `accrue_admin` surface — not a broad feature milestone (no new billing primitives, no breaking API/route changes, no Tailwind migration; core `accrue` stays LiveView-runtime-free — PhoenixStorybook is `accrue_admin` dev/test-only). Reopen decision recorded in `PROJECT.md`. Justification class: explicit strategy change (page-level design quality of the flagship adopter-facing surface elevated to a strategic priority — same class as v1.50/v1.51/v1.52/v1.53) **plus firsthand-observed page-level usability defects** in the running demo (modal-behind-scrim, scroll traps, floating/mispositioned overlays, won't-dismiss, hover-on-non-interactive empty states, disabled-looks-enabled).
 
 ## Milestone Progress
+
+### v1.55 Phase Summary (ACTIVE — OSS Quality Evaluation & Hardening Roadmap; audit-only, implementation hardening deferred)
+
+| Phase | Name | Requirements | Status |
+|-------|------|--------------|--------|
+| 201 | Software quality evaluation | QLT-01, QLT-02, QLT-03, QLT-04, QLT-05 | Ready |
+| 202 | CI/CD performance and determinism audit | CI-01, CI-02, CI-03, CI-04, CI-05 | Ready |
+| 203 | DB schema contract ADR | DB-01, DB-02, DB-03, DB-04 | Ready |
+| 204 | Ranked hardening roadmap | RD-01, RD-02, RD-03, RD-04 | Pending 201-203 review |
+
+Coverage: 18/18 v1.55 requirements mapped (each REQ-ID → exactly one phase). Initial milestone artifacts: `.planning/SOFTWARE-QUALITY-AUDIT.md`, `.planning/CI-CD-PERFORMANCE-AUDIT.md`, `.planning/DB-SCHEMA-CONTRACT-ADR.md`, and `.planning/HARDENING-ROADMAP.md`.
+
+**Dependency shape:** 201, 202, and 203 can be reviewed/refined independently; 204 integrates their findings into the ranked hardening plan. This milestone intentionally does not ship code or schema changes.
 
 ### v1.54 Phase Summary (SHIPPED & ARCHIVED 2026-07-01 — Admin UI Page-Level Streamlining & Storybook; phase dirs in `milestones/v1.54-phases/`)
 
