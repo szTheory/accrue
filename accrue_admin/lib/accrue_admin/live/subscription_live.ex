@@ -444,7 +444,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
 
   defp pending_action_content(assigns) do
     ~H"""
-    <section class="ax-stack-md">
+    <section class="ax-stack-md" data-role="confirm-panel">
       <p class="ax-label">Confirm action</p>
       <p class="ax-body"><%= confirm_copy(@pending_action, @subscription, @customer) %></p>
       <section

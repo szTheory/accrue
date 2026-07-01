@@ -6,9 +6,21 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const REPO_ROOT = path.resolve(__dirname, "..", "..");
 
+function firstExistingPath(...relativePaths) {
+  for (const relativePath of relativePaths) {
+    const candidate = path.join(REPO_ROOT, relativePath);
+    if (fs.existsSync(candidate)) return candidate;
+  }
+
+  return path.join(REPO_ROOT, relativePaths[0]);
+}
+
 const LEDGER_PATH =
   process.env.PHASE191_DEFECTS_PATH ||
-  path.join(REPO_ROOT, ".planning/phases/187-audit-baseline/defects.ndjson");
+  firstExistingPath(
+    ".planning/phases/187-audit-baseline/defects.ndjson",
+    ".planning/milestones/v1.53-phases/187-audit-baseline/defects.ndjson"
+  );
 const SPEC_PATH =
   process.env.PHASE191_SPEC_PATH ||
   path.join(REPO_ROOT, "accrue_admin/e2e/admin-page-flow-phase191.spec.js");
@@ -17,9 +29,9 @@ const HELPER_PATH =
   path.join(REPO_ROOT, "accrue_admin/e2e/phase191-page-flow-helpers.js");
 const HANDOFF_PATH =
   process.env.PHASE191_HANDOFF_PATH ||
-  path.join(
-    REPO_ROOT,
-    ".planning/phases/190-navigation-data-display-meta-component-cohesion/190-PHASE-191-HANDOFF.md"
+  firstExistingPath(
+    ".planning/phases/190-navigation-data-display-meta-component-cohesion/190-PHASE-191-HANDOFF.md",
+    ".planning/milestones/v1.53-phases/190-navigation-data-display-meta-component-cohesion/190-PHASE-191-HANDOFF.md"
   );
 
 const TAG_ALIASES = new Map([

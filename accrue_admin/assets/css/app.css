@@ -1422,6 +1422,7 @@ a.ax-kpi-card--linked:focus-visible {
   inset: auto 0 0 0;
   display: grid;
   grid-template-rows: auto minmax(0, 1fr) auto;
+  box-sizing: border-box;
   width: 100%;
   max-height: min(42rem, calc(100dvh - var(--ax-space-lg)));
   padding: var(--ax-space-lg);

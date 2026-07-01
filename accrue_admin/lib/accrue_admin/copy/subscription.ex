@@ -63,7 +63,9 @@ defmodule AccrueAdmin.Copy.Subscription do
       "Stripe can natively schedule end-of-period cancellation and resume that scheduled end when the subscription remains active. Fake mirrors the supported change flow locally for merge-blocking operator proof."
 
   def subscription_confirm_workflow_message(action_type, opts) do
-    subscription_id = Keyword.get(opts, :subscription_id, "this subscription")
+    subscription_id =
+      subscription_reference(Keyword.get(opts, :subscription_id, "this subscription"))
+
     customer_id = Keyword.get(opts, :customer_id, "this customer")
     source_event_id = Keyword.get(opts, :source_event_id)
     source = source_suffix(source_event_id)
@@ -105,6 +107,18 @@ defmodule AccrueAdmin.Copy.Subscription do
   defp subscription_action_label("remove_item"), do: "Remove subscription item"
   defp subscription_action_label("comp_subscription"), do: "Comp this subscription"
   defp subscription_action_label(action_type), do: "Run #{humanize_action(action_type)}"
+
+  defp subscription_reference("this subscription"), do: "this subscription"
+
+  defp subscription_reference(subscription_id) do
+    value = to_string(subscription_id)
+
+    if String.starts_with?(value, "subscription ") do
+      value
+    else
+      "subscription #{value}"
+    end
+  end
 
   defp subscription_billing_effect("cancel_now"),
     do:

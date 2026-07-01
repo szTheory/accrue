@@ -84,6 +84,28 @@ async function reset(request) {
   expect(response.ok()).toBeTruthy();
 }
 
+async function clickActionTrigger(page, { name, trigger, preferMenu = false }) {
+  const direct = page.getByRole("button", { name: trigger }).first();
+  if (!preferMenu && (await direct.count()) > 0 && (await direct.isVisible().catch(() => false))) {
+    await direct.click();
+    return;
+  }
+
+  const menu = page.locator("[data-ax-action-overflow-menu]").first();
+  await expect(menu, `${name}: overflow action menu`).toBeVisible();
+  await menu.click();
+
+  const item = page.getByRole("menuitem", { name: trigger }).first();
+  await expect(item, `${name}: menu item`).toBeVisible();
+  await item.click();
+}
+
+async function visibleDrawer(page, label) {
+  const drawer = page.locator("#ax-overlay-root [data-presentation='drawer']").first();
+  await expect(drawer, `${label}: drawer`).toBeVisible();
+  return drawer;
+}
+
 async function seedScenario(request, scenario, { optional = false } = {}) {
   const response = await request.post(`/__e2e__/seed/${scenario}`);
   if (optional && response.status() === 404) return {};
@@ -230,7 +252,7 @@ test.describe("Phase 191 page-flow regression harness", () => {
     await login(page, "/billing/dev/components?group=drawer-form");
     const drawerShell = page.locator("#grp190-drawer-form-shell");
     await expect(drawerShell).toBeVisible();
-    await expect(drawerShell).toHaveAttribute("phx-hook", "FocusTrap");
+    await expect(drawerShell).toHaveAttribute("phx-hook", "Overlay");
     await expect(drawerShell).toHaveAttribute("data-focus-trap-fallback", "#grp190-drawer-form-shell-title");
     await assertFocusWithin(page, drawerShell, "drawer-form proof drawer");
 
@@ -242,20 +264,22 @@ test.describe("Phase 191 page-flow regression harness", () => {
 
     const chargeRoute = resolvePhase191Route("charge-detail", fixtureData);
     await login(page, chargeRoute);
+    await clickActionTrigger(page, { name: "charge refund", trigger: /Refund charge/i });
+    const chargeDrawer = await visibleDrawer(page, "charge refund");
 
     const refundRowsBefore = await page.locator("text=fee refunded").count();
-    await page.locator("#charge-refund-form").evaluate((form) => form.requestSubmit());
+    await chargeDrawer.locator("#charge-refund-form").evaluate((form) => form.requestSubmit());
 
-    const confirmPanel = page.locator('[data-role="confirm-panel"]');
+    const confirmPanel = chargeDrawer.locator('[data-role="confirm-panel"]');
     await expect(confirmPanel).toBeVisible();
 
-    const confirmRefund = confirmPanel.locator('[data-role="confirm-refund"]');
+    const confirmRefund = chargeDrawer.locator('[data-role="confirm-refund"]');
     await confirmRefund.focus();
     await confirmRefund.click();
 
     const stepUp = page.locator("#accrue-admin-step-up-dialog");
     await expect(stepUp).toBeVisible();
-    await expect(stepUp).toHaveAttribute("phx-hook", "FocusTrap");
+    await expect(stepUp).toHaveAttribute("phx-hook", "Overlay");
     await expect(stepUp).toHaveAttribute("data-focus-trap-close-event", "step_up_dismiss");
     await assertFocusWithin(page, stepUp, "charge refund step-up modal");
     await assertTopPointerTarget(stepUp.locator(".ax-step-up-modal"), "charge refund step-up panel");
@@ -314,8 +338,10 @@ test.describe("Phase 191 page-flow regression harness", () => {
     const invoiceRoute = resolvePhase191Route("invoice-detail", fixtureData);
     const invoiceId = invoiceRoute.split("/").pop();
     await login(page, invoiceRoute);
-    await page.locator('[data-role="void-form"]').evaluate((form) => form.requestSubmit());
-    let confirmPanel = page.locator('[data-role="confirm-panel"]');
+    await clickActionTrigger(page, { name: "invoice void", trigger: /Void invoice/i, preferMenu: true });
+    const invoiceDrawer = await visibleDrawer(page, "invoice void");
+    await invoiceDrawer.locator('[data-role="void-form"]').evaluate((form) => form.requestSubmit());
+    let confirmPanel = invoiceDrawer.locator('[data-role="confirm-panel"]');
     await expect(confirmPanel).toBeVisible();
     await expect(confirmPanel).toContainText(new RegExp(`invoice ${invoiceId}`, "i"));
     await expect(confirmPanel).toContainText(/void|status/i);
@@ -324,8 +350,10 @@ test.describe("Phase 191 page-flow regression harness", () => {
     const subscriptionRoute = resolvePhase191Route("subscription-detail", fixtureData);
     const subscriptionId = subscriptionRoute.split("/").pop();
     await login(page, subscriptionRoute);
-    await page.locator('[data-role="cancel-now-form"]').evaluate((form) => form.requestSubmit());
-    confirmPanel = page.locator('[data-role="confirm-panel"]');
+    await clickActionTrigger(page, { name: "subscription cancel", trigger: /Cancel immediately/i, preferMenu: true });
+    const subscriptionDrawer = await visibleDrawer(page, "subscription cancel");
+    await subscriptionDrawer.locator('[data-role="cancel-now-form"]').evaluate((form) => form.requestSubmit());
+    confirmPanel = subscriptionDrawer.locator('[data-role="confirm-panel"]');
     await expect(confirmPanel).toBeVisible();
     await expect(confirmPanel).toContainText(new RegExp(`subscription ${subscriptionId}`, "i"));
     await expect(confirmPanel).toContainText(/billing period|billing schedule/i);
@@ -334,8 +362,10 @@ test.describe("Phase 191 page-flow regression harness", () => {
     const chargeRoute = resolvePhase191Route("charge-detail", fixtureData);
     const chargeId = chargeRoute.split("/").pop();
     await login(page, chargeRoute);
-    await page.locator("#charge-refund-form").evaluate((form) => form.requestSubmit());
-    confirmPanel = page.locator('[data-role="confirm-panel"]');
+    await clickActionTrigger(page, { name: "charge refund", trigger: /Refund charge/i });
+    const refundDrawer = await visibleDrawer(page, "charge refund");
+    await refundDrawer.locator("#charge-refund-form").evaluate((form) => form.requestSubmit());
+    confirmPanel = refundDrawer.locator('[data-role="confirm-panel"]');
     await expect(confirmPanel).toBeVisible();
     await expect(confirmPanel).toContainText(new RegExp(`Refund charge ${chargeId}`, "i"));
     await expect(confirmPanel).toContainText(/refund ledger row|admin audit row/i);

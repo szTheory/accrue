@@ -4,7 +4,12 @@ const path = require("path");
 const { SURFACES, OVERLAY_TAGS, cellsForSurface } = require("./baseline-manifest.js");
 
 const REPO_ROOT = path.resolve(__dirname, "..", "..");
-const PHASE191_DEFECTS_PATH = path.join(REPO_ROOT, ".planning/phases/187-audit-baseline/defects.ndjson");
+const PHASE191_DEFECTS_PATH = [
+  ".planning/phases/187-audit-baseline/defects.ndjson",
+  ".planning/milestones/v1.53-phases/187-audit-baseline/defects.ndjson",
+]
+  .map((relativePath) => path.join(REPO_ROOT, relativePath))
+  .find((candidate) => fs.existsSync(candidate)) || path.join(REPO_ROOT, ".planning/phases/187-audit-baseline/defects.ndjson");
 
 const PHASE191_VIEWPORTS = Object.freeze([
   { name: "phone-320", width: 320, height: 844 },
