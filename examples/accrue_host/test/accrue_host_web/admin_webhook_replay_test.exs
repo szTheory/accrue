@@ -133,9 +133,10 @@ defmodule AccrueHostWeb.AdminWebhookReplayTest do
     assert {:ok, _events_view, events_html} =
              live(conn, "/admin/events?source_webhook_event_id=#{webhook.id}")
 
-    assert events_html =~ AccrueAdmin.Copy.billing_events_heading_global()
+    assert events_html =~ AccrueAdmin.Copy.events_list_heading()
+    assert events_html =~ AccrueAdmin.Copy.events_list_subtitle()
     assert events_html =~ "invoice.payment_failed"
-    assert events_html =~ "append-only record of every billing and admin action"
+    assert events_html =~ AccrueAdmin.Copy.billing_events_table_column_webhook_source()
   end
 
   test "ambiguous or out-of-scope webhook replay blocks single and bulk replay without success audits",
