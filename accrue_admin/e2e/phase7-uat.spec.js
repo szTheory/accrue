@@ -77,9 +77,14 @@ test.describe("Phase 7 browser UAT", () => {
     await login(page, `/billing/webhooks/${data.single_webhook_id}`);
     await expect(page.getByRole("heading", { name: "invoice.payment_failed" })).toBeVisible();
     await page.getByRole("button", { name: "Replay webhook" }).click();
-    await expect(page.locator("[data-role='replay-confirm']")).toBeVisible({ timeout: 15_000 });
-    await page.locator("[data-role='confirm-replay']").click();
-    await expect(page.getByText(/Replay requested|Webhook replay requested/)).toBeVisible({
+    const replayDialog = page.getByRole("dialog", { name: "Confirm webhook replay" });
+    await expect(replayDialog).toBeVisible({ timeout: 15_000 });
+    await replayDialog.locator("[data-role='confirm-replay']").click();
+    const replayStepUp = page.locator("#accrue-admin-step-up-dialog");
+    await expect(replayStepUp).toBeVisible();
+    await replayStepUp.locator("input[name='code']").fill("123456");
+    await replayStepUp.locator("form[phx-submit='step_up_submit']").evaluate((form) => form.requestSubmit());
+    await expect(page.getByText(/Replay requested for the active organization|Webhook replay requested/)).toBeVisible({
       timeout: 15_000
     });
 
@@ -87,9 +92,9 @@ test.describe("Phase 7 browser UAT", () => {
     await seed(request, "operator-flows");
     await login(page, "/billing/webhooks?type=customer.subscription.updated&status=failed");
 
-    // Webhooks index h1 is "Webhooks"; the old "Replay, inspect, and trace
-    // webhook delivery" string is now the (visually-hidden) table caption.
-    await expect(page.getByRole("heading", { name: "Webhooks", level: 1 })).toBeVisible();
+    // The filtered replay queue uses a task-oriented h1; "Webhooks" is the
+    // breadcrumb/sidebar label and the table keeps the detailed caption.
+    await expect(page.getByRole("heading", { name: "Replay failed deliveries", level: 1 })).toBeVisible();
 
     // Bulk replay is selection-driven (h72): select the visible failed rows, then
     // the bulk-action button appears and opens the confirm panel. The old
@@ -114,23 +119,29 @@ test.describe("Phase 7 browser UAT", () => {
   }) => {
     const data = await seed(request, "operator-flows");
 
-    await login(page, `/billing/charges/${data.charge_id}`);
+    await login(page, `/billing/payments/${data.charge_id}`);
     await expect(page.getByRole("heading", { name: "ch_e2e_refund" })).toBeVisible();
-    await expect(page.getByText("Fee-aware refund review")).toBeVisible();
 
-    await page.locator("[data-role='refund-form'] input[name='amount_minor']").fill("4000");
-    await page.locator("[data-role='refund-form'] input[name='reason']").fill("requested_by_customer");
-    await page.locator("[data-role='refund-form'] select[name='source_event_id']").selectOption(
+    await page.getByRole("button", { name: /refund charge/i }).click();
+    const refundDrawer = page.getByRole("dialog", { name: "Confirm refund" });
+    await expect(refundDrawer).toBeVisible();
+    await expect(refundDrawer).toContainText(/Existing fee fields surface after\s+the refund is created/i);
+
+    await refundDrawer.locator("[data-role='refund-form'] input[name='amount_minor']").fill("4000");
+    await refundDrawer.locator("[data-role='refund-form'] input[name='reason']").fill("requested_by_customer");
+    await refundDrawer.locator("[data-role='refund-form'] select[name='source_event_id']").selectOption(
       String(data.source_event_id)
     );
-    await page.locator("[data-role='refund-form']").evaluate((form) => form.requestSubmit());
+    await refundDrawer.locator("[data-role='refund-form']").evaluate((form) => form.requestSubmit());
 
-    await expect(page.locator("[data-role='confirm-panel']")).toContainText("Confirm refund");
-    await page.locator("[data-role='confirm-refund']").click();
-    await expect(page.getByText("Step-up required")).toBeVisible();
+    await expect(refundDrawer.locator("[data-role='confirm-panel']")).toContainText("Confirm refund");
+    await refundDrawer.locator("[data-role='confirm-refund']").click();
+    const stepUp = page.locator("#accrue-admin-step-up-dialog");
+    await expect(stepUp).toBeVisible();
+    await expect(stepUp).toContainText("Step-up required");
 
-    await page.locator("form[phx-submit='step_up_submit'] input[name='code']").fill("123456");
-    await page.locator("form[phx-submit='step_up_submit']").evaluate((form) => form.requestSubmit());
+    await stepUp.locator("input[name='code']").fill("123456");
+    await stepUp.locator("form[phx-submit='step_up_submit']").evaluate((form) => form.requestSubmit());
 
     await expect(page.getByText("Refund created with fee-aware fields")).toBeVisible();
 

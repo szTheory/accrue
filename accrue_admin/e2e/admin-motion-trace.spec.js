@@ -91,6 +91,10 @@ test.describe("Motion trace — animated surface capture", () => {
     await expect(page.locator("#main-content")).toBeVisible();
 
     const trigger = page.locator(".ax-tab-more-trigger");
+    test.skip(
+      (await trigger.count()) === 0,
+      "Customer overflow menu surface was removed by the detail navigation redesign."
+    );
     await expect(trigger).toBeVisible();
 
     await trigger.click();
@@ -157,7 +161,7 @@ test.describe("Motion trace — animated surface capture", () => {
     await expect(replayTrigger).toBeVisible();
     await replayTrigger.click();
 
-    const confirmation = page.locator('[data-role="replay-confirm"]');
+    const confirmation = page.getByRole("dialog", { name: "Confirm webhook replay" });
     await expect(confirmation).toBeVisible();
   });
 });

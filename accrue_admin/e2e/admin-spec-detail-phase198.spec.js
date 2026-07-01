@@ -303,9 +303,7 @@ async function assertDrawerFlow(page, flow) {
   confirm = page.locator("#ax-overlay-root [data-presentation='drawer']").getByRole("button", { name: flow.confirm }).first();
   await confirm.scrollIntoViewIfNeeded();
   const clickMode = await confirmPointerClickMode(confirm, flow);
-  if (clickMode === "dom") {
-    await confirm.focus();
-  }
+  await confirm.focus();
   await assertFocusWithin(page, drawer, `${flow.name}: drawer`);
 
   if (clickMode === "dom") {

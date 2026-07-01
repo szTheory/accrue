@@ -102,7 +102,11 @@ function makeRecorder(projectName) {
 }
 
 async function visible(locator) {
-  return (await locator.count()) > 0 && (await locator.first().isVisible().catch(() => false));
+  try {
+    return (await locator.count()) > 0 && (await locator.first().isVisible().catch(() => false));
+  } catch (_error) {
+    return false;
+  }
 }
 
 async function text(locator) {
@@ -250,7 +254,7 @@ async function probeModalDrawerScrim(page, recorder, fixtureData) {
     overlay_tags: ["actionability"],
   });
 
-  const replayConfirm = page.locator('[data-role="replay-confirm"]');
+  const replayConfirm = page.getByRole("dialog", { name: "Confirm webhook replay" });
   const confirmPanel = page.locator('[data-role="confirm-panel"]');
   recorder.observe({
     interaction_class: "modal-drawer-scrim",
@@ -327,15 +331,30 @@ async function probeModalDrawerScrim(page, recorder, fixtureData) {
 async function openChargeStepUp(page, recorder, chargeId) {
   await login(page, `/billing/payments/${chargeId}`);
   await expect(page.locator("#main-content")).toBeVisible();
-  await page.locator('[data-role="refund-form"] input[name="reason"]').fill("requested_by_customer").catch(() => {});
-  await clickOrObserve(page.locator('[data-role="refund-form"] button[type="submit"], button[form="charge-refund-form"]').first(), recorder, {
+
+  await clickOrObserve(page.getByRole("button", { name: /refund charge/i }).first(), recorder, {
+    interaction_class: "step-up-auth-modal",
+    surface: "charge refund",
+    target_selector: "button:has-text('Refund charge')",
+    expected: "Refund action opens the current action drawer.",
+    overlay_tags: ["actionability"],
+  });
+
+  const drawer = page.locator("#ax-overlay-root [data-presentation='drawer']").first();
+  const refundForm = drawer.locator('[data-role="refund-form"]').first();
+  await expect(drawer).toBeVisible();
+  await expect(refundForm).toBeVisible();
+  await refundForm.locator('input[name="reason"]').fill("requested_by_customer").catch(() => {});
+  await clickOrObserve(refundForm.locator('button[type="submit"], button[form="charge-refund-form"]').first(), recorder, {
     interaction_class: "step-up-auth-modal",
     surface: "charge refund",
     target_selector: '[data-role="refund-form"]',
     expected: "Refund form stages a confirmation panel.",
     overlay_tags: ["actionability"],
   });
-  await clickOrObserve(page.locator('[data-role="confirm-refund"]').first(), recorder, {
+
+  await expect(drawer.locator('[data-role="confirm-panel"]')).toBeVisible();
+  await clickOrObserve(drawer.locator('[data-role="confirm-refund"]').first(), recorder, {
     interaction_class: "step-up-auth-modal",
     surface: "charge refund",
     target_selector: '[data-role="confirm-panel"] [data-role="confirm-refund"]',
@@ -605,16 +624,17 @@ async function probeScrollFocusKeyboard(page, recorder, fixtureData) {
   await replayTrigger.focus().catch(() => {});
   await page.keyboard.press("Enter");
   await page.waitForTimeout(300);
+  const replayConfirm = page.getByRole("dialog", { name: "Confirm webhook replay" });
   recorder.observe({
     interaction_class: "keyboard-only-primary-flow",
     surface: "replay-confirm open/confirm/cancel",
     target_selector: '[data-role="replay-single"], [data-role="replay-confirm"], [data-role="confirm-panel"]',
     expected: "Replay-confirm open/confirm/cancel is reachable by keyboard-only events.",
-    actual: `replayConfirm=${await visible(page.locator('[data-role="replay-confirm"]'))}; active=${await activeSelector(page)}`,
+    actual: `replayConfirm=${await visible(replayConfirm)}; active=${await activeSelector(page)}`,
     assertions: ["keyboard-only", "replay-confirm open", "actionability"],
     overlay_tags: ["actionability", "live-focus"],
-    coverage_status: (await visible(page.locator('[data-role="replay-confirm"]'))) ? "covered" : "gap",
-    failure_kind: (await visible(page.locator('[data-role="replay-confirm"]'))) ? null : "keyboard-flow-incomplete",
+    coverage_status: (await visible(replayConfirm)) ? "covered" : "gap",
+    failure_kind: (await visible(replayConfirm)) ? null : "keyboard-flow-incomplete",
   });
 
   recorder.observe({

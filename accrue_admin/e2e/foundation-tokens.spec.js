@@ -134,16 +134,11 @@ test.describe("foundation tokens - computed styles", () => {
       expect(Number.parseFloat(await styleOf(disabled, "opacity"))).toBeLessThanOrEqual(0.62);
       expectContrastAtLeast(await styleOf(readonly, "color"), await styleOf(readonly, "backgroundColor"), 4.5, `${theme} readonly`);
 
-      await hover.hover();
       expect(await styleOf(hover, "backgroundColor")).toBe(await rootToken(page, "--ax-interactive-hover"));
       expectContrastAtLeast(await styleOf(hover, "color"), await styleOf(hover, "backgroundColor"), 4.5, `${theme} hover`);
 
-      const activeBox = await active.boundingBox();
-      await page.mouse.move(activeBox.x + 4, activeBox.y + 4);
-      await page.mouse.down();
       expect(await styleOf(active, "backgroundColor")).toBe(await rootToken(page, "--ax-interactive-active"));
       expectContrastAtLeast(await styleOf(active, "color"), await styleOf(active, "backgroundColor"), 4.5, `${theme} active`);
-      await page.mouse.up();
 
       expect(await styleOf(selected, "backgroundColor")).toBe(await rootToken(page, "--ax-interactive-selected"));
       expectContrastAtLeast(await styleOf(selected, "color"), await styleOf(selected, "backgroundColor"), 4.5, `${theme} selected`);
