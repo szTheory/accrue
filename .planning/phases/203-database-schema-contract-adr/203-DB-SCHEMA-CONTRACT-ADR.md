@@ -48,6 +48,28 @@ config :accrue, :billing_schema, "billing"
 
 The `:billing_schema` setting belongs in `config/config.exs`, not `config/runtime.exs`, because `Accrue.Schema` compiles Ecto `@schema_prefix` from application compile-time configuration. Runtime-only changes are not enough to safely change compiled schema prefixes.
 
+## Compatibility and Upgrade Warning
+
+Existing installs should pin their intended placement before recompiling Accrue.
+
+For current public-schema installs:
+
+```elixir
+config :accrue, :billing_schema, "public"
+```
+
+For existing billing-schema installs, or hosts that want to make the default explicit:
+
+```elixir
+config :accrue, :billing_schema, "billing"
+```
+
+Fresh installs keep `billing`.
+
+Moving production data between `public`, `billing`, or any future schema is host-owned data migration work. Accrue does not automate that movement, hide it behind a default change, or publish a casual relocation recipe in Phase 203. A future relocation guide should only exist if a later implementation milestone intentionally supports schema relocation with backup, foreign-key, trigger, and verification guidance.
+
+Explicit `public` remains supported when a host intentionally wants Accrue tables in the default schema. It is an opt-out from the dedicated-schema default, not a deprecated or inferior path.
+
 ## Authoritative Surfaces
 
 The executable contract is authoritative in these surfaces:
@@ -115,6 +137,8 @@ Phase 204 should rank these rows against the Phase 201 software-quality audit an
 - Do not use Postgres `search_path` as the primary Accrue contract.
 - Do not put host-owned users, organizations, Oban jobs, or app tables under Accrue's schema.
 - Do not implement schema-prefix hardening in Phase 203.
+- Do not change current defaults, database schemas, migrations, installer behavior, source code, runtime behavior, public docs defaults, CI topology, package metadata, or product surface.
+- Do not publish a public-to-billing schema relocation recipe in this ADR.
 
 ## Verification
 
@@ -134,3 +158,22 @@ Current evidence to preserve:
 - `examples/accrue_host/config/config.exs`
 
 Future implementation should prove that schema prefix, migration prefix, docs, installer output, and example host all agree.
+
+Phase 203 verification is markdown/content verification because schema-relevant files are evidence only. If any implementation, public docs mirror, CI, package metadata, example-host, or script file changes while executing this phase, that violates the boundary and requires stopping or rerouting to an implementation milestone.
+
+## Requirement Coverage
+
+| Requirement | Coverage |
+|---|---|
+| DB-01 | Current Contract and Authoritative Surfaces explain default `billing`, explicit `public`, compile-time `Accrue.Schema`, `Accrue.Migration` prefix helpers, and host-owned data migration responsibility. |
+| DB-02 | Why Not Rename Default to `accrue` explains the tradeoff, the `accrue.accrue_` readability issue, and the upgrade risk of switching away from `billing`. |
+| DB-03 | Phase 204 Handoff lists concrete future hardening checks for prefix-agreement, schema-prefix assertions, raw SQL qualification, installer coverage, docs/test alignment, and old-default compatibility. |
+| DB-04 | Non-Goals plus Phase Handoff and Boundary identify future implementation milestone work and work not worth doing now. |
+
+## Phase Handoff and Boundary
+
+Phase 203 updates only `.planning/phases/203-database-schema-contract-adr/203-DB-SCHEMA-CONTRACT-ADR.md`. It does not change current defaults, database schemas, migrations, installer behavior, source code, runtime behavior, public docs defaults, CI topology, package metadata, or product surface.
+
+The Phase 204 Handoff is advisory follow-up implementation work for Phase 204 to rank. Phase 203 local DB-schema-contract priorities are not final cross-audit ordering.
+
+Because schema-relevant files are evidence only, no schema push task is required. This ADR cites code, migrations, installer behavior, docs, tests, and example-host config as evidence; it does not ask the executor to alter schema state.
