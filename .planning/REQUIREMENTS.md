@@ -7,11 +7,11 @@
 
 ### Software Quality Evaluation
 
-- [ ] **QLT-01**: Maintainer can read one evidence-backed audit that ranks Accrue's weakest adoption, production, maintenance, support, architecture, data, UI, security, release, upgrade, and OSS trust dimensions without treating every category as equally important.
-- [ ] **QLT-02**: The audit identifies the top five weakness deep dives with repo evidence, practical consequences, highest-leverage fixes, and what not to over-fix.
-- [ ] **QLT-03**: The audit separately covers adopter journey, production/SRE journey, maintainer journey, GSD sanity, and missing project-specific dimensions.
-- [ ] **QLT-04**: The audit marks strong or not-applicable dimensions honestly instead of manufacturing fake concerns.
-- [ ] **QLT-05**: The audit separates direct repo facts from assumptions and cites evidence paths for low scores.
+- [x] **QLT-01**: Maintainer can read one evidence-backed audit that ranks Accrue's weakest adoption, production, maintenance, support, architecture, data, UI, security, release, upgrade, and OSS trust dimensions without treating every category as equally important.
+- [x] **QLT-02**: The audit identifies the top five weakness deep dives with repo evidence, practical consequences, highest-leverage fixes, and what not to over-fix.
+- [x] **QLT-03**: The audit separately covers adopter journey, production/SRE journey, maintainer journey, GSD sanity, and missing project-specific dimensions.
+- [x] **QLT-04**: The audit marks strong or not-applicable dimensions honestly instead of manufacturing fake concerns.
+- [x] **QLT-05**: The audit separates direct repo facts from assumptions and cites evidence paths for low scores.
 
 ### CI/CD Evaluation
 
@@ -56,11 +56,11 @@ The most recent archive is `.planning/milestones/v1.54-REQUIREMENTS.md`.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| QLT-01 | Phase 201 | Pending |
-| QLT-02 | Phase 201 | Pending |
-| QLT-03 | Phase 201 | Pending |
-| QLT-04 | Phase 201 | Pending |
-| QLT-05 | Phase 201 | Pending |
+| QLT-01 | Phase 201 | Complete |
+| QLT-02 | Phase 201 | Complete |
+| QLT-03 | Phase 201 | Complete |
+| QLT-04 | Phase 201 | Complete |
+| QLT-05 | Phase 201 | Complete |
 | CI-01 | Phase 202 | Pending |
 | CI-02 | Phase 202 | Pending |
 | CI-03 | Phase 202 | Pending |
