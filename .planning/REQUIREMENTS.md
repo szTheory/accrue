@@ -23,10 +23,10 @@
 
 ### Database Schema Contract
 
-- [ ] **DB-01**: Maintainer can read one ADR explaining the current Accrue-owned Postgres schema contract: default `billing`, explicit `public`, Ecto compile-time schema prefix, migration prefix helpers, and host-owned data-migration responsibility.
-- [ ] **DB-02**: The ADR explains why v1.55 keeps `billing` instead of switching to `accrue`, including pros/cons and upgrade risk.
-- [ ] **DB-03**: The ADR lists concrete future hardening checks for prefix agreement, raw SQL qualification, installer/docs/test coverage, and explicit old-default compatibility.
-- [ ] **DB-04**: The ADR identifies which schema-related work belongs in a future implementation milestone and which work is not worth doing now.
+- [x] **DB-01**: Maintainer can read one ADR explaining the current Accrue-owned Postgres schema contract: default `billing`, explicit `public`, Ecto compile-time schema prefix, migration prefix helpers, and host-owned data-migration responsibility.
+- [x] **DB-02**: The ADR explains why v1.55 keeps `billing` instead of switching to `accrue`, including pros/cons and upgrade risk.
+- [x] **DB-03**: The ADR lists concrete future hardening checks for prefix agreement, raw SQL qualification, installer/docs/test coverage, and explicit old-default compatibility.
+- [x] **DB-04**: The ADR identifies which schema-related work belongs in a future implementation milestone and which work is not worth doing now.
 
 ### Hardening Roadmap
 
@@ -66,10 +66,10 @@ The most recent archive is `.planning/milestones/v1.54-REQUIREMENTS.md`.
 | CI-03 | Phase 202 | Complete |
 | CI-04 | Phase 202 | Complete |
 | CI-05 | Phase 202 | Complete |
-| DB-01 | Phase 203 | Pending |
-| DB-02 | Phase 203 | Pending |
-| DB-03 | Phase 203 | Pending |
-| DB-04 | Phase 203 | Pending |
+| DB-01 | Phase 203 | Complete |
+| DB-02 | Phase 203 | Complete |
+| DB-03 | Phase 203 | Complete |
+| DB-04 | Phase 203 | Complete |
 | RD-01 | Phase 204 | Pending |
 | RD-02 | Phase 204 | Pending |
 | RD-03 | Phase 204 | Pending |

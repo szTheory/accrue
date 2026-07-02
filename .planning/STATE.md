@@ -2,19 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.55
 milestone_name: OSS Quality Evaluation & Hardening Roadmap
-current_phase: 203
-current_phase_name: Database schema contract ADR
-status: ready_to_execute
-stopped_at: Phase 203 planning complete
-last_updated: "2026-07-02T22:25:20.000Z"
+status: verifying
+stopped_at: Completed 203-01-PLAN.md
+last_updated: "2026-07-02T22:45:07.818Z"
 last_activity: 2026-07-02
-last_activity_desc: Phase 203 planning complete - 1 plan ready
 progress:
   total_phases: 4
-  completed_phases: 2
-  total_plans: 2
-  completed_plans: 2
-  percent: 50
+  completed_phases: 3
+  total_plans: 3
+  completed_plans: 3
+  percent: 75
 ---
 
 # Project State
@@ -25,14 +22,14 @@ See: `.planning/PROJECT.md` (updated 2026-07-02 after Phase 202 completion)
 
 **Core value:** A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic Elixir DX, strong domain modeling, tamper-evident audit ledger, great observability, and zero breaking-change pain through v1.x.
 
-**Current focus:** Phase 203 — Database schema contract ADR
+**Current focus:** Phase 203 — database-schema-contract-adr
 
 ## Current Position
 
-Phase: 203 — Database schema contract ADR
-Plan: 1/1 plans ready
-Status: Ready to execute
-Last activity: 2026-07-02 — Phase 203 planning complete
+Phase: 203 (database-schema-contract-adr) — EXECUTING
+Plan: 1 of 1
+Status: Phase complete — ready for verification
+Last activity: 2026-07-02
 
 ## Post-v1.48 Pause Rule
 
@@ -261,6 +258,7 @@ Coverage: 22/22 v1.51 requirements mapped (each REQ-ID → exactly one phase). D
 | Phase 200 P05 | 7m 14s | 2 tasks | 5 files |
 | Phase 200 P06 | 24m | 3 tasks | 5 files |
 | Phase 202 P01 | 12 min | 3 tasks | 2 files |
+| Phase 203 P01 | 6m 12s | 3 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -496,6 +494,10 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - [Phase 200]: 200-06 records final maintainer ACCEPT only after explicit approval, empty regressions, passing scorecard/sign-off verifiers, zero judge blockers, and completed VER-01, VER-02, VER-03, STY-02, and STY-03 rows.
 - [Phase 202]: Phase 202 preserves high-value CI gates and requires measurement before topology changes. — The audit found duplicated CI work, but Phase 202 is audit-only; Phase 204 should rank measured implementation slices.
 - [Phase 202]: Phase 202 classifies live Stripe as proved only when Stripe test mode runs with required secrets and fixtures. — Skipped provider tests are skipped/not proved, while Fake-backed deterministic tests remain the merge-blocking default.
+- [Phase 203]: Keep `billing` as the default Accrue-owned Postgres schema for v1.55 and v1.x. — ADR 203-01 locks the current executable contract and avoids default-rename upgrade risk.
+- [Phase 203]: Keep explicit `public` as a supported opt-out, not a deprecated path. — Existing public-schema installs must be able to pin placement before recompiling.
+- [Phase 203]: Reject default `accrue` for v1.55. — `billing.accrue_*` is clearer than `accrue.accrue_*`, and a rename is not worth the compatibility burden.
+- [Phase 203]: Treat schema-prefix hardening checks as Phase 204 inputs, not shipped Phase 203 behavior. — Phase 204 owns final cross-audit ordering after consuming Phases 201, 202, and 203.
 
 ### Pending Todos
 
@@ -604,9 +606,9 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 
 ## Session Continuity
 
-Last session: 2026-07-02T21:39:55.157Z
-Stopped at: Phase 203 context gathered
-Resume file: .planning/phases/203-database-schema-contract-adr/203-CONTEXT.md
+Last session: 2026-07-02T22:45:07.814Z
+Stopped at: Completed 203-01-PLAN.md
+Resume file: None
 
 ## Operator Next Steps
 
