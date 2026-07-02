@@ -361,17 +361,17 @@ All claims in this research were verified from local repository files, local com
 |---|-------|---------|---------------|
 | none | No unverified assumption is intentionally used as a planning basis. [VERIFIED: sources listed below] | n/a | n/a |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **How many cheap Mix commands should the executor run?** [VERIFIED: .planning/phases/201-software-quality-evaluation/201-CONTEXT.md]
    - What we know: Cheap deterministic commands are allowed, but full verification commands are not required. [VERIFIED: .planning/phases/201-software-quality-evaluation/201-CONTEXT.md]
-   - What's unclear: The exact point where a Mix command stops being "cheap" is left to planner discretion. [VERIFIED: .planning/phases/201-software-quality-evaluation/201-CONTEXT.md]
-   - Recommendation: Prefer `rg`, `wc`, `find`, manifest inspection, and only narrowly scoped Mix commands if they directly support a disputed claim. [VERIFIED: local command output]
+   - RESOLVED decision: Phase 201 should not require Mix commands. Use `rg`, `wc`, `find`, package metadata inspection, and artifact checks as the default evidence path; permit a narrowly scoped Mix command only if static inspection cannot resolve a specific disputed claim and the command is bounded enough to fit the Phase 201 artifact-check feedback window. [VERIFIED: .planning/phases/201-software-quality-evaluation/201-CONTEXT.md] [VERIFIED: .planning/phases/201-software-quality-evaluation/201-VALIDATION.md]
+   - Planning impact: The PLAN.md task checks use shell artifact inspection and diff-boundary checks; broad project verification remains out of scope for Phase 201. [VERIFIED: .planning/phases/201-software-quality-evaluation/201-01-PLAN.md]
 
 2. **Should the seeded audit keep the exact rank order?** [VERIFIED: .planning/phases/201-software-quality-evaluation/201-SOFTWARE-QUALITY-AUDIT.md]
    - What we know: The context preserves rankings, scores, confidence, and top-five deep dives. [VERIFIED: .planning/phases/201-software-quality-evaluation/201-CONTEXT.md]
-   - What's unclear: The planner may tune table layout and labels, but should not soften real risks. [VERIFIED: .planning/phases/201-software-quality-evaluation/201-CONTEXT.md]
-   - Recommendation: Keep the existing relative order unless new local evidence changes a score or confidence label. [VERIFIED: .planning/phases/201-software-quality-evaluation/201-SOFTWARE-QUALITY-AUDIT.md]
+   - RESOLVED decision: Keep the seeded relative rank order, scores, confidence labels, and top-five weakness set unless new local evidence found during Task 1 directly changes a score or confidence label; allowed edits are table layout, evidence appendix, labels, and proof-checkable wording. [VERIFIED: .planning/phases/201-software-quality-evaluation/201-CONTEXT.md] [VERIFIED: .planning/phases/201-software-quality-evaluation/201-SOFTWARE-QUALITY-AUDIT.md]
+   - Planning impact: Task 2 refines the scored audit and journey sections without replacing the seeded audit with a generic matrix or softening the locked risks. [VERIFIED: .planning/phases/201-software-quality-evaluation/201-01-PLAN.md]
 
 ## Environment Availability
 
