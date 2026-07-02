@@ -39,7 +39,7 @@ Stop rule: if proposed work is polish-only with a documented workaround and no r
 
 - [x] Phase 201: Software quality evaluation — produce `201-SOFTWARE-QUALITY-AUDIT.md` covering adoption, production, maintainability, supportability, UI, release, upgrade, data, security, architecture, OSS trust, and missing project-specific dimensions (QLT-01..05). Completed 2026-07-02.
 - [x] Phase 202: CI/CD performance and determinism audit — produce `202-CI-CD-PERFORMANCE-AUDIT.md` with workflow topology, static critical path, measurement plan, bottlenecks, flaky/determinism risks, cache risks, and target pipeline recommendations (CI-01..05). (completed 2026-07-02)
-- [ ] Phase 203: Database schema contract ADR — produce `203-DB-SCHEMA-CONTRACT-ADR.md`; lock the current `billing` default, preserve explicit `public`, and define future prefix hardening checks without changing defaults now (DB-01..04).
+- [x] Phase 203: Database schema contract ADR — produce `203-DB-SCHEMA-CONTRACT-ADR.md`; lock the current `billing` default, preserve explicit `public`, and define future prefix hardening checks without changing defaults now (DB-01..04). (completed 2026-07-02)
 - [ ] Phase 204: Ranked hardening roadmap — produce `204-HARDENING-ROADMAP.md` grouping follow-up implementation work by priority, milestone shape, impact, effort, risk reduction, and done criteria (RD-01..04).
 
 **Dependency shape:** 201, 202, and 203 can run in parallel after milestone initialization. Phase 204 consumes all three audits and must run last.
@@ -110,7 +110,7 @@ Plans:
   3. The ADR documents why switching the default to `accrue` is out of scope for v1.55.
   4. Future schema-prefix hardening checks are described as follow-up implementation work for Phase 204 to rank.
 
-**Plans:** 1 plan
+**Plans:** 1/1 plans complete
 
 Plans:
 
@@ -284,7 +284,7 @@ Full details: [v1.48 roadmap archive](milestones/v1.48-ROADMAP.md)
 | 200. Idempotent verification & sign-off | v1.54 | 6/6 | Complete    | 2026-06-30 |
 | 201. Software quality evaluation | v1.55 | 1/1 | Complete    | 2026-07-02 |
 | 202. CI/CD performance and determinism audit | v1.55 | 1/1 | Complete    | 2026-07-02 |
-| 203. Database schema contract ADR | v1.55 | 1/1 | Complete   | 2026-07-02 |
+| 203. Database schema contract ADR | v1.55 | 1/1 | Complete    | 2026-07-02 |
 | 204. Ranked hardening roadmap | v1.55 | 0/1 | Pending | — |
 
 ## Historical Backlog Anchors (not active scope)
