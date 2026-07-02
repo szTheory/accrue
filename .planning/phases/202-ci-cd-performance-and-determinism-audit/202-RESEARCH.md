@@ -365,27 +365,31 @@ Source: D-18 through D-21 require a structured Phase 204 handoff table [VERIFIED
 | A3 | Cache benefit is workload-dependent beyond the official Playwright warning. | Common Pitfalls / State of the Art | Planner should still require measurement before cache changes. |
 | A4 | Broad async/partitioning can create flake when global state is mutated. | Common Pitfalls | ExUnit docs support the control, but exact Accrue flake risk needs measured/classified test evidence. |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **What are the current branch-protection required checks?**
    - What we know: `ci.yml` comments list merge-blocking job IDs [VERIFIED: codebase grep].
    - What's unclear: live branch protection settings were not queried in this research [ASSUMED].
    - Recommendation: Phase 202 may mention required-check topology only as inferred from committed workflow comments unless a read-only branch-protection check is collected and labeled [VERIFIED: 202-CONTEXT.md].
+   - RESOLVED: Treat branch protection as static-inferred from committed workflow comments for Phase 202 unless a separate read-only inspection is explicitly collected and labeled; this does not block the audit [VERIFIED: 202-CONTEXT.md].
 
 2. **How many recent CI runs are representative enough for baseline metrics?**
    - What we know: `gh run list --workflow CI --limit 8` returned recent runs, but they mix schedule/push, success/failure, and post-stabilization states [VERIFIED: gh CLI].
    - What's unclear: appropriate p50/p95 needs a larger, filtered sample and possibly only successful push/PR runs [ASSUMED].
    - Recommendation: collect 20-50 runs if feasible; otherwise keep metrics in `Baseline Metrics Needed` [VERIFIED: 202-CONTEXT.md].
+   - RESOLVED: Metrics-needed. Representative run sample size is intentionally deferred to `Baseline Metrics Needed`; Phase 202 can proceed with static findings and may only cite bounded snapshots as partial, non-authoritative evidence [VERIFIED: 202-CONTEXT.md].
 
 3. **Do Sigra and OpenTelemetry matrix cells prove distinct behavior?**
    - What we know: CI sets `ACCRUE_CI_SIGRA`, `ACCRUE_CI_OPENTELEMETRY`, and `ACCRUE_OTEL_MATRIX`; `compile_matrix.sh` still documents older Sigra advisory assumptions; core `mix.exs` declares OpenTelemetry optional and not Sigra [VERIFIED: codebase grep].
    - What's unclear: whether each cell materially changes dependency, compile, or test behavior today [VERIFIED: 202-CONTEXT.md].
    - Recommendation: classify as matrix-fidelity research in the audit and do not implement matrix redesign in Phase 202 [VERIFIED: 202-CONTEXT.md].
+   - RESOLVED: Matrix fidelity is an audit finding and verification target, not a blocker; Sigra remains advisory until resolvable, and OpenTelemetry should be treated as required only if with/without cells prove distinct code paths [VERIFIED: 202-CONTEXT.md].
 
 4. **Are recent run timings stable enough to rank runtime work?**
    - What we know: one successful run showed release-gate cells around 15-16 minutes, host integration around 10.6 minutes, Docker smoke around 7.2 minutes, and Playwright shards around 3.8-4.5 minutes [VERIFIED: gh CLI].
    - What's unclear: this is one run only and must not be treated as p50/p95 [VERIFIED: 202-CONTEXT.md].
    - Recommendation: include it only as an optional partial snapshot if the implementation plan decides it improves the audit; otherwise use it as proof that the measurement method works [VERIFIED: gh CLI].
+   - RESOLVED: Metrics-needed. Timing stability remains in `Baseline Metrics Needed`; the one-run data can support measurement feasibility but must not rank runtime work or imply p50/p95 stability [VERIFIED: 202-CONTEXT.md].
 
 ## Environment Availability
 
