@@ -67,37 +67,50 @@ Collected evidence: `gh run list --workflow CI --branch main --limit 10` plus `g
 
 ### Correctness
 
-The pipeline is high-signal and intentionally release-oriented. Keep the host proof, package gates, docs contracts, release manifest checks, and provider parity lanes. Do not optimize by hiding risk.
+The pipeline is high-signal and intentionally release-oriented. Keep the host proof, package gates, docs contracts, release manifest checks, Fake-backed deterministic tests, provider canary, and release proof. Do not optimize by hiding risk.
+
+The correctness gap is claim precision. A green Fake-backed default test path proves Accrue's deterministic billing behavior. A green `live-stripe` lane proves Stripe parity only when Stripe test mode actually runs with `STRIPE_TEST_SECRET_KEY` and the required price/account fixtures. A skipped provider test is skipped/not proved; it is not parity proof.
+
+`release-gate`, `host-integration`, `playwright-e2e`, `host-docker-smoke`, `annotation-sweep`, `live-stripe`, `publish-hex`, and `release-please` all carry real release-confidence work. The target pipeline should clarify what each gate proves before changing where it runs.
 
 ### Performance
 
-The biggest static waste is duplicated work:
+The biggest static waste is duplicated work, but the project should measure first before moving anything out of the PR path:
 
 - `release-gate` repeats package checks across matrix cells.
-- `host-integration` and its browser script both prepare browser deps.
+- `host-integration` and `scripts/ci/accrue_host_verify_browser.sh` both prepare browser deps.
 - `playwright-e2e` shards each do compile/build/seed/browser setup.
-- Docker smoke cold-builds a dev image and waits up to 900 seconds.
+- `host-docker-smoke` cold-builds a dev image and waits up to 900 seconds.
+- `annotation-sweep` waits on almost every required lane, so it inherits the slowest prerequisite.
+
+Partial run data supports the static concern: in inspected run `28538686414`, the required `release-gate` cells took about 16 minutes, `host-integration` about 11 minutes, Playwright shards about 4 minutes after host proof, and Docker smoke about 7 minutes. That is enough to prioritize instrumentation, not enough to delete or demote checks.
 
 ### Determinism / Flakiness
 
 Known risk patterns:
 
 - Many tests mutate `Application` env, so async conversion must be careful.
-- Live/provider tests can skip under missing secrets.
-- Browser tests use single-worker lanes in some guardrails, which is conservative but slow.
+- Live/provider tests can skip under missing secrets or missing Stripe fixture IDs.
+- Browser tests use single-worker lanes in some guardrails; that is conservative and slow, but it avoids hidden order-dependent failures.
+- `accrue_host_verify_browser.sh` disables duplicate Playwright global seeding when it already seeded the fixture, which is good determinism evidence and should be preserved.
+- Schedule runs in the 10-run snapshot failed quickly; without job-log review, treat them as provider/schedule investigation needed, not as a quantified flake rate.
+
+Do not turn this into broad async conversion. First classify env-mutating tests, sleep-based tests, network/provider tests, and deterministic Fake-backed tests.
 
 ### Caching
 
-Current cache keys include OS/OTP/Elixir/lockfile in many places, which is directionally good. Gaps:
+Current cache keys include OS, OTP, Elixir, optional-dependency labels, and lockfiles in many places, which is directionally sound. The gaps are visibility and proof:
 
-- No Playwright browser cache.
-- No Docker layer cache.
-- Manual host UAT workflow still uses older action majors.
-- Cache-hit state is not surfaced in a summary.
+- Cache-hit state is not surfaced in job summaries, so maintainers cannot tell whether slow jobs are cold, warm, or thrashing.
+- There is no Docker layer cache evidence for `host-docker-smoke`.
+- There is no Playwright browser cache, but Playwright browser-binary caching should not be added by default on Linux without measured restore-vs-download data.
+- Manual host UAT still uses older action majors than the main CI path, which is static drift risk for manual reproduction.
 
 ### Matrix / Version Policy
 
-The floor/primary matrix is reasonable for a library. The Sigra/OpenTelemetry cells need proof that env flags change dependency/compile/test behavior. Otherwise they should be renamed to "label-only advisory" or redesigned.
+The floor/primary matrix is reasonable for a Phoenix library. The Sigra and OpenTelemetry cells must materially change dependency, compile, or test behavior. Sigra is visibly advisory through `continue-on-error`; OpenTelemetry is required. That distinction is fine only if each label proves a distinct condition.
+
+The OpenTelemetry test explicitly compiles with `ACCRUE_OTEL_MATRIX=without_opentelemetry` and `with_opentelemetry`, which is stronger than a label-only cell. Sigra still needs current proof that the CI environment changes what gets resolved and compiled; otherwise keep it advisory, rename it, or redesign it after Phase 204 ranks the work.
 
 ### Test Suite Quality
 
@@ -108,6 +121,8 @@ The suite is large and likely valuable. Do not delete tests from static inspecti
 - Scheduled/manual: live provider parity and exhaustive compatibility if runtime grows.
 - Fix/quarantine: any test relying on sleeps, global env leaks, or network.
 
+Fake-backed tests remain the merge-blocking default because they are deterministic and local. Live Stripe is a provider canary for upstream API drift and provider-specific behavior. The audit should never trade Fake-backed confidence for a skip-capable network lane.
+
 ### Security / Supply Chain
 
 Good: no `pull_request_target`, top-level CI permissions are read-only, release/publish jobs are trusted workflows. Gaps:
@@ -115,72 +130,80 @@ Good: no `pull_request_target`, top-level CI permissions are read-only, release/
 - Third-party actions are tag-pinned, not SHA-pinned.
 - Release Please has broad write permissions as expected but should stay isolated.
 - Recovery publish should enforce prerequisites before publishing downstream packages.
+- Provider secrets are only discussed by name; no secret values were read or recorded in this audit.
 
 ### Release
 
-Primary Release Please path is carefully ordered. Recovery path is weaker: package order is in input prose, not enforced by the workflow.
+Primary Release Please is carefully ordered: `publish-accrue-admin` depends on core publish, `publish-accrue-portal` depends on core and admin publish, and linked proof checks tags, GitHub Releases, Hex API truth, HexDocs, and release snapshots.
 
-### DX / Docs
+The recovery path is weaker. `publish-hex.yml` publishes one selected package and relies on input prose: "Run accrue before accrue_admin before accrue_portal when recovering a same-day release." That is release-confidence debt. Do not change it in Phase 202; hand it to Phase 204 as a machine-preflight candidate.
 
-`scripts/ci/README.md` is detailed, but contributors need a shorter first-failure map. The local "run every release gate" instructions are accurate but heavy.
+### Developer Experience / Docs
+
+`scripts/ci/README.md` is detailed and useful for maintainers. The developer-experience gap is first-failure routing. A contributor needs to answer: what failed, what does this gate prove, what local command reproduces the smallest useful slice, and whether provider parity was actually proved or merely skipped.
+
+Keep the maintainer map. Add short failure summaries later only after the baseline identifies the high-churn gates. The audit itself should stay as the proof-checkable source for Phase 204, not become a public contributor doc rewrite.
 
 ## Prioritized Recommendations
 
 | Priority | Title | Category | Current issue | Proposed change | Impact | Risk | Verify | Rollback |
 |---|---|---|---|---|---|---|---|---|
-| P0 | CI baseline summaries | Measurement | No timing/cache summary artifact | Add job summaries for versions, cache hits, slowest tests where cheap | High | Low | Compare two runs | Remove summaries |
-| P0 | Live/provider proved-vs-skipped state | Correctness | Mandatory periodic can skip | Fail scheduled lane when required secrets absent, or rename as advisory skip-capable | High | Low/medium | Scheduled run shows proved/skipped | Revert condition |
-| P1 | Split release-gate check classes | Runtime | Matrix repeats too much | Run lint/docs/audit once, compatibility tests in matrix | High | Medium | p95 PR runtime down, same failures caught | Restore old job |
-| P1 | Host harness consolidation | Runtime/DX | duplicated npm/Chromium setup | Single source for browser setup, no double install | Medium | Low | host run logs one install | Revert script |
-| P1 | Release recovery guards | Release | manual order dependence | Check upstream Hex package/version before admin/portal publish | Medium | Low | attempted out-of-order recovery fails early | Remove check |
-| P1 | Matrix fidelity | Correctness | Sigra/OTel labels may not prove behavior | Make env flags load deps/tests or rename cells | Medium | Medium | forced negative test fails expected cell | Revert matrix |
-| P2 | Docker smoke SLA | Runtime | 900s cold boot tail | Add Docker layer cache or narrow trigger | Medium | Medium | smoke duration and hit rate improve | Disable cache |
-| P2 | Playwright browser cache | Runtime | repeated browser downloads | Cache browser binaries with exact Playwright version | Medium | Medium | cache hit and no stale browser failures | Remove cache |
-| P2 | Test value classification | QA | suite likely expensive | Produce keep/optimize/nightly/delete table from timings | Medium | Low | documented classification | n/a |
-| P3 | Required check finalizer | Branch protection | many matrix names | Optional stable summary check | Low/medium | Medium | branch protection simplified | keep existing checks |
+| P0 | CI baseline summaries | Measurement | No timing/cache summary artifact | Add summaries for versions, cache-hit state, key step timings, and slowest tests where cheap | High | Low | Compare two comparable runs and check summary fields | Remove summaries |
+| P0 | Live/provider proved-vs-skipped state | Correctness | Mandatory periodic can skip under missing secrets/fixtures | Choose: fail scheduled lane when required inputs are absent, or rename as advisory skip-capable | High | Low/medium | Scheduled run reports proved, skipped/not proved, or failed | Revert condition or label |
+| P1 | Split release-gate check classes | Runtime | Matrix repeats package gates | After p50/p95 and step timing baseline, run lint/docs/audit once and keep compatibility tests in matrix | High | Medium | Same failures caught; p95 PR runtime improves | Restore old job |
+| P1 | Host harness consolidation | Runtime/DX | duplicated npm/Chromium setup | After setup timing, make one owner for host browser setup | Medium | Low | host run logs one install path | Revert workflow/script change |
+| P1 | Release recovery guards | Release | manual order dependence | Add preflight checks for upstream Hex package/version before admin/portal recovery publish | Medium | Low | attempted out-of-order recovery fails before publish | Remove preflight |
+| P1 | Matrix fidelity | Correctness | optional-dependency labels may not prove behavior | Make env flags load deps/tests or rename cells as advisory/label-only | Medium | Medium | forced negative test fails the expected cell | Revert matrix edits |
+| P2 | Docker smoke SLA | Runtime | 900s cold boot tail | After cold/warm data, add layer cache or make path/main policy explicit | Medium | Medium | smoke duration and cache hit rate improve | Disable cache or restore trigger |
+| P2 | Playwright browser cache | Runtime | repeated browser downloads | Measure download vs restore time before caching browser binaries | Medium | Medium | cache hit and no stale browser failures | Remove cache |
+| P2 | Test value classification | QA | suite likely expensive | Produce keep/optimize/nightly/delete table from timings and failure history | Medium | Low | classification references measured slowest tests | n/a |
+| P3 | Required check finalizer | Branch protection | many matrix names | Consider stable summary check only after branch-protection data and failure routing prove value | Low/medium | Medium | branch protection simpler without losing signal | keep existing checks |
 
 ## Target Pipeline
 
+This is a target shape for Phase 204 ranking, not a Phase 202 implementation. Preserve high-value gates until measured evidence supports a change.
+
 **PR fast path**
 
-- Docs/support contracts.
-- One latest package gate for format/compile/test/credo/docs/audit.
-- Compatibility-focused test cells only where they prove a compatibility promise.
-- Host deterministic proof.
-- Focused browser guardrails with no duplicate setup.
-- Docker smoke only if relevant files changed or on main if too slow.
+- Keep docs/support contracts and release manifest checks PR-blocking.
+- Keep one latest package gate for format, compile, test, credo, docs, and audit.
+- Keep compatibility-focused matrix cells only where they prove a supported Elixir/OTP/provider/optional-dependency promise.
+- Keep Fake-backed deterministic tests and `host-integration` as merge-blocking proof.
+- Keep one focused browser proof on PRs; move duplicate full-suite coverage only after measured step timing and failure-history evidence.
+- Keep `host-docker-smoke` PR-blocking until Docker cold/warm data supports a path-aware, main-only, or release-only policy.
+- Keep `annotation-sweep` release-facing, but require its critical-path cost to be measured.
 
 **Main**
 
-- Same as PR plus broader smoke, cache warming, release manifest checks, Hex smoke when applicable.
+- Same as PR plus broader smoke, cache warming, release manifest checks, and host Hex smoke when applicable.
 
 **Scheduled**
 
-- Live Stripe provider parity, full compatibility matrix if needed, dependency/security audit, long browser evidence.
+- Live Stripe provider canary with binary proved/skipped/not-proved output, full compatibility matrix only if it proves supported promises, dependency/security audit, and long browser evidence.
 
 **Release/tag**
 
-- Release Please after green main, ordered publish, linked proof, release notes contract, host Hex smoke.
+- Release Please after green main, ordered publish, linked proof, release notes contract, and host Hex smoke.
 
 ## Concrete Patch Strategy
 
 PR 1: baseline only
 - Add summaries and timing commands.
-- Record cache hits.
+- Record cache-hit state.
 - Add `mix test --slowest 20` where cheap.
 
 PR 2: truth fixes
-- Fix toolchain docs.
 - Clarify `live-stripe` proved/skipped semantics.
 - Verify Sigra/OTel matrix behavior.
+- Keep Fake-backed deterministic tests as the merge-blocking default.
 
 PR 3: dedupe setup
 - Consolidate host npm/Chromium setup.
-- Remove duplicate browser install in either workflow or script.
+- Remove duplicate browser install in either workflow or script only after setup timing proves it is duplicated cost.
 
 PR 4: release-gate split
-- Extract single-run lint/docs/audit.
-- Keep compatibility matrix focused.
+- Extract single-run lint/docs/audit after a step-timing baseline.
+- Keep compatibility matrix focused on distinct compile/test behavior.
 
 PR 5: release recovery hardening
 - Add Hex prerequisite checks to `publish-hex.yml`.
@@ -189,15 +212,16 @@ PR 5: release recovery hardening
 
 Before/after metrics:
 
-- PR p50/p95 runtime.
-- Critical-path job duration.
-- Cache hit rate.
-- Failure/rerun rate.
-- Slowest tests.
-- Compile time.
-- Docker smoke duration.
-- Host browser setup time.
-- Mean time to actionable failure.
+- PR p50/p95 runtime, separated by push, pull request, release-please branch, schedule, and manual events.
+- Critical-path job duration and step timing for `release-gate`, `host-integration`, `playwright-e2e`, `host-docker-smoke`, and `annotation-sweep`.
+- Cache-hit rate, restore duration, save duration, and cache size for BEAM deps, PLTs, npm, and any browser cache trial.
+- Failure/rerun rate by job, with human reruns separated from new commits.
+- Slowest tests and slowest modules for core/admin/portal/host.
+- Compile time and compile-connected xref output before changing matrix shape.
+- Docker smoke cold/warm duration.
+- Host browser setup time before and after any setup consolidation.
+- Provider proved-vs-skipped counts for scheduled/manual `live-stripe`.
+- Mean time to actionable failure, using job summary and first failing gate name.
 
 Local diagnostics:
 
@@ -208,6 +232,8 @@ cd accrue && mix xref graph --format cycles --label compile-connected
 cd examples/accrue_host && mix verify
 cd examples/accrue_host && mix verify.full
 ```
+
+Phase 204 verification for any implementation slice should include before/after CI run links, job summary screenshots or logs, and rollback proof. A cleanup PR that cannot prove the same high-value gates still run should not merge.
 
 ## Recommended Local Commands
 
@@ -232,6 +258,15 @@ mix test --warnings-as-errors
 mix credo --strict
 mix docs --warnings-as-errors
 mix hex.audit
+```
+
+Release and recovery diagnostics:
+
+```bash
+bash scripts/ci/verify_release_manifest_alignment.sh
+bash scripts/ci/verify_release_contract.sh
+bash scripts/ci/capture_linked_release_proof.sh --help
+bash scripts/ci/accrue_host_hex_smoke.sh
 ```
 
 ## Evidence Appendix
