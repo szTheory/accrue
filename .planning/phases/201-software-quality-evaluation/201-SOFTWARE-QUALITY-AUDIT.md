@@ -85,6 +85,10 @@
 
 **Evidence from repo:** `README.md`, `accrue/README.md`, `examples/accrue_host/README.md`, `examples/accrue_host/docs/adoption-proof-matrix.md`, `accrue/guides/first_hour.md`.
 
+**User pain:** A Phoenix evaluator can see real proof but still spend the first session deciding which proof path is canonical.
+
+**Maintainer pain:** Support answers may start by re-routing people from a plausible but non-canonical entry point.
+
 **Fix first:** Add one evaluator path: what to read, what to run, what success looks like, and when to stop.
 
 **Do not over-fix:** Do not rewrite the whole docs corpus; the content is mostly good.
@@ -96,6 +100,10 @@
 **Why it matters:** Toolchain and release truth drift makes users doubt everything else.
 
 **Evidence from repo:** `CONTRIBUTING.md`; `accrue/mix.exs`; `accrue_admin/mix.exs`; `accrue_portal/mix.exs`; `.github/workflows/ci.yml`; `RELEASING.md`.
+
+**User pain:** A contributor or adopter can pick the wrong local toolchain and then distrust later setup failures.
+
+**Maintainer pain:** Review time shifts from actual code quality to explaining which public version statement is current.
 
 **Fix first:** One public truth table for supported Elixir/OTP/Postgres/Node/Phoenix/Ecto/Oban and release-lane meaning.
 
@@ -109,6 +117,10 @@
 
 **Evidence from repo:** `accrue_portal/README.md`; `accrue_portal/mix.exs`; `accrue_portal/CHANGELOG.md`; `accrue/guides/release-notes.md`; `.github/ISSUE_TEMPLATE/bug.yml`.
 
+**User pain:** A host adopting local checkout or mounted billing portal behavior may not get the same first-hour confidence the core/admin path provides.
+
+**Maintainer pain:** Portal questions become one-off support explanations instead of links to a package-local setup and troubleshooting path.
+
 **Fix first:** Portal readiness pass: install, auth/session, CSP, theming/customization, Braintree flow, troubleshooting, release notes.
 
 **Do not over-fix:** Do not build new portal features until the existing contract is easier to adopt.
@@ -120,6 +132,10 @@
 **Why it matters:** A billing library that loses track of which schema owns its tables can create scary data-migration failures.
 
 **Evidence from repo:** `accrue/lib/accrue/schema.ex`; `accrue/lib/accrue/migration.ex`; `accrue/lib/accrue/config.ex`; `accrue/guides/configuration.md`; `accrue/guides/upgrade.md`.
+
+**User pain:** A host can compile schemas against one prefix and run migrations or upgrade docs under another if the contract drifts.
+
+**Maintainer pain:** Schema-prefix bugs are high-anxiety support cases because they look like missing or duplicated billing data.
 
 **Fix first:** Keep `billing`. Add guards that schema prefix, migration helper prefix, installer docs, explicit `public`, and old `billing` compatibility stay aligned.
 
@@ -161,7 +177,7 @@
 
 Accrue has UI: `accrue_admin` and `accrue_portal`.
 
-`accrue_admin` looks useful enough to ship and unusually coherent after v1.53/v1.54: design specs, Storybook, component lab, page-flow gates, and accessibility checks exist. The top UI risk is no longer obvious visual inconsistency; it is regression-gate cost and whether portal parity keeps up with admin polish.
+`accrue_admin` looks useful enough to ship and unusually coherent after v1.53/v1.54: design specs, Storybook, component lab, page-flow gates, accessibility checks, and the shared `PageHeader` component/story exist. The top UI risk is no longer obvious visual inconsistency; it is regression-gate cost and whether portal parity keeps up with admin polish. `accrue_portal` has real LiveView/CSS surface area and a captured white-label todo, so the right UI finding is package parity, not a new admin redesign.
 
 Top UI fixes:
 1. Keep the page-flow gate, but measure its CI cost.
@@ -197,7 +213,7 @@ Top UI fixes:
 
 **Clean up now after GSD speed:** front-door docs, CI topology, old milestone-specific gates, release truth, package metadata.
 
-**Do not prematurely formalize:** a giant governance process, heavyweight benchmark suite, or broad new feature roadmap.
+**Do not overbuild:** a giant governance process, heavyweight benchmark suite, broad new feature roadmap, or new UI component system before Phase 204 ranks it.
 
 ## Missing-Dimension Discovery
 
