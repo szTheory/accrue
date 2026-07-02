@@ -538,7 +538,7 @@ zero blockers; non-critical follow-ups + partial Nyquist 123–125 deferred).
 
 ## Current State
 
-**v1.55 Phase 201 — Software quality evaluation completed 2026-07-02.** Phase 201 produced the evidence-backed software-quality audit at `.planning/phases/201-software-quality-evaluation/201-SOFTWARE-QUALITY-AUDIT.md`, verified 8/8 must-haves, and validated QLT-01 through QLT-05 without product behavior, public API, DB default, CI topology, release automation, runtime UI, CSS, route, or package metadata changes. Phase 202 and Phase 203 remain the specialist audit/ADR inputs; Phase 204 remains last and consumes the Phase 201-203 evidence into a ranked hardening roadmap.
+**v1.55 Phases 201-202 — Software quality and CI/CD audits completed 2026-07-02.** Phase 201 produced the evidence-backed software-quality audit at `.planning/phases/201-software-quality-evaluation/201-SOFTWARE-QUALITY-AUDIT.md`, verified 8/8 must-haves, and validated QLT-01 through QLT-05. Phase 202 produced the focused CI/CD performance and determinism audit at `.planning/phases/202-ci-cd-performance-and-determinism-audit/202-CI-CD-PERFORMANCE-AUDIT.md`, verified 11/11 must-haves, and validated CI-01 through CI-05 with static topology evidence, explicit metrics-needed boundaries, provider proof classification, and Phase 204-ready handoff rows. Both phases stayed audit-only: no product behavior, public API, DB default, CI topology, release automation, runtime UI, CSS, route, source, workflow, script, or package metadata changes. Phase 203 remains the specialist schema-contract ADR input; Phase 204 remains last and consumes the Phase 201-203 evidence into a ranked hardening roadmap.
 
 **v1.54 — Admin UI Page-Level Streamlining & Storybook shipped & archived 2026-07-01 (Phases 193–200, 59/59 plans, 23/23 requirements).** The milestone locked SPEC-OVERVIEW/LIST/DETAIL, extended the page-flow baseline, adopted PhoenixStorybook dev/test-only, delivered the Dashboard/Subscription-detail/Subscriptions-list archetype exemplars, extracted `PageHeader`, propagated LIST and DETAIL/analytics patterns across the admin surface, fixed overlay/focus/scroll/floating correctness, completed fixture stress and microcopy sweeps, and closed with Storybook/theming/axe/no-FOUC/reduced-motion/CI guardrail sign-off. The audit passed with 23/23 implementation-verified requirements, 8/8 phase verifications, 8/8 E2E flows, zero blockers, and TOOL-02 pixel-diff visual regression recorded as an accepted out-of-scope deferral.
 
@@ -567,9 +567,9 @@ The v1.50→v1.54 arc (Admin UI Foundation → Depth Pass → Brand System → D
 
 ### Active
 
-v1.55 is active as audit-only maintenance / release-readiness work. QLT-01 through QLT-05 are validated by Phase 201; CI-01 through CI-05, DB-01 through DB-04, and RD-01 through RD-04 remain pending for Phases 202-204. The post-v1.48 pause rule remains in force: future broad feature scope still requires a concrete adopter failure mode, correctness/security/data-loss risk, repeated support issue, operational failure, or explicit strategy change.
+v1.55 is active as audit-only maintenance / release-readiness work. QLT-01 through QLT-05 are validated by Phase 201; CI-01 through CI-05 are validated by Phase 202; DB-01 through DB-04 and RD-01 through RD-04 remain pending for Phases 203-204. The post-v1.48 pause rule remains in force: future broad feature scope still requires a concrete adopter failure mode, correctness/security/data-loss risk, repeated support issue, operational failure, or explicit strategy change.
 
-### Validated v1.55 (active milestone; Phase 201 complete 2026-07-02)
+### Validated v1.55 (active milestone; Phases 201-202 complete 2026-07-02)
 
 Software Quality Evaluation — 5/5 satisfied in Phase 201.
 
@@ -578,6 +578,14 @@ Software Quality Evaluation — 5/5 satisfied in Phase 201.
 - ✓ **QLT-03** — Separate adopter journey, production/SRE journey, maintainer journey, GSD sanity, and missing project-specific dimension coverage — Phase 201.
 - ✓ **QLT-04** — Strong and not-applicable dimensions are marked honestly without manufactured concerns — Phase 201.
 - ✓ **QLT-05** — Direct repo facts, assumptions, metrics-needed items, and local evidence paths are separated for low scores and recommendations — Phase 201.
+
+CI/CD Performance and Determinism Audit — 5/5 satisfied in Phase 202.
+
+- ✓ **CI-01** — Current CI topology, trigger model, matrix shape, service usage, cache posture, and likely critical path are documented from checked-in workflow evidence — Phase 202.
+- ✓ **CI-02** — Duplicated setup, bottlenecks, flaky/determinism risks, cache risks, release risks, and provider-parity risks are identified with concrete repo evidence — Phase 202.
+- ✓ **CI-03** — Target pipeline recommendations preserve high-value gates and require measurement before deleting, demoting, reshaping, or making checks optional — Phase 202.
+- ✓ **CI-04** — Follow-up work is classified by priority, expected impact, tradeoff, implementation approach, verification, rollback, metric-needed status, and Phase 204 slice fit — Phase 202.
+- ✓ **CI-05** — Baseline metrics still needing live GitHub run data are explicit, with dynamic claims labeled as collected evidence, metrics-needed, static inspection, or assumption — Phase 202.
 
 ### Validated v1.54 (archived in `.planning/milestones/v1.54-REQUIREMENTS.md`; milestone shipped & archived 2026-07-01)
 
@@ -693,4 +701,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-07-02 after v1.55 Phase 201 (Software quality evaluation) completed and validated QLT-01 through QLT-05. v1.55 remains active with Phases 202-204 pending; v1.54 is still the most recently shipped milestone.*
+*Last updated: 2026-07-02 after v1.55 Phase 202 (CI/CD performance and determinism audit) completed and validated CI-01 through CI-05. v1.55 remains active with Phases 203-204 pending; v1.54 is still the most recently shipped milestone.*
