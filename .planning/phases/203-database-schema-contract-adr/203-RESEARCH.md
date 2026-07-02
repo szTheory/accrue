@@ -414,12 +414,12 @@ This test proves the current installer path preserves explicit `public`. [VERIFI
 
 All implementation-relevant claims were verified against repo files, project planning files, Hex/Mix output, or official docs. [VERIFIED: repo commands; CITED: official docs listed in Sources]
 
-## Open Questions
+## Open Questions (RESOLVED)
 
-1. **Does Phase 204 rank DB schema hardening above other audit findings?**  
-   What we know: Phase 203 must hand off DB hardening candidates, and Phase 204 consumes Phases 201, 202, and 203. [VERIFIED: .planning/ROADMAP.md]  
-   What's unclear: Final priority ranking is intentionally downstream. [VERIFIED: .planning/phases/203-database-schema-contract-adr/203-CONTEXT.md]  
-   Recommendation: Do not pre-rank beyond local DB priority; make ADR rows structured enough for Phase 204. [VERIFIED: .planning/phases/203-database-schema-contract-adr/203-CONTEXT.md]
+1. **RESOLVED: Does Phase 204 rank DB schema hardening above other audit findings?**
+   What we know: Phase 203 must hand off DB hardening candidates, and Phase 204 consumes Phases 201, 202, and 203. [VERIFIED: .planning/ROADMAP.md]
+   Accepted resolution: Phase 203 supplies local DB-schema-contract inputs only. It should not pre-rank DB schema hardening above software-quality or CI/CD findings. Phase 204 owns final cross-audit ranking after consuming Phases 201, 202, and 203. [VERIFIED: .planning/phases/203-database-schema-contract-adr/203-CONTEXT.md]
+   Recommendation: Do not pre-rank beyond local DB-schema-contract priority; make ADR rows structured enough for Phase 204. [VERIFIED: .planning/phases/203-database-schema-contract-adr/203-CONTEXT.md]
 
 ## Environment Availability
 
