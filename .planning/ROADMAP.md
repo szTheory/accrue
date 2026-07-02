@@ -114,7 +114,7 @@ Plans:
 
 Plans:
 
-- [ ] 203-01-PLAN.md — Produce the database schema contract ADR.
+- [x] 203-01-PLAN.md — Produce the database schema contract ADR.
 
 **UI hint:** no
 
@@ -284,7 +284,7 @@ Full details: [v1.48 roadmap archive](milestones/v1.48-ROADMAP.md)
 | 200. Idempotent verification & sign-off | v1.54 | 6/6 | Complete    | 2026-06-30 |
 | 201. Software quality evaluation | v1.55 | 1/1 | Complete    | 2026-07-02 |
 | 202. CI/CD performance and determinism audit | v1.55 | 1/1 | Complete    | 2026-07-02 |
-| 203. Database schema contract ADR | v1.55 | 0/1 | Pending | — |
+| 203. Database schema contract ADR | v1.55 | 1/1 | Planned | 2026-07-02 |
 | 204. Ranked hardening roadmap | v1.55 | 0/1 | Pending | — |
 
 ## Historical Backlog Anchors (not active scope)
