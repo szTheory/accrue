@@ -38,13 +38,14 @@ Stop rule: if proposed work is polish-only with a documented workaround and no r
 **Posture:** Maintenance / release-readiness / support-contract hardening milestone under stable-core. This milestone produces evidence-backed audits and a ranked implementation roadmap. It does **not** change product behavior, public APIs, DB defaults, CI required-check topology, or package release automation.
 
 - [x] Phase 201: Software quality evaluation — produce `201-SOFTWARE-QUALITY-AUDIT.md` covering adoption, production, maintainability, supportability, UI, release, upgrade, data, security, architecture, OSS trust, and missing project-specific dimensions (QLT-01..05). Completed 2026-07-02.
-- [ ] Phase 202: CI/CD performance and determinism audit — produce `202-CI-CD-PERFORMANCE-AUDIT.md` with workflow topology, static critical path, measurement plan, bottlenecks, flaky/determinism risks, cache risks, and target pipeline recommendations (CI-01..05).
+- [x] Phase 202: CI/CD performance and determinism audit — produce `202-CI-CD-PERFORMANCE-AUDIT.md` with workflow topology, static critical path, measurement plan, bottlenecks, flaky/determinism risks, cache risks, and target pipeline recommendations (CI-01..05). (completed 2026-07-02)
 - [ ] Phase 203: Database schema contract ADR — produce `203-DB-SCHEMA-CONTRACT-ADR.md`; lock the current `billing` default, preserve explicit `public`, and define future prefix hardening checks without changing defaults now (DB-01..04).
 - [ ] Phase 204: Ranked hardening roadmap — produce `204-HARDENING-ROADMAP.md` grouping follow-up implementation work by priority, milestone shape, impact, effort, risk reduction, and done criteria (RD-01..04).
 
 **Dependency shape:** 201, 202, and 203 can run in parallel after milestone initialization. Phase 204 consumes all three audits and must run last.
 
 **Success criteria:**
+
 1. Every low score or hardening recommendation cites concrete repo evidence.
 2. Static CI findings are labeled separately from metrics that require GitHub run history.
 3. DB schema default remains `billing`; switching to `accrue` is explicitly not part of v1.55.
@@ -70,6 +71,7 @@ Coverage: 18/18 v1.55 requirements mapped.
 **Plans:** 1 plan
 
 Plans:
+
 - [x] 201-01-PLAN.md — Produce the software-quality audit and evidence map.
 
 **UI hint:** no
@@ -87,9 +89,10 @@ Plans:
   3. Recommendations identify duplicated, low-signal, flaky, cache-risky, or overly expensive checks without changing required-check topology in this phase.
   4. The audit gives Phase 204 enough information to rank CI/CD hardening and optimization work.
 
-**Plans:** 1 plan
+**Plans:** 1/1 plans complete
 
 Plans:
+
 - [x] 202-01-PLAN.md — Produce the CI/CD performance and determinism audit.
 
 **UI hint:** no
@@ -110,6 +113,7 @@ Plans:
 **Plans:** 1 plan
 
 Plans:
+
 - [ ] 203-01-PLAN.md — Produce the database schema contract ADR.
 
 **UI hint:** no
@@ -130,6 +134,7 @@ Plans:
 **Plans:** 1 plan
 
 Plans:
+
 - [ ] 204-01-PLAN.md — Produce the ranked hardening roadmap from Phases 201-203.
 
 **UI hint:** no
@@ -278,7 +283,7 @@ Full details: [v1.48 roadmap archive](milestones/v1.48-ROADMAP.md)
 | 199. Cross-cutting interaction/overlay correctness + fixture stress + microcopy | v1.54 | 15/15 | Complete    | 2026-06-30 |
 | 200. Idempotent verification & sign-off | v1.54 | 6/6 | Complete    | 2026-06-30 |
 | 201. Software quality evaluation | v1.55 | 1/1 | Complete    | 2026-07-02 |
-| 202. CI/CD performance and determinism audit | v1.55 | 1/1 | Complete   | 2026-07-02 |
+| 202. CI/CD performance and determinism audit | v1.55 | 1/1 | Complete    | 2026-07-02 |
 | 203. Database schema contract ADR | v1.55 | 0/1 | Pending | — |
 | 204. Ranked hardening roadmap | v1.55 | 0/1 | Pending | — |
 
