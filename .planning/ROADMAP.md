@@ -70,7 +70,7 @@ Coverage: 18/18 v1.55 requirements mapped.
 **Plans:** 1 plan
 
 Plans:
-- [ ] 201-01-PLAN.md — Produce the software-quality audit and evidence map.
+- [x] 201-01-PLAN.md — Produce the software-quality audit and evidence map.
 
 **UI hint:** no
 
@@ -277,7 +277,7 @@ Full details: [v1.48 roadmap archive](milestones/v1.48-ROADMAP.md)
 | 198. Propagate DETAIL + analytics | v1.54 | 9/9 | Complete    | 2026-06-29 |
 | 199. Cross-cutting interaction/overlay correctness + fixture stress + microcopy | v1.54 | 15/15 | Complete    | 2026-06-30 |
 | 200. Idempotent verification & sign-off | v1.54 | 6/6 | Complete    | 2026-06-30 |
-| 201. Software quality evaluation | v1.55 | 0/1 | Pending | — |
+| 201. Software quality evaluation | v1.55 | 1/1 | Complete   | 2026-07-02 |
 | 202. CI/CD performance and determinism audit | v1.55 | 0/1 | Pending | — |
 | 203. Database schema contract ADR | v1.55 | 0/1 | Pending | — |
 | 204. Ranked hardening roadmap | v1.55 | 0/1 | Pending | — |
