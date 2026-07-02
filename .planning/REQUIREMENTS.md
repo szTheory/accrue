@@ -15,11 +15,11 @@
 
 ### CI/CD Evaluation
 
-- [ ] **CI-01**: Maintainer can see the current CI workflow/job topology, trigger model, matrix shape, service usage, cache posture, and likely critical path in one document.
-- [ ] **CI-02**: The CI audit identifies duplicated setup, slow/static bottlenecks, flaky/determinism risks, cache risks, release risks, and provider-parity risks with repo evidence.
-- [ ] **CI-03**: The CI audit recommends a target pipeline that preserves high-value gates while measuring before demoting or deleting checks.
-- [ ] **CI-04**: The CI audit classifies follow-up work by priority, expected impact, tradeoff, implementation approach, verification, and rollback.
-- [ ] **CI-05**: The CI audit records required baseline metrics still needing live GitHub run data rather than pretending static inspection is enough.
+- [x] **CI-01**: Maintainer can see the current CI workflow/job topology, trigger model, matrix shape, service usage, cache posture, and likely critical path in one document.
+- [x] **CI-02**: The CI audit identifies duplicated setup, slow/static bottlenecks, flaky/determinism risks, cache risks, release risks, and provider-parity risks with repo evidence.
+- [x] **CI-03**: The CI audit recommends a target pipeline that preserves high-value gates while measuring before demoting or deleting checks.
+- [x] **CI-04**: The CI audit classifies follow-up work by priority, expected impact, tradeoff, implementation approach, verification, and rollback.
+- [x] **CI-05**: The CI audit records required baseline metrics still needing live GitHub run data rather than pretending static inspection is enough.
 
 ### Database Schema Contract
 
@@ -61,11 +61,11 @@ The most recent archive is `.planning/milestones/v1.54-REQUIREMENTS.md`.
 | QLT-03 | Phase 201 | Complete |
 | QLT-04 | Phase 201 | Complete |
 | QLT-05 | Phase 201 | Complete |
-| CI-01 | Phase 202 | Pending |
-| CI-02 | Phase 202 | Pending |
-| CI-03 | Phase 202 | Pending |
-| CI-04 | Phase 202 | Pending |
-| CI-05 | Phase 202 | Pending |
+| CI-01 | Phase 202 | Complete |
+| CI-02 | Phase 202 | Complete |
+| CI-03 | Phase 202 | Complete |
+| CI-04 | Phase 202 | Complete |
+| CI-05 | Phase 202 | Complete |
 | DB-01 | Phase 203 | Pending |
 | DB-02 | Phase 203 | Pending |
 | DB-03 | Phase 203 | Pending |
