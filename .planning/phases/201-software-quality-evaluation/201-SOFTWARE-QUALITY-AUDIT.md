@@ -284,9 +284,21 @@ Phase 201 is an **audit-only** gate. Broad project verification, Docker boot pro
 | Phase 203 | Schema-prefix safety is a data/upgrade risk because compile-time schema prefix, migration helpers, installer docs, explicit `public`, and existing installs must stay aligned | `.planning/phases/203-database-schema-contract-adr/203-DB-SCHEMA-CONTRACT-ADR.md` owns the accepted `billing` default, explicit `public`, non-goals, and hardening checks |
 | Phase 204 | Follow-up work needs ranking by impact, effort, risk reduction, timing, and done criteria | `.planning/phases/204-ranked-hardening-roadmap/204-HARDENING-ROADMAP.md` consumes this audit plus Phases 202/203 so CI and DB risks are not double-counted |
 
+## Requirement Coverage
+
+| Requirement | Covered by | Evidence |
+|---|---|---|
+| QLT-01 | Ranked Dimension Ranking Table | Scores, confidence, evidence, practical consequence, highest-leverage fix, and priority across adoption, production, maintenance, support, architecture, data, UI, security, release, upgrade, and OSS trust dimensions |
+| QLT-02 | Top 5 Weakness Deep Dives | Each top weakness has observation, why it matters, evidence from repo, pain, fix first, and do-not-over-fix restraint |
+| QLT-03 | Journey and missing-dimension sections | Adoption Friction, Production Readiness / SRE, Maintainer Friction, GSD Sanity, UI/UX, Missing-Dimension Discovery, and Phase 204 handoff sections stay separate |
+| QLT-04 | Honest score labels | Strong dimensions are marked `maintain` or `nice later`; Internationalization is `N/A` and `not worth now`; no fake concern is added for legal/licensing or recently hardened admin UI |
+| QLT-05 | Evidence Appendix | Score 3 rows cite local paths or carry explicit Assumption / metrics-needed labels |
+
 ## Top 10 Concrete Changes
 
-| Rank | Area | Dimension improved | Why it matters | Impact | Effort | Risk reduction | Timing | Done looks like |
+This is the Phase 204 handoff table. Each row is a rankable candidate, not implementation work completed in Phase 201.
+
+| Rank | Area / change | Quality dimension | Why it matters | Impact | Effort | Risk reduction | Timing | Done looks like / done criteria |
 |---:|---|---|---|---|---|---|---|---|
 | 1 | CI workflow | CI/CD | Shortens and clarifies required gates | High | Medium | High | before showing to strangers | timing baseline + target topology |
 | 2 | README/host docs | Adoption | Gives evaluators one path | High | Low | High | before showing to strangers | 30-minute proof path |
