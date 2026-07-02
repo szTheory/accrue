@@ -538,6 +538,8 @@ zero blockers; non-critical follow-ups + partial Nyquist 123–125 deferred).
 
 ## Current State
 
+**v1.55 Phase 201 — Software quality evaluation completed 2026-07-02.** Phase 201 produced the evidence-backed software-quality audit at `.planning/phases/201-software-quality-evaluation/201-SOFTWARE-QUALITY-AUDIT.md`, verified 8/8 must-haves, and validated QLT-01 through QLT-05 without product behavior, public API, DB default, CI topology, release automation, runtime UI, CSS, route, or package metadata changes. Phase 202 and Phase 203 remain the specialist audit/ADR inputs; Phase 204 remains last and consumes the Phase 201-203 evidence into a ranked hardening roadmap.
+
 **v1.54 — Admin UI Page-Level Streamlining & Storybook shipped & archived 2026-07-01 (Phases 193–200, 59/59 plans, 23/23 requirements).** The milestone locked SPEC-OVERVIEW/LIST/DETAIL, extended the page-flow baseline, adopted PhoenixStorybook dev/test-only, delivered the Dashboard/Subscription-detail/Subscriptions-list archetype exemplars, extracted `PageHeader`, propagated LIST and DETAIL/analytics patterns across the admin surface, fixed overlay/focus/scroll/floating correctness, completed fixture stress and microcopy sweeps, and closed with Storybook/theming/axe/no-FOUC/reduced-motion/CI guardrail sign-off. The audit passed with 23/23 implementation-verified requirements, 8/8 phase verifications, 8/8 E2E flows, zero blockers, and TOOL-02 pixel-diff visual regression recorded as an accepted out-of-scope deferral.
 
 **v1.53 — Admin UI Design-System Hardening shipped & archived 2026-06-20 (Phases 187–192, 39/39 plans, 33/33 requirements).** The fourth pass on the `accrue_admin` surface completed the interaction-correct and component-systematic baseline that v1.54 then lifted to page-level excellence.
@@ -565,7 +567,17 @@ The v1.50→v1.54 arc (Admin UI Foundation → Depth Pass → Brand System → D
 
 ### Active
 
-No active milestone-specific requirements. v1.54 is archived; the post-v1.48 pause rule remains in force until a future milestone is opened with a concrete adopter failure mode, correctness/security/data-loss risk, repeated support issue, operational failure, or explicit strategy change.
+v1.55 is active as audit-only maintenance / release-readiness work. QLT-01 through QLT-05 are validated by Phase 201; CI-01 through CI-05, DB-01 through DB-04, and RD-01 through RD-04 remain pending for Phases 202-204. The post-v1.48 pause rule remains in force: future broad feature scope still requires a concrete adopter failure mode, correctness/security/data-loss risk, repeated support issue, operational failure, or explicit strategy change.
+
+### Validated v1.55 (active milestone; Phase 201 complete 2026-07-02)
+
+Software Quality Evaluation — 5/5 satisfied in Phase 201.
+
+- ✓ **QLT-01** — Evidence-backed audit ranks Accrue's weakest adoption, production, maintenance, support, architecture, data, UI, security, release, upgrade, and OSS trust dimensions without equal weighting — Phase 201.
+- ✓ **QLT-02** — Top-five weakness deep dives include repo evidence, practical consequences, highest-leverage fixes, and explicit restraint — Phase 201.
+- ✓ **QLT-03** — Separate adopter journey, production/SRE journey, maintainer journey, GSD sanity, and missing project-specific dimension coverage — Phase 201.
+- ✓ **QLT-04** — Strong and not-applicable dimensions are marked honestly without manufactured concerns — Phase 201.
+- ✓ **QLT-05** — Direct repo facts, assumptions, metrics-needed items, and local evidence paths are separated for low scores and recommendations — Phase 201.
 
 ### Validated v1.54 (archived in `.planning/milestones/v1.54-REQUIREMENTS.md`; milestone shipped & archived 2026-07-01)
 
@@ -681,4 +693,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-07-01 after v1.54 (Admin UI Page-Level Streamlining & Storybook) shipped and archived. v1.54 is now the most recently shipped milestone; no active milestone-specific requirements remain. Prior milestone: v1.53 Admin UI Design-System Hardening (Phases 187–192, shipped & archived 2026-06-20).*
+*Last updated: 2026-07-02 after v1.55 Phase 201 (Software quality evaluation) completed and validated QLT-01 through QLT-05. v1.55 remains active with Phases 202-204 pending; v1.54 is still the most recently shipped milestone.*
