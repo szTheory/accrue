@@ -82,4 +82,4 @@ The most recent archive is `.planning/milestones/v1.54-REQUIREMENTS.md`.
 
 ---
 *Requirements defined: 2026-07-01*
-*Last updated: 2026-07-01 after v1.55 milestone initialization*
+*Last updated: 2026-07-02 after Phase 201 validated QLT-01 through QLT-05*

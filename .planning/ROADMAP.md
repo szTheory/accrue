@@ -37,7 +37,7 @@ Stop rule: if proposed work is polish-only with a documented workaround and no r
 
 **Posture:** Maintenance / release-readiness / support-contract hardening milestone under stable-core. This milestone produces evidence-backed audits and a ranked implementation roadmap. It does **not** change product behavior, public APIs, DB defaults, CI required-check topology, or package release automation.
 
-- [ ] Phase 201: Software quality evaluation — produce `201-SOFTWARE-QUALITY-AUDIT.md` covering adoption, production, maintainability, supportability, UI, release, upgrade, data, security, architecture, OSS trust, and missing project-specific dimensions (QLT-01..05).
+- [x] Phase 201: Software quality evaluation — produce `201-SOFTWARE-QUALITY-AUDIT.md` covering adoption, production, maintainability, supportability, UI, release, upgrade, data, security, architecture, OSS trust, and missing project-specific dimensions (QLT-01..05). Completed 2026-07-02.
 - [ ] Phase 202: CI/CD performance and determinism audit — produce `202-CI-CD-PERFORMANCE-AUDIT.md` with workflow topology, static critical path, measurement plan, bottlenecks, flaky/determinism risks, cache risks, and target pipeline recommendations (CI-01..05).
 - [ ] Phase 203: Database schema contract ADR — produce `203-DB-SCHEMA-CONTRACT-ADR.md`; lock the current `billing` default, preserve explicit `public`, and define future prefix hardening checks without changing defaults now (DB-01..04).
 - [ ] Phase 204: Ranked hardening roadmap — produce `204-HARDENING-ROADMAP.md` grouping follow-up implementation work by priority, milestone shape, impact, effort, risk reduction, and done criteria (RD-01..04).
