@@ -66,7 +66,7 @@ if (!process.env.ANTHROPIC_API_KEY) {
 // ----------------------------------------------------------------------------
 // GUARD 3 — only NOW import the manifest + SDK (key is present).
 // ----------------------------------------------------------------------------
-const { default: manifest } = await import("./baseline-manifest.js");
+const { default: manifest } = await import("../baseline-manifest.js");
 const { default: Anthropic } = await import("@anthropic-ai/sdk");
 const client = new Anthropic(); // reads ANTHROPIC_API_KEY from env
 
