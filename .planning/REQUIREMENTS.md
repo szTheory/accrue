@@ -21,12 +21,12 @@ Requirements for this milestone. Each maps to exactly one roadmap phase (205–2
 - [ ] **EVAL-02**: Maintainer can run a graphic-design evaluator lens that assesses the design dimensions (hierarchy, spacing-rhythm, responsive, brand-expression; token + contrast supporting) comparatively against named quiet-dev-tooling tier exemplars rather than emitting an absolute "award" score.
 - [ ] **EVAL-03**: The evaluator harness exits cleanly (exit 0, no failure) when `ANTHROPIC_API_KEY` is absent and enforces the existing per-image size guard, so it is safe to invoke anywhere.
 - [ ] **EVAL-04**: A committed design sub-rubric plus a curated good/bad exemplar set (sourced from repo history, license-clean) anchors the design lens to the locked brand DNA ("quiet polish, well-made dev tooling, not fintech").
-- [ ] **EVAL-05**: Each candidate finding records surface, rubric dimension, region tag, overlay tags, severity, and the persona/lens that raised it, plus `cell_refs` pointing into the existing 30,348-cell grammar.
+- [x] **EVAL-05**: Each candidate finding records surface, rubric dimension, region tag, overlay tags, severity, and the persona/lens that raised it, plus `cell_refs` pointing into the existing 30,348-cell grammar.
 
 ### Dedup & Stable Identity (DEDUP)
 
-- [ ] **DEDUP-01**: Each finding is assigned a canonical claim-key derived from surface + dimension + sorted overlay-tags + region (the LLM free-text is stored for humans but excluded from identity), so the same defect yields the same `finding_id` across runs.
-- [ ] **DEDUP-02**: Running the proposer twice on unchanged screenshots yields an identical `finding_id` set (prose-independence / non-flakiness), proven by an automated test.
+- [x] **DEDUP-01**: Each finding is assigned a canonical claim-key derived from surface + dimension + sorted overlay-tags + region (the LLM free-text is stored for humans but excluded from identity), so the same defect yields the same `finding_id` across runs.
+- [x] **DEDUP-02**: Running the proposer twice on unchanged screenshots yields an identical `finding_id` set (prose-independence / non-flakiness), proven by an automated test.
 - [ ] **DEDUP-03**: Findings raised independently by multiple personas/lenses collapse into a single work item carrying a `persona_frequency` count.
 
 ### Adversarial Verification (VERIFY)
@@ -99,9 +99,9 @@ Which phases cover which requirements. Populated during roadmap creation.
 | EVAL-02 | Phase 205 | Pending |
 | EVAL-03 | Phase 205 | Pending |
 | EVAL-04 | Phase 205 | Pending |
-| EVAL-05 | Phase 205 | Pending |
-| DEDUP-01 | Phase 205 | Pending |
-| DEDUP-02 | Phase 205 | Pending |
+| EVAL-05 | Phase 205 | Complete |
+| DEDUP-01 | Phase 205 | Complete |
+| DEDUP-02 | Phase 205 | Complete |
 | DEDUP-03 | Phase 206 | Pending |
 | VERIFY-01 | Phase 206 | Pending |
 | VERIFY-02 | Phase 206 | Pending |
