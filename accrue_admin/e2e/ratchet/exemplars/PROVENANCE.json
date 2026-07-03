@@ -1,0 +1,89 @@
+{
+  "schema": "ratchet-exemplar-provenance/1",
+  "purpose": "Auditable provenance for the design-lens exemplar set (Phase 205 plan 02, D-23). One entry per committed PNG.",
+  "version_pin": {
+    "pinned": true,
+    "policy": "Version-pinned. Refresh ONLY via a deliberate 're-baseline exemplars' maintainer commit that replaces the PNGs and this manifest together. Never auto-drift from the latest render — a drifting anchor breaks run-to-run comparability.",
+    "own_render_license": "All exemplars are own screenshots of this MIT-licensed repo (accrue_admin) — license-clean by construction (D-19). Third-party dashboards (Linear/Vercel/Prisma/Tailscale/Oban) stay TEXTUAL anchors in DESIGN-LENS-RUBRIC.md; none are committed as images.",
+    "source_commit_sha": "50acdd83472912130e94ff21cc1fa4045f530274",
+    "bundle_sha256": "75f9dc74f8c97ed9270f9dd674ceb2e65be59381945be00a3e1269cc43f543c5",
+    "css_bundle_note": "priv/static/accrue_admin.css was rebuilt via `mix accrue_admin.assets.build` (MIX_ENV=test) immediately before capture; the rebuild produced no diff, so PNGs reflect the committed CSS bundle (RESEARCH Pitfall 5)."
+  },
+  "capture_recipe": {
+    "server": "MIX_ENV=test mix accrue_admin.e2e.server (auto-booted by playwright.config.js webServer; port from ACCRUE_ADMIN_E2E_PORT, default 4017)",
+    "route": "POST /__e2e__/reset -> POST /__e2e__/seed/{operator-flows,dashboard,edge-states} -> GET /__e2e__/login?to=<surface> -> data-theme=light -> page.screenshot({ fullPage: false }) at a fixed viewport",
+    "downscale": "None required. Captured at a fixed 1280px-wide desktop viewport (the 'fixed-width playwright capture' path), so every PNG is <=1600px wide by construction and well under the 5 MB base64 MAX_B64_BYTES guard. sips/ImageMagick were available but not needed; no npm dependency (no sharp) was added.",
+    "bad_exemplar_method": "The admin serves a strict nonce-only CSP, so `<style>`/addStyleTag injection is blocked. Bad poles were produced by deterministic CSSOM mutation (element.style.setProperty(prop, val, 'important')), which CSP's style-src does not govern, over a bounded selector set on the current admin render, then screenshot, then discarded (own-render, no source change committed).",
+    "capture_harness": "A throwaway spec (e2e/_ratchet-exemplar-capture.spec.js) was used for capture and removed after curation — it is NOT committed. The reusable capture code with git history is e2e/admin-visuals.spec.js (D-18)."
+  },
+  "exemplars": [
+    {
+      "file": "good/dashboard.png",
+      "role": "good",
+      "density_pole": "correct",
+      "surface": "dashboard",
+      "surface_type": "page-flow",
+      "route": "/billing",
+      "viewport": "chromium-desktop",
+      "theme": "light",
+      "max_dimensions": { "width": 1280, "height": 1200 },
+      "capture_command": "reset -> seed(operator-flows,dashboard,edge-states) -> login(/billing) -> data-theme=light -> setViewportSize(1280x1200) -> screenshot(fullPage:false)",
+      "curator_note": "Correctly-dense operator dashboard (data-dense-operator archetype). The primary suppressor of the density footgun: shows Accrue's real spacing bar for a dense KPI + attention-rail + activity console."
+    },
+    {
+      "file": "good/dev-components.png",
+      "role": "good",
+      "density_pole": "correct",
+      "surface": "component-kitchen",
+      "surface_type": "component",
+      "route": "/billing/dev/components",
+      "viewport": "chromium-desktop",
+      "theme": "light",
+      "max_dimensions": { "width": 1280, "height": 1400 },
+      "capture_command": "reset -> seed(operator-flows,dashboard,edge-states) -> login(/billing/dev/components) -> data-theme=light -> setViewportSize(1280x1400) -> screenshot(fullPage:false)",
+      "curator_note": "The /dev/components kitchen (foundation archetype). Anchors token-clean primitive spacing/hierarchy for component and component-group surfaces."
+    },
+    {
+      "file": "bad/cramped.png",
+      "role": "bad",
+      "density_pole": "cramped",
+      "surface": "dashboard",
+      "surface_type": "page-flow",
+      "route": "/billing",
+      "viewport": "chromium-desktop",
+      "theme": "light",
+      "max_dimensions": { "width": 1280, "height": 1200 },
+      "capture_command": "login(/billing) -> CSSOM tighten (line-height 1.05; gaps 1px; div/section/card padding 1px 3px, margin 0; td/th padding 1px 4px; h1-h3 margin 0) -> screenshot(fullPage:false)",
+      "distortion": "Under-spaced / too-tight synthetic distortion of the current dashboard on the current admin (D-19 fallback for cramped, since an old-SHA boot was impractical in this working tree). Reads as cramped: nav rows and sections butt together, no group separation.",
+      "curator_note": "Cramped density pole. Teaches the under-spaced failure mode so the lens does not only learn the wasteful pole."
+    },
+    {
+      "file": "bad/wasteful.png",
+      "role": "bad",
+      "density_pole": "wasteful",
+      "surface": "dashboard",
+      "surface_type": "page-flow",
+      "route": "/billing",
+      "viewport": "chromium-desktop",
+      "theme": "light",
+      "max_dimensions": { "width": 1280, "height": 1200 },
+      "capture_command": "login(/billing) -> CSSOM inflate (line-height 2.4; gaps 56px; div/section/card padding 40px 48px, margin 24px 0; td/th padding 34px 44px) -> screenshot(fullPage:false)",
+      "distortion": "Synthetically over-whitespaced dashboard (inflate padding/gaps -> shoot -> revert; no source change committed, D-19). The operator's data is pushed far below the fold; the console reads like a marketing page.",
+      "curator_note": "Wasteful density pole. The direct anti-anchor for the milestone's biggest brand risk: over-whitespacing a correctly-dense console."
+    },
+    {
+      "file": "bad/off-register.png",
+      "role": "bad",
+      "density_pole": "none",
+      "surface": "dashboard",
+      "surface_type": "page-flow",
+      "route": "/billing",
+      "viewport": "chromium-desktop",
+      "theme": "light",
+      "max_dimensions": { "width": 1280, "height": 1200 },
+      "capture_command": "login(/billing) -> CSSOM fintech-glossy (purple/blue/cyan gradient background; serif type; 22px card radius + heavy shadow; 9999px gradient pill CTAs with glow shadow + text-shadow) -> screenshot(fullPage:false)",
+      "distortion": "Off-register / fintech-glossy negative synthesized on the own render (D-19 offered a textual-only fallback; a license-clean own-render was achievable so the PNG ships). Saturated gradients + glossy pill CTAs + rounded-everything + off-brand serif -> the anti-thesis of quiet, well-made developer tooling (D-21).",
+      "curator_note": "Brand-expression (d8) negative anchor. Attach as the BAD exemplar when the design lens probes brand register, independent of surface_type."
+    }
+  ]
+}
