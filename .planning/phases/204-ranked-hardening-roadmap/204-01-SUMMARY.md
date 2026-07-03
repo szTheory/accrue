@@ -82,6 +82,7 @@ Phase 204 Plan 01 rebuilt `.planning/phases/204-ranked-hardening-roadmap/204-HAR
 - Task 2 verifier passed: ten `### Rank N -` cards, exactly ten occurrences of each required card field label, five named slices, explicit deferral categories, and required evidence terms.
 - Task 3 verifier passed: all required sections, RD-01 through RD-04 coverage, roadmap-only/no-change language, required no-change surfaces, brand-term guard, and no product-surface status changes.
 - Overall closeout verifier passed: roadmap has 252 lines, all task commits exist, no stub-pattern matches were found in the roadmap, and no product/source surfaces changed.
+- Post-verification gap closure `634cf145` added direct Phase 201/202/203 evidence cues to each suggested follow-up milestone and corrected RD-03/RD-04 coverage mappings after the first phase verifier found those two documentation gaps.
 
 ## Deviations from Plan
 
