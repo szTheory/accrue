@@ -317,12 +317,129 @@ function isAdmissibleToken(token) {
   return token.startsWith(prefix) && token.length > prefix.length;
 }
 
+// -----------------------------------------------------------------------------
+// Pure self-test (D-05) — proves DEDUP-01 + DEDUP-02 with no key and no live model.
+// Twins `phase200-scorecard.mjs:841-946`: fixtures → assert → final-pass-line. No
+// mkdtemp/rmSync wrapper (this is pure — no filesystem, no network, no SDK).
+// -----------------------------------------------------------------------------
+
+/**
+ * Golden-hash snapshot (D-05 class 7). Computed ONCE from the real `findingId` at
+ * authoring time and pinned here so any future separator/field-order change flips it
+ * (same discipline as the phase200 golden-count guard). Do NOT hand-edit — regenerate
+ * only via a deliberate `findingId("dashboard__d03__kpi-row__ov-copy-vocabulary+hover-affordance")`.
+ */
+const GOLDEN_FINDING_ID = "f-15a8b227d09e0ea1";
+
+// assertSelfTest — copied verbatim from phase200-scorecard.mjs:841-844.
+function assertSelfTest(name, condition, details = "") {
+  if (!condition) throw new Error(`Self-test failed: ${name}${details ? ` (${details})` : ""}`);
+  console.log(`self-test pass: ${name}`);
+}
+
+/**
+ * runSelfTest() — asserts over hand-written identity fixtures (no tmp dirs, no model,
+ * no key) covering the 7 D-05 DEDUP-02 assertion classes plus a slug-parity check.
+ * Throws on any failure (→ nonzero exit via the standalone runner below).
+ */
+function runSelfTest() {
+  const base = {
+    surface: "dashboard",
+    dimension: 3,
+    region_tag: "kpi-row",
+    overlay_tags: ["copy-vocabulary", "hover-affordance"],
+  };
+  const id = (o) => findingId(claimKey(o.surface, o.dimension, o.region_tag, o.overlay_tags));
+
+  // (1) idempotence — two identical identity inputs → same finding_id.
+  assertSelfTest("(1) idempotence", id(base) === id({ ...base }));
+
+  // (2) prose-independence — clones differing ONLY in non-identity prose fields
+  //     (defect/suggested_fix/severity/persona_id/defect_bucket) → identical finding_id.
+  //     This is the DEDUP-02 heart: prose never reaches identity.
+  const prose = {
+    ...base,
+    defect: "The KPI labels are cramped and hard to scan quickly.",
+    suggested_fix: "Increase row gap and align numerals.",
+    severity: "real",
+    persona_id: "revenue-analyst",
+    defect_bucket: "spacing-density",
+  };
+  const proseClone = {
+    ...base,
+    defect: "totally different words describing a different symptom",
+    suggested_fix: "some other remedy entirely",
+    severity: "minor",
+    persona_id: "support-lead",
+    defect_bucket: "hierarchy-emphasis",
+  };
+  assertSelfTest("(2) prose-independence", id(prose) === id(proseClone) && id(prose) === id(base));
+
+  // (3) overlay order + duplicate invariance → same finding_id.
+  assertSelfTest(
+    "(3) overlay order/dup invariance",
+    id(base) === id({ ...base, overlay_tags: ["hover-affordance", "copy-vocabulary", "hover-affordance"] })
+  );
+
+  // (4) empty-normalization — overlays [] vs undefined → ov-none; region "" vs absent → noregion.
+  const emptyArr = { surface: "dashboard", dimension: 3, region_tag: "", overlay_tags: [] };
+  const emptyUndef = { surface: "dashboard", dimension: 3, region_tag: undefined, overlay_tags: undefined };
+  assertSelfTest("(4) empty-normalization", id(emptyArr) === id(emptyUndef));
+  assertSelfTest(
+    "(4) empty sentinels present",
+    claimKey("dashboard", 3, "", []) === "dashboard__d03__noregion__ov-none"
+  );
+
+  // (5) intended-distinctness negatives — differ ONLY in region OR dim OR overlay-set → DIFFERENT id.
+  assertSelfTest("(5) distinct region", id(base) !== id({ ...base, region_tag: "data-table" }));
+  assertSelfTest("(5) distinct dimension", id(base) !== id({ ...base, dimension: 8 }));
+  assertSelfTest("(5) distinct overlay-set", id(base) !== id({ ...base, overlay_tags: ["copy-vocabulary"] }));
+
+  // (6) closed-enum-throws — overlay ∉ enum, and dimension 13 via assertDimension → throw.
+  let overlayThrew = false;
+  try {
+    normalizeOverlays(["not-a-real-tag"]);
+  } catch {
+    overlayThrew = true;
+  }
+  assertSelfTest("(6) overlay ∉ enum throws", overlayThrew);
+  let dimThrew = false;
+  try {
+    assertDimension(13);
+  } catch {
+    dimThrew = true;
+  }
+  assertSelfTest("(6) dimension 13 throws", dimThrew);
+
+  // (7) golden-hash snapshot — locks separators + field order against a pinned literal.
+  assertSelfTest(
+    "(7) golden-hash snapshot",
+    findingId("dashboard__d03__kpi-row__ov-copy-vocabulary+hover-affordance") === GOLDEN_FINDING_ID,
+    `expected ${GOLDEN_FINDING_ID}`
+  );
+
+  // slug parity — the reimplemented slug() must be byte-identical to the frozen manifest
+  // cell grammar. The manifest cellId embeds `slug(surface)` as the segment after the
+  // `p187` prefix (baseline-manifest.js:263-276): p187__<slug(surface)>__<mode>__...
+  // We reproduce that exact expectation without importing the manifest (SSOT stays
+  // SDK/manifest-free): a surface with mixed case/spaces/punctuation must slug identically.
+  const sampleSurface = "subscription-detail";
+  assertSelfTest("slug parity (surface segment)", slug(sampleSurface) === "subscription-detail");
+  assertSelfTest(
+    "slug parity (normalization rules)",
+    slug("Recovery / At-Risk Subs!!") === "recovery-at-risk-subs" && slug("--Coupons--") === "coupons"
+  );
+
+  console.log("ratchet-propose claim-key self-test passed.");
+}
+
 module.exports = {
   REGION_TAGS,
   OVERLAY_TAGS,
   REGION_SELECTORS,
   ALLOWED_SUBSET,
   SYNONYM_TABLE,
+  GOLDEN_FINDING_ID,
   slug,
   allowedSubsetFor,
   assertDimension,
@@ -331,4 +448,12 @@ module.exports = {
   claimKey,
   findingId,
   isAdmissibleToken,
+  assertSelfTest,
+  runSelfTest,
 };
+
+// Standalone runner: `node accrue_admin/e2e/ratchet/region-tags.js` executes the pure
+// self-test and exits nonzero on any thrown assertion. No ANTHROPIC_API_KEY, no SDK.
+if (require.main === module) {
+  runSelfTest();
+}
