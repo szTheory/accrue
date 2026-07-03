@@ -40,7 +40,7 @@ Stop rule: if proposed work is polish-only with a documented workaround and no r
 - [x] Phase 201: Software quality evaluation — produce `201-SOFTWARE-QUALITY-AUDIT.md` covering adoption, production, maintainability, supportability, UI, release, upgrade, data, security, architecture, OSS trust, and missing project-specific dimensions (QLT-01..05). Completed 2026-07-02.
 - [x] Phase 202: CI/CD performance and determinism audit — produce `202-CI-CD-PERFORMANCE-AUDIT.md` with workflow topology, static critical path, measurement plan, bottlenecks, flaky/determinism risks, cache risks, and target pipeline recommendations (CI-01..05). (completed 2026-07-02)
 - [x] Phase 203: Database schema contract ADR — produce `203-DB-SCHEMA-CONTRACT-ADR.md`; lock the current `billing` default, preserve explicit `public`, and define future prefix hardening checks without changing defaults now (DB-01..04). (completed 2026-07-02)
-- [ ] Phase 204: Ranked hardening roadmap — produce `204-HARDENING-ROADMAP.md` grouping follow-up implementation work by priority, milestone shape, impact, effort, risk reduction, and done criteria (RD-01..04).
+- [x] Phase 204: Ranked hardening roadmap — produce `204-HARDENING-ROADMAP.md` grouping follow-up implementation work by priority, milestone shape, impact, effort, risk reduction, and done criteria (RD-01..04). (completed 2026-07-03)
 
 **Dependency shape:** 201, 202, and 203 can run in parallel after milestone initialization. Phase 204 consumes all three audits and must run last.
 
@@ -131,7 +131,7 @@ Plans:
   3. Polish-only work is deferred unless it reduces adoption, production, support, or maintenance risk.
   4. The roadmap preserves the v1.55 audit-only boundary and does not imply implementation happened in this milestone.
 
-**Plans:** 1 plan
+**Plans:** 1/1 plans complete
 
 Plans:
 
@@ -285,7 +285,7 @@ Full details: [v1.48 roadmap archive](milestones/v1.48-ROADMAP.md)
 | 201. Software quality evaluation | v1.55 | 1/1 | Complete    | 2026-07-02 |
 | 202. CI/CD performance and determinism audit | v1.55 | 1/1 | Complete    | 2026-07-02 |
 | 203. Database schema contract ADR | v1.55 | 1/1 | Complete    | 2026-07-02 |
-| 204. Ranked hardening roadmap | v1.55 | 1/1 | Complete   | 2026-07-03 |
+| 204. Ranked hardening roadmap | v1.55 | 1/1 | Complete    | 2026-07-03 |
 
 ## Historical Backlog Anchors (not active scope)
 
