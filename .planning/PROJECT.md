@@ -538,7 +538,7 @@ zero blockers; non-critical follow-ups + partial Nyquist 123–125 deferred).
 
 ## Current State
 
-**v1.55 Phases 201-203 — Software quality, CI/CD, and DB schema-contract audits completed 2026-07-02.** Phase 201 produced the evidence-backed software-quality audit at `.planning/phases/201-software-quality-evaluation/201-SOFTWARE-QUALITY-AUDIT.md`, verified 8/8 must-haves, and validated QLT-01 through QLT-05. Phase 202 produced the focused CI/CD performance and determinism audit at `.planning/phases/202-ci-cd-performance-and-determinism-audit/202-CI-CD-PERFORMANCE-AUDIT.md`, verified 11/11 must-haves, and validated CI-01 through CI-05 with static topology evidence, explicit metrics-needed boundaries, provider proof classification, and Phase 204-ready handoff rows. Phase 203 produced the accepted database schema contract ADR at `.planning/phases/203-database-schema-contract-adr/203-DB-SCHEMA-CONTRACT-ADR.md`, verified 5/5 must-haves, validated DB-01 through DB-04, kept `billing` as the default Accrue-owned Postgres schema, preserved explicit `public`, rejected a default `accrue` rename for v1.55, and handed schema-prefix hardening checks to Phase 204. These phases stayed audit/ADR-only: no product behavior, public API, DB default, CI topology, release automation, runtime UI, CSS, route, source, workflow, script, docs mirror, example host, or package metadata changes. Phase 204 remains last and consumes the Phase 201-203 evidence into a ranked hardening roadmap.
+**v1.55 — OSS Quality Evaluation & Hardening Roadmap completed 2026-07-03.** Phase 201 produced the evidence-backed software-quality audit at `.planning/phases/201-software-quality-evaluation/201-SOFTWARE-QUALITY-AUDIT.md`, verified 8/8 must-haves, and validated QLT-01 through QLT-05. Phase 202 produced the focused CI/CD performance and determinism audit at `.planning/phases/202-ci-cd-performance-and-determinism-audit/202-CI-CD-PERFORMANCE-AUDIT.md`, verified 11/11 must-haves, and validated CI-01 through CI-05 with static topology evidence, explicit metrics-needed boundaries, provider proof classification, and Phase 204-ready handoff rows. Phase 203 produced the accepted database schema contract ADR at `.planning/phases/203-database-schema-contract-adr/203-DB-SCHEMA-CONTRACT-ADR.md`, verified 5/5 must-haves, validated DB-01 through DB-04, kept `billing` as the default Accrue-owned Postgres schema, preserved explicit `public`, rejected a default `accrue` rename for v1.55, and handed schema-prefix hardening checks to Phase 204. Phase 204 produced the ranked hardening roadmap at `.planning/phases/204-ranked-hardening-roadmap/204-HARDENING-ROADMAP.md`, verified 12/12 must-haves, validated RD-01 through RD-04, and grouped future hardening work around public truth, evaluator proof, provider semantics, release safety, CI baseline data, schema guards, package listing trust, host browser setup, release-gate cleanup, and portal readiness. The milestone stayed audit/ADR/roadmap-only: no product behavior, public API, DB default, CI topology, release automation, runtime UI, CSS, route, source, workflow, script, docs mirror, example host, or package metadata changes.
 
 **v1.54 — Admin UI Page-Level Streamlining & Storybook shipped & archived 2026-07-01 (Phases 193–200, 59/59 plans, 23/23 requirements).** The milestone locked SPEC-OVERVIEW/LIST/DETAIL, extended the page-flow baseline, adopted PhoenixStorybook dev/test-only, delivered the Dashboard/Subscription-detail/Subscriptions-list archetype exemplars, extracted `PageHeader`, propagated LIST and DETAIL/analytics patterns across the admin surface, fixed overlay/focus/scroll/floating correctness, completed fixture stress and microcopy sweeps, and closed with Storybook/theming/axe/no-FOUC/reduced-motion/CI guardrail sign-off. The audit passed with 23/23 implementation-verified requirements, 8/8 phase verifications, 8/8 E2E flows, zero blockers, and TOOL-02 pixel-diff visual regression recorded as an accepted out-of-scope deferral.
 
@@ -567,9 +567,9 @@ The v1.50→v1.54 arc (Admin UI Foundation → Depth Pass → Brand System → D
 
 ### Active
 
-v1.55 is active as audit-only maintenance / release-readiness work. QLT-01 through QLT-05 are validated by Phase 201; CI-01 through CI-05 are validated by Phase 202; DB-01 through DB-04 are validated by Phase 203; RD-01 through RD-04 remain pending for Phase 204. The post-v1.48 pause rule remains in force: future broad feature scope still requires a concrete adopter failure mode, correctness/security/data-loss risk, repeated support issue, operational failure, or explicit strategy change.
+No active v1.55 requirements remain. QLT-01 through QLT-05 are validated by Phase 201; CI-01 through CI-05 are validated by Phase 202; DB-01 through DB-04 are validated by Phase 203; RD-01 through RD-04 are validated by Phase 204. The post-v1.48 pause rule remains in force: future broad feature scope still requires a concrete adopter failure mode, correctness/security/data-loss risk, repeated support issue, operational failure, or explicit strategy change.
 
-### Validated v1.55 (active milestone; Phases 201-203 complete 2026-07-02)
+### Validated v1.55 (Phases 201-204 complete 2026-07-03)
 
 Software Quality Evaluation — 5/5 satisfied in Phase 201.
 
@@ -593,6 +593,13 @@ Database Schema Contract ADR — 4/4 satisfied in Phase 203.
 - ✓ **DB-02** — ADR explains why v1.55 keeps `billing` instead of switching to `accrue`, including pros/cons and upgrade risk — Phase 203.
 - ✓ **DB-03** — ADR lists concrete future hardening checks for prefix agreement, raw SQL qualification, installer/docs/test coverage, and explicit old-default compatibility — Phase 203.
 - ✓ **DB-04** — ADR identifies which schema-related work belongs in a future implementation milestone and which work is not worth doing now — Phase 203.
+
+Ranked Hardening Roadmap — 4/4 satisfied in Phase 204.
+
+- ✓ **RD-01** — Ranked top-10 hardening list includes area/quality dimension, impact, effort, risk reduction, timing/slice, and done criteria — Phase 204.
+- ✓ **RD-02** — Follow-up work is grouped into milestone-sized slices rather than one broad cleanup list — Phase 204.
+- ✓ **RD-03** — Ranked rows, implementation cards, and follow-up slices trace back to concrete Phase 201, Phase 202, or Phase 203 evidence — Phase 204.
+- ✓ **RD-04** — Polish-only or overbuilt work is explicitly deferred unless it reduces adoption, production, support, release, data, or maintenance risk — Phase 204.
 
 ### Validated v1.54 (archived in `.planning/milestones/v1.54-REQUIREMENTS.md`; milestone shipped & archived 2026-07-01)
 
@@ -708,4 +715,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-07-02 after v1.55 Phase 203 (database schema contract ADR) completed and validated DB-01 through DB-04. v1.55 remains active with Phase 204 pending; v1.54 is still the most recently shipped milestone.*
+*Last updated: 2026-07-03 after v1.55 Phase 204 completed and validated RD-01 through RD-04. v1.55 is complete and ready for milestone closeout; v1.54 is still the most recently shipped milestone.*
