@@ -2,47 +2,47 @@
 gsd_state_version: 1.0
 milestone: v1.55
 milestone_name: OSS Quality Evaluation & Hardening Roadmap
-current_phase: 204
-status: Phase 204 complete and verified
-stopped_at: Phase 204 complete and verified
-last_updated: "2026-07-03T02:20:15.250Z"
+current_phase: null
+status: Awaiting next milestone
+stopped_at: Milestone v1.55 shipped and archived; no active milestone open
+last_updated: "2026-07-03T08:30:10.522Z"
 last_activity: 2026-07-03
-last_activity_desc: Phase 204 complete and verified
+last_activity_desc: Milestone v1.55 completed and archived
 progress:
   total_phases: 4
   completed_phases: 4
   total_plans: 4
   completed_plans: 4
   percent: 100
-current_phase_name: Ranked hardening roadmap
+current_phase_name: Awaiting next milestone
 ---
 
 # Project State
 
 ## Project Reference
 
-See: `.planning/PROJECT.md` (updated 2026-07-02 after Phase 203 completion)
+See: `.planning/PROJECT.md` (updated 2026-07-03 after v1.55 closeout)
 
 **Core value:** A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic Elixir DX, strong domain modeling, tamper-evident audit ledger, great observability, and zero breaking-change pain through v1.x.
 
-**Current focus:** v1.55 complete — ready for milestone closeout
+**Current focus:** Awaiting next milestone planning
 
 ## Current Position
 
-Phase: 204
-Plan: All Phase 204 plans complete
-Status: Phase complete and verified
-Last activity: 2026-07-03 — Phase 204 complete and verified
+Phase: none active
+Plan: —
+Status: Awaiting next milestone
+Last activity: 2026-07-03 — Milestone v1.55 completed and archived
 
 ## Post-v1.48 Pause Rule
 
 After v1.48, broad feature milestones remain closed by default unless reopened by concrete adopter failure, correctness/security/data-loss risk, repeated support issue, operational failure, or explicit strategy change.
 
-v1.54 Admin UI Page-Level Streamlining & Storybook shipped on 2026-07-01 as a quality / page-level-design / interaction-correctness investment in the already-shipped `accrue_admin` surface — not a broad feature milestone (no new billing primitives, no breaking API/route changes, no Tailwind migration; core `accrue` stays LiveView-runtime-free — PhoenixStorybook is `accrue_admin` dev/test-only). Reopen decision recorded in `PROJECT.md`. Justification class: explicit strategy change (page-level design quality of the flagship adopter-facing surface elevated to a strategic priority — same class as v1.50/v1.51/v1.52/v1.53) **plus firsthand-observed page-level usability defects** in the running demo (modal-behind-scrim, scroll traps, floating/mispositioned overlays, won't-dismiss, hover-on-non-interactive empty states, disabled-looks-enabled).
+v1.55 OSS Quality Evaluation & Hardening Roadmap shipped on 2026-07-03 as maintenance / release-readiness / support-contract hardening under stable core. It was audit-only and produced evidence-backed software quality, CI/CD, and DB schema-contract artifacts plus a ranked implementation roadmap; it did not change product behavior, public APIs, DB defaults, CI required-check topology, release automation, or runtime UI.
 
 ## Milestone Progress
 
-### v1.55 Phase Summary (ACTIVE — OSS Quality Evaluation & Hardening Roadmap; audit-only, implementation hardening deferred)
+### v1.55 Phase Summary (SHIPPED & ARCHIVED 2026-07-03 — OSS Quality Evaluation & Hardening Roadmap; phase dirs in `milestones/v1.55-phases/`)
 
 | Phase | Name | Requirements | Status |
 |-------|------|--------------|--------|
@@ -51,7 +51,7 @@ v1.54 Admin UI Page-Level Streamlining & Storybook shipped on 2026-07-01 as a qu
 | 203 | DB schema contract ADR | DB-01, DB-02, DB-03, DB-04 | Complete (2026-07-02) |
 | 204 | Ranked hardening roadmap | RD-01, RD-02, RD-03, RD-04 | Complete (2026-07-03) |
 
-Coverage: 18/18 v1.55 requirements mapped (each REQ-ID → exactly one phase). Initial milestone artifacts: `.planning/phases/201-software-quality-evaluation/201-SOFTWARE-QUALITY-AUDIT.md`, `.planning/phases/202-ci-cd-performance-and-determinism-audit/202-CI-CD-PERFORMANCE-AUDIT.md`, `.planning/phases/203-database-schema-contract-adr/203-DB-SCHEMA-CONTRACT-ADR.md`, and `.planning/phases/204-ranked-hardening-roadmap/204-HARDENING-ROADMAP.md`.
+Coverage: 18/18 v1.55 requirements mapped (each REQ-ID → exactly one phase). Milestone audit passed with 4/4 phase verifications, 18/18 requirements clean by 3-source audit, 8/8 integration checks, 6/6 audit-only flows, zero blockers, and Nyquist-compliant validation metadata. Archived milestone artifacts: `.planning/milestones/v1.55-phases/201-software-quality-evaluation/201-SOFTWARE-QUALITY-AUDIT.md`, `.planning/milestones/v1.55-phases/202-ci-cd-performance-and-determinism-audit/202-CI-CD-PERFORMANCE-AUDIT.md`, `.planning/milestones/v1.55-phases/203-database-schema-contract-adr/203-DB-SCHEMA-CONTRACT-ADR.md`, and `.planning/milestones/v1.55-phases/204-ranked-hardening-roadmap/204-HARDENING-ROADMAP.md`.
 
 **Dependency shape:** 201, 202, and 203 can be reviewed/refined independently; 204 integrates their findings into the ranked hardening plan. This milestone intentionally does not ship code or schema changes.
 
@@ -146,6 +146,10 @@ Coverage: 22/22 v1.51 requirements mapped (each REQ-ID → exactly one phase). D
 | 166 | Adoption DX Docs | DOC-01, DOC-02, DOC-03 | Complete |
 
 ### Recently shipped milestones
+
+**v1.55** (shipped & archived **2026-07-03**): 4 phases (**201–204**), 18 requirements. Theme: OSS Quality Evaluation & Hardening Roadmap. Audit passed; see `.planning/milestones/v1.55-ROADMAP.md`.
+
+**v1.54** (shipped & archived **2026-07-01**): 8 phases (**193–200**), 23 requirements. Theme: Admin UI Page-Level Streamlining & Storybook. Audit passed; see `.planning/milestones/v1.54-ROADMAP.md`.
 
 **v1.53** (shipped & archived **2026-06-20**): 6 phases (**187–192**), 33 requirements. Theme: Admin UI Design-System Hardening. See `.planning/milestones/v1.53-ROADMAP.md`.
 
@@ -619,4 +623,4 @@ Resume file: None
 
 ## Operator Next Steps
 
-- Complete or audit-close the v1.55 milestone.
+- Start the next milestone with /gsd-new-milestone

@@ -1,5 +1,22 @@
 # Milestones
 
+## v1.55 OSS Quality Evaluation & Hardening Roadmap (Shipped: 2026-07-03)
+
+**Phases completed:** 4 phases, 4 plans, 9 tasks
+
+**Key accomplishments:**
+
+- Evidence-backed release-readiness audit with ranked quality risks, top-five deep dives, journey sections, assumption labels, and Phase 204-ready hardening candidates.
+- Static-first CI/CD audit with a partial GitHub run snapshot, explicit metrics-needed gaps, and Phase 204-ready hardening rows.
+- Accepted ADR locking `billing` as the default Accrue-owned Postgres schema, preserving explicit `public`, rejecting a default `accrue` rename, and handing rankable schema-prefix hardening checks to Phase 204.
+- Ranked the top 10 follow-up hardening items into milestone-sized implementation slices with impact, effort, risk-reduction, done criteria, explicit deferrals, and no implication that implementation happened in v1.55.
+
+**Verification:** 18/18 requirements complete; milestone audit passed with 4/4 phase verifications, 18/18 requirements clean by 3-source audit, 8/8 integration checks, 6/6 audit-only flows, zero blockers, and Nyquist-compliant validation metadata.
+
+**Archives:** [`milestones/v1.55-ROADMAP.md`](milestones/v1.55-ROADMAP.md), [`milestones/v1.55-REQUIREMENTS.md`](milestones/v1.55-REQUIREMENTS.md), [`milestones/v1.55-MILESTONE-AUDIT.md`](milestones/v1.55-MILESTONE-AUDIT.md), [`milestones/v1.55-phases/`](milestones/v1.55-phases/). Planning git tag `v1.55`.
+
+---
+
 ## v1.35 : Dual-Provider Supportability Closure (Backfilled: 2026-07-01)
 
 **Note:** Synthesized from archive snapshot by `/gsd-health --backfill`. Original completion date unknown.

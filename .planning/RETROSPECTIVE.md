@@ -1452,12 +1452,56 @@ A page-level excellence pass on the already-shipped `accrue_admin` operator UI. 
 
 ---
 
+## Milestone: v1.55 - OSS Quality Evaluation & Hardening Roadmap
+
+**Shipped:** 2026-07-03  
+**Phases:** 4 (201-204) | **Plans:** 4 | **Tasks:** 9
+
+### What Was Built
+
+An audit-only maintenance milestone for release-readiness and support-contract hardening. Phase 201 produced an evidence-backed software-quality audit across adoption, production, maintenance, support, UI, release, upgrade, architecture, data, security, OSS trust, and Accrue-specific dimensions. Phase 202 produced a static-first CI/CD performance and determinism audit with explicit metrics-needed gaps. Phase 203 accepted the DB schema-contract ADR: keep `billing` as the default dedicated Postgres schema, preserve explicit `public`, and defer rename/data-movement work. Phase 204 ranked the top 10 follow-up hardening items into milestone-sized slices with impact, effort, risk reduction, done criteria, metrics needed, and non-goals.
+
+### What Worked
+
+- **Audit-only boundary stayed clean.** The milestone identified risk and ranked implementation work without changing runtime behavior, API surface, DB defaults, CI topology, or release automation.
+- **Parallel evidence gathering paid off.** Phases 201, 202, and 203 could run independently, then Phase 204 integrated their findings into one ordered roadmap.
+- **3-source requirement verification was useful.** REQUIREMENTS.md, VERIFICATION.md, and SUMMARY frontmatter now agree on all 18 requirements.
+- **Open-artifact cleanup reduced future noise.** Stale quick-task and pending-todo metadata were resolved before archive, so `audit-open` is clean.
+
+### What Was Inefficient
+
+- Validation metadata lagged behind completed phase evidence for 201-203 and had to be normalized during milestone audit closeout.
+- The generated MILESTONES entry omitted the Phase 204 accomplishment and needed editorial cleanup.
+- The archive command moved core artifacts but left current planning prose describing v1.55 as active, requiring manual ROADMAP/PROJECT/STATE cleanup.
+
+### Patterns Established
+
+- Use audit-only milestones when the next implementation sequence is unclear; produce ranked slices before opening hardening work.
+- Separate static CI evidence from run-history metrics that must be collected later, especially before cache, gate, topology, or branch-protection changes.
+- Treat schema-prefix posture as a contract: default `billing`, explicit `public`, qualified migration helpers, no `search_path` reliance, and no rename/data movement without a dedicated future milestone.
+
+### Key Lessons
+
+1. A maintenance milestone can be valuable without code changes if it leaves behind a ranked, evidence-backed implementation roadmap.
+2. Validation frontmatter should be refreshed immediately after verification, not only when the milestone audit complains.
+3. Closeout must include artifact-audit cleanup; stale TODOs and quick-task metadata otherwise keep resurfacing as false blockers.
+4. Archive tooling still needs a human editorial pass for current-state language and milestone accomplishments.
+
+### Cost Observations
+
+- Model mix: not tracked.
+- Sessions: short audit/roadmap chain plus closeout cleanup.
+- Notable: the highest-signal checks were the milestone integration audit, the 3-source requirements extraction, and the `audit-open` cleanup gate.
+
+---
+
 ## Cross-Milestone Trends
 
 ### Process Evolution
 
 | Milestone | Sessions | Phases | Key Change |
 |-----------|----------|--------|------------|
+| v1.55 | short | 4 | **QLT/CI/DB/RD** - audit-only maintenance milestone: evidence-backed software-quality audit, static-first CI/CD audit, accepted DB schema-contract ADR, and ranked top-10 hardening roadmap. Audit `passed`; phases archived under **`milestones/v1.55-phases/`**; archives **`milestones/v1.55-*`**. |
 | v1.54 | long | 8 | **RES/STY/EXE/PGH/PRP/IXN/FIX/CPY/VER** — page-level admin streamlining: archetype specs → gold-standard exemplars → LIST/DETAIL propagation, canonical overlay primitive, PhoenixStorybook dev/test-only, deterministic fixture stress, and a 30,348-cell zero-regression Phase 200 sign-off. Audit `passed`; phases archived under **`milestones/v1.54-phases/`**; archives **`milestones/v1.54-*`**. |
 | v1.53 | short | 6 | **VER/FND/CMP/GRP/IXN/PAGE/CPY/SEED** — fractal admin design-system hardening (foundations→primitives→groups→pages→flows): 12-dimension rubric + 21,276-cell only-forward baseline + 800-row AX187 ledger; package-local FocusTrap + regression coverage for behavioral defects screenshots miss; idempotent scorecard ≥ baseline (0 regressions) + merge-blocking CI guardrails; maintainer sign-off discharged v1.51 photographic-sign-off tech-debt. Audit `gaps_found` (doc/traceability only) closed inline at close. Phases **187–192** under **`.planning/phases/`**; archives **`milestones/v1.53-*`**. |
 | v1.29 | short | 3 | **MG-01..MG-07** — Mailglass framework integration replacing `mjml_eex` + `phoenix_swoosh`; explicit `Mailglass.deliver/1` `idempotency_key` replaces Oban `unique: [period: 60]`; `/dev/mail` LiveView replaces `mix accrue.mail.preview`; 13 templates ported, 26 MJML/text assets deleted; `mailglass_cleanup_test` enforces non-regression in CI; phases **88–90** under **`milestones/v1.29-phases/`**; archives **`milestones/v1.29-*`**. |
@@ -1495,6 +1539,7 @@ A page-level excellence pass on the already-shipped `accrue_admin` operator UI. 
 
 | Milestone | Tests | Coverage | Zero-Dep Additions |
 |-----------|-------|----------|-------------------|
+| v1.55 | Milestone audit passed with 4/4 phase verifications, 18/18 requirements clean by REQUIREMENTS/VERIFICATION/SUMMARY extraction, 8/8 integration checks, 6/6 audit-only flows, zero blockers, and Nyquist-compliant validation metadata. | 18/18 requirements archived | No runtime/package dependency changes; audit-only roadmap and ADR artifacts. |
 | v1.54 | Phase 200 union scorecard verifier (30,348 cells, 0 regressions), Storybook coverage/theming checks, axe/no-FOUC/reduced-motion browser guardrails, overlay/floating/focus lifecycle tests, and centralized LIST copy contract alignment | 23/23 requirements archived | PhoenixStorybook dev/test-only in `accrue_admin`; no adopter runtime dependency, no core `accrue` LiveView runtime leak. |
 | v1.29 | New `mailglass_cleanup_test` (5 regression-guard assertions), `email_preview_live_test` fixture sweep (renders every type via admin LiveView), `mailglass_admin_routes/__routes__/0` ExUnit assertion in `accrue_admin`; 128 email tests pass post-cleanup | MG-01..MG-07 (7/7) archived | **Net dep removal:** `mjml_eex` + `phoenix_swoosh` removed from `accrue/mix.exs`; new `:mailglass` path dep replaces them. `accrue/priv/repo/migrations/20260426000000_create_mailglass_poc_tables.exs` for host bootstrap. |
 | v1.26 | Extended **`verify_package_docs.sh`** + **`verify_adoption_proof_matrix.sh`** substring gates; no new ExUnit facade (portal facade shipped **v1.24**) | INT-13 + INV-04 (2/2) archived | Doc + CI needles only; **`milestones/v1.26-*`**; execution trees **`v1.26-phases/`**. |

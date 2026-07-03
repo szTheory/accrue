@@ -29,19 +29,25 @@ A historical anchor, dormant seed, or deferred idea never opens milestone scope 
 
 v1.49 **Realistic Demo App & Adoption Evidence** shipped on **2026-06-02**. The checked-in host now has rich PingPal-style demo data, Docker-first local evaluation, deterministic Playwright E2E coverage, CI Docker smoke, mandatory periodic live-Stripe parity, and a Start Here documentation path for adopters.
 
-## Current Milestone: v1.55 OSS Quality Evaluation & Hardening Roadmap
+## Current State
 
-**Goal:** Evaluate Accrue as a real OSS billing project end to end, identify the weakest quality dimensions with repo evidence, and produce a ranked hardening roadmap without changing product behavior in this milestone.
+No active milestone is open. v1.55 shipped and archived on 2026-07-03; the project is ready for the next explicit milestone initialization.
 
-**Target features:**
-- Produce a blunt software-quality audit across adoption, production, maintenance, support, UI, release, upgrade, architecture, data, security, and OSS trust dimensions.
-- Produce a focused CI/CD performance and determinism audit that measures before optimizing and separates high-value gates from duplicated or low-signal work.
-- Lock the database schema-prefix posture: keep `billing` as the default dedicated Postgres schema, preserve explicit `public`, and document hardening work instead of changing defaults now.
-- Rank follow-up hardening milestones so future implementation work is coherent, scoped, and tied to adoption/production/support risk.
+The highest-ranked follow-up from v1.55 is **Public Truth And Proof-State Baseline**: align executable toolchain/package truth with public docs, publish one evaluator proof path, clarify proved/skipped/advisory provider semantics, and mirror that truth into package/listing surfaces. This is a candidate next milestone, not active scope until `/gsd-new-milestone` opens it.
 
-**Reopen decision:** v1.55 is maintenance / release-readiness / support-contract hardening work under the stable-core posture, not a broad feature milestone. The trigger is an explicit maintainer request to find the weakest quality dimensions before public-adoption/release confidence work, with concrete repo evidence already found around CI critical-path duplication, public-truth drift, evaluator clarity, portal parity, and schema-prefix contract hardening.
+## Most recently shipped milestone: v1.55 — OSS Quality Evaluation & Hardening Roadmap (**shipped & archived 2026-07-03**)
 
-## Most recently shipped milestone: v1.54 — Admin UI Page-Level Streamlining & Storybook (**shipped & archived 2026-07-01**)
+**Goal (ACHIEVED):** Evaluate Accrue as a real OSS billing project end to end, identify the weakest quality dimensions with repo evidence, and produce a ranked hardening roadmap without changing product behavior.
+
+**Delivered (Phases 201-204, 4/4 plans, 18/18 requirements):** an evidence-backed software-quality audit across adoption, production, maintenance, support, UI, release, upgrade, architecture, data, security, OSS trust, and Accrue-specific dimensions (201); a static-first CI/CD performance and determinism audit with workflow topology, critical path, measurement needs, flaky/determinism risks, cache risks, provider-state ambiguity, and target recommendations (202); an accepted database schema contract ADR keeping `billing` as the default dedicated Postgres schema while preserving explicit `public` and deferring rename/data-movement work (203); and a ranked top-10 hardening roadmap sliced into future milestones with impact, effort, risk reduction, done criteria, metrics needed, and explicit non-goals (204).
+
+**Reopen decision (honored):** maintenance / release-readiness / support-contract hardening under the stable-core posture, not a broad feature milestone. The trigger was an explicit maintainer request to find the weakest quality dimensions before public-adoption/release confidence work. Scope stayed audit-only: no product behavior changes, public API changes, DB default changes, CI required-check topology changes, release automation changes, or runtime UI changes.
+
+**Closeout proof:** Phases 201-204; planning tag `v1.55`; milestone audit `passed` with 4/4 phase verifications, 18/18 requirements clean by 3-source audit, 8/8 integration checks, 6/6 audit-only flows, zero blockers, and Nyquist-compliant validation metadata. See `.planning/MILESTONES.md`, `.planning/milestones/v1.55-ROADMAP.md`, `.planning/milestones/v1.55-REQUIREMENTS.md`, `.planning/milestones/v1.55-MILESTONE-AUDIT.md`, and `.planning/milestones/v1.55-phases/`.
+
+**Key context:** Phase 204 ranks Public Truth And Proof-State Baseline first, followed by evaluator/release safety, measured CI cleanup, schema-prefix contract hardening, and portal parity readiness. These are follow-up implementation candidates; v1.55 itself only produced the audits, ADR, and roadmap.
+
+## Prior shipped milestone: v1.54 — Admin UI Page-Level Streamlining & Storybook (**shipped & archived 2026-07-01**)
 
 **Goal (ACHIEVED):** Take the already-component-hardened `accrue_admin` operator UI (v1.53) from *interaction-correct building blocks* to *page-level excellence* — every page driven from operator JTBD, the info-dump density reduced, firsthand-observed usability defects fixed, and the surface proven in light/dark/system with a rendered Storybook + page-flow gate.
 
@@ -538,7 +544,7 @@ zero blockers; non-critical follow-ups + partial Nyquist 123–125 deferred).
 
 ## Current State
 
-**v1.55 — OSS Quality Evaluation & Hardening Roadmap completed 2026-07-03.** Phase 201 produced the evidence-backed software-quality audit at `.planning/phases/201-software-quality-evaluation/201-SOFTWARE-QUALITY-AUDIT.md`, verified 8/8 must-haves, and validated QLT-01 through QLT-05. Phase 202 produced the focused CI/CD performance and determinism audit at `.planning/phases/202-ci-cd-performance-and-determinism-audit/202-CI-CD-PERFORMANCE-AUDIT.md`, verified 11/11 must-haves, and validated CI-01 through CI-05 with static topology evidence, explicit metrics-needed boundaries, provider proof classification, and Phase 204-ready handoff rows. Phase 203 produced the accepted database schema contract ADR at `.planning/phases/203-database-schema-contract-adr/203-DB-SCHEMA-CONTRACT-ADR.md`, verified 5/5 must-haves, validated DB-01 through DB-04, kept `billing` as the default Accrue-owned Postgres schema, preserved explicit `public`, rejected a default `accrue` rename for v1.55, and handed schema-prefix hardening checks to Phase 204. Phase 204 produced the ranked hardening roadmap at `.planning/phases/204-ranked-hardening-roadmap/204-HARDENING-ROADMAP.md`, verified 12/12 must-haves, validated RD-01 through RD-04, and grouped future hardening work around public truth, evaluator proof, provider semantics, release safety, CI baseline data, schema guards, package listing trust, host browser setup, release-gate cleanup, and portal readiness. The milestone stayed audit/ADR/roadmap-only: no product behavior, public API, DB default, CI topology, release automation, runtime UI, CSS, route, source, workflow, script, docs mirror, example host, or package metadata changes.
+**v1.55 — OSS Quality Evaluation & Hardening Roadmap shipped & archived 2026-07-03.** Phase 201 produced the evidence-backed software-quality audit at `.planning/milestones/v1.55-phases/201-software-quality-evaluation/201-SOFTWARE-QUALITY-AUDIT.md`, verified 8/8 must-haves, and validated QLT-01 through QLT-05. Phase 202 produced the focused CI/CD performance and determinism audit at `.planning/milestones/v1.55-phases/202-ci-cd-performance-and-determinism-audit/202-CI-CD-PERFORMANCE-AUDIT.md`, verified 11/11 must-haves, and validated CI-01 through CI-05 with static topology evidence, explicit metrics-needed boundaries, provider proof classification, and Phase 204-ready handoff rows. Phase 203 produced the accepted database schema contract ADR at `.planning/milestones/v1.55-phases/203-database-schema-contract-adr/203-DB-SCHEMA-CONTRACT-ADR.md`, verified 5/5 must-haves, validated DB-01 through DB-04, kept `billing` as the default Accrue-owned Postgres schema, preserved explicit `public`, rejected a default `accrue` rename for v1.55, and handed schema-prefix hardening checks to Phase 204. Phase 204 produced the ranked hardening roadmap at `.planning/milestones/v1.55-phases/204-ranked-hardening-roadmap/204-HARDENING-ROADMAP.md`, verified 12/12 must-haves, validated RD-01 through RD-04, and grouped future hardening work around public truth, evaluator proof, provider semantics, release safety, CI baseline data, schema guards, package listing trust, host browser setup, release-gate cleanup, and portal readiness. The milestone stayed audit/ADR/roadmap-only: no product behavior, public API, DB default, CI topology, release automation, runtime UI, CSS, route, source, workflow, script, docs mirror, example host, or package metadata changes.
 
 **v1.54 — Admin UI Page-Level Streamlining & Storybook shipped & archived 2026-07-01 (Phases 193–200, 59/59 plans, 23/23 requirements).** The milestone locked SPEC-OVERVIEW/LIST/DETAIL, extended the page-flow baseline, adopted PhoenixStorybook dev/test-only, delivered the Dashboard/Subscription-detail/Subscriptions-list archetype exemplars, extracted `PageHeader`, propagated LIST and DETAIL/analytics patterns across the admin surface, fixed overlay/focus/scroll/floating correctness, completed fixture stress and microcopy sweeps, and closed with Storybook/theming/axe/no-FOUC/reduced-motion/CI guardrail sign-off. The audit passed with 23/23 implementation-verified requirements, 8/8 phase verifications, 8/8 E2E flows, zero blockers, and TOOL-02 pixel-diff visual regression recorded as an accepted out-of-scope deferral.
 
@@ -546,8 +552,8 @@ zero blockers; non-critical follow-ups + partial Nyquist 123–125 deferred).
 
 The v1.50→v1.54 arc (Admin UI Foundation → Depth Pass → Brand System → Design-System Hardening → Page-Level Streamlining) closed out the adopter-facing presentation/DX investment: a coherent, distinctly-branded, interaction-correct, page-level-consistent operator UI plus a committed standalone brand book (`brandbook/`), logo system, design tokens, and voice/copy.
 
-**Last shipped planning milestone:** **v1.54** — Phases **193–200** — **2026-07-01** (Admin UI Page-Level Streamlining & Storybook)
-**Hex.pm:** accrue 1.4.0 · accrue_admin 1.4.0 · accrue_portal 1.4.0 (unchanged — v1.50–v1.54 shipped no new core package code; v1.54 was admin-UI/CSS/test/dev-tooling only)
+**Last shipped planning milestone:** **v1.55** — Phases **201–204** — **2026-07-03** (OSS Quality Evaluation & Hardening Roadmap)
+**Hex.pm:** accrue 1.4.0 · accrue_admin 1.4.0 · accrue_portal 1.4.0 (unchanged — v1.55 shipped no package/runtime code; v1.50–v1.54 shipped no new core package code)
 
 ## Prior shipped milestone
 
@@ -715,4 +721,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-07-03 after v1.55 Phase 204 completed and validated RD-01 through RD-04. v1.55 is complete and ready for milestone closeout; v1.54 is still the most recently shipped milestone.*
+*Last updated: 2026-07-03 after v1.55 shipped and archived. No active milestone is open; the next likely candidate is the Phase 204 Public Truth And Proof-State Baseline slice.*
