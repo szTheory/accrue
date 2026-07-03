@@ -408,17 +408,17 @@ All substantive claims in this research are tagged as verified from local artifa
 |---|-------|---------|---------------|
 | None | No unverified assumptions are intentionally used. | n/a | n/a |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **What exact CI metrics will future implementation collect?**  
    - What we know: Phase 202 lists p50/p95 runtime, step timings, cache-hit state, slowest tests, compile profile, flake/rerun rate, live-Stripe proved-vs-skipped counts, and Docker cold/warm duration. [VERIFIED: .planning/phases/202-ci-cd-performance-and-determinism-audit/202-CI-CD-PERFORMANCE-AUDIT.md]  
-   - What's unclear: The exact future scripts/workflow summary shape is implementation work, not Phase 204 work. [VERIFIED: .planning/phases/204-ranked-hardening-roadmap/204-CONTEXT.md]  
-   - Recommendation: In the roadmap, keep CI cleanup cards behind `Metrics/evidence needed` rather than specifying full workflow patches. [VERIFIED: .planning/phases/204-ranked-hardening-roadmap/204-CONTEXT.md]
+   - RESOLVED: Phase 204 will not design the exact future scripts or workflow summary patches. The roadmap must name the Phase 202 metric families above as `Metrics/evidence needed` for CI-related cards and keep topology, cache, gate, branch-protection, Docker, and Playwright changes behind that baseline evidence. [VERIFIED: .planning/phases/204-ranked-hardening-roadmap/204-CONTEXT.md; VERIFIED: .planning/phases/204-ranked-hardening-roadmap/204-01-PLAN.md]
+   - Roadmap consequence: CI cleanup recommendations stay as follow-up implementation cards, not Phase 204 implementation work. [VERIFIED: .planning/ROADMAP.md; VERIFIED: .planning/phases/204-ranked-hardening-roadmap/204-CONTEXT.md]
 
 2. **Should any top-10 rank move from locked D-11?**  
    - What we know: D-11 permits slight reordering only with stronger evidence from the final Phase 201-203 artifacts. [VERIFIED: .planning/phases/204-ranked-hardening-roadmap/204-CONTEXT.md]  
-   - What's unclear: No stronger contradictory evidence appeared during this research. [VERIFIED: .planning/phases/201-software-quality-evaluation/201-SOFTWARE-QUALITY-AUDIT.md; VERIFIED: .planning/phases/202-ci-cd-performance-and-determinism-audit/202-CI-CD-PERFORMANCE-AUDIT.md; VERIFIED: .planning/phases/203-database-schema-contract-adr/203-DB-SCHEMA-CONTRACT-ADR.md]  
-   - Recommendation: Preserve D-11 order in the final roadmap. [VERIFIED: .planning/phases/204-ranked-hardening-roadmap/204-CONTEXT.md]
+   - RESOLVED: No stronger contradictory evidence appeared during this research. The Phase 204 plan preserves the D-11 rank order: public toolchain/version truth, evaluator proof path, provider proved/skipped/advisory semantics, release recovery preflight, CI baseline summaries, schema-prefix hardening guards, package metadata/listing trust, host browser setup ownership after measurement, release-gate repetition split after baseline data, and narrow portal parity readiness. [VERIFIED: .planning/phases/201-software-quality-evaluation/201-SOFTWARE-QUALITY-AUDIT.md; VERIFIED: .planning/phases/202-ci-cd-performance-and-determinism-audit/202-CI-CD-PERFORMANCE-AUDIT.md; VERIFIED: .planning/phases/203-database-schema-contract-adr/203-DB-SCHEMA-CONTRACT-ADR.md; VERIFIED: .planning/phases/204-ranked-hardening-roadmap/204-CONTEXT.md; VERIFIED: .planning/phases/204-ranked-hardening-roadmap/204-01-PLAN.md]
+   - Roadmap consequence: future execution should implement the locked D-11 order unless a later phase records new source evidence and explicitly supersedes this resolution. [VERIFIED: .planning/phases/204-ranked-hardening-roadmap/204-CONTEXT.md]
 
 ## Environment Availability
 
