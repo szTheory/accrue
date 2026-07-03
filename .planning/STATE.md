@@ -6,11 +6,12 @@ status: planning
 last_updated: "2026-07-03T15:53:33.231Z"
 last_activity: 2026-07-03
 progress:
-  total_phases: 0
+  total_phases: 4
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
   percent: 0
+  note: "Phases 205-208 are the committed v1.56 set; Phase 209 (full-surface sweep, SWEEP-01) is scope-gated/optional and excluded from progress totals.
 ---
 
 # Project State
@@ -21,14 +22,16 @@ See: `.planning/PROJECT.md` (updated 2026-07-03 after v1.55 closeout)
 
 **Core value:** A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic Elixir DX, strong domain modeling, tamper-evident audit ledger, great observability, and zero breaking-change pain through v1.x.
 
-**Current focus:** Awaiting next milestone planning
+**Current focus:** Phase 205 — Persona + design-lens evaluator harness (roadmap created, ready to plan)
 
 ## Current Position
 
-Phase: Not started (defining requirements)
-Plan: —
-Status: Defining requirements
-Last activity: 2026-07-03 — Milestone v1.56 started
+Phase: 205 of 208 (Persona + design-lens evaluator harness) — plus optional scope-gated Phase 209
+Plan: — (not yet planned)
+Status: Roadmap created — ready to plan Phase 205
+Last activity: 2026-07-03 — v1.56 roadmap created (Phases 205-209; 29/29 v1 requirements mapped to 205-208; SWEEP-01 → optional Phase 209)
+
+Progress: [░░░░░░░░░░] 0%
 
 ## Post-v1.48 Pause Rule
 
@@ -37,6 +40,22 @@ After v1.48, broad feature milestones remain closed by default unless reopened b
 v1.55 OSS Quality Evaluation & Hardening Roadmap shipped on 2026-07-03 as maintenance / release-readiness / support-contract hardening under stable core. It was audit-only and produced evidence-backed software quality, CI/CD, and DB schema-contract artifacts plus a ranked implementation roadmap; it did not change product behavior, public APIs, DB defaults, CI required-check topology, release automation, or runtime UI.
 
 ## Milestone Progress
+
+### v1.56 Phase Summary (ACTIVE — opened 2026-07-03 — Admin UI Ratchet: Automated Adversarial Design Evaluation)
+
+| Phase | Name | Requirements | Status |
+|-------|------|--------------|--------|
+| 205 | Persona + design-lens evaluator harness | EVAL-01, EVAL-02, EVAL-03, EVAL-04, EVAL-05, DEDUP-01, DEDUP-02 | Ready to plan |
+| 206 | Adversarial verifier + finding ledger + deterministic gate | DEDUP-03, VERIFY-01, VERIFY-02, VERIFY-03, LEDGER-01, LEDGER-02, LEDGER-03, LEDGER-04, LEDGER-05 | Not started |
+| 207 | Orchestration + digest + one-command round/fix loop | ORCH-01, ORCH-02, ORCH-03, ORCH-04, ORCH-05, ORCH-06 | Not started |
+| 208 | Prove convergence on slice + wire CI + ACCEPT | CONV-01, CONV-02, CONV-03, CONV-04, CONV-05, CONV-06, CONV-07 | Not started |
+| 209 | Full-surface sweep under the ratchet | SWEEP-01 (deferred) | Scope-gated / optional — NOT required for v1.56 sign-off |
+
+Coverage: 29/29 v1 requirements mapped to Phases 205-208 (each REQ-ID → exactly one phase). Per-phase counts: 205→7 · 206→9 · 207→6 · 208→7 = 29. Phase 209 carries only the deferred SWEEP-01 and is teed up as a safe follow-on. Authoritative design source: `~/.claude/plans/ui-ratchet-txt-i-agile-honey.md` (approved 2026-07-03).
+
+**Dependency shape:** strictly linear — 205 → 206 → 207 → 208, with 209 an optional follow-on after 208. Two-plane architecture: a noisy off-gate LLM proposer/verifier (needs `ANTHROPIC_API_KEY`, local-only) and a deterministic CI gate (committed finding ledger + minted guards; `finding-regressions.ndjson` must be 0 bytes; LLM never on the gate path).
+
+**Guardrails (binding, out of scope):** `accrue_admin` + dev/test-only tooling only; no new billing primitives, no breaking API/route changes, no Tailwind migration; `ax-*` stays the styling SSOT; core `accrue` stays LiveView-runtime-free; no `accrue_portal` work; ratchet tooling never leaks into adopter runtime; no 13th rubric dimension (design lens sharpens existing dims); LLM is never a CI merge gate; converging all ~23 surfaces this milestone is out of scope (prove the slice, tee up SWEEP-01).
 
 ### v1.55 Phase Summary (SHIPPED & ARCHIVED 2026-07-03 — OSS Quality Evaluation & Hardening Roadmap; phase dirs in `milestones/v1.55-phases/`)
 
@@ -266,6 +285,13 @@ Coverage: 22/22 v1.51 requirements mapped (each REQ-ID → exactly one phase). D
 
 ## Accumulated Context
 
+### Key Planning Decisions for v1.56
+
+- **2026-07-03:** Opened v1.56 "Admin UI Ratchet: Automated Adversarial Design Evaluation" (Phases 205-209, continue-numbering from v1.55's Phase 204). Reopen decision: **explicit strategy change** (design quality of the flagship adopter-facing `accrue_admin` surface elevated to a strategic priority — same class accepted for v1.50–v1.54) **plus** a concrete maintainer request. Recorded in `PROJECT.md`.
+- **2026-07-03:** Roadmap created — 5 phases (205-209); 29/29 v1 requirements mapped to Phases 205-208 (each REQ-ID → exactly one phase); Phase 209 (full-surface sweep, SWEEP-01) is scope-gated/optional and explicitly NOT required for v1.56 sign-off (confirmed maintainer decision: prove on the representative slice, tee up the ~19-surface sweep as safe follow-on). Roadmapper formalized success criteria + traceability from the approved authoritative plan `~/.claude/plans/ui-ratchet-txt-i-agile-honey.md` (did not invent a different breakdown).
+- **2026-07-03:** Central design principle locked: the subjective LLM is a *proposer/ranker* only; humans triage; a committed forward-only finding ledger + minted deterministic guards are what ratchet. This reconciles the v1.54 team's deliberate refusal to let a non-deterministic LLM gate the UI — the LLM runs locally (maintainer's key, needs `ANTHROPIC_API_KEY`), CI gates the deterministic layer only (`finding-regressions.ndjson` must be 0 bytes, independently re-verified from raw ledger rows). ~90% of the mechanical foundation is reused: `admin-visuals.spec.js` capture, `score-visuals.mjs` (promoted), the 30,348-cell baseline grammar, and the `phase200-scorecard.mjs`/`verify_phase200_scorecard.mjs` forward-only reducer pattern. All new code is dev/test-only under `accrue_admin/e2e/ratchet/` + `scripts/ci/verify_ratchet_ledger.mjs` + two `mix accrue_admin.ui.*` tasks.
+- **2026-07-03:** Biggest brand risk mitigated by design: over-whitespacing a dense operator console. The 3-role verifier includes an *operator-density-defender* that refutes any fix reducing operator density or adding marketing whitespace without a task-completion justification; every candidate must cite an admissible justification token (`rubric-dim-below-bar` | `persona-job-miss:<job>` | `token-bypass`) or it is rejected before human triage. Termination is guaranteed by a finite frozen-signature lattice + K=2 dry rounds + a 6-round hard cap escalating to the maintainer.
+
 ### Key Planning Decisions for v1.54
 
 - **2026-06-24:** Opened v1.54 "Admin UI Page-Level Streamlining & Storybook" (Phases 193–200, continue-numbering from v1.53's Phase 192). Reopen decision: explicit strategy change (page-level design quality of the flagship adopter-facing surface elevated to strategic priority — same class as v1.50/v1.51/v1.52/v1.53) **plus firsthand-observed page-level usability defects** in the running demo (modal-behind-scrim, scroll traps, floating/mispositioned overlays, won't-dismiss, hover-on-non-interactive empty states, disabled-looks-enabled). No new billing primitives, no breaking API/route changes, no Tailwind migration, core stays LiveView-runtime-free. Recorded in `PROJECT.md`.
@@ -319,6 +345,8 @@ Coverage: 22/22 v1.51 requirements mapped (each REQ-ID → exactly one phase). D
 - v1.52 shipped and archived 2026-06-14: Phases 180–186
 - v1.53 shipped and archived 2026-06-20: Phases 187–192
 - v1.54 opened 2026-06-24 and shipped 2026-07-01: Phases 193–200 archived under `.planning/milestones/v1.54-phases/`
+- v1.55 shipped and archived 2026-07-03: Phases 201-204
+- v1.56 opened 2026-07-03: Phases 205-209 (205-208 committed, 209 scope-gated/optional) — roadmap created, ready to plan Phase 205
 
 ### Decisions
 

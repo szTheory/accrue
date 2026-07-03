@@ -95,12 +95,42 @@ Which phases cover which requirements. Populated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| _(to be filled by roadmapper)_ | | |
+| EVAL-01 | Phase 205 | Pending |
+| EVAL-02 | Phase 205 | Pending |
+| EVAL-03 | Phase 205 | Pending |
+| EVAL-04 | Phase 205 | Pending |
+| EVAL-05 | Phase 205 | Pending |
+| DEDUP-01 | Phase 205 | Pending |
+| DEDUP-02 | Phase 205 | Pending |
+| DEDUP-03 | Phase 206 | Pending |
+| VERIFY-01 | Phase 206 | Pending |
+| VERIFY-02 | Phase 206 | Pending |
+| VERIFY-03 | Phase 206 | Pending |
+| LEDGER-01 | Phase 206 | Pending |
+| LEDGER-02 | Phase 206 | Pending |
+| LEDGER-03 | Phase 206 | Pending |
+| LEDGER-04 | Phase 206 | Pending |
+| LEDGER-05 | Phase 206 | Pending |
+| ORCH-01 | Phase 207 | Pending |
+| ORCH-02 | Phase 207 | Pending |
+| ORCH-03 | Phase 207 | Pending |
+| ORCH-04 | Phase 207 | Pending |
+| ORCH-05 | Phase 207 | Pending |
+| ORCH-06 | Phase 207 | Pending |
+| CONV-01 | Phase 208 | Pending |
+| CONV-02 | Phase 208 | Pending |
+| CONV-03 | Phase 208 | Pending |
+| CONV-04 | Phase 208 | Pending |
+| CONV-05 | Phase 208 | Pending |
+| CONV-06 | Phase 208 | Pending |
+| CONV-07 | Phase 208 | Pending |
+| SWEEP-01 (deferred) | Phase 209 (scope-gated / optional) | Deferred — not in v1.56 committed set |
 
 **Coverage:**
 - v1 requirements: 29 total (EVAL ×5, DEDUP ×3, VERIFY ×3, LEDGER ×5, ORCH ×6, CONV ×7)
-- Mapped to phases: _(pending roadmap)_
-- Unmapped: _(pending roadmap)_ ⚠️
+- Mapped to phases: **29/29** ✓ — Phase 205 (7: EVAL-01..05, DEDUP-01, DEDUP-02), Phase 206 (9: DEDUP-03, VERIFY-01..03, LEDGER-01..05), Phase 207 (6: ORCH-01..06), Phase 208 (7: CONV-01..07). Each REQ-ID → exactly one phase.
+- Unmapped: none ✓
+- Deferred (not counted in v1): SWEEP-01 → Phase 209 (scope-gated / optional, not required for v1.56 sign-off); CIADV-01 (local-run-only decision; no phase).
 
 ---
 *Requirements defined: 2026-07-03*
