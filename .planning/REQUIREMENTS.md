@@ -17,9 +17,9 @@ Requirements for this milestone. Each maps to exactly one roadmap phase (205–2
 
 ### Evaluator Harness (EVAL)
 
-- [ ] **EVAL-01**: Maintainer can run a local evaluator pass that reads each admin surface's committed screenshots and produces candidate findings for all 6 operator personas, each prompted with its job + entry point (Operator/Founder, Customer Support, Finance/Billing Ops, Recovery/Growth Ops, Developer/Integration, Compliance/Audit).
+- [x] **EVAL-01**: Maintainer can run a local evaluator pass that reads each admin surface's committed screenshots and produces candidate findings for all 6 operator personas, each prompted with its job + entry point (Operator/Founder, Customer Support, Finance/Billing Ops, Recovery/Growth Ops, Developer/Integration, Compliance/Audit).
 - [x] **EVAL-02**: Maintainer can run a graphic-design evaluator lens that assesses the design dimensions (hierarchy, spacing-rhythm, responsive, brand-expression; token + contrast supporting) comparatively against named quiet-dev-tooling tier exemplars rather than emitting an absolute "award" score.
-- [ ] **EVAL-03**: The evaluator harness exits cleanly (exit 0, no failure) when `ANTHROPIC_API_KEY` is absent and enforces the existing per-image size guard, so it is safe to invoke anywhere.
+- [x] **EVAL-03**: The evaluator harness exits cleanly (exit 0, no failure) when `ANTHROPIC_API_KEY` is absent and enforces the existing per-image size guard, so it is safe to invoke anywhere.
 - [x] **EVAL-04**: A committed design sub-rubric plus a curated good/bad exemplar set (sourced from repo history, license-clean) anchors the design lens to the locked brand DNA ("quiet polish, well-made dev tooling, not fintech").
 - [x] **EVAL-05**: Each candidate finding records surface, rubric dimension, region tag, overlay tags, severity, and the persona/lens that raised it, plus `cell_refs` pointing into the existing 30,348-cell grammar.
 
@@ -95,9 +95,9 @@ Which phases cover which requirements. Populated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| EVAL-01 | Phase 205 | Pending |
+| EVAL-01 | Phase 205 | Complete |
 | EVAL-02 | Phase 205 | Complete |
-| EVAL-03 | Phase 205 | Pending |
+| EVAL-03 | Phase 205 | Complete |
 | EVAL-04 | Phase 205 | Complete |
 | EVAL-05 | Phase 205 | Complete |
 | DEDUP-01 | Phase 205 | Complete |

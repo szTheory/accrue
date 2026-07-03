@@ -2,11 +2,9 @@
 gsd_state_version: 1.0
 milestone: v1.56
 milestone_name: "Admin UI Ratchet: Automated Adversarial Design Evaluation"
-current_phase: 205
-current_phase_name: persona-design-lens-evaluator-harness
 status: executing
 stopped_at: Phase 205 context gathered
-last_updated: "2026-07-03T17:29:34.538Z"
+last_updated: "2026-07-03T17:38:28.819Z"
 last_activity: 2026-07-03
 progress:
   total_phases: 5
@@ -29,11 +27,11 @@ See: `.planning/PROJECT.md` (updated 2026-07-03 after v1.55 closeout)
 ## Current Position
 
 Phase: 205 (persona-design-lens-evaluator-harness) — EXECUTING
-Plan: 3 of 5
+Plan: 4 of 5
 Status: Ready to execute
 Last activity: 2026-07-03
 
-Progress: [██░░░░░░░░] 20%
+Progress: [████░░░░░░] 40%
 
 ## Post-v1.48 Pause Rule
 
@@ -286,6 +284,7 @@ Coverage: 22/22 v1.51 requirements mapped (each REQ-ID → exactly one phase). D
 | Phase 204 P01 | 00:09:02 | 3 tasks | 2 files |
 | Phase 205 P01 | 4m49s | 2 tasks | 1 files |
 | Phase 205 P02 | 13m | 2 tasks | 7 files |
+| Phase 205 P03 | 4m 43s | 3 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -294,6 +293,7 @@ Coverage: 22/22 v1.51 requirements mapped (each REQ-ID → exactly one phase). D
 - **2026-07-03:** Opened v1.56 "Admin UI Ratchet: Automated Adversarial Design Evaluation" (Phases 205-209, continue-numbering from v1.55's Phase 204). Reopen decision: **explicit strategy change** (design quality of the flagship adopter-facing `accrue_admin` surface elevated to a strategic priority — same class accepted for v1.50–v1.54) **plus** a concrete maintainer request. Recorded in `PROJECT.md`.
 - **2026-07-03:** Roadmap created — 5 phases (205-209); 29/29 v1 requirements mapped to Phases 205-208 (each REQ-ID → exactly one phase); Phase 209 (full-surface sweep, SWEEP-01) is scope-gated/optional and explicitly NOT required for v1.56 sign-off (confirmed maintainer decision: prove on the representative slice, tee up the ~19-surface sweep as safe follow-on). Roadmapper formalized success criteria + traceability from the approved authoritative plan `~/.claude/plans/ui-ratchet-txt-i-agile-honey.md` (did not invent a different breakdown).
 - **2026-07-03:** Central design principle locked: the subjective LLM is a *proposer/ranker* only; humans triage; a committed forward-only finding ledger + minted deterministic guards are what ratchet. This reconciles the v1.54 team's deliberate refusal to let a non-deterministic LLM gate the UI — the LLM runs locally (maintainer's key, needs `ANTHROPIC_API_KEY`), CI gates the deterministic layer only (`finding-regressions.ndjson` must be 0 bytes, independently re-verified from raw ledger rows). ~90% of the mechanical foundation is reused: `admin-visuals.spec.js` capture, `score-visuals.mjs` (promoted), the 30,348-cell baseline grammar, and the `phase200-scorecard.mjs`/`verify_phase200_scorecard.mjs` forward-only reducer pattern. All new code is dev/test-only under `accrue_admin/e2e/ratchet/` + `scripts/ci/verify_ratchet_ledger.mjs` + two `mix accrue_admin.ui.*` tasks.
+- **2026-07-03 (205-03):** `ratchet-propose.mjs` shipped — forked `score-visuals.mjs` into a defect-only proposer. 6 job-anchored operator-persona lenses issue forced `tool_use` (`emit_findings`) calls; the tool `enum`s are advisory only (Sonnet 4.5 lacks strict outputs) — the harness re-derives every identity field (`claim_key`/`finding_id`/`region_tag`/`overlay_tags`/`dimension`) from `region-tags.js` and ignores model-supplied identity (D-04/D-16). Guard order self-test→no-key→SDK-import (EVAL-03); `temperature: 0` config-gated (400s on 4.7+/5-family); parse-time drops (justification-token gate + taste denylist) + N=12/image cap; rows carry the full `ratchet-candidate/1` four-group schema with `cell_refs` FK into the census (D-12/D-17). Reads `tool_use .input.findings`, never `content[0]` text (Pitfall 6).
 - **2026-07-03:** Biggest brand risk mitigated by design: over-whitespacing a dense operator console. The 3-role verifier includes an *operator-density-defender* that refutes any fix reducing operator density or adding marketing whitespace without a task-completion justification; every candidate must cite an admissible justification token (`rubric-dim-below-bar` | `persona-job-miss:<job>` | `token-bypass`) or it is rejected before human triage. Termination is guaranteed by a finite frozen-signature lattice + K=2 dry rounds + a 6-round hard cap escalating to the maintainer.
 
 ### Key Planning Decisions for v1.54
@@ -647,7 +647,7 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 
 ## Session Continuity
 
-Last session: 2026-07-03T17:29:03.926Z
+Last session: 2026-07-03T17:38:28.815Z
 Stopped at: Phase 205 context gathered
 Resume file: None
 
