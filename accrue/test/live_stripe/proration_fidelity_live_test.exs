@@ -43,9 +43,14 @@ defmodule Accrue.LiveStripe.ProrationFidelityLiveTest do
   @moduletag :live_stripe
   @moduletag timeout: 90_000
 
-  unless System.get_env("STRIPE_TEST_SECRET_KEY") &&
-           System.get_env("ACCRUE_LIVE_BASIC_PRICE") &&
-           System.get_env("ACCRUE_LIVE_PRO_PRICE") do
+  unless Enum.all?(
+           [
+             System.get_env("STRIPE_TEST_SECRET_KEY", ""),
+             System.get_env("ACCRUE_LIVE_BASIC_PRICE", ""),
+             System.get_env("ACCRUE_LIVE_PRO_PRICE", "")
+           ],
+           &(String.trim(&1) != "")
+         ) do
     @moduletag :skip
   end
 
@@ -53,15 +58,15 @@ defmodule Accrue.LiveStripe.ProrationFidelityLiveTest do
   alias Accrue.Billing.{Customer, UpcomingInvoice}
 
   setup_all do
-    secret = System.get_env("STRIPE_TEST_SECRET_KEY")
-    basic = System.get_env("ACCRUE_LIVE_BASIC_PRICE")
-    pro = System.get_env("ACCRUE_LIVE_PRO_PRICE")
+    secret = System.get_env("STRIPE_TEST_SECRET_KEY", "") |> String.trim()
+    basic = System.get_env("ACCRUE_LIVE_BASIC_PRICE", "") |> String.trim()
+    pro = System.get_env("ACCRUE_LIVE_PRO_PRICE", "") |> String.trim()
 
     cond do
-      is_nil(secret) ->
+      secret == "" ->
         {:ok, skip: true}
 
-      is_nil(basic) or is_nil(pro) ->
+      basic == "" or pro == "" ->
         {:ok, skip: true}
 
       true ->

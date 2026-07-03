@@ -20,7 +20,12 @@ import Config
 # Default remains `Accrue.Processor.Fake` — any `mix test` run without
 # the secret is untouched.
 if config_env() == :test do
-  if key = System.get_env("STRIPE_TEST_SECRET_KEY") do
+  stripe_test_secret_key =
+    "STRIPE_TEST_SECRET_KEY"
+    |> System.get_env("")
+    |> String.trim()
+
+  if stripe_test_secret_key != "" do
     # The Stripe processor reads its secret via
     # `Application.get_env(:accrue, :stripe_secret_key)` (see
     # `lib/accrue/processor/stripe.ex:627`), not from the
@@ -28,6 +33,6 @@ if config_env() == :test do
     # picking up the processor swap automatically resolve their key.
     config :accrue,
       processor: Accrue.Processor.Stripe,
-      stripe_secret_key: key
+      stripe_secret_key: stripe_test_secret_key
   end
 end

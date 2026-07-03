@@ -42,7 +42,7 @@ defmodule Accrue.LiveStripe.Charge3DSLiveTest do
   # Conditional skip: if no secret is set in the environment, tag the
   # whole module `:skip` so `mix test.live` on a bare environment
   # reports "skipped" instead of dying in setup_all.
-  unless System.get_env("STRIPE_TEST_SECRET_KEY") do
+  if System.get_env("STRIPE_TEST_SECRET_KEY", "") |> String.trim() == "" do
     @moduletag :skip
   end
 
@@ -54,9 +54,9 @@ defmodule Accrue.LiveStripe.Charge3DSLiveTest do
     # the skip attribute was removed but the secret is still missing.
     # This is defensive — normally the module-level skip attribute fires
     # first and setup_all never runs.
-    secret = System.get_env("STRIPE_TEST_SECRET_KEY")
+    secret = System.get_env("STRIPE_TEST_SECRET_KEY", "") |> String.trim()
 
-    if is_nil(secret) do
+    if secret == "" do
       {:ok, skip: true}
     else
       # The Stripe processor reads its secret via

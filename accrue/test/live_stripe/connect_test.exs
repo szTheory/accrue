@@ -43,7 +43,7 @@ defmodule Accrue.LiveStripe.ConnectTest do
   @moduletag :live_stripe
   @moduletag timeout: 60_000
 
-  unless System.get_env("STRIPE_TEST_SECRET_KEY") do
+  if System.get_env("STRIPE_TEST_SECRET_KEY", "") |> String.trim() == "" do
     @moduletag :skip
   end
 
@@ -52,10 +52,10 @@ defmodule Accrue.LiveStripe.ConnectTest do
   alias Accrue.Money
 
   setup_all do
-    secret = System.get_env("STRIPE_TEST_SECRET_KEY")
+    secret = System.get_env("STRIPE_TEST_SECRET_KEY", "") |> String.trim()
 
     cond do
-      is_nil(secret) ->
+      secret == "" ->
         {:ok, skip: true}
 
       not String.starts_with?(secret, "sk_test_") ->
