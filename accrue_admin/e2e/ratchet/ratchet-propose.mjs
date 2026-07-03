@@ -26,8 +26,13 @@
  *   ANTHROPIC_API_KEY=… node e2e/ratchet/ratchet-propose.mjs   # live proposer run
  *   SCORE_MODEL=… node e2e/ratchet/ratchet-propose.mjs         # override the model
  *
- * NOTE: the comparative graphic-design lens (EVAL-02/EVAL-04) is added in Plan 04; this
- * plan (03) ships the 6 operator-persona lenses.
+ * LENSES: 6 job-anchored operator-persona lenses (plan 03) PLUS a 7th comparative
+ * graphic-design lens (plan 04, EVAL-02). The design lens attaches exactly two committed
+ * exemplar images per call (one archetype-matched GOOD + one BAD, keyed off `surface_type`,
+ * D-20) as few-shot, scores the surface COMPARATIVELY against them (never an absolute award
+ * score), and emits `raised_by.lens_kind:"design"` candidates carrying a `direction:air|cramped`
+ * self-flag + an `exemplar_ref`. Design candidates flow through the SAME harness validation +
+ * claim-key gate as persona findings — no separate identity path (DEDUP-02 preserved).
  */
 
 import fs from "fs";
@@ -132,6 +137,110 @@ function buildLensPrompt(persona) {
   );
 }
 
+// ----------------------------------------------------------------------------
+// Design lens (7th, plan 04) — a COMPARATIVE graphic-design lens. It attaches exactly
+// two committed exemplar images per call (D-20 hybrid few-shot), keyed off the surface's
+// `surface_type`, and scores the surface relative to them + the named textual tier anchors
+// (Linear/Vercel/Prisma/Tailscale/Oban; Stripe density-only under the anti-fintech caveat) —
+// never an absolute award score. It sharpens dims 2/3/5/8 (+1/6 support) and self-flags a
+// `direction:air|cramped` on every finding so the Phase-206 density-defender can apply a
+// higher confirm bar to air-ward claims.
+// ----------------------------------------------------------------------------
+const DESIGN_LENS_KIND = "design";
+const EXEMPLARS_DIR = path.join(__dirname, "exemplars");
+
+// Archetype-matched exemplar pair, keyed off `surface_type` (DESIGN-LENS-RUBRIC §5, RESEARCH
+// Open Q3). Exactly ONE good + ONE bad, bounded at 2 images per call regardless of surface.
+// Dense page-flow surfaces fail cramped-ward first; sparse component surfaces fail air-ward
+// first. Unknown surface_types fall back to the dense-console anchor pair.
+const EXEMPLAR_PAIR_BY_SURFACE_TYPE = {
+  "page-flow": { good: "good/dashboard.png", bad: "bad/cramped.png" },
+  component: { good: "good/dev-components.png", bad: "bad/wasteful.png" },
+  "component-group": { good: "good/dev-components.png", bad: "bad/wasteful.png" },
+};
+const DEFAULT_EXEMPLAR_PAIR = { good: "good/dashboard.png", bad: "bad/cramped.png" };
+
+function selectExemplarPair(surface_type) {
+  return EXEMPLAR_PAIR_BY_SURFACE_TYPE[surface_type] || DEFAULT_EXEMPLAR_PAIR;
+}
+
+// Read a committed exemplar PNG as base64, enforcing the SAME 5 MB per-image guard as the
+// target screenshot (T-205-03 — no unbounded gallery attach). Returns null (skip that block,
+// with a warning) if the file is missing — e.g. the `off-register` textual-only fallback (D-19).
+function readExemplarB64(relPath) {
+  const abs = path.join(EXEMPLARS_DIR, relPath);
+  try {
+    const b64 = fs.readFileSync(abs, "base64");
+    if (b64.length > MAX_B64_BYTES) {
+      console.warn(`[ratchet-propose] Exemplar ${relPath} exceeds 5 MB base64 — skipping attach`);
+      return null;
+    }
+    return b64;
+  } catch {
+    console.warn(`[ratchet-propose] Exemplar ${relPath} not found — skipping attach (textual fallback)`);
+    return null;
+  }
+}
+
+// Comparative design-lens prompt anchored to DESIGN-LENS-RUBRIC.md. Two exemplar images are
+// attached AFTER this prompt (labelled GOOD/BAD). Comparative, not absolute; dims 2/3/5/8
+// (+1/6 support); penalize BOTH density poles; require the `direction` self-flag per finding.
+function buildDesignLensPrompt(surface, surface_type) {
+  return (
+    `You are the comparative GRAPHIC-DESIGN lens for the Accrue Admin dashboard — a data-dense ` +
+    `operator console whose brand target is "quiet, well-made developer tooling; NOT fintech, NOT ` +
+    `generic SaaS". Judge this "${surface}" surface (surface_type: ${surface_type}) ` +
+    `COMPARATIVELY — never assign an absolute award score or a 0–100 grade.\n\n` +
+    `Two reference images are attached AFTER this prompt: a GOOD (in-brand, correctly-dense ` +
+    `own-render) exemplar and a BAD (density-pole / off-register own-render) exemplar. Also compare ` +
+    `against the named quiet-dev-tooling tier anchors — Linear, Vercel, Prisma, Tailscale, Oban Web. ` +
+    `Borrow Stripe's operator DENSITY and information architecture ONLY; never its brand, color, or ` +
+    `voice (Stripe is a fintech brand and is off-register for Accrue).\n\n` +
+    `Ask one relative question: does this surface hold Accrue's own density bar and stay clear of ` +
+    `the matched bad pole? Raise findings ONLY on the sharpened dimensions — d2 visual-hierarchy, ` +
+    `d3 spacing-rhythm, d5 responsive-mobile-first, d8 brand-expression (with d1 token-compliance ` +
+    `and d6 contrast as SUPPORT only). For d3, penalize BOTH poles equally: cramped (rows/controls/` +
+    `sections butt together) AND wasteful (oversized padding/gaps push the operator's data below ` +
+    `the fold). Over-whitespacing a correctly-dense console is the single biggest brand risk — do ` +
+    `NOT bias toward more air.\n\n` +
+    `For EVERY finding you MUST set direction: "air" if the fix ADDS whitespace, or "cramped" if the ` +
+    `fix REMOVES whitespace / tightens density. Set exemplar_ref to the committed exemplar the ` +
+    `surface fell short of (e.g. "exemplars/bad/wasteful.png"). In defect, name a concrete object + ` +
+    `the dimension — NO taste-only "nicer/cleaner/prettier/sleeker/more modern". Set ` +
+    `justification_token to "rubric-dim-below-bar" (or "token-bypass" for a d1 bare-token bypass). ` +
+    `Choose the region_tag where the defect lives. Return an empty findings array if the surface ` +
+    `holds the bar — do not invent findings.`
+  );
+}
+
+// Build the design-lens user content: target screenshot, prompt, then the GOOD and BAD exemplar
+// images each preceded by a labelling text block (same base64 image-block shape as
+// `score-visuals.mjs`). Bounded at 2 exemplar images (D-20).
+function buildDesignContent(b64, surface, surface_type) {
+  const pair = selectExemplarPair(surface_type);
+  const content = [
+    { type: "image", source: { type: "base64", media_type: "image/png", data: b64 } },
+    { type: "text", text: buildDesignLensPrompt(surface, surface_type) },
+  ];
+  const goodB64 = readExemplarB64(pair.good);
+  if (goodB64) {
+    content.push({
+      type: "text",
+      text: `GOOD exemplar (in-brand, correctly-dense reference — exemplars/${pair.good}):`,
+    });
+    content.push({ type: "image", source: { type: "base64", media_type: "image/png", data: goodB64 } });
+  }
+  const badB64 = readExemplarB64(pair.bad);
+  if (badB64) {
+    content.push({
+      type: "text",
+      text: `BAD exemplar (density-pole / off-register reference — exemplars/${pair.bad}):`,
+    });
+    content.push({ type: "image", source: { type: "base64", media_type: "image/png", data: badB64 } });
+  }
+  return { content, attachedBad: `exemplars/${pair.bad}` };
+}
+
 // Forced-tool JSON schema. The identity-field `enum`s are ADVISORY only on the current
 // SCORE_MODEL (Sonnet 4.5 lacks strict structured outputs — RESEARCH Pitfall 2); the
 // harness parse-time gate (Task 3) is the real enforcement. `region_tag` is seeded from
@@ -158,6 +267,11 @@ function buildToolSchema(surface) {
               justification_token: { type: "string" },
               defect_bucket: { type: "string" },
               effort_hint: { type: "string", enum: ["css", "ia-product-decision"] },
+              // Design-lens-only self-flags (plan 04). Optional on the shared schema — the
+              // persona lenses leave them unset; the harness reads them only for design rows
+              // and re-derives all IDENTITY regardless (both are non-identity free fields).
+              direction: { type: "string", enum: ["air", "cramped"] },
+              exemplar_ref: { type: "string" },
               defect: { type: "string" },
               suggested_fix: { type: "string" },
             },
@@ -290,6 +404,8 @@ async function main() {
 // then run every raw finding through the harness-authoritative validation+emit gate.
 async function proposeForImage(png, b64, provenance) {
   const surface = png.screen;
+  const surfaceInfo = SURFACES.find((entry) => entry.surface === surface);
+  const surface_type = surfaceInfo ? surfaceInfo.surface_type : "unknown";
   const toolSchema = buildToolSchema(surface);
   const collected = [];
 
@@ -325,6 +441,29 @@ async function proposeForImage(png, b64, provenance) {
     for (const f of raw) {
       collected.push({ raw: f, persona });
     }
+  }
+
+  // 7th lens — comparative graphic-design lens with archetype-matched few-shot exemplars.
+  // Reuses the SAME system preamble, forced tool schema, tool_choice, and config-gated
+  // temperature as the persona lenses; the ONLY differences are the comparative prompt and
+  // the two attached exemplar images.
+  const { content: designContent, attachedBad } = buildDesignContent(b64, surface, surface_type);
+  const designRequest = {
+    model,
+    max_tokens: 2048,
+    system: SYSTEM_PREAMBLE,
+    tools: [toolSchema],
+    tool_choice: { type: "tool", name: "emit_findings" },
+    messages: [{ role: "user", content: designContent }],
+  };
+  if (supportsSampling(model)) designRequest.temperature = 0;
+
+  const designResponse = await client.messages.create(designRequest);
+  const designRaw =
+    designResponse.content.find((b) => b.type === "tool_use")?.input?.findings ?? [];
+
+  for (const f of designRaw) {
+    collected.push({ raw: f, design: { attachedBad } });
   }
 
   return emitCandidates(png, surface, collected, provenance);
