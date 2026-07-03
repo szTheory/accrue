@@ -15,6 +15,8 @@
     "e2e:a11y": "env -u NO_COLOR playwright test e2e/admin-a11y.spec.js",
     "e2e:install": "playwright install chromium",
     "score-visuals": "node e2e/score-visuals.mjs",
+    "ratchet:propose": "node e2e/ratchet/ratchet-propose.mjs",
+    "ratchet:self-test": "node e2e/ratchet/ratchet-propose.mjs --self-test",
     "baseline:artifacts": "node e2e/baseline-artifacts.mjs",
     "baseline:parse": "node e2e/baseline-parse.mjs",
     "phase192:component-lab": "mix test test/accrue_admin/dev/component_registry_test.exs test/accrue_admin/dev/component_group_registry_test.exs",
