@@ -436,7 +436,11 @@ async function proposeForImage(png, b64, provenance) {
 
     // RESEARCH Pitfall 6: read the forced tool_use block `.input.findings`. Do NOT
     // index the first text content block — it is `undefined` under forced tool-use.
-    const raw = response.content.find((b) => b.type === "tool_use")?.input?.findings ?? [];
+    // Array.isArray guard: the model lacks strict structured output, so a
+    // non-array `findings` must degrade to [] rather than throw in `for…of`
+    // and abort the whole run (WR-01).
+    const _found = response.content.find((b) => b.type === "tool_use")?.input?.findings;
+    const raw = Array.isArray(_found) ? _found : [];
 
     for (const f of raw) {
       collected.push({ raw: f, persona });
@@ -459,8 +463,9 @@ async function proposeForImage(png, b64, provenance) {
   if (supportsSampling(model)) designRequest.temperature = 0;
 
   const designResponse = await client.messages.create(designRequest);
-  const designRaw =
-    designResponse.content.find((b) => b.type === "tool_use")?.input?.findings ?? [];
+  const _designFound =
+    designResponse.content.find((b) => b.type === "tool_use")?.input?.findings;
+  const designRaw = Array.isArray(_designFound) ? _designFound : [];
 
   for (const f of designRaw) {
     collected.push({ raw: f, design: { attachedBad } });
