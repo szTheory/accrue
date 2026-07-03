@@ -2,15 +2,17 @@
 gsd_state_version: 1.0
 milestone: v1.56
 milestone_name: "Admin UI Ratchet: Automated Adversarial Design Evaluation"
+current_phase: 205
+current_phase_name: persona-design-lens-evaluator-harness
 status: executing
 stopped_at: Phase 205 context gathered
-last_updated: "2026-07-03T17:18:06.615Z"
+last_updated: "2026-07-03T17:29:34.538Z"
 last_activity: 2026-07-03
 progress:
   total_phases: 5
   completed_phases: 0
   total_plans: 5
-  completed_plans: 1
+  completed_plans: 2
   percent: 0
 ---
 
@@ -27,7 +29,7 @@ See: `.planning/PROJECT.md` (updated 2026-07-03 after v1.55 closeout)
 ## Current Position
 
 Phase: 205 (persona-design-lens-evaluator-harness) — EXECUTING
-Plan: 2 of 5
+Plan: 3 of 5
 Status: Ready to execute
 Last activity: 2026-07-03
 
@@ -283,6 +285,7 @@ Coverage: 22/22 v1.51 requirements mapped (each REQ-ID → exactly one phase). D
 | Phase 203 P01 | 6m 12s | 3 tasks | 2 files |
 | Phase 204 P01 | 00:09:02 | 3 tasks | 2 files |
 | Phase 205 P01 | 4m49s | 2 tasks | 1 files |
+| Phase 205 P02 | 13m | 2 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -535,6 +538,7 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - [Phase 204]: Phase 204 keeps CI topology, cache, gate, and branch-protection work behind baseline summaries from Phase 202 evidence.
 - [Phase 204]: Phase 204 preserves the Phase 203 database contract: default billing prefix, explicit public references, no search_path primary contract, and no schema rename or data movement.
 - [Phase ?]: [Phase 205]: slug() reimplemented byte-identically in ratchet/region-tags.js (SDK/manifest-free SSOT); DEDUP-01/02 proven by pure key-free runSelfTest with pinned golden hash
+- [Phase ?]: 205-02 design-lens assets: off-register shipped as own-render PNG; bad poles via CSSOM setProperty (nonce-only CSP blocks style tags); fixed 1280px capture avoids downscale/sharp dep
 
 ### Pending Todos
 
@@ -643,7 +647,7 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 
 ## Session Continuity
 
-Last session: 2026-07-03T17:17:42.569Z
+Last session: 2026-07-03T17:29:03.926Z
 Stopped at: Phase 205 context gathered
 Resume file: None
 

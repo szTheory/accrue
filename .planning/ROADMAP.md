@@ -181,11 +181,11 @@ Full details: [v1.48 roadmap archive](milestones/v1.48-ROADMAP.md)
   4. A committed `DESIGN-LENS-RUBRIC.md` sub-rubric plus a curated, license-clean good/bad exemplar set (sourced from repo history) anchors the design lens to the locked brand DNA ("quiet polish, well-made dev tooling, not fintech").
   5. Running the proposer twice on unchanged screenshots yields an identical `finding_id` set — proven by an automated test — because each finding's canonical claim-key is derived from surface + dimension + sorted overlay-tags + region and excludes the LLM free-text.
 
-**Plans**: 5 plans
+**Plans**: 2/5 plans executed
 **Wave 1**
 
 - [x] 205-01-PLAN.md — Determinism SSOT (`region-tags.js`): closed-enum vocab + pure claim-key/finding-id + DEDUP self-test (DEDUP-01, DEDUP-02)
-- [ ] 205-02-PLAN.md — Design sub-rubric + curated good/bad exemplar set + PROVENANCE.json (EVAL-02, EVAL-04)
+- [x] 205-02-PLAN.md — Design sub-rubric + curated good/bad exemplar set + PROVENANCE.json (EVAL-02, EVAL-04)
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
@@ -296,7 +296,7 @@ Full details: [v1.48 roadmap archive](milestones/v1.48-ROADMAP.md)
 | 202. CI/CD performance and determinism audit | v1.55 | 1/1 | Complete    | 2026-07-02 |
 | 203. Database schema contract ADR | v1.55 | 1/1 | Complete    | 2026-07-02 |
 | 204. Ranked hardening roadmap | v1.55 | 1/1 | Complete    | 2026-07-03 |
-| 205. Persona + design-lens evaluator harness | v1.56 | 1/5 | In Progress|  |
+| 205. Persona + design-lens evaluator harness | v1.56 | 2/5 | In Progress|  |
 | 206. Adversarial verifier + finding ledger + deterministic gate | v1.56 | 0/0 | Not started | - |
 | 207. Orchestration + digest + one-command round/fix loop | v1.56 | 0/0 | Not started | - |
 | 208. Prove convergence on slice + wire CI + ACCEPT | v1.56 | 0/0 | Not started | - |

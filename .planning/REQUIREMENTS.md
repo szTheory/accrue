@@ -18,9 +18,9 @@ Requirements for this milestone. Each maps to exactly one roadmap phase (205–2
 ### Evaluator Harness (EVAL)
 
 - [ ] **EVAL-01**: Maintainer can run a local evaluator pass that reads each admin surface's committed screenshots and produces candidate findings for all 6 operator personas, each prompted with its job + entry point (Operator/Founder, Customer Support, Finance/Billing Ops, Recovery/Growth Ops, Developer/Integration, Compliance/Audit).
-- [ ] **EVAL-02**: Maintainer can run a graphic-design evaluator lens that assesses the design dimensions (hierarchy, spacing-rhythm, responsive, brand-expression; token + contrast supporting) comparatively against named quiet-dev-tooling tier exemplars rather than emitting an absolute "award" score.
+- [x] **EVAL-02**: Maintainer can run a graphic-design evaluator lens that assesses the design dimensions (hierarchy, spacing-rhythm, responsive, brand-expression; token + contrast supporting) comparatively against named quiet-dev-tooling tier exemplars rather than emitting an absolute "award" score.
 - [ ] **EVAL-03**: The evaluator harness exits cleanly (exit 0, no failure) when `ANTHROPIC_API_KEY` is absent and enforces the existing per-image size guard, so it is safe to invoke anywhere.
-- [ ] **EVAL-04**: A committed design sub-rubric plus a curated good/bad exemplar set (sourced from repo history, license-clean) anchors the design lens to the locked brand DNA ("quiet polish, well-made dev tooling, not fintech").
+- [x] **EVAL-04**: A committed design sub-rubric plus a curated good/bad exemplar set (sourced from repo history, license-clean) anchors the design lens to the locked brand DNA ("quiet polish, well-made dev tooling, not fintech").
 - [x] **EVAL-05**: Each candidate finding records surface, rubric dimension, region tag, overlay tags, severity, and the persona/lens that raised it, plus `cell_refs` pointing into the existing 30,348-cell grammar.
 
 ### Dedup & Stable Identity (DEDUP)
@@ -96,9 +96,9 @@ Which phases cover which requirements. Populated during roadmap creation.
 | Requirement | Phase | Status |
 |-------------|-------|--------|
 | EVAL-01 | Phase 205 | Pending |
-| EVAL-02 | Phase 205 | Pending |
+| EVAL-02 | Phase 205 | Complete |
 | EVAL-03 | Phase 205 | Pending |
-| EVAL-04 | Phase 205 | Pending |
+| EVAL-04 | Phase 205 | Complete |
 | EVAL-05 | Phase 205 | Complete |
 | DEDUP-01 | Phase 205 | Complete |
 | DEDUP-02 | Phase 205 | Complete |
@@ -127,6 +127,7 @@ Which phases cover which requirements. Populated during roadmap creation.
 | SWEEP-01 (deferred) | Phase 209 (scope-gated / optional) | Deferred — not in v1.56 committed set |
 
 **Coverage:**
+
 - v1 requirements: 29 total (EVAL ×5, DEDUP ×3, VERIFY ×3, LEDGER ×5, ORCH ×6, CONV ×7)
 - Mapped to phases: **29/29** ✓ — Phase 205 (7: EVAL-01..05, DEDUP-01, DEDUP-02), Phase 206 (9: DEDUP-03, VERIFY-01..03, LEDGER-01..05), Phase 207 (6: ORCH-01..06), Phase 208 (7: CONV-01..07). Each REQ-ID → exactly one phase.
 - Unmapped: none ✓
