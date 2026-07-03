@@ -52,8 +52,7 @@ in favor of the **ratified requirement**.
 - **D-03 — The defect-bucket concept is kept as a NON-identity field.** `defect_bucket` (a closed,
   dimension-scoped enum) rides on each finding for digest sub-grouping only; on dedup-merge it
   aggregates into a set. Never part of `claim_key`, never gates.
-- **D-04 — All identity fields are harness-injected or closed-enum-validated so prose cannot leak
-  into identity.** `surface` injected from filename→`SURFACES` lookup (never model-chosen, reusing
+- **D-04 — All identity fields are harness-injected or closed-enum-validated so prose cannot leak into identity.** `surface` injected from filename→`SURFACES` lookup (never model-chosen, reusing
   the existing `metadataForImage()` pattern); `dimension` ∈ 1..12 (throw otherwise); `region_tag` ∈
   the closed `REGION_TAGS` enum; `overlay_tags` each ∈ the 14 `OVERLAY_TAGS`. Sort = **default
   codepoint `.sort()`, NOT `localeCompare`**; dedup; empties → sentinels (`noregion`, `ov-none`).
@@ -100,8 +99,7 @@ in favor of the **ratified requirement**.
   verifier, gate, and digest.
 
 ### Emission model & severity — defect-only, layered on the census (not replacing it)
-- **D-11 — `ratchet-propose.mjs` is a defect-only proposer that LAYERS ON, never replaces, the
-  30,348-cell census scorecard.** It forks `score-visuals.mjs` keeping the load-bearing scaffolding
+- **D-11 — `ratchet-propose.mjs` is a defect-only proposer that LAYERS ON, never replaces, the 30,348-cell census scorecard.** It forks `score-visuals.mjs` keeping the load-bearing scaffolding
   (no-key `exit 0`, 5 MB base64 guard `MAX_B64_BYTES`, authoritative manifest enrichment,
   truncate-on-rerun) but **drops** the `hasExpectedDimensions()` "exactly 12 rows" invariant and the
   per-dimension 0–3 score. Emits a **variable 0..N** rows per image; an empty `[]` is valid and
@@ -111,8 +109,7 @@ in favor of the **ratified requirement**.
   on. Each candidate carries `cell_refs: [cell_id,…]` (via `cellId()` from `baseline-manifest.js`) as
   a **foreign key INTO** the lattice — cross-navigable, never merged. The inverted 0–3 stays
   exclusively in the census layer; it is not reused as defect severity.
-- **D-13 — Severity = single 2-level ordinal `{minor, real}`, spoken identically by
-  proposer→verifier→ledger.** The Phase-206 verifier can only DOWNGRADE (`real→minor`) or KILL
+- **D-13 — Severity = single 2-level ordinal `{minor, real}`, spoken identically by proposer→verifier→ledger.** The Phase-206 verifier can only DOWNGRADE (`real→minor`) or KILL
   (`→not-a-defect` = suppress, never a ledger bucket) — no level is invented downstream, so the
   ledger's two counted buckets stay stable by construction. Rejected: reusing inverted 0–3 (double-
   books census semantics) and 4/5-level scales (severity inflation + run-to-run drift → phantom

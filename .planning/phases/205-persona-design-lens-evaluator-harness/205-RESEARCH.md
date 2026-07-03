@@ -451,22 +451,25 @@ async function captureBBoxes(page, name, project, theme) {
 | A3 | The 5 own-render exemplar PNGs, once captured ≤~1600px fullPage, encode to < 5 MB base64. | Exemplars (D-20) | LOW — a 1600px-wide admin PNG is well under 5 MB; verify at curation time against `MAX_B64_BYTES`. |
 | A4 | The exact `ax-*` class selectors for all 14 regions exist in the current admin DOM (for D-09 bbox + presence cross-check). | Code Examples / D-06 | MEDIUM — needs a quick DOM audit during planning to map each `REGION_TAGS` value to a live `ax-*` selector; missing selectors just yield `null` bbox (safe). |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **Export `slug` vs reimplement in `region-tags.js`?**
    - What we know: `slug` is not exported today (verified); both options produce byte-identical output if copied faithfully.
    - What's unclear: whether the maintainer prefers touching the frozen manifest.
    - Recommendation: reimplement in `region-tags.js` (keeps `baseline-manifest.js` frozen; aligns D-10 lean). Add a self-test asserting `slug(x)` matches the manifest's cell-grammar slugging for a sample surface.
+   - **RESOLVED:** Reimplement `slug` byte-identically inside `region-tags.js` — **adopted in Plan 01 (205-01 Task 1/Task 2)**, with the Task 2 `runSelfTest()` slug-parity assertion locking byte-for-byte equivalence against the manifest cell-grammar. The frozen `baseline-manifest.js` is not touched.
 
 2. **Exact `REGION_TAGS → ax-* selector` map for the D-09 bbox capture.**
    - What we know: D-06 lists the 14 region names anchored to `ax-*` selectors; `admin-visuals.spec.js` already captures the surfaces.
    - What's unclear: the precise class name per region in the current DOM.
    - Recommendation: a Wave-0 DOM audit (grep `accrue_admin/assets/css` + rendered admin) to lock the selector map inside `region-tags.js`. `null` bbox for an absent selector is the intended safe fallback (presence cross-check).
+   - **RESOLVED:** No blocking Wave-0 DOM audit is required. **Disposition adopted in Plan 01 Task 1:** seed `REGION_SELECTORS` with best-guess `ax-*` selectors, each carrying a `// TODO: confirm selector` marker. The D-09 null-box fallback makes a wrong or absent selector **non-fatal** — `region_tag` is derived from the model output through `normalizeRegion`, never from the selector map, so identity/claim-key is unaffected. The bbox output feeds only the deferred Phase 207 overlay render plus an optional presence cross-check (Plan 05 emitter), both of which tolerate a `null` box. Any selector correction is a later, low-risk touch-up, not a phase-gating audit.
 
 3. **Does the design lens send exemplars per-call or per-image?**
    - What we know: D-20 bounds at exactly 2 exemplar images per design-lens call, archetype-matched.
    - What's unclear: whether "archetype-matched" is keyed off `surface_type` (list/detail/component) or a per-surface map.
    - Recommendation: key off `surface_type` for a small static good/bad selection; document in `DESIGN-LENS-RUBRIC.md`.
+   - **RESOLVED:** Archetype-match the 2 exemplars off `surface_type` (list/detail/component) — **adopted in Plan 04 (design lens) and Plan 02's `DESIGN-LENS-RUBRIC.md`**, which documents the static good/bad selection keyed by `surface_type`.
 
 ## Environment Availability
 

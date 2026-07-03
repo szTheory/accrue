@@ -169,66 +169,89 @@ Full details: [v1.48 roadmap archive](milestones/v1.48-ROADMAP.md)
 ## Phase Details (v1.56 active milestone)
 
 ### Phase 205: Persona + design-lens evaluator harness
+
 **Goal**: A maintainer can run a local, key-gated evaluator that fans out 6 operator-persona lenses + a comparative graphic-design lens over the committed admin screenshots and emits stable, claim-keyed candidate findings. Promotes the dormant `score-visuals.mjs` into `accrue_admin/e2e/ratchet/ratchet-propose.mjs`.
 **Depends on**: Nothing (first phase of v1.56; reuses the existing capture harness + 30,348-cell grammar)
 **Requirements**: EVAL-01, EVAL-02, EVAL-03, EVAL-04, EVAL-05, DEDUP-01, DEDUP-02
 **Success Criteria** (what must be TRUE):
+
   1. Maintainer runs the evaluator locally and gets a `candidates.ndjson` where each row records surface, rubric dimension, region tag, overlay tags, severity, the raising persona/lens, and `cell_refs` into the existing 30,348-cell grammar.
   2. All 6 operator personas (Operator/Founder, Customer Support, Finance/Billing Ops, Recovery/Growth Ops, Developer/Integration, Compliance/Audit) each produce job-anchored findings from their entry point, and the graphic-design lens scores comparatively against named quiet-dev-tooling exemplars (Linear / Vercel / Stripe / Prisma) rather than emitting an absolute "award" score.
   3. Running the evaluator with no `ANTHROPIC_API_KEY` exits 0 (no failure) and the existing per-image size guard still holds, so it is safe to invoke anywhere.
   4. A committed `DESIGN-LENS-RUBRIC.md` sub-rubric plus a curated, license-clean good/bad exemplar set (sourced from repo history) anchors the design lens to the locked brand DNA ("quiet polish, well-made dev tooling, not fintech").
   5. Running the proposer twice on unchanged screenshots yields an identical `finding_id` set — proven by an automated test — because each finding's canonical claim-key is derived from surface + dimension + sorted overlay-tags + region and excludes the LLM free-text.
+
 **Plans**: 5 plans
+**Wave 1**
+
 - [ ] 205-01-PLAN.md — Determinism SSOT (`region-tags.js`): closed-enum vocab + pure claim-key/finding-id + DEDUP self-test (DEDUP-01, DEDUP-02)
 - [ ] 205-02-PLAN.md — Design sub-rubric + curated good/bad exemplar set + PROVENANCE.json (EVAL-02, EVAL-04)
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
 - [ ] 205-03-PLAN.md — Proposer CLI: guards + 6 persona lenses + harness-validation gate + `candidates.ndjson` (EVAL-01, EVAL-03, EVAL-05)
-- [ ] 205-04-PLAN.md — Comparative graphic-design lens integration (few-shot exemplars, `direction` flag) (EVAL-02)
 - [ ] 205-05-PLAN.md — Capture-time `.bbox.json` region-selector emit for the 207 overlay + presence cross-check (EVAL-05)
 
+**Wave 3** *(blocked on Wave 2 completion)*
+
+- [ ] 205-04-PLAN.md — Comparative graphic-design lens integration (few-shot exemplars, `direction` flag) (EVAL-02)
+
 ### Phase 206: Adversarial verifier + finding ledger + deterministic gate
+
 **Goal**: Candidate findings are collapsed across lenses, adversarially confirmed, persisted to a committed forward-only ledger, and protected by a deterministic sibling gate that the LLM never touches — the pawl that lets the UI only move forward.
 **Depends on**: Phase 205 (consumes `candidates.ndjson` + claim-keys)
 **Requirements**: DEDUP-03, VERIFY-01, VERIFY-02, VERIFY-03, LEDGER-01, LEDGER-02, LEDGER-03, LEDGER-04, LEDGER-05
 **Success Criteria** (what must be TRUE):
+
   1. Findings raised independently by multiple personas/lenses collapse into a single work item carrying a `persona_frequency` count.
   2. Each candidate faces a 3-role adversarial skeptic panel (persona advocate, brand purist, operator-density defender) and is dropped unless at least 2 of 3 confirm; the operator-density-defender refutes any fix that would cut operator information density or add marketing-style whitespace without a concrete task-completion justification; and a candidate that cites no admissible justification token (`rubric-dim-below-bar` | `persona-job-miss:<job>` | `token-bypass`) is rejected before any human sees it.
   3. Confirmed findings persist to a committed `findings.ledger.ndjson` with an explicit lifecycle (`open → resolved → verified-closed`, or `suppressed` with a reason) and foreign-key `cell_refs`, and a committed `ledger.baseline.json` high-water baseline records `confirmed_open` counts per lens plus the `resolved_locked` claim-key set.
   4. The deterministic reducer emits a regression row when any lens's open count exceeds baseline, when a `resolved` finding's minted guard is missing/deleted, or when a `resolved_locked` claim reopens without a maintainer reopen marker; the gate passes only when `finding-regressions.ndjson` is 0 bytes and is independently re-verified by a CI script that recomputes counts from raw ledger rows (a hand-edited baseline that disagrees fails).
   5. Both the gate reducer and its verifier pass a `--self-test` proving that count-increase, missing-guard, and reopened-locked-claim each produce a regression row while a clean ledger produces zero.
+
 **Plans**: TBD
 
 ### Phase 207: Orchestration + digest + one-command round/fix loop
+
 **Goal**: The whole pipeline is driven by two `mix` commands with a rendered digest and minimal maintainer checkpoints, resolutions auto-mint deterministic guards, and the loop provably terminates.
 **Depends on**: Phase 206 (needs the verifier, ledger, and gate to orchestrate around)
 **Requirements**: ORCH-01, ORCH-02, ORCH-03, ORCH-04, ORCH-05, ORCH-06
 **Success Criteria** (what must be TRUE):
+
   1. Maintainer runs `mix accrue_admin.ui.round` and it builds assets, boots the admin, seeds, captures, fans out evaluators, dedups, verifies, ranks, and renders a digest in one command.
   2. The digest is a rendered HTML gallery grouping screenshots by surface with confirmed findings overlaid on their region, a ranked worklist, and a separate "decisions needed" queue for IA/product-decision items.
   3. Maintainer can batch-approve all auto-fixable confirmed findings in one action, or reject an individual finding into a suppress-list with a reason that feeds dedup so it never resurfaces.
   4. Maintainer runs `mix accrue_admin.ui.fix` and it applies the approved batch, rebuilds and commits the CSS bundle, re-captures, re-scores, updates the ledger, and auto-mints a deterministic guard (a targeted assertion in an existing spec, or a `ledger-count` guard for pure-taste findings) for each resolved finding so it cannot silently reopen.
   5. The loop reports convergence after K=2 consecutive dry rounds and escalates to the maintainer at a 6-round hard cap instead of looping indefinitely.
+
 **Plans**: TBD
 
 ### Phase 208: Prove convergence on the representative slice + wire CI + ACCEPT
+
 **Goal**: Prove the ratchet converges the representative slice end-to-end, freeze the first baseline, wire the deterministic-only CI gate beside the existing ones, and land maintainer ACCEPT with a runbook that tees up the full sweep.
 **Depends on**: Phase 207 (needs the one-command round/fix loop)
 **Requirements**: CONV-01, CONV-02, CONV-03, CONV-04, CONV-05, CONV-06, CONV-07
 **Success Criteria** (what must be TRUE):
+
   1. The ratchet runs to `CONVERGED (2 dry rounds)` on the representative slice (design-system foundation + a few component families, plus dashboard, subscription-detail, and subscriptions-list) with every slice cell scoring ≥ 2 and both `regressions.ndjson` and `finding-regressions.ndjson` empty, and the first non-empty `ledger.baseline.json` is frozen as the slice high-water mark.
   2. A new deterministic-only CI job `admin-ui-ratchet-guardrails` passes on a PR with no `ANTHROPIC_API_KEY` and blocks on a synthetic ledger count-increase.
   3. A change that improves one persona but regresses another is caught by the ledger (the regressed lens's open count rises → gate red), proven by an automated test.
   4. Existing UI gates (`admin-hardening-guardrails`, `admin-phase200-guardrails`, asset-drift) remain green and the committed `accrue_admin.css` bundle stays fresh.
   5. A `UI-RATCHET-SIGN-OFF.md` carries the maintainer `ACCEPT` line enforced by a sign-off verifier (mirroring the Phase 200 pattern), and a documented runbook enables graduating any remaining admin surface under the ratchet as a safe follow-on round.
+
 **Plans**: TBD
 **UI hint**: yes
 
 ### Phase 209: Full-surface sweep under the ratchet (SCOPE-GATED / OPTIONAL)
+
 **Goal**: Graduate the remaining ~19 admin surfaces round-by-round to 2 dry rounds each under the proven ratchet, with no regressions. **Optional follow-on — explicitly NOT required for v1.56 milestone sign-off** (confirmed maintainer decision: tee it up, do not force it into this milestone). Maps only the deferred `SWEEP-01`; no v1 (committed) requirement is assigned here.
 **Depends on**: Phase 208 (the ratchet must be proven + CI-gated first)
 **Requirements**: SWEEP-01 (deferred / not part of the v1.56 committed set)
 **Success Criteria** (what must be TRUE):
+
   1. Each remaining admin surface reaches 2 consecutive dry rounds under the ratchet with `finding-regressions.ndjson` empty.
   2. No lens's `confirmed_open` count regresses above its frozen baseline across the sweep, and existing UI gates stay green.
+
 **Plans**: TBD (deferred — not scheduled for v1.56)
 
 ## Progress
