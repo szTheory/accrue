@@ -1,4 +1,16 @@
 const { test, expect } = require("@playwright/test");
+const fs = require("fs");
+
+// REGION_SELECTORS is the region_tag → `ax-*` selector SSOT from plan 01
+// (accrue_admin/e2e/ratchet/region-tags.js). The capture harness is broader than
+// the ratchet, so the import is defensive: if the ratchet module is absent the
+// spec still runs and simply skips the additive .bbox.json emit (D-09).
+let REGION_SELECTORS = null;
+try {
+  ({ REGION_SELECTORS } = require("./ratchet/region-tags.js"));
+} catch {
+  REGION_SELECTORS = null;
+}
 
 async function reset(request) {
   const response = await request.post("/__e2e__/reset");
@@ -23,8 +35,52 @@ async function captureThemes(page, name, project) {
   const dir = `test-results/admin-visuals/${project}`;
   await page.evaluate(() => document.documentElement.setAttribute("data-theme", "light"));
   await page.screenshot({ path: `${dir}/${name}.png`, fullPage: true });
+  await captureBBoxes(page, name, project, "light");
   await page.evaluate(() => document.documentElement.setAttribute("data-theme", "dark"));
   await page.screenshot({ path: `${dir}/${name}-dark.png`, fullPage: true });
+  await captureBBoxes(page, name, project, "dark");
+}
+
+// captureBBoxes — capture-time selector bounding-box emitter (D-09). Per
+// surface/viewport/theme it writes a sibling `${name}.bbox.json` (light) /
+// `${name}-dark.bbox.json` (dark) next to the PNG, keyed by region_tag, recording
+// each REGION_SELECTORS `ax-*` selector's boundingBox() — or `null` when the
+// selector is absent on the surface.
+//
+// This geometry feeds ONLY the Phase-207 digest region overlay and the optional
+// presence cross-check (a region the model tagged but whose selector is absent →
+// downgrade to `content-body`). It is capture-time evidence: it is written to the
+// `.bbox.json` sidecar ONLY and NEVER enters the deterministic claim_key /
+// finding_id / any candidates.ndjson identity field (D-09, T-205-05).
+//
+// An absent or unresolvable selector yields a `null` box — never a thrown error
+// that aborts the capture sweep. The whole emit is additive: it does not change the
+// PNG capture behavior, filenames, or the surface sweep, and it no-ops entirely if
+// the ratchet region-tags module was not importable above.
+async function captureBBoxes(page, name, project, theme) {
+  if (!REGION_SELECTORS) return; // ratchet module absent → skip additively
+  const dir = `test-results/admin-visuals/${project}`;
+  const suffix = theme === "dark" ? "-dark" : "";
+  const boxes = {};
+  for (const [regionTag, selector] of Object.entries(REGION_SELECTORS)) {
+    let box = null;
+    try {
+      if (selector) {
+        const loc = page.locator("." + selector).first();
+        if (await loc.count()) {
+          box = await loc.boundingBox();
+        }
+      }
+    } catch {
+      // A wrong/absent selector must NEVER crash the capture — null box fallback.
+      box = null;
+    }
+    boxes[regionTag] = box || null;
+  }
+  await fs.promises.writeFile(
+    `${dir}/${name}${suffix}.bbox.json`,
+    JSON.stringify(boxes, null, 2)
+  );
 }
 
 test.describe("Admin visual inventory", () => {
