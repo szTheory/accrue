@@ -31,9 +31,22 @@ v1.49 **Realistic Demo App & Adoption Evidence** shipped on **2026-06-02**. The 
 
 ## Current State
 
-No active milestone is open. v1.55 shipped and archived on 2026-07-03; the project is ready for the next explicit milestone initialization.
+**Active milestone: v1.56 — Admin UI Ratchet: Automated Adversarial Design Evaluation** (opened 2026-07-03). v1.55 shipped and archived on 2026-07-03; this milestone was opened next by explicit maintainer request.
 
-The highest-ranked follow-up from v1.55 is **Public Truth And Proof-State Baseline**: align executable toolchain/package truth with public docs, publish one evaluator proof path, clarify proved/skipped/advisory provider semantics, and mirror that truth into package/listing surfaces. This is a candidate next milestone, not active scope until `/gsd-new-milestone` opens it.
+The Phase 204 hardening roadmap's top slice (**Public Truth And Proof-State Baseline**) remains the highest-ranked *release-readiness* follow-up and is deferred, not cancelled — it is a candidate for a subsequent milestone once v1.56 ships.
+
+## Current Milestone: v1.56 Admin UI Ratchet: Automated Adversarial Design Evaluation
+
+**Goal:** Make it maximally easy to evaluate and iterate the `accrue_admin` operator UI toward award-winning, on-brand graphic design — by building a maintainer-run, forward-only "UI ratchet" that automates the tedious hunt→fix→repeat loop into fan-out adversarial evaluation (per operator persona/JTBD + a graphic-design lens) → dedup → adversarial verify → batch-fix at root → re-score → loop-until-dry, where the maintainer only batch-approves and signs off, and the UI can only ever move forward (never accrue new issues).
+
+**Target features:**
+- Multi-persona + graphic-design LLM evaluator harness (6 operator personas from v1.51 §2 + comparative-to-exemplar design lens), promoted from the dormant `score-visuals.mjs`.
+- Canonical claim-key dedup (identity excludes LLM prose → run-to-run stable, no flaky regressions) + adversarial verifier panel (persona advocate / brand purist / operator-density defender; 2-of-3 confirm; mandatory v1.51 justification token).
+- Committed forward-only finding ledger + deterministic sibling gate (`finding-regressions.ndjson` must be 0 bytes), independently CI-re-verified; LLM never on the gate path.
+- One-command orchestration (`mix accrue_admin.ui.round` / `ui.fix`) + rendered digest/gallery + minimal maintainer checkpoints; guaranteed termination (finite lattice, K=2 dry rounds, 6-round cap).
+- End-to-end convergence proven on a representative slice (design-system + dashboard, subscription-detail, subscriptions-list); new deterministic-only CI job; maintainer ACCEPT. Full ~19-surface sweep teed up as safe follow-on rounds.
+
+**Key context / constraints:** Reopen justification class = **explicit strategy change** (flagship adopter-facing admin surface design quality, same class accepted for v1.50–v1.54) **plus** concrete maintainer request. Scope stays within `accrue_admin` + dev/test-only tooling: no new billing primitives, no breaking API/route changes, no Tailwind migration, `ax-*` stays the styling SSOT, core `accrue` stays LiveView-runtime-free, no `accrue_portal` work, and ratchet tooling never leaks into adopter runtime. LLM runs locally (maintainer's key); CI gates the deterministic layer only. Authoritative design source: the approved plan `~/.claude/plans/ui-ratchet-txt-i-agile-honey.md`. Continues GSD phase numbering from 204 → phases 205–209 (209 scope-gated/teed up). Central design principle: the subjective LLM is a *proposer/ranker*; humans triage; a committed ledger + minted deterministic guards are what ratchets — reconciling the v1.54 team's deliberate refusal to let a non-deterministic LLM gate the UI.
 
 ## Most recently shipped milestone: v1.55 — OSS Quality Evaluation & Hardening Roadmap (**shipped & archived 2026-07-03**)
 
@@ -721,4 +734,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-07-03 after v1.55 shipped and archived. No active milestone is open; the next likely candidate is the Phase 204 Public Truth And Proof-State Baseline slice.*
+*Last updated: 2026-07-03 — opened milestone v1.56 (Admin UI Ratchet: Automated Adversarial Design Evaluation), phases 205–209. Prior candidate (Phase 204 Public Truth And Proof-State Baseline) deferred to a subsequent milestone.*
