@@ -194,7 +194,7 @@ Full details: [v1.48 roadmap archive](milestones/v1.48-ROADMAP.md)
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
-- [ ] 205-04-PLAN.md — Comparative graphic-design lens integration (few-shot exemplars, `direction` flag) (EVAL-02)
+- [x] 205-04-PLAN.md — Comparative graphic-design lens integration (few-shot exemplars, `direction` flag) (EVAL-02)
 
 ### Phase 206: Adversarial verifier + finding ledger + deterministic gate
 
@@ -296,7 +296,7 @@ Full details: [v1.48 roadmap archive](milestones/v1.48-ROADMAP.md)
 | 202. CI/CD performance and determinism audit | v1.55 | 1/1 | Complete    | 2026-07-02 |
 | 203. Database schema contract ADR | v1.55 | 1/1 | Complete    | 2026-07-02 |
 | 204. Ranked hardening roadmap | v1.55 | 1/1 | Complete    | 2026-07-03 |
-| 205. Persona + design-lens evaluator harness | v1.56 | 4/5 | In Progress|  |
+| 205. Persona + design-lens evaluator harness | v1.56 | 5/5 | Complete   | 2026-07-03 |
 | 206. Adversarial verifier + finding ledger + deterministic gate | v1.56 | 0/0 | Not started | - |
 | 207. Orchestration + digest + one-command round/fix loop | v1.56 | 0/0 | Not started | - |
 | 208. Prove convergence on slice + wire CI + ACCEPT | v1.56 | 0/0 | Not started | - |
