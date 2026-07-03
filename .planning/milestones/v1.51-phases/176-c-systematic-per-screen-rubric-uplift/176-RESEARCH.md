@@ -709,7 +709,7 @@ This phase installs **no new packages**. All work is CSS + HEEx template edits w
 - `176-CONTEXT.md` — locked decisions, wave-split, scope constraints [CITED: locked user decisions]
 - `176-UI-SPEC.md` — breakpoint behavior table, `.ax-measure` contract, token gap flags, data-table reconciliation decision [CITED: approved design contract]
 - `.planning/research/v1.51-admin-ui-depth-design.md` §4, §6, §7 — rubric definitions, verification commands, guardrails [CITED: authoritative design source]
-- `.planning/ADMIN-UX-BASELINE-AUDIT.md` — prior baseline route matrix, grep footprint observations [CITED: planning artifact]
+- `.planning/research/v1.51-admin-ux-baseline-audit.md` — prior baseline route matrix, grep footprint observations [CITED: planning artifact]
 
 ---
 

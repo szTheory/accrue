@@ -90,7 +90,7 @@ The user selected all gray areas for advisor-style discussion and requested suba
 ### Prior Admin UI Evidence
 
 - `.planning/research/v1.51-admin-ui-depth-design.md` - authoritative prior admin UI design source, 10-dimension rubric, and scope guardrails.
-- `.planning/ADMIN-UX-BASELINE-AUDIT.md` - older admin UX baseline and rubric precedent.
+- `.planning/research/v1.51-admin-ux-baseline-audit.md` - older admin UX baseline and rubric precedent.
 - `.planning/milestones/v1.51-phases/176-c-systematic-per-screen-rubric-uplift/176-CONTEXT.md` - prior rubric uplift decisions.
 - `.planning/milestones/v1.51-phases/176-c-systematic-per-screen-rubric-uplift/176-SCORECARD.md` - prior screen scorecard.
 - `.planning/milestones/v1.51-phases/177-d-motion-micro-interaction-design/177-CONTEXT.md` - prior motion/interaction decisions.

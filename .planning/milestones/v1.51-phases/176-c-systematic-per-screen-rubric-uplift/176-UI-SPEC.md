@@ -206,7 +206,7 @@ This phase is uplift, not new flows — copy is mostly inherited/locked. Baselin
 
 ## Per-Screen Scorecard Artifact
 
-The before/after evidence for SCR-01..04 is `176-SCORECARD.md` in this phase dir: rows = every admin screen (the ~20 from the route matrix in `ADMIN-UX-BASELINE-AUDIT.md` §1, incl. the new `/events/:id` EventLive), columns = the 10 rubric dimensions × {before, after}, scored by **code-level audit** in both themes and both widths. Worst-first ordering. This artifact feeds Phase 179's screenshot sign-off. The before-score IS the primary anti-churn justification for every dimension-driven change.
+The before/after evidence for SCR-01..04 is `176-SCORECARD.md` in this phase dir: rows = every admin screen (the ~20 from the route matrix in `v1.51-admin-ux-baseline-audit.md` §1, incl. the new `/events/:id` EventLive), columns = the 10 rubric dimensions × {before, after}, scored by **code-level audit** in both themes and both widths. Worst-first ordering. This artifact feeds Phase 179's screenshot sign-off. The before-score IS the primary anti-churn justification for every dimension-driven change.
 
 ---
 

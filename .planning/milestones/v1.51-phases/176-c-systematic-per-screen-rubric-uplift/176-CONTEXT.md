@@ -13,7 +13,7 @@ Bring every admin screen up to one consistent rubric baseline (≥2 on all 10 di
 <decisions>
 ## Implementation Decisions
 
-Three areas proposed as a synthesized package grounded in the locked design source (`v1.51-admin-ui-depth-design.md` §4 Phase C + §6 rubric) and a codebase scout, accepted as-is by the user (calibration: `minimal_decisive`). Key scout findings that shaped the package: the prior baseline lives at `.planning/ADMIN-UX-BASELINE-AUDIT.md`; the `data_table` component **already supports mobile card-collapse** (`card_fields`/`card_title`/`ax-data-table-cards`); Phase 174's `--ax-bp-*` breakpoint tokens are already in use in app.css; and `.ax-measure` (68ch) exists as a utility but is **applied to no screen yet**.
+Three areas proposed as a synthesized package grounded in the locked design source (`v1.51-admin-ui-depth-design.md` §4 Phase C + §6 rubric) and a codebase scout, accepted as-is by the user (calibration: `minimal_decisive`). Key scout findings that shaped the package: the prior baseline lives at `.planning/research/v1.51-admin-ux-baseline-audit.md`; the `data_table` component **already supports mobile card-collapse** (`card_fields`/`card_title`/`ax-data-table-cards`); Phase 174's `--ax-bp-*` breakpoint tokens are already in use in app.css; and `.ax-measure` (68ch) exists as a utility but is **applied to no screen yet**.
 
 ### Scope, screen inventory & wave-split (SCR-01, SCR-03)
 - **Scope:** ALL ~20 admin screens must score ≥2 on every dimension, but *effort* concentrates on the under-iterated tail (payments/charges, coupons, promotion-codes, connect, events, webhooks, invoice detail, + the new `/events/:id` EventLive). Frozen screens (Home, primary nav, global search) and the v1.50-heavily-iterated screens (Customer-360, dashboard) are touched **only on a rubric-flagged miss** (anti-churn).
@@ -44,7 +44,7 @@ Three areas proposed as a synthesized package grounded in the locked design sour
 ## Existing Code Insights
 
 ### Reusable Assets
-- **`.planning/ADMIN-UX-BASELINE-AUDIT.md`** — the prior (v1.50-era) baseline; the rubric to score against. Read first when capturing the new baseline.
+- **`.planning/research/v1.51-admin-ux-baseline-audit.md`** — the prior (v1.50-era) baseline; the rubric to score against. Read first when capturing the new baseline.
 - **`data_table` component** (`components/data_table.ex`) — already renders a mobile card list (`ax-data-table-cards`, `card_fields`, `card_title`, `ax-data-table-card`) below the table; list-screen mobile-first is mostly an audit-and-wire task, not new construction.
 - **Phase 174 tokens** — `--ax-bp-sm/md/lg/content` breakpoint tokens (in use, 15 refs in app.css), `--ax-leading-*`/`--ax-tracking-*` type micro-tokens, `--ax-measure` (68ch) + `.ax-measure` utility (defined, unused), `--ax-transition-*` bundles.
 - **10-dimension rubric** (design source §6): ① token compliance ② visual hierarchy ③ spacing rhythm ④ state coverage ⑤ responsive/mobile-first ⑥ contrast ⑦ focus & semantics ⑧ brand expression ⑨ motion ⑩ reuse/DRY. Pass at ≥2.
