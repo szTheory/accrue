@@ -161,6 +161,8 @@ Ranking used the Phase 204 decision stack:
 
 Purpose: close the public trust gap before deeper hardening work. This slice includes Rank 1, Rank 2, Rank 3 setup language, and Rank 7 listing truth where the same source map can serve all public surfaces.
 
+Source evidence: Phase 201 found public toolchain/version drift, a scattered evaluator proof path, provider-proof ambiguity, and package/listing trust gaps; Phase 202 adds the merge-blocking CI versus provider-lane proof boundary.
+
 Expected outputs:
 
 - Repo-local version and package truth table.
@@ -171,6 +173,8 @@ Expected outputs:
 ### Evaluator Path And Release Safety
 
 Purpose: make proof and release decisions safer once public truth is aligned. This slice carries Rank 3 provider semantics and Rank 4 release recovery preflight.
+
+Source evidence: Phase 201 links provider-state clarity to evaluator trust and linked package/version truth; Phase 202 identifies `live-stripe` proved/skipped ambiguity, release-gate duration, and linked release-order recovery risk.
 
 Expected outputs:
 
@@ -183,6 +187,8 @@ Expected outputs:
 
 Purpose: create measured CI evidence before changing gates, cache policy, topology, or branch-protection rules. This slice includes Rank 5, Rank 8, and Rank 9.
 
+Source evidence: Phase 202 requires p50/p95 timing, step timing, cache hit/miss, provider-state, rerun, Docker, host browser, and release-gate baseline data before topology, cache, gate, or branch-protection changes; Phase 201 ties host browser setup ownership to first-hour proof friction.
+
 Expected outputs:
 
 - CI timing/cache/provider baseline summary.
@@ -194,6 +200,8 @@ Expected outputs:
 
 Purpose: turn the Phase 203 ADR into targeted guardrails while preserving host compatibility. This slice maps to Rank 6.
 
+Source evidence: Phase 203 accepts the default `billing` prefix, explicit `public`, compile-time `@schema_prefix`, and `Accrue.Migration.qualified_table/1` contract while deferring schema rename and data movement.
+
 Expected outputs:
 
 - Tests for default `billing`, explicit `public`, and compile-time `@schema_prefix`.
@@ -204,6 +212,8 @@ Expected outputs:
 ### Portal Parity Readiness
 
 Purpose: document narrow portal readiness before any broad design-system or white-label work. This slice maps to Rank 10.
+
+Source evidence: Phase 201 and the pending portal design-system note identify portal parity and ownership questions; Phase 204 limits the slice to readiness proof instead of broad UI, CSS, route, or white-label redesign work.
 
 Expected outputs:
 
@@ -233,8 +243,8 @@ Expected outputs:
 |---|---|---|
 | RD-01 | How to read this roadmap, Ranking method, Ranked Top 10 | The roadmap gives a fast scan path, states the ranking method, and orders exactly ten future hardening candidates from public truth through portal readiness. |
 | RD-02 | Ranked Top 10, Implementation Cards, Suggested Follow-Up Milestones | Each ranked row names impact, effort, risk reduction, timing, and done criteria; each card adds source evidence, scope, verification, rollback, and metrics. |
-| RD-03 | Implementation Cards, Explicit Deferrals, Phase Handoff and Boundary | Schema-prefix, release, provider, CI, package, and portal items keep their non-goals explicit, including schema rename, data movement, branch-protection edits, and broad portal redesign. |
-| RD-04 | Requirement Coverage, Phase Handoff and Boundary | This section maps the requirements to sections, and the boundary section confirms the Phase 204 artifact stayed roadmap-only. |
+| RD-03 | Ranked Top 10, Implementation Cards, Suggested Follow-Up Milestones | Every ranked row, card, and follow-up slice cites Phase 201, Phase 202, or Phase 203 evidence so future implementation work traces back to concrete audit or ADR risk. |
+| RD-04 | Explicit Deferrals, Phase Handoff and Boundary | Explicit Deferrals names polish-only or overbuilt work and its reopen threshold; the boundary section confirms Phase 204 stayed roadmap-only instead of promoting deferred work into implementation. |
 
 ## Phase Handoff and Boundary
 
