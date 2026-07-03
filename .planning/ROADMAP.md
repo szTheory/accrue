@@ -135,7 +135,7 @@ Plans:
 
 Plans:
 
-- [ ] 204-01-PLAN.md — Produce the ranked hardening roadmap from Phases 201-203.
+- [x] 204-01-PLAN.md — Produce the ranked hardening roadmap from Phases 201-203.
 
 **UI hint:** no
 
@@ -285,7 +285,7 @@ Full details: [v1.48 roadmap archive](milestones/v1.48-ROADMAP.md)
 | 201. Software quality evaluation | v1.55 | 1/1 | Complete    | 2026-07-02 |
 | 202. CI/CD performance and determinism audit | v1.55 | 1/1 | Complete    | 2026-07-02 |
 | 203. Database schema contract ADR | v1.55 | 1/1 | Complete    | 2026-07-02 |
-| 204. Ranked hardening roadmap | v1.55 | 0/1 | Pending | — |
+| 204. Ranked hardening roadmap | v1.55 | 1/1 | Complete   | 2026-07-03 |
 
 ## Historical Backlog Anchors (not active scope)
 

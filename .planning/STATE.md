@@ -2,16 +2,19 @@
 gsd_state_version: 1.0
 milestone: v1.55
 milestone_name: OSS Quality Evaluation & Hardening Roadmap
-status: Ready to execute
-stopped_at: Phase 204 planned
-last_updated: "2026-07-03T01:15:01Z"
-last_activity: 2026-07-02 — Phase 204 planned and verified
+current_phase: 204
+current_phase_name: Ranked hardening roadmap
+status: Phase complete — ready for verification
+stopped_at: Completed 204-01-PLAN.md
+last_updated: "2026-07-03T01:45:40.365Z"
+last_activity: 2026-07-03
+last_activity_desc: Completed 204-01-PLAN.md
 progress:
   total_phases: 4
-  completed_phases: 3
-  total_plans: 3
-  completed_plans: 3
-  percent: 75
+  completed_phases: 4
+  total_plans: 4
+  completed_plans: 4
+  percent: 100
 ---
 
 # Project State
@@ -28,8 +31,8 @@ See: `.planning/PROJECT.md` (updated 2026-07-02 after Phase 203 completion)
 
 Phase: 204 — Ranked hardening roadmap
 Plan: 1 plan ready
-Status: Ready to execute
-Last activity: 2026-07-02 — Phase 204 planned and verified
+Status: Phase complete — ready for verification
+Last activity: 2026-07-03 — Completed 204-01-PLAN.md
 
 ## Post-v1.48 Pause Rule
 
@@ -259,6 +262,7 @@ Coverage: 22/22 v1.51 requirements mapped (each REQ-ID → exactly one phase). D
 | Phase 200 P06 | 24m | 3 tasks | 5 files |
 | Phase 202 P01 | 12 min | 3 tasks | 2 files |
 | Phase 203 P01 | 6m 12s | 3 tasks | 2 files |
+| Phase 204 P01 | 00:09:02 | 3 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -498,6 +502,9 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - [Phase 203]: Keep explicit `public` as a supported opt-out, not a deprecated path. — Existing public-schema installs must be able to pin placement before recompiling.
 - [Phase 203]: Reject default `accrue` for v1.55. — `billing.accrue_*` is clearer than `accrue.accrue_*`, and a rename is not worth the compatibility burden.
 - [Phase 203]: Treat schema-prefix hardening checks as Phase 204 inputs, not shipped Phase 203 behavior. — Phase 204 owns final cross-audit ordering after consuming Phases 201, 202, and 203.
+- [Phase 204]: Phase 204 locked the hardening order around public truth, evaluator proof, provider semantics, release safety, CI baseline data, schema guards, package listing trust, host browser setup, release-gate cleanup, and portal readiness.
+- [Phase 204]: Phase 204 keeps CI topology, cache, gate, and branch-protection work behind baseline summaries from Phase 202 evidence.
+- [Phase 204]: Phase 204 preserves the Phase 203 database contract: default billing prefix, explicit public references, no search_path primary contract, and no schema rename or data movement.
 
 ### Pending Todos
 
@@ -606,9 +613,9 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 
 ## Session Continuity
 
-Last session: 2026-07-03T01:15:01Z
-Stopped at: Phase 204 planned
-Resume file: .planning/phases/204-ranked-hardening-roadmap/204-01-PLAN.md
+Last session: 2026-07-03T01:45:40.359Z
+Stopped at: Completed 204-01-PLAN.md
+Resume file: None
 
 ## Operator Next Steps
 

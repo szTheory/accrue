@@ -30,10 +30,10 @@
 
 ### Hardening Roadmap
 
-- [ ] **RD-01**: Maintainer gets a ranked top-10 hardening list with area, quality dimension improved, impact, effort, risk reduction, timing, and done criteria.
-- [ ] **RD-02**: Follow-up work is grouped into milestone-sized slices rather than one giant cleanup grab bag.
-- [ ] **RD-03**: The roadmap ties every recommended implementation slice back to concrete risk found in the audits.
-- [ ] **RD-04**: The roadmap explicitly defers polish-only or overbuilt work that does not reduce adoption, production, support, or maintenance risk.
+- [x] **RD-01**: Maintainer gets a ranked top-10 hardening list with area, quality dimension improved, impact, effort, risk reduction, timing, and done criteria.
+- [x] **RD-02**: Follow-up work is grouped into milestone-sized slices rather than one giant cleanup grab bag.
+- [x] **RD-03**: The roadmap ties every recommended implementation slice back to concrete risk found in the audits.
+- [x] **RD-04**: The roadmap explicitly defers polish-only or overbuilt work that does not reduce adoption, production, support, or maintenance risk.
 
 ## Standing Verification Anchors
 
@@ -42,8 +42,10 @@ keep the public docs and planning mirrors aligned:
 
 - **POS-01**: Public docs and package READMEs describe Accrue as stable-core /
   demand-driven expansion.
+
 - **POS-02**: Adopter-facing docs describe the supported SaaS billing loop,
   processor support boundaries, and package ownership boundaries.
+
 - **POS-03**: Release notes, package docs, support matrix, adoption proof docs,
   and planning mirrors describe the same stable-core posture.
 
@@ -70,12 +72,13 @@ The most recent archive is `.planning/milestones/v1.54-REQUIREMENTS.md`.
 | DB-02 | Phase 203 | Complete |
 | DB-03 | Phase 203 | Complete |
 | DB-04 | Phase 203 | Complete |
-| RD-01 | Phase 204 | Pending |
-| RD-02 | Phase 204 | Pending |
-| RD-03 | Phase 204 | Pending |
-| RD-04 | Phase 204 | Pending |
+| RD-01 | Phase 204 | Complete |
+| RD-02 | Phase 204 | Complete |
+| RD-03 | Phase 204 | Complete |
+| RD-04 | Phase 204 | Complete |
 
 **Coverage:**
+
 - v1.55 requirements: 18 total
 - Mapped to phases: 18
 - Unmapped: 0
