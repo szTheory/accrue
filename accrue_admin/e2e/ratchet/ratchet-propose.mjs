@@ -524,6 +524,48 @@ function validDefectBucket(dimension, b) {
   return buckets.includes(b) ? b : null;
 }
 
+// ----------------------------------------------------------------------------
+// Design-lens validation (plan 04). All NON-identity — `direction`/`exemplar_ref` never enter
+// claim_key, so a design finding and a persona finding that resolve to the same surface+dim+
+// region+overlay collapse to the SAME finding_id by construction (intended; DEDUP-03 lens
+// frequency collapse is Phase 206).
+// ----------------------------------------------------------------------------
+// The design lens sharpens only dims {2,3,5,8} (+{1,6} support). A design row whose dimension
+// is outside this set is dropped at the parse-time gate (DESIGN-LENS-RUBRIC §6).
+const DESIGN_DIMENSIONS = [1, 2, 3, 5, 6, 8];
+
+// `direction:air|cramped` is a MANDATORY self-flag on every design finding (drives the
+// Phase-206 asymmetric confirm bar). A design row without a valid direction is dropped.
+function validDirection(d) {
+  return d === "air" || d === "cramped" ? d : null;
+}
+
+// The committed exemplar set (DESIGN-LENS-RUBRIC §5 / PROVENANCE.json). `exemplar_ref` is
+// clamped to this set; a hallucinated ref is replaced by a deterministic default derived from
+// the dimension/direction (d8 → off-register; air → wasteful; cramped → cramped; else the
+// attached bad exemplar for the surface).
+const KNOWN_EXEMPLARS = new Set([
+  "exemplars/good/dashboard.png",
+  "exemplars/good/dev-components.png",
+  "exemplars/bad/cramped.png",
+  "exemplars/bad/wasteful.png",
+  "exemplars/bad/off-register.png",
+]);
+
+function deriveExemplarRef(supplied, dimension, direction, attachedBad) {
+  const norm =
+    typeof supplied === "string"
+      ? supplied.startsWith("exemplars/")
+        ? supplied
+        : `exemplars/${supplied.replace(/^\.?\//, "")}`
+      : null;
+  if (norm && KNOWN_EXEMPLARS.has(norm)) return norm;
+  if (dimension === 8) return "exemplars/bad/off-register.png";
+  if (direction === "air") return "exemplars/bad/wasteful.png";
+  if (direction === "cramped") return "exemplars/bad/cramped.png";
+  return attachedBad || "exemplars/bad/cramped.png";
+}
+
 // cell_refs (D-12) — foreign key INTO the frozen 30,348-cell census lattice via cellId().
 // A row references the census, never merges into it. Returns [] if the surface/theme/state
 // is not addressable in the manifest (cellId throws otherwise).
@@ -549,13 +591,27 @@ function emitCandidates(png, surface, collected, provenance) {
 
   const rows = [];
 
-  for (const { raw: f, persona } of collected) {
+  for (const item of collected) {
+    const f = item.raw;
+    const isDesign = !!item.design;
+
     // (1) dimension ∈ 1..12 — drop the row (not the image) on an out-of-range value.
     let dimension;
     try {
       dimension = regionTags.assertDimension(f.dimension);
     } catch {
       continue;
+    }
+
+    // (1a) design-lens dimension restriction — the design lens sharpens only {2,3,5,8}
+    //      (+{1,6} support); a design row outside that set is dropped (DESIGN-LENS-RUBRIC §6).
+    if (isDesign && !DESIGN_DIMENSIONS.includes(dimension)) continue;
+
+    // (1b) design-lens `direction` is a mandatory self-flag — drop a design row without one.
+    let direction = null;
+    if (isDesign) {
+      direction = validDirection(f.direction);
+      if (!direction) continue;
     }
 
     // (2) region_tag — subset → synonym → coerce content-body (never throws/invents).
@@ -586,6 +642,21 @@ function emitCandidates(png, surface, collected, provenance) {
     const severity = validSeverity(f.severity);
     const job_blocking = f.job_blocking === true;
 
+    // raised_by (D-17) — design rows carry ONLY `lens_kind:"design"` (no persona_id/job);
+    // persona rows carry the persona identity. Non-identity either way.
+    const raised_by = isDesign
+      ? { lens_kind: "design" }
+      : { lens_kind: "persona", persona_id: item.persona.persona_id, job: item.persona.job };
+
+    // Design-only NON-identity self-flags (excluded from claim_key). `exemplar_ref` is clamped
+    // to the committed set; `direction` was validated above.
+    const designFields = isDesign
+      ? {
+          direction,
+          exemplar_ref: deriveExemplarRef(f.exemplar_ref, dimension, direction, item.design.attachedBad),
+        }
+      : {};
+
     rows.push({
       // Provenance (non-identity)
       schema_version: "ratchet-candidate/1",
@@ -613,7 +684,8 @@ function emitCandidates(png, surface, collected, provenance) {
       job_blocking,
       defect_bucket: validDefectBucket(dimension, f.defect_bucket),
       justification_token: f.justification_token,
-      raised_by: { lens_kind: "persona", persona_id: persona.persona_id, job: persona.job },
+      raised_by,
+      ...designFields,
       persona_frequency: 1, // proposer emits 1; the Phase-206 verifier collapses (DEDUP-03)
       effort_hint: validEffortHint(f.effort_hint),
       // Human-only free text (excluded from identity)
