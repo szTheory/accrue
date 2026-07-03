@@ -142,7 +142,7 @@ Surface-to-script map:
 - **`verify_stable_core_posture:`** (stderr prefix on failure) is the dedicated stable-core posture gate for POS-01..03.
 - Expected anchor categories:
   - canonical posture surfaces (`README.md`, `accrue/README.md`, `maturity-and-maintenance.md`, `jobs_to_be_done.md`, `release-notes.md`),
-  - maintainer mirrors (`.planning/PROJECT.md`, `.planning/REQUIREMENTS.md`, `.planning/processor-support-matrix.md`, adoption-proof matrix),
+  - maintainer mirrors (`.planning/PROJECT.md`, active `.planning/REQUIREMENTS.md` when present, otherwise the current archived milestone requirements from `.planning/STATE.md`, `.planning/processor-support-matrix.md`, adoption-proof matrix),
   - thin package/proof mirrors (`first_hour.md`, `accrue_admin/README.md`, `accrue_portal/README.md`, `examples/accrue_host/README.md`).
 - Negative guards block retired public posture terms: `feature freeze`, `no new features ever`, and `maintenance only`.
 - If this gate fails, update canonical public guides first and keep package/proof mirrors thin. Do not create a second support matrix or move policy authority away from public guides.

@@ -595,13 +595,13 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 | tooling | TOOL-02 — pixel-diff visual-regression (Percy/Applitools) | deferred (continued) | Scored-cell forward-only gate over real composed routes is the mechanism; pixel-diff would flag every intentional v1.54 improvement as a regression. |
 | tooling | TOOL-03 — publish `brandbook/tokens/tokens.css` as npm/CDN distributable | deferred | Not needed for the admin streamlining pass. |
 
-### Known CI issue — nightly live-stripe canary red (deferred 2026-06-14)
+### Resolved CI hygiene issue — nightly live-stripe canary no-secret path (resolved 2026-07-03)
 
-The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode parity (mandatory periodic)", 06:00 UTC cron + manual dispatch) fails every night. **Not merge-blocking** — it never runs on push/PR, so the main matrix stays green; this is the only red on the repo.
+The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode parity (mandatory periodic)", 06:00 UTC cron + manual dispatch) previously failed when Stripe secrets were absent. **Not merge-blocking** — it never runs on push/PR, but it kept the dashboard red.
 
-- **Root cause:** the job's `env:` block sets only PG + `STRIPE_TEST_SECRET_KEY` + `ACCRUE_LIVE_*`. With the Stripe secret absent the tests are *supposed* to skip cleanly, but the `accrue` app crashes earlier at boot — `** (Accrue.ConfigError) ACCRUE-DX-WEBHOOK-SECRET-MISSING` from `Accrue.Application.start/2` — because the job omits the webhook signing secret env the rest of the test matrix supplies. So `mix test.live` exits 1 before any test can skip.
-- **Fix shape (when picked up):** add the webhook-secret env var to the `live-stripe` job, mirroring how the green matrix jobs provide it; then re-run via `gh workflow run` / dispatch to confirm green. Small, isolated CI-config change — good `/gsd-quick` or `/gsd-debug` candidate.
-- **revisit_trigger:** wanting an all-green CI dashboard, or before relying on the live-Stripe parity canary to catch upstream Stripe API drift.
+- **Root cause:** missing GitHub secrets appear as blank environment variables. `runtime.exs` and the `:live_stripe` test modules treated blank values as present, which selected the Stripe processor with an empty `:stripe_secret_key` before skip tags could protect the suite.
+- **Resolution:** blank `STRIPE_TEST_SECRET_KEY`, `ACCRUE_LIVE_BASIC_PRICE`, and `ACCRUE_LIVE_PRO_PRICE` values are now treated the same as missing values. `mix test.live` skips cleanly without secrets.
+- **revisit_trigger:** before relying on live Stripe API-drift detection, configure the repository secrets with a real Stripe test-mode key and matching price fixtures, then confirm a workflow-dispatch run executes the suite instead of skipping.
 
 ### Standing scope deferrals
 

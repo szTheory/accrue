@@ -25,6 +25,20 @@ require_absent_regex() {
   fi
 }
 
+state_file="$ROOT_DIR/.planning/STATE.md"
+requirements_file="$ROOT_DIR/.planning/REQUIREMENTS.md"
+
+if [[ ! -f "$requirements_file" ]]; then
+  current_milestone="$(
+    awk -F': ' '/^milestone:/ { gsub(/"/, "", $2); print $2; exit }' "$state_file" 2>/dev/null || true
+  )"
+  archived_requirements="$ROOT_DIR/.planning/milestones/${current_milestone}-REQUIREMENTS.md"
+
+  if [[ -n "$current_milestone" && -f "$archived_requirements" ]]; then
+    requirements_file="$archived_requirements"
+  fi
+fi
+
 public_anchor_files=(
   "$ROOT_DIR/README.md"
   "$ROOT_DIR/accrue/README.md"
@@ -32,7 +46,7 @@ public_anchor_files=(
   "$ROOT_DIR/accrue/guides/jobs_to_be_done.md"
   "$ROOT_DIR/accrue/guides/release-notes.md"
   "$ROOT_DIR/.planning/PROJECT.md"
-  "$ROOT_DIR/.planning/REQUIREMENTS.md"
+  "$requirements_file"
   "$ROOT_DIR/.planning/processor-support-matrix.md"
   "$ROOT_DIR/examples/accrue_host/docs/adoption-proof-matrix.md"
 )
@@ -54,7 +68,7 @@ require_fixed "$ROOT_DIR/accrue/guides/maturity-and-maintenance.md" "stable-core
 require_fixed "$ROOT_DIR/accrue/guides/jobs_to_be_done.md" "stable-core / demand-driven expansion"
 require_regex "$ROOT_DIR/accrue/guides/release-notes.md" "stable-core[^[:cntrl:]]*posture"
 require_fixed "$ROOT_DIR/.planning/PROJECT.md" "stable-core / demand-driven expansion"
-require_fixed "$ROOT_DIR/.planning/REQUIREMENTS.md" "POS-03"
+require_fixed "$requirements_file" "POS-03"
 require_fixed "$ROOT_DIR/.planning/processor-support-matrix.md" "maintainer-facing capability SSOT"
 require_fixed "$ROOT_DIR/examples/accrue_host/docs/adoption-proof-matrix.md" "scripts/ci/README.md"
 

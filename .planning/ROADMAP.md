@@ -24,6 +24,8 @@ Accrue is in **stable core / demand-driven expansion** posture as of 2026-05-31.
 
 After v1.48, broad feature milestones remain closed by default unless reopened by concrete adopter failure, correctness/security/data-loss risk, repeated support issue, operational failure, or explicit strategy change.
 
+No broad feature milestone is currently open.
+
 v1.55 OSS Quality Evaluation & Hardening Roadmap shipped on 2026-07-03 as maintenance / release-readiness / support-contract hardening work. It was not a broad feature milestone and did not add billing primitives, public API surface, new UI flows, DB defaults, CI required-check topology, or release automation changes. The next likely hardening slice is the Phase 204 top-ranked "Public Truth And Proof-State Baseline" work, pending explicit milestone initialization.
 
 v1.54 Admin UI Page-Level Streamlining & Storybook shipped on 2026-07-01 as a quality / page-level-design / interaction-correctness investment in the already-shipped `accrue_admin` operator UI (continuing v1.53's design-system hardening). It was **not** a broad feature milestone: no new billing primitives, no breaking API/route changes, no Tailwind migration, and core `accrue` remains LiveView-runtime-free while PhoenixStorybook is `accrue_admin` dev/test-only. The reopen justification remains recorded in `PROJECT.md`: explicit strategy change for the flagship adopter-facing surface plus firsthand-observed page-level usability defects.
