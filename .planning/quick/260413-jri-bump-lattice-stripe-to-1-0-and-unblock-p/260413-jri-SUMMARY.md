@@ -1,6 +1,7 @@
 ---
 phase: quick
 plan: 260413-jri
+status: complete
 subsystem: deps
 tags: [deps, lattice_stripe, roadmap, unblock]
 requires: []

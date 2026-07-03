@@ -1,6 +1,7 @@
 ---
 phase: 260602-6xv
 plan: "01"
+status: complete
 subsystem: examples/accrue_host Docker DX
 tags: [docker, dx, makefile, multi-project, port-conflict]
 dependency_graph:

@@ -1,7 +1,9 @@
 ---
 created: 2026-06-19T20:06:14Z
+completed: 2026-07-03
 title: White-label billing portal design system
 area: ui
+status: complete
 files:
   - accrue_portal/lib/accrue_portal/live/home_live.ex
   - accrue_portal/lib/accrue_portal/live/subscriptions_live.ex
@@ -51,3 +53,11 @@ Plan a future `accrue_portal` design-system and white-label pass:
   brand.
 - Document the white-label capability so adopters understand that `/billing` is
   package-provided by Accrue but host-branded by configuration.
+
+## Resolution
+
+Resolved as a captured future-hardening input, not immediate implementation
+scope. Phase 201 folded this todo as concrete portal parity evidence, and Phase
+204 ranked narrow portal readiness as future work while explicitly avoiding a
+broad portal redesign in v1.55. The actionable work now lives in
+`.planning/phases/204-ranked-hardening-roadmap/204-HARDENING-ROADMAP.md`.

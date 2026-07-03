@@ -1,7 +1,9 @@
 ---
 created: 2026-06-21T15:54:29.309Z
+completed: 2026-07-03
 title: Shared page_header component for accrue_admin list pages
 area: ui
+status: complete
 resolves_phase: 196
 files:
   - accrue_admin/lib/accrue_admin/components/detail.ex (summary_card — the detail-page analog)
@@ -30,3 +32,10 @@ it. Light test updates expected in `navigation_components` + per-page live tests
 Non-urgent design-system tightening — do when next touching admin page headers.
 Note: keep exactly one content `<h1>` per page (axe "page-has-heading-one" guardrail).
 TBD: whether to fold the breadcrumb into the component or keep it a sibling.
+
+## Resolution
+
+Completed by the v1.54 admin page-level work. Phase 196 introduced the shared
+`AccrueAdmin.Components.PageHeader` pattern, and Phase 197 propagated it across
+list pages. Later v1.55 phases treated this as resolved/stale todo evidence, not
+active scope.

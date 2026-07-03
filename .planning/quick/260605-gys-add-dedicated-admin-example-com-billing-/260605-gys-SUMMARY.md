@@ -1,6 +1,7 @@
 ---
 phase: quick-260605-gys
 plan: 01
+status: complete
 subsystem: testing
 tags: [seeds, admin, billing_admin, example_host, elixir, ecto]
 

@@ -3,6 +3,7 @@ task: 260414-l9q
 title: Automate Phase 3 human verification items
 phase: 03-core-subscription-lifecycle
 type: quick
+status: complete
 completed: 2026-04-14
 tasks_total: 6
 tasks_completed: 6

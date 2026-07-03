@@ -1,6 +1,7 @@
 ---
 phase: quick-260604-tjz
 plan: 01
+status: complete
 subsystem: examples/accrue_host (Docker DX) + accrue_admin (docs)
 tags: [docker, dx, ephemeral-ports, launch-banner, caching, docs]
 requires: []

@@ -1,6 +1,7 @@
 ---
 phase: quick-260605-dkx
 plan: 01
+status: complete
 subsystem: examples/accrue_host (Docker DX) + accrue_admin (docs)
 tags: [docker, dx, traefik, reverse-proxy, port-conflicts, apple-silicon, harfbuzz, rust-nif, caching, docs]
 requires: []
