@@ -1,7 +1,7 @@
 # Phase 204 Ranked Hardening Roadmap
 
 **Date:** 2026-07-03
-**Status:** Phase 204 roadmap assembly
+**Status:** Complete Phase 204 roadmap
 **Purpose:** Rank future hardening work after the Phase 201 software-quality audit, Phase 202 CI/CD audit, and Phase 203 schema-contract ADR.
 **Boundary:** This artifact is roadmap-only. It orders future work; it does not implement product, CI, release, package, database, documentation, or UI changes.
 
@@ -226,3 +226,27 @@ Expected outputs:
 - **i18n/localization:** Deferred; no Phase 201-203 evidence makes localization a current hardening blocker.
 - **broad runtime performance benchmarking:** Deferred until proof, CI measurement, release, and schema contract risks are lower.
 - **brandbook favicon polish:** Deferred as polish after ranked trust, release, CI, schema, and portal readiness work.
+
+## Requirement Coverage
+
+| Requirement | Covered by | Coverage proof |
+|---|---|---|
+| RD-01 | How to read this roadmap, Ranking method, Ranked Top 10 | The roadmap gives a fast scan path, states the ranking method, and orders exactly ten future hardening candidates from public truth through portal readiness. |
+| RD-02 | Ranked Top 10, Implementation Cards, Suggested Follow-Up Milestones | Each ranked row names impact, effort, risk reduction, timing, and done criteria; each card adds source evidence, scope, verification, rollback, and metrics. |
+| RD-03 | Implementation Cards, Explicit Deferrals, Phase Handoff and Boundary | Schema-prefix, release, provider, CI, package, and portal items keep their non-goals explicit, including schema rename, data movement, branch-protection edits, and broad portal redesign. |
+| RD-04 | Requirement Coverage, Phase Handoff and Boundary | This section maps the requirements to sections, and the boundary section confirms the Phase 204 artifact stayed roadmap-only. |
+
+## Phase Handoff and Boundary
+
+Phase 204 is roadmap-only and does not change product behavior, public APIs, DB defaults, CI topology, release automation, runtime UI, CSS, routes, package metadata, examples, scripts, or public docs. The only intended implementation artifact is `.planning/phases/204-ranked-hardening-roadmap/204-HARDENING-ROADMAP.md`, plus the executor summary and required GSD tracking files.
+
+Handoff rules for future phases:
+
+- Treat the rank order as the planning input, not proof that any hardening work has already landed.
+- Start with Public Truth And Proof-State Baseline unless a later planning pass records stronger evidence.
+- Keep CI topology, cache policy, release-gate shape, and branch-protection proposals behind the Phase 202 baseline requirement.
+- Keep the Phase 203 database contract: default `billing`, explicit `public`, no default `accrue`, and no `search_path` primary contract.
+- Keep portal work narrow until a later portal phase accepts white-label/design-system scope.
+- Preserve provider-state language so Fake processor proof, `live-stripe`, skipped lanes, and advisory lanes cannot be confused.
+
+This handoff did not change release commands, package manifests, workflow files, database migrations, source code, example app code, portal code, or public-facing guides.
