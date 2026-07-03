@@ -43,6 +43,7 @@ key_decisions:
   - Locked Phase 204 hardening order around public truth, evaluator proof, provider-state clarity, release recovery, CI baseline data, schema-prefix guards, package listing trust, host browser setup, release-gate cleanup, and portal readiness.
   - Kept CI topology, cache, gate, and branch-protection work behind baseline summaries from Phase 202 evidence.
   - Preserved the Phase 203 database contract: default billing prefix, explicit public references, no search_path primary contract, and no schema rename or data movement in this roadmap.
+requirements-completed: [RD-01, RD-02, RD-03, RD-04]
 metrics:
   duration: "00:09:02"
   completed: "2026-07-03T01:43:58Z"

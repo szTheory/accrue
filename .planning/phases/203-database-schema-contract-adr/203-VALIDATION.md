@@ -1,10 +1,12 @@
 ---
 phase: 203
 slug: database-schema-contract-adr
-status: ready
+status: green
 nyquist_compliant: true
 wave_0_complete: true
 created: 2026-07-02
+updated: 2026-07-03
+audited: 2026-07-03
 ---
 
 # Phase 203 - Validation Strategy
@@ -104,10 +106,10 @@ test -z "$(git diff --name-only -- accrue accrue_admin accrue_portal examples .g
 
 | Task ID | Plan | Wave | Requirement | Threat Ref | Secure Behavior | Test Type | Automated Command | File Exists | Status |
 |---------|------|------|-------------|------------|-----------------|-----------|-------------------|-------------|--------|
-| 203-01-01 | 01 | 1 | DB-01 | T-203-01 | ADR preserves current schema placement contract without relying on `search_path`. | markdown checklist | Run DB-01 block in the markdown checklist above. | yes | pending |
-| 203-01-02 | 01 | 1 | DB-02 | T-203-02 | ADR rejects a default rename that could break existing installs. | markdown checklist | Run DB-02 block in the markdown checklist above. | yes | pending |
-| 203-01-03 | 01 | 1 | DB-03 | T-203-03 | ADR hands future hardening checks to Phase 204 without implementing them now. | markdown checklist | Run DB-03 block in the markdown checklist above. | yes | pending |
-| 203-01-04 | 01 | 1 | DB-04 | T-203-04 | ADR separates support contract, non-goals, and future implementation work. | markdown checklist | Run DB-04 block in the markdown checklist above. | yes | pending |
+| 203-01-01 | 01 | 1 | DB-01 | T-203-01 | ADR preserves current schema placement contract without relying on `search_path`. | markdown checklist | Run DB-01 block in the markdown checklist above. | yes | green |
+| 203-01-02 | 01 | 1 | DB-02 | T-203-02 | ADR rejects a default rename that could break existing installs. | markdown checklist | Run DB-02 block in the markdown checklist above. | yes | green |
+| 203-01-03 | 01 | 1 | DB-03 | T-203-03 | ADR hands future hardening checks to Phase 204 without implementing them now. | markdown checklist | Run DB-03 block in the markdown checklist above. | yes | green |
+| 203-01-04 | 01 | 1 | DB-04 | T-203-04 | ADR separates support contract, non-goals, and future implementation work. | markdown checklist | Run DB-04 block in the markdown checklist above. | yes | green |
 
 *Status: pending, green, red, flaky.*
 
@@ -135,3 +137,16 @@ All phase behaviors have automated markdown/content verification. Manual review 
 - [x] `nyquist_compliant: true` set in frontmatter.
 
 **Approval:** approved 2026-07-02
+
+## Validation Audit 2026-07-03
+
+| Metric | Count |
+|--------|-------|
+| Gaps found | 1 metadata gap |
+| Resolved | 1 |
+| Escalated | 0 |
+
+The DB-01 through DB-04 markdown checklist passed, including the no-source-diff
+boundary for `accrue`, `accrue_admin`, `accrue_portal`, `examples`, `.github`,
+and `scripts`. The stale per-task rows were updated from `pending` to `green`;
+no generated tests are appropriate for this ADR-only phase.
