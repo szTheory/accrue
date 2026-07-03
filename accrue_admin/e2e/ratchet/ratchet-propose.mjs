@@ -330,10 +330,174 @@ async function proposeForImage(png, b64, provenance) {
   return emitCandidates(png, surface, collected, provenance);
 }
 
-// emitCandidates — Task 3 fills the harness-authoritative validation + candidates.ndjson
-// schema. Stage 2 wires the fan-out + tool_use parse; the emit gate is added next.
-function emitCandidates(_png, _surface, _collected, _provenance) {
-  return [];
+// ----------------------------------------------------------------------------
+// Non-identity closed enums (D-03/D-17) — `defect_bucket` is dimension-scoped and used
+// only for digest sub-grouping. It is EXCLUDED from claim_key and never gates; unknown
+// values coerce to `null`. Exact contents are Claude's discretion (D-03 non-identity).
+// ----------------------------------------------------------------------------
+const DEFECT_BUCKETS_BY_DIM = {
+  1: ["hardcoded-value", "untokenized-color", "untokenized-spacing"],
+  2: ["weak-emphasis", "competing-focal-points", "flat-hierarchy"],
+  3: ["cramped", "wasteful", "inconsistent-rhythm"],
+  4: ["missing-empty", "missing-loading", "missing-error"],
+  5: ["overflow", "truncation", "touch-target"],
+  6: ["low-contrast-text", "low-contrast-affordance"],
+  7: ["missing-focus-ring", "focus-trap", "focus-order"],
+  8: ["generic-saas", "fintech-glossy", "off-register"],
+  9: ["excessive-motion", "missing-reduced-motion"],
+  10: ["one-off-component", "inconsistent-variant"],
+  11: ["dead-control", "ambiguous-affordance", "destructive-unguarded"],
+  12: ["vague-copy", "jargon", "missing-recovery-guidance"],
+};
+
+// Taste denylist (D-16). A defect leaning on a subjective taste adjective is dropped
+// UNLESS it also names a concrete object/control/copy (a quoted phrase or a UI noun) —
+// every finding already carries a rubric dimension, so the named-object test is the
+// discriminating factor.
+const TASTE_ADJECTIVES = ["nicer", "cleaner", "prettier", "sleek", "more modern"]; // planner-discipline-allow: nicer
+const UI_NOUNS = [
+  "button", "field", "label", "table", "column", "row", "header", "tab", "badge", "icon",
+  "menu", "link", "input", "filter", "kpi", "card", "banner", "drawer", "modal", "tooltip",
+  "toggle", "checkbox", "dropdown", "toolbar", "nav", "breadcrumb", "pagination", "search",
+  "chip", "panel", "timeline", "payload", "dialog", "form", "placeholder", "heading", "title",
+  "cell", "avatar", "sidebar", "rail", "tab-bar", "chart", "graph", "counter", "metric",
+];
+
+function isTasteOnly(defect) {
+  const text = String(defect == null ? "" : defect).toLowerCase();
+  const hasTaste = TASTE_ADJECTIVES.some((adj) => text.includes(adj));
+  if (!hasTaste) return false;
+  const hasQuoted = /["'“”`].+?["'“”`]/.test(String(defect == null ? "" : defect));
+  const hasNoun = UI_NOUNS.some((noun) => new RegExp(`\\b${noun}s?\\b`).test(text));
+  return !(hasQuoted || hasNoun); // taste-only when no concrete anchor names a target
+}
+
+function validSeverity(s) {
+  return s === "real" || s === "minor" ? s : "minor"; // conservative downgrade on garbage
+}
+
+function validEffortHint(h) {
+  return h === "css" || h === "ia-product-decision" ? h : null;
+}
+
+function validDefectBucket(dimension, b) {
+  const buckets = DEFECT_BUCKETS_BY_DIM[dimension] || [];
+  return buckets.includes(b) ? b : null;
+}
+
+// cell_refs (D-12) — foreign key INTO the frozen 30,348-cell census lattice via cellId().
+// A row references the census, never merges into it. Returns [] if the surface/theme/state
+// is not addressable in the manifest (cellId throws otherwise).
+function computeCellRefs(surfaceInfo, surface, viewport, theme, state, dimension) {
+  if (!surfaceInfo || !surfaceInfo.themes.includes(theme)) return [];
+  try {
+    return [cellId(surface, viewport, theme, state, dimension)];
+  } catch {
+    return [];
+  }
+}
+
+// emitCandidates — the DETERMINISTIC parse-time gate (D-16) and the real enforcement. Every
+// identity field is harness-re-derived from region-tags.js; model-supplied claim_key/
+// finding_id are ignored (D-04). Rows failing the justification-token gate or the taste
+// denylist are dropped before emit; the image is capped at N=12 by (job_blocking, severity).
+function emitCandidates(png, surface, collected, provenance) {
+  const { viewport, theme } = png;
+  const state = "default-populated"; // D-17 default state for this slice
+  const surfaceInfo = SURFACES.find((entry) => entry.surface === surface);
+  const surface_type = surfaceInfo ? surfaceInfo.surface_type : "unknown";
+  const png_ref = path.relative(RESULTS_DIR, png.pngPath);
+
+  const rows = [];
+
+  for (const { raw: f, persona } of collected) {
+    // (1) dimension ∈ 1..12 — drop the row (not the image) on an out-of-range value.
+    let dimension;
+    try {
+      dimension = regionTags.assertDimension(f.dimension);
+    } catch {
+      continue;
+    }
+
+    // (2) region_tag — subset → synonym → coerce content-body (never throws/invents).
+    const region_tag = regionTags.normalizeRegion(surface, f.region_tag);
+
+    // (3) overlay_tags — ⊆ OVERLAY_TAGS, dedup, codepoint sort — drop the row on an
+    //     out-of-vocab tag (validation bug, not a data point — RESEARCH Pitfall 2).
+    let overlay_tags;
+    try {
+      overlay_tags = regionTags.normalizeOverlays(f.overlay_tags);
+    } catch {
+      continue;
+    }
+
+    // (4) justification-token gate (D-16) — drop before any human sees the row.
+    if (!regionTags.isAdmissibleToken(f.justification_token)) continue;
+
+    // (5) taste denylist (D-16) — drop taste-only prose with no named target.
+    if (isTasteOnly(f.defect)) continue;
+
+    // Harness-authoritative identity (model-supplied claim_key/finding_id ignored, D-04).
+    const claim_key = regionTags.claimKey(surface, dimension, region_tag, overlay_tags);
+    const finding_id = regionTags.findingId(claim_key);
+    const dimension_name =
+      DIMENSIONS.find((d) => d.id === dimension)?.name || `dimension-${dimension}`;
+    const cell_refs = computeCellRefs(surfaceInfo, surface, viewport, theme, state, dimension);
+
+    const severity = validSeverity(f.severity);
+    const job_blocking = f.job_blocking === true;
+
+    rows.push({
+      // Provenance (non-identity)
+      schema_version: "ratchet-candidate/1",
+      run_id: provenance.run_id,
+      round,
+      model,
+      bundle_sha256: provenance.bundle_sha256,
+      // Locator / evidence (non-identity)
+      png_ref,
+      viewport,
+      theme, // NOT in claim_key (D-17) — a both-themes defect is one root finding
+      state,
+      cell_refs,
+      // Identity (closed-enum, no prose)
+      surface,
+      surface_type,
+      dimension,
+      dimension_name,
+      overlay_tags,
+      region_tag,
+      claim_key,
+      finding_id,
+      // Severity / routing
+      severity,
+      job_blocking,
+      defect_bucket: validDefectBucket(dimension, f.defect_bucket),
+      justification_token: f.justification_token,
+      raised_by: { lens_kind: "persona", persona_id: persona.persona_id, job: persona.job },
+      persona_frequency: 1, // proposer emits 1; the Phase-206 verifier collapses (DEDUP-03)
+      effort_hint: validEffortHint(f.effort_hint),
+      // Human-only free text (excluded from identity)
+      defect: typeof f.defect === "string" ? f.defect : null,
+      suggested_fix: typeof f.suggested_fix === "string" ? f.suggested_fix : null,
+    });
+  }
+
+  // Cap at N=12/image (D-16) — keep the top-N by (job_blocking, severity); log the drop.
+  rows.sort((a, b) => {
+    if (a.job_blocking !== b.job_blocking) return a.job_blocking ? -1 : 1;
+    const rank = (s) => (s === "real" ? 0 : 1);
+    return rank(a.severity) - rank(b.severity);
+  });
+  if (rows.length > MAX_FINDINGS_PER_IMAGE) {
+    const dropped = rows.length - MAX_FINDINGS_PER_IMAGE;
+    console.warn(
+      `[ratchet-propose] ${viewport}/${surface} (${theme}) — capping at ${MAX_FINDINGS_PER_IMAGE}, dropped ${dropped} lower-priority finding(s)`
+    );
+    rows.length = MAX_FINDINGS_PER_IMAGE;
+  }
+
+  return rows;
 }
 
 await main();
