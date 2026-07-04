@@ -620,6 +620,17 @@ function main() {
   }
 }
 
+// WR-05: wrap the CLI entry point in the SAME clean-crash-message try/catch as the sibling
+// independent CI re-verifier (`scripts/ci/verify_ratchet_ledger.mjs`) — an unexpected throw here
+// (e.g. `fold()`'s tamper-evidence exception on a corrupted ledger, or `regenerateBaseline()`'s
+// frozen-baseline refusal error surfacing from an unexpected caller path) previously surfaced in
+// CI as a raw Node stack trace instead of the same actionable one-liner the sibling script
+// produces, despite the two being explicitly twinned by design elsewhere in this phase.
 if (import.meta.url === `file://${process.argv[1]}`) {
-  main();
+  try {
+    main();
+  } catch (error) {
+    console.error(`phase-ratchet-ledger.mjs crashed: ${error.message}`);
+    process.exitCode = 1;
+  }
 }

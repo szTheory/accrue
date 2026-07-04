@@ -823,4 +823,16 @@ function runSelfTest() {
   console.log("ratchet-verify self-test passed.");
 }
 
-await main();
+// WR-05: wrap the live-run entry point in the SAME clean-crash-message try/catch as the
+// sibling independent CI re-verifier (`scripts/ci/verify_ratchet_ledger.mjs`) — this is only
+// ever reached past both the `--self-test` and no-API-key guards above (both `process.exit(0)`
+// before this line), so it never affects `--self-test` behavior. An unexpected throw during a
+// live panel run (e.g. a malformed `candidates.ndjson` row, or an SDK-level error) previously
+// surfaced as a raw Node stack trace instead of the same actionable one-liner the sibling
+// script produces.
+try {
+  await main();
+} catch (error) {
+  console.error(`ratchet-verify.mjs crashed: ${error.message}`);
+  process.exitCode = 1;
+}
