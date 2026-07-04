@@ -38,21 +38,23 @@ created: 2026-07-04
 
 ## Per-Task Verification Map
 
-> Populated by the planner/executor once task IDs exist. Every deterministic-plane task MUST map to a
-> `--self-test` assertion. The three regression kinds below are the Nyquist critical samples.
+> Mapped to the finalized 4-plan structure (206-01..04). Every deterministic-plane task carries an
+> `<automated>` `--self-test` assertion. The three regression kinds are the Nyquist critical samples.
+> `File Exists` = ❌ W0 means the target artifact is created by this phase (Wave-0 fixture / new file).
 
-| Task ID | Plan | Wave | Requirement | Threat Ref | Secure Behavior | Test Type | Automated Command | File Exists | Status |
-|---------|------|------|-------------|------------|-----------------|-----------|-------------------|-------------|--------|
-| TBD | TBD | TBD | LEDGER-04/05 | — | count-increase per lens → regression row | self-test | `node e2e/ratchet/phase-ratchet-ledger.mjs --self-test` | ❌ W0 | ⬜ pending |
-| TBD | TBD | TBD | LEDGER-03/05 | — | missing/deleted minted guard → regression row | self-test | `node e2e/ratchet/phase-ratchet-ledger.mjs --self-test` | ❌ W0 | ⬜ pending |
-| TBD | TBD | TBD | LEDGER-05 | — | reopened locked claim w/o marker → regression row | self-test | `node e2e/ratchet/phase-ratchet-ledger.mjs --self-test` | ❌ W0 | ⬜ pending |
-| TBD | TBD | TBD | LEDGER-04 | — | hand-edited baseline disagreeing w/ raw rows → CI verifier fails | self-test | `node scripts/ci/verify_ratchet_ledger.mjs --self-test` | ❌ W0 | ⬜ pending |
-| TBD | TBD | TBD | LEDGER-01/03 | — | clean ledger → `finding-regressions.ndjson` 0 bytes | self-test | `node e2e/ratchet/phase-ratchet-ledger.mjs --self-test` | ❌ W0 | ⬜ pending |
-| TBD | TBD | TBD | DEDUP-03 | — | multi-lens collapse → one item, `persona_frequency`+union `raised_by_lenses` | self-test | `node e2e/ratchet/phase-ratchet-ledger.mjs --self-test` | ❌ W0 | ⬜ pending |
-| TBD | TBD | TBD | VERIFY-01/02 | — | median-then-clamp over synthetic vote arrays (2-of-3, downgrade-only) | self-test | `node e2e/ratchet/ratchet-verify.mjs --self-test` | ❌ W0 | ⬜ pending |
-| TBD | TBD | TBD | VERIFY-03 | — | confirmed verdict w/o admissible token dropped before ledger | self-test | `node e2e/ratchet/ratchet-verify.mjs --self-test` | ❌ W0 | ⬜ pending |
+| Task ID | Plan | Wave | Requirement | Secure Behavior | Test Type | Automated Command | Status |
+|---------|------|------|-------------|-----------------|-----------|-------------------|--------|
+| 206-01 T1 | 01 | 1 | DEDUP-03 | multi-lens collapse → one item, `persona_frequency` = distinct `raised_by_lenses` count | self-test | `node accrue_admin/e2e/ratchet/ratchet-ledger.js` | ⬜ pending |
+| 206-01 T2 | 01 | 1 | DEDUP-03/LEDGER-01 | append/fold helper; out-of-order `seq` throws (tamper-evidence) | self-test | `node accrue_admin/e2e/ratchet/ratchet-ledger.js` | ⬜ pending |
+| 206-02 T1 | 02 | 2 | VERIFY-01/02/03, LEDGER-01 | median-then-clamp (downgrade-only) + token re-gate + LLM-identity never trusted | self-test | `ANTHROPIC_API_KEY= node accrue_admin/e2e/ratchet/ratchet-verify.mjs --self-test` | ⬜ pending |
+| 206-02 T2 | 02 | 2 | VERIFY-03, LEDGER-01 | sole `open`-row writer; `--self-test` never mutates real ledger; npm wiring | self-test | `node accrue_admin/e2e/ratchet/ratchet-verify.mjs --self-test` | ⬜ pending |
+| 206-03 T1 | 03 | 2 | LEDGER-02 | per-lens (7-enum) `confirmed_open` compare, `fold()` reducer | self-test | `node accrue_admin/e2e/ratchet/phase-ratchet-ledger.mjs --self-test` | ⬜ pending |
+| 206-03 T2 | 03 | 2 | LEDGER-03 | count-increase / guard-missing / illegal-reopen each → 1 regression row | self-test | `node accrue_admin/e2e/ratchet/phase-ratchet-ledger.mjs --self-test` | ⬜ pending |
+| 206-03 T3 | 03 | 2 | LEDGER-05 | clean ledger → `finding-regressions.ndjson` 0 bytes; `--freeze` refusal | self-test | `node accrue_admin/e2e/ratchet/phase-ratchet-ledger.mjs --self-test` | ⬜ pending |
+| 206-04 T1 | 04 | 3 | LEDGER-04 | independent recompute-from-raw-rows; hand-edited baseline disagreement fails | self-test | `node scripts/ci/verify_ratchet_ledger.mjs` | ⬜ pending |
+| 206-04 T2 | 04 | 3 | LEDGER-04/05 | verifier `--self-test` fixtures + `ratchet:ledger:self-test` npm pair | self-test | `cd accrue_admin && npm run ratchet:ledger:self-test` | ⬜ pending |
 
-*Status: ⬜ pending · ✅ green · ❌ red · ⚠️ flaky*
+*Status: ⬜ pending · ✅ green · ❌ red · ⚠️ flaky. Flip to ✅ during execution as each `--self-test` goes green; set `nyquist_compliant: true` once all rows are ✅.*
 
 ---
 
