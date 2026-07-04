@@ -209,7 +209,19 @@ Full details: [v1.48 roadmap archive](milestones/v1.48-ROADMAP.md)
   4. The deterministic reducer emits a regression row when any lens's open count exceeds baseline, when a `resolved` finding's minted guard is missing/deleted, or when a `resolved_locked` claim reopens without a maintainer reopen marker; the gate passes only when `finding-regressions.ndjson` is 0 bytes and is independently re-verified by a CI script that recomputes counts from raw ledger rows (a hand-edited baseline that disagrees fails).
   5. Both the gate reducer and its verifier pass a `--self-test` proving that count-increase, missing-guard, and reopened-locked-claim each produce a regression row while a clean ledger produces zero.
 
-**Plans**: TBD
+**Plans**: 4 plans
+**Wave 1**
+
+- [ ] 206-01-PLAN.md — Shared `ratchet-ledger.js` lifecycle helper: DEDUP-03 collapse + append/fold reducer (DEDUP-03)
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
+- [ ] 206-02-PLAN.md — `ratchet-verify.mjs`: 3-role adversarial skeptic panel + median-clamp + committed ledger writer (VERIFY-01, VERIFY-02, VERIFY-03, LEDGER-01)
+- [ ] 206-03-PLAN.md — `phase-ratchet-ledger.mjs`: deterministic gate reducer + committed ledger/baseline/reopen-marker quadruple (LEDGER-02, LEDGER-03, LEDGER-05)
+
+**Wave 3** *(blocked on Wave 2 completion)*
+
+- [ ] 206-04-PLAN.md — `scripts/ci/verify_ratchet_ledger.mjs`: independent CI re-verifier + npm script wiring (LEDGER-04, LEDGER-05)
 
 ### Phase 207: Orchestration + digest + one-command round/fix loop
 
