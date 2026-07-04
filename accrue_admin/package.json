@@ -17,6 +17,8 @@
     "score-visuals": "node e2e/score-visuals.mjs",
     "ratchet:propose": "node e2e/ratchet/ratchet-propose.mjs",
     "ratchet:self-test": "node e2e/ratchet/ratchet-propose.mjs --self-test",
+    "ratchet:verify": "node e2e/ratchet/ratchet-verify.mjs",
+    "ratchet:verify:self-test": "node e2e/ratchet/ratchet-verify.mjs --self-test",
     "baseline:artifacts": "node e2e/baseline-artifacts.mjs",
     "baseline:parse": "node e2e/baseline-parse.mjs",
     "phase192:component-lab": "mix test test/accrue_admin/dev/component_registry_test.exs test/accrue_admin/dev/component_group_registry_test.exs",
