@@ -168,15 +168,28 @@ function lensKeyFor(raisedBy) {
   throw new Error(`lensKeyFor: unrecognized lens_kind: ${JSON.stringify(raisedBy.lens_kind)}`);
 }
 
+/** FINDING_ID_RE — the closed `f-[0-9a-f]{16}` shape every `finding_id` must match (D-17). */
+const FINDING_ID_RE = /^f-[0-9a-f]{16}$/;
+
 /**
  * isValidSuppressedReason(reason) — closed-enum check (D-41). `duplicate-of` is never
  * valid as a bare literal; it must carry a `:<finding_id>` suffix.
+ *
+ * IN-02: the `:<suffix>` after `duplicate-of:` must be SYNTACTICALLY a valid `finding_id`
+ * (`f-[0-9a-f]{16}`) — a typo'd or free-text suffix (e.g. `duplicate-of:oops` or
+ * `duplicate-of:see-ticket-123`) is now rejected here at the grammar level. This function is
+ * pure (no ledger access) and therefore cannot also confirm the referenced finding_id actually
+ * EXISTS in a given ledger — that cross-check is `appendSuppressed`'s job (see below), which
+ * has access to `ledgerPath` and rejects a syntactically-valid-but-dangling reference before
+ * ever appending the suppression row.
  */
 function isValidSuppressedReason(reason) {
   if (typeof reason !== "string") return false;
   if (reason === "duplicate-of") return false;
   if (SUPPRESSED_REASONS.includes(reason)) return true;
-  return reason.startsWith("duplicate-of:") && reason.length > "duplicate-of:".length;
+  if (!reason.startsWith("duplicate-of:")) return false;
+  const suffix = reason.slice("duplicate-of:".length);
+  return FINDING_ID_RE.test(suffix);
 }
 
 /** pick(obj, keys) — shallow-copy only the OWN keys present in `obj`. */
@@ -402,11 +415,28 @@ function appendVerifiedClosed(finding_id, ledgerPath, extraFields = {}) {
  * Requires `extraFields.suppressed_reason` to be one of `SUPPRESSED_REASONS` (or a
  * `duplicate-of:<finding_id>`-shaped value) — never writes a suppression with a
  * non-admissible or missing reason.
+ *
+ * IN-02: when `suppressed_reason` is `duplicate-of:<finding_id>`-shaped, also cross-checks
+ * that `<finding_id>` actually exists among prior rows in THIS ledger (`ledgerPath`) — a
+ * syntactically-valid-but-dangling reference (a typo, or a reference to a finding_id that was
+ * never confirmed in this ledger) is rejected here, before any row is appended.
  */
 function appendSuppressed(finding_id, ledgerPath, extraFields = {}) {
   const reason = extraFields.suppressed_reason;
   if (!isValidSuppressedReason(reason)) {
     throw new Error(`appendSuppressed: suppressed_reason not admissible: ${JSON.stringify(reason)}`);
+  }
+  if (reason.startsWith("duplicate-of:")) {
+    const referencedFindingId = reason.slice("duplicate-of:".length);
+    const rows = readLedgerRows(ledgerPath);
+    const referencedExists = rows.some((row) => row.finding_id === referencedFindingId);
+    if (!referencedExists) {
+      throw new Error(
+        `appendSuppressed: duplicate-of references a finding_id not present in ${ledgerPath}: ${JSON.stringify(
+          referencedFindingId
+        )}`
+      );
+    }
   }
   return appendLifecycleEvent(finding_id, ledgerPath, "suppress", extraFields);
 }
@@ -760,6 +790,91 @@ function runSelfTest() {
       assertSelfTest(
         "(c3) WR-06: appendOpen rejects (and never writes) a row with an out-of-range dimension",
         appendOpenThrew && !fs.existsSync(scratchLedgerPath)
+      );
+    } finally {
+      fs.rmSync(scratchRoot, { recursive: true, force: true });
+    }
+  }
+
+  // (c4) IN-02 regression: `duplicate-of:<suffix>` suppressed reasons must be grammar-checked
+  // (suffix shaped like a real `finding_id`) AND, at append time, existence-checked against the
+  // actual ledger — a dangling or typo'd reference must never be silently accepted.
+  {
+    assertSelfTest(
+      "(c4) IN-02: isValidSuppressedReason rejects a free-text (non-finding_id-shaped) duplicate-of suffix",
+      isValidSuppressedReason("duplicate-of:see-ticket-123") === false
+    );
+    assertSelfTest(
+      "(c4) IN-02: isValidSuppressedReason accepts a well-formed f-[0-9a-f]{16} duplicate-of suffix",
+      isValidSuppressedReason("duplicate-of:f-1111111111111111") === true
+    );
+
+    const scratchRoot = fs.mkdtempSync(path.join(os.tmpdir(), "ratchet-ledger-"));
+    try {
+      const ledgerPath = path.join(scratchRoot, "findings.ledger.ndjson");
+      const surface = "dashboard";
+      const dimension = 5;
+      const region_tag = "kpi-row";
+      const overlay_tags = [];
+      const claim_key = claimKey(surface, dimension, region_tag, overlay_tags);
+      const finding_id = findingId(claim_key);
+      const candidateRow = {
+        schema_version: "ratchet-candidate/1",
+        run_id: "run-fixture",
+        round: 1,
+        model: "fixture-model",
+        bundle_sha256: "0".repeat(64),
+        png_ref: "chromium-desktop/dashboard-light.png",
+        viewport: "chromium-desktop",
+        theme: "light",
+        state: "default-populated",
+        cell_refs: [],
+        surface,
+        surface_type: "dashboard",
+        dimension,
+        dimension_name: "spacing-rhythm",
+        overlay_tags,
+        region_tag,
+        claim_key,
+        finding_id,
+        severity: "minor",
+        job_blocking: false,
+        defect_bucket: null,
+        justification_token: "token-bypass",
+        raised_by: { lens_kind: "design" },
+        raised_by_lenses: ["design"],
+        persona_frequency: 1,
+        effort_hint: "small",
+        defect: "fixture defect for duplicate-of self-test",
+        suggested_fix: "fixture suggested fix",
+      };
+      appendOpen(candidateRow, ledgerPath);
+
+      // A syntactically-valid duplicate-of that references a finding_id NOT present in this
+      // ledger must be rejected — a dangling reference.
+      let danglingThrew = false;
+      try {
+        appendSuppressed(finding_id, ledgerPath, {
+          suppressed_reason: "duplicate-of:f-2222222222222222", // never appended to this ledger
+        });
+      } catch {
+        danglingThrew = true;
+      }
+      assertSelfTest(
+        "(c4) IN-02: appendSuppressed rejects a duplicate-of referencing a finding_id absent from the ledger",
+        danglingThrew
+      );
+      assertSelfTest(
+        "(c4) IN-02: the dangling-reference rejection never appends a row (still exactly 1 row)",
+        readLedgerRows(ledgerPath).length === 1
+      );
+
+      // A duplicate-of that references a finding_id which DOES exist in the ledger succeeds.
+      appendSuppressed(finding_id, ledgerPath, { suppressed_reason: `duplicate-of:${finding_id}` });
+      const foldedAfterSuppress = fold(readLedgerRows(ledgerPath));
+      assertSelfTest(
+        "(c4) IN-02: appendSuppressed accepts a duplicate-of referencing a finding_id present in the ledger",
+        foldedAfterSuppress.get(finding_id).status === "suppressed"
       );
     } finally {
       fs.rmSync(scratchRoot, { recursive: true, force: true });
