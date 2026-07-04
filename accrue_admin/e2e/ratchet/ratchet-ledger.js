@@ -444,6 +444,16 @@ function fold(rows) {
  * the group (the representative) — collapse happens BEFORE any Opus verification call is
  * made downstream (Claude's Discretion: verify each distinct `finding_id` once, never pay
  * Opus per duplicate).
+ *
+ * WR-04: `lensKeyFor` throws on any unrecognized `lens_kind`/`persona_id` (by design — DEDUP-03
+ * counting must never silently coerce a bad value). Since `candidates.ndjson` is bulk-produced
+ * by an LLM-driven upstream stage, a single corrupted/unexpectedly-shaped `raised_by` value
+ * anywhere in the file must NOT abort collapsing (and therefore verifying) every OTHER valid
+ * candidate in the run — a disproportionate blast radius for an isolated data-quality problem.
+ * Each row's `lensKeyFor` call is therefore wrapped in its own try/catch: an offending row is
+ * skipped and logged, not propagated. If EVERY row in a `finding_id` group is malformed, the
+ * whole group (having no valid lens to report) is dropped and logged rather than emitted with
+ * an empty `raised_by_lenses`/zero `persona_frequency`.
  */
 function collapseByFindingId(candidateRows) {
   const groups = new Map();
@@ -455,12 +465,35 @@ function collapseByFindingId(candidateRows) {
   const items = [];
   for (const [finding_id, group] of groups) {
     const representative = group[0];
-    const raisedByLenses = Array.from(new Set(group.map((row) => lensKeyFor(row.raised_by)))).sort();
+    const raisedByLenses = [];
+    for (const row of group) {
+      let lensKey;
+      try {
+        lensKey = lensKeyFor(row.raised_by);
+      } catch (err) {
+        console.warn(
+          `[ratchet-ledger] collapseByFindingId: skipping row with malformed raised_by for ` +
+            `finding_id=${JSON.stringify(finding_id)}: ${err.message}`
+        );
+        continue;
+      }
+      raisedByLenses.push(lensKey);
+    }
+
+    const dedupedSortedLenses = Array.from(new Set(raisedByLenses)).sort();
+    if (dedupedSortedLenses.length === 0) {
+      console.warn(
+        `[ratchet-ledger] collapseByFindingId: dropping finding_id=${JSON.stringify(finding_id)} — ` +
+          `every row in its group had a malformed raised_by`
+      );
+      continue;
+    }
+
     items.push({
       ...representative,
       finding_id,
-      raised_by_lenses: raisedByLenses,
-      persona_frequency: raisedByLenses.length,
+      raised_by_lenses: dedupedSortedLenses,
+      persona_frequency: dedupedSortedLenses.length,
     });
   }
   return items;
@@ -594,6 +627,68 @@ function runSelfTest() {
     "(c) collapse-persona-frequency: representative fields carried from first-encountered row",
     sharedItem.defect === "shared defect, phrasing A"
   );
+
+  // (c2) WR-04 regression: a single malformed `raised_by` row must not abort collapsing the
+  // rest of the batch. Fixture: the shared-finding group above gets ONE additional row with a
+  // malformed raised_by (unrecognized lens_kind), plus a brand-new distinct finding_id whose
+  // OWN group is 100% malformed rows (every row in that group has a bad raised_by).
+  {
+    const malformedRowFindingId = "f-fixture-shared0000001"; // reuse sharedFindingId's group
+    const allBadFindingId = "f-fixture-all-bad000003";
+    const candidateRowsWithMalformed = [
+      ...candidateRows,
+      {
+        finding_id: malformedRowFindingId,
+        surface: "dashboard",
+        dimension: 2,
+        region_tag: "kpi-row",
+        overlay_tags: [],
+        claim_key: "dashboard__d02__kpi-row__ov-none",
+        raised_by: { lens_kind: "not-a-real-lens-kind" }, // malformed — lensKeyFor throws
+        severity: "real",
+        defect: "malformed raised_by row, must be skipped not fatal",
+      },
+      {
+        finding_id: allBadFindingId,
+        surface: "subscriptions-list",
+        dimension: 4,
+        region_tag: "data-table",
+        overlay_tags: [],
+        claim_key: "subscriptions-list__d04__data-table__ov-none",
+        raised_by: { lens_kind: "not-a-real-lens-kind" }, // the ONLY row in this group — all bad
+        severity: "real",
+        defect: "entire group is malformed, must be dropped not fatal",
+      },
+    ];
+
+    let collapsedWithMalformed;
+    let threwUnexpectedly = false;
+    try {
+      collapsedWithMalformed = collapseByFindingId(candidateRowsWithMalformed);
+    } catch {
+      threwUnexpectedly = true;
+    }
+    assertSelfTest(
+      "(c2) WR-04: collapseByFindingId never throws on a malformed raised_by row",
+      !threwUnexpectedly
+    );
+    assertSelfTest(
+      "(c2) WR-04: the fully-malformed finding_id group is dropped, not emitted",
+      !collapsedWithMalformed.some((item) => item.finding_id === allBadFindingId)
+    );
+    const sharedItemAfterMalformedRow = collapsedWithMalformed.find(
+      (item) => item.finding_id === malformedRowFindingId
+    );
+    assertSelfTest(
+      "(c2) WR-04: the shared group's OTHER (valid) rows still collapse normally " +
+        "(persona_frequency still 3 — the malformed 4th row contributed nothing, not a crash)",
+      sharedItemAfterMalformedRow.persona_frequency === 3
+    );
+    assertSelfTest(
+      "(c2) WR-04: distinctFindingId's own untouched valid group is still present in the output",
+      collapsedWithMalformed.some((item) => item.finding_id === distinctFindingId)
+    );
+  }
 
   // (d) append-round-trip fixture: real appendOpen/appendResolved/appendVerifiedClosed
   // against an fs.mkdtempSync scratch path, wrapped in try/finally so cleanup never skips.
