@@ -51,6 +51,8 @@ Requirements for this milestone. Each maps to exactly one roadmap phase (205–2
 - [ ] **ORCH-04**: Maintainer can run a single command (`mix accrue_admin.ui.fix`) that applies the approved batch, rebuilds and commits the CSS bundle, re-captures, re-scores, and updates the ledger.
 - [ ] **ORCH-05**: Resolving a finding auto-mints a deterministic guard (a targeted assertion in an existing spec, or a `ledger-count` guard for pure-taste findings) so a closed finding cannot silently reopen.
 - [ ] **ORCH-06**: The loop detects convergence after K=2 consecutive dry rounds and escalates to the maintainer at a 6-round hard cap instead of looping indefinitely.
+- [ ] **ORCH-07**: The evaluator fan-out applies Anthropic prompt caching (`cache_control`) to the stable per-call prefix (system preamble, tool schema, and the design-lens exemplar images) so repeated `ui.round` runs reuse cached input instead of re-sending it, cutting per-run token cost, without altering identity (`claim_key`/`finding_id`) or the no-key/`--self-test` paths. *(Folded 2026-07-03 from the Phase 205 live smoke — the proposer currently sends no `cache_control` and re-sends the schema + images on all 7 calls/screenshot.)*
+- [ ] **ORCH-08**: `mix accrue_admin.ui.round` and the underlying proposer accept a surface/slice filter so a maintainer can scope a run to a bounded subset (the representative slice or a single surface) without manually pruning captured PNGs; capture and fan-out both honor the filter, and an unscoped run still covers the full configured surface set. *(Folded 2026-07-03 from the Phase 205 live smoke — there is currently no subset filter, so a slice run requires hand-pruning `test-results/`.)*
 
 ### Convergence Proof, CI & Sign-off (CONV)
 
@@ -117,6 +119,8 @@ Which phases cover which requirements. Populated during roadmap creation.
 | ORCH-04 | Phase 207 | Pending |
 | ORCH-05 | Phase 207 | Pending |
 | ORCH-06 | Phase 207 | Pending |
+| ORCH-07 | Phase 207 | Pending |
+| ORCH-08 | Phase 207 | Pending |
 | CONV-01 | Phase 208 | Pending |
 | CONV-02 | Phase 208 | Pending |
 | CONV-03 | Phase 208 | Pending |
@@ -129,7 +133,7 @@ Which phases cover which requirements. Populated during roadmap creation.
 **Coverage:**
 
 - v1 requirements: 29 total (EVAL ×5, DEDUP ×3, VERIFY ×3, LEDGER ×5, ORCH ×6, CONV ×7)
-- Mapped to phases: **29/29** ✓ — Phase 205 (7: EVAL-01..05, DEDUP-01, DEDUP-02), Phase 206 (9: DEDUP-03, VERIFY-01..03, LEDGER-01..05), Phase 207 (6: ORCH-01..06), Phase 208 (7: CONV-01..07). Each REQ-ID → exactly one phase.
+- Mapped to phases: **31/31** ✓ — Phase 205 (7: EVAL-01..05, DEDUP-01, DEDUP-02), Phase 206 (9: DEDUP-03, VERIFY-01..03, LEDGER-01..05), Phase 207 (8: ORCH-01..08), Phase 208 (7: CONV-01..07). Each REQ-ID → exactly one phase. *(ORCH-07/08 folded 2026-07-03 from the Phase 205 live smoke — cost/DX enhancements to the proposer, addressed by Phase 207; the original ratified set was 29.)*
 - Unmapped: none ✓
 - Deferred (not counted in v1): SWEEP-01 → Phase 209 (scope-gated / optional, not required for v1.56 sign-off); CIADV-01 (local-run-only decision; no phase).
 

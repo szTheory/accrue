@@ -54,7 +54,7 @@ v1.55 OSS Quality Evaluation & Hardening Roadmap shipped on 2026-07-03 as mainte
 | 208 | Prove convergence on slice + wire CI + ACCEPT | CONV-01, CONV-02, CONV-03, CONV-04, CONV-05, CONV-06, CONV-07 | Not started |
 | 209 | Full-surface sweep under the ratchet | SWEEP-01 (deferred) | Scope-gated / optional — NOT required for v1.56 sign-off |
 
-Coverage: 29/29 v1 requirements mapped to Phases 205-208 (each REQ-ID → exactly one phase). Per-phase counts: 205→7 · 206→9 · 207→6 · 208→7 = 29. Phase 209 carries only the deferred SWEEP-01 and is teed up as a safe follow-on. Authoritative design source: `~/.claude/plans/ui-ratchet-txt-i-agile-honey.md` (approved 2026-07-03).
+Coverage: 31/31 requirements mapped to Phases 205-208 (each REQ-ID → exactly one phase). Per-phase counts: 205→7 · 206→9 · 207→8 · 208→7 = 31 (ORCH-07/08 folded 2026-07-03 from the Phase 205 live smoke; original ratified set was 29). Phase 209 carries only the deferred SWEEP-01 and is teed up as a safe follow-on. Authoritative design source: `~/.claude/plans/ui-ratchet-txt-i-agile-honey.md` (approved 2026-07-03).
 
 **Dependency shape:** strictly linear — 205 → 206 → 207 → 208, with 209 an optional follow-on after 208. Two-plane architecture: a noisy off-gate LLM proposer/verifier (needs `ANTHROPIC_API_KEY`, local-only) and a deterministic CI gate (committed finding ledger + minted guards; `finding-regressions.ndjson` must be 0 bytes; LLM never on the gate path).
 

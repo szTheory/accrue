@@ -41,11 +41,11 @@ Stop rule: if proposed work is polish-only with a documented workaround and no r
 
 - [x] **Phase 205: Persona + design-lens evaluator harness** - Local, key-gated evaluator fans out 6 operator personas + a comparative graphic-design lens over committed screenshots and emits stable, claim-keyed candidate findings (EVAL-01..05, DEDUP-01, DEDUP-02) (completed 2026-07-04)
 - [ ] **Phase 206: Adversarial verifier + finding ledger + deterministic gate** - Candidates collapse, are adversarially confirmed (2-of-3 skeptic panel + mandatory justification token), persist to a committed forward-only ledger, and are protected by a deterministic sibling gate the LLM never touches (DEDUP-03, VERIFY-01..03, LEDGER-01..05)
-- [ ] **Phase 207: Orchestration + digest + one-command round/fix loop** - Two `mix accrue_admin.ui.*` commands drive the whole pipeline with a rendered digest, minimal batch-approve checkpoints, auto-minted guards, and guaranteed termination (ORCH-01..06)
+- [ ] **Phase 207: Orchestration + digest + one-command round/fix loop** - Two `mix accrue_admin.ui.*` commands drive the whole pipeline with a rendered digest, minimal batch-approve checkpoints, auto-minted guards, and guaranteed termination, plus proposer prompt-caching + a surface-subset filter (ORCH-01..08)
 - [ ] **Phase 208: Prove convergence on the representative slice + wire CI + ACCEPT** - Run the ratchet to convergence on the slice, freeze the first baseline, add the deterministic-only CI job, keep existing gates green, and land maintainer ACCEPT + a follow-on runbook (CONV-01..07)
 - [ ] **Phase 209: Full-surface sweep under the ratchet** — **SCOPE-GATED / OPTIONAL (teed up, NOT required for v1.56 sign-off)** - Graduate the remaining ~19 admin surfaces round-by-round to 2 dry rounds each with no regressions (deferred SWEEP-01)
 
-Coverage: **29/29 v1 requirements** mapped to Phases 205-208 (each REQ-ID → exactly one phase). Phase 209 carries only the deferred SWEEP-01 and is explicitly optional/scope-gated. Dependencies: strictly linear 205 → 206 → 207 → 208, with 209 an optional follow-on after 208. Full per-phase goals + success criteria: see [Phase Details](#phase-details-v156-active-milestone).
+Coverage: **31/31 requirements** mapped to Phases 205-208 (each REQ-ID → exactly one phase; ORCH-07/08 folded 2026-07-03 from the Phase 205 live smoke — the original ratified set was 29). Phase 209 carries only the deferred SWEEP-01 and is explicitly optional/scope-gated. Dependencies: strictly linear 205 → 206 → 207 → 208, with 209 an optional follow-on after 208. Full per-phase goals + success criteria: see [Phase Details](#phase-details-v156-active-milestone).
 
 <details>
 <summary>✅ v1.55 OSS Quality Evaluation & Hardening Roadmap (Phases 201-204) — SHIPPED 2026-07-03</summary>
@@ -215,7 +215,7 @@ Full details: [v1.48 roadmap archive](milestones/v1.48-ROADMAP.md)
 
 **Goal**: The whole pipeline is driven by two `mix` commands with a rendered digest and minimal maintainer checkpoints, resolutions auto-mint deterministic guards, and the loop provably terminates.
 **Depends on**: Phase 206 (needs the verifier, ledger, and gate to orchestrate around)
-**Requirements**: ORCH-01, ORCH-02, ORCH-03, ORCH-04, ORCH-05, ORCH-06
+**Requirements**: ORCH-01, ORCH-02, ORCH-03, ORCH-04, ORCH-05, ORCH-06, ORCH-07, ORCH-08
 **Success Criteria** (what must be TRUE):
 
   1. Maintainer runs `mix accrue_admin.ui.round` and it builds assets, boots the admin, seeds, captures, fans out evaluators, dedups, verifies, ranks, and renders a digest in one command.
@@ -223,6 +223,8 @@ Full details: [v1.48 roadmap archive](milestones/v1.48-ROADMAP.md)
   3. Maintainer can batch-approve all auto-fixable confirmed findings in one action, or reject an individual finding into a suppress-list with a reason that feeds dedup so it never resurfaces.
   4. Maintainer runs `mix accrue_admin.ui.fix` and it applies the approved batch, rebuilds and commits the CSS bundle, re-captures, re-scores, updates the ledger, and auto-mints a deterministic guard (a targeted assertion in an existing spec, or a `ledger-count` guard for pure-taste findings) for each resolved finding so it cannot silently reopen.
   5. The loop reports convergence after K=2 consecutive dry rounds and escalates to the maintainer at a 6-round hard cap instead of looping indefinitely.
+  6. Repeated `ui.round` runs on unchanged inputs reuse a cached prompt prefix (system preamble + tool schema + design-lens exemplar images) via Anthropic `cache_control`, measurably reducing per-run input tokens/cost, with identity (`claim_key`/`finding_id`) and the no-key/`--self-test` paths unchanged (ORCH-07). *(Folded from the Phase 205 live smoke: the proposer currently makes 7 uncached calls/screenshot, re-sending the schema + images each time.)*
+  7. A maintainer can scope a round to a surface subset (the representative slice or a single surface) through a documented flag on `mix accrue_admin.ui.round`, without hand-pruning `test-results/` PNGs; an unscoped round still sweeps the full configured surface set (ORCH-08). *(Folded from the Phase 205 live smoke: there is currently no subset filter, so a slice run required manual pruning.)*
 
 **Plans**: TBD
 
