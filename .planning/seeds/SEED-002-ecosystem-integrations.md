@@ -1,7 +1,10 @@
 ---
-seed_id: SEED-002-ecosystem-integrations
+id: SEED-002
 status: backlogged
-updated: 2026-05-31
+planted: 2026-05-31
+planted_during: v1.47 closeout
+trigger_when: when a milestone considers ecosystem / interoperability integrations with sibling sztheory libraries (Threadline audit bridge, Chimeway/Mailglass notifications, Rendro PDF, Scrypath search, Sigra/Lockspire identity), or when a concrete adopter needs one of these integrations
+scope: Large
 ---
 
 # Ecosystem Integrations (High-Value Wins)
@@ -14,6 +17,16 @@ current milestone. Keep it available for future milestone selection, but do not
 treat it as a v1.47 closeout blocker.
 
 Accrue provides the canonical billing state and lifecycle events. To provide a true "SaaS-in-a-box" experience, Accrue should provide seamless integration blueprints with the following sztheory libraries:
+
+## When to Surface
+
+Surface this seed when:
+
+- a new milestone theme touches ecosystem interoperability or "SaaS-in-a-box" completeness;
+- a concrete adopter needs one of the listed integrations (audit bridge, notification orchestration, PDF, search, identity/entitlement mapping);
+- the maintainer is choosing where to expand Accrue's ecosystem surface next.
+
+Note: dormant future-roadmap material — does not open milestone scope by itself.
 
 ## 1. Chimeway (Notification Orchestration) & Mailglass
 *The Win:* Automated, Explainable Dunning & Upgrades. 

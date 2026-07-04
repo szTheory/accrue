@@ -1,7 +1,10 @@
 ---
-seed_id: SEED-004-admin-ui-blueprint-redesign
+id: SEED-004
 status: backlogged
-updated: 2026-07-04
+planted: 2026-07-04
+planted_during: post-Phase-205 admin-UI blueprint synthesis
+trigger_when: opening any admin/operator UI, information-architecture, content-hierarchy, design-system, or admin-surface-quality milestone; or selecting the next post-v1.56 milestone
+scope: Large
 ---
 
 # Admin/Operator UI Blueprint Redesign (IA + Content-Hierarchy Pivot)
@@ -77,8 +80,17 @@ palette; Geist Sans/Mono canonical; brand anchors Linear/Vercel/Prisma/Tailscale
 brand-positive); dense operator console, not fintech; core `accrue` LiveView-runtime-free; no `accrue_portal`
 work under this seed (portal white-label is a separate queued item in the Phase 204 hardening roadmap).
 
-## Revisit trigger
+## When to Surface
 
-After v1.56 ships and the maintainer chooses the next admin milestone. Open via `/gsd-new-milestone`
-with reopen class **"explicit strategy change — flagship admin surface"** + concrete maintainer request
-(the established v1.50–v1.56 precedent). Downstream spec-generation scaffolding lives at blueprint §47–48.
+Surface this seed when:
+
+- a new milestone is being opened after v1.56 (Admin UI Ratchet) ships;
+- the next milestone theme touches the `accrue_admin` operator UI, information architecture, content
+  hierarchy, or design system;
+- signature-diagnostic work is being considered ("Why blocked?" card, causality graph, saved-lens list
+  model, sensitive-action A/B/C, or the new Usage / checkout / fee-reconciliation rooms);
+- the maintainer is choosing where to take admin UX next, or asking "what's the roadmap for the admin UI".
+
+Open via `/gsd-new-milestone` with reopen class **"explicit strategy change — flagship admin surface"** +
+concrete maintainer request (the established v1.50–v1.56 precedent). Downstream spec-generation scaffolding
+lives at blueprint §47–48.

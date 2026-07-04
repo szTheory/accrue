@@ -39,7 +39,24 @@ milestone opened.
 - Confirmed "Threadline" (and scoria/scrypath/etc.) in `.planning/` are **sibling sztheory libs /
   legit Accrue integration seeds**, NOT cross-contamination — surfaced after a maintainer concern.
 
+## Wave 2 — wire the seed into GSD's actual read-paths (kill dangling pointers)
+
+Follow-on after tracing what `/gsd-new-milestone` + the assessment ritual actually read. The
+initial ROADMAP-table + research-doc placement was partly dangling (GSD reads neither at
+milestone-open). Reinforcements so SEED-004 auto-surfaces:
+- **SEED-004 conformed to the canonical seed schema** (`id:` + `trigger_when:` + `## When to Surface`)
+  that `new-milestone.md` Step 2.5 extracts — was previously `seed_id:`/`## Revisit trigger` (unread keys).
+- **PROJECT.md `## Current State`** now names SEED-004 (first file new-milestone reads; theme-independent).
+- **STATE.md** `Standing scope deferrals` row + enriched `Operator Next Steps` (what `gsd-progress`/
+  `gsd-resume-work` surface).
+- **`prompts/MILESTONE-NEXT-STEP-ASSESSMENT.md`** step-1 reading set now includes `.planning/seeds/`
+  + `.planning/research/` (was omitted).
+- **SEED-002** conformed to the canonical schema too (same latent dangling-pointer bug).
+- Memory: `reference_gsd_context_carry_mechanics.md` added (reusable lesson) + seed memory updated.
+
 ## Verification
 
-All artifacts + ROADMAP row + MEMORY.md pointer present and render cleanly. No v1.56
-REQUIREMENTS/STATE milestone scope or phase files touched. No code changed. No milestone opened.
+All artifacts + ROADMAP row + MEMORY.md pointers present and render cleanly. SEED-004/SEED-002
+frontmatter now matches `SEED-003`'s canonical shape (scanner-readable). SEED-004 present in the
+milestone-open read-paths (canonical seed + PROJECT `## Current State` + STATE deferrals). No v1.56
+REQUIREMENTS milestone scope or phase files touched. No code changed. No milestone opened.

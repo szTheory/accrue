@@ -650,6 +650,7 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 | strategy_non_goal | FIN-03 finance exports · MRR/ARR product · MoR processors · Hyperwallet | explicit standing non-goals | Accrue is a billing/subscription library, not an accounting, merchant-of-record, or payout product. | Strategy non-goal | explicit strategy change or correctness/security/data-loss risk that cannot be handled by host-owned exports | carried |
 | seed | SEED-002-ecosystem-integrations — Chimeway/Mailglass ecosystem integrations | backlogged; future-roadmap seed, not a closeout blocker | Ecosystem blueprints are dormant future-roadmap material and do not open milestone scope by themselves. | Future roadmap / ecosystem integrations | concrete adopter failure requiring an integration, repeated support issue, or explicit strategy change | 2026-05-31 |
 | seed | SEED-003-repo-hygiene-before-new-milestone | backlogged; operational hygiene seed, not product scope | Repo/worktree/GitHub/GSD hygiene is useful before a new milestone or release prep but does not force a Hex publish. | Repo hygiene / release prep | before opening a new milestone, before release prep, or when local/GitHub/GSD state feels stale | 2026-07-01 |
+| seed | SEED-004-admin-ui-blueprint-redesign — first-principles admin/operator UI redesign ("operator control plane over billing state"); north-star `prompts/accrue_admin_operator_ui_journey_blueprint.md`, synthesis `.planning/research/ADMIN-UI-REDESIGN-BLUEPRINT-SYNTHESIS.md` | backlogged; post-v1.56 multi-milestone program, not a v1.56 closeout blocker | New target (distinct from the v1.56 ratchet machinery); reaches into core `accrue` diagnosis fns (first for the admin-UI line). Recommended M1 IA/grammar → M2 signature surfaces+core diagnosis → M3 new rooms. | Admin UI / IA redesign (+ core diagnosis) | after v1.56 ships → `/gsd-new-milestone` (reopen class: explicit strategy change — flagship admin surface) | 2026-07-04 |
 
 ## Session Continuity
 
@@ -659,4 +660,6 @@ Resume file: None
 
 ## Operator Next Steps
 
-- Start the next milestone with /gsd-new-milestone
+- Continue the active milestone: v1.56 Admin UI Ratchet is at Phase 206 (`/gsd-plan-phase 206`).
+- Queued post-v1.56 candidate: **SEED-004 admin-UI blueprint redesign** (`.planning/seeds/SEED-004-admin-ui-blueprint-redesign.md`; synthesis `.planning/research/ADMIN-UI-REDESIGN-BLUEPRINT-SYNTHESIS.md`) — a first-principles admin/operator UI redesign. See also the ROADMAP "Deferred Seeds and Ideas" table and STATE "Standing scope deferrals".
+- Start the next milestone with `/gsd-new-milestone` (it scans `.planning/seeds/` and reads PROJECT.md `## Current State` for queued candidates).

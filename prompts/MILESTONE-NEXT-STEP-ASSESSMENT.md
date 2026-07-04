@@ -49,9 +49,12 @@ Optimize for realistic adopter value, NOT perfectionism, and NOT phase/milestone
 1. **Understand what this lib actually is** — read `.planning/{PROJECT,ROADMAP,REQUIREMENTS,STATE,MILESTONES}.md`
    and archived `.planning/milestones/*`; any JTBD / gap-map doc; recent
    `.planning/phases/NN-*/NN-LEARNINGS.md` and `.planning/threads/*` (don't re-derive these);
+   **all planted seeds `.planning/seeds/SEED-*.md` and candidate-milestone research `.planning/research/*.md`
+   (these carry queued future-milestone options — e.g. SEED-004 admin-UI blueprint redesign — that the
+   ROADMAP "Deferred Seeds and Ideas" table only points at; read them so a candidate is never missed);**
    README + key guides; the `prompts/` research subdir (`*-deep-research.md`, `*-oss-dna.md`,
-   `*_context.md`, brand/UX docs); enough lib/ source + tests + examples to sanity-check
-   REAL vs described.
+   `*_context.md`, brand/UX docs, `*_journey_blueprint.md`); enough lib/ source + tests + examples
+   to sanity-check REAL vs described.
 2. **Explain the current adopter story briefly** — the one job; which flows are clearly
    real today; which Phoenix SaaS adopters it serves well; where the story is still rough.
 3. **Estimate how "done" it is** — rough done-% justified by this rubric (NOT by counting
