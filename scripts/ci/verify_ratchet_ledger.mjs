@@ -2,9 +2,10 @@
  * verify_ratchet_ledger.mjs — the independent CI re-verifier for the UI ratchet's committed
  * forward-only finding ledger (Phase 206, v1.56). Twins `verify_phase200_scorecard.mjs`'s
  * relationship to its own generator script: this file deliberately does NOT import the
- * deterministic reducer module it cross-checks (the sibling script committed alongside
- * `ratchet-ledger.js` under `accrue_admin/e2e/ratchet/` in 206-03) — genuine code
- * independence, so a bug shared between the two would not silently pass both.
+ * deterministic reducer module it cross-checks, nor the shared lifecycle/fold helper module
+ * (206-01) that reducer itself imports (both committed alongside this script's target data
+ * files under `accrue_admin/e2e/ratchet/`) — genuine code independence, so a bug shared
+ * between the two would not silently pass both.
  *
  * This is the LAST plane the LLM is permanently kept off of: this CI-facing script never
  * imports the Anthropic SDK package and makes zero network calls (grep-verifiable).
@@ -12,10 +13,10 @@
  * Independence discipline:
  *  - This file re-implements its OWN fold-and-recompute over the raw `findings.ledger.ndjson`
  *    rows: parse every line as JSON, assert `seq` is strictly increasing across the whole file
- *    (an independent re-implementation of the same tamper-evidence check `ratchet-ledger.js`'s
- *    `fold()` already performs — deliberately duplicated, not shared), keep only the latest row
- *    per `finding_id` (latest-event-wins), and recompute `confirmed_open` per lens directly from
- *    that independently-folded state.
+ *    (an independent re-implementation of the same tamper-evidence check the shared lifecycle
+ *    helper's `fold()` already performs — deliberately duplicated, not shared), keep only the
+ *    latest row per `finding_id` (latest-event-wins), and recompute `confirmed_open` per lens
+ *    directly from that independently-folded state.
  *  - It NEVER reads `ledger.baseline.json`'s own stored `confirmed_open` numbers as an input to
  *    the recompute — only as the thing being cross-checked against. Any mismatch (in either
  *    direction, for any of the 7 lens keys) is a hard failure (LEDGER-04's literal contract: "a
