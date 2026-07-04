@@ -4,13 +4,13 @@ milestone: v1.56
 milestone_name: "Admin UI Ratchet: Automated Adversarial Design Evaluation"
 status: executing
 stopped_at: Phase 206 context gathered
-last_updated: "2026-07-04T20:40:22.294Z"
+last_updated: "2026-07-04T20:52:23.834Z"
 last_activity: 2026-07-04
 progress:
   total_phases: 5
   completed_phases: 1
   total_plans: 9
-  completed_plans: 6
+  completed_plans: 7
   percent: 20
 ---
 
@@ -27,11 +27,11 @@ See: `.planning/PROJECT.md` (updated 2026-07-03 after v1.55 closeout)
 ## Current Position
 
 Phase: 206 (adversarial-verifier-finding-ledger-deterministic-gate) — EXECUTING
-Plan: 2 of 4
+Plan: 3 of 4
 Status: Ready to execute
 Last activity: 2026-07-04
 
-Progress: [███████░░░] 67%
+Progress: [████████░░] 78%
 
 ## Post-v1.48 Pause Rule
 
@@ -288,6 +288,7 @@ Coverage: 22/22 v1.51 requirements mapped (each REQ-ID → exactly one phase). D
 | Phase 205 P05 | 4m | 1 tasks | 1 files |
 | Phase 205 P04 | 6m4s | 2 tasks | 1 files |
 | Phase 206 P01 | 10min | 2 tasks | 1 files |
+| Phase 206 P02 | 25min | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -544,6 +545,8 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - [Phase ?]: 205-02 design-lens assets: off-register shipped as own-render PNG; bad poles via CSSOM setProperty (nonce-only CSP blocks style tags); fixed 1280px capture avoids downscale/sharp dep
 - [Phase 206]: appendResolved/appendVerifiedClosed/appendSuppressed take only finding_id, looking up the latest existing row in the ledger for identity re-derivation; only appendOpen takes the full candidate row. — Plan 206-01 (ratchet-ledger.js) — matches the plan's specified per-helper signatures while still re-validating identity via region-tags.js on every append
 - [Phase 206]: appendOpen rejects a non-admissible justification_token via isAdmissibleToken before writing. — Plan 206-01 — Rule 2 auto-fix: the plan required importing isAdmissibleToken but didn't spell out a call site; enforcing it on the new-finding write path closes that gap
+- [Phase 206]: 206-02: region-tags.js and ratchet-ledger.js imported via static top-level ESM import (not deferred to GUARD 3) since ratchet-verify.mjs's own --self-test needs synchronous access before any key check; only @anthropic-ai/sdk is dynamically imported behind the key guard.
+- [Phase 206]: 206-02: ratchet-verify.mjs is the single writer (D-35) appending 2-of-3-panel-confirmed candidates into the committed findings.ledger.ndjson; medianClamp() is downgrade-only (D-13) and the candidate's own justification_token is independently re-gated via isAdmissibleToken() regardless of panel vote (VERIFY-03).
 
 ### Pending Todos
 
@@ -654,7 +657,7 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 
 ## Session Continuity
 
-Last session: 2026-07-04T20:38:07.845Z
+Last session: 2026-07-04T20:50:06.500Z
 Stopped at: Phase 206 context gathered
 Resume file: None
 

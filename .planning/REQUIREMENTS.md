@@ -31,13 +31,13 @@ Requirements for this milestone. Each maps to exactly one roadmap phase (205–2
 
 ### Adversarial Verification (VERIFY)
 
-- [ ] **VERIFY-01**: Each candidate finding is judged by a 3-role adversarial skeptic panel (persona advocate, brand purist, operator-density defender) and is dropped unless at least 2 of 3 confirm it is a real defect.
-- [ ] **VERIFY-02**: The operator-density-defender role refutes any finding whose fix would reduce operator information density or add marketing-style whitespace without a concrete task-completion justification (anti-over-whitespacing guard).
-- [ ] **VERIFY-03**: A candidate cannot enter the ledger unless it cites an admissible justification token (`rubric-dim-below-bar` | `persona-job-miss:<job>` | `token-bypass`); a "looks nicer / my taste" claim is rejected before any human sees it.
+- [x] **VERIFY-01**: Each candidate finding is judged by a 3-role adversarial skeptic panel (persona advocate, brand purist, operator-density defender) and is dropped unless at least 2 of 3 confirm it is a real defect.
+- [x] **VERIFY-02**: The operator-density-defender role refutes any finding whose fix would reduce operator information density or add marketing-style whitespace without a concrete task-completion justification (anti-over-whitespacing guard).
+- [x] **VERIFY-03**: A candidate cannot enter the ledger unless it cites an admissible justification token (`rubric-dim-below-bar` | `persona-job-miss:<job>` | `token-bypass`); a "looks nicer / my taste" claim is rejected before any human sees it.
 
 ### Forward-Only Finding Ledger & Gate (LEDGER)
 
-- [ ] **LEDGER-01**: Confirmed findings persist to a committed finding ledger with an explicit lifecycle (`open → resolved → verified-closed`, or `suppressed` with a reason) and foreign-key `cell_refs` into the existing cell grammar.
+- [x] **LEDGER-01**: Confirmed findings persist to a committed finding ledger with an explicit lifecycle (`open → resolved → verified-closed`, or `suppressed` with a reason) and foreign-key `cell_refs` into the existing cell grammar.
 - [ ] **LEDGER-02**: A committed high-water baseline records `confirmed_open` counts per lens and the `resolved_locked` claim-key set.
 - [ ] **LEDGER-03**: A deterministic sibling gate emits a regression row when any lens's open count exceeds baseline, when a `resolved` finding's minted guard is missing/deleted, or when a `resolved_locked` claim reopens without an explicit maintainer reopen marker.
 - [ ] **LEDGER-04**: The gate passes only when `finding-regressions.ndjson` is 0 bytes, and is independently re-verified by a CI script that recomputes counts from raw ledger rows (a hand-edited baseline that disagrees fails).
@@ -105,10 +105,10 @@ Which phases cover which requirements. Populated during roadmap creation.
 | DEDUP-01 | Phase 205 | Complete |
 | DEDUP-02 | Phase 205 | Complete |
 | DEDUP-03 | Phase 206 | Complete |
-| VERIFY-01 | Phase 206 | Pending |
-| VERIFY-02 | Phase 206 | Pending |
-| VERIFY-03 | Phase 206 | Pending |
-| LEDGER-01 | Phase 206 | Pending |
+| VERIFY-01 | Phase 206 | Complete |
+| VERIFY-02 | Phase 206 | Complete |
+| VERIFY-03 | Phase 206 | Complete |
+| LEDGER-01 | Phase 206 | Complete |
 | LEDGER-02 | Phase 206 | Pending |
 | LEDGER-03 | Phase 206 | Pending |
 | LEDGER-04 | Phase 206 | Pending |
