@@ -1,0 +1,44 @@
+{
+  "schema_version": "ratchet-ledger-baseline/1",
+  "frozen": false,
+  "epoch": 1,
+  "ledger_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "confirmed_open": {
+    "persona:operator-founder": {
+      "total": 0,
+      "minor": 0,
+      "real": 0
+    },
+    "persona:customer-support": {
+      "total": 0,
+      "minor": 0,
+      "real": 0
+    },
+    "persona:finance-billing-ops": {
+      "total": 0,
+      "minor": 0,
+      "real": 0
+    },
+    "persona:recovery-growth-ops": {
+      "total": 0,
+      "minor": 0,
+      "real": 0
+    },
+    "persona:developer-integration": {
+      "total": 0,
+      "minor": 0,
+      "real": 0
+    },
+    "persona:compliance-audit": {
+      "total": 0,
+      "minor": 0,
+      "real": 0
+    },
+    "design": {
+      "total": 0,
+      "minor": 0,
+      "real": 0
+    }
+  },
+  "resolved_locked": []
+}
