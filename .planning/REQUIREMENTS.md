@@ -38,10 +38,10 @@ Requirements for this milestone. Each maps to exactly one roadmap phase (205–2
 ### Forward-Only Finding Ledger & Gate (LEDGER)
 
 - [x] **LEDGER-01**: Confirmed findings persist to a committed finding ledger with an explicit lifecycle (`open → resolved → verified-closed`, or `suppressed` with a reason) and foreign-key `cell_refs` into the existing cell grammar.
-- [ ] **LEDGER-02**: A committed high-water baseline records `confirmed_open` counts per lens and the `resolved_locked` claim-key set.
-- [ ] **LEDGER-03**: A deterministic sibling gate emits a regression row when any lens's open count exceeds baseline, when a `resolved` finding's minted guard is missing/deleted, or when a `resolved_locked` claim reopens without an explicit maintainer reopen marker.
+- [x] **LEDGER-02**: A committed high-water baseline records `confirmed_open` counts per lens and the `resolved_locked` claim-key set.
+- [x] **LEDGER-03**: A deterministic sibling gate emits a regression row when any lens's open count exceeds baseline, when a `resolved` finding's minted guard is missing/deleted, or when a `resolved_locked` claim reopens without an explicit maintainer reopen marker.
 - [ ] **LEDGER-04**: The gate passes only when `finding-regressions.ndjson` is 0 bytes, and is independently re-verified by a CI script that recomputes counts from raw ledger rows (a hand-edited baseline that disagrees fails).
-- [ ] **LEDGER-05**: The gate reducer and its verifier each pass a `--self-test` proving that count-increase, missing-guard, and reopened-locked-claim each produce a regression row while a clean ledger produces zero.
+- [x] **LEDGER-05**: The gate reducer and its verifier each pass a `--self-test` proving that count-increase, missing-guard, and reopened-locked-claim each produce a regression row while a clean ledger produces zero.
 
 ### Orchestration & Maintainer Loop (ORCH)
 
@@ -109,10 +109,10 @@ Which phases cover which requirements. Populated during roadmap creation.
 | VERIFY-02 | Phase 206 | Complete |
 | VERIFY-03 | Phase 206 | Complete |
 | LEDGER-01 | Phase 206 | Complete |
-| LEDGER-02 | Phase 206 | Pending |
-| LEDGER-03 | Phase 206 | Pending |
+| LEDGER-02 | Phase 206 | Complete |
+| LEDGER-03 | Phase 206 | Complete |
 | LEDGER-04 | Phase 206 | Pending |
-| LEDGER-05 | Phase 206 | Pending |
+| LEDGER-05 | Phase 206 | Complete |
 | ORCH-01 | Phase 207 | Pending |
 | ORCH-02 | Phase 207 | Pending |
 | ORCH-03 | Phase 207 | Pending |

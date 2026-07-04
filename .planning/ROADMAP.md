@@ -217,7 +217,7 @@ Full details: [v1.48 roadmap archive](milestones/v1.48-ROADMAP.md)
 **Wave 2** *(blocked on Wave 1 completion)*
 
 - [x] 206-02-PLAN.md — `ratchet-verify.mjs`: 3-role adversarial skeptic panel + median-clamp + committed ledger writer (VERIFY-01, VERIFY-02, VERIFY-03, LEDGER-01)
-- [ ] 206-03-PLAN.md — `phase-ratchet-ledger.mjs`: deterministic gate reducer + committed ledger/baseline/reopen-marker quadruple (LEDGER-02, LEDGER-03, LEDGER-05)
+- [x] 206-03-PLAN.md — `phase-ratchet-ledger.mjs`: deterministic gate reducer + committed ledger/baseline/reopen-marker quadruple (LEDGER-02, LEDGER-03, LEDGER-05)
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
@@ -311,7 +311,7 @@ Full details: [v1.48 roadmap archive](milestones/v1.48-ROADMAP.md)
 | 203. Database schema contract ADR | v1.55 | 1/1 | Complete    | 2026-07-02 |
 | 204. Ranked hardening roadmap | v1.55 | 1/1 | Complete    | 2026-07-03 |
 | 205. Persona + design-lens evaluator harness | v1.56 | 5/5 | Complete    | 2026-07-03 |
-| 206. Adversarial verifier + finding ledger + deterministic gate | v1.56 | 2/4 | In Progress|  |
+| 206. Adversarial verifier + finding ledger + deterministic gate | v1.56 | 3/4 | In Progress|  |
 | 207. Orchestration + digest + one-command round/fix loop | v1.56 | 0/0 | Not started | - |
 | 208. Prove convergence on slice + wire CI + ACCEPT | v1.56 | 0/0 | Not started | - |
 | 209. Full-surface sweep under the ratchet (optional/scope-gated) | v1.56 | 0/0 | Scope-gated | - |
