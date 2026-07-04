@@ -212,7 +212,7 @@ Full details: [v1.48 roadmap archive](milestones/v1.48-ROADMAP.md)
 **Plans**: 4 plans
 **Wave 1**
 
-- [ ] 206-01-PLAN.md — Shared `ratchet-ledger.js` lifecycle helper: DEDUP-03 collapse + append/fold reducer (DEDUP-03)
+- [x] 206-01-PLAN.md — Shared `ratchet-ledger.js` lifecycle helper: DEDUP-03 collapse + append/fold reducer (DEDUP-03)
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
@@ -311,7 +311,7 @@ Full details: [v1.48 roadmap archive](milestones/v1.48-ROADMAP.md)
 | 203. Database schema contract ADR | v1.55 | 1/1 | Complete    | 2026-07-02 |
 | 204. Ranked hardening roadmap | v1.55 | 1/1 | Complete    | 2026-07-03 |
 | 205. Persona + design-lens evaluator harness | v1.56 | 5/5 | Complete    | 2026-07-03 |
-| 206. Adversarial verifier + finding ledger + deterministic gate | v1.56 | 0/0 | Not started | - |
+| 206. Adversarial verifier + finding ledger + deterministic gate | v1.56 | 1/4 | In Progress|  |
 | 207. Orchestration + digest + one-command round/fix loop | v1.56 | 0/0 | Not started | - |
 | 208. Prove convergence on slice + wire CI + ACCEPT | v1.56 | 0/0 | Not started | - |
 | 209. Full-surface sweep under the ratchet (optional/scope-gated) | v1.56 | 0/0 | Scope-gated | - |

@@ -2,18 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.56
 milestone_name: "Admin UI Ratchet: Automated Adversarial Design Evaluation"
-current_phase: 206
-current_phase_name: Adversarial verifier + finding ledger + deterministic gate
 status: executing
 stopped_at: Phase 206 context gathered
-last_updated: "2026-07-04T19:36:49.024Z"
+last_updated: "2026-07-04T20:40:22.294Z"
 last_activity: 2026-07-04
-last_activity_desc: "Quick task 260704-i4p: seeded SEED-004 admin-UI blueprint redesign (post-v1.56). v1.56 position unchanged: Phase 205 complete, Phase 206 next."
 progress:
   total_phases: 5
   completed_phases: 1
-  total_plans: 5
-  completed_plans: 5
+  total_plans: 9
+  completed_plans: 6
   percent: 20
 ---
 
@@ -25,16 +22,16 @@ See: `.planning/PROJECT.md` (updated 2026-07-03 after v1.55 closeout)
 
 **Core value:** A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic Elixir DX, strong domain modeling, tamper-evident audit ledger, great observability, and zero breaking-change pain through v1.x.
 
-**Current focus:** Phase 205 — persona-design-lens-evaluator-harness
+**Current focus:** Phase 206 — adversarial-verifier-finding-ledger-deterministic-gate
 
 ## Current Position
 
-Phase: 206 — Adversarial verifier + finding ledger + deterministic gate
-Plan: Not started
+Phase: 206 (adversarial-verifier-finding-ledger-deterministic-gate) — EXECUTING
+Plan: 2 of 4
 Status: Ready to execute
-Last activity: 2026-07-04 — Quick task 260704-i4p: seeded SEED-004 admin-UI blueprint redesign (post-v1.56). v1.56 position unchanged: Phase 205 complete, Phase 206 next.
+Last activity: 2026-07-04
 
-Progress: [██████████] 100%
+Progress: [███████░░░] 67%
 
 ## Post-v1.48 Pause Rule
 
@@ -290,6 +287,7 @@ Coverage: 22/22 v1.51 requirements mapped (each REQ-ID → exactly one phase). D
 | Phase 205 P03 | 4m 43s | 3 tasks | 2 files |
 | Phase 205 P05 | 4m | 1 tasks | 1 files |
 | Phase 205 P04 | 6m4s | 2 tasks | 1 files |
+| Phase 206 P01 | 10min | 2 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -544,6 +542,8 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - [Phase 204]: Phase 204 preserves the Phase 203 database contract: default billing prefix, explicit public references, no search_path primary contract, and no schema rename or data movement.
 - [Phase ?]: [Phase 205]: slug() reimplemented byte-identically in ratchet/region-tags.js (SDK/manifest-free SSOT); DEDUP-01/02 proven by pure key-free runSelfTest with pinned golden hash
 - [Phase ?]: 205-02 design-lens assets: off-register shipped as own-render PNG; bad poles via CSSOM setProperty (nonce-only CSP blocks style tags); fixed 1280px capture avoids downscale/sharp dep
+- [Phase 206]: appendResolved/appendVerifiedClosed/appendSuppressed take only finding_id, looking up the latest existing row in the ledger for identity re-derivation; only appendOpen takes the full candidate row. — Plan 206-01 (ratchet-ledger.js) — matches the plan's specified per-helper signatures while still re-validating identity via region-tags.js on every append
+- [Phase 206]: appendOpen rejects a non-admissible justification_token via isAdmissibleToken before writing. — Plan 206-01 — Rule 2 auto-fix: the plan required importing isAdmissibleToken but didn't spell out a call site; enforcing it on the new-finding write path closes that gap
 
 ### Pending Todos
 
@@ -654,9 +654,9 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 
 ## Session Continuity
 
-Last session: 2026-07-04T18:52:32.984Z
+Last session: 2026-07-04T20:38:07.845Z
 Stopped at: Phase 206 context gathered
-Resume file: .planning/phases/206-adversarial-verifier-finding-ledger-deterministic-gate/206-CONTEXT.md
+Resume file: None
 
 ## Operator Next Steps
 

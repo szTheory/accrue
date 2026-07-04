@@ -27,7 +27,7 @@ Requirements for this milestone. Each maps to exactly one roadmap phase (205–2
 
 - [x] **DEDUP-01**: Each finding is assigned a canonical claim-key derived from surface + dimension + sorted overlay-tags + region (the LLM free-text is stored for humans but excluded from identity), so the same defect yields the same `finding_id` across runs.
 - [x] **DEDUP-02**: Running the proposer twice on unchanged screenshots yields an identical `finding_id` set (prose-independence / non-flakiness), proven by an automated test.
-- [ ] **DEDUP-03**: Findings raised independently by multiple personas/lenses collapse into a single work item carrying a `persona_frequency` count.
+- [x] **DEDUP-03**: Findings raised independently by multiple personas/lenses collapse into a single work item carrying a `persona_frequency` count.
 
 ### Adversarial Verification (VERIFY)
 
@@ -104,7 +104,7 @@ Which phases cover which requirements. Populated during roadmap creation.
 | EVAL-05 | Phase 205 | Complete |
 | DEDUP-01 | Phase 205 | Complete |
 | DEDUP-02 | Phase 205 | Complete |
-| DEDUP-03 | Phase 206 | Pending |
+| DEDUP-03 | Phase 206 | Complete |
 | VERIFY-01 | Phase 206 | Pending |
 | VERIFY-02 | Phase 206 | Pending |
 | VERIFY-03 | Phase 206 | Pending |
