@@ -19,6 +19,8 @@
     "ratchet:self-test": "node e2e/ratchet/ratchet-propose.mjs --self-test",
     "ratchet:verify": "node e2e/ratchet/ratchet-verify.mjs",
     "ratchet:verify:self-test": "node e2e/ratchet/ratchet-verify.mjs --self-test",
+    "ratchet:ledger": "node e2e/ratchet/phase-ratchet-ledger.mjs && node ../scripts/ci/verify_ratchet_ledger.mjs",
+    "ratchet:ledger:self-test": "node e2e/ratchet/phase-ratchet-ledger.mjs --self-test && node ../scripts/ci/verify_ratchet_ledger.mjs --self-test",
     "baseline:artifacts": "node e2e/baseline-artifacts.mjs",
     "baseline:parse": "node e2e/baseline-parse.mjs",
     "phase192:component-lab": "mix test test/accrue_admin/dev/component_registry_test.exs test/accrue_admin/dev/component_group_registry_test.exs",
