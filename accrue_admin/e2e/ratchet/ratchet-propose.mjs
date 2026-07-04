@@ -164,6 +164,19 @@ function selectExemplarPair(surface_type) {
   return EXEMPLAR_PAIR_BY_SURFACE_TYPE[surface_type] || DEFAULT_EXEMPLAR_PAIR;
 }
 
+// WR-03: some capture-name surfaces are whole-gallery/page shots with no single
+// manifest SURFACES entry — e.g. "component-kitchen" is the entire /dev/components
+// gallery, which the census models per-component (surface_type "component"). Without
+// this map such a surface resolves to "unknown" → the design lens attaches the
+// DEFAULT (page-flow) exemplar pair instead of the component pair, few-shotting the
+// component gallery against the wrong archetype. cell_refs deliberately stay [] for
+// these (a gallery spans many census cells, addressable individually, not as one).
+const SURFACE_TYPE_FALLBACK = { "component-kitchen": "component" };
+
+function resolveSurfaceType(surface, surfaceInfo) {
+  return surfaceInfo ? surfaceInfo.surface_type : SURFACE_TYPE_FALLBACK[surface] || "unknown";
+}
+
 // Read a committed exemplar PNG as base64, enforcing the SAME 5 MB per-image guard as the
 // target screenshot (T-205-03 — no unbounded gallery attach). Returns null (skip that block,
 // with a warning) if the file is missing — e.g. the `off-register` textual-only fallback (D-19).
@@ -405,7 +418,7 @@ async function main() {
 async function proposeForImage(png, b64, provenance) {
   const surface = png.screen;
   const surfaceInfo = SURFACES.find((entry) => entry.surface === surface);
-  const surface_type = surfaceInfo ? surfaceInfo.surface_type : "unknown";
+  const surface_type = resolveSurfaceType(surface, surfaceInfo);
   const toolSchema = buildToolSchema(surface);
   const collected = [];
 
@@ -591,7 +604,7 @@ function emitCandidates(png, surface, collected, provenance) {
   const { viewport, theme } = png;
   const state = "default-populated"; // D-17 default state for this slice
   const surfaceInfo = SURFACES.find((entry) => entry.surface === surface);
-  const surface_type = surfaceInfo ? surfaceInfo.surface_type : "unknown";
+  const surface_type = resolveSurfaceType(surface, surfaceInfo);
   const png_ref = path.relative(RESULTS_DIR, png.pngPath);
 
   const rows = [];

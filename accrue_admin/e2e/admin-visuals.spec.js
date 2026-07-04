@@ -27,17 +27,26 @@ async function login(page, target = "/billing") {
   await page.goto(`/__e2e__/login?to=${encodeURIComponent(target)}`);
 }
 
+// Surfaces captured viewport-only rather than fullPage: whole-gallery/reference
+// pages (e.g. the /dev/components kitchen) whose fullPage screenshot exceeds the
+// ratchet proposer's 5 MB per-image base64 guard and would be silently skipped.
+// A viewport-bounded shot of the top of the gallery is a representative design-system
+// sample. These PNGs are NOT inputs to any CI-gated scorer (the census captures
+// component surfaces individually via anchors), so bounding them is baseline-safe.
+const VIEWPORT_ONLY_SURFACES = new Set(["component-kitchen"]);
+
 // Capture the screen in both themes. Light keeps the historical `${name}.png`
 // filename; dark is a sibling `${name}-dark.png`. Theme is applied by setting
 // the data-theme attribute the admin chrome keys off (same hook the toggle uses).
 async function captureThemes(page, name, project) {
   await expect(page.locator("#main-content")).toBeVisible();
   const dir = `test-results/admin-visuals/${project}`;
+  const fullPage = !VIEWPORT_ONLY_SURFACES.has(name);
   await page.evaluate(() => document.documentElement.setAttribute("data-theme", "light"));
-  await page.screenshot({ path: `${dir}/${name}.png`, fullPage: true });
+  await page.screenshot({ path: `${dir}/${name}.png`, fullPage });
   await captureBBoxes(page, name, project, "light");
   await page.evaluate(() => document.documentElement.setAttribute("data-theme", "dark"));
-  await page.screenshot({ path: `${dir}/${name}-dark.png`, fullPage: true });
+  await page.screenshot({ path: `${dir}/${name}-dark.png`, fullPage });
   await captureBBoxes(page, name, project, "dark");
 }
 
