@@ -349,13 +349,38 @@ function buildFindingsInfoBlock(group) {
   );
 }
 
+/** resolveWithinResultsDir(pngRef) — CR-01: `png_ref` is untrusted (it comes straight off a
+ * collapsed candidate row from `candidates.ndjson`, which is not schema-enforced at read time
+ * here and is explicitly excluded from `assertIdentity`/`buildValidatedCandidateMap`'s identity
+ * re-derivation). Resolve it against `RESULTS_DIR` and reject anything that escapes that
+ * directory (e.g. `"../../../../.env"`) BEFORE the path is ever passed to `fs.readFileSync` —
+ * otherwise an arbitrary local file could be read, base64-encoded, and sent off-box to the
+ * Anthropic API inside `verifyImageGroup`'s image content block. */
+function resolveWithinResultsDir(pngRef) {
+  if (typeof pngRef !== "string" || pngRef.length === 0) {
+    throw new Error(`png_ref must be a non-empty string: ${JSON.stringify(pngRef)}`);
+  }
+  const abs = path.resolve(RESULTS_DIR, pngRef);
+  const root = path.resolve(RESULTS_DIR) + path.sep;
+  if (!abs.startsWith(root)) {
+    throw new Error(`png_ref escapes RESULTS_DIR: ${JSON.stringify(pngRef)}`);
+  }
+  return abs;
+}
+
 /** verifyImageGroup(pngRef, group) — one forced tool_use Opus call per source image,
  * batching every distinct finding on that image into one `verdicts` request array. Parses
  * the response using the SAME `.find((b) => b.type === "tool_use")?.input` pattern as
  * `ratchet-propose.mjs` (never index `content[0]` — RESEARCH Pitfall 1/6), degrading a
  * non-array `verdicts` to `[]` rather than throwing and aborting the whole run. */
 async function verifyImageGroup(pngRef, group) {
-  const abs = path.join(RESULTS_DIR, pngRef);
+  let abs;
+  try {
+    abs = resolveWithinResultsDir(pngRef);
+  } catch (err) {
+    console.warn(`[ratchet-verify] Rejecting unsafe png_ref: ${err.message} — skipping`);
+    return [];
+  }
   let b64;
   try {
     b64 = fs.readFileSync(abs, "base64");
@@ -754,6 +779,44 @@ function runSelfTest() {
     assertSelfTest(
       "(vi) real committed findings.ledger.ndjson untouched by --self-test",
       !existedBefore || Buffer.compare(beforeBytes, afterBytes) === 0
+    );
+  }
+
+  // (vii) CR-01 path-traversal regression: `resolveWithinResultsDir` must reject any `png_ref`
+  // that resolves outside `RESULTS_DIR` (e.g. a relative `../` escape reaching a dotfile like
+  // `.env` or a sibling config file), and must accept an ordinary in-directory reference.
+  {
+    let threwOnEscape = false;
+    try {
+      resolveWithinResultsDir("../../../../.env");
+    } catch {
+      threwOnEscape = true;
+    }
+    assertSelfTest(
+      "(vii) resolveWithinResultsDir rejects a png_ref that escapes RESULTS_DIR via ../ traversal",
+      threwOnEscape
+    );
+
+    let threwOnAbsoluteEscape = false;
+    try {
+      resolveWithinResultsDir(path.join(os.tmpdir(), "definitely-not-a-result.png"));
+    } catch {
+      threwOnAbsoluteEscape = true;
+    }
+    assertSelfTest(
+      "(vii) resolveWithinResultsDir rejects an absolute png_ref pointing outside RESULTS_DIR",
+      threwOnAbsoluteEscape
+    );
+
+    let resolvedOk = null;
+    try {
+      resolvedOk = resolveWithinResultsDir("chromium-desktop/dashboard-light.png");
+    } catch {
+      resolvedOk = null;
+    }
+    assertSelfTest(
+      "(vii) resolveWithinResultsDir accepts an ordinary in-directory png_ref",
+      resolvedOk === path.join(RESULTS_DIR, "chromium-desktop/dashboard-light.png")
     );
   }
 
