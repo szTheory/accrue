@@ -11,7 +11,7 @@
  * identity. `claim_key`/`finding_id`/`isAdmissibleToken` are imported, never reimplemented.
  *
  * SDK-free by contract: only `node:fs`/`node:os`/`node:path` plus `./region-tags.js` — no
- * network calls, no `@anthropic-ai/sdk`, so this module's `runSelfTest()` proves DEDUP-03
+ * network calls, no Anthropic SDK import, so this module's `runSelfTest()` proves DEDUP-03
  * collapse and the seq-monotonic tamper-evidence invariant with no ANTHROPIC_API_KEY.
  *
  * CommonJS (mirrors `region-tags.js`) so it is importable both by the ESM harness
@@ -32,6 +32,8 @@
  */
 
 const fs = require("node:fs");
+const os = require("node:os");
+const path = require("node:path");
 const { claimKey, findingId, isAdmissibleToken } = require("./region-tags.js");
 
 // -----------------------------------------------------------------------------
@@ -360,6 +362,261 @@ function appendSuppressed(finding_id, ledgerPath, extraFields = {}) {
   return appendLifecycleEvent(finding_id, ledgerPath, "suppress", extraFields);
 }
 
+// -----------------------------------------------------------------------------
+// fold() reducer (D-38) — the tamper-evidence check Wave-2's reducer and the independent
+// CI verifier both depend on.
+// -----------------------------------------------------------------------------
+
+/**
+ * fold(rows) — pure function over an array of already-parsed `ratchet-finding-event/1`
+ * row objects (in file order). Asserts `row.seq` is strictly greater than every
+ * previously-seen `seq` in the same array (throws `"seq not monotonic"` with the offending
+ * row's `finding_id`/`seq` on violation — T-206-01-01) and returns a
+ * `Map<finding_id, latestRow>` using latest-event-wins semantics: the LAST row seen for a
+ * given `finding_id` (in file order) is its current state; earlier rows for the same
+ * `finding_id` are superseded, never merged.
+ */
+function fold(rows) {
+  const result = new Map();
+  let maxSeq = -Infinity;
+  for (const row of rows) {
+    if (typeof row.seq !== "number" || !(row.seq > maxSeq)) {
+      throw new Error(
+        `seq not monotonic: finding_id=${JSON.stringify(row.finding_id)} seq=${JSON.stringify(row.seq)}`
+      );
+    }
+    maxSeq = row.seq;
+    result.set(row.finding_id, row);
+  }
+  return result;
+}
+
+/**
+ * collapseByFindingId(candidateRows) — pure function over an array of Phase-205
+ * `ratchet-candidate/1` rows. Groups by `finding_id`; for each distinct `finding_id` returns
+ * ONE work item: `raised_by_lenses` is the sorted, de-duplicated array of every
+ * `lensKeyFor(row.raised_by)` value among the group's rows; `persona_frequency` is
+ * `raised_by_lenses.length`; every OTHER field is taken from the FIRST-encountered row in
+ * the group (the representative) — collapse happens BEFORE any Opus verification call is
+ * made downstream (Claude's Discretion: verify each distinct `finding_id` once, never pay
+ * Opus per duplicate).
+ */
+function collapseByFindingId(candidateRows) {
+  const groups = new Map();
+  for (const row of candidateRows) {
+    if (!groups.has(row.finding_id)) groups.set(row.finding_id, []);
+    groups.get(row.finding_id).push(row);
+  }
+
+  const items = [];
+  for (const [finding_id, group] of groups) {
+    const representative = group[0];
+    const raisedByLenses = Array.from(new Set(group.map((row) => lensKeyFor(row.raised_by)))).sort();
+    items.push({
+      ...representative,
+      finding_id,
+      raised_by_lenses: raisedByLenses,
+      persona_frequency: raisedByLenses.length,
+    });
+  }
+  return items;
+}
+
+// -----------------------------------------------------------------------------
+// Self-test (D-05-style discipline, twins region-tags.js/phase200-scorecard.mjs)
+// -----------------------------------------------------------------------------
+
+/** assertSelfTest(name, condition, details) — verbatim shape of region-tags.js's helper. */
+function assertSelfTest(name, condition, details = "") {
+  if (!condition) throw new Error(`Self-test failed: ${name}${details ? ` (${details})` : ""}`);
+  console.log(`self-test pass: ${name}`);
+}
+
+/**
+ * runSelfTest() — covers, in order: (a) fold() lifecycle chains, (b) fold() seq-monotonic
+ * tamper detection, (c) collapseByFindingId() DEDUP-03 persona_frequency collapse, (d) a
+ * real append-round-trip fixture via appendOpen/appendResolved/appendVerifiedClosed against
+ * an fs.mkdtempSync scratch path. Zero network calls; zero mutation of any real committed
+ * file.
+ */
+function runSelfTest() {
+  // (a) fold() over a synthetic fixture exercising open -> resolved -> verified-closed for
+  // one finding_id and a separate open -> suppressed chain for another.
+  const chainRows = [
+    { finding_id: "f-fixture-chain-a", seq: 1, event: "confirm", status: "open" },
+    { finding_id: "f-fixture-chain-b", seq: 2, event: "confirm", status: "open" },
+    { finding_id: "f-fixture-chain-a", seq: 3, event: "resolve", status: "resolved" },
+    { finding_id: "f-fixture-chain-b", seq: 4, event: "suppress", status: "suppressed" },
+    { finding_id: "f-fixture-chain-a", seq: 5, event: "verify-close", status: "verified-closed" },
+  ];
+  const folded = fold(chainRows);
+  assertSelfTest(
+    "(a) fold-lifecycle: open->resolved->verified-closed terminal status",
+    folded.get("f-fixture-chain-a").status === "verified-closed"
+  );
+  assertSelfTest(
+    "(a) fold-lifecycle: open->suppressed terminal status",
+    folded.get("f-fixture-chain-b").status === "suppressed"
+  );
+
+  // (b) fold() throws on out-of-order / duplicate seq.
+  let outOfOrderThrew = false;
+  try {
+    fold([
+      { finding_id: "f-fixture-x", seq: 2, event: "confirm", status: "open" },
+      { finding_id: "f-fixture-y", seq: 1, event: "confirm", status: "open" },
+    ]);
+  } catch {
+    outOfOrderThrew = true;
+  }
+  assertSelfTest("(b) fold-seq-monotonic: out-of-order seq throws", outOfOrderThrew);
+
+  let duplicateThrew = false;
+  try {
+    fold([
+      { finding_id: "f-fixture-x", seq: 1, event: "confirm", status: "open" },
+      { finding_id: "f-fixture-y", seq: 1, event: "confirm", status: "open" },
+    ]);
+  } catch {
+    duplicateThrew = true;
+  }
+  assertSelfTest("(b) fold-seq-monotonic: duplicate seq throws", duplicateThrew);
+
+  // (c) collapseByFindingId() over 4 synthetic candidate rows — 3 sharing one finding_id
+  // across raised_by values mapping to persona:operator-founder/persona:customer-support/
+  // design, plus 1 with a distinct finding_id.
+  const sharedFindingId = "f-fixture-shared0000001";
+  const distinctFindingId = "f-fixture-distinct00002";
+  const candidateRows = [
+    {
+      finding_id: sharedFindingId,
+      surface: "dashboard",
+      dimension: 2,
+      region_tag: "kpi-row",
+      overlay_tags: [],
+      claim_key: "dashboard__d02__kpi-row__ov-none",
+      raised_by: { lens_kind: "persona", persona_id: "operator-founder" },
+      severity: "real",
+      defect: "shared defect, phrasing A",
+    },
+    {
+      finding_id: sharedFindingId,
+      surface: "dashboard",
+      dimension: 2,
+      region_tag: "kpi-row",
+      overlay_tags: [],
+      claim_key: "dashboard__d02__kpi-row__ov-none",
+      raised_by: { lens_kind: "persona", persona_id: "customer-support" },
+      severity: "minor",
+      defect: "shared defect, phrasing B",
+    },
+    {
+      finding_id: sharedFindingId,
+      surface: "dashboard",
+      dimension: 2,
+      region_tag: "kpi-row",
+      overlay_tags: [],
+      claim_key: "dashboard__d02__kpi-row__ov-none",
+      raised_by: { lens_kind: "design" },
+      severity: "real",
+      defect: "shared defect, phrasing C",
+    },
+    {
+      finding_id: distinctFindingId,
+      surface: "subscriptions-list",
+      dimension: 4,
+      region_tag: "data-table",
+      overlay_tags: [],
+      claim_key: "subscriptions-list__d04__data-table__ov-none",
+      raised_by: { lens_kind: "persona", persona_id: "finance-billing-ops" },
+      severity: "real",
+      defect: "distinct defect",
+    },
+  ];
+  const collapsed = collapseByFindingId(candidateRows);
+  assertSelfTest("(c) collapse-persona-frequency: 2 distinct work items", collapsed.length === 2);
+  const sharedItem = collapsed.find((item) => item.finding_id === sharedFindingId);
+  assertSelfTest(
+    "(c) collapse-persona-frequency: persona_frequency === 3",
+    sharedItem.persona_frequency === 3
+  );
+  assertSelfTest(
+    "(c) collapse-persona-frequency: raised_by_lenses contains all 3 lenses",
+    ["persona:operator-founder", "persona:customer-support", "design"].every((lens) =>
+      sharedItem.raised_by_lenses.includes(lens)
+    )
+  );
+  assertSelfTest(
+    "(c) collapse-persona-frequency: representative fields carried from first-encountered row",
+    sharedItem.defect === "shared defect, phrasing A"
+  );
+
+  // (d) append-round-trip fixture: real appendOpen/appendResolved/appendVerifiedClosed
+  // against an fs.mkdtempSync scratch path, wrapped in try/finally so cleanup never skips.
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "ratchet-ledger-"));
+  try {
+    const ledgerPath = path.join(root, "findings.ledger.ndjson");
+    const surface = "dashboard";
+    const dimension = 3;
+    const region_tag = "kpi-row";
+    const overlay_tags = [];
+    const claim_key = claimKey(surface, dimension, region_tag, overlay_tags);
+    const finding_id = findingId(claim_key);
+
+    const candidateRow = {
+      schema_version: "ratchet-candidate/1",
+      run_id: "run-fixture",
+      round: 1,
+      model: "fixture-model",
+      bundle_sha256: "0".repeat(64),
+      png_ref: "chromium-desktop/dashboard-light.png",
+      viewport: "chromium-desktop",
+      theme: "light",
+      state: "default-populated",
+      cell_refs: [],
+      surface,
+      surface_type: "dashboard",
+      dimension,
+      dimension_name: "spacing-rhythm",
+      overlay_tags,
+      region_tag,
+      claim_key,
+      finding_id,
+      severity: "real",
+      job_blocking: true,
+      defect_bucket: null,
+      justification_token: "rubric-dim-below-bar",
+      raised_by: { lens_kind: "persona", persona_id: "operator-founder" },
+      raised_by_lenses: ["persona:operator-founder"],
+      persona_frequency: 1,
+      effort_hint: "small",
+      defect: "fixture defect for append-round-trip self-test",
+      suggested_fix: "fixture suggested fix",
+    };
+
+    appendOpen(candidateRow, ledgerPath);
+    appendResolved(finding_id, ledgerPath, { resolved_round: 2 });
+    appendVerifiedClosed(finding_id, ledgerPath);
+
+    const rows = readLedgerRows(ledgerPath);
+    assertSelfTest("(d) append-round-trip: writes 3 NDJSON rows", rows.length === 3);
+    assertSelfTest(
+      "(d) append-round-trip: seq values are 1, 2, 3 in file order",
+      rows.map((row) => row.seq).join(",") === "1,2,3"
+    );
+
+    const foldedRoundTrip = fold(rows);
+    assertSelfTest(
+      "(d) append-round-trip: fold() reports terminal status verified-closed",
+      foldedRoundTrip.get(finding_id).status === "verified-closed"
+    );
+  } finally {
+    fs.rmSync(root, { recursive: true, force: true });
+  }
+
+  console.log("ratchet-ledger self-test passed.");
+}
+
 module.exports = {
   LENS_KEYS,
   EVENT_TYPES,
@@ -370,4 +627,14 @@ module.exports = {
   appendResolved,
   appendVerifiedClosed,
   appendSuppressed,
+  fold,
+  collapseByFindingId,
+  assertSelfTest,
+  runSelfTest,
 };
+
+// Standalone runner: `node accrue_admin/e2e/ratchet/ratchet-ledger.js` executes the
+// self-test and exits nonzero on any thrown assertion. No ANTHROPIC_API_KEY, no SDK.
+if (require.main === module) {
+  runSelfTest();
+}
