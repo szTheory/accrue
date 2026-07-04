@@ -392,6 +392,20 @@ function appendSuppressed(finding_id, ledgerPath, extraFields = {}) {
   return appendLifecycleEvent(finding_id, ledgerPath, "suppress", extraFields);
 }
 
+/**
+ * appendReopened(finding_id, ledgerPath, extraFields) — WR-02: append a `reopen` event. Every
+ * other event in the D-38 lifecycle vocabulary has a safe, identity-re-validating,
+ * transition-checked (WR-01) wrapper; `"reopen"` previously had none, despite `EVENT_TYPES`/
+ * `EVENT_STATUS` both including it — the only sanctioned way to append one was to hand-
+ * construct a raw NDJSON row, bypassing `seq` computation, identity re-validation, and
+ * carry-forward logic. Legal only from `resolved`/`verified-closed`/`suppressed` (never from
+ * `open` — a finding that is already open cannot be "reopened"; see `LEGAL_TRANSITIONS`),
+ * enforced by the same `appendLifecycleEvent` transition check as every other wrapper.
+ */
+function appendReopened(finding_id, ledgerPath, extraFields = {}) {
+  return appendLifecycleEvent(finding_id, ledgerPath, "reopen", extraFields);
+}
+
 // -----------------------------------------------------------------------------
 // fold() reducer (D-38) — the tamper-evidence check Wave-2's reducer and the independent
 // CI verifier both depend on.
@@ -743,6 +757,31 @@ function runSelfTest() {
         "(e) WR-01: resolved -> verify-close is a legal transition and succeeds",
         foldedAfterLegalClose.get(finding_id).status === "verified-closed"
       );
+
+      // (f) WR-02: appendReopened is now exported and enforces the same transition table —
+      // verified-closed -> reopen IS legal and must succeed, going back to status "open".
+      appendReopened(finding_id, ledgerPath);
+      const foldedAfterReopen = fold(readLedgerRows(ledgerPath));
+      assertSelfTest(
+        "(f) WR-02: verified-closed -> reopen (appendReopened) is legal and reopens to status open",
+        foldedAfterReopen.get(finding_id).status === "open"
+      );
+      assertSelfTest(
+        "(f) WR-02: appendReopened row is event:reopen",
+        foldedAfterReopen.get(finding_id).event === "reopen"
+      );
+
+      // open -> reopen is illegal — a finding that is already open cannot be "reopened" again.
+      let openToReopenThrew = false;
+      try {
+        appendReopened(finding_id, ledgerPath);
+      } catch {
+        openToReopenThrew = true;
+      }
+      assertSelfTest(
+        "(f) WR-02: open -> reopen (repeated) is an illegal transition and throws",
+        openToReopenThrew
+      );
     } finally {
       fs.rmSync(root2, { recursive: true, force: true });
     }
@@ -761,6 +800,7 @@ module.exports = {
   appendResolved,
   appendVerifiedClosed,
   appendSuppressed,
+  appendReopened,
   fold,
   collapseByFindingId,
   assertSelfTest,
