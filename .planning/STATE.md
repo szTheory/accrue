@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.56
 milestone_name: "Admin UI Ratchet: Automated Adversarial Design Evaluation"
-status: executing
+status: verifying
 stopped_at: Completed 206-03-PLAN.md
-last_updated: "2026-07-04T21:03:50.260Z"
+last_updated: "2026-07-04T21:16:07.087Z"
 last_activity: 2026-07-04
 progress:
   total_phases: 5
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 9
-  completed_plans: 8
-  percent: 20
+  completed_plans: 9
+  percent: 40
 ---
 
 # Project State
@@ -28,10 +28,10 @@ See: `.planning/PROJECT.md` (updated 2026-07-03 after v1.55 closeout)
 
 Phase: 206 (adversarial-verifier-finding-ledger-deterministic-gate) — EXECUTING
 Plan: 4 of 4
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-07-04
 
-Progress: [█████████░] 89%
+Progress: [██████████] 100%
 
 ## Post-v1.48 Pause Rule
 
@@ -290,6 +290,7 @@ Coverage: 22/22 v1.51 requirements mapped (each REQ-ID → exactly one phase). D
 | Phase 206 P01 | 10min | 2 tasks | 1 files |
 | Phase 206 P02 | 25min | 2 tasks | 2 files |
 | Phase 206 P03 | 8min | 3 tasks | 5 files |
+| Phase 206 P04 | 15min | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -550,6 +551,8 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - [Phase 206]: 206-02: ratchet-verify.mjs is the single writer (D-35) appending 2-of-3-panel-confirmed candidates into the committed findings.ledger.ndjson; medianClamp() is downgrade-only (D-13) and the candidate's own justification_token is independently re-gated via isAdmissibleToken() regardless of panel vote (VERIFY-03).
 - [Phase 206]: phase-ratchet-ledger.mjs uses a static ESM import of ratchet-ledger.js (CJS) rather than a dynamic await import() — no SDK-guard ordering constraint exists in this file — 206-02 already proved the static-import interop form works via cjs-module-lexer against the same CJS sibling; simpler and behavior-identical
 - [Phase 206]: regenerateBaseline() runs unconditionally on every non-self-test phase-ratchet-ledger.mjs invocation, not gated on regressions being absent — Per D-37, an unfrozen baseline is designed to track current counts on every run so Phase 207's ui.fix re-scoring can recompute it during iteration; only --freeze (Phase 208) makes it sticky
+- [Phase ?]: [Phase 206-04] LENS_KEYS and GUARD_HOME_SPECS are duplicated as local constants in verify_ratchet_ledger.mjs (not imported) — genuine independence from the deterministic reducer's own copies of these enums is the whole point of the CI re-verifier.
+- [Phase ?]: [Phase 206-04] Added checkJustificationTokensIndependent() (region-tags.js's isAdmissibleToken) as a defense-in-depth re-check beyond the plan's literal action text, since the plan flagged isAdmissibleToken as the one deliberate reuse exception.
 
 ### Pending Todos
 
@@ -660,7 +663,7 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 
 ## Session Continuity
 
-Last session: 2026-07-04T21:03:39.787Z
+Last session: 2026-07-04T21:14:27.258Z
 Stopped at: Completed 206-03-PLAN.md
 Resume file: None
 
