@@ -85,6 +85,26 @@ const EVENT_STATUS = {
 };
 
 /**
+ * LEGAL_TRANSITIONS — WR-01: the closed lifecycle state-machine transition table, keyed by a
+ * prior row's CURRENT `status`, valued by the set of `event`s legally appendable next. This is
+ * enforced inside `appendLifecycleEvent` (below) so the sole trusted writer for the D-38
+ * lifecycle vocabulary cannot append an illegal transition (e.g. `"resolve"` on a finding whose
+ * latest status is already `"verified-closed"`, or `"suppress"` on one already `"resolved"`) —
+ * closing the gap a future caller bug (e.g. Phase 207 orchestration) could otherwise silently
+ * exploit, since neither `fold()` nor any verify-tooling re-checks transition legality; both
+ * simply treat the last row as ground truth. `"open"` (the status `confirm`/`reopen` project
+ * to) may only be followed by `resolve` or `suppress` — it is never itself a `reopen` target
+ * (a finding that is already open cannot be "reopened"). Not exported — internal enforcement
+ * detail; callers use the `event ∈ EVENT_TYPES` vocabulary via the append* wrapper functions.
+ */
+const LEGAL_TRANSITIONS = {
+  open: ["resolve", "suppress"],
+  resolved: ["verify-close", "reopen"],
+  "verified-closed": ["reopen"],
+  suppressed: ["reopen"],
+};
+
+/**
  * IDENTITY_FIELDS — the D-17 `ratchet-candidate/1` identity/locator fields carried
  * VERBATIM onto every `ratchet-finding-event/1` row (re-validated, never re-derived from
  * prose).
@@ -295,9 +315,12 @@ function appendOpen(candidateRow, ledgerPath, extraFields = {}) {
 
 /**
  * appendLifecycleEvent(finding_id, ledgerPath, event, extraFields) — shared implementation
- * for `appendResolved`/`appendVerifiedClosed`/`appendSuppressed`. Looks up the finding's
- * latest existing row (by `finding_id`, in file order), re-validates its identity, and
- * carries every D-17 identity/carry field forward verbatim onto the new event row.
+ * for `appendResolved`/`appendVerifiedClosed`/`appendSuppressed`/`appendReopened`. Looks up
+ * the finding's latest existing row (by `finding_id`, in file order), re-validates its
+ * identity, validates the requested `event` is a LEGAL transition from the prior row's current
+ * `status` (WR-01, `LEGAL_TRANSITIONS`) — rejecting e.g. a `"resolve"` on an already
+ * `"verified-closed"` finding, or a repeated `"suppress"` on an already-`"suppressed"` one —
+ * and carries every D-17 identity/carry field forward verbatim onto the new event row.
  */
 function appendLifecycleEvent(finding_id, ledgerPath, event, extraFields = {}) {
   const status = EVENT_STATUS[event];
@@ -312,6 +335,13 @@ function appendLifecycleEvent(finding_id, ledgerPath, event, extraFields = {}) {
     );
   }
   assertIdentity(prior);
+  if (!LEGAL_TRANSITIONS[prior.status] || !LEGAL_TRANSITIONS[prior.status].includes(event)) {
+    throw new Error(
+      `appendLifecycleEvent: illegal transition ${JSON.stringify(prior.status)} -> ${JSON.stringify(
+        event
+      )} for finding_id=${JSON.stringify(finding_id)}`
+    );
+  }
 
   const seq = nextSeq(rows);
 
@@ -612,6 +642,110 @@ function runSelfTest() {
     );
   } finally {
     fs.rmSync(root, { recursive: true, force: true });
+  }
+
+  // (e) WR-01 regression: appendLifecycleEvent must reject illegal lifecycle transitions,
+  // never silently corrupting a "terminal" or already-visited status.
+  {
+    const root2 = fs.mkdtempSync(path.join(os.tmpdir(), "ratchet-ledger-"));
+    try {
+      const ledgerPath = path.join(root2, "findings.ledger.ndjson");
+      const surface = "subscriptions-list";
+      const dimension = 4;
+      const region_tag = "data-table";
+      const overlay_tags = [];
+      const claim_key = claimKey(surface, dimension, region_tag, overlay_tags);
+      const finding_id = findingId(claim_key);
+      const candidateRow = {
+        schema_version: "ratchet-candidate/1",
+        run_id: "run-fixture",
+        round: 1,
+        model: "fixture-model",
+        bundle_sha256: "0".repeat(64),
+        png_ref: "chromium-desktop/subscriptions-light.png",
+        viewport: "chromium-desktop",
+        theme: "light",
+        state: "default-populated",
+        cell_refs: [],
+        surface,
+        surface_type: "list",
+        dimension,
+        dimension_name: "state-coverage",
+        overlay_tags,
+        region_tag,
+        claim_key,
+        finding_id,
+        severity: "real",
+        job_blocking: true,
+        defect_bucket: null,
+        justification_token: "rubric-dim-below-bar",
+        raised_by: { lens_kind: "design" },
+        raised_by_lenses: ["design"],
+        persona_frequency: 1,
+        effort_hint: "small",
+        defect: "fixture defect for illegal-transition self-test",
+        suggested_fix: "fixture suggested fix",
+      };
+      appendOpen(candidateRow, ledgerPath);
+
+      // open -> verify-close is illegal (LEGAL_TRANSITIONS.open only permits resolve/suppress).
+      let openToVerifyCloseThrew = false;
+      try {
+        appendVerifiedClosed(finding_id, ledgerPath);
+      } catch {
+        openToVerifyCloseThrew = true;
+      }
+      assertSelfTest(
+        "(e) WR-01: open -> verify-close is an illegal transition and throws",
+        openToVerifyCloseThrew
+      );
+
+      // Now legally resolve it.
+      appendResolved(finding_id, ledgerPath, { resolved_round: 1 });
+
+      // resolved -> resolve (repeated) is illegal (LEGAL_TRANSITIONS.resolved only permits
+      // verify-close/reopen, not a second resolve).
+      let repeatedResolveThrew = false;
+      try {
+        appendResolved(finding_id, ledgerPath, { resolved_round: 2 });
+      } catch {
+        repeatedResolveThrew = true;
+      }
+      assertSelfTest(
+        "(e) WR-01: resolved -> resolve (repeated) is an illegal transition and throws",
+        repeatedResolveThrew
+      );
+
+      // resolved -> suppress is also illegal.
+      let resolvedToSuppressThrew = false;
+      try {
+        appendSuppressed(finding_id, ledgerPath, { suppressed_reason: "out-of-scope" });
+      } catch {
+        resolvedToSuppressThrew = true;
+      }
+      assertSelfTest(
+        "(e) WR-01: resolved -> suppress is an illegal transition and throws",
+        resolvedToSuppressThrew
+      );
+
+      // No illegal-transition attempt above should have appended a row — the ledger must
+      // still contain exactly the 2 legal rows (confirm, resolve).
+      const rowsAfterIllegalAttempts = readLedgerRows(ledgerPath);
+      assertSelfTest(
+        "(e) WR-01: illegal-transition attempts never append a row (still exactly 2 legal rows)",
+        rowsAfterIllegalAttempts.length === 2
+      );
+
+      // resolved -> verify-close IS legal and must succeed.
+      appendVerifiedClosed(finding_id, ledgerPath);
+      const foldedAfterLegalClose = fold(readLedgerRows(ledgerPath));
+      assertSelfTest(
+        "(e) WR-01: resolved -> verify-close is a legal transition and succeeds",
+        foldedAfterLegalClose.get(finding_id).status === "verified-closed"
+      );
+    } finally {
+      fs.rmSync(root2, { recursive: true, force: true });
+    }
   }
 
   console.log("ratchet-ledger self-test passed.");
