@@ -208,7 +208,19 @@ function readLedgerRows(ledgerPath) {
   return text.split("\n").map((line) => JSON.parse(line));
 }
 
-/** nextSeq(rows) — max existing `seq` + 1, or 1 for the first row (D-38, global counter). */
+/**
+ * nextSeq(rows) — max existing `seq` + 1, or 1 for the first row (D-38, global counter).
+ *
+ * IN-01 — LOAD-BEARING INVARIANT, NOT ENFORCED IN CODE: `nextSeq`/`appendRow` re-read the
+ * whole ledger file, compute the next `seq`, then append — this is race-free ONLY because
+ * every current caller (`ratchet-verify.mjs`'s `main()`) writes strictly SEQUENTIALLY inside an
+ * `await`-ed `for...of` loop, never `Promise.all`/concurrent. There is no file lock here. A
+ * future refactor toward concurrent/parallel image processing against the SAME `ledgerPath`
+ * would silently introduce duplicate/racing `seq` values (a classic read-then-write TOCTOU race)
+ * with no test catching it until `fold()`'s seq-monotonic tamper-evidence check starts throwing
+ * downstream. If parallel verification is ever introduced, add a real lock (e.g. an `O_EXCL`
+ * lockfile) before removing this comment.
+ */
 function nextSeq(rows) {
   let max = 0;
   for (const row of rows) {
