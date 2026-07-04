@@ -39,7 +39,7 @@ Stop rule: if proposed work is polish-only with a documented workaround and no r
 
 **Posture:** Design-quality investment in the flagship adopter-facing `accrue_admin` operator UI via a maintainer-run, forward-only "UI Ratchet" — **not** a broad feature milestone. Reopen justification (recorded in `PROJECT.md`): **explicit strategy change** (same class accepted for v1.50–v1.54) **plus** a concrete maintainer request. Scope stays within `accrue_admin` + dev/test-only tooling: no new billing primitives, no breaking API/route changes, no Tailwind migration, `ax-*` stays the styling SSOT, core `accrue` stays LiveView-runtime-free, no `accrue_portal` work, and ratchet tooling never leaks into adopter runtime. The LLM runs locally (maintainer's key) as a proposer/ranker only; CI gates the deterministic layer only (the LLM is never on the gate path). Authoritative design source: `~/.claude/plans/ui-ratchet-txt-i-agile-honey.md`.
 
-- [ ] **Phase 205: Persona + design-lens evaluator harness** - Local, key-gated evaluator fans out 6 operator personas + a comparative graphic-design lens over committed screenshots and emits stable, claim-keyed candidate findings (EVAL-01..05, DEDUP-01, DEDUP-02)
+- [x] **Phase 205: Persona + design-lens evaluator harness** - Local, key-gated evaluator fans out 6 operator personas + a comparative graphic-design lens over committed screenshots and emits stable, claim-keyed candidate findings (EVAL-01..05, DEDUP-01, DEDUP-02) (completed 2026-07-04)
 - [ ] **Phase 206: Adversarial verifier + finding ledger + deterministic gate** - Candidates collapse, are adversarially confirmed (2-of-3 skeptic panel + mandatory justification token), persist to a committed forward-only ledger, and are protected by a deterministic sibling gate the LLM never touches (DEDUP-03, VERIFY-01..03, LEDGER-01..05)
 - [ ] **Phase 207: Orchestration + digest + one-command round/fix loop** - Two `mix accrue_admin.ui.*` commands drive the whole pipeline with a rendered digest, minimal batch-approve checkpoints, auto-minted guards, and guaranteed termination (ORCH-01..06)
 - [ ] **Phase 208: Prove convergence on the representative slice + wire CI + ACCEPT** - Run the ratchet to convergence on the slice, freeze the first baseline, add the deterministic-only CI job, keep existing gates green, and land maintainer ACCEPT + a follow-on runbook (CONV-01..07)
@@ -296,7 +296,7 @@ Full details: [v1.48 roadmap archive](milestones/v1.48-ROADMAP.md)
 | 202. CI/CD performance and determinism audit | v1.55 | 1/1 | Complete    | 2026-07-02 |
 | 203. Database schema contract ADR | v1.55 | 1/1 | Complete    | 2026-07-02 |
 | 204. Ranked hardening roadmap | v1.55 | 1/1 | Complete    | 2026-07-03 |
-| 205. Persona + design-lens evaluator harness | v1.56 | 5/5 | Complete   | 2026-07-03 |
+| 205. Persona + design-lens evaluator harness | v1.56 | 5/5 | Complete    | 2026-07-03 |
 | 206. Adversarial verifier + finding ledger + deterministic gate | v1.56 | 0/0 | Not started | - |
 | 207. Orchestration + digest + one-command round/fix loop | v1.56 | 0/0 | Not started | - |
 | 208. Prove convergence on slice + wire CI + ACCEPT | v1.56 | 0/0 | Not started | - |
