@@ -34,7 +34,7 @@
 const fs = require("node:fs");
 const os = require("node:os");
 const path = require("node:path");
-const { claimKey, findingId, isAdmissibleToken } = require("./region-tags.js");
+const { claimKey, findingId, isAdmissibleToken, assertDimension } = require("./region-tags.js");
 
 // -----------------------------------------------------------------------------
 // Closed enums (D-24/D-25, D-38, D-41)
@@ -232,8 +232,15 @@ function latestRowForFindingId(rows, finding_id) {
  * stored `claim_key`; re-derive `finding_id` via `findingId()` and assert equality with the
  * row's stored `finding_id`. Throws a descriptive error on mismatch — never silently trusts
  * a hand-edited or corrupted row (T-206-01-02).
+ *
+ * WR-06: also calls `assertDimension(row.dimension)` FIRST, before deriving `claim_key` — self-
+ * consistency alone (does the stored `claim_key` match what `claimKey()` derives from the row's
+ * OWN fields) does not enforce the "exactly 12 rubric dimensions, no 13th" milestone guardrail:
+ * a row carrying a nonsensical `dimension` (e.g. `13`, `0`, or a non-numeric string) would
+ * otherwise pass as long as its own `claim_key`/`finding_id` were computed the same way.
  */
 function assertIdentity(row) {
+  assertDimension(row.dimension);
   const derivedClaimKey = claimKey(row.surface, row.dimension, row.region_tag, row.overlay_tags);
   if (derivedClaimKey !== row.claim_key) {
     throw new Error(
@@ -688,6 +695,63 @@ function runSelfTest() {
       "(c2) WR-04: distinctFindingId's own untouched valid group is still present in the output",
       collapsedWithMalformed.some((item) => item.finding_id === distinctFindingId)
     );
+  }
+
+  // (c3) WR-06 regression: a row whose `dimension` is OUT of the closed 1..12 rubric range
+  // (e.g. `13` — the milestone's explicit "no 13th dimension" guardrail) but whose own
+  // `claim_key`/`finding_id` were computed self-consistently (claimKey() itself does not range-
+  // check dimension; it merely interpolates it) must now be rejected by `assertIdentity` (and
+  // therefore `appendOpen`), where before this fix self-consistency alone was sufficient to pass.
+  {
+    const badDimension = 13;
+    const badSurface = "dashboard";
+    const badRegionTag = "kpi-row";
+    const badOverlayTags = [];
+    const badClaimKey = claimKey(badSurface, badDimension, badRegionTag, badOverlayTags);
+    const badFindingId = findingId(badClaimKey);
+    const badRow = {
+      surface: badSurface,
+      dimension: badDimension,
+      region_tag: badRegionTag,
+      overlay_tags: badOverlayTags,
+      claim_key: badClaimKey,
+      finding_id: badFindingId,
+    };
+    let threwOnBadDimension = false;
+    try {
+      assertIdentity(badRow);
+    } catch {
+      threwOnBadDimension = true;
+    }
+    assertSelfTest(
+      "(c3) WR-06: assertIdentity rejects a self-consistent row whose dimension is out of 1..12 (13)",
+      threwOnBadDimension
+    );
+
+    const scratchRoot = fs.mkdtempSync(path.join(os.tmpdir(), "ratchet-ledger-"));
+    try {
+      const scratchLedgerPath = path.join(scratchRoot, "findings.ledger.ndjson");
+      let appendOpenThrew = false;
+      try {
+        appendOpen(
+          {
+            ...badRow,
+            schema_version: "ratchet-candidate/1",
+            raised_by: { lens_kind: "design" },
+            raised_by_lenses: ["design"],
+          },
+          scratchLedgerPath
+        );
+      } catch {
+        appendOpenThrew = true;
+      }
+      assertSelfTest(
+        "(c3) WR-06: appendOpen rejects (and never writes) a row with an out-of-range dimension",
+        appendOpenThrew && !fs.existsSync(scratchLedgerPath)
+      );
+    } finally {
+      fs.rmSync(scratchRoot, { recursive: true, force: true });
+    }
   }
 
   // (d) append-round-trip fixture: real appendOpen/appendResolved/appendVerifiedClosed

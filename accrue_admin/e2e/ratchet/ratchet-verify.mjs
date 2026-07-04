@@ -239,10 +239,24 @@ const client = new Anthropic(); // reads ANTHROPIC_API_KEY from env
  * carries. A candidate whose own stored identity fails to re-derive is dropped from the map
  * (defense-in-depth — such a row should never occur from a correctly-functioning proposer,
  * but this file never trusts an identity field at face value regardless of its origin).
+ *
+ * WR-06: also re-validates `candidate.dimension` via `regionTags.assertDimension()` FIRST, before
+ * deriving `claim_key` — self-consistency alone (does the stored `claim_key` match what
+ * `claimKey()` derives from the candidate's OWN fields) does not enforce the "exactly 12 rubric
+ * dimensions, no 13th" milestone guardrail, since `claimKey()` itself merely interpolates
+ * `dimension` rather than range-checking it. A candidate carrying an out-of-range `dimension`
+ * (e.g. `13`) is dropped from the map the same way a self-verification failure is — this
+ * function's existing contract is "drop on any identity defect", never a hard throw that would
+ * abort the rest of the batch (twin of WR-04's per-row isolation).
  */
 function buildValidatedCandidateMap(collapsedRows) {
   const map = new Map();
   for (const candidate of collapsedRows) {
+    try {
+      regionTags.assertDimension(candidate.dimension);
+    } catch {
+      continue; // never index a candidate whose dimension is out of the closed 1..12 range
+    }
     const derivedClaimKey = regionTags.claimKey(
       candidate.surface,
       candidate.dimension,
@@ -663,6 +677,26 @@ function runSelfTest() {
     } finally {
       fs.rmSync(scratchRoot, { recursive: true, force: true });
     }
+  }
+
+  // (iv-a) WR-06 regression: a candidate whose own `claim_key`/`finding_id` self-verify but
+  // whose `dimension` is OUT of the closed 1..12 rubric range (e.g. `13`) must be dropped from
+  // `buildValidatedCandidateMap`'s index, not indexed just because it is internally
+  // self-consistent — `claimKey()` itself does not range-check `dimension`.
+  {
+    const badDimension = 13;
+    const badClaimKey = regionTags.claimKey("dashboard", badDimension, "kpi-row", []);
+    const badFindingId = regionTags.findingId(badClaimKey);
+    const badCandidate = makeFixtureCandidate({
+      dimension: badDimension,
+      claim_key: badClaimKey,
+      finding_id: badFindingId,
+    });
+    const mapWithBadDimension = buildValidatedCandidateMap([badCandidate]);
+    assertSelfTest(
+      "(iv-a) WR-06: a self-consistent candidate with an out-of-range dimension (13) is dropped from the index",
+      !mapWithBadDimension.has(badFindingId)
+    );
   }
 
   // (iv-b) CR-02 end-to-end regression: a verdict with only 2 role entries (schema-legal SHAPE
