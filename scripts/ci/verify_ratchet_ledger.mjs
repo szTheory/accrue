@@ -233,6 +233,28 @@ function validGuardHomePath(specPath) {
 }
 
 /**
+ * extractArrayLiteral(sourceText, constName) — WR-03: read a sibling file's array-literal
+ * constant declaration AS TEXT (never `require`/`import` it — this file's whole independence
+ * design is to never depend at RUNTIME on the modules/constants it cross-checks) and
+ * regex-extract + `JSON.parse` its literal value. Used ONLY by `runSelfTest()` below, as a
+ * cheap self-test-time-only consistency assertion that a hand-duplicated closed-enum array
+ * (`GUARD_HOME_SPECS`, `LENS_KEYS`) has not silently drifted from its sibling copy — closing
+ * the gap where a future phase adds/removes an entry in one file and forgets the other, which
+ * would otherwise go undetected until an unexplained CI pass/fail mismatch.
+ */
+function extractArrayLiteral(sourceText, constName) {
+  const re = new RegExp(`const ${constName}\\s*=\\s*(\\[[\\s\\S]*?\\]);`);
+  const match = re.exec(sourceText);
+  if (!match) {
+    throw new Error(`extractArrayLiteral: could not find ${constName} declaration in source`);
+  }
+  // Strip trailing commas before a closing `]` — valid JS array-literal syntax (as used by both
+  // sibling files' formatting), but not valid JSON.
+  const jsonish = match[1].replace(/,(\s*\])/g, "$1");
+  return JSON.parse(jsonish);
+}
+
+/**
  * checkGuardRefIndependent(guardRef, findingId, repoRoot) — re-implements the D-39/D-40
  * static-substring guard-presence contract from scratch. `guard_ref === "ledger-count"` is the
  * D-40 explicit no-real-guard sentinel and always passes. Otherwise splits on the literal `"::"`
@@ -557,6 +579,36 @@ function runSelfTest() {
       assertSelfTest(
         "(6) failures.inadmissibleToken is non-empty",
         result.failures.inadmissibleToken.length > 0
+      );
+    }
+
+    // (7) WR-03: cross-file consistency check — the two hand-duplicated closed-enum arrays
+    // (`GUARD_HOME_SPECS`, `LENS_KEYS`) must stay byte-identical to their sibling copies.
+    // `phase-ratchet-ledger.mjs` defines its OWN `GUARD_HOME_SPECS` but imports its
+    // `LENS_KEYS` from `ratchet-ledger.js` (`const { fold, LENS_KEYS } = ratchetLedger`) —
+    // so the canonical `LENS_KEYS` to compare this file's own independent copy against lives
+    // in `ratchet-ledger.js`, not `phase-ratchet-ledger.mjs`. Read as raw source text, never
+    // imported — this is a self-test-time-only assertion, not a runtime dependency.
+    {
+      const phaseReducerSource = fs.readFileSync(
+        path.join(RATCHET_DIR, "phase-ratchet-ledger.mjs"),
+        "utf8"
+      );
+      const ledgerSource = fs.readFileSync(path.join(RATCHET_DIR, "ratchet-ledger.js"), "utf8");
+
+      const reducerGuardHomeSpecs = extractArrayLiteral(phaseReducerSource, "GUARD_HOME_SPECS");
+      assertSelfTest(
+        "(7) GUARD_HOME_SPECS stays byte-identical between this file and phase-ratchet-ledger.mjs",
+        JSON.stringify(reducerGuardHomeSpecs) === JSON.stringify(GUARD_HOME_SPECS),
+        JSON.stringify({ reducerGuardHomeSpecs, thisFile: GUARD_HOME_SPECS })
+      );
+
+      const canonicalLensKeys = extractArrayLiteral(ledgerSource, "LENS_KEYS");
+      assertSelfTest(
+        "(7) LENS_KEYS stays byte-identical between this file's own copy and ratchet-ledger.js's " +
+          "canonical array (the one phase-ratchet-ledger.mjs actually imports)",
+        JSON.stringify(canonicalLensKeys) === JSON.stringify(LENS_KEYS),
+        JSON.stringify({ canonicalLensKeys, thisFile: LENS_KEYS })
       );
     }
 
