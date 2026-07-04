@@ -75,9 +75,26 @@ const RANK_BUCKET = ["not-a-defect", "minor", "real"];
  * tie). Otherwise the confirmed severity is `min(median, proposerRank)` — D-13 downgrade-only:
  * the panel may lower a proposer's `real` to `minor`, or kill it outright, but may NEVER
  * upgrade a proposer's `minor` to `real`.
+ *
+ * CR-02: `buckets` must contain EXACTLY 3 role verdicts, each a recognized bucket string. The
+ * forced-tool-use schema's `strict: true` only constrains item SHAPE, not array length (see
+ * `PANEL_TOOL.input_schema.properties.verdicts.items.properties.roles`'s `minItems`/`maxItems`
+ * below for the schema-level half of this fix) — a truncated/refused/non-conforming model
+ * response could otherwise hand this function fewer than 2 buckets, making `ranks[1]`
+ * `undefined`. `undefined === 0` is `false`, so the old kill-check silently fell through to
+ * `Math.min(undefined, proposerRank)` (`NaN`) and `RANK_BUCKET[NaN]` (`undefined`), returning
+ * `{confirmed: true, severity: undefined}` — a "confirmed" finding with a `severity` key that
+ * `JSON.stringify` then silently drops when the row is appended to the ledger. Reject any
+ * non-3-length or non-recognized-bucket input up front instead.
  */
 function medianClamp(buckets, proposerSeverity) {
+  if (!Array.isArray(buckets) || buckets.length !== 3) {
+    return { confirmed: false, severity: null };
+  }
   const ranks = buckets.map((b) => BUCKET_RANK[b]).sort((a, b) => a - b);
+  if (ranks.some((r) => typeof r !== "number")) {
+    return { confirmed: false, severity: null };
+  }
   const median = ranks[1];
   if (median === 0) return { confirmed: false, severity: null };
   const proposerRank = proposerSeverity === "real" ? 2 : 1;
@@ -162,6 +179,8 @@ const PANEL_TOOL = {
             finding_id: { type: "string" },
             roles: {
               type: "array",
+              minItems: 3,
+              maxItems: 3,
               items: {
                 type: "object",
                 additionalProperties: false,
@@ -491,6 +510,31 @@ function runSelfTest() {
       r.confirmed === true && r.severity === "minor"
     );
   }
+  // (ii-e)/(ii-f)/(ii-g) CR-02 regression cases — a truncated/malformed panel response (fewer
+  // than 3 role buckets) must NEVER silently fall through to `{confirmed: true, severity:
+  // undefined}`. Before the fix, `ranks[1]` on a length-0/1/2 array was `undefined`, and
+  // `undefined === 0` is `false`, so the kill-check did not fire.
+  {
+    const r = medianClamp([], "real");
+    assertSelfTest(
+      "(ii-e) medianClamp([], real) -> not confirmed, not the undefined-severity fail-open bug",
+      r.confirmed === false && r.severity === null
+    );
+  }
+  {
+    const r = medianClamp(["real"], "real");
+    assertSelfTest(
+      "(ii-f) medianClamp([real], real) -> not confirmed (single-vote truncated response)",
+      r.confirmed === false && r.severity === null
+    );
+  }
+  {
+    const r = medianClamp(["real", "real"], "real");
+    assertSelfTest(
+      "(ii-g) medianClamp([real,real], real) -> not confirmed (2-of-3-truncated response, not just 2-of-3-refute)",
+      r.confirmed === false && r.severity === null
+    );
+  }
 
   // Shared fixture identity for (iii)/(iv)/(v) — a real, self-consistent claim_key/finding_id
   // derived via region-tags.js (never hand-typed hex).
@@ -591,6 +635,39 @@ function runSelfTest() {
         result.written === false && result.reason === "unmatched-finding-id"
       );
       assertSelfTest("(iv) unmatched-finding-id drop never creates a ledger file", !fs.existsSync(scratchLedger));
+    } finally {
+      fs.rmSync(scratchRoot, { recursive: true, force: true });
+    }
+  }
+
+  // (iv-b) CR-02 end-to-end regression: a verdict with only 2 role entries (schema-legal SHAPE
+  // per-item, but short on COUNT — exactly the gap `minItems`/`maxItems` on `PANEL_TOOL` now
+  // closes at the schema level, and `medianClamp`'s length check now closes at the aggregation
+  // level) must be dropped by `confirmAndWrite`, never written to the ledger with a dropped
+  // `severity: undefined` field.
+  {
+    const scratchRoot = fs.mkdtempSync(path.join(os.tmpdir(), "ratchet-verify-"));
+    try {
+      const scratchLedger = path.join(scratchRoot, "findings.ledger.ndjson");
+      const candidate = makeFixtureCandidate();
+      const map = buildValidatedCandidateMap([candidate]);
+      const truncatedVerdict = {
+        finding_id: fixtureFindingId,
+        roles: [
+          { role: "advocate", bucket: "real", justification_token: "rubric-dim-below-bar" },
+          { role: "brand_purist", bucket: "real", justification_token: "rubric-dim-below-bar" },
+          // density_defender role missing — simulates a truncated/refused model response.
+        ],
+      };
+      const result = confirmAndWrite(truncatedVerdict, map, scratchLedger);
+      assertSelfTest(
+        "(iv-b) CR-02: a 2-role (truncated) verdict is dropped, not silently confirmed with severity:undefined",
+        result.written === false && result.reason === "not-confirmed"
+      );
+      assertSelfTest(
+        "(iv-b) CR-02: truncated-verdict drop never creates a ledger file",
+        !fs.existsSync(scratchLedger)
+      );
     } finally {
       fs.rmSync(scratchRoot, { recursive: true, force: true });
     }
