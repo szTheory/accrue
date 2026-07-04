@@ -31,7 +31,7 @@ v1.49 **Realistic Demo App & Adoption Evidence** shipped on **2026-06-02**. The 
 
 ## Current State
 
-**Active milestone: v1.56 — Admin UI Ratchet: Automated Adversarial Design Evaluation** (opened 2026-07-03). v1.55 shipped and archived on 2026-07-03; this milestone was opened next by explicit maintainer request.
+**Active milestone: v1.56 — Admin UI Ratchet: Automated Adversarial Design Evaluation** (opened 2026-07-03). v1.55 shipped and archived on 2026-07-03; this milestone was opened next by explicit maintainer request. **Progress: Phases 205 and 206 complete (2 of 5).** Phase 206 (adversarial verifier + committed forward-only finding ledger + deterministic sibling gate; DEDUP-03, VERIFY-01..03, LEDGER-01..05) shipped 2026-07-04 — 4 plans, verified 10/10, plus a full code-review pass (2 Critical + 6 Warning + 2 Info all fixed and self-test-proven). Next up: Phase 207 (one-command orchestration + digest + round/fix loop).
 
 The Phase 204 hardening roadmap's top slice (**Public Truth And Proof-State Baseline**) remains the highest-ranked *release-readiness* follow-up and is deferred, not cancelled — it is a candidate for a subsequent milestone once v1.56 ships.
 
