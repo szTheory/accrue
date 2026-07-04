@@ -1,8 +1,9 @@
 ---
 phase: 205-persona-design-lens-evaluator-harness
 verified: 2026-07-03T18:07:38Z
-status: human_needed
-score: 3/5 roadmap success-criteria fully verified (determinism/no-key spine 100% green)
+status: passed
+live_smoke_passed: 2026-07-03T19:30:00Z
+score: 5/5 roadmap success-criteria verified (spine automated; SC#1/SC#2 confirmed by live smoke 2026-07-03)
 behavior_unverified: 2
 overrides_applied: 0
 re_verification: null
@@ -24,9 +25,33 @@ human_verification:
 # Phase 205: Persona + Design-Lens Evaluator Harness — Verification Report
 
 **Phase Goal:** A maintainer can run a local, key-gated evaluator that fans out 6 operator-persona lenses + a comparative graphic-design lens over the committed admin screenshots and emits stable, claim-keyed candidate findings. Promotes the dormant `score-visuals.mjs` into `accrue_admin/e2e/ratchet/ratchet-propose.mjs`.
-**Verified:** 2026-07-03T18:07:38Z
-**Status:** human_needed
+**Verified:** 2026-07-03T18:07:38Z (automated spine) · 2026-07-03T19:30 (live smoke)
+**Status:** passed
 **Re-verification:** No — initial verification
+
+## Live-Smoke Addendum (2026-07-03) — SC#1 + SC#2 now OBSERVED
+
+The two `human_needed` criteria were exercised with a live `ANTHROPIC_API_KEY` over the representative
+slice (dashboard, subscriptions, subscription-detail on `claude-sonnet-4-5`, desktop, both themes):
+
+- **SC#1 ✓** — `candidates.ndjson` populated (69 candidates from 6 subject PNGs). Every row carries the
+  full `ratchet-candidate/1` schema (surface, dimension, region_tag, overlay_tags, severity, raised_by,
+  cell_refs, justification_token, …). **Identity integrity 69/69**: `finding_id == f-sha256(claim_key)[:16]`,
+  0 mismatches — harness-re-derived, never model-supplied. Coarse-key dedup collapsed 69 raw → 32 distinct ids.
+- **SC#2 ✓** — all 6 personas produced job-anchored findings (operator-founder, compliance-audit,
+  finance-billing-ops, developer-integration, recovery-growth-ops, customer-support) plus 20 comparative
+  design-lens rows (`lens_kind:design`, `direction:air|cramped`, `exemplar_ref`, no absolute award score).
+- **SC#5 (live)** — run-to-run `finding_id`-set overlap 80% (28/32 shared). Residual drift is the model
+  assigning defects to different structural coords at temp 0 (NOT prose leakage — identity was 69/69
+  harness-derived); the definitive DEDUP-02 proof remains the deterministic `--self-test` (green, golden-hash
+  locked). By design the LLM never gates CI; the Phase-206 skeptic-panel verifier absorbs this tail.
+
+Post-smoke fixes (committed): the design-system surface `component-kitchen` was initially skipped
+(fullPage screenshot > 5 MB guard) and mis-archetyped (WR-03: `surface_type` "unknown" → wrong exemplar).
+Fixed in `b9387410` (viewport-bounded capture + `SURFACE_TYPE_FALLBACK`→component) and re-smoked: now
+evaluated, `surface_type=component`, correct component-archetype exemplar. Two earlier live-path bugs
+(`3935f83f` import path, `eb8d4568`/WR-01 non-array findings) were also fixed. WR-02 (OVERLAY_TAGS parity
+assertion) remains an advisory follow-up in 205-REVIEW.md. Session live-smoke cost ~$2.5.
 
 ## Goal Achievement
 
