@@ -2,10 +2,13 @@
 gsd_state_version: 1.0
 milestone: v1.56
 milestone_name: "Admin UI Ratchet: Automated Adversarial Design Evaluation"
-status: verifying
-stopped_at: Phase 207 context gathered
-last_updated: "2026-07-04T22:05:01.140Z"
-last_activity: 2026-07-04 — Phase 206 complete, transitioned to Phase 207
+current_phase: 207
+current_phase_name: Orchestration + digest + one-command round/fix loop
+status: executing
+stopped_at: Phase 207 UI-SPEC approved
+last_updated: "2026-07-05T00:02:35.153Z"
+last_activity: 2026-07-04
+last_activity_desc: Phase 206 complete, transitioned to Phase 207
 progress:
   total_phases: 5
   completed_phases: 2
@@ -28,7 +31,7 @@ See: `.planning/PROJECT.md` (updated 2026-07-03 after v1.55 closeout)
 
 Phase: 207 — Orchestration + digest + one-command round/fix loop
 Plan: Not started
-Status: Phase complete — ready for verification
+Status: Ready to execute
 Last activity: 2026-07-04 — Phase 206 complete, transitioned to Phase 207
 
 Progress: [██████████] 100%
@@ -663,9 +666,9 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 
 ## Session Continuity
 
-Last session: 2026-07-04T22:05:01.133Z
-Stopped at: Phase 207 context gathered
-Resume file: .planning/phases/207-orchestration-digest-one-command-round-fix-loop/207-CONTEXT.md
+Last session: 2026-07-04T22:12:00.446Z
+Stopped at: Phase 207 UI-SPEC approved
+Resume file: .planning/phases/207-orchestration-digest-one-command-round-fix-loop/207-UI-SPEC.md
 
 ## Operator Next Steps
 

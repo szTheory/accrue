@@ -64,8 +64,7 @@ the milestone's "minimal toil / batch-approve" north-star and its residual risk 
 Decision IDs continue from Phase 206 (D-24..D-41). These are **D-42..D-57**, binding for planning.
 
 ### Approve / reject checkpoint mechanism (ORCH-03)
-- **D-42 — File-driven, pre-filled `decisions.json` (transient input; the committed ledger is the durable
-  record).** `ui.round` writes `test-results/ui-ratchet/round-NN/decisions.json` — **gitignored** (already
+- **D-42 — File-driven, pre-filled `decisions.json` (transient input; the committed ledger is the durable record).** `ui.round` writes `test-results/ui-ratchet/round-NN/decisions.json` — **gitignored** (already
   covered by `test-results/`), deliberately a transient input. Every auto-fixable confirmed finding is
   pre-filled `"decision": "approve"`, so **batch-approve is the zero-edit path: just run `mix
   accrue_admin.ui.fix`.** Format is JSON (matches `export_copy_strings` → Jason). Each row carries
@@ -85,8 +84,7 @@ Decision IDs continue from Phase 206 (D-24..D-41). These are **D-42..D-57**, bin
   suppress-list so the next round's proposer drops them before they re-enter as `open`.
 
 ### Guard auto-mint producer (ORCH-05) — the flagged fork, resolved to the data-row shape
-- **D-44 — The generator emits a typed DATA ROW (not a code block); assertion LOGIC is a single human-written,
-  once-reviewed loop.** `ui.fix` appends one typed row per resolved finding into a delimited marker region of
+- **D-44 — The generator emits a typed DATA ROW (not a code block); assertion LOGIC is a single human-written, once-reviewed loop.** `ui.fix` appends one typed row per resolved finding into a delimited marker region of
   the kind-appropriate existing home spec; a human-authored loop test iterates the table and applies the
   right computed-style helper. Values are **derived from the freshly re-captured post-fix DOM/CSS, never
   guessed** — this inverts the jest/characterization-test footgun (never lock in the still-wrong current
@@ -154,8 +152,7 @@ Decision IDs continue from Phase 206 (D-24..D-41). These are **D-42..D-57**, bin
   tasks trivially unit-testable via a fake `Runner`.
 
 ### Surface/slice subset filter (ORCH-08)
-- **D-52 — `--slice <name>` named preset + `--surface=a,b,c` CSV, resolved to a shared `RATCHET_SURFACES`
-  env read by BOTH the capture spec and the proposer.** The mix task is the single resolution point: it
+- **D-52 — `--slice <name>` named preset + `--surface=a,b,c` CSV, resolved to a shared `RATCHET_SURFACES` env read by BOTH the capture spec and the proposer.** The mix task is the single resolution point: it
   expands `--slice foundation` (bare `--slice` = the default representative slice) or `--surface=dashboard`
   into `RATCHET_SURFACES=<csv>`; the capture spec (`admin-visuals.spec.js`) filters its `shots` array by
   name, and the proposer (`ratchet-propose.mjs`) filters discovered PNGs by `png.screen`. **Unset = the full
@@ -172,8 +169,7 @@ Decision IDs continue from Phase 206 (D-24..D-41). These are **D-42..D-57**, bin
   self-contained-artifact idiom); emits `test-results/ui-ratchet/round-NN/digest.html`; invoked by `ui.round`.
   Opens locally/offline, regenerable, CI-checkable via its self-test. Borrow the Playwright-reporter *ideas*
   (grouping, overlays, self-contained), not the tool.
-- **D-54 — "Decisions needed" predicate is deterministic: `effort_class === "ia-product-decision"` → decision
-  queue; else (`"css"` | `null`) → auto-fixable worklist.** `effort_class` is set on the ledger row from
+- **D-54 — "Decisions needed" predicate is deterministic: `effort_class === "ia-product-decision"` → decision queue; else (`"css"` | `null`) → auto-fixable worklist.** `effort_class` is set on the ledger row from
   `candidate.effort_hint` (`ratchet-ledger.js`/`ratchet-verify.mjs`), whose schema enum is
   `["css","ia-product-decision"]` (`ratchet-propose.mjs`), defaulting `null`. Pure equality on a closed enum
   — no model call.
