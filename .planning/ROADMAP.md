@@ -244,7 +244,7 @@ Full details: [v1.48 roadmap archive](milestones/v1.48-ROADMAP.md)
 - [x] 207-02-PLAN.md
 - [x] 207-03-PLAN.md
 - [x] 207-04-PLAN.md
-- [ ] 207-05-PLAN.md
+- [x] 207-05-PLAN.md
 - [ ] 207-06-PLAN.md
 
 ### Phase 208: Prove convergence on the representative slice + wire CI + ACCEPT
@@ -319,7 +319,7 @@ Full details: [v1.48 roadmap archive](milestones/v1.48-ROADMAP.md)
 | 204. Ranked hardening roadmap | v1.55 | 1/1 | Complete    | 2026-07-03 |
 | 205. Persona + design-lens evaluator harness | v1.56 | 5/5 | Complete    | 2026-07-03 |
 | 206. Adversarial verifier + finding ledger + deterministic gate | v1.56 | 4/4 | Complete    | 2026-07-04 |
-| 207. Orchestration + digest + one-command round/fix loop | v1.56 | 4/6 | In Progress|  |
+| 207. Orchestration + digest + one-command round/fix loop | v1.56 | 5/6 | In Progress|  |
 | 208. Prove convergence on slice + wire CI + ACCEPT | v1.56 | 0/0 | Not started | - |
 | 209. Full-surface sweep under the ratchet (optional/scope-gated) | v1.56 | 0/0 | Scope-gated | - |
 
