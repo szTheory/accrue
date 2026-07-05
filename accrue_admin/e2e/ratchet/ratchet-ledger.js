@@ -1081,6 +1081,7 @@ module.exports = {
   EVENT_TYPES,
   STATUS_VALUES,
   SUPPRESSED_REASONS,
+  isValidSuppressedReason,
   lensKeyFor,
   appendOpen,
   appendResolved,
