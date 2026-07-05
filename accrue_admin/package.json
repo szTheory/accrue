@@ -24,6 +24,7 @@
     "ratchet:digest": "node e2e/ratchet/ratchet-digest.mjs",
     "ratchet:digest:self-test": "node e2e/ratchet/ratchet-digest.mjs --self-test",
     "ui:round": "cd .. && mix accrue_admin.ui.round",
+    "ui:fix": "cd .. && mix accrue_admin.ui.fix",
     "baseline:artifacts": "node e2e/baseline-artifacts.mjs",
     "baseline:parse": "node e2e/baseline-parse.mjs",
     "phase192:component-lab": "mix test test/accrue_admin/dev/component_registry_test.exs test/accrue_admin/dev/component_group_registry_test.exs",
