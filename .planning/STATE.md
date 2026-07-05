@@ -5,15 +5,15 @@ milestone_name: "Admin UI Ratchet: Automated Adversarial Design Evaluation"
 current_phase: 207
 current_phase_name: Orchestration + digest + one-command round/fix loop
 status: executing
-stopped_at: Phase 207 UI-SPEC approved
-last_updated: "2026-07-05T00:02:35.153Z"
-last_activity: 2026-07-04
-last_activity_desc: Phase 206 complete, transitioned to Phase 207
+stopped_at: Completed 207-01-PLAN.md
+last_updated: "2026-07-05T00:17:56.951Z"
+last_activity: 2026-07-05
+last_activity_desc: Phase 207 execution started
 progress:
   total_phases: 5
   completed_phases: 2
-  total_plans: 9
-  completed_plans: 9
+  total_plans: 15
+  completed_plans: 10
   percent: 40
 ---
 
@@ -25,14 +25,14 @@ See: `.planning/PROJECT.md` (updated 2026-07-03 after v1.55 closeout)
 
 **Core value:** A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic Elixir DX, strong domain modeling, tamper-evident audit ledger, great observability, and zero breaking-change pain through v1.x.
 
-**Current focus:** Phase 206 — adversarial-verifier-finding-ledger-deterministic-gate
+**Current focus:** Phase 207 — Orchestration + digest + one-command round/fix loop
 
 ## Current Position
 
-Phase: 207 — Orchestration + digest + one-command round/fix loop
-Plan: Not started
+Phase: 207 (Orchestration + digest + one-command round/fix loop) — EXECUTING
+Plan: 2 of 6
 Status: Ready to execute
-Last activity: 2026-07-04 — Phase 206 complete, transitioned to Phase 207
+Last activity: 2026-07-05 — Phase 207 execution started
 
 Progress: [██████████] 100%
 
@@ -294,6 +294,7 @@ Coverage: 22/22 v1.51 requirements mapped (each REQ-ID → exactly one phase). D
 | Phase 206 P02 | 25min | 2 tasks | 2 files |
 | Phase 206 P03 | 8min | 3 tasks | 5 files |
 | Phase 206 P04 | 15min | 2 tasks | 2 files |
+| Phase 207 P01 | 5min | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -556,6 +557,8 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - [Phase 206]: regenerateBaseline() runs unconditionally on every non-self-test phase-ratchet-ledger.mjs invocation, not gated on regressions being absent — Per D-37, an unfrozen baseline is designed to track current counts on every run so Phase 207's ui.fix re-scoring can recompute it during iteration; only --freeze (Phase 208) makes it sticky
 - [Phase ?]: [Phase 206-04] LENS_KEYS and GUARD_HOME_SPECS are duplicated as local constants in verify_ratchet_ledger.mjs (not imported) — genuine independence from the deterministic reducer's own copies of these enums is the whole point of the CI re-verifier.
 - [Phase ?]: [Phase 206-04] Added checkJustificationTokensIndependent() (region-tags.js's isAdmissibleToken) as a defense-in-depth re-check beyond the plan's literal action text, since the plan flagged isAdmissibleToken as the one deliberate reuse exception.
+- [Phase 207]: Round markers (.round-next/.round-status) live under gitignored test-results/, NOT DEFAULT_PATHS — ephemeral scalar handoffs to the Elixir orchestrator, not gate artifacts (207-01).
+- [Phase 207]: The seal-round CLI always exits 0 on success (escalation belongs to the later Elixir ui.round task); only missing/non-numeric RATCHET_ROUND exits 1 and appends nothing, T-207-07 (207-01).
 
 ### Pending Todos
 
@@ -666,9 +669,9 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 
 ## Session Continuity
 
-Last session: 2026-07-04T22:12:00.446Z
-Stopped at: Phase 207 UI-SPEC approved
-Resume file: .planning/phases/207-orchestration-digest-one-command-round-fix-loop/207-UI-SPEC.md
+Last session: 2026-07-05T00:17:49.290Z
+Stopped at: Completed 207-01-PLAN.md
+Resume file: None
 
 ## Operator Next Steps
 
