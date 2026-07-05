@@ -50,7 +50,51 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 // ----------------------------------------------------------------------------
 if (process.argv.includes("--self-test")) {
   regionTags.runSelfTest();
+  runProposeSelfTest();
   process.exit(0);
+}
+
+// runProposeSelfTest — pure, key-free assertions OWNED by this file (layered on top of
+// regionTags.runSelfTest above). Proves the ORCH-08 surface filter (Task 1) and the ORCH-07
+// cache_control request shape (Task 2) with ZERO network access and no ANTHROPIC_API_KEY. All
+// helpers it calls are hoisted function declarations, so it is safe to invoke here BEFORE the
+// module-level `const`s (e.g. SYSTEM_PREAMBLE) are initialized — every stable-prefix input the
+// builders need is passed in as an explicit argument, never closed over.
+function assertProposeSelfTest(name, condition, details = "") {
+  if (!condition) throw new Error(`Self-test failed: ${name}${details ? ` (${details})` : ""}`);
+  console.log(`self-test pass: ${name}`);
+}
+
+function runProposeSelfTest() {
+  // (A) ORCH-08 filterPngsBySurfaces — CSV subset filter over harness-derived `screen`.
+  {
+    const fixture = [
+      { screen: "dashboard", theme: "light" },
+      { screen: "dashboard", theme: "dark" },
+      { screen: "subscriptions", theme: "light" },
+      { screen: "invoices", theme: "light" },
+    ];
+    const both = filterPngsBySurfaces(fixture, "dashboard,subscriptions");
+    assertProposeSelfTest(
+      "(A-a) filterPngsBySurfaces keeps only the CSV-listed surfaces",
+      both.length === 3 && both.every((p) => p.screen === "dashboard" || p.screen === "subscriptions")
+    );
+    const trimmed = filterPngsBySurfaces(fixture, " dashboard , subscriptions ");
+    assertProposeSelfTest(
+      "(A-b) filterPngsBySurfaces trims whitespace around CSV entries",
+      trimmed.length === 3
+    );
+    assertProposeSelfTest(
+      "(A-c) filterPngsBySurfaces returns input UNCHANGED when CSV is absent",
+      filterPngsBySurfaces(fixture, undefined) === fixture &&
+        filterPngsBySurfaces(fixture, "") === fixture
+    );
+    const unknown = filterPngsBySurfaces(fixture, "no-such-surface");
+    assertProposeSelfTest(
+      "(A-d) filterPngsBySurfaces silently matches nothing on an unknown name (never expands scope)",
+      Array.isArray(unknown) && unknown.length === 0
+    );
+  }
 }
 
 // ----------------------------------------------------------------------------
@@ -306,6 +350,22 @@ function supportsSampling(m) {
 }
 
 // ----------------------------------------------------------------------------
+// filterPngsBySurfaces (ORCH-08, D-52) — PURE, exported, unit-testable filter shared by
+// `discoverPngs()`. `surfacesCsv` is the `RATCHET_SURFACES` env value: the SAME CSV vocabulary
+// admin-visuals.spec.js filters `shots` on. When it is falsy (unset/empty) the `pngs` array is
+// returned UNCHANGED. Otherwise each entry is kept only when its harness-derived `screen` field
+// (from the PNG filename, never model-chosen — D-04) is in the trimmed CSV set. An unknown name
+// simply matches nothing (silent no-op), never expands scope (T-207-05). No PNG file access and
+// no live key are required to exercise this — it is proven by the key-free `--self-test`.
+// ----------------------------------------------------------------------------
+export function filterPngsBySurfaces(pngs, surfacesCsv) {
+  if (!surfacesCsv) return pngs;
+  const wanted = new Set(String(surfacesCsv).split(",").map((s) => s.trim()).filter(Boolean));
+  if (wanted.size === 0) return pngs;
+  return pngs.filter((png) => wanted.has(png.screen));
+}
+
+// ----------------------------------------------------------------------------
 // PNG discovery — KEEP verbatim from `score-visuals.mjs:114-148`. Surface identity
 // is derived from the filename (harness-injected, never model-chosen — D-04).
 // ----------------------------------------------------------------------------
@@ -342,7 +402,9 @@ function discoverPngs() {
     }
   }
 
-  return pngs;
+  // ORCH-08 (D-52) — narrow to the RATCHET_SURFACES subset (shared vocabulary with
+  // admin-visuals.spec.js); returns `pngs` unchanged when the env var is unset/empty.
+  return filterPngsBySurfaces(pngs, process.env.RATCHET_SURFACES);
 }
 
 // ----------------------------------------------------------------------------

@@ -247,6 +247,19 @@ const SURFACES = [
   ...COMPONENT_GROUPS.map(componentGroupSurface),
 ];
 
+// SLICES (ORCH-08, D-52) — named capture/proposal subsets, keyed by slice name, valued by an
+// array of capture-name surface slugs (the EXACT `name` slugs used in admin-visuals.spec.js's
+// `shots` array). SLICES is the single source of truth that 207-05's `ui.round` mix task mirrors
+// for `--slice` name resolution, and it resolves to the SAME `RATCHET_SURFACES` CSV vocabulary
+// that admin-visuals.spec.js AND ratchet-propose.mjs both filter on. The `foundation` slice is
+// Phase 208's representative convergence slice: the design-system component gallery (component
+// families ride inside the single `component-kitchen` capture per D-52) plus the three exemplar
+// page-flows. An unrecognized surface name in a slice/CSV simply matches nothing (silent no-op),
+// never expands scope (T-207-05).
+const SLICES = {
+  foundation: ["component-kitchen", "dashboard", "subscription-detail", "subscriptions"],
+};
+
 function lookupProject(project) {
   const found = PROJECTS.find((item) => item.name === project || item.mode === project);
   if (!found) throw new Error(`Unknown baseline project: ${project}`);
@@ -317,6 +330,7 @@ module.exports = {
   THEMES,
   OWNER_PHASES,
   SURFACES,
+  SLICES,
   cellId,
   cellsForSurface,
 };

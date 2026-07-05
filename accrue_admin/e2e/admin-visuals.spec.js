@@ -137,7 +137,20 @@ test.describe("Admin visual inventory", () => {
       ["component-kitchen",   "/billing/dev/components"],
     ];
 
-    for (const [name, path] of shots) {
+    // RATCHET_SURFACES (ORCH-08, D-52) — optional CSV of capture-name surface slugs. When set,
+    // capture ONLY the listed surfaces (both themes, both projects); when unset, capture the full
+    // `shots` list unchanged. This is the SAME env var ratchet-propose.mjs filters `discoverPngs()`
+    // on, so a slice-scoped round needs zero hand-pruning of `test-results/`. An in-memory array
+    // filter only — the value is never interpolated into a shell command (T-207-05); an unknown
+    // name simply matches nothing (silent no-op), never expands scope.
+    const surfacesCsv = process.env.RATCHET_SURFACES;
+    let selectedShots = shots;
+    if (surfacesCsv) {
+      const wanted = new Set(surfacesCsv.split(",").map((s) => s.trim()).filter(Boolean));
+      selectedShots = shots.filter(([name]) => wanted.has(name));
+    }
+
+    for (const [name, path] of selectedShots) {
       await login(page, path);
       await captureThemes(page, name, project);
     }
