@@ -382,6 +382,40 @@ function resolveWithinResultsDir(pngRef) {
   return abs;
 }
 
+/** buildPanelRequest(model, systemAndRubric, panelTool, b64, findingsText) — pure, hoisted
+ * builder returning the EXACT same request shape as the previous inline literal PLUS three
+ * `cache_control: {type:"ephemeral"}` breakpoints on the stable prefix (ORCH-07, D-57): the sole
+ * `system` text block, `tools[0]`, and the FIRST `messages[0].content` block (the image). The
+ * per-call VARIABLE findings text that follows the image carries NO breakpoint. No field or
+ * content-block is reordered — the image is already first and system/tools already precede
+ * messages (RESEARCH). Params are passed in (never closed over) so the key-free `--self-test`
+ * can exercise this with fixtures and no live SDK call. */
+function buildPanelRequest(model, systemAndRubric, panelTool, b64, findingsText) {
+  const request = {
+    model,
+    max_tokens: 4096,
+    system: [{ type: "text", text: systemAndRubric, cache_control: { type: "ephemeral" } }],
+    tools: [{ ...panelTool, cache_control: { type: "ephemeral" } }],
+    tool_choice: { type: "tool", name: "emit_verdicts" },
+    messages: [
+      {
+        role: "user",
+        content: [
+          {
+            type: "image",
+            source: { type: "base64", media_type: "image/png", data: b64 },
+            cache_control: { type: "ephemeral" },
+          },
+          { type: "text", text: findingsText },
+        ],
+      },
+    ],
+  };
+  // Config-gated sampling param (RESEARCH Pitfall 1) — omitted on 4.7+/5-family models.
+  if (supportsSampling(model)) request.temperature = 0;
+  return request;
+}
+
 /** verifyImageGroup(pngRef, group) — one forced tool_use Opus call per source image,
  * batching every distinct finding on that image into one `verdicts` request array. Parses
  * the response using the SAME `.find((b) => b.type === "tool_use")?.input` pattern as
@@ -410,26 +444,9 @@ async function verifyImageGroup(pngRef, group) {
   // Stable-prefix-first (D-28): system + rubric + PANEL_TOOL schema are IDENTICAL on every
   // call (constructed once, module-level); only the message content below (image + the
   // per-finding info list) varies per image — this ordering is what makes ORCH-07's
-  // Phase-207 prompt-caching a drop-in later without touching identity.
+  // Phase-207 prompt-caching a drop-in without touching identity.
   const findingsText = buildFindingsInfoBlock(group);
-  const request = {
-    model,
-    max_tokens: 4096,
-    system: SYSTEM_AND_RUBRIC,
-    tools: [PANEL_TOOL],
-    tool_choice: { type: "tool", name: "emit_verdicts" },
-    messages: [
-      {
-        role: "user",
-        content: [
-          { type: "image", source: { type: "base64", media_type: "image/png", data: b64 } },
-          { type: "text", text: findingsText },
-        ],
-      },
-    ],
-  };
-  // Config-gated sampling param (RESEARCH Pitfall 1) — omitted on 4.7+/5-family models.
-  if (supportsSampling(model)) request.temperature = 0;
+  const request = buildPanelRequest(model, SYSTEM_AND_RUBRIC, PANEL_TOOL, b64, findingsText);
 
   const response = await client.messages.create(request);
 
@@ -852,6 +869,35 @@ function runSelfTest() {
       "(vii) resolveWithinResultsDir accepts an ordinary in-directory png_ref",
       resolvedOk === path.join(RESULTS_DIR, "chromium-desktop/dashboard-light.png")
     );
+  }
+
+  // (viii) ORCH-07 cache_control breakpoints — buildPanelRequest carries exactly 3 breakpoints on
+  // the stable prefix (system text block, tools[0], image content block) and NONE on the variable
+  // findings text block. Proven with fixtures — no live SDK call, no ANTHROPIC_API_KEY.
+  {
+    const ep = { type: "ephemeral" };
+    const eq = (v) => JSON.stringify(v) === JSON.stringify(ep);
+    const fakeTool = { name: "emit_verdicts", input_schema: { type: "object" } };
+    const req = buildPanelRequest("claude-opus-4-8", "fake system+rubric", fakeTool, "AAAABBBB", "fake findings text");
+
+    assertSelfTest(
+      "(viii) buildPanelRequest system is a single-text-block array with cache_control ephemeral",
+      Array.isArray(req.system) && req.system.length === 1 && req.system[0].type === "text" && eq(req.system[0].cache_control)
+    );
+    assertSelfTest(
+      "(viii) buildPanelRequest tools[0] carries cache_control ephemeral",
+      Array.isArray(req.tools) && req.tools.length === 1 && eq(req.tools[0].cache_control)
+    );
+    assertSelfTest(
+      "(viii) buildPanelRequest messages[0].content[0] is the image and carries cache_control ephemeral",
+      req.messages[0].content[0].type === "image" && eq(req.messages[0].content[0].cache_control)
+    );
+    assertSelfTest(
+      "(viii) buildPanelRequest findings text block after the image carries NO cache_control",
+      req.messages[0].content[1].type === "text" && req.messages[0].content[1].cache_control === undefined
+    );
+    const count = (JSON.stringify(req).match(/"cache_control"/g) || []).length;
+    assertSelfTest("(viii) buildPanelRequest has exactly 3 cache_control breakpoints", count === 3, `got ${count}`);
   }
 
   console.log("ratchet-verify self-test passed.");

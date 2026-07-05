@@ -95,6 +95,58 @@ function runProposeSelfTest() {
       Array.isArray(unknown) && unknown.length === 0
     );
   }
+
+  // (B) ORCH-07 cache_control breakpoints — exactly 3 per request, on the stable prefix only
+  //     (system text block, tools[0], image content block), NEVER on the variable text block.
+  {
+    const fakePreamble = "fake system preamble";
+    const fakeSchema = { name: "emit_findings", input_schema: { type: "object" } };
+    const fakeB64 = "AAAABBBBCCCC";
+    const fakePersona = { persona_id: "operator-founder", job: "test job", entry_point: "Home /" };
+
+    function assertBreakpointShape(label, req) {
+      const ep = { type: "ephemeral" };
+      const eq = (v) => JSON.stringify(v) === JSON.stringify(ep);
+      // system: array whose sole text block carries the breakpoint.
+      assertProposeSelfTest(
+        `${label}: system is a single-text-block array with cache_control ephemeral`,
+        Array.isArray(req.system) &&
+          req.system.length === 1 &&
+          req.system[0].type === "text" &&
+          eq(req.system[0].cache_control)
+      );
+      // tools[0] carries the breakpoint.
+      assertProposeSelfTest(
+        `${label}: tools[0] carries cache_control ephemeral`,
+        Array.isArray(req.tools) && req.tools.length === 1 && eq(req.tools[0].cache_control)
+      );
+      const content = req.messages[0].content;
+      // FIRST content block is the image and carries the breakpoint.
+      assertProposeSelfTest(
+        `${label}: messages[0].content[0] is the image and carries cache_control ephemeral`,
+        content[0].type === "image" && eq(content[0].cache_control)
+      );
+      // The text block that follows the image carries NO breakpoint (variable content).
+      assertProposeSelfTest(
+        `${label}: the per-call text block after the image carries NO cache_control`,
+        content[1].type === "text" && content[1].cache_control === undefined
+      );
+      // Exactly 3 breakpoints total across the whole request (within the 4-breakpoint max).
+      const count = (JSON.stringify(req).match(/"cache_control"/g) || []).length;
+      assertProposeSelfTest(`${label}: exactly 3 cache_control breakpoints`, count === 3, `got ${count}`);
+    }
+
+    const personaReq = buildPersonaRequest("claude-sonnet-4-5", fakePreamble, fakeSchema, fakeB64, fakePersona);
+    assertBreakpointShape("(B-persona) buildPersonaRequest", personaReq);
+
+    // Design builder takes a pre-built content array (image first, then prompt/exemplar blocks).
+    const fakeDesignContent = [
+      { type: "image", source: { type: "base64", media_type: "image/png", data: fakeB64 } },
+      { type: "text", text: "design prompt" },
+    ];
+    const designReq = buildDesignRequestPayload("claude-sonnet-4-5", fakePreamble, fakeSchema, fakeDesignContent);
+    assertBreakpointShape("(B-design) buildDesignRequestPayload", designReq);
+  }
 }
 
 // ----------------------------------------------------------------------------
@@ -475,6 +527,61 @@ async function main() {
   }
 }
 
+// ----------------------------------------------------------------------------
+// Request builders (ORCH-07, D-57) — small, pure, hoisted functions returning the EXACT same
+// request shape as the previous inline literals PLUS three `cache_control: {type:"ephemeral"}`
+// breakpoints on the stable request prefix: (1) the sole `system` text block, (2) `tools[0]`,
+// (3) the FIRST `messages[0].content` block (the image). RESEARCH confirmed the image is already
+// first and `system`/`tools` already precede `messages`, so NO field or content-block is
+// reordered — only the markers are added. The per-persona/per-candidate VARIABLE text that
+// follows the image intentionally carries NO breakpoint. `systemPreamble` is passed in (never
+// closed over) so these builders stay TDZ-safe when the key-free `--self-test` calls them before
+// the module-level `SYSTEM_PREAMBLE` const is initialized.
+function buildPersonaRequest(model, systemPreamble, toolSchema, b64, persona) {
+  const request = {
+    model,
+    max_tokens: 2048,
+    system: [{ type: "text", text: systemPreamble, cache_control: { type: "ephemeral" } }],
+    tools: [{ ...toolSchema, cache_control: { type: "ephemeral" } }],
+    tool_choice: { type: "tool", name: "emit_findings" },
+    messages: [
+      {
+        role: "user",
+        content: [
+          {
+            type: "image",
+            source: { type: "base64", media_type: "image/png", data: b64 },
+            cache_control: { type: "ephemeral" },
+          },
+          { type: "text", text: buildLensPrompt(persona) },
+        ],
+      },
+    ],
+  };
+  // Config-gated sampling param (RESEARCH Pitfall 1) — omitted on 4.7+/5-family models.
+  if (supportsSampling(model)) request.temperature = 0;
+  return request;
+}
+
+// buildDesignRequestPayload — same 3-breakpoint stable prefix as the persona builder. The
+// pre-built `designContent` array (image first, then the prompt + exemplar blocks) has the
+// breakpoint added to its FIRST (image) block WITHOUT reordering or mutating the input array.
+function buildDesignRequestPayload(model, systemPreamble, toolSchema, designContent) {
+  const content = designContent.map((block, i) =>
+    i === 0 ? { ...block, cache_control: { type: "ephemeral" } } : block
+  );
+  const request = {
+    model,
+    max_tokens: 2048,
+    system: [{ type: "text", text: systemPreamble, cache_control: { type: "ephemeral" } }],
+    tools: [{ ...toolSchema, cache_control: { type: "ephemeral" } }],
+    tool_choice: { type: "tool", name: "emit_findings" },
+    messages: [{ role: "user", content }],
+  };
+  if (supportsSampling(model)) request.temperature = 0;
+  return request;
+}
+
 // proposeForImage — fan the 6 persona lenses over one PNG, parse each tool_use block,
 // then run every raw finding through the harness-authoritative validation+emit gate.
 async function proposeForImage(png, b64, provenance) {
@@ -485,27 +592,7 @@ async function proposeForImage(png, b64, provenance) {
   const collected = [];
 
   for (const persona of PERSONAS) {
-    const request = {
-      model,
-      max_tokens: 2048,
-      system: SYSTEM_PREAMBLE,
-      tools: [toolSchema],
-      tool_choice: { type: "tool", name: "emit_findings" },
-      messages: [
-        {
-          role: "user",
-          content: [
-            {
-              type: "image",
-              source: { type: "base64", media_type: "image/png", data: b64 },
-            },
-            { type: "text", text: buildLensPrompt(persona) },
-          ],
-        },
-      ],
-    };
-    // Config-gated sampling param (RESEARCH Pitfall 1) — omitted on 4.7+/5-family models.
-    if (supportsSampling(model)) request.temperature = 0;
+    const request = buildPersonaRequest(model, SYSTEM_PREAMBLE, toolSchema, b64, persona);
 
     const response = await client.messages.create(request);
 
@@ -527,15 +614,7 @@ async function proposeForImage(png, b64, provenance) {
   // temperature as the persona lenses; the ONLY differences are the comparative prompt and
   // the two attached exemplar images.
   const { content: designContent, attachedBad } = buildDesignContent(b64, surface, surface_type);
-  const designRequest = {
-    model,
-    max_tokens: 2048,
-    system: SYSTEM_PREAMBLE,
-    tools: [toolSchema],
-    tool_choice: { type: "tool", name: "emit_findings" },
-    messages: [{ role: "user", content: designContent }],
-  };
-  if (supportsSampling(model)) designRequest.temperature = 0;
+  const designRequest = buildDesignRequestPayload(model, SYSTEM_PREAMBLE, toolSchema, designContent);
 
   const designResponse = await client.messages.create(designRequest);
   const _designFound =
