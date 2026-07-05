@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.56
 milestone_name: "Admin UI Ratchet: Automated Adversarial Design Evaluation"
-status: executing
+status: verifying
 stopped_at: Completed 207-01-PLAN.md
-last_updated: "2026-07-05T00:54:15.583Z"
+last_updated: "2026-07-05T01:07:22.720Z"
 last_activity: 2026-07-05
 progress:
   total_phases: 5
-  completed_phases: 2
+  completed_phases: 3
   total_plans: 15
-  completed_plans: 14
-  percent: 40
+  completed_plans: 15
+  percent: 60
 ---
 
 # Project State
@@ -28,10 +28,10 @@ See: `.planning/PROJECT.md` (updated 2026-07-03 after v1.55 closeout)
 
 Phase: 207 (Orchestration + digest + one-command round/fix loop) — EXECUTING
 Plan: 6 of 6
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-07-05
 
-Progress: [█████████░] 93%
+Progress: [██████████] 100%
 
 ## Post-v1.48 Pause Rule
 
@@ -296,6 +296,7 @@ Coverage: 22/22 v1.51 requirements mapped (each REQ-ID → exactly one phase). D
 | Phase 207 P03 | 18m | 2 tasks | 5 files |
 | Phase 207 P04 | 18 | 3 tasks | 2 files |
 | Phase 207 P05 | 8m | 2 tasks | 3 files |
+| Phase 207 P6 | 20min | 2 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -561,6 +562,8 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - [Phase 207]: Round markers (.round-next/.round-status) live under gitignored test-results/, NOT DEFAULT_PATHS — ephemeral scalar handoffs to the Elixir orchestrator, not gate artifacts (207-01).
 - [Phase 207]: The seal-round CLI always exits 0 on success (escalation belongs to the later Elixir ui.round task); only missing/non-numeric RATCHET_ROUND exits 1 and appends nothing, T-207-07 (207-01).
 - [Phase 207]: 207-02: Ratchet request builders take systemPreamble/toolSchema as explicit params (not closure) so the mandated key-free --self-test-first guard can call them before SYSTEM_PREAMBLE initializes without a TDZ error; cache_control ephemeral lands on exactly 3 stable-prefix positions (system text block, tools[0], image block) with no field reordering.
+- [Phase ?]: 2026-07-05 (207-06): Exported isValidSuppressedReason from ratchet-ledger.js (defined but unexported) so ui.fix apply-decisions validates the whole reject batch up-front — the abort-before-any-apply/zero-partial-apply invariant needs validation decoupled from appendSuppressed.
+- [Phase ?]: 2026-07-05 (207-06): ratchet-fix probe verdict policy — objective kinds (contrast/motion) re-measured against their invariant; other kinds trust the maintainer's approved resolution (present=false). ui.fix runs zero evaluator fan-out (D-50), grep-proven.
 
 ### Pending Todos
 
@@ -671,7 +674,7 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 
 ## Session Continuity
 
-Last session: 2026-07-05T00:54:08.167Z
+Last session: 2026-07-05T01:06:57.513Z
 Stopped at: Completed 207-01-PLAN.md
 Resume file: None
 
