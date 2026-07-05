@@ -673,3 +673,318 @@ export {
   writeDecisionsJson,
   renderDigestHtml,
 };
+
+// -----------------------------------------------------------------------------
+// Self-test (twins phase192-gallery.mjs's `assertSelfTest`/`runSelfTest`/`parseArgs`/`main`
+// shape). Covers all 4 locked banner states + XSS-escaping + partition disjointness/ordering.
+// Every fixture is built in-memory or under an `fs.mkdtempSync` scratch root — zero real
+// committed files are touched.
+// -----------------------------------------------------------------------------
+
+function assertSelfTest(name, condition, details = "") {
+  if (!condition) throw new Error(`Self-test failed: ${name}${details ? ` (${details})` : ""}`);
+  console.log(`self-test pass: ${name}`);
+}
+
+/** finding(overrides) — a fully-populated open ledger-row fixture with sane defaults. */
+function findingFixture(overrides = {}) {
+  return {
+    finding_id: "f-0000000000000001",
+    status: "open",
+    event: "confirm",
+    severity: "real",
+    effort_class: "css",
+    persona_frequency: 1,
+    surface: "dashboard",
+    region_tag: "kpi-row",
+    claim_key: "dashboard__d02__kpi-row__ov-none",
+    viewport: "chromium-desktop",
+    theme: "light",
+    round: 1,
+    defect: "fixture defect",
+    suggested_fix: "fixture fix",
+    ...overrides,
+  };
+}
+
+function runSelfTest() {
+  const scratchRoot = fs.mkdtempSync(path.join(os.tmpdir(), "ratchet-digest-"));
+  try {
+    // --- Fixture A: normal round, not converged (latest dry:false) ---
+    {
+      const rounds = [
+        { round: 2, dry: false, epoch: 1, seq: 1 },
+        { round: 3, dry: false, epoch: 1, seq: 2 },
+      ];
+      const conv = computeConvergenceDisplay(rounds);
+      assertSelfTest("(A) normal: status continue", conv.status === "continue", conv.status);
+      const findings = [
+        findingFixture({ finding_id: "f-000000000000000a", effort_class: "css", severity: "real" }),
+        findingFixture({ finding_id: "f-000000000000000b", effort_class: null, severity: "minor" }),
+        findingFixture({
+          finding_id: "f-000000000000000c",
+          effort_class: "ia-product-decision",
+          severity: "real",
+        }),
+      ];
+      const { worklist, decisionsNeeded } = partitionFindings(findings);
+      const banner = buildSummaryBanner({
+        round: conv.round,
+        confirmed: worklist.length + decisionsNeeded.length,
+        rootCause: worklist.length,
+        iaDecisions: decisionsNeeded.length,
+        status: conv.status,
+        consecutiveDry: conv.consecutiveDry,
+      });
+      assertSelfTest(
+        "(A) normal: exact banner copy, no badge",
+        banner.headline === "Round 3 — 3 confirmed, 2 root-cause, 1 IA decisions" && banner.badge === null,
+        banner.headline
+      );
+    }
+
+    // --- Fixture B: converged (2 consecutive dry:true in current epoch) ---
+    {
+      const rounds = [
+        { round: 4, dry: true, epoch: 2, seq: 1 },
+        { round: 5, dry: true, epoch: 2, seq: 2 },
+      ];
+      const conv = computeConvergenceDisplay(rounds);
+      const banner = buildSummaryBanner({
+        round: conv.round,
+        confirmed: 0,
+        rootCause: 0,
+        iaDecisions: 0,
+        status: conv.status,
+        consecutiveDry: conv.consecutiveDry,
+      });
+      assertSelfTest(
+        "(B) converged: CONVERGED badge with ✓ glyph",
+        banner.state === "converged" &&
+          banner.badge.glyph === "✓" &&
+          banner.badge.text === "CONVERGED (2 dry rounds)",
+        JSON.stringify(banner.badge)
+      );
+    }
+
+    // --- Fixture C: cap-reached (round 6, fewer than 2 consecutive dry) ---
+    {
+      const rounds = [
+        { round: 5, dry: false, epoch: 1, seq: 1 },
+        { round: 6, dry: true, epoch: 1, seq: 2 },
+      ];
+      const conv = computeConvergenceDisplay(rounds);
+      const banner = buildSummaryBanner({
+        round: conv.round,
+        confirmed: 4,
+        rootCause: 4,
+        iaDecisions: 0,
+        status: conv.status,
+        consecutiveDry: conv.consecutiveDry,
+      });
+      assertSelfTest(
+        "(C) cap-reached: exact copy + ⚠ glyph",
+        banner.state === "cap-reached" &&
+          banner.headline === "CAP REACHED — 6 rounds, 4 open, not converged" &&
+          banner.badge.glyph === "⚠",
+        banner.headline
+      );
+    }
+
+    // --- Fixture D: zero confirmed findings (empty state) ---
+    {
+      const rounds = [{ round: 2, dry: false, epoch: 1, seq: 1 }];
+      const conv = computeConvergenceDisplay(rounds);
+      const banner = buildSummaryBanner({
+        round: conv.round,
+        confirmed: 0,
+        rootCause: 0,
+        iaDecisions: 0,
+        status: conv.status,
+        consecutiveDry: conv.consecutiveDry,
+      });
+      assertSelfTest(
+        "(D) empty: exact headline",
+        banner.state === "empty" && banner.headline === "Round 2 — 0 confirmed findings",
+        banner.headline
+      );
+      assertSelfTest(
+        "(D) empty: exact heading + body copy pair",
+        banner.emptyHeading === "No confirmed findings this round" &&
+          banner.emptyBody ===
+            "Round 2 re-verified every surface in scope and found nothing new to fix. " +
+              "If this continues for one more round, the loop reports CONVERGED.",
+        banner.emptyBody
+      );
+    }
+
+    // --- XSS fixture: a `<script>` in `defect` must render escaped, never executable ---
+    {
+      const banner = buildSummaryBanner({
+        round: 1,
+        confirmed: 1,
+        rootCause: 1,
+        iaDecisions: 0,
+        status: "continue",
+        consecutiveDry: 0,
+      });
+      const worklist = [findingFixture({ defect: "<script>alert(1)</script>", suggested_fix: "safe" })];
+      const html = renderDigestHtml({ banner, worklist, decisionsNeeded: [], galleryGroups: [] });
+      assertSelfTest(
+        "(XSS) defect is HTML-escaped, never an executable tag",
+        html.includes("&lt;script&gt;alert(1)&lt;/script&gt;") && !html.includes("<script>alert(1)"),
+        ""
+      );
+      assertSelfTest(
+        "(XSS) rendered HTML has zero external http(s) references (offline, self-contained)",
+        !/https?:\/\//.test(html)
+      );
+    }
+
+    // --- Partition: worklist/decisions-needed are disjoint and correctly ordered ---
+    {
+      const findings = [
+        findingFixture({ finding_id: "f-0000000000000031", severity: "minor", effort_class: "css", persona_frequency: 1 }),
+        findingFixture({ finding_id: "f-0000000000000030", severity: "real", effort_class: null, persona_frequency: 2 }),
+        findingFixture({ finding_id: "f-0000000000000032", severity: "real", effort_class: "css", persona_frequency: 2 }),
+        findingFixture({ finding_id: "f-0000000000000040", severity: "real", effort_class: "ia-product-decision", persona_frequency: 5 }),
+      ];
+      const { worklist, decisionsNeeded } = partitionFindings(findings);
+      const wIds = worklist.map((f) => f.finding_id);
+      const dIds = decisionsNeeded.map((f) => f.finding_id);
+      assertSelfTest(
+        "(partition) disjoint: no finding_id in both queues",
+        wIds.every((id) => !dIds.includes(id))
+      );
+      assertSelfTest(
+        "(partition) worklist ordering: real+css(freq2) before real+null(freq2) before minor",
+        wIds.join(",") === "f-0000000000000032,f-0000000000000030,f-0000000000000031",
+        wIds.join(",")
+      );
+      assertSelfTest(
+        "(partition) decisions-needed holds only the ia-product-decision item",
+        dIds.join(",") === "f-0000000000000040",
+        dIds.join(",")
+      );
+      // determinism: identical input array → JSON.stringify-equal output twice
+      const once = JSON.stringify(partitionFindings(findings));
+      const twice = JSON.stringify(partitionFindings(findings));
+      assertSelfTest("(partition) deterministic on repeat", once === twice);
+    }
+
+    // --- Overlay scale math (D-55): pinned to the REAL 1280/393 widths, not 1440/390 ---
+    {
+      assertSelfTest(
+        "(overlay) desktop scale uses 1280, not 1440",
+        computeOverlayScale(1200, "chromium-desktop") === 1200 / 1280 &&
+          computeOverlayScale(1200, "chromium-desktop") !== 1200 / 1440
+      );
+      assertSelfTest(
+        "(overlay) mobile scale uses 393, not 390",
+        computeOverlayScale(393, "chromium-mobile") === 1 &&
+          computeOverlayScale(390, "chromium-mobile") !== 1
+      );
+      const box = scaleBox({ x: 128, y: 64, width: 256, height: 32 }, "chromium-desktop");
+      assertSelfTest(
+        "(overlay) scaleBox applies the uniform 960/1280 display scale",
+        box.left === 128 * (960 / 1280) && box.width === 256 * (960 / 1280),
+        JSON.stringify(box)
+      );
+      assertSelfTest("(overlay) null bbox → no box (region absent)", scaleBox(null, "chromium-desktop") === null);
+    }
+
+    // --- decisions.json round-trip against a scratch round dir (writer contract for 207-06) ---
+    {
+      const roundDir = path.join(scratchRoot, "round-07");
+      fs.mkdirSync(roundDir, { recursive: true });
+      const worklist = [findingFixture({ finding_id: "f-000000000000dd01", defect: "needs a decision row" })];
+      const rows = buildDecisionsJsonRows(worklist);
+      const dest = writeDecisionsJson(roundDir, rows);
+      const readBack = JSON.parse(fs.readFileSync(dest, "utf8"));
+      assertSelfTest(
+        "(decisions.json) row shape matches the 207-06 contract",
+        readBack.length === 1 &&
+          readBack[0].finding_id === "f-000000000000dd01" &&
+          readBack[0].decision === "approve" &&
+          readBack[0].surface === "dashboard" &&
+          readBack[0].summary === "needs a decision row" &&
+          readBack[0].region_tag === "kpi-row",
+        JSON.stringify(readBack[0])
+      );
+    }
+
+    console.log("ratchet-digest self-test passed.");
+  } finally {
+    fs.rmSync(scratchRoot, { recursive: true, force: true });
+  }
+}
+
+// -----------------------------------------------------------------------------
+// CLI entry point (twins phase192-gallery.mjs's parseArgs/main/import.meta.url guard).
+// -----------------------------------------------------------------------------
+
+function parseArgs(argv) {
+  const options = {};
+  for (const arg of argv) {
+    if (arg === "--self-test") options.selfTest = true;
+    else throw new Error(`Unknown argument: ${arg}`);
+  }
+  return options;
+}
+
+/**
+ * generateDigest() — the real (non-self-test) path: fold the committed ledger, derive the round
+ * from `rounds.ndjson`, build the worklist/decisions-needed/banner, assemble the round-NN
+ * artifacts, render + write `digest.html`, write `decisions.json`, and return the paths.
+ */
+function generateDigest() {
+  const foldedFindings = Array.from(fold(readNdjsonRows(LEDGER_PATH)).values());
+  const openFindings = foldedFindings.filter((f) => f.status === "open");
+  const roundsRows = readNdjsonRows(ROUNDS_PATH);
+  const conv = computeConvergenceDisplay(roundsRows);
+
+  const { worklist, decisionsNeeded } = partitionFindings(openFindings);
+  validateDigestRows(worklist, "worklist row");
+  validateDigestRows(decisionsNeeded, "decisions-needed row");
+
+  const banner = buildSummaryBanner({
+    round: conv.round,
+    confirmed: worklist.length + decisionsNeeded.length,
+    rootCause: worklist.length,
+    iaDecisions: decisionsNeeded.length,
+    status: conv.status,
+    consecutiveDry: conv.consecutiveDry,
+  });
+
+  const roundDir = assembleRoundArtifacts(conv.round, openFindings);
+  const galleryGroups = buildGalleryGroups(roundDir, openFindings);
+  const html = renderDigestHtml({ banner, worklist, decisionsNeeded, galleryGroups });
+
+  const digestPath = path.join(roundDir, "digest.html");
+  fs.writeFileSync(digestPath, html);
+  const decisionsPath = writeDecisionsJson(roundDir, buildDecisionsJsonRows(worklist));
+
+  return { digestPath, decisionsPath, roundDir };
+}
+
+function main(argv = process.argv.slice(2)) {
+  const options = parseArgs(argv);
+  if (options.selfTest) {
+    runSelfTest();
+    return;
+  }
+  const { digestPath, decisionsPath } = generateDigest();
+  console.log(`Wrote ${digestPath}`);
+  console.log(`Wrote ${decisionsPath}`);
+}
+
+if (import.meta.url === pathToFileURL(process.argv[1]).href) {
+  try {
+    main();
+  } catch (error) {
+    console.error(`ratchet-digest.mjs failed: ${error.message}`);
+    process.exitCode = 1;
+  }
+}
+
+export { runSelfTest, parseArgs, generateDigest, main };
