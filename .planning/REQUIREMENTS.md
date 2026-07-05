@@ -49,7 +49,7 @@ Requirements for this milestone. Each maps to exactly one roadmap phase (205–2
 - [ ] **ORCH-02**: The digest is a rendered HTML gallery grouping screenshots by surface with confirmed findings overlaid on their region, a ranked worklist, and a separate "decisions needed" queue for IA/product-decision items.
 - [ ] **ORCH-03**: Maintainer can batch-approve all auto-fixable confirmed findings in one action, or reject an individual finding into a suppress-list with a reason that feeds dedup so it never resurfaces.
 - [ ] **ORCH-04**: Maintainer can run a single command (`mix accrue_admin.ui.fix`) that applies the approved batch, rebuilds and commits the CSS bundle, re-captures, re-scores, and updates the ledger.
-- [ ] **ORCH-05**: Resolving a finding auto-mints a deterministic guard (a targeted assertion in an existing spec, or a `ledger-count` guard for pure-taste findings) so a closed finding cannot silently reopen.
+- [x] **ORCH-05**: Resolving a finding auto-mints a deterministic guard (a targeted assertion in an existing spec, or a `ledger-count` guard for pure-taste findings) so a closed finding cannot silently reopen.
 - [x] **ORCH-06**: The loop detects convergence after K=2 consecutive dry rounds and escalates to the maintainer at a 6-round hard cap instead of looping indefinitely.
 - [x] **ORCH-07**: The evaluator fan-out applies Anthropic prompt caching (`cache_control`) to the stable per-call prefix (system preamble, tool schema, and the design-lens exemplar images) so repeated `ui.round` runs reuse cached input instead of re-sending it, cutting per-run token cost, without altering identity (`claim_key`/`finding_id`) or the no-key/`--self-test` paths. *(Folded 2026-07-03 from the Phase 205 live smoke — the proposer currently sends no `cache_control` and re-sends the schema + images on all 7 calls/screenshot.)*
 - [x] **ORCH-08**: `mix accrue_admin.ui.round` and the underlying proposer accept a surface/slice filter so a maintainer can scope a run to a bounded subset (the representative slice or a single surface) without manually pruning captured PNGs; capture and fan-out both honor the filter, and an unscoped run still covers the full configured surface set. *(Folded 2026-07-03 from the Phase 205 live smoke — there is currently no subset filter, so a slice run requires hand-pruning `test-results/`.)*
@@ -117,7 +117,7 @@ Which phases cover which requirements. Populated during roadmap creation.
 | ORCH-02 | Phase 207 | Pending |
 | ORCH-03 | Phase 207 | Pending |
 | ORCH-04 | Phase 207 | Pending |
-| ORCH-05 | Phase 207 | Pending |
+| ORCH-05 | Phase 207 | Complete |
 | ORCH-06 | Phase 207 | Complete |
 | ORCH-07 | Phase 207 | Complete |
 | ORCH-08 | Phase 207 | Complete |
