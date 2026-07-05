@@ -292,6 +292,365 @@ function validateDigestRows(rows, sectionLabel = "row") {
   return rows;
 }
 
+// -----------------------------------------------------------------------------
+// HTML escaping (T-207-04 mitigation). Ledger prose (`defect`/`suggested_fix`) originates as
+// LLM free-text (Phase 205) and is the FIRST place in the repo rendered as HTML rather than
+// Markdown/plain data — every interpolated string field passes through here.
+// -----------------------------------------------------------------------------
+
+/** escapeHtml(value) — standard `&<>"'` entity escaping; null/undefined → "". */
+function escapeHtml(value) {
+  if (value === null || value === undefined) return "";
+  return String(value)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+// -----------------------------------------------------------------------------
+// Region overlay scale (D-55). `computeOverlayScale(renderedWidth, project)` =
+// `renderedWidth / CAPTURE_VIEWPORT_WIDTHS[project]` — the REAL capture width (1280/393), NOT
+// baseline-manifest.js's stale 1440/390.
+// -----------------------------------------------------------------------------
+
+/** computeOverlayScale(renderedWidth, project) — rendered/captured width ratio for the project. */
+function computeOverlayScale(renderedWidth, project) {
+  const captureWidth = CAPTURE_VIEWPORT_WIDTHS[project];
+  if (!captureWidth) throw new Error(`computeOverlayScale: unknown project ${JSON.stringify(project)}`);
+  return renderedWidth / captureWidth;
+}
+
+/**
+ * scaleBox(bbox, project) — apply the display scale to a capture-viewport `{x,y,width,height}`
+ * box, yielding on-page CSS px against the rendered `<img>` (displayed at `DISPLAY_WIDTHS`).
+ * Returns `null` for a `null`/absent box (selector wasn't present at capture time, D-55).
+ */
+function scaleBox(bbox, project) {
+  if (!bbox || typeof bbox !== "object") return null;
+  const scale = computeOverlayScale(DISPLAY_WIDTHS[project], project);
+  return {
+    left: bbox.x * scale,
+    top: bbox.y * scale,
+    width: bbox.width * scale,
+    height: bbox.height * scale,
+  };
+}
+
+// -----------------------------------------------------------------------------
+// round-NN artifact assembly (RESEARCH Pitfall 1's resolution). Copies FROM the flat Phase-205
+// capture dir INTO a new round-scoped directory — never mutates the capture dir or the
+// hardcoded flat paths in `admin-visuals.spec.js` / `ratchet-propose.mjs`.
+// -----------------------------------------------------------------------------
+
+/** resolveRoundDir(round) — `test-results/ui-ratchet/round-NN/` (zero-padded). */
+function resolveRoundDir(round) {
+  return path.join(ROUND_OUTPUT_ROOT, `round-${String(round).padStart(2, "0")}`);
+}
+
+/**
+ * assembleRoundArtifacts(round, findings) — makes the round dir, then for every surface
+ * referenced by a confirmed finding copies that surface's PNG(s) + `.bbox.json` sidecar(s)
+ * (light/dark × each capture project) from `CAPTURE_DIR/{project}/` into
+ * `roundDir/{project}/` (per-project subdir avoids the desktop/mobile filename collision on a
+ * shared surface name). A missing source combination is skipped silently — capture may not
+ * have produced every surface × project × theme. Returns the round dir path.
+ */
+function assembleRoundArtifacts(round, findings) {
+  const roundDir = resolveRoundDir(round);
+  fs.mkdirSync(roundDir, { recursive: true });
+
+  const surfaces = new Set((findings || []).map((f) => f.surface).filter(Boolean));
+  for (const surface of surfaces) {
+    for (const project of CAPTURE_PROJECTS) {
+      const srcProjectDir = path.join(CAPTURE_DIR, project);
+      const destProjectDir = path.join(roundDir, project);
+      for (const suffix of THEME_SUFFIXES) {
+        for (const kind of [".png", ".bbox.json"]) {
+          const name = `${surface}${suffix}${kind}`;
+          const src = path.join(srcProjectDir, name);
+          if (!fs.existsSync(src)) continue; // additive — never require every combination
+          fs.mkdirSync(destProjectDir, { recursive: true });
+          fs.cpSync(src, path.join(destProjectDir, name));
+        }
+      }
+    }
+  }
+  return roundDir;
+}
+
+/**
+ * buildGalleryGroups(roundDir, findings) — reads the assembled `.bbox.json` sidecars and
+ * resolves each confirmed finding's per-project/per-theme overlay box into on-page px, returning
+ * the pure `galleryGroups` structure `renderDigestHtml` consumes (so the renderer stays
+ * fs-free/testable). Findings are grouped by `surface`; each group lists the images actually
+ * present in `roundDir` with their scaled overlays and any region-absent notes.
+ */
+function buildGalleryGroups(roundDir, findings) {
+  const bySurface = new Map();
+  for (const f of findings || []) {
+    if (!f.surface) continue;
+    if (!bySurface.has(f.surface)) bySurface.set(f.surface, []);
+    bySurface.get(f.surface).push(f);
+  }
+
+  const groups = [];
+  for (const surface of Array.from(bySurface.keys()).sort()) {
+    const surfaceFindings = bySurface.get(surface);
+    const images = [];
+    for (const project of CAPTURE_PROJECTS) {
+      for (const suffix of THEME_SUFFIXES) {
+        const theme = suffix === "-dark" ? "dark" : "light";
+        const pngRel = `./${project}/${surface}${suffix}.png`;
+        const pngAbs = path.join(roundDir, project, `${surface}${suffix}.png`);
+        if (!fs.existsSync(pngAbs)) continue;
+
+        let bbox = {};
+        const bboxAbs = path.join(roundDir, project, `${surface}${suffix}.bbox.json`);
+        if (fs.existsSync(bboxAbs)) {
+          try {
+            bbox = JSON.parse(fs.readFileSync(bboxAbs, "utf8")) || {};
+          } catch {
+            bbox = {};
+          }
+        }
+
+        const overlays = [];
+        const absentRegions = [];
+        for (const f of surfaceFindings) {
+          const box = bbox[f.region_tag];
+          const scaled = scaleBox(box, project);
+          if (scaled) {
+            overlays.push({ finding_id: f.finding_id, region_tag: f.region_tag, ...scaled });
+          } else {
+            absentRegions.push({ finding_id: f.finding_id, region_tag: f.region_tag });
+          }
+        }
+        images.push({ project, theme, src: pngRel, displayWidth: DISPLAY_WIDTHS[project], overlays, absentRegions });
+      }
+    }
+    groups.push({ surface, findings: surfaceFindings, images });
+  }
+  return groups;
+}
+
+/**
+ * writeDecisionsJson(roundDir, rows) — writes `decisions.json` (2-space indent + trailing
+ * newline, matching the repo's `export_copy_strings`-style JSON convention). This is the
+ * checkpoint file the maintainer edits and 207-06's apply-decisions reader consumes.
+ */
+function writeDecisionsJson(roundDir, rows) {
+  const dest = path.join(roundDir, "decisions.json");
+  fs.writeFileSync(dest, `${JSON.stringify(rows, null, 2)}\n`);
+  return dest;
+}
+
+// -----------------------------------------------------------------------------
+// HTML rendering (207-UI-SPEC.md is the binding contract). Single self-contained document:
+// inline <style>, no external requests, `prefers-color-scheme` (not `data-theme`), system Geist
+// (no webfont), severity glyph+color pairing (never color alone), relative image src.
+// -----------------------------------------------------------------------------
+
+const SEVERITY_DISPLAY = {
+  real: { glyph: "■", label: "REAL", cls: "sev-real" },
+  minor: { glyph: "△", label: "MINOR", cls: "sev-minor" },
+};
+
+/** renderSeverity(sev) — glyph + label span pair (D-56: shape+color, never color alone). */
+function renderSeverity(sev) {
+  const d = SEVERITY_DISPLAY[sev] || { glyph: "•", label: escapeHtml(sev || "—"), cls: "sev-unknown" };
+  return `<span class="sev ${d.cls}"><span class="sev-glyph" aria-hidden="true">${d.glyph}</span> ${escapeHtml(
+    d.label
+  )}</span>`;
+}
+
+/** renderFindingRow(f) — one `<tr>` for the worklist/decisions-needed tables. */
+function renderFindingRow(f) {
+  return `        <tr>
+          <td class="col-sev">${renderSeverity(f.severity)}</td>
+          <td class="col-id"><code>${escapeHtml(f.finding_id)}</code></td>
+          <td class="col-loc"><code>${escapeHtml(f.surface)}</code> · <code>${escapeHtml(
+    f.region_tag
+  )}</code><br><span class="muted mono">${escapeHtml(f.claim_key)}</span></td>
+          <td class="col-freq"><span class="freq">×${escapeHtml(String(f.persona_frequency))}</span></td>
+          <td class="col-defect"><p class="defect">${escapeHtml(f.defect)}</p><p class="fix muted">${escapeHtml(
+    f.suggested_fix
+  )}</p></td>
+        </tr>`;
+}
+
+/** renderTableSection(id, heading, rows, emptyNote) — a `<section>` with a findings `<table>`. */
+function renderTableSection(id, heading, rows, emptyNote) {
+  const body = rows.length
+    ? rows.map(renderFindingRow).join("\n")
+    : `        <tr><td colspan="5" class="muted">${escapeHtml(emptyNote)}</td></tr>`;
+  return `  <section id="${id}">
+    <h2>${escapeHtml(heading)}</h2>
+    <table>
+      <thead>
+        <tr><th>Severity</th><th>Finding</th><th>Location</th><th>Freq</th><th>Defect &amp; suggested fix</th></tr>
+      </thead>
+      <tbody>
+${body}
+      </tbody>
+    </table>
+  </section>`;
+}
+
+/** renderOverlay(o) — one absolutely-positioned outline box + finding_id label chip. */
+function renderOverlay(o) {
+  const style = `left:${o.left}px;top:${o.top}px;width:${o.width}px;height:${o.height}px;`;
+  return `<div class="overlay" style="${style}"><span class="overlay-label">${escapeHtml(
+    o.finding_id
+  )}</span></div>`;
+}
+
+/** renderGalleryGroup(group) — a per-surface `<details>` with each image + its overlays. */
+function renderGalleryGroup(group) {
+  const imagesHtml = group.images
+    .map((img) => {
+      const overlays = img.overlays.map(renderOverlay).join("");
+      const absentNotes = img.absentRegions
+        .map(
+          (a) =>
+            `<p class="muted absent-note">${escapeHtml(a.region_tag)} not present on this surface/theme at capture time — no overlay drawn.</p>`
+        )
+        .join("\n        ");
+      return `      <figure class="shot">
+        <figcaption class="muted">${escapeHtml(group.surface)} · ${escapeHtml(img.project)} · ${escapeHtml(
+        img.theme
+      )}</figcaption>
+        <div class="shot-frame" style="width:${img.displayWidth}px">
+          <img src="${escapeHtml(img.src)}" alt="${escapeHtml(group.surface)} ${escapeHtml(
+        img.theme
+      )} screenshot" width="${img.displayWidth}">
+          ${overlays}
+        </div>
+        ${absentNotes}
+      </figure>`;
+    })
+    .join("\n");
+  return `    <details>
+      <summary>${escapeHtml(group.surface)}</summary>
+${imagesHtml}
+    </details>`;
+}
+
+/** renderBanner(banner) — the sticky summary banner in whichever of its 4 states. */
+function renderBanner(banner) {
+  const badge = banner.badge
+    ? `<span class="badge badge-${banner.badge.tone}"><span class="badge-glyph" aria-hidden="true">${banner.badge.glyph}</span> ${escapeHtml(
+        banner.badge.text
+      )}</span>`
+    : "";
+  const empty =
+    banner.state === "empty"
+      ? `\n    <div class="empty">
+      <p class="empty-heading">${escapeHtml(banner.emptyHeading)}</p>
+      <p class="empty-body muted">${escapeHtml(banner.emptyBody)}</p>
+    </div>`
+      : "";
+  return `  <header id="summary" class="banner banner-${banner.state}">
+    <p class="banner-headline">${escapeHtml(banner.headline)} ${badge}</p>${empty}
+  </header>`;
+}
+
+const DIGEST_STYLE = `    :root {
+      --bg: #fafbfc; --elevated: #ffffff; --accent: #5d79f6; --danger: #d64b4b;
+      --warning: #c8923b; --border: #e9eef2; --muted: #5d6a73; --text: #1a2229;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0f1318; --elevated: #171d24; --accent: #4a90b8; --danger: #d64b4b;
+        --warning: #c8923b; --border: #171d24; --muted: #a8b2bc; --text: #e6ebef;
+      }
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; background: var(--bg); color: var(--text);
+      font-family: Geist, system-ui, sans-serif; font-size: 16px; line-height: 1.6;
+    }
+    code, .mono { font-family: "Geist Mono", ui-monospace, monospace; font-size: 13px; line-height: 1.4; }
+    .muted { color: var(--muted); }
+    h2 { font-size: 20px; font-weight: 600; line-height: 1.2; margin: 0 0 16px; }
+    .banner {
+      position: sticky; top: 0; z-index: 10; background: var(--elevated);
+      border-bottom: 1px solid var(--border); padding: 16px 24px;
+    }
+    .banner-cap-reached { border-bottom: 2px solid var(--danger); }
+    .banner-headline { margin: 0; font-size: 16px; }
+    .badge {
+      display: inline-flex; align-items: center; gap: 8px; padding: 2px 8px;
+      border-radius: 6px; font-size: 13px; font-weight: 600; margin-left: 8px;
+    }
+    .badge-accent { border: 1px solid var(--accent); color: var(--accent); background: var(--elevated); }
+    .badge-danger { border: 1px solid var(--danger); color: #fff; background: var(--danger); }
+    .empty { margin-top: 8px; }
+    .empty-heading { margin: 0; font-weight: 600; }
+    .empty-body { margin: 4px 0 0; }
+    section { padding: 16px 24px; margin-top: 24px; }
+    #decisions-needed {
+      border-left: 3px solid var(--warning);
+      background: color-mix(in srgb, var(--warning) 6%, var(--elevated));
+    }
+    table { width: 100%; border-collapse: collapse; background: var(--elevated); }
+    th, td { text-align: left; padding: 8px; border-bottom: 1px solid var(--border); vertical-align: top; font-size: 14px; line-height: 1.4; }
+    th { color: var(--muted); font-weight: 600; }
+    .sev { display: inline-flex; align-items: center; gap: 8px; font-weight: 600; }
+    .sev-real { color: var(--danger); }
+    .sev-minor { color: var(--warning); }
+    .freq { font-family: "Geist Mono", ui-monospace, monospace; }
+    .defect { margin: 0; }
+    .fix { margin: 4px 0 0; }
+    details { margin-top: 32px; background: var(--elevated); border: 1px solid var(--border); border-radius: 8px; padding: 16px; }
+    summary { font-size: 20px; font-weight: 600; line-height: 1.2; cursor: pointer; }
+    .shot { margin: 16px 0 0; }
+    .shot-frame { position: relative; overflow: hidden; border: 1px solid var(--border); }
+    .shot-frame img { display: block; width: 100%; height: auto; }
+    .overlay { position: absolute; border: 2px solid var(--accent); pointer-events: none; }
+    .overlay-label {
+      position: absolute; top: -1px; left: -1px; font-family: "Geist Mono", ui-monospace, monospace;
+      font-size: 13px; padding: 0 4px; border: 1px solid var(--accent); color: var(--accent);
+      background: var(--elevated); white-space: nowrap;
+    }
+    .absent-note { margin: 8px 0 0; font-size: 14px; }`;
+
+/**
+ * renderDigestHtml({banner, worklist, decisionsNeeded, galleryGroups}) — the full offline HTML
+ * document per the UI-SPEC. Pure: takes already-built data, produces a string, touches no fs.
+ * Every ledger-row string field is `escapeHtml`'d before interpolation.
+ */
+function renderDigestHtml({ banner, worklist, decisionsNeeded, galleryGroups }) {
+  const gallery = (galleryGroups || []).map(renderGalleryGroup).join("\n");
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>${escapeHtml(banner.headline)}</title>
+  <style>
+${DIGEST_STYLE}
+  </style>
+</head>
+<body>
+${renderBanner(banner)}
+${renderTableSection("worklist", "Worklist", worklist, "No auto-fixable findings this round.")}
+${renderTableSection(
+    "decisions-needed",
+    "Decisions needed",
+    decisionsNeeded,
+    "No IA/product-decision items this round."
+  )}
+  <section id="gallery">
+    <h2>Gallery</h2>
+${gallery}
+  </section>
+</body>
+</html>
+`;
+}
+
 export {
   LEDGER_PATH,
   ROUNDS_PATH,
@@ -305,4 +664,12 @@ export {
   partitionFindings,
   buildDecisionsJsonRows,
   validateDigestRows,
+  escapeHtml,
+  computeOverlayScale,
+  scaleBox,
+  resolveRoundDir,
+  assembleRoundArtifacts,
+  buildGalleryGroups,
+  writeDecisionsJson,
+  renderDigestHtml,
 };
