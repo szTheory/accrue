@@ -238,12 +238,12 @@ Full details: [v1.48 roadmap archive](milestones/v1.48-ROADMAP.md)
   6. Repeated `ui.round` runs on unchanged inputs reuse a cached prompt prefix (system preamble + tool schema + design-lens exemplar images) via Anthropic `cache_control`, measurably reducing per-run input tokens/cost, with identity (`claim_key`/`finding_id`) and the no-key/`--self-test` paths unchanged (ORCH-07). *(Folded from the Phase 205 live smoke: the proposer currently makes 7 uncached calls/screenshot, re-sending the schema + images each time.)*
   7. A maintainer can scope a round to a surface subset (the representative slice or a single surface) through a documented flag on `mix accrue_admin.ui.round`, without hand-pruning `test-results/` PNGs; an unscoped round still sweeps the full configured surface set (ORCH-08). *(Folded from the Phase 205 live smoke: there is currently no subset filter, so a slice run required manual pruning.)*
 
-**Plans**: 1/6 plans executed
+**Plans**: 4/6 plans executed
 
 - [x] 207-01-PLAN.md
 - [x] 207-02-PLAN.md
 - [x] 207-03-PLAN.md
-- [ ] 207-04-PLAN.md
+- [x] 207-04-PLAN.md
 - [ ] 207-05-PLAN.md
 - [ ] 207-06-PLAN.md
 
@@ -319,7 +319,7 @@ Full details: [v1.48 roadmap archive](milestones/v1.48-ROADMAP.md)
 | 204. Ranked hardening roadmap | v1.55 | 1/1 | Complete    | 2026-07-03 |
 | 205. Persona + design-lens evaluator harness | v1.56 | 5/5 | Complete    | 2026-07-03 |
 | 206. Adversarial verifier + finding ledger + deterministic gate | v1.56 | 4/4 | Complete    | 2026-07-04 |
-| 207. Orchestration + digest + one-command round/fix loop | v1.56 | 3/6 | In Progress|  |
+| 207. Orchestration + digest + one-command round/fix loop | v1.56 | 4/6 | In Progress|  |
 | 208. Prove convergence on slice + wire CI + ACCEPT | v1.56 | 0/0 | Not started | - |
 | 209. Full-surface sweep under the ratchet (optional/scope-gated) | v1.56 | 0/0 | Scope-gated | - |
 

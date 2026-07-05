@@ -46,7 +46,7 @@ Requirements for this milestone. Each maps to exactly one roadmap phase (205–2
 ### Orchestration & Maintainer Loop (ORCH)
 
 - [ ] **ORCH-01**: Maintainer can run a single command (`mix accrue_admin.ui.round`) that builds assets, boots the admin, seeds, captures, fans out evaluators, dedups, verifies, ranks, and renders a digest.
-- [ ] **ORCH-02**: The digest is a rendered HTML gallery grouping screenshots by surface with confirmed findings overlaid on their region, a ranked worklist, and a separate "decisions needed" queue for IA/product-decision items.
+- [x] **ORCH-02**: The digest is a rendered HTML gallery grouping screenshots by surface with confirmed findings overlaid on their region, a ranked worklist, and a separate "decisions needed" queue for IA/product-decision items.
 - [ ] **ORCH-03**: Maintainer can batch-approve all auto-fixable confirmed findings in one action, or reject an individual finding into a suppress-list with a reason that feeds dedup so it never resurfaces.
 - [ ] **ORCH-04**: Maintainer can run a single command (`mix accrue_admin.ui.fix`) that applies the approved batch, rebuilds and commits the CSS bundle, re-captures, re-scores, and updates the ledger.
 - [x] **ORCH-05**: Resolving a finding auto-mints a deterministic guard (a targeted assertion in an existing spec, or a `ledger-count` guard for pure-taste findings) so a closed finding cannot silently reopen.
@@ -114,7 +114,7 @@ Which phases cover which requirements. Populated during roadmap creation.
 | LEDGER-04 | Phase 206 | Complete |
 | LEDGER-05 | Phase 206 | Complete |
 | ORCH-01 | Phase 207 | Pending |
-| ORCH-02 | Phase 207 | Pending |
+| ORCH-02 | Phase 207 | Complete |
 | ORCH-03 | Phase 207 | Pending |
 | ORCH-04 | Phase 207 | Pending |
 | ORCH-05 | Phase 207 | Complete |
