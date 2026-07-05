@@ -173,6 +173,113 @@ function computeNextRound(roundsRows) {
 }
 
 // -----------------------------------------------------------------------------
+// D-48 dry-round 4-clause conjunction + D-49 K=2/6-cap convergence — all pure, parameterized,
+// fs-free EXCEPT the two file-reading clauses (which accept explicit paths, mirroring the
+// existing `computeRegressions(paths)` vs `runReducer(paths)` split). The self-test flips each
+// input independently on `fs.mkdtempSync` fixtures.
+// -----------------------------------------------------------------------------
+
+/**
+ * computeClauseNewOpens(foldedFindings, currentRound) — Clause 1: passes iff NO folded finding's
+ * latest row is a `confirm` raised THIS round. A finding whose latest event is `confirm` with
+ * `round === currentRound` is a brand-new open this round and fails the clause.
+ */
+function computeClauseNewOpens(foldedFindings, currentRound) {
+  return !foldedFindings.some((f) => f.event === "confirm" && f.round === currentRound);
+}
+
+/**
+ * computeClauseZeroOpen(foldedFindings) — Clause 2: passes iff NO folded finding remains
+ * `status === "open"` (any round). A single still-open finding fails the clause.
+ */
+function computeClauseZeroOpen(foldedFindings) {
+  return !foldedFindings.some((f) => f.status === "open");
+}
+
+/**
+ * computeClauseRegressionsEmpty(findingRegressionsPath, standingRegressionsPath) — Clause 3:
+ * passes iff BOTH the just-written `finding-regressions.ndjson` and the standing Phase-200
+ * scorecard `regressions.ndjson` are empty (absent / 0-byte / whitespace-only all read as `[]`
+ * via the absence-safe `readNdjsonRows`).
+ */
+function computeClauseRegressionsEmpty(findingRegressionsPath, standingRegressionsPath) {
+  return (
+    readNdjsonRows(findingRegressionsPath).length === 0 &&
+    readNdjsonRows(standingRegressionsPath).length === 0
+  );
+}
+
+/**
+ * computeClauseCoverageFloor(cellsCensusRows, scopeSurfaces) — Clause 4: passes iff every cell in
+ * scope has `coverage_status === "covered"`. `scopeSurfaces` is either the `null`/`"all"` sentinel
+ * (no filter — the entire census must be covered) or a `Set<string>` of surface names to filter
+ * by. An empty filtered set vacuously passes.
+ */
+function computeClauseCoverageFloor(cellsCensusRows, scopeSurfaces) {
+  const noFilter = scopeSurfaces == null || scopeSurfaces === "all";
+  const filtered = noFilter
+    ? cellsCensusRows
+    : cellsCensusRows.filter((cell) => scopeSurfaces.has(cell.surface));
+  return filtered.every((cell) => cell.coverage_status === "covered");
+}
+
+/** computeDryRound(clauses) — the D-48 conjunction over the 4 clause booleans (as an array). */
+function computeDryRound(clauses) {
+  return clauses.every(Boolean);
+}
+
+/**
+ * computeConsecutiveDry(roundsRows, currentEpoch) — the trailing run-length of `dry === true`
+ * among rows in `currentEpoch`, in file order. Rows from any OTHER epoch are excluded FIRST so a
+ * dry streak never leaks across an epoch boundary (D-49). Counting stops at the first
+ * `dry === false` from the tail.
+ */
+function computeConsecutiveDry(roundsRows, currentEpoch) {
+  const scoped = roundsRows.filter((row) => row.epoch === currentEpoch);
+  let count = 0;
+  for (let i = scoped.length - 1; i >= 0; i--) {
+    if (scoped[i].dry === true) count += 1;
+    else break;
+  }
+  return count;
+}
+
+/**
+ * classifyRoundStatus(consecutiveDry, currentRoundNumber) — D-49: `"converged"` at K=2 consecutive
+ * dry rounds; else `"cap-reached"` at the 6-round hard cap; else `"continue"`.
+ */
+function classifyRoundStatus(consecutiveDry, currentRoundNumber) {
+  if (consecutiveDry >= 2) return "converged";
+  if (currentRoundNumber >= 6) return "cap-reached";
+  return "continue";
+}
+
+/**
+ * readCellsCensus(absPath) — parse the Phase-200 `final.cells.json` census array; an absent or
+ * malformed file (or a non-array top level) reads as `[]`, so Clause 4 vacuously passes rather
+ * than crashing the seal.
+ */
+function readCellsCensus(absPath) {
+  try {
+    const raw = fs.readFileSync(absPath, "utf8").trim();
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+/** bundleSha256() — sha256 of the built CSS bundle (D-17 provenance); `null` if absent. */
+function bundleSha256() {
+  try {
+    return sha256(BUNDLE_PATH);
+  } catch {
+    return null;
+  }
+}
+
+// -----------------------------------------------------------------------------
 // Per-lens open-finding count (D-24/D-25/D-26).
 // -----------------------------------------------------------------------------
 
@@ -437,6 +544,84 @@ function runReducer(paths = DEFAULT_PATHS) {
 }
 
 // -----------------------------------------------------------------------------
+// --seal-round orchestrator (207-01, D-48/D-49). Reuses `runReducer`/`fold` verbatim — never
+// reimplements ledger folding or regression computation.
+// -----------------------------------------------------------------------------
+
+/**
+ * sealRound(paths) — the D-48/D-49 round-seal pipeline. Validates `RATCHET_ROUND` (missing or
+ * non-finite → clear stderr message, `process.exitCode = 1`, append NOTHING); resolves scope from
+ * `RATCHET_SURFACES` (default `"all"`); runs the EXISTING `runReducer` (which writes
+ * `finding-regressions.ndjson` and regenerates the unfrozen baseline exactly as the plain no-flag
+ * run does); folds the ledger; computes the 4 dry clauses + `dry`; appends one
+ * `ratchet-round-seal/1` row to `rounds.ndjson`; classifies convergence over the just-updated
+ * rows scoped to the current epoch; writes the status marker; ALWAYS exits 0 on the success path
+ * (the non-zero escalation contract belongs to the later Elixir `ui.round` task, which reads this
+ * marker AFTER the digest renders — `--seal-round` must never abort mid-pipeline).
+ */
+function sealRound(paths = DEFAULT_PATHS) {
+  const rawRound = process.env.RATCHET_ROUND;
+  const currentRound = Number(rawRound);
+  if (
+    rawRound === undefined ||
+    rawRound === null ||
+    String(rawRound).trim() === "" ||
+    !Number.isFinite(currentRound)
+  ) {
+    console.error(
+      "[phase-ratchet-ledger] --seal-round: RATCHET_ROUND is missing or non-numeric; appending nothing to rounds.ndjson."
+    );
+    process.exitCode = 1;
+    return;
+  }
+
+  const rawScope = process.env.RATCHET_SURFACES || "all";
+  const scopeSurfaces =
+    rawScope === "all"
+      ? null
+      : new Set(
+          rawScope
+            .split(",")
+            .map((s) => s.trim())
+            .filter(Boolean)
+        );
+
+  // Reuse the existing reducer unchanged — writes finding-regressions.ndjson + regenerates the
+  // (unfrozen) baseline, identical to the plain no-flag invocation.
+  const { baseline } = runReducer(paths);
+
+  const foldedFindings = Array.from(fold(readNdjsonRows(paths.ledgerPath)).values());
+
+  const clause1 = computeClauseNewOpens(foldedFindings, currentRound);
+  const clause2 = computeClauseZeroOpen(foldedFindings);
+  const clause3 = computeClauseRegressionsEmpty(paths.regressionsPath, STANDING_REGRESSIONS_PATH);
+  const clause4 = computeClauseCoverageFloor(readCellsCensus(CELLS_CENSUS_PATH), scopeSurfaces);
+  const dry = computeDryRound([clause1, clause2, clause3, clause4]);
+
+  const epoch = baseline.epoch;
+  const existingRoundsRows = readNdjsonRows(paths.roundsPath);
+  const newRow = {
+    schema_version: "ratchet-round-seal/1",
+    round: currentRound,
+    dry,
+    epoch,
+    scope: rawScope,
+    bundle_sha256: bundleSha256(),
+    seq: existingRoundsRows.length + 1,
+  };
+  const updatedRows = [...existingRoundsRows, newRow];
+  writeNdjson(paths.roundsPath, updatedRows);
+
+  const consecutiveDry = computeConsecutiveDry(updatedRows, epoch);
+  const status = classifyRoundStatus(consecutiveDry, currentRound);
+
+  fs.mkdirSync(path.dirname(ROUND_STATUS_MARKER_PATH), { recursive: true });
+  fs.writeFileSync(ROUND_STATUS_MARKER_PATH, status);
+
+  console.log(`[phase-ratchet-ledger] round=${currentRound} dry=${dry} status=${status}`);
+}
+
+// -----------------------------------------------------------------------------
 // Self-test (D-37 — proves LEDGER-03/LEDGER-05 entirely on fixtures; zero network calls, no
 // live-model credential dependency). Twins `phase200-scorecard.mjs`'s `assertSelfTest()`/
 // `runSelfTest()` shape verbatim.
@@ -646,6 +831,138 @@ function runSelfTest() {
       );
     }
 
+    // (6) seal-round clauses — all 4 clauses true -> dry:true (D-48). Each clause is computed from
+    // crafted inputs so the conjunction is exercised end-to-end, not just asserted as a literal.
+    {
+      const dir = path.join(root, "fixture-seal-clauses-true");
+      fs.mkdirSync(dir, { recursive: true });
+      const emptyReg = path.join(dir, "finding-regressions.ndjson");
+      const emptyStanding = path.join(dir, "standing-regressions.ndjson");
+      fs.writeFileSync(emptyReg, "");
+      fs.writeFileSync(emptyStanding, "");
+      const c1 = computeClauseNewOpens([], 3);
+      const c2 = computeClauseZeroOpen([]);
+      const c3 = computeClauseRegressionsEmpty(emptyReg, emptyStanding);
+      const c4 = computeClauseCoverageFloor(
+        [{ surface: "dashboard", coverage_status: "covered" }],
+        null
+      );
+      assertSelfTest(
+        "(6) all 4 clauses true -> dry:true",
+        computeDryRound([c1, c2, c3, c4]) === true,
+        JSON.stringify([c1, c2, c3, c4])
+      );
+    }
+
+    // (7) each clause individually false -> dry:false, one clause flipped at a time.
+    {
+      // 7a — clause1 false: a finding whose latest event is a confirm raised THIS round.
+      assertSelfTest(
+        "(7a) clause1 (new-opens) false -> dry:false",
+        computeDryRound([
+          computeClauseNewOpens([{ event: "confirm", round: 3, status: "open" }], 3),
+          true,
+          true,
+          true,
+        ]) === false
+      );
+      // 7b — clause2 false: a still-open finding remains.
+      assertSelfTest(
+        "(7b) clause2 (zero-open) false -> dry:false",
+        computeDryRound([true, computeClauseZeroOpen([{ status: "open" }]), true, true]) === false
+      );
+      // 7c — clause3 false: a non-empty regressions fixture.
+      {
+        const dir = path.join(root, "fixture-clause3-false");
+        fs.mkdirSync(dir, { recursive: true });
+        const reg = path.join(dir, "finding-regressions.ndjson");
+        const standing = path.join(dir, "standing.ndjson");
+        writeNdjson(reg, [{ kind: "count-increase", lens: "x" }]);
+        fs.writeFileSync(standing, "");
+        assertSelfTest(
+          "(7c) clause3 (regressions-empty) false -> dry:false",
+          computeDryRound([true, true, computeClauseRegressionsEmpty(reg, standing), true]) === false
+        );
+      }
+      // 7d — clause4 false: an in-scope cell whose coverage_status is not "covered".
+      assertSelfTest(
+        "(7d) clause4 (coverage-floor) false -> dry:false",
+        computeDryRound([
+          true,
+          true,
+          true,
+          computeClauseCoverageFloor([{ surface: "dashboard", coverage_status: "gap" }], null),
+        ]) === false
+      );
+    }
+
+    // (8) 2 consecutive dry rows in the SAME epoch -> converged (D-49 K=2).
+    {
+      const rows = [
+        { round: 1, dry: true, epoch: 1 },
+        { round: 2, dry: true, epoch: 1 },
+      ];
+      const cd = computeConsecutiveDry(rows, 1);
+      assertSelfTest(
+        "(8) 2 consecutive dry (same epoch) -> converged",
+        cd === 2 && classifyRoundStatus(cd, 2) === "converged",
+        `consecutiveDry=${cd}`
+      );
+    }
+
+    // (9) a dry row from an OLDER epoch must NOT count toward the current epoch's streak.
+    {
+      const rows = [
+        { round: 1, dry: true, epoch: 0 },
+        { round: 2, dry: true, epoch: 1 },
+      ];
+      const cd = computeConsecutiveDry(rows, 1);
+      assertSelfTest(
+        "(9) older-epoch dry excluded from current streak",
+        cd === 1 && classifyRoundStatus(cd, 2) === "continue",
+        `consecutiveDry=${cd}`
+      );
+    }
+
+    // (10) round 6 with fewer than 2 consecutive dry rounds -> cap-reached (D-49 6-cap).
+    {
+      const rows = [
+        { round: 5, dry: false, epoch: 1 },
+        { round: 6, dry: true, epoch: 1 },
+      ];
+      const cd = computeConsecutiveDry(rows, 1);
+      assertSelfTest(
+        "(10) round 6, <2 consecutive dry -> cap-reached",
+        cd === 1 && classifyRoundStatus(cd, 6) === "cap-reached",
+        `consecutiveDry=${cd}`
+      );
+    }
+
+    // (11) missing RATCHET_ROUND -> non-zero process.exitCode, NO row appended (T-207-07).
+    {
+      const dir = path.join(root, "fixture-seal-no-round");
+      const paths = writeFixtureFiles(dir, {});
+      paths.roundsPath = path.join(dir, "rounds.ndjson");
+      writeNdjson(paths.roundsPath, []);
+
+      const prevRound = process.env.RATCHET_ROUND;
+      const prevExit = process.exitCode;
+      delete process.env.RATCHET_ROUND;
+      sealRound(paths);
+      const exitWas = process.exitCode;
+      const appended = readNdjsonRows(paths.roundsPath);
+      // Restore process/env state so the outer self-test exits clean.
+      process.exitCode = prevExit;
+      if (prevRound !== undefined) process.env.RATCHET_ROUND = prevRound;
+
+      assertSelfTest("(11) missing RATCHET_ROUND: non-zero exitCode", exitWas === 1, String(exitWas));
+      assertSelfTest(
+        "(11) missing RATCHET_ROUND: no row appended",
+        appended.length === 0,
+        JSON.stringify(appended)
+      );
+    }
+
     console.log("phase-ratchet-ledger self-test passed.");
   } finally {
     fs.rmSync(root, { recursive: true, force: true });
@@ -674,6 +991,13 @@ function main() {
     fs.mkdirSync(path.dirname(NEXT_ROUND_MARKER_PATH), { recursive: true });
     fs.writeFileSync(NEXT_ROUND_MARKER_PATH, String(next));
     console.log(`[phase-ratchet-ledger] next-round=${next}`);
+    return;
+  }
+
+  // `--seal-round` (207-01, D-48/D-49) — the 4-clause dry conjunction + convergence classification.
+  // Reuses `runReducer`/`fold`; never aborts mid-pipeline (always exits 0 on the success path).
+  if (process.argv.includes("--seal-round")) {
+    sealRound(DEFAULT_PATHS);
     return;
   }
 
