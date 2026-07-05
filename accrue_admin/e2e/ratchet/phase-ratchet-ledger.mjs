@@ -26,8 +26,14 @@ import path from "node:path";
 import { createHash } from "node:crypto";
 import { fileURLToPath } from "node:url";
 import * as ratchetLedger from "./ratchet-ledger.js";
+// Plain static data import — `baseline-manifest.js` is a pure CommonJS data module (zero
+// side effects, zero credential/key gating), unlike the dynamic key-gated SDK import in
+// `ratchet-propose.mjs`. `SURFACES` is the closed set of admin surfaces the coverage-floor
+// clause (D-48) resolves "scope=all" against.
+import baselineManifest from "../baseline-manifest.js";
 
 const { fold, LENS_KEYS } = ratchetLedger;
+const { SURFACES } = baselineManifest;
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 // __dirname === accrue_admin/e2e/ratchet/ — go up 3 levels to the repo root.
@@ -45,7 +51,29 @@ const DEFAULT_PATHS = {
   baselinePath: path.join(__dirname, "ledger.baseline.json"),
   reopenMarkersPath: path.join(__dirname, "reopen-markers.ndjson"),
   regressionsPath: path.join(__dirname, "finding-regressions.ndjson"),
+  roundsPath: path.join(__dirname, "rounds.ndjson"),
 };
+
+// -----------------------------------------------------------------------------
+// Round-state paths (207-01, D-47/D-48/D-49). `NEXT_ROUND_MARKER_PATH` and
+// `ROUND_STATUS_MARKER_PATH` are EPHEMERAL scalar handoff files to the (later) Elixir
+// orchestrator — NOT gate-relevant committed artifacts, so they live under the already-
+// gitignored repo-root `test-results/` tree and are deliberately absent from DEFAULT_PATHS.
+// -----------------------------------------------------------------------------
+const NEXT_ROUND_MARKER_PATH = path.join(__dirname, "../../test-results/ui-ratchet/.round-next");
+const ROUND_STATUS_MARKER_PATH = path.join(REPO_ROOT, "accrue_admin/test-results/ui-ratchet/.round-status");
+
+// Standing forward-only scorecard artifacts from Phase 200 (repo-root-relative). An ABSENT file
+// is treated as empty/pass, matching `readNdjsonRows`'s absence-safe convention.
+const STANDING_REGRESSIONS_PATH = path.join(
+  REPO_ROOT,
+  ".planning/milestones/v1.54-phases/200-idempotent-verification-sign-off/regressions.ndjson"
+);
+const CELLS_CENSUS_PATH = path.join(
+  REPO_ROOT,
+  ".planning/milestones/v1.54-phases/200-idempotent-verification-sign-off/final.cells.json"
+);
+const BUNDLE_PATH = path.join(REPO_ROOT, "accrue_admin/priv/static/accrue_admin.css");
 
 /**
  * GUARD_HOME_SPECS — the closed D-39 allowlist. `guard_ref` path components must be a literal
@@ -128,6 +156,20 @@ function regressionRow(kind, lens, baselineValue, currentValue, message) {
     current_value: currentValue,
     message,
   };
+}
+
+// -----------------------------------------------------------------------------
+// Round-state helpers (207-01, D-47) — pure, fs-free; the self-test drives them with
+// in-memory arrays.
+// -----------------------------------------------------------------------------
+
+/**
+ * computeNextRound(roundsRows) — the next round integer for the append-only `rounds.ndjson`
+ * event log: `max(0, ...round values) + 1`, order-independent. An empty log yields `1`; a log
+ * whose rows carry `round ∈ {1,2,3}` (in any order) yields `4`.
+ */
+function computeNextRound(roundsRows) {
+  return Math.max(0, ...roundsRows.map((row) => row.round || 0)) + 1;
 }
 
 // -----------------------------------------------------------------------------
@@ -439,6 +481,16 @@ function writeFixtureFiles(dir, { ledgerRows = [], baseline = null, reopenRows =
 function runSelfTest() {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "ratchet-ledger-"));
   try {
+    // (0) computeNextRound — pure, fs-free (D-47): empty log -> 1; rows carrying round {1,3,2}
+    // (deliberately out of order) -> 4 (max+1, order-independent).
+    {
+      assertSelfTest("(0) computeNextRound: empty -> 1", computeNextRound([]) === 1);
+      assertSelfTest(
+        "(0) computeNextRound: {1,3,2} -> 4 (order-independent)",
+        computeNextRound([{ round: 1 }, { round: 3 }, { round: 2 }]) === 4
+      );
+    }
+
     // (1) clean fixture — an empty ledger against the (absent -> all-zero) baseline.
     {
       const paths = writeFixtureFiles(path.join(root, "fixture-clean"), {});
@@ -612,6 +664,19 @@ function main() {
     return;
   }
 
+  // `--next-round` (207-01, D-47) — a side-effect-scoped scalar handoff: compute the next round
+  // integer from the committed `rounds.ndjson` and write it to the ephemeral marker for the
+  // Elixir orchestrator. Checked immediately after `--self-test` and before any reducer run so it
+  // NEVER touches the ledger/baseline/regressions gate artifacts.
+  if (process.argv.includes("--next-round")) {
+    const rows = readNdjsonRows(DEFAULT_PATHS.roundsPath);
+    const next = computeNextRound(rows);
+    fs.mkdirSync(path.dirname(NEXT_ROUND_MARKER_PATH), { recursive: true });
+    fs.writeFileSync(NEXT_ROUND_MARKER_PATH, String(next));
+    console.log(`[phase-ratchet-ledger] next-round=${next}`);
+    return;
+  }
+
   const { regressions } = runReducer(DEFAULT_PATHS);
   console.log(`[phase-ratchet-ledger] regressions=${regressions.length}`);
   if (regressions.length > 0) {
@@ -634,3 +699,12 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     process.exitCode = 1;
   }
 }
+
+// -----------------------------------------------------------------------------
+// Exports (207-01). This file was CLI-only before Phase 207. `GUARD_HOME_SPECS`/`checkGuardRef`/
+// `isSafeSpecPath` are exported so 207-03's `ratchet-guard-mint.mjs` reuses the SAME guard-token
+// grammar instead of re-deriving a second, possibly-diverging regex (Don't Hand-Roll — exactly
+// the failure mode Phase 206 flagged). `computeNextRound` is exported so the self-test (and any
+// later consumer) can call it directly on in-memory arrays.
+// -----------------------------------------------------------------------------
+export { GUARD_HOME_SPECS, checkGuardRef, isSafeSpecPath, computeNextRound };
