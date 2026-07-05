@@ -346,3 +346,33 @@ function functionSource(source, functionName) {
 // Phase 200 final verification commands:
 // env -u NO_COLOR npx playwright test e2e/reduced-motion.spec.js --timeout=60000 --workers=1
 // env -u NO_COLOR npx playwright test e2e/admin-interaction-overlay-phase199.spec.js --timeout=60000 --workers=1
+
+// >>> @ratchet:auto-guards >>>
+const RATCHET_AUTO_GUARDS = [];
+// <<< @ratchet:auto-guards <<<
+
+// Auto-minted regression guards (207-03, D-44/D-45/D-46). Iterates the human-reviewed-once
+// RATCHET_AUTO_GUARDS data array above; each "microcopy" row navigates row.route (reusing this
+// file's openPhase200Route) and asserts #main-content contains expected_text (and no longer
+// contains old_text, when present). Starts empty (loop no-ops).
+test("auto-minted ratchet guards — page-flow microcopy", async ({ page }) => {
+  test.skip(RATCHET_AUTO_GUARDS.length === 0, "no minted ratchet guards yet");
+
+  for (const row of RATCHET_AUTO_GUARDS) {
+    if (row.kind !== "microcopy") {
+      throw new Error(`\`@ratchet:${row.finding_id}\` unexpected kind for admin-page-flow home: ${row.kind}`);
+    }
+    await openPhase200Route(page, row.route);
+    const text = await page.locator("#main-content").innerText();
+    expect(
+      text,
+      `\`@ratchet:${row.finding_id}\` ${row.route} #main-content must contain the corrected microcopy "${row.expected_text}"`
+    ).toContain(row.expected_text);
+    if (row.old_text) {
+      expect(
+        text,
+        `\`@ratchet:${row.finding_id}\` ${row.route} #main-content must no longer contain the superseded microcopy "${row.old_text}"`
+      ).not.toContain(row.old_text);
+    }
+  }
+});

@@ -960,3 +960,32 @@ test.describe("Phase 199 interaction and overlay contract", () => {
     }
   });
 });
+
+// >>> @ratchet:auto-guards >>>
+const RATCHET_AUTO_GUARDS = [];
+// <<< @ratchet:auto-guards <<<
+
+// Auto-minted regression guards (207-03, D-44/D-45/D-46). Iterates the human-reviewed-once
+// RATCHET_AUTO_GUARDS data array above; each "focus-ring" row focuses row.selector (reusing
+// this file's login helper for navigation) and asserts the focused element paints a visible
+// outline (outlineStyle !== "none"). row.route is optional — defaults to the components lab.
+// Starts empty (loop no-ops).
+test("auto-minted ratchet guards — interaction focus-ring", async ({ page }) => {
+  test.skip(RATCHET_AUTO_GUARDS.length === 0, "no minted ratchet guards yet");
+
+  for (const row of RATCHET_AUTO_GUARDS) {
+    if (row.kind !== "focus-ring") {
+      throw new Error(`\`@ratchet:${row.finding_id}\` unexpected kind for interaction-overlay home: ${row.kind}`);
+    }
+    await login(page, row.route || "/billing/dev/components");
+    await expect(page.locator("#main-content")).toBeVisible();
+
+    const locator = page.locator(row.selector).first();
+    await locator.focus();
+    const outlineStyle = await locator.evaluate((el) => window.getComputedStyle(el).outlineStyle);
+    expect(
+      outlineStyle,
+      `\`@ratchet:${row.finding_id}\` ${row.selector} must paint a visible focus outline (outline-style !== "none")`
+    ).not.toBe("none");
+  }
+});

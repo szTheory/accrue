@@ -170,3 +170,48 @@ test.describe("foundation tokens - computed styles", () => {
     }
   });
 });
+
+// >>> @ratchet:auto-guards >>>
+const RATCHET_AUTO_GUARDS = [];
+// <<< @ratchet:auto-guards <<<
+
+// Auto-minted regression guards (207-03, D-44/D-45/D-46). This loop iterates the
+// human-reviewed-once RATCHET_AUTO_GUARDS data array above and dispatches per row.kind
+// to this file's own existing helpers (styleOf / rootToken / expectContrastAtLeast).
+// The array starts empty; 207-06's ui.fix orchestration appends typed DATA rows via
+// ratchet-guard-mint.mjs's appendMintedRow(). No per-finding generated assertion code.
+test("auto-minted ratchet guards — foundation tokens (design-token / contrast / spacing-scale)", async ({ page }) => {
+  test.skip(RATCHET_AUTO_GUARDS.length === 0, "no minted ratchet guards yet");
+  test.setTimeout(90_000);
+
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await login(page, "/billing/dev/components");
+  await expect(page.locator("#main-content")).toBeVisible();
+
+  for (const row of RATCHET_AUTO_GUARDS) {
+    const locator = page.locator(row.selector).first();
+    if (row.kind === "design-token") {
+      const actual = await styleOf(locator, row.property);
+      const expected = await rootToken(page, row.expected_token);
+      expect(
+        actual,
+        `\`@ratchet:${row.finding_id}\` ${row.selector} ${row.property} must resolve to token ${row.expected_token}`
+      ).toBe(expected);
+    } else if (row.kind === "contrast") {
+      expectContrastAtLeast(
+        await styleOf(locator, "color"),
+        await styleOf(locator, "backgroundColor"),
+        row.min_ratio,
+        `\`@ratchet:${row.finding_id}\` ${row.selector}`
+      );
+    } else if (row.kind === "spacing-scale") {
+      const actual = await styleOf(locator, row.property);
+      expect(
+        row.allowed_values,
+        `\`@ratchet:${row.finding_id}\` ${row.selector} ${row.property} (${actual}) must be a member of the spacing scale`
+      ).toContain(actual);
+    } else {
+      throw new Error(`\`@ratchet:${row.finding_id}\` unexpected kind for foundation-tokens home: ${row.kind}`);
+    }
+  }
+});

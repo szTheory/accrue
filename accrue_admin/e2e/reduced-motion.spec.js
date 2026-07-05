@@ -361,3 +361,38 @@ test("focus ring forced state is instant without relying on reduced-motion emula
     ).toBeLessThanOrEqual(1);
   }
 });
+
+// >>> @ratchet:auto-guards >>>
+const RATCHET_AUTO_GUARDS = [];
+// <<< @ratchet:auto-guards <<<
+
+// Auto-minted regression guards (207-03, D-44/D-45/D-46). Iterates the human-reviewed-once
+// RATCHET_AUTO_GUARDS data array above; each "motion" row asserts every computed
+// transition-duration segment collapses to ≤ row.max_ms, parsed the SAME comma-list way this
+// file's existing helpers already parse transitionDuration. Starts empty (loop no-ops).
+test("auto-minted ratchet guards — reduced motion (motion)", async ({ page }) => {
+  test.skip(RATCHET_AUTO_GUARDS.length === 0, "no minted ratchet guards yet");
+
+  for (const row of RATCHET_AUTO_GUARDS) {
+    if (row.kind !== "motion") {
+      throw new Error(`\`@ratchet:${row.finding_id}\` unexpected kind for reduced-motion home: ${row.kind}`);
+    }
+    await login(page, row.route);
+    await expect(page.locator("#main-content")).toBeVisible();
+
+    const segments = await page.locator(row.selector).first().evaluate((el) =>
+      window
+        .getComputedStyle(el)
+        .transitionDuration.split(",")
+        .map((seg) => seg.trim())
+    );
+
+    for (const seg of segments) {
+      const ms = parseFloat(seg) * (seg.endsWith("ms") ? 1 : 1000);
+      expect(
+        ms,
+        `\`@ratchet:${row.finding_id}\` ${row.selector} transition segment (${seg}) must be ≤ ${row.max_ms}ms`
+      ).toBeLessThanOrEqual(row.max_ms);
+    }
+  }
+});
