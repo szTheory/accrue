@@ -2,41 +2,41 @@
   "schema_version": "ratchet-ledger-baseline/1",
   "frozen": false,
   "epoch": 1,
-  "ledger_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "ledger_sha256": "bc56e18ebf7e9c113d38b15c1cef22ad18390b0b87515147a83b90c621c60f31",
   "confirmed_open": {
     "persona:operator-founder": {
-      "total": 0,
-      "minor": 0,
-      "real": 0
+      "total": 6,
+      "minor": 4,
+      "real": 2
     },
     "persona:customer-support": {
-      "total": 0,
-      "minor": 0,
-      "real": 0
+      "total": 3,
+      "minor": 2,
+      "real": 1
     },
     "persona:finance-billing-ops": {
-      "total": 0,
-      "minor": 0,
-      "real": 0
+      "total": 3,
+      "minor": 2,
+      "real": 1
     },
     "persona:recovery-growth-ops": {
-      "total": 0,
-      "minor": 0,
+      "total": 2,
+      "minor": 2,
       "real": 0
     },
     "persona:developer-integration": {
-      "total": 0,
-      "minor": 0,
+      "total": 2,
+      "minor": 2,
       "real": 0
     },
     "persona:compliance-audit": {
-      "total": 0,
-      "minor": 0,
-      "real": 0
+      "total": 5,
+      "minor": 3,
+      "real": 2
     },
     "design": {
-      "total": 0,
-      "minor": 0,
+      "total": 1,
+      "minor": 1,
       "real": 0
     }
   },
