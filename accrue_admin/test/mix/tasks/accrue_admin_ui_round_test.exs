@@ -8,6 +8,7 @@ defmodule Mix.Tasks.AccrueAdmin.Ui.RoundTest do
   @foundation_csv "component-kitchen,dashboard,subscription-detail,subscriptions"
   @next_round_marker "test-results/ui-ratchet/.round-next"
   @round_status_marker "test-results/ui-ratchet/.round-status"
+  @playwright_output_dir "test-results/playwright-ui-round"
 
   # A FakeRunner that never spawns node/npx/mix. `run/3` records each pipeline
   # call and returns success; `capture/3` recognizes the `load_slices!` node -e
@@ -119,6 +120,7 @@ defmodule Mix.Tasks.AccrueAdmin.Ui.RoundTest do
     # capture — surfaces present
     {"npx", ["playwright", "test", "e2e/admin-visuals.spec.js"], env} = next_call()
     assert {"RATCHET_SURFACES", @foundation_csv} in env
+    assert {"PLAYWRIGHT_OUTPUT_DIR", @playwright_output_dir} in env
 
     # propose — surfaces present
     {"node", ["e2e/ratchet/ratchet-propose.mjs"], env} = next_call()
@@ -146,6 +148,7 @@ defmodule Mix.Tasks.AccrueAdmin.Ui.RoundTest do
     next_call()
     {"npx", ["playwright", "test", "e2e/admin-visuals.spec.js"], env} = next_call()
     assert {"RATCHET_SURFACES", "dashboard,subscriptions"} in env
+    assert {"PLAYWRIGHT_OUTPUT_DIR", @playwright_output_dir} in env
   end
 
   test "a pre-seeded .round-next of 3 drives RATCHET_ROUND=3 for propose/verify/seal-round", %{

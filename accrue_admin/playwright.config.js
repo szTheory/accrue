@@ -3,6 +3,7 @@ const { defineConfig, devices } = require("@playwright/test");
 
 const port = process.env.ACCRUE_ADMIN_E2E_PORT || "4017";
 const baseURL = `http://127.0.0.1:${port}`;
+const outputDir = process.env.PLAYWRIGHT_OUTPUT_DIR || "test-results";
 
 module.exports = defineConfig({
   testDir: "./e2e",
@@ -32,5 +33,5 @@ module.exports = defineConfig({
       use: { ...devices["Pixel 5"] }
     }
   ],
-  outputDir: "test-results"
+  outputDir
 });

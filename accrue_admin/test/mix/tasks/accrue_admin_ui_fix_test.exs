@@ -6,6 +6,7 @@ defmodule Mix.Tasks.AccrueAdmin.Ui.FixTest do
   alias Mix.Tasks.AccrueAdmin.Ui.Fix
 
   @fix_context_marker "test-results/ui-ratchet/.fix-context.json"
+  @playwright_output_dir "test-results/playwright-ui-fix"
 
   # A FakeRunner that never spawns node/npx/mix/git. Every step records its command,
   # args, and env, then returns success — so the full sequence is exercised without a
@@ -76,8 +77,12 @@ defmodule Mix.Tasks.AccrueAdmin.Ui.FixTest do
 
     {"npx", ["playwright", "test", "e2e/admin-visuals.spec.js"], recapture_env} = next_call()
     assert {"RATCHET_SURFACES", "dashboard,subscriptions"} in recapture_env
+    assert {"PLAYWRIGHT_OUTPUT_DIR", @playwright_output_dir} in recapture_env
 
-    assert {"npx", ["playwright", "test", "e2e/ratchet-fix-probe.spec.js"], _} = next_call()
+    assert {"npx", ["playwright", "test", "e2e/ratchet-fix-probe.spec.js"], probe_env} =
+             next_call()
+
+    assert {"PLAYWRIGHT_OUTPUT_DIR", @playwright_output_dir} in probe_env
     assert {"node", ["e2e/ratchet/ratchet-fix.mjs", "--finalize-fixes"], _} = next_call()
   end
 
@@ -153,5 +158,6 @@ defmodule Mix.Tasks.AccrueAdmin.Ui.FixTest do
 
     {"npx", ["playwright", "test", "e2e/admin-visuals.spec.js"], recapture_env} = next_call()
     refute recapture_env && List.keymember?(recapture_env, "RATCHET_SURFACES", 0)
+    assert {"PLAYWRIGHT_OUTPUT_DIR", @playwright_output_dir} in recapture_env
   end
 end

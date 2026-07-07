@@ -41,6 +41,7 @@ defmodule Mix.Tasks.AccrueAdmin.Ui.Fix do
 
   @runner_env_key :accrue_admin_ui_fix_runner
   @fix_context_marker "test-results/ui-ratchet/.fix-context.json"
+  @playwright_output_dir "test-results/playwright-ui-fix"
 
   defmodule Runner do
     @moduledoc false
@@ -111,25 +112,35 @@ defmodule Mix.Tasks.AccrueAdmin.Ui.Fix do
         runner,
         "git-commit",
         "git",
-        ["commit", "-m", "chore(ui-ratchet): rebuild CSS bundle for round #{round}", "--allow-empty", "--", "priv/static"],
+        [
+          "commit",
+          "-m",
+          "chore(ui-ratchet): rebuild CSS bundle for round #{round}",
+          "--allow-empty",
+          "--",
+          "priv/static"
+        ],
         cd: root
       )
 
       # Step 5 — re-capture the (scoped) surfaces against the freshly-committed bundle.
       run_step!(runner, "recapture", "npx", ["playwright", "test", "e2e/admin-visuals.spec.js"],
         cd: root,
-        env: surfaces_env
+        env: playwright_env(surfaces_env)
       )
 
       # Step 6 — scoped per-resolved-finding probe (NOT an evaluator fan-out; zero net-new opens).
       run_step!(runner, "probe", "npx", ["playwright", "test", "e2e/ratchet-fix-probe.spec.js"],
-        cd: root
+        cd: root,
+        env: playwright_env([])
       )
 
       # Step 7 — mint guards + promote probe-confirmed fixes to verified-closed.
-      run_step!(runner, "finalize-fixes", "node", ["e2e/ratchet/ratchet-fix.mjs", "--finalize-fixes"],
-        cd: root
-      )
+      run_step!(
+        runner,
+        "finalize-fixes",
+        "node",
+        ["e2e/ratchet/ratchet-fix.mjs", "--finalize-fixes"], cd: root)
 
       Mix.shell().info(
         "ui.fix complete for round #{round}. " <>
@@ -139,6 +150,9 @@ defmodule Mix.Tasks.AccrueAdmin.Ui.Fix do
       :ok
     end
   end
+
+  defp playwright_env(extra_env),
+    do: [{"PLAYWRIGHT_OUTPUT_DIR", @playwright_output_dir} | extra_env]
 
   defp run_step!(runner, label, command, args, opts) do
     case runner.run(command, args, opts) do

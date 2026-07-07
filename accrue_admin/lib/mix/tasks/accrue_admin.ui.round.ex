@@ -41,6 +41,7 @@ defmodule Mix.Tasks.AccrueAdmin.Ui.Round do
 
   @next_round_marker "test-results/ui-ratchet/.round-next"
   @round_status_marker "test-results/ui-ratchet/.round-status"
+  @playwright_output_dir "test-results/playwright-ui-round"
 
   defmodule Runner do
     @moduledoc false
@@ -97,9 +98,11 @@ defmodule Mix.Tasks.AccrueAdmin.Ui.Round do
     # abort before the first pipeline step (D-52).
     surfaces_env = resolve_surfaces_env!(argv, root, runner)
 
-    run_step!(runner, "next-round", "node", ["e2e/ratchet/phase-ratchet-ledger.mjs", "--next-round"],
-      cd: root
-    )
+    run_step!(
+      runner,
+      "next-round",
+      "node",
+      ["e2e/ratchet/phase-ratchet-ledger.mjs", "--next-round"], cd: root)
 
     round =
       root
@@ -114,7 +117,7 @@ defmodule Mix.Tasks.AccrueAdmin.Ui.Round do
 
     run_step!(runner, "capture", "npx", ["playwright", "test", "e2e/admin-visuals.spec.js"],
       cd: root,
-      env: surfaces_env
+      env: playwright_env(surfaces_env)
     )
 
     run_step!(runner, "propose", "node", ["e2e/ratchet/ratchet-propose.mjs"],
@@ -127,7 +130,11 @@ defmodule Mix.Tasks.AccrueAdmin.Ui.Round do
       env: [{"RATCHET_ROUND", round_str}]
     )
 
-    run_step!(runner, "seal-round", "node", ["e2e/ratchet/phase-ratchet-ledger.mjs", "--seal-round"],
+    run_step!(
+      runner,
+      "seal-round",
+      "node",
+      ["e2e/ratchet/phase-ratchet-ledger.mjs", "--seal-round"],
       cd: root,
       env: [{"RATCHET_ROUND", round_str} | surfaces_env]
     )
@@ -216,6 +223,9 @@ defmodule Mix.Tasks.AccrueAdmin.Ui.Round do
         Mix.raise("slice manifest load failed: #{Exception.message(reason)}")
     end
   end
+
+  defp playwright_env(extra_env),
+    do: [{"PLAYWRIGHT_OUTPUT_DIR", @playwright_output_dir} | extra_env]
 
   defp run_step!(runner, label, command, args, opts) do
     case runner.run(command, args, opts) do
