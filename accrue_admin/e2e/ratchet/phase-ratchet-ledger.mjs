@@ -33,7 +33,7 @@ import * as ratchetLedger from "./ratchet-ledger.js";
 import baselineManifest from "../baseline-manifest.js";
 
 const { fold, LENS_KEYS } = ratchetLedger;
-const { SURFACES } = baselineManifest;
+const { SLICES, SURFACES } = baselineManifest;
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 // __dirname === accrue_admin/e2e/ratchet/ — go up 3 levels to the repo root.
@@ -210,17 +210,55 @@ function computeClauseRegressionsEmpty(findingRegressionsPath, standingRegressio
 }
 
 /**
- * computeClauseCoverageFloor(cellsCensusRows, scopeSurfaces) — Clause 4: passes iff every cell in
- * scope has `coverage_status === "covered"`. `scopeSurfaces` is either the `null`/`"all"` sentinel
- * (no filter — the entire census must be covered) or a `Set<string>` of surface names to filter
- * by. An empty filtered set vacuously passes.
+ * scoreFloorRowsForScopeMember(cellsCensusRows, scopeMember) — resolve one capture-scope member
+ * to the Phase 200 score-floor rows that prove it. Exact surface matches are used for ordinary
+ * page captures. The `component-kitchen` capture is not itself a census surface; it renders the
+ * component-family and component-group design-system rows, so it expands to those row families.
+ * If explicit scored Phase 200 rows exist for a member, ignore older fallback rows with null score.
+ */
+function scoreFloorRowsForScopeMember(cellsCensusRows, scopeMember) {
+  const matches =
+    scopeMember === "component-kitchen"
+      ? cellsCensusRows.filter((cell) => cell.surface_type === "component" || cell.surface_type === "component-group")
+      : cellsCensusRows.filter((cell) => cell.surface === scopeMember);
+  const scoredMatches = matches.filter((cell) => scoreValue(cell) !== null);
+  return scoredMatches.length > 0 ? scoredMatches : matches;
+}
+
+function scoreValue(cell) {
+  if (typeof cell.score === "number") return Number.isFinite(cell.score) ? cell.score : null;
+  if (typeof cell.score === "string" && cell.score.trim() !== "") {
+    const value = Number(cell.score);
+    return Number.isFinite(value) ? value : null;
+  }
+  return null;
+}
+
+function cellMeetsCoverageFloor(cell) {
+  const score = scoreValue(cell);
+  return cell.coverage_status === "covered" && score !== null && score >= 2;
+}
+
+function normalizeScopeMembers(scopeSurfaces) {
+  if (scopeSurfaces == null || scopeSurfaces === "all") return null;
+  return Array.from(scopeSurfaces).flatMap((surface) =>
+    surface === "foundation" ? SLICES.foundation : [surface]
+  );
+}
+
+/**
+ * computeClauseCoverageFloor(cellsCensusRows, scopeSurfaces) — Clause 4: passes iff at least one
+ * row is examined and every in-scope score-floor row has `coverage_status === "covered"` and
+ * numeric `score >= 2`. `scopeSurfaces` is either the `null`/`"all"` sentinel (no filter — the
+ * entire census must satisfy the floor) or a `Set<string>` of capture/slice surface names.
  */
 function computeClauseCoverageFloor(cellsCensusRows, scopeSurfaces) {
-  const noFilter = scopeSurfaces == null || scopeSurfaces === "all";
-  const filtered = noFilter
-    ? cellsCensusRows
-    : cellsCensusRows.filter((cell) => scopeSurfaces.has(cell.surface));
-  return filtered.every((cell) => cell.coverage_status === "covered");
+  const scopeMembers = normalizeScopeMembers(scopeSurfaces);
+  const filtered =
+    scopeMembers == null
+      ? cellsCensusRows
+      : scopeMembers.flatMap((surface) => scoreFloorRowsForScopeMember(cellsCensusRows, surface));
+  return filtered.length > 0 && filtered.every(cellMeetsCoverageFloor);
 }
 
 /** computeDryRound(clauses) — the D-48 conjunction over the 4 clause booleans (as an array). */
@@ -256,8 +294,8 @@ function classifyRoundStatus(consecutiveDry, currentRoundNumber) {
 
 /**
  * readCellsCensus(absPath) — parse the Phase-200 `final.cells.json` census array; an absent or
- * malformed file (or a non-array top level) reads as `[]`, so Clause 4 vacuously passes rather
- * than crashing the seal.
+ * malformed file (or a non-array top level) reads as `[]`, so Clause 4 fails closed rather than
+ * crashing the seal.
  */
 function readCellsCensus(absPath) {
   try {
@@ -844,7 +882,7 @@ function runSelfTest() {
       const c2 = computeClauseZeroOpen([]);
       const c3 = computeClauseRegressionsEmpty(emptyReg, emptyStanding);
       const c4 = computeClauseCoverageFloor(
-        [{ surface: "dashboard", coverage_status: "covered" }],
+        [{ surface: "dashboard", coverage_status: "covered", score: 2 }],
         null
       );
       assertSelfTest(
@@ -891,9 +929,58 @@ function runSelfTest() {
           true,
           true,
           true,
-          computeClauseCoverageFloor([{ surface: "dashboard", coverage_status: "gap" }], null),
+          computeClauseCoverageFloor([{ surface: "dashboard", coverage_status: "gap", score: 2 }], null),
         ]) === false
       );
+      // 7e — clause4 false: covered but below the Phase 208 score floor.
+      assertSelfTest(
+        "(7e) clause4 score 1 fails the score floor",
+        computeClauseCoverageFloor([{ surface: "dashboard", coverage_status: "covered", score: 1 }], null) === false
+      );
+      // 7f — clause4 false: covered but missing a numeric score.
+      assertSelfTest(
+        "(7f) clause4 missing score fails the score floor",
+        computeClauseCoverageFloor([{ surface: "dashboard", coverage_status: "covered" }], null) === false
+      );
+      // 7g — clause4 false: scoped lookup examines zero rows.
+      assertSelfTest(
+        "(7g) clause4 zero scoped rows fails closed",
+        computeClauseCoverageFloor([{ surface: "dashboard", coverage_status: "covered", score: 2 }], new Set(["missing-surface"])) === false
+      );
+      // 7h — the named Phase 208 foundation slice expands every member. The component-kitchen
+      // member maps to component/component-group rows, not an exact `surface=component-kitchen`
+      // lookup, because it is a capture containing the design-system census.
+      {
+        const foundationRows = [
+          { surface: "dashboard", surface_type: "page-flow", coverage_status: "covered", score: 2 },
+          { surface: "subscription-detail", surface_type: "page-flow", coverage_status: "covered", score: 2 },
+          { surface: "subscriptions", surface_type: "page-flow", coverage_status: "covered", score: 2 },
+          { surface: "button", surface_type: "component", coverage_status: "covered", score: 2 },
+          {
+            surface: "page-header/actions/breadcrumbs",
+            surface_type: "component-group",
+            coverage_status: "covered",
+            score: 2,
+          },
+        ];
+        const memberCounts = Object.fromEntries(
+          SLICES.foundation.map((member) => [member, scoreFloorRowsForScopeMember(foundationRows, member).length])
+        );
+        assertSelfTest(
+          "(7h) SLICES.foundation expands every member to at least one score-floor row",
+          Object.values(memberCounts).every((count) => count > 0),
+          JSON.stringify(memberCounts)
+        );
+        assertSelfTest(
+          "(7h) component-kitchen maps to component-family/design-system rows",
+          memberCounts["component-kitchen"] === 2,
+          JSON.stringify(memberCounts)
+        );
+        assertSelfTest(
+          "(7h) SLICES.foundation score-floor rows pass at score 2",
+          computeClauseCoverageFloor(foundationRows, new Set(["foundation"])) === true
+        );
+      }
     }
 
     // (8) 2 consecutive dry rows in the SAME epoch -> converged (D-49 K=2).
