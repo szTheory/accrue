@@ -4,11 +4,11 @@ milestone: v1.56
 milestone_name: "Admin UI Ratchet: Automated Adversarial Design Evaluation"
 current_phase: 207
 current_phase_name: Orchestration + digest + one-command round/fix loop
-status: executing
-stopped_at: Completed 207-08-PLAN.md
-last_updated: "2026-07-07T12:22:08.612Z"
+status: human_needed
+stopped_at: Phase 207 human verification required
+last_updated: "2026-07-07T12:46:21.000Z"
 last_activity: 2026-07-07
-last_activity_desc: Completed 207-08-PLAN.md
+last_activity_desc: Phase 207 verification requires human UAT
 progress:
   total_phases: 5
   completed_phases: 3
@@ -29,10 +29,10 @@ See: `.planning/PROJECT.md` (updated 2026-07-03 after v1.55 closeout)
 
 ## Current Position
 
-Phase: 207 (Orchestration + digest + one-command round/fix loop) — EXECUTING
+Phase: 207 (Orchestration + digest + one-command round/fix loop) — HUMAN VERIFICATION
 Plan: 8 of 8
-Status: Ready for verification
-Last activity: 2026-07-07 — Completed 207-08-PLAN.md
+Status: Human verification required for ORCH-07/ORCH-08 live smokes
+Last activity: 2026-07-07 — Phase 207 verification requires human UAT
 
 Progress: [██████████] 100%
 
@@ -50,7 +50,7 @@ v1.55 OSS Quality Evaluation & Hardening Roadmap shipped on 2026-07-03 as mainte
 |-------|------|--------------|--------|
 | 205 | Persona + design-lens evaluator harness | EVAL-01, EVAL-02, EVAL-03, EVAL-04, EVAL-05, DEDUP-01, DEDUP-02 | Ready to plan |
 | 206 | Adversarial verifier + finding ledger + deterministic gate | DEDUP-03, VERIFY-01, VERIFY-02, VERIFY-03, LEDGER-01, LEDGER-02, LEDGER-03, LEDGER-04, LEDGER-05 | Not started |
-| 207 | Orchestration + digest + one-command round/fix loop | ORCH-01, ORCH-02, ORCH-03, ORCH-04, ORCH-05, ORCH-06 | Not started |
+| 207 | Orchestration + digest + one-command round/fix loop | ORCH-01, ORCH-02, ORCH-03, ORCH-04, ORCH-05, ORCH-06, ORCH-07, ORCH-08 | Human verification |
 | 208 | Prove convergence on slice + wire CI + ACCEPT | CONV-01, CONV-02, CONV-03, CONV-04, CONV-05, CONV-06, CONV-07 | Not started |
 | 209 | Full-surface sweep under the ratchet | SWEEP-01 (deferred) | Scope-gated / optional — NOT required for v1.56 sign-off |
 
@@ -679,12 +679,12 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 
 ## Session Continuity
 
-Last session: 2026-07-07T12:22:08.608Z
-Stopped at: Completed 207-08-PLAN.md
+Last session: 2026-07-07T12:46:21.000Z
+Stopped at: Phase 207 human verification required
 Resume file: None
 
 ## Operator Next Steps
 
-- Continue the active milestone: v1.56 Admin UI Ratchet is at Phase 206 (`/gsd-plan-phase 206`).
+- Complete the Phase 207 human UAT items in `.planning/phases/207-orchestration-digest-one-command-round-fix-loop/207-UAT.md`, then run `/gsd:verify-work 207`.
 - Queued post-v1.56 candidate: **SEED-004 admin-UI blueprint redesign** (`.planning/seeds/SEED-004-admin-ui-blueprint-redesign.md`; synthesis `.planning/research/ADMIN-UI-REDESIGN-BLUEPRINT-SYNTHESIS.md`) — a first-principles admin/operator UI redesign. See also the ROADMAP "Deferred Seeds and Ideas" table and STATE "Standing scope deferrals".
 - Start the next milestone with `/gsd-new-milestone` (it scans `.planning/seeds/` and reads PROJECT.md `## Current State` for queued candidates).
