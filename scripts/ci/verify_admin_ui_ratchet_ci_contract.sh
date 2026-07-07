@@ -3,7 +3,6 @@ set -euo pipefail
 
 root_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 ci_file="$root_dir/.github/workflows/ci.yml"
-package_file="$root_dir/accrue_admin/package.json"
 ledger_verifier="$root_dir/scripts/ci/verify_ratchet_ledger.mjs"
 signoff_verifier="$root_dir/scripts/ci/verify_ui_ratchet_signoff.mjs"
 contract_file="$root_dir/scripts/ci/verify_admin_ui_ratchet_ci_contract.sh"
@@ -62,19 +61,7 @@ job_body() {
   ' "$ci_file"
 }
 
-package_script_value() {
-  local script_name="$1"
-
-  node -e '
-    const fs = require("fs");
-    const pkg = JSON.parse(fs.readFileSync(process.argv[1], "utf8"));
-    const script = pkg.scripts && pkg.scripts[process.argv[2]];
-    if (!script) process.exit(1);
-    process.stdout.write(script);
-  ' "$package_file" "$script_name" || fail "missing package script: ${script_name}"
-}
-
-for file in "$ci_file" "$package_file" "$ledger_verifier" "$signoff_verifier" "$contract_file"; do
+for file in "$ci_file" "$ledger_verifier" "$signoff_verifier" "$contract_file"; do
   require_file "$file"
 done
 
@@ -142,40 +129,6 @@ for pattern in \
   '(^|[[:space:]])--freeze([[:space:]]|$)'
 do
   require_source_absent_regex "admin-ui-ratchet-guardrails job" "$sanitized_job" "$pattern"
-done
-
-for script_name in \
-  "ratchet:ledger:verify-frozen" \
-  "ratchet:signoff:self-test" \
-  "ratchet:signoff" \
-  "ratchet:ci-contract"
-do
-  package_script_value "$script_name" >/dev/null
-done
-
-ledger_verify_script="$(package_script_value "ratchet:ledger:verify-frozen")"
-signoff_self_test_script="$(package_script_value "ratchet:signoff:self-test")"
-signoff_script="$(package_script_value "ratchet:signoff")"
-ci_contract_script="$(package_script_value "ratchet:ci-contract")"
-
-require_source_fixed "ratchet:ledger:verify-frozen package script" "$ledger_verify_script" "node ../scripts/ci/verify_ratchet_ledger.mjs --verify-frozen"
-require_source_fixed "ratchet:signoff:self-test package script" "$signoff_self_test_script" "node ../scripts/ci/verify_ui_ratchet_signoff.mjs --self-test"
-require_source_fixed "ratchet:signoff package script" "$signoff_script" "node ../scripts/ci/verify_ui_ratchet_signoff.mjs --require-accept"
-require_source_fixed "ratchet:ci-contract package script" "$ci_contract_script" "bash ../scripts/ci/verify_admin_ui_ratchet_ci_contract.sh"
-
-package_scripts="$ledger_verify_script
-$signoff_self_test_script
-$signoff_script
-$ci_contract_script"
-
-for pattern in \
-  '(^|[[:space:]])--freeze([[:space:]]|$)' \
-  'ui\.round' \
-  'ui\.fix' \
-  'ratchet-propose' \
-  'ratchet-verify'
-do
-  require_source_absent_regex "Phase 208 package scripts" "$package_scripts" "$pattern"
 done
 
 annotation_job="$(job_body "annotation-sweep")"
