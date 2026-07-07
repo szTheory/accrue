@@ -238,7 +238,7 @@ Full details: [v1.48 roadmap archive](milestones/v1.48-ROADMAP.md)
   6. Repeated `ui.round` runs on unchanged inputs reuse a cached prompt prefix (system preamble + tool schema + design-lens exemplar images) via Anthropic `cache_control`, measurably reducing per-run input tokens/cost, with identity (`claim_key`/`finding_id`) and the no-key/`--self-test` paths unchanged (ORCH-07). *(Folded from the Phase 205 live smoke: the proposer currently makes 7 uncached calls/screenshot, re-sending the schema + images each time.)*
   7. A maintainer can scope a round to a surface subset (the representative slice or a single surface) through a documented flag on `mix accrue_admin.ui.round`, without hand-pruning `test-results/` PNGs; an unscoped round still sweeps the full configured surface set (ORCH-08). *(Folded from the Phase 205 live smoke: there is currently no subset filter, so a slice run required manual pruning.)*
 
-**Plans**: 6/8 plans executed
+**Plans**: 7/8 plans executed
 **Wave 1**
 
 - [x] 207-01-PLAN.md
@@ -259,7 +259,7 @@ Full details: [v1.48 roadmap archive](milestones/v1.48-ROADMAP.md)
 
 **Wave 5** *(blocked on Wave 4 completion)*
 
-- [ ] 207-07-PLAN.md — CR-01 digest accepts nullable `suggested_fix` without aborting the round (ORCH-01, ORCH-02)
+- [x] 207-07-PLAN.md — CR-01 digest accepts nullable `suggested_fix` without aborting the round (ORCH-01, ORCH-02)
 - [ ] 207-08-PLAN.md — CR-02 guard-mint completeness and scoped `ui.fix` CSS commit (ORCH-04, ORCH-05)
 
 ### Phase 208: Prove convergence on the representative slice + wire CI + ACCEPT
@@ -334,7 +334,7 @@ Full details: [v1.48 roadmap archive](milestones/v1.48-ROADMAP.md)
 | 204. Ranked hardening roadmap | v1.55 | 1/1 | Complete    | 2026-07-03 |
 | 205. Persona + design-lens evaluator harness | v1.56 | 5/5 | Complete    | 2026-07-03 |
 | 206. Adversarial verifier + finding ledger + deterministic gate | v1.56 | 4/4 | Complete    | 2026-07-04 |
-| 207. Orchestration + digest + one-command round/fix loop | v1.56 | 6/6 | Complete   | 2026-07-05 |
+| 207. Orchestration + digest + one-command round/fix loop | v1.56 | 7/8 | In Progress|  |
 | 208. Prove convergence on slice + wire CI + ACCEPT | v1.56 | 0/0 | Not started | - |
 | 209. Full-surface sweep under the ratchet (optional/scope-gated) | v1.56 | 0/0 | Scope-gated | - |
 
