@@ -56,10 +56,10 @@ Requirements for this milestone. Each maps to exactly one roadmap phase (205–2
 
 ### Convergence Proof, CI & Sign-off (CONV)
 
-- [ ] **CONV-01**: The ratchet is run to convergence on the representative slice (design-system foundation + a few component families, plus dashboard, subscription-detail, and subscriptions-list) with every slice cell scoring ≥ 2 and both `regressions.ndjson` and `finding-regressions.ndjson` empty.
-- [ ] **CONV-02**: The first non-empty ledger baseline is frozen as the slice high-water mark.
-- [ ] **CONV-03**: A new deterministic-only CI job (`admin-ui-ratchet-guardrails`) passes on a PR with no `ANTHROPIC_API_KEY` and blocks on a synthetic ledger count-increase.
-- [ ] **CONV-04**: A change that improves one persona but regresses another is caught by the ledger (the regressed lens's open count rises → gate red), proven by an automated test.
+- [x] **CONV-01**: The ratchet is run to convergence on the representative slice (design-system foundation + a few component families, plus dashboard, subscription-detail, and subscriptions-list) with every slice cell scoring ≥ 2 and both `regressions.ndjson` and `finding-regressions.ndjson` empty.
+- [x] **CONV-02**: The first non-empty ledger baseline is frozen as the slice high-water mark.
+- [x] **CONV-03**: A new deterministic-only CI job (`admin-ui-ratchet-guardrails`) passes on a PR with no `ANTHROPIC_API_KEY` and blocks on a synthetic ledger count-increase.
+- [x] **CONV-04**: A change that improves one persona but regresses another is caught by the ledger (the regressed lens's open count rises → gate red), proven by an automated test.
 - [ ] **CONV-05**: Existing UI gates (`admin-hardening-guardrails`, `admin-phase200-guardrails`, asset-drift) remain green and the committed `accrue_admin.css` bundle stays fresh.
 - [ ] **CONV-06**: A `UI-RATCHET-SIGN-OFF.md` carries the maintainer `ACCEPT` line, enforced by a sign-off verifier mirroring the Phase 200 pattern.
 - [ ] **CONV-07**: A documented runbook enables graduating any remaining admin surface under the ratchet as a safe follow-on round (tees up the full sweep).
@@ -121,10 +121,10 @@ Which phases cover which requirements. Populated during roadmap creation.
 | ORCH-06 | Phase 207 | Complete |
 | ORCH-07 | Phase 207 | Complete |
 | ORCH-08 | Phase 207 | Complete |
-| CONV-01 | Phase 208 | Pending |
-| CONV-02 | Phase 208 | Pending |
-| CONV-03 | Phase 208 | Pending |
-| CONV-04 | Phase 208 | Pending |
+| CONV-01 | Phase 208 | Complete |
+| CONV-02 | Phase 208 | Complete |
+| CONV-03 | Phase 208 | Complete |
+| CONV-04 | Phase 208 | Complete |
 | CONV-05 | Phase 208 | Pending |
 | CONV-06 | Phase 208 | Pending |
 | CONV-07 | Phase 208 | Pending |
