@@ -276,7 +276,25 @@ Full details: [v1.48 roadmap archive](milestones/v1.48-ROADMAP.md)
   4. Existing UI gates (`admin-hardening-guardrails`, `admin-phase200-guardrails`, asset-drift) remain green and the committed `accrue_admin.css` bundle stays fresh.
   5. A `UI-RATCHET-SIGN-OFF.md` carries the maintainer `ACCEPT` line enforced by a sign-off verifier (mirroring the Phase 200 pattern), and a documented runbook enables graduating any remaining admin surface under the ratchet as a safe follow-on round.
 
-**Plans**: TBD
+**Plans**: 5 plans
+Plans:
+**Wave 1**
+
+- [ ] 208-01-PLAN.md — Deterministic frozen-baseline, score-floor, and red-path verifier foundations.
+- [ ] 208-02-PLAN.md — Phase 208 sign-off verifier foundation.
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
+- [ ] 208-03-PLAN.md — Deterministic-only CI job and contract wiring.
+
+**Wave 3** *(blocked on Wave 2 completion)*
+
+- [ ] 208-04-PLAN.md — Live foundation-slice convergence evidence and explicit baseline freeze.
+
+**Wave 4** *(blocked on Wave 3 completion)*
+
+- [ ] 208-05-PLAN.md — Maintainer ACCEPT sign-off and bounded follow-on runbook.
+
 **UI hint**: yes
 
 ### Phase 209: Full-surface sweep under the ratchet (SCOPE-GATED / OPTIONAL)
@@ -336,7 +354,7 @@ Full details: [v1.48 roadmap archive](milestones/v1.48-ROADMAP.md)
 | 205. Persona + design-lens evaluator harness | v1.56 | 5/5 | Complete    | 2026-07-03 |
 | 206. Adversarial verifier + finding ledger + deterministic gate | v1.56 | 4/4 | Complete    | 2026-07-04 |
 | 207. Orchestration + digest + one-command round/fix loop | v1.56 | 8/8 | Human verification | - |
-| 208. Prove convergence on slice + wire CI + ACCEPT | v1.56 | 0/0 | Not started | - |
+| 208. Prove convergence on slice + wire CI + ACCEPT | v1.56 | 0/5 | Not started | - |
 | 209. Full-surface sweep under the ratchet (optional/scope-gated) | v1.56 | 0/0 | Scope-gated | - |
 
 ## Historical Backlog Anchors (not active scope)
