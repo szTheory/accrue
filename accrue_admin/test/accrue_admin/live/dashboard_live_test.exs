@@ -134,6 +134,7 @@ defmodule AccrueAdmin.DashboardLiveTest do
     assert html =~ "Open event"
     assert html =~ "Open delivery"
     assert html =~ "Actor"
+    assert html =~ "Audit event"
 
     # Regrouped sidebar nav still threads to every section (exact, query-free hrefs)
     assert html =~ ~s(href="/billing/customers")
@@ -148,6 +149,7 @@ defmodule AccrueAdmin.DashboardLiveTest do
 
     # IA-01 visible search field on Home (Plan 175-04)
     assert html =~ ~s(role="search")
+    assert html =~ "Look up a customer"
     assert html =~ "Search customers, invoices"
   end
 end

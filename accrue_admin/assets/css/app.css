@@ -1232,14 +1232,14 @@ a.ax-kpi-card--linked:focus-visible {
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
-  gap: var(--ax-space-sm) var(--ax-space-lg);
-  padding: var(--ax-space-sm) 0;
+  gap: var(--ax-space-xs) var(--ax-space-md);
+  padding: var(--ax-space-xs) 0;
 }
 
 .ax-stat {
   display: flex;
   align-items: baseline;
-  gap: var(--ax-space-sm);
+  gap: var(--ax-space-xs);
   min-width: 0;
 }
 
@@ -1247,7 +1247,7 @@ a.ax-kpi-card--linked:focus-visible {
   content: "";
   align-self: stretch;
   width: 1px;
-  margin-right: var(--ax-space-md);
+  margin-right: var(--ax-space-sm);
   background: var(--ax-border);
 }
 
@@ -2157,6 +2157,24 @@ a.ax-kpi-card--linked:focus-visible {
   box-sizing: border-box;
 }
 
+.ax-page-header-compact {
+  gap: var(--ax-space-xs);
+  max-width: min(64rem, calc(100vw - 2.5rem));
+}
+
+.ax-page-header-compact .ax-page-header-main,
+.ax-page-header-compact .ax-page-header-title-row,
+.ax-page-header-compact .ax-page-header-title-copy,
+.ax-page-header-compact .ax-page-header-stat-strip,
+.ax-page-header-compact .ax-page-header-filter-toolbar {
+  gap: var(--ax-space-xs);
+}
+
+.ax-page-header-compact .ax-page-copy {
+  display: grid;
+  gap: var(--ax-space-2xs);
+}
+
 .ax-page-header-main,
 .ax-page-header-title-row,
 .ax-page-header-title-copy,
@@ -2515,7 +2533,7 @@ a.ax-kpi-card--linked:focus-visible {
 .ax-data-table {
   display: flex;
   flex-direction: column;
-  gap: var(--ax-space-lg);
+  gap: var(--ax-space-md);
 }
 
 .ax-data-table,
@@ -2638,7 +2656,30 @@ a.ax-kpi-card--linked:focus-visible {
 
 .ax-data-table-cards {
   display: grid;
-  gap: var(--ax-space-md);
+  gap: var(--ax-space-sm);
+}
+
+.ax-data-table-grid {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.ax-data-table-grid th,
+.ax-data-table-grid td {
+  padding: 0.75rem var(--ax-space-md);
+  border-bottom: 1px solid var(--ax-border);
+  text-align: left;
+  vertical-align: top;
+}
+
+.ax-page-header-compact .ax-data-table-filters {
+  gap: var(--ax-space-sm);
+}
+
+.ax-page-header-compact .ax-input,
+.ax-page-header-compact .ax-select {
+  min-height: 2.375rem;
+  padding-block: 0.5rem;
 }
 
 .ax-data-table-card,
@@ -3498,16 +3539,17 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
 .ax-input-search {
   width: 100%;
   min-height: 2.75rem;
-  border: 1px solid var(--ax-border);
+  border: 1px solid var(--ax-border-strong);
   border-radius: var(--ax-radius-md);
-  background: var(--ax-elevated);
+  background: color-mix(in srgb, var(--ax-elevated) 86%, var(--ax-accent-subtle));
   display: flex;
   align-items: center;
   gap: var(--ax-space-sm);
   padding-inline: var(--ax-space-md);
   cursor: pointer;
-  color: var(--ax-muted);
+  color: var(--ax-primary);
   text-align: start;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ax-accent-border) 38%, transparent);
 }
 
 .ax-input-search:hover,
@@ -3518,7 +3560,19 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
 
 .ax-input-icon {
   flex: none;
-  color: var(--ax-muted);
+  color: var(--ax-accent-readable);
+}
+
+.ax-input-text {
+  display: grid;
+  gap: var(--ax-space-2xs);
+  min-width: 0;
+}
+
+.ax-input-title {
+  font-size: var(--ax-type-sm);
+  font-weight: 700;
+  color: var(--ax-primary);
 }
 
 .ax-input-placeholder {
@@ -3918,7 +3972,7 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
 .ax-related-value {
   /* ax-type-exception: component-local typography is documented until this selector is migrated to a composed role utility in markup. */
   font-size: var(--ax-type-xs);
-  color: var(--ax-muted);
+  color: var(--ax-primary);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: normal;
@@ -4082,6 +4136,11 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
   gap: var(--ax-space-md);
 }
 
+.ax-detail-section-separated {
+  padding-top: var(--ax-space-md);
+  border-top: 1px solid var(--ax-border);
+}
+
 .ax-detail-section-head {
   display: flex;
   align-items: baseline;
@@ -4098,6 +4157,12 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
 
 .ax-detail-section-actions {
   display: flex;
+  gap: var(--ax-space-sm);
+}
+
+.ax-detail-actions-row {
+  display: flex;
+  flex-wrap: wrap;
   gap: var(--ax-space-sm);
 }
 

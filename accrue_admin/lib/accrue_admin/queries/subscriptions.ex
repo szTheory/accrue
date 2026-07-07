@@ -8,7 +8,7 @@ defmodule AccrueAdmin.Queries.Subscriptions do
   import Ecto.Query
 
   alias Accrue.Billing
-  alias Accrue.Billing.{Customer, Subscription}
+  alias Accrue.Billing.{Customer, Subscription, SubscriptionItem}
   alias Accrue.Repo
   alias AccrueAdmin.OwnerScope
   alias AccrueAdmin.Queries.Behaviour
@@ -22,16 +22,30 @@ defmodule AccrueAdmin.Queries.Subscriptions do
     cursor = Behaviour.decode_cursor(opts)
     owner_scope = Keyword.get(opts, :owner_scope)
 
+    item_summary =
+      from(item in SubscriptionItem,
+        group_by: item.subscription_id,
+        select: %{
+          subscription_id: item.subscription_id,
+          price_id: min(item.price_id),
+          quantity: sum(coalesce(item.quantity, 1)),
+          item_count: count(item.id)
+        }
+      )
+
     Subscription
     |> join(:inner, [subscription], customer in Customer,
       on: customer.id == subscription.customer_id
+    )
+    |> join(:left, [subscription, _customer], item in subquery(item_summary),
+      on: item.subscription_id == subscription.id
     )
     |> scope_query(owner_scope)
     |> filter_query(filter)
     |> Behaviour.apply_cursor(@time_field, cursor)
     |> order_by([subscription, _customer], desc: subscription.inserted_at, desc: subscription.id)
     |> limit(^Enum.max([limit + 1, 2]))
-    |> select([subscription, customer], %{
+    |> select([subscription, customer, item], %{
       id: subscription.id,
       customer_id: subscription.customer_id,
       customer_name: customer.name,
@@ -46,6 +60,9 @@ defmodule AccrueAdmin.Queries.Subscriptions do
       current_period_end: subscription.current_period_end,
       trial_end: subscription.trial_end,
       ended_at: subscription.ended_at,
+      plan_price_id: item.price_id,
+      plan_quantity: item.quantity,
+      plan_item_count: item.item_count,
       inserted_at: subscription.inserted_at
     })
     |> Repo.all()

@@ -84,7 +84,9 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert html =~ ~s(data-ax-page-title)
     assert html =~ ~s(data-component-group="page-header-actions-breadcrumbs")
     assert html =~ ~s(data-ax-page-filter-toolbar)
-    refute html =~ ~s(data-ax-page-actions)
+    assert html =~ ~s(data-ax-page-actions)
+    assert html =~ "Find customer"
+    assert html =~ "Webhook events"
     assert_one_h1(html)
 
     assert html
@@ -234,6 +236,10 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert {:ok, _view, html} = live(conn, "/billing/subscriptions?view=all")
 
     assert html =~ "Open invoice exposure"
+    assert html =~ "Open invoice queue"
+    assert html =~ "Find customer"
+    assert html =~ "Webhook events"
+    assert html =~ "amount not projected locally"
 
     assert_table_headings_in_order(html, [
       "Customer and subscription IDs",

@@ -50,7 +50,7 @@ defmodule AccrueAdmin.Live.DashboardLive do
       active_organization_name={@active_organization_name}
     >
       <section class="ax-page ax-home">
-        <header class="ax-page-header">
+        <header class="ax-page-header ax-page-header-compact">
           <Breadcrumbs.breadcrumbs items={[%{label: Copy.dashboard_breadcrumb_home()}]} />
           <h1 class="ax-display"><%= Copy.home_intro_headline() %></h1>
           <p class="ax-body ax-page-copy"><%= Copy.home_intro_copy() %></p>
@@ -109,7 +109,10 @@ defmodule AccrueAdmin.Live.DashboardLive do
               data-ax-command-palette-trigger="true"
             >
               <AccrueAdmin.Components.Icon.icon name={:search} size="md" class="ax-input-icon" />
-              <span class="ax-input-placeholder">Search customers, invoices… ⌘K</span>
+              <span class="ax-input-text">
+                <span class="ax-input-title"><%= Copy.home_launcher_customers_title() %></span>
+                <span class="ax-input-placeholder">Search customers, invoices… ⌘K</span>
+              </span>
             </button>
           </div>
 
@@ -208,7 +211,10 @@ defmodule AccrueAdmin.Live.DashboardLive do
                 <p class="ax-eyebrow"><%= Copy.dashboard_activity_event_ledger_eyebrow() %></p>
                 <h3 class="ax-heading"><%= Copy.dashboard_activity_recent_local_heading() %></h3>
               </div>
-              <a class="ax-link-quiet" href={ScopedPath.build(@admin_mount_path, "/events", @current_owner_scope)}>
+              <a
+                class="ax-button ax-button-secondary ax-button-sm"
+                href={ScopedPath.build(@admin_mount_path, "/events", @current_owner_scope)}
+              >
                 <%= Copy.home_activity_events_link() %>
                 <Icon.icon name={:arrow_right} size="sm" />
               </a>
@@ -336,12 +342,12 @@ defmodule AccrueAdmin.Live.DashboardLive do
     |> Repo.all()
     |> Enum.map(fn event ->
       %{
-        title: event.type,
+        title: event_actor_summary(event),
         at: format_datetime(event.inserted_at),
-        body: event_subject_summary(event),
+        body: "#{event.type} · #{event_subject_summary(event)}",
         status: event.actor_type,
         tone: if(event.actor_type == "admin", do: :cobalt, else: :slate),
-        meta: event_actor_summary(event),
+        meta: "Audit event",
         href: ScopedPath.build(mount_path, "/events/#{event.id}", scope),
         href_label: "Open event"
       }

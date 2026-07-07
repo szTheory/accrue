@@ -5,7 +5,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
 
   import Ecto.Query
 
-  alias Accrue.Billing.{Invoice, Query, Subscription}
+  alias Accrue.Billing.{Customer, Invoice, Query, Subscription}
   alias Accrue.Repo
   alias AccrueAdmin.BillingPresentation
 
@@ -95,6 +95,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
     >
       <section class="ax-page">
         <PageHeader.page_header
+          class="ax-page-header-compact"
           breadcrumbs={[
             %{label: "Dashboard", href: scoped_path(@admin_mount_path, "", @current_owner_scope)},
             %{label: "Subscriptions"}
@@ -103,7 +104,25 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
         >
           <:description>
             <p class="ax-body"><%= Copy.subscriptions_index_subtitle() %></p>
+            <p class="ax-body ax-page-description">
+              Use customer links in each row to pivot to a single customer overview, or open the event log when debugging webhook delivery.
+            </p>
           </:description>
+
+          <:actions>
+            <a
+              class="ax-button ax-button-secondary ax-button-sm"
+              href={scoped_path(@admin_mount_path, "/customers", @current_owner_scope)}
+            >
+              Find customer
+            </a>
+            <a
+              class="ax-button ax-button-secondary ax-button-sm"
+              href={scoped_path(@admin_mount_path, "/events", @current_owner_scope)}
+            >
+              Webhook events
+            </a>
+          </:actions>
 
           <:stat_strip>
             <StatStrip.stat_strip label="Subscription summary">
@@ -116,9 +135,16 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
               <:stat label="Paused subscriptions" value={Integer.to_string(@summary.paused_count)} tone="amber" />
               <:stat label="Past-due subscriptions" value={Integer.to_string(@summary.past_due_count)} />
               <:stat
-                label="Open invoice exposure"
-                value={format_minor(@summary.open_invoice_exposure_minor, "usd")}
+                label="Open invoice queue"
+                value={count(@summary.open_invoice_count, "invoice")}
                 tone="amber"
+                href={invoice_queue_path(@admin_mount_path, @current_owner_scope)}
+              />
+              <:stat
+                label="Open invoice exposure"
+                value={format_minor(@summary.open_invoice_exposure_minor, "usd") <> " at risk"}
+                tone="amber"
+                href={invoice_queue_path(@admin_mount_path, @current_owner_scope)}
               />
             </StatStrip.stat_strip>
           </:stat_strip>
@@ -209,6 +235,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
 
   defp subscription_summary(owner_scope) do
     subscriptions = scoped_subscriptions(owner_scope)
+    invoices = scoped_invoices(owner_scope)
     open_invoice_statuses = [:draft, :open]
 
     %{
@@ -217,8 +244,12 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
       paused_count: subscriptions |> Query.paused() |> Repo.aggregate(:count, :id),
       past_due_count: subscriptions |> Query.past_due() |> Repo.aggregate(:count, :id),
       total_count: subscriptions |> Repo.aggregate(:count, :id),
+      open_invoice_count:
+        invoices
+        |> where([invoice], invoice.status in ^open_invoice_statuses)
+        |> Repo.aggregate(:count, :id),
       open_invoice_exposure_minor:
-        Invoice
+        invoices
         |> where([invoice], invoice.status in ^open_invoice_statuses)
         |> select([invoice], coalesce(sum(invoice.amount_remaining_minor), 0))
         |> Repo.one()
@@ -236,6 +267,17 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
   end
 
   defp scoped_subscriptions(_owner_scope), do: Subscription
+
+  defp scoped_invoices(%{mode: :organization, organization_id: organization_id}) do
+    Invoice
+    |> join(:inner, [invoice], customer in Customer, on: customer.id == invoice.customer_id)
+    |> where(
+      [_invoice, customer],
+      customer.owner_type == "Organization" and customer.owner_id == ^organization_id
+    )
+  end
+
+  defp scoped_invoices(_owner_scope), do: Invoice
 
   defp billing_signals_cell(row) do
     ownership = BillingPresentation.ownership_label(row)
@@ -295,6 +337,23 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
   defp status_tone(status) when status in [:neutral, :canceled, :paused], do: "slate"
   defp status_tone(_status), do: "ink"
 
+  defp plan_amount_cell(%{plan_price_id: price_id} = row) when is_binary(price_id) do
+    quantity = integerish(row[:plan_quantity]) || 1
+    item_count = integerish(row[:plan_item_count]) || 1
+
+    [
+      price_id,
+      quantity > 1 && "qty #{quantity}",
+      item_count > 1 && "#{item_count} items",
+      "amount not projected locally"
+    ]
+    |> Enum.reject(&(&1 in [false, nil, ""]))
+    |> Enum.join(" · ")
+  end
+
+  defp plan_amount_cell(%{cancel_at_period_end: true}),
+    do: "Price not projected locally · renewal ending; verify processor amount"
+
   defp plan_amount_cell(_row), do: Copy.subscriptions_list_plan_amount_unavailable()
 
   defp format_minor(amount_minor, _currency) when is_integer(amount_minor) do
@@ -325,6 +384,13 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
     do: "Trial ends #{format_date(trial_end)}"
 
   defp time_cell(_row), do: "No renewal date"
+
+  defp count(1, noun), do: "1 #{noun}"
+  defp count(n, noun), do: "#{n} #{noun}s"
+
+  defp integerish(%Decimal{} = value), do: Decimal.to_integer(value)
+  defp integerish(value) when is_integer(value), do: value
+  defp integerish(_value), do: nil
 
   defp subscription_filter_fields do
     [
@@ -492,6 +558,12 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
   end
 
   defp scoped_path(mount_path, suffix, _owner_scope), do: mount_path <> suffix
+
+  defp invoice_queue_path(mount_path, owner_scope) do
+    mount_path
+    |> scoped_path("/invoices", owner_scope)
+    |> AccrueAdmin.DataTableNav.merge_query(%{"status" => "open"})
+  end
 
   defp map_only_scope?(params) do
     params != %{} and Map.keys(params) -- ["org"] == []

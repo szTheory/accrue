@@ -292,7 +292,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
           <details
             class="ax-detail-section"
             data-ax-drill-section="dunning-recovery"
-            open={default_drill_open?(@subscription, :dunning)}
+            open
           >
             <summary class="ax-detail-section-head">
               <span class="ax-detail-section-title">Dunning & recovery</span>
@@ -318,12 +318,34 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
                 <p class="ax-body">
                   <%= Copy.resource_state_copy(:dunning, :queue_empty, surface: :subscription_detail).body %>
                 </p>
-                <p class="ax-body">Recovery is triggered by invoice.payment_failed billing events.</p>
+                <p class="ax-body ax-detail-hint">
+                  No active campaign means there is no local recovery workflow queued for this subscription. Review the recovery funnel for at-risk accounts and the invoice queue for collection work.
+                </p>
               <% end %>
+
+              <div class="ax-detail-actions-row">
+                <a
+                  class="ax-button ax-button-secondary ax-button-sm"
+                  href={ScopedPath.build(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}
+                >
+                  Open recovery funnel
+                </a>
+                <a
+                  class="ax-button ax-button-secondary ax-button-sm"
+                  href={
+                    ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope, %{
+                      "status" => "open",
+                      "subscription_id" => @subscription.id
+                    })
+                  }
+                >
+                  Open invoice queue
+                </a>
+              </div>
             </div>
           </details>
 
-          <details class="ax-detail-section" data-ax-drill-section="tax-compliance">
+          <details class="ax-detail-section ax-detail-section-separated" data-ax-drill-section="tax-compliance">
             <summary class="ax-detail-section-head">
               <span class="ax-detail-section-title">Tax & compliance</span>
             </summary>
@@ -688,7 +710,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
       },
       %{
         label: "Plan / price",
-        value: current_price_id(subscription) || "Price not projected"
+        value: current_price_id(subscription) || not_projected_copy(:price)
       }
       |> maybe_put_summary_action(swap_plan_available?(subscription), %{
         action_label: "Change",
@@ -803,9 +825,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
     "#{format_datetime(starts_at)} - #{format_datetime(ends_at)}"
   end
 
-  defp current_period_summary(_subscription) do
-    "Current period not projected"
-  end
+  defp current_period_summary(_subscription), do: not_projected_copy(:period)
 
   defp summary_health_facts(subscription) do
     [
@@ -815,7 +835,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
     ]
   end
 
-  defp mrr_summary(_subscription), do: "Amount not projected locally"
+  defp mrr_summary(_subscription), do: not_projected_copy(:amount)
 
   defp lifecycle_health_label(subscription) do
     cond do
@@ -852,20 +872,23 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
         "Ends #{format_datetime(subscription.current_period_end)}"
 
       subscription.cancel_at_period_end ->
-        "End date not projected"
+        not_projected_copy(:end_date)
 
       match?(%DateTime{}, subscription.current_period_end) ->
         "Renews #{format_datetime(subscription.current_period_end)}"
 
       true ->
-        "Renewal date not projected"
+        not_projected_copy(:renewal)
     end
   end
 
   defp billing_fields(subscription) do
     [
       %{label: "Processor", value: humanize(subscription.processor)},
-      %{label: "Plan / price", value: current_price_id(subscription) || "Price not projected"},
+      %{
+        label: "Plan / price",
+        value: current_price_id(subscription) || not_projected_copy(:price)
+      },
       %{label: "Current period", value: current_period_summary(subscription)},
       %{label: "Renewal", value: renews_or_ends_summary(subscription)},
       %{label: "Quantity", value: quantity_summary(subscription)}
@@ -902,11 +925,23 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
     end
   end
 
+  defp not_projected_copy(:amount),
+    do: "Amount not projected locally - verify price or invoice sync before assessing health"
+
+  defp not_projected_copy(:end_date),
+    do: "End date not projected locally - verify processor sync before assessing health"
+
+  defp not_projected_copy(:period),
+    do: "Current period not projected locally - verify processor sync before assessing health"
+
+  defp not_projected_copy(:price),
+    do: "Price not projected locally - verify processor item sync before assessing revenue"
+
+  defp not_projected_copy(:renewal),
+    do: "Renewal date not projected locally - verify processor sync before assessing health"
+
   defp default_drill_open?(subscription, :billing),
     do: not Subscription.dunning_campaign_active?(subscription)
-
-  defp default_drill_open?(subscription, :dunning),
-    do: Subscription.dunning_campaign_active?(subscription)
 
   defp drawer_open?(nil, nil), do: false
   defp drawer_open?(_drawer_action_type, _pending_action), do: true
@@ -1721,11 +1756,18 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
         %{
           icon: :invoices,
           label: Copy.subscription_drill_link_invoices_for_subscription(),
-          value: "Filtered invoices for this subscription",
+          value: "Open invoice queue filtered to this subscription",
           href:
             ScopedPath.build(mount_path, "/invoices", scope, %{
+              "status" => "open",
               "subscription_id" => subscription.id
             })
+        },
+        %{
+          icon: :recovery,
+          label: "Recovery funnel",
+          value: "At-risk accounts, dunning state, and collection work",
+          href: ScopedPath.build(mount_path, "/analytics/recovery", scope)
         },
         %{
           icon: :payments,
@@ -1737,8 +1779,14 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
         },
         %{
           icon: :events,
+          label: "Webhook activity",
+          value: "Deliveries, failures, retries, and audit events",
+          href: ScopedPath.build(mount_path, "/webhooks", scope)
+        },
+        %{
+          icon: :events,
           label: Copy.subscription_drill_link_events_for_subscription(),
-          value: "Webhook sources, retries, and audit events",
+          value: "Filtered subscription event log with actor and source context",
           href:
             ScopedPath.build(mount_path, "/events", scope, %{
               "subject_type" => "Subscription",
