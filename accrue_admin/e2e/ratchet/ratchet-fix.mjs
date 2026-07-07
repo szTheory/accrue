@@ -501,22 +501,29 @@ function runSelfTest() {
     // finding whose probe says present:false; leave present:true / no-entry / other-round untouched.
     {
       const specRel = "accrue_admin/e2e/foundation-tokens.spec.js";
+      const microcopySpecRel = "accrue_admin/e2e/admin-page-flow-phase200.spec.js";
       const fakeRepo = fs.mkdtempSync(path.join(root, "repo-"));
       const destAbs = path.join(fakeRepo, specRel);
       fs.mkdirSync(path.dirname(destAbs), { recursive: true });
       fs.copyFileSync(path.join(REPO_ROOT, specRel), destAbs);
+      const microcopyDestAbs = path.join(fakeRepo, microcopySpecRel);
+      fs.mkdirSync(path.dirname(microcopyDestAbs), { recursive: true });
+      fs.copyFileSync(path.join(REPO_ROOT, microcopySpecRel), microcopyDestAbs);
+      const microcopyBefore = fs.readFileSync(microcopyDestAbs, "utf8");
 
       const ledgerPath = path.join(root, "ledger-d.ndjson");
       const fx = makeResolved(1, { surface: "dashboard", surface_type: "dashboard", dimension: 6, region_tag: "kpi-row", resolved_round: 4 }); // contrast
       const fy = makeResolved(2, { surface: "subscriptions", surface_type: "list", dimension: 2, region_tag: "data-table", resolved_round: 4 }); // ledger-count
       const fz = makeResolved(3, { surface: "customers", surface_type: "list", dimension: 12, region_tag: "content-body", resolved_round: 4 }); // microcopy, no probe entry
       const fw = makeResolved(4, { surface: "invoices", surface_type: "list", dimension: 6, region_tag: "data-table", resolved_round: 3 }); // different round
-      writeRows(ledgerPath, [fx, fy, fz, fw]);
+      const fm = makeResolved(5, { surface: "invoices", surface_type: "list", dimension: 12, region_tag: "summary-card", resolved_round: 4 }); // microcopy, incomplete probe fields
+      writeRows(ledgerPath, [fx, fy, fz, fw, fm]);
 
       const probeResults = {
         [fx.finding_id]: { present: false, probed: { selector: "[data-ax-foundation-status='danger']", min_ratio: 4.5 } },
         [fy.finding_id]: { present: true, probed: {} },
         [fw.finding_id]: { present: false, probed: { selector: ".ax-data-table", min_ratio: 4.5 } },
+        [fm.finding_id]: { present: false, probed: { region_present: false, text: null } },
       };
 
       const res = finalizeFixes({ round: 4, ledgerPath, repoRoot: fakeRepo, probeResults });
@@ -535,6 +542,15 @@ function runSelfTest() {
         fs.readFileSync(destAbs, "utf8").includes(`@ratchet:${fx.finding_id}`)
       );
       assertSelfTest(
+        "(d) incomplete microcopy probe promotes with ledger-count sentinel",
+        folded.get(fm.finding_id).status === "verified-closed" &&
+          folded.get(fm.finding_id).guard_ref === "ledger-count"
+      );
+      assertSelfTest(
+        "(d) incomplete microcopy probe does not mutate its guard-home spec",
+        fs.readFileSync(microcopyDestAbs, "utf8") === microcopyBefore
+      );
+      assertSelfTest(
         "(d) present:true finding stays resolved with no guard",
         folded.get(fy.finding_id).status === "resolved" && !folded.get(fy.finding_id).guard_ref
       );
@@ -547,8 +563,8 @@ function runSelfTest() {
         folded.get(fw.finding_id).status === "resolved"
       );
       assertSelfTest(
-        "(d) exactly one promotion + one file mint happened",
-        res.promoted === 1 && res.minted === 1 && res.leftResolved === 2
+        "(d) two promotions: one concrete mint and one ledger-count sentinel",
+        res.promoted === 2 && res.minted === 1 && res.ledgerCount === 1 && res.leftResolved === 2
       );
     }
 

@@ -200,9 +200,10 @@ test.describe("ratchet fix probe — scoped per-resolved-finding DOM check", () 
           // subjective ledger-count dimensions) has no single objective DOM invariant this probe
           // can rigorously re-derive without richer per-finding target metadata. The maintainer has
           // already hand-fixed and explicitly APPROVED the resolution in decisions.json; for these
-          // kinds that approval IS the verification, so the probe trusts it (present=false) and lets
-          // finalize mint the appropriate guard (concrete for design-token/microcopy/focus-ring,
-          // ledger-count sentinel otherwise). Objective kinds above can still override to present=true.
+          // kinds that approval IS the verification, so the probe trusts it (present=false) and records
+          // only scoped observations. The mint validator owns concrete-vs-ledger-count routing and
+          // refuses to invent expected_token/allowed_values/expected_text/old_text from model prose.
+          // Objective kinds above can still override to present=true.
           probed.region_present = regionPresent;
           if (regionPresent) {
             probed.text = (await locator.textContent().catch(() => null)) || null;

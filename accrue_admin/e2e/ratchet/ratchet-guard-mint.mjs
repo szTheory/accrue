@@ -110,6 +110,59 @@ function homeSpecForKind(kind) {
   }
 }
 
+const REQUIRED_FIELDS_BY_KIND = Object.freeze({
+  "design-token": ["selector", "property", "expected_token"],
+  contrast: ["selector", "min_ratio"],
+  "spacing-scale": ["selector", "property", "allowed_values"],
+  microcopy: ["route", "expected_text", "old_text"],
+  "focus-ring": ["selector"],
+  motion: ["route", "selector", "max_ms"],
+});
+
+function requiredFieldsForKind(kind) {
+  return REQUIRED_FIELDS_BY_KIND[kind] || [];
+}
+
+function isMissingRequiredValue(value) {
+  if (value === null || value === undefined) return true;
+  if (Array.isArray(value)) return value.length === 0;
+  if (typeof value === "string") return value.trim() === "";
+  return false;
+}
+
+function missingRequiredFields(kind, row) {
+  const missing = [];
+  if (!row || typeof row !== "object") {
+    return ["finding_id", "kind", ...requiredFieldsForKind(kind)];
+  }
+  if (isMissingRequiredValue(row.finding_id)) missing.push("finding_id");
+  if (row.kind !== kind) missing.push("kind");
+  for (const field of requiredFieldsForKind(kind)) {
+    if (isMissingRequiredValue(row[field])) missing.push(field);
+  }
+  return missing;
+}
+
+function validateConcreteRow(row, targetSpecPath) {
+  if (!row || typeof row !== "object") {
+    throw new Error("appendMintedRow: malformed concrete guard row (not an object)");
+  }
+  const kind = row.kind;
+  if (!kind || kind === "ledger-count" || requiredFieldsForKind(kind).length === 0) {
+    throw new Error(`appendMintedRow: malformed concrete guard row kind ${JSON.stringify(kind)}`);
+  }
+  const expectedHome = homeSpecForKind(kind);
+  if (expectedHome !== targetSpecPath) {
+    throw new Error(
+      `appendMintedRow: ${kind} row belongs in ${JSON.stringify(expectedHome)}, not ${JSON.stringify(targetSpecPath)}`
+    );
+  }
+  const missing = missingRequiredFields(kind, row);
+  if (missing.length > 0) {
+    throw new Error(`appendMintedRow: ${kind} row missing required field(s): ${missing.join(", ")}`);
+  }
+}
+
 // -----------------------------------------------------------------------------
 // Per-kind row shapes — EXACTLY the shapes 207-03 Task 1's loop tests read. The `finding_id` +
 // `kind` come from the finding; every other field is a freshly re-captured `probedFields` value
@@ -164,6 +217,16 @@ function mintGuardRow(finding, probedFields = {}) {
 
   const guard_ref = `${targetSpecPath}::@ratchet:${finding.finding_id}`;
   const row = buildRow(kind, finding, probedFields);
+  const missing = missingRequiredFields(kind, row);
+  if (missing.length > 0) {
+    return {
+      guard_ref: "ledger-count",
+      targetSpecPath: null,
+      row: null,
+      downgraded_from: kind,
+      missing_fields: missing,
+    };
+  }
   return { guard_ref, targetSpecPath, row };
 }
 
@@ -221,6 +284,7 @@ function appendMintedRow(targetSpecPath, row, repoRoot) {
   if (!isSafeSpecPath(targetSpecPath)) {
     throw new Error(`appendMintedRow: refusing unsafe/non-allowlisted spec path: ${JSON.stringify(targetSpecPath)}`);
   }
+  validateConcreteRow(row, targetSpecPath);
   const absPath = path.join(repoRoot, targetSpecPath);
   const text = fs.readFileSync(absPath, "utf8");
   const { bodyStart, closeIdx } = locateRegion(text);
@@ -327,6 +391,44 @@ function runSelfTest() {
       );
     }
 
+    // (b2) incomplete concrete rows degrade to the ledger-count sentinel instead of writing
+    // structurally incomplete data into committed guard-home specs (CR-02).
+    {
+      const incompleteCases = [
+        {
+          name: "design-token",
+          finding: { finding_id: hex16(0xb1), dimension: 1 },
+          probed: { selector: ".ax-card", property: "color", expected_token: null },
+          missing: "expected_token",
+        },
+        {
+          name: "spacing-scale",
+          finding: { finding_id: hex16(0xb2), dimension: 3, defect_bucket: "inconsistent-rhythm" },
+          probed: { selector: ".ax-card", property: "padding", allowed_values: [] },
+          missing: "allowed_values",
+        },
+        {
+          name: "microcopy",
+          finding: { finding_id: hex16(0xb3), dimension: 12 },
+          probed: { route: "/billing/customers", expected_text: "", old_text: "Empty" },
+          missing: "expected_text",
+        },
+      ];
+
+      for (const { name, finding, probed, missing } of incompleteCases) {
+        const out = mintGuardRow(finding, probed);
+        assertSelfTest(
+          `(b2) incomplete ${name} degrades to ledger-count`,
+          out.guard_ref === "ledger-count" &&
+            out.targetSpecPath === null &&
+            out.row === null &&
+            out.downgraded_from === name &&
+            out.missing_fields.includes(missing),
+          JSON.stringify(out)
+        );
+      }
+    }
+
     // (c) round-trip every real synth kind through the IMPORTED checkGuardRef, against a mkdtemp
     // COPY of the real target spec (never the real committed file).
     {
@@ -406,6 +508,30 @@ function runSelfTest() {
       );
     }
 
+    // (d2) direct malformed append is refused before any file rewrite.
+    {
+      const targetSpecPath = "accrue_admin/e2e/foundation-tokens.spec.js";
+      const fakeRepo = fs.mkdtempSync(path.join(root, "repo-malformed-"));
+      const destAbs = path.join(fakeRepo, targetSpecPath);
+      fs.mkdirSync(path.dirname(destAbs), { recursive: true });
+      fs.copyFileSync(path.join(REPO_ROOT, targetSpecPath), destAbs);
+      const before = fs.readFileSync(destAbs, "utf8");
+
+      let threw = false;
+      try {
+        appendMintedRow(
+          targetSpecPath,
+          { finding_id: hex16(0xd2), kind: "design-token", selector: ".ax-card", property: "color" },
+          fakeRepo
+        );
+      } catch (error) {
+        threw = /design-token row missing required field\(s\): expected_token/.test(error.message);
+      }
+
+      assertSelfTest("(d2) malformed direct append throws before rewrite", threw);
+      assertSelfTest("(d2) malformed direct append leaves target spec byte-identical", fs.readFileSync(destAbs, "utf8") === before);
+    }
+
     // (e) rows stay sorted by finding_id after 3 out-of-order appends.
     {
       const targetSpecPath = "accrue_admin/e2e/reduced-motion.spec.js";
@@ -457,4 +583,11 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   }
 }
 
-export { kindForFinding, homeSpecForKind, mintGuardRow, appendMintedRow };
+export {
+  kindForFinding,
+  homeSpecForKind,
+  requiredFieldsForKind,
+  missingRequiredFields,
+  mintGuardRow,
+  appendMintedRow,
+};
