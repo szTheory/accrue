@@ -55,6 +55,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
       {:ok, subscription} ->
         mount_path = admin["mount_path"] || "/billing"
         scope = socket.assigns.current_owner_scope
+        events = timeline_events(subscription.id)
 
         {:ok,
          socket
@@ -65,8 +66,8 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
          )
          |> assign(:subscription, subscription)
          |> assign(:customer, subscription.customer)
-         |> assign(:timeline_events, [])
-         |> assign(:timeline_events_loaded?, false)
+         |> assign(:timeline_events, events)
+         |> assign(:timeline_events_loaded?, true)
          |> assign(:raw_json_loaded?, false)
          |> assign(:proration_options, proration_options())
          |> assign(:swap_plan_available, swap_plan_available?(subscription))
@@ -214,9 +215,14 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
         >
           <:status><StatusBadge.status_badge status={@subscription.status} /></:status>
           <:facts>
-            <span><%= @customer.name || @customer.email || @customer.id %></span>
-            <span>period ends <%= format_datetime(@subscription.current_period_end) %></span>
-            <span><%= lifecycle_operator_summary(@subscription) %></span>
+            <span class="ax-summary-fact">
+              <strong>Customer</strong>
+              <%= @customer.name || @customer.email || @customer.id %>
+            </span>
+            <span :for={fact <- summary_health_facts(@subscription)} class="ax-summary-fact">
+              <strong><%= fact.label %></strong>
+              <%= fact.value %>
+            </span>
           </:facts>
         </Detail.summary_card>
 
@@ -326,7 +332,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
           <RelatedResources.related_resources items={@related_items} />
         </div>
 
-        <details class="ax-detail-section" data-ax-lazy-activity phx-click="load_activity">
+        <details class="ax-detail-section" data-ax-lazy-activity phx-click="load_activity" open>
           <summary class="ax-detail-section-head">
             <span class="ax-detail-section-title">Activity</span>
           </summary>
@@ -334,7 +340,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
             <Timeline.timeline
               label="Subscription events"
               empty_label="No subscription events yet"
-              items={timeline_items(@timeline_events)}
+              items={timeline_items(@timeline_events, @subscription)}
             />
           <% else %>
             <p class="ax-body">Open this section to load subscription activity.</p>
@@ -665,7 +671,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
       },
       %{
         label: "Plan / price",
-        value: current_price_id(subscription) || "-"
+        value: current_price_id(subscription) || "Price not projected"
       }
       |> maybe_put_summary_action(swap_plan_available?(subscription), %{
         action_label: "Change",
@@ -679,7 +685,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
       }),
       %{label: "Current period", value: current_period_summary(subscription)},
       renews_or_ends_row(subscription),
-      %{label: "Amount (MRR)", value: money_or_dash(nil)}
+      %{label: "Amount (MRR)", value: mrr_summary(subscription)}
     ]
 
     base_rows
@@ -773,27 +779,65 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
       else: "cancel_at_period_end"
   end
 
-  defp current_period_summary(subscription) do
-    "#{format_datetime(subscription.current_period_start)} - #{format_datetime(subscription.current_period_end)}"
+  defp current_period_summary(%{
+         current_period_start: %DateTime{} = starts_at,
+         current_period_end: %DateTime{} = ends_at
+       }) do
+    "#{format_datetime(starts_at)} - #{format_datetime(ends_at)}"
+  end
+
+  defp current_period_summary(_subscription) do
+    "Current period not projected"
+  end
+
+  defp summary_health_facts(subscription) do
+    [
+      %{label: "Health", value: lifecycle_health_label(subscription)},
+      %{label: "Renewal", value: renews_or_ends_summary(subscription)},
+      %{label: "MRR", value: mrr_summary(subscription)}
+    ]
+  end
+
+  defp mrr_summary(_subscription), do: "Amount not projected locally"
+
+  defp lifecycle_health_label(subscription) do
+    cond do
+      Accrue.Billing.Subscription.past_due?(subscription) -> "At risk"
+      Accrue.Billing.Subscription.canceling?(subscription) -> "Canceling"
+      Accrue.Billing.Subscription.paused?(subscription) -> "Paused"
+      Accrue.Billing.Subscription.canceled?(subscription) -> "Ended"
+      Accrue.Billing.Subscription.active?(subscription) -> "Active"
+      true -> humanize(subscription.status)
+    end
   end
 
   defp renews_or_ends_summary(subscription) do
     cond do
       Accrue.Billing.Subscription.canceled?(subscription) ->
-        "Ended #{format_datetime(subscription.ended_at || subscription.canceled_at)}"
+        if ended_at = subscription.ended_at || subscription.canceled_at do
+          "Ended #{format_datetime(ended_at)}"
+        else
+          "End date not projected"
+        end
 
       Accrue.Billing.Subscription.canceling?(subscription) ->
         "Ends #{format_datetime(subscription.current_period_end)}"
 
-      true ->
+      subscription.cancel_at_period_end ->
+        "End date not projected"
+
+      match?(%DateTime{}, subscription.current_period_end) ->
         "Renews #{format_datetime(subscription.current_period_end)}"
+
+      true ->
+        "Renewal date not projected"
     end
   end
 
   defp billing_fields(subscription) do
     [
       %{label: "Processor", value: humanize(subscription.processor)},
-      %{label: "Plan / price", value: current_price_id(subscription) || "-"},
+      %{label: "Plan / price", value: current_price_id(subscription) || "Price not projected"},
       %{label: "Current period", value: current_period_summary(subscription)},
       %{label: "Renewal", value: renews_or_ends_summary(subscription)},
       %{label: "Quantity", value: quantity_summary(subscription)}
@@ -919,17 +963,37 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
   defp action_label(nil), do: "Subscription action"
   defp action_label(action_type), do: humanize(action_type)
 
-  defp timeline_items(events) do
-    Enum.map(events, fn event ->
-      %{
-        title: event.type,
-        at: format_datetime(event.inserted_at),
-        body: event.subject_type <> " " <> event.subject_id,
-        status: event.actor_type,
-        tone: tone(event),
-        meta: "event ##{event.id}"
-      }
-    end)
+  defp timeline_items(events, subscription) do
+    events = List.wrap(events)
+
+    if events == [] do
+      [subscription_projection_timeline_item(subscription)]
+    else
+      Enum.map(events, &timeline_event_item/1)
+    end
+  end
+
+  defp timeline_event_item(event) do
+    %{
+      title: event.type,
+      at: format_datetime(event.inserted_at),
+      body: event.subject_type <> " " <> event.subject_id,
+      status: event.actor_type,
+      tone: tone(event),
+      meta: "event ##{event.id}"
+    }
+  end
+
+  defp subscription_projection_timeline_item(subscription) do
+    %{
+      title: "Subscription projection loaded",
+      at: format_datetime(subscription.inserted_at || subscription.current_period_start),
+      body:
+        "#{lifecycle_health_label(subscription)} local projection for customer #{subscription.customer_id}",
+      status: "local projection",
+      tone: :cobalt,
+      meta: "subscription #{subscription.processor_id || subscription.id}"
+    }
   end
 
   defp tone(%{actor_type: "admin"}), do: :cobalt
@@ -1330,12 +1394,13 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
 
   defp refresh_subscription(socket, subscription_id) do
     subscription = load_subscription(subscription_id)
+    events = timeline_events(subscription.id)
 
     socket
     |> assign(:subscription, subscription)
     |> assign(:customer, subscription.customer)
-    |> assign(:timeline_events, [])
-    |> assign(:timeline_events_loaded?, false)
+    |> assign(:timeline_events, events)
+    |> assign(:timeline_events_loaded?, true)
     |> assign(:swap_plan_available, swap_plan_available?(subscription))
   end
 
@@ -1393,7 +1458,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
   defp humanize(_value), do: "Unknown"
 
   defp format_datetime(%DateTime{} = value), do: Calendar.strftime(value, "%b %d, %Y %H:%M UTC")
-  defp format_datetime(_value), do: "Unknown"
+  defp format_datetime(_value), do: "Date not projected"
 
   # Read-only dunning-state panel (DUN-07 / SC#2). Tone is conveyed by the
   # status-badge variant only — the panel has no accent fill and no actions.
@@ -1440,19 +1505,6 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
 
   defp pluralize(1, unit), do: "1 #{unit}"
   defp pluralize(count, unit), do: "#{count} #{unit}s"
-
-  defp lifecycle_operator_summary(subscription) do
-    case predicate_summary(subscription) do
-      "active" ->
-        "Active and renewing. Default customer guidance should keep renewal changes explicit."
-
-      "active · canceling" ->
-        "Cancel renewal is already scheduled. Access remains until the current period end."
-
-      summary when is_binary(summary) ->
-        "Lifecycle summary: #{summary}. Keep provider-specific action promises honest."
-    end
-  end
 
   defp provider_action_guidance(subscription) do
     if braintree_processor?(subscription) do
@@ -1579,7 +1631,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
     "#{description}#{quantity} · #{money_or_dash(line.amount)}"
   end
 
-  defp money_or_dash(nil), do: "-"
+  defp money_or_dash(nil), do: "Amount not projected"
 
   defp money_or_dash(%Accrue.Money{} = money) do
     "#{money.amount_minor} #{money.currency}"
@@ -1623,7 +1675,8 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
         },
         %{
           icon: :events,
-          label: "Events",
+          label: Copy.subscription_drill_link_events_for_subscription(),
+          value: "Filtered to this subscription",
           href:
             ScopedPath.build(mount_path, "/events", scope, %{
               "subject_type" => "Subscription",

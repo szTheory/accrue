@@ -107,6 +107,8 @@ defmodule AccrueAdmin.DashboardLiveTest do
 
     # Zone 2 — task launchers (the JTBD doors)
     assert html =~ Copy.home_launcher_customers_title()
+    assert html =~ Copy.home_launcher_customers_meta()
+    assert html =~ "ax-launcher-primary"
     assert html =~ Copy.home_launcher_invoices_title()
     assert html =~ Copy.home_launcher_recovery_title()
     # Title relabeled in Phase 175-02 (IA-01 verb relabels); use Copy function directly.
@@ -124,6 +126,8 @@ defmodule AccrueAdmin.DashboardLiveTest do
     assert html =~ Copy.dashboard_kpi_webhooks_aria_label()
 
     # Zone 4 — recent activity timelines
+    assert html =~ Copy.dashboard_activity_event_ledger_eyebrow()
+    assert html =~ Copy.dashboard_activity_webhook_health_eyebrow()
     assert html =~ "invoice.payment_failed"
     assert html =~ "customer.updated"
 

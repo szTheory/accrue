@@ -1003,6 +1003,9 @@ defmodule AccrueAdmin.Copy do
   def subscription_drill_link_events_index,
     do: "All billing events (full ledger)"
 
+  def subscription_drill_link_events_for_subscription,
+    do: "Subscription events"
+
   def payment_processor_action_warning(payment_intent),
     do: "Processor requires action: " <> inspect(payment_intent)
 
@@ -1327,6 +1330,8 @@ defmodule AccrueAdmin.Copy do
 
   def home_launcher_customers_copy,
     do: "Search by name, email, or ID, then open their billing 360."
+
+  def home_launcher_customers_meta, do: "Primary support lookup"
 
   def home_launcher_invoices_title, do: "Clear the invoice queue"
 

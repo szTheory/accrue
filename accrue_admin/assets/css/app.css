@@ -1440,6 +1440,12 @@ a.ax-kpi-card--linked:focus-visible {
   flex-wrap: wrap;
 }
 
+.ax-detail-drawer-actions .ax-button-ghost {
+  border-color: var(--ax-border-strong);
+  background: var(--ax-elevated);
+  color: var(--ax-primary);
+}
+
 .ax-detail-drawer-body {
   display: grid;
   gap: var(--ax-space-lg);
@@ -3710,6 +3716,25 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
   transition: var(--ax-transition-base);
 }
 
+.ax-launcher-primary {
+  border-color: var(--ax-accent-border);
+  background: color-mix(in srgb, var(--ax-accent-subtle) 52%, var(--ax-elevated));
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ax-accent-border) 70%, transparent);
+}
+
+.ax-launcher-primary .ax-launcher-icon {
+  background: var(--ax-accent-readable);
+  color: var(--ax-base);
+}
+
+.ax-launcher-primary .ax-launcher-title {
+  font-size: var(--ax-type-lg);
+}
+
+.ax-launcher-primary .ax-launcher-meta {
+  color: var(--ax-accent-readable);
+}
+
 .ax-launcher:hover,
 .ax-launcher:focus-visible {
   transform: translateY(calc(-1 * var(--ax-rise-sm)));
@@ -3771,6 +3796,10 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  .ax-launcher-primary {
+    grid-column: span 2;
+  }
+
   .ax-kpi-grid-4 {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -3781,9 +3810,25 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
     grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 
+  .ax-launcher-primary {
+    grid-column: span 2;
+  }
+
   .ax-kpi-grid-4 {
     grid-template-columns: repeat(4, minmax(0, 1fr));
   }
+}
+
+.ax-activity-card {
+  border-left: 3px solid var(--ax-border-strong);
+}
+
+.ax-activity-card-ledger {
+  border-left-color: var(--ax-accent-border);
+}
+
+.ax-activity-card-pipeline {
+  border-left-color: var(--ax-warning-readable);
 }
 
 /* ============================================================================
@@ -3924,6 +3969,17 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
   font-size: var(--ax-type-sm);
   min-width: 0;
   overflow-wrap: anywhere;
+}
+
+.ax-summary-fact {
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--ax-space-2xs);
+}
+
+.ax-summary-fact strong {
+  color: var(--ax-primary);
+  font-weight: 600;
 }
 
 .ax-summary-actions {

@@ -107,14 +107,14 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
 
           <:stat_strip>
             <StatStrip.stat_strip label="Subscription summary">
-              <:stat label="Active" value={Integer.to_string(@summary.active_count)} />
+              <:stat label="Active subscriptions" value={Integer.to_string(@summary.active_count)} />
               <:stat
-                label="Canceling"
+                label="Canceling renewals"
                 value={Integer.to_string(@summary.canceling_count)}
                 tone="amber"
               />
-              <:stat label="Paused" value={Integer.to_string(@summary.paused_count)} tone="amber" />
-              <:stat label="Past due" value={Integer.to_string(@summary.past_due_count)} />
+              <:stat label="Paused subscriptions" value={Integer.to_string(@summary.paused_count)} tone="amber" />
+              <:stat label="Past-due subscriptions" value={Integer.to_string(@summary.past_due_count)} />
             </StatStrip.stat_strip>
           </:stat_strip>
 
@@ -148,7 +148,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
           clear_href={clear_all_href(@params, @table_path)}
           columns={[
             %{
-              label: "Customer / subscription",
+              label: "Customer and subscription IDs",
               render: &identity_cell(&1, @admin_mount_path, @current_owner_scope)
             },
             %{label: "State", render: &state_cell/1},
@@ -159,7 +159,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
           card_title={&customer_label/1}
           card_fields={[
             %{
-              label: "Customer / subscription",
+              label: "Customer and subscription IDs",
               render: &identity_cell(&1, @admin_mount_path, @current_owner_scope)
             },
             %{label: "State", render: &state_cell/1},
@@ -239,9 +239,11 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
   defp identity_cell(row, mount_path, owner_scope) do
     customer_href = scoped_path(mount_path, "/customers/#{row.customer_id}", owner_scope)
     subscription_href = scoped_path(mount_path, "/subscriptions/#{row.id}", owner_scope)
+    customer_id = escape(row.customer_id)
+    subscription_id = escape(row.processor_id || row.id)
 
     Phoenix.HTML.raw(
-      ~s(<span class="ax-stack-sm"><a href="#{customer_href}" class="ax-link">#{escape(customer_label(row))}</a><a href="#{subscription_href}" class="ax-label ax-muted">#{escape(row.processor_id || row.id)}</a></span>)
+      ~s(<span class="ax-stack-sm"><a href="#{customer_href}" class="ax-link">#{escape(customer_label(row))}</a><span class="ax-label ax-muted">Customer ID #{customer_id}</span><a href="#{subscription_href}" class="ax-label ax-muted">Subscription #{subscription_id}</a></span>)
     )
   end
 

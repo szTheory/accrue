@@ -112,10 +112,11 @@ defmodule AccrueAdmin.Live.DashboardLive do
           </div>
 
           <div class="ax-launchers">
-            <a class="ax-launcher" href={ScopedPath.build(@admin_mount_path, "/customers", @current_owner_scope)}>
+            <a class="ax-launcher ax-launcher-primary" href={ScopedPath.build(@admin_mount_path, "/customers", @current_owner_scope)}>
               <span class="ax-launcher-icon"><Icon.icon name={:search} size="lg" /></span>
               <span class="ax-launcher-title"><%= Copy.home_launcher_customers_title() %></span>
               <span class="ax-launcher-copy"><%= Copy.home_launcher_customers_copy() %></span>
+              <span class="ax-launcher-meta"><%= Copy.home_launcher_customers_meta() %></span>
             </a>
 
             <a class="ax-launcher" href={ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope, %{"status" => "open"})}>
@@ -198,9 +199,12 @@ defmodule AccrueAdmin.Live.DashboardLive do
 
         <%!-- Zone 4 — Recent activity --%>
         <section class="ax-grid ax-grid-2" aria-label={Copy.dashboard_activity_section_aria_label()} data-ax-zone="recent-activity">
-          <article class="ax-card">
+          <article class="ax-card ax-activity-card ax-activity-card-ledger">
             <header class="ax-section-head">
-              <h3 class="ax-heading"><%= Copy.dashboard_activity_recent_local_heading() %></h3>
+              <div>
+                <p class="ax-eyebrow"><%= Copy.dashboard_activity_event_ledger_eyebrow() %></p>
+                <h3 class="ax-heading"><%= Copy.dashboard_activity_recent_local_heading() %></h3>
+              </div>
               <a class="ax-link-quiet" href={ScopedPath.build(@admin_mount_path, "/events", @current_owner_scope)}>
                 <%= Copy.home_activity_events_link() %>
                 <Icon.icon name={:arrow_right} size="sm" />
@@ -214,9 +218,12 @@ defmodule AccrueAdmin.Live.DashboardLive do
             />
           </article>
 
-          <article class="ax-card">
+          <article class="ax-card ax-activity-card ax-activity-card-pipeline">
             <header class="ax-section-head">
-              <h3 class="ax-heading"><%= Copy.dashboard_activity_projection_pipeline_heading() %></h3>
+              <div>
+                <p class="ax-eyebrow"><%= Copy.dashboard_activity_webhook_health_eyebrow() %></p>
+                <h3 class="ax-heading"><%= Copy.dashboard_activity_projection_pipeline_heading() %></h3>
+              </div>
               <a class="ax-link-quiet" href={ScopedPath.build(@admin_mount_path, "/webhooks", @current_owner_scope)}>
                 <%= Copy.home_activity_webhooks_link() %>
                 <Icon.icon name={:arrow_right} size="sm" />

@@ -234,7 +234,7 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert {:ok, _view, html} = live(conn, "/billing/subscriptions?view=all")
 
     assert_table_headings_in_order(html, [
-      "Customer / subscription",
+      "Customer and subscription IDs",
       "State",
       "Plan / amount",
       "Renews / ends",
@@ -251,6 +251,8 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert {:ok, _view, html} = live(conn, "/billing/subscriptions?view=all")
 
     assert html =~ "phase196-primary@example.com"
+    assert html =~ "Customer ID #{subscription.customer_id}"
+    assert html =~ "Subscription #{subscription.processor_id}"
     assert html =~ subscription.processor_id
     assert_before(html, "phase196-primary@example.com", subscription.processor_id)
   end
