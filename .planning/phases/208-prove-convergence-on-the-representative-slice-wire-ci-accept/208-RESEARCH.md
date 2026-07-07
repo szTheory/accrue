@@ -450,22 +450,19 @@ GitHub documents that `continue-on-error: true` lets a job fail without failing 
 |---|-------|---------|---------------|
 | n/a | No unverified assumptions are required for the planning-critical findings in this research. | All | n/a |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
-1. **How should `component-kitchen` map to Phase 200 census surfaces for score-floor enforcement?**
-   - What we know: The capture slice includes `component-kitchen`, while Phase 200 cell rows use surface names that can be individual component families. [VERIFIED: codebase grep]
-   - What's unclear: The exact authoritative mapping for all design-system foundation cells is not encoded as a dedicated Phase 208 helper yet. [VERIFIED: codebase grep]
-   - Recommendation: Plan a small helper and fixture that expands `component-kitchen` to the intended component-family census set, then fails if no rows are examined. [VERIFIED: codebase grep]
+1. **RESOLVED - `component-kitchen` maps to component-family/design-system foundation census rows.**
+   - Resolution: Treat `SLICES.foundation` as the slice source of truth, then expand each member to the Phase 200 score-floor census rows it owns. `dashboard`, `subscription-detail`, and `subscriptions` may use exact surface matching where Phase 200 rows use those surface names. `component-kitchen` must expand to the design-system/component-family census rows rather than being checked as one exact `component-kitchen` row, because an exact-only lookup can examine zero Phase 200 rows and falsely satisfy CONV-01. [VERIFIED: codebase grep]
+   - Plan impact: Plan 208-01 must create a tested helper/fixture that expands every `SLICES.foundation` member to at least one score-floor row and fails closed if any member examines zero rows. [VERIFIED: checker issue]
 
-2. **What is the definitive non-placeholder proof when final open count is truly zero?**
-   - What we know: D-61 rejects an all-zero empty-file baseline, but a genuinely converged slice may have zero open findings. [VERIFIED: 208-CONTEXT.md]
-   - What's unclear: Whether the baseline file itself should gain explicit evidence metadata or whether sign-off evidence plus `rounds.ndjson` is sufficient. [VERIFIED: 208-CONTEXT.md]
-   - Recommendation: Prefer a verifier-visible proof using frozen baseline hash, two dry foundation rounds, real bundle hash, non-empty round evidence, and non-empty resolved/locked or explicit convergence metadata. [VERIFIED: 208-CONTEXT.md]
+2. **RESOLVED - materially non-empty baseline proof requires evidence beyond the baseline shape.**
+   - Resolution: A frozen baseline with the empty-file SHA and all-zero counts is invalid. If the representative slice genuinely has zero open findings, the verifier may still accept it only when same-epoch evidence proves the ratchet ran: two trailing dry `scope=foundation` rows, non-empty `bundle_sha256`, score-floor census coverage for every expanded slice member, both regression files at 0 bytes, independent recompute match, and frozen baseline metadata. The baseline file alone is not enough to distinguish real convergence from "never ran the ratchet." [VERIFIED: 208-CONTEXT.md]
+   - Plan impact: Plan 208-01's `--verify-frozen` path must encode this materiality rule, and Plan 208-05's sign-off must cite the same evidence before ACCEPT. [VERIFIED: checker issue]
 
-3. **Should the CI job itself prove existing UI gates are green, or only verify that those independent jobs are wired and referenced?**
-   - What we know: D-62 says the new ratchet job should remain Node-only unless a concrete verifier requires BEAM/Postgres/browser, and CONV-05 requires existing gates remain green. [VERIFIED: 208-CONTEXT.md]
-   - What's unclear: Whether sign-off evidence should cite workflow run artifacts manually or whether CI should inspect current workflow job status. [VERIFIED: 208-CONTEXT.md]
-   - Recommendation: Keep the new job Node-only, verify workflow wiring and sign-off evidence, and leave actual BEAM/browser work to the existing jobs. [VERIFIED: codebase grep]
+3. **RESOLVED - final ACCEPT requires PASS evidence for existing UI gates and asset freshness.**
+   - Resolution: Keep `admin-ui-ratchet-guardrails` Node-only and let `admin-hardening-guardrails`, `admin-phase200-guardrails`, and asset drift remain independent gates. The sign-off artifact may record `PENDING`, `BLOCKED`, or `N/A` while evidence is still being gathered, but final maintainer ACCEPT is blocked unless those existing UI gate rows and bundle freshness have `PASS` evidence with a command, workflow run, artifact, or verifier output reference. There is no maintainer override that turns `PENDING` or `N/A` existing-gate evidence into final ACCEPT. [VERIFIED: 208-CONTEXT.md]
+   - Plan impact: Plan 208-05 must pause/block before inserting the final ACCEPT line when existing UI gate or asset freshness evidence is not `PASS`. [VERIFIED: checker issue]
 
 ## Environment Availability
 
