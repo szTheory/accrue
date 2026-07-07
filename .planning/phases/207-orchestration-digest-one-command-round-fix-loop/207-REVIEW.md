@@ -1,158 +1,149 @@
 ---
 phase: 207-orchestration-digest-one-command-round-fix-loop
-reviewed: 2026-07-04T12:00:00Z
+reviewed: 2026-07-07T12:35:13Z
 depth: standard
-files_reviewed: 18
+files_reviewed: 20
 files_reviewed_list:
+  - accrue_admin/e2e/admin-interaction-overlay-phase199.spec.js
+  - accrue_admin/e2e/admin-page-flow-phase200.spec.js
+  - accrue_admin/e2e/admin-visuals.spec.js
+  - accrue_admin/e2e/baseline-manifest.js
+  - accrue_admin/e2e/foundation-tokens.spec.js
+  - accrue_admin/e2e/ratchet-fix-probe.spec.js
   - accrue_admin/e2e/ratchet/phase-ratchet-ledger.mjs
+  - accrue_admin/e2e/ratchet/ratchet-digest.mjs
+  - accrue_admin/e2e/ratchet/ratchet-fix.mjs
+  - accrue_admin/e2e/ratchet/ratchet-guard-mint.mjs
   - accrue_admin/e2e/ratchet/ratchet-ledger.js
   - accrue_admin/e2e/ratchet/ratchet-propose.mjs
   - accrue_admin/e2e/ratchet/ratchet-verify.mjs
-  - accrue_admin/e2e/ratchet/ratchet-guard-mint.mjs
-  - accrue_admin/e2e/ratchet/ratchet-digest.mjs
-  - accrue_admin/e2e/ratchet/ratchet-fix.mjs
-  - accrue_admin/e2e/baseline-manifest.js
-  - accrue_admin/e2e/admin-visuals.spec.js
-  - accrue_admin/e2e/foundation-tokens.spec.js
-  - accrue_admin/e2e/admin-interaction-overlay-phase199.spec.js
+  - accrue_admin/e2e/ratchet/rounds.ndjson
   - accrue_admin/e2e/reduced-motion.spec.js
-  - accrue_admin/e2e/admin-page-flow-phase200.spec.js
-  - accrue_admin/e2e/ratchet-fix-probe.spec.js
-  - accrue_admin/lib/mix/tasks/accrue_admin.ui.round.ex
   - accrue_admin/lib/mix/tasks/accrue_admin.ui.fix.ex
-  - accrue_admin/test/mix/tasks/accrue_admin_ui_round_test.exs
+  - accrue_admin/lib/mix/tasks/accrue_admin.ui.round.ex
+  - accrue_admin/package.json
   - accrue_admin/test/mix/tasks/accrue_admin_ui_fix_test.exs
+  - accrue_admin/test/mix/tasks/accrue_admin_ui_round_test.exs
 findings:
-  critical: 2
-  warning: 3
-  info: 3
-  total: 8
+  critical: 0
+  warning: 4
+  info: 0
+  total: 4
 status: issues_found
 ---
 
 # Phase 207: Code Review Report
 
-**Reviewed:** 2026-07-04T12:00:00Z
+**Reviewed:** 2026-07-07T12:35:13Z
 **Depth:** standard
-**Files Reviewed:** 18
+**Files Reviewed:** 20
 **Status:** issues_found
 
 ## Summary
 
-Reviewed the Phase 207 UI-ratchet orchestration slice: the round-seal / next-round / convergence additions to `phase-ratchet-ledger.mjs`, the new `ratchet-digest.mjs` HTML digest, the `ratchet-fix.mjs` apply/finalize mutation half, the `ratchet-guard-mint.mjs` guard mint, the `ratchet-fix-probe.spec.js` DOM probe, and the two thin `mix accrue_admin.ui.round` / `ui.fix` orchestrators plus their tests.
+Reviewed the 20-file Phase 207 source scope from the plan summaries, then re-reviewed the relevant ledger/fix-loop files after post-review fix commit `b1551e6f`.
 
-Overall the isolation posture is good: the LLM stays off the gate path, `--self-test` paths target `mkdtemp` scratch dirs, path-traversal on `png_ref` is closed, and HTML output is escaped. However there are two defects that break the phase's own load-bearing guarantees end-to-end — the digest can abort the whole round on legitimate LLM output, and `finalize-fixes` writes structurally-incomplete guard rows into committed guard-home specs, breaking those specs in CI. Both are reachable on normal (non-adversarial) inputs.
+The previous CR-01 is fixed in current HEAD. `ratchet-fix.mjs` now reads the ledger and calls `validateDecisionsBatch(rows, ledgerRows)` before any append (`accrue_admin/e2e/ratchet/ratchet-fix.mjs:211`), and that pure preflight rejects non-open or missing targets plus dangling `duplicate-of:<finding_id>` suppressions before `applyDecisions()` can append rows (`accrue_admin/e2e/ratchet/ratchet-fix.mjs:136`). The new self-test fixture `(b2) dangling duplicate-of aborts during preflight` asserts the ledger remains byte-identical (`accrue_admin/e2e/ratchet/ratchet-fix.mjs:512`). I also ran `node accrue_admin/e2e/ratchet/ratchet-fix.mjs --self-test`; it passed.
 
-## Critical Issues
+No critical findings remain. Four previously reported warnings are still valid.
 
-### CR-01: Digest aborts the entire round when a confirmed finding has `suggested_fix: null`
-
-**File:** `accrue_admin/e2e/ratchet/ratchet-digest.mjs:66-74, 281-293, 940-948`
-**Issue:** `REQUIRED_ROW_FIELDS` includes `"suggested_fix"`, and `validateDigestRows` throws when any worklist/decisions-needed row has a `null`/empty value for it. But `suggested_fix` is *not* a required field anywhere upstream: the proposer's forced-tool schema requires only `["dimension","region_tag","severity","defect"]` (`ratchet-propose.mjs:387`), and `emitCandidates` explicitly stores `suggested_fix: typeof f.suggested_fix === "string" ? f.suggested_fix : null` (`ratchet-propose.mjs:852`). That `null` is carried verbatim onto the committed ledger row (`suggested_fix` is in `ratchet-ledger.js` `CARRY_FIELDS`, and `appendOpen` copies present keys, `null` included). So a genuinely-confirmed finding whose model output omitted a fix reaches `generateDigest`, `validateDigestRows(worklist, ...)` throws, `ratchet-digest.mjs` exits non-zero, and the `mix accrue_admin.ui.round` `digest` step `run_step!` calls `Mix.raise("digest step failed ...")` — aborting the round with **no digest produced**. This directly defeats the documented guarantee ("ALWAYS renders the digest before deciding whether to raise", `accrue_admin.ui.round.ex:20-22`). It fires on ordinary LLM output, not a crafted payload.
-**Fix:** Either drop `suggested_fix` from the hard-required set and render a placeholder, or normalize it to a non-empty string at emit time. Minimal change in the digest:
-```js
-// ratchet-digest.mjs — treat suggested_fix as optional prose, not a gate field
-const REQUIRED_ROW_FIELDS = [
-  "finding_id", "surface", "region_tag", "severity", "persona_frequency", "defect",
-]; // suggested_fix removed
-// ...and in renderFindingRow, guard the optional fix line:
-const fixLine = f.suggested_fix ? `<p class="fix muted">${escapeHtml(f.suggested_fix)}</p>` : "";
-```
-(If the fix must stay mandatory, instead default it at the proposer: `suggested_fix: typeof f.suggested_fix === "string" && f.suggested_fix.trim() ? f.suggested_fix : "(no fix suggested)"`, so no null ever reaches the committed ledger.)
-
-### CR-02: `finalize-fixes` mints structurally-incomplete guards into committed guard-home specs for design-token / spacing-scale / microcopy findings
-
-**File:** `accrue_admin/e2e/ratchet/ratchet-fix.mjs:239-266`, `accrue_admin/e2e/ratchet-fix-probe.spec.js:198-213`, `accrue_admin/e2e/ratchet/ratchet-guard-mint.mjs:119-138`
-**Issue:** `ratchet-fix-probe.spec.js`'s `default` branch (every rubric dimension except contrast/6 and motion/9) unconditionally sets `present = false` and writes `probed = { selector, route, region_present, text }` — it never captures kind-specific fields. But `finalizeFixes` then routes those `present:false` findings through `mintGuardRow` → `buildRow`, and `buildRow` needs fields the probe never supplied:
-- `design-token` (dim 1) needs `property` + `expected_token` — probe supplies neither.
-- `spacing-scale` (dim 3 + `inconsistent-rhythm`) needs `property` + `allowed_values` — neither supplied.
-- `microcopy` (dim 12) needs `expected_text` + `old_text` — neither supplied.
-
-`buildRow` reads them off the empty map as `undefined`; `JSON.stringify` drops them; `appendMintedRow` writes an incomplete row into the committed guard-home spec (`foundation-tokens.spec.js` / `admin-page-flow-phase200.spec.js`) and flips `RATCHET_AUTO_GUARDS.length > 0`, so the previously-skipped auto-guard test now runs. It then executes e.g. `styleOf(locator, undefined)` / `rootToken(page, undefined)` (design-token) or `expect(text).toContain(undefined)` (microcopy) and **fails in CI** — corrupting a committed spec. `checkGuardRef`'s gate can't catch this: it only verifies the `@ratchet:<finding_id>` token substring exists, not that the row's kind-fields are populated. The probe's own comment even claims it produces "concrete [guards] for design-token/microcopy/focus-ring", but only `focus-ring` (needs just `selector`), `contrast`, and `motion` actually get complete data. This is reachable for any resolved dim-1/dim-3-rhythm/dim-12 finding — all common.
-**Fix:** Make `mintGuardRow`/`buildRow` refuse to mint a concrete guard when a required kind-field is missing, and have `finalizeFixes` fall back to the `ledger-count` sentinel (or leave the finding `resolved`) in that case. Concretely, in `ratchet-guard-mint.mjs`:
-```js
-const REQUIRED_FIELDS_BY_KIND = {
-  "design-token": ["selector", "property", "expected_token"],
-  contrast: ["selector", "min_ratio"],
-  "spacing-scale": ["selector", "property", "allowed_values"],
-  microcopy: ["route", "expected_text", "old_text"],
-  "focus-ring": ["selector"],
-  motion: ["route", "selector", "max_ms"],
-};
-function mintGuardRow(finding, probedFields = {}) {
-  const kind = kindForFinding(finding);
-  if (kind === "ledger-count") return { guard_ref: "ledger-count", targetSpecPath: null, row: null };
-  const missing = REQUIRED_FIELDS_BY_KIND[kind].filter((k) => probedFields[k] == null);
-  if (missing.length) {
-    // degrade to the ledger-count sentinel rather than mint a broken concrete guard
-    return { guard_ref: "ledger-count", targetSpecPath: null, row: null };
-  }
-  // ...existing allowlist + guard_ref build...
-}
-```
-Alternatively, extend the probe's `default` branch to actually capture the design-token/spacing/microcopy fields before it is allowed to report `present:false` for those kinds.
+## Narrative Findings (AI reviewer)
 
 ## Warnings
 
-### WR-01: `ratchet-verify.mjs` ledger-isolation self-test (vi) is vacuous — it can never fail
+### WR-01: [WARNING] `ratchet-verify.mjs` ledger-isolation self-test is still vacuous
 
-**File:** `accrue_admin/e2e/ratchet/ratchet-verify.mjs:826-834`
-**Issue:** The test claims to prove "real committed findings.ledger.ndjson untouched by --self-test", but it reads the file twice consecutively with **no operation in between**:
+**File:** `accrue_admin/e2e/ratchet/ratchet-verify.mjs:823`
+
+**Issue:** The self-test claims to prove the real committed `findings.ledger.ndjson` is untouched by `--self-test`, but it reads `beforeBytes` and `afterBytes` consecutively after all fixtures have already run. There is no operation between the two reads, so the assertion cannot fail even if an earlier fixture mutated the committed ledger.
+
+**Fix:** Snapshot the real ledger at the top of `runSelfTest()` before any fixture code runs, then compare against a fresh read in this check.
+
 ```js
-const beforeBytes = existedBefore ? fs.readFileSync(LEDGER_PATH) : null;
-const afterBytes  = existedBefore ? fs.readFileSync(LEDGER_PATH) : null;
+function runSelfTest() {
+  const realLedgerSnapshot = fs.existsSync(LEDGER_PATH) ? fs.readFileSync(LEDGER_PATH) : null;
+
+  // ...all fixture checks...
+
+  const after = realLedgerSnapshot ? fs.readFileSync(LEDGER_PATH) : null;
+  assertSelfTest(
+    "(vi) real committed findings.ledger.ndjson untouched by --self-test",
+    !realLedgerSnapshot || Buffer.compare(realLedgerSnapshot, after) === 0
+  );
+}
 ```
-`beforeBytes` and `afterBytes` are identical by construction, so `Buffer.compare(...) === 0` is always true regardless of whether earlier fixtures mutated the ledger. It provides false confidence in exactly the invariant this file most needs to guarantee (it is the *single writer* to the committed ledger). Compare with `phase-ratchet-ledger.mjs:812-830`, which correctly snapshots *before* the mutating call and re-reads *after*.
-**Fix:** Snapshot the bytes at the very top of `runSelfTest()` (before any fixture runs) and compare against a fresh read here:
+
+### WR-02: [WARNING] `appendOpen` still has no idempotency or lifecycle guard
+
+**File:** `accrue_admin/e2e/ratchet/ratchet-ledger.js:303`; interaction with `accrue_admin/e2e/ratchet/ratchet-verify.mjs:307`, `accrue_admin/lib/mix/tasks/accrue_admin.ui.round.ex:100`, and `accrue_admin/e2e/ratchet/phase-ratchet-ledger.mjs:988`
+
+**Issue:** `appendOpen` re-reads existing rows only to compute `seq`; it never checks whether the same `finding_id` is already open or was previously closed. `ui.round` computes the next round from `rounds.ndjson` before `verify`, but `verify` appends open findings before `seal-round` appends the round seal. If the process fails in that window, a rerun uses the same round number and can append duplicate `confirm/open` rows. If a candidate matches a previously resolved or verified-closed finding, `appendOpen` effectively reopens it with a raw `confirm` event instead of the transition-checked `appendReopened` path.
+
+**Fix:** Make `appendOpen` preflight the latest row for the `finding_id` before appending. It should no-op or return the existing row for same-round duplicate opens, reject already-open duplicates from a different round, and route legitimate reopens through `appendReopened` plus the required reopen-marker flow.
+
+### WR-03: [WARNING] `ratchet-propose.mjs` exports a helper but still exits or runs the live proposer on import
+
+**File:** `accrue_admin/e2e/ratchet/ratchet-propose.mjs:51`, `accrue_admin/e2e/ratchet/ratchet-propose.mjs:157`, `accrue_admin/e2e/ratchet/ratchet-propose.mjs:165`, `accrue_admin/e2e/ratchet/ratchet-propose.mjs:873`
+
+**Issue:** `filterPngsBySurfaces` is exported and documented as pure/unit-testable, but the module has top-level `process.exit(0)` guards and an unguarded `await main()`. Importing the helper without `ANTHROPIC_API_KEY` terminates the importing process; importing it with a key can start reading screenshots and calling the Anthropic API. That makes the export unsafe for tests and creates a surprising side-effect boundary for a file that now exposes a public helper.
+
+**Fix:** Move CLI-only guards into `main()` and wrap execution in an import-meta entrypoint guard. Keep helper exports side-effect-free.
+
 ```js
-// top of runSelfTest():
-const _ledgerSnapshot = fs.existsSync(LEDGER_PATH) ? fs.readFileSync(LEDGER_PATH) : null;
-// (vi):
-const after = _ledgerSnapshot ? fs.readFileSync(LEDGER_PATH) : null;
-assertSelfTest("(vi) ...", !_ledgerSnapshot || Buffer.compare(_ledgerSnapshot, after) === 0);
+import { pathToFileURL } from "node:url";
+
+async function main(argv = process.argv.slice(2)) {
+  if (argv.includes("--self-test")) {
+    regionTags.runSelfTest();
+    runProposeSelfTest();
+    return;
+  }
+  if (!process.env.ANTHROPIC_API_KEY) {
+    console.log("[ratchet-propose] ANTHROPIC_API_KEY not set - skipping (human/CI gate only)");
+    return;
+  }
+  // import SDK/manifest here, then run live proposer
+}
+
+if (import.meta.url === pathToFileURL(process.argv[1]).href) {
+  try {
+    await main();
+  } catch (error) {
+    console.error(`ratchet-propose.mjs crashed: ${error.message}`);
+    process.exitCode = 1;
+  }
+}
 ```
 
-### WR-02: `ui.fix` git-commit step commits the whole staged index, not "only priv/static"
+### WR-04: [WARNING] `ratchet-fix` can resolve malformed rounds into `round-NaN` or non-integer artifact paths
 
-**File:** `accrue_admin/lib/mix/tasks/accrue_admin.ui.fix.ex:107-116`
-**Issue:** The moduledoc and inline comment assert it "commits ONLY `priv/static`", and the test asserts `git add priv/static` stages exactly that path. But the subsequent `git commit -m ... --allow-empty` commits the **entire index**, not just the path that was just added. Any files a maintainer had already staged before running `ui.fix` are swept into the `chore(ui-ratchet): rebuild CSS bundle` commit. The test only checks the `add` args, so it can't catch this.
-**Fix:** Scope the commit to the pathspec so unrelated staged changes are excluded:
-```elixir
-run_step!(runner, "git-commit", "git",
-  ["commit", "-m", "chore(ui-ratchet): rebuild CSS bundle for round #{round}",
-   "--allow-empty", "--", "priv/static"],
-  cd: root)
+**File:** `accrue_admin/e2e/ratchet/ratchet-fix.mjs:72`, `accrue_admin/e2e/ratchet/ratchet-fix.mjs:102`, `accrue_admin/e2e/ratchet/ratchet-fix.mjs:304`, `accrue_admin/e2e/ratchet/ratchet-fix.mjs:320`, `accrue_admin/e2e/ratchet/ratchet-fix.mjs:340`
+
+**Issue:** `resolveRound` returns `Math.max(...roundsRows.map((r) => r.round))` without filtering finite integers, and `parseRoundArg` accepts any finite number even though its error says an integer is required. A malformed `rounds.ndjson` row with a missing `round`, or a direct CLI call like `--round 1.5`, flows into `resolveRoundDir()` and produces paths such as `round-NaN` or `round-1.5`, followed by opaque file errors.
+
+**Fix:** Require positive integers for both explicit and discovered rounds, and fail with a clear error when no valid round exists.
+
+```js
+function assertRound(value, source) {
+  const num = Number(value);
+  if (!Number.isInteger(num) || num < 1) {
+    throw new Error(`${source} must be a positive integer, got ${JSON.stringify(value)}`);
+  }
+  return num;
+}
+
+function resolveRound(explicitRound, roundsRows) {
+  if (explicitRound != null) return assertRound(explicitRound, "--round");
+  const rounds = roundsRows.map((r) => r.round).filter((r) => Number.isInteger(r) && r >= 1);
+  if (rounds.length === 0) {
+    throw new Error("resolveRound: no valid round recorded in rounds.ndjson and no --round given");
+  }
+  return Math.max(...rounds);
+}
 ```
-(A trailing `-- priv/static` limits the commit to that pathspec.)
-
-### WR-03: `appendOpen` is the one lifecycle writer with no status/transition guard — the non-atomic round pipeline can append `confirm/open` rows onto non-open findings
-
-**File:** `accrue_admin/e2e/ratchet/ratchet-ledger.js:303-346`; interaction with `accrue_admin/lib/mix/tasks/accrue_admin.ui.round.ex:100-133`
-**Issue:** Every other lifecycle writer (`appendResolved`/`appendVerifiedClosed`/`appendSuppressed`/`appendReopened`) funnels through `appendLifecycleEvent`, which enforces `LEGAL_TRANSITIONS` and refuses illegal appends. `appendOpen` does not: it appends a fresh `confirm/open` row for a `finding_id` regardless of that finding's current folded status, and performs no de-duplication. The `ui.round` pipeline is not atomic — if a run fails after `verify` writes to the committed ledger but before `seal-round` records the round in `rounds.ndjson`, a re-run computes the *same* `--next-round` integer, re-proposes, and `verify` re-appends `confirm/open` rows for still-present findings (and, if a candidate matches a previously `resolved`/`verified-closed` finding, "reopens" it by raw append, bypassing the `appendReopened` transition path). The deterministic reopen-marker gate (`checkReopenMarkers`) does eventually flag the cross-round case as `illegal-reopen`, so it is not silent, but the committed tamper-evident ledger still accumulates duplicate/illegitimate rows that require manual cleanup.
-**Fix:** Have `appendOpen` (or `confirmAndWrite`) refuse to append when the folded finding already exists in a non-terminal-appropriate state — e.g. skip if a prior `open` row exists for that `finding_id`, and route genuine reopens through `appendReopened`. At minimum, make the `ui.round` re-run path idempotent so a failed-then-retried round does not double-append.
-
-## Info
-
-### IN-01: Dead constant `EFFORT_ORDER` in the digest
-
-**File:** `accrue_admin/e2e/ratchet/ratchet-digest.mjs:200`
-**Issue:** `const EFFORT_ORDER = { css: 0, null: 1 };` is never referenced — `effortRank` (line 208) hardcodes its own logic. Dead code that implies a coupling that does not exist.
-**Fix:** Remove the constant, or drive `effortRank` from it.
-
-### IN-02: `ratchet-propose.mjs` lacks the clean-crash wrapper its sibling `ratchet-verify.mjs` has
-
-**File:** `accrue_admin/e2e/ratchet/ratchet-propose.mjs:873`
-**Issue:** `ratchet-verify.mjs:913-918` and `phase-ratchet-ledger.mjs:1018-1025` wrap their entry point in `try/catch` that prints an actionable one-liner on an unexpected throw; `ratchet-propose.mjs` calls `await main();` bare, so an unexpected error outside `main`'s inner try surfaces as a raw Node unhandled-rejection stack trace, inconsistent with the deliberately-twinned siblings.
-**Fix:** Wrap `await main()` in the same `try { ... } catch (error) { console.error(\`ratchet-propose.mjs crashed: ${error.message}\`); process.exitCode = 1; }`.
-
-### IN-03: `resolveRound` / rounds parsing can yield `round-NaN` paths on a malformed `rounds.ndjson`
-
-**File:** `accrue_admin/e2e/ratchet/ratchet-fix.mjs:102-108, 288-289`
-**Issue:** `resolveRound` returns `Math.max(...roundsRows.map((r) => r.round))`; a row missing `round` makes the result `NaN`, which flows into `resolveRoundDir(NaN)` → `round-NaN`, then `readJson(decisionsPath)` throws an opaque `ENOENT`. Not reachable through the normal pipeline (seal always writes a numeric `round`), but there is no validation guarding a hand-edited/partial file.
-**Fix:** Filter to finite `round` values (`.map(r => r.round).filter(Number.isFinite)`) and raise a clear error if none remain.
 
 ---
 
-_Reviewed: 2026-07-04T12:00:00Z_
-_Reviewer: Claude (gsd-code-reviewer)_
+_Reviewed: 2026-07-07T12:35:13Z_
+_Reviewer: the agent (gsd-code-reviewer)_
 _Depth: standard_
