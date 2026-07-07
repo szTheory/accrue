@@ -77,10 +77,10 @@ const RANK_BUCKET = ["not-a-defect", "minor", "real"];
  * upgrade a proposer's `minor` to `real`.
  *
  * CR-02: `buckets` must contain EXACTLY 3 role verdicts, each a recognized bucket string. The
- * forced-tool-use schema's `strict: true` only constrains item SHAPE, not array length (see
- * `PANEL_TOOL.input_schema.properties.verdicts.items.properties.roles`'s `minItems`/`maxItems`
- * below for the schema-level half of this fix) — a truncated/refused/non-conforming model
- * response could otherwise hand this function fewer than 2 buckets, making `ranks[1]`
+ * forced-tool-use schema's `strict: true` only constrains item SHAPE. The live provider rejects
+ * array `minItems` values other than 0 or 1, so role-count cardinality is enforced here, not in
+ * the provider schema — a truncated/refused/non-conforming model response could otherwise hand
+ * this function fewer than 2 buckets, making `ranks[1]`
  * `undefined`. `undefined === 0` is `false`, so the old kill-check silently fell through to
  * `Math.min(undefined, proposerRank)` (`NaN`) and `RANK_BUCKET[NaN]` (`undefined`), returning
  * `{confirmed: true, severity: undefined}` — a "confirmed" finding with a `severity` key that
@@ -179,8 +179,6 @@ const PANEL_TOOL = {
             finding_id: { type: "string" },
             roles: {
               type: "array",
-              minItems: 3,
-              maxItems: 3,
               items: {
                 type: "object",
                 additionalProperties: false,
@@ -717,10 +715,9 @@ function runSelfTest() {
   }
 
   // (iv-b) CR-02 end-to-end regression: a verdict with only 2 role entries (schema-legal SHAPE
-  // per-item, but short on COUNT — exactly the gap `minItems`/`maxItems` on `PANEL_TOOL` now
-  // closes at the schema level, and `medianClamp`'s length check now closes at the aggregation
-  // level) must be dropped by `confirmAndWrite`, never written to the ledger with a dropped
-  // `severity: undefined` field.
+  // per-item, but short on COUNT) must be dropped by `confirmAndWrite`, never written to the
+  // ledger with a dropped `severity: undefined` field. Cardinality stays local because the live
+  // provider rejects array `minItems` values other than 0 or 1.
   {
     const scratchRoot = fs.mkdtempSync(path.join(os.tmpdir(), "ratchet-verify-"));
     try {
@@ -747,6 +744,16 @@ function runSelfTest() {
     } finally {
       fs.rmSync(scratchRoot, { recursive: true, force: true });
     }
+  }
+
+  // (iv-c) Provider schema compatibility: role-count cardinality is intentionally absent from
+  // the tool schema and enforced by `medianClamp`/`confirmAndWrite` instead.
+  {
+    const rolesSchema = PANEL_TOOL.input_schema.properties.verdicts.items.properties.roles;
+    assertSelfTest(
+      "(iv-c) PANEL_TOOL roles schema omits provider-incompatible minItems/maxItems",
+      rolesSchema.minItems === undefined && rolesSchema.maxItems === undefined
+    );
   }
 
   // (v) end-to-end fixture: 2 confirmed candidates written through the REAL appendOpen-calling
