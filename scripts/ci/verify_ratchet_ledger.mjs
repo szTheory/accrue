@@ -43,6 +43,7 @@
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import { createHash } from "node:crypto";
 import { fileURLToPath } from "node:url";
 import * as regionTags from "../../accrue_admin/e2e/ratchet/region-tags.js";
 
@@ -59,7 +60,19 @@ const DEFAULT_PATHS = {
   baselinePath: path.join(RATCHET_DIR, "ledger.baseline.json"),
   reopenMarkersPath: path.join(RATCHET_DIR, "reopen-markers.ndjson"),
   regressionsPath: path.join(RATCHET_DIR, "finding-regressions.ndjson"),
+  roundsPath: path.join(RATCHET_DIR, "rounds.ndjson"),
+  phase200RegressionsPath: path.join(
+    REPO_ROOT,
+    ".planning/milestones/v1.54-phases/200-idempotent-verification-sign-off/regressions.ndjson"
+  ),
+  cellsCensusPath: path.join(
+    REPO_ROOT,
+    ".planning/milestones/v1.54-phases/200-idempotent-verification-sign-off/final.cells.json"
+  ),
 };
+
+const EMPTY_FILE_SHA256 = "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855";
+const FOUNDATION_SLICE = ["component-kitchen", "dashboard", "subscription-detail", "subscriptions"];
 
 /**
  * LENS_KEYS — the closed 7-value per-lens gate key (D-24/D-25). Duplicated here as its own
@@ -129,6 +142,32 @@ function writeNdjson(absPath, rows) {
   fs.mkdirSync(path.dirname(absPath), { recursive: true });
   const text = rows.map((row) => JSON.stringify(row)).join("\n") + (rows.length ? "\n" : "");
   fs.writeFileSync(absPath, text);
+}
+
+function sha256(absPath) {
+  return createHash("sha256").update(fs.readFileSync(absPath)).digest("hex");
+}
+
+function ledgerSha256(ledgerPath) {
+  if (fs.existsSync(ledgerPath)) return sha256(ledgerPath);
+  return EMPTY_FILE_SHA256;
+}
+
+function readJsonArray(absPath, failures, label) {
+  try {
+    const raw = fs.readFileSync(absPath, "utf8").trim();
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) {
+      failures.malformedJson.push(`${label} must contain a JSON array.`);
+      return [];
+    }
+    return parsed;
+  } catch (error) {
+    if (error && error.code === "ENOENT") return [];
+    failures.malformedJson.push(`${label} malformed JSON: ${error.message}`);
+    return [];
+  }
 }
 
 // -----------------------------------------------------------------------------
@@ -209,6 +248,19 @@ function compareAgainstBaseline(independentCounts, baselineConfirmedOpen, failur
         })} but the independent recompute from raw findings.ledger.ndjson rows is ${JSON.stringify(
           independent
         )}.`
+      );
+    }
+  }
+}
+
+function checkIndependentCountIncreases(independentCounts, baselineConfirmedOpen, failures) {
+  const baselineOpen = baselineConfirmedOpen || {};
+  for (const lens of LENS_KEYS) {
+    const independentTotal = independentCounts[lens].total;
+    const baselineTotal = baselineOpen[lens]?.total ?? 0;
+    if (independentTotal > baselineTotal) {
+      failures.countIncrease.push(
+        `Lens ${lens}: independent open-finding count increased from baseline ${baselineTotal} to ${independentTotal}.`
       );
     }
   }
@@ -358,6 +410,132 @@ function checkRegressionsZeroBytes(regressionsPath, failures) {
   }
 }
 
+function checkFileZeroBytes(absPath, failures, key, label) {
+  let size = 0;
+  try {
+    size = fs.statSync(absPath).size;
+  } catch (error) {
+    if (error && error.code === "ENOENT") {
+      size = 0;
+    } else {
+      throw error;
+    }
+  }
+  if (size !== 0) {
+    failures[key].push(`${label} is ${size} bytes (expected exactly 0).`);
+  }
+}
+
+function allConfirmedOpenZero(counts) {
+  return LENS_KEYS.every((lens) => {
+    const value = counts[lens] || {};
+    return (value.total ?? 0) === 0 && (value.minor ?? 0) === 0 && (value.real ?? 0) === 0;
+  });
+}
+
+function checkFoldedOpenZero(independentCounts, failures) {
+  for (const lens of LENS_KEYS) {
+    const value = independentCounts[lens] || {};
+    if ((value.total ?? 0) > 0 || (value.minor ?? 0) > 0 || (value.real ?? 0) > 0) {
+      failures.foldedOpenNonZero.push(
+        `Lens ${lens}: folded confirmed_open findings are ${JSON.stringify(value)} (expected all zero).`
+      );
+    }
+  }
+}
+
+function checkFrozenBaselineMateriality(baseline, paths, failures) {
+  if (baseline.frozen !== true) {
+    failures.frozenBaseline.push("ledger.baseline.json must have frozen: true for --verify-frozen.");
+  }
+
+  const actualLedgerSha = ledgerSha256(paths.ledgerPath);
+  if (baseline.ledger_sha256 !== actualLedgerSha) {
+    failures.frozenBaseline.push(
+      `ledger.baseline.json ledger_sha256=${JSON.stringify(
+        baseline.ledger_sha256
+      )} does not match findings.ledger.ndjson sha256=${actualLedgerSha}.`
+    );
+  }
+
+  const resolvedLocked = Array.isArray(baseline.resolved_locked) ? baseline.resolved_locked : [];
+  if (
+    baseline.ledger_sha256 === EMPTY_FILE_SHA256 &&
+    allConfirmedOpenZero(baseline.confirmed_open || {}) &&
+    resolvedLocked.length === 0
+  ) {
+    failures.baselineMateriality.push(
+      "ledger.baseline.json is the all-zero empty-file placeholder (empty ledger hash, zero confirmed_open totals, and no resolved_locked evidence)."
+    );
+  }
+}
+
+function readRoundsRows(roundsPath, failures) {
+  try {
+    return readRawLedgerLines(roundsPath);
+  } catch (error) {
+    failures.malformedJson.push(`rounds.ndjson malformed JSON: ${error.message}`);
+    return [];
+  }
+}
+
+function checkFoundationDryRounds(roundsRows, baseline, failures) {
+  const scoped = roundsRows.filter((row) => row.epoch === baseline.epoch && row.scope === "foundation");
+  const lastTwo = scoped.slice(-2);
+  if (lastTwo.length < 2) {
+    failures.dryRounds.push("rounds.ndjson must contain two current-epoch scope=foundation rows.");
+    return;
+  }
+  for (const row of lastTwo) {
+    if (row.dry !== true) {
+      failures.dryRounds.push(`round ${JSON.stringify(row.round)} is not dry=true for scope=foundation.`);
+    }
+    if (typeof row.bundle_sha256 !== "string" || row.bundle_sha256.length === 0) {
+      failures.dryRounds.push(`round ${JSON.stringify(row.round)} is missing non-empty bundle_sha256.`);
+    }
+  }
+}
+
+function scoreValue(cell) {
+  if (typeof cell.score === "number") return Number.isFinite(cell.score) ? cell.score : null;
+  if (typeof cell.score === "string" && cell.score.trim() !== "") {
+    const value = Number(cell.score);
+    return Number.isFinite(value) ? value : null;
+  }
+  return null;
+}
+
+function scoreFloorRowsForScopeMember(cellsCensusRows, scopeMember) {
+  const matches =
+    scopeMember === "component-kitchen"
+      ? cellsCensusRows.filter((cell) => cell.surface_type === "component" || cell.surface_type === "component-group")
+      : cellsCensusRows.filter((cell) => cell.surface === scopeMember);
+  const scoredMatches = matches.filter((cell) => scoreValue(cell) !== null);
+  return scoredMatches.length > 0 ? scoredMatches : matches;
+}
+
+function checkSliceScoreFloor(cellsCensusRows, failures) {
+  for (const member of FOUNDATION_SLICE) {
+    const rows = scoreFloorRowsForScopeMember(cellsCensusRows, member);
+    if (rows.length === 0) {
+      failures.scoreFloor.push(`SLICES.foundation member ${member} examined zero Phase 200 score-floor rows.`);
+      continue;
+    }
+    const failing = rows.filter((cell) => cell.coverage_status !== "covered" || (scoreValue(cell) ?? -Infinity) < 2);
+    if (failing.length > 0) {
+      const sample = failing.slice(0, 3).map((cell) => ({
+        cell_id: cell.cell_id,
+        surface: cell.surface,
+        coverage_status: cell.coverage_status,
+        score: cell.score,
+      }));
+      failures.scoreFloor.push(
+        `SLICES.foundation member ${member} has ${failing.length}/${rows.length} rows below coverage_status=covered and score>=2; sample=${JSON.stringify(sample)}.`
+      );
+    }
+  }
+}
+
 // -----------------------------------------------------------------------------
 // Top-level verifier.
 // -----------------------------------------------------------------------------
@@ -366,10 +544,17 @@ function failureTemplate() {
   return {
     seqNotMonotonic: [],
     malformedJson: [],
+    countIncrease: [],
     baselineMismatch: [],
     guardMissing: [],
     inadmissibleToken: [],
     regressionsNotEmpty: [],
+    phase200RegressionsNotEmpty: [],
+    frozenBaseline: [],
+    baselineMateriality: [],
+    dryRounds: [],
+    foldedOpenNonZero: [],
+    scoreFloor: [],
   };
 }
 
@@ -393,6 +578,7 @@ export function verifyRatchetLedger(overridePaths = {}) {
 
   const independentCounts = computeIndependentOpenCounts(folded);
   const baseline = readBaseline(paths.baselinePath, failures);
+  checkIndependentCountIncreases(independentCounts, baseline.confirmed_open, failures);
   compareAgainstBaseline(independentCounts, baseline.confirmed_open, failures);
 
   checkGuardRefsIndependent(folded, REPO_ROOT, failures);
@@ -402,6 +588,45 @@ export function verifyRatchetLedger(overridePaths = {}) {
 
   const ok = Object.values(failures).every((items) => items.length === 0);
   return { ok, failures };
+}
+
+export function verifyFrozenRatchetLedger(overridePaths = {}) {
+  const paths = { ...DEFAULT_PATHS, ...overridePaths };
+  const failures = failureTemplate();
+
+  const rawRows = readRawLedgerLines(paths.ledgerPath);
+  const { folded, seqFailures } = independentFold(rawRows);
+  failures.seqNotMonotonic.push(...seqFailures);
+
+  const independentCounts = computeIndependentOpenCounts(folded);
+  const baseline = readBaseline(paths.baselinePath, failures);
+  checkIndependentCountIncreases(independentCounts, baseline.confirmed_open, failures);
+  compareAgainstBaseline(independentCounts, baseline.confirmed_open, failures);
+  checkFoldedOpenZero(independentCounts, failures);
+
+  checkGuardRefsIndependent(folded, REPO_ROOT, failures);
+  checkJustificationTokensIndependent(folded, failures);
+  checkRegressionsZeroBytes(paths.regressionsPath, failures);
+  checkFileZeroBytes(
+    paths.phase200RegressionsPath,
+    failures,
+    "phase200RegressionsNotEmpty",
+    "Phase 200 regressions.ndjson"
+  );
+  checkFrozenBaselineMateriality(baseline, paths, failures);
+  checkFoundationDryRounds(readRoundsRows(paths.roundsPath, failures), baseline, failures);
+  checkSliceScoreFloor(readJsonArray(paths.cellsCensusPath, failures, "final.cells.json"), failures);
+
+  const ok = Object.values(failures).every((items) => items.length === 0);
+  return {
+    ok,
+    failures,
+    summary: {
+      frozen: baseline.frozen === true,
+      ledger_sha256: baseline.ledger_sha256 || null,
+      folded_confirmed_open_zero: allConfirmedOpenZero(independentCounts),
+    },
+  };
 }
 
 // -----------------------------------------------------------------------------
@@ -439,12 +664,75 @@ function writeFixtureFiles(dir, { ledgerRows = [], baseline = null, regressionsT
     baselinePath: path.join(dir, "ledger.baseline.json"),
     reopenMarkersPath: path.join(dir, "reopen-markers.ndjson"),
     regressionsPath: path.join(dir, "finding-regressions.ndjson"),
+    roundsPath: path.join(dir, "rounds.ndjson"),
+    phase200RegressionsPath: path.join(dir, "phase200-regressions.ndjson"),
+    cellsCensusPath: path.join(dir, "final.cells.json"),
   };
   writeNdjson(paths.ledgerPath, ledgerRows);
   if (baseline) writeJson(paths.baselinePath, baseline);
   fs.writeFileSync(paths.reopenMarkersPath, "");
   fs.mkdirSync(path.dirname(paths.regressionsPath), { recursive: true });
   fs.writeFileSync(paths.regressionsPath, regressionsText);
+  fs.writeFileSync(paths.phase200RegressionsPath, "");
+  writeNdjson(paths.roundsPath, []);
+  writeJson(paths.cellsCensusPath, []);
+  return paths;
+}
+
+function foundationScoreFloorFixtureRows(score = 2) {
+  return [
+    { cell_id: "fixture-dashboard", surface: "dashboard", surface_type: "page-flow", coverage_status: "covered", score },
+    {
+      cell_id: "fixture-subscription-detail",
+      surface: "subscription-detail",
+      surface_type: "page-flow",
+      coverage_status: "covered",
+      score,
+    },
+    { cell_id: "fixture-subscriptions", surface: "subscriptions", surface_type: "page-flow", coverage_status: "covered", score },
+    { cell_id: "fixture-button", surface: "button", surface_type: "component", coverage_status: "covered", score },
+    {
+      cell_id: "fixture-page-header-group",
+      surface: "page-header/actions/breadcrumbs",
+      surface_type: "component-group",
+      coverage_status: "covered",
+      score,
+    },
+  ];
+}
+
+function writeFrozenFixture(dir, options = {}) {
+  const ledgerRows =
+    options.ledgerRows ||
+    [
+      {
+        finding_id: "f-7777777777777701",
+        seq: 1,
+        event: "verify-close",
+        status: "verified-closed",
+        raised_by_lenses: ["design"],
+        severity: "real",
+        claim_key: "dashboard__d02__kpi-row__ov-none",
+        guard_ref: "ledger-count",
+      },
+    ];
+  const paths = writeFixtureFiles(dir, { ledgerRows, regressionsText: options.regressionsText || "" });
+  const baseline = options.baseline || {
+    ...emptyBaseline(),
+    frozen: true,
+    ledger_sha256: ledgerSha256(paths.ledgerPath),
+    resolved_locked: ["dashboard__d02__kpi-row__ov-none"],
+  };
+  writeJson(paths.baselinePath, baseline);
+  writeNdjson(
+    paths.roundsPath,
+    options.roundRows || [
+      { schema_version: "ratchet-round-seal/1", round: 4, dry: true, epoch: baseline.epoch, scope: "foundation", bundle_sha256: "a".repeat(64), seq: 1 },
+      { schema_version: "ratchet-round-seal/1", round: 5, dry: true, epoch: baseline.epoch, scope: "foundation", bundle_sha256: "b".repeat(64), seq: 2 },
+    ]
+  );
+  fs.writeFileSync(paths.phase200RegressionsPath, options.phase200RegressionsText || "");
+  writeJson(paths.cellsCensusPath, options.cellsCensusRows || foundationScoreFloorFixtureRows());
   return paths;
 }
 
@@ -612,6 +900,188 @@ function runSelfTest() {
       );
     }
 
+    // (8) Phase 208 --verify-frozen: valid frozen evidence passes.
+    {
+      const paths = writeFrozenFixture(path.join(root, "fixture-frozen-valid"));
+      const result = verifyFrozenRatchetLedger(paths);
+      assertSelfTest("(8) valid frozen evidence exits ok:true", result.ok, JSON.stringify(result.failures));
+    }
+
+    // (9) --verify-frozen rejects an unfrozen baseline.
+    {
+      const paths = writeFrozenFixture(path.join(root, "fixture-frozen-unfrozen"));
+      const baseline = JSON.parse(fs.readFileSync(paths.baselinePath, "utf8"));
+      baseline.frozen = false;
+      writeJson(paths.baselinePath, baseline);
+      const result = verifyFrozenRatchetLedger(paths);
+      assertSelfTest("(9) --verify-frozen rejects frozen:false baseline", !result.ok);
+      assertSelfTest("(9) failures.frozenBaseline is non-empty", result.failures.frozenBaseline.length > 0);
+    }
+
+    // (10) --verify-frozen rejects the all-zero empty-file placeholder baseline.
+    {
+      const baseline = emptyBaseline();
+      baseline.frozen = true;
+      baseline.ledger_sha256 = EMPTY_FILE_SHA256;
+      const paths = writeFrozenFixture(path.join(root, "fixture-empty-placeholder"), {
+        ledgerRows: [],
+        baseline,
+      });
+      const result = verifyFrozenRatchetLedger(paths);
+      assertSelfTest("(10) --verify-frozen rejects all-zero empty-file baseline", !result.ok);
+      assertSelfTest("(10) failures.baselineMateriality is non-empty", result.failures.baselineMateriality.length > 0);
+    }
+
+    // (11) --verify-frozen requires two current-epoch dry foundation rows.
+    {
+      const paths = writeFrozenFixture(path.join(root, "fixture-missing-dry"), { roundRows: [] });
+      const result = verifyFrozenRatchetLedger(paths);
+      assertSelfTest("(11) --verify-frozen rejects missing dry rounds", !result.ok);
+      assertSelfTest("(11) failures.dryRounds is non-empty", result.failures.dryRounds.length > 0);
+    }
+
+    // (12) --verify-frozen requires both regression files to be exactly 0 bytes.
+    {
+      const paths = writeFrozenFixture(path.join(root, "fixture-ratchet-regressions"), {
+        regressionsText: `${JSON.stringify({ kind: "count-increase", lens: "design" })}\n`,
+      });
+      const result = verifyFrozenRatchetLedger(paths);
+      assertSelfTest("(12) --verify-frozen rejects non-empty finding-regressions.ndjson", !result.ok);
+      assertSelfTest("(12) failures.regressionsNotEmpty is non-empty", result.failures.regressionsNotEmpty.length > 0);
+    }
+    {
+      const paths = writeFrozenFixture(path.join(root, "fixture-phase200-regressions"), {
+        phase200RegressionsText: `${JSON.stringify({ cell_id: "p193__dashboard__d02" })}\n`,
+      });
+      const result = verifyFrozenRatchetLedger(paths);
+      assertSelfTest("(12b) --verify-frozen rejects non-empty Phase 200 regressions.ndjson", !result.ok);
+      assertSelfTest(
+        "(12b) failures.phase200RegressionsNotEmpty is non-empty",
+        result.failures.phase200RegressionsNotEmpty.length > 0
+      );
+    }
+
+    // (13) --verify-frozen requires score >= 2 on every foundation score-floor row.
+    {
+      const paths = writeFrozenFixture(path.join(root, "fixture-score-below-floor"), {
+        cellsCensusRows: foundationScoreFloorFixtureRows(1),
+      });
+      const result = verifyFrozenRatchetLedger(paths);
+      assertSelfTest("(13) --verify-frozen rejects score below 2", !result.ok);
+      assertSelfTest("(13) failures.scoreFloor is non-empty", result.failures.scoreFloor.length > 0);
+    }
+
+    // (14) --verify-frozen rejects independent recompute mismatch.
+    {
+      const baseline = emptyBaseline();
+      baseline.frozen = true;
+      baseline.ledger_sha256 = EMPTY_FILE_SHA256;
+      baseline.confirmed_open.design = { total: 1, minor: 0, real: 1 };
+      const paths = writeFrozenFixture(path.join(root, "fixture-frozen-mismatch"), {
+        ledgerRows: [],
+        baseline,
+      });
+      const result = verifyFrozenRatchetLedger(paths);
+      assertSelfTest("(14) --verify-frozen rejects independent recompute mismatch", !result.ok);
+      assertSelfTest("(14) failures.baselineMismatch is non-empty", result.failures.baselineMismatch.length > 0);
+    }
+
+    // (15) A raw ledger and frozen baseline that match exactly but contain a nonzero open
+    // finding still fail the final freeze verifier on zero-open grounds.
+    {
+      const ledgerRows = [
+        {
+          finding_id: "f-8888888888888801",
+          seq: 1,
+          event: "confirm",
+          status: "open",
+          raised_by_lenses: ["design"],
+          severity: "real",
+          claim_key: "dashboard__d02__open__ov-none",
+        },
+      ];
+      const paths = writeFixtureFiles(path.join(root, "fixture-frozen-matching-open"), { ledgerRows });
+      const baseline = emptyBaseline();
+      baseline.frozen = true;
+      baseline.ledger_sha256 = ledgerSha256(paths.ledgerPath);
+      baseline.confirmed_open.design = { total: 1, minor: 0, real: 1 };
+      writeJson(paths.baselinePath, baseline);
+      writeNdjson(paths.roundsPath, [
+        { schema_version: "ratchet-round-seal/1", round: 4, dry: true, epoch: 1, scope: "foundation", bundle_sha256: "a".repeat(64), seq: 1 },
+        { schema_version: "ratchet-round-seal/1", round: 5, dry: true, epoch: 1, scope: "foundation", bundle_sha256: "b".repeat(64), seq: 2 },
+      ]);
+      writeJson(paths.cellsCensusPath, foundationScoreFloorFixtureRows());
+      const result = verifyFrozenRatchetLedger(paths);
+      assertSelfTest("(15) --verify-frozen rejects matching nonzero open finding", !result.ok);
+      assertSelfTest(
+        "(15) failures.foldedOpenNonZero is non-empty",
+        result.failures.foldedOpenNonZero.length > 0,
+        JSON.stringify(result.failures)
+      );
+    }
+
+    // (16) D-65 synthetic count-increase proof: a higher current total names the regressed lens.
+    {
+      const baseline = emptyBaseline();
+      const paths = writeFixtureFiles(path.join(root, "fixture-synthetic-count-increase"), {
+        ledgerRows: [
+          {
+            finding_id: "f-9999999999999901",
+            seq: 1,
+            event: "confirm",
+            status: "open",
+            raised_by_lenses: ["design"],
+            severity: "minor",
+          },
+        ],
+        baseline,
+      });
+      const result = verifyRatchetLedger(paths);
+      assertSelfTest("(16) synthetic count increase blocks the gate", !result.ok);
+      assertSelfTest(
+        "(16) failures.countIncrease names design",
+        result.failures.countIncrease.some((item) => item.includes("Lens design:")),
+        JSON.stringify(result.failures)
+      );
+    }
+
+    // (17) D-65 cross-persona proof: one lens improves while another rises; the rising lens
+    // alone appears in countIncrease, so aggregate improvements cannot mask a regression.
+    {
+      const baseline = emptyBaseline();
+      baseline.confirmed_open["persona:operator-founder"] = { total: 2, minor: 0, real: 2 };
+      baseline.confirmed_open["persona:customer-support"] = { total: 0, minor: 0, real: 0 };
+      const paths = writeFixtureFiles(path.join(root, "fixture-persona-regression"), {
+        ledgerRows: [
+          {
+            finding_id: "f-aaaaaaaaaaaaaa01",
+            seq: 1,
+            event: "confirm",
+            status: "open",
+            raised_by_lenses: ["persona:operator-founder"],
+            severity: "real",
+          },
+          {
+            finding_id: "f-aaaaaaaaaaaaaa02",
+            seq: 2,
+            event: "confirm",
+            status: "open",
+            raised_by_lenses: ["persona:customer-support"],
+            severity: "real",
+          },
+        ],
+        baseline,
+      });
+      const result = verifyRatchetLedger(paths);
+      assertSelfTest("(17) regressed lens count increase blocks the gate", !result.ok);
+      assertSelfTest(
+        "(17) failures.countIncrease names only persona:customer-support",
+        result.failures.countIncrease.some((item) => item.includes("Lens persona:customer-support:")) &&
+          !result.failures.countIncrease.some((item) => item.includes("Lens persona:operator-founder:")),
+        JSON.stringify(result.failures.countIncrease)
+      );
+    }
+
     console.log("verify_ratchet_ledger self-test passed.");
   } finally {
     fs.rmSync(root, { recursive: true, force: true });
@@ -639,11 +1109,16 @@ function main() {
     return;
   }
 
-  const result = verifyRatchetLedger(DEFAULT_PATHS);
+  const frozenMode = process.argv.includes("--verify-frozen");
+  const result = frozenMode ? verifyFrozenRatchetLedger(DEFAULT_PATHS) : verifyRatchetLedger(DEFAULT_PATHS);
   console.log(`[verify-ratchet-ledger] ok=${result.ok}`);
   if (!result.ok) {
     reportFailures(result.failures);
     process.exitCode = 1;
+  } else if (frozenMode) {
+    console.log(
+      "[verify-ratchet-ledger] frozen baseline evidence passed: folded confirmed_open findings are 0, regression files are 0 bytes, dry foundation rounds are present, and score-floor rows are covered at score >= 2."
+    );
   } else {
     console.log(
       "[verify-ratchet-ledger] independent recompute matches the committed baseline; finding-regressions.ndjson is 0 bytes."
