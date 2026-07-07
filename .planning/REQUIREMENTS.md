@@ -60,9 +60,9 @@ Requirements for this milestone. Each maps to exactly one roadmap phase (205–2
 - [x] **CONV-02**: The first non-empty ledger baseline is frozen as the slice high-water mark.
 - [x] **CONV-03**: A new deterministic-only CI job (`admin-ui-ratchet-guardrails`) passes on a PR with no `ANTHROPIC_API_KEY` and blocks on a synthetic ledger count-increase.
 - [x] **CONV-04**: A change that improves one persona but regresses another is caught by the ledger (the regressed lens's open count rises → gate red), proven by an automated test.
-- [ ] **CONV-05**: Existing UI gates (`admin-hardening-guardrails`, `admin-phase200-guardrails`, asset-drift) remain green and the committed `accrue_admin.css` bundle stays fresh.
-- [ ] **CONV-06**: A `UI-RATCHET-SIGN-OFF.md` carries the maintainer `ACCEPT` line, enforced by a sign-off verifier mirroring the Phase 200 pattern.
-- [ ] **CONV-07**: A documented runbook enables graduating any remaining admin surface under the ratchet as a safe follow-on round (tees up the full sweep).
+- [x] **CONV-05**: Existing UI gates (`admin-hardening-guardrails`, `admin-phase200-guardrails`, asset-drift) remain green and the committed `accrue_admin.css` bundle stays fresh.
+- [x] **CONV-06**: A `UI-RATCHET-SIGN-OFF.md` carries the maintainer `ACCEPT` line, enforced by a sign-off verifier mirroring the Phase 200 pattern.
+- [x] **CONV-07**: A documented runbook enables graduating any remaining admin surface under the ratchet as a safe follow-on round (tees up the full sweep).
 
 ## Future Requirements
 
@@ -125,9 +125,9 @@ Which phases cover which requirements. Populated during roadmap creation.
 | CONV-02 | Phase 208 | Complete |
 | CONV-03 | Phase 208 | Complete |
 | CONV-04 | Phase 208 | Complete |
-| CONV-05 | Phase 208 | Pending |
-| CONV-06 | Phase 208 | Pending |
-| CONV-07 | Phase 208 | Pending |
+| CONV-05 | Phase 208 | Complete |
+| CONV-06 | Phase 208 | Complete |
+| CONV-07 | Phase 208 | Complete |
 | SWEEP-01 (deferred) | Phase 209 (scope-gated / optional) | Deferred — not in v1.56 committed set |
 
 **Coverage:**
