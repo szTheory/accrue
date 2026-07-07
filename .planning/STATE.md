@@ -2,13 +2,10 @@
 gsd_state_version: 1.0
 milestone: v1.56
 milestone_name: "Admin UI Ratchet: Automated Adversarial Design Evaluation"
-current_phase: 207
-current_phase_name: Orchestration + digest + one-command round/fix loop
-status: human_needed
-stopped_at: Phase 207 human verification required
-last_updated: "2026-07-07T12:46:21.000Z"
-last_activity: 2026-07-07
-last_activity_desc: Phase 207 verification requires human UAT
+status: planning
+stopped_at: Phase 208 context gathered
+last_updated: "2026-07-07T15:09:36.535Z"
+last_activity: 2026-07-07 — Phase 207 complete, transitioned to Phase 208
 progress:
   total_phases: 5
   completed_phases: 3
@@ -25,16 +22,16 @@ See: `.planning/PROJECT.md` (updated 2026-07-03 after v1.55 closeout)
 
 **Core value:** A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic Elixir DX, strong domain modeling, tamper-evident audit ledger, great observability, and zero breaking-change pain through v1.x.
 
-**Current focus:** Phase 207 — Orchestration + digest + one-command round/fix loop
+**Current focus:** Phase 208 — Prove convergence on the representative slice + wire CI + ACCEPT
 
 ## Current Position
 
-Phase: 207 (Orchestration + digest + one-command round/fix loop) — HUMAN VERIFICATION
-Plan: 8 of 8
-Status: Human verification required for ORCH-07/ORCH-08 live smokes
-Last activity: 2026-07-07 — Phase 207 verification requires human UAT
+Phase: 208 — Prove convergence on the representative slice + wire CI + ACCEPT
+Plan: Not started
+Status: Ready to plan
+Last activity: 2026-07-07 — Phase 207 complete, transitioned to Phase 208
 
-Progress: [██████████] 100%
+Progress: [████████████████████] 17/17 plans (100%)
 
 ## Post-v1.48 Pause Rule
 
@@ -48,10 +45,10 @@ v1.55 OSS Quality Evaluation & Hardening Roadmap shipped on 2026-07-03 as mainte
 
 | Phase | Name | Requirements | Status |
 |-------|------|--------------|--------|
-| 205 | Persona + design-lens evaluator harness | EVAL-01, EVAL-02, EVAL-03, EVAL-04, EVAL-05, DEDUP-01, DEDUP-02 | Ready to plan |
-| 206 | Adversarial verifier + finding ledger + deterministic gate | DEDUP-03, VERIFY-01, VERIFY-02, VERIFY-03, LEDGER-01, LEDGER-02, LEDGER-03, LEDGER-04, LEDGER-05 | Not started |
-| 207 | Orchestration + digest + one-command round/fix loop | ORCH-01, ORCH-02, ORCH-03, ORCH-04, ORCH-05, ORCH-06, ORCH-07, ORCH-08 | Human verification |
-| 208 | Prove convergence on slice + wire CI + ACCEPT | CONV-01, CONV-02, CONV-03, CONV-04, CONV-05, CONV-06, CONV-07 | Not started |
+| 205 | Persona + design-lens evaluator harness | EVAL-01, EVAL-02, EVAL-03, EVAL-04, EVAL-05, DEDUP-01, DEDUP-02 | Complete |
+| 206 | Adversarial verifier + finding ledger + deterministic gate | DEDUP-03, VERIFY-01, VERIFY-02, VERIFY-03, LEDGER-01, LEDGER-02, LEDGER-03, LEDGER-04, LEDGER-05 | Complete |
+| 207 | Orchestration + digest + one-command round/fix loop | ORCH-01, ORCH-02, ORCH-03, ORCH-04, ORCH-05, ORCH-06, ORCH-07, ORCH-08 | Complete |
+| 208 | Prove convergence on slice + wire CI + ACCEPT | CONV-01, CONV-02, CONV-03, CONV-04, CONV-05, CONV-06, CONV-07 | Ready to plan |
 | 209 | Full-surface sweep under the ratchet | SWEEP-01 (deferred) | Scope-gated / optional — NOT required for v1.56 sign-off |
 
 Coverage: 31/31 requirements mapped to Phases 205-208 (each REQ-ID → exactly one phase). Per-phase counts: 205→7 · 206→9 · 207→8 · 208→7 = 31 (ORCH-07/08 folded 2026-07-03 from the Phase 205 live smoke; original ratified set was 29). Phase 209 carries only the deferred SWEEP-01 and is teed up as a safe follow-on. Authoritative design source: `~/.claude/plans/ui-ratchet-txt-i-agile-honey.md` (approved 2026-07-03).
@@ -189,7 +186,7 @@ Coverage: 22/22 v1.51 requirements mapped (each REQ-ID → exactly one phase). D
 
 **Velocity:**
 
-- Total plans completed: 187
+- Total plans completed: 195
 - Average duration: 1m
 - Total execution time: 1m
 
@@ -679,12 +676,12 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 
 ## Session Continuity
 
-Last session: 2026-07-07T12:46:21.000Z
-Stopped at: Phase 207 human verification required
-Resume file: None
+Last session: 2026-07-07T15:09:36.530Z
+Stopped at: Phase 208 context gathered
+Resume file: .planning/phases/208-prove-convergence-on-the-representative-slice-wire-ci-accept/208-CONTEXT.md
 
 ## Operator Next Steps
 
-- Complete the Phase 207 human UAT items in `.planning/phases/207-orchestration-digest-one-command-round-fix-loop/207-UAT.md`, then run `/gsd:verify-work 207`.
+- Plan Phase 208 with `/gsd:plan-phase 208`.
 - Queued post-v1.56 candidate: **SEED-004 admin-UI blueprint redesign** (`.planning/seeds/SEED-004-admin-ui-blueprint-redesign.md`; synthesis `.planning/research/ADMIN-UI-REDESIGN-BLUEPRINT-SYNTHESIS.md`) — a first-principles admin/operator UI redesign. See also the ROADMAP "Deferred Seeds and Ideas" table and STATE "Standing scope deferrals".
 - Start the next milestone with `/gsd-new-milestone` (it scans `.planning/seeds/` and reads PROJECT.md `## Current State` for queued candidates).
