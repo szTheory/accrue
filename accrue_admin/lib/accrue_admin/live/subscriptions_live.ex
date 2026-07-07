@@ -93,7 +93,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
       current_owner_scope={assigns[:current_owner_scope]}
       active_organization_name={@active_organization_name}
     >
-      <section class="ax-page">
+      <section class="ax-page ax-page-compact">
         <PageHeader.page_header
           class="ax-page-header-compact"
           breadcrumbs={[
@@ -142,7 +142,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
               />
               <:stat
                 label="Open invoice exposure"
-                value={format_minor(@summary.open_invoice_exposure_minor, "usd") <> " at risk"}
+                value={format_minor(@summary.open_invoice_exposure_minor, "usd") <> " at risk · target $0.00"}
                 tone="amber"
                 href={invoice_queue_path(@admin_mount_path, @current_owner_scope)}
               />
@@ -185,7 +185,10 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
             %{label: "State", render: &state_cell/1},
             %{label: "Plan / amount", render: &plan_amount_cell/1},
             %{label: "Renews / ends", render: &time_cell/1},
-            %{label: "Signals", render: &billing_signals_cell/1}
+            %{
+              label: "Signals",
+              render: &billing_signals_cell(&1, @admin_mount_path, @current_owner_scope)
+            }
           ]}
           card_title={&customer_label/1}
           card_fields={[
@@ -196,7 +199,10 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
             %{label: "State", render: &state_cell/1},
             %{label: "Plan / amount", render: &plan_amount_cell/1},
             %{label: "Renews / ends", render: &time_cell/1},
-            %{label: "Signals", render: &billing_signals_cell/1}
+            %{
+              label: "Signals",
+              render: &billing_signals_cell(&1, @admin_mount_path, @current_owner_scope)
+            }
           ]}
           filter_fields={subscription_filter_fields()}
           empty_title={empty_title(@params, @summary)}
@@ -279,14 +285,22 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
 
   defp scoped_invoices(_owner_scope), do: Invoice
 
-  defp billing_signals_cell(row) do
+  defp billing_signals_cell(row, mount_path, owner_scope) do
     ownership = BillingPresentation.ownership_label(row)
     tax = BillingPresentation.tax_health_label(BillingPresentation.tax_health(row))
     escaped_o = ownership |> Phoenix.HTML.html_escape() |> Phoenix.HTML.safe_to_string()
     escaped_t = tax |> Phoenix.HTML.html_escape() |> Phoenix.HTML.safe_to_string()
 
+    events_href =
+      mount_path
+      |> scoped_path("/events", owner_scope)
+      |> AccrueAdmin.DataTableNav.merge_query(%{
+        "subject_type" => "Subscription",
+        "subject_id" => row.id
+      })
+
     Phoenix.HTML.raw(
-      ~s(<span class="ax-chip ax-label">#{escaped_o}</span> <span class="ax-chip ax-label">#{escaped_t}</span>)
+      ~s(<span class="ax-stack-sm"><span><span class="ax-chip ax-label">#{escaped_o}</span> <span class="ax-chip ax-label">#{escaped_t}</span></span><a href="#{events_href}" class="ax-link">Webhook events</a></span>)
     )
   end
 
@@ -463,6 +477,13 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
         tone: :slate,
         active: queue_active or all_active,
         href: if(queue_active, do: clear_href, else: nil)
+      },
+      %{
+        id: :open_invoices,
+        label: "Open invoices",
+        tone: :amber,
+        active: true,
+        href: invoice_queue_path_from_table(table_path)
       }
     ] ++ filter_chips
   end
@@ -562,6 +583,15 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
   defp invoice_queue_path(mount_path, owner_scope) do
     mount_path
     |> scoped_path("/invoices", owner_scope)
+    |> AccrueAdmin.DataTableNav.merge_query(%{"status" => "open"})
+  end
+
+  defp invoice_queue_path_from_table(table_path) do
+    uri = URI.parse(table_path)
+    mount_path = uri.path |> Path.dirname()
+
+    %{uri | path: mount_path <> "/invoices"}
+    |> URI.to_string()
     |> AccrueAdmin.DataTableNav.merge_query(%{"status" => "open"})
   end
 

@@ -134,7 +134,7 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
     assert html =~ "Amount not projected locally"
     assert html =~ "verify price or invoice sync before assessing health"
     assert html =~ "Open recovery funnel"
-    assert html =~ "Open invoice queue"
+    assert html =~ "Open subscription invoice queue"
     assert html =~ "Actor"
     assert html =~ "Open full event log"
     refute html =~ ">Unknown<"
@@ -756,7 +756,13 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
   end
 
   defp page_wrapper_count(html) do
-    Regex.scan(~r/class="ax-page"/, html) |> length()
+    ~r/class="([^"]*)"/
+    |> Regex.scan(html, capture: :all_but_first)
+    |> Enum.count(fn [classes] ->
+      classes
+      |> String.split()
+      |> Enum.member?("ax-page")
+    end)
   end
 
   defp heading_count(html, tag) do

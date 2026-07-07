@@ -131,6 +131,9 @@ defmodule AccrueAdmin.Live.DashboardLive do
               <span :if={@stats.open_invoice_count > 0} class="ax-launcher-meta">
                 <%= count(@stats.open_invoice_count, "open invoice") %>
               </span>
+              <span class="ax-launcher-action">
+                Open invoice queue <Icon.icon name={:arrow_right} size="sm" />
+              </span>
             </a>
 
             <a class="ax-launcher" href={ScopedPath.build(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}>
@@ -141,6 +144,9 @@ defmodule AccrueAdmin.Live.DashboardLive do
               <span :if={@stats.past_due_subscription_count > 0} class="ax-launcher-meta ax-launcher-meta-warn">
                 <%= count(@stats.past_due_subscription_count, "at-risk subscription") %>
               </span>
+              <span class="ax-launcher-action">
+                Open recovery funnel <Icon.icon name={:arrow_right} size="sm" />
+              </span>
             </a>
 
             <a class="ax-launcher" href={ScopedPath.build(@admin_mount_path, "/webhooks", @current_owner_scope)}>
@@ -149,6 +155,9 @@ defmodule AccrueAdmin.Live.DashboardLive do
               <span class="ax-launcher-copy"><%= Copy.home_launcher_developer_copy() %></span>
               <span :if={@stats.blocked_webhook_count > 0} class="ax-launcher-meta ax-launcher-meta-warn">
                 <%= count(@stats.blocked_webhook_count, "dead-letter") %>
+              </span>
+              <span class="ax-launcher-action">
+                Debug webhook failures <Icon.icon name={:arrow_right} size="sm" />
               </span>
             </a>
           </div>
@@ -307,8 +316,8 @@ defmodule AccrueAdmin.Live.DashboardLive do
           metric: count(stats.blocked_webhook_count, "webhook"),
           label: Copy.home_attention_webhooks_label(),
           pill: "needs review",
-          action: Copy.home_attention_action_review(),
-          href: ScopedPath.build(mount_path, "/webhooks", scope, %{"status" => "dead"})
+          action: "Debug in event log",
+          href: ScopedPath.build(mount_path, "/events", scope, %{"q" => "webhook"})
         },
       stats.past_due_subscription_count > 0 &&
         %{

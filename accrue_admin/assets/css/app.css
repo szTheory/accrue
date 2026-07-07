@@ -449,12 +449,29 @@ button {
   position: relative;
   inset: auto;
   min-height: auto;
-  padding: var(--ax-space-lg);
+  padding: var(--ax-space-md);
   box-shadow: none;
 }
 
 .ax-dev-group-drawer-specimen .ax-detail-drawer-body {
+  gap: var(--ax-space-sm);
   max-height: min(26rem, 70vh);
+}
+
+.ax-dev-group-drawer-specimen .ax-detail-drawer-header {
+  margin-bottom: var(--ax-space-md);
+}
+
+.ax-dev-group-drawer-specimen .ax-detail-drawer-footer {
+  margin-top: var(--ax-space-md);
+}
+
+.ax-dev-group-drawer {
+  gap: var(--ax-space-sm);
+}
+
+.ax-dev-group-drawer-context {
+  padding: var(--ax-space-md);
 }
 
 @media (min-width: 768px) { /* --ax-bp-md ↑ */
@@ -1232,7 +1249,7 @@ a.ax-kpi-card--linked:focus-visible {
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
-  gap: var(--ax-space-xs) var(--ax-space-md);
+  gap: var(--ax-space-2xs) var(--ax-space-sm);
   padding: var(--ax-space-xs) 0;
 }
 
@@ -1260,7 +1277,7 @@ a.ax-kpi-card--linked:focus-visible {
 .ax-stat-value {
   /* ax-type-exception: component-local metric-value type, documented until migrated to a composed role utility in markup. */
   margin: 0;
-  font-size: var(--ax-type-lg);
+  font-size: var(--ax-type-md);
   font-weight: 600;
   line-height: var(--ax-leading-tight);
   color: var(--ax-primary);
@@ -2135,10 +2152,20 @@ a.ax-kpi-card--linked:focus-visible {
   box-sizing: border-box;
 }
 
+.ax-page-compact {
+  gap: var(--ax-space-md);
+}
+
 /* Detail stacks inside cards (UX-02) — not page shells; avoids nested ax-page */
 .ax-stack-xl {
   display: grid;
   gap: var(--ax-space-xl);
+  min-width: 0;
+}
+
+.ax-stack-md {
+  display: grid;
+  gap: var(--ax-space-md);
   min-width: 0;
 }
 
@@ -3840,6 +3867,16 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
 
 .ax-launcher-meta-warn {
   color: var(--ax-warning-readable);
+}
+
+.ax-launcher-action {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ax-space-xs);
+  margin-top: var(--ax-space-sm);
+  color: var(--ax-accent-readable);
+  font-size: var(--ax-type-sm);
+  font-weight: 700;
 }
 
 /* Demoted KPI strip on home: explicit responsive 4-up */

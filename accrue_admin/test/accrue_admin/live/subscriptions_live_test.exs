@@ -105,6 +105,7 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert html =~ ~s(data-ax-filter-chips)
     assert html =~ "At risk"
     assert html =~ "All"
+    assert html =~ "Open invoices"
     assert html =~ ~s(data-ax-state="filtered-empty") or html =~ ~s(data-ax-state="populated")
     refute html =~ "No subscriptions yet."
   end
@@ -240,6 +241,7 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert html =~ "Find customer"
     assert html =~ "Webhook events"
     assert html =~ "amount not projected locally"
+    assert html =~ "target $0.00"
 
     assert_table_headings_in_order(html, [
       "Customer and subscription IDs",

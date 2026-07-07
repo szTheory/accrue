@@ -187,7 +187,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
       active_organization_name={@active_organization_name}
     >
       <section
-        class="ax-page"
+        class="ax-page ax-page-compact ax-subscription-detail-page"
         phx-window-keydown="step_up_escape"
         phx-key="escape"
       >
@@ -205,16 +205,20 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
               label: customer_label(@customer),
               href: ScopedPath.build(@admin_mount_path, "/customers/#{@customer.id}", @current_owner_scope)
             },
-            %{label: @subscription.processor_id || @subscription.id}
+            %{label: subscription_title(@subscription, @customer)}
           ]}
         />
 
         <Detail.summary_card
           eyebrow={Copy.subscription_detail_eyebrow()}
-          title={@subscription.processor_id || @subscription.id}
+          title={subscription_title(@subscription, @customer)}
         >
           <:status><StatusBadge.status_badge status={@subscription.status} /></:status>
           <:facts>
+            <span class="ax-summary-fact">
+              <strong>Subscription</strong>
+              <%= @subscription.processor_id || @subscription.id %>
+            </span>
             <span class="ax-summary-fact">
               <strong>Customer</strong>
               <%= @customer.name || @customer.email || @customer.id %>
@@ -277,7 +281,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
           </div>
         </section>
 
-        <section class="ax-stack-xl" aria-label="Subscription details">
+        <section class="ax-stack-md" aria-label="Subscription details">
           <details
             class="ax-detail-section"
             data-ax-drill-section="billing-items"
@@ -319,7 +323,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
                   <%= Copy.resource_state_copy(:dunning, :queue_empty, surface: :subscription_detail).body %>
                 </p>
                 <p class="ax-body ax-detail-hint">
-                  No active campaign means there is no local recovery workflow queued for this subscription. Review the recovery funnel for at-risk accounts and the invoice queue for collection work.
+                  Open recovery funnel to view at-risk accounts. Open subscription invoice queue for collection work on this subscription.
                 </p>
               <% end %>
 
@@ -339,9 +343,12 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
                     })
                   }
                 >
-                  Open invoice queue
+                  Open subscription invoice queue
                 </a>
               </div>
+              <p class="ax-body ax-detail-hint">
+                The subscription invoice queue opens the Invoices worklist filtered to open invoices for this subscription.
+              </p>
             </div>
           </details>
 
@@ -730,6 +737,10 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
     base_rows
     |> maybe_add_quantity_row(subscription, subscription_label)
     |> maybe_add_dunning_row(subscription, subscription_label)
+  end
+
+  defp subscription_title(subscription, customer) do
+    "#{lifecycle_health_label(subscription)} · #{customer_label(customer)}"
   end
 
   defp maybe_add_quantity_row(rows, subscription, subscription_label) do

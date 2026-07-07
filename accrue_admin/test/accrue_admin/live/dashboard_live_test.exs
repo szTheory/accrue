@@ -99,21 +99,24 @@ defmodule AccrueAdmin.DashboardLiveTest do
 
     # Zone 1 — attention rail surfaces the seeded exceptions (dead webhook + meter failure)
     assert html =~ Copy.home_attention_webhooks_label()
-    assert html =~ Copy.home_attention_action_review()
+    assert html =~ "Debug in event log"
     assert html =~ Copy.home_attention_meter_label()
     assert html =~ Copy.home_attention_action_investigate()
     assert html =~ ~s(href="/billing/events?q=meter_event")
-    assert html =~ ~s(href="/billing/webhooks?status=dead")
+    assert html =~ ~s(href="/billing/events?q=webhook")
 
     # Zone 2 — task launchers (the JTBD doors)
     assert html =~ Copy.home_launcher_customers_title()
     assert html =~ Copy.home_launcher_customers_meta()
     assert html =~ "ax-launcher-primary"
     assert html =~ Copy.home_launcher_invoices_title()
+    assert html =~ "Open invoice queue"
     assert html =~ Copy.home_launcher_recovery_title()
     assert html =~ Copy.home_launcher_recovery_meta()
+    assert html =~ "Open recovery funnel"
     # Title relabeled in Phase 175-02 (IA-01 verb relabels); use Copy function directly.
     assert html =~ Copy.home_launcher_developer_title()
+    assert html =~ "Debug webhook failures"
 
     # Zone 3 — demoted KPI strip
     assert html =~ Copy.dashboard_kpi_customers_label()

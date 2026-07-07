@@ -10,9 +10,13 @@ defmodule AccrueAdmin.ComponentKitchenLiveTest do
     assert html =~ "Primary action"
     assert html =~ "Secondary action"
     assert html =~ "Dev tools"
+    assert html =~ "Test webhook fixtures"
     assert html =~ "/billing/dev/fake-inspect"
     assert html =~ "Command palette motion specimen"
     assert html =~ "ax-command-palette"
+    assert html =~ "Billing contact drawer specimen"
+    assert html =~ "Audit context"
+    assert html =~ "Preview billing health summary"
     assert html =~ "Enter the organization slug or platform owner scope"
   end
 end

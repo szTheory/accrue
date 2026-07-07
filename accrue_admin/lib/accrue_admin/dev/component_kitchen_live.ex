@@ -76,7 +76,7 @@ if Mix.env() != :prod do
         active_organization_name={@active_organization_name}
       >
         <section class="ax-page">
-          <header class="ax-page-header">
+          <header class="ax-page-header ax-page-header-compact">
             <Breadcrumbs.breadcrumbs
               items={[
                 %{label: "Dashboard", href: @admin_mount_path},
@@ -824,12 +824,25 @@ if Mix.env() != :prod do
 
       ~H"""
       <div class="ax-dev-group-body ax-dev-group-drawer-specimen">
-        <DetailDrawer.detail_drawer id="grp190-drawer-form-shell" open title="Edit billing contact" subtitle="Drawer/form proof specimen" close_label="Close drawer">
+        <DetailDrawer.detail_drawer
+          id="grp190-drawer-form-shell"
+          open
+          title="Billing contact drawer specimen"
+          subtitle="Component lab specimen for drawer fields. Recovery funnel analytics live in the Recovery page, not this form."
+          close_label="Close drawer"
+        >
           <:actions>
-            <Button.button variant="secondary" type="button">Preview</Button.button>
+            <Button.button variant="secondary" type="button">Preview billing health summary</Button.button>
           </:actions>
 
           <div class="ax-dev-group-drawer">
+            <section class="ax-card ax-dev-group-drawer-context">
+              <p class="ax-label">Audit context</p>
+              <p class="ax-body">
+                Last edited Jul 7, 2026 at 18:00 UTC by System. Open Event log for actor, timestamp, and source history.
+              </p>
+            </section>
+
             <Input.input id="grp190-drawer-email" name="billing_email" label="Billing email" value="operations@example.test" />
             <Select.select
               id="grp190-drawer-cadence"
