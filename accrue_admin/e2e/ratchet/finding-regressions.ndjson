@@ -1,7 +1,0 @@
-{"kind":"count-increase","lens":"persona:operator-founder","baseline_value":0,"current_value":6,"message":"Lens persona:operator-founder open-finding count increased from 0 to 6."}
-{"kind":"count-increase","lens":"persona:customer-support","baseline_value":0,"current_value":3,"message":"Lens persona:customer-support open-finding count increased from 0 to 3."}
-{"kind":"count-increase","lens":"persona:finance-billing-ops","baseline_value":0,"current_value":3,"message":"Lens persona:finance-billing-ops open-finding count increased from 0 to 3."}
-{"kind":"count-increase","lens":"persona:recovery-growth-ops","baseline_value":0,"current_value":2,"message":"Lens persona:recovery-growth-ops open-finding count increased from 0 to 2."}
-{"kind":"count-increase","lens":"persona:developer-integration","baseline_value":0,"current_value":2,"message":"Lens persona:developer-integration open-finding count increased from 0 to 2."}
-{"kind":"count-increase","lens":"persona:compliance-audit","baseline_value":0,"current_value":5,"message":"Lens persona:compliance-audit open-finding count increased from 0 to 5."}
-{"kind":"count-increase","lens":"design","baseline_value":0,"current_value":1,"message":"Lens design open-finding count increased from 0 to 1."}
