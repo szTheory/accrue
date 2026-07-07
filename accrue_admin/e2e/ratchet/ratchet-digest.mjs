@@ -70,7 +70,6 @@ const REQUIRED_ROW_FIELDS = [
   "severity",
   "persona_frequency",
   "defect",
-  "suggested_fix",
 ];
 
 // -----------------------------------------------------------------------------
@@ -467,6 +466,10 @@ function renderSeverity(sev) {
 
 /** renderFindingRow(f) — one `<tr>` for the worklist/decisions-needed tables. */
 function renderFindingRow(f) {
+  const suggestedFix =
+    f.suggested_fix === null || f.suggested_fix === undefined || String(f.suggested_fix).trim() === ""
+      ? ""
+      : `<p class="fix muted">${escapeHtml(f.suggested_fix)}</p>`;
   return `        <tr>
           <td class="col-sev">${renderSeverity(f.severity)}</td>
           <td class="col-id"><code>${escapeHtml(f.finding_id)}</code></td>
@@ -474,9 +477,7 @@ function renderFindingRow(f) {
     f.region_tag
   )}</code><br><span class="muted mono">${escapeHtml(f.claim_key)}</span></td>
           <td class="col-freq"><span class="freq">×${escapeHtml(String(f.persona_frequency))}</span></td>
-          <td class="col-defect"><p class="defect">${escapeHtml(f.defect)}</p><p class="fix muted">${escapeHtml(
-    f.suggested_fix
-  )}</p></td>
+          <td class="col-defect"><p class="defect">${escapeHtml(f.defect)}</p>${suggestedFix}</td>
         </tr>`;
 }
 
@@ -838,6 +839,75 @@ function runSelfTest() {
       assertSelfTest(
         "(XSS) rendered HTML has zero external http(s) references (offline, self-contained)",
         !/https?:\/\//.test(html)
+      );
+    }
+
+    // --- CR-01: optional suggested_fix:null must not abort or render literal null/undefined ---
+    {
+      const banner = buildSummaryBanner({
+        round: 1,
+        confirmed: 1,
+        rootCause: 1,
+        iaDecisions: 0,
+        status: "continue",
+        consecutiveDry: 0,
+      });
+      const nullableFix = findingFixture({
+        finding_id: "f-0000000000000c01",
+        defect: "ordinary proposer row without optional fix prose",
+        suggested_fix: null,
+      });
+      validateDigestRows([nullableFix], "worklist row");
+      const html = renderDigestHtml({ banner, worklist: [nullableFix], decisionsNeeded: [], galleryGroups: [] });
+      assertSelfTest(
+        "(CR-01) suggested_fix:null validates and still renders the defect",
+        html.includes("ordinary proposer row without optional fix prose")
+      );
+      assertSelfTest(
+        "(CR-01) suggested_fix:null does not render literal null/undefined",
+        !/\bnull\b/i.test(html) && !/\bundefined\b/i.test(html)
+      );
+
+      const decisionRows = buildDecisionsJsonRows([nullableFix]);
+      assertSelfTest(
+        "(CR-01) decisions row summary still comes from defect",
+        decisionRows.length === 1 &&
+          decisionRows[0].finding_id === "f-0000000000000c01" &&
+          decisionRows[0].decision === "approve" &&
+          decisionRows[0].surface === "dashboard" &&
+          decisionRows[0].summary === "ordinary proposer row without optional fix prose" &&
+          decisionRows[0].region_tag === "kpi-row",
+        JSON.stringify(decisionRows[0])
+      );
+
+      let requiredFieldThrew = false;
+      try {
+        validateDigestRows([findingFixture({ defect: null })], "worklist row");
+      } catch (error) {
+        requiredFieldThrew = /missing defect/.test(error.message);
+      }
+      assertSelfTest("(CR-01) required defect field remains strict", requiredFieldThrew);
+    }
+
+    // --- Optional suggested_fix prose remains escaped when it is present ---
+    {
+      const banner = buildSummaryBanner({
+        round: 1,
+        confirmed: 1,
+        rootCause: 1,
+        iaDecisions: 0,
+        status: "continue",
+        consecutiveDry: 0,
+      });
+      const worklist = [
+        findingFixture({
+          suggested_fix: '<img src=x onerror="alert(1)">',
+        }),
+      ];
+      const html = renderDigestHtml({ banner, worklist, decisionsNeeded: [], galleryGroups: [] });
+      assertSelfTest(
+        "(CR-01) suggested_fix prose is HTML-escaped when present",
+        html.includes("&lt;img src=x onerror=&quot;alert(1)&quot;&gt;") && !html.includes("<img src=x")
       );
     }
 
