@@ -123,13 +123,17 @@ function scopeForRound(round, roundsRows) {
 // -----------------------------------------------------------------------------
 
 /**
- * validateDecisionsBatch(rows) — pure batch classifier. Splits the maintainer-edited decision rows
- * into `{approves, rejects, invalidRows}`. A `reject` row is `invalid` unless its `suppressed_reason`
- * passes the REUSED closed-enum check; any row whose `decision` is neither `approve` nor `reject` is
- * also `invalid`. The caller aborts the WHOLE batch iff `invalidRows` is non-empty — so this pure
- * function is what makes the "abort on ANY invalid row" behavior testable without touching a ledger.
+ * validateDecisionsBatch(rows, ledgerRows) — pure batch classifier. Splits the maintainer-edited
+ * decision rows into `{approves, rejects, invalidRows}`. A `reject` row is `invalid` unless its
+ * `suppressed_reason` passes the REUSED closed-enum check; any row whose `decision` is neither
+ * `approve` nor `reject` is also `invalid`. When `ledgerRows` is supplied, this also preflights
+ * the lifecycle conditions the append helpers would otherwise discover one row at a time: every
+ * target finding must currently be `open`, and `duplicate-of:<finding_id>` suppressions must point
+ * at a finding that exists in this ledger. The caller aborts the WHOLE batch iff `invalidRows` is
+ * non-empty — so this pure function is what makes the "abort on ANY invalid row" behavior testable
+ * before any append-only ledger mutation.
  */
-function validateDecisionsBatch(rows) {
+function validateDecisionsBatch(rows, ledgerRows = []) {
   const approves = [];
   const rejects = [];
   const invalidRows = [];
@@ -147,6 +151,28 @@ function validateDecisionsBatch(rows) {
       invalidRows.push({ finding_id: row && row.finding_id, decision, unknown_decision: true });
     }
   }
+
+  if (Array.isArray(ledgerRows) && ledgerRows.length > 0) {
+    const folded = fold(ledgerRows);
+    const knownIds = new Set(ledgerRows.map((row) => row.finding_id).filter(Boolean));
+    for (const row of approves.concat(rejects)) {
+      const latest = folded.get(row.finding_id);
+      if (!latest || latest.status !== "open") {
+        invalidRows.push({ finding_id: row.finding_id, reason: "not-currently-open" });
+      }
+      if (typeof row.suppressed_reason === "string" && row.suppressed_reason.startsWith("duplicate-of:")) {
+        const referencedFindingId = row.suppressed_reason.slice("duplicate-of:".length);
+        if (!knownIds.has(referencedFindingId)) {
+          invalidRows.push({
+            finding_id: row.finding_id,
+            suppressed_reason: row.suppressed_reason,
+            reason: "dangling-duplicate-of",
+          });
+        }
+      }
+    }
+  }
+
   return { approves, rejects, invalidRows };
 }
 
@@ -182,13 +208,18 @@ function applyDecisions({ round, dryRun, ledgerPath, decisionsPath, roundsPath, 
     throw new Error(`applyDecisions: decisions file is not a JSON array: ${decisionsPath}`);
   }
 
-  const { approves, rejects, invalidRows } = validateDecisionsBatch(rows);
+  const ledgerRows = readNdjsonRows(ledgerPath);
+  const { approves, rejects, invalidRows } = validateDecisionsBatch(rows, ledgerRows);
 
   // Abort the ENTIRE batch on ANY invalid row — zero partial-apply (D-43).
   if (invalidRows.length > 0) {
     const named = invalidRows
       .map((r) =>
-        r.unknown_decision
+        r.reason
+          ? `${r.finding_id} (${r.reason}${
+              r.suppressed_reason != null ? `, suppressed_reason=${JSON.stringify(r.suppressed_reason)}` : ""
+            })`
+          : r.unknown_decision
           ? `${r.finding_id} (unknown decision=${JSON.stringify(r.decision)})`
           : `${r.finding_id} (suppressed_reason=${JSON.stringify(r.suppressed_reason)})`
       )
@@ -476,6 +507,45 @@ function runSelfTest() {
         fs.readFileSync(ledgerPath, "utf8") === before
       );
       assertSelfTest("(b) aborted batch writes no .fix-context.json", !fs.existsSync(fixContextPath));
+    }
+
+    // (b2) ledger-state preflight catches append-helper failures before any row is appended.
+    {
+      const ledgerPath = path.join(root, "ledger-b2.ndjson");
+      const openG = makeOpen(1, { surface: "dashboard", surface_type: "dashboard", dimension: 6, region_tag: "kpi-row" });
+      const openH = makeOpen(2, { surface: "subscriptions", surface_type: "list", dimension: 2, region_tag: "data-table" });
+      writeRows(ledgerPath, [openG, openH]);
+      const before = fs.readFileSync(ledgerPath, "utf8");
+      const decisionsPath = path.join(root, "decisions-b2.json");
+      fs.writeFileSync(
+        decisionsPath,
+        JSON.stringify([
+          // valid approve FIRST in file order — must NOT be applied when a later row references
+          // a duplicate target that appendSuppressed would reject.
+          { finding_id: openG.finding_id, decision: "approve", surface: "dashboard", summary: "x", region_tag: "kpi-row" },
+          {
+            finding_id: openH.finding_id,
+            decision: "reject",
+            surface: "subscriptions",
+            summary: "y",
+            region_tag: "data-table",
+            suppressed_reason: "duplicate-of:f-2222222222222222",
+          },
+        ])
+      );
+      const fixContextPath = path.join(root, ".fix-context-b2.json");
+      let threw = false;
+      try {
+        applyDecisions({ round: 4, dryRun: false, ledgerPath, decisionsPath, roundsPath, fixContextPath });
+      } catch (error) {
+        threw = /dangling-duplicate-of/.test(error.message);
+      }
+      assertSelfTest("(b2) dangling duplicate-of aborts during preflight", threw);
+      assertSelfTest(
+        "(b2) ZERO rows applied after preflight failure — ledger byte-identical",
+        fs.readFileSync(ledgerPath, "utf8") === before
+      );
+      assertSelfTest("(b2) preflight failure writes no .fix-context.json", !fs.existsSync(fixContextPath));
     }
 
     // (c) --dry-run mutates nothing: neither appendResolved/appendSuppressed nor .fix-context.json.
