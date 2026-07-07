@@ -71,7 +71,7 @@ defmodule Mix.Tasks.AccrueAdmin.Ui.FixTest do
     assert {"git", ["add", "priv/static"], _} = next_call()
 
     {"git", commit_args, _} = next_call()
-    assert ["commit", "-m", msg, "--allow-empty"] = commit_args
+    assert ["commit", "-m", msg, "--allow-empty", "--", "priv/static"] = commit_args
     assert msg =~ "round 3"
 
     {"npx", ["playwright", "test", "e2e/admin-visuals.spec.js"], recapture_env} = next_call()
@@ -112,6 +112,12 @@ defmodule Mix.Tasks.AccrueAdmin.Ui.FixTest do
     assert add_args == ["add", "priv/static"]
     refute Enum.any?(add_args, &String.contains?(&1, "e2e/ratchet"))
     refute Enum.any?(add_args, &String.contains?(&1, "ledger"))
+
+    {"git", commit_args, _} = next_call()
+    assert ["commit", "-m", msg, "--allow-empty", "--", "priv/static"] = commit_args
+    assert msg =~ "round 3"
+    refute Enum.any?(commit_args, &String.contains?(&1, "e2e/ratchet"))
+    refute Enum.any?(commit_args, &String.contains?(&1, "ledger"))
   end
 
   test "--dry-run runs ONLY apply-decisions --dry-run and no other step", %{root: _root} do

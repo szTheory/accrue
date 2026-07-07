@@ -111,7 +111,7 @@ defmodule Mix.Tasks.AccrueAdmin.Ui.Fix do
         runner,
         "git-commit",
         "git",
-        ["commit", "-m", "chore(ui-ratchet): rebuild CSS bundle for round #{round}", "--allow-empty"],
+        ["commit", "-m", "chore(ui-ratchet): rebuild CSS bundle for round #{round}", "--allow-empty", "--", "priv/static"],
         cd: root
       )
 
