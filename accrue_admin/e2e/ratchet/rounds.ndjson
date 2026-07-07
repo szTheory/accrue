@@ -1,2 +1,3 @@
 {"schema_version":"ratchet-round-seal/1","round":1,"dry":false,"epoch":1,"scope":"component-kitchen,dashboard,subscription-detail,subscriptions","bundle_sha256":"75f9dc74f8c97ed9270f9dd674ceb2e65be59381945be00a3e1269cc43f543c5","seq":1}
 {"schema_version":"ratchet-round-seal/1","round":2,"dry":false,"epoch":1,"scope":"component-kitchen,dashboard,subscription-detail,subscriptions","bundle_sha256":"a0678922161cb881ebd84468ee75a5d4f82ed94bcb1265bb59ba6feac0952cdd","seq":2}
+{"schema_version":"ratchet-round-seal/1","round":3,"dry":false,"epoch":1,"scope":"component-kitchen,dashboard,subscription-detail,subscriptions","bundle_sha256":"faebcbdb6efdc56c06d7777505f35632eb7aaae70578004e0b8382d68785938f","seq":3}
