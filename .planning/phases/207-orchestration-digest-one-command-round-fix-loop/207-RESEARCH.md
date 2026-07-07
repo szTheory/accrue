@@ -470,22 +470,25 @@ if (process.argv.includes("--next-round")) {
 
 **If this table is empty:** not applicable — all four items above are architecture-adjacent judgment calls flagged for planner confirmation, not verified-external facts; none touches a CONTEXT.md-locked decision.
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **Where do round-scoped digest/decisions/candidate artifacts physically live relative to the existing flat `test-results/admin-visuals/` capture path?**
    - What we know: CONTEXT.md/UI-SPEC assume a `test-results/ui-ratchet/round-NN/` directory holding digest.html + screenshots + bbox.json + candidates + verdicts together; none of this exists today; the existing capture/candidate/verdict paths are flat and hardcoded in 3 different files.
    - What's unclear: whether the planner should round-scope the capture pipeline itself or just copy artifacts into a round-NN home at digest time.
    - Recommendation: copy-at-digest-time (Pitfall 1, recommendation (a)) — smallest footprint, zero risk to existing consumers of the flat path (`score-visuals.mjs`, `phase192-gallery.mjs`, `phase200-scorecard.mjs` all read PNGs from the flat `test-results/admin-visuals/` structure and must keep working unmodified).
+   - **RESOLVED:** implemented by the executed `207-04` copy-at-digest-time approach. The digest owns the round-scoped artifact home without forcing the existing flat capture/proposer/verifier paths to change.
 
 2. **Does the digest's overlay-scale math get corrected to the real capture viewport (1280/393) or does it stay pinned to `baseline-manifest.js`'s declared values (1440/390)?**
    - What we know: the two numbers genuinely diverge, confirmed three ways (playwright.config.js explicit override, `devices["Pixel 5"]` actual viewport, and `exemplars/PROVENANCE.json`'s own capture-recipe note of "1280px-wide").
    - What's unclear: whether this is an already-known, accepted discrepancy from an earlier phase (in which case UI-SPEC's numbers may be intentional-but-wrong and should be corrected in this phase) or a genuinely new finding.
    - Recommendation: hardcode the real captured widths (1280/393) directly in `ratchet-digest.mjs` rather than trusting `baseline-manifest.js`'s `PROJECTS[...].viewport_width`, and leave a code comment documenting the divergence for a future baseline-manifest cleanup (out of this phase's scope to fix the manifest itself, since that's a frozen grammar file touched by many other phases).
+   - **RESOLVED:** implemented by executed `207-04` with the real capture widths `1280/393`, preserving correct overlay placement while leaving baseline-manifest cleanup out of scope.
 
 3. **Does `scripts/ci/verify_ratchet_ledger.mjs` need its own round-seal recomputation for independence, mirroring its existing GUARD_HOME_SPECS/LENS_KEYS duplication discipline?**
    - What we know: the file's own doc comment states an explicit "independence discipline" — it deliberately re-implements fold/guard-check/lens-enum rather than importing them, specifically so a shared bug wouldn't pass both checks.
    - What's unclear: whether the ORCH-06 convergence/dry computation is gate-relevant enough to warrant the same independent-reimplementation treatment, or whether it's purely advisory (digest-display-only, no CI consequence this phase, since 207 wires no CI per CONTEXT.md).
    - Recommendation: skip independent reimplementation this phase — CONTEXT.md is explicit that "207 wires no CI" and the round-seal/dry-round computation only feeds the digest banner + the maintainer's local terminal message, not a CI gate (that's Phase 208's `admin-ui-ratchet-guardrails` job). The independence discipline should be revisited in Phase 208 once convergence becomes CI-gated.
+   - **RESOLVED:** deferred to Phase 208, where convergence becomes CI-gated. Phase 207 keeps round-seal/dry-round logic local to the deterministic reducer and digest/terminal reporting path.
 
 ## Environment Availability
 

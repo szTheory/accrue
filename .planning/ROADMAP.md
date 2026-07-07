@@ -239,13 +239,26 @@ Full details: [v1.48 roadmap archive](milestones/v1.48-ROADMAP.md)
   7. A maintainer can scope a round to a surface subset (the representative slice or a single surface) through a documented flag on `mix accrue_admin.ui.round`, without hand-pruning `test-results/` PNGs; an unscoped round still sweeps the full configured surface set (ORCH-08). *(Folded from the Phase 205 live smoke: there is currently no subset filter, so a slice run required manual pruning.)*
 
 **Plans**: 6/8 plans executed
+**Wave 1**
 
 - [x] 207-01-PLAN.md
 - [x] 207-02-PLAN.md
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
 - [x] 207-03-PLAN.md
 - [x] 207-04-PLAN.md
+
+**Wave 3** *(blocked on Wave 2 completion)*
+
 - [x] 207-05-PLAN.md
+
+**Wave 4** *(blocked on Wave 3 completion)*
+
 - [x] 207-06-PLAN.md
+
+**Wave 5** *(blocked on Wave 4 completion)*
+
 - [ ] 207-07-PLAN.md — CR-01 digest accepts nullable `suggested_fix` without aborting the round (ORCH-01, ORCH-02)
 - [ ] 207-08-PLAN.md — CR-02 guard-mint completeness and scoped `ui.fix` CSS commit (ORCH-04, ORCH-05)
 
