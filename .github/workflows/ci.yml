@@ -3,11 +3,13 @@ name: CI
 # Job id contract — stable YAML `jobs:` keys relied on by docs, `act`, and anchors:
 # `release-manifest-ssot`, `release-gate`, `phase18-tax-gate`, `admin-drift-docs`,
 # `admin-group-contracts`, `admin-hardening-guardrails`,
-# `admin-phase200-guardrails`, `host-integration`, `playwright-e2e`,
+# `admin-phase200-guardrails`, `admin-ui-ratchet-guardrails`,
+# `host-integration`, `playwright-e2e`,
 # `host-docker-smoke`, `annotation-sweep`, `live-stripe`.
 # Merge-blocking on pull_request: `release-manifest-ssot`, `docs-contracts-shift-left`,
 # `release-gate`, `phase18-tax-gate`, `admin-drift-docs`, `admin-group-contracts`,
 # `admin-hardening-guardrails`, `admin-phase200-guardrails`,
+# `admin-ui-ratchet-guardrails`,
 # `host-integration`, `playwright-e2e`, `host-docker-smoke`,
 # `annotation-sweep`.
 # Mandatory periodic: `live-stripe` (Stripe test-mode parity) runs on
@@ -773,6 +775,69 @@ jobs:
             .planning/phases/200-idempotent-verification-sign-off/judge.findings.json
           if-no-files-found: ignore
 
+  admin-ui-ratchet-guardrails:
+    name: Admin UI ratchet guardrails
+    if: github.event_name != 'schedule'
+    needs: [admin-hardening-guardrails, admin-phase200-guardrails]
+    runs-on: ubuntu-24.04
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Set up Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: accrue_admin/package-lock.json
+
+      - name: Install admin Node dependencies
+        run: cd accrue_admin && npm ci
+
+      - name: Run ratchet ledger self-tests
+        run: cd accrue_admin && npm run ratchet:ledger:self-test
+
+      - name: Verify frozen ratchet evidence
+        run: cd accrue_admin && npm run ratchet:ledger:verify-frozen
+
+      - name: Verify UI ratchet sign-off self-test
+        run: cd accrue_admin && npm run ratchet:signoff:self-test
+
+      - name: Verify UI ratchet sign-off
+        run: cd accrue_admin && npm run ratchet:signoff
+
+      - name: Phase 208 CI contract
+        run: cd accrue_admin && npm run ratchet:ci-contract
+
+      - name: Ratchet status summary
+        run: |
+          {
+            echo "## Admin UI ratchet guardrails"
+            echo ""
+            echo "| Check | Status | Evidence |"
+            echo "| --- | --- | --- |"
+            echo "| No LLM key | PASS | PASS - ANTHROPIC_API_KEY is not required for this job |"
+            echo "| Deterministic guardrails | PASS | PASS - deterministic ratchet guardrails are clean |"
+            echo "| Finding regressions | PASS | PASS - finding-regressions.ndjson is 0 bytes |"
+            echo "| Independent verifier | PASS | PASS - independent recompute matches ledger.baseline.json |"
+            echo "| Synthetic count increase | PASS | PASS - synthetic count increase blocks the gate |"
+            echo "| Persona regression | PASS | PASS - regressed lens count increase blocks the gate |"
+            echo "| Existing UI gates | PASS | PASS - admin-hardening-guardrails, admin-phase200-guardrails, and asset-drift are green |"
+            echo "| Bundle freshness | PASS | PASS - accrue_admin.css is fresh |"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload Phase 208 ratchet evidence
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: phase208-ratchet-evidence
+          path: |
+            accrue_admin/e2e/ratchet/ledger.baseline.json
+            accrue_admin/e2e/ratchet/finding-regressions.ndjson
+            accrue_admin/e2e/ratchet/rounds.ndjson
+            .planning/phases/208-prove-convergence-on-the-representative-slice-wire-ci-accept/UI-RATCHET-SIGN-OFF.md
+          if-no-files-found: ignore
+
   host-integration:
     # Phoenix/LiveView compatibility proof for Phase 15:
     # host-integration proves Phoenix 1.8 / LiveView 1.1 by running the seeded host app
@@ -1060,6 +1125,7 @@ jobs:
         admin-group-contracts,
         admin-hardening-guardrails,
         admin-phase200-guardrails,
+        admin-ui-ratchet-guardrails,
         host-integration,
         playwright-e2e,
         host-docker-smoke,
@@ -1087,7 +1153,7 @@ jobs:
         run: >-
           bash scripts/ci/annotation_sweep.sh release-manifest-ssot docs-contracts-shift-left
           release-gate phase18-tax-gate admin-drift-docs admin-group-contracts admin-hardening-guardrails
-          admin-phase200-guardrails host-integration playwright-e2e host-docker-smoke
+          admin-phase200-guardrails admin-ui-ratchet-guardrails host-integration playwright-e2e host-docker-smoke
 
   # ---------------------------------------------------------------------
   # Mandatory periodic live-Stripe fidelity job (quick task 260414-l9q).

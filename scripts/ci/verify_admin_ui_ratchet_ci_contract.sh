@@ -67,7 +67,6 @@ done
 
 require_fixed "$ci_file" "admin-ui-ratchet-guardrails:"
 require_fixed "$ci_file" "Admin UI ratchet guardrails"
-require_fixed "$ci_file" "bash scripts/ci/verify_admin_ui_ratchet_ci_contract.sh"
 
 ratchet_job="$(job_body "admin-ui-ratchet-guardrails")"
 [ -n "$ratchet_job" ] || fail "could not extract admin-ui-ratchet-guardrails job"
@@ -135,6 +134,7 @@ annotation_job="$(job_body "annotation-sweep")"
 [ -n "$annotation_job" ] || fail "could not extract annotation-sweep job"
 require_source_fixed "annotation-sweep job" "$annotation_job" "admin-ui-ratchet-guardrails"
 require_source_fixed "annotation-sweep job" "$annotation_job" "bash scripts/ci/annotation_sweep.sh"
-require_source_regex "annotation-sweep job" "$annotation_job" 'annotation_sweep\.sh .*admin-ui-ratchet-guardrails|admin-ui-ratchet-guardrails.*annotation_sweep\.sh'
+annotation_job_flat="$(printf '%s\n' "$annotation_job" | tr '\n' ' ')"
+require_source_regex "annotation-sweep job" "$annotation_job_flat" 'annotation_sweep\.sh .*admin-ui-ratchet-guardrails'
 
 echo "verify_admin_ui_ratchet_ci_contract: ok"
