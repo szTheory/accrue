@@ -109,7 +109,9 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
     assert html =~ "subject_type=Subscription"
     assert html =~ "subject_id=#{subscription.id}"
     assert html =~ "Subscription events"
-    assert html =~ "Filtered to this subscription"
+    assert html =~ "Subscription invoice queue"
+    assert html =~ "Filtered invoices for this subscription"
+    assert html =~ "Webhook sources, retries, and audit events"
   end
 
   test "summary and drill bands replace page-level KPI and predicate noise", %{
@@ -125,8 +127,11 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
     assert html =~ "Tax &amp; compliance"
     assert html =~ "invoice.payment_failed"
     assert html =~ "Health"
+    assert html =~ "Healthy - active with no local risk flags"
     assert html =~ "MRR"
     assert html =~ "Amount not projected locally"
+    assert html =~ "Actor"
+    assert html =~ "Open full event log"
     refute html =~ ">Unknown<"
 
     refute html =~ Copy.subscription_kpi_status_label() <> "</"

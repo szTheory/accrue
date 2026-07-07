@@ -233,6 +233,8 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
 
     assert {:ok, _view, html} = live(conn, "/billing/subscriptions?view=all")
 
+    assert html =~ "Open invoice exposure"
+
     assert_table_headings_in_order(html, [
       "Customer and subscription IDs",
       "State",

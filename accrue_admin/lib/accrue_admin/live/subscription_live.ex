@@ -226,7 +226,10 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
           </:facts>
         </Detail.summary_card>
 
-        <Detail.summary_list rows={summary_rows(@subscription, @customer, @admin_mount_path, @current_owner_scope)} />
+        <Detail.summary_list
+          rows={summary_rows(@subscription, @customer, @admin_mount_path, @current_owner_scope)}
+          class="ax-summary-list-compact"
+        />
 
         <FlashGroup.flash_group flashes={@flashes} />
 
@@ -283,7 +286,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
             <summary class="ax-detail-section-head">
               <span class="ax-detail-section-title">Billing & items</span>
             </summary>
-            <Detail.detail_field_list fields={billing_fields(@subscription)} />
+            <Detail.detail_field_list fields={billing_fields(@subscription)} class="ax-field-list-compact" />
           </details>
 
           <details
@@ -336,12 +339,26 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
           <summary class="ax-detail-section-head">
             <span class="ax-detail-section-title">Activity</span>
           </summary>
+          <a
+            class="ax-link-quiet"
+            href={
+              ScopedPath.build(@admin_mount_path, "/events", @current_owner_scope, %{
+                "subject_type" => "Subscription",
+                "subject_id" => @subscription.id
+              })
+            }
+          >
+            Open full event log
+          </a>
           <%= if @timeline_events_loaded? do %>
             <Timeline.timeline
               label="Subscription events"
               empty_label="No subscription events yet"
-              items={timeline_items(@timeline_events, @subscription)}
+              items={timeline_items(@timeline_events, @subscription, @admin_mount_path, @current_owner_scope)}
             />
+            <p class="ax-body ax-detail-hint">
+              Actor, timestamp, and source are shown per event. The full event log includes filters, pagination, webhook sources, and retry context.
+            </p>
           <% else %>
             <p class="ax-body">Open this section to load subscription activity.</p>
           <% end %>
@@ -802,12 +819,23 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
 
   defp lifecycle_health_label(subscription) do
     cond do
-      Accrue.Billing.Subscription.past_due?(subscription) -> "At risk"
-      Accrue.Billing.Subscription.canceling?(subscription) -> "Canceling"
-      Accrue.Billing.Subscription.paused?(subscription) -> "Paused"
-      Accrue.Billing.Subscription.canceled?(subscription) -> "Ended"
-      Accrue.Billing.Subscription.active?(subscription) -> "Active"
-      true -> humanize(subscription.status)
+      Accrue.Billing.Subscription.past_due?(subscription) ->
+        "At risk - payment recovery needed"
+
+      Accrue.Billing.Subscription.canceling?(subscription) ->
+        "Canceling - renewal ends this period"
+
+      Accrue.Billing.Subscription.paused?(subscription) ->
+        "Paused - collection paused"
+
+      Accrue.Billing.Subscription.canceled?(subscription) ->
+        "Ended - no active billing"
+
+      Accrue.Billing.Subscription.active?(subscription) ->
+        "Healthy - active with no local risk flags"
+
+      true ->
+        humanize(subscription.status)
     end
   end
 
@@ -963,37 +991,58 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
   defp action_label(nil), do: "Subscription action"
   defp action_label(action_type), do: humanize(action_type)
 
-  defp timeline_items(events, subscription) do
+  defp timeline_items(events, subscription, mount_path, scope) do
     events = List.wrap(events)
 
     if events == [] do
-      [subscription_projection_timeline_item(subscription)]
+      [subscription_projection_timeline_item(subscription, mount_path, scope)]
     else
-      Enum.map(events, &timeline_event_item/1)
+      Enum.map(events, &timeline_event_item(&1, mount_path, scope))
     end
   end
 
-  defp timeline_event_item(event) do
+  defp timeline_event_item(event, mount_path, scope) do
     %{
       title: event.type,
       at: format_datetime(event.inserted_at),
-      body: event.subject_type <> " " <> event.subject_id,
+      body: event_subject_summary(event),
       status: event.actor_type,
       tone: tone(event),
-      meta: "event ##{event.id}"
+      meta: event_actor_summary(event),
+      href: ScopedPath.build(mount_path, "/events/#{event.id}", scope),
+      href_label: "Open event"
     }
   end
 
-  defp subscription_projection_timeline_item(subscription) do
+  defp subscription_projection_timeline_item(subscription, mount_path, scope) do
     %{
       title: "Subscription projection loaded",
       at: format_datetime(subscription.inserted_at || subscription.current_period_start),
       body:
-        "#{lifecycle_health_label(subscription)} local projection for customer #{subscription.customer_id}",
-      status: "local projection",
+        "System projection recorded #{lifecycle_health_label(subscription)} for customer #{short_id(subscription.customer_id)}",
+      status: "system projection",
       tone: :cobalt,
-      meta: "subscription #{subscription.processor_id || subscription.id}"
+      meta: "Actor System · subscription #{subscription.processor_id || subscription.id}",
+      href:
+        ScopedPath.build(mount_path, "/events", scope, %{
+          "subject_type" => "Subscription",
+          "subject_id" => subscription.id
+        }),
+      href_label: "Open filtered log"
     }
+  end
+
+  defp event_subject_summary(event) do
+    "#{humanize(event.subject_type)} #{short_id(event.subject_id)}"
+  end
+
+  defp event_actor_summary(%{actor_type: actor_type, actor_id: actor_id}) do
+    actor =
+      actor_type
+      |> to_string()
+      |> humanize()
+
+    if actor_id, do: "Actor #{actor} · #{short_id(actor_id)}", else: "Actor #{actor}"
   end
 
   defp tone(%{actor_type: "admin"}), do: :cobalt
@@ -1457,6 +1506,18 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
 
   defp humanize(_value), do: "Unknown"
 
+  defp short_id(nil), do: "unavailable"
+
+  defp short_id(value) do
+    value = to_string(value)
+
+    if String.length(value) > 14 do
+      String.slice(value, 0, 6) <> "..." <> String.slice(value, -5, 5)
+    else
+      value
+    end
+  end
+
   defp format_datetime(%DateTime{} = value), do: Calendar.strftime(value, "%b %d, %Y %H:%M UTC")
   defp format_datetime(_value), do: "Date not projected"
 
@@ -1659,7 +1720,8 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
       [
         %{
           icon: :invoices,
-          label: "Invoices",
+          label: Copy.subscription_drill_link_invoices_for_subscription(),
+          value: "Filtered invoices for this subscription",
           href:
             ScopedPath.build(mount_path, "/invoices", scope, %{
               "subscription_id" => subscription.id
@@ -1676,7 +1738,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
         %{
           icon: :events,
           label: Copy.subscription_drill_link_events_for_subscription(),
-          value: "Filtered to this subscription",
+          value: "Webhook sources, retries, and audit events",
           href:
             ScopedPath.build(mount_path, "/events", scope, %{
               "subject_type" => "Subscription",

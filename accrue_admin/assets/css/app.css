@@ -1695,6 +1695,16 @@ a.ax-kpi-card--linked:focus-visible {
   color: var(--ax-muted);
 }
 
+.ax-timeline-link {
+  /* ax-type-exception: timeline row links intentionally match compact row-action scale. */
+  color: var(--ax-accent-readable);
+  font-size: var(--ax-type-sm);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: var(--ax-space-2xs);
+  width: fit-content;
+}
+
 /* Threaded-feed elevation: a continuous rail threading calm node-anchored entries.
    Scoped overrides placed AFTER the shared grouped selectors so KPI/json rules stay intact. */
 
@@ -4007,6 +4017,10 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
   border-bottom: 1px solid var(--ax-border);
 }
 
+.ax-summary-list-compact .ax-summary-list-row {
+  padding: var(--ax-space-sm) 0;
+}
+
 .ax-summary-list-key,
 .ax-summary-list-value,
 .ax-summary-list-actions {
@@ -4095,6 +4109,10 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
   margin: 0;
 }
 
+.ax-field-list-compact {
+  gap: var(--ax-space-sm) var(--ax-space-lg);
+}
+
 .ax-field {
   display: grid;
   gap: var(--ax-space-2xs);
@@ -4117,6 +4135,11 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
   font-size: var(--ax-type-sm);
   color: var(--ax-primary);
   overflow-wrap: anywhere;
+}
+
+.ax-detail-hint {
+  color: var(--ax-muted);
+  max-width: var(--ax-measure);
 }
 
 @media (min-width: 640px) { /* --ax-bp-content ↑ */

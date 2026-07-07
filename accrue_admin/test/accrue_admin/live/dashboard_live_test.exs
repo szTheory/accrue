@@ -111,6 +111,7 @@ defmodule AccrueAdmin.DashboardLiveTest do
     assert html =~ "ax-launcher-primary"
     assert html =~ Copy.home_launcher_invoices_title()
     assert html =~ Copy.home_launcher_recovery_title()
+    assert html =~ Copy.home_launcher_recovery_meta()
     # Title relabeled in Phase 175-02 (IA-01 verb relabels); use Copy function directly.
     assert html =~ Copy.home_launcher_developer_title()
 
@@ -130,6 +131,9 @@ defmodule AccrueAdmin.DashboardLiveTest do
     assert html =~ Copy.dashboard_activity_webhook_health_eyebrow()
     assert html =~ "invoice.payment_failed"
     assert html =~ "customer.updated"
+    assert html =~ "Open event"
+    assert html =~ "Open delivery"
+    assert html =~ "Actor"
 
     # Regrouped sidebar nav still threads to every section (exact, query-free hrefs)
     assert html =~ ~s(href="/billing/customers")

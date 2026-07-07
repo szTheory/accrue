@@ -39,6 +39,7 @@ const VIEWPORT_ONLY_SURFACES = new Set(["component-kitchen"]);
 // filename; dark is a sibling `${name}-dark.png`. Theme is applied by setting
 // the data-theme attribute the admin chrome keys off (same hook the toggle uses).
 async function captureThemes(page, name, project) {
+  await hideCaptureOnlyChrome(page);
   await expect(page.locator("#main-content")).toBeVisible();
   const dir = `test-results/admin-visuals/${project}`;
   const fullPage = !VIEWPORT_ONLY_SURFACES.has(name);
@@ -90,6 +91,27 @@ async function captureBBoxes(page, name, project, theme) {
     `${dir}/${name}${suffix}.bbox.json`,
     JSON.stringify(boxes, null, 2)
   );
+}
+
+async function hideCaptureOnlyChrome(page) {
+  await page.addStyleTag({
+    content: `
+      .ax-dev-toolbar,
+      [data-ax-command-palette-backdrop],
+      [data-ax-command-palette-panel] {
+        display: none !important;
+      }
+
+      [data-ax-command-palette-shell] {
+        pointer-events: none !important;
+      }
+    `
+  });
+  await page.evaluate(() => {
+    document
+      .querySelectorAll("[data-ax-command-palette-shell]")
+      .forEach((element) => element.setAttribute("data-open", "false"));
+  });
 }
 
 test.describe("Admin visual inventory", () => {

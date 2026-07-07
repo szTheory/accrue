@@ -5,7 +5,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
 
   import Ecto.Query
 
-  alias Accrue.Billing.{Query, Subscription}
+  alias Accrue.Billing.{Invoice, Query, Subscription}
   alias Accrue.Repo
   alias AccrueAdmin.BillingPresentation
 
@@ -115,6 +115,11 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
               />
               <:stat label="Paused subscriptions" value={Integer.to_string(@summary.paused_count)} tone="amber" />
               <:stat label="Past-due subscriptions" value={Integer.to_string(@summary.past_due_count)} />
+              <:stat
+                label="Open invoice exposure"
+                value={format_minor(@summary.open_invoice_exposure_minor, "usd")}
+                tone="amber"
+              />
             </StatStrip.stat_strip>
           </:stat_strip>
 
@@ -204,13 +209,20 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
 
   defp subscription_summary(owner_scope) do
     subscriptions = scoped_subscriptions(owner_scope)
+    open_invoice_statuses = [:draft, :open]
 
     %{
       active_count: subscriptions |> Query.active() |> Repo.aggregate(:count, :id),
       canceling_count: subscriptions |> Query.canceling() |> Repo.aggregate(:count, :id),
       paused_count: subscriptions |> Query.paused() |> Repo.aggregate(:count, :id),
       past_due_count: subscriptions |> Query.past_due() |> Repo.aggregate(:count, :id),
-      total_count: subscriptions |> Repo.aggregate(:count, :id)
+      total_count: subscriptions |> Repo.aggregate(:count, :id),
+      open_invoice_exposure_minor:
+        Invoice
+        |> where([invoice], invoice.status in ^open_invoice_statuses)
+        |> select([invoice], coalesce(sum(invoice.amount_remaining_minor), 0))
+        |> Repo.one()
+        |> Kernel.||(0)
     }
   end
 
@@ -284,6 +296,19 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
   defp status_tone(_status), do: "ink"
 
   defp plan_amount_cell(_row), do: Copy.subscriptions_list_plan_amount_unavailable()
+
+  defp format_minor(amount_minor, _currency) when is_integer(amount_minor) do
+    dollars = amount_minor / 100
+    "$" <> :erlang.float_to_binary(dollars, decimals: 2)
+  end
+
+  defp format_minor(%Decimal{} = amount_minor, currency) do
+    amount_minor
+    |> Decimal.to_integer()
+    |> format_minor(currency)
+  end
+
+  defp format_minor(_amount_minor, _currency), do: "$0.00"
 
   defp time_cell(%{ended_at: %DateTime{} = ended_at}), do: "Ended #{format_date(ended_at)}"
 

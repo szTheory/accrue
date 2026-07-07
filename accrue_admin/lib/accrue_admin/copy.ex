@@ -997,6 +997,9 @@ defmodule AccrueAdmin.Copy do
   def subscription_drill_link_invoices_for_customer,
     do: "Invoices for this customer (not subscription-filtered)"
 
+  def subscription_drill_link_invoices_for_subscription,
+    do: "Subscription invoice queue"
+
   def subscription_drill_link_charges_for_customer,
     do: "Charges for this customer (not subscription-filtered)"
 
@@ -1340,6 +1343,8 @@ defmodule AccrueAdmin.Copy do
   def home_launcher_recovery_title, do: "Recover at-risk revenue"
 
   def home_launcher_recovery_copy, do: "Work the dunning funnel and at-risk subscriptions."
+
+  def home_launcher_recovery_meta, do: "Open recovery funnel"
 
   def home_launcher_developer_title, do: "Investigate an incident"
 

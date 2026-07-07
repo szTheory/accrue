@@ -13,5 +13,6 @@ defmodule AccrueAdmin.ComponentKitchenLiveTest do
     assert html =~ "/billing/dev/fake-inspect"
     assert html =~ "Command palette motion specimen"
     assert html =~ "ax-command-palette"
+    assert html =~ "Enter the organization slug or platform owner scope"
   end
 end

@@ -20,6 +20,8 @@ defmodule AccrueAdmin.Live.DashboardLive do
     stats = dashboard_stats()
     socket = assign_shell(socket, admin)
 
+    scope = socket.assigns[:current_owner_scope]
+
     {:ok,
      socket
      |> assign(:stats, stats)
@@ -28,11 +30,11 @@ defmodule AccrueAdmin.Live.DashboardLive do
        attention_items(
          stats,
          socket.assigns.admin_mount_path,
-         socket.assigns[:current_owner_scope]
+         scope
        )
      )
-     |> assign(:recent_events, recent_events())
-     |> assign(:webhook_health, webhook_health())}
+     |> assign(:recent_events, recent_events(socket.assigns.admin_mount_path, scope))
+     |> assign(:webhook_health, webhook_health(socket.assigns.admin_mount_path, scope))}
   end
 
   @impl true
@@ -132,6 +134,7 @@ defmodule AccrueAdmin.Live.DashboardLive do
               <span class="ax-launcher-icon"><Icon.icon name={:recovery} size="lg" /></span>
               <span class="ax-launcher-title"><%= Copy.home_launcher_recovery_title() %></span>
               <span class="ax-launcher-copy"><%= Copy.home_launcher_recovery_copy() %></span>
+              <span class="ax-launcher-meta"><%= Copy.home_launcher_recovery_meta() %></span>
               <span :if={@stats.past_due_subscription_count > 0} class="ax-launcher-meta ax-launcher-meta-warn">
                 <%= count(@stats.past_due_subscription_count, "at-risk subscription") %>
               </span>
@@ -326,7 +329,7 @@ defmodule AccrueAdmin.Live.DashboardLive do
   defp count(1, noun), do: "1 #{noun}"
   defp count(n, noun), do: "#{n} #{noun}s"
 
-  defp recent_events do
+  defp recent_events(mount_path, scope) do
     Event
     |> order_by([event], desc: event.inserted_at, desc: event.id)
     |> limit(6)
@@ -335,15 +338,17 @@ defmodule AccrueAdmin.Live.DashboardLive do
       %{
         title: event.type,
         at: format_datetime(event.inserted_at),
-        body: "#{event.subject_type} #{event.subject_id}",
+        body: event_subject_summary(event),
         status: event.actor_type,
         tone: if(event.actor_type == "admin", do: :cobalt, else: :slate),
-        meta: event.actor_id && "actor #{event.actor_id}"
+        meta: event_actor_summary(event),
+        href: ScopedPath.build(mount_path, "/events/#{event.id}", scope),
+        href_label: "Open event"
       }
     end)
   end
 
-  defp webhook_health do
+  defp webhook_health(mount_path, scope) do
     WebhookEvent
     |> order_by([event], desc: event.inserted_at, desc: event.id)
     |> limit(6)
@@ -352,12 +357,31 @@ defmodule AccrueAdmin.Live.DashboardLive do
       %{
         title: event.type,
         at: format_datetime(event.received_at || event.inserted_at),
-        body: "#{event.processor} #{event.processor_event_id}",
+        body: webhook_body(event),
         status: event.status,
         tone: webhook_tone(event.status),
-        meta: endpoint_label(event.endpoint)
+        meta: endpoint_label(event.endpoint),
+        href: ScopedPath.build(mount_path, "/webhooks/#{event.id}", scope),
+        href_label: "Open delivery"
       }
     end)
+  end
+
+  defp event_subject_summary(%{subject_type: subject_type, subject_id: subject_id}) do
+    "#{humanize(subject_type)} record #{short_id(subject_id)}"
+  end
+
+  defp event_actor_summary(%{actor_type: actor_type, actor_id: actor_id}) do
+    actor =
+      actor_type
+      |> to_string()
+      |> humanize()
+
+    if actor_id, do: "Actor #{actor} · #{short_id(actor_id)}", else: "Actor #{actor}"
+  end
+
+  defp webhook_body(event) do
+    "#{event.processor |> to_string() |> humanize()} delivery #{short_id(event.processor_event_id)}"
   end
 
   defp webhook_tone(status) when status in [:succeeded, :processing], do: :moss
@@ -367,6 +391,26 @@ defmodule AccrueAdmin.Live.DashboardLive do
 
   defp endpoint_label(nil), do: nil
   defp endpoint_label(endpoint), do: "endpoint #{endpoint}"
+
+  defp short_id(nil), do: "unavailable"
+
+  defp short_id(value) do
+    value = to_string(value)
+
+    if String.length(value) > 14 do
+      String.slice(value, 0, 6) <> "..." <> String.slice(value, -5, 5)
+    else
+      value
+    end
+  end
+
+  defp humanize(value) do
+    value
+    |> to_string()
+    |> String.replace("_", " ")
+    |> String.replace("-", " ")
+    |> String.capitalize()
+  end
 
   defp format_minor(amount_minor, _currency) when is_integer(amount_minor) do
     dollars = amount_minor / 100

@@ -36,6 +36,10 @@ defmodule AccrueAdmin.Components.Timeline do
             </details>
 
             <div :if={Map.get(item, :meta)} class="ax-timeline-meta"><%= Map.get(item, :meta) %></div>
+
+            <a :if={Map.get(item, :href)} class="ax-timeline-link" href={Map.get(item, :href)}>
+              <%= Map.get(item, :href_label, "Open details") %>
+            </a>
           </div>
         </li>
       </ol>

@@ -844,7 +844,15 @@ if Mix.env() != :prod do
               label="Operator notes"
               value="Long drawer content wraps without hiding the footer actions or stranding validation copy."
             />
-            <Input.input id="grp190-drawer-error" name="owner_scope" label="Owner scope" value="" errors={["Owner scope is required before saving."]} />
+            <Input.input
+              id="grp190-drawer-error"
+              name="owner_scope"
+              label="Owner scope"
+              value=""
+              placeholder="platform-demo"
+              help_text="Enter the organization slug or platform owner scope this billing contact belongs to."
+              errors={["Owner scope is required before saving."]}
+            />
           </div>
 
           <:footer>
