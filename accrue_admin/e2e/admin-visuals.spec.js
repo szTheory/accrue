@@ -94,23 +94,21 @@ async function captureBBoxes(page, name, project, theme) {
 }
 
 async function hideCaptureOnlyChrome(page) {
-  await page.addStyleTag({
-    content: `
-      .ax-dev-toolbar,
-      [data-ax-command-palette-backdrop],
-      [data-ax-command-palette-panel] {
-        display: none !important;
-      }
-
-      [data-ax-command-palette-shell] {
-        pointer-events: none !important;
-      }
-    `
-  });
   await page.evaluate(() => {
     document
-      .querySelectorAll("[data-ax-command-palette-shell]")
-      .forEach((element) => element.setAttribute("data-open", "false"));
+      .querySelectorAll(
+        [
+          ".ax-dev-toolbar",
+          "[data-ax-command-palette-backdrop]",
+          "[data-ax-command-palette-panel]",
+          "[data-ax-command-palette-shell]"
+        ].join(",")
+      )
+      .forEach((element) => {
+        element.hidden = true;
+        element.setAttribute("aria-hidden", "true");
+        element.setAttribute("data-open", "false");
+      });
   });
 }
 
