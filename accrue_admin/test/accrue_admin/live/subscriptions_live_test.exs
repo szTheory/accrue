@@ -87,9 +87,10 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert html =~ ~s(data-ax-page-actions)
     assert html =~ "Find customer"
     assert html =~ "Webhook events"
-    assert html =~ "Open invoice queue"
-    assert html =~ "Watch dunning funnel"
+    assert html =~ "Open global invoice queue"
+    assert html =~ "Open dunning funnel"
     assert html =~ "Audit event log"
+    assert html =~ "Billing health"
     assert_one_h1(html)
 
     assert html
@@ -109,8 +110,8 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert html =~ "At risk"
     assert html =~ "All"
     assert html =~ "Open invoices"
-    assert html =~ "Work open invoices"
-    assert html =~ "Watch dunning funnel"
+    assert html =~ "Open global invoice queue"
+    assert html =~ "Open dunning funnel"
     assert html =~ "Audit event log"
     assert html =~ ~s(data-ax-state="filtered-empty") or html =~ ~s(data-ax-state="populated")
     refute html =~ "No subscriptions yet."
@@ -243,7 +244,8 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert {:ok, _view, html} = live(conn, "/billing/subscriptions?view=all")
 
     assert html =~ "Open invoice exposure"
-    assert html =~ "Open invoice queue"
+    assert html =~ "Open global invoice queue"
+    assert html =~ "Open subscription invoices"
     assert html =~ "Find customer"
     assert html =~ "Webhook events"
     assert html =~ "amount not projected locally"

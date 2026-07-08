@@ -822,12 +822,12 @@ if Mix.env() != :prod do
         <DetailDrawer.detail_drawer
           id="grp190-drawer-form-shell"
           open
-          title="Billing contact drawer specimen"
-          subtitle="Component lab specimen for drawer fields. Billing health, webhook debugging, and audit history open in their operator workspaces."
+          title="Billing health summary drawer specimen"
+          subtitle="Shows health verdict, audit history, webhook debugging, and invoice work queues in one drawer."
           close_label="Close drawer"
         >
           <:actions>
-            <Button.button variant="secondary" href={@admin_mount_path}>Open billing health summary</Button.button>
+            <Button.button variant="primary" href={@admin_mount_path}>Open billing health summary</Button.button>
             <Button.button variant="secondary" href={@admin_mount_path <> "/events"}>Open Event log</Button.button>
             <Button.button variant="secondary" href={@admin_mount_path <> "/webhooks"}>Debug webhook deliveries</Button.button>
             <Button.button variant="secondary" href={@admin_mount_path <> "/invoices?status=open"}>Work open invoices</Button.button>
@@ -835,13 +835,17 @@ if Mix.env() != :prod do
 
           <div class="ax-dev-group-drawer">
             <section class="ax-card ax-dev-group-drawer-context">
-              <p class="ax-label">Audit context</p>
+              <p class="ax-label">Billing health summary</p>
               <p class="ax-body">
-                Last edited Jul 7, 2026 at 18:00 UTC by System.
-                <a class="ax-link" href={@admin_mount_path <> "/events"}>Open Event log</a>
-                for actor, timestamp, and source history.
+                <span class="ax-status-badge ax-status-badge-amber">
+                  <span class="ax-status-dot"></span>Unhealthy: $592.50 open above $0.00 target
+                </span>
+              </p>
+              <p class="ax-body">
+                Last edited Jul 7, 2026 at 18:00 UTC by System. Event log, webhook debug, and invoice work queues are available below without hiding the health verdict.
               </p>
               <div class="ax-detail-actions-row">
+                <a class="ax-button ax-button-secondary ax-button-sm" href={@admin_mount_path <> "/events"}>Open Event log</a>
                 <a class="ax-button ax-button-secondary ax-button-sm" href={@admin_mount_path <> "/webhooks"}>Debug webhook deliveries</a>
                 <a class="ax-button ax-button-primary ax-button-sm" href={@admin_mount_path <> "/invoices?status=open"}>Work open invoices</a>
               </div>

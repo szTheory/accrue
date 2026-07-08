@@ -2694,6 +2694,43 @@ a.ax-kpi-card--linked:focus-visible {
   gap: var(--ax-space-sm);
 }
 
+.ax-data-table-card {
+  padding: var(--ax-space-md);
+}
+
+.ax-data-table-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--ax-space-sm);
+  margin-block-end: var(--ax-space-sm);
+}
+
+.ax-data-table-card-fields {
+  display: grid;
+  gap: var(--ax-space-sm);
+  margin: 0;
+}
+
+.ax-data-table-card-field {
+  display: grid;
+  gap: var(--ax-space-2xs);
+}
+
+.ax-data-table-card dd {
+  margin: 0;
+}
+
+.ax-data-table-card .ax-stack-sm {
+  gap: var(--ax-space-xs);
+}
+
+.ax-data-table-inline-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ax-space-xs);
+}
+
 .ax-data-table-grid {
   width: 100%;
   border-collapse: collapse;
@@ -3834,6 +3871,16 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
   color: var(--ax-accent-readable);
 }
 
+.ax-launcher-recovery {
+  border-color: var(--ax-status-warning-border);
+  background: color-mix(in srgb, var(--ax-status-warning-bg) 38%, var(--ax-elevated));
+}
+
+.ax-launcher-recovery .ax-launcher-icon {
+  background: var(--ax-status-warning-bg);
+  color: var(--ax-status-warning-text);
+}
+
 .ax-launcher:hover,
 .ax-launcher:focus-visible {
   transform: translateY(calc(-1 * var(--ax-rise-sm)));
@@ -3875,6 +3922,10 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
 
 .ax-launcher-meta-warn {
   color: var(--ax-warning-readable);
+}
+
+.ax-launcher-meta-actions {
+  color: var(--ax-primary);
 }
 
 .ax-launcher-action {

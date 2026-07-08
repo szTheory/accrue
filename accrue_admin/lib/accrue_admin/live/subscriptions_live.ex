@@ -114,13 +114,13 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
               class="ax-button ax-button-primary ax-button-sm"
               href={invoice_queue_path(@admin_mount_path, @current_owner_scope)}
             >
-              Open invoice queue
+              Open global invoice queue
             </a>
             <a
               class="ax-button ax-button-secondary ax-button-sm"
               href={scoped_path(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}
             >
-              Watch dunning funnel
+              Open dunning funnel
             </a>
             <a
               class="ax-button ax-button-secondary ax-button-sm"
@@ -144,18 +144,36 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
 
           <:stat_strip>
             <StatStrip.stat_strip label="Subscription summary">
-              <:stat label="Active subscriptions" value={count(@summary.active_count, "active subscription")} />
+              <:stat
+                label="Billing health"
+                value={billing_health_summary(@summary)}
+                tone={billing_health_tone(@summary)}
+                href={invoice_queue_path(@admin_mount_path, @current_owner_scope)}
+              />
+              <:stat
+                label="Active subscriptions"
+                value={"Healthy: " <> count(@summary.active_count, "active subscription")}
+                tone="moss"
+              />
               <:stat
                 label="Canceling renewals"
-                value={count(@summary.canceling_count, "canceling renewal")}
+                value={"Watch: " <> count(@summary.canceling_count, "canceling renewal")}
                 tone="amber"
               />
-              <:stat label="Paused subscriptions" value={count(@summary.paused_count, "paused subscription")} tone="amber" />
-              <:stat label="Past-due subscriptions" value={count(@summary.past_due_count, "past-due subscription")} />
+              <:stat
+                label="Paused subscriptions"
+                value={watch_count(@summary.paused_count, "paused subscription")}
+                tone={if(@summary.paused_count == 0, do: "moss", else: "amber")}
+              />
+              <:stat
+                label="Past-due subscriptions"
+                value={watch_count(@summary.past_due_count, "past-due subscription")}
+                tone={if(@summary.past_due_count == 0, do: "moss", else: "amber")}
+              />
               <:stat
                 label="Open invoice queue"
-                value={count(@summary.open_invoice_count, "invoice")}
-                tone="amber"
+                value={invoice_queue_summary(@summary)}
+                tone={if(@summary.open_invoice_count == 0, do: "moss", else: "amber")}
                 href={invoice_queue_path(@admin_mount_path, @current_owner_scope)}
               />
               <:stat
@@ -239,13 +257,13 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
             />
             <div class="ax-work-queue-actions" aria-label="Direct work queues">
               <a class="ax-button ax-button-primary ax-button-sm" href={invoice_queue_path_from_table(@table_path)}>
-                Work open invoices
+                Open global invoice queue
               </a>
               <a
                 class="ax-button ax-button-secondary ax-button-sm"
                 href={scoped_path(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}
               >
-                Watch dunning funnel
+                Open dunning funnel
               </a>
               <a
                 class="ax-button ax-button-secondary ax-button-sm"
@@ -335,7 +353,14 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
         "subject_id" => row.id
       })
 
-    invoices_href =
+    global_invoices_href =
+      mount_path
+      |> scoped_path("/invoices", owner_scope)
+      |> AccrueAdmin.DataTableNav.merge_query(%{
+        "status" => "open"
+      })
+
+    subscription_invoices_href =
       mount_path
       |> scoped_path("/invoices", owner_scope)
       |> AccrueAdmin.DataTableNav.merge_query(%{
@@ -347,12 +372,35 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
     <span class="ax-stack-sm">
       <span><span class="ax-chip ax-label">#{escaped_o}</span> <span class="ax-chip ax-label">#{escaped_t}</span></span>
       <span class="ax-label ax-muted"><strong>Actor</strong> System · <strong>Action</strong> subscription.created · <strong>When</strong> #{created}</span>
-      <a href="#{invoices_href}" class="ax-button ax-button-secondary ax-button-sm">Open invoice queue</a>
+      <span class="ax-data-table-inline-actions">
+        <a href="#{subscription_invoices_href}" class="ax-button ax-button-primary ax-button-sm">Open subscription invoices</a>
+        <a href="#{global_invoices_href}" class="ax-button ax-button-secondary ax-button-sm">Open global invoice queue</a>
+      </span>
       <a href="#{events_href}" class="ax-link">Webhook events</a>
-      <span class="ax-label ax-muted">Invoice actions: send reminder, retry payment, void from invoice queue</span>
+      <span class="ax-label ax-muted">Subscription invoices are filtered to this row; global queue covers every open invoice.</span>
     </span>
     """)
   end
+
+  defp billing_health_summary(summary) do
+    if summary.open_invoice_count > 0 do
+      "Unhealthy: " <>
+        format_minor(summary.open_invoice_exposure_minor, "usd") <> " open above $0.00 target"
+    else
+      "Healthy: $0.00 open at target"
+    end
+  end
+
+  defp billing_health_tone(%{open_invoice_count: count}) when count > 0, do: "amber"
+  defp billing_health_tone(_summary), do: "moss"
+
+  defp invoice_queue_summary(%{open_invoice_count: count}) when count > 0,
+    do: "Unhealthy: " <> count(count, "open invoice")
+
+  defp invoice_queue_summary(_summary), do: "Healthy: 0 open invoices"
+
+  defp watch_count(0, noun), do: "Healthy: " <> count(0, noun)
+  defp watch_count(count, noun), do: "Watch: " <> count(count, noun)
 
   defp identity_cell(row, mount_path, owner_scope) do
     customer_href = scoped_path(mount_path, "/customers/#{row.customer_id}", owner_scope)

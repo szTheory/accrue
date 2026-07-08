@@ -233,7 +233,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
               class="ax-button ax-button-primary ax-button-sm"
               href={ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope, %{"status" => "open"})}
             >
-              Open all invoice queue
+              Open global invoice queue
             </a>
             <a
               class="ax-button ax-button-secondary ax-button-sm"
@@ -353,22 +353,22 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
                   <%= Copy.resource_state_copy(:dunning, :queue_empty, surface: :subscription_detail).body %>
                 </p>
                 <p class="ax-body ax-detail-hint">
-                  Watch dunning funnel to view at-risk accounts. Open all invoice queue to work every open invoice, or open this subscription's filtered queue for local context.
+                  Open dunning funnel to view at-risk accounts. Open global invoice queue to work every open invoice, or open this subscription's filtered queue for local context.
                 </p>
               <% end %>
 
               <div class="ax-detail-actions-row">
                 <a
                   class="ax-button ax-button-primary ax-button-sm"
-                  href={ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope, %{"status" => "open"})}
+                  href={ScopedPath.build(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}
                 >
-                  Open all invoice queue
+                  Open dunning funnel
                 </a>
                 <a
                   class="ax-button ax-button-secondary ax-button-sm"
-                  href={ScopedPath.build(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}
+                  href={ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope, %{"status" => "open"})}
                 >
-                  Watch dunning funnel
+                  Open global invoice queue
                 </a>
                 <a
                   class="ax-button ax-button-secondary ax-button-sm"

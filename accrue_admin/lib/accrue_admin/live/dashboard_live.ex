@@ -59,14 +59,14 @@ defmodule AccrueAdmin.Live.DashboardLive do
               class="ax-button ax-button-primary ax-button-sm"
               href={ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope, %{"status" => "open"})}
             >
-              Open invoice queue
+              Open global invoice queue
               <Icon.icon name={:arrow_right} size="sm" />
             </a>
             <a
               class="ax-button ax-button-secondary ax-button-sm"
               href={ScopedPath.build(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}
             >
-              Watch dunning funnel
+              Review recovery analytics
               <Icon.icon name={:arrow_right} size="sm" />
             </a>
           </div>
@@ -95,9 +95,7 @@ defmodule AccrueAdmin.Live.DashboardLive do
               <span :if={row.pill} class={["ax-attention-pill", "ax-attention-pill-#{row.tone}"]}>
                 <%= row.pill %>
               </span>
-              <span class="ax-attention-action">
-                <%= row.action %> <Icon.icon name={:arrow_right} size="sm" />
-              </span>
+              <span class="ax-attention-action"><%= row.action %></span>
             </a>
           </div>
 
@@ -147,12 +145,18 @@ defmodule AccrueAdmin.Live.DashboardLive do
               <span :if={@stats.open_invoice_count > 0} class="ax-launcher-meta">
                 <%= count(@stats.open_invoice_count, "open invoice") %>
               </span>
+              <span :if={@stats.open_invoice_count > 0} class="ax-launcher-meta ax-launcher-meta-warn">
+                Inline queue: <%= format_minor(@stats.open_invoice_balance_minor, "usd") %> open above $0.00 target
+              </span>
+              <span class="ax-launcher-meta ax-launcher-meta-actions">
+                Actions: send reminder, retry payment, void invoice
+              </span>
               <span class="ax-launcher-action">
-                Open invoice queue <Icon.icon name={:arrow_right} size="sm" />
+                Work open invoice queue <Icon.icon name={:arrow_right} size="sm" />
               </span>
             </a>
 
-            <a class="ax-launcher" href={ScopedPath.build(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}>
+            <a class="ax-launcher ax-launcher-recovery" href={ScopedPath.build(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}>
               <span class="ax-launcher-icon"><Icon.icon name={:recovery} size="lg" /></span>
               <span class="ax-launcher-title"><%= Copy.home_launcher_recovery_title() %></span>
               <span class="ax-launcher-copy"><%= Copy.home_launcher_recovery_copy() %></span>
@@ -161,7 +165,7 @@ defmodule AccrueAdmin.Live.DashboardLive do
                 <%= count(@stats.past_due_subscription_count, "at-risk subscription") %>
               </span>
               <span class="ax-launcher-action">
-                Watch dunning funnel <Icon.icon name={:arrow_right} size="sm" />
+                Open dunning funnel <Icon.icon name={:arrow_right} size="sm" />
               </span>
             </a>
 
