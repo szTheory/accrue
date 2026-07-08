@@ -116,8 +116,9 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
                 <span class="ax-status-dot"></span><%= billing_health_label(@summary) %>
               </span>
               <strong class="ax-health-verdict"><%= billing_health_verdict(@summary) %></strong>
-              <span class="ax-health-detail"><%= billing_health_summary(@summary) %>; <%= format_minor(@summary.open_invoice_exposure_minor, "usd") %> above the $0.00 target.</span>
-              <span class="ax-health-detail"><%= dunning_funnel_summary(@summary) %></span>
+              <span class="ax-health-detail ax-health-detail-primary"><%= billing_health_summary(@summary) %></span>
+              <span class="ax-health-detail">Open exposure: <%= format_minor(@summary.open_invoice_exposure_minor, "usd") %>; target $0.00.</span>
+              <span class="ax-health-detail">Recovery: <%= dunning_funnel_summary(@summary) %></span>
               <a class="ax-button ax-button-primary ax-button-sm" href={invoice_queue_path(@admin_mount_path, @current_owner_scope)}>
                 Work invoice queue to zero
               </a>
@@ -214,6 +215,28 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
         </PageHeader.page_header>
 
         <FlashGroup.flash_group flashes={flash_messages(@flash)} />
+
+        <section class="ax-inline-worklist ax-subscriptions-audit-strip" aria-label="Subscription audit trail">
+          <div class="ax-inline-worklist-copy">
+            <strong>Who did what, when?</strong>
+            <span>Latest audit event: subscription.created by Accrue system</span>
+            <span>Use the audit log before changing invoices, dunning, or webhook retries.</span>
+          </div>
+          <div class="ax-inline-worklist-actions">
+            <a
+              class="ax-button ax-button-primary ax-button-sm"
+              href={scoped_path(@admin_mount_path, "/events", @current_owner_scope, %{"type" => "subscription.created"})}
+            >
+              Open full audit event log
+            </a>
+            <a
+              class="ax-button ax-button-secondary ax-button-sm"
+              href={scoped_path(@admin_mount_path, "/events", @current_owner_scope, %{"actor_type" => "admin"})}
+            >
+              Filter admin actors
+            </a>
+          </div>
+        </section>
 
         <section class="ax-inline-worklist" aria-label="Open invoice worklist">
           <div class="ax-inline-worklist-copy">
@@ -449,7 +472,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
   defp billing_health_label(_summary), do: "Healthy"
 
   defp billing_health_verdict(%{open_invoice_count: count}) when count > 0,
-    do: "No - billing is not healthy right now"
+    do: "Billing needs attention now"
 
   defp billing_health_verdict(_summary), do: "Billing is healthy right now"
 

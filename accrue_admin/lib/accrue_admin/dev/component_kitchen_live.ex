@@ -822,35 +822,36 @@ if Mix.env() != :prod do
         <DetailDrawer.detail_drawer
           id="grp190-drawer-form-shell"
           open
-          title="Billing health and recovery drawer specimen"
-          subtitle="Shows health verdict, dunning funnel, actor audit history, webhook debugging, and invoice work queues in one drawer."
+          title="Billing health and recovery drawer"
+          subtitle="Current billing health, at-risk dunning, actor audit history, webhook debugging, and invoice work queues."
           close_label="Close drawer"
         >
           <:actions>
             <Button.button variant="primary" href={@admin_mount_path <> "/invoices?status=open"}>Work open invoices</Button.button>
-            <Button.button variant="secondary" href={@admin_mount_path <> "/webhooks"}>Debug webhook deliveries</Button.button>
+            <Button.button variant="secondary" href={@admin_mount_path <> "/analytics/recovery"}>Watch at-risk customers</Button.button>
+            <Button.button variant="primary" href={@admin_mount_path <> "/webhooks?status=failed,dead"}>Debug failed webhook deliveries</Button.button>
           </:actions>
 
           <div class="ax-dev-group-drawer">
             <section class="ax-dev-group-drawer-context ax-dev-group-drawer-health" aria-label="Billing health summary">
-              <p class="ax-label">Billing health summary</p>
+              <p class="ax-label">Billing health verdict</p>
               <p class="ax-dev-group-drawer-health-verdict">
                 <span class="ax-status-badge ax-status-badge-amber">
-                  <span class="ax-status-dot"></span>Unhealthy
+                  <span class="ax-status-dot"></span>Attention required
                 </span>
-                <strong>No - billing is not healthy right now</strong>
-                <span>$592.50 open above $0.00 target</span>
+                <strong>Billing needs attention now</strong>
+                <span>$592.50 open exposure; target $0.00</span>
               </p>
               <p class="ax-body">
-                Last edited Jul 7, 2026 at 18:00 UTC by System. Recovery analytics, actor audit history, webhook debug, and invoice work queues are available below without hiding the health verdict.
+                Last edited Jul 7, 2026 at 18:00 UTC by System. Recovery analytics, actor audit history, webhook debug, and invoice work queues are available from this panel.
               </p>
               <div class="ax-detail-actions-row">
                 <a class="ax-button ax-button-secondary ax-button-sm" href={@admin_mount_path}>Open billing health summary</a>
                 <a class="ax-button ax-button-primary ax-button-sm" href={@admin_mount_path <> "/invoices?status=open"}>Work open invoices</a>
-                <a class="ax-button ax-button-secondary ax-button-sm" href={@admin_mount_path <> "/analytics/recovery"}>Open dunning funnel</a>
+                <a class="ax-button ax-button-secondary ax-button-sm" href={@admin_mount_path <> "/analytics/recovery"}>Open at-risk dunning and customers</a>
                 <a class="ax-button ax-button-secondary ax-button-sm" href={@admin_mount_path <> "/customers"}>Find one customer and open billing 360 detail</a>
                 <a class="ax-button ax-button-secondary ax-button-sm" href={@admin_mount_path <> "/events?actor_type=admin"}>Who did what, when? Audit trail</a>
-                <a class="ax-button ax-button-secondary ax-button-sm" href={@admin_mount_path <> "/webhooks"}>Debug webhook deliveries</a>
+                <a class="ax-button ax-button-primary ax-button-sm" href={@admin_mount_path <> "/webhooks?status=failed,dead"}>Debug failed webhook deliveries</a>
               </div>
             </section>
 

@@ -449,17 +449,17 @@ button {
   position: relative;
   inset: auto;
   min-height: auto;
-  padding: var(--ax-space-sm);
+  padding: var(--ax-space-xs);
   box-shadow: none;
 }
 
 .ax-dev-group-drawer-specimen .ax-detail-drawer-body {
-  gap: var(--ax-space-xs);
+  gap: var(--ax-space-2xs);
   max-height: min(26rem, 70vh);
 }
 
 .ax-dev-group-drawer-specimen .ax-detail-drawer-header {
-  margin-bottom: var(--ax-space-xs);
+  margin-bottom: var(--ax-space-2xs);
 }
 
 .ax-dev-group-drawer-specimen .ax-detail-drawer-header .ax-heading {
@@ -499,8 +499,8 @@ button {
 
 .ax-dev-group-drawer-health {
   display: grid;
-  gap: var(--ax-space-xs);
-  padding: var(--ax-space-sm);
+  gap: var(--ax-space-2xs);
+  padding: var(--ax-space-xs);
   border: 1px solid var(--ax-status-warning-border);
   border-radius: var(--ax-radius-sm);
   background: color-mix(in srgb, var(--ax-status-warning-bg) 58%, var(--ax-elevated));
@@ -1547,12 +1547,12 @@ a.ax-kpi-card--linked:focus-visible {
   position: relative;
   inset: auto;
   min-height: auto;
-  padding: var(--ax-space-sm);
+  padding: var(--ax-space-xs);
   box-shadow: none;
 }
 
 .ax-dev-group-drawer-specimen .ax-detail-drawer-body {
-  gap: var(--ax-space-xs);
+  gap: var(--ax-space-2xs);
   max-height: min(26rem, 70vh);
 }
 
@@ -2336,6 +2336,10 @@ a.ax-kpi-card--linked:focus-visible {
   color: var(--ax-primary);
 }
 
+.ax-health-detail-primary {
+  font-weight: 700;
+}
+
 .ax-health-summary-amber {
   border-color: var(--ax-status-warning-border);
   background: color-mix(in srgb, var(--ax-status-warning-bg) 52%, var(--ax-elevated));
@@ -2384,6 +2388,11 @@ a.ax-kpi-card--linked:focus-visible {
   flex-wrap: wrap;
   gap: var(--ax-space-xs);
   align-items: center;
+}
+
+.ax-subscriptions-audit-strip {
+  border-color: var(--ax-status-info-border);
+  background: color-mix(in srgb, var(--ax-status-info-bg) 44%, var(--ax-elevated));
 }
 
 .ax-subscriptions-page .ax-filter-chip-bar {
@@ -4024,8 +4033,8 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: var(--ax-space-xs) var(--ax-space-sm);
-  padding: var(--ax-space-sm) var(--ax-space-md);
+  gap: var(--ax-space-2xs) var(--ax-space-sm);
+  padding: var(--ax-space-xs) var(--ax-space-sm);
   border: 1px solid var(--ax-border);
   border-radius: var(--ax-radius-sm);
   color: var(--ax-primary);

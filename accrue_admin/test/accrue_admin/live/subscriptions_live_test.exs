@@ -90,16 +90,19 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert html =~ ~s(data-ax-page-actions)
     assert html =~ "Find one customer"
 
-    assert html =~ "No - billing is not healthy right now" or
+    assert html =~ "Billing needs attention now" or
              html =~ "Billing is healthy right now"
 
     assert html =~ "Overall billing health answer"
     assert html =~ "ax-health-summary-prominent"
-    assert html =~ "above the $0.00 target"
+    assert html =~ "target $0.00"
     assert html =~ "Work open invoices"
     assert html =~ "Work invoice queue to zero"
     assert html =~ "Watch dunning funnel"
     assert html =~ "Who did what, when?"
+    assert html =~ "Latest audit event: subscription.created by Accrue system"
+    assert html =~ "Open full audit event log"
+    assert html =~ "Filter admin actors"
     assert html =~ "Debug failed webhook deliveries"
     assert html =~ "Billing health"
     assert html =~ "Recovery"
