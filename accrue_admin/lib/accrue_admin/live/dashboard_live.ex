@@ -277,6 +277,20 @@ defmodule AccrueAdmin.Live.DashboardLive do
               empty_label={Copy.dashboard_timeline_events_empty()}
               items={@recent_events}
             />
+            <div class="ax-activity-actions ax-activity-footer" aria-label="Event ledger navigation">
+              <a
+                class="ax-button ax-button-primary ax-button-sm"
+                href={ScopedPath.build(@admin_mount_path, "/events", @current_owner_scope)}
+              >
+                Open full event ledger
+              </a>
+              <a
+                class="ax-button ax-button-secondary ax-button-sm"
+                href={ScopedPath.build(@admin_mount_path, "/events", @current_owner_scope, %{"limit" => "25"})}
+              >
+                Load more audit events
+              </a>
+            </div>
           </article>
 
           <article class="ax-card ax-activity-card ax-activity-card-pipeline">
@@ -426,16 +440,32 @@ defmodule AccrueAdmin.Live.DashboardLive do
   end
 
   defp event_subject_summary(%{subject_type: subject_type, subject_id: subject_id}) do
-    "#{humanize(subject_type)} record #{short_id(subject_id)}"
+    if subject_id do
+      "#{humanize(subject_type)} activity"
+    else
+      "#{humanize(subject_type)} activity without linked record"
+    end
   end
 
   defp event_actor_summary(%{actor_type: actor_type, actor_id: actor_id}) do
-    actor =
-      actor_type
-      |> to_string()
-      |> humanize()
+    case to_string(actor_type) do
+      "admin" ->
+        if actor_id, do: "Admin user #{humanize_identifier(actor_id)}", else: "Admin user"
 
-    if actor_id, do: "Actor #{actor} · #{short_id(actor_id)}", else: "Actor #{actor}"
+      "system" ->
+        "Accrue system"
+
+      actor ->
+        humanize(actor)
+    end
+  end
+
+  defp humanize_identifier(value) do
+    value
+    |> to_string()
+    |> String.replace(["_", "-"], " ")
+    |> String.split()
+    |> Enum.map_join(" ", &String.capitalize/1)
   end
 
   defp webhook_body(event) do

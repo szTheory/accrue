@@ -439,6 +439,12 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
           </summary>
           <div class="ax-card ax-activity-audit-strip">
             <p class="ax-label">Who did what, when</p>
+            <% latest_audit = latest_audit_row(@timeline_events, @subscription) %>
+            <div class="ax-audit-summary-row" aria-label="Latest audit event summary">
+              <span><strong>Who</strong> <%= latest_audit.actor %></span>
+              <span><strong>Did</strong> <%= latest_audit.action %></span>
+              <span><strong>When</strong> <%= latest_audit.at %></span>
+            </div>
             <p class="ax-body"><%= activity_audit_summary(@timeline_events, @subscription) %></p>
             <div class="ax-activity-actions">
               <a
@@ -952,9 +958,9 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
       caveats != [] ->
         %{
           tone: "amber",
-          label: "Needs sync check",
-          headline: "Active billing has local projection gaps",
-          body: "Verify processor sync before treating this subscription as healthy.",
+          label: "Needs setup review",
+          headline: "Billing can run, but admin setup details are incomplete",
+          body: "Review the missing setup details before calling this account fully healthy.",
           caveats: caveats
         }
 
@@ -989,8 +995,8 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
         %{
           tone: "moss",
           label: "Healthy",
-          headline: "Active with no local risk flags",
-          body: "No local dunning, cancellation, or payment-risk flags are active.",
+          headline: "Active billing is healthy right now",
+          body: "No dunning, cancellation, or payment-risk flags are active.",
           caveats: []
         }
 
@@ -1008,10 +1014,10 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
   defp projection_caveats(subscription) do
     [
       unless(match?(%DateTime{}, subscription.current_period_end),
-        do: "Renewal date not projected locally"
+        do: "Renewal date is not shown in admin"
       ),
-      unless(present?(current_price_id(subscription)), do: "Price not protected locally"),
-      "Amount not protected locally"
+      unless(present?(current_price_id(subscription)), do: "Price is not confirmed in admin"),
+      "Amount is not confirmed in admin"
     ]
     |> Enum.reject(&is_nil/1)
   end
@@ -1033,7 +1039,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
         "Ended - no active billing"
 
       Accrue.Billing.Subscription.active?(subscription) ->
-        "Healthy - active with no local risk flags"
+        "Healthy - active billing"
 
       true ->
         humanize(subscription.status)
@@ -1046,7 +1052,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
         if ended_at = subscription.ended_at || subscription.canceled_at do
           "Ended #{format_datetime(ended_at)}"
         else
-          "End date not projected"
+          "End date is not shown in admin"
         end
 
       Accrue.Billing.Subscription.canceling?(subscription) ->
@@ -1107,19 +1113,19 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
   end
 
   defp not_projected_copy(:amount),
-    do: "Amount not protected locally - verify processor sync"
+    do: "Amount is not confirmed in admin"
 
   defp not_projected_copy(:end_date),
-    do: "End date not projected locally - verify processor sync before assessing health"
+    do: "End date is not shown in admin"
 
   defp not_projected_copy(:period),
-    do: "Current period not projected locally - verify processor sync before assessing health"
+    do: "Current period is not shown in admin"
 
   defp not_projected_copy(:price),
-    do: "Price not protected locally - verify processor item sync"
+    do: "Price is not confirmed in admin"
 
   defp not_projected_copy(:renewal),
-    do: "Renewal date not projected locally - verify processor sync"
+    do: "Renewal date is not shown in admin"
 
   defp default_drill_open?(subscription, :billing),
     do: not Subscription.dunning_campaign_active?(subscription)
@@ -1212,7 +1218,13 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
   end
 
   defp activity_audit_summary(_events, subscription) do
-    "Subscription projection loaded · Actor System · #{format_datetime(subscription.inserted_at || subscription.current_period_start)}"
+    "Subscription status reviewed · Accrue system · #{format_datetime(subscription.inserted_at || subscription.current_period_start)}"
+  end
+
+  defp latest_audit_row(events, subscription) do
+    events
+    |> audit_rows(subscription)
+    |> List.first()
   end
 
   defp audit_rows(events, subscription) do
@@ -1222,8 +1234,8 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
       [] ->
         [
           %{
-            actor: "Actor System",
-            action: "Subscription projection loaded",
+            actor: "Accrue system",
+            action: "Subscription status reviewed",
             at: format_datetime(subscription.inserted_at || subscription.current_period_start)
           }
         ]
@@ -1266,13 +1278,12 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
 
   defp subscription_projection_timeline_item(subscription, mount_path, scope) do
     %{
-      title: "Subscription projection loaded",
+      title: "Subscription status reviewed",
       at: format_datetime(subscription.inserted_at || subscription.current_period_start),
-      body:
-        "System projection recorded #{lifecycle_health_label(subscription)} for customer #{short_id(subscription.customer_id)}",
-      status: "system projection",
+      body: "Accrue checked #{lifecycle_health_label(subscription)} for this customer",
+      status: "system",
       tone: :cobalt,
-      meta: "Actor System · subscription #{subscription.processor_id || subscription.id}",
+      meta: "Accrue system",
       href:
         ScopedPath.build(mount_path, "/events", scope, %{
           "subject_type" => "Subscription",
@@ -1283,16 +1294,20 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
   end
 
   defp event_subject_summary(event) do
-    "#{humanize(event.subject_type)} #{short_id(event.subject_id)}"
+    "#{humanize(event.subject_type)} activity"
   end
 
   defp event_actor_summary(%{actor_type: actor_type, actor_id: actor_id}) do
-    actor =
-      actor_type
-      |> to_string()
-      |> humanize()
+    case to_string(actor_type) do
+      "admin" ->
+        if actor_id, do: "Admin user #{humanize_identifier(actor_id)}", else: "Admin user"
 
-    if actor_id, do: "Actor #{actor} · #{short_id(actor_id)}", else: "Actor #{actor}"
+      "system" ->
+        "Accrue system"
+
+      actor ->
+        humanize(actor)
+    end
   end
 
   defp tone(%{actor_type: "admin"}), do: :cobalt
@@ -1756,20 +1771,16 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
 
   defp humanize(_value), do: "Unknown"
 
-  defp short_id(nil), do: "unavailable"
-
-  defp short_id(value) do
-    value = to_string(value)
-
-    if String.length(value) > 14 do
-      String.slice(value, 0, 6) <> "..." <> String.slice(value, -5, 5)
-    else
-      value
-    end
+  defp humanize_identifier(value) do
+    value
+    |> to_string()
+    |> String.replace(["_", "-"], " ")
+    |> String.split()
+    |> Enum.map_join(" ", &String.capitalize/1)
   end
 
   defp format_datetime(%DateTime{} = value), do: Calendar.strftime(value, "%b %d, %Y %H:%M UTC")
-  defp format_datetime(_value), do: "Date not projected"
+  defp format_datetime(_value), do: "Date not shown"
 
   # Read-only dunning-state panel (DUN-07 / SC#2). Tone is conveyed by the
   # status-badge variant only — the panel has no accent fill and no actions.
@@ -1942,7 +1953,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
     "#{description}#{quantity} · #{money_or_dash(line.amount)}"
   end
 
-  defp money_or_dash(nil), do: "Amount not projected"
+  defp money_or_dash(nil), do: "Amount not shown"
 
   defp money_or_dash(%Accrue.Money{} = money) do
     "#{money.amount_minor} #{money.currency}"

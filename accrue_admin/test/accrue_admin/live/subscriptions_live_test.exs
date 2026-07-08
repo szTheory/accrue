@@ -88,8 +88,9 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert html =~ ~s(data-component-group="page-header-actions-breadcrumbs")
     assert html =~ ~s(data-ax-page-filter-toolbar)
     assert html =~ ~s(data-ax-page-actions)
-    assert html =~ "Find customer"
-    assert html =~ "open invoice exposure; target $0.00"
+    assert html =~ "Find one customer"
+    assert html =~ "Billing is not healthy right now" or html =~ "Billing is healthy right now"
+    assert html =~ "above the $0.00 target"
     assert html =~ "Work open invoices"
     assert html =~ "Watch dunning funnel"
     assert html =~ "Who did what, when?"
@@ -259,9 +260,9 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert html =~ "Tax: Off"
     assert html =~ "Who"
     assert html =~ "Did"
-    assert html =~ "Find customer"
+    assert html =~ "Find one customer"
     assert html =~ "Debug failed webhook deliveries"
-    assert html =~ "amount not projected locally"
+    assert html =~ "amount not confirmed in admin"
     assert html =~ "target $0.00"
 
     assert_table_headings_in_order(html, [

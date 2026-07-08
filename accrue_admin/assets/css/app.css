@@ -1463,6 +1463,10 @@ a.ax-kpi-card--linked:focus-visible {
   margin-bottom: var(--ax-space-lg);
 }
 
+.ax-detail-drawer-header .ax-body {
+  color: var(--ax-primary);
+}
+
 .ax-detail-drawer-actions {
   flex-wrap: wrap;
 }
@@ -4146,6 +4150,10 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
   justify-content: flex-end;
 }
 
+.ax-activity-footer {
+  margin-top: var(--ax-space-sm);
+}
+
 @media (min-width: 1024px) { /* --ax-bp-lg ↑ */
   .ax-shell-content:has(> .ax-subscriptions-page),
   .ax-shell-content:has(> .ax-subscription-detail-page) {
@@ -4588,6 +4596,21 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
   margin: 0;
   padding: 0;
   list-style: none;
+}
+
+.ax-audit-summary-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ax-space-xs) var(--ax-space-md);
+  padding: var(--ax-space-xs) var(--ax-space-sm);
+  border: 1px solid var(--ax-border);
+  border-radius: var(--ax-radius-sm);
+  background: color-mix(in srgb, var(--ax-sunken) 44%, var(--ax-elevated));
+  color: var(--ax-primary);
+}
+
+.ax-audit-summary-row strong {
+  color: var(--ax-muted);
 }
 
 .ax-audit-row {

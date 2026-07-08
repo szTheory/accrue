@@ -138,9 +138,11 @@ defmodule AccrueAdmin.DashboardLiveTest do
     assert html =~ "customer.updated"
     assert html =~ "Open event"
     assert html =~ "Open delivery"
+    assert html =~ "Open full event ledger"
+    assert html =~ "Load more audit events"
     assert html =~ "Filter admin actors"
     assert html =~ "Filter system actors"
-    assert html =~ "Actor"
+    assert html =~ "Admin user Admin 1"
     assert html =~ "Audit event"
 
     # Regrouped sidebar nav still threads to every section (exact, query-free hrefs)

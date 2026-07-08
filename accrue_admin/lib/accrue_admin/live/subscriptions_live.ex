@@ -108,14 +108,23 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
               <span class={["ax-status-badge", "ax-status-badge-" <> billing_health_tone(@summary)]}>
                 <span class="ax-status-dot"></span><%= billing_health_label(@summary) %>
               </span>
-              <strong><%= billing_health_summary(@summary) %></strong>
-              <span><%= format_minor(@summary.open_invoice_exposure_minor, "usd") %> open invoice exposure; target $0.00.</span>
+              <strong><%= billing_health_verdict(@summary) %></strong>
+              <span><%= billing_health_summary(@summary) %>; <%= format_minor(@summary.open_invoice_exposure_minor, "usd") %> above the $0.00 target.</span>
+              <a class="ax-button ax-button-primary ax-button-sm" href={invoice_queue_path(@admin_mount_path, @current_owner_scope)}>
+                Work invoice queue
+              </a>
             </div>
           </:description>
 
           <:actions>
             <a
               class="ax-button ax-button-primary ax-button-sm"
+              href={scoped_path(@admin_mount_path, "/customers", @current_owner_scope)}
+            >
+              Find one customer
+            </a>
+            <a
+              class="ax-button ax-button-secondary ax-button-sm"
               href={invoice_queue_path(@admin_mount_path, @current_owner_scope)}
             >
               Work open invoices
@@ -131,12 +140,6 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
               href={scoped_path(@admin_mount_path, "/events", @current_owner_scope, %{"actor_type" => "admin"})}
             >
               Who did what, when?
-            </a>
-            <a
-              class="ax-button ax-button-secondary ax-button-sm"
-              href={scoped_path(@admin_mount_path, "/customers", @current_owner_scope)}
-            >
-              Find customer
             </a>
             <a
               class="ax-button ax-button-secondary ax-button-sm"
@@ -414,8 +417,13 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
     """)
   end
 
-  defp billing_health_label(%{open_invoice_count: count}) when count > 0, do: "Needs work"
+  defp billing_health_label(%{open_invoice_count: count}) when count > 0, do: "Attention required"
   defp billing_health_label(_summary), do: "Healthy"
+
+  defp billing_health_verdict(%{open_invoice_count: count}) when count > 0,
+    do: "Billing is not healthy right now"
+
+  defp billing_health_verdict(_summary), do: "Billing is healthy right now"
 
   defp billing_health_summary(summary) do
     if summary.open_invoice_count > 0 do
@@ -497,14 +505,14 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
       price_id,
       quantity > 1 && "qty #{quantity}",
       item_count > 1 && "#{item_count} items",
-      "amount not projected locally"
+      "amount not confirmed in admin"
     ]
     |> Enum.reject(&(&1 in [false, nil, ""]))
     |> Enum.join(" · ")
   end
 
   defp plan_amount_cell(%{cancel_at_period_end: true}),
-    do: "Price not projected locally · renewal ending; verify processor amount"
+    do: "Price not confirmed in admin · renewal ending"
 
   defp plan_amount_cell(_row), do: Copy.subscriptions_list_plan_amount_unavailable()
 
@@ -750,7 +758,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
 
   defp format_date(%DateTime{} = value), do: Calendar.strftime(value, "%b %-d, %Y")
   defp format_date(%NaiveDateTime{} = value), do: Calendar.strftime(value, "%b %-d, %Y")
-  defp format_date(_value), do: "Date not projected"
+  defp format_date(_value), do: "Date not shown"
 
   defp humanize(value) when is_atom(value), do: value |> Atom.to_string() |> humanize()
 
