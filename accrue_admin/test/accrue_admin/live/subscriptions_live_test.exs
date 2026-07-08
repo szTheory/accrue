@@ -95,7 +95,9 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
 
     assert html =~ "Overall billing health answer"
     assert html =~ "ax-health-summary-prominent"
+    assert html =~ "ax-subscriptions-health-hero"
     assert html =~ "target $0.00"
+    assert html =~ "open exposure"
     assert html =~ "Work open invoices"
     assert html =~ "Work invoice queue to zero"
     assert html =~ "Watch dunning funnel"
@@ -106,6 +108,7 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert html =~ "Debug failed webhook deliveries"
     assert html =~ "Billing health"
     assert html =~ "Recovery"
+    assert html =~ "Find customer 360"
     refute html =~ "Billing health:"
     assert_one_h1(html)
 

@@ -2327,6 +2327,11 @@ a.ax-kpi-card--linked:focus-visible {
   box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ax-status-warning-border) 44%, transparent);
 }
 
+.ax-subscriptions-health-hero {
+  order: -1;
+  width: min(100%, 64rem);
+}
+
 .ax-health-verdict {
   font: var(--ax-type-title-font);
   color: var(--ax-primary);
@@ -3967,11 +3972,11 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
 
 /* Home page vertical rhythm + section headers */
 .ax-home {
-  gap: var(--ax-space-md);
+  gap: var(--ax-space-sm);
 }
 
 .ax-home > .ax-page-header {
-  gap: var(--ax-space-xs);
+  gap: var(--ax-space-2xs);
 }
 
 .ax-home > .ax-page-header .ax-display {
@@ -3982,6 +3987,12 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
 
 .ax-home > .ax-page-header .ax-page-copy {
   color: var(--ax-primary);
+}
+
+.ax-home-customer-search-cta {
+  box-shadow:
+    0 0 0 3px color-mix(in srgb, var(--ax-accent-border) 24%, transparent),
+    var(--ax-shadow-sm);
 }
 
 .ax-home-section {
@@ -4592,7 +4603,7 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
 .ax-detail-health-summary-amber {
   border-color: var(--ax-status-warning-border);
   border-width: 2px;
-  background: color-mix(in srgb, var(--ax-status-warning-bg) 62%, var(--ax-elevated));
+  background: var(--ax-elevated);
   box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ax-status-warning-border) 44%, transparent);
 }
 

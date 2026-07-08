@@ -826,12 +826,6 @@ if Mix.env() != :prod do
           subtitle="Current billing health, at-risk dunning, actor audit history, webhook debugging, and invoice work queues."
           close_label="Close drawer"
         >
-          <:actions>
-            <Button.button variant="primary" href={@admin_mount_path <> "/invoices?status=open"}>Work open invoices</Button.button>
-            <Button.button variant="secondary" href={@admin_mount_path <> "/analytics/recovery"}>Watch at-risk customers</Button.button>
-            <Button.button variant="primary" href={@admin_mount_path <> "/webhooks?status=failed,dead"}>Debug failed webhook deliveries</Button.button>
-          </:actions>
-
           <div class="ax-dev-group-drawer">
             <section class="ax-dev-group-drawer-context ax-dev-group-drawer-health" aria-label="Billing health summary">
               <p class="ax-label">Billing health verdict</p>
@@ -849,7 +843,7 @@ if Mix.env() != :prod do
                 <a class="ax-button ax-button-secondary ax-button-sm" href={@admin_mount_path}>Open billing health summary</a>
                 <a class="ax-button ax-button-primary ax-button-sm" href={@admin_mount_path <> "/invoices?status=open"}>Work open invoices</a>
                 <a class="ax-button ax-button-secondary ax-button-sm" href={@admin_mount_path <> "/analytics/recovery"}>Open at-risk dunning and customers</a>
-                <a class="ax-button ax-button-secondary ax-button-sm" href={@admin_mount_path <> "/customers"}>Find one customer and open billing 360 detail</a>
+                <a class="ax-button ax-button-secondary ax-button-sm" href={@admin_mount_path <> "/customers"}>Find customer</a>
                 <a class="ax-button ax-button-secondary ax-button-sm" href={@admin_mount_path <> "/events?actor_type=admin"}>Who did what, when? Audit trail</a>
                 <a class="ax-button ax-button-primary ax-button-sm" href={@admin_mount_path <> "/webhooks?status=failed,dead"}>Debug failed webhook deliveries</a>
               </div>

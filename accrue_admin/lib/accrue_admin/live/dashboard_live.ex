@@ -57,11 +57,11 @@ defmodule AccrueAdmin.Live.DashboardLive do
           <div class="ax-page-actions">
             <button
               type="button"
-              class="ax-button ax-button-secondary ax-button-sm"
+              class="ax-button ax-button-primary ax-button-sm ax-home-customer-search-cta"
               data-command-palette-trigger="true"
               data-ax-command-palette-trigger="true"
             >
-              Find one customer
+              Find one customer - open billing 360
               <Icon.icon name={:search} size="sm" />
             </button>
             <a
