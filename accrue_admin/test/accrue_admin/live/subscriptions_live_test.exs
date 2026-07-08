@@ -102,7 +102,7 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert html =~ "Open-invoice queue"
     assert html =~ "Target exposure"
     assert html =~ "Work open invoices"
-    assert html =~ "Work invoice queue to zero"
+    assert html =~ "Work open-invoice queue to zero"
     assert html =~ "Watch dunning funnel"
     assert html =~ "Who did what, when?"
     assert html =~ "Latest audit event: subscription.created by Accrue system"

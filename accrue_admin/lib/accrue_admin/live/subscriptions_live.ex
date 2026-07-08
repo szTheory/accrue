@@ -139,7 +139,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
                 </span>
               </span>
               <a class="ax-button ax-button-primary ax-button-sm" href={invoice_queue_path(@admin_mount_path, @current_owner_scope)}>
-                Work invoice queue to zero
+                Work open-invoice queue to zero
               </a>
             </div>
             <p class="ax-body">Open customer detail, invoice worklists, dunning, and actor audit from each row.</p>

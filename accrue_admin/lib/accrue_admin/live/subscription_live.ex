@@ -276,7 +276,10 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
         </Detail.summary_card>
 
         <section class={["ax-detail-health-summary", "ax-detail-health-summary-" <> health.tone]} aria-label="Primary billing health summary">
-          <p class="ax-detail-health-label ax-label">Billing health summary</p>
+          <div class="ax-detail-health-answer" role="status">
+            <span class="ax-detail-health-label ax-label">Billing health summary</span>
+            <strong><%= health.answer %></strong>
+          </div>
           <div class="ax-detail-health-copy">
             <span class={["ax-status-badge", "ax-status-badge-" <> health.tone]}>
               <span class="ax-status-dot"></span><%= health.label %>
@@ -2022,7 +2025,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
           value:
             "Opens failed/dead subscription.created deliveries; match subscription #{subscription.processor_id || subscription.id} in the event payload and retry trail",
           emphasis: :warning,
-          action_label: "Debug subscription webhooks",
+          action_label: "Debug failed webhooks",
           href:
             ScopedPath.build(mount_path, "/webhooks", scope, %{
               "status" => "failed,dead",

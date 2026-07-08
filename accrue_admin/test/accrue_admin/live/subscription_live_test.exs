@@ -113,7 +113,7 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
     assert html =~ "Work the open-invoice queue filtered to this subscription"
     assert html =~ "Debug this subscription&#39;s failed webhooks"
     assert html =~ "failed/dead subscription.created deliveries"
-    assert html =~ "Debug subscription webhooks"
+    assert html =~ "Debug failed webhooks"
     assert html =~ "Open queue"
     assert html =~ "Open full audit event log"
   end
@@ -133,6 +133,7 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
     assert html =~ "Billing health summary"
     assert html =~ "Not healthy yet"
     assert html =~ "ax-detail-health-summary-amber"
+    assert html =~ "ax-detail-health-answer"
     assert html =~ "No - billing is not healthy until setup is complete"
     assert html =~ "Billing is not healthy until setup is complete"
     assert html =~ "Billing health verdict"
