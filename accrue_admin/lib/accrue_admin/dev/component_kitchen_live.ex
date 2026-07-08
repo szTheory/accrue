@@ -819,8 +819,8 @@ if Mix.env() != :prod do
       """
     end
 
-    defp render_group_body(%{slug: "drawer-form"}, _admin_mount_path) do
-      assigns = %{__changed__: %{}}
+    defp render_group_body(%{slug: "drawer-form"}, admin_mount_path) do
+      assigns = %{admin_mount_path: admin_mount_path, __changed__: %{}}
 
       ~H"""
       <div class="ax-dev-group-body ax-dev-group-drawer-specimen">
@@ -828,18 +828,27 @@ if Mix.env() != :prod do
           id="grp190-drawer-form-shell"
           open
           title="Billing contact drawer specimen"
-          subtitle="Component lab specimen for drawer fields. Recovery funnel analytics live in the Recovery page, not this form."
+          subtitle="Component lab specimen for drawer fields. Billing health, webhook debugging, and audit history open in their operator workspaces."
           close_label="Close drawer"
         >
           <:actions>
-            <Button.button variant="secondary" type="button">Preview billing health summary</Button.button>
+            <Button.button variant="secondary" href={@admin_mount_path}>Open billing health summary</Button.button>
+            <Button.button variant="secondary" href={@admin_mount_path <> "/events"}>Open Event log</Button.button>
           </:actions>
 
           <div class="ax-dev-group-drawer">
             <section class="ax-card ax-dev-group-drawer-context">
               <p class="ax-label">Audit context</p>
               <p class="ax-body">
-                Last edited Jul 7, 2026 at 18:00 UTC by System. Open Event log for actor, timestamp, and source history.
+                Last edited Jul 7, 2026 at 18:00 UTC by System.
+                <a class="ax-link" href={@admin_mount_path <> "/events"}>Open Event log</a>
+                for actor, timestamp, and source history.
+              </p>
+              <p class="ax-body">
+                <a class="ax-link" href={@admin_mount_path <> "/webhooks"}>Debug webhook deliveries</a>
+                or
+                <a class="ax-link" href={@admin_mount_path <> "/invoices?status=open"}>work open invoices</a>
+                from the real operator queues.
               </p>
             </section>
 

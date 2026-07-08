@@ -228,6 +228,30 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
               <%= fact.value %>
             </span>
           </:facts>
+          <:actions>
+            <a
+              class="ax-button ax-button-primary ax-button-sm"
+              href={
+                ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope, %{
+                  "status" => "open",
+                  "subscription_id" => @subscription.id
+                })
+              }
+            >
+              Open subscription invoice queue
+            </a>
+            <a
+              class="ax-button ax-button-secondary ax-button-sm"
+              href={
+                ScopedPath.build(@admin_mount_path, "/events", @current_owner_scope, %{
+                  "subject_type" => "Subscription",
+                  "subject_id" => @subscription.id
+                })
+              }
+            >
+              Open filtered event log
+            </a>
+          </:actions>
         </Detail.summary_card>
 
         <Detail.summary_list
@@ -323,7 +347,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
                   <%= Copy.resource_state_copy(:dunning, :queue_empty, surface: :subscription_detail).body %>
                 </p>
                 <p class="ax-body ax-detail-hint">
-                  Open recovery funnel to view at-risk accounts. Open subscription invoice queue for collection work on this subscription.
+                  Open dunning funnel to view at-risk accounts. Open subscription invoice queue for collection work on this subscription.
                 </p>
               <% end %>
 
@@ -332,10 +356,10 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
                   class="ax-button ax-button-secondary ax-button-sm"
                   href={ScopedPath.build(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}
                 >
-                  Open recovery funnel
+                  Open dunning funnel
                 </a>
                 <a
-                  class="ax-button ax-button-secondary ax-button-sm"
+                  class="ax-button ax-button-primary ax-button-sm"
                   href={
                     ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope, %{
                       "status" => "open",
@@ -368,6 +392,10 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
           <summary class="ax-detail-section-head">
             <span class="ax-detail-section-title">Activity</span>
           </summary>
+          <div class="ax-card ax-activity-audit-strip">
+            <p class="ax-label">Latest audit event</p>
+            <p class="ax-body"><%= activity_audit_summary(@timeline_events, @subscription) %></p>
+          </div>
           <a
             class="ax-link-quiet"
             href={
@@ -1036,6 +1064,14 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
 
   defp action_label(nil), do: "Subscription action"
   defp action_label(action_type), do: humanize(action_type)
+
+  defp activity_audit_summary([event | _events], _subscription) do
+    "#{event.type} · #{event_actor_summary(event)} · #{format_datetime(event.inserted_at)}"
+  end
+
+  defp activity_audit_summary(_events, subscription) do
+    "Subscription projection loaded · Actor System · #{format_datetime(subscription.inserted_at || subscription.current_period_start)}"
+  end
 
   defp timeline_items(events, subscription, mount_path, scope) do
     events = List.wrap(events)
@@ -1776,7 +1812,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
         },
         %{
           icon: :recovery,
-          label: "Recovery funnel",
+          label: "Dunning funnel",
           value: "At-risk accounts, dunning state, and collection work",
           href: ScopedPath.build(mount_path, "/analytics/recovery", scope)
         },

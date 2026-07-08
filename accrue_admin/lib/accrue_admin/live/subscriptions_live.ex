@@ -111,6 +111,18 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
 
           <:actions>
             <a
+              class="ax-button ax-button-primary ax-button-sm"
+              href={invoice_queue_path(@admin_mount_path, @current_owner_scope)}
+            >
+              Open invoice queue
+            </a>
+            <a
+              class="ax-button ax-button-secondary ax-button-sm"
+              href={scoped_path(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}
+            >
+              Dunning funnel
+            </a>
+            <a
               class="ax-button ax-button-secondary ax-button-sm"
               href={scoped_path(@admin_mount_path, "/customers", @current_owner_scope)}
             >
@@ -142,7 +154,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
               />
               <:stat
                 label="Open invoice exposure"
-                value={format_minor(@summary.open_invoice_exposure_minor, "usd") <> " at risk · target $0.00"}
+                value={format_minor(@summary.open_invoice_exposure_minor, "usd") <> " critical exposure · healthy target $0.00"}
                 tone="amber"
                 href={invoice_queue_path(@admin_mount_path, @current_owner_scope)}
               />
@@ -219,6 +231,17 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
               clear_all_href={active_clear_all_href(@params, @table_path)}
               clear_all_label={Copy.data_table_clear_filters_label()}
             />
+            <div class="ax-work-queue-actions" aria-label="Direct work queues">
+              <a class="ax-button ax-button-primary ax-button-sm" href={invoice_queue_path_from_table(@table_path)}>
+                Work open invoices
+              </a>
+              <a
+                class="ax-button ax-button-secondary ax-button-sm"
+                href={scoped_path(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}
+              >
+                Watch dunning funnel
+              </a>
+            </div>
           </:list_status>
         </.live_component>
       </section>
@@ -290,6 +313,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
     tax = BillingPresentation.tax_health_label(BillingPresentation.tax_health(row))
     escaped_o = ownership |> Phoenix.HTML.html_escape() |> Phoenix.HTML.safe_to_string()
     escaped_t = tax |> Phoenix.HTML.html_escape() |> Phoenix.HTML.safe_to_string()
+    created = row.inserted_at |> format_date() |> escape()
 
     events_href =
       mount_path
@@ -299,8 +323,16 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
         "subject_id" => row.id
       })
 
+    invoices_href =
+      mount_path
+      |> scoped_path("/invoices", owner_scope)
+      |> AccrueAdmin.DataTableNav.merge_query(%{
+        "status" => "open",
+        "subscription_id" => row.id
+      })
+
     Phoenix.HTML.raw(
-      ~s(<span class="ax-stack-sm"><span><span class="ax-chip ax-label">#{escaped_o}</span> <span class="ax-chip ax-label">#{escaped_t}</span></span><a href="#{events_href}" class="ax-link">Webhook events</a></span>)
+      ~s(<span class="ax-stack-sm"><span><span class="ax-chip ax-label">#{escaped_o}</span> <span class="ax-chip ax-label">#{escaped_t}</span></span><span class="ax-label ax-muted">Created #{created}</span><a href="#{invoices_href}" class="ax-link">Work invoices</a><a href="#{events_href}" class="ax-link">Webhook events</a><span class="ax-label ax-muted">Invoice actions: send reminder, retry payment, void from invoice queue</span></span>)
     )
   end
 
@@ -602,6 +634,8 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
   defp escape(value), do: value |> Phoenix.HTML.html_escape() |> Phoenix.HTML.safe_to_string()
 
   defp format_date(%DateTime{} = value), do: Calendar.strftime(value, "%b %-d, %Y")
+  defp format_date(%NaiveDateTime{} = value), do: Calendar.strftime(value, "%b %-d, %Y")
+  defp format_date(_value), do: "Date not projected"
 
   defp humanize(value) when is_atom(value), do: value |> Atom.to_string() |> humanize()
 

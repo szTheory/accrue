@@ -16,7 +16,9 @@ defmodule AccrueAdmin.ComponentKitchenLiveTest do
     assert html =~ "ax-command-palette"
     assert html =~ "Billing contact drawer specimen"
     assert html =~ "Audit context"
-    assert html =~ "Preview billing health summary"
+    assert html =~ "Open billing health summary"
+    assert html =~ "Open Event log"
+    assert html =~ "Debug webhook deliveries"
     assert html =~ "Enter the organization slug or platform owner scope"
   end
 end

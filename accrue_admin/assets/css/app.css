@@ -449,29 +449,29 @@ button {
   position: relative;
   inset: auto;
   min-height: auto;
-  padding: var(--ax-space-md);
+  padding: var(--ax-space-sm);
   box-shadow: none;
 }
 
 .ax-dev-group-drawer-specimen .ax-detail-drawer-body {
-  gap: var(--ax-space-sm);
+  gap: var(--ax-space-xs);
   max-height: min(26rem, 70vh);
 }
 
 .ax-dev-group-drawer-specimen .ax-detail-drawer-header {
-  margin-bottom: var(--ax-space-md);
+  margin-bottom: var(--ax-space-xs);
 }
 
 .ax-dev-group-drawer-specimen .ax-detail-drawer-footer {
-  margin-top: var(--ax-space-md);
+  margin-top: var(--ax-space-sm);
 }
 
 .ax-dev-group-drawer {
-  gap: var(--ax-space-sm);
+  gap: var(--ax-space-xs);
 }
 
 .ax-dev-group-drawer-context {
-  padding: var(--ax-space-md);
+  padding: var(--ax-space-sm);
 }
 
 @media (min-width: 768px) { /* --ax-bp-md ↑ */
@@ -1491,11 +1491,12 @@ a.ax-kpi-card--linked:focus-visible {
   position: relative;
   inset: auto;
   min-height: auto;
-  padding: var(--ax-space-lg);
+  padding: var(--ax-space-sm);
   box-shadow: none;
 }
 
 .ax-dev-group-drawer-specimen .ax-detail-drawer-body {
+  gap: var(--ax-space-xs);
   max-height: min(26rem, 70vh);
 }
 
@@ -2154,6 +2155,13 @@ a.ax-kpi-card--linked:focus-visible {
 
 .ax-page-compact {
   gap: var(--ax-space-md);
+}
+
+.ax-work-queue-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ax-space-sm);
+  align-items: center;
 }
 
 /* Detail stacks inside cards (UX-02) — not page shells; avoids nested ax-page */
@@ -4038,10 +4046,19 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
   flex-wrap: wrap;
 }
 
+.ax-subscription-detail-page .ax-summary-card {
+  padding: var(--ax-space-md);
+  gap: var(--ax-space-md);
+}
+
 .ax-summary-main {
   display: grid;
   gap: var(--ax-space-sm);
   min-width: 0;
+}
+
+.ax-subscription-detail-page .ax-summary-main {
+  gap: var(--ax-space-xs);
 }
 
 .ax-summary-title-row {
@@ -4201,6 +4218,12 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
   display: flex;
   flex-wrap: wrap;
   gap: var(--ax-space-sm);
+}
+
+.ax-activity-audit-strip {
+  display: grid;
+  gap: var(--ax-space-2xs);
+  padding: var(--ax-space-sm);
 }
 
 /* Label -> value field list */

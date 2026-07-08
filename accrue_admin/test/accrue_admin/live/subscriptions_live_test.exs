@@ -87,6 +87,8 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert html =~ ~s(data-ax-page-actions)
     assert html =~ "Find customer"
     assert html =~ "Webhook events"
+    assert html =~ "Open invoice queue"
+    assert html =~ "Dunning funnel"
     assert_one_h1(html)
 
     assert html
@@ -106,6 +108,8 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert html =~ "At risk"
     assert html =~ "All"
     assert html =~ "Open invoices"
+    assert html =~ "Work open invoices"
+    assert html =~ "Watch dunning funnel"
     assert html =~ ~s(data-ax-state="filtered-empty") or html =~ ~s(data-ax-state="populated")
     refute html =~ "No subscriptions yet."
   end

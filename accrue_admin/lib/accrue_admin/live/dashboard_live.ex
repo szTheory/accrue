@@ -54,6 +54,22 @@ defmodule AccrueAdmin.Live.DashboardLive do
           <Breadcrumbs.breadcrumbs items={[%{label: Copy.dashboard_breadcrumb_home()}]} />
           <h1 class="ax-display"><%= Copy.home_intro_headline() %></h1>
           <p class="ax-body ax-page-copy"><%= Copy.home_intro_copy() %></p>
+          <div class="ax-page-actions">
+            <a
+              class="ax-button ax-button-primary ax-button-sm"
+              href={ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope, %{"status" => "open"})}
+            >
+              Open invoice queue
+              <Icon.icon name={:arrow_right} size="sm" />
+            </a>
+            <a
+              class="ax-button ax-button-secondary ax-button-sm"
+              href={ScopedPath.build(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}
+            >
+              Open dunning funnel
+              <Icon.icon name={:arrow_right} size="sm" />
+            </a>
+          </div>
         </header>
 
         <%!-- Zone 1 — Attention rail: exceptions first, only non-zero rows --%>
@@ -145,7 +161,7 @@ defmodule AccrueAdmin.Live.DashboardLive do
                 <%= count(@stats.past_due_subscription_count, "at-risk subscription") %>
               </span>
               <span class="ax-launcher-action">
-                Open recovery funnel <Icon.icon name={:arrow_right} size="sm" />
+                Open dunning funnel <Icon.icon name={:arrow_right} size="sm" />
               </span>
             </a>
 
