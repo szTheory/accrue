@@ -59,14 +59,14 @@ defmodule AccrueAdmin.Live.DashboardLive do
               class="ax-button ax-button-primary ax-button-sm"
               href={ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope, %{"status" => "open"})}
             >
-              Open global invoice queue
+              Work open-invoice queue to zero
               <Icon.icon name={:arrow_right} size="sm" />
             </a>
             <a
               class="ax-button ax-button-secondary ax-button-sm"
               href={ScopedPath.build(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}
             >
-              Review recovery analytics
+              Open dunning funnel
               <Icon.icon name={:arrow_right} size="sm" />
             </a>
           </div>
@@ -131,14 +131,7 @@ defmodule AccrueAdmin.Live.DashboardLive do
           </div>
 
           <div class="ax-launchers">
-            <a class="ax-launcher ax-launcher-primary" href={ScopedPath.build(@admin_mount_path, "/customers", @current_owner_scope)}>
-              <span class="ax-launcher-icon"><Icon.icon name={:search} size="lg" /></span>
-              <span class="ax-launcher-title"><%= Copy.home_launcher_customers_title() %></span>
-              <span class="ax-launcher-copy"><%= Copy.home_launcher_customers_copy() %></span>
-              <span class="ax-launcher-meta"><%= Copy.home_launcher_customers_meta() %></span>
-            </a>
-
-            <a class="ax-launcher" href={ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope, %{"status" => "open"})}>
+            <a class="ax-launcher ax-launcher-primary" href={ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope, %{"status" => "open"})}>
               <span class="ax-launcher-icon"><Icon.icon name={:invoices} size="lg" /></span>
               <span class="ax-launcher-title"><%= Copy.home_launcher_invoices_title() %></span>
               <span class="ax-launcher-copy"><%= Copy.home_launcher_invoices_copy() %></span>
@@ -152,8 +145,15 @@ defmodule AccrueAdmin.Live.DashboardLive do
                 Actions: send reminder, retry payment, void invoice
               </span>
               <span class="ax-launcher-action">
-                Work open invoice queue <Icon.icon name={:arrow_right} size="sm" />
+                Work open-invoice queue to zero <Icon.icon name={:arrow_right} size="sm" />
               </span>
+            </a>
+
+            <a class="ax-launcher" href={ScopedPath.build(@admin_mount_path, "/customers", @current_owner_scope)}>
+              <span class="ax-launcher-icon"><Icon.icon name={:search} size="lg" /></span>
+              <span class="ax-launcher-title"><%= Copy.home_launcher_customers_title() %></span>
+              <span class="ax-launcher-copy"><%= Copy.home_launcher_customers_copy() %></span>
+              <span class="ax-launcher-meta"><%= Copy.home_launcher_customers_meta() %></span>
             </a>
 
             <a class="ax-launcher ax-launcher-recovery" href={ScopedPath.build(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}>
@@ -240,13 +240,26 @@ defmodule AccrueAdmin.Live.DashboardLive do
                 <p class="ax-eyebrow"><%= Copy.dashboard_activity_event_ledger_eyebrow() %></p>
                 <h3 class="ax-heading"><%= Copy.dashboard_activity_recent_local_heading() %></h3>
               </div>
-              <a
-                class="ax-button ax-button-secondary ax-button-sm"
-                href={ScopedPath.build(@admin_mount_path, "/events", @current_owner_scope)}
-              >
-                <%= Copy.home_activity_events_link() %>
-                <Icon.icon name={:arrow_right} size="sm" />
-              </a>
+              <div class="ax-activity-actions" aria-label="Actor filters">
+                <a
+                  class="ax-button ax-button-secondary ax-button-sm"
+                  href={ScopedPath.build(@admin_mount_path, "/events", @current_owner_scope)}
+                >
+                  <%= Copy.home_activity_events_link() %>
+                </a>
+                <a
+                  class="ax-button ax-button-secondary ax-button-sm"
+                  href={ScopedPath.build(@admin_mount_path, "/events", @current_owner_scope, %{"actor_type" => "admin"})}
+                >
+                  Filter admin actors
+                </a>
+                <a
+                  class="ax-button ax-button-secondary ax-button-sm"
+                  href={ScopedPath.build(@admin_mount_path, "/events", @current_owner_scope, %{"actor_type" => "system"})}
+                >
+                  Filter system actors
+                </a>
+              </div>
             </header>
 
             <Timeline.timeline

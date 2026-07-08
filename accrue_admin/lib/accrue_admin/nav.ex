@@ -57,18 +57,18 @@ defmodule AccrueAdmin.Nav do
         badge: if(recovery_badge > 0, do: recovery_badge, else: nil)
       },
       %{
+        label: "Audit event log",
+        href: nav_href(mount_path, "/events", org),
+        icon: :events,
+        group: "Audit",
+        badge: nil
+      },
+      %{
         label: "Webhooks",
         href: nav_href(mount_path, "/webhooks", org),
         icon: :webhooks,
         group: "Developer",
         badge: if(developer_badge > 0, do: developer_badge, else: nil)
-      },
-      %{
-        label: "Event log",
-        href: nav_href(mount_path, "/events", org),
-        icon: :events,
-        group: "Developer",
-        badge: nil
       },
       %{
         label: "Coupons",

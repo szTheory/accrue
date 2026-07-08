@@ -93,9 +93,9 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
       current_owner_scope={assigns[:current_owner_scope]}
       active_organization_name={@active_organization_name}
     >
-      <section class="ax-page ax-page-compact">
+      <section class="ax-page ax-page-compact ax-subscriptions-page">
         <PageHeader.page_header
-          class="ax-page-header-compact"
+          class="ax-page-header-compact ax-subscriptions-header"
           breadcrumbs={[
             %{label: "Dashboard", href: scoped_path(@admin_mount_path, "", @current_owner_scope)},
             %{label: "Subscriptions"}
@@ -114,7 +114,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
               class="ax-button ax-button-primary ax-button-sm"
               href={invoice_queue_path(@admin_mount_path, @current_owner_scope)}
             >
-              Open global invoice queue
+              Work open-invoice queue to zero
             </a>
             <a
               class="ax-button ax-button-secondary ax-button-sm"
@@ -178,7 +178,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
               />
               <:stat
                 label="Open invoice exposure"
-                value={"Unhealthy when above target: " <> format_minor(@summary.open_invoice_exposure_minor, "usd") <> " open · target $0.00"}
+                value={format_minor(@summary.open_invoice_exposure_minor, "usd") <> " open; target $0.00"}
                 tone="amber"
                 href={invoice_queue_path(@admin_mount_path, @current_owner_scope)}
               />
@@ -257,7 +257,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
             />
             <div class="ax-work-queue-actions" aria-label="Direct work queues">
               <a class="ax-button ax-button-primary ax-button-sm" href={invoice_queue_path_from_table(@table_path)}>
-                Open global invoice queue
+                Work open-invoice queue to zero
               </a>
               <a
                 class="ax-button ax-button-secondary ax-button-sm"
@@ -370,7 +370,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
 
     Phoenix.HTML.raw("""
     <span class="ax-stack-sm">
-      <span><span class="ax-chip ax-label">#{escaped_o}</span> <span class="ax-chip ax-label">#{escaped_t}</span></span>
+      <span><span class="ax-chip ax-label">Owner: #{escaped_o}</span> <span class="ax-chip ax-label">Tax: #{escaped_t}</span></span>
       <span class="ax-label ax-muted"><strong>Actor</strong> System · <strong>Action</strong> subscription.created · <strong>When</strong> #{created}</span>
       <span class="ax-data-table-inline-actions">
         <a href="#{subscription_invoices_href}" class="ax-button ax-button-primary ax-button-sm">Open subscription invoices</a>
@@ -384,8 +384,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
 
   defp billing_health_summary(summary) do
     if summary.open_invoice_count > 0 do
-      "Unhealthy: " <>
-        format_minor(summary.open_invoice_exposure_minor, "usd") <> " open above $0.00 target"
+      "Unhealthy: " <> count(summary.open_invoice_count, "open invoice")
     else
       "Healthy: $0.00 open at target"
     end
@@ -582,7 +581,8 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
       },
       %{
         id: :open_invoices,
-        label: "Open invoices",
+        label: "Open-invoice worklist",
+        value: "Primary queue",
         tone: :amber,
         active: true,
         href: invoice_queue_path_from_table(table_path)

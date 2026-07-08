@@ -123,6 +123,7 @@ defmodule AccrueAdmin.Components.AppShellTest do
 
     assert html =~ "Billing"
     assert html =~ "Recovery"
+    assert html =~ "Audit"
     assert html =~ "Developer"
     assert html =~ ~s(href="/billing/analytics/recovery")
     assert html =~ "Payments"

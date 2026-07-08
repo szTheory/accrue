@@ -110,7 +110,7 @@ defmodule AccrueAdmin.DashboardLiveTest do
     assert html =~ Copy.home_launcher_customers_meta()
     assert html =~ "ax-launcher-primary"
     assert html =~ Copy.home_launcher_invoices_title()
-    assert html =~ "Open global invoice queue"
+    assert html =~ "Work open-invoice queue to zero"
     assert html =~ "Inline queue: $42.50 open above $0.00 target"
     assert html =~ "Actions: send reminder, retry payment, void invoice"
     assert html =~ Copy.home_launcher_recovery_title()
@@ -138,6 +138,8 @@ defmodule AccrueAdmin.DashboardLiveTest do
     assert html =~ "customer.updated"
     assert html =~ "Open event"
     assert html =~ "Open delivery"
+    assert html =~ "Filter admin actors"
+    assert html =~ "Filter system actors"
     assert html =~ "Actor"
     assert html =~ "Audit event"
 

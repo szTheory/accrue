@@ -2197,6 +2197,23 @@ a.ax-kpi-card--linked:focus-visible {
   max-width: min(64rem, calc(100vw - 2.5rem));
 }
 
+.ax-subscriptions-header {
+  gap: var(--ax-space-2xs);
+}
+
+.ax-subscriptions-header .ax-page-header-main,
+.ax-subscriptions-header .ax-page-header-title-row,
+.ax-subscriptions-header .ax-page-header-title-copy,
+.ax-subscriptions-header .ax-page-header-stat-strip,
+.ax-subscriptions-header .ax-page-header-filter-toolbar {
+  gap: var(--ax-space-2xs);
+}
+
+.ax-subscriptions-header .ax-stat-strip {
+  padding: 0;
+  gap: var(--ax-space-2xs) var(--ax-space-sm);
+}
+
 .ax-page-header-compact .ax-page-header-main,
 .ax-page-header-compact .ax-page-header-title-row,
 .ax-page-header-compact .ax-page-header-title-copy,
@@ -2695,7 +2712,7 @@ a.ax-kpi-card--linked:focus-visible {
 }
 
 .ax-data-table-card {
-  padding: var(--ax-space-md);
+  padding: var(--ax-space-sm);
 }
 
 .ax-data-table-card-header {
@@ -2708,7 +2725,7 @@ a.ax-kpi-card--linked:focus-visible {
 
 .ax-data-table-card-fields {
   display: grid;
-  gap: var(--ax-space-sm);
+  gap: var(--ax-space-xs);
   margin: 0;
 }
 
@@ -2722,7 +2739,7 @@ a.ax-kpi-card--linked:focus-visible {
 }
 
 .ax-data-table-card .ax-stack-sm {
-  gap: var(--ax-space-xs);
+  gap: var(--ax-space-2xs);
 }
 
 .ax-data-table-inline-actions {
@@ -3871,6 +3888,10 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
   color: var(--ax-accent-readable);
 }
 
+.ax-launcher-primary .ax-launcher-copy {
+  color: var(--ax-primary);
+}
+
 .ax-launcher-recovery {
   border-color: var(--ax-status-warning-border);
   background: color-mix(in srgb, var(--ax-status-warning-bg) 38%, var(--ax-elevated));
@@ -3936,6 +3957,20 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
   color: var(--ax-accent-readable);
   font-size: var(--ax-type-sm);
   font-weight: 700;
+}
+
+.ax-activity-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ax-space-xs);
+  justify-content: flex-end;
+}
+
+@media (min-width: 1024px) { /* --ax-bp-lg ↑ */
+  .ax-shell-content:has(> .ax-subscriptions-page),
+  .ax-shell-content:has(> .ax-subscription-detail-page) {
+    padding-top: var(--ax-space-lg);
+  }
 }
 
 /* Demoted KPI strip on home: explicit responsive 4-up */

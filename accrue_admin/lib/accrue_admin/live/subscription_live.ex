@@ -231,6 +231,12 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
           <:actions>
             <a
               class="ax-button ax-button-primary ax-button-sm"
+              href={ScopedPath.build(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}
+            >
+              Open dunning funnel
+            </a>
+            <a
+              class="ax-button ax-button-secondary ax-button-sm"
               href={ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope, %{"status" => "open"})}
             >
               Open global invoice queue
