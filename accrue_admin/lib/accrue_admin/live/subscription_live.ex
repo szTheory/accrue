@@ -209,6 +209,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
           ]}
         />
 
+        <% health = detail_health_summary(@subscription) %>
         <Detail.summary_card
           eyebrow={Copy.subscription_detail_eyebrow()}
           title={subscription_title(@subscription, @customer)}
@@ -223,6 +224,14 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
               <strong>Customer</strong>
               <%= @customer.name || @customer.email || @customer.id %>
             </span>
+            <span class={[
+              "ax-summary-fact",
+              "ax-summary-fact-health",
+              "ax-summary-fact-health-" <> health.tone
+            ]}>
+              <strong>Billing health</strong>
+              <span class="ax-summary-health-verdict"><%= health.label %>: <%= health.headline %></span>
+            </span>
             <span :for={fact <- summary_health_facts(@subscription)} class="ax-summary-fact">
               <strong><%= fact.label %></strong>
               <%= fact.value %>
@@ -233,10 +242,16 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
               class="ax-button ax-button-primary ax-button-sm"
               href={ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope, %{"status" => "open"})}
             >
-              Work global invoice queue
+              Work global invoice queue to zero
             </a>
             <a
-              class="ax-button ax-button-primary ax-button-sm"
+              class="ax-button ax-button-secondary ax-button-sm"
+              href={ScopedPath.build(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}
+            >
+              Watch dunning funnel and at-risk accounts
+            </a>
+            <a
+              class="ax-button ax-button-secondary ax-button-sm"
               href={
                 ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope, %{
                   "status" => "open",
@@ -260,21 +275,33 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
           </:actions>
         </Detail.summary_card>
 
-        <% health = detail_health_summary(@subscription) %>
-        <section class={["ax-detail-health-summary", "ax-detail-health-summary-" <> health.tone]} aria-label="Billing health summary">
+        <section class={["ax-detail-health-summary", "ax-detail-health-summary-" <> health.tone]} aria-label="Primary billing health summary">
+          <p class="ax-detail-health-label ax-label">Billing health summary</p>
           <div class="ax-detail-health-copy">
             <span class={["ax-status-badge", "ax-status-badge-" <> health.tone]}>
               <span class="ax-status-dot"></span><%= health.label %>
             </span>
-            <strong><%= health.headline %></strong>
-            <span><%= health.body %></span>
+            <strong class="ax-detail-health-verdict"><%= health.answer %></strong>
+            <span class="ax-detail-health-body"><%= health.body %></span>
           </div>
           <ul :if={health.caveats != []} class="ax-detail-health-caveats">
             <li :for={caveat <- health.caveats}><%= caveat %></li>
           </ul>
-          <div class="ax-detail-actions-row">
+          <div class="ax-detail-actions-row ax-detail-critical-actions">
             <a
               class="ax-button ax-button-primary ax-button-sm"
+              href={ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope, %{"status" => "open"})}
+            >
+              Work global invoice queue to zero
+            </a>
+            <a
+              class="ax-button ax-button-secondary ax-button-sm"
+              href={ScopedPath.build(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}
+            >
+              Watch dunning funnel and at-risk accounts
+            </a>
+            <a
+              class="ax-button ax-button-secondary ax-button-sm"
               href={
                 ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope, %{
                   "status" => "open",
@@ -283,12 +310,6 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
               }
             >
               Work this subscription invoice queue
-            </a>
-            <a
-              class="ax-button ax-button-secondary ax-button-sm"
-              href={ScopedPath.build(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}
-            >
-              Open dunning funnel
             </a>
           </div>
         </section>
@@ -395,13 +416,13 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
                   class="ax-button ax-button-primary ax-button-sm"
                   href={ScopedPath.build(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}
                 >
-                  Open dunning funnel and at-risk accounts
+                  Watch dunning funnel and at-risk accounts
                 </a>
                 <a
-                  class="ax-button ax-button-secondary ax-button-sm"
+                  class="ax-button ax-button-primary ax-button-sm"
                   href={ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope, %{"status" => "open"})}
                 >
-                  Open global invoice queue
+                  Work global invoice queue to zero
                 </a>
                 <a
                   class="ax-button ax-button-secondary ax-button-sm"
@@ -791,8 +812,13 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
 
   defp summary_rows(subscription, customer, mount_path, scope) do
     subscription_label = subscription.processor_id || subscription.id
+    health = detail_health_summary(subscription)
 
     base_rows = [
+      %{
+        label: "Billing health verdict",
+        value: health_summary_value(health)
+      },
       %{
         label: "Lifecycle state",
         value: "#{humanize(subscription.status)} - #{predicate_summary(subscription)}"
@@ -932,10 +958,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
   defp current_period_summary(_subscription), do: not_projected_copy(:period)
 
   defp summary_health_facts(subscription) do
-    health = detail_health_summary(subscription)
-
     [
-      %{label: "Billing health", value: health.label},
       %{label: "Renewal", value: renews_or_ends_summary(subscription)},
       %{label: "MRR", value: mrr_summary(subscription)}
     ]
@@ -949,6 +972,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
         %{
           tone: "amber",
           label: "At risk",
+          answer: "No - payment recovery is needed",
           headline: "Payment recovery is needed",
           body:
             "Open invoices or dunning activity need operator attention before this account is healthy.",
@@ -959,6 +983,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
         %{
           tone: "amber",
           label: "Not healthy yet",
+          answer: "No - billing is not healthy until setup is complete",
           headline: "Billing is not healthy until setup is complete",
           body:
             "The account has missing setup details; finish them before treating recurring billing as healthy.",
@@ -969,6 +994,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
         %{
           tone: "amber",
           label: "Ending",
+          answer: "No - renewal is scheduled to end",
           headline: "Renewal is scheduled to end",
           body: "The account remains active through the paid-through date.",
           caveats: []
@@ -978,6 +1004,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
         %{
           tone: "amber",
           label: "Paused",
+          answer: "No - collection is paused",
           headline: "Collection is paused",
           body: "Review collection settings before relying on recurring revenue.",
           caveats: []
@@ -987,6 +1014,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
         %{
           tone: "slate",
           label: "Ended",
+          answer: "No - no active billing",
           headline: "No active billing",
           body: "This subscription is no longer collecting recurring revenue.",
           caveats: []
@@ -996,6 +1024,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
         %{
           tone: "moss",
           label: "Healthy",
+          answer: "Yes - active billing is healthy right now",
           headline: "Active billing is healthy right now",
           body: "No dunning, cancellation, or payment-risk flags are active.",
           caveats: []
@@ -1005,6 +1034,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
         %{
           tone: "slate",
           label: humanize(subscription.status),
+          answer: "Review subscription state",
           headline: "Review subscription state",
           body: "Confirm the processor state before taking billing action.",
           caveats: caveats
@@ -1021,6 +1051,12 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
       "Amount is not confirmed in admin"
     ]
     |> Enum.reject(&is_nil/1)
+  end
+
+  defp health_summary_value(%{caveats: []} = health), do: "#{health.answer} - #{health.body}"
+
+  defp health_summary_value(health) do
+    "#{health.answer} - #{health.body} Missing setup: #{Enum.join(health.caveats, ", ")}"
   end
 
   defp mrr_summary(_subscription), do: not_projected_copy(:amount)
@@ -1982,11 +2018,16 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
       [
         %{
           icon: :events,
-          label: "Debug failed webhook deliveries",
-          value: "Primary debugger for failed/dead deliveries, retries, and event links",
+          label: "Debug this subscription's failed webhooks",
+          value:
+            "Opens failed/dead subscription.created deliveries; match subscription #{subscription.processor_id || subscription.id} in the event payload and retry trail",
           emphasis: :warning,
-          action_label: "Debug failed webhook deliveries",
-          href: ScopedPath.build(mount_path, "/webhooks", scope)
+          action_label: "Debug subscription webhooks",
+          href:
+            ScopedPath.build(mount_path, "/webhooks", scope, %{
+              "status" => "failed,dead",
+              "type" => "subscription.created"
+            })
         },
         %{
           icon: :invoices,

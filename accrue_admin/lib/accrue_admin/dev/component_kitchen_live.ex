@@ -832,12 +832,14 @@ if Mix.env() != :prod do
           </:actions>
 
           <div class="ax-dev-group-drawer">
-            <section class="ax-card ax-dev-group-drawer-context">
+            <section class="ax-dev-group-drawer-context ax-dev-group-drawer-health" aria-label="Billing health summary">
               <p class="ax-label">Billing health summary</p>
-              <p class="ax-body">
+              <p class="ax-dev-group-drawer-health-verdict">
                 <span class="ax-status-badge ax-status-badge-amber">
-                  <span class="ax-status-dot"></span>Unhealthy: $592.50 open above $0.00 target
+                  <span class="ax-status-dot"></span>Unhealthy
                 </span>
+                <strong>No - billing is not healthy right now</strong>
+                <span>$592.50 open above $0.00 target</span>
               </p>
               <p class="ax-body">
                 Last edited Jul 7, 2026 at 18:00 UTC by System. Recovery analytics, actor audit history, webhook debug, and invoice work queues are available below without hiding the health verdict.
@@ -846,7 +848,7 @@ if Mix.env() != :prod do
                 <a class="ax-button ax-button-secondary ax-button-sm" href={@admin_mount_path}>Open billing health summary</a>
                 <a class="ax-button ax-button-primary ax-button-sm" href={@admin_mount_path <> "/invoices?status=open"}>Work open invoices</a>
                 <a class="ax-button ax-button-secondary ax-button-sm" href={@admin_mount_path <> "/analytics/recovery"}>Open dunning funnel</a>
-                <a class="ax-button ax-button-secondary ax-button-sm" href={@admin_mount_path <> "/customers"}>Find one customer, see everything</a>
+                <a class="ax-button ax-button-secondary ax-button-sm" href={@admin_mount_path <> "/customers"}>Find one customer and open billing 360 detail</a>
                 <a class="ax-button ax-button-secondary ax-button-sm" href={@admin_mount_path <> "/events?actor_type=admin"}>Who did what, when? Audit trail</a>
                 <a class="ax-button ax-button-secondary ax-button-sm" href={@admin_mount_path <> "/webhooks"}>Debug webhook deliveries</a>
               </div>

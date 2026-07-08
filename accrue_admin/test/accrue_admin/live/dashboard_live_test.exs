@@ -95,6 +95,7 @@ defmodule AccrueAdmin.DashboardLiveTest do
 
     # Page chrome + attention rail heading
     assert html =~ Copy.home_intro_headline()
+    assert html =~ "ax-display"
     assert html =~ Copy.dashboard_display_headline()
 
     # Zone 1 — attention rail surfaces the seeded exceptions (dead webhook + meter failure)

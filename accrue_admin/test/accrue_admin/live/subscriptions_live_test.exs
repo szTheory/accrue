@@ -89,9 +89,15 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert html =~ ~s(data-ax-page-filter-toolbar)
     assert html =~ ~s(data-ax-page-actions)
     assert html =~ "Find one customer"
-    assert html =~ "Billing is not healthy right now" or html =~ "Billing is healthy right now"
+
+    assert html =~ "No - billing is not healthy right now" or
+             html =~ "Billing is healthy right now"
+
+    assert html =~ "Overall billing health answer"
+    assert html =~ "ax-health-summary-prominent"
     assert html =~ "above the $0.00 target"
     assert html =~ "Work open invoices"
+    assert html =~ "Work invoice queue to zero"
     assert html =~ "Watch dunning funnel"
     assert html =~ "Who did what, when?"
     assert html =~ "Debug failed webhook deliveries"
@@ -252,6 +258,7 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert {:ok, _view, html} = live(conn, "/billing/subscriptions?view=all")
 
     assert html =~ "Open invoice exposure"
+    assert html =~ "ax-health-verdict"
     assert html =~ "Work this subscription invoice queue"
     assert html =~ "Open all open invoices"
     assert html =~ "Debug this subscription&#39;s webhooks"
@@ -274,6 +281,8 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
       "Renews / ends",
       "Signals"
     ])
+
+    assert html =~ "ax-data-table-grid"
   end
 
   test "uses customer identity before raw subscription or processor IDs", %{conn: conn} do

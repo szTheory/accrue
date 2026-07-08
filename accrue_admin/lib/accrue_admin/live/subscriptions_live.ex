@@ -104,14 +104,22 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
         >
           <:description>
             <p class="ax-body">Open customer detail, invoice worklists, dunning, and actor audit from each row.</p>
-            <div class={["ax-health-summary", "ax-health-summary-" <> billing_health_tone(@summary)]}>
+            <div
+              class={[
+                "ax-health-summary",
+                "ax-health-summary-prominent",
+                "ax-health-summary-" <> billing_health_tone(@summary)
+              ]}
+              aria-label="Overall billing health answer"
+            >
               <span class={["ax-status-badge", "ax-status-badge-" <> billing_health_tone(@summary)]}>
                 <span class="ax-status-dot"></span><%= billing_health_label(@summary) %>
               </span>
-              <strong><%= billing_health_verdict(@summary) %></strong>
-              <span><%= billing_health_summary(@summary) %>; <%= format_minor(@summary.open_invoice_exposure_minor, "usd") %> above the $0.00 target.</span>
+              <strong class="ax-health-verdict"><%= billing_health_verdict(@summary) %></strong>
+              <span class="ax-health-detail"><%= billing_health_summary(@summary) %>; <%= format_minor(@summary.open_invoice_exposure_minor, "usd") %> above the $0.00 target.</span>
+              <span class="ax-health-detail"><%= dunning_funnel_summary(@summary) %></span>
               <a class="ax-button ax-button-primary ax-button-sm" href={invoice_queue_path(@admin_mount_path, @current_owner_scope)}>
-                Work invoice queue
+                Work invoice queue to zero
               </a>
             </div>
           </:description>
@@ -441,7 +449,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
   defp billing_health_label(_summary), do: "Healthy"
 
   defp billing_health_verdict(%{open_invoice_count: count}) when count > 0,
-    do: "Billing is not healthy right now"
+    do: "No - billing is not healthy right now"
 
   defp billing_health_verdict(_summary), do: "Billing is healthy right now"
 
