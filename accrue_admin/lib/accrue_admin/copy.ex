@@ -1317,7 +1317,7 @@ defmodule AccrueAdmin.Copy do
 
   def home_attention_action_review, do: "Review"
 
-  def home_attention_action_recover, do: "Recover"
+  def home_attention_action_recover, do: "Watch dunning funnel"
 
   def home_attention_action_investigate, do: "Investigate"
 
@@ -1344,7 +1344,7 @@ defmodule AccrueAdmin.Copy do
 
   def home_launcher_recovery_copy, do: "Work the dunning funnel and at-risk subscriptions."
 
-  def home_launcher_recovery_meta, do: "Open dunning funnel"
+  def home_launcher_recovery_meta, do: "Watch dunning funnel"
 
   def home_launcher_developer_title, do: "Investigate an incident"
 

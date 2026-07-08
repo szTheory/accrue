@@ -231,6 +231,12 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
           <:actions>
             <a
               class="ax-button ax-button-primary ax-button-sm"
+              href={ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope, %{"status" => "open"})}
+            >
+              Open all invoice queue
+            </a>
+            <a
+              class="ax-button ax-button-secondary ax-button-sm"
               href={
                 ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope, %{
                   "status" => "open",
@@ -347,19 +353,25 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
                   <%= Copy.resource_state_copy(:dunning, :queue_empty, surface: :subscription_detail).body %>
                 </p>
                 <p class="ax-body ax-detail-hint">
-                  Open dunning funnel to view at-risk accounts. Open subscription invoice queue for collection work on this subscription.
+                  Watch dunning funnel to view at-risk accounts. Open all invoice queue to work every open invoice, or open this subscription's filtered queue for local context.
                 </p>
               <% end %>
 
               <div class="ax-detail-actions-row">
                 <a
+                  class="ax-button ax-button-primary ax-button-sm"
+                  href={ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope, %{"status" => "open"})}
+                >
+                  Open all invoice queue
+                </a>
+                <a
                   class="ax-button ax-button-secondary ax-button-sm"
                   href={ScopedPath.build(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}
                 >
-                  Open dunning funnel
+                  Watch dunning funnel
                 </a>
                 <a
-                  class="ax-button ax-button-primary ax-button-sm"
+                  class="ax-button ax-button-secondary ax-button-sm"
                   href={
                     ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope, %{
                       "status" => "open",
@@ -395,6 +407,13 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
           <div class="ax-card ax-activity-audit-strip">
             <p class="ax-label">Latest audit event</p>
             <p class="ax-body"><%= activity_audit_summary(@timeline_events, @subscription) %></p>
+            <ul class="ax-audit-list" aria-label="Actor action timestamp rows">
+              <li :for={row <- audit_rows(@timeline_events, @subscription)} class="ax-audit-row">
+                <strong><%= row.actor %></strong>
+                <span><%= row.action %></span>
+                <time><%= row.at %></time>
+              </li>
+            </ul>
           </div>
           <a
             class="ax-link-quiet"
@@ -1071,6 +1090,32 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
 
   defp activity_audit_summary(_events, subscription) do
     "Subscription projection loaded · Actor System · #{format_datetime(subscription.inserted_at || subscription.current_period_start)}"
+  end
+
+  defp audit_rows(events, subscription) do
+    events
+    |> List.wrap()
+    |> case do
+      [] ->
+        [
+          %{
+            actor: "Actor System",
+            action: "Subscription projection loaded",
+            at: format_datetime(subscription.inserted_at || subscription.current_period_start)
+          }
+        ]
+
+      rows ->
+        rows
+        |> Enum.take(4)
+        |> Enum.map(fn event ->
+          %{
+            actor: event_actor_summary(event),
+            action: event.type,
+            at: format_datetime(event.inserted_at)
+          }
+        end)
+    end
   end
 
   defp timeline_items(events, subscription, mount_path, scope) do

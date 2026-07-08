@@ -19,6 +19,7 @@ defmodule AccrueAdmin.ComponentKitchenLiveTest do
     assert html =~ "Open billing health summary"
     assert html =~ "Open Event log"
     assert html =~ "Debug webhook deliveries"
+    assert html =~ "Work open invoices"
     assert html =~ "Enter the organization slug or platform owner scope"
   end
 end

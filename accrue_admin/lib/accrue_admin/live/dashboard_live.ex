@@ -66,7 +66,7 @@ defmodule AccrueAdmin.Live.DashboardLive do
               class="ax-button ax-button-secondary ax-button-sm"
               href={ScopedPath.build(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}
             >
-              Open dunning funnel
+              Watch dunning funnel
               <Icon.icon name={:arrow_right} size="sm" />
             </a>
           </div>
@@ -161,7 +161,7 @@ defmodule AccrueAdmin.Live.DashboardLive do
                 <%= count(@stats.past_due_subscription_count, "at-risk subscription") %>
               </span>
               <span class="ax-launcher-action">
-                Open dunning funnel <Icon.icon name={:arrow_right} size="sm" />
+                Watch dunning funnel <Icon.icon name={:arrow_right} size="sm" />
               </span>
             </a>
 

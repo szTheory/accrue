@@ -120,7 +120,13 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
               class="ax-button ax-button-secondary ax-button-sm"
               href={scoped_path(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}
             >
-              Dunning funnel
+              Watch dunning funnel
+            </a>
+            <a
+              class="ax-button ax-button-secondary ax-button-sm"
+              href={scoped_path(@admin_mount_path, "/events", @current_owner_scope)}
+            >
+              Audit event log
             </a>
             <a
               class="ax-button ax-button-secondary ax-button-sm"
@@ -138,14 +144,14 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
 
           <:stat_strip>
             <StatStrip.stat_strip label="Subscription summary">
-              <:stat label="Active subscriptions" value={Integer.to_string(@summary.active_count)} />
+              <:stat label="Active subscriptions" value={count(@summary.active_count, "active subscription")} />
               <:stat
                 label="Canceling renewals"
-                value={Integer.to_string(@summary.canceling_count)}
+                value={count(@summary.canceling_count, "canceling renewal")}
                 tone="amber"
               />
-              <:stat label="Paused subscriptions" value={Integer.to_string(@summary.paused_count)} tone="amber" />
-              <:stat label="Past-due subscriptions" value={Integer.to_string(@summary.past_due_count)} />
+              <:stat label="Paused subscriptions" value={count(@summary.paused_count, "paused subscription")} tone="amber" />
+              <:stat label="Past-due subscriptions" value={count(@summary.past_due_count, "past-due subscription")} />
               <:stat
                 label="Open invoice queue"
                 value={count(@summary.open_invoice_count, "invoice")}
@@ -154,7 +160,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
               />
               <:stat
                 label="Open invoice exposure"
-                value={format_minor(@summary.open_invoice_exposure_minor, "usd") <> " critical exposure · healthy target $0.00"}
+                value={"Unhealthy when above target: " <> format_minor(@summary.open_invoice_exposure_minor, "usd") <> " open · target $0.00"}
                 tone="amber"
                 href={invoice_queue_path(@admin_mount_path, @current_owner_scope)}
               />
@@ -240,6 +246,12 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
                 href={scoped_path(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}
               >
                 Watch dunning funnel
+              </a>
+              <a
+                class="ax-button ax-button-secondary ax-button-sm"
+                href={scoped_path(@admin_mount_path, "/events", @current_owner_scope)}
+              >
+                Audit event log
               </a>
             </div>
           </:list_status>
@@ -331,9 +343,15 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
         "subscription_id" => row.id
       })
 
-    Phoenix.HTML.raw(
-      ~s(<span class="ax-stack-sm"><span><span class="ax-chip ax-label">#{escaped_o}</span> <span class="ax-chip ax-label">#{escaped_t}</span></span><span class="ax-label ax-muted">Created #{created}</span><a href="#{invoices_href}" class="ax-link">Work invoices</a><a href="#{events_href}" class="ax-link">Webhook events</a><span class="ax-label ax-muted">Invoice actions: send reminder, retry payment, void from invoice queue</span></span>)
-    )
+    Phoenix.HTML.raw("""
+    <span class="ax-stack-sm">
+      <span><span class="ax-chip ax-label">#{escaped_o}</span> <span class="ax-chip ax-label">#{escaped_t}</span></span>
+      <span class="ax-label ax-muted"><strong>Actor</strong> System · <strong>Action</strong> subscription.created · <strong>When</strong> #{created}</span>
+      <a href="#{invoices_href}" class="ax-button ax-button-secondary ax-button-sm">Open invoice queue</a>
+      <a href="#{events_href}" class="ax-link">Webhook events</a>
+      <span class="ax-label ax-muted">Invoice actions: send reminder, retry payment, void from invoice queue</span>
+    </span>
+    """)
   end
 
   defp identity_cell(row, mount_path, owner_scope) do
@@ -342,9 +360,13 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
     customer_id = escape(row.customer_id)
     subscription_id = escape(row.processor_id || row.id)
 
-    Phoenix.HTML.raw(
-      ~s(<span class="ax-stack-sm"><a href="#{customer_href}" class="ax-link">#{escape(customer_label(row))}</a><span class="ax-label ax-muted">Customer ID #{customer_id}</span><a href="#{subscription_href}" class="ax-label ax-muted">Subscription #{subscription_id}</a></span>)
-    )
+    Phoenix.HTML.raw("""
+    <span class="ax-stack-sm">
+      <a href="#{customer_href}" class="ax-link">#{escape(customer_label(row))}</a>
+      <span class="ax-label ax-muted"><strong>Customer ID</strong> #{customer_id}</span>
+      <a href="#{subscription_href}" class="ax-label ax-muted"><strong>Subscription</strong> #{subscription_id}</a>
+    </span>
+    """)
   end
 
   defp customer_label(row), do: row.customer_name || row.customer_email || row.customer_id

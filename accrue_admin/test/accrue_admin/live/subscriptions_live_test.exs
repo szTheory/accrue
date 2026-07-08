@@ -88,7 +88,8 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert html =~ "Find customer"
     assert html =~ "Webhook events"
     assert html =~ "Open invoice queue"
-    assert html =~ "Dunning funnel"
+    assert html =~ "Watch dunning funnel"
+    assert html =~ "Audit event log"
     assert_one_h1(html)
 
     assert html
@@ -110,6 +111,7 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert html =~ "Open invoices"
     assert html =~ "Work open invoices"
     assert html =~ "Watch dunning funnel"
+    assert html =~ "Audit event log"
     assert html =~ ~s(data-ax-state="filtered-empty") or html =~ ~s(data-ax-state="populated")
     refute html =~ "No subscriptions yet."
   end
@@ -265,8 +267,9 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert {:ok, _view, html} = live(conn, "/billing/subscriptions?view=all")
 
     assert html =~ "phase196-primary@example.com"
-    assert html =~ "Customer ID #{subscription.customer_id}"
-    assert html =~ "Subscription #{subscription.processor_id}"
+    assert html =~ "Customer ID"
+    assert html =~ subscription.customer_id
+    assert html =~ "Subscription"
     assert html =~ subscription.processor_id
     assert_before(html, "phase196-primary@example.com", subscription.processor_id)
   end

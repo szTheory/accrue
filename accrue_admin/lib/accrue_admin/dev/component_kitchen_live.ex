@@ -48,12 +48,7 @@ if Mix.env() != :prod do
          socket
          |> assign_shell(admin, "/dev/components", "Component Kitchen")
          |> assign(:available?, true)
-         |> assign(:flashes, [
-           %{
-             kind: :info,
-             message: "Previewing shared admin components against the shipped package CSS."
-           }
-         ])}
+         |> assign(:flashes, [])}
       else
         {:ok,
          socket
@@ -83,7 +78,7 @@ if Mix.env() != :prod do
                 %{label: "Component kitchen"}
               ]}
             />
-            <h1 class="ax-display">Component Kitchen</h1>
+            <h1 class="ax-heading">Component Kitchen</h1>
             <p class="ax-page-description">Primitive and form components — full state matrix. Use the topbar theme toggle to review light and dark.</p>
           </header>
 
@@ -834,6 +829,8 @@ if Mix.env() != :prod do
           <:actions>
             <Button.button variant="secondary" href={@admin_mount_path}>Open billing health summary</Button.button>
             <Button.button variant="secondary" href={@admin_mount_path <> "/events"}>Open Event log</Button.button>
+            <Button.button variant="secondary" href={@admin_mount_path <> "/webhooks"}>Debug webhook deliveries</Button.button>
+            <Button.button variant="secondary" href={@admin_mount_path <> "/invoices?status=open"}>Work open invoices</Button.button>
           </:actions>
 
           <div class="ax-dev-group-drawer">
@@ -844,12 +841,10 @@ if Mix.env() != :prod do
                 <a class="ax-link" href={@admin_mount_path <> "/events"}>Open Event log</a>
                 for actor, timestamp, and source history.
               </p>
-              <p class="ax-body">
-                <a class="ax-link" href={@admin_mount_path <> "/webhooks"}>Debug webhook deliveries</a>
-                or
-                <a class="ax-link" href={@admin_mount_path <> "/invoices?status=open"}>work open invoices</a>
-                from the real operator queues.
-              </p>
+              <div class="ax-detail-actions-row">
+                <a class="ax-button ax-button-secondary ax-button-sm" href={@admin_mount_path <> "/webhooks"}>Debug webhook deliveries</a>
+                <a class="ax-button ax-button-primary ax-button-sm" href={@admin_mount_path <> "/invoices?status=open"}>Work open invoices</a>
+              </div>
             </section>
 
             <Input.input id="grp190-drawer-email" name="billing_email" label="Billing email" value="operations@example.test" />
