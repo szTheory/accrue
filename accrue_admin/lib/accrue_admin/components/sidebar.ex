@@ -40,7 +40,7 @@ defmodule AccrueAdmin.Components.Sidebar do
         <% end %>
       </div>
 
-      <nav class="ax-sidebar-nav">
+      <nav class="ax-sidebar-nav ax-primary-nav">
         <%= for {group, items, group_meta} <- grouped_items(@items) do %>
           <section
             id={"sidebar-group-section-#{slugify(group)}"}
