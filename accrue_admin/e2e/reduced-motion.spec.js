@@ -363,7 +363,9 @@ test("focus ring forced state is instant without relying on reduced-motion emula
 });
 
 // >>> @ratchet:auto-guards >>>
-const RATCHET_AUTO_GUARDS = [];
+const RATCHET_AUTO_GUARDS = [
+  {"finding_id":"f-d0ea97ffd1604a31","kind":"motion","route":"/billing/dev/components","selector":".ax-layer","max_ms":1}, // @ratchet:f-d0ea97ffd1604a31
+];
 // <<< @ratchet:auto-guards <<<
 
 // Auto-minted regression guards (207-03, D-44/D-45/D-46). Iterates the human-reviewed-once
@@ -372,6 +374,8 @@ const RATCHET_AUTO_GUARDS = [];
 // file's existing helpers already parse transitionDuration. Starts empty (loop no-ops).
 test("auto-minted ratchet guards — reduced motion (motion)", async ({ page }) => {
   test.skip(RATCHET_AUTO_GUARDS.length === 0, "no minted ratchet guards yet");
+
+  await page.emulateMedia({ reducedMotion: "reduce" });
 
   for (const row of RATCHET_AUTO_GUARDS) {
     if (row.kind !== "motion") {

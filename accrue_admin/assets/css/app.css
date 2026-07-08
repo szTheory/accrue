@@ -4382,6 +4382,7 @@ html.accrue-admin::-webkit-scrollbar-thumb:hover {
 .ax-launcher:focus-visible,
 .ax-related-item:focus-visible,
 .ax-summary-list-action:focus-visible,
+.ax-layer:focus-visible,
 [data-ax-force~="focus"] {
   border-color: var(--ax-focus-ring);
   outline: 2px solid var(--ax-focus-ring);

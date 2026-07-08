@@ -86,7 +86,7 @@ defmodule AccrueAdmin.Components.AppShell do
         <Topbar.topbar theme={@theme} />
 
         <main
-          class="ax-shell-content"
+          class="ax-shell-content ax-content"
           id="main-content"
           tabindex="-1"
           data-phase191-focus="main-content"

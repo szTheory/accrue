@@ -89,7 +89,7 @@ if Mix.env() != :prod do
             <p class="ax-body">Dev tools require `Accrue.Processor.Fake` as the configured processor.</p>
           </section>
 
-          <section :if={@available?} class="ax-kpi-grid">
+          <section :if={@available?} class="ax-kpi-grid ax-kpi-row">
             <KpiCard.kpi_card label="Primary KPI" value="$42.00" delta="healthy" delta_tone="moss">
               <:meta>Sample money formatting in the packaged shell</:meta>
             </KpiCard.kpi_card>
@@ -107,7 +107,7 @@ if Mix.env() != :prod do
               ]}
             />
 
-            <div class="ax-dev-grid">
+            <div class="ax-dev-grid ax-toolbar">
               <Button.button variant="primary" type="button">Primary action</Button.button>
               <Button.button variant="secondary" type="button">Secondary action</Button.button>
               <Button.button variant="ghost" href={@admin_mount_path <> "/webhooks"}>Ghost link</Button.button>
@@ -138,7 +138,7 @@ if Mix.env() != :prod do
           </section>
 
           <%!-- Detail skeleton: summary card + section + field list --%>
-          <section :if={@available?} class="ax-dev-stack">
+          <section :if={@available?} class="ax-dev-stack ax-detail">
             <Detail.summary_card eyebrow="Component kitchen" title="sub_demo_00042">
               <:status><StatusBadge.status_badge status={:active} /></:status>
               <:facts>
@@ -302,7 +302,7 @@ if Mix.env() != :prod do
               <p class="ax-body ax-dev-caption">Higher layers paint on top: toast sits over modal, over drawer, over popover, over dropdown, over sticky. Nothing to click — the cascade itself shows the order.</p>
               <div class="ax-foundation-layer-stack">
                 <%= for {{layer, token}, i} <- Enum.reverse(Enum.with_index([{"sticky", "--ax-z-sticky"}, {"dropdown", "--ax-z-dropdown"}, {"popover", "--ax-z-popover"}, {"drawer", "--ax-z-drawer"}, {"modal", "--ax-z-modal"}, {"toast", "--ax-z-toast"}])) do %>
-                  <div class="ax-foundation ax-foundation-layer ax-card" data-ax-foundation-layer={layer} style={"top: #{i * 1.6}rem; left: #{i * 1.5}rem; z-index: var(#{token});"}>
+                  <div class="ax-foundation ax-foundation-layer ax-layer ax-card" data-ax-foundation-layer={layer} tabindex="0" aria-label={"Layer specimen #{layer}"} style={"top: #{i * 1.6}rem; left: #{i * 1.5}rem; z-index: var(#{token});"}>
                     <p class="ax-label"><%= layer %></p>
                     <code class="ax-type-code-xs"><%= token %></code>
                   </div>

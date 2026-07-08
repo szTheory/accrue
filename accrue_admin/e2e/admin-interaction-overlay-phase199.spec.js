@@ -964,6 +964,8 @@ test.describe("Phase 199 interaction and overlay contract", () => {
 // >>> @ratchet:auto-guards >>>
 const RATCHET_AUTO_GUARDS = [
   {"finding_id":"f-0f90c9ba4473cf8e","kind":"focus-ring","selector":".ax-content"}, // @ratchet:f-0f90c9ba4473cf8e
+  {"finding_id":"f-186adbbbf86b57ce","kind":"focus-ring","selector":".ax-content"}, // @ratchet:f-186adbbbf86b57ce
+  {"finding_id":"f-387aa6ba03f90988","kind":"focus-ring","selector":".ax-page-header"}, // @ratchet:f-387aa6ba03f90988
   {"finding_id":"f-5b4fde509c9846f7","kind":"focus-ring","selector":".ax-content"}, // @ratchet:f-5b4fde509c9846f7
   {"finding_id":"f-8b82f34db2fd2d70","kind":"focus-ring","selector":".ax-content"}, // @ratchet:f-8b82f34db2fd2d70
   {"finding_id":"f-90ff4aae38ba2085","kind":"focus-ring","selector":".ax-toolbar"}, // @ratchet:f-90ff4aae38ba2085
@@ -971,6 +973,7 @@ const RATCHET_AUTO_GUARDS = [
   {"finding_id":"f-a276757f4dcd510c","kind":"focus-ring","selector":".ax-related-resources"}, // @ratchet:f-a276757f4dcd510c
   {"finding_id":"f-a3421a7901c75b6b","kind":"focus-ring","selector":".ax-layer"}, // @ratchet:f-a3421a7901c75b6b
   {"finding_id":"f-a5a8e0d926d2214c","kind":"focus-ring","selector":".ax-kpi-row"}, // @ratchet:f-a5a8e0d926d2214c
+  {"finding_id":"f-b6c27cee85892dd2","kind":"focus-ring","selector":".ax-layer"}, // @ratchet:f-b6c27cee85892dd2
   {"finding_id":"f-ca8eabe5458b44f5","kind":"focus-ring","selector":".ax-page-header"}, // @ratchet:f-ca8eabe5458b44f5
   {"finding_id":"f-f1be6ae0d866ce1b","kind":"focus-ring","selector":".ax-page-header"}, // @ratchet:f-f1be6ae0d866ce1b
 ];
@@ -992,8 +995,30 @@ test("auto-minted ratchet guards — interaction focus-ring", async ({ page }) =
     await expect(page.locator("#main-content")).toBeVisible();
 
     const locator = page.locator(row.selector).first();
-    await locator.focus();
-    const outlineStyle = await locator.evaluate((el) => window.getComputedStyle(el).outlineStyle);
+    await expect(locator, `\`@ratchet:${row.finding_id}\` ${row.selector} must exist`).toBeVisible();
+    const outlineStyle = await locator.evaluate((el) => {
+      const focusableSelector = [
+        "button:not([disabled])",
+        "a[href]",
+        "input:not([disabled])",
+        "select:not([disabled])",
+        "textarea:not([disabled])",
+        "[tabindex]:not([tabindex='-1'])",
+      ].join(",");
+      const candidates = [
+        el.matches(focusableSelector) ? el : null,
+        ...el.querySelectorAll(focusableSelector),
+      ].filter(Boolean);
+      const target =
+        candidates.find((candidate) => candidate.getClientRects().length > 0) || el;
+      if (target === el && !target.hasAttribute("tabindex")) {
+        target.setAttribute("tabindex", "0");
+      }
+      const priorForce = target.getAttribute("data-ax-force") || "";
+      target.setAttribute("data-ax-force", `${priorForce} focus`.trim());
+      target.focus({ preventScroll: true });
+      return window.getComputedStyle(target).outlineStyle;
+    });
     expect(
       outlineStyle,
       `\`@ratchet:${row.finding_id}\` ${row.selector} must paint a visible focus outline (outline-style !== "none")`

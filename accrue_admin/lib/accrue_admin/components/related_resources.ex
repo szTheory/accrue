@@ -27,7 +27,7 @@ defmodule AccrueAdmin.Components.RelatedResources do
 
   def related_resources(assigns) do
     ~H"""
-    <section :if={@items != []} class="ax-card ax-related" aria-label={@title}>
+    <section :if={@items != []} class="ax-card ax-related ax-related-resources" aria-label={@title}>
       <header class="ax-related-head">
         <h3 class="ax-related-title"><%= @title %></h3>
       </header>
