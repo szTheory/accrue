@@ -103,10 +103,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
           title={Copy.subscriptions_index_heading()}
         >
           <:description>
-            <p class="ax-body"><%= Copy.subscriptions_index_subtitle() %></p>
-            <p class="ax-body ax-page-description">
-              Use customer links in each row to pivot to a single customer overview, or open the event log when debugging webhook delivery.
-            </p>
+            <p class="ax-body">Open customer detail, invoice worklists, dunning, and actor audit from each row.</p>
           </:description>
 
           <:actions>
@@ -124,9 +121,9 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
             </a>
             <a
               class="ax-button ax-button-secondary ax-button-sm"
-              href={scoped_path(@admin_mount_path, "/events", @current_owner_scope)}
+              href={scoped_path(@admin_mount_path, "/events", @current_owner_scope, %{"actor_type" => "admin"})}
             >
-              Audit event log
+              Who did what, when?
             </a>
             <a
               class="ax-button ax-button-secondary ax-button-sm"
@@ -138,7 +135,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
               class="ax-button ax-button-secondary ax-button-sm"
               href={scoped_path(@admin_mount_path, "/events", @current_owner_scope)}
             >
-              Webhook events
+              Audit event log
             </a>
           </:actions>
 
@@ -267,9 +264,9 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
               </a>
               <a
                 class="ax-button ax-button-secondary ax-button-sm"
-                href={scoped_path(@admin_mount_path, "/events", @current_owner_scope)}
+                href={scoped_path(@admin_mount_path, "/events", @current_owner_scope, %{"actor_type" => "admin"})}
               >
-                Audit event log
+                Who did what, when?
               </a>
             </div>
           </:list_status>
@@ -370,8 +367,8 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
 
     Phoenix.HTML.raw("""
     <span class="ax-stack-sm">
+      <span class="ax-audit-signal"><strong>Who</strong> System <strong>Did</strong> subscription.created <strong>When</strong> #{created}</span>
       <span><span class="ax-chip ax-label">Owner: #{escaped_o}</span> <span class="ax-chip ax-label">Tax: #{escaped_t}</span></span>
-      <span class="ax-label ax-muted"><strong>Actor</strong> System · <strong>Action</strong> subscription.created · <strong>When</strong> #{created}</span>
       <span class="ax-data-table-inline-actions">
         <a href="#{subscription_invoices_href}" class="ax-button ax-button-primary ax-button-sm">Open subscription invoices</a>
         <a href="#{global_invoices_href}" class="ax-button ax-button-secondary ax-button-sm">Open global invoice queue</a>
@@ -681,6 +678,12 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
   end
 
   defp scoped_path(mount_path, suffix, _owner_scope), do: mount_path <> suffix
+
+  defp scoped_path(mount_path, suffix, owner_scope, params) do
+    mount_path
+    |> scoped_path(suffix, owner_scope)
+    |> AccrueAdmin.DataTableNav.merge_query(params)
+  end
 
   defp invoice_queue_path(mount_path, owner_scope) do
     mount_path

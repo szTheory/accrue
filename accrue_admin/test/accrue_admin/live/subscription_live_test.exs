@@ -112,8 +112,8 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
     assert html =~ "Subscription invoice queue"
     assert html =~ "Open invoice queue filtered to this subscription"
     assert html =~ "Dunning funnel"
-    assert html =~ "Webhook activity"
-    assert html =~ "Deliveries, failures, retries, and audit events"
+    assert html =~ "Debug webhook failures"
+    assert html =~ "Webhook deliveries, failures, retries, and audit events"
   end
 
   test "summary and drill bands replace page-level KPI and predicate noise", %{

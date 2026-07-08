@@ -48,7 +48,10 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert {:ok, _view, html} = live(conn, "/billing/subscriptions?status=canceling")
 
     assert html =~ Copy.subscriptions_index_heading()
-    assert html =~ Copy.subscriptions_index_subtitle()
+
+    assert html =~
+             "Open customer detail, invoice worklists, dunning, and actor audit from each row."
+
     assert html =~ "Canceling at period end"
     assert html =~ "/billing/subscriptions/"
     assert html =~ "ax-chip ax-label"
@@ -86,9 +89,9 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert html =~ ~s(data-ax-page-filter-toolbar)
     assert html =~ ~s(data-ax-page-actions)
     assert html =~ "Find customer"
-    assert html =~ "Webhook events"
     assert html =~ "Work open-invoice queue to zero"
     assert html =~ "Open dunning funnel"
+    assert html =~ "Who did what, when?"
     assert html =~ "Audit event log"
     assert html =~ "Billing health"
     assert_one_h1(html)
@@ -113,7 +116,7 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert html =~ "Primary queue"
     assert html =~ "Work open-invoice queue to zero"
     assert html =~ "Open dunning funnel"
-    assert html =~ "Audit event log"
+    assert html =~ "Who did what, when?"
     assert html =~ ~s(data-ax-state="filtered-empty") or html =~ ~s(data-ax-state="populated")
     refute html =~ "No subscriptions yet."
   end
@@ -249,6 +252,8 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert html =~ "Open subscription invoices"
     assert html =~ "Owner: User"
     assert html =~ "Tax: Off"
+    assert html =~ "Who"
+    assert html =~ "Did"
     assert html =~ "Find customer"
     assert html =~ "Webhook events"
     assert html =~ "amount not projected locally"

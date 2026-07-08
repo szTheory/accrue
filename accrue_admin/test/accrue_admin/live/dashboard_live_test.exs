@@ -157,6 +157,6 @@ defmodule AccrueAdmin.DashboardLiveTest do
     # IA-01 visible search field on Home (Plan 175-04)
     assert html =~ ~s(role="search")
     assert html =~ "Look up a customer"
-    assert html =~ "Search customers, invoices"
+    assert html =~ "Search customers; open their billing 360"
   end
 end

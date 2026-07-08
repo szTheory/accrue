@@ -2199,6 +2199,7 @@ a.ax-kpi-card--linked:focus-visible {
 
 .ax-subscriptions-header {
   gap: var(--ax-space-2xs);
+  max-width: min(70rem, calc(100vw - 2.5rem));
 }
 
 .ax-subscriptions-header .ax-page-header-main,
@@ -2212,6 +2213,23 @@ a.ax-kpi-card--linked:focus-visible {
 .ax-subscriptions-header .ax-stat-strip {
   padding: 0;
   gap: var(--ax-space-2xs) var(--ax-space-sm);
+}
+
+.ax-subscriptions-page {
+  gap: var(--ax-space-md);
+}
+
+.ax-subscriptions-page .ax-data-table {
+  gap: var(--ax-space-xs);
+}
+
+.ax-subscriptions-page .ax-filter-chip-bar {
+  padding: var(--ax-space-sm);
+  border-radius: var(--ax-radius-md);
+}
+
+.ax-subscriptions-page .ax-filter-chip-header {
+  display: none;
 }
 
 .ax-page-header-compact .ax-page-header-main,
@@ -2631,6 +2649,10 @@ a.ax-kpi-card--linked:focus-visible {
   gap: var(--ax-space-md);
 }
 
+.ax-subscriptions-page .ax-data-table-list-status {
+  gap: var(--ax-space-sm);
+}
+
 .ax-data-table-loading {
   display: grid;
   gap: var(--ax-space-md);
@@ -2711,8 +2733,16 @@ a.ax-kpi-card--linked:focus-visible {
   gap: var(--ax-space-sm);
 }
 
+.ax-subscriptions-page .ax-data-table-cards {
+  gap: var(--ax-space-xs);
+}
+
 .ax-data-table-card {
   padding: var(--ax-space-sm);
+}
+
+.ax-subscriptions-page .ax-data-table-card {
+  padding: var(--ax-space-xs);
 }
 
 .ax-data-table-card-header {
@@ -2721,6 +2751,10 @@ a.ax-kpi-card--linked:focus-visible {
   justify-content: space-between;
   gap: var(--ax-space-sm);
   margin-block-end: var(--ax-space-sm);
+}
+
+.ax-subscriptions-page .ax-data-table-card-header {
+  margin-block-end: var(--ax-space-xs);
 }
 
 .ax-data-table-card-fields {
@@ -2740,6 +2774,24 @@ a.ax-kpi-card--linked:focus-visible {
 
 .ax-data-table-card .ax-stack-sm {
   gap: var(--ax-space-2xs);
+}
+
+.ax-subscriptions-page .ax-data-table-grid th,
+.ax-subscriptions-page .ax-data-table-grid td {
+  padding: 0.5rem var(--ax-space-sm);
+}
+
+.ax-audit-signal {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: var(--ax-space-2xs) var(--ax-space-xs);
+  color: var(--ax-primary);
+  font: var(--ax-type-label-font);
+}
+
+.ax-audit-signal strong {
+  color: var(--ax-muted);
+  font-weight: 600;
 }
 
 .ax-data-table-inline-actions {
@@ -3969,7 +4021,7 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
 @media (min-width: 1024px) { /* --ax-bp-lg ↑ */
   .ax-shell-content:has(> .ax-subscriptions-page),
   .ax-shell-content:has(> .ax-subscription-detail-page) {
-    padding-top: var(--ax-space-lg);
+    padding-top: var(--ax-space-md);
   }
 }
 

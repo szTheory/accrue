@@ -1877,8 +1877,8 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
         },
         %{
           icon: :events,
-          label: "Webhook activity",
-          value: "Deliveries, failures, retries, and audit events",
+          label: "Debug webhook failures",
+          value: "Webhook deliveries, failures, retries, and audit events",
           href: ScopedPath.build(mount_path, "/webhooks", scope)
         },
         %{
