@@ -976,6 +976,7 @@ const RATCHET_AUTO_GUARDS = [
   {"finding_id":"f-a5a8e0d926d2214c","kind":"focus-ring","selector":".ax-kpi-row"}, // @ratchet:f-a5a8e0d926d2214c
   {"finding_id":"f-b6c27cee85892dd2","kind":"focus-ring","selector":".ax-layer"}, // @ratchet:f-b6c27cee85892dd2
   {"finding_id":"f-ca8eabe5458b44f5","kind":"focus-ring","selector":".ax-page-header"}, // @ratchet:f-ca8eabe5458b44f5
+  {"finding_id":"f-e3deb40c0e41d060","kind":"focus-ring","selector":".ax-layer"}, // @ratchet:f-e3deb40c0e41d060
   {"finding_id":"f-f1be6ae0d866ce1b","kind":"focus-ring","selector":".ax-page-header"}, // @ratchet:f-f1be6ae0d866ce1b
 ];
 // <<< @ratchet:auto-guards <<<
