@@ -141,13 +141,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
               class="ax-button ax-button-secondary ax-button-sm"
               href={scoped_path(@admin_mount_path, "/webhooks", @current_owner_scope, %{"status" => "failed,dead"})}
             >
-              Debug webhook failures
-            </a>
-            <a
-              class="ax-button ax-button-secondary ax-button-sm"
-              href={scoped_path(@admin_mount_path, "/events", @current_owner_scope, %{"q" => "webhook"})}
-            >
-              Debug failed webhooks end-to-end
+              Debug failed webhook deliveries
             </a>
           </:actions>
 
@@ -213,6 +207,14 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
         </PageHeader.page_header>
 
         <FlashGroup.flash_group flashes={flash_messages(@flash)} />
+
+        <section class="ax-inline-worklist" aria-label="Open invoice worklist">
+          <a class="ax-inline-worklist-link" href={invoice_queue_path(@admin_mount_path, @current_owner_scope)}>
+            <strong>Open invoice worklist</strong>
+            <span><%= invoice_queue_summary(@summary) %></span>
+            <span><%= format_minor(@summary.open_invoice_exposure_minor, "usd") %> remaining; target $0.00</span>
+          </a>
+        </section>
 
         <.live_component
           module={DataTable}

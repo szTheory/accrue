@@ -93,8 +93,7 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert html =~ "Work open invoices"
     assert html =~ "Watch dunning funnel"
     assert html =~ "Who did what, when?"
-    assert html =~ "Debug webhook failures"
-    assert html =~ "Debug failed webhooks end-to-end"
+    assert html =~ "Debug failed webhook deliveries"
     assert html =~ "Billing health"
     assert html =~ "Dunning funnel"
     assert_one_h1(html)
@@ -259,7 +258,7 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert html =~ "Who"
     assert html =~ "Did"
     assert html =~ "Find customer"
-    assert html =~ "Debug failed webhooks end-to-end"
+    assert html =~ "Debug failed webhook deliveries"
     assert html =~ "amount not projected locally"
     assert html =~ "target $0.00"
 

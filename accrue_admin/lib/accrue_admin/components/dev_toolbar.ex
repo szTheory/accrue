@@ -38,7 +38,7 @@ if Mix.env() != :prod do
       [
         %{label: "Clock", href: mount_path <> "/dev/clock"},
         %{label: "Email preview", href: mount_path <> "/dev/email-preview"},
-        %{label: "Webhook fixture lab", href: mount_path <> "/dev/webhook-fixtures"},
+        %{label: "Dev-only webhook fixtures", href: mount_path <> "/dev/webhook-fixtures"},
         %{label: "Components", href: mount_path <> "/dev/components"},
         %{label: "Fake inspect", href: mount_path <> "/dev/fake-inspect"}
       ]

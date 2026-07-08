@@ -136,6 +136,7 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
     assert html =~ "Amount not projected locally"
     assert html =~ "verify price or invoice sync before assessing health"
     assert html =~ "Open dunning funnel"
+    assert html =~ "Work global invoice queue"
     assert html =~ "Open global invoice queue"
     assert html =~ "Open subscription invoice queue"
     assert html =~ "Open audit event log"

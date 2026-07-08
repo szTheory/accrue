@@ -55,6 +55,15 @@ defmodule AccrueAdmin.Live.DashboardLive do
           <h1 class="ax-display"><%= Copy.home_intro_headline() %></h1>
           <p class="ax-body ax-page-copy"><%= Copy.home_intro_copy() %></p>
           <div class="ax-page-actions">
+            <button
+              type="button"
+              class="ax-button ax-button-secondary ax-button-sm"
+              data-command-palette-trigger="true"
+              data-ax-command-palette-trigger="true"
+            >
+              Find one customer
+              <Icon.icon name={:search} size="sm" />
+            </button>
             <a
               class="ax-button ax-button-primary ax-button-sm"
               href={ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope, %{"status" => "open"})}
@@ -166,7 +175,7 @@ defmodule AccrueAdmin.Live.DashboardLive do
                 <%= count(@stats.past_due_subscription_count, "at-risk subscription") %>
               </span>
               <span class="ax-launcher-action">
-                Open dunning funnel <Icon.icon name={:arrow_right} size="sm" />
+                Open dunning funnel and at-risk details <Icon.icon name={:arrow_right} size="sm" />
               </span>
             </a>
 

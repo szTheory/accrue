@@ -230,13 +230,13 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
           </:facts>
           <:actions>
             <a
-              class="ax-button ax-button-secondary ax-button-sm"
+              class="ax-button ax-button-primary ax-button-sm"
               href={ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope, %{"status" => "open"})}
             >
-              Open global invoice queue
+              Work global invoice queue
             </a>
             <a
-              class="ax-button ax-button-secondary ax-button-sm"
+              class="ax-button ax-button-primary ax-button-sm"
               href={
                 ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope, %{
                   "status" => "open",
@@ -247,7 +247,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
               Open subscription invoice queue
             </a>
             <a
-              class="ax-button ax-button-primary ax-button-sm"
+              class="ax-button ax-button-secondary ax-button-sm"
               href={
                 ScopedPath.build(@admin_mount_path, "/events", @current_owner_scope, %{
                   "subject_type" => "Subscription",
@@ -362,7 +362,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
                   class="ax-button ax-button-primary ax-button-sm"
                   href={ScopedPath.build(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}
                 >
-                  Open dunning funnel
+                  Open dunning funnel and at-risk accounts
                 </a>
                 <a
                   class="ax-button ax-button-secondary ax-button-sm"
