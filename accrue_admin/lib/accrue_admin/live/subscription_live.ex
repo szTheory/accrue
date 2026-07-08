@@ -242,7 +242,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
               class="ax-button ax-button-primary ax-button-sm"
               href={ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope, %{"status" => "open"})}
             >
-              Work global invoice queue to zero
+              Work open-invoice queue to zero
             </a>
             <a
               class="ax-button ax-button-secondary ax-button-sm"
@@ -292,7 +292,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
               class="ax-button ax-button-primary ax-button-sm"
               href={ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope, %{"status" => "open"})}
             >
-              Work global invoice queue to zero
+              Work open-invoice queue to zero
             </a>
             <a
               class="ax-button ax-button-secondary ax-button-sm"
@@ -407,7 +407,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
                   <%= Copy.resource_state_copy(:dunning, :queue_empty, surface: :subscription_detail).body %>
                 </p>
                 <p class="ax-body ax-detail-hint">
-                  Use the dunning funnel for at-risk accounts. Open global invoice queue to work every open invoice, or open this subscription's filtered queue for local context.
+                  Use the dunning funnel for at-risk accounts. Open the open-invoice queue to work every open invoice, or open this subscription's filtered queue for local context.
                 </p>
               <% end %>
 
@@ -422,7 +422,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
                   class="ax-button ax-button-primary ax-button-sm"
                   href={ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope, %{"status" => "open"})}
                 >
-                  Work global invoice queue to zero
+                  Work open-invoice queue to zero
                 </a>
                 <a
                   class="ax-button ax-button-secondary ax-button-sm"

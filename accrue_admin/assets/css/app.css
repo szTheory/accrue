@@ -466,6 +466,7 @@ button {
   font-size: var(--ax-type-lg);
   font-weight: 700;
   line-height: var(--ax-leading-tight);
+  color: var(--ax-primary);
 }
 
 .ax-dev-group-drawer-specimen .ax-detail-drawer-header .ax-body {
@@ -524,6 +525,16 @@ button {
 .ax-dev-group-drawer-health-verdict strong {
   color: var(--ax-primary);
   font: var(--ax-type-title-font);
+}
+
+.ax-dev-group-drawer-primary-actions {
+  padding-top: var(--ax-space-xs);
+  border-top: 1px solid var(--ax-status-warning-border);
+}
+
+.ax-dev-group-drawer-primary-actions .ax-button-primary {
+  flex-basis: 100%;
+  justify-content: center;
 }
 
 @media (min-width: 768px) { /* --ax-bp-md ↑ */
@@ -2343,6 +2354,38 @@ a.ax-kpi-card--linked:focus-visible {
 
 .ax-health-detail-primary {
   font-weight: 700;
+}
+
+.ax-health-metrics {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ax-space-xs);
+  width: 100%;
+}
+
+.ax-health-metric {
+  display: grid;
+  gap: var(--ax-space-2xs);
+  min-width: min(11rem, 100%);
+  padding: var(--ax-space-xs);
+  border: 1px solid var(--ax-border);
+  border-radius: var(--ax-radius-sm);
+  background: var(--ax-elevated);
+  color: var(--ax-primary);
+}
+
+.ax-health-metric strong {
+  color: var(--ax-primary);
+  font-weight: 800;
+}
+
+.ax-health-metric span {
+  color: var(--ax-muted);
+  font: var(--ax-type-label-sm-font);
+}
+
+.ax-health-metric-warning {
+  border-color: var(--ax-status-warning-border);
 }
 
 .ax-health-summary-amber {

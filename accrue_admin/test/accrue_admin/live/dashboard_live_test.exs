@@ -104,9 +104,9 @@ defmodule AccrueAdmin.DashboardLiveTest do
     assert html =~ Copy.home_attention_meter_label()
     assert html =~ Copy.home_attention_action_investigate()
     assert html =~ "Billing needs attention now"
-    assert html =~ "Work the biggest issue"
+    assert html =~ "Work open-invoice queue to zero"
     assert html =~ ~s(href="/billing/events?q=meter_event")
-    assert html =~ ~s(href="/billing/events?q=webhook")
+    assert html =~ ~s(href="/billing/invoices?status=open")
 
     # Zone 2 — task launchers (the JTBD doors)
     assert html =~ Copy.home_launcher_customers_title()

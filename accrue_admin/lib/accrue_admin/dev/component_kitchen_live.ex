@@ -839,13 +839,12 @@ if Mix.env() != :prod do
               <p class="ax-body">
                 Last edited Jul 7, 2026 at 18:00 UTC by System. Recovery analytics, actor audit history, webhook debug, and invoice work queues are available from this panel.
               </p>
-              <div class="ax-detail-actions-row">
-                <a class="ax-button ax-button-secondary ax-button-sm" href={@admin_mount_path}>Open billing health summary</a>
-                <a class="ax-button ax-button-primary ax-button-sm" href={@admin_mount_path <> "/invoices?status=open"}>Work open invoices</a>
+              <div class="ax-detail-actions-row ax-dev-group-drawer-primary-actions">
+                <a class="ax-button ax-button-primary ax-button-sm" href={@admin_mount_path <> "/invoices?status=open"}>Work open-invoice queue to zero</a>
+                <a class="ax-button ax-button-secondary ax-button-sm" href={@admin_mount_path <> "/webhooks?status=failed,dead"}>Debug failed webhook deliveries</a>
                 <a class="ax-button ax-button-secondary ax-button-sm" href={@admin_mount_path <> "/analytics/recovery"}>Open at-risk dunning and customers</a>
                 <a class="ax-button ax-button-secondary ax-button-sm" href={@admin_mount_path <> "/customers"}>Find customer</a>
                 <a class="ax-button ax-button-secondary ax-button-sm" href={@admin_mount_path <> "/events?actor_type=admin"}>Who did what, when? Audit trail</a>
-                <a class="ax-button ax-button-primary ax-button-sm" href={@admin_mount_path <> "/webhooks?status=failed,dead"}>Debug failed webhook deliveries</a>
               </div>
             </section>
 

@@ -18,13 +18,13 @@ defmodule AccrueAdmin.ComponentKitchenLiveTest do
     assert html =~ "Billing needs attention now"
     assert html =~ "$592.50 open exposure; target $0.00"
     assert html =~ "Billing health verdict"
-    assert html =~ "Open billing health summary"
+    assert html =~ "ax-dev-group-drawer-primary-actions"
     assert html =~ "Open at-risk dunning and customers"
     assert html =~ "Find customer"
     refute html =~ "Find one customer and open billing 360 detail"
     assert html =~ "Who did what, when? Audit trail"
     assert html =~ "Debug failed webhook deliveries"
-    assert html =~ "Work open invoices"
+    assert html =~ "Work open-invoice queue to zero"
     assert html =~ "Enter the organization slug or platform owner scope"
   end
 end

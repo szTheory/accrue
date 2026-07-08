@@ -103,9 +103,9 @@ defmodule AccrueAdmin.Live.DashboardLive do
             <span><%= attention_health_summary(@stats) %></span>
             <a
               class="ax-button ax-button-primary ax-button-sm"
-              href={ScopedPath.build(@admin_mount_path, "/events", @current_owner_scope, %{"q" => "webhook"})}
+              href={ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope, %{"status" => "open"})}
             >
-              Work the biggest issue
+              Work open-invoice queue to zero
             </a>
           </div>
 

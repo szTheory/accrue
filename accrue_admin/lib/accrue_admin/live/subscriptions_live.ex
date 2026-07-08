@@ -116,7 +116,28 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
                 <span class="ax-status-dot"></span><%= billing_health_label(@summary) %>
               </span>
               <strong class="ax-health-verdict"><%= billing_health_verdict(@summary) %></strong>
-              <span class="ax-health-detail ax-health-detail-primary"><%= billing_health_rollup(@summary) %></span>
+              <span class="ax-health-metrics" aria-label="Billing health metrics">
+                <span class="ax-health-metric ax-health-metric-warning">
+                  <strong><%= billing_health_summary(@summary) %></strong>
+                  <span>Open-invoice queue</span>
+                </span>
+                <span class="ax-health-metric">
+                  <strong><%= format_minor(@summary.open_invoice_exposure_minor, "usd") %></strong>
+                  <span>Open exposure</span>
+                </span>
+                <span class="ax-health-metric ax-health-metric-warning">
+                  <strong><%= past_due_health_metric(@summary) %></strong>
+                  <span>Dunning risk</span>
+                </span>
+                <span class="ax-health-metric">
+                  <strong><%= canceling_health_metric(@summary) %></strong>
+                  <span>Renewal endings</span>
+                </span>
+                <span class="ax-health-metric">
+                  <strong>$0.00</strong>
+                  <span>Target exposure</span>
+                </span>
+              </span>
               <a class="ax-button ax-button-primary ax-button-sm" href={invoice_queue_path(@admin_mount_path, @current_owner_scope)}>
                 Work invoice queue to zero
               </a>
@@ -240,7 +261,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
         <section class="ax-inline-worklist" aria-label="Open invoice worklist">
           <div class="ax-inline-worklist-copy">
             <strong>Open invoice worklist</strong>
-            <span><%= billing_health_rollup(@summary) %></span>
+            <span><%= invoice_queue_summary(@summary) %>; <%= format_minor(@summary.open_invoice_exposure_minor, "usd") %> open exposure.</span>
           </div>
           <div class="ax-inline-worklist-actions">
             <a class="ax-button ax-button-primary ax-button-sm" href={invoice_queue_path(@admin_mount_path, @current_owner_scope)}>
@@ -482,15 +503,15 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
     end
   end
 
-  defp billing_health_rollup(summary) do
-    [
-      billing_health_summary(summary),
-      "open exposure " <> format_minor(summary.open_invoice_exposure_minor, "usd"),
-      dunning_funnel_summary(summary),
-      "target $0.00"
-    ]
-    |> Enum.join("; ")
-  end
+  defp past_due_health_metric(%{past_due_count: count}) when count > 0,
+    do: count(count, "past-due subscription") <> " at risk"
+
+  defp past_due_health_metric(_summary), do: "0 at risk"
+
+  defp canceling_health_metric(%{canceling_count: count}) when count > 0,
+    do: count(count, "canceling renewal")
+
+  defp canceling_health_metric(_summary), do: "0 ending"
 
   defp billing_health_tone(%{open_invoice_count: count}) when count > 0, do: "amber"
   defp billing_health_tone(_summary), do: "moss"
