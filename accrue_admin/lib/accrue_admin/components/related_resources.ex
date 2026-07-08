@@ -46,6 +46,9 @@ defmodule AccrueAdmin.Components.RelatedResources do
               <span class="ax-related-label"><%= item.label %></span>
               <span :if={item[:value]} class="ax-related-value"><%= item.value %></span>
             </span>
+            <span :if={item[:action_label]} class="ax-related-action-label">
+              <%= item.action_label %>
+            </span>
             <Icon.icon name={:chevron_right} size="sm" class="ax-related-chevron" />
           </a>
         </li>

@@ -111,13 +111,19 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
               class="ax-button ax-button-primary ax-button-sm"
               href={invoice_queue_path(@admin_mount_path, @current_owner_scope)}
             >
-              Work open-invoice queue to zero
+              Billing health: <%= billing_health_summary(@summary) %>
+            </a>
+            <a
+              class="ax-button ax-button-secondary ax-button-sm"
+              href={invoice_queue_path(@admin_mount_path, @current_owner_scope)}
+            >
+              Work open invoices
             </a>
             <a
               class="ax-button ax-button-secondary ax-button-sm"
               href={scoped_path(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}
             >
-              Open dunning funnel
+              Watch dunning funnel
             </a>
             <a
               class="ax-button ax-button-secondary ax-button-sm"
@@ -141,7 +147,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
               class="ax-button ax-button-secondary ax-button-sm"
               href={scoped_path(@admin_mount_path, "/events", @current_owner_scope, %{"q" => "webhook"})}
             >
-              Webhook event log
+              Debug failed webhooks end-to-end
             </a>
           </:actions>
 
@@ -172,6 +178,12 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
                 label="Past-due subscriptions"
                 value={watch_count(@summary.past_due_count, "past-due subscription")}
                 tone={if(@summary.past_due_count == 0, do: "moss", else: "amber")}
+              />
+              <:stat
+                label="Dunning funnel"
+                value={dunning_funnel_summary(@summary)}
+                tone={if(@summary.past_due_count == 0 and @summary.canceling_count == 0, do: "moss", else: "amber")}
+                href={scoped_path(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}
               />
               <:stat
                 label="Open invoice queue"
@@ -266,7 +278,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
                 class="ax-button ax-button-secondary ax-button-sm"
                 href={scoped_path(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}
               >
-                Open dunning funnel
+                Watch dunning funnel
               </a>
               <a
                 class="ax-button ax-button-secondary ax-button-sm"
@@ -403,6 +415,12 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
 
   defp watch_count(0, noun), do: "Healthy: " <> count(0, noun)
   defp watch_count(count, noun), do: "Watch: " <> count(count, noun)
+
+  defp dunning_funnel_summary(summary) do
+    "At risk: " <>
+      count(summary.past_due_count, "past-due subscription") <>
+      "; canceling: " <> count(summary.canceling_count, "canceling renewal")
+  end
 
   defp identity_cell(row, mount_path, owner_scope) do
     customer_href = scoped_path(mount_path, "/customers/#{row.customer_id}", owner_scope)

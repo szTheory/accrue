@@ -127,6 +127,7 @@ defmodule AccrueAdmin.Live.DashboardLive do
                 <span class="ax-input-title"><%= Copy.home_search_customers_title() %></span>
                 <span class="ax-input-placeholder"><%= Copy.home_search_customers_placeholder() %></span>
               </span>
+              <span class="ax-input-action">Search</span>
             </button>
           </div>
 

@@ -158,5 +158,6 @@ defmodule AccrueAdmin.DashboardLiveTest do
     assert html =~ ~s(role="search")
     assert html =~ "Find one customer"
     assert html =~ "Search customers; open billing 360 detail"
+    assert html =~ "Search"
   end
 end

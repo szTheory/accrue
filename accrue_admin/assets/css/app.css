@@ -2162,6 +2162,10 @@ a.ax-kpi-card--linked:focus-visible {
   gap: var(--ax-space-md);
 }
 
+.ax-subscription-detail-page {
+  gap: var(--ax-space-sm);
+}
+
 .ax-work-queue-actions {
   display: flex;
   flex-wrap: wrap;
@@ -2229,12 +2233,24 @@ a.ax-kpi-card--linked:focus-visible {
 }
 
 .ax-subscriptions-page .ax-filter-chip-bar {
-  padding: var(--ax-space-sm);
+  padding: var(--ax-space-2xs) var(--ax-space-xs);
   border-radius: var(--ax-radius-md);
 }
 
 .ax-subscriptions-page .ax-filter-chip-header {
   display: none;
+}
+
+.ax-subscriptions-page .ax-filter-chip-list,
+.ax-subscriptions-page .ax-filter-chip-content,
+.ax-subscriptions-page .ax-filter-chip-meta {
+  gap: var(--ax-space-2xs);
+}
+
+.ax-subscriptions-page .ax-filter-chip {
+  padding: 0.25rem 0.625rem;
+  gap: var(--ax-space-2xs);
+  line-height: var(--ax-leading-tight);
 }
 
 .ax-page-header-compact .ax-page-header-main,
@@ -2307,6 +2323,14 @@ a.ax-kpi-card--linked:focus-visible {
 
   .ax-page-header-actions {
     justify-content: flex-end;
+  }
+
+  .ax-subscriptions-header .ax-page-header-title-row {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .ax-subscriptions-header .ax-page-header-actions {
+    justify-content: flex-start;
   }
 }
 
@@ -3730,6 +3754,19 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
   color: var(--ax-muted);
 }
 
+.ax-input-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2rem;
+  padding: 0 var(--ax-space-sm);
+  border-radius: var(--ax-radius-sm);
+  background: var(--ax-accent-readable);
+  color: var(--ax-base);
+  font: var(--ax-type-label-sm-font);
+  white-space: nowrap;
+}
+
 /* Home page vertical rhythm + section headers */
 .ax-home {
   gap: var(--ax-space-xl);
@@ -4186,6 +4223,18 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
   overflow-wrap: anywhere;
 }
 
+.ax-related-action-label {
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.75rem;
+  padding: 0 var(--ax-space-sm);
+  border-radius: var(--ax-radius-sm);
+  background: var(--ax-accent-readable);
+  color: var(--ax-base);
+  font: var(--ax-type-label-sm-font);
+  white-space: nowrap;
+}
+
 .ax-related-chevron {
   color: var(--ax-muted);
   flex: none;
@@ -4208,8 +4257,8 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
 }
 
 .ax-subscription-detail-page .ax-summary-card {
-  padding: var(--ax-space-md);
-  gap: var(--ax-space-md);
+  padding: var(--ax-space-sm) var(--ax-space-md);
+  gap: var(--ax-space-sm);
 }
 
 .ax-summary-main {
@@ -4407,6 +4456,11 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
 .ax-audit-row span,
 .ax-audit-row time {
   color: var(--ax-muted);
+}
+
+.ax-audit-row-head {
+  color: var(--ax-muted);
+  font: var(--ax-type-label-sm-font);
 }
 
 @media (max-width: 700px) {

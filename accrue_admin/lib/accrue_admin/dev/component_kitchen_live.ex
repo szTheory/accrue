@@ -830,8 +830,8 @@ if Mix.env() != :prod do
             <Button.button variant="primary" href={@admin_mount_path}>Open billing health summary</Button.button>
             <Button.button variant="primary" href={@admin_mount_path <> "/invoices?status=open"}>Work open invoices</Button.button>
             <Button.button variant="primary" href={@admin_mount_path <> "/analytics/recovery"}>Open dunning funnel</Button.button>
-            <Button.button variant="primary" href={@admin_mount_path <> "/customers"}>Open one customer billing 360</Button.button>
-            <Button.button variant="primary" href={@admin_mount_path <> "/events"}>Open actor audit trail</Button.button>
+            <Button.button variant="primary" href={@admin_mount_path <> "/customers"}>Find one customer, then open billing 360</Button.button>
+            <Button.button variant="primary" href={@admin_mount_path <> "/events"}>Who did what, when? Audit trail</Button.button>
             <Button.button variant="primary" href={@admin_mount_path <> "/webhooks"}>Debug webhook deliveries</Button.button>
           </:actions>
 
@@ -849,8 +849,8 @@ if Mix.env() != :prod do
               <div class="ax-detail-actions-row">
                 <a class="ax-button ax-button-primary ax-button-sm" href={@admin_mount_path <> "/invoices?status=open"}>Work open invoices</a>
                 <a class="ax-button ax-button-primary ax-button-sm" href={@admin_mount_path <> "/analytics/recovery"}>Open dunning funnel</a>
-                <a class="ax-button ax-button-primary ax-button-sm" href={@admin_mount_path <> "/customers"}>Open one customer billing 360</a>
-                <a class="ax-button ax-button-primary ax-button-sm" href={@admin_mount_path <> "/events?actor_type=admin"}>Open actor audit trail</a>
+                <a class="ax-button ax-button-primary ax-button-sm" href={@admin_mount_path <> "/customers"}>Find one customer, then open billing 360</a>
+                <a class="ax-button ax-button-primary ax-button-sm" href={@admin_mount_path <> "/events?actor_type=admin"}>Who did what, when? Audit trail</a>
                 <a class="ax-button ax-button-primary ax-button-sm" href={@admin_mount_path <> "/webhooks"}>Debug webhook deliveries</a>
               </div>
             </section>

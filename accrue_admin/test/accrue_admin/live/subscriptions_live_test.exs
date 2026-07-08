@@ -89,12 +89,14 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert html =~ ~s(data-ax-page-filter-toolbar)
     assert html =~ ~s(data-ax-page-actions)
     assert html =~ "Find customer"
-    assert html =~ "Work open-invoice queue to zero"
-    assert html =~ "Open dunning funnel"
+    assert html =~ "Billing health:"
+    assert html =~ "Work open invoices"
+    assert html =~ "Watch dunning funnel"
     assert html =~ "Who did what, when?"
     assert html =~ "Debug webhook failures"
-    assert html =~ "Webhook event log"
+    assert html =~ "Debug failed webhooks end-to-end"
     assert html =~ "Billing health"
+    assert html =~ "Dunning funnel"
     assert_one_h1(html)
 
     assert html
@@ -116,7 +118,7 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert html =~ "Open-invoice worklist"
     assert html =~ "Primary queue"
     assert html =~ "Work open-invoice queue to zero"
-    assert html =~ "Open dunning funnel"
+    assert html =~ "Watch dunning funnel"
     assert html =~ "Who did what, when?"
     assert html =~ ~s(data-ax-state="filtered-empty") or html =~ ~s(data-ax-state="populated")
     refute html =~ "No subscriptions yet."
@@ -257,7 +259,7 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert html =~ "Who"
     assert html =~ "Did"
     assert html =~ "Find customer"
-    assert html =~ "Webhook event log"
+    assert html =~ "Debug failed webhooks end-to-end"
     assert html =~ "amount not projected locally"
     assert html =~ "target $0.00"
 

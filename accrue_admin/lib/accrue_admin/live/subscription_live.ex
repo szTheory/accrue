@@ -230,12 +230,6 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
           </:facts>
           <:actions>
             <a
-              class="ax-button ax-button-primary ax-button-sm"
-              href={ScopedPath.build(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}
-            >
-              Open dunning funnel
-            </a>
-            <a
               class="ax-button ax-button-secondary ax-button-sm"
               href={ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope, %{"status" => "open"})}
             >
@@ -359,7 +353,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
                   <%= Copy.resource_state_copy(:dunning, :queue_empty, surface: :subscription_detail).body %>
                 </p>
                 <p class="ax-body ax-detail-hint">
-                  Open dunning funnel to view at-risk accounts. Open global invoice queue to work every open invoice, or open this subscription's filtered queue for local context.
+                  Use the dunning funnel for at-risk accounts. Open global invoice queue to work every open invoice, or open this subscription's filtered queue for local context.
                 </p>
               <% end %>
 
@@ -411,7 +405,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
             <span class="ax-detail-section-title">Activity</span>
           </summary>
           <div class="ax-card ax-activity-audit-strip">
-            <p class="ax-label">Latest audit event</p>
+            <p class="ax-label">Who did what, when</p>
             <p class="ax-body"><%= activity_audit_summary(@timeline_events, @subscription) %></p>
             <div class="ax-activity-actions">
               <a
@@ -427,6 +421,11 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
               </a>
             </div>
             <ul class="ax-audit-list" aria-label="Actor action timestamp rows">
+              <li class="ax-audit-row ax-audit-row-head" aria-hidden="true">
+                <strong>Who</strong>
+                <span>Did</span>
+                <time>When</time>
+              </li>
               <li :for={row <- audit_rows(@timeline_events, @subscription)} class="ax-audit-row">
                 <strong><%= row.actor %></strong>
                 <span><%= row.action %></span>
@@ -1854,21 +1853,24 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
     customer_items ++
       [
         %{
+          icon: :events,
+          label: "Debug failed webhook deliveries",
+          value: "Primary debugger for failed/dead deliveries, retries, and event links",
+          emphasis: :warning,
+          action_label: "Debug failures",
+          href: ScopedPath.build(mount_path, "/webhooks", scope)
+        },
+        %{
           icon: :invoices,
           label: Copy.subscription_drill_link_invoices_for_subscription(),
           value: "Work the open-invoice queue filtered to this subscription",
           emphasis: :primary,
+          action_label: "Open queue",
           href:
             ScopedPath.build(mount_path, "/invoices", scope, %{
               "status" => "open",
               "subscription_id" => subscription.id
             })
-        },
-        %{
-          icon: :recovery,
-          label: "Dunning funnel",
-          value: "At-risk accounts, dunning state, and collection work",
-          href: ScopedPath.build(mount_path, "/analytics/recovery", scope)
         },
         %{
           icon: :payments,
@@ -1877,13 +1879,6 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
             ScopedPath.build(mount_path, "/payments", scope, %{
               "customer_id" => subscription.customer_id
             })
-        },
-        %{
-          icon: :events,
-          label: "Check failed webhook queue",
-          value: "Failed/dead deliveries, retries, and audit-linked events",
-          emphasis: :warning,
-          href: ScopedPath.build(mount_path, "/webhooks", scope)
         },
         %{
           icon: :events,
