@@ -2229,9 +2229,7 @@ a.ax-kpi-card--linked:focus-visible {
   gap: var(--ax-space-2xs) var(--ax-space-sm);
 }
 
-.ax-subscriptions-header .ax-stat-value--amber,
-.ax-subscriptions-header .ax-stat-value--moss,
-.ax-subscriptions-header .ax-stat-value--cobalt {
+.ax-subscriptions-header .ax-stat-value {
   color: var(--ax-primary);
 }
 
@@ -2245,34 +2243,72 @@ a.ax-kpi-card--linked:focus-visible {
   gap: var(--ax-space-sm);
 }
 
+.ax-health-summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--ax-space-xs) var(--ax-space-sm);
+  width: fit-content;
+  max-width: 100%;
+  padding: var(--ax-space-xs) var(--ax-space-sm);
+  border: 1px solid var(--ax-border);
+  border-radius: var(--ax-radius-sm);
+  color: var(--ax-primary);
+}
+
+.ax-health-summary strong,
+.ax-health-summary span {
+  min-width: 0;
+}
+
+.ax-health-summary-amber {
+  border-color: var(--ax-status-warning-border);
+  background: color-mix(in srgb, var(--ax-status-warning-bg) 52%, var(--ax-elevated));
+}
+
+.ax-health-summary-moss {
+  border-color: var(--ax-status-success-border);
+  background: color-mix(in srgb, var(--ax-status-success-bg) 52%, var(--ax-elevated));
+}
+
 .ax-subscriptions-page .ax-data-table {
   gap: var(--ax-space-xs);
 }
 
 .ax-inline-worklist {
-  display: grid;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ax-space-sm);
+  padding: var(--ax-space-sm);
+  border: 1px solid var(--ax-accent-border);
+  border-radius: var(--ax-radius-sm);
+  background: color-mix(in srgb, var(--ax-accent-subtle) 38%, var(--ax-elevated));
 }
 
-.ax-inline-worklist-link {
+.ax-inline-worklist-copy {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: var(--ax-space-xs) var(--ax-space-sm);
-  padding: var(--ax-space-xs) var(--ax-space-sm);
-  border: 1px solid var(--ax-accent-border);
-  border-radius: var(--ax-radius-sm);
-  background: color-mix(in srgb, var(--ax-accent-subtle) 38%, var(--ax-elevated));
-  color: var(--ax-primary);
-  text-decoration: none;
-}
-
-.ax-inline-worklist-link strong {
   color: var(--ax-primary);
 }
 
-.ax-inline-worklist-link span {
+.ax-inline-worklist-copy strong {
+  color: var(--ax-primary);
+}
+
+.ax-inline-worklist-copy span {
   color: var(--ax-primary);
   font: var(--ax-type-label-sm-font);
+}
+
+.ax-inline-worklist-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ax-space-xs);
+  align-items: center;
 }
 
 .ax-subscriptions-page .ax-filter-chip-bar {
@@ -4361,6 +4397,63 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
 .ax-summary-fact strong {
   color: var(--ax-primary);
   font-weight: 600;
+}
+
+.ax-detail-health-summary {
+  display: grid;
+  gap: var(--ax-space-sm);
+  padding: var(--ax-space-sm) var(--ax-space-md);
+  border: 1px solid var(--ax-border);
+  border-radius: var(--ax-radius-sm);
+  color: var(--ax-primary);
+}
+
+.ax-detail-health-summary-amber {
+  border-color: var(--ax-status-warning-border);
+  background: color-mix(in srgb, var(--ax-status-warning-bg) 42%, var(--ax-elevated));
+}
+
+.ax-detail-health-summary-moss {
+  border-color: var(--ax-status-success-border);
+  background: color-mix(in srgb, var(--ax-status-success-bg) 42%, var(--ax-elevated));
+}
+
+.ax-detail-health-summary-slate {
+  border-color: var(--ax-status-neutral-border);
+  background: color-mix(in srgb, var(--ax-status-neutral-bg) 42%, var(--ax-elevated));
+}
+
+.ax-detail-health-copy {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--ax-space-xs) var(--ax-space-sm);
+}
+
+.ax-detail-health-copy strong {
+  color: var(--ax-primary);
+}
+
+.ax-detail-health-copy span:last-child {
+  color: var(--ax-primary);
+}
+
+.ax-detail-health-caveats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ax-space-xs);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ax-detail-health-caveats li {
+  padding: 0.25rem 0.625rem;
+  border: 1px solid var(--ax-status-warning-border);
+  border-radius: var(--ax-radius-sm);
+  background: var(--ax-elevated);
+  color: var(--ax-primary);
+  font: var(--ax-type-label-sm-font);
 }
 
 .ax-summary-actions {

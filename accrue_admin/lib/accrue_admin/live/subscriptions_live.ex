@@ -104,17 +104,18 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
         >
           <:description>
             <p class="ax-body">Open customer detail, invoice worklists, dunning, and actor audit from each row.</p>
+            <div class={["ax-health-summary", "ax-health-summary-" <> billing_health_tone(@summary)]}>
+              <span class={["ax-status-badge", "ax-status-badge-" <> billing_health_tone(@summary)]}>
+                <span class="ax-status-dot"></span><%= billing_health_label(@summary) %>
+              </span>
+              <strong><%= billing_health_summary(@summary) %></strong>
+              <span><%= format_minor(@summary.open_invoice_exposure_minor, "usd") %> open invoice exposure; target $0.00.</span>
+            </div>
           </:description>
 
           <:actions>
             <a
               class="ax-button ax-button-primary ax-button-sm"
-              href={invoice_queue_path(@admin_mount_path, @current_owner_scope)}
-            >
-              Billing health: <%= billing_health_summary(@summary) %>
-            </a>
-            <a
-              class="ax-button ax-button-secondary ax-button-sm"
               href={invoice_queue_path(@admin_mount_path, @current_owner_scope)}
             >
               Work open invoices
@@ -154,33 +155,28 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
                 href={invoice_queue_path(@admin_mount_path, @current_owner_scope)}
               />
               <:stat
-                label="Active subscriptions"
-                value={"Healthy: " <> count(@summary.active_count, "active subscription")}
+                label="Active"
+                value={count(@summary.active_count, "active subscription")}
                 tone="moss"
               />
               <:stat
-                label="Canceling renewals"
-                value={"Watch: " <> count(@summary.canceling_count, "canceling renewal")}
-                tone="amber"
-              />
-              <:stat
-                label="Paused subscriptions"
-                value={watch_count(@summary.paused_count, "paused subscription")}
-                tone={if(@summary.paused_count == 0, do: "moss", else: "amber")}
-              />
-              <:stat
-                label="Past-due subscriptions"
-                value={watch_count(@summary.past_due_count, "past-due subscription")}
+                label="At risk"
+                value={count(@summary.past_due_count, "past-due subscription")}
                 tone={if(@summary.past_due_count == 0, do: "moss", else: "amber")}
               />
               <:stat
-                label="Dunning funnel"
+                label="Ending"
+                value={count(@summary.canceling_count, "canceling renewal")}
+                tone="amber"
+              />
+              <:stat
+                label="Recovery"
                 value={dunning_funnel_summary(@summary)}
                 tone={if(@summary.past_due_count == 0 and @summary.canceling_count == 0, do: "moss", else: "amber")}
                 href={scoped_path(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}
               />
               <:stat
-                label="Open invoice queue"
+                label="Open invoices"
                 value={invoice_queue_summary(@summary)}
                 tone={if(@summary.open_invoice_count == 0, do: "moss", else: "amber")}
                 href={invoice_queue_path(@admin_mount_path, @current_owner_scope)}
@@ -209,11 +205,22 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
         <FlashGroup.flash_group flashes={flash_messages(@flash)} />
 
         <section class="ax-inline-worklist" aria-label="Open invoice worklist">
-          <a class="ax-inline-worklist-link" href={invoice_queue_path(@admin_mount_path, @current_owner_scope)}>
+          <div class="ax-inline-worklist-copy">
             <strong>Open invoice worklist</strong>
             <span><%= invoice_queue_summary(@summary) %></span>
             <span><%= format_minor(@summary.open_invoice_exposure_minor, "usd") %> remaining; target $0.00</span>
-          </a>
+          </div>
+          <div class="ax-inline-worklist-actions">
+            <a class="ax-button ax-button-primary ax-button-sm" href={invoice_queue_path(@admin_mount_path, @current_owner_scope)}>
+              Work <%= count(@summary.open_invoice_count, "open invoice") %>
+            </a>
+            <a class="ax-button ax-button-secondary ax-button-sm" href={AccrueAdmin.DataTableNav.merge_query(@table_path, %{"status" => default_queue_status()})}>
+              Review at-risk subscriptions
+            </a>
+            <a class="ax-button ax-button-secondary ax-button-sm" href={scoped_path(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}>
+              Open dunning funnel
+            </a>
+          </div>
         </section>
 
         <.live_component
@@ -370,6 +377,13 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
         "subject_id" => row.id
       })
 
+    webhook_href =
+      mount_path
+      |> scoped_path("/webhooks", owner_scope)
+      |> AccrueAdmin.DataTableNav.merge_query(%{
+        "type" => "subscription.created"
+      })
+
     global_invoices_href =
       mount_path
       |> scoped_path("/invoices", owner_scope)
@@ -392,16 +406,20 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
       <span class="ax-data-table-inline-actions">
         <a href="#{subscription_invoices_href}" class="ax-button ax-button-primary ax-button-sm">Work this subscription invoice queue</a>
         <a href="#{global_invoices_href}" class="ax-button ax-button-secondary ax-button-sm">Open all open invoices</a>
+        <a href="#{webhook_href}" class="ax-button ax-button-secondary ax-button-sm">View webhook delivery log</a>
         <a href="#{events_href}" class="ax-button ax-button-secondary ax-button-sm">Open subscription audit log</a>
       </span>
-      <span class="ax-label ax-muted">Subscription queue is scoped to this row; all open invoices covers every customer.</span>
+      <span class="ax-label ax-muted">Subscription queue is scoped to this row; webhook log filters subscription.created delivery attempts.</span>
     </span>
     """)
   end
 
+  defp billing_health_label(%{open_invoice_count: count}) when count > 0, do: "Needs work"
+  defp billing_health_label(_summary), do: "Healthy"
+
   defp billing_health_summary(summary) do
     if summary.open_invoice_count > 0 do
-      "Unhealthy: " <> count(summary.open_invoice_count, "open invoice")
+      count(summary.open_invoice_count, "open invoice") <> " need collection"
     else
       "Healthy: $0.00 open at target"
     end
@@ -411,17 +429,13 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
   defp billing_health_tone(_summary), do: "moss"
 
   defp invoice_queue_summary(%{open_invoice_count: count}) when count > 0,
-    do: "Unhealthy: " <> count(count, "open invoice")
+    do: count(count, "open invoice") <> " need collection"
 
   defp invoice_queue_summary(_summary), do: "Healthy: 0 open invoices"
 
-  defp watch_count(0, noun), do: "Healthy: " <> count(0, noun)
-  defp watch_count(count, noun), do: "Watch: " <> count(count, noun)
-
   defp dunning_funnel_summary(summary) do
-    "At risk: " <>
-      count(summary.past_due_count, "past-due subscription") <>
-      "; canceling: " <> count(summary.canceling_count, "canceling renewal")
+    count(summary.past_due_count, "past-due subscription") <>
+      " at risk; " <> count(summary.canceling_count, "canceling renewal")
   end
 
   defp identity_cell(row, mount_path, owner_scope) do
@@ -557,6 +571,8 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
     |> Subscriptions.encode_filter()
     |> Map.new(fn {key, value} -> {to_string(key), to_string(value)} end)
   end
+
+  defp default_queue_status, do: @default_queue_status
 
   defp flash_messages(flash) do
     Enum.flat_map([:error, :info], fn kind ->

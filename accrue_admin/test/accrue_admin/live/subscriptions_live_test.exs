@@ -89,13 +89,14 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert html =~ ~s(data-ax-page-filter-toolbar)
     assert html =~ ~s(data-ax-page-actions)
     assert html =~ "Find customer"
-    assert html =~ "Billing health:"
+    assert html =~ "open invoice exposure; target $0.00"
     assert html =~ "Work open invoices"
     assert html =~ "Watch dunning funnel"
     assert html =~ "Who did what, when?"
     assert html =~ "Debug failed webhook deliveries"
     assert html =~ "Billing health"
-    assert html =~ "Dunning funnel"
+    assert html =~ "Recovery"
+    refute html =~ "Billing health:"
     assert_one_h1(html)
 
     assert html
@@ -252,6 +253,7 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert html =~ "Open invoice exposure"
     assert html =~ "Work this subscription invoice queue"
     assert html =~ "Open all open invoices"
+    assert html =~ "View webhook delivery log"
     assert html =~ "Open subscription audit log"
     assert html =~ "Owner: User"
     assert html =~ "Tax: Off"

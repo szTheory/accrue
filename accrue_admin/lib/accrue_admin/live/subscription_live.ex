@@ -260,6 +260,39 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
           </:actions>
         </Detail.summary_card>
 
+        <% health = detail_health_summary(@subscription) %>
+        <section class={["ax-detail-health-summary", "ax-detail-health-summary-" <> health.tone]} aria-label="Billing health summary">
+          <div class="ax-detail-health-copy">
+            <span class={["ax-status-badge", "ax-status-badge-" <> health.tone]}>
+              <span class="ax-status-dot"></span><%= health.label %>
+            </span>
+            <strong><%= health.headline %></strong>
+            <span><%= health.body %></span>
+          </div>
+          <ul :if={health.caveats != []} class="ax-detail-health-caveats">
+            <li :for={caveat <- health.caveats}><%= caveat %></li>
+          </ul>
+          <div class="ax-detail-actions-row">
+            <a
+              class="ax-button ax-button-primary ax-button-sm"
+              href={
+                ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope, %{
+                  "status" => "open",
+                  "subscription_id" => @subscription.id
+                })
+              }
+            >
+              Work this subscription invoice queue
+            </a>
+            <a
+              class="ax-button ax-button-secondary ax-button-sm"
+              href={ScopedPath.build(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}
+            >
+              Open dunning funnel
+            </a>
+          </div>
+        </section>
+
         <Detail.summary_list
           rows={summary_rows(@subscription, @customer, @admin_mount_path, @current_owner_scope)}
           class="ax-summary-list-compact"
@@ -794,7 +827,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
   end
 
   defp subscription_title(subscription, customer) do
-    "#{lifecycle_health_label(subscription)} · #{customer_label(customer)}"
+    customer_label(customer) || subscription.processor_id || subscription.id
   end
 
   defp maybe_add_quantity_row(rows, subscription, subscription_label) do
@@ -893,11 +926,94 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
   defp current_period_summary(_subscription), do: not_projected_copy(:period)
 
   defp summary_health_facts(subscription) do
+    health = detail_health_summary(subscription)
+
     [
-      %{label: "Health", value: lifecycle_health_label(subscription)},
+      %{label: "Billing health", value: health.label},
       %{label: "Renewal", value: renews_or_ends_summary(subscription)},
       %{label: "MRR", value: mrr_summary(subscription)}
     ]
+  end
+
+  defp detail_health_summary(subscription) do
+    caveats = projection_caveats(subscription)
+
+    cond do
+      Accrue.Billing.Subscription.past_due?(subscription) ->
+        %{
+          tone: "amber",
+          label: "At risk",
+          headline: "Payment recovery is needed",
+          body:
+            "Open invoices or dunning activity need operator attention before this account is healthy.",
+          caveats: caveats
+        }
+
+      caveats != [] ->
+        %{
+          tone: "amber",
+          label: "Needs sync check",
+          headline: "Active billing has local projection gaps",
+          body: "Verify processor sync before treating this subscription as healthy.",
+          caveats: caveats
+        }
+
+      Accrue.Billing.Subscription.canceling?(subscription) ->
+        %{
+          tone: "amber",
+          label: "Ending",
+          headline: "Renewal is scheduled to end",
+          body: "The account remains active through the paid-through date.",
+          caveats: []
+        }
+
+      Accrue.Billing.Subscription.paused?(subscription) ->
+        %{
+          tone: "amber",
+          label: "Paused",
+          headline: "Collection is paused",
+          body: "Review collection settings before relying on recurring revenue.",
+          caveats: []
+        }
+
+      Accrue.Billing.Subscription.canceled?(subscription) ->
+        %{
+          tone: "slate",
+          label: "Ended",
+          headline: "No active billing",
+          body: "This subscription is no longer collecting recurring revenue.",
+          caveats: []
+        }
+
+      Accrue.Billing.Subscription.active?(subscription) ->
+        %{
+          tone: "moss",
+          label: "Healthy",
+          headline: "Active with no local risk flags",
+          body: "No local dunning, cancellation, or payment-risk flags are active.",
+          caveats: []
+        }
+
+      true ->
+        %{
+          tone: "slate",
+          label: humanize(subscription.status),
+          headline: "Review subscription state",
+          body: "Confirm the processor state before taking billing action.",
+          caveats: caveats
+        }
+    end
+  end
+
+  defp projection_caveats(subscription) do
+    [
+      unless(match?(%DateTime{}, subscription.current_period_end),
+        do: "Renewal date not projected locally"
+      ),
+      unless(present?(current_price_id(subscription)), do: "Price not protected locally"),
+      "Amount not protected locally"
+    ]
+    |> Enum.reject(&is_nil/1)
   end
 
   defp mrr_summary(_subscription), do: not_projected_copy(:amount)
@@ -991,7 +1107,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
   end
 
   defp not_projected_copy(:amount),
-    do: "Amount not projected locally - verify price or invoice sync before assessing health"
+    do: "Amount not protected locally - verify processor sync"
 
   defp not_projected_copy(:end_date),
     do: "End date not projected locally - verify processor sync before assessing health"
@@ -1000,10 +1116,10 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
     do: "Current period not projected locally - verify processor sync before assessing health"
 
   defp not_projected_copy(:price),
-    do: "Price not projected locally - verify processor item sync before assessing revenue"
+    do: "Price not protected locally - verify processor item sync"
 
   defp not_projected_copy(:renewal),
-    do: "Renewal date not projected locally - verify processor sync before assessing health"
+    do: "Renewal date not projected locally - verify processor sync"
 
   defp default_drill_open?(subscription, :billing),
     do: not Subscription.dunning_campaign_active?(subscription)
