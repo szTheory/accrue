@@ -823,7 +823,7 @@ if Mix.env() != :prod do
           id="grp190-drawer-form-shell"
           open
           title="Billing health and recovery drawer"
-          subtitle="Current billing health, at-risk dunning, actor audit history, webhook debugging, and invoice work queues."
+          subtitle="Current billing health, at-risk dunning, actor audit history, failed-webhook debugging, and invoice work queues."
           close_label="Close drawer"
           class="ax-dev-group-drawer-overlay"
         >
@@ -838,11 +838,11 @@ if Mix.env() != :prod do
                 <span>$592.50 open exposure; target $0.00</span>
               </p>
               <p class="ax-body">
-                Last edited Jul 7, 2026 at 18:00 UTC by System. Recovery analytics, actor audit history, webhook debug, and invoice work queues are available from this panel.
+                Last edited Jul 7, 2026 at 18:00 UTC by System. Recovery analytics, actor audit history, failed-webhook debugging, and invoice work queues are available from this panel.
               </p>
               <div class="ax-detail-actions-row ax-dev-group-drawer-primary-actions">
-                <a class="ax-button ax-button-primary ax-button-sm" href={@admin_mount_path <> "/invoices?status=open"}>Open 2-invoice queue: send reminders or retry payments</a>
-                <a class="ax-button ax-button-warning ax-button-sm" href={@admin_mount_path <> "/webhooks?status=failed,dead"}>Debug failed webhook deliveries</a>
+                <a class="ax-button ax-button-primary ax-button-sm" href={@admin_mount_path <> "/invoices?status=open"}>Open invoice queue view for 2 open invoices</a>
+                <a class="ax-button ax-button-primary ax-button-sm" href={@admin_mount_path <> "/webhooks?status=failed,dead"}>Open failed-webhook debugger</a>
                 <a class="ax-button ax-button-recovery ax-button-sm" href={@admin_mount_path <> "/analytics/recovery"}>Watch dunning funnel analytics and at-risk customers</a>
                 <a class="ax-button ax-button-secondary ax-button-sm" href={@admin_mount_path <> "/customers"}>Find customer</a>
                 <a class="ax-button ax-button-warning ax-button-sm" href={@admin_mount_path <> "/events?actor_type=admin"}>Open actor audit history</a>

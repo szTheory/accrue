@@ -54,6 +54,13 @@ defmodule AccrueAdmin.Live.DashboardLive do
           <Breadcrumbs.breadcrumbs items={[%{label: Copy.dashboard_breadcrumb_home()}]} />
           <h1 class="ax-display"><%= Copy.home_intro_headline() %></h1>
           <p class="ax-body ax-page-copy"><%= Copy.home_intro_copy() %></p>
+          <div :if={@attention != []} class="ax-home-header-health ax-health-summary ax-health-summary-amber" aria-label="Dashboard billing health answer">
+            <span class="ax-status-badge ax-status-badge-amber">
+              <span class="ax-status-dot"></span>Billing needs attention now
+            </span>
+            <strong><%= attention_health_summary(@stats) %></strong>
+            <span>Target exposure is $0.00.</span>
+          </div>
           <div class="ax-page-actions">
             <button
               type="button"

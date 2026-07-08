@@ -23,8 +23,9 @@ defmodule AccrueAdmin.ComponentKitchenLiveTest do
     assert html =~ "Find customer"
     refute html =~ "Find one customer and open billing 360 detail"
     assert html =~ "Open actor audit history"
-    assert html =~ "Debug failed webhook deliveries"
-    assert html =~ "Open 2-invoice queue: send reminders or retry payments"
+    assert html =~ "Open failed-webhook debugger"
+    assert html =~ "Open invoice queue view for 2 open invoices"
+    assert html =~ "Open failed-webhook debugger"
     assert html =~ "Enter the organization slug or platform owner scope"
   end
 end

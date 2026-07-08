@@ -240,12 +240,6 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
           <:actions>
             <a
               class="ax-button ax-button-primary ax-button-sm"
-              href={ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope, %{"status" => "open"})}
-            >
-              Work open-invoice queue to zero
-            </a>
-            <a
-              class="ax-button ax-button-secondary ax-button-sm"
               href={
                 ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope, %{
                   "status" => "open",
@@ -253,7 +247,18 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
                 })
               }
             >
-              Open subscription invoice queue
+              Open this subscription invoice queue
+            </a>
+            <a
+              class="ax-button ax-button-warning ax-button-sm"
+              href={
+                ScopedPath.build(@admin_mount_path, "/webhooks", @current_owner_scope, %{
+                  "status" => "failed,dead",
+                  "type" => "subscription.created"
+                })
+              }
+            >
+              Open failed-webhook debugger
             </a>
             <a
               class="ax-button ax-button-secondary ax-button-sm"
@@ -278,7 +283,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
             <span class={["ax-status-badge", "ax-status-badge-" <> health.tone]}>
               <span class="ax-status-dot"></span><%= health.label %>
             </span>
-            <strong class="ax-detail-health-verdict"><%= health.answer %></strong>
+            <strong class="ax-detail-health-verdict"><%= health.headline %></strong>
             <span class="ax-detail-health-body"><%= health.body %></span>
           </div>
           <ul :if={health.caveats != []} class="ax-detail-health-caveats">
@@ -309,12 +314,6 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
           <div class="ax-detail-actions-row ax-detail-critical-actions">
             <a
               class="ax-button ax-button-primary ax-button-sm"
-              href={ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope, %{"status" => "open"})}
-            >
-              Work open-invoice queue to zero
-            </a>
-            <a
-              class="ax-button ax-button-secondary ax-button-sm"
               href={
                 ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope, %{
                   "status" => "open",
@@ -322,7 +321,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
                 })
               }
             >
-              Work this subscription invoice queue
+              Open this subscription invoice queue
             </a>
           </div>
         </section>
@@ -2029,7 +2028,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
           value:
             "Opens failed/dead subscription.created deliveries; match subscription #{subscription.processor_id || subscription.id} in the event payload and retry trail",
           emphasis: :warning,
-          action_label: "Open failed webhook debugger",
+          action_label: "Open failed-webhook debugger",
           href:
             ScopedPath.build(mount_path, "/webhooks", scope, %{
               "status" => "failed,dead",

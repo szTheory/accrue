@@ -113,7 +113,7 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
     assert html =~ "Work the open-invoice queue filtered to this subscription"
     assert html =~ "Debug this subscription&#39;s failed webhooks"
     assert html =~ "failed/dead subscription.created deliveries"
-    assert html =~ "Open failed webhook debugger"
+    assert html =~ "Open failed-webhook debugger"
     assert html =~ "Open queue"
     assert html =~ "Open full audit event log"
   end
@@ -144,7 +144,7 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
     assert html =~ "Open customer billing profile"
     assert html =~ "Review setup audit events"
     assert html =~ "Watch dunning funnel and at-risk accounts"
-    assert html =~ "Work open-invoice queue to zero"
+    assert html =~ "Open this subscription invoice queue"
     refute html =~ "Work global invoice queue to zero"
     assert html =~ "Open this subscription&#39;s invoice queue"
     assert html =~ "Open audit event log"
