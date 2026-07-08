@@ -963,6 +963,7 @@ test.describe("Phase 199 interaction and overlay contract", () => {
 
 // >>> @ratchet:auto-guards >>>
 const RATCHET_AUTO_GUARDS = [
+  {"finding_id":"f-0f90c9ba4473cf8e","kind":"focus-ring","selector":".ax-content"}, // @ratchet:f-0f90c9ba4473cf8e
   {"finding_id":"f-5b4fde509c9846f7","kind":"focus-ring","selector":".ax-content"}, // @ratchet:f-5b4fde509c9846f7
   {"finding_id":"f-8b82f34db2fd2d70","kind":"focus-ring","selector":".ax-content"}, // @ratchet:f-8b82f34db2fd2d70
   {"finding_id":"f-90ff4aae38ba2085","kind":"focus-ring","selector":".ax-toolbar"}, // @ratchet:f-90ff4aae38ba2085
