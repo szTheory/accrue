@@ -283,21 +283,32 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
               clear_all_label={Copy.data_table_clear_filters_label()}
             />
             <div class="ax-work-queue-actions" aria-label="Direct work queues">
-              <a class="ax-button ax-button-primary ax-button-sm" href={invoice_queue_path_from_table(@table_path)}>
-                Work open-invoice queue to zero
-              </a>
-              <a
-                class="ax-button ax-button-secondary ax-button-sm"
-                href={scoped_path(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}
-              >
-                Watch dunning funnel
-              </a>
-              <a
-                class="ax-button ax-button-secondary ax-button-sm"
-                href={scoped_path(@admin_mount_path, "/events", @current_owner_scope, %{"actor_type" => "admin"})}
-              >
-                Who did what, when?
-              </a>
+              <div class="ax-work-queue-primary">
+                <span class="ax-label">Primary queue</span>
+                <a class="ax-button ax-button-primary ax-button-sm" href={invoice_queue_path_from_table(@table_path)}>
+                  Work open-invoice queue to zero
+                </a>
+              </div>
+              <div class="ax-work-queue-secondary">
+                <a
+                  class="ax-button ax-button-secondary ax-button-sm"
+                  href={scoped_path(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}
+                >
+                  Watch dunning funnel
+                </a>
+                <a
+                  class="ax-button ax-button-secondary ax-button-sm"
+                  href={scoped_path(@admin_mount_path, "/events", @current_owner_scope, %{"actor_type" => "admin"})}
+                >
+                  Who did what, when?
+                </a>
+                <a
+                  class="ax-button ax-button-secondary ax-button-sm"
+                  href={scoped_path(@admin_mount_path, "/webhooks", @current_owner_scope, %{"status" => "failed,dead"})}
+                >
+                  Failed webhook deliveries
+                </a>
+              </div>
             </div>
           </:list_status>
         </.live_component>
@@ -384,6 +395,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
       mount_path
       |> scoped_path("/webhooks", owner_scope)
       |> AccrueAdmin.DataTableNav.merge_query(%{
+        "status" => "failed,dead",
         "type" => "subscription.created"
       })
 
@@ -404,15 +416,23 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
 
     Phoenix.HTML.raw("""
     <span class="ax-stack-sm">
-      <span class="ax-audit-signal"><strong>Who</strong> System <strong>Did</strong> subscription.created <strong>When</strong> #{created}</span>
+      <span class="ax-audit-summary-row ax-subscription-row-audit" aria-label="Latest subscription audit event">
+        <span><strong>Actor</strong> Accrue system</span>
+        <span><strong>Event</strong> subscription.created</span>
+        <span><strong>When</strong> #{created}</span>
+      </span>
+      <span class="ax-webhook-row-status ax-webhook-row-status-warning">
+        <strong>Webhook delivery status</strong>
+        <span>Check failed/dead deliveries for this subscription</span>
+      </span>
       <span><span class="ax-chip ax-label">Owner: #{escaped_o}</span> <span class="ax-chip ax-label">Tax: #{escaped_t}</span></span>
       <span class="ax-data-table-inline-actions">
         <a href="#{subscription_invoices_href}" class="ax-button ax-button-primary ax-button-sm">Work this subscription invoice queue</a>
         <a href="#{global_invoices_href}" class="ax-button ax-button-secondary ax-button-sm">Open all open invoices</a>
-        <a href="#{webhook_href}" class="ax-button ax-button-secondary ax-button-sm">View webhook delivery log</a>
+        <a href="#{webhook_href}" class="ax-button ax-button-primary ax-button-sm">Debug this subscription's webhooks</a>
         <a href="#{events_href}" class="ax-button ax-button-secondary ax-button-sm">Open subscription audit log</a>
       </span>
-      <span class="ax-label ax-muted">Subscription queue is scoped to this row; webhook log filters subscription.created delivery attempts.</span>
+      <span class="ax-label ax-muted">Subscription queue is scoped to this row; webhook log opens failed/dead subscription.created delivery attempts.</span>
     </span>
     """)
   end

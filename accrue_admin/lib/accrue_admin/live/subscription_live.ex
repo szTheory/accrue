@@ -958,9 +958,10 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
       caveats != [] ->
         %{
           tone: "amber",
-          label: "Needs setup review",
-          headline: "Billing can run, but admin setup details are incomplete",
-          body: "Review the missing setup details before calling this account fully healthy.",
+          label: "Not healthy yet",
+          headline: "Billing is not healthy until setup is complete",
+          body:
+            "The account has missing setup details; finish them before treating recurring billing as healthy.",
           caveats: caveats
         }
 
@@ -1984,7 +1985,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
           label: "Debug failed webhook deliveries",
           value: "Primary debugger for failed/dead deliveries, retries, and event links",
           emphasis: :warning,
-          action_label: "Debug failures",
+          action_label: "Debug failed webhook deliveries",
           href: ScopedPath.build(mount_path, "/webhooks", scope)
         },
         %{

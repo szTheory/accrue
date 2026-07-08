@@ -95,6 +95,20 @@ defmodule AccrueAdmin.Live.DashboardLive do
             </a>
           </header>
 
+          <div :if={@attention != []} class="ax-attention-summary ax-attention-summary-warning" aria-label="Overall billing health">
+            <span class="ax-status-badge ax-status-badge-amber">
+              <span class="ax-status-dot"></span>Attention required
+            </span>
+            <strong>Billing is not healthy right now</strong>
+            <span><%= attention_health_summary(@stats) %></span>
+            <a
+              class="ax-button ax-button-primary ax-button-sm"
+              href={ScopedPath.build(@admin_mount_path, "/events", @current_owner_scope, %{"q" => "webhook"})}
+            >
+              Work the biggest issue
+            </a>
+          </div>
+
           <div :if={@attention != []} class="ax-card ax-attention">
             <a :for={row <- @attention} href={row.href} class="ax-attention-row">
               <span class={["ax-attention-dot", "ax-attention-dot-#{row.tone}"]} aria-hidden="true"></span>
@@ -272,6 +286,13 @@ defmodule AccrueAdmin.Live.DashboardLive do
               </div>
             </header>
 
+            <% latest_event = latest_dashboard_audit(@recent_events) %>
+            <div :if={latest_event} class="ax-audit-summary-row ax-dashboard-audit-summary" aria-label="Latest event ledger summary">
+              <span><strong>Actor</strong> <%= latest_event.actor %></span>
+              <span><strong>Action</strong> <%= latest_event.action %></span>
+              <span><strong>When</strong> <%= latest_event.at %></span>
+            </div>
+
             <Timeline.timeline
               label={Copy.dashboard_timeline_events_label()}
               empty_label={Copy.dashboard_timeline_events_empty()}
@@ -398,6 +419,18 @@ defmodule AccrueAdmin.Live.DashboardLive do
     |> Enum.filter(& &1)
   end
 
+  defp attention_health_summary(stats) do
+    summary =
+      [
+        count(stats.blocked_webhook_count, "dead-lettered webhook"),
+        count(stats.past_due_subscription_count, "past-due subscription"),
+        count(stats.failed_meter_event_count, "failed meter event")
+      ]
+      |> Enum.join(" · ")
+
+    summary <> " need review."
+  end
+
   defp count(1, noun), do: "1 #{noun}"
   defp count(n, noun), do: "#{n} #{noun}s"
 
@@ -414,11 +447,24 @@ defmodule AccrueAdmin.Live.DashboardLive do
         status: event.actor_type,
         tone: if(event.actor_type == "admin", do: :cobalt, else: :slate),
         meta: "Audit event",
+        audit_actor: event_actor_summary(event),
+        audit_action: event.type,
+        audit_at: format_datetime(event.inserted_at),
         href: ScopedPath.build(mount_path, "/events/#{event.id}", scope),
         href_label: "Open event"
       }
     end)
   end
+
+  defp latest_dashboard_audit([event | _events]) do
+    %{
+      actor: Map.get(event, :audit_actor),
+      action: Map.get(event, :audit_action),
+      at: Map.get(event, :audit_at)
+    }
+  end
+
+  defp latest_dashboard_audit(_events), do: nil
 
   defp webhook_health(mount_path, scope) do
     WebhookEvent

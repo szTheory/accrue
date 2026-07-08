@@ -462,13 +462,26 @@ button {
   margin-bottom: var(--ax-space-xs);
 }
 
+.ax-dev-group-drawer-specimen .ax-detail-drawer-header .ax-heading {
+  font-size: var(--ax-type-lg);
+  font-weight: 700;
+  line-height: var(--ax-leading-tight);
+}
+
+.ax-dev-group-drawer-specimen .ax-detail-drawer-header .ax-body {
+  max-width: 34rem;
+  font-size: var(--ax-type-sm);
+  color: var(--ax-primary);
+}
+
 .ax-dev-group-drawer-specimen .ax-detail-drawer-footer {
   margin-top: var(--ax-space-sm);
 }
 
 .ax-dev-group-drawer-specimen .ax-detail-drawer-actions,
 .ax-dev-group-drawer-specimen .ax-detail-actions-row {
-  gap: var(--ax-space-2xs);
+  align-items: flex-start;
+  gap: var(--ax-space-2xs) var(--ax-space-xs);
 }
 
 .ax-dev-group-drawer-specimen .ax-button {
@@ -2182,6 +2195,19 @@ a.ax-kpi-card--linked:focus-visible {
   align-items: center;
 }
 
+.ax-work-queue-primary,
+.ax-work-queue-secondary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--ax-space-xs);
+}
+
+.ax-work-queue-primary {
+  padding-right: var(--ax-space-sm);
+  border-right: 1px solid var(--ax-border);
+}
+
 /* Detail stacks inside cards (UX-02) — not page shells; avoids nested ax-page */
 .ax-stack-xl {
   display: grid;
@@ -2904,6 +2930,34 @@ a.ax-kpi-card--linked:focus-visible {
 .ax-audit-signal strong {
   color: var(--ax-muted);
   font-weight: 600;
+}
+
+.ax-subscription-row-audit {
+  justify-content: flex-start;
+  padding: var(--ax-space-2xs) var(--ax-space-xs);
+}
+
+.ax-webhook-row-status {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--ax-space-2xs) var(--ax-space-xs);
+  width: fit-content;
+  max-width: 100%;
+  padding: var(--ax-space-2xs) var(--ax-space-xs);
+  border: 1px solid var(--ax-border);
+  border-radius: var(--ax-radius-sm);
+  color: var(--ax-primary);
+  font: var(--ax-type-label-sm-font);
+}
+
+.ax-webhook-row-status strong {
+  color: var(--ax-primary);
+}
+
+.ax-webhook-row-status-warning {
+  border-color: var(--ax-status-warning-border);
+  background: color-mix(in srgb, var(--ax-status-warning-bg) 42%, var(--ax-elevated));
 }
 
 .ax-data-table-inline-actions {
@@ -3904,6 +3958,27 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
   overflow: hidden;
 }
 
+.ax-attention-summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--ax-space-xs) var(--ax-space-sm);
+  padding: var(--ax-space-sm) var(--ax-space-md);
+  border: 1px solid var(--ax-border);
+  border-radius: var(--ax-radius-sm);
+  color: var(--ax-primary);
+}
+
+.ax-attention-summary strong,
+.ax-attention-summary span {
+  min-width: 0;
+}
+
+.ax-attention-summary-warning {
+  border-color: var(--ax-status-warning-border);
+  background: color-mix(in srgb, var(--ax-status-warning-bg) 46%, var(--ax-elevated));
+}
+
 .ax-attention-row {
   display: flex;
   align-items: center;
@@ -4611,6 +4686,10 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
 
 .ax-audit-summary-row strong {
   color: var(--ax-muted);
+}
+
+.ax-dashboard-audit-summary {
+  margin-bottom: var(--ax-space-sm);
 }
 
 .ax-audit-row {

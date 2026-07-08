@@ -827,12 +827,8 @@ if Mix.env() != :prod do
           close_label="Close drawer"
         >
           <:actions>
-            <Button.button variant="primary" href={@admin_mount_path}>Open billing health summary</Button.button>
             <Button.button variant="primary" href={@admin_mount_path <> "/invoices?status=open"}>Work open invoices</Button.button>
-            <Button.button variant="primary" href={@admin_mount_path <> "/analytics/recovery"}>Open dunning funnel</Button.button>
-            <Button.button variant="primary" href={@admin_mount_path <> "/customers"}>Find one customer, see everything</Button.button>
-            <Button.button variant="primary" href={@admin_mount_path <> "/events"}>Who did what, when? Audit trail</Button.button>
-            <Button.button variant="primary" href={@admin_mount_path <> "/webhooks"}>Debug webhook deliveries</Button.button>
+            <Button.button variant="secondary" href={@admin_mount_path <> "/webhooks"}>Debug webhook deliveries</Button.button>
           </:actions>
 
           <div class="ax-dev-group-drawer">
@@ -847,11 +843,12 @@ if Mix.env() != :prod do
                 Last edited Jul 7, 2026 at 18:00 UTC by System. Recovery analytics, actor audit history, webhook debug, and invoice work queues are available below without hiding the health verdict.
               </p>
               <div class="ax-detail-actions-row">
+                <a class="ax-button ax-button-secondary ax-button-sm" href={@admin_mount_path}>Open billing health summary</a>
                 <a class="ax-button ax-button-primary ax-button-sm" href={@admin_mount_path <> "/invoices?status=open"}>Work open invoices</a>
-                <a class="ax-button ax-button-primary ax-button-sm" href={@admin_mount_path <> "/analytics/recovery"}>Open dunning funnel</a>
-                <a class="ax-button ax-button-primary ax-button-sm" href={@admin_mount_path <> "/customers"}>Find one customer, see everything</a>
-                <a class="ax-button ax-button-primary ax-button-sm" href={@admin_mount_path <> "/events?actor_type=admin"}>Who did what, when? Audit trail</a>
-                <a class="ax-button ax-button-primary ax-button-sm" href={@admin_mount_path <> "/webhooks"}>Debug webhook deliveries</a>
+                <a class="ax-button ax-button-secondary ax-button-sm" href={@admin_mount_path <> "/analytics/recovery"}>Open dunning funnel</a>
+                <a class="ax-button ax-button-secondary ax-button-sm" href={@admin_mount_path <> "/customers"}>Find one customer, see everything</a>
+                <a class="ax-button ax-button-secondary ax-button-sm" href={@admin_mount_path <> "/events?actor_type=admin"}>Who did what, when? Audit trail</a>
+                <a class="ax-button ax-button-secondary ax-button-sm" href={@admin_mount_path <> "/webhooks"}>Debug webhook deliveries</a>
               </div>
             </section>
 
