@@ -22,7 +22,7 @@ defmodule AccrueAdmin.ComponentKitchenLiveTest do
     assert html =~ "Watch dunning funnel analytics and at-risk customers"
     assert html =~ "Find customer"
     refute html =~ "Find one customer and open billing 360 detail"
-    assert html =~ "Who did what, when? Audit trail"
+    assert html =~ "Open actor audit history"
     assert html =~ "Debug failed webhook deliveries"
     assert html =~ "Open 2-invoice queue: send reminders or retry payments"
     assert html =~ "Enter the organization slug or platform owner scope"

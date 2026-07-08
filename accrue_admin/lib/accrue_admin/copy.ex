@@ -1346,7 +1346,8 @@ defmodule AccrueAdmin.Copy do
 
   def home_launcher_recovery_title, do: "Recover at-risk revenue"
 
-  def home_launcher_recovery_copy, do: "Work the dunning funnel and at-risk subscriptions."
+  def home_launcher_recovery_copy,
+    do: "Open recovery analytics for the dunning funnel and at-risk customers."
 
   def home_launcher_recovery_meta, do: "Dunning funnel"
 

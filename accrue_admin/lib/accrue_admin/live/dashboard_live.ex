@@ -68,11 +68,11 @@ defmodule AccrueAdmin.Live.DashboardLive do
               class="ax-button ax-button-primary ax-button-sm"
               href={ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope, %{"status" => "open"})}
             >
-              Work open-invoice queue to zero
+              Open invoice queue workspace
               <Icon.icon name={:arrow_right} size="sm" />
             </a>
             <a
-              class="ax-button ax-button-secondary ax-button-sm"
+              class="ax-button ax-button-recovery ax-button-sm"
               href={ScopedPath.build(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}
             >
               Watch dunning funnel and at-risk accounts
@@ -160,7 +160,7 @@ defmodule AccrueAdmin.Live.DashboardLive do
               <span class="ax-launcher-title"><%= Copy.home_launcher_invoices_title() %></span>
               <span class="ax-launcher-copy"><%= Copy.home_launcher_invoices_copy() %></span>
               <span class="ax-launcher-action">
-                Open <%= count(@stats.open_invoice_count, "open invoice") %> to send reminders or retry payment <Icon.icon name={:arrow_right} size="sm" />
+                Work <%= count(@stats.open_invoice_count, "open invoice") %> to zero: review, retry, or void <Icon.icon name={:arrow_right} size="sm" />
               </span>
               <span :if={@stats.open_invoice_count > 0} class="ax-launcher-meta">
                 <%= count(@stats.open_invoice_count, "open invoice") %>

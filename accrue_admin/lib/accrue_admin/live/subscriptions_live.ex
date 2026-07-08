@@ -159,7 +159,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
               Work open invoices
             </a>
             <a
-              class="ax-button ax-button-secondary ax-button-sm"
+              class="ax-button ax-button-recovery ax-button-sm"
               href={scoped_path(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}
             >
               Watch dunning funnel
@@ -341,7 +341,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
               </div>
               <div class="ax-work-queue-secondary">
                 <a
-                  class="ax-button ax-button-secondary ax-button-sm"
+                  class="ax-button ax-button-recovery ax-button-sm"
                   href={scoped_path(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}
                 >
                   Watch dunning funnel

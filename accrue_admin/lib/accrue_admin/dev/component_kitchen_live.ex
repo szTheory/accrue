@@ -825,6 +825,7 @@ if Mix.env() != :prod do
           title="Billing health and recovery drawer"
           subtitle="Current billing health, at-risk dunning, actor audit history, webhook debugging, and invoice work queues."
           close_label="Close drawer"
+          class="ax-dev-group-drawer-overlay"
         >
           <div class="ax-dev-group-drawer">
             <section class="ax-dev-group-drawer-context ax-dev-group-drawer-health" aria-label="Billing health summary">
@@ -841,10 +842,10 @@ if Mix.env() != :prod do
               </p>
               <div class="ax-detail-actions-row ax-dev-group-drawer-primary-actions">
                 <a class="ax-button ax-button-primary ax-button-sm" href={@admin_mount_path <> "/invoices?status=open"}>Open 2-invoice queue: send reminders or retry payments</a>
-                <a class="ax-button ax-button-secondary ax-button-sm" href={@admin_mount_path <> "/webhooks?status=failed,dead"}>Debug failed webhook deliveries</a>
-                <a class="ax-button ax-button-secondary ax-button-sm" href={@admin_mount_path <> "/analytics/recovery"}>Watch dunning funnel analytics and at-risk customers</a>
+                <a class="ax-button ax-button-warning ax-button-sm" href={@admin_mount_path <> "/webhooks?status=failed,dead"}>Debug failed webhook deliveries</a>
+                <a class="ax-button ax-button-recovery ax-button-sm" href={@admin_mount_path <> "/analytics/recovery"}>Watch dunning funnel analytics and at-risk customers</a>
                 <a class="ax-button ax-button-secondary ax-button-sm" href={@admin_mount_path <> "/customers"}>Find customer</a>
-                <a class="ax-button ax-button-secondary ax-button-sm" href={@admin_mount_path <> "/events?actor_type=admin"}>Who did what, when? Audit trail</a>
+                <a class="ax-button ax-button-warning ax-button-sm" href={@admin_mount_path <> "/events?actor_type=admin"}>Open actor audit history</a>
               </div>
             </section>
 

@@ -246,12 +246,6 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
             </a>
             <a
               class="ax-button ax-button-secondary ax-button-sm"
-              href={ScopedPath.build(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}
-            >
-              Watch dunning funnel and at-risk accounts
-            </a>
-            <a
-              class="ax-button ax-button-secondary ax-button-sm"
               href={
                 ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope, %{
                   "status" => "open",
@@ -290,18 +284,34 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
           <ul :if={health.caveats != []} class="ax-detail-health-caveats">
             <li :for={caveat <- health.caveats}><%= caveat %></li>
           </ul>
+          <div :if={health.caveats != []} class="ax-detail-setup-actions" aria-label="Resolve missing billing setup">
+            <span class="ax-detail-health-body">
+              Fix setup in the source billing system, then use this admin view to verify the projected renewal, price, and amount.
+            </span>
+            <a
+              class="ax-button ax-button-secondary ax-button-sm"
+              href={ScopedPath.build(@admin_mount_path, "/customers/#{@customer.id}", @current_owner_scope)}
+            >
+              Open customer billing profile
+            </a>
+            <a
+              class="ax-button ax-button-secondary ax-button-sm"
+              href={
+                ScopedPath.build(@admin_mount_path, "/events", @current_owner_scope, %{
+                  "subject_type" => "Subscription",
+                  "subject_id" => @subscription.id
+                })
+              }
+            >
+              Review setup audit events
+            </a>
+          </div>
           <div class="ax-detail-actions-row ax-detail-critical-actions">
             <a
               class="ax-button ax-button-primary ax-button-sm"
               href={ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope, %{"status" => "open"})}
             >
               Work open-invoice queue to zero
-            </a>
-            <a
-              class="ax-button ax-button-secondary ax-button-sm"
-              href={ScopedPath.build(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}
-            >
-              Watch dunning funnel and at-risk accounts
             </a>
             <a
               class="ax-button ax-button-secondary ax-button-sm"
@@ -417,18 +427,6 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
               <div class="ax-detail-actions-row">
                 <a
                   class="ax-button ax-button-primary ax-button-sm"
-                  href={ScopedPath.build(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}
-                >
-                  Watch dunning funnel and at-risk accounts
-                </a>
-                <a
-                  class="ax-button ax-button-primary ax-button-sm"
-                  href={ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope, %{"status" => "open"})}
-                >
-                  Work open-invoice queue to zero
-                </a>
-                <a
-                  class="ax-button ax-button-secondary ax-button-sm"
                   href={
                     ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope, %{
                       "status" => "open",
@@ -436,7 +434,13 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
                     })
                   }
                 >
-                  Open subscription invoice queue
+                  Open this subscription's invoice queue
+                </a>
+                <a
+                  class="ax-button ax-button-recovery ax-button-sm"
+                  href={ScopedPath.build(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}
+                >
+                  Watch dunning funnel and at-risk accounts
                 </a>
               </div>
               <p class="ax-body ax-detail-hint">
@@ -2025,7 +2029,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
           value:
             "Opens failed/dead subscription.created deliveries; match subscription #{subscription.processor_id || subscription.id} in the event payload and retry trail",
           emphasis: :warning,
-          action_label: "Debug failed webhooks",
+          action_label: "Open failed webhook debugger",
           href:
             ScopedPath.build(mount_path, "/webhooks", scope, %{
               "status" => "failed,dead",
