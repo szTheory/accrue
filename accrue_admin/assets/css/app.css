@@ -466,6 +466,11 @@ button {
   margin-top: var(--ax-space-sm);
 }
 
+.ax-dev-group-drawer-specimen .ax-detail-drawer-actions,
+.ax-dev-group-drawer-specimen .ax-detail-actions-row {
+  gap: var(--ax-space-2xs);
+}
+
 .ax-dev-group-drawer {
   gap: var(--ax-space-xs);
 }
@@ -3673,16 +3678,16 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
 
 /* Home visible search field (IA-01: Support entry discoverability) */
 .ax-home-search {
-  margin-bottom: var(--ax-space-md);
+  margin-bottom: var(--ax-space-sm);
 }
 
 /* Search-styled button — uses .ax-input base for sizing + border, then layered */
 .ax-input-search {
   width: 100%;
-  min-height: 2.75rem;
-  border: 1px solid var(--ax-border-strong);
+  min-height: 3.25rem;
+  border: 2px solid var(--ax-accent-border);
   border-radius: var(--ax-radius-md);
-  background: color-mix(in srgb, var(--ax-elevated) 86%, var(--ax-accent-subtle));
+  background: var(--ax-base);
   display: flex;
   align-items: center;
   gap: var(--ax-space-sm);
@@ -3690,12 +3695,15 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
   cursor: pointer;
   color: var(--ax-primary);
   text-align: start;
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ax-accent-border) 38%, transparent);
+  box-shadow:
+    0 0 0 3px color-mix(in srgb, var(--ax-accent-border) 22%, transparent),
+    var(--ax-shadow-sm);
 }
 
 .ax-input-search:hover,
 .ax-input-search:focus-visible {
   border-color: var(--ax-focus-ring);
+  background: color-mix(in srgb, var(--ax-accent-subtle) 32%, var(--ax-base));
   outline: none;
 }
 
@@ -3711,7 +3719,7 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
 }
 
 .ax-input-title {
-  font-size: var(--ax-type-sm);
+  font-size: var(--ax-type-md);
   font-weight: 700;
   color: var(--ax-primary);
 }
@@ -4123,6 +4131,21 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
   background: var(--ax-sunken);
   border-color: var(--ax-border);
   outline: none;
+}
+
+.ax-related-item-primary {
+  border-color: var(--ax-accent-border);
+  background: color-mix(in srgb, var(--ax-accent-subtle) 50%, var(--ax-elevated));
+}
+
+.ax-related-item-warning {
+  border-color: var(--ax-status-warning-border);
+  background: color-mix(in srgb, var(--ax-status-warning-bg) 38%, var(--ax-elevated));
+}
+
+.ax-related-item-primary .ax-related-value,
+.ax-related-item-warning .ax-related-value {
+  color: var(--ax-primary);
 }
 
 .ax-related-icon {

@@ -33,7 +33,14 @@ defmodule AccrueAdmin.Components.RelatedResources do
       </header>
       <ul class="ax-related-list">
         <li :for={item <- @items}>
-          <a class="ax-related-item" href={item.href}>
+          <a
+            class={[
+              "ax-related-item",
+              item[:emphasis] == :primary && "ax-related-item-primary",
+              item[:emphasis] == :warning && "ax-related-item-warning"
+            ]}
+            href={item.href}
+          >
             <span class="ax-related-icon"><Icon.icon name={item.icon} size="sm" /></span>
             <span class="ax-related-text">
               <span class="ax-related-label"><%= item.label %></span>

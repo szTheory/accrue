@@ -1329,12 +1329,16 @@ defmodule AccrueAdmin.Copy do
 
   def home_attention_meter_label, do: "failed to report — usage not billed"
 
-  def home_launcher_customers_title, do: "Look up a customer"
+  def home_search_customers_title, do: "Find one customer"
+
+  def home_search_customers_placeholder, do: "Search customers; open billing 360 detail"
+
+  def home_launcher_customers_title, do: "Browse customer records"
 
   def home_launcher_customers_copy,
-    do: "Search by name, email, or ID, then open their billing 360."
+    do: "Use the customer directory when list context matters."
 
-  def home_launcher_customers_meta, do: "Primary support lookup"
+  def home_launcher_customers_meta, do: "Secondary customer directory"
 
   def home_launcher_invoices_title, do: "Clear the invoice queue"
 

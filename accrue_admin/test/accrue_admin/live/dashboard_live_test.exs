@@ -151,12 +151,12 @@ defmodule AccrueAdmin.DashboardLiveTest do
     assert html =~ ~s(href="/billing/events")
 
     # IA-01 verb relabels (Plan 175-02)
-    assert html =~ "Look up a customer"
+    assert html =~ "Browse customer records"
     assert html =~ "Clear the invoice queue"
 
     # IA-01 visible search field on Home (Plan 175-04)
     assert html =~ ~s(role="search")
-    assert html =~ "Look up a customer"
-    assert html =~ "Search customers; open their billing 360"
+    assert html =~ "Find one customer"
+    assert html =~ "Search customers; open billing 360 detail"
   end
 end

@@ -253,7 +253,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
               Open subscription invoice queue
             </a>
             <a
-              class="ax-button ax-button-secondary ax-button-sm"
+              class="ax-button ax-button-primary ax-button-sm"
               href={
                 ScopedPath.build(@admin_mount_path, "/events", @current_owner_scope, %{
                   "subject_type" => "Subscription",
@@ -261,7 +261,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
                 })
               }
             >
-              Open filtered event log
+              Open audit event log
             </a>
           </:actions>
         </Detail.summary_card>
@@ -413,6 +413,19 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
           <div class="ax-card ax-activity-audit-strip">
             <p class="ax-label">Latest audit event</p>
             <p class="ax-body"><%= activity_audit_summary(@timeline_events, @subscription) %></p>
+            <div class="ax-activity-actions">
+              <a
+                class="ax-button ax-button-primary ax-button-sm"
+                href={
+                  ScopedPath.build(@admin_mount_path, "/events", @current_owner_scope, %{
+                    "subject_type" => "Subscription",
+                    "subject_id" => @subscription.id
+                  })
+                }
+              >
+                Open full audit event log
+              </a>
+            </div>
             <ul class="ax-audit-list" aria-label="Actor action timestamp rows">
               <li :for={row <- audit_rows(@timeline_events, @subscription)} class="ax-audit-row">
                 <strong><%= row.actor %></strong>
@@ -421,17 +434,6 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
               </li>
             </ul>
           </div>
-          <a
-            class="ax-link-quiet"
-            href={
-              ScopedPath.build(@admin_mount_path, "/events", @current_owner_scope, %{
-                "subject_type" => "Subscription",
-                "subject_id" => @subscription.id
-              })
-            }
-          >
-            Open full event log
-          </a>
           <%= if @timeline_events_loaded? do %>
             <Timeline.timeline
               label="Subscription events"
@@ -1854,7 +1856,8 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
         %{
           icon: :invoices,
           label: Copy.subscription_drill_link_invoices_for_subscription(),
-          value: "Open invoice queue filtered to this subscription",
+          value: "Work the open-invoice queue filtered to this subscription",
+          emphasis: :primary,
           href:
             ScopedPath.build(mount_path, "/invoices", scope, %{
               "status" => "open",
@@ -1877,8 +1880,9 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
         },
         %{
           icon: :events,
-          label: "Debug webhook failures",
-          value: "Webhook deliveries, failures, retries, and audit events",
+          label: "Check failed webhook queue",
+          value: "Failed/dead deliveries, retries, and audit-linked events",
+          emphasis: :warning,
           href: ScopedPath.build(mount_path, "/webhooks", scope)
         },
         %{

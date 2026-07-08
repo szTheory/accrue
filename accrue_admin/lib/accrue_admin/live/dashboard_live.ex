@@ -124,8 +124,8 @@ defmodule AccrueAdmin.Live.DashboardLive do
             >
               <AccrueAdmin.Components.Icon.icon name={:search} size="md" class="ax-input-icon" />
               <span class="ax-input-text">
-                <span class="ax-input-title"><%= Copy.home_launcher_customers_title() %></span>
-                <span class="ax-input-placeholder">Search customers; open their billing 360</span>
+                <span class="ax-input-title"><%= Copy.home_search_customers_title() %></span>
+                <span class="ax-input-placeholder"><%= Copy.home_search_customers_placeholder() %></span>
               </span>
             </button>
           </div>

@@ -133,9 +133,15 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
             </a>
             <a
               class="ax-button ax-button-secondary ax-button-sm"
-              href={scoped_path(@admin_mount_path, "/events", @current_owner_scope)}
+              href={scoped_path(@admin_mount_path, "/webhooks", @current_owner_scope, %{"status" => "failed,dead"})}
             >
-              Audit event log
+              Debug webhook failures
+            </a>
+            <a
+              class="ax-button ax-button-secondary ax-button-sm"
+              href={scoped_path(@admin_mount_path, "/events", @current_owner_scope, %{"q" => "webhook"})}
+            >
+              Webhook event log
             </a>
           </:actions>
 
@@ -370,11 +376,11 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
       <span class="ax-audit-signal"><strong>Who</strong> System <strong>Did</strong> subscription.created <strong>When</strong> #{created}</span>
       <span><span class="ax-chip ax-label">Owner: #{escaped_o}</span> <span class="ax-chip ax-label">Tax: #{escaped_t}</span></span>
       <span class="ax-data-table-inline-actions">
-        <a href="#{subscription_invoices_href}" class="ax-button ax-button-primary ax-button-sm">Open subscription invoices</a>
-        <a href="#{global_invoices_href}" class="ax-button ax-button-secondary ax-button-sm">Open global invoice queue</a>
+        <a href="#{subscription_invoices_href}" class="ax-button ax-button-primary ax-button-sm">Work this subscription invoice queue</a>
+        <a href="#{global_invoices_href}" class="ax-button ax-button-secondary ax-button-sm">Open all open invoices</a>
+        <a href="#{events_href}" class="ax-button ax-button-secondary ax-button-sm">Open subscription audit log</a>
       </span>
-      <a href="#{events_href}" class="ax-link">Webhook events</a>
-      <span class="ax-label ax-muted">Subscription invoices are filtered to this row; global queue covers every open invoice.</span>
+      <span class="ax-label ax-muted">Subscription queue is scoped to this row; all open invoices covers every customer.</span>
     </span>
     """)
   end

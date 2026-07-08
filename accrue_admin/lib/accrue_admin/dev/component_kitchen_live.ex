@@ -518,7 +518,7 @@ if Mix.env() != :prod do
                     <ul class="ax-command-palette-list">
                       <li class="ax-command-palette-list-item">
                         <a class="ax-command-palette-item" href={@admin_mount_path <> "/customers"}>
-                          <Icon.icon name={:users} size="sm" /> <span>Look up a customer</span>
+                          <Icon.icon name={:users} size="sm" /> <span>Find one customer</span>
                         </a>
                       </li>
                       <li class="ax-command-palette-list-item">
@@ -827,11 +827,11 @@ if Mix.env() != :prod do
           close_label="Close drawer"
         >
           <:actions>
-            <Button.button variant="secondary" href={@admin_mount_path}>Open billing health summary</Button.button>
+            <Button.button variant="primary" href={@admin_mount_path}>Open billing health summary</Button.button>
             <Button.button variant="primary" href={@admin_mount_path <> "/invoices?status=open"}>Work open invoices</Button.button>
             <Button.button variant="primary" href={@admin_mount_path <> "/analytics/recovery"}>Open dunning funnel</Button.button>
-            <Button.button variant="primary" href={@admin_mount_path <> "/customers"}>Find customer record</Button.button>
-            <Button.button variant="secondary" href={@admin_mount_path <> "/events"}>Who did what, when?</Button.button>
+            <Button.button variant="primary" href={@admin_mount_path <> "/customers"}>Open one customer billing 360</Button.button>
+            <Button.button variant="primary" href={@admin_mount_path <> "/events"}>Open actor audit trail</Button.button>
             <Button.button variant="primary" href={@admin_mount_path <> "/webhooks"}>Debug webhook deliveries</Button.button>
           </:actions>
 
@@ -849,8 +849,8 @@ if Mix.env() != :prod do
               <div class="ax-detail-actions-row">
                 <a class="ax-button ax-button-primary ax-button-sm" href={@admin_mount_path <> "/invoices?status=open"}>Work open invoices</a>
                 <a class="ax-button ax-button-primary ax-button-sm" href={@admin_mount_path <> "/analytics/recovery"}>Open dunning funnel</a>
-                <a class="ax-button ax-button-primary ax-button-sm" href={@admin_mount_path <> "/customers"}>Find customer record</a>
-                <a class="ax-button ax-button-secondary ax-button-sm" href={@admin_mount_path <> "/events?actor_type=admin"}>Who did what, when?</a>
+                <a class="ax-button ax-button-primary ax-button-sm" href={@admin_mount_path <> "/customers"}>Open one customer billing 360</a>
+                <a class="ax-button ax-button-primary ax-button-sm" href={@admin_mount_path <> "/events?actor_type=admin"}>Open actor audit trail</a>
                 <a class="ax-button ax-button-primary ax-button-sm" href={@admin_mount_path <> "/webhooks"}>Debug webhook deliveries</a>
               </div>
             </section>
