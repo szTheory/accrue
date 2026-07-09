@@ -89,19 +89,18 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     refute html =~ ~s(data-ax-page-actions)
     refute html =~ "Search customer, open detail"
 
-    assert html =~ "Billing health: open invoices need work" or
-             html =~ "Billing health: healthy - no collection queue"
+    assert html =~ "Billing health: No - open invoices need work" or
+             html =~ "Billing health: Yes - no collection queue"
 
     assert html =~ "Open invoice exposure: $0.00; target met" or
              html =~ "above target"
 
-    assert html =~ "Open dedicated Invoices queue"
-    assert html =~ "Bulk invoice actions"
-    assert html =~ "Process next open invoice"
-    assert html =~ "Send reminders"
+    assert html =~ "Open Invoices queue"
+    refute html =~ "Bulk invoice actions"
+    assert html =~ "Process next invoice"
+    assert html =~ "Send invoice reminders"
     assert html =~ "Find one customer record"
-    assert html =~ "Who did what, when - filter admin actors"
-    assert html =~ "Open subscription event log"
+    refute html =~ "Who did what, when - filter admin actors"
     assert html =~ "Open row in dedicated invoice queue"
     assert html =~ "Who did what, when?"
     assert html =~ "Latest audit event: subscription.created by Accrue system"
@@ -127,7 +126,7 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert html =~ ~s(data-ax-filter-chips)
     assert html =~ "At risk"
     assert html =~ "All"
-    assert html =~ "Open-invoice worklist"
+    assert html =~ "Dedicated Invoices queue"
     assert html =~ "Billing health:"
     assert html =~ "ax-subscription-row-state"
     assert html =~ "Failed webhook deliveries"

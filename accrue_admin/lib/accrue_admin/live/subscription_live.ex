@@ -263,12 +263,12 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
             </ul>
           </div>
           <div class="ax-detail-priority-group ax-detail-priority-group-recovery">
-            <span class="ax-label ax-detail-priority-label">Dunning and at-risk</span>
+            <span class="ax-label ax-detail-priority-label">Recovery workspace</span>
             <a
               class="ax-button ax-button-recovery ax-button-sm ax-detail-recovery-primary"
               href={ScopedPath.build(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}
             >
-              Watch dunning + at-risk
+              Open recovery funnel
             </a>
           </div>
           <div class="ax-detail-priority-links">
@@ -435,7 +435,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
                   class="ax-button ax-button-recovery ax-button-sm ax-detail-recovery-primary"
                   href={ScopedPath.build(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}
                 >
-                  Watch dunning + at-risk
+                  Open recovery funnel
                 </a>
                 <a
                   class="ax-button ax-button-secondary ax-button-sm"
@@ -1016,11 +1016,11 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
       caveats != [] ->
         %{
           tone: "slate",
-          label: "Setup blocked",
-          answer: "Billing health needs setup data",
-          headline: "Missing billing inputs",
+          label: "Billing blocked",
+          answer: "No - billing is not healthy",
+          headline: "Missing renewal, price, or charge data",
           body:
-            "Fix renewal, price, or charge data before relying on revenue or collection decisions.",
+            "Fix the missing renewal, price, or charge fields before using revenue or collection decisions.",
           caveats: caveats
         }
 

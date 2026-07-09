@@ -116,10 +116,10 @@ if Mix.env() != :prod do
               <a class="ax-button ax-button-primary ax-button-sm" href={@admin_mount_path <> "/invoices?status=open"}>
                 Open invoice queue workspace
               </a>
-              <span class="ax-dev-secondary-route">
-                <strong>Customer</strong>
+              <span class="ax-dev-secondary-route ax-dev-secondary-route-customer">
+                <strong>Customer lookup</strong>
                 <a class="ax-link-quiet" href={@admin_mount_path <> "/customers"}>
-                  Search customer records
+                  Open customer directory
                 </a>
               </span>
               <span class="ax-dev-secondary-route">
@@ -566,7 +566,7 @@ if Mix.env() != :prod do
                     <ul class="ax-command-palette-list">
                       <li class="ax-command-palette-list-item">
                         <a class="ax-command-palette-item" href={@admin_mount_path <> "/customers"}>
-                          <Icon.icon name={:users} size="sm" /> <span>Search customer records</span>
+                          <Icon.icon name={:users} size="sm" /> <span>Customer search result: open records</span>
                         </a>
                       </li>
                       <li class="ax-command-palette-list-item">

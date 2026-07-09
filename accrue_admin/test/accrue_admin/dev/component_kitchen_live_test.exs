@@ -38,7 +38,7 @@ defmodule AccrueAdmin.ComponentKitchenLiveTest do
     assert html =~ "Debug failed webhook deliveries"
     assert html =~ "Open invoice queue view"
     assert html =~ "Find one customer - see everything"
-    assert html =~ "Search customer records"
+    assert html =~ "Open customer directory"
     assert html =~ "Enter the organization slug or platform owner scope"
   end
 end

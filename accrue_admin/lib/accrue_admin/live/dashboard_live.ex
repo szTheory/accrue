@@ -71,7 +71,7 @@ defmodule AccrueAdmin.Live.DashboardLive do
               class="ax-button ax-button-primary ax-button-sm ax-home-primary-action"
               href={ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope, %{"status" => "open"})}
             >
-              Open invoice queue to $0.00
+              Work Invoices queue to $0.00
               <Icon.icon name={:arrow_right} size="sm" />
             </a>
             <a
@@ -95,7 +95,7 @@ defmodule AccrueAdmin.Live.DashboardLive do
               class="ax-button ax-button-secondary ax-button-sm"
               href={ScopedPath.build(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}
             >
-              Open dunning funnel
+              Open recovery funnel
               <Icon.icon name={:arrow_right} size="sm" />
             </a>
           </div>
@@ -147,7 +147,7 @@ defmodule AccrueAdmin.Live.DashboardLive do
               <span class="ax-launcher-title"><%= Copy.home_launcher_invoices_title() %></span>
               <span class="ax-launcher-copy"><%= Copy.home_launcher_invoices_copy() %></span>
               <span class="ax-launcher-action">
-                Open invoice queue for retry, void, and clearing <Icon.icon name={:arrow_right} size="sm" />
+                Work the dedicated invoice queue <Icon.icon name={:arrow_right} size="sm" />
               </span>
               <span :if={@stats.open_invoice_count > 0} class="ax-launcher-meta">
                 <%= count(@stats.open_invoice_count, "open invoice") %>: review, retry, or void
@@ -178,10 +178,10 @@ defmodule AccrueAdmin.Live.DashboardLive do
               <%= count(@stats.past_due_subscription_count, "at-risk subscription") %>
             </span>
             <span class="ax-launcher-meta ax-launcher-meta-actions">
-              Funnel watch: retry, dunning, at-risk
+              Recovery metrics: retry, dunning, at-risk
             </span>
             <span class="ax-launcher-action">
-              Open dunning funnel <Icon.icon name={:arrow_right} size="sm" />
+              Open recovery funnel <Icon.icon name={:arrow_right} size="sm" />
             </span>
             </a>
 
@@ -393,7 +393,7 @@ defmodule AccrueAdmin.Live.DashboardLive do
           label:
             "open invoice queue above $0.00 target - #{format_minor(stats.open_invoice_balance_minor, "usd")}",
           pill: "primary queue",
-          action: "Open invoice queue",
+          action: "Go to dedicated Invoices queue",
           href: ScopedPath.build(mount_path, "/invoices", scope, %{"status" => "open"})
         },
       stats.blocked_webhook_count > 0 &&

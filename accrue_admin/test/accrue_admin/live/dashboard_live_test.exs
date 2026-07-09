@@ -107,7 +107,7 @@ defmodule AccrueAdmin.DashboardLiveTest do
     assert html =~ "Billing health: unhealthy"
     assert html =~ "failed webhook delivery"
     assert html =~ "Debug dead-lettered webhooks"
-    assert html =~ "Open invoice queue to $0.00"
+    assert html =~ "Invoices queue: $0.00 target"
     assert html =~ ~s(href="/billing/events?q=meter_event")
     assert html =~ ~s(href="/billing/invoices?status=open")
 
@@ -120,7 +120,7 @@ defmodule AccrueAdmin.DashboardLiveTest do
     assert html =~ "Actions: send reminder, retry payment, void invoice"
     assert html =~ Copy.home_launcher_recovery_title()
     assert html =~ Copy.home_launcher_recovery_meta()
-    assert html =~ "Open dunning funnel"
+    assert html =~ "Open recovery funnel"
     # Title relabeled in Phase 175-02 (IA-01 verb relabels); use Copy function directly.
     assert html =~ Copy.home_launcher_developer_title()
     assert html =~ "Debug webhook failures"
@@ -161,7 +161,7 @@ defmodule AccrueAdmin.DashboardLiveTest do
 
     # IA-01 verb relabels (Plan 175-02)
     assert html =~ "Find one customer record"
-    assert html =~ "Open invoice queue to $0.00"
+    assert html =~ "Invoices queue: $0.00 target"
 
     # IA-01 customer lookup entry point on Home (Plan 175-04)
     assert html =~ "Search customer name or ID"

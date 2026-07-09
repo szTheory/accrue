@@ -1341,17 +1341,17 @@ defmodule AccrueAdmin.Copy do
 
   def home_launcher_customers_meta, do: "Customer directory"
 
-  def home_launcher_invoices_title, do: "Open invoice queue to $0.00"
+  def home_launcher_invoices_title, do: "Invoices queue: $0.00 target"
 
   def home_launcher_invoices_copy,
     do: "Primary queue for retrying payment, voiding invoices, and clearing open receivables."
 
-  def home_launcher_recovery_title, do: "Open dunning funnel + at-risk"
+  def home_launcher_recovery_title, do: "Dunning funnel"
 
   def home_launcher_recovery_copy,
-    do: "Click this card to review failed-payment recovery and at-risk customers."
+    do: "Review failed-payment recovery metrics and at-risk customers."
 
-  def home_launcher_recovery_meta, do: "Clickable recovery workspace"
+  def home_launcher_recovery_meta, do: "Recovery workspace"
 
   def home_launcher_developer_title, do: "Investigate an incident"
 
