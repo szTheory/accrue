@@ -965,6 +965,7 @@ test.describe("Phase 199 interaction and overlay contract", () => {
 const RATCHET_AUTO_GUARDS = [
   {"finding_id":"f-0f90c9ba4473cf8e","kind":"focus-ring","selector":".ax-content"}, // @ratchet:f-0f90c9ba4473cf8e
   {"finding_id":"f-186adbbbf86b57ce","kind":"focus-ring","selector":".ax-content"}, // @ratchet:f-186adbbbf86b57ce
+  {"finding_id":"f-29171df0f331750c","kind":"focus-ring","selector":".ax-topbar"}, // @ratchet:f-29171df0f331750c
   {"finding_id":"f-387aa6ba03f90988","kind":"focus-ring","selector":".ax-page-header"}, // @ratchet:f-387aa6ba03f90988
   {"finding_id":"f-5b4fde509c9846f7","kind":"focus-ring","selector":".ax-content"}, // @ratchet:f-5b4fde509c9846f7
   {"finding_id":"f-66ff3aa97d803c81","kind":"focus-ring","selector":".ax-toolbar"}, // @ratchet:f-66ff3aa97d803c81
@@ -973,6 +974,7 @@ const RATCHET_AUTO_GUARDS = [
   {"finding_id":"f-8d4e761ccec068a7","kind":"focus-ring","selector":".ax-primary-nav:visible, [data-sidebar-toggle='true']:visible"}, // @ratchet:f-8d4e761ccec068a7
   {"finding_id":"f-90ff4aae38ba2085","kind":"focus-ring","selector":".ax-toolbar"}, // @ratchet:f-90ff4aae38ba2085
   {"finding_id":"f-988d2a9808195b53","kind":"focus-ring","selector":".ax-detail"}, // @ratchet:f-988d2a9808195b53
+  {"finding_id":"f-9f433603cde72097","kind":"focus-ring","selector":".ax-kpi-row"}, // @ratchet:f-9f433603cde72097
   {"finding_id":"f-a276757f4dcd510c","kind":"focus-ring","selector":".ax-related-resources"}, // @ratchet:f-a276757f4dcd510c
   {"finding_id":"f-a3421a7901c75b6b","kind":"focus-ring","selector":".ax-layer"}, // @ratchet:f-a3421a7901c75b6b
   {"finding_id":"f-a5a8e0d926d2214c","kind":"focus-ring","selector":".ax-kpi-row"}, // @ratchet:f-a5a8e0d926d2214c
