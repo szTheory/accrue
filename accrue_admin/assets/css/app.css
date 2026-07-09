@@ -2460,7 +2460,7 @@ a.ax-kpi-card--linked:focus-visible {
 }
 
 .ax-subscriptions-health-hero .ax-health-metric span {
-  line-height: var(--ax-leading-tight);
+  display: none;
 }
 
 .ax-subscriptions-health-hero .ax-health-verdict {
@@ -4708,7 +4708,7 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
   .ax-shell-content:has(> .ax-subscriptions-page),
   .ax-shell-content:has(> .ax-subscription-detail-page),
   .ax-shell-content:has(> .ax-home) {
-    padding-top: var(--ax-space-xs);
+    padding-top: 0.25rem;
   }
 }
 
@@ -4770,12 +4770,12 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
    ========================================================================== */
 .ax-related {
   display: grid;
-  gap: var(--ax-space-xs);
+  gap: var(--ax-space-2xs);
   min-width: 0;
 }
 
 .ax-subscription-detail-page .ax-related {
-  padding: var(--ax-space-xs);
+  padding: 0.1875rem var(--ax-space-xs);
 }
 
 .ax-related-title {
@@ -4801,7 +4801,7 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
   min-width: 0;
   max-width: 100%;
   box-sizing: border-box;
-  padding: var(--ax-space-xs);
+  padding: 0.1875rem var(--ax-space-xs);
   border: 1px solid transparent;
   border-radius: var(--ax-radius-sm);
   color: var(--ax-primary);
@@ -5058,7 +5058,7 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
 }
 
 .ax-detail-health-summary-slate .ax-detail-health-answer {
-  color: var(--ax-warning-readable);
+  color: var(--ax-status-danger-text);
 }
 
 .ax-detail-health-label {

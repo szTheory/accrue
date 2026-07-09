@@ -96,7 +96,7 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert html =~ "Overall billing health answer"
     assert html =~ "ax-health-summary-prominent"
     assert html =~ "ax-subscriptions-health-hero"
-    assert html =~ "target $0.00"
+    assert html =~ "to reach $0.00"
     assert html =~ "Primary queue"
     assert html =~ "collect"
     assert html =~ "ax-health-metrics"
@@ -108,8 +108,8 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert html =~ "Open full audit event log"
     assert html =~ "Filter admin actors"
     assert html =~ "Debug failed webhook deliveries"
-    assert html =~ "Billing health"
-    assert html =~ "Recovery"
+    assert html =~ "Dunning risk"
+    assert html =~ "Renewal endings"
     assert html =~ "Search customer, open detail"
     refute html =~ "Billing health:"
     assert_one_h1(html)
@@ -284,7 +284,7 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert html =~ "Search customer, open detail"
     assert html =~ "Debug failed webhook deliveries"
     assert html =~ "amount not confirmed in admin"
-    assert html =~ "target $0.00"
+    assert html =~ "to reach $0.00"
 
     assert_table_headings_in_order(html, [
       "Customer and subscription IDs",

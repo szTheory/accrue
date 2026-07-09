@@ -87,6 +87,9 @@ if Mix.env() != :prod do
               <a class="ax-button ax-button-primary ax-button-sm" href={@admin_mount_path <> "/invoices?status=open"}>
                 Open Invoices queue - work to zero
               </a>
+              <a class="ax-button ax-button-secondary ax-button-sm" href={@admin_mount_path <> "/webhooks?status=failed,dead"}>
+                Debug failed webhooks
+              </a>
             </div>
             <section class="ax-inline-worklist ax-dev-audit-strip" aria-label="Component kitchen audit trail">
               <div class="ax-inline-worklist-copy">
@@ -112,10 +115,10 @@ if Mix.env() != :prod do
 
           <section :if={@available?} class="ax-kpi-grid ax-kpi-row">
             <KpiCard.kpi_card
-              label="Primary KPI"
-              value="$42.00"
-              delta="healthy"
-              delta_tone="moss"
+              label="Billing health status"
+              value="Unhealthy"
+              delta="3 failed/dead webhooks"
+              delta_tone="amber"
               href={@admin_mount_path <> "/invoices?status=open"}
             >
               <:meta>Go to Invoices open queue to clear invoices</:meta>

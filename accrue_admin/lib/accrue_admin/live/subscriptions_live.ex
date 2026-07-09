@@ -14,8 +14,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
     DataTable,
     FilterChipBar,
     FlashGroup,
-    PageHeader,
-    StatStrip
+    PageHeader
   }
 
   alias AccrueAdmin.Components.StatusBadge
@@ -166,50 +165,6 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
               Debug failed webhook deliveries
             </a>
           </:actions>
-
-          <:stat_strip>
-            <StatStrip.stat_strip label="Subscription summary">
-              <:stat
-                label="Billing health"
-                value={billing_health_summary(@summary)}
-                tone={billing_health_tone(@summary)}
-                href={invoice_queue_path(@admin_mount_path, @current_owner_scope)}
-              />
-              <:stat
-                label="Active"
-                value={count(@summary.active_count, "active subscription")}
-                tone="moss"
-              />
-              <:stat
-                label="At risk"
-                value={count(@summary.past_due_count, "past-due subscription")}
-                tone={if(@summary.past_due_count == 0, do: "moss", else: "amber")}
-              />
-              <:stat
-                label="Ending"
-                value={count(@summary.canceling_count, "canceling renewal")}
-                tone="amber"
-              />
-              <:stat
-                label="Recovery"
-                value={dunning_funnel_summary(@summary)}
-                tone={if(@summary.past_due_count == 0 and @summary.canceling_count == 0, do: "moss", else: "amber")}
-                href={scoped_path(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}
-              />
-              <:stat
-                label="Open invoices"
-                value={invoice_count_summary(@summary)}
-                tone={if(@summary.open_invoice_count == 0, do: "moss", else: "amber")}
-                href={invoice_queue_path(@admin_mount_path, @current_owner_scope)}
-              />
-              <:stat
-                label="Queue exposure target"
-                value={format_minor(@summary.open_invoice_exposure_minor, "usd") <> " to collect; target $0.00"}
-                tone="amber"
-                href={invoice_queue_path(@admin_mount_path, @current_owner_scope)}
-              />
-            </StatStrip.stat_strip>
-          </:stat_strip>
 
           <:filter_toolbar>
             <DataTable.filter_toolbar
@@ -525,16 +480,6 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
 
   defp billing_health_tone(%{open_invoice_count: count}) when count > 0, do: "amber"
   defp billing_health_tone(_summary), do: "moss"
-
-  defp invoice_count_summary(%{open_invoice_count: count}) when count > 0,
-    do: count(count, "open invoice")
-
-  defp invoice_count_summary(_summary), do: "0 open invoices"
-
-  defp dunning_funnel_summary(summary) do
-    count(summary.past_due_count, "past-due subscription") <>
-      " at risk; " <> count(summary.canceling_count, "canceling renewal")
-  end
 
   defp identity_cell(row, mount_path, owner_scope) do
     customer_href = scoped_path(mount_path, "/customers/#{row.customer_id}", owner_scope)
