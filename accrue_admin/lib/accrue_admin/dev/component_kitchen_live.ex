@@ -96,7 +96,7 @@ if Mix.env() != :prod do
               delta_tone="moss"
               href={@admin_mount_path <> "/invoices?status=open"}
             >
-              <:meta>Open invoice queue to work invoices to zero</:meta>
+              <:meta>Go to Invoices open queue to clear invoices</:meta>
             </KpiCard.kpi_card>
             <KpiCard.kpi_card
               label="Queued invoice jobs"
@@ -105,7 +105,7 @@ if Mix.env() != :prod do
               delta_tone="amber"
               href={@admin_mount_path <> "/invoices?status=open"}
             >
-              <:meta>Open queue workspace and clear invoices</:meta>
+              <:meta>Navigate to the open-invoice queue workspace</:meta>
             </KpiCard.kpi_card>
           </section>
 
@@ -119,10 +119,10 @@ if Mix.env() != :prod do
             />
 
             <div class="ax-dev-grid ax-toolbar">
-              <Button.button variant="primary" type="button">Primary action</Button.button>
+              <Button.button variant="primary" href={@admin_mount_path <> "/customers"}>Search one customer and open detail view</Button.button>
+              <Button.button variant="secondary" type="button">Primary action specimen</Button.button>
               <Button.button variant="secondary" type="button">Secondary action</Button.button>
-              <Button.button variant="secondary" href={@admin_mount_path <> "/customers"}>Search customer detail view</Button.button>
-              <Button.button variant="secondary" class="ax-button-recovery" href={@admin_mount_path <> "/analytics/recovery"}>View dunning funnel and at-risk</Button.button>
+              <Button.button variant="secondary" href={@admin_mount_path <> "/analytics/recovery"}>Open dunning funnel workspace</Button.button>
               <Button.button variant="ghost" href={@admin_mount_path <> "/webhooks"}>Ghost link</Button.button>
               <DropdownMenu.dropdown_menu
                 label="More billing actions"
@@ -532,7 +532,7 @@ if Mix.env() != :prod do
                     <ul class="ax-command-palette-list">
                       <li class="ax-command-palette-list-item">
                         <a class="ax-command-palette-item" href={@admin_mount_path <> "/customers"}>
-                          <Icon.icon name={:users} size="sm" /> <span>Search customer details</span>
+                          <Icon.icon name={:users} size="sm" /> <span>Find customer detail view</span>
                         </a>
                       </li>
                       <li class="ax-command-palette-list-item">
@@ -871,7 +871,7 @@ if Mix.env() != :prod do
                 <div class="ax-dev-group-action-cluster">
                   <span class="ax-label">Recovery and audit</span>
                   <div class="ax-detail-actions-row">
-                    <a class="ax-button ax-button-recovery ax-button-sm" href={@admin_mount_path <> "/analytics/recovery"}>View dunning funnel and at-risk analytics</a>
+                    <a class="ax-button ax-button-secondary ax-button-sm" href={@admin_mount_path <> "/analytics/recovery"}>Open dunning funnel and at-risk analytics</a>
                     <a class="ax-button ax-button-warning ax-button-sm" href={@admin_mount_path <> "/events?actor_type=admin"}>View full audit history</a>
                     <a class="ax-button ax-button-secondary ax-button-sm" href={@admin_mount_path <> "/customers"}>Find customer</a>
                   </div>

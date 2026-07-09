@@ -280,6 +280,32 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
           </:actions>
         </Detail.summary_card>
 
+        <section class="ax-detail-priority-actions" aria-label="Priority billing workspaces">
+          <a
+            class="ax-button ax-button-primary ax-button-sm"
+            href={ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope, %{"status" => "open"})}
+          >
+            Open full invoice queue workspace
+          </a>
+          <a
+            class="ax-button ax-button-secondary ax-button-sm"
+            href={ScopedPath.build(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}
+          >
+            Watch dunning funnel and at-risk accounts
+          </a>
+          <a
+            class="ax-button ax-button-secondary ax-button-sm"
+            href={
+              ScopedPath.build(@admin_mount_path, "/webhooks", @current_owner_scope, %{
+                "status" => "failed,dead",
+                "type" => "subscription.created"
+              })
+            }
+          >
+            Open failed-webhook debugger
+          </a>
+        </section>
+
         <section class={["ax-detail-health-summary", "ax-detail-health-summary-" <> health.tone]} aria-label="Primary billing health summary">
           <div class="ax-detail-health-answer" role="status">
             <span class="ax-detail-health-label ax-label">Billing health summary</span>

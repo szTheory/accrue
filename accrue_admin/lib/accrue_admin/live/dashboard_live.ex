@@ -56,12 +56,20 @@ defmodule AccrueAdmin.Live.DashboardLive do
           <p class="ax-body ax-page-copy"><%= Copy.home_intro_copy() %></p>
           <div :if={@attention != []} class="ax-home-header-health ax-health-summary ax-health-summary-amber" aria-label="Dashboard billing health answer">
             <span class="ax-status-badge ax-status-badge-amber">
-              <span class="ax-status-dot"></span>Billing needs attention now
+              <span class="ax-status-dot"></span>Billing is unhealthy
             </span>
             <strong><%= attention_health_summary(@stats) %></strong>
-            <span>Target exposure is $0.00.</span>
+            <span><%= attention_health_detail(@stats) %></span>
           </div>
           <div class="ax-page-actions">
+            <a
+              :if={@stats.blocked_webhook_count > 0}
+              class="ax-button ax-button-warning ax-button-sm"
+              href={ScopedPath.build(@admin_mount_path, "/webhooks", @current_owner_scope, %{"status" => "failed,dead"})}
+            >
+              Debug dead-lettered webhooks
+              <Icon.icon name={:arrow_right} size="sm" />
+            </a>
             <button
               type="button"
               class="ax-button ax-button-primary ax-button-sm ax-home-customer-search-cta"
@@ -374,8 +382,8 @@ defmodule AccrueAdmin.Live.DashboardLive do
           metric: count(stats.blocked_webhook_count, "webhook"),
           label: Copy.home_attention_webhooks_label(),
           pill: "needs review",
-          action: "Debug in event log",
-          href: ScopedPath.build(mount_path, "/events", scope, %{"q" => "webhook"})
+          action: "Open webhook queue",
+          href: ScopedPath.build(mount_path, "/webhooks", scope, %{"status" => "failed,dead"})
         },
       stats.past_due_subscription_count > 0 &&
         %{
@@ -400,8 +408,11 @@ defmodule AccrueAdmin.Live.DashboardLive do
   end
 
   defp attention_health_summary(stats) do
-    "Highest priority: #{count(stats.blocked_webhook_count, "dead-lettered webhook")}. " <>
-      "Also review #{count(stats.past_due_subscription_count, "past-due subscription")} and #{count(stats.failed_meter_event_count, "failed meter event")}."
+    "Unhealthy: #{count(stats.blocked_webhook_count, "dead-lettered webhook")} need debugging."
+  end
+
+  defp attention_health_detail(stats) do
+    "Then review #{count(stats.past_due_subscription_count, "past-due subscription")} and #{count(stats.failed_meter_event_count, "failed meter event")}; open exposure target remains $0.00."
   end
 
   defp count(1, noun), do: "1 #{noun}"

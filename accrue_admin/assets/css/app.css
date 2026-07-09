@@ -2378,6 +2378,16 @@ a.ax-kpi-card--linked:focus-visible {
   color: var(--ax-primary);
 }
 
+.ax-subscriptions-header .ax-stat:first-child .ax-stat-label {
+  color: var(--ax-primary);
+  font-weight: 800;
+}
+
+.ax-subscriptions-header .ax-stat:first-child .ax-stat-value {
+  font-size: var(--ax-type-lg);
+  font-weight: 900;
+}
+
 .ax-subscriptions-header .ax-button-sm,
 .ax-work-queue-actions .ax-button-sm {
   min-height: 1.75rem;
@@ -4445,20 +4455,28 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
 .ax-launcher-recovery {
   border-color: var(--ax-status-warning-border);
   border-width: 2px;
-  background: color-mix(in srgb, var(--ax-status-warning-bg) 62%, var(--ax-elevated));
+  background: var(--ax-status-warning-solid);
+  color: var(--ax-status-warning-on-solid);
   box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ax-status-warning-border) 42%, transparent);
 }
 
 .ax-launcher-recovery .ax-launcher-icon {
-  background: var(--ax-warning-readable);
-  color: var(--ax-base);
+  background: var(--ax-status-warning-on-solid);
+  color: var(--ax-status-warning-solid);
+}
+
+.ax-launcher-recovery .ax-launcher-title,
+.ax-launcher-recovery .ax-launcher-copy,
+.ax-launcher-recovery .ax-launcher-meta,
+.ax-launcher-recovery .ax-launcher-meta-warn {
+  color: var(--ax-status-warning-on-solid);
 }
 
 .ax-launcher-recovery .ax-launcher-action {
-  border-color: var(--ax-status-warning-solid);
-  background: var(--ax-status-warning-solid);
-  color: var(--ax-status-warning-on-solid);
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ax-status-warning-border) 48%, transparent);
+  border-color: var(--ax-status-warning-on-solid);
+  background: var(--ax-status-warning-on-solid);
+  color: var(--ax-status-warning-solid);
+  box-shadow: var(--ax-shadow-sm);
 }
 
 .ax-launcher:hover,
@@ -4865,7 +4883,8 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
 
 .ax-detail-health-summary-slate {
   border-color: var(--ax-status-neutral-border);
-  background: color-mix(in srgb, var(--ax-status-neutral-bg) 42%, var(--ax-elevated));
+  background: transparent;
+  box-shadow: none;
 }
 
 .ax-detail-health-copy {
@@ -4939,6 +4958,17 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
 
 .ax-detail-setup-actions .ax-detail-health-body {
   flex: 1 1 18rem;
+}
+
+.ax-detail-priority-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ax-space-xs);
+  align-items: center;
+  padding: var(--ax-space-2xs) var(--ax-space-xs);
+  border: 1px solid var(--ax-accent-border);
+  border-radius: var(--ax-radius-sm);
+  background: color-mix(in srgb, var(--ax-accent-subtle) 42%, var(--ax-elevated));
 }
 
 .ax-summary-actions {

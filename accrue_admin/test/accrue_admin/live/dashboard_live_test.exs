@@ -100,10 +100,11 @@ defmodule AccrueAdmin.DashboardLiveTest do
 
     # Zone 1 — attention rail surfaces the seeded exceptions (dead webhook + meter failure)
     assert html =~ Copy.home_attention_webhooks_label()
-    assert html =~ "Debug in event log"
+    assert html =~ "Open webhook queue"
     assert html =~ Copy.home_attention_meter_label()
     assert html =~ Copy.home_attention_action_investigate()
-    assert html =~ "Billing needs attention now"
+    assert html =~ "Billing is unhealthy"
+    assert html =~ "Debug dead-lettered webhooks"
     assert html =~ "Open invoice queue workspace"
     assert html =~ ~s(href="/billing/events?q=meter_event")
     assert html =~ ~s(href="/billing/invoices?status=open")

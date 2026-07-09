@@ -157,7 +157,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
               class="ax-button ax-button-secondary ax-button-sm"
               href={scoped_path(@admin_mount_path, "/events", @current_owner_scope, %{"actor_type" => "admin"})}
             >
-              Who did what, when?
+              Open audit event log
             </a>
             <a
               class="ax-button ax-button-secondary ax-button-sm"
@@ -251,7 +251,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
           </div>
           <div class="ax-inline-worklist-actions">
             <a
-              class="ax-button ax-button-secondary ax-button-sm"
+              class="ax-button ax-button-primary ax-button-sm"
               href={scoped_path(@admin_mount_path, "/events", @current_owner_scope, %{"type" => "subscription.created"})}
             >
               Open full audit event log
