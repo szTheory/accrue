@@ -239,7 +239,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
                 })
               }
             >
-              Open this subscription's invoice queue
+              Open filtered invoice queue for this subscription
             </a>
             <a
               class="ax-button ax-button-secondary ax-button-sm"
@@ -273,18 +273,18 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
         </Detail.summary_card>
 
         <section class="ax-detail-priority-actions" aria-label="Priority billing workspaces">
-          <span class="ax-label ax-detail-priority-label">Priority workspaces</span>
+          <span class="ax-label ax-detail-priority-label">Invoice queue first</span>
           <a
-            class="ax-button ax-button-recovery ax-button-sm ax-detail-priority-primary"
+            class="ax-button ax-button-primary ax-button-sm ax-detail-priority-primary ax-detail-invoice-primary"
+            href={ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope, %{"status" => "open", "subscription_id" => @subscription.id})}
+          >
+            Open filtered invoice queue for this subscription
+          </a>
+          <a
+            class="ax-button ax-button-recovery ax-button-sm"
             href={ScopedPath.build(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}
           >
             Watch dunning funnel + at-risk accounts
-          </a>
-          <a
-            class="ax-button ax-button-primary ax-button-sm"
-            href={ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope, %{"status" => "open", "subscription_id" => @subscription.id})}
-          >
-            Open this subscription's filtered invoices
           </a>
           <span class="ax-detail-priority-links">
             <a
@@ -306,18 +306,18 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
             <span class={["ax-status-badge", "ax-status-badge-" <> health.tone]}>
               <span class="ax-status-dot"></span><%= health.label %>
             </span>
-            <span class="ax-detail-health-label ax-label">Billing health summary</span>
+            <span class="ax-detail-health-label ax-label">Billing health answer</span>
             <strong class="ax-detail-health-answer"><%= health.answer %></strong>
             <strong class="ax-detail-health-verdict"><%= health.headline %></strong>
             <span class="ax-detail-health-body"><%= health.body %></span>
           </div>
-          <div :if={health.caveats != []} class="ax-detail-health-caveats" aria-label="Setup gaps blocking billing health">
-            <strong>Setup gaps blocking verification</strong>
+          <div :if={health.caveats != []} class="ax-detail-health-caveats" aria-label="Missing data blocking billing health">
+            <strong>What is missing</strong>
             <span :for={caveat <- health.caveats} class="ax-detail-health-caveat"><%= caveat %></span>
           </div>
-          <div :if={health.caveats != []} class="ax-detail-setup-actions" aria-label="Resolve missing billing setup">
+          <div :if={health.caveats != []} class="ax-detail-setup-actions" aria-label="Fix missing billing data">
             <span class="ax-detail-health-body">
-              Fix setup in the source billing system, then use this admin view to verify the projected renewal, price, and amount.
+              Fix missing renewal, price, and amount data in the source billing system, then verify the charge projection here.
             </span>
             <a
               class="ax-button ax-button-secondary ax-button-sm"
@@ -1026,10 +1026,11 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
       caveats != [] ->
         %{
           tone: "slate",
-          label: "Setup incomplete",
-          answer: "Billing unhealthy: #{Enum.join(caveats, ", ")}",
-          headline: "Fix #{Enum.join(caveats, ", ")} before trusting charges",
-          body: "Resolve the listed setup gaps, then confirm renewal and charges here.",
+          label: "Not healthy",
+          answer: "No - billing is not healthy right now",
+          headline: "Setup is incomplete, so charges cannot be trusted",
+          body:
+            "Missing renewal, price, or amount data must be fixed before this subscription can be treated as healthy.",
           caveats: caveats
         }
 
@@ -1088,10 +1089,10 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
   defp projection_caveats(subscription) do
     [
       unless(match?(%DateTime{}, subscription.current_period_end),
-        do: "Missing renewal date"
+        do: "Renewal date not shown"
       ),
-      unless(present?(current_price_id(subscription)), do: "Missing price"),
-      "Missing amount"
+      unless(present?(current_price_id(subscription)), do: "Price not shown"),
+      "Charge amount not shown"
     ]
     |> Enum.reject(&is_nil/1)
   end

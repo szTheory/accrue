@@ -417,7 +417,7 @@ defmodule AccrueAdmin.Live.DashboardLive do
   end
 
   defp attention_health_detail(_stats) do
-    "Billing is not healthy until failed deliveries, past-due accounts, and blocked usage records are cleared. Use the task cards below."
+    "Billing is not healthy until failed deliveries, past-due accounts, and blocked usage records are cleared."
   end
 
   defp count(1, noun), do: "1 #{noun}"

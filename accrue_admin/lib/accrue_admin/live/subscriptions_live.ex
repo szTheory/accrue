@@ -109,7 +109,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
                 "ax-subscriptions-health-hero",
                 "ax-health-summary-" <> billing_health_tone(@summary)
               ]}
-              aria-label="Overall billing health answer"
+              aria-label="Open-invoice queue status"
             >
               <span class={["ax-status-badge", "ax-status-badge-" <> billing_health_tone(@summary)]}>
                 <span class="ax-status-dot"></span><%= billing_health_label(@summary) %>
@@ -117,7 +117,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
               <strong class="ax-health-verdict"><%= billing_health_verdict(@summary) %></strong>
               <span class="ax-health-business-answer"><%= billing_health_business_answer(@summary) %></span>
             </div>
-            <p class="ax-body">Priority: clear the unified invoice queue first; use dunning recovery for at-risk accounts and failed-webhook debugger for delivery blockers.</p>
+            <p class="ax-body">Use the invoices workspace for collection work; use the failed-webhook debugger for delivery blockers. Subscription rows below are context only.</p>
           </:description>
 
           <:actions>
@@ -125,7 +125,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
               class="ax-button ax-button-primary ax-button-sm"
               href={invoice_queue_path(@admin_mount_path, @current_owner_scope)}
             >
-              Open invoice collection queue
+              Open invoices workspace filtered to open
             </a>
             <a
               class="ax-button ax-button-recovery ax-button-sm"
@@ -154,6 +154,25 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
         </PageHeader.page_header>
 
         <FlashGroup.flash_group flashes={flash_messages(@flash)} />
+
+        <section class="ax-inline-worklist ax-subscriptions-invoice-strip" aria-label="Open invoice collection worklist">
+          <div class="ax-inline-worklist-copy">
+            <strong>Open-invoice collection queue</strong>
+            <span>
+              <%= count(@summary.open_invoice_count, "open invoice") %>,
+              <%= format_minor(@summary.open_invoice_exposure_minor, "usd") %> exposure.
+            </span>
+            <span>Work retry, void, and clearing in the invoices workspace; this table stays subscription-scoped.</span>
+          </div>
+          <div class="ax-inline-worklist-actions">
+            <a
+              class="ax-button ax-button-primary ax-button-sm"
+              href={invoice_queue_path(@admin_mount_path, @current_owner_scope)}
+            >
+              Open open-invoice queue
+            </a>
+          </div>
+        </section>
 
         <section class="ax-inline-worklist ax-subscriptions-audit-strip" aria-label="Subscription audit trail">
           <div class="ax-inline-worklist-copy">
@@ -373,19 +392,19 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
     """)
   end
 
-  defp billing_health_label(%{open_invoice_count: count}) when count > 0, do: "Priority 1"
-  defp billing_health_label(_summary), do: "Healthy"
+  defp billing_health_label(%{open_invoice_count: count}) when count > 0, do: "Open invoices"
+  defp billing_health_label(_summary), do: "Invoice queue clear"
 
   defp billing_health_verdict(%{open_invoice_count: 1}),
-    do: "Billing unhealthy: 1 open invoice needs collection"
+    do: "Open-invoice queue: 1 invoice needs collection"
 
   defp billing_health_verdict(%{open_invoice_count: count}) when count > 1,
-    do: "Billing unhealthy: #{count(count, "open invoice")} need collection"
+    do: "Open-invoice queue: #{count(count, "open invoice")} need collection"
 
-  defp billing_health_verdict(_summary), do: "Yes - billing is healthy right now"
+  defp billing_health_verdict(_summary), do: "Invoice queue clear: no collection work"
 
   defp billing_health_business_answer(%{open_invoice_count: count} = summary) when count > 0 do
-    "Collect #{format_minor(summary.open_invoice_exposure_minor, "usd")} across #{count(count, "open invoice")} in the unified invoice queue."
+    "#{format_minor(summary.open_invoice_exposure_minor, "usd")} exposure. Open the invoices workspace; subscription rows are context only."
   end
 
   defp billing_health_business_answer(_summary), do: "$0.00 open invoice exposure."
@@ -418,7 +437,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
       <a href="#{customer_href}" class="ax-link ax-subscription-row-customer">Open customer detail: #{escape(customer_label(row))}</a>
       <span class="ax-subscription-row-meta"><strong>Customer ID</strong> #{customer_id}</span>
       <a href="#{subscription_href}" class="ax-subscription-row-meta ax-subscription-row-id"><strong>Subscription</strong> #{subscription_id}</a>
-      <a href="#{subscription_invoices_href}" class="ax-link ax-subscription-row-invoices">Open this subscription's open invoices</a>
+      <a href="#{subscription_invoices_href}" class="ax-link ax-subscription-row-invoices">Open this row's filtered invoices</a>
     </span>
     """)
   end
