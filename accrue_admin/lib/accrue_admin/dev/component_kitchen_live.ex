@@ -839,10 +839,11 @@ if Mix.env() != :prod do
               </p>
               <p class="ax-body">
                 Last edited Jul 7, 2026 at 18:00 UTC by System. Recovery analytics, actor audit history, failed-webhook debugging, and invoice work queues are available from this panel.
+                <a class="ax-link-quiet" href={@admin_mount_path <> "/webhooks?status=failed,dead"}>Open failed-webhook debugger</a>
               </p>
               <div class="ax-detail-actions-row ax-dev-group-drawer-primary-actions">
                 <a class="ax-button ax-button-primary ax-button-sm" href={@admin_mount_path <> "/invoices?status=open"}>Open invoice queue view for 2 open invoices</a>
-                <a class="ax-button ax-button-primary ax-button-sm" href={@admin_mount_path <> "/webhooks?status=failed,dead"}>Open failed-webhook debugger</a>
+                <a class="ax-button ax-button-primary ax-button-sm" href={@admin_mount_path <> "/webhooks?status=failed,dead"}>Open failed-webhook queue</a>
                 <a class="ax-button ax-button-recovery ax-button-sm" href={@admin_mount_path <> "/analytics/recovery"}>Watch dunning funnel analytics and at-risk customers</a>
                 <a class="ax-button ax-button-secondary ax-button-sm" href={@admin_mount_path <> "/customers"}>Find customer</a>
                 <a class="ax-button ax-button-warning ax-button-sm" href={@admin_mount_path <> "/events?actor_type=admin"}>Open actor audit history</a>

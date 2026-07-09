@@ -4139,7 +4139,7 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
   flex-wrap: wrap;
   align-items: center;
   gap: var(--ax-space-2xs) var(--ax-space-sm);
-  padding: var(--ax-space-xs) var(--ax-space-sm);
+  padding: var(--ax-space-2xs) var(--ax-space-xs);
   border: 1px solid var(--ax-border);
   border-radius: var(--ax-radius-sm);
   color: var(--ax-primary);
@@ -4240,7 +4240,12 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
   display: inline-flex;
   align-items: center;
   gap: var(--ax-space-xs);
-  color: var(--ax-accent-readable);
+  min-height: 1.75rem;
+  padding: 0 var(--ax-space-xs);
+  border: 1px solid var(--ax-accent-readable);
+  border-radius: var(--ax-radius-sm);
+  background: var(--ax-accent-readable);
+  color: var(--ax-base);
   font-weight: 600;
   font-size: var(--ax-type-sm);
   white-space: nowrap;
@@ -4288,14 +4293,14 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
 .ax-launchers {
   display: grid;
   grid-template-columns: 1fr;
-  gap: var(--ax-space-md);
+  gap: var(--ax-space-xs);
 }
 
 .ax-launcher {
   display: grid;
   grid-template-rows: auto auto 1fr auto;
-  gap: var(--ax-space-xs);
-  padding: var(--ax-space-lg);
+  gap: var(--ax-space-2xs);
+  padding: var(--ax-space-sm);
   border: 1px solid var(--ax-border);
   border-radius: var(--ax-radius-md);
   background: var(--ax-elevated);
@@ -4351,9 +4356,9 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 2.5rem;
-  height: 2.5rem;
-  margin-bottom: var(--ax-space-xs);
+  width: 2rem;
+  height: 2rem;
+  margin-bottom: 0;
   border-radius: var(--ax-radius-sm);
   background: var(--ax-accent-subtle);
   color: var(--ax-accent-readable);
@@ -4372,7 +4377,7 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
 
 .ax-launcher-meta {
   /* ax-type-exception: component-local typography is documented until this selector is migrated to a composed role utility in markup. */
-  margin-top: var(--ax-space-sm);
+  margin-top: 0;
   font-size: var(--ax-type-xs);
   font-weight: 600;
   color: var(--ax-muted);
@@ -4391,7 +4396,7 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
   align-items: center;
   gap: var(--ax-space-xs);
   width: fit-content;
-  margin-top: var(--ax-space-xs);
+  margin-top: 0;
   padding: var(--ax-space-2xs) var(--ax-space-xs);
   border: 1px solid currentColor;
   border-radius: var(--ax-radius-sm);

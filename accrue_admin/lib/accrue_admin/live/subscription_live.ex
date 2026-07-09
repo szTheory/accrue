@@ -250,17 +250,6 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
               Open this subscription invoice queue
             </a>
             <a
-              class="ax-button ax-button-warning ax-button-sm"
-              href={
-                ScopedPath.build(@admin_mount_path, "/webhooks", @current_owner_scope, %{
-                  "status" => "failed,dead",
-                  "type" => "subscription.created"
-                })
-              }
-            >
-              Open failed-webhook debugger
-            </a>
-            <a
               class="ax-button ax-button-secondary ax-button-sm"
               href={
                 ScopedPath.build(@admin_mount_path, "/events", @current_owner_scope, %{
@@ -325,6 +314,10 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
             </a>
           </div>
         </section>
+
+        <div data-ax-related-resources>
+          <RelatedResources.related_resources items={@related_items} />
+        </div>
 
         <Detail.summary_list
           rows={summary_rows(@subscription, @customer, @admin_mount_path, @current_owner_scope)}
@@ -455,10 +448,6 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
             <Detail.detail_field_list fields={tax_fields(@subscription, @customer)} />
           </details>
         </section>
-
-        <div data-ax-related-resources>
-          <RelatedResources.related_resources items={@related_items} />
-        </div>
 
         <details class="ax-detail-section" data-ax-lazy-activity phx-click="load_activity" open>
           <summary class="ax-detail-section-head">
@@ -989,7 +978,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
         %{
           tone: "amber",
           label: "Not healthy yet",
-          answer: "No - billing is not healthy until setup is complete",
+          answer: "Setup incomplete - billing is unhealthy",
           headline: "Billing is not healthy until setup is complete",
           body:
             "The account has missing setup details; finish them before treating recurring billing as healthy.",

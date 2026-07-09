@@ -134,7 +134,7 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
     assert html =~ "Not healthy yet"
     assert html =~ "ax-detail-health-summary-amber"
     assert html =~ "ax-detail-health-answer"
-    assert html =~ "No - billing is not healthy until setup is complete"
+    assert html =~ "Setup incomplete - billing is unhealthy"
     assert html =~ "Billing is not healthy until setup is complete"
     assert html =~ "Billing health verdict"
     assert html =~ "MRR"

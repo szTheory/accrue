@@ -474,12 +474,12 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
       <span class="ax-webhook-row-status ax-webhook-row-status-warning">
         <strong>Webhook delivery status</strong>
         <span>Check failed/dead deliveries for this subscription</span>
+        <a href="#{webhook_href}" class="ax-button ax-button-primary ax-button-sm">Open failed/dead deliveries</a>
       </span>
       <span><span class="ax-chip ax-label">Owner: #{escaped_o}</span> <span class="ax-chip ax-label">Tax: #{escaped_t}</span></span>
       <span class="ax-data-table-inline-actions">
         <a href="#{subscription_invoices_href}" class="ax-button ax-button-primary ax-button-sm">Work this subscription invoice queue</a>
         <a href="#{global_invoices_href}" class="ax-button ax-button-secondary ax-button-sm">Open all open invoices</a>
-        <a href="#{webhook_href}" class="ax-button ax-button-primary ax-button-sm">Debug this subscription's webhooks</a>
         <a href="#{events_href}" class="ax-button ax-button-secondary ax-button-sm">Open subscription audit log</a>
       </span>
       <span class="ax-label ax-muted">Subscription queue is scoped to this row; webhook log opens failed/dead subscription.created delivery attempts.</span>

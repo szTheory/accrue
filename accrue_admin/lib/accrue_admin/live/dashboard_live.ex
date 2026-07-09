@@ -82,7 +82,7 @@ defmodule AccrueAdmin.Live.DashboardLive do
               class="ax-button ax-button-recovery ax-button-sm"
               href={ScopedPath.build(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}
             >
-              Watch dunning funnel and at-risk accounts
+              Open dunning funnel
               <Icon.icon name={:arrow_right} size="sm" />
             </a>
           </div>
@@ -167,10 +167,10 @@ defmodule AccrueAdmin.Live.DashboardLive do
               <span class="ax-launcher-title"><%= Copy.home_launcher_invoices_title() %></span>
               <span class="ax-launcher-copy"><%= Copy.home_launcher_invoices_copy() %></span>
               <span class="ax-launcher-action">
-                Work <%= count(@stats.open_invoice_count, "open invoice") %> to zero: review, retry, or void <Icon.icon name={:arrow_right} size="sm" />
+                Open invoice queue workspace <Icon.icon name={:arrow_right} size="sm" />
               </span>
               <span :if={@stats.open_invoice_count > 0} class="ax-launcher-meta">
-                <%= count(@stats.open_invoice_count, "open invoice") %>
+                <%= count(@stats.open_invoice_count, "open invoice") %>: review, retry, or void
               </span>
               <span :if={@stats.open_invoice_count > 0} class="ax-launcher-meta ax-launcher-meta-warn">
                 Inline queue: <%= format_minor(@stats.open_invoice_balance_minor, "usd") %> open above $0.00 target
@@ -196,7 +196,7 @@ defmodule AccrueAdmin.Live.DashboardLive do
                 <%= count(@stats.past_due_subscription_count, "at-risk subscription") %>
               </span>
               <span class="ax-launcher-action">
-                Watch dunning funnel and at-risk accounts <Icon.icon name={:arrow_right} size="sm" />
+                Open dunning funnel analytics <Icon.icon name={:arrow_right} size="sm" />
               </span>
             </a>
 
@@ -327,11 +327,17 @@ defmodule AccrueAdmin.Live.DashboardLive do
                 <p class="ax-eyebrow"><%= Copy.dashboard_activity_webhook_health_eyebrow() %></p>
                 <h3 class="ax-heading"><%= Copy.dashboard_activity_projection_pipeline_heading() %></h3>
               </div>
-              <a class="ax-link-quiet" href={ScopedPath.build(@admin_mount_path, "/webhooks", @current_owner_scope)}>
-                <%= Copy.home_activity_webhooks_link() %>
-                <Icon.icon name={:arrow_right} size="sm" />
+              <a
+                class="ax-button ax-button-warning ax-button-sm"
+                href={ScopedPath.build(@admin_mount_path, "/webhooks", @current_owner_scope, %{"status" => "failed,dead"})}
+              >
+                Open all failed/dead webhook deliveries
               </a>
             </header>
+
+            <p class="ax-body ax-activity-context">
+              Recent rows below are individual deliveries. Use the failed/dead webhook queue for the complete debugging workflow.
+            </p>
 
             <Timeline.timeline
               label={Copy.dashboard_timeline_webhooks_label()}

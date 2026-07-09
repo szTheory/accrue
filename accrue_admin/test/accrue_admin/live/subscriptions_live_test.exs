@@ -270,7 +270,7 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert html =~ "ax-health-verdict"
     assert html =~ "Work this subscription invoice queue"
     assert html =~ "Open all open invoices"
-    assert html =~ "Debug this subscription&#39;s webhooks"
+    assert html =~ "Open failed/dead deliveries"
     assert html =~ "Webhook delivery status"
     assert html =~ "failed/dead subscription.created delivery attempts"
     assert html =~ "Open subscription audit log"
