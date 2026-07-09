@@ -96,7 +96,7 @@ if Mix.env() != :prod do
               delta_tone="moss"
               href={@admin_mount_path <> "/invoices?status=open"}
             >
-              <:meta>Open invoice queue workspace</:meta>
+              <:meta>Open invoice queue to work invoices to zero</:meta>
             </KpiCard.kpi_card>
             <KpiCard.kpi_card
               label="Queued invoice jobs"
@@ -105,7 +105,7 @@ if Mix.env() != :prod do
               delta_tone="amber"
               href={@admin_mount_path <> "/invoices?status=open"}
             >
-              <:meta>Work invoice queue to zero</:meta>
+              <:meta>Open queue workspace and clear invoices</:meta>
             </KpiCard.kpi_card>
           </section>
 
@@ -121,7 +121,7 @@ if Mix.env() != :prod do
             <div class="ax-dev-grid ax-toolbar">
               <Button.button variant="primary" type="button">Primary action</Button.button>
               <Button.button variant="secondary" type="button">Secondary action</Button.button>
-              <Button.button variant="secondary" href={@admin_mount_path <> "/customers"}>Find one customer</Button.button>
+              <Button.button variant="secondary" href={@admin_mount_path <> "/customers"}>Search customer detail view</Button.button>
               <Button.button variant="secondary" class="ax-button-recovery" href={@admin_mount_path <> "/analytics/recovery"}>View dunning funnel and at-risk</Button.button>
               <Button.button variant="ghost" href={@admin_mount_path <> "/webhooks"}>Ghost link</Button.button>
               <DropdownMenu.dropdown_menu
@@ -532,7 +532,7 @@ if Mix.env() != :prod do
                     <ul class="ax-command-palette-list">
                       <li class="ax-command-palette-list-item">
                         <a class="ax-command-palette-item" href={@admin_mount_path <> "/customers"}>
-                          <Icon.icon name={:users} size="sm" /> <span>Find one customer</span>
+                          <Icon.icon name={:users} size="sm" /> <span>Search customer details</span>
                         </a>
                       </li>
                       <li class="ax-command-palette-list-item">

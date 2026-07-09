@@ -117,13 +117,9 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
               </span>
               <strong class="ax-health-verdict"><%= billing_health_verdict(@summary) %></strong>
               <span class="ax-health-metrics" aria-label="Billing health metrics">
-                <span class="ax-health-metric ax-health-metric-warning">
+                <span class="ax-health-metric ax-health-metric-warning ax-health-metric-primary">
                   <strong><%= billing_health_summary(@summary) %></strong>
-                  <span>Open-invoice queue</span>
-                </span>
-                <span class="ax-health-metric">
-                  <strong><%= format_minor(@summary.open_invoice_exposure_minor, "usd") %></strong>
-                  <span>Open exposure</span>
+                  <span>Primary queue - collect <%= format_minor(@summary.open_invoice_exposure_minor, "usd") %> to reach $0.00</span>
                 </span>
                 <span class="ax-health-metric ax-health-metric-warning">
                   <strong><%= past_due_health_metric(@summary) %></strong>
@@ -133,10 +129,6 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
                   <strong><%= canceling_health_metric(@summary) %></strong>
                   <span>Renewal endings</span>
                 </span>
-                <span class="ax-health-metric">
-                  <strong>$0.00</strong>
-                  <span>Target exposure</span>
-                </span>
               </span>
             </div>
             <p class="ax-body">Open customer detail, invoice worklists, dunning, failed webhook deliveries, and actor audit from this view.</p>
@@ -144,16 +136,16 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
 
           <:actions>
             <a
+              class="ax-button ax-button-primary ax-button-sm"
+              href={invoice_queue_path(@admin_mount_path, @current_owner_scope)}
+            >
+              Open invoice queue workspace
+            </a>
+            <a
               class="ax-button ax-button-secondary ax-button-sm"
               href={scoped_path(@admin_mount_path, "/customers", @current_owner_scope)}
             >
               Find one customer
-            </a>
-            <a
-              class="ax-button ax-button-secondary ax-button-sm"
-              href={invoice_queue_path(@admin_mount_path, @current_owner_scope)}
-            >
-              Work open invoices
             </a>
             <a
               class="ax-button ax-button-recovery ax-button-sm"
@@ -211,8 +203,8 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
                 href={invoice_queue_path(@admin_mount_path, @current_owner_scope)}
               />
               <:stat
-                label="Open invoice exposure"
-                value={format_minor(@summary.open_invoice_exposure_minor, "usd") <> " open; target $0.00"}
+                label="Queue exposure target"
+                value={format_minor(@summary.open_invoice_exposure_minor, "usd") <> " to collect; target $0.00"}
                 tone="amber"
                 href={invoice_queue_path(@admin_mount_path, @current_owner_scope)}
               />
@@ -232,6 +224,24 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
         </PageHeader.page_header>
 
         <FlashGroup.flash_group flashes={flash_messages(@flash)} />
+
+        <section class="ax-inline-worklist ax-subscriptions-invoice-strip" aria-label="Open invoice worklist">
+          <div class="ax-inline-worklist-copy">
+            <strong>Open invoice worklist</strong>
+            <span>Dedicated queue view for every open invoice; <%= format_minor(@summary.open_invoice_exposure_minor, "usd") %> open exposure.</span>
+          </div>
+          <div class="ax-inline-worklist-actions">
+            <a class="ax-button ax-button-primary ax-button-sm" href={invoice_queue_path(@admin_mount_path, @current_owner_scope)}>
+              Open invoice queue workspace
+            </a>
+            <a class="ax-button ax-button-secondary ax-button-sm" href={AccrueAdmin.DataTableNav.merge_query(@table_path, %{"status" => default_queue_status()})}>
+              Review at-risk subscriptions
+            </a>
+            <a class="ax-button ax-button-secondary ax-button-sm" href={scoped_path(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}>
+              Open dunning funnel
+            </a>
+          </div>
+        </section>
 
         <section class="ax-inline-worklist ax-subscriptions-audit-strip" aria-label="Subscription audit trail">
           <div class="ax-inline-worklist-copy">
@@ -272,24 +282,6 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
               href={scoped_path(@admin_mount_path, "/webhooks", @current_owner_scope, %{"status" => "failed,dead", "type" => "subscription.created"})}
             >
               Filter subscription.created
-            </a>
-          </div>
-        </section>
-
-        <section class="ax-inline-worklist" aria-label="Open invoice worklist">
-          <div class="ax-inline-worklist-copy">
-            <strong>Open invoice worklist</strong>
-            <span>Dedicated queue view for every open invoice; <%= format_minor(@summary.open_invoice_exposure_minor, "usd") %> open exposure.</span>
-          </div>
-          <div class="ax-inline-worklist-actions">
-            <a class="ax-button ax-button-primary ax-button-sm" href={invoice_queue_path(@admin_mount_path, @current_owner_scope)}>
-              Open invoice queue workspace
-            </a>
-            <a class="ax-button ax-button-secondary ax-button-sm" href={AccrueAdmin.DataTableNav.merge_query(@table_path, %{"status" => default_queue_status()})}>
-              Review at-risk subscriptions
-            </a>
-            <a class="ax-button ax-button-secondary ax-button-sm" href={scoped_path(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}>
-              Open dunning funnel
             </a>
           </div>
         </section>
@@ -353,8 +345,8 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
             <div class="ax-work-queue-actions" aria-label="Direct work queues">
               <div class="ax-work-queue-primary">
                 <span class="ax-label">Primary queue</span>
-                <a class="ax-button ax-button-secondary ax-button-sm" href={invoice_queue_path_from_table(@table_path)}>
-                  Same invoice queue
+                <a class="ax-button ax-button-primary ax-button-sm" href={invoice_queue_path_from_table(@table_path)}>
+                  Open full invoice queue workspace
                 </a>
               </div>
               <div class="ax-work-queue-secondary">
@@ -496,8 +488,8 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
       </span>
       <span><span class="ax-chip ax-label">Owner: #{escaped_o}</span> <span class="ax-chip ax-label">Tax: #{escaped_t}</span></span>
       <span class="ax-data-table-inline-actions">
+        <a href="#{global_invoices_href}" class="ax-button ax-button-primary ax-button-sm">Open full invoice queue workspace</a>
         <a href="#{subscription_invoices_href}" class="ax-button ax-button-secondary ax-button-sm">Open this row's invoices</a>
-        <a href="#{global_invoices_href}" class="ax-button ax-button-secondary ax-button-sm">Open all open invoices</a>
         <a href="#{events_href}" class="ax-button ax-button-secondary ax-button-sm">Open subscription audit log</a>
       </span>
       <span class="ax-label ax-muted">Subscription queue is scoped to this row; webhook log opens failed/dead subscription.created delivery attempts.</span>
@@ -566,10 +558,10 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
       <span class="ax-subscription-row-state ax-status-badge ax-status-badge-#{state_tone}">
         <span class="ax-status-dot"></span>#{escape(state_label)}
       </span>
-      <a href="#{customer_href}" class="ax-link">#{escape(customer_label(row))}</a>
+      <a href="#{customer_href}" class="ax-link ax-subscription-row-customer">#{escape(customer_label(row))}</a>
       <span class="ax-label ax-muted"><strong>Customer ID</strong> #{customer_id}</span>
-      <a href="#{subscription_href}" class="ax-label ax-muted"><strong>Subscription</strong> #{subscription_id}</a>
-      <a href="#{subscription_invoices_href}" class="ax-button ax-button-secondary ax-button-sm">Open filtered invoice queue</a>
+      <a href="#{subscription_href}" class="ax-label ax-muted ax-subscription-row-id"><strong>Subscription</strong> #{subscription_id}</a>
+      <a href="#{subscription_invoices_href}" class="ax-button ax-button-secondary ax-button-sm">Open this subscription's open invoices</a>
     </span>
     """)
   end

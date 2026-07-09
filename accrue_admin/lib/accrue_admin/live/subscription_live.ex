@@ -250,7 +250,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
               Work this subscription's open invoices
             </a>
             <a
-              class="ax-button ax-button-warning ax-button-sm"
+              class="ax-button ax-button-secondary ax-button-sm"
               href={
                 ScopedPath.build(@admin_mount_path, "/webhooks", @current_owner_scope, %{
                   "status" => "failed,dead",
@@ -261,7 +261,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
               Debug failed webhook end-to-end
             </a>
             <a
-              class="ax-button ax-button-recovery ax-button-sm"
+              class="ax-button ax-button-secondary ax-button-sm"
               href={ScopedPath.build(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}
             >
               Watch dunning funnel and at-risk accounts
@@ -423,6 +423,12 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
               <div class="ax-detail-actions-row">
                 <a
                   class="ax-button ax-button-primary ax-button-sm"
+                  href={ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope, %{"status" => "open"})}
+                >
+                  Open full invoice queue workspace
+                </a>
+                <a
+                  class="ax-button ax-button-secondary ax-button-sm"
                   href={
                     ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope, %{
                       "status" => "open",
@@ -430,7 +436,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
                     })
                   }
                 >
-                  Open this subscription's invoice queue
+                  Open this subscription's filtered invoices
                 </a>
                 <a
                   class="ax-button ax-button-recovery ax-button-sm"
@@ -440,7 +446,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
                 </a>
               </div>
               <p class="ax-body ax-detail-hint">
-                The subscription invoice queue opens the Invoices worklist filtered to open invoices for this subscription.
+                The full queue works every open invoice to zero; the filtered link keeps local context for this subscription.
               </p>
             </div>
           </details>
@@ -2017,11 +2023,11 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
       [
         %{
           icon: :events,
-          label: "Debug this subscription's failed webhooks",
+          label: "Open failed-webhook debugger",
           value:
-            "Opens the failed/dead subscription.created queue for end-to-end debugging: delivery status, event payload, retry trail, and replay action for #{subscription.processor_id || subscription.id}",
+            "Failed/dead subscription.created queue with delivery status, event payload, retry trail, and replay action for #{subscription.processor_id || subscription.id}",
           emphasis: :warning,
-          action_label: "Debug failed webhook end-to-end",
+          action_label: "Open debugger",
           href:
             ScopedPath.build(mount_path, "/webhooks", scope, %{
               "status" => "failed,dead",
