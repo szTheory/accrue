@@ -2054,6 +2054,19 @@ a.ax-kpi-card--linked:focus-visible {
   background: none;
 }
 
+.ax-component-kitchen-page .ax-breadcrumbs-link,
+.ax-component-kitchen-page .ax-breadcrumbs-current,
+.ax-component-kitchen-page .ax-breadcrumbs-separator {
+  color: var(--ax-primary);
+  font-weight: 800;
+}
+
+.ax-dev-audit-strip {
+  width: min(100%, 48rem);
+  border-color: var(--ax-status-info-border);
+  background: var(--ax-elevated);
+}
+
 .ax-flash-group {
   display: grid;
   position: relative;
@@ -2448,6 +2461,20 @@ a.ax-kpi-card--linked:focus-visible {
 
 .ax-subscriptions-health-hero .ax-health-metric span {
   line-height: var(--ax-leading-tight);
+}
+
+.ax-subscriptions-health-hero .ax-health-verdict {
+  font-weight: 900;
+}
+
+.ax-subscriptions-health-hero .ax-health-metric-primary strong {
+  font-size: var(--ax-type-md);
+  font-weight: 900;
+}
+
+.ax-subscriptions-health-hero .ax-health-metric:not(.ax-health-metric-primary) strong {
+  font-size: var(--ax-type-sm);
+  font-weight: 700;
 }
 
 .ax-health-verdict {
@@ -4276,6 +4303,17 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
   color: var(--ax-primary);
 }
 
+.ax-dashboard-title-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--ax-space-xs);
+}
+
+.ax-dashboard-title-row .ax-display {
+  width: auto;
+}
+
 .ax-home-customer-search-cta {
   box-shadow:
     0 0 0 3px color-mix(in srgb, var(--ax-accent-border) 24%, transparent),
@@ -4283,12 +4321,12 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
 }
 
 .ax-home-header-health {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
-  gap: var(--ax-space-2xs) var(--ax-space-sm);
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ax-space-2xs) var(--ax-space-xs);
   align-items: center;
   width: min(100%, 54rem);
-  padding: 0.1875rem var(--ax-space-xs);
+  padding: 0.125rem var(--ax-space-xs);
   border-color: var(--ax-status-danger-border);
   background: color-mix(in srgb, var(--ax-status-danger-bg) 74%, var(--ax-elevated));
   box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ax-status-danger-border) 50%, transparent);
@@ -4300,8 +4338,18 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
 }
 
 .ax-home-header-health > span:last-child {
-  grid-column: 2;
+  flex-basis: 100%;
   color: var(--ax-primary);
+  font: var(--ax-type-label-sm-font);
+}
+
+.ax-home .ax-page-actions {
+  gap: var(--ax-space-2xs);
+}
+
+.ax-home .ax-page-actions .ax-button-sm {
+  min-height: 1.75rem;
+  padding: 0.25rem 0.625rem;
 }
 
 .ax-home-section {
@@ -5010,7 +5058,7 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
 }
 
 .ax-detail-health-summary-slate .ax-detail-health-answer {
-  color: var(--ax-status-danger-text);
+  color: var(--ax-warning-readable);
 }
 
 .ax-detail-health-label {

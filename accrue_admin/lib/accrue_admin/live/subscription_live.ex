@@ -1004,8 +1004,8 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
         %{
           tone: "slate",
           label: "Setup unverified",
-          answer: "No - setup gaps block billing verification",
-          headline: "Billing is not verified right now",
+          answer: "Unhealthy - setup gaps block verification",
+          headline: "Billing cannot be treated as healthy",
           body:
             "Required setup details are missing. Check invoices and setup audit events before treating recurring billing as healthy.",
           caveats: caveats

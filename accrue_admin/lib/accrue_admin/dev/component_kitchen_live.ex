@@ -69,11 +69,12 @@ if Mix.env() != :prod do
         current_owner_scope={assigns[:current_owner_scope]}
         active_organization_name={@active_organization_name}
       >
-        <section class="ax-page">
+        <section class="ax-page ax-component-kitchen-page">
           <header class="ax-page-header ax-page-header-compact">
             <Breadcrumbs.breadcrumbs
               items={[
                 %{label: "Dashboard", href: @admin_mount_path},
+                %{label: "Recovery", href: @admin_mount_path <> "/analytics/recovery"},
                 %{label: "Component kitchen"}
               ]}
             />
@@ -87,6 +88,19 @@ if Mix.env() != :prod do
                 Open Invoices queue - work to zero
               </a>
             </div>
+            <section class="ax-inline-worklist ax-dev-audit-strip" aria-label="Component kitchen audit trail">
+              <div class="ax-inline-worklist-copy">
+                <strong>Who did what, when?</strong>
+                <span>Actor Admin user</span>
+                <span>Action billing.contact.updated</span>
+                <span>When Jul 09, 2026 14:51 UTC</span>
+              </div>
+              <div class="ax-inline-worklist-actions">
+                <a class="ax-button ax-button-secondary ax-button-sm" href={@admin_mount_path <> "/events"}>
+                  Open audit event log
+                </a>
+              </div>
+            </section>
           </header>
 
           <FlashGroup.flash_group flashes={@flashes} />

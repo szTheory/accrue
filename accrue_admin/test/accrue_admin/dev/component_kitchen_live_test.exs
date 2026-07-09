@@ -23,6 +23,8 @@ defmodule AccrueAdmin.ComponentKitchenLiveTest do
     assert html =~ "Billing health verdict"
     assert html =~ "ax-dev-group-drawer-primary-actions"
     assert html =~ "Open dunning funnel and at-risk analytics"
+    assert html =~ "Open dunning funnel + at-risk analytics"
+    assert html =~ "Who did what, when?"
     assert html =~ "Find customer"
     refute html =~ "Find one customer and open billing 360 detail"
     assert html =~ "View full audit history"

@@ -52,7 +52,12 @@ defmodule AccrueAdmin.Live.DashboardLive do
       <section class="ax-page ax-home">
         <header class="ax-page-header ax-page-header-compact">
           <Breadcrumbs.breadcrumbs items={[%{label: Copy.dashboard_breadcrumb_home()}]} />
-          <h1 class="ax-display"><%= Copy.home_intro_headline() %></h1>
+          <div class="ax-dashboard-title-row">
+            <h1 class="ax-display"><%= Copy.home_intro_headline() %></h1>
+            <span :if={@attention != []} class="ax-status-badge ax-badge-danger">
+              <span class="ax-status-dot"></span>Unhealthy billing
+            </span>
+          </div>
           <p class="ax-body ax-page-copy"><%= Copy.home_intro_copy() %></p>
           <div :if={@attention != []} class="ax-home-header-health ax-health-summary ax-health-summary-amber" aria-label="Dashboard billing health answer">
             <span class="ax-status-badge ax-badge-danger">
