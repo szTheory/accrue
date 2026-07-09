@@ -145,10 +145,10 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
               class="ax-button ax-button-secondary ax-button-sm"
               href={scoped_path(@admin_mount_path, "/customers", @current_owner_scope)}
             >
-              Find one customer
+              Search customer, open detail
             </a>
             <a
-              class="ax-button ax-button-recovery ax-button-sm"
+              class="ax-button ax-button-secondary ax-button-sm"
               href={scoped_path(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}
             >
               Watch dunning funnel
@@ -477,20 +477,20 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
     Phoenix.HTML.raw("""
     <span class="ax-stack-sm">
       <span class="ax-audit-summary-row ax-subscription-row-audit" aria-label="Latest subscription audit event">
-        <span><strong>Actor</strong> Accrue system</span>
-        <span><strong>Event</strong> subscription.created</span>
-        <span><strong>When</strong> #{created}</span>
+        <span><strong>Actor</strong><em>Accrue system</em></span>
+        <span><strong>Event</strong><em>subscription.created</em></span>
+        <span><strong>When</strong><em>#{created}</em></span>
       </span>
       <span class="ax-webhook-row-status ax-webhook-row-status-warning">
         <strong>Webhook delivery status</strong>
-        <span>Check failed/dead deliveries for this subscription</span>
-        <a href="#{webhook_href}" class="ax-button ax-button-warning ax-button-sm">Open failed/dead deliveries</a>
+        <span>Check failed/dead subscription.created deliveries</span>
+        <a href="#{webhook_href}" class="ax-link">Open failed/dead deliveries</a>
       </span>
       <span><span class="ax-chip ax-label">Owner: #{escaped_o}</span> <span class="ax-chip ax-label">Tax: #{escaped_t}</span></span>
       <span class="ax-data-table-inline-actions">
         <a href="#{global_invoices_href}" class="ax-button ax-button-primary ax-button-sm">Open full invoice queue workspace</a>
-        <a href="#{subscription_invoices_href}" class="ax-button ax-button-secondary ax-button-sm">Open this row's invoices</a>
-        <a href="#{events_href}" class="ax-button ax-button-secondary ax-button-sm">Open subscription audit log</a>
+        <a href="#{subscription_invoices_href}" class="ax-link">Open this row's invoices</a>
+        <a href="#{events_href}" class="ax-link">Open subscription audit log</a>
       </span>
       <span class="ax-label ax-muted">Subscription queue is scoped to this row; webhook log opens failed/dead subscription.created delivery attempts.</span>
     </span>
@@ -559,9 +559,9 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
         <span class="ax-status-dot"></span>#{escape(state_label)}
       </span>
       <a href="#{customer_href}" class="ax-link ax-subscription-row-customer">#{escape(customer_label(row))}</a>
-      <span class="ax-label ax-muted"><strong>Customer ID</strong> #{customer_id}</span>
-      <a href="#{subscription_href}" class="ax-label ax-muted ax-subscription-row-id"><strong>Subscription</strong> #{subscription_id}</a>
-      <a href="#{subscription_invoices_href}" class="ax-button ax-button-secondary ax-button-sm">Open this subscription's open invoices</a>
+      <span class="ax-subscription-row-meta"><strong>Customer ID</strong> #{customer_id}</span>
+      <a href="#{subscription_href}" class="ax-subscription-row-meta ax-subscription-row-id"><strong>Subscription</strong> #{subscription_id}</a>
+      <a href="#{subscription_invoices_href}" class="ax-link ax-subscription-row-invoices">Open this subscription's open invoices</a>
     </span>
     """)
   end
@@ -659,7 +659,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
 
   defp subscription_filter_fields do
     [
-      %{id: :q, label: "Search", placeholder: "Search subscriptions"},
+      %{id: :q, label: "List filter", placeholder: "Filter subscriptions list"},
       %{
         id: :status,
         label: "Status",

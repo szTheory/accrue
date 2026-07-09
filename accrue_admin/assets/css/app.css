@@ -2504,7 +2504,7 @@ a.ax-kpi-card--linked:focus-visible {
   align-items: center;
   justify-content: space-between;
   gap: var(--ax-space-xs);
-  padding: var(--ax-space-xs);
+  padding: var(--ax-space-2xs) var(--ax-space-xs);
   border: 1px solid var(--ax-accent-border);
   border-radius: var(--ax-radius-sm);
   background: color-mix(in srgb, var(--ax-accent-subtle) 38%, var(--ax-elevated));
@@ -2514,7 +2514,7 @@ a.ax-kpi-card--linked:focus-visible {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: var(--ax-space-xs) var(--ax-space-sm);
+  gap: var(--ax-space-2xs) var(--ax-space-xs);
   color: var(--ax-primary);
 }
 
@@ -2530,7 +2530,7 @@ a.ax-kpi-card--linked:focus-visible {
 .ax-inline-worklist-actions {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--ax-space-xs);
+  gap: var(--ax-space-2xs);
   align-items: center;
 }
 
@@ -2549,6 +2549,10 @@ a.ax-kpi-card--linked:focus-visible {
 .ax-subscriptions-invoice-strip {
   border-color: var(--ax-accent-readable);
   background: color-mix(in srgb, var(--ax-accent-subtle) 56%, var(--ax-elevated));
+}
+
+.ax-inline-worklist + .ax-inline-worklist {
+  margin-top: var(--ax-space-2xs);
 }
 
 .ax-subscriptions-page .ax-filter-chip-bar {
@@ -3090,7 +3094,7 @@ a.ax-kpi-card--linked:focus-visible {
 }
 
 .ax-subscriptions-page .ax-data-table-card {
-  padding: 0.125rem var(--ax-space-2xs);
+  padding: 0.1875rem var(--ax-space-xs);
 }
 
 .ax-data-table-card-header {
@@ -3170,7 +3174,7 @@ a.ax-kpi-card--linked:focus-visible {
 
 .ax-subscription-row-audit {
   justify-content: flex-start;
-  padding: var(--ax-space-2xs) var(--ax-space-xs);
+  padding: 0.1875rem var(--ax-space-xs);
 }
 
 .ax-webhook-row-status {
@@ -3180,7 +3184,7 @@ a.ax-kpi-card--linked:focus-visible {
   gap: var(--ax-space-2xs) var(--ax-space-xs);
   width: fit-content;
   max-width: 100%;
-  padding: var(--ax-space-2xs) var(--ax-space-xs);
+  padding: 0.1875rem var(--ax-space-xs);
   border: 1px solid var(--ax-border);
   border-radius: var(--ax-radius-sm);
   color: var(--ax-primary);
@@ -3199,11 +3203,12 @@ a.ax-kpi-card--linked:focus-visible {
 .ax-data-table-inline-actions {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--ax-space-2xs);
+  gap: var(--ax-space-2xs) var(--ax-space-xs);
+  align-items: center;
 }
 
 .ax-subscriptions-page .ax-data-table-grid .ax-stack-sm {
-  gap: var(--ax-space-2xs);
+  gap: 0.1875rem;
 }
 
 .ax-subscriptions-page .ax-data-table-inline-actions .ax-button-sm {
@@ -3218,8 +3223,34 @@ a.ax-kpi-card--linked:focus-visible {
 }
 
 .ax-subscription-row-customer {
+  width: fit-content;
+  color: var(--ax-primary);
+  font-weight: 900;
+}
+
+.ax-subscription-row-meta,
+.ax-subscription-row-invoices {
+  width: fit-content;
+  color: var(--ax-muted);
+  font: var(--ax-type-label-sm-font);
+}
+
+.ax-subscription-row-meta strong {
   color: var(--ax-primary);
   font-weight: 800;
+}
+
+.ax-subscription-row-invoices {
+  color: var(--ax-accent-readable);
+  font-weight: 700;
+}
+
+.ax-subscriptions-page .ax-data-table-grid td:first-child {
+  min-width: 14rem;
+}
+
+.ax-subscriptions-page .ax-data-table-grid td:last-child {
+  max-width: 24rem;
 }
 
 .ax-subscription-row-id {
@@ -4058,8 +4089,8 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
 .ax-search-trigger {
   /* ax-type-exception: component-local typography is documented until this selector is migrated to a composed role utility in markup. */
   justify-content: flex-start;
-  width: 20rem;
-  max-width: 20rem;
+  width: 23rem;
+  max-width: 23rem;
   min-width: 0;
   border-color: var(--ax-accent-border);
   border-radius: var(--ax-radius-sm);
@@ -4096,8 +4127,8 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
 
 @media (max-width: 599.98px) { /* --ax-bp-sm ↓ */
   .ax-search-trigger {
-    width: min(12.5rem, calc(100vw - 7rem));
-    max-width: min(12.5rem, calc(100vw - 7rem));
+    width: min(13.5rem, calc(100vw - 7rem));
+    max-width: min(13.5rem, calc(100vw - 7rem));
   }
 
   .ax-search-trigger-text {
@@ -4376,10 +4407,10 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
   gap: var(--ax-space-xs);
   min-height: 1.75rem;
   padding: 0 var(--ax-space-xs);
-  border: 1px solid var(--ax-accent-readable);
+  border: 1px solid var(--ax-border-strong);
   border-radius: var(--ax-radius-sm);
-  background: var(--ax-accent-readable);
-  color: var(--ax-base);
+  background: var(--ax-elevated);
+  color: var(--ax-accent-readable);
   font-weight: 600;
   font-size: var(--ax-type-sm);
   white-space: nowrap;
@@ -4601,7 +4632,7 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
   }
 
   .ax-launcher-primary {
-    grid-column: span 2;
+    grid-column: auto;
   }
 
   .ax-kpi-grid-4 {
@@ -4615,7 +4646,7 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
   }
 
   .ax-launcher-primary {
-    grid-column: span 2;
+    grid-column: auto;
   }
 
   .ax-kpi-grid-4 {
@@ -4884,10 +4915,10 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
 
 .ax-detail-health-summary {
   display: grid;
-  grid-template-columns: minmax(10rem, auto) minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr);
   align-items: start;
   gap: var(--ax-space-2xs) var(--ax-space-xs);
-  padding: var(--ax-space-2xs);
+  padding: var(--ax-space-xs);
   border: 1px solid var(--ax-border);
   border-radius: var(--ax-radius-sm);
   color: var(--ax-primary);
@@ -4919,15 +4950,6 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
 }
 
 .ax-detail-health-answer {
-  display: grid;
-  gap: var(--ax-space-2xs);
-  padding: 0;
-  border: 0;
-  border-radius: 0;
-  background: transparent;
-}
-
-.ax-detail-health-answer strong {
   color: var(--ax-primary);
   font: var(--ax-type-title-font);
 }
@@ -4989,11 +5011,15 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
   flex-wrap: wrap;
   gap: var(--ax-space-2xs) var(--ax-space-sm);
   align-items: center;
-  padding: var(--ax-space-2xs) 0 var(--ax-space-xs);
+  padding: var(--ax-space-2xs) var(--ax-space-xs);
   border: 0;
-  border-bottom: 1px solid var(--ax-border);
-  border-radius: 0;
-  background: transparent;
+  border-radius: var(--ax-radius-sm);
+  background: color-mix(in srgb, var(--ax-accent-subtle) 35%, transparent);
+}
+
+.ax-detail-priority-label {
+  color: var(--ax-accent-readable);
+  font-weight: 900;
 }
 
 .ax-detail-priority-links {
@@ -5153,20 +5179,52 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
 .ax-audit-summary-row {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--ax-space-xs) var(--ax-space-md);
+  gap: var(--ax-space-2xs) var(--ax-space-xs);
   padding: var(--ax-space-2xs) var(--ax-space-xs);
-  border: 1px solid var(--ax-border);
+  border: 1px solid var(--ax-border-strong);
   border-radius: var(--ax-radius-sm);
-  background: color-mix(in srgb, var(--ax-sunken) 44%, var(--ax-elevated));
+  background: var(--ax-elevated);
   color: var(--ax-primary);
 }
 
+.ax-audit-summary-row span {
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--ax-space-2xs);
+  min-width: 0;
+}
+
 .ax-audit-summary-row strong {
-  color: var(--ax-muted);
+  flex: none;
+  padding: 0.0625rem 0.3125rem;
+  border-radius: var(--ax-radius-2xs);
+  background: var(--ax-sunken);
+  color: var(--ax-primary);
+  font-weight: 800;
+}
+
+.ax-audit-summary-row em {
+  min-width: 0;
+  color: var(--ax-primary);
+  font-style: normal;
+  font-weight: 600;
 }
 
 .ax-dashboard-audit-summary {
-  margin-bottom: var(--ax-space-sm);
+  margin-bottom: var(--ax-space-xs);
+}
+
+.ax-dashboard-audit-summary span {
+  flex: 1 1 13rem;
+}
+
+.ax-activity-card-ledger .ax-timeline-card {
+  padding-block: var(--ax-space-xs);
+}
+
+.ax-activity-card-ledger .ax-timeline-time,
+.ax-activity-card-ledger .ax-timeline-meta {
+  color: var(--ax-primary);
 }
 
 .ax-audit-row {

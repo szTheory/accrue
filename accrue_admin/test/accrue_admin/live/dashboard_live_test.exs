@@ -162,7 +162,7 @@ defmodule AccrueAdmin.DashboardLiveTest do
     assert html =~ "Clear the invoice queue"
 
     # IA-01 customer lookup entry point on Home (Plan 175-04)
-    assert html =~ "Find one customer - open billing 360"
+    assert html =~ "Search customer, open billing 360 detail"
     assert html =~ "ax-home-customer-search-cta"
   end
 end

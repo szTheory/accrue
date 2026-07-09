@@ -63,8 +63,15 @@ defmodule AccrueAdmin.Live.DashboardLive do
           </div>
           <div class="ax-page-actions">
             <a
+              class="ax-button ax-button-primary ax-button-sm ax-home-primary-action"
+              href={ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope, %{"status" => "open"})}
+            >
+              Open invoice queue workspace
+              <Icon.icon name={:arrow_right} size="sm" />
+            </a>
+            <a
               :if={@stats.blocked_webhook_count > 0}
-              class="ax-button ax-button-warning ax-button-sm"
+              class="ax-button ax-button-secondary ax-button-sm"
               href={ScopedPath.build(@admin_mount_path, "/webhooks", @current_owner_scope, %{"status" => "failed,dead"})}
             >
               Debug dead-lettered webhooks
@@ -72,22 +79,15 @@ defmodule AccrueAdmin.Live.DashboardLive do
             </a>
             <button
               type="button"
-              class="ax-button ax-button-primary ax-button-sm ax-home-customer-search-cta"
+              class="ax-button ax-button-secondary ax-button-sm ax-home-customer-search-cta"
               data-command-palette-trigger="true"
               data-ax-command-palette-trigger="true"
             >
-              Find one customer - open billing 360
+              Search customer, open billing 360 detail
               <Icon.icon name={:search} size="sm" />
             </button>
             <a
-              class="ax-button ax-button-primary ax-button-sm"
-              href={ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope, %{"status" => "open"})}
-            >
-              Open invoice queue workspace
-              <Icon.icon name={:arrow_right} size="sm" />
-            </a>
-            <a
-              class="ax-button ax-button-recovery ax-button-sm"
+              class="ax-button ax-button-secondary ax-button-sm"
               href={ScopedPath.build(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}
             >
               Open dunning funnel
@@ -270,9 +270,9 @@ defmodule AccrueAdmin.Live.DashboardLive do
 
             <% latest_event = latest_dashboard_audit(@recent_events) %>
             <div :if={latest_event} class="ax-audit-summary-row ax-dashboard-audit-summary" aria-label="Latest event ledger summary">
-              <span><strong>Actor</strong> <%= latest_event.actor %></span>
-              <span><strong>Action</strong> <%= latest_event.action %></span>
-              <span><strong>When</strong> <%= latest_event.at %></span>
+              <span><strong>Actor</strong><em><%= latest_event.actor %></em></span>
+              <span><strong>Action</strong><em><%= latest_event.action %></em></span>
+              <span><strong>When</strong><em><%= latest_event.at %></em></span>
             </div>
 
             <Timeline.timeline

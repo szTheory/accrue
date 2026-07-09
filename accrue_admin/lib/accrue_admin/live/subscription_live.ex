@@ -231,7 +231,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
           </:facts>
           <:actions>
             <a
-              class="ax-button ax-button-primary ax-button-sm"
+              class="ax-button ax-button-secondary ax-button-sm"
               href={
                 ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope, %{
                   "status" => "open",
@@ -273,6 +273,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
         </Detail.summary_card>
 
         <section class="ax-detail-priority-actions" aria-label="Priority billing workspaces">
+          <span class="ax-label ax-detail-priority-label">Primary queue</span>
           <a
             class="ax-button ax-button-primary ax-button-sm"
             href={ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope, %{"status" => "open"})}
@@ -298,14 +299,12 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
         </section>
 
         <section class={["ax-detail-health-summary", "ax-detail-health-summary-" <> health.tone]} aria-label="Primary billing health summary">
-          <div class="ax-detail-health-answer" role="status">
-            <span class="ax-detail-health-label ax-label">Billing health summary</span>
-            <strong><%= health.answer %></strong>
-          </div>
-          <div class="ax-detail-health-copy">
+          <div class="ax-detail-health-copy" role="status">
             <span class={["ax-status-badge", "ax-status-badge-" <> health.tone]}>
               <span class="ax-status-dot"></span><%= health.label %>
             </span>
+            <span class="ax-detail-health-label ax-label">Billing health summary</span>
+            <strong class="ax-detail-health-answer"><%= health.answer %></strong>
             <strong class="ax-detail-health-verdict"><%= health.headline %></strong>
             <span class="ax-detail-health-body"><%= health.body %></span>
           </div>
@@ -484,9 +483,9 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
             <p class="ax-label">Who did what, when</p>
             <% latest_audit = latest_audit_row(@timeline_events, @subscription) %>
             <div class="ax-audit-summary-row" aria-label="Latest audit event summary">
-              <span><strong>Who</strong> <%= latest_audit.actor %></span>
-              <span><strong>Did</strong> <%= latest_audit.action %></span>
-              <span><strong>When</strong> <%= latest_audit.at %></span>
+              <span><strong>Who</strong><em><%= latest_audit.actor %></em></span>
+              <span><strong>Did</strong><em><%= latest_audit.action %></em></span>
+              <span><strong>When</strong><em><%= latest_audit.at %></em></span>
             </div>
             <p class="ax-body"><%= activity_audit_summary(@timeline_events, @subscription) %></p>
             <div class="ax-activity-actions">

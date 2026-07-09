@@ -79,6 +79,14 @@ if Mix.env() != :prod do
             />
             <h1 class="ax-heading">Component Kitchen</h1>
             <p class="ax-page-description">Primitive and form components — full state matrix. Use the topbar theme toggle to review light and dark.</p>
+            <div class="ax-page-actions">
+              <a class="ax-button ax-button-secondary ax-button-sm" href={@admin_mount_path <> "/analytics/recovery"}>
+                Open dunning funnel
+              </a>
+              <a class="ax-button ax-button-primary ax-button-sm" href={@admin_mount_path <> "/invoices?status=open"}>
+                Open invoice queue workspace
+              </a>
+            </div>
           </header>
 
           <FlashGroup.flash_group flashes={@flashes} />
@@ -105,7 +113,7 @@ if Mix.env() != :prod do
               delta_tone="amber"
               href={@admin_mount_path <> "/invoices?status=open"}
             >
-              <:meta>Open invoice queue workspace to clear invoices</:meta>
+              <:meta>Open invoice queue workspace</:meta>
             </KpiCard.kpi_card>
           </section>
 
@@ -532,7 +540,7 @@ if Mix.env() != :prod do
                     <ul class="ax-command-palette-list">
                       <li class="ax-command-palette-list-item">
                         <a class="ax-command-palette-item" href={@admin_mount_path <> "/customers"}>
-                          <Icon.icon name={:users} size="sm" /> <span>Find one customer</span>
+                          <Icon.icon name={:users} size="sm" /> <span>Search customer, open detail</span>
                         </a>
                       </li>
                       <li class="ax-command-palette-list-item">
