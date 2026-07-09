@@ -99,6 +99,7 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert html =~ "Open dunning funnel"
     assert html =~ "Dunning funnel and invoice queue summary"
     assert html =~ "Recovery funnel"
+    assert html =~ ~s(class="ax-kpi-row ax-subscriptions-kpi-row")
     refute html =~ "Bulk invoice actions"
     refute html =~ "Process next invoice"
     refute html =~ "Send invoice reminders"

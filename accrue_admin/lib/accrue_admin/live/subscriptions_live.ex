@@ -120,26 +120,28 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
             </a>
           </:actions>
           <:stat_strip>
-            <StatStrip.stat_strip label="Dunning funnel and invoice queue summary">
-              <:stat
-                label="At-risk"
-                value={Integer.to_string(@summary.past_due_count)}
-                tone="amber"
-                href={scoped_path(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}
-              />
-              <:stat
-                label="Open invoices"
-                value={Integer.to_string(@summary.open_invoice_count)}
-                tone="amber"
-                href={invoice_queue_path(@admin_mount_path, @current_owner_scope)}
-              />
-              <:stat
-                label="Recovery funnel"
-                value="Open"
-                tone="cobalt"
-                href={scoped_path(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}
-              />
-            </StatStrip.stat_strip>
+            <div class="ax-kpi-row ax-subscriptions-kpi-row">
+              <StatStrip.stat_strip label="Dunning funnel and invoice queue summary">
+                <:stat
+                  label="At-risk"
+                  value={Integer.to_string(@summary.past_due_count)}
+                  tone="amber"
+                  href={scoped_path(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}
+                />
+                <:stat
+                  label="Open invoices"
+                  value={Integer.to_string(@summary.open_invoice_count)}
+                  tone="amber"
+                  href={invoice_queue_path(@admin_mount_path, @current_owner_scope)}
+                />
+                <:stat
+                  label="Recovery funnel"
+                  value="Open"
+                  tone="cobalt"
+                  href={scoped_path(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}
+                />
+              </StatStrip.stat_strip>
+            </div>
           </:stat_strip>
           <:filter_toolbar>
             <DataTable.filter_toolbar

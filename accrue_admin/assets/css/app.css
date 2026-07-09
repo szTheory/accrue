@@ -2511,6 +2511,13 @@ a.ax-kpi-card--linked:focus-visible {
   gap: var(--ax-space-2xs) var(--ax-space-sm);
 }
 
+.ax-subscriptions-header .ax-subscriptions-kpi-row {
+  width: 100%;
+  color: var(--ax-primary);
+  background: var(--ax-elevated);
+  border-radius: var(--ax-radius-xs);
+}
+
 .ax-subscriptions-header .ax-page-header-actions {
   gap: 0.125rem;
 }
