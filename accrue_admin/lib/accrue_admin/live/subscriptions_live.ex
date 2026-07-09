@@ -376,13 +376,16 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
   defp billing_health_label(%{open_invoice_count: count}) when count > 0, do: "Priority 1"
   defp billing_health_label(_summary), do: "Healthy"
 
-  defp billing_health_verdict(%{open_invoice_count: count}) when count > 0,
-    do: "Invoice queue above $0.00"
+  defp billing_health_verdict(%{open_invoice_count: 1}),
+    do: "Billing unhealthy: 1 open invoice needs collection"
+
+  defp billing_health_verdict(%{open_invoice_count: count}) when count > 1,
+    do: "Billing unhealthy: #{count(count, "open invoice")} need collection"
 
   defp billing_health_verdict(_summary), do: "Yes - billing is healthy right now"
 
   defp billing_health_business_answer(%{open_invoice_count: count} = summary) when count > 0 do
-    "Collect #{format_minor(summary.open_invoice_exposure_minor, "usd")} across #{count(count, "open invoice")} in the unified invoice queue to reach $0.00."
+    "Collect #{format_minor(summary.open_invoice_exposure_minor, "usd")} across #{count(count, "open invoice")} in the unified invoice queue."
   end
 
   defp billing_health_business_answer(_summary), do: "$0.00 open invoice exposure."
@@ -460,20 +463,33 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
     quantity = integerish(row[:plan_quantity]) || 1
     item_count = integerish(row[:plan_item_count]) || 1
 
-    [
-      price_id,
-      quantity > 1 && "qty #{quantity}",
-      item_count > 1 && "#{item_count} items",
-      "amount not confirmed in admin"
-    ]
-    |> Enum.reject(&(&1 in [false, nil, ""]))
-    |> Enum.join(" · ")
+    plan_context =
+      [
+        price_id,
+        quantity > 1 && "qty #{quantity}",
+        item_count > 1 && "#{item_count} items"
+      ]
+      |> Enum.reject(&(&1 in [false, nil, ""]))
+      |> Enum.join(" · ")
+
+    setup_gap_cell(plan_context, "Amount not confirmed in admin")
   end
 
   defp plan_amount_cell(%{cancel_at_period_end: true}),
-    do: "Price not confirmed in admin · renewal ending"
+    do: setup_gap_cell("Renewal ending", "Price not confirmed in admin")
 
-  defp plan_amount_cell(_row), do: Copy.subscriptions_list_plan_amount_unavailable()
+  defp plan_amount_cell(_row),
+    do: setup_gap_cell("No renewal data", Copy.subscriptions_list_plan_amount_unavailable())
+
+  defp setup_gap_cell(context, issue) do
+    Phoenix.HTML.raw("""
+    <span class="ax-subscription-setup-gap">
+      <strong>Setup gap</strong>
+      <span>#{escape(issue)}</span>
+      <em>#{escape(context)}</em>
+    </span>
+    """)
+  end
 
   defp format_minor(amount_minor, _currency) when is_integer(amount_minor) do
     dollars = amount_minor / 100

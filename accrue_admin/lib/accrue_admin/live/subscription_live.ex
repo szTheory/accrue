@@ -275,10 +275,10 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
         <section class="ax-detail-priority-actions" aria-label="Priority billing workspaces">
           <span class="ax-label ax-detail-priority-label">Priority workspaces</span>
           <a
-            class="ax-button ax-button-recovery ax-button-sm"
+            class="ax-button ax-button-recovery ax-button-sm ax-detail-priority-primary"
             href={ScopedPath.build(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}
           >
-            Open dunning funnel and at-risk workspace
+            Primary: open dunning funnel and at-risk workspace
           </a>
           <a
             class="ax-button ax-button-primary ax-button-sm"
@@ -1028,9 +1028,8 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
           tone: "slate",
           label: "Setup incomplete",
           answer: "Unhealthy: setup gaps block billing verification",
-          headline: "Cannot verify charges until setup gaps are fixed",
-          body:
-            "Missing renewal, price, or amount data prevents admin from confirming billing. Fix these setup gaps before trusting recurring billing.",
+          headline: "Billing unhealthy: renewal, price, or amount is missing",
+          body: "Fix missing billing setup, then confirm renewal and charges here.",
           caveats: caveats
         }
 
@@ -2056,10 +2055,10 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
       [
         %{
           icon: :events,
-          label: "Open failed-webhook debugger",
+          label: "Failed webhook deliveries for this subscription",
           value:
-            "Failed/dead subscription.created queue with delivery status, event payload, retry trail, and replay action for #{subscription.processor_id || subscription.id}",
-          action_label: "Debug webhook",
+            "Open failed/dead subscription.created deliveries for #{subscription.processor_id || subscription.id}; inspect payload, retry trail, and replay action.",
+          action_label: "Debug this subscription's webhooks",
           href:
             ScopedPath.build(mount_path, "/webhooks", scope, %{
               "status" => "failed,dead",

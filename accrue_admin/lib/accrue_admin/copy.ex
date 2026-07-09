@@ -1332,7 +1332,7 @@ defmodule AccrueAdmin.Copy do
 
   def home_search_customers_title, do: "Find one customer"
 
-  def home_search_customers_placeholder, do: "Search customers; open billing 360 detail"
+  def home_search_customers_placeholder, do: "Type customer name, email, or ID"
 
   def home_launcher_customers_title, do: "Browse customer records"
 

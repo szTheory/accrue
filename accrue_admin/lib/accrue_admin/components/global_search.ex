@@ -180,7 +180,7 @@ defmodule AccrueAdmin.Components.GlobalSearch do
                   type="text"
                   name="q"
                   value={@query}
-                  placeholder="Search customers; open billing 360 detail"
+                  placeholder="Type customer name, email, or ID"
                   autocomplete="off"
                   spellcheck="false"
                   autofocus
@@ -200,7 +200,7 @@ defmodule AccrueAdmin.Components.GlobalSearch do
                   <ul class="ax-command-palette-list">
                     <li class="ax-command-palette-list-item">
                       <a class="ax-command-palette-item" href={scoped_path(@mount_path, "/customers", @current_owner_scope)} data-path={scoped_path(@mount_path, "/customers", @current_owner_scope)}>
-                        <Icon.icon name={:users} size="sm" /> <span>Search customer, open billing 360 detail</span>
+                        <Icon.icon name={:users} size="sm" /> <span>Search customer records</span>
                       </a>
                     </li>
                     <li class="ax-command-palette-list-item">

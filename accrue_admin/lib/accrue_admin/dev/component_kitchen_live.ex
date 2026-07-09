@@ -557,7 +557,7 @@ if Mix.env() != :prod do
                     <ul class="ax-command-palette-list">
                       <li class="ax-command-palette-list-item">
                         <a class="ax-command-palette-item" href={@admin_mount_path <> "/customers"}>
-                          <Icon.icon name={:users} size="sm" /> <span>Search customer, open billing 360 detail</span>
+                          <Icon.icon name={:users} size="sm" /> <span>Search customer records</span>
                         </a>
                       </li>
                       <li class="ax-command-palette-list-item">

@@ -90,7 +90,7 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert html =~ ~s(data-ax-page-actions)
     refute html =~ "Search customer, open detail"
 
-    assert html =~ "Invoice queue above $0.00" or
+    assert html =~ "Billing unhealthy:" or
              html =~ "Yes - billing is healthy right now"
 
     assert html =~ "Overall billing health answer"
@@ -275,7 +275,8 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert html =~ "Event"
     refute html =~ "Search customer, open detail"
     assert html =~ "Debug failed-webhook deliveries"
-    assert html =~ "amount not confirmed in admin"
+    assert html =~ "Setup gap"
+    assert html =~ "Amount not confirmed in admin"
     assert html =~ "$0.00 open invoice exposure." or html =~ "to reach $0.00."
 
     assert_table_headings_in_order(html, [

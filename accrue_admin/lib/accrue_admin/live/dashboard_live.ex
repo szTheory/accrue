@@ -88,7 +88,7 @@ defmodule AccrueAdmin.Live.DashboardLive do
               data-command-palette-trigger="true"
               data-ax-command-palette-trigger="true"
             >
-              Search customer, open billing 360 detail
+              Search customer name or ID
               <Icon.icon name={:search} size="sm" />
             </button>
             <a
@@ -147,7 +147,7 @@ defmodule AccrueAdmin.Live.DashboardLive do
               <span class="ax-launcher-title"><%= Copy.home_launcher_invoices_title() %></span>
               <span class="ax-launcher-copy"><%= Copy.home_launcher_invoices_copy() %></span>
               <span class="ax-launcher-action">
-                Open queue to retry, void, and clear to $0.00 <Icon.icon name={:arrow_right} size="sm" />
+                Open invoice queue for retry, void, and clearing <Icon.icon name={:arrow_right} size="sm" />
               </span>
               <span :if={@stats.open_invoice_count > 0} class="ax-launcher-meta">
                 <%= count(@stats.open_invoice_count, "open invoice") %>: review, retry, or void
@@ -416,8 +416,8 @@ defmodule AccrueAdmin.Live.DashboardLive do
     "Critical queues need action"
   end
 
-  defp attention_health_detail(stats) do
-    "Immediate work: #{count(stats.blocked_webhook_count, "failed webhook retry")}; #{count(stats.past_due_subscription_count, "at-risk recovery")}; #{count(stats.failed_meter_event_count, "blocked meter event")}. Use the task cards below."
+  defp attention_health_detail(_stats) do
+    "Billing is not healthy until failed deliveries, past-due accounts, and blocked usage records are cleared. Use the task cards below."
   end
 
   defp count(1, noun), do: "1 #{noun}"
