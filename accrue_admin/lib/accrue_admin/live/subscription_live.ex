@@ -1000,9 +1000,9 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
           tone: "slate",
           label: "Status: Unhealthy",
           answer: "Unhealthy",
-          headline: "Setup gaps block verification",
+          headline: "Charges cannot be verified until setup is complete",
           body:
-            "Billing cannot be treated as healthy until required setup details are present. Check invoices and setup audit events before trusting recurring billing.",
+            "Billing cannot process or verify charges until required setup details are present. Check invoices and setup audit events before trusting recurring billing.",
           caveats: caveats
         }
 
@@ -2041,7 +2041,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
         %{
           icon: :invoices,
           label: Copy.subscription_drill_link_invoices_for_subscription(),
-          value: "Actionable open invoices are pinned in the header action for this subscription",
+          value: "Open this subscription's filtered invoice queue for local invoice context",
           emphasis: :primary,
           href:
             ScopedPath.build(mount_path, "/invoices", scope, %{

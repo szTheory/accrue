@@ -112,7 +112,7 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
     assert html =~ "Subscription invoice queue"
 
     assert html =~
-             "Actionable open invoices are pinned in the header action for this subscription"
+             "Open this subscription&#39;s filtered invoice queue for local invoice context"
 
     assert html =~ "Open failed-webhook debugger"
     assert html =~ "Failed/dead subscription.created queue"
@@ -139,8 +139,8 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
     assert html =~ "ax-detail-health-summary-slate"
     assert html =~ "ax-detail-health-answer"
     assert html =~ "Unhealthy"
-    assert html =~ "Setup gaps block verification"
-    assert html =~ "Billing cannot be treated as healthy"
+    assert html =~ "Charges cannot be verified until setup is complete"
+    assert html =~ "Billing cannot process or verify charges"
     refute html =~ "Billing health right now"
     assert html =~ "MRR"
     assert html =~ "Amount is not confirmed in admin"

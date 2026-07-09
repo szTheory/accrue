@@ -116,13 +116,13 @@ if Mix.env() != :prod do
           <section :if={@available?} class="ax-kpi-grid ax-kpi-row">
             <KpiCard.kpi_card
               label="Billing health status"
-              value="Unhealthy"
-              delta="3 failed/dead webhooks"
+              value="Needs attention"
+              delta="Warning: billing works; webhooks failed"
               delta_tone="amber"
               class="ax-kpi-card-danger"
               href={@admin_mount_path <> "/webhooks?status=failed,dead"}
             >
-              <:meta>Open failed/dead webhooks to restore billing health</:meta>
+              <:meta>Resolve failed/dead webhook deliveries</:meta>
             </KpiCard.kpi_card>
             <KpiCard.kpi_card
               label="Queued invoice jobs"

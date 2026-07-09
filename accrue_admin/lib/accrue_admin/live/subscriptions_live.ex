@@ -142,24 +142,6 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
             </a>
             <a
               class="ax-button ax-button-secondary ax-button-sm"
-              href={scoped_path(@admin_mount_path, "/customers", @current_owner_scope)}
-            >
-              Search customer, open detail
-            </a>
-            <a
-              class="ax-button ax-button-secondary ax-button-sm"
-              href={scoped_path(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}
-            >
-              Watch dunning funnel
-            </a>
-            <a
-              class="ax-button ax-button-secondary ax-button-sm"
-              href={scoped_path(@admin_mount_path, "/events", @current_owner_scope, %{"actor_type" => "admin"})}
-            >
-              Open audit event log
-            </a>
-            <a
-              class="ax-button ax-button-secondary ax-button-sm"
               href={scoped_path(@admin_mount_path, "/webhooks", @current_owner_scope, %{"status" => "failed,dead"})}
             >
               Debug failed webhook deliveries
@@ -456,7 +438,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
   defp billing_health_label(_summary), do: "Healthy"
 
   defp billing_health_verdict(%{open_invoice_count: count}) when count > 0,
-    do: "No. Billing is not healthy right now."
+    do: "Billing health: Unhealthy"
 
   defp billing_health_verdict(_summary), do: "Billing is healthy right now"
 

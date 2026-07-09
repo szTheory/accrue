@@ -88,9 +88,9 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert html =~ ~s(data-component-group="page-header-actions-breadcrumbs")
     assert html =~ ~s(data-ax-page-filter-toolbar)
     assert html =~ ~s(data-ax-page-actions)
-    assert html =~ "Search customer, open detail"
+    refute html =~ "Search customer, open detail"
 
-    assert html =~ "No. Billing is not healthy right now." or
+    assert html =~ "Billing health: Unhealthy" or
              html =~ "Billing is healthy right now"
 
     assert html =~ "Overall billing health answer"
@@ -110,7 +110,6 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert html =~ "Debug failed webhook deliveries"
     assert html =~ "Dunning risk"
     assert html =~ "Renewal endings"
-    assert html =~ "Search customer, open detail"
     refute html =~ "Billing health:"
     assert_one_h1(html)
 
@@ -281,7 +280,7 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert html =~ "Tax: Off"
     assert html =~ "Actor"
     assert html =~ "Event"
-    assert html =~ "Search customer, open detail"
+    refute html =~ "Search customer, open detail"
     assert html =~ "Debug failed webhook deliveries"
     assert html =~ "amount not confirmed in admin"
     assert html =~ "to reach $0.00"
