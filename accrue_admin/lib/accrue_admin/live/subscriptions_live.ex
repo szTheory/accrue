@@ -206,7 +206,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
               />
               <:stat
                 label="Open invoices"
-                value={invoice_queue_summary(@summary)}
+                value={invoice_count_summary(@summary)}
                 tone={if(@summary.open_invoice_count == 0, do: "moss", else: "amber")}
                 href={invoice_queue_path(@admin_mount_path, @current_owner_scope)}
               />
@@ -279,11 +279,11 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
         <section class="ax-inline-worklist" aria-label="Open invoice worklist">
           <div class="ax-inline-worklist-copy">
             <strong>Open invoice worklist</strong>
-            <span><%= invoice_queue_summary(@summary) %>; <%= format_minor(@summary.open_invoice_exposure_minor, "usd") %> open exposure.</span>
+            <span>Dedicated queue view for every open invoice; <%= format_minor(@summary.open_invoice_exposure_minor, "usd") %> open exposure.</span>
           </div>
           <div class="ax-inline-worklist-actions">
             <a class="ax-button ax-button-primary ax-button-sm" href={invoice_queue_path(@admin_mount_path, @current_owner_scope)}>
-              Work <%= count(@summary.open_invoice_count, "open invoice") %>
+              Open invoice queue workspace
             </a>
             <a class="ax-button ax-button-secondary ax-button-sm" href={AccrueAdmin.DataTableNav.merge_query(@table_path, %{"status" => default_queue_status()})}>
               Review at-risk subscriptions
@@ -354,7 +354,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
               <div class="ax-work-queue-primary">
                 <span class="ax-label">Primary queue</span>
                 <a class="ax-button ax-button-secondary ax-button-sm" href={invoice_queue_path_from_table(@table_path)}>
-                  Open invoice queue workspace
+                  Same invoice queue
                 </a>
               </div>
               <div class="ax-work-queue-secondary">
@@ -534,10 +534,10 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
   defp billing_health_tone(%{open_invoice_count: count}) when count > 0, do: "amber"
   defp billing_health_tone(_summary), do: "moss"
 
-  defp invoice_queue_summary(%{open_invoice_count: count}) when count > 0,
-    do: count(count, "open invoice") <> " need collection"
+  defp invoice_count_summary(%{open_invoice_count: count}) when count > 0,
+    do: count(count, "open invoice")
 
-  defp invoice_queue_summary(_summary), do: "Healthy: 0 open invoices"
+  defp invoice_count_summary(_summary), do: "0 open invoices"
 
   defp dunning_funnel_summary(summary) do
     count(summary.past_due_count, "past-due subscription") <>

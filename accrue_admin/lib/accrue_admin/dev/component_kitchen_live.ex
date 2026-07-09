@@ -96,7 +96,7 @@ if Mix.env() != :prod do
               delta_tone="moss"
               href={@admin_mount_path <> "/invoices?status=open"}
             >
-              <:meta>Open invoice queue action</:meta>
+              <:meta>Open invoice queue workspace</:meta>
             </KpiCard.kpi_card>
             <KpiCard.kpi_card
               label="Queued invoice jobs"
@@ -105,7 +105,7 @@ if Mix.env() != :prod do
               delta_tone="amber"
               href={@admin_mount_path <> "/invoices?status=open"}
             >
-              <:meta>Review queued invoices</:meta>
+              <:meta>Work invoice queue to zero</:meta>
             </KpiCard.kpi_card>
           </section>
 
@@ -121,6 +121,7 @@ if Mix.env() != :prod do
             <div class="ax-dev-grid ax-toolbar">
               <Button.button variant="primary" type="button">Primary action</Button.button>
               <Button.button variant="secondary" type="button">Secondary action</Button.button>
+              <Button.button variant="secondary" href={@admin_mount_path <> "/customers"}>Find one customer</Button.button>
               <Button.button variant="secondary" class="ax-button-recovery" href={@admin_mount_path <> "/analytics/recovery"}>View dunning funnel and at-risk</Button.button>
               <Button.button variant="ghost" href={@admin_mount_path <> "/webhooks"}>Ghost link</Button.button>
               <DropdownMenu.dropdown_menu

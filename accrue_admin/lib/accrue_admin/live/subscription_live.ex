@@ -980,12 +980,12 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
 
       caveats != [] ->
         %{
-          tone: "amber",
-          label: "Setup incomplete",
-          answer: "No. Billing is not healthy right now.",
-          headline: "Setup incomplete; active billing cannot be verified",
+          tone: "slate",
+          label: "Setup unverified",
+          answer: "Unverified - setup incomplete",
+          headline: "Active billing cannot be verified",
           body:
-            "Required setup details are missing. Check invoices and setup audit events before treating recurring billing as healthy.",
+            "Required setup details are missing, so health is unverified rather than healthy. Check invoices and setup audit events before treating recurring billing as healthy.",
           caveats: caveats
         }
 

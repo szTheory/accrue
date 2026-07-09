@@ -3120,7 +3120,7 @@ a.ax-kpi-card--linked:focus-visible {
 
 .ax-subscriptions-page .ax-data-table-grid th,
 .ax-subscriptions-page .ax-data-table-grid td {
-  padding: 0.3125rem var(--ax-space-xs);
+  padding: 0.25rem var(--ax-space-xs);
 }
 
 .ax-subscriptions-page .ax-data-table-grid th {
@@ -3175,6 +3175,15 @@ a.ax-kpi-card--linked:focus-visible {
   display: flex;
   flex-wrap: wrap;
   gap: var(--ax-space-2xs);
+}
+
+.ax-subscriptions-page .ax-data-table-grid .ax-stack-sm {
+  gap: var(--ax-space-2xs);
+}
+
+.ax-subscriptions-page .ax-data-table-inline-actions .ax-button-sm {
+  min-height: 1.625rem;
+  padding: 0.1875rem 0.5rem;
 }
 
 .ax-subscription-row-state {
@@ -4047,11 +4056,15 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
 
 @media (max-width: 599.98px) { /* --ax-bp-sm ↓ */
   .ax-search-trigger {
-    width: auto;
-    max-width: none;
+    width: min(12.5rem, calc(100vw - 7rem));
+    max-width: min(12.5rem, calc(100vw - 7rem));
   }
 
   .ax-search-trigger-text {
+    display: block;
+  }
+
+  .ax-search-trigger .ax-kbd {
     display: none;
   }
 }
@@ -4749,7 +4762,9 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
 }
 
 .ax-summary-fact-health {
-  align-items: center;
+  display: inline-grid;
+  align-items: start;
+  gap: 0;
   padding: var(--ax-space-2xs) var(--ax-space-xs);
   border: 1px solid var(--ax-border);
   border-radius: var(--ax-radius-sm);
