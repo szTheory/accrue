@@ -54,8 +54,8 @@ defmodule AccrueAdmin.Live.DashboardLive do
           <Breadcrumbs.breadcrumbs items={[%{label: Copy.dashboard_breadcrumb_home()}]} />
           <div class="ax-dashboard-title-row">
             <h1 class="ax-display"><%= Copy.home_intro_headline() %></h1>
-            <span :if={@attention != []} class="ax-status-badge ax-badge-danger">
-              <span class="ax-status-dot"></span>Unhealthy
+            <span :if={@attention != []} class="ax-status-badge ax-badge-danger ax-dashboard-health-badge">
+              <span class="ax-status-dot"></span><%= attention_health_summary(@stats) %> - <%= attention_health_counts(@stats) %>
             </span>
           </div>
           <p class="ax-body ax-page-copy"><%= Copy.home_intro_copy() %></p>
@@ -160,10 +160,9 @@ defmodule AccrueAdmin.Live.DashboardLive do
               </span>
             </a>
 
-            <a class="ax-launcher" href={ScopedPath.build(@admin_mount_path, "/customers", @current_owner_scope)}>
+            <a class="ax-launcher ax-launcher-customer" href={ScopedPath.build(@admin_mount_path, "/customers", @current_owner_scope)}>
               <span class="ax-launcher-icon"><Icon.icon name={:search} size="lg" /></span>
               <span class="ax-launcher-title"><%= Copy.home_launcher_customers_title() %></span>
-              <span class="ax-launcher-copy"><%= Copy.home_launcher_customers_copy() %></span>
               <span class="ax-launcher-meta"><%= Copy.home_launcher_customers_meta() %></span>
             </a>
 
@@ -381,6 +380,16 @@ defmodule AccrueAdmin.Live.DashboardLive do
   # Attention rail rows — only exceptions that exist, highest-signal first.
   defp attention_items(stats, mount_path, scope) do
     [
+      stats.open_invoice_count > 0 &&
+        %{
+          tone: "warning",
+          metric: count(stats.open_invoice_count, "open invoice"),
+          label:
+            "open invoice queue above $0.00 target - #{format_minor(stats.open_invoice_balance_minor, "usd")}",
+          pill: "primary queue",
+          action: "Open invoice queue",
+          href: ScopedPath.build(mount_path, "/invoices", scope, %{"status" => "open"})
+        },
       stats.blocked_webhook_count > 0 &&
         %{
           tone: "danger",

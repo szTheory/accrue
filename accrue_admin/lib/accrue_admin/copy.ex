@@ -1334,12 +1334,12 @@ defmodule AccrueAdmin.Copy do
 
   def home_search_customers_placeholder, do: "Type customer name, email, or ID"
 
-  def home_launcher_customers_title, do: "Browse customer records"
+  def home_launcher_customers_title, do: "Find one customer record"
 
   def home_launcher_customers_copy,
     do: "Use the customer directory when list context matters."
 
-  def home_launcher_customers_meta, do: "Secondary customer directory"
+  def home_launcher_customers_meta, do: "Customer directory"
 
   def home_launcher_invoices_title, do: "Open invoice queue to $0.00"
 

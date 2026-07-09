@@ -2130,7 +2130,7 @@ a.ax-kpi-card--linked:focus-visible {
 .ax-dev-production-strip {
   width: min(100%, 58rem);
   order: -1;
-  padding: 0.0625rem 0.4375rem;
+  padding: 0;
   border-color: var(--ax-accent-border);
   background: color-mix(in srgb, var(--ax-accent-subtle) 36%, var(--ax-elevated));
 }
@@ -2799,6 +2799,18 @@ a.ax-kpi-card--linked:focus-visible {
   min-height: 1.375rem;
 }
 
+.ax-subscriptions-utility-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.125rem 0.5rem;
+  align-items: center;
+  padding: 0 0.3125rem;
+  border: 1px solid color-mix(in srgb, var(--ax-border) 72%, transparent);
+  border-radius: var(--ax-radius-sm);
+  background: transparent;
+  font: var(--ax-type-label-sm-font);
+}
+
 .ax-inline-worklist + .ax-inline-worklist {
   margin-top: 0;
 }
@@ -3453,6 +3465,13 @@ a.ax-kpi-card--linked:focus-visible {
   padding: 0;
   border-color: var(--ax-border);
   background: transparent;
+}
+
+.ax-subscription-row-audit-primary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, auto));
+  gap: 0.03125rem 0.375rem;
+  width: fit-content;
 }
 
 .ax-subscription-row-audit strong {
@@ -4571,6 +4590,13 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
   width: auto;
 }
 
+.ax-dashboard-health-badge {
+  max-width: min(100%, 42rem);
+  white-space: normal;
+  overflow-wrap: anywhere;
+  border: 1px solid var(--ax-status-danger-border);
+}
+
 .ax-home-customer-search-cta {
   box-shadow:
     0 0 0 3px color-mix(in srgb, var(--ax-accent-border) 24%, transparent),
@@ -4870,6 +4896,21 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
 
 .ax-launcher-primary .ax-launcher-copy {
   color: var(--ax-primary);
+}
+
+.ax-launcher-customer {
+  grid-template-rows: auto auto;
+  border-color: color-mix(in srgb, var(--ax-border) 72%, var(--ax-elevated));
+  background: var(--ax-elevated);
+}
+
+.ax-launcher-customer .ax-launcher-title {
+  color: var(--ax-primary);
+  font-weight: 800;
+}
+
+.ax-launcher-customer .ax-launcher-meta {
+  color: var(--ax-muted);
 }
 
 .ax-launcher-recovery {

@@ -132,7 +132,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
               class="ax-button ax-button-primary ax-button-sm ax-subscriptions-primary-action"
               href={invoice_queue_path(@admin_mount_path, @current_owner_scope)}
             >
-              Go to Invoices queue - open only
+              Open dedicated Invoices queue
             </a>
             <span class="ax-subscriptions-secondary-group ax-subscriptions-secondary-group-primary">
               <strong>Bulk invoice actions</strong>
@@ -149,43 +149,25 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
                 Send reminders
               </a>
             </span>
-            <span class="ax-subscriptions-secondary-group">
-              <strong>Webhook debugging</strong>
-              <a
-                class="ax-link-quiet ax-subscriptions-secondary-link"
-                href={scoped_path(@admin_mount_path, "/webhooks", @current_owner_scope, %{"status" => "failed,dead"})}
-              >
-                Debug failed webhook deliveries
-              </a>
-            </span>
-            <span class="ax-subscriptions-secondary-group">
-              <strong>Who did what, when</strong>
-              <a
-                class="ax-link-quiet ax-subscriptions-secondary-link"
-                href={scoped_path(@admin_mount_path, "/events", @current_owner_scope, %{"type" => "subscription.created"})}
-              >
-                Open actor-filtered event log
-              </a>
-              <a
-                class="ax-link-quiet ax-subscriptions-secondary-link"
-                href={scoped_path(@admin_mount_path, "/events", @current_owner_scope, %{"actor_type" => "admin"})}
-              >
-                Filter admin actors
-              </a>
-            </span>
-            <span class="ax-subscriptions-secondary-group">
-              <strong>Customer lookup</strong>
-              <a class="ax-link-quiet ax-subscriptions-secondary-link" href={scoped_path(@admin_mount_path, "/customers", @current_owner_scope)}>
-                Find one customer record
-              </a>
-            </span>
-            <span class="ax-subscriptions-secondary-group">
-              <strong>Recovery</strong>
-              <a class="ax-link-quiet ax-subscriptions-secondary-link" href={scoped_path(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}>
-                Watch dunning + at-risk
-              </a>
-            </span>
           </div>
+        </section>
+
+        <section class="ax-subscriptions-utility-strip" aria-label="Customer and audit utility views">
+          <a class="ax-link-quiet" href={scoped_path(@admin_mount_path, "/customers", @current_owner_scope)}>
+            Find one customer record
+          </a>
+          <a
+            class="ax-link-quiet"
+            href={scoped_path(@admin_mount_path, "/events", @current_owner_scope, %{"actor_type" => "admin"})}
+          >
+            Who did what, when - filter admin actors
+          </a>
+          <a
+            class="ax-link-quiet"
+            href={scoped_path(@admin_mount_path, "/events", @current_owner_scope, %{"type" => "subscription.created"})}
+          >
+            Open subscription event log
+          </a>
         </section>
 
         <section class="ax-inline-worklist ax-subscriptions-audit-strip" aria-label="Subscription audit trail">
@@ -386,15 +368,15 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
 
     Phoenix.HTML.raw("""
     <span class="ax-stack-sm">
-      <span class="ax-audit-summary-row ax-subscription-row-audit" aria-label="Latest subscription audit event">
+      <span class="ax-audit-summary-row ax-subscription-row-audit ax-subscription-row-audit-primary" aria-label="Latest subscription audit event">
         <span><strong>Actor</strong><em>Accrue system</em></span>
         <span><strong>Event</strong><em>subscription.created</em></span>
         <span><strong>When</strong><em>#{created}</em></span>
       </span>
       <span class="ax-webhook-row-status ax-webhook-row-status-warning">
         <strong>Invoice queue</strong>
-        <span>Filtered open-invoice queue for this subscription</span>
-        <a href="#{subscription_invoices_href}" class="ax-link">Open this row's invoice queue</a>
+        <span>Dedicated invoice queue filtered to this subscription</span>
+        <a href="#{subscription_invoices_href}" class="ax-link">Open row in dedicated invoice queue</a>
       </span>
       <span class="ax-webhook-row-status ax-webhook-row-status-warning">
         <strong>Webhook debugging</strong>
@@ -403,7 +385,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
       </span>
       <span><span class="ax-chip ax-label">Owner: #{escaped_o}</span> <span class="ax-chip ax-label">Tax: #{escaped_t}</span></span>
       <span class="ax-data-table-inline-actions">
-        <a href="#{events_href}" class="ax-link">Open who-did-what event log</a>
+        <a href="#{events_href}" class="ax-link">Open who did what, when event log</a>
       </span>
       <span class="ax-label ax-muted">Webhook log opens failed subscription.created delivery attempts.</span>
     </span>
@@ -447,7 +429,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
       <a href="#{customer_href}" class="ax-link ax-subscription-row-customer">Open customer detail: #{escape(customer_label(row))}</a>
       <span class="ax-subscription-row-meta"><strong>Customer ID</strong> #{customer_id}</span>
       <a href="#{subscription_href}" class="ax-subscription-row-meta ax-subscription-row-id"><strong>Subscription</strong> #{subscription_id}</a>
-      <a href="#{subscription_invoices_href}" class="ax-link ax-subscription-row-invoices">Open this row's filtered invoices</a>
+      <a href="#{subscription_invoices_href}" class="ax-link ax-subscription-row-invoices">Open filtered invoices for this subscription</a>
     </span>
     """)
   end

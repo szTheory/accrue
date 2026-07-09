@@ -219,10 +219,6 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
             </span>
           </:status>
           <:facts>
-            <span class={["ax-summary-fact", "ax-summary-fact-health", "ax-summary-fact-health-" <> health.tone]}>
-              <strong>Billing health</strong>
-              <span class="ax-summary-health-verdict"><%= health.answer %></span>
-            </span>
             <span class="ax-summary-fact">
               <strong>Subscription</strong>
               <%= @subscription.processor_id || @subscription.id %>
@@ -280,7 +276,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
               class="ax-link-quiet"
               href={ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope, %{"status" => "open"})}
             >
-              Open global open-invoice queue
+              Return to global open-invoice queue
             </a>
             <a
               class="ax-link-quiet"
@@ -1021,10 +1017,10 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
         %{
           tone: "slate",
           label: "Setup blocked",
-          answer: "Billing is not healthy: setup blocked",
-          headline: "No - setup data is missing",
+          answer: "Billing cannot be trusted yet",
+          headline: "Missing renewal, price, or charge data",
           body:
-            "Fix the blocking fields in the source billing system before treating this subscription as healthy.",
+            "Fix missing billing inputs before using this subscription for revenue or collection decisions.",
           caveats: caveats
         }
 

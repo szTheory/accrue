@@ -160,7 +160,7 @@ defmodule AccrueAdmin.DashboardLiveTest do
     assert html =~ ~s(href="/billing/events")
 
     # IA-01 verb relabels (Plan 175-02)
-    assert html =~ "Browse customer records"
+    assert html =~ "Find one customer record"
     assert html =~ "Open invoice queue to $0.00"
 
     # IA-01 customer lookup entry point on Home (Plan 175-04)
