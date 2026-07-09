@@ -412,12 +412,12 @@ defmodule AccrueAdmin.Live.DashboardLive do
     |> Enum.filter(& &1)
   end
 
-  defp attention_health_summary(_stats) do
-    "Critical queues need action"
+  defp attention_health_summary(stats) do
+    "Billing health: unhealthy - #{count(stats.blocked_webhook_count, "dead webhook")}, #{count(stats.past_due_subscription_count, "past-due subscription")}, #{count(stats.failed_meter_event_count, "blocked usage record")}"
   end
 
   defp attention_health_detail(_stats) do
-    "Billing is not healthy until failed deliveries, past-due accounts, and blocked usage records are cleared."
+    "Fix failed deliveries, recover past-due subscriptions, and unblock usage metering before billing is healthy."
   end
 
   defp count(1, noun), do: "1 #{noun}"

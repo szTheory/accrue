@@ -6,13 +6,14 @@ defmodule AccrueAdmin.ComponentKitchenLiveTest do
 
     assert {:ok, _view, html} = live(conn, "/billing/dev/components")
 
-    assert html =~ "Use these live queue links"
+    assert html =~ "Billing health dashboard"
+    assert html =~ "Monitor open invoice exposure"
     assert html =~ "Primary action"
     assert html =~ "Secondary action"
-    assert html =~ "Billing work starts in production queues"
+    assert html =~ "Billing health: monitor open invoice exposure"
     assert html =~ "More billing actions"
     assert html =~ "View dunning funnel and at-risk"
-    assert html =~ "Dev tools"
+    assert html =~ "Dashboard"
     assert html =~ "Dev-only webhook fixtures"
     assert html =~ "/billing/dev/fake-inspect"
     assert html =~ "Command palette motion specimen"
@@ -31,8 +32,8 @@ defmodule AccrueAdmin.ComponentKitchenLiveTest do
     assert html =~ "billing.contact.updated"
     assert html =~ "Open failed-webhook debugger"
     assert html =~ "Open invoice queue view for 2 open invoices"
-    assert html =~ "Primary target is $0.00 open invoice exposure."
-    assert html =~ "Open production open-invoice queue first"
+    assert html =~ "Open invoice exposure target: $0.00."
+    assert html =~ "Open open-invoice queue first"
     assert html =~ "Open production invoice queue"
     assert html =~ "Open production audit log"
     assert html =~ "Debug production webhooks"

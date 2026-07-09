@@ -73,15 +73,18 @@ if Mix.env() != :prod do
           <header class="ax-page-header ax-page-header-compact ax-component-kitchen-header">
             <Breadcrumbs.breadcrumbs
               items={[
-                %{label: "Dev tools", href: @admin_mount_path <> "/dev/components"},
-                %{label: "Component kitchen"}
+                %{label: "Dashboard", href: @admin_mount_path},
+                %{label: "Billing health"}
               ]}
             />
-            <h1 class="ax-heading ax-component-kitchen-title">Production billing workspaces</h1>
-            <p class="ax-page-description">Use these live queue links for billing work; component specimens below are non-actionable dev fixtures.</p>
+            <h1 class="ax-heading ax-component-kitchen-title">Billing health dashboard</h1>
+            <p class="ax-page-description">Monitor open invoice exposure, failed webhooks, customer lookup, and audit trail from live billing workspaces.</p>
             <div class="ax-page-actions">
+              <a class="ax-button ax-button-secondary ax-button-sm" href={@admin_mount_path <> "/customers"}>
+                Find one customer - see everything
+              </a>
               <a class="ax-button ax-button-primary ax-button-sm" href={@admin_mount_path <> "/invoices?status=open"}>
-                Open production open-invoice queue first
+                Open open-invoice queue first
               </a>
               <a class="ax-button ax-button-recovery ax-button-sm" href={@admin_mount_path <> "/analytics/recovery"}>
                 Open dunning funnel workspace
@@ -114,9 +117,9 @@ if Mix.env() != :prod do
 
           <section :if={@available?} class="ax-inline-worklist ax-dev-production-strip" aria-label="Production billing entrypoints">
             <div class="ax-inline-worklist-copy">
-              <strong>Billing work starts in production queues</strong>
-              <span>Primary target is $0.00 open invoice exposure.</span>
-              <span>Audit and webhook links below open live queue workspaces, not fixture data.</span>
+              <strong>Billing health: monitor open invoice exposure</strong>
+              <span>Open invoice exposure target: $0.00.</span>
+              <span>Use customer search for one account; use queue links for collection, webhooks, and audit trail.</span>
             </div>
             <div class="ax-inline-worklist-actions">
               <a class="ax-button ax-button-primary ax-button-sm" href={@admin_mount_path <> "/invoices?status=open"}>

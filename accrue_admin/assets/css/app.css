@@ -2129,9 +2129,16 @@ a.ax-kpi-card--linked:focus-visible {
 
 .ax-dev-production-strip {
   width: min(100%, 58rem);
-  padding: 0.125rem 0.5rem;
+  order: -1;
+  padding: 0.1875rem 0.625rem;
   border-color: var(--ax-accent-border);
   background: color-mix(in srgb, var(--ax-accent-subtle) 36%, var(--ax-elevated));
+}
+
+.ax-dev-production-strip .ax-inline-worklist-copy strong {
+  color: var(--ax-primary);
+  font-size: var(--ax-type-md);
+  font-weight: 900;
 }
 
 .ax-flash-group {
@@ -2707,10 +2714,20 @@ a.ax-kpi-card--linked:focus-visible {
 }
 
 .ax-subscriptions-invoice-strip {
-  padding: 0.125rem 0.5rem;
+  padding: 0.0625rem 0.375rem;
   border-color: var(--ax-accent-readable);
   border-width: 2px;
   background: color-mix(in srgb, var(--ax-accent-subtle) 56%, var(--ax-elevated));
+}
+
+.ax-subscriptions-invoice-strip .ax-inline-worklist-copy {
+  gap: 0;
+}
+
+.ax-subscriptions-invoice-strip .ax-inline-worklist-copy strong {
+  color: var(--ax-primary);
+  font-size: var(--ax-type-md);
+  font-weight: 900;
 }
 
 .ax-subscriptions-priority-actions {
@@ -2723,8 +2740,8 @@ a.ax-kpi-card--linked:focus-visible {
   flex-wrap: wrap;
   align-items: center;
   gap: 0.0625rem 0.3125rem;
-  min-height: 1.625rem;
-  padding: 0.0625rem 0.3125rem;
+  min-height: 1.5rem;
+  padding: 0.03125rem 0.25rem;
   border: 1px solid var(--ax-border);
   border-radius: var(--ax-radius-sm);
   background: var(--ax-elevated);
@@ -2738,7 +2755,7 @@ a.ax-kpi-card--linked:focus-visible {
 }
 
 .ax-subscriptions-secondary-link {
-  min-height: 1.75rem;
+  min-height: 1.375rem;
 }
 
 .ax-inline-worklist + .ax-inline-worklist {
@@ -3351,8 +3368,13 @@ a.ax-kpi-card--linked:focus-visible {
 
 .ax-subscriptions-page .ax-data-table-grid th,
 .ax-subscriptions-page .ax-data-table-grid td {
-  padding: 0.03125rem 0.1875rem;
+  padding: 0 0.125rem;
   vertical-align: top;
+}
+
+.ax-subscriptions-page .ax-status-badge {
+  gap: 0.25rem;
+  padding: 0.0625rem 0.3125rem;
 }
 
 .ax-subscriptions-page .ax-data-table-grid .ax-stack-sm,
@@ -3429,7 +3451,7 @@ a.ax-kpi-card--linked:focus-visible {
 }
 
 .ax-subscriptions-page .ax-data-table-grid .ax-stack-sm {
-  gap: 0.125rem;
+  gap: 0.03125rem;
 }
 
 .ax-subscriptions-page .ax-data-table-inline-actions .ax-button-sm {
@@ -3440,7 +3462,7 @@ a.ax-kpi-card--linked:focus-visible {
 .ax-subscription-setup-gap {
   display: inline-grid;
   gap: 0.03125rem;
-  padding: 0.125rem 0.375rem;
+  padding: 0.0625rem 0.25rem;
   border: 1px solid var(--ax-status-warning-border);
   border-radius: var(--ax-radius-sm);
   background: color-mix(in srgb, var(--ax-status-warning-bg) 58%, var(--ax-elevated));
@@ -4340,12 +4362,13 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
   min-width: 0;
   border-color: var(--ax-accent-readable);
   border-radius: var(--ax-radius-sm);
-  background: color-mix(in srgb, var(--ax-accent-subtle) 72%, var(--ax-elevated));
+  background: color-mix(in srgb, var(--ax-accent-subtle) 88%, var(--ax-elevated));
   font-weight: 700;
   cursor: pointer;
   box-shadow:
-    inset 0 0 0 1px color-mix(in srgb, var(--ax-accent-readable) 34%, transparent),
-    var(--ax-shadow-xs);
+    inset 0 0 0 1px color-mix(in srgb, var(--ax-accent-readable) 60%, transparent),
+    0 0 0 3px color-mix(in srgb, var(--ax-accent-border) 22%, transparent),
+    var(--ax-shadow-sm);
 }
 
 .ax-search-trigger:hover {

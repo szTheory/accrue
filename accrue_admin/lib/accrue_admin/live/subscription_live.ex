@@ -284,7 +284,6 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
             <span class={["ax-status-badge", "ax-status-badge-" <> health.tone]}>
               <span class="ax-status-dot"></span><%= health.label %>
             </span>
-            <span class="ax-detail-health-label ax-label">Billing health answer</span>
             <strong class="ax-detail-health-answer"><%= health.answer %></strong>
             <strong class="ax-detail-health-verdict"><%= health.headline %></strong>
             <span class="ax-detail-health-body"><%= health.body %></span>
@@ -1005,8 +1004,8 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
         %{
           tone: "slate",
           label: "Setup blocked",
-          answer: "No - setup data is missing",
-          headline: "Billing health is not trusted until setup fields are present",
+          answer: "Billing health: setup blocked",
+          headline: "No - setup data is missing",
           body:
             "Fix the blocking fields in the source billing system before treating this subscription as healthy.",
           caveats: caveats

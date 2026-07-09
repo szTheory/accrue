@@ -133,13 +133,12 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
     assert html =~ "Dunning &amp; recovery"
     assert html =~ "Tax &amp; compliance"
     assert html =~ "invoice.payment_failed"
-    assert html =~ "Billing health answer"
+    assert html =~ "Billing health: setup blocked"
     assert html =~ "Setup blocked"
     assert html =~ "ax-detail-health-summary-slate"
     assert html =~ "ax-detail-health-answer"
     assert html =~ "No - setup data is missing"
     assert html =~ "Charge amount not shown"
-    assert html =~ "Billing health is not trusted until setup fields are present"
 
     assert html =~
              "Fix the blocking fields in the source billing system before treating this subscription as healthy."
