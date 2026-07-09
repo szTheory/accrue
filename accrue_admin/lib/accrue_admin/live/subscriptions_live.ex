@@ -452,7 +452,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
     """)
   end
 
-  defp billing_health_label(%{open_invoice_count: count}) when count > 0, do: "Attention required"
+  defp billing_health_label(%{open_invoice_count: count}) when count > 0, do: "Status: Unhealthy"
   defp billing_health_label(_summary), do: "Healthy"
 
   defp billing_health_verdict(%{open_invoice_count: count}) when count > 0,

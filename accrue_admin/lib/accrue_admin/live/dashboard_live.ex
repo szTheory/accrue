@@ -55,7 +55,7 @@ defmodule AccrueAdmin.Live.DashboardLive do
           <div class="ax-dashboard-title-row">
             <h1 class="ax-display"><%= Copy.home_intro_headline() %></h1>
             <span :if={@attention != []} class="ax-status-badge ax-badge-danger">
-              <span class="ax-status-dot"></span>Unhealthy billing
+              <span class="ax-status-dot"></span>Status: Unhealthy
             </span>
           </div>
           <p class="ax-body ax-page-copy"><%= Copy.home_intro_copy() %></p>
@@ -412,12 +412,12 @@ defmodule AccrueAdmin.Live.DashboardLive do
     |> Enum.filter(& &1)
   end
 
-  defp attention_health_summary(stats) do
-    "Unhealthy: #{count(stats.blocked_webhook_count, "dead-lettered webhook")} need debugging."
+  defp attention_health_summary(_stats) do
+    "Status: Unhealthy"
   end
 
   defp attention_health_detail(stats) do
-    "Then review #{count(stats.past_due_subscription_count, "past-due subscription")} and #{count(stats.failed_meter_event_count, "failed meter event")}; open exposure target remains $0.00."
+    "#{count(stats.blocked_webhook_count, "dead-lettered webhook")} need debugging; #{count(stats.past_due_subscription_count, "past-due subscription")} at risk; #{count(stats.failed_meter_event_count, "failed meter event")} blocked."
   end
 
   defp count(1, noun), do: "1 #{noun}"

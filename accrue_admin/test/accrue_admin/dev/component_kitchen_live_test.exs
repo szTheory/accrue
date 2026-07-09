@@ -31,7 +31,7 @@ defmodule AccrueAdmin.ComponentKitchenLiveTest do
     assert html =~ "billing.contact.updated"
     assert html =~ "Open failed-webhook debugger"
     assert html =~ "Open invoice queue view for 2 open invoices"
-    assert html =~ "Go to Invoices open queue to clear invoices"
+    assert html =~ "Open failed/dead webhooks to restore billing health"
     assert html =~ "Open Invoices queue - work to zero"
     assert html =~ "Find one customer - see everything"
     assert html =~ "Search customer, open detail"

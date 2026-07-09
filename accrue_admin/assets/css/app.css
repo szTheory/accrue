@@ -2057,6 +2057,39 @@ a.ax-kpi-card--linked:focus-visible {
 .ax-component-kitchen-page .ax-breadcrumbs-link,
 .ax-component-kitchen-page .ax-breadcrumbs-current,
 .ax-component-kitchen-page .ax-breadcrumbs-separator {
+  font-size: 0.8125rem;
+  line-height: var(--ax-leading-tight);
+  color: var(--ax-muted);
+  font-weight: 600;
+}
+
+.ax-component-kitchen-title {
+  color: var(--ax-primary);
+  font-size: 1.625rem;
+  font-weight: 800;
+  line-height: var(--ax-leading-tight);
+}
+
+.ax-component-kitchen-page .ax-kpi-card-danger .ax-kpi-delta-amber {
+  border: 1px solid var(--ax-status-danger-border);
+  background: var(--ax-status-danger-bg);
+  color: var(--ax-status-danger-text);
+}
+
+.ax-component-kitchen-page .ax-button-recovery {
+  border-color: var(--ax-status-warning-border);
+  background: var(--ax-status-warning-solid);
+  color: var(--ax-status-warning-on-solid);
+  box-shadow: var(--ax-shadow-sm);
+}
+
+.ax-component-kitchen-page .ax-button-recovery:hover,
+.ax-component-kitchen-page .ax-button-recovery:focus-visible {
+  background: color-mix(in srgb, var(--ax-status-warning-solid) 86%, black);
+}
+
+.ax-component-kitchen-page .ax-dev-audit-strip strong,
+.ax-component-kitchen-page .ax-dev-audit-strip span {
   color: var(--ax-primary);
   font-weight: 800;
 }
@@ -2435,7 +2468,7 @@ a.ax-kpi-card--linked:focus-visible {
 
 .ax-health-summary-prominent {
   width: min(100%, 58rem);
-  padding: 0.1875rem var(--ax-space-xs);
+  padding: 0.125rem var(--ax-space-xs);
   border-width: 2px;
   box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ax-status-warning-border) 44%, transparent);
 }
@@ -2443,7 +2476,7 @@ a.ax-kpi-card--linked:focus-visible {
 .ax-subscriptions-health-hero {
   order: -1;
   width: min(100%, 64rem);
-  padding: 0.125rem var(--ax-space-xs);
+  padding: 0.0625rem var(--ax-space-xs);
   gap: 0.125rem var(--ax-space-xs);
 }
 
@@ -3210,7 +3243,7 @@ a.ax-kpi-card--linked:focus-visible {
 
 .ax-subscriptions-page .ax-data-table-grid th,
 .ax-subscriptions-page .ax-data-table-grid td {
-  padding: 0.1875rem var(--ax-space-xs);
+  padding: 0.125rem 0.375rem;
 }
 
 .ax-subscriptions-page .ax-data-table-grid th {
@@ -3235,7 +3268,7 @@ a.ax-kpi-card--linked:focus-visible {
 
 .ax-subscription-row-audit {
   justify-content: flex-start;
-  padding: 0.1875rem var(--ax-space-xs);
+  padding: 0.125rem 0.375rem;
 }
 
 .ax-webhook-row-status {
@@ -3245,7 +3278,7 @@ a.ax-kpi-card--linked:focus-visible {
   gap: var(--ax-space-2xs) var(--ax-space-xs);
   width: fit-content;
   max-width: 100%;
-  padding: 0.1875rem var(--ax-space-xs);
+  padding: 0.125rem 0.375rem;
   border: 1px solid var(--ax-border);
   border-radius: var(--ax-radius-sm);
   color: var(--ax-primary);
@@ -3273,8 +3306,8 @@ a.ax-kpi-card--linked:focus-visible {
 }
 
 .ax-subscriptions-page .ax-data-table-inline-actions .ax-button-sm {
-  min-height: 1.625rem;
-  padding: 0.1875rem 0.5rem;
+  min-height: 1.5rem;
+  padding: 0.125rem 0.4375rem;
 }
 
 .ax-subscription-row-state {
@@ -5040,9 +5073,10 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
 }
 
 .ax-detail-health-summary-slate {
-  border-color: var(--ax-status-neutral-border);
-  background: transparent;
-  box-shadow: none;
+  border-color: var(--ax-status-danger-border);
+  border-width: 2px;
+  background: color-mix(in srgb, var(--ax-status-danger-bg) 72%, var(--ax-elevated));
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ax-status-danger-border) 44%, transparent);
 }
 
 .ax-detail-health-copy {
@@ -5067,7 +5101,7 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
 }
 
 .ax-detail-health-verdict {
-  color: var(--ax-primary);
+  color: var(--ax-status-danger-text);
   font: var(--ax-type-title-font);
 }
 
@@ -5329,10 +5363,22 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
 
 .ax-dashboard-audit-summary {
   margin-bottom: var(--ax-space-xs);
+  border-color: var(--ax-border-strong);
+  background: color-mix(in srgb, var(--ax-status-info-bg) 42%, var(--ax-elevated));
 }
 
 .ax-dashboard-audit-summary span {
   flex: 1 1 13rem;
+}
+
+.ax-dashboard-audit-summary strong {
+  background: var(--ax-primary);
+  color: var(--ax-base);
+}
+
+.ax-dashboard-audit-summary em {
+  color: var(--ax-primary);
+  font-weight: 800;
 }
 
 .ax-activity-card-ledger .ax-timeline-card {

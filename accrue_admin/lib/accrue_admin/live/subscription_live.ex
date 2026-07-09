@@ -432,16 +432,16 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
                   <%= Copy.resource_state_copy(:dunning, :queue_empty, surface: :subscription_detail).body %>
                 </p>
                 <p class="ax-body ax-detail-hint">
-                  Use the dunning funnel for at-risk accounts. Open the open-invoice queue to work every open invoice, or open this subscription's filtered queue for local context.
+                  Use the dunning funnel for at-risk accounts. Open this subscription's filtered invoice queue only when you need local invoice context.
                 </p>
               <% end %>
 
               <div class="ax-detail-actions-row">
                 <a
                   class="ax-button ax-button-primary ax-button-sm"
-                  href={ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope, %{"status" => "open"})}
+                  href={ScopedPath.build(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}
                 >
-                  Open full invoice queue workspace
+                  Open dunning funnel
                 </a>
                 <a
                   class="ax-button ax-button-secondary ax-button-sm"
@@ -833,13 +833,8 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
 
   defp summary_rows(subscription, customer, mount_path, scope) do
     subscription_label = subscription.processor_id || subscription.id
-    health = detail_health_summary(subscription)
 
     base_rows = [
-      %{
-        label: "Billing health verdict",
-        value: health_summary_value(health)
-      },
       %{
         label: "Lifecycle state",
         value: "#{humanize(subscription.status)} - #{predicate_summary(subscription)}"
@@ -1003,11 +998,11 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
       caveats != [] ->
         %{
           tone: "slate",
-          label: "Setup unverified",
-          answer: "Unhealthy - setup gaps block verification",
-          headline: "Billing cannot be treated as healthy",
+          label: "Status: Unhealthy",
+          answer: "Unhealthy",
+          headline: "Setup gaps block verification",
           body:
-            "Required setup details are missing. Check invoices and setup audit events before treating recurring billing as healthy.",
+            "Billing cannot be treated as healthy until required setup details are present. Check invoices and setup audit events before trusting recurring billing.",
           caveats: caveats
         }
 
@@ -1072,12 +1067,6 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
       "Amount is not confirmed in admin"
     ]
     |> Enum.reject(&is_nil/1)
-  end
-
-  defp health_summary_value(%{caveats: []} = health), do: health.answer
-
-  defp health_summary_value(health) do
-    "#{health.answer}; setup gaps: #{Enum.join(health.caveats, ", ")}"
   end
 
   defp mrr_summary(_subscription), do: not_projected_copy(:amount)
