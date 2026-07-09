@@ -2726,17 +2726,19 @@ a.ax-kpi-card--linked:focus-visible {
 }
 
 .ax-subscriptions-audit-strip {
+  order: 2;
   display: flex;
   padding: 0.0625rem 0.375rem;
-  border-color: color-mix(in srgb, var(--ax-border) 72%, var(--ax-base));
+  border-color: color-mix(in srgb, var(--ax-border) 60%, transparent);
   background: transparent;
 }
 
 .ax-subscriptions-webhook-strip {
+  order: 2;
   display: flex;
   padding: 0.0625rem 0.375rem;
-  border-color: color-mix(in srgb, var(--ax-status-warning-border) 42%, var(--ax-border));
-  background: color-mix(in srgb, var(--ax-status-warning-bg) 16%, transparent);
+  border-color: color-mix(in srgb, var(--ax-status-warning-border) 36%, var(--ax-border));
+  background: transparent;
 }
 
 .ax-subscriptions-invoice-strip {
@@ -3448,10 +3450,18 @@ a.ax-kpi-card--linked:focus-visible {
 }
 
 .ax-subscriptions-page .ax-data-table-grid th {
-  border-bottom-color: var(--ax-border-strong);
-  background: color-mix(in srgb, var(--ax-sunken) 78%, var(--ax-elevated));
+  border-bottom: 2px solid var(--ax-accent-border);
+  background: color-mix(in srgb, var(--ax-elevated) 88%, var(--ax-base));
   color: var(--ax-primary);
-  font-weight: 800;
+  font-size: var(--ax-type-sm);
+  font-weight: 900;
+}
+
+.ax-component-kitchen-page .ax-dev-production-strip .ax-button-secondary {
+  border-color: var(--ax-status-info-border);
+  background: var(--ax-elevated);
+  color: var(--ax-primary);
+  box-shadow: var(--ax-shadow-xs);
 }
 
 .ax-audit-signal {
@@ -4425,13 +4435,15 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
 .ax-search-trigger {
   /* ax-type-exception: component-local typography is documented until this selector is migrated to a composed role utility in markup. */
   justify-content: flex-start;
-  width: 23rem;
-  max-width: 23rem;
+  width: 26rem;
+  max-width: 26rem;
   min-width: 0;
   border-color: var(--ax-accent-readable);
+  border-width: 3px;
   border-radius: var(--ax-radius-sm);
-  background: color-mix(in srgb, var(--ax-accent-subtle) 88%, var(--ax-elevated));
-  font-weight: 700;
+  background: color-mix(in srgb, var(--ax-accent-subtle) 96%, var(--ax-elevated));
+  font-size: var(--ax-type-md);
+  font-weight: 900;
   cursor: pointer;
   box-shadow:
     inset 0 0 0 1px color-mix(in srgb, var(--ax-accent-readable) 60%, transparent),
@@ -4440,7 +4452,7 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
 }
 
 .ax-search-trigger:hover {
-  background: color-mix(in srgb, var(--ax-accent-subtle) 86%, var(--ax-elevated));
+  background: color-mix(in srgb, var(--ax-accent-subtle) 92%, var(--ax-elevated));
   border-color: var(--ax-accent-readable);
 }
 
@@ -4457,7 +4469,7 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
   white-space: nowrap;
   text-align: left;
   color: var(--ax-primary);
-  font-weight: 700;
+  font-weight: 900;
 }
 
 .ax-search-trigger .ax-kbd {

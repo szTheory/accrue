@@ -49,7 +49,7 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
 
     assert html =~ Copy.subscriptions_index_heading()
 
-    assert html =~ "Open invoice exposure:"
+    assert html =~ "open exposure" or html =~ "above $0.00 target"
 
     assert html =~ "Canceling at period end"
     assert html =~ "/billing/subscriptions/"
@@ -86,16 +86,17 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert html =~ ~s(data-ax-page-title)
     assert html =~ ~s(data-component-group="page-header-actions-breadcrumbs")
     assert html =~ ~s(data-ax-page-filter-toolbar)
-    refute html =~ ~s(data-ax-page-actions)
+    assert html =~ ~s(data-ax-page-actions)
     refute html =~ "Search customer, open detail"
 
-    assert html =~ "Billing health: No - open invoices need work" or
-             html =~ "Billing health: Yes - no collection queue"
+    assert html =~ "Billing health: No -" or
+             html =~ "Billing health: Yes - invoices clear"
 
-    assert html =~ "Open invoice exposure: $0.00; target met" or
-             html =~ "above target"
+    assert html =~ "$0.00 open exposure; target met." or
+             html =~ "above $0.00 target."
 
     assert html =~ "Open Invoices queue"
+    assert html =~ "Open dunning funnel"
     refute html =~ "Bulk invoice actions"
     assert html =~ "Process next invoice"
     assert html =~ "Send invoice reminders"
@@ -263,7 +264,7 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
 
     assert {:ok, _view, html} = live(conn, "/billing/subscriptions?view=all")
 
-    assert html =~ "Open invoice exposure:"
+    assert html =~ "open exposure" or html =~ "above $0.00 target"
     refute html =~ "ax-health-verdict"
     assert html =~ "Open row in dedicated invoice queue"
     assert html =~ "Debug failed webhook deliveries"
@@ -279,8 +280,8 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert html =~ "Setup gap"
     assert html =~ "Amount not confirmed in admin"
 
-    assert html =~ "Open invoice exposure: $0.00; target met" or
-             html =~ "above target"
+    assert html =~ "$0.00 open exposure; target met." or
+             html =~ "above $0.00 target."
 
     assert_table_headings_in_order(html, [
       "Customer and subscription IDs",

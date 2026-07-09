@@ -122,24 +122,18 @@ if Mix.env() != :prod do
                   Open customer directory
                 </a>
               </span>
-              <span class="ax-dev-secondary-route">
-                <strong>Audit</strong>
-                <a class="ax-link-quiet" href={@admin_mount_path <> "/events"}>
-                  Open production audit log
-                </a>
-              </span>
+              <a class="ax-button ax-button-secondary ax-button-sm" href={@admin_mount_path <> "/events"}>
+                Open audit event log
+              </a>
               <span class="ax-dev-secondary-route">
                 <strong>Webhooks</strong>
                 <a class="ax-link-quiet" href={@admin_mount_path <> "/webhooks?status=failed,dead"}>
                   Debug failed webhook deliveries
                 </a>
               </span>
-              <span class="ax-dev-secondary-route">
-                <strong>Recovery</strong>
-                <a class="ax-link-quiet" href={@admin_mount_path <> "/analytics/recovery"}>
-                  Watch dunning + at-risk
-                </a>
-              </span>
+              <a class="ax-button ax-button-recovery ax-button-sm" href={@admin_mount_path <> "/analytics/recovery"}>
+                Open dunning funnel
+              </a>
             </div>
           </section>
 

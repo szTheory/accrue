@@ -101,6 +101,23 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
           ]}
           title={Copy.subscriptions_index_heading()}
         >
+          <:description>
+            <p>Review subscription context here; use Invoices for open receivables and recovery for dunning funnel work.</p>
+          </:description>
+          <:actions>
+            <a
+              class="ax-button ax-button-primary ax-button-sm"
+              href={invoice_queue_path(@admin_mount_path, @current_owner_scope)}
+            >
+              Open Invoices queue
+            </a>
+            <a
+              class="ax-button ax-button-recovery ax-button-sm"
+              href={scoped_path(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}
+            >
+              Open dunning funnel
+            </a>
+          </:actions>
           <:filter_toolbar>
             <DataTable.filter_toolbar
               id="subscriptions"
@@ -125,7 +142,6 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
           <div class="ax-inline-worklist-copy ax-subscriptions-priority-copy">
             <strong><%= billing_priority_title(@summary) %></strong>
             <span class="ax-subscriptions-exposure"><%= billing_exposure_summary(@summary) %></span>
-            <span>Use Invoices for queue work; subscription rows stay for account context.</span>
           </div>
           <div class="ax-inline-worklist-actions ax-subscriptions-priority-actions">
             <a
@@ -247,7 +263,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
         >
           <:list_status :let={status}>
             <FilterChipBar.filter_chip_bar
-              items={work_queue_chips(@params, @table_path)}
+              items={work_queue_chips(@params, @table_path, @summary)}
               label="Work queue"
               result_count={status.visible_count}
               result_label={{"subscription", "subscriptions"}}
@@ -378,16 +394,16 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
   end
 
   defp billing_priority_title(%{open_invoice_count: count}) when count > 0,
-    do: "Billing health: No - open invoices need work"
+    do: "Billing health: No - #{count(count, "open invoice")}"
 
-  defp billing_priority_title(_summary), do: "Billing health: Yes - no collection queue"
+  defp billing_priority_title(_summary), do: "Billing health: Yes - invoices clear"
 
   defp billing_exposure_summary(%{open_invoice_count: count} = summary) when count > 0 do
-    "Open invoice exposure: #{format_minor(summary.open_invoice_exposure_minor, "usd")} above target; #{count(count, "open invoice")}."
+    "#{format_minor(summary.open_invoice_exposure_minor, "usd")} above $0.00 target."
   end
 
   defp billing_exposure_summary(_summary),
-    do: "Open invoice exposure: $0.00; target met across 0 open invoices."
+    do: "$0.00 open exposure; target met."
 
   defp identity_cell(row, mount_path, owner_scope) do
     customer_href = scoped_path(mount_path, "/customers/#{row.customer_id}", owner_scope)
@@ -564,7 +580,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
     end)
   end
 
-  defp work_queue_chips(params, table_path) do
+  defp work_queue_chips(params, table_path, summary) do
     queue_active = Map.get(params, "status") == @default_queue_status
     all_active = Map.get(params, "view") == "all"
     clear_href = clear_all_href(params, table_path)
@@ -588,6 +604,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
       %{
         id: :status_queue,
         label: "At risk",
+        value: "#{count(summary.past_due_count, "at-risk subscription")} - dunning funnel",
         tone: :cobalt,
         active: queue_active,
         remove_href: if(queue_active, do: clear_href, else: nil)
@@ -602,7 +619,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
       %{
         id: :open_invoices,
         label: "Dedicated Invoices queue",
-        value: "Open invoices",
+        value: count(summary.open_invoice_count, "open invoice"),
         tone: :amber,
         active: true,
         href: invoice_queue_path_from_table(table_path)

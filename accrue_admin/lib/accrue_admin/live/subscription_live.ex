@@ -219,6 +219,10 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
             </span>
           </:status>
           <:facts>
+            <span class={["ax-summary-fact", "ax-summary-fact-health", "ax-summary-fact-health-" <> health.tone]}>
+              <strong>Billing health</strong>
+              <span class="ax-summary-health-verdict"><%= health.answer %></span>
+            </span>
             <span class="ax-summary-fact">
               <strong>Subscription</strong>
               <%= @subscription.processor_id || @subscription.id %>
@@ -241,56 +245,6 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
             </a>
           </:actions>
         </Detail.summary_card>
-
-        <section class="ax-detail-priority-actions ax-detail-priority-actions-split" aria-label="Priority billing workspaces">
-          <div class="ax-detail-priority-group ax-detail-priority-group-primary">
-            <span class="ax-label ax-detail-priority-label">Main invoice queue</span>
-            <a
-              class="ax-button ax-button-primary ax-button-sm ax-detail-priority-primary ax-detail-invoice-primary"
-              href={ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope, %{"status" => "open"})}
-            >
-              Open global invoice queue to zero
-            </a>
-            <ul class="ax-detail-local-queue" aria-label="Local open invoice queue preview">
-              <li>
-                <strong>Queue preview</strong>
-                <span>Global open invoices first; local filter stays below</span>
-              </li>
-              <li>
-                <strong>Bulk actions</strong>
-                <span>Process next invoice or send reminder in Invoices</span>
-              </li>
-            </ul>
-          </div>
-          <div class="ax-detail-priority-group ax-detail-priority-group-recovery">
-            <span class="ax-label ax-detail-priority-label">Recovery workspace</span>
-            <a
-              class="ax-button ax-button-recovery ax-button-sm ax-detail-recovery-primary"
-              href={ScopedPath.build(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}
-            >
-              Open recovery funnel
-            </a>
-          </div>
-          <div class="ax-detail-priority-links">
-            <a
-              class="ax-link-quiet"
-              href={ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope, %{"status" => "open", "subscription_id" => @subscription.id})}
-            >
-              Open this subscription's invoice queue
-            </a>
-            <a
-              class="ax-link-quiet"
-              href={
-                ScopedPath.build(@admin_mount_path, "/webhooks", @current_owner_scope, %{
-                  "status" => "failed,dead",
-                  "type" => "subscription.created"
-                })
-              }
-            >
-              Webhook debugger
-            </a>
-          </div>
-        </section>
 
         <section class={["ax-detail-health-summary", "ax-detail-health-summary-" <> health.tone]} aria-label="Primary billing health summary">
           <div class="ax-detail-health-copy" role="status">
@@ -325,6 +279,68 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
               }
             >
               Review setup audit events
+            </a>
+          </div>
+        </section>
+
+        <section class="ax-detail-priority-actions ax-detail-priority-actions-split" aria-label="Priority billing workspaces">
+          <div class="ax-detail-priority-group ax-detail-priority-group-primary">
+            <span class="ax-label ax-detail-priority-label">Main invoice queue</span>
+            <a
+              class="ax-button ax-button-primary ax-button-sm ax-detail-priority-primary ax-detail-invoice-primary"
+              href={ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope, %{"status" => "open"})}
+            >
+              Open global invoice queue to zero
+            </a>
+            <ul class="ax-detail-local-queue" aria-label="Local open invoice queue preview">
+              <li>
+                <strong>Queue preview</strong>
+                <span>Global open invoices first; local filter stays below</span>
+              </li>
+              <li>
+                <strong>Bulk actions</strong>
+                <span>Process next invoice or send reminder in Invoices</span>
+              </li>
+            </ul>
+            <a
+              class="ax-button ax-button-secondary ax-button-sm"
+              href={ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope, %{"status" => "open", "work" => "next"})}
+            >
+              Process next invoice
+            </a>
+            <a
+              class="ax-button ax-button-secondary ax-button-sm"
+              href={ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope, %{"status" => "open", "work" => "send_reminder"})}
+            >
+              Send invoice reminders
+            </a>
+          </div>
+          <div class="ax-detail-priority-group ax-detail-priority-group-recovery">
+            <span class="ax-label ax-detail-priority-label">Recovery workspace</span>
+            <a
+              class="ax-button ax-button-recovery ax-button-sm ax-detail-recovery-primary"
+              href={ScopedPath.build(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}
+            >
+              Open recovery funnel
+            </a>
+          </div>
+          <div class="ax-detail-priority-links">
+            <a
+              class="ax-link-quiet"
+              href={ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope, %{"status" => "open", "subscription_id" => @subscription.id})}
+            >
+              Open this subscription's invoice queue
+            </a>
+            <a
+              class="ax-link-quiet"
+              href={
+                ScopedPath.build(@admin_mount_path, "/webhooks", @current_owner_scope, %{
+                  "status" => "failed,dead",
+                  "type" => "subscription.created"
+                })
+              }
+            >
+              Webhook debugger
             </a>
           </div>
         </section>
