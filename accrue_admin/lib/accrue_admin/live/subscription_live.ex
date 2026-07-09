@@ -234,12 +234,11 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
               class="ax-button ax-button-primary ax-button-sm"
               href={
                 ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope, %{
-                  "status" => "open",
-                  "subscription_id" => @subscription.id
+                  "status" => "open"
                 })
               }
             >
-              Open filtered invoice queue for this subscription
+              Open global open-invoice queue
             </a>
             <a
               class="ax-button ax-button-secondary ax-button-sm"
@@ -272,21 +271,32 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
           </:actions>
         </Detail.summary_card>
 
-        <section class="ax-detail-priority-actions" aria-label="Priority billing workspaces">
-          <span class="ax-label ax-detail-priority-label">Invoice queue first</span>
-          <a
-            class="ax-button ax-button-primary ax-button-sm ax-detail-priority-primary ax-detail-invoice-primary"
-            href={ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope, %{"status" => "open", "subscription_id" => @subscription.id})}
-          >
-            Open filtered invoice queue for this subscription
-          </a>
-          <a
-            class="ax-button ax-button-recovery ax-button-sm"
-            href={ScopedPath.build(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}
-          >
-            Watch dunning funnel + at-risk accounts
-          </a>
-          <span class="ax-detail-priority-links">
+        <section class="ax-detail-priority-actions ax-detail-priority-actions-split" aria-label="Priority billing workspaces">
+          <div class="ax-detail-priority-group ax-detail-priority-group-primary">
+            <span class="ax-label ax-detail-priority-label">Main invoice queue</span>
+            <a
+              class="ax-button ax-button-primary ax-button-sm ax-detail-priority-primary ax-detail-invoice-primary"
+              href={ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope, %{"status" => "open"})}
+            >
+              Open global open-invoice queue
+            </a>
+          </div>
+          <div class="ax-detail-priority-group ax-detail-priority-group-recovery">
+            <span class="ax-label ax-detail-priority-label">Dunning recovery</span>
+            <a
+              class="ax-button ax-button-recovery ax-button-sm ax-detail-recovery-primary"
+              href={ScopedPath.build(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}
+            >
+              Open dunning funnel
+            </a>
+          </div>
+          <div class="ax-detail-priority-links">
+            <a
+              class="ax-link-quiet"
+              href={ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope, %{"status" => "open", "subscription_id" => @subscription.id})}
+            >
+              Local invoices for this subscription
+            </a>
             <a
               class="ax-link-quiet"
               href={
@@ -298,7 +308,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
             >
               Failed-webhook debugger
             </a>
-          </span>
+          </div>
         </section>
 
         <section class={["ax-detail-health-summary", "ax-detail-health-summary-" <> health.tone]} aria-label="Primary billing health summary">
@@ -436,7 +446,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
                   <%= Copy.resource_state_copy(:dunning, :queue_empty, surface: :subscription_detail).body %>
                 </p>
                 <p class="ax-body ax-detail-hint">
-                  Use the dunning funnel for at-risk accounts. Open this subscription's filtered invoice queue only when you need local invoice context.
+                  Use the dunning funnel for at-risk accounts. Open this subscription's local invoice context only when you do not need the global queue.
                 </p>
               <% end %>
 
@@ -456,11 +466,11 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
                     })
                   }
                 >
-                  Open this subscription's filtered invoices
+                  Open local invoice context
                 </a>
               </div>
               <p class="ax-body ax-detail-hint">
-                The full queue works every open invoice to zero; the filtered link keeps local context for this subscription.
+                The global queue works every open invoice to zero; the local link keeps context for this subscription.
               </p>
             </div>
           </details>
@@ -1026,9 +1036,9 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
       caveats != [] ->
         %{
           tone: "slate",
-          label: "Not healthy",
-          answer: "No - billing is not healthy right now",
-          headline: "Setup is incomplete, so charges cannot be trusted",
+          label: "Unhealthy",
+          answer: "Billing is unhealthy right now",
+          headline: "Missing billing data blocks trusted charges",
           body:
             "Missing renewal, price, or amount data must be fixed before this subscription can be treated as healthy.",
           caveats: caveats

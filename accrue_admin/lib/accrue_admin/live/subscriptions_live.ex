@@ -122,22 +122,10 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
 
           <:actions>
             <a
-              class="ax-button ax-button-primary ax-button-sm"
+              class="ax-button ax-button-primary ax-button-sm ax-subscriptions-primary-action"
               href={invoice_queue_path(@admin_mount_path, @current_owner_scope)}
             >
               Open invoices workspace filtered to open
-            </a>
-            <a
-              class="ax-button ax-button-recovery ax-button-sm"
-              href={scoped_path(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}
-            >
-              Open dunning funnel workspace
-            </a>
-            <a
-              class="ax-button ax-button-secondary ax-button-sm"
-              href={scoped_path(@admin_mount_path, "/webhooks", @current_owner_scope, %{"status" => "failed,dead"})}
-            >
-              Debug failed-webhook deliveries
             </a>
           </:actions>
 
@@ -166,10 +154,16 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
           </div>
           <div class="ax-inline-worklist-actions">
             <a
-              class="ax-button ax-button-primary ax-button-sm"
+              class="ax-button ax-button-primary ax-button-sm ax-subscriptions-primary-action"
               href={invoice_queue_path(@admin_mount_path, @current_owner_scope)}
             >
               Open open-invoice queue
+            </a>
+            <a
+              class="ax-link-quiet ax-subscriptions-secondary-link"
+              href={scoped_path(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}
+            >
+              Dunning funnel workspace
             </a>
           </div>
         </section>
@@ -206,7 +200,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
               class="ax-button ax-button-warning ax-button-sm"
               href={scoped_path(@admin_mount_path, "/webhooks", @current_owner_scope, %{"status" => "failed,dead"})}
             >
-              Open all failed/dead deliveries
+              Debug failed-webhook deliveries
             </a>
             <a
               class="ax-button ax-button-secondary ax-button-sm"

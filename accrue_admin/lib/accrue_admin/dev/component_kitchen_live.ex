@@ -77,8 +77,8 @@ if Mix.env() != :prod do
                 %{label: "Component kitchen"}
               ]}
             />
-            <h1 class="ax-heading ax-component-kitchen-title">Billing Operations Component Kitchen</h1>
-            <p class="ax-page-description">Dev-only specimens for invoice queue, dunning funnel, customer search, and billing health states.</p>
+            <h1 class="ax-heading ax-component-kitchen-title">Billing Operations Dev Reference</h1>
+            <p class="ax-page-description">Sandbox examples only; production billing health lives on Dashboard and the queue workspaces.</p>
             <div class="ax-page-actions">
               <a class="ax-button ax-button-recovery ax-button-sm" href={@admin_mount_path <> "/analytics/recovery"}>
                 Open dunning funnel workspace
@@ -114,23 +114,23 @@ if Mix.env() != :prod do
 
           <section :if={@available?} class="ax-kpi-grid ax-kpi-row">
             <KpiCard.kpi_card
-              label="Billing health specimen"
-              value="Billing unhealthy: webhook delivery failures"
-              delta="Fix failed/dead webhook deliveries before billing is healthy"
+              label="Demo billing health state"
+              value="Demo billing status: unhealthy"
+              delta="Sample webhook delivery failures"
               delta_tone="amber"
               class="ax-kpi-card-danger"
               href={@admin_mount_path <> "/webhooks?status=failed,dead"}
             >
-              <:meta>Open failed-webhook debugger to restore overall billing health</:meta>
+              <:meta>Demo only. Use Dashboard for production billing health.</:meta>
             </KpiCard.kpi_card>
             <KpiCard.kpi_card
-              label="Queued invoice jobs"
-              value="7 queued jobs"
-              delta="Unhealthy above 0-job target"
+              label="Demo queued invoice jobs"
+              value="Demo queue unhealthy: 7 jobs"
+              delta="Target is 0 queued jobs"
               delta_tone="amber"
               href={@admin_mount_path <> "/invoices?status=open"}
             >
-              <:meta>Healthy target: 0 queued invoice jobs. Review the invoices workspace until the queue clears.</:meta>
+              <:meta>Demo only. Seven queued jobs is above the healthy target.</:meta>
             </KpiCard.kpi_card>
           </section>
 

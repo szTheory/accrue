@@ -104,7 +104,7 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert html =~ "Open invoices workspace filtered to open"
     assert html =~ "Open-invoice collection queue"
     assert html =~ "Open open-invoice queue"
-    assert html =~ "Open dunning funnel workspace"
+    assert html =~ "Dunning funnel workspace"
     assert html =~ "Open this row&#39;s filtered invoices"
     assert html =~ "Who did what, when?"
     assert html =~ "Latest audit event: subscription.created by Accrue system"
@@ -134,7 +134,7 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert html =~ "Open-invoice collection queue"
     assert html =~ "ax-subscription-row-state"
     assert html =~ "Failed/dead webhook deliveries"
-    assert html =~ "Open all failed/dead deliveries"
+    assert html =~ "Debug failed-webhook deliveries"
     assert html =~ "Filter subscription.created"
     assert html =~ "Who did what, when?"
     assert html =~ ~s(data-ax-state="filtered-empty") or html =~ ~s(data-ax-state="populated")
