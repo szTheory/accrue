@@ -105,7 +105,7 @@ if Mix.env() != :prod do
               delta_tone="amber"
               href={@admin_mount_path <> "/invoices?status=open"}
             >
-              <:meta>Navigate to the open-invoice queue workspace</:meta>
+              <:meta>Open invoice queue workspace to clear invoices</:meta>
             </KpiCard.kpi_card>
           </section>
 
@@ -532,7 +532,7 @@ if Mix.env() != :prod do
                     <ul class="ax-command-palette-list">
                       <li class="ax-command-palette-list-item">
                         <a class="ax-command-palette-item" href={@admin_mount_path <> "/customers"}>
-                          <Icon.icon name={:users} size="sm" /> <span>Find customer detail view</span>
+                          <Icon.icon name={:users} size="sm" /> <span>Find one customer</span>
                         </a>
                       </li>
                       <li class="ax-command-palette-list-item">

@@ -224,14 +224,6 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
               <strong>Customer</strong>
               <%= @customer.name || @customer.email || @customer.id %>
             </span>
-            <span class={[
-              "ax-summary-fact",
-              "ax-summary-fact-health",
-              "ax-summary-fact-health-" <> health.tone
-            ]}>
-              <strong>Billing health right now</strong>
-              <span class="ax-summary-health-verdict"><%= health.answer %></span>
-            </span>
             <span :for={fact <- summary_health_facts(@subscription)} class="ax-summary-fact">
               <strong><%= fact.label %></strong>
               <%= fact.value %>
@@ -287,23 +279,22 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
           >
             Open full invoice queue workspace
           </a>
-          <a
-            class="ax-button ax-button-secondary ax-button-sm"
-            href={ScopedPath.build(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}
-          >
-            Watch dunning funnel and at-risk accounts
-          </a>
-          <a
-            class="ax-button ax-button-secondary ax-button-sm"
-            href={
-              ScopedPath.build(@admin_mount_path, "/webhooks", @current_owner_scope, %{
-                "status" => "failed,dead",
-                "type" => "subscription.created"
-              })
-            }
-          >
-            Open failed-webhook debugger
-          </a>
+          <span class="ax-detail-priority-links">
+            <a class="ax-link-quiet" href={ScopedPath.build(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}>
+              Dunning funnel
+            </a>
+            <a
+              class="ax-link-quiet"
+              href={
+                ScopedPath.build(@admin_mount_path, "/webhooks", @current_owner_scope, %{
+                  "status" => "failed,dead",
+                  "type" => "subscription.created"
+                })
+              }
+            >
+              Failed-webhook debugger
+            </a>
+          </span>
         </section>
 
         <section class={["ax-detail-health-summary", "ax-detail-health-summary-" <> health.tone]} aria-label="Primary billing health summary">
@@ -2052,8 +2043,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
           label: "Open failed-webhook debugger",
           value:
             "Failed/dead subscription.created queue with delivery status, event payload, retry trail, and replay action for #{subscription.processor_id || subscription.id}",
-          emphasis: :warning,
-          action_label: "Open debugger",
+          action_label: "Debug webhook",
           href:
             ScopedPath.build(mount_path, "/webhooks", scope, %{
               "status" => "failed,dead",

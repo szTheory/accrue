@@ -4065,7 +4065,13 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
   border-radius: var(--ax-radius-sm);
   background: var(--ax-elevated);
   font-weight: 700;
+  cursor: pointer;
   box-shadow: 0 0 0 2px color-mix(in srgb, var(--ax-accent-border) 18%, transparent);
+}
+
+.ax-search-trigger:hover {
+  background: color-mix(in srgb, var(--ax-accent-subtle) 60%, var(--ax-elevated));
+  border-color: var(--ax-accent-readable);
 }
 
 .ax-search-trigger-icon {
@@ -4196,7 +4202,25 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
 }
 
 .ax-home-header-health {
-  padding: 0.1875rem var(--ax-space-xs);
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: var(--ax-space-2xs) var(--ax-space-sm);
+  align-items: center;
+  width: min(100%, 54rem);
+  padding: var(--ax-space-xs);
+  border-color: var(--ax-status-danger-border);
+  background: color-mix(in srgb, var(--ax-status-danger-bg) 74%, var(--ax-elevated));
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ax-status-danger-border) 50%, transparent);
+}
+
+.ax-home-header-health strong {
+  color: var(--ax-status-danger-text);
+  font: var(--ax-type-title-font);
+}
+
+.ax-home-header-health > span:last-child {
+  grid-column: 2;
+  color: var(--ax-primary);
 }
 
 .ax-home-section {
@@ -4963,12 +4987,20 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
 .ax-detail-priority-actions {
   display: flex;
   flex-wrap: wrap;
+  gap: var(--ax-space-2xs) var(--ax-space-sm);
+  align-items: center;
+  padding: var(--ax-space-2xs) 0 var(--ax-space-xs);
+  border: 0;
+  border-bottom: 1px solid var(--ax-border);
+  border-radius: 0;
+  background: transparent;
+}
+
+.ax-detail-priority-links {
+  display: inline-flex;
+  flex-wrap: wrap;
   gap: var(--ax-space-xs);
   align-items: center;
-  padding: var(--ax-space-2xs) var(--ax-space-xs);
-  border: 1px solid var(--ax-accent-border);
-  border-radius: var(--ax-radius-sm);
-  background: color-mix(in srgb, var(--ax-accent-subtle) 42%, var(--ax-elevated));
 }
 
 .ax-summary-actions {

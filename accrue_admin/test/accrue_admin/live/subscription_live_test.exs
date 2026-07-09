@@ -116,7 +116,7 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
 
     assert html =~ "Open failed-webhook debugger"
     assert html =~ "Failed/dead subscription.created queue"
-    assert html =~ "Open debugger"
+    assert html =~ "Debug webhook"
     assert html =~ "Work this subscription&#39;s open invoices"
     assert html =~ "Watch dunning funnel and at-risk accounts"
     assert html =~ "Open full audit event log"
@@ -140,7 +140,7 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
     assert html =~ "ax-detail-health-answer"
     assert html =~ "Unverified - setup incomplete"
     assert html =~ "Active billing cannot be verified"
-    assert html =~ "Billing health right now"
+    refute html =~ "Billing health right now"
     assert html =~ "MRR"
     assert html =~ "Amount is not confirmed in admin"
     assert html =~ "Required setup details are missing"
