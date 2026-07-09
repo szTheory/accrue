@@ -90,7 +90,7 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert html =~ ~s(data-ax-page-actions)
     assert html =~ "Find one customer"
 
-    assert html =~ "Billing needs attention now" or
+    assert html =~ "No. Billing is not healthy right now." or
              html =~ "Billing is healthy right now"
 
     assert html =~ "Overall billing health answer"
@@ -112,7 +112,7 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert html =~ "Debug failed webhook deliveries"
     assert html =~ "Billing health"
     assert html =~ "Recovery"
-    assert html =~ "Find customer 360"
+    assert html =~ "Find one customer"
     refute html =~ "Billing health:"
     assert_one_h1(html)
 
@@ -273,7 +273,7 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
 
     assert html =~ "Open invoice exposure"
     assert html =~ "ax-health-verdict"
-    assert html =~ "Work this subscription invoice queue"
+    assert html =~ "Open this row&#39;s invoices"
     assert html =~ "Open all open invoices"
     assert html =~ "Open failed/dead deliveries"
     assert html =~ "Webhook delivery status"

@@ -11,7 +11,7 @@ defmodule AccrueAdmin.ComponentKitchenLiveTest do
     assert html =~ "Secondary action"
     assert html =~ "Queued invoice jobs"
     assert html =~ "More billing actions"
-    assert html =~ "Open recovery analytics"
+    assert html =~ "View dunning funnel and at-risk"
     assert html =~ "Dev tools"
     assert html =~ "Dev-only webhook fixtures"
     assert html =~ "/billing/dev/fake-inspect"
@@ -29,6 +29,7 @@ defmodule AccrueAdmin.ComponentKitchenLiveTest do
     assert html =~ "billing.contact.updated"
     assert html =~ "Open failed-webhook debugger"
     assert html =~ "Open invoice queue view for 2 open invoices"
+    assert html =~ "Open invoice queue action"
     assert html =~ "Enter the organization slug or platform owner scope"
   end
 end

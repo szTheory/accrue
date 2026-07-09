@@ -138,9 +138,6 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
                   <span>Target exposure</span>
                 </span>
               </span>
-              <a class="ax-button ax-button-primary ax-button-sm" href={invoice_queue_path(@admin_mount_path, @current_owner_scope)}>
-                Open invoice queue workspace
-              </a>
             </div>
             <p class="ax-body">Open customer detail, invoice worklists, dunning, failed webhook deliveries, and actor audit from this view.</p>
           </:description>
@@ -356,7 +353,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
             <div class="ax-work-queue-actions" aria-label="Direct work queues">
               <div class="ax-work-queue-primary">
                 <span class="ax-label">Primary queue</span>
-                <a class="ax-button ax-button-primary ax-button-sm" href={invoice_queue_path_from_table(@table_path)}>
+                <a class="ax-button ax-button-secondary ax-button-sm" href={invoice_queue_path_from_table(@table_path)}>
                   Open invoice queue workspace
                 </a>
               </div>
@@ -499,7 +496,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
       </span>
       <span><span class="ax-chip ax-label">Owner: #{escaped_o}</span> <span class="ax-chip ax-label">Tax: #{escaped_t}</span></span>
       <span class="ax-data-table-inline-actions">
-        <a href="#{subscription_invoices_href}" class="ax-button ax-button-primary ax-button-sm">Work this subscription invoice queue</a>
+        <a href="#{subscription_invoices_href}" class="ax-button ax-button-secondary ax-button-sm">Open this row's invoices</a>
         <a href="#{global_invoices_href}" class="ax-button ax-button-secondary ax-button-sm">Open all open invoices</a>
         <a href="#{events_href}" class="ax-button ax-button-secondary ax-button-sm">Open subscription audit log</a>
       </span>
@@ -512,7 +509,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
   defp billing_health_label(_summary), do: "Healthy"
 
   defp billing_health_verdict(%{open_invoice_count: count}) when count > 0,
-    do: "Billing needs attention now"
+    do: "No. Billing is not healthy right now."
 
   defp billing_health_verdict(_summary), do: "Billing is healthy right now"
 

@@ -247,7 +247,24 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
                 })
               }
             >
-              Open filtered open-invoice queue
+              Work this subscription's open invoices
+            </a>
+            <a
+              class="ax-button ax-button-warning ax-button-sm"
+              href={
+                ScopedPath.build(@admin_mount_path, "/webhooks", @current_owner_scope, %{
+                  "status" => "failed,dead",
+                  "type" => "subscription.created"
+                })
+              }
+            >
+              Debug failed webhook end-to-end
+            </a>
+            <a
+              class="ax-button ax-button-recovery ax-button-sm"
+              href={ScopedPath.build(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}
+            >
+              Watch dunning funnel and at-risk accounts
             </a>
             <a
               class="ax-button ax-button-secondary ax-button-sm"
@@ -298,19 +315,6 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
               }
             >
               Review setup audit events
-            </a>
-          </div>
-          <div class="ax-detail-actions-row ax-detail-critical-actions">
-            <a
-              class="ax-button ax-button-primary ax-button-sm"
-              href={
-                ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope, %{
-                  "status" => "open",
-                  "subscription_id" => @subscription.id
-                })
-              }
-            >
-              Open filtered open-invoice queue
             </a>
           </div>
         </section>
@@ -2027,9 +2031,8 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
         %{
           icon: :invoices,
           label: Copy.subscription_drill_link_invoices_for_subscription(),
-          value: "Open actionable open invoices filtered to this subscription",
+          value: "Actionable open invoices are pinned in the header action for this subscription",
           emphasis: :primary,
-          action_label: "Open filtered open-invoice queue",
           href:
             ScopedPath.build(mount_path, "/invoices", scope, %{
               "status" => "open",

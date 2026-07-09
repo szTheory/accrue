@@ -96,7 +96,7 @@ if Mix.env() != :prod do
               delta_tone="moss"
               href={@admin_mount_path <> "/invoices?status=open"}
             >
-              <:meta>Open invoice queue view</:meta>
+              <:meta>Open invoice queue action</:meta>
             </KpiCard.kpi_card>
             <KpiCard.kpi_card
               label="Queued invoice jobs"
@@ -121,14 +121,14 @@ if Mix.env() != :prod do
             <div class="ax-dev-grid ax-toolbar">
               <Button.button variant="primary" type="button">Primary action</Button.button>
               <Button.button variant="secondary" type="button">Secondary action</Button.button>
-              <Button.button variant="secondary" class="ax-button-recovery" href={@admin_mount_path <> "/analytics/recovery"}>Open recovery analytics</Button.button>
+              <Button.button variant="secondary" class="ax-button-recovery" href={@admin_mount_path <> "/analytics/recovery"}>View dunning funnel and at-risk</Button.button>
               <Button.button variant="ghost" href={@admin_mount_path <> "/webhooks"}>Ghost link</Button.button>
               <DropdownMenu.dropdown_menu
                 label="More billing actions"
                 items={[
                   %{label: "Open webhooks", href: @admin_mount_path <> "/webhooks", description: "Inspect event delivery"},
                   %{label: "Open events", href: @admin_mount_path <> "/events", description: "Review audit timeline"},
-                  %{label: "Open recovery analytics", href: @admin_mount_path <> "/analytics/recovery", description: "Review dunning and at-risk accounts"}
+                  %{label: "View dunning funnel and at-risk", href: @admin_mount_path <> "/analytics/recovery", description: "Review dunning and at-risk accounts"}
                 ]}
               />
             </div>

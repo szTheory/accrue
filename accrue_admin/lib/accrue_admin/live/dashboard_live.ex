@@ -102,20 +102,6 @@ defmodule AccrueAdmin.Live.DashboardLive do
             </a>
           </header>
 
-          <div :if={@attention != []} class="ax-attention-summary ax-attention-summary-warning" aria-label="Overall billing health">
-            <span class="ax-status-badge ax-status-badge-amber">
-              <span class="ax-status-dot"></span>Attention required
-            </span>
-            <strong>Billing needs attention now</strong>
-            <span><%= attention_health_summary(@stats) %></span>
-            <a
-              class="ax-button ax-button-primary ax-button-sm"
-              href={ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope, %{"status" => "open"})}
-            >
-              Open invoice queue workspace
-            </a>
-          </div>
-
           <div :if={@attention != []} class="ax-card ax-attention">
             <a :for={row <- @attention} href={row.href} class="ax-attention-row">
               <span class={["ax-attention-dot", "ax-attention-dot-#{row.tone}"]} aria-hidden="true"></span>
@@ -177,7 +163,7 @@ defmodule AccrueAdmin.Live.DashboardLive do
                 <%= count(@stats.past_due_subscription_count, "at-risk subscription") %>
               </span>
               <span class="ax-launcher-action">
-                Open recovery analytics <Icon.icon name={:arrow_right} size="sm" />
+                View dunning funnel and at-risk accounts <Icon.icon name={:arrow_right} size="sm" />
               </span>
             </a>
 
