@@ -2399,7 +2399,7 @@ a.ax-kpi-card--linked:focus-visible {
 }
 
 .ax-subscriptions-page {
-  gap: var(--ax-space-sm);
+  gap: var(--ax-space-2xs);
 }
 
 .ax-health-summary {
@@ -2559,13 +2559,13 @@ a.ax-kpi-card--linked:focus-visible {
 .ax-subscriptions-audit-strip {
   padding: var(--ax-space-2xs) var(--ax-space-xs);
   border-color: var(--ax-status-info-border);
-  background: color-mix(in srgb, var(--ax-status-info-bg) 44%, var(--ax-elevated));
+  background: var(--ax-elevated);
 }
 
 .ax-subscriptions-webhook-strip {
   padding: var(--ax-space-2xs) var(--ax-space-xs);
   border-color: var(--ax-status-warning-border);
-  background: color-mix(in srgb, var(--ax-status-warning-bg) 48%, var(--ax-elevated));
+  background: var(--ax-elevated);
 }
 
 .ax-subscriptions-invoice-strip {
@@ -2574,7 +2574,7 @@ a.ax-kpi-card--linked:focus-visible {
 }
 
 .ax-inline-worklist + .ax-inline-worklist {
-  margin-top: var(--ax-space-2xs);
+  margin-top: 0;
 }
 
 .ax-subscriptions-page .ax-filter-chip-bar {
@@ -3642,7 +3642,7 @@ details[open].ax-dropdown .ax-dropdown-panel {
   padding: 0 0.875rem;
   border: 1px solid var(--ax-border);
   border-radius: var(--ax-radius-pill);
-  background: var(--ax-elevated);
+  background: color-mix(in srgb, var(--ax-accent-subtle) 58%, var(--ax-elevated));
   color: var(--ax-primary);
   font-size: var(--ax-type-sm);
   font-weight: 700;
@@ -4131,7 +4131,7 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
   background: var(--ax-elevated);
   font-weight: 700;
   cursor: pointer;
-  box-shadow: 0 0 0 2px color-mix(in srgb, var(--ax-accent-border) 18%, transparent);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--ax-accent-border) 32%, transparent);
 }
 
 .ax-search-trigger:hover {
@@ -4160,9 +4160,25 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
 }
 
 @media (max-width: 599.98px) { /* --ax-bp-sm ↓ */
+  .ax-icon-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+  }
+
+  .ax-icon-button {
+    min-width: 2.75rem;
+    padding-inline: 0.625rem;
+  }
+
   .ax-search-trigger {
-    width: min(13.5rem, calc(100vw - 7rem));
-    max-width: min(13.5rem, calc(100vw - 7rem));
+    width: min(10.25rem, calc(100vw - 13.5rem));
+    max-width: min(10.25rem, calc(100vw - 13.5rem));
+    padding-inline: 0.625rem;
   }
 
   .ax-search-trigger-text {
@@ -4252,7 +4268,7 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
 
 .ax-home > .ax-page-header .ax-display {
   color: var(--ax-primary);
-  font-size: 1.75rem;
+  font-size: 1.5rem;
   font-weight: 800;
 }
 
@@ -4272,7 +4288,7 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
   gap: var(--ax-space-2xs) var(--ax-space-sm);
   align-items: center;
   width: min(100%, 54rem);
-  padding: var(--ax-space-xs);
+  padding: 0.1875rem var(--ax-space-xs);
   border-color: var(--ax-status-danger-border);
   background: color-mix(in srgb, var(--ax-status-danger-bg) 74%, var(--ax-elevated));
   box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ax-status-danger-border) 50%, transparent);
@@ -4483,8 +4499,8 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
    Reduce card border prominence and mute labels; no type-scale rework. */
 [data-ax-zone="kpi-cluster"] .ax-kpi-card {
   border-color: color-mix(in srgb, var(--ax-border) 60%, var(--ax-base));
-  gap: var(--ax-space-xs);
-  padding: var(--ax-space-sm);
+  gap: var(--ax-space-2xs);
+  padding: var(--ax-space-xs);
 }
 [data-ax-zone="kpi-cluster"] .ax-label {
   font-size: var(--ax-type-xs);
@@ -4494,7 +4510,7 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
 
 [data-ax-zone="kpi-cluster"] .ax-kpi-value {
   color: var(--ax-primary);
-  font-size: 1.625rem;
+  font-size: 1.375rem;
   font-weight: 850;
 }
 
@@ -4509,7 +4525,7 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
   display: grid;
   grid-template-rows: auto auto 1fr auto;
   gap: var(--ax-space-2xs);
-  padding: var(--ax-space-xs);
+  padding: var(--ax-space-2xs) var(--ax-space-xs);
   border: 1px solid var(--ax-border);
   border-radius: var(--ax-radius-md);
   background: var(--ax-elevated);
@@ -4543,29 +4559,29 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
 
 .ax-launcher-recovery {
   border-color: var(--ax-status-warning-border);
-  border-width: 2px;
-  background: var(--ax-status-warning-solid);
-  color: var(--ax-status-warning-on-solid);
+  border-width: 1px;
+  background: color-mix(in srgb, var(--ax-status-warning-bg) 54%, var(--ax-elevated));
+  color: var(--ax-primary);
   box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ax-status-warning-border) 42%, transparent);
 }
 
 .ax-launcher-recovery .ax-launcher-icon {
-  background: var(--ax-status-warning-on-solid);
-  color: var(--ax-status-warning-solid);
+  background: var(--ax-status-warning-solid);
+  color: var(--ax-status-warning-on-solid);
 }
 
 .ax-launcher-recovery .ax-launcher-title,
 .ax-launcher-recovery .ax-launcher-copy,
 .ax-launcher-recovery .ax-launcher-meta,
 .ax-launcher-recovery .ax-launcher-meta-warn {
-  color: var(--ax-status-warning-on-solid);
+  color: var(--ax-primary);
 }
 
 .ax-launcher-recovery .ax-launcher-action {
-  border-color: var(--ax-status-warning-on-solid);
-  background: var(--ax-status-warning-on-solid);
-  color: var(--ax-status-warning-solid);
-  box-shadow: var(--ax-shadow-sm);
+  border-color: var(--ax-status-warning-border);
+  background: var(--ax-elevated);
+  color: var(--ax-warning-readable);
+  box-shadow: none;
 }
 
 .ax-launcher:hover,
@@ -4642,7 +4658,8 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
 
 @media (min-width: 1024px) { /* --ax-bp-lg ↑ */
   .ax-shell-content:has(> .ax-subscriptions-page),
-  .ax-shell-content:has(> .ax-subscription-detail-page) {
+  .ax-shell-content:has(> .ax-subscription-detail-page),
+  .ax-shell-content:has(> .ax-home) {
     padding-top: var(--ax-space-xs);
   }
 }
@@ -4992,6 +5009,10 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
   font: var(--ax-type-title-font);
 }
 
+.ax-detail-health-summary-slate .ax-detail-health-answer {
+  color: var(--ax-status-danger-text);
+}
+
 .ax-detail-health-label {
   color: var(--ax-primary);
   font-weight: 800;
@@ -5003,7 +5024,9 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
 }
 
 .ax-detail-health-body {
+  flex-basis: 100%;
   color: var(--ax-primary);
+  font: var(--ax-type-label-sm-font);
 }
 
 .ax-detail-health-caveats {

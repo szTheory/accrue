@@ -1074,10 +1074,10 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
     |> Enum.reject(&is_nil/1)
   end
 
-  defp health_summary_value(%{caveats: []} = health), do: "#{health.answer} - #{health.body}"
+  defp health_summary_value(%{caveats: []} = health), do: health.answer
 
   defp health_summary_value(health) do
-    "#{health.answer} - #{health.body} Missing setup: #{Enum.join(health.caveats, ", ")}"
+    "#{health.answer}; setup gaps: #{Enum.join(health.caveats, ", ")}"
   end
 
   defp mrr_summary(_subscription), do: not_projected_copy(:amount)

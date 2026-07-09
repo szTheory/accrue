@@ -84,7 +84,7 @@ if Mix.env() != :prod do
                 Open dunning funnel + at-risk analytics
               </a>
               <a class="ax-button ax-button-primary ax-button-sm" href={@admin_mount_path <> "/invoices?status=open"}>
-                Open invoice queue workspace
+                Open Invoices queue - work to zero
               </a>
             </div>
           </header>
@@ -113,7 +113,7 @@ if Mix.env() != :prod do
               delta_tone="amber"
               href={@admin_mount_path <> "/invoices?status=open"}
             >
-              <:meta>Open invoice queue workspace</:meta>
+              <:meta>Open Invoices queue - work to zero</:meta>
             </KpiCard.kpi_card>
           </section>
 
@@ -127,7 +127,7 @@ if Mix.env() != :prod do
             />
 
             <div class="ax-dev-grid ax-toolbar">
-              <Button.button variant="primary" href={@admin_mount_path <> "/customers"}>Search one customer and open detail view</Button.button>
+              <Button.button variant="primary" href={@admin_mount_path <> "/customers"}>Find one customer - see everything</Button.button>
               <Button.button variant="secondary" type="button">Primary action specimen</Button.button>
               <Button.button variant="secondary" type="button">Secondary action</Button.button>
               <Button.button variant="secondary" href={@admin_mount_path <> "/analytics/recovery"}>Open dunning funnel workspace</Button.button>
