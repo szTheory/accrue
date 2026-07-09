@@ -145,52 +145,48 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
 
         <section class="ax-inline-worklist ax-subscriptions-invoice-strip" aria-label="Billing health priority worklist">
           <div class="ax-inline-worklist-copy">
-            <strong>Billing health priority</strong>
+            <strong><%= billing_priority_title(@summary) %></strong>
             <span>
               <%= count(@summary.open_invoice_count, "open invoice") %>,
               <%= format_minor(@summary.open_invoice_exposure_minor, "usd") %> exposure.
             </span>
-            <span>Open invoices are the primary queue; use secondary links only for dunning, webhooks, or audit context.</span>
-            <span class="ax-subscriptions-secondary-context">Who did what, when? Latest audit event: subscription.created by Accrue system.</span>
-            <span class="ax-subscriptions-secondary-context">Failed/dead webhook deliveries: debug failed subscription.created deliveries without hunting through subscription rows.</span>
+            <span>Target is $0.00 open invoice exposure; collect open invoices before secondary queues.</span>
+            <span class="ax-subscriptions-secondary-context">Secondary queues are labeled by job: webhook debugging, audit trail, and recovery.</span>
           </div>
-          <div class="ax-inline-worklist-actions">
+          <div class="ax-inline-worklist-actions ax-subscriptions-priority-actions">
             <a
               class="ax-button ax-button-primary ax-button-sm ax-subscriptions-primary-action"
               href={invoice_queue_path(@admin_mount_path, @current_owner_scope)}
             >
-              Open open-invoice queue
+              Open open-invoice queue first
             </a>
-            <a
-              class="ax-link-quiet ax-subscriptions-secondary-link"
-              href={scoped_path(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}
-            >
-              Dunning funnel workspace
-            </a>
-            <a
-              class="ax-link-quiet ax-subscriptions-secondary-link"
-              href={scoped_path(@admin_mount_path, "/webhooks", @current_owner_scope, %{"status" => "failed,dead"})}
-            >
-              Debug failed-webhook deliveries
-            </a>
-            <a
-              class="ax-link-quiet ax-subscriptions-secondary-link"
-              href={scoped_path(@admin_mount_path, "/webhooks", @current_owner_scope, %{"status" => "failed,dead", "type" => "subscription.created"})}
-            >
-              Filter subscription.created
-            </a>
-            <a
-              class="ax-link-quiet ax-subscriptions-secondary-link"
-              href={scoped_path(@admin_mount_path, "/events", @current_owner_scope, %{"type" => "subscription.created"})}
-            >
-              Open full audit event log
-            </a>
-            <a
-              class="ax-link-quiet ax-subscriptions-secondary-link"
-              href={scoped_path(@admin_mount_path, "/events", @current_owner_scope, %{"actor_type" => "admin"})}
-            >
-              Filter admin actors
-            </a>
+            <span class="ax-subscriptions-secondary-group">
+              <strong>Webhook debugging</strong>
+              <a
+                class="ax-link-quiet ax-subscriptions-secondary-link"
+                href={scoped_path(@admin_mount_path, "/webhooks", @current_owner_scope, %{"status" => "failed,dead"})}
+              >
+                Debug failed-webhook deliveries
+              </a>
+            </span>
+            <span class="ax-subscriptions-secondary-group">
+              <strong>Audit trail</strong>
+              <a
+                class="ax-link-quiet ax-subscriptions-secondary-link"
+                href={scoped_path(@admin_mount_path, "/events", @current_owner_scope, %{"type" => "subscription.created"})}
+              >
+                Open actor/event log
+              </a>
+            </span>
+            <span class="ax-subscriptions-secondary-group">
+              <strong>Recovery</strong>
+              <a
+                class="ax-link-quiet ax-subscriptions-secondary-link"
+                href={scoped_path(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}
+              >
+                Open dunning funnel
+              </a>
+            </span>
           </div>
         </section>
 
@@ -412,22 +408,27 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
     """)
   end
 
-  defp billing_health_label(%{open_invoice_count: count}) when count > 0, do: "Needs attention"
+  defp billing_health_label(%{open_invoice_count: count}) when count > 0, do: "Unhealthy"
   defp billing_health_label(_summary), do: "Healthy"
 
+  defp billing_priority_title(%{open_invoice_count: count}) when count > 0,
+    do: "Billing health priority: open invoices first"
+
+  defp billing_priority_title(_summary), do: "Billing health priority: no collection queue"
+
   defp billing_health_verdict(%{open_invoice_count: 1}),
-    do: "Billing health needs attention: 1 open invoice needs collection"
+    do: "Billing health: unhealthy - 1 open invoice needs collection"
 
   defp billing_health_verdict(%{open_invoice_count: count}) when count > 1,
-    do: "Billing health needs attention: #{count(count, "open invoice")} need collection"
+    do: "Billing health: unhealthy - #{count(count, "open invoice")} need collection"
 
-  defp billing_health_verdict(_summary), do: "Billing health is clear: no collection work"
+  defp billing_health_verdict(_summary), do: "Billing health: healthy - no collection work"
 
   defp billing_health_business_answer(%{open_invoice_count: count} = summary) when count > 0 do
-    "#{format_minor(summary.open_invoice_exposure_minor, "usd")} exposure. Work the open-invoice queue before secondary queues."
+    "#{format_minor(summary.open_invoice_exposure_minor, "usd")} exposure above the $0.00 target."
   end
 
-  defp billing_health_business_answer(_summary), do: "$0.00 open invoice exposure."
+  defp billing_health_business_answer(_summary), do: "$0.00 open invoice exposure; target met."
 
   defp billing_health_tone(%{open_invoice_count: count}) when count > 0, do: "amber"
   defp billing_health_tone(_summary), do: "moss"

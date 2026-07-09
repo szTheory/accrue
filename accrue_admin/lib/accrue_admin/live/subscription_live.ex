@@ -231,42 +231,10 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
           </:facts>
           <:actions>
             <a
-              class="ax-button ax-button-primary ax-button-sm"
-              href={
-                ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope, %{
-                  "status" => "open"
-                })
-              }
-            >
-              Open global open-invoice queue
-            </a>
-            <a
               class="ax-button ax-button-secondary ax-button-sm"
-              href={
-                ScopedPath.build(@admin_mount_path, "/webhooks", @current_owner_scope, %{
-                  "status" => "failed,dead",
-                  "type" => "subscription.created"
-                })
-              }
+              href={ScopedPath.build(@admin_mount_path, "", @current_owner_scope)}
             >
-              Debug failed webhook end-to-end
-            </a>
-            <a
-              class="ax-button ax-button-secondary ax-button-sm"
-              href={ScopedPath.build(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}
-            >
-              Open dunning funnel and at-risk workspace
-            </a>
-            <a
-              class="ax-button ax-button-secondary ax-button-sm"
-              href={
-                ScopedPath.build(@admin_mount_path, "/events", @current_owner_scope, %{
-                  "subject_type" => "Subscription",
-                  "subject_id" => @subscription.id
-                })
-              }
-            >
-              Open audit event log
+              View system-wide billing health
             </a>
           </:actions>
         </Detail.summary_card>
@@ -322,8 +290,8 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
             <span class="ax-detail-health-body"><%= health.body %></span>
           </div>
           <div :if={health.caveats != []} class="ax-detail-health-caveats" aria-label="Missing data blocking billing health">
-            <strong>What is missing</strong>
-            <span :for={caveat <- health.caveats} class="ax-detail-health-caveat"><%= caveat %></span>
+            <strong>Blocking fields:</strong>
+            <span class="ax-detail-health-caveat"><%= Enum.join(health.caveats, ", ") %></span>
           </div>
           <div :if={health.caveats != []} class="ax-detail-setup-actions" aria-label="Fix missing billing data">
             <span class="ax-detail-health-body">
@@ -488,12 +456,12 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
             <span class="ax-detail-section-title">Activity</span>
           </summary>
           <div class="ax-card ax-activity-audit-strip">
-            <p class="ax-label">Who did what, when</p>
+            <p class="ax-label">Who did what, when - actor, action, timestamp</p>
             <% latest_audit = latest_audit_row(@timeline_events, @subscription) %>
             <div class="ax-audit-summary-row" aria-label="Latest audit event summary">
-              <span><strong>Who</strong><em><%= latest_audit.actor %></em></span>
-              <span><strong>Did</strong><em><%= latest_audit.action %></em></span>
-              <span><strong>When</strong><em><%= latest_audit.at %></em></span>
+              <span><strong>Actor</strong><em><%= latest_audit.actor %></em></span>
+              <span><strong>Action</strong><em><%= latest_audit.action %></em></span>
+              <span><strong>Timestamp</strong><em><%= latest_audit.at %></em></span>
             </div>
             <p class="ax-body"><%= activity_audit_summary(@timeline_events, @subscription) %></p>
             <div class="ax-activity-actions">
@@ -511,9 +479,9 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
             </div>
             <ul class="ax-audit-list" aria-label="Actor action timestamp rows">
               <li class="ax-audit-row ax-audit-row-head" aria-hidden="true">
-                <strong>Who</strong>
-                <span>Did</span>
-                <time>When</time>
+                <strong>Actor</strong>
+                <span>Action</span>
+                <time>Timestamp</time>
               </li>
               <li :for={row <- audit_rows(@timeline_events, @subscription)} class="ax-audit-row">
                 <strong><%= row.actor %></strong>
@@ -1036,11 +1004,11 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
       caveats != [] ->
         %{
           tone: "slate",
-          label: "Unhealthy",
-          answer: "Billing is unhealthy right now",
-          headline: "Missing billing data blocks trusted charges",
+          label: "Setup blocked",
+          answer: "No - setup data is missing",
+          headline: "Billing health is not trusted until setup fields are present",
           body:
-            "Missing renewal, price, or amount data must be fixed before this subscription can be treated as healthy.",
+            "Fix the blocking fields in the source billing system before treating this subscription as healthy.",
           caveats: caveats
         }
 

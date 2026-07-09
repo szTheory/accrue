@@ -77,14 +77,14 @@ if Mix.env() != :prod do
                 %{label: "Component kitchen"}
               ]}
             />
-            <h1 class="ax-heading ax-component-kitchen-title">Billing Operations Dev Reference</h1>
-            <p class="ax-page-description">Sandbox examples only; production billing health lives on Dashboard and the queue workspaces.</p>
+            <h1 class="ax-heading ax-component-kitchen-title">Production billing workspaces</h1>
+            <p class="ax-page-description">Use these live queue links for billing work; component specimens below are non-actionable dev fixtures.</p>
             <div class="ax-page-actions">
+              <a class="ax-button ax-button-primary ax-button-sm" href={@admin_mount_path <> "/invoices?status=open"}>
+                Open production open-invoice queue first
+              </a>
               <a class="ax-button ax-button-recovery ax-button-sm" href={@admin_mount_path <> "/analytics/recovery"}>
                 Open dunning funnel workspace
-              </a>
-              <a class="ax-button ax-button-primary ax-button-sm" href={@admin_mount_path <> "/invoices?status=open"}>
-                Open production open-invoice queue
               </a>
               <a class="ax-button ax-button-secondary ax-button-sm" href={@admin_mount_path <> "/webhooks?status=failed,dead"}>
                 Debug failed webhooks
@@ -112,26 +112,23 @@ if Mix.env() != :prod do
             <p class="ax-body">Dev tools require `Accrue.Processor.Fake` as the configured processor.</p>
           </section>
 
-          <section :if={@available?} class="ax-kpi-grid ax-kpi-row">
-            <KpiCard.kpi_card
-              label="Demo billing health state"
-              value="Demo billing status: unhealthy"
-              delta="Sample webhook delivery failures"
-              delta_tone="amber"
-              class="ax-kpi-card-danger"
-              href={@admin_mount_path <> "/webhooks?status=failed,dead"}
-            >
-              <:meta>Demo only. Use Dashboard for production billing health.</:meta>
-            </KpiCard.kpi_card>
-            <KpiCard.kpi_card
-              label="Demo queued invoice jobs"
-              value="Demo queue unhealthy: 7 jobs"
-              delta="Target is 0 queued jobs"
-              delta_tone="amber"
-              href={@admin_mount_path <> "/invoices?status=open"}
-            >
-              <:meta>Demo only. Seven queued jobs is above the healthy target.</:meta>
-            </KpiCard.kpi_card>
+          <section :if={@available?} class="ax-inline-worklist ax-dev-production-strip" aria-label="Production billing entrypoints">
+            <div class="ax-inline-worklist-copy">
+              <strong>Billing work starts in production queues</strong>
+              <span>Primary target is $0.00 open invoice exposure.</span>
+              <span>Audit and webhook links below open live queue workspaces, not fixture data.</span>
+            </div>
+            <div class="ax-inline-worklist-actions">
+              <a class="ax-button ax-button-primary ax-button-sm" href={@admin_mount_path <> "/invoices?status=open"}>
+                Open production invoice queue
+              </a>
+              <a class="ax-link-quiet" href={@admin_mount_path <> "/events"}>
+                Open production audit log
+              </a>
+              <a class="ax-link-quiet" href={@admin_mount_path <> "/webhooks?status=failed,dead"}>
+                Debug production webhooks
+              </a>
+            </div>
           </section>
 
           <section :if={@available?} class="ax-card ax-dev-stack">
