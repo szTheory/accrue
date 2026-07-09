@@ -2059,8 +2059,20 @@ a.ax-kpi-card--linked:focus-visible {
 .ax-component-kitchen-page .ax-breadcrumbs-separator {
   font-size: 0.75rem;
   line-height: var(--ax-leading-tight);
-  color: var(--ax-muted);
-  font-weight: 500;
+  color: var(--ax-primary);
+  font-weight: 700;
+}
+
+.ax-component-kitchen-header {
+  gap: 0.1875rem;
+}
+
+.ax-component-kitchen-header .ax-page-actions {
+  gap: var(--ax-space-2xs);
+}
+
+.ax-component-kitchen-header .ax-page-description {
+  max-width: 48rem;
 }
 
 .ax-component-kitchen-title {
@@ -2091,7 +2103,16 @@ a.ax-kpi-card--linked:focus-visible {
 .ax-component-kitchen-page .ax-dev-audit-strip strong,
 .ax-component-kitchen-page .ax-dev-audit-strip span {
   color: var(--ax-primary);
-  font-weight: 800;
+}
+
+.ax-component-kitchen-page .ax-dev-audit-strip strong {
+  font-size: var(--ax-type-sm);
+  font-weight: 700;
+}
+
+.ax-component-kitchen-page .ax-dev-audit-strip span {
+  color: var(--ax-muted);
+  font-weight: 600;
 }
 
 .ax-dev-audit-strip {
@@ -2344,7 +2365,7 @@ a.ax-kpi-card--linked:focus-visible {
 .ax-work-queue-actions {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--ax-space-sm);
+  gap: var(--ax-space-2xs);
   align-items: center;
 }
 
@@ -2353,11 +2374,11 @@ a.ax-kpi-card--linked:focus-visible {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: var(--ax-space-xs);
+  gap: var(--ax-space-2xs);
 }
 
 .ax-work-queue-primary {
-  padding-right: var(--ax-space-sm);
+  padding-right: var(--ax-space-xs);
   border-right: 1px solid var(--ax-border);
 }
 
@@ -2399,7 +2420,7 @@ a.ax-kpi-card--linked:focus-visible {
 }
 
 .ax-subscriptions-header {
-  gap: var(--ax-space-2xs);
+  gap: 0.125rem;
   max-width: min(70rem, calc(100vw - 2.5rem));
 }
 
@@ -2421,7 +2442,7 @@ a.ax-kpi-card--linked:focus-visible {
 }
 
 .ax-subscriptions-header .ax-page-header-actions {
-  gap: var(--ax-space-2xs);
+  gap: 0.1875rem;
 }
 
 .ax-subscriptions-header .ax-stat-value {
@@ -2445,7 +2466,7 @@ a.ax-kpi-card--linked:focus-visible {
 }
 
 .ax-subscriptions-page {
-  gap: var(--ax-space-2xs);
+  gap: 0.1875rem;
 }
 
 .ax-health-summary {
@@ -2476,20 +2497,20 @@ a.ax-kpi-card--linked:focus-visible {
 .ax-subscriptions-health-hero {
   order: -1;
   width: min(100%, 64rem);
-  padding: 0.0625rem var(--ax-space-xs);
-  gap: 0.125rem var(--ax-space-xs);
+  padding: 0.0625rem 0.375rem;
+  gap: 0.0625rem 0.375rem;
 }
 
 .ax-subscriptions-health-hero .ax-health-metrics {
-  gap: 0.125rem;
+  gap: 0.0625rem;
 }
 
 .ax-subscriptions-health-hero .ax-health-metric {
   display: inline-flex;
   align-items: baseline;
-  gap: var(--ax-space-2xs);
+  gap: 0.1875rem;
   min-width: auto;
-  padding: 0.03125rem 0.3125rem;
+  padding: 0.03125rem 0.25rem;
 }
 
 .ax-subscriptions-health-hero .ax-health-metric span {
@@ -2498,6 +2519,7 @@ a.ax-kpi-card--linked:focus-visible {
 
 .ax-subscriptions-health-hero .ax-health-verdict {
   font-weight: 900;
+  flex-basis: 12rem;
 }
 
 .ax-subscriptions-health-hero .ax-health-metric-primary strong {
@@ -2585,8 +2607,8 @@ a.ax-kpi-card--linked:focus-visible {
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: var(--ax-space-xs);
-  padding: var(--ax-space-2xs) var(--ax-space-xs);
+  gap: 0.1875rem 0.375rem;
+  padding: 0.125rem 0.5rem;
   border: 1px solid var(--ax-accent-border);
   border-radius: var(--ax-radius-sm);
   background: color-mix(in srgb, var(--ax-accent-subtle) 38%, var(--ax-elevated));
@@ -2596,7 +2618,7 @@ a.ax-kpi-card--linked:focus-visible {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: var(--ax-space-2xs) var(--ax-space-xs);
+  gap: 0.0625rem 0.375rem;
   color: var(--ax-primary);
 }
 
@@ -2612,18 +2634,18 @@ a.ax-kpi-card--linked:focus-visible {
 .ax-inline-worklist-actions {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--ax-space-2xs);
+  gap: 0.125rem;
   align-items: center;
 }
 
 .ax-subscriptions-audit-strip {
-  padding: var(--ax-space-2xs) var(--ax-space-xs);
+  padding: 0.125rem 0.5rem;
   border-color: var(--ax-status-info-border);
   background: var(--ax-elevated);
 }
 
 .ax-subscriptions-webhook-strip {
-  padding: var(--ax-space-2xs) var(--ax-space-xs);
+  padding: 0.125rem 0.5rem;
   border-color: var(--ax-status-warning-border);
   background: var(--ax-elevated);
 }
@@ -2638,7 +2660,7 @@ a.ax-kpi-card--linked:focus-visible {
 }
 
 .ax-subscriptions-page .ax-filter-chip-bar {
-  padding: var(--ax-space-2xs) var(--ax-space-xs);
+  padding: 0.125rem 0.5rem;
   border-radius: var(--ax-radius-md);
 }
 
@@ -2671,7 +2693,7 @@ a.ax-kpi-card--linked:focus-visible {
 .ax-subscriptions-header.ax-page-header-compact .ax-page-header-title-copy,
 .ax-subscriptions-header.ax-page-header-compact .ax-page-header-stat-strip,
 .ax-subscriptions-header.ax-page-header-compact .ax-page-header-filter-toolbar {
-  gap: var(--ax-space-2xs);
+  gap: 0.125rem;
 }
 
 .ax-subscriptions-header .ax-display {
@@ -3243,7 +3265,18 @@ a.ax-kpi-card--linked:focus-visible {
 
 .ax-subscriptions-page .ax-data-table-grid th,
 .ax-subscriptions-page .ax-data-table-grid td {
-  padding: 0.125rem 0.375rem;
+  padding: 0.0625rem 0.25rem;
+  vertical-align: top;
+}
+
+.ax-subscriptions-page .ax-data-table-grid .ax-stack-sm,
+.ax-subscriptions-page .ax-subscription-row-state,
+.ax-subscriptions-page .ax-subscription-row-meta,
+.ax-subscriptions-page .ax-subscription-row-invoices,
+.ax-subscriptions-page .ax-webhook-row-status,
+.ax-subscriptions-page .ax-audit-summary-row {
+  gap: 0.0625rem;
+  line-height: var(--ax-leading-tight);
 }
 
 .ax-subscriptions-page .ax-data-table-grid th {
@@ -3698,9 +3731,9 @@ details[open].ax-dropdown .ax-dropdown-panel {
   display: inline-flex;
   align-items: center;
   gap: var(--ax-space-sm);
-  min-height: 2.5rem;
+  min-height: 2.75rem;
   padding: 0 0.875rem;
-  border: 1px solid var(--ax-border);
+  border: 2px solid var(--ax-border);
   border-radius: var(--ax-radius-pill);
   background: color-mix(in srgb, var(--ax-accent-subtle) 58%, var(--ax-elevated));
   color: var(--ax-primary);
@@ -4186,16 +4219,18 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
   width: 23rem;
   max-width: 23rem;
   min-width: 0;
-  border-color: var(--ax-accent-border);
+  border-color: var(--ax-accent-readable);
   border-radius: var(--ax-radius-sm);
-  background: var(--ax-elevated);
+  background: color-mix(in srgb, var(--ax-accent-subtle) 72%, var(--ax-elevated));
   font-weight: 700;
   cursor: pointer;
-  box-shadow: 0 0 0 2px color-mix(in srgb, var(--ax-accent-border) 32%, transparent);
+  box-shadow:
+    inset 0 0 0 1px color-mix(in srgb, var(--ax-accent-readable) 34%, transparent),
+    var(--ax-shadow-xs);
 }
 
 .ax-search-trigger:hover {
-  background: color-mix(in srgb, var(--ax-accent-subtle) 60%, var(--ax-elevated));
+  background: color-mix(in srgb, var(--ax-accent-subtle) 86%, var(--ax-elevated));
   border-color: var(--ax-accent-readable);
 }
 
@@ -4217,6 +4252,9 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
 
 .ax-search-trigger .ax-kbd {
   margin-left: auto;
+  border-color: var(--ax-accent-border);
+  background: var(--ax-base);
+  color: var(--ax-primary);
 }
 
 @media (max-width: 599.98px) { /* --ax-bp-sm ↓ */
@@ -4659,10 +4697,12 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
 }
 
 .ax-launcher-recovery .ax-launcher-action {
-  border-color: var(--ax-status-warning-border);
-  background: var(--ax-status-warning-solid);
-  color: var(--ax-status-warning-on-solid);
-  box-shadow: var(--ax-shadow-sm);
+  padding: 0;
+  border-color: transparent;
+  background: transparent;
+  color: var(--ax-warning-readable);
+  box-shadow: none;
+  font-weight: 900;
 }
 
 .ax-launcher:hover,
@@ -5113,17 +5153,33 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
 
 .ax-detail-health-caveats {
   grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.125rem 0.25rem;
+  align-items: center;
   margin: 0;
   padding: 0.125rem var(--ax-space-xs);
-  border: 1px solid var(--ax-status-warning-border);
+  border: 1px solid var(--ax-status-danger-border);
   border-radius: var(--ax-radius-sm);
-  background: color-mix(in srgb, var(--ax-status-warning-bg) 72%, var(--ax-elevated));
+  background: color-mix(in srgb, var(--ax-status-danger-bg) 70%, var(--ax-elevated));
   color: var(--ax-primary);
   font: var(--ax-type-label-sm-font);
 }
 
 .ax-detail-health-caveats strong {
+  flex-basis: 100%;
   color: var(--ax-primary);
+  font-size: var(--ax-type-sm);
+  font-weight: 900;
+}
+
+.ax-detail-health-caveat {
+  padding: 0.0625rem 0.375rem;
+  border: 1px solid var(--ax-status-danger-border);
+  border-radius: var(--ax-radius-sm);
+  background: var(--ax-status-danger-bg);
+  color: var(--ax-status-danger-text);
+  font: var(--ax-type-label-sm-font);
   font-weight: 800;
 }
 

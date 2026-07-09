@@ -176,7 +176,7 @@ defmodule AccrueAdmin.Live.DashboardLive do
                 <%= count(@stats.past_due_subscription_count, "at-risk subscription") %>
               </span>
               <span class="ax-launcher-action">
-                View dunning funnel and at-risk accounts <Icon.icon name={:arrow_right} size="sm" />
+                Open dunning funnel <Icon.icon name={:arrow_right} size="sm" />
               </span>
             </a>
 

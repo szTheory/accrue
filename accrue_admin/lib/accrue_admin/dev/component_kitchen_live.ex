@@ -70,7 +70,7 @@ if Mix.env() != :prod do
         active_organization_name={@active_organization_name}
       >
         <section class="ax-page ax-component-kitchen-page">
-          <header class="ax-page-header ax-page-header-compact">
+          <header class="ax-page-header ax-page-header-compact ax-component-kitchen-header">
             <Breadcrumbs.breadcrumbs
               items={[
                 %{label: "Dashboard", href: @admin_mount_path},
@@ -116,13 +116,13 @@ if Mix.env() != :prod do
           <section :if={@available?} class="ax-kpi-grid ax-kpi-row">
             <KpiCard.kpi_card
               label="Billing health status"
-              value="Needs attention"
-              delta="Warning: billing works; webhooks failed"
+              value="Unhealthy"
+              delta="Webhook deliveries failed"
               delta_tone="amber"
               class="ax-kpi-card-danger"
               href={@admin_mount_path <> "/webhooks?status=failed,dead"}
             >
-              <:meta>Resolve failed/dead webhook deliveries</:meta>
+              <:meta>Open failed/dead deliveries to restore admin billing health</:meta>
             </KpiCard.kpi_card>
             <KpiCard.kpi_card
               label="Queued invoice jobs"

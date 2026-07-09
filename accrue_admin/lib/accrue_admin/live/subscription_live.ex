@@ -308,9 +308,10 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
             <strong class="ax-detail-health-verdict"><%= health.headline %></strong>
             <span class="ax-detail-health-body"><%= health.body %></span>
           </div>
-          <p :if={health.caveats != []} class="ax-detail-health-caveats">
-            <strong>Setup gaps:</strong> <%= Enum.join(health.caveats, "; ") %>
-          </p>
+          <div :if={health.caveats != []} class="ax-detail-health-caveats" aria-label="Setup gaps blocking billing health">
+            <strong>Setup gaps blocking verification</strong>
+            <span :for={caveat <- health.caveats} class="ax-detail-health-caveat"><%= caveat %></span>
+          </div>
           <div :if={health.caveats != []} class="ax-detail-setup-actions" aria-label="Resolve missing billing setup">
             <span class="ax-detail-health-body">
               Fix setup in the source billing system, then use this admin view to verify the projected renewal, price, and amount.
@@ -834,40 +835,44 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
   defp summary_rows(subscription, customer, mount_path, scope) do
     subscription_label = subscription.processor_id || subscription.id
 
-    base_rows = [
-      %{
-        label: "Lifecycle state",
-        value: "#{humanize(subscription.status)} - #{predicate_summary(subscription)}"
-      },
-      %{
-        label: "Customer",
-        value: customer_label(customer),
-        action_label: "View",
-        action_context:
-          Copy.action_hidden_context("View",
-            resource: "customer",
-            object: "subscription #{subscription_label}"
-          ),
-        action_href: ScopedPath.build(mount_path, "/customers/#{customer.id}", scope)
-      },
-      %{
-        label: "Plan / price",
-        value: current_price_id(subscription) || not_projected_copy(:price)
-      }
-      |> maybe_put_summary_action(swap_plan_available?(subscription), %{
-        action_label: "Change",
-        action_context:
-          Copy.action_hidden_context("Change",
-            resource: "plan",
-            object: "subscription #{subscription_label}"
-          ),
-        action_event: "open_action_drawer",
-        action_value: "swap_plan"
-      }),
-      %{label: "Current period", value: current_period_summary(subscription)},
-      renews_or_ends_row(subscription),
-      %{label: "Amount (MRR)", value: mrr_summary(subscription)}
-    ]
+    base_rows =
+      [
+        %{
+          label: "Lifecycle state",
+          value: "#{humanize(subscription.status)} - #{predicate_summary(subscription)}"
+        }
+      ] ++
+        setup_gap_summary_rows(subscription, mount_path, scope) ++
+        [
+          %{
+            label: "Customer",
+            value: customer_label(customer),
+            action_label: "View",
+            action_context:
+              Copy.action_hidden_context("View",
+                resource: "customer",
+                object: "subscription #{subscription_label}"
+              ),
+            action_href: ScopedPath.build(mount_path, "/customers/#{customer.id}", scope)
+          },
+          %{
+            label: "Plan / price",
+            value: current_price_id(subscription) || not_projected_copy(:price)
+          }
+          |> maybe_put_summary_action(swap_plan_available?(subscription), %{
+            action_label: "Change",
+            action_context:
+              Copy.action_hidden_context("Change",
+                resource: "plan",
+                object: "subscription #{subscription_label}"
+              ),
+            action_event: "open_action_drawer",
+            action_value: "swap_plan"
+          }),
+          %{label: "Current period", value: current_period_summary(subscription)},
+          renews_or_ends_row(subscription),
+          %{label: "Amount (MRR)", value: mrr_summary(subscription)}
+        ]
 
     base_rows
     |> maybe_add_quantity_row(subscription, subscription_label)
@@ -908,6 +913,32 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
 
   defp maybe_put_summary_action(row, true, attrs), do: Map.merge(row, attrs)
   defp maybe_put_summary_action(row, _available?, _attrs), do: row
+
+  defp setup_gap_summary_rows(subscription, mount_path, scope) do
+    case projection_caveats(subscription) do
+      [] ->
+        []
+
+      caveats ->
+        [
+          %{
+            label: "Billing setup gaps",
+            value: Enum.join(caveats, ", "),
+            action_label: "Audit",
+            action_context:
+              Copy.action_hidden_context("Audit",
+                resource: "setup events",
+                object: "subscription #{subscription.processor_id || subscription.id}"
+              ),
+            action_href:
+              ScopedPath.build(mount_path, "/events", scope, %{
+                "subject_id" => subscription.id,
+                "subject_type" => "Subscription"
+              })
+          }
+        ]
+    end
+  end
 
   defp maybe_add_dunning_row(rows, subscription, subscription_label) do
     if subscription.dunning_campaign_started_at do
@@ -998,11 +1029,11 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
       caveats != [] ->
         %{
           tone: "slate",
-          label: "Status: Unhealthy",
-          answer: "Unhealthy",
-          headline: "Charges cannot be verified until setup is complete",
+          label: "Setup incomplete",
+          answer: "Billing health: Unhealthy",
+          headline: "Cannot verify charges until setup gaps are fixed",
           body:
-            "Billing cannot process or verify charges until required setup details are present. Check invoices and setup audit events before trusting recurring billing.",
+            "Missing renewal, price, or amount data prevents admin from confirming billing. Fix these setup gaps before trusting recurring billing.",
           caveats: caveats
         }
 
@@ -1061,10 +1092,10 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
   defp projection_caveats(subscription) do
     [
       unless(match?(%DateTime{}, subscription.current_period_end),
-        do: "Renewal date is not shown in admin"
+        do: "Missing renewal date"
       ),
-      unless(present?(current_price_id(subscription)), do: "Price is not confirmed in admin"),
-      "Amount is not confirmed in admin"
+      unless(present?(current_price_id(subscription)), do: "Missing price"),
+      "Missing amount"
     ]
     |> Enum.reject(&is_nil/1)
   end

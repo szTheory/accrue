@@ -1345,12 +1345,12 @@ defmodule AccrueAdmin.Copy do
 
   def home_launcher_invoices_copy, do: "Review, void, or chase open receivables."
 
-  def home_launcher_recovery_title, do: "Watch the dunning funnel + at-risk"
+  def home_launcher_recovery_title, do: "Open dunning funnel + at-risk"
 
   def home_launcher_recovery_copy,
-    do: "Use the dunning funnel to monitor failed-payment recovery and at-risk customers."
+    do: "Click this card to review failed-payment recovery and at-risk customers."
 
-  def home_launcher_recovery_meta, do: "Dunning funnel + at-risk accounts"
+  def home_launcher_recovery_meta, do: "Clickable recovery workspace"
 
   def home_launcher_developer_title, do: "Investigate an incident"
 
