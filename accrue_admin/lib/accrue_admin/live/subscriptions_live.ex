@@ -116,25 +116,25 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
         <FlashGroup.flash_group flashes={flash_messages(@flash)} />
 
         <section class="ax-inline-worklist ax-subscriptions-invoice-strip" aria-label="Billing health priority worklist">
-          <div class="ax-inline-worklist-copy">
+          <div class="ax-inline-worklist-copy ax-subscriptions-priority-copy">
             <strong><%= billing_priority_title(@summary) %></strong>
-            <span><%= billing_exposure_summary(@summary) %></span>
-            <span>Use row invoice links to verify affected subscriptions; process collection in the invoice workspace.</span>
+            <span class="ax-subscriptions-exposure"><%= billing_exposure_summary(@summary) %></span>
+            <span>Invoice queue is the primary workspace; bulk controls are grouped beside it.</span>
           </div>
           <div class="ax-inline-worklist-actions ax-subscriptions-priority-actions">
             <a
               class="ax-button ax-button-primary ax-button-sm ax-subscriptions-primary-action"
               href={invoice_queue_path(@admin_mount_path, @current_owner_scope)}
             >
-              Open invoices workspace filtered to open
+              Open invoice queue
             </a>
-            <span class="ax-subscriptions-secondary-group">
-              <strong>Queue controls</strong>
+            <span class="ax-subscriptions-secondary-group ax-subscriptions-secondary-group-primary">
+              <strong>Bulk invoice actions</strong>
               <a
                 class="ax-link-quiet ax-subscriptions-secondary-link"
                 href={scoped_path(@admin_mount_path, "/invoices", @current_owner_scope, %{"status" => "open", "work" => "next"})}
               >
-                Process next invoice
+                Process next open invoice
               </a>
               <a
                 class="ax-link-quiet ax-subscriptions-secondary-link"
@@ -144,27 +144,27 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
               </a>
             </span>
             <span class="ax-subscriptions-secondary-group">
+              <strong>Webhook debugging</strong>
+              <a
+                class="ax-link-quiet ax-subscriptions-secondary-link"
+                href={scoped_path(@admin_mount_path, "/webhooks", @current_owner_scope, %{"status" => "failed,dead"})}
+              >
+                Debug failed webhook deliveries
+              </a>
+            </span>
+            <span class="ax-subscriptions-secondary-group">
               <strong>Audit trail</strong>
               <a
-                class="ax-button ax-button-secondary ax-button-sm"
+                class="ax-link-quiet ax-subscriptions-secondary-link"
                 href={scoped_path(@admin_mount_path, "/events", @current_owner_scope, %{"type" => "subscription.created"})}
               >
                 Open actor/event log
               </a>
             </span>
             <span class="ax-subscriptions-secondary-group">
-              <strong>Webhook debugging</strong>
-              <a
-                class="ax-link-quiet ax-subscriptions-secondary-link"
-                href={scoped_path(@admin_mount_path, "/webhooks", @current_owner_scope, %{"status" => "failed,dead"})}
-              >
-                Debug failed deliveries
-              </a>
-            </span>
-            <span class="ax-subscriptions-secondary-group">
               <strong>Recovery</strong>
               <a class="ax-link-quiet ax-subscriptions-secondary-link" href={scoped_path(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}>
-                Open dunning funnel
+                Open dunning funnel and at-risk workspace
               </a>
             </span>
           </div>
@@ -194,7 +194,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
 
         <section class="ax-inline-worklist ax-subscriptions-webhook-strip" aria-label="Failed webhook delivery worklist">
           <div class="ax-inline-worklist-copy">
-            <strong>Failed/dead webhook deliveries</strong>
+            <strong>Failed webhook deliveries</strong>
             <span>Debug failed subscription.created deliveries without hunting through subscription rows.</span>
           </div>
           <div class="ax-inline-worklist-actions">
@@ -202,7 +202,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
               class="ax-button ax-button-warning ax-button-sm"
               href={scoped_path(@admin_mount_path, "/webhooks", @current_owner_scope, %{"status" => "failed,dead"})}
             >
-              Debug failed-webhook deliveries
+              Debug failed webhook deliveries
             </a>
             <a
               class="ax-button ax-button-secondary ax-button-sm"
@@ -375,20 +375,19 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
       </span>
       <span class="ax-webhook-row-status ax-webhook-row-status-warning">
         <strong>Invoice queue</strong>
-        <span>Open-invoice check for this subscription</span>
+        <span>Filtered open-invoice queue for this subscription</span>
         <a href="#{subscription_invoices_href}" class="ax-link">Open this row's invoice queue</a>
       </span>
       <span class="ax-webhook-row-status ax-webhook-row-status-warning">
-        <strong>Webhook delivery status</strong>
-        <span>Check failed/dead subscription.created deliveries</span>
-        <a href="#{webhook_href}" class="ax-link">Open failed/dead deliveries</a>
+        <strong>Webhook debugging</strong>
+        <span>Failed subscription.created deliveries</span>
+        <a href="#{webhook_href}" class="ax-link">Debug failed webhook deliveries</a>
       </span>
       <span><span class="ax-chip ax-label">Owner: #{escaped_o}</span> <span class="ax-chip ax-label">Tax: #{escaped_t}</span></span>
       <span class="ax-data-table-inline-actions">
-        <a href="#{subscription_invoices_href}" class="ax-link">Open this row's invoices</a>
         <a href="#{events_href}" class="ax-link">Open subscription audit log</a>
       </span>
-      <span class="ax-label ax-muted">Subscription queue is scoped to this row; webhook log opens failed/dead subscription.created delivery attempts.</span>
+      <span class="ax-label ax-muted">Webhook log opens failed subscription.created delivery attempts.</span>
     </span>
     """)
   end

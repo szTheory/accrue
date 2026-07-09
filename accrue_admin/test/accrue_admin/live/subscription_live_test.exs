@@ -112,12 +112,14 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
     assert html =~ "Open local invoice context"
 
     assert html =~ "Failed webhook deliveries for this subscription"
-    assert html =~ "Open failed/dead subscription.created deliveries"
+    assert html =~ "Open failed subscription.created deliveries"
     assert html =~ "Debug this subscription&#39;s webhooks"
+    assert html =~ "Open this subscription&#39;s invoice queue"
+    assert html =~ "Queue preview"
     assert html =~ "Open global open-invoice queue"
-    assert html =~ "Open dunning funnel"
+    assert html =~ "Open dunning funnel and at-risk workspace"
     assert html =~ "Main invoice queue"
-    assert html =~ "Local invoices for this subscription"
+    assert html =~ "Webhook debugger"
     assert html =~ "Open full audit event log"
   end
 
@@ -142,6 +144,9 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
 
     assert html =~
              "Fix the blocking fields in the source billing system before treating this subscription as healthy."
+
+    assert html =~
+             "Blocking fields must be fixed in the source billing system before charge projections can be trusted."
 
     refute html =~ "Billing health right now"
     assert html =~ "MRR"

@@ -4,6 +4,7 @@ defmodule AccrueAdmin.Nav do
   def items(mount_path, current_path, attention_counts \\ %{}) do
     org = org_slug(current_path)
 
+    invoice_badge = Map.get(attention_counts, :invoices, 0)
     recovery_badge = Map.get(attention_counts, :recovery, 0)
     developer_badge = Map.get(attention_counts, :developer, 0)
 
@@ -36,11 +37,11 @@ defmodule AccrueAdmin.Nav do
         badge: nil
       },
       %{
-        label: "Invoices",
+        label: "Invoices queue",
         href: nav_href(mount_path, "/invoices", org),
         icon: :invoices,
         group: "Billing",
-        badge: nil
+        badge: if(invoice_badge > 0, do: invoice_badge, else: nil)
       },
       %{
         label: "Payments",

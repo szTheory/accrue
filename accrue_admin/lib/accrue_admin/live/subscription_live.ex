@@ -18,7 +18,6 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
     FlashGroup,
     JsonViewer,
     RelatedResources,
-    StatusBadge,
     StepUpAuthModal,
     Timeline
   }
@@ -214,8 +213,16 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
           eyebrow={Copy.subscription_detail_eyebrow()}
           title={subscription_title(@subscription, @customer)}
         >
-          <:status><StatusBadge.status_badge status={@subscription.status} /></:status>
+          <:status>
+            <span class={["ax-status-badge", "ax-status-badge-" <> health.tone]}>
+              <span class="ax-status-dot"></span><%= health.label %>
+            </span>
+          </:status>
           <:facts>
+            <span class={["ax-summary-fact", "ax-summary-fact-health", "ax-summary-fact-health-" <> health.tone]}>
+              <strong>Billing health</strong>
+              <span class="ax-summary-health-verdict"><%= health.answer %></span>
+            </span>
             <span class="ax-summary-fact">
               <strong>Subscription</strong>
               <%= @subscription.processor_id || @subscription.id %>
@@ -244,26 +251,36 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
             <span class="ax-label ax-detail-priority-label">Main invoice queue</span>
             <a
               class="ax-button ax-button-primary ax-button-sm ax-detail-priority-primary ax-detail-invoice-primary"
-              href={ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope, %{"status" => "open"})}
+              href={ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope, %{"status" => "open", "subscription_id" => @subscription.id})}
             >
-              Open global open-invoice queue
+              Open this subscription's invoice queue
             </a>
+            <ul class="ax-detail-local-queue" aria-label="Local open invoice queue preview">
+              <li>
+                <strong>Queue preview</strong>
+                <span>Filtered to this subscription's open invoices</span>
+              </li>
+              <li>
+                <strong>Bulk actions</strong>
+                <span>Process next invoice or send reminder in Invoices</span>
+              </li>
+            </ul>
           </div>
           <div class="ax-detail-priority-group ax-detail-priority-group-recovery">
-            <span class="ax-label ax-detail-priority-label">Dunning recovery</span>
+            <span class="ax-label ax-detail-priority-label">Dunning and at-risk</span>
             <a
               class="ax-button ax-button-recovery ax-button-sm ax-detail-recovery-primary"
               href={ScopedPath.build(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}
             >
-              Open dunning funnel
+              Open dunning funnel and at-risk workspace
             </a>
           </div>
           <div class="ax-detail-priority-links">
             <a
               class="ax-link-quiet"
-              href={ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope, %{"status" => "open", "subscription_id" => @subscription.id})}
+              href={ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope, %{"status" => "open"})}
             >
-              Local invoices for this subscription
+              Open global open-invoice queue
             </a>
             <a
               class="ax-link-quiet"
@@ -274,7 +291,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
                 })
               }
             >
-              Failed-webhook debugger
+              Webhook debugger
             </a>
           </div>
         </section>
@@ -294,7 +311,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
           </div>
           <div :if={health.caveats != []} class="ax-detail-setup-actions" aria-label="Fix missing billing data">
             <span class="ax-detail-health-body">
-              Fix missing renewal, price, and amount data in the source billing system, then verify the charge projection here.
+              Blocking fields must be fixed in the source billing system before charge projections can be trusted.
             </span>
             <a
               class="ax-button ax-button-secondary ax-button-sm"
@@ -2035,7 +2052,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
           icon: :events,
           label: "Failed webhook deliveries for this subscription",
           value:
-            "Open failed/dead subscription.created deliveries for #{subscription.processor_id || subscription.id}; inspect payload, retry trail, and replay action.",
+            "Open failed subscription.created deliveries for #{subscription.processor_id || subscription.id}; inspect payload, retry trail, and replay action.",
           action_label: "Debug this subscription's webhooks",
           href:
             ScopedPath.build(mount_path, "/webhooks", scope, %{

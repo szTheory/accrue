@@ -105,7 +105,7 @@ defmodule AccrueAdmin.DashboardLiveTest do
     assert html =~ Copy.home_attention_action_investigate()
     assert html =~ "Billing is unhealthy"
     assert html =~ "Billing health: unhealthy"
-    assert html =~ "Fix failed deliveries, recover past-due subscriptions"
+    assert html =~ "failed webhook delivery"
     assert html =~ "Debug dead-lettered webhooks"
     assert html =~ "Open invoice queue to $0.00"
     assert html =~ ~s(href="/billing/events?q=meter_event")

@@ -2141,6 +2141,22 @@ a.ax-kpi-card--linked:focus-visible {
   font-weight: 900;
 }
 
+.ax-dev-secondary-route {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.03125rem 0.25rem;
+  border: 1px solid var(--ax-border);
+  border-radius: var(--ax-radius-sm);
+  background: var(--ax-elevated);
+  font: var(--ax-type-label-sm-font);
+}
+
+.ax-dev-secondary-route strong {
+  color: var(--ax-muted);
+  font-weight: 800;
+}
+
 .ax-flash-group {
   display: grid;
   position: relative;
@@ -2730,6 +2746,15 @@ a.ax-kpi-card--linked:focus-visible {
   font-weight: 900;
 }
 
+.ax-subscriptions-priority-copy strong {
+  color: var(--ax-status-danger-text);
+  font-weight: 900;
+}
+
+.ax-subscriptions-exposure {
+  font-weight: 800;
+}
+
 .ax-subscriptions-priority-actions {
   align-items: stretch;
   gap: 0.125rem 0.375rem;
@@ -2747,6 +2772,11 @@ a.ax-kpi-card--linked:focus-visible {
   background: var(--ax-elevated);
   color: var(--ax-primary);
   font: var(--ax-type-label-sm-font);
+}
+
+.ax-subscriptions-secondary-group-primary {
+  border-color: var(--ax-accent-border);
+  background: color-mix(in srgb, var(--ax-accent-subtle) 34%, var(--ax-elevated));
 }
 
 .ax-subscriptions-secondary-group strong {
@@ -4499,11 +4529,12 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
 
 /* Home page vertical rhythm + section headers */
 .ax-home {
-  gap: 0.1875rem;
+  gap: 0.125rem;
 }
 
 .ax-home > .ax-page-header {
   gap: 0;
+  padding-block: 0.125rem;
 }
 
 .ax-home > .ax-page-header .ax-display {
@@ -4538,7 +4569,7 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
 .ax-home-header-health {
   display: flex;
   flex-wrap: wrap;
-  gap: 0 0.3125rem;
+  gap: 0 0.25rem;
   align-items: center;
   width: min(100%, 54rem);
   padding: 0;
@@ -4574,7 +4605,7 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
 
 .ax-home-section {
   display: grid;
-  gap: var(--ax-space-xs);
+  gap: 0.25rem;
   min-width: 0;
 }
 
@@ -4642,7 +4673,7 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
   display: flex;
   align-items: center;
   gap: var(--ax-space-xs);
-  padding: 0.1875rem 0.5rem;
+  padding: 0.125rem 0.4375rem;
   border-bottom: 1px solid var(--ax-border);
   color: var(--ax-primary);
   text-decoration: none;
@@ -4786,7 +4817,7 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
 .ax-launchers {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 0.375rem;
+  gap: 0.25rem;
 }
 
 .ax-launcher {
@@ -4794,7 +4825,7 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
   grid-template-columns: auto minmax(0, 1fr);
   grid-template-rows: auto auto auto auto;
   gap: 0.03125rem 0.375rem;
-  padding: 0.25rem 0.5rem;
+  padding: 0.1875rem 0.4375rem;
   border: 1px solid var(--ax-border);
   border-radius: var(--ax-radius-sm);
   background: var(--ax-elevated);
@@ -5156,7 +5187,7 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
 }
 
 .ax-subscription-detail-page .ax-summary-card {
-  padding: 0.0625rem var(--ax-space-xs);
+  padding: 0 var(--ax-space-xs);
   gap: var(--ax-space-2xs) var(--ax-space-xs);
 }
 
@@ -5228,7 +5259,7 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
   display: inline-grid;
   align-items: start;
   gap: 0;
-  padding: var(--ax-space-2xs) var(--ax-space-xs);
+  padding: 0.03125rem 0.3125rem;
   border: 1px solid var(--ax-border);
   border-radius: var(--ax-radius-sm);
 }
@@ -5258,7 +5289,7 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
   grid-template-columns: minmax(0, 1fr);
   align-items: start;
   gap: 0;
-  padding: 0.03125rem 0.3125rem;
+  padding: 0 0.25rem;
   border: 1px solid var(--ax-border);
   border-radius: var(--ax-radius-sm);
   color: var(--ax-primary);
@@ -5385,7 +5416,7 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
 
 .ax-detail-priority-actions-split {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: minmax(18rem, 1.4fr) minmax(13rem, 0.8fr) minmax(12rem, 0.8fr);
   gap: 0.125rem;
   align-items: stretch;
   padding: 0.125rem;
@@ -5403,6 +5434,29 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
   border: 1px solid var(--ax-border);
   border-radius: var(--ax-radius-sm);
   background: var(--ax-elevated);
+}
+
+.ax-detail-local-queue {
+  display: grid;
+  gap: 0.03125rem;
+  flex-basis: 100%;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  color: var(--ax-primary);
+  font: var(--ax-type-label-sm-font);
+}
+
+.ax-detail-local-queue li {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.125rem 0.3125rem;
+  align-items: center;
+}
+
+.ax-detail-local-queue strong {
+  color: var(--ax-muted);
+  font-weight: 800;
 }
 
 .ax-detail-priority-group-primary {

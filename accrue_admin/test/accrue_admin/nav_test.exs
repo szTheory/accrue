@@ -34,7 +34,7 @@ defmodule AccrueAdmin.NavTest do
     items = Nav.items("/billing", "/billing")
 
     assert Enum.find(items, &(&1.label == "Customers")).group == "Billing"
-    assert Enum.find(items, &(&1.label == "Invoices")).group == "Billing"
+    assert Enum.find(items, &(&1.label == "Invoices queue")).group == "Billing"
     assert Enum.find(items, &(&1.label == "Recovery")).group == "Recovery"
     assert Enum.find(items, &(&1.label == "Webhooks")).group == "Developer"
     assert Enum.find(items, &(&1.label == "Audit event log")).group == "Audit"
@@ -52,6 +52,12 @@ defmodule AccrueAdmin.NavTest do
     items = Nav.items("/billing", "/billing", %{recovery: 2, developer: 0})
     recovery = Enum.find(items, &(&1.label == "Recovery"))
     assert recovery.badge == 2
+  end
+
+  test "items/3 with invoices > 0 returns Invoices queue item with badge" do
+    items = Nav.items("/billing", "/billing", %{invoices: 3, recovery: 0, developer: 0})
+    invoices = Enum.find(items, &(&1.label == "Invoices queue"))
+    assert invoices.badge == 3
   end
 
   test "items/3 with recovery == 0 returns Recovery group item with badge: nil" do

@@ -80,17 +80,8 @@ if Mix.env() != :prod do
             <h1 class="ax-heading ax-component-kitchen-title">Billing health dashboard</h1>
             <p class="ax-page-description">Monitor open invoice exposure, failed webhooks, customer lookup, and audit trail from live billing workspaces.</p>
             <div class="ax-page-actions">
-              <a class="ax-button ax-button-secondary ax-button-sm" href={@admin_mount_path <> "/customers"}>
-                Find one customer - see everything
-              </a>
               <a class="ax-button ax-button-primary ax-button-sm" href={@admin_mount_path <> "/invoices?status=open"}>
                 Open open-invoice queue first
-              </a>
-              <a class="ax-button ax-button-recovery ax-button-sm" href={@admin_mount_path <> "/analytics/recovery"}>
-                Open dunning funnel workspace
-              </a>
-              <a class="ax-button ax-button-secondary ax-button-sm" href={@admin_mount_path <> "/webhooks?status=failed,dead"}>
-                Debug failed webhooks
               </a>
             </div>
             <section class="ax-inline-worklist ax-dev-audit-strip" aria-label="Component kitchen audit trail">
@@ -117,20 +108,38 @@ if Mix.env() != :prod do
 
           <section :if={@available?} class="ax-inline-worklist ax-dev-production-strip" aria-label="Production billing entrypoints">
             <div class="ax-inline-worklist-copy">
-              <strong>Billing health: monitor open invoice exposure</strong>
+              <strong>Billing health: invoice queue first</strong>
               <span>Open invoice exposure target: $0.00.</span>
-              <span>Use customer search for one account; use queue links for collection, webhooks, and audit trail.</span>
+              <span>Use the open-invoice queue as the primary workspace; secondary routes stay grouped by job.</span>
             </div>
             <div class="ax-inline-worklist-actions">
               <a class="ax-button ax-button-primary ax-button-sm" href={@admin_mount_path <> "/invoices?status=open"}>
                 Open production invoice queue
               </a>
-              <a class="ax-link-quiet" href={@admin_mount_path <> "/events"}>
-                Open production audit log
-              </a>
-              <a class="ax-link-quiet" href={@admin_mount_path <> "/webhooks?status=failed,dead"}>
-                Debug production webhooks
-              </a>
+              <span class="ax-dev-secondary-route">
+                <strong>Customer</strong>
+                <a class="ax-link-quiet" href={@admin_mount_path <> "/customers"}>
+                  Search customer records
+                </a>
+              </span>
+              <span class="ax-dev-secondary-route">
+                <strong>Audit</strong>
+                <a class="ax-link-quiet" href={@admin_mount_path <> "/events"}>
+                  Open production audit log
+                </a>
+              </span>
+              <span class="ax-dev-secondary-route">
+                <strong>Webhooks</strong>
+                <a class="ax-link-quiet" href={@admin_mount_path <> "/webhooks?status=failed,dead"}>
+                  Debug failed webhook deliveries
+                </a>
+              </span>
+              <span class="ax-dev-secondary-route">
+                <strong>Recovery</strong>
+                <a class="ax-link-quiet" href={@admin_mount_path <> "/analytics/recovery"}>
+                  Open dunning funnel and at-risk workspace
+                </a>
+              </span>
             </div>
           </section>
 
@@ -147,7 +156,7 @@ if Mix.env() != :prod do
               <Button.button variant="primary" href={@admin_mount_path <> "/customers"}>Find one customer - see everything</Button.button>
               <Button.button variant="secondary" type="button">Primary action specimen</Button.button>
               <Button.button variant="secondary" type="button">Secondary action</Button.button>
-              <Button.button variant="secondary" class="ax-button-recovery" href={@admin_mount_path <> "/analytics/recovery"}>Open dunning funnel workspace</Button.button>
+              <Button.button variant="secondary" class="ax-button-recovery" href={@admin_mount_path <> "/analytics/recovery"}>Open dunning funnel and at-risk workspace</Button.button>
               <Button.button variant="ghost" href={@admin_mount_path <> "/webhooks"}>Ghost link</Button.button>
               <DropdownMenu.dropdown_menu
                 label="More billing actions"

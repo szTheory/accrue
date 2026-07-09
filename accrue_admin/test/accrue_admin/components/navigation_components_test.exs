@@ -311,6 +311,7 @@ defmodule AccrueAdmin.NavigationComponentsTest do
   describe "Sidebar static groups" do
     defp make_items(mount_path \\ "/billing") do
       AccrueAdmin.Nav.items(mount_path, mount_path <> "/", %{
+        invoices: 4,
         recovery: 3,
         developer: 2
       })
@@ -359,6 +360,7 @@ defmodule AccrueAdmin.NavigationComponentsTest do
       # Catalog has badge: nil → no badge rendered for Catalog
       # (We check the Developer badge aria-label to confirm count appears)
       assert html =~ ~s(ax-badge-warning)
+      assert html =~ ~s(aria-label="4 open invoices")
     end
 
     test "badge has class ax-badge-warning for Recovery group" do

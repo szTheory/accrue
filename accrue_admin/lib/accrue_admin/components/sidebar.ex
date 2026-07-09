@@ -70,8 +70,8 @@ defmodule AccrueAdmin.Components.Sidebar do
     """
   end
 
-  # Returns {group, items, group_meta} 3-tuples. group_meta is derived from the first item
-  # in each group (all items in a group share :badge per nav.ex convention).
+  # Returns {group, items, group_meta} 3-tuples. group_meta uses the first positive
+  # badge in a group so a specific link can lift attention to the static group label.
   #
   # Uses Enum.group_by (order-independent) followed by a deterministic sort so
   # duplicate groups are merged even if Nav.items/3 ever returns them
@@ -89,13 +89,15 @@ defmodule AccrueAdmin.Components.Sidebar do
 
     Enum.map(group_order, fn group ->
       group_items = Map.fetch!(grouped, group)
-      [first | _] = group_items
-      badge = Map.get(first, :badge)
+      badge = Enum.find_value(group_items, &positive_badge/1)
       tone = badge_tone(group)
       group_meta = %{badge: badge, tone: tone}
       {group, group_items, group_meta}
     end)
   end
+
+  defp positive_badge(%{badge: badge}) when is_integer(badge) and badge > 0, do: badge
+  defp positive_badge(_item), do: nil
 
   # Returns the full CSS class string for a badge based on tone.
   defp badge_class(:warning), do: "ax-badge ax-badge-warning"
@@ -103,11 +105,13 @@ defmodule AccrueAdmin.Components.Sidebar do
   defp badge_class(_), do: "ax-badge"
 
   # Returns an accessible aria-label string for a group badge.
+  defp badge_aria_label("Billing", n), do: "#{n} open invoices"
   defp badge_aria_label("Recovery", n), do: "#{n} at-risk subscriptions"
   defp badge_aria_label("Developer", n), do: "#{n} webhooks need attention"
   defp badge_aria_label(group, n), do: "#{n} #{group} items need attention"
 
   # Maps group name to status tone for badge coloring.
+  defp badge_tone("Billing"), do: :warning
   defp badge_tone("Recovery"), do: :warning
   defp badge_tone("Developer"), do: :danger
   defp badge_tone(_), do: :neutral

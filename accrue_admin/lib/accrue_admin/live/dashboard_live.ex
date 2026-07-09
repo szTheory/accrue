@@ -64,7 +64,7 @@ defmodule AccrueAdmin.Live.DashboardLive do
               <span class="ax-status-dot"></span>Billing is unhealthy
             </span>
             <strong><%= attention_health_summary(@stats) %></strong>
-            <span><%= attention_health_detail(@stats) %></span>
+            <span><%= attention_health_counts(@stats) %></span>
           </div>
           <div class="ax-page-actions">
             <a
@@ -311,12 +311,12 @@ defmodule AccrueAdmin.Live.DashboardLive do
                 class="ax-button ax-button-warning ax-button-sm"
                 href={ScopedPath.build(@admin_mount_path, "/webhooks", @current_owner_scope, %{"status" => "failed,dead"})}
               >
-                Open all failed/dead webhook deliveries
+                Open all failed webhook deliveries
               </a>
             </header>
 
             <p class="ax-body ax-activity-context">
-              Recent rows below are individual deliveries. Use the failed/dead webhook queue for the complete debugging workflow.
+              Recent rows below are individual deliveries. Use the failed webhook queue for the complete debugging workflow.
             </p>
 
             <Timeline.timeline
@@ -412,12 +412,10 @@ defmodule AccrueAdmin.Live.DashboardLive do
     |> Enum.filter(& &1)
   end
 
-  defp attention_health_summary(stats) do
-    "Billing health: unhealthy - #{count(stats.blocked_webhook_count, "dead webhook")}, #{count(stats.past_due_subscription_count, "past-due subscription")}, #{count(stats.failed_meter_event_count, "blocked usage record")}"
-  end
+  defp attention_health_summary(_stats), do: "Billing health: unhealthy"
 
-  defp attention_health_detail(_stats) do
-    "Fix failed deliveries, recover past-due subscriptions, and unblock usage metering before billing is healthy."
+  defp attention_health_counts(stats) do
+    "#{count(stats.blocked_webhook_count, "failed webhook delivery")}, #{count(stats.past_due_subscription_count, "at-risk subscription")}, #{count(stats.failed_meter_event_count, "blocked usage record")} need work."
   end
 
   defp count(1, noun), do: "1 #{noun}"
