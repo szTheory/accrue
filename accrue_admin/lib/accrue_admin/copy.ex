@@ -1304,7 +1304,8 @@ defmodule AccrueAdmin.Copy do
   def home_intro_headline, do: "Billing operations"
 
   def home_intro_copy,
-    do: "Start with what needs you, then jump straight to the task that resolves it."
+    do:
+      "Check billing health first, then open the invoice, dunning, webhook, or customer workspace that resolves the issue."
 
   def home_tasks_heading, do: "Jump to a task"
 

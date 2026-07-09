@@ -147,7 +147,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
 
           <:actions>
             <a
-              class="ax-button ax-button-primary ax-button-sm"
+              class="ax-button ax-button-secondary ax-button-sm"
               href={scoped_path(@admin_mount_path, "/customers", @current_owner_scope)}
             >
               Find one customer
@@ -244,7 +244,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
           </div>
           <div class="ax-inline-worklist-actions">
             <a
-              class="ax-button ax-button-primary ax-button-sm"
+              class="ax-button ax-button-secondary ax-button-sm"
               href={scoped_path(@admin_mount_path, "/events", @current_owner_scope, %{"type" => "subscription.created"})}
             >
               Open full audit event log
@@ -265,7 +265,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
           </div>
           <div class="ax-inline-worklist-actions">
             <a
-              class="ax-button ax-button-primary ax-button-sm"
+              class="ax-button ax-button-warning ax-button-sm"
               href={scoped_path(@admin_mount_path, "/webhooks", @current_owner_scope, %{"status" => "failed,dead"})}
             >
               Open all failed/dead deliveries
@@ -495,7 +495,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
       <span class="ax-webhook-row-status ax-webhook-row-status-warning">
         <strong>Webhook delivery status</strong>
         <span>Check failed/dead deliveries for this subscription</span>
-        <a href="#{webhook_href}" class="ax-button ax-button-primary ax-button-sm">Open failed/dead deliveries</a>
+        <a href="#{webhook_href}" class="ax-button ax-button-warning ax-button-sm">Open failed/dead deliveries</a>
       </span>
       <span><span class="ax-chip ax-label">Owner: #{escaped_o}</span> <span class="ax-chip ax-label">Tax: #{escaped_t}</span></span>
       <span class="ax-data-table-inline-actions">
@@ -550,6 +550,8 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
   defp identity_cell(row, mount_path, owner_scope) do
     customer_href = scoped_path(mount_path, "/customers/#{row.customer_id}", owner_scope)
     subscription_href = scoped_path(mount_path, "/subscriptions/#{row.id}", owner_scope)
+    {status, state_label} = lifecycle_status(row)
+    state_tone = status_tone(status)
 
     subscription_invoices_href =
       mount_path
@@ -564,10 +566,13 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
 
     Phoenix.HTML.raw("""
     <span class="ax-stack-sm">
+      <span class="ax-subscription-row-state ax-status-badge ax-status-badge-#{state_tone}">
+        <span class="ax-status-dot"></span>#{escape(state_label)}
+      </span>
       <a href="#{customer_href}" class="ax-link">#{escape(customer_label(row))}</a>
       <span class="ax-label ax-muted"><strong>Customer ID</strong> #{customer_id}</span>
       <a href="#{subscription_href}" class="ax-label ax-muted"><strong>Subscription</strong> #{subscription_id}</a>
-      <a href="#{subscription_invoices_href}" class="ax-button ax-button-primary ax-button-sm">Open invoice queue workspace</a>
+      <a href="#{subscription_invoices_href}" class="ax-button ax-button-secondary ax-button-sm">Open filtered invoice queue</a>
     </span>
     """)
   end

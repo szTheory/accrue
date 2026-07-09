@@ -89,11 +89,23 @@ if Mix.env() != :prod do
           </section>
 
           <section :if={@available?} class="ax-kpi-grid ax-kpi-row">
-            <KpiCard.kpi_card label="Primary KPI" value="$42.00" delta="healthy" delta_tone="moss">
-              <:meta>Sample money formatting in the packaged shell</:meta>
+            <KpiCard.kpi_card
+              label="Primary KPI"
+              value="$42.00"
+              delta="healthy"
+              delta_tone="moss"
+              href={@admin_mount_path <> "/invoices?status=open"}
+            >
+              <:meta>Open invoice queue view</:meta>
             </KpiCard.kpi_card>
-            <KpiCard.kpi_card label="Queued jobs" value="7" delta="needs review" delta_tone="amber">
-              <:meta>Visual check for operator-heavy status cards</:meta>
+            <KpiCard.kpi_card
+              label="Queued invoice jobs"
+              value="7"
+              delta="needs review"
+              delta_tone="amber"
+              href={@admin_mount_path <> "/invoices?status=open"}
+            >
+              <:meta>Review queued invoices</:meta>
             </KpiCard.kpi_card>
           </section>
 
@@ -109,12 +121,14 @@ if Mix.env() != :prod do
             <div class="ax-dev-grid ax-toolbar">
               <Button.button variant="primary" type="button">Primary action</Button.button>
               <Button.button variant="secondary" type="button">Secondary action</Button.button>
+              <Button.button variant="secondary" class="ax-button-recovery" href={@admin_mount_path <> "/analytics/recovery"}>Open recovery analytics</Button.button>
               <Button.button variant="ghost" href={@admin_mount_path <> "/webhooks"}>Ghost link</Button.button>
               <DropdownMenu.dropdown_menu
-                label="More actions"
+                label="More billing actions"
                 items={[
                   %{label: "Open webhooks", href: @admin_mount_path <> "/webhooks", description: "Inspect event delivery"},
-                  %{label: "Open events", href: @admin_mount_path <> "/events", description: "Review audit timeline"}
+                  %{label: "Open events", href: @admin_mount_path <> "/events", description: "Review audit timeline"},
+                  %{label: "Open recovery analytics", href: @admin_mount_path <> "/analytics/recovery", description: "Review dunning and at-risk accounts"}
                 ]}
               />
             </div>

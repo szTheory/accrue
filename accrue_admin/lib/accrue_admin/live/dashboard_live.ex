@@ -414,15 +414,8 @@ defmodule AccrueAdmin.Live.DashboardLive do
   end
 
   defp attention_health_summary(stats) do
-    summary =
-      [
-        count(stats.blocked_webhook_count, "dead-lettered webhook"),
-        count(stats.past_due_subscription_count, "past-due subscription"),
-        count(stats.failed_meter_event_count, "failed meter event")
-      ]
-      |> Enum.join(" · ")
-
-    summary <> " need review."
+    "Highest priority: #{count(stats.blocked_webhook_count, "dead-lettered webhook")}. " <>
+      "Also review #{count(stats.past_due_subscription_count, "past-due subscription")} and #{count(stats.failed_meter_event_count, "failed meter event")}."
   end
 
   defp count(1, noun), do: "1 #{noun}"

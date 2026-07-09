@@ -247,7 +247,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
                 })
               }
             >
-              Open invoice queue workspace for this subscription
+              Open filtered open-invoice queue
             </a>
             <a
               class="ax-button ax-button-secondary ax-button-sm"
@@ -310,7 +310,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
                 })
               }
             >
-              Open invoice queue workspace for this subscription
+              Open filtered open-invoice queue
             </a>
           </div>
         </section>
@@ -2027,9 +2027,9 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
         %{
           icon: :invoices,
           label: Copy.subscription_drill_link_invoices_for_subscription(),
-          value: "Open the invoice queue workspace filtered to this subscription",
+          value: "Open actionable open invoices filtered to this subscription",
           emphasis: :primary,
-          action_label: "Open invoice queue workspace",
+          action_label: "Open filtered open-invoice queue",
           href:
             ScopedPath.build(mount_path, "/invoices", scope, %{
               "status" => "open",
