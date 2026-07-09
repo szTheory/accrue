@@ -14,7 +14,8 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
     DataTable,
     FilterChipBar,
     FlashGroup,
-    PageHeader
+    PageHeader,
+    StatStrip
   }
 
   alias AccrueAdmin.Components.StatusBadge
@@ -118,6 +119,28 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
               Open dunning funnel
             </a>
           </:actions>
+          <:stat_strip>
+            <StatStrip.stat_strip label="Dunning funnel and invoice queue summary">
+              <:stat
+                label="At-risk"
+                value={Integer.to_string(@summary.past_due_count)}
+                tone="amber"
+                href={scoped_path(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}
+              />
+              <:stat
+                label="Open invoices"
+                value={Integer.to_string(@summary.open_invoice_count)}
+                tone="amber"
+                href={invoice_queue_path(@admin_mount_path, @current_owner_scope)}
+              />
+              <:stat
+                label="Recovery funnel"
+                value="Open"
+                tone="cobalt"
+                href={scoped_path(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}
+              />
+            </StatStrip.stat_strip>
+          </:stat_strip>
           <:filter_toolbar>
             <DataTable.filter_toolbar
               id="subscriptions"
@@ -142,26 +165,6 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
           <div class="ax-inline-worklist-copy ax-subscriptions-priority-copy">
             <strong><%= billing_priority_title(@summary) %></strong>
             <span class="ax-subscriptions-exposure"><%= billing_exposure_summary(@summary) %></span>
-          </div>
-          <div class="ax-inline-worklist-actions ax-subscriptions-priority-actions">
-            <a
-              class="ax-button ax-button-primary ax-button-sm ax-subscriptions-primary-action"
-              href={invoice_queue_path(@admin_mount_path, @current_owner_scope)}
-            >
-              Open Invoices queue
-            </a>
-            <a
-              class="ax-button ax-button-secondary ax-button-sm"
-              href={scoped_path(@admin_mount_path, "/invoices", @current_owner_scope, %{"status" => "open", "work" => "next"})}
-            >
-              Process next invoice
-            </a>
-            <a
-              class="ax-button ax-button-secondary ax-button-sm"
-              href={scoped_path(@admin_mount_path, "/invoices", @current_owner_scope, %{"status" => "open", "work" => "send_reminder"})}
-            >
-              Send invoice reminders
-            </a>
           </div>
         </section>
 
@@ -374,17 +377,17 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
         <span><strong>Event</strong><em>subscription.created</em></span>
         <span><strong>When</strong><em>#{created}</em></span>
       </span>
-      <span class="ax-webhook-row-status ax-webhook-row-status-warning">
+      <span class="ax-webhook-row-status ax-webhook-row-status-warning ax-subscription-row-signal-primary">
         <strong>Invoice queue</strong>
         <span>Dedicated invoice queue filtered to this subscription</span>
         <a href="#{subscription_invoices_href}" class="ax-link">Open row in dedicated invoice queue</a>
       </span>
-      <span class="ax-webhook-row-status ax-webhook-row-status-warning">
+      <span class="ax-webhook-row-status ax-webhook-row-status-warning ax-subscription-row-signal-secondary">
         <strong>Webhook debugging</strong>
         <span>Failed subscription.created deliveries</span>
         <a href="#{webhook_href}" class="ax-button ax-button-warning ax-button-sm">Debug failed webhook deliveries</a>
       </span>
-      <span><span class="ax-chip ax-label">Owner: #{escaped_o}</span> <span class="ax-chip ax-label">Tax: #{escaped_t}</span></span>
+      <span class="ax-subscription-row-admin-chips"><span class="ax-chip ax-label">Owner: #{escaped_o}</span> <span class="ax-chip ax-label">Tax: #{escaped_t}</span></span>
       <span class="ax-data-table-inline-actions">
         <a href="#{events_href}" class="ax-link">Open who did what, when event log</a>
       </span>
@@ -394,9 +397,9 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
   end
 
   defp billing_priority_title(%{open_invoice_count: count}) when count > 0,
-    do: "Billing health: No - #{count(count, "open invoice")}"
+    do: "Billing health: Unhealthy - #{count(count, "open invoice")}"
 
-  defp billing_priority_title(_summary), do: "Billing health: Yes - invoices clear"
+  defp billing_priority_title(_summary), do: "Billing health: Healthy - invoices clear"
 
   defp billing_exposure_summary(%{open_invoice_count: count} = summary) when count > 0 do
     "#{format_minor(summary.open_invoice_exposure_minor, "usd")} above $0.00 target."

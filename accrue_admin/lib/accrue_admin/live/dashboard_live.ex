@@ -145,18 +145,11 @@ defmodule AccrueAdmin.Live.DashboardLive do
             <a class="ax-launcher ax-launcher-primary" href={ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope, %{"status" => "open"})}>
               <span class="ax-launcher-icon"><Icon.icon name={:invoices} size="lg" /></span>
               <span class="ax-launcher-title"><%= Copy.home_launcher_invoices_title() %></span>
-              <span class="ax-launcher-copy"><%= Copy.home_launcher_invoices_copy() %></span>
               <span class="ax-launcher-action">
                 Work the dedicated invoice queue <Icon.icon name={:arrow_right} size="sm" />
               </span>
-              <span :if={@stats.open_invoice_count > 0} class="ax-launcher-meta">
-                <%= count(@stats.open_invoice_count, "open invoice") %>: review, retry, or void
-              </span>
               <span :if={@stats.open_invoice_count > 0} class="ax-launcher-meta ax-launcher-meta-warn">
-                Inline queue: <%= format_minor(@stats.open_invoice_balance_minor, "usd") %> open above $0.00 target
-              </span>
-              <span class="ax-launcher-meta ax-launcher-meta-actions">
-                Actions: send reminder, retry payment, void invoice
+                <%= count(@stats.open_invoice_count, "open invoice") %>; <%= format_minor(@stats.open_invoice_balance_minor, "usd") %> above $0.00 target
               </span>
             </a>
 

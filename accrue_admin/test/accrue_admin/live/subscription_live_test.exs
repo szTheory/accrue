@@ -135,7 +135,7 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
     assert html =~ "Dunning &amp; recovery"
     assert html =~ "Tax &amp; compliance"
     assert html =~ "invoice.payment_failed"
-    assert html =~ "No - billing is not healthy"
+    assert html =~ "Blocked - setup data missing"
     assert html =~ "Billing blocked"
     assert html =~ "ax-detail-health-summary-slate"
     assert html =~ "ax-detail-health-answer"
@@ -146,14 +146,14 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
              "Fix the missing renewal, price, or charge fields before using revenue or collection decisions."
 
     assert html =~
-             "Blocking fields must be fixed in the source billing system before charge projections can be trusted."
+             "Fix missing fields in the billing source before trusting charge projections."
 
     refute html =~ "Billing health right now"
     assert html =~ "MRR"
     assert html =~ "Charge amount not shown"
     assert html =~ "Billing setup gaps"
     assert html =~ "Fix missing billing data"
-    assert html =~ "Blocking fields:"
+    assert html =~ "Missing fields:"
     assert html =~ "Open customer billing profile"
     assert html =~ "Review setup audit events"
     assert html =~ "Open local invoice context"

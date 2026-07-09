@@ -89,17 +89,19 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert html =~ ~s(data-ax-page-actions)
     refute html =~ "Search customer, open detail"
 
-    assert html =~ "Billing health: No -" or
-             html =~ "Billing health: Yes - invoices clear"
+    assert html =~ "Billing health: Unhealthy -" or
+             html =~ "Billing health: Healthy - invoices clear"
 
     assert html =~ "$0.00 open exposure; target met." or
              html =~ "above $0.00 target."
 
     assert html =~ "Open Invoices queue"
     assert html =~ "Open dunning funnel"
+    assert html =~ "Dunning funnel and invoice queue summary"
+    assert html =~ "Recovery funnel"
     refute html =~ "Bulk invoice actions"
-    assert html =~ "Process next invoice"
-    assert html =~ "Send invoice reminders"
+    refute html =~ "Process next invoice"
+    refute html =~ "Send invoice reminders"
     assert html =~ "Find one customer record"
     refute html =~ "Who did what, when - filter admin actors"
     assert html =~ "Open row in dedicated invoice queue"

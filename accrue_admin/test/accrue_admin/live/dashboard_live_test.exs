@@ -116,8 +116,7 @@ defmodule AccrueAdmin.DashboardLiveTest do
     assert html =~ Copy.home_launcher_customers_meta()
     assert html =~ "ax-launcher-primary"
     assert html =~ Copy.home_launcher_invoices_title()
-    assert html =~ "Inline queue: $42.50 open above $0.00 target"
-    assert html =~ "Actions: send reminder, retry payment, void invoice"
+    assert html =~ "$42.50 above $0.00 target"
     assert html =~ Copy.home_launcher_recovery_title()
     assert html =~ Copy.home_launcher_recovery_meta()
     assert html =~ "Open recovery funnel"

@@ -248,20 +248,18 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
 
         <section class={["ax-detail-health-summary", "ax-detail-health-summary-" <> health.tone]} aria-label="Primary billing health summary">
           <div class="ax-detail-health-copy" role="status">
-            <span class={["ax-status-badge", "ax-status-badge-" <> health.tone]}>
-              <span class="ax-status-dot"></span><%= health.label %>
-            </span>
+            <span class="ax-detail-health-label"><%= health.label %></span>
             <strong class="ax-detail-health-answer"><%= health.answer %></strong>
             <strong class="ax-detail-health-verdict"><%= health.headline %></strong>
             <span class="ax-detail-health-body"><%= health.body %></span>
           </div>
           <div :if={health.caveats != []} class="ax-detail-health-caveats" aria-label="Missing data blocking billing health">
-            <strong>Blocking fields:</strong>
+            <strong>Missing fields:</strong>
             <span class="ax-detail-health-caveat"><%= Enum.join(health.caveats, ", ") %></span>
           </div>
           <div :if={health.caveats != []} class="ax-detail-setup-actions" aria-label="Fix missing billing data">
             <span class="ax-detail-health-body">
-              Blocking fields must be fixed in the source billing system before charge projections can be trusted.
+              Fix missing fields in the billing source before trusting charge projections.
             </span>
             <a
               class="ax-button ax-button-secondary ax-button-sm"
@@ -1022,7 +1020,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
         %{
           tone: "amber",
           label: "At risk",
-          answer: "No - payment recovery is needed",
+          answer: "Unhealthy - payment recovery needed",
           headline: "Payment recovery is needed",
           body:
             "Open invoices or dunning activity need operator attention before this account is healthy.",
@@ -1033,7 +1031,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
         %{
           tone: "slate",
           label: "Billing blocked",
-          answer: "No - billing is not healthy",
+          answer: "Blocked - setup data missing",
           headline: "Missing renewal, price, or charge data",
           body:
             "Fix the missing renewal, price, or charge fields before using revenue or collection decisions.",
