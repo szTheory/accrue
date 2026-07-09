@@ -125,7 +125,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
               class="ax-button ax-button-primary ax-button-sm"
               href={invoice_queue_path(@admin_mount_path, @current_owner_scope)}
             >
-              Open unified invoice queue to $0.00
+              Open invoice collection queue
             </a>
             <a
               class="ax-button ax-button-recovery ax-button-sm"
@@ -415,7 +415,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
       <span class="ax-subscription-row-state ax-status-badge ax-status-badge-#{state_tone}">
         <span class="ax-status-dot"></span>#{escape(state_label)}
       </span>
-      <a href="#{customer_href}" class="ax-link ax-subscription-row-customer">#{escape(customer_label(row))}</a>
+      <a href="#{customer_href}" class="ax-link ax-subscription-row-customer">Open customer detail: #{escape(customer_label(row))}</a>
       <span class="ax-subscription-row-meta"><strong>Customer ID</strong> #{customer_id}</span>
       <a href="#{subscription_href}" class="ax-subscription-row-meta ax-subscription-row-id"><strong>Subscription</strong> #{subscription_id}</a>
       <a href="#{subscription_invoices_href}" class="ax-link ax-subscription-row-invoices">Open this subscription's open invoices</a>
@@ -529,7 +529,11 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
 
   defp subscription_filter_fields do
     [
-      %{id: :q, label: "List filter", placeholder: "Filter subscriptions list"},
+      %{
+        id: :q,
+        label: "Find customer or subscription",
+        placeholder: "Customer email, customer ID, or subscription ID"
+      },
       %{
         id: :status,
         label: "Status",

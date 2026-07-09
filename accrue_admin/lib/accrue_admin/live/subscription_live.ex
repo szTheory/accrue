@@ -231,7 +231,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
           </:facts>
           <:actions>
             <a
-              class="ax-button ax-button-secondary ax-button-sm"
+              class="ax-button ax-button-primary ax-button-sm"
               href={
                 ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope, %{
                   "status" => "open",
@@ -239,7 +239,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
                 })
               }
             >
-              Work this subscription's open invoices
+              Open this subscription's invoice queue
             </a>
             <a
               class="ax-button ax-button-secondary ax-button-sm"
@@ -278,7 +278,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
             class="ax-button ax-button-recovery ax-button-sm ax-detail-priority-primary"
             href={ScopedPath.build(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}
           >
-            Primary: open dunning funnel and at-risk workspace
+            Watch dunning funnel + at-risk accounts
           </a>
           <a
             class="ax-button ax-button-primary ax-button-sm"
@@ -1027,9 +1027,9 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
         %{
           tone: "slate",
           label: "Setup incomplete",
-          answer: "Unhealthy: setup gaps block billing verification",
-          headline: "Billing unhealthy: renewal, price, or amount is missing",
-          body: "Fix missing billing setup, then confirm renewal and charges here.",
+          answer: "Billing unhealthy: #{Enum.join(caveats, ", ")}",
+          headline: "Fix #{Enum.join(caveats, ", ")} before trusting charges",
+          body: "Resolve the listed setup gaps, then confirm renewal and charges here.",
           caveats: caveats
         }
 

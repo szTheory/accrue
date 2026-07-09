@@ -4,8 +4,9 @@ if Mix.env() != :prod do
 
     use Phoenix.Component
 
-    def visible? do
-      Application.get_env(:accrue, :processor, Accrue.Processor.Fake) == Accrue.Processor.Fake
+    def visible?(current_path \\ "", mount_path \\ "/billing") do
+      Application.get_env(:accrue, :processor, Accrue.Processor.Fake) == Accrue.Processor.Fake and
+        String.starts_with?(current_path || "", (mount_path || "/billing") <> "/dev")
     end
 
     attr(:current_path, :string, required: true)

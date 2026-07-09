@@ -114,7 +114,7 @@ defmodule AccrueAdmin.Components.AppShell do
     defp dev_toolbar(assigns) do
       ~H"""
       <AccrueAdmin.Components.DevToolbar.dev_toolbar
-        :if={AccrueAdmin.Components.DevToolbar.visible?()}
+        :if={AccrueAdmin.Components.DevToolbar.visible?(@current_path, @mount_path)}
         current_path={@current_path}
         mount_path={@mount_path}
       />

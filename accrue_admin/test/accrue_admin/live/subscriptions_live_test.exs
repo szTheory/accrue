@@ -98,7 +98,7 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert html =~ "ax-subscriptions-health-hero"
     assert html =~ "$0.00 open invoice exposure." or html =~ "to reach $0.00."
     assert html =~ "unified invoice queue first"
-    assert html =~ "Open unified invoice queue to $0.00"
+    assert html =~ "Open invoice collection queue"
     assert html =~ "Open dunning funnel workspace"
     assert html =~ "Open this subscription&#39;s open invoices"
     assert html =~ "Who did what, when?"
@@ -299,6 +299,7 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert {:ok, _view, html} = live(conn, "/billing/subscriptions?view=all")
 
     assert html =~ "phase196-primary@example.com"
+    assert html =~ "Open customer detail: phase196-primary@example.com"
     assert html =~ "Customer ID"
     assert html =~ subscription.customer_id
     assert html =~ "Subscription"

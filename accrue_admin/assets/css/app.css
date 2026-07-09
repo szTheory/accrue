@@ -2513,6 +2513,10 @@ a.ax-kpi-card--linked:focus-visible {
   gap: 0.0625rem 0.375rem;
 }
 
+.ax-subscriptions-health-hero.ax-health-summary-amber {
+  background: var(--ax-elevated);
+}
+
 .ax-subscriptions-health-hero .ax-health-metrics {
   gap: 0.0625rem;
 }
@@ -3396,6 +3400,7 @@ a.ax-kpi-card--linked:focus-visible {
   width: fit-content;
   color: var(--ax-primary);
   font-weight: 900;
+  text-decoration-thickness: 2px;
 }
 
 .ax-subscription-row-meta,
@@ -4885,6 +4890,11 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
   border-left-color: var(--ax-warning-readable);
 }
 
+.ax-activity-card .ax-eyebrow,
+.ax-activity-card .ax-heading {
+  color: var(--ax-primary);
+}
+
 /* ============================================================================
    Phase 170 (v1.50 AUI-04) — cross-screen threading: related-resources card
    ========================================================================== */
@@ -5044,7 +5054,7 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
 }
 
 .ax-subscription-detail-page .ax-summary-card {
-  padding: 0.1875rem var(--ax-space-xs);
+  padding: 0.125rem var(--ax-space-xs);
   gap: var(--ax-space-2xs) var(--ax-space-xs);
 }
 
@@ -5321,8 +5331,8 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
 }
 
 .ax-subscription-detail-page .ax-summary-list-compact .ax-summary-list-row {
-  gap: 0.25rem var(--ax-space-sm);
-  padding: 0.125rem 0;
+  gap: 0.125rem var(--ax-space-xs);
+  padding: 0.0625rem 0;
 }
 
 .ax-summary-list-key,
