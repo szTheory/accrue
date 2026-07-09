@@ -276,9 +276,9 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
           <span class="ax-label ax-detail-priority-label">Primary queue</span>
           <a
             class="ax-button ax-button-primary ax-button-sm"
-            href={ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope, %{"status" => "open"})}
+            href={ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope, %{"status" => "open", "subscription_id" => @subscription.id})}
           >
-            Open full invoice queue workspace
+            Open this subscription's filtered invoices
           </a>
           <span class="ax-detail-priority-links">
             <a class="ax-link-quiet" href={ScopedPath.build(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}>
@@ -1030,7 +1030,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
         %{
           tone: "slate",
           label: "Setup incomplete",
-          answer: "Billing health: Unhealthy",
+          answer: "No - billing is unhealthy right now",
           headline: "Cannot verify charges until setup gaps are fixed",
           body:
             "Missing renewal, price, or amount data prevents admin from confirming billing. Fix these setup gaps before trusting recurring billing.",
@@ -2067,17 +2067,6 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
             ScopedPath.build(mount_path, "/webhooks", scope, %{
               "status" => "failed,dead",
               "type" => "subscription.created"
-            })
-        },
-        %{
-          icon: :invoices,
-          label: Copy.subscription_drill_link_invoices_for_subscription(),
-          value: "Open this subscription's filtered invoice queue for local invoice context",
-          emphasis: :primary,
-          href:
-            ScopedPath.build(mount_path, "/invoices", scope, %{
-              "status" => "open",
-              "subscription_id" => subscription.id
             })
         },
         %{

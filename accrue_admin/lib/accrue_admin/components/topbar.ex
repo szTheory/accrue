@@ -20,11 +20,11 @@ defmodule AccrueAdmin.Components.Topbar do
           id="search-trigger"
           type="button"
           class="ax-search-trigger"
-          aria-label="Search customers and open detail (Command or Control K)"
+          aria-label="Find customer and open billing 360 detail (Command or Control K)"
           data-command-palette-trigger="true"
         >
           <Icon.icon name={:search} size="sm" class="ax-search-trigger-icon" />
-          <span class="ax-search-trigger-text">Find customer by name, email, or ID</span>
+          <span class="ax-search-trigger-text">Find customer - open billing 360</span>
           <kbd class="ax-kbd">⌘K</kbd>
         </button>
 

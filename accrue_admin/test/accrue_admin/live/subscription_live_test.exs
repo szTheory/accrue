@@ -109,16 +109,13 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
     assert html =~ "subject_type=Subscription"
     assert html =~ "subject_id=#{subscription.id}"
     assert html =~ "Subscription events"
-    assert html =~ "Subscription invoice queue"
-
-    assert html =~
-             "Open this subscription&#39;s filtered invoice queue for local invoice context"
+    assert html =~ "Open this subscription&#39;s filtered invoices"
 
     assert html =~ "Open failed-webhook debugger"
     assert html =~ "Failed/dead subscription.created queue"
     assert html =~ "Debug webhook"
     assert html =~ "Work this subscription&#39;s open invoices"
-    assert html =~ "Watch dunning funnel and at-risk accounts"
+    assert html =~ "Dunning funnel"
     assert html =~ "Open full audit event log"
   end
 
@@ -138,7 +135,7 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
     assert html =~ "Setup incomplete"
     assert html =~ "ax-detail-health-summary-slate"
     assert html =~ "ax-detail-health-answer"
-    assert html =~ "Billing health: Unhealthy"
+    assert html =~ "No - billing is unhealthy right now"
     assert html =~ "Cannot verify charges until setup gaps are fixed"
     assert html =~ "Missing renewal, price, or amount data prevents admin from confirming billing"
     refute html =~ "Billing health right now"
@@ -148,10 +145,8 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
     assert html =~ "Resolve missing billing setup"
     assert html =~ "Open customer billing profile"
     assert html =~ "Review setup audit events"
-    assert html =~ "Watch dunning funnel and at-risk accounts"
-    assert html =~ "Work this subscription&#39;s open invoices"
-    assert html =~ "Open full invoice queue workspace"
     assert html =~ "Open this subscription&#39;s filtered invoices"
+    assert html =~ "Work this subscription&#39;s open invoices"
     assert html =~ "Open audit event log"
     assert html =~ "Who did what, when"
     assert html =~ "Latest audit event summary"

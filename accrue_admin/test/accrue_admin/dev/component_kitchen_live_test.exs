@@ -6,7 +6,7 @@ defmodule AccrueAdmin.ComponentKitchenLiveTest do
 
     assert {:ok, _view, html} = live(conn, "/billing/dev/components")
 
-    assert html =~ "Primitive and form components"
+    assert html =~ "Dev-only component states"
     assert html =~ "Primary action"
     assert html =~ "Secondary action"
     assert html =~ "Queued invoice jobs"
@@ -31,6 +31,7 @@ defmodule AccrueAdmin.ComponentKitchenLiveTest do
     assert html =~ "billing.contact.updated"
     assert html =~ "Open failed-webhook debugger"
     assert html =~ "Open invoice queue view for 2 open invoices"
+    assert html =~ "No - unhealthy right now"
     assert html =~ "Webhook deliveries failed"
     assert html =~ "Open failed/dead deliveries to restore admin billing health"
     assert html =~ "Open Invoices queue - work to zero"

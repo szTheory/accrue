@@ -90,8 +90,8 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert html =~ ~s(data-ax-page-actions)
     refute html =~ "Search customer, open detail"
 
-    assert html =~ "Billing health: Unhealthy" or
-             html =~ "Billing is healthy right now"
+    assert html =~ "No - billing is unhealthy right now" or
+             html =~ "Yes - billing is healthy right now"
 
     assert html =~ "Overall billing health answer"
     assert html =~ "ax-health-summary-prominent"
@@ -102,7 +102,7 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert html =~ "ax-health-metrics"
     assert html =~ "Open invoice queue workspace"
     assert html =~ "Open this subscription&#39;s open invoices"
-    assert html =~ "Watch dunning funnel"
+    assert html =~ "Open dunning funnel"
     assert html =~ "Who did what, when?"
     assert html =~ "Latest audit event: subscription.created by Accrue system"
     assert html =~ "Open full audit event log"
@@ -110,7 +110,7 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert html =~ "Debug failed webhook deliveries"
     assert html =~ "Dunning risk"
     assert html =~ "Renewal endings"
-    refute html =~ "Billing health:"
+    refute html =~ "Billing health: Unhealthy"
     assert_one_h1(html)
 
     assert html
@@ -133,7 +133,7 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert html =~ "Primary queue"
     assert html =~ "Open full invoice queue workspace"
     assert html =~ "ax-subscription-row-state"
-    assert html =~ "Watch dunning funnel"
+    assert html =~ "Open dunning funnel"
     assert html =~ "Failed/dead webhook deliveries"
     assert html =~ "Open all failed/dead deliveries"
     assert html =~ "Filter subscription.created"

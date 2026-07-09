@@ -73,13 +73,12 @@ if Mix.env() != :prod do
           <header class="ax-page-header ax-page-header-compact ax-component-kitchen-header">
             <Breadcrumbs.breadcrumbs
               items={[
-                %{label: "Dashboard", href: @admin_mount_path},
-                %{label: "Recovery", href: @admin_mount_path <> "/analytics/recovery"},
+                %{label: "Dev tools", href: @admin_mount_path <> "/dev/components"},
                 %{label: "Component kitchen"}
               ]}
             />
             <h1 class="ax-heading ax-component-kitchen-title">Component Kitchen</h1>
-            <p class="ax-page-description">Primitive and form components — full state matrix. Use the topbar theme toggle to review light and dark.</p>
+            <p class="ax-page-description">Dev-only component states and billing-health specimens.</p>
             <div class="ax-page-actions">
               <a class="ax-button ax-button-recovery ax-button-sm" href={@admin_mount_path <> "/analytics/recovery"}>
                 Open dunning funnel + at-risk analytics
@@ -115,8 +114,8 @@ if Mix.env() != :prod do
 
           <section :if={@available?} class="ax-kpi-grid ax-kpi-row">
             <KpiCard.kpi_card
-              label="Billing health status"
-              value="Unhealthy"
+              label="Billing health specimen"
+              value="No - unhealthy right now"
               delta="Webhook deliveries failed"
               delta_tone="amber"
               class="ax-kpi-card-danger"

@@ -115,6 +115,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
                 <span class="ax-status-dot"></span><%= billing_health_label(@summary) %>
               </span>
               <strong class="ax-health-verdict"><%= billing_health_verdict(@summary) %></strong>
+              <span class="ax-health-business-answer"><%= billing_health_business_answer(@summary) %></span>
               <span class="ax-health-metrics" aria-label="Billing health metrics">
                 <span class="ax-health-metric ax-health-metric-warning ax-health-metric-primary">
                   <strong><%= billing_health_summary(@summary) %></strong>
@@ -164,8 +165,8 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
 
         <section class="ax-inline-worklist ax-subscriptions-invoice-strip" aria-label="Open invoice worklist">
           <div class="ax-inline-worklist-copy">
-            <strong>Open invoice worklist</strong>
-            <span>Dedicated queue view for every open invoice; <%= format_minor(@summary.open_invoice_exposure_minor, "usd") %> open exposure.</span>
+            <strong>Open invoice worklist - <%= format_minor(@summary.open_invoice_exposure_minor, "usd") %> to collect</strong>
+            <span>Primary path to work every open invoice queue down to $0.00.</span>
           </div>
           <div class="ax-inline-worklist-actions">
             <a class="ax-button ax-button-primary ax-button-sm" href={invoice_queue_path(@admin_mount_path, @current_owner_scope)}>
@@ -291,19 +292,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
                   class="ax-button ax-button-recovery ax-button-sm"
                   href={scoped_path(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}
                 >
-                  Watch dunning funnel
-                </a>
-                <a
-                  class="ax-button ax-button-secondary ax-button-sm"
-                  href={scoped_path(@admin_mount_path, "/events", @current_owner_scope, %{"actor_type" => "admin"})}
-                >
-                  Who did what, when?
-                </a>
-                <a
-                  class="ax-button ax-button-secondary ax-button-sm"
-                  href={scoped_path(@admin_mount_path, "/webhooks", @current_owner_scope, %{"status" => "failed,dead"})}
-                >
-                  Failed webhook deliveries
+                  Open dunning funnel
                 </a>
               </div>
             </div>
@@ -438,13 +427,19 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
   defp billing_health_label(_summary), do: "Healthy"
 
   defp billing_health_verdict(%{open_invoice_count: count}) when count > 0,
-    do: "Billing health: Unhealthy"
+    do: "No - billing is unhealthy right now"
 
-  defp billing_health_verdict(_summary), do: "Billing is healthy right now"
+  defp billing_health_verdict(_summary), do: "Yes - billing is healthy right now"
+
+  defp billing_health_business_answer(%{open_invoice_count: count} = summary) when count > 0 do
+    "Collect #{format_minor(summary.open_invoice_exposure_minor, "usd")} across #{count(count, "open invoice")} before billing is healthy."
+  end
+
+  defp billing_health_business_answer(_summary), do: "$0.00 open invoice exposure."
 
   defp billing_health_summary(summary) do
     if summary.open_invoice_count > 0 do
-      count(summary.open_invoice_count, "open invoice") <> " open"
+      count(summary.open_invoice_count, "open invoice") <> " need collection"
     else
       "Healthy: $0.00 open at target"
     end
