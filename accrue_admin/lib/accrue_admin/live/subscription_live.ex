@@ -1030,7 +1030,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
         %{
           tone: "slate",
           label: "Setup incomplete",
-          answer: "No - billing is unhealthy right now",
+          answer: "Unhealthy: setup gaps block billing verification",
           headline: "Cannot verify charges until setup gaps are fixed",
           body:
             "Missing renewal, price, or amount data prevents admin from confirming billing. Fix these setup gaps before trusting recurring billing.",

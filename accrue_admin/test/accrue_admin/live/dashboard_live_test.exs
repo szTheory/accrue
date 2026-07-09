@@ -159,7 +159,7 @@ defmodule AccrueAdmin.DashboardLiveTest do
 
     # IA-01 verb relabels (Plan 175-02)
     assert html =~ "Browse customer records"
-    assert html =~ "Clear the invoice queue"
+    assert html =~ "Open invoice queue to $0.00"
 
     # IA-01 customer lookup entry point on Home (Plan 175-04)
     assert html =~ "Search customer, open billing 360 detail"

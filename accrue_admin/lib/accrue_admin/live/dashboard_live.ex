@@ -55,7 +55,7 @@ defmodule AccrueAdmin.Live.DashboardLive do
           <div class="ax-dashboard-title-row">
             <h1 class="ax-display"><%= Copy.home_intro_headline() %></h1>
             <span :if={@attention != []} class="ax-status-badge ax-badge-danger">
-              <span class="ax-status-dot"></span>Status: Unhealthy
+              <span class="ax-status-dot"></span>Unhealthy
             </span>
           </div>
           <p class="ax-body ax-page-copy"><%= Copy.home_intro_copy() %></p>
@@ -147,7 +147,7 @@ defmodule AccrueAdmin.Live.DashboardLive do
               <span class="ax-launcher-title"><%= Copy.home_launcher_invoices_title() %></span>
               <span class="ax-launcher-copy"><%= Copy.home_launcher_invoices_copy() %></span>
               <span class="ax-launcher-action">
-                Open invoice queue workspace <Icon.icon name={:arrow_right} size="sm" />
+                Open queue to retry, void, and clear to $0.00 <Icon.icon name={:arrow_right} size="sm" />
               </span>
               <span :if={@stats.open_invoice_count > 0} class="ax-launcher-meta">
                 <%= count(@stats.open_invoice_count, "open invoice") %>: review, retry, or void
@@ -413,11 +413,11 @@ defmodule AccrueAdmin.Live.DashboardLive do
   end
 
   defp attention_health_summary(_stats) do
-    "Status: Unhealthy"
+    "Unhealthy: billing needs operator action"
   end
 
   defp attention_health_detail(stats) do
-    "#{count(stats.blocked_webhook_count, "dead-lettered webhook")} need debugging; #{count(stats.past_due_subscription_count, "past-due subscription")} at risk; #{count(stats.failed_meter_event_count, "failed meter event")} blocked."
+    "#{count(stats.blocked_webhook_count, "webhook")} blocked; #{count(stats.past_due_subscription_count, "past-due subscription")} in recovery; #{count(stats.failed_meter_event_count, "meter event")} blocked."
   end
 
   defp count(1, noun), do: "1 #{noun}"

@@ -84,7 +84,7 @@ if Mix.env() != :prod do
                 Open dunning funnel + at-risk analytics
               </a>
               <a class="ax-button ax-button-primary ax-button-sm" href={@admin_mount_path <> "/invoices?status=open"}>
-                Open Invoices queue - work to zero
+                Open invoice queue view
               </a>
               <a class="ax-button ax-button-secondary ax-button-sm" href={@admin_mount_path <> "/webhooks?status=failed,dead"}>
                 Debug failed webhooks
@@ -115,7 +115,7 @@ if Mix.env() != :prod do
           <section :if={@available?} class="ax-kpi-grid ax-kpi-row">
             <KpiCard.kpi_card
               label="Billing health specimen"
-              value="No - unhealthy right now"
+              value="Unhealthy: webhooks failed"
               delta="Webhook deliveries failed"
               delta_tone="amber"
               class="ax-kpi-card-danger"
@@ -130,7 +130,7 @@ if Mix.env() != :prod do
               delta_tone="amber"
               href={@admin_mount_path <> "/invoices?status=open"}
             >
-              <:meta>Open Invoices queue - work to zero</:meta>
+              <:meta>View queued invoice jobs in the invoices workspace</:meta>
             </KpiCard.kpi_card>
           </section>
 
@@ -557,12 +557,12 @@ if Mix.env() != :prod do
                     <ul class="ax-command-palette-list">
                       <li class="ax-command-palette-list-item">
                         <a class="ax-command-palette-item" href={@admin_mount_path <> "/customers"}>
-                          <Icon.icon name={:users} size="sm" /> <span>Search customer, open detail</span>
+                          <Icon.icon name={:users} size="sm" /> <span>Search customer, open billing 360 detail</span>
                         </a>
                       </li>
                       <li class="ax-command-palette-list-item">
                         <a class="ax-command-palette-item" href={@admin_mount_path <> "/invoices?status=open"}>
-                          <Icon.icon name={:invoices} size="sm" /> <span>Clear the invoice queue</span>
+                          <Icon.icon name={:invoices} size="sm" /> <span>Open invoice queue to $0.00</span>
                         </a>
                       </li>
                       <li class="ax-command-palette-list-item">
@@ -898,7 +898,7 @@ if Mix.env() != :prod do
                   <div class="ax-detail-actions-row">
                     <a class="ax-button ax-button-secondary ax-button-sm" href={@admin_mount_path <> "/analytics/recovery"}>Open dunning funnel and at-risk analytics</a>
                     <a class="ax-button ax-button-warning ax-button-sm" href={@admin_mount_path <> "/events?actor_type=admin"}>View full audit history</a>
-                    <a class="ax-button ax-button-secondary ax-button-sm" href={@admin_mount_path <> "/customers"}>Find customer</a>
+                    <a class="ax-button ax-button-secondary ax-button-sm" href={@admin_mount_path <> "/customers"}>Find customer and open billing 360 detail</a>
                   </div>
                 </div>
               </div>

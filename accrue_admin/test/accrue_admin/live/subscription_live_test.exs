@@ -135,7 +135,7 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
     assert html =~ "Setup incomplete"
     assert html =~ "ax-detail-health-summary-slate"
     assert html =~ "ax-detail-health-answer"
-    assert html =~ "No - billing is unhealthy right now"
+    assert html =~ "Unhealthy: setup gaps block billing verification"
     assert html =~ "Cannot verify charges until setup gaps are fixed"
     assert html =~ "Missing renewal, price, or amount data prevents admin from confirming billing"
     refute html =~ "Billing health right now"

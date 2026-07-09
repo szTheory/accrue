@@ -1341,9 +1341,9 @@ defmodule AccrueAdmin.Copy do
 
   def home_launcher_customers_meta, do: "Secondary customer directory"
 
-  def home_launcher_invoices_title, do: "Clear the invoice queue"
+  def home_launcher_invoices_title, do: "Open invoice queue to $0.00"
 
-  def home_launcher_invoices_copy, do: "Review, void, or chase open receivables."
+  def home_launcher_invoices_copy, do: "Retry payment, void invoices, and clear open receivables."
 
   def home_launcher_recovery_title, do: "Open dunning funnel + at-risk"
 

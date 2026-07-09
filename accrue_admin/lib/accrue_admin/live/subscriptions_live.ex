@@ -116,22 +116,8 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
               </span>
               <strong class="ax-health-verdict"><%= billing_health_verdict(@summary) %></strong>
               <span class="ax-health-business-answer"><%= billing_health_business_answer(@summary) %></span>
-              <span class="ax-health-metrics" aria-label="Billing health metrics">
-                <span class="ax-health-metric ax-health-metric-warning ax-health-metric-primary">
-                  <strong><%= billing_health_summary(@summary) %></strong>
-                  <span>Primary queue - collect <%= format_minor(@summary.open_invoice_exposure_minor, "usd") %> to reach $0.00</span>
-                </span>
-                <span class="ax-health-metric ax-health-metric-warning">
-                  <strong><%= past_due_health_metric(@summary) %></strong>
-                  <span>Dunning risk</span>
-                </span>
-                <span class="ax-health-metric">
-                  <strong><%= canceling_health_metric(@summary) %></strong>
-                  <span>Renewal endings</span>
-                </span>
-              </span>
             </div>
-            <p class="ax-body">Open customer detail, invoice worklists, dunning, failed webhook deliveries, and actor audit from this view.</p>
+            <p class="ax-body">At-risk subscriptions, dunning recovery, failed webhook delivery, and invoice queue context stay on this surface.</p>
           </:description>
 
           <:actions>
@@ -162,24 +148,6 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
         </PageHeader.page_header>
 
         <FlashGroup.flash_group flashes={flash_messages(@flash)} />
-
-        <section class="ax-inline-worklist ax-subscriptions-invoice-strip" aria-label="Open invoice worklist">
-          <div class="ax-inline-worklist-copy">
-            <strong>Open invoice worklist - <%= format_minor(@summary.open_invoice_exposure_minor, "usd") %> to collect</strong>
-            <span>Primary path to work every open invoice queue down to $0.00.</span>
-          </div>
-          <div class="ax-inline-worklist-actions">
-            <a class="ax-button ax-button-primary ax-button-sm" href={invoice_queue_path(@admin_mount_path, @current_owner_scope)}>
-              Open invoice queue workspace
-            </a>
-            <a class="ax-button ax-button-secondary ax-button-sm" href={AccrueAdmin.DataTableNav.merge_query(@table_path, %{"status" => default_queue_status()})}>
-              Review at-risk subscriptions
-            </a>
-            <a class="ax-button ax-button-secondary ax-button-sm" href={scoped_path(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}>
-              Open dunning funnel
-            </a>
-          </div>
-        </section>
 
         <section class="ax-inline-worklist ax-subscriptions-audit-strip" aria-label="Subscription audit trail">
           <div class="ax-inline-worklist-copy">
@@ -280,22 +248,6 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
               clear_all_href={active_clear_all_href(@params, @table_path)}
               clear_all_label={Copy.data_table_clear_filters_label()}
             />
-            <div class="ax-work-queue-actions" aria-label="Direct work queues">
-              <div class="ax-work-queue-primary">
-                <span class="ax-label">Primary queue</span>
-                <a class="ax-button ax-button-primary ax-button-sm" href={invoice_queue_path_from_table(@table_path)}>
-                  Open full invoice queue workspace
-                </a>
-              </div>
-              <div class="ax-work-queue-secondary">
-                <a
-                  class="ax-button ax-button-recovery ax-button-sm"
-                  href={scoped_path(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}
-                >
-                  Open dunning funnel
-                </a>
-              </div>
-            </div>
           </:list_status>
         </.live_component>
       </section>
@@ -385,13 +337,6 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
         "type" => "subscription.created"
       })
 
-    global_invoices_href =
-      mount_path
-      |> scoped_path("/invoices", owner_scope)
-      |> AccrueAdmin.DataTableNav.merge_query(%{
-        "status" => "open"
-      })
-
     subscription_invoices_href =
       mount_path
       |> scoped_path("/invoices", owner_scope)
@@ -414,7 +359,6 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
       </span>
       <span><span class="ax-chip ax-label">Owner: #{escaped_o}</span> <span class="ax-chip ax-label">Tax: #{escaped_t}</span></span>
       <span class="ax-data-table-inline-actions">
-        <a href="#{global_invoices_href}" class="ax-button ax-button-primary ax-button-sm">Open full invoice queue workspace</a>
         <a href="#{subscription_invoices_href}" class="ax-link">Open this row's invoices</a>
         <a href="#{events_href}" class="ax-link">Open subscription audit log</a>
       </span>
@@ -427,33 +371,15 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
   defp billing_health_label(_summary), do: "Healthy"
 
   defp billing_health_verdict(%{open_invoice_count: count}) when count > 0,
-    do: "No - billing is unhealthy right now"
+    do: "Unhealthy: open invoices need collection"
 
   defp billing_health_verdict(_summary), do: "Yes - billing is healthy right now"
 
   defp billing_health_business_answer(%{open_invoice_count: count} = summary) when count > 0 do
-    "Collect #{format_minor(summary.open_invoice_exposure_minor, "usd")} across #{count(count, "open invoice")} before billing is healthy."
+    "Collect #{format_minor(summary.open_invoice_exposure_minor, "usd")} across #{count(count, "open invoice")} to reach $0.00."
   end
 
   defp billing_health_business_answer(_summary), do: "$0.00 open invoice exposure."
-
-  defp billing_health_summary(summary) do
-    if summary.open_invoice_count > 0 do
-      count(summary.open_invoice_count, "open invoice") <> " need collection"
-    else
-      "Healthy: $0.00 open at target"
-    end
-  end
-
-  defp past_due_health_metric(%{past_due_count: count}) when count > 0,
-    do: count(count, "past-due subscription") <> " at risk"
-
-  defp past_due_health_metric(_summary), do: "0 at risk"
-
-  defp canceling_health_metric(%{canceling_count: count}) when count > 0,
-    do: count(count, "canceling renewal")
-
-  defp canceling_health_metric(_summary), do: "0 ending"
 
   defp billing_health_tone(%{open_invoice_count: count}) when count > 0, do: "amber"
   defp billing_health_tone(_summary), do: "moss"
@@ -606,8 +532,6 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
     |> Subscriptions.encode_filter()
     |> Map.new(fn {key, value} -> {to_string(key), to_string(value)} end)
   end
-
-  defp default_queue_status, do: @default_queue_status
 
   defp flash_messages(flash) do
     Enum.flat_map([:error, :info], fn kind ->

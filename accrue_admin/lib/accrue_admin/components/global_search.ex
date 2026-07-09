@@ -200,12 +200,12 @@ defmodule AccrueAdmin.Components.GlobalSearch do
                   <ul class="ax-command-palette-list">
                     <li class="ax-command-palette-list-item">
                       <a class="ax-command-palette-item" href={scoped_path(@mount_path, "/customers", @current_owner_scope)} data-path={scoped_path(@mount_path, "/customers", @current_owner_scope)}>
-                        <Icon.icon name={:users} size="sm" /> <span>Search customer, open detail</span>
+                        <Icon.icon name={:users} size="sm" /> <span>Search customer, open billing 360 detail</span>
                       </a>
                     </li>
                     <li class="ax-command-palette-list-item">
                       <a class="ax-command-palette-item" href={scoped_path(@mount_path, "/invoices", @current_owner_scope, %{"status" => "open"})} data-path={scoped_path(@mount_path, "/invoices", @current_owner_scope, %{"status" => "open"})}>
-                        <Icon.icon name={:invoices} size="sm" /> <span>Clear the invoice queue</span>
+                        <Icon.icon name={:invoices} size="sm" /> <span>Open invoice queue to $0.00</span>
                       </a>
                     </li>
                     <li class="ax-command-palette-list-item">
