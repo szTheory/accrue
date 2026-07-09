@@ -112,7 +112,7 @@ defmodule AccrueAdmin.Live.DashboardLive do
               class="ax-button ax-button-primary ax-button-sm"
               href={ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope, %{"status" => "open"})}
             >
-              Work open-invoice queue to zero
+              Open invoice queue workspace
             </a>
           </div>
 
@@ -196,7 +196,7 @@ defmodule AccrueAdmin.Live.DashboardLive do
                 <%= count(@stats.past_due_subscription_count, "at-risk subscription") %>
               </span>
               <span class="ax-launcher-action">
-                Open dunning funnel analytics <Icon.icon name={:arrow_right} size="sm" />
+                Open recovery analytics <Icon.icon name={:arrow_right} size="sm" />
               </span>
             </a>
 

@@ -139,10 +139,10 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
                 </span>
               </span>
               <a class="ax-button ax-button-primary ax-button-sm" href={invoice_queue_path(@admin_mount_path, @current_owner_scope)}>
-                Work open-invoice queue to zero
+                Open invoice queue workspace
               </a>
             </div>
-            <p class="ax-body">Open customer detail, invoice worklists, dunning, and actor audit from each row.</p>
+            <p class="ax-body">Open customer detail, invoice worklists, dunning, failed webhook deliveries, and actor audit from this view.</p>
           </:description>
 
           <:actions>
@@ -258,6 +258,27 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
           </div>
         </section>
 
+        <section class="ax-inline-worklist ax-subscriptions-webhook-strip" aria-label="Failed webhook delivery worklist">
+          <div class="ax-inline-worklist-copy">
+            <strong>Failed/dead webhook deliveries</strong>
+            <span>Debug failed subscription.created deliveries without hunting through subscription rows.</span>
+          </div>
+          <div class="ax-inline-worklist-actions">
+            <a
+              class="ax-button ax-button-primary ax-button-sm"
+              href={scoped_path(@admin_mount_path, "/webhooks", @current_owner_scope, %{"status" => "failed,dead"})}
+            >
+              Open all failed/dead deliveries
+            </a>
+            <a
+              class="ax-button ax-button-secondary ax-button-sm"
+              href={scoped_path(@admin_mount_path, "/webhooks", @current_owner_scope, %{"status" => "failed,dead", "type" => "subscription.created"})}
+            >
+              Filter subscription.created
+            </a>
+          </div>
+        </section>
+
         <section class="ax-inline-worklist" aria-label="Open invoice worklist">
           <div class="ax-inline-worklist-copy">
             <strong>Open invoice worklist</strong>
@@ -336,7 +357,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
               <div class="ax-work-queue-primary">
                 <span class="ax-label">Primary queue</span>
                 <a class="ax-button ax-button-primary ax-button-sm" href={invoice_queue_path_from_table(@table_path)}>
-                  Work open-invoice queue to zero
+                  Open invoice queue workspace
                 </a>
               </div>
               <div class="ax-work-queue-secondary">

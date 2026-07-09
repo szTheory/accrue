@@ -229,8 +229,8 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
               "ax-summary-fact-health",
               "ax-summary-fact-health-" <> health.tone
             ]}>
-              <strong>Billing health</strong>
-              <span class="ax-summary-health-verdict"><%= health.label %>: <%= health.headline %></span>
+              <strong>Billing health right now</strong>
+              <span class="ax-summary-health-verdict"><%= health.answer %></span>
             </span>
             <span :for={fact <- summary_health_facts(@subscription)} class="ax-summary-fact">
               <strong><%= fact.label %></strong>
@@ -247,7 +247,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
                 })
               }
             >
-              Open this subscription invoice queue
+              Open invoice queue workspace for this subscription
             </a>
             <a
               class="ax-button ax-button-secondary ax-button-sm"
@@ -310,7 +310,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
                 })
               }
             >
-              Open this subscription invoice queue
+              Open invoice queue workspace for this subscription
             </a>
           </div>
         </section>
@@ -977,11 +977,11 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
       caveats != [] ->
         %{
           tone: "amber",
-          label: "Not healthy yet",
-          answer: "Setup incomplete - billing is unhealthy",
-          headline: "Billing is not healthy until setup is complete",
+          label: "Setup incomplete",
+          answer: "Billing health cannot be verified",
+          headline: "Setup incomplete; active billing not verified",
           body:
-            "The account has missing setup details; finish them before treating recurring billing as healthy.",
+            "Required setup details are missing. Check invoices and setup audit events before treating recurring billing as healthy.",
           caveats: caveats
         }
 
@@ -2015,9 +2015,9 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
           icon: :events,
           label: "Debug this subscription's failed webhooks",
           value:
-            "Opens failed/dead subscription.created deliveries; match subscription #{subscription.processor_id || subscription.id} in the event payload and retry trail",
+            "Opens the failed/dead subscription.created queue for end-to-end debugging: delivery status, event payload, retry trail, and replay action for #{subscription.processor_id || subscription.id}",
           emphasis: :warning,
-          action_label: "Open failed-webhook debugger",
+          action_label: "Debug failed webhook end-to-end",
           href:
             ScopedPath.build(mount_path, "/webhooks", scope, %{
               "status" => "failed,dead",
@@ -2027,9 +2027,9 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
         %{
           icon: :invoices,
           label: Copy.subscription_drill_link_invoices_for_subscription(),
-          value: "Work the open-invoice queue filtered to this subscription",
+          value: "Open the invoice queue workspace filtered to this subscription",
           emphasis: :primary,
-          action_label: "Open queue",
+          action_label: "Open invoice queue workspace",
           href:
             ScopedPath.build(mount_path, "/invoices", scope, %{
               "status" => "open",

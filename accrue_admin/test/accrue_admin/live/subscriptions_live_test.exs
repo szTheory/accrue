@@ -50,7 +50,7 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert html =~ Copy.subscriptions_index_heading()
 
     assert html =~
-             "Open customer detail, invoice worklists, dunning, and actor audit from each row."
+             "Open customer detail, invoice worklists, dunning, failed webhook deliveries, and actor audit from this view."
 
     assert html =~ "Canceling at period end"
     assert html =~ "/billing/subscriptions/"
@@ -102,7 +102,7 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert html =~ "Open-invoice queue"
     assert html =~ "Target exposure"
     assert html =~ "Work open invoices"
-    assert html =~ "Work open-invoice queue to zero"
+    assert html =~ "Open invoice queue workspace"
     assert html =~ "Watch dunning funnel"
     assert html =~ "Who did what, when?"
     assert html =~ "Latest audit event: subscription.created by Accrue system"
@@ -133,8 +133,11 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert html =~ "All"
     assert html =~ "Open-invoice worklist"
     assert html =~ "Primary queue"
-    assert html =~ "Work open-invoice queue to zero"
+    assert html =~ "Open invoice queue workspace"
     assert html =~ "Watch dunning funnel"
+    assert html =~ "Failed/dead webhook deliveries"
+    assert html =~ "Open all failed/dead deliveries"
+    assert html =~ "Filter subscription.created"
     assert html =~ "Who did what, when?"
     assert html =~ ~s(data-ax-state="filtered-empty") or html =~ ~s(data-ax-state="populated")
     refute html =~ "No subscriptions yet."

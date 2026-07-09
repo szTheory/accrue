@@ -839,14 +839,18 @@ if Mix.env() != :prod do
               </p>
               <p class="ax-body">
                 Last edited Jul 7, 2026 at 18:00 UTC by System. Recovery analytics, actor audit history, failed-webhook debugging, and invoice work queues are available from this panel.
-                <a class="ax-link-quiet" href={@admin_mount_path <> "/webhooks?status=failed,dead"}>Open failed-webhook debugger</a>
               </p>
+              <div class="ax-audit-summary-row" aria-label="Recent actor audit history">
+                <span><strong>Actor</strong> System</span>
+                <span><strong>Event</strong> billing.contact.updated</span>
+                <span><strong>When</strong> Jul 7, 2026 18:00 UTC</span>
+              </div>
               <div class="ax-detail-actions-row ax-dev-group-drawer-primary-actions">
                 <a class="ax-button ax-button-primary ax-button-sm" href={@admin_mount_path <> "/invoices?status=open"}>Open invoice queue view for 2 open invoices</a>
-                <a class="ax-button ax-button-primary ax-button-sm" href={@admin_mount_path <> "/webhooks?status=failed,dead"}>Open failed-webhook queue</a>
+                <a class="ax-button ax-button-primary ax-button-sm" href={@admin_mount_path <> "/webhooks?status=failed,dead"}>Open failed-webhook debugger</a>
                 <a class="ax-button ax-button-recovery ax-button-sm" href={@admin_mount_path <> "/analytics/recovery"}>Watch dunning funnel analytics and at-risk customers</a>
                 <a class="ax-button ax-button-secondary ax-button-sm" href={@admin_mount_path <> "/customers"}>Find customer</a>
-                <a class="ax-button ax-button-warning ax-button-sm" href={@admin_mount_path <> "/events?actor_type=admin"}>Open actor audit history</a>
+                <a class="ax-button ax-button-warning ax-button-sm" href={@admin_mount_path <> "/events?actor_type=admin"}>View full audit history</a>
               </div>
             </section>
 
@@ -862,7 +866,7 @@ if Mix.env() != :prod do
               id="grp190-drawer-notes"
               name="notes"
               label="Operator notes"
-              value="Long drawer content wraps without hiding the footer actions or stranding validation copy."
+              value="Customer asked for billing contact review before the next renewal."
             />
             <Input.input
               id="grp190-drawer-error"

@@ -104,7 +104,7 @@ defmodule AccrueAdmin.DashboardLiveTest do
     assert html =~ Copy.home_attention_meter_label()
     assert html =~ Copy.home_attention_action_investigate()
     assert html =~ "Billing needs attention now"
-    assert html =~ "Work open-invoice queue to zero"
+    assert html =~ "Open invoice queue workspace"
     assert html =~ ~s(href="/billing/events?q=meter_event")
     assert html =~ ~s(href="/billing/invoices?status=open")
 
@@ -113,12 +113,11 @@ defmodule AccrueAdmin.DashboardLiveTest do
     assert html =~ Copy.home_launcher_customers_meta()
     assert html =~ "ax-launcher-primary"
     assert html =~ Copy.home_launcher_invoices_title()
-    assert html =~ "Work open-invoice queue to zero"
     assert html =~ "Inline queue: $42.50 open above $0.00 target"
     assert html =~ "Actions: send reminder, retry payment, void invoice"
     assert html =~ Copy.home_launcher_recovery_title()
     assert html =~ Copy.home_launcher_recovery_meta()
-    assert html =~ "Open dunning funnel analytics"
+    assert html =~ "Open recovery analytics"
     # Title relabeled in Phase 175-02 (IA-01 verb relabels); use Copy function directly.
     assert html =~ Copy.home_launcher_developer_title()
     assert html =~ "Debug webhook failures"
