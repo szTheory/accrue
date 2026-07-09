@@ -115,7 +115,13 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
 
         <FlashGroup.flash_group flashes={flash_messages(@flash)} />
 
-        <section class="ax-inline-worklist ax-subscriptions-invoice-strip" aria-label="Billing health priority worklist">
+        <section
+          class={[
+            "ax-inline-worklist ax-subscriptions-invoice-strip",
+            @summary.open_invoice_count > 0 && "ax-subscriptions-invoice-strip-danger"
+          ]}
+          aria-label="Billing health priority worklist"
+        >
           <div class="ax-inline-worklist-copy ax-subscriptions-priority-copy">
             <strong><%= billing_priority_title(@summary) %></strong>
             <span class="ax-subscriptions-exposure"><%= billing_exposure_summary(@summary) %></span>
@@ -126,7 +132,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
               class="ax-button ax-button-primary ax-button-sm ax-subscriptions-primary-action"
               href={invoice_queue_path(@admin_mount_path, @current_owner_scope)}
             >
-              Open invoice queue
+              Go to Invoices queue - open only
             </a>
             <span class="ax-subscriptions-secondary-group ax-subscriptions-secondary-group-primary">
               <strong>Bulk invoice actions</strong>
@@ -153,18 +159,30 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
               </a>
             </span>
             <span class="ax-subscriptions-secondary-group">
-              <strong>Audit trail</strong>
+              <strong>Who did what, when</strong>
               <a
                 class="ax-link-quiet ax-subscriptions-secondary-link"
                 href={scoped_path(@admin_mount_path, "/events", @current_owner_scope, %{"type" => "subscription.created"})}
               >
-                Open actor/event log
+                Open actor-filtered event log
+              </a>
+              <a
+                class="ax-link-quiet ax-subscriptions-secondary-link"
+                href={scoped_path(@admin_mount_path, "/events", @current_owner_scope, %{"actor_type" => "admin"})}
+              >
+                Filter admin actors
+              </a>
+            </span>
+            <span class="ax-subscriptions-secondary-group">
+              <strong>Customer lookup</strong>
+              <a class="ax-link-quiet ax-subscriptions-secondary-link" href={scoped_path(@admin_mount_path, "/customers", @current_owner_scope)}>
+                Find one customer record
               </a>
             </span>
             <span class="ax-subscriptions-secondary-group">
               <strong>Recovery</strong>
               <a class="ax-link-quiet ax-subscriptions-secondary-link" href={scoped_path(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}>
-                Open dunning funnel and at-risk workspace
+                Watch dunning + at-risk
               </a>
             </span>
           </div>
@@ -385,7 +403,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
       </span>
       <span><span class="ax-chip ax-label">Owner: #{escaped_o}</span> <span class="ax-chip ax-label">Tax: #{escaped_t}</span></span>
       <span class="ax-data-table-inline-actions">
-        <a href="#{events_href}" class="ax-link">Open subscription audit log</a>
+        <a href="#{events_href}" class="ax-link">Open who-did-what event log</a>
       </span>
       <span class="ax-label ax-muted">Webhook log opens failed subscription.created delivery attempts.</span>
     </span>

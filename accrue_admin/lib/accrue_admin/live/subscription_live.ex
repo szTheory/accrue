@@ -272,7 +272,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
               class="ax-button ax-button-recovery ax-button-sm ax-detail-recovery-primary"
               href={ScopedPath.build(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}
             >
-              Open dunning funnel and at-risk workspace
+              Watch dunning + at-risk
             </a>
           </div>
           <div class="ax-detail-priority-links">
@@ -439,7 +439,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
                   class="ax-button ax-button-recovery ax-button-sm ax-detail-recovery-primary"
                   href={ScopedPath.build(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}
                 >
-                  Open dunning funnel and at-risk workspace
+                  Watch dunning + at-risk
                 </a>
                 <a
                   class="ax-button ax-button-secondary ax-button-sm"
@@ -1021,7 +1021,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
         %{
           tone: "slate",
           label: "Setup blocked",
-          answer: "Billing health: setup blocked",
+          answer: "Billing is not healthy: setup blocked",
           headline: "No - setup data is missing",
           body:
             "Fix the blocking fields in the source billing system before treating this subscription as healthy.",

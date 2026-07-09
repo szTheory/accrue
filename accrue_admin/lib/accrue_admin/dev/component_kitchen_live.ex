@@ -114,7 +114,7 @@ if Mix.env() != :prod do
             </div>
             <div class="ax-inline-worklist-actions">
               <a class="ax-button ax-button-primary ax-button-sm" href={@admin_mount_path <> "/invoices?status=open"}>
-                Open production invoice queue
+                Open open-invoice queue to zero
               </a>
               <span class="ax-dev-secondary-route">
                 <strong>Customer</strong>
@@ -137,7 +137,7 @@ if Mix.env() != :prod do
               <span class="ax-dev-secondary-route">
                 <strong>Recovery</strong>
                 <a class="ax-link-quiet" href={@admin_mount_path <> "/analytics/recovery"}>
-                  Open dunning funnel and at-risk workspace
+                  Watch dunning + at-risk
                 </a>
               </span>
             </div>
@@ -156,7 +156,7 @@ if Mix.env() != :prod do
               <Button.button variant="primary" href={@admin_mount_path <> "/customers"}>Find one customer - see everything</Button.button>
               <Button.button variant="secondary" type="button">Primary action specimen</Button.button>
               <Button.button variant="secondary" type="button">Secondary action</Button.button>
-              <Button.button variant="secondary" class="ax-button-recovery" href={@admin_mount_path <> "/analytics/recovery"}>Open dunning funnel and at-risk workspace</Button.button>
+              <Button.button variant="primary" href={@admin_mount_path <> "/analytics/recovery"}>Watch dunning + at-risk</Button.button>
               <Button.button variant="ghost" href={@admin_mount_path <> "/webhooks"}>Ghost link</Button.button>
               <DropdownMenu.dropdown_menu
                 label="More billing actions"
