@@ -71,7 +71,7 @@ defmodule AccrueAdmin.Live.DashboardLive do
               class="ax-button ax-button-primary ax-button-sm ax-home-primary-action"
               href={ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope, %{"status" => "open"})}
             >
-              Open invoice queue workspace
+              Open invoice queue to $0.00
               <Icon.icon name={:arrow_right} size="sm" />
             </a>
             <a
@@ -413,11 +413,11 @@ defmodule AccrueAdmin.Live.DashboardLive do
   end
 
   defp attention_health_summary(_stats) do
-    "Unhealthy: billing needs operator action"
+    "Critical queues need action"
   end
 
   defp attention_health_detail(stats) do
-    "#{count(stats.blocked_webhook_count, "webhook")} blocked; #{count(stats.past_due_subscription_count, "past-due subscription")} in recovery; #{count(stats.failed_meter_event_count, "meter event")} blocked."
+    "Immediate work: #{count(stats.blocked_webhook_count, "failed webhook retry")}; #{count(stats.past_due_subscription_count, "at-risk recovery")}; #{count(stats.failed_meter_event_count, "blocked meter event")}. Use the task cards below."
   end
 
   defp count(1, noun), do: "1 #{noun}"

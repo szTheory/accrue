@@ -117,7 +117,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
               <strong class="ax-health-verdict"><%= billing_health_verdict(@summary) %></strong>
               <span class="ax-health-business-answer"><%= billing_health_business_answer(@summary) %></span>
             </div>
-            <p class="ax-body">At-risk subscriptions, dunning recovery, failed webhook delivery, and invoice queue context stay on this surface.</p>
+            <p class="ax-body">Priority: clear the unified invoice queue first; use dunning recovery for at-risk accounts and failed-webhook debugger for delivery blockers.</p>
           </:description>
 
           <:actions>
@@ -125,13 +125,19 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
               class="ax-button ax-button-primary ax-button-sm"
               href={invoice_queue_path(@admin_mount_path, @current_owner_scope)}
             >
-              Open invoice queue workspace
+              Open unified invoice queue to $0.00
+            </a>
+            <a
+              class="ax-button ax-button-recovery ax-button-sm"
+              href={scoped_path(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}
+            >
+              Open dunning funnel workspace
             </a>
             <a
               class="ax-button ax-button-secondary ax-button-sm"
               href={scoped_path(@admin_mount_path, "/webhooks", @current_owner_scope, %{"status" => "failed,dead"})}
             >
-              Debug failed webhook deliveries
+              Debug failed-webhook deliveries
             </a>
           </:actions>
 
@@ -367,16 +373,16 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
     """)
   end
 
-  defp billing_health_label(%{open_invoice_count: count}) when count > 0, do: "Action required"
+  defp billing_health_label(%{open_invoice_count: count}) when count > 0, do: "Priority 1"
   defp billing_health_label(_summary), do: "Healthy"
 
   defp billing_health_verdict(%{open_invoice_count: count}) when count > 0,
-    do: "Unhealthy: open invoices need collection"
+    do: "Invoice queue above $0.00"
 
   defp billing_health_verdict(_summary), do: "Yes - billing is healthy right now"
 
   defp billing_health_business_answer(%{open_invoice_count: count} = summary) when count > 0 do
-    "Collect #{format_minor(summary.open_invoice_exposure_minor, "usd")} across #{count(count, "open invoice")} to reach $0.00."
+    "Collect #{format_minor(summary.open_invoice_exposure_minor, "usd")} across #{count(count, "open invoice")} in the unified invoice queue to reach $0.00."
   end
 
   defp billing_health_business_answer(_summary), do: "$0.00 open invoice exposure."

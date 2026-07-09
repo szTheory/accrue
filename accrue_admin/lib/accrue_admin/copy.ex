@@ -1343,7 +1343,8 @@ defmodule AccrueAdmin.Copy do
 
   def home_launcher_invoices_title, do: "Open invoice queue to $0.00"
 
-  def home_launcher_invoices_copy, do: "Retry payment, void invoices, and clear open receivables."
+  def home_launcher_invoices_copy,
+    do: "Primary queue for retrying payment, voiding invoices, and clearing open receivables."
 
   def home_launcher_recovery_title, do: "Open dunning funnel + at-risk"
 

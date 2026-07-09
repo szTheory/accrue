@@ -256,7 +256,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
               class="ax-button ax-button-secondary ax-button-sm"
               href={ScopedPath.build(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}
             >
-              Watch dunning funnel and at-risk accounts
+              Open dunning funnel and at-risk workspace
             </a>
             <a
               class="ax-button ax-button-secondary ax-button-sm"
@@ -273,7 +273,13 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
         </Detail.summary_card>
 
         <section class="ax-detail-priority-actions" aria-label="Priority billing workspaces">
-          <span class="ax-label ax-detail-priority-label">Primary queue</span>
+          <span class="ax-label ax-detail-priority-label">Priority workspaces</span>
+          <a
+            class="ax-button ax-button-recovery ax-button-sm"
+            href={ScopedPath.build(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}
+          >
+            Open dunning funnel and at-risk workspace
+          </a>
           <a
             class="ax-button ax-button-primary ax-button-sm"
             href={ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope, %{"status" => "open", "subscription_id" => @subscription.id})}
@@ -281,9 +287,6 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
             Open this subscription's filtered invoices
           </a>
           <span class="ax-detail-priority-links">
-            <a class="ax-link-quiet" href={ScopedPath.build(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}>
-              Dunning funnel
-            </a>
             <a
               class="ax-link-quiet"
               href={
@@ -454,12 +457,6 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
                   }
                 >
                   Open this subscription's filtered invoices
-                </a>
-                <a
-                  class="ax-button ax-button-recovery ax-button-sm"
-                  href={ScopedPath.build(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}
-                >
-                  Watch dunning funnel and at-risk accounts
                 </a>
               </div>
               <p class="ax-body ax-detail-hint">

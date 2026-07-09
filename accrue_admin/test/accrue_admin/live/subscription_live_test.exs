@@ -115,7 +115,8 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
     assert html =~ "Failed/dead subscription.created queue"
     assert html =~ "Debug webhook"
     assert html =~ "Work this subscription&#39;s open invoices"
-    assert html =~ "Dunning funnel"
+    assert html =~ "Open dunning funnel and at-risk workspace"
+    assert html =~ "Priority workspaces"
     assert html =~ "Open full audit event log"
   end
 

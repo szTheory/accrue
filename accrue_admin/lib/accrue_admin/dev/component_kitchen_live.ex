@@ -77,11 +77,11 @@ if Mix.env() != :prod do
                 %{label: "Component kitchen"}
               ]}
             />
-            <h1 class="ax-heading ax-component-kitchen-title">Component Kitchen</h1>
-            <p class="ax-page-description">Dev-only component states and billing-health specimens.</p>
+            <h1 class="ax-heading ax-component-kitchen-title">Billing Operations Component Kitchen</h1>
+            <p class="ax-page-description">Dev-only specimens for invoice queue, dunning funnel, customer search, and billing health states.</p>
             <div class="ax-page-actions">
               <a class="ax-button ax-button-recovery ax-button-sm" href={@admin_mount_path <> "/analytics/recovery"}>
-                Open dunning funnel + at-risk analytics
+                Open dunning funnel workspace
               </a>
               <a class="ax-button ax-button-primary ax-button-sm" href={@admin_mount_path <> "/invoices?status=open"}>
                 Open invoice queue view
@@ -121,7 +121,7 @@ if Mix.env() != :prod do
               class="ax-kpi-card-danger"
               href={@admin_mount_path <> "/webhooks?status=failed,dead"}
             >
-              <:meta>Open failed/dead deliveries to restore admin billing health</:meta>
+              <:meta>Open failed-webhook debugger to restore admin billing health</:meta>
             </KpiCard.kpi_card>
             <KpiCard.kpi_card
               label="Queued invoice jobs"

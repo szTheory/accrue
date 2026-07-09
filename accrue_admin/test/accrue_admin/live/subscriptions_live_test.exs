@@ -50,7 +50,7 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert html =~ Copy.subscriptions_index_heading()
 
     assert html =~
-             "At-risk subscriptions, dunning recovery, failed webhook delivery, and invoice queue context stay on this surface."
+             "Priority: clear the unified invoice queue first; use dunning recovery for at-risk accounts and failed-webhook debugger for delivery blockers."
 
     assert html =~ "Canceling at period end"
     assert html =~ "/billing/subscriptions/"
@@ -90,21 +90,22 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert html =~ ~s(data-ax-page-actions)
     refute html =~ "Search customer, open detail"
 
-    assert html =~ "Unhealthy: open invoices need collection" or
+    assert html =~ "Invoice queue above $0.00" or
              html =~ "Yes - billing is healthy right now"
 
     assert html =~ "Overall billing health answer"
     assert html =~ "ax-health-summary-prominent"
     assert html =~ "ax-subscriptions-health-hero"
     assert html =~ "$0.00 open invoice exposure." or html =~ "to reach $0.00."
-    assert html =~ "invoice queue context"
-    assert html =~ "Open invoice queue workspace"
+    assert html =~ "unified invoice queue first"
+    assert html =~ "Open unified invoice queue to $0.00"
+    assert html =~ "Open dunning funnel workspace"
     assert html =~ "Open this subscription&#39;s open invoices"
     assert html =~ "Who did what, when?"
     assert html =~ "Latest audit event: subscription.created by Accrue system"
     assert html =~ "Open full audit event log"
     assert html =~ "Filter admin actors"
-    assert html =~ "Debug failed webhook deliveries"
+    assert html =~ "Debug failed-webhook deliveries"
     assert html =~ "dunning recovery"
     refute html =~ "Billing health: Unhealthy"
     assert_one_h1(html)
@@ -273,7 +274,7 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert html =~ "Actor"
     assert html =~ "Event"
     refute html =~ "Search customer, open detail"
-    assert html =~ "Debug failed webhook deliveries"
+    assert html =~ "Debug failed-webhook deliveries"
     assert html =~ "amount not confirmed in admin"
     assert html =~ "$0.00 open invoice exposure." or html =~ "to reach $0.00."
 
