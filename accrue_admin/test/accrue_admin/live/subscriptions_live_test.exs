@@ -50,7 +50,7 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert html =~ Copy.subscriptions_index_heading()
 
     assert html =~
-             "Use the invoices workspace for collection work; use the failed-webhook debugger for delivery blockers."
+             "Work the open-invoice queue first; subscription rows below are context only."
 
     assert html =~ "Canceling at period end"
     assert html =~ "/billing/subscriptions/"
@@ -90,19 +90,19 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert html =~ ~s(data-ax-page-actions)
     refute html =~ "Search customer, open detail"
 
-    assert html =~ "Open-invoice queue:" or
-             html =~ "Invoice queue clear: no collection work"
+    assert html =~ "Billing health needs attention:" or
+             html =~ "Billing health is clear: no collection work"
 
     assert html =~ "Open-invoice queue status"
     assert html =~ "ax-health-summary-prominent"
     assert html =~ "ax-subscriptions-health-hero"
 
     assert html =~ "$0.00 open invoice exposure." or
-             html =~ "exposure. Open the invoices workspace"
+             html =~ "exposure. Work the open-invoice queue"
 
-    assert html =~ "Subscription rows below are context only"
+    assert html =~ "subscription rows below are context only"
     assert html =~ "Open invoices workspace filtered to open"
-    assert html =~ "Open-invoice collection queue"
+    assert html =~ "Billing health priority"
     assert html =~ "Open open-invoice queue"
     assert html =~ "Dunning funnel workspace"
     assert html =~ "Open this row&#39;s filtered invoices"
@@ -131,7 +131,7 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert html =~ "At risk"
     assert html =~ "All"
     assert html =~ "Open-invoice worklist"
-    assert html =~ "Open-invoice collection queue"
+    assert html =~ "Billing health priority"
     assert html =~ "ax-subscription-row-state"
     assert html =~ "Failed/dead webhook deliveries"
     assert html =~ "Debug failed-webhook deliveries"
@@ -284,7 +284,7 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert html =~ "Amount not confirmed in admin"
 
     assert html =~ "$0.00 open invoice exposure." or
-             html =~ "exposure. Open the invoices workspace"
+             html =~ "exposure. Work the open-invoice queue"
 
     assert_table_headings_in_order(html, [
       "Customer and subscription IDs",

@@ -84,7 +84,7 @@ if Mix.env() != :prod do
                 Open dunning funnel workspace
               </a>
               <a class="ax-button ax-button-primary ax-button-sm" href={@admin_mount_path <> "/invoices?status=open"}>
-                Open invoice queue view
+                Open production open-invoice queue
               </a>
               <a class="ax-button ax-button-secondary ax-button-sm" href={@admin_mount_path <> "/webhooks?status=failed,dead"}>
                 Debug failed webhooks

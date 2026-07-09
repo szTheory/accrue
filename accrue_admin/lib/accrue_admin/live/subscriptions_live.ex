@@ -117,7 +117,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
               <strong class="ax-health-verdict"><%= billing_health_verdict(@summary) %></strong>
               <span class="ax-health-business-answer"><%= billing_health_business_answer(@summary) %></span>
             </div>
-            <p class="ax-body">Use the invoices workspace for collection work; use the failed-webhook debugger for delivery blockers. Subscription rows below are context only.</p>
+            <p class="ax-body">Work the open-invoice queue first; subscription rows below are context only.</p>
           </:description>
 
           <:actions>
@@ -143,14 +143,16 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
 
         <FlashGroup.flash_group flashes={flash_messages(@flash)} />
 
-        <section class="ax-inline-worklist ax-subscriptions-invoice-strip" aria-label="Open invoice collection worklist">
+        <section class="ax-inline-worklist ax-subscriptions-invoice-strip" aria-label="Billing health priority worklist">
           <div class="ax-inline-worklist-copy">
-            <strong>Open-invoice collection queue</strong>
+            <strong>Billing health priority</strong>
             <span>
               <%= count(@summary.open_invoice_count, "open invoice") %>,
               <%= format_minor(@summary.open_invoice_exposure_minor, "usd") %> exposure.
             </span>
-            <span>Work retry, void, and clearing in the invoices workspace; this table stays subscription-scoped.</span>
+            <span>Open invoices are the primary queue; use secondary links only for dunning, webhooks, or audit context.</span>
+            <span class="ax-subscriptions-secondary-context">Who did what, when? Latest audit event: subscription.created by Accrue system.</span>
+            <span class="ax-subscriptions-secondary-context">Failed/dead webhook deliveries: debug failed subscription.created deliveries without hunting through subscription rows.</span>
           </div>
           <div class="ax-inline-worklist-actions">
             <a
@@ -164,6 +166,30 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
               href={scoped_path(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}
             >
               Dunning funnel workspace
+            </a>
+            <a
+              class="ax-link-quiet ax-subscriptions-secondary-link"
+              href={scoped_path(@admin_mount_path, "/webhooks", @current_owner_scope, %{"status" => "failed,dead"})}
+            >
+              Debug failed-webhook deliveries
+            </a>
+            <a
+              class="ax-link-quiet ax-subscriptions-secondary-link"
+              href={scoped_path(@admin_mount_path, "/webhooks", @current_owner_scope, %{"status" => "failed,dead", "type" => "subscription.created"})}
+            >
+              Filter subscription.created
+            </a>
+            <a
+              class="ax-link-quiet ax-subscriptions-secondary-link"
+              href={scoped_path(@admin_mount_path, "/events", @current_owner_scope, %{"type" => "subscription.created"})}
+            >
+              Open full audit event log
+            </a>
+            <a
+              class="ax-link-quiet ax-subscriptions-secondary-link"
+              href={scoped_path(@admin_mount_path, "/events", @current_owner_scope, %{"actor_type" => "admin"})}
+            >
+              Filter admin actors
             </a>
           </div>
         </section>
@@ -386,19 +412,19 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
     """)
   end
 
-  defp billing_health_label(%{open_invoice_count: count}) when count > 0, do: "Open invoices"
-  defp billing_health_label(_summary), do: "Invoice queue clear"
+  defp billing_health_label(%{open_invoice_count: count}) when count > 0, do: "Needs attention"
+  defp billing_health_label(_summary), do: "Healthy"
 
   defp billing_health_verdict(%{open_invoice_count: 1}),
-    do: "Open-invoice queue: 1 invoice needs collection"
+    do: "Billing health needs attention: 1 open invoice needs collection"
 
   defp billing_health_verdict(%{open_invoice_count: count}) when count > 1,
-    do: "Open-invoice queue: #{count(count, "open invoice")} need collection"
+    do: "Billing health needs attention: #{count(count, "open invoice")} need collection"
 
-  defp billing_health_verdict(_summary), do: "Invoice queue clear: no collection work"
+  defp billing_health_verdict(_summary), do: "Billing health is clear: no collection work"
 
   defp billing_health_business_answer(%{open_invoice_count: count} = summary) when count > 0 do
-    "#{format_minor(summary.open_invoice_exposure_minor, "usd")} exposure. Open the invoices workspace; subscription rows are context only."
+    "#{format_minor(summary.open_invoice_exposure_minor, "usd")} exposure. Work the open-invoice queue before secondary queues."
   end
 
   defp billing_health_business_answer(_summary), do: "$0.00 open invoice exposure."

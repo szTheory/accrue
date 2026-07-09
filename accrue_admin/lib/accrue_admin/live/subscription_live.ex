@@ -452,10 +452,10 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
 
               <div class="ax-detail-actions-row">
                 <a
-                  class="ax-button ax-button-primary ax-button-sm"
+                  class="ax-button ax-button-recovery ax-button-sm ax-detail-recovery-primary"
                   href={ScopedPath.build(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}
                 >
-                  Open dunning funnel
+                  Open dunning funnel and at-risk workspace
                 </a>
                 <a
                   class="ax-button ax-button-secondary ax-button-sm"
