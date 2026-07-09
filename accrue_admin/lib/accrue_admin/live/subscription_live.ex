@@ -275,9 +275,9 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
             <strong class="ax-detail-health-verdict"><%= health.headline %></strong>
             <span class="ax-detail-health-body"><%= health.body %></span>
           </div>
-          <ul :if={health.caveats != []} class="ax-detail-health-caveats">
-            <li :for={caveat <- health.caveats}><%= caveat %></li>
-          </ul>
+          <p :if={health.caveats != []} class="ax-detail-health-caveats">
+            <strong>Setup gaps:</strong> <%= Enum.join(health.caveats, "; ") %>
+          </p>
           <div :if={health.caveats != []} class="ax-detail-setup-actions" aria-label="Resolve missing billing setup">
             <span class="ax-detail-health-body">
               Fix setup in the source billing system, then use this admin view to verify the projected renewal, price, and amount.
@@ -978,8 +978,8 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
         %{
           tone: "amber",
           label: "Setup incomplete",
-          answer: "Billing health cannot be verified",
-          headline: "Setup incomplete; active billing not verified",
+          answer: "No. Billing is not healthy right now.",
+          headline: "Setup incomplete; active billing cannot be verified",
           body:
             "Required setup details are missing. Check invoices and setup audit events before treating recurring billing as healthy.",
           caveats: caveats

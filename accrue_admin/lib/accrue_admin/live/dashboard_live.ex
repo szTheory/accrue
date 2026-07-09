@@ -142,25 +142,6 @@ defmodule AccrueAdmin.Live.DashboardLive do
             <h3 class="ax-heading"><%= Copy.home_tasks_heading() %></h3>
           </header>
 
-          <%!-- Visible search field (IA-01): Support entry point visible without hotkey knowledge --%>
-          <div class="ax-home-search">
-            <button
-              type="button"
-              class="ax-input-search"
-              role="search"
-              aria-label="Search"
-              data-command-palette-trigger="true"
-              data-ax-command-palette-trigger="true"
-            >
-              <AccrueAdmin.Components.Icon.icon name={:search} size="md" class="ax-input-icon" />
-              <span class="ax-input-text">
-                <span class="ax-input-title"><%= Copy.home_search_customers_title() %></span>
-                <span class="ax-input-placeholder"><%= Copy.home_search_customers_placeholder() %></span>
-              </span>
-              <span class="ax-input-action">Search</span>
-            </button>
-          </div>
-
           <div class="ax-launchers">
             <a class="ax-launcher ax-launcher-primary" href={ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope, %{"status" => "open"})}>
               <span class="ax-launcher-icon"><Icon.icon name={:invoices} size="lg" /></span>

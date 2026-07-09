@@ -10,7 +10,6 @@ if Mix.env() != :prod do
       Button,
       Checkbox,
       Detail,
-      DetailDrawer,
       DropdownMenu,
       EmptyState,
       FilterChipBar,
@@ -819,14 +818,15 @@ if Mix.env() != :prod do
 
       ~H"""
       <div class="ax-dev-group-body ax-dev-group-drawer-specimen">
-        <DetailDrawer.detail_drawer
-          id="grp190-drawer-form-shell"
-          open
-          title="Billing health and recovery drawer"
-          subtitle="Current billing health, at-risk dunning, actor audit history, failed-webhook debugging, and invoice work queues."
-          close_label="Close drawer"
-          class="ax-dev-group-drawer-overlay"
-        >
+        <section class="ax-card ax-dev-group-drawer-preview" aria-label="Billing health and recovery drawer">
+          <header class="ax-section-head">
+            <div>
+              <p class="ax-eyebrow">Drawer preview</p>
+              <h5 class="ax-heading">Billing health and recovery drawer</h5>
+              <p class="ax-body">Current billing health, at-risk dunning, actor audit history, failed-webhook debugging, and invoice queue controls.</p>
+            </div>
+          </header>
+
           <div class="ax-dev-group-drawer">
             <section class="ax-dev-group-drawer-context ax-dev-group-drawer-health" aria-label="Billing health summary">
               <p class="ax-label">Billing health verdict</p>
@@ -838,19 +838,29 @@ if Mix.env() != :prod do
                 <span>$592.50 open exposure; target $0.00</span>
               </p>
               <p class="ax-body">
-                Last edited Jul 7, 2026 at 18:00 UTC by System. Recovery analytics, actor audit history, failed-webhook debugging, and invoice work queues are available from this panel.
+                Last edited Jul 7, 2026 at 18:00 UTC by System after billing.contact.updated.
               </p>
               <div class="ax-audit-summary-row" aria-label="Recent actor audit history">
                 <span><strong>Actor</strong> System</span>
                 <span><strong>Event</strong> billing.contact.updated</span>
                 <span><strong>When</strong> Jul 7, 2026 18:00 UTC</span>
               </div>
-              <div class="ax-detail-actions-row ax-dev-group-drawer-primary-actions">
-                <a class="ax-button ax-button-primary ax-button-sm" href={@admin_mount_path <> "/invoices?status=open"}>Open invoice queue view for 2 open invoices</a>
-                <a class="ax-button ax-button-primary ax-button-sm" href={@admin_mount_path <> "/webhooks?status=failed,dead"}>Open failed-webhook debugger</a>
-                <a class="ax-button ax-button-recovery ax-button-sm" href={@admin_mount_path <> "/analytics/recovery"}>Watch dunning funnel analytics and at-risk customers</a>
-                <a class="ax-button ax-button-secondary ax-button-sm" href={@admin_mount_path <> "/customers"}>Find customer</a>
-                <a class="ax-button ax-button-warning ax-button-sm" href={@admin_mount_path <> "/events?actor_type=admin"}>View full audit history</a>
+              <div class="ax-dev-group-action-clusters">
+                <div class="ax-dev-group-action-cluster">
+                  <span class="ax-label">Queues</span>
+                  <div class="ax-detail-actions-row ax-dev-group-drawer-primary-actions">
+                    <a class="ax-button ax-button-primary ax-button-sm" href={@admin_mount_path <> "/invoices?status=open"}>Open invoice queue view for 2 open invoices</a>
+                    <a class="ax-button ax-button-primary ax-button-sm" href={@admin_mount_path <> "/webhooks?status=failed,dead"}>Open failed-webhook debugger</a>
+                  </div>
+                </div>
+                <div class="ax-dev-group-action-cluster">
+                  <span class="ax-label">Recovery and audit</span>
+                  <div class="ax-detail-actions-row">
+                    <a class="ax-button ax-button-recovery ax-button-sm" href={@admin_mount_path <> "/analytics/recovery"}>View dunning funnel and at-risk analytics</a>
+                    <a class="ax-button ax-button-warning ax-button-sm" href={@admin_mount_path <> "/events?actor_type=admin"}>View full audit history</a>
+                    <a class="ax-button ax-button-secondary ax-button-sm" href={@admin_mount_path <> "/customers"}>Find customer</a>
+                  </div>
+                </div>
               </div>
             </section>
 
@@ -879,11 +889,11 @@ if Mix.env() != :prod do
             />
           </div>
 
-          <:footer>
+          <footer class="ax-detail-drawer-footer">
             <Button.button variant="ghost" type="button">Cancel</Button.button>
             <Button.button variant="primary" type="button">Save contact</Button.button>
-          </:footer>
-        </DetailDrawer.detail_drawer>
+          </footer>
+        </section>
       </div>
       """
     end

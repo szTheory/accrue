@@ -550,6 +550,15 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
   defp identity_cell(row, mount_path, owner_scope) do
     customer_href = scoped_path(mount_path, "/customers/#{row.customer_id}", owner_scope)
     subscription_href = scoped_path(mount_path, "/subscriptions/#{row.id}", owner_scope)
+
+    subscription_invoices_href =
+      mount_path
+      |> scoped_path("/invoices", owner_scope)
+      |> AccrueAdmin.DataTableNav.merge_query(%{
+        "status" => "open",
+        "subscription_id" => row.id
+      })
+
     customer_id = escape(row.customer_id)
     subscription_id = escape(row.processor_id || row.id)
 
@@ -558,6 +567,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
       <a href="#{customer_href}" class="ax-link">#{escape(customer_label(row))}</a>
       <span class="ax-label ax-muted"><strong>Customer ID</strong> #{customer_id}</span>
       <a href="#{subscription_href}" class="ax-label ax-muted"><strong>Subscription</strong> #{subscription_id}</a>
+      <a href="#{subscription_invoices_href}" class="ax-button ax-button-primary ax-button-sm">Open invoice queue workspace</a>
     </span>
     """)
   end
