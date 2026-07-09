@@ -172,7 +172,9 @@ test.describe("foundation tokens - computed styles", () => {
 });
 
 // >>> @ratchet:auto-guards >>>
-const RATCHET_AUTO_GUARDS = [];
+const RATCHET_AUTO_GUARDS = [
+  {"finding_id":"f-c215fb4ea22d61fe","kind":"contrast","selector":".ax-kpi-row","min_ratio":4.5}, // @ratchet:f-c215fb4ea22d61fe
+];
 // <<< @ratchet:auto-guards <<<
 
 // Auto-minted regression guards (207-03, D-44/D-45/D-46). This loop iterates the
