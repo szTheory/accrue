@@ -81,7 +81,7 @@ if Mix.env() != :prod do
             <p class="ax-page-description">Monitor open invoice exposure, failed webhooks, customer lookup, and audit trail from live billing workspaces.</p>
             <div class="ax-page-actions">
               <a class="ax-button ax-button-primary ax-button-sm" href={@admin_mount_path <> "/invoices?status=open"}>
-                Open open-invoice queue first
+                Open invoice queue workspace
               </a>
             </div>
             <section class="ax-inline-worklist ax-dev-audit-strip" aria-label="Component kitchen audit trail">
@@ -114,7 +114,7 @@ if Mix.env() != :prod do
             </div>
             <div class="ax-inline-worklist-actions">
               <a class="ax-button ax-button-primary ax-button-sm" href={@admin_mount_path <> "/invoices?status=open"}>
-                Open open-invoice queue to zero
+                Open invoice queue workspace
               </a>
               <span class="ax-dev-secondary-route">
                 <strong>Customer</strong>

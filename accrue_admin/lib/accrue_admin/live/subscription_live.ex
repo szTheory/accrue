@@ -237,7 +237,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
               class="ax-button ax-button-secondary ax-button-sm"
               href={ScopedPath.build(@admin_mount_path, "", @current_owner_scope)}
             >
-              View system-wide billing health
+              Open billing health dashboard
             </a>
           </:actions>
         </Detail.summary_card>
@@ -247,14 +247,14 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
             <span class="ax-label ax-detail-priority-label">Main invoice queue</span>
             <a
               class="ax-button ax-button-primary ax-button-sm ax-detail-priority-primary ax-detail-invoice-primary"
-              href={ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope, %{"status" => "open", "subscription_id" => @subscription.id})}
+              href={ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope, %{"status" => "open"})}
             >
-              Open this subscription's invoice queue
+              Open global invoice queue to zero
             </a>
             <ul class="ax-detail-local-queue" aria-label="Local open invoice queue preview">
               <li>
                 <strong>Queue preview</strong>
-                <span>Filtered to this subscription's open invoices</span>
+                <span>Global open invoices first; local filter stays below</span>
               </li>
               <li>
                 <strong>Bulk actions</strong>
@@ -274,9 +274,9 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
           <div class="ax-detail-priority-links">
             <a
               class="ax-link-quiet"
-              href={ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope, %{"status" => "open"})}
+              href={ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope, %{"status" => "open", "subscription_id" => @subscription.id})}
             >
-              Return to global open-invoice queue
+              Open this subscription's invoice queue
             </a>
             <a
               class="ax-link-quiet"
@@ -1017,10 +1017,10 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
         %{
           tone: "slate",
           label: "Setup blocked",
-          answer: "Billing cannot be trusted yet",
-          headline: "Missing renewal, price, or charge data",
+          answer: "Billing health needs setup data",
+          headline: "Missing billing inputs",
           body:
-            "Fix missing billing inputs before using this subscription for revenue or collection decisions.",
+            "Fix renewal, price, or charge data before relying on revenue or collection decisions.",
           caveats: caveats
         }
 

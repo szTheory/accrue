@@ -168,6 +168,9 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
           >
             Open subscription event log
           </a>
+          <a class="ax-link-quiet" href={scoped_path(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}>
+            Recovery: watch dunning funnel
+          </a>
         </section>
 
         <section class="ax-inline-worklist ax-subscriptions-audit-strip" aria-label="Subscription audit trail">
@@ -393,12 +396,12 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
   end
 
   defp billing_priority_title(%{open_invoice_count: count}) when count > 0,
-    do: "Billing health: unhealthy - open invoices require collection"
+    do: "Billing health: open invoices need work"
 
   defp billing_priority_title(_summary), do: "Billing health: healthy - no collection queue"
 
   defp billing_exposure_summary(%{open_invoice_count: count} = summary) when count > 0 do
-    "Open invoice exposure: #{format_minor(summary.open_invoice_exposure_minor, "usd")} above the $0.00 target across #{count(count, "open invoice")}."
+    "Open invoice exposure: #{format_minor(summary.open_invoice_exposure_minor, "usd")} above target; #{count(count, "open invoice")}."
   end
 
   defp billing_exposure_summary(_summary),

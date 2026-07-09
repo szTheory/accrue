@@ -89,11 +89,11 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     refute html =~ ~s(data-ax-page-actions)
     refute html =~ "Search customer, open detail"
 
-    assert html =~ "Billing health: unhealthy - open invoices require collection" or
+    assert html =~ "Billing health: open invoices need work" or
              html =~ "Billing health: healthy - no collection queue"
 
     assert html =~ "Open invoice exposure: $0.00; target met" or
-             html =~ "exposure above the $0.00 target"
+             html =~ "above target"
 
     assert html =~ "Open dedicated Invoices queue"
     assert html =~ "Bulk invoice actions"
@@ -281,7 +281,7 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert html =~ "Amount not confirmed in admin"
 
     assert html =~ "Open invoice exposure: $0.00; target met" or
-             html =~ "exposure above the $0.00 target"
+             html =~ "above target"
 
     assert_table_headings_in_order(html, [
       "Customer and subscription IDs",

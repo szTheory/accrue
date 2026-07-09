@@ -55,7 +55,7 @@ defmodule AccrueAdmin.Live.DashboardLive do
           <div class="ax-dashboard-title-row">
             <h1 class="ax-display"><%= Copy.home_intro_headline() %></h1>
             <span :if={@attention != []} class="ax-status-badge ax-badge-danger ax-dashboard-health-badge">
-              <span class="ax-status-dot"></span><%= attention_health_summary(@stats) %> - <%= attention_health_counts(@stats) %>
+              <span class="ax-status-dot"></span>Unhealthy
             </span>
           </div>
           <p class="ax-body ax-page-copy"><%= Copy.home_intro_copy() %></p>
@@ -161,22 +161,28 @@ defmodule AccrueAdmin.Live.DashboardLive do
             </a>
 
             <a class="ax-launcher ax-launcher-customer" href={ScopedPath.build(@admin_mount_path, "/customers", @current_owner_scope)}>
-              <span class="ax-launcher-icon"><Icon.icon name={:search} size="lg" /></span>
-              <span class="ax-launcher-title"><%= Copy.home_launcher_customers_title() %></span>
-              <span class="ax-launcher-meta"><%= Copy.home_launcher_customers_meta() %></span>
-            </a>
+            <span class="ax-launcher-icon"><Icon.icon name={:search} size="lg" /></span>
+            <span class="ax-launcher-title"><%= Copy.home_launcher_customers_title() %></span>
+            <span class="ax-launcher-meta"><%= Copy.home_launcher_customers_meta() %></span>
+            <span class="ax-launcher-action">
+              Open customer directory <Icon.icon name={:arrow_right} size="sm" />
+            </span>
+          </a>
 
             <a class="ax-launcher ax-launcher-recovery" href={ScopedPath.build(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}>
               <span class="ax-launcher-icon"><Icon.icon name={:recovery} size="lg" /></span>
               <span class="ax-launcher-title"><%= Copy.home_launcher_recovery_title() %></span>
               <span class="ax-launcher-copy"><%= Copy.home_launcher_recovery_copy() %></span>
               <span class="ax-launcher-meta"><%= Copy.home_launcher_recovery_meta() %></span>
-              <span :if={@stats.past_due_subscription_count > 0} class="ax-launcher-meta ax-launcher-meta-warn">
-                <%= count(@stats.past_due_subscription_count, "at-risk subscription") %>
-              </span>
-              <span class="ax-launcher-action">
-                Open dunning funnel <Icon.icon name={:arrow_right} size="sm" />
-              </span>
+            <span :if={@stats.past_due_subscription_count > 0} class="ax-launcher-meta ax-launcher-meta-warn">
+              <%= count(@stats.past_due_subscription_count, "at-risk subscription") %>
+            </span>
+            <span class="ax-launcher-meta ax-launcher-meta-actions">
+              Funnel watch: retry, dunning, at-risk
+            </span>
+            <span class="ax-launcher-action">
+              Open dunning funnel <Icon.icon name={:arrow_right} size="sm" />
+            </span>
             </a>
 
             <a class="ax-launcher" href={ScopedPath.build(@admin_mount_path, "/webhooks", @current_owner_scope)}>

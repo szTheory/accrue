@@ -116,7 +116,7 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
     assert html =~ "Debug this subscription&#39;s webhooks"
     assert html =~ "Open this subscription&#39;s invoice queue"
     assert html =~ "Queue preview"
-    assert html =~ "Return to global open-invoice queue"
+    assert html =~ "Open global invoice queue to zero"
     assert html =~ "Watch dunning + at-risk"
     assert html =~ "Main invoice queue"
     assert html =~ "Webhook debugger"
@@ -135,15 +135,15 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
     assert html =~ "Dunning &amp; recovery"
     assert html =~ "Tax &amp; compliance"
     assert html =~ "invoice.payment_failed"
-    assert html =~ "Billing cannot be trusted yet"
+    assert html =~ "Billing health needs setup data"
     assert html =~ "Setup blocked"
     assert html =~ "ax-detail-health-summary-slate"
     assert html =~ "ax-detail-health-answer"
-    assert html =~ "Missing renewal, price, or charge data"
+    assert html =~ "Missing billing inputs"
     assert html =~ "Charge amount not shown"
 
     assert html =~
-             "Fix missing billing inputs before using this subscription for revenue or collection decisions."
+             "Fix renewal, price, or charge data before relying on revenue or collection decisions."
 
     assert html =~
              "Blocking fields must be fixed in the source billing system before charge projections can be trusted."
@@ -157,8 +157,8 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
     assert html =~ "Open customer billing profile"
     assert html =~ "Review setup audit events"
     assert html =~ "Open local invoice context"
-    assert html =~ "Return to global open-invoice queue"
-    assert html =~ "View system-wide billing health"
+    assert html =~ "Open this subscription&#39;s invoice queue"
+    assert html =~ "Open billing health dashboard"
     assert html =~ "Who did what, when"
     assert html =~ "Latest audit event summary"
     assert html =~ "Actor"
