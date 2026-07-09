@@ -2,7 +2,7 @@
   "schema_version": "ratchet-ledger-baseline/1",
   "frozen": false,
   "epoch": 1,
-  "ledger_sha256": "54368d022688f599ec12ca8b53ebce6b47608425ecdde9318f0b15a62380b036",
+  "ledger_sha256": "f7cf0aa395f4bba57f615f22ef972aaa39ca515a65bd1bfdbb3b6be24102cb47",
   "confirmed_open": {
     "persona:operator-founder": {
       "total": 0,
@@ -15,13 +15,13 @@
       "real": 0
     },
     "persona:finance-billing-ops": {
-      "total": 0,
-      "minor": 0,
+      "total": 1,
+      "minor": 1,
       "real": 0
     },
     "persona:recovery-growth-ops": {
-      "total": 0,
-      "minor": 0,
+      "total": 1,
+      "minor": 1,
       "real": 0
     },
     "persona:developer-integration": {
@@ -109,7 +109,6 @@
     "subscriptions__d02__primary-nav__ov-none",
     "subscriptions__d08__page-header__ov-none",
     "subscriptions__d11__content-body__ov-none",
-    "component-kitchen__d02__layer__ov-none",
     "dashboard__d07__primary-nav__ov-none",
     "subscriptions__d03__data-table__ov-none",
     "subscriptions__d02__page-header__ov-none",
@@ -130,6 +129,10 @@
     "subscription-detail__d03__attention-rail__ov-none",
     "subscription-detail__d07__attention-rail__ov-none",
     "subscriptions__d01__page-header__ov-none",
-    "subscription-detail__d02__primary-nav__ov-none"
+    "subscription-detail__d02__primary-nav__ov-none",
+    "component-kitchen__d08__layer__ov-copy-specificity",
+    "dashboard__d03__kpi-row__ov-none",
+    "subscription-detail__d03__content-body__ov-none",
+    "component-kitchen__d08__layer__ov-actionability+layer-z-index"
   ]
 }
