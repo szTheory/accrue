@@ -81,7 +81,7 @@ if Mix.env() != :prod do
             <p class="ax-page-description">Primitive and form components — full state matrix. Use the topbar theme toggle to review light and dark.</p>
             <div class="ax-page-actions">
               <a class="ax-button ax-button-secondary ax-button-sm" href={@admin_mount_path <> "/analytics/recovery"}>
-                Open dunning funnel
+                Open dunning funnel + at-risk analytics
               </a>
               <a class="ax-button ax-button-primary ax-button-sm" href={@admin_mount_path <> "/invoices?status=open"}>
                 Open invoice queue workspace
