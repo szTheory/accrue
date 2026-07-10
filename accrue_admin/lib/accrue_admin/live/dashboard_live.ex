@@ -65,7 +65,7 @@ defmodule AccrueAdmin.Live.DashboardLive do
               class="ax-button ax-button-primary ax-button-sm ax-home-primary-action"
               href={ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope, %{"status" => "open"})}
             >
-              Work open-invoice queue: <%= format_minor(@stats.open_invoice_balance_minor, "usd") %> open
+              Open invoice queue: collect <%= format_minor(@stats.open_invoice_balance_minor, "usd") %>
               <Icon.icon name={:arrow_right} size="sm" />
             </a>
             <a
@@ -438,11 +438,11 @@ defmodule AccrueAdmin.Live.DashboardLive do
     |> Enum.filter(& &1)
   end
 
-  defp attention_health_summary(_stats), do: "Billing healthy? No"
+  defp attention_health_summary(_stats), do: "Unhealthy - clear open invoices first"
 
   defp attention_health_issue_summary(stats),
     do:
-      "Priority 1: clear #{count(stats.open_invoice_count, "open invoice")} / #{format_minor(stats.open_invoice_balance_minor, "usd")}."
+      "Priority 1: #{count(stats.open_invoice_count, "open invoice")} totaling #{format_minor(stats.open_invoice_balance_minor, "usd")}; target is $0.00."
 
   defp count(1, noun), do: "1 #{noun}"
   defp count(n, noun), do: "#{n} #{noun}s"

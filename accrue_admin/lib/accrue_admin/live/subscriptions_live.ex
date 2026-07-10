@@ -106,9 +106,8 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
           <:description>
             <p class="ax-subscriptions-health-line">
               <strong class="ax-subscriptions-heading-verdict"><%= subscriptions_health_verdict(@summary) %></strong>
-              <span class="ax-subscriptions-heading-metric"><strong><%= count(@summary.open_invoice_count, "open invoice") %></strong></span>
-              <span class="ax-subscriptions-heading-metric"><strong><%= format_minor(@summary.open_invoice_exposure_minor, "usd") %></strong> open invoice exposure</span>
-              <span class="ax-subscriptions-heading-metric"><strong>$0.00</strong> target policy</span>
+              <span class="ax-subscriptions-heading-metric"><strong><%= count(@summary.open_invoice_count, "open invoice") %></strong> in queue</span>
+              <span class="ax-subscriptions-heading-metric"><strong><%= format_minor(@summary.open_invoice_exposure_minor, "usd") %></strong> above $0.00 target</span>
             </p>
             <p class="ax-subscriptions-route-line">
               Health is defined by the open-invoice queue target: work the queue to $0.00, debug failed webhooks, then review at-risk subscriptions.
@@ -138,13 +137,13 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
                 })
               }
             >
-              View failed webhook details and retry
+              Open failed webhook deliveries
             </a>
             <a
               class="ax-button ax-button-recovery ax-button-sm ax-subscriptions-recovery-workspace"
               href={scoped_path(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}
             >
-              Watch dunning funnel + at-risk
+              Watch dunning funnel
             </a>
           </:actions>
           <:stat_strip>
@@ -210,7 +209,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
                 |> AccrueAdmin.DataTableNav.merge_query(%{"status" => "failed,dead"})
               }
             >
-              View failed webhook details and retry
+              Open failed webhook deliveries
             </a>
           </div>
         </section>
@@ -222,40 +221,40 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
           </a>
         </section>
 
-        <section class="ax-inline-worklist ax-subscriptions-at-risk-strip" aria-label="At-risk subscription queue">
-          <div class="ax-inline-worklist-copy">
-            <strong>At-risk subscription queue</strong>
-            <span><%= count(@summary.past_due_count, "subscription") %> in the dunning funnel</span>
-            <span>Review recovery state before renewal, cancellation, or invoice follow-up.</span>
-          </div>
-          <div class="ax-inline-worklist-actions">
-            <a class="ax-button ax-button-secondary ax-button-sm" href={scoped_path(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}>
-              Watch dunning funnel + at-risk
-            </a>
-          </div>
-        </section>
+        <div class="ax-subscriptions-secondary-strips">
+          <section class="ax-inline-worklist ax-subscriptions-at-risk-strip" aria-label="At-risk subscription queue">
+            <div class="ax-inline-worklist-copy">
+              <strong>At-risk queue</strong>
+              <span><%= count(@summary.past_due_count, "subscription") %> in dunning; review before renewal or cancellation.</span>
+            </div>
+            <div class="ax-inline-worklist-actions">
+              <a class="ax-button ax-button-secondary ax-button-sm" href={scoped_path(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}>
+                Watch dunning funnel
+              </a>
+            </div>
+          </section>
 
-        <section class="ax-inline-worklist ax-subscriptions-audit-strip" aria-label="Subscription audit trail">
-          <div class="ax-inline-worklist-copy">
-            <strong>Who did what, when?</strong>
-            <span>Latest audit event: subscription.created by Accrue system</span>
-            <span>Use the audit log before changing invoices, dunning, or webhook retries.</span>
-          </div>
-          <div class="ax-inline-worklist-actions">
-            <a
-              class="ax-button ax-button-primary ax-button-sm"
-              href={scoped_path(@admin_mount_path, "/events", @current_owner_scope, %{"type" => "subscription.created"})}
-            >
-              Open full audit event log
-            </a>
-            <a
-              class="ax-button ax-button-secondary ax-button-sm"
-              href={scoped_path(@admin_mount_path, "/events", @current_owner_scope, %{"actor_type" => "admin"})}
-            >
-              Filter admin actors
-            </a>
-          </div>
-        </section>
+          <section class="ax-inline-worklist ax-subscriptions-audit-strip" aria-label="Subscription audit trail">
+            <div class="ax-inline-worklist-copy">
+              <strong>Audit trail</strong>
+              <span>Latest: subscription.created by Accrue system. Use before invoice, dunning, or webhook changes.</span>
+            </div>
+            <div class="ax-inline-worklist-actions">
+              <a
+                class="ax-button ax-button-primary ax-button-sm"
+                href={scoped_path(@admin_mount_path, "/events", @current_owner_scope, %{"type" => "subscription.created"})}
+              >
+                Open audit log
+              </a>
+              <a
+                class="ax-button ax-button-secondary ax-button-sm"
+                href={scoped_path(@admin_mount_path, "/events", @current_owner_scope, %{"actor_type" => "admin"})}
+              >
+                Admin actors
+              </a>
+            </div>
+          </section>
+        </div>
 
         <.live_component
           module={DataTable}
@@ -417,26 +416,23 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
     Phoenix.HTML.raw("""
     <span class="ax-stack-sm">
       <span class="ax-audit-summary-row ax-subscription-row-audit ax-subscription-row-audit-primary" aria-label="Latest subscription audit event">
-        <span class="ax-audit-fact"><strong>Actor</strong><em>Accrue system</em></span>
-        <span class="ax-audit-fact"><strong>Event</strong><em>subscription.created</em></span>
-        <span class="ax-audit-fact"><strong>When</strong><em>#{created}</em></span>
+        <span class="ax-audit-fact"><strong>Audit</strong><em>subscription.created by Accrue system - #{created}</em></span>
       </span>
       <span class="ax-webhook-row-status ax-webhook-row-status-warning ax-subscription-row-signal-primary">
         <strong>Invoice action</strong>
-        <span>Work this subscription's open invoices in the dedicated queue</span>
-        <a href="#{subscription_invoices_href}" class="ax-link ax-subscription-row-invoice-action">Work, review, or remove invoices</a>
+        <span>Dedicated queue for this subscription's open invoices</span>
+        <a href="#{subscription_invoices_href}" class="ax-link ax-subscription-row-invoice-action">Work open invoices</a>
         <a href="#{subscription_invoices_href}&work=send_reminder" class="ax-link ax-subscription-row-invoice-action">Send reminder</a>
       </span>
       <span class="ax-webhook-row-status ax-webhook-row-status-warning ax-subscription-row-signal-secondary">
         <strong>Webhook debug path</strong>
-        <span>Use one failed-delivery workflow for payload, response, retry trail, and replay controls</span>
-        <a href="#{webhook_href}" class="ax-link ax-subscription-row-webhook-action">View failed webhook details and retry</a>
+        <span>Payload, response, retry trail, and replay controls</span>
+        <a href="#{webhook_href}" class="ax-link ax-subscription-row-webhook-action">Open failed deliveries</a>
       </span>
       <span class="ax-subscription-row-admin-chips"><span class="ax-chip ax-label">Owner: #{escaped_o}</span> <span class="ax-chip ax-label">Tax: #{escaped_t}</span></span>
       <span class="ax-data-table-inline-actions">
         <a href="#{events_href}" class="ax-link">Open audit context for this subscription</a>
       </span>
-      <span class="ax-label ax-muted">Start with Debug failed webhooks; use the audit log only for actor and timestamp context.</span>
     </span>
     """)
   end
@@ -484,7 +480,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
   defp customer_label(row), do: row.customer_name || row.customer_email || row.customer_id
 
   defp subscriptions_health_verdict(%{open_invoice_count: count}) when count > 0,
-    do: "Billing status: Unhealthy"
+    do: "Unhealthy - open invoices block the target"
 
   defp subscriptions_health_verdict(_summary), do: "Billing status: Healthy"
 

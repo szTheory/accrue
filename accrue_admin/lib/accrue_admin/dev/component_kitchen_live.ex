@@ -79,14 +79,14 @@ if Mix.env() != :prod do
               ]}
             />
             <div class="ax-component-kitchen-title-row">
-              <h1 class="ax-heading ax-component-kitchen-title">Billing is currently unhealthy</h1>
-              <span class="ax-component-kitchen-header-status">2 open invoices, 3 failed webhooks, 1 past-due subscription</span>
+              <h1 class="ax-heading ax-component-kitchen-title">Unhealthy billing preview</h1>
+              <span class="ax-component-kitchen-header-status">Next action: clear 2 open invoices, then debug 3 failed webhooks.</span>
             </div>
-            <p class="ax-page-description">Work invoices, webhooks, and dunning from one command center.</p>
+            <p class="ax-page-description">One health answer, then the invoice, webhook, and dunning workspaces.</p>
             <section :if={@available?} class="ax-dev-health-snapshot ax-dev-health-snapshot-header" aria-label="Billing health answer">
               <span class="ax-dev-health-status">
-                <strong>Billing status: Unhealthy.</strong>
-                <em>Restore health by clearing 2 open invoices, debugging 3 failed webhooks, and reviewing 1 past-due subscription.</em>
+                <strong>Unhealthy - invoice queue first.</strong>
+                <em>Clear 2 open invoices, then debug 3 failed webhooks and review 1 at-risk subscription.</em>
                 <a class="ax-dev-health-link" href={@admin_mount_path <> "/webhooks?status=failed,dead"}>Debug failed webhooks</a>
               </span>
             </section>
@@ -124,7 +124,7 @@ if Mix.env() != :prod do
 
           <section :if={@available?} class="ax-inline-worklist ax-dev-production-strip" aria-label="Production billing entrypoints">
             <div class="ax-inline-worklist-copy">
-              <strong>Billing status: Unhealthy</strong>
+              <strong>Unhealthy - invoice queue first</strong>
               <span>2 open invoices</span>
               <span>$592.50 unpaid invoice balance; target is $0.00 open</span>
               <span>Customer support path: find one customer and open the full billing context.</span>
@@ -975,7 +975,7 @@ if Mix.env() != :prod do
                 <div class="ax-dev-group-action-cluster">
                   <span class="ax-label">Recovery and audit</span>
                   <div class="ax-detail-actions-row">
-                    <a class="ax-button ax-button-secondary ax-button-sm" href={@admin_mount_path <> "/analytics/recovery"}>Watch dunning funnel + at-risk analytics</a>
+                    <a class="ax-button ax-button-secondary ax-button-sm" href={@admin_mount_path <> "/analytics/recovery"}>Watch dunning funnel</a>
                     <a class="ax-button ax-button-warning ax-button-sm" href={@admin_mount_path <> "/events?actor_type=admin"}>View full audit history</a>
                     <a class="ax-button ax-button-secondary ax-button-sm" href={@admin_mount_path <> "/customers"}>Find customer and open billing 360 detail</a>
                   </div>

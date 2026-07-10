@@ -303,17 +303,6 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
             >
               Open invoice queue for this subscription
             </a>
-            <span class="ax-detail-queue-depth"><strong>Queue depth</strong><%= invoice_queue_summary(@open_invoice_summary) %></span>
-            <ul class="ax-detail-local-queue" aria-label="Local open invoice queue preview">
-              <li>
-                <strong>Queue workspace</strong>
-                <span>Open invoices, amounts, next action, and reminders live in Invoices</span>
-              </li>
-              <li>
-                <strong>This page</strong>
-                <span>Subscription context only; use the queue link to work receivables</span>
-              </li>
-            </ul>
             <a
               class="ax-button ax-button-primary ax-button-sm ax-detail-process-next"
               href={ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope, %{"status" => "open", "work" => "next"})}
@@ -326,6 +315,13 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
             >
               Send invoice reminders
             </a>
+            <span class="ax-detail-queue-depth"><strong>Queue depth</strong><%= invoice_queue_summary(@open_invoice_summary) %></span>
+            <ul class="ax-detail-local-queue" aria-label="Local open invoice queue preview">
+              <li>
+                <strong>Queue workspace</strong>
+                <span>Open invoices, amounts, next action, and reminders live in Invoices</span>
+              </li>
+            </ul>
           </div>
           <div class="ax-detail-priority-group ax-detail-priority-group-webhook">
             <span class="ax-label ax-detail-priority-label">Webhook debugging</span>
@@ -337,7 +333,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
                 })
               }
             >
-              Debug all failed webhooks end-to-end
+              Open failed webhook deliveries
             </a>
             <a
               class="ax-link-quiet"
@@ -349,7 +345,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
             >
               Open payload, response, retry history, and replay controls
             </a>
-            <span class="ax-detail-priority-note">Full debugger opens every failed or dead delivery with source event, payload, response, retry trail, and replay controls.</span>
+            <span class="ax-detail-priority-note">Shows each failed or dead delivery with source event, payload, response, retry trail, and replay controls.</span>
           </div>
           <div class="ax-detail-priority-links">
             <a
@@ -464,7 +460,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
                   class="ax-button ax-button-recovery ax-button-sm ax-detail-recovery-shortcut"
                   href={ScopedPath.build(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}
                 >
-                  Open dunning funnel dashboard
+                  Open dunning funnel
                 </a>
                 <div class="ax-detail-dunning-summary" aria-label="Dunning funnel preview for this subscription">
                   <span><strong>Dunning funnel</strong><em>0 active campaigns here</em></span>
@@ -474,7 +470,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
                     class="ax-button ax-button-recovery ax-button-sm ax-detail-dunning-action"
                     href={ScopedPath.build(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}
                   >
-                    Watch dunning funnel + at-risk
+                    Watch dunning funnel
                   </a>
                 </div>
                 <p class="ax-body">
@@ -1099,8 +1095,8 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
         %{
           tone: "amber",
           label: "Setup missing",
-          answer: "Billing healthy? Yes - revenue can flow",
-          headline: "Setup follow-up affects reporting only",
+          answer: "Healthy - revenue can flow",
+          headline: "Healthy billing; setup affects reporting only",
           body: "Complete setup fields to make revenue and recovery reporting exact.",
           caveats: caveats
         }
