@@ -228,7 +228,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
             <span :for={impact <- setup_field_impacts(health.caveats)} class="ax-detail-health-caveat"><%= impact %></span>
           </div>
           <div :if={health.caveats != []} class="ax-detail-setup-actions" aria-label="Fix missing billing data">
-            <span class="ax-detail-health-body">Complete setup before relying on revenue and recovery numbers.</span>
+            <span class="ax-detail-health-body">Warning: finish setup fields before trusting revenue and recovery numbers.</span>
             <a
               class="ax-button ax-button-secondary ax-button-sm"
               href={ScopedPath.build(@admin_mount_path, "/customers/#{@customer.id}", @current_owner_scope)}
@@ -333,7 +333,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
                 })
               }
             >
-              Open failed webhook deliveries
+              Open failed delivery debugger
             </a>
             <a
               class="ax-link-quiet"
@@ -343,9 +343,9 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
                 })
               }
             >
-              Open payload, response, retry history, and replay controls
+              Pick a failed delivery to inspect payload, response, retry trail, and replay
             </a>
-            <span class="ax-detail-priority-note">Shows each failed or dead delivery with source event, payload, response, retry trail, and replay controls.</span>
+            <span class="ax-detail-priority-note">The failed-delivery debugger opens each event's payload, response, retry trail, and replay controls.</span>
           </div>
           <div class="ax-detail-priority-links">
             <a
@@ -462,10 +462,8 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
                 >
                   Open dunning funnel
                 </a>
-                <div class="ax-detail-dunning-summary" aria-label="Dunning funnel preview for this subscription">
-                  <span><strong>Dunning funnel</strong><em>0 active campaigns here</em></span>
-                  <span><strong>At-risk status</strong><em>No active campaign</em></span>
-                  <span><strong>Recovery analytics</strong><em>Global dunning funnel and at-risk accounts</em></span>
+                <div class="ax-detail-dunning-summary" aria-label="Dunning funnel state for this subscription">
+                  <span><strong>No active dunning campaign</strong><em>Use the global funnel for at-risk accounts and recovery trends.</em></span>
                   <a
                     class="ax-button ax-button-recovery ax-button-sm ax-detail-dunning-action"
                     href={ScopedPath.build(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}
@@ -1095,9 +1093,9 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
         %{
           tone: "amber",
           label: "Setup missing",
-          answer: "Healthy - revenue can flow",
-          headline: "Healthy billing; setup affects reporting only",
-          body: "Complete setup fields to make revenue and recovery reporting exact.",
+          answer: "Setup incomplete - revenue can flow",
+          headline: "Revenue can flow; reporting needs setup",
+          body: "Finish setup fields before relying on revenue and recovery reporting.",
           caveats: caveats
         }
 

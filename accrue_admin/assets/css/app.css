@@ -2067,6 +2067,10 @@ a.ax-kpi-card--linked:focus-visible {
   font-weight: 700;
 }
 
+.ax-component-kitchen-page {
+  gap: 0.125rem;
+}
+
 .ax-component-kitchen-header {
   gap: 0.03125rem;
   padding-block: 0;
@@ -2238,7 +2242,7 @@ a.ax-kpi-card--linked:focus-visible {
 
 .ax-dev-production-strip {
   width: min(100%, 58rem);
-  padding: 0.03125rem 0.3125rem;
+  padding: 0 0.25rem;
   border-color: var(--ax-status-danger-border);
   border-width: 1px;
   background: color-mix(in srgb, var(--ax-status-danger-bg) 74%, var(--ax-elevated));
@@ -2270,14 +2274,14 @@ a.ax-kpi-card--linked:focus-visible {
 
 .ax-dev-invoice-preview {
   width: min(100%, 58rem);
-  padding: 0.03125rem 0.3125rem;
+  padding: 0 0.25rem;
   border-color: var(--ax-accent-border);
   background: color-mix(in srgb, var(--ax-accent-subtle) 48%, var(--ax-elevated));
 }
 
 .ax-dev-webhook-preview {
   width: min(100%, 58rem);
-  padding: 0.03125rem 0.3125rem;
+  padding: 0 0.25rem;
   border-color: var(--ax-status-warning-border);
   background: color-mix(in srgb, var(--ax-status-warning-bg) 44%, var(--ax-elevated));
 }
@@ -2287,7 +2291,7 @@ a.ax-kpi-card--linked:focus-visible {
 .ax-dev-funnel-preview {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.125rem 0.375rem;
+  gap: 0.0625rem 0.25rem;
   margin: 0;
   padding: 0;
   list-style: none;
@@ -2299,8 +2303,8 @@ a.ax-kpi-card--linked:focus-visible {
   display: inline-flex;
   align-items: baseline;
   gap: 0.25rem;
-  min-height: 1.5rem;
-  padding: 0 0.375rem;
+  min-height: 1.375rem;
+  padding: 0 0.25rem;
   border: 1px solid var(--ax-border);
   border-radius: var(--ax-radius-sm);
   background: var(--ax-elevated);
@@ -5376,7 +5380,7 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
 }
 
 .ax-home .ax-home-section {
-  margin-block-start: 0.125rem;
+  margin-block-start: 0.0625rem;
 }
 
 .ax-home-header-health .ax-status-badge {
@@ -5450,8 +5454,14 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
 
 .ax-home-section {
   display: grid;
-  gap: 0.125rem;
+  gap: 0.0625rem;
   min-width: 0;
+}
+
+.ax-home [data-ax-zone="attention-rail"],
+.ax-home [data-ax-zone="task-launcher"],
+.ax-home [data-ax-zone="kpi-cluster"] {
+  margin-block-start: 0;
 }
 
 .ax-section-head {
@@ -5696,9 +5706,16 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
    Reduce card border prominence and mute labels; no type-scale rework. */
 [data-ax-zone="kpi-cluster"] .ax-kpi-card {
   border-color: color-mix(in srgb, var(--ax-border) 60%, var(--ax-base));
-  gap: var(--ax-space-2xs);
-  padding: 0.375rem;
+  gap: 0.03125rem;
+  padding: 0.125rem 0.25rem;
+  border-radius: var(--ax-radius-sm);
 }
+
+[data-ax-zone="kpi-cluster"] .ax-kpi-card-header,
+[data-ax-zone="kpi-cluster"] .ax-kpi-card-footer {
+  gap: 0.03125rem;
+}
+
 [data-ax-zone="kpi-cluster"] .ax-label {
   font-size: var(--ax-type-xs);
   font-weight: 700;
@@ -5707,8 +5724,18 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
 
 [data-ax-zone="kpi-cluster"] .ax-kpi-value {
   color: var(--ax-primary);
-  font-size: 1.375rem;
+  font-size: 1.25rem;
   font-weight: 850;
+}
+
+[data-ax-zone="kpi-cluster"] .ax-kpi-delta {
+  min-height: 1.125rem;
+  padding: 0 0.25rem;
+}
+
+[data-ax-zone="kpi-cluster"] .ax-kpi-meta {
+  font-size: var(--ax-type-xs);
+  line-height: var(--ax-leading-tight);
 }
 
 /* Task launchers — JTBD doors */
@@ -6417,11 +6444,11 @@ button.ax-launcher {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 0.03125rem 0.1875rem;
-  padding: 0 0.125rem;
-  border: 1px solid var(--ax-border-strong);
+  gap: 0.0625rem 0.25rem;
+  padding: 0.0625rem 0.25rem;
+  border: 1px solid var(--ax-status-warning-border);
   border-radius: var(--ax-radius-sm);
-  background: var(--ax-elevated);
+  background: color-mix(in srgb, var(--ax-status-warning-bg) 58%, var(--ax-elevated));
 }
 
 @media (max-width: 599.98px) { /* --ax-bp-sm ↓ */
@@ -6511,7 +6538,7 @@ button.ax-launcher {
 
 .ax-detail-dunning-summary {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr)) auto;
+  grid-template-columns: minmax(0, 1fr) auto;
   gap: 0.125rem;
   align-items: stretch;
   color: var(--ax-primary);

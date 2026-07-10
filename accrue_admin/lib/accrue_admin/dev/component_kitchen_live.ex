@@ -75,19 +75,19 @@ if Mix.env() != :prod do
               items={[
                 %{label: "Dashboard", href: @admin_mount_path},
                 %{label: "Billing health", href: @admin_mount_path},
-                %{label: "Billing health preview"}
+                %{label: "Billing health"}
               ]}
             />
             <div class="ax-component-kitchen-title-row">
-              <h1 class="ax-heading ax-component-kitchen-title">Unhealthy billing preview</h1>
-              <span class="ax-component-kitchen-header-status">Next action: clear 2 open invoices, then debug 3 failed webhooks.</span>
+              <h1 class="ax-heading ax-component-kitchen-title">Billing health: unhealthy</h1>
+              <span class="ax-component-kitchen-header-status">2 open invoices; $592.50 above target.</span>
             </div>
-            <p class="ax-page-description">One health answer, then the invoice, webhook, and dunning workspaces.</p>
+            <p class="ax-page-description">Next: clear invoices, open failed webhook deliveries, then review dunning.</p>
             <section :if={@available?} class="ax-dev-health-snapshot ax-dev-health-snapshot-header" aria-label="Billing health answer">
               <span class="ax-dev-health-status">
                 <strong>Unhealthy - invoice queue first.</strong>
-                <em>Clear 2 open invoices, then debug 3 failed webhooks and review 1 at-risk subscription.</em>
-                <a class="ax-dev-health-link" href={@admin_mount_path <> "/webhooks?status=failed,dead"}>Debug failed webhooks</a>
+                <em>Clear 2 open invoices, then inspect 3 failed webhook deliveries and 1 at-risk subscription.</em>
+                <a class="ax-dev-health-link" href={@admin_mount_path <> "/webhooks?status=failed,dead"}>Open failed deliveries</a>
               </span>
             </section>
             <section :if={@available?} class="ax-dev-support-primary-strip" aria-label="Primary support workflow">
@@ -104,7 +104,7 @@ if Mix.env() != :prod do
                 <Icon.icon name={:invoices} size="sm" /> Receivables: open-invoice queue, $592.50
               </a>
               <a class="ax-button ax-button-secondary ax-button-sm ax-dev-webhook-action" href={@admin_mount_path <> "/webhooks?status=failed,dead"}>
-                <Icon.icon name={:webhooks} size="sm" /> Engineering: debug 3 failed webhooks
+                <Icon.icon name={:webhooks} size="sm" /> Engineering: inspect 3 failed deliveries
               </a>
             </div>
             <section :if={@available?} class="ax-dev-route-strip" aria-label="Secondary billing routes">
@@ -142,9 +142,9 @@ if Mix.env() != :prod do
             </div>
           </section>
 
-          <section :if={@available?} id="dev-invoice-preview" class="ax-inline-worklist ax-dev-invoice-preview" aria-label="Open invoice queue preview">
+          <section :if={@available?} id="dev-invoice-preview" class="ax-inline-worklist ax-dev-invoice-preview" aria-label="Open invoice queue">
             <div class="ax-inline-worklist-copy">
-              <strong>Open invoice queue preview</strong>
+              <strong>Open invoice queue</strong>
               <span>2 invoices ready for inline queue review</span>
             </div>
             <div class="ax-dev-funnel-preview" aria-label="Dunning funnel metrics">
@@ -166,9 +166,9 @@ if Mix.env() != :prod do
             </div>
           </section>
 
-          <section :if={@available?} class="ax-inline-worklist ax-dev-webhook-preview" aria-label="Failed webhook preview">
+          <section :if={@available?} class="ax-inline-worklist ax-dev-webhook-preview" aria-label="Failed webhook deliveries">
             <div class="ax-inline-worklist-copy">
-              <strong>Failed webhook preview</strong>
+              <strong>Failed webhook deliveries</strong>
               <span>3 failed deliveries visible before navigation</span>
             </div>
             <ol class="ax-dev-webhook-preview-list">
