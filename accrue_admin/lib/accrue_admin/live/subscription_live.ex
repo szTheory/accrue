@@ -1041,11 +1041,11 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
       caveats != [] ->
         %{
           tone: "slate",
-          label: "Billing blocked",
-          answer: "Billing blocked",
-          headline: "Setup data missing",
+          label: "Action required",
+          answer: "#{length(caveats)} setup fields missing",
+          headline: "Billing setup is blocked",
           body:
-            "Missing renewal, price, or charge fields block trustworthy revenue and collection decisions.",
+            "Fix renewal, price, and charge fields before using revenue or collection decisions.",
           caveats: caveats
         }
 
@@ -2071,10 +2071,10 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
       [
         %{
           icon: :events,
-          label: "Failed webhook deliveries for this subscription",
+          label: "Webhook failures",
           value:
-            "Open failed subscription.created deliveries for #{subscription.processor_id || subscription.id}; inspect payload, retry trail, and replay action.",
-          action_label: "Debug this subscription's webhooks",
+            "subscription.created failed for #{subscription.processor_id || subscription.id}; inspect payload, retry trail, and replay action.",
+          action_label: "Open failed webhook debugger",
           href:
             ScopedPath.build(mount_path, "/webhooks", scope, %{
               "status" => "failed,dead",

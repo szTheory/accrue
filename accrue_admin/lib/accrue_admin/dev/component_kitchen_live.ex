@@ -108,9 +108,9 @@ if Mix.env() != :prod do
 
           <section :if={@available?} class="ax-inline-worklist ax-dev-production-strip" aria-label="Production billing entrypoints">
             <div class="ax-inline-worklist-copy">
-              <strong>Billing health: invoice queue first</strong>
-              <span>Open invoice exposure target: $0.00.</span>
-              <span>Use the open-invoice queue as the primary workspace; secondary routes stay grouped by job.</span>
+              <strong>Billing status: action needed</strong>
+              <span>2 open invoices create $592.50 exposure; target is $0.00.</span>
+              <span>Primary next step: work the Invoices queue. Webhooks, customer lookup, Recovery, and audit are secondary workspaces.</span>
             </div>
             <div class="ax-inline-worklist-actions">
               <a class="ax-button ax-button-primary ax-button-sm" href={@admin_mount_path <> "/invoices?status=open"}>
@@ -122,12 +122,9 @@ if Mix.env() != :prod do
               <a class="ax-button ax-button-secondary ax-button-sm" href={@admin_mount_path <> "/events"}>
                 Open audit event log
               </a>
-              <span class="ax-dev-secondary-route">
-                <strong>Webhooks</strong>
-                <a class="ax-link-quiet" href={@admin_mount_path <> "/webhooks?status=failed,dead"}>
-                  Open full webhook debugging workflow
-                </a>
-              </span>
+              <a class="ax-button ax-button-warning ax-button-sm ax-dev-webhook-action" href={@admin_mount_path <> "/webhooks?status=failed,dead"}>
+                Open full webhook debugging workflow
+              </a>
               <a class="ax-button ax-button-secondary ax-button-sm ax-dev-dunning-action" href={@admin_mount_path <> "/analytics/recovery"}>
                 Watch dunning funnel + at-risk
               </a>

@@ -111,9 +111,9 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
     assert html =~ "Subscription events"
     assert html =~ "Open local invoice context"
 
-    assert html =~ "Failed webhook deliveries for this subscription"
-    assert html =~ "Open failed subscription.created deliveries"
-    assert html =~ "Debug this subscription&#39;s webhooks"
+    assert html =~ "Webhook failures"
+    assert html =~ "subscription.created failed"
+    assert html =~ "Open failed webhook debugger"
     assert html =~ "Open this subscription&#39;s invoice context"
     assert html =~ "Queue workspace"
     assert html =~ "Go to Invoices queue workspace"
@@ -136,14 +136,14 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
     assert html =~ "Dunning &amp; recovery"
     assert html =~ "Tax &amp; compliance"
     assert html =~ "invoice.payment_failed"
-    assert html =~ "Setup data missing"
-    assert html =~ "Billing blocked"
+    assert html =~ "Billing setup is blocked"
+    assert html =~ "setup fields missing"
     assert html =~ "ax-detail-health-summary-slate"
     assert html =~ "ax-detail-health-answer"
     assert html =~ "Charge amount not shown"
 
     assert html =~
-             "Missing renewal, price, or charge fields block trustworthy revenue and collection decisions."
+             "Fix renewal, price, and charge fields before using revenue or collection decisions."
 
     assert html =~
              "Fix missing fields in the billing source before trusting charge projections."
