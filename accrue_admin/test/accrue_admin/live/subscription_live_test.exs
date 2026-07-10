@@ -111,8 +111,8 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
     assert html =~ "Subscription events"
     assert html =~ "Open local invoice context"
 
-    assert html =~ "Webhook failures"
-    assert html =~ "subscription.created failed"
+    assert html =~ "Webhook debugging"
+    assert html =~ "Failed subscription.created"
     assert html =~ "Open failed webhook debugger"
     assert html =~ "Open this subscription&#39;s invoice context"
     assert html =~ "Queue workspace"

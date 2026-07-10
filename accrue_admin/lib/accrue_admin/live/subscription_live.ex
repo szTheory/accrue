@@ -2070,10 +2070,11 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
     customer_items ++
       [
         %{
-          icon: :events,
-          label: "Webhook failures",
+          icon: :webhooks,
+          label: "Webhook debugging",
           value:
-            "subscription.created failed for #{subscription.processor_id || subscription.id}; inspect payload, retry trail, and replay action.",
+            "Failed subscription.created deliveries for #{subscription.processor_id || subscription.id}; inspect payload, retry trail, and replay action.",
+          emphasis: :warning,
           action_label: "Open failed webhook debugger",
           href:
             ScopedPath.build(mount_path, "/webhooks", scope, %{
