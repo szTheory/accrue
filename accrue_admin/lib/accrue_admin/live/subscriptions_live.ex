@@ -106,7 +106,6 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
           <:description>
             <p class="ax-subscriptions-health-line">
               <strong class="ax-subscriptions-heading-verdict"><%= subscriptions_health_verdict(@summary) %></strong>
-              <span class="ax-subscriptions-heading-metric">Target: <strong>$0.00 open invoice exposure</strong></span>
             </p>
             <p class="ax-subscriptions-route-line">
               Next: clear open invoices, review failed webhook deliveries, then check at-risk accounts.
@@ -193,7 +192,6 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
           <div class="ax-inline-worklist-copy ax-subscriptions-priority-copy">
             <strong><%= billing_priority_title(@summary) %></strong>
             <span class="ax-subscriptions-exposure"><%= count(@summary.open_invoice_count, "open invoice") %>; <%= format_minor(@summary.open_invoice_exposure_minor, "usd") %> to collect</span>
-            <span>Target: $0.00 open invoice exposure</span>
           </div>
           <div class="ax-inline-worklist-actions">
             <a class="ax-button ax-button-primary ax-button-sm ax-subscriptions-primary-workspace" href={invoice_queue_path(@admin_mount_path, @current_owner_scope)}>
@@ -478,7 +476,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
   defp customer_label(row), do: row.customer_name || row.customer_email || row.customer_id
 
   defp subscriptions_health_verdict(%{open_invoice_count: count}) when count > 0,
-    do: "#{count(count, "open invoice")} above target"
+    do: "Billing unhealthy: #{count(count, "open invoice")} needs collection"
 
   defp subscriptions_health_verdict(_summary), do: "Billing status: Healthy"
 

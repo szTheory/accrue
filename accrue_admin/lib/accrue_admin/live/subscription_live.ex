@@ -217,7 +217,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
             <span class="ax-detail-health-label">Billing health summary</span>
             <strong class="ax-detail-health-answer"><%= health.answer %></strong>
             <span class="ax-detail-health-metric"><%= detail_health_metric(health) %></span>
-            <span :if={@open_invoice_summary.count > 0} class="ax-detail-health-metric ax-detail-health-exposure">
+            <span :if={@open_invoice_summary.exposure_minor > 0} class="ax-detail-health-metric ax-detail-health-exposure">
               <strong>Open-invoice exposure</strong><%= invoice_queue_summary(@open_invoice_summary) %>
             </span>
             <strong class="ax-detail-health-verdict"><%= health.headline %></strong>
@@ -283,7 +283,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
               class="ax-button ax-button-primary ax-button-sm ax-detail-invoice-primary"
               href={ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope, %{"status" => "open", "subscription_id" => @subscription.id})}
             >
-              Open invoice queue now: <%= invoice_queue_summary(@open_invoice_summary) %>
+              Open global invoice queue: <%= invoice_queue_summary(@open_invoice_summary) %>
             </a>
             <a
               class="ax-button ax-button-recovery ax-button-sm ax-detail-recovery-summary"
@@ -301,7 +301,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
               class="ax-button ax-button-primary ax-button-sm ax-detail-priority-primary ax-detail-invoice-primary"
               href={ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope, %{"status" => "open"})}
             >
-              Open invoice queue for this subscription
+              Open global invoice queue
             </a>
             <a
               class="ax-button ax-button-primary ax-button-sm ax-detail-process-next"
@@ -347,12 +347,12 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
             </a>
             <ul class="ax-detail-webhook-picks" aria-label="Failed delivery choices">
               <li>
-                <a href={ScopedPath.build(@admin_mount_path, "/webhooks", @current_owner_scope, %{"status" => "failed,dead", "type" => "subscription.created"})}>
+                <a class="ax-button ax-button-warning ax-button-sm" href={ScopedPath.build(@admin_mount_path, "/webhooks", @current_owner_scope, %{"status" => "failed,dead", "type" => "subscription.created"})}>
                   subscription.created failed deliveries
                 </a>
               </li>
               <li>
-                <a href={ScopedPath.build(@admin_mount_path, "/webhooks", @current_owner_scope, %{"status" => "failed,dead", "type" => "invoice.payment_failed"})}>
+                <a class="ax-button ax-button-warning ax-button-sm" href={ScopedPath.build(@admin_mount_path, "/webhooks", @current_owner_scope, %{"status" => "failed,dead", "type" => "invoice.payment_failed"})}>
                   invoice.payment_failed retry trail
                 </a>
               </li>
@@ -1105,8 +1105,8 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
         %{
           tone: "amber",
           label: "Setup missing",
-          answer: "Setup warning only",
-          headline: "Billing can process; reporting is incomplete",
+          answer: "Billing can process",
+          headline: "Setup fields affect reporting only",
           body: "Finish setup fields before relying on revenue and recovery reporting.",
           caveats: caveats
         }
@@ -1115,7 +1115,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
         %{
           tone: "amber",
           label: "Ending",
-          answer: "No - renewal is scheduled to end",
+          answer: "Renewal is ending",
           headline: "Renewal is scheduled to end",
           body: "The account remains active through the paid-through date.",
           caveats: []
@@ -1125,7 +1125,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
         %{
           tone: "amber",
           label: "Paused",
-          answer: "No - collection is paused",
+          answer: "Collection is paused",
           headline: "Collection is paused",
           body: "Review collection settings before relying on recurring revenue.",
           caveats: []
@@ -1135,7 +1135,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
         %{
           tone: "slate",
           label: "Ended",
-          answer: "No - no active billing",
+          answer: "No active billing",
           headline: "No active billing",
           body: "This subscription is no longer collecting recurring revenue.",
           caveats: []

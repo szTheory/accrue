@@ -116,8 +116,8 @@ defmodule AccrueAdmin.Live.DashboardLive do
             </a>
           </header>
           <div :if={@attention != []} class="ax-attention-summary ax-attention-summary-warning" aria-label="Attention health verdict">
-            <strong>No - billing is unhealthy right now.</strong>
-            <span>P1 collect open invoices, P2 inspect failed deliveries, P3 review dunning.</span>
+            <strong>Billing is unhealthy.</strong>
+            <span>Collect open invoices first, then inspect failed deliveries and dunning.</span>
           </div>
 
           <div :if={@attention != []} class="ax-card ax-attention">
@@ -438,11 +438,11 @@ defmodule AccrueAdmin.Live.DashboardLive do
     |> Enum.filter(& &1)
   end
 
-  defp attention_health_summary(_stats), do: "Unhealthy - clear open invoices first"
+  defp attention_health_summary(_stats), do: "Billing is unhealthy"
 
   defp attention_health_issue_summary(stats),
     do:
-      "Priority 1: #{count(stats.open_invoice_count, "open invoice")} totaling #{format_minor(stats.open_invoice_balance_minor, "usd")}; target is $0.00."
+      "Collect #{format_minor(stats.open_invoice_balance_minor, "usd")} from #{count(stats.open_invoice_count, "open invoice")}."
 
   defp count(1, noun), do: "1 #{noun}"
   defp count(n, noun), do: "#{n} #{noun}s"

@@ -79,16 +79,10 @@ if Mix.env() != :prod do
               ]}
             />
             <div class="ax-component-kitchen-title-row">
-              <h1 class="ax-heading ax-component-kitchen-title">Billing is unhealthy now</h1>
-              <span class="ax-component-kitchen-header-status">No - 2 open invoices need collection.</span>
+              <h1 class="ax-heading ax-component-kitchen-title">Billing unhealthy</h1>
+              <span class="ax-component-kitchen-header-status">Collect $592.50 from 2 open invoices.</span>
             </div>
             <p class="ax-page-description">Primary action: collect $592.50 to reach $0.00 open invoice exposure.</p>
-            <section :if={@available?} class="ax-dev-health-snapshot ax-dev-health-snapshot-header" aria-label="Billing health answer">
-              <span class="ax-dev-health-status">
-                <strong>No - billing is unhealthy: 2 open invoices.</strong>
-                <a class="ax-dev-health-link" href={@admin_mount_path <> "/invoices?status=open"}>Open invoice queue</a>
-              </span>
-            </section>
             <section :if={@available?} class="ax-dev-support-primary-strip" aria-label="Primary support workflow">
               <strong>Primary support path</strong>
               <a class="ax-button ax-button-primary ax-button-sm ax-dev-customer-action ax-dev-customer-primary" href={@admin_mount_path <> "/customers"}>
@@ -123,11 +117,10 @@ if Mix.env() != :prod do
 
           <section :if={@available?} class="ax-inline-worklist ax-dev-production-strip" aria-label="Production billing entrypoints">
             <div class="ax-inline-worklist-copy">
-              <strong>No - billing is unhealthy</strong>
-              <span>2 open invoices; $592.50 to collect</span>
-              <span>Target: $0.00 open invoice exposure</span>
-              <span>Customer support path: find one customer and open the full billing context.</span>
-              <span>Dunning funnel: 1 at-risk subscription in recovery review.</span>
+              <strong>Primary work queue</strong>
+              <span>Collect $592.50 from 2 open invoices.</span>
+              <span>Then inspect 3 failed deliveries and 1 at-risk account.</span>
+              <span>Customer support path: open one customer and see the full billing context.</span>
               <span>Latest audit event: billing.contact.updated by Admin user.</span>
               <span>Audit timestamp: Jul 09, 2026 14:51 UTC.</span>
             </div>
