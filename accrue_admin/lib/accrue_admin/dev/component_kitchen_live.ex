@@ -84,7 +84,7 @@ if Mix.env() != :prod do
             </div>
             <p class="ax-page-description">Work the invoice queue, debug failed webhook deliveries, and watch dunning recovery from one command center.</p>
             <section :if={@available?} class="ax-dev-health-snapshot ax-dev-health-snapshot-header" aria-label="Billing health answer">
-              <span class="ax-dev-health-status"><strong>Billing is not healthy</strong><em>Clear invoice, webhook, and recovery queues before treating billing as healthy.</em></span>
+              <span class="ax-dev-health-status"><strong>Billing is not healthy.</strong><em>Invoice, webhook, and recovery queues must be clear before billing is healthy.</em></span>
             </section>
             <div class="ax-page-actions">
               <a class="ax-button ax-button-primary ax-button-sm ax-dev-customer-action ax-dev-customer-primary" href={@admin_mount_path <> "/customers"}>
@@ -96,14 +96,15 @@ if Mix.env() != :prod do
               <a class="ax-button ax-button-secondary ax-button-sm ax-dev-webhook-action" href={@admin_mount_path <> "/webhooks?status=failed,dead"}>
                 <Icon.icon name={:webhooks} size="sm" /> Debug failed webhooks
               </a>
-              <a class="ax-button ax-button-secondary ax-button-sm ax-dev-dunning-action" href={@admin_mount_path <> "/analytics/recovery"}>
-                <Icon.icon name={:recovery} size="sm" /> Recovery analytics: dunning & at-risk
+              <a class="ax-button ax-button-primary ax-button-sm ax-dev-dunning-action" href={@admin_mount_path <> "/analytics/recovery"}>
+                <Icon.icon name={:recovery} size="sm" /> Watch dunning funnel + at-risk
               </a>
             </div>
             <section :if={@available?} class="ax-dev-route-strip" aria-label="Secondary billing routes">
-              <a class="ax-dev-secondary-route" href={@admin_mount_path <> "/customers"}>Customer detail: see everything</a>
-              <a class="ax-dev-secondary-route" href={@admin_mount_path <> "/invoices?status=open"}>Invoices queue: work receivables</a>
-              <a class="ax-dev-secondary-route" href={@admin_mount_path <> "/webhooks?status=failed,dead"}>Webhook events: debug failed deliveries</a>
+              <span>Secondary routes:</span>
+              <a class="ax-dev-secondary-route" href={@admin_mount_path <> "/customers"}>Customer detail</a>
+              <a class="ax-dev-secondary-route" href={@admin_mount_path <> "/invoices?status=open"}>Invoices queue</a>
+              <a class="ax-dev-secondary-route" href={@admin_mount_path <> "/webhooks?status=failed,dead"}>Webhook events</a>
             </section>
           </header>
 
@@ -118,7 +119,7 @@ if Mix.env() != :prod do
             <div class="ax-inline-worklist-copy">
               <strong>Billing status: Unhealthy</strong>
               <span>2 open invoices</span>
-              <span>$592.50 exposure over $0.00 target</span>
+              <span>$592.50 unpaid invoice balance; target is $0.00 open</span>
               <span>Customer support path: find one customer and open the full billing context.</span>
               <span>Latest audit: Admin user updated billing.contact.updated at Jul 09, 2026 14:51 UTC.</span>
             </div>

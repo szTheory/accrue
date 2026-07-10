@@ -435,20 +435,7 @@ defmodule AccrueAdmin.Live.DashboardLive do
 
   defp attention_health_summary(_stats), do: "Billing is unhealthy"
 
-  defp attention_health_issue_summary(stats) do
-    [
-      stats.open_invoice_count > 0 &&
-        "Fix #{count(stats.open_invoice_count, "open invoice")}",
-      stats.blocked_webhook_count > 0 &&
-        "Debug #{count(stats.blocked_webhook_count, "failed webhook")}",
-      stats.past_due_subscription_count > 0 &&
-        "Recover #{count(stats.past_due_subscription_count, "past-due subscription")}",
-      stats.failed_meter_event_count > 0 &&
-        "Clear #{count(stats.failed_meter_event_count, "blocked usage record")}"
-    ]
-    |> Enum.filter(& &1)
-    |> Enum.join(", ")
-  end
+  defp attention_health_issue_summary(_stats), do: "Work the non-zero queues below."
 
   defp attention_health_metrics(stats),
     do: [

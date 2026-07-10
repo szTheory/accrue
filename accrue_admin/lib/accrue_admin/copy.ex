@@ -875,7 +875,7 @@ defmodule AccrueAdmin.Copy do
 
   # --- Index page headers (h1 + subtitle) for inline-literal pages
 
-  def subscriptions_index_heading, do: "Billing health status"
+  def subscriptions_index_heading, do: "Billing health"
 
   def subscriptions_index_subtitle,
     do:

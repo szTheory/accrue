@@ -274,7 +274,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
               class="ax-button ax-button-primary ax-button-sm ax-detail-invoice-primary"
               href={ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope, %{"status" => "open", "subscription_id" => @subscription.id})}
             >
-              Open invoice queue: <%= invoice_queue_summary(@open_invoice_summary) %>
+              Open invoice queue now: <%= invoice_queue_summary(@open_invoice_summary) %>
             </a>
           </:actions>
         </Detail.summary_card>
@@ -456,7 +456,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
                 <div class="ax-detail-dunning-summary" aria-label="Dunning funnel preview for this subscription">
                   <span><strong>Dunning funnel</strong><em>0 active campaigns here</em></span>
                   <span><strong>At-risk status</strong><em>No active campaign</em></span>
-                  <span><strong>Recovery workspace</strong><em>Use the dunning funnel workspace for at-risk accounts</em></span>
+                  <span><strong>Recovery analytics</strong><em>Global dunning funnel and at-risk accounts</em></span>
                   <a
                     class="ax-button ax-button-recovery ax-button-sm ax-detail-dunning-action"
                     href={ScopedPath.build(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}
@@ -1086,7 +1086,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
         %{
           tone: "amber",
           label: "Setup missing",
-          answer: "Operational billing running; setup incomplete",
+          answer: "Billing needs setup before projections are reliable",
           headline: "Complete #{pluralize(length(caveats), "setup field")}",
           body:
             "Payments can continue, but revenue, dunning, and renewal projections are not reliable until setup fields are complete.",

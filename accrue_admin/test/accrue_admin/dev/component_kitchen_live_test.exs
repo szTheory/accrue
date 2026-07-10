@@ -10,10 +10,10 @@ defmodule AccrueAdmin.ComponentKitchenLiveTest do
     assert html =~ "Work the invoice queue, debug failed webhook deliveries"
     assert html =~ "Primary action"
     assert html =~ "Secondary action"
-    assert html =~ "Billing is not healthy"
+    assert html =~ "Billing is not healthy."
 
     assert html =~
-             "Clear invoice, webhook, and recovery queues before treating billing as healthy."
+             "Invoice, webhook, and recovery queues must be clear before billing is healthy."
 
     assert html =~ "More billing actions"
     assert html =~ "View dunning funnel and at-risk"
@@ -33,7 +33,7 @@ defmodule AccrueAdmin.ComponentKitchenLiveTest do
     assert html =~ "Find one customer"
     assert html =~ "Open invoice queue: 2 invoices, $592.50 exposure"
     assert html =~ "Debug failed webhooks"
-    assert html =~ "Recovery analytics: dunning &amp; at-risk"
+    assert html =~ "Watch dunning funnel + at-risk"
     refute html =~ "Find one customer and open billing 360 detail"
     assert html =~ "View full audit history"
     assert html =~ "billing.contact.updated"
@@ -44,7 +44,7 @@ defmodule AccrueAdmin.ComponentKitchenLiveTest do
     assert html =~ "Northstar Labs"
     assert html =~ "$420.00 open"
     assert html =~ "Billing health answer"
-    assert html =~ "Invoices queue: work receivables"
+    assert html =~ "Invoices queue"
     refute html =~ "Work invoice queue in this billing alert"
     assert html =~ "Watch dunning funnel + at-risk"
     assert html =~ "Open invoice queue"

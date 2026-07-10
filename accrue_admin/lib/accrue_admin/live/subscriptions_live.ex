@@ -464,9 +464,11 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
         </span>
       </span>
       <span class="ax-subscription-row-customer-scope">Primary path: see every subscription, invoice, event, and recovery state for this customer.</span>
-      <span class="ax-subscription-row-meta"><strong>Customer ID</strong> #{customer_id}</span>
-      <a href="#{subscription_href}" class="ax-subscription-row-meta ax-subscription-row-id"><strong>Subscription</strong> #{subscription_id}</a>
-      <a href="#{subscription_invoices_href}" class="ax-link ax-subscription-row-invoices">Open filtered invoices for this subscription</a>
+      <span class="ax-subscription-row-meta-grid">
+        <span class="ax-subscription-row-meta"><strong>Customer ID</strong> #{customer_id}</span>
+        <a href="#{subscription_href}" class="ax-subscription-row-meta ax-subscription-row-id"><strong>Subscription</strong> #{subscription_id}</a>
+        <a href="#{subscription_invoices_href}" class="ax-link ax-subscription-row-invoices">Open filtered invoices for this subscription</a>
+      </span>
     </span>
     """)
   end
@@ -585,7 +587,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
       %{
         id: :q,
         label: "Filter subscriptions table",
-        placeholder: "Filter by customer email, customer ID, or subscription ID"
+        placeholder: "Filter by customer email, customer ID, subscription ID, or actor"
       },
       %{
         id: :status,
