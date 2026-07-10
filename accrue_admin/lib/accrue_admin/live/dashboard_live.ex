@@ -98,6 +98,13 @@ defmodule AccrueAdmin.Live.DashboardLive do
               Open recovery analytics: dunning funnel + at-risk
               <Icon.icon name={:arrow_right} size="sm" />
             </a>
+            <a
+              class="ax-button ax-button-secondary ax-button-sm"
+              href={ScopedPath.build(@admin_mount_path, "/events", @current_owner_scope)}
+            >
+              Audit: open event ledger
+              <Icon.icon name={:arrow_right} size="sm" />
+            </a>
           </div>
         </header>
 
@@ -114,6 +121,10 @@ defmodule AccrueAdmin.Live.DashboardLive do
               <Icon.icon name={:arrow_right} size="sm" />
             </a>
           </header>
+          <div :if={@attention != []} class="ax-attention-summary ax-attention-summary-warning" aria-label="Attention health verdict">
+            <strong>Billing health: Critical issues require attention</strong>
+            <span>Resolve priority 1 open invoices before webhook debugging and recovery review.</span>
+          </div>
 
           <div :if={@attention != []} class="ax-card ax-attention">
             <a :for={row <- @attention} href={row.href} class="ax-attention-row">
@@ -433,10 +444,11 @@ defmodule AccrueAdmin.Live.DashboardLive do
     |> Enum.filter(& &1)
   end
 
-  defp attention_health_summary(_stats), do: "Billing status: Unhealthy"
+  defp attention_health_summary(_stats),
+    do: "Billing health: Critical issues require attention"
 
   defp attention_health_issue_summary(_stats),
-    do: "Start with the open-invoice queue, then dead-lettered webhooks."
+    do: "Work open-invoice queue first; then debug failed webhooks."
 
   defp attention_health_metrics(stats),
     do: [

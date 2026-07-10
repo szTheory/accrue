@@ -123,7 +123,7 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
     assert html =~ "Back to Recovery analytics"
     refute html =~ "Webhook debugger"
     assert html =~ "Open full audit event log"
-    assert html =~ "Latest audit event context"
+    assert html =~ "Audit event table: Actor / Action / Timestamp"
   end
 
   test "summary and drill bands replace page-level KPI and predicate noise", %{
@@ -139,14 +139,14 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
     assert html =~ "Tax &amp; compliance"
     assert html =~ "invoice.payment_failed"
     assert html =~ "Billing health summary"
-    assert html =~ "Billing is operating; setup data is incomplete"
+    assert html =~ "Revenue can flow; setup fields are missing"
     assert html =~ "setup fields"
     assert html =~ "ax-detail-health-summary-amber"
     assert html =~ "ax-detail-health-answer"
     assert html =~ "Charge amount not shown"
 
     assert html =~
-             "Money is not blocked. Complete setup fields to make revenue and recovery numbers exact."
+             "Complete setup fields to make revenue and recovery reporting exact."
 
     assert html =~
              "Complete setup before relying on revenue and recovery numbers."
@@ -167,7 +167,7 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
     assert html =~ "Dunning funnel preview for this subscription"
     assert html =~ "Global dunning funnel and at-risk accounts"
     assert html =~ "Open invoice queue now:"
-    assert html =~ "Latest audit event context"
+    assert html =~ "Audit event table: Actor / Action / Timestamp"
     assert html =~ "Latest audit event summary"
     assert html =~ "Actor"
     assert html =~ "Open full audit event log"

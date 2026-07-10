@@ -217,6 +217,9 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
             <span class="ax-detail-health-label">Billing health summary</span>
             <strong class="ax-detail-health-answer"><%= health.answer %></strong>
             <span class="ax-detail-health-metric"><%= detail_health_metric(health) %></span>
+            <span :if={@open_invoice_summary.count > 0} class="ax-detail-health-metric ax-detail-health-exposure">
+              <strong>Open-invoice exposure</strong><%= invoice_queue_summary(@open_invoice_summary) %>
+            </span>
             <strong class="ax-detail-health-verdict"><%= health.headline %></strong>
             <span class="ax-detail-health-body"><%= health.body %></span>
           </div>
@@ -516,7 +519,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
             <span class="ax-detail-section-title">Activity</span>
           </summary>
           <div class="ax-card ax-activity-audit-strip">
-            <p class="ax-label">Latest audit event context</p>
+            <p class="ax-label">Audit event table: Actor / Action / Timestamp</p>
             <% latest_audit = latest_audit_row(@timeline_events, @subscription) %>
             <div class="ax-audit-summary-row" aria-label="Latest audit event summary">
               <span><strong>Actor</strong><em><%= latest_audit.actor %></em></span>
@@ -1098,10 +1101,9 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
         %{
           tone: "amber",
           label: "Setup missing",
-          answer: "Billing is operating; setup data is incomplete",
-          headline: "Setup data missing for reporting",
-          body:
-            "Money is not blocked. Complete setup fields to make revenue and recovery numbers exact.",
+          answer: "Revenue can flow; setup fields are missing",
+          headline: "Revenue is not blocked",
+          body: "Complete setup fields to make revenue and recovery reporting exact.",
           caveats: caveats
         }
 

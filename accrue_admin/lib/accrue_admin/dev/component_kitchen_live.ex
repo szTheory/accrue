@@ -95,7 +95,7 @@ if Mix.env() != :prod do
                 <Icon.icon name={:search} size="sm" /> Support: find one customer
               </a>
               <a class="ax-button ax-button-primary ax-button-sm ax-dev-dunning-action" href={@admin_mount_path <> "/analytics/recovery"}>
-                <Icon.icon name={:recovery} size="sm" /> Recovery: open dunning analytics
+                <Icon.icon name={:recovery} size="sm" /> View dunning funnel & at-risk analytics
               </a>
               <a class="ax-button ax-button-secondary ax-button-sm ax-dev-invoice-action ax-dev-invoice-primary" href={@admin_mount_path <> "/invoices?status=open"}>
                 <Icon.icon name={:invoices} size="sm" /> Receivables: open-invoice queue, $592.50
@@ -125,12 +125,16 @@ if Mix.env() != :prod do
               <span>2 open invoices</span>
               <span>$592.50 unpaid invoice balance; target is $0.00 open</span>
               <span>Customer support path: find one customer and open the full billing context.</span>
+              <span>Dunning funnel: 1 at-risk subscription in recovery review.</span>
               <span>Latest audit event: billing.contact.updated by Admin user.</span>
               <span>Audit timestamp: Jul 09, 2026 14:51 UTC.</span>
             </div>
             <div class="ax-inline-worklist-actions">
               <a class="ax-button ax-button-primary ax-button-sm ax-dev-invoice-action" href={@admin_mount_path <> "/invoices?status=open"}>
-                Open invoice queue: 2 open invoices
+                Work inline invoice queue preview: 2 open invoices
+              </a>
+              <a class="ax-button ax-button-secondary ax-button-sm ax-dev-dunning-action" href={@admin_mount_path <> "/analytics/recovery?status=at_risk"}>
+                View at-risk accounts
               </a>
             </div>
           </section>
@@ -138,7 +142,12 @@ if Mix.env() != :prod do
           <section :if={@available?} class="ax-inline-worklist ax-dev-invoice-preview" aria-label="Open invoice queue preview">
             <div class="ax-inline-worklist-copy">
               <strong>Open invoice queue preview</strong>
-              <span>2 invoices visible before navigation</span>
+              <span>2 invoices ready for inline queue review</span>
+            </div>
+            <div class="ax-dev-funnel-preview" aria-label="Dunning funnel metrics">
+              <span><strong>Dunning funnel</strong><em>1 at-risk subscription</em></span>
+              <span><strong>Recovery stage</strong><em>Reminder pending</em></span>
+              <span><strong>At-risk accounts</strong><em>1 account needs review</em></span>
             </div>
             <ol class="ax-dev-invoice-preview-list">
               <li><strong>Northstar Labs</strong><span>$420.00 open</span><em>Send reminder</em></li>
@@ -147,6 +156,9 @@ if Mix.env() != :prod do
             <div class="ax-inline-worklist-actions">
               <a class="ax-button ax-button-primary ax-button-sm ax-dev-invoice-action" href={@admin_mount_path <> "/invoices?status=open"}>
                 Open invoice queue
+              </a>
+              <a class="ax-button ax-button-secondary ax-button-sm ax-dev-dunning-action" href={@admin_mount_path <> "/analytics/recovery?status=at_risk"}>
+                View at-risk accounts
               </a>
             </div>
           </section>

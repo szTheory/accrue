@@ -103,8 +103,12 @@ defmodule AccrueAdmin.DashboardLiveTest do
     assert html =~ "Debug failed webhook queue"
     assert html =~ Copy.home_attention_meter_label()
     assert html =~ Copy.home_attention_action_investigate()
-    assert html =~ "Billing status: Unhealthy"
-    assert html =~ "Start with the open-invoice queue, then dead-lettered webhooks."
+    assert html =~ "Billing health: Critical issues require attention"
+    assert html =~ "Work open-invoice queue first; then debug failed webhooks."
+
+    assert html =~
+             "Resolve priority 1 open invoices before webhook debugging and recovery review."
+
     assert html =~ "failed webhooks"
     assert html =~ "open invoices"
     assert html =~ ">1<"
@@ -113,6 +117,7 @@ defmodule AccrueAdmin.DashboardLiveTest do
     assert html =~ "Work open-invoice queue: $42.50 open"
     assert html =~ ~s(href="/billing/events?q=meter_event")
     assert html =~ ~s(href="/billing/invoices?status=open")
+    assert html =~ "Audit: open event ledger"
 
     # Zone 2 — task launchers (the JTBD doors)
     assert html =~ Copy.home_launcher_customers_title()
