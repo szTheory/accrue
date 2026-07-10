@@ -86,18 +86,18 @@ if Mix.env() != :prod do
             <section :if={@available?} class="ax-dev-support-primary-strip" aria-label="Primary support workflow">
               <strong>Primary support path</strong>
               <a class="ax-button ax-button-primary ax-button-sm ax-dev-customer-action ax-dev-customer-primary" href={@admin_mount_path <> "/customers"}>
-                <Icon.icon name={:search} size="sm" /> Open customer 360 search
+                <Icon.icon name={:search} size="sm" /> Find one customer - open 360
               </a>
             </section>
             <div class="ax-page-actions">
-              <a class="ax-button ax-button-primary ax-button-sm ax-dev-dunning-action" href={@admin_mount_path <> "/analytics/recovery"}>
-                <Icon.icon name={:recovery} size="sm" /> View dunning funnel & at-risk analytics
-              </a>
-              <a class="ax-button ax-button-secondary ax-button-sm ax-dev-invoice-action ax-dev-invoice-primary" href={@admin_mount_path <> "/invoices?status=open"}>
-                <Icon.icon name={:invoices} size="sm" /> Receivables: open-invoice queue, $592.50
+              <a class="ax-button ax-button-primary ax-button-sm ax-dev-invoice-action ax-dev-invoice-primary" href={@admin_mount_path <> "/invoices?status=open"}>
+                <Icon.icon name={:invoices} size="sm" /> Work open-invoice queue
               </a>
               <a class="ax-button ax-button-secondary ax-button-sm ax-dev-webhook-action" href={@admin_mount_path <> "/webhooks?status=failed,dead"}>
                 <Icon.icon name={:webhooks} size="sm" /> Engineering: inspect 3 failed deliveries
+              </a>
+              <a class="ax-button ax-button-secondary ax-button-sm ax-dev-dunning-action" href={@admin_mount_path <> "/analytics/recovery"}>
+                <Icon.icon name={:recovery} size="sm" /> View dunning funnel
               </a>
             </div>
             <section :if={@available?} class="ax-dev-route-strip" aria-label="Secondary billing routes">

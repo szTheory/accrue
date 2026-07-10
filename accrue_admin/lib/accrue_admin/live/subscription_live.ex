@@ -221,7 +221,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
               <strong>Open-invoice exposure</strong><%= invoice_queue_summary(@open_invoice_summary) %>
             </span>
             <strong class="ax-detail-health-verdict"><%= health.headline %></strong>
-            <span class="ax-detail-health-body"><%= health.body %></span>
+            <span :if={health.caveats == []} class="ax-detail-health-body"><%= health.body %></span>
           </div>
           <div :if={health.caveats != []} class="ax-detail-health-caveats" aria-label="Setup fields needed before billing projections are reliable">
             <strong>Missing setup fields:</strong>

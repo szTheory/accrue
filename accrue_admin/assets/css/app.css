@@ -2148,7 +2148,7 @@ a.ax-kpi-card--linked:focus-visible {
   border-color: var(--ax-accent-readable);
   border-width: 2px;
   background: var(--ax-accent-readable);
-  color: var(--ax-base);
+  color: var(--ax-accent-contrast);
   font-weight: 950;
   box-shadow:
     0 0 0 3px color-mix(in srgb, var(--ax-accent-border) 26%, transparent),

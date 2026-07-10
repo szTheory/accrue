@@ -135,7 +135,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
                 })
               }
             >
-              Open failed delivery debugger
+              Webhooks: open failed delivery debugger
             </a>
             <a
               class="ax-button ax-button-recovery ax-button-sm ax-subscriptions-recovery-workspace"
@@ -240,7 +240,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
                 class="ax-button ax-button-primary ax-button-sm"
                 href={scoped_path(@admin_mount_path, "/events", @current_owner_scope, %{"type" => "subscription.created"})}
               >
-                Open full actor audit log
+                Events: open full actor audit log
               </a>
               <a
                 class="ax-button ax-button-secondary ax-button-sm"
@@ -423,7 +423,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
       <span class="ax-webhook-row-status ax-webhook-row-status-warning ax-subscription-row-signal-secondary">
         <strong>Webhook debug path</strong>
         <span>Payload, response, retry trail, and replay controls</span>
-        <a href="#{webhook_href}" class="ax-link ax-subscription-row-webhook-action">Open failed deliveries</a>
+        <a href="#{webhook_href}" class="ax-button ax-button-warning ax-button-sm ax-subscription-row-webhook-action">Open failed delivery debugger</a>
       </span>
       <span class="ax-subscription-row-admin-chips"><span class="ax-chip ax-label">Owner: #{escaped_o}</span> <span class="ax-chip ax-label">Tax: #{escaped_t}</span></span>
       <span class="ax-data-table-inline-actions">
