@@ -2134,14 +2134,14 @@ a.ax-kpi-card--linked:focus-visible {
   width: min(100%, 58rem);
   order: -1;
   padding: 0.1875rem 0.5rem;
-  border-color: var(--ax-status-warning-border);
+  border-color: var(--ax-accent-border);
   border-width: 2px;
-  background: color-mix(in srgb, var(--ax-status-warning-bg) 62%, var(--ax-elevated));
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ax-status-warning-border) 48%, transparent);
+  background: color-mix(in srgb, var(--ax-accent-subtle) 46%, var(--ax-elevated));
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ax-accent-border) 54%, transparent);
 }
 
 .ax-dev-production-strip .ax-inline-worklist-copy strong {
-  color: var(--ax-warning-readable);
+  color: var(--ax-primary);
   font-size: var(--ax-type-md);
   font-weight: 900;
 }
@@ -2152,12 +2152,14 @@ a.ax-kpi-card--linked:focus-visible {
 }
 
 .ax-component-kitchen-page .ax-dev-production-strip .ax-dev-customer-action {
-  border-color: var(--ax-accent-border);
+  min-height: 2rem;
+  padding-inline: 0.75rem;
+  border-color: transparent;
   border-width: 2px;
-  background: color-mix(in srgb, var(--ax-accent-subtle) 72%, var(--ax-elevated));
-  color: var(--ax-accent-readable);
+  background: var(--ax-accent-strong);
+  color: var(--ax-accent-contrast);
   font-weight: 900;
-  box-shadow: var(--ax-shadow-xs);
+  box-shadow: var(--ax-shadow-sm);
 }
 
 .ax-component-kitchen-page .ax-dev-production-strip .ax-dev-webhook-action {
@@ -2402,6 +2404,12 @@ a.ax-kpi-card--linked:focus-visible {
   background: var(--ax-status-warning-bg);
   color: var(--ax-status-warning-text);
   border-color: var(--ax-status-warning-border);
+}
+
+.ax-status-badge-danger {
+  background: var(--ax-status-danger-bg);
+  color: var(--ax-status-danger-text);
+  border-color: var(--ax-status-danger-border);
 }
 
 .ax-status-badge-slate {
@@ -2756,7 +2764,7 @@ a.ax-kpi-card--linked:focus-visible {
 .ax-inline-worklist-actions {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.125rem;
+  gap: 0.25rem;
   align-items: center;
 }
 
@@ -2811,6 +2819,19 @@ a.ax-kpi-card--linked:focus-visible {
 .ax-subscriptions-priority-copy strong {
   color: var(--ax-status-danger-text);
   font-weight: 900;
+}
+
+.ax-subscriptions-invoice-strip-danger .ax-inline-worklist-actions .ax-button-primary {
+  border-color: transparent;
+  background: var(--ax-status-danger-on-solid);
+  color: var(--ax-status-danger-solid);
+  box-shadow: var(--ax-shadow-xs);
+}
+
+.ax-subscriptions-invoice-strip-danger .ax-inline-worklist-actions .ax-button-warning {
+  border: 1px solid color-mix(in srgb, var(--ax-status-danger-on-solid) 58%, transparent);
+  background: transparent;
+  color: var(--ax-status-danger-on-solid);
 }
 
 .ax-subscriptions-primary-workspace {
@@ -3528,10 +3549,10 @@ a.ax-kpi-card--linked:focus-visible {
 }
 
 .ax-component-kitchen-page .ax-dev-production-strip .ax-button-secondary {
-  border-color: var(--ax-status-info-border);
+  border-color: color-mix(in srgb, var(--ax-border-strong) 74%, transparent);
   background: var(--ax-elevated);
   color: var(--ax-primary);
-  box-shadow: var(--ax-shadow-xs);
+  box-shadow: none;
 }
 
 .ax-component-kitchen-page .ax-dev-production-strip .ax-dev-dunning-action {
@@ -4803,6 +4824,19 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
   font-weight: 900;
 }
 
+.ax-home-health-answer {
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.375rem;
+  padding: 0.0625rem 0.375rem;
+  border: 1px solid color-mix(in srgb, var(--ax-status-danger-on-solid) 44%, transparent);
+  border-radius: var(--ax-radius-sm);
+  background: color-mix(in srgb, var(--ax-status-danger-on-solid) 18%, transparent);
+  color: var(--ax-status-danger-on-solid);
+  font: var(--ax-type-label-sm-font);
+  font-weight: 900;
+}
+
 .ax-home-health-metrics {
   display: inline-flex;
   flex-wrap: wrap;
@@ -4911,8 +4945,8 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
 .ax-attention-row {
   display: flex;
   align-items: center;
-  gap: var(--ax-space-xs);
-  padding: 0.125rem 0.4375rem;
+  gap: 0.375rem;
+  padding: 0.0625rem 0.3125rem;
   border-bottom: 1px solid var(--ax-border);
   color: var(--ax-primary);
   text-decoration: none;
@@ -4931,8 +4965,8 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
 
 .ax-attention-priority {
   flex: none;
-  min-width: 4.25rem;
-  padding: 0.0625rem 0.3125rem;
+  min-width: 3.75rem;
+  padding: 0 0.25rem;
   border: 1px solid var(--ax-border);
   border-radius: var(--ax-radius-sm);
   background: var(--ax-elevated);
@@ -5094,10 +5128,10 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
   grid-template-rows: auto auto auto auto;
-  gap: 0.03125rem 0.375rem;
+  gap: 0 0.3125rem;
   align-content: start;
   min-width: 0;
-  padding: 0.125rem 0.375rem;
+  padding: 0.0625rem 0.3125rem;
   border: 1px solid var(--ax-border);
   border-radius: var(--ax-radius-sm);
   background: var(--ax-elevated);
@@ -5574,6 +5608,11 @@ button.ax-launcher {
   background: var(--ax-status-danger-bg);
 }
 
+.ax-summary-fact-health-danger {
+  border-color: var(--ax-status-danger-border);
+  background: var(--ax-status-danger-bg);
+}
+
 .ax-summary-health-verdict {
   color: var(--ax-primary);
   font-weight: 700;
@@ -5610,6 +5649,14 @@ button.ax-launcher {
   box-shadow: var(--ax-shadow-sm);
 }
 
+.ax-detail-health-summary-danger {
+  border-color: var(--ax-status-danger-border);
+  border-width: 2px;
+  background: var(--ax-status-danger-solid);
+  color: var(--ax-status-danger-on-solid);
+  box-shadow: var(--ax-shadow-sm);
+}
+
 .ax-detail-health-copy {
   display: flex;
   flex-wrap: wrap;
@@ -5629,11 +5676,20 @@ button.ax-launcher {
   color: var(--ax-status-danger-on-solid);
 }
 
+.ax-detail-health-summary-danger .ax-detail-health-answer {
+  color: var(--ax-status-danger-on-solid);
+}
+
 .ax-detail-health-summary-slate .ax-detail-health-label,
 .ax-detail-health-summary-slate .ax-detail-health-verdict,
 .ax-detail-health-summary-slate .ax-detail-health-body,
 .ax-detail-health-summary-slate .ax-detail-health-caveats,
-.ax-detail-health-summary-slate .ax-detail-health-caveats strong {
+.ax-detail-health-summary-slate .ax-detail-health-caveats strong,
+.ax-detail-health-summary-danger .ax-detail-health-label,
+.ax-detail-health-summary-danger .ax-detail-health-verdict,
+.ax-detail-health-summary-danger .ax-detail-health-body,
+.ax-detail-health-summary-danger .ax-detail-health-caveats,
+.ax-detail-health-summary-danger .ax-detail-health-caveats strong {
   color: var(--ax-status-danger-on-solid);
 }
 
@@ -6349,6 +6405,7 @@ html.accrue-admin::-webkit-scrollbar-thumb:hover {
   color: var(--ax-status-warning-text);
 }
 
+.ax-status-badge-danger,
 .ax-badge-danger,
 .ax-flash-error,
 .ax-banner-danger,

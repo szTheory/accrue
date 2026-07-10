@@ -77,11 +77,11 @@ if Mix.env() != :prod do
                 %{label: "Billing health"}
               ]}
             />
-            <h1 class="ax-heading ax-component-kitchen-title">Billing health workspaces</h1>
-            <p class="ax-page-description">Compact live entrypoints for invoice queue, customer lookup, dunning funnel, webhooks, and audit trail.</p>
+            <h1 class="ax-heading ax-component-kitchen-title">Customer lookup workspaces</h1>
+            <p class="ax-page-description">Find one customer record first, then jump to invoice, dunning, webhook, or audit context.</p>
             <div class="ax-page-actions">
-              <a class="ax-button ax-button-primary ax-button-sm" href={@admin_mount_path <> "/invoices?status=open"}>
-                Open invoice queue workspace
+              <a class="ax-button ax-button-primary ax-button-sm ax-dev-customer-action" href={@admin_mount_path <> "/customers"}>
+                Find customer record
               </a>
             </div>
             <section class="ax-inline-worklist ax-dev-audit-strip" aria-label="Component kitchen audit trail">
@@ -108,16 +108,16 @@ if Mix.env() != :prod do
 
           <section :if={@available?} class="ax-inline-worklist ax-dev-production-strip" aria-label="Production billing entrypoints">
             <div class="ax-inline-worklist-copy">
-              <strong>Billing status: action needed</strong>
-              <span>2 open invoices create $592.50 exposure; target is $0.00.</span>
-              <span>Primary next step: work the Invoices queue. Webhooks, customer lookup, Recovery, and audit are secondary workspaces.</span>
+              <strong>Customer lookup: ready</strong>
+              <span>Primary task: find one customer record and open the full billing context.</span>
+              <span>After lookup, use invoice, Recovery, webhook, or audit links only when that customer context requires it.</span>
             </div>
             <div class="ax-inline-worklist-actions">
-              <a class="ax-button ax-button-primary ax-button-sm" href={@admin_mount_path <> "/invoices?status=open"}>
-                Open invoice queue workspace
-              </a>
-              <a class="ax-button ax-button-secondary ax-button-sm ax-dev-customer-action" href={@admin_mount_path <> "/customers"}>
+              <a class="ax-button ax-button-primary ax-button-sm ax-dev-customer-action" href={@admin_mount_path <> "/customers"}>
                 Find customer record
+              </a>
+              <a class="ax-button ax-button-secondary ax-button-sm" href={@admin_mount_path <> "/invoices?status=open"}>
+                Open invoice queue workspace
               </a>
               <a class="ax-button ax-button-secondary ax-button-sm" href={@admin_mount_path <> "/events"}>
                 Open audit event log

@@ -166,34 +166,13 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
         >
           <div class="ax-inline-worklist-copy ax-subscriptions-priority-copy">
             <strong><%= billing_priority_title(@summary) %></strong>
-            <span class="ax-subscriptions-exposure">Exposure: <%= billing_exposure_summary(@summary) %></span>
-          </div>
-        </section>
-
-        <section class="ax-subscriptions-utility-strip" aria-label="Customer lookup utility view">
-          <a class="ax-link-quiet" href={scoped_path(@admin_mount_path, "/customers", @current_owner_scope)}>
-            Find customer record
-          </a>
-        </section>
-
-        <section class="ax-inline-worklist ax-subscriptions-invoice-records" aria-label="Open invoice records handoff">
-          <div class="ax-inline-worklist-copy">
-            <strong>Invoice records live in Invoices</strong>
-            <span><%= count(@summary.open_invoice_count, "open invoice") %>; <%= billing_exposure_summary(@summary) %> Work invoice rows, reminders, and next actions in the dedicated queue.</span>
+            <span class="ax-subscriptions-exposure">Critical: <%= count(@summary.open_invoice_count, "open invoice") %>; <%= billing_exposure_summary(@summary) %></span>
+            <span>Secondary debugging: failed webhook deliveries are grouped in Webhooks.</span>
           </div>
           <div class="ax-inline-worklist-actions">
             <a class="ax-button ax-button-primary ax-button-sm" href={invoice_queue_path(@admin_mount_path, @current_owner_scope)}>
               Open actionable invoice records
             </a>
-          </div>
-        </section>
-
-        <section class="ax-inline-worklist ax-subscriptions-webhook-strip" aria-label="Webhook debugging workspace">
-          <div class="ax-inline-worklist-copy">
-            <strong>Webhook debugging workspace</strong>
-            <span>Skip row-by-row hunting: failed deliveries, payloads, attempts, and replay actions are grouped in Webhooks.</span>
-          </div>
-          <div class="ax-inline-worklist-actions">
             <a
               class="ax-button ax-button-warning ax-button-sm"
               href={scoped_path(@admin_mount_path, "/webhooks", @current_owner_scope, %{"status" => "failed,dead"})}
@@ -201,6 +180,12 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
               Open failed webhook deliveries
             </a>
           </div>
+        </section>
+
+        <section class="ax-subscriptions-utility-strip" aria-label="Customer lookup utility view">
+          <a class="ax-link-quiet" href={scoped_path(@admin_mount_path, "/customers", @current_owner_scope)}>
+            Find customer record
+          </a>
         </section>
 
         <section class="ax-inline-worklist ax-subscriptions-audit-strip" aria-label="Subscription audit trail">
@@ -426,7 +411,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
   end
 
   defp billing_priority_title(%{open_invoice_count: count}) when count > 0,
-    do: "Billing health: Action required - #{count(count, "open invoice")};"
+    do: "Billing Health: Action Required - #{count(count, "open invoice")};"
 
   defp billing_priority_title(_summary), do: "Billing health: Healthy - invoices clear"
 

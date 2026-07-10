@@ -64,6 +64,7 @@ defmodule AccrueAdmin.Live.DashboardLive do
               <span class="ax-status-dot"></span>Billing is unhealthy
             </span>
             <strong><%= attention_health_summary(@stats) %></strong>
+            <span class="ax-home-health-answer"><%= attention_health_issue_summary(@stats) %></span>
             <div class="ax-home-health-metrics" aria-label="Billing health metrics">
               <span :for={metric <- attention_health_metrics(@stats)} class={["ax-home-health-metric", "ax-home-health-metric-" <> metric.tone]}>
                 <strong><%= metric.value %></strong>
@@ -150,7 +151,7 @@ defmodule AccrueAdmin.Live.DashboardLive do
           <div class="ax-launchers">
             <a class="ax-launcher ax-launcher-primary" href={ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope, %{"status" => "open"})}>
               <span class="ax-launcher-icon"><Icon.icon name={:invoices} size="lg" /></span>
-              <span class="ax-launcher-title"><%= Copy.home_launcher_invoices_title() %></span>
+              <span class="ax-launcher-title"><%= invoice_launcher_title(@stats) %></span>
               <span class="ax-launcher-action">
                 Work the dedicated invoice queue <Icon.icon name={:arrow_right} size="sm" />
               </span>
@@ -435,7 +436,19 @@ defmodule AccrueAdmin.Live.DashboardLive do
     |> Enum.filter(& &1)
   end
 
-  defp attention_health_summary(_stats), do: "Billing health: action required"
+  defp attention_health_summary(_stats), do: "Billing Health: Unhealthy"
+
+  defp attention_health_issue_summary(stats) do
+    issue_count =
+      stats.blocked_webhook_count + stats.open_invoice_count + stats.past_due_subscription_count +
+        stats.failed_meter_event_count
+
+    if issue_count == 1 do
+      "1 critical issue needs action"
+    else
+      "#{issue_count} critical issues need action"
+    end
+  end
 
   defp attention_health_metrics(stats),
     do: [
@@ -451,6 +464,13 @@ defmodule AccrueAdmin.Live.DashboardLive do
 
   defp count(1, noun), do: "1 #{noun}"
   defp count(n, noun), do: "#{n} #{noun}s"
+
+  defp invoice_launcher_title(%{open_invoice_count: count, open_invoice_balance_minor: amount})
+       when count > 0 do
+    "Invoices queue: #{format_minor(amount, "usd")} open"
+  end
+
+  defp invoice_launcher_title(_stats), do: Copy.home_launcher_invoices_title()
 
   defp recent_events(mount_path, scope) do
     Event

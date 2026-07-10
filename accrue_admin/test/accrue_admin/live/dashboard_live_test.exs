@@ -104,13 +104,14 @@ defmodule AccrueAdmin.DashboardLiveTest do
     assert html =~ Copy.home_attention_meter_label()
     assert html =~ Copy.home_attention_action_investigate()
     assert html =~ "Billing is unhealthy"
-    assert html =~ "Billing health: action required"
+    assert html =~ "Billing Health: Unhealthy"
+    assert html =~ "critical issues need action"
     assert html =~ "failed webhooks"
     assert html =~ "open invoices"
     assert html =~ "Critical"
     assert html =~ "Priority"
     assert html =~ "Debug dead-lettered webhooks"
-    assert html =~ "Invoices queue: $0.00 target"
+    assert html =~ "Invoices queue: $42.50 open"
     assert html =~ ~s(href="/billing/events?q=meter_event")
     assert html =~ ~s(href="/billing/invoices?status=open")
 
@@ -118,7 +119,7 @@ defmodule AccrueAdmin.DashboardLiveTest do
     assert html =~ Copy.home_launcher_customers_title()
     assert html =~ Copy.home_launcher_customers_meta()
     assert html =~ "ax-launcher-primary"
-    assert html =~ Copy.home_launcher_invoices_title()
+    assert html =~ "Invoices queue: $42.50 open"
     assert html =~ "$42.50 above $0.00 target"
     assert html =~ Copy.home_launcher_recovery_title()
     assert html =~ Copy.home_launcher_recovery_meta()
@@ -164,7 +165,7 @@ defmodule AccrueAdmin.DashboardLiveTest do
     # IA-01 verb relabels (Plan 175-02)
     assert html =~ "Find customer now"
     assert html =~ "Search customers on this page"
-    assert html =~ "Invoices queue: $0.00 target"
+    assert html =~ "Invoices queue: $42.50 open"
 
     # IA-01 customer lookup entry point on Home (Plan 175-04)
     assert html =~ "Search customer name or ID"
