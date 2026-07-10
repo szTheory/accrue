@@ -117,7 +117,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
               Open invoice queue for <%= count(@summary.open_invoice_count, "open invoice") %>
             </a>
             <a
-              class="ax-button ax-button-warning ax-button-sm ax-subscriptions-webhook-workspace"
+              class="ax-button ax-button-secondary ax-button-sm ax-subscriptions-webhook-workspace"
               href={
                 @admin_mount_path
                 |> scoped_path("/webhooks", @current_owner_scope)
@@ -130,7 +130,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
               Debug failed webhooks end-to-end
             </a>
             <a
-              class="ax-button ax-button-recovery ax-button-sm"
+              class="ax-button ax-button-secondary ax-button-sm"
               href={scoped_path(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}
             >
               View dunning funnel dashboard
@@ -193,28 +193,6 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
           <a class="ax-link-quiet" href={scoped_path(@admin_mount_path, "/customers", @current_owner_scope)}>
             Find customer record
           </a>
-        </section>
-
-        <section class="ax-inline-worklist ax-subscriptions-webhook-strip" aria-label="Failed webhook debugging workspace">
-          <div class="ax-inline-worklist-copy">
-            <strong>Webhook debugging workspace</strong>
-            <span>Failed subscription.created deliveries are collected here before row-level delivery attempts.</span>
-          </div>
-          <div class="ax-inline-worklist-actions">
-            <a
-              class="ax-button ax-button-warning ax-button-sm"
-              href={
-                @admin_mount_path
-                |> scoped_path("/webhooks", @current_owner_scope)
-                |> AccrueAdmin.DataTableNav.merge_query(%{
-                  "status" => "failed,dead",
-                  "type" => "subscription.created"
-                })
-              }
-            >
-              Debug failed webhooks end-to-end
-            </a>
-          </div>
         </section>
 
         <section class="ax-inline-worklist ax-subscriptions-audit-strip" aria-label="Subscription audit trail">
@@ -423,7 +401,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
   end
 
   defp billing_priority_title(%{open_invoice_count: count}) when count > 0,
-    do: "Billing status: Unhealthy"
+    do: "Billing status: Unhealthy - invoices need work now"
 
   defp billing_priority_title(_summary), do: "Billing status: Healthy"
 
@@ -469,7 +447,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
   defp customer_label(row), do: row.customer_name || row.customer_email || row.customer_id
 
   defp subscriptions_health_verdict(%{open_invoice_count: count}) when count > 0,
-    do: "Billing status: Unhealthy"
+    do: "Billing status: Unhealthy - invoices need work now"
 
   defp subscriptions_health_verdict(_summary), do: "Billing status: Healthy"
 

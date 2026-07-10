@@ -2620,8 +2620,9 @@ a.ax-kpi-card--linked:focus-visible {
 }
 
 .ax-subscriptions-header {
-  gap: 0.0625rem;
+  gap: 0;
   max-width: min(70rem, calc(100vw - 2.5rem));
+  padding-block: 0;
 }
 
 .ax-subscriptions-header .ax-page-header-main,
@@ -2649,7 +2650,7 @@ a.ax-kpi-card--linked:focus-visible {
 }
 
 .ax-subscriptions-header .ax-page-header-actions {
-  gap: 0.125rem;
+  gap: 0.0625rem;
 }
 
 .ax-subscriptions-header .ax-stat-value {
@@ -2697,7 +2698,7 @@ a.ax-kpi-card--linked:focus-visible {
 }
 
 .ax-subscriptions-page {
-  gap: 0.125rem;
+  gap: 0.0625rem;
 }
 
 .ax-health-summary {
@@ -2890,7 +2891,7 @@ a.ax-kpi-card--linked:focus-visible {
 
 .ax-subscriptions-invoice-strip {
   order: 0;
-  padding: 0.03125rem 0.3125rem;
+  padding: 0 0.25rem;
   border-color: var(--ax-accent-readable);
   border-width: 2px;
   background: color-mix(in srgb, var(--ax-accent-subtle) 56%, var(--ax-elevated));
@@ -3645,8 +3646,8 @@ a.ax-kpi-card--linked:focus-visible {
 
 .ax-subscriptions-page .ax-webhook-row-status,
 .ax-subscriptions-page .ax-audit-summary-row {
-  padding-block: 0.03125rem;
-  padding-inline: 0.25rem;
+  padding-block: 0;
+  padding-inline: 0.1875rem;
 }
 
 .ax-subscriptions-page .ax-data-table-grid th {
@@ -3977,7 +3978,7 @@ a.ax-kpi-card--linked:focus-visible {
 
 .ax-subscriptions-page .ax-data-table-grid th,
 .ax-subscriptions-page .ax-data-table-grid td {
-  padding: 0.125rem 0.25rem;
+  padding: 0.1875rem 0.25rem;
   line-height: var(--ax-leading-tight);
 }
 
@@ -4822,7 +4823,8 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
   border-color: var(--ax-focus-ring);
   border-width: 3px;
   border-radius: var(--ax-radius-sm);
-  background: var(--ax-base);
+  background: var(--ax-accent-readable);
+  color: var(--ax-base);
   font-size: var(--ax-type-md);
   font-weight: 900;
   cursor: pointer;
@@ -4833,12 +4835,12 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
 }
 
 .ax-search-trigger:hover {
-  background: color-mix(in srgb, var(--ax-accent-subtle) 92%, var(--ax-elevated));
+  background: color-mix(in srgb, var(--ax-accent-readable) 88%, black);
   border-color: var(--ax-accent-readable);
 }
 
 .ax-search-trigger-icon {
-  color: var(--ax-focus-ring);
+  color: var(--ax-base);
 }
 
 .ax-search-trigger-text {
@@ -4850,14 +4852,14 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
   overflow: hidden;
   text-overflow: ellipsis;
   text-align: left;
-  color: var(--ax-primary);
+  color: var(--ax-base);
   font-weight: 900;
 }
 
 .ax-search-trigger-text strong,
 .ax-search-trigger-text em {
   overflow: hidden;
-  color: var(--ax-primary);
+  color: var(--ax-base);
   font-style: normal;
   line-height: var(--ax-leading-tight);
   text-overflow: ellipsis;
@@ -4865,7 +4867,7 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
 }
 
 .ax-search-trigger-text em {
-  color: var(--ax-muted);
+  color: color-mix(in srgb, var(--ax-base) 82%, transparent);
   font-size: var(--ax-type-xs);
   font-weight: 800;
 }
@@ -4876,17 +4878,17 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
   min-height: 1.5rem;
   padding: 0 0.5rem;
   border-radius: var(--ax-radius-sm);
-  background: var(--ax-accent-readable);
-  color: var(--ax-base);
+  background: var(--ax-base);
+  color: var(--ax-accent-readable);
   font: var(--ax-type-label-sm-font);
   font-weight: 900;
 }
 
 .ax-search-trigger .ax-kbd {
   margin-left: auto;
-  border-color: var(--ax-accent-border);
-  background: var(--ax-base);
-  color: var(--ax-primary);
+  border-color: color-mix(in srgb, var(--ax-base) 55%, transparent);
+  background: color-mix(in srgb, var(--ax-base) 12%, transparent);
+  color: var(--ax-base);
 }
 
 @media (max-width: 599.98px) { /* --ax-bp-sm ↓ */

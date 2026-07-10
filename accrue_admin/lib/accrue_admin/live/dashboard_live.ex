@@ -432,7 +432,7 @@ defmodule AccrueAdmin.Live.DashboardLive do
     |> Enum.filter(& &1)
   end
 
-  defp attention_health_summary(_stats), do: "Billing healthy right now: No"
+  defp attention_health_summary(_stats), do: "Billing status: Unhealthy"
 
   defp attention_health_issue_summary(stats) do
     issue_count =

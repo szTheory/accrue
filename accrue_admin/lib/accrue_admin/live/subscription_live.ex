@@ -1032,9 +1032,9 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
       caveats != [] ->
         %{
           tone: "amber",
-          label: "Setup incomplete",
-          answer: "No - billing health blocked by missing setup data",
-          headline: "#{length(caveats)} setup fields missing",
+          label: "Unhealthy",
+          answer: "Billing status: Unhealthy",
+          headline: "Setup missing: #{pluralize(length(caveats), "field")}",
           body:
             "This is not an active payment failure. Use Invoices for receivables; fill setup fields before trusting revenue, dunning, or renewal decisions.",
           caveats: caveats
@@ -1093,7 +1093,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
   end
 
   defp detail_health_metric(%{caveats: caveats}) when is_list(caveats) and caveats != [],
-    do: "#{length(caveats)} setup fields blocking health"
+    do: "Setup missing: #{pluralize(length(caveats), "field")}"
 
   defp detail_health_metric(%{tone: "moss"}), do: "0 blockers"
 

@@ -81,6 +81,17 @@ if Mix.env() != :prod do
             />
             <h1 class="ax-heading ax-component-kitchen-title">Billing health command center</h1>
             <p class="ax-page-description">Customer detail is the primary support path; billing routes stay visible as secondary handoffs.</p>
+            <div class="ax-page-actions">
+              <a class="ax-button ax-button-primary ax-button-sm ax-dev-customer-action ax-dev-customer-primary" href={@admin_mount_path <> "/customers"}>
+                <Icon.icon name={:search} size="sm" /> Primary action: find one customer record
+              </a>
+              <a class="ax-button ax-button-secondary ax-button-sm ax-dev-invoice-action ax-dev-invoice-primary" href={@admin_mount_path <> "/invoices?status=open"}>
+                <Icon.icon name={:invoices} size="sm" /> Open invoice queue: 2 invoices, $592.50 exposure
+              </a>
+              <a class="ax-button ax-button-secondary ax-button-sm ax-dev-dunning-action" href={@admin_mount_path <> "/analytics/recovery"}>
+                <Icon.icon name={:recovery} size="sm" /> View dunning funnel
+              </a>
+            </div>
             <section :if={@available?} class="ax-dev-health-snapshot ax-dev-health-snapshot-header" aria-label="Billing health snapshot">
               <span><strong>Billing Health</strong><em>Unhealthy</em></span>
               <span><strong>Invoices</strong><em>2 open, $592.50 over target</em></span>
@@ -89,14 +100,6 @@ if Mix.env() != :prod do
               <span><strong>Webhook route</strong><a class="ax-link" href={@admin_mount_path <> "/webhooks?status=failed,dead"}>Webhooks to Events</a></span>
               <span><strong>Recovery route</strong><a class="ax-link" href={@admin_mount_path <> "/analytics/recovery"}>Dunning funnel</a></span>
             </section>
-            <div class="ax-page-actions">
-              <a class="ax-button ax-button-primary ax-button-sm ax-dev-customer-action ax-dev-customer-primary" href={@admin_mount_path <> "/customers"}>
-                <Icon.icon name={:search} size="sm" /> Primary action: find one customer record
-              </a>
-              <a class="ax-button ax-button-secondary ax-button-sm ax-dev-invoice-action ax-dev-invoice-primary" href={@admin_mount_path <> "/invoices?status=open"}>
-                <Icon.icon name={:invoices} size="sm" /> Open invoice queue: 2 invoices, $592.50 exposure
-              </a>
-            </div>
           </header>
 
           <FlashGroup.flash_group flashes={@flashes} />
