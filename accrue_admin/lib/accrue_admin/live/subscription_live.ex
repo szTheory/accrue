@@ -247,7 +247,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
               Review setup audit events
             </a>
             <a
-              class="ax-button ax-button-recovery ax-button-sm"
+              class="ax-button ax-button-secondary ax-button-sm"
               href={ScopedPath.build(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}
             >
               Open dunning analytics
@@ -333,25 +333,23 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
               class="ax-button ax-button-warning ax-button-sm ax-detail-webhook-primary"
               href={
                 ScopedPath.build(@admin_mount_path, "/webhooks", @current_owner_scope, %{
-                  "status" => "failed,dead",
-                  "type" => "subscription.created"
+                  "status" => "failed,dead"
                 })
               }
             >
-              Open full webhook debugger and retry
+              Debug all failed webhooks end-to-end
             </a>
             <a
               class="ax-link-quiet"
               href={
                 ScopedPath.build(@admin_mount_path, "/webhooks", @current_owner_scope, %{
-                  "status" => "failed,dead",
-                  "type" => "subscription.created"
+                  "status" => "failed,dead"
                 })
               }
             >
-              Open failed webhook delivery details and retry
+              Open payload, response, retry history, and replay controls
             </a>
-            <span class="ax-detail-priority-note">Full debugger opens failed subscription.created deliveries with payload, response, retry trail, and replay controls.</span>
+            <span class="ax-detail-priority-note">Full debugger opens every failed or dead delivery with source event, payload, response, retry trail, and replay controls.</span>
           </div>
           <div class="ax-detail-priority-links">
             <a
@@ -1101,8 +1099,8 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
         %{
           tone: "amber",
           label: "Setup missing",
-          answer: "Revenue can flow; setup fields are missing",
-          headline: "Revenue is not blocked",
+          answer: "Billing healthy? Yes - revenue can flow",
+          headline: "Setup follow-up affects reporting only",
           body: "Complete setup fields to make revenue and recovery reporting exact.",
           caveats: caveats
         }

@@ -59,12 +59,6 @@ defmodule AccrueAdmin.Live.DashboardLive do
           <div :if={@attention != []} class="ax-home-header-health ax-health-summary ax-health-summary-amber" aria-label="Dashboard billing health answer">
             <strong><%= attention_health_summary(@stats) %></strong>
             <span class="ax-home-health-answer"><%= attention_health_issue_summary(@stats) %></span>
-            <div class="ax-home-health-metrics" aria-label="Billing health metrics">
-              <span :for={metric <- attention_health_metrics(@stats)} class={["ax-home-health-metric", "ax-home-health-metric-" <> metric.tone]}>
-                <strong><%= metric.value %></strong>
-                <em><%= metric.label %></em>
-              </span>
-            </div>
           </div>
           <div class="ax-page-actions">
             <a
@@ -444,23 +438,11 @@ defmodule AccrueAdmin.Live.DashboardLive do
     |> Enum.filter(& &1)
   end
 
-  defp attention_health_summary(_stats),
-    do: "Billing health: Critical issues require attention"
+  defp attention_health_summary(_stats), do: "Billing healthy? No"
 
-  defp attention_health_issue_summary(_stats),
-    do: "Work open-invoice queue first; then debug failed webhooks."
-
-  defp attention_health_metrics(stats),
-    do: [
-      %{tone: "danger", value: stats.blocked_webhook_count, label: "failed webhooks"},
-      %{tone: "warning", value: stats.open_invoice_count, label: "open invoices"},
-      %{
-        tone: "warning",
-        value: stats.past_due_subscription_count,
-        label: "at-risk subscriptions"
-      },
-      %{tone: "info", value: stats.failed_meter_event_count, label: "blocked usage records"}
-    ]
+  defp attention_health_issue_summary(stats),
+    do:
+      "Priority 1: clear #{count(stats.open_invoice_count, "open invoice")} / #{format_minor(stats.open_invoice_balance_minor, "usd")}."
 
   defp count(1, noun), do: "1 #{noun}"
   defp count(n, noun), do: "#{n} #{noun}s"

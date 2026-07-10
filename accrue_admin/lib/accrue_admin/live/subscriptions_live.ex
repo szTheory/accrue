@@ -141,10 +141,10 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
               View failed webhook details and retry
             </a>
             <a
-              class="ax-button ax-button-secondary ax-button-sm"
+              class="ax-button ax-button-recovery ax-button-sm ax-subscriptions-recovery-workspace"
               href={scoped_path(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}
             >
-              View dunning funnel dashboard
+              Watch dunning funnel + at-risk
             </a>
           </:actions>
           <:stat_strip>
@@ -218,7 +218,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
         <section class="ax-subscriptions-queue-shortcut" aria-label="Open-invoice queue records">
           <span><%= count(@summary.open_invoice_count, "open invoice") %> ready for queue work.</span>
           <a class="ax-link-quiet" href={invoice_queue_path(@admin_mount_path, @current_owner_scope)}>
-            Open-invoice records for queue work
+            Work, review, or remove open-invoice records
           </a>
         </section>
 
@@ -230,7 +230,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
           </div>
           <div class="ax-inline-worklist-actions">
             <a class="ax-button ax-button-secondary ax-button-sm" href={scoped_path(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}>
-              Open at-risk recovery analytics
+              Watch dunning funnel + at-risk
             </a>
           </div>
         </section>
@@ -423,8 +423,9 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
       </span>
       <span class="ax-webhook-row-status ax-webhook-row-status-warning ax-subscription-row-signal-primary">
         <strong>Invoice action</strong>
-        <span>Work open-invoice records in the dedicated Invoices queue</span>
-        <a href="#{subscription_invoices_href}" class="ax-link">Open invoice queue for this subscription</a>
+        <span>Work this subscription's open invoices in the dedicated queue</span>
+        <a href="#{subscription_invoices_href}" class="ax-link ax-subscription-row-invoice-action">Work, review, or remove invoices</a>
+        <a href="#{subscription_invoices_href}&work=send_reminder" class="ax-link ax-subscription-row-invoice-action">Send reminder</a>
       </span>
       <span class="ax-webhook-row-status ax-webhook-row-status-warning ax-subscription-row-signal-secondary">
         <strong>Webhook debug path</strong>

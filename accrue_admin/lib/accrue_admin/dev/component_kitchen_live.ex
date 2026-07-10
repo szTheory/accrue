@@ -90,10 +90,13 @@ if Mix.env() != :prod do
                 <a class="ax-dev-health-link" href={@admin_mount_path <> "/webhooks?status=failed,dead"}>Debug failed webhooks</a>
               </span>
             </section>
-            <div class="ax-page-actions">
+            <section :if={@available?} class="ax-dev-support-primary-strip" aria-label="Primary support workflow">
+              <strong>Primary support path</strong>
               <a class="ax-button ax-button-primary ax-button-sm ax-dev-customer-action ax-dev-customer-primary" href={@admin_mount_path <> "/customers"}>
-                <Icon.icon name={:search} size="sm" /> Support: find one customer
+                <Icon.icon name={:search} size="sm" /> Find one customer, see everything
               </a>
+            </section>
+            <div class="ax-page-actions">
               <a class="ax-button ax-button-primary ax-button-sm ax-dev-dunning-action" href={@admin_mount_path <> "/analytics/recovery"}>
                 <Icon.icon name={:recovery} size="sm" /> View dunning funnel & at-risk analytics
               </a>
@@ -130,8 +133,8 @@ if Mix.env() != :prod do
               <span>Audit timestamp: Jul 09, 2026 14:51 UTC.</span>
             </div>
             <div class="ax-inline-worklist-actions">
-              <a class="ax-button ax-button-primary ax-button-sm ax-dev-invoice-action" href={@admin_mount_path <> "/invoices?status=open"}>
-                Work inline invoice queue preview: 2 open invoices
+              <a class="ax-button ax-button-secondary ax-button-sm ax-dev-invoice-action" href="#dev-invoice-preview">
+                Review inline invoice preview below
               </a>
               <a class="ax-button ax-button-secondary ax-button-sm ax-dev-dunning-action" href={@admin_mount_path <> "/analytics/recovery?status=at_risk"}>
                 View at-risk accounts
@@ -139,7 +142,7 @@ if Mix.env() != :prod do
             </div>
           </section>
 
-          <section :if={@available?} class="ax-inline-worklist ax-dev-invoice-preview" aria-label="Open invoice queue preview">
+          <section :if={@available?} id="dev-invoice-preview" class="ax-inline-worklist ax-dev-invoice-preview" aria-label="Open invoice queue preview">
             <div class="ax-inline-worklist-copy">
               <strong>Open invoice queue preview</strong>
               <span>2 invoices ready for inline queue review</span>

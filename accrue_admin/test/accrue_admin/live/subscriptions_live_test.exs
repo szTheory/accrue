@@ -98,7 +98,7 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert html =~ "target"
 
     assert html =~ "Work open-invoice queue to $0.00"
-    assert html =~ "View dunning funnel dashboard"
+    assert html =~ "Watch dunning funnel + at-risk"
 
     assert html =~ "review at-risk subscriptions"
     assert html =~ "View failed webhook details and retry"
@@ -111,14 +111,14 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     refute html =~ "Send invoice reminders"
     assert html =~ "Find one customer and see everything"
     refute html =~ "Who did what, when - filter admin actors"
-    assert html =~ "Open invoice queue for this subscription"
+    assert html =~ "Work, review, or remove invoices"
     assert html =~ "Who did what, when?"
     assert html =~ "Latest audit event: subscription.created by Accrue system"
     assert html =~ "Open full audit event log"
     assert html =~ "Filter admin actors"
     assert html =~ "View failed webhook details and retry"
     assert html =~ "At-risk subscription queue"
-    assert html =~ "Open at-risk recovery analytics"
+    assert html =~ "Watch dunning funnel + at-risk"
     refute html =~ "Billing health: Unhealthy"
     assert_one_h1(html)
 
@@ -276,7 +276,7 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert html =~ "exposure"
     assert html =~ "target"
     refute html =~ "ax-health-verdict"
-    assert html =~ "Open invoice queue for this subscription"
+    assert html =~ "Work, review, or remove invoices"
     assert html =~ "View failed webhook details and retry"
     assert html =~ "Webhook debug path"
     assert html =~ "failed-delivery workflow"
@@ -318,7 +318,7 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert html =~ "phase196-primary@example.com"
     assert html =~ "Customer overview: phase196-primary@example.com"
     assert html =~ "Open-invoice queue records"
-    assert html =~ "Open-invoice records for queue work"
+    assert html =~ "Work, review, or remove open-invoice records"
     assert html =~ "Customer ID"
     assert html =~ subscription.customer_id
     assert html =~ "Subscription"
