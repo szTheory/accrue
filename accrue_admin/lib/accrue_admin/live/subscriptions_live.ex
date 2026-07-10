@@ -196,6 +196,16 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
             <a class="ax-button ax-button-primary ax-button-sm ax-subscriptions-primary-workspace" href={invoice_queue_path(@admin_mount_path, @current_owner_scope)}>
               Open invoice queue to $0.00
             </a>
+            <a
+              class="ax-button ax-button-warning ax-button-sm ax-subscriptions-webhook-workspace"
+              href={
+                @admin_mount_path
+                |> scoped_path("/webhooks", @current_owner_scope)
+                |> AccrueAdmin.DataTableNav.merge_query(%{"status" => "failed,dead"})
+              }
+            >
+              Debug failed webhooks
+            </a>
           </div>
         </section>
 
@@ -397,15 +407,15 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
         <a href="#{subscription_invoices_href}" class="ax-link">Open invoice queue for this subscription</a>
       </span>
       <span class="ax-webhook-row-status ax-webhook-row-status-warning ax-subscription-row-signal-secondary">
-        <strong>Row webhook attempts</strong>
-        <span>This subscription's failed subscription.created deliveries</span>
+        <strong>Webhook debug path</strong>
+        <span>Use one failed-delivery workflow for payload, response, retry trail, and replay controls</span>
         <a href="#{webhook_href}" class="ax-link ax-subscription-row-webhook-action">Debug failed webhooks for this subscription</a>
       </span>
       <span class="ax-subscription-row-admin-chips"><span class="ax-chip ax-label">Owner: #{escaped_o}</span> <span class="ax-chip ax-label">Tax: #{escaped_t}</span></span>
       <span class="ax-data-table-inline-actions">
-        <a href="#{events_href}" class="ax-link">Open who did what, when event log</a>
+        <a href="#{events_href}" class="ax-link">Open audit context for this subscription</a>
       </span>
-      <span class="ax-label ax-muted">Webhook log opens failed subscription.created delivery attempts.</span>
+      <span class="ax-label ax-muted">Start with Debug failed webhooks; use the audit log only for actor and timestamp context.</span>
     </span>
     """)
   end
@@ -435,12 +445,12 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
     Phoenix.HTML.raw("""
     <span class="ax-stack-sm">
       <span class="ax-subscription-row-primary-line">
-        <a href="#{customer_href}" class="ax-button ax-button-primary ax-button-sm ax-subscription-row-customer">View customer: #{escape(customer_label(row))}</a>
+        <a href="#{customer_href}" class="ax-button ax-button-primary ax-button-sm ax-subscription-row-customer">View customer detail: #{escape(customer_label(row))}</a>
         <span class="ax-subscription-row-state ax-status-badge ax-status-badge-#{state_tone}">
           <span class="ax-status-dot"></span>#{escape(state_label)}
         </span>
       </span>
-      <span class="ax-subscription-row-customer-scope">Customer detail shows all subscriptions, invoices, events, and recovery state for this customer.</span>
+      <span class="ax-subscription-row-customer-scope">Primary path: see every subscription, invoice, event, and recovery state for this customer.</span>
       <span class="ax-subscription-row-meta"><strong>Customer ID</strong> #{customer_id}</span>
       <a href="#{subscription_href}" class="ax-subscription-row-meta ax-subscription-row-id"><strong>Subscription</strong> #{subscription_id}</a>
       <a href="#{subscription_invoices_href}" class="ax-link ax-subscription-row-invoices">Open filtered invoices for this subscription</a>

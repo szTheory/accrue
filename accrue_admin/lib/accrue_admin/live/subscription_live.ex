@@ -214,7 +214,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
         <% health = detail_health_summary(@subscription) %>
         <section class={["ax-detail-health-summary ax-detail-health-summary-top", "ax-detail-health-summary-" <> health.tone]} aria-label="Primary billing health summary">
           <div class="ax-detail-health-copy" role="status">
-            <span class="ax-detail-health-label">Billing status</span>
+            <span class="ax-detail-health-label">Healthy right now?</span>
             <strong class="ax-detail-health-answer"><%= health.answer %></strong>
             <span class="ax-detail-health-metric"><%= detail_health_metric(health) %></span>
             <strong class="ax-detail-health-verdict"><%= health.headline %></strong>
@@ -1086,10 +1086,10 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
         %{
           tone: "amber",
           label: "Setup missing",
-          answer: "Setup incomplete",
+          answer: "No - setup incomplete",
           headline: "Complete #{pluralize(length(caveats), "setup field")}",
           body:
-            "Billing projections are limited until the customer profile has the required renewal, price, and charge fields.",
+            "Active billing can continue, but revenue, dunning, and renewal projections are not reliable until setup fields are complete.",
           caveats: caveats
         }
 

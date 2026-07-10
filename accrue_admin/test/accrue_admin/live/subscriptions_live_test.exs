@@ -137,7 +137,7 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert html =~ "At risk"
     assert html =~ "All"
     assert html =~ "Dedicated Invoices queue"
-    assert html =~ "Billing status:"
+    assert html =~ "Billing"
     assert html =~ "ax-subscription-row-state"
     assert html =~ "Debug failed webhooks"
     assert html =~ "Who did what, when?"
@@ -276,13 +276,13 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     refute html =~ "ax-health-verdict"
     assert html =~ "Open invoice queue for this subscription"
     assert html =~ "Debug failed webhooks for this subscription"
-    assert html =~ "Row webhook attempts"
-    assert html =~ "failed subscription.created delivery attempts"
+    assert html =~ "Webhook debug path"
+    assert html =~ "failed-delivery workflow"
 
     assert html =~ "Billing is unhealthy: open invoices above target" or
              html =~ "Billing status: Healthy"
 
-    assert html =~ "Open who did what, when event log"
+    assert html =~ "Open audit context for this subscription"
     assert html =~ "Owner: User"
     assert html =~ "Tax: Off"
     assert html =~ "Actor"
@@ -314,7 +314,7 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert {:ok, _view, html} = live(conn, "/billing/subscriptions?view=all")
 
     assert html =~ "phase196-primary@example.com"
-    assert html =~ "View customer: phase196-primary@example.com"
+    assert html =~ "View customer detail: phase196-primary@example.com"
     assert html =~ "Customer ID"
     assert html =~ subscription.customer_id
     assert html =~ "Subscription"

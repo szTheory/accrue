@@ -138,14 +138,14 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
     assert html =~ "Dunning &amp; recovery"
     assert html =~ "Tax &amp; compliance"
     assert html =~ "invoice.payment_failed"
-    assert html =~ "Setup incomplete"
+    assert html =~ "No - setup incomplete"
     assert html =~ "setup fields"
     assert html =~ "ax-detail-health-summary-amber"
     assert html =~ "ax-detail-health-answer"
     assert html =~ "Charge amount not shown"
 
     assert html =~
-             "Billing projections are limited until the customer profile has the required renewal, price, and charge fields."
+             "Active billing can continue, but revenue, dunning, and renewal projections are not reliable until setup fields are complete."
 
     assert html =~
              "Complete these setup fields before using revenue, dunning, or renewal projections."

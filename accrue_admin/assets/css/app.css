@@ -3933,7 +3933,7 @@ a.ax-kpi-card--linked:focus-visible {
 }
 
 .ax-subscription-row-primary-line .ax-subscription-row-customer {
-  flex: 0 1 18rem;
+  flex: 0 1 22rem;
 }
 
 .ax-subscription-row-signal-primary {
@@ -4019,9 +4019,11 @@ a.ax-kpi-card--linked:focus-visible {
 .ax-subscription-row-customer {
   width: fit-content;
   font-size: var(--ax-type-sm);
-  font-weight: 900;
+  font-weight: 950;
   text-decoration: none;
   white-space: normal;
+  border-width: 2px;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ax-accent-border) 68%, transparent), var(--ax-shadow-sm);
 }
 
 .ax-subscription-row-customer-scope {

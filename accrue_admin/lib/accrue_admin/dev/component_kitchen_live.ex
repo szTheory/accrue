@@ -75,16 +75,16 @@ if Mix.env() != :prod do
               items={[
                 %{label: "Dashboard", href: @admin_mount_path},
                 %{label: "Billing health", href: @admin_mount_path},
-                %{label: "Component kitchen"}
+                %{label: "Billing health preview"}
               ]}
             />
             <div class="ax-component-kitchen-title-row">
-              <h1 class="ax-heading ax-component-kitchen-title">Billing is unhealthy</h1>
-              <span class="ax-component-kitchen-header-status">2 open invoices, 3 failed webhooks, 1 past-due subscription</span>
+              <h1 class="ax-heading ax-component-kitchen-title">Billing health: unhealthy</h1>
+              <span class="ax-component-kitchen-header-status">No - fix 2 open invoices, debug 3 failed webhooks, recover 1 past-due subscription</span>
             </div>
             <p class="ax-page-description">Work the invoice queue, debug failed webhook deliveries, and watch dunning recovery from one command center.</p>
             <section :if={@available?} class="ax-dev-health-snapshot ax-dev-health-snapshot-header" aria-label="Billing health answer">
-              <span class="ax-dev-health-status"><strong>Status</strong><em>Unhealthy until queues are cleared</em></span>
+              <span class="ax-dev-health-status"><strong>Healthy right now?</strong><em>No - unhealthy until billing queues are cleared</em></span>
               <span><strong>Fix first</strong><a class="ax-link" href={@admin_mount_path <> "/invoices?status=open"}>Open invoice queue</a></span>
               <span><strong>Then debug</strong><a class="ax-link" href={@admin_mount_path <> "/webhooks?status=failed,dead"}>Failed webhook deliveries</a></span>
               <span><strong>Support</strong><a class="ax-link" href={@admin_mount_path <> "/customers"}>Find one customer</a></span>
@@ -100,7 +100,7 @@ if Mix.env() != :prod do
                 <Icon.icon name={:webhooks} size="sm" /> Debug failed webhooks
               </a>
               <a class="ax-button ax-button-recovery ax-button-sm ax-dev-dunning-action" href={@admin_mount_path <> "/analytics/recovery"}>
-                <Icon.icon name={:recovery} size="sm" /> Watch dunning funnel
+                <Icon.icon name={:recovery} size="sm" /> Watch dunning funnel + at-risk
               </a>
             </div>
             <section :if={@available?} class="ax-dev-route-strip" aria-label="Secondary billing routes">
@@ -150,7 +150,7 @@ if Mix.env() != :prod do
             </div>
           </section>
 
-          <section :if={@available?} class="ax-inline-worklist ax-dev-audit-strip" aria-label="Component kitchen audit trail">
+          <section :if={@available?} class="ax-inline-worklist ax-dev-audit-strip" aria-label="Billing preview audit trail">
             <div class="ax-inline-worklist-copy">
               <strong>Who did what, when?</strong>
               <span>Actor Admin user</span>
@@ -224,7 +224,7 @@ if Mix.env() != :prod do
 
           <%!-- Detail skeleton: summary card + section + field list --%>
           <section :if={@available?} class="ax-dev-stack ax-detail">
-            <Detail.summary_card eyebrow="Component kitchen" title="sub_demo_00042">
+            <Detail.summary_card eyebrow="Billing preview" title="sub_demo_00042">
               <:status><StatusBadge.status_badge status={:active} /></:status>
               <:facts>
                 <span>$42.00 / month</span>
