@@ -2,9 +2,11 @@
 gsd_state_version: 1.0
 milestone: v1.56
 milestone_name: "Admin UI Ratchet: Automated Adversarial Design Evaluation"
+current_phase: 208
+current_phase_name: prove-convergence-on-the-representative-slice-wire-ci-accept
 status: executing
-stopped_at: Completed 208-03-PLAN.md
-last_updated: "2026-07-07T20:59:23.052Z"
+stopped_at: "Blocked at 208-04 Task 1: ANTHROPIC_API_KEY absent; ledger baseline still frozen:false"
+last_updated: "2026-07-10T18:24:11.636Z"
 last_activity: 2026-07-07
 progress:
   total_phases: 5
@@ -580,6 +582,7 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 
 - (Resolved/obsolete: the 190-05 `admin-baseline.spec.js` hang note was cleared 2026-06-21 — Phase 190 and the full v1.53 milestone subsequently shipped & verified, so the bounded-retry concern no longer applies.)
 - Phase 196 final full-suite gate: cd accrue_admin && mix test --warnings-as-errors fails outside Phase 196 in dashboard_live_test.exs:91 (missing $42.50) and webhooks_live_test.exs:106 (audit count expected 1, observed 2). Focused Phase 196 tests, package docs, assets, and e2e:phase196 pass.
+- Phase 208 Plan 04 blocked at Task 1: ANTHROPIC_API_KEY is absent from the execution environment; ledger.baseline.json remains frozen:false and live convergence/freeze must not proceed without maintainer local key.
 
 ### Quick Tasks Completed
 
@@ -679,9 +682,9 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 
 ## Session Continuity
 
-Last session: 2026-07-07T20:59:23.047Z
-Stopped at: Completed 208-03-PLAN.md
-Resume file: None
+Last session: 2026-07-10T18:24:11.631Z
+Stopped at: Blocked at 208-04 Task 1: ANTHROPIC_API_KEY absent; ledger baseline still frozen:false
+Resume file: .planning/phases/208-prove-convergence-on-the-representative-slice-wire-ci-accept/208-04-PLAN.md
 
 ## Operator Next Steps
 
