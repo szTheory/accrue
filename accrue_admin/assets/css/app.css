@@ -2073,7 +2073,7 @@ a.ax-kpi-card--linked:focus-visible {
 }
 
 .ax-component-kitchen-header .ax-page-actions {
-  gap: var(--ax-space-2xs);
+  gap: 0.125rem;
 }
 
 .ax-component-kitchen-header .ax-dev-dunning-action {
@@ -2093,8 +2093,8 @@ a.ax-kpi-card--linked:focus-visible {
 .ax-component-kitchen-header-status {
   display: inline-flex;
   align-items: center;
-  min-height: 1.625rem;
-  padding: 0 0.5rem;
+  min-height: 1.375rem;
+  padding: 0 0.375rem;
   border: 1px solid var(--ax-status-danger-border);
   border-radius: var(--ax-radius-sm);
   background: var(--ax-status-danger-solid);
@@ -2108,19 +2108,20 @@ a.ax-kpi-card--linked:focus-visible {
   border-width: 2px;
   background: var(--ax-accent-readable);
   color: var(--ax-base);
-  font-weight: 900;
+  font-weight: 950;
   box-shadow:
+    0 0 0 3px color-mix(in srgb, var(--ax-accent-border) 26%, transparent),
     inset 0 0 0 1px color-mix(in srgb, var(--ax-accent-border) 68%, transparent),
     var(--ax-shadow-sm);
 }
 
 .ax-component-kitchen-header .ax-dev-invoice-primary {
   border-color: var(--ax-status-danger-border);
-  border-width: 2px;
-  background: var(--ax-status-danger-solid);
-  color: var(--ax-status-danger-on-solid);
+  border-width: 1px;
+  background: color-mix(in srgb, var(--ax-status-danger-bg) 72%, var(--ax-elevated));
+  color: var(--ax-status-danger-text);
   font-weight: 900;
-  box-shadow: var(--ax-shadow-sm);
+  box-shadow: none;
 }
 
 .ax-component-kitchen-header .ax-page-description {
@@ -2131,7 +2132,7 @@ a.ax-kpi-card--linked:focus-visible {
 
 .ax-component-kitchen-title {
   color: var(--ax-primary);
-  font-size: 1.25rem;
+  font-size: 1.125rem;
   font-weight: 800;
   line-height: var(--ax-leading-tight);
 }
@@ -2726,14 +2727,15 @@ a.ax-kpi-card--linked:focus-visible {
   display: inline-flex;
   align-items: center;
   min-height: 1.375rem;
-  margin-inline-end: 0.25rem;
-  padding: 0 0.375rem;
+  margin-inline-end: 0.125rem;
+  padding: 0 0.4375rem;
   border: 1px solid var(--ax-status-danger-border);
   border-radius: var(--ax-radius-sm);
   background: var(--ax-status-danger-bg);
   color: var(--ax-status-danger-text);
   font: var(--ax-type-label-sm-font);
   font-weight: 950;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ax-status-danger-border) 50%, transparent);
 }
 
 .ax-subscriptions-health-line,
@@ -2755,12 +2757,12 @@ a.ax-kpi-card--linked:focus-visible {
   align-items: center;
   min-height: 1.375rem;
   padding: 0 0.3125rem;
-  border: 1px solid var(--ax-border-strong);
+  border: 1px solid var(--ax-border);
   border-radius: var(--ax-radius-sm);
   background: var(--ax-elevated);
   color: var(--ax-primary);
   font: var(--ax-type-label-sm-font);
-  font-weight: 850;
+  font-weight: 750;
 }
 
 .ax-subscriptions-heading-metric strong {
@@ -2833,7 +2835,7 @@ a.ax-kpi-card--linked:focus-visible {
 }
 
 .ax-subscriptions-health-hero .ax-health-metric span {
-  display: none;
+  display: inline;
 }
 
 .ax-subscriptions-health-hero .ax-health-verdict {
@@ -3998,7 +4000,24 @@ a.ax-kpi-card--linked:focus-visible {
 }
 
 .ax-subscriptions-page .ax-data-table-grid .ax-stack-sm {
-  gap: 0.125rem;
+  gap: 0.03125rem;
+}
+
+.ax-subscriptions-page .ax-subscription-row-customer {
+  min-height: 1.375rem;
+  padding: 0.0625rem 0.3125rem;
+}
+
+.ax-subscriptions-page .ax-subscription-row-customer-scope {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--ax-muted);
+}
+
+.ax-subscriptions-at-risk-strip {
+  border-color: var(--ax-status-warning-border);
+  background: color-mix(in srgb, var(--ax-status-warning-bg) 48%, var(--ax-elevated));
 }
 
 .ax-subscriptions-page .ax-data-table-inline-actions .ax-button-sm {
@@ -5218,10 +5237,10 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
 .ax-home-header-health {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.1875rem 0.375rem;
+  gap: 0.125rem 0.3125rem;
   align-items: center;
   width: min(100%, 54rem);
-  padding: 0.1875rem 0.4375rem;
+  padding: 0.0625rem 0.3125rem;
   border-color: var(--ax-status-danger-border);
   background: var(--ax-status-danger-solid);
   color: var(--ax-status-danger-on-solid);
@@ -5399,7 +5418,7 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
 
 .ax-attention-priority {
   flex: none;
-  min-width: 6.25rem;
+  min-width: 7.5rem;
   padding: 0 0.25rem;
   border: 1px solid var(--ax-border);
   border-radius: var(--ax-radius-sm);
@@ -5503,8 +5522,8 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
   display: inline-flex;
   align-items: center;
   gap: var(--ax-space-xs);
-  min-height: 1.375rem;
-  padding: 0 0.375rem;
+  min-height: 1.25rem;
+  padding: 0 0.3125rem;
   border: 1px solid var(--ax-border);
   border-radius: var(--ax-radius-sm);
   background: var(--ax-elevated);
@@ -5582,7 +5601,7 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
   gap: 0 0.3125rem;
   align-content: start;
   min-width: 0;
-  padding: 0 0.25rem;
+  padding: 0.03125rem 0.25rem;
   border: 1px solid var(--ax-border);
   border-radius: var(--ax-radius-sm);
   background: var(--ax-elevated);
@@ -6122,9 +6141,9 @@ button.ax-launcher {
 
 .ax-detail-health-summary-amber {
   border-color: var(--ax-status-warning-border);
-  border-width: 1px;
+  border-width: 2px;
   background: color-mix(in srgb, var(--ax-status-warning-bg) 58%, var(--ax-elevated));
-  box-shadow: none;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ax-status-warning-border) 42%, transparent);
 }
 
 .ax-detail-health-summary-moss {
@@ -6237,10 +6256,10 @@ button.ax-launcher {
   gap: 0.0625rem 0.25rem;
   align-items: center;
   margin: 0;
-  padding: 0;
-  border: 0;
+  padding: 0.0625rem 0.25rem;
+  border: 1px solid var(--ax-status-warning-border);
   border-radius: var(--ax-radius-sm);
-  background: transparent;
+  background: color-mix(in srgb, var(--ax-status-warning-bg) 42%, var(--ax-elevated));
   color: var(--ax-primary);
   font: var(--ax-type-label-sm-font);
 }
@@ -6253,10 +6272,10 @@ button.ax-launcher {
 }
 
 .ax-detail-health-caveat {
-  padding: 0;
-  border: 0;
-  border-radius: 0;
-  background: transparent;
+  padding: 0.03125rem 0.25rem;
+  border: 1px solid color-mix(in srgb, var(--ax-status-warning-border) 72%, transparent);
+  border-radius: var(--ax-radius-sm);
+  background: var(--ax-elevated);
   color: var(--ax-primary);
   font: var(--ax-type-label-sm-font);
   font-weight: 800;

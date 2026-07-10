@@ -1318,9 +1318,9 @@ defmodule AccrueAdmin.Copy do
 
   def home_attention_action_review, do: "Review"
 
-  def home_attention_action_recover, do: "Open recovery queue"
+  def home_attention_action_recover, do: "Open recovery analytics"
 
-  def home_attention_action_investigate, do: "Investigate"
+  def home_attention_action_investigate, do: "Inspect usage events"
 
   def home_attention_action_work, do: "Work queue"
 

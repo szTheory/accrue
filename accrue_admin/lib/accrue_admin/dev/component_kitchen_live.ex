@@ -82,13 +82,13 @@ if Mix.env() != :prod do
               <h1 class="ax-heading ax-component-kitchen-title">Billing is currently unhealthy</h1>
               <span class="ax-component-kitchen-header-status">2 open invoices, 3 failed webhooks, 1 past-due subscription</span>
             </div>
-            <p class="ax-page-description">Work the invoice queue, debug failed webhook deliveries, and watch dunning recovery from one command center.</p>
+            <p class="ax-page-description">Work invoices, webhooks, and dunning from one command center.</p>
             <section :if={@available?} class="ax-dev-health-snapshot ax-dev-health-snapshot-header" aria-label="Billing health answer">
               <span class="ax-dev-health-status"><strong>Billing is not healthy.</strong><em>Invoice, webhook, and recovery queues must be clear before billing is healthy.</em></span>
             </section>
             <div class="ax-page-actions">
               <a class="ax-button ax-button-primary ax-button-sm ax-dev-customer-action ax-dev-customer-primary" href={@admin_mount_path <> "/customers"}>
-                <Icon.icon name={:search} size="sm" /> Find one customer
+                <Icon.icon name={:search} size="sm" /> Find one customer: open billing context
               </a>
               <a class="ax-button ax-button-secondary ax-button-sm ax-dev-invoice-action ax-dev-invoice-primary" href={@admin_mount_path <> "/invoices?status=open"}>
                 <Icon.icon name={:invoices} size="sm" /> Open invoice queue: 2 invoices, $592.50 exposure
@@ -97,7 +97,7 @@ if Mix.env() != :prod do
                 <Icon.icon name={:webhooks} size="sm" /> Debug failed webhooks
               </a>
               <a class="ax-button ax-button-primary ax-button-sm ax-dev-dunning-action" href={@admin_mount_path <> "/analytics/recovery"}>
-                <Icon.icon name={:recovery} size="sm" /> Watch dunning funnel + at-risk
+                <Icon.icon name={:recovery} size="sm" /> Open recovery analytics: dunning funnel + at-risk
               </a>
             </div>
             <section :if={@available?} class="ax-dev-route-strip" aria-label="Secondary billing routes">
@@ -121,7 +121,8 @@ if Mix.env() != :prod do
               <span>2 open invoices</span>
               <span>$592.50 unpaid invoice balance; target is $0.00 open</span>
               <span>Customer support path: find one customer and open the full billing context.</span>
-              <span>Latest audit: Admin user updated billing.contact.updated at Jul 09, 2026 14:51 UTC.</span>
+              <span>Latest audit event: billing.contact.updated by Admin user.</span>
+              <span>Audit timestamp: Jul 09, 2026 14:51 UTC.</span>
             </div>
             <div class="ax-inline-worklist-actions">
               <a class="ax-button ax-button-primary ax-button-sm ax-dev-invoice-action" href={@admin_mount_path <> "/invoices?status=open"}>

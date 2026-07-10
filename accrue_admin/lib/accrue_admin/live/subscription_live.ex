@@ -221,11 +221,11 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
             <span class="ax-detail-health-body"><%= health.body %></span>
           </div>
           <div :if={health.caveats != []} class="ax-detail-health-caveats" aria-label="Setup fields needed before billing projections are reliable">
-            <strong>Setup fields:</strong>
-            <span class="ax-detail-health-caveat"><%= Enum.join(health.caveats, ", ") %></span>
+            <strong>Setup field impacts:</strong>
+            <span :for={impact <- setup_field_impacts(health.caveats)} class="ax-detail-health-caveat"><%= impact %></span>
           </div>
           <div :if={health.caveats != []} class="ax-detail-setup-actions" aria-label="Fix missing billing data">
-            <span class="ax-detail-health-body">Complete these setup fields before using revenue, dunning, or renewal projections.</span>
+            <span class="ax-detail-health-body">Complete setup fields before trusting MRR, dunning, renewal, or invoice exposure.</span>
             <a
               class="ax-button ax-button-secondary ax-button-sm"
               href={ScopedPath.build(@admin_mount_path, "/customers/#{@customer.id}", @current_owner_scope)}
@@ -1086,10 +1086,11 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
         %{
           tone: "amber",
           label: "Setup missing",
-          answer: "Billing needs setup before projections are reliable",
-          headline: "Complete #{pluralize(length(caveats), "setup field")}",
+          answer: "Billing is not fully healthy: setup fields block reliable projections",
+          headline:
+            "Complete #{pluralize(length(caveats), "setup field")} before trusting projections",
           body:
-            "Payments can continue, but revenue, dunning, and renewal projections are not reliable until setup fields are complete.",
+            "Payments can continue, but revenue, dunning, renewal, and invoice exposure projections are unreliable until setup fields are complete.",
           caveats: caveats
         }
 
@@ -1163,6 +1164,22 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
       "Charge amount not shown"
     ]
     |> Enum.reject(&is_nil/1)
+  end
+
+  defp setup_field_impacts(caveats) do
+    Enum.map(caveats, fn
+      "Renewal date not shown" ->
+        "Renewal date missing: renewal timing and dunning ETA are unreliable"
+
+      "Price not shown" ->
+        "Price missing: MRR and plan comparison are unreliable"
+
+      "Charge amount not shown" ->
+        "Charge amount missing: invoice exposure and recovery priority are unreliable"
+
+      caveat ->
+        "#{caveat}: billing projections are unreliable"
+    end)
   end
 
   defp mrr_summary(_subscription), do: not_projected_copy(:amount)

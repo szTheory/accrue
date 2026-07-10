@@ -111,7 +111,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
               <span class="ax-subscriptions-heading-metric"><strong>$0.00</strong> exposure target</span>
             </p>
             <p class="ax-subscriptions-route-line">
-              Immediate action: collect open invoices, debug failed webhook deliveries, then review dunning recovery.
+              Immediate action: collect open invoices to $0.00, debug failed webhook deliveries, then review the at-risk subscription queue.
             </p>
           </:description>
           <:actions>
@@ -218,6 +218,19 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
           <div class="ax-inline-worklist-actions">
             <a class="ax-button ax-button-primary ax-button-sm" href={invoice_queue_path(@admin_mount_path, @current_owner_scope)}>
               Open invoice records
+            </a>
+          </div>
+        </section>
+
+        <section class="ax-inline-worklist ax-subscriptions-at-risk-strip" aria-label="At-risk subscription queue">
+          <div class="ax-inline-worklist-copy">
+            <strong>At-risk subscription queue</strong>
+            <span><%= count(@summary.past_due_count, "subscription") %> in the dunning funnel</span>
+            <span>Review recovery state before renewal, cancellation, or invoice follow-up.</span>
+          </div>
+          <div class="ax-inline-worklist-actions">
+            <a class="ax-button ax-button-secondary ax-button-sm" href={scoped_path(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}>
+              Open at-risk recovery analytics
             </a>
           </div>
         </section>
@@ -434,7 +447,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
   end
 
   defp billing_priority_title(%{open_invoice_count: count}) when count > 0,
-    do: "Invoice queue needs work now"
+    do: "Billing is unhealthy: open invoice exposure above $0.00 target"
 
   defp billing_priority_title(_summary), do: "Billing status: Healthy"
 

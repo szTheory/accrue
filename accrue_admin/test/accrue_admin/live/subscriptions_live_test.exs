@@ -100,7 +100,7 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert html =~ "Work open invoices to $0.00"
     assert html =~ "View dunning funnel dashboard"
 
-    assert html =~ "review dunning recovery"
+    assert html =~ "review the at-risk subscription queue"
     assert html =~ "View failed webhook details and retry"
     assert html =~ "Dunning funnel and invoice queue summary"
     assert html =~ "At-risk subscriptions"
@@ -117,6 +117,8 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert html =~ "Open full audit event log"
     assert html =~ "Filter admin actors"
     assert html =~ "View failed webhook details and retry"
+    assert html =~ "At-risk subscription queue"
+    assert html =~ "Open at-risk recovery analytics"
     refute html =~ "Billing health: Unhealthy"
     assert_one_h1(html)
 
