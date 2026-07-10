@@ -71,7 +71,7 @@ defmodule AccrueAdmin.Live.DashboardLive do
               class="ax-button ax-button-primary ax-button-sm ax-home-primary-action"
               href={ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope, %{"status" => "open"})}
             >
-              Work Invoices queue to $0.00
+              Go to Invoices queue workspace
               <Icon.icon name={:arrow_right} size="sm" />
             </a>
             <a
@@ -95,7 +95,7 @@ defmodule AccrueAdmin.Live.DashboardLive do
               class="ax-button ax-button-secondary ax-button-sm"
               href={ScopedPath.build(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}
             >
-              Open recovery funnel
+              Watch dunning funnel + at-risk
               <Icon.icon name={:arrow_right} size="sm" />
             </a>
           </div>
@@ -153,14 +153,19 @@ defmodule AccrueAdmin.Live.DashboardLive do
               </span>
             </a>
 
-            <a class="ax-launcher ax-launcher-customer" href={ScopedPath.build(@admin_mount_path, "/customers", @current_owner_scope)}>
-            <span class="ax-launcher-icon"><Icon.icon name={:search} size="lg" /></span>
-            <span class="ax-launcher-title"><%= Copy.home_launcher_customers_title() %></span>
-            <span class="ax-launcher-meta"><%= Copy.home_launcher_customers_meta() %></span>
-            <span class="ax-launcher-action">
-              Open customer directory <Icon.icon name={:arrow_right} size="sm" />
-            </span>
-          </a>
+            <button
+              type="button"
+              class="ax-launcher ax-launcher-customer ax-launcher-button"
+              data-command-palette-trigger="true"
+              data-ax-command-palette-trigger="true"
+            >
+              <span class="ax-launcher-icon"><Icon.icon name={:search} size="lg" /></span>
+              <span class="ax-launcher-title"><%= Copy.home_launcher_customers_title() %></span>
+              <span class="ax-launcher-meta"><%= Copy.home_launcher_customers_meta() %></span>
+              <span class="ax-launcher-action">
+                Search customers on this page <Icon.icon name={:search} size="sm" />
+              </span>
+            </button>
 
             <a class="ax-launcher ax-launcher-recovery" href={ScopedPath.build(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}>
               <span class="ax-launcher-icon"><Icon.icon name={:recovery} size="lg" /></span>
@@ -174,7 +179,7 @@ defmodule AccrueAdmin.Live.DashboardLive do
               Recovery metrics: retry, dunning, at-risk
             </span>
             <span class="ax-launcher-action">
-              Open recovery funnel <Icon.icon name={:arrow_right} size="sm" />
+              Watch dunning funnel + at-risk <Icon.icon name={:arrow_right} size="sm" />
             </span>
             </a>
 

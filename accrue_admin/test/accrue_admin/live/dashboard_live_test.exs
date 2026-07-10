@@ -119,7 +119,7 @@ defmodule AccrueAdmin.DashboardLiveTest do
     assert html =~ "$42.50 above $0.00 target"
     assert html =~ Copy.home_launcher_recovery_title()
     assert html =~ Copy.home_launcher_recovery_meta()
-    assert html =~ "Open recovery funnel"
+    assert html =~ "Watch dunning funnel + at-risk"
     # Title relabeled in Phase 175-02 (IA-01 verb relabels); use Copy function directly.
     assert html =~ Copy.home_launcher_developer_title()
     assert html =~ "Debug webhook failures"
@@ -159,7 +159,8 @@ defmodule AccrueAdmin.DashboardLiveTest do
     assert html =~ ~s(href="/billing/events")
 
     # IA-01 verb relabels (Plan 175-02)
-    assert html =~ "Find one customer record"
+    assert html =~ "Find customer now"
+    assert html =~ "Search customers on this page"
     assert html =~ "Invoices queue: $0.00 target"
 
     # IA-01 customer lookup entry point on Home (Plan 175-04)

@@ -283,21 +283,21 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
 
         <section class="ax-detail-priority-actions ax-detail-priority-actions-split" aria-label="Priority billing workspaces">
           <div class="ax-detail-priority-group ax-detail-priority-group-primary">
-            <span class="ax-label ax-detail-priority-label">Main invoice queue</span>
+            <span class="ax-label ax-detail-priority-label">Invoice queue handoff</span>
             <a
               class="ax-button ax-button-primary ax-button-sm ax-detail-priority-primary ax-detail-invoice-primary"
               href={ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope, %{"status" => "open"})}
             >
-              Open global invoice queue to zero
+              Go to Invoices queue workspace
             </a>
             <ul class="ax-detail-local-queue" aria-label="Local open invoice queue preview">
               <li>
-                <strong>Queue preview</strong>
-                <span>Global open invoices first; local filter stays below</span>
+                <strong>Queue workspace</strong>
+                <span>Open invoices, amounts, next action, and reminders live in Invoices</span>
               </li>
               <li>
-                <strong>Bulk actions</strong>
-                <span>Process next invoice or send reminder in Invoices</span>
+                <strong>This page</strong>
+                <span>Subscription context only; use the queue link to work receivables</span>
               </li>
             </ul>
             <a
@@ -319,7 +319,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
               class="ax-button ax-button-recovery ax-button-sm ax-detail-recovery-primary"
               href={ScopedPath.build(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}
             >
-              Open recovery funnel
+              Watch dunning funnel + at-risk
             </a>
           </div>
           <div class="ax-detail-priority-links">
@@ -327,7 +327,13 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
               class="ax-link-quiet"
               href={ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope, %{"status" => "open", "subscription_id" => @subscription.id})}
             >
-              Open this subscription's invoice queue
+              Open this subscription's invoice context
+            </a>
+            <a
+              class="ax-link-quiet"
+              href={ScopedPath.build(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}
+            >
+              Back to Recovery analytics
             </a>
             <a
               class="ax-link-quiet"
@@ -436,6 +442,11 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
                   <%= next_action_summary(@subscription) %>
                 </p>
               <% else %>
+                <div class="ax-detail-dunning-summary" aria-label="Dunning funnel preview for this subscription">
+                  <span><strong>Dunning funnel</strong><em>0 active campaigns here</em></span>
+                  <span><strong>At-risk status</strong><em>No active campaign</em></span>
+                  <span><strong>Recovery workspace</strong><em>Watch all at-risk accounts in Recovery</em></span>
+                </div>
                 <p class="ax-body">
                   <%= Copy.resource_state_copy(:dunning, :queue_empty, surface: :subscription_detail).body %>
                 </p>
@@ -449,7 +460,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
                   class="ax-button ax-button-recovery ax-button-sm ax-detail-recovery-primary"
                   href={ScopedPath.build(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}
                 >
-                  Open recovery funnel
+                  Watch dunning funnel + at-risk
                 </a>
                 <a
                   class="ax-button ax-button-secondary ax-button-sm"
@@ -1031,10 +1042,10 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
         %{
           tone: "slate",
           label: "Billing blocked",
-          answer: "Blocked - setup data missing",
-          headline: "Missing renewal, price, or charge data",
+          answer: "Billing blocked",
+          headline: "Setup data missing",
           body:
-            "Fix the missing renewal, price, or charge fields before using revenue or collection decisions.",
+            "Missing renewal, price, or charge fields block trustworthy revenue and collection decisions.",
           caveats: caveats
         }
 

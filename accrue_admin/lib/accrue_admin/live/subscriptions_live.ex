@@ -103,7 +103,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
           title={Copy.subscriptions_index_heading()}
         >
           <:description>
-            <p>Review subscription context here; use Invoices for open receivables and recovery for dunning funnel work.</p>
+            <p>Choose the right billing workspace: customer lookup, Invoices for receivables, or Recovery for the dunning funnel.</p>
           </:description>
           <:actions>
             <a
@@ -116,29 +116,29 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
               class="ax-button ax-button-recovery ax-button-sm"
               href={scoped_path(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}
             >
-              Open dunning funnel
+              Watch dunning funnel + at-risk
             </a>
           </:actions>
           <:stat_strip>
             <div class="ax-kpi-row ax-subscriptions-kpi-row">
               <StatStrip.stat_strip label="Dunning funnel and invoice queue summary">
                 <:stat
-                  label="At-risk"
-                  value={Integer.to_string(@summary.past_due_count)}
+                  label="Dunning funnel"
+                  value={count(@summary.past_due_count, "campaign")}
+                  tone="amber"
+                  href={scoped_path(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}
+                />
+                <:stat
+                  label="At-risk subscriptions"
+                  value={count(@summary.past_due_count, "subscription")}
                   tone="amber"
                   href={scoped_path(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}
                 />
                 <:stat
                   label="Open invoices"
-                  value={Integer.to_string(@summary.open_invoice_count)}
-                  tone="amber"
-                  href={invoice_queue_path(@admin_mount_path, @current_owner_scope)}
-                />
-                <:stat
-                  label="Recovery funnel"
-                  value="Open"
+                  value={count(@summary.open_invoice_count, "invoice")}
                   tone="cobalt"
-                  href={scoped_path(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}
+                  href={invoice_queue_path(@admin_mount_path, @current_owner_scope)}
                 />
               </StatStrip.stat_strip>
             </div>
@@ -166,13 +166,13 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
         >
           <div class="ax-inline-worklist-copy ax-subscriptions-priority-copy">
             <strong><%= billing_priority_title(@summary) %></strong>
-            <span class="ax-subscriptions-exposure"><%= billing_exposure_summary(@summary) %></span>
+            <span class="ax-subscriptions-exposure">Exposure: <%= billing_exposure_summary(@summary) %></span>
           </div>
         </section>
 
         <section class="ax-subscriptions-utility-strip" aria-label="Customer lookup utility view">
           <a class="ax-link-quiet" href={scoped_path(@admin_mount_path, "/customers", @current_owner_scope)}>
-            Find one customer record
+            Find customer record
           </a>
         </section>
 
@@ -375,14 +375,14 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
     Phoenix.HTML.raw("""
     <span class="ax-stack-sm">
       <span class="ax-audit-summary-row ax-subscription-row-audit ax-subscription-row-audit-primary" aria-label="Latest subscription audit event">
-        <span><strong>Actor</strong><em>Accrue system</em></span>
-        <span><strong>Event</strong><em>subscription.created</em></span>
-        <span><strong>When</strong><em>#{created}</em></span>
+        <span class="ax-audit-fact"><strong>Actor</strong><em>Accrue system</em></span>
+        <span class="ax-audit-fact"><strong>Event</strong><em>subscription.created</em></span>
+        <span class="ax-audit-fact"><strong>When</strong><em>#{created}</em></span>
       </span>
       <span class="ax-webhook-row-status ax-webhook-row-status-warning ax-subscription-row-signal-primary">
-        <strong>Invoice queue</strong>
-        <span>Dedicated invoice queue filtered to this subscription</span>
-        <a href="#{subscription_invoices_href}" class="ax-link">Open row in dedicated invoice queue</a>
+        <strong>Invoice action</strong>
+        <span>Work open invoice records in the dedicated Invoices queue</span>
+        <a href="#{subscription_invoices_href}" class="ax-link">Open invoice queue for this subscription</a>
       </span>
       <span class="ax-webhook-row-status ax-webhook-row-status-warning ax-subscription-row-signal-secondary">
         <strong>Webhook debugging</strong>
@@ -399,7 +399,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
   end
 
   defp billing_priority_title(%{open_invoice_count: count}) when count > 0,
-    do: "Billing health: Unhealthy - #{count(count, "open invoice")}"
+    do: "Billing health: Unhealthy - #{count(count, "open invoice")};"
 
   defp billing_priority_title(_summary), do: "Billing health: Healthy - invoices clear"
 

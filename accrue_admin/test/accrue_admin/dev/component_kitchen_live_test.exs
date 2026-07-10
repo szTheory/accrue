@@ -6,8 +6,8 @@ defmodule AccrueAdmin.ComponentKitchenLiveTest do
 
     assert {:ok, _view, html} = live(conn, "/billing/dev/components")
 
-    assert html =~ "Billing health dashboard"
-    assert html =~ "Monitor open invoice exposure"
+    assert html =~ "Billing health workspaces"
+    assert html =~ "Compact live entrypoints for invoice queue"
     assert html =~ "Primary action"
     assert html =~ "Secondary action"
     assert html =~ "Billing health: invoice queue first"
@@ -23,10 +23,10 @@ defmodule AccrueAdmin.ComponentKitchenLiveTest do
     assert html =~ "$592.50 open exposure; target $0.00"
     assert html =~ "Billing health verdict"
     assert html =~ "ax-dev-group-drawer-primary-actions"
-    assert html =~ "Open dunning funnel and at-risk analytics"
+    assert html =~ "Watch dunning funnel + at-risk analytics"
     assert html =~ "Watch dunning funnel + at-risk"
     assert html =~ "Who did what, when?"
-    assert html =~ "Find customer"
+    assert html =~ "Find customer record"
     refute html =~ "Find one customer and open billing 360 detail"
     assert html =~ "View full audit history"
     assert html =~ "billing.contact.updated"
@@ -36,10 +36,9 @@ defmodule AccrueAdmin.ComponentKitchenLiveTest do
     assert html =~ "Open invoice queue workspace"
     assert html =~ "Open audit event log"
     assert html =~ "Open full webhook debugging workflow"
-    assert html =~ "Open dunning funnel"
+    assert html =~ "Watch dunning funnel + at-risk"
     assert html =~ "Open invoice queue view"
-    assert html =~ "Find one customer - see everything"
-    assert html =~ "Open customer directory"
+    assert html =~ "Find customer and open billing 360 detail"
     assert html =~ "Enter the organization slug or platform owner scope"
   end
 end

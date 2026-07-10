@@ -77,8 +77,8 @@ if Mix.env() != :prod do
                 %{label: "Billing health"}
               ]}
             />
-            <h1 class="ax-heading ax-component-kitchen-title">Billing health dashboard</h1>
-            <p class="ax-page-description">Monitor open invoice exposure, failed webhooks, customer lookup, and audit trail from live billing workspaces.</p>
+            <h1 class="ax-heading ax-component-kitchen-title">Billing health workspaces</h1>
+            <p class="ax-page-description">Compact live entrypoints for invoice queue, customer lookup, dunning funnel, webhooks, and audit trail.</p>
             <div class="ax-page-actions">
               <a class="ax-button ax-button-primary ax-button-sm" href={@admin_mount_path <> "/invoices?status=open"}>
                 Open invoice queue workspace
@@ -116,12 +116,9 @@ if Mix.env() != :prod do
               <a class="ax-button ax-button-primary ax-button-sm" href={@admin_mount_path <> "/invoices?status=open"}>
                 Open invoice queue workspace
               </a>
-              <span class="ax-dev-secondary-route ax-dev-secondary-route-customer">
-                <strong>Customer lookup</strong>
-                <a class="ax-link-quiet" href={@admin_mount_path <> "/customers"}>
-                  Open customer directory
-                </a>
-              </span>
+              <a class="ax-button ax-button-secondary ax-button-sm ax-dev-customer-action" href={@admin_mount_path <> "/customers"}>
+                Find customer record
+              </a>
               <a class="ax-button ax-button-secondary ax-button-sm" href={@admin_mount_path <> "/events"}>
                 Open audit event log
               </a>
@@ -132,7 +129,7 @@ if Mix.env() != :prod do
                 </a>
               </span>
               <a class="ax-button ax-button-secondary ax-button-sm ax-dev-dunning-action" href={@admin_mount_path <> "/analytics/recovery"}>
-                Open dunning funnel
+                Watch dunning funnel + at-risk
               </a>
             </div>
           </section>
@@ -147,7 +144,7 @@ if Mix.env() != :prod do
             />
 
             <div class="ax-dev-grid ax-toolbar">
-              <Button.button variant="primary" href={@admin_mount_path <> "/customers"}>Find one customer - see everything</Button.button>
+              <Button.button variant="primary" href={@admin_mount_path <> "/customers"}>Find customer record</Button.button>
               <Button.button variant="secondary" type="button">Primary action specimen</Button.button>
               <Button.button variant="secondary" type="button">Secondary action</Button.button>
               <Button.button variant="primary" href={@admin_mount_path <> "/analytics/recovery"}>Watch dunning funnel + at-risk</Button.button>
@@ -899,7 +896,7 @@ if Mix.env() != :prod do
                 <div class="ax-dev-group-action-cluster">
                   <span class="ax-label">Recovery and audit</span>
                   <div class="ax-detail-actions-row">
-                    <a class="ax-button ax-button-secondary ax-button-sm" href={@admin_mount_path <> "/analytics/recovery"}>Open dunning funnel and at-risk analytics</a>
+                    <a class="ax-button ax-button-secondary ax-button-sm" href={@admin_mount_path <> "/analytics/recovery"}>Watch dunning funnel + at-risk analytics</a>
                     <a class="ax-button ax-button-warning ax-button-sm" href={@admin_mount_path <> "/events?actor_type=admin"}>View full audit history</a>
                     <a class="ax-button ax-button-secondary ax-button-sm" href={@admin_mount_path <> "/customers"}>Find customer and open billing 360 detail</a>
                   </div>

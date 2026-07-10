@@ -875,7 +875,7 @@ defmodule AccrueAdmin.Copy do
 
   # --- Index page headers (h1 + subtitle) for inline-literal pages
 
-  def subscriptions_index_heading, do: "Subscriptions and invoice triage"
+  def subscriptions_index_heading, do: "Billing work queues"
 
   def subscriptions_index_subtitle,
     do:
@@ -1334,12 +1334,12 @@ defmodule AccrueAdmin.Copy do
 
   def home_search_customers_placeholder, do: "Type customer name, email, or ID"
 
-  def home_launcher_customers_title, do: "Find one customer record"
+  def home_launcher_customers_title, do: "Find customer now"
 
   def home_launcher_customers_copy,
     do: "Use the customer directory when list context matters."
 
-  def home_launcher_customers_meta, do: "Customer directory"
+  def home_launcher_customers_meta, do: "Search name, email, or customer ID"
 
   def home_launcher_invoices_title, do: "Invoices queue: $0.00 target"
 
