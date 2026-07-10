@@ -221,11 +221,11 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
             <span class="ax-detail-health-body"><%= health.body %></span>
           </div>
           <div :if={health.caveats != []} class="ax-detail-health-caveats" aria-label="Setup fields needed before billing projections are reliable">
-            <strong>Setup field impacts:</strong>
+            <strong>Missing setup fields:</strong>
             <span :for={impact <- setup_field_impacts(health.caveats)} class="ax-detail-health-caveat"><%= impact %></span>
           </div>
           <div :if={health.caveats != []} class="ax-detail-setup-actions" aria-label="Fix missing billing data">
-            <span class="ax-detail-health-body">Complete setup fields before trusting MRR, dunning, renewal, or invoice exposure.</span>
+            <span class="ax-detail-health-body">Complete setup before relying on revenue and recovery numbers.</span>
             <a
               class="ax-button ax-button-secondary ax-button-sm"
               href={ScopedPath.build(@admin_mount_path, "/customers/#{@customer.id}", @current_owner_scope)}
@@ -242,6 +242,12 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
               }
             >
               Review setup audit events
+            </a>
+            <a
+              class="ax-button ax-button-recovery ax-button-sm"
+              href={ScopedPath.build(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}
+            >
+              Open dunning analytics
             </a>
           </div>
         </section>
@@ -303,7 +309,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
               class="ax-button ax-button-primary ax-button-sm ax-detail-process-next"
               href={ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope, %{"status" => "open", "work" => "next"})}
             >
-              Process next invoice
+              Open next invoice details
             </a>
             <a
               class="ax-button ax-button-secondary ax-button-sm"
@@ -1086,11 +1092,10 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
         %{
           tone: "amber",
           label: "Setup missing",
-          answer: "Billing is not fully healthy: setup fields block reliable projections",
-          headline:
-            "Complete #{pluralize(length(caveats), "setup field")} before trusting projections",
+          answer: "No - setup is incomplete",
+          headline: "Complete #{pluralize(length(caveats), "setup field")}",
           body:
-            "Payments can continue, but revenue, dunning, renewal, and invoice exposure projections are unreliable until setup fields are complete.",
+            "Payments can continue; revenue and recovery numbers are estimates until setup is complete.",
           caveats: caveats
         }
 
@@ -1169,16 +1174,16 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
   defp setup_field_impacts(caveats) do
     Enum.map(caveats, fn
       "Renewal date not shown" ->
-        "Renewal date missing: renewal timing and dunning ETA are unreliable"
+        "Renewal date"
 
       "Price not shown" ->
-        "Price missing: MRR and plan comparison are unreliable"
+        "Price"
 
       "Charge amount not shown" ->
-        "Charge amount missing: invoice exposure and recovery priority are unreliable"
+        "Charge amount"
 
       caveat ->
-        "#{caveat}: billing projections are unreliable"
+        caveat
     end)
   end
 

@@ -139,27 +139,28 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
     assert html =~ "Tax &amp; compliance"
     assert html =~ "invoice.payment_failed"
     assert html =~ "Billing health summary"
-    assert html =~ "Billing is not fully healthy: setup fields block reliable projections"
+    assert html =~ "No - setup is incomplete"
     assert html =~ "setup fields"
     assert html =~ "ax-detail-health-summary-amber"
     assert html =~ "ax-detail-health-answer"
     assert html =~ "Charge amount not shown"
 
     assert html =~
-             "Payments can continue, but revenue, dunning, renewal, and invoice exposure projections are unreliable until setup fields are complete."
+             "Payments can continue; revenue and recovery numbers are estimates until setup is complete."
 
     assert html =~
-             "Complete setup fields before trusting MRR, dunning, renewal, or invoice exposure."
+             "Complete setup before relying on revenue and recovery numbers."
 
     refute html =~ "Billing health right now"
     assert html =~ "MRR"
     assert html =~ "Charge amount not shown"
     assert html =~ "Billing setup gaps"
     assert html =~ "Fix missing billing data"
-    assert html =~ "Setup field impacts:"
-    assert html =~ "Charge amount missing: invoice exposure and recovery priority are unreliable"
+    assert html =~ "Missing setup fields:"
+    assert html =~ "Charge amount"
     assert html =~ "Open customer billing profile"
     assert html =~ "Review setup audit events"
+    assert html =~ "Open dunning analytics"
     assert html =~ "Open local invoice context"
     assert html =~ "Open this subscription&#39;s invoice context"
     assert html =~ "Open failed webhook delivery details and retry"

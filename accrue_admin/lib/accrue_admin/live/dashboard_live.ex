@@ -391,7 +391,7 @@ defmodule AccrueAdmin.Live.DashboardLive do
       stats.open_invoice_count > 0 &&
         %{
           tone: "warning",
-          priority: "Invoice priority",
+          priority: "Start here",
           metric: count(stats.open_invoice_count, "open invoice"),
           label:
             "above $0.00 target - #{format_minor(stats.open_invoice_balance_minor, "usd")} open",
@@ -402,7 +402,7 @@ defmodule AccrueAdmin.Live.DashboardLive do
       stats.blocked_webhook_count > 0 &&
         %{
           tone: "danger",
-          priority: "Webhook priority",
+          priority: "Next",
           metric: count(stats.blocked_webhook_count, "webhook"),
           label: Copy.home_attention_webhooks_label(),
           pill: nil,
@@ -412,7 +412,7 @@ defmodule AccrueAdmin.Live.DashboardLive do
       stats.past_due_subscription_count > 0 &&
         %{
           tone: "warning",
-          priority: "Recovery priority",
+          priority: "Then",
           metric: count(stats.past_due_subscription_count, "subscription"),
           label: Copy.home_attention_past_due_label(),
           pill: nil,
@@ -422,7 +422,7 @@ defmodule AccrueAdmin.Live.DashboardLive do
       stats.failed_meter_event_count > 0 &&
         %{
           tone: "info",
-          priority: "Usage priority",
+          priority: "Monitor",
           metric: count(stats.failed_meter_event_count, "meter event"),
           label: Copy.home_attention_meter_label(),
           pill: nil,
@@ -433,7 +433,7 @@ defmodule AccrueAdmin.Live.DashboardLive do
     |> Enum.filter(& &1)
   end
 
-  defp attention_health_summary(_stats), do: "Billing is unhealthy"
+  defp attention_health_summary(_stats), do: "Billing status: Unhealthy"
 
   defp attention_health_issue_summary(_stats),
     do: "Start with filtered open invoices, then dead-lettered webhooks."

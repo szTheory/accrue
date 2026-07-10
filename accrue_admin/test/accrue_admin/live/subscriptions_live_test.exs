@@ -90,7 +90,7 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert html =~ ~s(data-ax-page-actions)
     refute html =~ "Search customer, open detail"
 
-    assert html =~ "Billing is unhealthy: open invoices above target" or
+    assert html =~ "Billing status: Unhealthy" or
              html =~ "Billing status: Healthy"
 
     assert html =~ "exposure"
@@ -100,7 +100,7 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert html =~ "Work open invoices to $0.00"
     assert html =~ "View dunning funnel dashboard"
 
-    assert html =~ "review the at-risk subscription queue"
+    assert html =~ "review at-risk subscriptions"
     assert html =~ "View failed webhook details and retry"
     assert html =~ "Dunning funnel and invoice queue summary"
     assert html =~ "At-risk subscriptions"
@@ -281,7 +281,7 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert html =~ "Webhook debug path"
     assert html =~ "failed-delivery workflow"
 
-    assert html =~ "Billing is unhealthy: open invoices above target" or
+    assert html =~ "Billing status: Unhealthy" or
              html =~ "Billing status: Healthy"
 
     assert html =~ "Open audit context for this subscription"

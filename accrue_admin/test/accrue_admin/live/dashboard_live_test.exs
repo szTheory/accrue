@@ -103,12 +103,12 @@ defmodule AccrueAdmin.DashboardLiveTest do
     assert html =~ "Next: debug failed queue"
     assert html =~ Copy.home_attention_meter_label()
     assert html =~ Copy.home_attention_action_investigate()
-    assert html =~ "Billing is unhealthy"
+    assert html =~ "Billing status: Unhealthy"
     assert html =~ "Start with filtered open invoices, then dead-lettered webhooks."
     assert html =~ "failed webhooks"
     assert html =~ "open invoices"
-    assert html =~ "Invoice priority"
-    assert html =~ "Webhook priority"
+    assert html =~ "Start here"
+    assert html =~ "Next"
     assert html =~ "Debug dead-lettered webhooks"
     assert html =~ "Open filtered invoice queue: $42.50 open"
     assert html =~ ~s(href="/billing/events?q=meter_event")
