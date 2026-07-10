@@ -561,8 +561,8 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
     [
       %{
         id: :q,
-        label: "Find customer or subscription",
-        placeholder: "Customer email, customer ID, or subscription ID"
+        label: "Filter subscriptions table",
+        placeholder: "Filter by customer email, customer ID, or subscription ID"
       },
       %{
         id: :status,

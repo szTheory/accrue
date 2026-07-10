@@ -29,7 +29,7 @@ defmodule AccrueAdmin.ComponentKitchenLiveTest do
     assert html =~ "Who did what, when?"
     assert html =~ "Find one customer"
     assert html =~ "Open invoice queue: 2 invoices, $592.50 exposure"
-    assert html =~ "Webhooks to Events"
+    assert html =~ "Webhook events"
     refute html =~ "Find one customer and open billing 360 detail"
     assert html =~ "View full audit history"
     assert html =~ "billing.contact.updated"

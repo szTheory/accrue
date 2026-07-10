@@ -87,6 +87,7 @@ if Mix.env() != :prod do
               <span class="ax-dev-health-status"><strong>Billing status</strong><em>Unhealthy</em></span>
               <span><strong>Primary work</strong><a class="ax-link" href={@admin_mount_path <> "/invoices?status=open"}>Open invoice queue</a></span>
               <span><strong>Customer path</strong><a class="ax-link" href={@admin_mount_path <> "/customers"}>Find one customer</a></span>
+              <span><strong>Webhook path</strong><a class="ax-link" href={@admin_mount_path <> "/webhooks?status=failed,dead"}>Webhook events</a></span>
             </section>
             <div class="ax-page-actions">
               <a class="ax-button ax-button-primary ax-button-sm ax-dev-customer-action ax-dev-customer-primary" href={@admin_mount_path <> "/customers"}>
@@ -95,6 +96,9 @@ if Mix.env() != :prod do
               <a class="ax-button ax-button-secondary ax-button-sm ax-dev-invoice-action ax-dev-invoice-primary" href={@admin_mount_path <> "/invoices?status=open"}>
                 <Icon.icon name={:invoices} size="sm" /> Open invoice queue: 2 invoices, $592.50 exposure
               </a>
+              <a class="ax-button ax-button-secondary ax-button-sm ax-dev-webhook-action" href={@admin_mount_path <> "/webhooks?status=failed,dead"}>
+                <Icon.icon name={:webhooks} size="sm" /> Webhook events
+              </a>
               <a class="ax-button ax-button-secondary ax-button-sm ax-dev-dunning-action" href={@admin_mount_path <> "/analytics/recovery"}>
                 <Icon.icon name={:recovery} size="sm" /> View dunning funnel
               </a>
@@ -102,7 +106,7 @@ if Mix.env() != :prod do
             <section :if={@available?} class="ax-dev-route-strip" aria-label="Secondary billing routes">
               <a class="ax-dev-secondary-route" href={@admin_mount_path <> "/customers"}>Customer detail: see everything</a>
               <a class="ax-dev-secondary-route" href={@admin_mount_path <> "/invoices?status=open"}>Invoices queue: work receivables</a>
-              <a class="ax-dev-secondary-route" href={@admin_mount_path <> "/webhooks?status=failed,dead"}>Webhooks to Events: failed delivery debug</a>
+              <a class="ax-dev-secondary-route" href={@admin_mount_path <> "/webhooks?status=failed,dead"}>Webhook events: debug failed deliveries</a>
               <a class="ax-dev-secondary-route" href={@admin_mount_path <> "/analytics/recovery"}>Dunning funnel: recovery analytics</a>
             </section>
           </header>

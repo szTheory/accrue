@@ -254,7 +254,6 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
             <span class={["ax-status-badge", "ax-status-badge-" <> health.tone]}>
               <span class="ax-status-dot"></span><%= health.label %>
             </span>
-            <span class="ax-summary-health-answer"><%= health.answer %></span>
           </:status>
           <:facts>
             <span class="ax-summary-fact">
@@ -448,6 +447,12 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
                   <%= next_action_summary(@subscription) %>
                 </p>
               <% else %>
+                <a
+                  class="ax-button ax-button-recovery ax-button-sm ax-detail-recovery-shortcut"
+                  href={ScopedPath.build(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}
+                >
+                  Open dunning funnel dashboard
+                </a>
                 <div class="ax-detail-dunning-summary" aria-label="Dunning funnel preview for this subscription">
                   <span><strong>Dunning funnel</strong><em>0 active campaigns here</em></span>
                   <span><strong>At-risk status</strong><em>No active campaign</em></span>
@@ -1080,7 +1085,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
       caveats != [] ->
         %{
           tone: "amber",
-          label: "Unhealthy",
+          label: "Setup missing",
           answer: "Billing status: Unhealthy",
           headline: "Setup missing: #{pluralize(length(caveats), "field")}",
           body:
@@ -1141,7 +1146,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
   end
 
   defp detail_health_metric(%{caveats: caveats}) when is_list(caveats) and caveats != [],
-    do: "#{pluralize(length(caveats), "field")} blocking billing confidence"
+    do: "Setup data missing"
 
   defp detail_health_metric(%{tone: "moss"}), do: "0 blockers"
 
