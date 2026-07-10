@@ -2,7 +2,7 @@
   "schema_version": "ratchet-ledger-baseline/1",
   "frozen": false,
   "epoch": 1,
-  "ledger_sha256": "136d95e5ee3be442a6287889534538f1ab9004114b30a00d80b4798b30f12525",
+  "ledger_sha256": "928a0c5097c4e180121befd530ae741fc2cb6c32f704dc657178aa2619a4356f",
   "confirmed_open": {
     "persona:operator-founder": {
       "total": 0,
