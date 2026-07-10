@@ -57,7 +57,8 @@ defmodule AccrueAdmin.Live.DashboardLive do
           </div>
           <p class="ax-body ax-page-copy"><%= Copy.home_intro_copy() %></p>
           <div :if={@attention != []} class="ax-home-header-health ax-health-summary ax-health-summary-amber" aria-label="Dashboard billing health answer">
-            <strong><%= attention_health_summary(@stats) %>: <%= attention_health_issue_summary(@stats) %></strong>
+            <strong><%= attention_health_summary(@stats) %></strong>
+            <span class="ax-home-health-answer"><%= attention_health_issue_summary(@stats) %></span>
             <div class="ax-home-health-metrics" aria-label="Billing health metrics">
               <span :for={metric <- attention_health_metrics(@stats)} class={["ax-home-health-metric", "ax-home-health-metric-" <> metric.tone]}>
                 <strong><%= metric.value %></strong>
@@ -434,18 +435,16 @@ defmodule AccrueAdmin.Live.DashboardLive do
   defp attention_health_summary(_stats), do: "Billing healthy right now: No"
 
   defp attention_health_issue_summary(stats) do
-    [
-      stats.open_invoice_count > 0 &&
-        "#{count(stats.open_invoice_count, "open invoice")} above $0.00 target",
-      stats.blocked_webhook_count > 0 &&
-        "#{count(stats.blocked_webhook_count, "failed webhook")} needs debugging",
-      stats.past_due_subscription_count > 0 &&
-        "#{count(stats.past_due_subscription_count, "at-risk subscription")} in recovery",
-      stats.failed_meter_event_count > 0 &&
-        "#{count(stats.failed_meter_event_count, "meter event")} not billed"
-    ]
-    |> Enum.filter(& &1)
-    |> Enum.join("; ")
+    issue_count =
+      [
+        stats.open_invoice_count,
+        stats.blocked_webhook_count,
+        stats.past_due_subscription_count,
+        stats.failed_meter_event_count
+      ]
+      |> Enum.count(&(&1 > 0))
+
+    "#{count(issue_count, "queue")} needs action"
   end
 
   defp attention_health_metrics(stats),

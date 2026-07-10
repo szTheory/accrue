@@ -89,19 +89,16 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert html =~ ~s(data-ax-page-actions)
     refute html =~ "Search customer, open detail"
 
-    assert html =~ "Billing Health: Unhealthy -" or
-             html =~ "Billing health: Healthy - invoices clear"
+    assert html =~ "Billing healthy right now: No" or
+             html =~ "Billing healthy right now: Yes"
 
     assert html =~ "$0.00 open exposure; target met." or
-             html =~ "above $0.00 target."
+             html =~ "exposure over $0.00 target."
 
     assert html =~ "Open invoice queue for"
     assert html =~ "View dunning funnel dashboard"
 
-    assert html =~ "Billing Health: Unhealthy -" or
-             html =~ "Billing health: Healthy - invoices clear"
-
-    assert html =~ "At-risk summary:"
+    assert html =~ "Recovery:"
     assert html =~ "failed webhook"
     assert html =~ "Dunning funnel and invoice queue summary"
     assert html =~ "At-risk subscriptions"
@@ -138,7 +135,7 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert html =~ "At risk"
     assert html =~ "All"
     assert html =~ "Dedicated Invoices queue"
-    assert html =~ "Billing Health:" or html =~ "Billing health:"
+    assert html =~ "Billing healthy right now:"
     assert html =~ "ax-subscription-row-state"
     assert html =~ "failed webhook"
     assert html =~ "Who did what, when?"
@@ -278,6 +275,7 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert html =~ "Open this row&#39;s delivery attempts"
     assert html =~ "Row webhook attempts"
     assert html =~ "failed subscription.created delivery attempts"
+    assert html =~ "Billing healthy right now: No" or html =~ "Billing healthy right now: Yes"
     assert html =~ "Open who did what, when event log"
     assert html =~ "Owner: User"
     assert html =~ "Tax: Off"
@@ -311,7 +309,7 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert {:ok, _view, html} = live(conn, "/billing/subscriptions?view=all")
 
     assert html =~ "phase196-primary@example.com"
-    assert html =~ "Open customer detail: phase196-primary@example.com"
+    assert html =~ "See full customer record: phase196-primary@example.com"
     assert html =~ "Customer ID"
     assert html =~ subscription.customer_id
     assert html =~ "Subscription"

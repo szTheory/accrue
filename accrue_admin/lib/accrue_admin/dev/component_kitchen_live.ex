@@ -83,12 +83,15 @@ if Mix.env() != :prod do
               <span><strong>Billing Health</strong><em>Unhealthy</em></span>
               <span><strong>Invoices</strong><em>2 open, $592.50 over target</em></span>
               <span><strong>Primary route</strong><a class="ax-link" href={@admin_mount_path <> "/customers"}>Customer detail</a></span>
-              <span><strong>Invoice route</strong><a class="ax-link" href={@admin_mount_path <> "/invoices?status=open"}>Work invoice queue</a></span>
+              <span><strong>Invoice route</strong><em>Use the queue button below</em></span>
               <span><strong>Recovery route</strong><a class="ax-link" href={@admin_mount_path <> "/analytics/recovery"}>Dunning funnel</a></span>
             </section>
             <div class="ax-page-actions">
               <a class="ax-button ax-button-primary ax-button-sm ax-dev-customer-action ax-dev-customer-primary" href={@admin_mount_path <> "/customers"}>
                 <Icon.icon name={:search} size="sm" /> Customer detail: find one customer
+              </a>
+              <a class="ax-button ax-button-primary ax-button-sm ax-dev-invoice-action ax-dev-invoice-primary" href={@admin_mount_path <> "/invoices?status=open"}>
+                <Icon.icon name={:invoices} size="sm" /> Open invoice queue: 2 invoices, $592.50 exposure
               </a>
             </div>
             <section class="ax-inline-worklist ax-dev-audit-strip" aria-label="Component kitchen audit trail">
@@ -115,15 +118,27 @@ if Mix.env() != :prod do
 
           <section :if={@available?} class="ax-inline-worklist ax-dev-production-strip" aria-label="Production billing entrypoints">
             <div class="ax-inline-worklist-copy">
-              <strong>Billing Health: Unhealthy</strong>
-              <span>Critical: 2 open invoices; $592.50 above $0.00 target.</span>
+              <strong>Billing healthy right now: No</strong>
+              <span>2 open invoices</span>
+              <span>$592.50 exposure over $0.00 target</span>
               <span>Customer support path: find one customer record and open the full billing context.</span>
             </div>
             <div class="ax-inline-worklist-actions">
               <a class="ax-button ax-button-primary ax-button-sm ax-dev-invoice-action" href={@admin_mount_path <> "/invoices?status=open"}>
-                Work invoice queue
+                Open invoice queue view: 2 open invoices
               </a>
             </div>
+          </section>
+
+          <section :if={@available?} class="ax-inline-worklist ax-dev-invoice-preview" aria-label="Open invoice queue preview">
+            <div class="ax-inline-worklist-copy">
+              <strong>Open invoice queue preview</strong>
+              <span>2 invoices visible before navigation</span>
+            </div>
+            <ol class="ax-dev-invoice-preview-list">
+              <li><strong>Northstar Labs</strong><span>$420.00 open</span><em>Send reminder</em></li>
+              <li><strong>Acme Field Ops</strong><span>$172.50 open</span><em>Review collection note</em></li>
+            </ol>
           </section>
 
           <section :if={@available?} class="ax-card ax-dev-audit-log-card" aria-label="Actor-filtered audit event log preview">

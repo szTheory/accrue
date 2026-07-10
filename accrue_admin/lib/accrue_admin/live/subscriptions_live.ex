@@ -181,7 +181,8 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
           <div class="ax-inline-worklist-copy ax-subscriptions-priority-copy">
             <strong><%= billing_priority_title(@summary) %></strong>
             <span class="ax-subscriptions-exposure"><%= billing_exposure_summary(@summary) %></span>
-            <span>At-risk summary: <%= count(@summary.past_due_count, "subscription in Recovery") %>; <%= count(@summary.failed_webhook_count, "failed webhook delivery") %>.</span>
+            <span>Recovery: <%= count(@summary.past_due_count, "subscription") %></span>
+            <span>Webhooks: <%= count(@summary.failed_webhook_count, "failed delivery") %></span>
           </div>
         </section>
 
@@ -419,12 +420,12 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
   end
 
   defp billing_priority_title(%{open_invoice_count: count}) when count > 0,
-    do: "Billing Health: Unhealthy - #{count(count, "open invoice")} require immediate attention"
+    do: "Billing healthy right now: No"
 
-  defp billing_priority_title(_summary), do: "Billing health: Healthy - invoices clear"
+  defp billing_priority_title(_summary), do: "Billing healthy right now: Yes"
 
   defp billing_exposure_summary(%{open_invoice_count: count} = summary) when count > 0 do
-    "#{format_minor(summary.open_invoice_exposure_minor, "usd")} above $0.00 target."
+    "#{count(count, "open invoice")}; #{format_minor(summary.open_invoice_exposure_minor, "usd")} exposure over $0.00 target."
   end
 
   defp billing_exposure_summary(_summary),
@@ -450,7 +451,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
     Phoenix.HTML.raw("""
     <span class="ax-stack-sm">
       <span class="ax-subscription-row-primary-line">
-        <a href="#{customer_href}" class="ax-link ax-subscription-row-customer">Open customer detail: #{escape(customer_label(row))}</a>
+        <a href="#{customer_href}" class="ax-button ax-button-primary ax-button-sm ax-subscription-row-customer">See full customer record: #{escape(customer_label(row))}</a>
         <span class="ax-subscription-row-state ax-status-badge ax-status-badge-#{state_tone}">
           <span class="ax-status-dot"></span>#{escape(state_label)}
         </span>

@@ -323,15 +323,6 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
             </a>
             <span class="ax-detail-priority-note">Open failed deliveries with payload, response, retry trail, and replay controls.</span>
           </div>
-          <div class="ax-detail-priority-group ax-detail-priority-group-recovery">
-            <span class="ax-label ax-detail-priority-label">Recovery workspace</span>
-            <a
-              class="ax-button ax-button-recovery ax-button-sm ax-detail-recovery-primary"
-              href={ScopedPath.build(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}
-            >
-              Watch dunning funnel + at-risk
-            </a>
-          </div>
           <div class="ax-detail-priority-links">
             <a
               class="ax-link-quiet"
@@ -444,7 +435,13 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
                 <div class="ax-detail-dunning-summary" aria-label="Dunning funnel preview for this subscription">
                   <span><strong>Dunning funnel</strong><em>0 active campaigns here</em></span>
                   <span><strong>At-risk status</strong><em>No active campaign</em></span>
-                  <span><strong>Recovery workspace</strong><em>Use the top Recovery workspace button for at-risk accounts</em></span>
+                  <span><strong>Recovery workspace</strong><em>Use the dunning funnel workspace for at-risk accounts</em></span>
+                  <a
+                    class="ax-button ax-button-recovery ax-button-sm ax-detail-dunning-action"
+                    href={ScopedPath.build(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}
+                  >
+                    Watch dunning funnel + at-risk
+                  </a>
                 </div>
                 <p class="ax-body">
                   <%= Copy.resource_state_copy(:dunning, :queue_empty, surface: :subscription_detail).body %>
@@ -1035,8 +1032,8 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
         %{
           tone: "amber",
           label: "Setup incomplete",
-          answer: "Setup data missing - not a payment failure",
-          headline: "#{length(caveats)} setup fields block projection",
+          answer: "No - billing health blocked by missing setup data",
+          headline: "#{length(caveats)} setup fields missing",
           body:
             "This is not an active payment failure. Use Invoices for receivables; fill setup fields before trusting revenue, dunning, or renewal decisions.",
           caveats: caveats
