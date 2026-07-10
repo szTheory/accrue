@@ -2,7 +2,7 @@
   "schema_version": "ratchet-ledger-baseline/1",
   "frozen": false,
   "epoch": 1,
-  "ledger_sha256": "899e96a119532f7c23eb1119696dcc7c46aed103719cfaccb6439164fc1d6d88",
+  "ledger_sha256": "72d78d2f09dc05036a217df8bf0e3bc64a6dbdf7f2343063a81e0298608a5c4a",
   "confirmed_open": {
     "persona:operator-founder": {
       "total": 0,
@@ -172,6 +172,7 @@
     "component-kitchen__d11__toolbar__ov-none",
     "component-kitchen__d03__toolbar__ov-none",
     "component-kitchen__d01__page-header__ov-none",
-    "subscriptions__d07__data-table__ov-none"
+    "subscriptions__d07__data-table__ov-none",
+    "subscription-detail__d11__page-header__ov-none"
   ]
 }
