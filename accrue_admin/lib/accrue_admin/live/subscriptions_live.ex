@@ -120,10 +120,10 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
               Work open-invoice queue to $0.00
             </a>
             <a
-              class="ax-button ax-button-secondary ax-button-sm ax-subscriptions-customer-workspace"
+              class="ax-button ax-button-primary ax-button-sm ax-subscriptions-customer-workspace"
               href={scoped_path(@admin_mount_path, "/customers", @current_owner_scope)}
             >
-              Find one customer and see everything
+              Open customer 360 search
             </a>
             <a
               class="ax-button ax-button-secondary ax-button-sm ax-subscriptions-webhook-workspace"
@@ -234,21 +234,21 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
 
           <section class="ax-inline-worklist ax-subscriptions-audit-strip" aria-label="Subscription audit trail">
             <div class="ax-inline-worklist-copy">
-              <strong>Audit trail</strong>
-              <span>Latest: subscription.created by Accrue system. Use before invoice, dunning, or webhook changes.</span>
+              <strong>Who did what, when?</strong>
+              <span>Open the chronological actor audit log for subscription, invoice, dunning, and webhook changes.</span>
             </div>
             <div class="ax-inline-worklist-actions">
               <a
                 class="ax-button ax-button-primary ax-button-sm"
                 href={scoped_path(@admin_mount_path, "/events", @current_owner_scope, %{"type" => "subscription.created"})}
               >
-                Open audit log
+                Open full actor audit log
               </a>
               <a
                 class="ax-button ax-button-secondary ax-button-sm"
                 href={scoped_path(@admin_mount_path, "/events", @current_owner_scope, %{"actor_type" => "admin"})}
               >
-                Admin actors
+                Filter admin actions
               </a>
             </div>
           </section>

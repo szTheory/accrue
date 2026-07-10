@@ -345,6 +345,18 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
             >
               Pick a failed delivery to inspect payload, response, retry trail, and replay
             </a>
+            <ul class="ax-detail-webhook-picks" aria-label="Failed delivery choices">
+              <li>
+                <a href={ScopedPath.build(@admin_mount_path, "/webhooks", @current_owner_scope, %{"status" => "failed,dead", "type" => "subscription.created"})}>
+                  subscription.created failed deliveries
+                </a>
+              </li>
+              <li>
+                <a href={ScopedPath.build(@admin_mount_path, "/webhooks", @current_owner_scope, %{"status" => "failed,dead", "type" => "invoice.payment_failed"})}>
+                  invoice.payment_failed retry trail
+                </a>
+              </li>
+            </ul>
             <span class="ax-detail-priority-note">The failed-delivery debugger opens each event's payload, response, retry trail, and replay controls.</span>
           </div>
           <div class="ax-detail-priority-links">
@@ -869,7 +881,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
       [
         %{
           label: "Lifecycle state",
-          value: "#{humanize(subscription.status)} - #{predicate_summary(subscription)}"
+          value: lifecycle_health_label(subscription)
         }
       ] ++
         setup_gap_summary_rows(subscription, mount_path, scope) ++
@@ -1093,8 +1105,8 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
         %{
           tone: "amber",
           label: "Setup missing",
-          answer: "Setup incomplete - revenue can flow",
-          headline: "Revenue can flow; reporting needs setup",
+          answer: "Setup warning only",
+          headline: "Billing can process; reporting is incomplete",
           body: "Finish setup fields before relying on revenue and recovery reporting.",
           caveats: caveats
         }
@@ -1481,23 +1493,6 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
     do: :amber
 
   defp tone(_event), do: :slate
-
-  defp predicate_summary(subscription) do
-    [
-      Accrue.Billing.Subscription.active?(subscription) && "active",
-      Accrue.Billing.Subscription.canceling?(subscription) && "canceling",
-      Accrue.Billing.Subscription.paused?(subscription) && "paused",
-      Accrue.Billing.Subscription.past_due?(subscription) && "past due",
-      Accrue.Billing.Subscription.canceled?(subscription) &&
-        Copy.subscription_lifecycle_ended_label()
-    ]
-    |> Enum.reject(&is_nil/1)
-    |> Enum.reject(&(&1 == false))
-    |> case do
-      [] -> "no flags"
-      flags -> Enum.join(flags, " · ")
-    end
-  end
 
   defp current_price_id(subscription) do
     case subscription.subscription_items do

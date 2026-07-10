@@ -82,7 +82,7 @@ defmodule AccrueAdmin.Live.DashboardLive do
               data-command-palette-trigger="true"
               data-ax-command-palette-trigger="true"
             >
-              Find one customer: open global search
+              Search all customers
               <Icon.icon name={:search} size="sm" />
             </button>
             <a
@@ -116,8 +116,8 @@ defmodule AccrueAdmin.Live.DashboardLive do
             </a>
           </header>
           <div :if={@attention != []} class="ax-attention-summary ax-attention-summary-warning" aria-label="Attention health verdict">
-            <strong>Billing health: Critical issues require attention</strong>
-            <span>Resolve priority 1 open invoices before webhook debugging and recovery review.</span>
+            <strong>No - billing is unhealthy right now.</strong>
+            <span>P1 collect open invoices, P2 inspect failed deliveries, P3 review dunning.</span>
           </div>
 
           <div :if={@attention != []} class="ax-card ax-attention">
@@ -396,7 +396,7 @@ defmodule AccrueAdmin.Live.DashboardLive do
       stats.open_invoice_count > 0 &&
         %{
           tone: "warning",
-          priority: "1",
+          priority: "P1",
           metric: count(stats.open_invoice_count, "open invoice"),
           label:
             "above $0.00 target - #{format_minor(stats.open_invoice_balance_minor, "usd")} open",
@@ -407,7 +407,7 @@ defmodule AccrueAdmin.Live.DashboardLive do
       stats.blocked_webhook_count > 0 &&
         %{
           tone: "danger",
-          priority: "2",
+          priority: "P2",
           metric: count(stats.blocked_webhook_count, "webhook"),
           label: Copy.home_attention_webhooks_label(),
           pill: nil,
@@ -417,7 +417,7 @@ defmodule AccrueAdmin.Live.DashboardLive do
       stats.past_due_subscription_count > 0 &&
         %{
           tone: "warning",
-          priority: "3",
+          priority: "P3",
           metric: count(stats.past_due_subscription_count, "subscription"),
           label: Copy.home_attention_past_due_label(),
           pill: nil,
@@ -427,7 +427,7 @@ defmodule AccrueAdmin.Live.DashboardLive do
       stats.failed_meter_event_count > 0 &&
         %{
           tone: "info",
-          priority: "4",
+          priority: "P4",
           metric: count(stats.failed_meter_event_count, "meter event"),
           label: Copy.home_attention_meter_label(),
           pill: nil,
