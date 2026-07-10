@@ -113,7 +113,7 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
 
     assert html =~ "Webhook debugging"
     assert html =~ "failed subscription.created"
-    assert html =~ "Debug failed webhooks end-to-end"
+    assert html =~ "Open full webhook debugger and retry"
     assert html =~ "Open this subscription&#39;s invoice context"
     assert html =~ "Queue workspace"
     assert html =~ "Open invoice queue for this subscription"
@@ -139,14 +139,14 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
     assert html =~ "Tax &amp; compliance"
     assert html =~ "invoice.payment_failed"
     assert html =~ "Billing health summary"
-    assert html =~ "No - setup is incomplete"
+    assert html =~ "Billing is operating; setup data is incomplete"
     assert html =~ "setup fields"
     assert html =~ "ax-detail-health-summary-amber"
     assert html =~ "ax-detail-health-answer"
     assert html =~ "Charge amount not shown"
 
     assert html =~
-             "Payments can continue; revenue and recovery numbers are estimates until setup is complete."
+             "Money is not blocked. Complete setup fields to make revenue and recovery numbers exact."
 
     assert html =~
              "Complete setup before relying on revenue and recovery numbers."

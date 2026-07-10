@@ -71,7 +71,7 @@ defmodule AccrueAdmin.Live.DashboardLive do
               class="ax-button ax-button-primary ax-button-sm ax-home-primary-action"
               href={ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope, %{"status" => "open"})}
             >
-              Open filtered invoice queue: <%= format_minor(@stats.open_invoice_balance_minor, "usd") %> open
+              Work open-invoice queue: <%= format_minor(@stats.open_invoice_balance_minor, "usd") %> open
               <Icon.icon name={:arrow_right} size="sm" />
             </a>
             <a
@@ -147,7 +147,7 @@ defmodule AccrueAdmin.Live.DashboardLive do
               <span class="ax-launcher-icon"><Icon.icon name={:invoices} size="lg" /></span>
               <span class="ax-launcher-title"><%= invoice_launcher_title(@stats) %></span>
               <span class="ax-launcher-action">
-                Open filtered invoice queue <Icon.icon name={:arrow_right} size="sm" />
+                Work open-invoice queue <Icon.icon name={:arrow_right} size="sm" />
               </span>
               <span :if={@stats.open_invoice_count > 0} class="ax-launcher-meta ax-launcher-meta-warn">
                 <%= count(@stats.open_invoice_count, "open invoice") %>; <%= format_minor(@stats.open_invoice_balance_minor, "usd") %> above $0.00 target
@@ -318,7 +318,7 @@ defmodule AccrueAdmin.Live.DashboardLive do
                 class="ax-button ax-button-warning ax-button-sm"
                 href={ScopedPath.build(@admin_mount_path, "/webhooks", @current_owner_scope, %{"status" => "failed,dead"})}
               >
-                Open failed webhook queue
+                Debug failed webhook queue
               </a>
             </header>
 
@@ -391,28 +391,28 @@ defmodule AccrueAdmin.Live.DashboardLive do
       stats.open_invoice_count > 0 &&
         %{
           tone: "warning",
-          priority: "Start here",
+          priority: "1",
           metric: count(stats.open_invoice_count, "open invoice"),
           label:
             "above $0.00 target - #{format_minor(stats.open_invoice_balance_minor, "usd")} open",
           pill: nil,
-          action: "Start here: open filtered queue",
+          action: "Work open-invoice queue",
           href: ScopedPath.build(mount_path, "/invoices", scope, %{"status" => "open"})
         },
       stats.blocked_webhook_count > 0 &&
         %{
           tone: "danger",
-          priority: "Next",
+          priority: "2",
           metric: count(stats.blocked_webhook_count, "webhook"),
           label: Copy.home_attention_webhooks_label(),
           pill: nil,
-          action: "Next: debug failed queue",
+          action: "Debug failed webhook queue",
           href: ScopedPath.build(mount_path, "/webhooks", scope, %{"status" => "failed,dead"})
         },
       stats.past_due_subscription_count > 0 &&
         %{
           tone: "warning",
-          priority: "Then",
+          priority: "3",
           metric: count(stats.past_due_subscription_count, "subscription"),
           label: Copy.home_attention_past_due_label(),
           pill: nil,
@@ -422,7 +422,7 @@ defmodule AccrueAdmin.Live.DashboardLive do
       stats.failed_meter_event_count > 0 &&
         %{
           tone: "info",
-          priority: "Monitor",
+          priority: "4",
           metric: count(stats.failed_meter_event_count, "meter event"),
           label: Copy.home_attention_meter_label(),
           pill: nil,
@@ -436,7 +436,7 @@ defmodule AccrueAdmin.Live.DashboardLive do
   defp attention_health_summary(_stats), do: "Billing status: Unhealthy"
 
   defp attention_health_issue_summary(_stats),
-    do: "Start with filtered open invoices, then dead-lettered webhooks."
+    do: "Start with the open-invoice queue, then dead-lettered webhooks."
 
   defp attention_health_metrics(stats),
     do: [
@@ -455,7 +455,7 @@ defmodule AccrueAdmin.Live.DashboardLive do
 
   defp invoice_launcher_title(%{open_invoice_count: count, open_invoice_balance_minor: amount})
        when count > 0 do
-    "Filtered open invoice queue: #{format_minor(amount, "usd")} open"
+    "Open-invoice queue: #{format_minor(amount, "usd")} open"
   end
 
   defp invoice_launcher_title(_stats), do: Copy.home_launcher_invoices_title()

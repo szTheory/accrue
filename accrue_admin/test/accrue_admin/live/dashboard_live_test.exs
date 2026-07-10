@@ -100,17 +100,17 @@ defmodule AccrueAdmin.DashboardLiveTest do
 
     # Zone 1 — attention rail surfaces the seeded exceptions (dead webhook + meter failure)
     assert html =~ Copy.home_attention_webhooks_label()
-    assert html =~ "Next: debug failed queue"
+    assert html =~ "Debug failed webhook queue"
     assert html =~ Copy.home_attention_meter_label()
     assert html =~ Copy.home_attention_action_investigate()
     assert html =~ "Billing status: Unhealthy"
-    assert html =~ "Start with filtered open invoices, then dead-lettered webhooks."
+    assert html =~ "Start with the open-invoice queue, then dead-lettered webhooks."
     assert html =~ "failed webhooks"
     assert html =~ "open invoices"
-    assert html =~ "Start here"
-    assert html =~ "Next"
+    assert html =~ ">1<"
+    assert html =~ ">2<"
     assert html =~ "Debug dead-lettered webhooks"
-    assert html =~ "Open filtered invoice queue: $42.50 open"
+    assert html =~ "Work open-invoice queue: $42.50 open"
     assert html =~ ~s(href="/billing/events?q=meter_event")
     assert html =~ ~s(href="/billing/invoices?status=open")
 
@@ -118,7 +118,7 @@ defmodule AccrueAdmin.DashboardLiveTest do
     assert html =~ Copy.home_launcher_customers_title()
     assert html =~ Copy.home_launcher_customers_meta()
     assert html =~ "ax-launcher-primary"
-    assert html =~ "Filtered open invoice queue: $42.50 open"
+    assert html =~ "Open-invoice queue: $42.50 open"
     assert html =~ "$42.50 above $0.00 target"
     assert html =~ Copy.home_launcher_recovery_title()
     assert html =~ "Recovery status: At risk"
@@ -146,7 +146,7 @@ defmodule AccrueAdmin.DashboardLiveTest do
     assert html =~ "customer.updated"
     assert html =~ "Open event"
     assert html =~ "Debug delivery trace"
-    assert html =~ "Open failed webhook queue"
+    assert html =~ "Debug failed webhook queue"
     assert html =~ "Open full event ledger"
     assert html =~ "Load more audit events"
     assert html =~ "Filter admin actors"
@@ -167,7 +167,7 @@ defmodule AccrueAdmin.DashboardLiveTest do
     assert html =~ "Search customers globally"
     assert html =~ "Open global customer search"
     assert html =~ "Opens the Invoices queue workspace for current receivables"
-    assert html =~ "Open filtered invoice queue: $42.50 open"
+    assert html =~ "Work open-invoice queue: $42.50 open"
 
     # IA-01 customer lookup entry point on Home (Plan 175-04)
     assert html =~ "Find one customer"

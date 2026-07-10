@@ -97,19 +97,19 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert html =~ "$0.00"
     assert html =~ "target"
 
-    assert html =~ "Work open invoices to $0.00"
+    assert html =~ "Work open-invoice queue to $0.00"
     assert html =~ "View dunning funnel dashboard"
 
     assert html =~ "review at-risk subscriptions"
     assert html =~ "View failed webhook details and retry"
-    assert html =~ "Dunning funnel and invoice queue summary"
+    assert html =~ "Dunning funnel and open-invoice queue summary"
     assert html =~ "At-risk subscriptions"
-    assert html =~ "Invoice queue"
+    assert html =~ "Open-invoice queue"
     assert html =~ ~s(class="ax-kpi-row ax-subscriptions-kpi-row")
     refute html =~ "Bulk invoice actions"
     refute html =~ "Process next invoice"
     refute html =~ "Send invoice reminders"
-    assert html =~ "Find one customer"
+    assert html =~ "Find one customer and see everything"
     refute html =~ "Who did what, when - filter admin actors"
     assert html =~ "Open invoice queue for this subscription"
     assert html =~ "Who did what, when?"
@@ -316,9 +316,9 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert {:ok, _view, html} = live(conn, "/billing/subscriptions?view=all")
 
     assert html =~ "phase196-primary@example.com"
-    assert html =~ "Open customer overview: phase196-primary@example.com"
-    assert html =~ "Open invoice queue records"
-    assert html =~ "Open invoice records"
+    assert html =~ "Customer overview: phase196-primary@example.com"
+    assert html =~ "Open-invoice queue records"
+    assert html =~ "Open-invoice records for queue work"
     assert html =~ "Customer ID"
     assert html =~ subscription.customer_id
     assert html =~ "Subscription"

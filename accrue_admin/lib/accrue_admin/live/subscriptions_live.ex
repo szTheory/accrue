@@ -111,7 +111,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
               <span class="ax-subscriptions-heading-metric"><strong>$0.00</strong> target policy</span>
             </p>
             <p class="ax-subscriptions-route-line">
-              Health is defined by the open-invoice target: collect open invoices to $0.00, debug failed webhooks, then review at-risk subscriptions.
+              Health is defined by the open-invoice queue target: work the queue to $0.00, debug failed webhooks, then review at-risk subscriptions.
             </p>
           </:description>
           <:actions>
@@ -119,7 +119,13 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
               class="ax-button ax-button-primary ax-button-sm ax-subscriptions-primary-workspace"
               href={invoice_queue_path(@admin_mount_path, @current_owner_scope)}
             >
-              Work open invoices to $0.00
+              Work open-invoice queue to $0.00
+            </a>
+            <a
+              class="ax-button ax-button-secondary ax-button-sm ax-subscriptions-customer-workspace"
+              href={scoped_path(@admin_mount_path, "/customers", @current_owner_scope)}
+            >
+              Find one customer and see everything
             </a>
             <a
               class="ax-button ax-button-secondary ax-button-sm ax-subscriptions-webhook-workspace"
@@ -143,7 +149,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
           </:actions>
           <:stat_strip>
             <div class="ax-kpi-row ax-subscriptions-kpi-row">
-              <StatStrip.stat_strip label="Dunning funnel and invoice queue summary">
+              <StatStrip.stat_strip label="Dunning funnel and open-invoice queue summary">
                 <:stat
                   label="Dunning funnel"
                   value={count(@summary.past_due_count, "campaign")}
@@ -157,7 +163,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
                   href={scoped_path(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}
                 />
                 <:stat
-                  label="Invoice queue"
+                  label="Open-invoice queue"
                   value={count(@summary.open_invoice_count, "invoice")}
                   tone="cobalt"
                   href={invoice_queue_path(@admin_mount_path, @current_owner_scope)}
@@ -184,20 +190,20 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
             "ax-inline-worklist ax-subscriptions-invoice-strip",
             @summary.open_invoice_count > 0 && "ax-subscriptions-invoice-strip-danger"
           ]}
-          aria-label="Invoice exposure worklist"
+          aria-label="Open-invoice queue worklist"
         >
           <div class="ax-inline-worklist-copy ax-subscriptions-priority-copy">
             <strong><%= billing_priority_title(@summary) %></strong>
             <span class="ax-subscriptions-exposure"><%= count(@summary.open_invoice_count, "open invoice") %></span>
             <span><%= format_minor(@summary.open_invoice_exposure_minor, "usd") %> exposure</span>
-            <span>Policy target: $0.00 open invoice exposure</span>
+            <span>Open-invoice queue target: $0.00 exposure</span>
           </div>
           <div class="ax-inline-worklist-actions">
             <a class="ax-button ax-button-primary ax-button-sm ax-subscriptions-primary-workspace" href={invoice_queue_path(@admin_mount_path, @current_owner_scope)}>
-              Open invoice queue to $0.00
+              Work open-invoice queue to $0.00
             </a>
             <a
-              class="ax-button ax-button-warning ax-button-sm ax-subscriptions-webhook-workspace"
+              class="ax-button ax-button-secondary ax-button-sm ax-subscriptions-webhook-workspace"
               href={
                 @admin_mount_path
                 |> scoped_path("/webhooks", @current_owner_scope)
@@ -209,17 +215,11 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
           </div>
         </section>
 
-        <section class="ax-inline-worklist ax-subscriptions-invoice-records" aria-label="Open invoice queue records">
-          <div class="ax-inline-worklist-copy">
-            <strong>Open invoice queue records</strong>
-            <span><%= count(@summary.open_invoice_count, "open invoice") %> ready for queue work</span>
-            <span>Process, remind, or resolve invoices in the dedicated queue.</span>
-          </div>
-          <div class="ax-inline-worklist-actions">
-            <a class="ax-button ax-button-primary ax-button-sm" href={invoice_queue_path(@admin_mount_path, @current_owner_scope)}>
-              Open invoice records
-            </a>
-          </div>
+        <section class="ax-subscriptions-queue-shortcut" aria-label="Open-invoice queue records">
+          <span><%= count(@summary.open_invoice_count, "open invoice") %> ready for queue work.</span>
+          <a class="ax-link-quiet" href={invoice_queue_path(@admin_mount_path, @current_owner_scope)}>
+            Open-invoice records for queue work
+          </a>
         </section>
 
         <section class="ax-inline-worklist ax-subscriptions-at-risk-strip" aria-label="At-risk subscription queue">
@@ -233,12 +233,6 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
               Open at-risk recovery analytics
             </a>
           </div>
-        </section>
-
-        <section class="ax-subscriptions-utility-strip" aria-label="Customer lookup utility view">
-          <a class="ax-link-quiet" href={scoped_path(@admin_mount_path, "/customers", @current_owner_scope)}>
-            Find one customer
-          </a>
         </section>
 
         <section class="ax-inline-worklist ax-subscriptions-audit-strip" aria-label="Subscription audit trail">
@@ -429,7 +423,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
       </span>
       <span class="ax-webhook-row-status ax-webhook-row-status-warning ax-subscription-row-signal-primary">
         <strong>Invoice action</strong>
-        <span>Work open invoice records in the dedicated Invoices queue</span>
+        <span>Work open-invoice records in the dedicated Invoices queue</span>
         <a href="#{subscription_invoices_href}" class="ax-link">Open invoice queue for this subscription</a>
       </span>
       <span class="ax-webhook-row-status ax-webhook-row-status-warning ax-subscription-row-signal-secondary">
@@ -447,7 +441,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
   end
 
   defp billing_priority_title(%{open_invoice_count: count}) when count > 0,
-    do: "Invoice exposure worklist: #{count(count, "open invoice")} above target"
+    do: "Open-invoice queue: #{count(count, "open invoice")} above target"
 
   defp billing_priority_title(_summary), do: "Billing status: Healthy"
 
@@ -471,7 +465,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
     Phoenix.HTML.raw("""
     <span class="ax-stack-sm">
       <span class="ax-subscription-row-primary-line">
-        <a href="#{customer_href}" class="ax-button ax-button-primary ax-button-sm ax-subscription-row-customer">Open customer overview: #{escape(customer_label(row))}</a>
+        <a href="#{customer_href}" class="ax-link ax-subscription-row-customer">Customer overview: #{escape(customer_label(row))}</a>
         <span class="ax-subscription-row-state ax-status-badge ax-status-badge-#{state_tone}">
           <span class="ax-status-dot"></span>#{escape(state_label)}
         </span>
@@ -480,7 +474,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
       <span class="ax-subscription-row-meta-grid">
         <span class="ax-subscription-row-meta"><strong>Customer ID</strong> #{customer_id}</span>
         <a href="#{subscription_href}" class="ax-subscription-row-meta ax-subscription-row-id"><strong>Subscription</strong> #{subscription_id}</a>
-        <a href="#{subscription_invoices_href}" class="ax-link ax-subscription-row-invoices">Open filtered invoices for this subscription</a>
+        <a href="#{subscription_invoices_href}" class="ax-link ax-subscription-row-invoices">Open this subscription's open invoices</a>
       </span>
     </span>
     """)

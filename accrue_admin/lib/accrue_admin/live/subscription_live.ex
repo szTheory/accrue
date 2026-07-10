@@ -282,6 +282,12 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
             >
               Open invoice queue now: <%= invoice_queue_summary(@open_invoice_summary) %>
             </a>
+            <a
+              class="ax-button ax-button-recovery ax-button-sm ax-detail-recovery-summary"
+              href={ScopedPath.build(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}
+            >
+              Open dunning analytics
+            </a>
           </:actions>
         </Detail.summary_card>
 
@@ -329,7 +335,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
                 })
               }
             >
-              Debug failed webhooks end-to-end
+              Open full webhook debugger and retry
             </a>
             <a
               class="ax-link-quiet"
@@ -342,7 +348,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
             >
               Open failed webhook delivery details and retry
             </a>
-            <span class="ax-detail-priority-note">Scoped to this subscription: failed subscription.created deliveries open with payload, response, retry trail, and replay controls.</span>
+            <span class="ax-detail-priority-note">Full debugger opens failed subscription.created deliveries with payload, response, retry trail, and replay controls.</span>
           </div>
           <div class="ax-detail-priority-links">
             <a
@@ -1092,10 +1098,10 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
         %{
           tone: "amber",
           label: "Setup missing",
-          answer: "No - setup is incomplete",
-          headline: "Complete #{pluralize(length(caveats), "setup field")}",
+          answer: "Billing is operating; setup data is incomplete",
+          headline: "Setup data missing for reporting",
           body:
-            "Payments can continue; revenue and recovery numbers are estimates until setup is complete.",
+            "Money is not blocked. Complete setup fields to make revenue and recovery numbers exact.",
           caveats: caveats
         }
 
