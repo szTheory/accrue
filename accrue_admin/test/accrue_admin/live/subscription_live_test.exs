@@ -113,7 +113,7 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
 
     assert html =~ "Webhook debugging"
     assert html =~ "failed subscription.created"
-    assert html =~ "Debug failed subscription.created webhook"
+    assert html =~ "Debug failed webhooks end-to-end"
     assert html =~ "Open this subscription&#39;s invoice context"
     assert html =~ "Queue workspace"
     assert html =~ "Go to Invoices queue workspace"
@@ -123,6 +123,7 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
     assert html =~ "Back to Recovery analytics"
     refute html =~ "Webhook debugger"
     assert html =~ "Open full audit event log"
+    assert html =~ "actor-filtered audit table"
   end
 
   test "summary and drill bands replace page-level KPI and predicate noise", %{

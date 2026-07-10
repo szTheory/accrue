@@ -179,8 +179,8 @@ defmodule AccrueAdmin.Live.DashboardLive do
               <span class="ax-launcher-meta ax-launcher-meta-actions">
                 Retry monitor: <%= count(@stats.blocked_webhook_count, "failed webhook") %>; open receivables: <%= count(@stats.open_invoice_count, "invoice") %>
               </span>
-              <span class="ax-launcher-action">
-                Watch dunning funnel + at-risk <Icon.icon name={:arrow_right} size="sm" />
+              <span class="ax-launcher-action ax-launcher-action-button">
+                Open dunning funnel analytics <Icon.icon name={:arrow_right} size="sm" />
               </span>
             </a>
 

@@ -217,6 +217,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
             <span class={["ax-status-badge", "ax-status-badge-" <> health.tone]}>
               <span class="ax-status-dot"></span><%= health.label %>
             </span>
+            <span class="ax-summary-health-answer"><%= health.answer %></span>
           </:status>
           <:facts>
             <span class="ax-summary-fact">
@@ -319,9 +320,9 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
                 })
               }
             >
-              Debug failed subscription.created webhook
+              Debug failed webhooks end-to-end
             </a>
-            <span class="ax-detail-priority-note">Open failed deliveries with payload, response, retry trail, and replay controls.</span>
+            <span class="ax-detail-priority-note">Opens failed subscription.created deliveries with payload, response, retry trail, and replay controls.</span>
           </div>
           <div class="ax-detail-priority-links">
             <a
@@ -483,7 +484,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
             <span class="ax-detail-section-title">Activity</span>
           </summary>
           <div class="ax-card ax-activity-audit-strip">
-            <p class="ax-label">Who did what, when - actor, action, timestamp</p>
+            <p class="ax-label">Who did what, when - actor-filtered audit table</p>
             <% latest_audit = latest_audit_row(@timeline_events, @subscription) %>
             <div class="ax-audit-summary-row" aria-label="Latest audit event summary">
               <span><strong>Actor</strong><em><%= latest_audit.actor %></em></span>

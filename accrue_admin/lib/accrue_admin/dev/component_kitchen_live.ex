@@ -74,6 +74,8 @@ if Mix.env() != :prod do
             <Breadcrumbs.breadcrumbs
               items={[
                 %{label: "Dashboard", href: @admin_mount_path},
+                %{label: "Webhooks", href: @admin_mount_path <> "/webhooks?status=failed,dead"},
+                %{label: "Events", href: @admin_mount_path <> "/events?type=subscription.created"},
                 %{label: "Billing health"}
               ]}
             />
@@ -84,29 +86,17 @@ if Mix.env() != :prod do
               <span><strong>Invoices</strong><em>2 open, $592.50 over target</em></span>
               <span><strong>Primary route</strong><a class="ax-link" href={@admin_mount_path <> "/customers"}>Customer detail</a></span>
               <span><strong>Invoice route</strong><em>Use the queue button below</em></span>
+              <span><strong>Webhook route</strong><a class="ax-link" href={@admin_mount_path <> "/webhooks?status=failed,dead"}>Webhooks to Events</a></span>
               <span><strong>Recovery route</strong><a class="ax-link" href={@admin_mount_path <> "/analytics/recovery"}>Dunning funnel</a></span>
             </section>
             <div class="ax-page-actions">
               <a class="ax-button ax-button-primary ax-button-sm ax-dev-customer-action ax-dev-customer-primary" href={@admin_mount_path <> "/customers"}>
-                <Icon.icon name={:search} size="sm" /> Customer detail: find one customer
+                <Icon.icon name={:search} size="sm" /> Primary action: find one customer record
               </a>
-              <a class="ax-button ax-button-primary ax-button-sm ax-dev-invoice-action ax-dev-invoice-primary" href={@admin_mount_path <> "/invoices?status=open"}>
+              <a class="ax-button ax-button-secondary ax-button-sm ax-dev-invoice-action ax-dev-invoice-primary" href={@admin_mount_path <> "/invoices?status=open"}>
                 <Icon.icon name={:invoices} size="sm" /> Open invoice queue: 2 invoices, $592.50 exposure
               </a>
             </div>
-            <section class="ax-inline-worklist ax-dev-audit-strip" aria-label="Component kitchen audit trail">
-              <div class="ax-inline-worklist-copy">
-                <strong>Who did what, when?</strong>
-                <span>Actor Admin user</span>
-                <span>Action billing.contact.updated</span>
-                <span>When Jul 09, 2026 14:51 UTC</span>
-              </div>
-              <div class="ax-inline-worklist-actions">
-                <a class="ax-button ax-button-secondary ax-button-sm" href={@admin_mount_path <> "/events?actor_type=admin"}>
-                  Who did what, when? Actor-filtered audit log
-                </a>
-              </div>
-            </section>
           </header>
 
           <FlashGroup.flash_group flashes={@flashes} />
@@ -139,6 +129,20 @@ if Mix.env() != :prod do
               <li><strong>Northstar Labs</strong><span>$420.00 open</span><em>Send reminder</em></li>
               <li><strong>Acme Field Ops</strong><span>$172.50 open</span><em>Review collection note</em></li>
             </ol>
+          </section>
+
+          <section :if={@available?} class="ax-inline-worklist ax-dev-audit-strip" aria-label="Component kitchen audit trail">
+            <div class="ax-inline-worklist-copy">
+              <strong>Who did what, when?</strong>
+              <span>Actor Admin user</span>
+              <span>Action billing.contact.updated</span>
+              <span>When Jul 09, 2026 14:51 UTC</span>
+            </div>
+            <div class="ax-inline-worklist-actions">
+              <a class="ax-button ax-button-secondary ax-button-sm" href={@admin_mount_path <> "/events?actor_type=admin"}>
+                Who did what, when? Actor-filtered audit log
+              </a>
+            </div>
           </section>
 
           <section :if={@available?} class="ax-card ax-dev-audit-log-card" aria-label="Actor-filtered audit event log preview">

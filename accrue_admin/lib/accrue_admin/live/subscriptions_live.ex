@@ -104,7 +104,10 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
           title={Copy.subscriptions_index_heading()}
         >
           <:description>
-            <p>Start with the billing-health verdict, then route to Invoices for receivables, Recovery for dunning, or Webhooks for failed delivery debugging.</p>
+            <p>
+              <strong class="ax-subscriptions-heading-verdict"><%= subscriptions_health_verdict(@summary) %></strong>
+              Route to Invoices for receivables, Recovery for dunning, or Webhooks for failed delivery debugging.
+            </p>
           </:description>
           <:actions>
             <a
@@ -420,9 +423,9 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
   end
 
   defp billing_priority_title(%{open_invoice_count: count}) when count > 0,
-    do: "Billing healthy right now: No"
+    do: "Billing status: Unhealthy"
 
-  defp billing_priority_title(_summary), do: "Billing healthy right now: Yes"
+  defp billing_priority_title(_summary), do: "Billing status: Healthy"
 
   defp billing_exposure_summary(%{open_invoice_count: count} = summary) when count > 0 do
     "#{count(count, "open invoice")}; #{format_minor(summary.open_invoice_exposure_minor, "usd")} exposure over $0.00 target."
@@ -451,7 +454,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
     Phoenix.HTML.raw("""
     <span class="ax-stack-sm">
       <span class="ax-subscription-row-primary-line">
-        <a href="#{customer_href}" class="ax-button ax-button-primary ax-button-sm ax-subscription-row-customer">See full customer record: #{escape(customer_label(row))}</a>
+        <a href="#{customer_href}" class="ax-button ax-button-secondary ax-button-sm ax-subscription-row-customer">Open this row's customer record: #{escape(customer_label(row))}</a>
         <span class="ax-subscription-row-state ax-status-badge ax-status-badge-#{state_tone}">
           <span class="ax-status-dot"></span>#{escape(state_label)}
         </span>
@@ -464,6 +467,11 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
   end
 
   defp customer_label(row), do: row.customer_name || row.customer_email || row.customer_id
+
+  defp subscriptions_health_verdict(%{open_invoice_count: count}) when count > 0,
+    do: "Billing status: Unhealthy"
+
+  defp subscriptions_health_verdict(_summary), do: "Billing status: Healthy"
 
   defp state_cell(row) do
     {status, label} = lifecycle_status(row)

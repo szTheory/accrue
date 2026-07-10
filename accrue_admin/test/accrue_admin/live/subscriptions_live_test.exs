@@ -89,8 +89,8 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert html =~ ~s(data-ax-page-actions)
     refute html =~ "Search customer, open detail"
 
-    assert html =~ "Billing healthy right now: No" or
-             html =~ "Billing healthy right now: Yes"
+    assert html =~ "Billing status: Unhealthy" or
+             html =~ "Billing status: Healthy"
 
     assert html =~ "$0.00 open exposure; target met." or
              html =~ "exposure over $0.00 target."
@@ -135,7 +135,7 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert html =~ "At risk"
     assert html =~ "All"
     assert html =~ "Dedicated Invoices queue"
-    assert html =~ "Billing healthy right now:"
+    assert html =~ "Billing status:"
     assert html =~ "ax-subscription-row-state"
     assert html =~ "failed webhook"
     assert html =~ "Who did what, when?"
@@ -275,7 +275,7 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert html =~ "Open this row&#39;s delivery attempts"
     assert html =~ "Row webhook attempts"
     assert html =~ "failed subscription.created delivery attempts"
-    assert html =~ "Billing healthy right now: No" or html =~ "Billing healthy right now: Yes"
+    assert html =~ "Billing status: Unhealthy" or html =~ "Billing status: Healthy"
     assert html =~ "Open who did what, when event log"
     assert html =~ "Owner: User"
     assert html =~ "Tax: Off"
@@ -309,7 +309,7 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert {:ok, _view, html} = live(conn, "/billing/subscriptions?view=all")
 
     assert html =~ "phase196-primary@example.com"
-    assert html =~ "See full customer record: phase196-primary@example.com"
+    assert html =~ "Open this row&#39;s customer record: phase196-primary@example.com"
     assert html =~ "Customer ID"
     assert html =~ subscription.customer_id
     assert html =~ "Subscription"

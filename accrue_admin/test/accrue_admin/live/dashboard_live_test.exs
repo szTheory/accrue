@@ -125,7 +125,7 @@ defmodule AccrueAdmin.DashboardLiveTest do
     assert html =~ Copy.home_launcher_recovery_title()
     assert html =~ "Dunning funnel metrics inline"
     assert html =~ "At-risk now:"
-    assert html =~ "Watch dunning funnel + at-risk"
+    assert html =~ "Open dunning funnel analytics"
     # Title relabeled in Phase 175-02 (IA-01 verb relabels); use Copy function directly.
     assert html =~ Copy.home_launcher_developer_title()
     assert html =~ "Debug webhook failures"
