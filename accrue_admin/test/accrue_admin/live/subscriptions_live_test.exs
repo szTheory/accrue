@@ -102,7 +102,7 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert html =~ "Open recovery analytics"
 
     assert html =~ "At-risk subscription queue"
-    assert html =~ "Open failed delivery debugger"
+    assert html =~ "Debug failed deliveries after invoice queue"
     assert html =~ "Dunning funnel and open-invoice queue summary"
     assert html =~ "At-risk subscriptions"
     assert html =~ "Open-invoice queue"
@@ -117,7 +117,7 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert html =~ "subscription.created by Accrue system"
     assert html =~ "Events: open full actor audit log"
     assert html =~ "Filter admin actions"
-    assert html =~ "Open failed delivery debugger"
+    assert html =~ "Debug failed deliveries after invoice queue"
     assert html =~ "At-risk subscription queue"
     assert html =~ "Open recovery analytics"
     refute html =~ "Billing health: Unhealthy"
@@ -142,7 +142,7 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert html =~ "Open invoice queue workspace"
     assert html =~ "Billing"
     assert html =~ "ax-subscription-row-state"
-    assert html =~ "Open failed delivery debugger"
+    assert html =~ "Debug failed deliveries after invoice queue"
     assert html =~ "Who did what, when?"
     assert html =~ ~s(data-ax-state="filtered-empty") or html =~ ~s(data-ax-state="populated")
     refute html =~ "No subscriptions yet."
@@ -278,9 +278,9 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert html =~ "target"
     refute html =~ "ax-health-verdict"
     assert html =~ "Work, review, or remove open-invoice records"
-    assert html =~ "Open failed delivery debugger"
-    assert html =~ "Webhook debug path"
-    assert html =~ "Open failed delivery debugger"
+    assert html =~ "Debug failed deliveries after invoice queue"
+    assert html =~ "Webhook follow-up"
+    assert html =~ "Open invoice queue records for this subscription"
 
     assert html =~ "Action required: collect" or
              html =~ "Billing status: Healthy"
@@ -291,7 +291,7 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert html =~ "Audit"
     assert html =~ "subscription.created by Accrue system"
     refute html =~ "Search customer, open detail"
-    assert html =~ "Open failed delivery debugger"
+    assert html =~ "Debug failed deliveries after invoice queue"
     assert html =~ "Setup gap"
     assert html =~ "Amount not confirmed in admin"
 
@@ -317,7 +317,7 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert {:ok, _view, html} = live(conn, "/billing/subscriptions?view=all")
 
     assert html =~ "phase196-primary@example.com"
-    assert html =~ "Customer billing context: phase196-primary@example.com"
+    assert html =~ "Open unified customer view: phase196-primary@example.com"
     assert html =~ "Open-invoice queue records"
     assert html =~ "Work, review, or remove open-invoice records"
     assert html =~ "Customer ID"

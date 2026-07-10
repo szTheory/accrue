@@ -83,7 +83,7 @@ defmodule AccrueAdmin.Live.DashboardLive do
               data-command-palette-trigger="true"
               data-ax-command-palette-trigger="true"
             >
-              Search all customers
+              Find one customer
               <Icon.icon name={:search} size="sm" />
             </button>
             <a
@@ -181,6 +181,9 @@ defmodule AccrueAdmin.Live.DashboardLive do
               <span class="ax-launcher-copy">Review dunning after open invoices are cleared.</span>
               <span class="ax-launcher-meta ax-launcher-meta-warn">
                 Next stage: reminder pending
+              </span>
+              <span class="ax-launcher-meta ax-launcher-meta-actions">
+                Funnel preview: <%= count(@stats.past_due_subscription_count, "at-risk account") %>; reminder stage is next.
               </span>
               <span class="ax-launcher-action ax-launcher-action-button">
                 Open dunning analytics <Icon.icon name={:arrow_right} size="sm" />

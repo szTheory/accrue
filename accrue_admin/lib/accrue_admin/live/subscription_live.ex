@@ -220,43 +220,21 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
             <strong :if={health.caveats == []} class="ax-detail-health-verdict"><%= health.headline %></strong>
             <span :if={health.caveats == []} class="ax-detail-health-body"><%= health.body %></span>
           </div>
-          <div :if={health.caveats != []} class="ax-detail-health-caveats" aria-label="Setup fields needed before billing projections are reliable">
-            <strong>Missing setup fields:</strong>
-            <span :for={impact <- setup_field_impacts(health.caveats)} class="ax-detail-health-caveat"><%= impact %></span>
-          </div>
-          <div :if={health.caveats != []} class="ax-detail-setup-actions" aria-label="Fix missing billing data">
-            <span class="ax-detail-health-body">Fix setup before trusting revenue, dunning, or recovery numbers.</span>
-            <a
-              class="ax-button ax-button-secondary ax-button-sm"
-              href={ScopedPath.build(@admin_mount_path, "/customers/#{@customer.id}", @current_owner_scope)}
-            >
-              Open customer billing profile
-            </a>
-            <a
-              class="ax-button ax-button-secondary ax-button-sm"
-              href={
-                ScopedPath.build(@admin_mount_path, "/events", @current_owner_scope, %{
-                  "subject_type" => "Subscription",
-                  "subject_id" => @subscription.id
-                })
-              }
-            >
-              Review setup audit events
-            </a>
-          </div>
+          <span :if={health.caveats != []} class="ax-detail-health-body ax-detail-health-setup-note">
+            Fix customer setup fields before trusting revenue, renewal, or recovery numbers.
+          </span>
           <div class="ax-detail-health-actions" aria-label="Primary billing action from health summary">
-            <strong>Primary invoice action</strong>
             <a
               class="ax-button ax-button-primary ax-button-sm ax-detail-invoice-primary"
               href={ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope, %{"status" => "open", "subscription_id" => @subscription.id})}
             >
-              Work open-invoice queue now: <%= invoice_queue_summary(@open_invoice_summary) %>
+              Open invoice queue for this subscription
             </a>
             <a
-              class="ax-button ax-button-secondary ax-button-sm ax-detail-recovery-summary"
-              href={ScopedPath.build(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}
+              class="ax-button ax-button-secondary ax-button-sm"
+              href={ScopedPath.build(@admin_mount_path, "/customers/#{@customer.id}", @current_owner_scope)}
             >
-              Open global dunning funnel
+              Fix customer setup
             </a>
           </div>
         </section>
@@ -281,65 +259,25 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
           </:facts>
         </Detail.summary_card>
 
-        <section class="ax-detail-priority-actions ax-detail-priority-actions-split" aria-label="Priority billing workspaces">
-          <div class="ax-detail-priority-group ax-detail-priority-group-primary">
-            <span class="ax-label ax-detail-priority-label">Primary invoice queue workspace</span>
-            <a
-              class="ax-button ax-button-primary ax-button-sm ax-detail-priority-primary ax-detail-invoice-primary"
-              href={ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope, %{"status" => "open"})}
-            >
-              Work global invoice queue to $0.00
-            </a>
-            <span class="ax-detail-queue-depth"><strong>Queue depth</strong><%= invoice_queue_summary(@open_invoice_summary) %></span>
-            <ul class="ax-detail-local-queue" aria-label="Local open invoice queue preview">
-              <li>
-                <strong>Queue workspace</strong>
-                <span>Open invoices, amounts, next action, and reminders live in Invoices</span>
-              </li>
-            </ul>
-          </div>
-          <div class="ax-detail-priority-group ax-detail-priority-group-webhook">
-            <span class="ax-label ax-detail-priority-label">Webhook debugging</span>
-            <a
-              class="ax-button ax-button-warning ax-button-sm ax-detail-webhook-primary"
-              href={
-                ScopedPath.build(@admin_mount_path, "/webhooks", @current_owner_scope, %{
-                  "status" => "failed,dead"
-                })
-              }
-            >
-              Open failed delivery debugger
-            </a>
-            <a
-              class="ax-link-quiet"
-              href={
-                ScopedPath.build(@admin_mount_path, "/webhooks", @current_owner_scope, %{
-                  "status" => "failed,dead"
-                })
-              }
-            >
-              Inspect failed delivery payload and retry trail
-            </a>
-            <ul class="ax-detail-webhook-picks" aria-label="Failed delivery choices">
-              <li>
-                <a class="ax-button ax-button-warning ax-button-sm" href={ScopedPath.build(@admin_mount_path, "/webhooks", @current_owner_scope, %{"status" => "failed,dead", "type" => "subscription.created"})}>
-                  subscription.created
-                </a>
-              </li>
-              <li>
-                <a class="ax-button ax-button-warning ax-button-sm" href={ScopedPath.build(@admin_mount_path, "/webhooks", @current_owner_scope, %{"status" => "failed,dead", "type" => "invoice.payment_failed"})}>
-                  invoice.payment_failed
-                </a>
-              </li>
-            </ul>
-            <span class="ax-detail-priority-note">The failed-delivery debugger opens each event's payload, response, retry trail, and replay controls.</span>
-          </div>
+        <section class="ax-detail-priority-actions ax-detail-priority-actions-compact" aria-label="Invoice queue workspace">
+          <span class="ax-label ax-detail-priority-label">Invoice queue workspace</span>
+          <span class="ax-detail-queue-depth"><strong>Queue depth</strong><%= invoice_queue_summary(@open_invoice_summary) %></span>
+          <a
+            class="ax-button ax-button-primary ax-button-sm ax-detail-priority-primary ax-detail-invoice-primary"
+            href={ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope, %{"status" => "open", "subscription_id" => @subscription.id})}
+          >
+            Open invoice queue records
+          </a>
           <div class="ax-detail-priority-links">
             <a
               class="ax-link-quiet"
-              href={ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope, %{"status" => "open", "subscription_id" => @subscription.id})}
+              href={
+                ScopedPath.build(@admin_mount_path, "/webhooks", @current_owner_scope, %{
+                  "status" => "failed,dead"
+                })
+              }
             >
-              Open this subscription's invoice context
+              Webhook debugger after invoice queue
             </a>
             <a
               class="ax-link-quiet"
@@ -450,7 +388,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
                   <%= Copy.resource_state_copy(:dunning, :queue_empty, surface: :subscription_detail).body %>
                 </p>
                 <p class="ax-body ax-detail-hint">
-                  Use the global dunning funnel from the health summary. Open this subscription's local invoice context only when you do not need the global queue.
+                  Use Recovery analytics for global dunning trends. Open this subscription's local invoice context only when you do not need the global queue.
                 </p>
               <% end %>
 
@@ -1144,22 +1082,6 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
       "Charge amount not shown"
     ]
     |> Enum.reject(&is_nil/1)
-  end
-
-  defp setup_field_impacts(caveats) do
-    Enum.map(caveats, fn
-      "Renewal date not shown" ->
-        "Renewal date"
-
-      "Price not shown" ->
-        "Price"
-
-      "Charge amount not shown" ->
-        "Charge amount"
-
-      caveat ->
-        caveat
-    end)
   end
 
   defp mrr_summary(_subscription), do: not_projected_copy(:amount)

@@ -80,9 +80,9 @@ if Mix.env() != :prod do
             />
             <div class="ax-component-kitchen-title-row">
               <h1 class="ax-heading ax-component-kitchen-title">Billing health: Unhealthy</h1>
-              <span class="ax-component-kitchen-header-status">Cause: 2 open invoices / $592.50</span>
+              <span class="ax-component-kitchen-header-status">Open invoice total: $592.50</span>
             </div>
-            <p class="ax-page-description">Next action: collect invoices to $0.00, then debug webhooks and audit Events.</p>
+            <p class="ax-page-description">Healthy means open invoices are $0.00; collect the invoice queue first.</p>
             <div class="ax-page-actions">
               <a class="ax-button ax-button-primary ax-button-sm ax-dev-invoice-action ax-dev-invoice-primary" href={@admin_mount_path <> "/invoices?status=open"}>
                 <Icon.icon name={:invoices} size="sm" /> Collect open invoices first

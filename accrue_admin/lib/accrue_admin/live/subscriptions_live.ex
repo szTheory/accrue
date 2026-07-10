@@ -468,10 +468,9 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
         <a href="#{subscription_invoices_href}" class="ax-link ax-subscription-row-invoice-action">Work open invoices</a>
         <a href="#{subscription_invoices_href}&work=send_reminder" class="ax-link ax-subscription-row-invoice-action">Send reminder</a>
       </span>
-      <span class="ax-webhook-row-status ax-webhook-row-status-warning ax-subscription-row-signal-secondary">
-        <strong>Webhook debug path</strong>
-        <span>Payload, response, retry trail, and replay controls</span>
-        <a href="#{webhook_href}" class="ax-button ax-button-warning ax-button-sm ax-subscription-row-webhook-action">Open failed delivery debugger</a>
+      <span class="ax-subscription-row-signal-secondary">
+        <strong>Webhook follow-up</strong>
+        <a href="#{webhook_href}" class="ax-link ax-subscription-row-webhook-action">Debug failed deliveries after invoice queue</a>
       </span>
       <span class="ax-subscription-row-admin-chips"><span class="ax-chip ax-label">Owner: #{escaped_o}</span> <span class="ax-chip ax-label">Tax: #{escaped_t}</span></span>
       <span class="ax-data-table-inline-actions">
@@ -506,16 +505,16 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
     Phoenix.HTML.raw("""
     <span class="ax-stack-sm">
       <span class="ax-subscription-row-primary-line">
-        <a href="#{customer_href}" class="ax-link ax-subscription-row-customer">Customer billing context: #{escape(customer_label(row))} / #{subscription_id}</a>
+        <a href="#{customer_href}" class="ax-link ax-subscription-row-customer">Open unified customer view: #{escape(customer_label(row))}</a>
         <span class="ax-subscription-row-state ax-status-badge ax-status-badge-#{state_tone}">
           <span class="ax-status-dot"></span>#{escape(state_label)}
         </span>
       </span>
-      <span class="ax-subscription-row-customer-scope">Unified customer view with this subscription selected</span>
+      <span class="ax-subscription-row-customer-scope">All subscriptions for this customer; current subscription #{subscription_id}</span>
       <span class="ax-subscription-row-meta-grid">
         <span class="ax-subscription-row-meta"><strong>Customer ID</strong> #{customer_id}</span>
         <a href="#{subscription_href}" class="ax-subscription-row-meta ax-subscription-row-id"><strong>Subscription</strong> #{subscription_id}</a>
-        <a href="#{subscription_invoices_href}" class="ax-link ax-subscription-row-invoices">Open this subscription's open invoices</a>
+        <a href="#{subscription_invoices_href}" class="ax-link ax-subscription-row-invoices">Open invoice queue records for this subscription</a>
       </span>
     </span>
     """)
