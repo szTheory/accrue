@@ -387,31 +387,31 @@ defmodule AccrueAdmin.Live.DashboardLive do
       stats.open_invoice_count > 0 &&
         %{
           tone: "warning",
-          priority: "1 Invoice queue",
+          priority: "1 Fix invoices",
           metric: count(stats.open_invoice_count, "open invoice"),
           label:
             "above $0.00 target - #{format_minor(stats.open_invoice_balance_minor, "usd")} open",
-          pill: "primary queue",
+          pill: nil,
           action: "Open invoice queue",
           href: ScopedPath.build(mount_path, "/invoices", scope, %{"status" => "open"})
         },
       stats.blocked_webhook_count > 0 &&
         %{
           tone: "danger",
-          priority: "2 Webhooks",
+          priority: "2 Debug webhooks",
           metric: count(stats.blocked_webhook_count, "webhook"),
           label: Copy.home_attention_webhooks_label(),
-          pill: "needs review",
+          pill: nil,
           action: "Debug failed webhook queue",
           href: ScopedPath.build(mount_path, "/webhooks", scope, %{"status" => "failed,dead"})
         },
       stats.past_due_subscription_count > 0 &&
         %{
           tone: "warning",
-          priority: "3 Recovery",
+          priority: "3 Recover",
           metric: count(stats.past_due_subscription_count, "subscription"),
           label: Copy.home_attention_past_due_label(),
-          pill: "status: at risk",
+          pill: nil,
           action: Copy.home_attention_action_recover(),
           href: ScopedPath.build(mount_path, "/analytics/recovery", scope)
         },
@@ -429,19 +429,21 @@ defmodule AccrueAdmin.Live.DashboardLive do
     |> Enum.filter(& &1)
   end
 
-  defp attention_health_summary(_stats), do: "Billing status: Unhealthy"
+  defp attention_health_summary(_stats), do: "Billing is unhealthy"
 
   defp attention_health_issue_summary(stats) do
-    issue_count =
-      [
-        stats.open_invoice_count,
-        stats.blocked_webhook_count,
-        stats.past_due_subscription_count,
-        stats.failed_meter_event_count
-      ]
-      |> Enum.count(&(&1 > 0))
-
-    "#{count(issue_count, "queue")} needs action"
+    [
+      stats.open_invoice_count > 0 &&
+        "Fix #{count(stats.open_invoice_count, "open invoice")}",
+      stats.blocked_webhook_count > 0 &&
+        "Debug #{count(stats.blocked_webhook_count, "failed webhook")}",
+      stats.past_due_subscription_count > 0 &&
+        "Recover #{count(stats.past_due_subscription_count, "past-due subscription")}",
+      stats.failed_meter_event_count > 0 &&
+        "Clear #{count(stats.failed_meter_event_count, "blocked usage record")}"
+    ]
+    |> Enum.filter(& &1)
+    |> Enum.join(", ")
   end
 
   defp attention_health_metrics(stats),

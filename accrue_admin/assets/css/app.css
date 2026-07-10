@@ -2086,8 +2086,8 @@ a.ax-kpi-card--linked:focus-visible {
 .ax-component-kitchen-header-status {
   display: inline-flex;
   align-items: center;
-  min-height: 1.5rem;
-  padding: 0 0.4375rem;
+  min-height: 1.625rem;
+  padding: 0 0.5rem;
   border: 1px solid var(--ax-status-danger-border);
   border-radius: var(--ax-radius-sm);
   background: var(--ax-status-danger-solid);
@@ -3811,6 +3811,16 @@ a.ax-kpi-card--linked:focus-visible {
   border-right-color: color-mix(in srgb, var(--ax-status-danger-border) 64%, transparent);
 }
 
+.ax-dev-health-snapshot-header .ax-dev-health-status {
+  flex-basis: 100%;
+  padding-right: 0;
+  border-right: 0;
+}
+
+.ax-dev-health-snapshot-header .ax-dev-health-status em {
+  font-weight: 950;
+}
+
 .ax-dev-health-snapshot-header strong,
 .ax-dev-health-snapshot-header em,
 .ax-dev-health-snapshot-header a {
@@ -4115,10 +4125,20 @@ a.ax-kpi-card--linked:focus-visible {
   gap: var(--ax-space-sm);
 }
 
+.ax-subscriptions-header.ax-page-header-compact .ax-data-table-filters {
+  gap: 0.0625rem;
+}
+
 .ax-page-header-compact .ax-input,
 .ax-page-header-compact .ax-select {
   min-height: 2.375rem;
   padding-block: 0.5rem;
+}
+
+.ax-subscriptions-header.ax-page-header-compact .ax-input,
+.ax-subscriptions-header.ax-page-header-compact .ax-select {
+  min-height: 1.75rem;
+  padding-block: 0.125rem;
 }
 
 .ax-data-table-card,
@@ -6403,6 +6423,13 @@ button.ax-launcher {
   min-height: 1.625rem;
   padding-inline: 0.5rem;
   box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ax-status-warning-border) 68%, transparent), var(--ax-shadow-sm);
+}
+
+.ax-detail-process-next {
+  min-height: 1.625rem;
+  padding-inline: 0.5rem;
+  border-width: 2px;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ax-accent-border) 68%, transparent), var(--ax-shadow-sm);
 }
 
 .ax-detail-invoice-primary {

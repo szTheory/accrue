@@ -107,11 +107,11 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
             <p class="ax-subscriptions-health-line">
               <strong class="ax-subscriptions-heading-verdict"><%= subscriptions_health_verdict(@summary) %></strong>
               <span class="ax-subscriptions-heading-metric"><strong><%= count(@summary.open_invoice_count, "open invoice") %></strong></span>
-              <span class="ax-subscriptions-heading-metric"><strong><%= format_minor(@summary.open_invoice_exposure_minor, "usd") %></strong> exposure</span>
-              <span class="ax-subscriptions-heading-metric"><strong>$0.00</strong> target</span>
+              <span class="ax-subscriptions-heading-metric"><strong><%= format_minor(@summary.open_invoice_exposure_minor, "usd") %></strong> open invoice exposure</span>
+              <span class="ax-subscriptions-heading-metric"><strong>$0.00</strong> exposure target</span>
             </p>
             <p class="ax-subscriptions-route-line">
-              Use Invoices for receivables, Webhooks to Events for failed deliveries, and Recovery for dunning.
+              Immediate action: collect open invoices, debug failed webhook deliveries, then review dunning recovery.
             </p>
           </:description>
           <:actions>
@@ -132,7 +132,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
                 })
               }
             >
-              Open Webhooks to Events
+              Debug failed webhooks
             </a>
             <a
               class="ax-button ax-button-secondary ax-button-sm"
@@ -399,7 +399,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
       <span class="ax-webhook-row-status ax-webhook-row-status-warning ax-subscription-row-signal-secondary">
         <strong>Row webhook attempts</strong>
         <span>This subscription's failed subscription.created deliveries</span>
-        <a href="#{webhook_href}" class="ax-link ax-subscription-row-webhook-action">Open Webhooks to Events for this subscription</a>
+        <a href="#{webhook_href}" class="ax-link ax-subscription-row-webhook-action">Debug failed webhooks for this subscription</a>
       </span>
       <span class="ax-subscription-row-admin-chips"><span class="ax-chip ax-label">Owner: #{escaped_o}</span> <span class="ax-chip ax-label">Tax: #{escaped_t}</span></span>
       <span class="ax-data-table-inline-actions">
@@ -451,7 +451,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
   defp customer_label(row), do: row.customer_name || row.customer_email || row.customer_id
 
   defp subscriptions_health_verdict(%{open_invoice_count: count}) when count > 0,
-    do: "Billing status: Unhealthy"
+    do: "Billing is unhealthy: open invoices above target"
 
   defp subscriptions_health_verdict(_summary), do: "Billing status: Healthy"
 

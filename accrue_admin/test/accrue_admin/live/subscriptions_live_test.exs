@@ -90,7 +90,7 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert html =~ ~s(data-ax-page-actions)
     refute html =~ "Search customer, open detail"
 
-    assert html =~ "Billing status: Unhealthy" or
+    assert html =~ "Billing is unhealthy: open invoices above target" or
              html =~ "Billing status: Healthy"
 
     assert html =~ "exposure"
@@ -100,8 +100,8 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert html =~ "Open invoice queue for"
     assert html =~ "View dunning funnel dashboard"
 
-    assert html =~ "Recovery for dunning"
-    assert html =~ "Webhooks to Events"
+    assert html =~ "review dunning recovery"
+    assert html =~ "Debug failed webhooks"
     assert html =~ "Dunning funnel and invoice queue summary"
     assert html =~ "At-risk subscriptions"
     assert html =~ "Invoice queue"
@@ -116,7 +116,7 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert html =~ "Latest audit event: subscription.created by Accrue system"
     assert html =~ "Open full audit event log"
     assert html =~ "Filter admin actors"
-    assert html =~ "Open Webhooks to Events"
+    assert html =~ "Debug failed webhooks"
     refute html =~ "Billing health: Unhealthy"
     assert_one_h1(html)
 
@@ -139,7 +139,7 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert html =~ "Dedicated Invoices queue"
     assert html =~ "Billing status:"
     assert html =~ "ax-subscription-row-state"
-    assert html =~ "Webhooks to Events"
+    assert html =~ "Debug failed webhooks"
     assert html =~ "Who did what, when?"
     assert html =~ ~s(data-ax-state="filtered-empty") or html =~ ~s(data-ax-state="populated")
     refute html =~ "No subscriptions yet."
@@ -275,17 +275,20 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert html =~ "target"
     refute html =~ "ax-health-verdict"
     assert html =~ "Open invoice queue for this subscription"
-    assert html =~ "Open Webhooks to Events for this subscription"
+    assert html =~ "Debug failed webhooks for this subscription"
     assert html =~ "Row webhook attempts"
     assert html =~ "failed subscription.created delivery attempts"
-    assert html =~ "Billing status: Unhealthy" or html =~ "Billing status: Healthy"
+
+    assert html =~ "Billing is unhealthy: open invoices above target" or
+             html =~ "Billing status: Healthy"
+
     assert html =~ "Open who did what, when event log"
     assert html =~ "Owner: User"
     assert html =~ "Tax: Off"
     assert html =~ "Actor"
     assert html =~ "Event"
     refute html =~ "Search customer, open detail"
-    assert html =~ "Open Webhooks to Events"
+    assert html =~ "Debug failed webhooks"
     assert html =~ "Setup gap"
     assert html =~ "Amount not confirmed in admin"
 

@@ -6,12 +6,11 @@ defmodule AccrueAdmin.ComponentKitchenLiveTest do
 
     assert {:ok, _view, html} = live(conn, "/billing/dev/components")
 
-    assert html =~ "Billing health command center"
-    assert html =~ "Find one customer is the primary support path"
+    assert html =~ "Billing is unhealthy"
+    assert html =~ "Work the invoice queue, debug failed webhook deliveries"
     assert html =~ "Primary action"
     assert html =~ "Secondary action"
-    assert html =~ "Billing status"
-    assert html =~ "Unhealthy"
+    assert html =~ "Unhealthy until queues are cleared"
     assert html =~ "More billing actions"
     assert html =~ "View dunning funnel and at-risk"
     assert html =~ "Dashboard"
@@ -29,7 +28,7 @@ defmodule AccrueAdmin.ComponentKitchenLiveTest do
     assert html =~ "Who did what, when?"
     assert html =~ "Find one customer"
     assert html =~ "Open invoice queue: 2 invoices, $592.50 exposure"
-    assert html =~ "Webhook events"
+    assert html =~ "Debug failed webhooks"
     refute html =~ "Find one customer and open billing 360 detail"
     assert html =~ "View full audit history"
     assert html =~ "billing.contact.updated"
@@ -42,7 +41,7 @@ defmodule AccrueAdmin.ComponentKitchenLiveTest do
     assert html =~ "Billing health answer"
     assert html =~ "Invoices queue: work receivables"
     refute html =~ "Work invoice queue in this billing alert"
-    assert html =~ "Dunning funnel"
+    assert html =~ "Watch dunning funnel"
     assert html =~ "Open invoice queue"
     assert html =~ "Who did what, when? Actor-filtered audit log"
     assert html =~ "Open failed-webhook debugger"

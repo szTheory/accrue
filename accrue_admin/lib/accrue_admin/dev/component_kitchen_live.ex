@@ -79,15 +79,15 @@ if Mix.env() != :prod do
               ]}
             />
             <div class="ax-component-kitchen-title-row">
-              <h1 class="ax-heading ax-component-kitchen-title">Billing health command center</h1>
-              <span class="ax-component-kitchen-header-status">Billing Health: Unhealthy</span>
+              <h1 class="ax-heading ax-component-kitchen-title">Billing is unhealthy</h1>
+              <span class="ax-component-kitchen-header-status">2 open invoices, 3 failed webhooks, 1 past-due subscription</span>
             </div>
-            <p class="ax-page-description">Find one customer is the primary support path; invoice, webhook, and recovery routes stay visible as direct handoffs.</p>
+            <p class="ax-page-description">Work the invoice queue, debug failed webhook deliveries, and watch dunning recovery from one command center.</p>
             <section :if={@available?} class="ax-dev-health-snapshot ax-dev-health-snapshot-header" aria-label="Billing health answer">
-              <span class="ax-dev-health-status"><strong>Billing status</strong><em>Unhealthy</em></span>
-              <span><strong>Primary work</strong><a class="ax-link" href={@admin_mount_path <> "/invoices?status=open"}>Open invoice queue</a></span>
-              <span><strong>Customer path</strong><a class="ax-link" href={@admin_mount_path <> "/customers"}>Find one customer</a></span>
-              <span><strong>Webhook path</strong><a class="ax-link" href={@admin_mount_path <> "/webhooks?status=failed,dead"}>Webhook events</a></span>
+              <span class="ax-dev-health-status"><strong>Status</strong><em>Unhealthy until queues are cleared</em></span>
+              <span><strong>Fix first</strong><a class="ax-link" href={@admin_mount_path <> "/invoices?status=open"}>Open invoice queue</a></span>
+              <span><strong>Then debug</strong><a class="ax-link" href={@admin_mount_path <> "/webhooks?status=failed,dead"}>Failed webhook deliveries</a></span>
+              <span><strong>Support</strong><a class="ax-link" href={@admin_mount_path <> "/customers"}>Find one customer</a></span>
             </section>
             <div class="ax-page-actions">
               <a class="ax-button ax-button-primary ax-button-sm ax-dev-customer-action ax-dev-customer-primary" href={@admin_mount_path <> "/customers"}>
@@ -97,17 +97,16 @@ if Mix.env() != :prod do
                 <Icon.icon name={:invoices} size="sm" /> Open invoice queue: 2 invoices, $592.50 exposure
               </a>
               <a class="ax-button ax-button-secondary ax-button-sm ax-dev-webhook-action" href={@admin_mount_path <> "/webhooks?status=failed,dead"}>
-                <Icon.icon name={:webhooks} size="sm" /> Webhook events
+                <Icon.icon name={:webhooks} size="sm" /> Debug failed webhooks
               </a>
-              <a class="ax-button ax-button-secondary ax-button-sm ax-dev-dunning-action" href={@admin_mount_path <> "/analytics/recovery"}>
-                <Icon.icon name={:recovery} size="sm" /> View dunning funnel
+              <a class="ax-button ax-button-recovery ax-button-sm ax-dev-dunning-action" href={@admin_mount_path <> "/analytics/recovery"}>
+                <Icon.icon name={:recovery} size="sm" /> Watch dunning funnel
               </a>
             </div>
             <section :if={@available?} class="ax-dev-route-strip" aria-label="Secondary billing routes">
               <a class="ax-dev-secondary-route" href={@admin_mount_path <> "/customers"}>Customer detail: see everything</a>
               <a class="ax-dev-secondary-route" href={@admin_mount_path <> "/invoices?status=open"}>Invoices queue: work receivables</a>
               <a class="ax-dev-secondary-route" href={@admin_mount_path <> "/webhooks?status=failed,dead"}>Webhook events: debug failed deliveries</a>
-              <a class="ax-dev-secondary-route" href={@admin_mount_path <> "/analytics/recovery"}>Dunning funnel: recovery analytics</a>
             </section>
           </header>
 

@@ -220,12 +220,12 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
             <strong class="ax-detail-health-verdict"><%= health.headline %></strong>
             <span class="ax-detail-health-body"><%= health.body %></span>
           </div>
-          <div :if={health.caveats != []} class="ax-detail-health-caveats" aria-label="Missing data blocking billing health">
-            <strong>Missing fields:</strong>
+          <div :if={health.caveats != []} class="ax-detail-health-caveats" aria-label="Setup fields needed before billing projections are reliable">
+            <strong>Setup fields:</strong>
             <span class="ax-detail-health-caveat"><%= Enum.join(health.caveats, ", ") %></span>
           </div>
           <div :if={health.caveats != []} class="ax-detail-setup-actions" aria-label="Fix missing billing data">
-            <span class="ax-detail-health-body">Fix setup fields before trusting revenue, dunning, or renewal decisions.</span>
+            <span class="ax-detail-health-body">Complete these setup fields before using revenue, dunning, or renewal projections.</span>
             <a
               class="ax-button ax-button-secondary ax-button-sm"
               href={ScopedPath.build(@admin_mount_path, "/customers/#{@customer.id}", @current_owner_scope)}
@@ -300,7 +300,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
               </li>
             </ul>
             <a
-              class="ax-button ax-button-secondary ax-button-sm"
+              class="ax-button ax-button-primary ax-button-sm ax-detail-process-next"
               href={ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope, %{"status" => "open", "work" => "next"})}
             >
               Process next invoice
@@ -334,7 +334,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
                 })
               }
             >
-              Open Webhooks to Events
+              Debug failed webhook deliveries
             </a>
             <span class="ax-detail-priority-note">failed subscription.created deliveries open with payload, response, retry trail, and replay controls.</span>
           </div>
@@ -1086,10 +1086,10 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
         %{
           tone: "amber",
           label: "Setup missing",
-          answer: "Billing status: Unhealthy",
-          headline: "Setup missing: #{pluralize(length(caveats), "field")}",
+          answer: "Setup incomplete",
+          headline: "Complete #{pluralize(length(caveats), "setup field")}",
           body:
-            "Setup fields are missing. Use Invoices for receivables; complete these fields before trusting revenue, dunning, or renewal decisions.",
+            "Billing projections are limited until the customer profile has the required renewal, price, and charge fields.",
           caveats: caveats
         }
 
@@ -1146,7 +1146,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
   end
 
   defp detail_health_metric(%{caveats: caveats}) when is_list(caveats) and caveats != [],
-    do: "Setup data missing"
+    do: "#{pluralize(length(caveats), "setup field")} needed"
 
   defp detail_health_metric(%{tone: "moss"}), do: "0 blockers"
 
