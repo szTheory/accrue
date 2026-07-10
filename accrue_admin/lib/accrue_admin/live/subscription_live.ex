@@ -235,6 +235,23 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
           </:facts>
           <:actions>
             <a
+              class="ax-button ax-button-primary ax-button-sm ax-detail-invoice-primary"
+              href={ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope, %{"status" => "open"})}
+            >
+              Go to Invoices queue workspace
+            </a>
+            <a
+              class="ax-button ax-button-warning ax-button-sm ax-detail-webhook-primary"
+              href={
+                ScopedPath.build(@admin_mount_path, "/webhooks", @current_owner_scope, %{
+                  "status" => "failed,dead",
+                  "type" => "subscription.created"
+                })
+              }
+            >
+              Open Webhooks to Events
+            </a>
+            <a
               class="ax-button ax-button-secondary ax-button-sm"
               href={ScopedPath.build(@admin_mount_path, "", @current_owner_scope)}
             >
@@ -322,7 +339,18 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
             >
               Debug failed webhooks end-to-end
             </a>
-            <span class="ax-detail-priority-note">Opens failed subscription.created deliveries with payload, response, retry trail, and replay controls.</span>
+            <a
+              class="ax-link-quiet"
+              href={
+                ScopedPath.build(@admin_mount_path, "/webhooks", @current_owner_scope, %{
+                  "status" => "failed,dead",
+                  "type" => "subscription.created"
+                })
+              }
+            >
+              Open Webhooks to Events
+            </a>
+            <span class="ax-detail-priority-note">failed subscription.created deliveries open with payload, response, retry trail, and replay controls.</span>
           </div>
           <div class="ax-detail-priority-links">
             <a
@@ -1036,7 +1064,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
           answer: "Billing status: Unhealthy",
           headline: "Setup missing: #{pluralize(length(caveats), "field")}",
           body:
-            "This is not an active payment failure. Use Invoices for receivables; fill setup fields before trusting revenue, dunning, or renewal decisions.",
+            "Setup fields are missing. Use Invoices for receivables; complete these fields before trusting revenue, dunning, or renewal decisions.",
           caveats: caveats
         }
 
@@ -1093,7 +1121,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
   end
 
   defp detail_health_metric(%{caveats: caveats}) when is_list(caveats) and caveats != [],
-    do: "Setup missing: #{pluralize(length(caveats), "field")}"
+    do: "#{pluralize(length(caveats), "field")} blocking billing confidence"
 
   defp detail_health_metric(%{tone: "moss"}), do: "0 blockers"
 

@@ -146,7 +146,7 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
     assert html =~ "Charge amount not shown"
 
     assert html =~
-             "This is not an active payment failure. Use Invoices for receivables; fill setup fields before trusting revenue, dunning, or renewal decisions."
+             "Setup fields are missing. Use Invoices for receivables; complete these fields before trusting revenue, dunning, or renewal decisions."
 
     assert html =~
              "Fix setup fields before trusting revenue, dunning, or renewal decisions."

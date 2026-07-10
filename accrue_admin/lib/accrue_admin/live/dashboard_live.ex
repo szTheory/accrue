@@ -84,11 +84,11 @@ defmodule AccrueAdmin.Live.DashboardLive do
             </a>
             <button
               type="button"
-              class="ax-button ax-button-secondary ax-button-sm ax-home-customer-search-cta"
+              class="ax-button ax-button-primary ax-button-sm ax-home-customer-search-cta"
               data-command-palette-trigger="true"
               data-ax-command-palette-trigger="true"
             >
-              Search all customers
+              Find one customer
               <Icon.icon name={:search} size="sm" />
             </button>
             <a
@@ -171,13 +171,10 @@ defmodule AccrueAdmin.Live.DashboardLive do
             <a class="ax-launcher ax-launcher-recovery" href={ScopedPath.build(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}>
               <span class="ax-launcher-icon"><Icon.icon name={:recovery} size="lg" /></span>
               <span class="ax-launcher-title"><%= Copy.home_launcher_recovery_title() %></span>
-              <span class="ax-launcher-copy"><%= Copy.home_launcher_recovery_copy() %></span>
-              <span class="ax-launcher-meta">Dunning funnel metrics inline</span>
+              <span class="ax-launcher-health ax-launcher-health-warning">Recovery status: At risk</span>
+              <span class="ax-launcher-copy">Dunning funnel metrics and retry state live here.</span>
               <span class="ax-launcher-meta ax-launcher-meta-warn">
                 At-risk now: <%= count(@stats.past_due_subscription_count, "subscription") %>
-              </span>
-              <span class="ax-launcher-meta ax-launcher-meta-actions">
-                Retry monitor: <%= count(@stats.blocked_webhook_count, "failed webhook") %>; open receivables: <%= count(@stats.open_invoice_count, "invoice") %>
               </span>
               <span class="ax-launcher-action ax-launcher-action-button">
                 Open dunning funnel analytics <Icon.icon name={:arrow_right} size="sm" />
@@ -414,7 +411,7 @@ defmodule AccrueAdmin.Live.DashboardLive do
           priority: "3 Recovery",
           metric: count(stats.past_due_subscription_count, "subscription"),
           label: Copy.home_attention_past_due_label(),
-          pill: "at risk",
+          pill: "status: at risk",
           action: Copy.home_attention_action_recover(),
           href: ScopedPath.build(mount_path, "/analytics/recovery", scope)
         },

@@ -98,8 +98,8 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert html =~ "Open invoice queue for"
     assert html =~ "View dunning funnel dashboard"
 
-    assert html =~ "Recovery:"
-    assert html =~ "failed webhook"
+    assert html =~ "Recovery for dunning"
+    assert html =~ "Webhooks to Events"
     assert html =~ "Dunning funnel and invoice queue summary"
     assert html =~ "At-risk subscriptions"
     assert html =~ "Invoice queue"
@@ -107,14 +107,14 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     refute html =~ "Bulk invoice actions"
     refute html =~ "Process next invoice"
     refute html =~ "Send invoice reminders"
-    assert html =~ "Find customer record"
+    assert html =~ "Find one customer"
     refute html =~ "Who did what, when - filter admin actors"
     assert html =~ "Open invoice queue for this subscription"
     assert html =~ "Who did what, when?"
     assert html =~ "Latest audit event: subscription.created by Accrue system"
     assert html =~ "Open full audit event log"
     assert html =~ "Filter admin actors"
-    assert html =~ "Debug failed webhooks end-to-end"
+    assert html =~ "Open Webhooks to Events"
     refute html =~ "Billing health: Unhealthy"
     assert_one_h1(html)
 
@@ -137,7 +137,7 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert html =~ "Dedicated Invoices queue"
     assert html =~ "Billing status:"
     assert html =~ "ax-subscription-row-state"
-    assert html =~ "failed webhook"
+    assert html =~ "Webhooks to Events"
     assert html =~ "Who did what, when?"
     assert html =~ ~s(data-ax-state="filtered-empty") or html =~ ~s(data-ax-state="populated")
     refute html =~ "No subscriptions yet."
@@ -272,7 +272,7 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert html =~ "open exposure" or html =~ "above $0.00 target"
     refute html =~ "ax-health-verdict"
     assert html =~ "Open invoice queue for this subscription"
-    assert html =~ "Open this row&#39;s delivery attempts"
+    assert html =~ "Open Webhooks to Events for this subscription"
     assert html =~ "Row webhook attempts"
     assert html =~ "failed subscription.created delivery attempts"
     assert html =~ "Billing status: Unhealthy" or html =~ "Billing status: Healthy"
@@ -282,7 +282,7 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert html =~ "Actor"
     assert html =~ "Event"
     refute html =~ "Search customer, open detail"
-    assert html =~ "Debug failed webhooks end-to-end"
+    assert html =~ "Open Webhooks to Events"
     assert html =~ "Setup gap"
     assert html =~ "Amount not confirmed in admin"
 
@@ -290,7 +290,7 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
              html =~ "above $0.00 target."
 
     assert_table_headings_in_order(html, [
-      "Customer and subscription IDs",
+      "Customer details",
       "State",
       "Plan / amount",
       "Renews / ends",
@@ -309,7 +309,7 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert {:ok, _view, html} = live(conn, "/billing/subscriptions?view=all")
 
     assert html =~ "phase196-primary@example.com"
-    assert html =~ "Open this row&#39;s customer record: phase196-primary@example.com"
+    assert html =~ "View customer: phase196-primary@example.com"
     assert html =~ "Customer ID"
     assert html =~ subscription.customer_id
     assert html =~ "Subscription"

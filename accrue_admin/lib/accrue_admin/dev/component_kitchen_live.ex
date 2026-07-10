@@ -74,31 +74,33 @@ if Mix.env() != :prod do
             <Breadcrumbs.breadcrumbs
               items={[
                 %{label: "Dashboard", href: @admin_mount_path},
-                %{label: "Webhooks", href: @admin_mount_path <> "/webhooks?status=failed,dead"},
-                %{label: "Events", href: @admin_mount_path <> "/events?type=subscription.created"},
-                %{label: "Billing health"}
+                %{label: "Billing health", href: @admin_mount_path},
+                %{label: "Component kitchen"}
               ]}
             />
             <h1 class="ax-heading ax-component-kitchen-title">Billing health command center</h1>
-            <p class="ax-page-description">Customer detail is the primary support path; billing routes stay visible as secondary handoffs.</p>
+            <p class="ax-page-description">Find one customer is the primary support path; invoice, webhook, and recovery routes stay visible as direct handoffs.</p>
             <div class="ax-page-actions">
               <a class="ax-button ax-button-primary ax-button-sm ax-dev-customer-action ax-dev-customer-primary" href={@admin_mount_path <> "/customers"}>
-                <Icon.icon name={:search} size="sm" /> Primary action: find one customer record
+                <Icon.icon name={:search} size="sm" /> Find one customer
               </a>
               <a class="ax-button ax-button-secondary ax-button-sm ax-dev-invoice-action ax-dev-invoice-primary" href={@admin_mount_path <> "/invoices?status=open"}>
-                <Icon.icon name={:invoices} size="sm" /> Open invoice queue: 2 invoices, $592.50 exposure
+                <Icon.icon name={:invoices} size="sm" /> Work invoice queue: 2 invoices, $592.50 exposure
               </a>
               <a class="ax-button ax-button-secondary ax-button-sm ax-dev-dunning-action" href={@admin_mount_path <> "/analytics/recovery"}>
                 <Icon.icon name={:recovery} size="sm" /> View dunning funnel
               </a>
             </div>
-            <section :if={@available?} class="ax-dev-health-snapshot ax-dev-health-snapshot-header" aria-label="Billing health snapshot">
-              <span><strong>Billing Health</strong><em>Unhealthy</em></span>
-              <span><strong>Invoices</strong><em>2 open, $592.50 over target</em></span>
-              <span><strong>Primary route</strong><a class="ax-link" href={@admin_mount_path <> "/customers"}>Customer detail</a></span>
-              <span><strong>Invoice route</strong><em>Use the queue button below</em></span>
-              <span><strong>Webhook route</strong><a class="ax-link" href={@admin_mount_path <> "/webhooks?status=failed,dead"}>Webhooks to Events</a></span>
-              <span><strong>Recovery route</strong><a class="ax-link" href={@admin_mount_path <> "/analytics/recovery"}>Dunning funnel</a></span>
+            <section :if={@available?} class="ax-dev-health-snapshot ax-dev-health-snapshot-header" aria-label="Billing health answer">
+              <span class="ax-dev-health-status"><strong>Billing status</strong><em>Unhealthy</em></span>
+              <span><strong>Primary work</strong><a class="ax-link" href={@admin_mount_path <> "/invoices?status=open"}>Work invoice queue</a></span>
+              <span><strong>Customer path</strong><a class="ax-link" href={@admin_mount_path <> "/customers"}>Find one customer</a></span>
+            </section>
+            <section :if={@available?} class="ax-dev-route-strip" aria-label="Secondary billing routes">
+              <a class="ax-dev-secondary-route" href={@admin_mount_path <> "/customers"}>Customer detail: see everything</a>
+              <a class="ax-dev-secondary-route" href={@admin_mount_path <> "/invoices?status=open"}>Invoices queue: work receivables</a>
+              <a class="ax-dev-secondary-route" href={@admin_mount_path <> "/webhooks?status=failed,dead"}>Webhooks to Events: failed delivery debug</a>
+              <a class="ax-dev-secondary-route" href={@admin_mount_path <> "/analytics/recovery"}>Dunning funnel: recovery analytics</a>
             </section>
           </header>
 
@@ -111,14 +113,17 @@ if Mix.env() != :prod do
 
           <section :if={@available?} class="ax-inline-worklist ax-dev-production-strip" aria-label="Production billing entrypoints">
             <div class="ax-inline-worklist-copy">
-              <strong>Billing healthy right now: No</strong>
+              <strong>Billing status: Unhealthy</strong>
               <span>2 open invoices</span>
               <span>$592.50 exposure over $0.00 target</span>
-              <span>Customer support path: find one customer record and open the full billing context.</span>
+              <span>Customer support path: find one customer and open the full billing context.</span>
             </div>
             <div class="ax-inline-worklist-actions">
               <a class="ax-button ax-button-primary ax-button-sm ax-dev-invoice-action" href={@admin_mount_path <> "/invoices?status=open"}>
-                Open invoice queue view: 2 open invoices
+                Work invoice queue: 2 open invoices
+              </a>
+              <a class="ax-button ax-button-secondary ax-button-sm ax-dev-customer-action" href={@admin_mount_path <> "/customers"}>
+                Find one customer
               </a>
             </div>
           </section>
@@ -132,6 +137,11 @@ if Mix.env() != :prod do
               <li><strong>Northstar Labs</strong><span>$420.00 open</span><em>Send reminder</em></li>
               <li><strong>Acme Field Ops</strong><span>$172.50 open</span><em>Review collection note</em></li>
             </ol>
+            <div class="ax-inline-worklist-actions">
+              <a class="ax-button ax-button-primary ax-button-sm ax-dev-invoice-action" href={@admin_mount_path <> "/invoices?status=open"}>
+                Work queue
+              </a>
+            </div>
           </section>
 
           <section :if={@available?} class="ax-inline-worklist ax-dev-audit-strip" aria-label="Component kitchen audit trail">
@@ -919,7 +929,7 @@ if Mix.env() != :prod do
                 <div class="ax-dev-group-action-cluster">
                   <span class="ax-label">Queues</span>
                   <div class="ax-detail-actions-row ax-dev-group-drawer-primary-actions">
-                    <a class="ax-button ax-button-primary ax-button-sm" href={@admin_mount_path <> "/invoices?status=open"}>Open invoice queue view for 2 open invoices</a>
+                    <a class="ax-button ax-button-primary ax-button-sm" href={@admin_mount_path <> "/invoices?status=open"}>Work invoice queue for 2 open invoices</a>
                     <a class="ax-button ax-button-primary ax-button-sm" href={@admin_mount_path <> "/webhooks?status=failed,dead"}>Open failed-webhook debugger</a>
                   </div>
                 </div>

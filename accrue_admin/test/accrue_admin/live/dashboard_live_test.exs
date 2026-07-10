@@ -123,7 +123,7 @@ defmodule AccrueAdmin.DashboardLiveTest do
     assert html =~ "Invoice queue details: $42.50 open"
     assert html =~ "$42.50 above $0.00 target"
     assert html =~ Copy.home_launcher_recovery_title()
-    assert html =~ "Dunning funnel metrics inline"
+    assert html =~ "Recovery status: At risk"
     assert html =~ "At-risk now:"
     assert html =~ "Open dunning funnel analytics"
     # Title relabeled in Phase 175-02 (IA-01 verb relabels); use Copy function directly.
@@ -172,7 +172,7 @@ defmodule AccrueAdmin.DashboardLiveTest do
     assert html =~ "Invoice queue details: $42.50 open"
 
     # IA-01 customer lookup entry point on Home (Plan 175-04)
-    assert html =~ "Search all customers"
+    assert html =~ "Find one customer"
     assert html =~ "ax-home-customer-search-cta"
   end
 end
