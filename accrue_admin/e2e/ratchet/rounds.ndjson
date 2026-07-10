@@ -84,3 +84,4 @@
 {"schema_version":"ratchet-round-seal/1","round":84,"dry":false,"epoch":1,"scope":"component-kitchen,dashboard,subscription-detail,subscriptions","bundle_sha256":"c11ffd2d080f469eb25fa89be4992224e86edf21ace83562eca086abdeea537d","seq":84}
 {"schema_version":"ratchet-round-seal/1","round":85,"dry":false,"epoch":1,"scope":"component-kitchen,dashboard,subscription-detail,subscriptions","bundle_sha256":"b881715d6c85357117c44d8b80446a0001f501c8d2e771baa45bd0eec1e2c694","seq":85}
 {"schema_version":"ratchet-round-seal/1","round":86,"dry":false,"epoch":1,"scope":"component-kitchen,dashboard,subscription-detail,subscriptions","bundle_sha256":"dacb39e07430f1d39f98ef64520e9ac4ee95c77002dab2f0854aa746a9f9cfca","seq":86}
+{"schema_version":"ratchet-round-seal/1","round":87,"dry":false,"epoch":1,"scope":"component-kitchen,dashboard,subscription-detail,subscriptions","bundle_sha256":"99b00667402d23e332bd17417dc5d0fc42bb754ce4f3ad4295e322e4832937e2","seq":87}
