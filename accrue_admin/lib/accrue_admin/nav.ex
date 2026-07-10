@@ -65,7 +65,7 @@ defmodule AccrueAdmin.Nav do
         badge: nil
       },
       %{
-        label: "Webhooks",
+        label: "Webhook events",
         href: nav_href(mount_path, "/webhooks", org),
         icon: :webhooks,
         group: "Developer",

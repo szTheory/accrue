@@ -3,9 +3,11 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
 
   use Phoenix.LiveView
 
+  import Ecto.Query
+
   alias Accrue.{Actor, Auth, Billing, Clock, Config, Events, PlanResolver}
-  alias Accrue.Billing.Subscription
-  alias Accrue.Billing.UpcomingInvoice
+  alias Accrue.Billing.{Invoice, Subscription, UpcomingInvoice}
+  alias Accrue.Invoices.Render, as: InvoiceRender
   alias Accrue.Dunning.Campaign
   alias Accrue.Repo
 
@@ -65,6 +67,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
          )
          |> assign(:subscription, subscription)
          |> assign(:customer, subscription.customer)
+         |> assign(:open_invoice_summary, open_invoice_summary(subscription))
          |> assign(:timeline_events, events)
          |> assign(:timeline_events_loaded?, true)
          |> assign(:raw_json_loaded?, false)
@@ -209,58 +212,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
         />
 
         <% health = detail_health_summary(@subscription) %>
-        <Detail.summary_card
-          eyebrow={Copy.subscription_detail_eyebrow()}
-          title={subscription_title(@subscription, @customer)}
-        >
-          <:status>
-            <span class={["ax-status-badge", "ax-status-badge-" <> health.tone]}>
-              <span class="ax-status-dot"></span><%= health.label %>
-            </span>
-            <span class="ax-summary-health-answer"><%= health.answer %></span>
-          </:status>
-          <:facts>
-            <span class="ax-summary-fact">
-              <strong>Subscription</strong>
-              <%= @subscription.processor_id || @subscription.id %>
-            </span>
-            <span class="ax-summary-fact">
-              <strong>Customer</strong>
-              <%= @customer.name || @customer.email || @customer.id %>
-            </span>
-            <span :for={fact <- summary_health_facts(@subscription)} class="ax-summary-fact">
-              <strong><%= fact.label %></strong>
-              <%= fact.value %>
-            </span>
-          </:facts>
-          <:actions>
-            <a
-              class="ax-button ax-button-primary ax-button-sm ax-detail-invoice-primary"
-              href={ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope, %{"status" => "open"})}
-            >
-              Go to Invoices queue workspace
-            </a>
-            <a
-              class="ax-button ax-button-warning ax-button-sm ax-detail-webhook-primary"
-              href={
-                ScopedPath.build(@admin_mount_path, "/webhooks", @current_owner_scope, %{
-                  "status" => "failed,dead",
-                  "type" => "subscription.created"
-                })
-              }
-            >
-              Open Webhooks to Events
-            </a>
-            <a
-              class="ax-button ax-button-secondary ax-button-sm"
-              href={ScopedPath.build(@admin_mount_path, "", @current_owner_scope)}
-            >
-              Open billing health dashboard
-            </a>
-          </:actions>
-        </Detail.summary_card>
-
-        <section class={["ax-detail-health-summary", "ax-detail-health-summary-" <> health.tone]} aria-label="Primary billing health summary">
+        <section class={["ax-detail-health-summary ax-detail-health-summary-top", "ax-detail-health-summary-" <> health.tone]} aria-label="Primary billing health summary">
           <div class="ax-detail-health-copy" role="status">
             <span class="ax-detail-health-label">Billing status</span>
             <strong class="ax-detail-health-answer"><%= health.answer %></strong>
@@ -294,6 +246,40 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
           </div>
         </section>
 
+        <Detail.summary_card
+          eyebrow={Copy.subscription_detail_eyebrow()}
+          title={subscription_title(@subscription, @customer)}
+        >
+          <:status>
+            <span class={["ax-status-badge", "ax-status-badge-" <> health.tone]}>
+              <span class="ax-status-dot"></span><%= health.label %>
+            </span>
+            <span class="ax-summary-health-answer"><%= health.answer %></span>
+          </:status>
+          <:facts>
+            <span class="ax-summary-fact">
+              <strong>Subscription</strong>
+              <%= @subscription.processor_id || @subscription.id %>
+            </span>
+            <span class="ax-summary-fact">
+              <strong>Customer</strong>
+              <%= @customer.name || @customer.email || @customer.id %>
+            </span>
+            <span :for={fact <- summary_health_facts(@subscription)} class="ax-summary-fact">
+              <strong><%= fact.label %></strong>
+              <%= fact.value %>
+            </span>
+          </:facts>
+          <:actions>
+            <a
+              class="ax-button ax-button-primary ax-button-sm ax-detail-invoice-primary"
+              href={ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope, %{"status" => "open", "subscription_id" => @subscription.id})}
+            >
+              Open invoice queue: <%= invoice_queue_summary(@open_invoice_summary) %>
+            </a>
+          </:actions>
+        </Detail.summary_card>
+
         <section class="ax-detail-priority-actions ax-detail-priority-actions-split" aria-label="Priority billing workspaces">
           <div class="ax-detail-priority-group ax-detail-priority-group-primary">
             <span class="ax-label ax-detail-priority-label">Invoice queue handoff</span>
@@ -301,8 +287,9 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
               class="ax-button ax-button-primary ax-button-sm ax-detail-priority-primary ax-detail-invoice-primary"
               href={ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope, %{"status" => "open"})}
             >
-              Go to Invoices queue workspace
+              Open invoice queue for this subscription
             </a>
+            <span class="ax-detail-queue-depth"><strong>Queue depth</strong><%= invoice_queue_summary(@open_invoice_summary) %></span>
             <ul class="ax-detail-local-queue" aria-label="Local open invoice queue preview">
               <li>
                 <strong>Queue workspace</strong>
@@ -1041,6 +1028,39 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
       %{label: "MRR", value: mrr_summary(subscription)}
     ]
   end
+
+  defp open_invoice_summary(subscription) do
+    open_statuses = [:draft, :open]
+
+    Invoice
+    |> where(
+      [invoice],
+      invoice.subscription_id == ^subscription.id and invoice.status in ^open_statuses
+    )
+    |> select([invoice], %{
+      count: count(invoice.id),
+      exposure_minor: fragment("coalesce(sum(?), 0)", invoice.amount_remaining_minor)
+    })
+    |> Repo.one()
+    |> case do
+      %{count: count, exposure_minor: exposure_minor} ->
+        %{count: count || 0, exposure_minor: exposure_minor || 0}
+
+      _summary ->
+        %{count: 0, exposure_minor: 0}
+    end
+  end
+
+  defp invoice_queue_summary(%{count: count, exposure_minor: exposure_minor}) do
+    "#{pluralize(count, "open invoice")}; #{format_invoice_exposure(exposure_minor)} exposure"
+  end
+
+  defp invoice_queue_summary(_summary), do: "0 open invoices; $0.00 exposure"
+
+  defp format_invoice_exposure(amount_minor) when is_integer(amount_minor),
+    do: InvoiceRender.format_money(amount_minor, :usd, "en")
+
+  defp format_invoice_exposure(_amount_minor), do: "$0.00"
 
   defp detail_health_summary(subscription) do
     caveats = projection_caveats(subscription)

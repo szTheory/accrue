@@ -12,7 +12,7 @@ defmodule AccrueAdmin.NavTest do
     assert "Recovery" in labels
 
     events_idx = Enum.find_index(labels, &(&1 == "Audit event log"))
-    webhooks_idx = Enum.find_index(labels, &(&1 == "Webhooks"))
+    webhooks_idx = Enum.find_index(labels, &(&1 == "Webhook events"))
 
     assert is_integer(webhooks_idx) and is_integer(events_idx)
     assert events_idx < webhooks_idx
@@ -36,7 +36,7 @@ defmodule AccrueAdmin.NavTest do
     assert Enum.find(items, &(&1.label == "Customers")).group == "Billing"
     assert Enum.find(items, &(&1.label == "Invoices queue")).group == "Billing"
     assert Enum.find(items, &(&1.label == "Recovery")).group == "Recovery"
-    assert Enum.find(items, &(&1.label == "Webhooks")).group == "Developer"
+    assert Enum.find(items, &(&1.label == "Webhook events")).group == "Developer"
     assert Enum.find(items, &(&1.label == "Audit event log")).group == "Audit"
     assert Enum.find(items, &(&1.label == "Coupons")).group == "Catalog"
     assert Enum.find(items, &(&1.label == "Promotion codes")).group == "Catalog"

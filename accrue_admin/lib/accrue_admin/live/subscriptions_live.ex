@@ -104,10 +104,14 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
           title={Copy.subscriptions_index_heading()}
         >
           <:description>
-            <p>
+            <p class="ax-subscriptions-health-line">
               <strong class="ax-subscriptions-heading-verdict"><%= subscriptions_health_verdict(@summary) %></strong>
-              <span class="ax-subscriptions-heading-summary"><%= billing_exposure_summary(@summary) %></span>
-              <span>Use Invoices for receivables, Webhooks to Events for failed deliveries, and Recovery for dunning.</span>
+              <span class="ax-subscriptions-heading-metric"><strong><%= count(@summary.open_invoice_count, "open invoice") %></strong></span>
+              <span class="ax-subscriptions-heading-metric"><strong><%= format_minor(@summary.open_invoice_exposure_minor, "usd") %></strong> exposure</span>
+              <span class="ax-subscriptions-heading-metric"><strong>$0.00</strong> target</span>
+            </p>
+            <p class="ax-subscriptions-route-line">
+              Use Invoices for receivables, Webhooks to Events for failed deliveries, and Recovery for dunning.
             </p>
           </:description>
           <:actions>
@@ -190,7 +194,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
           </div>
           <div class="ax-inline-worklist-actions">
             <a class="ax-button ax-button-primary ax-button-sm ax-subscriptions-primary-workspace" href={invoice_queue_path(@admin_mount_path, @current_owner_scope)}>
-              Work invoices to $0.00
+              Open invoice queue to $0.00
             </a>
           </div>
         </section>
@@ -410,13 +414,6 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
     do: "Invoice queue needs work now"
 
   defp billing_priority_title(_summary), do: "Billing status: Healthy"
-
-  defp billing_exposure_summary(%{open_invoice_count: count} = summary) when count > 0 do
-    "#{count(count, "open invoice")}; #{format_minor(summary.open_invoice_exposure_minor, "usd")} exposure over $0.00 target."
-  end
-
-  defp billing_exposure_summary(_summary),
-    do: "$0.00 open exposure; target met."
 
   defp identity_cell(row, mount_path, owner_scope) do
     customer_href = scoped_path(mount_path, "/customers/#{row.customer_id}", owner_scope)
