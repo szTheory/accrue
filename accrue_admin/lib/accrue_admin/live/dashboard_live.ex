@@ -53,7 +53,7 @@ defmodule AccrueAdmin.Live.DashboardLive do
         <header class="ax-page-header ax-page-header-compact">
           <Breadcrumbs.breadcrumbs items={[%{label: Copy.dashboard_breadcrumb_home()}]} />
           <div class="ax-dashboard-title-row">
-            <h1 class="ax-display"><%= Copy.home_intro_headline() %></h1>
+            <h1 class="ax-display"><%= dashboard_health_headline(@attention) %></h1>
           </div>
           <p class="ax-body ax-page-copy"><%= Copy.home_intro_copy() %></p>
           <div :if={@attention != []} class="ax-home-header-health ax-health-summary ax-health-summary-amber" aria-label="Dashboard billing health answer">
@@ -106,7 +106,7 @@ defmodule AccrueAdmin.Live.DashboardLive do
         <%!-- Zone 1 — Attention rail: exceptions first, only non-zero rows --%>
         <section class="ax-home-section" aria-label="Billing exceptions" data-ax-zone="attention-rail">
           <header class="ax-section-head">
-            <h3 class="ax-heading"><%= Copy.dashboard_display_headline() %></h3>
+            <h3 class="ax-heading"><%= attention_rail_heading(@attention) %></h3>
             <a
               :if={@attention != []}
               class="ax-link-quiet"
@@ -153,7 +153,7 @@ defmodule AccrueAdmin.Live.DashboardLive do
               <span class="ax-launcher-icon"><Icon.icon name={:invoices} size="lg" /></span>
               <span class="ax-launcher-title"><%= invoice_launcher_title(@stats) %></span>
               <span class="ax-launcher-action">
-                Work open-invoice queue <Icon.icon name={:arrow_right} size="sm" />
+                Open invoice queue workspace <Icon.icon name={:arrow_right} size="sm" />
               </span>
               <span :if={@stats.open_invoice_count > 0} class="ax-launcher-meta ax-launcher-meta-warn">
                 <%= count(@stats.open_invoice_count, "open invoice") %>; <%= format_minor(@stats.open_invoice_balance_minor, "usd") %> above $0.00 target
@@ -444,6 +444,12 @@ defmodule AccrueAdmin.Live.DashboardLive do
   defp attention_health_issue_summary(stats),
     do:
       "Collect #{format_minor(stats.open_invoice_balance_minor, "usd")} from #{count(stats.open_invoice_count, "open invoice")} before webhook or dunning work."
+
+  defp dashboard_health_headline([]), do: Copy.home_intro_headline()
+  defp dashboard_health_headline(_attention), do: "Billing health: Unhealthy"
+
+  defp attention_rail_heading([]), do: Copy.dashboard_display_headline()
+  defp attention_rail_heading(_attention), do: "Priority exceptions"
 
   defp count(1, noun), do: "1 #{noun}"
   defp count(n, noun), do: "#{n} #{noun}s"

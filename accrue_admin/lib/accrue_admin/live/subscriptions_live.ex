@@ -229,7 +229,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
             </div>
             <div class="ax-inline-worklist-actions">
               <a class="ax-button ax-button-secondary ax-button-sm" href={scoped_path(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}>
-                Watch dunning funnel
+                Open recovery analytics
               </a>
             </div>
           </section>
@@ -506,12 +506,12 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
     Phoenix.HTML.raw("""
     <span class="ax-stack-sm">
       <span class="ax-subscription-row-primary-line">
-        <a href="#{customer_href}" class="ax-link ax-subscription-row-customer">Customer overview: #{escape(customer_label(row))}</a>
+        <a href="#{customer_href}" class="ax-link ax-subscription-row-customer">Customer billing context: #{escape(customer_label(row))} / #{subscription_id}</a>
         <span class="ax-subscription-row-state ax-status-badge ax-status-badge-#{state_tone}">
           <span class="ax-status-dot"></span>#{escape(state_label)}
         </span>
       </span>
-      <span class="ax-subscription-row-customer-scope">Customer billing context</span>
+      <span class="ax-subscription-row-customer-scope">Unified customer view with this subscription selected</span>
       <span class="ax-subscription-row-meta-grid">
         <span class="ax-subscription-row-meta"><strong>Customer ID</strong> #{customer_id}</span>
         <a href="#{subscription_href}" class="ax-subscription-row-meta ax-subscription-row-id"><strong>Subscription</strong> #{subscription_id}</a>
@@ -524,7 +524,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
   defp customer_label(row), do: row.customer_name || row.customer_email || row.customer_id
 
   defp subscriptions_health_verdict(%{open_invoice_count: count}) when count > 0,
-    do: "Billing unhealthy: #{count(count, "open invoice")} needs collection"
+    do: "Action required: collect #{count(count, "open invoice")} to reach $0.00"
 
   defp subscriptions_health_verdict(_summary), do: "Billing status: Healthy"
 

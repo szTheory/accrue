@@ -47,7 +47,7 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
 
     assert {:ok, _view, html} = live(conn, "/billing/subscriptions?status=canceling")
 
-    assert html =~ "Billing unhealthy:" or
+    assert html =~ "Action required: collect" or
              html =~ "Billing status: Healthy"
 
     assert html =~ "exposure"
@@ -91,7 +91,7 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert html =~ ~s(data-ax-page-actions)
     refute html =~ "Search customer, open detail"
 
-    assert html =~ "Billing unhealthy:" or
+    assert html =~ "Action required: collect" or
              html =~ "Billing status: Healthy"
 
     assert html =~ "exposure"
@@ -99,7 +99,7 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert html =~ "target"
 
     assert html =~ "Work open-invoice queue to $0.00"
-    assert html =~ "Watch dunning funnel"
+    assert html =~ "Open recovery analytics"
 
     assert html =~ "At-risk subscription queue"
     assert html =~ "Open failed delivery debugger"
@@ -119,7 +119,7 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert html =~ "Filter admin actions"
     assert html =~ "Open failed delivery debugger"
     assert html =~ "At-risk subscription queue"
-    assert html =~ "Watch dunning funnel"
+    assert html =~ "Open recovery analytics"
     refute html =~ "Billing health: Unhealthy"
     assert_one_h1(html)
 
@@ -282,7 +282,7 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert html =~ "Webhook debug path"
     assert html =~ "Open failed delivery debugger"
 
-    assert html =~ "Billing unhealthy:" or
+    assert html =~ "Action required: collect" or
              html =~ "Billing status: Healthy"
 
     assert html =~ "Open audit context for this subscription"
@@ -317,7 +317,7 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert {:ok, _view, html} = live(conn, "/billing/subscriptions?view=all")
 
     assert html =~ "phase196-primary@example.com"
-    assert html =~ "Customer overview: phase196-primary@example.com"
+    assert html =~ "Customer billing context: phase196-primary@example.com"
     assert html =~ "Open-invoice queue records"
     assert html =~ "Work, review, or remove open-invoice records"
     assert html =~ "Customer ID"

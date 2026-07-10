@@ -217,9 +217,6 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
             <span class="ax-detail-health-label">Billing status</span>
             <strong class="ax-detail-health-answer"><%= health.answer %></strong>
             <span class="ax-detail-health-metric"><%= detail_health_metric(health) %></span>
-            <span :if={@open_invoice_summary.count > 0} class="ax-detail-health-metric ax-detail-health-exposure">
-              <strong>Open-invoice queue</strong><%= invoice_queue_summary(@open_invoice_summary) %>
-            </span>
             <strong :if={health.caveats == []} class="ax-detail-health-verdict"><%= health.headline %></strong>
             <span :if={health.caveats == []} class="ax-detail-health-body"><%= health.body %></span>
           </div>
@@ -255,6 +252,12 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
             >
               Work open-invoice queue now: <%= invoice_queue_summary(@open_invoice_summary) %>
             </a>
+            <a
+              class="ax-button ax-button-secondary ax-button-sm ax-detail-recovery-summary"
+              href={ScopedPath.build(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}
+            >
+              Open global dunning funnel
+            </a>
           </div>
         </section>
 
@@ -262,11 +265,6 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
           eyebrow={Copy.subscription_detail_eyebrow()}
           title={subscription_title(@subscription, @customer)}
         >
-          <:status>
-            <span class={["ax-status-badge", "ax-status-badge-" <> health.tone]}>
-              <span class="ax-status-dot"></span><%= health.label %>
-            </span>
-          </:status>
           <:facts>
             <span class="ax-summary-fact">
               <strong>Subscription</strong>
@@ -445,26 +443,14 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
                   <%= next_action_summary(@subscription) %>
                 </p>
               <% else %>
-                <a
-                  class="ax-button ax-button-recovery ax-button-sm ax-detail-recovery-shortcut"
-                  href={ScopedPath.build(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}
-                >
-                  Open dunning funnel
-                </a>
                 <div class="ax-detail-dunning-summary" aria-label="Dunning funnel state for this subscription">
-                  <span><strong>No active dunning campaign</strong><em>Use the global funnel for at-risk accounts and recovery trends.</em></span>
-                  <a
-                    class="ax-button ax-button-recovery ax-button-sm ax-detail-dunning-action"
-                    href={ScopedPath.build(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}
-                  >
-                    Watch dunning funnel
-                  </a>
+                  <span><strong>No subscription-level campaign</strong><em>Global recovery analytics still shows at-risk accounts and funnel trends.</em></span>
                 </div>
                 <p class="ax-body">
                   <%= Copy.resource_state_copy(:dunning, :queue_empty, surface: :subscription_detail).body %>
                 </p>
                 <p class="ax-body ax-detail-hint">
-                  Use the dunning funnel for at-risk accounts. Open this subscription's local invoice context only when you do not need the global queue.
+                  Use the global dunning funnel from the health summary. Open this subscription's local invoice context only when you do not need the global queue.
                 </p>
               <% end %>
 
@@ -1081,8 +1067,8 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
       caveats != [] ->
         %{
           tone: "amber",
-          label: "Setup missing",
-          answer: "Incomplete - setup needed",
+          label: "Setup incomplete",
+          answer: "Billing is not ready",
           headline: "Billing status: setup incomplete",
           body: "No - missing setup fields block reliable revenue and recovery reporting.",
           caveats: caveats
@@ -1141,7 +1127,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
   end
 
   defp detail_health_metric(%{caveats: caveats}) when is_list(caveats) and caveats != [],
-    do: "#{pluralize(length(caveats), "setup field")} needed"
+    do: "Setup fields missing"
 
   defp detail_health_metric(%{tone: "moss"}), do: "0 blockers"
 

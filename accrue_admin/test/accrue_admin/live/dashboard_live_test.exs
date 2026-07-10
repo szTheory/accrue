@@ -94,9 +94,9 @@ defmodule AccrueAdmin.DashboardLiveTest do
     assert {:ok, _view, html} = live(conn, "/billing")
 
     # Page chrome + attention rail heading
-    assert html =~ Copy.home_intro_headline()
+    assert html =~ "Billing health: Unhealthy"
     assert html =~ "ax-display"
-    assert html =~ Copy.dashboard_display_headline()
+    assert html =~ "Priority exceptions"
 
     # Zone 1 — attention rail surfaces the seeded exceptions (dead webhook + meter failure)
     assert html =~ Copy.home_attention_webhooks_label()

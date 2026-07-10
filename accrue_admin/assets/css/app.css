@@ -2078,6 +2078,7 @@ a.ax-kpi-card--linked:focus-visible {
 .ax-component-kitchen-header {
   gap: 0.03125rem;
   padding-block: 0;
+  align-content: start;
 }
 
 .ax-component-kitchen-header .ax-breadcrumbs,
@@ -2174,6 +2175,7 @@ a.ax-kpi-card--linked:focus-visible {
 .ax-component-kitchen-header .ax-page-description {
   max-width: 48rem;
   margin: 0;
+  font-size: var(--ax-type-xs);
   line-height: var(--ax-leading-tight);
 }
 
@@ -5286,30 +5288,27 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
 .ax-search-trigger {
   /* ax-type-exception: component-local typography is documented until this selector is migrated to a composed role utility in markup. */
   justify-content: flex-start;
-  width: 32rem;
-  max-width: min(32rem, calc(100vw - 8rem));
+  width: 24rem;
+  max-width: min(24rem, calc(100vw - 8rem));
   min-width: 0;
-  border-color: var(--ax-focus-ring);
-  border-width: 3px;
+  border-color: var(--ax-border-strong);
+  border-width: 1px;
   border-radius: var(--ax-radius-sm);
-  background: color-mix(in srgb, var(--ax-accent-readable) 86%, black);
-  color: var(--ax-base);
-  font-size: var(--ax-type-md);
-  font-weight: 900;
+  background: var(--ax-elevated);
+  color: var(--ax-primary);
+  font-size: var(--ax-type-sm);
+  font-weight: 750;
   cursor: pointer;
-  box-shadow:
-    inset 0 0 0 1px color-mix(in srgb, var(--ax-focus-ring) 72%, transparent),
-    0 0 0 3px color-mix(in srgb, var(--ax-accent-border) 34%, transparent),
-    var(--ax-shadow-sm);
+  box-shadow: none;
 }
 
 .ax-search-trigger:hover {
-  background: color-mix(in srgb, var(--ax-accent-readable) 76%, black);
-  border-color: var(--ax-accent-readable);
+  background: var(--ax-sunken);
+  border-color: var(--ax-focus-ring);
 }
 
 .ax-search-trigger-icon {
-  color: var(--ax-base);
+  color: var(--ax-accent-readable);
 }
 
 .ax-search-trigger-text {
@@ -5321,14 +5320,14 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
   overflow: hidden;
   text-overflow: ellipsis;
   text-align: left;
-  color: var(--ax-base);
-  font-weight: 900;
+  color: var(--ax-primary);
+  font-weight: 750;
 }
 
 .ax-search-trigger-text strong,
 .ax-search-trigger-text em {
   overflow: hidden;
-  color: var(--ax-base);
+  color: var(--ax-primary);
   font-style: normal;
   line-height: var(--ax-leading-tight);
   text-overflow: ellipsis;
@@ -5336,9 +5335,9 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
 }
 
 .ax-search-trigger-text em {
-  color: color-mix(in srgb, var(--ax-base) 92%, transparent);
+  color: var(--ax-muted);
   font-size: var(--ax-type-xs);
-  font-weight: 800;
+  font-weight: 650;
 }
 
 .ax-search-trigger-action {
@@ -5346,18 +5345,19 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
   align-items: center;
   min-height: 1.5rem;
   padding: 0 0.5rem;
+  border: 1px solid var(--ax-border);
   border-radius: var(--ax-radius-sm);
-  background: var(--ax-base);
-  color: var(--ax-accent-readable);
+  background: var(--ax-sunken);
+  color: var(--ax-primary);
   font: var(--ax-type-label-sm-font);
-  font-weight: 900;
+  font-weight: 750;
 }
 
 .ax-search-trigger .ax-kbd {
   margin-left: auto;
-  border-color: color-mix(in srgb, var(--ax-base) 55%, transparent);
-  background: color-mix(in srgb, var(--ax-base) 12%, transparent);
-  color: var(--ax-base);
+  border-color: var(--ax-border);
+  background: var(--ax-sunken);
+  color: var(--ax-muted);
 }
 
 @media (max-width: 599.98px) { /* --ax-bp-sm ↓ */
@@ -5382,7 +5382,7 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
     min-height: 1.75rem;
     gap: 0.1875rem;
     padding: 0 0.25rem;
-    border-width: 2px;
+    border-width: 1px;
     font-size: var(--ax-type-xs);
   }
 
@@ -6759,7 +6759,7 @@ button.ax-launcher {
 
 .ax-detail-dunning-summary {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-columns: minmax(0, 1fr);
   gap: 0.125rem;
   align-items: stretch;
   color: var(--ax-primary);
@@ -6776,7 +6776,7 @@ button.ax-launcher {
 }
 
 .ax-detail-dunning-summary strong {
-  color: var(--ax-warning-readable);
+  color: var(--ax-primary);
   font: var(--ax-type-label-sm-font);
   font-weight: 900;
 }
@@ -6789,8 +6789,14 @@ button.ax-launcher {
 
 .ax-detail-dunning-action {
   align-self: center;
-  min-height: 2rem;
+  min-height: 1.5rem;
   white-space: normal;
+}
+
+.ax-subscription-detail-page .ax-detail-health-actions .ax-button-sm,
+.ax-subscription-detail-page .ax-detail-priority-group .ax-button-sm {
+  min-height: 1.5rem;
+  padding: 0.125rem 0.4375rem;
 }
 
 .ax-detail-recovery-shortcut {
