@@ -168,7 +168,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
           <div class="ax-inline-worklist-copy ax-subscriptions-priority-copy">
             <strong><%= billing_priority_title(@summary) %></strong>
             <span class="ax-subscriptions-exposure"><%= billing_exposure_summary(@summary) %></span>
-            <span>Also watch <%= count(@summary.past_due_count, "at-risk subscription") %> and <%= count(@summary.failed_webhook_count, "failed webhook delivery") %>.</span>
+            <span>At-risk summary: <%= count(@summary.past_due_count, "subscription in Recovery") %>; <%= count(@summary.failed_webhook_count, "failed webhook delivery") %>.</span>
           </div>
         </section>
 
@@ -384,7 +384,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
   end
 
   defp billing_priority_title(%{open_invoice_count: count}) when count > 0,
-    do: "Billing Health: Unhealthy - work #{count(count, "open invoice")} first"
+    do: "Billing Health: Unhealthy - #{count(count, "open invoice")} require immediate attention"
 
   defp billing_priority_title(_summary), do: "Billing health: Healthy - invoices clear"
 

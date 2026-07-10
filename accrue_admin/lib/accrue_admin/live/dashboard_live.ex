@@ -54,17 +54,10 @@ defmodule AccrueAdmin.Live.DashboardLive do
           <Breadcrumbs.breadcrumbs items={[%{label: Copy.dashboard_breadcrumb_home()}]} />
           <div class="ax-dashboard-title-row">
             <h1 class="ax-display"><%= Copy.home_intro_headline() %></h1>
-            <span :if={@attention != []} class="ax-status-badge ax-badge-danger ax-dashboard-health-badge">
-              <span class="ax-status-dot"></span>Unhealthy
-            </span>
           </div>
           <p class="ax-body ax-page-copy"><%= Copy.home_intro_copy() %></p>
           <div :if={@attention != []} class="ax-home-header-health ax-health-summary ax-health-summary-amber" aria-label="Dashboard billing health answer">
-            <span class="ax-status-badge ax-badge-danger">
-              <span class="ax-status-dot"></span>Billing is unhealthy
-            </span>
-            <strong><%= attention_health_summary(@stats) %></strong>
-            <span class="ax-home-health-answer"><%= attention_health_issue_summary(@stats) %></span>
+            <strong><%= attention_health_summary(@stats) %>: <%= attention_health_issue_summary(@stats) %></strong>
             <div class="ax-home-health-metrics" aria-label="Billing health metrics">
               <span :for={metric <- attention_health_metrics(@stats)} class={["ax-home-health-metric", "ax-home-health-metric-" <> metric.tone]}>
                 <strong><%= metric.value %></strong>
@@ -438,7 +431,7 @@ defmodule AccrueAdmin.Live.DashboardLive do
     |> Enum.filter(& &1)
   end
 
-  defp attention_health_summary(_stats), do: "Billing Health: Unhealthy"
+  defp attention_health_summary(_stats), do: "Billing Health Unhealthy"
 
   defp attention_health_issue_summary(stats) do
     issue_count =

@@ -98,10 +98,10 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert html =~ "Open invoice queue workspace"
     assert html =~ "View dunning funnel dashboard"
 
-    assert html =~ "Billing Health: Unhealthy - work" or
+    assert html =~ "Billing Health: Unhealthy -" or
              html =~ "Billing health: Healthy - invoices clear"
 
-    assert html =~ "Also watch"
+    assert html =~ "At-risk summary:"
     assert html =~ "failed webhook"
     assert html =~ "Dunning funnel and invoice queue summary"
     assert html =~ "At-risk subscriptions"
@@ -138,7 +138,7 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert html =~ "At risk"
     assert html =~ "All"
     assert html =~ "Dedicated Invoices queue"
-    assert html =~ "Billing health:"
+    assert html =~ "Billing Health:" or html =~ "Billing health:"
     assert html =~ "ax-subscription-row-state"
     assert html =~ "failed webhook"
     assert html =~ "Who did what, when?"

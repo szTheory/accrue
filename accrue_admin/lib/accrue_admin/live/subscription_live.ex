@@ -219,10 +219,6 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
             </span>
           </:status>
           <:facts>
-            <span class={["ax-summary-fact", "ax-summary-fact-health", "ax-summary-fact-health-" <> health.tone]}>
-              <strong>Billing health</strong>
-              <span class="ax-summary-health-verdict"><%= health.answer %></span>
-            </span>
             <span class="ax-summary-fact">
               <strong>Subscription</strong>
               <%= @subscription.processor_id || @subscription.id %>
@@ -324,7 +320,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
                 })
               }
             >
-              Open failed subscription.created debugger
+              Open failed subscription.created event queue
             </a>
             <span class="ax-detail-priority-note">Select the failed event, inspect payload and retry trail, then replay.</span>
           </div>

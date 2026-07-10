@@ -79,7 +79,16 @@ if Mix.env() != :prod do
             />
             <h1 class="ax-heading ax-component-kitchen-title">Billing health command center</h1>
             <p class="ax-page-description">Check billing health first, then route to receivables, recovery, webhook debugging, audit, or one customer record.</p>
+            <section :if={@available?} class="ax-dev-health-snapshot ax-dev-health-snapshot-header" aria-label="Billing health snapshot">
+              <span><strong>Billing Health</strong><em>Unhealthy</em></span>
+              <span><strong>Invoices</strong><em>2 open, $592.50 over target</em></span>
+              <span><strong>Primary route</strong><a class="ax-link" href={@admin_mount_path <> "/invoices?status=open"}>Work invoice queue</a></span>
+              <span><strong>Recovery route</strong><em>Dunning funnel and at-risk analytics available</em></span>
+            </section>
             <div class="ax-page-actions">
+              <a class="ax-button ax-button-primary ax-button-sm ax-dev-invoice-action" href={@admin_mount_path <> "/invoices?status=open"}>
+                Work invoice queue
+              </a>
               <a class="ax-button ax-button-secondary ax-button-sm ax-dev-customer-action" href={@admin_mount_path <> "/customers"}>
                 Find customer record
               </a>
@@ -101,8 +110,8 @@ if Mix.env() != :prod do
                 <span>When Jul 09, 2026 14:51 UTC</span>
               </div>
               <div class="ax-inline-worklist-actions">
-                <a class="ax-button ax-button-secondary ax-button-sm" href={@admin_mount_path <> "/events"}>
-                  Open audit event log
+                <a class="ax-button ax-button-secondary ax-button-sm" href={@admin_mount_path <> "/events?actor_type=admin"}>
+                  Who did what, when? Actor-filtered audit log
                 </a>
               </div>
             </section>
@@ -128,8 +137,8 @@ if Mix.env() != :prod do
               <a class="ax-button ax-button-secondary ax-button-sm ax-dev-customer-action" href={@admin_mount_path <> "/customers"}>
                 Find customer record
               </a>
-              <a class="ax-button ax-button-secondary ax-button-sm" href={@admin_mount_path <> "/events"}>
-                Open audit event log
+              <a class="ax-button ax-button-secondary ax-button-sm" href={@admin_mount_path <> "/events?actor_type=admin"}>
+                Who did what, when? Actor-filtered audit log
               </a>
               <a class="ax-button ax-button-warning ax-button-sm ax-dev-webhook-action" href={@admin_mount_path <> "/webhooks?status=failed,dead"}>
                 Open full webhook debugging workflow
@@ -139,13 +148,6 @@ if Mix.env() != :prod do
               </a>
             </div>
           </section>
-
-          <section :if={@available?} class="ax-dev-health-snapshot" aria-label="Billing health snapshot">
-            <span><strong>Status</strong><em>Unhealthy</em></span>
-            <span><strong>Invoices</strong><em>2 open, $592.50 over target</em></span>
-              <span><strong>Primary route</strong><em>Work invoice queue in this billing alert</em></span>
-              <span><strong>Recovery route</strong><em>Dunning funnel and at-risk analytics available</em></span>
-            </section>
 
           <section :if={@available?} class="ax-card ax-dev-stack">
             <Tabs.tabs
