@@ -95,7 +95,7 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert html =~ "$0.00 open exposure; target met." or
              html =~ "above $0.00 target."
 
-    assert html =~ "Open invoice queue workspace"
+    assert html =~ "Open invoice queue for"
     assert html =~ "View dunning funnel dashboard"
 
     assert html =~ "Billing Health: Unhealthy -" or

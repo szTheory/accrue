@@ -111,7 +111,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
               class="ax-button ax-button-primary ax-button-sm ax-subscriptions-primary-workspace"
               href={invoice_queue_path(@admin_mount_path, @current_owner_scope)}
             >
-              Open invoice queue workspace
+              Open invoice queue for <%= count(@summary.open_invoice_count, "open invoice") %>
             </a>
             <a
               class="ax-button ax-button-warning ax-button-sm ax-subscriptions-webhook-workspace"
@@ -189,6 +189,28 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
           <a class="ax-link-quiet" href={scoped_path(@admin_mount_path, "/customers", @current_owner_scope)}>
             Find customer record
           </a>
+        </section>
+
+        <section class="ax-inline-worklist ax-subscriptions-webhook-strip" aria-label="Failed webhook debugging workspace">
+          <div class="ax-inline-worklist-copy">
+            <strong>Webhook debugging workspace</strong>
+            <span>Failed subscription.created deliveries are collected here before row-level delivery attempts.</span>
+          </div>
+          <div class="ax-inline-worklist-actions">
+            <a
+              class="ax-button ax-button-warning ax-button-sm"
+              href={
+                @admin_mount_path
+                |> scoped_path("/webhooks", @current_owner_scope)
+                |> AccrueAdmin.DataTableNav.merge_query(%{
+                  "status" => "failed,dead",
+                  "type" => "subscription.created"
+                })
+              }
+            >
+              Debug failed webhooks end-to-end
+            </a>
+          </div>
         </section>
 
         <section class="ax-inline-worklist ax-subscriptions-audit-strip" aria-label="Subscription audit trail">

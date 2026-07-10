@@ -24,7 +24,11 @@ defmodule AccrueAdmin.Components.Topbar do
           data-command-palette-trigger="true"
         >
           <Icon.icon name={:search} size="sm" class="ax-search-trigger-icon" />
-          <span class="ax-search-trigger-text">Find one customer, open detail</span>
+          <span class="ax-search-trigger-text">
+            <strong>Find one customer</strong>
+            <em>Open detail</em>
+          </span>
+          <span class="ax-search-trigger-action">Search</span>
           <kbd class="ax-kbd">⌘K</kbd>
         </button>
 

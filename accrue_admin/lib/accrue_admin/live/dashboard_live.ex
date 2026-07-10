@@ -171,16 +171,16 @@ defmodule AccrueAdmin.Live.DashboardLive do
               <span class="ax-launcher-icon"><Icon.icon name={:recovery} size="lg" /></span>
               <span class="ax-launcher-title"><%= Copy.home_launcher_recovery_title() %></span>
               <span class="ax-launcher-copy"><%= Copy.home_launcher_recovery_copy() %></span>
-              <span class="ax-launcher-meta"><%= Copy.home_launcher_recovery_meta() %></span>
-            <span :if={@stats.past_due_subscription_count > 0} class="ax-launcher-meta ax-launcher-meta-warn">
-              <%= count(@stats.past_due_subscription_count, "at-risk subscription") %>
-            </span>
-            <span class="ax-launcher-meta ax-launcher-meta-actions">
-              Recovery metrics: retry, dunning, at-risk
-            </span>
-            <span class="ax-launcher-action">
-              Watch dunning funnel + at-risk <Icon.icon name={:arrow_right} size="sm" />
-            </span>
+              <span class="ax-launcher-meta">Dunning funnel metrics inline</span>
+              <span class="ax-launcher-meta ax-launcher-meta-warn">
+                At-risk now: <%= count(@stats.past_due_subscription_count, "subscription") %>
+              </span>
+              <span class="ax-launcher-meta ax-launcher-meta-actions">
+                Retry monitor: <%= count(@stats.blocked_webhook_count, "failed webhook") %>; open receivables: <%= count(@stats.open_invoice_count, "invoice") %>
+              </span>
+              <span class="ax-launcher-action">
+                Watch dunning funnel + at-risk <Icon.icon name={:arrow_right} size="sm" />
+              </span>
             </a>
 
             <a class="ax-launcher" href={ScopedPath.build(@admin_mount_path, "/webhooks", @current_owner_scope)}>
@@ -431,7 +431,7 @@ defmodule AccrueAdmin.Live.DashboardLive do
     |> Enum.filter(& &1)
   end
 
-  defp attention_health_summary(_stats), do: "Billing Health Unhealthy"
+  defp attention_health_summary(_stats), do: "Billing healthy right now: No"
 
   defp attention_health_issue_summary(stats) do
     [

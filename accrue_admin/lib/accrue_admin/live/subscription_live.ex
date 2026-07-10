@@ -244,7 +244,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
 
         <section class={["ax-detail-health-summary", "ax-detail-health-summary-" <> health.tone]} aria-label="Primary billing health summary">
           <div class="ax-detail-health-copy" role="status">
-            <span class="ax-detail-health-label">Billing healthy right now?</span>
+            <span class="ax-detail-health-label">Billing status</span>
             <strong class="ax-detail-health-answer"><%= health.answer %></strong>
             <span class="ax-detail-health-metric"><%= detail_health_metric(health) %></span>
             <strong class="ax-detail-health-verdict"><%= health.headline %></strong>
@@ -255,9 +255,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
             <span class="ax-detail-health-caveat"><%= Enum.join(health.caveats, ", ") %></span>
           </div>
           <div :if={health.caveats != []} class="ax-detail-setup-actions" aria-label="Fix missing billing data">
-            <span class="ax-detail-health-body">
-              Fix missing fields in the billing source before trusting charge projections.
-            </span>
+            <span class="ax-detail-health-body">Fix setup fields before trusting revenue, dunning, or renewal decisions.</span>
             <a
               class="ax-button ax-button-secondary ax-button-sm"
               href={ScopedPath.build(@admin_mount_path, "/customers/#{@customer.id}", @current_owner_scope)}
@@ -446,7 +444,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
                 <div class="ax-detail-dunning-summary" aria-label="Dunning funnel preview for this subscription">
                   <span><strong>Dunning funnel</strong><em>0 active campaigns here</em></span>
                   <span><strong>At-risk status</strong><em>No active campaign</em></span>
-                  <span><strong>Recovery workspace</strong><em>Watch all at-risk accounts in Recovery</em></span>
+                  <span><strong>Recovery workspace</strong><em>Use the top Recovery workspace button for at-risk accounts</em></span>
                 </div>
                 <p class="ax-body">
                   <%= Copy.resource_state_copy(:dunning, :queue_empty, surface: :subscription_detail).body %>
@@ -457,12 +455,6 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
               <% end %>
 
               <div class="ax-detail-actions-row">
-                <a
-                  class="ax-button ax-button-recovery ax-button-sm ax-detail-recovery-primary"
-                  href={ScopedPath.build(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}
-                >
-                  Watch dunning funnel + at-risk
-                </a>
                 <a
                   class="ax-button ax-button-secondary ax-button-sm"
                   href={
@@ -1042,8 +1034,8 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
       caveats != [] ->
         %{
           tone: "amber",
-          label: "Billing health not trustworthy yet",
-          answer: "No - setup data is missing, not a payment failure",
+          label: "Setup incomplete",
+          answer: "Setup data missing - not a payment failure",
           headline: "#{length(caveats)} setup fields block projection",
           body:
             "This is not an active payment failure. Use Invoices for receivables; fill setup fields before trusting revenue, dunning, or renewal decisions.",
