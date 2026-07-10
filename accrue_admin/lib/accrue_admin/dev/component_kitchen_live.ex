@@ -79,15 +79,12 @@ if Mix.env() != :prod do
               ]}
             />
             <div class="ax-component-kitchen-title-row">
-              <h1 class="ax-heading ax-component-kitchen-title">Billing health: unhealthy</h1>
-              <span class="ax-component-kitchen-header-status">No - fix 2 open invoices, debug 3 failed webhooks, recover 1 past-due subscription</span>
+              <h1 class="ax-heading ax-component-kitchen-title">Billing is currently unhealthy</h1>
+              <span class="ax-component-kitchen-header-status">2 open invoices, 3 failed webhooks, 1 past-due subscription</span>
             </div>
             <p class="ax-page-description">Work the invoice queue, debug failed webhook deliveries, and watch dunning recovery from one command center.</p>
             <section :if={@available?} class="ax-dev-health-snapshot ax-dev-health-snapshot-header" aria-label="Billing health answer">
-              <span class="ax-dev-health-status"><strong>Healthy right now?</strong><em>No - unhealthy until billing queues are cleared</em></span>
-              <span><strong>Fix first</strong><a class="ax-link" href={@admin_mount_path <> "/invoices?status=open"}>Open invoice queue</a></span>
-              <span><strong>Then debug</strong><a class="ax-link" href={@admin_mount_path <> "/webhooks?status=failed,dead"}>Failed webhook deliveries</a></span>
-              <span><strong>Support</strong><a class="ax-link" href={@admin_mount_path <> "/customers"}>Find one customer</a></span>
+              <span class="ax-dev-health-status"><strong>Billing is not healthy</strong><em>Clear invoice, webhook, and recovery queues before treating billing as healthy.</em></span>
             </section>
             <div class="ax-page-actions">
               <a class="ax-button ax-button-primary ax-button-sm ax-dev-customer-action ax-dev-customer-primary" href={@admin_mount_path <> "/customers"}>
@@ -100,7 +97,7 @@ if Mix.env() != :prod do
                 <Icon.icon name={:webhooks} size="sm" /> Debug failed webhooks
               </a>
               <a class="ax-button ax-button-secondary ax-button-sm ax-dev-dunning-action" href={@admin_mount_path <> "/analytics/recovery"}>
-                <Icon.icon name={:recovery} size="sm" /> Open recovery analytics
+                <Icon.icon name={:recovery} size="sm" /> Recovery analytics: dunning & at-risk
               </a>
             </div>
             <section :if={@available?} class="ax-dev-route-strip" aria-label="Secondary billing routes">

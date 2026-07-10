@@ -3017,6 +3017,7 @@ a.ax-kpi-card--linked:focus-visible {
 
 .ax-subscriptions-invoice-records {
   order: -1;
+  padding: 0.0625rem 0.3125rem;
   border-color: var(--ax-accent-border);
   background: color-mix(in srgb, var(--ax-accent-subtle) 60%, var(--ax-elevated));
 }
@@ -6695,6 +6696,13 @@ button.ax-launcher {
   margin-bottom: var(--ax-space-xs);
   border-color: var(--ax-border-strong);
   background: color-mix(in srgb, var(--ax-status-info-bg) 42%, var(--ax-elevated));
+}
+
+.ax-dashboard-audit-summary strong {
+  padding: 0 0.25rem;
+  border: 1px solid var(--ax-border);
+  background: var(--ax-sunken);
+  color: var(--ax-primary);
 }
 
 .ax-dashboard-audit-summary span {

@@ -209,6 +209,19 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
           </div>
         </section>
 
+        <section class="ax-inline-worklist ax-subscriptions-invoice-records" aria-label="Open invoice queue records">
+          <div class="ax-inline-worklist-copy">
+            <strong>Open invoice queue records</strong>
+            <span><%= count(@summary.open_invoice_count, "open invoice") %> ready for queue work</span>
+            <span>Process, remind, or resolve invoices in the dedicated queue.</span>
+          </div>
+          <div class="ax-inline-worklist-actions">
+            <a class="ax-button ax-button-primary ax-button-sm" href={invoice_queue_path(@admin_mount_path, @current_owner_scope)}>
+              Open invoice records
+            </a>
+          </div>
+        </section>
+
         <section class="ax-subscriptions-utility-strip" aria-label="Customer lookup utility view">
           <a class="ax-link-quiet" href={scoped_path(@admin_mount_path, "/customers", @current_owner_scope)}>
             Find one customer
@@ -445,7 +458,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
     Phoenix.HTML.raw("""
     <span class="ax-stack-sm">
       <span class="ax-subscription-row-primary-line">
-        <a href="#{customer_href}" class="ax-button ax-button-primary ax-button-sm ax-subscription-row-customer">View customer detail: #{escape(customer_label(row))}</a>
+        <a href="#{customer_href}" class="ax-button ax-button-primary ax-button-sm ax-subscription-row-customer">Open customer overview: #{escape(customer_label(row))}</a>
         <span class="ax-subscription-row-state ax-status-badge ax-status-badge-#{state_tone}">
           <span class="ax-status-dot"></span>#{escape(state_label)}
         </span>

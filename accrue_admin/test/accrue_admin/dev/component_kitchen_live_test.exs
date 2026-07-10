@@ -6,11 +6,15 @@ defmodule AccrueAdmin.ComponentKitchenLiveTest do
 
     assert {:ok, _view, html} = live(conn, "/billing/dev/components")
 
-    assert html =~ "Billing health: unhealthy"
+    assert html =~ "Billing is currently unhealthy"
     assert html =~ "Work the invoice queue, debug failed webhook deliveries"
     assert html =~ "Primary action"
     assert html =~ "Secondary action"
-    assert html =~ "No - unhealthy until billing queues are cleared"
+    assert html =~ "Billing is not healthy"
+
+    assert html =~
+             "Clear invoice, webhook, and recovery queues before treating billing as healthy."
+
     assert html =~ "More billing actions"
     assert html =~ "View dunning funnel and at-risk"
     assert html =~ "Dashboard"
@@ -29,6 +33,7 @@ defmodule AccrueAdmin.ComponentKitchenLiveTest do
     assert html =~ "Find one customer"
     assert html =~ "Open invoice queue: 2 invoices, $592.50 exposure"
     assert html =~ "Debug failed webhooks"
+    assert html =~ "Recovery analytics: dunning &amp; at-risk"
     refute html =~ "Find one customer and open billing 360 detail"
     assert html =~ "View full audit history"
     assert html =~ "billing.contact.updated"

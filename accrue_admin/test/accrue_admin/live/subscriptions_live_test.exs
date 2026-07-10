@@ -314,7 +314,9 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert {:ok, _view, html} = live(conn, "/billing/subscriptions?view=all")
 
     assert html =~ "phase196-primary@example.com"
-    assert html =~ "View customer detail: phase196-primary@example.com"
+    assert html =~ "Open customer overview: phase196-primary@example.com"
+    assert html =~ "Open invoice queue records"
+    assert html =~ "Open invoice records"
     assert html =~ "Customer ID"
     assert html =~ subscription.customer_id
     assert html =~ "Subscription"

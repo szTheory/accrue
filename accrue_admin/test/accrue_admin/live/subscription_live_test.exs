@@ -138,14 +138,15 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
     assert html =~ "Dunning &amp; recovery"
     assert html =~ "Tax &amp; compliance"
     assert html =~ "invoice.payment_failed"
-    assert html =~ "No - setup incomplete"
+    assert html =~ "Billing health summary"
+    assert html =~ "Operational billing running; setup incomplete"
     assert html =~ "setup fields"
     assert html =~ "ax-detail-health-summary-amber"
     assert html =~ "ax-detail-health-answer"
     assert html =~ "Charge amount not shown"
 
     assert html =~
-             "Active billing can continue, but revenue, dunning, and renewal projections are not reliable until setup fields are complete."
+             "Payments can continue, but revenue, dunning, and renewal projections are not reliable until setup fields are complete."
 
     assert html =~
              "Complete these setup fields before using revenue, dunning, or renewal projections."
@@ -160,6 +161,7 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
     assert html =~ "Review setup audit events"
     assert html =~ "Open local invoice context"
     assert html =~ "Open this subscription&#39;s invoice context"
+    assert html =~ "Open failed webhook delivery details and retry"
     assert html =~ "Dunning funnel preview for this subscription"
     assert html =~ "Use the dunning funnel workspace for at-risk accounts"
     assert html =~ "Open invoice queue:"

@@ -284,7 +284,7 @@ defmodule AccrueAdmin.Live.DashboardLive do
             <div :if={latest_event} class="ax-audit-summary-row ax-dashboard-audit-summary" aria-label="Latest event ledger summary">
               <span><strong>Actor</strong><em><%= latest_event.actor %></em></span>
               <span><strong>Action</strong><em><%= latest_event.action %></em></span>
-              <span><strong>When</strong><em><%= latest_event.at %></em></span>
+              <span><strong>Timestamp</strong><em><%= latest_event.at %></em></span>
             </div>
 
             <Timeline.timeline

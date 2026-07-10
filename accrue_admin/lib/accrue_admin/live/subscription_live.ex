@@ -214,7 +214,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
         <% health = detail_health_summary(@subscription) %>
         <section class={["ax-detail-health-summary ax-detail-health-summary-top", "ax-detail-health-summary-" <> health.tone]} aria-label="Primary billing health summary">
           <div class="ax-detail-health-copy" role="status">
-            <span class="ax-detail-health-label">Healthy right now?</span>
+            <span class="ax-detail-health-label">Billing health summary</span>
             <strong class="ax-detail-health-answer"><%= health.answer %></strong>
             <span class="ax-detail-health-metric"><%= detail_health_metric(health) %></span>
             <strong class="ax-detail-health-verdict"><%= health.headline %></strong>
@@ -334,7 +334,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
                 })
               }
             >
-              Debug failed webhook deliveries
+              Open failed webhook delivery details and retry
             </a>
             <span class="ax-detail-priority-note">Scoped to this subscription: failed subscription.created deliveries open with payload, response, retry trail, and replay controls.</span>
           </div>
@@ -1086,10 +1086,10 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
         %{
           tone: "amber",
           label: "Setup missing",
-          answer: "No - setup incomplete",
+          answer: "Operational billing running; setup incomplete",
           headline: "Complete #{pluralize(length(caveats), "setup field")}",
           body:
-            "Active billing can continue, but revenue, dunning, and renewal projections are not reliable until setup fields are complete.",
+            "Payments can continue, but revenue, dunning, and renewal projections are not reliable until setup fields are complete.",
           caveats: caveats
         }
 
