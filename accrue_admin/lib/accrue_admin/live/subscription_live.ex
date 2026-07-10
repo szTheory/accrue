@@ -1041,11 +1041,11 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
       caveats != [] ->
         %{
           tone: "danger",
-          label: "Unhealthy",
-          answer: "No - billing is not healthy right now",
-          headline: "Billing Health: Blocked - #{length(caveats)} setup fields missing",
+          label: "Setup blocked",
+          answer: "No - setup data is missing, not a payment failure",
+          headline: "#{length(caveats)} setup fields missing",
           body:
-            "Existing open invoices can still be worked in Invoices. Fix setup fields before trusting revenue, dunning, or renewal decisions.",
+            "Open invoices can still be worked in Invoices. Fill setup fields before trusting revenue, dunning, or renewal decisions.",
           caveats: caveats
         }
 

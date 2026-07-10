@@ -81,10 +81,13 @@ if Mix.env() != :prod do
             <p class="ax-page-description">Check billing health first, then work open invoices or find one customer record with full billing context.</p>
             <div class="ax-page-actions">
               <a class="ax-button ax-button-primary ax-button-sm ax-dev-invoice-action" href={@admin_mount_path <> "/invoices?status=open"}>
-                Work open invoices
+                Open invoice queue workspace
               </a>
               <a class="ax-button ax-button-secondary ax-button-sm ax-dev-customer-action" href={@admin_mount_path <> "/customers"}>
                 Find customer record
+              </a>
+              <a class="ax-button ax-button-warning ax-button-sm ax-dev-webhook-action" href={@admin_mount_path <> "/webhooks?status=failed,dead"}>
+                Open full webhook debugging workflow
               </a>
             </div>
             <section class="ax-inline-worklist ax-dev-audit-strip" aria-label="Component kitchen audit trail">
@@ -137,7 +140,7 @@ if Mix.env() != :prod do
           <section :if={@available?} class="ax-dev-health-snapshot" aria-label="Billing health snapshot">
             <span><strong>Status</strong><em>Unhealthy</em></span>
             <span><strong>Invoices</strong><em>2 open, $592.50 over target</em></span>
-            <span><strong>Next step</strong><em>Work invoice queue or open a customer record</em></span>
+            <span><strong>Next step</strong><em>Open invoice queue workspace or find customer record</em></span>
           </section>
 
           <section :if={@available?} class="ax-card ax-dev-stack">

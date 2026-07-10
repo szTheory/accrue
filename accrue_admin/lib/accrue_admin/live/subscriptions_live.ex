@@ -111,7 +111,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
               class="ax-button ax-button-primary ax-button-sm ax-subscriptions-primary-workspace"
               href={invoice_queue_path(@admin_mount_path, @current_owner_scope)}
             >
-              Work Invoices queue now
+              Open invoice queue workspace
             </a>
             <a
               class="ax-button ax-button-recovery ax-button-sm"
@@ -170,29 +170,12 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
             <span class="ax-subscriptions-exposure">Open invoices: <%= count(@summary.open_invoice_count, "invoice") %>; <%= billing_exposure_summary(@summary) %></span>
             <span>At-risk subscriptions: <%= count(@summary.past_due_count, "subscription") %>; failed webhooks: <%= count(@summary.failed_webhook_count, "delivery") %>.</span>
           </div>
-          <div class="ax-inline-worklist-actions">
-            <a class="ax-button ax-button-primary ax-button-sm" href={invoice_queue_path(@admin_mount_path, @current_owner_scope)}>
-              Open actionable invoice records
-            </a>
-            <a
-              class="ax-button ax-button-warning ax-button-sm"
-              href={scoped_path(@admin_mount_path, "/webhooks", @current_owner_scope, %{"status" => "failed,dead"})}
-            >
-              Open failed webhook deliveries
-            </a>
-          </div>
         </section>
 
         <section class="ax-subscriptions-utility-strip" aria-label="Customer lookup utility view">
           <a class="ax-link-quiet" href={scoped_path(@admin_mount_path, "/customers", @current_owner_scope)}>
             Find customer record
           </a>
-        </section>
-
-        <section class="ax-subscriptions-table-summary" aria-label="Aggregate billing health before subscription rows">
-          <span><strong>Billing health summary</strong><em><%= count(@summary.open_invoice_count, "open invoice") %></em></span>
-          <span><strong>At-risk</strong><em><%= count(@summary.past_due_count, "subscription") %></em></span>
-          <span><strong>Webhook failures</strong><em><%= count(@summary.failed_webhook_count, "delivery") %></em></span>
         </section>
 
         <section class="ax-inline-worklist ax-subscriptions-audit-strip" aria-label="Subscription audit trail">
@@ -213,27 +196,6 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
               href={scoped_path(@admin_mount_path, "/events", @current_owner_scope, %{"actor_type" => "admin"})}
             >
               Filter admin actors
-            </a>
-          </div>
-        </section>
-
-        <section class="ax-inline-worklist ax-subscriptions-webhook-strip" aria-label="Failed webhook delivery worklist">
-          <div class="ax-inline-worklist-copy">
-            <strong>Failed webhook deliveries</strong>
-            <span>Debug failed subscription.created deliveries without hunting through subscription rows.</span>
-          </div>
-          <div class="ax-inline-worklist-actions">
-            <a
-              class="ax-button ax-button-warning ax-button-sm"
-              href={scoped_path(@admin_mount_path, "/webhooks", @current_owner_scope, %{"status" => "failed,dead"})}
-            >
-              Debug failed webhook deliveries
-            </a>
-            <a
-              class="ax-button ax-button-secondary ax-button-sm"
-              href={scoped_path(@admin_mount_path, "/webhooks", @current_owner_scope, %{"status" => "failed,dead", "type" => "subscription.created"})}
-            >
-              Filter subscription.created
             </a>
           </div>
         </section>

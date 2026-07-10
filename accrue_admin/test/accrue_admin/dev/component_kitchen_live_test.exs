@@ -35,7 +35,6 @@ defmodule AccrueAdmin.ComponentKitchenLiveTest do
     assert html =~ "Critical: 2 open invoices"
     assert html =~ "Billing health snapshot"
     assert html =~ "2 open, $592.50 over target"
-    assert html =~ "Work open invoices"
     assert html =~ "Open invoice queue workspace"
     assert html =~ "Open audit event log"
     assert html =~ "Open full webhook debugging workflow"

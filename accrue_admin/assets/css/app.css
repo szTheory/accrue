@@ -2451,14 +2451,14 @@ a.ax-kpi-card--linked:focus-visible {
 
 .ax-subscription-detail-page .ax-breadcrumbs-list,
 .ax-subscription-detail-page .ax-breadcrumbs-item {
-  gap: var(--ax-space-2xs);
+  gap: 0.125rem;
 }
 
 .ax-subscription-detail-page .ax-breadcrumbs-link,
 .ax-subscription-detail-page .ax-breadcrumbs-current,
 .ax-subscription-detail-page .ax-breadcrumbs-separator {
   font-size: var(--ax-type-xs);
-  line-height: var(--ax-leading-tight);
+  line-height: 1;
 }
 
 .ax-work-queue-actions {
@@ -2785,14 +2785,6 @@ a.ax-kpi-card--linked:focus-visible {
   background: transparent;
 }
 
-.ax-subscriptions-webhook-strip {
-  order: 2;
-  display: flex;
-  padding: 0.0625rem 0.375rem;
-  border-color: color-mix(in srgb, var(--ax-status-warning-border) 36%, var(--ax-border));
-  background: transparent;
-}
-
 .ax-subscriptions-invoice-strip {
   order: -2;
   padding: 0.03125rem 0.3125rem;
@@ -2830,19 +2822,6 @@ a.ax-kpi-card--linked:focus-visible {
   font-weight: 900;
 }
 
-.ax-subscriptions-invoice-strip-danger .ax-inline-worklist-actions .ax-button-primary {
-  border-color: transparent;
-  background: var(--ax-status-danger-on-solid);
-  color: var(--ax-status-danger-solid);
-  box-shadow: var(--ax-shadow-xs);
-}
-
-.ax-subscriptions-invoice-strip-danger .ax-inline-worklist-actions .ax-button-warning {
-  border: 1px solid color-mix(in srgb, var(--ax-status-danger-on-solid) 58%, transparent);
-  background: transparent;
-  color: var(--ax-status-danger-on-solid);
-}
-
 .ax-subscriptions-primary-workspace {
   border-width: 2px;
   box-shadow: var(--ax-shadow-sm);
@@ -2856,17 +2835,6 @@ a.ax-kpi-card--linked:focus-visible {
 
 .ax-subscriptions-invoice-records .ax-inline-worklist-copy strong {
   color: var(--ax-accent-readable);
-  font-weight: 900;
-}
-
-.ax-subscriptions-webhook-strip {
-  order: -1;
-  border-color: var(--ax-status-warning-border);
-  background: color-mix(in srgb, var(--ax-status-warning-bg) 52%, var(--ax-elevated));
-}
-
-.ax-subscriptions-webhook-strip .ax-inline-worklist-copy strong {
-  color: var(--ax-warning-readable);
   font-weight: 900;
 }
 
@@ -2918,36 +2886,6 @@ a.ax-kpi-card--linked:focus-visible {
   border-radius: var(--ax-radius-sm);
   background: transparent;
   font: var(--ax-type-label-sm-font);
-}
-
-.ax-subscriptions-table-summary {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.25rem 0.5rem;
-  align-items: center;
-  padding: 0.125rem 0.5rem;
-  border: 1px solid var(--ax-status-danger-border);
-  border-radius: var(--ax-radius-sm);
-  background: var(--ax-status-danger-bg);
-  color: var(--ax-status-danger-text);
-  font: var(--ax-type-label-sm-font);
-}
-
-.ax-subscriptions-table-summary span {
-  display: inline-flex;
-  align-items: baseline;
-  gap: 0.25rem;
-  min-width: 0;
-}
-
-.ax-subscriptions-table-summary strong,
-.ax-subscriptions-table-summary em {
-  color: var(--ax-status-danger-text);
-  font-style: normal;
-}
-
-.ax-subscriptions-table-summary strong {
-  font-weight: 900;
 }
 
 .ax-inline-worklist + .ax-inline-worklist {
@@ -3584,7 +3522,7 @@ a.ax-kpi-card--linked:focus-visible {
   background: color-mix(in srgb, var(--ax-elevated) 88%, var(--ax-base));
   color: var(--ax-primary);
   font-size: var(--ax-type-sm);
-  font-weight: 900;
+  font-weight: 950;
 }
 
 .ax-component-kitchen-page .ax-dev-production-strip .ax-button-secondary {
@@ -5701,7 +5639,7 @@ button.ax-launcher {
   grid-template-columns: minmax(0, 1fr);
   align-items: start;
   gap: 0;
-  padding: 0.125rem 0.375rem;
+  padding: 0.0625rem 0.3125rem;
   border: 1px solid var(--ax-border);
   border-radius: var(--ax-radius-sm);
   color: var(--ax-primary);
@@ -5746,7 +5684,7 @@ button.ax-launcher {
 .ax-detail-health-answer {
   flex-basis: 100%;
   color: var(--ax-primary);
-  font: var(--ax-type-title-font);
+  font: var(--ax-type-label-font);
   font-weight: 900;
 }
 
@@ -5856,9 +5794,9 @@ button.ax-launcher {
 .ax-detail-priority-actions-split {
   display: grid;
   grid-template-columns: minmax(18rem, 1.4fr) minmax(13rem, 0.8fr) minmax(12rem, 0.8fr);
-  gap: 0.125rem;
+  gap: 0.0625rem;
   align-items: stretch;
-  padding: 0.0625rem;
+  padding: 0;
   border: 1px solid var(--ax-border);
   background: color-mix(in srgb, var(--ax-accent-subtle) 24%, transparent);
 }
@@ -5867,9 +5805,9 @@ button.ax-launcher {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 0.125rem 0.375rem;
+  gap: 0.0625rem 0.25rem;
   min-width: 0;
-  padding: 0.0625rem 0.3125rem;
+  padding: 0.0625rem 0.25rem;
   border: 1px solid var(--ax-border);
   border-radius: var(--ax-radius-sm);
   background: var(--ax-elevated);
@@ -5949,7 +5887,7 @@ button.ax-launcher {
 .ax-detail-priority-links {
   display: inline-flex;
   flex-wrap: wrap;
-  gap: var(--ax-space-xs);
+  gap: 0.25rem;
   align-items: center;
   grid-column: 1 / -1;
   padding-inline: 0.125rem;
@@ -6119,7 +6057,7 @@ button.ax-launcher {
 
 .ax-subscription-detail-page .ax-detail-section-title {
   color: var(--ax-primary);
-  font-size: var(--ax-type-lg);
+  font-size: var(--ax-type-md);
   font-weight: 900;
 }
 
