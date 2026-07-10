@@ -117,7 +117,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
               class="ax-button ax-button-recovery ax-button-sm"
               href={scoped_path(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}
             >
-              Watch dunning funnel + at-risk
+              View dunning funnel dashboard
             </a>
           </:actions>
           <:stat_strip>

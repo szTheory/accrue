@@ -90,7 +90,7 @@ if Mix.env() != :prod do
                 Open full webhook debugging workflow
               </a>
               <a class="ax-button ax-button-recovery ax-button-sm ax-dev-dunning-action" href={@admin_mount_path <> "/analytics/recovery"}>
-                Open recovery and dunning analytics
+                Watch dunning funnel + at-risk
               </a>
             </div>
             <section class="ax-inline-worklist ax-dev-audit-strip" aria-label="Component kitchen audit trail">
@@ -123,7 +123,7 @@ if Mix.env() != :prod do
             </div>
             <div class="ax-inline-worklist-actions">
               <a class="ax-button ax-button-primary ax-button-sm ax-dev-invoice-action" href={@admin_mount_path <> "/invoices?status=open"}>
-                Open invoice queue workspace
+                Work invoice queue
               </a>
               <a class="ax-button ax-button-secondary ax-button-sm ax-dev-customer-action" href={@admin_mount_path <> "/customers"}>
                 Find customer record
@@ -143,7 +143,7 @@ if Mix.env() != :prod do
           <section :if={@available?} class="ax-dev-health-snapshot" aria-label="Billing health snapshot">
             <span><strong>Status</strong><em>Unhealthy</em></span>
             <span><strong>Invoices</strong><em>2 open, $592.50 over target</em></span>
-              <span><strong>Primary route</strong><em>Use the red invoice queue CTA below</em></span>
+              <span><strong>Primary route</strong><em>Work invoice queue in this billing alert</em></span>
               <span><strong>Recovery route</strong><em>Dunning funnel and at-risk analytics available</em></span>
             </section>
 

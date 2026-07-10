@@ -324,9 +324,9 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
                 })
               }
             >
-              Open failed webhook debugger
+              Open failed subscription.created debugger
             </a>
-            <span class="ax-detail-priority-note">Failed subscription.created delivery trace and replay action</span>
+            <span class="ax-detail-priority-note">Select the failed event, inspect payload and retry trail, then replay.</span>
           </div>
           <div class="ax-detail-priority-group ax-detail-priority-group-recovery">
             <span class="ax-label ax-detail-priority-label">Recovery workspace</span>
@@ -1045,8 +1045,8 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
       caveats != [] ->
         %{
           tone: "amber",
-          label: "Billing health unknown",
-          answer: "Unknown - setup data is missing, not a payment failure",
+          label: "Billing health not trustworthy yet",
+          answer: "No - setup data is missing, not a payment failure",
           headline: "#{length(caveats)} setup fields block projection",
           body:
             "This is not an active payment failure. Use Invoices for receivables; fill setup fields before trusting revenue, dunning, or renewal decisions.",

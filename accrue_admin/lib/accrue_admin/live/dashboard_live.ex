@@ -77,7 +77,7 @@ defmodule AccrueAdmin.Live.DashboardLive do
               class="ax-button ax-button-primary ax-button-sm ax-home-primary-action"
               href={ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope, %{"status" => "open"})}
             >
-              Go to Invoices queue workspace
+              Work invoice queue: <%= format_minor(@stats.open_invoice_balance_minor, "usd") %> open
               <Icon.icon name={:arrow_right} size="sm" />
             </a>
             <a
@@ -153,7 +153,7 @@ defmodule AccrueAdmin.Live.DashboardLive do
               <span class="ax-launcher-icon"><Icon.icon name={:invoices} size="lg" /></span>
               <span class="ax-launcher-title"><%= invoice_launcher_title(@stats) %></span>
               <span class="ax-launcher-action">
-                Work the dedicated invoice queue <Icon.icon name={:arrow_right} size="sm" />
+                Open the same invoice queue <Icon.icon name={:arrow_right} size="sm" />
               </span>
               <span :if={@stats.open_invoice_count > 0} class="ax-launcher-meta ax-launcher-meta-warn">
                 <%= count(@stats.open_invoice_count, "open invoice") %>; <%= format_minor(@stats.open_invoice_balance_minor, "usd") %> above $0.00 target
@@ -401,7 +401,7 @@ defmodule AccrueAdmin.Live.DashboardLive do
           label:
             "open invoice queue above $0.00 target - #{format_minor(stats.open_invoice_balance_minor, "usd")}",
           pill: "primary queue",
-          action: "Go to dedicated Invoices queue",
+          action: "Same invoice queue as primary action",
           href: ScopedPath.build(mount_path, "/invoices", scope, %{"status" => "open"})
         },
       stats.blocked_webhook_count > 0 &&
@@ -469,7 +469,7 @@ defmodule AccrueAdmin.Live.DashboardLive do
 
   defp invoice_launcher_title(%{open_invoice_count: count, open_invoice_balance_minor: amount})
        when count > 0 do
-    "Invoices queue: #{format_minor(amount, "usd")} open"
+    "Invoice queue details: #{format_minor(amount, "usd")} open"
   end
 
   defp invoice_launcher_title(_stats), do: Copy.home_launcher_invoices_title()

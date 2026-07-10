@@ -111,7 +111,8 @@ defmodule AccrueAdmin.DashboardLiveTest do
     assert html =~ "Critical"
     assert html =~ "Priority"
     assert html =~ "Debug dead-lettered webhooks"
-    assert html =~ "Invoices queue: $42.50 open"
+    assert html =~ "Invoice queue details: $42.50 open"
+    assert html =~ "Work invoice queue: $42.50 open"
     assert html =~ ~s(href="/billing/events?q=meter_event")
     assert html =~ ~s(href="/billing/invoices?status=open")
 
@@ -119,7 +120,7 @@ defmodule AccrueAdmin.DashboardLiveTest do
     assert html =~ Copy.home_launcher_customers_title()
     assert html =~ Copy.home_launcher_customers_meta()
     assert html =~ "ax-launcher-primary"
-    assert html =~ "Invoices queue: $42.50 open"
+    assert html =~ "Invoice queue details: $42.50 open"
     assert html =~ "$42.50 above $0.00 target"
     assert html =~ Copy.home_launcher_recovery_title()
     assert html =~ Copy.home_launcher_recovery_meta()
@@ -167,7 +168,7 @@ defmodule AccrueAdmin.DashboardLiveTest do
     assert html =~ "Search customers globally"
     assert html =~ "Open global customer search"
     assert html =~ "Opens the Invoices queue workspace for current receivables"
-    assert html =~ "Invoices queue: $42.50 open"
+    assert html =~ "Invoice queue details: $42.50 open"
 
     # IA-01 customer lookup entry point on Home (Plan 175-04)
     assert html =~ "Search all customers"
