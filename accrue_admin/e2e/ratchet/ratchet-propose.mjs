@@ -36,12 +36,22 @@
  */
 
 import fs from "fs";
+import os from "node:os";
 import path from "path";
 import { fileURLToPath } from "url";
 import { createHash } from "node:crypto";
 import * as regionTags from "./region-tags.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const CANONICAL_USAGE_LOG_PATH = path.resolve(__dirname, "resource-usage.ndjson");
+const SONNET_45_PRICING_USD_PER_MTOK = {
+  input_tokens: 3,
+  output_tokens: 15,
+  cache_creation_5m_input_tokens: 3.75,
+  cache_creation_1h_input_tokens: 6,
+  cache_read_input_tokens: 0.3,
+};
+const PRICING_SOURCE = "https://platform.claude.com/docs/en/about-claude/pricing";
 
 // ----------------------------------------------------------------------------
 // GUARD 1 — `--self-test` FIRST. Pure DEDUP-01/DEDUP-02 proof: no key, no SDK
@@ -147,6 +157,118 @@ function runProposeSelfTest() {
     const designReq = buildDesignRequestPayload("claude-sonnet-4-5", fakePreamble, fakeSchema, fakeDesignContent);
     assertBreakpointShape("(B-design) buildDesignRequestPayload", designReq);
   }
+
+  // (C) ORCH-07 live-UAT usage accounting — pure extraction only. The live runner
+  // consumes this value from generated usage logs; self-test keeps the parser key-free.
+  {
+    assertProposeSelfTest(
+      "(C-a) usageCacheReadInputTokens reads Anthropic response usage",
+      usageCacheReadInputTokens({ usage: { cache_read_input_tokens: 17 } }) === 17
+    );
+    assertProposeSelfTest(
+      "(C-b) usageCacheReadInputTokens treats absent cache reads as zero",
+      usageCacheReadInputTokens({ usage: { input_tokens: 100 } }) === 0
+    );
+    const fakeRow = buildUsageRow(
+      "persona",
+      {
+        png: { screen: "dashboard", viewport: "chromium-desktop", theme: "dark" },
+        persona: { persona_id: "operator-founder" },
+        run_id: "run-fixture",
+        bundle_sha256: "abc123",
+      },
+      {
+        usage: {
+          input_tokens: 1000,
+          output_tokens: 200,
+          cache_creation_input_tokens: 300,
+          cache_read_input_tokens: 400,
+        },
+      },
+      { modelName: "claude-sonnet-4-5", roundNumber: 77, recordedAt: "2026-07-10T00:00:00.000Z" }
+    );
+    const allowedKeys = [
+      "schema_version",
+      "recorded_at",
+      "pass",
+      "run_id",
+      "bundle_sha256",
+      "model",
+      "round",
+      "surface",
+      "viewport",
+      "theme",
+      "lens_kind",
+      "persona_id",
+      "input_tokens",
+      "output_tokens",
+      "cache_creation_5m_input_tokens",
+      "cache_creation_1h_input_tokens",
+      "cache_read_input_tokens",
+      "estimated_cost_usd",
+      "pricing_source",
+    ];
+    assertProposeSelfTest(
+      "(C-c) buildUsageRow emits only approved PII-safe accounting fields",
+      Object.keys(fakeRow).every((key) => allowedKeys.includes(key)) &&
+        fakeRow.estimated_cost_usd > 0 &&
+        fakeRow.usage === undefined &&
+        fakeRow.prompt === undefined &&
+        fakeRow.png_path === undefined
+    );
+
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "ratchet-usage-self-test-"));
+    const tempLog = path.join(tmpDir, "temp-usage.ndjson");
+    fs.writeFileSync(tempLog, "old\n");
+    resetUsageLogPath(tempLog, { canonicalPath: path.join(tmpDir, "resource-usage.ndjson") });
+    assertProposeSelfTest(
+      "(C-d) temporary usage logs are truncated for isolated proof runs",
+      fs.readFileSync(tempLog, "utf8") === ""
+    );
+    const canonicalFixture = path.join(tmpDir, "resource-usage.ndjson");
+    fs.writeFileSync(canonicalFixture, "old\n");
+    resetUsageLogPath(canonicalFixture, { canonicalPath: canonicalFixture });
+    assertProposeSelfTest(
+      "(C-e) canonical usage ledger is append-only and not truncated at run start",
+      fs.readFileSync(canonicalFixture, "utf8") === "old\n"
+    );
+    fs.rmSync(tmpDir, { recursive: true, force: true });
+  }
+
+  // (D) Provider image-dimension guard — pure PNG header parsing so the live runner
+  // skips over-limit captures before making an API call.
+  {
+    const within = makePngHeaderFixture(1081, 8000);
+    const tooTall = makePngHeaderFixture(1081, 8825);
+    assertProposeSelfTest(
+      "(D-a) pngDimensionsFromBuffer reads PNG IHDR dimensions",
+      JSON.stringify(pngDimensionsFromBuffer(within)) === JSON.stringify({ width: 1081, height: 8000 })
+    );
+    assertProposeSelfTest(
+      "(D-b) pngExceedsDimensionLimit accepts images at the provider limit",
+      pngExceedsDimensionLimit(within, 8000) === false
+    );
+    assertProposeSelfTest(
+      "(D-c) pngExceedsDimensionLimit rejects images above the provider limit",
+      pngExceedsDimensionLimit(tooTall, 8000) === true
+    );
+  }
+
+  // (E) Transient provider retry classification — pure and key-free.
+  {
+    assertProposeSelfTest(
+      "(E-a) retryableProviderError treats provider 500s as retryable",
+      retryableProviderError({ status: 500, message: "Internal server error" }) === true
+    );
+    assertProposeSelfTest(
+      "(E-b) retryableProviderError treats connection failures as retryable",
+      retryableProviderError({ message: "Connection error." }) === true
+    );
+    assertProposeSelfTest(
+      "(E-c) retryableProviderError does not retry request-shape errors",
+      retryableProviderError({ status: 400, message: "invalid_request_error" }) === false
+    );
+  }
 }
 
 // ----------------------------------------------------------------------------
@@ -174,8 +296,12 @@ const round = Number(process.env.RATCHET_ROUND || "1");
 const RESULTS_DIR = path.join(__dirname, "../../test-results/admin-visuals");
 const BUNDLE_PATH = path.join(__dirname, "../../priv/static/accrue_admin.css");
 const CANDIDATES_PATH = path.join(RESULTS_DIR, "candidates.ndjson");
+const USAGE_LOG_PATH = process.env.RATCHET_USAGE_LOG || null;
 const MAX_B64_BYTES = 5 * 1024 * 1024; // 5 MB — skip oversized images with a warning
+const MAX_IMAGE_DIMENSION = 8000; // Anthropic image API rejects any dimension above this.
 const MAX_FINDINGS_PER_IMAGE = 12; // D-16 cap: keep top-N by (job_blocking, severity)
+const API_MAX_ATTEMPTS = Number(process.env.RATCHET_PROPOSE_API_MAX_ATTEMPTS || "3");
+const API_RETRY_BASE_MS = Number(process.env.RATCHET_PROPOSE_API_RETRY_BASE_MS || "1000");
 
 const { DIMENSIONS, SURFACES, cellId } = manifest;
 
@@ -473,6 +599,7 @@ async function main() {
 
   // Truncate/create the output so reruns do not concatenate stale rows.
   fs.writeFileSync(CANDIDATES_PATH, "");
+  resetUsageLog();
 
   const run_id = makeRunId();
   const bundle_sha256 = bundleSha256();
@@ -483,8 +610,22 @@ async function main() {
 
   try {
     for (const png of pngs) {
-      // Large-image guard — skip PNGs whose base64 encoding exceeds 5 MB (EVAL-03).
-      const b64 = fs.readFileSync(png.pngPath, "base64");
+      // Large-image guard — skip PNGs whose base64 encoding or pixel dimensions
+      // exceed provider limits (EVAL-03 + live-UAT provider guard).
+      const pngBuffer = fs.readFileSync(png.pngPath);
+      const dimensions = pngDimensionsFromBuffer(pngBuffer);
+      if (
+        dimensions &&
+        (dimensions.width > MAX_IMAGE_DIMENSION || dimensions.height > MAX_IMAGE_DIMENSION)
+      ) {
+        console.warn(
+          `[ratchet-propose] Skipping ${png.pngPath} — PNG dimensions ${dimensions.width}x${dimensions.height} exceed ${MAX_IMAGE_DIMENSION}px provider limit`
+        );
+        skipped++;
+        continue;
+      }
+
+      const b64 = pngBuffer.toString("base64");
       if (b64.length > MAX_B64_BYTES) {
         console.warn(
           `[ratchet-propose] Skipping ${png.pngPath} — base64 size ${b64.length} exceeds 5 MB limit`
@@ -524,6 +665,183 @@ async function main() {
   if (failedImages > 0) {
     console.error(`[ratchet-propose] ${failedImages} image(s) could not be evaluated`);
     process.exit(1);
+  }
+}
+
+function usageCacheReadInputTokens(usageLike) {
+  const usage =
+    usageLike && typeof usageLike === "object" && usageLike.usage && typeof usageLike.usage === "object"
+      ? usageLike.usage
+      : usageLike;
+  const raw = usage && usage.cache_read_input_tokens;
+  const value = Number(raw);
+  return Number.isFinite(value) ? value : 0;
+}
+
+function numberOrZero(value) {
+  const n = Number(value);
+  return Number.isFinite(n) ? n : 0;
+}
+
+function extractUsageNumbers(responseLike) {
+  const usage =
+    responseLike &&
+    typeof responseLike === "object" &&
+    responseLike.usage &&
+    typeof responseLike.usage === "object"
+      ? responseLike.usage
+      : responseLike || {};
+  const cacheCreation = usage.cache_creation && typeof usage.cache_creation === "object" ? usage.cache_creation : {};
+  const legacyCacheCreation = numberOrZero(usage.cache_creation_input_tokens);
+  return {
+    input_tokens: numberOrZero(usage.input_tokens),
+    output_tokens: numberOrZero(usage.output_tokens),
+    cache_creation_5m_input_tokens:
+      numberOrZero(cacheCreation.ephemeral_5m_input_tokens) + legacyCacheCreation,
+    cache_creation_1h_input_tokens: numberOrZero(cacheCreation.ephemeral_1h_input_tokens),
+    cache_read_input_tokens: usageCacheReadInputTokens(usage),
+  };
+}
+
+function estimateUsageCostUsd(usageNumbers) {
+  const mtok = 1_000_000;
+  const cost =
+    (usageNumbers.input_tokens * SONNET_45_PRICING_USD_PER_MTOK.input_tokens +
+      usageNumbers.output_tokens * SONNET_45_PRICING_USD_PER_MTOK.output_tokens +
+      usageNumbers.cache_creation_5m_input_tokens *
+        SONNET_45_PRICING_USD_PER_MTOK.cache_creation_5m_input_tokens +
+      usageNumbers.cache_creation_1h_input_tokens *
+        SONNET_45_PRICING_USD_PER_MTOK.cache_creation_1h_input_tokens +
+      usageNumbers.cache_read_input_tokens * SONNET_45_PRICING_USD_PER_MTOK.cache_read_input_tokens) /
+    mtok;
+  return Math.round(cost * 1_000_000) / 1_000_000;
+}
+
+function usageLogIsCanonical(logPath, canonicalPath = CANONICAL_USAGE_LOG_PATH) {
+  return Boolean(logPath) && path.resolve(logPath) === path.resolve(canonicalPath);
+}
+
+function resetUsageLogPath(logPath, { canonicalPath = CANONICAL_USAGE_LOG_PATH } = {}) {
+  if (!logPath) return;
+  fs.mkdirSync(path.dirname(logPath), { recursive: true });
+  if (usageLogIsCanonical(logPath, canonicalPath)) {
+    fs.closeSync(fs.openSync(logPath, "a"));
+    return;
+  }
+  fs.writeFileSync(logPath, "");
+}
+
+function pngDimensionsFromBuffer(buffer) {
+  if (!Buffer.isBuffer(buffer) || buffer.length < 24) return null;
+  const isPng =
+    buffer[0] === 0x89 &&
+    buffer[1] === 0x50 &&
+    buffer[2] === 0x4e &&
+    buffer[3] === 0x47 &&
+    buffer[4] === 0x0d &&
+    buffer[5] === 0x0a &&
+    buffer[6] === 0x1a &&
+    buffer[7] === 0x0a;
+  if (!isPng || buffer.toString("ascii", 12, 16) !== "IHDR") return null;
+  return {
+    width: buffer.readUInt32BE(16),
+    height: buffer.readUInt32BE(20),
+  };
+}
+
+function pngExceedsDimensionLimit(buffer, maxDimension) {
+  const dimensions = pngDimensionsFromBuffer(buffer);
+  return Boolean(
+    dimensions &&
+      Number.isFinite(maxDimension) &&
+      (dimensions.width > maxDimension || dimensions.height > maxDimension)
+  );
+}
+
+function makePngHeaderFixture(width, height) {
+  const buffer = Buffer.alloc(24);
+  buffer[0] = 0x89;
+  buffer.write("PNG\r\n\x1a\n", 1, "binary");
+  buffer.writeUInt32BE(13, 8);
+  buffer.write("IHDR", 12, "ascii");
+  buffer.writeUInt32BE(width, 16);
+  buffer.writeUInt32BE(height, 20);
+  return buffer;
+}
+
+function resetUsageLog() {
+  resetUsageLogPath(USAGE_LOG_PATH);
+}
+
+function buildUsageRow(
+  lens_kind,
+  { png, persona = null, run_id = null, bundle_sha256 = null },
+  response,
+  { modelName = model, roundNumber = round, recordedAt = new Date().toISOString() } = {}
+) {
+  const usageNumbers = extractUsageNumbers(response);
+  return {
+    schema_version: "ratchet-propose-usage/2",
+    recorded_at: recordedAt,
+    pass: process.env.RATCHET_LIVE_UAT_PASS || null,
+    run_id,
+    bundle_sha256,
+    model: modelName,
+    round: roundNumber,
+    surface: png.screen,
+    viewport: png.viewport,
+    theme: png.theme,
+    lens_kind,
+    persona_id: persona ? persona.persona_id : null,
+    ...usageNumbers,
+    estimated_cost_usd: estimateUsageCostUsd(usageNumbers),
+    pricing_source: PRICING_SOURCE,
+  };
+}
+
+function recordUsage(lens_kind, { png, persona = null, run_id = null, bundle_sha256 = null }, response) {
+  if (!USAGE_LOG_PATH) return;
+  const row = buildUsageRow(lens_kind, { png, persona, run_id, bundle_sha256 }, response);
+  fs.appendFileSync(USAGE_LOG_PATH, JSON.stringify(row) + "\n");
+}
+
+function retryableProviderError(error) {
+  const status = Number(error && error.status);
+  if ([408, 409, 429, 500, 502, 503, 504, 529].includes(status)) return true;
+
+  const type = String(error?.type || error?.error?.type || "");
+  if (["api_error", "overloaded_error", "rate_limit_error"].includes(type)) return true;
+
+  const message = String(error?.message || "").toLowerCase();
+  return (
+    message.includes("connection error") ||
+    message.includes("internal server error") ||
+    message.includes("overloaded") ||
+    message.includes("timeout") ||
+    message.includes("rate limit")
+  );
+}
+
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function createMessageWithRetry(request, context) {
+  const maxAttempts = Number.isFinite(API_MAX_ATTEMPTS) && API_MAX_ATTEMPTS > 0 ? API_MAX_ATTEMPTS : 3;
+  const baseMs = Number.isFinite(API_RETRY_BASE_MS) && API_RETRY_BASE_MS >= 0 ? API_RETRY_BASE_MS : 1000;
+
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    try {
+      return await client.messages.create(request);
+    } catch (error) {
+      if (attempt >= maxAttempts || !retryableProviderError(error)) throw error;
+
+      const delay = baseMs * 2 ** (attempt - 1);
+      console.warn(
+        `[ratchet-propose] ${context} attempt ${attempt}/${maxAttempts} failed: ${error.message}; retrying in ${delay}ms`
+      );
+      await sleep(delay);
+    }
   }
 }
 
@@ -594,7 +912,11 @@ async function proposeForImage(png, b64, provenance) {
   for (const persona of PERSONAS) {
     const request = buildPersonaRequest(model, SYSTEM_PREAMBLE, toolSchema, b64, persona);
 
-    const response = await client.messages.create(request);
+    const response = await createMessageWithRetry(
+      request,
+      `${png.viewport}/${png.screen} (${png.theme}) persona:${persona.persona_id}`
+    );
+    recordUsage("persona", { png, persona, ...provenance }, response);
 
     // RESEARCH Pitfall 6: read the forced tool_use block `.input.findings`. Do NOT
     // index the first text content block — it is `undefined` under forced tool-use.
@@ -616,7 +938,11 @@ async function proposeForImage(png, b64, provenance) {
   const { content: designContent, attachedBad } = buildDesignContent(b64, surface, surface_type);
   const designRequest = buildDesignRequestPayload(model, SYSTEM_PREAMBLE, toolSchema, designContent);
 
-  const designResponse = await client.messages.create(designRequest);
+  const designResponse = await createMessageWithRetry(
+    designRequest,
+    `${png.viewport}/${png.screen} (${png.theme}) design`
+  );
+  recordUsage("design", { png, ...provenance }, designResponse);
   const _designFound =
     designResponse.content.find((b) => b.type === "tool_use")?.input?.findings;
   const designRaw = Array.isArray(_designFound) ? _designFound : [];

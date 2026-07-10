@@ -45,6 +45,8 @@ import * as regionTags from "./region-tags.js";
 import * as ratchetLedger from "./ratchet-ledger.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const PRICING_SOURCE = "https://platform.claude.com/docs/en/about-claude/pricing";
+const USAGE_LOG_PATH = process.env.RATCHET_USAGE_LOG || null;
 
 // ----------------------------------------------------------------------------
 // Configuration — read unconditionally (no SDK/key dependency to compute these).
@@ -60,6 +62,97 @@ const LEDGER_PATH = path.join(__dirname, "findings.ledger.ndjson"); // the REAL 
 // ledger (206-03 seeds it as an initially-empty file). --self-test NEVER writes here — every
 // self-test fixture targets an fs.mkdtempSync scratch directory instead.
 const MAX_B64_BYTES = 5 * 1024 * 1024; // 5 MB — skip oversized images with a warning
+
+function basePricingUsdPerMtok(modelName) {
+  if (/claude-sonnet-4-5/.test(modelName)) return { input_tokens: 3, output_tokens: 15 };
+  if (/claude-opus-4/.test(modelName)) return { input_tokens: 15, output_tokens: 75 };
+  return { input_tokens: null, output_tokens: null };
+}
+
+function numberOrZero(value) {
+  const n = Number(value);
+  return Number.isFinite(n) ? n : 0;
+}
+
+function usageCacheReadInputTokens(usageLike) {
+  const usage =
+    usageLike && typeof usageLike === "object" && usageLike.usage && typeof usageLike.usage === "object"
+      ? usageLike.usage
+      : usageLike;
+  return numberOrZero(usage && usage.cache_read_input_tokens);
+}
+
+function extractUsageNumbers(responseLike) {
+  const usage =
+    responseLike &&
+    typeof responseLike === "object" &&
+    responseLike.usage &&
+    typeof responseLike.usage === "object"
+      ? responseLike.usage
+      : responseLike || {};
+  const cacheCreation = usage.cache_creation && typeof usage.cache_creation === "object" ? usage.cache_creation : {};
+  const legacyCacheCreation = numberOrZero(usage.cache_creation_input_tokens);
+  return {
+    input_tokens: numberOrZero(usage.input_tokens),
+    output_tokens: numberOrZero(usage.output_tokens),
+    cache_creation_5m_input_tokens:
+      numberOrZero(cacheCreation.ephemeral_5m_input_tokens) + legacyCacheCreation,
+    cache_creation_1h_input_tokens: numberOrZero(cacheCreation.ephemeral_1h_input_tokens),
+    cache_read_input_tokens: usageCacheReadInputTokens(usage),
+  };
+}
+
+function estimateUsageCostUsd(modelName, usageNumbers) {
+  const base = basePricingUsdPerMtok(modelName);
+  if (base.input_tokens === null || base.output_tokens === null) return null;
+  const mtok = 1_000_000;
+  const cost =
+    (usageNumbers.input_tokens * base.input_tokens +
+      usageNumbers.output_tokens * base.output_tokens +
+      usageNumbers.cache_creation_5m_input_tokens * base.input_tokens * 1.25 +
+      usageNumbers.cache_creation_1h_input_tokens * base.input_tokens * 2 +
+      usageNumbers.cache_read_input_tokens * base.input_tokens * 0.1) /
+    mtok;
+  return Math.round(cost * 1_000_000) / 1_000_000;
+}
+
+function usageMetadataFromGroup(group) {
+  const first = Array.isArray(group) && group.length > 0 ? group[0] : {};
+  return {
+    run_id: first.run_id || null,
+    bundle_sha256: first.bundle_sha256 || null,
+    round: Number.isFinite(Number(first.round)) ? Number(first.round) : Number(process.env.RATCHET_ROUND || 1),
+    surface: first.surface || null,
+    viewport: first.viewport || null,
+    theme: first.theme || null,
+  };
+}
+
+function buildUsageRow(stage, metadata, response, { modelName = model, recordedAt = new Date().toISOString() } = {}) {
+  const usageNumbers = extractUsageNumbers(response);
+  return {
+    schema_version: "ratchet-verify-usage/1",
+    recorded_at: recordedAt,
+    stage,
+    run_id: metadata.run_id,
+    bundle_sha256: metadata.bundle_sha256,
+    model: modelName,
+    round: metadata.round,
+    surface: metadata.surface,
+    viewport: metadata.viewport,
+    theme: metadata.theme,
+    ...usageNumbers,
+    estimated_cost_usd: estimateUsageCostUsd(modelName, usageNumbers),
+    pricing_source: PRICING_SOURCE,
+  };
+}
+
+function recordUsage(stage, metadata, response) {
+  if (!USAGE_LOG_PATH) return;
+  fs.mkdirSync(path.dirname(USAGE_LOG_PATH), { recursive: true });
+  const row = buildUsageRow(stage, metadata, response);
+  fs.appendFileSync(USAGE_LOG_PATH, JSON.stringify(row) + "\n");
+}
 
 // ----------------------------------------------------------------------------
 // Median-then-clamp vote aggregation (D-29, pure function — twin of phase200-judge.mjs's
@@ -447,6 +540,7 @@ async function verifyImageGroup(pngRef, group) {
   const request = buildPanelRequest(model, SYSTEM_AND_RUBRIC, PANEL_TOOL, b64, findingsText);
 
   const response = await client.messages.create(request);
+  recordUsage("verify-panel", usageMetadataFromGroup(group), response);
 
   // RESEARCH Pitfall 6: read the forced tool_use block `.input.verdicts`. Do NOT index the
   // first content block — it is not guaranteed to be the tool_use block. Array.isArray guard
@@ -587,6 +681,59 @@ function runSelfTest() {
     assertSelfTest(
       "(ii-g) medianClamp([real,real], real) -> not confirmed (2-of-3-truncated response, not just 2-of-3-refute)",
       r.confirmed === false && r.severity === null
+    );
+  }
+
+  // (ii-h) usage accounting rows stay PII-safe: no prompts, screenshot payloads, raw response
+  // bodies, or finding prose are persisted to the durable cost ledger.
+  {
+    const fakeRow = buildUsageRow(
+      "verify-panel",
+      {
+        run_id: "run-fixture",
+        bundle_sha256: "abc123",
+        round: 77,
+        surface: "dashboard",
+        viewport: "chromium-desktop",
+        theme: "dark",
+      },
+      {
+        usage: {
+          input_tokens: 1000,
+          output_tokens: 200,
+          cache_creation_input_tokens: 300,
+          cache_read_input_tokens: 400,
+        },
+      },
+      { modelName: "claude-opus-4-8", recordedAt: "2026-07-10T00:00:00.000Z" }
+    );
+    const allowedKeys = [
+      "schema_version",
+      "recorded_at",
+      "stage",
+      "run_id",
+      "bundle_sha256",
+      "model",
+      "round",
+      "surface",
+      "viewport",
+      "theme",
+      "input_tokens",
+      "output_tokens",
+      "cache_creation_5m_input_tokens",
+      "cache_creation_1h_input_tokens",
+      "cache_read_input_tokens",
+      "estimated_cost_usd",
+      "pricing_source",
+    ];
+    assertSelfTest(
+      "(ii-h) buildUsageRow emits only approved verifier accounting fields",
+      Object.keys(fakeRow).every((key) => allowedKeys.includes(key)) &&
+        fakeRow.estimated_cost_usd > 0 &&
+        fakeRow.usage === undefined &&
+        fakeRow.prompt === undefined &&
+        fakeRow.findingsText === undefined &&
+        fakeRow.response === undefined
     );
   }
 
