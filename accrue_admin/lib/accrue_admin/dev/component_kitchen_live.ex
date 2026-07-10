@@ -89,8 +89,8 @@ if Mix.env() != :prod do
               <a class="ax-button ax-button-primary ax-button-sm ax-dev-invoice-action" href={@admin_mount_path <> "/invoices?status=open"}>
                 Work invoice queue
               </a>
-              <a class="ax-button ax-button-secondary ax-button-sm ax-dev-customer-action" href={@admin_mount_path <> "/customers"}>
-                Find customer record
+              <a class="ax-button ax-button-secondary ax-button-sm ax-dev-customer-action ax-dev-customer-primary" href={@admin_mount_path <> "/customers"}>
+                <Icon.icon name={:search} size="sm" /> Find one customer record
               </a>
               <a class="ax-button ax-button-secondary ax-button-sm" href={@admin_mount_path <> "/events?actor_type=admin"}>
                 Open actor-filtered event log
@@ -147,6 +147,22 @@ if Mix.env() != :prod do
                 Watch dunning funnel + at-risk
               </a>
             </div>
+          </section>
+
+          <section :if={@available?} class="ax-card ax-dev-audit-log-card" aria-label="Actor-filtered audit event log preview">
+            <div class="ax-dev-audit-log-copy">
+              <p class="ax-label">Who did what, when?</p>
+              <strong>Actor-filtered audit trail</strong>
+              <span>Admin user updated billing.contact.updated at Jul 09, 2026 14:51 UTC.</span>
+            </div>
+            <div class="ax-audit-summary-row" aria-label="Latest actor action timestamp">
+              <span><strong>Actor</strong><em>Admin user</em></span>
+              <span><strong>Action</strong><em>billing.contact.updated</em></span>
+              <span><strong>Timestamp</strong><em>Jul 09, 2026 14:51 UTC</em></span>
+            </div>
+            <a class="ax-button ax-button-secondary ax-button-sm" href={@admin_mount_path <> "/events?actor_type=admin"}>
+              Open actor-filtered event log
+            </a>
           </section>
 
           <section :if={@available?} class="ax-card ax-dev-stack">

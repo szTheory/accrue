@@ -389,28 +389,28 @@ defmodule AccrueAdmin.Live.DashboardLive do
       stats.open_invoice_count > 0 &&
         %{
           tone: "warning",
-          priority: "Priority",
+          priority: "1 Invoice queue",
           metric: count(stats.open_invoice_count, "open invoice"),
           label:
-            "open invoice queue above $0.00 target - #{format_minor(stats.open_invoice_balance_minor, "usd")}",
+            "above $0.00 target - #{format_minor(stats.open_invoice_balance_minor, "usd")} open",
           pill: "primary queue",
-          action: "Same invoice queue as primary action",
+          action: "Work open invoices first",
           href: ScopedPath.build(mount_path, "/invoices", scope, %{"status" => "open"})
         },
       stats.blocked_webhook_count > 0 &&
         %{
           tone: "danger",
-          priority: "Critical",
+          priority: "2 Webhooks",
           metric: count(stats.blocked_webhook_count, "webhook"),
           label: Copy.home_attention_webhooks_label(),
           pill: "needs review",
-          action: "Open webhook queue",
+          action: "Debug failed webhook queue",
           href: ScopedPath.build(mount_path, "/webhooks", scope, %{"status" => "failed,dead"})
         },
       stats.past_due_subscription_count > 0 &&
         %{
           tone: "warning",
-          priority: "At risk",
+          priority: "3 Recovery",
           metric: count(stats.past_due_subscription_count, "subscription"),
           label: Copy.home_attention_past_due_label(),
           pill: "at risk",
@@ -420,7 +420,7 @@ defmodule AccrueAdmin.Live.DashboardLive do
       stats.failed_meter_event_count > 0 &&
         %{
           tone: "info",
-          priority: "Info",
+          priority: "4 Usage",
           metric: count(stats.failed_meter_event_count, "meter event"),
           label: Copy.home_attention_meter_label(),
           pill: nil,
@@ -434,15 +434,18 @@ defmodule AccrueAdmin.Live.DashboardLive do
   defp attention_health_summary(_stats), do: "Billing Health Unhealthy"
 
   defp attention_health_issue_summary(stats) do
-    issue_count =
-      stats.blocked_webhook_count + stats.open_invoice_count + stats.past_due_subscription_count +
-        stats.failed_meter_event_count
-
-    if issue_count == 1 do
-      "1 critical issue needs action"
-    else
-      "#{issue_count} critical issues need action"
-    end
+    [
+      stats.open_invoice_count > 0 &&
+        "#{count(stats.open_invoice_count, "open invoice")} above $0.00 target",
+      stats.blocked_webhook_count > 0 &&
+        "#{count(stats.blocked_webhook_count, "failed webhook")} needs debugging",
+      stats.past_due_subscription_count > 0 &&
+        "#{count(stats.past_due_subscription_count, "at-risk subscription")} in recovery",
+      stats.failed_meter_event_count > 0 &&
+        "#{count(stats.failed_meter_event_count, "meter event")} not billed"
+    ]
+    |> Enum.filter(& &1)
+    |> Enum.join("; ")
   end
 
   defp attention_health_metrics(stats),

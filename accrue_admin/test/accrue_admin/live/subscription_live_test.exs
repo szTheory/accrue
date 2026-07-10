@@ -113,7 +113,7 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
 
     assert html =~ "Webhook debugging"
     assert html =~ "failed subscription.created"
-    assert html =~ "Open failed subscription.created event queue"
+    assert html =~ "Debug failed subscription.created webhook"
     assert html =~ "Open this subscription&#39;s invoice context"
     assert html =~ "Queue workspace"
     assert html =~ "Go to Invoices queue workspace"

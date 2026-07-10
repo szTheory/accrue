@@ -244,8 +244,9 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
 
         <section class={["ax-detail-health-summary", "ax-detail-health-summary-" <> health.tone]} aria-label="Primary billing health summary">
           <div class="ax-detail-health-copy" role="status">
-            <span class="ax-detail-health-label"><%= health.label %></span>
+            <span class="ax-detail-health-label">Billing healthy right now?</span>
             <strong class="ax-detail-health-answer"><%= health.answer %></strong>
+            <span class="ax-detail-health-metric"><%= detail_health_metric(health) %></span>
             <strong class="ax-detail-health-verdict"><%= health.headline %></strong>
             <span class="ax-detail-health-body"><%= health.body %></span>
           </div>
@@ -320,9 +321,9 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
                 })
               }
             >
-              Open failed subscription.created event queue
+              Debug failed subscription.created webhook
             </a>
-            <span class="ax-detail-priority-note">Select the failed event, inspect payload and retry trail, then replay.</span>
+            <span class="ax-detail-priority-note">Open failed deliveries with payload, response, retry trail, and replay controls.</span>
           </div>
           <div class="ax-detail-priority-group ax-detail-priority-group-recovery">
             <span class="ax-label ax-detail-priority-label">Recovery workspace</span>
@@ -1100,6 +1101,15 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
         }
     end
   end
+
+  defp detail_health_metric(%{caveats: caveats}) when is_list(caveats) and caveats != [],
+    do: "#{length(caveats)} setup fields blocking health"
+
+  defp detail_health_metric(%{tone: "moss"}), do: "0 blockers"
+
+  defp detail_health_metric(%{tone: "amber"}), do: "Operator action required"
+
+  defp detail_health_metric(_health), do: "Review required"
 
   defp projection_caveats(subscription) do
     [

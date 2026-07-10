@@ -114,6 +114,19 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
               Open invoice queue workspace
             </a>
             <a
+              class="ax-button ax-button-warning ax-button-sm ax-subscriptions-webhook-workspace"
+              href={
+                @admin_mount_path
+                |> scoped_path("/webhooks", @current_owner_scope)
+                |> AccrueAdmin.DataTableNav.merge_query(%{
+                  "status" => "failed,dead",
+                  "type" => "subscription.created"
+                })
+              }
+            >
+              Debug failed webhooks end-to-end
+            </a>
+            <a
               class="ax-button ax-button-recovery ax-button-sm"
               href={scoped_path(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}
             >
@@ -370,9 +383,9 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
         <a href="#{subscription_invoices_href}" class="ax-link">Open invoice queue for this subscription</a>
       </span>
       <span class="ax-webhook-row-status ax-webhook-row-status-warning ax-subscription-row-signal-secondary">
-        <strong>Webhook debugging workspace</strong>
-        <span>Failed subscription.created deliveries and replay actions</span>
-        <a href="#{webhook_href}" class="ax-button ax-button-warning ax-button-sm ax-subscription-row-webhook-action">Debug failed webhook deliveries</a>
+        <strong>Row webhook attempts</strong>
+        <span>This subscription's failed subscription.created deliveries</span>
+        <a href="#{webhook_href}" class="ax-link ax-subscription-row-webhook-action">Open this row's delivery attempts</a>
       </span>
       <span class="ax-subscription-row-admin-chips"><span class="ax-chip ax-label">Owner: #{escaped_o}</span> <span class="ax-chip ax-label">Tax: #{escaped_t}</span></span>
       <span class="ax-data-table-inline-actions">

@@ -117,7 +117,7 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert html =~ "Latest audit event: subscription.created by Accrue system"
     assert html =~ "Open full audit event log"
     assert html =~ "Filter admin actors"
-    assert html =~ "Debug failed webhook deliveries"
+    assert html =~ "Debug failed webhooks end-to-end"
     refute html =~ "Billing health: Unhealthy"
     assert_one_h1(html)
 
@@ -275,8 +275,8 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert html =~ "open exposure" or html =~ "above $0.00 target"
     refute html =~ "ax-health-verdict"
     assert html =~ "Open invoice queue for this subscription"
-    assert html =~ "Debug failed webhook deliveries"
-    assert html =~ "Webhook debugging workspace"
+    assert html =~ "Open this row&#39;s delivery attempts"
+    assert html =~ "Row webhook attempts"
     assert html =~ "failed subscription.created delivery attempts"
     assert html =~ "Open who did what, when event log"
     assert html =~ "Owner: User"
@@ -284,7 +284,7 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert html =~ "Actor"
     assert html =~ "Event"
     refute html =~ "Search customer, open detail"
-    assert html =~ "Debug failed webhook deliveries"
+    assert html =~ "Debug failed webhooks end-to-end"
     assert html =~ "Setup gap"
     assert html =~ "Amount not confirmed in admin"
 
