@@ -49,7 +49,8 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
          socket.assigns.current_owner_scope
        )
      )
-     |> assign(:summary, subscription_summary(socket.assigns.current_owner_scope))}
+     |> assign(:summary, subscription_summary(socket.assigns.current_owner_scope))
+     |> assign(:open_invoice_queue, open_invoice_queue(socket.assigns.current_owner_scope))}
   end
 
   @impl true
@@ -217,6 +218,28 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
           </a>
         </section>
 
+        <section class="ax-inline-worklist ax-subscriptions-invoice-records" aria-label="Open-invoice queue preview">
+          <div class="ax-inline-worklist-copy">
+            <strong>Open-invoice queue records</strong>
+            <span>Top records to work to $0.00; open the dedicated invoice queue for full filtering and bulk action.</span>
+          </div>
+          <ol :if={@open_invoice_queue != []} class="ax-subscriptions-invoice-record-list">
+            <li :for={invoice <- @open_invoice_queue}>
+              <a href={invoice_queue_record_href(@admin_mount_path, @current_owner_scope, invoice)} class="ax-subscriptions-invoice-record">
+                <strong><%= invoice_queue_customer_label(invoice) %></strong>
+                <span><%= format_minor(invoice.amount_remaining_minor, invoice.currency || "usd") %> remaining</span>
+                <em><%= invoice_queue_due(invoice) %></em>
+              </a>
+            </li>
+          </ol>
+          <span :if={@open_invoice_queue == []} class="ax-subscriptions-invoice-record-empty">
+            No open invoice records in this scope.
+          </span>
+          <a class="ax-button ax-button-primary ax-button-sm ax-subscriptions-primary-workspace" href={invoice_queue_path(@admin_mount_path, @current_owner_scope)}>
+            Open dedicated invoice queue
+          </a>
+        </section>
+
         <div class="ax-subscriptions-secondary-strips">
           <section class="ax-inline-worklist ax-subscriptions-at-risk-strip" aria-label="At-risk subscription queue">
             <div class="ax-inline-worklist-copy">
@@ -304,7 +327,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
               items={work_queue_chips(@params, @table_path, @summary)}
               label="Work queue"
               result_count={status.visible_count}
-              result_label={{"subscription", "subscriptions"}}
+              result_label={{"subscription row", "subscription rows"}}
               clear_all_href={active_clear_all_href(@params, @table_path)}
               clear_all_label={Copy.data_table_clear_filters_label()}
             />
@@ -377,6 +400,50 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
   end
 
   defp scoped_invoices(_owner_scope), do: Invoice
+
+  defp open_invoice_queue(owner_scope) do
+    open_invoice_statuses = [:draft, :open]
+
+    owner_scope
+    |> open_invoice_queue_base(open_invoice_statuses)
+    |> order_by([invoice, _customer, _subscription],
+      asc_nulls_last: invoice.due_date,
+      desc: invoice.amount_remaining_minor
+    )
+    |> limit(3)
+    |> select([invoice, customer, subscription], %{
+      id: invoice.id,
+      number: invoice.number,
+      subscription_id: invoice.subscription_id,
+      subscription_processor_id: subscription.processor_id,
+      customer_name: customer.name,
+      customer_email: customer.email,
+      customer_id: customer.id,
+      amount_remaining_minor: invoice.amount_remaining_minor,
+      currency: invoice.currency,
+      due_date: invoice.due_date,
+      status: invoice.status
+    })
+    |> Repo.all()
+  end
+
+  defp open_invoice_queue_base(%{mode: :organization, organization_id: organization_id}, statuses) do
+    Invoice
+    |> join(:inner, [invoice], customer in Customer, on: customer.id == invoice.customer_id)
+    |> join(:left, [invoice, _customer], subscription in assoc(invoice, :subscription))
+    |> where(
+      [invoice, customer, _subscription],
+      invoice.status in ^statuses and customer.owner_type == "Organization" and
+        customer.owner_id == ^organization_id
+    )
+  end
+
+  defp open_invoice_queue_base(_owner_scope, statuses) do
+    Invoice
+    |> join(:inner, [invoice], customer in Customer, on: customer.id == invoice.customer_id)
+    |> join(:left, [invoice, _customer], subscription in assoc(invoice, :subscription))
+    |> where([invoice, _customer, _subscription], invoice.status in ^statuses)
+  end
 
   defp billing_signals_cell(row, mount_path, owner_scope) do
     ownership = BillingPresentation.ownership_label(row)
@@ -661,7 +728,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
       },
       %{
         id: :open_invoices,
-        label: "Dedicated Invoices queue",
+        label: "Open invoice queue workspace",
         value: count(summary.open_invoice_count, "open invoice"),
         tone: :amber,
         active: true,
@@ -773,6 +840,32 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
     |> scoped_path("/invoices", owner_scope)
     |> AccrueAdmin.DataTableNav.merge_query(%{"status" => "open"})
   end
+
+  defp invoice_queue_record_href(mount_path, owner_scope, invoice) do
+    mount_path
+    |> scoped_path("/invoices", owner_scope)
+    |> AccrueAdmin.DataTableNav.merge_query(%{
+      "status" => "open",
+      "subscription_id" => invoice.subscription_id,
+      "invoice_id" => invoice.id
+    })
+  end
+
+  defp invoice_queue_due(%{due_date: %DateTime{} = due_date}), do: "Due #{format_date(due_date)}"
+
+  defp invoice_queue_due(%{number: number}) when is_binary(number) and number != "",
+    do: "Invoice #{number}"
+
+  defp invoice_queue_due(%{status: status}), do: "Status #{humanize(status)}"
+
+  defp invoice_queue_customer_label(%{customer_name: name}) when is_binary(name) and name != "",
+    do: name
+
+  defp invoice_queue_customer_label(%{customer_email: email})
+       when is_binary(email) and email != "",
+       do: email
+
+  defp invoice_queue_customer_label(%{customer_id: id}), do: id
 
   defp invoice_queue_path_from_table(table_path) do
     uri = URI.parse(table_path)

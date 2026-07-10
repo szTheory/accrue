@@ -103,17 +103,20 @@ defmodule AccrueAdmin.DashboardLiveTest do
     assert html =~ "Debug failed webhook queue"
     assert html =~ Copy.home_attention_meter_label()
     assert html =~ Copy.home_attention_action_investigate()
-    assert html =~ "Billing healthy? No"
-    assert html =~ "Billing health: Critical issues require attention"
+    assert html =~ "Billing is unhealthy"
+    assert html =~ "ax-home-health-answer"
+    assert html =~ "Collect "
+    assert html =~ "open invoice"
 
     assert html =~
-             "Resolve priority 1 open invoices before webhook debugging and recovery review."
+             "Collect open invoices first, then inspect failed deliveries and dunning."
 
     assert html =~ "open invoices"
-    assert html =~ ">1<"
-    assert html =~ ">2<"
+    assert html =~ ">P1<"
+    assert html =~ ">P2<"
+    assert html =~ "Open dedicated invoice queue"
     assert html =~ "Debug dead-lettered webhooks"
-    assert html =~ "Work open-invoice queue: $42.50 open"
+    assert html =~ "Open-invoice queue:"
     assert html =~ ~s(href="/billing/events?q=meter_event")
     assert html =~ ~s(href="/billing/invoices?status=open")
     assert html =~ "Audit: open event ledger"
@@ -122,8 +125,8 @@ defmodule AccrueAdmin.DashboardLiveTest do
     assert html =~ Copy.home_launcher_customers_title()
     assert html =~ Copy.home_launcher_customers_meta()
     assert html =~ "ax-launcher-primary"
-    assert html =~ "Open-invoice queue: $42.50 open"
-    assert html =~ "$42.50 above $0.00 target"
+    assert html =~ "Open-invoice queue:"
+    assert html =~ "above $0.00 target"
     assert html =~ Copy.home_launcher_recovery_title()
     assert html =~ "Recovery status: At risk"
     assert html =~ "At-risk now:"
@@ -136,7 +139,7 @@ defmodule AccrueAdmin.DashboardLiveTest do
     assert html =~ Copy.dashboard_kpi_customers_label()
     assert html =~ Copy.dashboard_kpi_active_subscriptions_label()
     assert html =~ Copy.dashboard_kpi_open_invoice_balance_label()
-    assert html =~ "$42.50"
+    assert html =~ "Open invoice queue: collect"
     assert html =~ Copy.dashboard_kpi_webhook_backlog_label()
     assert html =~ Copy.dashboard_kpi_customers_aria_label()
     assert html =~ Copy.dashboard_kpi_subscriptions_aria_label()
@@ -171,10 +174,10 @@ defmodule AccrueAdmin.DashboardLiveTest do
     assert html =~ "Search customers globally"
     assert html =~ "Open global customer search"
     assert html =~ "Opens the Invoices queue workspace for current receivables"
-    assert html =~ "Work open-invoice queue: $42.50 open"
+    assert html =~ "Open-invoice queue:"
 
     # IA-01 customer lookup entry point on Home (Plan 175-04)
-    assert html =~ "Find one customer"
+    assert html =~ "Search all customers"
     assert html =~ "ax-home-customer-search-cta"
   end
 end

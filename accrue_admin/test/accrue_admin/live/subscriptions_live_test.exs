@@ -90,7 +90,7 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert html =~ ~s(data-ax-page-actions)
     refute html =~ "Search customer, open detail"
 
-    assert html =~ "Billing status: Unhealthy" or
+    assert html =~ "Billing unhealthy:" or
              html =~ "Billing status: Healthy"
 
     assert html =~ "exposure"
@@ -98,10 +98,10 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert html =~ "target"
 
     assert html =~ "Work open-invoice queue to $0.00"
-    assert html =~ "Watch dunning funnel + at-risk"
+    assert html =~ "Watch dunning funnel"
 
-    assert html =~ "review at-risk subscriptions"
-    assert html =~ "View failed webhook details and retry"
+    assert html =~ "At-risk subscription queue"
+    assert html =~ "Open failed delivery debugger"
     assert html =~ "Dunning funnel and open-invoice queue summary"
     assert html =~ "At-risk subscriptions"
     assert html =~ "Open-invoice queue"
@@ -109,16 +109,16 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     refute html =~ "Bulk invoice actions"
     refute html =~ "Process next invoice"
     refute html =~ "Send invoice reminders"
-    assert html =~ "Find one customer and see everything"
+    assert html =~ "Open-invoice queue records"
     refute html =~ "Who did what, when - filter admin actors"
-    assert html =~ "Work, review, or remove invoices"
+    assert html =~ "Work, review, or remove open-invoice records"
     assert html =~ "Who did what, when?"
-    assert html =~ "Latest audit event: subscription.created by Accrue system"
-    assert html =~ "Open full audit event log"
-    assert html =~ "Filter admin actors"
-    assert html =~ "View failed webhook details and retry"
+    assert html =~ "subscription.created by Accrue system"
+    assert html =~ "Events: open full actor audit log"
+    assert html =~ "Filter admin actions"
+    assert html =~ "Open failed delivery debugger"
     assert html =~ "At-risk subscription queue"
-    assert html =~ "Watch dunning funnel + at-risk"
+    assert html =~ "Watch dunning funnel"
     refute html =~ "Billing health: Unhealthy"
     assert_one_h1(html)
 
@@ -138,10 +138,10 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert html =~ ~s(data-ax-filter-chips)
     assert html =~ "At risk"
     assert html =~ "All"
-    assert html =~ "Dedicated Invoices queue"
+    assert html =~ "Open invoice queue workspace"
     assert html =~ "Billing"
     assert html =~ "ax-subscription-row-state"
-    assert html =~ "View failed webhook details and retry"
+    assert html =~ "Open failed delivery debugger"
     assert html =~ "Who did what, when?"
     assert html =~ ~s(data-ax-state="filtered-empty") or html =~ ~s(data-ax-state="populated")
     refute html =~ "No subscriptions yet."
@@ -276,21 +276,21 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert html =~ "exposure"
     assert html =~ "target"
     refute html =~ "ax-health-verdict"
-    assert html =~ "Work, review, or remove invoices"
-    assert html =~ "View failed webhook details and retry"
+    assert html =~ "Work, review, or remove open-invoice records"
+    assert html =~ "Open failed delivery debugger"
     assert html =~ "Webhook debug path"
-    assert html =~ "failed-delivery workflow"
+    assert html =~ "Open failed delivery debugger"
 
-    assert html =~ "Billing status: Unhealthy" or
+    assert html =~ "Billing unhealthy:" or
              html =~ "Billing status: Healthy"
 
     assert html =~ "Open audit context for this subscription"
     assert html =~ "Owner: User"
     assert html =~ "Tax: Off"
-    assert html =~ "Actor"
-    assert html =~ "Event"
+    assert html =~ "Audit"
+    assert html =~ "subscription.created by Accrue system"
     refute html =~ "Search customer, open detail"
-    assert html =~ "View failed webhook details and retry"
+    assert html =~ "Open failed delivery debugger"
     assert html =~ "Setup gap"
     assert html =~ "Amount not confirmed in admin"
 

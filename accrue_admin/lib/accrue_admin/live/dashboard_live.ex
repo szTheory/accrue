@@ -177,9 +177,12 @@ defmodule AccrueAdmin.Live.DashboardLive do
               <span class="ax-launcher-icon"><Icon.icon name={:recovery} size="lg" /></span>
               <span class="ax-launcher-title"><%= Copy.home_launcher_recovery_title() %></span>
               <span class="ax-launcher-health ax-launcher-health-warning">Recovery status: At risk</span>
-              <span class="ax-launcher-copy">Dunning funnel metrics and retry state live here.</span>
+              <span class="ax-launcher-copy">Dunning funnel metrics, at-risk customers, and retry state live here.</span>
               <span class="ax-launcher-meta ax-launcher-meta-warn">
                 At-risk now: <%= count(@stats.past_due_subscription_count, "subscription") %>
+              </span>
+              <span class="ax-launcher-meta ax-launcher-meta-warn">
+                Funnel stage: reminder pending; review before renewal or cancellation
               </span>
               <span class="ax-launcher-action ax-launcher-action-button">
                 Open dunning funnel analytics <Icon.icon name={:arrow_right} size="sm" />
@@ -401,7 +404,7 @@ defmodule AccrueAdmin.Live.DashboardLive do
           label:
             "above $0.00 target - #{format_minor(stats.open_invoice_balance_minor, "usd")} open",
           pill: nil,
-          action: "Work open-invoice queue",
+          action: "Open dedicated invoice queue",
           href: ScopedPath.build(mount_path, "/invoices", scope, %{"status" => "open"})
         },
       stats.blocked_webhook_count > 0 &&

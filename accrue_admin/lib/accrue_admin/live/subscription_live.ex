@@ -217,8 +217,8 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
             <span class="ax-detail-health-label">Billing health summary</span>
             <strong class="ax-detail-health-answer"><%= health.answer %></strong>
             <span class="ax-detail-health-metric"><%= detail_health_metric(health) %></span>
-            <span :if={@open_invoice_summary.exposure_minor > 0} class="ax-detail-health-metric ax-detail-health-exposure">
-              <strong>Open-invoice exposure</strong><%= invoice_queue_summary(@open_invoice_summary) %>
+            <span :if={@open_invoice_summary.count > 0} class="ax-detail-health-metric ax-detail-health-exposure">
+              <strong>Open-invoice queue</strong><%= invoice_queue_summary(@open_invoice_summary) %>
             </span>
             <strong class="ax-detail-health-verdict"><%= health.headline %></strong>
             <span :if={health.caveats == []} class="ax-detail-health-body"><%= health.body %></span>
@@ -251,6 +251,21 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
               href={ScopedPath.build(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}
             >
               Open dunning analytics
+            </a>
+          </div>
+          <div class="ax-detail-health-actions" aria-label="Primary billing action from health summary">
+            <strong>Primary invoice action</strong>
+            <a
+              class="ax-button ax-button-primary ax-button-sm ax-detail-invoice-primary"
+              href={ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope, %{"status" => "open", "subscription_id" => @subscription.id})}
+            >
+              Work open-invoice queue now: <%= invoice_queue_summary(@open_invoice_summary) %>
+            </a>
+            <a
+              class="ax-button ax-button-warning ax-button-sm ax-detail-webhook-primary"
+              href={ScopedPath.build(@admin_mount_path, "/webhooks", @current_owner_scope, %{"status" => "failed,dead", "type" => "invoice.payment_failed"})}
+            >
+              Debug failed invoice webhooks
             </a>
           </div>
         </section>
@@ -296,12 +311,12 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
 
         <section class="ax-detail-priority-actions ax-detail-priority-actions-split" aria-label="Priority billing workspaces">
           <div class="ax-detail-priority-group ax-detail-priority-group-primary">
-            <span class="ax-label ax-detail-priority-label">Invoice queue handoff</span>
+            <span class="ax-label ax-detail-priority-label">Primary invoice queue workspace</span>
             <a
               class="ax-button ax-button-primary ax-button-sm ax-detail-priority-primary ax-detail-invoice-primary"
               href={ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope, %{"status" => "open"})}
             >
-              Open global invoice queue
+              Work global invoice queue to $0.00
             </a>
             <a
               class="ax-button ax-button-primary ax-button-sm ax-detail-process-next"
@@ -1105,8 +1120,8 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
         %{
           tone: "amber",
           label: "Setup missing",
-          answer: "Billing can process",
-          headline: "Setup fields affect reporting only",
+          answer: "Billing setup incomplete - action needed",
+          headline: "Fix setup fields before trusting billing health",
           body: "Finish setup fields before relying on revenue and recovery reporting.",
           caveats: caveats
         }

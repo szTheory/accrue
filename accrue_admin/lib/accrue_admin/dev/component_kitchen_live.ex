@@ -115,11 +115,36 @@ if Mix.env() != :prod do
             <p class="ax-body">Dev tools require `Accrue.Processor.Fake` as the configured processor.</p>
           </section>
 
+          <section :if={@available?} class="ax-dev-health-command-center" aria-label="Billing health command center">
+            <div class="ax-dev-health-command-verdict">
+              <span>Billing health</span>
+              <strong>Unhealthy - work invoice queue first</strong>
+              <em>Collect $592.50 from 2 open invoices, then debug 3 failed webhooks and review 1 at-risk account.</em>
+            </div>
+            <div class="ax-dev-health-kpis" aria-label="Billing health KPI row">
+              <span><strong>MRR</strong><em>$4,820.00</em></span>
+              <span><strong>Open invoices</strong><em>2 / $592.50</em></span>
+              <span><strong>Collection rate</strong><em>91%</em></span>
+              <span><strong>Failed webhooks</strong><em>3</em></span>
+              <span><strong>At risk</strong><em>1 account</em></span>
+            </div>
+            <div class="ax-dev-health-command-actions">
+              <a class="ax-button ax-button-primary ax-button-sm ax-dev-invoice-action" href={@admin_mount_path <> "/invoices?status=open"}>
+                Open dedicated invoice queue
+              </a>
+              <a class="ax-button ax-button-warning ax-button-sm ax-dev-webhook-action" href={@admin_mount_path <> "/webhooks?status=failed,dead"}>
+                Open failed webhook debugger
+              </a>
+              <a class="ax-button ax-button-secondary ax-button-sm ax-dev-dunning-action" href={@admin_mount_path <> "/analytics/recovery?status=at_risk"}>
+                Open dunning funnel
+              </a>
+            </div>
+          </section>
+
           <section :if={@available?} class="ax-inline-worklist ax-dev-production-strip" aria-label="Production billing entrypoints">
             <div class="ax-inline-worklist-copy">
-              <strong>Primary work queue</strong>
-              <span>Collect $592.50 from 2 open invoices.</span>
-              <span>Then inspect 3 failed deliveries and 1 at-risk account.</span>
+              <strong>Queue backup routes</strong>
+              <span>Use only after the command center choice above.</span>
               <span>Customer support path: open one customer and see the full billing context.</span>
               <span>Latest audit event: billing.contact.updated by Admin user.</span>
               <span>Audit timestamp: Jul 09, 2026 14:51 UTC.</span>
