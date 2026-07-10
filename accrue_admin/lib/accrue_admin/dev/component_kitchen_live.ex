@@ -99,8 +99,8 @@ if Mix.env() != :prod do
               <a class="ax-button ax-button-secondary ax-button-sm ax-dev-webhook-action" href={@admin_mount_path <> "/webhooks?status=failed,dead"}>
                 <Icon.icon name={:webhooks} size="sm" /> Debug failed webhooks
               </a>
-              <a class="ax-button ax-button-recovery ax-button-sm ax-dev-dunning-action" href={@admin_mount_path <> "/analytics/recovery"}>
-                <Icon.icon name={:recovery} size="sm" /> Watch dunning funnel + at-risk
+              <a class="ax-button ax-button-secondary ax-button-sm ax-dev-dunning-action" href={@admin_mount_path <> "/analytics/recovery"}>
+                <Icon.icon name={:recovery} size="sm" /> Open recovery analytics
               </a>
             </div>
             <section :if={@available?} class="ax-dev-route-strip" aria-label="Secondary billing routes">
@@ -123,6 +123,7 @@ if Mix.env() != :prod do
               <span>2 open invoices</span>
               <span>$592.50 exposure over $0.00 target</span>
               <span>Customer support path: find one customer and open the full billing context.</span>
+              <span>Latest audit: Admin user updated billing.contact.updated at Jul 09, 2026 14:51 UTC.</span>
             </div>
             <div class="ax-inline-worklist-actions">
               <a class="ax-button ax-button-primary ax-button-sm ax-dev-invoice-action" href={@admin_mount_path <> "/invoices?status=open"}>

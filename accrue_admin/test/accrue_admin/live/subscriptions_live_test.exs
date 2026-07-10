@@ -97,11 +97,11 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert html =~ "$0.00"
     assert html =~ "target"
 
-    assert html =~ "Open invoice queue for"
+    assert html =~ "Work open invoices to $0.00"
     assert html =~ "View dunning funnel dashboard"
 
     assert html =~ "review dunning recovery"
-    assert html =~ "Debug failed webhooks"
+    assert html =~ "View failed webhook details and retry"
     assert html =~ "Dunning funnel and invoice queue summary"
     assert html =~ "At-risk subscriptions"
     assert html =~ "Invoice queue"
@@ -116,7 +116,7 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert html =~ "Latest audit event: subscription.created by Accrue system"
     assert html =~ "Open full audit event log"
     assert html =~ "Filter admin actors"
-    assert html =~ "Debug failed webhooks"
+    assert html =~ "View failed webhook details and retry"
     refute html =~ "Billing health: Unhealthy"
     assert_one_h1(html)
 
@@ -139,7 +139,7 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert html =~ "Dedicated Invoices queue"
     assert html =~ "Billing"
     assert html =~ "ax-subscription-row-state"
-    assert html =~ "Debug failed webhooks"
+    assert html =~ "View failed webhook details and retry"
     assert html =~ "Who did what, when?"
     assert html =~ ~s(data-ax-state="filtered-empty") or html =~ ~s(data-ax-state="populated")
     refute html =~ "No subscriptions yet."
@@ -275,7 +275,7 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert html =~ "target"
     refute html =~ "ax-health-verdict"
     assert html =~ "Open invoice queue for this subscription"
-    assert html =~ "Debug failed webhooks for this subscription"
+    assert html =~ "View failed webhook details and retry"
     assert html =~ "Webhook debug path"
     assert html =~ "failed-delivery workflow"
 
@@ -288,7 +288,7 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert html =~ "Actor"
     assert html =~ "Event"
     refute html =~ "Search customer, open detail"
-    assert html =~ "Debug failed webhooks"
+    assert html =~ "View failed webhook details and retry"
     assert html =~ "Setup gap"
     assert html =~ "Amount not confirmed in admin"
 

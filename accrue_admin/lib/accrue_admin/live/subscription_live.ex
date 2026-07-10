@@ -336,7 +336,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
             >
               Debug failed webhook deliveries
             </a>
-            <span class="ax-detail-priority-note">failed subscription.created deliveries open with payload, response, retry trail, and replay controls.</span>
+            <span class="ax-detail-priority-note">Scoped to this subscription: failed subscription.created deliveries open with payload, response, retry trail, and replay controls.</span>
           </div>
           <div class="ax-detail-priority-links">
             <a
@@ -504,7 +504,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
             <span class="ax-detail-section-title">Activity</span>
           </summary>
           <div class="ax-card ax-activity-audit-strip">
-            <p class="ax-label">Who did what, when - actor-filtered audit table</p>
+            <p class="ax-label">Latest audit event context</p>
             <% latest_audit = latest_audit_row(@timeline_events, @subscription) %>
             <div class="ax-audit-summary-row" aria-label="Latest audit event summary">
               <span><strong>Actor</strong><em><%= latest_audit.actor %></em></span>

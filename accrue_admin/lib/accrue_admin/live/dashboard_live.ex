@@ -218,7 +218,9 @@ defmodule AccrueAdmin.Live.DashboardLive do
               delta_tone="amber"
               href={ScopedPath.build(@admin_mount_path, "/subscriptions", @current_owner_scope, %{"status" => "canceling"})}
               aria_label={Copy.dashboard_kpi_subscriptions_aria_label()}
-            />
+            >
+              <:meta>Canceling subscriptions need renewal review when above 0.</:meta>
+            </KpiCard.kpi_card>
             <KpiCard.kpi_card
               label={Copy.dashboard_kpi_open_invoice_balance_label()}
               value={format_minor(@stats.open_invoice_balance_minor, "usd")}
@@ -242,7 +244,9 @@ defmodule AccrueAdmin.Live.DashboardLive do
               delta_tone={if(@stats.blocked_webhook_count > 0, do: "amber", else: "moss")}
               href={ScopedPath.build(@admin_mount_path, "/webhooks", @current_owner_scope, %{"status" => "dead"})}
               aria_label={Copy.dashboard_kpi_webhooks_aria_label()}
-            />
+            >
+              <:meta><%= if @stats.blocked_webhook_count > 0, do: "Failed or dead events need debugging.", else: "No failed webhook backlog." %></:meta>
+            </KpiCard.kpi_card>
           </div>
         </section>
 

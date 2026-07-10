@@ -119,7 +119,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
               class="ax-button ax-button-primary ax-button-sm ax-subscriptions-primary-workspace"
               href={invoice_queue_path(@admin_mount_path, @current_owner_scope)}
             >
-              Open invoice queue for <%= count(@summary.open_invoice_count, "open invoice") %>
+              Work open invoices to $0.00
             </a>
             <a
               class="ax-button ax-button-secondary ax-button-sm ax-subscriptions-webhook-workspace"
@@ -132,7 +132,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
                 })
               }
             >
-              Debug failed webhooks
+              View failed webhook details and retry
             </a>
             <a
               class="ax-button ax-button-secondary ax-button-sm"
@@ -204,7 +204,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
                 |> AccrueAdmin.DataTableNav.merge_query(%{"status" => "failed,dead"})
               }
             >
-              Debug failed webhooks
+              View failed webhook details and retry
             </a>
           </div>
         </section>
@@ -409,7 +409,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
       <span class="ax-webhook-row-status ax-webhook-row-status-warning ax-subscription-row-signal-secondary">
         <strong>Webhook debug path</strong>
         <span>Use one failed-delivery workflow for payload, response, retry trail, and replay controls</span>
-        <a href="#{webhook_href}" class="ax-link ax-subscription-row-webhook-action">Debug failed webhooks for this subscription</a>
+        <a href="#{webhook_href}" class="ax-link ax-subscription-row-webhook-action">View failed webhook details and retry</a>
       </span>
       <span class="ax-subscription-row-admin-chips"><span class="ax-chip ax-label">Owner: #{escaped_o}</span> <span class="ax-chip ax-label">Tax: #{escaped_t}</span></span>
       <span class="ax-data-table-inline-actions">
