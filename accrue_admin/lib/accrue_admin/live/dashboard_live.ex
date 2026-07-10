@@ -94,7 +94,7 @@ defmodule AccrueAdmin.Live.DashboardLive do
               data-command-palette-trigger="true"
               data-ax-command-palette-trigger="true"
             >
-              Search customer name or ID
+              Search all customers
               <Icon.icon name={:search} size="sm" />
             </button>
             <a
@@ -170,7 +170,7 @@ defmodule AccrueAdmin.Live.DashboardLive do
               <span class="ax-launcher-title"><%= Copy.home_launcher_customers_title() %></span>
               <span class="ax-launcher-meta"><%= Copy.home_launcher_customers_meta() %></span>
               <span class="ax-launcher-action">
-                Search customers on this page <Icon.icon name={:search} size="sm" />
+                Open global customer search <Icon.icon name={:search} size="sm" />
               </span>
             </button>
 
@@ -238,7 +238,9 @@ defmodule AccrueAdmin.Live.DashboardLive do
               delta_tone="cobalt"
               href={ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope, %{"status" => "open"})}
               aria_label={Copy.dashboard_kpi_invoices_aria_label()}
-            />
+            >
+              <:meta><%= Copy.dashboard_kpi_open_invoice_balance_meta() %></:meta>
+            </KpiCard.kpi_card>
             <KpiCard.kpi_card
               label={Copy.dashboard_kpi_webhook_backlog_label()}
               value={Integer.to_string(@stats.blocked_webhook_count)}
@@ -321,12 +323,12 @@ defmodule AccrueAdmin.Live.DashboardLive do
                 class="ax-button ax-button-warning ax-button-sm"
                 href={ScopedPath.build(@admin_mount_path, "/webhooks", @current_owner_scope, %{"status" => "failed,dead"})}
               >
-                Open all failed webhook deliveries
+                Open failed webhook queue
               </a>
             </header>
 
             <p class="ax-body ax-activity-context">
-              Recent rows below are individual deliveries. Use the failed webhook queue for the complete debugging workflow.
+              Recent rows below are individual deliveries. Use each Debug delivery trace link for one failed delivery, or open the queue for all failures.
             </p>
 
             <Timeline.timeline
@@ -518,7 +520,7 @@ defmodule AccrueAdmin.Live.DashboardLive do
         tone: webhook_tone(event.status),
         meta: endpoint_label(event.endpoint),
         href: ScopedPath.build(mount_path, "/webhooks/#{event.id}", scope),
-        href_label: "Open delivery"
+        href_label: "Debug delivery trace"
       }
     end)
   end

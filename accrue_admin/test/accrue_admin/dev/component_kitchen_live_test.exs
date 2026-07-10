@@ -35,12 +35,14 @@ defmodule AccrueAdmin.ComponentKitchenLiveTest do
     assert html =~ "Critical: 2 open invoices"
     assert html =~ "Billing health snapshot"
     assert html =~ "2 open, $592.50 over target"
+    assert html =~ "Use the red invoice queue CTA below"
+    assert html =~ "Dunning funnel and at-risk analytics available"
     assert html =~ "Open invoice queue workspace"
-    assert html =~ "Open audit event log"
+    assert html =~ "Open actor-filtered event log"
     assert html =~ "Open full webhook debugging workflow"
-    assert html =~ "Watch dunning funnel + at-risk"
+    assert html =~ "Open recovery and dunning analytics"
     assert html =~ "Open invoice queue view"
-    assert html =~ "Find customer and open billing 360 detail"
+    assert html =~ "Customer lookup specimen"
     assert html =~ "Enter the organization slug or platform owner scope"
   end
 end

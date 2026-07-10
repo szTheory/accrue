@@ -78,16 +78,19 @@ if Mix.env() != :prod do
               ]}
             />
             <h1 class="ax-heading ax-component-kitchen-title">Billing health command center</h1>
-            <p class="ax-page-description">Check billing health first, then work open invoices or find one customer record with full billing context.</p>
+            <p class="ax-page-description">Check billing health first, then route to receivables, recovery, webhook debugging, audit, or one customer record.</p>
             <div class="ax-page-actions">
-              <a class="ax-button ax-button-primary ax-button-sm ax-dev-invoice-action" href={@admin_mount_path <> "/invoices?status=open"}>
-                Open invoice queue workspace
-              </a>
               <a class="ax-button ax-button-secondary ax-button-sm ax-dev-customer-action" href={@admin_mount_path <> "/customers"}>
                 Find customer record
               </a>
+              <a class="ax-button ax-button-secondary ax-button-sm" href={@admin_mount_path <> "/events?actor_type=admin"}>
+                Open actor-filtered event log
+              </a>
               <a class="ax-button ax-button-warning ax-button-sm ax-dev-webhook-action" href={@admin_mount_path <> "/webhooks?status=failed,dead"}>
                 Open full webhook debugging workflow
+              </a>
+              <a class="ax-button ax-button-recovery ax-button-sm ax-dev-dunning-action" href={@admin_mount_path <> "/analytics/recovery"}>
+                Open recovery and dunning analytics
               </a>
             </div>
             <section class="ax-inline-worklist ax-dev-audit-strip" aria-label="Component kitchen audit trail">
@@ -140,8 +143,9 @@ if Mix.env() != :prod do
           <section :if={@available?} class="ax-dev-health-snapshot" aria-label="Billing health snapshot">
             <span><strong>Status</strong><em>Unhealthy</em></span>
             <span><strong>Invoices</strong><em>2 open, $592.50 over target</em></span>
-            <span><strong>Next step</strong><em>Open invoice queue workspace or find customer record</em></span>
-          </section>
+              <span><strong>Primary route</strong><em>Use the red invoice queue CTA below</em></span>
+              <span><strong>Recovery route</strong><em>Dunning funnel and at-risk analytics available</em></span>
+            </section>
 
           <section :if={@available?} class="ax-card ax-dev-stack">
             <Tabs.tabs
@@ -153,10 +157,10 @@ if Mix.env() != :prod do
             />
 
             <div class="ax-dev-grid ax-toolbar">
-              <Button.button variant="primary" href={@admin_mount_path <> "/customers"}>Find customer record</Button.button>
+              <Button.button variant="secondary" href={@admin_mount_path <> "/customers"}>Customer lookup specimen</Button.button>
               <Button.button variant="secondary" type="button">Primary action specimen</Button.button>
               <Button.button variant="secondary" type="button">Secondary action</Button.button>
-              <Button.button variant="primary" href={@admin_mount_path <> "/analytics/recovery"}>Watch dunning funnel + at-risk</Button.button>
+              <Button.button variant="secondary" href={@admin_mount_path <> "/analytics/recovery"}>Recovery analytics specimen</Button.button>
               <Button.button variant="ghost" href={@admin_mount_path <> "/webhooks"}>Ghost link</Button.button>
               <DropdownMenu.dropdown_menu
                 label="More billing actions"

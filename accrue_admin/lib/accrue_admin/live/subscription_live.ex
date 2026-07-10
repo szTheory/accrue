@@ -313,6 +313,21 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
               Send invoice reminders
             </a>
           </div>
+          <div class="ax-detail-priority-group ax-detail-priority-group-webhook">
+            <span class="ax-label ax-detail-priority-label">Webhook debugging</span>
+            <a
+              class="ax-button ax-button-warning ax-button-sm ax-detail-webhook-primary"
+              href={
+                ScopedPath.build(@admin_mount_path, "/webhooks", @current_owner_scope, %{
+                  "status" => "failed,dead",
+                  "type" => "subscription.created"
+                })
+              }
+            >
+              Open failed webhook debugger
+            </a>
+            <span class="ax-detail-priority-note">Failed subscription.created delivery trace and replay action</span>
+          </div>
           <div class="ax-detail-priority-group ax-detail-priority-group-recovery">
             <span class="ax-label ax-detail-priority-label">Recovery workspace</span>
             <a
@@ -334,17 +349,6 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
               href={ScopedPath.build(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}
             >
               Back to Recovery analytics
-            </a>
-            <a
-              class="ax-link-quiet"
-              href={
-                ScopedPath.build(@admin_mount_path, "/webhooks", @current_owner_scope, %{
-                  "status" => "failed,dead",
-                  "type" => "subscription.created"
-                })
-              }
-            >
-              Webhook debugger
             </a>
           </div>
         </section>
@@ -1040,12 +1044,12 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
 
       caveats != [] ->
         %{
-          tone: "danger",
-          label: "Setup blocked",
-          answer: "No - setup data is missing, not a payment failure",
-          headline: "#{length(caveats)} setup fields missing",
+          tone: "amber",
+          label: "Billing health unknown",
+          answer: "Unknown - setup data is missing, not a payment failure",
+          headline: "#{length(caveats)} setup fields block projection",
           body:
-            "Open invoices can still be worked in Invoices. Fill setup fields before trusting revenue, dunning, or renewal decisions.",
+            "This is not an active payment failure. Use Invoices for receivables; fill setup fields before trusting revenue, dunning, or renewal decisions.",
           caveats: caveats
         }
 
@@ -2069,19 +2073,6 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
 
     customer_items ++
       [
-        %{
-          icon: :webhooks,
-          label: "Webhook debugging",
-          value:
-            "Failed subscription.created deliveries for #{subscription.processor_id || subscription.id}; inspect payload, retry trail, and replay action.",
-          emphasis: :warning,
-          action_label: "Open failed webhook debugger",
-          href:
-            ScopedPath.build(mount_path, "/webhooks", scope, %{
-              "status" => "failed,dead",
-              "type" => "subscription.created"
-            })
-        },
         %{
           icon: :payments,
           label: Copy.subscription_drill_link_charges_for_customer(),

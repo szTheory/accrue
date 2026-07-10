@@ -97,12 +97,15 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
 
     assert html =~ "Open invoice queue workspace"
     assert html =~ "Watch dunning funnel + at-risk"
-    assert html =~ "Open invoices:"
-    assert html =~ "At-risk subscriptions:"
-    assert html =~ "failed webhooks:"
+
+    assert html =~ "Billing Health: Unhealthy - work" or
+             html =~ "Billing health: Healthy - invoices clear"
+
+    assert html =~ "Also watch"
+    assert html =~ "failed webhook"
     assert html =~ "Dunning funnel and invoice queue summary"
     assert html =~ "At-risk subscriptions"
-    assert html =~ "Open invoices"
+    assert html =~ "Invoice queue"
     assert html =~ ~s(class="ax-kpi-row ax-subscriptions-kpi-row")
     refute html =~ "Bulk invoice actions"
     refute html =~ "Process next invoice"
@@ -137,7 +140,7 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert html =~ "Dedicated Invoices queue"
     assert html =~ "Billing health:"
     assert html =~ "ax-subscription-row-state"
-    assert html =~ "failed webhooks:"
+    assert html =~ "failed webhook"
     assert html =~ "Who did what, when?"
     assert html =~ ~s(data-ax-state="filtered-empty") or html =~ ~s(data-ax-state="populated")
     refute html =~ "No subscriptions yet."

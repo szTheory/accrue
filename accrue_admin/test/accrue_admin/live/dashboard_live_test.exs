@@ -145,7 +145,8 @@ defmodule AccrueAdmin.DashboardLiveTest do
     assert html =~ "invoice.payment_failed"
     assert html =~ "customer.updated"
     assert html =~ "Open event"
-    assert html =~ "Open delivery"
+    assert html =~ "Debug delivery trace"
+    assert html =~ "Open failed webhook queue"
     assert html =~ "Open full event ledger"
     assert html =~ "Load more audit events"
     assert html =~ "Filter admin actors"
@@ -163,12 +164,13 @@ defmodule AccrueAdmin.DashboardLiveTest do
     assert html =~ ~s(href="/billing/events")
 
     # IA-01 verb relabels (Plan 175-02)
-    assert html =~ "Find customer now"
-    assert html =~ "Search customers on this page"
+    assert html =~ "Search customers globally"
+    assert html =~ "Open global customer search"
+    assert html =~ "Opens the Invoices queue workspace for current receivables"
     assert html =~ "Invoices queue: $42.50 open"
 
     # IA-01 customer lookup entry point on Home (Plan 175-04)
-    assert html =~ "Search customer name or ID"
+    assert html =~ "Search all customers"
     assert html =~ "ax-home-customer-search-cta"
   end
 end

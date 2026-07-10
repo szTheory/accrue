@@ -120,7 +120,7 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
     assert html =~ "Watch dunning funnel + at-risk"
     assert html =~ "Invoice queue handoff"
     assert html =~ "Back to Recovery analytics"
-    assert html =~ "Webhook debugger"
+    refute html =~ "Webhook debugger"
     assert html =~ "Open full audit event log"
   end
 
@@ -136,15 +136,15 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
     assert html =~ "Dunning &amp; recovery"
     assert html =~ "Tax &amp; compliance"
     assert html =~ "invoice.payment_failed"
-    assert html =~ "No - setup data is missing, not a payment failure"
-    assert html =~ "Setup blocked"
-    assert html =~ "setup fields missing"
-    assert html =~ "ax-detail-health-summary-danger"
+    assert html =~ "Unknown - setup data is missing, not a payment failure"
+    assert html =~ "Billing health unknown"
+    assert html =~ "setup fields block projection"
+    assert html =~ "ax-detail-health-summary-amber"
     assert html =~ "ax-detail-health-answer"
     assert html =~ "Charge amount not shown"
 
     assert html =~
-             "Open invoices can still be worked in Invoices. Fill setup fields before trusting revenue, dunning, or renewal decisions."
+             "This is not an active payment failure. Use Invoices for receivables; fill setup fields before trusting revenue, dunning, or renewal decisions."
 
     assert html =~
              "Fix missing fields in the billing source before trusting charge projections."

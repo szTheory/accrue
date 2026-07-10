@@ -875,7 +875,7 @@ defmodule AccrueAdmin.Copy do
 
   # --- Index page headers (h1 + subtitle) for inline-literal pages
 
-  def subscriptions_index_heading, do: "Billing work queues"
+  def subscriptions_index_heading, do: "Billing health work queues"
 
   def subscriptions_index_subtitle,
     do:
@@ -1238,7 +1238,7 @@ defmodule AccrueAdmin.Copy do
 
   def dashboard_kpi_active_subscriptions_label, do: "Active subscriptions"
 
-  def dashboard_kpi_open_invoice_balance_label, do: "Open invoice balance"
+  def dashboard_kpi_open_invoice_balance_label, do: "Invoice queue balance"
 
   def dashboard_kpi_webhook_backlog_label, do: "Webhook backlog"
 
@@ -1249,7 +1249,7 @@ defmodule AccrueAdmin.Copy do
   def dashboard_kpi_active_subscriptions_meta, do: "Canonical active + trialing predicates"
 
   def dashboard_kpi_open_invoice_balance_meta,
-    do: "Remaining amount due from local invoice projections"
+    do: "Opens the Invoices queue workspace for current receivables"
 
   def dashboard_kpi_webhook_backlog_meta,
     do: "Failed + dead webhook rows waiting for operator attention"
@@ -1270,7 +1270,7 @@ defmodule AccrueAdmin.Copy do
 
   def dashboard_kpi_subscriptions_aria_label, do: "Open subscriptions list"
 
-  def dashboard_kpi_invoices_aria_label, do: "Open invoices list"
+  def dashboard_kpi_invoices_aria_label, do: "Open invoice queue workspace"
 
   def dashboard_kpi_webhooks_aria_label, do: "Open webhooks list"
 
@@ -1334,12 +1334,12 @@ defmodule AccrueAdmin.Copy do
 
   def home_search_customers_placeholder, do: "Type customer name, email, or ID"
 
-  def home_launcher_customers_title, do: "Find customer now"
+  def home_launcher_customers_title, do: "Search customers globally"
 
   def home_launcher_customers_copy,
     do: "Use the customer directory when list context matters."
 
-  def home_launcher_customers_meta, do: "Search name, email, or customer ID"
+  def home_launcher_customers_meta, do: "Global customer name, email, or ID search"
 
   def home_launcher_invoices_title, do: "Invoices queue: $0.00 target"
 
