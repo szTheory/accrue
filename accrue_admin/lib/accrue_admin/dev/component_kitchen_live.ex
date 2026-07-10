@@ -79,16 +79,10 @@ if Mix.env() != :prod do
               ]}
             />
             <div class="ax-component-kitchen-title-row">
-              <h1 class="ax-heading ax-component-kitchen-title">Billing status: Unhealthy</h1>
-              <span class="ax-component-kitchen-header-status">Primary queue: 2 open invoices / $592.50</span>
+              <h1 class="ax-heading ax-component-kitchen-title">Unhealthy - collect $592.50 from 2 open invoices</h1>
+              <span class="ax-component-kitchen-header-status">Next: invoice queue to $0.00</span>
             </div>
             <p class="ax-page-description">One verdict with invoice, webhook, dunning, and audit routes.</p>
-            <section :if={@available?} class="ax-dev-support-primary-strip" aria-label="Primary support workflow">
-              <strong>Support route</strong>
-              <a class="ax-button ax-button-primary ax-button-sm ax-dev-customer-action ax-dev-customer-primary" href={@admin_mount_path <> "/customers"}>
-                <Icon.icon name={:search} size="sm" /> Find one customer - open 360
-              </a>
-            </section>
             <div class="ax-page-actions">
               <a class="ax-button ax-button-primary ax-button-sm ax-dev-invoice-action ax-dev-invoice-primary" href={@admin_mount_path <> "/invoices?status=open"}>
                 <Icon.icon name={:invoices} size="sm" /> Collect open invoices first
@@ -130,7 +124,7 @@ if Mix.env() != :prod do
             </div>
             <div class="ax-dev-health-command-actions">
               <a class="ax-button ax-button-primary ax-button-sm ax-dev-invoice-action" href={@admin_mount_path <> "/invoices?status=open"}>
-                Open dedicated invoice queue
+                Work invoice queue to $0.00
               </a>
               <a class="ax-button ax-button-warning ax-button-sm ax-dev-webhook-action" href={@admin_mount_path <> "/webhooks?status=failed,dead"}>
                 Debug failed webhooks end-to-end

@@ -183,21 +183,11 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
         >
           <div class="ax-inline-worklist-copy ax-subscriptions-priority-copy">
             <strong><%= billing_priority_title(@summary) %></strong>
-            <span class="ax-subscriptions-exposure"><%= count(@summary.open_invoice_count, "open invoice") %>; <%= format_minor(@summary.open_invoice_exposure_minor, "usd") %> to collect</span>
+            <span class="ax-subscriptions-exposure"><%= count(@summary.open_invoice_count, "invoice") %> / <%= format_minor(@summary.open_invoice_exposure_minor, "usd") %> to collect</span>
           </div>
           <div class="ax-inline-worklist-actions">
             <a class="ax-button ax-button-primary ax-button-sm ax-subscriptions-primary-workspace" href={invoice_queue_path(@admin_mount_path, @current_owner_scope)}>
               Work open-invoice queue to $0.00
-            </a>
-            <a
-              class="ax-button ax-button-secondary ax-button-sm ax-subscriptions-webhook-workspace"
-              href={
-                @admin_mount_path
-                |> scoped_path("/webhooks", @current_owner_scope)
-                |> AccrueAdmin.DataTableNav.merge_query(%{"status" => "failed,dead"})
-              }
-            >
-              Open failed delivery debugger
             </a>
           </div>
         </section>
@@ -492,7 +482,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
   end
 
   defp billing_priority_title(%{open_invoice_count: count}) when count > 0,
-    do: "Primary queue: #{count(count, "open invoice")}"
+    do: "Primary queue"
 
   defp billing_priority_title(_summary), do: "Billing status: Healthy"
 
@@ -521,7 +511,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
           <span class="ax-status-dot"></span>#{escape(state_label)}
         </span>
       </span>
-      <span class="ax-subscription-row-customer-scope">Primary path: see every subscription, invoice, event, and recovery state for this customer.</span>
+      <span class="ax-subscription-row-customer-scope">Customer billing context</span>
       <span class="ax-subscription-row-meta-grid">
         <span class="ax-subscription-row-meta"><strong>Customer ID</strong> #{customer_id}</span>
         <a href="#{subscription_href}" class="ax-subscription-row-meta ax-subscription-row-id"><strong>Subscription</strong> #{subscription_id}</a>

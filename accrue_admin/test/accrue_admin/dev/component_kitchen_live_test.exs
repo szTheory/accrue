@@ -6,7 +6,7 @@ defmodule AccrueAdmin.ComponentKitchenLiveTest do
 
     assert {:ok, _view, html} = live(conn, "/billing/dev/components")
 
-    assert html =~ "Billing status: Unhealthy"
+    assert html =~ "Unhealthy - collect $592.50 from 2 open invoices"
     assert html =~ "One verdict with invoice, webhook, dunning, and audit routes."
     assert html =~ "Primary action"
     assert html =~ "Secondary action"
@@ -24,14 +24,13 @@ defmodule AccrueAdmin.ComponentKitchenLiveTest do
     assert html =~ "ax-dev-group-drawer-primary-actions"
     assert html =~ "Watch dunning funnel"
     assert html =~ "Who did what, when?"
-    assert html =~ "Support route"
-    assert html =~ "Find one customer - open 360"
     assert html =~ "Collect open invoices first"
     assert html =~ "Debug failed webhooks end-to-end"
     assert html =~ "Open Events audit log"
     assert html =~ "View dunning funnel"
     assert html =~ "Audit timestamp: Jul 09, 2026 14:51 UTC"
     refute html =~ "Find one customer and open billing 360 detail"
+    refute html =~ "Find one customer - open 360"
     assert html =~ "View full audit history"
     assert html =~ "billing.contact.updated"
     assert html =~ "Open failed-webhook debugger"

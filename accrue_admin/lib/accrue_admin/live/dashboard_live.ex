@@ -57,7 +57,8 @@ defmodule AccrueAdmin.Live.DashboardLive do
           </div>
           <p class="ax-body ax-page-copy"><%= Copy.home_intro_copy() %></p>
           <div :if={@attention != []} class="ax-home-header-health ax-health-summary ax-health-summary-amber" aria-label="Dashboard billing health answer">
-            <strong><%= attention_health_summary(@stats) %></strong>
+            <span class="ax-home-health-label">Billing status</span>
+            <strong class="ax-home-health-status"><%= attention_health_summary(@stats) %></strong>
             <span class="ax-home-health-answer"><%= attention_health_issue_summary(@stats) %></span>
           </div>
           <div class="ax-page-actions">
@@ -176,16 +177,13 @@ defmodule AccrueAdmin.Live.DashboardLive do
             <a class="ax-launcher ax-launcher-recovery" href={ScopedPath.build(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}>
               <span class="ax-launcher-icon"><Icon.icon name={:recovery} size="lg" /></span>
               <span class="ax-launcher-title"><%= Copy.home_launcher_recovery_title() %></span>
-              <span class="ax-launcher-health ax-launcher-health-warning">Recovery status: At risk</span>
-              <span class="ax-launcher-copy">Dunning funnel metrics, at-risk customers, and retry state live here.</span>
+              <span class="ax-launcher-health ax-launcher-health-warning">Dunning check: <%= count(@stats.past_due_subscription_count, "at-risk account") %></span>
+              <span class="ax-launcher-copy">Review dunning after open invoices are cleared.</span>
               <span class="ax-launcher-meta ax-launcher-meta-warn">
-                At-risk now: <%= count(@stats.past_due_subscription_count, "subscription") %>
-              </span>
-              <span class="ax-launcher-meta ax-launcher-meta-warn">
-                Funnel stage: reminder pending; review before renewal or cancellation
+                Next stage: reminder pending
               </span>
               <span class="ax-launcher-action ax-launcher-action-button">
-                Open dunning funnel analytics <Icon.icon name={:arrow_right} size="sm" />
+                Open dunning analytics <Icon.icon name={:arrow_right} size="sm" />
               </span>
             </a>
 
@@ -441,7 +439,7 @@ defmodule AccrueAdmin.Live.DashboardLive do
     |> Enum.filter(& &1)
   end
 
-  defp attention_health_summary(_stats), do: "Billing status: Unhealthy"
+  defp attention_health_summary(_stats), do: "Unhealthy"
 
   defp attention_health_issue_summary(stats),
     do:
