@@ -7,6 +7,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
 
   alias Accrue.Billing.{Customer, Invoice, Query, Subscription}
   alias Accrue.Repo
+  alias Accrue.Webhook.WebhookEvent
   alias AccrueAdmin.BillingPresentation
 
   alias AccrueAdmin.Components.{
@@ -166,8 +167,8 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
         >
           <div class="ax-inline-worklist-copy ax-subscriptions-priority-copy">
             <strong><%= billing_priority_title(@summary) %></strong>
-            <span class="ax-subscriptions-exposure">Critical: <%= count(@summary.open_invoice_count, "open invoice") %>; <%= billing_exposure_summary(@summary) %></span>
-            <span>Secondary debugging: failed webhook deliveries are grouped in Webhooks.</span>
+            <span class="ax-subscriptions-exposure">Open invoices: <%= count(@summary.open_invoice_count, "invoice") %>; <%= billing_exposure_summary(@summary) %></span>
+            <span>At-risk subscriptions: <%= count(@summary.past_due_count, "subscription") %>; failed webhooks: <%= count(@summary.failed_webhook_count, "delivery") %>.</span>
           </div>
           <div class="ax-inline-worklist-actions">
             <a class="ax-button ax-button-primary ax-button-sm" href={invoice_queue_path(@admin_mount_path, @current_owner_scope)}>
@@ -186,6 +187,12 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
           <a class="ax-link-quiet" href={scoped_path(@admin_mount_path, "/customers", @current_owner_scope)}>
             Find customer record
           </a>
+        </section>
+
+        <section class="ax-subscriptions-table-summary" aria-label="Aggregate billing health before subscription rows">
+          <span><strong>Billing health summary</strong><em><%= count(@summary.open_invoice_count, "open invoice") %></em></span>
+          <span><strong>At-risk</strong><em><%= count(@summary.past_due_count, "subscription") %></em></span>
+          <span><strong>Webhook failures</strong><em><%= count(@summary.failed_webhook_count, "delivery") %></em></span>
         </section>
 
         <section class="ax-inline-worklist ax-subscriptions-audit-strip" aria-label="Subscription audit trail">
@@ -327,7 +334,11 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
         |> where([invoice], invoice.status in ^open_invoice_statuses)
         |> select([invoice], coalesce(sum(invoice.amount_remaining_minor), 0))
         |> Repo.one()
-        |> Kernel.||(0)
+        |> Kernel.||(0),
+      failed_webhook_count:
+        WebhookEvent
+        |> where([event], event.status in [:failed, :dead])
+        |> Repo.aggregate(:count, :id)
     }
   end
 
@@ -411,7 +422,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
   end
 
   defp billing_priority_title(%{open_invoice_count: count}) when count > 0,
-    do: "Billing Health: Action Required - #{count(count, "open invoice")};"
+    do: "Billing Health: Unhealthy - #{count(count, "open invoice")};"
 
   defp billing_priority_title(_summary), do: "Billing health: Healthy - invoices clear"
 

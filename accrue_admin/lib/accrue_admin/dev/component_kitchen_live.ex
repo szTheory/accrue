@@ -77,10 +77,13 @@ if Mix.env() != :prod do
                 %{label: "Billing health"}
               ]}
             />
-            <h1 class="ax-heading ax-component-kitchen-title">Customer lookup workspaces</h1>
-            <p class="ax-page-description">Find one customer record first, then jump to invoice, dunning, webhook, or audit context.</p>
+            <h1 class="ax-heading ax-component-kitchen-title">Billing health command center</h1>
+            <p class="ax-page-description">Check billing health first, then work open invoices or find one customer record with full billing context.</p>
             <div class="ax-page-actions">
-              <a class="ax-button ax-button-primary ax-button-sm ax-dev-customer-action" href={@admin_mount_path <> "/customers"}>
+              <a class="ax-button ax-button-primary ax-button-sm ax-dev-invoice-action" href={@admin_mount_path <> "/invoices?status=open"}>
+                Work open invoices
+              </a>
+              <a class="ax-button ax-button-secondary ax-button-sm ax-dev-customer-action" href={@admin_mount_path <> "/customers"}>
                 Find customer record
               </a>
             </div>
@@ -108,16 +111,16 @@ if Mix.env() != :prod do
 
           <section :if={@available?} class="ax-inline-worklist ax-dev-production-strip" aria-label="Production billing entrypoints">
             <div class="ax-inline-worklist-copy">
-              <strong>Customer lookup: ready</strong>
-              <span>Primary task: find one customer record and open the full billing context.</span>
-              <span>After lookup, use invoice, Recovery, webhook, or audit links only when that customer context requires it.</span>
+              <strong>Billing Health: Unhealthy</strong>
+              <span>Critical: 2 open invoices; $592.50 above $0.00 target.</span>
+              <span>Customer support path: find one customer record and open the full billing context.</span>
             </div>
             <div class="ax-inline-worklist-actions">
-              <a class="ax-button ax-button-primary ax-button-sm ax-dev-customer-action" href={@admin_mount_path <> "/customers"}>
-                Find customer record
-              </a>
-              <a class="ax-button ax-button-secondary ax-button-sm" href={@admin_mount_path <> "/invoices?status=open"}>
+              <a class="ax-button ax-button-primary ax-button-sm ax-dev-invoice-action" href={@admin_mount_path <> "/invoices?status=open"}>
                 Open invoice queue workspace
+              </a>
+              <a class="ax-button ax-button-secondary ax-button-sm ax-dev-customer-action" href={@admin_mount_path <> "/customers"}>
+                Find customer record
               </a>
               <a class="ax-button ax-button-secondary ax-button-sm" href={@admin_mount_path <> "/events"}>
                 Open audit event log
@@ -129,6 +132,12 @@ if Mix.env() != :prod do
                 Watch dunning funnel + at-risk
               </a>
             </div>
+          </section>
+
+          <section :if={@available?} class="ax-dev-health-snapshot" aria-label="Billing health snapshot">
+            <span><strong>Status</strong><em>Unhealthy</em></span>
+            <span><strong>Invoices</strong><em>2 open, $592.50 over target</em></span>
+            <span><strong>Next step</strong><em>Work invoice queue or open a customer record</em></span>
           </section>
 
           <section :if={@available?} class="ax-card ax-dev-stack">
