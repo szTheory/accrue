@@ -47,7 +47,8 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
 
     assert {:ok, _view, html} = live(conn, "/billing/subscriptions?status=canceling")
 
-    assert html =~ Copy.subscriptions_index_heading()
+    assert html =~ "Billing unhealthy:" or
+             html =~ "Billing status: Healthy"
 
     assert html =~ "exposure"
     assert html =~ "target"

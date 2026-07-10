@@ -102,14 +102,11 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
             %{label: "Dashboard", href: scoped_path(@admin_mount_path, "", @current_owner_scope)},
             %{label: "Subscriptions"}
           ]}
-          title={Copy.subscriptions_index_heading()}
+          title={subscriptions_health_verdict(@summary)}
         >
           <:description>
-            <p class="ax-subscriptions-health-line">
-              <strong class="ax-subscriptions-heading-verdict"><%= subscriptions_health_verdict(@summary) %></strong>
-            </p>
             <p class="ax-subscriptions-route-line">
-              Next: clear open invoices, review failed webhook deliveries, then check at-risk accounts.
+              Primary order: collect open invoices, debug failed webhooks, then audit Events.
             </p>
           </:description>
           <:actions>
@@ -118,12 +115,6 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
               href={invoice_queue_path(@admin_mount_path, @current_owner_scope)}
             >
               Work open-invoice queue to $0.00
-            </a>
-            <a
-              class="ax-button ax-button-primary ax-button-sm ax-subscriptions-customer-workspace"
-              href={scoped_path(@admin_mount_path, "/customers", @current_owner_scope)}
-            >
-              Open customer 360 search
             </a>
             <a
               class="ax-button ax-button-secondary ax-button-sm ax-subscriptions-webhook-workspace"
@@ -136,13 +127,13 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
                 })
               }
             >
-              Webhooks: open failed delivery debugger
+              Webhooks: debug failed deliveries
             </a>
             <a
-              class="ax-button ax-button-recovery ax-button-sm ax-subscriptions-recovery-workspace"
-              href={scoped_path(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}
+              class="ax-button ax-button-secondary ax-button-sm"
+              href={scoped_path(@admin_mount_path, "/events", @current_owner_scope, %{"type" => "subscription.created"})}
             >
-              Watch dunning funnel
+              Events audit log
             </a>
           </:actions>
           <:stat_strip>
@@ -501,7 +492,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
   end
 
   defp billing_priority_title(%{open_invoice_count: count}) when count > 0,
-    do: "Open-invoice queue: #{count(count, "open invoice")} above target"
+    do: "Primary queue: #{count(count, "open invoice")}"
 
   defp billing_priority_title(_summary), do: "Billing status: Healthy"
 

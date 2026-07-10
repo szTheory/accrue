@@ -79,32 +79,33 @@ if Mix.env() != :prod do
               ]}
             />
             <div class="ax-component-kitchen-title-row">
-              <h1 class="ax-heading ax-component-kitchen-title">Billing unhealthy</h1>
-              <span class="ax-component-kitchen-header-status">Collect $592.50 from 2 open invoices.</span>
+              <h1 class="ax-heading ax-component-kitchen-title">Billing status: Unhealthy</h1>
+              <span class="ax-component-kitchen-header-status">Primary queue: 2 open invoices / $592.50</span>
             </div>
-            <p class="ax-page-description">Primary action: collect $592.50 to reach $0.00 open invoice exposure.</p>
+            <p class="ax-page-description">One verdict with invoice, webhook, dunning, and audit routes.</p>
             <section :if={@available?} class="ax-dev-support-primary-strip" aria-label="Primary support workflow">
-              <strong>Primary support path</strong>
+              <strong>Support route</strong>
               <a class="ax-button ax-button-primary ax-button-sm ax-dev-customer-action ax-dev-customer-primary" href={@admin_mount_path <> "/customers"}>
                 <Icon.icon name={:search} size="sm" /> Find one customer - open 360
               </a>
             </section>
             <div class="ax-page-actions">
               <a class="ax-button ax-button-primary ax-button-sm ax-dev-invoice-action ax-dev-invoice-primary" href={@admin_mount_path <> "/invoices?status=open"}>
-                <Icon.icon name={:invoices} size="sm" /> Work open-invoice queue
+                <Icon.icon name={:invoices} size="sm" /> Collect open invoices first
               </a>
               <a class="ax-button ax-button-secondary ax-button-sm ax-dev-webhook-action" href={@admin_mount_path <> "/webhooks?status=failed,dead"}>
-                <Icon.icon name={:webhooks} size="sm" /> Engineering: inspect 3 failed deliveries
+                <Icon.icon name={:webhooks} size="sm" /> Debug failed webhooks end-to-end
               </a>
-              <a class="ax-button ax-button-secondary ax-button-sm ax-dev-dunning-action" href={@admin_mount_path <> "/analytics/recovery"}>
-                <Icon.icon name={:recovery} size="sm" /> View dunning funnel
+              <a class="ax-button ax-button-secondary ax-button-sm" href={@admin_mount_path <> "/events?actor_type=admin"}>
+                <Icon.icon name={:events} size="sm" /> Open Events audit log
               </a>
             </div>
             <section :if={@available?} class="ax-dev-route-strip" aria-label="Secondary billing routes">
               <span>Secondary routes after queue choice:</span>
               <a class="ax-dev-secondary-route" href={@admin_mount_path <> "/customers"}>Customer detail</a>
               <a class="ax-dev-secondary-route" href={@admin_mount_path <> "/invoices?status=open"}>Invoices queue</a>
-              <a class="ax-dev-secondary-route" href={@admin_mount_path <> "/webhooks?status=failed,dead"}>Webhook events</a>
+              <a class="ax-dev-secondary-route" href={@admin_mount_path <> "/webhooks?status=failed,dead"}>Webhooks</a>
+              <a class="ax-dev-secondary-route" href={@admin_mount_path <> "/events?actor_type=admin"}>Events</a>
             </section>
           </header>
 
@@ -117,26 +118,25 @@ if Mix.env() != :prod do
 
           <section :if={@available?} class="ax-dev-health-command-center" aria-label="Billing health command center">
             <div class="ax-dev-health-command-verdict">
-              <span>Billing health</span>
-              <strong>Unhealthy - work invoice queue first</strong>
-              <em>Collect $592.50 from 2 open invoices, then debug 3 failed webhooks and review 1 at-risk account.</em>
+              <span>Unified health verdict</span>
+              <strong>Unhealthy - invoice collection first</strong>
+              <em>Collect $592.50, debug 3 failed webhooks, then audit actor changes.</em>
             </div>
             <div class="ax-dev-health-kpis" aria-label="Billing health KPI row">
-              <span><strong>MRR</strong><em>$4,820.00</em></span>
               <span><strong>Open invoices</strong><em>2 / $592.50</em></span>
-              <span><strong>Collection rate</strong><em>91%</em></span>
               <span><strong>Failed webhooks</strong><em>3</em></span>
               <span><strong>At risk</strong><em>1 account</em></span>
+              <span><strong>Audit log</strong><em>Actor-filtered</em></span>
             </div>
             <div class="ax-dev-health-command-actions">
               <a class="ax-button ax-button-primary ax-button-sm ax-dev-invoice-action" href={@admin_mount_path <> "/invoices?status=open"}>
                 Open dedicated invoice queue
               </a>
               <a class="ax-button ax-button-warning ax-button-sm ax-dev-webhook-action" href={@admin_mount_path <> "/webhooks?status=failed,dead"}>
-                Open failed webhook debugger
+                Debug failed webhooks end-to-end
               </a>
-              <a class="ax-button ax-button-secondary ax-button-sm ax-dev-dunning-action" href={@admin_mount_path <> "/analytics/recovery?status=at_risk"}>
-                Open dunning funnel
+              <a class="ax-button ax-button-secondary ax-button-sm" href={@admin_mount_path <> "/events?actor_type=admin"}>
+                Open Events audit log
               </a>
             </div>
           </section>

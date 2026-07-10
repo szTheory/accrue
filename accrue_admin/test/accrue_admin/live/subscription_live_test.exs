@@ -138,16 +138,15 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
     assert html =~ "Dunning &amp; recovery"
     assert html =~ "Tax &amp; compliance"
     assert html =~ "invoice.payment_failed"
-    assert html =~ "Billing health summary"
-    assert html =~ "Billing setup incomplete - action needed"
-    assert html =~ "Fix setup fields before trusting billing health"
+    assert html =~ "Billing healthy?"
+    assert html =~ "No - setup incomplete"
+    assert html =~ "Billing status: setup incomplete"
     assert html =~ "setup fields"
     assert html =~ "ax-detail-health-summary-amber"
     assert html =~ "ax-detail-health-answer"
     assert html =~ "Charge amount not shown"
 
-    assert html =~
-             "Warning: finish setup fields before trusting revenue and recovery numbers."
+    assert html =~ "Fix setup before trusting revenue, dunning, or recovery numbers."
 
     refute html =~ "Billing health right now"
     assert html =~ "MRR"

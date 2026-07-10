@@ -214,7 +214,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
         <% health = detail_health_summary(@subscription) %>
         <section class={["ax-detail-health-summary ax-detail-health-summary-top", "ax-detail-health-summary-" <> health.tone]} aria-label="Primary billing health summary">
           <div class="ax-detail-health-copy" role="status">
-            <span class="ax-detail-health-label">Billing health summary</span>
+            <span class="ax-detail-health-label">Billing healthy?</span>
             <strong class="ax-detail-health-answer"><%= health.answer %></strong>
             <span class="ax-detail-health-metric"><%= detail_health_metric(health) %></span>
             <span :if={@open_invoice_summary.count > 0} class="ax-detail-health-metric ax-detail-health-exposure">
@@ -228,7 +228,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
             <span :for={impact <- setup_field_impacts(health.caveats)} class="ax-detail-health-caveat"><%= impact %></span>
           </div>
           <div :if={health.caveats != []} class="ax-detail-setup-actions" aria-label="Fix missing billing data">
-            <span class="ax-detail-health-body">Warning: finish setup fields before trusting revenue and recovery numbers.</span>
+            <span class="ax-detail-health-body">Fix setup before trusting revenue, dunning, or recovery numbers.</span>
             <a
               class="ax-button ax-button-secondary ax-button-sm"
               href={ScopedPath.build(@admin_mount_path, "/customers/#{@customer.id}", @current_owner_scope)}
@@ -278,6 +278,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
             <span class={["ax-status-badge", "ax-status-badge-" <> health.tone]}>
               <span class="ax-status-dot"></span><%= health.label %>
             </span>
+            <span class="ax-summary-health-answer"><%= health.answer %></span>
           </:status>
           <:facts>
             <span class="ax-summary-fact">
@@ -358,17 +359,17 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
                 })
               }
             >
-              Pick a failed delivery to inspect payload, response, retry trail, and replay
+              Inspect failed delivery payload and retry trail
             </a>
             <ul class="ax-detail-webhook-picks" aria-label="Failed delivery choices">
               <li>
                 <a class="ax-button ax-button-warning ax-button-sm" href={ScopedPath.build(@admin_mount_path, "/webhooks", @current_owner_scope, %{"status" => "failed,dead", "type" => "subscription.created"})}>
-                  subscription.created failed deliveries
+                  subscription.created
                 </a>
               </li>
               <li>
                 <a class="ax-button ax-button-warning ax-button-sm" href={ScopedPath.build(@admin_mount_path, "/webhooks", @current_owner_scope, %{"status" => "failed,dead", "type" => "invoice.payment_failed"})}>
-                  invoice.payment_failed retry trail
+                  invoice.payment_failed
                 </a>
               </li>
             </ul>
@@ -1120,9 +1121,9 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
         %{
           tone: "amber",
           label: "Setup missing",
-          answer: "Billing setup incomplete - action needed",
-          headline: "Fix setup fields before trusting billing health",
-          body: "Finish setup fields before relying on revenue and recovery reporting.",
+          answer: "No - setup incomplete",
+          headline: "Billing status: setup incomplete",
+          body: "No - missing setup fields block reliable revenue and recovery reporting.",
           caveats: caveats
         }
 
