@@ -222,14 +222,14 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
             <span :if={health.caveats == []} class="ax-detail-health-body"><%= health.body %></span>
           </div>
           <span :if={health.caveats != []} class="ax-detail-health-body ax-detail-health-setup-note">
-            Fix customer setup fields before trusting revenue, renewal, or recovery numbers.
+            Billing is not active until setup fields are fixed; finish setup before trusting revenue, renewal, or recovery numbers.
           </span>
           <div class="ax-detail-health-actions" aria-label="Primary billing action from health summary">
             <a
               class="ax-button ax-button-primary ax-button-sm ax-detail-invoice-primary"
               href={ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope, %{"status" => "open"})}
             >
-              Open global invoice queue
+              Work global invoice queue
             </a>
             <a
               class="ax-button ax-button-secondary ax-button-sm"
@@ -267,7 +267,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
             class="ax-button ax-button-primary ax-button-sm ax-detail-priority-primary ax-detail-invoice-primary"
             href={ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope, %{"status" => "open"})}
           >
-            Open global invoice queue records
+            Work all open invoice records
           </a>
           <div class="ax-detail-priority-links">
             <a
@@ -306,6 +306,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
                 <strong><%= global_invoice_row_customer(invoice) %></strong>
                 <span><%= format_invoice_exposure(invoice.amount_remaining_minor || 0) %> remaining</span>
                 <em><%= global_invoice_row_due(invoice) %></em>
+                <span class="ax-detail-open-invoice-action">Work this invoice</span>
               </a>
             </li>
           </ol>
@@ -313,7 +314,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
             No open invoice records in this owner scope.
           </span>
           <a class="ax-button ax-button-primary ax-button-sm ax-detail-invoice-primary" href={ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope, %{"status" => "open"})}>
-            Open dedicated invoice queue
+            Work full invoice queue
           </a>
         </section>
 
@@ -435,7 +436,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
                   class="ax-button ax-button-secondary ax-button-sm"
                   href={ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope, %{"status" => "open"})}
                 >
-                  Open global invoice queue
+                  Work global invoice queue
                 </a>
                 <a
                   class="ax-button ax-button-secondary ax-button-sm"
@@ -1096,7 +1097,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
   defp global_invoice_row_due(%{due_date: %DateTime{} = due_date}),
     do: "Due #{format_datetime(due_date)}"
 
-  defp global_invoice_row_due(_invoice), do: "Due date not shown"
+  defp global_invoice_row_due(_invoice), do: "Due now - prioritize before dunning"
 
   defp detail_health_summary(subscription) do
     caveats = projection_caveats(subscription)
@@ -1115,12 +1116,12 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
 
       caveats != [] ->
         %{
-          tone: "amber",
+          tone: "danger",
           label: "Setup incomplete",
-          answer: "Unhealthy - setup incomplete",
-          headline: "Billing status: setup incomplete",
+          answer: "Billing is not active - setup required",
+          headline: "Billing is not active",
           body:
-            "No - missing setup fields block reliable revenue, renewal, and recovery reporting.",
+            "Setup fields must be fixed before billing, revenue, renewal, or recovery reporting can be trusted.",
           caveats: caveats
         }
 
@@ -1177,7 +1178,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
   end
 
   defp detail_health_metric(%{caveats: caveats}) when is_list(caveats) and caveats != [],
-    do: "Billing health blocked"
+    do: "Setup blocks billing start"
 
   defp detail_health_metric(%{tone: "moss"}), do: "0 blockers"
 

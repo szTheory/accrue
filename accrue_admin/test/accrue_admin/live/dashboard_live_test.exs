@@ -117,12 +117,12 @@ defmodule AccrueAdmin.DashboardLiveTest do
     assert html =~ "open invoices"
     assert html =~ ">P1<"
     assert html =~ ">P2<"
-    assert html =~ "Open dedicated invoice queue"
+    assert html =~ "Work invoice queue"
     assert html =~ "Debug dead-lettered webhooks"
     assert html =~ "Open-invoice queue:"
     assert html =~ ~s(href="/billing/events?q=meter_event")
     assert html =~ ~s(href="/billing/invoices?status=open")
-    assert html =~ "Audit: open event ledger"
+    assert html =~ "Audit ledger"
 
     # Zone 2 — task launchers (the JTBD doors)
     assert html =~ Copy.home_launcher_customers_title()

@@ -10,7 +10,7 @@ defmodule AccrueAdmin.ComponentKitchenLiveTest do
     assert html =~ "Primary action: open the invoice queue and collect to $0.00."
     assert html =~ "Unhealthy: $592.50 overdue; clear to $0.00"
     assert html =~ "3 - open debugger"
-    assert html =~ "Step 1: work invoice queue to $0.00"
+    assert html =~ "Step 1: collect $592.50 in invoice queue"
     assert html =~ "Primary action"
     assert html =~ "Secondary action"
     assert html =~ "More billing actions"

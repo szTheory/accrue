@@ -2084,7 +2084,8 @@ a.ax-kpi-card--linked:focus-visible {
 .ax-component-kitchen-header .ax-breadcrumbs,
 .ax-component-kitchen-header .ax-breadcrumbs-list {
   margin: 0;
-  gap: 0.0625rem;
+  gap: 0;
+  line-height: 1;
 }
 
 .ax-component-kitchen-header .ax-page-actions {
@@ -2129,7 +2130,7 @@ a.ax-kpi-card--linked:focus-visible {
 .ax-component-kitchen-title-row {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.125rem 0.25rem;
+  gap: 0.0625rem 0.25rem;
   align-items: center;
 }
 
@@ -2314,10 +2315,13 @@ a.ax-kpi-card--linked:focus-visible {
 
 .ax-dev-health-command-actions .ax-dev-invoice-action {
   border-width: 2px;
-  background: var(--ax-accent-readable);
-  color: var(--ax-accent-contrast);
+  border-color: var(--ax-status-warning-solid);
+  background: var(--ax-status-warning-solid);
+  color: var(--ax-status-warning-on-solid);
   font-weight: 950;
-  box-shadow: var(--ax-shadow-sm);
+  box-shadow:
+    0 0 0 3px color-mix(in srgb, var(--ax-status-warning-border) 28%, transparent),
+    var(--ax-shadow-sm);
 }
 
 .ax-dev-health-command-actions .ax-button:not(.ax-dev-invoice-action) {
@@ -5640,18 +5644,12 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
   color: var(--ax-status-danger-on-solid);
 }
 
-.ax-home-recovery-primary {
-  border-width: 2px;
-  background: var(--ax-status-warning-solid);
-  color: var(--ax-status-warning-on-solid);
-  font-weight: 950;
-  box-shadow: var(--ax-shadow-sm);
-}
-
-.ax-home-recovery-primary:hover,
-.ax-home-recovery-primary:focus-visible {
-  background: color-mix(in srgb, var(--ax-status-warning-solid) 86%, black);
-  color: var(--ax-status-warning-on-solid);
+.ax-home-secondary-action,
+.ax-home-customer-search-cta {
+  border-color: var(--ax-border-strong);
+  background: var(--ax-elevated);
+  color: var(--ax-primary);
+  box-shadow: none;
 }
 
 .ax-home-customer-search-strip {
@@ -5751,7 +5749,7 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
 }
 
 .ax-home .ax-page-actions {
-  gap: var(--ax-space-2xs);
+  gap: 0.125rem;
 }
 
 .ax-home .ax-page-actions .ax-button-sm {
@@ -6625,9 +6623,9 @@ button.ax-launcher {
 
 .ax-detail-health-summary-amber {
   border-color: var(--ax-status-warning-border);
-  border-width: 1px;
-  background: color-mix(in srgb, var(--ax-status-warning-bg) 34%, var(--ax-elevated));
-  box-shadow: none;
+  border-width: 2px;
+  background: color-mix(in srgb, var(--ax-status-warning-solid) 18%, var(--ax-elevated));
+  box-shadow: var(--ax-shadow-sm);
 }
 
 .ax-detail-health-summary-moss {
@@ -6656,7 +6654,7 @@ button.ax-launcher {
   flex-wrap: wrap;
   align-items: center;
   gap: 0.03125rem 0.25rem;
-  padding: 0.0625rem 0.25rem;
+  padding: 0.03125rem 0.25rem;
   line-height: var(--ax-leading-tight);
 }
 
@@ -6708,6 +6706,13 @@ button.ax-launcher {
 
 .ax-detail-health-summary-danger .ax-detail-health-answer {
   color: var(--ax-status-danger-on-solid);
+}
+
+.ax-detail-health-summary-danger .ax-detail-health-metric {
+  border-color: color-mix(in srgb, var(--ax-status-danger-on-solid) 56%, transparent);
+  background: color-mix(in srgb, var(--ax-status-danger-on-solid) 16%, transparent);
+  color: var(--ax-status-danger-on-solid);
+  box-shadow: none;
 }
 
 .ax-detail-health-summary-slate .ax-detail-health-label,
@@ -7041,6 +7046,33 @@ button.ax-launcher {
   font-weight: 800;
 }
 
+.ax-detail-open-invoice-action {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  min-height: 1.25rem;
+  padding: 0 0.3125rem;
+  border: 1px solid var(--ax-accent-border);
+  border-radius: var(--ax-radius-sm);
+  background: var(--ax-accent-readable);
+  color: var(--ax-accent-contrast) !important;
+  font-weight: 950 !important;
+}
+
+.ax-subscription-row-webhook-action {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  min-height: 1.25rem;
+  padding: 0 0.3125rem;
+  border: 1px solid var(--ax-status-warning-border);
+  border-radius: var(--ax-radius-sm);
+  background: var(--ax-status-warning-solid);
+  color: var(--ax-status-warning-on-solid);
+  font-weight: 950;
+  text-decoration: none;
+}
+
 .ax-subscription-detail-page .ax-detail-health-actions .ax-button-sm,
 .ax-subscription-detail-page .ax-detail-priority-group .ax-button-sm {
   min-height: 1.5rem;
@@ -7165,7 +7197,8 @@ button.ax-launcher {
 }
 
 .ax-subscription-detail-page .ax-summary-list {
-  margin-top: 0;
+  margin-top: 0.25rem;
+  border-top: 2px solid var(--ax-border-strong);
 }
 
 .ax-summary-list-row {
@@ -7183,9 +7216,10 @@ button.ax-launcher {
 }
 
 .ax-subscription-detail-page .ax-summary-list-compact .ax-summary-list-row {
+  padding: 0.3125rem 0;
+  border-bottom-color: var(--ax-border-strong);
   grid-template-columns: minmax(0, 9rem) minmax(0, 1fr) max-content;
   gap: 0.0625rem var(--ax-space-xs);
-  padding: 0.03125rem 0;
 }
 
 .ax-subscription-detail-page .ax-summary-list-key,

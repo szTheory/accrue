@@ -112,16 +112,16 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
     assert html =~ "Open local invoice context"
 
     assert html =~ "Global invoice queue workspace"
-    assert html =~ "Open global invoice queue records"
+    assert html =~ "Work all open invoice records"
     assert html =~ "Webhook debugger after invoice queue"
     assert html =~ "Open local invoice context"
-    assert html =~ "Open global invoice queue"
+    assert html =~ "Work global invoice queue"
     refute html =~ "Recovery workspace button"
     assert html =~ "Open dunning funnel and at-risk analytics"
     assert html =~ "Open Events audit log with subscription filter"
     assert html =~ "Audit event table: Actor / Action / Timestamp"
     assert html =~ "Global open-invoice queue rows"
-    assert html =~ "Open dedicated invoice queue"
+    assert html =~ "Work full invoice queue"
   end
 
   test "summary and drill bands replace page-level KPI and predicate noise", %{
@@ -137,14 +137,14 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
     assert html =~ "Tax &amp; compliance"
     assert html =~ "invoice.payment_failed"
     assert html =~ "Billing status"
-    assert html =~ "Unhealthy - setup incomplete"
-    assert html =~ "Billing health blocked"
-    assert html =~ "ax-detail-health-summary-amber"
+    assert html =~ "Billing is not active - setup required"
+    assert html =~ "Setup blocks billing start"
+    assert html =~ "ax-detail-health-summary-danger"
     assert html =~ "ax-detail-health-answer"
     assert html =~ "Charge amount not shown"
 
     assert html =~
-             "Fix customer setup fields before trusting revenue, renewal, or recovery numbers."
+             "Billing is not active until setup fields are fixed; finish setup before trusting revenue, renewal, or recovery numbers."
 
     refute html =~ "Billing health right now"
     assert html =~ "MRR"
@@ -155,7 +155,7 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
     assert html =~ "Open local invoice context"
     assert html =~ "Global dunning funnel"
     assert html =~ "recovery analytics still shows at-risk accounts and funnel trends."
-    assert html =~ "Open global invoice queue"
+    assert html =~ "Work global invoice queue"
     assert html =~ "Audit event table: Actor / Action / Timestamp"
     assert html =~ "Latest audit event summary"
     assert html =~ "Actor"

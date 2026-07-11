@@ -71,7 +71,7 @@ defmodule AccrueAdmin.Live.DashboardLive do
             </a>
             <a
               :if={@stats.blocked_webhook_count > 0}
-              class="ax-button ax-button-secondary ax-button-sm"
+              class="ax-button ax-button-secondary ax-button-sm ax-home-secondary-action"
               href={ScopedPath.build(@admin_mount_path, "/webhooks", @current_owner_scope, %{"status" => "failed,dead"})}
             >
               Debug dead-lettered webhooks
@@ -79,7 +79,7 @@ defmodule AccrueAdmin.Live.DashboardLive do
             </a>
             <button
               type="button"
-              class="ax-button ax-button-primary ax-button-sm ax-home-customer-search-cta"
+              class="ax-button ax-button-secondary ax-button-sm ax-home-customer-search-cta"
               data-command-palette-trigger="true"
               data-ax-command-palette-trigger="true"
             >
@@ -87,17 +87,17 @@ defmodule AccrueAdmin.Live.DashboardLive do
               <Icon.icon name={:search} size="sm" />
             </button>
             <a
-              class="ax-button ax-button-warning ax-button-sm ax-home-recovery-primary"
+              class="ax-button ax-button-secondary ax-button-sm ax-home-secondary-action"
               href={ScopedPath.build(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}
             >
-              Open recovery analytics: dunning funnel + at-risk
+              Dunning after invoices
               <Icon.icon name={:arrow_right} size="sm" />
             </a>
             <a
-              class="ax-button ax-button-secondary ax-button-sm"
+              class="ax-button ax-button-secondary ax-button-sm ax-home-secondary-action"
               href={ScopedPath.build(@admin_mount_path, "/events", @current_owner_scope)}
             >
-              Audit: open event ledger
+              Audit ledger
               <Icon.icon name={:arrow_right} size="sm" />
             </a>
           </div>
@@ -421,7 +421,7 @@ defmodule AccrueAdmin.Live.DashboardLive do
           label:
             "above $0.00 target - #{format_minor(stats.open_invoice_balance_minor, "usd")} open",
           pill: nil,
-          action: "Open dedicated invoice queue",
+          action: "Work invoice queue",
           href: ScopedPath.build(mount_path, "/invoices", scope, %{"status" => "open"})
         },
       stats.blocked_webhook_count > 0 &&
@@ -441,7 +441,7 @@ defmodule AccrueAdmin.Live.DashboardLive do
           metric: count(stats.past_due_subscription_count, "subscription"),
           label: Copy.home_attention_past_due_label(),
           pill: nil,
-          action: Copy.home_attention_action_recover(),
+          action: "Review dunning",
           href: ScopedPath.build(mount_path, "/analytics/recovery", scope)
         },
       stats.failed_meter_event_count > 0 &&

@@ -74,8 +74,7 @@ if Mix.env() != :prod do
             <Breadcrumbs.breadcrumbs
               items={[
                 %{label: "Dashboard", href: @admin_mount_path},
-                %{label: "Billing health", href: @admin_mount_path},
-                %{label: "Billing health"}
+                %{label: "Component kitchen billing specimen"}
               ]}
             />
             <div class="ax-component-kitchen-title-row">
@@ -124,7 +123,7 @@ if Mix.env() != :prod do
             </div>
             <div class="ax-dev-health-command-actions">
               <a class="ax-button ax-button-primary ax-button-sm ax-dev-invoice-action" href={@admin_mount_path <> "/invoices?status=open"}>
-                Step 1: work invoice queue to $0.00
+                Step 1: collect $592.50 in invoice queue
               </a>
               <a class="ax-button ax-button-warning ax-button-sm ax-dev-webhook-action" href={@admin_mount_path <> "/webhooks?status=failed,dead"}>
                 Step 2 after invoices: debug failed webhooks
