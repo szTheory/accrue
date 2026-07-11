@@ -28,7 +28,7 @@ defmodule AccrueAdmin.Components.Topbar do
             <strong>Customer billing lookup</strong>
             <em>Customer name, email, or ID</em>
           </span>
-          <span class="ax-search-trigger-action">Open customer search</span>
+          <span class="ax-search-trigger-action">Search customers now</span>
           <kbd class="ax-kbd">⌘K</kbd>
         </button>
 

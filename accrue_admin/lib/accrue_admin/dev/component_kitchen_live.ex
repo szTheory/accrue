@@ -89,6 +89,9 @@ if Mix.env() != :prod do
               <a class="ax-button ax-button-secondary ax-button-sm ax-dev-webhook-action" href={@admin_mount_path <> "/webhooks?status=failed,dead"}>
                 <Icon.icon name={:webhooks} size="sm" /> Debug failed webhooks end-to-end
               </a>
+              <a class="ax-button ax-button-secondary ax-button-sm ax-dev-customer-primary" href={@admin_mount_path <> "/customers"}>
+                <Icon.icon name={:users} size="sm" /> Open at-risk customer
+              </a>
               <a class="ax-button ax-button-secondary ax-button-sm" href={@admin_mount_path <> "/events?actor_type=admin"}>
                 <Icon.icon name={:events} size="sm" /> Open Events audit log
               </a>
@@ -118,7 +121,7 @@ if Mix.env() != :prod do
             <div class="ax-dev-health-kpis" aria-label="Billing health KPI row">
               <span><strong>Open invoices</strong><em>2 / $592.50</em></span>
               <a href={@admin_mount_path <> "/webhooks?status=failed,dead"}><strong>Failed webhooks</strong><em>3 - open debugger</em></a>
-              <span><strong>At risk</strong><em>1 account</em></span>
+              <a href={@admin_mount_path <> "/customers"}><strong>At risk</strong><em>1 account - open customer</em></a>
               <span><strong>Audit log</strong><em>Actor-filtered</em></span>
             </div>
             <div class="ax-dev-health-command-actions">

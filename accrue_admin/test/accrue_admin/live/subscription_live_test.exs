@@ -121,7 +121,7 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
     assert html =~ "Open Events audit log with subscription filter"
     assert html =~ "Audit event table: Actor / Action / Timestamp"
     assert html =~ "Global open-invoice queue rows"
-    assert html =~ "Work full invoice queue"
+    assert html =~ "Work all invoices in queue"
   end
 
   test "summary and drill bands replace page-level KPI and predicate noise", %{
@@ -137,8 +137,8 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
     assert html =~ "Tax &amp; compliance"
     assert html =~ "invoice.payment_failed"
     assert html =~ "Billing status"
-    assert html =~ "Billing is not active - setup required"
-    assert html =~ "Setup blocks billing start"
+    assert html =~ "No - billing is not active"
+    assert html =~ "Setup required now"
     assert html =~ "ax-detail-health-summary-danger"
     assert html =~ "ax-detail-health-answer"
     assert html =~ "Charge amount not shown"

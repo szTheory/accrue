@@ -193,23 +193,6 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
 
         <FlashGroup.flash_group flashes={flash_messages(@flash)} />
 
-        <section class="ax-inline-worklist ax-subscriptions-customer-search-strip" aria-label="Find one customer">
-          <div class="ax-inline-worklist-copy">
-            <strong>Find ONE customer</strong>
-            <span>Open customer search by name, email, or ID and then review the unified billing view.</span>
-          </div>
-          <div class="ax-inline-worklist-actions">
-            <button
-              type="button"
-              class="ax-button ax-button-primary ax-button-sm ax-subscriptions-customer-search-action"
-              data-command-palette-trigger="true"
-              data-ax-command-palette-trigger="true"
-            >
-              Open customer search
-            </button>
-          </div>
-        </section>
-
         <section
           class={[
             "ax-inline-worklist ax-subscriptions-invoice-strip",

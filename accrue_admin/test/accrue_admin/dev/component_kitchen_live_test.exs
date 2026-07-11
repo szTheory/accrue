@@ -29,6 +29,8 @@ defmodule AccrueAdmin.ComponentKitchenLiveTest do
     assert html =~ "Who did what, when?"
     assert html =~ "Collect open invoices first"
     assert html =~ "Debug failed webhooks end-to-end"
+    assert html =~ "Open at-risk customer"
+    assert html =~ "1 account - open customer"
     assert html =~ "Open Events audit log"
     assert html =~ "View dunning funnel"
     assert html =~ "Audit timestamp: Jul 09, 2026 14:51 UTC"

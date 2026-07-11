@@ -237,6 +237,12 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
             >
               Fix customer setup
             </a>
+            <a
+              class="ax-button ax-button-warning ax-button-sm ax-detail-recovery-shortcut"
+              href={ScopedPath.build(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}
+            >
+              Review dunning after invoices
+            </a>
           </div>
         </section>
 
@@ -298,7 +304,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
         <section class="ax-inline-worklist ax-detail-open-invoice-queue" aria-label="Global open invoice queue preview">
           <div class="ax-inline-worklist-copy">
             <strong>Global open-invoice queue rows</strong>
-            <span>Work these invoice records to $0.00 before local subscription-only context.</span>
+            <span>Each row opens one invoice record; use the full queue link to work every open invoice to $0.00.</span>
           </div>
           <ol :if={@global_open_invoice_queue != []} class="ax-detail-open-invoice-list">
             <li :for={invoice <- @global_open_invoice_queue}>
@@ -306,7 +312,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
                 <strong><%= global_invoice_row_customer(invoice) %></strong>
                 <span><%= format_invoice_exposure(invoice.amount_remaining_minor || 0) %> remaining</span>
                 <em><%= global_invoice_row_due(invoice) %></em>
-                <span class="ax-detail-open-invoice-action">Work this invoice</span>
+                <span class="ax-detail-open-invoice-action">Open invoice record</span>
               </a>
             </li>
           </ol>
@@ -314,7 +320,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
             No open invoice records in this owner scope.
           </span>
           <a class="ax-button ax-button-primary ax-button-sm ax-detail-invoice-primary" href={ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope, %{"status" => "open"})}>
-            Work full invoice queue
+            Work all invoices in queue
           </a>
         </section>
 
@@ -1118,7 +1124,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
         %{
           tone: "danger",
           label: "Setup incomplete",
-          answer: "Billing is not active - setup required",
+          answer: "No - billing is not active",
           headline: "Billing is not active",
           body:
             "Setup fields must be fixed before billing, revenue, renewal, or recovery reporting can be trusted.",
@@ -1178,7 +1184,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
   end
 
   defp detail_health_metric(%{caveats: caveats}) when is_list(caveats) and caveats != [],
-    do: "Setup blocks billing start"
+    do: "Setup required now"
 
   defp detail_health_metric(%{tone: "moss"}), do: "0 blockers"
 

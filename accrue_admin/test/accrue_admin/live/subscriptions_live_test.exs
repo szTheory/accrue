@@ -98,8 +98,8 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert html =~ "$0.00"
     assert html =~ "target"
 
-    assert html =~ "Find ONE customer"
-    assert html =~ "Open customer search"
+    assert html =~ "Customer billing lookup"
+    assert html =~ "Search customers now"
     assert html =~ "Open dedicated invoice queue"
     assert html =~ "Open recovery analytics"
 
