@@ -2,41 +2,41 @@
   "schema_version": "ratchet-ledger-baseline/1",
   "frozen": false,
   "epoch": 1,
-  "ledger_sha256": "b5152f433738bd37fad46bc129eefe79dbd92cc5ee47f2a05f614bd3ffc79231",
+  "ledger_sha256": "e0db9a597e8b5c8e9ebb28c3629908da901a7c124d9992cd9ad66d0f90ca6488",
   "confirmed_open": {
     "persona:operator-founder": {
       "total": 7,
-      "minor": 5,
-      "real": 2
+      "minor": 6,
+      "real": 1
     },
     "persona:customer-support": {
-      "total": 4,
-      "minor": 4,
-      "real": 0
-    },
-    "persona:finance-billing-ops": {
-      "total": 5,
-      "minor": 5,
-      "real": 0
-    },
-    "persona:recovery-growth-ops": {
-      "total": 4,
-      "minor": 4,
-      "real": 0
-    },
-    "persona:developer-integration": {
       "total": 1,
       "minor": 1,
       "real": 0
     },
-    "persona:compliance-audit": {
-      "total": 2,
-      "minor": 2,
+    "persona:finance-billing-ops": {
+      "total": 10,
+      "minor": 7,
+      "real": 3
+    },
+    "persona:recovery-growth-ops": {
+      "total": 3,
+      "minor": 3,
       "real": 0
     },
+    "persona:developer-integration": {
+      "total": 2,
+      "minor": 1,
+      "real": 1
+    },
+    "persona:compliance-audit": {
+      "total": 1,
+      "minor": 0,
+      "real": 1
+    },
     "design": {
-      "total": 7,
-      "minor": 7,
+      "total": 4,
+      "minor": 4,
       "real": 0
     }
   },
@@ -46,7 +46,6 @@
     "dashboard__d02__content-body__ov-none",
     "dashboard__d07__content-body__ov-none",
     "subscription-detail__d02__page-header__ov-none",
-    "subscription-detail__d08__content-body__ov-none",
     "subscriptions__d08__kpi-row__ov-none",
     "subscriptions__d08__data-table__ov-none",
     "subscription-detail__d08__detail-panel__ov-none",
@@ -55,9 +54,9 @@
     "subscriptions__d07__kpi-row__ov-none",
     "component-kitchen__d11__layer__ov-none",
     "dashboard__d08__page-header__ov-none",
+    "dashboard__d03__content-body__ov-none",
     "dashboard__d11__content-body__ov-none",
     "dashboard__d01__content-body__ov-none",
-    "subscription-detail__d03__page-header__ov-none",
     "subscription-detail__d03__detail-panel__ov-none",
     "subscription-detail__d02__related-panel__ov-none",
     "subscription-detail__d07__related-panel__ov-none",
@@ -69,6 +68,7 @@
     "subscription-detail__d01__detail-panel__ov-none",
     "subscription-detail__d01__primary-nav__ov-none",
     "subscriptions__d07__page-header__ov-none",
+    "subscriptions__d03__primary-nav__ov-none",
     "component-kitchen__d03__layer__ov-none",
     "component-kitchen__d02__page-header__ov-none",
     "component-kitchen__d07__layer__ov-none",
@@ -76,12 +76,13 @@
     "dashboard__d08__attention-rail__ov-none",
     "dashboard__d07__page-header__ov-none",
     "dashboard__d01__page-header__ov-none",
-    "subscription-detail__d08__page-header__ov-none",
     "subscription-detail__d11__detail-panel__ov-none",
     "subscriptions__d01__primary-nav__ov-none",
     "subscriptions__d03__content-body__ov-none",
     "subscriptions__d07__toolbar__ov-none",
     "subscriptions__d08__toolbar__ov-none",
+    "component-kitchen__d07__content-body__ov-none",
+    "subscriptions__d08__content-body__ov-none",
     "subscriptions__d02__toolbar__ov-none",
     "component-kitchen__d08__layer__ov-none",
     "dashboard__d02__attention-rail__ov-none",
@@ -96,7 +97,6 @@
     "component-kitchen__d07__layer__ov-actionability+overlay-position",
     "component-kitchen__d03__content-body__ov-none",
     "component-kitchen__d11__content-body__ov-none",
-    "subscriptions__d02__content-body__ov-none",
     "subscriptions__d02__primary-nav__ov-none",
     "subscriptions__d08__page-header__ov-none",
     "subscriptions__d11__content-body__ov-none",
@@ -106,13 +106,15 @@
     "component-kitchen__d08__layer__ov-disabled-affordance",
     "subscription-detail__d02__content-body__ov-none",
     "subscription-detail__d01__related-panel__ov-none",
-    "component-kitchen__d08__content-body__ov-none",
+    "subscription-detail__d01__attention-rail__ov-none",
+    "subscriptions__d01__content-body__ov-none",
+    "subscription-detail__d02__attention-rail__ov-none",
+    "dashboard__d03__attention-rail__ov-none",
     "component-kitchen__d08__layer__ov-actionability+disabled-affordance",
     "subscription-detail__d08__related-panel__ov-none",
     "subscriptions__d03__layer__ov-none",
     "component-kitchen__d07__layer__ov-actionability+disabled-affordance",
     "subscription-detail__d03__attention-rail__ov-none",
-    "subscription-detail__d07__attention-rail__ov-none",
     "subscriptions__d01__page-header__ov-none",
     "subscription-detail__d02__primary-nav__ov-none",
     "component-kitchen__d08__layer__ov-copy-specificity",
@@ -120,7 +122,6 @@
     "subscription-detail__d03__content-body__ov-none",
     "component-kitchen__d08__layer__ov-actionability+layer-z-index",
     "component-kitchen__d02__kpi-row__ov-none",
-    "dashboard__d11__page-header__ov-none",
     "component-kitchen__d03__primary-nav__ov-none",
     "component-kitchen__d02__topbar__ov-none",
     "component-kitchen__d07__toolbar__ov-none",
@@ -129,6 +130,7 @@
     "component-kitchen__d07__kpi-row__ov-none",
     "component-kitchen__d03__kpi-row__ov-none",
     "component-kitchen__d08__topbar__ov-none",
+    "component-kitchen__d03__topbar__ov-none",
     "subscription-detail__d01__page-header__ov-none",
     "subscriptions__d07__topbar__ov-none",
     "dashboard__d07__attention-rail__ov-none",
@@ -137,6 +139,7 @@
     "dashboard__d07__topbar__ov-none",
     "component-kitchen__d02__primary-nav__ov-none",
     "component-kitchen__d08__page-header__ov-none",
+    "component-kitchen__d11__page-header__ov-none",
     "component-kitchen__d08__toolbar__ov-none",
     "component-kitchen__d01__content-body__ov-none",
     "dashboard__d08__topbar__ov-none",
@@ -153,14 +156,13 @@
     "subscriptions__d12__page-header__ov-none",
     "component-kitchen__d11__toolbar__ov-none",
     "component-kitchen__d03__toolbar__ov-none",
-    "component-kitchen__d01__page-header__ov-none",
     "subscriptions__d07__data-table__ov-none",
-    "subscription-detail__d11__page-header__ov-none",
     "component-kitchen__d12__page-header__ov-none",
     "subscriptions__d07__primary-nav__ov-none",
     "component-kitchen__d11__kpi-row__ov-none",
     "dashboard__d03__data-table__ov-none",
     "subscription-detail__d11__content-body__ov-none",
-    "dashboard__d01__kpi-row__ov-none"
+    "dashboard__d01__kpi-row__ov-none",
+    "component-kitchen__d01__topbar__ov-none"
   ]
 }
