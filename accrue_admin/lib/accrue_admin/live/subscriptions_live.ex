@@ -114,7 +114,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
               class="ax-button ax-button-primary ax-button-sm ax-subscriptions-primary-workspace"
               href={invoice_queue_path(@admin_mount_path, @current_owner_scope)}
             >
-              Work open-invoice queue to $0.00
+              Open dedicated invoice queue
             </a>
             <a
               class="ax-button ax-button-secondary ax-button-sm ax-subscriptions-webhook-workspace"
@@ -174,6 +174,23 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
 
         <FlashGroup.flash_group flashes={flash_messages(@flash)} />
 
+        <section class="ax-inline-worklist ax-subscriptions-customer-search-strip" aria-label="Find one customer">
+          <div class="ax-inline-worklist-copy">
+            <strong>Find ONE customer</strong>
+            <span>Open customer search by name, email, or ID and then review the unified billing view.</span>
+          </div>
+          <div class="ax-inline-worklist-actions">
+            <button
+              type="button"
+              class="ax-button ax-button-primary ax-button-sm ax-subscriptions-customer-search-action"
+              data-command-palette-trigger="true"
+              data-ax-command-palette-trigger="true"
+            >
+              Open customer search
+            </button>
+          </div>
+        </section>
+
         <section
           class={[
             "ax-inline-worklist ax-subscriptions-invoice-strip",
@@ -187,7 +204,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
           </div>
           <div class="ax-inline-worklist-actions">
             <a class="ax-button ax-button-primary ax-button-sm ax-subscriptions-primary-workspace" href={invoice_queue_path(@admin_mount_path, @current_owner_scope)}>
-              Work open-invoice queue to $0.00
+              Open dedicated invoice queue
             </a>
           </div>
         </section>
@@ -195,7 +212,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
         <section class="ax-subscriptions-queue-shortcut" aria-label="Open-invoice queue records">
           <span><%= count(@summary.open_invoice_count, "open invoice") %> ready for queue work.</span>
           <a class="ax-link-quiet" href={invoice_queue_path(@admin_mount_path, @current_owner_scope)}>
-            Work, review, or remove open-invoice records
+            Open dedicated invoice queue records
           </a>
         </section>
 
@@ -469,8 +486,9 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
         <a href="#{subscription_invoices_href}&work=send_reminder" class="ax-link ax-subscription-row-invoice-action">Send reminder</a>
       </span>
       <span class="ax-subscription-row-signal-secondary">
-        <strong>Webhook follow-up</strong>
-        <a href="#{webhook_href}" class="ax-link ax-subscription-row-webhook-action">Debug failed deliveries after invoice queue</a>
+        <strong>Webhook status</strong>
+        <span>Failed deliveries pending after invoice queue</span>
+        <a href="#{webhook_href}" class="ax-link ax-subscription-row-webhook-action">Open failed-delivery debugger</a>
       </span>
       <span class="ax-subscription-row-admin-chips"><span class="ax-chip ax-label">Owner: #{escaped_o}</span> <span class="ax-chip ax-label">Tax: #{escaped_t}</span></span>
       <span class="ax-data-table-inline-actions">
@@ -514,7 +532,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
       <span class="ax-subscription-row-meta-grid">
         <span class="ax-subscription-row-meta"><strong>Customer ID</strong> #{customer_id}</span>
         <a href="#{subscription_href}" class="ax-subscription-row-meta ax-subscription-row-id"><strong>Subscription</strong> #{subscription_id}</a>
-        <a href="#{subscription_invoices_href}" class="ax-link ax-subscription-row-invoices">Open invoice queue records for this subscription</a>
+        <a href="#{subscription_invoices_href}" class="ax-link ax-subscription-row-invoices">Filter invoice queue to this subscription</a>
       </span>
     </span>
     """)

@@ -7,7 +7,8 @@ defmodule AccrueAdmin.ComponentKitchenLiveTest do
     assert {:ok, _view, html} = live(conn, "/billing/dev/components")
 
     assert html =~ "Billing health: Unhealthy"
-    assert html =~ "Healthy means open invoices are $0.00; collect the invoice queue first."
+    assert html =~ "Primary action: open the invoice queue and collect to $0.00."
+    assert html =~ "Critical: $592.50 open invoices"
     assert html =~ "Primary action"
     assert html =~ "Secondary action"
     assert html =~ "More billing actions"

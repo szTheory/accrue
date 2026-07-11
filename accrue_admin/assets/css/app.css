@@ -938,8 +938,8 @@ html.accrue-admin[data-theme="dark"] .ax-sidebar-link.ax-sidebar-link-active {
   align-items: center;
   flex-wrap: wrap;
   justify-content: flex-end;
-  padding: 1rem 1.25rem;
-  min-height: 3.5rem;
+  padding: 0.375rem 0.75rem;
+  min-height: 2.75rem;
   border-bottom: 1px solid var(--ax-border);
   background: var(--ax-base);
   backdrop-filter: blur(18px);
@@ -948,7 +948,7 @@ html.accrue-admin[data-theme="dark"] .ax-sidebar-link.ax-sidebar-link-active {
 
 .ax-topbar-actions {
   align-items: center;
-  gap: var(--ax-space-sm);
+  gap: 0.375rem;
 }
 
 .ax-icon-button {
@@ -2143,10 +2143,10 @@ a.ax-kpi-card--linked:focus-visible {
   align-items: center;
   min-height: 1.375rem;
   padding: 0 0.375rem;
-  border: 1px solid var(--ax-status-warning-border);
+  border: 2px solid var(--ax-status-danger-border);
   border-radius: var(--ax-radius-sm);
-  background: color-mix(in srgb, var(--ax-status-warning-bg) 62%, var(--ax-elevated));
-  color: var(--ax-primary);
+  background: var(--ax-status-danger-bg);
+  color: var(--ax-status-danger-text);
   font: var(--ax-type-label-sm-font);
   font-weight: 950;
 }
@@ -2262,7 +2262,7 @@ a.ax-kpi-card--linked:focus-visible {
   padding: 0 0.25rem;
   border-color: var(--ax-border);
   border-width: 1px;
-  background: var(--ax-elevated);
+  background: transparent;
   color: var(--ax-primary);
   box-shadow: none;
 }
@@ -2272,9 +2272,9 @@ a.ax-kpi-card--linked:focus-visible {
   gap: 0.1875rem;
   width: min(100%, 58rem);
   padding: 0.25rem;
-  border: 1px solid var(--ax-status-warning-border);
+  border: 2px solid var(--ax-status-danger-border);
   border-radius: var(--ax-radius-sm);
-  background: color-mix(in srgb, var(--ax-status-warning-bg) 32%, var(--ax-elevated));
+  background: color-mix(in srgb, var(--ax-status-danger-bg) 46%, var(--ax-elevated));
   color: var(--ax-primary);
 }
 
@@ -3140,6 +3140,33 @@ a.ax-kpi-card--linked:focus-visible {
   border-color: var(--ax-border);
   border-width: 1px;
   background: var(--ax-elevated);
+}
+
+.ax-subscriptions-customer-search-strip {
+  order: -3;
+  padding: 0.125rem 0.375rem;
+  border: 2px solid var(--ax-accent-border);
+  background: color-mix(in srgb, var(--ax-accent-subtle) 72%, var(--ax-elevated));
+  color: var(--ax-primary);
+  box-shadow: var(--ax-shadow-sm);
+}
+
+.ax-subscriptions-customer-search-strip .ax-inline-worklist-copy strong {
+  color: var(--ax-accent-readable);
+  font-size: var(--ax-type-md);
+  font-weight: 950;
+}
+
+.ax-subscriptions-customer-search-strip .ax-inline-worklist-copy span {
+  color: var(--ax-primary);
+  font-weight: 800;
+}
+
+.ax-subscriptions-customer-search-action {
+  border-color: var(--ax-accent-border);
+  background: var(--ax-accent-readable);
+  color: var(--ax-accent-contrast);
+  font-weight: 950;
 }
 
 .ax-subscriptions-invoice-strip-danger {
@@ -4441,7 +4468,7 @@ a.ax-kpi-card--linked:focus-visible {
 
 .ax-subscriptions-page .ax-data-table-grid th,
 .ax-subscriptions-page .ax-data-table-grid td {
-  padding: 0.0625rem 0.1875rem;
+  padding: 0;
   line-height: var(--ax-leading-tight);
 }
 
@@ -5290,18 +5317,19 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
 .ax-search-trigger {
   /* ax-type-exception: component-local typography is documented until this selector is migrated to a composed role utility in markup. */
   justify-content: flex-start;
-  width: 24rem;
-  max-width: min(24rem, calc(100vw - 8rem));
+  width: 21rem;
+  max-width: min(21rem, calc(100vw - 7rem));
   min-width: 0;
-  border-color: var(--ax-border-strong);
-  border-width: 1px;
+  min-height: 2rem;
+  border-color: var(--ax-accent-border);
+  border-width: 2px;
   border-radius: var(--ax-radius-sm);
-  background: var(--ax-elevated);
+  background: color-mix(in srgb, var(--ax-accent-subtle) 72%, var(--ax-elevated));
   color: var(--ax-primary);
   font-size: var(--ax-type-sm);
-  font-weight: 750;
+  font-weight: 900;
   cursor: pointer;
-  box-shadow: none;
+  box-shadow: var(--ax-shadow-sm);
 }
 
 .ax-search-trigger:hover {
@@ -5347,12 +5375,12 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
   align-items: center;
   min-height: 1.5rem;
   padding: 0 0.5rem;
-  border: 1px solid var(--ax-border);
+  border: 1px solid var(--ax-accent-border);
   border-radius: var(--ax-radius-sm);
-  background: var(--ax-sunken);
-  color: var(--ax-primary);
+  background: var(--ax-accent-readable);
+  color: var(--ax-accent-contrast);
   font: var(--ax-type-label-sm-font);
-  font-weight: 750;
+  font-weight: 950;
 }
 
 .ax-search-trigger .ax-kbd {
@@ -5487,9 +5515,9 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
 }
 
 .ax-home > .ax-page-header .ax-display {
-  color: var(--ax-primary);
-  font-size: 1.25rem;
-  font-weight: 800;
+  color: var(--ax-status-danger-text);
+  font-size: 1.5rem;
+  font-weight: 950;
 }
 
 .ax-home > .ax-page-header .ax-page-copy {
@@ -5526,10 +5554,10 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
   align-items: center;
   width: min(100%, 54rem);
   padding: 0 0.25rem;
-  border-color: var(--ax-status-warning-border);
-  background: color-mix(in srgb, var(--ax-status-warning-bg) 42%, var(--ax-elevated));
+  border: 2px solid var(--ax-status-danger-border);
+  background: color-mix(in srgb, var(--ax-status-danger-bg) 52%, var(--ax-elevated));
   color: var(--ax-primary);
-  box-shadow: none;
+  box-shadow: var(--ax-shadow-sm);
 }
 
 .ax-home .ax-page-header-compact {
@@ -5554,9 +5582,9 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
 }
 
 .ax-home-health-label {
-  color: var(--ax-muted);
+  color: var(--ax-status-danger-text);
   font: var(--ax-type-label-sm-font);
-  font-weight: 850;
+  font-weight: 950;
 }
 
 .ax-home-health-status {
@@ -6661,8 +6689,8 @@ button.ax-launcher {
   flex-wrap: wrap;
   gap: 0.1875rem;
   align-items: center;
-  padding: 0.125rem 0.1875rem;
-  border-top: 1px solid color-mix(in srgb, var(--ax-status-warning-border) 66%, transparent);
+  padding: 0.0625rem 0.1875rem;
+  border-top: 0;
 }
 
 .ax-detail-health-setup-note {
@@ -6720,9 +6748,9 @@ button.ax-launcher {
   gap: 0.125rem 0.375rem;
   align-items: center;
   width: min(100%, 62rem);
-  padding: 0.125rem 0.25rem;
-  border: 1px solid var(--ax-accent-border);
-  background: color-mix(in srgb, var(--ax-accent-subtle) 46%, var(--ax-elevated));
+  padding: 0.0625rem 0.25rem;
+  border: 2px solid var(--ax-accent-border);
+  background: color-mix(in srgb, var(--ax-accent-subtle) 68%, var(--ax-elevated));
 }
 
 .ax-detail-priority-actions-split {
@@ -6807,6 +6835,21 @@ button.ax-launcher {
   background: color-mix(in srgb, var(--ax-status-warning-bg) 44%, var(--ax-elevated));
 }
 
+.ax-detail-hint-chip {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  max-width: 100%;
+  min-height: 1.375rem;
+  padding: 0 0.375rem;
+  border: 1px solid var(--ax-border-strong);
+  border-radius: var(--ax-radius-sm);
+  background: var(--ax-elevated);
+  color: var(--ax-primary);
+  font: var(--ax-type-label-sm-font);
+  font-weight: 850;
+}
+
 .ax-detail-dunning-summary strong {
   color: var(--ax-primary);
   font: var(--ax-type-label-sm-font);
@@ -6836,6 +6879,10 @@ button.ax-launcher {
   min-height: 1.5rem;
   padding-inline: 0.375rem;
   border-width: 2px;
+  border-color: var(--ax-status-warning-border);
+  background: var(--ax-status-warning-bg);
+  color: var(--ax-primary);
+  font-weight: 950;
 }
 
 @media (max-width: 700px) {
@@ -7077,6 +7124,12 @@ button.ax-launcher {
   font-weight: 900;
 }
 
+.ax-subscription-detail-page .ax-detail-section-title-audit {
+  color: var(--ax-accent-readable);
+  font-size: var(--ax-type-lg);
+  font-weight: 950;
+}
+
 .ax-detail-section-actions {
   display: flex;
   gap: var(--ax-space-sm);
@@ -7133,6 +7186,11 @@ button.ax-launcher {
   border-radius: var(--ax-radius-sm);
   background: var(--ax-elevated);
   color: var(--ax-primary);
+}
+
+.ax-activity-audit-title {
+  color: var(--ax-accent-readable);
+  font-weight: 950;
 }
 
 .ax-audit-summary-row span {

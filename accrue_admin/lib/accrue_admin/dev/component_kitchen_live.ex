@@ -80,9 +80,9 @@ if Mix.env() != :prod do
             />
             <div class="ax-component-kitchen-title-row">
               <h1 class="ax-heading ax-component-kitchen-title">Billing health: Unhealthy</h1>
-              <span class="ax-component-kitchen-header-status">Open invoice total: $592.50</span>
+              <span class="ax-component-kitchen-header-status">Critical: $592.50 open invoices</span>
             </div>
-            <p class="ax-page-description">Healthy means open invoices are $0.00; collect the invoice queue first.</p>
+            <p class="ax-page-description">Primary action: open the invoice queue and collect to $0.00.</p>
             <div class="ax-page-actions">
               <a class="ax-button ax-button-primary ax-button-sm ax-dev-invoice-action ax-dev-invoice-primary" href={@admin_mount_path <> "/invoices?status=open"}>
                 <Icon.icon name={:invoices} size="sm" /> Collect open invoices first
@@ -137,8 +137,8 @@ if Mix.env() != :prod do
 
           <section :if={@available?} class="ax-inline-worklist ax-dev-production-strip" aria-label="Production billing entrypoints">
             <div class="ax-inline-worklist-copy">
-              <strong>Queue backup routes</strong>
-              <span>Use only after the command center choice above.</span>
+              <strong>Secondary billing routes</strong>
+              <span>Use after the primary invoice queue choice above.</span>
               <span>Customer support path: open one customer and see the full billing context.</span>
               <span>Latest audit event: billing.contact.updated by Admin user.</span>
               <span>Audit timestamp: Jul 09, 2026 14:51 UTC.</span>

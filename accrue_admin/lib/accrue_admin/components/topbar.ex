@@ -25,10 +25,10 @@ defmodule AccrueAdmin.Components.Topbar do
         >
           <Icon.icon name={:search} size="sm" class="ax-search-trigger-icon" />
           <span class="ax-search-trigger-text">
-            <strong>Find one customer</strong>
-            <em>Name, email, or ID</em>
+            <strong>Find ONE customer</strong>
+            <em>Click or press Command K</em>
           </span>
-          <span class="ax-search-trigger-action">Search</span>
+          <span class="ax-search-trigger-action">Open</span>
           <kbd class="ax-kbd">⌘K</kbd>
         </button>
 

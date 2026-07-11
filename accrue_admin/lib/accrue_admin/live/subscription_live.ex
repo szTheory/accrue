@@ -226,9 +226,9 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
           <div class="ax-detail-health-actions" aria-label="Primary billing action from health summary">
             <a
               class="ax-button ax-button-primary ax-button-sm ax-detail-invoice-primary"
-              href={ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope, %{"status" => "open", "subscription_id" => @subscription.id})}
+              href={ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope, %{"status" => "open"})}
             >
-              Open invoice queue for this subscription
+              Open global invoice queue
             </a>
             <a
               class="ax-button ax-button-secondary ax-button-sm"
@@ -259,16 +259,22 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
           </:facts>
         </Detail.summary_card>
 
-        <section class="ax-detail-priority-actions ax-detail-priority-actions-compact" aria-label="Invoice queue workspace">
-          <span class="ax-label ax-detail-priority-label">Invoice queue workspace</span>
-          <span class="ax-detail-queue-depth"><strong>Queue depth</strong><%= invoice_queue_summary(@open_invoice_summary) %></span>
+        <section class="ax-detail-priority-actions ax-detail-priority-actions-compact" aria-label="Global invoice queue workspace">
+          <span class="ax-label ax-detail-priority-label">Global invoice queue workspace</span>
+          <span class="ax-detail-queue-depth"><strong>Local context</strong><%= invoice_queue_summary(@open_invoice_summary) %></span>
           <a
             class="ax-button ax-button-primary ax-button-sm ax-detail-priority-primary ax-detail-invoice-primary"
-            href={ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope, %{"status" => "open", "subscription_id" => @subscription.id})}
+            href={ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope, %{"status" => "open"})}
           >
-            Open invoice queue records
+            Open global invoice queue records
           </a>
           <div class="ax-detail-priority-links">
+            <a
+              class="ax-link-quiet"
+              href={ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope, %{"status" => "open", "subscription_id" => @subscription.id})}
+            >
+              Filter this subscription's invoices
+            </a>
             <a
               class="ax-link-quiet"
               href={
@@ -283,7 +289,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
               class="ax-link-quiet"
               href={ScopedPath.build(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}
             >
-              Back to Recovery analytics
+              Open Recovery analytics dashboard
             </a>
           </div>
         </section>
@@ -382,17 +388,26 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
                 </p>
               <% else %>
                 <div class="ax-detail-dunning-summary" aria-label="Dunning funnel state for this subscription">
-                  <span><strong>No subscription-level campaign</strong><em>Global recovery analytics still shows at-risk accounts and funnel trends.</em></span>
+                  <span><strong>Global dunning funnel</strong><em>No subscription-level campaign here; recovery analytics still shows at-risk accounts and funnel trends.</em></span>
                 </div>
                 <p class="ax-body">
                   <%= Copy.resource_state_copy(:dunning, :queue_empty, surface: :subscription_detail).body %>
                 </p>
-                <p class="ax-body ax-detail-hint">
-                  Use Recovery analytics for global dunning trends. Open this subscription's local invoice context only when you do not need the global queue.
-                </p>
               <% end %>
 
               <div class="ax-detail-actions-row">
+                <a
+                  class="ax-button ax-button-primary ax-button-sm ax-detail-recovery-shortcut"
+                  href={ScopedPath.build(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}
+                >
+                  Open recovery analytics dashboard
+                </a>
+                <a
+                  class="ax-button ax-button-secondary ax-button-sm"
+                  href={ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope, %{"status" => "open"})}
+                >
+                  Open global invoice queue
+                </a>
                 <a
                   class="ax-button ax-button-secondary ax-button-sm"
                   href={
@@ -405,9 +420,9 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
                   Open local invoice context
                 </a>
               </div>
-              <p class="ax-body ax-detail-hint">
-                The global queue works every open invoice to zero; the local link keeps context for this subscription.
-              </p>
+              <span class="ax-detail-hint-chip">
+                Global queue works every open invoice to $0.00; local context is secondary.
+              </span>
             </div>
           </details>
 
@@ -421,10 +436,10 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
 
         <details class="ax-detail-section" data-ax-lazy-activity phx-click="load_activity" open>
           <summary class="ax-detail-section-head">
-            <span class="ax-detail-section-title">Activity</span>
+            <span class="ax-detail-section-title ax-detail-section-title-audit">Activity audit log</span>
           </summary>
           <div class="ax-card ax-activity-audit-strip">
-            <p class="ax-label">Audit event table: Actor / Action / Timestamp</p>
+            <p class="ax-label ax-activity-audit-title">Audit event table: Actor / Action / Timestamp</p>
             <% latest_audit = latest_audit_row(@timeline_events, @subscription) %>
             <div class="ax-audit-summary-row" aria-label="Latest audit event summary">
               <span><strong>Actor</strong><em><%= latest_audit.actor %></em></span>
@@ -442,7 +457,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
                   })
                 }
               >
-                Open full audit event log
+                Open Events audit log with subscription filter
               </a>
             </div>
             <ul class="ax-audit-list" aria-label="Actor action timestamp rows">
@@ -1099,6 +1114,9 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
 
       Accrue.Billing.Subscription.canceled?(subscription) ->
         "Ended - no active billing"
+
+      projection_caveats(subscription) != [] ->
+        "Setup incomplete - active billing unverified"
 
       Accrue.Billing.Subscription.active?(subscription) ->
         "Healthy - active billing"
