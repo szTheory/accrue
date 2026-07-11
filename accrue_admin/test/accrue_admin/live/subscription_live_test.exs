@@ -117,9 +117,11 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
     assert html =~ "Open local invoice context"
     assert html =~ "Open global invoice queue"
     refute html =~ "Recovery workspace button"
-    assert html =~ "Open Recovery analytics dashboard"
+    assert html =~ "Open dunning funnel and at-risk analytics"
     assert html =~ "Open Events audit log with subscription filter"
     assert html =~ "Audit event table: Actor / Action / Timestamp"
+    assert html =~ "Global open-invoice queue rows"
+    assert html =~ "Open dedicated invoice queue"
   end
 
   test "summary and drill bands replace page-level KPI and predicate noise", %{
@@ -135,8 +137,8 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
     assert html =~ "Tax &amp; compliance"
     assert html =~ "invoice.payment_failed"
     assert html =~ "Billing status"
-    assert html =~ "Billing is not ready"
-    assert html =~ "Setup fields missing"
+    assert html =~ "Unhealthy - setup incomplete"
+    assert html =~ "Billing health blocked"
     assert html =~ "ax-detail-health-summary-amber"
     assert html =~ "ax-detail-health-answer"
     assert html =~ "Charge amount not shown"

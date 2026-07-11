@@ -8,7 +8,8 @@ defmodule AccrueAdmin.ComponentKitchenLiveTest do
 
     assert html =~ "Billing health: Unhealthy"
     assert html =~ "Primary action: open the invoice queue and collect to $0.00."
-    assert html =~ "Critical: $592.50 open invoices"
+    assert html =~ "Critical: $592.50 overdue now; healthy threshold $0.00"
+    assert html =~ "Step 1: work invoice queue to $0.00"
     assert html =~ "Primary action"
     assert html =~ "Secondary action"
     assert html =~ "More billing actions"

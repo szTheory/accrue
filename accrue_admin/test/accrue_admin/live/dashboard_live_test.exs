@@ -110,8 +110,10 @@ defmodule AccrueAdmin.DashboardLiveTest do
     assert html =~ "before webhook or dunning work"
 
     assert html =~
-             "Collect open invoices first, then inspect failed deliveries and dunning."
+             "P1 is first, P2 next, P3 after invoices: collect open invoices, then inspect failed deliveries and dunning."
 
+    assert html =~ "Find ONE customer"
+    assert html =~ "Open customer search"
     assert html =~ "open invoices"
     assert html =~ ">P1<"
     assert html =~ ">P2<"

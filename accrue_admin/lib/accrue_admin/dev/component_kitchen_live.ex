@@ -80,7 +80,7 @@ if Mix.env() != :prod do
             />
             <div class="ax-component-kitchen-title-row">
               <h1 class="ax-heading ax-component-kitchen-title">Billing health: Unhealthy</h1>
-              <span class="ax-component-kitchen-header-status">Critical: $592.50 open invoices</span>
+              <span class="ax-component-kitchen-header-status">Critical: $592.50 overdue now; healthy threshold $0.00</span>
             </div>
             <p class="ax-page-description">Primary action: open the invoice queue and collect to $0.00.</p>
             <div class="ax-page-actions">
@@ -95,11 +95,11 @@ if Mix.env() != :prod do
               </a>
             </div>
             <section :if={@available?} class="ax-dev-route-strip" aria-label="Secondary billing routes">
-              <span>Secondary routes after queue choice:</span>
-              <a class="ax-dev-secondary-route" href={@admin_mount_path <> "/customers"}>Customer detail</a>
-              <a class="ax-dev-secondary-route" href={@admin_mount_path <> "/invoices?status=open"}>Invoices queue</a>
-              <a class="ax-dev-secondary-route" href={@admin_mount_path <> "/webhooks?status=failed,dead"}>Webhooks</a>
-              <a class="ax-dev-secondary-route" href={@admin_mount_path <> "/events?actor_type=admin"}>Events</a>
+              <span>Secondary route buttons after Step 1:</span>
+              <a class="ax-dev-secondary-route" href={@admin_mount_path <> "/customers"}>Open customer detail</a>
+              <a class="ax-dev-secondary-route" href={@admin_mount_path <> "/invoices?status=open"}>Open invoice queue</a>
+              <a class="ax-dev-secondary-route" href={@admin_mount_path <> "/webhooks?status=failed,dead"}>Open webhooks</a>
+              <a class="ax-dev-secondary-route" href={@admin_mount_path <> "/events?actor_type=admin"}>Open Events audit</a>
             </section>
           </header>
 
@@ -114,7 +114,7 @@ if Mix.env() != :prod do
             <div class="ax-dev-health-command-verdict">
               <span>Unified health verdict</span>
               <strong>Unhealthy - invoice collection first</strong>
-              <em>Collect $592.50, debug 3 failed webhooks, then audit actor changes.</em>
+              <em>Step 1 collect $592.50 to the $0.00 threshold; Step 2 debug 3 failed webhooks; Step 3 audit actor changes.</em>
             </div>
             <div class="ax-dev-health-kpis" aria-label="Billing health KPI row">
               <span><strong>Open invoices</strong><em>2 / $592.50</em></span>
@@ -124,13 +124,13 @@ if Mix.env() != :prod do
             </div>
             <div class="ax-dev-health-command-actions">
               <a class="ax-button ax-button-primary ax-button-sm ax-dev-invoice-action" href={@admin_mount_path <> "/invoices?status=open"}>
-                Work invoice queue to $0.00
+                Step 1: work invoice queue to $0.00
               </a>
               <a class="ax-button ax-button-warning ax-button-sm ax-dev-webhook-action" href={@admin_mount_path <> "/webhooks?status=failed,dead"}>
-                Debug failed webhooks end-to-end
+                Step 2 after invoices: debug failed webhooks
               </a>
               <a class="ax-button ax-button-secondary ax-button-sm" href={@admin_mount_path <> "/events?actor_type=admin"}>
-                Open Events audit log
+                Step 3 after invoices: open Events audit log
               </a>
             </div>
           </section>

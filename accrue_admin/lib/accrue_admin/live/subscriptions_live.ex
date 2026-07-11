@@ -466,24 +466,14 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
         "type" => "subscription.created"
       })
 
-    subscription_invoices_href =
-      mount_path
-      |> scoped_path("/invoices", owner_scope)
-      |> AccrueAdmin.DataTableNav.merge_query(%{
-        "status" => "open",
-        "subscription_id" => row.id
-      })
-
     Phoenix.HTML.raw("""
     <span class="ax-stack-sm">
       <span class="ax-audit-summary-row ax-subscription-row-audit ax-subscription-row-audit-primary" aria-label="Latest subscription audit event">
         <span class="ax-audit-fact"><strong>Audit</strong><em>subscription.created by Accrue system - #{created}</em></span>
       </span>
       <span class="ax-webhook-row-status ax-webhook-row-status-warning ax-subscription-row-signal-primary">
-        <strong>Invoice action</strong>
-        <span>Dedicated queue for this subscription's open invoices</span>
-        <a href="#{subscription_invoices_href}" class="ax-link ax-subscription-row-invoice-action">Work open invoices</a>
-        <a href="#{subscription_invoices_href}&work=send_reminder" class="ax-link ax-subscription-row-invoice-action">Send reminder</a>
+        <strong>Invoice queue status</strong>
+        <span>Work controls are in Customer details for this row</span>
       </span>
       <span class="ax-subscription-row-signal-secondary">
         <strong>Webhook status</strong>
@@ -532,7 +522,11 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
       <span class="ax-subscription-row-meta-grid">
         <span class="ax-subscription-row-meta"><strong>Customer ID</strong> #{customer_id}</span>
         <a href="#{subscription_href}" class="ax-subscription-row-meta ax-subscription-row-id"><strong>Subscription</strong> #{subscription_id}</a>
-        <a href="#{subscription_invoices_href}" class="ax-link ax-subscription-row-invoices">Filter invoice queue to this subscription</a>
+        <span class="ax-subscription-row-invoice-controls">
+          <a href="#{subscription_invoices_href}" class="ax-button ax-button-primary ax-button-sm ax-subscription-row-invoice-primary">Work open invoices</a>
+          <a href="#{subscription_invoices_href}&work=send_reminder" class="ax-button ax-button-secondary ax-button-sm ax-subscription-row-invoice-primary">Send reminder</a>
+          <a href="#{subscription_invoices_href}" class="ax-link ax-subscription-row-invoices">Filter invoice queue to this subscription</a>
+        </span>
       </span>
     </span>
     """)

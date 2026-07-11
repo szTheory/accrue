@@ -28,7 +28,7 @@ defmodule AccrueAdmin.Components.Topbar do
             <strong>Find ONE customer</strong>
             <em>Click or press Command K</em>
           </span>
-          <span class="ax-search-trigger-action">Open</span>
+          <span class="ax-search-trigger-action">Open customer search</span>
           <kbd class="ax-kbd">⌘K</kbd>
         </button>
 

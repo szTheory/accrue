@@ -87,7 +87,7 @@ defmodule AccrueAdmin.Live.DashboardLive do
               <Icon.icon name={:search} size="sm" />
             </button>
             <a
-              class="ax-button ax-button-secondary ax-button-sm"
+              class="ax-button ax-button-warning ax-button-sm ax-home-recovery-primary"
               href={ScopedPath.build(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}
             >
               Open recovery analytics: dunning funnel + at-risk
@@ -118,7 +118,7 @@ defmodule AccrueAdmin.Live.DashboardLive do
           </header>
           <div :if={@attention != []} class="ax-attention-summary ax-attention-summary-warning" aria-label="Attention health verdict">
             <strong>Billing status: Unhealthy.</strong>
-            <span>Collect open invoices first, then inspect failed deliveries and dunning.</span>
+            <span>P1 is first, P2 next, P3 after invoices: collect open invoices, then inspect failed deliveries and dunning.</span>
           </div>
 
           <div :if={@attention != []} class="ax-card ax-attention">
@@ -140,6 +140,22 @@ defmodule AccrueAdmin.Live.DashboardLive do
             <p class="ax-empty-title"><%= Copy.home_attention_empty_title() %></p>
             <p class="ax-body ax-empty-copy"><%= Copy.home_attention_empty_copy() %></p>
           </div>
+        </section>
+
+        <section class="ax-home-section ax-home-customer-search-strip" aria-label="Find one customer" data-ax-zone="customer-search">
+          <div>
+            <strong>Find ONE customer</strong>
+            <span>Name, email, or ID opens the unified customer billing view.</span>
+          </div>
+          <button
+            type="button"
+            class="ax-button ax-button-primary ax-button-sm ax-home-customer-search-strip-action"
+            data-command-palette-trigger="true"
+            data-ax-command-palette-trigger="true"
+          >
+            Open customer search
+            <Icon.icon name={:search} size="sm" />
+          </button>
         </section>
 
         <%!-- Zone 2 — Task launchers: one door per JTBD --%>
@@ -237,7 +253,7 @@ defmodule AccrueAdmin.Live.DashboardLive do
                 Integer.to_string(@stats.open_invoice_count) <>
                   Copy.dashboard_kpi_open_invoice_delta_suffix()
               }
-              delta_tone="cobalt"
+              delta_tone={if(@stats.open_invoice_count > 0, do: "amber", else: "moss")}
               href={ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope, %{"status" => "open"})}
               aria_label={Copy.dashboard_kpi_invoices_aria_label()}
             >

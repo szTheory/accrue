@@ -68,6 +68,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
          |> assign(:subscription, subscription)
          |> assign(:customer, subscription.customer)
          |> assign(:open_invoice_summary, open_invoice_summary(subscription))
+         |> assign(:global_open_invoice_queue, global_open_invoice_queue(scope))
          |> assign(:timeline_events, events)
          |> assign(:timeline_events_loaded?, true)
          |> assign(:raw_json_loaded?, false)
@@ -289,9 +290,31 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
               class="ax-link-quiet"
               href={ScopedPath.build(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}
             >
-              Open Recovery analytics dashboard
+              Open dunning funnel and at-risk analytics
             </a>
           </div>
+        </section>
+
+        <section class="ax-inline-worklist ax-detail-open-invoice-queue" aria-label="Global open invoice queue preview">
+          <div class="ax-inline-worklist-copy">
+            <strong>Global open-invoice queue rows</strong>
+            <span>Work these invoice records to $0.00 before local subscription-only context.</span>
+          </div>
+          <ol :if={@global_open_invoice_queue != []} class="ax-detail-open-invoice-list">
+            <li :for={invoice <- @global_open_invoice_queue}>
+              <a href={global_invoice_row_href(@admin_mount_path, @current_owner_scope, invoice)} class="ax-detail-open-invoice-row">
+                <strong><%= global_invoice_row_customer(invoice) %></strong>
+                <span><%= format_invoice_exposure(invoice.amount_remaining_minor || 0) %> remaining</span>
+                <em><%= global_invoice_row_due(invoice) %></em>
+              </a>
+            </li>
+          </ol>
+          <span :if={@global_open_invoice_queue == []} class="ax-detail-open-invoice-empty">
+            No open invoice records in this owner scope.
+          </span>
+          <a class="ax-button ax-button-primary ax-button-sm ax-detail-invoice-primary" href={ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope, %{"status" => "open"})}>
+            Open dedicated invoice queue
+          </a>
         </section>
 
         <div data-ax-related-resources>
@@ -389,6 +412,12 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
               <% else %>
                 <div class="ax-detail-dunning-summary" aria-label="Dunning funnel state for this subscription">
                   <span><strong>Global dunning funnel</strong><em>No subscription-level campaign here; recovery analytics still shows at-risk accounts and funnel trends.</em></span>
+                  <a
+                    class="ax-button ax-button-primary ax-button-sm ax-detail-dunning-action"
+                    href={ScopedPath.build(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}
+                  >
+                    Open dunning funnel and at-risk analytics
+                  </a>
                 </div>
                 <p class="ax-body">
                   <%= Copy.resource_state_copy(:dunning, :queue_empty, surface: :subscription_detail).body %>
@@ -400,7 +429,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
                   class="ax-button ax-button-primary ax-button-sm ax-detail-recovery-shortcut"
                   href={ScopedPath.build(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}
                 >
-                  Open recovery analytics dashboard
+                  Open dunning funnel and at-risk analytics
                 </a>
                 <a
                   class="ax-button ax-button-secondary ax-button-sm"
@@ -796,6 +825,10 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
     base_rows =
       [
         %{
+          label: "Billing health verdict",
+          value: detail_health_summary(subscription).answer
+        },
+        %{
           label: "Lifecycle state",
           value: lifecycle_health_label(subscription)
         }
@@ -1002,6 +1035,69 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
 
   defp format_invoice_exposure(_amount_minor), do: "$0.00"
 
+  defp global_open_invoice_queue(owner_scope) do
+    open_statuses = [:draft, :open]
+
+    owner_scope
+    |> global_open_invoice_base(open_statuses)
+    |> order_by([invoice, _customer, _subscription],
+      asc_nulls_last: invoice.due_date,
+      desc: invoice.amount_remaining_minor
+    )
+    |> limit(3)
+    |> select([invoice, customer, subscription], %{
+      id: invoice.id,
+      number: invoice.number,
+      customer_id: customer.id,
+      customer_name: customer.name,
+      customer_email: customer.email,
+      subscription_id: invoice.subscription_id,
+      subscription_processor_id: subscription.processor_id,
+      amount_remaining_minor: invoice.amount_remaining_minor,
+      currency: invoice.currency,
+      due_date: invoice.due_date,
+      status: invoice.status
+    })
+    |> Repo.all()
+  end
+
+  defp global_open_invoice_base(
+         %{mode: :organization, organization_id: organization_id},
+         statuses
+       ) do
+    Invoice
+    |> join(:inner, [invoice], customer in assoc(invoice, :customer))
+    |> join(:left, [invoice, _customer], subscription in assoc(invoice, :subscription))
+    |> where(
+      [invoice, customer, _subscription],
+      invoice.status in ^statuses and customer.owner_type == "Organization" and
+        customer.owner_id == ^organization_id
+    )
+  end
+
+  defp global_open_invoice_base(_owner_scope, statuses) do
+    Invoice
+    |> join(:inner, [invoice], customer in assoc(invoice, :customer))
+    |> join(:left, [invoice, _customer], subscription in assoc(invoice, :subscription))
+    |> where([invoice, _customer, _subscription], invoice.status in ^statuses)
+  end
+
+  defp global_invoice_row_href(mount_path, owner_scope, invoice) do
+    ScopedPath.build(mount_path, "/invoices", owner_scope, %{
+      "status" => "open",
+      "invoice_id" => invoice.id
+    })
+  end
+
+  defp global_invoice_row_customer(invoice),
+    do:
+      invoice.customer_name || invoice.customer_email || invoice.customer_id || "Unknown customer"
+
+  defp global_invoice_row_due(%{due_date: %DateTime{} = due_date}),
+    do: "Due #{format_datetime(due_date)}"
+
+  defp global_invoice_row_due(_invoice), do: "Due date not shown"
+
   defp detail_health_summary(subscription) do
     caveats = projection_caveats(subscription)
 
@@ -1021,9 +1117,10 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
         %{
           tone: "amber",
           label: "Setup incomplete",
-          answer: "Billing is not ready",
+          answer: "Unhealthy - setup incomplete",
           headline: "Billing status: setup incomplete",
-          body: "No - missing setup fields block reliable revenue and recovery reporting.",
+          body:
+            "No - missing setup fields block reliable revenue, renewal, and recovery reporting.",
           caveats: caveats
         }
 
@@ -1080,7 +1177,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
   end
 
   defp detail_health_metric(%{caveats: caveats}) when is_list(caveats) and caveats != [],
-    do: "Setup fields missing"
+    do: "Billing health blocked"
 
   defp detail_health_metric(%{tone: "moss"}), do: "0 blockers"
 
