@@ -99,7 +99,10 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
         <PageHeader.page_header
           class="ax-page-header-compact ax-subscriptions-header"
           breadcrumbs={[
-            %{label: "Dashboard", href: scoped_path(@admin_mount_path, "", @current_owner_scope)},
+            %{
+              label: "Billing health overview",
+              href: scoped_path(@admin_mount_path, "", @current_owner_scope)
+            },
             %{label: "Subscriptions"}
           ]}
           title={subscriptions_health_verdict(@summary)}
@@ -140,6 +143,12 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
             <div class="ax-kpi-row ax-subscriptions-kpi-row">
               <StatStrip.stat_strip label="Dunning funnel and open-invoice queue summary">
                 <:stat
+                  label="MRR signal"
+                  value="Not projected"
+                  tone="slate"
+                  href={scoped_path(@admin_mount_path, "/events", @current_owner_scope, %{"q" => "revenue"})}
+                />
+                <:stat
                   label="Dunning funnel"
                   value={count(@summary.past_due_count, "campaign")}
                   tone="amber"
@@ -156,6 +165,16 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
                   value={count(@summary.open_invoice_count, "invoice")}
                   tone="cobalt"
                   href={invoice_queue_path(@admin_mount_path, @current_owner_scope)}
+                />
+                <:stat
+                  label="Failed payment/webhook count"
+                  value={count(@summary.failed_webhook_count, "failure")}
+                  tone="amber"
+                  href={
+                    @admin_mount_path
+                    |> scoped_path("/webhooks", @current_owner_scope)
+                    |> AccrueAdmin.DataTableNav.merge_query(%{"status" => "failed,dead"})
+                  }
                 />
               </StatStrip.stat_strip>
             </div>
@@ -255,6 +274,9 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
             <div class="ax-inline-worklist-copy">
               <strong>Who did what, when?</strong>
               <span>Open the chronological actor audit log for subscription, invoice, dunning, and webhook changes.</span>
+              <span class="ax-subscriptions-audit-preview">
+                <strong>Actor</strong> Accrue system <strong>Action</strong> subscription.created <strong>Timestamp</strong> latest first
+              </span>
             </div>
             <div class="ax-inline-worklist-actions">
               <a

@@ -80,7 +80,7 @@ if Mix.env() != :prod do
             />
             <div class="ax-component-kitchen-title-row">
               <h1 class="ax-heading ax-component-kitchen-title">Billing health: Unhealthy</h1>
-              <span class="ax-component-kitchen-header-status">Critical: $592.50 overdue now; healthy threshold $0.00</span>
+              <span class="ax-component-kitchen-header-status">Unhealthy: $592.50 overdue; clear to $0.00</span>
             </div>
             <p class="ax-page-description">Primary action: open the invoice queue and collect to $0.00.</p>
             <div class="ax-page-actions">
@@ -118,7 +118,7 @@ if Mix.env() != :prod do
             </div>
             <div class="ax-dev-health-kpis" aria-label="Billing health KPI row">
               <span><strong>Open invoices</strong><em>2 / $592.50</em></span>
-              <span><strong>Failed webhooks</strong><em>3</em></span>
+              <a href={@admin_mount_path <> "/webhooks?status=failed,dead"}><strong>Failed webhooks</strong><em>3 - open debugger</em></a>
               <span><strong>At risk</strong><em>1 account</em></span>
               <span><strong>Audit log</strong><em>Actor-filtered</em></span>
             </div>
