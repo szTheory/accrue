@@ -31,7 +31,7 @@ See: `.planning/PROJECT.md` (updated 2026-07-03 after v1.55 closeout)
 Phase: 208 (prove-convergence-on-the-representative-slice-wire-ci-accept) — EXECUTING
 Plan: 4 of 5
 Status: Ready to execute
-Last activity: 2026-07-18 - Completed quick task 260718-g6b: click-to-copy demo credentials on host login page
+Last activity: 2026-07-18 - Completed quick task 260718-i32: one-click jump-into-account + persistent demo account switcher
 
 Progress: [█████████░] 91%
 
@@ -610,6 +610,7 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 | 260622-i2c | Green the accrue_admin Playwright browser UAT — 8 spec-drift realigns + 1 responsive `.ax-kpi-delta` fix | 2026-06-22 | 90952f5f | [260622-i2c-admin-uat-green-up](./quick/260622-i2c-admin-uat-green-up/) |
 | 260704-i4p | Seed admin-UI blueprint redesign as post-v1.56 program — synthesis doc + SEED-004 + ROADMAP row (docs-only, no milestone opened) | 2026-07-04 | a7ae001c | [260704-i4p-admin-ui-blueprint-redesign-seed](./quick/260704-i4p-admin-ui-blueprint-redesign-seed/) |
 | 260718-g6b | Click-to-copy demo credentials on host login page — email + per-card password chips, daisyUI toast, zero reflow (Playwright 10/10) | 2026-07-18 | b4407552 | [260718-g6b-login-copy-credentials](./quick/260718-g6b-login-copy-credentials/) |
+| 260718-i32 | One-click "Enter workspace" + persistent "Switch account" nav dropdown — real pre-filled Sigra login w/ safe return_to, lands in persona billing view (Playwright 8/8) | 2026-07-18 | 228591f5 | [260718-i32-one-click-jump-into-account-persistent-d](./quick/260718-i32-one-click-jump-into-account-persistent-d/) |
 
 ### Milestone Intake Rules
 
