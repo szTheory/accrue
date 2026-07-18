@@ -142,7 +142,11 @@ defmodule AccruePortal.Live.SubscriptionLive do
       <section class="portal-card">
         <h1>{Copy.subscription_not_found_title()}</h1>
         <p>{Copy.subscription_not_found_body()}</p>
-        <a href={Path.home(@base_path)}>{Copy.subscription_back_home_cta()}</a>
+        <div class="portal-actions">
+          <a href={Path.home(@base_path)} class="portal-button-secondary">
+            {Copy.subscription_back_home_cta()}
+          </a>
+        </div>
       </section>
     </main>
     """
@@ -175,7 +179,9 @@ defmodule AccruePortal.Live.SubscriptionLive do
           </li>
           <li>
             <strong>{Copy.subscription_status_label()}</strong>
-            <span>{Copy.subscription_lifecycle_label(@subscription)}</span>
+            <span class={["portal-status", status_variant(@subscription.status)]}>
+              {Copy.subscription_lifecycle_label(@subscription)}
+            </span>
           </li>
           <li>
             <strong>{Copy.subscription_summary_label()}</strong>
@@ -261,6 +267,15 @@ defmodule AccruePortal.Live.SubscriptionLive do
     </main>
     """
   end
+
+  # Presentation-only: map a subscription lifecycle status to a status-pill
+  # variant class. No copy/behavior change.
+  defp status_variant(status) when status in [:active, :trialing], do: "portal-status-active"
+
+  defp status_variant(status) when status in [:past_due, :unpaid, :incomplete],
+    do: "portal-status-warning"
+
+  defp status_variant(_status), do: "portal-status-info"
 
   defp format_datetime(nil), do: "-"
   defp format_datetime(%DateTime{} = dt), do: Calendar.strftime(dt, "%Y-%m-%d")

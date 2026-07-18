@@ -19,7 +19,7 @@ defmodule AccruePortal.Live.InvoicesLive do
     <main class="portal-shell">
       <section class="portal-card">
         <h1>{Copy.invoices_heading()}</h1>
-        <div :if={@invoices == []} class="portal-stack">
+        <div :if={@invoices == []} class="portal-empty">
           <strong>{Copy.invoices_empty_title()}</strong>
           <p>{Copy.invoices_empty_body()}</p>
         </div>
@@ -27,7 +27,12 @@ defmodule AccruePortal.Live.InvoicesLive do
           <li :for={invoice <- @invoices}>
             <div>
               <strong>{invoice.number || invoice.processor_id || invoice.id}</strong>
-              <p>{Copy.invoices_status_label()}: {invoice.status}</p>
+              <p>
+                {Copy.invoices_status_label()}:
+                <span class={["portal-status", status_variant(invoice.status)]}>
+                  {invoice.status}
+                </span>
+              </p>
             </div>
             <a :if={invoice.hosted_url} href={invoice.hosted_url} class="portal-button-secondary">
               {Copy.invoices_open_cta()}
@@ -38,4 +43,11 @@ defmodule AccruePortal.Live.InvoicesLive do
     </main>
     """
   end
+
+  # Presentation-only: map an invoice status to a status-pill variant class.
+  # No copy/behavior change.
+  defp status_variant(:paid), do: "portal-status-active"
+  defp status_variant(:uncollectible), do: "portal-status-warning"
+  defp status_variant(status) when status in [:open, :draft], do: "portal-status-info"
+  defp status_variant(_status), do: nil
 end

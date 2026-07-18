@@ -242,7 +242,7 @@ body {
 
 /* --- Metrics ------------------------------------------------------------ */
 
-.portal-metric-label {
+.portal-shell .portal-metric-label {
   font-size: 0.8125rem;
   font-weight: 600;
   text-transform: uppercase;

@@ -32,7 +32,7 @@ defmodule AccruePortal.Live.PaymentMethodsLive do
           </a>
         </div>
 
-        <div :if={@payment_methods == []} class="portal-stack">
+        <div :if={@payment_methods == []} class="portal-empty">
           <strong>{Copy.payment_methods_empty_title()}</strong>
           <p>{Copy.payment_methods_empty_body()}</p>
         </div>
@@ -45,7 +45,9 @@ defmodule AccruePortal.Live.PaymentMethodsLive do
                 ending in {payment_method.card_last4}
               </strong>
               <p :if={payment_method.id == @current_customer.default_payment_method_id}>
-                {Copy.payment_methods_default_badge()}
+                <span class="portal-status portal-status-active">
+                  {Copy.payment_methods_default_badge()}
+                </span>
               </p>
             </div>
             <div class="portal-actions">

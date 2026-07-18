@@ -47,7 +47,7 @@ defmodule AccruePortal.Live.SubscriptionsLive do
     <main class="portal-shell">
       <section class="portal-card">
         <h1>{Copy.subscriptions_heading()}</h1>
-        <div :if={@subscriptions == []}>
+        <div :if={@subscriptions == []} class="portal-empty">
           <strong>{Copy.subscriptions_empty_title()}</strong>
           <p>{Copy.subscriptions_empty_body()}</p>
         </div>
@@ -55,15 +55,23 @@ defmodule AccruePortal.Live.SubscriptionsLive do
           <li :for={subscription <- @subscriptions}>
             <div>
               <strong>{subscription.processor_id || subscription.id}</strong>
-              <p>{Copy.subscriptions_status_label()}: {Copy.subscription_lifecycle_label(subscription)}</p>
+              <p>
+                {Copy.subscriptions_status_label()}:
+                <span class={["portal-status", status_variant(subscription.status)]}>
+                  {Copy.subscription_lifecycle_label(subscription)}
+                </span>
+              </p>
               <p>{Copy.subscriptions_summary_label()}: {Copy.subscription_lifecycle_summary(subscription)}</p>
               <p>{Copy.subscription_access_timing(subscription)}</p>
               <p>
                 {plan_change_summary(subscription)}
               </p>
             </div>
-            <div>
-              <a href={Path.subscriptions(@base_path) <> "/" <> subscription.id}>
+            <div class="portal-actions">
+              <a
+                href={Path.subscriptions(@base_path) <> "/" <> subscription.id}
+                class="portal-button-secondary"
+              >
                 {Copy.subscriptions_view_cta()}
               </a>
               <button
@@ -90,4 +98,13 @@ defmodule AccruePortal.Live.SubscriptionsLive do
 
   defp plan_change_summary(%Subscription{}),
     do: Copy.subscriptions_plan_change_ready()
+
+  # Presentation-only: map a subscription lifecycle status to a status-pill
+  # variant class. No copy/behavior change.
+  defp status_variant(status) when status in [:active, :trialing], do: "portal-status-active"
+
+  defp status_variant(status) when status in [:past_due, :unpaid, :incomplete],
+    do: "portal-status-warning"
+
+  defp status_variant(_status), do: "portal-status-info"
 end
