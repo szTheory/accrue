@@ -104,13 +104,11 @@ defmodule AccrueHostWeb.UserLive.Login do
               <p class="text-sm font-semibold uppercase text-secondary">Demo accounts</p>
               <h2 class="mt-2 text-2xl font-semibold">Choose a role</h2>
             </div>
-            <span class="rounded-md bg-base-200 px-2 py-1 text-xs font-semibold text-base-content/60">
-              {demo_password}
-            </span>
+            <span class="mt-1 text-xs font-medium text-base-content/45">Tap any field to copy</span>
           </div>
 
           <div class="mt-5 grid gap-3">
-            <div :for={persona <- personas} class="rounded-md border border-base-300 p-3">
+            <div :for={{persona, idx} <- Enum.with_index(personas)} class="rounded-md border border-base-300 p-3">
               <div class="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between">
                 <div>
                   <p class="font-semibold">{persona.label}</p>
@@ -120,13 +118,52 @@ defmodule AccrueHostWeb.UserLive.Login do
                   {persona.state}
                 </span>
               </div>
-              <p class="mt-3 break-all rounded-md bg-base-200 px-3 py-2 text-sm font-semibold">
-                {persona.email}
-              </p>
+              <div class="mt-3 grid gap-2">
+                <div>
+                  <p class="mb-1 text-xs font-semibold uppercase text-base-content/45">Email</p>
+                  <button
+                    type="button"
+                    id={"copy-email-#{idx}"}
+                    phx-hook="Clipboard"
+                    data-clipboard-text={persona.email}
+                    data-copy-label="email address"
+                    aria-label={"Copy email address #{persona.email}"}
+                    class="copy-chip flex w-full items-center justify-between gap-2 break-all rounded-md bg-base-200 px-3 py-2 text-left text-sm font-semibold transition-colors hover:bg-base-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-base-100"
+                  >
+                    <span>{persona.email}</span>
+                    <.icon name="hero-clipboard-document" class="copy-chip-idle size-4 shrink-0 text-base-content/40" />
+                    <.icon name="hero-check" class="copy-chip-done size-4 shrink-0 text-success" />
+                  </button>
+                </div>
+                <div>
+                  <p class="mb-1 text-xs font-semibold uppercase text-base-content/45">Password</p>
+                  <button
+                    type="button"
+                    id={"copy-pass-#{idx}"}
+                    phx-hook="Clipboard"
+                    data-clipboard-text={demo_password}
+                    data-copy-label="password"
+                    aria-label="Copy password"
+                    class="copy-chip flex w-full items-center justify-between gap-2 break-all rounded-md bg-base-200 px-3 py-2 text-left text-sm font-semibold transition-colors hover:bg-base-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-base-100"
+                  >
+                    <span>{demo_password}</span>
+                    <.icon name="hero-clipboard-document" class="copy-chip-idle size-4 shrink-0 text-base-content/40" />
+                    <.icon name="hero-check" class="copy-chip-done size-4 shrink-0 text-success" />
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         </aside>
       </div>
+
+      <div id="copy-toast-root" class="toast toast-top toast-end z-[60]" aria-live="polite" aria-atomic="true"></div>
+      <template id="copy-toast-template">
+        <div class="copy-toast alert alert-success w-72 shadow-lg">
+          <.icon name="hero-check-circle" class="size-5 shrink-0" />
+          <span data-copy-toast-label>Copied</span>
+        </div>
+      </template>
     </Layouts.app>
     """
   end

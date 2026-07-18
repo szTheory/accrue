@@ -103,3 +103,29 @@
 [data-phx-session], [data-phx-teleported-src] { display: contents }
 
 /* This file is for your main application CSS */
+
+/* Click-to-copy credential chips (demo login page).
+   Icon swaps copy -> check on the transient data-copied state; both icons are
+   size-4 so the swap causes no reflow. The copied outline uses an inset
+   box-shadow (not a border) so it also adds zero layout shift. */
+.copy-chip-done {
+  display: none;
+}
+.copy-chip[data-copied="true"] .copy-chip-idle {
+  display: none;
+}
+.copy-chip[data-copied="true"] .copy-chip-done {
+  display: inline-block;
+}
+.copy-chip[data-copied="true"] {
+  box-shadow: inset 0 0 0 1.5px var(--color-success);
+}
+
+/* Ephemeral copy toast: enter is immediate, leave fades/slides out. */
+.copy-toast {
+  transition: opacity 0.18s ease, transform 0.18s ease;
+}
+.copy-toast[data-leaving="true"] {
+  opacity: 0;
+  transform: translateY(-4px);
+}
