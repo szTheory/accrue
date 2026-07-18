@@ -30,7 +30,7 @@ defmodule AccrueHostWeb.PageHTML do
   def plan_interval(_plan), do: "per month"
 
   def plan_blurb(%{summary: summary}) when is_binary(summary), do: summary
-  def plan_blurb(_plan), do: "A CohortFlow plan for paid cohort programs."
+  def plan_blurb(_plan), do: "A Cadence plan for teams that track work and bill for it."
 
   def plan_features(%{features: features}) when is_list(features), do: features
   def plan_features(_plan), do: []

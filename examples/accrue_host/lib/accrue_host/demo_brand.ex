@@ -2,27 +2,27 @@ defmodule AccrueHost.DemoBrand do
   @moduledoc """
   Host-owned visible identity for the checked-in example SaaS.
 
-  Accrue remains the billing library and operator/admin product. CohortFlow is
+  Accrue remains the billing library and operator/admin product. Cadence is
   the fictional customer-facing SaaS that demonstrates how a real Phoenix app
   would use Accrue.
   """
 
-  @product_name "CohortFlow"
+  @product_name "Cadence"
   @demo_password "accrue-demo-password"
 
   @personas [
     %{
       email: "healthy@example.com",
-      label: "Program Owner",
-      workspace: "Northstar Academy",
+      label: "Team Lead",
+      workspace: "Northwind Labs",
       state: "Active workspace",
       route: "/app/billing",
-      description: "A paid cohort program with a healthy subscription and no recovery notices."
+      description: "A paid team workspace with a healthy subscription and no recovery notices."
     },
     %{
       email: "past-due@example.com",
-      label: "Finance Lead",
-      workspace: "Summit Workshop",
+      label: "Ops Manager",
+      workspace: "Tidewater Systems",
       state: "Payment recovery",
       route: "/billing",
       description:
@@ -30,11 +30,11 @@ defmodule AccrueHost.DemoBrand do
     },
     %{
       email: "enterprise@example.com",
-      label: "Scale Customer",
-      workspace: "Atlas Learning Group",
+      label: "Head of Engineering",
+      workspace: "Meridian Group",
       state: "Scale plan",
       route: "/app/billing",
-      description: "A larger program account with richer billing history and invoice examples."
+      description: "A larger team account with richer billing history and invoice examples."
     },
     %{
       email: "admin@example.com",
@@ -54,12 +54,12 @@ defmodule AccrueHost.DemoBrand do
   @doc "Short customer-facing positioning line."
   @spec tagline() :: String.t()
   def tagline do
-    "Run live cohorts, paid memberships, and alumni communities from one workspace."
+    "Plan work, track issues, and ship on time — all from one workspace."
   end
 
   @doc "Compact product promise used in headings and nav."
   @spec short_tagline() :: String.t()
-  def short_tagline, do: "Cohort operations and subscriptions in one place."
+  def short_tagline, do: "Project tracking and subscriptions in one place."
 
   @doc "Seeded password shared by local demo personas."
   @spec demo_password() :: String.t()
@@ -67,11 +67,11 @@ defmodule AccrueHost.DemoBrand do
 
   @doc "Customer-facing support email for the example SaaS."
   @spec support_email() :: String.t()
-  def support_email, do: "support@cohortflow.test"
+  def support_email, do: "support@cadence.test"
 
   @doc "Customer-facing billing sender email for the example SaaS."
   @spec billing_email() :: String.t()
-  def billing_email, do: "billing@cohortflow.test"
+  def billing_email, do: "billing@cadence.test"
 
   @doc "Seeded evaluator personas shown in the local demo UI."
   @spec personas() :: [map()]

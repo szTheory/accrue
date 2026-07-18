@@ -13,7 +13,7 @@ defmodule AccrueHostWeb.SubscriptionLive do
   @active_organization_label "Active workspace"
   @active_organization_helper "Plan changes and payment actions apply to this workspace only."
   @empty_state_heading "No workspace subscription yet"
-  @empty_state_body "Choose a plan to start billing for this cohort workspace. Subscription and invoice records will appear here after checkout or webhook updates."
+  @empty_state_body "Choose a plan to start billing for this team workspace. Subscription and invoice records will appear here after checkout or webhook updates."
   @error_copy "We couldn't complete that billing action for the active workspace. Check access, billing setup, or payment state, then try again."
   @cancel_copy "Cancel now for this workspace only. Access can end immediately."
   @cancel_heading "Need to stop access?"
@@ -179,7 +179,7 @@ defmodule AccrueHostWeb.SubscriptionLive do
             </p>
             <h1 class="mt-2 text-3xl font-semibold">Workspace billing</h1>
             <p class="mt-2 max-w-3xl text-base leading-7 text-base-content/70">
-              Review the active cohort workspace, subscription status, usage, and payment recovery path.
+              Review the active team workspace, subscription status, usage, and payment recovery path.
             </p>
           </div>
           <.link navigate={~p"/"} class="btn btn-ghost btn-sm self-start rounded-lg sm:self-auto">
@@ -230,7 +230,7 @@ defmodule AccrueHostWeb.SubscriptionLive do
             <div>
               <h2 class="text-2xl font-semibold">Current subscription</h2>
               <p class="mt-1 text-base leading-7 text-base-content/65">
-                This workspace is subscribed and can keep cohort access active.
+                This workspace is subscribed and can keep the team's access active.
               </p>
             </div>
 
@@ -333,7 +333,7 @@ defmodule AccrueHostWeb.SubscriptionLive do
           <h2 class="text-2xl font-semibold">Payment recovery</h2>
           <div class="mt-1 space-y-1 text-base leading-7 text-base-content/65">
             <p>
-              CohortFlow keeps recovery checks active for expiring cards, missed usage events, and payment states that need follow-up.
+              Cadence keeps recovery checks active for expiring cards, missed usage events, and payment states that need follow-up.
             </p>
             <p>
               Operators can review the underlying billing events and recovery analytics in Accrue Admin.

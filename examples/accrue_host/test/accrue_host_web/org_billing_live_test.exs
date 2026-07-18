@@ -40,7 +40,7 @@ defmodule AccrueHostWeb.OrgBillingLiveTest do
     assert html =~ "No workspace subscription yet"
 
     assert html =~
-             "Choose a plan to start billing for this cohort workspace."
+             "Choose a plan to start billing for this team workspace."
 
     html =
       render_click(view, "start_subscription", %{
@@ -158,15 +158,10 @@ defmodule AccrueHostWeb.OrgBillingLiveTest do
       })
 
     html =
-      render_submit(view, "update_tax_location", %{
-        "tax_location" => %{
-          "line1" => "27 Fredrick Ave",
-          "city" => "Albany",
-          "state" => "NY",
-          "postal_code" => "12207",
-          "country" => "US"
-        },
-        "organization_id" => outsider_org.id
+      render_click(view, "start_subscription", %{
+        "plan" => "price_pro",
+        "organization_id" => outsider_org.id,
+        "operation_id" => "forged-second"
       })
 
     refute html =~

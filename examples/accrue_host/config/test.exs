@@ -29,10 +29,10 @@ config :accrue,
   #   webhook_signing_secrets: %{stripe: System.fetch_env!("STRIPE_WEBHOOK_SECRET")}
   webhook_signing_secrets: %{stripe: "whsec_test_host"},
   branding: [
-    business_name: "CohortFlow",
-    from_name: "CohortFlow Billing",
-    from_email: "billing@cohortflow.test",
-    support_email: "support@cohortflow.test",
+    business_name: "Cadence",
+    from_name: "Cadence Billing",
+    from_email: "billing@cadence.test",
+    support_email: "support@cadence.test",
     accent_color: "#26785F",
     secondary_color: "#3E6E91"
   ],

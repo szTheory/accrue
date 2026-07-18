@@ -25,7 +25,7 @@ ensure_demo_admin("admin@example.com")
 
 # 1. HEALTHY demo account (banner-OFF) — subscribed, no dunning anchor.
 healthy_user = ensure_demo_user("healthy@example.com")
-healthy_org = ensure_demo_org(healthy_user, "Northstar Academy", "healthy-co")
+healthy_org = ensure_demo_org(healthy_user, "Northwind Labs", "healthy-co")
 ensure_owner_membership(healthy_org, healthy_user)
 
 unless match?(
@@ -151,7 +151,7 @@ _healthy_portal_invoice =
 
 # 2. PAST-DUE demo account (banner-ON) — subscribed, then flipped into a dunning campaign
 past_due_user = ensure_demo_user("past-due@example.com")
-past_due_org = ensure_demo_org(past_due_user, "Summit Workshop", "past-due-co")
+past_due_org = ensure_demo_org(past_due_user, "Tidewater Systems", "past-due-co")
 ensure_owner_membership(past_due_org, past_due_user)
 
 unless match?(
@@ -175,7 +175,7 @@ end
 
 # 3. CANCELED demo account
 canceled_user = ensure_demo_user("canceled@example.com")
-canceled_org = ensure_demo_org(canceled_user, "Archive Fellows", "canceled-co")
+canceled_org = ensure_demo_org(canceled_user, "Redwood Studio", "canceled-co")
 ensure_owner_membership(canceled_org, canceled_user)
 
 unless match?(
@@ -198,20 +198,20 @@ end
 
 # 4. ENTERPRISE demo account
 enterprise_user = ensure_demo_user("enterprise@example.com")
-enterprise_org = ensure_demo_org(enterprise_user, "Atlas Learning Group", "enterprise-co")
+enterprise_org = ensure_demo_org(enterprise_user, "Meridian Group", "enterprise-co")
 ensure_owner_membership(enterprise_org, enterprise_user)
 
 unless match?(
          {:ok, %{subscription: %Accrue.Billing.Subscription{}}},
          AccrueHost.Billing.billing_state_for(enterprise_org)
        ) do
-  # The enterprise persona is the "Scale Customer" — put it on the catalog Scale plan.
+  # The enterprise persona is the "Head of Engineering" — put it on the catalog Scale plan.
   {:ok, _enterprise_sub} = AccrueHost.Billing.subscribe(enterprise_org, "price_metered")
 end
 
 # 5. TRIALING demo account
 trialing_user = ensure_demo_user("trialing@example.com")
-trialing_org = ensure_demo_org(trialing_user, "Pilot Cohort Studio", "trialing-co")
+trialing_org = ensure_demo_org(trialing_user, "Pilot Works", "trialing-co")
 ensure_owner_membership(trialing_org, trialing_user)
 
 unless match?(

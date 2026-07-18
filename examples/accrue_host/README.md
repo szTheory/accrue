@@ -1,7 +1,7 @@
-# CohortFlow Example Host
+# Cadence Example Host
 
 This checked-in Phoenix app is the canonical local evaluation path for `accrue`
-and `accrue_admin`. It presents a fictional cohort SaaS called **CohortFlow** so
+and `accrue_admin`. It presents a fictional team project-tracking SaaS called **Cadence** so
 the customer-facing app feels like a real Phoenix product using Accrue, while the
 operator surface remains **Accrue Admin**.
 
@@ -16,7 +16,7 @@ make up         # every time after that — builds on first run, then read the b
 ```
 
 Then open **http://accrue.localhost/**. That URL is stable — bookmark it. Start
-from the CohortFlow home page to choose pricing, customer billing, or the Accrue
+from the Cadence home page to choose pricing, customer billing, or the Accrue
 Admin operator path. You must be logged in as `admin@example.com` (password
 `accrue-demo-password`) to access `/admin`; customer logins are for
 tenant-facing billing flows only.
@@ -46,8 +46,8 @@ prints a copy-pasteable block with:
 
 - the stable URL (`http://accrue.localhost/`) — plus an ephemeral
   `http://127.0.0.1:<port>` **fallback** for when the proxy isn't running,
-- the key routes — `/` (CohortFlow app home), `/pricing` (CohortFlow plans),
-  `/billing` (CohortFlow customer portal), `/app/billing` (workspace billing),
+- the key routes — `/` (Cadence app home), `/pricing` (Cadence plans),
+  `/billing` (Cadence customer portal), `/app/billing` (workspace billing),
   `/admin` (mounted Accrue Admin UI), `/app/reports/advanced`
   (entitlement-gated reports), `/users/log-in` (sign in), `/dev/mailbox`
   (sent-email preview), and
@@ -206,7 +206,7 @@ mix setup
 mix phx.server
 ```
 
-Then walk the public CohortFlow story in this order:
+Then walk the public Cadence story in this order:
 
 1. Sign in, open workspace billing, and choose the Launch plan
    on `/app/billing` to create one Fake-backed subscription through
@@ -214,7 +214,7 @@ Then walk the public CohortFlow story in this order:
 2. Post one signed webhook through the real `/webhooks/stripe` endpoint. The
    focused proof suite uses `customer.subscription.created` for this step.
    If ingest fails, see [`../../accrue/guides/troubleshooting.md`](../../accrue/guides/troubleshooting.md#accrue-dx-webhook-raw-body) (**`ACCRUE-DX-WEBHOOK-RAW-BODY`**) and [`../../accrue/guides/troubleshooting.md#accrue-dx-webhook-secret-missing`](../../accrue/guides/troubleshooting.md#accrue-dx-webhook-secret-missing) (**`ACCRUE-DX-WEBHOOK-SECRET-MISSING`**) for stable fix paths — VERIFY-01 authority stays under [**#proof-and-verification**](#proof-and-verification).
-3. Visit `/billing` as `healthy@example.com` to confirm the CohortFlow-branded
+3. Visit `/billing` as `healthy@example.com` to confirm the Cadence-branded
    customer portal shows subscription, invoice, and payment method state.
    `/app/billing` is workspace/org billing; `/billing` is the signed-in user's
    customer portal. Visit `/admin` as the operator to inspect billing state,
@@ -414,12 +414,12 @@ For a **human screen-recording checklist** (evaluators / stakeholders), see
 
 ## Visual walkthrough (Fake-backed)
 
-To **see** the CohortFlow + Accrue Admin story (no live Stripe), use the
+To **see** the Cadence + Accrue Admin story (no live Stripe), use the
 **`@phase15-trust`** Playwright spec. This lane is **trust/demo visuals only**; it
 does not substitute for the VERIFY-01 merge-blocking checklist under
 [Proof and verification](#proof-and-verification) above. It uses the same Fake-backed
 fixture as the rest of the browser suite (scrubs prior `sub_fake_%` host rows so
-Fake ids cannot collide): CohortFlow workspace billing and customer portal first,
+Fake ids cannot collide): Cadence workspace billing and customer portal first,
 then mounted **Accrue Admin** for webhook detail, replay, and audit.
 
 **Artifacts (local, gitignored under `test-results/`):**

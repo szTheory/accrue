@@ -5,7 +5,7 @@ defmodule AccrueHostWeb.PageControllerTest do
     conn = get(conn, ~p"/")
     html = html_response(conn, 200)
 
-    assert html =~ "CohortFlow"
+    assert html =~ "Cadence"
     assert html =~ "Three realistic billing roles"
     assert html =~ ~p"/pricing"
     assert html =~ ~p"/billing"
@@ -13,7 +13,7 @@ defmodule AccrueHostWeb.PageControllerTest do
     assert html =~ ~p"/admin"
     assert html =~ "accrue-demo-password"
     assert html =~ "healthy@example.com"
-    assert html =~ "Northstar Academy"
+    assert html =~ "Northwind Labs"
     assert html =~ "Developer routes"
     refute html =~ "Accrue demo"
     refute html =~ "Example host"
@@ -24,8 +24,8 @@ defmodule AccrueHostWeb.PageControllerTest do
     conn = get(conn, ~p"/pricing")
     html = html_response(conn, 200)
 
-    assert html =~ "CohortFlow pricing"
-    assert html =~ "Plans for cohort programs"
+    assert html =~ "Cadence pricing"
+    assert html =~ "Plans for product teams"
     assert html =~ "Launch"
     assert html =~ "Studio"
     assert html =~ "Scale"

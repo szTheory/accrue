@@ -52,7 +52,7 @@ defmodule AccrueHostWeb.PortalColdStartTest do
       body = html_response(conn, 200)
       assert body =~ AccruePortal.Copy.home_heading()
       assert body =~ AccruePortal.Copy.home_body()
-      assert body =~ "CohortFlow billing"
+      assert body =~ "Cadence billing"
     end
 
     test "anonymous GET /billing redirects to host login and stores the return path", %{
@@ -65,7 +65,7 @@ defmodule AccrueHostWeb.PortalColdStartTest do
     end
   end
 
-  describe "seeded CohortFlow portal walkthrough" do
+  describe "seeded Cadence portal walkthrough" do
     setup :seed_hero_accounts
 
     test "healthy customer sees subscriptions, payment methods, and invoices in /billing", %{

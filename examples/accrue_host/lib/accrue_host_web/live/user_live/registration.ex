@@ -47,7 +47,7 @@ defmodule AccrueHostWeb.UserLive.Registration do
         <aside class="rounded-lg border border-base-300 bg-base-100 p-6 shadow-sm">
           <p class="text-sm font-semibold uppercase text-secondary">Workspace model</p>
           <h2 class="mt-2 text-2xl font-semibold">
-            Cohorts, seats, and billing state stay together.
+            Projects, seats, and billing state stay together.
           </h2>
           <dl class="mt-6 grid gap-4">
             <div class="border-b border-base-300 pb-4">
@@ -59,7 +59,7 @@ defmodule AccrueHostWeb.UserLive.Registration do
             <div class="border-b border-base-300 pb-4">
               <dt class="text-sm font-semibold text-base-content/60">Customer portal</dt>
               <dd class="mt-1 text-sm leading-6">
-                Members review payment methods, invoices, and subscription details under the CohortFlow brand.
+                Members review payment methods, invoices, and subscription details under the Cadence brand.
               </dd>
             </div>
             <div>

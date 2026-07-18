@@ -1,6 +1,6 @@
 # Evaluator walkthrough script (screen recording)
 
-Use this as a **checklist** when recording a short demo for stakeholders. It mirrors the same Fake-backed paths CI exercises; no Stripe keys required. The customer-facing app is **CohortFlow**; the operator surface is **Accrue Admin**.
+Use this as a **checklist** when recording a short demo for stakeholders. It mirrors the same Fake-backed paths CI exercises; no Stripe keys required. The customer-facing app is **Cadence**; the operator surface is **Accrue Admin**.
 
 **Prep (once per machine):** Follow `examples/accrue_host/README.md` setup through `mix setup` / DB migrate as documented.
 
@@ -16,11 +16,11 @@ Use this as a **checklist** when recording a short demo for stakeholders. It mir
 2. Run `mix verify` (bounded slice) — mention it includes **user-billable** facade tests and **org** billing tests.
 3. Optionally run full `mix verify.full` if you want the complete maintainer story (longer).
 
-## C. Browser story — CohortFlow + Accrue Admin (~5–8 min)
+## C. Browser story — Cadence + Accrue Admin (~5–8 min)
 
 1. `npm ci` then `npm run e2e:install` (if not already done).
 2. Run the VERIFY-01 Playwright entrypoint from the README (or `npm run e2e:visuals` for screenshots only).
-3. Show: CohortFlow home → pricing → sign in → workspace billing → tax location → choose/cancel a workspace plan.
+3. Show: Cadence home → pricing → sign in → workspace billing → tax location → choose/cancel a workspace plan.
 4. Open the mounted **Accrue Admin** path used in specs (see `verify01-admin-mounted.spec.js` / README) and show subscription + webhook inspection briefly.
 
 ## D. Artifacts

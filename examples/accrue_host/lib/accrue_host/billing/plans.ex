@@ -15,11 +15,11 @@ defmodule AccrueHost.Billing.Plans do
         key: :basic,
         id: @ids.basic,
         label: @labels.basic,
-        eyebrow: "First paid cohort",
-        summary: "Launch a paid cohort with subscriptions, invoices, and member access.",
+        eyebrow: "For a small team",
+        summary: "Track issues and plan work for one team, with billing and receipts.",
         features: [
-          "One active cohort workspace",
-          "Subscription billing and receipts",
+          "One active team workspace",
+          "Issue tracking and project boards",
           "Self-serve invoice and payment history"
         ],
         unit_amount_minor: @amounts.basic,
@@ -30,12 +30,12 @@ defmodule AccrueHost.Billing.Plans do
         key: :pro,
         id: @ids.pro,
         label: @labels.pro,
-        eyebrow: "Growing program team",
-        summary: "Run multiple cohorts with team seats, alumni spaces, and plan changes.",
+        eyebrow: "For a growing team",
+        summary: "Multiple projects with team seats, automations, and plan changes.",
         featured: true,
         features: [
-          "Multiple active cohorts",
-          "Team seats for facilitators",
+          "Multiple active projects",
+          "Team seats and roles",
           "Plan changes and checkout recovery"
         ],
         unit_amount_minor: @amounts.pro,
@@ -46,11 +46,11 @@ defmodule AccrueHost.Billing.Plans do
         key: :metered,
         id: @ids.metered,
         label: @labels.metered,
-        eyebrow: "Larger cohort operations",
-        summary: "Add usage-based capacity for high-volume programs and enterprise workflows.",
+        eyebrow: "For larger orgs",
+        summary: "Usage-based capacity for automations and API, plus advanced controls.",
         features: [
-          "Usage-based learner activity",
-          "Advanced recovery workflows",
+          "Usage-based automation runs",
+          "Advanced permissions and audit",
           "Billing data ready for operators"
         ],
         unit_amount_minor: @amounts.metered,

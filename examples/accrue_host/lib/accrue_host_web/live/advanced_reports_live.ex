@@ -12,9 +12,9 @@ defmodule AccrueHostWeb.AdvancedReportsLive do
         <p class="text-sm font-semibold uppercase text-primary">
           {AccrueHost.DemoBrand.product_name()} reports
         </p>
-        <h1 class="mt-2 text-3xl font-semibold">Cohort performance</h1>
+        <h1 class="mt-2 text-3xl font-semibold">Team performance</h1>
         <p class="mt-3 max-w-2xl text-sm leading-6 text-base-content/65">
-          This workspace has access to advanced cohort reporting through its active plan.
+          This workspace has access to advanced project reporting through its active plan.
         </p>
       </section>
     </Layouts.app>
