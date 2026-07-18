@@ -35,9 +35,24 @@ defmodule AccrueHostWeb.SubscriptionLive do
 
   @impl true
   def handle_event("start_subscription", %{"plan" => plan_id} = params, socket) do
-    case Billing.subscribe_active_organization(socket.assigns.current_scope, plan_id,
-           operation_id: operation_id(params, "subscribe")
-         ) do
+    # An org already on a different, non-canceled plan should CHANGE plans
+    # (swap the existing subscription) rather than create a second one; a
+    # first-time or canceled workspace subscribes. Both report the same copy.
+    result =
+      case socket.assigns.subscription do
+        %Subscription{} = subscription ->
+          if not Subscription.canceled?(subscription) and
+               active_plan_id(subscription) != plan_id do
+            change_active_plan(socket, subscription, plan_id)
+          else
+            subscribe_active_org(socket, plan_id, params)
+          end
+
+        _ ->
+          subscribe_active_org(socket, plan_id, params)
+      end
+
+    case result do
       {:ok, _subscription} ->
         {:noreply,
          socket
@@ -407,6 +422,20 @@ defmodule AccrueHostWeb.SubscriptionLive do
       </section>
     </Layouts.app>
     """
+  end
+
+  defp subscribe_active_org(socket, plan_id, params) do
+    Billing.subscribe_active_organization(socket.assigns.current_scope, plan_id,
+      operation_id: operation_id(params, "subscribe")
+    )
+  end
+
+  defp change_active_plan(socket, subscription, plan_id) do
+    if billing_locked?(socket.assigns.access_state) do
+      {:error, :forbidden}
+    else
+      Billing.change_plan(subscription, plan_id, proration: :create_prorations)
+    end
   end
 
   defp list_switchable_organizations(nil), do: []

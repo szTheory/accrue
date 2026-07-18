@@ -26,6 +26,11 @@ defmodule AccrueHost.Application do
 
     case Supervisor.start_link(children, opts) do
       {:ok, _pid} = ok ->
+        # Rehydrate the in-memory Fake processor from seeded DB rows so billing
+        # actions (subscribe/change/cancel) work on the seeded personas. Runs
+        # after the Repo is up; no-ops unless the Fake is the configured
+        # processor; never blocks boot on failure.
+        AccrueHost.FakeHydration.run()
         # Dev-only native launch banner; suppressed under Docker. Best-effort.
         AccrueHostWeb.DevBanner.maybe_print()
         ok

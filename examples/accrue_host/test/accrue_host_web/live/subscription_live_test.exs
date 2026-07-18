@@ -48,6 +48,44 @@ defmodule AccrueHostWeb.SubscriptionLiveTest do
     assert html =~ "https://checkout.stripe.test/c/pay/cs_fake_"
   end
 
+  test "choosing a different plan while subscribed swaps instead of creating a second subscription",
+       %{conn: conn, organization: organization, user: user} do
+    assert {:ok, _} = Billing.subscribe(organization, "price_basic")
+
+    {:ok, view, _html} =
+      conn
+      |> log_in_user(user, active_organization_id: organization.id)
+      |> live(~p"/app/billing")
+
+    html =
+      view
+      |> element("[data-plan-id='price_pro'] button")
+      |> render_click()
+
+    assert html =~ "Subscription started."
+    refute html =~ "We couldn't complete that billing action."
+
+    customer =
+      Repo.one!(
+        from(customer in Customer,
+          where: customer.owner_type == "Organization" and customer.owner_id == ^organization.id,
+          limit: 1
+        )
+      )
+
+    subscriptions =
+      Repo.all(
+        from(subscription in Accrue.Billing.Subscription,
+          where: subscription.customer_id == ^customer.id,
+          preload: [:subscription_items]
+        )
+      )
+
+    # Swap, not a second subscription: still exactly one row, now on price_pro.
+    assert length(subscriptions) == 1
+    assert Enum.any?(hd(subscriptions).subscription_items, &(&1.price_id == "price_pro"))
+  end
+
   test "workspace billing copy stays customer-facing", %{
     conn: conn,
     organization: organization,
