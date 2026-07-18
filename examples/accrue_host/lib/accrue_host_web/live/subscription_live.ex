@@ -4,7 +4,6 @@ defmodule AccrueHostWeb.SubscriptionLive do
   import Ecto.Query
   import Phoenix.Controller, only: [get_csrf_token: 0]
 
-  alias Accrue.APIError
   alias Accrue.Billing.Subscription
   alias AccrueHost.Accounts.{Organization, OrganizationMembership}
   alias AccrueHost.Billing
@@ -21,8 +20,6 @@ defmodule AccrueHostWeb.SubscriptionLive do
   @cancel_body "Use immediate cancellation when the workspace should stop billing and access right away."
   @cancel_cta "Cancel workspace subscription"
   @cancel_keep_cta "Keep subscription"
-  @tax_location_repair_copy "Please update customer address or shipping before enabling automatic tax."
-  @tax_location_success_copy "Tax location saved. Choose a plan again when you're ready."
   @member_denial_copy "Billing is managed by workspace admins. You can review the current billing state, but you can't change it."
   @no_active_organization_copy "Select an active workspace before managing billing."
   @start_subscription_copy "Choose plan"
@@ -39,7 +36,6 @@ defmodule AccrueHostWeb.SubscriptionLive do
   @impl true
   def handle_event("start_subscription", %{"plan" => plan_id} = params, socket) do
     case Billing.subscribe_active_organization(socket.assigns.current_scope, plan_id,
-           automatic_tax: true,
            operation_id: operation_id(params, "subscribe")
          ) do
       {:ok, _subscription} ->
@@ -47,14 +43,7 @@ defmodule AccrueHostWeb.SubscriptionLive do
          socket
          |> put_flash(:info, "Subscription started.")
          |> assign(:confirm_cancel, false)
-         |> assign(:tax_location_error, nil)
          |> load_state()}
-
-      {:error, %APIError{code: "customer_tax_location_invalid"}} ->
-        {:noreply,
-         socket
-         |> assign(:tax_location_error, @tax_location_repair_copy)
-         |> put_flash(:error, @tax_location_repair_copy)}
 
       {:error, :no_active_organization} ->
         {:noreply, put_flash(socket, :error, @no_active_organization_copy)}
@@ -76,7 +65,6 @@ defmodule AccrueHostWeb.SubscriptionLive do
            socket.assigns.current_scope,
            plan_id,
            vault_reference,
-           automatic_tax: true,
            operation_id: operation_id(params, "subscribe")
          ) do
       {:ok, _subscription} ->
@@ -84,14 +72,7 @@ defmodule AccrueHostWeb.SubscriptionLive do
          socket
          |> put_flash(:info, "Subscription started.")
          |> assign(:confirm_cancel, false)
-         |> assign(:tax_location_error, nil)
          |> load_state()}
-
-      {:error, %APIError{code: "customer_tax_location_invalid"}} ->
-        {:noreply,
-         socket
-         |> assign(:tax_location_error, @tax_location_repair_copy)
-         |> put_flash(:error, @tax_location_repair_copy)}
 
       {:error, :no_active_organization} ->
         {:noreply, put_flash(socket, :error, @no_active_organization_copy)}
@@ -101,46 +82,6 @@ defmodule AccrueHostWeb.SubscriptionLive do
 
       {:error, _reason} ->
         {:noreply, put_flash(socket, :error, @error_copy)}
-    end
-  end
-
-  def handle_event("update_tax_location", %{"tax_location" => params}, socket) do
-    case Billing.update_active_organization_tax_location(
-           socket.assigns.current_scope,
-           tax_location_attrs(params)
-         ) do
-      {:ok, _customer} ->
-        {:noreply,
-         socket
-         |> put_flash(:info, @tax_location_success_copy)
-         |> assign(:tax_location_error, nil)
-         |> assign(:tax_location_form, tax_location_defaults(params))
-         |> load_state()}
-
-      {:error, %APIError{code: "customer_tax_location_invalid"}} ->
-        {:noreply,
-         socket
-         |> assign(:tax_location_error, @tax_location_repair_copy)
-         |> assign(:tax_location_form, tax_location_defaults(params))
-         |> put_flash(:error, @tax_location_repair_copy)}
-
-      {:error, :no_active_organization} ->
-        {:noreply,
-         socket
-         |> assign(:tax_location_form, tax_location_defaults(params))
-         |> put_flash(:error, @no_active_organization_copy)}
-
-      {:error, :forbidden} ->
-        {:noreply,
-         socket
-         |> assign(:tax_location_form, tax_location_defaults(params))
-         |> put_flash(:error, @member_denial_copy)}
-
-      {:error, _reason} ->
-        {:noreply,
-         socket
-         |> assign(:tax_location_form, tax_location_defaults(params))
-         |> put_flash(:error, @error_copy)}
     end
   end
 
@@ -185,23 +126,6 @@ defmodule AccrueHostWeb.SubscriptionLive do
         end
 
       nil ->
-        {:noreply, put_flash(socket, :error, @error_copy)}
-    end
-  end
-
-  def handle_event("simulate_api_call", _params, socket) do
-    # Meter events use value:; quantity: belongs to subscription/invoice line items.
-    case Billing.report_usage_for_scope(socket.assigns.current_scope, "api_calls", value: 1) do
-      {:ok, _event} ->
-        {:noreply, put_flash(socket, :info, "Learner activity recorded for this period.")}
-
-      {:error, :no_active_organization} ->
-        {:noreply, put_flash(socket, :error, @no_active_organization_copy)}
-
-      {:error, :forbidden} ->
-        {:noreply, put_flash(socket, :error, @member_denial_copy)}
-
-      {:error, _reason} ->
         {:noreply, put_flash(socket, :error, @error_copy)}
     end
   end
@@ -347,28 +271,6 @@ defmodule AccrueHostWeb.SubscriptionLive do
               <% end %>
             </div>
           </section>
-
-          <section
-            class="flex flex-col gap-4 rounded-lg border border-base-300 bg-base-100 p-6 shadow-sm"
-            data-role="metered-usage-demo"
-          >
-            <div>
-              <h2 class="text-2xl font-semibold">Usage this period</h2>
-              <p class="mt-1 text-base leading-7 text-base-content/65">
-                Record learner activity for usage-based capacity on larger cohort programs.
-              </p>
-            </div>
-            <div class="flex flex-wrap gap-2">
-              <button
-                type="button"
-                phx-click="simulate_api_call"
-                class="btn btn-outline rounded-lg"
-                disabled={@billing_locked? || !@subscription}
-              >
-                Record learner activity
-              </button>
-            </div>
-          </section>
         <% else %>
           <section class="flex flex-col gap-4 rounded-lg border border-dashed border-base-300 bg-base-100 p-8 text-center shadow-sm">
             <h2 class="text-2xl font-semibold">{@empty_state_heading}</h2>
@@ -422,98 +324,6 @@ defmodule AccrueHostWeb.SubscriptionLive do
               Operators can review the underlying billing events and recovery analytics in Accrue Admin.
             </p>
           </div>
-        </section>
-
-        <section class="flex flex-col gap-4 rounded-lg border border-base-300 bg-base-100 p-6 shadow-sm">
-          <div>
-            <p class="text-sm font-semibold text-primary">Tax location</p>
-            <h2 class="mt-1 text-2xl font-semibold">Repair automatic tax input</h2>
-            <div class="mt-1 space-y-1 text-base leading-7 text-base-content/65">
-              <p>Save the workspace billing address before starting a tax-enabled subscription.</p>
-              <p>{@tax_location_repair_copy}</p>
-            </div>
-          </div>
-
-          <div :if={@tax_location_error} class="flex flex-col gap-2">
-            <h3 class="text-xl font-semibold" data-testid="e2e-tax-invalid-headline">
-              Tax location needs attention
-            </h3>
-            <p class="text-base leading-7 text-base-content/65" data-testid="e2e-tax-invalid-body">
-              Update the customer tax location before tax-enabled charges can proceed.
-            </p>
-            <p class="text-sm font-semibold text-warning">{@tax_location_error}</p>
-          </div>
-
-          <p :if={tax_location_status(@subscription)} class="text-base leading-7 text-base-content/65">
-            {tax_location_status(@subscription)}
-          </p>
-
-          <.form
-            for={%{}}
-            as={:tax_location}
-            id="tax-location-form"
-            phx-submit="update_tax_location"
-            class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4"
-          >
-            <input type="hidden" name="organization_id" value="ignored-client-org" />
-            <label class="flex flex-col gap-1 text-sm font-semibold text-base-content/70">
-              Street address
-              <input
-                type="text"
-                name="tax_location[line1]"
-                value={@tax_location_form.line1}
-                class="input input-bordered w-full rounded-lg"
-              />
-            </label>
-
-            <label class="flex flex-col gap-1 text-sm font-semibold text-base-content/70">
-              City
-              <input
-                type="text"
-                name="tax_location[city]"
-                value={@tax_location_form.city}
-                class="input input-bordered w-full rounded-lg"
-              />
-            </label>
-
-            <label class="flex flex-col gap-1 text-sm font-semibold text-base-content/70">
-              State
-              <input
-                type="text"
-                name="tax_location[state]"
-                value={@tax_location_form.state}
-                class="input input-bordered w-full rounded-lg"
-              />
-            </label>
-
-            <label class="flex flex-col gap-1 text-sm font-semibold text-base-content/70">
-              Postal code
-              <input
-                type="text"
-                name="tax_location[postal_code]"
-                value={@tax_location_form.postal_code}
-                class="input input-bordered w-full rounded-lg"
-              />
-            </label>
-
-            <label class="flex flex-col gap-1 text-sm font-semibold text-base-content/70">
-              Country
-              <input
-                type="text"
-                name="tax_location[country]"
-                value={@tax_location_form.country}
-                class="input input-bordered w-full rounded-lg"
-              />
-            </label>
-
-            <button
-              type="submit"
-              class="btn btn-outline self-end rounded-lg"
-              disabled={@billing_locked?}
-            >
-              Save tax location
-            </button>
-          </.form>
         </section>
 
         <section class="grid gap-4 lg:grid-cols-3">
@@ -637,13 +447,10 @@ defmodule AccrueHostWeb.SubscriptionLive do
     |> assign(:cancel_cta, @cancel_cta)
     |> assign(:cancel_keep_cta, @cancel_keep_cta)
     |> assign(:cancel_copy, @cancel_copy)
-    |> assign(:tax_location_repair_copy, @tax_location_repair_copy)
     |> assign(:access_state, access_state)
     |> assign(:access_message, access_message(access_state))
     |> assign(:billing_locked?, billing_locked?(access_state))
     |> assign_new(:braintree_client_token, fn -> nil end)
-    |> assign_new(:tax_location_error, fn -> nil end)
-    |> assign_new(:tax_location_form, fn -> empty_tax_location_form() end)
     |> assign_new(:checkout_url, fn -> nil end)
     |> assign(:customer, customer)
     |> assign(:subscription, subscription)
@@ -747,54 +554,4 @@ defmodule AccrueHostWeb.SubscriptionLive do
 
   defp humanize_status(status),
     do: status |> Atom.to_string() |> String.replace("_", " ") |> String.capitalize()
-
-  defp tax_location_status(%Subscription{} = subscription) do
-    # Map.get keeps this LiveView compiling against older published `accrue`
-    # (Hex smoke) where `Subscription` may not yet expose this field.
-    case Map.get(subscription, :automatic_tax_disabled_reason) do
-      reason when is_binary(reason) and reason != "" ->
-        "Automatic tax is currently disabled: #{humanize_reason(reason)}."
-
-      _ ->
-        nil
-    end
-  end
-
-  defp tax_location_status(_subscription), do: nil
-
-  defp tax_location_attrs(params) when is_map(params) do
-    %{
-      address: %{
-        line1: blank_to_nil(params["line1"]),
-        city: blank_to_nil(params["city"]),
-        state: blank_to_nil(params["state"]),
-        postal_code: blank_to_nil(params["postal_code"]),
-        country: blank_to_nil(params["country"])
-      }
-    }
-  end
-
-  defp tax_location_defaults(params) when is_map(params) do
-    %{
-      line1: params["line1"] || "",
-      city: params["city"] || "",
-      state: params["state"] || "",
-      postal_code: params["postal_code"] || "",
-      country: params["country"] || ""
-    }
-  end
-
-  defp empty_tax_location_form do
-    %{line1: "", city: "", state: "", postal_code: "", country: "US"}
-  end
-
-  defp humanize_reason(value) do
-    value
-    |> String.replace("_", " ")
-    |> String.split()
-    |> Enum.map_join(" ", &String.capitalize/1)
-  end
-
-  defp blank_to_nil(value) when value in [nil, ""], do: nil
-  defp blank_to_nil(value), do: value
 end

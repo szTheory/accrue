@@ -122,18 +122,6 @@ test("@phase15-trust canonical first-run and admin replay walkthrough stays rele
   ]);
   await captureState(page, testInfo, "first-run-billing-empty");
 
-  // Organization subscribe uses automatic_tax; host Billing requires a saved tax location first.
-  const taxForm = page.locator("#tax-location-form");
-  await taxForm.locator('[name="tax_location[line1]"]').fill("27 Fredrick Ave");
-  await taxForm.locator('[name="tax_location[city]"]').fill("Albany");
-  await taxForm.locator('[name="tax_location[state]"]').fill("NY");
-  await taxForm.locator('[name="tax_location[postal_code]"]').fill("12207");
-  await taxForm.locator('[name="tax_location[country]"]').fill("US");
-  await taxForm.getByRole("button", { name: "Save tax location" }).click();
-  await expect(page.getByText(/Tax location saved/)).toBeVisible();
-  await waitForLiveView(page);
-  await expect(taxForm.locator('[name="tax_location[line1]"]')).toHaveValue("27 Fredrick Ave");
-
   await page
     .locator("[data-plan-id='price_basic']")
     .getByRole("button", { name: "Choose Launch" })

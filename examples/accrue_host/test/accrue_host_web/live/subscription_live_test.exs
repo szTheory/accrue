@@ -6,7 +6,6 @@ defmodule AccrueHostWeb.SubscriptionLiveTest do
   alias Accrue.Billing.SubscriptionItem
   alias AccrueHost.AccountsFixtures
   alias AccrueHost.Billing
-  alias AccrueHost.Billing.Plans
   alias AccrueHost.Repo
 
   import Ecto.Query
@@ -25,33 +24,6 @@ defmodule AccrueHostWeb.SubscriptionLiveTest do
     organization = AccountsFixtures.organization_fixture(%{owner: user})
 
     %{user: user, organization: organization}
-  end
-
-  test "records metered learner activity from the workspace billing screen", %{
-    conn: conn,
-    organization: organization,
-    user: user
-  } do
-    assert {:ok, _} = Billing.subscribe(organization, Plans.ids().metered)
-
-    {:ok, view, html} =
-      conn
-      |> log_in_user(user, active_organization_id: organization.id)
-      |> live(~p"/app/billing")
-
-    assert html =~ "Usage this period"
-    assert html =~ "Record learner activity"
-
-    view
-    |> element("button", "Record learner activity")
-    |> render_click()
-
-    assert render(view) =~ "Learner activity recorded for this period."
-
-    assert Repo.aggregate(MeterEvent, :count, :id) == 1
-    event = Repo.one(MeterEvent)
-    assert event.event_name == "api_calls"
-    assert event.value == 1
   end
 
   test "creates a checkout handoff link from workspace billing", %{
@@ -74,74 +46,6 @@ defmodule AccrueHostWeb.SubscriptionLiveTest do
     html = render(view)
     assert html =~ "Checkout link"
     assert html =~ "https://checkout.stripe.test/c/pay/cs_fake_"
-  end
-
-  test "repairs tax location through the host facade and starts a tax-enabled subscription", %{
-    conn: conn,
-    organization: organization,
-    user: user
-  } do
-    {:ok, view, html} =
-      conn
-      |> log_in_user(user, active_organization_id: organization.id)
-      |> live(~p"/app/billing")
-
-    assert html =~ "Repair automatic tax input"
-    assert html =~ "Save tax location"
-
-    html =
-      view
-      |> form("#tax-location-form", %{
-        "tax_location" => %{
-          "line1" => "27 Fredrick Ave",
-          "city" => "Albany",
-          "state" => "NY",
-          "postal_code" => "12207",
-          "country" => "US"
-        }
-      })
-      |> render_submit()
-
-    refute html =~ "We couldn't complete that billing action."
-
-    customer =
-      Repo.one!(
-        from(customer in Customer,
-          where: customer.owner_type == "Organization" and customer.owner_id == ^organization.id,
-          limit: 1
-        )
-      )
-
-    refute Map.has_key?(customer.data || %{}, "address")
-
-    assert Repo.aggregate(
-             from(subscription in Accrue.Billing.Subscription,
-               where: subscription.customer_id == ^customer.id
-             ),
-             :count,
-             :id
-           ) == 0
-  end
-
-  test "shows stable repair guidance when automatic tax starts without a valid location", %{
-    conn: conn,
-    organization: organization,
-    user: user
-  } do
-    {:ok, view, html} =
-      conn
-      |> log_in_user(user, active_organization_id: organization.id)
-      |> live(~p"/app/billing")
-
-    assert html =~ "Please update customer address or shipping before enabling automatic tax."
-
-    html =
-      view
-      |> element("[data-plan-id='price_basic'] button")
-      |> render_click()
-
-    assert html =~ "Please update customer address or shipping before enabling automatic tax."
-    refute html =~ "We couldn't complete that billing action."
   end
 
   test "workspace billing copy stays customer-facing", %{

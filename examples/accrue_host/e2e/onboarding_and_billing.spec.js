@@ -14,34 +14,21 @@ test.describe("Core User Journeys", () => {
     await waitForLiveView(page);
     await expect(page.getByRole("heading", { name: "Workspace billing" })).toBeVisible();
 
-    // 1. Setup tax location
-    const taxForm = page.locator("#tax-location-form");
-    if (await taxForm.isVisible()) {
-      await taxForm.locator('[name="tax_location[line1]"]').fill("123 Test St");
-      await taxForm.locator('[name="tax_location[city]"]').fill("Testville");
-      await taxForm.locator('[name="tax_location[state]"]').fill("NY");
-      await taxForm.locator('[name="tax_location[postal_code]"]').fill("10001");
-      await taxForm.locator('[name="tax_location[country]"]').fill("US");
-      await taxForm.getByRole("button", { name: "Save tax location" }).click();
-      await expect(page.getByText(/Tax location saved/)).toBeVisible();
-      await waitForLiveView(page);
-    }
-
-    // 2. Start basic subscription
+    // 1. Start basic subscription
     const startBasic = page.locator("[data-plan-id='price_basic']").getByRole("button", { name: "Choose Launch" });
     await startBasic.click();
     await expect(page.getByText("Subscription started.")).toBeVisible({ timeout: 15_000 });
     await expect(currentSubscription.getByText("Launch", { exact: true })).toBeVisible();
     await waitForLiveView(page);
 
-    // 3. Cancel subscription
+    // 2. Cancel subscription
     await page.getByRole("button", { name: "Cancel workspace subscription" }).click();
     await expect(page.getByRole("button", { name: "Confirm cancellation" })).toBeVisible();
     await page.getByRole("button", { name: "Confirm cancellation" }).click();
     await expect(page.getByText(/Subscription canceled now/)).toBeVisible({ timeout: 15_000 });
     await waitForLiveView(page);
 
-    // 4. Upgrade to Studio
+    // 3. Upgrade to Studio
     const chooseStudio = page.locator("[data-plan-id='price_pro']").getByRole("button", { name: "Choose Studio" });
     await chooseStudio.click();
     
@@ -55,7 +42,7 @@ test.describe("Core User Journeys", () => {
     await expect(currentSubscription.getByText("Studio", { exact: true })).toBeVisible();
     await waitForLiveView(page);
 
-    // 5. Downgrade back to Launch
+    // 4. Downgrade back to Launch
     await page.locator("[data-plan-id='price_basic']").getByRole("button", { name: "Choose Launch" }).click();
 
     const confirmDowngradeButton = page.getByRole("button", { name: "Confirm plan change" });
@@ -67,7 +54,7 @@ test.describe("Core User Journeys", () => {
     await expect(currentSubscription.getByText("Launch", { exact: true })).toBeVisible();
     await waitForLiveView(page);
 
-    // 6. Payment method management surface
+    // 5. Payment method management surface
     await page.goto("/billing/payment-methods", { waitUntil: "domcontentloaded" });
     await waitForLiveView(page);
     await expect(page.getByRole("heading", { name: "Payment methods" })).toBeVisible();
@@ -84,12 +71,5 @@ test.describe("Core User Journeys", () => {
 
     await page.goto("/app/billing", { waitUntil: "domcontentloaded" });
     await waitForLiveView(page);
-
-    // 7. Test metered usage demo.
-    const simulateButton = page.getByRole("button", { name: "Record learner activity" });
-    await expect(simulateButton).toBeVisible();
-    await simulateButton.click();
-    await expect(page.getByText("Learner activity recorded for this period.")).toBeVisible();
-
   });
 });
