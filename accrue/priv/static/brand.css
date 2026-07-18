@@ -24,4 +24,44 @@
   --accrue-moss:   #5E9E84;  /* success, active subscription, primary */
   --accrue-cobalt: #5D79F6;  /* interactive, links, secondary actions */
   --accrue-amber:  #C8923B;  /* warning, grace period, dunning */
+
+  /*
+   * Brand bridge — additive tokens (stable v1.0 API; names never change).
+   *
+   * A host app configures branding (business_name / accent_color /
+   * secondary_color / font_stack / logo_url) and the mounted customer portal
+   * overrides these `--accrue-brand-*` tokens with a CSP-safe nonce'd inline
+   * <style>. When no host brand is configured, the neutral-Accrue defaults
+   * below render — un-configured adopters still get the polished default.
+   */
+  --accrue-brand-accent:          var(--accrue-moss);   /* primary CTA, active accent */
+  --accrue-brand-accent-strong:   #4D8A70;              /* hover / active state */
+  --accrue-brand-accent-contrast: #FFFFFF;              /* text on the accent */
+  --accrue-brand-secondary:       var(--accrue-slate);  /* secondary emphasis, links */
+  --accrue-brand-font:
+    system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+
+  /* Surface + shape polish tokens */
+  --accrue-surface:        #FFFFFF;              /* card / panel background */
+  --accrue-surface-muted:  var(--accrue-paper);  /* page background */
+  --accrue-border:         var(--accrue-fog);    /* card / divider borders */
+  --accrue-shadow:         0 1px 2px rgba(17, 20, 24, 0.04), 0 12px 32px rgba(36, 48, 59, 0.06);
+  --accrue-radius:         14px;
+  --accrue-radius-sm:      10px;
+}
+
+/*
+ * Optional dark-mode surface pass. Kept token-scoped so the portal's
+ * token-driven CSS inherits it automatically. Host brand accent/secondary
+ * still override via the nonce'd inline <style>.
+ */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --accrue-ink:            #ECF1F5;
+    --accrue-slate:          #B7C2CC;
+    --accrue-surface:        #171B20;
+    --accrue-surface-muted:  #10141A;
+    --accrue-border:         #2A333D;
+    --accrue-shadow:         0 1px 2px rgba(0, 0, 0, 0.4), 0 12px 32px rgba(0, 0, 0, 0.45);
+  }
 }

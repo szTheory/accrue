@@ -20,6 +20,7 @@ defmodule Accrue.Portal.BrandPlug do
         :logo_url,
         :accent_color,
         :secondary_color,
+        :font_stack,
         :support_email
       ])
 
