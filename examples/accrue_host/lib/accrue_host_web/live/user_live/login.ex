@@ -118,7 +118,15 @@ defmodule AccrueHostWeb.UserLive.Login do
                   {persona.state}
                 </span>
               </div>
-              <div class="mt-3 grid gap-2">
+              <.demo_login_form persona={persona} class="mt-3">
+                <button type="submit" class="btn btn-primary btn-sm w-full rounded-lg">
+                  <.icon name="hero-arrow-right-on-rectangle" class="size-4" /> Enter workspace
+                </button>
+              </.demo_login_form>
+              <p class="mt-3 text-center text-xs text-base-content/45">
+                or copy to sign in manually
+              </p>
+              <div class="mt-2 grid gap-2">
                 <div>
                   <p class="mb-1 text-xs font-semibold uppercase text-base-content/45">Email</p>
                   <button

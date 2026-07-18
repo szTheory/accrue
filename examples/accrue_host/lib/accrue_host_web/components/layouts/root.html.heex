@@ -32,6 +32,8 @@
   </head>
   <body class="bg-base-100 text-base-content antialiased">
     <% current_user = assigns[:current_scope] && assigns.current_scope.user %>
+    <% personas = AccrueHost.DemoBrand.personas() %>
+    <% current_persona = current_user && Enum.find(personas, &(&1.email == current_user.email)) %>
     <header class="relative z-10 border-b border-base-300 bg-base-100/95">
       <nav class="mx-auto flex min-h-16 max-w-6xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
         <.link href={~p"/"} class="flex min-w-0 items-center gap-3">
@@ -60,9 +62,45 @@
             >
               Billing
             </.link>
-            <span class="hidden max-w-44 truncate text-sm text-base-content/65 md:block">
-              {current_user.email}
-            </span>
+            <div class="dropdown dropdown-end">
+              <div
+                tabindex="0"
+                role="button"
+                class="btn btn-ghost btn-sm rounded-lg"
+                aria-haspopup="menu"
+                aria-label="Switch demo account"
+              >
+                <.icon name="hero-users" class="size-4" />
+                <span class="hidden max-w-40 truncate md:inline">
+                  {(current_persona && current_persona.label) || "Switch account"}
+                </span>
+                <.icon name="hero-chevron-down" class="size-3 opacity-60" />
+              </div>
+              <ul
+                tabindex="0"
+                class="dropdown-content z-50 mt-2 w-64 rounded-box border border-base-300 bg-base-100 p-2 shadow-lg"
+              >
+                <li class="px-3 py-1 text-xs font-semibold uppercase text-base-content/45">
+                  Switch demo account
+                </li>
+                <li :for={persona <- personas}>
+                  <.demo_login_form persona={persona}>
+                    <button
+                      type="submit"
+                      class={[
+                        "flex w-full flex-col rounded-md px-3 py-2 text-left transition-colors hover:bg-base-200",
+                        current_persona && current_persona.email == persona.email && "bg-base-200"
+                      ]}
+                    >
+                      <span class="text-sm font-semibold">{persona.label}</span>
+                      <span class="text-xs text-base-content/60">
+                        {persona.workspace} · {persona.state}
+                      </span>
+                    </button>
+                  </.demo_login_form>
+                </li>
+              </ul>
+            </div>
             <.link
               href={~p"/users/settings"}
               class="btn btn-ghost btn-sm hidden rounded-lg sm:inline-flex"

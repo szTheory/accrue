@@ -35,6 +35,7 @@ defmodule AccrueHostWeb.UserSessionController do
 
     if user = Accounts.get_user_by_email_and_password(email, password) do
       conn
+      |> maybe_store_login_return_to(user_params)
       |> put_flash(:info, info)
       |> UserAuth.log_in_user(user, user_params)
     else
@@ -64,4 +65,17 @@ defmodule AccrueHostWeb.UserSessionController do
     |> put_flash(:info, "Logged out successfully.")
     |> UserAuth.log_out_user()
   end
+
+  # Optional post-login landing, used by the demo "Enter workspace" cards and the
+  # account switcher. Only local paths are honored — blocks open-redirect via a
+  # scheme-relative "//host" or a "/\host" target — and it flows through the same
+  # `:user_return_to` session key that `UserAuth.log_in_user/3` already reads.
+  defp maybe_store_login_return_to(conn, %{"return_to" => path}) when is_binary(path) do
+    if local_path?(path), do: put_session(conn, :user_return_to, path), else: conn
+  end
+
+  defp maybe_store_login_return_to(conn, _params), do: conn
+
+  defp local_path?("/" <> rest), do: not String.starts_with?(rest, ["/", "\\"])
+  defp local_path?(_path), do: false
 end

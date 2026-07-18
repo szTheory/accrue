@@ -117,6 +117,36 @@ defmodule AccrueHostWeb.CoreComponents do
   end
 
   @doc """
+  Renders the real login form, pre-filled for a demo persona, with the caller's
+  button supplied in the slot.
+
+  Submitting performs a genuine login (the shared demo password) and — via the
+  safe `return_to` param honored by `UserSessionController` — lands on the
+  persona's own route. Used by the login page "Enter workspace" cards and the
+  top-nav "Switch account" dropdown, so both share one source of truth.
+
+  ## Examples
+
+      <.demo_login_form persona={persona}>
+        <button type="submit" class="btn btn-primary">Enter workspace</button>
+      </.demo_login_form>
+  """
+  attr :persona, :map, required: true
+  attr :class, :string, default: nil
+  slot :inner_block, required: true
+
+  def demo_login_form(assigns) do
+    ~H"""
+    <.form for={%{}} action="/users/log-in" method="post" class={@class}>
+      <input type="hidden" name="user[email]" value={@persona.email} />
+      <input type="hidden" name="user[password]" value={AccrueHost.DemoBrand.demo_password()} />
+      <input type="hidden" name="user[return_to]" value={@persona.route} />
+      {render_slot(@inner_block)}
+    </.form>
+    """
+  end
+
+  @doc """
   Renders an input with label and error messages.
 
   A `Phoenix.HTML.FormField` may be passed as argument,
