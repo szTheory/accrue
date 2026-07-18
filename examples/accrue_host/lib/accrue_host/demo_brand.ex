@@ -16,6 +16,7 @@ defmodule AccrueHost.DemoBrand do
       label: "Team Lead",
       workspace: "Northwind Labs",
       state: "Active workspace",
+      jtbd: "Manage a healthy subscription",
       route: "/app/billing",
       description: "A paid team workspace with a healthy subscription and no recovery notices."
     },
@@ -24,6 +25,7 @@ defmodule AccrueHost.DemoBrand do
       label: "Ops Manager",
       workspace: "Tidewater Systems",
       state: "Payment recovery",
+      jtbd: "Recover a past-due payment",
       route: "/billing",
       description:
         "A customer account with a past-due subscription and active recovery messaging."
@@ -33,6 +35,7 @@ defmodule AccrueHost.DemoBrand do
       label: "Head of Engineering",
       workspace: "Meridian Group",
       state: "Scale plan",
+      jtbd: "Explore a scale-plan account",
       route: "/app/billing",
       description: "A larger team account with richer billing history and invoice examples."
     },
@@ -41,6 +44,7 @@ defmodule AccrueHost.DemoBrand do
       label: "Billing Operator",
       workspace: "Accrue Admin",
       state: "Operator console",
+      jtbd: "Run the operator console",
       route: "/admin",
       description:
         "An admin-only operator account for reviewing customers, invoices, and webhooks."
