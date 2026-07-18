@@ -31,7 +31,7 @@ See: `.planning/PROJECT.md` (updated 2026-07-03 after v1.55 closeout)
 Phase: 208 (prove-convergence-on-the-representative-slice-wire-ci-accept) — EXECUTING
 Plan: 4 of 5
 Status: Ready to execute
-Last activity: 2026-07-18 - Completed quick task 260718-iwa: removed automatic-tax friction + usage button from /app/billing (uncovered Fake ID-collision follow-up)
+Last activity: 2026-07-18 - Completed quick task 260718-jmi: boot-time Fake↔DB rehydration + swap routing (fixes /app/billing plan actions for seeded personas)
 
 Progress: [█████████░] 91%
 
@@ -612,6 +612,7 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 | 260718-g6b | Click-to-copy demo credentials on host login page — email + per-card password chips, daisyUI toast, zero reflow (Playwright 10/10) | 2026-07-18 | b4407552 | [260718-g6b-login-copy-credentials](./quick/260718-g6b-login-copy-credentials/) |
 | 260718-i32 | One-click "Enter workspace" + persistent "Switch account" nav dropdown — real pre-filled Sigra login w/ safe return_to, lands in persona billing view (Playwright 8/8) | 2026-07-18 | 228591f5 | [260718-i32-one-click-jump-into-account-persistent-d](./quick/260718-i32-one-click-jump-into-account-persistent-d/) |
 | 260718-iwa | Remove automatic-tax friction + "Record learner activity" button from /app/billing demo; uncovered pre-existing Fake sequential-ID collision (seeds run in separate node) crashing subscribe → follow-up to fix | 2026-07-18 | a4661ee1 | [260718-iwa-billing-remove-tax-and-usage-button](./quick/260718-iwa-billing-remove-tax-and-usage-button/) |
+| 260718-jmi | Boot-time Fake↔DB rehydration (new core `Fake.load_fixtures/1` seam + host boot hook) + swap-route plan changes; fixes /app/billing subscribe/change/cancel for seeded personas (Playwright 7/7, unit 23/0 + 5/0) | 2026-07-18 | ffdad355, c23a6656 | [260718-jmi-fake-db-consistency-boot-hydration](./quick/260718-jmi-fake-db-consistency-boot-hydration/) |
 
 ### Milestone Intake Rules
 
