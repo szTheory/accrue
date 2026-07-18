@@ -116,6 +116,36 @@ defmodule Accrue.Processor.Fake do
   end
 
   @doc """
+  Loads pre-existing customers and subscriptions into the in-memory state,
+  keyed by their processor id, and raises the per-resource counters so
+  subsequently-created resources never reuse a loaded id.
+
+  This exists so a host demo/dev app can rehydrate the Fake from durable
+  storage on boot: the seeds that created these rows ran in a separate BEAM
+  node, so the in-memory Fake state was lost while the DB rows (and their
+  `processor_id`s) survived. Loaded records are built with the same shape as
+  `create_customer`/`create_subscription`, so every downstream
+  `update_*`/`cancel_*`/`retrieve_*` handler resolves them identically to
+  natively-created resources.
+
+  `fixtures` is a map with optional keys:
+
+    * `:customers` — list of `%{id:, name:, email:, metadata:}`
+    * `:subscriptions` — list of `%{id:, customer_id:, item_id:, price_id:,
+      product_id:, quantity:, status:, metadata:, current_period_start:,
+      current_period_end:}`
+    * `:counters` — map of `resource => non_neg_integer`; each named counter is
+      raised to at least the given value (a floor), so new ids skip past loaded
+      ones. Callers pass the max numeric suffix seen among `<prefix>NNNNN` ids.
+
+  Idempotent: reloading the same fixtures yields the same state.
+  """
+  @spec load_fixtures(map()) :: :ok
+  def load_fixtures(fixtures) when is_map(fixtures) do
+    call({:load_fixtures, fixtures})
+  end
+
+  @doc """
   Advances the in-memory clock by `seconds` seconds. Existing Phase 1
   API — preserved for tests that only need to push the clock without
   any subscription-aware webhook synthesis.
@@ -760,6 +790,22 @@ defmodule Accrue.Processor.Fake do
     counters = Map.put(fresh.counters, :connect_account, preserved_counter)
 
     {:reply, :ok, %{fresh | connect_accounts: preserved_accounts, counters: counters}}
+  end
+
+  def handle_call({:load_fixtures, fixtures}, _from, state) do
+    state =
+      fixtures
+      |> Map.get(:customers, [])
+      |> Enum.reduce(state, &load_fixture_customer/2)
+
+    state =
+      fixtures
+      |> Map.get(:subscriptions, [])
+      |> Enum.reduce(state, &load_fixture_subscription/2)
+
+    counters = raise_counter_floor(state.counters, Map.get(fixtures, :counters, %{}))
+
+    {:reply, :ok, %{state | counters: counters}}
   end
 
   def handle_call({:advance, seconds}, _from, %State{clock: clock} = state) do
@@ -2180,6 +2226,67 @@ defmodule Accrue.Processor.Fake do
       quantity: item[:quantity] || item["quantity"] || 1,
       metadata: item[:metadata] || item["metadata"] || %{}
     }
+  end
+
+  # --- load_fixtures/1 support (demo/dev rehydration) ---
+
+  defp load_fixture_customer(desc, state) do
+    record = %{
+      id: desc.id,
+      object: "customer",
+      created: state.clock,
+      name: Map.get(desc, :name),
+      email: Map.get(desc, :email),
+      metadata: Map.get(desc, :metadata) || %{}
+    }
+
+    %{state | customers: Map.put(state.customers, desc.id, record)}
+  end
+
+  defp load_fixture_subscription(desc, state) do
+    params = %{
+      customer: desc.customer_id,
+      items: fixture_item_params(desc),
+      metadata: Map.get(desc, :metadata) || %{}
+    }
+
+    base = build_subscription(state, desc.id, params)
+
+    record =
+      Map.merge(base, %{
+        status: Map.get(desc, :status) || base.status,
+        current_period_start:
+          fixture_period(Map.get(desc, :current_period_start), base.current_period_start),
+        current_period_end:
+          fixture_period(Map.get(desc, :current_period_end), base.current_period_end)
+      })
+
+    %{state | subscriptions: Map.put(state.subscriptions, desc.id, record)}
+  end
+
+  defp fixture_item_params(desc) do
+    case Map.get(desc, :item_id) do
+      nil ->
+        []
+
+      item_id ->
+        [
+          %{
+            id: item_id,
+            price: %{id: Map.get(desc, :price_id), product: Map.get(desc, :product_id)},
+            quantity: Map.get(desc, :quantity) || 1
+          }
+        ]
+    end
+  end
+
+  defp fixture_period(%DateTime{} = dt, _default), do: DateTime.to_unix(dt)
+  defp fixture_period(_missing, default), do: default
+
+  defp raise_counter_floor(counters, floor) when is_map(floor) do
+    Enum.reduce(floor, counters, fn {resource, value}, acc ->
+      Map.update(acc, resource, value, &max(&1, value))
+    end)
   end
 
   defp build_invoice(state, id, params) do

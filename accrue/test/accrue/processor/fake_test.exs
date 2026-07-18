@@ -306,4 +306,63 @@ defmodule Accrue.Processor.FakeTest do
       assert session.total_details == %{amount_tax: 0}
     end
   end
+
+  describe "load_fixtures/1" do
+    test "rehydrated subscriptions are mutable (update/cancel) instead of resource_missing" do
+      :ok =
+        Fake.load_fixtures(%{
+          customers: [%{id: "cus_fake_00007", name: "Northstar", email: "healthy@example.com"}],
+          subscriptions: [
+            %{
+              id: "sub_fake_00007",
+              customer_id: "cus_fake_00007",
+              item_id: "sub_fake_00007_item_1",
+              price_id: "price_basic",
+              product_id: "prod_fake_price_basic",
+              quantity: 1,
+              status: :active
+            }
+          ],
+          counters: %{customer: 7, subscription: 7}
+        })
+
+      # Retrieve resolves the loaded records (not resource_missing).
+      assert {:ok, %{id: "cus_fake_00007"}} = Fake.retrieve_customer("cus_fake_00007", [])
+      assert {:ok, %{id: "sub_fake_00007", status: :active}} =
+               Fake.retrieve_subscription("sub_fake_00007", [])
+
+      # Swap the item price by id — must UPDATE the existing item, not append.
+      assert {:ok, updated} =
+               Fake.update_subscription(
+                 "sub_fake_00007",
+                 %{items: [%{id: "sub_fake_00007_item_1", price: "price_pro"}]},
+                 []
+               )
+
+      assert [%{id: "sub_fake_00007_item_1", price: %{id: "price_pro"}}] =
+               updated.items.data
+
+      # Cancel resolves the loaded subscription.
+      assert {:ok, %{status: :canceled}} = Fake.cancel_subscription("sub_fake_00007", [])
+    end
+
+    test "counter floor makes fresh creates skip past loaded ids" do
+      :ok =
+        Fake.load_fixtures(%{
+          customers: [%{id: "cus_fake_00003"}],
+          subscriptions: [
+            %{id: "sub_fake_00003", customer_id: "cus_fake_00003", item_id: "sub_fake_00003_item_1", price_id: "price_basic"}
+          ],
+          counters: %{customer: 3, subscription: 3}
+        })
+
+      assert {:ok, %{id: "cus_fake_00004"}} = Fake.create_customer(%{email: "next@ex"}, [])
+
+      assert {:ok, %{id: "sub_fake_00004"}} =
+               Fake.create_subscription(
+                 %{customer: "cus_fake_00004", items: [%{price: "price_basic"}]},
+                 []
+               )
+    end
+  end
 end
