@@ -5,9 +5,10 @@ milestone_name: "Admin UI Ratchet: Automated Adversarial Design Evaluation"
 current_phase: 208
 current_phase_name: prove-convergence-on-the-representative-slice-wire-ci-accept
 status: executing
-stopped_at: "Blocked at 208-04 Task 1: ANTHROPIC_API_KEY absent; ledger baseline still frozen:false"
-last_updated: "2026-07-10T18:24:11.636Z"
-last_activity: 2026-07-07
+stopped_at: context exhaustion at 76% (2026-07-18)
+last_updated: "2026-07-18T21:28:59.836Z"
+last_activity: 2026-07-18
+last_activity_desc: "Completed quick task 260718-nzm: rebranded demo CohortFlow → Cadence (team project tracking)"
 progress:
   total_phases: 5
   completed_phases: 3
@@ -31,7 +32,7 @@ See: `.planning/PROJECT.md` (updated 2026-07-03 after v1.55 closeout)
 Phase: 208 (prove-convergence-on-the-representative-slice-wire-ci-accept) — EXECUTING
 Plan: 4 of 5
 Status: Ready to execute
-Last activity: 2026-07-18 - Completed quick task 260718-nzm: rebranded demo CohortFlow → Cadence (team project tracking)
+Last activity: 2026-07-18 - Simplified demo /users/log-in to a one-click persona funnel (commit e6813444); prior: rebrand CohortFlow → Cadence (260718-nzm)
 
 Progress: [█████████░] 91%
 
@@ -687,8 +688,8 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 
 ## Session Continuity
 
-Last session: 2026-07-10T18:24:11.631Z
-Stopped at: Blocked at 208-04 Task 1: ANTHROPIC_API_KEY absent; ledger baseline still frozen:false
+Last session: 2026-07-18T21:28:59.830Z
+Stopped at: context exhaustion at 76% (2026-07-18)
 Resume file: .planning/phases/208-prove-convergence-on-the-representative-slice-wire-ci-accept/208-04-PLAN.md
 
 ## Operator Next Steps
