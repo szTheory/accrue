@@ -76,7 +76,7 @@ defmodule AccrueHostWeb.UserLive.RegistrationTest do
         |> render_click()
         |> follow_redirect(conn, ~p"/users/log-in")
 
-      assert login_html =~ "Sign in to your workspace"
+      assert login_html =~ "Choose a demo workspace"
     end
   end
 end
