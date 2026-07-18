@@ -205,9 +205,8 @@ unless match?(
          {:ok, %{subscription: %Accrue.Billing.Subscription{}}},
          AccrueHost.Billing.billing_state_for(enterprise_org)
        ) do
-  # assuming "price_premium" or similar exists, fallback to basic if needed.
-  # Let's use "price_premium" for variety if it's supported by the system, if not, we can use price_basic.
-  {:ok, _enterprise_sub} = AccrueHost.Billing.subscribe(enterprise_org, "price_premium")
+  # The enterprise persona is the "Scale Customer" — put it on the catalog Scale plan.
+  {:ok, _enterprise_sub} = AccrueHost.Billing.subscribe(enterprise_org, "price_metered")
 end
 
 # 5. TRIALING demo account

@@ -10,7 +10,7 @@ defmodule AccrueHostWeb.EntitlementsGuardTest do
     entitled_org = AccrueHost.AccountsFixtures.organization_fixture(%{owner: user})
 
     assert {:ok, _subscription} =
-             Billing.subscribe(entitled_org, "price_premium", trial_end: {:days, 14})
+             Billing.subscribe(entitled_org, "price_metered", trial_end: {:days, 14})
 
     conn =
       conn
@@ -72,7 +72,7 @@ defmodule AccrueHostWeb.EntitlementsGuardTest do
     entitled_org = AccrueHost.AccountsFixtures.organization_fixture(%{owner: user})
 
     assert {:ok, _subscription} =
-             Billing.subscribe(entitled_org, "price_premium", trial_end: {:days, 14})
+             Billing.subscribe(entitled_org, "price_metered", trial_end: {:days, 14})
 
     conn =
       conn

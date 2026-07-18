@@ -132,9 +132,9 @@ config :accrue, :entitlements,
     end
   end,
   plans: [
-    premium: [
+    scale: [
       features: [:advanced_reports],
-      price_ids: ["price_premium"]
+      price_ids: ["price_metered"]
     ]
   ]
 
