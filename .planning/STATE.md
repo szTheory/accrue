@@ -3,10 +3,10 @@ gsd_state_version: 1.0
 milestone: v1.57
 milestone_name: Admin Operator Control Plane (SEED-004 M1)
 status: planning
-last_updated: "2026-07-19T16:15:55.887Z"
+last_updated: "2026-07-19T17:00:00.000Z"
 last_activity: 2026-07-19
 progress:
-  total_phases: 0
+  total_phases: 3
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
@@ -21,14 +21,15 @@ See: `.planning/PROJECT.md` (updated 2026-07-03 after v1.55 closeout)
 
 **Core value:** A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic Elixir DX, strong domain modeling, tamper-evident audit ledger, great observability, and zero breaking-change pain through v1.x.
 
-**Current focus:** Phase 208 — prove-convergence-on-the-representative-slice-wire-ci-accept
+**Current focus:** Phase 209 — reign-subscriptions-list-plus-detail-css-coordination (v1.57 SEED-004 M1)
 
 ## Current Position
 
-Phase: Not started (defining requirements)
+Phase: 209 — Reign Subscriptions (list + detail CSS coordination)
 Plan: —
-Status: Defining requirements
-Last activity: 2026-07-19 — Milestone v1.57 started
+Status: Roadmap complete — ready to plan Phase 209
+Last activity: 2026-07-19 — v1.57 roadmap created (Phases 209-211); 11/11 requirements mapped
+Next: `/gsd-plan-phase 209`
 
 ## Post-v1.48 Pause Rule
 
@@ -38,7 +39,19 @@ v1.55 OSS Quality Evaluation & Hardening Roadmap shipped on 2026-07-03 as mainte
 
 ## Milestone Progress
 
-### v1.56 Phase Summary (ACTIVE — opened 2026-07-03 — Admin UI Ratchet: Automated Adversarial Design Evaluation)
+### v1.57 Phase Summary (ACTIVE — opened 2026-07-19 — Admin Operator Control Plane (SEED-004 M1))
+
+| Phase | Name | Requirements | Status |
+|-------|------|--------------|--------|
+| 209 | Reign Subscriptions (list + detail CSS coordination) | REIGN-01, REIGN-02, COMP-01 | Ready to plan |
+| 210 | Reign Home + certify answer-first IA & copy integrity | REIGN-03, IA-01, IA-02, IA-03, IA-04, COPY-01, COPY-02 | Not started |
+| 211 | Grep-gated CSS retirement & cross-surface cleanup | REIGN-04 | Not started |
+
+Coverage: 11/11 requirements mapped to Phases 209-211 (each REQ-ID → exactly one phase). Per-phase counts: 209→3 · 210→7 · 211→1. **Dependency shape:** strictly linear — 209 → 210 → 211 (Subscriptions before Home per the research build order; CSS retirement last, after both templates land, because `.ax-inline-worklist*` / `.ax-audit-summary-row` are shared with the out-of-scope subscription detail page `subscription_live.ex`).
+
+**Guardrails (binding, out of scope):** admin-only (`accrue_admin` LiveView templates + `assets/css`); NO core `accrue` change (M2), NO new nav rooms (M3), NO "why blocked"/causality/diagnosis synthesis, no new deps, no Tailwind migration; `ax-*` stays the styling SSOT; no `accrue_portal` work. Keep the Cobalt / quiet-confidence brand + prior de-garish/card-grammar polish. Console **density is the point** — do not over-air (no-density-regression gate on both reign phases). Every CSS/copy change rebuilds + commits BOTH generated artifacts (`priv/static/accrue_admin.css`, `examples/accrue_host/e2e/generated/copy_strings.json`); CSS retirement is grep-gated (detail-shared classes preserved); PNG-verify against the canonical Payments/Customers/Invoices reference. Authoritative sources: `prompts/accrue_admin_operator_ui_journey_blueprint.md`, `.planning/research/ADMIN-UI-REDESIGN-BLUEPRINT-SYNTHESIS.md`, `research/admin-ratchet-round99-confirmed-findings.json`.
+
+### v1.56 Phase Summary (PARKED 2026-07-19 — Admin UI Ratchet: Automated Adversarial Design Evaluation; ledger + baseline preserved in `accrue_admin/e2e/ratchet/`)
 
 | Phase | Name | Requirements | Status |
 |-------|------|--------------|--------|

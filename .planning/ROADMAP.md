@@ -6,12 +6,13 @@
 - ✅ **v1.48 Release Readiness + Stable Core Posture** — Phases 159-162 (shipped 2026-06-01) — [archive](milestones/v1.48-ROADMAP.md)
 - ✅ **v1.49 Realistic Demo App & Adoption Evidence** — Phases 163-166 (shipped 2026-06-02) — [archive](milestones/v1.49-ROADMAP.md)
 - ✅ **v1.50 Admin UI Foundation** — Phases 167-173 (shipped 2026-06-02 via PR #32; archived 2026-06-03) — [archive](milestones/v1.50-ROADMAP.md)
-- ✅ **v1.51 Admin UI: Depth Pass [SHIPPED 2026-06-04 — see milestones/v1.51-ROADMAP.md] (IA + Systematic Polish)** — Phases 174-179 (planning 2026-06-03; second, depth-oriented pass on the same `accrue_admin` surface; persona-driven IA reshape + token gap-closure + systematic rubric uplift + motion + seed expressiveness + screenshot-driven visual-QA; no new billing primitives)
-- ✅ **v1.52 Brand System** — Phases 180-186 (shipped 2026-06-14; brand audit + DNA lock, SVG logo tournament, design tokens, voice/copy, standalone HTML brand book; no billing primitives) — [archive](milestones/v1.52-ROADMAP.md)
-- ✅ **v1.53 Admin UI Design-System Hardening** — Phases 187-192 (shipped 2026-06-20; fractal design-system audit foundations→primitives→groups→pages→flows + interaction-defect remediation + component-level systematization + idempotent only-forward verification on `accrue_admin`; no new billing primitives, no breaking API/route changes, no Tailwind migration) — [archive](milestones/v1.53-ROADMAP.md)
-- ✅ **v1.54 Admin UI Page-Level Streamlining & Storybook** — Phases 193-200 (shipped 2026-07-01; page-level excellence on `accrue_admin` — archetype specs, gold-standard overview/list/detail exemplars, propagation across all pages, canonical overlay correctness, PhoenixStorybook dev/test-only, and zero-regression page-flow gate; no new billing primitives, no breaking API/route changes, no Tailwind migration, core stays LiveView-runtime-free) — [archive](milestones/v1.54-ROADMAP.md)
-- ✅ **v1.55 OSS Quality Evaluation & Hardening Roadmap** — Phases 201-204 (shipped 2026-07-03; audit-only quality evaluation, CI/CD determinism audit, DB schema-contract ADR, and ranked hardening roadmap; no product behavior changes) — [archive](milestones/v1.55-ROADMAP.md)
-- 🔨 **v1.56 Admin UI Ratchet: Automated Adversarial Design Evaluation** — Phases 205-209 (ACTIVE, opened 2026-07-03; maintainer-run forward-only "UI Ratchet" that automates fan-out adversarial design evaluation → dedup → verify → batch-fix → re-score → loop-until-dry over `accrue_admin`; dev/test-only tooling + admin CSS polish; LLM proposes, humans triage, a committed ledger + minted deterministic guards ratchet; no new billing primitives, no breaking API/route changes, no Tailwind migration, core stays LiveView-runtime-free, LLM never gates CI)
+- ✅ **v1.51 Admin UI: Depth Pass (IA + Systematic Polish)** — Phases 174-179 (shipped 2026-06-04) — [archive](milestones/v1.51-ROADMAP.md)
+- ✅ **v1.52 Brand System** — Phases 180-186 (shipped 2026-06-14) — [archive](milestones/v1.52-ROADMAP.md)
+- ✅ **v1.53 Admin UI Design-System Hardening** — Phases 187-192 (shipped 2026-06-20) — [archive](milestones/v1.53-ROADMAP.md)
+- ✅ **v1.54 Admin UI Page-Level Streamlining & Storybook** — Phases 193-200 (shipped 2026-07-01) — [archive](milestones/v1.54-ROADMAP.md)
+- ✅ **v1.55 OSS Quality Evaluation & Hardening Roadmap** — Phases 201-204 (shipped 2026-07-03) — [archive](milestones/v1.55-ROADMAP.md)
+- ⏸️ **v1.56 Admin UI Ratchet: Automated Adversarial Design Evaluation** — Phases 205-208 (PARKED 2026-07-19; 205-207 shipped, 208 was 3/5 and non-converging on IA findings — the work v1.57 now takes on; ledger + baseline preserved in `accrue_admin/e2e/ratchet/`) — [archive](milestones/v1.56-ROADMAP.md)
+- 🔨 **v1.57 Admin Operator Control Plane (SEED-004 M1)** — Phases 209-211 (ACTIVE, opened 2026-07-19; reign the two outlier admin pages — Home + Subscriptions — onto the shared component vocabulary and pivot their IA to answer-first, so the whole `accrue_admin` reads as one operator-first system; admin-only, no core `accrue` change, no new nav rooms, no new deps)
 
 ## Planning Doctrine
 
@@ -25,48 +26,54 @@ Accrue is in **stable core / demand-driven expansion** posture as of 2026-05-31.
 
 After v1.48, broad feature milestones remain closed by default unless reopened by concrete adopter failure, correctness/security/data-loss risk, repeated support issue, operational failure, or explicit strategy change.
 
-**v1.56 Admin UI Ratchet: Automated Adversarial Design Evaluation is open** (Phases 205-209, opened 2026-07-03). It is **not** a broad feature milestone: it is a design-quality investment in the already-shipped `accrue_admin` operator UI (dev/test-only evaluation tooling + admin CSS polish). Reopen justification class: **explicit strategy change** (flagship adopter-facing admin surface design quality — same class accepted for v1.50–v1.54) **plus** a concrete maintainer request, recorded in `PROJECT.md`. No new billing primitives, no breaking API/route changes, no Tailwind migration, core `accrue` stays LiveView-runtime-free, `ax-*` stays the styling SSOT, and the LLM never gates CI.
+**v1.57 Admin Operator Control Plane (SEED-004 M1) is open** (Phases 209-211, opened 2026-07-19). It is **not** a broad feature milestone: it is the first slice of the SEED-004 admin redesign — an information-architecture / component-grammar pivot on the already-shipped `accrue_admin` operator UI. Reopen justification class: **explicit strategy change** (flagship adopter-facing admin surface, elevated to a strategic redesign — same class accepted for v1.50–v1.54), recorded in `PROJECT.md`. Scope is admin-only (`accrue_admin` LiveView templates + `assets/css`): **no core `accrue` change** (core diagnosis fns are M2), **no new nav rooms** (M3), no new deps, no Tailwind migration, `ax-*` stays the styling SSOT, no `accrue_portal` work. The parked v1.56 ratchet re-locks this redesign after M1 lands.
 
-v1.55 OSS Quality Evaluation & Hardening Roadmap shipped on 2026-07-03 as maintenance / release-readiness / support-contract hardening work. It was not a broad feature milestone and did not add billing primitives, public API surface, new UI flows, DB defaults, CI required-check topology, or release automation changes. The next likely hardening slice is the Phase 204 top-ranked "Public Truth And Proof-State Baseline" work, pending explicit milestone initialization.
-
-v1.54 Admin UI Page-Level Streamlining & Storybook shipped on 2026-07-01 as a quality / page-level-design / interaction-correctness investment in the already-shipped `accrue_admin` operator UI (continuing v1.53's design-system hardening). It was **not** a broad feature milestone: no new billing primitives, no breaking API/route changes, no Tailwind migration, and core `accrue` remains LiveView-runtime-free while PhoenixStorybook is `accrue_admin` dev/test-only. The reopen justification remains recorded in `PROJECT.md`: explicit strategy change for the flagship adopter-facing surface plus firsthand-observed page-level usability defects.
+**v1.56 Admin UI Ratchet is PARKED** (2026-07-19) mid-flight to open v1.57. Phases 205-207 shipped; Phase 208 (prove-convergence + ACCEPT) was 3/5 with 208-04/05 maintainer-gated and **non-converging because the ratchet kept surfacing information-architecture findings** — which is exactly the work v1.57/SEED-004 now takes on. The forward-only ledger + frozen baseline in `accrue_admin/e2e/ratchet/` are preserved untouched; the harness becomes the tool that re-freezes the v1.57 redesign after it lands. The 23 round-99 confirmed IA findings are carried into v1.57 as M1 input (`research/admin-ratchet-round99-confirmed-findings.json`). To resume v1.56 later: restore from the archive and run `/gsd-execute-phase 208`.
 
 Stop rule: if proposed work is polish-only with a documented workaround and no release/adopter failure mode, record it as deferred with a revisit trigger and do not create a milestone for it.
 
 ## Phases
 
-### 🔨 v1.56 Admin UI Ratchet: Automated Adversarial Design Evaluation (Phases 205-209) — ACTIVE (opened 2026-07-03)
+### 🔨 v1.57 Admin Operator Control Plane (SEED-004 M1) (Phases 209-211) — ACTIVE (opened 2026-07-19)
 
-**Posture:** Design-quality investment in the flagship adopter-facing `accrue_admin` operator UI via a maintainer-run, forward-only "UI Ratchet" — **not** a broad feature milestone. Reopen justification (recorded in `PROJECT.md`): **explicit strategy change** (same class accepted for v1.50–v1.54) **plus** a concrete maintainer request. Scope stays within `accrue_admin` + dev/test-only tooling: no new billing primitives, no breaking API/route changes, no Tailwind migration, `ax-*` stays the styling SSOT, core `accrue` stays LiveView-runtime-free, no `accrue_portal` work, and ratchet tooling never leaks into adopter runtime. The LLM runs locally (maintainer's key) as a proposer/ranker only; CI gates the deterministic layer only (the LLM is never on the gate path). Authoritative design source: `~/.claude/plans/ui-ratchet-txt-i-agile-honey.md`.
+**Posture:** First slice (M1) of the SEED-004 redesign of `accrue_admin` from a CRUD surface into an "operator control plane over billing state." M1 reigns the two outlier pages — **Home** (`dashboard_live.ex`) and **Subscriptions** (`subscriptions_live.ex`) — onto the canonical shared component vocabulary (PageHeader / StatStrip / DataTable / FilterChipBar / `.ax-card` / Button / StatusBadge / EmptyState / KpiCard / Timeline / Icon) that ~10 admin pages already follow, and pivots their information architecture to **answer-first** (one scannable health verdict + one primary action per zone, redundant bands trimmed), retiring ~325 bespoke `.ax-home-*` / `.ax-launcher*` / `.ax-attention*` / `.ax-subscriptions-*` / `.ax-inline-worklist*` rules. **Scope fence (binding):** admin-only; **no** core `accrue` change (M2), **no** new nav rooms (M3), **no** "why blocked"/causality/diagnosis synthesis, no new deps, no Tailwind migration; `ax-*` stays the styling SSOT; keep the Cobalt / quiet-confidence brand + prior de-garish/card-grammar polish. Console **density is the point** — do not over-air. Reuse shared components (compose, don't fork); at most one small new shared component (`WorkQueueCallout`) if the callout shape demonstrably repeats. Every CSS/copy change rebuilds + commits **both** generated artifacts (`priv/static/accrue_admin.css` via `mix accrue_admin.assets.build`, and `examples/accrue_host/e2e/generated/copy_strings.json` via `mix accrue_admin.export_copy_strings`); CSS retirement is grep-gated (classes shared with the out-of-scope subscription **detail** page are preserved); PNG-verify against the canonical Payments/Customers/Invoices reference. Authoritative design sources: `prompts/accrue_admin_operator_ui_journey_blueprint.md`, `.planning/research/ADMIN-UI-REDESIGN-BLUEPRINT-SYNTHESIS.md`, `research/admin-ratchet-round99-confirmed-findings.json`.
 
-- [x] **Phase 205: Persona + design-lens evaluator harness** - Local, key-gated evaluator fans out 6 operator personas + a comparative graphic-design lens over committed screenshots and emits stable, claim-keyed candidate findings (EVAL-01..05, DEDUP-01, DEDUP-02) (completed 2026-07-04)
-- [x] **Phase 206: Adversarial verifier + finding ledger + deterministic gate** - Candidates collapse, are adversarially confirmed (2-of-3 skeptic panel + mandatory justification token), persist to a committed forward-only ledger, and are protected by a deterministic sibling gate the LLM never touches (DEDUP-03, VERIFY-01..03, LEDGER-01..05) (completed 2026-07-04)
-- [ ] **Phase 207: Orchestration + digest + one-command round/fix loop** - Two `mix accrue_admin.ui.*` commands drive the whole pipeline with a rendered digest, minimal batch-approve checkpoints, auto-minted guards, and guaranteed termination, plus proposer prompt-caching + a surface-subset filter (ORCH-01..08)
-- [ ] **Phase 208: Prove convergence on the representative slice + wire CI + ACCEPT** - Run the ratchet to convergence on the slice, freeze the first baseline, add the deterministic-only CI job, keep existing gates green, and land maintainer ACCEPT + a follow-on runbook (CONV-01..07)
-- [ ] **Phase 209: Full-surface sweep under the ratchet** — **SCOPE-GATED / OPTIONAL (teed up, NOT required for v1.56 sign-off)** - Graduate the remaining ~19 admin surfaces round-by-round to 2 dry rounds each with no regressions (deferred SWEEP-01)
+- [ ] **Phase 209: Reign Subscriptions (list + detail CSS coordination)** - Compose the Subscriptions list from the canonical spine — single verdict, one invoice-queue action, five bespoke bands trimmed, compact cell idiom, per-row actions out of cells — and resolve the `WorkQueueCallout` extract-or-inline decision + the detail-page shared-CSS coordination (REIGN-01, REIGN-02, COMP-01)
+- [ ] **Phase 210: Reign Home + certify answer-first IA & copy integrity** - Adopt `PageHeader` and recompose Home's attention rail + launcher tiles from shared primitives, then certify the answer-first grammar and copy/nav integrity across both now-reigned pages (REIGN-03, IA-01, IA-02, IA-03, IA-04, COPY-01, COPY-02)
+- [ ] **Phase 211: Grep-gated CSS retirement & cross-surface cleanup** - Retire the now-dead bespoke `.ax-*` rules (grep-gated, detail-shared classes preserved), rebuild the committed bundle, and clean up the component kitchen / storybook / `region-tags.js` selector map (REIGN-04)
 
-Coverage: **31/31 requirements** mapped to Phases 205-208 (each REQ-ID → exactly one phase; ORCH-07/08 folded 2026-07-03 from the Phase 205 live smoke — the original ratified set was 29). Phase 209 carries only the deferred SWEEP-01 and is explicitly optional/scope-gated. Dependencies: strictly linear 205 → 206 → 207 → 208, with 209 an optional follow-on after 208. Full per-phase goals + success criteria: see [Phase Details](#phase-details-v156-active-milestone).
+Coverage: **11/11 requirements** mapped to Phases 209-211 (each REQ-ID → exactly one phase). Per-phase counts: 209→3 · 210→7 · 211→1. Dependencies: strictly linear — 209 → 210 → 211 (Subscriptions before Home per the research build order; CSS retirement last, after both templates land, because `.ax-inline-worklist*` / `.ax-audit-summary-row` are shared with the out-of-scope subscription detail page). Full per-phase goals + success criteria: see [Phase Details](#phase-details-v157-active-milestone).
+
+<details>
+<summary>⏸️ v1.56 Admin UI Ratchet: Automated Adversarial Design Evaluation (Phases 205-208) — PARKED 2026-07-19</summary>
+
+**Posture:** Maintainer-run, forward-only "UI Ratchet" that automates fan-out adversarial design evaluation → dedup → verify → batch-fix → re-score → loop-until-dry over `accrue_admin` (dev/test-only tooling + admin CSS polish). **PARKED mid-flight** to open v1.57: Phases 205-207 shipped; Phase 208 (prove-convergence + ACCEPT) reached 3/5 with 208-04/05 maintainer-gated and non-converging on IA findings — the work v1.57 now takes on. The ledger + frozen baseline in `accrue_admin/e2e/ratchet/` are preserved untouched and become the tool that re-locks the v1.57 redesign after it lands. The v1.56 optional "full-surface sweep" placeholder (originally numbered 209, `SWEEP-01`) was never created as a phase; **phase number 209 is reused by v1.57**.
+
+- [x] Phase 205: Persona + design-lens evaluator harness (5/5 plans) — completed 2026-07-03 (EVAL-01..05, DEDUP-01, DEDUP-02)
+- [x] Phase 206: Adversarial verifier + finding ledger + deterministic gate (4/4 plans) — completed 2026-07-04 (DEDUP-03, VERIFY-01..03, LEDGER-01..05)
+- [x] Phase 207: Orchestration + digest + one-command round/fix loop (8/8 plans) — completed 2026-07-07 (ORCH-01..08)
+- [ ] Phase 208: Prove convergence on slice + wire CI + ACCEPT (3/5 plans) — PARKED (CONV-01..07)
+
+Coverage: 31/31 requirements mapped to Phases 205-208. To resume: restore from `milestones/v1.56-ROADMAP.md` / `milestones/v1.56-phases/` and run `/gsd-execute-phase 208`. Full details: [v1.56 roadmap archive](milestones/v1.56-ROADMAP.md).
+
+</details>
 
 <details>
 <summary>✅ v1.55 OSS Quality Evaluation & Hardening Roadmap (Phases 201-204) — SHIPPED 2026-07-03</summary>
 
 **Posture:** Audit-only maintenance / release-readiness / support-contract hardening under stable core. The milestone produced evidence-backed audits and a ranked implementation roadmap. It did **not** change product behavior, public APIs, DB defaults, CI required-check topology, package release automation, or runtime UI.
 
-- [x] Phase 201: Software quality evaluation — adoption, production, maintainability, supportability, UI, release, upgrade, data, security, architecture, OSS trust, and project-specific quality dimensions (QLT-01..05). Completed 2026-07-02.
-- [x] Phase 202: CI/CD performance and determinism audit — workflow topology, static critical path, measurement plan, bottlenecks, flaky/determinism risks, cache risks, and target pipeline recommendations (CI-01..05). Completed 2026-07-02.
-- [x] Phase 203: Database schema contract ADR — default `billing` schema kept, explicit `public` preserved, future prefix hardening described without changing defaults (DB-01..04). Completed 2026-07-02.
-- [x] Phase 204: Ranked hardening roadmap — top 10 future hardening items grouped by priority, milestone shape, impact, effort, risk reduction, and done criteria (RD-01..04). Completed 2026-07-03.
+- [x] Phase 201: Software quality evaluation (QLT-01..05). Completed 2026-07-02.
+- [x] Phase 202: CI/CD performance and determinism audit (CI-01..05). Completed 2026-07-02.
+- [x] Phase 203: Database schema contract ADR (DB-01..04). Completed 2026-07-02.
+- [x] Phase 204: Ranked hardening roadmap (RD-01..04). Completed 2026-07-03.
 
-Coverage: 18/18 requirements complete. Audit passed with 4/4 phase verifications, 18/18 requirements clean by 3-source audit, 8/8 integration checks, 6/6 audit-only flows, and zero blockers.
-
-Full details: [v1.55 roadmap archive](milestones/v1.55-ROADMAP.md), [requirements archive](milestones/v1.55-REQUIREMENTS.md), [audit archive](milestones/v1.55-MILESTONE-AUDIT.md), and [phase artifacts](milestones/v1.55-phases/).
+Coverage: 18/18 requirements complete. Full details: [v1.55 roadmap archive](milestones/v1.55-ROADMAP.md).
 
 </details>
 
 <details>
 <summary>✅ v1.54 Admin UI Page-Level Streamlining & Storybook (Phases 193-200) — SHIPPED 2026-07-01</summary>
-
-**Posture:** Quality / page-level-design / interaction-correctness investment in the already-shipped `accrue_admin` operator UI — **not** a broad feature milestone. Took the surface from interaction-correct building blocks to page-level excellence: specs locked, exemplars built, patterns propagated, overlays hardened, Storybook adopted dev/test-only, and the forward-only page-flow gate closed with zero regressions.
 
 - [x] Phase 193: Research, re-baseline & pattern lock (5/5 plans) — completed 2026-06-25
 - [x] Phase 194: Exemplar A — Dashboard (4/4 plans) — completed 2026-06-26
@@ -77,16 +84,12 @@ Full details: [v1.55 roadmap archive](milestones/v1.55-ROADMAP.md), [requirement
 - [x] Phase 199: Cross-cutting interaction/overlay correctness + fixture stress + microcopy (15/15 plans) — completed 2026-06-30
 - [x] Phase 200: Idempotent verification & sign-off (6/6 plans) — completed 2026-06-30, accepted
 
-Coverage: 23/23 requirements complete. Audit passed with 8/8 phase verifications, 23/23 implementation-verified requirements, 8/8 E2E flows, zero blockers, and one accepted out-of-scope deferral (TOOL-02 pixel-diff visual regression).
-
-Full details: [v1.54 roadmap archive](milestones/v1.54-ROADMAP.md)
+Coverage: 23/23 requirements complete. Full details: [v1.54 roadmap archive](milestones/v1.54-ROADMAP.md)
 
 </details>
 
 <details>
-<summary>✅ v1.53 Admin UI Design-System Hardening (Phases 187-192) — SHIPPED 2026-06-20 (deps strictly linear 187→188→189→190→191→192)</summary>
-
-**Posture:** Quality / interaction-correctness / design-system investment in the already-shipped `accrue_admin` operator UI — **not** a broad feature milestone (no new billing primitives, no breaking API/route changes, no Tailwind migration). Took the admin UI from *considered* (v1.51) to *interaction-correct and component-systematic*: fractal design-system audit (foundations → primitives → groups → pages → flows), behavioral interaction-defect remediation, component-level systematization, and an idempotent only-forward verification loop. Discharged v1.51's open photographic-sign-off tech-debt.
+<summary>✅ v1.53 Admin UI Design-System Hardening (Phases 187-192) — SHIPPED 2026-06-20</summary>
 
 - [x] Phase 187: Audit & Baseline (5/5 plans) — completed 2026-06-15 (VER-01)
 - [x] Phase 188: Foundations hardening (8/8 plans) — completed 2026-06-20 (FND-01..06)
@@ -95,16 +98,12 @@ Full details: [v1.54 roadmap archive](milestones/v1.54-ROADMAP.md)
 - [x] Phase 191: Page & flow interaction pass + fixture stress + microcopy (7/7 plans) — completed 2026-06-19 (IXN-01..05, PAGE-01..04, CPY-01..03, SEED-01..02)
 - [x] Phase 192: Idempotent verification & sign-off (6/6 plans) — completed 2026-06-20 (VER-02..04)
 
-Coverage: 33/33 requirements. Final scorecard ≥ Phase-187 baseline across 21,276 cells with 0 regressions; maintainer sign-off ACCEPT.
-
-Full details: [v1.53 roadmap archive](milestones/v1.53-ROADMAP.md)
+Coverage: 33/33 requirements. Full details: [v1.53 roadmap archive](milestones/v1.53-ROADMAP.md)
 
 </details>
 
 <details>
-<summary>✅ v1.52 Brand System (Phases 180-186) — SHIPPED 2026-06-14 (deps 180→181→182→183→186, with 180→{184,185}→186 side-rails)</summary>
-
-**Posture:** Brand/DX investment in adopter-facing presentation surfaces (README, Hex.pm, HexDocs, social previews, admin UI identity) — **not** a broad feature milestone (no new billing primitives). Reopen decision recorded in `PROJECT.md`; justification class same as v1.50/v1.51.
+<summary>✅ v1.52 Brand System (Phases 180-186) — SHIPPED 2026-06-14</summary>
 
 - [x] Phase 180: Brand Audit & DNA Lock (4/4 plans) — completed 2026-06-12 (AUD-01..03)
 - [x] Phase 181: SVG Pipeline + Tournament Round 1 — Divergent (7/7 plans) — completed 2026-06-13 (LOGO-01, LOGO-02)
@@ -119,9 +118,7 @@ Full details: [v1.52 roadmap archive](milestones/v1.52-ROADMAP.md)
 </details>
 
 <details>
-<summary>✅ v1.51 Admin UI: Depth Pass (Phases 174-179) — SHIPPED 2026-06-04 (deps A→B→C→{D,E}→F)</summary>
-
-**Posture:** Quality / adopter-facing operator-DX investment in the already-shipped `accrue_admin` surface — **not** a broad feature milestone (no new billing primitives). The second, depth-oriented pass on v1.50's foundation: re-map IA from entity-shaped to job/persona-shaped, close design-token gaps, lift the under-iterated screen tail to one rubric baseline, add restrained motion, make seed data express every state, and prove it with a screenshot-driven visual-QA loop.
+<summary>✅ v1.51 Admin UI: Depth Pass (Phases 174-179) — SHIPPED 2026-06-04</summary>
 
 Full details: [v1.51 roadmap archive](milestones/v1.51-ROADMAP.md)
 
@@ -130,13 +127,7 @@ Full details: [v1.51 roadmap archive](milestones/v1.51-ROADMAP.md)
 <details>
 <summary>✅ v1.50 Admin UI Foundation (Phases 167-173) — SHIPPED 2026-06-02 (PR #32; archived 2026-06-03)</summary>
 
-- [x] Phase 167: Design Tokens & Motion Foundation — completed 2026-06-02 (AUI-01)
-- [x] Phase 168: Typography & Icon System — completed 2026-06-02 (AUI-02)
-- [x] Phase 169: IA — Home, Nav & Search — completed 2026-06-02 (AUI-03)
-- [x] Phase 170: Cross-Screen Threading & Microcopy — completed 2026-06-02 (AUI-04)
-- [x] Phase 171: Shared Detail Components & Refactor — completed 2026-06-02 (AUI-05)
-- [x] Phase 172: Seed Enrichment & Component Kitchen — completed 2026-06-02 (AUI-06)
-- [x] Phase 173: Rubric Audit & Visual/A11y Coverage — completed 2026-06-02 (AUI-07)
+- [x] Phase 167-173 — completed 2026-06-02 (AUI-01..07)
 
 Full details: [v1.50 roadmap archive](milestones/v1.50-ROADMAP.md)
 
@@ -145,11 +136,6 @@ Full details: [v1.50 roadmap archive](milestones/v1.50-ROADMAP.md)
 <details>
 <summary>✅ v1.49 Realistic Demo App & Adoption Evidence (Phases 163-166) — SHIPPED 2026-06-02</summary>
 
-- [x] Phase 163: Realistic Domain & Rich Seeds (1/1 plan) — completed 2026-06-01
-- [x] Phase 164: Docker DX & Optimized Caching (2/2 plans) — completed 2026-06-01
-- [x] Phase 165: E2E Automation & Shift-Left CI (4/4 plans) — completed 2026-06-02
-- [x] Phase 166: Adoption DX Docs (3/3 plans) — completed 2026-06-02
-
 Full details: [v1.49 roadmap archive](milestones/v1.49-ROADMAP.md)
 
 </details>
@@ -157,224 +143,95 @@ Full details: [v1.49 roadmap archive](milestones/v1.49-ROADMAP.md)
 <details>
 <summary>✅ v1.48 Release Readiness + Stable Core Posture (Phases 159-162) — SHIPPED 2026-06-01</summary>
 
-- [x] Phase 159: Linked Release Readiness + Publish Proof (2/2 plans) — completed 2026-06-01
-- [x] Phase 160: Stable-Core Public Positioning (3/3 plans) — completed 2026-05-31
-- [x] Phase 161: Backlog Anchor Closure + Pause Rule (1/1 plan) — completed 2026-06-01
-- [x] Phase 162: Close gap: REL-01/REL-03 — linked release proof (4/4 plans) — completed 2026-06-01
-
 Full details: [v1.48 roadmap archive](milestones/v1.48-ROADMAP.md)
 
 </details>
 
-## Phase Details (v1.56 active milestone)
+## Phase Details (v1.57 active milestone)
 
-### Phase 205: Persona + design-lens evaluator harness
+### Phase 209: Reign Subscriptions (list + detail CSS coordination)
 
-**Goal**: A maintainer can run a local, key-gated evaluator that fans out 6 operator-persona lenses + a comparative graphic-design lens over the committed admin screenshots and emits stable, claim-keyed candidate findings. Promotes the dormant `score-visuals.mjs` into `accrue_admin/e2e/ratchet/ratchet-propose.mjs`.
-**Depends on**: Nothing (first phase of v1.56; reuses the existing capture harness + 30,348-cell grammar)
-**Requirements**: EVAL-01, EVAL-02, EVAL-03, EVAL-04, EVAL-05, DEDUP-01, DEDUP-02
+**Goal**: The Subscriptions list (`subscriptions_live.ex`) is composed only from the canonical shared skeleton (`AppShell → section.ax-page → PageHeader → FlashGroup → DataTable` with `FilterChipBar` in `:list_status`), reads answer-first (one verdict, one invoice-queue entry point), and its per-row cells use the compact shared idiom — while the shared-CSS coordination with the out-of-scope subscription **detail** page (`subscription_live.ex`) is resolved so no later deletion can silently break it. This is the first, lowest-risk reign (Subscriptions is ~90% already on the skeleton) and it surfaces the one-new-component decision before Home needs to consume it.
+**Depends on**: Nothing (first phase of v1.57)
+**Requirements**: REIGN-01, REIGN-02, COMP-01
 **Success Criteria** (what must be TRUE):
-
-  1. Maintainer runs the evaluator locally and gets a `candidates.ndjson` where each row records surface, rubric dimension, region tag, overlay tags, severity, the raising persona/lens, and `cell_refs` into the existing 30,348-cell grammar.
-  2. All 6 operator personas (Operator/Founder, Customer Support, Finance/Billing Ops, Recovery/Growth Ops, Developer/Integration, Compliance/Audit) each produce job-anchored findings from their entry point, and the graphic-design lens scores comparatively against named quiet-dev-tooling exemplars (Linear / Vercel / Stripe / Prisma) rather than emitting an absolute "award" score.
-  3. Running the evaluator with no `ANTHROPIC_API_KEY` exits 0 (no failure) and the existing per-image size guard still holds, so it is safe to invoke anywhere.
-  4. A committed `DESIGN-LENS-RUBRIC.md` sub-rubric plus a curated, license-clean good/bad exemplar set (sourced from repo history) anchors the design lens to the locked brand DNA ("quiet polish, well-made dev tooling, not fintech").
-  5. Running the proposer twice on unchanged screenshots yields an identical `finding_id` set — proven by an automated test — because each finding's canonical claim-key is derived from surface + dimension + sorted overlay-tags + region and excludes the LLM free-text.
-
-**Plans**: 2/5 plans executed
-**Wave 1**
-
-- [x] 205-01-PLAN.md — Determinism SSOT (`region-tags.js`): closed-enum vocab + pure claim-key/finding-id + DEDUP self-test (DEDUP-01, DEDUP-02)
-- [x] 205-02-PLAN.md — Design sub-rubric + curated good/bad exemplar set + PROVENANCE.json (EVAL-02, EVAL-04)
-
-**Wave 2** *(blocked on Wave 1 completion)*
-
-- [x] 205-03-PLAN.md — Proposer CLI: guards + 6 persona lenses + harness-validation gate + `candidates.ndjson` (EVAL-01, EVAL-03, EVAL-05)
-- [x] 205-05-PLAN.md — Capture-time `.bbox.json` region-selector emit for the 207 overlay + presence cross-check (EVAL-05)
-
-**Wave 3** *(blocked on Wave 2 completion)*
-
-- [x] 205-04-PLAN.md — Comparative graphic-design lens integration (few-shot exemplars, `direction` flag) (EVAL-02)
-
-### Phase 206: Adversarial verifier + finding ledger + deterministic gate
-
-**Goal**: Candidate findings are collapsed across lenses, adversarially confirmed, persisted to a committed forward-only ledger, and protected by a deterministic sibling gate that the LLM never touches — the pawl that lets the UI only move forward.
-**Depends on**: Phase 205 (consumes `candidates.ndjson` + claim-keys)
-**Requirements**: DEDUP-03, VERIFY-01, VERIFY-02, VERIFY-03, LEDGER-01, LEDGER-02, LEDGER-03, LEDGER-04, LEDGER-05
-**Success Criteria** (what must be TRUE):
-
-  1. Findings raised independently by multiple personas/lenses collapse into a single work item carrying a `persona_frequency` count.
-  2. Each candidate faces a 3-role adversarial skeptic panel (persona advocate, brand purist, operator-density defender) and is dropped unless at least 2 of 3 confirm; the operator-density-defender refutes any fix that would cut operator information density or add marketing-style whitespace without a concrete task-completion justification; and a candidate that cites no admissible justification token (`rubric-dim-below-bar` | `persona-job-miss:<job>` | `token-bypass`) is rejected before any human sees it.
-  3. Confirmed findings persist to a committed `findings.ledger.ndjson` with an explicit lifecycle (`open → resolved → verified-closed`, or `suppressed` with a reason) and foreign-key `cell_refs`, and a committed `ledger.baseline.json` high-water baseline records `confirmed_open` counts per lens plus the `resolved_locked` claim-key set.
-  4. The deterministic reducer emits a regression row when any lens's open count exceeds baseline, when a `resolved` finding's minted guard is missing/deleted, or when a `resolved_locked` claim reopens without a maintainer reopen marker; the gate passes only when `finding-regressions.ndjson` is 0 bytes and is independently re-verified by a CI script that recomputes counts from raw ledger rows (a hand-edited baseline that disagrees fails).
-  5. Both the gate reducer and its verifier pass a `--self-test` proving that count-increase, missing-guard, and reopened-locked-claim each produce a regression row while a clean ledger produces zero.
-
-**Plans**: 4 plans
-**Wave 1**
-
-- [x] 206-01-PLAN.md — Shared `ratchet-ledger.js` lifecycle helper: DEDUP-03 collapse + append/fold reducer (DEDUP-03)
-
-**Wave 2** *(blocked on Wave 1 completion)*
-
-- [x] 206-02-PLAN.md — `ratchet-verify.mjs`: 3-role adversarial skeptic panel + median-clamp + committed ledger writer (VERIFY-01, VERIFY-02, VERIFY-03, LEDGER-01)
-- [x] 206-03-PLAN.md — `phase-ratchet-ledger.mjs`: deterministic gate reducer + committed ledger/baseline/reopen-marker quadruple (LEDGER-02, LEDGER-03, LEDGER-05)
-
-**Wave 3** *(blocked on Wave 2 completion)*
-
-- [x] 206-04-PLAN.md — `scripts/ci/verify_ratchet_ledger.mjs`: independent CI re-verifier + npm script wiring (LEDGER-04, LEDGER-05)
-
-### Phase 207: Orchestration + digest + one-command round/fix loop
-
-**Goal**: The whole pipeline is driven by two `mix` commands with a rendered digest and minimal maintainer checkpoints, resolutions auto-mint deterministic guards, and the loop provably terminates.
-**Depends on**: Phase 206 (needs the verifier, ledger, and gate to orchestrate around)
-**Requirements**: ORCH-01, ORCH-02, ORCH-03, ORCH-04, ORCH-05, ORCH-06, ORCH-07, ORCH-08
-**Success Criteria** (what must be TRUE):
-
-  1. Maintainer runs `mix accrue_admin.ui.round` and it builds assets, boots the admin, seeds, captures, fans out evaluators, dedups, verifies, ranks, and renders a digest in one command.
-  2. The digest is a rendered HTML gallery grouping screenshots by surface with confirmed findings overlaid on their region, a ranked worklist, and a separate "decisions needed" queue for IA/product-decision items.
-  3. Maintainer can batch-approve all auto-fixable confirmed findings in one action, or reject an individual finding into a suppress-list with a reason that feeds dedup so it never resurfaces.
-  4. Maintainer runs `mix accrue_admin.ui.fix` and it applies the approved batch, rebuilds and commits the CSS bundle, re-captures, re-scores, updates the ledger, and auto-mints a deterministic guard (a targeted assertion in an existing spec, or a `ledger-count` guard for pure-taste findings) for each resolved finding so it cannot silently reopen.
-  5. The loop reports convergence after K=2 consecutive dry rounds and escalates to the maintainer at a 6-round hard cap instead of looping indefinitely.
-  6. Repeated `ui.round` runs on unchanged inputs reuse a cached prompt prefix (system preamble + tool schema + design-lens exemplar images) via Anthropic `cache_control`, measurably reducing per-run input tokens/cost, with identity (`claim_key`/`finding_id`) and the no-key/`--self-test` paths unchanged (ORCH-07). *(Folded from the Phase 205 live smoke: the proposer currently makes 7 uncached calls/screenshot, re-sending the schema + images each time.)*
-  7. A maintainer can scope a round to a surface subset (the representative slice or a single surface) through a documented flag on `mix accrue_admin.ui.round`, without hand-pruning `test-results/` PNGs; an unscoped round still sweeps the full configured surface set (ORCH-08). *(Folded from the Phase 205 live smoke: there is currently no subset filter, so a slice run required manual pruning.)*
-
-**Plans**: 8/8 plans executed
-**Verification**: automated verification passed; human UAT pending for ORCH-07 live cache-cost smoke and ORCH-08 live capture filter.
-**Wave 1**
-
-- [x] 207-01-PLAN.md
-- [x] 207-02-PLAN.md
-
-**Wave 2** *(blocked on Wave 1 completion)*
-
-- [x] 207-03-PLAN.md
-- [x] 207-04-PLAN.md
-
-**Wave 3** *(blocked on Wave 2 completion)*
-
-- [x] 207-05-PLAN.md
-
-**Wave 4** *(blocked on Wave 3 completion)*
-
-- [x] 207-06-PLAN.md
-
-**Wave 5** *(blocked on Wave 4 completion)*
-
-- [x] 207-07-PLAN.md — CR-01 digest accepts nullable `suggested_fix` without aborting the round (ORCH-01, ORCH-02)
-- [x] 207-08-PLAN.md — CR-02 guard-mint completeness and scoped `ui.fix` CSS commit (ORCH-04, ORCH-05)
-
-### Phase 208: Prove convergence on the representative slice + wire CI + ACCEPT
-
-**Goal**: Prove the ratchet converges the representative slice end-to-end, freeze the first baseline, wire the deterministic-only CI gate beside the existing ones, and land maintainer ACCEPT with a runbook that tees up the full sweep.
-**Depends on**: Phase 207 (needs the one-command round/fix loop)
-**Requirements**: CONV-01, CONV-02, CONV-03, CONV-04, CONV-05, CONV-06, CONV-07
-**Success Criteria** (what must be TRUE):
-
-  1. The ratchet runs to `CONVERGED (2 dry rounds)` on the representative slice (design-system foundation + a few component families, plus dashboard, subscription-detail, and subscriptions-list) with every slice cell scoring ≥ 2 and both `regressions.ndjson` and `finding-regressions.ndjson` empty, and the first non-empty `ledger.baseline.json` is frozen as the slice high-water mark.
-  2. A new deterministic-only CI job `admin-ui-ratchet-guardrails` passes on a PR with no `ANTHROPIC_API_KEY` and blocks on a synthetic ledger count-increase.
-  3. A change that improves one persona but regresses another is caught by the ledger (the regressed lens's open count rises → gate red), proven by an automated test.
-  4. Existing UI gates (`admin-hardening-guardrails`, `admin-phase200-guardrails`, asset-drift) remain green and the committed `accrue_admin.css` bundle stays fresh.
-  5. A `UI-RATCHET-SIGN-OFF.md` carries the maintainer `ACCEPT` line enforced by a sign-off verifier (mirroring the Phase 200 pattern), and a documented runbook enables graduating any remaining admin surface under the ratchet as a safe follow-on round.
-
-**Plans**: 5 plans
-Plans:
-**Wave 1**
-
-- [x] 208-01-PLAN.md — Deterministic frozen-baseline, score-floor, and red-path verifier foundations.
-- [x] 208-02-PLAN.md — Phase 208 sign-off verifier foundation.
-
-**Wave 2** *(blocked on Wave 1 completion)*
-
-- [x] 208-03-PLAN.md — Deterministic-only CI job and contract wiring.
-
-**Wave 3** *(blocked on Wave 2 completion)*
-
-- [ ] 208-04-PLAN.md — Live foundation-slice convergence evidence and explicit baseline freeze.
-
-**Wave 4** *(blocked on Wave 3 completion)*
-
-- [ ] 208-05-PLAN.md — Maintainer ACCEPT sign-off and bounded follow-on runbook.
-
+  1. The Subscriptions list renders from the canonical spine with **nothing** between `FlashGroup` and the `DataTable`: the five bespoke band `<section>`s (`.ax-subscriptions-invoice-strip` / `-queue-shortcut` / `-invoice-records` / `-secondary-strips` wrapping `-at-risk-strip` + `-audit-strip`) are gone, the page-level override classes (`ax-page-compact ax-subscriptions-page`, `ax-page-header-compact ax-subscriptions-header`, the `ax-kpi-row` StatStrip wrapper) are dropped, and the now-dead `open_invoice_queue/1` query is removed — with a content inventory proving every distinct operator datum (at-risk exposure, last-webhook status, open-invoice count) survives, relocated not lost.
+  2. The page presents one scannable health verdict (short-noun title + a single verdict expressed via StatStrip/StatusBadge, not a full-sentence title) and exactly one invoice-queue primary action in `PageHeader` `:actions` (the triple-repeated "Open dedicated invoice queue" CTA — the most-confirmed round-99 defect — collapses to one), with the fake "Billing health overview" breadcrumb parent replaced by the real 2-crumb `[home, Subscriptions]`.
+  3. Subscriptions table + card cells render via the compact shared idiom (`StatusBadge`, `ax-stack-xs`, `ax-link`, `ax-chip ax-label`) with no in-cell action buttons — the 15-20-line bespoke `identity_cell/3` + `billing_signals_cell/3` raw HTML is rebuilt and per-row actions move to a shared control (actions column or `DropdownMenu`), matching the reference pages.
+  4. The `WorkQueueCallout` extract-or-inline decision is made and recorded: if the trimmed worklist callout shape demonstrably repeats (and will be reused by Home), exactly one small shared component composed from existing tokens + `.ax-card` reusing the `moss`/`cobalt`/`amber`/`slate`/`ink` tone scale is added and consumed by Subscriptions; otherwise Subscriptions composes from `.ax-card` directly and no component is added. No other new components, no new deps.
+  5. Verification gates pass in-phase: no operator-density regression versus the pre-reign Subscriptions screenshot (row height, rows-per-viewport, header band height held) and PNG parity against the canonical Payments/Customers/Invoices reference; the `subscriptions_live_test:111` (`ax-kpi-row ax-subscriptions-kpi-row`) assertion and any other retired-class/copy assertions are migrated to the shared-component selector in this phase; the served `priv/static/accrue_admin.css` bundle and `examples/accrue_host/e2e/generated/copy_strings.json` are rebuilt and committed; the subscription **detail** page's shared `.ax-inline-worklist*` / `.ax-audit-summary-row` styling is preserved (retain-vs-reign decided and PNG-verified) — and the diff touches no `accrue/lib`, adds no nav room, and introduces no "why blocked"/causality synthesis.
+**Plans**: TBD
 **UI hint**: yes
 
-### Phase 209: Full-surface sweep under the ratchet (SCOPE-GATED / OPTIONAL)
+### Phase 210: Reign Home + certify answer-first IA & copy integrity
 
-**Goal**: Graduate the remaining ~19 admin surfaces round-by-round to 2 dry rounds each under the proven ratchet, with no regressions. **Optional follow-on — explicitly NOT required for v1.56 milestone sign-off** (confirmed maintainer decision: tee it up, do not force it into this milestone). Maps only the deferred `SWEEP-01`; no v1 (committed) requirement is assigned here.
-**Depends on**: Phase 208 (the ratchet must be proven + CI-gated first)
-**Requirements**: SWEEP-01 (deferred / not part of the v1.56 committed set)
+**Goal**: The Home page (`dashboard_live.ex`) is composed from the canonical `PageHeader` instead of a hand-rolled `<header>`, its two signature zones (attention rail + task-launcher tiles) are rebuilt from shared primitives, and — with both outlier pages now reigned — the answer-first information architecture and plain-language copy/nav integrity are certified across Home **and** Subscriptions so the whole admin reads as one operator-first system. Home is the larger lift (fully bespoke header + two zones with no shared component today) and is done second so it can consume anything Subscriptions established (including `WorkQueueCallout`).
+**Depends on**: Phase 209
+**Requirements**: REIGN-03, IA-01, IA-02, IA-03, IA-04, COPY-01, COPY-02
 **Success Criteria** (what must be TRUE):
+  1. Home is composed from the canonical `PageHeader` (breadcrumbs + title + `:description`/`:actions`/`:stat_strip`); its attention rail + four launcher tiles are rebuilt from `.ax-card` + `Button` + `Icon` + `StatusBadge` (with `EmptyState` for empty branches), and the already-canonical `KpiCard` "At a glance" band and `Timeline` activity cards are kept as-is.
+  2. Each of the two pages presents exactly **one** scannable billing-health verdict (Home's verdict — rendered three times today — and the Subscriptions verdict each collapse to a single clear statement) and **one** unambiguous primary action per zone (Home's triplicated customer-search entry de-duplicates to a single discoverable control folded into `PageHeader` `:actions`; the Subscriptions invoice-queue entry stays single from Phase 209).
+  3. Content on both pages is ordered answer-first (health verdict → primary action → supporting detail → records), redundant bands are trimmed with **no operator-density regression** versus each page's pre-reign baseline (verified by PNG compare against both the canonical reference and the pre-reign screenshot), and console density is preserved rather than over-aired.
+  4. Operator-facing copy on both pages is plain-language (no double-negative "No — billing is not active"; "workspace" jargon clarified) and sourced from `AccrueAdmin.Copy` (no inline template literals); breadcrumbs point only to real navigable parents (no fake "Billing health overview"), and the primary customer-lookup control is discoverable rather than buried.
+  5. Verification gates pass in-phase: the `dashboard_live_test` assertions at L107 (`ax-home-health-answer`), L130 (`ax-launcher-primary`), L184 (`ax-home-customer-search-cta`) and the `e2e/admin-spec-overview-phase194` + `admin-interaction-overlay-phase199` `.ax-attention-rail*` selectors are migrated to the shared-component DOM; `admin-a11y.spec.js` (axe) stays green with landmark/heading/visually-hidden semantics preserved; the served `accrue_admin.css` bundle and `copy_strings.json` are rebuilt and committed; and the diff touches no `accrue/lib`, adds no nav room, and introduces no diagnosis/causality synthesis.
+**Plans**: TBD
+**UI hint**: yes
 
-  1. Each remaining admin surface reaches 2 consecutive dry rounds under the ratchet with `finding-regressions.ndjson` empty.
-  2. No lens's `confirmed_open` count regresses above its frozen baseline across the sweep, and existing UI gates stay green.
+### Phase 211: Grep-gated CSS retirement & cross-surface cleanup
 
-**Plans**: TBD (deferred — not scheduled for v1.56)
+**Goal**: With both target templates reigned, retire the now-dead bespoke `.ax-*` rule sets from `assets/css/app.css`, rebuild and commit the served bundle, and clean up the secondary surfaces that still reference the retired vocabulary (component kitchen, storybook, and the parked ratchet's `region-tags.js` selector map) — grep-gated throughout so the out-of-scope subscription detail page keeps its shared classes. CSS deletion is sequenced last, after all reigned templates land, because blind prefix-deletion is invisible to source-text CI.
+**Depends on**: Phase 210 (both Home and Subscriptions must be reigned before the shared/dead CSS can be safely retired)
+**Requirements**: REIGN-04
+**Success Criteria** (what must be TRUE):
+  1. A definitive grep census across `lib/`, `test/`, and `e2e/` confirms zero remaining references to each candidate class before deletion; the bespoke `.ax-home-*` / `.ax-launcher*` / `.ax-attention*` / `.ax-health-summary*` / `.ax-subscriptions-*` / `.ax-subscription-row-*` / `.ax-subscription-setup*` sets (~325 rules) are removed from `assets/css/app.css`.
+  2. The detail-page-shared classes (`.ax-inline-worklist`, `.ax-inline-worklist-copy`, `.ax-audit-summary-row`, and any other class still referenced by `subscription_live.ex`) are **preserved**; the subscription detail page is PNG-verified unbroken after retirement.
+  3. The committed `priv/static/accrue_admin.css` bundle is rebuilt via `mix accrue_admin.assets.build` and committed in the same change (no dead-CSS ship); a cheap guard confirms no orphan `ax-*` rule lacks a source reference and no source `ax-*` class lacks a rule.
+  4. The component kitchen (`component_kitchen_live.ex`) and `priv/static/storybook.css` no longer render retired vocabulary (updated + `storybook.css` rebuilt), the phase200 storybook specs stay green, and the parked `region-tags.js` `.ax-attention-rail` mapping is opportunistically fixed so a future ratchet re-freeze starts from a non-dangling selector map.
+  5. Full `mix test` + the admin e2e suite are green across the phase boundary (no red left behind), and the diff touches no `accrue/lib` and adds no nav room.
+**Plans**: TBD
+**UI hint**: yes
 
 ## Progress
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
-| 167. Design Tokens & Motion Foundation | v1.50 | ✓ | Complete | 2026-06-02 |
-| 168. Typography & Icon System | v1.50 | ✓ | Complete | 2026-06-02 |
-| 169. IA — Home, Nav & Search | v1.50 | ✓ | Complete | 2026-06-02 |
-| 170. Cross-Screen Threading & Microcopy | v1.50 | ✓ | Complete | 2026-06-02 |
-| 171. Shared Detail Components & Refactor | v1.50 | ✓ | Complete | 2026-06-02 |
-| 172. Seed Enrichment & Component Kitchen | v1.50 | ✓ | Complete | 2026-06-02 |
-| 173. Rubric Audit & Visual/A11y Coverage | v1.50 | ✓ | Complete | 2026-06-02 |
-| 174. A — Design-System Gap Closure & Token Completeness | v1.51 | 7/7 | Complete | 2026-06-04 |
-| 175. B — Persona-Driven IA Spine | v1.51 | 7/7 | Complete | 2026-06-04 |
-| 176. C — Systematic Per-Screen Rubric Uplift | v1.51 | 6/6 | Complete | 2026-06-04 |
-| 177. D — Motion & Micro-interaction Design | v1.51 | 6/6 | Complete | 2026-06-04 |
-| 178. E — Seed Expressiveness & State Coverage | v1.51 | 4/4 | Complete | 2026-06-04 |
-| 179. F — Screenshot-Driven Visual QA Loop & Sign-off | v1.51 | 3/3 | Complete | 2026-06-05 |
-| 180. Brand Audit & DNA Lock | v1.52 | 4/4 | Complete | 2026-06-12 |
-| 181. SVG Pipeline + Tournament Round 1 — Divergent | v1.52 | 7/7 | Complete | 2026-06-13 |
-| 182. Tournament Convergent Refinement | v1.52 | 3/3 | Complete | 2026-06-13 |
-| 183. Logo System Production | v1.52 | 4/4 | Complete | 2026-06-13 |
-| 184. Design Tokens & Specimens | v1.52 | 5/5 | Complete | 2026-06-14 |
-| 185. Voice, Microcopy & Marketing Copy | v1.52 | 3/3 | Complete | 2026-06-14 |
-| 186. HTML Brand Book Assembly & Quality Gate | v1.52 | 3/3 | Complete | 2026-06-14 |
-| 187. Audit & Baseline | v1.53 | 5/5 | Complete    | 2026-06-15 |
-| 188. Foundations hardening | v1.53 | 8/8 | Complete    | 2026-06-20 |
-| 189. Primitive & form components + component lab | v1.53 | 7/7 | Complete   | 2026-06-18 |
-| 190. Navigation, data-display & meta-component cohesion | v1.53 | 6/6 | Complete | 2026-06-18 |
-| 191. Page & flow interaction pass + fixture stress + microcopy | v1.53 | 7/7 | Complete | 2026-06-19 |
-| 192. Idempotent verification & sign-off | v1.53 | 6/6 | Complete   | 2026-06-20 |
-| 193. Research, re-baseline & pattern lock | v1.54 | 5/5 | Complete    | 2026-06-25 |
-| 194. Exemplar A — Dashboard | v1.54 | 4/4 | Complete    | 2026-06-26 |
-| 195. Exemplar B — Subscription detail | v1.54 | 8/8 | Complete    | 2026-06-26 |
-| 196. Exemplar C — Subscriptions list + PageHeader | v1.54 | 5/5 | Complete    | 2026-06-26 |
-| 197. Propagate LIST | v1.54 | 7/7 | Complete    | 2026-06-28 |
-| 198. Propagate DETAIL + analytics | v1.54 | 9/9 | Complete    | 2026-06-29 |
-| 199. Cross-cutting interaction/overlay correctness + fixture stress + microcopy | v1.54 | 15/15 | Complete    | 2026-06-30 |
-| 200. Idempotent verification & sign-off | v1.54 | 6/6 | Complete    | 2026-06-30 |
-| 201. Software quality evaluation | v1.55 | 1/1 | Complete    | 2026-07-02 |
-| 202. CI/CD performance and determinism audit | v1.55 | 1/1 | Complete    | 2026-07-02 |
-| 203. Database schema contract ADR | v1.55 | 1/1 | Complete    | 2026-07-02 |
-| 204. Ranked hardening roadmap | v1.55 | 1/1 | Complete    | 2026-07-03 |
-| 205. Persona + design-lens evaluator harness | v1.56 | 5/5 | Complete    | 2026-07-03 |
-| 206. Adversarial verifier + finding ledger + deterministic gate | v1.56 | 4/4 | Complete    | 2026-07-04 |
-| 207. Orchestration + digest + one-command round/fix loop | v1.56 | 8/8 | Human verification | - |
-| 208. Prove convergence on slice + wire CI + ACCEPT | v1.56 | 3/5 | In Progress|  |
-| 209. Full-surface sweep under the ratchet (optional/scope-gated) | v1.56 | 0/0 | Scope-gated | - |
+| 193. Research, re-baseline & pattern lock | v1.54 | 5/5 | Complete | 2026-06-25 |
+| 194. Exemplar A — Dashboard | v1.54 | 4/4 | Complete | 2026-06-26 |
+| 195. Exemplar B — Subscription detail | v1.54 | 8/8 | Complete | 2026-06-26 |
+| 196. Exemplar C — Subscriptions list + PageHeader | v1.54 | 5/5 | Complete | 2026-06-26 |
+| 197. Propagate LIST | v1.54 | 7/7 | Complete | 2026-06-28 |
+| 198. Propagate DETAIL + analytics | v1.54 | 9/9 | Complete | 2026-06-29 |
+| 199. Cross-cutting interaction/overlay correctness | v1.54 | 15/15 | Complete | 2026-06-30 |
+| 200. Idempotent verification & sign-off | v1.54 | 6/6 | Complete | 2026-06-30 |
+| 201. Software quality evaluation | v1.55 | 1/1 | Complete | 2026-07-02 |
+| 202. CI/CD performance and determinism audit | v1.55 | 1/1 | Complete | 2026-07-02 |
+| 203. Database schema contract ADR | v1.55 | 1/1 | Complete | 2026-07-02 |
+| 204. Ranked hardening roadmap | v1.55 | 1/1 | Complete | 2026-07-03 |
+| 205. Persona + design-lens evaluator harness | v1.56 | 5/5 | Complete | 2026-07-03 |
+| 206. Adversarial verifier + finding ledger + deterministic gate | v1.56 | 4/4 | Complete | 2026-07-04 |
+| 207. Orchestration + digest + one-command round/fix loop | v1.56 | 8/8 | Complete | 2026-07-07 |
+| 208. Prove convergence on slice + wire CI + ACCEPT | v1.56 | 3/5 | Parked | - |
+| 209. Reign Subscriptions (list + detail CSS coordination) | v1.57 | 0/0 | Not started | - |
+| 210. Reign Home + certify answer-first IA & copy integrity | v1.57 | 0/0 | Not started | - |
+| 211. Grep-gated CSS retirement & cross-surface cleanup | v1.57 | 0/0 | Not started | - |
 
 ## Historical Backlog Anchors (not active scope)
 
 These v1.17 FRG anchors are retained for traceability only as historical, non-active planning context. They do not create milestone scope unless a fresh sourced friction row meets the current stable-core evidence bar.
 
-- [INT-10 Phase 63](.planning/research/v1.17-FRICTION-INVENTORY.md#backlog--int-10-phase-63) — Historical / non-active Braintree and multi-processor integration anchor; materially shipped across v1.31+ and reflected in the processor support matrix. Reopen only for a concrete adopter failure mode or operational failure in the shipped processor-support contract.
+- [INT-10 Phase 63](.planning/research/v1.17-FRICTION-INVENTORY.md#backlog--int-10-phase-63) — Historical / non-active Braintree and multi-processor integration anchor; materially shipped across v1.31+. Reopen only for a concrete adopter failure mode or operational failure in the shipped processor-support contract.
 - [BIL-03 Phase 64](.planning/research/v1.17-FRICTION-INVENTORY.md#backlog--bil-03-phase-64) — Historical / non-active billing portal configuration anchor; materially shipped via `accrue_portal`, guides, and host proof. Reopen only for a repeated support issue or correctness/data-loss risk in the portal support surface.
-- [ADM-12 Phase 65](.planning/research/v1.17-FRICTION-INVENTORY.md#backlog--adm-12-phase-65) — Historical / non-active admin UI role-based access anchor; no current broad feature scope follows from this link. Reopen only for a concrete security/compliance requirement or explicit strategy change.
+- [ADM-12 Phase 65](.planning/research/v1.17-FRICTION-INVENTORY.md#backlog--adm-12-phase-65) — Historical / non-active admin UI role-based access anchor. Reopen only for a concrete security/compliance requirement or explicit strategy change.
 
 ## Deferred Seeds and Ideas (dormant / trigger-bound)
 
 | Item | Status | Reason | Future owner/category | Revisit trigger |
 |------|--------|--------|-----------------------|-----------------|
-| TOOL-01 (PhoenixStorybook) | adopted (v1.54) | v1.53 deferred it; v1.54 reverses the deferral — PhoenixStorybook is adopted `only: [:dev, :test]` (STY-01..03) so adopters never carry it. | Component-lab tooling | n/a — adopted |
-| TOOL-02 (pixel-diff visual-regression) | deferred (v1.53/v1.54) | Percy/Applitools-style pixel-diff tooling deferred in favor of the scored-cell forward-only gate over real composed routes (it would flag every intentional v1.54 improvement as a regression). | Visual-regression tooling | flaky/insufficient scored-cell + judge loop, or explicit strategy change |
-| TOOL-03 (publish tokens.css distributable) | deferred (v1.53) | Standalone npm/CDN token distributable not needed for the admin hardening/streamlining passes. | Brand/token distribution | external doc/marketing-site need for distributable tokens |
-| SEED-001 | resolved historical context | Linked-release purpose was superseded by later linked publish work and Phase 159 release-readiness proof. | Release readiness / archive traceability | operational failure in linked release proof or explicit strategy change in release process |
-| SEED-002 | dormant future roadmap | Ecosystem integrations are useful blueprints but are not v1.48 closeout blockers and do not create default milestone scope. | Future roadmap / ecosystem integrations | concrete adopter failure requiring one listed integration, repeated support issue, or explicit strategy change |
-| SEED-003 | dormant operational hygiene | Repo hygiene checkpoints are useful before milestone/release prep but do not create product scope or force Hex publish. | Repo hygiene / release prep | before opening a new milestone, before release prep, or when local/GitHub/GSD state feels stale |
-| ENT-EXT-01 | deferred | Rich metered, tiered, and range entitlement math is beyond current seat-count support and lacks a sourced adopter contract. | Entitlements extension | concrete adopter failure or explicit adopter contract requiring richer entitlement math |
-| FIN-03 | standing non-goal | App-owned finance exports remain outside Accrue's declared billing-library scope. | Strategy non-goal / finance exports | explicit strategy change or correctness/security/data-loss risk that cannot be solved by host-owned exports |
-| SEED-004 (Admin UI blueprint redesign) | backlogged future roadmap (post-v1.56) | First-principles admin/operator UI redesign toward an "operator control plane over billing state" — IA restructure (+Usage/+Settings, de-tab Customer-360, lens-default lists), signature diagnostic surfaces ("Why blocked?" card, causality graph), sensitive-action A/B/C, new rooms (Usage/checkout/fee-recon). A genuine *new target*, distinct from the v1.56 ratchet (machinery). Reaches into core `accrue` diagnosis fns (first time in the admin-UI line). North-star: `prompts/accrue_admin_operator_ui_journey_blueprint.md`; synthesis: [`.planning/research/ADMIN-UI-REDESIGN-BLUEPRINT-SYNTHESIS.md`](.planning/research/ADMIN-UI-REDESIGN-BLUEPRINT-SYNTHESIS.md); seed: [`SEED-004`](.planning/seeds/SEED-004-admin-ui-blueprint-redesign.md). | Admin UI / IA redesign (+ core diagnosis) | after v1.56 ships → `/gsd-new-milestone` (reopen class: explicit strategy change — flagship admin surface) |
+| SEED-004 M2 (signature diagnostic surfaces + core diagnosis) | deferred (next after v1.57 M1) | The "Why blocked?" diagnosis card, causality graph/timeline, unified `billing_state_for_customer/1` synthesis, freshness/stale chips, and the core `accrue` diagnosis fns they require (`blocking_reason_for_owner/1`, `causality_chain_for_event/1`) + durable event-name contracts. First admin-UI line to reach into core `accrue`. | Admin UI / IA + core diagnosis | after v1.57 M1 lands → `/gsd-new-milestone` (reopen class: explicit strategy change) |
+| SEED-004 M3 (new rooms + structure + ratchet re-freeze) | deferred (after M2) | New Usage/meters, checkout-sessions, Connect-capabilities, fee-reconciliation rooms; `+Usage`/`+Settings` nav groups; de-tab Customer-360; and the v1.56-ratchet re-freeze (refresh design-lens rubric + persona exemplars + re-freeze baseline) that re-locks the landed redesign. | Admin UI / IA + ratchet | after M2 lands; ratchet re-freeze is post-M3 |
+| v1.56 SWEEP-01 (full-surface ratchet sweep) | parked with v1.56 | Graduate the remaining ~19 admin surfaces round-by-round under the proven ratchet. Parked with the v1.56 milestone; the ratchet re-freeze after SEED-004 lands supersedes the original sweep target. | Ratchet / admin design QA | v1.56 resumed, or post-M3 ratchet re-freeze |
+| TOOL-02 (pixel-diff visual-regression) | deferred (v1.53/v1.54) | Percy/Applitools-style pixel-diff tooling deferred in favor of the scored-cell forward-only gate over real composed routes. | Visual-regression tooling | flaky/insufficient scored-cell + judge loop, or explicit strategy change |
+| TOOL-03 (publish tokens.css distributable) | deferred (v1.53) | Standalone npm/CDN token distributable not needed for the admin passes. | Brand/token distribution | external doc/marketing-site need for distributable tokens |
+| ENT-EXT-01 | deferred | Rich metered/tiered/range entitlement math beyond current seat-count support; no sourced adopter contract. | Entitlements extension | concrete adopter failure or explicit adopter contract |
+| FIN-03 | standing non-goal | App-owned finance exports remain outside Accrue's declared billing-library scope. | Strategy non-goal / finance exports | explicit strategy change or correctness/security/data-loss risk not solvable by host-owned exports |
+| SEED-002 | dormant future roadmap | Ecosystem integrations are useful blueprints but do not create default milestone scope. | Future roadmap / ecosystem integrations | concrete adopter failure requiring one listed integration, repeated support issue, or explicit strategy change |

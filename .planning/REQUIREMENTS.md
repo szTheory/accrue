@@ -59,4 +59,24 @@ Requirements for this milestone (M1). Each maps to exactly one roadmap phase.
 
 ## Traceability
 
-Filled by the roadmap (each REQ-ID → phase).
+Each v1 requirement maps to exactly one phase. Coverage: **11/11 mapped, 0 orphans, 0 duplicates.**
+
+| Requirement | Phase | Status |
+|-------------|-------|--------|
+| REIGN-01 | Phase 209 — Reign Subscriptions (list + detail CSS coordination) | Pending |
+| REIGN-02 | Phase 209 — Reign Subscriptions (list + detail CSS coordination) | Pending |
+| COMP-01 | Phase 209 — Reign Subscriptions (list + detail CSS coordination) | Pending |
+| REIGN-03 | Phase 210 — Reign Home + certify answer-first IA & copy integrity | Pending |
+| IA-01 | Phase 210 — Reign Home + certify answer-first IA & copy integrity | Pending |
+| IA-02 | Phase 210 — Reign Home + certify answer-first IA & copy integrity | Pending |
+| IA-03 | Phase 210 — Reign Home + certify answer-first IA & copy integrity | Pending |
+| IA-04 | Phase 210 — Reign Home + certify answer-first IA & copy integrity | Pending |
+| COPY-01 | Phase 210 — Reign Home + certify answer-first IA & copy integrity | Pending |
+| COPY-02 | Phase 210 — Reign Home + certify answer-first IA & copy integrity | Pending |
+| REIGN-04 | Phase 211 — Grep-gated CSS retirement & cross-surface cleanup | Pending |
+
+**Mapping notes:**
+- **REIGN-01/REIGN-02** carry the Subscriptions-page structural reign in Phase 209; because band removal + single-verdict + single-CTA + compact cells *are* the Subscriptions answer-first pivot, that page's IA work is delivered physically under these two requirements. The cross-page IA/COPY requirements (IA-01..04, COPY-01/02) become fully TRUE only once the second page (Home) is reigned, so they close in Phase 210.
+- **COMP-01** (the one-new-component budget) resolves in Phase 209 — the `WorkQueueCallout` extract-or-inline decision surfaces during the Subscriptions reign and, if extracted, is consumed by Home in Phase 210.
+- **REIGN-04** (grep-gated CSS retirement) is sequenced last in Phase 211 — it can only run safely after both target templates land, because `.ax-inline-worklist*` / `.ax-audit-summary-row` are shared with the out-of-scope subscription detail page. Per-page markup/selector migration happens in the reign phases (209/210); Phase 211 does the zero-reference-verified deletion + bundle rebuild + kitchen/storybook/`region-tags.js` cleanup.
+- **Density (IA-03)** and **PNG-parity** are cross-cutting done-criteria repeated as success criteria on *both* reign phases (209 and 210), even though IA-03 formally maps to Phase 210.
