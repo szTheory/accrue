@@ -32,7 +32,7 @@ See: `.planning/PROJECT.md` (updated 2026-07-03 after v1.55 closeout)
 Phase: 208 (prove-convergence-on-the-representative-slice-wire-ci-accept) — EXECUTING
 Plan: 4 of 5
 Status: Ready to execute
-Last activity: 2026-07-18 - Completed quick task 260718-qni: added a short JTBD subtitle to each persona in the nav account-switcher dropdown (commit ae940cb1); prior: polished + Cadence-branded the accrue_portal customer portal /billing (260718-osx)
+Last activity: 2026-07-18 - Completed quick task 260718-s1y: real light/dark/system theming + idiomatic picker for the accrue_portal customer portal, brandable in both modes (commits 3a7284f4, ba6a715c); prior: JTBD subtitles in the nav account-switcher dropdown (260718-qni)
 
 Progress: [█████████░] 91%
 
@@ -617,6 +617,7 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 | 260718-kf9 | Put "Scale Customer" persona on the real Scale plan (price_metered) instead of orphan price_premium + move :advanced_reports entitlement with it; /app/billing now labels+highlights the plan (Playwright, unit 3/0) | 2026-07-18 | 1ba06cba | [260718-kf9-scale-persona-real-plan](./quick/260718-kf9-scale-persona-real-plan/) |
 | 260718-osx | Polish + Cadence-brand the `accrue_portal` customer portal (`/billing`) — built the plumbed-but-unrendered host-brand bridge (nonce'd `:root` override from `@brand`, additive `--accrue-brand-*`/surface tokens in core `brand.css`, `:font_stack` through BrandPlug, `.portal-topbar` chrome) + token-driven CSS polish (killed hardcoded `#2f6e58`/gradient, type scale, hover/`:focus-visible`, status pills) across all 7 portal pages; neutral-Accrue fallback preserved (portal compile clean, tests 36/0) | 2026-07-18 | ca5dd2f7, 690e03f2, 5f221975 | [260718-osx-portal-billing-cadence-polish](./quick/260718-osx-portal-billing-cadence-polish/) |
 | 260718-qni | Add a short JTBD subtitle to each persona in the nav "Switch account" dropdown — new `:jtbd` field in `DemoBrand` + two-line dropdown item (label + workspace tag, JTBD line) so picking a persona reads as choosing a scenario (compile clean, login_test 2/0) | 2026-07-18 | ae940cb1 | [260718-qni-add-short-jtbd-line-to-each-persona-in-t](./quick/260718-qni-add-short-jtbd-line-to-each-persona-in-t/) |
+| 260718-s1y | Real light/dark/system theming for the `accrue_portal` customer portal — three-state `[data-theme]` model in core `brand.css` (was OS-only `prefers-color-scheme`), `--accrue-brand-accent-text` + derived `-strong` so a single host accent stays legible in both modes, an idiomatic 3-way topbar picker (monitor/sun/moon, SSR-active, `accrue_theme` cookie persist, CSP-safe delegated JS). Library-only (compile clean, portal tests 36/0). DEFERRED: single-mode config API, admin config surface, admin re-skin→SEED-004, dunning banner | 2026-07-18 | 3a7284f4, ba6a715c | [260718-s1y-portal-light-dark-system-theming-picker-](./quick/260718-s1y-portal-light-dark-system-theming-picker-/) |
 
 ### Milestone Intake Rules
 
