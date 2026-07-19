@@ -971,21 +971,23 @@ const RATCHET_AUTO_GUARDS = [
   {"finding_id":"f-4f474e99919ee505","kind":"focus-ring","selector":".ax-topbar"}, // @ratchet:f-4f474e99919ee505
   {"finding_id":"f-5b4fde509c9846f7","kind":"focus-ring","selector":".ax-content"}, // @ratchet:f-5b4fde509c9846f7
   {"finding_id":"f-66ff3aa97d803c81","kind":"focus-ring","selector":".ax-toolbar"}, // @ratchet:f-66ff3aa97d803c81
-  {"finding_id":"f-68d2bf118467b34a","kind":"focus-ring","selector":".ax-attention-rail"}, // @ratchet:f-68d2bf118467b34a
+  {"finding_id":"f-68d2bf118467b34a","kind":"focus-ring","selector":"[data-ax-zone=attention-rail]","route":"/billing"}, // @ratchet:f-68d2bf118467b34a
   {"finding_id":"f-8b82f34db2fd2d70","kind":"focus-ring","selector":".ax-content"}, // @ratchet:f-8b82f34db2fd2d70
   {"finding_id":"f-8d4e761ccec068a7","kind":"focus-ring","selector":".ax-primary-nav:visible, [data-sidebar-toggle='true']:visible"}, // @ratchet:f-8d4e761ccec068a7
   {"finding_id":"f-90ff4aae38ba2085","kind":"focus-ring","selector":".ax-toolbar"}, // @ratchet:f-90ff4aae38ba2085
   {"finding_id":"f-988d2a9808195b53","kind":"focus-ring","selector":".ax-detail"}, // @ratchet:f-988d2a9808195b53
-  {"finding_id":"f-9e6f3e53a835a6d5","kind":"focus-ring","selector":".ax-attention-rail"}, // @ratchet:f-9e6f3e53a835a6d5
+  {"finding_id":"f-9e6f3e53a835a6d5","kind":"focus-ring","selector":"[data-ax-zone=attention-rail]","route":"/billing"}, // @ratchet:f-9e6f3e53a835a6d5
   {"finding_id":"f-9f433603cde72097","kind":"focus-ring","selector":".ax-kpi-row"}, // @ratchet:f-9f433603cde72097
   {"finding_id":"f-a276757f4dcd510c","kind":"focus-ring","selector":".ax-related-resources"}, // @ratchet:f-a276757f4dcd510c
   {"finding_id":"f-a3421a7901c75b6b","kind":"focus-ring","selector":".ax-layer"}, // @ratchet:f-a3421a7901c75b6b
   {"finding_id":"f-a5a8e0d926d2214c","kind":"focus-ring","selector":".ax-kpi-row"}, // @ratchet:f-a5a8e0d926d2214c
   {"finding_id":"f-b6c27cee85892dd2","kind":"focus-ring","selector":".ax-layer"}, // @ratchet:f-b6c27cee85892dd2
   {"finding_id":"f-ca8eabe5458b44f5","kind":"focus-ring","selector":".ax-page-header"}, // @ratchet:f-ca8eabe5458b44f5
+  {"finding_id":"f-d43539c599a42ac9","kind":"focus-ring","selector":".ax-primary-nav"}, // @ratchet:f-d43539c599a42ac9
   {"finding_id":"f-e3deb40c0e41d060","kind":"focus-ring","selector":".ax-layer"}, // @ratchet:f-e3deb40c0e41d060
   {"finding_id":"f-f1be6ae0d866ce1b","kind":"focus-ring","selector":".ax-page-header"}, // @ratchet:f-f1be6ae0d866ce1b
   {"finding_id":"f-f6641ba530cd6c0b","kind":"focus-ring","selector":".ax-topbar"}, // @ratchet:f-f6641ba530cd6c0b
+  {"finding_id":"f-f91517ae68a2adec","kind":"focus-ring","selector":".ax-data-table"}, // @ratchet:f-f91517ae68a2adec
 ];
 // <<< @ratchet:auto-guards <<<
 
