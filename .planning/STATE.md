@@ -2,11 +2,9 @@
 gsd_state_version: 1.0
 milestone: v1.57
 milestone_name: Admin Operator Control Plane
-current_phase: 209
-current_phase_name: reign-subscriptions-list-detail-css-coordination
-status: ready_to_plan
-stopped_at: Phase 209 complete (3/3) — ready to discuss Phase 210
-last_updated: 2026-07-19T18:49:08.129Z
+status: planning
+stopped_at: Phase 210 context gathered
+last_updated: "2026-07-19T19:00:26.605Z"
 last_activity: 2026-07-19
 progress:
   total_phases: 3
@@ -717,9 +715,9 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 
 ## Session Continuity
 
-Last session: 2026-07-19T18:43:25.245Z
-Stopped at: Completed 209-03-PLAN.md
-Resume file: None
+Last session: 2026-07-19T19:00:26.601Z
+Stopped at: Phase 210 context gathered
+Resume file: .planning/phases/210-reign-home-certify-answer-first-ia-copy-integrity/210-CONTEXT.md
 
 ## Operator Next Steps
 
