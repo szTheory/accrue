@@ -29,6 +29,8 @@ cd examples/accrue_host && mix verify.full
 
 ## Start here
 
+- [Architecture](accrue/guides/architecture.md) for the outside-in model of host ownership, processor authority, local projections, webhooks, entitlements, Admin, and Portal.
+- [Code walkthrough](accrue/guides/code-walkthrough.md) for the same direct-subscribe and webhook route through representative current source.
 - [Canonical local demo: Fake](examples/accrue_host/README.md) for the checked-in host app and the shortest path to a first subscription, signed webhook, admin inspection, and focused proof run.
 - [Visual walkthrough (Fake screenshots)](examples/accrue_host/README.md#visual-walkthrough-fake-backed) for full-page PNGs of host + mounted admin via Playwright (`npm run e2e:visuals` in `examples/accrue_host`).
 - [Package tutorial](accrue/guides/first_hour.md) for the same host-first story in package-facing terms.
