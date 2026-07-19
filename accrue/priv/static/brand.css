@@ -35,7 +35,10 @@
    * below render — un-configured adopters still get the polished default.
    */
   --accrue-brand-accent:          var(--accrue-moss);   /* primary CTA, active accent */
-  --accrue-brand-accent-strong:   #4D8A70;              /* hover / active state */
+  --accrue-brand-accent-strong:                         /* hover / active state */
+    color-mix(in srgb, var(--accrue-brand-accent) 82%, black);
+  --accrue-brand-accent-text:                           /* accent used as text (legible per-theme) */
+    var(--accrue-brand-accent);
   --accrue-brand-accent-contrast: #FFFFFF;              /* text on the accent */
   --accrue-brand-secondary:       var(--accrue-slate);  /* secondary emphasis, links */
   --accrue-brand-font:
@@ -51,17 +54,47 @@
 }
 
 /*
- * Optional dark-mode surface pass. Kept token-scoped so the portal's
- * token-driven CSS inherits it automatically. Host brand accent/secondary
- * still override via the nonce'd inline <style>.
+ * Dark-mode surface pass — three-state theming driven by `<html data-theme>`
+ * (set by the portal root layout from the `accrue_theme` cookie).
+ *
+ *   - `:root`                       → light defaults (above).
+ *   - `:root[data-theme="dark"]`    → explicit dark; wins even on a light OS.
+ *   - system / no-attr + dark OS    → follows the OS (`prefers-color-scheme`).
+ *
+ * Scoping the OS block to `data-theme="system"` (and the no-attribute case)
+ * means an explicit `data-theme="light"` stays light on a dark OS. The ~8 dark
+ * vars are duplicated across the two selectors — acceptable for this build-less
+ * file. Kept token-scoped so the portal's token-driven CSS inherits it
+ * automatically; host brand accent/secondary still override via the nonce'd
+ * inline <style>. In dark mode `--accrue-brand-accent-text` and
+ * `--accrue-brand-accent-strong` are re-derived so any host accent stays
+ * legible against the dark surface.
  */
+:root[data-theme="dark"] {
+  --accrue-ink:            #ECF1F5;
+  --accrue-slate:          #B7C2CC;
+  --accrue-surface:        #171B20;
+  --accrue-surface-muted:  #10141A;
+  --accrue-border:         #2A333D;
+  --accrue-shadow:         0 1px 2px rgba(0, 0, 0, 0.4), 0 12px 32px rgba(0, 0, 0, 0.45);
+  --accrue-brand-accent-text:
+    color-mix(in srgb, var(--accrue-brand-accent) 60%, #ECF1F5);
+  --accrue-brand-accent-strong:
+    color-mix(in srgb, var(--accrue-brand-accent) 82%, white);
+}
+
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root[data-theme="system"],
+  :root:not([data-theme]) {
     --accrue-ink:            #ECF1F5;
     --accrue-slate:          #B7C2CC;
     --accrue-surface:        #171B20;
     --accrue-surface-muted:  #10141A;
     --accrue-border:         #2A333D;
     --accrue-shadow:         0 1px 2px rgba(0, 0, 0, 0.4), 0 12px 32px rgba(0, 0, 0, 0.45);
+    --accrue-brand-accent-text:
+      color-mix(in srgb, var(--accrue-brand-accent) 60%, #ECF1F5);
+    --accrue-brand-accent-strong:
+      color-mix(in srgb, var(--accrue-brand-accent) 82%, white);
   }
 }
