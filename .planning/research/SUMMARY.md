@@ -1,183 +1,154 @@
-# Project Research Summary — v1.54
+# Project Research Summary
 
-**Project:** Accrue — `accrue_admin` operator UI (page-level streamlining + Storybook)
-**Milestone:** v1.54 — Admin UI Page-Level Streamlining & Storybook (Phases 193–200)
-**Domain:** Dense operator/admin tooling for an Elixir/Phoenix billing library; token-based design system (`ax-*`), forward-only visual-QA machinery
-**Researched:** 2026-06-24
+**Project:** Accrue (`accrue_admin` package)
+**Domain:** LiveView operator-console admin UI — information-architecture / screen-grammar pivot (v1.57 = SEED-004 **M1**)
+**Researched:** 2026-07-19
 **Confidence:** HIGH
 
-> Single synthesis of four v1.54 research files. The roadmapper and REQUIREMENTS step read **this** file; the four sources are cited inline for detail:
-> - **FEATURES.md** — page archetypes, IA, progressive disclosure (SPEC-OVERVIEW / SPEC-LIST / SPEC-DETAIL)
-> - **ARCHITECTURE.md** — micro-animation & interaction-motion (Emil Kowalski K1–K15, overlay/scroll/portal fixes, IXN acceptance criteria 1–12)
-> - **PITFALLS.md** — 9 maintainer bug classes → root cause → prevention → guard/AC → gap-vs-existing-gate
-> - **v1.54-storybook-and-forward-only-qa.md** — PhoenixStorybook adoption + forward-only page-flow baseline extension
->
-> (`.planning/research/STACK.md` is the **canonical project-wide stack**, unchanged — NOT v1.54 research.)
+## Executive Summary
 
----
+v1.57 M1 is an **admin-only cohesion pivot**, not a build-out. The `accrue_admin` LiveView admin already has a mature shared component library and a canonical page skeleton that ~10 of its pages (Payments/Charges, Invoices, Customers) already follow. Two pages are outliers — **Home** (`dashboard_live.ex`) and **Subscriptions** (`subscriptions_live.ex`) — and M1 reigns them onto that shared vocabulary, retiring ~325 bespoke `.ax-*` CSS rules and trimming redundant bands so the whole admin reads as one "operator control plane over billing state" before M2's diagnostics land. All four research tracks independently converged on **HIGH confidence** because every finding is grounded in direct reads of the real modules, tests, e2e specs, and the committed CSS bundle — not speculation.
 
-## Executive Summary — the cross-cutting linchpin
+The recommended approach is **compose, don't fork, and don't add technology**. No new Hex/npm dependencies; the component library and `ax-*` token system already cover every shape M1 needs. The canonical skeleton to enforce is: `AppShell → section.ax-page → PageHeader (breadcrumbs + title + :description/:stat_strip/:filter_toolbar) → FlashGroup → DataTable (+ FilterChipBar in :list_status)` — with **nothing** sitting between FlashGroup and DataTable on a good page. Build order is **Subscriptions first** (a pure MODIFY — it already imports the vocabulary; drop override classes, collapse the triple-repeated invoice-queue CTA, delete 5 bespoke band sections, rebuild the `.ax-subscription-row-*` cell renderers to the compact idiom) **then Home** (the larger lift — adopt `PageHeader`, recompose the attention rail + launcher tiles from `.ax-card` + `Button` + `Icon` + `StatusBadge`; its KPI and Timeline zones are already canonical). Exactly **one** new shared component (`WorkQueueCallout`) is pre-authorized, and only if the work-queue "callout" shape demonstrably repeats across both pages — a decision deliberately deferred to the Subscriptions build.
 
-**The one finding that unifies all four docs: the maintainer's reported defects are STRUCTURAL, not cosmetic, and the existing CI gates structurally cannot see them.** Modal-behind-scrim, awkward/trapping scroll, floating/mispositioned overlays, won't-dismiss, hover-on-non-interactive empty states, disabled-looks-enabled — these are *page-composition / runtime-interaction* failures: overlay layering, a **completely missing body scroll-lock** (`grep` confirms none exists in the repo), `position:fixed` shells **trapped by a transformed/filtered ancestor** stacking context, a **non-inert** background behind the scrim, and a **geometrically-wrong drawer** (full-viewport bottom sheet on every breakpoint with a wrong-axis `translateX` enter). Every existing gate (`verify_package_docs.sh`, FND-05 contrast, z-index literal ban, motion guards) operates on **token + CSS source text** — none observe a *composed, rendered page* across viewport × theme × state. The maintainer's entire bug list lives precisely in the blind spot.
-
-**Therefore the milestone's backbone is two things:** (a) **one hardened, canonical overlay primitive** that every modal/drawer/popover routes through — body-level portal/`<dialog>` top-layer + ref-counted iOS-safe body scroll-lock + `inert` background + single dismissal contract + origin-aware enter motion; and (b) **a rendered state-matrix gate** — PhoenixStorybook (dev/test-only) + axe-core + a Playwright interaction battery, folded into v1.53's forward-only cell-baseline as new `surface_type:"page-flow"` cells under the unchanged `regressions.ndjson` zero-regression rule. **Prevention via source-lint where mechanical (3 cheap new guards); rendered-detection in CI where compositional (the real prevention surface).** Do not try to lint taste.
-
-On top of that structural backbone, the *page-design* work is **archetype-driven**: lock three pattern specs (overview / list / detail) as design contracts, nail one gold-standard exemplar per archetype (Dashboard / Subscription-detail / Subscriptions-list), then propagate. The center of gravity is the **object-detail archetype** — `subscription_live.ex` at 1,234 LOC renders ~25 flat-stacked zones with **ten permanently-expanded inline action forms** (the textbook "info dump"), to be converted to **summary-then-drill + a single action menu + side-drawer + lazy plumbing** (~25 zones → ~6 bands). The motion-token vocabulary is already Kowalski-aligned and **stays as-is** — the budget goes to structural correctness, not new curves.
-
----
+The risks are almost entirely **discipline risks, not technical risks**. The highest-value guardrails: (1) **density is the point** — composing shared components at their default roomier spacing silently trades away the operator density that makes the admin cohesive, so a "no density regression vs pre-reign baseline" acceptance criterion must be written once and inherited by both phases; (2) **CSS retirement is grep-gated** — `.ax-inline-worklist*` and `.ax-audit-summary-row` are also used by the out-of-scope subscription **detail** page, so blind prefix-deletion silently breaks it in a way source-text CI cannot see; (3) **two committed generated artifacts** (`priv/static/accrue_admin.css` and `examples/accrue_host/e2e/generated/copy_strings.json`) must be rebuilt and committed in the same change as every CSS/copy edit, or the work ships dead; and (4) **scope creep into M2/M3** — the moment a "health verdict" starts synthesizing *why* something is blocked, or a plan touches `accrue/lib`, M1 has silently become M2.
 
 ## Key Findings
 
-### Storybook adoption + forward-only QA (`v1.54-storybook-and-forward-only-qa.md`)
+### Recommended Stack
 
-Adopt **`{:phoenix_storybook, "~> 1.2", only: [:dev, :test]}`** (1.2.0, 2026-06-11; deps already satisfied; new transitive `makeup_*`/`mdex` never reach a host runtime).
+**No stack additions or changes.** (See STACK.md.) M1 is a pure composition + IA exercise on top of an already-mature shared component library and `ax-*` token system (1,452 `.ax-*` rules, the styling SSOT). Every building block already ships in `accrue_admin`; the work is *retiring* bespoke markup/CSS on the two outliers and re-expressing them with the canonical vocabulary. The only defensible new authored artifact is a single small shared function component (`WorkQueueCallout`), built entirely from existing tokens + `.ax-card` — not a dependency, not a build-tool change, not a token-system change.
 
-- **Leak-proof mount** = copy the in-repo **Mailglass sibling-scope precedent** (`AccrueAdmin.Router`): Storybook emits its own `live_session`, so mount as a sibling scope, never nested. Backend module wrapped in `if Mix.env() != :prod`.
-- **The critical library-vs-app gotcha:** a host pulling `accrue_admin` from Hex never downloads its `:dev,:test` deps, yet `dev_routes?` defaults true → a bare `import PhoenixStorybook.Router` would **fail the host's dev compile**. **Mandatory fix:** guard the router wrap on `Code.ensure_loaded?(PhoenixStorybook.Router)`. Encode as a hard AC: a host dev compile of `examples/accrue_host` succeeds with the dep absent and exposes **no** `/dev/storybook` route.
-- **Registry-driven stories:** `variations/0` is an ordinary function → generate it from `AccrueAdmin.Dev.ComponentRegistry` (`entries/0` specimens/states → `%Variation{}`/`%VariationGroup{}`; `group_contracts/0` → group stories). One compiled generator + ~14 family shims + ~8 group shims. **Registry stays SSOT; Storybook is a second renderer.**
-- **Keep the kitchen** (`/dev/components`) — its `data-ax-family`/`data-ax-state`/`data-component-group` locators back the Phase-189/190 drift/coverage tests; deleting it = churn against the zero-regression gate for no upside.
-- **Theming bridge (the one real wrinkle, MEDIUM-confidence spike):** Storybook color-mode toggles a **class**; accrue_admin scopes dark via the **attribute** `html.accrue-admin[data-theme="dark"]`. Resolve with a thin sandbox-scoped CSS dark-shim (`color_mode_sandbox_dark_class`). **Asset deviation:** accrue_admin has **no Tailwind** and ships a committed CSS bundle — serve Storybook's CSS/JS from the existing `AccrueAdmin.Assets` controller, NOT the official Tailwind recipe, so the lab renders *shipped* styles (heed the "editing app.css ships nothing until rebuilt+committed" lesson).
-- **Forward-only page QA = EXTEND the baseline, no SaaS.** Add `surface_type:"page-flow"` cells over the ~20 real routes (reuse Phase-191's page-flow Playwright driver), score with the same 12-dim rubric + adversarial judge, gate with the unchanged `regressions.ndjson`. **No pixel-diff gate** (it would flag every intentional v1.54 improvement as a regression). Storybook is the design lab, **not** the visual-regression engine — the page gate runs over real composed routes.
+**Core technologies (all already present, zero change):**
+- `:phoenix_live_view ~> 1.1` — renders the admin pages being reworked; the pivot is HEEx re-composition inside existing LiveViews.
+- `:phoenix ~> 1.8` / `:phoenix_html ~> 4.2` — router/endpoint + HEEx helpers; unchanged (no new routes).
+- `:accrue` (path / `== 1.4.0`) — billing domain data the pages already load; **no core change in M1** (core diagnosis fns are M2).
+- `ax-*` CSS + design tokens (in-repo) — stays the styling SSOT; the pivot *reduces* bespoke rules. Tailwind remains a compile-time minifier only (`mix accrue_admin.assets.build`), never an authoring path.
 
-### Page archetypes & information architecture (`FEATURES.md`)
+**Shared components to reuse (the whole M1 toolbox):** `PageHeader`, `StatStrip`, `KpiCard`, `DataTable` (+ `filter_toolbar`), `FilterChipBar`, `Button`, `StatusBadge`, `EmptyState`, `DropdownMenu`, `Timeline`, `Icon`.
 
-Three repeatable archetypes, each with a chosen direction (counterposition argued then rejected):
+### Expected Features
 
-- **Overview (Dashboard + Recovery):** *refine, don't rebuild.* Keep the four-zone grammar — `attention-rail (exceptions-only, prominent healthy empty-state) → verb task-launchers (+ visible ⌘K) → demoted clickable KPIs → recent activity`. Recovery analytics adopts the **same** grammar (`hero metric pair → at-risk work-queue table → supporting trend`), **not** a chart wall. Rejected: KPI-first headline (becomes wallpaper).
-- **List (9 pages):** **table-first + `PageHeader`.** `PageHeader(breadcrumb, title, stat-strip, actions, filter-toolbar) → filter chips + result count + clear-all → table (identity·state·money·time prioritized; plumbing deferred) → row→card stacking below breakpoint → server pagination`. Work-queue default, "All" one chip away. Four **distinct** states: first-run-empty ≠ filtered-empty ≠ loading-skeleton ≠ error-retry. Extract the shared **`PageHeader`** (the pending todo — highest-leverage list DRY win). Rejected: cards-everywhere (loses for scan/compare), infinite scroll (destroys position memory + back-nav on a queue).
-- **Detail (10+ pages; worst = Subscription @ 1,234 LOC):** **summary-then-drill, NOT tabs-first, NOT everything-at-once.** `breadcrumbs → summary-list header (GOV.UK key/value rows + row-level "Change") → ≤2 primary buttons + overflow action menu (actions open in a side-drawer; destructive → step-up modal; swap-plan preview in drawer) → collapsible drill sections (most-relevant open) → ONE related-resources strip (bidirectional threading; delete the duplicate) → lazy activity timeline + lazy raw JSON`. Never a 2-column form wall. **Tabs allowed only for peer record-sets** (Customer-360 Subscriptions/Invoices/Payments). Rejected: tabs-for-primary-state (27–43% of users miss horizontal tabs vs 8% for collapsed sections; billing labels resist 1–2 words); everything-visible (Linear's speed comes from *findability + muscle memory*, not simultaneous exposure — ten near-identical open forms are *slower*).
-- **Pure-subtraction wins** (no disclosure mechanism needed): delete the duplicate related card; flatten card-in-card double borders; kill redundant eyebrow==heading; de-emphasize plumbing IDs to mono-small; padding discipline (compact rows, generous only for cards).
+M1's job is a **coherence layer**, not new capability. (See FEATURES.md.) The blueprint thesis: "Accrue Admin is not a CRUD interface — it is an operator control plane over billing state," where every screen answers *What needs attention? / What is the true billing state? / What safe action can I take?* faster than anything else. The 12 of 23 round-99 findings on `dashboard` + `subscriptions` are the M1 acceptance checklist.
 
-### Micro-animation & interaction-motion (`ARCHITECTURE.md`)
+**Must have (table stakes for M1 cohesion):**
+- **Reign Home + Subscriptions onto the shared vocabulary** — the single largest lever; retire `.ax-home-*` / `.ax-launcher*` / `.ax-attention*` / `.ax-subscriptions-*` / `.ax-inline-worklist*`.
+- **One scannable health verdict per page** — Home renders the verdict *three times* today; collapse to one in the `PageHeader` title slot.
+- **One primary action per zone / de-dup entry points** — the "Open dedicated invoice queue" CTA appears 3×+ on Subscriptions; collapse to one canonical entry point (the most-confirmed round-99 defect, `f-5a1ecbfd`).
+- **Trim redundant bands + tighten density to the reference** — delete the 5 stacked Subscriptions bands; match Payments/Customers/Invoices density, do not add "designed" air.
+- **Plain-language verdicts + precise action labels** — kill double-negatives ("No — billing is not active") and jargon ("workspace"); copy stays in `AccrueAdmin.Copy` SSOT.
+- **Answer-first content order** (verdict → primary action → demoted KPIs → records) on both pages.
 
-The motion system is **already mostly Kowalski-correct** (120–240ms band, composite-only properties, enter-gentle/exit-snappy asymmetry, single earned overshoot, reduced-motion for free). **Keep the token vocabulary; spend the budget on overlay correctness.**
+**Should have (competitive — makes it read best-in-class):**
+- **Reusable "health verdict" pattern** and **`WorkQueueCallout`** — the likely one-new-shared-component, only if the callout shape repeats.
+- **"One door per JTBD" launcher as shared cards** — Home's four task launchers rebuilt on `.ax-card` + `Button`, preserving the strong task-launcher IA while shedding bespoke CSS.
+- Correct nav/breadcrumb integrity (make Home genuinely the "Billing health overview" the Subscriptions breadcrumb promises); customer lookup promoted to one prominent entry.
 
-- **K1–K15 audit:** mostly ✅. Gaps: **K10 origin-aware transforms** (drawer enters on wrong axis; dropdowns lack `transform-origin` toward trigger), **K8 interruptibility** (rapid open→close→open can leave stale enter/exit classes).
-- **Adversarially-held position:** do **not** raise the 240ms ceiling to match Vaul/Sonner (~500ms) — those are low-frequency consumer surfaces; K11 localizes operator tooling *down* to 180–250ms/none. (Footgun F7.)
-- **Overlay structural fixes** (the bug class): **R-1 body scroll-lock** (highest-value single fix; ref-counted, iOS-safe `position:fixed`+restore, `overscroll-behavior:contain`, `scrollbar-gutter:stable`); **F2 portal to a body-level `#ax-overlay-root`** (no transformed/filtered/`contain` ancestor may wrap a `position:fixed` shell); **R-5 `inert` background** while overlay open; **R-2 single dismissal contract** (backdrop click + Escape → same close event, idempotent); **R-3 drawer geometry** (desktop edge-docked right panel on `translateX`; mobile bottom sheet on `translateY`); **R-4 origin-aware popovers**; **R-6 no hover/cursor on non-interactive empty-state heroes**.
-- **List/stream motion:** first-load whole-body crossfade only (**no per-row stagger**, F6); new stream rows flash via `--ax-transition-colors`, never a height/translate list shift; View Transitions **deferred** (candidate spike, not v1.54).
-- **Token decision:** **no new motion tokens** (one possible `--ax-dur-sheet` held pending mobile-sheet UAT, must be ≤300ms). New non-motion primitives: `[data-ax-scroll-locked]` rule + `ScrollLock` hook + `inert` toggle.
+**Defer (M2 / M3 — explicitly out of scope, must not be pulled in):**
+- "Why blocked?" diagnosis card, causality graph/timeline, unified `billing_state_for_customer/1`, freshness/stale chips — all **M2** (require core `accrue` diagnosis fns).
+- New rooms (Usage/meters, checkout, Connect matrix, fee reconciliation), `+Usage`/`+Settings` nav groups — **M3**.
+- De-tab Customer-360, subscription-**detail** same-grammar cleanup, sensitive-action A/B/C + step-up, "View event" toasts — later M1-family / M2 slices.
 
-### Usability footguns & prevention (`PITFALLS.md`)
+### Architecture Approach
 
-Nine maintainer bug classes, each mapped root-cause → prevention → AC/guard → gap-vs-gate. The **structural gap**: all existing gates are source-text; the bugs are rendered-composition.
+This is **integration architecture, not greenfield**. (See ARCHITECTURE.md.) The canonical spine is "caller-owned content on a shared chassis": `<section class="ax-page">` → `PageHeader` → `FlashGroup` → `DataTable`, with the default lens + "All one click away" expressed entirely through `work_queue_chips/2` in the DataTable's `:list_status` slot — no band `<section>`s between flash and table. Data flow is unchanged (presentation pivot only); both targets keep their existing `mount → summary/stats → handle_params default-lens → render`.
 
-| # | Bug class | Canonical prevention | Gate status |
-|---|-----------|----------------------|-------------|
-| 1 | Modal-behind-scrim | Body-level portal / native `<dialog>` top-layer; scrim one rung below in **same** context | ✅ z-literal ban; 🆕 rendered hit-test + portal rule |
-| 2 | Awkward/trapped scroll | scrollbar-gutter-stable lock + iOS fixed-restore + internal scroll + `overscroll:contain` | 🆕 before/after layout-box AC; ⚠️ scrollbar-token consumption |
-| 3 | Mispositioned floats | Anchor-to-trigger + collision flip + top-layer/root portal | ✅ z-rung; 🆕 viewport-bounds AC |
-| 4 | Misalignment / asymmetric padding | EightShapes inset/stack/inline tokens; no per-side magic px | 🆕 **spacing-literal guard** (mirror FND-01) |
-| 5 | Card-in-card over-boxing / flush spacing | One elevation step; sunken/hairline not nested borders; margin>padding | ⚠️ judgment → archetype spec + rubric |
-| 6 | Disabled-looks-enabled / focus / contrast | Distinct disabled token set (not opacity); `:focus-visible` ≥3:1; on-solid text token; per-theme retune | ✅ tokens presence; 🆕 **`:focus-visible` guard** + axe over rendered stories |
-| 7 | Tabs no active state / dead pagination / empty-state hover | ARIA-bound selected; conditional affordances (`pages>1`); non-interactive heroes | ✅ selected consumption; 🆕 conditional-affordance ACs |
-| 8 | Squished columns / table overuse / stat-card drift | `min-width:0`+`minmax(0,1fr)`; declared per-table degradation; one `KpiCard` | 🆕 **truncation-without-`min-width:0` guard**; ⚠️ per-page intentionality |
-| 9 | No tri-state theme / FOUC | Tri-state (✅ shipped); server-rendered `data-theme` before first paint | ✅ structure; 🆕 no-FOUC + persistence + system-emulation Playwright AC |
+**Major components / moves:**
+1. **Subscriptions (~90% on the skeleton — pure MODIFY)** — drop `ax-page-compact ax-subscriptions-page` + header override classes; short-noun title + single verdict; collapse the 3× invoice-queue CTA to one `Button` in `:actions`; unwrap `StatStrip`; **delete the 5 bespoke bands** (L196–279); rebuild `identity_cell/3` + `billing_signals_cell/3` from 15–20-line bespoke raw HTML to the compact `ax-stack-xs`/`ax-link`/`ax-chip` + `StatusBadge` idiom, pushing per-row action buttons out of cells; delete the now-dead `open_invoice_queue/1` query.
+2. **Home (the larger lift)** — adopt `PageHeader` (it currently hand-rolls a `<header>` and never uses the existing `:actions` slot); recompose the attention rail and launcher tiles from `.ax-card` + `Button` + `Icon` + `StatusBadge` + `EmptyState`; fold the duplicated customer-search strip into `PageHeader` `:actions`; **keep** the already-canonical KpiCard (Zone 3) and Timeline (Zone 4) zones as-is.
+3. **Grep-gated CSS retirement** — delete retired `.ax-*` rules from `assets/css/app.css` **last**, only for classes with zero remaining `.ex` references after both pages are rebuilt; retain the detail-page-shared classes.
 
-**Three new cheap source guards:** spacing-literal · `:focus-visible` · truncation-without-`min-width:0`. **The real prevention surface:** PhoenixStorybook state-matrix stories + axe-core over rendered stories + the Playwright interaction/overlay battery + the per-page rubric.
+### Critical Pitfalls
 
----
+(Top items from PITFALLS.md — all discipline risks, not technical ones.)
 
-## Adversarial synthesis — agreements & resolved tensions
-
-**Where all four agree (high-confidence convergence):**
-- The defects are **structural/compositional**, invisible to source-lint → the milestone needs a **rendered state-matrix gate** (FEATURES rubric + PITFALLS harness + ARCHITECTURE IXN ACs + Storybook doc all land on this).
-- **Body scroll-lock is missing and is the single highest-value fix** (ARCHITECTURE R-1 ≡ PITFALLS Pitfall-2).
-- **One canonical overlay primitive**, body-level portal, `inert` background, single dismissal contract (ARCHITECTURE 2.1–2.3 ≡ PITFALLS 1/3).
-- **No hover on non-interactive empty states** (ARCHITECTURE R-6 ≡ PITFALLS Pitfall-7 ≡ FEATURES detail anti-patterns).
-- **Reuse over rebuild:** keep the motion tokens, keep the kitchen, keep the four-zone dashboard, extend (not replace) the v1.53 baseline.
-
-**Tensions, with the chosen direction (each adversarially judged):**
-
-| Tension | Chosen direction | Why the alternative was rejected |
-|---------|------------------|----------------------------------|
-| **Native `<dialog>`+top-layer vs custom portal** | PITFALLS prefers native `<dialog showModal()>` as *structurally immune* (top layer escapes all stacking contexts); ARCHITECTURE describes a custom `#ax-overlay-root` body-level portal that reuses the existing isolated z-scale + FocusTrap. **Resolve in Phase 193 spike → default to the body-level portal that reuses the shipped FocusTrap/z-scale, treating `<dialog>` top-layer as the fallback if a transformed-ancestor audit (Phase 199) finds re-rooting we can't remove.** Either way: **prove it with a Playwright hit-test**, never "just bump z-index." | "Bump the modal z-index" cannot escape a trapped context — the exact non-fix that perpetuates the bug. |
-| **New tokens vs reuse** | **Reuse.** No new motion tokens (CI already forces any new duration to be a token ≤300ms); one possible `--ax-dur-sheet` held pending mobile-sheet UAT only. Spacing uses existing `--ax-space-*`. | Speculative tokens dilute the disciplined vocabulary; the gap is correctness, not curves. |
-| **Duration: match Vaul/Sonner 500ms?** | **No — hold the 120–240ms band.** | Vaul/Sonner are low-frequency consumer surfaces; K11 localizes high-frequency operator tooling down. |
-| **Tabs vs summary-then-drill for detail** | **Summary-then-drill primary; tabs only for peer record-sets** (Customer-360). | 27–43% miss horizontal tabs; primary state / critical action behind a tab is an anti-pattern; billing labels resist 1–2 words. |
-| **Storybook as the visual-regression gate?** | **No.** Storybook = design lab; the page-flow Playwright cell-baseline = gate (real composed routes). | Chromatic/Percy are SaaS (TOOL-02 deferred); story pixel-diff misses page-level info-dump/scroll/overlay defects. |
-| **Pixel-diff vs scored-cell gate** | **Scored dimensions, not pixels.** | Pixel-diff flags every intentional v1.54 improvement as a regression — opposite of forward-only uplift. |
-| **Force all tables → cards on mobile?** | **No — declared per-table degradation** (card | horizontal-scroll-with-frozen-identity-column); `min-width:0` universal. | Operators often want the dense scrollable grid; over-correction. |
-| **Replace the kitchen with Storybook?** | **Keep both** (registry SSOT, two renderers). | Re-homing Phase-189/190 drift tests = churn + regression risk for zero upside. |
-
----
+1. **Over-airing the console (density regression).** Composing shared components at their default roomier spacing silently trades away operator density and *loses* cohesion even though the components are now "shared." Avoid: write "no density regression vs pre-reign baseline" as an explicit acceptance criterion; PNG-compare reigned pages against both the canonical reference and the pre-reign screenshot (row height, rows-per-viewport, header band height must not regress); reuse existing compact modifiers.
+2. **Deleting CSS the subscription DETAIL page still uses.** `.ax-inline-worklist*` and `.ax-audit-summary-row` are referenced by the out-of-scope `subscription_live.ex` (detail); blind prefix-delete breaks its styling invisibly to source-text CI. Avoid: grep-gate every candidate class against the whole `lib/` tree, delete CSS **last** and only at zero references, sequence Subscriptions list + detail together, and PNG-verify the detail page after the list reign.
+3. **The committed-bundle footgun.** The served stylesheet is the git-tracked minified `priv/static/accrue_admin.css`, not source `app.css` — editing source without `mix accrue_admin.assets.build` + committing the bundle ships dead CSS (burned Phase 189). Avoid: rebuild + `git add priv/static/accrue_admin.css` in the same commit; verify PNGs against the *served* bundle.
+4. **Host `copy_strings.json` staleness (cross-repo coupling).** Reigning changes copy; `examples/accrue_host/e2e/generated/copy_strings.json` is regenerated by host-integration but read as-committed by Playwright shards. Avoid: re-run `mix accrue_admin.export_copy_strings` and commit the JSON in the same change; keep copy in `AccrueAdmin.Copy`.
+5. **IA over-reach into M2/M3.** A "health verdict" that starts summarizing *why* something is blocked, or any plan touching `accrue/lib` or adding a nav room, has silently become M2/M3. Avoid: hard scope fence (no core fns, no new rooms, no causality/diagnosis synthesis); plan-review rejects any plan importing M2/M3 surfaces.
+6. **Losing operator content while "trimming redundant bands."** Redundancy (same datum twice) and density (many distinct facts compactly) look alike in a screenshot. Avoid: build a content inventory before deleting; trim only true duplication/decoration; treat deleted copy-test assertions as a red flag.
+7. **Test + selector breakage against retired classes** (`dashboard_live_test` L107/130/184, `subscriptions_live_test:111`, `admin-spec-overview-phase194`, `admin-interaction-overlay-phase199`, `region-tags.js`). Avoid: grep + migrate every assertion to the shared-component selector in the *same* phase; retire, don't alias; never leave the suite red across a phase boundary.
 
 ## Implications for Roadmap
 
-### Phase-mapped findings (Phases 193–200)
+Based on the combined research, the two-page reign decomposes cleanly. **Sequence: Subscriptions before Home** (Subscriptions is closest to canonical → lower-risk fast coherence win, and it surfaces the `WorkQueueCallout` decision before Home's attention rail needs to consume it). A shared "milestone scope + verification discipline" gate should be written once and inherited by both build phases.
 
-| Phase | Lands these findings |
-|-------|----------------------|
-| **193** Research, re-baseline & pattern lock | Adopt the **three pattern specs** (SPEC-OVERVIEW/LIST/DETAIL) verbatim as design contracts. Stand up **PhoenixStorybook** (dep + env-guarded backend + `Code.ensure_loaded?`-guarded sibling-scope wrap + registry generator + asset serving). Extend Phase-187 baseline with `surface_type:"page-flow"` cells. Add the **3 new source guards**. Run the **spikes** (overlay portal-vs-`<dialog>`, `data-theme` dark-shim, `inert` browser-floor). |
-| **194** Exemplar A — Dashboard | *Refine, don't rebuild* the four-zone overview; apply the same grammar to Recovery (`hero pair → at-risk queue → trend`). |
-| **195** Exemplar B — Subscription detail | Instantiate **summary-then-drill + ≤2 primary + overflow action menu + side-drawer + lazy plumbing**; delete the duplicate related card; flatten card-in-card; build the **action-menu primitive** + side-drawer action hosting. ~25 zones → ~6 bands. |
-| **196** Exemplar C — Subscriptions list + `PageHeader` | Table-first, chips+count+clear-all, work-queue default, row→card mobile degradation; **extract shared `PageHeader`**; truncation/`min-width:0` discipline. |
-| **197** Propagate LIST | Apply locked list spec + `PageHeader` to the 8 other list pages (customers · invoices · payments · coupons · promotion-codes · webhooks · events · connect). |
-| **198** Propagate DETAIL + overview | Apply summary-then-drill to the 8 other detail pages + Recovery/Campaign. |
-| **199** Cross-cutting interaction/overlay correctness | The **canonical overlay primitive**: scroll-lock, portal, `inert`, dismissal contract, drawer geometry, origin-aware popovers, no-hover-on-non-interactive. Multi-step **fixture stress**. Full **brand-voice microcopy** sweep. Audit transformed/filtered ancestors that re-root `position:fixed`. |
-| **200** Idempotent verification & sign-off | Re-score all cells (component + group + page-flow) viewport × theme × state; forward-only ≥ baseline, **zero regressions**; **axe-core** over rendered stories; Storybook complete (all families + 8 groups); no-FOUC/persistence/system-emulation checks; adversarial multi-lens judge + maintainer photographic/interaction sign-off. |
+### Phase 0 (SPEC / discuss — written once, before build): Scope fence + shared verification contract
+**Rationale:** Pitfalls #1, #2, #5, and the two generated-artifact couplings are cross-cutting; they must be locked as written requirements before either build phase so both inherit them.
+**Delivers:** A scope fence (no core `accrue`, no new nav rooms, no "why blocked"/causality/diagnosis synthesis, one-new-component budget) and a shared verification checklist: no-density-regression gate, grep-before-delete + CSS-deleted-last protocol, `mix accrue_admin.assets.build` + commit bundle, `export_copy_strings` + commit JSON, axe (`admin-a11y.spec.js`), selector migration.
+**Avoids:** #2 IA over-reach, #5 bundle footgun, #8 copy staleness — set as gates, not afterthoughts.
 
-### Candidate acceptance criteria by requirement category
+### Phase 1: Reign Subscriptions (list + detail as one CSS unit)
+**Rationale:** ~90% already on the skeleton — override-drop + band-trim + cell-rebuild, not a from-scratch compose; lowest risk; surfaces the `WorkQueueCallout` decision first.
+**Delivers:** Subscriptions on the canonical spine — single verdict, one invoice-queue entry point, 5 bespoke bands deleted, compact cell renderers, `open_invoice_queue/1` removed; grep-gated retirement of the LIST-only `.ax-subscriptions-*` / `.ax-subscription-row-*` sets; detail page's shared `.ax-inline-worklist*`/`.ax-audit-summary-row` retained or reigned.
+**Addresses (FEATURES):** reign onto vocabulary, one primary action per zone, trim bands + density, plain-language copy, answer-first order, lens-default confirm.
+**Avoids (PITFALLS):** #3 content loss (content inventory), #4/#7 selector churn (`subscriptions_live_test:111`), #6 detail-page CSS break (grep-gate, delete CSS last, verify detail after list), #1 density.
+**Decision point:** whether the trimmed worklist callout shape justifies extracting the one allowed `WorkQueueCallout` component.
 
-(Categories named in PROJECT.md / the v1.54 plan.)
+### Phase 2: Reign Home
+**Rationale:** The larger lift (fully bespoke; needs full `PageHeader` adoption + recomposition of two zones with no shared component today); done second so it can reuse anything Subscriptions establishes (incl. `WorkQueueCallout`).
+**Delivers:** Home on `PageHeader`; single health verdict; attention rail + four launcher tiles recomposed from `.ax-card` + `Button` + `Icon` + `StatusBadge` + `EmptyState`; customer search promoted to one entry; KpiCard/Timeline zones kept; grep-gated retirement of `.ax-home-*` / `.ax-launcher*` / `.ax-attention*` / `.ax-health-summary*`.
+**Uses (STACK):** `PageHeader`, `StatStrip`/`KpiCard`, `Button`, `Icon`, `StatusBadge`, `EmptyState` + optional `WorkQueueCallout`.
+**Avoids (PITFALLS):** #1 density, #4/#7 selectors (`dashboard_live_test` L107/130/184, `admin-spec-overview-phase194`, `admin-interaction-overlay-phase199`), #5 bundle, #7/a11y, #8 copy.
 
-- **RES (research/baseline):** three archetype pattern specs locked as design contracts; Phase-187 baseline extended with `surface_type:"page-flow"` cells over ~20 routes (additive sibling `baseline.page-flow.cells.json` recommended for provenance).
-- **STY (Storybook):** `phoenix_storybook` is `only:[:dev,:test]`; host `:prod` **and** host `:dev` compile of `examples/accrue_host` succeeds with the dep absent and exposes no `/dev/storybook` route (proves the `Code.ensure_loaded?` guard); every registry family + all 8 group contracts have a generated story; stories render in both color modes against the **shipped `ax-*` bundle** (not a Tailwind rebuild); kitchen + Phase-189/190 drift tests stay green.
-- **STY/source guards:** spacing-literal guard (no raw px on padding/margin/gap outside allowlist); `:focus-visible` guard (focus styling targets `:focus-visible`); truncation-without-`min-width:0` guard.
-- **EXE (exemplars):** Dashboard refined to the four-zone spec + Recovery re-grammared; Subscription detail = summary-then-drill ~6 bands (duplicate card deleted, card-in-card flattened); Subscriptions list = table-first + `PageHeader` + 4 distinct states.
-- **PGH (`PageHeader`):** one shared `PageHeader(breadcrumb, title, stat-strip, actions, filter-toolbar)` adopted by all list pages; slot contract locked **before** Phase-197 propagation (avoid 8-page re-churn).
-- **PRP (propagation):** all 8 remaining list pages conform to SPEC-LIST; all remaining detail/analytics pages conform to SPEC-DETAIL.
-- **IXN (interaction/overlay):** the 12 ARCHITECTURE ACs — (1) scroll-lock ref-counted + iOS + no gutter jump; (2) portal/stacking, never painted behind scrim, always hit-testable; (3) dismissal backdrop+Escape same event, double-toggle settles; (4) `inert` background; (5) drawer desktop-edge-dock / mobile-sheet correct axis; (6) origin-aware popovers; (7) no hover/cursor on non-interactive; (8) focus into-panel/trap/restore, instant focus ring; (9) duration band ≤240ms held; (10) reduced-motion preserved (extend `reduced-motion.spec.js`); (11) no new motion tokens unless justified ≤300ms; (12) list first-load crossfade only, no per-row stagger. Plus floating-in-viewport-bounds + conditional-affordance + theme-no-FOUC checks.
-- **FIX (fixture-stress):** multi-step workflows + long-content/edge fixtures surface squish, clipping, overflow on real seeded (deterministic) data.
-- **CPY (copy):** full brand-voice microcopy sweep; distinct first-run-empty vs filtered-empty copy; "Change"/action labels with visually-hidden context.
-- **VER (verification):** merged `regressions.ndjson` shows **zero regressions** vs the union baseline across component + group + page-flow cells; axe color-contrast + name/role pass over rendered stories; maintainer sign-off ACCEPT.
+### Phase 3 (fold into whichever phase retires the shared classes): Kitchen / Storybook + selector-map cleanup
+**Rationale:** `component_kitchen_live.ex` and `priv/static/storybook.css` also render the retired vocabulary; the parked `region-tags.js` selector map still points at `.ax-attention-rail`.
+**Delivers:** kitchen/storybook entries updated + `storybook.css` rebuilt (same bundle footgun); phase200 storybook specs green; opportunistic `region-tags.js` fix so the eventual ratchet re-freeze starts from a non-dangling selector map.
 
-### Research flags
+### Phase Ordering Rationale
+- **Subscriptions before Home** because it is closest to canonical (fast, low-risk coherence win) and surfaces the one-new-component decision before Home needs to consume it. Building Home first would force that decision blind.
+- **CSS deletion is sequenced last within each page's reign** and grep-gated across the whole tree — the detail-page sharing hazard (`.ax-inline-worklist*`, `.ax-audit-summary-row`) makes ordering load-bearing, not cosmetic.
+- **List + detail are treated as one CSS unit** in the Subscriptions phase because they share bespoke classes; splitting them across phase boundaries is how the silent detail-page break happens.
+- **Ratchet re-freeze is explicitly deferred** to post-M3 (the v1.56 harness is parked); do NOT gate on it during M1.
 
-- **Needs spike (Phase 193):** overlay portal-vs-native-`<dialog>` decision (+ Playwright hit-test); `data-theme` dark-shim selector specificity vs `.psb-sandbox` (color-mode bridge, MEDIUM); Storybook asset-serving without Tailwind (MEDIUM); `inert` vs `aria-hidden`+focusguard given the browser floor.
-- **Standard / well-documented (lighter touch):** Dashboard refinement (194 — keep existing grammar); LIST/DETAIL **propagation** phases (197/198 — apply already-locked specs); the 3 new source guards (mechanical, mirror proven FND-01/MOT-01 shape).
+### Research Flags
 
----
+Phases likely needing deeper research during planning:
+- **None require external/web research** — the entire domain is grounded in in-repo reads (HIGH confidence across all four tracks).
+- **Phase 1 (Subscriptions)** warrants a planning-time *code inventory* (not research): the exact grep census across `lib/`, `test/`, `e2e/` for each retirement class, and a content inventory of every operator-facing datum before deletion. This is the highest-uncertainty area (content-loss + detail-page-sharing hazard), and the `WorkQueueCallout` extract/no-extract decision resolves here.
+
+Phases with standard patterns (skip research-phase):
+- **Phase 2 (Home)** — the canonical spine is fully documented in ARCHITECTURE.md; it is applying a known grammar, just to more surface area.
+- **Phase 0 / Phase 3** — pure discipline/mechanics already specified in the pitfalls and architecture research.
 
 ## Confidence Assessment
 
 | Area | Confidence | Notes |
 |------|------------|-------|
-| Storybook adoption (pin, leak-proof mount, registry generator) | HIGH | hex.pm/mix.exs verified; in-repo Mailglass precedent near-identical; `variations/0` is an ordinary function |
-| Color-mode `data-theme` bridge + no-Tailwind asset serving | MEDIUM | `color_mode` documented; class→attribute shim is known-good CSS but unexercised here — budget a Phase-193 spike |
-| Overlay failure-mode root causes (scroll-lock, transformed ancestor, inert) | HIGH | Cross-checked jayfreestone/Ben Frain/CSS-Tricks/Stripe-army + first-hand repo reading (no scroll-lock confirmed by grep; drawer geometry confirmed) |
-| Motion principles (Kowalski enter/easing/duration/composite/reduced-motion) | HIGH | Multiple primary sources incl. his own article already cited in `motion.md` |
-| Kowalski exact constants (velocity 0.11, 500ms Vaul, origin values) | MEDIUM | Course digests/skill refs — directional, treat as guidance not law |
-| Page-archetype IA (overview/list/detail disclosure) | HIGH | Converging NN/g + Baymard + Smashing + PatternFly + GOV.UK; matches shipped v1.51 decisions |
-| Forward-only page-flow QA extension | HIGH | Extends an already-shipped in-repo harness; `surface_type` discriminator already present |
-| Per-persona emphasis / user loves-hates | MEDIUM | Personas well-defined (v1.51); ordering claims reasoned not user-tested; HN/Reddit threads thin |
+| Stack | HIGH | Grounded in `accrue_admin/mix.exs`, the shipped component library, and the assets build task — "no new deps" is verified, not assumed. |
+| Features | HIGH | Traced to the SEED-004 blueprint synthesis, the 23 round-99 confirmed findings (12 = M1 checklist), and direct reads of both target LiveViews. |
+| Architecture | HIGH | Direct reads of all canonical + target LiveViews and every shared component; grep-verified the detail-page CSS-sharing hazard. |
+| Pitfalls | HIGH | Every pitfall names concrete file/line evidence in source, tests, e2e specs, and the committed bundle; corroborated by prior-incident project memory (Phase 189, CI green-up 260622). |
 
-**Overall confidence:** HIGH.
+**Overall confidence:** HIGH
 
 ### Gaps to Address
 
-- **Side-drawer + action-menu primitives:** no overflow/dropdown action-menu primitive is confirmed in the read set; confirm `detail_drawer.ex` can host action forms + step-up handoff without re-introducing modal-behind-scrim. Build in Phase 195, land in Storybook. (Phase 195/199.)
-- **`PageHeader` slot contract:** lock exact slots before Phase-197 propagation. (Phase 196.)
-- **Overlay primitive decision** (portal vs `<dialog>`) + theming-bridge + `inert`-floor: resolve via Phase-193 spikes before exemplar work.
-- **Transformed-ancestor audit:** confirm no LiveView page wrapper applies `transform`/`filter`/`contain` that re-roots `position:fixed` shells. (Phase 199.)
-- **Baseline storage:** additive sibling `baseline.page-flow.cells.json` (recommended) vs in-place extension — decide in Phase 193.
-- **Empirical loves/hates:** optional targeted HN/Reddit pull to harden the MEDIUM feedback section.
+- **Exact retirement rule count varies by measurement** (PITFALLS measured ~284 rules; STACK/PROJECT estimate ~325; ARCHITECTURE sums the clearly-retirable sets to ≈325). This is a counting-method difference, not a disagreement — resolve during planning with a definitive grep census; the *set* of prefixes to retire is agreed.
+- **`WorkQueueCallout` extract-or-inline is intentionally unresolved** — it is a build-time decision made during the Subscriptions reign (does the callout shape genuinely repeat across Home's attention rail and Subscriptions' consolidated worklist?). Default to "compose inline, add no component" unless the shape clearly repeats.
+- **Detail-page (`subscription_live.ex`) reach** — it is out of M1's *feature* scope but in scope for the *CSS-sharing* hazard. Planning must decide per shared class: retain the class, or reign the detail worklist onto the shared component in the same phase. Do not extend M1 into a full detail-page redesign.
+- **Ratchet re-freeze is a recorded downstream breadcrumb, not an M1 task** — leave it in the RETROSPECTIVE/RESULT; do not attempt to keep the parked ratchet green during M1.
 
 ## Sources
 
 ### Primary (HIGH confidence)
-- **In-repo first-hand:** `subscription_live.ex` (1,234-LOC info-dump), `dashboard_live.ex` (exemplary overview), `nav.ex`, `router.ex` (Mailglass sibling-scope precedent), `dev/component_registry.ex`, `dev/component_kitchen_live.ex`, `guides/motion.md`, `assets/css/theme.css` + `app.css`, `assets/js/hooks/focus_trap.js`, `detail_drawer.ex`, `step_up_auth_modal.ex`, `playwright.config.js` + `e2e/admin-page-flow-phase191.spec.js`, `baseline.cells.json` (no body scroll-lock confirmed by grep; drawer geometry + cell schema confirmed)
-- hex.pm / hexdocs phoenix_storybook 1.2.0 (version, deps, `color_modes`, story shape)
-- Emil Kowalski — "Great animations" (emilkowal.ski/ui/great-animations), Vaul/Sonner, design-eng skill
-- GOV.UK Design System (summary-list, task-list, one-thing-per-page); NN/g (tabs, accordions, mobile tables); Baymard (avoid horizontal tabs); Smashing (modal-vs-page decision tree); PatternFly (toolbar/overflow menu)
-- iOS body scroll-lock (jayfreestone, Ben Frain, CSS-Tricks, Stripe-army); CSS stacking-context (freecodecamp, playfulprogramming); flex/grid squish (CSS-Tricks, bigbinary)
+- `accrue_admin/lib/accrue_admin/live/{charges,invoices,customers,subscriptions,dashboard,subscription}_live.ex` — canonical spine + both target outliers + detail-page sharing check.
+- `accrue_admin/lib/accrue_admin/components/{page_header,stat_strip,data_table,filter_chip_bar,button,status_badge,empty_state,kpi_card,timeline,dropdown_menu,icon}.ex` — the complete shared vocabulary.
+- `accrue_admin/lib/accrue_admin/assets.ex`, `lib/mix/tasks/accrue_admin.assets.build.ex`, `assets/css/app.css` vs committed `priv/static/accrue_admin.css` — bundle mechanics + rule-count census (`ax-subscriptions` 146, `ax-attention` 43, `ax-home` 38, `ax-launcher` 37, `ax-inline-worklist` 20).
+- `accrue_admin/test/accrue_admin/live/{dashboard_live_test,subscriptions_live_test,subscription_live_test}.exs` — retired-class + copy assertions at named lines.
+- `accrue_admin/e2e/{admin-spec-overview-phase194,admin-interaction-overlay-phase199,admin-a11y}.spec.js`, `e2e/ratchet/region-tags.js` — `.ax-attention-rail*` selector couplings.
+- `lib/mix/tasks/accrue_admin.export_copy_strings.ex` + `examples/accrue_host/e2e/generated/copy_strings.json` — cross-repo copy coupling.
+- `.planning/research/admin-ratchet-round99-confirmed-findings.json` — 23 confirmed findings; 12 on `dashboard`+`subscriptions` = M1 acceptance checklist.
+- `.planning/PROJECT.md` (Current Milestone v1.57), `.planning/seeds/SEED-004-admin-ui-blueprint-redesign.md`, `.planning/research/ADMIN-UI-REDESIGN-BLUEPRINT-SYNTHESIS.md` — M1 scope fence, guardrails, M1/M2/M3 decomposition.
 
 ### Secondary (MEDIUM confidence)
-- EightShapes spacing model; Atlassian/Carbon spacing; datatables/uxpatterns responsive tables; Sara Soueidan focus indicators; disabled-button contrast (design-bootcamp); dark-mode a11y (accessibilitychecker, DubBot); Eleken/Stripe/Linear operator-UX commentary; Storybook visual+a11y testing docs
+- North-star blueprint `prompts/accrue_admin_operator_ui_journey_blueprint.md` (read through the self-contained synthesis, not verbatim) — §4 domain-language, §8 grammars, §12 ⌘K, §41 answer-order.
+- Project memory — Phase 189 "dead CSS" incident and "CI green-up 260622" copy-strings staleness (prior-incident recall corroborating Pitfalls #5 and #8).
 
 ### Tertiary (LOW confidence)
-- Wildnet / Tableau / GridRebels / raw.studio / databox / excited.agency dashboard-UX writeups (synthesized, validate against rubric)
+- None — no inference-only or single-source claims material to the roadmap.
 
 ---
-*Research completed: 2026-06-24*
+*Research completed: 2026-07-19*
 *Ready for roadmap: yes*
