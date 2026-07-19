@@ -96,6 +96,22 @@ defmodule AccrueAdmin.Copy.Subscription do
 
   def subscriptions_list_plan_amount_unavailable, do: "Plan and amount unavailable"
 
+  # Subscriptions list reign (SubscriptionsLive) — Phase 209, REIGN-01/REIGN-02
+
+  def subscriptions_index_breadcrumb, do: "Subscriptions"
+
+  def subscriptions_invoice_queue_cta, do: "Open invoice queue"
+
+  def subscriptions_health_verdict_healthy, do: "Healthy"
+
+  def subscriptions_health_verdict_action_required, do: "Action required"
+
+  def subscriptions_route_line,
+    do: "Collect open invoices first, then review at-risk subscriptions and failed webhooks."
+
+  def subscriptions_kpi_section_aria_label,
+    do: "Open invoices, exposure, at-risk subscriptions, and failed webhooks summary"
+
   defp subscription_action_label("cancel_now"), do: "Cancel immediately"
   defp subscription_action_label("cancel_at_period_end"), do: "Cancel renewal"
   defp subscription_action_label("pause"), do: "Pause subscription collection"

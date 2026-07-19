@@ -249,6 +249,12 @@ defmodule AccrueAdmin.Copy do
   defdelegate subscriptions_list_filtered_empty_body(), to: Subscription
   defdelegate subscriptions_list_loading_label(), to: Subscription
   defdelegate subscriptions_list_plan_amount_unavailable(), to: Subscription
+  defdelegate subscriptions_index_breadcrumb(), to: Subscription
+  defdelegate subscriptions_invoice_queue_cta(), to: Subscription
+  defdelegate subscriptions_health_verdict_healthy(), to: Subscription
+  defdelegate subscriptions_health_verdict_action_required(), to: Subscription
+  defdelegate subscriptions_route_line(), to: Subscription
+  defdelegate subscriptions_kpi_section_aria_label(), to: Subscription
 
   defdelegate dunning_panel_eyebrow(), to: Dunning
   defdelegate dunning_panel_title(), to: Dunning

@@ -95,32 +95,36 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
       current_owner_scope={assigns[:current_owner_scope]}
       active_organization_name={@active_organization_name}
     >
-      <section class="ax-page ax-page-compact ax-subscriptions-page">
+      <section class="ax-page">
         <PageHeader.page_header
-          class="ax-page-header-compact ax-subscriptions-header"
           breadcrumbs={[
             %{
-              label: "Billing health overview",
+              label: Copy.dashboard_breadcrumb_home(),
               href: scoped_path(@admin_mount_path, "", @current_owner_scope)
             },
-            %{label: "Subscriptions"}
+            %{label: Copy.subscriptions_index_breadcrumb()}
           ]}
-          title={subscriptions_health_verdict(@summary)}
+          title={Copy.subscriptions_index_breadcrumb()}
         >
           <:description>
-            <p class="ax-subscriptions-route-line">
-              Primary order: collect open invoices, debug failed webhooks, then audit Events.
+            <p>
+              <StatusBadge.status_badge
+                status={verdict_status(@summary)}
+                label={verdict_label(verdict_status(@summary))}
+                tone={verdict_tone(verdict_status(@summary))}
+              />
             </p>
+            <p class="ax-body"><%= Copy.subscriptions_route_line() %></p>
           </:description>
           <:actions>
             <a
-              class="ax-button ax-button-primary ax-button-sm ax-subscriptions-primary-workspace"
+              class="ax-button ax-button-primary ax-button-sm"
               href={invoice_queue_path(@admin_mount_path, @current_owner_scope)}
             >
-              Open dedicated invoice queue
+              <%= Copy.subscriptions_invoice_queue_cta() %>
             </a>
             <a
-              class="ax-button ax-button-secondary ax-button-sm ax-subscriptions-webhook-workspace"
+              class="ax-button ax-button-secondary ax-button-sm"
               href={
                 @admin_mount_path
                 |> scoped_path("/webhooks", @current_owner_scope)
@@ -140,44 +144,36 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
             </a>
           </:actions>
           <:stat_strip>
-            <div class="ax-kpi-row ax-subscriptions-kpi-row">
-              <StatStrip.stat_strip label="Dunning funnel and open-invoice queue summary">
-                <:stat
-                  label="MRR signal"
-                  value="Not projected"
-                  tone="slate"
-                  href={scoped_path(@admin_mount_path, "/events", @current_owner_scope, %{"q" => "revenue"})}
-                />
-                <:stat
-                  label="Dunning funnel"
-                  value={count(@summary.past_due_count, "campaign")}
-                  tone="amber"
-                  href={scoped_path(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}
-                />
-                <:stat
-                  label="At-risk subscriptions"
-                  value={count(@summary.past_due_count, "subscription")}
-                  tone="amber"
-                  href={scoped_path(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}
-                />
-                <:stat
-                  label="Open-invoice queue"
-                  value={count(@summary.open_invoice_count, "invoice")}
-                  tone="cobalt"
-                  href={invoice_queue_path(@admin_mount_path, @current_owner_scope)}
-                />
-                <:stat
-                  label="Failed payment/webhook count"
-                  value={count(@summary.failed_webhook_count, "failure")}
-                  tone="amber"
-                  href={
-                    @admin_mount_path
-                    |> scoped_path("/webhooks", @current_owner_scope)
-                    |> AccrueAdmin.DataTableNav.merge_query(%{"status" => "failed,dead"})
-                  }
-                />
-              </StatStrip.stat_strip>
-            </div>
+            <StatStrip.stat_strip label={Copy.subscriptions_kpi_section_aria_label()}>
+              <:stat
+                label="Open invoices"
+                value={count(@summary.open_invoice_count, "invoice")}
+                tone="cobalt"
+                href={invoice_queue_path(@admin_mount_path, @current_owner_scope)}
+              />
+              <:stat
+                label="Exposure"
+                value={format_minor(@summary.open_invoice_exposure_minor, "usd")}
+                tone={exposure_tone(@summary)}
+                href={invoice_queue_path(@admin_mount_path, @current_owner_scope)}
+              />
+              <:stat
+                label="At-risk subscriptions"
+                value={count(@summary.past_due_count, "subscription")}
+                tone="amber"
+                href={scoped_path(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}
+              />
+              <:stat
+                label="Failed webhooks"
+                value={count(@summary.failed_webhook_count, "failed webhook")}
+                tone={webhook_tone(@summary)}
+                href={
+                  @admin_mount_path
+                  |> scoped_path("/webhooks", @current_owner_scope)
+                  |> AccrueAdmin.DataTableNav.merge_query(%{"status" => "failed,dead"})
+                }
+              />
+            </StatStrip.stat_strip>
           </:stat_strip>
           <:filter_toolbar>
             <DataTable.filter_toolbar
@@ -343,7 +339,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
 
   defp assign_shell(socket, admin) do
     socket
-    |> assign(:page_title, "Subscriptions")
+    |> assign(:page_title, Copy.subscriptions_index_breadcrumb())
     |> assign(:brand, admin["brand"] || default_brand())
     |> assign(:theme, admin["theme"] || "system")
     |> assign(:csp_nonce, admin["csp_nonce"])
@@ -539,10 +535,20 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
 
   defp customer_label(row), do: row.customer_name || row.customer_email || row.customer_id
 
-  defp subscriptions_health_verdict(%{open_invoice_count: count}) when count > 0,
-    do: "Action required: collect #{count(count, "open invoice")} to reach $0.00"
+  defp verdict_status(%{open_invoice_count: count}) when count > 0, do: :action_required
+  defp verdict_status(_summary), do: :healthy
 
-  defp subscriptions_health_verdict(_summary), do: "Billing status: Healthy"
+  defp verdict_label(:action_required), do: Copy.subscriptions_health_verdict_action_required()
+  defp verdict_label(:healthy), do: Copy.subscriptions_health_verdict_healthy()
+
+  defp verdict_tone(:action_required), do: "amber"
+  defp verdict_tone(:healthy), do: "moss"
+
+  defp exposure_tone(%{open_invoice_exposure_minor: minor}) when minor > 0, do: "amber"
+  defp exposure_tone(_summary), do: "moss"
+
+  defp webhook_tone(%{failed_webhook_count: count}) when count > 0, do: "amber"
+  defp webhook_tone(_summary), do: "moss"
 
   defp state_cell(row) do
     {status, label} = lifecycle_status(row)
