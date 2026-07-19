@@ -31,8 +31,8 @@ Requirements for this milestone (M1). Each maps to exactly one roadmap phase.
 
 ### Copy & Navigation Integrity (COPY)
 
-- [ ] **COPY-01**: Operator-facing copy on the two pages is plain-language (no double-negative "No — billing is not active"; unexplained "workspace" jargon clarified) and sourced from `AccrueAdmin.Copy`, not inline template strings.
-- [ ] **COPY-02**: Breadcrumbs on the two pages point only to real navigable parents (no fake "Billing health overview" parent without a target), and the primary customer-lookup control is discoverable rather than buried.
+- [x] **COPY-01**: Operator-facing copy on the two pages is plain-language (no double-negative "No — billing is not active"; unexplained "workspace" jargon clarified) and sourced from `AccrueAdmin.Copy`, not inline template strings.
+- [x] **COPY-02**: Breadcrumbs on the two pages point only to real navigable parents (no fake "Billing health overview" parent without a target), and the primary customer-lookup control is discoverable rather than buried.
 
 ### Shared Component Additions (COMP)
 
@@ -71,8 +71,8 @@ Each v1 requirement maps to exactly one phase. Coverage: **11/11 mapped, 0 orpha
 | IA-02 | Phase 210 — Reign Home + certify answer-first IA & copy integrity | Pending |
 | IA-03 | Phase 210 — Reign Home + certify answer-first IA & copy integrity | Pending |
 | IA-04 | Phase 210 — Reign Home + certify answer-first IA & copy integrity | Pending |
-| COPY-01 | Phase 210 — Reign Home + certify answer-first IA & copy integrity | Pending |
-| COPY-02 | Phase 210 — Reign Home + certify answer-first IA & copy integrity | Pending |
+| COPY-01 | Phase 210 — Reign Home + certify answer-first IA & copy integrity | Complete |
+| COPY-02 | Phase 210 — Reign Home + certify answer-first IA & copy integrity | Complete |
 | REIGN-04 | Phase 211 — Grep-gated CSS retirement & cross-surface cleanup | Pending |
 
 **Mapping notes:**

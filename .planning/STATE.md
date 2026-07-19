@@ -3,16 +3,17 @@ gsd_state_version: 1.0
 milestone: v1.57
 milestone_name: Admin Operator Control Plane
 current_phase: 210
+current_phase_name: reign-home-certify-answer-first-ia-copy-integrity
 status: executing
 stopped_at: Phase 210 UI-SPEC approved
-last_updated: "2026-07-19T19:45:17.457Z"
+last_updated: "2026-07-19T19:52:00.109Z"
 last_activity: 2026-07-19
-last_activity_desc: Phase 210 planning complete
+last_activity_desc: Phase 210 execution started
 progress:
   total_phases: 3
   completed_phases: 1
-  total_plans: 3
-  completed_plans: 3
+  total_plans: 6
+  completed_plans: 4
   percent: 33
 ---
 
@@ -24,14 +25,14 @@ See: `.planning/PROJECT.md` (updated 2026-07-03 after v1.55 closeout)
 
 **Core value:** A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic Elixir DX, strong domain modeling, tamper-evident audit ledger, great observability, and zero breaking-change pain through v1.x.
 
-**Current focus:** Phase 210 — reign home + certify answer first ia & copy integrity
+**Current focus:** Phase 210 — reign-home-certify-answer-first-ia-copy-integrity
 
 ## Current Position
 
-Phase: 210
-Plan: Not started
+Phase: 210 (reign-home-certify-answer-first-ia-copy-integrity) — EXECUTING
+Plan: 2 of 3
 Status: Ready to execute
-Last activity: 2026-07-19 — Phase 210 planning complete
+Last activity: 2026-07-19 — Phase 210 execution started
 Next: `/gsd-plan-phase 209`
 
 ## Post-v1.48 Pause Rule
@@ -318,6 +319,7 @@ Coverage: 22/22 v1.51 requirements mapped (each REQ-ID → exactly one phase). D
 | Phase 209 P01 | 5min | 2 tasks | 0 files |
 | Phase 209 P02 | 15min | 2 tasks | 3 files |
 | Phase 209 P03 | 25min | 3 tasks | 3 files |
+| Phase 210 P01 | 8m | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -590,6 +592,8 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - [Phase ?]: Playwright's default outputDir clearing destroyed Plan 01's pre-reign PNG baseline mid-Task-1; fell back to Plan 01's recorded prose geometry notes as the comparison target instead of pixel diffing.
 - [Phase ?]: Added the 6 new Plan-02 Copy.Subscription functions to the export_copy_strings mix task's static allowlist — without this, rebuilding the anti-drift copy_strings.json artifact was a silent no-op.
 - [Phase ?]: Removed two coincidentally-passing '$0.00' assertions and one stale duplicate 'Open failed-delivery debugger' assertion from subscriptions_live_test.exs that the plan's literal line-range instructions would have kept, since all three tested content that no longer renders post-reign.
+- [Phase ?]: Home reign verdict language reuses Subscriptions' exact literals (Healthy / Action required) for cross-page parity
+- [Phase ?]: Added 4 new Home Copy fns to export_copy_strings allowlist so they appear in copy_strings.json
 
 ### Pending Todos
 
@@ -717,7 +721,7 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 
 ## Session Continuity
 
-Last session: 2026-07-19T19:11:45.077Z
+Last session: 2026-07-19T19:51:42.467Z
 Stopped at: Phase 210 UI-SPEC approved
 Resume file: .planning/phases/210-reign-home-certify-answer-first-ia-copy-integrity/210-UI-SPEC.md
 

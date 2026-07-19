@@ -191,10 +191,10 @@ Plans:
   4. Operator-facing copy on both pages is plain-language (no double-negative "No — billing is not active"; "workspace" jargon clarified) and sourced from `AccrueAdmin.Copy` (no inline template literals); breadcrumbs point only to real navigable parents (no fake "Billing health overview"), and the primary customer-lookup control is discoverable rather than buried.
   5. Verification gates pass in-phase: the `dashboard_live_test` assertions at L107 (`ax-home-health-answer`), L130 (`ax-launcher-primary`), L184 (`ax-home-customer-search-cta`) and the `e2e/admin-spec-overview-phase194` + `admin-interaction-overlay-phase199` `.ax-attention-rail*` selectors are migrated to the shared-component DOM; `admin-a11y.spec.js` (axe) stays green with landmark/heading/visually-hidden semantics preserved; the served `accrue_admin.css` bundle and `copy_strings.json` are rebuilt and committed; and the diff touches no `accrue/lib`, adds no nav room, and introduces no diagnosis/causality synthesis.
 
-**Plans**: 3 plans
+**Plans**: 1/3 plans executed
 **Wave 1**
 
-- [ ] 210-01-PLAN.md — Copy SSOT pass: add Home verdict/heading/customer-search strings, de-jargon "workspace", regenerate copy_strings.json (COPY-01, COPY-02)
+- [x] 210-01-PLAN.md — Copy SSOT pass: add Home verdict/heading/customer-search strings, de-jargon "workspace", regenerate copy_strings.json (COPY-01, COPY-02)
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
@@ -243,7 +243,7 @@ Plans:
 | 207. Orchestration + digest + one-command round/fix loop | v1.56 | 8/8 | Complete | 2026-07-07 |
 | 208. Prove convergence on slice + wire CI + ACCEPT | v1.56 | 3/5 | Parked | - |
 | 209. Reign Subscriptions (list + detail CSS coordination) | v1.57 | 3/3 | Complete    | 2026-07-19 |
-| 210. Reign Home + certify answer-first IA & copy integrity | v1.57 | 0/0 | Not started | - |
+| 210. Reign Home + certify answer-first IA & copy integrity | v1.57 | 1/3 | In Progress|  |
 | 211. Grep-gated CSS retirement & cross-surface cleanup | v1.57 | 0/0 | Not started | - |
 
 ## Historical Backlog Anchors (not active scope)
