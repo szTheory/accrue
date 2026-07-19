@@ -162,7 +162,7 @@ Full details: [v1.48 roadmap archive](milestones/v1.48-ROADMAP.md)
   4. The `WorkQueueCallout` extract-or-inline decision is made and recorded: if the trimmed worklist callout shape demonstrably repeats (and will be reused by Home), exactly one small shared component composed from existing tokens + `.ax-card` reusing the `moss`/`cobalt`/`amber`/`slate`/`ink` tone scale is added and consumed by Subscriptions; otherwise Subscriptions composes from `.ax-card` directly and no component is added. No other new components, no new deps.
   5. Verification gates pass in-phase: no operator-density regression versus the pre-reign Subscriptions screenshot (row height, rows-per-viewport, header band height held) and PNG parity against the canonical Payments/Customers/Invoices reference; the `subscriptions_live_test:111` (`ax-kpi-row ax-subscriptions-kpi-row`) assertion and any other retired-class/copy assertions are migrated to the shared-component selector in this phase; the served `priv/static/accrue_admin.css` bundle and `examples/accrue_host/e2e/generated/copy_strings.json` are rebuilt and committed; the subscription **detail** page's shared `.ax-inline-worklist*` / `.ax-audit-summary-row` styling is preserved (retain-vs-reign decided and PNG-verified) — and the diff touches no `accrue/lib`, adds no nav room, and introduces no "why blocked"/causality synthesis.
 
-**Plans**: 2/3 plans executed
+**Plans**: 3/3 plans complete
 Plans:
 **Wave 1**
 
@@ -174,7 +174,7 @@ Plans:
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
-- [ ] 209-03-PLAN.md — D-04 shared-CSS grep-gate + detail-page PNG parity + test migration + generated-artifact rebuild
+- [x] 209-03-PLAN.md — D-04 shared-CSS grep-gate + detail-page PNG parity + test migration + generated-artifact rebuild
 
 **UI hint**: yes
 
@@ -230,7 +230,7 @@ Plans:
 | 206. Adversarial verifier + finding ledger + deterministic gate | v1.56 | 4/4 | Complete | 2026-07-04 |
 | 207. Orchestration + digest + one-command round/fix loop | v1.56 | 8/8 | Complete | 2026-07-07 |
 | 208. Prove convergence on slice + wire CI + ACCEPT | v1.56 | 3/5 | Parked | - |
-| 209. Reign Subscriptions (list + detail CSS coordination) | v1.57 | 2/3 | In Progress|  |
+| 209. Reign Subscriptions (list + detail CSS coordination) | v1.57 | 3/3 | Complete   | 2026-07-19 |
 | 210. Reign Home + certify answer-first IA & copy integrity | v1.57 | 0/0 | Not started | - |
 | 211. Grep-gated CSS retirement & cross-surface cleanup | v1.57 | 0/0 | Not started | - |
 

@@ -4,16 +4,16 @@ milestone: v1.57
 milestone_name: Admin Operator Control Plane
 current_phase: 209
 current_phase_name: reign-subscriptions-list-detail-css-coordination
-status: executing
-stopped_at: Completed 209-02-PLAN.md
-last_updated: "2026-07-19T18:17:01.517Z"
+status: verifying
+stopped_at: Completed 209-03-PLAN.md
+last_updated: "2026-07-19T18:43:25.251Z"
 last_activity: 2026-07-19
 progress:
   total_phases: 3
-  completed_phases: 0
+  completed_phases: 1
   total_plans: 3
-  completed_plans: 2
-  percent: 0
+  completed_plans: 3
+  percent: 33
 ---
 
 # Project State
@@ -30,7 +30,7 @@ See: `.planning/PROJECT.md` (updated 2026-07-03 after v1.55 closeout)
 
 Phase: 209 (reign-subscriptions-list-detail-css-coordination) — EXECUTING
 Plan: 3 of 3
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-07-19
 Next: `/gsd-plan-phase 209`
 
@@ -317,6 +317,7 @@ Coverage: 22/22 v1.51 requirements mapped (each REQ-ID → exactly one phase). D
 | Phase 208 P03 | 55 min | 3 tasks | 3 files |
 | Phase 209 P01 | 5min | 2 tasks | 0 files |
 | Phase 209 P02 | 15min | 2 tasks | 3 files |
+| Phase 209 P03 | 25min | 3 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -586,6 +587,9 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - [Phase ?]: 2026-07-05 (207-06): ratchet-fix probe verdict policy — objective kinds (contrast/motion) re-measured against their invariant; other kinds trust the maintainer's approved resolution (present=false). ui.fix runs zero evaluator fan-out (D-50), grep-proven.
 - [Phase ?]: 209-01: No source/test/CSS touched -- both tasks read-only evidence capture (12/12 green tests + 8-PNG light/dark/desktop/mobile baseline preserved outside git for Plan 03's density-no-regression diff).
 - [Phase ?]: COMP-01 resolves inline (D-02) for 209-02: no WorkQueueCallout component file created; Subscriptions composes directly from PageHeader/StatStrip/StatusBadge.
+- [Phase ?]: Playwright's default outputDir clearing destroyed Plan 01's pre-reign PNG baseline mid-Task-1; fell back to Plan 01's recorded prose geometry notes as the comparison target instead of pixel diffing.
+- [Phase ?]: Added the 6 new Plan-02 Copy.Subscription functions to the export_copy_strings mix task's static allowlist — without this, rebuilding the anti-drift copy_strings.json artifact was a silent no-op.
+- [Phase ?]: Removed two coincidentally-passing '$0.00' assertions and one stale duplicate 'Open failed-delivery debugger' assertion from subscriptions_live_test.exs that the plan's literal line-range instructions would have kept, since all three tested content that no longer renders post-reign.
 
 ### Pending Todos
 
@@ -711,8 +715,8 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 
 ## Session Continuity
 
-Last session: 2026-07-19T18:17:01.507Z
-Stopped at: Completed 209-02-PLAN.md
+Last session: 2026-07-19T18:43:25.245Z
+Stopped at: Completed 209-03-PLAN.md
 Resume file: None
 
 ## Operator Next Steps
