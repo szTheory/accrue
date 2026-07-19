@@ -17,6 +17,16 @@
 
 ---
 
+## v1.56 Admin UI Ratchet: Automated Adversarial Design Evaluation (PARKED: 2026-07-19)
+
+**Status:** PARKED mid-flight (not shipped) to open v1.57 (SEED-004 admin redesign). Phases 205–207 SHIPPED; Phase 208 (prove-convergence + ACCEPT) was 3/5 done with 208-04/05 remaining — both maintainer-gated and **non-converging: the ratchet kept surfacing information-architecture findings, which is exactly the work v1.57/SEED-004 now takes on.** Parking is the right call, not abandonment.
+
+**Preserved (do NOT delete):** the forward-only ratchet ledger + frozen baseline live in `accrue_admin/e2e/ratchet/` (untouched); the harness (`ratchet-propose/verify/digest.mjs`, `mix accrue_admin.ui.{round,fix}`) remains functional. Per its own design, the ratchet becomes the tool that **re-locks** the v1.57 redesign once it lands (refresh design-lens rubric + persona exemplars + re-freeze baseline). The 23 round-99 confirmed IA findings are carried into v1.57 as M1 input at `research/admin-ratchet-round99-confirmed-findings.json`.
+
+**Archives:** [`milestones/v1.56-ROADMAP.md`](milestones/v1.56-ROADMAP.md), [`milestones/v1.56-REQUIREMENTS.md`](milestones/v1.56-REQUIREMENTS.md), [`milestones/v1.56-phases/`](milestones/v1.56-phases/) (phases 205–208). To resume v1.56 later: restore from the archive and run `/gsd-execute-phase 208`.
+
+---
+
 ## v1.35 : Dual-Provider Supportability Closure (Backfilled: 2026-07-01)
 
 **Note:** Synthesized from archive snapshot by `/gsd-health --backfill`. Original completion date unknown.

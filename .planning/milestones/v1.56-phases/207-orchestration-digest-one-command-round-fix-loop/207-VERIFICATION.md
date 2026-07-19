@@ -1,8 +1,8 @@
 ---
 phase: 207-orchestration-digest-one-command-round-fix-loop
-verified: 2026-07-07T12:42:16Z
-status: human_needed
-score: 7/7 must-haves verified
+verified: 2026-07-07T13:52:29Z
+status: passed
+score: 7/7 must-haves verified; 2/2 live smokes passed
 behavior_unverified: 0
 overrides_applied: 0
 re_verification:
@@ -15,20 +15,22 @@ re_verification:
     - "Post-review CR: applyDecisions() preflights ledger state before any append, preventing partial mutation on later invalid decisions"
   gaps_remaining: []
   regressions: []
-human_verification:
+live_verification:
   - test: "ORCH-07 live cache-cost smoke"
     expected: "Run the proposer twice with ANTHROPIC_API_KEY against unchanged PNGs; the second run reports non-zero usage.cache_read_input_tokens while claim_key/finding_id identity remains stable."
-    why_human: "Requires a live Anthropic API key and network. Automated self-tests verify the request shape and no-key path, not measured provider cache hits."
+    result: "passed"
+    evidence: "npm run ratchet:live-uat wrote test-results/ui-ratchet/live-uat/summary.json with pass2 cache_read_input_tokens=37394 and identity_stable=true."
   - test: "ORCH-08 live capture filter"
     expected: "Run RATCHET_SURFACES=dashboard npx playwright test e2e/admin-visuals.spec.js inside accrue_admin/ with the e2e server available; only dashboard PNGs are written for both desktop/mobile and light/dark captures."
-    why_human: "Requires the Phoenix e2e server and Playwright browser capture output. Automated checks verify the filter predicate and env threading."
+    result: "passed"
+    evidence: "summary.json actual_artifacts exactly matched the 8 dashboard PNG/bbox artifacts for chromium-desktop and chromium-mobile."
 ---
 
 # Phase 207: Orchestration + digest + one-command round/fix loop Verification Report
 
 **Phase Goal:** The whole pipeline is driven by two `mix` commands with a rendered digest and minimal maintainer checkpoints, resolutions auto-mint deterministic guards, and the loop provably terminates.
-**Verified:** 2026-07-07T12:42:16Z
-**Status:** human_needed
+**Verified:** 2026-07-07T13:52:29Z
+**Status:** passed
 **Re-verification:** Yes — after gap closure
 
 ## Goal Achievement
@@ -43,9 +45,9 @@ human_verification:
 | SC4 | `mix accrue_admin.ui.fix` applies batch, rebuilds/commits CSS, recaptures, probes, finalizes ledger | VERIFIED | `ui.fix` sequence and dry-run covered by ExUnit; D-50 grep clean for no propose/verify fan-out; commit now uses `git commit ... --allow-empty -- priv/static`. |
 | SC5 | Resolved findings auto-mint deterministic guards or ledger-count sentinel | VERIFIED | `ratchet-guard-mint.mjs --self-test` verifies routing, imported guard grammar, idempotent sorted append, complete concrete rows, and CR-02 incomplete-row downgrade. |
 | SC6 | Loop terminates: K=2 dry rounds converge and round 6 escalates | VERIFIED | `phase-ratchet-ledger.mjs --self-test` passes all four dry clauses, epoch-boundary isolation, K=2 convergence, round-6 cap, and missing-round no-append path. |
-| SC7 | ORCH-07/08 cache-control and surface scoping are wired | VERIFIED + HUMAN | Request-shape and filter logic self-tests pass; `ui.round` reads JS `SLICES` and threads `RATCHET_SURFACES`. Live provider cache-hit and live capture-directory outcomes remain human smokes. |
+| SC7 | ORCH-07/08 cache-control and surface scoping are wired | VERIFIED | Request-shape and filter logic self-tests pass; `ui.round` reads JS `SLICES` and threads `RATCHET_SURFACES`; `npm run ratchet:live-uat` passed with non-zero provider cache reads and exact dashboard capture artifacts. |
 
-**Score:** 7/7 truths verified by code/test evidence; 2 live smoke checks still require human verification.
+**Score:** 7/7 truths verified by code/test evidence; 2/2 live smoke checks passed.
 
 ### Required Artifacts
 
@@ -108,8 +110,8 @@ human_verification:
 | ORCH-04 | One-command `ui.fix` applies, rebuilds/commits CSS, recaptures, finalizes | SATISFIED | Mix task ExUnit and scoped commit pathspec verified. |
 | ORCH-05 | Deterministic guard per resolved finding or ledger-count sentinel | SATISFIED | Guard mint complete/incomplete paths self-tested; finalize CR-02 route self-tested. |
 | ORCH-06 | K=2 convergence, 6-round cap | SATISFIED | Phase ledger self-test covers clauses and status classification. |
-| ORCH-07 | Anthropic prompt caching stable prefix | AUTOMATED SATISFIED; HUMAN SMOKE PENDING | Exactly 3 cache-control breakpoints verified; live token-cost reduction needs key/network. |
-| ORCH-08 | Surface/slice filter for capture and fan-out | AUTOMATED SATISFIED; HUMAN SMOKE PENDING | `SLICES`, capture filter, proposer filter, and env threading verified; live capture output needs server/browser run. |
+| ORCH-07 | Anthropic prompt caching stable prefix | SATISFIED | Exactly 3 cache-control breakpoints verified; live UAT pass 2 reported `cache_read_input_tokens=37394` and stable identity. |
+| ORCH-08 | Surface/slice filter for capture and fan-out | SATISFIED | `SLICES`, capture filter, proposer filter, and env threading verified; live UAT wrote exactly the 8 dashboard PNG/bbox artifacts. |
 
 ### Anti-Patterns Found
 
@@ -121,25 +123,25 @@ human_verification:
 | `ratchet-propose.mjs` | 51/157/873 | Exported helper lives in a module with CLI import side effects | WARNING | Helper import ergonomics risk; current self-tests and CLI use pass. |
 | `ratchet-fix.mjs` | 72/102 | Malformed round can resolve to non-integer artifact path | WARNING | Clearer validation recommended; focused Phase 207 paths pass. |
 
-### Human Verification Required
+### Live Verification Completed
 
 1. **ORCH-07 cache-hit reduction**
 
 **Test:** Run `ANTHROPIC_API_KEY=... npm run ratchet:propose` twice against unchanged PNGs and compare provider usage.
 **Expected:** The second run reports non-zero `usage.cache_read_input_tokens`; identity remains stable.
-**Why human:** Requires live Anthropic network/API behavior that deterministic self-tests intentionally do not exercise.
+**Result:** Passed via `npm run ratchet:live-uat`; pass 2 reported `cache_read_input_tokens=37394` and `identity_stable=true`.
 
 2. **ORCH-08 capture-side filter**
 
 **Test:** Run `RATCHET_SURFACES=dashboard npx playwright test e2e/admin-visuals.spec.js` inside `accrue_admin/` with the e2e server/browser environment available.
 **Expected:** Only dashboard PNGs are written for both projects/themes; no other surface PNGs are created.
-**Why human:** Requires a booted Phoenix e2e server and actual Playwright capture output.
+**Result:** Passed via `npm run ratchet:live-uat`; actual artifacts exactly matched the expected dashboard-only matrix.
 
 ### Gaps Summary
 
-No blocking gaps remain from the prior verification. CR-01, CR-02, the `ui.fix` commit pathspec warning, and the post-review `applyDecisions()` atomicity issue are all closed with source evidence and passing focused tests. The phase is not marked `passed` because two explicitly manual live smokes remain.
+No blocking gaps remain from the prior verification. CR-01, CR-02, the `ui.fix` commit pathspec warning, and the post-review `applyDecisions()` atomicity issue are all closed with source evidence and passing focused tests. The two live smokes have now passed.
 
 ---
 
-_Verified: 2026-07-07T12:42:16Z_
+_Verified: 2026-07-07T13:52:29Z_
 _Verifier: the agent (gsd-verifier)_
