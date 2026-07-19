@@ -154,9 +154,106 @@ defmodule Accrue.MixProject do
       source_ref: "accrue-v#{@version}",
       extras: ["README.md" | Path.wildcard("guides/*.md")],
       groups_for_extras: [Guides: Path.wildcard("guides/*.md")],
+      before_closing_body_tag: &before_closing_body_tag/1,
       skip_undefined_reference_warnings_on: &skip_undefined_reference_warning?/1
     ]
   end
+
+  defp before_closing_body_tag(:html) do
+    """
+    <style>
+      .accrue-mermaid {
+        margin: 1.5rem 0;
+        overflow-x: auto;
+        padding: 1rem;
+        border: 1px solid #d8dee9;
+        border-radius: 0.5rem;
+        background: #ffffff;
+        color: #111827;
+        text-align: center;
+      }
+
+      .accrue-mermaid svg {
+        display: block;
+        width: 100%;
+        min-width: 42rem;
+        max-width: none;
+        height: auto;
+        margin: 0 auto;
+      }
+
+      @media (min-width: 48rem) {
+        .accrue-mermaid svg {
+          min-width: 0;
+          max-width: 100%;
+        }
+      }
+    </style>
+    <script type="module">
+      const mermaidSource =
+        "https://cdn.jsdelivr.net/npm/mermaid@11.16.0/dist/mermaid.esm.min.mjs";
+      let mermaidPromise;
+      let renderSequence = 0;
+      let warned = false;
+
+      const warnOnce = (error) => {
+        if (warned) return;
+        warned = true;
+        console.warn("Accrue docs could not render a Mermaid diagram; showing source instead.", error);
+      };
+
+      const loadMermaid = () => {
+        mermaidPromise ||= import(mermaidSource).then(({ default: mermaid }) => {
+          mermaid.initialize({ startOnLoad: false, securityLevel: "strict" });
+          return mermaid;
+        });
+
+        return mermaidPromise;
+      };
+
+      const renderMermaid = async () => {
+        const blocks = document.querySelectorAll("pre > code.mermaid");
+        if (blocks.length === 0) return;
+
+        let mermaid;
+
+        try {
+          mermaid = await loadMermaid();
+        } catch (error) {
+          mermaidPromise = undefined;
+          warnOnce(error);
+          return;
+        }
+
+        for (const code of blocks) {
+          const pre = code.parentElement;
+          if (!pre || code.dataset.mermaidRendering === "true") continue;
+
+          code.dataset.mermaidRendering = "true";
+
+          try {
+            const diagramId = `accrue-mermaid-${++renderSequence}`;
+            const { svg, bindFunctions } = await mermaid.render(diagramId, code.textContent);
+            const wrapper = document.createElement("div");
+            wrapper.className = "accrue-mermaid";
+            wrapper.innerHTML = svg;
+
+            if (typeof bindFunctions === "function") bindFunctions(wrapper);
+
+            pre.replaceWith(wrapper);
+          } catch (error) {
+            delete code.dataset.mermaidRendering;
+            warnOnce(error);
+          }
+        }
+      };
+
+      window.addEventListener("exdoc:loaded", renderMermaid);
+    </script>
+    """
+  end
+
+  defp before_closing_body_tag(_format), do: ""
 
   # Pre-v1 API docs still contain internal cross-links to schema types and
   # hidden lifecycle functions that are not public ExDoc nodes yet. Keep guide
