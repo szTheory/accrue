@@ -46,6 +46,12 @@ defmodule AccrueHostWeb.Layouts do
                 <p class="mt-0.5 text-sm text-base-content/70">
                   We couldn't process your recent payment. Update your payment method to avoid a service interruption.
                 </p>
+                <.link
+                  navigate="/billing/payment-methods"
+                  class="mt-2 inline-flex items-center gap-1 text-sm font-semibold text-warning hover:underline"
+                >
+                  Update payment method <.icon name="hero-arrow-right" class="size-4" />
+                </.link>
               </div>
             </div>
           </AccrueAdmin.Components.DunningBanner.dunning_banner>
