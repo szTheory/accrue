@@ -2,18 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.57
 milestone_name: Admin Operator Control Plane
-current_phase: 210
-current_phase_name: reign-home-certify-answer-first-ia-copy-integrity
 status: executing
-stopped_at: Phase 210 UI-SPEC approved
-last_updated: "2026-07-19T19:52:00.109Z"
+stopped_at: Completed 210-02-PLAN.md
+last_updated: "2026-07-19T20:03:10.315Z"
 last_activity: 2026-07-19
-last_activity_desc: Phase 210 execution started
 progress:
   total_phases: 3
   completed_phases: 1
   total_plans: 6
-  completed_plans: 4
+  completed_plans: 5
   percent: 33
 ---
 
@@ -30,9 +27,9 @@ See: `.planning/PROJECT.md` (updated 2026-07-03 after v1.55 closeout)
 ## Current Position
 
 Phase: 210 (reign-home-certify-answer-first-ia-copy-integrity) — EXECUTING
-Plan: 2 of 3
+Plan: 3 of 3
 Status: Ready to execute
-Last activity: 2026-07-19 — Phase 210 execution started
+Last activity: 2026-07-19
 Next: `/gsd-plan-phase 209`
 
 ## Post-v1.48 Pause Rule
@@ -320,6 +317,7 @@ Coverage: 22/22 v1.51 requirements mapped (each REQ-ID → exactly one phase). D
 | Phase 209 P02 | 15min | 2 tasks | 3 files |
 | Phase 209 P03 | 25min | 3 tasks | 3 files |
 | Phase 210 P01 | 8m | 2 tasks | 3 files |
+| Phase 210 P02 | ~30m | 3 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -594,6 +592,8 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - [Phase ?]: Removed two coincidentally-passing '$0.00' assertions and one stale duplicate 'Open failed-delivery debugger' assertion from subscriptions_live_test.exs that the plan's literal line-range instructions would have kept, since all three tested content that no longer renders post-reign.
 - [Phase ?]: Home reign verdict language reuses Subscriptions' exact literals (Healthy / Action required) for cross-page parity
 - [Phase ?]: Added 4 new Home Copy fns to export_copy_strings allowlist so they appear in copy_strings.json
+- [Phase ?]: 210-02: Home reigned onto PageHeader spine — single StatusBadge verdict (data-ax-health-verdict) + exposure-first StatStrip, one command-palette customer-lookup, three .ax-card launcher tiles (customer tile removed per D-02a)
+- [Phase ?]: 210-02: Launcher tile actions styled secondary so the page keeps exactly one primary cobalt CTA (header); CSS additive-only, retired .ax-launcher*/.ax-attention* rules preserved for Phase 211
 
 ### Pending Todos
 
@@ -721,9 +721,9 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 
 ## Session Continuity
 
-Last session: 2026-07-19T19:51:42.467Z
-Stopped at: Phase 210 UI-SPEC approved
-Resume file: .planning/phases/210-reign-home-certify-answer-first-ia-copy-integrity/210-UI-SPEC.md
+Last session: 2026-07-19T20:02:54.429Z
+Stopped at: Completed 210-02-PLAN.md
+Resume file: None
 
 ## Operator Next Steps
 
