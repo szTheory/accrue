@@ -159,6 +159,59 @@ light ~near-white-pink 45% tint and `#ffaaaa` on the dark red-tint both pass AA;
 → exit 0; post-commit `git diff --exit-code -- priv/static/accrue_admin.css` → clean; edits
 confirmed in the minified bundle; pre-existing dirty files + `mix.lock` untouched.
 
+## Follow-up 2 (coordinator sweep) — detail/dev red health bars + name-overflow bug
+
+Sweep found 3 more fixes (same de-garish/robustness class). One atomic source commit + bundle rebuild.
+
+| Commit | Message | Files |
+| ------ | ------- | ----- |
+| `6e5e53a3` | style(260719-ey5): de-saturate detail/dev red health bars + wrap long queue names | `accrue_admin/assets/css/app.css` |
+| `c2f2d6d4` | chore(260719-ey5): rebuild bundle for detail/dev health-bar de-saturation + name wrap | `accrue_admin/priv/static/accrue_admin.css` |
+
+**FIX 1 — detail-page health bar** (subscription-detail / customer-detail twin of the home bar).
+Selectors changed in `app.css`:
+- `.ax-detail-health-summary-slate` + `.ax-detail-health-summary-danger` containers:
+  `background: var(--ax-status-danger-solid)` → `color-mix(--ax-status-danger-bg 42%, --ax-elevated)`
+  (matches the already-correct sibling `-moss`); `border-width: 2px → 1px`; dropped white
+  `color: --ax-status-danger-on-solid` → `--ax-primary`. box-shadow/width kept.
+- `.ax-detail-health-summary-{slate,danger} .ax-detail-health-answer`: white → `--ax-primary`.
+- `.ax-detail-health-summary-danger .ax-detail-health-metric`: white-derived border/bg/text →
+  `--ax-status-danger-border` + `color-mix(--ax-status-danger-bg 48%, --ax-elevated)` + `--ax-primary`
+  (mirrors the `-amber` metric pattern).
+- Grouped white override block (`.ax-detail-health-{label,verdict,body,caveats,caveats strong}` for
+  both `-slate`/`-danger`): removed — label/body/caveats now fall back to their `--ax-primary` base
+  (caveats keeps its own amber sub-card bg); **verdict/heading** set to `--ax-status-danger-text`
+  (readable danger-red hue cue, matching the home bar's `strong` treatment).
+
+**FIX 2 — dev health snapshot** (`.ax-dev-health-snapshot .ax-dev-health-status`):
+`background: var(--ax-status-danger-solid)` → `color-mix(--ax-status-danger-bg 42%, --ax-elevated)`;
+`border-right-color` white-derived → `--ax-status-danger-border`; `color` white → `--ax-primary`
+(strong/em children already resolve to `--ax-primary` via base rules).
+
+**FIX 3 — layout-breaking text overflow** (long customer name stretched queue-record cards
+full-width). Used the existing `overflow-wrap: anywhere` idiom (no ellipsis truncation — names wrap
+and stay readable):
+- `.ax-inline-worklist-copy`: added `min-width: 0` + `overflow-wrap: anywhere`.
+- `.ax-inline-worklist-copy strong`: added `min-width: 0` + `overflow-wrap: anywhere`.
+- (`.ax-inline-worklist` flex row already allows the copy child to shrink via the added
+  `min-width: 0`; esbuild merged both into
+  `.ax-inline-worklist-copy,.ax-inline-worklist-copy strong{min-width:0;overflow-wrap:anywhere;...}`.)
+
+**Look for (re-capture):** every subscription-detail / customer-detail in a bad state shows the
+health bar as a soft red-tinted card (dark-red bold verdict, normal-ink body, metric chips readable),
+NOT solid red; the dev health snapshot likewise tinted; and a queue record with a very long customer
+name now wraps within its card instead of stretching the row full-width — in both light and dark.
+
+**WCAG AA:** danger tint bg is `color-mix(danger-bg 42%, elevated)` (near-white-pink light /
+dark red-tint dark); `--ax-status-danger-text` (`#9b1c1c` / `#ffaaaa`) and `--ax-primary` body ink
+both pass AA on it in both themes. All class-level, theme-aware tokens → no `theme.css` / system-dark
+mirror needed. Remaining `--ax-status-danger-solid` uses in the bundle are only the token
+definitions + `.ax-button-danger` CTA (correct solid-button pattern) — no health bar stays solid.
+
+**Gates (all green):** `mix accrue_admin.assets.build` → exit 0; `mix compile --warnings-as-errors`
+→ exit 0; post-commit `git diff --exit-code -- priv/static/accrue_admin.css` → clean; all three
+fixes confirmed in the minified bundle; pre-existing dirty files + `mix.lock` untouched.
+
 ## Self-Check: PASSED
 - Commits exist: `f8c528cc`, `341fafba`, `b775b121` (all found in `git log`).
 - Files present: `accrue_admin/assets/css/app.css`, `accrue_admin/priv/static/accrue_admin.css`,
