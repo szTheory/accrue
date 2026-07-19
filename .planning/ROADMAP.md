@@ -230,7 +230,7 @@ Plans:
 | 206. Adversarial verifier + finding ledger + deterministic gate | v1.56 | 4/4 | Complete | 2026-07-04 |
 | 207. Orchestration + digest + one-command round/fix loop | v1.56 | 8/8 | Complete | 2026-07-07 |
 | 208. Prove convergence on slice + wire CI + ACCEPT | v1.56 | 3/5 | Parked | - |
-| 209. Reign Subscriptions (list + detail CSS coordination) | v1.57 | 3/3 | Complete   | 2026-07-19 |
+| 209. Reign Subscriptions (list + detail CSS coordination) | v1.57 | 3/3 | Complete    | 2026-07-19 |
 | 210. Reign Home + certify answer-first IA & copy integrity | v1.57 | 0/0 | Not started | - |
 | 211. Grep-gated CSS retirement & cross-surface cleanup | v1.57 | 0/0 | Not started | - |
 
