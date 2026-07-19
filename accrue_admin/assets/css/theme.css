@@ -140,8 +140,8 @@ html.accrue-admin {
   --ax-primary: var(--accrue-ink);
   --ax-muted: #5d6a73;
   --ax-subtle: var(--accrue-slate);
-  --ax-border: rgba(36, 48, 59, 0.12);
-  --ax-border-strong: rgba(36, 48, 59, 0.24);
+  --ax-border: rgba(36, 48, 59, 0.20);
+  --ax-border-strong: rgba(36, 48, 59, 0.32);
   --ax-success: var(--accrue-moss);
   --ax-success-readable: #2f6b4f;
   --ax-warning: var(--accrue-amber);
