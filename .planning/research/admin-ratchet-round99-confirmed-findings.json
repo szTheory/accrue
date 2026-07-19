@@ -1,0 +1,219 @@
+[
+  {
+    "finding_id": "f-2d5d103150b2baae",
+    "decision": "approve",
+    "surface": "component-kitchen",
+    "summary": "The 'Audit log' section shows only 'Actor-filtered' label but does not display the actual audit entries (who did what, when). The compliance-audit operator cannot see timestamps, actor names, or action details needed to complete their job.",
+    "region_tag": "content-body"
+  },
+  {
+    "finding_id": "f-ad500f6f14bc16d4",
+    "decision": "approve",
+    "surface": "subscriptions",
+    "summary": "The current view shows 'At risk 1 at-risk subscription - dunning funnel' with 'Open invoice queue workspace 2 open invoices' but the main heading says 'Action required: collect 2 open invoices to reach $0.00'. It's unclear whether working these 2 subscription rows will resolve the 2 open invoices or if the user needs to navigate elsewhere.",
+    "region_tag": "content-body"
+  },
+  {
+    "finding_id": "f-033f8d877a304769",
+    "decision": "approve",
+    "surface": "subscription-detail",
+    "summary": "Global invoice queue workspace section has oversized vertical padding (≈20px) between header and content rows, wasting vertical space",
+    "region_tag": "attention-rail"
+  },
+  {
+    "finding_id": "f-70ea46e6c37d9e7a",
+    "decision": "approve",
+    "surface": "subscriptions",
+    "summary": "MRR signal row: excessive horizontal padding between badges (≈24px) and oversized vertical margin (≈16px below) wastes space",
+    "region_tag": "content-body"
+  },
+  {
+    "finding_id": "f-48c5df33e93b8295",
+    "decision": "approve",
+    "surface": "dashboard",
+    "summary": "The page header displays 'Billing health: Unhealthy' but the status is buried in dense red/orange alert blocks with multiple competing priorities (P1, P2, P3), making it difficult to quickly assess overall billing health without parsing through technical details about webhooks, subscriptions, and invoice queues.",
+    "region_tag": "page-header"
+  },
+  {
+    "finding_id": "f-5a1ecbfd0b3d789d",
+    "decision": "approve",
+    "surface": "subscriptions",
+    "summary": "The primary action 'Open dedicated invoice queue' button appears three times (in the alert banner, in the blue card for E2E Dunning Customer, and as a tab) but none clearly explain that this is THE workspace to work invoices to zero. The user must guess which of these three identical labels is the correct entry point.",
+    "region_tag": "page-header"
+  },
+  {
+    "finding_id": "f-bd3b2cae05e5a935",
+    "decision": "approve",
+    "surface": "subscription-detail",
+    "summary": "The red 'Billing status No - billing is not active' banner at the top is the critical health signal, but it is visually competing with multiple other alerts and action items (global invoice queue, dunning funnel warnings, setup gaps) making it difficult to quickly assess overall billing health status",
+    "region_tag": "attention-rail"
+  },
+  {
+    "finding_id": "f-ca8eabe5458b44f5",
+    "decision": "approve",
+    "surface": "dashboard",
+    "summary": "The 'Find ONE customer' search box is buried in a small blue banner at the very bottom of the 'Priority exceptions' section with the label 'Find ONE customer' and a text input that says 'Name, email, or ID opens the unified customer billing view.' This is not prominently placed for a primary job and requires scrolling past multiple sections to discover.",
+    "region_tag": "page-header"
+  },
+  {
+    "finding_id": "f-f00ee035cae18278",
+    "decision": "approve",
+    "surface": "subscriptions",
+    "summary": "Primary queue banner: excessive vertical padding (≈16px top/bottom) pushes critical subscription table below fold",
+    "region_tag": "page-header"
+  },
+  {
+    "finding_id": "f-f72b5bca62e29354",
+    "decision": "approve",
+    "surface": "component-kitchen",
+    "summary": "The page header mixes the health status with primary action guidance ('Primary action: open the invoice queue and collect to $0.00') in a single dense paragraph, violating information hierarchy. The operator must parse multiple concepts simultaneously to extract the simple health answer.",
+    "region_tag": "page-header"
+  },
+  {
+    "finding_id": "f-037729e9f47aa3b5",
+    "decision": "approve",
+    "surface": "subscription-detail",
+    "summary": "The link 'Open invoice queue rows' in the 'Global open-invoice queue rows' section is presented as inline body text rather than as a clear actionable control, making it difficult to identify as the primary entry point for working the invoice queue.",
+    "region_tag": "content-body"
+  },
+  {
+    "finding_id": "f-0f90c9ba4473cf8e",
+    "decision": "approve",
+    "surface": "component-kitchen",
+    "summary": "The 'Open invoices 2 / $592.50' button does not directly allow working the invoice queue to zero; clicking it likely navigates away to a separate view rather than providing inline queue-processing controls on this surface",
+    "region_tag": "content-body"
+  },
+  {
+    "finding_id": "f-16203f0c8e57d72c",
+    "decision": "approve",
+    "surface": "subscriptions",
+    "summary": "The breadcrumb 'Billing health overview / Subscriptions' suggests a 'Billing health overview' parent page exists, but there is no visible navigation control to return to that overview where health status would be shown",
+    "region_tag": "primary-nav"
+  },
+  {
+    "finding_id": "f-186adbbbf86b57ce",
+    "decision": "approve",
+    "surface": "subscriptions",
+    "summary": "The 'Work open invoices' button appears twice in the data table but it's unclear what action this performs - does it open a workspace, navigate to another view, or perform an inline action? No affordance indicates the outcome.",
+    "region_tag": "content-body"
+  },
+  {
+    "finding_id": "f-3229847d2e51d07f",
+    "decision": "approve",
+    "surface": "subscriptions",
+    "summary": "The 'Open invoice queue workspace 2 open invoices' control uses technical jargon ('workspace') and doesn't clearly communicate that this is the primary path to work invoices down to zero",
+    "region_tag": "content-body"
+  },
+  {
+    "finding_id": "f-3380c55096c63ace",
+    "decision": "approve",
+    "surface": "component-kitchen",
+    "summary": "Billing health status 'Unhealthy' is buried in dense prose alongside action instructions. The critical health verdict requires parsing a complex sentence structure ('Billing health: Unhealthy | Unhealthy: $592.50 overdue; clear to $0.00') instead of being immediately scannable.",
+    "region_tag": "page-header"
+  },
+  {
+    "finding_id": "f-3536ce241fc0e658",
+    "decision": "approve",
+    "surface": "dashboard",
+    "summary": "Red alert banner 'Billing status: Unhealthy' competes visually with the page title 'Billing health: Unhealthy', creating redundant hierarchy and confusion about primary heading",
+    "region_tag": "page-header"
+  },
+  {
+    "finding_id": "f-45f7a0e8db0e3b03",
+    "decision": "approve",
+    "surface": "component-kitchen",
+    "summary": "The primary action button 'Collect open invoices first' does not clearly indicate it will work the invoice queue to zero or what specific action it performs on the 2 open invoices totaling $592.50",
+    "region_tag": "page-header"
+  },
+  {
+    "finding_id": "f-4704825fa0ad0c4e",
+    "decision": "approve",
+    "surface": "subscriptions",
+    "summary": "Subscription table rows: excessive padding-block (≈16px) and large gap between customer detail sections wastes vertical space",
+    "region_tag": "data-table"
+  },
+  {
+    "finding_id": "f-48c3e6c9db950933",
+    "decision": "approve",
+    "surface": "subscription-detail",
+    "summary": "Multiple red alert banners at the top ('Billing status No - billing is not active', 'Work global invoice queue') compete for attention without clear hierarchy, making it unclear which issue is most critical for billing health assessment",
+    "region_tag": "page-header"
+  },
+  {
+    "finding_id": "f-4f83748a394e26bd",
+    "decision": "approve",
+    "surface": "component-kitchen",
+    "summary": "Excessive vertical padding around breadcrumb and billing health banner pushes critical invoice queue data below the fold",
+    "region_tag": "page-header"
+  },
+  {
+    "finding_id": "f-54366a3795c599fd",
+    "decision": "approve",
+    "surface": "subscription-detail",
+    "summary": "Related billing section has excessive gap (≈24px) between section header and first list item",
+    "region_tag": "detail-panel"
+  },
+  {
+    "finding_id": "f-66d02ab6e7624c41",
+    "decision": "approve",
+    "surface": "subscription-detail",
+    "summary": "The 'BILLING HEALTH VERDICT' field shows 'No - billing is not active' using the same confusing double-negative phrasing that makes quick comprehension difficult",
+    "region_tag": "detail-panel"
+  },
+  {
+    "finding_id": "f-7573c4d4725eae9d",
+    "decision": "approve",
+    "surface": "subscription-detail",
+    "summary": "Red alert banner has excessive vertical padding (≈16px top/bottom), pushing critical subscription detail content below the fold",
+    "region_tag": "page-header"
+  },
+  {
+    "finding_id": "f-91cf26608e9c2db3",
+    "decision": "approve",
+    "surface": "subscriptions",
+    "summary": "The filter input placeholder 'Filter by customer email, customer ID, subscription ID, or actor' is buried in the toolbar and not visually prominent as a primary customer lookup control for the 'Find ONE customer, see everything' job.",
+    "region_tag": "toolbar"
+  },
+  {
+    "finding_id": "f-bd22ab26a33406ec",
+    "decision": "approve",
+    "surface": "component-kitchen",
+    "summary": "The 'Search customers now' button in the top header is visually de-emphasized with a light blue background that blends into the search input, making it difficult to discover as the primary entry point for the customer-support persona's core job of finding one customer.",
+    "region_tag": "page-header"
+  },
+  {
+    "finding_id": "f-c56b21f43523331f",
+    "decision": "approve",
+    "surface": "subscription-detail",
+    "summary": "Critical billing health information is scattered across multiple sections (BILLING HEALTH VERDICT, LIFECYCLE STATE, BILLING SETUP GAPS) rather than consolidated into a single, scannable health summary",
+    "region_tag": "attention-rail"
+  },
+  {
+    "finding_id": "f-ce7380d0f74e8fef",
+    "decision": "approve",
+    "surface": "subscription-detail",
+    "summary": "Critical information about the open-invoice queue (the 'Global open-invoice queue rows' section stating 'Both new opens one invoice record, use the full queue link to work it') is buried mid-page among unrelated subscription details, dunning information, and activity logs, requiring extensive scrolling to locate.",
+    "region_tag": "content-body"
+  },
+  {
+    "finding_id": "f-f1a5f298fffc5583",
+    "decision": "approve",
+    "surface": "subscription-detail",
+    "summary": "Multiple overlapping concerns are presented with similar visual weight: red banner about billing status, blue panels about invoice queues, yellow dunning funnel warnings - no clear hierarchy for which issue is most critical to billing health",
+    "region_tag": "attention-rail"
+  },
+  {
+    "finding_id": "f-f1be6ae0d866ce1b",
+    "decision": "approve",
+    "surface": "subscriptions",
+    "summary": "The 'Customer billing lookup' search box in the top bar is labeled 'Customer name, email, or ID' but the persona's job is to 'Find ONE customer, see everything' and this control is visually de-emphasized and positioned far from the main workspace, making it unclear this is the primary entry point for the customer-support operator's core job.",
+    "region_tag": "page-header"
+  },
+  {
+    "finding_id": "f-f6f54df79c510157",
+    "decision": "approve",
+    "surface": "subscription-detail",
+    "summary": "The 'Webhooks' navigation item in the left sidebar does not provide any visual indication or direct path to 'Events' – the developer-integration operator's normal entry point for debugging failed webhooks end-to-end.",
+    "region_tag": "primary-nav"
+  }
+]
