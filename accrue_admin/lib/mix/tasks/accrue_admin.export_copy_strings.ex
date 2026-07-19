@@ -50,6 +50,12 @@ defmodule Mix.Tasks.AccrueAdmin.ExportCopyStrings do
     subscription_action_quantity_label
     subscription_action_single_item_quantity_guidance
     subscriptions_index_empty_title
+    subscriptions_index_breadcrumb
+    subscriptions_invoice_queue_cta
+    subscriptions_health_verdict_healthy
+    subscriptions_health_verdict_action_required
+    subscriptions_route_line
+    subscriptions_kpi_section_aria_label
     connect_accounts_headline
     connect_accounts_list_heading
     connect_accounts_table_empty_title
