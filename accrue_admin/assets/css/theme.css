@@ -218,72 +218,16 @@ html.accrue-admin {
   color-scheme: light;
 }
 
-html.accrue-admin[data-theme="dark"] {
-  --ax-base: #0f1318;
-  --ax-elevated: #171d24;
-  --ax-sunken: #0b1015;
-  --ax-primary: #f4f7fa;
-  --ax-muted: #a8b2bc;
-  --ax-subtle: #d7dde3;
-  --ax-border: rgba(233, 238, 242, 0.12);
-  --ax-border-strong: rgba(233, 238, 242, 0.2);
-  --ax-success-readable: #8ed6ac;
-  --ax-warning-readable: #f0c36a;
-  --ax-danger-readable: #ffaaaa;
-  --ax-info: #4a90b8;
-  --ax-info-readable: #9fcbe6;
-  --ax-accent-readable: color-mix(in srgb, var(--ax-accent) 65%, var(--accrue-paper));
-  --ax-accent-contrast: #ffffff;
-  --ax-focus-ring: var(--ax-accent-readable);
-  --ax-focus-ring-offset: var(--ax-base);
-  --ax-focus-shadow: 0 0 0 4px color-mix(in srgb, var(--ax-accent) 24%, transparent);
-  --ax-scrollbar-thumb: #a8b2bc;
-  --ax-scrollbar-track: #171d24;
-  --ax-scrollbar-thumb-hover: #d7dde3;
-  --ax-disabled-bg: #202832;
-  --ax-disabled-border: var(--ax-border);
-  --ax-disabled-text: #c0c9d2;
-  --ax-disabled-opacity: 0.62;
-  --ax-disabled-cursor: not-allowed;
-  --ax-readonly-bg: #202832;
-  --ax-readonly-border: var(--ax-border);
-  --ax-readonly-text: #d7dde3;
-  --ax-interactive-hover: #22334c;
-  --ax-interactive-active: #2b3f5f;
-  --ax-interactive-selected: #26385a;
-  --ax-status-success-bg: #14261c;
-  --ax-status-success-border: #3e7e58;
-  --ax-status-success-text: #8ed6ac;
-  --ax-status-success-solid: #8ed6ac;
-  --ax-status-success-on-solid: #0f1318;
-  --ax-status-warning-bg: #2a2111;
-  --ax-status-warning-border: #8d6522;
-  --ax-status-warning-text: #f0c36a;
-  --ax-status-warning-solid: #f0c36a;
-  --ax-status-warning-on-solid: #17120a;
-  --ax-status-danger-bg: #2b1719;
-  --ax-status-danger-border: #874346;
-  --ax-status-danger-text: #ffaaaa;
-  --ax-status-danger-solid: #c0392b;
-  --ax-status-danger-on-solid: #ffffff;
-  --ax-status-info-bg: #112331;
-  --ax-status-info-border: #426f8d;
-  --ax-status-info-text: #9fcbe6;
-  --ax-status-info-solid: #9fcbe6;
-  --ax-status-info-on-solid: #0f1318;
-  --ax-status-neutral-bg: #202832;
-  --ax-status-neutral-border: #56616d;
-  --ax-status-neutral-text: #f4f7fa;
-  --ax-status-neutral-solid: #d7dde3;
-  --ax-status-neutral-on-solid: #0f1318;
-  color-scheme: dark;
-}
-
-/* Phase 189 — sub-tree theme scoping for the component lab state-matrix columns.
-   Keeps html.accrue-admin[data-theme='dark'] for full-page production use;
-   adds .accrue-admin [data-theme='dark'] so any descendant element with
-   data-theme='dark' inside .accrue-admin genuinely re-scopes --ax-* tokens
-   (standard Radix/Primer pattern). Must contain the FULL dark token set — no subset. */
+/* Phase 189 / quick 260718-u1s — dark token set, single-sourced.
+   The two NON-media dark scopes are merged into one combined selector list so the
+   dark --ax-* set is authored ONCE (was triplicated). Scopes:
+   - html.accrue-admin[data-theme='dark']  — full-page production use;
+   - html.accrue-admin [data-theme='dark'] / .accrue-admin [data-theme='dark'] —
+     component-lab sub-tree re-scoping (standard Radix/Primer pattern).
+   The @media (prefers-color-scheme: dark) html.accrue-admin[data-theme='system'] copy
+   below MUST stay a separate rule — CSS cannot list a media-gated selector here.
+   Must contain the FULL dark token set — no subset. */
+html.accrue-admin[data-theme="dark"],
 html.accrue-admin [data-theme="dark"],
 .accrue-admin [data-theme="dark"] {
   --ax-base: #0f1318;
