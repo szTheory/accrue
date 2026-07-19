@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40" role="img" aria-labelledby="accrue-favicon-title accrue-favicon-desc">
+  <title id="accrue-favicon-title">Accrue</title>
+  <desc id="accrue-favicon-desc">The Accrue ascending bar mark, sized for a browser tab.</desc>
+  <style>
+    .accrue-favicon-bars { fill: #181818; }
+    @media (prefers-color-scheme: dark) {
+      .accrue-favicon-bars { fill: #FAFBFC; }
+    }
+  </style>
+  <path class="accrue-favicon-bars" d="M0 30h10v10H0Zm10-10h10v20H10Zm10-10h10v30H20Z"/>
+  <path fill="#5E9E84" d="M30 0h10v40H30Z"/>
+</svg>

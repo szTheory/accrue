@@ -5,6 +5,8 @@ defmodule Accrue.Docs.ArchitectureCodeWalkthroughTest do
   @walkthrough_path Path.expand("../../../guides/code-walkthrough.md", __DIR__)
   @core_readme_path Path.expand("../../../README.md", __DIR__)
   @root_readme_path Path.expand("../../../../README.md", __DIR__)
+  @docs_logo_path Path.expand("../../../priv/ex_doc/accrue-mark.svg", __DIR__)
+  @docs_favicon_path Path.expand("../../../priv/ex_doc/favicon.svg", __DIR__)
 
   @architecture_headings [
     "Accrue in one picture",
@@ -36,6 +38,22 @@ defmodule Accrue.Docs.ArchitectureCodeWalkthroughTest do
     assert root_readme =~ "accrue/guides/code-walkthrough.md"
     assert core_readme =~ "guides/architecture.md"
     assert core_readme =~ "guides/code-walkthrough.md"
+  end
+
+  test "ExDoc ships adaptive Accrue branding" do
+    docs = Mix.Project.config() |> Keyword.fetch!(:docs)
+
+    assert Keyword.fetch!(docs, :logo) == "priv/ex_doc/accrue-mark.svg"
+    assert Keyword.fetch!(docs, :favicon) == "priv/ex_doc/favicon.svg"
+
+    for {label, path} <- [{"logo", @docs_logo_path}, {"favicon", @docs_favicon_path}] do
+      asset = File.read!(path)
+
+      assert asset =~ "Accrue", "expected the docs #{label} to identify the Accrue brand"
+
+      assert asset =~ "prefers-color-scheme: dark",
+             "expected the docs #{label} to remain visible in dark browser chrome"
+    end
   end
 
   test "architecture keeps its teaching order, accessible diagrams, and parseable examples" do
@@ -156,11 +174,16 @@ defmodule Accrue.Docs.ArchitectureCodeWalkthroughTest do
 
     assert html =~ ~s(securityLevel: "strict")
     assert html =~ ~s(startOnLoad: false)
-    assert html =~ ~s|window.addEventListener("exdoc:loaded", renderMermaid)|
+    assert html =~ ~s|window.addEventListener("exdoc:loaded", scheduleMermaidRender)|
     assert html =~ ~s|document.querySelectorAll("pre > code.mermaid")|
     assert html =~ ~s(code.dataset.mermaidRendering = "true")
     assert html =~ "delete code.dataset.mermaidRendering"
     assert html =~ "console.warn"
+    assert html =~ ~s|document.body.classList.contains("dark") ? "dark" : "default"|
+    assert html =~ ~s|theme });|
+    assert html =~ "new MutationObserver(scheduleMermaidRender)"
+    assert html =~ "wrapper.dataset.mermaidSource = source"
+    assert html =~ "renderExistingDiagram"
 
     render_position = position!(html, "await mermaid.render")
     replace_position = position!(html, "pre.replaceWith(wrapper)")

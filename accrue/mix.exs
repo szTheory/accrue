@@ -152,6 +152,8 @@ defmodule Accrue.MixProject do
     [
       main: "readme",
       source_ref: "accrue-v#{@version}",
+      logo: "priv/ex_doc/accrue-mark.svg",
+      favicon: "priv/ex_doc/favicon.svg",
       extras: ["README.md" | Path.wildcard("guides/*.md")],
       groups_for_extras: [Guides: Path.wildcard("guides/*.md")],
       before_closing_body_tag: &before_closing_body_tag/1,
@@ -163,14 +165,23 @@ defmodule Accrue.MixProject do
     """
     <style>
       .accrue-mermaid {
+        --accrue-diagram-ring: rgba(15, 23, 42, 0.08);
         margin: 1.5rem 0;
         overflow-x: auto;
         padding: 1rem;
-        border: 1px solid #d8dee9;
-        border-radius: 0.5rem;
-        background: #ffffff;
-        color: #111827;
+        border-radius: 0.75rem;
+        background: transparent;
+        box-shadow:
+          0 0 0 1px var(--accrue-diagram-ring),
+          0 1px 2px -1px rgba(15, 23, 42, 0.08),
+          0 2px 6px rgba(15, 23, 42, 0.04);
+        color: inherit;
         text-align: center;
+      }
+
+      body.dark .accrue-mermaid {
+        --accrue-diagram-ring: rgba(255, 255, 255, 0.1);
+        box-shadow: 0 0 0 1px var(--accrue-diagram-ring);
       }
 
       .accrue-mermaid svg {
@@ -194,6 +205,7 @@ defmodule Accrue.MixProject do
         "https://cdn.jsdelivr.net/npm/mermaid@11.16.0/dist/mermaid.esm.min.mjs";
       let mermaidPromise;
       let renderSequence = 0;
+      let renderQueue = Promise.resolve();
       let warned = false;
 
       const warnOnce = (error) => {
@@ -203,17 +215,70 @@ defmodule Accrue.MixProject do
       };
 
       const loadMermaid = () => {
-        mermaidPromise ||= import(mermaidSource).then(({ default: mermaid }) => {
-          mermaid.initialize({ startOnLoad: false, securityLevel: "strict" });
-          return mermaid;
-        });
+        mermaidPromise ||= import(mermaidSource).then(({ default: mermaid }) => mermaid);
 
         return mermaidPromise;
       };
 
+      const docsTheme = () =>
+        document.body.classList.contains("dark") ? "dark" : "default";
+
+      const renderExistingDiagram = async (mermaid, wrapper, theme) => {
+        if (
+          wrapper.dataset.mermaidTheme === theme ||
+          wrapper.dataset.mermaidRendering === "true"
+        ) {
+          return;
+        }
+
+        wrapper.dataset.mermaidRendering = "true";
+
+        try {
+          const diagramId = `accrue-mermaid-${++renderSequence}`;
+          const { svg, bindFunctions } =
+            await mermaid.render(diagramId, wrapper.dataset.mermaidSource);
+          const rendered = document.createElement("div");
+          rendered.innerHTML = svg;
+          wrapper.replaceChildren(...rendered.childNodes);
+          wrapper.dataset.mermaidTheme = theme;
+
+          if (typeof bindFunctions === "function") bindFunctions(wrapper);
+        } catch (error) {
+          warnOnce(error);
+        } finally {
+          delete wrapper.dataset.mermaidRendering;
+        }
+      };
+
+      const renderSourceDiagram = async (mermaid, code, theme) => {
+        const pre = code.parentElement;
+        if (!pre || code.dataset.mermaidRendering === "true") return;
+
+        code.dataset.mermaidRendering = "true";
+
+        try {
+          const source = code.textContent;
+          const diagramId = `accrue-mermaid-${++renderSequence}`;
+          const { svg, bindFunctions } = await mermaid.render(diagramId, source);
+          const wrapper = document.createElement("div");
+          wrapper.className = "accrue-mermaid";
+          wrapper.dataset.mermaidSource = source;
+          wrapper.dataset.mermaidTheme = theme;
+          wrapper.innerHTML = svg;
+
+          if (typeof bindFunctions === "function") bindFunctions(wrapper);
+
+          pre.replaceWith(wrapper);
+        } catch (error) {
+          delete code.dataset.mermaidRendering;
+          warnOnce(error);
+        }
+      };
+
       const renderMermaid = async () => {
         const blocks = document.querySelectorAll("pre > code.mermaid");
-        if (blocks.length === 0) return;
+        const diagrams = document.querySelectorAll(".accrue-mermaid[data-mermaid-source]");
+        if (blocks.length === 0 && diagrams.length === 0) return;
 
         let mermaid;
 
@@ -225,30 +290,34 @@ defmodule Accrue.MixProject do
           return;
         }
 
+        const theme = docsTheme();
+        mermaid.initialize({ startOnLoad: false, securityLevel: "strict", theme });
+
+        for (const wrapper of diagrams) {
+          await renderExistingDiagram(mermaid, wrapper, theme);
+        }
+
         for (const code of blocks) {
-          const pre = code.parentElement;
-          if (!pre || code.dataset.mermaidRendering === "true") continue;
-
-          code.dataset.mermaidRendering = "true";
-
-          try {
-            const diagramId = `accrue-mermaid-${++renderSequence}`;
-            const { svg, bindFunctions } = await mermaid.render(diagramId, code.textContent);
-            const wrapper = document.createElement("div");
-            wrapper.className = "accrue-mermaid";
-            wrapper.innerHTML = svg;
-
-            if (typeof bindFunctions === "function") bindFunctions(wrapper);
-
-            pre.replaceWith(wrapper);
-          } catch (error) {
-            delete code.dataset.mermaidRendering;
-            warnOnce(error);
-          }
+          await renderSourceDiagram(mermaid, code, theme);
         }
       };
 
-      window.addEventListener("exdoc:loaded", renderMermaid);
+      const scheduleMermaidRender = () => {
+        renderQueue = renderQueue.then(renderMermaid).catch(warnOnce);
+      };
+
+      new MutationObserver(scheduleMermaidRender).observe(document.body, {
+        attributes: true,
+        attributeFilter: ["class"]
+      });
+
+      window.addEventListener("exdoc:loaded", scheduleMermaidRender);
+
+      if (document.readyState === "loading") {
+        window.addEventListener("DOMContentLoaded", scheduleMermaidRender, { once: true });
+      } else {
+        scheduleMermaidRender();
+      }
     </script>
     """
   end

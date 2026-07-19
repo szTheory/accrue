@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40" role="img" aria-labelledby="accrue-doc-mark-title accrue-doc-mark-desc">
+  <title id="accrue-doc-mark-title">Accrue</title>
+  <desc id="accrue-doc-mark-desc">The Accrue ascending bar mark.</desc>
+  <style>
+    .accrue-doc-mark-bars { fill: #181818; }
+    @media (prefers-color-scheme: dark) {
+      .accrue-doc-mark-bars { fill: #FAFBFC; }
+    }
+  </style>
+  <path class="accrue-doc-mark-bars" d="M0 30h10v10H0Zm10-10h10v20H10Zm10-10h10v30H20Z"/>
+  <path fill="#5E9E84" d="M30 0h10v40H30Z"/>
+</svg>
