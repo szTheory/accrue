@@ -155,16 +155,27 @@ Full details: [v1.48 roadmap archive](milestones/v1.48-ROADMAP.md)
 **Depends on**: Nothing (first phase of v1.57)
 **Requirements**: REIGN-01, REIGN-02, COMP-01
 **Success Criteria** (what must be TRUE):
+
   1. The Subscriptions list renders from the canonical spine with **nothing** between `FlashGroup` and the `DataTable`: the five bespoke band `<section>`s (`.ax-subscriptions-invoice-strip` / `-queue-shortcut` / `-invoice-records` / `-secondary-strips` wrapping `-at-risk-strip` + `-audit-strip`) are gone, the page-level override classes (`ax-page-compact ax-subscriptions-page`, `ax-page-header-compact ax-subscriptions-header`, the `ax-kpi-row` StatStrip wrapper) are dropped, and the now-dead `open_invoice_queue/1` query is removed — with a content inventory proving every distinct operator datum (at-risk exposure, last-webhook status, open-invoice count) survives, relocated not lost.
   2. The page presents one scannable health verdict (short-noun title + a single verdict expressed via StatStrip/StatusBadge, not a full-sentence title) and exactly one invoice-queue primary action in `PageHeader` `:actions` (the triple-repeated "Open dedicated invoice queue" CTA — the most-confirmed round-99 defect — collapses to one), with the fake "Billing health overview" breadcrumb parent replaced by the real 2-crumb `[home, Subscriptions]`.
   3. Subscriptions table + card cells render via the compact shared idiom (`StatusBadge`, `ax-stack-xs`, `ax-link`, `ax-chip ax-label`) with no in-cell action buttons — the 15-20-line bespoke `identity_cell/3` + `billing_signals_cell/3` raw HTML is rebuilt and per-row actions move to a shared control (actions column or `DropdownMenu`), matching the reference pages.
   4. The `WorkQueueCallout` extract-or-inline decision is made and recorded: if the trimmed worklist callout shape demonstrably repeats (and will be reused by Home), exactly one small shared component composed from existing tokens + `.ax-card` reusing the `moss`/`cobalt`/`amber`/`slate`/`ink` tone scale is added and consumed by Subscriptions; otherwise Subscriptions composes from `.ax-card` directly and no component is added. No other new components, no new deps.
   5. Verification gates pass in-phase: no operator-density regression versus the pre-reign Subscriptions screenshot (row height, rows-per-viewport, header band height held) and PNG parity against the canonical Payments/Customers/Invoices reference; the `subscriptions_live_test:111` (`ax-kpi-row ax-subscriptions-kpi-row`) assertion and any other retired-class/copy assertions are migrated to the shared-component selector in this phase; the served `priv/static/accrue_admin.css` bundle and `examples/accrue_host/e2e/generated/copy_strings.json` are rebuilt and committed; the subscription **detail** page's shared `.ax-inline-worklist*` / `.ax-audit-summary-row` styling is preserved (retain-vs-reign decided and PNG-verified) — and the diff touches no `accrue/lib`, adds no nav room, and introduces no "why blocked"/causality synthesis.
+
 **Plans**: 3 plans
 Plans:
+**Wave 1**
+
 - [ ] 209-01-PLAN.md — Baseline capture: pre-reign test-green confirmation + PNG snapshot (Subscriptions + Subscription-detail, light/dark)
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
 - [ ] 209-02-PLAN.md — Header/spine rebuild (breadcrumb, single verdict, single CTA, 4-stat StatStrip, Copy additions) + band removal/dead-code cleanup + compact cell rebuild
+
+**Wave 3** *(blocked on Wave 2 completion)*
+
 - [ ] 209-03-PLAN.md — D-04 shared-CSS grep-gate + detail-page PNG parity + test migration + generated-artifact rebuild
+
 **UI hint**: yes
 
 ### Phase 210: Reign Home + certify answer-first IA & copy integrity
@@ -173,11 +184,13 @@ Plans:
 **Depends on**: Phase 209
 **Requirements**: REIGN-03, IA-01, IA-02, IA-03, IA-04, COPY-01, COPY-02
 **Success Criteria** (what must be TRUE):
+
   1. Home is composed from the canonical `PageHeader` (breadcrumbs + title + `:description`/`:actions`/`:stat_strip`); its attention rail + four launcher tiles are rebuilt from `.ax-card` + `Button` + `Icon` + `StatusBadge` (with `EmptyState` for empty branches), and the already-canonical `KpiCard` "At a glance" band and `Timeline` activity cards are kept as-is.
   2. Each of the two pages presents exactly **one** scannable billing-health verdict (Home's verdict — rendered three times today — and the Subscriptions verdict each collapse to a single clear statement) and **one** unambiguous primary action per zone (Home's triplicated customer-search entry de-duplicates to a single discoverable control folded into `PageHeader` `:actions`; the Subscriptions invoice-queue entry stays single from Phase 209).
   3. Content on both pages is ordered answer-first (health verdict → primary action → supporting detail → records), redundant bands are trimmed with **no operator-density regression** versus each page's pre-reign baseline (verified by PNG compare against both the canonical reference and the pre-reign screenshot), and console density is preserved rather than over-aired.
   4. Operator-facing copy on both pages is plain-language (no double-negative "No — billing is not active"; "workspace" jargon clarified) and sourced from `AccrueAdmin.Copy` (no inline template literals); breadcrumbs point only to real navigable parents (no fake "Billing health overview"), and the primary customer-lookup control is discoverable rather than buried.
   5. Verification gates pass in-phase: the `dashboard_live_test` assertions at L107 (`ax-home-health-answer`), L130 (`ax-launcher-primary`), L184 (`ax-home-customer-search-cta`) and the `e2e/admin-spec-overview-phase194` + `admin-interaction-overlay-phase199` `.ax-attention-rail*` selectors are migrated to the shared-component DOM; `admin-a11y.spec.js` (axe) stays green with landmark/heading/visually-hidden semantics preserved; the served `accrue_admin.css` bundle and `copy_strings.json` are rebuilt and committed; and the diff touches no `accrue/lib`, adds no nav room, and introduces no diagnosis/causality synthesis.
+
 **Plans**: TBD
 **UI hint**: yes
 
@@ -187,11 +200,13 @@ Plans:
 **Depends on**: Phase 210 (both Home and Subscriptions must be reigned before the shared/dead CSS can be safely retired)
 **Requirements**: REIGN-04
 **Success Criteria** (what must be TRUE):
+
   1. A definitive grep census across `lib/`, `test/`, and `e2e/` confirms zero remaining references to each candidate class before deletion; the bespoke `.ax-home-*` / `.ax-launcher*` / `.ax-attention*` / `.ax-health-summary*` / `.ax-subscriptions-*` / `.ax-subscription-row-*` / `.ax-subscription-setup*` sets (~325 rules) are removed from `assets/css/app.css`.
   2. The detail-page-shared classes (`.ax-inline-worklist`, `.ax-inline-worklist-copy`, `.ax-audit-summary-row`, and any other class still referenced by `subscription_live.ex`) are **preserved**; the subscription detail page is PNG-verified unbroken after retirement.
   3. The committed `priv/static/accrue_admin.css` bundle is rebuilt via `mix accrue_admin.assets.build` and committed in the same change (no dead-CSS ship); a cheap guard confirms no orphan `ax-*` rule lacks a source reference and no source `ax-*` class lacks a rule.
   4. The component kitchen (`component_kitchen_live.ex`) and `priv/static/storybook.css` no longer render retired vocabulary (updated + `storybook.css` rebuilt), the phase200 storybook specs stay green, and the parked `region-tags.js` `.ax-attention-rail` mapping is opportunistically fixed so a future ratchet re-freeze starts from a non-dangling selector map.
   5. Full `mix test` + the admin e2e suite are green across the phase boundary (no red left behind), and the diff touches no `accrue/lib` and adds no nav room.
+
 **Plans**: TBD
 **UI hint**: yes
 

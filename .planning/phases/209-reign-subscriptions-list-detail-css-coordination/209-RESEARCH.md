@@ -282,22 +282,25 @@ Not applicable in the external-library sense (no dependency-version drift to rep
 | A3 | The `:actions` slot's two secondary buttons (webhook-debug, events-audit) should be removed along with their originating context, not preserved as orphaned secondary actions | Pitfall 3, Open Question 2 | Medium — affects 2 test assertions and the exact final shape of the header; genuinely underspecified by the locked contracts, flagged explicitly rather than assumed silently. |
 | A4 | Identity-cell raw-ID display (Customer ID / Subscription processor ID as explicit labeled facts) is intentionally traded away by the REIGN-02 compact-cell mandate, matching Invoices' idiom, rather than needing an added `IdBadge` column matching Customers' idiom | Target File Anatomy → identity_cell rebuild table | Low-Medium — if wrong, an `IdBadge` column task is missing from the plan; either way this is presented as an explicit two-option choice, not silently decided. |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **Does `[ Home , Subscriptions ]` in UI-SPEC's Copywriting Contract mean the literal string "Home," or is it describing crumb structure generically (root crumb, using whatever `dashboard_breadcrumb_home()` already returns — "Dashboard")?**
    - What we know: every other reference page (Invoices via `Copy.dashboard_breadcrumb_home()`, Customers via a hardcoded `"Dashboard"` literal, and the detail page `subscription_live.ex` via the same Copy fn) currently renders "Dashboard" as the root crumb label.
    - What's unclear: whether UI-SPEC's bracket notation is prescriptive text or descriptive structure.
    - Recommendation: treat as descriptive (keep "Dashboard"); changing the shared fn's return value is a 7+-page blast radius outside this phase's file scope. Surface to the user only if the planner disagrees.
+   - **RESOLVED:** Keep "Dashboard" — `Copy.dashboard_breadcrumb_home/0` is left untouched and Plan 02's root breadcrumb uses it as-is; the bracket notation was treated as descriptive crumb structure, not a literal-string mandate, avoiding a 7+-page blast-radius copy change to shared infrastructure.
 
 2. **Do the two non-triplicated `:actions` secondary buttons ("Webhooks: debug failed deliveries" / "Events audit log") survive the reign as secondary actions, or are they removed along with their band context?**
    - What we know: neither reference page (Invoices, Customers) uses the `:actions` slot at all; D-01/D-03 only mandate collapsing the *triplicated invoice-queue CTA* to one; UI-SPEC's copywriting table lists only the one primary CTA row and is silent on the other two.
    - What's unclear: whether "answer-first, one primary action per zone" (IA-02/Interaction Contract point 2) extends to removing secondary navigation shortcuts entirely, or just means "only one button gets the Cobalt-accent primary treatment."
    - Recommendation: default to keeping both as `.ax-button-secondary` entries in `:actions` (lowest-risk, preserves existing navigation shortcuts, satisfies "one primary CTA" literally) unless the planner has reason to trim further; document whichever choice is made so `subscriptions_live_test.exs` lines 104/120-121 are rewritten to match intentionally, not by accident.
+   - **RESOLVED:** Kept as secondary — both buttons survive unchanged (text and hrefs untouched, only their decorative `ax-subscriptions-*-workspace` override classes drop) as the two `.ax-button-secondary` entries in `:actions`, alongside the single collapsed `.ax-button-primary` CTA; preserves existing navigation shortcuts while satisfying "one primary CTA" literally.
 
 3. **Is a new `Repo` query needed for "Last webhook · time," or should D-03's StatStrip stat be worded to avoid needing one (e.g., "N failed" without a timestamp, matching what's already computed)?**
    - What we know: `failed_webhook_count` (a plain count, no timestamp) is the only webhook aggregate currently computed in `subscription_summary/1`.
    - What's unclear: whether the UI-SPEC's "(status · time)" phrasing is a hard requirement or illustrative.
    - Recommendation: treat "time" as optional/discretionary; ship "N failed webhooks" if a timestamp query is judged not worth the added complexity for this phase, since D-03 says "Every datum currently spread across the five removed bands... must land" — and no removed band currently surfaces a webhook *timestamp* either (band 1's actions-slot webhook button, which is untouched, links to a filtered view, it doesn't display a timestamp).
+   - **RESOLVED:** Descoped to count-only — the StatStrip's "Failed webhooks" stat ships as a plain count (`count(@summary.failed_webhook_count, "failed webhook")`), no timestamp; no new `Repo` query was added, since no removed band ever surfaced a webhook timestamp either.
 
 ## Environment Availability
 
