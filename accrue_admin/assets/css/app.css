@@ -1418,16 +1418,22 @@ a.ax-kpi-card--linked:focus-visible {
   color: var(--ax-warning-readable);
 }
 
-.ax-stat-link {
-  display: inline-flex;
-  align-items: baseline;
-  gap: var(--ax-space-sm);
-  text-decoration: none;
-  color: inherit;
-  border-radius: var(--ax-radius-2xs);
+/* Linked stat: dt/dd stay direct children of the .ax-stat grouping div (keeps the
+   <dl> axe-clean); the link is a "stretched link" overlay covering the whole stat.
+   The overlay carries the accessible name (aria-label), so it needs no visible text. */
+.ax-stat--linked {
+  position: relative;
 }
 
-.ax-stat-link:hover .ax-stat-value {
+.ax-stat-link {
+  position: absolute;
+  inset: 0;
+  border-radius: var(--ax-radius-2xs);
+  text-decoration: none;
+  color: inherit;
+}
+
+.ax-stat--linked:hover .ax-stat-value {
   text-decoration: underline;
 }
 
@@ -7709,6 +7715,19 @@ html.accrue-admin::-webkit-scrollbar-thumb:hover {
   outline-offset: 2px;
   box-shadow: var(--ax-focus-shadow);
   transition: none;
+}
+
+/* Attention-rail focusables (the quiet "all signals" link + the row anchors)
+   deliberately suppress the outline under real :focus-visible (they read as a
+   background/underline change instead). That intentional `outline: none` — at
+   specificity (0,2,0) — also swallowed the forced-focus ring the interaction
+   ratchet guard asserts. Reassert the standard focus ring under the forced-focus
+   hook only (specificity (0,3,0)); real keyboard focus visuals are unchanged. */
+[data-ax-zone="attention-rail"] .ax-link-quiet[data-ax-force~="focus"],
+[data-ax-zone="attention-rail"] .ax-attention-row[data-ax-force~="focus"] {
+  outline: 2px solid var(--ax-focus-ring);
+  outline-offset: 2px;
+  box-shadow: var(--ax-focus-shadow);
 }
 
 .ax-button[aria-disabled="true"],
