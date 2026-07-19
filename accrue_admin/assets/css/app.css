@@ -5365,7 +5365,7 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
 
 .ax-banner {
   /* ax-type-exception: component-local typography is documented until this selector is migrated to a composed role utility in markup. */
-  padding: var(--ax-space-md);
+  padding: var(--ax-space-sm) var(--ax-space-md);
   text-align: center;
   font-weight: 500;
   border-bottom: 1px solid transparent;
