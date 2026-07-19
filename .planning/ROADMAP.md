@@ -192,9 +192,18 @@ Plans:
   5. Verification gates pass in-phase: the `dashboard_live_test` assertions at L107 (`ax-home-health-answer`), L130 (`ax-launcher-primary`), L184 (`ax-home-customer-search-cta`) and the `e2e/admin-spec-overview-phase194` + `admin-interaction-overlay-phase199` `.ax-attention-rail*` selectors are migrated to the shared-component DOM; `admin-a11y.spec.js` (axe) stays green with landmark/heading/visually-hidden semantics preserved; the served `accrue_admin.css` bundle and `copy_strings.json` are rebuilt and committed; and the diff touches no `accrue/lib`, adds no nav room, and introduces no diagnosis/causality synthesis.
 
 **Plans**: 3 plans
+**Wave 1**
+
 - [ ] 210-01-PLAN.md — Copy SSOT pass: add Home verdict/heading/customer-search strings, de-jargon "workspace", regenerate copy_strings.json (COPY-01, COPY-02)
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
 - [ ] 210-02-PLAN.md — Recompose dashboard_live.ex onto PageHeader: single verdict (StatusBadge + exposure-first StatStrip), single customer-search control, primitive-built attention rail + EmptyState, three-tile launcher grid; KpiCard/Timeline kept (REIGN-03, IA-01, IA-02, IA-04, COPY-02)
+
+**Wave 3** *(blocked on Wave 2 completion)*
+
 - [ ] 210-03-PLAN.md — Migrate unit + e2e gates to the reigned DOM, keep axe green, human-verify density-no-regression + one-system PNG parity (REIGN-03, IA-03)
+
 **UI hint**: yes
 
 ### Phase 211: Grep-gated CSS retirement & cross-surface cleanup
