@@ -6346,10 +6346,17 @@ button.ax-launcher {
   transition: var(--ax-transition-base);
 }
 
-.ax-home-launcher-card:hover,
-.ax-home-launcher-card:focus-visible {
+.ax-home-launcher-card:hover {
   box-shadow: var(--ax-shadow-md);
-  outline: none;
+}
+
+/* Keyboard focus gets a distinct, visible ring (WCAG 2.4.7) — matches the standard
+   admin focus-ring treatment reasserted on the attention-rail focusables (see the
+   [data-ax-zone="attention-rail"] focus block), never the hover-identical shadow. */
+.ax-home-launcher-card:focus-visible {
+  outline: 2px solid var(--ax-focus-ring);
+  outline-offset: 2px;
+  box-shadow: var(--ax-focus-shadow);
 }
 
 .ax-home-launcher-icon {

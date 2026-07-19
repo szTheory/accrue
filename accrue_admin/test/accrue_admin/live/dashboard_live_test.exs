@@ -163,4 +163,24 @@ defmodule AccrueAdmin.DashboardLiveTest do
     assert html =~ ~s(href="/billing/webhooks")
     assert html =~ ~s(href="/billing/events")
   end
+
+  test "header verdict is 'Action required' when open invoices are zero but another signal fires (WR-01)",
+       %{conn: conn} do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+
+    # Drive open_invoice_count to 0 while the setup's dead webhook (blocked_webhook_count > 0)
+    # and failed meter event remain. The header verdict must key off ALL attention signals,
+    # so it must render "Action required" — never a green "Healthy" while the attention rail
+    # lists priority exceptions on the same page (the IA-01 answer-first contract).
+    TestRepo.delete_all(Invoice)
+
+    assert {:ok, _view, html} = live(conn, "/billing")
+
+    assert html =~ "data-ax-health-verdict"
+    assert html =~ Copy.dashboard_health_verdict_action_required()
+    refute html =~ Copy.dashboard_health_verdict_healthy()
+
+    # The exception the verdict must not contradict is still surfaced in the rail.
+    assert html =~ Copy.home_attention_webhooks_label()
+  end
 end

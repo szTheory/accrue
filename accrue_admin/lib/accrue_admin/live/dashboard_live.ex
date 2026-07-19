@@ -460,9 +460,19 @@ defmodule AccrueAdmin.Live.DashboardLive do
     |> Enum.filter(& &1)
   end
 
-  # Single billing-health verdict — mirrors subscriptions_live.ex for cross-page parity,
-  # adapted to Home's @stats keys.
-  defp verdict_status(%{open_invoice_count: count}) when count > 0, do: :action_required
+  # Single billing-health verdict. Keyed off the SAME four attention signals that drive
+  # `attention_items/3` so the answer-first header verdict can never contradict the priority
+  # exceptions listed beneath it (IA-01). Any live signal → :action_required, else :healthy.
+  defp verdict_status(%{
+         open_invoice_count: open_invoices,
+         blocked_webhook_count: blocked_webhooks,
+         past_due_subscription_count: past_due_subscriptions,
+         failed_meter_event_count: failed_meter_events
+       })
+       when open_invoices > 0 or blocked_webhooks > 0 or past_due_subscriptions > 0 or
+              failed_meter_events > 0,
+       do: :action_required
+
   defp verdict_status(_stats), do: :healthy
 
   defp verdict_label(:action_required), do: Copy.dashboard_health_verdict_action_required()
