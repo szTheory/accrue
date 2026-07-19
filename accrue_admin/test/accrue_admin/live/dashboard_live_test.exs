@@ -93,48 +93,39 @@ defmodule AccrueAdmin.DashboardLiveTest do
 
     assert {:ok, _view, html} = live(conn, "/billing")
 
-    # Page chrome + attention rail heading
-    assert html =~ "Billing health: Unhealthy"
+    # Page chrome — PageHeader emits the single top-level h1 (ax-display) + one verdict
     assert html =~ "ax-display"
-    assert html =~ "Priority exceptions"
+    assert html =~ "data-ax-health-verdict"
+    # Seed has one open invoice → verdict is :action_required (single StatusBadge verdict)
+    assert html =~ Copy.dashboard_health_verdict_action_required()
 
-    # Zone 1 — attention rail surfaces the seeded exceptions (dead webhook + meter failure)
+    # Zone 1 — attention rail: heading + seeded exceptions (open invoice P1, dead webhook P2,
+    # failed meter P4), rebuilt from StatusBadge / .ax-chip / .ax-link-quiet primitives
+    assert html =~ Copy.home_attention_priority_heading()
+    assert html =~ "Work invoice queue"
     assert html =~ Copy.home_attention_webhooks_label()
     assert html =~ "Debug failed webhook queue"
     assert html =~ Copy.home_attention_meter_label()
     assert html =~ Copy.home_attention_action_investigate()
-    assert html =~ "Billing status: Unhealthy"
-    assert html =~ "ax-home-health-answer"
-    assert html =~ "Collect "
-    assert html =~ "open invoice"
-    assert html =~ "before webhook or dunning work"
-
-    assert html =~
-             "P1 is first, P2 next, P3 after invoices: collect open invoices, then inspect failed deliveries and dunning."
-
-    assert html =~ "Find ONE customer"
-    assert html =~ "Open customer search"
-    assert html =~ "open invoices"
-    assert html =~ ">P1<"
-    assert html =~ ">P2<"
-    assert html =~ "Work invoice queue"
-    assert html =~ "Debug dead-lettered webhooks"
-    assert html =~ "Open-invoice queue:"
     assert html =~ ~s(href="/billing/events?q=meter_event")
     assert html =~ ~s(href="/billing/invoices?status=open")
+
+    # Header actions — single customer-lookup control + audit-ledger link
+    assert html =~ "data-ax-command-palette-trigger"
+    assert html =~ Copy.home_customer_search_cta()
     assert html =~ "Audit ledger"
 
-    # Zone 2 — task launchers (the JTBD doors)
-    assert html =~ Copy.home_launcher_customers_title()
-    assert html =~ Copy.home_launcher_customers_meta()
-    assert html =~ "ax-launcher-primary"
-    assert html =~ "Open-invoice queue:"
-    assert html =~ "above $0.00 target"
+    # Header StatStrip — 4-stat exposure-first strip
+    assert html =~ "Open invoices"
+    assert html =~ "Exposure"
+    assert html =~ "At-risk subscriptions"
+    assert html =~ "Failed webhooks"
+
+    # Zone 2 — task launchers (three JTBD doors; customer tile folded into the header)
+    assert html =~ "data-ax-launcher-primary"
+    assert html =~ Copy.home_launcher_invoices_title()
     assert html =~ Copy.home_launcher_recovery_title()
-    assert html =~ "Dunning check:"
-    assert html =~ "Next stage: reminder pending"
     assert html =~ "Open dunning analytics"
-    # Title relabeled in Phase 175-02 (IA-01 verb relabels); use Copy function directly.
     assert html =~ Copy.home_launcher_developer_title()
     assert html =~ "Debug webhook failures"
 
@@ -142,7 +133,6 @@ defmodule AccrueAdmin.DashboardLiveTest do
     assert html =~ Copy.dashboard_kpi_customers_label()
     assert html =~ Copy.dashboard_kpi_active_subscriptions_label()
     assert html =~ Copy.dashboard_kpi_open_invoice_balance_label()
-    assert html =~ "Open invoice queue: collect"
     assert html =~ Copy.dashboard_kpi_webhook_backlog_label()
     assert html =~ Copy.dashboard_kpi_customers_aria_label()
     assert html =~ Copy.dashboard_kpi_subscriptions_aria_label()
@@ -172,15 +162,5 @@ defmodule AccrueAdmin.DashboardLiveTest do
     assert html =~ ~s(href="/billing/invoices")
     assert html =~ ~s(href="/billing/webhooks")
     assert html =~ ~s(href="/billing/events")
-
-    # IA-01 verb relabels (Plan 175-02)
-    assert html =~ "Search customers globally"
-    assert html =~ "Open global customer search"
-    assert html =~ "Opens the Invoices queue workspace for current receivables"
-    assert html =~ "Open-invoice queue:"
-
-    # IA-01 customer lookup entry point on Home (Plan 175-04)
-    assert html =~ "Find one customer"
-    assert html =~ "ax-home-customer-search-cta"
   end
 end
