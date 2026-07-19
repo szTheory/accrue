@@ -8,6 +8,8 @@ If you ship a SaaS on Elixir and want documentation you can hand to a teammate, 
 
 ## Start here
 
+- [Architecture](guides/architecture.md) — the outside-in model of host ownership, processor authority, local projections, webhooks, entitlements, Admin, and Portal.
+- [Code walkthrough](guides/code-walkthrough.md) — the same direct-subscribe and webhook route through representative current source.
 - [Jobs to Be Done](guides/jobs_to_be_done.md) — a ~15-minute tour of what you can build, organized by the life of a paying customer; the best first read for understanding Accrue's surface.
 - [Organization billing (non-Sigra)](guides/organization_billing.md) — session→billable org path when the Stripe Customer should follow an organization, not only the signed-in user.
 - [Testing](guides/testing.md) — Fake-first verification posture for host billing flows.
