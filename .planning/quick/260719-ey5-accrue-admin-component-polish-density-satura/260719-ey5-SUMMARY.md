@@ -118,6 +118,47 @@ dark + system-dark mirror pattern already used in `app.css` (e.g. sidebar nav ov
 Visual confirmation (dashboard + subscriptions, light + dark PNGs via Playwright) is the
 orchestrator's step — not run here.
 
+## Follow-up (coordinator PNG review) — solid red header health bar
+
+Dashboard PNG check found the pass missed the single biggest eyesore: the solid red
+"Billing status: Unhealthy — Collect $592.50…" headline bar. Root cause: Task A edited the
+small badge `.ax-home-health-status`, but the red comes from the CONTAINER
+`.ax-home-header-health` (~L5621), which overrides with a solid danger fill. Applied the same
+tinted-surface pattern (one source commit + bundle rebuild, same quick task).
+
+| Commit | Message | Files |
+| ------ | ------- | ----- |
+| `0b0adc75` | style(260719-ey5): de-saturate the solid red header health bar | `accrue_admin/assets/css/app.css` |
+| `47dd0906` | chore(260719-ey5): rebuild bundle for header health bar de-saturation | `accrue_admin/priv/static/accrue_admin.css` |
+
+**Before → after (what to look for in the re-capture):**
+- `.ax-home-header-health` container: `background: var(--ax-status-danger-solid)` (solid red) →
+  `color-mix(--ax-status-danger-bg 45%, --ax-elevated)` (tinted danger card); `border 2px → 1px`;
+  `color: --ax-status-danger-on-solid` (white) → `--ax-primary`; `padding: 0` →
+  `--ax-space-2xs --ax-space-sm` (breathing room now it's a tinted card, not a full-bleed bar).
+  `box-shadow`/width kept.
+- `.ax-home-header-health strong`: white → `--ax-status-danger-text` (readable danger-red; bold kept).
+- `.ax-home-header-health span`: white → `--ax-primary` (the "Collect $592.50…" answer as body ink).
+- **`.ax-home-health-label`** (NOT in the coordinator's list, but same white `--ax-status-danger-on-solid`
+  on the container) → `--ax-primary`. Left as white it would have been illegible on the new tint —
+  fixed as a legibility correctness item so the "Billing status:" label stays readable.
+- `.ax-home-header-health .ax-status-badge` ("Unhealthy" pill): left as-is (`--ax-elevated` bg +
+  `--ax-primary` text — already legible on the tint).
+- Secondary: `.ax-home-customer-search-strip` accent-subtle mix `55% → 35%` (gentler dark tint).
+
+**Look for:** the top billing-status bar is now a soft red-tinted card (dark-red bold value,
+normal-ink label/answer, "Unhealthy" pill still crisp), NOT a solid red full-bleed bar — in both
+light and dark. Danger hue preserved.
+
+**WCAG AA:** `--ax-status-danger-text` is the token's readable-on-tint purpose — `#9b1c1c` on the
+light ~near-white-pink 45% tint and `#ffaaaa` on the dark red-tint both pass AA; `--ax-primary`
+(main body ink) on the tint passes AA in both themes. Class-level theme-aware tokens → no
+`theme.css` / system-dark mirror needed.
+
+**Gates (all green):** `mix accrue_admin.assets.build` → exit 0; `mix compile --warnings-as-errors`
+→ exit 0; post-commit `git diff --exit-code -- priv/static/accrue_admin.css` → clean; edits
+confirmed in the minified bundle; pre-existing dirty files + `mix.lock` untouched.
+
 ## Self-Check: PASSED
 - Commits exist: `f8c528cc`, `341fafba`, `b775b121` (all found in `git log`).
 - Files present: `accrue_admin/assets/css/app.css`, `accrue_admin/priv/static/accrue_admin.css`,
