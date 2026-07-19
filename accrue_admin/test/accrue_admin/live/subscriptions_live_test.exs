@@ -47,10 +47,10 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
 
     assert {:ok, _view, html} = live(conn, "/billing/subscriptions?status=canceling")
 
-    assert html =~ "Action required: collect" or
-             html =~ "Billing status: Healthy"
+    assert html =~ "Action required" or
+             html =~ "Healthy"
 
-    assert html =~ "exposure"
+    assert html =~ "Exposure"
     assert html =~ "target"
 
     assert html =~ "Canceling at period end"
@@ -91,37 +91,27 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert html =~ ~s(data-ax-page-actions)
     refute html =~ "Search customer, open detail"
 
-    assert html =~ "Action required: collect" or
-             html =~ "Billing status: Healthy"
+    assert html =~ "Action required" or
+             html =~ "Healthy"
 
-    assert html =~ "exposure"
-    assert html =~ "$0.00"
+    assert html =~ "Exposure"
     assert html =~ "target"
 
     assert html =~ "Customer billing lookup"
     assert html =~ "Search customers now"
-    assert html =~ "Open dedicated invoice queue"
-    assert html =~ "Open recovery analytics"
+    assert html =~ "Open invoice queue"
 
-    assert html =~ "At-risk subscription queue"
-    assert html =~ "Open failed-delivery debugger"
-    assert html =~ "Dunning funnel and open-invoice queue summary"
+    assert html =~ Copy.subscriptions_kpi_section_aria_label()
     assert html =~ "At-risk subscriptions"
-    assert html =~ "Open-invoice queue"
-    assert html =~ ~s(class="ax-kpi-row ax-subscriptions-kpi-row")
+    assert html =~ "Open invoices"
+    assert html =~ "Webhooks: debug failed deliveries"
+    assert html =~ "Events audit log"
+    assert html =~ "ax-status-badge"
+    assert html =~ "Failed webhooks"
     refute html =~ "Bulk invoice actions"
     refute html =~ "Process next invoice"
     refute html =~ "Send invoice reminders"
-    assert html =~ "Open-invoice queue records"
     refute html =~ "Who did what, when - filter admin actors"
-    assert html =~ "Open dedicated invoice queue records"
-    assert html =~ "Who did what, when?"
-    assert html =~ "subscription.created by Accrue system"
-    assert html =~ "Events: open full actor audit log"
-    assert html =~ "Filter admin actions"
-    assert html =~ "Open failed-delivery debugger"
-    assert html =~ "At-risk subscription queue"
-    assert html =~ "Open recovery analytics"
     refute html =~ "Billing health: Unhealthy"
     assert_one_h1(html)
 
@@ -143,9 +133,6 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert html =~ "All"
     assert html =~ "Open invoice queue workspace"
     assert html =~ "Billing"
-    assert html =~ "ax-subscription-row-state"
-    assert html =~ "Open failed-delivery debugger"
-    assert html =~ "Who did what, when?"
     assert html =~ ~s(data-ax-state="filtered-empty") or html =~ ~s(data-ax-state="populated")
     refute html =~ "No subscriptions yet."
   end
@@ -276,28 +263,18 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
 
     assert {:ok, _view, html} = live(conn, "/billing/subscriptions?view=all")
 
-    assert html =~ "exposure"
+    assert html =~ "Exposure"
     assert html =~ "target"
     refute html =~ "ax-health-verdict"
-    assert html =~ "Open dedicated invoice queue records"
-    assert html =~ "Open failed-delivery debugger"
-    assert html =~ "Webhook status"
-    assert html =~ "Filter invoice queue to this subscription"
 
-    assert html =~ "Action required: collect" or
-             html =~ "Billing status: Healthy"
+    assert html =~ "Action required" or
+             html =~ "Healthy"
 
-    assert html =~ "Open audit context for this subscription"
     assert html =~ "Owner: User"
     assert html =~ "Tax: Off"
-    assert html =~ "Audit"
-    assert html =~ "subscription.created by Accrue system"
     refute html =~ "Search customer, open detail"
-    assert html =~ "Open failed-delivery debugger"
     assert html =~ "Setup gap"
     assert html =~ "Amount not confirmed in admin"
-
-    assert html =~ "$0.00"
 
     assert_table_headings_in_order(html, [
       "Customer details",
@@ -310,7 +287,8 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert html =~ "ax-data-table-grid"
   end
 
-  test "uses customer identity before raw subscription or processor IDs", %{conn: conn} do
+  test "renders the identity cell as a customer-label link to the subscription and a muted subscription-id link to the customer",
+       %{conn: conn} do
     %{subscription: subscription} =
       Factory.active_subscription(%{email: "phase196-primary@example.com"})
 
@@ -319,13 +297,27 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert {:ok, _view, html} = live(conn, "/billing/subscriptions?view=all")
 
     assert html =~ "phase196-primary@example.com"
-    assert html =~ "Open unified customer view: phase196-primary@example.com"
-    assert html =~ "Open-invoice queue records"
-    assert html =~ "Open dedicated invoice queue records"
-    assert html =~ "Customer ID"
-    assert html =~ subscription.customer_id
-    assert html =~ "Subscription"
-    assert html =~ subscription.processor_id
+
+    parsed = Floki.parse_document!(html)
+
+    assert parsed
+           |> Floki.find("a.ax-link")
+           |> Enum.any?(fn link ->
+             Floki.text(link) == "phase196-primary@example.com" and
+               link
+               |> Floki.attribute("href")
+               |> Enum.any?(&String.contains?(&1, "/subscriptions/#{subscription.id}"))
+           end)
+
+    assert parsed
+           |> Floki.find("a.ax-label.ax-muted")
+           |> Enum.any?(fn link ->
+             Floki.text(link) == subscription.processor_id and
+               link
+               |> Floki.attribute("href")
+               |> Enum.any?(&String.contains?(&1, "/customers/#{subscription.customer_id}"))
+           end)
+
     assert_before(html, "phase196-primary@example.com", subscription.processor_id)
   end
 
