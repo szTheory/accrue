@@ -160,7 +160,11 @@ Full details: [v1.48 roadmap archive](milestones/v1.48-ROADMAP.md)
   3. Subscriptions table + card cells render via the compact shared idiom (`StatusBadge`, `ax-stack-xs`, `ax-link`, `ax-chip ax-label`) with no in-cell action buttons — the 15-20-line bespoke `identity_cell/3` + `billing_signals_cell/3` raw HTML is rebuilt and per-row actions move to a shared control (actions column or `DropdownMenu`), matching the reference pages.
   4. The `WorkQueueCallout` extract-or-inline decision is made and recorded: if the trimmed worklist callout shape demonstrably repeats (and will be reused by Home), exactly one small shared component composed from existing tokens + `.ax-card` reusing the `moss`/`cobalt`/`amber`/`slate`/`ink` tone scale is added and consumed by Subscriptions; otherwise Subscriptions composes from `.ax-card` directly and no component is added. No other new components, no new deps.
   5. Verification gates pass in-phase: no operator-density regression versus the pre-reign Subscriptions screenshot (row height, rows-per-viewport, header band height held) and PNG parity against the canonical Payments/Customers/Invoices reference; the `subscriptions_live_test:111` (`ax-kpi-row ax-subscriptions-kpi-row`) assertion and any other retired-class/copy assertions are migrated to the shared-component selector in this phase; the served `priv/static/accrue_admin.css` bundle and `examples/accrue_host/e2e/generated/copy_strings.json` are rebuilt and committed; the subscription **detail** page's shared `.ax-inline-worklist*` / `.ax-audit-summary-row` styling is preserved (retain-vs-reign decided and PNG-verified) — and the diff touches no `accrue/lib`, adds no nav room, and introduces no "why blocked"/causality synthesis.
-**Plans**: TBD
+**Plans**: 3 plans
+Plans:
+- [ ] 209-01-PLAN.md — Baseline capture: pre-reign test-green confirmation + PNG snapshot (Subscriptions + Subscription-detail, light/dark)
+- [ ] 209-02-PLAN.md — Header/spine rebuild (breadcrumb, single verdict, single CTA, 4-stat StatStrip, Copy additions) + band removal/dead-code cleanup + compact cell rebuild
+- [ ] 209-03-PLAN.md — D-04 shared-CSS grep-gate + detail-page PNG parity + test migration + generated-artifact rebuild
 **UI hint**: yes
 
 ### Phase 210: Reign Home + certify answer-first IA & copy integrity
