@@ -45,6 +45,57 @@ defmodule AccruePortal.Layouts do
             <span :if={!@brand_logo_url && @brand_wordmark} class="portal-wordmark">
               {@brand_wordmark}
             </span>
+            <div class="portal-theme-picker" role="group" aria-label="Theme">
+              <button
+                type="button"
+                data-portal-theme="system"
+                aria-pressed={@theme == "system"}
+                class={["portal-theme-option", @theme == "system" && "is-active"]}
+                aria-label="Match system theme"
+                title="System"
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                  stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <rect x="3" y="4" width="18" height="12" rx="2" />
+                  <path d="M8 20h8" />
+                  <path d="M12 16v4" />
+                </svg>
+              </button>
+              <button
+                type="button"
+                data-portal-theme="light"
+                aria-pressed={@theme == "light"}
+                class={["portal-theme-option", @theme == "light" && "is-active"]}
+                aria-label="Light theme"
+                title="Light"
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                  stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <circle cx="12" cy="12" r="4" />
+                  <path d="M12 2v2" />
+                  <path d="M12 20v2" />
+                  <path d="M4.93 4.93l1.41 1.41" />
+                  <path d="M17.66 17.66l1.41 1.41" />
+                  <path d="M2 12h2" />
+                  <path d="M20 12h2" />
+                  <path d="M4.93 19.07l1.41-1.41" />
+                  <path d="M17.66 6.34l1.41-1.41" />
+                </svg>
+              </button>
+              <button
+                type="button"
+                data-portal-theme="dark"
+                aria-pressed={@theme == "dark"}
+                class={["portal-theme-option", @theme == "dark" && "is-active"]}
+                aria-label="Dark theme"
+                title="Dark"
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                  stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+                </svg>
+              </button>
+            </div>
           </div>
         </header>
         <%= @inner_content %>

@@ -134,6 +134,45 @@
       : button.dataset.labelDefault;
   }
 
+  // --- Theme picker ------------------------------------------------------
+  // Delegated (document-level) so it survives LiveView DOM patches without
+  // re-binding. SSR already sets <html data-theme> from the accrue_theme
+  // cookie, so this only handles user clicks — no FOUC, no inline script.
+  function applyTheme(choice) {
+    if (choice !== "system" && choice !== "light" && choice !== "dark") return;
+
+    document.documentElement.dataset.theme = choice;
+    document.cookie =
+      "accrue_theme=" + choice + "; path=/; max-age=31536000; samesite=lax";
+
+    var buttons = document.querySelectorAll("[data-portal-theme]");
+
+    for (var i = 0; i < buttons.length; i++) {
+      var button = buttons[i];
+      var active = button.getAttribute("data-portal-theme") === choice;
+
+      button.setAttribute("aria-pressed", active ? "true" : "false");
+
+      if (active) {
+        button.classList.add("is-active");
+      } else {
+        button.classList.remove("is-active");
+      }
+    }
+  }
+
+  function handleThemeClick(event) {
+    var target = event.target.closest
+      ? event.target.closest("[data-portal-theme]")
+      : null;
+
+    if (!target) return;
+
+    applyTheme(target.getAttribute("data-portal-theme"));
+  }
+
+  document.addEventListener("click", handleThemeClick);
+
   function bootLiveSocket() {
     var liveView = window.LiveView || (window.Phoenix && window.Phoenix.LiveView);
 
