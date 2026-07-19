@@ -45,6 +45,10 @@ defmodule AccruePortal.Live.SubscriptionsLive do
   def render(assigns) do
     ~H"""
     <main class="portal-shell">
+      <AccruePortal.Layouts.breadcrumb trail={[
+        %{label: Copy.breadcrumb_home(), href: Path.home(@base_path)},
+        %{label: Copy.subscriptions_heading(), href: nil}
+      ]} />
       <section class="portal-card">
         <h1>{Copy.subscriptions_heading()}</h1>
         <div :if={@subscriptions == []} class="portal-empty">

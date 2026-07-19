@@ -29,6 +29,8 @@ defmodule AccruePortal.SubscriptionLiveTest do
     assert html =~ "Active and renewing."
     assert html =~ "Cancel renewal"
     refute html =~ "Keep subscription"
+    assert html =~ ~s(aria-label="Breadcrumb")
+    assert html =~ "Account"
 
     html =
       view

@@ -30,5 +30,7 @@ defmodule AccruePortal.PaymentMethodsLiveTest do
     assert html =~ "/billing/payment-methods/new"
     assert html =~ "/billing/payment-methods/#{payment_method.id}/delete"
     refute html =~ "/billing/payment-methods/#{foreign_payment_method.id}/delete"
+    assert html =~ ~s(aria-label="Breadcrumb")
+    assert html =~ "Account"
   end
 end

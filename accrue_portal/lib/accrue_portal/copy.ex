@@ -3,6 +3,8 @@ defmodule AccruePortal.Copy do
 
   alias Accrue.Billing.Subscription
 
+  def breadcrumb_home, do: "Account"
+
   def checkout_page_title, do: "Checkout"
   def checkout_heading, do: "Checkout"
   def checkout_leave_cta, do: "Leave checkout"

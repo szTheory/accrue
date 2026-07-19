@@ -3,6 +3,7 @@ defmodule AccruePortal.Live.InvoicesLive do
 
   alias AccruePortal.BillingReadModel
   alias AccruePortal.Copy
+  alias AccruePortal.Path
 
   @impl true
   def mount(_params, %{"accrue_portal" => portal}, socket) do
@@ -17,6 +18,10 @@ defmodule AccruePortal.Live.InvoicesLive do
   def render(assigns) do
     ~H"""
     <main class="portal-shell">
+      <AccruePortal.Layouts.breadcrumb trail={[
+        %{label: Copy.breadcrumb_home(), href: Path.home(@base_path)},
+        %{label: Copy.invoices_heading(), href: nil}
+      ]} />
       <section class="portal-card">
         <h1>{Copy.invoices_heading()}</h1>
         <div :if={@invoices == []} class="portal-empty">

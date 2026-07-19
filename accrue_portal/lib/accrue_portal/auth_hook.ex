@@ -33,6 +33,7 @@ defmodule Accrue.Portal.AuthHook do
          |> assign(:assets_js_path, Map.get(portal, "assets_js_path"))
          |> assign(:phoenix_js_path, Map.get(portal, "phoenix_js_path"))
          |> assign(:live_view_js_path, Map.get(portal, "live_view_js_path"))
+         |> assign(:base_path, Map.get(portal, "mount_path"))
          |> assign(:current_user, user)
          |> assign(:current_customer, customer)}
 

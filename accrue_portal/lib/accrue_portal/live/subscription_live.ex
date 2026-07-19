@@ -155,6 +155,11 @@ defmodule AccruePortal.Live.SubscriptionLive do
   def render(assigns) do
     ~H"""
     <main class="portal-shell">
+      <AccruePortal.Layouts.breadcrumb trail={[
+        %{label: Copy.breadcrumb_home(), href: Path.home(@base_path)},
+        %{label: Copy.subscriptions_heading(), href: Path.subscriptions(@base_path)},
+        %{label: Copy.subscription_heading(), href: nil}
+      ]} />
       <section
         :if={recovery_prompt?(@subscription)}
         class="portal-card"

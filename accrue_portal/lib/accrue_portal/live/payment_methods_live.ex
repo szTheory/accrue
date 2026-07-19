@@ -22,6 +22,10 @@ defmodule AccruePortal.Live.PaymentMethodsLive do
   def render(assigns) do
     ~H"""
     <main class="portal-shell">
+      <AccruePortal.Layouts.breadcrumb trail={[
+        %{label: Copy.breadcrumb_home(), href: Path.home(@base_path)},
+        %{label: Copy.payment_methods_heading(), href: nil}
+      ]} />
       <section class="portal-card">
         <div class="portal-actions">
           <div class="portal-stack">

@@ -14,6 +14,7 @@ defmodule AccruePortal.Layouts do
   attr(:assets_js_path, :string, default: nil)
   attr(:phoenix_js_path, :string, default: nil)
   attr(:live_view_js_path, :string, default: nil)
+  attr(:base_path, :string, default: nil)
 
   def root(assigns) do
     assigns =
@@ -37,15 +38,17 @@ defmodule AccruePortal.Layouts do
       <body>
         <header class="portal-topbar">
           <div class="portal-topbar-inner">
-            <img
-              :if={@brand_logo_url}
-              class="portal-logo"
-              src={@brand_logo_url}
-              alt={@brand_wordmark || "Billing"}
-            />
-            <span :if={!@brand_logo_url && @brand_wordmark} class="portal-wordmark">
-              {@brand_wordmark}
-            </span>
+            <a href={@base_path} class="portal-brand-link" aria-label={@brand_wordmark || "Billing home"}>
+              <img
+                :if={@brand_logo_url}
+                class="portal-logo"
+                src={@brand_logo_url}
+                alt={@brand_wordmark || "Billing"}
+              />
+              <span :if={!@brand_logo_url && @brand_wordmark} class="portal-wordmark">
+                {@brand_wordmark}
+              </span>
+            </a>
             <div
               :if={not @theme_locked}
               class="portal-theme-picker"
@@ -110,6 +113,23 @@ defmodule AccruePortal.Layouts do
         <script :if={@assets_js_path} defer src={@assets_js_path}></script>
       </body>
     </html>
+    """
+  end
+
+  attr(:trail, :list, required: true)
+
+  def breadcrumb(assigns) do
+    ~H"""
+    <nav class="portal-breadcrumb" aria-label="Breadcrumb">
+      <ol>
+        <li :for={crumb <- @trail}>
+          <a :if={crumb.href} href={crumb.href} class="portal-breadcrumb-link">{crumb.label}</a>
+          <span :if={!crumb.href} class="portal-breadcrumb-current" aria-current="page">
+            {crumb.label}
+          </span>
+        </li>
+      </ol>
+    </nav>
     """
   end
 
