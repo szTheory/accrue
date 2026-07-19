@@ -49,12 +49,27 @@ defmodule Accrue.ConfigBrandingTest do
         :company_address,
         :support_url,
         :social_links,
-        :list_unsubscribe_url
+        :list_unsubscribe_url,
+        :theme
       ]
 
       for k <- expected_keys do
         assert Keyword.has_key?(kw, k), "expected branding key #{inspect(k)}"
       end
+    end
+
+    test "theme default is :system" do
+      assert Config.branding(:theme) == :system
+    end
+
+    test "theme accepts :light and :dark" do
+      Application.put_env(:accrue, :branding,
+        from_email: "noreply@example.test",
+        support_email: "support@example.test",
+        theme: :dark
+      )
+
+      assert Config.branding(:theme) == :dark
     end
 
     test "branding/1 returns default business_name Accrue" do

@@ -46,6 +46,34 @@ loud via `Accrue.ConfigError`.
 | `footer_text` | `string` | nil | no | Plain-text version of `footer_html` for text/plain email parts |
 | `currency_symbol_override` | `string` | nil | no | Overrides the CLDR-derived currency symbol. Usually leave nil |
 | `list_unsubscribe_url` | `string` | nil | no | Opt-in RFC 8058 `List-Unsubscribe` header URL. See guides/email.md "RFC 8058 opt-in" |
+| `theme` | `:system \| :light \| :dark` | `:system` | no | Customer-portal color-mode policy. See "Portal color-mode" below |
+
+## Portal color-mode
+
+The `:theme` option controls which color modes the mounted customer portal
+(`accrue_portal`) offers:
+
+- `:system` (default) — the portal offers **both** light and dark, driven by a
+  three-way picker in the topbar (System / Light / Dark). "System" follows the
+  visitor's OS preference; an explicit choice is remembered via the
+  `accrue_theme` cookie. This is the standard, fully-themed experience.
+- `:light` / `:dark` — the portal is **locked** to that single mode. The mode is
+  forced server-side (the `accrue_theme` cookie is ignored) and the picker is
+  **hidden** — the affordance is simply absent when there is no choice to make.
+
+Use `:light` or `:dark` when you only want to brand and ship a single color
+mode and would rather not maintain both. The option is library-only and requires
+no host code — set it under `:branding` and the portal honors it on the next
+request:
+
+```elixir
+config :accrue,
+  branding: [
+    from_email: "billing@acme.test",
+    support_email: "support@acme.test",
+    theme: :light
+  ]
+```
 
 ## Hex color validation
 

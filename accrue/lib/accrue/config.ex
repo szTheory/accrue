@@ -368,7 +368,15 @@ defmodule Accrue.Config do
         company_address: [type: {:or, [:string, nil]}, default: nil],
         support_url: [type: {:or, [:string, nil]}, default: nil],
         social_links: [type: :keyword_list, default: []],
-        list_unsubscribe_url: [type: {:or, [:string, nil]}, default: nil]
+        list_unsubscribe_url: [type: {:or, [:string, nil]}, default: nil],
+        theme: [
+          type: {:in, [:system, :light, :dark]},
+          default: :system,
+          doc:
+            "Customer portal color-mode policy. `:system` (default) offers light + dark with a picker " <>
+              "(follows the OS, user-switchable via the `accrue_theme` cookie). `:light` or `:dark` locks " <>
+              "the portal to that mode and hides the picker."
+        ]
       ],
       doc:
         "Branding config. Single source of truth for email + PDF brand. " <>
