@@ -1,10 +1,11 @@
 ---
 phase: 209
 slug: reign-subscriptions-list-detail-css-coordination
-status: draft
+status: approved
 shadcn_initialized: false
 preset: none
 created: 2026-07-19
+reviewed_at: 2026-07-19
 ---
 
 # Phase 209 — UI Design Contract
