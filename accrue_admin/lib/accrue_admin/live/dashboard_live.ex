@@ -10,7 +10,18 @@ defmodule AccrueAdmin.Live.DashboardLive do
   alias Accrue.Repo
   alias Accrue.Webhook.WebhookEvent
   alias AccrueAdmin.AttentionCounts
-  alias AccrueAdmin.Components.{AppShell, Breadcrumbs, Icon, KpiCard, Timeline}
+
+  alias AccrueAdmin.Components.{
+    AppShell,
+    FlashGroup,
+    Icon,
+    KpiCard,
+    PageHeader,
+    StatStrip,
+    Timeline
+  }
+
+  alias AccrueAdmin.Components.StatusBadge
   alias AccrueAdmin.Copy
   alias AccrueAdmin.ScopedPath
 
@@ -50,58 +61,76 @@ defmodule AccrueAdmin.Live.DashboardLive do
       active_organization_name={@active_organization_name}
     >
       <section class="ax-page ax-home">
-        <header class="ax-page-header ax-page-header-compact">
-          <Breadcrumbs.breadcrumbs items={[%{label: Copy.dashboard_breadcrumb_home()}]} />
-          <div class="ax-dashboard-title-row">
-            <h1 class="ax-display"><%= dashboard_health_headline(@attention) %></h1>
-          </div>
-          <p class="ax-body ax-page-copy"><%= Copy.home_intro_copy() %></p>
-          <div :if={@attention != []} class="ax-home-header-health ax-health-summary ax-health-summary-amber" aria-label="Dashboard billing health answer">
-            <span class="ax-home-health-label">Billing status</span>
-            <strong class="ax-home-health-status"><%= attention_health_summary(@stats) %></strong>
-            <span class="ax-home-health-answer"><%= attention_health_issue_summary(@stats) %></span>
-          </div>
-          <div class="ax-page-actions">
+        <PageHeader.page_header
+          breadcrumbs={[%{label: Copy.dashboard_breadcrumb_home()}]}
+          title={Copy.dashboard_breadcrumb_home()}
+        >
+          <:description>
+            <p data-ax-health-verdict="true">
+              <StatusBadge.status_badge
+                status={verdict_status(@stats)}
+                label={verdict_label(verdict_status(@stats))}
+                tone={verdict_tone(verdict_status(@stats))}
+              />
+            </p>
+            <p class="ax-body"><%= Copy.home_intro_copy() %></p>
+          </:description>
+          <:actions>
             <a
-              class="ax-button ax-button-primary ax-button-sm ax-home-primary-action"
+              class="ax-button ax-button-primary ax-button-sm"
               href={ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope, %{"status" => "open"})}
             >
-              Open invoice queue: collect <%= format_minor(@stats.open_invoice_balance_minor, "usd") %>
-              <Icon.icon name={:arrow_right} size="sm" />
-            </a>
-            <a
-              :if={@stats.blocked_webhook_count > 0}
-              class="ax-button ax-button-secondary ax-button-sm ax-home-secondary-action"
-              href={ScopedPath.build(@admin_mount_path, "/webhooks", @current_owner_scope, %{"status" => "failed,dead"})}
-            >
-              Debug dead-lettered webhooks
+              Open invoice queue
               <Icon.icon name={:arrow_right} size="sm" />
             </a>
             <button
               type="button"
-              class="ax-button ax-button-secondary ax-button-sm ax-home-customer-search-cta"
+              class="ax-button ax-button-secondary ax-button-sm"
               data-command-palette-trigger="true"
               data-ax-command-palette-trigger="true"
             >
-              Find one customer
+              <%= Copy.home_customer_search_cta() %>
               <Icon.icon name={:search} size="sm" />
             </button>
             <a
-              class="ax-button ax-button-secondary ax-button-sm ax-home-secondary-action"
-              href={ScopedPath.build(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}
-            >
-              Dunning after invoices
-              <Icon.icon name={:arrow_right} size="sm" />
-            </a>
-            <a
-              class="ax-button ax-button-secondary ax-button-sm ax-home-secondary-action"
+              class="ax-button ax-button-secondary ax-button-sm"
               href={ScopedPath.build(@admin_mount_path, "/events", @current_owner_scope)}
             >
               Audit ledger
               <Icon.icon name={:arrow_right} size="sm" />
             </a>
-          </div>
-        </header>
+          </:actions>
+          <:stat_strip>
+            <StatStrip.stat_strip label={Copy.dashboard_kpi_section_aria_label()}>
+              <:stat
+                label="Open invoices"
+                value={count(@stats.open_invoice_count, "invoice")}
+                tone="cobalt"
+                href={ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope, %{"status" => "open"})}
+              />
+              <:stat
+                label="Exposure"
+                value={format_minor(@stats.open_invoice_balance_minor, "usd")}
+                tone={exposure_tone(@stats)}
+                href={ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope, %{"status" => "open"})}
+              />
+              <:stat
+                label="At-risk subscriptions"
+                value={count(@stats.past_due_subscription_count, "subscription")}
+                tone="amber"
+                href={ScopedPath.build(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}
+              />
+              <:stat
+                label="Failed webhooks"
+                value={count(@stats.blocked_webhook_count, "failed webhook")}
+                tone={stat_webhook_tone(@stats)}
+                href={ScopedPath.build(@admin_mount_path, "/webhooks", @current_owner_scope, %{"status" => "failed,dead"})}
+              />
+            </StatStrip.stat_strip>
+          </:stat_strip>
+        </PageHeader.page_header>
+
+        <FlashGroup.flash_group flashes={flash_messages(@flash)} />
 
         <%!-- Zone 1 — Attention rail: exceptions first, only non-zero rows --%>
         <section class="ax-home-section" aria-label="Billing exceptions" data-ax-zone="attention-rail">
@@ -458,14 +487,33 @@ defmodule AccrueAdmin.Live.DashboardLive do
     |> Enum.filter(& &1)
   end
 
-  defp attention_health_summary(_stats), do: "Unhealthy"
+  # Single billing-health verdict — mirrors subscriptions_live.ex for cross-page parity,
+  # adapted to Home's @stats keys.
+  defp verdict_status(%{open_invoice_count: count}) when count > 0, do: :action_required
+  defp verdict_status(_stats), do: :healthy
 
-  defp attention_health_issue_summary(stats),
-    do:
-      "Collect #{format_minor(stats.open_invoice_balance_minor, "usd")} from #{count(stats.open_invoice_count, "open invoice")} before webhook or dunning work."
+  defp verdict_label(:action_required), do: Copy.dashboard_health_verdict_action_required()
+  defp verdict_label(:healthy), do: Copy.dashboard_health_verdict_healthy()
 
-  defp dashboard_health_headline([]), do: Copy.home_intro_headline()
-  defp dashboard_health_headline(_attention), do: "Billing health: Unhealthy"
+  defp verdict_tone(:action_required), do: "amber"
+  defp verdict_tone(:healthy), do: "moss"
+
+  defp exposure_tone(%{open_invoice_balance_minor: minor}) when minor > 0, do: "amber"
+  defp exposure_tone(_stats), do: "moss"
+
+  # StatStrip webhook tone — named distinctly from the timeline `webhook_tone/1` below
+  # (arity-collision by name); reads Home's `blocked_webhook_count` stat.
+  defp stat_webhook_tone(%{blocked_webhook_count: count}) when count > 0, do: "amber"
+  defp stat_webhook_tone(_stats), do: "moss"
+
+  defp flash_messages(flash) do
+    Enum.flat_map([:error, :info], fn kind ->
+      case Phoenix.Flash.get(flash, kind) do
+        nil -> []
+        message -> [%{kind: kind, message: message}]
+      end
+    end)
+  end
 
   defp attention_rail_heading([]), do: Copy.dashboard_display_headline()
   defp attention_rail_heading(_attention), do: "Priority exceptions"
