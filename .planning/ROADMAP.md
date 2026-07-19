@@ -219,7 +219,24 @@ Plans:
   4. The component kitchen (`component_kitchen_live.ex`) and `priv/static/storybook.css` no longer render retired vocabulary (updated + `storybook.css` rebuilt), the phase200 storybook specs stay green, and the parked `region-tags.js` `.ax-attention-rail` mapping is opportunistically fixed so a future ratchet re-freeze starts from a non-dangling selector map.
   5. Full `mix test` + the admin e2e suite are green across the phase boundary (no red left behind), and the diff touches no `accrue/lib` and adds no nav room.
 
-**Plans**: TBD
+**Plans**: 4 plans
+Plans:
+**Wave 1**
+
+- [ ] 211-01-PLAN.md — Build the orphan/dangling `ax-*` CSS census guard (`verify-css-census.mjs` + self-test) and capture the pre-Phase-211 mix test baseline + cross-validate the guard against the RESEARCH.md census
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
+- [ ] 211-02-PLAN.md — Delete the 92 named + 5 D-01 adjacent dead `.ax-*` selectors from `app.css` (Home/Launcher/Attention/HealthSummary, then Subscriptions/SubscriptionRow), preserving all 16 live classes and comma-grouped live branches, then rebuild + commit `accrue_admin.css`/`.js`
+
+**Wave 3** *(blocked on Wave 2 completion)*
+
+- [ ] 211-03-PLAN.md — Recompose `priv/static/storybook.css` per the D-04 shell recipe and run the orphan guard against the retired `app.css` plus an early smoke test
+
+**Wave 4** *(blocked on Wave 3 completion)*
+
+- [ ] 211-04-PLAN.md — Fix the `region-tags.js` attention-rail selector (D-03), run the full `mix test` + admin e2e suite with no-core-touched/no-nav-room confirmation, and human-verify the subscription detail page PNG parity
+
 **UI hint**: yes
 
 ## Progress
@@ -244,7 +261,7 @@ Plans:
 | 208. Prove convergence on slice + wire CI + ACCEPT | v1.56 | 3/5 | Parked | - |
 | 209. Reign Subscriptions (list + detail CSS coordination) | v1.57 | 3/3 | Complete    | 2026-07-19 |
 | 210. Reign Home + certify answer-first IA & copy integrity | v1.57 | 3/3 | Complete    | 2026-07-19 |
-| 211. Grep-gated CSS retirement & cross-surface cleanup | v1.57 | 0/0 | Not started | - |
+| 211. Grep-gated CSS retirement & cross-surface cleanup | v1.57 | 0/4 | Not started | - |
 
 ## Historical Backlog Anchors (not active scope)
 
