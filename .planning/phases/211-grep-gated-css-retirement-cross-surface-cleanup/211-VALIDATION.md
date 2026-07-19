@@ -1,9 +1,9 @@
 ---
 phase: 211
 slug: grep-gated-css-retirement-cross-surface-cleanup
-status: draft
-nyquist_compliant: false
-wave_0_complete: false
+status: approved
+nyquist_compliant: true
+wave_0_complete: true
 created: 2026-07-19
 ---
 
@@ -36,12 +36,17 @@ created: 2026-07-19
 
 ## Per-Task Verification Map
 
-> Filled by the planner. Each retirement/rebuild/cleanup task maps to a grep census assertion,
-> a bundle-guard assertion, a storybook-spec-green assertion, or a PNG-parity check.
-
 | Task ID | Plan | Wave | Requirement | Threat Ref | Secure Behavior | Test Type | Automated Command | File Exists | Status |
 |---------|------|------|-------------|------------|-----------------|-----------|-------------------|-------------|--------|
-| 211-XX-XX | XX | X | REIGN-04 | — | N/A (cleanup phase) | grep/build/e2e | `{command}` | ✅ | ⬜ pending |
+| 211-01-01 | 01 | 1 | REIGN-04 | — | N/A (cleanup phase) | script | `node accrue_admin/e2e/verify-css-census.mjs --self-test` (exit 0) | ❌ W1 (new script) | ⬜ pending |
+| 211-01-02 | 01 | 1 | REIGN-04 | — | N/A | script/unit | pre-phase `cd accrue_admin && mix test` baseline captured; guard extraction cross-validated vs RESEARCH.md census | ✅ | ⬜ pending |
+| 211-02-01 | 02 | 2 | REIGN-04 | — | N/A | grep | Home/Launcher/Attention/HealthSummary dead families + 5 D-01 adjacent rules gone; live `.ax-home*` rules present (`rg` exact-token) | ✅ | ⬜ pending |
+| 211-02-02 | 02 | 2 | REIGN-04 | — | N/A | grep/build | Subscriptions/SubscriptionRow dead families gone; `.ax-subscription-setup-gap` preserved; `mix accrue_admin.assets.build` run; `accrue_admin.css`/`.js` committed | ✅ | ⬜ pending |
+| 211-03-01 | 03 | 3 | REIGN-04 | — | N/A | script/unit | `storybook.css` recomposed per D-04 recipe (D-17 shim tail byte-preserved); `npm run phase200:storybook` green | ✅ | ⬜ pending |
+| 211-03-02 | 03 | 3 | REIGN-04 | — | N/A | script | `node accrue_admin/e2e/verify-css-census.mjs` against retired `app.css` exits 0; `mix compile` clean | ✅ (post-W1) | ⬜ pending |
+| 211-04-01 | 04 | 4 | REIGN-04 | — | N/A | grep | `region-tags.js` `attention-rail` → `[data-ax-zone='attention-rail']`; TODO-marker count decreases by exactly 1 | ✅ | ⬜ pending |
+| 211-04-02 | 04 | 4 | REIGN-04 | — | N/A | unit/e2e | `cd accrue_admin && mix test` + `npm run e2e` green; `git diff --stat -- ../accrue/lib` empty; no nav room added | ✅ | ⬜ pending |
+| 211-04-03 | 04 | 4 | REIGN-04 | — | Detail page unbroken | manual/e2e | PNG-parity of subscription detail page (light+dark) via `checkpoint:human-verify` | ✅ | ⬜ pending |
 
 *Status: ⬜ pending · ✅ green · ❌ red · ⚠️ flaky*
 
@@ -68,6 +73,6 @@ created: 2026-07-19
 - [ ] Wave 0 covers all MISSING references (none — existing infra)
 - [ ] No watch-mode flags
 - [ ] Feedback latency acceptable (grep/compile seconds)
-- [ ] `nyquist_compliant: true` set in frontmatter
+- [x] `nyquist_compliant: true` set in frontmatter
 
-**Approval:** pending
+**Approval:** approved 2026-07-19
