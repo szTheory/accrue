@@ -36,10 +36,20 @@ defmodule AccrueHostWeb.Layouts do
   def app(assigns) do
     ~H"""
     <main class="bg-base-200 px-4 py-12 sm:px-6 lg:px-8">
-      <%= if customer = dunning_customer(@current_scope) do %>
-        <AccrueAdmin.Components.DunningBanner.dunning_banner customer={customer} />
-      <% end %>
       <div class="mx-auto max-w-6xl space-y-4">
+        <%= if customer = dunning_customer(@current_scope) do %>
+          <AccrueAdmin.Components.DunningBanner.dunning_banner customer={customer}>
+            <div role="alert" class="flex items-start gap-3 rounded-lg border border-warning/40 bg-warning/10 p-4 shadow-sm">
+              <.icon name="hero-exclamation-triangle" class="size-5 shrink-0 text-warning" />
+              <div class="flex-1">
+                <p class="font-semibold text-base-content">Action required — payment failed</p>
+                <p class="mt-0.5 text-sm text-base-content/70">
+                  We couldn't process your recent payment. Update your payment method to avoid a service interruption.
+                </p>
+              </div>
+            </div>
+          </AccrueAdmin.Components.DunningBanner.dunning_banner>
+        <% end %>
         {render_slot(@inner_block)}
       </div>
     </main>
