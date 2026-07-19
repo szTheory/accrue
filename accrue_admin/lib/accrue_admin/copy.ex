@@ -1232,6 +1232,14 @@ defmodule AccrueAdmin.Copy do
 
   def dashboard_display_headline, do: "What needs attention now"
 
+  # Home reign verdict badges — Phase 210, COPY-01/COPY-02, D-04.
+  # Reuse the exact literals from copy/subscription.ex so Home and Subscriptions
+  # read identically ("Healthy" / "Action required"), verdict-language parity.
+
+  def dashboard_health_verdict_healthy, do: "Healthy"
+
+  def dashboard_health_verdict_action_required, do: "Action required"
+
   def dashboard_page_copy_primary,
     do:
       "Start with the highest-signal billing exceptions, then jump into the customer, revenue, recovery, or operations queue that can resolve them."
@@ -1255,7 +1263,7 @@ defmodule AccrueAdmin.Copy do
   def dashboard_kpi_active_subscriptions_meta, do: "Canonical active + trialing predicates"
 
   def dashboard_kpi_open_invoice_balance_meta,
-    do: "Opens the Invoices queue workspace for current receivables"
+    do: "Opens the invoice queue for current receivables"
 
   def dashboard_kpi_webhook_backlog_meta,
     do: "Failed + dead webhook rows waiting for operator attention"
@@ -1276,7 +1284,7 @@ defmodule AccrueAdmin.Copy do
 
   def dashboard_kpi_subscriptions_aria_label, do: "Open subscriptions list"
 
-  def dashboard_kpi_invoices_aria_label, do: "Open invoice queue workspace"
+  def dashboard_kpi_invoices_aria_label, do: "Open invoice queue"
 
   def dashboard_kpi_webhooks_aria_label, do: "Open webhooks list"
 
@@ -1311,9 +1319,19 @@ defmodule AccrueAdmin.Copy do
 
   def home_intro_copy,
     do:
-      "Check billing health first, then open the invoice, dunning, webhook, or customer workspace that resolves the issue."
+      "Check billing health first, then open the invoice, dunning, webhook, or customer queue that resolves the issue."
 
   def home_tasks_heading, do: "Jump to a task"
+
+  # Home reign — Phase 210, COPY-01/COPY-02.
+  # Attention-rail non-empty zone heading (migrates the inline literal formerly
+  # at dashboard_live.ex L471; the empty branch keeps calling
+  # dashboard_display_headline/0). Single header customer-lookup control label
+  # (sentence case; distinct from home_search_customers_title "Find one customer").
+
+  def home_attention_priority_heading, do: "Priority exceptions"
+
+  def home_customer_search_cta, do: "Find a customer"
 
   def home_attention_all_signals, do: "Review all signals"
 
@@ -1347,7 +1365,7 @@ defmodule AccrueAdmin.Copy do
 
   def home_launcher_customers_meta, do: "Global customer name, email, or ID search"
 
-  def home_launcher_invoices_title, do: "Invoices queue: $0.00 target"
+  def home_launcher_invoices_title, do: "Invoice queue"
 
   def home_launcher_invoices_copy,
     do: "Primary queue for retrying payment, voiding invoices, and clearing open receivables."
@@ -1357,7 +1375,7 @@ defmodule AccrueAdmin.Copy do
   def home_launcher_recovery_copy,
     do: "Review failed-payment recovery metrics and at-risk customers."
 
-  def home_launcher_recovery_meta, do: "Recovery workspace"
+  def home_launcher_recovery_meta, do: "At-risk accounts"
 
   def home_launcher_developer_title, do: "Investigate an incident"
 

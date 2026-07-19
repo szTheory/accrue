@@ -49,6 +49,10 @@ defmodule Mix.Tasks.AccrueAdmin.ExportCopyStrings do
     subscription_action_item_id_label
     subscription_action_quantity_label
     subscription_action_single_item_quantity_guidance
+    dashboard_health_verdict_healthy
+    dashboard_health_verdict_action_required
+    home_attention_priority_heading
+    home_customer_search_cta
     subscriptions_index_empty_title
     subscriptions_index_breadcrumb
     subscriptions_invoice_queue_cta
