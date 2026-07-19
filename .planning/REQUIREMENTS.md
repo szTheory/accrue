@@ -18,7 +18,7 @@ Requirements for this milestone (M1). Each maps to exactly one roadmap phase.
 ### Shared-Component Reign (REIGN)
 
 - [x] **REIGN-01**: The Subscriptions list page is composed only from the canonical shared skeleton (AppShell → `section.ax-page` → `PageHeader` with `:description`/`:stat_strip`/`:filter_toolbar` → `FlashGroup` → shared `DataTable` with `FilterChipBar` in `:list_status`); the bespoke `.ax-subscriptions-*` / `.ax-inline-worklist*` band sections between the header and the table are removed, and the page-specific override classes (`ax-page-compact`, `ax-subscriptions-header`, `ax-kpi-row` wrapper) are dropped.
-- [ ] **REIGN-02**: Subscriptions table cells render via the compact shared idiom (`StatusBadge`, `ax-stack-xs`, `ax-link`, `ax-chip ax-label`) with no in-cell action buttons — per-row actions move to a shared control (dedicated actions column or `DropdownMenu`), matching the good pages.
+- [x] **REIGN-02**: Subscriptions table cells render via the compact shared idiom (`StatusBadge`, `ax-stack-xs`, `ax-link`, `ax-chip ax-label`) with no in-cell action buttons — per-row actions move to a shared control (dedicated actions column or `DropdownMenu`), matching the good pages.
 - [ ] **REIGN-03**: The Home page is composed from the canonical `PageHeader` (breadcrumbs + title + `:description`/`:actions`/`:stat_strip`) instead of a hand-rolled header, and its attention rail + task-launcher tiles are rebuilt from shared primitives (`.ax-card` + `Button` + `Icon` + `StatusBadge`, `EmptyState` for empty branches); the already-canonical `KpiCard` "At a glance" band and `Timeline` activity cards are kept.
 - [ ] **REIGN-04**: The bespoke `.ax-home-*` / `.ax-launcher*` / `.ax-attention*` / `.ax-subscriptions-*` / `.ax-inline-worklist*` / `.ax-subscription-row-*` CSS is retired (grep-gated — only classes with zero remaining `.ex` references; classes still used by the subscription detail page `subscription_live.ex` are preserved), the committed `priv/static/accrue_admin.css` bundle is rebuilt, and all in-repo test/e2e selector assertions on retired classes are migrated in the same phase.
 
@@ -36,7 +36,7 @@ Requirements for this milestone (M1). Each maps to exactly one roadmap phase.
 
 ### Shared Component Additions (COMP)
 
-- [ ] **COMP-01**: If (and only if) the work-queue "callout" shape proves to repeat across Home's attention rail and Subscriptions' worklist strips, exactly one small shared component (e.g. `WorkQueueCallout`) is added — composed from existing tokens + `.ax-card`, reusing the existing tone scale (`moss`/`cobalt`/`amber`/`slate`/`ink`) — and consumed by both pages; otherwise both compose from `.ax-card` directly. No other new components; no new deps.
+- [x] **COMP-01**: If (and only if) the work-queue "callout" shape proves to repeat across Home's attention rail and Subscriptions' worklist strips, exactly one small shared component (e.g. `WorkQueueCallout`) is added — composed from existing tokens + `.ax-card`, reusing the existing tone scale (`moss`/`cobalt`/`amber`/`slate`/`ink`) — and consumed by both pages; otherwise both compose from `.ax-card` directly. No other new components; no new deps.
 
 ---
 
@@ -64,8 +64,8 @@ Each v1 requirement maps to exactly one phase. Coverage: **11/11 mapped, 0 orpha
 | Requirement | Phase | Status |
 |-------------|-------|--------|
 | REIGN-01 | Phase 209 — Reign Subscriptions (list + detail CSS coordination) | Complete |
-| REIGN-02 | Phase 209 — Reign Subscriptions (list + detail CSS coordination) | Pending |
-| COMP-01 | Phase 209 — Reign Subscriptions (list + detail CSS coordination) | Pending |
+| REIGN-02 | Phase 209 — Reign Subscriptions (list + detail CSS coordination) | Complete |
+| COMP-01 | Phase 209 — Reign Subscriptions (list + detail CSS coordination) | Complete |
 | REIGN-03 | Phase 210 — Reign Home + certify answer-first IA & copy integrity | Pending |
 | IA-01 | Phase 210 — Reign Home + certify answer-first IA & copy integrity | Pending |
 | IA-02 | Phase 210 — Reign Home + certify answer-first IA & copy integrity | Pending |
@@ -76,6 +76,7 @@ Each v1 requirement maps to exactly one phase. Coverage: **11/11 mapped, 0 orpha
 | REIGN-04 | Phase 211 — Grep-gated CSS retirement & cross-surface cleanup | Pending |
 
 **Mapping notes:**
+
 - **REIGN-01/REIGN-02** carry the Subscriptions-page structural reign in Phase 209; because band removal + single-verdict + single-CTA + compact cells *are* the Subscriptions answer-first pivot, that page's IA work is delivered physically under these two requirements. The cross-page IA/COPY requirements (IA-01..04, COPY-01/02) become fully TRUE only once the second page (Home) is reigned, so they close in Phase 210.
 - **COMP-01** (the one-new-component budget) resolves in Phase 209 — the `WorkQueueCallout` extract-or-inline decision surfaces during the Subscriptions reign and, if extracted, is consumed by Home in Phase 210.
 - **REIGN-04** (grep-gated CSS retirement) is sequenced last in Phase 211 — it can only run safely after both target templates land, because `.ax-inline-worklist*` / `.ax-audit-summary-row` are shared with the out-of-scope subscription detail page. Per-page markup/selector migration happens in the reign phases (209/210); Phase 211 does the zero-reference-verified deletion + bundle rebuild + kitchen/storybook/`region-tags.js` cleanup.
