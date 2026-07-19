@@ -13,6 +13,7 @@ defmodule AccrueAdmin.Live.DashboardLive do
 
   alias AccrueAdmin.Components.{
     AppShell,
+    EmptyState,
     FlashGroup,
     Icon,
     KpiCard,
@@ -145,46 +146,28 @@ defmodule AccrueAdmin.Live.DashboardLive do
               <Icon.icon name={:arrow_right} size="sm" />
             </a>
           </header>
-          <div :if={@attention != []} class="ax-attention-summary ax-attention-summary-warning" aria-label="Attention health verdict">
-            <strong>Billing status: Unhealthy.</strong>
-            <span>P1 is first, P2 next, P3 after invoices: collect open invoices, then inspect failed deliveries and dunning.</span>
-          </div>
-
           <div :if={@attention != []} class="ax-card ax-attention">
             <a :for={row <- @attention} href={row.href} class="ax-attention-row">
-              <span class={["ax-attention-priority", "ax-attention-priority-#{row.tone}"]}><%= row.priority %></span>
-              <span class={["ax-attention-dot", "ax-attention-dot-#{row.tone}"]} aria-hidden="true"></span>
-              <span class="ax-attention-text">
+              <StatusBadge.status_badge
+                status={:info}
+                label={row.priority}
+                tone={attention_status_badge_tone(row.tone)}
+              />
+              <span class="ax-attention-text ax-stack-xs">
                 <strong><%= row.metric %></strong> <%= row.label %>
               </span>
-              <span :if={row.pill} class={["ax-attention-pill", "ax-attention-pill-#{row.tone}"]}>
-                <%= row.pill %>
-              </span>
-              <span class="ax-attention-action"><%= row.action %></span>
+              <span :if={row.pill} class="ax-chip ax-label"><%= row.pill %></span>
+              <span class="ax-link-quiet"><%= row.action %></span>
             </a>
           </div>
 
-          <div :if={@attention == []} class="ax-card ax-empty ax-attention-rail--empty">
-            <Icon.icon name={:check_circle} size="lg" class="ax-empty-icon" />
-            <p class="ax-empty-title"><%= Copy.home_attention_empty_title() %></p>
-            <p class="ax-body ax-empty-copy"><%= Copy.home_attention_empty_copy() %></p>
-          </div>
-        </section>
-
-        <section class="ax-home-section ax-home-customer-search-strip" aria-label="Find one customer" data-ax-zone="customer-search">
-          <div>
-            <strong>Find ONE customer</strong>
-            <span>Name, email, or ID opens the unified customer billing view.</span>
-          </div>
-          <button
-            type="button"
-            class="ax-button ax-button-primary ax-button-sm ax-home-customer-search-strip-action"
-            data-command-palette-trigger="true"
-            data-ax-command-palette-trigger="true"
-          >
-            Open customer search
-            <Icon.icon name={:search} size="sm" />
-          </button>
+          <EmptyState.empty_state
+            :if={@attention == []}
+            icon={:check_circle}
+            title={Copy.home_attention_empty_title()}
+            body={Copy.home_attention_empty_copy()}
+            class="ax-attention-rail--empty"
+          />
         </section>
 
         <%!-- Zone 2 — Task launchers: one door per JTBD --%>
@@ -516,7 +499,13 @@ defmodule AccrueAdmin.Live.DashboardLive do
   end
 
   defp attention_rail_heading([]), do: Copy.dashboard_display_headline()
-  defp attention_rail_heading(_attention), do: "Priority exceptions"
+  defp attention_rail_heading(_attention), do: Copy.home_attention_priority_heading()
+
+  # Map attention-rail row tone → StatusBadge tone (StatusBadge scale: moss/cobalt/amber/slate/ink).
+  defp attention_status_badge_tone("warning"), do: "amber"
+  defp attention_status_badge_tone("danger"), do: "amber"
+  defp attention_status_badge_tone("info"), do: "cobalt"
+  defp attention_status_badge_tone(_tone), do: "slate"
 
   defp count(1, noun), do: "1 #{noun}"
   defp count(n, noun), do: "#{n} #{noun}s"
