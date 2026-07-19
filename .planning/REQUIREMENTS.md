@@ -17,7 +17,7 @@ Requirements for this milestone (M1). Each maps to exactly one roadmap phase.
 
 ### Shared-Component Reign (REIGN)
 
-- [ ] **REIGN-01**: The Subscriptions list page is composed only from the canonical shared skeleton (AppShell → `section.ax-page` → `PageHeader` with `:description`/`:stat_strip`/`:filter_toolbar` → `FlashGroup` → shared `DataTable` with `FilterChipBar` in `:list_status`); the bespoke `.ax-subscriptions-*` / `.ax-inline-worklist*` band sections between the header and the table are removed, and the page-specific override classes (`ax-page-compact`, `ax-subscriptions-header`, `ax-kpi-row` wrapper) are dropped.
+- [x] **REIGN-01**: The Subscriptions list page is composed only from the canonical shared skeleton (AppShell → `section.ax-page` → `PageHeader` with `:description`/`:stat_strip`/`:filter_toolbar` → `FlashGroup` → shared `DataTable` with `FilterChipBar` in `:list_status`); the bespoke `.ax-subscriptions-*` / `.ax-inline-worklist*` band sections between the header and the table are removed, and the page-specific override classes (`ax-page-compact`, `ax-subscriptions-header`, `ax-kpi-row` wrapper) are dropped.
 - [ ] **REIGN-02**: Subscriptions table cells render via the compact shared idiom (`StatusBadge`, `ax-stack-xs`, `ax-link`, `ax-chip ax-label`) with no in-cell action buttons — per-row actions move to a shared control (dedicated actions column or `DropdownMenu`), matching the good pages.
 - [ ] **REIGN-03**: The Home page is composed from the canonical `PageHeader` (breadcrumbs + title + `:description`/`:actions`/`:stat_strip`) instead of a hand-rolled header, and its attention rail + task-launcher tiles are rebuilt from shared primitives (`.ax-card` + `Button` + `Icon` + `StatusBadge`, `EmptyState` for empty branches); the already-canonical `KpiCard` "At a glance" band and `Timeline` activity cards are kept.
 - [ ] **REIGN-04**: The bespoke `.ax-home-*` / `.ax-launcher*` / `.ax-attention*` / `.ax-subscriptions-*` / `.ax-inline-worklist*` / `.ax-subscription-row-*` CSS is retired (grep-gated — only classes with zero remaining `.ex` references; classes still used by the subscription detail page `subscription_live.ex` are preserved), the committed `priv/static/accrue_admin.css` bundle is rebuilt, and all in-repo test/e2e selector assertions on retired classes are migrated in the same phase.
@@ -63,7 +63,7 @@ Each v1 requirement maps to exactly one phase. Coverage: **11/11 mapped, 0 orpha
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| REIGN-01 | Phase 209 — Reign Subscriptions (list + detail CSS coordination) | Pending |
+| REIGN-01 | Phase 209 — Reign Subscriptions (list + detail CSS coordination) | Complete |
 | REIGN-02 | Phase 209 — Reign Subscriptions (list + detail CSS coordination) | Pending |
 | COMP-01 | Phase 209 — Reign Subscriptions (list + detail CSS coordination) | Pending |
 | REIGN-03 | Phase 210 — Reign Home + certify answer-first IA & copy integrity | Pending |

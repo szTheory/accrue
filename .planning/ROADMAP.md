@@ -166,7 +166,7 @@ Full details: [v1.48 roadmap archive](milestones/v1.48-ROADMAP.md)
 Plans:
 **Wave 1**
 
-- [ ] 209-01-PLAN.md — Baseline capture: pre-reign test-green confirmation + PNG snapshot (Subscriptions + Subscription-detail, light/dark)
+- [x] 209-01-PLAN.md — Baseline capture: pre-reign test-green confirmation + PNG snapshot (Subscriptions + Subscription-detail, light/dark)
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
@@ -230,7 +230,7 @@ Plans:
 | 206. Adversarial verifier + finding ledger + deterministic gate | v1.56 | 4/4 | Complete | 2026-07-04 |
 | 207. Orchestration + digest + one-command round/fix loop | v1.56 | 8/8 | Complete | 2026-07-07 |
 | 208. Prove convergence on slice + wire CI + ACCEPT | v1.56 | 3/5 | Parked | - |
-| 209. Reign Subscriptions (list + detail CSS coordination) | v1.57 | 0/0 | Not started | - |
+| 209. Reign Subscriptions (list + detail CSS coordination) | v1.57 | 1/3 | In Progress|  |
 | 210. Reign Home + certify answer-first IA & copy integrity | v1.57 | 0/0 | Not started | - |
 | 211. Grep-gated CSS retirement & cross-surface cleanup | v1.57 | 0/0 | Not started | - |
 

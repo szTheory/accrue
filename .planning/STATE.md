@@ -4,13 +4,13 @@ milestone: v1.57
 milestone_name: Admin Operator Control Plane
 status: executing
 stopped_at: Phase 209 context gathered
-last_updated: "2026-07-19T18:00:36.054Z"
-last_activity: 2026-07-19 -- Phase 209 planning complete
+last_updated: "2026-07-19T18:08:54.906Z"
+last_activity: 2026-07-19
 progress:
   total_phases: 3
   completed_phases: 0
   total_plans: 3
-  completed_plans: 0
+  completed_plans: 1
   percent: 0
 ---
 
@@ -22,14 +22,14 @@ See: `.planning/PROJECT.md` (updated 2026-07-03 after v1.55 closeout)
 
 **Core value:** A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic Elixir DX, strong domain modeling, tamper-evident audit ledger, great observability, and zero breaking-change pain through v1.x.
 
-**Current focus:** Phase 209 — reign-subscriptions-list-plus-detail-css-coordination (v1.57 SEED-004 M1)
+**Current focus:** Phase 209 — reign-subscriptions-list-detail-css-coordination
 
 ## Current Position
 
-Phase: 209 — Reign Subscriptions (list + detail CSS coordination)
-Plan: —
+Phase: 209 (reign-subscriptions-list-detail-css-coordination) — EXECUTING
+Plan: 2 of 3
 Status: Ready to execute
-Last activity: 2026-07-19 -- Phase 209 planning complete
+Last activity: 2026-07-19
 Next: `/gsd-plan-phase 209`
 
 ## Post-v1.48 Pause Rule
@@ -313,6 +313,7 @@ Coverage: 22/22 v1.51 requirements mapped (each REQ-ID → exactly one phase). D
 | Phase 208 P01 | 35 min | 3 tasks | 2 files |
 | Phase 208 P02 | 45 min | 2 tasks | 1 files |
 | Phase 208 P03 | 55 min | 3 tasks | 3 files |
+| Phase 209 P01 | 5min | 2 tasks | 0 files |
 
 ## Accumulated Context
 
@@ -580,6 +581,7 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - [Phase 207]: 207-02: Ratchet request builders take systemPreamble/toolSchema as explicit params (not closure) so the mandated key-free --self-test-first guard can call them before SYSTEM_PREAMBLE initializes without a TDZ error; cache_control ephemeral lands on exactly 3 stable-prefix positions (system text block, tools[0], image block) with no field reordering.
 - [Phase ?]: 2026-07-05 (207-06): Exported isValidSuppressedReason from ratchet-ledger.js (defined but unexported) so ui.fix apply-decisions validates the whole reject batch up-front — the abort-before-any-apply/zero-partial-apply invariant needs validation decoupled from appendSuppressed.
 - [Phase ?]: 2026-07-05 (207-06): ratchet-fix probe verdict policy — objective kinds (contrast/motion) re-measured against their invariant; other kinds trust the maintainer's approved resolution (present=false). ui.fix runs zero evaluator fan-out (D-50), grep-proven.
+- [Phase ?]: 209-01: No source/test/CSS touched -- both tasks read-only evidence capture (12/12 green tests + 8-PNG light/dark/desktop/mobile baseline preserved outside git for Plan 03's density-no-regression diff).
 
 ### Pending Todos
 
@@ -705,9 +707,9 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 
 ## Session Continuity
 
-Last session: 2026-07-19T17:17:54.261Z
+Last session: 2026-07-19T18:06:27.341Z
 Stopped at: Phase 209 context gathered
-Resume file: .planning/phases/209-reign-subscriptions-list-detail-css-coordination/209-CONTEXT.md
+Resume file: None
 
 ## Operator Next Steps
 
