@@ -176,56 +176,46 @@ defmodule AccrueAdmin.Live.DashboardLive do
             <h3 class="ax-heading"><%= Copy.home_tasks_heading() %></h3>
           </header>
 
-          <div class="ax-launchers">
-            <a class="ax-launcher ax-launcher-primary" href={ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope, %{"status" => "open"})}>
-              <span class="ax-launcher-icon"><Icon.icon name={:invoices} size="lg" /></span>
-              <span class="ax-launcher-title"><%= invoice_launcher_title(@stats) %></span>
-              <span class="ax-launcher-action">
-                Open invoice queue workspace <Icon.icon name={:arrow_right} size="sm" />
+          <div class="ax-launchers ax-launchers-tri">
+            <a
+              class="ax-card ax-home-launcher-card"
+              data-ax-launcher-primary="true"
+              href={ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope, %{"status" => "open"})}
+            >
+              <span class="ax-home-launcher-icon"><Icon.icon name={:invoices} size="lg" /></span>
+              <h4 class="ax-heading"><%= Copy.home_launcher_invoices_title() %></h4>
+              <span :if={@stats.open_invoice_count > 0} class="ax-chip ax-label">
+                <%= count(@stats.open_invoice_count, "open invoice") %> · <%= format_minor(@stats.open_invoice_balance_minor, "usd") %> above target
               </span>
-              <span :if={@stats.open_invoice_count > 0} class="ax-launcher-meta ax-launcher-meta-warn">
-                <%= count(@stats.open_invoice_count, "open invoice") %>; <%= format_minor(@stats.open_invoice_balance_minor, "usd") %> above $0.00 target
+              <span class="ax-button ax-button-secondary ax-button-sm ax-home-launcher-action">
+                Open invoice queue <Icon.icon name={:arrow_right} size="sm" />
               </span>
             </a>
 
-            <button
-              type="button"
-              class="ax-launcher ax-launcher-customer ax-launcher-button"
-              data-command-palette-trigger="true"
-              data-ax-command-palette-trigger="true"
+            <a
+              class="ax-card ax-home-launcher-card"
+              href={ScopedPath.build(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}
             >
-              <span class="ax-launcher-icon"><Icon.icon name={:search} size="lg" /></span>
-              <span class="ax-launcher-title"><%= Copy.home_launcher_customers_title() %></span>
-              <span class="ax-launcher-meta"><%= Copy.home_launcher_customers_meta() %></span>
-              <span class="ax-launcher-action">
-                Open global customer search <Icon.icon name={:search} size="sm" />
+              <span class="ax-home-launcher-icon"><Icon.icon name={:recovery} size="lg" /></span>
+              <h4 class="ax-heading"><%= Copy.home_launcher_recovery_title() %></h4>
+              <span :if={@stats.past_due_subscription_count > 0} class="ax-chip ax-label">
+                <%= count(@stats.past_due_subscription_count, "at-risk account") %>
               </span>
-            </button>
-
-            <a class="ax-launcher ax-launcher-recovery" href={ScopedPath.build(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}>
-              <span class="ax-launcher-icon"><Icon.icon name={:recovery} size="lg" /></span>
-              <span class="ax-launcher-title"><%= Copy.home_launcher_recovery_title() %></span>
-              <span class="ax-launcher-health ax-launcher-health-warning">Dunning check: <%= count(@stats.past_due_subscription_count, "at-risk account") %></span>
-              <span class="ax-launcher-copy">Review dunning after open invoices are cleared.</span>
-              <span class="ax-launcher-meta ax-launcher-meta-warn">
-                Next stage: reminder pending
-              </span>
-              <span class="ax-launcher-meta ax-launcher-meta-actions">
-                Funnel preview: <%= count(@stats.past_due_subscription_count, "at-risk account") %>; reminder stage is next.
-              </span>
-              <span class="ax-launcher-action ax-launcher-action-button">
+              <span class="ax-button ax-button-secondary ax-button-sm ax-home-launcher-action">
                 Open dunning analytics <Icon.icon name={:arrow_right} size="sm" />
               </span>
             </a>
 
-            <a class="ax-launcher" href={ScopedPath.build(@admin_mount_path, "/webhooks", @current_owner_scope)}>
-              <span class="ax-launcher-icon"><Icon.icon name={:webhooks} size="lg" /></span>
-              <span class="ax-launcher-title"><%= Copy.home_launcher_developer_title() %></span>
-              <span class="ax-launcher-copy"><%= Copy.home_launcher_developer_copy() %></span>
-              <span :if={@stats.blocked_webhook_count > 0} class="ax-launcher-meta ax-launcher-meta-warn">
-                <%= count(@stats.blocked_webhook_count, "dead-letter") %>
+            <a
+              class="ax-card ax-home-launcher-card"
+              href={ScopedPath.build(@admin_mount_path, "/webhooks", @current_owner_scope)}
+            >
+              <span class="ax-home-launcher-icon"><Icon.icon name={:webhooks} size="lg" /></span>
+              <h4 class="ax-heading"><%= Copy.home_launcher_developer_title() %></h4>
+              <span :if={@stats.blocked_webhook_count > 0} class="ax-chip ax-label">
+                <%= count(@stats.blocked_webhook_count, "dead-letter event") %>
               </span>
-              <span class="ax-launcher-action">
+              <span class="ax-button ax-button-secondary ax-button-sm ax-home-launcher-action">
                 Debug webhook failures <Icon.icon name={:arrow_right} size="sm" />
               </span>
             </a>
@@ -509,13 +499,6 @@ defmodule AccrueAdmin.Live.DashboardLive do
 
   defp count(1, noun), do: "1 #{noun}"
   defp count(n, noun), do: "#{n} #{noun}s"
-
-  defp invoice_launcher_title(%{open_invoice_count: count, open_invoice_balance_minor: amount})
-       when count > 0 do
-    "Open-invoice queue: #{format_minor(amount, "usd")} open"
-  end
-
-  defp invoice_launcher_title(_stats), do: Copy.home_launcher_invoices_title()
 
   defp recent_events(mount_path, scope) do
     Event

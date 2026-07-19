@@ -6326,6 +6326,67 @@ button.ax-launcher {
   }
 }
 
+/* Phase 210 — reigned three-tile launcher grid (additive).
+   Tiles are now .ax-card primitives keyed off data-ax-launcher-primary; this
+   layer does not touch any .ax-launcher* rule (Phase 211 retires those). */
+.ax-home-launcher-card {
+  display: grid;
+  grid-template-rows: auto auto 1fr auto;
+  gap: var(--ax-space-sm);
+  align-content: start;
+  padding: var(--ax-space-md);
+  color: var(--ax-primary);
+  text-decoration: none;
+  transition: var(--ax-transition-base);
+}
+
+.ax-home-launcher-card:hover,
+.ax-home-launcher-card:focus-visible {
+  box-shadow: var(--ax-shadow-md);
+  outline: none;
+}
+
+.ax-home-launcher-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: var(--ax-radius-md);
+  background: var(--ax-sunken);
+  color: var(--ax-primary);
+}
+
+.ax-home-launcher-action {
+  justify-self: start;
+}
+
+.ax-home-launcher-card[data-ax-launcher-primary] {
+  border: 1px solid var(--ax-accent-border);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ax-accent-border) 60%, transparent), var(--ax-shadow-sm);
+}
+
+.ax-home-launcher-card[data-ax-launcher-primary] .ax-home-launcher-icon {
+  background: var(--ax-accent-readable);
+  color: var(--ax-base);
+}
+
+@media (min-width: 640px) { /* --ax-bp-content ↑ */
+  .ax-launchers-tri .ax-home-launcher-card[data-ax-launcher-primary] {
+    grid-column: span 2;
+  }
+}
+
+@media (min-width: 1024px) { /* --ax-bp-lg ↑ */
+  .ax-launchers-tri {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .ax-launchers-tri .ax-home-launcher-card[data-ax-launcher-primary] {
+    grid-column: auto;
+  }
+}
+
 .ax-activity-card {
   border-left: 3px solid var(--ax-border-strong);
 }
