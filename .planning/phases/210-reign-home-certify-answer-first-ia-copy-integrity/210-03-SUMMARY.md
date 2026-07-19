@@ -178,3 +178,12 @@ status: complete
 
 - All modified files present on disk.
 - All commits present: `bfd1aa2b`, `22486e63`, `a87e66df`, `bea58d84`.
+
+## Post-Review Fixes (e98d71af)
+
+Two `210-REVIEW.md` warnings resolved after code review:
+
+- **WR-01 (correctness regression):** `verdict_status/1` in `dashboard_live.ex` was keyed only on `open_invoice_count`, so the answer-first header verdict could render a green "Healthy" badge while the attention rail listed P2/P3/P4 webhook/dunning/meter exceptions on the same page — contradicting the IA-01 "one correct verdict" thesis. Rewrote the predicate to fire `:action_required` on ANY of the four attention signals (`open_invoice_count`, `blocked_webhook_count`, `past_due_subscription_count`, `failed_meter_event_count`), mirroring `attention_items/3` exactly so header and rail can never disagree.
+- **WR-02 (a11y focus ring):** `.ax-home-launcher-card:focus-visible` shared the hover rule with `outline: none`, making keyboard focus invisible (WCAG 2.4.7). Split it out with the standard admin focus ring (`--ax-focus-ring` / `--ax-focus-shadow`), matching the attention-rail treatment; rebuilt the committed `priv/static/accrue_admin.css` bundle.
+- **New test:** `dashboard_live_test.exs` gains a verdict-consistency regression test asserting the header verdict is "Action required" (not "Healthy") when `open_invoice_count == 0` but a webhook signal is active.
+- **Gates re-run live:** phase194 GREEN, phase199 GREEN, admin-a11y unchanged (still the 2 deferred dark-mode color-contrast items ONLY). Info items IN-01..04 left advisory/open.
