@@ -49,8 +49,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
          socket.assigns.current_owner_scope
        )
      )
-     |> assign(:summary, subscription_summary(socket.assigns.current_owner_scope))
-     |> assign(:open_invoice_queue, open_invoice_queue(socket.assigns.current_owner_scope))}
+     |> assign(:summary, subscription_summary(socket.assigns.current_owner_scope))}
   end
 
   @impl true
@@ -189,91 +188,6 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
 
         <FlashGroup.flash_group flashes={flash_messages(@flash)} />
 
-        <section
-          class={[
-            "ax-inline-worklist ax-subscriptions-invoice-strip",
-            @summary.open_invoice_count > 0 && "ax-subscriptions-invoice-strip-danger"
-          ]}
-          aria-label="Open-invoice queue worklist"
-        >
-          <div class="ax-inline-worklist-copy ax-subscriptions-priority-copy">
-            <strong><%= billing_priority_title(@summary) %></strong>
-            <span class="ax-subscriptions-exposure"><%= count(@summary.open_invoice_count, "invoice") %> / <%= format_minor(@summary.open_invoice_exposure_minor, "usd") %> to collect</span>
-          </div>
-          <div class="ax-inline-worklist-actions">
-            <a class="ax-button ax-button-primary ax-button-sm ax-subscriptions-primary-workspace" href={invoice_queue_path(@admin_mount_path, @current_owner_scope)}>
-              Open dedicated invoice queue
-            </a>
-          </div>
-        </section>
-
-        <section class="ax-subscriptions-queue-shortcut" aria-label="Open-invoice queue records">
-          <span><%= count(@summary.open_invoice_count, "open invoice") %> ready for queue work.</span>
-          <a class="ax-link-quiet" href={invoice_queue_path(@admin_mount_path, @current_owner_scope)}>
-            Open dedicated invoice queue records
-          </a>
-        </section>
-
-        <section class="ax-inline-worklist ax-subscriptions-invoice-records" aria-label="Open-invoice queue preview">
-          <div class="ax-inline-worklist-copy">
-            <strong>Open-invoice queue records</strong>
-            <span>Top records to work to $0.00; open the dedicated invoice queue for full filtering and bulk action.</span>
-          </div>
-          <ol :if={@open_invoice_queue != []} class="ax-subscriptions-invoice-record-list">
-            <li :for={invoice <- @open_invoice_queue}>
-              <a href={invoice_queue_record_href(@admin_mount_path, @current_owner_scope, invoice)} class="ax-subscriptions-invoice-record">
-                <strong><%= invoice_queue_customer_label(invoice) %></strong>
-                <span><%= format_minor(invoice.amount_remaining_minor, invoice.currency || "usd") %> remaining</span>
-                <em><%= invoice_queue_due(invoice) %></em>
-              </a>
-            </li>
-          </ol>
-          <span :if={@open_invoice_queue == []} class="ax-subscriptions-invoice-record-empty">
-            No open invoice records in this scope.
-          </span>
-          <a class="ax-button ax-button-primary ax-button-sm ax-subscriptions-primary-workspace" href={invoice_queue_path(@admin_mount_path, @current_owner_scope)}>
-            Open dedicated invoice queue
-          </a>
-        </section>
-
-        <div class="ax-subscriptions-secondary-strips">
-          <section class="ax-inline-worklist ax-subscriptions-at-risk-strip" aria-label="At-risk subscription queue">
-            <div class="ax-inline-worklist-copy">
-              <strong>At-risk queue</strong>
-              <span><%= count(@summary.past_due_count, "subscription") %> in dunning; review before renewal or cancellation.</span>
-            </div>
-            <div class="ax-inline-worklist-actions">
-              <a class="ax-button ax-button-secondary ax-button-sm" href={scoped_path(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}>
-                Open recovery analytics
-              </a>
-            </div>
-          </section>
-
-          <section class="ax-inline-worklist ax-subscriptions-audit-strip" aria-label="Subscription audit trail">
-            <div class="ax-inline-worklist-copy">
-              <strong>Who did what, when?</strong>
-              <span>Open the chronological actor audit log for subscription, invoice, dunning, and webhook changes.</span>
-              <span class="ax-subscriptions-audit-preview">
-                <strong>Actor</strong> Accrue system <strong>Action</strong> subscription.created <strong>Timestamp</strong> latest first
-              </span>
-            </div>
-            <div class="ax-inline-worklist-actions">
-              <a
-                class="ax-button ax-button-primary ax-button-sm"
-                href={scoped_path(@admin_mount_path, "/events", @current_owner_scope, %{"type" => "subscription.created"})}
-              >
-                Events: open full actor audit log
-              </a>
-              <a
-                class="ax-button ax-button-secondary ax-button-sm"
-                href={scoped_path(@admin_mount_path, "/events", @current_owner_scope, %{"actor_type" => "admin"})}
-              >
-                Filter admin actions
-              </a>
-            </div>
-          </section>
-        </div>
-
         <.live_component
           module={DataTable}
           id="subscriptions"
@@ -297,7 +211,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
             %{label: "Plan / amount", render: &plan_amount_cell/1},
             %{label: "Renews / ends", render: &time_cell/1},
             %{
-              label: "Signals / audit",
+              label: "Signals",
               render: &billing_signals_cell(&1, @admin_mount_path, @current_owner_scope)
             }
           ]}
@@ -311,7 +225,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
             %{label: "Plan / amount", render: &plan_amount_cell/1},
             %{label: "Renews / ends", render: &time_cell/1},
             %{
-              label: "Signals / audit",
+              label: "Signals",
               render: &billing_signals_cell(&1, @admin_mount_path, @current_owner_scope)
             }
           ]}
@@ -400,137 +314,30 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
 
   defp scoped_invoices(_owner_scope), do: Invoice
 
-  defp open_invoice_queue(owner_scope) do
-    open_invoice_statuses = [:draft, :open]
-
-    owner_scope
-    |> open_invoice_queue_base(open_invoice_statuses)
-    |> order_by([invoice, _customer, _subscription],
-      asc_nulls_last: invoice.due_date,
-      desc: invoice.amount_remaining_minor
-    )
-    |> limit(3)
-    |> select([invoice, customer, subscription], %{
-      id: invoice.id,
-      number: invoice.number,
-      subscription_id: invoice.subscription_id,
-      subscription_processor_id: subscription.processor_id,
-      customer_name: customer.name,
-      customer_email: customer.email,
-      customer_id: customer.id,
-      amount_remaining_minor: invoice.amount_remaining_minor,
-      currency: invoice.currency,
-      due_date: invoice.due_date,
-      status: invoice.status
-    })
-    |> Repo.all()
-  end
-
-  defp open_invoice_queue_base(%{mode: :organization, organization_id: organization_id}, statuses) do
-    Invoice
-    |> join(:inner, [invoice], customer in Customer, on: customer.id == invoice.customer_id)
-    |> join(:left, [invoice, _customer], subscription in assoc(invoice, :subscription))
-    |> where(
-      [invoice, customer, _subscription],
-      invoice.status in ^statuses and customer.owner_type == "Organization" and
-        customer.owner_id == ^organization_id
-    )
-  end
-
-  defp open_invoice_queue_base(_owner_scope, statuses) do
-    Invoice
-    |> join(:inner, [invoice], customer in Customer, on: customer.id == invoice.customer_id)
-    |> join(:left, [invoice, _customer], subscription in assoc(invoice, :subscription))
-    |> where([invoice, _customer, _subscription], invoice.status in ^statuses)
-  end
-
-  defp billing_signals_cell(row, mount_path, owner_scope) do
+  # Compact two-chip idiom (matches invoices_live.ex's billing_signals_cell/1) — no in-cell
+  # actions, no audit/webhook-status lines (per D-01/REIGN-02).
+  defp billing_signals_cell(row, _mount_path, _owner_scope) do
     ownership = BillingPresentation.ownership_label(row)
     tax = BillingPresentation.tax_health_label(BillingPresentation.tax_health(row))
     escaped_o = ownership |> Phoenix.HTML.html_escape() |> Phoenix.HTML.safe_to_string()
     escaped_t = tax |> Phoenix.HTML.html_escape() |> Phoenix.HTML.safe_to_string()
-    created = row.inserted_at |> format_date() |> escape()
 
-    events_href =
-      mount_path
-      |> scoped_path("/events", owner_scope)
-      |> AccrueAdmin.DataTableNav.merge_query(%{
-        "subject_type" => "Subscription",
-        "subject_id" => row.id
-      })
-
-    webhook_href =
-      mount_path
-      |> scoped_path("/webhooks", owner_scope)
-      |> AccrueAdmin.DataTableNav.merge_query(%{
-        "status" => "failed,dead",
-        "type" => "subscription.created"
-      })
-
-    Phoenix.HTML.raw("""
-    <span class="ax-stack-sm">
-      <span class="ax-audit-summary-row ax-subscription-row-audit ax-subscription-row-audit-primary" aria-label="Latest subscription audit event">
-        <span class="ax-audit-fact"><strong>Audit</strong><em>subscription.created by Accrue system - #{created}</em></span>
-      </span>
-      <span class="ax-webhook-row-status ax-webhook-row-status-warning ax-subscription-row-signal-primary">
-        <strong>Invoice queue status</strong>
-        <span>Work controls are in Customer details for this row</span>
-      </span>
-      <span class="ax-subscription-row-signal-secondary">
-        <strong>Webhook status</strong>
-        <span>Failed deliveries pending after invoice queue</span>
-        <a href="#{webhook_href}" class="ax-link ax-subscription-row-webhook-action">Open failed-delivery debugger</a>
-      </span>
-      <span class="ax-subscription-row-admin-chips"><span class="ax-chip ax-label">Owner: #{escaped_o}</span> <span class="ax-chip ax-label">Tax: #{escaped_t}</span></span>
-      <span class="ax-data-table-inline-actions">
-        <a href="#{events_href}" class="ax-link">Open audit context for this subscription</a>
-      </span>
-    </span>
-    """)
+    Phoenix.HTML.raw(
+      ~s(<span class="ax-chip ax-label">Owner: #{escaped_o}</span> <span class="ax-chip ax-label">Tax: #{escaped_t}</span>)
+    )
   end
 
-  defp billing_priority_title(%{open_invoice_count: count}) when count > 0,
-    do: "Primary queue"
-
-  defp billing_priority_title(_summary), do: "Billing status: Healthy"
-
+  # Primary link resolves to the subscription's own detail page (D-01's literal href
+  # mandate) with customer-first TEXT for scannability; secondary link cross-navigates to
+  # the customer (mirrors invoices_live.ex's bidirectional identity-cell pattern).
   defp identity_cell(row, mount_path, owner_scope) do
-    customer_href = scoped_path(mount_path, "/customers/#{row.customer_id}", owner_scope)
     subscription_href = scoped_path(mount_path, "/subscriptions/#{row.id}", owner_scope)
-    {status, state_label} = lifecycle_status(row)
-    state_tone = status_tone(status)
+    customer_href = scoped_path(mount_path, "/customers/#{row.customer_id}", owner_scope)
+    subscription_id = row.processor_id || row.id
 
-    subscription_invoices_href =
-      mount_path
-      |> scoped_path("/invoices", owner_scope)
-      |> AccrueAdmin.DataTableNav.merge_query(%{
-        "status" => "open",
-        "subscription_id" => row.id
-      })
-
-    customer_id = escape(row.customer_id)
-    subscription_id = escape(row.processor_id || row.id)
-
-    Phoenix.HTML.raw("""
-    <span class="ax-stack-sm">
-      <span class="ax-subscription-row-primary-line">
-        <a href="#{customer_href}" class="ax-link ax-subscription-row-customer">Open unified customer view: #{escape(customer_label(row))}</a>
-        <span class="ax-subscription-row-state ax-status-badge ax-status-badge-#{state_tone}">
-          <span class="ax-status-dot"></span>#{escape(state_label)}
-        </span>
-      </span>
-      <span class="ax-subscription-row-customer-scope">All subscriptions for this customer; current subscription #{subscription_id}</span>
-      <span class="ax-subscription-row-meta-grid">
-        <span class="ax-subscription-row-meta"><strong>Customer ID</strong> #{customer_id}</span>
-        <a href="#{subscription_href}" class="ax-subscription-row-meta ax-subscription-row-id"><strong>Subscription</strong> #{subscription_id}</a>
-        <span class="ax-subscription-row-invoice-controls">
-          <a href="#{subscription_invoices_href}" class="ax-button ax-button-primary ax-button-sm ax-subscription-row-invoice-primary">Work open invoices</a>
-          <a href="#{subscription_invoices_href}&work=send_reminder" class="ax-button ax-button-secondary ax-button-sm ax-subscription-row-invoice-primary">Send reminder</a>
-          <a href="#{subscription_invoices_href}" class="ax-link ax-subscription-row-invoices">Filter invoice queue to this subscription</a>
-        </span>
-      </span>
-    </span>
-    """)
+    Phoenix.HTML.raw(
+      ~s(<span class="ax-stack-xs"><a href="#{subscription_href}" class="ax-link">#{escape(customer_label(row))}</a><a href="#{customer_href}" class="ax-label ax-muted">#{escape(subscription_id)}</a></span>)
+    )
   end
 
   defp customer_label(row), do: row.customer_name || row.customer_email || row.customer_id
@@ -844,32 +651,6 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
     |> AccrueAdmin.DataTableNav.merge_query(%{"status" => "open"})
   end
 
-  defp invoice_queue_record_href(mount_path, owner_scope, invoice) do
-    mount_path
-    |> scoped_path("/invoices", owner_scope)
-    |> AccrueAdmin.DataTableNav.merge_query(%{
-      "status" => "open",
-      "subscription_id" => invoice.subscription_id,
-      "invoice_id" => invoice.id
-    })
-  end
-
-  defp invoice_queue_due(%{due_date: %DateTime{} = due_date}), do: "Due #{format_date(due_date)}"
-
-  defp invoice_queue_due(%{number: number}) when is_binary(number) and number != "",
-    do: "Invoice #{number}"
-
-  defp invoice_queue_due(%{status: status}), do: "Status #{humanize(status)}"
-
-  defp invoice_queue_customer_label(%{customer_name: name}) when is_binary(name) and name != "",
-    do: name
-
-  defp invoice_queue_customer_label(%{customer_email: email})
-       when is_binary(email) and email != "",
-       do: email
-
-  defp invoice_queue_customer_label(%{customer_id: id}), do: id
-
   defp invoice_queue_path_from_table(table_path) do
     uri = URI.parse(table_path)
     mount_path = uri.path |> Path.dirname()
@@ -886,7 +667,6 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
   defp escape(value), do: value |> Phoenix.HTML.html_escape() |> Phoenix.HTML.safe_to_string()
 
   defp format_date(%DateTime{} = value), do: Calendar.strftime(value, "%b %-d, %Y")
-  defp format_date(%NaiveDateTime{} = value), do: Calendar.strftime(value, "%b %-d, %Y")
   defp format_date(_value), do: "Date not shown"
 
   defp humanize(value) when is_atom(value), do: value |> Atom.to_string() |> humanize()
