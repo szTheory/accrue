@@ -26,6 +26,7 @@ defmodule Accrue.Portal.AuthHook do
          |> assign(:accrue_portal_session, session)
          |> assign(:brand, Map.get(portal, "brand", %{}))
          |> assign(:theme, Map.get(portal, "theme", "system"))
+         |> assign(:theme_locked, Map.get(portal, "theme_locked", false))
          |> assign(:csp_nonce, Map.get(portal, "csp_nonce"))
          |> assign(:brand_css_path, Map.get(portal, "brand_css_path"))
          |> assign(:assets_css_path, Map.get(portal, "assets_css_path"))

@@ -58,6 +58,37 @@ defmodule AccruePortal.RouterTest do
     assert session["accrue_portal"]["mount_path"] == "/billing"
     assert session["accrue_portal"]["login_path"] == "/"
     assert session["accrue_portal"]["theme"] == "system"
+    assert session["accrue_portal"]["theme_locked"] == false
+  end
+
+  test "locked theme policy forces the mode server-side and marks the session locked" do
+    previous = Application.get_env(:accrue, :branding)
+
+    Application.put_env(:accrue, :branding,
+      from_email: "billing@example.test",
+      support_email: "support@example.test",
+      theme: :dark
+    )
+
+    on_exit(fn ->
+      if is_nil(previous) do
+        Application.delete_env(:accrue, :branding)
+      else
+        Application.put_env(:accrue, :branding, previous)
+      end
+    end)
+
+    session =
+      Phoenix.ConnTest.build_conn()
+      # A conflicting cookie must be ignored when the policy locks the mode.
+      |> Plug.Test.put_req_cookie("accrue_theme", "light")
+      |> Plug.Test.init_test_session(%{"user_token" => "token-123"})
+      |> Accrue.Portal.CSPPlug.call([])
+      |> Accrue.Portal.BrandPlug.call([])
+      |> Accrue.Portal.Router.__session__([:user_token], "/billing")
+
+    assert session["accrue_portal"]["theme"] == "dark"
+    assert session["accrue_portal"]["theme_locked"] == true
   end
 
   test "session callback includes configured login path" do

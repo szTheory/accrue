@@ -7,6 +7,7 @@ defmodule AccruePortal.Layouts do
   attr(:page_title, :string, default: "Billing Portal")
   attr(:brand, :map, default: %{})
   attr(:theme, :string, default: "system")
+  attr(:theme_locked, :boolean, default: false)
   attr(:csp_nonce, :string, default: nil)
   attr(:brand_css_path, :string, default: nil)
   attr(:assets_css_path, :string, default: nil)
@@ -45,7 +46,12 @@ defmodule AccruePortal.Layouts do
             <span :if={!@brand_logo_url && @brand_wordmark} class="portal-wordmark">
               {@brand_wordmark}
             </span>
-            <div class="portal-theme-picker" role="group" aria-label="Theme">
+            <div
+              :if={not @theme_locked}
+              class="portal-theme-picker"
+              role="group"
+              aria-label="Theme"
+            >
               <button
                 type="button"
                 data-portal-theme="system"

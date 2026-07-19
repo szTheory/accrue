@@ -66,7 +66,12 @@ defmodule AccruePortal.AuthHookTest do
 
     session = %{
       "user_token" => "customer-token",
-      "accrue_portal" => %{"mount_path" => "/billing", "login_path" => "/users/log-in"}
+      "accrue_portal" => %{
+        "mount_path" => "/billing",
+        "login_path" => "/users/log-in",
+        "theme" => "dark",
+        "theme_locked" => true
+      }
     }
 
     socket = %Phoenix.LiveView.Socket{}
@@ -81,6 +86,8 @@ defmodule AccruePortal.AuthHookTest do
 
     assert mounted.assigns.current_user == user
     assert mounted.assigns.current_customer.id == customer.id
+    assert mounted.assigns.theme == "dark"
+    assert mounted.assigns.theme_locked == true
   end
 
   test "unauthenticated access redirects before render", %{conn: conn} do

@@ -136,6 +136,7 @@ defmodule Accrue.Portal.Router do
         "live_view_js_path" => AccruePortal.Assets.hashed_path(:live_view, mount_path),
         "brand" => conn.assigns[:accrue_portal_brand],
         "theme" => conn.assigns[:accrue_portal_theme] || "system",
+        "theme_locked" => conn.assigns[:accrue_portal_theme_locked] || false,
         "csp_nonce" => conn.assigns[:accrue_portal_csp_nonce]
       }
     })
