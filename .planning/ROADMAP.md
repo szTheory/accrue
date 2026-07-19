@@ -202,7 +202,7 @@ Plans:
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
-- [ ] 210-03-PLAN.md — Migrate unit + e2e gates to the reigned DOM, keep axe green, human-verify density-no-regression + one-system PNG parity (REIGN-03, IA-03)
+- [x] 210-03-PLAN.md — Migrate unit + e2e gates to the reigned DOM, keep axe green, human-verify density-no-regression + one-system PNG parity (REIGN-03, IA-03)
 
 **UI hint**: yes
 
@@ -243,7 +243,7 @@ Plans:
 | 207. Orchestration + digest + one-command round/fix loop | v1.56 | 8/8 | Complete | 2026-07-07 |
 | 208. Prove convergence on slice + wire CI + ACCEPT | v1.56 | 3/5 | Parked | - |
 | 209. Reign Subscriptions (list + detail CSS coordination) | v1.57 | 3/3 | Complete    | 2026-07-19 |
-| 210. Reign Home + certify answer-first IA & copy integrity | v1.57 | 2/3 | In Progress|  |
+| 210. Reign Home + certify answer-first IA & copy integrity | v1.57 | 3/3 | Complete   | 2026-07-19 |
 | 211. Grep-gated CSS retirement & cross-surface cleanup | v1.57 | 0/0 | Not started | - |
 
 ## Historical Backlog Anchors (not active scope)

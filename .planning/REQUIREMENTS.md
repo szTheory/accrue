@@ -26,7 +26,7 @@ Requirements for this milestone (M1). Each maps to exactly one roadmap phase.
 
 - [x] **IA-01**: Each of the two pages presents exactly one scannable billing-health verdict — Home's verdict (currently rendered three times) and the Subscriptions sentence-title verdict collapse to a single clear statement per page.
 - [x] **IA-02**: Each zone offers one unambiguous primary action — the duplicated invoice-queue entry point (Subscriptions "Open dedicated invoice queue", currently 3+ occurrences — the most-confirmed round-99 defect) and the triplicated customer-search entry (Home) are each de-duplicated to a single clear control.
-- [ ] **IA-03**: Redundant bands/sections are trimmed so each page leads with its answer, while operator console density is preserved — the reigned pages show no spacing-density regression versus their pre-reign state.
+- [x] **IA-03**: Redundant bands/sections are trimmed so each page leads with its answer, while operator console density is preserved — the reigned pages show no spacing-density regression versus their pre-reign state.
 - [x] **IA-04**: Content on both pages is ordered answer-first (health verdict → primary action → supporting detail), matching the grammar the reference list pages already exhibit.
 
 ### Copy & Navigation Integrity (COPY)
@@ -69,7 +69,7 @@ Each v1 requirement maps to exactly one phase. Coverage: **11/11 mapped, 0 orpha
 | REIGN-03 | Phase 210 — Reign Home + certify answer-first IA & copy integrity | Complete |
 | IA-01 | Phase 210 — Reign Home + certify answer-first IA & copy integrity | Complete |
 | IA-02 | Phase 210 — Reign Home + certify answer-first IA & copy integrity | Complete |
-| IA-03 | Phase 210 — Reign Home + certify answer-first IA & copy integrity | Pending |
+| IA-03 | Phase 210 — Reign Home + certify answer-first IA & copy integrity | Complete |
 | IA-04 | Phase 210 — Reign Home + certify answer-first IA & copy integrity | Complete |
 | COPY-01 | Phase 210 — Reign Home + certify answer-first IA & copy integrity | Complete |
 | COPY-02 | Phase 210 — Reign Home + certify answer-first IA & copy integrity | Complete |
