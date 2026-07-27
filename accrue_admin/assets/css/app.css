@@ -7223,6 +7223,23 @@ button.ax-launcher {
   white-space: normal;
 }
 
+/* In dark / system@dark the higher-specificity primary-button override
+   (`html[data-theme="dark"] .ax-button-primary`) re-tints the fill to cobalt,
+   which strips this button's amber warning intent and leaves dark on-solid text
+   on cobalt (fails WCAG AA at 2.76:1). Re-assert the amber warning pair with
+   matching specificity so the dunning action stays legible in every theme. */
+html.accrue-admin[data-theme="dark"] .ax-detail-dunning-action {
+  background: var(--ax-status-warning-solid);
+  color: var(--ax-status-warning-on-solid);
+}
+
+@media (prefers-color-scheme: dark) {
+  html.accrue-admin[data-theme="system"] .ax-detail-dunning-action {
+    background: var(--ax-status-warning-solid);
+    color: var(--ax-status-warning-on-solid);
+  }
+}
+
 .ax-detail-open-invoice-queue {
   width: min(100%, 62rem);
   box-sizing: border-box;
@@ -7291,7 +7308,10 @@ button.ax-launcher {
   padding: 0 0.3125rem;
   border: 1px solid var(--ax-accent-border);
   border-radius: var(--ax-radius-sm);
-  background: var(--ax-accent-readable);
+  /* accent-strong (not -readable) is the solid-accent background pair for white
+     text — matches .ax-button-primary and keeps AA contrast in dark, where
+     -readable flips to a light tint (#94a6f8) and fails white-on-light. */
+  background: var(--ax-accent-strong);
   color: var(--ax-accent-contrast) !important;
   /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
   font-weight: 950 !important;
