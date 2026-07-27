@@ -1,7 +1,7 @@
 const { test, expect } = require("@playwright/test");
 const {
   DASHBOARD_BREADCRUMB_HOME,
-  DASHBOARD_DISPLAY_HEADLINE,
+  HOME_ATTENTION_PRIORITY_HEADING,
   DASHBOARD_KPI_OPEN_INVOICE_BALANCE_LABEL,
   DASHBOARD_KPI_WEBHOOK_BACKLOG_LABEL
 } = require("../../examples/accrue_host/e2e/support/copy_dashboard.js");
@@ -38,11 +38,16 @@ test.describe("Phase 7 browser UAT", () => {
     // is now only a breadcrumb crumb, not a heading (redesign IA).
     await expect(page.getByRole("heading", { name: "Billing operations" })).toBeVisible();
     await expect(page.getByText(DASHBOARD_BREADCRUMB_HOME).first()).toBeVisible();
-    await expect(page.getByText(DASHBOARD_DISPLAY_HEADLINE)).toBeVisible();
-    await expect(page.getByText(DASHBOARD_KPI_OPEN_INVOICE_BALANCE_LABEL)).toBeVisible();
-    await expect(page.getByText("$42.50")).toBeVisible();
-    await expect(page.getByText(DASHBOARD_KPI_WEBHOOK_BACKLOG_LABEL)).toBeVisible();
-    await expect(page.getByText("invoice.payment_failed")).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: HOME_ATTENTION_PRIORITY_HEADING })
+    ).toBeVisible();
+    // The reigned Home surfaces these values in more than one place (StatStrip
+    // value + KpiCard + aria-labels + activity timeline), so scope to the first
+    // match — same pattern the breadcrumb assertion above already uses.
+    await expect(page.getByText(DASHBOARD_KPI_OPEN_INVOICE_BALANCE_LABEL).first()).toBeVisible();
+    await expect(page.getByText("$42.50").first()).toBeVisible();
+    await expect(page.getByText(DASHBOARD_KPI_WEBHOOK_BACKLOG_LABEL).first()).toBeVisible();
+    await expect(page.getByText("invoice.payment_failed").first()).toBeVisible();
 
     if (isMobile) {
       await page.evaluate(() => {
