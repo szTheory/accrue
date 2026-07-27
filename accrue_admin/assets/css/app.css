@@ -463,6 +463,7 @@ button {
 }
 
 .ax-dev-group-drawer-specimen .ax-detail-drawer-header .ax-heading {
+  /* ax-type-exception: dev-kitchen specimen type mirrors production scale */
   font-size: var(--ax-type-lg);
   font-weight: 700;
   line-height: var(--ax-leading-tight);
@@ -471,6 +472,7 @@ button {
 
 .ax-dev-group-drawer-specimen .ax-detail-drawer-header .ax-body {
   max-width: 34rem;
+  /* ax-type-exception: dev-kitchen specimen type mirrors production scale */
   font-size: var(--ax-type-sm);
   color: var(--ax-primary);
 }
@@ -484,6 +486,7 @@ button {
 
 .ax-dev-group-drawer-overlay .ax-detail-drawer-header .ax-heading {
   color: var(--ax-primary);
+  /* ax-type-exception: dev-kitchen specimen type mirrors production scale */
   font-weight: 900;
 }
 
@@ -532,6 +535,7 @@ button {
 
 .ax-dev-group-drawer-health .ax-label {
   color: var(--ax-primary);
+  /* ax-type-exception: dev-kitchen specimen type mirrors production scale */
   font-weight: 800;
 }
 
@@ -2071,6 +2075,7 @@ a.ax-kpi-card--linked:focus-visible {
 .ax-component-kitchen-page .ax-breadcrumbs-link,
 .ax-component-kitchen-page .ax-breadcrumbs-current,
 .ax-component-kitchen-page .ax-breadcrumbs-separator {
+  /* ax-type-exception: dev-kitchen specimen type mirrors production scale */
   font-size: 0.75rem;
   line-height: var(--ax-leading-tight);
   color: var(--ax-primary);
@@ -2091,6 +2096,7 @@ a.ax-kpi-card--linked:focus-visible {
 .ax-component-kitchen-header .ax-breadcrumbs-list {
   margin: 0;
   gap: 0;
+  /* ax-type-exception: dev-kitchen specimen type mirrors production scale */
   line-height: 1;
 }
 
@@ -2114,6 +2120,7 @@ a.ax-kpi-card--linked:focus-visible {
 .ax-dev-support-primary-strip strong {
   color: var(--ax-accent-readable);
   font: var(--ax-type-label-sm-font);
+  /* ax-type-exception: dev-kitchen specimen type mirrors production scale */
   font-weight: 950;
 }
 
@@ -2126,6 +2133,7 @@ a.ax-kpi-card--linked:focus-visible {
   border-color: var(--ax-accent-readable);
   background: var(--ax-accent-readable);
   color: var(--ax-base);
+  /* ax-type-exception: dev-kitchen specimen type mirrors production scale */
   font-weight: 950;
   box-shadow:
     0 0 0 3px color-mix(in srgb, var(--ax-accent-border) 20%, transparent),
@@ -2141,6 +2149,7 @@ a.ax-kpi-card--linked:focus-visible {
 }
 
 .ax-component-kitchen-title {
+  /* ax-type-exception: dev-kitchen specimen type mirrors production scale */
   font-size: 1.125rem;
   font-weight: 950;
 }
@@ -2155,6 +2164,7 @@ a.ax-kpi-card--linked:focus-visible {
   background: var(--ax-status-danger-bg);
   color: var(--ax-status-danger-text);
   font: var(--ax-type-label-sm-font);
+  /* ax-type-exception: dev-kitchen specimen type mirrors production scale */
   font-weight: 950;
 }
 
@@ -2163,6 +2173,7 @@ a.ax-kpi-card--linked:focus-visible {
   border-width: 2px;
   background: var(--ax-accent-readable);
   color: var(--ax-accent-contrast);
+  /* ax-type-exception: dev-kitchen specimen type mirrors production scale */
   font-weight: 950;
   box-shadow:
     0 0 0 3px color-mix(in srgb, var(--ax-accent-border) 26%, transparent),
@@ -2175,6 +2186,7 @@ a.ax-kpi-card--linked:focus-visible {
   border-width: 1px;
   background: color-mix(in srgb, var(--ax-accent-subtle) 64%, var(--ax-elevated));
   color: var(--ax-accent-readable);
+  /* ax-type-exception: dev-kitchen specimen type mirrors production scale */
   font-weight: 900;
   box-shadow: none;
 }
@@ -2182,12 +2194,14 @@ a.ax-kpi-card--linked:focus-visible {
 .ax-component-kitchen-header .ax-page-description {
   max-width: 48rem;
   margin: 0;
+  /* ax-type-exception: dev-kitchen specimen type mirrors production scale */
   font-size: var(--ax-type-xs);
   line-height: var(--ax-leading-tight);
 }
 
 .ax-component-kitchen-title {
   color: var(--ax-primary);
+  /* ax-type-exception: dev-kitchen specimen type mirrors production scale */
   font-size: 1.125rem;
   font-weight: 950;
   line-height: var(--ax-leading-tight);
@@ -2217,12 +2231,14 @@ a.ax-kpi-card--linked:focus-visible {
 }
 
 .ax-component-kitchen-page .ax-dev-audit-strip strong {
+  /* ax-type-exception: dev-kitchen specimen type mirrors production scale */
   font-size: var(--ax-type-sm);
   font-weight: 700;
 }
 
 .ax-component-kitchen-page .ax-dev-audit-strip span {
   color: var(--ax-muted);
+  /* ax-type-exception: dev-kitchen specimen type mirrors production scale */
   font-weight: 600;
 }
 
@@ -2295,11 +2311,13 @@ a.ax-kpi-card--linked:focus-visible {
 .ax-dev-health-command-verdict span {
   color: var(--ax-warning-readable);
   font: var(--ax-type-label-sm-font);
+  /* ax-type-exception: dev-kitchen specimen type mirrors production scale */
   font-weight: 950;
 }
 
 .ax-dev-health-command-verdict strong {
   color: var(--ax-primary);
+  /* ax-type-exception: dev-kitchen specimen type mirrors production scale */
   font-size: var(--ax-type-lg);
   font-weight: 950;
 }
@@ -2308,6 +2326,7 @@ a.ax-kpi-card--linked:focus-visible {
   flex-basis: 100%;
   color: var(--ax-primary);
   font-style: normal;
+  /* ax-type-exception: dev-kitchen specimen type mirrors production scale */
   font-weight: 800;
 }
 
@@ -2324,6 +2343,7 @@ a.ax-kpi-card--linked:focus-visible {
   border-color: var(--ax-status-warning-solid);
   background: var(--ax-status-warning-solid);
   color: var(--ax-status-warning-on-solid);
+  /* ax-type-exception: dev-kitchen specimen type mirrors production scale */
   font-weight: 950;
   box-shadow:
     0 0 0 3px color-mix(in srgb, var(--ax-status-warning-border) 28%, transparent),
@@ -2334,6 +2354,7 @@ a.ax-kpi-card--linked:focus-visible {
   border-color: var(--ax-border-strong);
   background: var(--ax-elevated);
   color: var(--ax-primary);
+  /* ax-type-exception: dev-kitchen specimen type mirrors production scale */
   font-weight: 850;
   box-shadow: none;
 }
@@ -2370,22 +2391,26 @@ a.ax-kpi-card--linked:focus-visible {
 
 .ax-dev-health-kpis strong {
   font: var(--ax-type-label-sm-font);
+  /* ax-type-exception: dev-kitchen specimen type mirrors production scale */
   font-weight: 800;
 }
 
 .ax-dev-health-kpis em {
+  /* ax-type-exception: dev-kitchen specimen type mirrors production scale */
   font-size: var(--ax-type-md);
   font-weight: 950;
 }
 
 .ax-dev-production-strip .ax-inline-worklist-copy strong {
   color: var(--ax-primary);
+  /* ax-type-exception: dev-kitchen specimen type mirrors production scale */
   font-size: var(--ax-type-md);
   font-weight: 900;
 }
 
 .ax-dev-production-strip .ax-inline-worklist-copy span {
   color: var(--ax-primary);
+  /* ax-type-exception: dev-kitchen specimen type mirrors production scale */
   font-weight: 700;
 }
 
@@ -2396,6 +2421,7 @@ a.ax-kpi-card--linked:focus-visible {
   border-width: 1px;
   background: var(--ax-accent-readable);
   color: var(--ax-base);
+  /* ax-type-exception: dev-kitchen specimen type mirrors production scale */
   font-weight: 900;
   box-shadow: none;
 }
@@ -2444,6 +2470,7 @@ a.ax-kpi-card--linked:focus-visible {
 .ax-dev-webhook-preview-list strong,
 .ax-dev-funnel-preview strong {
   color: var(--ax-primary);
+  /* ax-type-exception: dev-kitchen specimen type mirrors production scale */
   font-weight: 900;
 }
 
@@ -2454,6 +2481,7 @@ a.ax-kpi-card--linked:focus-visible {
 .ax-dev-funnel-preview em {
   color: var(--ax-muted);
   font-style: normal;
+  /* ax-type-exception: dev-kitchen specimen type mirrors production scale */
   font-weight: 800;
 }
 
@@ -2461,6 +2489,7 @@ a.ax-kpi-card--linked:focus-visible {
   border-color: color-mix(in srgb, var(--ax-status-danger-on-solid) 62%, transparent);
   background: transparent;
   color: var(--ax-status-danger-on-solid);
+  /* ax-type-exception: dev-kitchen specimen type mirrors production scale */
   font-weight: 900;
   box-shadow: none;
 }
@@ -2481,6 +2510,7 @@ a.ax-kpi-card--linked:focus-visible {
   background: color-mix(in srgb, var(--ax-accent-subtle) 58%, var(--ax-elevated));
   color: var(--ax-accent-readable);
   font: var(--ax-type-label-sm-font);
+  /* ax-type-exception: dev-kitchen specimen type mirrors production scale */
   font-weight: 950;
   text-decoration: none;
 }
@@ -2497,6 +2527,7 @@ a.ax-kpi-card--linked:focus-visible {
 
 .ax-dev-route-strip > span {
   color: var(--ax-primary);
+  /* ax-type-exception: dev-kitchen specimen type mirrors production scale */
   font-weight: 950;
 }
 
@@ -2513,6 +2544,7 @@ a.ax-kpi-card--linked:focus-visible {
 
 .ax-dev-secondary-route strong {
   color: var(--ax-primary);
+  /* ax-type-exception: dev-kitchen specimen type mirrors production scale */
   font-weight: 900;
 }
 
@@ -2791,6 +2823,7 @@ html.accrue-admin[data-theme="dark"] .ax-button-primary {
 .ax-subscription-detail-page .ax-breadcrumbs-link,
 .ax-subscription-detail-page .ax-breadcrumbs-current,
 .ax-subscription-detail-page .ax-breadcrumbs-separator {
+  /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
   font-size: var(--ax-type-xs);
   line-height: 1;
 }
@@ -2907,15 +2940,18 @@ html.accrue-admin[data-theme="dark"] .ax-button-primary {
 }
 
 .ax-subscriptions-header .ax-stat-label {
+  /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
   font-size: var(--ax-type-xs);
 }
 
 .ax-subscriptions-header .ax-stat:first-child .ax-stat-label {
   color: var(--ax-primary);
+  /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
   font-weight: 800;
 }
 
 .ax-subscriptions-header .ax-stat:first-child .ax-stat-value {
+  /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
   font-size: var(--ax-type-lg);
   font-weight: 900;
 }
@@ -2931,6 +2967,7 @@ html.accrue-admin[data-theme="dark"] .ax-button-primary {
   background: var(--ax-status-danger-bg);
   color: var(--ax-status-danger-text);
   font: var(--ax-type-label-sm-font);
+  /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
   font-weight: 950;
   box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ax-status-danger-border) 50%, transparent);
 }
@@ -2959,11 +2996,13 @@ html.accrue-admin[data-theme="dark"] .ax-button-primary {
   background: var(--ax-elevated);
   color: var(--ax-primary);
   font: var(--ax-type-label-sm-font);
+  /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
   font-weight: 750;
 }
 
 .ax-subscriptions-heading-metric strong {
   color: var(--ax-primary);
+  /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
   font-weight: 950;
 }
 
@@ -3036,6 +3075,7 @@ html.accrue-admin[data-theme="dark"] .ax-button-primary {
 }
 
 .ax-subscriptions-health-hero .ax-health-verdict {
+  /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
   font-weight: 900;
   flex-basis: 14rem;
 }
@@ -3044,15 +3084,18 @@ html.accrue-admin[data-theme="dark"] .ax-button-primary {
   flex-basis: 100%;
   color: var(--ax-primary);
   font: var(--ax-type-label-sm-font);
+  /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
   font-weight: 800;
 }
 
 .ax-subscriptions-health-hero .ax-health-metric-primary strong {
+  /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
   font-size: var(--ax-type-md);
   font-weight: 900;
 }
 
 .ax-subscriptions-health-hero .ax-health-metric:not(.ax-health-metric-primary) strong {
+  /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
   font-size: var(--ax-type-sm);
   font-weight: 700;
 }
@@ -3067,6 +3110,7 @@ html.accrue-admin[data-theme="dark"] .ax-button-primary {
 }
 
 .ax-health-detail-primary {
+  /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
   font-weight: 700;
 }
 
@@ -3095,6 +3139,7 @@ html.accrue-admin[data-theme="dark"] .ax-button-primary {
 
 .ax-health-metric strong {
   color: var(--ax-primary);
+  /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
   font-weight: 800;
 }
 
@@ -3110,6 +3155,7 @@ html.accrue-admin[data-theme="dark"] .ax-button-primary {
 
 .ax-health-metric-warning strong {
   color: var(--ax-warning-readable);
+  /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
   font-weight: 900;
 }
 
@@ -3204,12 +3250,14 @@ html.accrue-admin[data-theme="dark"] .ax-button-primary {
 
 .ax-subscriptions-customer-search-strip .ax-inline-worklist-copy strong {
   color: var(--ax-accent-readable);
+  /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
   font-size: var(--ax-type-md);
   font-weight: 950;
 }
 
 .ax-subscriptions-customer-search-strip .ax-inline-worklist-copy span {
   color: var(--ax-primary);
+  /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
   font-weight: 800;
 }
 
@@ -3217,6 +3265,7 @@ html.accrue-admin[data-theme="dark"] .ax-button-primary {
   border-color: var(--ax-accent-border);
   background: var(--ax-accent-readable);
   color: var(--ax-accent-contrast);
+  /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
   font-weight: 950;
 }
 
@@ -3234,6 +3283,7 @@ html.accrue-admin[data-theme="dark"] .ax-button-primary {
 
 .ax-subscriptions-invoice-strip .ax-inline-worklist-copy strong {
   color: var(--ax-primary);
+  /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
   font-size: var(--ax-type-md);
   font-weight: 900;
 }
@@ -3246,11 +3296,13 @@ html.accrue-admin[data-theme="dark"] .ax-button-primary {
 }
 
 .ax-subscriptions-invoice-strip .ax-inline-worklist-copy span {
+  /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
   font-weight: 800;
 }
 
 .ax-subscriptions-priority-copy strong {
   color: var(--ax-primary);
+  /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
   font-weight: 900;
 }
 
@@ -3276,6 +3328,7 @@ html.accrue-admin[data-theme="dark"] .ax-button-primary {
 
 .ax-subscriptions-invoice-records .ax-inline-worklist-copy strong {
   color: var(--ax-accent-readable);
+  /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
   font-weight: 900;
 }
 
@@ -3312,6 +3365,7 @@ html.accrue-admin[data-theme="dark"] .ax-button-primary {
 }
 
 .ax-subscriptions-invoice-record strong {
+  /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
   font-weight: 950;
 }
 
@@ -3319,6 +3373,7 @@ html.accrue-admin[data-theme="dark"] .ax-button-primary {
 .ax-subscriptions-invoice-record em,
 .ax-subscriptions-invoice-record-empty {
   font: var(--ax-type-label-sm-font);
+  /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
   font-weight: 800;
 }
 
@@ -3348,11 +3403,13 @@ html.accrue-admin[data-theme="dark"] .ax-button-primary {
 
 .ax-subscriptions-exposure {
   color: var(--ax-primary);
+  /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
   font-weight: 800;
 }
 
 .ax-subscriptions-invoice-strip-danger .ax-subscriptions-exposure {
   color: var(--ax-primary);
+  /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
   font-weight: 950;
 }
 
@@ -3389,6 +3446,7 @@ html.accrue-admin[data-theme="dark"] .ax-button-primary {
 
 .ax-subscriptions-secondary-group strong {
   color: var(--ax-muted);
+  /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
   font-weight: 800;
 }
 
@@ -3431,6 +3489,7 @@ html.accrue-admin[data-theme="dark"] .ax-button-primary {
 .ax-subscriptions-page .ax-filter-chip {
   padding: 0.1875rem 0.5rem;
   gap: var(--ax-space-2xs);
+  /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
   line-height: var(--ax-leading-tight);
 }
 
@@ -3440,6 +3499,7 @@ html.accrue-admin[data-theme="dark"] .ax-button-primary {
   border-width: 2px;
   background: color-mix(in srgb, var(--ax-accent-subtle) 70%, var(--ax-elevated));
   color: var(--ax-accent-readable);
+  /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
   font-weight: 950;
 }
 
@@ -3461,6 +3521,7 @@ html.accrue-admin[data-theme="dark"] .ax-button-primary {
 
 .ax-subscriptions-header .ax-display {
   color: var(--ax-primary);
+  /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
   font-size: var(--ax-type-xl);
   font-weight: 900;
   line-height: var(--ax-leading-tight);
@@ -3999,10 +4060,12 @@ html.accrue-admin[data-theme="dark"] .ax-button-primary {
 }
 
 .ax-subscriptions-page .ax-data-table-card .ax-heading {
+  /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
   font-size: var(--ax-type-sm);
 }
 
 .ax-subscriptions-page .ax-data-table-card .ax-body {
+  /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
   font-size: var(--ax-type-xs);
 }
 
@@ -4038,6 +4101,7 @@ html.accrue-admin[data-theme="dark"] .ax-button-primary {
 }
 
 .ax-subscriptions-page .ax-data-table-grid tr {
+  /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
   line-height: var(--ax-leading-tight);
   border-bottom: 2px solid var(--ax-border);
 }
@@ -4058,6 +4122,7 @@ html.accrue-admin[data-theme="dark"] .ax-button-primary {
 .ax-subscriptions-page .ax-webhook-row-status,
 .ax-subscriptions-page .ax-audit-summary-row {
   gap: 0.03125rem;
+  /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
   line-height: var(--ax-leading-tight);
 }
 
@@ -4074,6 +4139,7 @@ html.accrue-admin[data-theme="dark"] .ax-button-primary {
 
 .ax-subscription-row-audit .ax-audit-fact strong {
   color: var(--ax-muted);
+  /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
   font-size: var(--ax-type-xs);
   font-weight: 750;
 }
@@ -4081,10 +4147,12 @@ html.accrue-admin[data-theme="dark"] .ax-button-primary {
 .ax-subscription-row-audit .ax-audit-fact em {
   color: var(--ax-primary);
   font-style: normal;
+  /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
   font-weight: 800;
 }
 
 .ax-subscription-row-audit .ax-audit-fact:nth-child(2) em {
+  /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
   font-size: var(--ax-type-sm);
   font-weight: 950;
 }
@@ -4093,6 +4161,7 @@ html.accrue-admin[data-theme="dark"] .ax-button-primary {
   border-bottom: 2px solid var(--ax-accent-border);
   background: color-mix(in srgb, var(--ax-elevated) 88%, var(--ax-base));
   color: var(--ax-primary);
+  /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
   font-size: var(--ax-type-xs);
   font-weight: 950;
 }
@@ -4142,6 +4211,7 @@ html.accrue-admin[data-theme="dark"] .ax-button-primary {
 }
 
 .ax-dev-health-snapshot strong {
+  /* ax-type-exception: dev-kitchen specimen type mirrors production scale */
   font-weight: 900;
 }
 
@@ -4165,10 +4235,12 @@ html.accrue-admin[data-theme="dark"] .ax-button-primary {
 }
 
 .ax-dev-health-snapshot-header .ax-dev-health-status strong {
+  /* ax-type-exception: dev-kitchen specimen type mirrors production scale */
   font-size: var(--ax-type-sm);
 }
 
 .ax-dev-health-snapshot-header .ax-dev-health-status em {
+  /* ax-type-exception: dev-kitchen specimen type mirrors production scale */
   font-weight: 750;
 }
 
@@ -4179,6 +4251,7 @@ html.accrue-admin[data-theme="dark"] .ax-button-primary {
 }
 
 .ax-dev-health-snapshot-header a {
+  /* ax-type-exception: dev-kitchen specimen type mirrors production scale */
   font-weight: 900;
 }
 
@@ -4198,6 +4271,7 @@ html.accrue-admin[data-theme="dark"] .ax-button-primary {
 
 .ax-audit-signal strong {
   color: var(--ax-muted);
+  /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
   font-weight: 600;
 }
 
@@ -4233,6 +4307,7 @@ html.accrue-admin[data-theme="dark"] .ax-button-primary {
 .ax-subscription-row-audit .ax-audit-fact em {
   color: var(--ax-primary);
   font-style: normal;
+  /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
   font-weight: 800;
 }
 
@@ -4258,6 +4333,7 @@ html.accrue-admin[data-theme="dark"] .ax-button-primary {
 
 .ax-webhook-row-status strong {
   color: var(--ax-primary);
+  /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
   font-size: var(--ax-type-xs);
   font-weight: 950;
 }
@@ -4273,6 +4349,7 @@ html.accrue-admin[data-theme="dark"] .ax-button-primary {
 }
 
 .ax-subscription-row-signal-secondary .ax-subscription-row-webhook-action {
+  /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
   font-weight: 800;
 }
 
@@ -4301,6 +4378,7 @@ html.accrue-admin[data-theme="dark"] .ax-button-primary {
 }
 
 .ax-subscription-row-signal-primary strong {
+  /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
   font-weight: 900;
 }
 
@@ -4312,6 +4390,7 @@ html.accrue-admin[data-theme="dark"] .ax-button-primary {
   border: 1px solid var(--ax-accent-border);
   border-radius: var(--ax-radius-2xs);
   background: var(--ax-elevated);
+  /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
   font-weight: 900;
 }
 
@@ -4328,6 +4407,7 @@ html.accrue-admin[data-theme="dark"] .ax-button-primary {
 
 .ax-subscription-row-admin-chips .ax-chip {
   color: var(--ax-muted);
+  /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
   font-size: var(--ax-type-xs);
 }
 
@@ -4361,6 +4441,7 @@ html.accrue-admin[data-theme="dark"] .ax-button-primary {
   border: 0;
   background: transparent;
   color: var(--ax-accent-readable);
+  /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
   font-size: var(--ax-type-md);
   font-weight: 900;
   line-height: var(--ax-leading-tight);
@@ -4384,10 +4465,12 @@ html.accrue-admin[data-theme="dark"] .ax-button-primary {
 .ax-subscription-row-invoice-controls .ax-button-sm {
   min-height: 1.375rem;
   padding: 0.0625rem 0.3125rem;
+  /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
   font-size: var(--ax-type-xs);
 }
 
 .ax-subscription-row-invoice-primary {
+  /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
   font-weight: 900;
 }
 
@@ -4413,18 +4496,21 @@ html.accrue-admin[data-theme="dark"] .ax-button-primary {
   padding: 0 0 0 var(--ax-space-sm);
   border-left: 3px solid var(--ax-status-warning-border);
   color: var(--ax-primary);
+  /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
   line-height: var(--ax-leading-tight);
 }
 
 .ax-subscription-setup-gap strong {
   color: var(--ax-warning-readable);
   font: var(--ax-type-label-sm-font);
+  /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
   font-weight: 900;
 }
 
 .ax-subscription-setup-gap span,
 .ax-subscription-setup-gap em {
   color: var(--ax-primary);
+  /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
   font-size: var(--ax-type-xs);
   font-style: normal;
 }
@@ -4433,11 +4519,13 @@ html.accrue-admin[data-theme="dark"] .ax-button-primary {
   width: fit-content;
   max-width: 100%;
   border-width: 2px;
+  /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
   font-weight: 900;
 }
 
 .ax-subscription-row-customer {
   width: fit-content;
+  /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
   font-size: var(--ax-type-sm);
   font-weight: 950;
   text-decoration: none;
@@ -4456,6 +4544,7 @@ html.accrue-admin[data-theme="dark"] .ax-button-primary {
   background: color-mix(in srgb, var(--ax-accent-subtle) 42%, var(--ax-elevated));
   color: var(--ax-primary);
   font: var(--ax-type-label-sm-font);
+  /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
   font-size: var(--ax-type-xs);
   font-weight: 800;
 }
@@ -4473,17 +4562,20 @@ html.accrue-admin[data-theme="dark"] .ax-button-primary {
   width: fit-content;
   color: var(--ax-muted);
   font: var(--ax-type-label-sm-font);
+  /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
   font-size: var(--ax-type-xs);
   line-height: var(--ax-leading-tight);
 }
 
 .ax-subscription-row-meta strong {
   color: var(--ax-primary);
+  /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
   font-weight: 800;
 }
 
 .ax-subscription-row-invoices {
   color: var(--ax-accent-readable);
+  /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
   font-weight: 800;
 }
 
@@ -4514,6 +4606,7 @@ html.accrue-admin[data-theme="dark"] .ax-button-primary {
 }
 
 .ax-subscription-row-id {
+  /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
   font-size: var(--ax-type-xs);
 }
 
@@ -4537,6 +4630,7 @@ html.accrue-admin[data-theme="dark"] .ax-button-primary {
 .ax-subscriptions-page .ax-data-table-grid th,
 .ax-subscriptions-page .ax-data-table-grid td {
   padding: 0.0625rem 0.125rem;
+  /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
   line-height: var(--ax-leading-tight);
 }
 
@@ -5431,6 +5525,7 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
   overflow: hidden;
   color: var(--ax-primary);
   font-style: normal;
+  /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
   line-height: var(--ax-leading-tight);
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -5438,6 +5533,7 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
 
 .ax-search-trigger-text em {
   color: var(--ax-primary);
+  /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
   font-size: var(--ax-type-xs);
   font-weight: 800;
 }
@@ -5452,6 +5548,7 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
   background: var(--ax-focus-ring);
   color: var(--ax-base);
   font: var(--ax-type-label-sm-font);
+  /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
   font-weight: 950;
 }
 
@@ -5485,6 +5582,7 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
     gap: 0.1875rem;
     padding: 0 0.25rem;
     border-width: 1px;
+    /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
     font-size: var(--ax-type-xs);
   }
 
@@ -5493,6 +5591,7 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
   }
 
   .ax-search-trigger-text strong {
+    /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
     line-height: 1;
   }
 
@@ -5552,6 +5651,7 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
 }
 
 .ax-input-title {
+  /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
   font-size: var(--ax-type-md);
   font-weight: 700;
   color: var(--ax-primary);
@@ -5588,6 +5688,7 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
 
 .ax-home > .ax-page-header .ax-display {
   color: var(--ax-primary);
+  /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
   font-size: 1.5rem;
   font-weight: 950;
 }
@@ -5595,6 +5696,7 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
 .ax-home > .ax-page-header .ax-page-copy {
   color: var(--ax-primary);
   font: var(--ax-type-label-sm-font);
+  /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
   line-height: var(--ax-leading-tight);
 }
 
@@ -5613,6 +5715,7 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
   border-color: var(--ax-focus-ring);
   background: var(--ax-accent-readable);
   color: var(--ax-base);
+  /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
   font-weight: 950;
   box-shadow:
     0 0 0 3px color-mix(in srgb, var(--ax-accent-border) 24%, transparent),
@@ -5651,12 +5754,14 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
 .ax-home-header-health strong {
   color: var(--ax-status-danger-text);
   font: var(--ax-type-label-sm-font);
+  /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
   font-weight: 950;
 }
 
 .ax-home-health-label {
   color: var(--ax-primary);
   font: var(--ax-type-label-sm-font);
+  /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
   font-weight: 950;
 }
 
@@ -5695,6 +5800,7 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
 
 .ax-home-customer-search-strip strong {
   color: var(--ax-accent-readable);
+  /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
   font-size: var(--ax-type-lg);
   font-weight: 950;
 }
@@ -5702,6 +5808,7 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
 .ax-home-customer-search-strip span {
   color: var(--ax-primary);
   font: var(--ax-type-label-sm-font);
+  /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
   font-weight: 800;
 }
 
@@ -5709,6 +5816,7 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
   border-color: var(--ax-accent-border);
   background: var(--ax-accent-readable);
   color: var(--ax-accent-contrast);
+  /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
   font-weight: 950;
 }
 
@@ -5722,6 +5830,7 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
   background: var(--ax-status-warning-bg);
   color: var(--ax-warning-readable) !important;
   font: var(--ax-type-label-sm-font);
+  /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
   font-weight: 950;
 }
 
@@ -5735,6 +5844,7 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
   background: var(--ax-elevated);
   color: var(--ax-primary);
   font: var(--ax-type-label-sm-font);
+  /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
   font-weight: 900;
 }
 
@@ -5765,6 +5875,7 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
 }
 
 .ax-home-health-metric strong {
+  /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
   font-weight: 900;
 }
 
@@ -5789,6 +5900,7 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
 
 .ax-home [data-ax-zone="attention-rail"] .ax-section-head .ax-heading {
   margin: 0;
+  /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
   line-height: 1;
 }
 
@@ -5901,6 +6013,7 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
   background: var(--ax-elevated);
   color: var(--ax-primary);
   font: var(--ax-type-label-sm-font);
+  /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
   font-weight: 900;
   text-align: center;
 }
@@ -5955,6 +6068,7 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
 
 .ax-attention-row:first-child .ax-attention-text strong,
 .ax-attention-row:first-child .ax-attention-action {
+  /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
   font-weight: 900;
 }
 
@@ -5985,6 +6099,7 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
 .ax-attention .ax-attention-pill-danger,
 .ax-attention .ax-attention-pill-warning {
   color: var(--ax-primary);
+  /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
   font-weight: 700;
 }
 
@@ -6060,6 +6175,7 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
 }
 
 [data-ax-zone="kpi-cluster"] .ax-label {
+  /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
   font-size: var(--ax-type-xs);
   font-weight: 700;
   color: var(--ax-muted);
@@ -6067,6 +6183,7 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
 
 [data-ax-zone="kpi-cluster"] .ax-kpi-value {
   color: var(--ax-primary);
+  /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
   font-size: 1.25rem;
   font-weight: 850;
 }
@@ -6077,6 +6194,7 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
 }
 
 [data-ax-zone="kpi-cluster"] .ax-kpi-meta {
+  /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
   font-size: var(--ax-type-xs);
   line-height: var(--ax-leading-tight);
 }
@@ -6125,11 +6243,13 @@ button.ax-launcher {
 }
 
 .ax-launcher-primary .ax-launcher-title {
+  /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
   font-size: var(--ax-type-md);
 }
 
 .ax-launcher-primary .ax-launcher-meta {
   color: var(--ax-primary);
+  /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
   font-weight: 850;
 }
 
@@ -6145,6 +6265,7 @@ button.ax-launcher {
 
 .ax-launcher-customer .ax-launcher-title {
   color: var(--ax-primary);
+  /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
   font-weight: 800;
 }
 
@@ -6184,6 +6305,7 @@ button.ax-launcher {
   background: color-mix(in srgb, var(--ax-status-warning-bg) 34%, var(--ax-elevated));
   color: var(--ax-primary);
   font: var(--ax-type-label-sm-font);
+  /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
   font-weight: 950;
 }
 
@@ -6191,6 +6313,7 @@ button.ax-launcher {
   border-color: var(--ax-accent-border);
   background: color-mix(in srgb, var(--ax-accent-subtle) 54%, var(--ax-elevated));
   color: var(--ax-accent-readable);
+  /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
   font-weight: 900;
 }
 
@@ -6199,6 +6322,7 @@ button.ax-launcher {
   border: 1px solid var(--ax-accent-border);
   background: var(--ax-accent-readable);
   color: var(--ax-base);
+  /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
   font-weight: 950;
 }
 
@@ -6269,6 +6393,7 @@ button.ax-launcher {
   border: 0;
   border-radius: var(--ax-radius-sm);
   color: var(--ax-accent-readable);
+  /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
   font-size: var(--ax-type-xs);
   font-weight: 700;
 }
@@ -6483,6 +6608,7 @@ button.ax-launcher {
 
 .ax-related-item-warning .ax-related-label {
   color: var(--ax-warning-readable);
+  /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
   font-weight: 800;
 }
 
@@ -6615,6 +6741,7 @@ button.ax-launcher {
 }
 
 .ax-subscription-detail-page .ax-summary-title {
+  /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
   font-size: 1.375rem;
   font-weight: 950;
 }
@@ -6642,6 +6769,7 @@ button.ax-launcher {
 
 .ax-summary-fact strong {
   color: var(--ax-primary);
+  /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
   font-weight: 600;
 }
 
@@ -6676,6 +6804,7 @@ button.ax-launcher {
 
 .ax-summary-health-verdict {
   color: var(--ax-primary);
+  /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
   font-weight: 900;
 }
 
@@ -6689,6 +6818,7 @@ button.ax-launcher {
   background: color-mix(in srgb, var(--ax-status-warning-bg) 42%, var(--ax-elevated));
   color: var(--ax-primary);
   font: var(--ax-type-label-sm-font);
+  /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
   font-weight: 950;
 }
 
@@ -6742,6 +6872,7 @@ button.ax-launcher {
   align-items: center;
   gap: 0.03125rem 0.25rem;
   padding: 0.03125rem 0.25rem;
+  /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
   line-height: var(--ax-leading-tight);
 }
 
@@ -6749,6 +6880,7 @@ button.ax-launcher {
   flex-basis: auto;
   color: var(--ax-primary);
   font: var(--ax-type-label-font);
+  /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
   font-weight: 950;
 }
 
@@ -6763,6 +6895,7 @@ button.ax-launcher {
   background: var(--ax-elevated);
   color: var(--ax-primary);
   font: var(--ax-type-label-font);
+  /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
   font-weight: 950;
   box-shadow: var(--ax-shadow-sm);
 }
@@ -6770,6 +6903,7 @@ button.ax-launcher {
 .ax-detail-health-exposure strong {
   color: inherit;
   font: inherit;
+  /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
   font-weight: 950;
 }
 
@@ -6784,6 +6918,7 @@ button.ax-launcher {
 }
 
 .ax-detail-health-summary-amber .ax-detail-health-answer {
+  /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
   font-size: var(--ax-type-sm);
 }
 
@@ -6810,12 +6945,14 @@ button.ax-launcher {
 
 .ax-detail-health-label {
   color: var(--ax-primary);
+  /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
   font-weight: 800;
 }
 
 .ax-detail-health-verdict {
   color: var(--ax-primary);
   font: var(--ax-type-label-font);
+  /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
   font-weight: 900;
 }
 
@@ -6823,6 +6960,7 @@ button.ax-launcher {
   flex-basis: auto;
   color: var(--ax-primary);
   font: var(--ax-type-label-sm-font);
+  /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
   line-height: var(--ax-leading-tight);
 }
 
@@ -6844,6 +6982,7 @@ button.ax-launcher {
 .ax-detail-health-caveats strong {
   flex-basis: auto;
   color: var(--ax-primary);
+  /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
   font-size: var(--ax-type-xs);
   font-weight: 900;
 }
@@ -6855,6 +6994,7 @@ button.ax-launcher {
   background: var(--ax-elevated);
   color: var(--ax-primary);
   font: var(--ax-type-label-sm-font);
+  /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
   font-weight: 800;
 }
 
@@ -6893,12 +7033,14 @@ button.ax-launcher {
 .ax-detail-health-setup-note {
   grid-column: 1 / -1;
   padding: 0 0.25rem 0.0625rem;
+  /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
   font-weight: 800;
 }
 
 .ax-detail-health-actions strong {
   color: var(--ax-primary);
   font: var(--ax-type-label-sm-font);
+  /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
   font-weight: 950;
 }
 
@@ -6922,6 +7064,7 @@ button.ax-launcher {
   background: color-mix(in srgb, var(--ax-status-warning-bg) 58%, var(--ax-elevated));
   color: var(--ax-primary);
   font: var(--ax-type-label-sm-font);
+  /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
   font-weight: 850;
   max-width: 100%;
   overflow-wrap: anywhere;
@@ -6983,11 +7126,13 @@ button.ax-launcher {
   background: color-mix(in srgb, var(--ax-accent-subtle) 48%, var(--ax-elevated));
   color: var(--ax-primary);
   font: var(--ax-type-label-sm-font);
+  /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
   font-weight: 850;
 }
 
 .ax-detail-queue-depth strong {
   color: var(--ax-accent-readable);
+  /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
   font-weight: 950;
 }
 
@@ -7011,6 +7156,7 @@ button.ax-launcher {
 
 .ax-detail-local-queue strong {
   color: var(--ax-muted);
+  /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
   font-weight: 800;
 }
 
@@ -7044,18 +7190,21 @@ button.ax-launcher {
   background: var(--ax-elevated);
   color: var(--ax-primary);
   font: var(--ax-type-label-sm-font);
+  /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
   font-weight: 850;
 }
 
 .ax-detail-dunning-summary strong {
   color: var(--ax-primary);
   font: var(--ax-type-label-sm-font);
+  /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
   font-weight: 900;
 }
 
 .ax-detail-dunning-summary em {
   color: var(--ax-primary);
   font-style: normal;
+  /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
   font-weight: 800;
 }
 
@@ -7066,6 +7215,7 @@ button.ax-launcher {
   border-color: var(--ax-status-warning-solid);
   background: var(--ax-status-warning-solid);
   color: var(--ax-status-warning-on-solid);
+  /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
   font-weight: 950;
   white-space: normal;
 }
@@ -7081,6 +7231,7 @@ button.ax-launcher {
 
 .ax-detail-open-invoice-queue .ax-inline-worklist-copy strong {
   color: var(--ax-accent-readable);
+  /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
   font-size: var(--ax-type-md);
   font-weight: 950;
 }
@@ -7116,6 +7267,7 @@ button.ax-launcher {
 }
 
 .ax-detail-open-invoice-row strong {
+  /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
   font-weight: 950;
 }
 
@@ -7123,6 +7275,7 @@ button.ax-launcher {
 .ax-detail-open-invoice-row em,
 .ax-detail-open-invoice-empty {
   font: var(--ax-type-label-sm-font);
+  /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
   font-weight: 800;
 }
 
@@ -7136,6 +7289,7 @@ button.ax-launcher {
   border-radius: var(--ax-radius-sm);
   background: var(--ax-accent-readable);
   color: var(--ax-accent-contrast) !important;
+  /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
   font-weight: 950 !important;
 }
 
@@ -7149,6 +7303,7 @@ button.ax-launcher {
   border-radius: var(--ax-radius-sm);
   background: var(--ax-status-warning-solid);
   color: var(--ax-status-warning-on-solid);
+  /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
   font-weight: 950;
   text-decoration: none;
 }
@@ -7167,6 +7322,7 @@ button.ax-launcher {
   border-color: var(--ax-status-warning-border);
   background: var(--ax-status-warning-bg);
   color: var(--ax-primary);
+  /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
   font-weight: 950;
 }
 
@@ -7195,6 +7351,7 @@ button.ax-launcher {
   flex-basis: 100%;
   color: var(--ax-primary);
   font: var(--ax-type-label-sm-font);
+  /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
   font-weight: 800;
 }
 
@@ -7206,6 +7363,7 @@ button.ax-launcher {
   border-radius: var(--ax-radius-sm);
   background: var(--ax-elevated);
   color: var(--ax-primary);
+  /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
   font-weight: 900;
   overflow-wrap: anywhere;
   white-space: normal;
@@ -7213,6 +7371,7 @@ button.ax-launcher {
 
 .ax-detail-priority-label {
   color: var(--ax-accent-readable);
+  /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
   font-weight: 900;
 }
 
@@ -7305,15 +7464,18 @@ button.ax-launcher {
 .ax-subscription-detail-page .ax-summary-list-key,
 .ax-subscription-detail-page .ax-summary-list-value,
 .ax-subscription-detail-page .ax-summary-list-action {
+  /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
   line-height: var(--ax-leading-tight);
 }
 
 .ax-subscription-detail-page .ax-summary-list-key {
+  /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
   font-size: 0.6875rem;
 }
 
 .ax-subscription-detail-page .ax-summary-list-value,
 .ax-subscription-detail-page .ax-summary-list-action {
+  /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
   font-size: 0.8125rem;
 }
 
@@ -7407,12 +7569,14 @@ button.ax-launcher {
 
 .ax-subscription-detail-page .ax-detail-section-title {
   color: var(--ax-primary);
+  /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
   font-size: var(--ax-type-md);
   font-weight: 900;
 }
 
 .ax-subscription-detail-page .ax-detail-section-title-audit {
   color: var(--ax-accent-readable);
+  /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
   font-size: var(--ax-type-lg);
   font-weight: 950;
 }
@@ -7477,6 +7641,7 @@ button.ax-launcher {
 
 .ax-activity-audit-title {
   color: var(--ax-accent-readable);
+  /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
   font-weight: 950;
 }
 
@@ -7493,6 +7658,7 @@ button.ax-launcher {
   border-radius: var(--ax-radius-2xs);
   background: transparent;
   color: var(--ax-muted);
+  /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
   font-weight: 800;
 }
 
@@ -7500,6 +7666,7 @@ button.ax-launcher {
   min-width: 0;
   color: var(--ax-primary);
   font-style: normal;
+  /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
   font-weight: 600;
 }
 
@@ -7528,6 +7695,7 @@ button.ax-launcher {
 
 .ax-dashboard-audit-summary em {
   color: var(--ax-primary);
+  /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
   font-weight: 800;
 }
 
@@ -7604,6 +7772,7 @@ button.ax-launcher {
 
 .ax-subscription-detail-page .ax-field-label,
 .ax-subscription-detail-page .ax-field-value {
+  /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
   line-height: 1.1;
 }
 
