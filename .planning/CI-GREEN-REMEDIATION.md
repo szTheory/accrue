@@ -51,10 +51,20 @@ until FND-01 is resolved.
   `toBeVisible` fails "across themes and breakpoints." **Possible real UI regression** from the
   reign work (or a stale spec). Needs reproduction against the running admin app.
 - **AccrueAdmin Browser UAT** workflow — red, not yet triaged.
-- **Unknown remainder** — the `accrue` suite's 25 failures were ALL verifier+brand (so it should go
-  green once FND-01 lands). But the **accrue_admin package test suite and full e2e were never
-  enumerated** — more failures may hide behind the FND-01 block. Run `cd accrue_admin && mix test`
-  and the e2e gates once FND-01 is resolved.
+- **accrue_admin package suite — ENUMERATED (was 7 failures, now 2).** Commit `cc0d0e35` fixed 5
+  stale tests (RelatedResources `ax-related-resources` class ×4 + `ax-related-item ` space;
+  auth_hook headline→`<title>Dashboard</title>`; theme_test dark-selector regex). **2 remain, both
+  real (not stale) — deferred to this pass:**
+  - `AccrueAdmin.ThemeTest` "Storybook dark shim mirrors every dark ax token" — `storybook.css`
+    dark shim hardcodes `#9bb5ff` where `theme.css` dark now uses `var(--ax-accent-readable)`.
+    Real drift; `storybook.css` has no rebuild task (hand-composed, Phase 193) — recompose per the
+    Phase 211 research recipe (`.planning/phases/211-.../211-RESEARCH.md` § Bundle Rebuild).
+  - `AccrueAdmin.Queries.QueryModulesTest` "subscription queries use status-safe list filters" —
+    `Subscriptions.list(status: active)` row set doesn't match the expected fixture. **Possibly a
+    real status-filter regression** (data correctness) — investigate before assuming stale fixture.
+- **accrue suite** — 25 failures were ALL verifier+brand; goes green once FND-01 lands (verified the
+  brand fix already; the other 24 cascade off FND-01).
+- **e2e / Browser UAT** — still not enumerated (need running admin app + Playwright).
 
 ## Meta-finding
 
