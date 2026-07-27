@@ -28,7 +28,12 @@ const brandTokens = {
   "--accrue-paper": "#fafbfc",
   "--accrue-moss": "#5e9e84",
   "--accrue-cobalt": "#5d79f6",
-  "--accrue-amber": "#c8923b"
+  "--accrue-amber": "#c8923b",
+  // Runtime brand-bridge tokens (AccrueAdmin.Layouts injects these; defaults from layouts.ex).
+  // theme.css derives --ax-accent-readable/--ax-focus-ring from --ax-accent via color-mix,
+  // so the checker must know the shipped default to resolve those chains.
+  "--ax-accent": "#5D79F6",
+  "--ax-accent-contrast": "#FFFFFF"
 };
 
 const lightTokens = extract(css.match(scopes.light)[1]);
@@ -55,6 +60,16 @@ function resolve(value, tokens, seen = new Set()) {
     if (seen.has(name)) throw new Error(`[foundation_contrast] circular var ${name}`);
     seen.add(name);
     return resolve(tokens[name] || "", tokens, seen);
+  }
+  // color-mix(in srgb, <colorA> <pct>%, <colorB>) — sRGB linear mix; pct applies to colorA.
+  // Handled BEFORE the generic var-replace so component colors resolve to rgb arrays cleanly.
+  const mix = current.match(/^color-mix\(in srgb,\s*(.+?)\s+([\d.]+)%,\s*(.+?)\)$/i);
+  if (mix) {
+    const a = resolve(mix[1], tokens, new Set(seen));
+    const b = resolve(mix[3], tokens, new Set(seen));
+    if (!a || !b) return null;
+    const p = Number(mix[2]) / 100;
+    return [0, 1, 2].map((i) => Math.round(a[i] * p + b[i] * (1 - p)));
   }
   current = current.replace(/var\((--[a-z0-9-]+)\)/gi, (_, name) => {
     if (seen.has(name)) throw new Error(`[foundation_contrast] circular var ${name}`);

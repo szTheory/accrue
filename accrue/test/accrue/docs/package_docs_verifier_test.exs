@@ -822,7 +822,7 @@ defmodule Accrue.Docs.PackageDocsVerifierTest do
     drifted =
       String.replace(
         original,
-        ~s(<Button.button variant="primary" type="button">Primary action</Button.button>),
+        ~s(<Button.button variant="secondary" type="button">Primary action specimen</Button.button>),
         ~s(<button class="ax-button ax-button-primary" style="color: red;" type="button">Primary action</button>),
         global: false
       )
