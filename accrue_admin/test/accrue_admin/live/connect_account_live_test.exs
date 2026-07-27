@@ -110,7 +110,7 @@ defmodule AccrueAdmin.ConnectAccountLiveTest do
     assert {:ok, _view, html} = live(conn, "/billing/connect/#{account.id}")
 
     # Related resources card must be present
-    assert html =~ ~s(class="ax-card ax-related")
+    assert html =~ ~s(class="ax-card ax-related ax-related-resources")
     # Events filtered by ConnectAccount subject in related resources
     assert html =~ "subject_type=ConnectAccount"
     assert html =~ "subject_id=#{account.id}"

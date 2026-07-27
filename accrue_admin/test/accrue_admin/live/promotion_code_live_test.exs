@@ -101,7 +101,7 @@ defmodule AccrueAdmin.PromotionCodeLiveTest do
     assert {:ok, _view, html} = live(conn, "/billing/promotion-codes/#{promotion_code.id}")
 
     # Related resources card must be present
-    assert html =~ ~s(class="ax-card ax-related")
+    assert html =~ ~s(class="ax-card ax-related ax-related-resources")
     # Source coupon link in related resources
     assert html =~ "/billing/coupons/#{promotion_code.coupon_id}"
     # Events filtered by PromotionCode subject in related resources

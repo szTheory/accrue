@@ -400,8 +400,8 @@ defmodule AccrueAdmin.DisplayComponentsTest do
           ]
         })
 
-      assert html =~ ~s(class="ax-card ax-related")
-      assert html =~ ~s(class="ax-related-item")
+      assert html =~ ~s(class="ax-card ax-related ax-related-resources")
+      assert html =~ "ax-related-item"
       refute html =~ ~s(class="ax-card ax-related-item")
       assert html =~ "Northwind Finance"
     end

@@ -193,7 +193,7 @@ defmodule AccrueAdmin.ThemeTest do
     theme_dark_tokens =
       theme_css_path()
       |> File.read!()
-      |> css_block(~r/html\.accrue-admin\[data-theme="dark"\]\s*\{(?<body>.*?)\}/s)
+      |> css_block(~r/html\.accrue-admin\[data-theme="dark"\][^{]*\{(?<body>.*?)\}/s)
       |> ax_token_declarations()
 
     storybook_dark_tokens =
