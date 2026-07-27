@@ -46,6 +46,20 @@ Requirements for this milestone (M1). Each maps to exactly one roadmap phase.
 - **M3 — new rooms + structure:** new Usage/meters, checkout-sessions, Connect-capabilities, and fee-reconciliation rooms; `+Usage` / `+Settings` nav groups; de-tabbing Customer-360; and the v1.56-ratchet re-freeze (refresh design-lens rubric + persona exemplars + re-freeze baseline) that re-locks the landed redesign.
 - Applying the answer-first reign to the remaining detail surfaces (subscription-detail, customer-detail, component-kitchen) beyond the shared-CSS coordination already required by REIGN-04.
 
+## Standing Stable-Core Posture Anchors
+
+These anchors remain active outside a feature milestone because CI uses them to
+keep the public docs and planning mirrors aligned:
+
+- **POS-01**: Public docs and package READMEs describe Accrue as stable-core /
+  demand-driven expansion.
+
+- **POS-02**: Adopter-facing docs describe the supported SaaS billing loop,
+  processor support boundaries, and package ownership boundaries.
+
+- **POS-03**: Release notes, package docs, support matrix, adoption proof docs,
+  and planning mirrors describe the same stable-core posture.
+
 ## Out of Scope (explicit exclusions this milestone)
 
 - Any change to `accrue/lib` (core) — M1 is admin-only by construction; a diff touching core is a scope breach.
