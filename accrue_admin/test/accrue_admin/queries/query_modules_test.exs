@@ -175,6 +175,9 @@ defmodule AccrueAdmin.Queries.QueryModulesTest do
                owner_type: "User",
                automatic_tax: false,
                automatic_tax_disabled_reason: nil,
+               plan_price_id: nil,
+               plan_quantity: nil,
+               plan_item_count: nil,
                id: Enum.at(rows, 0).id,
                inserted_at: Enum.at(rows, 0).inserted_at
              },
@@ -191,6 +194,9 @@ defmodule AccrueAdmin.Queries.QueryModulesTest do
                owner_type: "User",
                automatic_tax: false,
                automatic_tax_disabled_reason: nil,
+               plan_price_id: nil,
+               plan_quantity: nil,
+               plan_item_count: nil,
                customer_id: Enum.at(rows, 1).customer_id,
                id: Enum.at(rows, 1).id,
                inserted_at: Enum.at(rows, 1).inserted_at
