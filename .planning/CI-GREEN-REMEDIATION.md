@@ -6,13 +6,32 @@
 full gate for the first time and exposed accumulated drift — chiefly a large design-system
 contract regression shipped (uncaught) by the Phase 209/210 "reign" work.
 
-## Status snapshot
+## Status snapshot (updated 2026-07-27, end of remediation session)
 
-| Workflow | State |
-|----------|-------|
-| Release Please | ✅ green |
-| CI | ❌ red — blocked by FND-01 (below) |
-| AccrueAdmin Browser UAT | ❌ red — not yet triaged |
+- **`accrue` package suite: ✅ GREEN** (was 25 failures → 0). FND-01 annotated, FND-05 contrast
+  checker fixed, DSY-01/RES-04/brand/CMP-05-anchor all fixed.
+- **`accrue_admin` package suite: 1 failure left** (was 7 → 1). 6 stale tests fixed; the remaining
+  one is the storybook-shim design item below.
+- **Docs-and-bash-contracts job: should be ✅** (full `verify_package_docs.sh` passes locally).
+- **Remaining CI red:** the 1 admin ThemeTest failure (blocks the Release gate), the admin browser
+  guardrail gates (drawer-form — needs the running app), and Browser UAT (needs the running app).
+
+### Remaining work (the real tail)
+
+1. **ThemeTest storybook dark-shim drift** — `theme.css` dark now uses `var(--ax-accent-readable)` /
+   `color-mix(in srgb, var(--ax-accent) …)` for 3 tokens (`--ax-accent-readable`, `--ax-focus-ring`,
+   `--ax-focus-shadow`), but the storybook `.ax-theme-dark-shim` holds resolved hexes (`#9bb5ff`,
+   `rgba(155,181,255,.24)`). The test wants verbatim mirroring, BUT `--ax-accent` is **not defined in
+   the storybook sandbox** (it's runtime brand-injected via `layouts.ex`). So the correct fix is to
+   add `--ax-accent` (default `#5d79f6`) + any needed `--accrue-*` to the sandbox so a verbatim-var
+   shim resolves — a deliberate storybook-theming change on the composed `priv/static/storybook.css`.
+   Do NOT just var-ify the shim (breaks dark rendering in the sandbox). Fold with the Phase 211
+   storybook.css recomposition.
+2. **Admin browser guardrails (Phase 190/192) — `drawer-form portal shell` not visible** — possible
+   real UI regression; needs reproduction against the running admin app + Playwright.
+3. **AccrueAdmin Browser UAT** — needs running app; untriaged.
+4. **FND-01 follow-up (optional/future)** — 168 blocks are annotated as exceptions (approved). The
+   deliberate type-system pass can convert intentional ones to `.ax-type-*` primitives later.
 
 ## Already fixed + pushed (mechanical, contract-defined — banked)
 
