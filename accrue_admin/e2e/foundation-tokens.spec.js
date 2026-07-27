@@ -14,8 +14,13 @@ async function login(page, target = "/billing") {
 
 function parseColor(value) {
   const match = value.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([0-9.]+))?\)/);
-  if (!match) throw new Error(`Unsupported color: ${value}`);
-  return match.slice(1, 4).map(Number);
+  if (match) return match.slice(1, 4).map(Number);
+  // Modern Chrome serializes color-mix()/relative-color results as
+  // `color(srgb r g b [/ a])` with 0–1 float channels. The reign adopted
+  // color-mix() for accent/focus tokens, so accept this form too.
+  const srgb = value.match(/color\(srgb\s+([\d.]+)\s+([\d.]+)\s+([\d.]+)/i);
+  if (srgb) return srgb.slice(1, 4).map((channel) => Math.round(Number(channel) * 255));
+  throw new Error(`Unsupported color: ${value}`);
 }
 
 function relativeLuminance(rgb) {

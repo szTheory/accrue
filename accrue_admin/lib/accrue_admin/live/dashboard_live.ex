@@ -64,7 +64,7 @@ defmodule AccrueAdmin.Live.DashboardLive do
       <section class="ax-page ax-home">
         <PageHeader.page_header
           breadcrumbs={[%{label: Copy.dashboard_breadcrumb_home()}]}
-          title={Copy.dashboard_breadcrumb_home()}
+          title={Copy.home_intro_headline()}
         >
           <:description>
             <p data-ax-health-verdict="true">

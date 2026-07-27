@@ -12,7 +12,7 @@ test.describe("Dropdown menu — outside-click dismissal", () => {
 
     const dropdown = page
       .locator("details.ax-dropdown")
-      .filter({ hasText: "More actions" })
+      .filter({ hasText: "More billing actions" })
       .first();
     await expect(dropdown).toBeVisible();
 

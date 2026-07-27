@@ -93,7 +93,7 @@ test.describe("Phase 196 Subscriptions LIST contract", () => {
       );
 
       await assertColumnOrder(page, [
-        "Customer / subscription",
+        "Customer details",
         "State",
         "Plan / amount",
         "Renews / ends",
