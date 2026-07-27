@@ -140,7 +140,9 @@ defmodule Mix.Tasks.AccrueAdmin.Ui.Fix do
         runner,
         "finalize-fixes",
         "node",
-        ["e2e/ratchet/ratchet-fix.mjs", "--finalize-fixes"], cd: root)
+        ["e2e/ratchet/ratchet-fix.mjs", "--finalize-fixes"],
+        cd: root
+      )
 
       Mix.shell().info(
         "ui.fix complete for round #{round}. " <>

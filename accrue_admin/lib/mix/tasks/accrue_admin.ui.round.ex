@@ -102,7 +102,9 @@ defmodule Mix.Tasks.AccrueAdmin.Ui.Round do
       runner,
       "next-round",
       "node",
-      ["e2e/ratchet/phase-ratchet-ledger.mjs", "--next-round"], cd: root)
+      ["e2e/ratchet/phase-ratchet-ledger.mjs", "--next-round"],
+      cd: root
+    )
 
     round =
       root

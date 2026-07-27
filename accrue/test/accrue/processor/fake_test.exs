@@ -328,6 +328,7 @@ defmodule Accrue.Processor.FakeTest do
 
       # Retrieve resolves the loaded records (not resource_missing).
       assert {:ok, %{id: "cus_fake_00007"}} = Fake.retrieve_customer("cus_fake_00007", [])
+
       assert {:ok, %{id: "sub_fake_00007", status: :active}} =
                Fake.retrieve_subscription("sub_fake_00007", [])
 
@@ -351,7 +352,12 @@ defmodule Accrue.Processor.FakeTest do
         Fake.load_fixtures(%{
           customers: [%{id: "cus_fake_00003"}],
           subscriptions: [
-            %{id: "sub_fake_00003", customer_id: "cus_fake_00003", item_id: "sub_fake_00003_item_1", price_id: "price_basic"}
+            %{
+              id: "sub_fake_00003",
+              customer_id: "cus_fake_00003",
+              item_id: "sub_fake_00003_item_1",
+              price_id: "price_basic"
+            }
           ],
           counters: %{customer: 3, subscription: 3}
         })
