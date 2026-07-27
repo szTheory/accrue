@@ -10,6 +10,7 @@ if Mix.env() != :prod do
       Button,
       Checkbox,
       Detail,
+      DetailDrawer,
       DropdownMenu,
       EmptyState,
       FilterChipBar,
@@ -950,15 +951,13 @@ if Mix.env() != :prod do
 
       ~H"""
       <div class="ax-dev-group-body ax-dev-group-drawer-specimen">
-        <section class="ax-card ax-dev-group-drawer-preview" aria-label="Billing health and recovery drawer">
-          <header class="ax-section-head">
-            <div>
-              <p class="ax-eyebrow">Drawer preview</p>
-              <h5 class="ax-heading">Billing health and recovery drawer</h5>
-              <p class="ax-body">Current billing health, at-risk dunning, actor audit history, failed-webhook debugging, and invoice queue controls.</p>
-            </div>
-          </header>
-
+        <DetailDrawer.detail_drawer
+          id="grp190-drawer-form-shell"
+          open
+          title="Edit billing contact"
+          subtitle="Billing health and recovery drawer proof specimen"
+          close_label="Close drawer"
+        >
           <div class="ax-dev-group-drawer">
             <section class="ax-dev-group-drawer-context ax-dev-group-drawer-health" aria-label="Billing health summary">
               <p class="ax-label">Billing health verdict</p>
@@ -1021,11 +1020,11 @@ if Mix.env() != :prod do
             />
           </div>
 
-          <footer class="ax-detail-drawer-footer">
+          <:footer>
             <Button.button variant="ghost" type="button">Cancel</Button.button>
             <Button.button variant="primary" type="button">Save contact</Button.button>
-          </footer>
-        </section>
+          </:footer>
+        </DetailDrawer.detail_drawer>
       </div>
       """
     end
