@@ -1,8 +1,6 @@
 defmodule AccrueAdmin.AuthHookTest do
   use AccrueAdmin.LiveCase, async: false
 
-  alias AccrueAdmin.Copy
-
   defmodule AuthAdapter do
     @behaviour Accrue.Auth
 

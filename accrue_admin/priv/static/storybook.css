@@ -26,11 +26,13 @@ html.accrue-admin{--ax-font-sans:"Geist",system-ui,-apple-system,BlinkMacSystemF
   --ax-danger-readable: #ffaaaa;
   --ax-info: #4a90b8;
   --ax-info-readable: #9fcbe6;
-  --ax-accent-readable: #9bb5ff;
+  --ax-accent: #5d79f6;
+  --accrue-paper: #0f1318;
+  --ax-accent-readable: color-mix(in srgb, var(--ax-accent) 65%, var(--accrue-paper));
   --ax-accent-contrast: #ffffff;
-  --ax-focus-ring: #9bb5ff;
+  --ax-focus-ring: var(--ax-accent-readable);
   --ax-focus-ring-offset: var(--ax-base);
-  --ax-focus-shadow: 0 0 0 4px rgba(155, 181, 255, 0.24);
+  --ax-focus-shadow: 0 0 0 4px color-mix(in srgb, var(--ax-accent) 24%, transparent);
   --ax-scrollbar-thumb: #a8b2bc;
   --ax-scrollbar-track: #171d24;
   --ax-scrollbar-thumb-hover: #d7dde3;
