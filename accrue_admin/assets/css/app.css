@@ -4006,7 +4006,7 @@ html.accrue-admin[data-theme="dark"] .ax-button-primary {
   font-size: var(--ax-type-xs);
 }
 
-@media (min-width: 700px) {
+@media (min-width: 700px) { /* --ax-bp-700 ↑ */
   .ax-subscriptions-page .ax-data-table-card-fields {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -4236,7 +4236,7 @@ html.accrue-admin[data-theme="dark"] .ax-button-primary {
   font-weight: 800;
 }
 
-@media (max-width: 760px) {
+@media (max-width: 760px) { /* --ax-bp-760 ↓ */
   .ax-subscription-row-audit-primary {
     grid-template-columns: 1fr;
   }
@@ -4396,7 +4396,7 @@ html.accrue-admin[data-theme="dark"] .ax-button-primary {
   border-left: 3px solid var(--ax-status-warning-border);
 }
 
-@media (max-width: 760px) {
+@media (max-width: 760px) { /* --ax-bp-760 ↓ */
   .ax-subscriptions-secondary-strips {
     grid-template-columns: 1fr;
   }
@@ -4487,7 +4487,7 @@ html.accrue-admin[data-theme="dark"] .ax-button-primary {
   font-weight: 800;
 }
 
-@media (max-width: 700px) {
+@media (max-width: 700px) { /* --ax-bp-700 ↓ */
   .ax-subscription-row-primary-line {
     align-items: flex-start;
   }
@@ -5427,6 +5427,7 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
 
 .ax-search-trigger-text strong,
 .ax-search-trigger-text em {
+  min-width: 0;
   overflow: hidden;
   color: var(--ax-primary);
   font-style: normal;
@@ -5467,7 +5468,7 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
     width: 1px;
     height: 1px;
     padding: 0;
-    margin: -1px;
+    margin: -1px; /* ax-spacing-exception: sr-only clip pattern requires the -1px negative margin */
     overflow: hidden;
     clip: rect(0 0 0 0);
   }
@@ -7169,7 +7170,7 @@ button.ax-launcher {
   font-weight: 950;
 }
 
-@media (max-width: 700px) {
+@media (max-width: 700px) { /* --ax-bp-700 ↓ */
   .ax-detail-dunning-summary {
     grid-template-columns: 1fr;
   }
@@ -7254,7 +7255,7 @@ button.ax-launcher {
   box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ax-status-warning-border) 68%, transparent), var(--ax-shadow-sm);
 }
 
-@media (max-width: 700px) {
+@media (max-width: 700px) { /* --ax-bp-700 ↓ */
   .ax-detail-priority-actions-split {
     grid-template-columns: 1fr;
   }
@@ -7560,7 +7561,7 @@ button.ax-launcher {
   font: var(--ax-type-label-sm-font);
 }
 
-@media (max-width: 700px) {
+@media (max-width: 700px) { /* --ax-bp-700 ↓ */
   .ax-audit-row {
     grid-template-columns: 1fr;
     gap: var(--ax-space-2xs);

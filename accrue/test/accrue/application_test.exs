@@ -70,7 +70,7 @@ defmodule Accrue.ApplicationTest do
   end
 
   describe "brand.css (FND-07)" do
-    test "brand.css is shipped under priv/static and contains 7 --accrue- variables" do
+    test "brand.css is shipped under priv/static and defines the 7 core --accrue- palette variables" do
       priv = :code.priv_dir(:accrue)
       path = Path.join([priv, "static", "brand.css"])
       assert File.exists?(path)
@@ -81,12 +81,15 @@ defmodule Accrue.ApplicationTest do
         assert contents =~ "--accrue-#{name}:", "missing --accrue-#{name} variable"
       end
 
-      # Count token definitions as a sanity check (exactly 7).
+      # Sanity floor: the 7 core palette colors must be present. brand.css also
+      # carries theming tokens (surface/border/radius/shadow, duplicated across
+      # light/dark/system modes) since the three-state theming work, so the total
+      # single-word --accrue-* definition count is >= 7, not exactly 7.
       count =
         Regex.scan(~r/^\s*--accrue-[a-z]+:/m, contents)
         |> length()
 
-      assert count == 7, "expected 7 --accrue-* variables, got #{count}"
+      assert count >= 7, "expected at least the 7 core --accrue-* variables, got #{count}"
     end
 
     test "brand.css is discoverable via :code.priv_dir/1" do
