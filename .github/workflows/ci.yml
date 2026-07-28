@@ -780,6 +780,16 @@ jobs:
     if: github.event_name != 'schedule'
     needs: [admin-hardening-guardrails, admin-phase200-guardrails]
     runs-on: ubuntu-24.04
+    # NON-BLOCKING while the v1.56 Admin UI Ratchet milestone is PARKED (superseded
+    # by v1.57 on 2026-07-19). The verify-frozen / sign-off steps require a frozen
+    # ledger with zero open findings, but v1.56 was parked mid-convergence at Phase
+    # 208 (3/5): ledger.baseline.json is intentionally frozen:false with ~23 IA
+    # findings deferred to v1.57. This gate was wired in 208-03 and has never been
+    # satisfiable on main; it stayed dormant only because its Phase 192 dependency
+    # was red. The job still runs (its deterministic self-tests keep reporting), but
+    # its failure must not block CI while parked. REMOVE this line when v1.57 M3
+    # re-freezes the ratchet (verify-frozen then passes on its own).
+    continue-on-error: true
 
     steps:
       - uses: actions/checkout@v6
