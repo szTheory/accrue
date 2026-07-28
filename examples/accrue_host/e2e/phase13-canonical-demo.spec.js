@@ -4,7 +4,10 @@ const path = require("node:path");
 const { test, expect } = require("./support/test.js");
 const { readFixture, reseedFixture, login, workspaceBillingLink, waitForLiveView } = require("./support/fixture.js");
 const { expectNoHorizontalOverflow, expectVisibleInViewport } = require("./support/overflow.js");
-const { DASHBOARD_DISPLAY_HEADLINE } = require("./support/copy_dashboard.js");
+// The reigned admin Home (210) uses "Billing operations" as the always-present
+// h1; the old "What needs attention now" is now only the *empty*-rail heading
+// (populated rails show "Priority exceptions"), so it's not a stable dashboard signal.
+const HOME_INTRO_HEADLINE = "Billing operations";
 
 const copyStrings = JSON.parse(
   fs.readFileSync(path.join(__dirname, "generated", "copy_strings.json"), "utf8")
@@ -158,13 +161,13 @@ test("@phase15-trust canonical first-run and admin replay walkthrough stays rele
     page,
     "/admin admin dashboard",
     () => page.goto("/admin"),
-    page.getByText(DASHBOARD_DISPLAY_HEADLINE)
+    page.getByRole("heading", { name: HOME_INTRO_HEADLINE })
   );
 
   expect(billingElapsedMs).toBeGreaterThanOrEqual(0);
   await assertResponsiveState(page, "admin dashboard", [
     {
-      locator: page.getByText(DASHBOARD_DISPLAY_HEADLINE),
+      locator: page.getByRole("heading", { name: HOME_INTRO_HEADLINE }),
       label: "admin dashboard summary"
     },
     {

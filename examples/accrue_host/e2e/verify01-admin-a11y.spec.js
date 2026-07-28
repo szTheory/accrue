@@ -47,19 +47,34 @@ async function openDeleteConfirmation(page, last4) {
 async function waitForDarkThemeSettled(page) {
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
 
+  // Wait until the dark CSS has actually painted before running axe. Assert the
+  // *character* of the dark theme (dark chrome surfaces + light control text)
+  // rather than exact rgb literals: the surfaces are cobalt-tinted color-mix()
+  // values that (a) drift with token tuning and (b) modern Chrome serializes as
+  // `color(srgb r g b)`, not `rgb(...)`. Parse both forms and check darkness.
   await page.waitForFunction(
     () => {
+      const parse = (value) => {
+        if (!value) return null;
+        const rgb = value.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+        if (rgb) return [Number(rgb[1]), Number(rgb[2]), Number(rgb[3])];
+        const srgb = value.match(/color\(srgb\s+([\d.]+)\s+([\d.]+)\s+([\d.]+)/i);
+        if (srgb) return srgb.slice(1, 4).map((c) => Math.round(Number(c) * 255));
+        return null;
+      };
       const search = document.querySelector(".ax-search-trigger");
       const darkButton = document.querySelector('button[data-theme-target="dark"]');
       const activeNav = document.querySelector("a.ax-sidebar-link-active");
-
       if (!search || !darkButton || !activeNav) return false;
 
-      return (
-        getComputedStyle(search).backgroundColor === "rgb(15, 19, 24)" &&
-        getComputedStyle(darkButton).color === "rgb(244, 247, 250)" &&
-        getComputedStyle(activeNav).backgroundColor === "rgb(31, 40, 61)"
-      );
+      const searchBg = parse(getComputedStyle(search).backgroundColor);
+      const navBg = parse(getComputedStyle(activeNav).backgroundColor);
+      const btnColor = parse(getComputedStyle(darkButton).color);
+      if (!searchBg || !navBg || !btnColor) return false;
+
+      const isDarkSurface = (c) => c[0] + c[1] + c[2] < 300;
+      const isLightText = (c) => c[0] + c[1] + c[2] > 600;
+      return isDarkSurface(searchBg) && isDarkSurface(navBg) && isLightText(btnColor);
     },
     { timeout: 5_000 }
   );
