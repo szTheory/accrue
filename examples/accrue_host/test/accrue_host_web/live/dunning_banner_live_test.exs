@@ -46,8 +46,8 @@ defmodule AccrueHostWeb.DunningBannerLiveTest do
       |> log_in_user(user, active_organization_id: organization.id)
       |> live(~p"/app/billing")
 
-    assert html =~ "Action Required"
-    assert has_element?(view, ".accrue-default-dunning-banner")
+    assert html =~ "Action required — payment failed"
+    assert has_element?(view, ".accrue-dunning-banner-wrapper")
   end
 
   test "does not show the dunning banner when the active org is healthy (banner-OFF)", %{
@@ -62,8 +62,8 @@ defmodule AccrueHostWeb.DunningBannerLiveTest do
       |> log_in_user(user, active_organization_id: organization.id)
       |> live(~p"/app/billing")
 
-    refute html =~ "Action Required"
-    refute has_element?(view, ".accrue-default-dunning-banner")
+    refute html =~ "Action required — payment failed"
+    refute has_element?(view, ".accrue-dunning-banner-wrapper")
   end
 
   defp cleanup_fake_billing_rows! do

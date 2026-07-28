@@ -81,7 +81,9 @@ defmodule AccrueHostWeb.PortalColdStartTest do
 
       assert dashboard =~ AccruePortal.Copy.home_heading()
       refute dashboard =~ AccruePortal.Copy.home_empty_body()
-      assert dashboard =~ "Status: active"
+      # Status renders as a styled pill (label + <span class="portal-status …">value</span>),
+      # so match the label/value across the span markup rather than a contiguous literal.
+      assert dashboard =~ ~r/Status:\s*<span[^>]*>\s*active/
       assert dashboard_metric_count(dashboard, 1) == 3
 
       payment_methods =
@@ -103,7 +105,7 @@ defmodule AccrueHostWeb.PortalColdStartTest do
         |> html_response(200)
 
       assert invoices =~ "PORTAL-LAUNCH-001"
-      assert invoices =~ "Status: paid"
+      assert invoices =~ ~r/Status:\s*<span[^>]*>\s*paid/
     end
   end
 
