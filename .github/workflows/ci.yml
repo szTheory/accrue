@@ -1150,11 +1150,15 @@ jobs:
           GITHUB_REPOSITORY: ${{ github.repository }}
           GITHUB_RUN_ID: ${{ github.run_id }}
           GH_TOKEN: ${{ github.token }}
-          # Advisory release-gate cells (continue-on-error: matrix.support == 'advisory',
-          # name-tagged "[advisory]") are non-blocking by design, so their warning/failure
-          # annotations must not fail this release-facing sweep. Keep in sync with the
-          # release-gate matrix `support: 'advisory'` cells.
-          ANNOTATION_SWEEP_EXCLUDE: advisory
+          # Non-blocking jobs whose annotations must not fail this release-facing sweep:
+          #   'advisory' — advisory release-gate cells (continue-on-error: matrix.support ==
+          #     'advisory', name-tagged "[advisory]"). Keep in sync with the release-gate
+          #     matrix `support: 'advisory'` cells.
+          #   'ratchet'  — the "Admin UI ratchet guardrails" job is non-blocking (its own
+          #     continue-on-error) while the v1.56 ratchet milestone is PARKED; its parked
+          #     verify-frozen failure annotations must not fail the sweep. Drop 'ratchet'
+          #     when v1.57 M3 re-freezes the ledger.
+          ANNOTATION_SWEEP_EXCLUDE: advisory,ratchet
           # Non-actionable upstream-dependency compiler deprecation (Oban emits
           # `first..last inside match is deprecated` on Elixir 1.19+). Accrue cannot fix
           # third-party source; first-party warnings are still enforced via the gates'
