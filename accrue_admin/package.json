@@ -15,6 +15,8 @@
     "e2e:a11y": "env -u NO_COLOR playwright test e2e/admin-a11y.spec.js",
     "e2e:install": "playwright install chromium",
     "score-visuals": "node e2e/score-visuals.mjs",
+    "css:census": "node e2e/verify-css-census.mjs",
+    "css:census:self-test": "node e2e/verify-css-census.mjs --self-test",
     "ratchet:propose": "node e2e/ratchet/ratchet-propose.mjs",
     "ratchet:self-test": "node e2e/ratchet/ratchet-propose.mjs --self-test",
     "ratchet:live-uat": "node e2e/ratchet/ratchet-live-uat.mjs",
