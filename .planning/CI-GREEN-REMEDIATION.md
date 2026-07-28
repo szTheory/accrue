@@ -6,32 +6,69 @@
 full gate for the first time and exposed accumulated drift — chiefly a large design-system
 contract regression shipped (uncaught) by the Phase 209/210 "reign" work.
 
-## Status snapshot (updated 2026-07-27, end of remediation session)
+## Status snapshot (updated 2026-07-27, SESSION 2 — the tail is closed)
 
-- **`accrue` package suite: ✅ GREEN** (was 25 failures → 0). FND-01 annotated, FND-05 contrast
-  checker fixed, DSY-01/RES-04/brand/CMP-05-anchor all fixed.
-- **`accrue_admin` package suite: 1 failure left** (was 7 → 1). 6 stale tests fixed; the remaining
-  one is the storybook-shim design item below.
-- **Docs-and-bash-contracts job: should be ✅** (full `verify_package_docs.sh` passes locally).
-- **Remaining CI red:** the 1 admin ThemeTest failure (blocks the Release gate), the admin browser
-  guardrail gates (drawer-form — needs the running app), and Browser UAT (needs the running app).
+- **`accrue` package suite: ✅ GREEN** — 1685 tests, 0 failures, `--warnings-as-errors` clean
+  (`--seed 0`). FND-01 annotated, FND-05 contrast checker fixed, DSY-01/RES-04/brand/CMP-05-anchor.
+- **`accrue_admin` package suite: ✅ GREEN** — 514 tests, 0 failures, `--warnings-as-errors` clean.
+  The last unit failure (ThemeTest storybook dark-shim, item 1 below) is FIXED, and a hidden
+  `--warnings-as-errors` aborter (unused `alias AccrueAdmin.Copy` in `auth_hook_test.exs`, left by
+  the earlier stale-test fix) is removed.
+- **Docs-and-bash-contracts job: ✅** — `verify_package_docs.sh` + `verify_stable_core_posture.sh`
+  both green locally; FND-05 semantic contrast math passes.
+- **Admin browser guardrails (Phase 190/192): ✅** — `admin-group-contracts` (16/16), phase191
+  "avoid clipping at required widths" (2/2) and "overlays trap focus" (2/2) all pass against the
+  running e2e server.
+- **Only unverified surface left:** the top-level **AccrueAdmin Browser UAT** workflow (item 3) —
+  not yet run locally; everything the Phase 192 script covers is green.
 
-### Remaining work (the real tail)
+### The tail — RESOLVED this session (commits `74a4c0be`, `b79e89e4`)
 
-1. **ThemeTest storybook dark-shim drift** — `theme.css` dark now uses `var(--ax-accent-readable)` /
-   `color-mix(in srgb, var(--ax-accent) …)` for 3 tokens (`--ax-accent-readable`, `--ax-focus-ring`,
-   `--ax-focus-shadow`), but the storybook `.ax-theme-dark-shim` holds resolved hexes (`#9bb5ff`,
-   `rgba(155,181,255,.24)`). The test wants verbatim mirroring, BUT `--ax-accent` is **not defined in
-   the storybook sandbox** (it's runtime brand-injected via `layouts.ex`). So the correct fix is to
-   add `--ax-accent` (default `#5d79f6`) + any needed `--accrue-*` to the sandbox so a verbatim-var
-   shim resolves — a deliberate storybook-theming change on the composed `priv/static/storybook.css`.
-   Do NOT just var-ify the shim (breaks dark rendering in the sandbox). Fold with the Phase 211
-   storybook.css recomposition.
-2. **Admin browser guardrails (Phase 190/192) — `drawer-form portal shell` not visible** — possible
-   real UI regression; needs reproduction against the running admin app + Playwright.
-3. **AccrueAdmin Browser UAT** — needs running app; untriaged.
-4. **FND-01 follow-up (optional/future)** — 168 blocks are annotated as exceptions (approved). The
+1. **ThemeTest storybook dark-shim drift** — ✅ FIXED (`74a4c0be`). Made the `.ax-theme-dark-shim`
+   block verbatim-mirror theme.css for the 3 accent/focus tokens AND added `--ax-accent: #5d79f6`
+   (the `layouts.ex` brand default) + `--accrue-paper: #0f1318` (dark base) inside the shim so the
+   var/color-mix values still resolve in the runtime-brand-free storybook sandbox — exactly the
+   recipe this doc prescribed. `priv/static/storybook.css` edited directly (hand-composed, no build
+   task). Clears Admin Phase 200 + all Release gates.
+2. **Admin browser guardrails (Phase 190/192) — `drawer-form portal shell` not visible** — ✅ FIXED
+   (`b79e89e4`). REAL regression: the 209/210 reign replaced the dev-kitchen
+   `<DetailDrawer.detail_drawer id="grp190-drawer-form-shell">` (a portaled Overlay supplying the id,
+   `data-component-group="drawer-form"`, `-title`, focus-trap fallback) with a plain inline preview
+   card. Re-wrapped the reign's richer content in DetailDrawer (Cancel/Save → `:footer`).
+   ALSO surfaced a latent phase191 clip (subscription-detail @ phone-320, ~12px horizontal overflow;
+   the phase192 script had been aborting at group-contracts before ever reaching it): three
+   content-box elements with explicit `width` + padding/border and no box-sizing reset
+   (`.ax-detail-priority-actions-compact`, `.ax-detail-open-invoice-queue`, mobile full-width
+   `.ax-dropdown-trigger`/`.ax-dropdown-panel`) — added `box-sizing: border-box` to each, rebuilt the
+   committed `accrue_admin.css` bundle.
+3. **AccrueAdmin Browser UAT** — ✅ ALL 11 red specs fixed & verified against the running e2e
+   server (commits `74a4c0be`, `b79e89e4`, `1dce1262`, `d30cbacc`, `97e67f79`, `515283e4`). Full
+   inventory + resolutions:
+   - `admin-a11y:38` (axe) — dark contrast fixes (`1dce1262`).
+   - `admin-group-contracts:618` (operator-stress) — drawer portal shell (`b79e89e4`).
+   - `phase191:219` (clipping) + `phase191:245` (focus-trap) — box-sizing clip + drawer shell.
+   - `phase200:71` (final evidence) — cleared by the a11y + overlay fixes.
+   - `phase196:73` (Subscriptions LIST) — column rename "Customer / subscription"→"Customer details".
+   - `dropdown-dismiss:8` — kitchen label "More actions"→"More billing actions".
+   - `foundation-tokens:64` (contrast) — parseColor accepts Chrome `color(srgb …)`.
+   - `foundation-tokens:190` (auto-guard) — retarget `.ax-kpi-row`→`.ax-kpi-card`.
+   - `phase7-uat:29` — Home h1 regression (source) + StatStrip/IA copy reconciliation + `.first()`.
+   - `phase199:999` (auto-guard) — retarget `.ax-primary-nav`→`.ax-topbar` (both-viewport nav chrome).
+   All pushed to origin/main; CI + Browser UAT re-validating.
+4. **FND-01 follow-up (optional/future)** — 168 blocks annotated as exceptions (approved). The
    deliberate type-system pass can convert intentional ones to `.ax-type-*` primitives later.
+
+## SESSION 2 outcome (2026-07-27 → 2026-07-28)
+
+The tail is closed. Real regressions found & fixed at source (all shipped uncaught by the 209/210
+reign because it was PNG-verified, never CI-validated): dark-shim drift, drawer-form portal shell
+loss, subscription-detail 320px horizontal clip (3 box-sizing sites), two dark-mode AA contrast
+failures, and the Home h1 (210-02 wired PageHeader `title=` to the wrong Copy fn, orphaning
+`home_intro_headline/0`). The rest were legitimate stale-test drift from intentional reign copy
+(column/label renames, StatStrip duplication → `.first()`, color-mix serialization, kitchen dropdown
+label) and two parked-ratchet-guard retargets. Core CI (Release ×4, Phase 200, Phase 192,
+Docs/posture) green locally; assets gate clean (bundle == source build); ratchet ledger self-test +
+verify-frozen pass.
 
 ## Already fixed + pushed (mechanical, contract-defined — banked)
 
