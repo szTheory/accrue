@@ -3932,6 +3932,26 @@ html.accrue-admin[data-theme="dark"] .ax-button-primary {
   min-width: 12rem;
 }
 
+/* At phone widths the 12rem (192px) grow-filter floor + toolbar can exceed a
+   ~280px content box, overflowing the page unscrollably under CI font metrics
+   (phase191 connect flow @320). Let the filter form and its children shrink to
+   the container below the sm breakpoint. */
+@media (max-width: 599.98px) { /* --ax-bp-sm ↓ */
+  .ax-data-table-filters,
+  .ax-data-table-filter,
+  .ax-data-table-filter-grow {
+    min-width: 0;
+  }
+
+  /* A multi-segment status filter (e.g. connect's 4-up) is nowrap inline-flex
+     and can exceed a ~270px filter cell. The active state is background-based,
+     not a transform thumb, so wrapping is safe — wrap it to fit the phone cell
+     instead of overflowing the page unscrollably. */
+  .ax-data-table-filter .ax-segmented {
+    flex-wrap: wrap;
+  }
+}
+
 .ax-data-table-list-status,
 .ax-data-table-loading,
 .ax-data-table-skeleton-cards,
@@ -7408,12 +7428,25 @@ html.accrue-admin[data-theme="dark"] .ax-detail-dunning-action {
 }
 
 .ax-detail-priority-links {
-  display: inline-flex;
+  display: flex;
   flex-wrap: wrap;
   gap: 0.25rem;
   align-items: center;
   grid-column: 1 / -1;
+  /* min-width:0 so this full-width grid item shrinks to the track and the
+     nowrap quiet-links actually wrap instead of growing the row past the
+     container (subscription-detail 320px unscrollable-overflow under CI fonts). */
+  min-width: 0;
   padding-inline: 0.125rem;
+}
+
+/* These priority links are wrappable phrases, not nav shortcuts — let them wrap
+   at word boundaries instead of inheriting the base .ax-link-quiet nowrap, which
+   made a single link overflow the 280px track under CI font metrics. */
+.ax-detail-priority-links .ax-link-quiet {
+  min-width: 0;
+  white-space: normal;
+  text-align: left;
 }
 
 .ax-detail-priority-primary {
