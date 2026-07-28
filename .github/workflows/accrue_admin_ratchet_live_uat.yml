@@ -1,0 +1,79 @@
+name: AccrueAdmin Ratchet Live UAT
+
+on:
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  ratchet-live-uat:
+    name: Ratchet live UAT (manual only)
+    runs-on: ubuntu-24.04
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_USER: postgres
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      MIX_ENV: test
+      PGUSER: postgres
+      PGPASSWORD: postgres
+      PGHOST: localhost
+      ACCRUE_ADMIN_E2E_PORT: 4017
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Set up BEAM
+        uses: erlef/setup-beam@v1
+        with:
+          otp-version: "28.0"
+          elixir-version: "1.19.5"
+
+      - name: Install Hex
+        run: mix local.hex 2.4.2 --force
+
+      - name: Set up Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: accrue_admin/package-lock.json
+
+      - name: Install Elixir deps
+        run: cd accrue_admin && mix deps.get
+
+      - name: Compile admin package
+        run: cd accrue_admin && mix compile --warnings-as-errors
+
+      - name: Install browser deps
+        run: cd accrue_admin && npm ci
+
+      - name: Install Chromium
+        run: cd accrue_admin && npx playwright install --with-deps chromium
+
+      - name: Run ratchet live UAT
+        run: cd accrue_admin && npm run ratchet:live-uat
+
+      - name: Upload ratchet live UAT evidence
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: accrue-admin-ratchet-live-uat
+          path: |
+            accrue_admin/test-results/ui-ratchet/live-uat
+            accrue_admin/test-results/admin-visuals
+          if-no-files-found: ignore
