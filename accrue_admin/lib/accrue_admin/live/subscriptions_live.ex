@@ -666,8 +666,9 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
 
   defp escape(value), do: value |> Phoenix.HTML.html_escape() |> Phoenix.HTML.safe_to_string()
 
+  # Every caller guards %DateTime{} before calling (see time_cell/1), so a
+  # non-DateTime fallback clause is unreachable — dialyzer flags it (pattern_match_cov).
   defp format_date(%DateTime{} = value), do: Calendar.strftime(value, "%b %-d, %Y")
-  defp format_date(_value), do: "Date not shown"
 
   defp humanize(value) when is_atom(value), do: value |> Atom.to_string() |> humanize()
 

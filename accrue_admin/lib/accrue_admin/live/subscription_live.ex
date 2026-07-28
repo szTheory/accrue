@@ -7,8 +7,8 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
 
   alias Accrue.{Actor, Auth, Billing, Clock, Config, Events, PlanResolver}
   alias Accrue.Billing.{Invoice, Subscription, UpcomingInvoice}
-  alias Accrue.Invoices.Render, as: InvoiceRender
   alias Accrue.Dunning.Campaign
+  alias Accrue.Invoices.Render, as: InvoiceRender
   alias Accrue.Repo
 
   alias AccrueAdmin.Components.{
@@ -1233,7 +1233,9 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
   defp renews_or_ends_summary(subscription) do
     cond do
       Accrue.Billing.Subscription.canceled?(subscription) ->
-        if ended_at = subscription.ended_at || subscription.canceled_at do
+        ended_at = subscription.ended_at || subscription.canceled_at
+
+        if ended_at do
           "Ended #{format_datetime(ended_at)}"
         else
           "End date is not shown in admin"
