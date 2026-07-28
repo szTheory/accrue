@@ -125,9 +125,7 @@ Initial public releases with the admin UI, asset pipeline, and docs wired for th
 ## How we version
 
 - **Patch** — safe fixes, docs, and internal quality.
-- **Minor** (pre-1.0) — new capabilities you can adopt incrementally; read the changelog before upgrading production.
-
-When in doubt, read **[Upgrade](upgrade.md)** and run your usual test and staging passes.
- production.
+- **Minor** — additive capabilities you can adopt incrementally; read the changelog before upgrading production.
+- **Major** — breaking changes, shipped only after a deprecation cycle.
 
 When in doubt, read **[Upgrade](upgrade.md)** and run your usual test and staging passes.

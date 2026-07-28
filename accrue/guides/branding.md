@@ -20,9 +20,6 @@ config :accrue, :branding,
   accent_color: "#1F6FEB",
   secondary_color: "#6B7280",
   font_stack: "-apple-system, BlinkMacSystemFont, sans-serif",
-  footer_html: nil,
-  footer_text: nil,
-  currency_symbol_override: nil,
   list_unsubscribe_url: nil
 ```
 
@@ -33,18 +30,15 @@ loud via `Accrue.ConfigError`.
 
 | Key | Type | Default | Required | Purpose |
 |-----|------|---------|----------|---------|
-| `business_name` | `string` | `"Acme"` | no | Rendered as the sender name + used in `{business}` template interpolation |
-| `from_name` | `string` | `business_name` | no | `From:` display name on Swoosh emails |
-| `from_email` | `string` | `"noreply@example.com"` | yes (prod) | `From:` address |
-| `support_email` | `string` | nil | no | Rendered in `Contact support at` footer line |
+| `business_name` | `string` | `"Accrue"` | no | Rendered as the sender name + used in `{business}` template interpolation |
+| `from_name` | `string` | `"Accrue"` | no | `From:` display name on Swoosh emails |
+| `from_email` | `string` | — | **yes** | `From:` address |
+| `support_email` | `string` | — | **yes** | Rendered in `Contact support at` footer line |
 | `company_address` | `string` | nil | conditional | Physical postal address shown in email footer. **Required** for EU/CA audiences per CAN-SPAM/CASL transactional exemptions — see guides/email.md |
 | `logo_url` | `string (HTTPS)` | nil | no | HTTPS-accessible logo. Used in email `<img>` src + PDF URL mode |
 | `accent_color` | `hex color (#RRGGBB)` | `"#1F6FEB"` | no | Primary CTA button + link color |
 | `secondary_color` | `hex color (#RRGGBB)` | `"#6B7280"` | no | Muted text + borders |
 | `font_stack` | `string` | `"-apple-system, BlinkMacSystemFont, sans-serif"` | no | CSS font-family. Web-safe stack recommended |
-| `footer_html` | `string (HTML)` | nil | no | HTML footer appended below the standard Accrue footer |
-| `footer_text` | `string` | nil | no | Plain-text version of `footer_html` for text/plain email parts |
-| `currency_symbol_override` | `string` | nil | no | Overrides the CLDR-derived currency symbol. Usually leave nil |
 | `list_unsubscribe_url` | `string` | nil | no | Opt-in RFC 8058 `List-Unsubscribe` header URL. See guides/email.md "RFC 8058 opt-in" |
 | `theme` | `:system \| :light \| :dark` | `:system` | no | Customer-portal color-mode policy. See "Portal color-mode" below |
 

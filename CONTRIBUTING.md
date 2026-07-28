@@ -10,7 +10,7 @@ Thanks for contributing to Accrue. This repository ships three sibling Mix packa
 
 Install the supported toolchain first:
 
-- Elixir 1.17+
+- Elixir 1.19+
 - OTP 27+
 - PostgreSQL 14+
 - Node.js for browser UAT in `examples/accrue_host`

@@ -133,8 +133,12 @@ defmodule MyAppWeb.BillingPortalLive do
     # Lazily fetch or create the customer record
     {:ok, customer} = Billing.customer(user)
     
-    # Fetch active subscriptions
-    subscriptions = Accrue.Billing.SubscriptionQueries.list_active_for(customer)
+    # Fetch active subscriptions via the composable Accrue.Billing.Query API,
+    # run through your app's Repo.
+    subscriptions =
+      Accrue.Billing.Query.active()
+      |> Ecto.Query.where([s], s.customer_id == ^customer.id)
+      |> Repo.all()
     
     {:ok, assign(socket, customer: customer, subscriptions: subscriptions)}
   end

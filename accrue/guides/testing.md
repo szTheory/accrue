@@ -6,11 +6,9 @@ The example host proves the end-to-end browser and integration path with `cd exa
 
 For the library itself, Accrue prefers ExUnit and deterministic helper-driven proofs whenever behavior is observable without a human clicking through a product UI.
 
-- **`accrue/test/accrue/verification/`** — manifest tests that assert migration files + backing suites still exist (prevents silent drift).
-- **`mix verify.uat_phase_04`** — runs the legacy `uat_phase_04` verify target plus the focused ExUnit files that prove metered billing, dunning, DLQ, multi-endpoint webhooks, checkout/portal, events query API, and telemetry ops/metrics.
-- **`mix verify.uat`** — runs the whole `test/accrue/verification/` tree (add more `*_surrogate_test.exs` modules as coverage grows).
+- **`mix test`** (run in `accrue/`) — the full ExUnit suite, including the focused files that prove metered billing, dunning, DLQ, multi-endpoint webhooks, checkout/portal, the events query API, and telemetry ops/metrics.
 
-The repository CI already runs `mix test --warnings-as-errors` for `accrue/`, which includes every surrogate — there is no second duplicate suite to keep in sync.
+The repository CI already runs `mix test --warnings-as-errors` for `accrue/`, so there is no second duplicate suite to keep in sync.
 
 ## Fake-first Phoenix scenario
 

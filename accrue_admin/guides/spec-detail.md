@@ -6,10 +6,10 @@ spine: breadcrumbs → GOV.UK-style summary-list header (always-on state) → ac
 (≤2 primary buttons + overflow) → collapsible drill sections → one related-resources strip →
 lazy activity timeline and raw JSON at the bottom.
 
-The archetype's governing rule is **summary-then-drill, not everything-at-once.** The worst
-current offender — `subscription_live.ex` at 1,234 lines with ~25 always-visible zones and
-10 permanently-expanded inline action forms — is the gold-standard remediation target for
-Phase 195. The pattern eliminates the "info dump" by layering content by frequency-of-need per
+The archetype's governing rule is **summary-then-drill, not everything-at-once.** The pattern was
+developed to remediate `subscription_live.ex` — historically the worst "info dump" offender, with
+~25 always-visible zones and 10 permanently-expanded inline action forms — as the Phase 195
+remediation target. It eliminates the "info dump" by layering content by frequency-of-need per
 persona, without deleting any information.
 
 Audience: build agents for Phases 194–200, the `accrue_admin` maintainer, and adopters extending

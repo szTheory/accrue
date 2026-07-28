@@ -292,7 +292,7 @@ Enabling is a **two-step opt-in** — both are required:
 
 2. **Enable the Stripe event on your Dashboard.** This is **host-owned** — Accrue
    cannot do it for you. On your Stripe webhook endpoint (the same one Accrue
-   already verifies under your `:webhook_signing_secret`), enable the
+   already verifies under your `:webhook_signing_secrets`), enable the
    `entitlements.active_entitlement_summary.updated` event. Until that event is
    enabled in Stripe, no summaries arrive and the cache stays empty.
 

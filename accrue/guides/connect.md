@@ -49,11 +49,11 @@ plug knows which secret to verify against:
 ```elixir
 # lib/my_app_web/router.ex
 pipeline :stripe_webhooks do
-  plug Accrue.Plug.VerifyStripeSignature, endpoint: :primary
+  plug Accrue.Webhook.Plug, processor: :stripe, endpoint: :primary
 end
 
 pipeline :stripe_connect_webhooks do
-  plug Accrue.Plug.VerifyStripeSignature, endpoint: :connect
+  plug Accrue.Webhook.Plug, processor: :stripe, endpoint: :connect
 end
 
 scope "/webhooks" do
@@ -183,7 +183,7 @@ write the same billing code platform-scoped and account-scoped.
 Accrue.Connect.with_account("acct_marketplace_seller_42", fn ->
   # All three calls inside this block carry the Stripe-Account header
   # automatically.
-  {:ok, customer} = Accrue.Billing.fetch_or_create_customer(buyer_user)
+  {:ok, customer} = Accrue.Billing.customer(buyer_user)
   {:ok, sub}      = Accrue.Billing.subscribe(customer, "price_pro_monthly")
   {:ok, invoice}  = Accrue.Billing.preview_upcoming_invoice(sub)
   {:ok, sub, invoice}
@@ -348,8 +348,9 @@ platform scope regardless of any surrounding `with_account/2` block.
 The process dictionary does not survive `Task.async`, GenServer
 dispatch, or Oban job enqueue. Accrue's Oban middleware re-reads
 `:accrue_connected_account_id` at enqueue time and restores it at
-perform time — use `Accrue.Workers.ConnectAwareWorker` or enqueue
-through a helper that threads the scope through job args.
+perform time — so any Oban worker inherits the connected-account scope
+automatically. When you enqueue outside a `with_account/2` block, thread
+the scope through job args explicitly.
 
 ### Pitfall 3 — Missing `application_fee_amount` currency check
 

@@ -12,7 +12,7 @@ Work through the sections in order the first time you promote to production; lat
 
 ### 2. Runtime secrets and config
 
-- [ ] **`:stripe_secret_key`** and **`:webhook_signing_secret`** are read from **`config/runtime.exs`** (or equivalent), not compile-time config. See [Configuration](configuration.md#required-runtime-keys).
+- [ ] **`:stripe_secret_key`** and **`:webhook_signing_secrets`** are read from **`config/runtime.exs`** (or equivalent), not compile-time config. See [Configuration](configuration.md#required-runtime-keys).
 - [ ] Optional adapters (**`:auth_adapter`**, **`:invoice_pdf_adapter`**, **`:pdf_adapter`**, **`:mailer`**) match how you run in prod vs dev/test. `:invoice_pdf_adapter` owns invoice rendering; `:pdf_adapter` remains the lower-level HTML seam. See [Configuration](configuration.md).
 - [ ] If you ship **Braintree**, `portal_mount_path` matches the mounted `accrue_portal` route and `portal_base_url` is an absolute host URL in the same runtime environment that generates checkout and billing portal links. See [Braintree local portal](braintree-local-portal.md).
 - [ ] If you ship **Braintree** and expose `Accrue.Billing.swap_plan/3` or admin-driven plan swaps, `:plan_resolver` is configured in runtime config and resolves app-facing `price_id`s to Braintree plan metadata. See [Lifecycle semantics](lifecycle_semantics.md) and [Braintree local portal](braintree-local-portal.md).

@@ -56,7 +56,7 @@ When the invoice renderer depends on a newly published Rendro version, preserve 
 
 1. Publish `rendro`.
 2. Confirm the new Rendro version is available on Hex.
-3. Update `accrue/mix.exs` to use the published `{:rendro, "~> 0.1.0"}`-style dependency.
+3. Update `accrue/mix.exs` to use the published `{:rendro, "~> 1.0"}`-style dependency.
 4. Run `bash scripts/ci/verify_rendro_hex_resolution.sh` to prove a clean checkout resolves Rendro from Hex instead of `../../rendro`.
 
 ### Release Please + Hex (linked automation)

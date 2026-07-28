@@ -98,18 +98,20 @@ config :accrue,
     campaign: [
       enabled: true,
       steps: [
-        [after_days: 0,  template: :dunning_step_1],
-        [after_days: 5,  template: :dunning_step_2],
-        [after_days: 12, template: :dunning_step_3]
+        [after_days: 0,  key: :reminder,        template: Accrue.Emails.InvoicePaymentFailed],
+        [after_days: 5,  key: :action_required, template: Accrue.Emails.DunningActionRequired],
+        [after_days: 12, key: :final_notice,    template: Accrue.Emails.DunningFinalNotice]
       ]
     ],
     grace_days: 14
   ]
 ```
 
-The `steps:` list is ordered by `after_days` (ascending). Each step maps an
-`after_days` offset (absolute from `dunning_campaign_started_at`) to a Swoosh email
-template key. The default journey is `[0, 5, 12]`.
+Each step is `[after_days: N, key: atom, template: module]`. `after_days` is
+absolute from `dunning_campaign_started_at`, strictly increasing and unique;
+`key` is required and unique (it becomes the Oban-unique step identity);
+`template` is the email module to send. The default journey is `[0, 5, 12]`
+(keys `:reminder`, `:action_required`, `:final_notice`).
 
 **Opt out entirely:**
 
@@ -198,8 +200,9 @@ The following are **not affected** by switching to Chimeway orchestration:
 
 - **Campaign DB state** — `dunning_campaign_started_at` on `accrue_subscriptions` remains the
   single anchor column; Accrue still owns all dunning DB writes.
-- **Email templates** — the same Accrue dunning email templates (`dunning_step_1`,
-  `dunning_step_2`, `dunning_step_3`) are used; Chimeway routes delivery, Accrue authors the
+- **Email templates** — the same Accrue dunning email modules
+  (`Accrue.Emails.InvoicePaymentFailed`, `Accrue.Emails.DunningActionRequired`,
+  `Accrue.Emails.DunningFinalNotice`) are used; Chimeway routes delivery, Accrue authors the
   content.
 - **Ledger events** — `dunning.campaign_started`, `dunning.step_sent`, `dunning.recovered`, and
   `dunning.exhausted` are still written to `accrue_events`.

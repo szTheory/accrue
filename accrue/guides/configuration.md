@@ -9,10 +9,10 @@ Keep processor secrets in `config/runtime.exs` so release artifacts never bake t
 ```elixir
 config :accrue,
   stripe_secret_key: System.fetch_env!("STRIPE_SECRET_KEY"),
-  webhook_signing_secret: System.fetch_env!("STRIPE_WEBHOOK_SIGNING_SECRET")
+  webhook_signing_secrets: %{stripe: System.fetch_env!("STRIPE_WEBHOOK_SIGNING_SECRET")}
 ```
 
-The runtime-only keys you must supply for the Stripe processor are `:stripe_secret_key` and `:webhook_signing_secret`.
+The runtime-only keys you must supply for the Stripe processor are `:stripe_secret_key` and `:webhook_signing_secrets` (a map of processor atom to signing secret, so multiple processors can each carry their own secret).
 
 ## Billing schema
 

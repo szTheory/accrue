@@ -31,10 +31,10 @@ See `accrue/test/live_stripe/`. Current modules:
 |---|---|
 | `charge_3ds_live_test.exs` | `Billing.charge/3` with a 3DS-required test PM surfaces `{:ok, :requires_action, pi}` against real Stripe |
 | `proration_fidelity_live_test.exs` | `preview_upcoming_invoice/2` line items match the committed invoice produced by `swap_plan/3` line-for-line |
+| `connect_test.exs` | `Connect.create_account/2` (Standard + Express), account retrieval, and account/login links against real Stripe |
 
-Together these automate all 3 items in
-`.planning/phases/03-core-subscription-lifecycle/03-HUMAN-UAT.md`
-so Phase 3 ships with zero manual human verification gaps.
+Together these automate the human-UAT items for the core subscription-lifecycle
+work, so those flows ship with zero manual human verification gaps.
 
 ## Running locally
 

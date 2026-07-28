@@ -48,10 +48,10 @@ Invoice attachments follow the invoice renderer, not the lower-level HTML seam:
 
 ## Mailglass migrations (staged rollout)
 
-Starting in Accrue v1.29, the email pipeline is being migrated from
-`mjml_eex` + `phoenix_swoosh` to [Mailglass](https://github.com/szTheory/mailglass)
+As of Accrue v1.29, the email pipeline runs on [Mailglass](https://github.com/szTheory/mailglass)
 — a HEEx-native transactional email framework with an append-only event
-ledger, native idempotency, and a LiveView dev-preview dashboard.
+ledger, native idempotency, and a LiveView dev-preview dashboard — replacing
+the earlier `mjml_eex` + `phoenix_swoosh` stack.
 
 Mailglass introduces three Postgres tables that the host application
 must create alongside Accrue's existing migrations:
@@ -97,16 +97,13 @@ migrations, the most common cause is a stale snapshot in
 
 ### What changes for Accrue users
 
-The first rollout step only adds the Mailglass dependency and admin
-dashboard.
-The existing `Accrue.Mailer.deliver/2` API, the type/assigns contract,
-the override ladder, and the Oban-based async pipeline remain unchanged.
-
-The next rollout step refactors `Accrue.Workers.Mailer` to dispatch via
-`Mailglass.deliver/1` and adds explicit idempotency keys. The final
-step ports the remaining MJML templates, removes `mjml_eex` and
-`phoenix_swoosh` from `accrue/mix.exs`, and leaves the admin preview UI
-as the supported inspection surface.
+The migration is complete: `Accrue.Workers.Mailer` dispatches through
+`Mailglass.deliver/1` with explicit idempotency keys, the MJML templates
+have been ported, and `mjml_eex` + `phoenix_swoosh` have been removed from
+`accrue/mix.exs`. The existing `Accrue.Mailer.deliver/2` API, the
+type/assigns contract, the override ladder, and the Oban-based async
+pipeline are unchanged, and the admin preview UI is the supported
+inspection surface.
 
 See [Mailglass getting started](https://github.com/szTheory/mailglass/blob/main/guides/getting-started.md)
 for the upstream install reference.

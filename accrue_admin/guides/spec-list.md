@@ -5,7 +5,7 @@ subscriptions, customers, payments, coupons, promotion codes, and related list v
 follows the same structural grammar: a `PageHeader` with breadcrumbs, title, stat-strip, and
 filter toolbar; a persistent filter-chip row with result count and clear-all; a responsive
 `data_table` that degrades to stacked label/value cards below the mobile breakpoint; and
-server-side pagination.
+server-side, cursor-based load-more.
 
 The archetype's governing rule is **table-first, not card-first.** Billing operators scan across
 rows to compare state, money, and time — tasks that tables serve and heterogeneous card grids do
@@ -31,7 +31,7 @@ The following invariants are verified deterministically by the page-flow Playwri
 | **Renders 4 distinct states with distinct copy strings.** A list page must handle: (1) populated with data rows, (2) first-run empty (no records ever created — onboarding copy), (3) filtered-empty (filter excludes all results — "no open invoices" copy with a clear-filters affordance distinct from the first-run copy), (4) loading skeleton (skeleton rows matching the table column shape, not a spinner). The first-run-empty and filtered-empty states must not share the same copy string. | Playwright page-flow spec seeds fixtures for each state and asserts the distinct selector or copy string is present. The filtered-empty state must contain a `[data-ax-state="filtered-empty"]` or equivalent locator with a "clear filters" affordance; the first-run-empty must not contain that affordance. |
 | **Filter chips, result count, and clear-all are all present when a filter is active.** When at least one filter parameter is active, the page must render: a removable chip for each active filter, a visible numeric result count, and a "clear all" / "clear filters" control. None of the three may be absent when a filter is active. | Playwright page-flow spec applies a filter, then asserts `[data-ax-filter-chips]` count > 0, `[data-ax-result-count]` is visible, and `[data-ax-clear-all]` is visible — all three checks must pass simultaneously. |
 | **Every truncating cell pairs `text-overflow: ellipsis` with `min-width: 0` in the same CSS block.** A table cell that clips long strings with an ellipsis must also declare `min-width: 0` in the same rule or on the same element; without `min-width: 0` the ellipsis is ineffective in flex/grid containers and text overflows its parent. | New source guard in `scripts/ci/verify_package_docs.sh` (`require_regex`): for every CSS rule containing `text-overflow: ellipsis`, the same block must also contain `min-width: 0`. Pairs with a negative test in `PackageDocsVerifierTest`. |
-| **No pagination controls rendered when total pages ≤ 1.** If the result set fits on a single page (or is empty), no "previous / next" pagination UI may appear in the DOM. Showing pagination for a one-page result is visual noise and implies more data exists. | Playwright page-flow spec: seed a fixture with ≤ page-size rows, assert `[data-ax-pagination]` is absent (or hidden). |
+| **No load-more control rendered when the result set fits on one page.** Lists load incrementally via a cursor-based `data-role="load-more"` control (`phx-viewport-bottom`), not previous/next pagination. If the result set fits within the page size (or is empty), no load-more affordance may appear in the DOM — showing one for a complete result implies more data exists. | Playwright page-flow spec: seed a fixture with ≤ page-size rows, assert `[data-role="load-more"]` is absent. |
 
 ### Judge-graded criteria (12-dim rubric)
 
