@@ -1,0 +1,165 @@
+{
+  "generated_at": "2026-07-28T00:20:39.186Z",
+  "rows": [
+    {
+      "story_url": "/billing/dev/storybook/components/action_menu",
+      "theme": "light",
+      "status": "passed",
+      "evidence_refs": [
+        "playwright:admin-storybook-a11y-phase200:chromium-desktop",
+        "storybook:/billing/dev/storybook/components/action_menu:light"
+      ],
+      "violations": []
+    },
+    {
+      "story_url": "/billing/dev/storybook/components/action_menu",
+      "theme": "dark",
+      "status": "passed",
+      "evidence_refs": [
+        "playwright:admin-storybook-a11y-phase200:chromium-desktop",
+        "storybook:/billing/dev/storybook/components/action_menu:dark"
+      ],
+      "violations": []
+    },
+    {
+      "story_url": "/billing/dev/storybook/components/button",
+      "theme": "light",
+      "status": "passed",
+      "evidence_refs": [
+        "playwright:admin-storybook-a11y-phase200:chromium-desktop",
+        "storybook:/billing/dev/storybook/components/button:light"
+      ],
+      "violations": []
+    },
+    {
+      "story_url": "/billing/dev/storybook/components/button",
+      "theme": "dark",
+      "status": "passed",
+      "evidence_refs": [
+        "playwright:admin-storybook-a11y-phase200:chromium-desktop",
+        "storybook:/billing/dev/storybook/components/button:dark"
+      ],
+      "violations": []
+    },
+    {
+      "story_url": "/billing/dev/storybook/components/component_registry",
+      "theme": "light",
+      "status": "passed",
+      "evidence_refs": [
+        "playwright:admin-storybook-a11y-phase200:chromium-desktop",
+        "storybook:/billing/dev/storybook/components/component_registry:light"
+      ],
+      "violations": []
+    },
+    {
+      "story_url": "/billing/dev/storybook/components/component_registry",
+      "theme": "dark",
+      "status": "passed",
+      "evidence_refs": [
+        "playwright:admin-storybook-a11y-phase200:chromium-desktop",
+        "storybook:/billing/dev/storybook/components/component_registry:dark"
+      ],
+      "violations": []
+    },
+    {
+      "story_url": "/billing/dev/storybook/components/detail",
+      "theme": "light",
+      "status": "passed",
+      "evidence_refs": [
+        "playwright:admin-storybook-a11y-phase200:chromium-desktop",
+        "storybook:/billing/dev/storybook/components/detail:light"
+      ],
+      "violations": []
+    },
+    {
+      "story_url": "/billing/dev/storybook/components/detail",
+      "theme": "dark",
+      "status": "passed",
+      "evidence_refs": [
+        "playwright:admin-storybook-a11y-phase200:chromium-desktop",
+        "storybook:/billing/dev/storybook/components/detail:dark"
+      ],
+      "violations": []
+    },
+    {
+      "story_url": "/billing/dev/storybook/components/overlay",
+      "theme": "light",
+      "status": "passed",
+      "evidence_refs": [
+        "playwright:admin-storybook-a11y-phase200:chromium-desktop",
+        "storybook:/billing/dev/storybook/components/overlay:light"
+      ],
+      "violations": []
+    },
+    {
+      "story_url": "/billing/dev/storybook/components/overlay",
+      "theme": "dark",
+      "status": "passed",
+      "evidence_refs": [
+        "playwright:admin-storybook-a11y-phase200:chromium-desktop",
+        "storybook:/billing/dev/storybook/components/overlay:dark"
+      ],
+      "violations": []
+    },
+    {
+      "story_url": "/billing/dev/storybook/components/page_header",
+      "theme": "light",
+      "status": "passed",
+      "evidence_refs": [
+        "playwright:admin-storybook-a11y-phase200:chromium-desktop",
+        "storybook:/billing/dev/storybook/components/page_header:light"
+      ],
+      "violations": []
+    },
+    {
+      "story_url": "/billing/dev/storybook/components/page_header",
+      "theme": "dark",
+      "status": "passed",
+      "evidence_refs": [
+        "playwright:admin-storybook-a11y-phase200:chromium-desktop",
+        "storybook:/billing/dev/storybook/components/page_header:dark"
+      ],
+      "violations": []
+    },
+    {
+      "story_url": "/billing/dev/storybook/components/subscription_detail",
+      "theme": "light",
+      "status": "passed",
+      "evidence_refs": [
+        "playwright:admin-storybook-a11y-phase200:chromium-desktop",
+        "storybook:/billing/dev/storybook/components/subscription_detail:light"
+      ],
+      "violations": []
+    },
+    {
+      "story_url": "/billing/dev/storybook/components/subscription_detail",
+      "theme": "dark",
+      "status": "passed",
+      "evidence_refs": [
+        "playwright:admin-storybook-a11y-phase200:chromium-desktop",
+        "storybook:/billing/dev/storybook/components/subscription_detail:dark"
+      ],
+      "violations": []
+    },
+    {
+      "story_url": "/billing/dev/storybook/groups/component_groups",
+      "theme": "light",
+      "status": "passed",
+      "evidence_refs": [
+        "playwright:admin-storybook-a11y-phase200:chromium-desktop",
+        "storybook:/billing/dev/storybook/groups/component_groups:light"
+      ],
+      "violations": []
+    },
+    {
+      "story_url": "/billing/dev/storybook/groups/component_groups",
+      "theme": "dark",
+      "status": "passed",
+      "evidence_refs": [
+        "playwright:admin-storybook-a11y-phase200:chromium-desktop",
+        "storybook:/billing/dev/storybook/groups/component_groups:dark"
+      ],
+      "violations": []
+    }
+  ]
+}
