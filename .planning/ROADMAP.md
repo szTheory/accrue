@@ -225,7 +225,7 @@ Plans:
 Plans:
 **Wave 1**
 
-- [ ] 211-01-PLAN.md — Build the orphan/dangling `ax-*` CSS census guard (`verify-css-census.mjs` + self-test) and capture the pre-Phase-211 mix test baseline + cross-validate the guard against the RESEARCH.md census
+- [x] 211-01-PLAN.md — Build the orphan/dangling `ax-*` CSS census guard (`verify-css-census.mjs` + self-test) and capture the pre-Phase-211 mix test baseline + cross-validate the guard against the RESEARCH.md census
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
@@ -263,7 +263,7 @@ Plans:
 | 208. Prove convergence on slice + wire CI + ACCEPT | v1.56 | 3/5 | Parked | - |
 | 209. Reign Subscriptions (list + detail CSS coordination) | v1.57 | 3/3 | Complete    | 2026-07-19 |
 | 210. Reign Home + certify answer-first IA & copy integrity | v1.57 | 3/3 | Complete    | 2026-07-19 |
-| 211. Grep-gated CSS retirement & cross-surface cleanup | v1.57 | 0/4 | Not started | - |
+| 211. Grep-gated CSS retirement & cross-surface cleanup | v1.57 | 1/4 | In Progress|  |
 
 ## Historical Backlog Anchors (not active scope)
 
