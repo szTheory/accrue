@@ -2801,6 +2801,11 @@ html.accrue-admin[data-theme="dark"] .ax-button-primary {
 
 .ax-page {
   display: grid;
+  /* Single-column stack. Pin the implicit track to minmax(0, 1fr) so a child's
+     min-content (e.g. the reign health-summary's ~296px flex row) can't expand
+     the column past the container — otherwise content overflows the viewport by
+     a few px under wider (Linux/CI) font metrics. See CI-GREEN-REMEDIATION.md. */
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--ax-space-xl);
   min-width: 0;
   width: 100%;
@@ -6832,6 +6837,9 @@ button.ax-launcher {
   padding: 0;
   border: 1px solid var(--ax-border);
   border-radius: var(--ax-radius-sm);
+  /* border-box so the 1–2px status border sits inside the capped grid track
+     rather than adding to the summary's width (subscription-detail 320px clip). */
+  box-sizing: border-box;
   color: var(--ax-primary);
 }
 
