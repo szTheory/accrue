@@ -221,7 +221,7 @@ Plans:
   4. The component kitchen (`component_kitchen_live.ex`) and `priv/static/storybook.css` no longer render retired vocabulary (updated + `storybook.css` rebuilt), the phase200 storybook specs stay green, and the parked `region-tags.js` `.ax-attention-rail` mapping is opportunistically fixed so a future ratchet re-freeze starts from a non-dangling selector map.
   5. Full `mix test` + the admin e2e suite are green across the phase boundary (no red left behind), and the diff touches no `accrue/lib` and adds no nav room.
 
-**Plans**: 2/4 plans executed
+**Plans**: 3/4 plans executed
 Plans:
 **Wave 1**
 
@@ -233,7 +233,7 @@ Plans:
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
-- [ ] 211-03-PLAN.md — Recompose `priv/static/storybook.css` per the D-04 shell recipe and run the orphan guard against the retired `app.css` plus an early smoke test
+- [x] 211-03-PLAN.md — Recompose `priv/static/storybook.css` per the D-04 shell recipe and run the orphan guard against the retired `app.css` plus an early smoke test
 
 **Wave 4** *(blocked on Wave 3 completion)*
 
@@ -263,7 +263,7 @@ Plans:
 | 208. Prove convergence on slice + wire CI + ACCEPT | v1.56 | 3/5 | Parked | - |
 | 209. Reign Subscriptions (list + detail CSS coordination) | v1.57 | 3/3 | Complete    | 2026-07-19 |
 | 210. Reign Home + certify answer-first IA & copy integrity | v1.57 | 3/3 | Complete    | 2026-07-19 |
-| 211. Grep-gated CSS retirement & cross-surface cleanup | v1.57 | 2/4 | In Progress|  |
+| 211. Grep-gated CSS retirement & cross-surface cleanup | v1.57 | 3/4 | In Progress|  |
 
 ## Historical Backlog Anchors (not active scope)
 
