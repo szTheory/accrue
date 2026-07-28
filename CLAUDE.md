@@ -11,7 +11,7 @@ Tagline: *"Billing state, modeled clearly."*
 
 ### Constraints
 
-- **Tech stack**: Elixir 1.17+, OTP 27+, Phoenix 1.8+, Ecto 3.12+, PostgreSQL 14+. No legacy OTP support.
+- **Tech stack**: Elixir 1.19+, OTP 27+, Phoenix 1.8+, Ecto 3.12+, PostgreSQL 14+. No legacy OTP support.
 - **Dependencies (required)**: `lattice_stripe` (Stripe calls), `oban` (webhook async + email async + scheduled jobs), `swoosh` (email), `ecto_sql`, `postgrex`, `nimble_options` (config validation), `telemetry`, `chromic_pdf` (default PDF adapter — pullable via `accrue_admin` and core).
 - **Dependencies (optional)**: `sigra` (`optional: true`). NOTE: `phoenix_live_view` is a **required** (non-optional) core dep — it ships `Phoenix.Component`/`~H` for the email + invoice render spine and backs the conditionally-compiled entitlement `on_mount` guard. Core stays **LiveView-runtime-free**: no LiveView socket runtime in always-compiled code, and `phoenix_live_view` never appears in `extra_applications` (OTP-level it is `[:logger]` only). `accrue_admin` additionally hard-deps LiveView for its dashboard.
 - **Release model**: ship complete. No public v0.x iteration cycle. Internal phases are build milestones, not public releases. First public release is v1.0 (or `0.1.0` if strict semver-pre-1 is preferred, but conceptually "complete").
@@ -30,8 +30,8 @@ Tagline: *"Billing state, modeled clearly."*
 ### Core Technologies — `accrue` package
 | Technology | Version Constraint | Purpose | Rationale |
 |------------|-------------------|---------|-----------|
-| Elixir | `~> 1.17` | Language | Locked in PROJECT.md. Matches `config/runtime.exs` era, native `Ecto.Repo.transact/2`, OTP 27 baseline. |
-| Erlang/OTP | `27+` | Runtime | Locked. Required for Elixir 1.17. |
+| Elixir | `~> 1.19` | Language | Locked in `mix.exs` (all three packages). Native `Ecto.Repo.transact/2`, OTP 27 baseline. |
+| Erlang/OTP | `27+` | Runtime | Locked. Required for Elixir 1.19. |
 | `:phoenix` | `~> 1.8` | HTTP layer (optional-not-required at runtime, but we target 1.8 conventions) | Locked. Needed for verified routes and the 1.8 LiveView stream/function-component shape in `accrue_admin`. |
 | `:ecto` | `~> 3.13` | Domain modeling | Bumped from `~> 3.12` because `ecto_sql` current is **3.13.5** (2025-11-09), and Accrue's `Repo.transact/2` usage is cleanest on 3.12+. `~> 3.13` is strict enough to guarantee the API we need. |
 | `:ecto_sql` | `~> 3.13` | Repo + migrations | Pinned to match `:ecto` minor. Current **3.13.5**. |
@@ -79,7 +79,7 @@ Tagline: *"Billing state, modeled clearly."*
 ## Version Compatibility Matrix
 | Anchor Pin | Forces | Notes |
 |------------|--------|-------|
-| `elixir ~> 1.17` | OTP 27+, Phoenix 1.8+, LiveView 1.1+ | Locked. |
+| `elixir ~> 1.19` | OTP 27+, Phoenix 1.8+, LiveView 1.1+ | Locked. |
 | `ecto ~> 3.13` | `ecto_sql ~> 3.13`, `postgrex ~> 0.22` | Ecto 3.13 supports `postgrex ~> 0.20 or ~> 1.0` but we pin tighter. |
 | `oban ~> 2.21` | Postgres 14+, Ecto 3.12+ | Already matches our floor. Oban uses `ecto_sql` directly; no conflict. |
 | `phoenix ~> 1.8` | `phoenix_html ~> 4.1+`, `plug ~> 1.16` | Transitive. |
@@ -91,9 +91,8 @@ Tagline: *"Billing state, modeled clearly."*
 ### Elixir / OTP / Phoenix CI Matrix
 | Elixir | OTP | Phoenix | Notes |
 |--------|-----|---------|-------|
-| 1.17.x | 27 | 1.8.x | Floor — this is the minimum supported. |
-| 1.18.x | 27 | 1.8.x | Primary development target. |
-| 1.18.x | 28 | 1.8.x | Forward-compat smoke canary. |
+| 1.19.0 | 28 | 1.8.x | Floor — minimum supported compatibility cell. |
+| 1.19.5 | 28 | 1.8.x | Primary development target. |
 ## Conditional Compilation for Optional Deps
 ### 1. Declare optional in `deps/0`
 ### 2. Silence compiler warnings for undefined optional modules
@@ -103,7 +102,7 @@ Tagline: *"Billing state, modeled clearly."*
 | Setting | Where | Why |
 |---------|-------|-----|
 | `:auth_adapter`, `:pdf_adapter`, `:mailer_adapter`, `:processor` | `config/config.exs` (compile-time OK) | Adapter resolution is stable per-deploy; compile-time is fine and slightly faster at lookup. Use `Application.compile_env!/2` inside Accrue modules so misconfig fails at `mix compile`, not at runtime. |
-| `:stripe_secret_key`, `:webhook_signing_secret` | `config/runtime.exs` (MUST be runtime) | Secrets come from env vars at release-start; compile-time reading leaks build secrets into release artifacts. |
+| `:stripe_secret_key`, `:webhook_signing_secrets` | `config/runtime.exs` (MUST be runtime) | Secrets come from env vars at release-start; compile-time reading leaks build secrets into release artifacts. |
 | `:default_currency`, `:from_email`, brand colors | `config/runtime.exs` | Host-owned, may differ per-env. |
 | `:oban` queue config | Host-owned, runtime | Accrue documents recommended queues (`accrue_webhooks: 10`, `accrue_mailers: 20`), host wires into their own Oban config. Accrue does NOT start its own Oban instance. |
 | Feature flags (e.g., enable_dunning?) | `config/runtime.exs` | Want to toggle without recompile. |
