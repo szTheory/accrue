@@ -45,3 +45,9 @@ accrue/.secrets
 
 # Internal brand working doc — local-only, not part of the published repo.
 prompts/accrue-brand-book.md
+
+.env
+
+# Claude Code local scheduler lock — machine-local runtime state (session id / pid),
+# not shared repo state.
+.claude/scheduled_tasks.lock
