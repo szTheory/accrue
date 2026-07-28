@@ -178,7 +178,7 @@ test.describe("foundation tokens - computed styles", () => {
 
 // >>> @ratchet:auto-guards >>>
 const RATCHET_AUTO_GUARDS = [
-  {"finding_id":"f-c215fb4ea22d61fe","kind":"contrast","selector":".ax-kpi-row","min_ratio":4.5}, // @ratchet:f-c215fb4ea22d61fe
+  {"finding_id":"f-c215fb4ea22d61fe","kind":"contrast","selector":".ax-kpi-card","min_ratio":4.5}, // @ratchet:f-c215fb4ea22d61fe (209/210 reign replaced .ax-kpi-row with KpiCard/StatStrip; retargeted to .ax-kpi-card)
 ];
 // <<< @ratchet:auto-guards <<<
 

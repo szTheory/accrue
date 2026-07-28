@@ -983,7 +983,7 @@ const RATCHET_AUTO_GUARDS = [
   {"finding_id":"f-a5a8e0d926d2214c","kind":"focus-ring","selector":".ax-kpi-card"}, // @ratchet:f-a5a8e0d926d2214c
   {"finding_id":"f-b6c27cee85892dd2","kind":"focus-ring","selector":".ax-layer"}, // @ratchet:f-b6c27cee85892dd2
   {"finding_id":"f-ca8eabe5458b44f5","kind":"focus-ring","selector":".ax-page-header"}, // @ratchet:f-ca8eabe5458b44f5
-  {"finding_id":"f-d43539c599a42ac9","kind":"focus-ring","selector":".ax-primary-nav"}, // @ratchet:f-d43539c599a42ac9
+  {"finding_id":"f-d43539c599a42ac9","kind":"focus-ring","selector":".ax-topbar"}, // @ratchet:f-d43539c599a42ac9 (.ax-primary-nav sidebar is hidden on mobile by design — nav is reached via the topbar Menu toggle; retargeted to the both-viewport .ax-topbar chrome)
   {"finding_id":"f-e3deb40c0e41d060","kind":"focus-ring","selector":".ax-layer"}, // @ratchet:f-e3deb40c0e41d060
   {"finding_id":"f-f1be6ae0d866ce1b","kind":"focus-ring","selector":".ax-page-header"}, // @ratchet:f-f1be6ae0d866ce1b
   {"finding_id":"f-f6641ba530cd6c0b","kind":"focus-ring","selector":".ax-topbar"}, // @ratchet:f-f6641ba530cd6c0b
