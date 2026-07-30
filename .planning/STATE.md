@@ -6,7 +6,7 @@ current_phase: 213
 current_phase_name: stripe-native-advisory-entitlements-sync-observational-only
 status: executing
 stopped_at: Completed 213-02-PLAN.md
-last_updated: "2026-07-30T21:21:09.581Z"
+last_updated: "2026-07-30T21:21:40.287Z"
 last_activity: 2026-07-30
 last_activity_desc: Phase 213 execution started
 progress:
@@ -641,6 +641,8 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - [Phase ?]: Pull and webhook entitlement-summary writes share Accrue.Entitlements.Reconcile so advisory cache ordering has one implementation.
 - [Phase ?]: Pull writes use pull_started_at as synced_at and carry forward the greatest real webhook watermark.
 - [Phase ?]: Identical pull snapshots short-circuit as :unchanged before DB upsert and do not duplicate the ledger.
+- [Phase 213]: Stripe adapter drains the ActiveEntitlement stream through the processor facade and projects only bounded webhook-compatible fields. — Keeps raw LatticeStripe references confined to stripe.ex and preserves the public list callback shape.
+- [Phase 213]: RefreshWorker uses the existing accrue_webhooks queue with scalar customer_id args and no scheduler. — Preserves host-owned Oban wiring and keeps advisory refresh off request paths without introducing an always-on poller.
 
 ### Pending Todos
 
