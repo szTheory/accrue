@@ -77,6 +77,19 @@ jobs:
       - name: Run browser UAT
         run: cd accrue_admin && npm run e2e
 
+      - name: Check for committed visual baselines
+        id: vrbaseline
+        run: |
+          if ls accrue_admin/e2e/__screenshots__/visual-desktop/*.png >/dev/null 2>&1; then
+            echo "present=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "present=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Phase 211 visual regression gate
+        if: steps.vrbaseline.outputs.present == 'true'
+        run: cd accrue_admin && npm run e2e:visual-regression
+
       - name: Upload Playwright report
         if: failure()
         uses: actions/upload-artifact@v7
@@ -91,4 +104,77 @@ jobs:
         with:
           name: accrue-admin-playwright-traces
           path: accrue_admin/test-results
+          if-no-files-found: ignore
+
+  # Non-blocking baseline-mint job. Pixel baselines are OS/font-stack specific and
+  # MUST be generated on the Linux CI runner (Mac-minted baselines fail on Linux
+  # 100%). workflow_dispatch cannot be dispatched from a feature branch, so this
+  # mints on the workflow's existing pull_request trigger. It is a separate,
+  # non-required job that only produces an artifact — it does not gate browser-uat.
+  visual-baselines-mint:
+    name: Mint visual baselines
+    runs-on: ubuntu-24.04
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_USER: postgres
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      MIX_ENV: test
+      PGUSER: postgres
+      PGPASSWORD: postgres
+      PGHOST: localhost
+      ACCRUE_ADMIN_E2E_PORT: 4017
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Set up BEAM
+        uses: erlef/setup-beam@v1
+        with:
+          otp-version: "28.0"
+          elixir-version: "1.19.5"
+
+      - name: Install Hex
+        run: mix local.hex 2.4.2 --force
+
+      - name: Set up Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: accrue_admin/package-lock.json
+
+      - name: Install Elixir deps
+        run: cd accrue_admin && mix deps.get
+
+      - name: Compile admin package
+        run: cd accrue_admin && mix compile --warnings-as-errors
+
+      - name: Install browser deps
+        run: cd accrue_admin && npm ci
+
+      - name: Install Chromium
+        run: cd accrue_admin && npx playwright install --with-deps chromium
+
+      - name: Mint visual baselines
+        run: cd accrue_admin && npm run e2e:visual-regression -- --update-snapshots
+
+      - name: Upload minted baselines
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: phase211-visual-baselines
+          path: accrue_admin/e2e/__screenshots__
           if-no-files-found: ignore
