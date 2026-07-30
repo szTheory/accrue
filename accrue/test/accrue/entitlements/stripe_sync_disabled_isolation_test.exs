@@ -113,7 +113,12 @@ defmodule Accrue.Entitlements.StripeSyncDisabledIsolationTest do
   end
 
   test "advisory cache rows cannot alter the full local grant surface when sync is enabled" do
-    Application.put_env(:accrue, :entitlements, Keyword.put(@entitlements, :stripe_native_sync, :advisory))
+    Application.put_env(
+      :accrue,
+      :entitlements,
+      Keyword.put(@entitlements, :stripe_native_sync, :advisory)
+    )
+
     assert Accrue.Config.stripe_native_sync?()
 
     oid = Ecto.UUID.generate()

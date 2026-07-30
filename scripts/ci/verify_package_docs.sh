@@ -136,6 +136,11 @@ require_fixed "$ROOT_DIR/accrue/guides/analytics.md" 'Cutoff-Date Semantics'
 require_fixed "$ROOT_DIR/accrue/guides/entitlements.md" 'stripe_native_sync'
 require_fixed "$ROOT_DIR/accrue/guides/entitlements.md" 'entitlements.active_entitlement_summary.updated'
 require_fixed "$ROOT_DIR/accrue/guides/entitlements.md" 'does NOT change `entitled?` /'
+require_fixed "$ROOT_DIR/accrue/guides/entitlements.md" 'fetch_entitled/2` is closed and will-not-build'
+require_fixed "$ROOT_DIR/accrue/lib/accrue/entitlements/admin.ex" 'fetch_entitled/2` is closed and will-not-build'
+require_fixed "$ROOT_DIR/accrue/lib/accrue/entitlements/admin.ex" 'Accrue.Entitlements.StripeSync.summary_for_customer/1'
+require_absent_regex "$ROOT_DIR/accrue/guides/entitlements.md" 'fetch_entitled/2.*deferred'
+require_absent_regex "$ROOT_DIR/accrue/lib/accrue/entitlements/admin.ex" 'def(p)?[[:space:]]+fetch_entitled'
 require_fixed "$ROOT_DIR/accrue/guides/telemetry.md" '[:accrue, :entitlements, :sync]'
 
 # Optional Chimeway dunning engine adapter (Phase 131, DUN-03)

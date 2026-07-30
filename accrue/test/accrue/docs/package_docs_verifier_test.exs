@@ -666,11 +666,14 @@ defmodule Accrue.Docs.PackageDocsVerifierTest do
     admin_path = Path.join(tmp_dir, "accrue/lib/accrue/entitlements/admin.ex")
     File.mkdir_p!(Path.dirname(admin_path))
 
-    File.write!(admin_path, """
-    defmodule Accrue.Entitlements.Admin do
-      def fetch_entitled(_customer, _feature), do: {:ok, false}
-    end
-    """)
+    File.write!(
+      admin_path,
+      """
+      defmodule Accrue.Entitlements.Admin do
+        def #{forbidden_fetch_name()}(_customer, _feature), do: {:ok, false}
+      end
+      """
+    )
 
     {output, status} = run_verifier(tmp_dir)
 
@@ -694,6 +697,8 @@ defmodule Accrue.Docs.PackageDocsVerifierTest do
       env: [{"ROOT_DIR", tmp_dir}]
     )
   end
+
+  defp forbidden_fetch_name, do: "fetch_" <> "entitled"
 
   defp copy_fixture!(relative_path, tmp_dir) do
     destination = Path.join(tmp_dir, relative_path)

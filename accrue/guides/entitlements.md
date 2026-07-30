@@ -268,6 +268,14 @@ The advisory cache is exposed read-only via a core seam — the
 (one-way, internal `@doc false`) — so the recorded summary is programmatically
 inspectable without ever touching the gate.
 
+### Why there is no `fetch_entitled/2`
+
+`fetch_entitled/2` is closed and will-not-build. A Stripe-backed predicate would
+make authorization depend on a network call that can fail open under partition,
+which contradicts Accrue's fail-closed local gate. The non-gate diagnostic value
+is already served by `Accrue.Entitlements.StripeSync.summary_for_customer/1` and
+`Accrue.Entitlements.Admin.resolve_for_customer/1`.
+
 ### How to enable it
 
 Enabling is a **two-step opt-in** — both are required:

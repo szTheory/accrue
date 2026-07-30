@@ -3,8 +3,11 @@ defmodule Accrue.Entitlements.Admin do
   Internal read-only diagnostic seam for the `accrue_admin` entitlements tab
   (ENT-11).
 
-  NOT a public gate API — there is no boolean `entitled?`-style surface here
-  (Phase 123 D-07 `fetch_entitled/2` stays deferred). This module answers the
+  NOT a public gate API — there is no boolean `entitled?`-style surface here.
+  `fetch_entitled/2` is closed and will-not-build: a Stripe-backed predicate
+  makes authorization depend on a network call that can fail open under
+  partition, while `Accrue.Entitlements.StripeSync.summary_for_customer/1` and
+  `resolve_for_customer/1` already provide diagnostic observation. This module answers the
   operator question *"what does the resolver currently grant this customer, and
   what entitling `price_id`s is it silently discarding?"* by returning a
   `{resolved, unmapped_price_ids}` pair — never a grant/deny decision.
