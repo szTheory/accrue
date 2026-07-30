@@ -8,7 +8,17 @@ const outputDir = process.env.PLAYWRIGHT_OUTPUT_DIR || "test-results";
 module.exports = defineConfig({
   testDir: "./e2e",
   timeout: 30_000,
-  expect: { timeout: 5_000 },
+  expect: {
+    timeout: 5_000,
+    toHaveScreenshot: {
+      threshold: 0.2,          // per-pixel color delta for anti-aliasing/font hinting
+      maxDiffPixelRatio: 0.01, // tiny jitter budget; real color/spacing breaks still trip it
+      animations: "disabled",
+      caret: "hide",
+      scale: "css",
+    },
+  },
+  snapshotPathTemplate: "e2e/__screenshots__/{projectName}/{arg}{ext}",
   fullyParallel: false,
   workers: 1,
   reporter: process.env.CI ? [["github"], ["html", { open: "never" }]] : [["list"]],
