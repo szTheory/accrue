@@ -108,11 +108,14 @@ jobs:
 
   # Non-blocking baseline-mint job. Pixel baselines are OS/font-stack specific and
   # MUST be generated on the Linux CI runner (Mac-minted baselines fail on Linux
-  # 100%). workflow_dispatch cannot be dispatched from a feature branch, so this
-  # mints on the workflow's existing pull_request trigger. It is a separate,
-  # non-required job that only produces an artifact — it does not gate browser-uat.
+  # 100%). Baselines are now committed, so this runs on demand only — dispatch it
+  # manually (Actions → AccrueAdmin Browser UAT → Run workflow) whenever an
+  # intentional UI change requires re-minting, then download artifact
+  # `phase211-visual-baselines` and commit the refreshed PNGs. Guarded to
+  # workflow_dispatch so it no longer runs on every accrue_admin PR.
   visual-baselines-mint:
     name: Mint visual baselines
+    if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-24.04
 
     services:
