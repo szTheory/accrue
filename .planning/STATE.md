@@ -2,18 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.58
 milestone_name: lattice_stripe 2.x Bump & Stripe-Native Entitlements Sync
-current_phase: 212
-status: ready_to_execute
-stopped_at: Phase 212 planned (1 plan, ready to execute)
-last_updated: "2026-07-30T15:24:19.988Z"
+status: verifying
+stopped_at: Completed 212-01-PLAN.md
+last_updated: "2026-07-30T19:16:24.628Z"
 last_activity: 2026-07-30
-last_activity_desc: Phase 212 planned — 1 plan, 3 tasks, wave 1; research + validation + plan-checker all green (3/3 reqs, 11/11 decisions covered)
 progress:
   total_phases: 3
-  completed_phases: 0
+  completed_phases: 1
   total_plans: 1
-  completed_plans: 0
-  percent: 0
+  completed_plans: 1
+  percent: 33
 ---
 
 # Project State
@@ -24,14 +22,14 @@ See: `.planning/PROJECT.md` (updated 2026-07-30 after v1.57 closeout)
 
 **Core value:** A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic Elixir DX, strong domain modeling, tamper-evident audit ledger, great observability, and zero breaking-change pain through v1.x.
 
-**Current focus:** Active milestone v1.58 — lattice_stripe 2.x Bump & Stripe-Native Entitlements Sync. Phase 212 planned (1 plan, ready to execute); Phases 213-214 not yet planned. v1.57 (SEED-004 M1) shipped 2026-07-30; next SEED-004 candidate (M2) remains deferred.
+**Current focus:** Phase 212 — lattice-stripe-2-x-bump-green-reconciliation
 
 ## Current Position
 
-Phase: 212 (planned — ready to execute)
-Plan: 212-01 (1 plan, 3 tasks, wave 1)
-Status: Phase 212 planned — ready to execute (`/gsd-execute-phase 212`)
-Last activity: 2026-07-30 — Phase 212 planned: research (a44a1580) + validation (e9a2eab7) + plan (c6e70098) all green; plan-checker VERIFICATION PASSED (0 blockers), 3/3 reqs + 11/11 decisions covered
+Phase: 212 (lattice-stripe-2-x-bump-green-reconciliation) — EXECUTING
+Plan: 1 of 1
+Status: Phase complete — ready for verification
+Last activity: 2026-07-30
 
 ## Post-v1.48 Pause Rule
 
@@ -340,6 +338,7 @@ Coverage: 22/22 v1.51 requirements mapped (each REQ-ID → exactly one phase). D
 | Phase 211 P02 | 15 min | 2 tasks | 3 files |
 | Phase 211 P03 | 6 min | 2 tasks | 1 files |
 | Phase 211 P04 | 50 min | 3 tasks | 1 files |
+| Phase 212 P01 | 20min | 3 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -632,6 +631,8 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - [Phase ?]: 210-02: Home reigned onto PageHeader spine — single StatusBadge verdict (data-ax-health-verdict) + exposure-first StatStrip, one command-palette customer-lookup, three .ax-card launcher tiles (customer tile removed per D-02a)
 - [Phase ?]: 210-02: Launcher tile actions styled secondary so the page keeps exactly one primary cobalt CTA (header); CSS additive-only, retired .ax-launcher*/.ax-attention* rules preserved for Phase 211
 - [Phase 210]: 210-03: certified the Home reign — restructured StatStrip linked stat (stretched-link inside <dd>) to satisfy axe definition-list on both Home + Subscriptions; restored attention-rail forced-focus ring under [data-ax-force~=focus]; migrated stale kpi-row/data-table ratchet guards. All named gates green except 2 approved-deferred dark-mode contrast items.
+- [Phase ?]: lattice_stripe bumped ~> 1.1 to ~> 2.0 (resolves 2.1.0) across all 4 packages; zero Accrue-side code changes needed
+- [Phase ?]: Host lockfile stale hex-mode entries required explicit mix deps.unlock (not just deps.update) to remove — D-05 assumption corrected
 
 ### Pending Todos
 
@@ -768,9 +769,9 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 
 ## Session Continuity
 
-Last session: 2026-07-30T15:24:19.976Z
-Stopped at: Phase 212 context gathered
-Resume file: .planning/phases/212-lattice-stripe-2-x-bump-green-reconciliation/212-CONTEXT.md
+Last session: 2026-07-30T19:16:24.621Z
+Stopped at: Completed 212-01-PLAN.md
+Resume file: None
 
 ## Operator Next Steps
 

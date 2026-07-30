@@ -26,9 +26,9 @@ Each maps to exactly one roadmap phase (assigned in ROADMAP.md).
 
 ### Dependency Bump & Reconciliation (BUMP)
 
-- [ ] **BUMP-01**: The `:lattice_stripe` pin in `accrue/mix.exs` is bumped `{:lattice_stripe, "~> 1.1"}` → `~> 2.0`, and `mix.lock` is refreshed to a resolved 2.x version across every project that resolves the dep — `accrue`, `accrue_admin`, `accrue_portal`, and `examples/accrue_host` — with all lockfiles committed. Any sibling package that independently pins `:lattice_stripe` is bumped in lockstep.
-- [ ] **BUMP-02**: Every `LatticeStripe.*` call site in Accrue (core lib, admin, portal, examples, and test support) compiles clean against 2.x with no deprecated-call warnings; the two verified 2.0.0 breaking vectors (fixture-builder `<object>_json` rename; optional/default-wired Finch pool) are confirmed to need no change, or are reconciled if the confirmation turns out false.
-- [ ] **BUMP-03**: The Three Zeros gate is green across all packages on the bumped deps — `mix test`, `mix dialyzer`, `mix credo --strict`, and coverage — with no new skips introduced to pass, and any dialyzer PLT churn from the bump absorbed.
+- [x] **BUMP-01**: The `:lattice_stripe` pin in `accrue/mix.exs` is bumped `{:lattice_stripe, "~> 1.1"}` → `~> 2.0`, and `mix.lock` is refreshed to a resolved 2.x version across every project that resolves the dep — `accrue`, `accrue_admin`, `accrue_portal`, and `examples/accrue_host` — with all lockfiles committed. Any sibling package that independently pins `:lattice_stripe` is bumped in lockstep.
+- [x] **BUMP-02**: Every `LatticeStripe.*` call site in Accrue (core lib, admin, portal, examples, and test support) compiles clean against 2.x with no deprecated-call warnings; the two verified 2.0.0 breaking vectors (fixture-builder `<object>_json` rename; optional/default-wired Finch pool) are confirmed to need no change, or are reconciled if the confirmation turns out false.
+- [x] **BUMP-03**: The Three Zeros gate is green across all packages on the bumped deps — `mix test`, `mix dialyzer`, `mix credo --strict`, and coverage — with no new skips introduced to pass, and any dialyzer PLT churn from the bump absorbed.
 
 ### Stripe-Native Entitlements Sync Adoption (SYNC)
 
@@ -79,9 +79,9 @@ Phase assignments are written by the roadmap step (ROADMAP.md). Continues phase 
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| BUMP-01 | Phase 212 — lattice_stripe 2.x bump & green reconciliation | Pending |
-| BUMP-02 | Phase 212 — lattice_stripe 2.x bump & green reconciliation | Pending |
-| BUMP-03 | Phase 212 — lattice_stripe 2.x bump & green reconciliation | Pending |
+| BUMP-01 | Phase 212 — lattice_stripe 2.x bump & green reconciliation | Complete |
+| BUMP-02 | Phase 212 — lattice_stripe 2.x bump & green reconciliation | Complete |
+| BUMP-03 | Phase 212 — lattice_stripe 2.x bump & green reconciliation | Complete |
 | SYNC-01 | Phase 213 — Stripe-native advisory entitlements sync (observational-only) | Pending |
 | SYNC-02 | Phase 213 — Stripe-native advisory entitlements sync (observational-only) | Pending |
 | SYNC-03 | Phase 213 — Stripe-native advisory entitlements sync (observational-only) | Pending |

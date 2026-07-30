@@ -176,10 +176,10 @@ Full details: [v1.48 roadmap archive](milestones/v1.48-ROADMAP.md)
   4. `mix test`, `mix dialyzer`, `mix credo --strict`, and coverage (the Three Zeros gate) are green across every package on the bumped deps, with zero new skips/exclusions introduced to make it pass, and any dialyzer PLT churn from the major bump absorbed (PLTs rebuild clean in CI).
   5. A fresh `mix deps.get && mix compile --warnings-as-errors` on each package from a clean checkout succeeds with no warning or error attributable to the lattice_stripe bump.
 
-**Plans:** 1 plan
+**Plans:** 1/1 plans complete
 
 Plans:
-- [ ] 212-01-PLAN.md — Bump `:lattice_stripe` to `~> 2.0`, regenerate all four lockfiles in path mode, run each package's actually-configured Three Zeros gate, and commit the atomic 5-file bump plus a D-10 evidence artifact
+- [x] 212-01-PLAN.md — Bump `:lattice_stripe` to `~> 2.0`, regenerate all four lockfiles in path mode, run each package's actually-configured Three Zeros gate, and commit the atomic 5-file bump plus a D-10 evidence artifact
 
 ### Phase 213: Stripe-native advisory entitlements sync (observational-only)
 
