@@ -74,14 +74,11 @@ function maskLocators(page, name) {
 }
 
 test.describe("Phase 211 visual regression", () => {
-  // Runs only under the dedicated `visual-desktop` project (see playwright.config.js).
-  // That project is excluded from the default `npm run e2e` run, so this pixel-diff
-  // is invoked only via `npm run e2e:visual-regression` and the CI mint job — never
-  // baking a mobile baseline set or failing the general suite on a missing snapshot.
-  test.skip(
-    ({}, testInfo) => testInfo.project.name !== "visual-desktop",
-    "visual-desktop project only"
-  );
+  // Scoping is enforced at the config level: this spec matches ONLY the dedicated
+  // `visual-desktop` project (testMatch) and is excluded from the two base projects
+  // (testIgnore) and the default `npm run e2e` run. No runtime project guard needed —
+  // a describe-level `test.skip(fn)` receives only the fixtures object (no testInfo),
+  // so a `testInfo.project` guard there throws.
 
   test.beforeEach(async ({ request }) => {
     await reset(request);
