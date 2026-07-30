@@ -63,7 +63,19 @@ function maskLocators(page, name) {
         // datetime (the plan's original `.ax-body` selector, kept as a superset).
         page
           .locator(".ax-body")
-          .filter({ hasText: /Renews|Ends|Ended|Campaign started|Started/ })
+          .filter({ hasText: /Renews|Ends|Ended|Campaign started|Started/ }),
+        // "Activity audit log" section — all three render `subscription.inserted_at`
+        // (seed-time now(), drifts every run). Confirmed leaking on the first CI mint.
+        // (1) summary row Timestamp <em> (subscription_live.ex:483):
+        page
+          .locator(".ax-audit-summary-row span")
+          .filter({ hasText: "Timestamp" })
+          .locator("em"),
+        // (2) "…reviewed · Accrue system · <datetime>" subtitle (line 485):
+        page.locator(".ax-activity-audit-strip > p.ax-body"),
+        // (3) audit-list data-row <time> cells, excluding the static "Timestamp"
+        //     header row (lines 505-509):
+        page.locator(".ax-audit-list .ax-audit-row:not(.ax-audit-row-head) time")
       ];
     case "component-kitchen":
       // Fully static hardcoded literal timestamps — no mask.
