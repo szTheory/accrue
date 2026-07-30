@@ -68,9 +68,13 @@ coverage:
     human_judgment: false
   - id: D4
     description: "Rendered dashboard/subscriptions surfaces remain visually correct after CSS retirement"
-    verification: []
-    human_judgment: true
-    rationale: "No test asserts pixel/visual fidelity of the reigned Home + Subscriptions surfaces; e2e visual gates (phase194/196/197/199) run in Plan 211-04's full-suite pass, not here."
+    requirement: REIGN-04
+    verification:
+      - kind: automated_ui
+        ref: "cd accrue_admin && npm run e2e:visual-regression -> toHaveScreenshot pixel-diff of dashboard + subscriptions (light+dark) vs committed Linux baselines under e2e/__screenshots__/visual-desktop/; 0 diffs. Blocking gate in accrue_admin_browser.yml browser-uat (quick-260729-rjo, PR #35)."
+        status: pass
+    human_judgment: false
+    rationale: "Superseded by the deterministic Playwright toHaveScreenshot gate added in quick-260729-rjo: pixel-diff of dashboard + subscriptions in both themes against committed CI-minted baselines, wired blocking into browser-uat. No human PNG review required."
 
 # Metrics
 duration: 15min

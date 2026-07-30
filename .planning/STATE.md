@@ -28,11 +28,11 @@ See: `.planning/PROJECT.md` (updated 2026-07-03 after v1.55 closeout)
 
 ## Current Position
 
-Phase: 211 (grep-gated-css-retirement-cross-surface-cleanup) — EXECUTING
+Phase: 211 (grep-gated-css-retirement-cross-surface-cleanup) — VERIFIED
 Plan: 4 of 4
-Status: Phase complete — ready for verification
-Last activity: 2026-07-29 -- Quick task 260729-rjo: Phase 211 visual-regression CI gate (Part A) merged to origin/main (PR #35); reconciling 211 execution + Part B UAT close on branch phase211-exec-and-uat-close
-Next: `/gsd-verify-work 210` then `/gsd-plan-phase 211` (grep-gated CSS retirement)
+Status: UAT complete — 15/15 deliverables auto-covered, 0 human checkpoints, 0 issues (211-UAT.md). The two former human-only visual checkpoints (211-02 D4, 211-04 D5) are now closed by the deterministic Playwright toHaveScreenshot gate (quick-260729-rjo, PR #35).
+Last activity: 2026-07-30 -- Phase 211 UAT auto-closed via automated visual-regression gate; 211 execution + gate + Part B reconciled on branch phase211-exec-and-uat-close (PR to origin/main)
+Next: merge the reconciliation PR to origin/main, then `/gsd-complete-milestone` assessment for v1.57 M1 (209/210/211 all shipped)
 
 ## Post-v1.48 Pause Rule
 

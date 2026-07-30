@@ -78,10 +78,10 @@ coverage:
     requirement: REIGN-04
     verification:
       - kind: automated_ui
-        ref: "playwright:test-results/admin-visuals/chromium-desktop/subscription-detail.png + subscription-detail-dark.png + subscriptions(.png/-dark) + dashboard(.png/-dark) + component-kitchen(.png/-dark)"
+        ref: "cd accrue_admin && npm run e2e:visual-regression -> toHaveScreenshot pixel-diff of subscription-detail (light+dark) + subscriptions + dashboard + component-kitchen vs committed Linux baselines under e2e/__screenshots__/visual-desktop/; 0 diffs. Blocking gate in accrue_admin_browser.yml browser-uat (quick-260729-rjo, PR #35). Audit-log render-time datetimes masked."
         status: pass
-    human_judgment: true
-    rationale: "Silent visual/layout regression on the out-of-scope detail page that shares classes with the deleted list CSS (T-211-05) cannot be fully asserted by any automated gate; blocking human-verify checkpoint per 211-VALIDATION.md Manual-Only Verification. Human APPROVED both themes; independent orchestrator PNG read agreed."
+    human_judgment: false
+    rationale: "The T-211-05 silent-regression risk on the shared-class detail page IS now asserted by an automated gate: quick-260729-rjo added a deterministic Playwright toHaveScreenshot pixel-diff over all four surfaces in both themes against committed CI-minted baselines, wired blocking into browser-uat. Converts the one-time human PNG approval into a permanent regression guard — no human-verify required. (Original human APPROVAL of both themes still stands as the baseline's provenance.)"
 
 # Metrics
 duration: 50 min

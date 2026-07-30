@@ -46,7 +46,7 @@ created: 2026-07-19
 | 211-03-02 | 03 | 3 | REIGN-04 | — | N/A | script | `node accrue_admin/e2e/verify-css-census.mjs` against retired `app.css` exits 0; `mix compile` clean | ✅ (post-W1) | ⬜ pending |
 | 211-04-01 | 04 | 4 | REIGN-04 | — | N/A | grep | `region-tags.js` `attention-rail` → `[data-ax-zone='attention-rail']`; TODO-marker count decreases by exactly 1 | ✅ | ⬜ pending |
 | 211-04-02 | 04 | 4 | REIGN-04 | — | N/A | unit/e2e | `cd accrue_admin && mix test` + `npm run e2e` green; `git diff --stat -- ../accrue/lib` empty; no nav room added | ✅ | ⬜ pending |
-| 211-04-03 | 04 | 4 | REIGN-04 | — | Detail page unbroken | manual/e2e | PNG-parity of subscription detail page (light+dark) via `checkpoint:human-verify` | ✅ | ⬜ pending |
+| 211-04-03 | 04 | 4 | REIGN-04 | — | Detail page unbroken | automated_ui | Pixel-diff parity of subscription detail page (light+dark) — deterministic Playwright `toHaveScreenshot` gate (`npm run e2e:visual-regression`) vs committed Linux baselines, blocking in `browser-uat` (quick-260729-rjo, PR #35). Was `checkpoint:human-verify`; now automated. | ✅ | ⬜ pending |
 
 *Status: ⬜ pending · ✅ green · ❌ red · ⚠️ flaky*
 
@@ -60,9 +60,11 @@ created: 2026-07-19
 
 ## Manual-Only Verifications
 
-| Behavior | Requirement | Why Manual | Test Instructions |
-|----------|-------------|------------|-------------------|
-| Subscription **detail** page renders unbroken after retirement | REIGN-04 | Visual/layout regression on preserved shared classes is invisible to source-text CI | Load `/admin` subscription detail route, capture PNG, compare against pre-retirement baseline; confirm `.ax-inline-worklist*` / `.ax-audit-summary-row` render intact |
+**None remaining.** The former manual-only item (subscription-detail PNG parity) was automated in quick-260729-rjo (PR #35): a deterministic Playwright `toHaveScreenshot` pixel-diff over the four checkpoint surfaces (dashboard, subscriptions, subscription-detail, component-kitchen) in both themes, against CI-minted Linux baselines committed under `accrue_admin/e2e/__screenshots__/visual-desktop/`, wired **blocking** into the `browser-uat` job. Render-time datetimes are masked. This converts the one-time human PNG approval into a permanent, no-human regression guard — the visual/layout regression on preserved shared classes that was "invisible to source-text CI" is now caught by pixel diff.
+
+| Behavior | Requirement | Was Manual Because | Now Automated By |
+|----------|-------------|--------------------|------------------|
+| Subscription **detail** page renders unbroken after retirement | REIGN-04 | Visual/layout regression on preserved `.ax-inline-worklist*` / `.ax-audit-summary-row` was invisible to source-text CI | `npm run e2e:visual-regression` — Playwright `toHaveScreenshot` vs committed baselines, blocking in `browser-uat` |
 
 ---
 
