@@ -39,7 +39,7 @@ Stop rule: if proposed work is polish-only with a documented workaround and no r
 
 **Posture:** Move Accrue onto `lattice_stripe ~> 2.0` (major 1.x→2.x bump), reconcile the major-version deltas with the Three Zeros gate (test/dialyzer/credo/coverage) green across every package, then adopt the new `LatticeStripe.Entitlements.{ActiveEntitlement, ActiveEntitlementSummary, Feature}` surface as a client-backed, opt-in, **observational-only** advisory refresh path into the existing entitlements cache — closing the Phase 127 "optional Stripe-native entitlements sync" deferral (SEED-005) — before reconciling docs/truth. **Scope fence (binding):** the sync is a read seam, **never** a grant gate — the local plan→feature map (`resolver/local_map.ex`) remains the sole canonical gate (D-01/D-11), and `scripts/ci/verify_entitlement_sync_isolation.sh` stays green and is extended to the new client-fetch path; pin target is `~> 2.0` (not `~> 2.1`); no new required dependencies; no new admin nav rooms or admin redesign (SEED-004 M2/M3 territory); no `accrue_portal` work; sync tests run only against the Fake/Test processor (no live Stripe, no Chrome, fully `async`-safe). Any processor-surface/support-matrix implication updates behavior, docs, examples/verifiers, and release notes together in the same phase (stable-core rule). Authoritative sources: `.planning/seeds/SEED-005-lattice-stripe-entitlements-bump.md`, `accrue/lib/accrue/entitlements/*`, `scripts/ci/verify_entitlement_sync_isolation.sh`, CLAUDE.md Technology Stack + Version Compatibility Matrix, `guides/jobs_to_be_done.md` + `.planning/research/JTBD-FRONTIER.md`.
 
-- [ ] **Phase 212: lattice_stripe 2.x bump & green reconciliation** - Bump the `:lattice_stripe` pin to `~> 2.0` across every resolving package, reconcile the two verified 2.0.0 breaking vectors, and bring the Three Zeros gate green with no new skips (BUMP-01, BUMP-02, BUMP-03)
+- [x] **Phase 212: lattice_stripe 2.x bump & green reconciliation** - Bump the `:lattice_stripe` pin to `~> 2.0` across every resolving package, reconcile the two verified 2.0.0 breaking vectors, and bring the Three Zeros gate green with no new skips (BUMP-01, BUMP-02, BUMP-03) — completed 2026-07-30
 - [ ] **Phase 213: Stripe-native advisory entitlements sync (observational-only)** - Adopt a client-backed, opt-in refresh path into the advisory cache via `LatticeStripe.Entitlements.*`, extend the isolation-guard script to the new surface, resolve the D-07 `fetch_entitled/2` question, and prove by Fake-processor test that the sync can never become a gate (SYNC-01, SYNC-02, SYNC-03, SYNC-04, SYNC-05)
 - [ ] **Phase 214: Docs & truth reconciliation** - Bring CLAUDE.md, the JTBD guides, and per-package changelogs/release notes into agreement with the shipped 2.x bump and the new observational sync (DOCS-01, DOCS-02, DOCS-03)
 
@@ -225,6 +225,7 @@ Plans:
 | 209. Reign Subscriptions (list + detail CSS coordination) | v1.57 | 3/3 | Complete | 2026-07-19 |
 | 210. Reign Home + certify answer-first IA & copy integrity | v1.57 | 3/3 | Complete | 2026-07-19 |
 | 211. Grep-gated CSS retirement & cross-surface cleanup | v1.57 | 4/4 | Complete | 2026-07-29 |
+| 212. lattice_stripe 2.x bump & green reconciliation | v1.58 | 1/1 | Complete | 2026-07-30 |
 
 ## Historical Backlog Anchors (not active scope)
 
