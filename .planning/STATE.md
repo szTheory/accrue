@@ -2,9 +2,9 @@
 gsd_state_version: 1.0
 milestone: v1.58
 milestone_name: lattice_stripe 2.x Bump & Stripe-Native Entitlements Sync
-status: ready_to_plan
-stopped_at: Phase 212 complete (1/1) — ready to discuss Phase 213
-last_updated: 2026-07-30T19:24:44.722Z
+status: planning
+stopped_at: Phase 213 context gathered
+last_updated: "2026-07-30T20:00:58.762Z"
 last_activity: 2026-07-30
 progress:
   total_phases: 3
@@ -769,9 +769,9 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 
 ## Session Continuity
 
-Last session: 2026-07-30T19:16:24.621Z
-Stopped at: Completed 212-01-PLAN.md
-Resume file: None
+Last session: 2026-07-30T20:00:58.756Z
+Stopped at: Phase 213 context gathered
+Resume file: .planning/phases/213-stripe-native-advisory-entitlements-sync-observational-only/213-CONTEXT.md
 
 ## Operator Next Steps
 
