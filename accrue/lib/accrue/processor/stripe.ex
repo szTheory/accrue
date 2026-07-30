@@ -61,6 +61,7 @@ defmodule Accrue.Processor.Stripe do
 
   alias Accrue.Processor.Stripe.ErrorMapper
   alias Accrue.Telemetry
+  alias LatticeStripe.Entitlements.ActiveEntitlement
 
   require Logger
 
@@ -550,6 +551,27 @@ defmodule Accrue.Processor.Stripe do
      }}
   end
 
+  @impl Accrue.Processor
+  def list_active_entitlements(id, opts) when is_binary(id) and is_list(opts) do
+    client = build_client!(opts)
+    stripe_opts = stripe_opts_no_idem(opts)
+
+    entitlements =
+      client
+      |> ActiveEntitlement.stream!(%{"customer" => id, "limit" => "100"}, stripe_opts)
+      |> Enum.map(&active_entitlement_to_wire_map/1)
+
+    {:ok, entitlements}
+  rescue
+    raw in LatticeStripe.Error -> {:error, ErrorMapper.to_accrue_error(raw)}
+  end
+
+  @doc false
+  @spec active_entitlement_list_metadata() :: %{list_path: String.t()}
+  def active_entitlement_list_metadata do
+    %{list_path: ActiveEntitlement.list_path()}
+  end
+
   # ---------------------------------------------------------------------------
   # Refund (Phase 3)
   # ---------------------------------------------------------------------------
@@ -1025,11 +1047,28 @@ defmodule Accrue.Processor.Stripe do
     api_version = resolve_api_version(opts)
     stripe_account = resolve_stripe_account(opts)
 
-    LatticeStripe.Client.new!(
-      api_key: key,
-      api_version: api_version,
-      stripe_account: stripe_account
-    )
+    client_opts =
+      opts
+      |> Keyword.take([
+        :base_url,
+        :files_base_url,
+        :finch,
+        :json_codec,
+        :max_retries,
+        :operation_timeouts,
+        :require_explicit_proration,
+        :retry_strategy,
+        :telemetry_enabled,
+        :timeout,
+        :transport
+      ])
+      |> Keyword.merge(
+        api_key: key,
+        api_version: api_version,
+        stripe_account: stripe_account
+      )
+
+    LatticeStripe.Client.new!(client_opts)
   end
 
   defp random_seed_with_warning(op, subject_id) do
@@ -1061,6 +1100,32 @@ defmodule Accrue.Processor.Stripe do
     c
     |> Map.from_struct()
   end
+
+  defp active_entitlement_to_wire_map(%ActiveEntitlement{} = entitlement) do
+    %{
+      "id" => entitlement.id,
+      "object" => entitlement.object,
+      "feature" => plain_feature(entitlement.feature),
+      "lookup_key" => entitlement.lookup_key,
+      "livemode" => entitlement.livemode
+    }
+  end
+
+  defp active_entitlement_to_wire_map(%{} = entitlement) do
+    %{
+      "id" => Map.get(entitlement, "id") || Map.get(entitlement, :id),
+      "object" =>
+        Map.get(entitlement, "object") || Map.get(entitlement, :object) ||
+          "entitlements.active_entitlement",
+      "feature" =>
+        plain_feature(Map.get(entitlement, "feature") || Map.get(entitlement, :feature)),
+      "lookup_key" => Map.get(entitlement, "lookup_key") || Map.get(entitlement, :lookup_key),
+      "livemode" => Map.get(entitlement, "livemode") || Map.get(entitlement, :livemode)
+    }
+  end
+
+  defp plain_feature(%_{} = feature), do: Map.from_struct(feature)
+  defp plain_feature(feature), do: feature
 
   defp stringify_keys(map) when is_map(map) do
     Map.new(map, fn
