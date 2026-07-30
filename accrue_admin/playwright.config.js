@@ -36,11 +36,24 @@ module.exports = defineConfig({
   projects: [
     {
       name: "chromium-desktop",
+      // The dedicated visual-regression spec runs only under the `visual-desktop`
+      // project (below) so it stays out of the default `npm run e2e` run — a
+      // missing pixel baseline fails on CI, and the baselines are minted later.
+      testIgnore: /admin-visual-regression-phase211\.spec\.js/,
       use: { ...devices["Desktop Chrome"], viewport: { width: 1280, height: 900 } }
     },
     {
       name: "chromium-mobile",
+      testIgnore: /admin-visual-regression-phase211\.spec\.js/,
       use: { ...devices["Pixel 5"] }
+    },
+    {
+      // Deterministic pixel-diff gate (Phase 211). Isolated in its own project so
+      // it is excluded from the default `playwright test` run and only invoked via
+      // `npm run e2e:visual-regression` (baseline-guarded in CI) and the CI mint job.
+      name: "visual-desktop",
+      testMatch: /admin-visual-regression-phase211\.spec\.js/,
+      use: { ...devices["Desktop Chrome"], viewport: { width: 1280, height: 900 } }
     }
   ],
   outputDir

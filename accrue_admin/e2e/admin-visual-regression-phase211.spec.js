@@ -74,11 +74,13 @@ function maskLocators(page, name) {
 }
 
 test.describe("Phase 211 visual regression", () => {
-  // Desktop-only: skip on every project except chromium-desktop so we never mint
-  // a second (mobile) baseline set.
+  // Runs only under the dedicated `visual-desktop` project (see playwright.config.js).
+  // That project is excluded from the default `npm run e2e` run, so this pixel-diff
+  // is invoked only via `npm run e2e:visual-regression` and the CI mint job — never
+  // baking a mobile baseline set or failing the general suite on a missing snapshot.
   test.skip(
-    ({}, testInfo) => testInfo.project.name !== "chromium-desktop",
-    "desktop-only visual baselines"
+    ({}, testInfo) => testInfo.project.name !== "visual-desktop",
+    "visual-desktop project only"
   );
 
   test.beforeEach(async ({ request }) => {

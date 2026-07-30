@@ -80,7 +80,7 @@ jobs:
       - name: Check for committed visual baselines
         id: vrbaseline
         run: |
-          if ls accrue_admin/e2e/__screenshots__/chromium-desktop/*.png >/dev/null 2>&1; then
+          if ls accrue_admin/e2e/__screenshots__/visual-desktop/*.png >/dev/null 2>&1; then
             echo "present=true" >> "$GITHUB_OUTPUT"
           else
             echo "present=false" >> "$GITHUB_OUTPUT"
