@@ -88,7 +88,7 @@ const REGION_SELECTORS = {
   toolbar: "ax-toolbar", // TODO: confirm selector
   "tab-bar": "ax-tabs", // TODO: confirm selector
   "kpi-row": "ax-kpi-row", // TODO: confirm selector
-  "attention-rail": "ax-attention-rail", // TODO: confirm selector
+  "attention-rail": "[data-ax-zone='attention-rail']", // fixed (D-03): real live selector — matches phase199 guard selector + dashboard_live.ex data-ax-zone attribute (the bare ax-attention-rail class never existed)
   "data-table": "ax-data-table",
   "detail-panel": "ax-detail", // TODO: confirm selector
   "related-panel": "ax-related-resources", // TODO: confirm selector
