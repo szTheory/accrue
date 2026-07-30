@@ -11,6 +11,8 @@ defmodule Accrue.Webhook.WR05ConcurrencyTest do
 
   alias Accrue.Billing.Customer
   alias Accrue.Billing.EntitlementSummary
+  alias Accrue.Entitlements.StripeSync
+  alias Accrue.Processor.Fake
   alias Accrue.Webhook.DefaultHandler
 
   @cus_processor_id "cus_wr05_race"
@@ -140,6 +142,57 @@ defmodule Accrue.Webhook.WR05ConcurrencyTest do
     row = TestRepo.get_by(EntitlementSummary, customer_id: customer.id)
     assert DateTime.compare(row.last_stripe_event_ts, new_ts) == :eq
     assert row.last_stripe_event_id == "evt_new"
+  end
+
+  test "concurrent pull and webhook do not crash and preserve the greatest webhook watermark", %{
+    customer: customer
+  } do
+    prev_config = Application.get_env(:accrue, :entitlements, [])
+    on_exit(fn -> Application.put_env(:accrue, :entitlements, prev_config) end)
+
+    Application.put_env(
+      :accrue,
+      :entitlements,
+      Keyword.put(prev_config, :stripe_native_sync, :advisory)
+    )
+
+    Fake.put_entitlements(@cus_processor_id, [
+      %{
+        "id" => "ent_pull",
+        "object" => "entitlements.active_entitlement",
+        "feature" => "feat_pull",
+        "lookup_key" => "pull"
+      }
+    ])
+
+    pull_started_at = Accrue.Clock.utc_now()
+    webhook_ts = DateTime.add(pull_started_at, 1, :second)
+    webhook = make_summary_event("evt_pull_webhook_newer", webhook_ts, ["feat_webhook"])
+
+    parent = self()
+
+    tasks = [
+      Task.async(fn ->
+        Ecto.Adapters.SQL.Sandbox.allow(Accrue.TestRepo, parent, self())
+        StripeSync.refresh(customer)
+      end),
+      Task.async(fn ->
+        Ecto.Adapters.SQL.Sandbox.allow(Accrue.TestRepo, parent, self())
+        DefaultHandler.handle(webhook)
+      end)
+    ]
+
+    results = Task.await_many(tasks)
+
+    for result <- results do
+      assert {:ok, _} = result
+    end
+
+    row = TestRepo.get_by(EntitlementSummary, customer_id: customer.id)
+    assert DateTime.compare(row.synced_at, webhook_ts) == :eq
+    assert DateTime.compare(row.last_stripe_event_ts, webhook_ts) == :eq
+    assert row.last_stripe_event_id == "evt_pull_webhook_newer"
+    assert [%{"feature" => "feat_webhook"}] = row.data["entitlements"]["data"]
   end
 
   defp make_summary_event(id, ts, features) do

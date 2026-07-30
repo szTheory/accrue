@@ -8,6 +8,7 @@ defmodule Accrue.Entitlements.StripeSyncRefreshTest do
   alias Accrue.Billing.EntitlementSummary
   alias Accrue.Entitlements.StripeSync
   alias Accrue.Events.Event
+  alias Accrue.Webhook.DefaultHandler
 
   setup do
     {:ok, customer} =
@@ -15,7 +16,7 @@ defmodule Accrue.Entitlements.StripeSyncRefreshTest do
       |> Customer.changeset(%{
         owner_type: "User",
         owner_id: Ecto.UUID.generate(),
-        processor: "fake",
+        processor: "stripe",
         processor_id: "cus_fake_sync",
         email: "stripe-sync@example.test"
       })
@@ -75,6 +76,59 @@ defmodule Accrue.Entitlements.StripeSyncRefreshTest do
       assert Repo.aggregate(EntitlementSummary, :count) == 1
     end
 
+    test "stale pull cannot clobber a strictly newer webhook snapshot", %{customer: customer} do
+      Fake.put_entitlements(customer.processor_id, [entitlement("pull_old", "pull-old")])
+
+      webhook_ts = DateTime.add(Accrue.Clock.utc_now(), 60, :second)
+
+      webhook =
+        StripeFixtures.entitlement_summary_event(
+          [
+            customer: customer.processor_id,
+            entitlements: [entitlement("webhook_new", "webhook-new")]
+          ],
+          %{"id" => "evt_newer_webhook", "created" => DateTime.to_unix(webhook_ts)}
+        )
+
+      assert {:ok, %EntitlementSummary{}} = DefaultHandler.handle(webhook)
+      assert {:ok, :stale} = StripeSync.refresh(customer)
+
+      row = Repo.get_by(EntitlementSummary, customer_id: customer.id)
+      assert row.last_stripe_event_id == "evt_newer_webhook"
+      assert DateTime.compare(row.last_stripe_event_ts, webhook_ts) == :eq
+      assert [%{"lookup_key" => "webhook-new"}] = row.data["entitlements"]["data"]
+    end
+
+    test "newer pull can refresh advisory data without erasing webhook watermark", %{
+      customer: customer
+    } do
+      webhook_ts = DateTime.truncate(Accrue.Clock.utc_now(), :second)
+
+      webhook =
+        StripeFixtures.entitlement_summary_event(
+          [
+            customer: customer.processor_id,
+            entitlements: [entitlement("webhook_first", "webhook-first")]
+          ],
+          %{"id" => "evt_existing_webhook", "created" => DateTime.to_unix(webhook_ts)}
+        )
+
+      assert {:ok, %EntitlementSummary{}} = DefaultHandler.handle(webhook)
+
+      assert {:ok, _effects} =
+               Accrue.Test.Clock.advance_clock([seconds: 90], processor: Accrue.Processor.Fake)
+
+      Fake.put_entitlements(customer.processor_id, [entitlement("pull_later", "pull-later")])
+
+      assert {:ok, %EntitlementSummary{} = summary} = StripeSync.refresh(customer)
+
+      assert DateTime.compare(summary.synced_at, webhook_ts) == :gt
+      assert summary.last_stripe_event_id == "evt_existing_webhook"
+      assert DateTime.compare(summary.last_stripe_event_ts, webhook_ts) == :eq
+      assert [%{"lookup_key" => "pull-later"}] = summary.data["entitlements"]["data"]
+      assert summary.data["_accrue"]["source"] == "pull"
+    end
+
     test "identical refresh is unchanged and does not duplicate the ledger", %{customer: customer} do
       Fake.put_entitlements(customer.processor_id, [
         %{
@@ -115,5 +169,15 @@ defmodule Accrue.Entitlements.StripeSyncRefreshTest do
     assert {:ok, :disabled} = StripeSync.refresh(customer)
     assert Fake.call_count(:list_active_entitlements) == 0
     assert Repo.aggregate(EntitlementSummary, :count) == 0
+  end
+
+  defp entitlement(feature, lookup_key) do
+    %{
+      "id" => "ent_#{lookup_key}",
+      "object" => "entitlements.active_entitlement",
+      "feature" => "feat_#{feature}",
+      "lookup_key" => lookup_key,
+      "livemode" => false
+    }
   end
 end
