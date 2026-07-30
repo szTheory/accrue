@@ -12,6 +12,7 @@
 **Verified pre-open facts:** `lattice_stripe` 2.0.0 is on Hex (entitlements landed in 2.0.0; 2.1.0 is latest). Both 2.0.0 breaking vectors were checked low-risk for Accrue before opening — no direct fixture-builder (`*_json`) usage in Accrue lib/test, and no `LatticeStripe.Finch` pool wiring to reconcile. New modules: `LatticeStripe.Entitlements.{ActiveEntitlement, ActiveEntitlementSummary, Feature}`.
 
 **Scope guardrails (binding / inviolable):**
+
 - **Observational-only (D-01/D-11) is inviolable.** The Stripe-native sync is a *read seam* — its data is written to the advisory cache and surfaced for diagnostics only; it is **never** consulted for a grant/entitlement decision. The local plan→feature mapping (`resolver/local_map.ex`) remains the single canonical gate.
 - `scripts/ci/verify_entitlement_sync_isolation.sh` (asserts no `gate → seam` edge) stays green and is **extended** to cover any new client-fetch surface added this milestone.
 - Pin target is `~> 2.0` (permissive within major 2 for adopters), **not** `~> 2.1`.
@@ -32,11 +33,11 @@ Each maps to exactly one roadmap phase (assigned in ROADMAP.md).
 
 ### Stripe-Native Entitlements Sync Adoption (SYNC)
 
-- [ ] **SYNC-01**: A client-backed advisory refresh path fetches a customer's active Stripe entitlements via `LatticeStripe.Entitlements.{ActiveEntitlement, ActiveEntitlementSummary}` and writes them into the existing advisory cache (`Accrue.Entitlements.StripeSync` → `Accrue.Billing.EntitlementSummary` row) — i.e. a pull/refresh path, not webhook-payload-only — closing the Phase 127 "optional Stripe-native entitlements sync" deferral.
-- [ ] **SYNC-02**: The sync is **opt-in and observational-only** — gated behind the existing `stripe_native_sync: :advisory` config seam, off by default, and its output is consumed only by diagnostic/admin read surfaces. It is never read by the resolver/guard grant path; the local plan→feature map remains the canonical gate (D-01/D-11 preserved).
+- [x] **SYNC-01**: A client-backed advisory refresh path fetches a customer's active Stripe entitlements via `LatticeStripe.Entitlements.{ActiveEntitlement, ActiveEntitlementSummary}` and writes them into the existing advisory cache (`Accrue.Entitlements.StripeSync` → `Accrue.Billing.EntitlementSummary` row) — i.e. a pull/refresh path, not webhook-payload-only — closing the Phase 127 "optional Stripe-native entitlements sync" deferral.
+- [x] **SYNC-02**: The sync is **opt-in and observational-only** — gated behind the existing `stripe_native_sync: :advisory` config seam, off by default, and its output is consumed only by diagnostic/admin read surfaces. It is never read by the resolver/guard grant path; the local plan→feature map remains the canonical gate (D-01/D-11 preserved).
 - [ ] **SYNC-03**: `scripts/ci/verify_entitlement_sync_isolation.sh` stays green and is extended so the new client-fetch entry point is covered by the `gate → seam` isolation assertion (a future gate that reads the new path fails CI).
 - [ ] **SYNC-04**: The D-07 `fetch_entitled/2` question left open in `admin.ex` is resolved this milestone — either implemented as part of the advisory refresh surface (observational) or kept deferred with a one-line recorded reason in the code/docs; the milestone does not leave it ambiguous.
-- [ ] **SYNC-05**: The new sync path is covered by tests using the Fake/Test processor (no live Stripe, no Chrome, `async`-safe), asserting: cache is populated from `LatticeStripe.Entitlements.*` results; a grant decision is unchanged whether the advisory cache is empty, stale, or contradictory (proves it is never a gate); and the config default keeps it off.
+- [x] **SYNC-05**: The new sync path is covered by tests using the Fake/Test processor (no live Stripe, no Chrome, `async`-safe), asserting: cache is populated from `LatticeStripe.Entitlements.*` results; a grant decision is unchanged whether the advisory cache is empty, stale, or contradictory (proves it is never a gate); and the config default keeps it off.
 
 ### Docs & Truth (DOCS)
 
@@ -82,11 +83,11 @@ Phase assignments are written by the roadmap step (ROADMAP.md). Continues phase 
 | BUMP-01 | Phase 212 — lattice_stripe 2.x bump & green reconciliation | Complete |
 | BUMP-02 | Phase 212 — lattice_stripe 2.x bump & green reconciliation | Complete |
 | BUMP-03 | Phase 212 — lattice_stripe 2.x bump & green reconciliation | Complete |
-| SYNC-01 | Phase 213 — Stripe-native advisory entitlements sync (observational-only) | Pending |
-| SYNC-02 | Phase 213 — Stripe-native advisory entitlements sync (observational-only) | Pending |
+| SYNC-01 | Phase 213 — Stripe-native advisory entitlements sync (observational-only) | Complete |
+| SYNC-02 | Phase 213 — Stripe-native advisory entitlements sync (observational-only) | Complete |
 | SYNC-03 | Phase 213 — Stripe-native advisory entitlements sync (observational-only) | Pending |
 | SYNC-04 | Phase 213 — Stripe-native advisory entitlements sync (observational-only) | Pending |
-| SYNC-05 | Phase 213 — Stripe-native advisory entitlements sync (observational-only) | Pending |
+| SYNC-05 | Phase 213 — Stripe-native advisory entitlements sync (observational-only) | Complete |
 | DOCS-01 | Phase 214 — Docs & truth reconciliation | Pending |
 | DOCS-02 | Phase 214 — Docs & truth reconciliation | Pending |
 | DOCS-03 | Phase 214 — Docs & truth reconciliation | Pending |

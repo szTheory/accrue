@@ -3,16 +3,17 @@ gsd_state_version: 1.0
 milestone: v1.58
 milestone_name: lattice_stripe 2.x Bump & Stripe-Native Entitlements Sync
 current_phase: 213
+current_phase_name: stripe-native-advisory-entitlements-sync-observational-only
 status: executing
-stopped_at: Phase 213 context gathered
-last_updated: "2026-07-30T20:51:39.812Z"
+stopped_at: Completed 213-01-PLAN.md
+last_updated: "2026-07-30T21:12:14.951Z"
 last_activity: 2026-07-30
-last_activity_desc: Phase 213 planning complete
+last_activity_desc: Phase 213 execution started
 progress:
   total_phases: 3
   completed_phases: 1
   total_plans: 4
-  completed_plans: 1
+  completed_plans: 2
   percent: 33
 ---
 
@@ -24,14 +25,14 @@ See: `.planning/PROJECT.md` (updated 2026-07-30 after v1.57 closeout)
 
 **Core value:** A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic Elixir DX, strong domain modeling, tamper-evident audit ledger, great observability, and zero breaking-change pain through v1.x.
 
-**Current focus:** Phase 213 — stripe native advisory entitlements sync (observational only)
+**Current focus:** Phase 213 — stripe-native-advisory-entitlements-sync-observational-only
 
 ## Current Position
 
-Phase: 213
-Plan: Not started
+Phase: 213 (stripe-native-advisory-entitlements-sync-observational-only) — EXECUTING
+Plan: 2 of 3
 Status: Ready to execute
-Last activity: 2026-07-30 — Phase 213 planning complete
+Last activity: 2026-07-30 — Phase 213 execution started
 
 ## Post-v1.48 Pause Rule
 
@@ -341,6 +342,7 @@ Coverage: 22/22 v1.51 requirements mapped (each REQ-ID → exactly one phase). D
 | Phase 211 P03 | 6 min | 2 tasks | 1 files |
 | Phase 211 P04 | 50 min | 3 tasks | 1 files |
 | Phase 212 P01 | 20min | 3 tasks | 6 files |
+| Phase 213 P01 | approximately 6 minutes | 2 tasks | 8 files |
 
 ## Accumulated Context
 
@@ -635,6 +637,9 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - [Phase 210]: 210-03: certified the Home reign — restructured StatStrip linked stat (stretched-link inside <dd>) to satisfy axe definition-list on both Home + Subscriptions; restored attention-rail forced-focus ring under [data-ax-force~=focus]; migrated stale kpi-row/data-table ratchet guards. All named gates green except 2 approved-deferred dark-mode contrast items.
 - [Phase ?]: lattice_stripe bumped ~> 1.1 to ~> 2.0 (resolves 2.1.0) across all 4 packages; zero Accrue-side code changes needed
 - [Phase ?]: Host lockfile stale hex-mode entries required explicit mix deps.unlock (not just deps.update) to remove — D-05 assumption corrected
+- [Phase ?]: Pull and webhook entitlement-summary writes share Accrue.Entitlements.Reconcile so advisory cache ordering has one implementation.
+- [Phase ?]: Pull writes use pull_started_at as synced_at and carry forward the greatest real webhook watermark.
+- [Phase ?]: Identical pull snapshots short-circuit as :unchanged before DB upsert and do not duplicate the ledger.
 
 ### Pending Todos
 
@@ -771,9 +776,9 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 
 ## Session Continuity
 
-Last session: 2026-07-30T20:00:58.756Z
-Stopped at: Phase 213 context gathered
-Resume file: .planning/phases/213-stripe-native-advisory-entitlements-sync-observational-only/213-CONTEXT.md
+Last session: 2026-07-30T21:12:14.941Z
+Stopped at: Completed 213-01-PLAN.md
+Resume file: None
 
 ## Operator Next Steps
 
