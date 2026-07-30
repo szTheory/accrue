@@ -195,7 +195,7 @@ Plans:
   4. The D-07 `fetch_entitled/2` question left open in `admin.ex` is closed one way or the other this milestone: either implemented as part of the advisory refresh surface (observational-only), or explicitly deferred with a one-line recorded reason in code and docs — no ambiguity remains.
   5. A test suite using only the Fake/Test processor (no live Stripe, no Chrome, fully `async`-safe) proves: the cache populates correctly from `LatticeStripe.Entitlements.*` results; a grant decision is identical whether the advisory cache is empty, stale, or directly contradicts the local plan→feature map; and the config defaults to off.
 
-**Plans:** 1/3 plans executed
+**Plans:** 2/3 plans executed
 
 Plans:
 **Wave 1**
@@ -204,7 +204,7 @@ Plans:
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
-- [ ] 213-02-PLAN.md — Wire the exhaustive LatticeStripe adapter and existing-queue refresh worker
+- [x] 213-02-PLAN.md — Wire the exhaustive LatticeStripe adapter and existing-queue refresh worker
 - [ ] 213-03-PLAN.md — Enforce the isolation boundary and close the Stripe-backed predicate ambiguity
 
 ### Phase 214: Docs & truth reconciliation
