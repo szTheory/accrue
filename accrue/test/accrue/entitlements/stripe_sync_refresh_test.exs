@@ -97,7 +97,12 @@ defmodule Accrue.Entitlements.StripeSyncRefreshTest do
 
   test "disabled refresh returns before Processor or Repo I/O", %{customer: customer} do
     previous = Application.get_env(:accrue, :entitlements)
-    Application.put_env(:accrue, :entitlements, Keyword.put(previous || [], :stripe_native_sync, :disabled))
+
+    Application.put_env(
+      :accrue,
+      :entitlements,
+      Keyword.put(previous || [], :stripe_native_sync, :disabled)
+    )
 
     on_exit(fn ->
       if previous do

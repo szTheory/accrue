@@ -283,6 +283,23 @@ defmodule Accrue.Processor.Fake do
     call({:update_customer, id, params, opts})
   end
 
+  @doc """
+  Seeds active entitlements for a customer processor id.
+
+  Test helper for the advisory Stripe-native sync path.
+  """
+  @spec put_entitlements(String.t(), [map()]) :: :ok
+  def put_entitlements(customer_id, entitlements)
+      when is_binary(customer_id) and is_list(entitlements) do
+    call({:put_entitlements, customer_id, entitlements})
+  end
+
+  @doc false
+  @spec active_entitlement_list_metadata() :: %{list_path: String.t()}
+  def active_entitlement_list_metadata do
+    %{list_path: "/v1/entitlements/active_entitlements"}
+  end
+
   # ---------------------------------------------------------------------------
   # Behaviour callbacks — subscription
   # ---------------------------------------------------------------------------
@@ -485,6 +502,11 @@ defmodule Accrue.Processor.Fake do
   @impl Accrue.Processor
   def list_charges(params, opts \\ []) when is_map(params) and is_list(opts) do
     call({:list_charges, params, opts})
+  end
+
+  @impl Accrue.Processor
+  def list_active_entitlements(id, opts \\ []) when is_binary(id) and is_list(opts) do
+    call({:list_active_entitlements, id, opts})
   end
 
   # ---------------------------------------------------------------------------
@@ -958,6 +980,10 @@ defmodule Accrue.Processor.Fake do
     end)
   end
 
+  def handle_call({:put_entitlements, customer_id, entitlements}, _from, state) do
+    {:reply, :ok, %{state | entitlements: Map.put(state.entitlements, customer_id, entitlements)}}
+  end
+
   # --- subscription ---
 
   def handle_call({:create_subscription, params, opts}, _from, state) do
@@ -1388,6 +1414,12 @@ defmodule Accrue.Processor.Fake do
         |> Enum.filter(fn c -> is_nil(customer) or c[:customer] == customer end)
 
       {{:ok, %{object: "list", data: data, has_more: false}}, state}
+    end)
+  end
+
+  def handle_call({:list_active_entitlements, id, opts}, _from, state) do
+    with_script_or_stub(state, :list_active_entitlements, [id, opts], fn state ->
+      {{:ok, Map.get(state.entitlements, id, [])}, state}
     end)
   end
 

@@ -85,6 +85,9 @@ defmodule Accrue.Processor do
   ### Usage/Meters
   `report_meter_event/1`
 
+  ### Entitlements
+  `list_active_entitlements/2` — optional advisory Stripe-native read seam.
+
   ### Generic refetch
   `fetch/2` — routes `(object_type_atom, id)` to the appropriate
   `retrieve_*` callback. Used by the webhook handler to re-fetch
@@ -204,6 +207,12 @@ defmodule Accrue.Processor do
   @callback list_charges(params(), opts()) :: result()
 
   # ---------------------------------------------------------------------------
+  # Entitlements
+  # ---------------------------------------------------------------------------
+
+  @callback list_active_entitlements(id(), opts()) :: {:ok, [map()]} | {:error, Exception.t()}
+
+  # ---------------------------------------------------------------------------
   # Refund
   # ---------------------------------------------------------------------------
 
@@ -298,6 +307,7 @@ defmodule Accrue.Processor do
                       create_login_link: 2,
                       create_transfer: 2,
                       retrieve_transfer: 2,
+                      list_active_entitlements: 2,
                       capabilities: 0,
                       processor_name: 0
 
@@ -363,6 +373,30 @@ defmodule Accrue.Processor do
   def invoice_item_delete(id, params \\ %{}, opts \\ [])
       when is_binary(id) and is_map(params) and is_list(opts) do
     __impl__().invoice_item_delete(id, params, opts)
+  end
+
+  @doc """
+  Lists a customer's active processor-native entitlements.
+
+  This is an optional advisory read callback used by
+  `Accrue.Entitlements.StripeSync.refresh/2`. It returns a complete
+  materialized list and is never part of the local grant path.
+  """
+  @spec list_active_entitlements(id(), opts()) :: {:ok, [map()]} | {:error, Exception.t()}
+  def list_active_entitlements(id, opts \\ []) when is_binary(id) and is_list(opts) do
+    __impl__().list_active_entitlements(id, opts)
+  end
+
+  @doc false
+  @spec active_entitlement_list_metadata() :: %{list_path: String.t()}
+  def active_entitlement_list_metadata do
+    adapter = __impl__()
+
+    if function_exported?(adapter, :active_entitlement_list_metadata, 0) do
+      adapter.active_entitlement_list_metadata()
+    else
+      %{list_path: "/v1/entitlements/active_entitlements"}
+    end
   end
 
   @doc false

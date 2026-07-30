@@ -27,6 +27,8 @@ defmodule Accrue.Entitlements.StripeSync do
   """
 
   alias Accrue.Billing.{Customer, EntitlementSummary}
+  alias Accrue.Entitlements.Reconcile
+  alias Accrue.Processor
   alias Accrue.Repo
 
   # Returns the cached `Accrue.Billing.EntitlementSummary` row for
@@ -37,5 +39,41 @@ defmodule Accrue.Entitlements.StripeSync do
   @spec summary_for_customer(Customer.t()) :: EntitlementSummary.t() | nil
   def summary_for_customer(%Customer{} = customer) do
     Repo.get_by(EntitlementSummary, customer_id: customer.id)
+  end
+
+  @doc """
+  Refreshes the observational entitlement-summary cache for one customer.
+
+  The refresh is disabled by default and returns `{:ok, :disabled}` before
+  any processor or repository I/O unless `stripe_native_sync: :advisory` is
+  enabled. The resulting cache row is diagnostic only and is never consulted
+  by grant decisions.
+  """
+  @doc since: "1.4.0"
+  @spec refresh(Customer.t(), keyword()) ::
+          {:ok, EntitlementSummary.t() | :disabled | :unchanged | :stale} | {:error, term()}
+  def refresh(%Customer{} = customer, opts \\ []) when is_list(opts) do
+    if Accrue.Config.stripe_native_sync?() do
+      do_refresh(customer, opts)
+    else
+      {:ok, :disabled}
+    end
+  end
+
+  defp do_refresh(%Customer{} = customer, opts) do
+    pull_started_at = Accrue.Clock.utc_now()
+
+    metadata = %{
+      customer_id: customer.id,
+      customer_processor_id: customer.processor_id,
+      source: :pull
+    }
+
+    Accrue.Telemetry.span([:accrue, :entitlements, :sync], metadata, fn ->
+      with {:ok, entitlements} <- Processor.list_active_entitlements(customer.processor_id, opts) do
+        %{list_path: list_path} = Processor.active_entitlement_list_metadata()
+        Reconcile.write_pull(customer, pull_started_at, entitlements, list_path)
+      end
+    end)
   end
 end
