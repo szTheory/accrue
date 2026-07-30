@@ -28,7 +28,9 @@ defmodule Accrue.Entitlements.StripeSyncRefreshWorkerTest do
     test "uses the existing webhooks queue with scalar JSON-safe customer_id args", %{
       customer: customer
     } do
-      assert %Ecto.Changeset{valid?: true} = changeset = RefreshWorker.new(%{"customer_id" => customer.id})
+      assert %Ecto.Changeset{valid?: true} =
+               changeset = RefreshWorker.new(%{"customer_id" => customer.id})
+
       job = Ecto.Changeset.apply_changes(changeset)
 
       assert job.queue == "accrue_webhooks"
