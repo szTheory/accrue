@@ -5,6 +5,7 @@
     "e2e": "env -u NO_COLOR playwright test",
     "e2e:group-contracts": "env -u NO_COLOR playwright test e2e/admin-group-contracts.spec.js --timeout=60000 --workers=1",
     "e2e:visuals:png-only": "env -u NO_COLOR playwright test e2e/admin-visuals.spec.js",
+    "e2e:visual-regression": "playwright test e2e/admin-visual-regression-phase211.spec.js --project=chromium-desktop --workers=1",
     "e2e:phase191": "env -u NO_COLOR playwright test e2e/admin-page-flow-phase191.spec.js --timeout=60000 --workers=1",
     "e2e:phase194": "env -u NO_COLOR playwright test e2e/admin-spec-overview-phase194.spec.js --timeout=60000 --workers=1",
     "e2e:phase195": "env -u NO_COLOR playwright test e2e/admin-spec-detail-phase195.spec.js --timeout=60000 --workers=1",
