@@ -179,6 +179,7 @@ Full details: [v1.48 roadmap archive](milestones/v1.48-ROADMAP.md)
 **Plans:** 1/1 plans complete
 
 Plans:
+
 - [x] 212-01-PLAN.md — Bump `:lattice_stripe` to `~> 2.0`, regenerate all four lockfiles in path mode, run each package's actually-configured Three Zeros gate, and commit the atomic 5-file bump plus a D-10 evidence artifact
 
 ### Phase 213: Stripe-native advisory entitlements sync (observational-only)
@@ -197,7 +198,12 @@ Plans:
 **Plans:** 3 plans
 
 Plans:
+**Wave 1**
+
 - [ ] 213-01-PLAN.md — Prove the Fake-backed refresh tracer and shared pull/webhook ordering contract
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
 - [ ] 213-02-PLAN.md — Wire the exhaustive LatticeStripe adapter and existing-queue refresh worker
 - [ ] 213-03-PLAN.md — Enforce the isolation boundary and close the Stripe-backed predicate ambiguity
 
