@@ -349,17 +349,15 @@ assert {:ok, _} =
 | A1 | A temporary-fixture style negative test is the most practical way to prove the isolation regex catches new symbols. | Pitfalls / Validation | Planner may choose a different proof mechanism; requirement is the failure-path proof, not the exact harness. |
 | A2 | Worker should use customer UUID args rather than processor id args. | Architecture / Code Examples | If host scheduling naturally knows only processor ids, worker lookup shape may change; refresh primitive remains customer-backed. |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
-1. **Should the shared writer's DB guard switch from `last_stripe_event_ts` to `synced_at`?**
+1. **RESOLVED — the shared writer's DB guard switches from `last_stripe_event_ts` to `synced_at`.**
    - What we know: D-11 recommends it, but flags correctness risk; current code and tests are built around event watermark ordering. `[VERIFIED: phase context; default_handler.ex]`
-   - What's unclear: exact behavior for timestamp-less webhooks and concurrent pull/webhook ordering after the flip. `[VERIFIED: phase context]`
-   - Recommendation: planner should add an explicit first task to re-derive and test the ordering before refactoring the writer. `[VERIFIED: phase context]`
+   - Resolution: Plan 01 Task 2 proves the guard before finalizing it with five edge probes: stale pull after newer webhook, newer webhook after pull, pull begun after stored webhook with watermark preservation, concurrent pull/webhook greatest-`synced_at` convergence, and timestamp-less/equal-time webhook behavior. The implementation retains `check_stale/2`, uses strict-greater `synced_at` conflict semantics, and carries the greatest real webhook watermark across pulls and timestamp-less writes. `[VERIFIED: 213-01-PLAN.md Task 2]`
 
-2. **Exact shared writer module name**
+2. **RESOLVED — the shared writer is `Accrue.Entitlements.Reconcile`.**
    - What we know: `Accrue.Entitlements.Reconcile` is suggested and should stay off gate files. `[VERIFIED: phase context]`
-   - What's unclear: whether folding into `StripeSync` is cleaner after extraction. `[VERIFIED: phase context]`
-   - Recommendation: use `Accrue.Entitlements.Reconcile` to make the isolation token explicit and keep `StripeSync` focused on public sync/read primitives. `[ASSUMED]`
+   - Resolution: use `Accrue.Entitlements.Reconcile` to keep `StripeSync` focused on public sync/read primitives and give D-15 an explicit shared-writer isolation token. `[VERIFIED: 213-01-PLAN.md; 213-03-PLAN.md]`
 
 ## Environment Availability
 
@@ -390,11 +388,11 @@ assert {:ok, _} =
 
 | Req ID | Behavior | Test Type | Automated Command | File Exists? |
 |--------|----------|-----------|-------------------|--------------|
-| SYNC-01 | Refresh fetches active entitlements and writes summary row | integration | `cd accrue && mix test test/accrue/entitlements/stripe_sync_refresh_test.exs` | no, Wave 0 |
+| SYNC-01 | Refresh fetches active entitlements and writes summary row | integration | `cd accrue && mix test test/accrue/entitlements/stripe_sync_refresh_test.exs` | planned in Plan 01 Task 1 |
 | SYNC-02 | Config default/off no-op; grant path unchanged | unit/integration | `cd accrue && mix test test/accrue/entitlements/stripe_sync_refresh_test.exs test/accrue/entitlements/stripe_sync_disabled_isolation_test.exs` | partial |
 | SYNC-03 | Static guard fails on new gate-to-seam edge | script/test | `bash scripts/ci/verify_entitlement_sync_isolation.sh` plus new negative test | partial |
 | SYNC-04 | `fetch_entitled/2` closure in moduledoc/guide | docs test or grep | `cd accrue && mix test test/accrue/docs/package_docs_verifier_test.exs` | partial |
-| SYNC-05 | Fake processor covers population and contradictory cache does not affect grants | integration | `cd accrue && mix test test/accrue/entitlements/stripe_sync_refresh_test.exs` | no, Wave 0 |
+| SYNC-05 | Fake processor covers population and contradictory cache does not affect grants | integration | `cd accrue && mix test test/accrue/entitlements/stripe_sync_refresh_test.exs` | planned in Plan 01 Task 1 and Plan 03 Task 2 |
 
 ### Sampling Rate
 
@@ -402,12 +400,12 @@ assert {:ok, _} =
 - **Per wave merge:** `cd accrue && mix test.all`.
 - **Phase gate:** full `accrue` gate green before verification; no live Stripe/no Chrome.
 
-### Wave 0 Gaps
+### Task-Owned Test Gaps
 
-- [ ] `accrue/test/accrue/entitlements/stripe_sync_refresh_test.exs` - covers SYNC-01, SYNC-02, SYNC-05.
-- [ ] `accrue/test/accrue/entitlements/stripe_sync_refresh_worker_test.exs` - covers worker wrapper behavior.
-- [ ] Negative-path isolation proof for `list_active_entitlements` and shared-writer token - covers SYNC-03.
-- [ ] Docs/moduledoc assertion or package-doc verifier extension for D-14 closure - covers SYNC-04.
+- [ ] Plan 01 Task 1 creates `accrue/test/accrue/entitlements/stripe_sync_refresh_test.exs` for SYNC-01, SYNC-02, and SYNC-05.
+- [ ] Plan 02 Task 2 creates `accrue/test/accrue/entitlements/stripe_sync_refresh_worker_test.exs` for worker behavior.
+- [ ] Plan 03 Task 1 creates the negative-path isolation proof for `list_active_entitlements` and the shared-writer token for SYNC-03.
+- [ ] Plan 03 Task 2 extends the package-doc verifier with the D-14 closure assertion for SYNC-04.
 
 ## Security Domain
 
