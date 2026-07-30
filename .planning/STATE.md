@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.58
 milestone_name: lattice_stripe 2.x Bump & Stripe-Native Entitlements Sync
 current_phase: 212
-status: planning
-stopped_at: Phase 212 context gathered
+status: ready_to_execute
+stopped_at: Phase 212 planned (1 plan, ready to execute)
 last_updated: "2026-07-30T15:24:19.988Z"
 last_activity: 2026-07-30
-last_activity_desc: v1.58 ROADMAP.md created (Phases 212-214; 11/11 requirements mapped, 0 orphans, 0 duplicates)
+last_activity_desc: Phase 212 planned — 1 plan, 3 tasks, wave 1; research + validation + plan-checker all green (3/3 reqs, 11/11 decisions covered)
 progress:
   total_phases: 3
   completed_phases: 0
-  total_plans: 0
+  total_plans: 1
   completed_plans: 0
   percent: 0
 ---
@@ -24,14 +24,14 @@ See: `.planning/PROJECT.md` (updated 2026-07-30 after v1.57 closeout)
 
 **Core value:** A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic Elixir DX, strong domain modeling, tamper-evident audit ledger, great observability, and zero breaking-change pain through v1.x.
 
-**Current focus:** Active milestone v1.58 — lattice_stripe 2.x Bump & Stripe-Native Entitlements Sync. Roadmap created (Phases 212-214, 11/11 requirements mapped); ready to plan Phase 212. v1.57 (SEED-004 M1) shipped 2026-07-30; next SEED-004 candidate (M2) remains deferred.
+**Current focus:** Active milestone v1.58 — lattice_stripe 2.x Bump & Stripe-Native Entitlements Sync. Phase 212 planned (1 plan, ready to execute); Phases 213-214 not yet planned. v1.57 (SEED-004 M1) shipped 2026-07-30; next SEED-004 candidate (M2) remains deferred.
 
 ## Current Position
 
-Phase: 212 (not started)
-Plan: —
-Status: Roadmap created — ready to plan Phase 212
-Last activity: 2026-07-30 — v1.58 ROADMAP.md created (Phases 212-214; 11/11 requirements mapped, 0 orphans, 0 duplicates)
+Phase: 212 (planned — ready to execute)
+Plan: 212-01 (1 plan, 3 tasks, wave 1)
+Status: Phase 212 planned — ready to execute (`/gsd-execute-phase 212`)
+Last activity: 2026-07-30 — Phase 212 planned: research (a44a1580) + validation (e9a2eab7) + plan (c6e70098) all green; plan-checker VERIFICATION PASSED (0 blockers), 3/3 reqs + 11/11 decisions covered
 
 ## Post-v1.48 Pause Rule
 
@@ -47,7 +47,7 @@ v1.58 lattice_stripe 2.x Bump & Stripe-Native Entitlements Sync opened 2026-07-3
 
 | Phase | Name | Requirements | Status |
 |-------|------|--------------|--------|
-| 212 | lattice_stripe 2.x bump & green reconciliation | BUMP-01, BUMP-02, BUMP-03 | Ready to plan |
+| 212 | lattice_stripe 2.x bump & green reconciliation | BUMP-01, BUMP-02, BUMP-03 | Planned — ready to execute |
 | 213 | Stripe-native advisory entitlements sync (observational-only) | SYNC-01, SYNC-02, SYNC-03, SYNC-04, SYNC-05 | Not started |
 | 214 | Docs & truth reconciliation | DOCS-01, DOCS-02, DOCS-03 | Not started |
 
