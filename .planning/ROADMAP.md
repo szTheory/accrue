@@ -11,8 +11,8 @@
 - ✅ **v1.53 Admin UI Design-System Hardening** — Phases 187-192 (shipped 2026-06-20) — [archive](milestones/v1.53-ROADMAP.md)
 - ✅ **v1.54 Admin UI Page-Level Streamlining & Storybook** — Phases 193-200 (shipped 2026-07-01) — [archive](milestones/v1.54-ROADMAP.md)
 - ✅ **v1.55 OSS Quality Evaluation & Hardening Roadmap** — Phases 201-204 (shipped 2026-07-03) — [archive](milestones/v1.55-ROADMAP.md)
-- ⏸️ **v1.56 Admin UI Ratchet: Automated Adversarial Design Evaluation** — Phases 205-208 (PARKED 2026-07-19; 205-207 shipped, 208 was 3/5 and non-converging on IA findings — the work v1.57 now takes on; ledger + baseline preserved in `accrue_admin/e2e/ratchet/`) — [archive](milestones/v1.56-ROADMAP.md)
-- 🔨 **v1.57 Admin Operator Control Plane (SEED-004 M1)** — Phases 209-211 (ACTIVE, opened 2026-07-19; reign the two outlier admin pages — Home + Subscriptions — onto the shared component vocabulary and pivot their IA to answer-first, so the whole `accrue_admin` reads as one operator-first system; admin-only, no core `accrue` change, no new nav rooms, no new deps)
+- ⏸️ **v1.56 Admin UI Ratchet: Automated Adversarial Design Evaluation** — Phases 205-208 (PARKED 2026-07-19; 205-207 shipped, 208 was 3/5 and non-converging on IA findings — the work v1.57 took on; ledger + baseline preserved in `accrue_admin/e2e/ratchet/`) — [archive](milestones/v1.56-ROADMAP.md)
+- ✅ **v1.57 Admin Operator Control Plane (SEED-004 M1)** — Phases 209-211 (shipped 2026-07-30; reigned Home + Subscriptions onto the shared operator-first component vocabulary + answer-first IA, retired the bespoke `.ax-*` sets, and closed UAT via a deterministic Playwright pixel-diff gate) — [archive](milestones/v1.57-ROADMAP.md)
 
 ## Planning Doctrine
 
@@ -26,30 +26,31 @@ Accrue is in **stable core / demand-driven expansion** posture as of 2026-05-31.
 
 After v1.48, broad feature milestones remain closed by default unless reopened by concrete adopter failure, correctness/security/data-loss risk, repeated support issue, operational failure, or explicit strategy change.
 
-No broad feature milestone is currently open.
+**No broad feature milestone is currently open.** v1.57 (SEED-004 M1) shipped 2026-07-30 under the *explicit strategy change* reopen class (flagship adopter-facing admin surface, elevated to a strategic redesign — same class accepted for v1.50–v1.54). The next SEED-004 candidate is **M2** (signature "Why blocked?" diagnosis surfaces + causality graph + the first core `accrue` diagnosis functions), deferred pending a `/gsd-new-milestone` reopen decision recorded in `PROJECT.md`.
 
-**v1.57 Admin Operator Control Plane (SEED-004 M1) is open** (Phases 209-211, opened 2026-07-19). It is **not** a broad feature milestone: it is the first slice of the SEED-004 admin redesign — an information-architecture / component-grammar pivot on the already-shipped `accrue_admin` operator UI. Reopen justification class: **explicit strategy change** (flagship adopter-facing admin surface, elevated to a strategic redesign — same class accepted for v1.50–v1.54), recorded in `PROJECT.md`. Scope is admin-only (`accrue_admin` LiveView templates + `assets/css`): **no core `accrue` change** (core diagnosis fns are M2), **no new nav rooms** (M3), no new deps, no Tailwind migration, `ax-*` stays the styling SSOT, no `accrue_portal` work. The parked v1.56 ratchet re-locks this redesign after M1 lands.
-
-**v1.56 Admin UI Ratchet is PARKED** (2026-07-19) mid-flight to open v1.57. Phases 205-207 shipped; Phase 208 (prove-convergence + ACCEPT) was 3/5 with 208-04/05 maintainer-gated and **non-converging because the ratchet kept surfacing information-architecture findings** — which is exactly the work v1.57/SEED-004 now takes on. The forward-only ledger + frozen baseline in `accrue_admin/e2e/ratchet/` are preserved untouched; the harness becomes the tool that re-freezes the v1.57 redesign after it lands. The 23 round-99 confirmed IA findings are carried into v1.57 as M1 input (`research/admin-ratchet-round99-confirmed-findings.json`). To resume v1.56 later: restore from the archive and run `/gsd-execute-phase 208`.
+**v1.56 Admin UI Ratchet is PARKED** (2026-07-19) mid-flight. Phases 205-207 shipped; Phase 208 (prove-convergence + ACCEPT) was 3/5 with 208-04/05 maintainer-gated and **non-converging because the ratchet kept surfacing information-architecture findings** — which is exactly the work v1.57/SEED-004 took on and shipped. The forward-only ledger + frozen baseline in `accrue_admin/e2e/ratchet/` are preserved untouched; per its own design the harness re-freezes the v1.57 redesign after M3 lands. The 23 round-99 confirmed IA findings were carried into v1.57 as M1 input (`research/admin-ratchet-round99-confirmed-findings.json`). To resume v1.56 later: restore from the archive and run `/gsd-execute-phase 208`.
 
 Stop rule: if proposed work is polish-only with a documented workaround and no release/adopter failure mode, record it as deferred with a revisit trigger and do not create a milestone for it.
 
 ## Phases
 
-### 🔨 v1.57 Admin Operator Control Plane (SEED-004 M1) (Phases 209-211) — ACTIVE (opened 2026-07-19)
+<details>
+<summary>✅ v1.57 Admin Operator Control Plane (SEED-004 M1) (Phases 209-211) — SHIPPED 2026-07-30</summary>
 
-**Posture:** First slice (M1) of the SEED-004 redesign of `accrue_admin` from a CRUD surface into an "operator control plane over billing state." M1 reigns the two outlier pages — **Home** (`dashboard_live.ex`) and **Subscriptions** (`subscriptions_live.ex`) — onto the canonical shared component vocabulary (PageHeader / StatStrip / DataTable / FilterChipBar / `.ax-card` / Button / StatusBadge / EmptyState / KpiCard / Timeline / Icon) that ~10 admin pages already follow, and pivots their information architecture to **answer-first** (one scannable health verdict + one primary action per zone, redundant bands trimmed), retiring ~325 bespoke `.ax-home-*` / `.ax-launcher*` / `.ax-attention*` / `.ax-subscriptions-*` / `.ax-inline-worklist*` rules. **Scope fence (binding):** admin-only; **no** core `accrue` change (M2), **no** new nav rooms (M3), **no** "why blocked"/causality/diagnosis synthesis, no new deps, no Tailwind migration; `ax-*` stays the styling SSOT; keep the Cobalt / quiet-confidence brand + prior de-garish/card-grammar polish. Console **density is the point** — do not over-air. Reuse shared components (compose, don't fork); at most one small new shared component (`WorkQueueCallout`) if the callout shape demonstrably repeats. Every CSS/copy change rebuilds + commits **both** generated artifacts (`priv/static/accrue_admin.css` via `mix accrue_admin.assets.build`, and `examples/accrue_host/e2e/generated/copy_strings.json` via `mix accrue_admin.export_copy_strings`); CSS retirement is grep-gated (classes shared with the out-of-scope subscription **detail** page are preserved); PNG-verify against the canonical Payments/Customers/Invoices reference. Authoritative design sources: `prompts/accrue_admin_operator_ui_journey_blueprint.md`, `.planning/research/ADMIN-UI-REDESIGN-BLUEPRINT-SYNTHESIS.md`, `research/admin-ratchet-round99-confirmed-findings.json`.
+**Posture:** First slice (M1) of the SEED-004 redesign of `accrue_admin` from a CRUD surface into an "operator control plane over billing state." M1 reigned the two outlier pages — **Home** (`dashboard_live.ex`) and **Subscriptions** (`subscriptions_live.ex`) — onto the canonical shared component vocabulary (PageHeader / StatStrip / DataTable / FilterChipBar / `.ax-card` / Button / StatusBadge / EmptyState / KpiCard / Timeline / Icon), pivoted their information architecture to **answer-first** (one scannable health verdict + one primary action per zone, redundant bands trimmed), and retired the bespoke `.ax-home-*` / `.ax-launcher*` / `.ax-attention*` / `.ax-subscriptions-*` sets (97 selectors). Admin-only; no core `accrue` change, no new nav rooms, no new deps. UAT closed with zero human checkpoints via a new deterministic Playwright `toHaveScreenshot` pixel-diff gate.
 
-- [ ] **Phase 209: Reign Subscriptions (list + detail CSS coordination)** - Compose the Subscriptions list from the canonical spine — single verdict, one invoice-queue action, five bespoke bands trimmed, compact cell idiom, per-row actions out of cells — and resolve the `WorkQueueCallout` extract-or-inline decision + the detail-page shared-CSS coordination (REIGN-01, REIGN-02, COMP-01)
-- [x] **Phase 210: Reign Home + certify answer-first IA & copy integrity** - Adopt `PageHeader` and recompose Home's attention rail + launcher tiles from shared primitives, then certify the answer-first grammar and copy/nav integrity across both now-reigned pages (REIGN-03, IA-01, IA-02, IA-03, IA-04, COPY-01, COPY-02) (completed 2026-07-19)
-- [ ] **Phase 211: Grep-gated CSS retirement & cross-surface cleanup** - Retire the now-dead bespoke `.ax-*` rules (grep-gated, detail-shared classes preserved), rebuild the committed bundle, and clean up the component kitchen / storybook / `region-tags.js` selector map (REIGN-04)
+- [x] Phase 209: Reign Subscriptions (list + detail CSS coordination) (3/3 plans) — completed 2026-07-19 (REIGN-01, REIGN-02, COMP-01)
+- [x] Phase 210: Reign Home + certify answer-first IA & copy integrity (3/3 plans) — completed 2026-07-19 (REIGN-03, IA-01, IA-02, IA-03, IA-04, COPY-01, COPY-02)
+- [x] Phase 211: Grep-gated CSS retirement & cross-surface cleanup (4/4 plans) — completed 2026-07-29 (REIGN-04)
 
-Coverage: **11/11 requirements** mapped to Phases 209-211 (each REQ-ID → exactly one phase). Per-phase counts: 209→3 · 210→7 · 211→1. Dependencies: strictly linear — 209 → 210 → 211 (Subscriptions before Home per the research build order; CSS retirement last, after both templates land, because `.ax-inline-worklist*` / `.ax-audit-summary-row` are shared with the out-of-scope subscription detail page). Full per-phase goals + success criteria: see [Phase Details](#phase-details-v157-active-milestone).
+Coverage: 11/11 requirements complete. Milestone audit passed (11/11 reqs, 3/3 phases, 5/5 integration, 5/5 flows). Full details: [v1.57 roadmap archive](milestones/v1.57-ROADMAP.md).
+
+</details>
 
 <details>
 <summary>⏸️ v1.56 Admin UI Ratchet: Automated Adversarial Design Evaluation (Phases 205-208) — PARKED 2026-07-19</summary>
 
-**Posture:** Maintainer-run, forward-only "UI Ratchet" that automates fan-out adversarial design evaluation → dedup → verify → batch-fix → re-score → loop-until-dry over `accrue_admin` (dev/test-only tooling + admin CSS polish). **PARKED mid-flight** to open v1.57: Phases 205-207 shipped; Phase 208 (prove-convergence + ACCEPT) reached 3/5 with 208-04/05 maintainer-gated and non-converging on IA findings — the work v1.57 now takes on. The ledger + frozen baseline in `accrue_admin/e2e/ratchet/` are preserved untouched and become the tool that re-locks the v1.57 redesign after it lands. The v1.56 optional "full-surface sweep" placeholder (originally numbered 209, `SWEEP-01`) was never created as a phase; **phase number 209 is reused by v1.57**.
+**Posture:** Maintainer-run, forward-only "UI Ratchet" that automates fan-out adversarial design evaluation → dedup → verify → batch-fix → re-score → loop-until-dry over `accrue_admin` (dev/test-only tooling + admin CSS polish). **PARKED mid-flight** to open v1.57: Phases 205-207 shipped; Phase 208 (prove-convergence + ACCEPT) reached 3/5 with 208-04/05 maintainer-gated and non-converging on IA findings — the work v1.57 took on and shipped. The ledger + frozen baseline in `accrue_admin/e2e/ratchet/` are preserved untouched and become the tool that re-locks the v1.57 redesign after M3. The v1.56 optional "full-surface sweep" placeholder (originally numbered 209, `SWEEP-01`) was never created as a phase; **phase number 209 was reused by v1.57**.
 
 - [x] Phase 205: Persona + design-lens evaluator harness (5/5 plans) — completed 2026-07-03 (EVAL-01..05, DEDUP-01, DEDUP-02)
 - [x] Phase 206: Adversarial verifier + finding ledger + deterministic gate (4/4 plans) — completed 2026-07-04 (DEDUP-03, VERIFY-01..03, LEDGER-01..05)
@@ -149,110 +150,10 @@ Full details: [v1.48 roadmap archive](milestones/v1.48-ROADMAP.md)
 
 </details>
 
-## Phase Details (v1.57 active milestone)
-
-### Phase 209: Reign Subscriptions (list + detail CSS coordination)
-
-**Goal**: The Subscriptions list (`subscriptions_live.ex`) is composed only from the canonical shared skeleton (`AppShell → section.ax-page → PageHeader → FlashGroup → DataTable` with `FilterChipBar` in `:list_status`), reads answer-first (one verdict, one invoice-queue entry point), and its per-row cells use the compact shared idiom — while the shared-CSS coordination with the out-of-scope subscription **detail** page (`subscription_live.ex`) is resolved so no later deletion can silently break it. This is the first, lowest-risk reign (Subscriptions is ~90% already on the skeleton) and it surfaces the one-new-component decision before Home needs to consume it.
-**Depends on**: Nothing (first phase of v1.57)
-**Requirements**: REIGN-01, REIGN-02, COMP-01
-**Success Criteria** (what must be TRUE):
-
-  1. The Subscriptions list renders from the canonical spine with **nothing** between `FlashGroup` and the `DataTable`: the five bespoke band `<section>`s (`.ax-subscriptions-invoice-strip` / `-queue-shortcut` / `-invoice-records` / `-secondary-strips` wrapping `-at-risk-strip` + `-audit-strip`) are gone, the page-level override classes (`ax-page-compact ax-subscriptions-page`, `ax-page-header-compact ax-subscriptions-header`, the `ax-kpi-row` StatStrip wrapper) are dropped, and the now-dead `open_invoice_queue/1` query is removed — with a content inventory proving every distinct operator datum (at-risk exposure, last-webhook status, open-invoice count) survives, relocated not lost.
-  2. The page presents one scannable health verdict (short-noun title + a single verdict expressed via StatStrip/StatusBadge, not a full-sentence title) and exactly one invoice-queue primary action in `PageHeader` `:actions` (the triple-repeated "Open dedicated invoice queue" CTA — the most-confirmed round-99 defect — collapses to one), with the fake "Billing health overview" breadcrumb parent replaced by the real 2-crumb `[home, Subscriptions]`.
-  3. Subscriptions table + card cells render via the compact shared idiom (`StatusBadge`, `ax-stack-xs`, `ax-link`, `ax-chip ax-label`) with no in-cell action buttons — the 15-20-line bespoke `identity_cell/3` + `billing_signals_cell/3` raw HTML is rebuilt and per-row actions move to a shared control (actions column or `DropdownMenu`), matching the reference pages.
-  4. The `WorkQueueCallout` extract-or-inline decision is made and recorded: if the trimmed worklist callout shape demonstrably repeats (and will be reused by Home), exactly one small shared component composed from existing tokens + `.ax-card` reusing the `moss`/`cobalt`/`amber`/`slate`/`ink` tone scale is added and consumed by Subscriptions; otherwise Subscriptions composes from `.ax-card` directly and no component is added. No other new components, no new deps.
-  5. Verification gates pass in-phase: no operator-density regression versus the pre-reign Subscriptions screenshot (row height, rows-per-viewport, header band height held) and PNG parity against the canonical Payments/Customers/Invoices reference; the `subscriptions_live_test:111` (`ax-kpi-row ax-subscriptions-kpi-row`) assertion and any other retired-class/copy assertions are migrated to the shared-component selector in this phase; the served `priv/static/accrue_admin.css` bundle and `examples/accrue_host/e2e/generated/copy_strings.json` are rebuilt and committed; the subscription **detail** page's shared `.ax-inline-worklist*` / `.ax-audit-summary-row` styling is preserved (retain-vs-reign decided and PNG-verified) — and the diff touches no `accrue/lib`, adds no nav room, and introduces no "why blocked"/causality synthesis.
-
-**Plans**: 3/3 plans complete
-Plans:
-**Wave 1**
-
-- [x] 209-01-PLAN.md — Baseline capture: pre-reign test-green confirmation + PNG snapshot (Subscriptions + Subscription-detail, light/dark)
-
-**Wave 2** *(blocked on Wave 1 completion)*
-
-- [x] 209-02-PLAN.md — Header/spine rebuild (breadcrumb, single verdict, single CTA, 4-stat StatStrip, Copy additions) + band removal/dead-code cleanup + compact cell rebuild
-
-**Wave 3** *(blocked on Wave 2 completion)*
-
-- [x] 209-03-PLAN.md — D-04 shared-CSS grep-gate + detail-page PNG parity + test migration + generated-artifact rebuild
-
-**UI hint**: yes
-
-### Phase 210: Reign Home + certify answer-first IA & copy integrity
-
-**Goal**: The Home page (`dashboard_live.ex`) is composed from the canonical `PageHeader` instead of a hand-rolled `<header>`, its two signature zones (attention rail + task-launcher tiles) are rebuilt from shared primitives, and — with both outlier pages now reigned — the answer-first information architecture and plain-language copy/nav integrity are certified across Home **and** Subscriptions so the whole admin reads as one operator-first system. Home is the larger lift (fully bespoke header + two zones with no shared component today) and is done second so it can consume anything Subscriptions established (including `WorkQueueCallout`).
-**Depends on**: Phase 209
-**Requirements**: REIGN-03, IA-01, IA-02, IA-03, IA-04, COPY-01, COPY-02
-**Success Criteria** (what must be TRUE):
-
-  1. Home is composed from the canonical `PageHeader` (breadcrumbs + title + `:description`/`:actions`/`:stat_strip`); its attention rail + four launcher tiles are rebuilt from `.ax-card` + `Button` + `Icon` + `StatusBadge` (with `EmptyState` for empty branches), and the already-canonical `KpiCard` "At a glance" band and `Timeline` activity cards are kept as-is.
-  2. Each of the two pages presents exactly **one** scannable billing-health verdict (Home's verdict — rendered three times today — and the Subscriptions verdict each collapse to a single clear statement) and **one** unambiguous primary action per zone (Home's triplicated customer-search entry de-duplicates to a single discoverable control folded into `PageHeader` `:actions`; the Subscriptions invoice-queue entry stays single from Phase 209).
-  3. Content on both pages is ordered answer-first (health verdict → primary action → supporting detail → records), redundant bands are trimmed with **no operator-density regression** versus each page's pre-reign baseline (verified by PNG compare against both the canonical reference and the pre-reign screenshot), and console density is preserved rather than over-aired.
-  4. Operator-facing copy on both pages is plain-language (no double-negative "No — billing is not active"; "workspace" jargon clarified) and sourced from `AccrueAdmin.Copy` (no inline template literals); breadcrumbs point only to real navigable parents (no fake "Billing health overview"), and the primary customer-lookup control is discoverable rather than buried.
-  5. Verification gates pass in-phase: the `dashboard_live_test` assertions at L107 (`ax-home-health-answer`), L130 (`ax-launcher-primary`), L184 (`ax-home-customer-search-cta`) and the `e2e/admin-spec-overview-phase194` + `admin-interaction-overlay-phase199` `.ax-attention-rail*` selectors are migrated to the shared-component DOM; `admin-a11y.spec.js` (axe) stays green with landmark/heading/visually-hidden semantics preserved; the served `accrue_admin.css` bundle and `copy_strings.json` are rebuilt and committed; and the diff touches no `accrue/lib`, adds no nav room, and introduces no diagnosis/causality synthesis.
-
-**Plans**: 1/3 plans executed
-**Wave 1**
-
-- [x] 210-01-PLAN.md — Copy SSOT pass: add Home verdict/heading/customer-search strings, de-jargon "workspace", regenerate copy_strings.json (COPY-01, COPY-02)
-
-**Wave 2** *(blocked on Wave 1 completion)*
-
-- [x] 210-02-PLAN.md — Recompose dashboard_live.ex onto PageHeader: single verdict (StatusBadge + exposure-first StatStrip), single customer-search control, primitive-built attention rail + EmptyState, three-tile launcher grid; KpiCard/Timeline kept (REIGN-03, IA-01, IA-02, IA-04, COPY-02)
-
-**Wave 3** *(blocked on Wave 2 completion)*
-
-- [x] 210-03-PLAN.md — Migrate unit + e2e gates to the reigned DOM, keep axe green, human-verify density-no-regression + one-system PNG parity (REIGN-03, IA-03)
-
-**UI hint**: yes
-
-### Phase 211: Grep-gated CSS retirement & cross-surface cleanup
-
-**Goal**: With both target templates reigned, retire the now-dead bespoke `.ax-*` rule sets from `assets/css/app.css`, rebuild and commit the served bundle, and clean up the secondary surfaces that still reference the retired vocabulary (component kitchen, storybook, and the parked ratchet's `region-tags.js` selector map) — grep-gated throughout so the out-of-scope subscription detail page keeps its shared classes. CSS deletion is sequenced last, after all reigned templates land, because blind prefix-deletion is invisible to source-text CI.
-**Depends on**: Phase 210 (both Home and Subscriptions must be reigned before the shared/dead CSS can be safely retired)
-**Requirements**: REIGN-04
-**Success Criteria** (what must be TRUE):
-
-  1. A definitive grep census across `lib/`, `test/`, and `e2e/` confirms zero remaining references to each candidate class before deletion; the bespoke `.ax-home-*` / `.ax-launcher*` / `.ax-attention*` / `.ax-health-summary*` / `.ax-subscriptions-*` / `.ax-subscription-row-*` / `.ax-subscription-setup*` sets (~325 rules) are removed from `assets/css/app.css`.
-  2. The detail-page-shared classes (`.ax-inline-worklist`, `.ax-inline-worklist-copy`, `.ax-audit-summary-row`, and any other class still referenced by `subscription_live.ex`) are **preserved**; the subscription detail page is PNG-verified unbroken after retirement.
-  3. The committed `priv/static/accrue_admin.css` bundle is rebuilt via `mix accrue_admin.assets.build` and committed in the same change (no dead-CSS ship); a cheap guard confirms no orphan `ax-*` rule lacks a source reference and no source `ax-*` class lacks a rule.
-  4. The component kitchen (`component_kitchen_live.ex`) and `priv/static/storybook.css` no longer render retired vocabulary (updated + `storybook.css` rebuilt), the phase200 storybook specs stay green, and the parked `region-tags.js` `.ax-attention-rail` mapping is opportunistically fixed so a future ratchet re-freeze starts from a non-dangling selector map.
-  5. Full `mix test` + the admin e2e suite are green across the phase boundary (no red left behind), and the diff touches no `accrue/lib` and adds no nav room.
-
-**Plans**: 4/4 plans executed
-Plans:
-**Wave 1**
-
-- [x] 211-01-PLAN.md — Build the orphan/dangling `ax-*` CSS census guard (`verify-css-census.mjs` + self-test) and capture the pre-Phase-211 mix test baseline + cross-validate the guard against the RESEARCH.md census
-
-**Wave 2** *(blocked on Wave 1 completion)*
-
-- [x] 211-02-PLAN.md — Delete the 92 named + 5 D-01 adjacent dead `.ax-*` selectors from `app.css` (Home/Launcher/Attention/HealthSummary, then Subscriptions/SubscriptionRow), preserving all 16 live classes and comma-grouped live branches, then rebuild + commit `accrue_admin.css`/`.js`
-
-**Wave 3** *(blocked on Wave 2 completion)*
-
-- [x] 211-03-PLAN.md — Recompose `priv/static/storybook.css` per the D-04 shell recipe and run the orphan guard against the retired `app.css` plus an early smoke test
-
-**Wave 4** *(blocked on Wave 3 completion)*
-
-- [x] 211-04-PLAN.md — Fix the `region-tags.js` attention-rail selector (D-03), run the full `mix test` + admin e2e suite with no-core-touched/no-nav-room confirmation, and human-verify the subscription detail page PNG parity
-
-**UI hint**: yes
-
 ## Progress
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
-| 193. Research, re-baseline & pattern lock | v1.54 | 5/5 | Complete | 2026-06-25 |
-| 194. Exemplar A — Dashboard | v1.54 | 4/4 | Complete | 2026-06-26 |
-| 195. Exemplar B — Subscription detail | v1.54 | 8/8 | Complete | 2026-06-26 |
-| 196. Exemplar C — Subscriptions list + PageHeader | v1.54 | 5/5 | Complete | 2026-06-26 |
-| 197. Propagate LIST | v1.54 | 7/7 | Complete | 2026-06-28 |
-| 198. Propagate DETAIL + analytics | v1.54 | 9/9 | Complete | 2026-06-29 |
-| 199. Cross-cutting interaction/overlay correctness | v1.54 | 15/15 | Complete | 2026-06-30 |
-| 200. Idempotent verification & sign-off | v1.54 | 6/6 | Complete | 2026-06-30 |
 | 201. Software quality evaluation | v1.55 | 1/1 | Complete | 2026-07-02 |
 | 202. CI/CD performance and determinism audit | v1.55 | 1/1 | Complete | 2026-07-02 |
 | 203. Database schema contract ADR | v1.55 | 1/1 | Complete | 2026-07-02 |
@@ -261,9 +162,9 @@ Plans:
 | 206. Adversarial verifier + finding ledger + deterministic gate | v1.56 | 4/4 | Complete | 2026-07-04 |
 | 207. Orchestration + digest + one-command round/fix loop | v1.56 | 8/8 | Complete | 2026-07-07 |
 | 208. Prove convergence on slice + wire CI + ACCEPT | v1.56 | 3/5 | Parked | - |
-| 209. Reign Subscriptions (list + detail CSS coordination) | v1.57 | 3/3 | Complete    | 2026-07-19 |
-| 210. Reign Home + certify answer-first IA & copy integrity | v1.57 | 3/3 | Complete    | 2026-07-19 |
-| 211. Grep-gated CSS retirement & cross-surface cleanup | v1.57 | 4/4 | In Progress|  |
+| 209. Reign Subscriptions (list + detail CSS coordination) | v1.57 | 3/3 | Complete | 2026-07-19 |
+| 210. Reign Home + certify answer-first IA & copy integrity | v1.57 | 3/3 | Complete | 2026-07-19 |
+| 211. Grep-gated CSS retirement & cross-surface cleanup | v1.57 | 4/4 | Complete | 2026-07-29 |
 
 ## Historical Backlog Anchors (not active scope)
 
@@ -277,10 +178,11 @@ These v1.17 FRG anchors are retained for traceability only as historical, non-ac
 
 | Item | Status | Reason | Future owner/category | Revisit trigger |
 |------|--------|--------|-----------------------|-----------------|
-| SEED-004 M2 (signature diagnostic surfaces + core diagnosis) | deferred (next after v1.57 M1) | The "Why blocked?" diagnosis card, causality graph/timeline, unified `billing_state_for_customer/1` synthesis, freshness/stale chips, and the core `accrue` diagnosis fns they require (`blocking_reason_for_owner/1`, `causality_chain_for_event/1`) + durable event-name contracts. First admin-UI line to reach into core `accrue`. | Admin UI / IA + core diagnosis | after v1.57 M1 lands → `/gsd-new-milestone` (reopen class: explicit strategy change) |
+| SEED-004 M2 (signature diagnostic surfaces + core diagnosis) | deferred (next after v1.57 M1) | The "Why blocked?" diagnosis card, causality graph/timeline, unified `billing_state_for_customer/1` synthesis, freshness/stale chips, and the core `accrue` diagnosis fns they require (`blocking_reason_for_owner/1`, `causality_chain_for_event/1`) + durable event-name contracts. First admin-UI line to reach into core `accrue`. | Admin UI / IA + core diagnosis | v1.57 M1 shipped 2026-07-30 → `/gsd-new-milestone` (reopen class: explicit strategy change) |
 | SEED-004 M3 (new rooms + structure + ratchet re-freeze) | deferred (after M2) | New Usage/meters, checkout-sessions, Connect-capabilities, fee-reconciliation rooms; `+Usage`/`+Settings` nav groups; de-tab Customer-360; and the v1.56-ratchet re-freeze (refresh design-lens rubric + persona exemplars + re-freeze baseline) that re-locks the landed redesign. | Admin UI / IA + ratchet | after M2 lands; ratchet re-freeze is post-M3 |
 | v1.56 SWEEP-01 (full-surface ratchet sweep) | parked with v1.56 | Graduate the remaining ~19 admin surfaces round-by-round under the proven ratchet. Parked with the v1.56 milestone; the ratchet re-freeze after SEED-004 lands supersedes the original sweep target. | Ratchet / admin design QA | v1.56 resumed, or post-M3 ratchet re-freeze |
-| TOOL-02 (pixel-diff visual-regression) | deferred (v1.53/v1.54) | Percy/Applitools-style pixel-diff tooling deferred in favor of the scored-cell forward-only gate over real composed routes. | Visual-regression tooling | flaky/insufficient scored-cell + judge loop, or explicit strategy change |
+| lattice_stripe 2.0.0 entitlements dep bump (SEED-005) | ready (not auto-executed) | lattice_stripe 2.0.0 is live on Hex with entitlements support; the major 1.x→2.0 bump is earmarked. Promote via a new milestone or run standalone. | Core deps / entitlements | maintainer promotes, or an entitlements feature needs the 2.0 surface |
+| TOOL-02 (pixel-diff visual-regression) | resolved (superseded by v1.57 gate) | Percy/Applitools-style pixel-diff tooling was deferred in favor of the scored-cell forward-only gate; v1.57 introduced a first-party deterministic Playwright `toHaveScreenshot` pixel-diff gate (4 admin surfaces × light/dark) in browser-uat. | Visual-regression tooling | broaden surface coverage, or replace with a hosted service on explicit strategy change |
 | TOOL-03 (publish tokens.css distributable) | deferred (v1.53) | Standalone npm/CDN token distributable not needed for the admin passes. | Brand/token distribution | external doc/marketing-site need for distributable tokens |
 | ENT-EXT-01 | deferred | Rich metered/tiered/range entitlement math beyond current seat-count support; no sourced adopter contract. | Entitlements extension | concrete adopter failure or explicit adopter contract |
 | FIN-03 | standing non-goal | App-owned finance exports remain outside Accrue's declared billing-library scope. | Strategy non-goal / finance exports | explicit strategy change or correctness/security/data-loss risk not solvable by host-owned exports |

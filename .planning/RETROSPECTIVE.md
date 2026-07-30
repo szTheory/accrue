@@ -1495,12 +1495,57 @@ An audit-only maintenance milestone for release-readiness and support-contract h
 
 ---
 
+## Milestone: v1.57 — Admin Operator Control Plane (SEED-004 M1)
+
+**Shipped:** 2026-07-30  
+**Phases:** 3 (209-211) | **Plans:** 10 | **Tasks:** 19
+
+### What Was Built
+
+The first slice (M1) of the SEED-004 redesign of `accrue_admin` from a CRUD surface into an "operator control plane over billing state." Phase 209 reigned the Subscriptions list onto the canonical PageHeader/StatStrip/DataTable spine — one StatusBadge verdict, one primary CTA, a 4-stat StatStrip, compact cell idiom, zero bespoke worklist bands or in-cell buttons — resolving COMP-01 inline (no new component). Phase 210 recomposed Home onto `PageHeader` with a single verdict, one discoverable customer-search control, a primitive-built attention rail + EmptyState and launcher grid, and certified answer-first IA + plain-language `AccrueAdmin.Copy` strings + real-parent breadcrumbs across both pages (axe-clean, no density regression). Phase 211 grep-gated the retirement of 97 dead bespoke `.ax-*` selectors (detail-shared classes preserved), rebuilt both generated artifacts, recomposed storybook, and fixed the parked ratchet's dangling selector — full unit (514/0) + e2e (200/0) + storybook suites green.
+
+### What Worked
+
+- **Answer-first IA reign delivered directly, not via the ratchet.** The v1.56 ratchet had stalled non-converging on IA findings; treating those 23 round-99 findings as an explicit M1 acceptance checklist and reigning the two outlier pages by hand converged where the automated loop could not.
+- **Sequencing the CSS retirement last (Phase 211) after both templates landed** made blind prefix-deletion safe — the grep-gate + orphan-guard census proved zero live-class over-deletion, and detail-page-shared classes were preserved.
+- **The new deterministic Playwright pixel-diff gate closed UAT with zero human checkpoints.** The two former human-only visual checkpoints were replaced by a `toHaveScreenshot` gate (4 surfaces × light/dark), making the visual-regression posture reproducible in CI.
+- **Compose-don't-fork discipline held.** COMP-01's one-new-component budget went unspent — the callout shape did not demonstrably repeat, so both pages composed from `.ax-card` directly.
+
+### What Was Inefficient
+
+- **Phase 211 execution shipped as 11 unpushed local-main commits** while origin/main had only the plans — a real origin/local skew that had to be caught and reconciled (CI-validated via PR #36) before the milestone could close cleanly.
+- **VERIFICATION.md for Phase 211 was written retroactively during the milestone audit** (the recurring "write VERIFICATION when green, not at close" gotcha); substance was already covered by 211-UAT.md + approved 211-VALIDATION.md, but the artifact lagged.
+- **210 SUMMARY frontmatter under-tagged `requirements_completed`** — traceability was sound via 210-VERIFICATION.md per-criterion evidence, but the frontmatter tags were incomplete.
+- **Validation metadata was uneven across phases** (209 draft, 210 absent, 211 approved) — a coverage TODO the inactive Nyquist hook did not gate.
+
+### Patterns Established
+
+- **A deterministic pixel-diff gate can retire human visual checkpoints** for an admin surface once masks/baselines are minted (see `reference_admin_visual_regression_gate`).
+- **For IA/grammar reigns, drive from a confirmed-findings checklist** (the ratchet's round-99 output) rather than looping the automated evaluator; the harness re-freezes the result afterward, it doesn't converge the redesign itself.
+- **Grep-gated CSS retirement + an orphan/dangling census guard** is the safe pattern for deleting shared bespoke class families that source-text CI can't see.
+
+### Key Lessons
+
+1. When an automated evaluation loop stops converging, that non-convergence is itself signal — here it correctly identified that the work was a human IA redesign, not more ratchet rounds.
+2. Push execution commits promptly: an 11-commit local-main skew silently left origin describing plans while the actual CSS retirement sat undeployed.
+3. Write VERIFICATION.md at the moment a phase goes green, not at milestone close — the retroactive write is pure rework and risks under-capturing evidence.
+4. Replacing human visual checkpoints with a deterministic gate is worth the setup cost: v1.57 closed UAT with 0 human steps and a reproducible CI guard.
+
+### Cost Observations
+
+- Model mix: GSD model routing in effect (high-volume mechanical agents on Sonnet, planning/verifier on inherit).
+- Sessions: multi-session over 2026-07-19 → 2026-07-30, including a mid-flight main-skew reconciliation and the automated visual-gate build (quick-260729-rjo).
+- Notable: the highest-signal steps were the round-99 findings checklist, the grep-gate/orphan-guard census, and the deterministic pixel-diff gate that eliminated human UAT.
+
+---
+
 ## Cross-Milestone Trends
 
 ### Process Evolution
 
 | Milestone | Sessions | Phases | Key Change |
 |-----------|----------|--------|------------|
+| v1.57 | multi (2026-07-19→07-30) | 3 | **REIGN/IA/COPY/COMP** — SEED-004 M1: reigned the two outlier admin pages (Home + Subscriptions) onto the shared operator-first component vocabulary + answer-first IA, retired 97 dead bespoke `.ax-*` selectors (grep-gated), and closed UAT with **0 human checkpoints** via a new deterministic Playwright `toHaveScreenshot` pixel-diff gate. Reopen class: explicit strategy change. Non-convergence of the parked v1.56 ratchet on IA findings was the trigger. Audit `passed`; phases **209–211** under **`milestones/v1.57-phases/`**; archives **`milestones/v1.57-*`**. |
 | v1.55 | short | 4 | **QLT/CI/DB/RD** - audit-only maintenance milestone: evidence-backed software-quality audit, static-first CI/CD audit, accepted DB schema-contract ADR, and ranked top-10 hardening roadmap. Audit `passed`; phases archived under **`milestones/v1.55-phases/`**; archives **`milestones/v1.55-*`**. |
 | v1.54 | long | 8 | **RES/STY/EXE/PGH/PRP/IXN/FIX/CPY/VER** — page-level admin streamlining: archetype specs → gold-standard exemplars → LIST/DETAIL propagation, canonical overlay primitive, PhoenixStorybook dev/test-only, deterministic fixture stress, and a 30,348-cell zero-regression Phase 200 sign-off. Audit `passed`; phases archived under **`milestones/v1.54-phases/`**; archives **`milestones/v1.54-*`**. |
 | v1.53 | short | 6 | **VER/FND/CMP/GRP/IXN/PAGE/CPY/SEED** — fractal admin design-system hardening (foundations→primitives→groups→pages→flows): 12-dimension rubric + 21,276-cell only-forward baseline + 800-row AX187 ledger; package-local FocusTrap + regression coverage for behavioral defects screenshots miss; idempotent scorecard ≥ baseline (0 regressions) + merge-blocking CI guardrails; maintainer sign-off discharged v1.51 photographic-sign-off tech-debt. Audit `gaps_found` (doc/traceability only) closed inline at close. Phases **187–192** under **`.planning/phases/`**; archives **`milestones/v1.53-*`**. |
@@ -1539,6 +1584,7 @@ An audit-only maintenance milestone for release-readiness and support-contract h
 
 | Milestone | Tests | Coverage | Zero-Dep Additions |
 |-----------|-------|----------|-------------------|
+| v1.57 | Full `accrue_admin` unit suite 514/0 + e2e 200/0 + storybook gate green with zero regressions; new deterministic Playwright `toHaveScreenshot` pixel-diff gate (4 admin surfaces × light/dark) blocking in browser-uat; grep-gate + orphan/dangling `ax-*` census guard proving 97 selectors retired with zero live-class over-deletion. Milestone audit `passed` (11/11 reqs, 3/3 phases, 5/5 integration, 5/5 flows). | 11/11 requirements archived | No dependency changes; admin-only CSS/template reign (no core `accrue` change, no new nav rooms, no Tailwind migration); both generated artifacts (`accrue_admin.css`, `copy_strings.json`) rebuilt in-repo. |
 | v1.55 | Milestone audit passed with 4/4 phase verifications, 18/18 requirements clean by REQUIREMENTS/VERIFICATION/SUMMARY extraction, 8/8 integration checks, 6/6 audit-only flows, zero blockers, and Nyquist-compliant validation metadata. | 18/18 requirements archived | No runtime/package dependency changes; audit-only roadmap and ADR artifacts. |
 | v1.54 | Phase 200 union scorecard verifier (30,348 cells, 0 regressions), Storybook coverage/theming checks, axe/no-FOUC/reduced-motion browser guardrails, overlay/floating/focus lifecycle tests, and centralized LIST copy contract alignment | 23/23 requirements archived | PhoenixStorybook dev/test-only in `accrue_admin`; no adopter runtime dependency, no core `accrue` LiveView runtime leak. |
 | v1.29 | New `mailglass_cleanup_test` (5 regression-guard assertions), `email_preview_live_test` fixture sweep (renders every type via admin LiveView), `mailglass_admin_routes/__routes__/0` ExUnit assertion in `accrue_admin`; 128 email tests pass post-cleanup | MG-01..MG-07 (7/7) archived | **Net dep removal:** `mjml_eex` + `phoenix_swoosh` removed from `accrue/mix.exs`; new `:mailglass` path dep replaces them. `accrue/priv/repo/migrations/20260426000000_create_mailglass_poc_tables.exs` for host bootstrap. |

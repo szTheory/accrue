@@ -1,5 +1,24 @@
 # Milestones
 
+## v1.57 Admin Operator Control Plane (Shipped: 2026-07-30)
+
+**Phases completed:** 3 phases, 10 plans, 19 tasks
+
+**Key accomplishments:**
+
+- Captured a confirmed-green 12/12 Elixir test run plus an 8-PNG (+8 bbox.json) light/dark/desktop/mobile visual baseline for Subscriptions list + Subscription-detail, preserved outside git, before any markup edit lands.
+- Rebuilt `subscriptions_live.ex`'s PageHeader spine and list cells onto the canonical Invoices/Customers shape — one StatusBadge verdict, one primary CTA, a 4-stat unwrapped StatStrip, and zero bespoke worklist bands or in-cell action buttons — with COMP-01 resolved inline (no new component file).
+- Proved the phase's namesake shared-CSS-coordination risk held via a 6-point grep-gate + PNG re-capture, migrated all 12 tests in `subscriptions_live_test.exs` to the post-reign template (still 12/12 green), and rebuilt/committed both generated artifacts — extending the `export_copy_strings` allowlist so it actually captures the 6 new Subscriptions copy strings instead of silently no-op'ing.
+- All named phase-210 gates green on the reigned Home DOM — unit + phase194 + phase199 + axe — via an attention-rail forced-focus-ring restore, an axe-clean StatStrip `<dl>` restructure (stretched-link inside `<dd>`), and migration of the stale ratchet guards unmasked along the way; the only remaining red is the 2 explicitly-deferred dark-mode contrast items.
+- Hand-recomposed `storybook.css` off the post-retirement `accrue_admin.css` bundle (SHA256-verified embed), then proved via the orphan guard that all 97 REIGN-04 target selectors are cleanly retired from `app.css` with zero live-class over-deletion — early smoke gate green (mix compile + 17 storybook unit tests, 0 failures).
+- Phase 211 certified closed: the one dangling ratchet selector (D-03) fixed to the live `[data-ax-zone='attention-rail']`, the full accrue_admin unit suite (514/0) + e2e suite (200 passed/0 failed) + storybook gate green with zero regressions, no core/nav scope breach, and a human-confirmed unbroken subscription detail page across both themes.
+
+**Verification:** 11/11 requirements complete; milestone audit `passed` with 3/3 phase verifications, 11/11 requirements clean, 5/5 integration checks, 5/5 flows, zero blockers. UAT auto-closed with **zero human checkpoints** — the two former visual checkpoints replaced by a deterministic Playwright `toHaveScreenshot` pixel-diff gate (4 admin surfaces × light/dark, blocking in browser-uat; quick-260729-rjo, PRs #35/#36/#37). Closeout type: `override_closeout` — known verification overrides: 1 (see STATE.md Deferred Items — quick-task 260719-fz6, absorbed into the Phase 210 Home reign).
+
+**Archives:** [`milestones/v1.57-ROADMAP.md`](milestones/v1.57-ROADMAP.md), [`milestones/v1.57-REQUIREMENTS.md`](milestones/v1.57-REQUIREMENTS.md), [`milestones/v1.57-MILESTONE-AUDIT.md`](milestones/v1.57-MILESTONE-AUDIT.md), [`milestones/v1.57-phases/`](milestones/v1.57-phases/). Planning git tag `v1.57`.
+
+---
+
 ## v1.55 OSS Quality Evaluation & Hardening Roadmap (Shipped: 2026-07-03)
 
 **Phases completed:** 4 phases, 4 plans, 9 tasks

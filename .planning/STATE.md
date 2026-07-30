@@ -2,37 +2,37 @@
 gsd_state_version: 1.0
 milestone: v1.57
 milestone_name: Admin Operator Control Plane
-current_phase: 211
-current_phase_name: grep-gated-css-retirement-cross-surface-cleanup
-status: verifying
+status: Awaiting next milestone
 stopped_at: Completed 211-04-PLAN.md
-last_updated: "2026-07-29T23:17:45.208Z"
-last_activity: 2026-07-29
+last_updated: "2026-07-30T04:06:59.586Z"
+last_activity: 2026-07-30
+last_activity_desc: Milestone v1.57 completed and archived
 progress:
   total_phases: 3
   completed_phases: 3
   total_plans: 10
   completed_plans: 10
   percent: 100
+current_phase: 211
+current_phase_name: grep-gated-css-retirement-cross-surface-cleanup
 ---
 
 # Project State
 
 ## Project Reference
 
-See: `.planning/PROJECT.md` (updated 2026-07-03 after v1.55 closeout)
+See: `.planning/PROJECT.md` (updated 2026-07-30 after v1.57 closeout)
 
 **Core value:** A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic Elixir DX, strong domain modeling, tamper-evident audit ledger, great observability, and zero breaking-change pain through v1.x.
 
-**Current focus:** Phase 211 — grep-gated-css-retirement-cross-surface-cleanup
+**Current focus:** Planning next milestone — no active milestone. v1.57 (SEED-004 M1) shipped 2026-07-30; next candidate is SEED-004 M2 (deferred, `/gsd-new-milestone`).
 
 ## Current Position
 
-Phase: 211 (grep-gated-css-retirement-cross-surface-cleanup) — VERIFIED
-Plan: 4 of 4
-Status: UAT complete — 15/15 deliverables auto-covered, 0 human checkpoints, 0 issues (211-UAT.md). The two former human-only visual checkpoints (211-02 D4, 211-04 D5) are now closed by the deterministic Playwright toHaveScreenshot gate (quick-260729-rjo, PR #35).
-Last activity: 2026-07-30 -- Phase 211 UAT auto-closed via automated visual-regression gate; 211 execution + gate + Part B reconciled on branch phase211-exec-and-uat-close (PR to origin/main)
-Next: merge the reconciliation PR to origin/main, then `/gsd-complete-milestone` assessment for v1.57 M1 (209/210/211 all shipped)
+Phase: Milestone v1.57 complete
+Plan: —
+Status: Awaiting next milestone
+Last activity: 2026-07-30 — Milestone v1.57 completed and archived
 
 ## Post-v1.48 Pause Rule
 
@@ -666,6 +666,14 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 
 ## Deferred Items
 
+### Acknowledged at v1.57 milestone close (2026-07-30)
+
+1 open artifact acknowledged and deferred at milestone close (`override_closeout`). Its substance was absorbed into the Phase 210 Home reign — an unclosed tracking stub, not outstanding v1.57 scope (the milestone audit flagged it in the same stale-quick_tasks tech-debt bucket):
+
+| Category | Item | Status |
+|----------|------|--------|
+| quick_task | 260719-fz6-admin-home-border-spacing-grammar | missing (pre-v1.57 de-garish/card-grammar polish; work shipped under Phase 210 Home reign) |
+
 ### Acknowledged at v1.53 milestone close (2026-06-20)
 
 9 open artifacts acknowledged and deferred at milestone close — all carryover from earlier milestones or future-roadmap work, none v1.53-scoped:
@@ -736,6 +744,4 @@ Resume file: None
 
 ## Operator Next Steps
 
-- Plan Phase 208 with `/gsd:plan-phase 208`.
-- Queued post-v1.56 candidate: **SEED-004 admin-UI blueprint redesign** (`.planning/seeds/SEED-004-admin-ui-blueprint-redesign.md`; synthesis `.planning/research/ADMIN-UI-REDESIGN-BLUEPRINT-SYNTHESIS.md`) — a first-principles admin/operator UI redesign. See also the ROADMAP "Deferred Seeds and Ideas" table and STATE "Standing scope deferrals".
-- Start the next milestone with `/gsd-new-milestone` (it scans `.planning/seeds/` and reads PROJECT.md `## Current State` for queued candidates).
+- Start the next milestone with /gsd-new-milestone
