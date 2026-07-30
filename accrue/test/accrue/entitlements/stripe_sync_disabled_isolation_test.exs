@@ -21,7 +21,9 @@ defmodule Accrue.Entitlements.StripeSyncDisabledIsolationTest do
   """
   use Accrue.BillingCase, async: false
 
+  alias Accrue.Billing.EntitlementSummary
   alias Accrue.Test.Factory
+  alias Accrue.TestRepo
 
   # Host-canonical Ecto query telemetry event (what `Accrue.Repo` emits).
   @canonical_repo_query_event [:accrue, :repo, :query]
@@ -108,5 +110,110 @@ defmodule Accrue.Entitlements.StripeSyncDisabledIsolationTest do
     # subscription has the default item quantity 1, so the :seats cap of 5
     # resolves to min(5, 1) == 1 — NOT the bare configured cap.
     assert Accrue.entitlement_quantity(billable, :seats) == 1
+  end
+
+  test "advisory cache rows cannot alter the full local grant surface when sync is enabled" do
+    Application.put_env(:accrue, :entitlements, Keyword.put(@entitlements, :stripe_native_sync, :advisory))
+    assert Accrue.Config.stripe_native_sync?()
+
+    oid = Ecto.UUID.generate()
+    %{customer: customer} = Factory.active_subscription(%{owner_id: oid, price_id: "price_pro"})
+    billable = %TestUser{id: oid}
+
+    expected = grant_surface(billable)
+
+    assert expected == %{
+             entitled_reports?: true,
+             entitled_export?: true,
+             entitled_contradictory?: false,
+             has_pro_atom?: true,
+             has_pro_price?: true,
+             has_contradictory_plan?: false,
+             features: [:export, :reports],
+             seats: 1
+           }
+
+    TestRepo.delete_all(EntitlementSummary)
+    assert grant_surface(billable) == expected
+
+    insert_summary!(customer, %{
+      "entitlements" => %{"data" => []},
+      "_accrue" => %{"fixture" => "empty"}
+    })
+
+    assert grant_surface(billable) == expected
+
+    TestRepo.delete_all(EntitlementSummary)
+
+    insert_summary!(
+      customer,
+      %{
+        "entitlements" => %{
+          "data" => [
+            %{
+              "id" => "ent_stale",
+              "object" => "entitlements.active_entitlement",
+              "feature" => "feature_stale_reports",
+              "lookup_key" => "not_a_feature",
+              "livemode" => false
+            }
+          ]
+        },
+        "_accrue" => %{"fixture" => "stale"}
+      },
+      synced_at: DateTime.add(DateTime.utc_now(), -3600, :second)
+    )
+
+    assert grant_surface(billable) == expected
+
+    TestRepo.delete_all(EntitlementSummary)
+
+    insert_summary!(customer, %{
+      "entitlements" => %{
+        "data" => [
+          %{
+            "id" => "ent_contradictory",
+            "object" => "entitlements.active_entitlement",
+            "feature" => "feature_contradictory",
+            "lookup_key" => "not_a_feature",
+            "livemode" => false
+          }
+        ]
+      },
+      "_accrue" => %{"fixture" => "fresh-contradictory"}
+    })
+
+    assert grant_surface(billable) == expected
+  end
+
+  defp grant_surface(billable) do
+    %{
+      entitled_reports?: Accrue.entitled?(billable, :reports),
+      entitled_export?: Accrue.entitled?(billable, :export),
+      entitled_contradictory?: Accrue.entitled?(billable, :not_a_feature),
+      has_pro_atom?: Accrue.has_active_plan?(billable, :pro),
+      has_pro_price?: Accrue.has_active_plan?(billable, "price_pro"),
+      has_contradictory_plan?: Accrue.has_active_plan?(billable, :contradictory),
+      features: Accrue.features_for(billable),
+      seats: Accrue.entitlement_quantity(billable, :seats)
+    }
+  end
+
+  defp insert_summary!(customer, data, opts \\ []) do
+    now = Keyword.get(opts, :synced_at, DateTime.utc_now())
+
+    %EntitlementSummary{}
+    |> EntitlementSummary.force_changeset(%{
+      customer_id: customer.id,
+      stripe_customer_id: customer.processor_id,
+      livemode: false,
+      entitlement_count: length(get_in(data, ["entitlements", "data"]) || []),
+      truncated: false,
+      data: data,
+      synced_at: now,
+      last_stripe_event_ts: now,
+      last_stripe_event_id: "evt_#{System.unique_integer([:positive])}"
+    })
+    |> TestRepo.insert!()
   end
 end

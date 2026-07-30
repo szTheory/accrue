@@ -640,6 +640,45 @@ defmodule Accrue.Docs.PackageDocsVerifierTest do
     assert output =~ "adoption-proof-matrix.md"
   end
 
+  test "entitlements docs reject renewed fetch_entitled ambiguity" do
+    tmp_dir = tmp_dir!()
+    seed_tmp_dir!(tmp_dir)
+
+    guide_path = Path.join(tmp_dir, "accrue/guides/entitlements.md")
+
+    File.write!(
+      guide_path,
+      File.read!(guide_path) <>
+        "\nThe fetch_entitled/2 question stays deferred for a later Stripe-backed gate.\n"
+    )
+
+    {output, status} = run_verifier(tmp_dir)
+
+    assert status != 0
+    assert output =~ "[verify_package_docs]"
+    assert output =~ "fetch_entitled/2"
+  end
+
+  test "entitlements docs reject reintroduced fetch_entitled predicate" do
+    tmp_dir = tmp_dir!()
+    seed_tmp_dir!(tmp_dir)
+
+    admin_path = Path.join(tmp_dir, "accrue/lib/accrue/entitlements/admin.ex")
+    File.mkdir_p!(Path.dirname(admin_path))
+
+    File.write!(admin_path, """
+    defmodule Accrue.Entitlements.Admin do
+      def fetch_entitled(_customer, _feature), do: {:ok, false}
+    end
+    """)
+
+    {output, status} = run_verifier(tmp_dir)
+
+    assert status != 0
+    assert output =~ "[verify_package_docs]"
+    assert output =~ "fetch_entitled"
+  end
+
   defp tmp_dir! do
     tmp_dir =
       Path.join(System.tmp_dir!(), "accrue-docs-verifier-#{System.unique_integer([:positive])}")
@@ -692,6 +731,7 @@ defmodule Accrue.Docs.PackageDocsVerifierTest do
     copy_fixture!("accrue/guides/testing.md", tmp_dir)
     copy_fixture!("accrue/guides/troubleshooting.md", tmp_dir)
     copy_fixture!("accrue/guides/analytics.md", tmp_dir)
+    copy_fixture!("accrue/lib/accrue/entitlements/admin.ex", tmp_dir)
     copy_fixture!("accrue_admin/mix.exs", tmp_dir)
     copy_fixture!("accrue_admin/README.md", tmp_dir)
     copy_fixture!("accrue_admin/assets/css/app.css", tmp_dir)
