@@ -31,11 +31,29 @@ v1.49 **Realistic Demo App & Adoption Evidence** shipped on **2026-06-02**. The 
 
 ## Current State
 
-**No active milestone.** v1.57 — Admin Operator Control Plane (SEED-004, M1) shipped & archived **2026-07-30** (Phases 209–211, 11/11 requirements, milestone audit passed). The project returns to **stable core / demand-driven expansion** posture between milestones. The next SEED-004 candidate is **M2** (signature "Why blocked?" diagnosis surfaces + causality graph + the first core `accrue` diagnosis functions), deferred pending a `/gsd-new-milestone` reopen decision — reopen class *explicit strategy change*, recorded here before ROADMAP/STATE change.
+**Active milestone: v1.58 — lattice_stripe 2.x Bump & Stripe-Native Entitlements Sync (SEED-005), opened 2026-07-30.** SEED-005's trigger fired 2026-07-29 (lattice_stripe `2.0.0` published; latest is `2.1.0`, entitlements landed in `2.0.0`). This milestone moves Accrue onto `lattice_stripe ~> 2.0`, reconciles the major-version deltas with all suites green, and adopts the new `LatticeStripe.Entitlements.*` surface to close **Phase 127's deferred optional Stripe-native entitlements sync** — while preserving the observational-only architecture (D-01/D-11: the sync is a read seam, never consulted for a grant decision).
+
+**Reopen decision (recorded per the post-v1.48 pause rule, before ROADMAP/STATE change):** justification class **maintenance / dependency currency** (a major-version bump of a required core dependency, `lattice_stripe`, cf. v1.46) **plus closing a prior explicitly-deferred capability** (Phase 127's optional Stripe-native entitlements sync, unblocked only now that 2.0.0 ships the entitlements primitives). This is *not* broad new product surface: it stays inside the already-shipped entitlements feature, keeps local plan→feature mapping canonical as the gate, and keeps `scripts/ci/verify_entitlement_sync_isolation.sh` (`gate → seam` must never happen) green. Library pin target is `~> 2.0` (permissive within major 2 for adopters).
+
+**v1.57 — Admin Operator Control Plane (SEED-004, M1)** shipped & archived **2026-07-30** (Phases 209–211, 11/11 requirements, milestone audit passed). The next SEED-004 candidate is **M2** (signature "Why blocked?" diagnosis surfaces + causality graph + the first core `accrue` diagnosis functions), deferred — reopen class *explicit strategy change*, to be recorded here before any ROADMAP/STATE change.
 
 **v1.56 (Admin UI Ratchet) remains PARKED** — phases 205–207 shipped, 208 was 3/5, non-converging because the ratchet kept surfacing information-architecture findings (23 confirmed in round 99); that was exactly the work v1.57 took on and shipped. The ratchet ledger/baseline in `accrue_admin/e2e/ratchet/` are preserved and become the tool that re-freezes the v1.57 redesign after M3.
 
-The Phase 204 hardening roadmap's top slice (**Public Truth And Proof-State Baseline**) remains the highest-ranked *release-readiness* follow-up, deferred — a candidate for a later milestone. SEED-005 (lattice_stripe 2.0.0 entitlements dep bump) is live-on-Hex and earmarked `ready` but not auto-executed.
+The Phase 204 hardening roadmap's top slice (**Public Truth And Proof-State Baseline**) remains the highest-ranked *release-readiness* follow-up, deferred — a candidate for a later milestone.
+
+## Current Milestone: v1.58 lattice_stripe 2.x Bump & Stripe-Native Entitlements Sync
+
+**Goal:** Move Accrue onto `lattice_stripe ~> 2.0`, reconcile the major-version deltas with all suites green, and adopt the new `LatticeStripe.Entitlements.*` surface to close Phase 127's deferred optional Stripe-native entitlements sync — without weakening the observational-only architecture.
+
+**Target features:**
+- **Dep bump & reconciliation** — bump `accrue/mix.exs` `{:lattice_stripe, "~> 1.1"}` → `~> 2.0`; refresh `mix.lock` across `accrue`, `accrue_admin`, `accrue_portal`, and `examples/accrue_host`; reconcile any 2.0 API deltas at all `LatticeStripe.*` call sites; keep the Three Zeros gate (test / dialyzer / credo / coveralls) green across packages.
+- **Adopt Stripe-native entitlements sync** — wire `LatticeStripe.Entitlements.{ActiveEntitlement, ActiveEntitlementSummary, Feature}` into Accrue's advisory cache (a client-backed refresh path, not webhook-payload-only; optionally surface Feature definitions), closing the Phase 127 deferral.
+- **Docs & truth** — update `CLAUDE.md` `:lattice_stripe` row + Version Compatibility Matrix, `guides/jobs_to_be_done.md` + `.planning/research/JTBD-FRONTIER.md` entitlements deferral status, guides/changelog/release notes, and `@since` annotations.
+
+**Binding guardrails (out of scope / inviolable):**
+- **Observational-only stays inviolable (D-01/D-11):** the new sync is a read seam; it is *never* consulted for a grant decision. Local plan→feature mapping remains the canonical gate. `scripts/ci/verify_entitlement_sync_isolation.sh` (`gate → seam` must never happen) stays green — extend it if the surface grows.
+- Breaking vectors verified low-risk before opening: no direct lattice_stripe fixture-builder usage in Accrue lib/test; no `LatticeStripe.Finch` pool wiring to reconcile.
+- Any processor-surface/support-matrix implication must update behavior, docs, examples/verifiers, and release notes together (stable-core rule).
 
 ## Most recently shipped milestone: v1.57 — Admin Operator Control Plane (SEED-004, M1) (**shipped & archived 2026-07-30**)
 
@@ -740,4 +758,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-07-30 after v1.57 milestone — Admin Operator Control Plane (SEED-004 M1) shipped & archived (Phases 209–211, 11/11 reqs, audit passed). No active milestone; next SEED-004 candidate is M2 (deferred). v1.56 Admin UI Ratchet remains parked.*
+*Last updated: 2026-07-30 — opened milestone v1.58 (lattice_stripe 2.x Bump & Stripe-Native Entitlements Sync, SEED-005; reopen class maintenance/dependency-currency + closes Phase 127 deferral). v1.57 (SEED-004 M1) shipped & archived 2026-07-30; SEED-004 M2 deferred; v1.56 Admin UI Ratchet remains parked.*

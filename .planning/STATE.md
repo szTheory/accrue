@@ -1,20 +1,16 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.57
-milestone_name: Admin Operator Control Plane
-status: Awaiting next milestone
-stopped_at: Completed 211-04-PLAN.md
-last_updated: "2026-07-30T04:06:59.586Z"
+milestone: v1.58
+milestone_name: lattice_stripe 2.x Bump & Stripe-Native Entitlements Sync
+status: planning
+last_updated: "2026-07-30T04:58:31.854Z"
 last_activity: 2026-07-30
-last_activity_desc: Milestone v1.57 completed and archived
 progress:
-  total_phases: 3
-  completed_phases: 3
-  total_plans: 10
-  completed_plans: 10
-  percent: 100
-current_phase: 211
-current_phase_name: grep-gated-css-retirement-cross-surface-cleanup
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
 ---
 
 # Project State
@@ -29,10 +25,10 @@ See: `.planning/PROJECT.md` (updated 2026-07-30 after v1.57 closeout)
 
 ## Current Position
 
-Phase: Milestone v1.57 complete
+Phase: Not started (defining requirements)
 Plan: —
-Status: Awaiting next milestone
-Last activity: 2026-07-30 — Milestone v1.57 completed and archived
+Status: Defining requirements
+Last activity: 2026-07-30 — Milestone v1.58 started
 
 ## Post-v1.48 Pause Rule
 
