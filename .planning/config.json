@@ -84,7 +84,29 @@
   "project_code": null,
   "phase_naming": "sequential",
   "agent_skills": {},
-  "resolve_model_ids": "omit",
+  "resolve_model_ids": true,
   "mode": "yolo",
-  "granularity": "standard"
+  "granularity": "standard",
+  "runtime": "codex",
+  "model_policy": {
+    "provider": "custom",
+    "high": "gpt-5.6-sol",
+    "medium": "gpt-5.5",
+    "low": "gpt-5.5"
+  },
+  "model_profile_overrides": {
+    "codex": {
+      "opus": "gpt-5.6-sol",
+      "sonnet": "gpt-5.5",
+      "haiku": "gpt-5.5"
+    }
+  },
+  "effort": {
+    "default": "medium",
+    "routing_tier_defaults": {
+      "light": "medium",
+      "standard": "medium",
+      "heavy": "medium"
+    }
+  }
 }
