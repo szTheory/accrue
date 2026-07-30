@@ -2,19 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.58
 milestone_name: lattice_stripe 2.x Bump & Stripe-Native Entitlements Sync
-current_phase: 213
-current_phase_name: stripe-native-advisory-entitlements-sync-observational-only
-status: executing
-stopped_at: Completed 213-02-PLAN.md
-last_updated: "2026-07-30T21:21:40.287Z"
+status: verifying
+stopped_at: Completed 213-03-PLAN.md
+last_updated: "2026-07-30T21:30:31.317Z"
 last_activity: 2026-07-30
-last_activity_desc: Phase 213 execution started
 progress:
   total_phases: 3
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 4
-  completed_plans: 3
-  percent: 33
+  completed_plans: 4
+  percent: 67
 ---
 
 # Project State
@@ -31,8 +28,8 @@ See: `.planning/PROJECT.md` (updated 2026-07-30 after v1.57 closeout)
 
 Phase: 213 (stripe-native-advisory-entitlements-sync-observational-only) — EXECUTING
 Plan: 3 of 3
-Status: Ready to execute
-Last activity: 2026-07-30 — Phase 213 execution started
+Status: Phase complete — ready for verification
+Last activity: 2026-07-30
 
 ## Post-v1.48 Pause Rule
 
@@ -48,8 +45,8 @@ v1.58 lattice_stripe 2.x Bump & Stripe-Native Entitlements Sync opened 2026-07-3
 
 | Phase | Name | Requirements | Status |
 |-------|------|--------------|--------|
-| 212 | lattice_stripe 2.x bump & green reconciliation | BUMP-01, BUMP-02, BUMP-03 | Planned — ready to execute |
-| 213 | Stripe-native advisory entitlements sync (observational-only) | SYNC-01, SYNC-02, SYNC-03, SYNC-04, SYNC-05 | Not started |
+| 212 | lattice_stripe 2.x bump & green reconciliation | BUMP-01, BUMP-02, BUMP-03 | Complete |
+| 213 | Stripe-native advisory entitlements sync (observational-only) | SYNC-01, SYNC-02, SYNC-03, SYNC-04, SYNC-05 | Complete — ready for verification |
 | 214 | Docs & truth reconciliation | DOCS-01, DOCS-02, DOCS-03 | Not started |
 
 Coverage: 11/11 requirements mapped to Phases 212-214 (each REQ-ID → exactly one phase). Per-phase counts: 212→3 · 213→5 · 214→3. **Dependency shape:** strictly linear — 212 → 213 → 214 (the bump must land green before anything else compiles against 2.x; the sync adoption needs the 2.x `LatticeStripe.Entitlements.*` modules present; docs reconcile against the final shipped behavior of both).
@@ -344,6 +341,7 @@ Coverage: 22/22 v1.51 requirements mapped (each REQ-ID → exactly one phase). D
 | Phase 212 P01 | 20min | 3 tasks | 6 files |
 | Phase 213 P01 | approximately 6 minutes | 2 tasks | 8 files |
 | Phase 213 P02 | 6 min | 2 tasks | 4 files |
+| Phase 213 P03 | 347s | 2 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -643,6 +641,8 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - [Phase ?]: Identical pull snapshots short-circuit as :unchanged before DB upsert and do not duplicate the ledger.
 - [Phase 213]: Stripe adapter drains the ActiveEntitlement stream through the processor facade and projects only bounded webhook-compatible fields. — Keeps raw LatticeStripe references confined to stripe.ex and preserves the public list callback shape.
 - [Phase 213]: RefreshWorker uses the existing accrue_webhooks queue with scalar customer_id args and no scheduler. — Preserves host-owned Oban wiring and keeps advisory refresh off request paths without introducing an always-on poller.
+- [Phase ?]: The static entitlement isolation guard rejects executable list_active_entitlements and Reconcile references from gate-path files while allowing explanatory comments and moduledocs.
+- [Phase ?]: fetch_entitled/2 is closed and will-not-build; Stripe-native entitlement data remains diagnostic through StripeSync.summary_for_customer/1 and Admin.resolve_for_customer/1, never an authorization predicate.
 
 ### Pending Todos
 
@@ -779,8 +779,8 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 
 ## Session Continuity
 
-Last session: 2026-07-30T21:21:09.572Z
-Stopped at: Completed 213-02-PLAN.md
+Last session: 2026-07-30T21:30:31.312Z
+Stopped at: Completed 213-03-PLAN.md
 Resume file: None
 
 ## Operator Next Steps
