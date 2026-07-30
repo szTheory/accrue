@@ -79,16 +79,16 @@ Phase assignments are written by the roadmap step (ROADMAP.md). Continues phase 
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| BUMP-01 | TBD (roadmap) | Pending |
-| BUMP-02 | TBD (roadmap) | Pending |
-| BUMP-03 | TBD (roadmap) | Pending |
-| SYNC-01 | TBD (roadmap) | Pending |
-| SYNC-02 | TBD (roadmap) | Pending |
-| SYNC-03 | TBD (roadmap) | Pending |
-| SYNC-04 | TBD (roadmap) | Pending |
-| SYNC-05 | TBD (roadmap) | Pending |
-| DOCS-01 | TBD (roadmap) | Pending |
-| DOCS-02 | TBD (roadmap) | Pending |
-| DOCS-03 | TBD (roadmap) | Pending |
+| BUMP-01 | Phase 212 — lattice_stripe 2.x bump & green reconciliation | Pending |
+| BUMP-02 | Phase 212 — lattice_stripe 2.x bump & green reconciliation | Pending |
+| BUMP-03 | Phase 212 — lattice_stripe 2.x bump & green reconciliation | Pending |
+| SYNC-01 | Phase 213 — Stripe-native advisory entitlements sync (observational-only) | Pending |
+| SYNC-02 | Phase 213 — Stripe-native advisory entitlements sync (observational-only) | Pending |
+| SYNC-03 | Phase 213 — Stripe-native advisory entitlements sync (observational-only) | Pending |
+| SYNC-04 | Phase 213 — Stripe-native advisory entitlements sync (observational-only) | Pending |
+| SYNC-05 | Phase 213 — Stripe-native advisory entitlements sync (observational-only) | Pending |
+| DOCS-01 | Phase 214 — Docs & truth reconciliation | Pending |
+| DOCS-02 | Phase 214 — Docs & truth reconciliation | Pending |
+| DOCS-03 | Phase 214 — Docs & truth reconciliation | Pending |
 
-**Coverage target:** 11/11 mapped, 0 orphans, 0 duplicates (validated at roadmap creation).
+**Coverage:** 11/11 mapped, 0 orphans, 0 duplicates (validated at roadmap creation 2026-07-30).

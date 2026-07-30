@@ -3,10 +3,10 @@ gsd_state_version: 1.0
 milestone: v1.58
 milestone_name: lattice_stripe 2.x Bump & Stripe-Native Entitlements Sync
 status: planning
-last_updated: "2026-07-30T04:58:31.854Z"
+last_updated: "2026-07-30T05:20:00.000Z"
 last_activity: 2026-07-30
 progress:
-  total_phases: 0
+  total_phases: 3
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
@@ -21,14 +21,14 @@ See: `.planning/PROJECT.md` (updated 2026-07-30 after v1.57 closeout)
 
 **Core value:** A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic Elixir DX, strong domain modeling, tamper-evident audit ledger, great observability, and zero breaking-change pain through v1.x.
 
-**Current focus:** Planning next milestone — no active milestone. v1.57 (SEED-004 M1) shipped 2026-07-30; next candidate is SEED-004 M2 (deferred, `/gsd-new-milestone`).
+**Current focus:** Active milestone v1.58 — lattice_stripe 2.x Bump & Stripe-Native Entitlements Sync. Roadmap created (Phases 212-214, 11/11 requirements mapped); ready to plan Phase 212. v1.57 (SEED-004 M1) shipped 2026-07-30; next SEED-004 candidate (M2) remains deferred.
 
 ## Current Position
 
-Phase: Not started (defining requirements)
+Phase: 212 (not started)
 Plan: —
-Status: Defining requirements
-Last activity: 2026-07-30 — Milestone v1.58 started
+Status: Roadmap created — ready to plan Phase 212
+Last activity: 2026-07-30 — v1.58 ROADMAP.md created (Phases 212-214; 11/11 requirements mapped, 0 orphans, 0 duplicates)
 
 ## Post-v1.48 Pause Rule
 
@@ -36,19 +36,35 @@ After v1.48, broad feature milestones remain closed by default unless reopened b
 
 v1.55 OSS Quality Evaluation & Hardening Roadmap shipped on 2026-07-03 as maintenance / release-readiness / support-contract hardening under stable core. It was audit-only and produced evidence-backed software quality, CI/CD, and DB schema-contract artifacts plus a ranked implementation roadmap; it did not change product behavior, public APIs, DB defaults, CI required-check topology, release automation, or runtime UI.
 
+v1.58 lattice_stripe 2.x Bump & Stripe-Native Entitlements Sync opened 2026-07-30 as **maintenance / dependency currency plus closing a prior explicitly-deferred capability** (SEED-005's trigger fired 2026-07-29 when lattice_stripe `2.0.0` published with entitlements support, unblocking Phase 127's deferred optional Stripe-native sync). Not broad feature scope: stays inside the already-shipped entitlements feature, keeps the local plan→feature map canonical as the sole grant gate (D-01/D-11), and keeps `scripts/ci/verify_entitlement_sync_isolation.sh` green throughout.
+
 ## Milestone Progress
 
-### v1.57 Phase Summary (ACTIVE — opened 2026-07-19 — Admin Operator Control Plane (SEED-004 M1))
+### v1.58 Phase Summary (ACTIVE — opened 2026-07-30 — lattice_stripe 2.x Bump & Stripe-Native Entitlements Sync, SEED-005)
 
 | Phase | Name | Requirements | Status |
 |-------|------|--------------|--------|
-| 209 | Reign Subscriptions (list + detail CSS coordination) | REIGN-01, REIGN-02, COMP-01 | Ready to plan |
-| 210 | Reign Home + certify answer-first IA & copy integrity | REIGN-03, IA-01, IA-02, IA-03, IA-04, COPY-01, COPY-02 | Not started |
-| 211 | Grep-gated CSS retirement & cross-surface cleanup | REIGN-04 | Not started |
+| 212 | lattice_stripe 2.x bump & green reconciliation | BUMP-01, BUMP-02, BUMP-03 | Ready to plan |
+| 213 | Stripe-native advisory entitlements sync (observational-only) | SYNC-01, SYNC-02, SYNC-03, SYNC-04, SYNC-05 | Not started |
+| 214 | Docs & truth reconciliation | DOCS-01, DOCS-02, DOCS-03 | Not started |
+
+Coverage: 11/11 requirements mapped to Phases 212-214 (each REQ-ID → exactly one phase). Per-phase counts: 212→3 · 213→5 · 214→3. **Dependency shape:** strictly linear — 212 → 213 → 214 (the bump must land green before anything else compiles against 2.x; the sync adoption needs the 2.x `LatticeStripe.Entitlements.*` modules present; docs reconcile against the final shipped behavior of both).
+
+**Guardrails (binding, out of scope):** observational-only stays inviolable (D-01/D-11) — the Stripe-native sync is a read seam, never consulted for a grant decision; the local plan→feature map (`resolver/local_map.ex`) remains the sole canonical gate. `scripts/ci/verify_entitlement_sync_isolation.sh` stays green and is extended to cover the new client-fetch path. Pin target is `~> 2.0`, not `~> 2.1`. No new required dependencies; no new admin nav rooms; no admin redesign work (that is SEED-004 M2/M3); no `accrue_portal` work. Any processor-surface/support-matrix implication updates behavior, docs, examples/verifiers, and release notes together (stable-core rule). Sync tests use the Fake/Test processor only — no live Stripe, no Chrome, fully `async`-safe. Authoritative sources: `.planning/seeds/SEED-005-lattice-stripe-entitlements-bump.md`, `accrue/lib/accrue/entitlements/*`, `scripts/ci/verify_entitlement_sync_isolation.sh`.
+
+### v1.57 Phase Summary (SHIPPED & ARCHIVED 2026-07-30 — Admin Operator Control Plane (SEED-004 M1); phase dirs in `milestones/v1.57-phases/`)
+
+| Phase | Name | Requirements | Status |
+|-------|------|--------------|--------|
+| 209 | Reign Subscriptions (list + detail CSS coordination) | REIGN-01, REIGN-02, COMP-01 | Complete (2026-07-19) |
+| 210 | Reign Home + certify answer-first IA & copy integrity | REIGN-03, IA-01, IA-02, IA-03, IA-04, COPY-01, COPY-02 | Complete (2026-07-19) |
+| 211 | Grep-gated CSS retirement & cross-surface cleanup | REIGN-04 | Complete (2026-07-29) |
 
 Coverage: 11/11 requirements mapped to Phases 209-211 (each REQ-ID → exactly one phase). Per-phase counts: 209→3 · 210→7 · 211→1. **Dependency shape:** strictly linear — 209 → 210 → 211 (Subscriptions before Home per the research build order; CSS retirement last, after both templates land, because `.ax-inline-worklist*` / `.ax-audit-summary-row` are shared with the out-of-scope subscription detail page `subscription_live.ex`).
 
 **Guardrails (binding, out of scope):** admin-only (`accrue_admin` LiveView templates + `assets/css`); NO core `accrue` change (M2), NO new nav rooms (M3), NO "why blocked"/causality/diagnosis synthesis, no new deps, no Tailwind migration; `ax-*` stays the styling SSOT; no `accrue_portal` work. Keep the Cobalt / quiet-confidence brand + prior de-garish/card-grammar polish. Console **density is the point** — do not over-air (no-density-regression gate on both reign phases). Every CSS/copy change rebuilds + commits BOTH generated artifacts (`priv/static/accrue_admin.css`, `examples/accrue_host/e2e/generated/copy_strings.json`); CSS retirement is grep-gated (detail-shared classes preserved); PNG-verify against the canonical Payments/Customers/Invoices reference. Authoritative sources: `prompts/accrue_admin_operator_ui_journey_blueprint.md`, `.planning/research/ADMIN-UI-REDESIGN-BLUEPRINT-SYNTHESIS.md`, `research/admin-ratchet-round99-confirmed-findings.json`.
+
+**Closeout:** milestone audit passed (11/11 requirements clean, 3/3 phase verifications, 5/5 integration checks, 5/5 flows, zero blockers); planning tag `v1.57`; archived under `.planning/milestones/v1.57-{ROADMAP,REQUIREMENTS,MILESTONE-AUDIT}.md` and `.planning/milestones/v1.57-phases/`.
 
 ### v1.56 Phase Summary (PARKED 2026-07-19 — Admin UI Ratchet: Automated Adversarial Design Evaluation; ledger + baseline preserved in `accrue_admin/e2e/ratchet/`)
 
@@ -332,6 +348,17 @@ Coverage: 22/22 v1.51 requirements mapped (each REQ-ID → exactly one phase). D
 - **2026-07-03 (205-03):** `ratchet-propose.mjs` shipped — forked `score-visuals.mjs` into a defect-only proposer. 6 job-anchored operator-persona lenses issue forced `tool_use` (`emit_findings`) calls; the tool `enum`s are advisory only (Sonnet 4.5 lacks strict outputs) — the harness re-derives every identity field (`claim_key`/`finding_id`/`region_tag`/`overlay_tags`/`dimension`) from `region-tags.js` and ignores model-supplied identity (D-04/D-16). Guard order self-test→no-key→SDK-import (EVAL-03); `temperature: 0` config-gated (400s on 4.7+/5-family); parse-time drops (justification-token gate + taste denylist) + N=12/image cap; rows carry the full `ratchet-candidate/1` four-group schema with `cell_refs` FK into the census (D-12/D-17). Reads `tool_use .input.findings`, never `content[0]` text (Pitfall 6).
 - **2026-07-03:** Biggest brand risk mitigated by design: over-whitespacing a dense operator console. The 3-role verifier includes an *operator-density-defender* that refutes any fix reducing operator density or adding marketing whitespace without a task-completion justification; every candidate must cite an admissible justification token (`rubric-dim-below-bar` | `persona-job-miss:<job>` | `token-bypass`) or it is rejected before human triage. Termination is guaranteed by a finite frozen-signature lattice + K=2 dry rounds + a 6-round hard cap escalating to the maintainer.
 
+### Key Planning Decisions for v1.57
+
+- **2026-07-19:** Opened v1.57 "Admin Operator Control Plane (SEED-004 M1)" (Phases 209–211, continue-numbering from v1.56's Phase 208; v1.56's placeholder Phase 209 SWEEP-01 was never created, so 209 was reused). Reopen decision: explicit strategy change (flagship adopter-facing admin surface elevated to a strategic redesign — same class accepted for v1.50–v1.54). Scope stayed admin-only: no core `accrue` change (M2), no new nav rooms (M3), no new deps, no Tailwind migration, `ax-*` stayed the styling SSOT, no `accrue_portal` work.
+- **2026-07-30:** v1.57 shipped & archived. Milestone audit passed with 3/3 phase verifications, 11/11 requirements clean, 5/5 integration checks, 5/5 flows, zero blockers. UAT closed with zero human checkpoints via a new deterministic Playwright `toHaveScreenshot` pixel-diff gate (4 admin surfaces × light/dark).
+
+### Key Planning Decisions for v1.58
+
+- **2026-07-30:** Opened v1.58 "lattice_stripe 2.x Bump & Stripe-Native Entitlements Sync" (Phases 212-214, continue-numbering from v1.57's Phase 211). Reopen decision: **maintenance / dependency currency** (major-version bump of a required core dependency, cf. v1.46) **plus closing a prior explicitly-deferred capability** (SEED-005's trigger fired 2026-07-29 when lattice_stripe `2.0.0` published with entitlements support, unblocking Phase 127's deferred optional Stripe-native sync). Recorded in `PROJECT.md`.
+- **2026-07-30:** Roadmap created — 3 phases (212–214), 11/11 v1 requirements mapped (each REQ-ID → exactly one phase), strictly linear deps 212→213→214 (the bump must land green before the 2.x `LatticeStripe.Entitlements.*` modules exist for Phase 213 to consume; docs in Phase 214 reconcile against the final shipped behavior of both). The recommended 3-phase split from the milestone brief was used as-is (SYNC's 5 requirements cohere tightly around one client-fetch+cache-write+isolation-guard+test-proof story, so it was not further split).
+- **2026-07-30:** Locked guardrails threaded into every phase's success criteria: observational-only stays inviolable (D-01/D-11) — the Stripe-native sync is a read seam, never a grant gate, and the local plan→feature map (`resolver/local_map.ex`) remains canonical; `scripts/ci/verify_entitlement_sync_isolation.sh` stays green and is extended to the new client-fetch path; pin target is `~> 2.0`, not `~> 2.1`; Three Zeros (test/dialyzer/credo/coverage) green across all packages is the Phase 212 exit gate; sync tests use only the Fake/Test processor (no live Stripe, no Chrome, fully `async`-safe).
+
 ### Key Planning Decisions for v1.54
 
 - **2026-06-24:** Opened v1.54 "Admin UI Page-Level Streamlining & Storybook" (Phases 193–200, continue-numbering from v1.53's Phase 192). Reopen decision: explicit strategy change (page-level design quality of the flagship adopter-facing surface elevated to strategic priority — same class as v1.50/v1.51/v1.52/v1.53) **plus firsthand-observed page-level usability defects** in the running demo (modal-behind-scrim, scroll traps, floating/mispositioned overlays, won't-dismiss, hover-on-non-interactive empty states, disabled-looks-enabled). No new billing primitives, no breaking API/route changes, no Tailwind migration, core stays LiveView-runtime-free. Recorded in `PROJECT.md`.
@@ -387,11 +414,15 @@ Coverage: 22/22 v1.51 requirements mapped (each REQ-ID → exactly one phase). D
 - v1.54 opened 2026-06-24 and shipped 2026-07-01: Phases 193–200 archived under `.planning/milestones/v1.54-phases/`
 - v1.55 shipped and archived 2026-07-03: Phases 201-204
 - v1.56 opened 2026-07-03: Phases 205-209 (205-208 committed, 209 scope-gated/optional) — roadmap created, ready to plan Phase 205
+- v1.57 opened 2026-07-19 and shipped 2026-07-30: Phases 209-211
+- v1.58 opened 2026-07-30: Phases 212-214 — roadmap created, ready to plan Phase 212
 
 ### Decisions
 
 Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 
+- **2026-07-30:** Opened v1.58 "lattice_stripe 2.x Bump & Stripe-Native Entitlements Sync" (Phases 212-214). Reopen class: maintenance / dependency currency plus closing a prior explicitly-deferred capability (SEED-005). Roadmap created with 3 phases, 11/11 requirements mapped, strictly linear deps 212→213→214.
+- **2026-07-30:** Shipped & archived v1.57 "Admin Operator Control Plane (SEED-004 M1)" (Phases 209–211). Milestone audit passed; 11/11 requirements complete; phase trees archived under `.planning/milestones/v1.57-phases/`.
 - **2026-07-01:** Closed v1.54 "Admin UI Page-Level Streamlining & Storybook" (Phases 193–200). Audit passed; 23/23 requirements complete; phase trees archived under `.planning/milestones/v1.54-phases/`; no active milestone-specific requirements remain.
 - **2026-06-14:** Opened v1.53 "Admin UI Design-System Hardening" (Phases 187–192). Quality / interaction-correctness investment in the already-shipped `accrue_admin` surface; no new billing primitives. Roadmap created with 6 phases, 33/33 requirements mapped.
 - **2026-06-11:** Opened v1.52 "Brand System". This explicitly does not open new broad feature scope, but rather invests in adopter-facing brand presentation surfaces (logo, brand book, design tokens, voice/copy). Roadmap created with 7 phases (180–186).
@@ -735,9 +766,9 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 ## Session Continuity
 
 Last session: 2026-07-29T23:17:45.197Z
-Stopped at: Completed 211-04-PLAN.md
+Stopped at: v1.58 ROADMAP.md created (Phases 212-214, 11/11 requirements mapped); ready to plan Phase 212
 Resume file: None
 
 ## Operator Next Steps
 
-- Start the next milestone with /gsd-new-milestone
+- Run `/gsd-plan-phase 212` to begin planning the lattice_stripe 2.x bump & green reconciliation phase.
