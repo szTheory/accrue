@@ -18,13 +18,18 @@
 #   - `EntitlementSummary`            (the advisory-cache model)
 #   - `StripeSync`                    (the Stripe-native sync namespace)
 #   - `accrue_entitlement_summaries`  (the advisory-cache table)
+#   - `stripe_native_sync`            (the advisory config seam)
+#   - `list_active_entitlements`      (the client-backed fetch seam)
+#   - `Reconcile`                     (the shared pull/webhook writer)
 #
 # Allowlist (by construction):
 #   - Doc comments / comment lines — the `^[^#]*` anchor means a matched
 #     alternative must appear BEFORE any `#` on the line, so a leading-`#`
-#     comment line (e.g. a moduledoc that NAMES the cache to explain the
-#     isolation) never trips the gate, and a same-line trailing comment is
-#     ignored. Only real code refs fail the build.
+#     comment line never trips the gate, and a same-line trailing comment is
+#     ignored.
+#   - Elixir triple-quoted doc strings — the awk scanner skips lines inside
+#     `"""` blocks so module prose may name the seam without weakening the
+#     executable-code guard.
 set -euo pipefail
 
 repo_root="${ROOT_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}"
@@ -43,15 +48,32 @@ for f in "${gate_path_files[@]}"; do
   fi
 done
 
-hits=$(grep -rnE \
-  '^[^#]*(EntitlementSummary|StripeSync|accrue_entitlement_summaries|stripe_native_sync)' \
-  "${gate_path_files[@]}" \
-  || true)
+hits=$(
+  awk '
+    BEGIN {
+      forbidden = "(EntitlementSummary|StripeSync|accrue_entitlement_summaries|stripe_native_sync|list_active_entitlements|Reconcile)"
+    }
+    {
+      line = $0
+      if (line ~ /"""/) {
+        in_doc = !in_doc
+        next
+      }
+      if (in_doc) {
+        next
+      }
+      sub(/#.*/, "", line)
+      if (line ~ forbidden) {
+        print FILENAME ":" FNR ":" $0
+      }
+    }
+  ' "${gate_path_files[@]}"
+)
 
 if [[ -n "${hits}" ]]; then
   echo "verify_entitlement_sync_isolation: FAIL — advisory-cache ref reachable from the always-on gate path:" >&2
   echo "${hits}" >&2
-  echo "The Stripe-native entitlement-summary cache is observational-only (D-01); it must NEVER be referenced from the gate-decision path (T-127-09)." >&2
+  echo "The Stripe-native entitlement-summary cache, client fetch seam, and shared Reconcile writer are observational-only (D-01/D-15); they must NEVER be referenced from the gate-decision path (T-127-09/T-213-08)." >&2
   exit 1
 fi
 
