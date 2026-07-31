@@ -3,8 +3,19 @@ defmodule AccrueAdmin.E2E.Fixtures do
 
   import Ecto.Query
 
-  alias Accrue.Billing.{Charge, Coupon, Customer, Invoice, PromotionCode, Refund, Subscription}
+  alias Accrue.Billing.{
+    Charge,
+    Coupon,
+    Customer,
+    Invoice,
+    PromotionCode,
+    Refund,
+    Subscription,
+    SubscriptionItem
+  }
+
   alias Accrue.Connect.Account
+  alias Accrue.Entitlements.Reconcile
   alias Accrue.Events
   alias Accrue.Webhook.WebhookEvent
   alias AccrueAdmin.TestRepo
@@ -15,6 +26,7 @@ defmodule AccrueAdmin.E2E.Fixtures do
 
   @accrue_tables ~w(
     accrue_events
+    accrue_entitlement_summaries
     accrue_refunds
     accrue_charges
     accrue_invoice_items
@@ -29,6 +41,13 @@ defmodule AccrueAdmin.E2E.Fixtures do
     accrue_customers
   )
 
+  @e2e_entitlements [
+    plans: [
+      pro: [features: [:reports], limits: [seats: 5], price_ids: ["price_pro"]]
+    ],
+    unmapped_action: :deny
+  ]
+
   def reset! do
     tables =
       @public_tables ++
@@ -37,7 +56,71 @@ defmodule AccrueAdmin.E2E.Fixtures do
     TestRepo.query!("TRUNCATE TABLE #{Enum.join(tables, ", ")} RESTART IDENTITY CASCADE", [])
     :ok = Accrue.Processor.Fake.reset()
     :ok = Accrue.Actor.put_operation_id("e2e-" <> Ecto.UUID.generate())
+    Application.put_env(:accrue, :entitlements, @e2e_entitlements)
     :ok
+  end
+
+  def seed_advisory_entitlements! do
+    reset!()
+
+    Application.put_env(
+      :accrue,
+      :entitlements,
+      Keyword.put(@e2e_entitlements, :stripe_native_sync, :advisory)
+    )
+
+    customer =
+      insert_customer(%{
+        name: "E2E Advisory Entitlements Customer",
+        email: "phase2142-entitlements@example.com",
+        processor_id: "cus_e2e_phase2142"
+      })
+
+    subscription =
+      insert_subscription(customer, %{
+        status: :active,
+        processor_id: "sub_e2e_phase2142"
+      })
+
+    insert_subscription_item(subscription, %{
+      processor_id: "si_e2e_phase2142",
+      price_id: "price_pro",
+      processor_plan_id: "price_pro",
+      quantity: 1
+    })
+
+    lookup_keys =
+      Enum.map(1..10, fn index ->
+        "phase2142-entitlement-#{String.pad_leading(Integer.to_string(index), 2, "0")}-" <>
+          String.duplicate("wrap-safe-", 5)
+      end)
+
+    payload = %{
+      "object" => "entitlements.active_entitlement_summary",
+      "customer" => customer.processor_id,
+      "livemode" => false,
+      "entitlements" => %{
+        "object" => "list",
+        "has_more" => true,
+        "url" => "/v1/entitlements/active_entitlements",
+        "data" => Enum.map(Enum.reverse(lookup_keys), &%{"lookup_key" => &1})
+      }
+    }
+
+    {:ok, _summary} =
+      Reconcile.write_webhook(
+        "evt_e2e_phase2142",
+        ~U[2026-07-31 16:00:00Z],
+        payload,
+        :fake
+      )
+
+    %{
+      customer_id: customer.id,
+      lookup_keys: lookup_keys,
+      preview_keys: Enum.take(lookup_keys, 8),
+      hidden_keys: Enum.drop(lookup_keys, 8)
+    }
   end
 
   def seed_dashboard! do
@@ -702,6 +785,21 @@ defmodule AccrueAdmin.E2E.Fixtures do
     %Subscription{}
     |> Subscription.changeset(Map.merge(defaults, attrs))
     |> put_id(id)
+    |> TestRepo.insert!()
+  end
+
+  defp insert_subscription_item(subscription, attrs) do
+    defaults = %{
+      subscription_id: subscription.id,
+      processor: "fake",
+      quantity: 1,
+      metadata: %{},
+      data: %{},
+      lock_version: 1
+    }
+
+    %SubscriptionItem{}
+    |> SubscriptionItem.changeset(Map.merge(defaults, attrs))
     |> TestRepo.insert!()
   end
 

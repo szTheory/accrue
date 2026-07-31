@@ -95,6 +95,12 @@ jobs:
           cache: npm
           cache-dependency-path: brandbook/tokens/harness/package-lock.json
 
+      - name: Executable UAT contract self-test
+        run: node scripts/ci/verify_executable_uat_contract.mjs --self-test
+
+      - name: Phase 214.2 executable UAT contract
+        run: node scripts/ci/verify_executable_uat_contract.mjs --phase 214.2
+
       - name: Install tokens harness
         run: cd brandbook/tokens/harness && npm ci
 
@@ -633,6 +639,9 @@ jobs:
 
       - name: Phase 192 local guardrail contract
         run: bash scripts/ci/verify_phase192_guardrail_contract.sh
+
+      - name: Phase 214.2 advisory entitlement integration and browser gate
+        run: cd accrue_admin && npm run e2e:phase2142
 
       - name: Run Phase 192 admin hardening guardrails
         run: bash scripts/ci/verify_phase192_admin_guardrails.sh

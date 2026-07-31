@@ -45,6 +45,11 @@ module.exports = defineConfig({
         ...trustWalkthroughVideo,
         viewport: { width: 1280, height: 900 }
       }
+    },
+    {
+      name: "chromium-mobile",
+      testMatch: /verify01-admin-mobile\.spec\.js/,
+      use: { ...devices["Pixel 5"] }
     }
   ],
   outputDir: "test-results"

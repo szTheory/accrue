@@ -46,6 +46,10 @@ defmodule AccrueAdmin.E2E.Plug do
     json(conn, 200, Fixtures.seed_operator_flows!())
   end
 
+  post "/seed/advisory-entitlements" do
+    json(conn, 200, Fixtures.seed_advisory_entitlements!())
+  end
+
   post "/seed/edge-states" do
     json(conn, 200, Fixtures.seed_edge_states!())
   end
@@ -97,6 +101,10 @@ defmodule AccrueAdmin.E2E.Plug do
 
   post "/__e2e__/seed/operator-flows" do
     json(conn, 200, Fixtures.seed_operator_flows!())
+  end
+
+  post "/__e2e__/seed/advisory-entitlements" do
+    json(conn, 200, Fixtures.seed_advisory_entitlements!())
   end
 
   get "/counts" do
