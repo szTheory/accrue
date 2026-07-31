@@ -2,13 +2,10 @@
 gsd_state_version: 1.0
 milestone: v1.58
 milestone_name: lattice_stripe 2.x Bump & Stripe-Native Entitlements Sync
-current_phase: 214
-current_phase_name: Docs & truth reconciliation
 status: planning
-stopped_at: Completed 213-05-PLAN.md
-last_updated: "2026-07-31T02:03:47.973Z"
-last_activity: 2026-07-30
-last_activity_desc: Phase 213 complete, transitioned to Phase 214
+stopped_at: Phase 214 context gathered
+last_updated: "2026-07-31T02:30:27.032Z"
+last_activity: 2026-07-30 — Phase 213 complete, transitioned to Phase 214
 progress:
   total_phases: 3
   completed_phases: 2
@@ -788,9 +785,9 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 
 ## Session Continuity
 
-Last session: 2026-07-31T01:51:11.285Z
-Stopped at: Completed 213-05-PLAN.md
-Resume file: None
+Last session: 2026-07-31T02:30:27.026Z
+Stopped at: Phase 214 context gathered
+Resume file: .planning/phases/214-docs-truth-reconciliation/214-CONTEXT.md
 
 ## Operator Next Steps
 
