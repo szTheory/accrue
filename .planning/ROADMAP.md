@@ -230,7 +230,7 @@ Plans:
   3. Per-package CHANGELOG/release notes record the major dep bump and the new advisory sync, every new public function carries an `@since` annotation, and the adoption-proof / support-matrix / planning-mirror docs describe one consistent stable-core posture (POS-03) with no contradiction between any two of them.
   4. A reviewer grepping for "lattice_stripe" or "entitlements sync" across `CLAUDE.md`, `guides/`, package CHANGELOGs, and `.planning/` mirrors finds one consistent version/status story, not several conflicting ones.
 
-**Plans**: 3 plans (2 complete; gap-closure Plan 03 ready)
+**Plans**: 3/3 plans executed
 
 Plans:
 **Wave 1**
@@ -243,7 +243,7 @@ Plans:
 
 **Wave 3** *(gap closure; blocked on Wave 2 verification)*
 
-- [ ] 214-03-PLAN.md — Make the release contract accept both the current pre-release state and an aligned Release Please 1.5.0 candidate, with mismatch/malformed/incomplete-candidate fixtures.
+- [x] 214-03-PLAN.md — Make the release contract accept both the current pre-release state and an aligned Release Please 1.5.0 candidate, with mismatch/malformed/incomplete-candidate fixtures.
 
 **Verification:** gaps found (8/9 truths). DOCS-03 remains unsatisfied because the release contract rejects the aligned Release Please 1.5.0 candidate. See `v1.58-v1.58-MILESTONE-AUDIT.md`.
 
@@ -334,7 +334,7 @@ Plans:
 | 211. Grep-gated CSS retirement & cross-surface cleanup | v1.57 | 4/4 | Complete | 2026-07-29 |
 | 212. lattice_stripe 2.x bump & green reconciliation | v1.58 | 1/1 | Complete | 2026-07-30 |
 | 213. Stripe-native advisory entitlements sync (observational-only) | v1.58 | 5/5 | Complete    | 2026-07-31 |
-| 214. Docs & truth reconciliation | v1.58 | 2/3 | Gap Plan Ready | - |
+| 214. Docs & truth reconciliation | v1.58 | 3/3 | In Progress|  |
 | 215. Multi-rail contract and additive data foundation | v1.59 | 0/TBD | Queued | - |
 | 216. Canonical account projection and gateway compatibility | v1.59 | 0/TBD | Queued | - |
 | 217. Apple observation rail and automatic linking | v1.59 | 0/TBD | Queued | - |

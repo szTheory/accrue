@@ -3,18 +3,18 @@ gsd_state_version: 1.0
 milestone: v1.58
 milestone_name: lattice_stripe 2.x Bump & Stripe-Native Entitlements Sync
 current_phase: 214
-current_phase_name: Docs & truth reconciliation
+current_phase_name: docs-truth-reconciliation
 status: verifying
-stopped_at: v1.58 audit blocked on DOCS-03; v1.59 roadmap queued
-last_updated: "2026-07-31T13:51:00.000Z"
+stopped_at: Completed 214-03-PLAN.md
+last_updated: "2026-07-31T14:19:16.644Z"
 last_activity: 2026-07-31
-last_activity_desc: Multi-rail/offline roadmap queued; v1.58 closeout blocker recorded
+last_activity_desc: Phase 214 execution started
 progress:
   total_phases: 3
-  completed_phases: 2
-  total_plans: 8
-  completed_plans: 8
-  percent: 67
+  completed_phases: 3
+  total_plans: 9
+  completed_plans: 9
+  percent: 100
 ---
 
 # Project State
@@ -25,14 +25,14 @@ See: `.planning/PROJECT.md` (updated 2026-07-31 after multi-rail/offline roadmap
 
 **Core value:** A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic Elixir DX, strong domain modeling, tamper-evident audit ledger, great observability, and zero breaking-change pain through v1.x.
 
-**Current focus:** Close Phase 214 DOCS-03, then promote queued v1.59 Phases 215-219
+**Current focus:** Phase 214 — docs-truth-reconciliation
 
 ## Current Position
 
-Phase: 214 (Docs & truth reconciliation) — IMPLEMENTED, NOT VERIFIED
-Plan: 2 of 2 complete
-Status: Milestone audit gaps_found — DOCS-03 blocks v1.58 closeout; v1.59 queued
-Last activity: 2026-07-31 — Multi-rail/offline roadmap queued; v1.58 closeout blocker recorded
+Phase: 214 (docs-truth-reconciliation) — EXECUTING
+Plan: 3 of 3
+Status: Phase complete — ready for verification
+Last activity: 2026-07-31 — Phase 214 execution started
 
 ## Post-v1.48 Pause Rule
 
@@ -365,6 +365,7 @@ Coverage: 22/22 v1.51 requirements mapped (each REQ-ID → exactly one phase). D
 | Phase 213 P05 | 8min | 1 tasks | 2 files |
 | Phase 214 P01 | 41min | 3 tasks | 12 files |
 | Phase 214 P02 | 12min | 3 tasks | 12 files |
+| Phase 214-docs-truth-reconciliation P03 | 8min | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -687,6 +688,8 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - [Phase ?]: Release Please remains the only writer for numbered package changelog sections and package @version values; main carries only Unreleased and hand-authored next-release prose.
 - [Phase ?]: Admin and portal changelog entries are compatibility-only; substantive advisory sync capability belongs to the core accrue changelog.
 - [Phase ?]: Exactly StripeSync.refresh/2, Processor.list_active_entitlements/2 callback, Processor.list_active_entitlements/2 facade, and Processor.Fake.put_entitlements/2 carry since 1.5.0 metadata.
+- [Phase ?]: Linked Release Please candidates require stable equal SemVer and matching package-local numbered sections before release-note verification accepts them.
+- [Phase ?]: Verification and UAT default to executable evidence; credentials and irreversible publishing are authorization gates.
 
 ### Pending Todos
 
@@ -825,8 +828,8 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 
 ## Session Continuity
 
-Last session: 2026-07-31T13:45:00Z
-Stopped at: v1.58 audit blocked on DOCS-03; v1.59 roadmap queued
+Last session: 2026-07-31T14:18:57.551Z
+Stopped at: Completed 214-03-PLAN.md
 Resume file: None
 
 ## Operator Next Steps
