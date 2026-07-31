@@ -55,19 +55,21 @@ defmodule AccrueAdmin.Copy.Entitlements do
   def advisory_boundary, do: "Stripe advisory snapshot — does not change access."
 
   @doc false
-  def advisory_recorded_title, do: "Snapshot recorded"
+  def advisory_recorded_title, do: "Snapshot recorded."
 
   @doc false
-  def advisory_disabled_title, do: "Not enabled"
+  def advisory_disabled_title, do: "Not enabled."
 
   @doc false
-  def advisory_disabled_copy, do: "Stripe advisory sync is off for this host. Local access above is unchanged."
+  def advisory_disabled_copy,
+    do: "Stripe advisory sync is off for this host. Local access above is unchanged."
 
   @doc false
   def advisory_count(count), do: "#{count} entitlements observed"
 
   @doc false
-  def advisory_observed_at(timestamp), do: "Observed #{DateTime.to_iso8601(timestamp)}"
+  def advisory_observed_at(timestamp),
+    do: "Observed #{Calendar.strftime(timestamp, "%b %d, %Y %H:%M UTC")}."
 
   @doc false
   def advisory_source_label, do: "Source"
@@ -91,7 +93,7 @@ defmodule AccrueAdmin.Copy.Entitlements do
   def advisory_observed_at_label, do: "Observed at"
 
   @doc false
-  def advisory_unavailable_title, do: "Snapshot unavailable"
+  def advisory_unavailable_title, do: "Snapshot unavailable."
 
   @doc false
   def advisory_source_unavailable, do: "Source unavailable"
@@ -101,4 +103,38 @@ defmodule AccrueAdmin.Copy.Entitlements do
 
   @doc false
   def advisory_unavailable, do: "Unavailable"
+
+  @doc false
+  def advisory_not_observed_title, do: "No snapshot yet."
+
+  @doc false
+  def advisory_not_observed_copy, do: "No advisory snapshot has been recorded for this customer."
+
+  @doc false
+  def advisory_age_unknown_title, do: "Snapshot time unavailable."
+
+  @doc false
+  def advisory_age_unknown_copy,
+    do: "This advisory snapshot has no recorded observation time."
+
+  @doc false
+  def advisory_incomplete_title, do: "Incomplete snapshot."
+
+  @doc false
+  def advisory_incomplete_copy,
+    do:
+      "This webhook snapshot contains only the first reported entitlements. Local access above is unchanged."
+
+  @doc false
+  def advisory_unavailable_copy,
+    do: "We couldn't load the Stripe advisory snapshot. Local access above is unchanged."
+
+  @doc false
+  def advisory_source_webhook, do: "Webhook"
+
+  @doc false
+  def advisory_completeness_unknown, do: "Unknown"
+
+  @doc false
+  def advisory_preview_more(count), do: "+#{count} more"
 end

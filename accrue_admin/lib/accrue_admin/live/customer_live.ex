@@ -289,18 +289,20 @@ defmodule AccrueAdmin.Live.CustomerLive do
             <summary class="ax-detail-section-head">
               <span class="ax-detail-section-title">Access and entitlements</span>
             </summary>
-            <div class="ax-stack-md" data-role="canonical-access">
+            <div class="ax-stack-md" data-role="accrue-access-canonical">
               <h3 class="ax-detail-section-title"><%= Copy.entitlements_canonical_group_title() %></h3>
               <Detail.detail_field_list fields={canonical_access_fields(@entitlements_view)} />
             </div>
-            <div class="ax-stack-md" data-role="stripe-advisory">
+            <div class="ax-stack-md" data-role="stripe-observation-advisory">
               <h3 class="ax-detail-section-title"><%= Copy.entitlements_advisory_group_title() %></h3>
               <p class="ax-body"><%= Copy.entitlements_advisory_boundary() %></p>
-              <StatusBadge.status_badge
-                status={@entitlements_view.stripe_advisory.state}
-                label={advisory_state_title(@entitlements_view.stripe_advisory)}
-                tone="slate"
-              />
+              <span data-role="stripe-advisory-state">
+                <StatusBadge.status_badge
+                  status={@entitlements_view.stripe_advisory.state}
+                  label={advisory_state_title(@entitlements_view.stripe_advisory)}
+                  tone={advisory_tone(@entitlements_view.stripe_advisory)}
+                />
+              </span>
               <Detail.detail_field_list fields={stripe_advisory_fields(@entitlements_view.stripe_advisory)} />
             </div>
             <p :if={@entitlements_view.local == {:error, :unavailable}} class="ax-body" data-role="entitlements-error">
@@ -598,7 +600,9 @@ defmodule AccrueAdmin.Live.CustomerLive do
     ]
   end
 
-  defp canonical_access_fields(%{local: {:ok, %{resolved: resolved, unmapped_price_ids: unmapped}}}) do
+  defp canonical_access_fields(%{
+         local: {:ok, %{resolved: resolved, unmapped_price_ids: unmapped}}
+       }) do
     active_plans = resolved.active_plans |> MapSet.to_list() |> Enum.sort()
     features = resolved.features |> MapSet.to_list() |> Enum.sort()
     grace_plans = resolved.grace_plans |> MapSet.to_list() |> Enum.sort()
@@ -632,32 +636,100 @@ defmodule AccrueAdmin.Live.CustomerLive do
     ]
   end
 
-  defp stripe_advisory_fields(%{state: :disabled}) do
-    [%{label: Copy.entitlements_advisory_group_title(), value: Copy.entitlements_advisory_disabled_copy()}]
+  defp stripe_advisory_fields(%{state: state} = advisory) do
+    state_field = %{label: advisory_state_title(advisory), value: advisory_state_copy(advisory)}
+
+    case state do
+      state when state in [:recorded, :age_unknown, :incomplete] ->
+        [
+          state_field,
+          %{
+            label: Copy.entitlements_advisory_observed_entitlements_label(),
+            value: Copy.entitlements_advisory_count(advisory.entitlement_count)
+          },
+          %{
+            label: Copy.entitlements_advisory_lookup_keys_label(),
+            value: advisory_lookup_preview(advisory.lookup_keys)
+          },
+          %{
+            label: Copy.entitlements_advisory_observed_at_label(),
+            value: format_advisory_timestamp(advisory.observed_at)
+          },
+          %{
+            label: Copy.entitlements_advisory_source_label(),
+            value: advisory_source(advisory.source)
+          },
+          %{
+            label: Copy.entitlements_advisory_completeness_label(),
+            value: advisory_completeness(advisory.completeness)
+          }
+        ]
+
+      _ ->
+        [state_field]
+    end
   end
 
-  defp stripe_advisory_fields(%{state: :recorded} = advisory) do
-    [
-      %{label: Copy.entitlements_advisory_observed_entitlements_label(), value: Copy.entitlements_advisory_count(advisory.entitlement_count)},
-      %{label: Copy.entitlements_advisory_lookup_keys_label(), value: Enum.join(advisory.lookup_keys, ", ")},
-      %{label: Copy.entitlements_advisory_observed_at_label(), value: Copy.entitlements_advisory_observed_at(advisory.synced_at)},
-      %{label: Copy.entitlements_advisory_source_label(), value: advisory_source(advisory.source)},
-      %{label: Copy.entitlements_advisory_completeness_label(), value: advisory_completeness(advisory.completeness)}
-    ]
-  end
+  defp advisory_state_title(%{state: :disabled}), do: Copy.entitlements_advisory_disabled_title()
 
-  defp stripe_advisory_fields(_advisory), do: []
+  defp advisory_state_title(%{state: :not_observed}),
+    do: Copy.entitlements_advisory_not_observed_title()
 
   defp advisory_state_title(%{state: :recorded}), do: Copy.entitlements_advisory_recorded_title()
-  defp advisory_state_title(%{state: :disabled}), do: Copy.entitlements_advisory_disabled_title()
+
+  defp advisory_state_title(%{state: :age_unknown}),
+    do: Copy.entitlements_advisory_age_unknown_title()
+
+  defp advisory_state_title(%{state: :incomplete}),
+    do: Copy.entitlements_advisory_incomplete_title()
+
   defp advisory_state_title(_advisory), do: Copy.entitlements_advisory_unavailable_title()
 
+  defp advisory_state_copy(%{state: :disabled}), do: Copy.entitlements_advisory_disabled_copy()
+
+  defp advisory_state_copy(%{state: :not_observed}),
+    do: Copy.entitlements_advisory_not_observed_copy()
+
+  defp advisory_state_copy(%{state: :recorded, observed_at: observed_at}),
+    do: format_advisory_timestamp(observed_at)
+
+  defp advisory_state_copy(%{state: :age_unknown}),
+    do: Copy.entitlements_advisory_age_unknown_copy()
+
+  defp advisory_state_copy(%{state: :incomplete}),
+    do: Copy.entitlements_advisory_incomplete_copy()
+
+  defp advisory_state_copy(_advisory), do: Copy.entitlements_advisory_unavailable_copy()
+
+  defp advisory_tone(%{state: :incomplete}), do: "amber"
+  defp advisory_tone(%{state: :unavailable}), do: "ink"
+  defp advisory_tone(_advisory), do: "slate"
+
+  defp format_advisory_timestamp(%DateTime{} = timestamp),
+    do: Copy.entitlements_advisory_observed_at(timestamp)
+
+  defp format_advisory_timestamp(_timestamp), do: Copy.entitlements_advisory_age_unknown_copy()
+
+  defp advisory_lookup_preview(lookup_keys) do
+    sorted = Enum.sort(lookup_keys)
+    preview = Enum.take(sorted, 8)
+    remaining = length(sorted) - length(preview)
+
+    [
+      Enum.join(preview, ", "),
+      if(remaining > 0, do: Copy.entitlements_advisory_preview_more(remaining))
+    ]
+    |> Enum.reject(&(&1 in [nil, ""]))
+    |> Enum.join(" ")
+  end
+
   defp advisory_source(:pull), do: Copy.entitlements_advisory_source_pull()
+  defp advisory_source(:webhook), do: Copy.entitlements_advisory_source_webhook()
   defp advisory_source(_source), do: Copy.entitlements_advisory_source_unavailable()
 
   defp advisory_completeness(:complete), do: Copy.entitlements_advisory_complete()
   defp advisory_completeness(:incomplete), do: Copy.entitlements_advisory_incomplete()
-  defp advisory_completeness(_completeness), do: Copy.entitlements_advisory_unavailable()
+  defp advisory_completeness(_completeness), do: Copy.entitlements_advisory_completeness_unknown()
 
   defp tax_ownership_fields(row, tax_risk) do
     tax_health = BillingPresentation.tax_health(row)
@@ -692,11 +764,20 @@ defmodule AccrueAdmin.Live.CustomerLive do
     }
   end
 
-  defp raw_entitlements_payload(%{local: {:ok, %{resolved: resolved}}, stripe_advisory: advisory}),
-    do: Map.put(entitlements_display_map(resolved), "stripe_advisory", raw_advisory_payload(advisory))
+  defp raw_entitlements_payload(%{
+         local: {:ok, %{resolved: resolved}},
+         stripe_advisory: advisory
+       }),
+       do: %{
+         "local" => entitlements_display_map(resolved),
+         "stripe_advisory" => raw_advisory_payload(advisory)
+       }
 
   defp raw_entitlements_payload(%{local: {:error, :unavailable}, stripe_advisory: advisory}),
-    do: %{"error" => Copy.entitlements_error_copy(), "stripe_advisory" => raw_advisory_payload(advisory)}
+    do: %{
+      "local" => %{"error" => Copy.entitlements_error_copy()},
+      "stripe_advisory" => raw_advisory_payload(advisory)
+    }
 
   defp related_items(customer, mount_path, scope) do
     [
@@ -801,7 +882,11 @@ defmodule AccrueAdmin.Live.CustomerLive do
   defp entitlements_view(customer) do
     Accrue.Entitlements.Admin.diagnostic_for_customer(customer)
   rescue
-    _ -> %{local: {:error, :unavailable}, stripe_advisory: %{state: :unavailable, lookup_keys: [], entitlement_count: 0, raw: %{}}}
+    _ ->
+      %{
+        local: {:error, :unavailable},
+        stripe_advisory: %{state: :unavailable, lookup_keys: [], entitlement_count: 0, raw: %{}}
+      }
   end
 
   defp raw_advisory_payload(advisory), do: advisory.raw
