@@ -731,6 +731,52 @@ defmodule Accrue.Docs.PackageDocsVerifierTest do
     assert output =~ "grant" or output =~ "deferred"
   end
 
+  test "package docs verifier rejects advisory sync authority inversion in support mirrors" do
+    tmp_dir = tmp_dir!()
+    seed_tmp_dir!(tmp_dir)
+
+    entitlements_path = Path.join(tmp_dir, "accrue/guides/entitlements.md")
+
+    File.write!(
+      entitlements_path,
+      File.read!(entitlements_path) <>
+        "\nThe advisory Stripe cache changes `entitled?/2` and is authoritative for grant decisions.\n"
+    )
+
+    matrix_path = Path.join(tmp_dir, ".planning/processor-support-matrix.md")
+
+    File.write!(
+      matrix_path,
+      File.read!(matrix_path) <>
+        "\nStripe-native sync can displace local mapping as the grant source of truth.\n"
+    )
+
+    {output, status} = run_verifier(tmp_dir)
+
+    assert status != 0
+    assert output =~ "[verify_package_docs]"
+    assert output =~ "advisory" or output =~ "grant"
+  end
+
+  test "package docs verifier rejects live-Stripe merge gate claims in adoption proof" do
+    tmp_dir = tmp_dir!()
+    seed_tmp_dir!(tmp_dir)
+
+    proof_path = Path.join(tmp_dir, "examples/accrue_host/docs/adoption-proof-matrix.md")
+
+    File.write!(
+      proof_path,
+      File.read!(proof_path) <>
+        "\nLive Stripe entitlement refresh is the merge-blocking proof for advisory sync.\n"
+    )
+
+    {output, status} = run_verifier(tmp_dir)
+
+    assert status != 0
+    assert output =~ "[verify_package_docs]"
+    assert output =~ "adoption-proof-matrix.md"
+  end
+
   defp tmp_dir! do
     tmp_dir =
       Path.join(System.tmp_dir!(), "accrue-docs-verifier-#{System.unique_integer([:positive])}")
@@ -773,6 +819,7 @@ defmodule Accrue.Docs.PackageDocsVerifierTest do
     copy_fixture!("CONTRIBUTING.md", tmp_dir)
     copy_fixture!(".planning/STRATEGY.md", tmp_dir)
     copy_fixture!(".planning/PROJECT.md", tmp_dir)
+    copy_fixture!(".planning/processor-support-matrix.md", tmp_dir)
     copy_fixture!(".planning/research/JTBD-FRONTIER.md", tmp_dir)
     copy_fixture!("accrue/mix.exs", tmp_dir)
     copy_fixture!("accrue/README.md", tmp_dir)
