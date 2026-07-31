@@ -35,7 +35,7 @@ v1.49 **Realistic Demo App & Adoption Evidence** shipped on **2026-06-02**. The 
 
 **Active milestone: v1.58 — lattice_stripe 2.x Bump & Stripe-Native Entitlements Sync (SEED-005), opened 2026-07-30.** SEED-005's trigger fired 2026-07-29 (lattice_stripe `2.0.0` published; latest is `2.1.0`, entitlements landed in `2.0.0`). This milestone moves Accrue onto `lattice_stripe ~> 2.0`, reconciles the major-version deltas with all suites green, and adopts the new `LatticeStripe.Entitlements.*` surface to close **Phase 127's deferred optional Stripe-native entitlements sync** — while preserving the observational-only architecture (D-01/D-11: the sync is a read seam, never consulted for a grant decision).
 
-**Milestone progress:** **Phases 212–214 and the Phase 214.1 DOCS-03 correction are complete and green.** Phase 214 re-verification passed 9/9 must-haves after the release contract was made Release Please-safe for aligned generated candidates, including a future `1.6.0` fixture; Phase 214.1's source, verifier, and fixture correction has focused green evidence. Phase 214/214.1 verification is the next gate, followed by an independent milestone re-audit and archive; v1.59 remains queued and has not started.
+**Milestone progress:** **Phases 212–214 and the Phase 214.1 DOCS-03 correction are complete and verified.** Phase 214 re-verification passed 9/9 must-haves after the release contract was made Release Please-safe for aligned generated candidates, including a future `1.6.0` fixture; Phase 214.1 re-verification passed 9/9 with its source, verifier, fixture, and current traceability aligned. An independent milestone re-audit and archive are next; v1.59 remains queued and has not started.
 
 **Reopen decision (recorded per the post-v1.48 pause rule, before ROADMAP/STATE change):** justification class **maintenance / dependency currency** (a major-version bump of a required core dependency, `lattice_stripe`, cf. v1.46) **plus closing a prior explicitly-deferred capability** (Phase 127's optional Stripe-native entitlements sync, unblocked only now that 2.0.0 ships the entitlements primitives). This is *not* broad new product surface: it stays inside the already-shipped entitlements feature, keeps local plan→feature mapping canonical as the gate, and keeps `scripts/ci/verify_entitlement_sync_isolation.sh` (`gate → seam` must never happen) green. Library pin target is `~> 2.0` (permissive within major 2 for adopters).
 
@@ -61,7 +61,7 @@ The Phase 204 hardening roadmap's top slice (**Public Truth And Proof-State Base
 - Breaking vectors verified low-risk before opening: no direct lattice_stripe fixture-builder usage in Accrue lib/test; no `LatticeStripe.Finch` pool wiring to reconcile.
 - Any processor-surface/support-matrix implication must update behavior, docs, examples/verifiers, and release notes together (stable-core rule).
 
-**Closeout blocker:** The executable Phase 214.1 source/verifier/fixture correction is green, but v1.58 remains active pending Phase 214/214.1 verification. An independent milestone re-audit is pending before archive; the historical `gaps_found` audit remains authoritative until then, and only then may queued v1.59 be promoted to the active milestone.
+**Closeout blocker:** Phase 214.1 passed re-verification 9/9, so the remaining v1.58 gate is the independent milestone re-audit before archive. The historical `gaps_found` audit remains authoritative until that re-audit, and only after archive may queued v1.59 be promoted to the active milestone.
 
 ## Most recently shipped milestone: v1.57 — Admin Operator Control Plane (SEED-004, M1) (**shipped & archived 2026-07-30**)
 
@@ -766,4 +766,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-07-31 — **Phases 212–214 complete; Phase 214 verified 9/9 with zero human UAT**. Milestone v1.58 is ready for re-audit and archive; v1.59 remains queued and unstarted. v1.57 (SEED-004 M1) shipped & archived 2026-07-30; SEED-004 M2 deferred; v1.56 Admin UI Ratchet remains parked.*
+*Last updated: 2026-07-31 — **Phases 212–214.1 complete; Phases 214 and 214.1 each verified 9/9 with zero human UAT**. Milestone v1.58 is ready for independent re-audit and archive; v1.59 remains queued and unstarted. v1.57 (SEED-004 M1) shipped & archived 2026-07-30; SEED-004 M2 deferred; v1.56 Admin UI Ratchet remains parked.*
