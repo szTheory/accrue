@@ -47,7 +47,7 @@ v1.58 lattice_stripe 2.x Bump & Stripe-Native Entitlements Sync opened 2026-07-3
 |-------|------|--------------|--------|
 | 212 | lattice_stripe 2.x bump & green reconciliation | BUMP-01, BUMP-02, BUMP-03 | Complete |
 | 213 | Stripe-native advisory entitlements sync (observational-only) | SYNC-01, SYNC-02, SYNC-03, SYNC-04, SYNC-05 | Complete |
-| 214 | Docs & truth reconciliation | DOCS-01, DOCS-02, DOCS-03 | In Progress |
+| 214 | Docs & truth reconciliation | DOCS-01, DOCS-02, DOCS-03 | Complete |
 
 Coverage: 11/11 requirements mapped to Phases 212-214 (each REQ-ID → exactly one phase). Per-phase counts: 212→3 · 213→5 · 214→3. Phase 213 final re-verification passed 13/13 truths. **Dependency shape:** strictly linear — 212 → 213 → 214 (the bump must land green before anything else compiles against 2.x; the sync adoption needs the 2.x `LatticeStripe.Entitlements.*` modules present; docs reconcile against the final shipped behavior of both).
 
@@ -799,4 +799,4 @@ Resume file: None
 
 ## Operator Next Steps
 
-- Run `/gsd-plan-phase 214` to plan the docs and truth reconciliation phase.
+- Run `/gsd-verify-work 214` or the milestone audit/ship gate for v1.58.

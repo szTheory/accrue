@@ -41,7 +41,7 @@ Stop rule: if proposed work is polish-only with a documented workaround and no r
 
 - [x] **Phase 212: lattice_stripe 2.x bump & green reconciliation** - Bump the `:lattice_stripe` pin to `~> 2.0` across every resolving package, reconcile the two verified 2.0.0 breaking vectors, and bring the Three Zeros gate green with no new skips (BUMP-01, BUMP-02, BUMP-03) — completed 2026-07-30
 - [x] **Phase 213: Stripe-native advisory entitlements sync (observational-only)** - Adopt a client-backed, opt-in refresh path into the advisory cache via `LatticeStripe.Entitlements.*`, extend the isolation-guard script to the new surface, resolve the D-07 `fetch_entitled/2` question, and prove by Fake-processor test that the sync can never become a gate (SYNC-01, SYNC-02, SYNC-03, SYNC-04, SYNC-05) — final re-verification passed 13/13 truths on 2026-07-31 (completed 2026-07-30)
-- [ ] **Phase 214: Docs & truth reconciliation** - Bring CLAUDE.md, the JTBD guides, and per-package changelogs/release notes into agreement with the shipped 2.x bump and the new observational sync (DOCS-01, DOCS-02, DOCS-03)
+- [x] **Phase 214: Docs & truth reconciliation** - Bring CLAUDE.md, the JTBD guides, and per-package changelogs/release notes into agreement with the shipped 2.x bump and the new observational sync (DOCS-01, DOCS-02, DOCS-03) — completed 2026-07-31
 
 Coverage: **11/11 requirements** mapped to Phases 212-214 (each REQ-ID → exactly one phase). Per-phase counts: 212→3 · 213→5 · 214→3. Dependencies: strictly linear — 212 → 213 → 214 (nothing else compiles against 2.x until the bump lands green; the sync adoption needs the 2.x `LatticeStripe.Entitlements.*` modules present; docs reconcile against the final shipped behavior of both). Full per-phase goals + success criteria: see [Phase Details](#phase-details-v158-active-milestone).
 
@@ -255,6 +255,7 @@ Plans:
 | 211. Grep-gated CSS retirement & cross-surface cleanup | v1.57 | 4/4 | Complete | 2026-07-29 |
 | 212. lattice_stripe 2.x bump & green reconciliation | v1.58 | 1/1 | Complete | 2026-07-30 |
 | 213. Stripe-native advisory entitlements sync (observational-only) | v1.58 | 5/5 | Complete    | 2026-07-31 |
+| 214. Docs & truth reconciliation | v1.58 | 2/2 | Complete | 2026-07-31 |
 
 ## Historical Backlog Anchors (not active scope)
 
