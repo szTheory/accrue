@@ -2,13 +2,13 @@
 gsd_state_version: 1.0
 milestone: v1.58
 milestone_name: lattice_stripe 2.x Bump & Stripe-Native Entitlements Sync
-current_phase: 214.1
-current_phase_name: close-gap-docs-03-reconcile-stripesync-writer-documentation
+current_phase: 214.2
+current_phase_name: close-gap-sync-02-docs-03-surface-advisory-entitlement-diagn
 status: complete
-stopped_at: Phase 214.1 verified 9/9; independent v1.58 milestone re-audit pending
-last_updated: "2026-07-31T17:11:46.445Z"
+stopped_at: Phase 214.2 context gathered
+last_updated: "2026-07-31T18:17:31.916Z"
 last_activity: 2026-07-31
-last_activity_desc: Phase 214.1 complete and verified 9/9; v1.58 milestone re-audit pending
+last_activity_desc: Phase 214.1 complete and verified 9/9
 progress:
   total_phases: 4
   completed_phases: 4
@@ -25,11 +25,11 @@ See: `.planning/PROJECT.md` (updated 2026-07-31 after multi-rail/offline roadmap
 
 **Core value:** A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic Elixir DX, strong domain modeling, tamper-evident audit ledger, great observability, and zero breaking-change pain through v1.x.
 
-**Current focus:** Phase 214.1 — close-gap-docs-03-reconcile-stripesync-writer-documentation
+**Current focus:** Phase 214.2 — close-gap-sync-02-docs-03-surface-advisory-entitlement-diagn
 
 ## Current Position
 
-Phase: 214.1 — close-gap-docs-03-reconcile-stripesync-writer-documentation
+Phase: 214.2 — close-gap-sync-02-docs-03-surface-advisory-entitlement-diagn
 Plan: 4 of 4 complete
 Status: Complete and verified 9/9; independent v1.58 milestone re-audit pending
 Last activity: 2026-07-31 — Phase 214.1 complete and verified 9/9
@@ -461,6 +461,7 @@ Coverage: 22/22 v1.51 requirements mapped (each REQ-ID → exactly one phase). D
 - v1.58 opened 2026-07-30: Phases 212-214 — roadmap created, ready to plan Phase 212
 - v1.59 queued 2026-07-31: Phases 215-219 — approved roadmap and requirements recorded; activation blocked only by v1.58 verified closeout
 - Phase 214.1 inserted after Phase 214: Close gap: DOCS-03 — reconcile StripeSync writer documentation (URGENT)
+- Phase 214.2 inserted after Phase 214: Close gap: SYNC-02/DOCS-03 — surface advisory entitlement diagnostics (URGENT)
 
 ### Decisions
 
@@ -839,9 +840,9 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 
 ## Session Continuity
 
-Last session: 2026-07-31T17:04:28.852Z
-Stopped at: Completed 214.1-04-PLAN.md
-Resume file: None
+Last session: 2026-07-31T18:17:31.903Z
+Stopped at: Phase 214.2 context gathered
+Resume file: .planning/phases/214.2-close-gap-sync-02-docs-03-surface-advisory-entitlement-diagn/214.2-CONTEXT.md
 
 ## Operator Next Steps
 
