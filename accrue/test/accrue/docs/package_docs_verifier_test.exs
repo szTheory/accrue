@@ -866,6 +866,36 @@ defmodule Accrue.Docs.PackageDocsVerifierTest do
     assert output =~ "StripeSync writer provenance"
   end
 
+  test "package docs verifier rejects a missing StripeSync public-prose shared reconciler" do
+    tmp_dir = tmp_dir!()
+    seed_tmp_dir!(tmp_dir)
+
+    stripe_sync_path = Path.join(tmp_dir, "accrue/lib/accrue/entitlements/stripe_sync.ex")
+    original = File.read!(stripe_sync_path)
+
+    missing_public_reconciler =
+      String.replace(
+        original,
+        "through `Accrue.Entitlements.Reconcile`.",
+        "through the shared reconciler.",
+        global: false
+      )
+
+    assert missing_public_reconciler != original
+    refute missing_public_reconciler =~ "through `Accrue.Entitlements.Reconcile`."
+    assert missing_public_reconciler =~ "alias Accrue.Entitlements.Reconcile"
+
+    File.write!(stripe_sync_path, missing_public_reconciler)
+
+    {output, status} = run_verifier(tmp_dir)
+
+    assert status != 0
+    assert output =~ "[verify_package_docs]"
+    assert output =~ "accrue/lib/accrue/entitlements/stripe_sync.ex"
+    assert output =~ "StripeSync writer provenance"
+    assert output =~ "missing shared reconciler"
+  end
+
   defp tmp_dir! do
     tmp_dir =
       Path.join(System.tmp_dir!(), "accrue-docs-verifier-#{System.unique_integer([:positive])}")
