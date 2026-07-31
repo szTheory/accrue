@@ -41,8 +41,8 @@ Each maps to exactly one roadmap phase (assigned in ROADMAP.md).
 
 ### Docs & Truth (DOCS)
 
-- [ ] **DOCS-01**: `CLAUDE.md` is updated — the Technology Stack `:lattice_stripe` row (version + entitlements note) and the Version Compatibility Matrix `lattice_stripe` anchor pin now read `~> 2.0`, correcting the stale `~> 0.2` matrix cell in passing.
-- [ ] **DOCS-02**: The entitlements JTBD truth is updated — `guides/jobs_to_be_done.md` and `.planning/research/JTBD-FRONTIER.md` flip the Phase 127 "optional Stripe-native sync deferred" status to shipped/observational, without overstating (it stays advisory, never a gate).
+- [x] **DOCS-01**: `CLAUDE.md` is updated — the Technology Stack `:lattice_stripe` row (version + entitlements note) and the Version Compatibility Matrix `lattice_stripe` anchor pin now read `~> 2.0`, correcting the stale `~> 0.2` matrix cell in passing.
+- [x] **DOCS-02**: The entitlements JTBD truth is updated — `guides/jobs_to_be_done.md` and `.planning/research/JTBD-FRONTIER.md` flip the Phase 127 "optional Stripe-native sync deferred" status to shipped/observational, without overstating (it stays advisory, never a gate).
 - [x] **DOCS-03**: Per-package changelog / release notes record the major dep bump and the new advisory sync; new public functions carry `@since` annotations; and the adoption-proof / support-matrix / planning-mirror docs stay mutually consistent (POS-03 / stable-core rule).
 
 ---

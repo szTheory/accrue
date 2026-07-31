@@ -2,13 +2,13 @@
 gsd_state_version: 1.0
 milestone: v1.58
 milestone_name: lattice_stripe 2.x Bump & Stripe-Native Entitlements Sync
-current_phase: 214
-current_phase_name: docs-truth-reconciliation
-status: verifying
+current_phase: 208
+current_phase_name: 3/5 plans
+status: planning
 stopped_at: Completed 214-03-PLAN.md
-last_updated: "2026-07-31T14:19:16.644Z"
+last_updated: "2026-07-31T14:39:16.977Z"
 last_activity: 2026-07-31
-last_activity_desc: Phase 214 execution started
+last_activity_desc: Phase 214 complete, transitioned to Phase 208
 progress:
   total_phases: 3
   completed_phases: 3
@@ -29,10 +29,10 @@ See: `.planning/PROJECT.md` (updated 2026-07-31 after multi-rail/offline roadmap
 
 ## Current Position
 
-Phase: 214 (docs-truth-reconciliation) — EXECUTING
-Plan: 3 of 3
-Status: Phase complete — ready for verification
-Last activity: 2026-07-31 — Phase 214 execution started
+Phase: 208 — prove convergence on slice + wire ci + accept (3/5 plans) — parked (conv 01..07)
+Plan: Not started
+Status: Ready to plan
+Last activity: 2026-07-31 — Phase 214 complete, transitioned to Phase 208
 
 ## Post-v1.48 Pause Rule
 
