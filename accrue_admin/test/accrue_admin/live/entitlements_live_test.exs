@@ -13,6 +13,7 @@ defmodule AccrueAdmin.EntitlementsLiveTest do
   use AccrueAdmin.LiveCase, async: false
 
   alias Accrue.Test.Factory
+  alias Accrue.Entitlements.Reconcile
   alias AccrueAdmin.Copy
 
   defmodule AuthAdapter do
@@ -132,5 +133,45 @@ defmodule AccrueAdmin.EntitlementsLiveTest do
     assert html =~ "The gate fails closed, so no access is granted on error"
     # The normal happy-path drift section must NOT render on the error branch.
     refute html =~ Copy.entitlements_no_drift_copy()
+  end
+
+  test "a contradictory pull snapshot is advisory while canonical access remains local", %{conn: conn} do
+    prior_entitlements = Application.get_env(:accrue, :entitlements)
+
+    Application.put_env(
+      :accrue,
+      :entitlements,
+      Keyword.put(@entitlements, :stripe_native_sync, :advisory)
+    )
+
+    on_exit(fn -> Application.put_env(:accrue, :entitlements, prior_entitlements) end)
+
+    %{customer: customer} = Factory.active_subscription(%{price_id: "price_pro"})
+
+    assert {:ok, _summary} =
+             Reconcile.write_pull(
+               customer,
+               ~U[2026-07-31 12:34:56Z],
+               [%{"lookup_key" => "priority-support", "feature" => "feature_priority"}],
+               "/v1/entitlements/active_entitlements"
+             )
+
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+
+    assert {:ok, _view, html} =
+             live(conn, "/billing/customers/#{customer.id}?tab=entitlements")
+
+    assert html =~ "Accrue access (canonical)"
+    assert html =~ "Stripe observation (advisory)"
+    assert html =~ "Stripe advisory snapshot — does not change access."
+    assert html =~ "Reports"
+    assert html =~ "priority-support"
+    assert html =~ "2 active access grants"
+    assert html =~ "Pull refresh"
+    assert html =~ "Complete"
+    refute html =~ "match"
+    refute html =~ "mismatch"
+    refute html =~ "in sync"
+    refute html =~ "healthy"
   end
 end

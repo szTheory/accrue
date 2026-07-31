@@ -18,6 +18,7 @@ defmodule Accrue.Entitlements.AdminTest do
   use Accrue.BillingCase, async: false
 
   alias Accrue.Entitlements.Admin
+  alias Accrue.Entitlements.Reconcile
 
   @entitlements [
     plans: [
@@ -196,6 +197,64 @@ defmodule Accrue.Entitlements.AdminTest do
       assert {_resolved, unmapped} = Admin.resolve_for_customer(customer)
       refute "price_basic" in unmapped
       assert unmapped == []
+    end
+  end
+
+  describe "diagnostic_for_customer/1" do
+    test "keeps the local resolver result separate from a recorded pull snapshot" do
+      Application.put_env(
+        :accrue,
+        :entitlements,
+        Keyword.put(@entitlements, :stripe_native_sync, :advisory)
+      )
+
+      %{customer: customer} =
+        Accrue.Test.Factory.active_subscription(%{owner_id: Ecto.UUID.generate(), price_id: "price_p1"})
+
+      observed_at = ~U[2026-07-31 12:34:56Z]
+
+      assert {:ok, _summary} =
+               Reconcile.write_pull(
+                 customer,
+                 observed_at,
+                 [
+                   %{"lookup_key" => "priority-support", "feature" => "feature_priority"},
+                   %{"lookup_key" => "alpha", "feature" => "feature_alpha"}
+                 ],
+                 "/v1/entitlements/active_entitlements"
+               )
+
+      assert %{local: {:ok, %{resolved: resolved, unmapped_price_ids: []}}, stripe_advisory: advisory} =
+               Admin.diagnostic_for_customer(customer)
+
+      assert MapSet.member?(resolved.features, :reports)
+      assert advisory == %{
+               state: :recorded,
+               lookup_keys: ["alpha", "priority-support"],
+               entitlement_count: 2,
+               synced_at: observed_at,
+               source: :pull,
+               completeness: :complete,
+               raw: %{
+                 "lookup_keys" => ["alpha", "priority-support"],
+                 "entitlement_count" => 2,
+                 "synced_at" => "2026-07-31T12:34:56Z",
+                 "source" => "pull",
+                 "completeness" => "complete"
+               }
+             }
+
+      assert Admin.resolve_for_customer(customer) == {resolved, []}
+    end
+
+    test "returns disabled before reading a historical advisory snapshot" do
+      %{customer: customer} =
+        Accrue.Test.Factory.active_subscription(%{owner_id: Ecto.UUID.generate(), price_id: "price_p1"})
+
+      assert %{local: {:ok, %{resolved: resolved}}, stripe_advisory: %{state: :disabled}} =
+               Admin.diagnostic_for_customer(customer)
+
+      assert MapSet.member?(resolved.features, :reports)
     end
   end
 end
