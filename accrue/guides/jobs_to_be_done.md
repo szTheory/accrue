@@ -382,10 +382,12 @@ controller plug plus `require_feature`/`require_plan` router macros, a
 conditionally-compiled LiveView `on_mount` guard, and an admin entitlements view.
 It's **provider-honest** (local-identical across Stripe/Braintree/Fake) and
 **lifecycle-truthful** (derives from `entitling?/1`, with a `past_due_grace`
-knob). The *optional* Stripe-native sync (consuming
-`entitlements.active_entitlement_summary.updated`) is a deferred, off-by-default
-add-on (Phase 127) — the core gate needs no Stripe dependency. See
-[Entitlements](entitlements.md).
+knob). The *optional* Stripe-native sync now ships as an off-by-default
+observational lane: it records Stripe native entitlement summaries and
+client-backed refreshes in a local advisory cache for diagnostics/admin reads,
+while the local plan→feature map remains Accrue's canonical grant gate. It never
+changes `entitled?/2`, `has_active_plan?/2`, controller plugs, or LiveView
+guards. See [Entitlements](entitlements.md).
 
 Accrue runs in **intake-gated maintenance mode** — stable, with new work driven
 by real adopter needs rather than speculative expansion. Expansion reopens only
@@ -403,4 +405,5 @@ lives in [Maturity and maintenance](maturity-and-maintenance.md).
 - **2026-05-23** — entitlements ✅ shipped (v1.39): added the "Gate access on what
   they paid for" section and flipped the scope table row from gap to shipped. Core
   gate API + Plug/LiveView guards + admin view are first-party and provider-honest;
-  the optional Stripe-native sync stays deferred and off by default (Phase 127).
+  the optional Stripe-native sync later shipped as an off-by-default observational
+  diagnostics lane, never as a grant authority.

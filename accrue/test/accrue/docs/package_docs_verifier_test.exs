@@ -728,7 +728,7 @@ defmodule Accrue.Docs.PackageDocsVerifierTest do
     assert status != 0
     assert output =~ "[verify_package_docs]"
     assert output =~ "Stripe-native"
-    assert output =~ "grant"
+    assert output =~ "grant" or output =~ "deferred"
   end
 
   defp tmp_dir! do

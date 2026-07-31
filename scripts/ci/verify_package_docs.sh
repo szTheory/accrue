@@ -143,6 +143,25 @@ require_absent_regex "$ROOT_DIR/accrue/guides/entitlements.md" 'fetch_entitled/2
 require_absent_regex "$ROOT_DIR/accrue/lib/accrue/entitlements/admin.ex" 'def(p)?[[:space:]]+fetch_entitled'
 require_fixed "$ROOT_DIR/accrue/guides/telemetry.md" '[:accrue, :entitlements, :sync]'
 
+# Current lattice_stripe 2.x and Stripe-native advisory truth (Phase 214, DOCS-01/DOCS-02)
+require_fixed "$ROOT_DIR/CLAUDE.md" '| `:lattice_stripe` | `~> 2.0` | Stripe API wrapper |'
+require_fixed "$ROOT_DIR/CLAUDE.md" '| `lattice_stripe ~> 2.0` |'
+require_fixed "$ROOT_DIR/CLAUDE.md" 'current lock resolves to 2.1.0'
+require_fixed "$ROOT_DIR/CLAUDE.md" '2.x `LatticeStripe.Entitlements.*` active-entitlement support'
+require_absent_regex "$ROOT_DIR/CLAUDE.md" '^\| `:lattice_stripe` \| `~> (0\.2|1\.1)` \|'
+require_absent_regex "$ROOT_DIR/CLAUDE.md" '^\| `lattice_stripe ~> (0\.2|1\.1)` \|'
+require_fixed "$ROOT_DIR/accrue/guides/jobs_to_be_done.md" '*optional* Stripe-native sync now ships as an off-by-default'
+require_fixed "$ROOT_DIR/accrue/guides/jobs_to_be_done.md" 'local plan→feature map remains Accrue'
+require_fixed "$ROOT_DIR/accrue/guides/jobs_to_be_done.md" 'It never'
+require_fixed "$ROOT_DIR/accrue/guides/jobs_to_be_done.md" 'changes `entitled?/2`, `has_active_plan?/2`, controller plugs, or LiveView'
+require_absent_regex "$ROOT_DIR/accrue/guides/jobs_to_be_done.md" 'Stripe-native sync.*deferred|deferred.*Stripe-native sync'
+require_absent_regex "$ROOT_DIR/accrue/guides/jobs_to_be_done.md" 'Stripe-native.*grant authority|grant authority.*Stripe-native'
+require_fixed "$ROOT_DIR/.planning/research/JTBD-FRONTIER.md" '*optional* Stripe-native sync now ships as an off-by-default observational diagnostics lane'
+require_fixed "$ROOT_DIR/.planning/research/JTBD-FRONTIER.md" 'local plan→feature map remains Accrue'
+require_fixed "$ROOT_DIR/.planning/research/JTBD-FRONTIER.md" 'never changes `entitled?/2`, `has_active_plan?/2`, controller plugs, or LiveView guards'
+require_absent_regex "$ROOT_DIR/.planning/research/JTBD-FRONTIER.md" 'Stripe-native sync.*deferred|deferred.*Stripe-native sync'
+require_absent_regex "$ROOT_DIR/.planning/research/JTBD-FRONTIER.md" "Stripe-native entitlements are Accrue's source of truth|source of truth for grant decisions"
+
 # Optional Chimeway dunning engine adapter (Phase 131, DUN-03)
 require_fixed "$ROOT_DIR/accrue/guides/dunning.md" 'Accrue.Dunning.Engine'
 require_fixed "$ROOT_DIR/accrue/guides/dunning.md" 'Accrue.Integrations.Chimeway'
