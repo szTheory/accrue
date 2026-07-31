@@ -12,8 +12,10 @@ defmodule Accrue.Billing.EntitlementSummary do
   its identity is the customer it belongs to). Stripe is canonical for
   entitlement state;
   Accrue persists only the typed columns operators read on, plus a `data`
-  jsonb with the full payload (including the `entitlements.url` pagination
-  handle) for the deferred `lattice_stripe >= 1.2` paginated reconcile.
+  jsonb with the full payload. A client-backed pull refresh exhaustively
+  streams the customer's active entitlements before persisting its advisory
+  snapshot. Webhook summary snapshots can contain only the first reported
+  entitlements; `entitlements.has_more` records that known incompleteness.
 
   ## Observational-only (D-01)
 
@@ -34,10 +36,11 @@ defmodule Accrue.Billing.EntitlementSummary do
 
   ## Truncation honesty (D-07)
 
-  Stripe inlines at most 10 entitlements; `entitlements.has_more` maps to
-  the typed `truncated` column (queryable / partially-indexed) so operators
-  can find known-incomplete caches. Because the cache is observational-only,
-  truncation can never affect a gate decision.
+  Stripe webhook summaries inline at most 10 entitlements; `entitlements.has_more`
+  maps to the typed `truncated` column (queryable / partially-indexed) so
+  operators can find known-incomplete advisory snapshots. Both the exhaustive
+  pull and potentially incomplete webhook paths are observational-only and
+  never affect local access or a gate decision.
   """
 
   use Accrue.Schema
