@@ -28,6 +28,17 @@ defmodule Accrue.Docs.ReleaseNotesContractTest do
     assert output =~ "verify_release_notes_contract: OK (1.5.0)"
   end
 
+  test "release notes contract accepts a later aligned Release Please candidate" do
+    tmp_dir = release_fixture_dir!()
+    setup_release_fixture!(tmp_dir)
+    promote_release_please_candidate!(tmp_dir, "1.6.0")
+
+    {output, status} = run_contract(tmp_dir)
+
+    assert status == 0, output
+    assert output =~ "verify_release_notes_contract: OK (1.6.0)"
+  end
+
   test "release notes contract rejects one-package version divergence" do
     tmp_dir = release_fixture_dir!()
     setup_release_fixture!(tmp_dir)
@@ -365,7 +376,10 @@ defmodule Accrue.Docs.ReleaseNotesContractTest do
 
       changelog
       |> File.read!()
-      |> String.replace("## Unreleased\n\n", "## Unreleased\n\n## [#{version}]\n\n", global: false)
+      |> String.replace("## Unreleased\n\n", "## Unreleased\n\n## [#{version}]\n\n",
+        global: false
+      )
+      |> String.replace("linked 1.5.0", "linked #{version}")
       |> then(&File.write!(changelog, &1))
     end
   end

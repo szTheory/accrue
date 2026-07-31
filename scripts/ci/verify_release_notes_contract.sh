@@ -45,11 +45,6 @@ assert_stable_semver "accrue_portal" "$accrue_portal_version"
 [[ "$accrue_version" == "$accrue_admin_version" ]] || fail "accrue and accrue_admin versions diverged"
 [[ "$accrue_version" == "$accrue_portal_version" ]] || fail "accrue and accrue_portal versions diverged"
 
-case "$accrue_version" in
-  1.4.0) release_state="pre-release" ;;
-  1.5.0) release_state="candidate" ;;
-  *) fail "linked @version must be the supported pre-release or Release Please candidate state" ;;
-esac
 [[ -f "$notes" ]] || fail "missing $notes"
 [[ -f "$core_changelog" ]] || fail "missing $core_changelog"
 [[ -f "$admin_changelog" ]] || fail "missing $admin_changelog"
@@ -82,6 +77,13 @@ changelog_release_section() {
     in_section { print }
     END { exit found ? 0 : 1 }
   ' "$file"
+}
+
+changelog_has_release_section() {
+  local file=$1
+  local version=$2
+
+  changelog_release_section "$file" "$version" >/dev/null
 }
 
 assert_unreleased_before_latest() {
@@ -117,15 +119,33 @@ assert_section_contains() {
 assert_companion_compatibility_only() {
   local label=$1
   local section=$2
+  local version=$3
 
   assert_section_contains "$label" "$section" "Compatibility only:" "must remain compatibility-only"
-  assert_section_contains "$label" "$section" "linked 1.5.0" "must name the linked 1.5.0 line"
+  assert_section_contains "$label" "$section" "linked ${version}" "must name the linked ${version} line"
   assert_section_contains "$label" "$section" "core" "must defer substantive capability to core"
   assert_section_contains "$label" "$section" "package owns" "must defer substantive capability to core"
 
   ! grep -Eiq 'admin-owned|portal-owned|new .*workflow|new .*API|grant authority|authorization behavior' <<<"$section" ||
     fail "$label must remain compatibility-only"
 }
+
+candidate_sections=0
+for file in "$core_changelog" "$admin_changelog" "$portal_changelog"; do
+  if changelog_has_release_section "$file" "$accrue_version"; then
+    candidate_sections=$((candidate_sections + 1))
+  fi
+done
+
+if [[ "$accrue_version" == "1.4.0" ]]; then
+  release_state="pre-release"
+  companion_version="1.5.0"
+elif [[ "$candidate_sections" -eq 3 ]]; then
+  release_state="candidate"
+  companion_version="$accrue_version"
+else
+  fail "linked @version must be the checked-in pre-release or a fully generated Release Please candidate"
+fi
 
 if [[ "$release_state" == "pre-release" ]]; then
   for entry in \
@@ -171,8 +191,8 @@ assert_section_contains "accrue/CHANGELOG.md" "$core_section" "shared reconcile/
 assert_section_contains "accrue/CHANGELOG.md" "$core_section" "fetch_entitled/2" "missing fetch_entitled closure"
 assert_section_contains "accrue/CHANGELOG.md" "$core_section" "remains closed" "missing fetch_entitled closure"
 
-assert_companion_compatibility_only "accrue_admin/CHANGELOG.md" "$admin_section"
-assert_companion_compatibility_only "accrue_portal/CHANGELOG.md" "$portal_section"
+assert_companion_compatibility_only "accrue_admin/CHANGELOG.md" "$admin_section" "$companion_version"
+assert_companion_compatibility_only "accrue_portal/CHANGELOG.md" "$portal_section" "$companion_version"
 
 grep -Fq "# Release notes (plain-language)" "$notes" || fail "release-notes.md missing title"
 grep -Fq "## accrue" "$notes" || fail "release-notes.md missing accrue section"
@@ -210,9 +230,9 @@ section_has_version() {
   ' "$notes"
 }
 
-section_has_version "## accrue" "## accrue_admin" ||
-  fail "release-notes.md must describe ${accrue_version} in the accrue section"
 if [[ "$release_state" == "pre-release" ]]; then
+  section_has_version "## accrue" "## accrue_admin" ||
+    fail "release-notes.md must describe ${accrue_version} in the accrue section"
   section_has_version "## accrue_admin" "## How we version" ||
     fail "release-notes.md must describe ${accrue_version} in the accrue_admin section"
 fi
