@@ -1,5 +1,35 @@
 # Milestones
 
+## v1.58 lattice_stripe 2.x Bump & Stripe-Native Entitlements Sync (Shipped: 2026-07-31)
+
+**Delivered:** Upgraded every resolving package to `lattice_stripe ~> 2.0` and shipped an opt-in, client-backed Stripe entitlement sync whose output remains advisory-only while becoming visible in existing operator diagnostics.
+
+**Phases completed:** 212-214.2 (5 phases, 17 plans, 33 tasks)
+
+**Key accomplishments:**
+
+- Bumped the sole dependency pin from `~> 1.1` to `~> 2.0`; all four lockfiles resolve 2.1.0 and their configured compile/test/Credo/Dialyzer/coverage/audit gates remained green.
+- Added a client-backed advisory refresh path, optional Stripe processor callback, Fake-backed deterministic coverage, shared pull/webhook reconciler, monotonic ordering, and an explicitly host-owned refresh worker.
+- Preserved the local plan→feature map as the only grant authority, with contradictory-cache grant-invariance tests and a static isolation gate covering resolver and Guard surfaces.
+- Surfaced persisted advisory observations through the existing core diagnostic and admin customer detail, with independent failure containment and executable desktop/mobile/accessibility UAT.
+- Reconciled package docs, JTBD/support/adoption mirrors, changelogs, `@since` metadata, writer provenance, pagination truth, and Release Please candidate contracts.
+- Closed all audit blockers: 11/11 requirements, five verified phases, 10/11 integration connections, and 5/5 end-to-end flows; the remaining items are documented non-blocking tech debt.
+
+**Stats:**
+
+- 150 files changed across the milestone git range
+- 5 phases, 17 plans, 33 tasks
+- 2 calendar days (2026-07-30 → 2026-07-31)
+- Git range: `66b055d9` → archive commits for v1.58
+
+**Known technical debt:** Processor capability discovery does not advertise the implemented callback; non-Stripe rows are not rejected before refresh I/O; malformed worker arguments retry rather than cancel; the worker has no production enqueuer; Phase 214.2 validation metadata remains `ready` rather than authoritative `validated`. None is a requirement, integration-flow, or grant-boundary blocker. See the audit archive.
+
+**Archives:** [`milestones/v1.58-ROADMAP.md`](milestones/v1.58-ROADMAP.md), [`milestones/v1.58-REQUIREMENTS.md`](milestones/v1.58-REQUIREMENTS.md), [`milestones/v1.58-MILESTONE-AUDIT.md`](milestones/v1.58-MILESTONE-AUDIT.md), [`milestones/v1.58-phases/`](milestones/v1.58-phases/).
+
+**What's next:** Review and formally open queued v1.59 Account-Scoped Multi-Rail & Offline Entitlements with `$gsd-new-milestone`.
+
+---
+
 ## v1.57 Admin Operator Control Plane (Shipped: 2026-07-30)
 
 **Phases completed:** 3 phases, 10 plans, 19 tasks

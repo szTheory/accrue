@@ -1539,12 +1539,57 @@ The first slice (M1) of the SEED-004 redesign of `accrue_admin` from a CRUD surf
 
 ---
 
+## Milestone: v1.58 — lattice_stripe 2.x Bump & Stripe-Native Entitlements Sync
+
+**Shipped:** 2026-07-31
+**Phases:** 5 | **Plans:** 17 | **Tasks:** 33
+
+### What Was Built
+
+- Upgraded all resolving packages to `lattice_stripe ~> 2.0` with four aligned lockfiles and green package-specific quality gates.
+- Added a default-off client-backed Stripe entitlement refresh, optional processor callback, shared pull/webhook reconciliation, deterministic ordering, and a host-owned worker.
+- Proved advisory data cannot influence grants, then surfaced it separately through core diagnostics and the existing admin customer detail.
+- Reconciled public/support/release/planning truth, including writer provenance, pagination semantics, `@since` metadata, and Release Please candidate handling.
+
+### What Worked
+
+- The static isolation gate plus contradictory-cache runtime tests made the observational-only boundary falsifiable instead of relying on architecture prose.
+- Fake/local transport seams kept processor, reconciliation, and browser verification deterministic and credential-free.
+- Independent milestone audits found two real integration/documentation gaps; decimal closure phases fixed both without diluting canonical requirement ownership.
+- Executable desktop/mobile/accessibility UAT removed the final human-only closeout ambiguity.
+
+### What Was Inefficient
+
+- Initial completion metadata omitted Phase 214.2 and duplicated the audit filename prefix, so the archive dry run would have silently left out a verified closure phase and the audit.
+- Nonstandard summary frontmatter caused the archive tool to undercount tasks (19 detected versus 33 recorded in phase metrics) and extract deviation headings as accomplishments.
+- Documentation truth required two closure phases because writer provenance and pull/webhook completeness were not tested together early enough.
+
+### Patterns Established
+
+- Archive commands must be dry-run and checked for exact phase-directory and audit-file membership before mutation.
+- Advisory provider data should flow through one reconciler, one diagnostic projection, and an explicit static/runtime non-authority boundary.
+- Closure phases may supplement evidence for an existing requirement, but canonical traceability ownership remains singular.
+
+### Key Lessons
+
+1. Put production-doc claims under negative-fixture tests at the same time as the behavior they describe, especially writer provenance and completeness semantics.
+2. Normalize summary metadata (`one-liner`, task count) before closeout so automatic milestone rollups remain trustworthy.
+3. Treat phase scope discovered by the archive tool as an assertion to verify, not an implementation detail.
+
+### Cost Observations
+
+- Model mix and session count were not reliably recorded for this milestone.
+- The main avoidable cost was audit-driven documentation and diagnostic closure, not the dependency bump itself.
+
+---
+
 ## Cross-Milestone Trends
 
 ### Process Evolution
 
 | Milestone | Sessions | Phases | Key Change |
 |-----------|----------|--------|------------|
+| v1.58 | multi (2026-07-30→07-31) | 5 | **BUMP/SYNC/DOCS** — moved all packages to `lattice_stripe ~> 2.0`, shipped client-backed advisory entitlements with static/runtime grant isolation, surfaced diagnostics in the existing admin detail, and closed writer/pagination truth through two audit-driven decimal phases. Audit `tech_debt`: 11/11 requirements and 5/5 flows pass. |
 | v1.57 | multi (2026-07-19→07-30) | 3 | **REIGN/IA/COPY/COMP** — SEED-004 M1: reigned the two outlier admin pages (Home + Subscriptions) onto the shared operator-first component vocabulary + answer-first IA, retired 97 dead bespoke `.ax-*` selectors (grep-gated), and closed UAT with **0 human checkpoints** via a new deterministic Playwright `toHaveScreenshot` pixel-diff gate. Reopen class: explicit strategy change. Non-convergence of the parked v1.56 ratchet on IA findings was the trigger. Audit `passed`; phases **209–211** under **`milestones/v1.57-phases/`**; archives **`milestones/v1.57-*`**. |
 | v1.55 | short | 4 | **QLT/CI/DB/RD** - audit-only maintenance milestone: evidence-backed software-quality audit, static-first CI/CD audit, accepted DB schema-contract ADR, and ranked top-10 hardening roadmap. Audit `passed`; phases archived under **`milestones/v1.55-phases/`**; archives **`milestones/v1.55-*`**. |
 | v1.54 | long | 8 | **RES/STY/EXE/PGH/PRP/IXN/FIX/CPY/VER** — page-level admin streamlining: archetype specs → gold-standard exemplars → LIST/DETAIL propagation, canonical overlay primitive, PhoenixStorybook dev/test-only, deterministic fixture stress, and a 30,348-cell zero-regression Phase 200 sign-off. Audit `passed`; phases archived under **`milestones/v1.54-phases/`**; archives **`milestones/v1.54-*`**. |
@@ -1584,6 +1629,7 @@ The first slice (M1) of the SEED-004 redesign of `accrue_admin` from a CRUD surf
 
 | Milestone | Tests | Coverage | Zero-Dep Additions |
 |-----------|-------|----------|-------------------|
+| v1.58 | Five phase verifications (63/63 combined must-haves), isolation verifier, package-doc verifier, 81 focused core tests, 37 focused admin/LiveView tests, and executable desktop/Pixel 5 browser UAT. | 11/11 requirements; 10/11 integrations; 5/5 flows | No new required dependency; existing `lattice_stripe` pin advanced to `~> 2.0`. Advisory sync remains default-off and non-authoritative. |
 | v1.57 | Full `accrue_admin` unit suite 514/0 + e2e 200/0 + storybook gate green with zero regressions; new deterministic Playwright `toHaveScreenshot` pixel-diff gate (4 admin surfaces × light/dark) blocking in browser-uat; grep-gate + orphan/dangling `ax-*` census guard proving 97 selectors retired with zero live-class over-deletion. Milestone audit `passed` (11/11 reqs, 3/3 phases, 5/5 integration, 5/5 flows). | 11/11 requirements archived | No dependency changes; admin-only CSS/template reign (no core `accrue` change, no new nav rooms, no Tailwind migration); both generated artifacts (`accrue_admin.css`, `copy_strings.json`) rebuilt in-repo. |
 | v1.55 | Milestone audit passed with 4/4 phase verifications, 18/18 requirements clean by REQUIREMENTS/VERIFICATION/SUMMARY extraction, 8/8 integration checks, 6/6 audit-only flows, zero blockers, and Nyquist-compliant validation metadata. | 18/18 requirements archived | No runtime/package dependency changes; audit-only roadmap and ADR artifacts. |
 | v1.54 | Phase 200 union scorecard verifier (30,348 cells, 0 regressions), Storybook coverage/theming checks, axe/no-FOUC/reduced-motion browser guardrails, overlay/floating/focus lifecycle tests, and centralized LIST copy contract alignment | 23/23 requirements archived | PhoenixStorybook dev/test-only in `accrue_admin`; no adopter runtime dependency, no core `accrue` LiveView runtime leak. |

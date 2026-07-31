@@ -33,9 +33,9 @@ v1.49 **Realistic Demo App & Adoption Evidence** shipped on **2026-06-02**. The 
 
 ## Current State
 
-**Active milestone: v1.58 — lattice_stripe 2.x Bump & Stripe-Native Entitlements Sync (SEED-005), opened 2026-07-30.** SEED-005's trigger fired 2026-07-29 (lattice_stripe `2.0.0` published; latest is `2.1.0`, entitlements landed in `2.0.0`). This milestone moves Accrue onto `lattice_stripe ~> 2.0`, reconciles the major-version deltas with all suites green, and adopts the new `LatticeStripe.Entitlements.*` surface to close **Phase 127's deferred optional Stripe-native entitlements sync** — while preserving the observational-only architecture (D-01/D-11: the sync is a read seam, never consulted for a grant decision).
+**Latest shipped milestone: v1.58 — lattice_stripe 2.x Bump & Stripe-Native Entitlements Sync (SEED-005), shipped 2026-07-31.** All resolving packages now use `lattice_stripe ~> 2.0` (resolving 2.1.0). The client-backed Stripe entitlement refresh is opt-in and advisory-only, converges with webhook observations through the shared reconciler, never participates in grants, and is visible through the existing core diagnostic and admin customer detail.
 
-**Milestone progress:** **Phases 212–214 and the Phase 214.1 DOCS-03 correction are complete and verified.** Phase 214 re-verification passed 9/9 must-haves after the release contract was made Release Please-safe for aligned generated candidates, including a future `1.6.0` fixture; Phase 214.1 re-verification passed 9/9 with its source, verifier, fixture, and current traceability aligned. An independent milestone re-audit and archive are next; v1.59 remains queued and has not started.
+**Closeout:** Phases 212, 213, 214, 214.1, and 214.2 completed across 17 plans and 33 tasks. The audit passed 11/11 requirements and 5/5 flows with 10/11 integrations fully wired; the host-owned worker's lack of a production enqueuer and four other warning-level items remain documented technical debt. Phase 214.2 passed 19/19 verification with executable desktop/mobile UAT; its post-execution Nyquist metadata remains `ready` rather than authoritative `validated`.
 
 **Reopen decision (recorded per the post-v1.48 pause rule, before ROADMAP/STATE change):** justification class **maintenance / dependency currency** (a major-version bump of a required core dependency, `lattice_stripe`, cf. v1.46) **plus closing a prior explicitly-deferred capability** (Phase 127's optional Stripe-native entitlements sync, unblocked only now that 2.0.0 ships the entitlements primitives). This is *not* broad new product surface: it stays inside the already-shipped entitlements feature, keeps local plan→feature mapping canonical as the gate, and keeps `scripts/ci/verify_entitlement_sync_isolation.sh` (`gate → seam` must never happen) green. Library pin target is `~> 2.0` (permissive within major 2 for adopters).
 
@@ -47,21 +47,20 @@ The Phase 204 hardening roadmap's top slice (**Public Truth And Proof-State Base
 
 **Queued next milestone: v1.59 — Account-Scoped Multi-Rail & Offline Entitlements (SEED-006).** A concrete adopter, anonymized as **B2C Alpha**, requires one account to remain entitled across Stripe web billing, Apple in-app purchase, and extended offline use in a Phoenix/Crosswake application. This satisfies the post-v1.48 reopen bar as both a sourced adopter requirement and an explicit strategy expansion with reusable value for Phoenix apps going mobile. The approved direction is a common account entitlement projection fed by rail-specific lifecycle observers, plus a signed time-bounded offline lease; lifecycle management remains honestly rail-aware. Google Play is SEED-007 and stays dormant until Android is scheduled or a second adopter requires it. Source: `.planning/research/MULTI-RAIL-OFFLINE-ENTITLEMENTS.md`.
 
-## Current Milestone: v1.58 lattice_stripe 2.x Bump & Stripe-Native Entitlements Sync
+## Next Milestone Goals: v1.59 Account-Scoped Multi-Rail & Offline Entitlements
 
-**Goal:** Move Accrue onto `lattice_stripe ~> 2.0`, reconcile the major-version deltas with all suites green, and adopt the new `LatticeStripe.Entitlements.*` surface to close Phase 127's deferred optional Stripe-native entitlements sync — without weakening the observational-only architecture.
+v1.59 is queued, not active. Start it with `$gsd-new-milestone` so its archived draft requirements can be reviewed and regenerated as a fresh milestone-scoped `REQUIREMENTS.md`.
 
-**Target features:**
-- **Dep bump & reconciliation** — bump `accrue/mix.exs` `{:lattice_stripe, "~> 1.1"}` → `~> 2.0`; refresh `mix.lock` across `accrue`, `accrue_admin`, `accrue_portal`, and `examples/accrue_host`; reconcile any 2.0 API deltas at all `LatticeStripe.*` call sites; keep the Three Zeros gate (test / dialyzer / credo / coveralls) green across packages.
-- **Adopt Stripe-native entitlements sync** — wire `LatticeStripe.Entitlements.{ActiveEntitlement, ActiveEntitlementSummary, Feature}` into Accrue's advisory cache (a client-backed refresh path, not webhook-payload-only; optionally surface Feature definitions), closing the Phase 127 deferral.
-- **Docs & truth** — update `CLAUDE.md` `:lattice_stripe` row + Version Compatibility Matrix, `guides/jobs_to_be_done.md` + `.planning/research/JTBD-FRONTIER.md` entitlements deferral status, guides/changelog/release notes, and `@since` annotations.
+**Goal:** Preserve one account's access across Stripe web billing, Apple in-app purchase, and extended offline use through a common entitlement projection and signed, time-bounded offline lease, while keeping lifecycle operations rail-aware.
 
-**Binding guardrails (out of scope / inviolable):**
-- **Observational-only stays inviolable (D-01/D-11):** the new sync is a read seam; it is *never* consulted for a grant decision. Local plan→feature mapping remains the canonical gate. `scripts/ci/verify_entitlement_sync_isolation.sh` (`gate → seam` must never happen) stays green — extend it if the surface grows.
-- Breaking vectors verified low-risk before opening: no direct lattice_stripe fixture-builder usage in Accrue lib/test; no `LatticeStripe.Finch` pool wiring to reconcile.
-- Any processor-surface/support-matrix implication must update behavior, docs, examples/verifiers, and release notes together (stable-core rule).
+**Proposed outcomes:**
+- Concurrent Stripe and Apple rail registration plus rail-qualified product mapping and source capabilities.
+- A canonical account projection that unions effective grants without allowing one rail's revocation to erase another rail's access.
+- Verified Apple evidence and automatic `appAccountToken` linking with idempotent reconciliation.
+- A compact ES256 offline lease with 30-day freshness, one signed 72-hour degraded window, hard expiry, and secure reconnect/replacement.
+- B2C Alpha end-to-end proof, operator diagnostics, automatic repair paths, runbooks, and public contract alignment.
 
-**Closeout blocker:** Phase 214.1 passed re-verification 9/9, so the remaining v1.58 gate is the independent milestone re-audit before archive. The historical `gaps_found` audit remains authoritative until that re-audit, and only after archive may queued v1.59 be promoted to the active milestone.
+**Guardrails:** Existing single-processor hosts remain compatible; lifecycle management stays provider-honest; Google Play, Family Sharing, offer authoring, migration/proration, and configurable risk matrices remain deferred unless separately justified.
 
 ## Most recently shipped milestone: v1.57 — Admin Operator Control Plane (SEED-004, M1) (**shipped & archived 2026-07-30**)
 
@@ -766,4 +765,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-07-31 — **Phases 212–214.1 complete; Phases 214 and 214.1 each verified 9/9 with zero human UAT**. Milestone v1.58 is ready for independent re-audit and archive; v1.59 remains queued and unstarted. v1.57 (SEED-004 M1) shipped & archived 2026-07-30; SEED-004 M2 deferred; v1.56 Admin UI Ratchet remains parked.*
+*Last updated: 2026-07-31 after v1.58 milestone completion. v1.58 shipped and archived with 11/11 requirements and 5/5 flows passing; v1.59 remains queued for `$gsd-new-milestone` review.*

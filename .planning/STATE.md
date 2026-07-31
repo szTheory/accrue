@@ -2,37 +2,37 @@
 gsd_state_version: 1.0
 milestone: v1.58
 milestone_name: lattice_stripe 2.x Bump & Stripe-Native Entitlements Sync
+status: Awaiting next milestone
+stopped_at: Phase 214.2 verified 19/19 with executable UAT
+last_updated: "2026-07-31T23:46:33.515Z"
+last_activity: 2026-07-31
+last_activity_desc: Milestone v1.58 completed and archived
+progress:
+  total_phases: 5
+  completed_phases: 5
+  total_plans: 17
+  completed_plans: 17
+  percent: 100
 current_phase: 214.2
 current_phase_name: close-gap-sync-02-docs-03-surface-advisory-entitlement-diagn
-status: complete
-stopped_at: Phase 214.2 context gathered
-last_updated: "2026-07-31T18:17:31.916Z"
-last_activity: 2026-07-31
-last_activity_desc: Phase 214.1 complete and verified 9/9
-progress:
-  total_phases: 4
-  completed_phases: 4
-  total_plans: 13
-  completed_plans: 13
-  percent: 100
 ---
 
 # Project State
 
 ## Project Reference
 
-See: `.planning/PROJECT.md` (updated 2026-07-31 after multi-rail/offline roadmap assessment)
+See: `.planning/PROJECT.md` (updated 2026-07-31 after v1.58 milestone completion)
 
 **Core value:** A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic Elixir DX, strong domain modeling, tamper-evident audit ledger, great observability, and zero breaking-change pain through v1.x.
 
-**Current focus:** Phase 214.2 — close-gap-sync-02-docs-03-surface-advisory-entitlement-diagn
+**Current focus:** Planning next milestone; v1.59 is queued for `$gsd-new-milestone` review
 
 ## Current Position
 
-Phase: 214.2 — close-gap-sync-02-docs-03-surface-advisory-entitlement-diagn
-Plan: 4 of 4 complete
-Status: Complete and verified 9/9; independent v1.58 milestone re-audit pending
-Last activity: 2026-07-31 — Phase 214.1 complete and verified 9/9
+Phase: Milestone v1.58 complete
+Plan: —
+Status: Awaiting next milestone
+Last activity: 2026-07-31 — Milestone v1.58 completed and archived
 
 ## Post-v1.48 Pause Rule
 
@@ -46,7 +46,7 @@ Queued v1.59 clears the reopen rule through a concrete adopter requirement and e
 
 ## Milestone Progress
 
-### v1.58 Phase Summary (ACTIVE — opened 2026-07-30 — lattice_stripe 2.x Bump & Stripe-Native Entitlements Sync, SEED-005)
+### v1.58 Phase Summary (SHIPPED & ARCHIVED 2026-07-31 — lattice_stripe 2.x Bump & Stripe-Native Entitlements Sync, SEED-005)
 
 | Phase | Name | Requirements | Status |
 |-------|------|--------------|--------|
@@ -54,12 +54,13 @@ Queued v1.59 clears the reopen rule through a concrete adopter requirement and e
 | 213 | Stripe-native advisory entitlements sync (observational-only) | SYNC-01, SYNC-02, SYNC-03, SYNC-04, SYNC-05 | Complete |
 | 214 | Docs & truth reconciliation | DOCS-01, DOCS-02, DOCS-03 | Complete (verified 9/9) |
 | 214.1 | DOCS-03 writer-documentation gap closure | DOCS-03 | Complete (verified 9/9) |
+| 214.2 | Diagnostic-display and pagination gap closure | SYNC-02, DOCS-03 closure evidence | Complete (verified 19/19) |
 
-Coverage: 11/11 requirements mapped to Phases 212-214 (each REQ-ID → exactly one phase); Phase 214.1 closes the DOCS-03 writer-documentation gap without duplicate assignment. Per-phase counts: 212→3 · 213→5 · 214→3. Phase 213 final re-verification passed 13/13 truths. **Dependency shape:** 212 → 213 → 214 → 214.1 (the bump must land green before anything else compiles against 2.x; the sync adoption needs the 2.x `LatticeStripe.Entitlements.*` modules present; docs reconcile against the final shipped behavior of both).
+Coverage: 11/11 requirements satisfied. Phases 214.1 and 214.2 supplied closure evidence without changing the canonical requirement owners. **Dependency shape:** 212 → 213 → 214 → 214.1 → 214.2.
 
 **Guardrails (binding, out of scope):** observational-only stays inviolable (D-01/D-11) — the Stripe-native sync is a read seam, never consulted for a grant decision; the local plan→feature map (`resolver/local_map.ex`) remains the sole canonical gate. `scripts/ci/verify_entitlement_sync_isolation.sh` stays green and is extended to cover the new client-fetch path. Pin target is `~> 2.0`, not `~> 2.1`. No new required dependencies; no new admin nav rooms; no admin redesign work (that is SEED-004 M2/M3); no `accrue_portal` work. Any processor-surface/support-matrix implication updates behavior, docs, examples/verifiers, and release notes together (stable-core rule). Sync tests use the Fake/Test processor only — no live Stripe, no Chrome, fully `async`-safe. Authoritative sources: `.planning/seeds/SEED-005-lattice-stripe-entitlements-bump.md`, `accrue/lib/accrue/entitlements/*`, `scripts/ci/verify_entitlement_sync_isolation.sh`.
 
-**Closeout evidence:** Phase 214 re-verification passed 9/9 and closed the prior Release Please candidate gap with aligned 1.5.0 and future 1.6.0 fixtures; Phase 214.1 re-verification passed 9/9 with the source/verifier/fixture correction and current traceability green. v1.58 remains active until an independent milestone re-audit passes; archive only after that pass, and no v1.59 product implementation starts before archive.
+**Closeout evidence:** Five phase verifications passed; the independent audit reports 11/11 requirements, 10/11 integrations, and 5/5 flows. Archives live under `.planning/milestones/v1.58-*`; remaining warning-level items are recorded under Deferred Items below.
 
 ### v1.59 Phase Summary (QUEUED — Account-Scoped Multi-Rail & Offline Entitlements, SEED-006)
 
@@ -371,6 +372,10 @@ Coverage: 22/22 v1.51 requirements mapped (each REQ-ID → exactly one phase). D
 | Phase 214.1 P02 | 12m | 2 tasks | 4 files |
 | Phase 214.1-close-gap-docs-03-reconcile-stripesync-writer-documentation P03 | 3min | 1 tasks | 2 files |
 | Phase 214.1 P04 | 4m | 1 tasks | 2 files |
+| Phase 214.2 P01 | 4m | 1 tasks | 6 files |
+| Phase 214.2-close-gap-sync-02-docs-03-surface-advisory-entitlement-diagn P04 | 14m | 2 tasks | 4 files |
+| Phase 214.2 P02 | 6m | 2 tasks | 3 files |
+| Phase 214.2 P03 | 7m | 2 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -702,6 +707,12 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - [Phase ?]: Scoped the StripeSync shared-reconciler verifier assertion to public one-way-dependency prose.
 - [Phase ?]: Proved public-prose drift through an alias-preserving ROOT_DIR production-verifier fixture.
 - [Phase ?]: Advanced only the uniquely attributed DOCS-03 traceability cell after focused verifier and preservation checks passed.
+- [Phase ?]: CustomerLive consumes one core diagnostic value; only its local branch controls the Access headline.
+- [Phase ?]: Client-backed pull documentation is exhaustive; webhook snapshots remain advisory and may be incomplete.
+- [Phase ?]: The existing package-doc verifier and ROOT_DIR fixtures enforce entitlement completeness wording.
+- [Phase ?]: Advisory diagnostics use complete normalized maps with independent local and advisory failures.
+- [Phase ?]: Provenance derives only from the exact pull stamp or webhook watermark; no freshness inference is emitted.
+- [Phase ?]: Stripe observations remain separate from the local access headline; bounded previews retain full Raw data evidence.
 
 ### Pending Todos
 
@@ -719,6 +730,7 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 
 | # | Description | Date | Commit | Status | Directory |
 |---|-------------|------|--------|--------|-----------|
+| 260731-n4f | Automate Phase 214.2 integration and E2E verification with zero human UAT | 2026-07-31 | cda60887, d2ee7a42 | Verified | [260731-n4f-automate-phase-214-2-integration-and-e2e](./quick/260731-n4f-automate-phase-214-2-integration-and-e2e/) |
 | 260618-3pu | Component-lab family-label map (replace `String.upcase(family)` with UI-SPEC labels) | 2026-06-18 | b5cf3527 |  | [260618-3pu-component-lab-family-label-map](./quick/260618-3pu-component-lab-family-label-map/) |
 | 260620-gmv | Green main CI — format test file + harden CMP-05 xargs guards (GNU-vs-BSD portability) | 2026-06-20 | 0ce75413 |  | [260620-gmv-fix-ci-format-xargs](./quick/260620-gmv-fix-ci-format-xargs/) |
 | 260620-lie | Fix host login 500 — validate stale `active_organization_id` against live memberships before session insert (FK crash) | 2026-06-20 | 69867bb9 |  | [260620-lie-fix-stale-active-org-login](./quick/260620-lie-fix-stale-active-org-login/) |
@@ -765,6 +777,18 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - Any processor-surface change must update runtime behavior, support matrix, docs, examples/verifiers, and release notes together.
 
 ## Deferred Items
+
+### Recorded at v1.58 milestone close (2026-07-31)
+
+The milestone audit classified these as non-blocking technical debt; none breaks a requirement, end-to-end flow, or the local-map-only grant boundary:
+
+| Category | Item | Status |
+|----------|------|--------|
+| processor | Advertise the implemented Stripe-native callback through capability discovery | deferred |
+| sync | Reject non-Stripe customer rows before Stripe-native processor I/O | deferred |
+| worker | Cancel malformed refresh-worker arguments deterministically | deferred |
+| integration | Document or intentionally add a production enqueue policy for the host-owned worker | deferred |
+| validation | Promote Phase 214.2 `VALIDATION.md` from `ready` to authoritative `validated` | deferred |
 
 ### Acknowledged at v1.57 milestone close (2026-07-30)
 
@@ -836,16 +860,14 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 | seed | SEED-003-repo-hygiene-before-new-milestone | backlogged; operational hygiene seed, not product scope | Repo/worktree/GitHub/GSD hygiene is useful before a new milestone or release prep but does not force a Hex publish. | Repo hygiene / release prep | before opening a new milestone, before release prep, or when local/GitHub/GSD state feels stale | 2026-07-01 |
 | seed | SEED-004-admin-ui-blueprint-redesign — first-principles admin/operator UI redesign ("operator control plane over billing state"); north-star `prompts/accrue_admin_operator_ui_journey_blueprint.md`, synthesis `.planning/research/ADMIN-UI-REDESIGN-BLUEPRINT-SYNTHESIS.md` | backlogged; post-v1.56 multi-milestone program, not a v1.56 closeout blocker | New target (distinct from the v1.56 ratchet machinery); reaches into core `accrue` diagnosis fns (first for the admin-UI line). Recommended M1 IA/grammar → M2 signature surfaces+core diagnosis → M3 new rooms. | Admin UI / IA redesign (+ core diagnosis) | after v1.56 ships → `/gsd-new-milestone` (reopen class: explicit strategy change — flagship admin surface) | 2026-07-04 |
 | seed | SEED-006-account-multi-rail-offline-entitlements | promoted; queued v1.59 | Concrete B2C Alpha requirement for coherent Stripe/Apple account access and extended offline use. | Core entitlements / mobile billing | activate immediately after v1.58 verified archive | 2026-07-31 |
-| seed | SEED-007-google-play-billing-rail | dormant | Preserve the v1.59 seam as a reusable rail contract without paying Android lifecycle cost before demand. | Mobile billing / entitlements | Android scheduled or second adopter requires Google Play | 2026-07-31 |
+| seed | SEED-007-google-play-billing-rail | backlogged | Preserve the v1.59 seam as a reusable rail contract without paying Android lifecycle cost before demand. | Mobile billing / entitlements | Android scheduled or second adopter requires Google Play | 2026-07-31 |
 
 ## Session Continuity
 
-Last session: 2026-07-31T18:17:31.903Z
-Stopped at: Phase 214.2 context gathered
-Resume file: .planning/phases/214.2-close-gap-sync-02-docs-03-surface-advisory-entitlement-diagn/214.2-CONTEXT.md
+Last session: 2026-07-31T20:49:48.000Z
+Stopped at: Milestone v1.58 completed and archived
+Resume file: none; start the next milestone with `$gsd-new-milestone`
 
 ## Operator Next Steps
 
-- Re-run `/gsd-verify-work 214.1` to confirm the executable correction and current planning mirrors together.
-- Run `$gsd-audit-milestone v1.58` as the independent milestone re-audit; archive only after it passes.
-- Then promote queued v1.59 through `$gsd-new-milestone v1.59 Account-Scoped Multi-Rail & Offline Entitlements` and begin `$gsd-discuss-phase 215`.
+- Start the next milestone with $gsd-new-milestone
