@@ -49,7 +49,7 @@ defmodule Accrue.Entitlements.StripeSync do
   enabled. The resulting cache row is diagnostic only and is never consulted
   by grant decisions.
   """
-  @doc since: "1.4.0"
+  @doc since: "1.5.0"
   @spec refresh(Customer.t(), keyword()) ::
           {:ok, EntitlementSummary.t() | :disabled | :unchanged | :stale} | {:error, term()}
   def refresh(%Customer{} = customer, opts \\ []) when is_list(opts) do

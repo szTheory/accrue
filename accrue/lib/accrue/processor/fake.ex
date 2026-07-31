@@ -288,6 +288,7 @@ defmodule Accrue.Processor.Fake do
 
   Test helper for the advisory Stripe-native sync path.
   """
+  @doc since: "1.5.0"
   @spec put_entitlements(String.t(), [map()]) :: :ok
   def put_entitlements(customer_id, entitlements)
       when is_binary(customer_id) and is_list(entitlements) do

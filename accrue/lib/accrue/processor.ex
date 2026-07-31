@@ -210,6 +210,7 @@ defmodule Accrue.Processor do
   # Entitlements
   # ---------------------------------------------------------------------------
 
+  @doc since: "1.5.0"
   @callback list_active_entitlements(id(), opts()) :: {:ok, [map()]} | {:error, Exception.t()}
 
   # ---------------------------------------------------------------------------
@@ -382,6 +383,7 @@ defmodule Accrue.Processor do
   `Accrue.Entitlements.StripeSync.refresh/2`. It returns a complete
   materialized list and is never part of the local grant path.
   """
+  @doc since: "1.5.0"
   @spec list_active_entitlements(id(), opts()) :: {:ok, [map()]} | {:error, Exception.t()}
   def list_active_entitlements(id, opts \\ []) when is_binary(id) and is_list(opts) do
     adapter = __impl__()

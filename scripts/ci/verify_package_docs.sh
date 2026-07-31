@@ -43,6 +43,47 @@ require_absent_regex() {
   fi
 }
 
+require_fixed_count() {
+  local file=$1
+  local needle=$2
+  local expected=$3
+  local actual
+
+  actual=$(grep -Fc -- "$needle" "$file" || true)
+  [[ "$actual" == "$expected" ]] ||
+    fail "$file expected $expected occurrences of $needle, found $actual"
+}
+
+require_since_immediately_before() {
+  local file=$1
+  local target=$2
+  local label=$3
+
+  awk -v target="$target" '
+    $0 == target {
+      if (previous == "  @doc since: \"1.5.0\"") {
+        found = 1
+      }
+    }
+    { previous = $0 }
+    END { exit found ? 0 : 1 }
+  ' "$file" || fail "$label must carry @doc since: \"1.5.0\" immediately before its spec/callback"
+}
+
+require_no_since_immediately_before() {
+  local file=$1
+  local target=$2
+  local label=$3
+
+  awk -v target="$target" '
+    $0 == target && previous == "  @doc since: \"1.5.0\"" {
+      bad = 1
+    }
+    { previous = $0 }
+    END { exit bad ? 1 : 0 }
+  ' "$file" || fail "$label internal Phase 213 surface must not carry @doc since: \"1.5.0\""
+}
+
 require_any_fixed() {
   local file=$1
   shift
@@ -175,6 +216,49 @@ require_fixed "$ROOT_DIR/examples/accrue_host/docs/adoption-proof-matrix.md" 've
 require_fixed "$ROOT_DIR/examples/accrue_host/docs/adoption-proof-matrix.md" 'verify_entitlement_sync_isolation.sh` proves the advisory cache'
 require_fixed "$ROOT_DIR/examples/accrue_host/docs/adoption-proof-matrix.md" 'Live Stripe parity remains advisory evidence only'
 require_absent_regex "$ROOT_DIR/examples/accrue_host/docs/adoption-proof-matrix.md" 'Live Stripe entitlement refresh is the merge-blocking proof|live Stripe.*merge-blocking proof'
+
+# Phase 213 public availability metadata (Phase 214, DOCS-03 / D-09..D-12)
+stripe_sync_ex="$ROOT_DIR/accrue/lib/accrue/entitlements/stripe_sync.ex"
+processor_ex="$ROOT_DIR/accrue/lib/accrue/processor.ex"
+fake_processor_ex="$ROOT_DIR/accrue/lib/accrue/processor/fake.ex"
+stripe_processor_ex="$ROOT_DIR/accrue/lib/accrue/processor/stripe.ex"
+reconcile_ex="$ROOT_DIR/accrue/lib/accrue/entitlements/reconcile.ex"
+refresh_worker_ex="$ROOT_DIR/accrue/lib/accrue/entitlements/stripe_sync/refresh_worker.ex"
+
+require_no_since_immediately_before "$stripe_sync_ex" \
+  '  @spec summary_for_customer(Customer.t()) :: EntitlementSummary.t() | nil' \
+  "StripeSync.summary_for_customer/1"
+require_no_since_immediately_before "$processor_ex" \
+  '  @spec active_entitlement_list_metadata() :: %{list_path: String.t()}' \
+  "Processor.active_entitlement_list_metadata/0"
+require_no_since_immediately_before "$fake_processor_ex" \
+  '  @spec active_entitlement_list_metadata() :: %{list_path: String.t()}' \
+  "Processor.Fake.active_entitlement_list_metadata/0"
+
+require_since_immediately_before "$stripe_sync_ex" \
+  '  @spec refresh(Customer.t(), keyword()) ::' \
+  "StripeSync.refresh/2"
+require_since_immediately_before "$processor_ex" \
+  '  @callback list_active_entitlements(id(), opts()) :: {:ok, [map()]} | {:error, Exception.t()}' \
+  "Processor.list_active_entitlements/2 callback"
+require_since_immediately_before "$processor_ex" \
+  '  @spec list_active_entitlements(id(), opts()) :: {:ok, [map()]} | {:error, Exception.t()}' \
+  "Processor.list_active_entitlements/2 facade"
+require_since_immediately_before "$fake_processor_ex" \
+  '  @spec put_entitlements(String.t(), [map()]) :: :ok' \
+  "Processor.Fake.put_entitlements/2"
+
+require_fixed_count "$stripe_sync_ex" '@doc since: "1.5.0"' 1
+require_fixed_count "$processor_ex" '@doc since: "1.5.0"' 2
+require_fixed_count "$fake_processor_ex" '@doc since: "1.5.0"' 1
+require_absent_regex "$stripe_sync_ex" '@doc since: "1\.4\.0"'
+
+for internal_file in \
+  "$stripe_processor_ex" \
+  "$reconcile_ex" \
+  "$refresh_worker_ex"; do
+  require_absent_regex "$internal_file" '@doc since: "1\.5\.0"'
+done
 
 # Optional Chimeway dunning engine adapter (Phase 131, DUN-03)
 require_fixed "$ROOT_DIR/accrue/guides/dunning.md" 'Accrue.Dunning.Engine'
