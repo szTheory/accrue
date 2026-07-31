@@ -138,6 +138,62 @@ defmodule Accrue.Docs.ReleaseNotesContractTest do
     assert output =~ "Release Please owns numbered 1.5.0 changelog sections"
   end
 
+  test "release notes contract rejects missing portal changelog link" do
+    tmp_dir =
+      Path.join(System.tmp_dir!(), "accrue-release-notes-#{System.unique_integer([:positive])}")
+
+    setup_release_fixture!(tmp_dir)
+
+    notes = Path.join(tmp_dir, "accrue/guides/release-notes.md")
+
+    drifted_notes =
+      File.read!(notes)
+      |> String.replace(
+        "- [`accrue_portal/CHANGELOG.md`](https://github.com/szTheory/accrue/blob/main/accrue_portal/CHANGELOG.md) — same for the customer portal package\n",
+        ""
+      )
+
+    File.write!(notes, drifted_notes)
+
+    {output, status} =
+      System.cmd("bash", [@script_path],
+        stderr_to_stdout: true,
+        env: [{"ROOT_DIR", tmp_dir}]
+      )
+
+    assert status != 0
+    assert output =~ "verify_release_notes_contract:"
+    assert output =~ "release-notes.md missing accrue_portal changelog link"
+  end
+
+  test "release notes contract rejects missing next-release 1.5.0 story" do
+    tmp_dir =
+      Path.join(System.tmp_dir!(), "accrue-release-notes-#{System.unique_integer([:positive])}")
+
+    setup_release_fixture!(tmp_dir)
+
+    notes = Path.join(tmp_dir, "accrue/guides/release-notes.md")
+
+    drifted_notes =
+      File.read!(notes)
+      |> String.replace(
+        "### 1.5.0\n\n**lattice_stripe 2.x plus observational Stripe-native entitlement sync.**\n\n`1.5.0` is the next linked feature release. The core `accrue` package moves to `lattice_stripe ~> 2.0` and adds an optional, default-off Stripe-native entitlement refresh for diagnostics and admin read surfaces. The local plan-to-feature map remains the only Accrue grant gate, so Stripe-native advisory data never changes `entitled?/2`, plugs, or LiveView guards.\n\n`accrue_admin` and `accrue_portal` ship compatibility-only updates in the same linked version family; they do not add package-owned workflows or authorization behavior for this slice.\n\n",
+        ""
+      )
+
+    File.write!(notes, drifted_notes)
+
+    {output, status} =
+      System.cmd("bash", [@script_path],
+        stderr_to_stdout: true,
+        env: [{"ROOT_DIR", tmp_dir}]
+      )
+
+    assert status != 0
+    assert output =~ "verify_release_notes_contract:"
+    assert output =~ "release-notes.md missing next-release 1.5.0 story"
+  end
+
   defp extract_version!(file) do
     content = File.read!(file)
 
