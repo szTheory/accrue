@@ -5,6 +5,7 @@ defmodule Accrue.Entitlements.EntitlementSyncIsolationGuardTest do
 
   @gate_files [
     "accrue/lib/accrue/entitlements.ex",
+    "accrue/lib/accrue/entitlements/guard.ex",
     "accrue/lib/accrue/entitlements/resolver.ex",
     "accrue/lib/accrue/entitlements/resolver/local_map.ex"
   ]
@@ -70,6 +71,57 @@ defmodule Accrue.Entitlements.EntitlementSyncIsolationGuardTest do
     assert output =~ "verify_entitlement_sync_isolation: OK"
   end
 
+  @tag :guard_surface_red_path
+  test "executable advisory references from guard fail the isolation guard" do
+    forbidden_refs = [
+      {"list_active_entitlements",
+       "def leak, do: Accrue.Processor.list_active_entitlements(\"cus_123\", [])"},
+      {"Reconcile", "def leak, do: Accrue.Entitlements.Reconcile.write(:gate)"},
+      {"StripeSync", "def leak, do: Accrue.Entitlements.StripeSync.refresh(:gate)"},
+      {"EntitlementSummary", "def leak, do: Accrue.Billing.EntitlementSummary"}
+    ]
+
+    Enum.each(forbidden_refs, fn {token, code} ->
+      tmp_dir = fixture_root!()
+
+      inject_before_comment!(
+        tmp_dir,
+        "accrue/lib/accrue/entitlements/guard.ex",
+        code
+      )
+
+      {output, status} = run_guard(tmp_dir)
+
+      assert status != 0
+      assert output =~ "verify_entitlement_sync_isolation: FAIL"
+      assert output =~ token
+    end)
+  end
+
+  test "guard comment and moduledoc mentions of forbidden advisory symbols pass" do
+    tmp_dir = fixture_root!()
+
+    write_gate_file!(
+      tmp_dir,
+      "accrue/lib/accrue/entitlements/guard.ex",
+      """
+      defmodule Accrue.Entitlements.Guard do
+        @moduledoc \"\"\"
+        Guard prose may name Accrue.Processor.list_active_entitlements/2,
+        Accrue.Entitlements.Reconcile, Accrue.Entitlements.StripeSync, and
+        Accrue.Billing.EntitlementSummary while documenting the isolation rule.
+        \"\"\"
+
+        # Comments may name list_active_entitlements, Reconcile, StripeSync, and EntitlementSummary.
+        def clean, do: :ok
+      end
+      """
+    )
+
+    assert {output, 0} = run_guard(tmp_dir)
+    assert output =~ "verify_entitlement_sync_isolation: OK"
+  end
+
   test "missing gate-path fixture still fails with the missing-file message" do
     tmp_dir = fixture_root!()
     File.rm!(Path.join(tmp_dir, "accrue/lib/accrue/entitlements/resolver.ex"))
@@ -124,6 +176,7 @@ defmodule Accrue.Entitlements.EntitlementSyncIsolationGuardTest do
   end
 
   defp module_for("accrue/lib/accrue/entitlements.ex"), do: Accrue.Entitlements
+  defp module_for("accrue/lib/accrue/entitlements/guard.ex"), do: Accrue.Entitlements.Guard
   defp module_for("accrue/lib/accrue/entitlements/resolver.ex"), do: Accrue.Entitlements.Resolver
 
   defp module_for("accrue/lib/accrue/entitlements/resolver/local_map.ex"),
