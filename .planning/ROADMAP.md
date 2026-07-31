@@ -48,18 +48,6 @@ Stop rule: if proposed work is polish-only with a documented workaround and no r
 
 Coverage: **11/11 requirements** mapped to Phases 212-214 (each REQ-ID → exactly one phase). Per-phase counts: 212→3 · 213→5 · 214→3. Dependencies: strictly linear — 212 → 213 → 214 (nothing else compiles against 2.x until the bump lands green; the sync adoption needs the 2.x `LatticeStripe.Entitlements.*` modules present; docs reconcile against the final shipped behavior of both). Full per-phase goals + success criteria: see [Phase Details](#phase-details-v158-active-milestone).
 
-### ⏭️ v1.59 Account-Scoped Multi-Rail & Offline Entitlements (Phases 215-219) — QUEUED
-
-**Goal:** Make account entitlement coherent across Stripe and Apple, including extended offline use, without pretending the rails expose the same lifecycle controls. Preserve host-owned routes/auth/runtime config, retain `lattice_stripe` as Stripe transport, and keep existing single-processor hosts additive-compatible.
-
-- [ ] **Phase 215: Multi-rail contract and additive data foundation** — lock the rail capability matrix, additive config/API compatibility contract, account/grant/device schemas, and rail-qualified identifiers (RAIL-01..04)
-- [ ] **Phase 216: Canonical account projection and gateway compatibility** — aggregate every live source for an account, dispatch gateway operations by resource rail, preserve legacy APIs/config, and exclude observer rails from dunning (ACCT-01..04)
-- [ ] **Phase 217: Apple observation rail and automatic linking** — verify StoreKit/App Store evidence, link through authenticated `appAccountToken`, reduce lifecycle states monotonically, repair missed notifications, and expose externally-managed actions honestly (AAPL-01..05)
-- [ ] **Phase 218: Signed offline lease and reconnect protocol** — issue and verify the ES256 device-bound lease with the locked 30-day + 72-hour policy, fail safely at hard expiry, and reconcile/tombstone atomically on reconnect (OFF-01..06)
-- [ ] **Phase 219: B2C Alpha proof, operations, docs, and release gates** — prove web↔iOS access and offline/reconnect journeys in the anonymized host, add safe diagnostics/runbooks/conformance gates, and reconcile public compatibility/release truth (PROOF-01..05)
-
-Coverage: **24/24 queued v1.59 requirements** mapped exactly once. Dependencies are strictly linear: **215 → 216 → 217 → 218 → 219**. Google Play, Family Sharing, offer authoring, cross-rail migration/proration, arbitrary TTL/device-risk matrices, and advanced attestation remain later.
-
 <details>
 <summary>✅ v1.57 Admin Operator Control Plane (SEED-004 M1) (Phases 209-211) — SHIPPED 2026-07-30</summary>
 
@@ -242,7 +230,7 @@ Plans:
   3. Per-package CHANGELOG/release notes record the major dep bump and the new advisory sync, every new public function carries an `@since` annotation, and the adoption-proof / support-matrix / planning-mirror docs describe one consistent stable-core posture (POS-03) with no contradiction between any two of them.
   4. A reviewer grepping for "lattice_stripe" or "entitlements sync" across `CLAUDE.md`, `guides/`, package CHANGELOGs, and `.planning/` mirrors finds one consistent version/status story, not several conflicting ones.
 
-**Plans**: 2 plans
+**Plans**: 3 plans (2 complete; gap-closure Plan 03 ready)
 
 Plans:
 **Wave 1**
@@ -253,9 +241,17 @@ Plans:
 
 - [x] 214-02-PLAN.md — Reconcile linked release notes/changelogs and exact ExDoc `since: "1.5.0"` metadata.
 
+**Wave 3** *(gap closure; blocked on Wave 2 verification)*
+
+- [ ] 214-03-PLAN.md — Make the release contract accept both the current pre-release state and an aligned Release Please 1.5.0 candidate, with mismatch/malformed/incomplete-candidate fixtures.
+
 **Verification:** gaps found (8/9 truths). DOCS-03 remains unsatisfied because the release contract rejects the aligned Release Please 1.5.0 candidate. See `v1.58-v1.58-MILESTONE-AUDIT.md`.
 
-## Queued Phase Details (v1.59; activate after v1.58 closeout)
+## Queued Next Milestone: v1.59 Account-Scoped Multi-Rail & Offline Entitlements
+
+**Status:** approved and fully mapped, but not active. Activate only after v1.58 re-verifies and archives.
+**Goal:** Make account entitlement coherent across Stripe and Apple, including extended offline use, without pretending the rails expose the same lifecycle controls. Preserve host-owned routes/auth/runtime config, retain `lattice_stripe` as Stripe transport, and keep existing single-processor hosts additive-compatible.
+**Sequence:** 215 → 216 → 217 → 218 → 219. Coverage: 24/24 queued requirements mapped exactly once.
 
 ### Phase 215: Multi-rail contract and additive data foundation
 
@@ -338,7 +334,7 @@ Plans:
 | 211. Grep-gated CSS retirement & cross-surface cleanup | v1.57 | 4/4 | Complete | 2026-07-29 |
 | 212. lattice_stripe 2.x bump & green reconciliation | v1.58 | 1/1 | Complete | 2026-07-30 |
 | 213. Stripe-native advisory entitlements sync (observational-only) | v1.58 | 5/5 | Complete    | 2026-07-31 |
-| 214. Docs & truth reconciliation | v1.58 | 2/2 | Gaps Found | - |
+| 214. Docs & truth reconciliation | v1.58 | 2/3 | Gap Plan Ready | - |
 | 215. Multi-rail contract and additive data foundation | v1.59 | 0/TBD | Queued | - |
 | 216. Canonical account projection and gateway compatibility | v1.59 | 0/TBD | Queued | - |
 | 217. Apple observation rail and automatic linking | v1.59 | 0/TBD | Queued | - |
