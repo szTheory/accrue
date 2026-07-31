@@ -682,6 +682,55 @@ defmodule Accrue.Docs.PackageDocsVerifierTest do
     assert output =~ "fetch_entitled"
   end
 
+  test "package docs verifier rejects stale lattice_stripe compatibility truth" do
+    tmp_dir = tmp_dir!()
+    seed_tmp_dir!(tmp_dir)
+
+    claude_path = Path.join(tmp_dir, "CLAUDE.md")
+
+    drifted =
+      claude_path
+      |> File.read!()
+      |> String.replace("`~> 2.0`", "`~> 1.1`", global: false)
+
+    File.write!(claude_path, drifted)
+
+    {output, status} = run_verifier(tmp_dir)
+
+    assert status != 0
+    assert output =~ "[verify_package_docs]"
+    assert output =~ "CLAUDE.md"
+    assert output =~ "lattice_stripe"
+  end
+
+  test "package docs verifier rejects deferred or gate-influencing Stripe-native sync wording" do
+    tmp_dir = tmp_dir!()
+    seed_tmp_dir!(tmp_dir)
+
+    jtbd_path = Path.join(tmp_dir, "accrue/guides/jobs_to_be_done.md")
+
+    File.write!(
+      jtbd_path,
+      File.read!(jtbd_path) <>
+        "\nThe optional Stripe-native sync is deferred and can become the grant authority for gates.\n"
+    )
+
+    frontier_path = Path.join(tmp_dir, ".planning/research/JTBD-FRONTIER.md")
+
+    File.write!(
+      frontier_path,
+      File.read!(frontier_path) <>
+        "\nStripe-native entitlements are Accrue's source of truth for grant decisions.\n"
+    )
+
+    {output, status} = run_verifier(tmp_dir)
+
+    assert status != 0
+    assert output =~ "[verify_package_docs]"
+    assert output =~ "Stripe-native"
+    assert output =~ "grant"
+  end
+
   defp tmp_dir! do
     tmp_dir =
       Path.join(System.tmp_dir!(), "accrue-docs-verifier-#{System.unique_integer([:positive])}")
@@ -719,10 +768,12 @@ defmodule Accrue.Docs.PackageDocsVerifierTest do
     File.mkdir_p!(Path.join(tmp_dir, "scripts/ci"))
 
     copy_fixture!("README.md", tmp_dir)
+    copy_fixture!("CLAUDE.md", tmp_dir)
     copy_fixture!("RELEASING.md", tmp_dir)
     copy_fixture!("CONTRIBUTING.md", tmp_dir)
     copy_fixture!(".planning/STRATEGY.md", tmp_dir)
     copy_fixture!(".planning/PROJECT.md", tmp_dir)
+    copy_fixture!(".planning/research/JTBD-FRONTIER.md", tmp_dir)
     copy_fixture!("accrue/mix.exs", tmp_dir)
     copy_fixture!("accrue/README.md", tmp_dir)
     copy_fixture!("accrue/guides/custom_processors.md", tmp_dir)
