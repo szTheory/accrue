@@ -2,13 +2,13 @@
 gsd_state_version: 1.0
 milestone: v1.58
 milestone_name: lattice_stripe 2.x Bump & Stripe-Native Entitlements Sync
-current_phase: 208
-current_phase_name: 3/5 plans
-status: planning
-stopped_at: Completed 214-03-PLAN.md
+current_phase: 214
+current_phase_name: Docs & truth reconciliation
+status: verifying
+stopped_at: Phase 214 passed 9/9; v1.58 ready for milestone re-audit and archive
 last_updated: "2026-07-31T14:39:16.977Z"
 last_activity: 2026-07-31
-last_activity_desc: Phase 214 complete, transitioned to Phase 208
+last_activity_desc: Phase 214 verified 9/9; v1.58 ready for re-audit
 progress:
   total_phases: 3
   completed_phases: 3
@@ -25,14 +25,14 @@ See: `.planning/PROJECT.md` (updated 2026-07-31 after multi-rail/offline roadmap
 
 **Core value:** A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic Elixir DX, strong domain modeling, tamper-evident audit ledger, great observability, and zero breaking-change pain through v1.x.
 
-**Current focus:** Phase 214 — docs-truth-reconciliation
+**Current focus:** Re-audit and archive v1.58; keep v1.59 queued
 
 ## Current Position
 
-Phase: 208 — prove convergence on slice + wire ci + accept (3/5 plans) — parked (conv 01..07)
-Plan: Not started
-Status: Ready to plan
-Last activity: 2026-07-31 — Phase 214 complete, transitioned to Phase 208
+Phase: 214 — Docs & truth reconciliation
+Plan: 3 of 3 complete
+Status: Verified 9/9; zero human UAT; milestone re-audit pending
+Last activity: 2026-07-31 — Phase 214 passed all automated gates
 
 ## Post-v1.48 Pause Rule
 
@@ -52,13 +52,13 @@ Queued v1.59 clears the reopen rule through a concrete adopter requirement and e
 |-------|------|--------------|--------|
 | 212 | lattice_stripe 2.x bump & green reconciliation | BUMP-01, BUMP-02, BUMP-03 | Complete |
 | 213 | Stripe-native advisory entitlements sync (observational-only) | SYNC-01, SYNC-02, SYNC-03, SYNC-04, SYNC-05 | Complete |
-| 214 | Docs & truth reconciliation | DOCS-01, DOCS-02, DOCS-03 | Gaps found |
+| 214 | Docs & truth reconciliation | DOCS-01, DOCS-02, DOCS-03 | Complete (verified 9/9) |
 
 Coverage: 11/11 requirements mapped to Phases 212-214 (each REQ-ID → exactly one phase). Per-phase counts: 212→3 · 213→5 · 214→3. Phase 213 final re-verification passed 13/13 truths. **Dependency shape:** strictly linear — 212 → 213 → 214 (the bump must land green before anything else compiles against 2.x; the sync adoption needs the 2.x `LatticeStripe.Entitlements.*` modules present; docs reconcile against the final shipped behavior of both).
 
 **Guardrails (binding, out of scope):** observational-only stays inviolable (D-01/D-11) — the Stripe-native sync is a read seam, never consulted for a grant decision; the local plan→feature map (`resolver/local_map.ex`) remains the sole canonical gate. `scripts/ci/verify_entitlement_sync_isolation.sh` stays green and is extended to cover the new client-fetch path. Pin target is `~> 2.0`, not `~> 2.1`. No new required dependencies; no new admin nav rooms; no admin redesign work (that is SEED-004 M2/M3); no `accrue_portal` work. Any processor-surface/support-matrix implication updates behavior, docs, examples/verifiers, and release notes together (stable-core rule). Sync tests use the Fake/Test processor only — no live Stripe, no Chrome, fully `async`-safe. Authoritative sources: `.planning/seeds/SEED-005-lattice-stripe-entitlements-bump.md`, `accrue/lib/accrue/entitlements/*`, `scripts/ci/verify_entitlement_sync_isolation.sh`.
 
-**Closeout evidence:** `.planning/v1.58-v1.58-MILESTONE-AUDIT.md` = `gaps_found`, 10/11 requirements, 2/3 phases, 7/8 integration links, 2/3 flows. Required fix is the Release Please-safe version invariant plus aligned 1.5.0 candidate fixture. No v1.59 product implementation starts before re-verification and archive.
+**Closeout evidence:** Phase 214 re-verification passed 9/9 and closed the prior Release Please candidate gap with aligned 1.5.0 and future 1.6.0 fixtures. The existing milestone audit remains historical `gaps_found` evidence until re-audit; no v1.59 product implementation starts before archive.
 
 ### v1.59 Phase Summary (QUEUED — Account-Scoped Multi-Rail & Offline Entitlements, SEED-006)
 
