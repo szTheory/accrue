@@ -2,13 +2,13 @@
 gsd_state_version: 1.0
 milestone: v1.58
 milestone_name: lattice_stripe 2.x Bump & Stripe-Native Entitlements Sync
-current_phase: 214.1
-current_phase_name: close-gap-docs-03-reconcile-stripesync-writer-documentation
-status: executing
+current_phase: 208
+current_phase_name: 3/5 plans
+status: planning
 stopped_at: Completed 214.1-04-PLAN.md
-last_updated: "2026-07-31T17:04:28.861Z"
+last_updated: "2026-07-31T17:11:46.445Z"
 last_activity: 2026-07-31
-last_activity_desc: Phase 214.1 execution started
+last_activity_desc: Phase 214.1 complete, transitioned to Phase 208
 progress:
   total_phases: 4
   completed_phases: 4
@@ -29,10 +29,10 @@ See: `.planning/PROJECT.md` (updated 2026-07-31 after multi-rail/offline roadmap
 
 ## Current Position
 
-Phase: 214.1 (close-gap-docs-03-reconcile-stripesync-writer-documentation) — EXECUTING
-Plan: 2 of 4
-Status: Ready to execute
-Last activity: 2026-07-31 — Phase 214.1 execution started
+Phase: 208 — prove convergence on slice + wire ci + accept (3/5 plans) — parked (conv 01..07)
+Plan: Not started
+Status: Ready to plan
+Last activity: 2026-07-31 — Phase 214.1 complete, transitioned to Phase 208
 
 ## Post-v1.48 Pause Rule
 
