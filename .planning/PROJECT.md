@@ -61,7 +61,7 @@ The Phase 204 hardening roadmap's top slice (**Public Truth And Proof-State Base
 - Breaking vectors verified low-risk before opening: no direct lattice_stripe fixture-builder usage in Accrue lib/test; no `LatticeStripe.Finch` pool wiring to reconcile.
 - Any processor-surface/support-matrix implication must update behavior, docs, examples/verifiers, and release notes together (stable-core rule).
 
-**Closeout blocker:** The executable Phase 214.1 source/verifier/fixture correction is green, but v1.58 remains active pending Phase 214/214.1 verification, an independent milestone re-audit, and archive. The historical `gaps_found` audit remains authoritative until that independent re-audit; only then may queued v1.59 be promoted to the active milestone.
+**Closeout blocker:** The executable Phase 214.1 source/verifier/fixture correction is green, but v1.58 remains active pending Phase 214/214.1 verification. An independent milestone re-audit is pending before archive; the historical `gaps_found` audit remains authoritative until then, and only then may queued v1.59 be promoted to the active milestone.
 
 ## Most recently shipped milestone: v1.57 — Admin Operator Control Plane (SEED-004, M1) (**shipped & archived 2026-07-30**)
 

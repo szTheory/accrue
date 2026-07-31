@@ -4,9 +4,9 @@ milestone: v1.58
 milestone_name: lattice_stripe 2.x Bump & Stripe-Native Entitlements Sync
 current_phase: 214.1
 current_phase_name: close-gap-docs-03-reconcile-stripesync-writer-documentation
-status: executing
-stopped_at: Completed 214.1-01-PLAN.md
-last_updated: "2026-07-31T15:56:06.209Z"
+status: complete
+stopped_at: Phase 214.1 Plan 02 complete
+last_updated: "2026-07-31T15:59:23.581Z"
 last_activity: 2026-07-31
 last_activity_desc: Phase 214.1 execution started
 progress:
@@ -29,10 +29,10 @@ See: `.planning/PROJECT.md` (updated 2026-07-31 after multi-rail/offline roadmap
 
 ## Current Position
 
-Phase: 214.1 (close-gap-docs-03-reconcile-stripesync-writer-documentation) — EXECUTING
-Plan: 2 of 2
-Status: Ready to execute
-Last activity: 2026-07-31 — Phase 214.1 execution started
+Phase: 214.1 (close-gap-docs-03-reconcile-stripesync-writer-documentation) — COMPLETE
+Plan: 2 of 2 complete
+Status: Phase 214.1 correction green; Phase 214/214.1 verification; independent milestone re-audit pending
+Last activity: 2026-07-31 — Phase 214.1 current-planning reconciliation completed
 
 ## Post-v1.48 Pause Rule
 
@@ -53,12 +53,13 @@ Queued v1.59 clears the reopen rule through a concrete adopter requirement and e
 | 212 | lattice_stripe 2.x bump & green reconciliation | BUMP-01, BUMP-02, BUMP-03 | Complete |
 | 213 | Stripe-native advisory entitlements sync (observational-only) | SYNC-01, SYNC-02, SYNC-03, SYNC-04, SYNC-05 | Complete |
 | 214 | Docs & truth reconciliation | DOCS-01, DOCS-02, DOCS-03 | Complete (verified 9/9) |
+| 214.1 | DOCS-03 writer-documentation gap closure | DOCS-03 | Complete (focused evidence green) |
 
-Coverage: 11/11 requirements mapped to Phases 212-214 (each REQ-ID → exactly one phase). Per-phase counts: 212→3 · 213→5 · 214→3. Phase 213 final re-verification passed 13/13 truths. **Dependency shape:** strictly linear — 212 → 213 → 214 (the bump must land green before anything else compiles against 2.x; the sync adoption needs the 2.x `LatticeStripe.Entitlements.*` modules present; docs reconcile against the final shipped behavior of both).
+Coverage: 11/11 requirements mapped to Phases 212-214 (each REQ-ID → exactly one phase); Phase 214.1 closes the DOCS-03 writer-documentation gap without duplicate assignment. Per-phase counts: 212→3 · 213→5 · 214→3. Phase 213 final re-verification passed 13/13 truths. **Dependency shape:** 212 → 213 → 214 → 214.1 (the bump must land green before anything else compiles against 2.x; the sync adoption needs the 2.x `LatticeStripe.Entitlements.*` modules present; docs reconcile against the final shipped behavior of both).
 
 **Guardrails (binding, out of scope):** observational-only stays inviolable (D-01/D-11) — the Stripe-native sync is a read seam, never consulted for a grant decision; the local plan→feature map (`resolver/local_map.ex`) remains the sole canonical gate. `scripts/ci/verify_entitlement_sync_isolation.sh` stays green and is extended to cover the new client-fetch path. Pin target is `~> 2.0`, not `~> 2.1`. No new required dependencies; no new admin nav rooms; no admin redesign work (that is SEED-004 M2/M3); no `accrue_portal` work. Any processor-surface/support-matrix implication updates behavior, docs, examples/verifiers, and release notes together (stable-core rule). Sync tests use the Fake/Test processor only — no live Stripe, no Chrome, fully `async`-safe. Authoritative sources: `.planning/seeds/SEED-005-lattice-stripe-entitlements-bump.md`, `accrue/lib/accrue/entitlements/*`, `scripts/ci/verify_entitlement_sync_isolation.sh`.
 
-**Closeout evidence:** Phase 214 re-verification passed 9/9 and closed the prior Release Please candidate gap with aligned 1.5.0 and future 1.6.0 fixtures. The existing milestone audit remains historical `gaps_found` evidence until re-audit; no v1.59 product implementation starts before archive.
+**Closeout evidence:** Phase 214 re-verification passed 9/9 and closed the prior Release Please candidate gap with aligned 1.5.0 and future 1.6.0 fixtures; Phase 214.1's source/verifier/fixture correction is green. v1.58 remains active until Phase 214/214.1 verification and an independent milestone re-audit pass; archive only after that pass, and no v1.59 product implementation starts before archive.
 
 ### v1.59 Phase Summary (QUEUED — Account-Scoped Multi-Rail & Offline Entitlements, SEED-006)
 
@@ -831,12 +832,12 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 
 ## Session Continuity
 
-Last session: 2026-07-31T15:56:06.199Z
-Stopped at: Completed 214.1-01-PLAN.md
-Resume file: .planning/phases/214.1-close-gap-docs-03-reconcile-stripesync-writer-documentation/214.1-02-PLAN.md
+Last session: 2026-07-31T15:59:23.571Z
+Stopped at: Phase 214.1 Plan 02 complete
+Resume file: .planning/phases/214.1-close-gap-docs-03-reconcile-stripesync-writer-documentation/214.1-02-SUMMARY.md
 
 ## Operator Next Steps
 
-- Close Phase 214 DOCS-03 with a Release Please-safe lockstep-version invariant and aligned 1.5.0 candidate fixture (implementation not authorized by this roadmap-only update).
-- Re-run `/gsd-verify-work 214` and `$gsd-audit-milestone v1.58`; archive only after both pass.
+- Run `/gsd-verify-work 214.1` (Phase 214/214.1 verification) to confirm the executable correction and current planning mirrors together.
+- Run `$gsd-audit-milestone v1.58` as the independent milestone re-audit; archive only after it passes.
 - Then promote queued v1.59 through `$gsd-new-milestone v1.59 Account-Scoped Multi-Rail & Offline Entitlements` and begin `$gsd-discuss-phase 215`.

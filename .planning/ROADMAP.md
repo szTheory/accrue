@@ -38,15 +38,16 @@ Stop rule: if proposed work is polish-only with a documented workaround and no r
 
 ## Phases
 
-### 🔨 v1.58 lattice_stripe 2.x Bump & Stripe-Native Entitlements Sync (Phases 212-214) — ACTIVE (opened 2026-07-30)
+### 🔨 v1.58 lattice_stripe 2.x Bump & Stripe-Native Entitlements Sync (Phases 212-214, 214.1 correction) — ACTIVE (opened 2026-07-30)
 
 **Posture:** Move Accrue onto `lattice_stripe ~> 2.0` (major 1.x→2.x bump), reconcile the major-version deltas with the Three Zeros gate (test/dialyzer/credo/coverage) green across every package, then adopt the new `LatticeStripe.Entitlements.{ActiveEntitlement, ActiveEntitlementSummary, Feature}` surface as a client-backed, opt-in, **observational-only** advisory refresh path into the existing entitlements cache — closing the Phase 127 "optional Stripe-native entitlements sync" deferral (SEED-005) — before reconciling docs/truth. **Scope fence (binding):** the sync is a read seam, **never** a grant gate — the local plan→feature map (`resolver/local_map.ex`) remains the sole canonical gate (D-01/D-11), and `scripts/ci/verify_entitlement_sync_isolation.sh` stays green and is extended to the new client-fetch path; pin target is `~> 2.0` (not `~> 2.1`); no new required dependencies; no new admin nav rooms or admin redesign (SEED-004 M2/M3 territory); no `accrue_portal` work; sync tests run only against the Fake/Test processor (no live Stripe, no Chrome, fully `async`-safe). Any processor-surface/support-matrix implication updates behavior, docs, examples/verifiers, and release notes together in the same phase (stable-core rule). Authoritative sources: `.planning/seeds/SEED-005-lattice-stripe-entitlements-bump.md`, `accrue/lib/accrue/entitlements/*`, `scripts/ci/verify_entitlement_sync_isolation.sh`, CLAUDE.md Technology Stack + Version Compatibility Matrix, `guides/jobs_to_be_done.md` + `.planning/research/JTBD-FRONTIER.md`.
 
 - [x] **Phase 212: lattice_stripe 2.x bump & green reconciliation** - Bump the `:lattice_stripe` pin to `~> 2.0` across every resolving package, reconcile the two verified 2.0.0 breaking vectors, and bring the Three Zeros gate green with no new skips (BUMP-01, BUMP-02, BUMP-03) — completed 2026-07-30
 - [x] **Phase 213: Stripe-native advisory entitlements sync (observational-only)** - Adopt a client-backed, opt-in refresh path into the advisory cache via `LatticeStripe.Entitlements.*`, extend the isolation-guard script to the new surface, resolve the D-07 `fetch_entitled/2` question, and prove by Fake-processor test that the sync can never become a gate (SYNC-01, SYNC-02, SYNC-03, SYNC-04, SYNC-05) — final re-verification passed 13/13 truths on 2026-07-31 (completed 2026-07-30)
 - [x] **Phase 214: Docs & truth reconciliation** - Bring CLAUDE.md, the JTBD guides, and per-package changelogs/release notes into agreement with the shipped 2.x bump and the new observational sync (DOCS-01, DOCS-02, DOCS-03) (completed 2026-07-31)
+- [x] **Phase 214.1: DOCS-03 writer-documentation gap closure** - Correct StripeSync webhook/pull writer provenance through the shared advisory reconciler and preserve the audit boundary (DOCS-03) (completed 2026-07-31)
 
-Coverage: **11/11 requirements** mapped to Phases 212-214 (each REQ-ID → exactly one phase). Per-phase counts: 212→3 · 213→5 · 214→3. Dependencies: strictly linear — 212 → 213 → 214 (nothing else compiles against 2.x until the bump lands green; the sync adoption needs the 2.x `LatticeStripe.Entitlements.*` modules present; docs reconcile against the final shipped behavior of both). Full per-phase goals + success criteria: see [Phase Details](#phase-details-v158-active-milestone).
+Coverage: **11/11 requirements** mapped to Phases 212-214 (each REQ-ID → exactly one phase); Phase 214.1 closes the DOCS-03 writer-documentation gap without a duplicate requirement assignment. Per-phase counts: 212→3 · 213→5 · 214→3. Dependencies: 212 → 213 → 214 → 214.1 (nothing else compiles against 2.x until the bump lands green; the sync adoption needs the 2.x `LatticeStripe.Entitlements.*` modules present; docs reconcile against the final shipped behavior of both). v1.58 remains active; independent milestone re-audit is pending after Phase 214/214.1 verification and before archive. Full per-phase goals + success criteria: see [Phase Details](#phase-details-v158-active-milestone).
 
 <details>
 <summary>✅ v1.57 Admin Operator Control Plane (SEED-004 M1) (Phases 209-211) — SHIPPED 2026-07-30</summary>
@@ -245,7 +246,7 @@ Plans:
 
 - [x] 214-03-PLAN.md — Make the release contract accept both the current pre-release state and an aligned Release Please 1.5.0 candidate, with mismatch/malformed/incomplete-candidate fixtures.
 
-**Verification:** gaps found (8/9 truths). DOCS-03 remains unsatisfied because the release contract rejects the aligned Release Please 1.5.0 candidate. See `v1.58-v1.58-MILESTONE-AUDIT.md`.
+**Verification:** Phase 214.1 closed the DOCS-03 writer gap with focused green executable evidence. The historical milestone audit remains `gaps_found`; Phase 214/214.1 verification and an independent milestone re-audit must pass before v1.58 archives. See `v1.58-v1.58-MILESTONE-AUDIT.md`.
 
 ## Queued Next Milestone: v1.59 Account-Scoped Multi-Rail & Offline Entitlements
 
@@ -258,7 +259,8 @@ Plans:
 **Goal:** Make `Accrue.Entitlements.StripeSync` accurately document webhook and client-backed pull writes through the shared advisory reconciler, prove that truth through the existing package-doc verifier family, and reconcile current planning mirrors without rewriting the historical `gaps_found` audit.
 **Requirements**: DOCS-03
 **Depends on:** Phase 214
-**Plans:** 1/2 plans executed
+**Plans:** 2/2 plans executed
+**Status:** Complete
 
 Plans:
 
@@ -268,7 +270,7 @@ Plans:
 
 **Wave 2** *(blocked on Wave 1 focused verification)*
 
-- [ ] 214.1-02-PLAN.md — Reconcile only current planning mirrors while preserving the historical milestone audit for independent re-audit.
+- [x] 214.1-02-PLAN.md — Reconcile only current planning mirrors while preserving the historical milestone audit for independent re-audit.
 
 ### Phase 215: Multi-rail contract and additive data foundation
 
@@ -351,7 +353,8 @@ Plans:
 | 211. Grep-gated CSS retirement & cross-surface cleanup | v1.57 | 4/4 | Complete | 2026-07-29 |
 | 212. lattice_stripe 2.x bump & green reconciliation | v1.58 | 1/1 | Complete | 2026-07-30 |
 | 213. Stripe-native advisory entitlements sync (observational-only) | v1.58 | 5/5 | Complete    | 2026-07-31 |
-| 214. Docs & truth reconciliation | v1.58 | 3/3 | In Progress|  |
+| 214. Docs & truth reconciliation | v1.58 | 3/3 | Complete | 2026-07-31 |
+| 214.1. DOCS-03 writer-documentation gap closure | v1.58 | 2/2 | Complete | 2026-07-31 |
 | 215. Multi-rail contract and additive data foundation | v1.59 | 0/TBD | Queued | - |
 | 216. Canonical account projection and gateway compatibility | v1.59 | 0/TBD | Queued | - |
 | 217. Apple observation rail and automatic linking | v1.59 | 0/TBD | Queued | - |
