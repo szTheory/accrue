@@ -841,6 +841,31 @@ defmodule Accrue.Docs.PackageDocsVerifierTest do
     assert output =~ "internal Phase 213 surface"
   end
 
+  test "package docs verifier rejects stale StripeSync writer provenance" do
+    tmp_dir = tmp_dir!()
+    seed_tmp_dir!(tmp_dir)
+
+    stripe_sync_path = Path.join(tmp_dir, "accrue/lib/accrue/entitlements/stripe_sync.ex")
+
+    stale_writer_story =
+      stripe_sync_path
+      |> File.read!()
+      |> String.replace(
+        "`seam → billing`, never `gate → seam`. When a host enables\n  `stripe_native_sync: :advisory`, webhook handling and client-backed pull refresh write the same advisory `Accrue.Billing.EntitlementSummary` row through `Accrue.Entitlements.Reconcile`. The feature is off by default and diagnostic only; neither path can influence grants. Local plan→feature mapping remains the sole Accrue grant authority.",
+        "`seam → billing read`, never `gate → seam`. Nothing under the gate path\n  references this module; it only reads through `Accrue.Repo`. The cache is\n  written exclusively by `Accrue.Webhook.DefaultHandler` when a host opts\n  into `config :accrue, :entitlements, stripe_native_sync: :advisory`.",
+        global: false
+      )
+
+    File.write!(stripe_sync_path, stale_writer_story)
+
+    {output, status} = run_verifier(tmp_dir)
+
+    assert status != 0
+    assert output =~ "[verify_package_docs]"
+    assert output =~ "accrue/lib/accrue/entitlements/stripe_sync.ex"
+    assert output =~ "StripeSync writer provenance"
+  end
+
   defp tmp_dir! do
     tmp_dir =
       Path.join(System.tmp_dir!(), "accrue-docs-verifier-#{System.unique_integer([:positive])}")
