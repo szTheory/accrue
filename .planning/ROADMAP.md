@@ -253,6 +253,23 @@ Plans:
 **Goal:** Make account entitlement coherent across Stripe and Apple, including extended offline use, without pretending the rails expose the same lifecycle controls. Preserve host-owned routes/auth/runtime config, retain `lattice_stripe` as Stripe transport, and keep existing single-processor hosts additive-compatible.
 **Sequence:** 215 → 216 → 217 → 218 → 219. Coverage: 24/24 queued requirements mapped exactly once.
 
+### Phase 214.1: Close gap: DOCS-03 — reconcile StripeSync writer documentation (INSERTED)
+
+**Goal:** Make `Accrue.Entitlements.StripeSync` accurately document webhook and client-backed pull writes through the shared advisory reconciler, prove that truth through the existing package-doc verifier family, and reconcile current planning mirrors without rewriting the historical `gaps_found` audit.
+**Requirements**: DOCS-03
+**Depends on:** Phase 214
+**Plans:** 2 plans
+
+Plans:
+
+**Wave 1**
+
+- [ ] 214.1-01-PLAN.md — Correct and ratchet StripeSync writer provenance through the existing documentation contract and focused ROOT_DIR fixture.
+
+**Wave 2** *(blocked on Wave 1 focused verification)*
+
+- [ ] 214.1-02-PLAN.md — Reconcile only current planning mirrors while preserving the historical milestone audit for independent re-audit.
+
 ### Phase 215: Multi-rail contract and additive data foundation
 
 **Goal:** Establish the smallest honest rail seam and additive persistence model before any Apple integration changes runtime behavior.
