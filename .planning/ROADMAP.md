@@ -13,7 +13,8 @@
 - ✅ **v1.55 OSS Quality Evaluation & Hardening Roadmap** — Phases 201-204 (shipped 2026-07-03) — [archive](milestones/v1.55-ROADMAP.md)
 - ⏸️ **v1.56 Admin UI Ratchet: Automated Adversarial Design Evaluation** — Phases 205-208 (PARKED 2026-07-19; 205-207 shipped, 208 was 3/5 and non-converging on IA findings — the work v1.57 took on; ledger + baseline preserved in `accrue_admin/e2e/ratchet/`) — [archive](milestones/v1.56-ROADMAP.md)
 - ✅ **v1.57 Admin Operator Control Plane (SEED-004 M1)** — Phases 209-211 (shipped 2026-07-30; reigned Home + Subscriptions onto the shared operator-first component vocabulary + answer-first IA, retired the bespoke `.ax-*` sets, and closed UAT via a deterministic Playwright pixel-diff gate) — [archive](milestones/v1.57-ROADMAP.md)
-- 🔨 **v1.58 lattice_stripe 2.x Bump & Stripe-Native Entitlements Sync** — Phases 212-214 (ACTIVE, opened 2026-07-30; bump `lattice_stripe` 1.x→2.x with the Three Zeros gate green across all packages, adopt the new `LatticeStripe.Entitlements.*` surface as an opt-in observational-only advisory sync closing the Phase 127 deferral, and reconcile docs/truth — SEED-005)
+- 🔨 **v1.58 lattice_stripe 2.x Bump & Stripe-Native Entitlements Sync** — Phases 212-214 (ACTIVE, opened 2026-07-30; closeout blocked by Phase 214 DOCS-03 release-candidate verification — see `v1.58-v1.58-MILESTONE-AUDIT.md`)
+- ⏭️ **v1.59 Account-Scoped Multi-Rail & Offline Entitlements** — Phases 215-219 (QUEUED; starts only after v1.58 passes re-verification and archives; Stripe + Apple account union, provider-honest lifecycle management, signed offline lease, and B2C Alpha proof — SEED-006)
 
 ## Planning Doctrine
 
@@ -28,6 +29,8 @@ Accrue is in **stable core / demand-driven expansion** posture as of 2026-05-31.
 After v1.48, broad feature milestones remain closed by default unless reopened by concrete adopter failure, correctness/security/data-loss risk, repeated support issue, operational failure, or explicit strategy change.
 
 **v1.58 lattice_stripe 2.x Bump & Stripe-Native Entitlements Sync is open** (Phases 212-214, opened 2026-07-30). Reopen justification class: **maintenance / dependency currency plus closing a prior explicitly-deferred capability** — SEED-005's trigger fired 2026-07-29 (lattice_stripe `2.0.0` published on Hex with entitlements support), unblocking Phase 127's deferred optional Stripe-native entitlements sync now that the `LatticeStripe.Entitlements.*` primitives exist. Recorded in `PROJECT.md`. This is **not** a broad feature milestone: it stays inside the already-shipped entitlements feature, keeps the local plan→feature map canonical as the sole grant gate (D-01/D-11), and keeps `scripts/ci/verify_entitlement_sync_isolation.sh` green (extended to the new client-fetch surface this milestone). Pin target is `~> 2.0`, not `~> 2.1`; no new required deps, no admin redesign, no `accrue_portal` work. v1.57 (SEED-004 M1) shipped 2026-07-30 under the *explicit strategy change* reopen class (flagship adopter-facing admin surface, elevated to a strategic redesign — same class accepted for v1.50–v1.54). The next SEED-004 candidate is **M2** (signature "Why blocked?" diagnosis surfaces + causality graph + the first core `accrue` diagnosis functions), deferred pending a separate `/gsd-new-milestone` reopen decision recorded in `PROJECT.md`.
+
+**v1.59 Account-Scoped Multi-Rail & Offline Entitlements is queued, not active.** The strategy-change trigger is a concrete first adopter, anonymized as **B2C Alpha**, whose Phoenix/Crosswake application must preserve one account's access across Stripe web billing, Apple in-app purchase, and extended offline use. The accepted design signal is `.planning/research/MULTI-RAIL-OFFLINE-ENTITLEMENTS.md`; SEED-006 is promoted, while Google Play remains dormant in SEED-007 until Android is scheduled or a second adopter requires it. v1.59 may start only after the v1.58 DOCS-03 release-contract gap passes re-verification and v1.58 archives.
 
 **v1.56 Admin UI Ratchet is PARKED** (2026-07-19) mid-flight. Phases 205-207 shipped; Phase 208 (prove-convergence + ACCEPT) was 3/5 with 208-04/05 maintainer-gated and **non-converging because the ratchet kept surfacing information-architecture findings** — which is exactly the work v1.57/SEED-004 took on and shipped. The forward-only ledger + frozen baseline in `accrue_admin/e2e/ratchet/` are preserved untouched; per its own design the harness re-freezes the v1.57 redesign after M3 lands. The 23 round-99 confirmed IA findings were carried into v1.57 as M1 input (`research/admin-ratchet-round99-confirmed-findings.json`). To resume v1.56 later: restore from the archive and run `/gsd-execute-phase 208`.
 
@@ -44,6 +47,18 @@ Stop rule: if proposed work is polish-only with a documented workaround and no r
 - [ ] **Phase 214: Docs & truth reconciliation** - Bring CLAUDE.md, the JTBD guides, and per-package changelogs/release notes into agreement with the shipped 2.x bump and the new observational sync (DOCS-01, DOCS-02, DOCS-03)
 
 Coverage: **11/11 requirements** mapped to Phases 212-214 (each REQ-ID → exactly one phase). Per-phase counts: 212→3 · 213→5 · 214→3. Dependencies: strictly linear — 212 → 213 → 214 (nothing else compiles against 2.x until the bump lands green; the sync adoption needs the 2.x `LatticeStripe.Entitlements.*` modules present; docs reconcile against the final shipped behavior of both). Full per-phase goals + success criteria: see [Phase Details](#phase-details-v158-active-milestone).
+
+### ⏭️ v1.59 Account-Scoped Multi-Rail & Offline Entitlements (Phases 215-219) — QUEUED
+
+**Goal:** Make account entitlement coherent across Stripe and Apple, including extended offline use, without pretending the rails expose the same lifecycle controls. Preserve host-owned routes/auth/runtime config, retain `lattice_stripe` as Stripe transport, and keep existing single-processor hosts additive-compatible.
+
+- [ ] **Phase 215: Multi-rail contract and additive data foundation** — lock the rail capability matrix, additive config/API compatibility contract, account/grant/device schemas, and rail-qualified identifiers (RAIL-01..04)
+- [ ] **Phase 216: Canonical account projection and gateway compatibility** — aggregate every live source for an account, dispatch gateway operations by resource rail, preserve legacy APIs/config, and exclude observer rails from dunning (ACCT-01..04)
+- [ ] **Phase 217: Apple observation rail and automatic linking** — verify StoreKit/App Store evidence, link through authenticated `appAccountToken`, reduce lifecycle states monotonically, repair missed notifications, and expose externally-managed actions honestly (AAPL-01..05)
+- [ ] **Phase 218: Signed offline lease and reconnect protocol** — issue and verify the ES256 device-bound lease with the locked 30-day + 72-hour policy, fail safely at hard expiry, and reconcile/tombstone atomically on reconnect (OFF-01..06)
+- [ ] **Phase 219: B2C Alpha proof, operations, docs, and release gates** — prove web↔iOS access and offline/reconnect journeys in the anonymized host, add safe diagnostics/runbooks/conformance gates, and reconcile public compatibility/release truth (PROOF-01..05)
+
+Coverage: **24/24 queued v1.59 requirements** mapped exactly once. Dependencies are strictly linear: **215 → 216 → 217 → 218 → 219**. Google Play, Family Sharing, offer authoring, cross-rail migration/proration, arbitrary TTL/device-risk matrices, and advanced attestation remain later.
 
 <details>
 <summary>✅ v1.57 Admin Operator Control Plane (SEED-004 M1) (Phases 209-211) — SHIPPED 2026-07-30</summary>
@@ -238,6 +253,74 @@ Plans:
 
 - [x] 214-02-PLAN.md — Reconcile linked release notes/changelogs and exact ExDoc `since: "1.5.0"` metadata.
 
+**Verification:** gaps found (8/9 truths). DOCS-03 remains unsatisfied because the release contract rejects the aligned Release Please 1.5.0 candidate. See `v1.58-v1.58-MILESTONE-AUDIT.md`.
+
+## Queued Phase Details (v1.59; activate after v1.58 closeout)
+
+### Phase 215: Multi-rail contract and additive data foundation
+
+**Goal:** Establish the smallest honest rail seam and additive persistence model before any Apple integration changes runtime behavior.
+**Depends on:** v1.58 archived with DOCS-03 verified.
+**Requirements:** RAIL-01, RAIL-02, RAIL-03, RAIL-04
+**Success Criteria:**
+
+1. A checked-in rail/entitlement-source capability matrix distinguishes observation, lifecycle control, restore, reconciliation, management, and offline-lease support for Stripe and Apple; it is separate from the existing gateway processor matrix.
+2. Migrations/specs define `EntitlementAccount`, rail-qualified `EntitlementGrant`, and `EntitlementDevice`, including rail/environment-scoped external identities, monotonic revisions/cursors, and bounded provenance.
+3. The public compatibility contract preserves `processor`, bare default-rail `price_ids`, `customer/1`, existing gate return types, Stripe `Subscription`, and observational `EntitlementSummary` while specifying additive `rails`, `default_rail`, rail-qualified products, `customer/2`, `customers/1`, management capabilities, and `snapshot/1`.
+4. Threat and conformance fixtures cover cross-rail identifier collisions, duplicate/out-of-order evidence, source-specific revocation, no-PII payloads, and atomic revision changes.
+
+### Phase 216: Canonical account projection and gateway compatibility
+
+**Goal:** Make the default entitlement resolver aggregate every verified source for one host account while legacy gateway-only hosts behave unchanged.
+**Depends on:** Phase 215.
+**Requirements:** ACCT-01, ACCT-02, ACCT-03, ACCT-04
+**Success Criteria:**
+
+1. One account with live Stripe and Apple-like fake evidence receives the union of plans/features on every surface; identical logical grants do not double-count and quantities use maximum effective quantity.
+2. Revoking one rail retracts only that source, and cross-rail external-ID collisions cannot select or mutate the wrong customer/grant.
+3. Gateway lifecycle actions dispatch from the resource rail/capability, while observer-only rails return an explicit externally-managed/unsupported result and never enter dunning.
+4. Existing single-processor config, `customer/1`, billable associations, price mappings, entitlement gates, custom handlers, and Stripe advisory-cache isolation pass unchanged compatibility tests.
+
+### Phase 217: Apple observation rail and automatic linking
+
+**Goal:** Observe Apple-controlled subscription truth and link it safely to the authenticated Accrue account without pretending Accrue controls the lifecycle.
+**Depends on:** Phase 216.
+**Requirements:** AAPL-01, AAPL-02, AAPL-03, AAPL-04, AAPL-05
+**Success Criteria:**
+
+1. Purchase/restore uses the authenticated `EntitlementAccount` UUID as `appAccountToken`; a verified signed transaction can repair linkage, while email/product/device heuristics fail closed.
+2. App Store Server Notifications V2 verification and rail-specific reduction are idempotent, environment scoped, monotonic under duplicate/out-of-order delivery, and quarantine unmatched evidence for automatic retry.
+3. Server status/history reconciliation repairs missed notifications and projects active, grace, billing-retry, expiry, refund, and revocation bounds without widening the Stripe subscription enum.
+4. Apple management capability reports externally managed actions/guidance; cancel, retry, dunning, swap, and proration mutations are never invoked.
+5. Family Sharing is explicitly disabled/deferred; introductory/promotional offer and ownership provenance remain representable without becoming v1 authoring APIs.
+
+### Phase 218: Signed offline lease and reconnect protocol
+
+**Goal:** Let a registered device make a safe entitlement decision without network for the locked offline horizon, then converge deterministically on reconnect.
+**Depends on:** Phase 217.
+**Requirements:** OFF-01, OFF-02, OFF-03, OFF-04, OFF-05, OFF-06
+**Success Criteria:**
+
+1. Accrue issues compact ES256 JWS leases with protocol version, key id, audience, account/revision, device P-256 thumbprint, time bounds, and effective plan/feature/quantity claims; fixtures permit an independent Crosswake/client verifier.
+2. Fresh access lasts at most 30 rolling days, shortens for known earlier scheduled ends, and has one signed 72-hour degraded-offline window with no provider-grace stacking.
+3. At hard expiry, premium actions fail closed while the host can keep the application shell and existing local data available with an explicit reconnect-required state.
+4. Reconnect authenticates account/device, refreshes due rails, compares revision/device state, and atomically replaces the lease or signed deny tombstone; stale client tokens are never accepted as provider truth.
+5. Clock rollback/high-watermark, audience/algorithm confusion, token copying, key rotation (old keys retained at least 33 days plus skew), device revocation, and compromised-key cases have deterministic tests.
+6. No PII, raw receipts, notification bodies, or unbounded provider payloads appear in tokens, telemetry, fixtures, or diagnostics.
+
+### Phase 219: B2C Alpha proof, operations, docs, and release gates
+
+**Goal:** Prove the complete Stripe-web ↔ Apple-iOS ↔ offline journey in an anonymized host and leave a solo operator with automatic reconciliation and actionable diagnostics.
+**Depends on:** Phase 218.
+**Requirements:** PROOF-01, PROOF-02, PROOF-03, PROOF-04, PROOF-05
+**Success Criteria:**
+
+1. An anonymized Phoenix/Crosswake host proves Apple purchase → web login and Stripe purchase → iOS login grant the same account without manual reconciliation.
+2. The host proves 30-day offline use, degraded grace, hard expiry, refund/revocation, reconnect, deny tombstone, device replacement, and key rotation using deterministic fixtures rather than live-store credentials in merge CI.
+3. Minimal operator diagnostics show rail/provenance, provider state, observed/reconciled time, account revision, lease horizon, quarantine/retry state, and safe remediation without raw transaction data or PII.
+4. Runbooks cover Apple notification/status repair, key rotation, unmatched evidence, stale devices, and provider outages with no routine manual account reconciliation step.
+5. Public guides, capability matrices, compatibility notes, examples, release notes, and conformance gates tell one additive/non-breaking truth; Google Play and later policy work remain clearly deferred.
+
 ## Progress
 
 | Phase | Milestone | Plans Complete | Status | Completed |
@@ -255,7 +338,12 @@ Plans:
 | 211. Grep-gated CSS retirement & cross-surface cleanup | v1.57 | 4/4 | Complete | 2026-07-29 |
 | 212. lattice_stripe 2.x bump & green reconciliation | v1.58 | 1/1 | Complete | 2026-07-30 |
 | 213. Stripe-native advisory entitlements sync (observational-only) | v1.58 | 5/5 | Complete    | 2026-07-31 |
-| 214. Docs & truth reconciliation | v1.58 | 2/2 | Complete | 2026-07-31 |
+| 214. Docs & truth reconciliation | v1.58 | 2/2 | Gaps Found | - |
+| 215. Multi-rail contract and additive data foundation | v1.59 | 0/TBD | Queued | - |
+| 216. Canonical account projection and gateway compatibility | v1.59 | 0/TBD | Queued | - |
+| 217. Apple observation rail and automatic linking | v1.59 | 0/TBD | Queued | - |
+| 218. Signed offline lease and reconnect protocol | v1.59 | 0/TBD | Queued | - |
+| 219. B2C Alpha proof, operations, docs, and release gates | v1.59 | 0/TBD | Queued | - |
 
 ## Historical Backlog Anchors (not active scope)
 
@@ -272,7 +360,8 @@ These v1.17 FRG anchors are retained for traceability only as historical, non-ac
 | SEED-004 M2 (signature diagnostic surfaces + core diagnosis) | deferred (next after v1.57 M1) | The "Why blocked?" diagnosis card, causality graph/timeline, unified `billing_state_for_customer/1` synthesis, freshness/stale chips, and the core `accrue` diagnosis fns they require (`blocking_reason_for_owner/1`, `causality_chain_for_event/1`) + durable event-name contracts. First admin-UI line to reach into core `accrue`. | Admin UI / IA + core diagnosis | v1.57 M1 shipped 2026-07-30 → `/gsd-new-milestone` (reopen class: explicit strategy change) |
 | SEED-004 M3 (new rooms + structure + ratchet re-freeze) | deferred (after M2) | New Usage/meters, checkout-sessions, Connect-capabilities, fee-reconciliation rooms; `+Usage`/`+Settings` nav groups; de-tab Customer-360; and the v1.56-ratchet re-freeze (refresh design-lens rubric + persona exemplars + re-freeze baseline) that re-locks the landed redesign. | Admin UI / IA + ratchet | after M2 lands; ratchet re-freeze is post-M3 |
 | v1.56 SWEEP-01 (full-surface ratchet sweep) | parked with v1.56 | Graduate the remaining ~19 admin surfaces round-by-round under the proven ratchet. Parked with the v1.56 milestone; the ratchet re-freeze after SEED-004 lands supersedes the original sweep target. | Ratchet / admin design QA | v1.56 resumed, or post-M3 ratchet re-freeze |
-| lattice_stripe 2.0.0 entitlements dep bump (SEED-005) | promoted → v1.58 (opened 2026-07-30) | Trigger fired 2026-07-29 (lattice_stripe 2.0.0 live on Hex with entitlements support); the major 1.x→2.0 bump plus Stripe-native entitlements sync adoption is now active milestone scope (Phases 212-214). | Core deps / entitlements | in flight; superseded by v1.58 closeout |
+| lattice_stripe 2.0.0 entitlements dep bump (SEED-005) | consumed by v1.58 | Trigger fired 2026-07-29; Phases 212-213 shipped the bump/advisory sync. Phase 214 closeout still has a release-contract verification gap. | Core deps / entitlements | close v1.58 DOCS-03 |
+| Google Play Billing rail (SEED-007) | dormant | The v1.59 seam should make this a bounded adapter, but Android is not yet scheduled and Apple is the proof rail. | Mobile billing / entitlements | Android scheduled or second concrete adopter requires Google Play |
 | TOOL-02 (pixel-diff visual-regression) | resolved (superseded by v1.57 gate) | Percy/Applitools-style pixel-diff tooling was deferred in favor of the scored-cell forward-only gate; v1.57 introduced a first-party deterministic Playwright `toHaveScreenshot` pixel-diff gate (4 admin surfaces × light/dark) in browser-uat. | Visual-regression tooling | broaden surface coverage, or replace with a hosted service on explicit strategy change |
 | TOOL-03 (publish tokens.css distributable) | deferred (v1.53) | Standalone npm/CDN token distributable not needed for the admin passes. | Brand/token distribution | external doc/marketing-site need for distributable tokens |
 | ENT-EXT-01 | deferred | Rich metered/tiered/range entitlement math beyond current seat-count support; no sourced adopter contract. | Entitlements extension | concrete adopter failure or explicit adopter contract |

@@ -33,7 +33,7 @@ v1.49 **Realistic Demo App & Adoption Evidence** shipped on **2026-06-02**. The 
 
 **Active milestone: v1.58 — lattice_stripe 2.x Bump & Stripe-Native Entitlements Sync (SEED-005), opened 2026-07-30.** SEED-005's trigger fired 2026-07-29 (lattice_stripe `2.0.0` published; latest is `2.1.0`, entitlements landed in `2.0.0`). This milestone moves Accrue onto `lattice_stripe ~> 2.0`, reconciles the major-version deltas with all suites green, and adopts the new `LatticeStripe.Entitlements.*` surface to close **Phase 127's deferred optional Stripe-native entitlements sync** — while preserving the observational-only architecture (D-01/D-11: the sync is a read seam, never consulted for a grant decision).
 
-**Milestone progress:** **Phases 212–213 are complete and green as of 2026-07-30.** Phase 212 moved every package onto `lattice_stripe ~> 2.0` with the Three Zeros gate green. Phase 213 shipped the client-backed, opt-in advisory entitlement refresh, shared pull/webhook reconciliation, host-owned worker, Fake/Test proof, and a resolver/Guard isolation gate that keeps the local plan→feature map authoritative (verified 13/13). Next up: Phase 214 (docs & truth reconciliation).
+**Milestone progress:** **Phases 212–213 are complete and green. Phase 214 is implemented but not verified.** Its audit found DOCS-03 blocked because the release-notes contract hard-pins `1.4.0` and rejects the aligned Release Please `1.5.0` candidate. v1.58 remains active and must not archive as verified until that gap closes; see `.planning/v1.58-v1.58-MILESTONE-AUDIT.md`.
 
 **Reopen decision (recorded per the post-v1.48 pause rule, before ROADMAP/STATE change):** justification class **maintenance / dependency currency** (a major-version bump of a required core dependency, `lattice_stripe`, cf. v1.46) **plus closing a prior explicitly-deferred capability** (Phase 127's optional Stripe-native entitlements sync, unblocked only now that 2.0.0 ships the entitlements primitives). This is *not* broad new product surface: it stays inside the already-shipped entitlements feature, keeps local plan→feature mapping canonical as the gate, and keeps `scripts/ci/verify_entitlement_sync_isolation.sh` (`gate → seam` must never happen) green. Library pin target is `~> 2.0` (permissive within major 2 for adopters).
 
@@ -42,6 +42,8 @@ v1.49 **Realistic Demo App & Adoption Evidence** shipped on **2026-06-02**. The 
 **v1.56 (Admin UI Ratchet) remains PARKED** — phases 205–207 shipped, 208 was 3/5, non-converging because the ratchet kept surfacing information-architecture findings (23 confirmed in round 99); that was exactly the work v1.57 took on and shipped. The ratchet ledger/baseline in `accrue_admin/e2e/ratchet/` are preserved and become the tool that re-freezes the v1.57 redesign after M3.
 
 The Phase 204 hardening roadmap's top slice (**Public Truth And Proof-State Baseline**) remains the highest-ranked *release-readiness* follow-up, deferred — a candidate for a later milestone.
+
+**Queued next milestone: v1.59 — Account-Scoped Multi-Rail & Offline Entitlements (SEED-006).** A concrete adopter, anonymized as **B2C Alpha**, requires one account to remain entitled across Stripe web billing, Apple in-app purchase, and extended offline use in a Phoenix/Crosswake application. This satisfies the post-v1.48 reopen bar as both a sourced adopter requirement and an explicit strategy expansion with reusable value for Phoenix apps going mobile. The approved direction is a common account entitlement projection fed by rail-specific lifecycle observers, plus a signed time-bounded offline lease; lifecycle management remains honestly rail-aware. Google Play is SEED-007 and stays dormant until Android is scheduled or a second adopter requires it. Source: `.planning/research/MULTI-RAIL-OFFLINE-ENTITLEMENTS.md`.
 
 ## Current Milestone: v1.58 lattice_stripe 2.x Bump & Stripe-Native Entitlements Sync
 
@@ -56,6 +58,8 @@ The Phase 204 hardening roadmap's top slice (**Public Truth And Proof-State Base
 - **Observational-only stays inviolable (D-01/D-11):** the new sync is a read seam; it is *never* consulted for a grant decision. Local plan→feature mapping remains the canonical gate. `scripts/ci/verify_entitlement_sync_isolation.sh` (`gate → seam` must never happen) stays green — extend it if the surface grows.
 - Breaking vectors verified low-risk before opening: no direct lattice_stripe fixture-builder usage in Accrue lib/test; no `LatticeStripe.Finch` pool wiring to reconcile.
 - Any processor-surface/support-matrix implication must update behavior, docs, examples/verifiers, and release notes together (stable-core rule).
+
+**Closeout blocker:** Phase 214 verification is `gaps_found` (8/9 truths). Fix the Release Please-safe invariant and candidate fixture, re-verify, and archive v1.58 before promoting queued v1.59 to the active milestone.
 
 ## Most recently shipped milestone: v1.57 — Admin Operator Control Plane (SEED-004, M1) (**shipped & archived 2026-07-30**)
 

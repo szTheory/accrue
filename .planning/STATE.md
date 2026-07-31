@@ -5,14 +5,14 @@ milestone_name: lattice_stripe 2.x Bump & Stripe-Native Entitlements Sync
 current_phase: 214
 current_phase_name: Docs & truth reconciliation
 status: verifying
-stopped_at: Completed 214-02-PLAN.md
-last_updated: "2026-07-31T13:47:42.629Z"
+stopped_at: v1.58 audit blocked on DOCS-03; v1.59 roadmap queued
+last_updated: "2026-07-31T13:51:00.000Z"
 last_activity: 2026-07-31
-last_activity_desc: Phase 214 planning complete
+last_activity_desc: Multi-rail/offline roadmap queued; v1.58 closeout blocker recorded
 progress:
   total_phases: 3
   completed_phases: 2
-  total_plans: 9
+  total_plans: 8
   completed_plans: 8
   percent: 67
 ---
@@ -21,18 +21,18 @@ progress:
 
 ## Project Reference
 
-See: `.planning/PROJECT.md` (updated 2026-07-30 after v1.57 closeout)
+See: `.planning/PROJECT.md` (updated 2026-07-31 after multi-rail/offline roadmap assessment)
 
 **Core value:** A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic Elixir DX, strong domain modeling, tamper-evident audit ledger, great observability, and zero breaking-change pain through v1.x.
 
-**Current focus:** Phase 214 — Docs & truth reconciliation
+**Current focus:** Close Phase 214 DOCS-03, then promote queued v1.59 Phases 215-219
 
 ## Current Position
 
-Phase: 214 (Docs & truth reconciliation) — EXECUTING
-Plan: 2 of 2
-Status: Verification gaps found — fix planning required
-Last activity: 2026-07-31 — Phase 214 planning complete
+Phase: 214 (Docs & truth reconciliation) — IMPLEMENTED, NOT VERIFIED
+Plan: 2 of 2 complete
+Status: Milestone audit gaps_found — DOCS-03 blocks v1.58 closeout; v1.59 queued
+Last activity: 2026-07-31 — Multi-rail/offline roadmap queued; v1.58 closeout blocker recorded
 
 ## Post-v1.48 Pause Rule
 
@@ -41,6 +41,8 @@ After v1.48, broad feature milestones remain closed by default unless reopened b
 v1.55 OSS Quality Evaluation & Hardening Roadmap shipped on 2026-07-03 as maintenance / release-readiness / support-contract hardening under stable core. It was audit-only and produced evidence-backed software quality, CI/CD, and DB schema-contract artifacts plus a ranked implementation roadmap; it did not change product behavior, public APIs, DB defaults, CI required-check topology, release automation, or runtime UI.
 
 v1.58 lattice_stripe 2.x Bump & Stripe-Native Entitlements Sync opened 2026-07-30 as **maintenance / dependency currency plus closing a prior explicitly-deferred capability** (SEED-005's trigger fired 2026-07-29 when lattice_stripe `2.0.0` published with entitlements support, unblocking Phase 127's deferred optional Stripe-native sync). Not broad feature scope: stays inside the already-shipped entitlements feature, keeps the local plan→feature map canonical as the sole grant gate (D-01/D-11), and keeps `scripts/ci/verify_entitlement_sync_isolation.sh` green throughout.
+
+Queued v1.59 clears the reopen rule through a concrete adopter requirement and explicit strategy change. B2C Alpha needs coherent Stripe/Apple account access plus extended offline use; the reusable signal is recorded without adopter identity or PII in `.planning/research/MULTI-RAIL-OFFLINE-ENTITLEMENTS.md`.
 
 ## Milestone Progress
 
@@ -55,6 +57,20 @@ v1.58 lattice_stripe 2.x Bump & Stripe-Native Entitlements Sync opened 2026-07-3
 Coverage: 11/11 requirements mapped to Phases 212-214 (each REQ-ID → exactly one phase). Per-phase counts: 212→3 · 213→5 · 214→3. Phase 213 final re-verification passed 13/13 truths. **Dependency shape:** strictly linear — 212 → 213 → 214 (the bump must land green before anything else compiles against 2.x; the sync adoption needs the 2.x `LatticeStripe.Entitlements.*` modules present; docs reconcile against the final shipped behavior of both).
 
 **Guardrails (binding, out of scope):** observational-only stays inviolable (D-01/D-11) — the Stripe-native sync is a read seam, never consulted for a grant decision; the local plan→feature map (`resolver/local_map.ex`) remains the sole canonical gate. `scripts/ci/verify_entitlement_sync_isolation.sh` stays green and is extended to cover the new client-fetch path. Pin target is `~> 2.0`, not `~> 2.1`. No new required dependencies; no new admin nav rooms; no admin redesign work (that is SEED-004 M2/M3); no `accrue_portal` work. Any processor-surface/support-matrix implication updates behavior, docs, examples/verifiers, and release notes together (stable-core rule). Sync tests use the Fake/Test processor only — no live Stripe, no Chrome, fully `async`-safe. Authoritative sources: `.planning/seeds/SEED-005-lattice-stripe-entitlements-bump.md`, `accrue/lib/accrue/entitlements/*`, `scripts/ci/verify_entitlement_sync_isolation.sh`.
+
+**Closeout evidence:** `.planning/v1.58-v1.58-MILESTONE-AUDIT.md` = `gaps_found`, 10/11 requirements, 2/3 phases, 7/8 integration links, 2/3 flows. Required fix is the Release Please-safe version invariant plus aligned 1.5.0 candidate fixture. No v1.59 product implementation starts before re-verification and archive.
+
+### v1.59 Phase Summary (QUEUED — Account-Scoped Multi-Rail & Offline Entitlements, SEED-006)
+
+| Phase | Name | Requirements | Status |
+|---|---|---|---|
+| 215 | Multi-rail contract and additive data foundation | RAIL-01..04 | Queued |
+| 216 | Canonical account projection and gateway compatibility | ACCT-01..04 | Queued |
+| 217 | Apple observation rail and automatic linking | AAPL-01..05 | Queued |
+| 218 | Signed offline lease and reconnect protocol | OFF-01..06 | Queued |
+| 219 | B2C Alpha proof, operations, docs, and release gates | PROOF-01..05 | Queued |
+
+Coverage: 24/24 queued requirements mapped exactly once; strictly linear dependencies 215→216→217→218→219. v1 scope is Stripe + Apple and the locked 30-day full lease + 72-hour degraded-offline policy. Google Play, Family Sharing, offer authoring, migration/proration, and configurable risk matrices remain later.
 
 ### v1.57 Phase Summary (SHIPPED & ARCHIVED 2026-07-30 — Admin Operator Control Plane (SEED-004 M1); phase dirs in `milestones/v1.57-phases/`)
 
@@ -370,6 +386,15 @@ Coverage: 22/22 v1.51 requirements mapped (each REQ-ID → exactly one phase). D
 - **2026-07-30:** Opened v1.58 "lattice_stripe 2.x Bump & Stripe-Native Entitlements Sync" (Phases 212-214, continue-numbering from v1.57's Phase 211). Reopen decision: **maintenance / dependency currency** (major-version bump of a required core dependency, cf. v1.46) **plus closing a prior explicitly-deferred capability** (SEED-005's trigger fired 2026-07-29 when lattice_stripe `2.0.0` published with entitlements support, unblocking Phase 127's deferred optional Stripe-native sync). Recorded in `PROJECT.md`.
 - **2026-07-30:** Roadmap created — 3 phases (212–214), 11/11 v1 requirements mapped (each REQ-ID → exactly one phase), strictly linear deps 212→213→214 (the bump must land green before the 2.x `LatticeStripe.Entitlements.*` modules exist for Phase 213 to consume; docs in Phase 214 reconcile against the final shipped behavior of both). The recommended 3-phase split from the milestone brief was used as-is (SYNC's 5 requirements cohere tightly around one client-fetch+cache-write+isolation-guard+test-proof story, so it was not further split).
 - **2026-07-30:** Locked guardrails threaded into every phase's success criteria: observational-only stays inviolable (D-01/D-11) — the Stripe-native sync is a read seam, never a grant gate, and the local plan→feature map (`resolver/local_map.ex`) remains canonical; `scripts/ci/verify_entitlement_sync_isolation.sh` stays green and is extended to the new client-fetch path; pin target is `~> 2.0`, not `~> 2.1`; Three Zeros (test/dialyzer/credo/coverage) green across all packages is the Phase 212 exit gate; sync tests use only the Fake/Test processor (no live Stripe, no Chrome, fully `async`-safe).
+- **2026-07-31:** Milestone audit found DOCS-03 unsatisfied: the release truth contract hard-pins 1.4.0 and rejects the aligned Release Please 1.5.0 candidate. v1.58 remains active; do not tag/archive as verified until Phase 214 re-verifies.
+
+### Key Planning Decisions for queued v1.59
+
+- **2026-07-31:** Queued v1.59 "Account-Scoped Multi-Rail & Offline Entitlements" (Phases 215-219) from promoted SEED-006. Driving adopter is anonymized as B2C Alpha; no adopter identity or PII is permitted in planning, fixtures, tokens, telemetry, or diagnostics.
+- **2026-07-31:** Entitlement access is rail-neutral and account-scoped; lifecycle control remains resource/rail-aware. `Accrue.Processor` remains the controllable gateway seam; Apple uses a narrower verified lifecycle observer.
+- **2026-07-31:** Additive compatibility is binding: retain `processor`, bare default-rail `price_ids`, deterministic `customer/1`, existing gate return types, gateway `Subscription`, and Stripe-only observational `EntitlementSummary`; add rails/default rail, qualified products, multi-customer reads, capabilities/management actions, and snapshot APIs.
+- **2026-07-31:** Offline lease protocol is compact ES256 JWS, device P-256-bound, account-revisioned, 30-day rolling full access shortened by known ends, plus one 72-hour degraded-offline window. Hard expiry denies premium actions but preserves shell/local data; reconnect atomically replaces with a fresh lease or signed deny tombstone.
+- **2026-07-31:** Google Play is SEED-007 and stays dormant until Android is scheduled or a second adopter requires it. Family Sharing, offers, cross-rail migration/proration, arbitrary TTL/risk knobs, and advanced attestation are later.
 
 ### Key Planning Decisions for v1.54
 
@@ -428,12 +453,14 @@ Coverage: 22/22 v1.51 requirements mapped (each REQ-ID → exactly one phase). D
 - v1.56 opened 2026-07-03: Phases 205-209 (205-208 committed, 209 scope-gated/optional) — roadmap created, ready to plan Phase 205
 - v1.57 opened 2026-07-19 and shipped 2026-07-30: Phases 209-211
 - v1.58 opened 2026-07-30: Phases 212-214 — roadmap created, ready to plan Phase 212
+- v1.59 queued 2026-07-31: Phases 215-219 — approved roadmap and requirements recorded; activation blocked only by v1.58 verified closeout
 
 ### Decisions
 
 Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 
 - **2026-07-30:** Opened v1.58 "lattice_stripe 2.x Bump & Stripe-Native Entitlements Sync" (Phases 212-214). Reopen class: maintenance / dependency currency plus closing a prior explicitly-deferred capability (SEED-005). Roadmap created with 3 phases, 11/11 requirements mapped, strictly linear deps 212→213→214.
+- **2026-07-31:** Queued v1.59 "Account-Scoped Multi-Rail & Offline Entitlements" (Phases 215-219), 24/24 requirements mapped, from sourced adopter signal B2C Alpha. Activate only after v1.58 DOCS-03 passes and v1.58 archives.
 - **2026-07-30:** Shipped & archived v1.57 "Admin Operator Control Plane (SEED-004 M1)" (Phases 209–211). Milestone audit passed; 11/11 requirements complete; phase trees archived under `.planning/milestones/v1.57-phases/`.
 - **2026-07-01:** Closed v1.54 "Admin UI Page-Level Streamlining & Storybook" (Phases 193–200). Audit passed; 23/23 requirements complete; phase trees archived under `.planning/milestones/v1.54-phases/`; no active milestone-specific requirements remain.
 - **2026-06-14:** Opened v1.53 "Admin UI Design-System Hardening" (Phases 187–192). Quality / interaction-correctness investment in the already-shipped `accrue_admin` surface; no new billing primitives. Roadmap created with 6 phases, 33/33 requirements mapped.
@@ -787,19 +814,23 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 |----------|------|--------|--------|-----------------------|-----------------|-------------|
 | scope | Rich metered/tiered/range entitlement math (beyond seat counts) | out of scope v1.39 | Current entitlement support intentionally covers local plan and seat-style quantities without a sourced adopter contract for richer math. | Entitlements extension | concrete adopter failure or explicit adopter contract requiring richer entitlement math | 2026-05-22 |
 | scope | Atomic seat enforcement / membership management | host-owned; documented recipe, not core API | Membership ownership remains app-specific and Accrue does not own host user/team schemas. | Host integration recipe | concrete adopter failure showing documented host-owned enforcement is insufficient | 2026-05-22 |
-| scope | Typed upstream Stripe Entitlements resources + live API reads | deferred to `lattice_stripe >= 1.2` | Local entitlement truth is canonical; typed upstream reads wait on dependency capability. | Stripe advisory overlay | correctness/security/data-loss risk in advisory cache truth or explicit dependency capability change | 2026-05-22 |
+| scope | Typed upstream Stripe Entitlements resources + live API reads | shipped observationally in v1.58 Phase 213 | `lattice_stripe` 2.x now supplies the typed advisory read; it remains isolated from the canonical grant gate. | Stripe advisory overlay | closed; do not repurpose `EntitlementSummary` for v1.59 canonical grants | 2026-05-22 |
 | scope | Multi-channel (SMS/push) dunning via Chimeway | out of scope v1.45; deferred | In-app and email dunning closed the current story without adding extra compliance and channel-delivery scope. | Dunning ecosystem integration | repeated support issue or concrete adopter failure requiring SMS/push orchestration | 2026-05-28 |
 | strategy_non_goal | FIN-03 finance exports · MRR/ARR product · MoR processors · Hyperwallet | explicit standing non-goals | Accrue is a billing/subscription library, not an accounting, merchant-of-record, or payout product. | Strategy non-goal | explicit strategy change or correctness/security/data-loss risk that cannot be handled by host-owned exports | carried |
 | seed | SEED-002-ecosystem-integrations — Chimeway/Mailglass ecosystem integrations | backlogged; future-roadmap seed, not a closeout blocker | Ecosystem blueprints are dormant future-roadmap material and do not open milestone scope by themselves. | Future roadmap / ecosystem integrations | concrete adopter failure requiring an integration, repeated support issue, or explicit strategy change | 2026-05-31 |
 | seed | SEED-003-repo-hygiene-before-new-milestone | backlogged; operational hygiene seed, not product scope | Repo/worktree/GitHub/GSD hygiene is useful before a new milestone or release prep but does not force a Hex publish. | Repo hygiene / release prep | before opening a new milestone, before release prep, or when local/GitHub/GSD state feels stale | 2026-07-01 |
 | seed | SEED-004-admin-ui-blueprint-redesign — first-principles admin/operator UI redesign ("operator control plane over billing state"); north-star `prompts/accrue_admin_operator_ui_journey_blueprint.md`, synthesis `.planning/research/ADMIN-UI-REDESIGN-BLUEPRINT-SYNTHESIS.md` | backlogged; post-v1.56 multi-milestone program, not a v1.56 closeout blocker | New target (distinct from the v1.56 ratchet machinery); reaches into core `accrue` diagnosis fns (first for the admin-UI line). Recommended M1 IA/grammar → M2 signature surfaces+core diagnosis → M3 new rooms. | Admin UI / IA redesign (+ core diagnosis) | after v1.56 ships → `/gsd-new-milestone` (reopen class: explicit strategy change — flagship admin surface) | 2026-07-04 |
+| seed | SEED-006-account-multi-rail-offline-entitlements | promoted; queued v1.59 | Concrete B2C Alpha requirement for coherent Stripe/Apple account access and extended offline use. | Core entitlements / mobile billing | activate immediately after v1.58 verified archive | 2026-07-31 |
+| seed | SEED-007-google-play-billing-rail | dormant | Preserve the v1.59 seam as a reusable rail contract without paying Android lifecycle cost before demand. | Mobile billing / entitlements | Android scheduled or second adopter requires Google Play | 2026-07-31 |
 
 ## Session Continuity
 
-Last session: 2026-07-31T04:00:11.102Z
-Stopped at: Completed 214-02-PLAN.md
+Last session: 2026-07-31T13:45:00Z
+Stopped at: v1.58 audit blocked on DOCS-03; v1.59 roadmap queued
 Resume file: None
 
 ## Operator Next Steps
 
-- Run `/gsd-verify-work 214` or the milestone audit/ship gate for v1.58.
+- Close Phase 214 DOCS-03 with a Release Please-safe lockstep-version invariant and aligned 1.5.0 candidate fixture (implementation not authorized by this roadmap-only update).
+- Re-run `/gsd-verify-work 214` and `$gsd-audit-milestone v1.58`; archive only after both pass.
+- Then promote queued v1.59 through `$gsd-new-milestone v1.59 Account-Scoped Multi-Rail & Offline Entitlements` and begin `$gsd-discuss-phase 215`.

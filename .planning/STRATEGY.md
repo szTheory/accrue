@@ -2,14 +2,19 @@
 
 ## Active Strategic Track
 
-### PROC-08 — Official dual-provider core
+### ENT-RAIL-01 — Account-scoped multi-rail and offline entitlement core
 
-**Status:** Active as of 2026-04-29  
-**Why now:** Accrue reached `1.0.0` with no open P0/P1 maintainer-friction rows and an explicit post-1.0 intake gate. Continuing with maintenance-only milestones would likely produce diminishing returns. The next substantial bet is reopening **PROC-08** with written boundaries and a locked second-provider contract.
+**Status:** Queued 2026-07-31; activates after v1.58 verified closeout
+**Why now:** The anonymized B2C Alpha adopter has a concrete web + iOS + offline requirement that the shipped gateway-centric processor abstraction cannot satisfy safely. This is a likely recurring Phoenix-going-mobile shape and clears the stable-core reopen bar.
 
-**North star:** Move Accrue from a credible Stripe-first billing library to a credible production billing platform with **Stripe plus one first-party Stripe-like processor** on the documented billing facade.
+**North star:** One host account receives coherent access from any verified payment rail, online or offline, while Accrue stays honest about which lifecycle operations it controls and which it only observes.
 
-**Success condition:** Accrue officially supports the documented billing facade across `Fake`, `Stripe`, and `Braintree` for the capability slice listed in the processor-support matrix, without degrading the Stripe-first first-user path or broadening into a merchant-of-record or finance-system strategy.
+**Success condition:** Stripe and Apple grants converge into one account snapshot; web and iOS see the same access; an ES256 device-bound lease supports the locked 30-day fresh + 72-hour degraded-offline policy; reconnect reconciles automatically; existing single-processor hosts remain additive-compatible.
+
+### PROC-08 — Official dual-provider gateway core
+
+**Status:** Shipped across v1.31–v1.36; retained as a bounded gateway foundation, not the active expansion track.
+**Outcome:** Fake, Stripe, and Braintree support the documented capability slice without claiming generic provider parity. The v1.59 rail seam builds beside this processor contract rather than widening it into a lowest-common-denominator lifecycle interface.
 
 ## Track Boundaries
 
@@ -20,24 +25,30 @@
 - **Custom adapter posture:** custom processors remain an extension point through `Accrue.Processor`, but they stay outside first-party support, parity promises, and release guarantees unless they are explicitly listed in the official processor-support matrix.
 - **Target-provider posture:** `Braintree` is the locked second-provider target because it fits Accrue's Stripe-shaped facade, preserves a direct-gateway strategy, and has a tractable Elixir package surface.
 - **Non-targets:** merchant-of-record providers, `Adyen`, `PayPal direct subscriptions`, and bank-debit specialists such as `GoCardless` remain explicit non-targets for this track.
+- **Rail seam:** the existing processor-support matrix remains the gateway-control truth. A separate rail/entitlement-source matrix owns observation, restore, reconciliation, management, and offline capability truth.
+- **Host boundary:** host apps continue to own routes, auth, runtime config, client storage, and app-domain membership policy.
+- **Offline policy:** Accrue owns protocol/signing/server reconciliation; Crosswake/host code owns secure storage and client verification.
+- **v1 rail scope:** Stripe + Apple only. Google Play is trigger-bound in SEED-007.
 
 ## Execution Shape
 
-### Phase 1 — `v1.31`
+### Completed foundation — `v1.31` through `v1.36`
 
 **Theme:** Boundary hardening + thin slice  
 **Goal:** Lock the repo around a capability-explicit processor-support contract, harden the processor boundary where Stripe assumptions block expansion, and prove one real `Braintree` path through the **gateway subscription core** slice.
 
-### Phase 2 — follow-on milestone(s)
+### Queued expansion — `v1.59`
 
-**Theme:** Official dual-provider core  
-**Goal:** Extend the thin slice into a complete first-party adapter story for the supported capability slice, with explicit docs, support labels, and proof lanes.
+**Theme:** Account-scoped rail observation + offline access
+**Goal:** Deliver Phases 215–219: contract/foundation, canonical projection, Apple observer, offline lease, and B2C Alpha proof.
 
 ## Milestone Rollup
 
 | Milestone | Role in track | Status |
 |-----------|---------------|--------|
-| v1.31 | Reopen PROC-08 with a locked provider, capability matrix, bounded processor contract, and one real vertical slice | Active |
+| v1.31–v1.36 | Bounded Fake/Stripe/Braintree gateway core and support matrix | Shipped |
+| v1.58 | lattice_stripe 2.x + Stripe advisory entitlements | Active; closeout blocked on DOCS-03 |
+| v1.59 | Account-scoped Stripe/Apple entitlement union + offline lease | Queued after v1.58 closeout |
 
 ## Decision Notes
 
@@ -52,3 +63,8 @@
 - Accrue should avoid the **ActiveMerchant** trap: too much gateway breadth creates lowest-common-denominator pressure, leaky abstractions, and DX erosion.
 - The **Ecto / Active Storage / Active Job** lesson also applies: adapter compatibility is real, but first-party support only exists where the repo enumerates what is guaranteed.
 - Strategy defaults are **reopened only for high-impact changes** such as adding a provider, expanding the supported slice, or changing release-gate philosophy.
+- Access aggregation is rail-neutral; lifecycle mutation is resource/rail-aware. This intentional leak is safer than forcing Apple into Stripe-shaped control semantics.
+- The Stripe-only `EntitlementSummary` remains observational diagnostics and is never promoted into canonical grant truth.
+- The v1.59 canonical projection uses rail/environment-qualified evidence and an account revision; no email-based Apple linking is permitted.
+- Offline v1 uses a sharp default: 30-day rolling full lease, shortened by known ends, then one 72-hour degraded-offline window; hard expiry denies premium actions but preserves the shell and local data.
+- Google Play, Family Sharing policy, offer authoring, cross-rail migration/proration, and configurable risk matrices are later work, not v1.59 scope.

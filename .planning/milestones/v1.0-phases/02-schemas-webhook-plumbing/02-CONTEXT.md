@@ -178,7 +178,7 @@ None — no backlog items matched Phase 2.
 - `:telemetry.span/3` — https://hexdocs.pm/telemetry/ — handler invocation wrapping (D2-30)
 - `Phoenix.Router` `forward/3` + `pipeline/2` — https://hexdocs.pm/phoenix/Phoenix.Router.html — primitive the `accrue_webhook` macro expands to (D2-16)
 - `Jason` — https://hexdocs.pm/jason — JSON decoder for Plug.Parsers pipeline (D2-19)
-- `lattice_stripe ~> 0.2` — sibling lib, source at `/Users/jon/projects/lattice_stripe/` (or `/Users/jon/getfluent/lattice_stripe/`). Specifically:
+- `lattice_stripe ~> 0.2` — sibling lib, source in the maintainer's local sibling checkout. Specifically:
   - `lib/lattice_stripe/client.ex` — current default idempotency key generation (`idk_ltc_<uuid4>`) that Accrue must override (D2-11)
   - `lib/lattice_stripe.ex` — `:stripe_version` per-request opt (D2-14)
   - `guides/error-handling.md` — `{:idempotency_error, ...}` tuple shape (D2-13)

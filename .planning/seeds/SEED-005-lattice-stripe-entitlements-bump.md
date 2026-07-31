@@ -1,17 +1,18 @@
 ---
 id: SEED-005
-status: ready
+status: consumed
 planted: 2026-07-28
 triggered: 2026-07-29
 planted_during: v1.57 Admin Operator Control Plane — Phase 211 (grep-gated CSS retirement)
 trigger_when: TRIGGER FIRED 2026-07-29 — lattice_stripe 2.0.0 published to Hex.pm (was: when the entitlements-bearing version ships)
 target_version: "2.0.0"
 scope: medium
+consumed_by: v1.58 Phases 212-214
 ---
 
-# SEED-005: Bump `lattice_stripe` dep to 2.0.0 (entitlements support) — TRIGGER FIRED
+# SEED-005: Bump `lattice_stripe` dep to 2.0.0 (entitlements support) — CONSUMED BY v1.58
 
-## Status: READY (trigger fired 2026-07-29)
+## Status: CONSUMED (v1.58)
 
 **`lattice_stripe 2.0.0` is now published on Hex.pm** (released 2026-07-29T14:50Z,
 confirmed via hex.pm API — it is `latest_stable`). This seed is no longer dormant; it is
