@@ -254,6 +254,28 @@ Plans:
 **Goal:** Make account entitlement coherent across Stripe and Apple, including extended offline use, without pretending the rails expose the same lifecycle controls. Preserve host-owned routes/auth/runtime config, retain `lattice_stripe` as Stripe transport, and keep existing single-processor hosts additive-compatible.
 **Sequence:** 215 → 216 → 217 → 218 → 219. Coverage: 24/24 queued requirements mapped exactly once.
 
+### Phase 214.2: Close gap: SYNC-02/DOCS-03 — surface advisory entitlement diagnostics (INSERTED)
+
+**Goal:** Close the verified v1.58 observation gap by surfacing already-persisted Stripe advisory entitlement diagnostics in the existing admin customer detail flow while local resolution remains the sole authorization source, and correct plus regression-protect both stale advisory pagination statements.
+**Requirements**: SYNC-02, DOCS-03
+**Depends on:** Phase 214
+**Plans:** 4 plans
+
+Plans:
+
+**Wave 1**
+
+- [ ] 214.2-01-PLAN.md — Prove a contradictory advisory writer → persisted row → core diagnostic → existing customer-detail tracer without changing local access.
+- [ ] 214.2-04-PLAN.md — Correct and ratchet the two stale pull/webhook pagination statements through the existing package-doc verifier family.
+
+**Wave 2** *(blocked on Plan 01)*
+
+- [ ] 214.2-02-PLAN.md — Complete all core advisory states, provenance rules, independent failure containment, disabled no-I/O, and grant-invariance tests.
+
+**Wave 3** *(blocked on Plan 02)*
+
+- [ ] 214.2-03-PLAN.md — Complete Copy-backed UI states, bounded preview/full Raw data evidence, generated copy contract, and existing accessibility/mobile browser certification.
+
 ### Phase 214.1: Close gap: DOCS-03 — reconcile StripeSync writer documentation (INSERTED)
 
 **Goal:** Make `Accrue.Entitlements.StripeSync` accurately document webhook and client-backed pull writes through the shared advisory reconciler, prove that truth through the existing package-doc verifier family, and reconcile current planning mirrors without rewriting the historical `gaps_found` audit.
