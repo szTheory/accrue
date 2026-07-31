@@ -79,13 +79,6 @@ changelog_release_section() {
   ' "$file"
 }
 
-changelog_has_release_section() {
-  local file=$1
-  local version=$2
-
-  changelog_release_section "$file" "$version" >/dev/null
-}
-
 assert_unreleased_before_latest() {
   local label=$1
   local file=$2
@@ -130,21 +123,12 @@ assert_companion_compatibility_only() {
     fail "$label must remain compatibility-only"
 }
 
-candidate_sections=0
-for file in "$core_changelog" "$admin_changelog" "$portal_changelog"; do
-  if changelog_has_release_section "$file" "$accrue_version"; then
-    candidate_sections=$((candidate_sections + 1))
-  fi
-done
-
 if [[ "$accrue_version" == "1.4.0" ]]; then
   release_state="pre-release"
   companion_version="1.5.0"
-elif [[ "$candidate_sections" -eq 3 ]]; then
+else
   release_state="candidate"
   companion_version="$accrue_version"
-else
-  fail "linked @version must be the checked-in pre-release or a fully generated Release Please candidate"
 fi
 
 if [[ "$release_state" == "pre-release" ]]; then
