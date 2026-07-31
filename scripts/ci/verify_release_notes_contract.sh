@@ -20,6 +20,17 @@ extract_version() {
   printf '%s\n' "$version"
 }
 
+is_stable_semver() {
+  [[ "$1" =~ ^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$ ]]
+}
+
+assert_stable_semver() {
+  local label=$1
+  local version=$2
+
+  is_stable_semver "$version" || fail "$label @version must be stable SemVer"
+}
+
 notes="$ROOT_DIR/accrue/guides/release-notes.md"
 core_changelog="$ROOT_DIR/accrue/CHANGELOG.md"
 admin_changelog="$ROOT_DIR/accrue_admin/CHANGELOG.md"
@@ -28,11 +39,17 @@ accrue_version=$(extract_version "$ROOT_DIR/accrue/mix.exs")
 accrue_admin_version=$(extract_version "$ROOT_DIR/accrue_admin/mix.exs")
 accrue_portal_version=$(extract_version "$ROOT_DIR/accrue_portal/mix.exs")
 
+assert_stable_semver "accrue" "$accrue_version"
+assert_stable_semver "accrue_admin" "$accrue_admin_version"
+assert_stable_semver "accrue_portal" "$accrue_portal_version"
 [[ "$accrue_version" == "$accrue_admin_version" ]] || fail "accrue and accrue_admin versions diverged"
 [[ "$accrue_version" == "$accrue_portal_version" ]] || fail "accrue and accrue_portal versions diverged"
-[[ "$accrue_version" == "1.4.0" ]] || fail "accrue @version must remain 1.4.0 until Release Please"
-[[ "$accrue_admin_version" == "1.4.0" ]] || fail "accrue_admin @version must remain 1.4.0 until Release Please"
-[[ "$accrue_portal_version" == "1.4.0" ]] || fail "accrue_portal @version must remain 1.4.0 until Release Please"
+
+case "$accrue_version" in
+  1.4.0) release_state="pre-release" ;;
+  1.5.0) release_state="candidate" ;;
+  *) fail "linked @version must be the supported pre-release or Release Please candidate state" ;;
+esac
 [[ -f "$notes" ]] || fail "missing $notes"
 [[ -f "$core_changelog" ]] || fail "missing $core_changelog"
 [[ -f "$admin_changelog" ]] || fail "missing $admin_changelog"
@@ -52,6 +69,18 @@ changelog_unreleased_section() {
     /^## Unreleased$/ { in_section = 1; next }
     /^## \[/ && in_section { exit }
     in_section { print }
+  ' "$file"
+}
+
+changelog_release_section() {
+  local file=$1
+  local version=$2
+
+  awk -v heading="## [${version}]" '
+    $0 == heading { in_section = 1; found = 1; next }
+    /^## \[/ && in_section { exit }
+    in_section { print }
+    END { exit found ? 0 : 1 }
   ' "$file"
 }
 
@@ -87,10 +116,7 @@ assert_section_contains() {
 
 assert_companion_compatibility_only() {
   local label=$1
-  local file=$2
-  local section
-
-  section=$(changelog_unreleased_section "$file")
+  local section=$2
 
   assert_section_contains "$label" "$section" "Compatibility only:" "must remain compatibility-only"
   assert_section_contains "$label" "$section" "linked 1.5.0" "must name the linked 1.5.0 line"
@@ -101,17 +127,39 @@ assert_companion_compatibility_only() {
     fail "$label must remain compatibility-only"
 }
 
-for entry in \
-  "accrue/CHANGELOG.md:$core_changelog" \
-  "accrue_admin/CHANGELOG.md:$admin_changelog" \
-  "accrue_portal/CHANGELOG.md:$portal_changelog"; do
-  label=${entry%%:*}
-  file=${entry#*:}
-  assert_unreleased_before_latest "$label" "$file"
-  assert_no_manual_next_release_section "$label" "$file"
-done
+if [[ "$release_state" == "pre-release" ]]; then
+  for entry in \
+    "accrue/CHANGELOG.md:$core_changelog" \
+    "accrue_admin/CHANGELOG.md:$admin_changelog" \
+    "accrue_portal/CHANGELOG.md:$portal_changelog"; do
+    label=${entry%%:*}
+    file=${entry#*:}
+    assert_unreleased_before_latest "$label" "$file"
+    assert_no_manual_next_release_section "$label" "$file"
+  done
 
-core_section=$(changelog_unreleased_section "$core_changelog")
+  core_section=$(changelog_unreleased_section "$core_changelog")
+  admin_section=$(changelog_unreleased_section "$admin_changelog")
+  portal_section=$(changelog_unreleased_section "$portal_changelog")
+else
+  for entry in \
+    "accrue/CHANGELOG.md:$core_changelog" \
+    "accrue_admin/CHANGELOG.md:$admin_changelog" \
+    "accrue_portal/CHANGELOG.md:$portal_changelog"; do
+    label=${entry%%:*}
+    file=${entry#*:}
+    if ! section=$(changelog_release_section "$file" "$accrue_version"); then
+      fail "$label missing numbered ${accrue_version} changelog section"
+    fi
+
+    case "$label" in
+      accrue/CHANGELOG.md) core_section=$section ;;
+      accrue_admin/CHANGELOG.md) admin_section=$section ;;
+      accrue_portal/CHANGELOG.md) portal_section=$section ;;
+    esac
+  done
+fi
+
 assert_section_contains "accrue/CHANGELOG.md" "$core_section" "lattice_stripe" "missing lattice_stripe ~> 2.0 bump"
 assert_section_contains "accrue/CHANGELOG.md" "$core_section" "~> 2.0" "missing lattice_stripe ~> 2.0 bump"
 assert_section_contains "accrue/CHANGELOG.md" "$core_section" "optional, default-off advisory Stripe-native entitlement refresh" "missing advisory refresh"
@@ -123,8 +171,8 @@ assert_section_contains "accrue/CHANGELOG.md" "$core_section" "shared reconcile/
 assert_section_contains "accrue/CHANGELOG.md" "$core_section" "fetch_entitled/2" "missing fetch_entitled closure"
 assert_section_contains "accrue/CHANGELOG.md" "$core_section" "remains closed" "missing fetch_entitled closure"
 
-assert_companion_compatibility_only "accrue_admin/CHANGELOG.md" "$admin_changelog"
-assert_companion_compatibility_only "accrue_portal/CHANGELOG.md" "$portal_changelog"
+assert_companion_compatibility_only "accrue_admin/CHANGELOG.md" "$admin_section"
+assert_companion_compatibility_only "accrue_portal/CHANGELOG.md" "$portal_section"
 
 grep -Fq "# Release notes (plain-language)" "$notes" || fail "release-notes.md missing title"
 grep -Fq "## accrue" "$notes" || fail "release-notes.md missing accrue section"
@@ -164,7 +212,9 @@ section_has_version() {
 
 section_has_version "## accrue" "## accrue_admin" ||
   fail "release-notes.md must describe ${accrue_version} in the accrue section"
-section_has_version "## accrue_admin" "## How we version" ||
-  fail "release-notes.md must describe ${accrue_version} in the accrue_admin section"
+if [[ "$release_state" == "pre-release" ]]; then
+  section_has_version "## accrue_admin" "## How we version" ||
+    fail "release-notes.md must describe ${accrue_version} in the accrue_admin section"
+fi
 
 echo "verify_release_notes_contract: OK (${accrue_version})"
