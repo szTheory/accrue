@@ -20,10 +20,8 @@ defmodule Accrue.Entitlements.StripeSync do
 
   ## One-way dependency
 
-  `seam → billing read`, never `gate → seam`. Nothing under the gate path
-  references this module; it only reads through `Accrue.Repo`. The cache is
-  written exclusively by `Accrue.Webhook.DefaultHandler` when a host opts
-  into `config :accrue, :entitlements, stripe_native_sync: :advisory`.
+  `seam → billing`, never `gate → seam`. When a host enables
+  `stripe_native_sync: :advisory`, webhook handling and client-backed pull refresh write the same advisory `Accrue.Billing.EntitlementSummary` row through `Accrue.Entitlements.Reconcile`. The feature is off by default and diagnostic only; neither path can influence grants. Local plan→feature mapping remains the sole Accrue grant authority.
   """
 
   alias Accrue.Billing.{Customer, EntitlementSummary}

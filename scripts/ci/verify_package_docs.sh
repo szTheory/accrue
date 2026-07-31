@@ -23,23 +23,26 @@ extract_version() {
 require_fixed() {
   local file=$1
   local needle=$2
+  local message=${3:-"$file is missing: $needle"}
 
-  grep -Fq -- "$needle" "$file" || fail "$file is missing: $needle"
+  grep -Fq -- "$needle" "$file" || fail "$message"
 }
 
 require_regex() {
   local file=$1
   local pattern=$2
+  local message=${3:-"$file does not match: $pattern"}
 
-  grep -Eq -- "$pattern" "$file" || fail "$file does not match: $pattern"
+  grep -Eq -- "$pattern" "$file" || fail "$message"
 }
 
 require_absent_regex() {
   local file=$1
   local pattern=$2
+  local message=${3:-"$file must not match: $pattern"}
 
   if grep -Eq -- "$pattern" "$file"; then
-    fail "$file must not match: $pattern"
+    fail "$message"
   fi
 }
 
@@ -252,6 +255,33 @@ require_fixed_count "$stripe_sync_ex" '@doc since: "1.5.0"' 1
 require_fixed_count "$processor_ex" '@doc since: "1.5.0"' 2
 require_fixed_count "$fake_processor_ex" '@doc since: "1.5.0"' 1
 require_absent_regex "$stripe_sync_ex" '@doc since: "1\.4\.0"'
+
+# DOCS-03: both optional writer paths converge through the same advisory row;
+# they remain diagnostic-only and cannot become a grant source of truth.
+stripe_sync_writer_provenance="StripeSync writer provenance ($stripe_sync_ex)"
+
+require_fixed "$stripe_sync_ex" "webhook handling" \
+  "$stripe_sync_writer_provenance: missing webhook writer"
+require_fixed "$stripe_sync_ex" "client-backed pull refresh" \
+  "$stripe_sync_writer_provenance: missing pull-refresh writer"
+require_fixed "$stripe_sync_ex" 'same advisory `Accrue.Billing.EntitlementSummary` row' \
+  "$stripe_sync_writer_provenance: missing shared advisory row"
+require_fixed "$stripe_sync_ex" "Accrue.Entitlements.Reconcile" \
+  "$stripe_sync_writer_provenance: missing shared reconciler"
+require_fixed "$stripe_sync_ex" "stripe_native_sync: :advisory" \
+  "$stripe_sync_writer_provenance: missing advisory opt-in boundary"
+require_fixed "$stripe_sync_ex" "off by default" \
+  "$stripe_sync_writer_provenance: missing default-off boundary"
+require_fixed "$stripe_sync_ex" "diagnostic only" \
+  "$stripe_sync_writer_provenance: missing diagnostic-only boundary"
+require_fixed "$stripe_sync_ex" "neither path can influence grants" \
+  "$stripe_sync_writer_provenance: missing non-gate boundary"
+require_fixed "$stripe_sync_ex" "Local plan→feature mapping remains the sole Accrue grant authority." \
+  "$stripe_sync_writer_provenance: missing local grant authority"
+require_absent_regex "$stripe_sync_ex" 'only reads through `Accrue\.Repo`' \
+  "$stripe_sync_writer_provenance: stale read-only claim remains"
+require_absent_regex "$stripe_sync_ex" 'written exclusively by `Accrue\.Webhook\.DefaultHandler`' \
+  "$stripe_sync_writer_provenance: stale webhook-exclusive claim remains"
 
 for internal_file in \
   "$stripe_processor_ex" \
