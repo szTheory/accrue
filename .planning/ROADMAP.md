@@ -230,7 +230,12 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
+**Wave 1**
+
 - [ ] 214-01-PLAN.md — Establish and enforce the current version/advisory-authority truth contract across public, support, adoption, and planning mirrors.
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
 - [ ] 214-02-PLAN.md — Reconcile linked release notes/changelogs and exact ExDoc `since: "1.5.0"` metadata.
 
 ## Progress
