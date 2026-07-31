@@ -11,6 +11,7 @@
 #
 # Gate-path files scanned (the always-on entitlement decision path):
 #   - accrue/lib/accrue/entitlements.ex                      (public fail-closed gate API)
+#   - accrue/lib/accrue/entitlements/guard.ex                (shared Plug/LiveView guard engine)
 #   - accrue/lib/accrue/entitlements/resolver.ex             (resolver behaviour + dispatch)
 #   - accrue/lib/accrue/entitlements/resolver/local_map.ex   (default local-state resolver)
 #
@@ -37,6 +38,7 @@ lib="${repo_root}/accrue/lib"
 
 gate_path_files=(
   "${lib}/accrue/entitlements.ex"
+  "${lib}/accrue/entitlements/guard.ex"
   "${lib}/accrue/entitlements/resolver.ex"
   "${lib}/accrue/entitlements/resolver/local_map.ex"
 )
