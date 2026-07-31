@@ -259,10 +259,12 @@ Plans:
 **Goal:** Make `Accrue.Entitlements.StripeSync` accurately document webhook and client-backed pull writes through the shared advisory reconciler, prove that truth through the existing package-doc verifier family, and reconcile current planning mirrors without rewriting the historical `gaps_found` audit.
 **Requirements**: DOCS-03
 **Depends on:** Phase 214
-**Plans:** 2/2 plans executed
+**Plans:** 2/3 plans executed
 **Status:** Complete
 
 Plans:
+
+- [ ] 214.1-03-PLAN.md
 
 **Wave 1**
 
@@ -354,7 +356,7 @@ Plans:
 | 212. lattice_stripe 2.x bump & green reconciliation | v1.58 | 1/1 | Complete | 2026-07-30 |
 | 213. Stripe-native advisory entitlements sync (observational-only) | v1.58 | 5/5 | Complete    | 2026-07-31 |
 | 214. Docs & truth reconciliation | v1.58 | 3/3 | Complete | 2026-07-31 |
-| 214.1. DOCS-03 writer-documentation gap closure | v1.58 | 2/2 | Complete | 2026-07-31 |
+| 214.1. DOCS-03 writer-documentation gap closure | v1.58 | 2/3 | In Progress|  |
 | 215. Multi-rail contract and additive data foundation | v1.59 | 0/TBD | Queued | - |
 | 216. Canonical account projection and gateway compatibility | v1.59 | 0/TBD | Queued | - |
 | 217. Apple observation rail and automatic linking | v1.59 | 0/TBD | Queued | - |
