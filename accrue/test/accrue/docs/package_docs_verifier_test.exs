@@ -896,6 +896,56 @@ defmodule Accrue.Docs.PackageDocsVerifierTest do
     assert output =~ "missing shared reconciler"
   end
 
+  test "package docs verifier rejects stale EntitlementSummary pagination truth" do
+    tmp_dir = tmp_dir!()
+    seed_tmp_dir!(tmp_dir)
+
+    summary_path = Path.join(tmp_dir, "accrue/lib/accrue/billing/entitlement_summary.ex")
+
+    stale_summary =
+      summary_path
+      |> File.read!()
+      |> String.replace(
+        "jsonb with the full payload. A client-backed pull refresh exhaustively\n  streams the customer's active entitlements before persisting its advisory\n  snapshot. Webhook summary snapshots can contain only the first reported\n  entitlements; `entitlements.has_more` records that known incompleteness.",
+        "jsonb with the full payload (including the `entitlements.url` pagination\n  handle) for the deferred `lattice_stripe >= 1.2` paginated reconcile.",
+        global: false
+      )
+
+    File.write!(summary_path, stale_summary)
+
+    {output, status} = run_verifier(tmp_dir)
+
+    assert status != 0
+    assert output =~ "[verify_package_docs]"
+    assert output =~ "accrue/lib/accrue/billing/entitlement_summary.ex"
+    assert output =~ "EntitlementSummary completeness"
+  end
+
+  test "package docs verifier rejects stale telemetry pagination truth" do
+    tmp_dir = tmp_dir!()
+    seed_tmp_dir!(tmp_dir)
+
+    telemetry_path = Path.join(tmp_dir, "accrue/guides/telemetry.md")
+
+    stale_telemetry =
+      telemetry_path
+      |> File.read!()
+      |> String.replace(
+        "Identifies a known-incomplete webhook advisory snapshot when `has_more: true`; client-backed pull exhaustively streams active entitlements before persistence. Neither path gates local access.",
+        "Fires only when `has_more: true` — full pagination is deferred until `lattice_stripe >= 1.2`.",
+        global: false
+      )
+
+    File.write!(telemetry_path, stale_telemetry)
+
+    {output, status} = run_verifier(tmp_dir)
+
+    assert status != 0
+    assert output =~ "[verify_package_docs]"
+    assert output =~ "accrue/guides/telemetry.md"
+    assert output =~ "telemetry completeness"
+  end
+
   defp tmp_dir! do
     tmp_dir =
       Path.join(System.tmp_dir!(), "accrue-docs-verifier-#{System.unique_integer([:positive])}")
@@ -950,6 +1000,7 @@ defmodule Accrue.Docs.PackageDocsVerifierTest do
     copy_fixture!("accrue/guides/quickstart.md", tmp_dir)
     copy_fixture!("accrue/guides/production-readiness.md", tmp_dir)
     copy_fixture!("accrue/guides/telemetry.md", tmp_dir)
+    copy_fixture!("accrue/lib/accrue/billing/entitlement_summary.ex", tmp_dir)
     copy_fixture!("accrue/guides/testing.md", tmp_dir)
     copy_fixture!("accrue/guides/troubleshooting.md", tmp_dir)
     copy_fixture!("accrue/guides/analytics.md", tmp_dir)
