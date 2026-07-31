@@ -11,6 +11,23 @@ defmodule Accrue.Docs.ReleaseNotesContractTest do
     assert output =~ "verify_release_notes_contract: OK (#{version})"
   end
 
+  test "release notes contract accepts an aligned Release Please 1.5.0 candidate" do
+    tmp_dir =
+      Path.join(System.tmp_dir!(), "accrue release notes #{System.unique_integer([:positive])}")
+
+    setup_release_fixture!(tmp_dir)
+    promote_release_please_candidate!(tmp_dir, "1.5.0")
+
+    {output, status} =
+      System.cmd("bash", [@script_path],
+        stderr_to_stdout: true,
+        env: [{"ROOT_DIR", tmp_dir}]
+      )
+
+    assert status == 0, output
+    assert output =~ "verify_release_notes_contract: OK (1.5.0)"
+  end
+
   test "release notes contract rejects missing current-version section" do
     tmp_dir =
       Path.join(System.tmp_dir!(), "accrue-release-notes-#{System.unique_integer([:positive])}")
@@ -226,6 +243,24 @@ defmodule Accrue.Docs.ReleaseNotesContractTest do
           "accrue/guides/release-notes.md"
         ] do
       copy_fixture!(path, tmp_dir)
+    end
+  end
+
+  defp promote_release_please_candidate!(tmp_dir, version) do
+    for package <- ["accrue", "accrue_admin", "accrue_portal"] do
+      mix_exs = Path.join(tmp_dir, "#{package}/mix.exs")
+
+      mix_exs
+      |> File.read!()
+      |> String.replace(~r/@version "[^"]+"/, "@version \"#{version}\"", global: false)
+      |> then(&File.write!(mix_exs, &1))
+
+      changelog = Path.join(tmp_dir, "#{package}/CHANGELOG.md")
+
+      changelog
+      |> File.read!()
+      |> String.replace("## Unreleased\n\n", "## Unreleased\n\n## [#{version}]\n\n", global: false)
+      |> then(&File.write!(changelog, &1))
     end
   end
 end
