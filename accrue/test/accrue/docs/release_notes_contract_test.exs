@@ -28,6 +28,92 @@ defmodule Accrue.Docs.ReleaseNotesContractTest do
     assert output =~ "verify_release_notes_contract: OK (1.5.0)"
   end
 
+  test "release notes contract rejects one-package version divergence" do
+    tmp_dir = release_fixture_dir!()
+    setup_release_fixture!(tmp_dir)
+    set_package_version!(tmp_dir, "accrue_admin", "1.5.0")
+
+    {output, status} = run_contract(tmp_dir)
+
+    assert status != 0
+    assert output =~ "verify_release_notes_contract:"
+    assert output =~ "accrue and accrue_admin versions diverged"
+  end
+
+  test "release notes contract rejects malformed versions before candidate matching" do
+    tmp_dir = release_fixture_dir!()
+    setup_release_fixture!(tmp_dir)
+    set_package_version!(tmp_dir, "accrue", "1.5.0; injected")
+
+    {output, status} = run_contract(tmp_dir)
+
+    assert status != 0
+    assert output =~ "verify_release_notes_contract: accrue @version must be stable SemVer"
+    refute output =~ "injected"
+  end
+
+  test "release notes contract rejects an aligned candidate missing a package section" do
+    tmp_dir = release_fixture_dir!()
+    setup_release_fixture!(tmp_dir)
+    promote_release_please_candidate!(tmp_dir, "1.5.0")
+
+    portal_changelog = Path.join(tmp_dir, "accrue_portal/CHANGELOG.md")
+
+    portal_changelog
+    |> File.read!()
+    |> String.replace("## [1.5.0]", "## [candidate-missing]", global: false)
+    |> then(&File.write!(portal_changelog, &1))
+
+    {output, status} = run_contract(tmp_dir)
+
+    assert status != 0
+    assert output =~ "verify_release_notes_contract:"
+    assert output =~ "accrue_portal/CHANGELOG.md missing numbered 1.5.0 changelog section"
+  end
+
+  test "release notes contract rejects candidate ownership inversions" do
+    tmp_dir = release_fixture_dir!()
+    setup_release_fixture!(tmp_dir)
+    promote_release_please_candidate!(tmp_dir, "1.5.0")
+
+    core_changelog = Path.join(tmp_dir, "accrue/CHANGELOG.md")
+
+    core_changelog
+    |> File.read!()
+    |> String.replace(
+      "optional, default-off advisory Stripe-native entitlement refresh",
+      "removed advisory entitlement refresh",
+      global: false
+    )
+    |> then(&File.write!(core_changelog, &1))
+
+    {output, status} = run_contract(tmp_dir)
+
+    assert status != 0
+    assert output =~ "verify_release_notes_contract:"
+    assert output =~ "accrue/CHANGELOG.md missing advisory refresh"
+
+    setup_release_fixture!(tmp_dir)
+    promote_release_please_candidate!(tmp_dir, "1.5.0")
+
+    admin_changelog = Path.join(tmp_dir, "accrue_admin/CHANGELOG.md")
+
+    admin_changelog
+    |> File.read!()
+    |> String.replace(
+      "Compatibility only:",
+      "New admin-owned advisory entitlement workflow:",
+      global: false
+    )
+    |> then(&File.write!(admin_changelog, &1))
+
+    {output, status} = run_contract(tmp_dir)
+
+    assert status != 0
+    assert output =~ "verify_release_notes_contract:"
+    assert output =~ "accrue_admin/CHANGELOG.md must remain compatibility-only"
+  end
+
   test "release notes contract rejects missing current-version section" do
     tmp_dir =
       Path.join(System.tmp_dir!(), "accrue-release-notes-#{System.unique_integer([:positive])}")
@@ -219,6 +305,26 @@ defmodule Accrue.Docs.ReleaseNotesContractTest do
       [version] -> version
       _ -> raise "could not extract version from #{file}"
     end
+  end
+
+  defp release_fixture_dir! do
+    Path.join(System.tmp_dir!(), "accrue release notes #{System.unique_integer([:positive])}")
+  end
+
+  defp run_contract(tmp_dir) do
+    System.cmd("bash", [@script_path],
+      stderr_to_stdout: true,
+      env: [{"ROOT_DIR", tmp_dir}]
+    )
+  end
+
+  defp set_package_version!(tmp_dir, package, version) do
+    mix_exs = Path.join(tmp_dir, "#{package}/mix.exs")
+
+    mix_exs
+    |> File.read!()
+    |> String.replace(~r/@version "[^"]+"/, "@version \"#{version}\"", global: false)
+    |> then(&File.write!(mix_exs, &1))
   end
 
   defp copy_fixture!(relative_path, tmp_dir) do
