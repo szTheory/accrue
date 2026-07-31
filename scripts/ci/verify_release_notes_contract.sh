@@ -21,13 +21,110 @@ extract_version() {
 }
 
 notes="$ROOT_DIR/accrue/guides/release-notes.md"
+core_changelog="$ROOT_DIR/accrue/CHANGELOG.md"
+admin_changelog="$ROOT_DIR/accrue_admin/CHANGELOG.md"
+portal_changelog="$ROOT_DIR/accrue_portal/CHANGELOG.md"
 accrue_version=$(extract_version "$ROOT_DIR/accrue/mix.exs")
 accrue_admin_version=$(extract_version "$ROOT_DIR/accrue_admin/mix.exs")
 accrue_portal_version=$(extract_version "$ROOT_DIR/accrue_portal/mix.exs")
 
 [[ "$accrue_version" == "$accrue_admin_version" ]] || fail "accrue and accrue_admin versions diverged"
 [[ "$accrue_version" == "$accrue_portal_version" ]] || fail "accrue and accrue_portal versions diverged"
+[[ "$accrue_version" == "1.4.0" ]] || fail "accrue @version must remain 1.4.0 until Release Please"
+[[ "$accrue_admin_version" == "1.4.0" ]] || fail "accrue_admin @version must remain 1.4.0 until Release Please"
+[[ "$accrue_portal_version" == "1.4.0" ]] || fail "accrue_portal @version must remain 1.4.0 until Release Please"
 [[ -f "$notes" ]] || fail "missing $notes"
+[[ -f "$core_changelog" ]] || fail "missing $core_changelog"
+[[ -f "$admin_changelog" ]] || fail "missing $admin_changelog"
+[[ -f "$portal_changelog" ]] || fail "missing $portal_changelog"
+
+first_line_matching() {
+  local pattern=$1
+  local file=$2
+
+  grep -nE "$pattern" "$file" | head -n 1 | cut -d: -f1 || true
+}
+
+changelog_unreleased_section() {
+  local file=$1
+
+  awk '
+    /^## Unreleased$/ { in_section = 1; next }
+    /^## \[/ && in_section { exit }
+    in_section { print }
+  ' "$file"
+}
+
+assert_unreleased_before_latest() {
+  local label=$1
+  local file=$2
+  local unreleased_line
+  local latest_line
+
+  unreleased_line=$(first_line_matching '^## Unreleased$' "$file")
+  latest_line=$(first_line_matching '^## \[' "$file")
+
+  [[ -n "$unreleased_line" && -n "$latest_line" && "$unreleased_line" -lt "$latest_line" ]] ||
+    fail "$label missing top-level Unreleased before latest release"
+}
+
+assert_no_manual_next_release_section() {
+  local label=$1
+  local file=$2
+
+  ! grep -Eq '^## \[?1\.5\.0\]?' "$file" ||
+    fail "Release Please owns numbered 1.5.0 changelog sections"
+}
+
+assert_section_contains() {
+  local label=$1
+  local section=$2
+  local token=$3
+  local message=$4
+
+  grep -Fq "$token" <<<"$section" || fail "$label $message"
+}
+
+assert_companion_compatibility_only() {
+  local label=$1
+  local file=$2
+  local section
+
+  section=$(changelog_unreleased_section "$file")
+
+  assert_section_contains "$label" "$section" "Compatibility only:" "must remain compatibility-only"
+  assert_section_contains "$label" "$section" "linked 1.5.0" "must name the linked 1.5.0 line"
+  assert_section_contains "$label" "$section" "core" "must defer substantive capability to core"
+  assert_section_contains "$label" "$section" "package owns" "must defer substantive capability to core"
+
+  ! grep -Eiq 'admin-owned|portal-owned|new .*workflow|new .*API|grant authority|authorization behavior' <<<"$section" ||
+    fail "$label must remain compatibility-only"
+}
+
+for entry in \
+  "accrue/CHANGELOG.md:$core_changelog" \
+  "accrue_admin/CHANGELOG.md:$admin_changelog" \
+  "accrue_portal/CHANGELOG.md:$portal_changelog"; do
+  label=${entry%%:*}
+  file=${entry#*:}
+  assert_unreleased_before_latest "$label" "$file"
+  assert_no_manual_next_release_section "$label" "$file"
+done
+
+core_section=$(changelog_unreleased_section "$core_changelog")
+assert_section_contains "accrue/CHANGELOG.md" "$core_section" "lattice_stripe" "missing lattice_stripe ~> 2.0 bump"
+assert_section_contains "accrue/CHANGELOG.md" "$core_section" "~> 2.0" "missing lattice_stripe ~> 2.0 bump"
+assert_section_contains "accrue/CHANGELOG.md" "$core_section" "optional, default-off advisory Stripe-native entitlement refresh" "missing advisory refresh"
+assert_section_contains "accrue/CHANGELOG.md" "$core_section" "never changes entitlement grants" "missing never-a-gate semantics"
+assert_section_contains "accrue/CHANGELOG.md" "$core_section" "Accrue.Entitlements.StripeSync.refresh/2" "missing StripeSync.refresh/2 contract"
+assert_section_contains "accrue/CHANGELOG.md" "$core_section" "Accrue.Processor.list_active_entitlements/2" "missing Processor list contract"
+assert_section_contains "accrue/CHANGELOG.md" "$core_section" "Accrue.Processor.Fake.put_entitlements/2" "missing Fake test helper contract"
+assert_section_contains "accrue/CHANGELOG.md" "$core_section" "shared reconcile/isolation proof" "missing reconcile/isolation proof"
+assert_section_contains "accrue/CHANGELOG.md" "$core_section" "fetch_entitled/2" "missing fetch_entitled closure"
+assert_section_contains "accrue/CHANGELOG.md" "$core_section" "remains closed" "missing fetch_entitled closure"
+
+assert_companion_compatibility_only "accrue_admin/CHANGELOG.md" "$admin_changelog"
+assert_companion_compatibility_only "accrue_portal/CHANGELOG.md" "$portal_changelog"
 
 grep -Fq "# Release notes (plain-language)" "$notes" || fail "release-notes.md missing title"
 grep -Fq "## accrue" "$notes" || fail "release-notes.md missing accrue section"
