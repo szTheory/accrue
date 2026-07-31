@@ -236,7 +236,7 @@ Plans:
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
-- [ ] 214-02-PLAN.md — Reconcile linked release notes/changelogs and exact ExDoc `since: "1.5.0"` metadata.
+- [x] 214-02-PLAN.md — Reconcile linked release notes/changelogs and exact ExDoc `since: "1.5.0"` metadata.
 
 ## Progress
 
