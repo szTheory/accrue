@@ -47,7 +47,7 @@ Stop rule: if proposed work is polish-only with a documented workaround and no r
 - [x] **Phase 214: Docs & truth reconciliation** - Bring CLAUDE.md, the JTBD guides, and per-package changelogs/release notes into agreement with the shipped 2.x bump and the new observational sync (DOCS-01, DOCS-02, DOCS-03) (completed 2026-07-31)
 - [x] **Phase 214.1: DOCS-03 writer-documentation gap closure** - Correct StripeSync webhook/pull writer provenance through the shared advisory reconciler and preserve the audit boundary (DOCS-03) (completed 2026-07-31)
 
-Coverage: **11/11 requirements** mapped to Phases 212-214 (each REQ-ID → exactly one phase); Phase 214.1 closes the DOCS-03 writer-documentation gap without a duplicate requirement assignment. Per-phase counts: 212→3 · 213→5 · 214→3. Dependencies: 212 → 213 → 214 → 214.1 (nothing else compiles against 2.x until the bump lands green; the sync adoption needs the 2.x `LatticeStripe.Entitlements.*` modules present; docs reconcile against the final shipped behavior of both). v1.58 remains active; independent milestone re-audit is pending after Phase 214/214.1 verification and before archive. Full per-phase goals + success criteria: see [Phase Details](#phase-details-v158-active-milestone).
+Coverage: **11/11 requirements** mapped to Phases 212-214 (each REQ-ID → exactly one phase); Phase 214.1 closes the DOCS-03 writer-documentation gap without a duplicate requirement assignment. Per-phase counts: 212→3 · 213→5 · 214→3. Dependencies: 212 → 213 → 214 → 214.1 (nothing else compiles against 2.x until the bump lands green; the sync adoption needs the 2.x `LatticeStripe.Entitlements.*` modules present; docs reconcile against the final shipped behavior of both). Phases 214 and 214.1 each passed 9/9 verification. v1.58 remains active pending the independent milestone re-audit before archive. Full per-phase goals + success criteria: see [Phase Details](#phase-details-v158-active-milestone).
 
 <details>
 <summary>✅ v1.57 Admin Operator Control Plane (SEED-004 M1) (Phases 209-211) — SHIPPED 2026-07-30</summary>
@@ -246,7 +246,7 @@ Plans:
 
 - [x] 214-03-PLAN.md — Make the release contract accept both the current pre-release state and an aligned Release Please 1.5.0 candidate, with mismatch/malformed/incomplete-candidate fixtures.
 
-**Verification:** Phase 214.1 closed the DOCS-03 writer gap with focused green executable evidence. The historical milestone audit remains `gaps_found`; Phase 214/214.1 verification and an independent milestone re-audit must pass before v1.58 archives. See `v1.58-v1.58-MILESTONE-AUDIT.md`.
+**Verification:** Phase 214.1 closed the DOCS-03 writer gap and passed 9/9 re-verification with focused green executable evidence. The historical milestone audit remains `gaps_found`; an independent milestone re-audit must pass before v1.58 archives. See `v1.58-v1.58-MILESTONE-AUDIT.md`.
 
 ## Queued Next Milestone: v1.59 Account-Scoped Multi-Rail & Offline Entitlements
 
@@ -260,7 +260,7 @@ Plans:
 **Requirements**: DOCS-03
 **Depends on:** Phase 214
 **Plans:** 4/4 plans executed
-**Status:** In Progress
+**Status:** Complete — verified 9/9 on 2026-07-31; independent v1.58 milestone re-audit pending
 
 Plans:
 

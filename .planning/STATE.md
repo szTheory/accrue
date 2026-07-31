@@ -2,13 +2,13 @@
 gsd_state_version: 1.0
 milestone: v1.58
 milestone_name: lattice_stripe 2.x Bump & Stripe-Native Entitlements Sync
-current_phase: 208
-current_phase_name: 3/5 plans
-status: planning
-stopped_at: Completed 214.1-04-PLAN.md
+current_phase: 214.1
+current_phase_name: close-gap-docs-03-reconcile-stripesync-writer-documentation
+status: complete
+stopped_at: Phase 214.1 verified 9/9; independent v1.58 milestone re-audit pending
 last_updated: "2026-07-31T17:11:46.445Z"
 last_activity: 2026-07-31
-last_activity_desc: Phase 214.1 complete, transitioned to Phase 208
+last_activity_desc: Phase 214.1 complete and verified 9/9; v1.58 milestone re-audit pending
 progress:
   total_phases: 4
   completed_phases: 4
@@ -29,10 +29,10 @@ See: `.planning/PROJECT.md` (updated 2026-07-31 after multi-rail/offline roadmap
 
 ## Current Position
 
-Phase: 208 — prove convergence on slice + wire ci + accept (3/5 plans) — parked (conv 01..07)
-Plan: Not started
-Status: Ready to plan
-Last activity: 2026-07-31 — Phase 214.1 complete, transitioned to Phase 208
+Phase: 214.1 — close-gap-docs-03-reconcile-stripesync-writer-documentation
+Plan: 4 of 4 complete
+Status: Complete and verified 9/9; independent v1.58 milestone re-audit pending
+Last activity: 2026-07-31 — Phase 214.1 complete and verified 9/9
 
 ## Post-v1.48 Pause Rule
 
@@ -53,13 +53,13 @@ Queued v1.59 clears the reopen rule through a concrete adopter requirement and e
 | 212 | lattice_stripe 2.x bump & green reconciliation | BUMP-01, BUMP-02, BUMP-03 | Complete |
 | 213 | Stripe-native advisory entitlements sync (observational-only) | SYNC-01, SYNC-02, SYNC-03, SYNC-04, SYNC-05 | Complete |
 | 214 | Docs & truth reconciliation | DOCS-01, DOCS-02, DOCS-03 | Complete (verified 9/9) |
-| 214.1 | DOCS-03 writer-documentation gap closure | DOCS-03 | Plans complete; verification pending |
+| 214.1 | DOCS-03 writer-documentation gap closure | DOCS-03 | Complete (verified 9/9) |
 
 Coverage: 11/11 requirements mapped to Phases 212-214 (each REQ-ID → exactly one phase); Phase 214.1 closes the DOCS-03 writer-documentation gap without duplicate assignment. Per-phase counts: 212→3 · 213→5 · 214→3. Phase 213 final re-verification passed 13/13 truths. **Dependency shape:** 212 → 213 → 214 → 214.1 (the bump must land green before anything else compiles against 2.x; the sync adoption needs the 2.x `LatticeStripe.Entitlements.*` modules present; docs reconcile against the final shipped behavior of both).
 
 **Guardrails (binding, out of scope):** observational-only stays inviolable (D-01/D-11) — the Stripe-native sync is a read seam, never consulted for a grant decision; the local plan→feature map (`resolver/local_map.ex`) remains the sole canonical gate. `scripts/ci/verify_entitlement_sync_isolation.sh` stays green and is extended to cover the new client-fetch path. Pin target is `~> 2.0`, not `~> 2.1`. No new required dependencies; no new admin nav rooms; no admin redesign work (that is SEED-004 M2/M3); no `accrue_portal` work. Any processor-surface/support-matrix implication updates behavior, docs, examples/verifiers, and release notes together (stable-core rule). Sync tests use the Fake/Test processor only — no live Stripe, no Chrome, fully `async`-safe. Authoritative sources: `.planning/seeds/SEED-005-lattice-stripe-entitlements-bump.md`, `accrue/lib/accrue/entitlements/*`, `scripts/ci/verify_entitlement_sync_isolation.sh`.
 
-**Closeout evidence:** Phase 214 re-verification passed 9/9 and closed the prior Release Please candidate gap with aligned 1.5.0 and future 1.6.0 fixtures; Phase 214.1's source/verifier/fixture correction is green. v1.58 remains active until Phase 214/214.1 verification and an independent milestone re-audit pass; archive only after that pass, and no v1.59 product implementation starts before archive.
+**Closeout evidence:** Phase 214 re-verification passed 9/9 and closed the prior Release Please candidate gap with aligned 1.5.0 and future 1.6.0 fixtures; Phase 214.1 re-verification passed 9/9 with the source/verifier/fixture correction and current traceability green. v1.58 remains active until an independent milestone re-audit passes; archive only after that pass, and no v1.59 product implementation starts before archive.
 
 ### v1.59 Phase Summary (QUEUED — Account-Scoped Multi-Rail & Offline Entitlements, SEED-006)
 
