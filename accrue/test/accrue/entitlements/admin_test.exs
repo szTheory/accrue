@@ -371,6 +371,44 @@ defmodule Accrue.Entitlements.AdminTest do
       assert MapSet.member?(resolved.features, :reports)
       assert unavailable == advisory(:unavailable)
     end
+
+    test "contains a local resolver failure while retaining a valid advisory snapshot" do
+      Application.put_env(
+        :accrue,
+        :entitlements,
+        @entitlements
+        |> Keyword.put(:stripe_native_sync, :advisory)
+        |> Keyword.put(:unmapped_action, :raise)
+      )
+
+      %{customer: customer} =
+        Accrue.Test.Factory.active_subscription(%{owner_id: Ecto.UUID.generate()})
+
+      observed_at = ~U[2026-07-31 15:00:00.000000Z]
+
+      insert_summary!(
+        customer,
+        %{
+          "entitlements" => %{"data" => [%{"lookup_key" => "priority-support"}]},
+          "_accrue" => %{"source" => "pull"}
+        },
+        synced_at: observed_at
+      )
+
+      assert %{
+               local: {:error, :unavailable},
+               stripe_advisory: %{
+                 state: :recorded,
+                 source: :pull,
+                 lookup_keys: ["priority-support"]
+               }
+             } =
+               Admin.diagnostic_for_customer(customer)
+
+      assert_raise RuntimeError, ~r/unmapped/, fn ->
+        Admin.resolve_for_customer(customer)
+      end
+    end
   end
 
   defp advisory(state) do

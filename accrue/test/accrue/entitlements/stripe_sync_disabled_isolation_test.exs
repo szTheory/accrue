@@ -22,6 +22,7 @@ defmodule Accrue.Entitlements.StripeSyncDisabledIsolationTest do
   use Accrue.BillingCase, async: false
 
   alias Accrue.Billing.EntitlementSummary
+  alias Accrue.Entitlements.Admin
   alias Accrue.Test.Factory
   alias Accrue.TestRepo
 
@@ -92,6 +93,35 @@ defmodule Accrue.Entitlements.StripeSyncDisabledIsolationTest do
                     "entitled?/2 must NOT query #{@cache_table} when sync is :disabled"
   end
 
+  test "diagnostic_for_customer/1 reads no historical advisory row while sync is disabled" do
+    oid = Ecto.UUID.generate()
+    %{customer: customer} = Factory.active_subscription(%{owner_id: oid, price_id: "price_pro"})
+    insert_summary!(customer, %{"entitlements" => %{"data" => [%{"lookup_key" => "historical"}]}})
+
+    cache_queries = cache_queries_while(fn -> Admin.diagnostic_for_customer(customer) end)
+
+    assert %{stripe_advisory: %{state: :disabled}} = Admin.diagnostic_for_customer(customer)
+    assert cache_queries == []
+  end
+
+  test "enabled diagnostic performs one owner-scoped summary lookup" do
+    Application.put_env(
+      :accrue,
+      :entitlements,
+      Keyword.put(@entitlements, :stripe_native_sync, :advisory)
+    )
+
+    oid = Ecto.UUID.generate()
+    %{customer: customer} = Factory.active_subscription(%{owner_id: oid, price_id: "price_pro"})
+
+    assert %{stripe_advisory: %{state: :not_observed}} = Admin.diagnostic_for_customer(customer)
+
+    cache_queries = cache_queries_while(fn -> Admin.diagnostic_for_customer(customer) end)
+
+    assert length(cache_queries) == 1
+    assert Enum.all?(cache_queries, &String.contains?(&1, "WHERE (a0.\"customer_id\""))
+  end
+
   test "surface parity: entitled?/features_for match the Phase-126 local-resolution fixture" do
     oid = Ecto.UUID.generate()
     Factory.active_subscription(%{owner_id: oid, price_id: "price_pro"})
@@ -139,6 +169,7 @@ defmodule Accrue.Entitlements.StripeSyncDisabledIsolationTest do
            }
 
     TestRepo.delete_all(EntitlementSummary)
+    assert_diagnostic_preserves_surface(customer, billable, expected)
     assert grant_surface(billable) == expected
 
     insert_summary!(customer, %{
@@ -146,6 +177,7 @@ defmodule Accrue.Entitlements.StripeSyncDisabledIsolationTest do
       "_accrue" => %{"fixture" => "empty"}
     })
 
+    assert_diagnostic_preserves_surface(customer, billable, expected)
     assert grant_surface(billable) == expected
 
     TestRepo.delete_all(EntitlementSummary)
@@ -169,6 +201,7 @@ defmodule Accrue.Entitlements.StripeSyncDisabledIsolationTest do
       synced_at: DateTime.add(DateTime.utc_now(), -3600, :second)
     )
 
+    assert_diagnostic_preserves_surface(customer, billable, expected)
     assert grant_surface(billable) == expected
 
     TestRepo.delete_all(EntitlementSummary)
@@ -188,7 +221,43 @@ defmodule Accrue.Entitlements.StripeSyncDisabledIsolationTest do
       "_accrue" => %{"fixture" => "fresh-contradictory"}
     })
 
+    assert_diagnostic_preserves_surface(customer, billable, expected)
     assert grant_surface(billable) == expected
+  end
+
+  defp assert_diagnostic_preserves_surface(customer, billable, expected) do
+    assert %{local: {:ok, _}, stripe_advisory: _} = Admin.diagnostic_for_customer(customer)
+    assert grant_surface(billable) == expected
+  end
+
+  defp cache_queries_while(fun) do
+    test_pid = self()
+    handler_id = "diagnostic-cache-#{System.unique_integer([:positive])}"
+
+    :telemetry.attach_many(
+      handler_id,
+      [@test_repo_query_event, @canonical_repo_query_event],
+      fn _event, _meas, meta, _ ->
+        sql = Map.get(meta, :query, "")
+
+        if is_binary(sql) and String.contains?(sql, @cache_table) do
+          send(test_pid, {:cache_query, sql})
+        end
+      end,
+      nil
+    )
+
+    on_exit(fn -> :telemetry.detach(handler_id) end)
+    _ = fun.()
+    drain_cache_queries([])
+  end
+
+  defp drain_cache_queries(queries) do
+    receive do
+      {:cache_query, sql} -> drain_cache_queries([sql | queries])
+    after
+      0 -> Enum.reverse(queries)
+    end
   end
 
   defp grant_surface(billable) do
