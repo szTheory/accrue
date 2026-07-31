@@ -259,6 +259,11 @@ require_absent_regex "$stripe_sync_ex" '@doc since: "1\.4\.0"'
 # DOCS-03: both optional writer paths converge through the same advisory row;
 # they remain diagnostic-only and cannot become a grant source of truth.
 stripe_sync_writer_provenance="StripeSync writer provenance ($stripe_sync_ex)"
+stripe_sync_one_way_dependency=$(awk '
+  /^  ## One-way dependency$/ { in_section = 1; next }
+  in_section && /^  """$/ { exit }
+  in_section { print }
+' "$stripe_sync_ex")
 
 require_fixed "$stripe_sync_ex" "webhook handling" \
   "$stripe_sync_writer_provenance: missing webhook writer"
@@ -266,8 +271,8 @@ require_fixed "$stripe_sync_ex" "client-backed pull refresh" \
   "$stripe_sync_writer_provenance: missing pull-refresh writer"
 require_fixed "$stripe_sync_ex" 'same advisory `Accrue.Billing.EntitlementSummary` row' \
   "$stripe_sync_writer_provenance: missing shared advisory row"
-require_fixed "$stripe_sync_ex" "Accrue.Entitlements.Reconcile" \
-  "$stripe_sync_writer_provenance: missing shared reconciler"
+[[ "$stripe_sync_one_way_dependency" == *"Accrue.Entitlements.Reconcile"* ]] ||
+  fail "$stripe_sync_writer_provenance: missing shared reconciler"
 require_fixed "$stripe_sync_ex" "stripe_native_sync: :advisory" \
   "$stripe_sync_writer_provenance: missing advisory opt-in boundary"
 require_fixed "$stripe_sync_ex" "off by default" \
