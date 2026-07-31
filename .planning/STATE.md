@@ -5,16 +5,16 @@ milestone_name: lattice_stripe 2.x Bump & Stripe-Native Entitlements Sync
 current_phase: 213
 current_phase_name: stripe-native-advisory-entitlements-sync-observational-only
 status: executing
-stopped_at: Completed 213-04-PLAN.md
-last_updated: "2026-07-31T01:15:06.135Z"
+stopped_at: Phase 213 verification found 1 remaining isolation-guard gap
+last_updated: "2026-07-31T01:29:12Z"
 last_activity: 2026-07-31
-last_activity_desc: Completed 213-04-PLAN.md
+last_activity_desc: Phase 213 verification found 1 remaining isolation-guard gap
 progress:
   total_phases: 3
-  completed_phases: 2
+  completed_phases: 1
   total_plans: 5
   completed_plans: 5
-  percent: 67
+  percent: 33
 ---
 
 # Project State
@@ -29,10 +29,10 @@ See: `.planning/PROJECT.md` (updated 2026-07-30 after v1.57 closeout)
 
 ## Current Position
 
-Phase: 213 (stripe-native-advisory-entitlements-sync-observational-only) — COMPLETE
+Phase: 213 (stripe-native-advisory-entitlements-sync-observational-only) — GAPS FOUND
 Plan: 4 of 4
-Status: Complete — ready for verification
-Last activity: 2026-07-31 — Completed 213-04-PLAN.md
+Status: Verification gaps found — isolation guard coverage incomplete
+Last activity: 2026-07-31 — Phase verification found 1 remaining gap
 
 ## Post-v1.48 Pause Rule
 
@@ -49,7 +49,7 @@ v1.58 lattice_stripe 2.x Bump & Stripe-Native Entitlements Sync opened 2026-07-3
 | Phase | Name | Requirements | Status |
 |-------|------|--------------|--------|
 | 212 | lattice_stripe 2.x bump & green reconciliation | BUMP-01, BUMP-02, BUMP-03 | Complete |
-| 213 | Stripe-native advisory entitlements sync (observational-only) | SYNC-01, SYNC-02, SYNC-03, SYNC-04, SYNC-05 | Complete — ready for verification |
+| 213 | Stripe-native advisory entitlements sync (observational-only) | SYNC-01, SYNC-02, SYNC-03, SYNC-04, SYNC-05 | Gaps found — isolation guard coverage incomplete |
 | 214 | Docs & truth reconciliation | DOCS-01, DOCS-02, DOCS-03 | Not started |
 
 Coverage: 11/11 requirements mapped to Phases 212-214 (each REQ-ID → exactly one phase). Per-phase counts: 212→3 · 213→5 · 214→3. **Dependency shape:** strictly linear — 212 → 213 → 214 (the bump must land green before anything else compiles against 2.x; the sync adoption needs the 2.x `LatticeStripe.Entitlements.*` modules present; docs reconcile against the final shipped behavior of both).
