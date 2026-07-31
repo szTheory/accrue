@@ -259,7 +259,7 @@ Plans:
 **Goal:** Close the verified v1.58 observation gap by surfacing already-persisted Stripe advisory entitlement diagnostics in the existing admin customer detail flow while local resolution remains the sole authorization source, and correct plus regression-protect both stale advisory pagination statements.
 **Requirements**: SYNC-02, DOCS-03
 **Depends on:** Phase 214
-**Plans:** 2/4 plans executed
+**Plans:** 3/4 plans executed
 
 Plans:
 
@@ -270,7 +270,7 @@ Plans:
 
 **Wave 2** *(blocked on Plan 01)*
 
-- [ ] 214.2-02-PLAN.md — Complete all core advisory states, provenance rules, independent failure containment, disabled no-I/O, and grant-invariance tests.
+- [x] 214.2-02-PLAN.md — Complete all core advisory states, provenance rules, independent failure containment, disabled no-I/O, and grant-invariance tests.
 
 **Wave 3** *(blocked on Plan 02)*
 
