@@ -14,7 +14,7 @@
 ### PROC-08 — Official dual-provider gateway core
 
 **Status:** Shipped across v1.31–v1.36; retained as a bounded gateway foundation, not the active expansion track.
-**Outcome:** Fake, Stripe, and Braintree support the documented capability slice without claiming generic provider parity. The v1.59 rail seam builds beside this processor contract rather than widening it into a lowest-common-denominator lifecycle interface.
+**Outcome:** Fake, Stripe, and Braintree support the documented Stripe-first capability slice without claiming generic provider parity. The v1.59 rail seam builds beside this processor contract rather than widening it into a lowest-common-denominator lifecycle interface.
 
 ## Track Boundaries
 
