@@ -260,11 +260,9 @@ Plans:
 **Requirements**: DOCS-03
 **Depends on:** Phase 214
 **Plans:** 2/3 plans executed
-**Status:** Complete
+**Status:** In Progress
 
 Plans:
-
-- [ ] 214.1-03-PLAN.md
 
 **Wave 1**
 
@@ -273,6 +271,7 @@ Plans:
 **Wave 2** *(blocked on Wave 1 focused verification)*
 
 - [x] 214.1-02-PLAN.md — Reconcile only current planning mirrors while preserving the historical milestone audit for independent re-audit.
+- [ ] 214.1-03-PLAN.md — Scope the shared-reconciler assertion to public StripeSync prose and prove the alias-preserving ROOT_DIR regression fails.
 
 ### Phase 215: Multi-rail contract and additive data foundation
 

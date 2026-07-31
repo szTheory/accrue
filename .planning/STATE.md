@@ -4,17 +4,17 @@ milestone: v1.58
 milestone_name: lattice_stripe 2.x Bump & Stripe-Native Entitlements Sync
 current_phase: 214.1
 current_phase_name: close-gap-docs-03-reconcile-stripesync-writer-documentation
-status: complete
-stopped_at: Phase 214.1 Plan 02 complete
-last_updated: "2026-07-31T16:03:49.930Z"
+status: ready_to_execute
+stopped_at: Phase 214.1 Plan 03 planned
+last_updated: "2026-07-31T16:24:14.729Z"
 last_activity: 2026-07-31
-last_activity_desc: Phase 214.1 current-planning reconciliation completed
+last_activity_desc: Phase 214.1 verification-gap Plan 03 created and verified
 progress:
   total_phases: 4
-  completed_phases: 4
-  total_plans: 11
+  completed_phases: 3
+  total_plans: 12
   completed_plans: 11
-  percent: 100
+  percent: 92
 ---
 
 # Project State
@@ -29,10 +29,10 @@ See: `.planning/PROJECT.md` (updated 2026-07-31 after multi-rail/offline roadmap
 
 ## Current Position
 
-Phase: 214.1 (close-gap-docs-03-reconcile-stripesync-writer-documentation) — COMPLETE
-Plan: 2 of 2 complete
-Status: Phase 214.1 correction green; Phase 214/214.1 verification; independent milestone re-audit pending
-Last activity: 2026-07-31 — Phase 214.1 current-planning reconciliation completed
+Phase: 214.1 (close-gap-docs-03-reconcile-stripesync-writer-documentation) — IN PROGRESS
+Plan: 2 of 3 complete
+Status: Plan 03 ready to execute for the scoped public-prose verifier gap
+Last activity: 2026-07-31 — Phase 214.1 verification-gap Plan 03 created and verified
 
 ## Post-v1.48 Pause Rule
 
@@ -53,7 +53,7 @@ Queued v1.59 clears the reopen rule through a concrete adopter requirement and e
 | 212 | lattice_stripe 2.x bump & green reconciliation | BUMP-01, BUMP-02, BUMP-03 | Complete |
 | 213 | Stripe-native advisory entitlements sync (observational-only) | SYNC-01, SYNC-02, SYNC-03, SYNC-04, SYNC-05 | Complete |
 | 214 | Docs & truth reconciliation | DOCS-01, DOCS-02, DOCS-03 | Complete (verified 9/9) |
-| 214.1 | DOCS-03 writer-documentation gap closure | DOCS-03 | Complete (focused evidence green) |
+| 214.1 | DOCS-03 writer-documentation gap closure | DOCS-03 | In Progress (Plan 03 ready) |
 
 Coverage: 11/11 requirements mapped to Phases 212-214 (each REQ-ID → exactly one phase); Phase 214.1 closes the DOCS-03 writer-documentation gap without duplicate assignment. Per-phase counts: 212→3 · 213→5 · 214→3. Phase 213 final re-verification passed 13/13 truths. **Dependency shape:** 212 → 213 → 214 → 214.1 (the bump must land green before anything else compiles against 2.x; the sync adoption needs the 2.x `LatticeStripe.Entitlements.*` modules present; docs reconcile against the final shipped behavior of both).
 
@@ -834,12 +834,13 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 
 ## Session Continuity
 
-Last session: 2026-07-31T16:03:49.921Z
-Stopped at: Phase 214.1 Plan 02 complete
-Resume file: .planning/phases/214.1-close-gap-docs-03-reconcile-stripesync-writer-documentation/214.1-02-SUMMARY.md
+Last session: 2026-07-31T16:24:14.729Z
+Stopped at: Phase 214.1 Plan 03 planned
+Resume file: .planning/phases/214.1-close-gap-docs-03-reconcile-stripesync-writer-documentation/214.1-03-PLAN.md
 
 ## Operator Next Steps
 
-- Run `/gsd-verify-work 214.1` (Phase 214/214.1 verification) to confirm the executable correction and current planning mirrors together.
+- Run `$gsd-execute-phase 214.1` to execute Plan 03's scoped public-prose verifier and alias-preserving ROOT_DIR regression.
+- Re-run `/gsd-verify-work 214.1` to confirm the executable correction and current planning mirrors together.
 - Run `$gsd-audit-milestone v1.58` as the independent milestone re-audit; archive only after it passes.
 - Then promote queued v1.59 through `$gsd-new-milestone v1.59 Account-Scoped Multi-Rail & Offline Entitlements` and begin `$gsd-discuss-phase 215`.
