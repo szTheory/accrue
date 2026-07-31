@@ -31,18 +31,32 @@ defmodule Accrue.Entitlements.Reconcile do
         {:ok, :ignored}
 
       true ->
+        synced_at = synced_at_from_event(evt_ts)
+
         Repo.transact(fn ->
           case Repo.get_by(Customer, processor_id: cus_id, processor: to_string(processor)) do
             %Customer{} = customer ->
               row = Repo.get_by(EntitlementSummary, customer_id: customer.id)
 
-              case check_stale(row, evt_ts) do
-                :stale ->
-                  :telemetry.execute(
-                    [:accrue, :webhooks, :stale_event],
-                    %{},
-                    %{object_type: :entitlement_summary, stripe_id: cus_id, event_id: evt_id}
+              case check_stale(row, synced_at, evt_id) do
+                :stale_same ->
+                  emit_webhook_stale(cus_id, evt_id)
+
+                  emit_summary_synced(
+                    %{
+                      customer_id: customer.id,
+                      has_more: get(entitlements, :has_more) == true,
+                      entitlement_count: length(data),
+                      source: :webhook
+                    },
+                    length(data),
+                    :unchanged
                   )
+
+                  {:ok, :stale}
+
+                :stale ->
+                  emit_webhook_stale(cus_id, evt_id)
 
                   {:ok, :stale}
 
@@ -50,7 +64,7 @@ defmodule Accrue.Entitlements.Reconcile do
                   write_summary(%{
                     source: :webhook,
                     event_id: evt_id,
-                    synced_at: synced_at_from_event(evt_ts),
+                    synced_at: synced_at,
                     event_ts: evt_ts,
                     payload: obj,
                     customer: customer,
@@ -240,7 +254,18 @@ defmodule Accrue.Entitlements.Reconcile do
       from(e in EntitlementSummary,
         where:
           (is_nil(e.synced_at) and is_nil(e.last_stripe_event_ts)) or
-            fragment("COALESCE(?, ?) < EXCLUDED.synced_at", e.synced_at, e.last_stripe_event_ts),
+            fragment("COALESCE(?, ?) < EXCLUDED.synced_at", e.synced_at, e.last_stripe_event_ts) or
+            fragment(
+              """
+              COALESCE(?, ?) = EXCLUDED.synced_at
+              AND EXCLUDED.last_stripe_event_id IS NOT NULL
+              AND (? IS NULL OR ? COLLATE "C" < EXCLUDED.last_stripe_event_id COLLATE "C")
+              """,
+              e.synced_at,
+              e.last_stripe_event_ts,
+              e.last_stripe_event_id,
+              e.last_stripe_event_id
+            ),
         update: [
           set: [
             processor: fragment("EXCLUDED.processor"),
@@ -292,15 +317,53 @@ defmodule Accrue.Entitlements.Reconcile do
   defp livemode_from_entitlements([first | _]), do: get(first, :livemode)
   defp livemode_from_entitlements(_), do: nil
 
-  defp check_stale(nil, _evt_ts), do: :ok
-  defp check_stale(%{last_stripe_event_ts: nil}, _evt_ts), do: :ok
-  defp check_stale(_row, nil), do: :ok
+  defp check_stale(nil, _synced_at, _event_id), do: :ok
+  defp check_stale(_row, nil, _event_id), do: :ok
 
-  defp check_stale(%{last_stripe_event_ts: last}, evt_ts) do
-    case DateTime.compare(evt_ts, last) do
-      :lt -> :stale
-      _ -> :ok
+  defp check_stale(row, synced_at, event_id) do
+    case summary_order(row, synced_at, event_id) do
+      :older -> :stale
+      :same -> :stale_same
+      :newer -> :ok
     end
+  end
+
+  defp summary_order(%EntitlementSummary{} = row, %DateTime{} = synced_at, event_id) do
+    case row_order_timestamp(row) do
+      nil ->
+        :newer
+
+      %DateTime{} = existing_ts ->
+        case DateTime.compare(synced_at, existing_ts) do
+          :gt -> :newer
+          :lt -> :older
+          :eq -> compare_event_id(event_id, row.last_stripe_event_id)
+        end
+    end
+  end
+
+  defp row_order_timestamp(%EntitlementSummary{} = row) do
+    row.synced_at || row.last_stripe_event_ts
+  end
+
+  defp compare_event_id(nil, _existing_id), do: :same
+  defp compare_event_id(event_id, nil) when is_binary(event_id), do: :newer
+
+  defp compare_event_id(event_id, existing_id)
+       when is_binary(event_id) and is_binary(existing_id) do
+    cond do
+      event_id > existing_id -> :newer
+      event_id < existing_id -> :older
+      true -> :same
+    end
+  end
+
+  defp emit_webhook_stale(cus_id, evt_id) do
+    :telemetry.execute(
+      [:accrue, :webhooks, :stale_event],
+      %{},
+      %{object_type: :entitlement_summary, stripe_id: cus_id, event_id: evt_id}
+    )
   end
 
   defp emit_summary_malformed(evt_id, reason) do
