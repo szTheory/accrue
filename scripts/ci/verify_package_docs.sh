@@ -259,6 +259,8 @@ require_absent_regex "$stripe_sync_ex" '@doc since: "1\.4\.0"'
 # DOCS-03: both optional writer paths converge through the same advisory row;
 # they remain diagnostic-only and cannot become a grant source of truth.
 stripe_sync_writer_provenance="StripeSync writer provenance ($stripe_sync_ex)"
+entitlement_summary_ex="$ROOT_DIR/accrue/lib/accrue/billing/entitlement_summary.ex"
+telemetry_md="$ROOT_DIR/accrue/guides/telemetry.md"
 stripe_sync_one_way_dependency=$(awk '
   /^  ## One-way dependency$/ { in_section = 1; next }
   in_section && /^  """$/ { exit }
@@ -287,6 +289,23 @@ require_absent_regex "$stripe_sync_ex" 'only reads through `Accrue\.Repo`' \
   "$stripe_sync_writer_provenance: stale read-only claim remains"
 require_absent_regex "$stripe_sync_ex" 'written exclusively by `Accrue\.Webhook\.DefaultHandler`' \
   "$stripe_sync_writer_provenance: stale webhook-exclusive claim remains"
+
+# DOCS-03 / D-21: current advisory-snapshot completeness truth. Client-backed
+# pull exhaustively drains active entitlements before persistence; webhook
+# summaries can be incomplete. Both paths remain observational-only.
+require_fixed "$entitlement_summary_ex" "streams the customer's active entitlements before persisting its advisory" \
+  "EntitlementSummary completeness ($entitlement_summary_ex): missing exhaustive pull truth"
+require_fixed "$entitlement_summary_ex" "snapshot. Webhook summary snapshots can contain only the first reported" \
+  "EntitlementSummary completeness ($entitlement_summary_ex): missing webhook incompleteness truth"
+require_fixed "$entitlement_summary_ex" "never affect local access or a gate decision." \
+  "EntitlementSummary completeness ($entitlement_summary_ex): missing advisory-only boundary"
+require_absent_regex "$entitlement_summary_ex" '`lattice_stripe >= 1\.2`|deferred.*paginated.*reconcile|full pagination is deferred' \
+  "EntitlementSummary completeness ($entitlement_summary_ex): stale deferred pagination truth remains"
+
+require_fixed "$telemetry_md" "Known-incomplete webhook advisory snapshot: \`has_more: true\` means only the first reported entitlements were received. Client-backed pull exhaustively streams active entitlements before persistence; neither path gates local access." \
+  "telemetry completeness ($telemetry_md): missing webhook/pull advisory truth"
+require_absent_regex "$telemetry_md" '`lattice_stripe >= 1\.2`|full pagination is deferred|deferred.*pagination' \
+  "telemetry completeness ($telemetry_md): stale deferred pagination truth remains"
 
 for internal_file in \
   "$stripe_processor_ex" \

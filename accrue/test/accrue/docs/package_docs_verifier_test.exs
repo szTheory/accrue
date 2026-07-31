@@ -931,7 +931,7 @@ defmodule Accrue.Docs.PackageDocsVerifierTest do
       telemetry_path
       |> File.read!()
       |> String.replace(
-        "Identifies a known-incomplete webhook advisory snapshot when `has_more: true`; client-backed pull exhaustively streams active entitlements before persistence. Neither path gates local access.",
+        "Known-incomplete webhook advisory snapshot: `has_more: true` means only the first reported entitlements were received. Client-backed pull exhaustively streams active entitlements before persistence; neither path gates local access.",
         "Fires only when `has_more: true` — full pagination is deferred until `lattice_stripe >= 1.2`.",
         global: false
       )

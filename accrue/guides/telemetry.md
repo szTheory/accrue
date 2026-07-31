@@ -460,7 +460,7 @@ For **ordered triage**, default **Oban** queue placement (anchor **`#oban-queue-
 | `[:accrue, :ops, :connect_account_deauthorized]` | Disconnect Connect account in product UI; stop destination charges; audit open Connect transfers. |
 | `[:accrue, :ops, :connect_capability_lost]` | Read `capability` + `to` status; Stripe Connect onboarding / requirements. |
 | `[:accrue, :ops, :connect_payout_failed]` | Use `payout_id` + `failure_code` in Stripe; update bank account or resolve restriction. |
-| `[:accrue, :ops, :entitlement_summary_truncated]` | Optional Stripe-native entitlement sync cached a known-incomplete summary (>10 inline entitlements, `has_more: true`); the advisory cache is observational-only and never gates access — full pagination lands with `lattice_stripe >= 1.2`. |
+| `[:accrue, :ops, :entitlement_summary_truncated]` | Known-incomplete webhook advisory snapshot: `has_more: true` means only the first reported entitlements were received. Client-backed pull exhaustively streams active entitlements before persistence; neither path gates local access. |
 
 ## See also
 
