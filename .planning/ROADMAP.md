@@ -259,7 +259,7 @@ Plans:
 **Goal:** Close the verified v1.58 observation gap by surfacing already-persisted Stripe advisory entitlement diagnostics in the existing admin customer detail flow while local resolution remains the sole authorization source, and correct plus regression-protect both stale advisory pagination statements.
 **Requirements**: SYNC-02, DOCS-03
 **Depends on:** Phase 214
-**Plans:** 3/4 plans executed
+**Plans:** 4/4 plans executed
 
 Plans:
 
@@ -274,7 +274,7 @@ Plans:
 
 **Wave 3** *(blocked on Plan 02)*
 
-- [ ] 214.2-03-PLAN.md — Complete Copy-backed UI states, bounded preview/full Raw data evidence, generated copy contract, and existing accessibility/mobile browser certification.
+- [x] 214.2-03-PLAN.md — Complete Copy-backed UI states, bounded preview/full Raw data evidence, generated copy contract, and existing accessibility/mobile browser certification.
 
 ### Phase 214.1: Close gap: DOCS-03 — reconcile StripeSync writer documentation (INSERTED)
 
