@@ -19,6 +19,8 @@ defmodule Accrue.Entitlements.AdminTest do
 
   alias Accrue.Entitlements.Admin
   alias Accrue.Entitlements.Reconcile
+  alias Accrue.Billing.EntitlementSummary
+  alias Accrue.TestRepo
 
   @entitlements [
     plans: [
@@ -209,7 +211,10 @@ defmodule Accrue.Entitlements.AdminTest do
       )
 
       %{customer: customer} =
-        Accrue.Test.Factory.active_subscription(%{owner_id: Ecto.UUID.generate(), price_id: "price_p1"})
+        Accrue.Test.Factory.active_subscription(%{
+          owner_id: Ecto.UUID.generate(),
+          price_id: "price_p1"
+        })
 
       observed_at = ~U[2026-07-31 12:34:56.000000Z]
 
@@ -224,21 +229,25 @@ defmodule Accrue.Entitlements.AdminTest do
                  "/v1/entitlements/active_entitlements"
                )
 
-      assert %{local: {:ok, %{resolved: resolved, unmapped_price_ids: []}}, stripe_advisory: advisory} =
+      assert %{
+               local: {:ok, %{resolved: resolved, unmapped_price_ids: []}},
+               stripe_advisory: advisory
+             } =
                Admin.diagnostic_for_customer(customer)
 
       assert MapSet.member?(resolved.features, :reports)
+
       assert advisory == %{
                state: :recorded,
                lookup_keys: ["alpha", "priority-support"],
                entitlement_count: 2,
-               synced_at: observed_at,
+               observed_at: observed_at,
                source: :pull,
                completeness: :complete,
                raw: %{
                  "lookup_keys" => ["alpha", "priority-support"],
                  "entitlement_count" => 2,
-                 "synced_at" => "2026-07-31T12:34:56.000000Z",
+                 "observed_at" => "2026-07-31T12:34:56.000000Z",
                  "source" => "pull",
                  "completeness" => "complete"
                }
@@ -249,12 +258,160 @@ defmodule Accrue.Entitlements.AdminTest do
 
     test "returns disabled before reading a historical advisory snapshot" do
       %{customer: customer} =
-        Accrue.Test.Factory.active_subscription(%{owner_id: Ecto.UUID.generate(), price_id: "price_p1"})
+        Accrue.Test.Factory.active_subscription(%{
+          owner_id: Ecto.UUID.generate(),
+          price_id: "price_p1"
+        })
 
       assert %{local: {:ok, %{resolved: resolved}}, stripe_advisory: %{state: :disabled}} =
                Admin.diagnostic_for_customer(customer)
 
       assert MapSet.member?(resolved.features, :reports)
     end
+
+    test "distinguishes no snapshot from an observed empty entitlement list" do
+      Application.put_env(
+        :accrue,
+        :entitlements,
+        Keyword.put(@entitlements, :stripe_native_sync, :advisory)
+      )
+
+      %{customer: customer} = Accrue.Test.Factory.customer(%{owner_id: Ecto.UUID.generate()})
+
+      assert %{stripe_advisory: not_observed} = Admin.diagnostic_for_customer(customer)
+
+      assert not_observed == advisory(:not_observed)
+
+      insert_summary!(customer, %{
+        "entitlements" => %{"data" => []},
+        "_accrue" => %{"source" => "pull"}
+      })
+
+      assert %{stripe_advisory: recorded_empty} = Admin.diagnostic_for_customer(customer)
+      assert recorded_empty.state == :recorded
+      assert recorded_empty.entitlement_count == 0
+      assert recorded_empty.lookup_keys == []
+      assert recorded_empty != not_observed
+    end
+
+    test "normalizes incomplete webhook, unknown provenance, and missing observation time" do
+      Application.put_env(
+        :accrue,
+        :entitlements,
+        Keyword.put(@entitlements, :stripe_native_sync, :advisory)
+      )
+
+      %{customer: customer} = Accrue.Test.Factory.customer(%{owner_id: Ecto.UUID.generate()})
+      observed_at = ~U[2026-07-31 14:00:00.000000Z]
+
+      insert_summary!(
+        customer,
+        %{"entitlements" => %{"data" => [%{"lookup_key" => "zeta"}, %{"lookup_key" => "alpha"}]}},
+        truncated: true,
+        synced_at: observed_at,
+        last_stripe_event_ts: observed_at,
+        last_stripe_event_id: "evt_webhook"
+      )
+
+      assert %{
+               stripe_advisory: %{
+                 state: :incomplete,
+                 source: :webhook,
+                 completeness: :incomplete,
+                 lookup_keys: ["alpha", "zeta"]
+               }
+             } =
+               Admin.diagnostic_for_customer(customer)
+
+      TestRepo.delete_all(EntitlementSummary)
+
+      insert_summary!(customer, %{"entitlements" => %{"data" => []}},
+        synced_at: observed_at,
+        last_stripe_event_ts: nil,
+        last_stripe_event_id: nil
+      )
+
+      assert %{
+               stripe_advisory: %{state: :recorded, source: :unavailable, completeness: :complete}
+             } =
+               Admin.diagnostic_for_customer(customer)
+
+      TestRepo.delete_all(EntitlementSummary)
+
+      insert_summary!(customer, %{"entitlements" => %{"data" => []}},
+        synced_at: nil,
+        last_stripe_event_ts: nil,
+        last_stripe_event_id: nil
+      )
+
+      assert %{stripe_advisory: %{state: :age_unknown, observed_at: nil}} =
+               Admin.diagnostic_for_customer(customer)
+    end
+
+    test "contains malformed advisory evidence as unavailable without losing local data" do
+      Application.put_env(
+        :accrue,
+        :entitlements,
+        Keyword.put(@entitlements, :stripe_native_sync, :advisory)
+      )
+
+      %{customer: customer} =
+        Accrue.Test.Factory.active_subscription(%{
+          owner_id: Ecto.UUID.generate(),
+          price_id: "price_p1"
+        })
+
+      insert_summary!(customer, %{
+        "entitlements" => %{"data" => [%{"lookup_key" => "valid"}, "malformed"]}
+      })
+
+      assert %{local: {:ok, %{resolved: resolved}}, stripe_advisory: unavailable} =
+               Admin.diagnostic_for_customer(customer)
+
+      assert MapSet.member?(resolved.features, :reports)
+      assert unavailable == advisory(:unavailable)
+    end
+  end
+
+  defp advisory(state) do
+    %{
+      state: state,
+      entitlement_count: 0,
+      lookup_keys: [],
+      observed_at: nil,
+      source: :unavailable,
+      completeness: :unknown,
+      raw: %{
+        "lookup_keys" => [],
+        "entitlement_count" => 0,
+        "observed_at" => nil,
+        "source" => "unavailable",
+        "completeness" => "unknown"
+      }
+    }
+  end
+
+  defp insert_summary!(customer, data, opts \\ []) do
+    now = Keyword.get(opts, :synced_at, DateTime.utc_now())
+
+    %EntitlementSummary{}
+    |> EntitlementSummary.force_changeset(%{
+      customer_id: customer.id,
+      stripe_customer_id: customer.processor_id,
+      livemode: false,
+      entitlement_count:
+        Keyword.get(
+          opts,
+          :entitlement_count,
+          length(get_in(data, ["entitlements", "data"]) || [])
+        ),
+      truncated: Keyword.get(opts, :truncated, false),
+      data: data,
+      synced_at: now,
+      last_stripe_event_ts: Keyword.get(opts, :last_stripe_event_ts, now),
+      last_stripe_event_id:
+        Keyword.get(opts, :last_stripe_event_id, "evt_#{System.unique_integer([:positive])}")
+    })
+    |> TestRepo.insert!()
   end
 end
