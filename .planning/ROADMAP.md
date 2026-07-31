@@ -259,13 +259,13 @@ Plans:
 **Goal:** Close the verified v1.58 observation gap by surfacing already-persisted Stripe advisory entitlement diagnostics in the existing admin customer detail flow while local resolution remains the sole authorization source, and correct plus regression-protect both stale advisory pagination statements.
 **Requirements**: SYNC-02, DOCS-03
 **Depends on:** Phase 214
-**Plans:** 4 plans
+**Plans:** 1/4 plans executed
 
 Plans:
 
 **Wave 1**
 
-- [ ] 214.2-01-PLAN.md — Prove a contradictory advisory writer → persisted row → core diagnostic → existing customer-detail tracer without changing local access.
+- [x] 214.2-01-PLAN.md — Prove a contradictory advisory writer → persisted row → core diagnostic → existing customer-detail tracer without changing local access.
 - [ ] 214.2-04-PLAN.md — Correct and ratchet the two stale pull/webhook pagination statements through the existing package-doc verifier family.
 
 **Wave 2** *(blocked on Plan 01)*
