@@ -777,6 +777,70 @@ defmodule Accrue.Docs.PackageDocsVerifierTest do
     assert output =~ "adoption-proof-matrix.md"
   end
 
+  test "package docs verifier rejects missing supported Phase 213 since metadata" do
+    tmp_dir = tmp_dir!()
+    seed_tmp_dir!(tmp_dir)
+
+    for relative_path <- [
+          "accrue/lib/accrue/entitlements/stripe_sync.ex",
+          "accrue/lib/accrue/processor.ex",
+          "accrue/lib/accrue/processor/fake.ex"
+        ] do
+      path = Path.join(tmp_dir, relative_path)
+      File.write!(path, String.replace(File.read!(path), ~s(  @doc since: "1.5.0"\n), ""))
+    end
+
+    {output, status} = run_verifier(tmp_dir)
+
+    assert status != 0
+    assert output =~ "[verify_package_docs]"
+    assert output =~ ~s(@doc since: "1.5.0")
+  end
+
+  test "package docs verifier rejects stale StripeSync since metadata" do
+    tmp_dir = tmp_dir!()
+    seed_tmp_dir!(tmp_dir)
+
+    stripe_sync_path = Path.join(tmp_dir, "accrue/lib/accrue/entitlements/stripe_sync.ex")
+
+    File.write!(
+      stripe_sync_path,
+      String.replace(File.read!(stripe_sync_path), ~s(@doc since: "1.5.0"), ~s(@doc since: "1.4.0"),
+        global: false
+      )
+    )
+
+    {output, status} = run_verifier(tmp_dir)
+
+    assert status != 0
+    assert output =~ "[verify_package_docs]"
+    assert output =~ "StripeSync.refresh/2"
+    assert output =~ ~s(@doc since: "1.5.0")
+  end
+
+  test "package docs verifier rejects internal Phase 213 since metadata" do
+    tmp_dir = tmp_dir!()
+    seed_tmp_dir!(tmp_dir)
+
+    stripe_sync_path = Path.join(tmp_dir, "accrue/lib/accrue/entitlements/stripe_sync.ex")
+
+    File.write!(
+      stripe_sync_path,
+      String.replace(
+        File.read!(stripe_sync_path),
+        "  @doc false\n  @spec summary_for_customer",
+        "  @doc false\n  @doc since: \"1.5.0\"\n  @spec summary_for_customer",
+        global: false
+      )
+    )
+
+    {output, status} = run_verifier(tmp_dir)
+
+    assert status != 0
+    assert output =~ "[verify_package_docs]"
+    assert output =~ "internal Phase 213 surface"
+  end
+
   defp tmp_dir! do
     tmp_dir =
       Path.join(System.tmp_dir!(), "accrue-docs-verifier-#{System.unique_integer([:positive])}")
@@ -835,6 +899,9 @@ defmodule Accrue.Docs.PackageDocsVerifierTest do
     copy_fixture!("accrue/guides/troubleshooting.md", tmp_dir)
     copy_fixture!("accrue/guides/analytics.md", tmp_dir)
     copy_fixture!("accrue/lib/accrue/entitlements/admin.ex", tmp_dir)
+    copy_fixture!("accrue/lib/accrue/entitlements/stripe_sync.ex", tmp_dir)
+    copy_fixture!("accrue/lib/accrue/processor.ex", tmp_dir)
+    copy_fixture!("accrue/lib/accrue/processor/fake.ex", tmp_dir)
     copy_fixture!("accrue_admin/mix.exs", tmp_dir)
     copy_fixture!("accrue_admin/README.md", tmp_dir)
     copy_fixture!("accrue_admin/assets/css/app.css", tmp_dir)
