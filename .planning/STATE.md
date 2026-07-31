@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.58
 milestone_name: lattice_stripe 2.x Bump & Stripe-Native Entitlements Sync
 current_phase: 214.1
-current_phase_name: "Close gap: DOCS-03 — reconcile StripeSync writer documentation"
-status: verifying
-stopped_at: Phase 214.1 context gathered
-last_updated: "2026-07-31T14:58:59.655Z"
+current_phase_name: close-gap-docs-03-reconcile-stripesync-writer-documentation
+status: executing
+stopped_at: Completed 214.1-01-PLAN.md
+last_updated: "2026-07-31T15:56:06.209Z"
 last_activity: 2026-07-31
-last_activity_desc: Phase 214.1 context gathered
+last_activity_desc: Phase 214.1 execution started
 progress:
   total_phases: 3
   completed_phases: 3
@@ -25,14 +25,14 @@ See: `.planning/PROJECT.md` (updated 2026-07-31 after multi-rail/offline roadmap
 
 **Core value:** A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic Elixir DX, strong domain modeling, tamper-evident audit ledger, great observability, and zero breaking-change pain through v1.x.
 
-**Current focus:** Re-audit and archive v1.58; keep v1.59 queued
+**Current focus:** Phase 214.1 — close-gap-docs-03-reconcile-stripesync-writer-documentation
 
 ## Current Position
 
-Phase: 214.1 — Close gap: DOCS-03 — reconcile StripeSync writer documentation
-Plan: Context gathered; ready to plan
-Status: Verified 9/9; zero human UAT; milestone re-audit pending
-Last activity: 2026-07-31 — Phase 214.1 context gathered
+Phase: 214.1 (close-gap-docs-03-reconcile-stripesync-writer-documentation) — EXECUTING
+Plan: 2 of 2
+Status: Ready to execute
+Last activity: 2026-07-31 — Phase 214.1 execution started
 
 ## Post-v1.48 Pause Rule
 
@@ -366,6 +366,7 @@ Coverage: 22/22 v1.51 requirements mapped (each REQ-ID → exactly one phase). D
 | Phase 214 P01 | 41min | 3 tasks | 12 files |
 | Phase 214 P02 | 12min | 3 tasks | 12 files |
 | Phase 214-docs-truth-reconciliation P03 | 8min | 2 tasks | 4 files |
+| Phase 214.1 P01 | 4m | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -691,6 +692,7 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - [Phase ?]: Exactly StripeSync.refresh/2, Processor.list_active_entitlements/2 callback, Processor.list_active_entitlements/2 facade, and Processor.Fake.put_entitlements/2 carry since 1.5.0 metadata.
 - [Phase ?]: Linked Release Please candidates require stable equal SemVer and matching package-local numbered sections before release-note verification accepts them.
 - [Phase ?]: Verification and UAT default to executable evidence; credentials and irreversible publishing are authorization gates.
+- [Phase ?]: Document webhook and client-backed pull refresh as opt-in writers of one advisory row while preserving local plan-to-feature mapping as the sole grant authority.
 
 ### Pending Todos
 
@@ -829,9 +831,9 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 
 ## Session Continuity
 
-Last session: 2026-07-31T14:58:35.027Z
-Stopped at: Phase 214.1 context gathered
-Resume file: .planning/phases/214.1-close-gap-docs-03-reconcile-stripesync-writer-documentation/214.1-CONTEXT.md
+Last session: 2026-07-31T15:56:06.199Z
+Stopped at: Completed 214.1-01-PLAN.md
+Resume file: .planning/phases/214.1-close-gap-docs-03-reconcile-stripesync-writer-documentation/214.1-02-PLAN.md
 
 ## Operator Next Steps
 

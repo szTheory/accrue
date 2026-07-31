@@ -258,13 +258,13 @@ Plans:
 **Goal:** Make `Accrue.Entitlements.StripeSync` accurately document webhook and client-backed pull writes through the shared advisory reconciler, prove that truth through the existing package-doc verifier family, and reconcile current planning mirrors without rewriting the historical `gaps_found` audit.
 **Requirements**: DOCS-03
 **Depends on:** Phase 214
-**Plans:** 2 plans
+**Plans:** 1/2 plans executed
 
 Plans:
 
 **Wave 1**
 
-- [ ] 214.1-01-PLAN.md — Correct and ratchet StripeSync writer provenance through the existing documentation contract and focused ROOT_DIR fixture.
+- [x] 214.1-01-PLAN.md — Correct and ratchet StripeSync writer provenance through the existing documentation contract and focused ROOT_DIR fixture.
 
 **Wave 2** *(blocked on Wave 1 focused verification)*
 
