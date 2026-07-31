@@ -295,8 +295,7 @@ Enabling is a **two-step opt-in** — both are required:
    ```
 
    The key is a boot-validated enum (`:disabled | :advisory`), not a boolean, so
-   future modes (e.g. the deferred paginated reconcile) can be appended without a
-   breaking config change.
+   future modes can be appended without a breaking config change.
 
 2. **Enable the Stripe event on your Dashboard.** This is **host-owned** — Accrue
    cannot do it for you. On your Stripe webhook endpoint (the same one Accrue
@@ -322,8 +321,9 @@ resolution means a stale advisory cache **never produces a wrong gate
 decision** — the local subscription projection (kept in sync by
 `customer.subscription.*` webhooks on the same monotonic discipline) is the
 truth the gate reads. The monotonic guard guarantees the cache, once it catches
-up, reflects the highest-timestamp summary regardless of delivery order. The
-proper fix for *missed* webhooks (the deferred reconcile) is described below.
+up, reflects the highest-timestamp summary regardless of delivery order. For
+missed webhooks or startup reconciliation, use the client-backed refresh path
+described below.
 
 ### The 10-entitlement inline cap
 
@@ -342,17 +342,38 @@ customer holds more. Accrue records exactly what the webhook delivers and is
   cause a wrong gate decision — it is surfaced for transparency, not consulted
   for access.
 
-### Deferred: the full paginated read (`lattice_stripe >= 1.2`)
+### Client-backed refresh for missed webhooks and reconciliation
 
-The complete fix for both missed webhooks (eventual consistency) and the
-10-entitlement cap is a **full paginated read** of Stripe's
-`GET /v1/entitlements/active_entitlements` API — fetched on startup and to
-reconcile after a webhook delivery failure, following Stripe's own guidance.
-That read is **deferred**: `lattice_stripe 1.1` has no Entitlements list API, so
-the monotonic-snapshot reducer is the complete in-scope path for v1.x. The
-paginated reconcile lands as a follow-up depending on `lattice_stripe >= 1.2`
-(exposed as a future `stripe_native_sync` mode value). Until then, `truncated`
-and the truncation ops event surface the gap honestly.
+Accrue now ships the full client-backed read through
+`Accrue.Entitlements.StripeSync.refresh/2`. When
+`stripe_native_sync: :advisory` is enabled, the refresh asks the configured
+processor for Stripe active entitlements and writes the same advisory cache row
+as the webhook reducer. When the flag is disabled, it returns
+`{:ok, :disabled}` before processor or repository I/O.
+
+Use this path after missed webhook delivery, on operational startup
+reconciliation, or when an operator wants to compare Stripe's current native
+entitlement view with Accrue's local grant model:
+
+```elixir
+customer = Accrue.Repo.get!(Accrue.Billing.Customer, customer_id)
+Accrue.Entitlements.StripeSync.refresh(customer)
+```
+
+Hosts that use Oban can enqueue the provided host-owned worker on the existing
+webhook queue:
+
+```elixir
+%{"customer_id" => customer.id}
+|> Accrue.Entitlements.StripeSync.RefreshWorker.new()
+|> Oban.insert()
+```
+
+Refresh errors return through the processor result and Oban retry semantics; a
+successful refresh still writes diagnostics only. The local plan→feature map
+remains the only Accrue grant authority, and refreshed advisory rows never
+change `entitled?/2`, `has_active_plan?/2`, controller plugs, or LiveView
+guards.
 
 ---
 

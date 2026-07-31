@@ -15,6 +15,14 @@ This matrix is a proof mirror. Canonical support-boundary semantics and stable-c
 
 **Layer C (merge-blocking `docs-contracts-shift-left` + `host-integration`):** job `docs-contracts-shift-left` is the CI home for the support-contract bundle. The exact bundle membership lives in `scripts/ci/README.md` and `.github/workflows/ci.yml`; the host-facing checks this matrix depends on are `verify_package_docs.sh`, `verify_v1_17_friction_research_contract.sh`, `verify_verify01_readme_contract.sh`, `verify_adoption_proof_matrix.sh`, and `verify_core_admin_invoice_verify_ids.sh`. Job `host-integration` runs `bash scripts/ci/accrue_host_uat.sh` (which delegates to `mix verify.full`) and may run `bash scripts/ci/accrue_host_hex_smoke.sh` on eligible workflow events. Local `mix verify.full` is the core host stack but **not** the entire merge contract unless you also run the same shift-left scripts from the repository root.
 
+**Advisory Stripe-native entitlement sync proof:** the merge-blocking proof is
+deterministic docs/isolation coverage, not a live Stripe run.
+`verify_package_docs.sh` pins the public wording that local plan→feature mapping
+is the grant authority and the Stripe cache is optional/default-off diagnostics.
+`verify_entitlement_sync_isolation.sh` proves the advisory cache, client fetch
+seam, and shared reconcile writer cannot enter resolver, plug, or LiveView guard
+paths. Live Stripe parity remains advisory evidence only.
+
 ## Blocking: Fake-backed host + browser
 
 | Concern | Proof | Where |
@@ -31,6 +39,7 @@ This matrix is a proof mirror. Canonical support-boundary semantics and stable-c
 | Dunning campaign wiring — `accrue_dunning` queue + `Oban.Plugins.Cron` DunningSweeper in host config; Fake-backed failed-payment → campaign-step → recovery loop through the real webhook entry point | `dunning_wiring_test.exs` (host wiring smoke) + `dunning_full_journey_test.exs` (accrue package full journey) | `examples/accrue_host/test/accrue_host/dunning_wiring_test.exs` + `accrue/test/accrue/dunning/dunning_full_journey_test.exs` |
 | Recovery wiring (PROOF-06) — base `config/config.exs` proof validates `Oban` config, requires queues `accrue_webhooks`, `accrue_mailers`, `accrue_dunning`, `accrue_meters`, `accrue_scheduled`, and requires `Oban.Plugins.Cron` workers `DunningSweeper`, `DetectExpiringCards`, `MeterEventsReconciler`, `MeteredRenewalReconciler`; see canonical append-merge teaching in `config/config.exs` (`append-merge` comment) | `recovery_wiring_test.exs` (host wiring smoke) | `examples/accrue_host/test/accrue_host/recovery_wiring_test.exs` |
 | Entitlement gating (`Accrue.Live.Entitlements`) | Gated `/app/reports/advanced` with `{:require_feature, :advanced_reports}` ; `entitlements_guard_test.exs` | `examples/accrue_host` router + `Accrue.Config.entitlements()` configuration |
+| Stripe-native advisory entitlement sync boundary | `verify_package_docs.sh` pins default-off/advisory/local-grant wording; `verify_entitlement_sync_isolation.sh` blocks gate-path references to the advisory cache/client-fetch/reconcile seam | `scripts/ci/verify_package_docs.sh`, `scripts/ci/verify_entitlement_sync_isolation.sh`, `accrue/guides/entitlements.md`, `.planning/processor-support-matrix.md` |
 | Recovered Revenue Dashboard | Deterministic seeds and UI rendering proof (`recovery_analytics_test.exs`) | [`priv/repo/seeds.exs`](../priv/repo/seeds.exs), `/admin/analytics/recovery`, `test-results/recovery-dashboard.png` |
 | In-app dunning banner (BAN-04) — shows for a past-due org and is absent for a healthy org, side-by-side via seeded `healthy@example.com` vs `past-due@example.com` | `dunning_banner_live_test.exs` (banner-on + banner-off) + `AccrueAdmin.Components.DunningBanner` mounted zero-config at the top of `Layouts.app` | [`test/accrue_host_web/live/dunning_banner_live_test.exs`](../test/accrue_host_web/live/dunning_banner_live_test.exs) + [`priv/repo/seeds.exs`](../priv/repo/seeds.exs) |
 
