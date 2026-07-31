@@ -5,10 +5,10 @@ milestone_name: lattice_stripe 2.x Bump & Stripe-Native Entitlements Sync
 current_phase: 214
 current_phase_name: Docs & truth reconciliation
 status: verifying
-stopped_at: Phase 214 passed 9/9; v1.58 ready for milestone re-audit and archive
-last_updated: "2026-07-31T14:39:16.977Z"
+stopped_at: Phase 214.1 context gathered
+last_updated: "2026-07-31T14:58:35.044Z"
 last_activity: 2026-07-31
-last_activity_desc: Phase 214 verified 9/9; v1.58 ready for re-audit
+last_activity_desc: Phase 214 passed all automated gates
 progress:
   total_phases: 3
   completed_phases: 3
@@ -455,6 +455,7 @@ Coverage: 22/22 v1.51 requirements mapped (each REQ-ID → exactly one phase). D
 - v1.57 opened 2026-07-19 and shipped 2026-07-30: Phases 209-211
 - v1.58 opened 2026-07-30: Phases 212-214 — roadmap created, ready to plan Phase 212
 - v1.59 queued 2026-07-31: Phases 215-219 — approved roadmap and requirements recorded; activation blocked only by v1.58 verified closeout
+- Phase 214.1 inserted after Phase 214: Close gap: DOCS-03 — reconcile StripeSync writer documentation (URGENT)
 
 ### Decisions
 
@@ -828,9 +829,9 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 
 ## Session Continuity
 
-Last session: 2026-07-31T14:18:57.551Z
-Stopped at: Completed 214-03-PLAN.md
-Resume file: None
+Last session: 2026-07-31T14:58:35.027Z
+Stopped at: Phase 214.1 context gathered
+Resume file: .planning/phases/214.1-close-gap-docs-03-reconcile-stripesync-writer-documentation/214.1-CONTEXT.md
 
 ## Operator Next Steps
 
