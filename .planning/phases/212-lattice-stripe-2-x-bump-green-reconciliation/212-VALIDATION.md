@@ -3,9 +3,9 @@ phase: 212
 slug: lattice-stripe-2-x-bump-green-reconciliation
 # status lifecycle: draft (seeded by plan-phase) → validated (set by validate-phase §6)
 # audit-milestone §5.5 distinguishes NOT-VALIDATED (draft) from PARTIAL (validated + nyquist_compliant: false) (#2117)
-status: draft
-nyquist_compliant: false
-wave_0_complete: false
+status: validated
+nyquist_compliant: true
+wave_0_complete: true
 created: 2026-07-30
 ---
 
@@ -51,15 +51,15 @@ created: 2026-07-30
 
 | Req ID | What must be TRUE | Automated Command | Package(s) | Status |
 |--------|-------------------|-------------------|------------|--------|
-| BUMP-01 | Pin `~> 2.0`; all 4 locks same 2.x version+checksum; 5-file atomic commit | `grep '"lattice_stripe"' accrue/mix.lock accrue_admin/mix.lock accrue_portal/mix.lock examples/accrue_host/mix.lock` + `git diff --stat` | all 4 | ⬜ pending |
-| BUMP-01 | Host stale `{:hex, :accrue, ...}` line dropped | `grep '"accrue":' examples/accrue_host/mix.lock` → no hex line | `examples/accrue_host` | ⬜ pending |
-| BUMP-02 | Zero compile warnings incl. Finch-optional path | `mix compile --warnings-as-errors` + `mix compile --warnings-as-errors --no-optional-deps` | `accrue`, `examples/accrue_host` | ⬜ pending |
-| BUMP-02 | Fixture-rename vector confirmed no-op | `grep -rn "LatticeStripe.Testing" accrue/test/support/stripe_fixtures.ex` → 0 matches | `accrue` | ⬜ pending |
-| BUMP-03 | `mix test` green, zero new skips | `mix test --warnings-as-errors` | `accrue`, `accrue_admin`, `accrue_portal` | ⬜ pending |
-| BUMP-03 | `mix dialyzer` green, PLT churn absorbed (cache key includes `hashFiles(mix.lock)` → auto-rebuild) | `mix dialyzer --format github` | `accrue`, `accrue_admin` only | ⬜ pending |
-| BUMP-03 | `mix credo --strict` green | `mix credo --strict` | `accrue`, `accrue_admin`, `accrue_portal` | ⬜ pending |
-| BUMP-03 | Coverage green | `mix coveralls` | `accrue`, `accrue_admin`, `accrue_portal` | ⬜ pending |
-| Success Criterion 5 | Fresh clean-checkout `mix deps.get && mix compile --warnings-as-errors` succeeds | Run from `git clean -fdx`/fresh clone state per package | all 4 | ⬜ pending |
+| BUMP-01 | Pin `~> 2.0`; all 4 locks same 2.x version+checksum; 5-file atomic commit | `grep '"lattice_stripe"' accrue/mix.lock accrue_admin/mix.lock accrue_portal/mix.lock examples/accrue_host/mix.lock` + `git show --stat 82f659fd` | all 4 | ✅ green |
+| BUMP-01 | Host stale `{:hex, :accrue, ...}` line dropped | `grep '"accrue":' examples/accrue_host/mix.lock` → no hex line | `examples/accrue_host` | ✅ green |
+| BUMP-02 | Zero compile warnings incl. Finch-optional path | `mix compile --warnings-as-errors` + `mix compile --warnings-as-errors --no-optional-deps` | all 4 | ✅ green |
+| BUMP-02 | Fixture-rename vector confirmed no-op | `grep -rn "LatticeStripe.Testing" accrue/test/support/stripe_fixtures.ex` → 0 matches | `accrue` | ✅ green |
+| BUMP-03 | `mix test` green, zero new skips | `mix test --warnings-as-errors` | `accrue`, `accrue_admin`, `accrue_portal` | ✅ green |
+| BUMP-03 | `mix dialyzer` green at the phase boundary, PLT churn absorbed (cache key includes `hashFiles(mix.lock)` → auto-rebuild) | `mix dialyzer --format github` | `accrue`, `accrue_admin` only | ✅ green |
+| BUMP-03 | `mix credo --strict` green | `mix credo --strict` | `accrue`, `accrue_admin`, `accrue_portal` | ✅ green |
+| BUMP-03 | Coverage green | `MIX_ENV=test mix coveralls` (`accrue`); `mix test --cover` (`accrue_admin`, `accrue_portal`) | `accrue`, `accrue_admin`, `accrue_portal` | ✅ green |
+| Success Criterion 5 | Fresh clean-checkout `mix deps.get && mix compile --warnings-as-errors` succeeds | Run from fresh clone state per package | all 4 | ✅ green |
 
 *Status: ⬜ pending · ✅ green · ❌ red · ⚠️ flaky*
 
@@ -82,11 +82,23 @@ created: 2026-07-30
 
 ## Validation Sign-Off
 
-- [ ] All tasks have `<automated>` verify or are covered by the compile/gate matrix above
-- [ ] Sampling continuity: compile gate runs on every touched package per commit
-- [ ] Wave 0 covers all MISSING references (N/A — none)
-- [ ] No watch-mode flags
-- [ ] Feedback latency < 30s (compile gate)
-- [ ] `nyquist_compliant: true` set in frontmatter
+- [x] All tasks have `<automated>` verify or are covered by the compile/gate matrix above
+- [x] Sampling continuity: compile gate runs on every touched package per commit
+- [x] Wave 0 covers all MISSING references (N/A — none)
+- [x] No watch-mode flags
+- [x] Feedback latency < 30s (compile gate)
+- [x] `nyquist_compliant: true` set in frontmatter
 
-**Approval:** pending
+**Approval:** validated 2026-07-31
+
+## Validation Audit 2026-07-31
+
+| Metric | Count |
+|--------|-------|
+| Gaps found | 0 |
+| Resolved | 0 |
+| Escalated | 0 |
+
+All BUMP-01/02/03 requirements have automated verification references and passed at the phase-212 boundary, as recorded in `212-UPGRADE-EVIDENCE.md` and independently confirmed by `212-VERIFICATION.md` (13/13 must-haves). The audit re-ran the phase-specific manifest, lockfile, fixture-decoupling, compile, test, and Credo checks at current HEAD; the Accrue suite passed with 1,731 tests and 0 failures.
+
+The current-HEAD Accrue Dialyzer run reports a warning in `accrue/lib/accrue/entitlements/reconcile.ex`, introduced by Phase 213 commit `192eb8ce`, after Phase 212 completed. That later implementation regression does not represent a missing Phase 212 verification reference and is therefore not counted as a Nyquist gap here; it remains actionable under Phase 213's review/validation scope.
