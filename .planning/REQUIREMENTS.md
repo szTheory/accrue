@@ -41,9 +41,9 @@ Each maps to exactly one roadmap phase (assigned in ROADMAP.md).
 
 ### Docs & Truth (DOCS)
 
-- [ ] **DOCS-01**: `CLAUDE.md` is updated — the Technology Stack `:lattice_stripe` row (version + entitlements note) and the Version Compatibility Matrix `lattice_stripe` anchor pin now read `~> 2.0`, correcting the stale `~> 0.2` matrix cell in passing.
-- [ ] **DOCS-02**: The entitlements JTBD truth is updated — `guides/jobs_to_be_done.md` and `.planning/research/JTBD-FRONTIER.md` flip the Phase 127 "optional Stripe-native sync deferred" status to shipped/observational, without overstating (it stays advisory, never a gate).
-- [ ] **DOCS-03**: Per-package changelog / release notes record the major dep bump and the new advisory sync; new public functions carry `@since` annotations; and the adoption-proof / support-matrix / planning-mirror docs stay mutually consistent (POS-03 / stable-core rule).
+- [x] **DOCS-01**: `CLAUDE.md` is updated — the Technology Stack `:lattice_stripe` row (version + entitlements note) and the Version Compatibility Matrix `lattice_stripe` anchor pin now read `~> 2.0`, correcting the stale `~> 0.2` matrix cell in passing.
+- [x] **DOCS-02**: The entitlements JTBD truth is updated — `guides/jobs_to_be_done.md` and `.planning/research/JTBD-FRONTIER.md` flip the Phase 127 "optional Stripe-native sync deferred" status to shipped/observational, without overstating (it stays advisory, never a gate).
+- [x] **DOCS-03**: Per-package changelog / release notes record the major dep bump and the new advisory sync; new public functions carry `@since` annotations; and the adoption-proof / support-matrix / planning-mirror docs stay mutually consistent (POS-03 / stable-core rule).
 
 ---
 
@@ -88,8 +88,8 @@ Phase assignments are written by the roadmap step (ROADMAP.md). Continues phase 
 | SYNC-03 | Phase 213 — Stripe-native advisory entitlements sync (observational-only) | Complete |
 | SYNC-04 | Phase 213 — Stripe-native advisory entitlements sync (observational-only) | Complete |
 | SYNC-05 | Phase 213 — Stripe-native advisory entitlements sync (observational-only) | Complete |
-| DOCS-01 | Phase 214 — Docs & truth reconciliation | Pending |
-| DOCS-02 | Phase 214 — Docs & truth reconciliation | Pending |
-| DOCS-03 | Phase 214 — Docs & truth reconciliation | Pending |
+| DOCS-01 | Phase 214 — Docs & truth reconciliation | Complete |
+| DOCS-02 | Phase 214 — Docs & truth reconciliation | Complete |
+| DOCS-03 | Phase 214 — Docs & truth reconciliation | Complete |
 
 **Coverage:** 11/11 mapped, 0 orphans, 0 duplicates (validated at roadmap creation 2026-07-30).

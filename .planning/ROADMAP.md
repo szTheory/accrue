@@ -232,7 +232,7 @@ Plans:
 Plans:
 **Wave 1**
 
-- [ ] 214-01-PLAN.md — Establish and enforce the current version/advisory-authority truth contract across public, support, adoption, and planning mirrors.
+- [x] 214-01-PLAN.md — Establish and enforce the current version/advisory-authority truth contract across public, support, adoption, and planning mirrors.
 
 **Wave 2** *(blocked on Wave 1 completion)*
 

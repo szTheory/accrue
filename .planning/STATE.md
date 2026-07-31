@@ -2,18 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.58
 milestone_name: lattice_stripe 2.x Bump & Stripe-Native Entitlements Sync
-current_phase: 214
-current_phase_name: Docs & truth reconciliation
 status: executing
-stopped_at: Phase 214 context gathered
-last_updated: "2026-07-31T03:33:30.419Z"
-last_activity: 2026-07-30
-last_activity_desc: Phase 214 execution started
+stopped_at: Completed 214-01-PLAN.md
+last_updated: "2026-07-31T03:46:02.133Z"
+last_activity: 2026-07-31
 progress:
   total_phases: 3
   completed_phases: 2
   total_plans: 8
-  completed_plans: 6
+  completed_plans: 7
   percent: 67
 ---
 
@@ -30,9 +27,9 @@ See: `.planning/PROJECT.md` (updated 2026-07-30 after v1.57 closeout)
 ## Current Position
 
 Phase: 214 (Docs & truth reconciliation) — EXECUTING
-Plan: 1 of 2
-Status: Executing Phase 214
-Last activity: 2026-07-30 — Phase 214 execution started
+Plan: 2 of 2
+Status: Ready to execute
+Last activity: 2026-07-31
 
 ## Post-v1.48 Pause Rule
 
@@ -347,6 +344,7 @@ Coverage: 22/22 v1.51 requirements mapped (each REQ-ID → exactly one phase). D
 | Phase 213 P03 | 347s | 2 tasks | 7 files |
 | Phase 213 P04 | 4 min | 2 tasks | 4 files |
 | Phase 213 P05 | 8min | 1 tasks | 2 files |
+| Phase 214 P01 | 41min | 3 tasks | 12 files |
 
 ## Accumulated Context
 
@@ -652,6 +650,9 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - [Phase 213]: Same-second webhook summaries are ordered by {synced_at, event_id}; the bytewise-greater event id wins. — Makes reducer and database conflict handling converge deterministically independent of arrival order.
 - [Phase 213]: Guard joins the always-on entitlement gate-path scan inventory without changing production Guard runtime behavior.
 - [Phase 213]: The existing scanner's comment and triple-quoted doc filtering remains unchanged; coverage is strengthened by hermetic Guard fixtures instead of broadening an allowlist.
+- [Phase ?]: Current-truth checks are scoped to active public/planning surfaces; dated phase, archive, and seed evidence remains historical.
+- [Phase ?]: Stripe-native entitlement sync is optional, default-off, observational diagnostics; local plan-to-feature mapping remains the only Accrue grant authority.
+- [Phase ?]: Adoption proof for advisory sync is deterministic docs/isolation verification, not live Stripe merge gating.
 
 ### Pending Todos
 
@@ -788,9 +789,9 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 
 ## Session Continuity
 
-Last session: 2026-07-31T02:30:27.026Z
-Stopped at: Phase 214 context gathered
-Resume file: .planning/phases/214-docs-truth-reconciliation/214-CONTEXT.md
+Last session: 2026-07-31T03:46:02.121Z
+Stopped at: Completed 214-01-PLAN.md
+Resume file: None
 
 ## Operator Next Steps
 
