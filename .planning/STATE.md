@@ -2,19 +2,19 @@
 gsd_state_version: 1.0
 milestone: v1.58
 milestone_name: lattice_stripe 2.x Bump & Stripe-Native Entitlements Sync
-current_phase: 213
-current_phase_name: stripe-native-advisory-entitlements-sync-observational-only
-status: executing
-stopped_at: Planned 213-05-PLAN.md
-last_updated: "2026-07-31T01:42:10Z"
+current_phase: 214
+current_phase_name: Docs & truth reconciliation
+status: ready_to_plan
+stopped_at: Completed 213-05-PLAN.md
+last_updated: "2026-07-31T01:51:11.297Z"
 last_activity: 2026-07-31
-last_activity_desc: Phase 213 gap closure planning complete
+last_activity_desc: Phase 213 gap closure execution complete
 progress:
   total_phases: 3
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 6
-  completed_plans: 5
-  percent: 33
+  completed_plans: 6
+  percent: 67
 ---
 
 # Project State
@@ -25,14 +25,14 @@ See: `.planning/PROJECT.md` (updated 2026-07-30 after v1.57 closeout)
 
 **Core value:** A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic Elixir DX, strong domain modeling, tamper-evident audit ledger, great observability, and zero breaking-change pain through v1.x.
 
-**Current focus:** Phase 213 — stripe-native-advisory-entitlements-sync-observational-only
+**Current focus:** Phase 214 — Docs & truth reconciliation
 
 ## Current Position
 
-Phase: 213 (stripe-native-advisory-entitlements-sync-observational-only) — EXECUTING
-Plan: 4 of 5
-Status: Gap closure planned — ready to execute
-Last activity: 2026-07-31 — Phase 213 gap closure planning complete
+Phase: 214 (Docs & truth reconciliation) — READY TO PLAN
+Plan: 0 of 1
+Status: Phase 213 complete; ready to plan Phase 214
+Last activity: 2026-07-31 — Phase 213 gap closure execution complete
 
 ## Post-v1.48 Pause Rule
 
@@ -49,7 +49,7 @@ v1.58 lattice_stripe 2.x Bump & Stripe-Native Entitlements Sync opened 2026-07-3
 | Phase | Name | Requirements | Status |
 |-------|------|--------------|--------|
 | 212 | lattice_stripe 2.x bump & green reconciliation | BUMP-01, BUMP-02, BUMP-03 | Complete |
-| 213 | Stripe-native advisory entitlements sync (observational-only) | SYNC-01, SYNC-02, SYNC-03, SYNC-04, SYNC-05 | Gap closure planned — ready to execute |
+| 213 | Stripe-native advisory entitlements sync (observational-only) | SYNC-01, SYNC-02, SYNC-03, SYNC-04, SYNC-05 | Complete |
 | 214 | Docs & truth reconciliation | DOCS-01, DOCS-02, DOCS-03 | Not started |
 
 Coverage: 11/11 requirements mapped to Phases 212-214 (each REQ-ID → exactly one phase). Per-phase counts: 212→3 · 213→5 · 214→3. **Dependency shape:** strictly linear — 212 → 213 → 214 (the bump must land green before anything else compiles against 2.x; the sync adoption needs the 2.x `LatticeStripe.Entitlements.*` modules present; docs reconcile against the final shipped behavior of both).
@@ -346,6 +346,7 @@ Coverage: 22/22 v1.51 requirements mapped (each REQ-ID → exactly one phase). D
 | Phase 213 P02 | 6 min | 2 tasks | 4 files |
 | Phase 213 P03 | 347s | 2 tasks | 7 files |
 | Phase 213 P04 | 4 min | 2 tasks | 4 files |
+| Phase 213 P05 | 8min | 1 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -649,6 +650,8 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - [Phase ?]: fetch_entitled/2 is closed and will-not-build; Stripe-native entitlement data remains diagnostic through StripeSync.summary_for_customer/1 and Admin.resolve_for_customer/1, never an authorization predicate.
 - [Phase 213]: Callback-omitting adapters return a bounded unsupported_operation APIError instead of a false empty snapshot or UndefinedFunctionError. — Preserves the optional Processor contract while avoiding a misleading successful empty advisory snapshot.
 - [Phase 213]: Same-second webhook summaries are ordered by {synced_at, event_id}; the bytewise-greater event id wins. — Makes reducer and database conflict handling converge deterministically independent of arrival order.
+- [Phase 213]: Guard joins the always-on entitlement gate-path scan inventory without changing production Guard runtime behavior.
+- [Phase 213]: The existing scanner's comment and triple-quoted doc filtering remains unchanged; coverage is strengthened by hermetic Guard fixtures instead of broadening an allowlist.
 
 ### Pending Todos
 
@@ -785,10 +788,10 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 
 ## Session Continuity
 
-Last session: 2026-07-31T01:14:24.714Z
-Stopped at: Completed 213-04-PLAN.md
+Last session: 2026-07-31T01:51:11.285Z
+Stopped at: Completed 213-05-PLAN.md
 Resume file: None
 
 ## Operator Next Steps
 
-- Run `/gsd-plan-phase 212` to begin planning the lattice_stripe 2.x bump & green reconciliation phase.
+- Run `/gsd-plan-phase 214` to plan the docs and truth reconciliation phase.

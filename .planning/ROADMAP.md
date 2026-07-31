@@ -195,7 +195,7 @@ Plans:
   4. The D-07 `fetch_entitled/2` question left open in `admin.ex` is closed one way or the other this milestone: either implemented as part of the advisory refresh surface (observational-only), or explicitly deferred with a one-line recorded reason in code and docs — no ambiguity remains.
   5. A test suite using only the Fake/Test processor (no live Stripe, no Chrome, fully `async`-safe) proves: the cache populates correctly from `LatticeStripe.Entitlements.*` results; a grant decision is identical whether the advisory cache is empty, stale, or directly contradicts the local plan→feature map; and the config defaults to off.
 
-**Plans:** 4/5 plans complete
+**Plans:** 5/5 plans executed
 
 Plans:
 **Wave 1**
@@ -213,7 +213,7 @@ Plans:
 
 **Wave 4** *(gap closure; blocked on completed Wave 3)*
 
-- [ ] 213-05-PLAN.md — Extend the isolation guard across the shared Plug/LiveView Guard path
+- [x] 213-05-PLAN.md — Extend the isolation guard across the shared Plug/LiveView Guard path
 
 ### Phase 214: Docs & truth reconciliation
 
@@ -245,7 +245,7 @@ Plans:
 | 210. Reign Home + certify answer-first IA & copy integrity | v1.57 | 3/3 | Complete | 2026-07-19 |
 | 211. Grep-gated CSS retirement & cross-surface cleanup | v1.57 | 4/4 | Complete | 2026-07-29 |
 | 212. lattice_stripe 2.x bump & green reconciliation | v1.58 | 1/1 | Complete | 2026-07-30 |
-| 213. Stripe-native advisory entitlements sync (observational-only) | v1.58 | 4/4 | Complete | 2026-07-31 |
+| 213. Stripe-native advisory entitlements sync (observational-only) | v1.58 | 5/5 | Complete | 2026-07-31 |
 
 ## Historical Backlog Anchors (not active scope)
 
