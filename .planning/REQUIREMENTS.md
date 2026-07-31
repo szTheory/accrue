@@ -83,11 +83,11 @@ Phase assignments are written by the roadmap step (ROADMAP.md). Continues phase 
 | BUMP-01 | Phase 212 — lattice_stripe 2.x bump & green reconciliation | Complete |
 | BUMP-02 | Phase 212 — lattice_stripe 2.x bump & green reconciliation | Complete |
 | BUMP-03 | Phase 212 — lattice_stripe 2.x bump & green reconciliation | Complete |
-| SYNC-01 | Phase 213 — Stripe-native advisory entitlements sync (observational-only) | Gaps Found |
+| SYNC-01 | Phase 213 — Stripe-native advisory entitlements sync (observational-only) | Complete |
 | SYNC-02 | Phase 213 — Stripe-native advisory entitlements sync (observational-only) | Complete |
 | SYNC-03 | Phase 213 — Stripe-native advisory entitlements sync (observational-only) | Complete |
-| SYNC-04 | Phase 213 — Stripe-native advisory entitlements sync (observational-only) | Gaps Found |
-| SYNC-05 | Phase 213 — Stripe-native advisory entitlements sync (observational-only) | Gaps Found |
+| SYNC-04 | Phase 213 — Stripe-native advisory entitlements sync (observational-only) | Complete |
+| SYNC-05 | Phase 213 — Stripe-native advisory entitlements sync (observational-only) | Complete |
 | DOCS-01 | Phase 214 — Docs & truth reconciliation | Pending |
 | DOCS-02 | Phase 214 — Docs & truth reconciliation | Pending |
 | DOCS-03 | Phase 214 — Docs & truth reconciliation | Pending |

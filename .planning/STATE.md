@@ -6,9 +6,9 @@ current_phase: 214
 current_phase_name: Docs & truth reconciliation
 status: executing
 stopped_at: Phase 214 context gathered
-last_updated: "2026-07-31T03:31:59.228Z"
+last_updated: "2026-07-31T03:33:30.419Z"
 last_activity: 2026-07-30
-last_activity_desc: Phase 213 complete, transitioned to Phase 214
+last_activity_desc: Phase 214 execution started
 progress:
   total_phases: 3
   completed_phases: 2
@@ -29,10 +29,10 @@ See: `.planning/PROJECT.md` (updated 2026-07-30 after v1.57 closeout)
 
 ## Current Position
 
-Phase: 214 — Docs & truth reconciliation
-Plan: Not started
-Status: Ready to execute
-Last activity: 2026-07-30 — Phase 213 complete, transitioned to Phase 214
+Phase: 214 (Docs & truth reconciliation) — EXECUTING
+Plan: 1 of 2
+Status: Executing Phase 214
+Last activity: 2026-07-30 — Phase 214 execution started
 
 ## Post-v1.48 Pause Rule
 
@@ -50,9 +50,9 @@ v1.58 lattice_stripe 2.x Bump & Stripe-Native Entitlements Sync opened 2026-07-3
 |-------|------|--------------|--------|
 | 212 | lattice_stripe 2.x bump & green reconciliation | BUMP-01, BUMP-02, BUMP-03 | Complete |
 | 213 | Stripe-native advisory entitlements sync (observational-only) | SYNC-01, SYNC-02, SYNC-03, SYNC-04, SYNC-05 | Complete |
-| 214 | Docs & truth reconciliation | DOCS-01, DOCS-02, DOCS-03 | Not started |
+| 214 | Docs & truth reconciliation | DOCS-01, DOCS-02, DOCS-03 | In Progress |
 
-Coverage: 11/11 requirements mapped to Phases 212-214 (each REQ-ID → exactly one phase). Per-phase counts: 212→3 · 213→5 · 214→3. **Dependency shape:** strictly linear — 212 → 213 → 214 (the bump must land green before anything else compiles against 2.x; the sync adoption needs the 2.x `LatticeStripe.Entitlements.*` modules present; docs reconcile against the final shipped behavior of both).
+Coverage: 11/11 requirements mapped to Phases 212-214 (each REQ-ID → exactly one phase). Per-phase counts: 212→3 · 213→5 · 214→3. Phase 213 final re-verification passed 13/13 truths. **Dependency shape:** strictly linear — 212 → 213 → 214 (the bump must land green before anything else compiles against 2.x; the sync adoption needs the 2.x `LatticeStripe.Entitlements.*` modules present; docs reconcile against the final shipped behavior of both).
 
 **Guardrails (binding, out of scope):** observational-only stays inviolable (D-01/D-11) — the Stripe-native sync is a read seam, never consulted for a grant decision; the local plan→feature map (`resolver/local_map.ex`) remains the sole canonical gate. `scripts/ci/verify_entitlement_sync_isolation.sh` stays green and is extended to cover the new client-fetch path. Pin target is `~> 2.0`, not `~> 2.1`. No new required dependencies; no new admin nav rooms; no admin redesign work (that is SEED-004 M2/M3); no `accrue_portal` work. Any processor-surface/support-matrix implication updates behavior, docs, examples/verifiers, and release notes together (stable-core rule). Sync tests use the Fake/Test processor only — no live Stripe, no Chrome, fully `async`-safe. Authoritative sources: `.planning/seeds/SEED-005-lattice-stripe-entitlements-bump.md`, `accrue/lib/accrue/entitlements/*`, `scripts/ci/verify_entitlement_sync_isolation.sh`.
 
