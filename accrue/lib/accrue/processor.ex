@@ -384,7 +384,21 @@ defmodule Accrue.Processor do
   """
   @spec list_active_entitlements(id(), opts()) :: {:ok, [map()]} | {:error, Exception.t()}
   def list_active_entitlements(id, opts \\ []) when is_binary(id) and is_list(opts) do
-    __impl__().list_active_entitlements(id, opts)
+    adapter = __impl__()
+
+    Code.ensure_loaded(adapter)
+
+    if function_exported?(adapter, :list_active_entitlements, 2) do
+      adapter.list_active_entitlements(id, opts)
+    else
+      {:error,
+       %Accrue.APIError{
+         code: "unsupported_operation",
+         http_status: 501,
+         message:
+           "#{inspect(adapter)} does not implement optional callback list_active_entitlements/2"
+       }}
+    end
   end
 
   @doc false
