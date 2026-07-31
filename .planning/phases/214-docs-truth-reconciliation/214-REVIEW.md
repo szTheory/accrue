@@ -1,6 +1,6 @@
 ---
 phase: 214-docs-truth-reconciliation
-reviewed: 2026-07-31T04:06:00Z
+reviewed: 2026-07-31T00:00:00Z
 depth: standard
 files_reviewed: 15
 files_reviewed_list:
@@ -20,8 +20,8 @@ files_reviewed_list:
   - scripts/ci/verify_package_docs.sh
   - scripts/ci/verify_release_notes_contract.sh
 findings:
-  critical: 1
-  warning: 0
+  critical: 0
+  warning: 1
   info: 0
   total: 1
 status: issues_found
@@ -29,33 +29,29 @@ status: issues_found
 
 # Phase 214: Code Review Report
 
-**Reviewed:** 2026-07-31T04:06:00Z
+**Reviewed:** 2026-07-31T00:00:00Z
 **Depth:** standard
 **Files Reviewed:** 15
 **Status:** issues_found
 
 ## Summary
 
-Reviewed the documentation/release contract changes and the advisory entitlement refresh public seam in context. Focused contract scripts and tests pass at the current version, but the new release verifier prevents the next Release Please version bump from passing CI.
+Reviewed the documentation reconciliation, entitlement public-surface metadata, and both CI contracts. The focused scripts and their 54 associated tests pass, but the new release-notes contract is hard-coded to a single upcoming release and will reject every subsequent normal linked release.
 
 ## Narrative Findings (AI reviewer)
 
-## Critical Issues
+## Warnings
 
-### CR-01: The release contract rejects the Release Please version it is meant to ship
+### WR-01: Release gate permanently rejects the next release after 1.5.0
 
-**File:** `scripts/ci/verify_release_notes_contract.sh:33-35`
-**Issue:** The verifier requires all package `@version` values to be exactly `1.4.0`. Release Please updates those values to `1.5.0` before the release PR is validated, so that PR will fail this script even when all packages remain aligned and the generated `1.5.0` changelog sections are correct. The existing ExUnit coverage only runs against the current `1.4.0` fixture, so it cannot catch the post-bump failure. This blocks the intended release pipeline.
-**Fix:** Remove the fixed-version assertions and validate the invariant that matters: all three versions match and the release notes contain the discovered current version. Add a fixture test with all three `mix.exs` files set to `1.5.0` (and a generated numbered changelog section) to prove the Release Please state passes.
+**File:** `scripts/ci/verify_release_notes_contract.sh:48-52`
 
-```bash
-[[ "$accrue_version" == "$accrue_admin_version" ]] || fail "accrue and accrue_admin versions diverged"
-[[ "$accrue_version" == "$accrue_portal_version" ]] || fail "accrue and accrue_portal versions diverged"
-# Do not pin the current version: Release Please advances it in the release PR.
-```
+**Issue:** The contract accepts only `1.4.0` and `1.5.0`; an aligned stable `1.6.0` (or any later linked version) fails before its changelog/release-note sections are inspected. This gate is run as part of the package documentation/release contract, so the next routine minor or patch release will be blocked unless this phase-specific script is edited first. The test suite only covers the hard-coded `1.5.0` candidate, so it cannot detect that regression.
+
+**Fix:** Derive the release state from changelog structure or pass the expected candidate version explicitly from the release workflow. For example, retain the `Unreleased` validation for the current checked-in release, but in candidate mode use the parsed shared version rather than a fixed `1.5.0` literal; add a fixture for a later aligned version such as `1.6.0`.
 
 ---
 
-_Reviewed: 2026-07-31T04:06:00Z_
+_Reviewed: 2026-07-31T00:00:00Z_
 _Reviewer: the agent (gsd-code-reviewer)_
 _Depth: standard_
