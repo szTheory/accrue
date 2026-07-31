@@ -8,10 +8,10 @@ last_updated: "2026-07-31T04:00:11.113Z"
 last_activity: 2026-07-31
 progress:
   total_phases: 3
-  completed_phases: 3
+  completed_phases: 2
   total_plans: 8
   completed_plans: 8
-  percent: 100
+  percent: 67
 ---
 
 # Project State
@@ -28,7 +28,7 @@ See: `.planning/PROJECT.md` (updated 2026-07-30 after v1.57 closeout)
 
 Phase: 214 (Docs & truth reconciliation) — EXECUTING
 Plan: 2 of 2
-Status: Phase complete — ready for verification
+Status: Verification gaps found — fix planning required
 Last activity: 2026-07-31
 
 ## Post-v1.48 Pause Rule
@@ -47,7 +47,7 @@ v1.58 lattice_stripe 2.x Bump & Stripe-Native Entitlements Sync opened 2026-07-3
 |-------|------|--------------|--------|
 | 212 | lattice_stripe 2.x bump & green reconciliation | BUMP-01, BUMP-02, BUMP-03 | Complete |
 | 213 | Stripe-native advisory entitlements sync (observational-only) | SYNC-01, SYNC-02, SYNC-03, SYNC-04, SYNC-05 | Complete |
-| 214 | Docs & truth reconciliation | DOCS-01, DOCS-02, DOCS-03 | Complete |
+| 214 | Docs & truth reconciliation | DOCS-01, DOCS-02, DOCS-03 | Gaps found |
 
 Coverage: 11/11 requirements mapped to Phases 212-214 (each REQ-ID → exactly one phase). Per-phase counts: 212→3 · 213→5 · 214→3. Phase 213 final re-verification passed 13/13 truths. **Dependency shape:** strictly linear — 212 → 213 → 214 (the bump must land green before anything else compiles against 2.x; the sync adoption needs the 2.x `LatticeStripe.Entitlements.*` modules present; docs reconcile against the final shipped behavior of both).
 
