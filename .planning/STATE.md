@@ -4,17 +4,17 @@ milestone: v1.58
 milestone_name: lattice_stripe 2.x Bump & Stripe-Native Entitlements Sync
 current_phase: 214.1
 current_phase_name: close-gap-docs-03-reconcile-stripesync-writer-documentation
-status: ready_to_execute
-stopped_at: Phase 214.1 Plan 03 planned
-last_updated: "2026-07-31T16:24:14.729Z"
+status: ready_to_verify
+stopped_at: Completed 214.1-03-PLAN.md
+last_updated: "2026-07-31T16:33:16.584Z"
 last_activity: 2026-07-31
-last_activity_desc: Phase 214.1 verification-gap Plan 03 created and verified
+last_activity_desc: Phase 214.1 Plan 03 completed; focused verification is ready
 progress:
   total_phases: 4
-  completed_phases: 3
+  completed_phases: 4
   total_plans: 12
-  completed_plans: 11
-  percent: 92
+  completed_plans: 12
+  percent: 100
 ---
 
 # Project State
@@ -29,10 +29,10 @@ See: `.planning/PROJECT.md` (updated 2026-07-31 after multi-rail/offline roadmap
 
 ## Current Position
 
-Phase: 214.1 (close-gap-docs-03-reconcile-stripesync-writer-documentation) — IN PROGRESS
-Plan: 2 of 3 complete
-Status: Plan 03 ready to execute for the scoped public-prose verifier gap
-Last activity: 2026-07-31 — Phase 214.1 verification-gap Plan 03 created and verified
+Phase: 214.1 (close-gap-docs-03-reconcile-stripesync-writer-documentation) — READY TO VERIFY
+Plan: 3 of 3 complete
+Status: All plans complete; focused phase verification is next
+Last activity: 2026-07-31 — Plan 03 completed with the scoped public-prose verifier regression
 
 ## Post-v1.48 Pause Rule
 
@@ -53,7 +53,7 @@ Queued v1.59 clears the reopen rule through a concrete adopter requirement and e
 | 212 | lattice_stripe 2.x bump & green reconciliation | BUMP-01, BUMP-02, BUMP-03 | Complete |
 | 213 | Stripe-native advisory entitlements sync (observational-only) | SYNC-01, SYNC-02, SYNC-03, SYNC-04, SYNC-05 | Complete |
 | 214 | Docs & truth reconciliation | DOCS-01, DOCS-02, DOCS-03 | Complete (verified 9/9) |
-| 214.1 | DOCS-03 writer-documentation gap closure | DOCS-03 | In Progress (Plan 03 ready) |
+| 214.1 | DOCS-03 writer-documentation gap closure | DOCS-03 | Plans complete; verification pending |
 
 Coverage: 11/11 requirements mapped to Phases 212-214 (each REQ-ID → exactly one phase); Phase 214.1 closes the DOCS-03 writer-documentation gap without duplicate assignment. Per-phase counts: 212→3 · 213→5 · 214→3. Phase 213 final re-verification passed 13/13 truths. **Dependency shape:** 212 → 213 → 214 → 214.1 (the bump must land green before anything else compiles against 2.x; the sync adoption needs the 2.x `LatticeStripe.Entitlements.*` modules present; docs reconcile against the final shipped behavior of both).
 
@@ -369,6 +369,7 @@ Coverage: 22/22 v1.51 requirements mapped (each REQ-ID → exactly one phase). D
 | Phase 214-docs-truth-reconciliation P03 | 8min | 2 tasks | 4 files |
 | Phase 214.1 P01 | 4m | 2 tasks | 3 files |
 | Phase 214.1 P02 | 12m | 2 tasks | 4 files |
+| Phase 214.1-close-gap-docs-03-reconcile-stripesync-writer-documentation P03 | 3min | 1 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -696,6 +697,8 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - [Phase ?]: Verification and UAT default to executable evidence; credentials and irreversible publishing are authorization gates.
 - [Phase ?]: Document webhook and client-backed pull refresh as opt-in writers of one advisory row while preserving local plan-to-feature mapping as the sole grant authority.
 - [Phase ?]: Phase 214.1 executable correction is green, but only independent v1.58 re-audit can change the historical audit or authorize archive.
+- [Phase ?]: Scoped the StripeSync shared-reconciler verifier assertion to public one-way-dependency prose.
+- [Phase ?]: Proved public-prose drift through an alias-preserving ROOT_DIR production-verifier fixture.
 
 ### Pending Todos
 
@@ -834,13 +837,12 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 
 ## Session Continuity
 
-Last session: 2026-07-31T16:24:14.729Z
-Stopped at: Phase 214.1 Plan 03 planned
-Resume file: .planning/phases/214.1-close-gap-docs-03-reconcile-stripesync-writer-documentation/214.1-03-PLAN.md
+Last session: 2026-07-31T16:33:16.574Z
+Stopped at: Completed 214.1-03-PLAN.md
+Resume file: None
 
 ## Operator Next Steps
 
-- Run `$gsd-execute-phase 214.1` to execute Plan 03's scoped public-prose verifier and alias-preserving ROOT_DIR regression.
 - Re-run `/gsd-verify-work 214.1` to confirm the executable correction and current planning mirrors together.
 - Run `$gsd-audit-milestone v1.58` as the independent milestone re-audit; archive only after it passes.
 - Then promote queued v1.59 through `$gsd-new-milestone v1.59 Account-Scoped Multi-Rail & Offline Entitlements` and begin `$gsd-discuss-phase 215`.
