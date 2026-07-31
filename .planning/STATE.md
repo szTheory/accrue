@@ -5,15 +5,15 @@ milestone_name: lattice_stripe 2.x Bump & Stripe-Native Entitlements Sync
 current_phase: 213
 current_phase_name: stripe-native-advisory-entitlements-sync-observational-only
 status: executing
-stopped_at: Completed 213-03-PLAN.md
-last_updated: "2026-07-31T01:06:20.414Z"
-last_activity: 2026-07-30
-last_activity_desc: Phase 213 planning complete
+stopped_at: Completed 213-04-PLAN.md
+last_updated: "2026-07-31T01:15:06.135Z"
+last_activity: 2026-07-31
+last_activity_desc: Completed 213-04-PLAN.md
 progress:
   total_phases: 3
   completed_phases: 2
   total_plans: 5
-  completed_plans: 4
+  completed_plans: 5
   percent: 67
 ---
 
@@ -29,10 +29,10 @@ See: `.planning/PROJECT.md` (updated 2026-07-30 after v1.57 closeout)
 
 ## Current Position
 
-Phase: 213 (stripe-native-advisory-entitlements-sync-observational-only) — EXECUTING
-Plan: 3 of 3
-Status: Ready to execute
-Last activity: 2026-07-30 — Phase 213 planning complete
+Phase: 213 (stripe-native-advisory-entitlements-sync-observational-only) — COMPLETE
+Plan: 4 of 4
+Status: Complete — ready for verification
+Last activity: 2026-07-31 — Completed 213-04-PLAN.md
 
 ## Post-v1.48 Pause Rule
 
@@ -345,6 +345,7 @@ Coverage: 22/22 v1.51 requirements mapped (each REQ-ID → exactly one phase). D
 | Phase 213 P01 | approximately 6 minutes | 2 tasks | 8 files |
 | Phase 213 P02 | 6 min | 2 tasks | 4 files |
 | Phase 213 P03 | 347s | 2 tasks | 7 files |
+| Phase 213 P04 | 4 min | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -646,6 +647,8 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - [Phase 213]: RefreshWorker uses the existing accrue_webhooks queue with scalar customer_id args and no scheduler. — Preserves host-owned Oban wiring and keeps advisory refresh off request paths without introducing an always-on poller.
 - [Phase ?]: The static entitlement isolation guard rejects executable list_active_entitlements and Reconcile references from gate-path files while allowing explanatory comments and moduledocs.
 - [Phase ?]: fetch_entitled/2 is closed and will-not-build; Stripe-native entitlement data remains diagnostic through StripeSync.summary_for_customer/1 and Admin.resolve_for_customer/1, never an authorization predicate.
+- [Phase 213]: Callback-omitting adapters return a bounded unsupported_operation APIError instead of a false empty snapshot or UndefinedFunctionError. — Preserves the optional Processor contract while avoiding a misleading successful empty advisory snapshot.
+- [Phase 213]: Same-second webhook summaries are ordered by {synced_at, event_id}; the bytewise-greater event id wins. — Makes reducer and database conflict handling converge deterministically independent of arrival order.
 
 ### Pending Todos
 
@@ -782,8 +785,8 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 
 ## Session Continuity
 
-Last session: 2026-07-30T21:30:31.312Z
-Stopped at: Completed 213-03-PLAN.md
+Last session: 2026-07-31T01:14:24.714Z
+Stopped at: Completed 213-04-PLAN.md
 Resume file: None
 
 ## Operator Next Steps
