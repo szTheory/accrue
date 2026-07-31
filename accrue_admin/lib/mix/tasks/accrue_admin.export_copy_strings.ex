@@ -112,6 +112,32 @@ defmodule Mix.Tasks.AccrueAdmin.ExportCopyStrings do
     entitlements_no_drift_copy
     entitlements_raw_map_label
     entitlements_error_copy
+    entitlements_canonical_group_title
+    entitlements_advisory_group_title
+    entitlements_advisory_boundary
+    entitlements_advisory_recorded_title
+    entitlements_advisory_disabled_title
+    entitlements_advisory_disabled_copy
+    entitlements_advisory_source_label
+    entitlements_advisory_source_pull
+    entitlements_advisory_completeness_label
+    entitlements_advisory_complete
+    entitlements_advisory_observed_entitlements_label
+    entitlements_advisory_lookup_keys_label
+    entitlements_advisory_observed_at_label
+    entitlements_advisory_unavailable_title
+    entitlements_advisory_source_unavailable
+    entitlements_advisory_incomplete
+    entitlements_advisory_unavailable
+    entitlements_advisory_not_observed_title
+    entitlements_advisory_not_observed_copy
+    entitlements_advisory_age_unknown_title
+    entitlements_advisory_age_unknown_copy
+    entitlements_advisory_incomplete_title
+    entitlements_advisory_incomplete_copy
+    entitlements_advisory_unavailable_copy
+    entitlements_advisory_source_webhook
+    entitlements_advisory_completeness_unknown
   )a
 
   @impl Mix.Task
