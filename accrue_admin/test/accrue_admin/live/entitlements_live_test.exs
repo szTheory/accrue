@@ -135,7 +135,9 @@ defmodule AccrueAdmin.EntitlementsLiveTest do
     refute html =~ Copy.entitlements_no_drift_copy()
   end
 
-  test "a contradictory pull snapshot is advisory while canonical access remains local", %{conn: conn} do
+  test "a contradictory pull snapshot is advisory while canonical access remains local", %{
+    conn: conn
+  } do
     prior_entitlements = Application.get_env(:accrue, :entitlements)
 
     Application.put_env(
@@ -177,20 +179,25 @@ defmodule AccrueAdmin.EntitlementsLiveTest do
 
   test "advisory state copy distinguishes every non-authoritative observation state" do
     assert Copy.entitlements_advisory_not_observed_title() == "No snapshot yet."
+
     assert Copy.entitlements_advisory_not_observed_copy() ==
              "No advisory snapshot has been recorded for this customer."
 
     assert Copy.entitlements_advisory_age_unknown_title() == "Snapshot time unavailable."
+
     assert Copy.entitlements_advisory_age_unknown_copy() ==
              "This advisory snapshot has no recorded observation time."
 
     assert Copy.entitlements_advisory_incomplete_title() == "Incomplete snapshot."
+
     assert Copy.entitlements_advisory_incomplete_copy() ==
              "This webhook snapshot contains only the first reported entitlements. Local access above is unchanged."
 
     assert Copy.entitlements_advisory_unavailable_title() == "Snapshot unavailable."
+
     assert Copy.entitlements_advisory_unavailable_copy() ==
              "We couldn't load the Stripe advisory snapshot. Local access above is unchanged."
+
     assert Copy.entitlements_advisory_preview_more(2) == "+2 more"
     assert Copy.entitlements_advisory_count(0) == "0 entitlements observed"
   end
