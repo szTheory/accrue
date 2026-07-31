@@ -1163,6 +1163,26 @@ defmodule AccrueAdmin.Copy do
 
   defdelegate entitlements_error_copy(), to: Entitlements, as: :error_copy
 
+  defdelegate entitlements_canonical_group_title(), to: Entitlements, as: :canonical_group_title
+  defdelegate entitlements_advisory_group_title(), to: Entitlements, as: :advisory_group_title
+  defdelegate entitlements_advisory_boundary(), to: Entitlements, as: :advisory_boundary
+  defdelegate entitlements_advisory_recorded_title(), to: Entitlements, as: :advisory_recorded_title
+  defdelegate entitlements_advisory_disabled_title(), to: Entitlements, as: :advisory_disabled_title
+  defdelegate entitlements_advisory_disabled_copy(), to: Entitlements, as: :advisory_disabled_copy
+  defdelegate entitlements_advisory_count(count), to: Entitlements, as: :advisory_count
+  defdelegate entitlements_advisory_observed_at(timestamp), to: Entitlements, as: :advisory_observed_at
+  defdelegate entitlements_advisory_source_label(), to: Entitlements, as: :advisory_source_label
+  defdelegate entitlements_advisory_source_pull(), to: Entitlements, as: :advisory_source_pull
+  defdelegate entitlements_advisory_completeness_label(), to: Entitlements, as: :advisory_completeness_label
+  defdelegate entitlements_advisory_complete(), to: Entitlements, as: :advisory_complete
+  defdelegate entitlements_advisory_observed_entitlements_label(), to: Entitlements, as: :advisory_observed_entitlements_label
+  defdelegate entitlements_advisory_lookup_keys_label(), to: Entitlements, as: :advisory_lookup_keys_label
+  defdelegate entitlements_advisory_observed_at_label(), to: Entitlements, as: :advisory_observed_at_label
+  defdelegate entitlements_advisory_unavailable_title(), to: Entitlements, as: :advisory_unavailable_title
+  defdelegate entitlements_advisory_source_unavailable(), to: Entitlements, as: :advisory_source_unavailable
+  defdelegate entitlements_advisory_incomplete(), to: Entitlements, as: :advisory_incomplete
+  defdelegate entitlements_advisory_unavailable(), to: Entitlements, as: :advisory_unavailable
+
   def webhooks_index_empty_title, do: "No webhook deliveries for this organization yet"
 
   def webhooks_index_empty_copy,

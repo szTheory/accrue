@@ -24,6 +24,7 @@ defmodule AccrueAdmin.Live.CustomerLive do
     JsonViewer,
     MoneyFormatter,
     RelatedResources,
+    StatusBadge,
     Timeline
   }
 
@@ -288,8 +289,21 @@ defmodule AccrueAdmin.Live.CustomerLive do
             <summary class="ax-detail-section-head">
               <span class="ax-detail-section-title">Access and entitlements</span>
             </summary>
-            <Detail.detail_field_list fields={access_entitlement_fields(@entitlements_view)} />
-            <p :if={@entitlements_view == :error} class="ax-body" data-role="entitlements-error">
+            <div class="ax-stack-md" data-role="canonical-access">
+              <h3 class="ax-detail-section-title"><%= Copy.entitlements_canonical_group_title() %></h3>
+              <Detail.detail_field_list fields={canonical_access_fields(@entitlements_view)} />
+            </div>
+            <div class="ax-stack-md" data-role="stripe-advisory">
+              <h3 class="ax-detail-section-title"><%= Copy.entitlements_advisory_group_title() %></h3>
+              <p class="ax-body"><%= Copy.entitlements_advisory_boundary() %></p>
+              <StatusBadge.status_badge
+                status={@entitlements_view.stripe_advisory.state}
+                label={advisory_state_title(@entitlements_view.stripe_advisory)}
+                tone="slate"
+              />
+              <Detail.detail_field_list fields={stripe_advisory_fields(@entitlements_view.stripe_advisory)} />
+            </div>
+            <p :if={@entitlements_view.local == {:error, :unavailable}} class="ax-body" data-role="entitlements-error">
               <%= Copy.entitlements_error_copy() %>
             </p>
           </details>
@@ -550,9 +564,9 @@ defmodule AccrueAdmin.Live.CustomerLive do
     |> Enum.join(" · ")
   end
 
-  defp access_headline(:error), do: Copy.entitlements_error_copy()
+  defp access_headline(%{local: {:error, :unavailable}}), do: Copy.entitlements_error_copy()
 
-  defp access_headline({:ok, resolved, unmapped}) do
+  defp access_headline(%{local: {:ok, %{resolved: resolved, unmapped_price_ids: unmapped}}}) do
     active_count = MapSet.size(resolved.active_plans) + MapSet.size(resolved.features)
 
     cond do
@@ -577,14 +591,14 @@ defmodule AccrueAdmin.Live.CustomerLive do
     |> Enum.join(", ")
   end
 
-  defp access_entitlement_fields(:error) do
+  defp canonical_access_fields(%{local: {:error, :unavailable}}) do
     [
       %{label: "Access", value: Copy.entitlements_error_copy()},
       %{label: "Drift", value: Copy.entitlements_error_copy()}
     ]
   end
 
-  defp access_entitlement_fields({:ok, resolved, unmapped}) do
+  defp canonical_access_fields(%{local: {:ok, %{resolved: resolved, unmapped_price_ids: unmapped}}}) do
     active_plans = resolved.active_plans |> MapSet.to_list() |> Enum.sort()
     features = resolved.features |> MapSet.to_list() |> Enum.sort()
     grace_plans = resolved.grace_plans |> MapSet.to_list() |> Enum.sort()
@@ -617,6 +631,33 @@ defmodule AccrueAdmin.Live.CustomerLive do
       }
     ]
   end
+
+  defp stripe_advisory_fields(%{state: :disabled}) do
+    [%{label: Copy.entitlements_advisory_group_title(), value: Copy.entitlements_advisory_disabled_copy()}]
+  end
+
+  defp stripe_advisory_fields(%{state: :recorded} = advisory) do
+    [
+      %{label: Copy.entitlements_advisory_observed_entitlements_label(), value: Copy.entitlements_advisory_count(advisory.entitlement_count)},
+      %{label: Copy.entitlements_advisory_lookup_keys_label(), value: Enum.join(advisory.lookup_keys, ", ")},
+      %{label: Copy.entitlements_advisory_observed_at_label(), value: Copy.entitlements_advisory_observed_at(advisory.synced_at)},
+      %{label: Copy.entitlements_advisory_source_label(), value: advisory_source(advisory.source)},
+      %{label: Copy.entitlements_advisory_completeness_label(), value: advisory_completeness(advisory.completeness)}
+    ]
+  end
+
+  defp stripe_advisory_fields(_advisory), do: []
+
+  defp advisory_state_title(%{state: :recorded}), do: Copy.entitlements_advisory_recorded_title()
+  defp advisory_state_title(%{state: :disabled}), do: Copy.entitlements_advisory_disabled_title()
+  defp advisory_state_title(_advisory), do: Copy.entitlements_advisory_unavailable_title()
+
+  defp advisory_source(:pull), do: Copy.entitlements_advisory_source_pull()
+  defp advisory_source(_source), do: Copy.entitlements_advisory_source_unavailable()
+
+  defp advisory_completeness(:complete), do: Copy.entitlements_advisory_complete()
+  defp advisory_completeness(:incomplete), do: Copy.entitlements_advisory_incomplete()
+  defp advisory_completeness(_completeness), do: Copy.entitlements_advisory_unavailable()
 
   defp tax_ownership_fields(row, tax_risk) do
     tax_health = BillingPresentation.tax_health(row)
@@ -651,10 +692,11 @@ defmodule AccrueAdmin.Live.CustomerLive do
     }
   end
 
-  defp raw_entitlements_payload({:ok, resolved, _unmapped}),
-    do: entitlements_display_map(resolved)
+  defp raw_entitlements_payload(%{local: {:ok, %{resolved: resolved}}, stripe_advisory: advisory}),
+    do: Map.put(entitlements_display_map(resolved), "stripe_advisory", raw_advisory_payload(advisory))
 
-  defp raw_entitlements_payload(:error), do: %{"error" => Copy.entitlements_error_copy()}
+  defp raw_entitlements_payload(%{local: {:error, :unavailable}, stripe_advisory: advisory}),
+    do: %{"error" => Copy.entitlements_error_copy(), "stripe_advisory" => raw_advisory_payload(advisory)}
 
   defp related_items(customer, mount_path, scope) do
     [
@@ -746,7 +788,7 @@ defmodule AccrueAdmin.Live.CustomerLive do
     |> Repo.all()
   end
 
-  # Calls the read-only entitlements diagnostic seam ONCE, returning a contained
+  # Calls the read-only two-branch entitlements diagnostic seam ONCE, returning a contained
   # result. One-way dependency: admin -> core; the LiveView only reads through
   # the resolver's SSOT fold, never re-derives resolution truth.
   #
@@ -755,14 +797,14 @@ defmodule AccrueAdmin.Live.CustomerLive do
   # the two DB round-trips can fail transiently. Wrap the resolution in
   # try/rescue so a failure collapses to the fail-closed `:error` sentinel
   # (rendered as `Copy.entitlements_error_copy/0`) instead of crashing the
-  # LiveView process. Returns `{:ok, resolved, unmapped}` on success, `:error`
-  # on any resolution failure.
+  # LiveView process. The canonical local and advisory branches remain independent.
   defp entitlements_view(customer) do
-    {resolved, unmapped} = Accrue.Entitlements.Admin.resolve_for_customer(customer)
-    {:ok, resolved, unmapped}
+    Accrue.Entitlements.Admin.diagnostic_for_customer(customer)
   rescue
-    _ -> :error
+    _ -> %{local: {:error, :unavailable}, stripe_advisory: %{state: :unavailable, lookup_keys: [], entitlement_count: 0, raw: %{}}}
   end
+
+  defp raw_advisory_payload(advisory), do: advisory.raw
 
   # Converts the resolved map's MapSets to sorted plain lists before the
   # JsonViewer renders them — JsonViewer mangles a raw MapSet struct as

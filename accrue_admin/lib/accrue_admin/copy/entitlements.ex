@@ -44,4 +44,61 @@ defmodule AccrueAdmin.Copy.Entitlements do
   def error_copy,
     do:
       "Entitlements couldn't be resolved for this customer right now. The gate fails closed, so no access is granted on error — retry shortly."
+
+  @doc false
+  def canonical_group_title, do: "Accrue access (canonical)"
+
+  @doc false
+  def advisory_group_title, do: "Stripe observation (advisory)"
+
+  @doc false
+  def advisory_boundary, do: "Stripe advisory snapshot — does not change access."
+
+  @doc false
+  def advisory_recorded_title, do: "Snapshot recorded"
+
+  @doc false
+  def advisory_disabled_title, do: "Not enabled"
+
+  @doc false
+  def advisory_disabled_copy, do: "Stripe advisory sync is off for this host. Local access above is unchanged."
+
+  @doc false
+  def advisory_count(count), do: "#{count} entitlements observed"
+
+  @doc false
+  def advisory_observed_at(timestamp), do: "Observed #{DateTime.to_iso8601(timestamp)}"
+
+  @doc false
+  def advisory_source_label, do: "Source"
+
+  @doc false
+  def advisory_source_pull, do: "Pull refresh"
+
+  @doc false
+  def advisory_completeness_label, do: "Completeness"
+
+  @doc false
+  def advisory_complete, do: "Complete"
+
+  @doc false
+  def advisory_observed_entitlements_label, do: "Observed entitlements"
+
+  @doc false
+  def advisory_lookup_keys_label, do: "Lookup keys"
+
+  @doc false
+  def advisory_observed_at_label, do: "Observed at"
+
+  @doc false
+  def advisory_unavailable_title, do: "Snapshot unavailable"
+
+  @doc false
+  def advisory_source_unavailable, do: "Source unavailable"
+
+  @doc false
+  def advisory_incomplete, do: "Incomplete"
+
+  @doc false
+  def advisory_unavailable, do: "Unavailable"
 end

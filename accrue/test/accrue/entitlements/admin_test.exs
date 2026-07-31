@@ -211,7 +211,7 @@ defmodule Accrue.Entitlements.AdminTest do
       %{customer: customer} =
         Accrue.Test.Factory.active_subscription(%{owner_id: Ecto.UUID.generate(), price_id: "price_p1"})
 
-      observed_at = ~U[2026-07-31 12:34:56Z]
+      observed_at = ~U[2026-07-31 12:34:56.000000Z]
 
       assert {:ok, _summary} =
                Reconcile.write_pull(
@@ -238,7 +238,7 @@ defmodule Accrue.Entitlements.AdminTest do
                raw: %{
                  "lookup_keys" => ["alpha", "priority-support"],
                  "entitlement_count" => 2,
-                 "synced_at" => "2026-07-31T12:34:56Z",
+                 "synced_at" => "2026-07-31T12:34:56.000000Z",
                  "source" => "pull",
                  "completeness" => "complete"
                }
