@@ -227,7 +227,11 @@ Plans:
   3. Per-package CHANGELOG/release notes record the major dep bump and the new advisory sync, every new public function carries an `@since` annotation, and the adoption-proof / support-matrix / planning-mirror docs describe one consistent stable-core posture (POS-03) with no contradiction between any two of them.
   4. A reviewer grepping for "lattice_stripe" or "entitlements sync" across `CLAUDE.md`, `guides/`, package CHANGELOGs, and `.planning/` mirrors finds one consistent version/status story, not several conflicting ones.
 
-**Plans**: TBD
+**Plans**: 2 plans
+
+Plans:
+- [ ] 214-01-PLAN.md — Establish and enforce the current version/advisory-authority truth contract across public, support, adoption, and planning mirrors.
+- [ ] 214-02-PLAN.md — Reconcile linked release notes/changelogs and exact ExDoc `since: "1.5.0"` metadata.
 
 ## Progress
 

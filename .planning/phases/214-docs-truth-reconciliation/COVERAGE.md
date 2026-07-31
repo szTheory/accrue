@@ -1,0 +1,1 @@
+No external API integration: Phase 214 reconciles documentation, release metadata, ExDoc annotations, and existing drift verifiers for the already-shipped Stripe advisory sync; it adds no API/SDK/service calls or capabilities.
