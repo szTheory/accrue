@@ -131,6 +131,20 @@ grep -Fq "## accrue" "$notes" || fail "release-notes.md missing accrue section"
 grep -Fq "## accrue_admin" "$notes" || fail "release-notes.md missing accrue_admin section"
 grep -Fq "GitHub releases" "$notes" || fail "release-notes.md missing GitHub releases link"
 grep -Fq "accrue_portal" "$notes" || fail "release-notes.md must mention accrue_portal version-family context"
+grep -Fq '[`accrue_portal/CHANGELOG.md`](https://github.com/szTheory/accrue/blob/main/accrue_portal/CHANGELOG.md)' "$notes" ||
+  fail "release-notes.md missing accrue_portal changelog link"
+grep -Fq '### 1.5.0' "$notes" ||
+  fail "release-notes.md missing next-release 1.5.0 story"
+grep -Fq '`1.5.0` is the next linked feature release' "$notes" ||
+  fail "release-notes.md missing next-release 1.5.0 story"
+grep -Fq 'lattice_stripe ~> 2.0' "$notes" ||
+  fail "release-notes.md missing next-release 1.5.0 story"
+grep -Fq 'optional, default-off Stripe-native entitlement refresh' "$notes" ||
+  fail "release-notes.md missing next-release 1.5.0 story"
+grep -Fq 'Stripe-native advisory data never changes `entitled?/2`, plugs, or LiveView guards' "$notes" ||
+  fail "release-notes.md missing next-release 1.5.0 story"
+grep -Fq 'compatibility-only updates' "$notes" ||
+  fail "release-notes.md missing next-release 1.5.0 story"
 grep -Eq "stable-core[^[:cntrl:]]*posture" "$notes" ||
   fail "release-notes.md missing stable-core posture token"
 grep -Eq "maturity-and-maintenance\\.md|first_hour\\.md|jobs_to_be_done\\.md" "$notes" ||

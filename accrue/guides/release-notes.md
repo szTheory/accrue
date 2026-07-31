@@ -4,9 +4,10 @@ This page is the **story** of what shipped—not a commit list. For every line i
 
 - [`accrue/CHANGELOG.md`](https://github.com/szTheory/accrue/blob/main/accrue/CHANGELOG.md) — machine-precise history for the core library
 - [`accrue_admin/CHANGELOG.md`](https://github.com/szTheory/accrue/blob/main/accrue_admin/CHANGELOG.md) — same for the admin UI package
+- [`accrue_portal/CHANGELOG.md`](https://github.com/szTheory/accrue/blob/main/accrue_portal/CHANGELOG.md) — same for the customer portal package
 - [GitHub releases](https://github.com/szTheory/accrue/releases) — tags and generated notes (more technical)
 
-`accrue` and `accrue_admin` live in one repo and are usually bumped together so your host app never depends on mismatched versions. `accrue_portal` ships in the same version family; for now, its package-specific history is easiest to track through the package changelog and README.
+`accrue`, `accrue_admin`, and `accrue_portal` live in one repo and are usually bumped together so your host app never depends on mismatched versions.
 
 ---
 
@@ -15,6 +16,14 @@ This page is the **story** of what shipped—not a commit list. For every line i
 Accrue follows a **stable-core / demand-driven expansion** posture. Release notes are a change story, not the static support contract. For canonical posture and boundaries, use [`maturity-and-maintenance.md`](maturity-and-maintenance.md), [`first_hour.md`](first_hour.md), and [`jobs_to_be_done.md`](jobs_to_be_done.md#scope-and-maturity).
 
 ## accrue
+
+### 1.5.0
+
+**lattice_stripe 2.x plus observational Stripe-native entitlement sync.**
+
+`1.5.0` is the next linked feature release. The core `accrue` package moves to `lattice_stripe ~> 2.0` and adds an optional, default-off Stripe-native entitlement refresh for diagnostics and admin read surfaces. The local plan-to-feature map remains the only Accrue grant gate, so Stripe-native advisory data never changes `entitled?/2`, plugs, or LiveView guards.
+
+`accrue_admin` and `accrue_portal` ship compatibility-only updates in the same linked version family; they do not add package-owned workflows or authorization behavior for this slice.
 
 ### 1.4.0
 
