@@ -195,7 +195,7 @@ Plans:
   4. The D-07 `fetch_entitled/2` question left open in `admin.ex` is closed one way or the other this milestone: either implemented as part of the advisory refresh surface (observational-only), or explicitly deferred with a one-line recorded reason in code and docs — no ambiguity remains.
   5. A test suite using only the Fake/Test processor (no live Stripe, no Chrome, fully `async`-safe) proves: the cache populates correctly from `LatticeStripe.Entitlements.*` results; a grant decision is identical whether the advisory cache is empty, stale, or directly contradicts the local plan→feature map; and the config defaults to off.
 
-**Plans:** 4/4 plans complete
+**Plans:** 4/5 plans complete
 
 Plans:
 **Wave 1**
@@ -210,6 +210,10 @@ Plans:
 **Wave 3** *(gap closure; blocked on completed Waves 1-2)*
 
 - [x] 213-04-PLAN.md — Close optional-callback safety and deterministic same-second webhook ordering gaps
+
+**Wave 4** *(gap closure; blocked on completed Wave 3)*
+
+- [ ] 213-05-PLAN.md — Extend the isolation guard across the shared Plug/LiveView Guard path
 
 ### Phase 214: Docs & truth reconciliation
 
