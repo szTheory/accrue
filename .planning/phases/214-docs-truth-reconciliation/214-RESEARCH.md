@@ -55,7 +55,9 @@ latest brand DNA; developer ergonomics; auditability; and stable-core constraint
   cross-package story. Add a next-release story (target `1.5.0`) for core plus
   compatibility-only admin and portal coverage, and add the missing portal changelog
   link beside the core/admin links. Do not hand-edit generated
-  `accrue/doc/release-notes.md`; regenerate it through the normal ExDoc build.
+  `accrue/doc/release-notes.md`. The local generated file is ignored and untracked, so
+  it is not a phase artifact and must not be added unless repository tracking policy
+  changes. [VERIFIED: `git ls-files --error-unmatch`, `git check-ignore -v`]
 - **D-08:** Do not add a numbered `1.5.0` changelog block or bump package versions on
   `main`. Release Please remains the single writer for numbered changelog sections and
   all linked package version bumps. `## Unreleased` is drained into the numbered section
@@ -314,7 +316,7 @@ def list_active_entitlements(id, opts \\ [])
 | Live service config | None; no external service configuration changes are in scope. [VERIFIED: CONTEXT.md] | None |
 | OS-registered state | None; no OS registrations are referenced by the phase. [VERIFIED: CONTEXT.md] | None |
 | Secrets/env vars | None; no env var rename or secret key change is in scope. [VERIFIED: CONTEXT.md] | None |
-| Build artifacts | `accrue/doc/release-notes.md` is generated ExDoc output if present; D-07 says do not hand-edit it. [VERIFIED: CONTEXT.md] | Regenerate through normal ExDoc build only if implementation touches generated docs. |
+| Build artifacts | `accrue/doc/release-notes.md` exists locally as generated ExDoc output, is ignored by `**/doc/`, and is not tracked by Git; D-07 says do not hand-edit it. [VERIFIED: CONTEXT.md, `git ls-files --error-unmatch`, `git check-ignore -v`] | Do not edit or add it in this phase. A normal ExDoc build may refresh the ignored local copy, but it remains outside the tracked phase diff unless repository tracking policy changes. |
 
 ## Common Pitfalls
 
@@ -405,12 +407,11 @@ grep -Fq "### 1.5.0" "$notes" ||
 
 All claims in this research are verified locally or cited from official documentation. No `[ASSUMED]` claims are required. [VERIFIED: research process]
 
-## Open Questions
+## Open Questions (RESOLVED)
 
-1. **Should generated `accrue/doc/release-notes.md` be regenerated in this phase?**
-   - What we know: D-07 says do not hand-edit generated docs. [VERIFIED: CONTEXT.md]
-   - What's unclear: Whether the repository currently tracks generated ExDoc output for this file in the active branch.
-   - Recommendation: Planner should include a conditional check: if `accrue/doc/release-notes.md` exists and is tracked, regenerate via the normal docs build after editing `accrue/guides/release-notes.md`.
+1. **Should generated `accrue/doc/release-notes.md` be regenerated as a tracked phase artifact? — No.**
+   - Measured result: the file exists locally, `git ls-files --error-unmatch accrue/doc/release-notes.md` exits 1, and `git check-ignore -v accrue/doc/release-notes.md` identifies `.gitignore` rule `**/doc/`. It is generated, ignored, and untracked. [VERIFIED: local Git commands]
+   - Resolution: do not hand-edit or add `accrue/doc/release-notes.md` in Phase 214. If a normal ExDoc build refreshes the local copy, it remains outside the tracked phase diff. Revisit only if repository tracking policy changes.
 
 ## Environment Availability
 

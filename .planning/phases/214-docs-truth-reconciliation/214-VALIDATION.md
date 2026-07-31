@@ -1,9 +1,9 @@
 ---
 phase: 214
 slug: docs-truth-reconciliation
-status: draft
-nyquist_compliant: false
-wave_0_complete: false
+status: ready
+nyquist_compliant: true
+wave_0_complete: true
 created: 2026-07-30
 ---
 
@@ -38,19 +38,23 @@ created: 2026-07-30
 
 | Task ID | Plan | Wave | Requirement | Threat Ref | Secure Behavior | Test Type | Automated Command | File Exists | Status |
 |---------|------|------|-------------|------------|-----------------|-----------|-------------------|-------------|--------|
-| 214-01-01 | 01 | 1 | DOCS-01 | T-214-01 | Current docs reject stale `lattice_stripe` pins | contract | `bash scripts/ci/verify_package_docs.sh` | ✅ extend | ⬜ pending |
-| 214-01-02 | 01 | 1 | DOCS-02 | T-214-01 | Sync remains observational and never grant-authoritative | contract | `cd accrue && mix test test/accrue/docs/package_docs_verifier_test.exs` | ✅ extend | ⬜ pending |
-| 214-02-01 | 02 | 2 | DOCS-03 | T-214-02 | Release notes and public API metadata agree | contract | `bash scripts/ci/verify_release_notes_contract.sh` | ✅ extend | ⬜ pending |
+| 214-01-01 | 01 | 1 | DOCS-01, DOCS-02 | T-214-01 | Current docs reject stale `lattice_stripe` pins and grant-authority drift | contract + focused fixture | `cd accrue && mix test test/accrue/docs/package_docs_verifier_test.exs && cd .. && bash scripts/ci/verify_package_docs.sh` | ✅ extend | ⬜ pending |
+| 214-01-02 | 01 | 1 | DOCS-02, DOCS-03 | T-214-01, T-214-03 | Adopter, support, and proof mirrors preserve observational-only authority | contract + isolation | `cd accrue && mix test test/accrue/docs/package_docs_verifier_test.exs && cd .. && bash scripts/ci/verify_package_docs.sh && bash scripts/ci/verify_processor_support_matrix.sh && bash scripts/ci/verify_entitlement_sync_isolation.sh` | ✅ extend | ⬜ pending |
+| 214-01-03 | 01 | 1 | DOCS-03 | T-214-02 | Active planning mirrors reconcile without rewriting dated evidence | scoped planning audit | `node /Users/jon/.codex/gsd-core/bin/gsd-tools.cjs query roadmap.get-phase 214 && rg -n '213|SYNC-0[1-5]|214|DOCS-0[1-3]' .planning/ROADMAP.md .planning/REQUIREMENTS.md .planning/STATE.md` | ✅ existing | ⬜ pending |
+| 214-02-01 | 02 | 2 | DOCS-03 | T-214-05, T-214-07, T-214-08 | Package-owned Unreleased and release-guide truth preserve ownership and grant boundaries | release contract + diff check | `bash scripts/ci/verify_release_notes_contract.sh && git diff --check -- accrue/CHANGELOG.md accrue_admin/CHANGELOG.md accrue_portal/CHANGELOG.md accrue/guides/release-notes.md` | ✅ extend | ⬜ pending |
+| 214-02-02 | 02 | 2 | DOCS-03 | T-214-05, T-214-08 | Release-note discoverability regressions fail non-vacuously | focused fixture | `cd accrue && mix test test/accrue/docs/release_notes_contract_test.exs && cd .. && bash scripts/ci/verify_release_notes_contract.sh` | ✅ extend | ⬜ pending |
+| 214-02-03 | 02 | 2 | DOCS-03 | T-214-06 | Exactly the supported public contracts carry `since: "1.5.0"` | focused fixture + compile | `cd accrue && mix test test/accrue/docs/package_docs_verifier_test.exs && mix compile --warnings-as-errors && cd .. && bash scripts/ci/verify_package_docs.sh` | ✅ extend | ⬜ pending |
 
 *Status: ⬜ pending · ✅ green · ❌ red · ⚠️ flaky*
 
 ---
 
-## Wave 0 Requirements
+## Wave 0 Infrastructure
 
-- [ ] Extend `accrue/test/accrue/docs/package_docs_verifier_test.exs` with stale `lattice_stripe` and deferred-sync red paths.
-- [ ] Extend `accrue/test/accrue/docs/release_notes_contract_test.exs` with missing portal changelog link and missing next-release story red paths.
-- [ ] Add verifier assertions for `since: "1.5.0"` on Phase 213 public contracts.
+- [x] `accrue/test/accrue/docs/package_docs_verifier_test.exs` exists and provides the ROOT_DIR-backed fixture scaffold that Tasks 214-01-01, 214-01-02, and 214-02-03 extend.
+- [x] `accrue/test/accrue/docs/release_notes_contract_test.exs` exists and provides the release-note fixture scaffold that Task 214-02-02 extends.
+- [x] `scripts/ci/verify_package_docs.sh`, `scripts/ci/verify_release_notes_contract.sh`, `scripts/ci/verify_processor_support_matrix.sh`, and `scripts/ci/verify_entitlement_sync_isolation.sh` exist and are directly exercised by task-level automation.
+- [x] No task references a missing test file or unresolved Wave 0 dependency; behavior-specific red fixtures and verifier assertions are created test-first inside their owning tasks.
 
 ---
 
@@ -64,11 +68,11 @@ created: 2026-07-30
 
 ## Validation Sign-Off
 
-- [ ] All tasks have `<automated>` verify or Wave 0 dependencies
-- [ ] Sampling continuity: no 3 consecutive tasks without automated verify
-- [ ] Wave 0 covers all MISSING references
-- [ ] No watch-mode flags
-- [ ] Feedback latency < 60s
-- [ ] `nyquist_compliant: true` set in frontmatter
+- [x] All tasks have `<automated>` verification
+- [x] Sampling continuity: no 3 consecutive tasks without automated verification
+- [x] Wave 0 infrastructure exists and every task verification target is present
+- [x] No watch-mode flags
+- [x] Feedback latency < 60s
+- [x] `nyquist_compliant: true` set in frontmatter
 
-**Approval:** pending
+**Approval:** ready for execution
