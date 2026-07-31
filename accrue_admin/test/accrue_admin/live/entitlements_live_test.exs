@@ -12,8 +12,10 @@ defmodule AccrueAdmin.EntitlementsLiveTest do
 
   use AccrueAdmin.LiveCase, async: false
 
-  alias Accrue.Test.Factory
+  alias Accrue.Billing.EntitlementSummary
   alias Accrue.Entitlements.Reconcile
+  alias Accrue.Test.Factory
+  alias AccrueAdmin.TestRepo
   alias AccrueAdmin.Copy
 
   defmodule AuthAdapter do
@@ -200,5 +202,201 @@ defmodule AccrueAdmin.EntitlementsLiveTest do
 
     assert Copy.entitlements_advisory_preview_more(2) == "+2 more"
     assert Copy.entitlements_advisory_count(0) == "0 entitlements observed"
+  end
+
+  test "every advisory state renders with text, contained metadata, and unchanged local access",
+       %{
+         conn: conn
+       } do
+    %{customer: disabled_customer} = Factory.active_subscription(%{price_id: "price_pro"})
+    disabled_html = render_entitlements(conn, disabled_customer)
+
+    assert_advisory_state(disabled_html, "Not enabled.", "ax-status-badge-slate")
+
+    assert disabled_html =~
+             "Stripe advisory sync is off for this host. Local access above is unchanged."
+
+    assert_local_access(disabled_html)
+
+    enable_advisory!()
+
+    %{customer: absent_customer} = Factory.active_subscription(%{price_id: "price_pro"})
+    absent_html = render_entitlements(conn, absent_customer)
+
+    assert_advisory_state(absent_html, "No snapshot yet.", "ax-status-badge-slate")
+    assert absent_html =~ "No advisory snapshot has been recorded for this customer."
+    refute absent_html =~ "0 entitlements observed"
+    assert_local_access(absent_html)
+
+    %{customer: empty_customer} = Factory.active_subscription(%{price_id: "price_pro"})
+
+    insert_summary!(empty_customer, %{
+      "entitlements" => %{"data" => []},
+      "_accrue" => %{"source" => "pull"}
+    })
+
+    empty_html = render_entitlements(conn, empty_customer)
+
+    assert_advisory_state(empty_html, "Snapshot recorded.", "ax-status-badge-slate")
+    assert empty_html =~ "0 entitlements observed"
+    assert empty_html =~ "Pull refresh"
+    assert empty_html =~ "Complete"
+    assert_local_access(empty_html)
+
+    %{customer: unknown_time_customer} = Factory.active_subscription(%{price_id: "price_pro"})
+
+    insert_summary!(
+      unknown_time_customer,
+      %{"entitlements" => %{"data" => [%{"lookup_key" => "reports-shadow"}]}},
+      synced_at: nil,
+      last_stripe_event_ts: nil,
+      last_stripe_event_id: nil
+    )
+
+    unknown_time_html = render_entitlements(conn, unknown_time_customer)
+
+    assert_advisory_state(
+      unknown_time_html,
+      "Snapshot time unavailable.",
+      "ax-status-badge-slate"
+    )
+
+    assert unknown_time_html =~ "This advisory snapshot has no recorded observation time."
+    assert_local_access(unknown_time_html)
+
+    %{customer: incomplete_customer} = Factory.active_subscription(%{price_id: "price_pro"})
+
+    insert_summary!(
+      incomplete_customer,
+      %{
+        "_accrue" => %{"source" => "webhook"},
+        "entitlements" => %{
+          "data" => [%{"lookup_key" => "partial-observation"}],
+          "has_more" => true
+        }
+      },
+      truncated: true
+    )
+
+    incomplete_html = render_entitlements(conn, incomplete_customer)
+
+    assert_advisory_state(incomplete_html, "Incomplete snapshot.", "ax-status-badge-amber")
+
+    assert incomplete_html =~
+             "This webhook snapshot contains only the first reported entitlements. Local access above is unchanged."
+
+    assert incomplete_html =~ "Webhook"
+    assert incomplete_html =~ "Incomplete"
+    assert_local_access(incomplete_html)
+
+    %{customer: unavailable_customer} = Factory.active_subscription(%{price_id: "price_pro"})
+
+    insert_summary!(unavailable_customer, %{
+      "entitlements" => %{"data" => [%{"lookup_key" => "valid"}, "malformed"]}
+    })
+
+    unavailable_html = render_entitlements(conn, unavailable_customer)
+
+    assert_advisory_state(unavailable_html, "Snapshot unavailable.", "ax-status-badge-ink")
+
+    assert unavailable_html =~
+             "load the Stripe advisory snapshot. Local access above is unchanged."
+
+    refute unavailable_html =~ "Observed entitlements"
+    assert_local_access(unavailable_html)
+  end
+
+  test "lookup preview is bounded while lazy Raw data retains complete normalized evidence", %{
+    conn: conn
+  } do
+    enable_advisory!()
+    %{customer: customer} = Factory.active_subscription(%{price_id: "price_pro"})
+
+    lookup_keys = Enum.map(1..10, &"entitlement-key-#{String.pad_leading(to_string(&1), 2, "0")}")
+
+    assert {:ok, _summary} =
+             Reconcile.write_pull(
+               customer,
+               ~U[2026-07-31 16:00:00Z],
+               Enum.map(Enum.reverse(lookup_keys), &%{"lookup_key" => &1}),
+               "/v1/entitlements/active_entitlements"
+             )
+
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+
+    assert {:ok, view, html} =
+             live(conn, "/billing/customers/#{customer.id}?tab=entitlements")
+
+    assert html =~ "10 entitlements observed"
+    assert html =~ "+2 more"
+
+    for key <- Enum.take(lookup_keys, 8), do: assert(html =~ key)
+    refute html =~ Enum.at(lookup_keys, 8)
+    refute html =~ Enum.at(lookup_keys, 9)
+    refute html =~ "customer-raw-data"
+
+    raw_html = render_click(element(view, "[data-ax-lazy-json]"))
+
+    assert raw_html =~ "customer-raw-data"
+    for key <- lookup_keys, do: assert(raw_html =~ key)
+    assert raw_html =~ "stripe_advisory"
+    refute raw_html =~ "last_stripe_event_id"
+  end
+
+  defp enable_advisory! do
+    current = Application.get_env(:accrue, :entitlements, [])
+
+    Application.put_env(
+      :accrue,
+      :entitlements,
+      Keyword.put(current, :stripe_native_sync, :advisory)
+    )
+  end
+
+  defp render_entitlements(conn, customer) do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+
+    assert {:ok, _view, html} =
+             live(conn, "/billing/customers/#{customer.id}?tab=entitlements")
+
+    html
+  end
+
+  defp assert_advisory_state(html, title, tone_class) do
+    assert html =~ title
+    assert html =~ tone_class
+
+    [state_markup] =
+      Regex.run(~r/<span data-role="stripe-advisory-state">.*?<\/span>/s, html)
+
+    refute state_markup =~ ~s(role="status")
+  end
+
+  defp assert_local_access(html) do
+    assert html =~ "Reports"
+    assert html =~ "2 active access grants"
+
+    {canonical_position, _} = :binary.match(html, ~s(data-role="accrue-access-canonical"))
+    {advisory_position, _} = :binary.match(html, ~s(data-role="stripe-observation-advisory"))
+    assert canonical_position < advisory_position
+  end
+
+  defp insert_summary!(customer, data, opts \\ []) do
+    synced_at = Keyword.get(opts, :synced_at, ~U[2026-07-31 15:00:00Z])
+
+    %EntitlementSummary{}
+    |> EntitlementSummary.force_changeset(%{
+      customer_id: customer.id,
+      stripe_customer_id: customer.processor_id,
+      livemode: false,
+      entitlement_count: length(get_in(data, ["entitlements", "data"]) || []),
+      truncated: Keyword.get(opts, :truncated, false),
+      data: data,
+      synced_at: synced_at,
+      last_stripe_event_ts: Keyword.get(opts, :last_stripe_event_ts, synced_at),
+      last_stripe_event_id:
+        Keyword.get(opts, :last_stripe_event_id, "evt_#{System.unique_integer([:positive])}")
+    })
+    |> TestRepo.insert!()
   end
 end

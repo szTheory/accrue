@@ -389,7 +389,12 @@ defmodule AccrueAdmin.Live.CustomerLive do
           <% end %>
         </details>
 
-        <details class="ax-detail-section" data-ax-lazy-json phx-click="load_raw_json">
+        <details
+          class="ax-detail-section"
+          data-ax-lazy-json
+          phx-click="load_raw_json"
+          open={@raw_json_loaded?}
+        >
           <summary class="ax-detail-section-head">
             <span class="ax-detail-section-title">Raw data</span>
           </summary>
