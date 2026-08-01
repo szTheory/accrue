@@ -83,11 +83,40 @@ Filled during roadmap creation. Every v1.59 requirement must map to exactly one 
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
+| RSCH-01 | Phase 215 | Pending |
+| RSCH-02 | Phase 215 | Pending |
+| RSCH-03 | Phase 215 | Pending |
+| RAIL-04 | Phase 215 | Pending |
+| RAIL-05 | Phase 215 | Pending |
+| RAIL-01 | Phase 216 | Pending |
+| RAIL-02 | Phase 216 | Pending |
+| RAIL-03 | Phase 216 | Pending |
+| ACCT-01 | Phase 217 | Pending |
+| ACCT-02 | Phase 217 | Pending |
+| ACCT-03 | Phase 217 | Pending |
+| ACCT-04 | Phase 217 | Pending |
+| ACCT-05 | Phase 217 | Pending |
+| AAPL-01 | Phase 218 | Pending |
+| AAPL-02 | Phase 218 | Pending |
+| AAPL-03 | Phase 218 | Pending |
+| AAPL-04 | Phase 218 | Pending |
+| AAPL-05 | Phase 218 | Pending |
+| OFF-01 | Phase 219 | Pending |
+| OFF-02 | Phase 219 | Pending |
+| OFF-03 | Phase 219 | Pending |
+| OFF-04 | Phase 219 | Pending |
+| OFF-05 | Phase 219 | Pending |
+| OFF-06 | Phase 219 | Pending |
+| PROOF-01 | Phase 220 | Pending |
+| PROOF-02 | Phase 220 | Pending |
+| PROOF-03 | Phase 220 | Pending |
+| PROOF-04 | Phase 220 | Pending |
+| PROOF-05 | Phase 220 | Pending |
 
 **Coverage:**
 - v1.59 requirements: 29 total
-- Mapped to phases: 0
-- Unmapped: 29
+- Mapped to phases: 29
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-07-31*

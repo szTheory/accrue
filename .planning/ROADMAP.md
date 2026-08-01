@@ -14,13 +14,13 @@
 - ⏸️ **v1.56 Admin UI Ratchet: Automated Adversarial Design Evaluation** — Phases 205-208 (parked 2026-07-19) — [archive](milestones/v1.56-ROADMAP.md)
 - ✅ **v1.57 Admin Operator Control Plane (SEED-004 M1)** — Phases 209-211 (shipped 2026-07-30) — [archive](milestones/v1.57-ROADMAP.md)
 - ✅ **v1.58 lattice_stripe 2.x Bump & Stripe-Native Entitlements Sync** — Phases 212-214.2 (shipped 2026-07-31; 11/11 requirements and 5/5 flows passed with documented non-blocking tech debt) — [archive](milestones/v1.58-ROADMAP.md)
-- ⏭️ **v1.59 Account-Scoped Multi-Rail & Offline Entitlements** — Phases 215-219 (queued; Stripe + Apple account union, provider-honest lifecycle management, signed offline lease, and B2C Alpha proof)
+- ◆ **v1.59 Account-Scoped Multi-Rail & Offline Entitlements** — Phases 215-220 (active; Stripe + Apple account union, provider-honest lifecycle management, signed offline proof, and B2C Alpha proof)
 
 ## Planning Doctrine
 
 Accrue remains in **stable-core / demand-driven expansion** posture. New feature milestones require a concrete adopter failure mode, correctness/security/data-loss risk, repeated support issue, operational failure, or explicit strategy change recorded in `PROJECT.md` or `STRATEGY.md`.
 
-v1.59 clears that bar through B2C Alpha's sourced need for coherent Stripe/Apple access and extended offline use. Google Play remains dormant in SEED-007 until Android is scheduled or a second adopter requires it.
+v1.59 clears that bar through B2C Alpha's sourced need for coherent Stripe/Apple access and extended offline use. Google Play remains backlogged in SEED-007 until Android is scheduled or a second adopter requires it.
 
 ## Phases
 
@@ -37,17 +37,89 @@ Full history: [v1.58 roadmap archive](milestones/v1.58-ROADMAP.md).
 
 </details>
 
-### ⏭️ v1.59 Account-Scoped Multi-Rail & Offline Entitlements (Queued)
+### ◆ v1.59 Account-Scoped Multi-Rail & Offline Entitlements (Active)
 
-**Goal:** Preserve one account's access across Stripe web billing, Apple in-app purchase, and extended offline use through a common entitlement projection and signed, time-bounded offline lease, while keeping lifecycle operations rail-aware.
+**Goal:** Preserve one account's access across Stripe web billing, Apple in-app purchase, and extended offline study through a common entitlement projection and signed, device-bound proof, while keeping lifecycle operations rail-aware.
 
-- [ ] **Phase 215: Multi-rail contract and additive data foundation** — Concurrent Stripe/Apple rail registration, logical product mapping, stable account/grant/device persistence, and a dedicated entitlement-source capability matrix (RAIL-01..04).
-- [ ] **Phase 216: Canonical account projection and gateway compatibility** — Union/dedup effective access, source-local revocation, rail-aware lifecycle dispatch, and backward-compatible single-processor behavior (ACCT-01..04).
-- [ ] **Phase 217: Apple observation rail and automatic linking** — `appAccountToken` linking, signed evidence verification, idempotent convergence, reconciliation, and honest management boundaries (AAPL-01..05).
-- [ ] **Phase 218: Signed offline lease and reconnect protocol** — ES256 offline lease, 30-day freshness, signed 72-hour degraded window, hard expiry, atomic reconnect, and device/key security (OFF-01..06).
-- [ ] **Phase 219: B2C Alpha proof, operations, docs, and release gates** — Cross-rail adopter proof, offline/revocation/key-rotation scenarios, operator diagnostics, repair runbooks, and public contract alignment (PROOF-01..05).
+- [ ] **Phase 215: Research, contracts, and Crosswake feasibility** — Freeze the evidence-to-entitlement contract and prove or block required Crosswake client capabilities before runtime assumptions (RSCH-01..03, RAIL-04..05).
+- [ ] **Phase 216: Additive rail and persistence foundation** — Add concurrent Stripe/Apple rails, qualified products, and durable account/observation/grant/device records without breaking legacy hosts (RAIL-01..03).
+- [ ] **Phase 217: Canonical projection and compatibility** — Project rail-qualified evidence into one revisioned account snapshot with provider-honest lifecycle and safe cross-rail purchase eligibility (ACCT-01..05).
+- [ ] **Phase 218: Apple observation and repair** — Verify, link, quarantine, reconcile, and present Apple lifecycle evidence without ownership heuristics or Stripe mutation leakage (AAPL-01..05).
+- [ ] **Phase 219: Offline study contract** — Deliver device-bound ES256 proof, stale-study continuity, and atomic reconnect using the accepted no-72-hour-cutoff policy (OFF-01..06).
+- [ ] **Phase 220: First-adopter proof and release gates** — Prove the complete Stripe/Apple/offline workflow, operations, documentation, and release contract for B2C Alpha (PROOF-01..05).
 
-Dependencies: 215 → 216 → 217 → 218 → 219. The archived v1.58 requirements file also preserves the queued v1.59 requirement draft for `$gsd-new-milestone` review.
+Dependencies: 215 → 216 → 217 → {218, 219} → 220. Phase 215 must prove Crosswake feasibility before later client assumptions; Phase 219 depends on Phase 217 and the accepted Phase-215 contract, not on Apple runtime implementation.
+
+## Phase Details
+
+### Phase 215: Research, contracts, and Crosswake feasibility
+**Goal**: Maintainers have one current, evidence-backed multi-rail contract and know whether the required Crosswake client boundary is feasible before runtime coupling begins.
+**Depends on**: Nothing (first phase)
+**Requirements**: RSCH-01, RSCH-02, RSCH-03, RAIL-04, RAIL-05
+**Success Criteria** (what must be TRUE):
+  1. A maintainer can find one versioned v1.59 bundle with source provenance, accepted and rejected choices, confidence, and a dated change watchlist.
+  2. An implementer can use one decision table to determine projection, eligibility, repair, and offline-continuity outcomes for duplicate, out-of-order, revocation, survivor-grant, and stale cases.
+  3. A host can inspect source-specific observation, control, restore, reconciliation, management, and offline capabilities without treating the processor matrix as a rail contract.
+  4. The checked-in Crosswake tracer proves every required bridge or explicitly blocks mobile runtime coupling before later phases rely on it.
+**Plans**: TBD
+
+### Phase 216: Additive rail and persistence foundation
+**Goal**: Hosts can represent concurrent Stripe and Apple entitlement evidence on durable, rail-qualified records while existing single-processor integrations remain valid.
+**Depends on**: Phase 215
+**Requirements**: RAIL-01, RAIL-02, RAIL-03
+**Success Criteria** (what must be TRUE):
+  1. A host can register Stripe and Apple together while legacy `processor` configuration continues as the supported default-rail alias.
+  2. A host can map each rail/environment product identifier to one logical plan without identifier collisions across rails or Apple sandbox and production.
+  3. An account’s observations, grants, devices, provenance, quarantine state, and ordering data persist with stable identity and transactional uniqueness.
+**Plans**: TBD
+
+### Phase 217: Canonical projection and compatibility
+**Goal**: A host can make entitlement and purchase decisions from one revisioned account snapshot without changing legacy billing behavior or destroying survivor grants.
+**Depends on**: Phase 216
+**Requirements**: ACCT-01, ACCT-02, ACCT-03, ACCT-04, ACCT-05
+**Success Criteria** (what must be TRUE):
+  1. A user with any live Stripe or Apple grant receives the union of effective plans/features, with duplicate logical grants deduplicated and maximum effective quantity used.
+  2. Revoking one source leaves access granted by another source intact, and duplicate or metadata-only evidence does not advance the account revision.
+  3. Lifecycle actions dispatch by the persisted rail; externally managed Apple resources give explicit guidance and never enter Accrue-owned billing mutations.
+  4. Existing single-processor hosts retain deterministic customers, mappings, webhooks, Stripe subscriptions, gates, and advisory-cache isolation through an opt-in, parity-checked multi-rail cutover.
+  5. An equivalent second-rail purchase is blocked by default, with an explicit host warning/override path and no automatic cancellation, transfer, refund, migration, or proration.
+**Plans**: TBD
+
+### Phase 218: Apple observation and repair
+**Goal**: Verified Apple evidence safely contributes to the account snapshot and repairs itself without ownership reassignment or provider-lifecycle confusion.
+**Depends on**: Phase 217
+**Requirements**: AAPL-01, AAPL-02, AAPL-03, AAPL-04, AAPL-05
+**Success Criteria** (what must be TRUE):
+  1. An authenticated account can purchase or restore through its opaque entitlement UUID; only eligible verified lineage binds once, while ownership conflicts quarantine without heuristic or automatic reassignment.
+  2. Only Apple evidence verified for permitted algorithms, trust, certificates, bundle, environment, and production identity can change grants.
+  3. Duplicate, delayed, and out-of-order Apple evidence converges idempotently, while invalid, unmatched, and conflicting input remains non-granting and repairable.
+  4. Scheduled status and history reconciliation repairs missed notifications and accurately represents active, grace, retry, expiry, refund, and revocation boundaries.
+  5. Hosts receive honest externally-managed Apple subscription guidance, with Family Sharing and offer authoring explicitly deferred.
+**Plans**: TBD
+
+### Phase 219: Offline study contract
+**Goal**: A registered device can safely retain downloaded-study continuity while offline, then converge atomically when it reconnects.
+**Depends on**: Phase 215, Phase 217
+**Requirements**: OFF-01, OFF-02, OFF-03, OFF-04, OFF-05, OFF-06
+**Success Criteria** (what must be TRUE):
+  1. A registered device independently verifies a versioned, compact ES256 entitlement proof with language-neutral fixtures and no signing secret.
+  2. Successful reconciliation establishes a 30-day revalidation target (shortened by known provider bounds); passing it produces `stale_offline`, never an independent 72-hour cutoff.
+  3. While stale, already-downloaded lessons and local progress remain usable, while new premium downloads and all other value-expanding actions wait for reconnection.
+  4. Host code can distinguish fresh, stale-offline, denied, and invalid proof states with bounded reasons while existing boolean gate return types remain compatible.
+  5. Reconnect authenticates account and device, refreshes due rails, and atomically replaces cached proof with a newer allow proof or signed deny tombstone; copied, replayed, wrong-device, rollback, revoked-device, and rotated-key proofs fail safely.
+**Plans**: TBD
+
+### Phase 220: First-adopter proof and release gates
+**Goal**: The anonymized B2C Alpha reference host and public release contract prove that multi-rail access and offline study are safe, diagnosable, and operable.
+**Depends on**: Phase 218, Phase 219
+**Requirements**: PROOF-01, PROOF-02, PROOF-03, PROOF-04, PROOF-05
+**Success Criteria** (what must be TRUE):
+  1. The reference host proves Apple-to-web and Stripe-to-iOS access converge for the same account without manual reconciliation.
+  2. Deterministic, credential-free checks prove duplicate-purchase prevention, stale study continuity, restricted expansion, reconnect, revocation, survivor grants, device replacement, deny tombstones, clock rollback, and key rotation.
+  3. An operator can inspect redacted account, rail, provider, revision, eligibility, device/proof, and quarantine/retry state without raw transaction data or PII.
+  4. Automated repair and runbooks address missed Apple notifications, history cursor recovery, outages, conflicts, duplicate charges, stale devices, signing-key compromise, and reconciliation backlog without routine account reconstruction.
+  5. Public guides, examples, capability/compatibility material, App Review guidance, release notes, threat model, watchlist, and conformance gates state one additive contract and its explicit v1.59 limits.
+**Plans**: TBD
 
 ## Progress
 
@@ -58,4 +130,9 @@ Dependencies: 215 → 216 → 217 → 218 → 219. The archived v1.58 requiremen
 | 214. Docs reconciliation | v1.58 | 3/3 | Complete | 2026-07-31 |
 | 214.1. Writer-documentation closure | v1.58 | 4/4 | Complete | 2026-07-31 |
 | 214.2. Diagnostic-display/pagination closure | v1.58 | 4/4 | Complete | 2026-07-31 |
-| 215-219. Multi-rail/offline entitlements | v1.59 | 0/TBD | Queued | - |
+| 215. Research, contracts, and Crosswake feasibility | v1.59 | 0/TBD | Not started | - |
+| 216. Additive rail and persistence foundation | v1.59 | 0/TBD | Not started | - |
+| 217. Canonical projection and compatibility | v1.59 | 0/TBD | Not started | - |
+| 218. Apple observation and repair | v1.59 | 0/TBD | Not started | - |
+| 219. Offline study contract | v1.59 | 0/TBD | Not started | - |
+| 220. First-adopter proof and release gates | v1.59 | 0/TBD | Not started | - |
