@@ -73,4 +73,25 @@ defmodule Accrue.Entitlements.SourceTest do
 
     assert {:ok, _} = Registry.inspect(:apple)
   end
+
+  test "checked-in source fixture exactly mirrors ordered registry inspection" do
+    fixture =
+      "priv/entitlements/v1.59-source-capabilities.json"
+      |> File.read!()
+      |> Jason.decode!()
+
+    runtime =
+      for source <- Registry.sources(), %Outcome{} = outcome <- elem(Registry.inspect(source), 1) do
+        %{
+          "source" => Atom.to_string(source),
+          "capability" => Atom.to_string(outcome.capability),
+          "state" => Atom.to_string(outcome.state),
+          "guidance" => atom_keys_to_strings(outcome.guidance)
+        }
+      end
+
+    assert fixture["outcomes"] == runtime
+  end
+
+  defp atom_keys_to_strings(map), do: Map.new(map, fn {key, value} -> {Atom.to_string(key), value} end)
 end
