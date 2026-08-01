@@ -22,7 +22,7 @@ struct CapabilityReportTests {
     @Test("missing bridge or device evidence fails feasibility closed")
     func missingEvidenceBlocksFeasibility() {
         for failure in [
-            Capability.crosswakeShellTransport,
+            Capability.authenticatedHostTransport,
             Capability.storeKitPurchase,
             Capability.secureEnclaveKey,
             Capability.atomicVerifiedReplacement
