@@ -74,4 +74,47 @@ defmodule Accrue.Entitlements.DecisionCasesTest do
     File.write!(markdown_path, "drift\n")
     assert {:error, [^markdown_path]} = Accrue.Entitlements.DecisionCases.Export.check(root)
   end
+
+  test "offline vectors are derived from unique canonical case bindings" do
+    vectors = Accrue.Entitlements.DecisionCases.Export.offline_vectors()
+    canonical = Map.new(DecisionCases.all(), &{&1.id, &1})
+
+    assert length(vectors) == length(Enum.uniq_by(vectors, & &1.case_id))
+
+    Enum.each(vectors, fn vector ->
+      case_data = Map.fetch!(canonical, vector.case_id)
+      assert vector.contract_version == case_data.contract_version
+      assert vector.expected_disposition == Atom.to_string(case_data.expected.disposition)
+    end)
+  end
+
+  test "offline export check fails closed with named diagnostics for case drift" do
+    root = Path.join(System.tmp_dir!(), "offline-vectors-#{System.unique_integer([:positive])}")
+    on_exit(fn -> File.rm_rf(root) end)
+
+    assert :ok = Accrue.Entitlements.DecisionCases.Export.write(root)
+    assert :ok = Accrue.Entitlements.DecisionCases.Export.check(root)
+
+    vector_path = Path.join(root, "accrue/priv/entitlements/v1.59-offline-golden-vectors.json")
+    File.write!(vector_path, "{\"vectors\": []}\n")
+
+    assert {:error, paths} = Accrue.Entitlements.DecisionCases.Export.check(root)
+    assert vector_path in paths
+  end
+
+  test "offline fixture key is unmistakably test-only and private material stays out of application code" do
+    root = Path.expand("../../..", __DIR__)
+    key_path = Path.join(root, "priv/entitlements/v1.59-offline-test-key.jwk.json")
+    key = Jason.decode!(File.read!(key_path))
+
+    assert key["use"] == "test-only"
+    assert key["warning"] =~ "MUST NEVER"
+
+    private_material = Map.fetch!(key, "d")
+
+    root
+    |> Path.join("lib")
+    |> Path.wildcard("**/*.ex")
+    |> Enum.each(fn path -> refute File.read!(path) =~ private_material end)
+  end
 end
