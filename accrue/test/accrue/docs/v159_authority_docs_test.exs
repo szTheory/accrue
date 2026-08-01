@@ -22,7 +22,12 @@ defmodule Accrue.Docs.V159AuthorityDocsTest do
     assert output =~ "missing authority manifest"
 
     fixture = fixture_root!()
-    replace!(fixture, ".planning/research/RESEARCH-INDEX.md", "v1.59-AUTHORITY.md", "v1.59-SUMMARY.md")
+    replace!(
+      fixture,
+      ".planning/research/RESEARCH-INDEX.md",
+      "- [v1.59-AUTHORITY.md](v1.59-AUTHORITY.md)",
+      "- [v1.59-SUMMARY.md](v1.59-SUMMARY.md)"
+    )
     assert {output, status} = run_verifier(fixture)
     assert status != 0
     assert output =~ "first v1.59 index entry"
@@ -50,13 +55,21 @@ defmodule Accrue.Docs.V159AuthorityDocsTest do
     assert output =~ "watchlist row"
 
     fixture = fixture_root!()
-    replace!(fixture, ".planning/research/v1.59-WATCHLIST.md", "217 Apple adapter runbook", "null")
+    replace!(fixture, ".planning/research/v1.59-WATCHLIST.md", "Phase 218 Apple observer and repair runbook", "null")
     assert {output, status} = run_verifier(fixture)
     assert status != 0
     assert output =~ "null"
 
     fixture = fixture_root!()
-    apple_row = "| Apple App Store Server API, ASSN V2, StoreKit, `appAccountToken` | Deprecation, new notification/status field, changed signing or linkage semantics | 218 Apple adapter runbook | Classify compatibility/security impact; update corpus; rerun independent verifier and sandbox conformance before release. |"
+    apple_row =
+      fixture
+      |> Path.join(".planning/research/v1.59-WATCHLIST.md")
+      |> File.read!()
+      |> String.split("\n")
+      |> Enum.find(&String.starts_with?(&1, "| V159-WL-APPLE-API |"))
+      |> String.split("|", parts: 3)
+      |> List.last()
+      |> then(&"| V159-WL-DUPLICATE |" <> &1)
     append!(fixture, ".planning/research/v1.59-WATCHLIST.md", "\n" <> apple_row)
     assert {output, status} = run_verifier(fixture)
     assert status != 0
@@ -65,7 +78,7 @@ defmodule Accrue.Docs.V159AuthorityDocsTest do
 
   test "v1.59 authority verifier requires dated reassessment behavior and all owned categories" do
     fixture = fixture_root!()
-    replace!(fixture, ".planning/research/v1.59-WATCHLIST.md", "dated reassessment", "review")
+    replace_all!(fixture, ".planning/research/v1.59-WATCHLIST.md", "dated reassessment", "review")
     assert {output, status} = run_verifier(fixture)
     assert status != 0
     assert output =~ "dated reassessment"
@@ -99,6 +112,11 @@ defmodule Accrue.Docs.V159AuthorityDocsTest do
   defp replace!(root, relative_path, needle, replacement) do
     path = Path.join(root, relative_path)
     File.write!(path, String.replace(File.read!(path), needle, replacement, global: false))
+  end
+
+  defp replace_all!(root, relative_path, needle, replacement) do
+    path = Path.join(root, relative_path)
+    File.write!(path, String.replace(File.read!(path), needle, replacement))
   end
 
   defp append!(root, relative_path, contents), do: File.write!(Path.join(root, relative_path), contents, [:append])
