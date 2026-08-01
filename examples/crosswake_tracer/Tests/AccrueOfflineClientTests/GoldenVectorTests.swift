@@ -53,4 +53,20 @@ struct GoldenVectorTests {
         #expect(try firstHandle.candidateURLs().isEmpty)
         #expect(try secondHandle.candidateURLs().isEmpty)
     }
+
+    @Test("recovery removes abandoned candidates without changing canonical cache")
+    func recoveryKeepsCanonicalBytesAndRemovesAbandonedCandidates() throws {
+        let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: directory) }
+        let cache = AtomicOfflineCache(url: directory.appendingPathComponent("entitlement.json"))
+        try cache.replace(with: Data("old-complete".utf8))
+        let abandoned = directory.appendingPathComponent(".entitlement.json.candidate.crashed-child")
+        try Data("new-incomplete".utf8).write(to: abandoned)
+
+        try cache.recover()
+
+        #expect(try String(contentsOf: cache.url) == "old-complete")
+        #expect(try cache.candidateURLs().isEmpty)
+    }
 }
