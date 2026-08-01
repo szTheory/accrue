@@ -1,10 +1,10 @@
 ---
 schema_version: 1
-open_count: 1
+open_count: 3
 waived_count: 0
 fixed_count: 0
-total_count: 1
-last_updated: 2026-07-31T19:21:33.589Z
+total_count: 3
+last_updated: 2026-08-01T01:55:48.106Z
 ---
 
 # Broken Windows Ledger
@@ -16,6 +16,8 @@ last_updated: 2026-07-31T19:21:33.589Z
 | id | phase | kind | file | line | description | status | reason | recorded_at | resolved_at |
 |----|-------|------|------|------|-------------|--------|--------|-------------|-------------|
 | 1 | 214.2 | unrun-verify | examples/accrue_host/e2e/verify01-admin-mobile.spec.js |  | Host mobile entitlement contract is skipped because the checked-in Playwright config has no chromium-mobile project. | open |  | 2026-07-31T19:21:33.589Z |  |
+| 2 | 215 | deviation | examples/crosswake_tracer/Tests/AccrueOfflineClientTests/CapabilityReportTests.swift |  | Corrected stale capability case name in the tracer test. | open |  | 2026-08-01T01:55:48.046Z |  |
+| 3 | 215 | deviation | examples/crosswake_tracer/Sources/AccrueOfflineClient/AccrueOfflineClient.swift |  | Reducer now requires every declared evidence lane before reporting proven. | open |  | 2026-08-01T01:55:48.106Z |  |
 
 ````json
 [
@@ -29,6 +31,30 @@ last_updated: 2026-07-31T19:21:33.589Z
     "status": "open",
     "reason": "",
     "recorded_at": "2026-07-31T19:21:33.589Z",
+    "resolved_at": null
+  },
+  {
+    "id": 2,
+    "kind": "deviation",
+    "phase": "215",
+    "file": "examples/crosswake_tracer/Tests/AccrueOfflineClientTests/CapabilityReportTests.swift",
+    "line": null,
+    "description": "Corrected stale capability case name in the tracer test.",
+    "status": "open",
+    "reason": "",
+    "recorded_at": "2026-08-01T01:55:48.046Z",
+    "resolved_at": null
+  },
+  {
+    "id": 3,
+    "kind": "deviation",
+    "phase": "215",
+    "file": "examples/crosswake_tracer/Sources/AccrueOfflineClient/AccrueOfflineClient.swift",
+    "line": null,
+    "description": "Reducer now requires every declared evidence lane before reporting proven.",
+    "status": "open",
+    "reason": "",
+    "recorded_at": "2026-08-01T01:55:48.106Z",
     "resolved_at": null
   }
 ]
