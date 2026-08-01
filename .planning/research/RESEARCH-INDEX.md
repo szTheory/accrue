@@ -4,6 +4,8 @@
 
 For **v1.59 Account-Scoped Multi-Rail & Offline Entitlements**, the versioned files below are canonical. Future `$gsd-new-milestone` work should read them before treating generic research files as current authority.
 
+- [v1.59-AUTHORITY.md](v1.59-AUTHORITY.md) — first entry point: active policy, D-02 precedence, review state, and effective date.
+- [v1.59-AMENDMENTS.md](v1.59-AMENDMENTS.md) — stable claim IDs, accepted amendments, supersession, and dated reassessment workflow.
 - [v1.59-SUMMARY.md](v1.59-SUMMARY.md) — decisions, boundaries, phases, deltas, and confidence.
 - [v1.59-SOURCES.md](v1.59-SOURCES.md) — deduplicated source provenance, access date, authority classification.
 - [v1.59-DECISION-TABLE.md](v1.59-DECISION-TABLE.md) — implementation/test-ready evidence-to-continuity cases.
