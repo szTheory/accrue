@@ -102,7 +102,9 @@ defmodule Accrue.Entitlements.DecisionCasesTest do
     markdown = Markdown.render([case_data])
 
     assert markdown =~ "| Lease | Continuity |"
-    assert markdown =~ "| `stale_offline_continuity` | stripe/offline | preserve | not_applicable | stale_offline | downloaded_only |"
+
+    assert markdown =~
+             "| `stale_offline_continuity` | stripe/offline | preserve | not_applicable | stale_offline | downloaded_only |"
   end
 
   test "export check detects generated view drift" do
@@ -174,7 +176,9 @@ defmodule Accrue.Entitlements.DecisionCasesTest do
   end
 
   test "offline export check names every mutated expectation field and vector" do
-    root = Path.join(System.tmp_dir!(), "offline-expectations-#{System.unique_integer([:positive])}")
+    root =
+      Path.join(System.tmp_dir!(), "offline-expectations-#{System.unique_integer([:positive])}")
+
     on_exit(fn -> File.rm_rf(root) end)
 
     assert :ok = Accrue.Entitlements.DecisionCases.Export.write(root)
@@ -184,7 +188,11 @@ defmodule Accrue.Entitlements.DecisionCasesTest do
       fixture = Jason.decode!(File.read!(vector_path))
       [first | rest] = fixture["vectors"]
       mutated = put_in(first[field], "mutated")
-      File.write!(vector_path, Jason.encode!(%{fixture | "vectors" => [mutated | rest]}, pretty: true) <> "\n")
+
+      File.write!(
+        vector_path,
+        Jason.encode!(%{fixture | "vectors" => [mutated | rest]}, pretty: true) <> "\n"
+      )
 
       assert {:error, diagnostics} = Accrue.Entitlements.DecisionCases.Export.check(root)
       assert "#{vector_path}: vector #{first["id"]} #{field}" in diagnostics
@@ -211,7 +219,13 @@ defmodule Accrue.Entitlements.DecisionCasesTest do
         ] do
       fixture = Jason.decode!(File.read!(vector_path))
       [first | rest] = fixture["vectors"]
-      File.write!(vector_path, Jason.encode!(%{fixture | "vectors" => [Map.put(first, field, "mutated") | rest]}, pretty: true) <> "\n")
+
+      File.write!(
+        vector_path,
+        Jason.encode!(%{fixture | "vectors" => [Map.put(first, field, "mutated") | rest]},
+          pretty: true
+        ) <> "\n"
+      )
 
       assert {:error, diagnostics} = Accrue.Entitlements.DecisionCases.Export.check(root)
       assert "#{vector_path}: vector #{first["id"]} #{field}" in diagnostics
@@ -220,10 +234,24 @@ defmodule Accrue.Entitlements.DecisionCasesTest do
 
     for field <- ["schema_version", "purpose"] do
       fixture = Jason.decode!(File.read!(vector_path))
-      File.write!(vector_path, Jason.encode!(Map.put(fixture, field, "mutated"), pretty: true) <> "\n")
+
+      File.write!(
+        vector_path,
+        Jason.encode!(Map.put(fixture, field, "mutated"), pretty: true) <> "\n"
+      )
 
       assert {:error, diagnostics} = Accrue.Entitlements.DecisionCases.Export.check(root)
       assert "#{vector_path}: #{field}" in diagnostics
+      assert :ok = Accrue.Entitlements.DecisionCases.Export.write(root)
+    end
+
+    for corpus <- [
+          Map.delete(Jason.decode!(File.read!(vector_path)), "purpose"),
+          Map.put(Jason.decode!(File.read!(vector_path)), "unexpected", "value")
+        ] do
+      File.write!(vector_path, Jason.encode!(corpus, pretty: true) <> "\n")
+      assert {:error, diagnostics} = Accrue.Entitlements.DecisionCases.Export.check(root)
+      assert Enum.any?(diagnostics, &String.contains?(&1, " key "))
       assert :ok = Accrue.Entitlements.DecisionCases.Export.write(root)
     end
 
@@ -233,16 +261,41 @@ defmodule Accrue.Entitlements.DecisionCasesTest do
     for {vectors, diagnostic} <- [
           {[first, first | rest], "#{vector_path}: duplicate vector #{first["id"]}"},
           {rest, "#{vector_path}: missing vector #{first["id"]}"},
-          {[Map.put(first, "id", "extra_vector") | fixture["vectors"]], "#{vector_path}: unexpected vector extra_vector"},
-          {[Map.delete(first, "compact_jws") | rest], "#{vector_path}: vector #{first["id"]} missing key compact_jws"},
-          {[Map.put(first, "unexpected", "value") | rest], "#{vector_path}: vector #{first["id"]} unexpected key unexpected"}
+          {[Map.put(first, "id", "extra_vector") | fixture["vectors"]],
+           "#{vector_path}: unexpected vector extra_vector"},
+          {[Map.delete(first, "compact_jws") | rest],
+           "#{vector_path}: vector #{first["id"]} missing key compact_jws"},
+          {[Map.put(first, "unexpected", "value") | rest],
+           "#{vector_path}: vector #{first["id"]} unexpected key unexpected"}
         ] do
-      File.write!(vector_path, Jason.encode!(%{fixture | "vectors" => vectors}, pretty: true) <> "\n")
+      File.write!(
+        vector_path,
+        Jason.encode!(%{fixture | "vectors" => vectors}, pretty: true) <> "\n"
+      )
 
       assert {:error, diagnostics} = Accrue.Entitlements.DecisionCases.Export.check(root)
       assert diagnostic in diagnostics
       assert :ok = Accrue.Entitlements.DecisionCases.Export.write(root)
     end
+
+    fixture = Jason.decode!(File.read!(vector_path))
+    fault_index = Enum.find_index(fixture["vectors"], &Map.has_key?(&1, "fault_point"))
+    fault_vector = Enum.at(fixture["vectors"], fault_index)
+
+    vectors =
+      List.replace_at(
+        fixture["vectors"],
+        fault_index,
+        Map.put(fault_vector, "fault_point", "mutated")
+      )
+
+    File.write!(
+      vector_path,
+      Jason.encode!(%{fixture | "vectors" => vectors}, pretty: true) <> "\n"
+    )
+
+    assert {:error, diagnostics} = Accrue.Entitlements.DecisionCases.Export.check(root)
+    assert "#{vector_path}: vector #{fault_vector["id"]} fault_point" in diagnostics
   end
 
   test "offline fixture key is unmistakably test-only and private material stays out of application code" do

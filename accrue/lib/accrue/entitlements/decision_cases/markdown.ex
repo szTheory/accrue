@@ -10,7 +10,7 @@ defmodule Accrue.Entitlements.DecisionCases.Markdown do
       |> Enum.map(fn case_data ->
         expected = case_data.expected
 
-        "| `#{case_data.id}` | #{case_data.evidence.rail}/#{case_data.evidence.environment} | #{expected.disposition} | #{expected.eligibility} | #{expected.lease} | `#{expected.reason}` |"
+        "| `#{case_data.id}` | #{case_data.evidence.rail}/#{case_data.evidence.environment} | #{expected.disposition} | #{expected.eligibility} | #{expected.lease} | #{expected.continuity} | `#{expected.reason}` |"
       end)
 
     [
@@ -20,8 +20,8 @@ defmodule Accrue.Entitlements.DecisionCases.Markdown do
       "",
       "Contract version: `#{DecisionCases.version()}`",
       "",
-      "| Case ID | Qualified evidence | Source disposition | Purchase eligibility | Continuity | Support reason |",
-      "| --- | --- | --- | --- | --- | --- |",
+      "| Case ID | Qualified evidence | Source disposition | Purchase eligibility | Lease | Continuity | Support reason |",
+      "| --- | --- | --- | --- | --- | --- | --- |",
       rows,
       ""
     ]
@@ -110,7 +110,8 @@ defmodule Accrue.Entitlements.DecisionCases.Export do
   defp offline_json do
     %{
       schema_version: "v1.59",
-      purpose: "TEST-ONLY signed offline entitlement verification corpus; never configure this key for issuance.",
+      purpose:
+        "TEST-ONLY signed offline entitlement verification corpus; never configure this key for issuance.",
       vectors: offline_vectors()
     }
     |> ordered_json()
@@ -118,67 +119,287 @@ defmodule Accrue.Entitlements.DecisionCases.Export do
     |> Kernel.<>("\n")
   end
 
+  @top_level_keys MapSet.new(["schema_version", "purpose", "vectors"])
+  @vector_fields [
+    "id",
+    "case_id",
+    "contract_version",
+    "expected_disposition",
+    "compact_jws",
+    "expected_verification",
+    "expected_reason",
+    "expected_cache_disposition",
+    "fault_point"
+  ]
+
   defp offline_drift(path, actual, expected) do
-    with {:ok, %{"vectors" => actual_vectors}} <- Jason.decode(actual),
-         {:ok, %{"vectors" => expected_vectors}} <- Jason.decode(expected) do
-      expected_by_id = Map.new(expected_vectors, &{&1["id"], &1})
+    with {:ok, actual_corpus} <- Jason.decode(actual),
+         {:ok, expected_corpus} <- Jason.decode(expected),
+         true <- is_map(actual_corpus) and is_map(expected_corpus),
+         {:ok, actual_vectors} <- fetch_vectors(actual_corpus),
+         {:ok, expected_vectors} <- fetch_vectors(expected_corpus) do
+      diagnostics =
+        top_level_drift(path, actual_corpus, expected_corpus) ++
+          duplicate_id_drift(path, actual_vectors) ++
+          vector_identity_drift(path, actual_vectors, expected_vectors) ++
+          vector_content_drift(path, actual_vectors, expected_vectors)
 
-      missing_ids =
-        expected_vectors
-        |> Enum.map(& &1["id"])
-        |> MapSet.new()
-        |> MapSet.difference(MapSet.new(Enum.map(actual_vectors, & &1["id"])))
-        |> Enum.map(fn id -> "#{path}: missing vector #{id}" end)
-
-      missing_paths = if missing_ids == [], do: [], else: [path]
-
-      actual_vectors
-      |> Enum.flat_map(fn vector ->
-        case Map.fetch(expected_by_id, vector["id"]) do
-          {:ok, expected_vector} ->
-            for field <- ["expected_verification", "expected_reason", "expected_cache_disposition"],
-                vector[field] != expected_vector[field],
-                do: "#{path}: vector #{vector["id"]} #{field}"
-
-          :error ->
-            ["#{path}: unknown vector #{vector["id"]}"]
-        end
-      end)
-      |> Kernel.++(missing_paths ++ missing_ids)
-      |> case do
-        [] -> []
-        diagnostics -> diagnostics
-      end
+      if diagnostics == [], do: [], else: [path | diagnostics]
     else
       _ -> [path]
     end
   end
 
+  defp fetch_vectors(%{"vectors" => vectors}) when is_list(vectors), do: {:ok, vectors}
+  defp fetch_vectors(_), do: :error
+
+  defp top_level_drift(path, actual, expected) do
+    keys = Map.keys(actual) |> MapSet.new()
+
+    key_diagnostics(path, keys, @top_level_keys) ++
+      for field <- ["schema_version", "purpose"],
+          actual[field] != expected[field],
+          do: "#{path}: #{field}"
+  end
+
+  defp duplicate_id_drift(path, vectors) do
+    vectors
+    |> Enum.map(&Map.get(&1, "id"))
+    |> Enum.reject(&is_nil/1)
+    |> Enum.frequencies()
+    |> Enum.filter(fn {_id, count} -> count > 1 end)
+    |> Enum.map(fn {id, _count} -> "#{path}: duplicate vector #{id}" end)
+    |> Enum.sort()
+  end
+
+  defp vector_identity_drift(path, actual_vectors, expected_vectors) do
+    actual_ids = MapSet.new(Enum.map(actual_vectors, &Map.get(&1, "id")))
+    expected_ids = MapSet.new(Enum.map(expected_vectors, &Map.get(&1, "id")))
+
+    missing =
+      MapSet.difference(expected_ids, actual_ids)
+      |> Enum.sort()
+      |> Enum.map(&"#{path}: missing vector #{&1}")
+
+    extra =
+      MapSet.difference(actual_ids, expected_ids)
+      |> Enum.sort()
+      |> Enum.map(&"#{path}: unexpected vector #{&1}")
+
+    missing ++ extra
+  end
+
+  defp vector_content_drift(path, actual_vectors, expected_vectors) do
+    Enum.zip(actual_vectors, expected_vectors)
+    |> Enum.flat_map(fn {actual, expected} ->
+      vector_id = Map.get(expected, "id", "unknown")
+
+      if is_map(actual) do
+        actual_keys = Map.keys(actual) |> MapSet.new()
+        expected_keys = Map.keys(expected) |> MapSet.new()
+
+        key_diagnostics(path <> ": vector #{vector_id}", actual_keys, expected_keys) ++
+          for field <- @vector_fields,
+              Map.get(actual, field) != Map.get(expected, field),
+              do: "#{path}: vector #{vector_id} #{field}"
+      else
+        ["#{path}: vector #{vector_id}"]
+      end
+    end)
+  end
+
+  defp key_diagnostics(path, actual_keys, expected_keys) do
+    missing =
+      MapSet.difference(expected_keys, actual_keys)
+      |> Enum.sort()
+      |> Enum.map(&"#{path} missing key #{&1}")
+
+    extra =
+      MapSet.difference(actual_keys, expected_keys)
+      |> Enum.sort()
+      |> Enum.map(&"#{path} unexpected key #{&1}")
+
+    missing ++ extra
+  end
+
   defp offline_specs do
-    allow = "eyJhbGciOiJFUzI1NiIsImtpZCI6ImFjY3J1ZS12MS41OS1vZmZsaW5lLXRlc3Qtb25seSJ9.eyJpc3MiOiJhY2NydWUudGVzdC5vZmZsaW5lIiwiYXVkIjoiYWNjcnVlLW9mZmxpbmUtY2xpZW50IiwidHlwIjoiYWNjcnVlLWVudGl0bGVtZW50IiwiYWNjb3VudF9pZCI6ImFjY291bnQtMTIzIiwiZGV2aWNlX2lkIjoiZGV2aWNlLTEyMyIsImNuZiI6InRlc3QtdGh1bWJwcmludCIsInJldmlzaW9uIjo1LCJpYXQiOjE3MDAwMDAwMDAsImZyZXNoX3VudGlsIjoxNzAwMDAzNjAwLCJkaXNwb3NpdGlvbiI6ImFsbG93In0.JFnJfG7Tsj8imq2WkdKKRSAX3EdENW6FeFUkgwMpFT0Atgb3B0S9zrcRRf-UjmjfF1WMu8eBdZ1hs2GzC0kZmw"
-    denial = "eyJhbGciOiJFUzI1NiIsImtpZCI6ImFjY3J1ZS12MS41OS1vZmZsaW5lLXRlc3Qtb25seSJ9.eyJpc3MiOiJhY2NydWUudGVzdC5vZmZsaW5lIiwiYXVkIjoiYWNjcnVlLW9mZmxpbmUtY2xpZW50IiwidHlwIjoiYWNjcnVlLWVudGl0bGVtZW50IiwiYWNjb3VudF9pZCI6ImFjY291bnQtMTIzIiwiZGV2aWNlX2lkIjoiZGV2aWNlLTEyMyIsImNuZiI6InRlc3QtdGh1bWJwcmludCIsInJldmlzaW9uIjo1LCJpYXQiOjE3MDAwMDAwMDAsImZyZXNoX3VudGlsIjoxNzAwMDAzNjAwLCJkaXNwb3NpdGlvbiI6ImRlbnkifQ.IzhX4g4ftHpPUVHnjBGA47f0QX7IuOCUva9P-jvVH0Wv2lL1KNoCmaunfA4-BIWtQJ4F3uU3_F5xYDgWS1NVaA"
+    allow =
+      "eyJhbGciOiJFUzI1NiIsImtpZCI6ImFjY3J1ZS12MS41OS1vZmZsaW5lLXRlc3Qtb25seSJ9.eyJpc3MiOiJhY2NydWUudGVzdC5vZmZsaW5lIiwiYXVkIjoiYWNjcnVlLW9mZmxpbmUtY2xpZW50IiwidHlwIjoiYWNjcnVlLWVudGl0bGVtZW50IiwiYWNjb3VudF9pZCI6ImFjY291bnQtMTIzIiwiZGV2aWNlX2lkIjoiZGV2aWNlLTEyMyIsImNuZiI6InRlc3QtdGh1bWJwcmludCIsInJldmlzaW9uIjo1LCJpYXQiOjE3MDAwMDAwMDAsImZyZXNoX3VudGlsIjoxNzAwMDAzNjAwLCJkaXNwb3NpdGlvbiI6ImFsbG93In0.JFnJfG7Tsj8imq2WkdKKRSAX3EdENW6FeFUkgwMpFT0Atgb3B0S9zrcRRf-UjmjfF1WMu8eBdZ1hs2GzC0kZmw"
+
+    denial =
+      "eyJhbGciOiJFUzI1NiIsImtpZCI6ImFjY3J1ZS12MS41OS1vZmZsaW5lLXRlc3Qtb25seSJ9.eyJpc3MiOiJhY2NydWUudGVzdC5vZmZsaW5lIiwiYXVkIjoiYWNjcnVlLW9mZmxpbmUtY2xpZW50IiwidHlwIjoiYWNjcnVlLWVudGl0bGVtZW50IiwiYWNjb3VudF9pZCI6ImFjY291bnQtMTIzIiwiZGV2aWNlX2lkIjoiZGV2aWNlLTEyMyIsImNuZiI6InRlc3QtdGh1bWJwcmludCIsInJldmlzaW9uIjo1LCJpYXQiOjE3MDAwMDAwMDAsImZyZXNoX3VudGlsIjoxNzAwMDAzNjAwLCJkaXNwb3NpdGlvbiI6ImRlbnkifQ.IzhX4g4ftHpPUVHnjBGA47f0QX7IuOCUva9P-jvVH0Wv2lL1KNoCmaunfA4-BIWtQJ4F3uU3_F5xYDgWS1NVaA"
 
     [
-      %{id: "valid_allow", case_id: "reconnect_positive_replacement", compact_jws: allow, expected_verification: "accept", expected_reason: "ok", expected_cache_disposition: "allow"},
-      %{id: "valid_signed_denial", case_id: "reconnect_denied_tombstone", compact_jws: denial, expected_verification: "accept", expected_reason: "ok", expected_cache_disposition: "deny"},
-      %{id: "wrong_signature", case_id: "invalid_apple_evidence", compact_jws: String.replace_suffix(allow, "Zmw", "Ymw"), expected_verification: "reject", expected_reason: "signature", expected_cache_disposition: "allow"},
-      %{id: "wrong_key", case_id: "apple_token_mismatch", compact_jws: allow, expected_verification: "reject", expected_reason: "key", expected_cache_disposition: "allow"},
-      %{id: "wrong_device", case_id: "unmapped_verified_product", compact_jws: allow, expected_verification: "reject", expected_reason: "device", expected_cache_disposition: "allow"},
-      %{id: "rollback", case_id: "out_of_order_positive_after_revoke", compact_jws: allow, expected_verification: "reject", expected_reason: "rollback", expected_cache_disposition: "deny"},
-      %{id: "older_iat", case_id: "duplicate_provider_event", compact_jws: allow, expected_verification: "reject", expected_reason: "iat", expected_cache_disposition: "deny"},
-      %{id: "stale_freshness", case_id: "stale_offline_continuity", compact_jws: allow, expected_verification: "reject", expected_reason: "freshness", expected_cache_disposition: "allow"},
-      %{id: "deny_precedence", case_id: "all_grants_revoked", compact_jws: denial, expected_verification: "accept", expected_reason: "ok", expected_cache_disposition: "deny"},
-      %{id: "fault_before_replace", case_id: "atomic_transaction_boundary", compact_jws: allow, expected_verification: "accept", expected_reason: "fault_before_replace", expected_cache_disposition: "deny", fault_point: "before_rename"},
-      %{id: "fault_after_replace", case_id: "stripe_revoked_apple_survives", compact_jws: denial, expected_verification: "accept", expected_reason: "fault_after_replace", expected_cache_disposition: "deny", fault_point: "after_rename"},
-      %{id: "wrong_account", case_id: "apple_token_mismatch", compact_jws: "eyJhbGciOiJFUzI1NiIsImtpZCI6ImFjY3J1ZS12MS41OS1vZmZsaW5lLXRlc3Qtb25seSJ9.eyJhY2NvdW50X2lkIjoiYWNjb3VudC05OTkiLCJhdWQiOiJhY2NydWUtb2ZmbGluZS1jbGllbnQiLCJjbmYiOiJ0ZXN0LXRodW1icHJpbnQiLCJkZXZpY2VfaWQiOiJkZXZpY2UtMTIzIiwiZGlzcG9zaXRpb24iOiJhbGxvdyIsImZyZXNoX3VudGlsIjoxNzAwMDAzNjAwLCJpYXQiOjE3MDAwMDAwMDAsImlzcyI6ImFjY3J1ZS50ZXN0Lm9mZmxpbmUiLCJyZXZpc2lvbiI6NSwidHlwIjoiYWNjcnVlLWVudGl0bGVtZW50In0.43qdmSN-I2l2HZdFom_fQonTndBVyteuUa2LO0F_QwojXrVR9ZrvtBZXmnABBwSSzdyM7iBPdgoTqFnA8b-YBg", expected_verification: "reject", expected_reason: "account", expected_cache_disposition: "allow"},
-      %{id: "wrong_audience", case_id: "invalid_apple_evidence", compact_jws: "eyJhbGciOiJFUzI1NiIsImtpZCI6ImFjY3J1ZS12MS41OS1vZmZsaW5lLXRlc3Qtb25seSJ9.eyJhY2NvdW50X2lkIjoiYWNjb3VudC0xMjMiLCJhdWQiOiJ3cm9uZy1hdWRpZW5jZSIsImNuZiI6InRlc3QtdGh1bWJwcmludCIsImRldmljZV9pZCI6ImRldmljZS0xMjMiLCJkaXNwb3NpdGlvbiI6ImFsbG93IiwiZnJlc2hfdW50aWwiOjE3MDAwMDM2MDAsImlhdCI6MTcwMDAwMDAwMCwiaXNzIjoiYWNjcnVlLnRlc3Qub2ZmbGluZSIsInJldmlzaW9uIjo1LCJ0eXAiOiJhY2NydWUtZW50aXRsZW1lbnQifQ.6v1LxZrviSLxPXSgMaV1elIYkrBChMSHyiN8vrdsf0WvocJkMul69NnWaBVdWc7GpriznSVEfSiz_gSpQEUbnA", expected_verification: "reject", expected_reason: "audience", expected_cache_disposition: "allow"},
-      %{id: "wrong_type", case_id: "unmapped_verified_product", compact_jws: "eyJhbGciOiJFUzI1NiIsImtpZCI6ImFjY3J1ZS12MS41OS1vZmZsaW5lLXRlc3Qtb25seSJ9.eyJpc3MiOiJhY2NydWUudGVzdC5vZmZsaW5lIiwiYXVkIjoiYWNjcnVlLW9mZmxpbmUtY2xpZW50IiwidHlwIjoid3JvbmctdHlwZSIsImFjY291bnRfaWQiOiJhY2NvdW50LTEyMyIsImRldmljZV9pZCI6ImRldmljZS0xMjMiLCJjbmYiOiJ0ZXN0LXRodW1icHJpbnQiLCJyZXZpc2lvbiI6NSwiaWF0IjoxNzAwMDAwMDAwLCJmcmVzaF91bnRpbCI6MTcwMDAwMzYwMCwiZGlzcG9zaXRpb24iOiJhbGxvdyJ9.BaZWg4FGrXhFJUh-doqyd41kMl6VhCbKlJcyxkWDhbqvc6bg3dKwGT1U6eRAXrGMgu1IKWa8ZVTEHjd31QK3LQ", expected_verification: "reject", expected_reason: "type", expected_cache_disposition: "allow"},
-      %{id: "wrong_algorithm", case_id: "invalid_apple_evidence", compact_jws: "eyJhbGciOiJIUzI1NiIsImtpZCI6ImFjY3J1ZS12MS41OS1vZmZsaW5lLXRlc3Qtb25seSJ9.eyJhY2NvdW50X2lkIjoiYWNjb3VudC0xMjMiLCJhdWQiOiJhY2NydWUtb2ZmbGluZS1jbGllbnQiLCJjbmYiOiJ0ZXN0LXRodW1icHJpbnQiLCJkZXZpY2VfaWQiOiJkZXZpY2UtMTIzIiwiZGlzcG9zaXRpb24iOiJhbGxvdyIsImZyZXNoX3VudGlsIjoxNzAwMDAzNjAwLCJpYXQiOjE3MDAwMDAwMDAsImlzcyI6ImFjY3VlLnRlc3Qub2ZmbGluZSIsInJldmlzaW9uIjo1LCJ0eXAiOiJhY2NydWUtZW50aXRsZW1lbnQifQ.P1Qfjf00tfTI9dvtJojQpY_QjeOkGXygt-nQJhuyILMFrtNTspKdbfk8H1yTep10t6jUl-WH2w6ECIbrOSnpTQ", expected_verification: "reject", expected_reason: "algorithm", expected_cache_disposition: "allow"},
-      %{id: "malformed_compact", case_id: "invalid_apple_evidence", compact_jws: "not-a-jws", expected_verification: "reject", expected_reason: "malformed", expected_cache_disposition: "allow"},
-      %{id: "malformed_revision", case_id: "out_of_order_positive_after_revoke", compact_jws: "eyJhbGciOiJFUzI1NiIsImtpZCI6ImFjY3J1ZS12MS41OS1vZmZsaW5lLXRlc3Qtb25seSJ9.eyJpc3MiOiJhY2NydWUudGVzdC5vZmZsaW5lIiwiYXVkIjoiYWNjcnVlLW9mZmxpbmUtY2xpZW50IiwidHlwIjoiYWNjcnVlLWVudGl0bGVtZW50IiwiYWNjb3VudF9pZCI6ImFjY291bnQtMTIzIiwiZGV2aWNlX2lkIjoiZGV2aWNlLTEyMyIsImNuZiI6InRlc3QtdGh1bWJwcmludCIsInJldmlzaW9uIjoiZml2ZSIsImlhdCI6MTcwMDAwMDAwMCwiZnJlc2hfdW50aWwiOjE3MDAwMDM2MDAsImRpc3Bvc2l0aW9uIjoiYWxsb3cifQ.3XNemG0CWFPnLLNZDsxVvq6DhnOX-5_9e7jHsFJkI5G0En3WhazkYS_JAuxwoaLlM4OvlpjuQLk65foUU27qlA", expected_verification: "reject", expected_reason: "revision", expected_cache_disposition: "allow"},
-      %{id: "malformed_iat", case_id: "duplicate_provider_event", compact_jws: "eyJhbGciOiJFUzI1NiIsImtpZCI6ImFjY3J1ZS12MS41OS1vZmZsaW5lLXRlc3Qtb25seSJ9.eyJpc3MiOiJhY2NydWUudGVzdC5vZmZsaW5lIiwiYXVkIjoiYWNjcnVlLW9mZmxpbmUtY2xpZW50IiwidHlwIjoiYWNjcnVlLWVudGl0bGVtZW50IiwiYWNjb3VudF9pZCI6ImFjY291bnQtMTIzIiwiZGV2aWNlX2lkIjoiZGV2aWNlLTEyMyIsImNuZiI6InRlc3QtdGh1bWJwcmludCIsInJldmlzaW9uIjo1LCJpYXQiOiJub3ciLCJmcmVzaF91bnRpbCI6MTcwMDAwMzYwMCwiZGlzcG9zaXRpb24iOiJhbGxvdyJ9.Sy1U_J0PAO1zeYDn4Tp55OJo7qqdDZVjyMijy-oFSlP5lPFoVXf0NqKHA8E-IVMd1UQkel1h9NCnAuyE6spvNw", expected_verification: "reject", expected_reason: "iat", expected_cache_disposition: "allow"},
-      %{id: "malformed_freshness", case_id: "stale_offline_continuity", compact_jws: "eyJhbGciOiJFUzI1NiIsImtpZCI6ImFjY3J1ZS12MS41OS1vZmZsaW5lLXRlc3Qtb25seSJ9.eyJpc3MiOiJhY2NydWUudGVzdC5vZmZsaW5lIiwiYXVkIjoiYWNjcnVlLW9mZmxpbmUtY2xpZW50IiwidHlwIjoiYWNjcnVlLWVudGl0bGVtZW50IiwiYWNjb3VudF9pZCI6ImFjY291bnQtMTIzIiwiZGV2aWNlX2lkIjoiZGV2aWNlLTEyMyIsImNuZiI6InRlc3QtdGh1bWJwcmludCIsInJldmlzaW9uIjo1LCJpYXQiOjE3MDAwMDAwMDAsImZyZXNoX3VudGlsIjoibGF0ZXIiLCJkaXNwb3NpdGlvbiI6ImFsbG93In0.8Lz7r30EHYUzzgBcHmmlZUTb4kkUN3C0us9DIVZZul6LaV0CBUNGlREw37pgp2RDOcPB6Y1paGhdMlLbdSmFkg", expected_verification: "reject", expected_reason: "freshness", expected_cache_disposition: "allow"},
-      %{id: "unknown_disposition", case_id: "reconnect_positive_replacement", compact_jws: "eyJhbGciOiJFUzI1NiIsImtpZCI6ImFjY3J1ZS12MS41OS1vZmZsaW5lLXRlc3Qtb25seSJ9.eyJpc3MiOiJhY2NydWUudGVzdC5vZmZsaW5lIiwiYXVkIjoiYWNjcnVlLW9mZmxpbmUtY2xpZW50IiwidHlwIjoiYWNjcnVlLWVudGl0bGVtZW50IiwiYWNjb3VudF9pZCI6ImFjY291bnQtMTIzIiwiZGV2aWNlX2lkIjoiZGV2aWNlLTEyMyIsImNuZiI6InRlc3QtdGh1bWJwcmludCIsInJldmlzaW9uIjo1LCJpYXQiOjE3MDAwMDAwMDAsImZyZXNoX3VudGlsIjoxNzAwMDAzNjAwLCJkaXNwb3NpdGlvbiI6Im1heWJlIn0.IITy6KiR_eQ-OxZ5CdsQ_byEefEfWaEdI2-AFiMygkqHufz6w4lbxtO3sHSBleOIbnRgybpSUKotJgw4MFhY6Q", expected_verification: "reject", expected_reason: "disposition", expected_cache_disposition: "allow"}
+      %{
+        id: "valid_allow",
+        case_id: "reconnect_positive_replacement",
+        compact_jws: allow,
+        expected_verification: "accept",
+        expected_reason: "ok",
+        expected_cache_disposition: "allow"
+      },
+      %{
+        id: "valid_signed_denial",
+        case_id: "reconnect_denied_tombstone",
+        compact_jws: denial,
+        expected_verification: "accept",
+        expected_reason: "ok",
+        expected_cache_disposition: "deny"
+      },
+      %{
+        id: "wrong_signature",
+        case_id: "invalid_apple_evidence",
+        compact_jws: String.replace_suffix(allow, "Zmw", "Ymw"),
+        expected_verification: "reject",
+        expected_reason: "signature",
+        expected_cache_disposition: "allow"
+      },
+      %{
+        id: "wrong_key",
+        case_id: "apple_token_mismatch",
+        compact_jws: allow,
+        expected_verification: "reject",
+        expected_reason: "key",
+        expected_cache_disposition: "allow"
+      },
+      %{
+        id: "wrong_device",
+        case_id: "unmapped_verified_product",
+        compact_jws: allow,
+        expected_verification: "reject",
+        expected_reason: "device",
+        expected_cache_disposition: "allow"
+      },
+      %{
+        id: "rollback",
+        case_id: "out_of_order_positive_after_revoke",
+        compact_jws: allow,
+        expected_verification: "reject",
+        expected_reason: "rollback",
+        expected_cache_disposition: "deny"
+      },
+      %{
+        id: "older_iat",
+        case_id: "duplicate_provider_event",
+        compact_jws: allow,
+        expected_verification: "reject",
+        expected_reason: "iat",
+        expected_cache_disposition: "deny"
+      },
+      %{
+        id: "stale_freshness",
+        case_id: "stale_offline_continuity",
+        compact_jws: allow,
+        expected_verification: "reject",
+        expected_reason: "freshness",
+        expected_cache_disposition: "allow"
+      },
+      %{
+        id: "deny_precedence",
+        case_id: "all_grants_revoked",
+        compact_jws: denial,
+        expected_verification: "accept",
+        expected_reason: "ok",
+        expected_cache_disposition: "deny"
+      },
+      %{
+        id: "fault_before_replace",
+        case_id: "atomic_transaction_boundary",
+        compact_jws: allow,
+        expected_verification: "accept",
+        expected_reason: "fault_before_replace",
+        expected_cache_disposition: "deny",
+        fault_point: "before_rename"
+      },
+      %{
+        id: "fault_after_replace",
+        case_id: "stripe_revoked_apple_survives",
+        compact_jws: denial,
+        expected_verification: "accept",
+        expected_reason: "fault_after_replace",
+        expected_cache_disposition: "deny",
+        fault_point: "after_rename"
+      },
+      %{
+        id: "wrong_account",
+        case_id: "apple_token_mismatch",
+        compact_jws:
+          "eyJhbGciOiJFUzI1NiIsImtpZCI6ImFjY3J1ZS12MS41OS1vZmZsaW5lLXRlc3Qtb25seSJ9.eyJhY2NvdW50X2lkIjoiYWNjb3VudC05OTkiLCJhdWQiOiJhY2NydWUtb2ZmbGluZS1jbGllbnQiLCJjbmYiOiJ0ZXN0LXRodW1icHJpbnQiLCJkZXZpY2VfaWQiOiJkZXZpY2UtMTIzIiwiZGlzcG9zaXRpb24iOiJhbGxvdyIsImZyZXNoX3VudGlsIjoxNzAwMDAzNjAwLCJpYXQiOjE3MDAwMDAwMDAsImlzcyI6ImFjY3J1ZS50ZXN0Lm9mZmxpbmUiLCJyZXZpc2lvbiI6NSwidHlwIjoiYWNjcnVlLWVudGl0bGVtZW50In0.43qdmSN-I2l2HZdFom_fQonTndBVyteuUa2LO0F_QwojXrVR9ZrvtBZXmnABBwSSzdyM7iBPdgoTqFnA8b-YBg",
+        expected_verification: "reject",
+        expected_reason: "account",
+        expected_cache_disposition: "allow"
+      },
+      %{
+        id: "wrong_audience",
+        case_id: "invalid_apple_evidence",
+        compact_jws:
+          "eyJhbGciOiJFUzI1NiIsImtpZCI6ImFjY3J1ZS12MS41OS1vZmZsaW5lLXRlc3Qtb25seSJ9.eyJhY2NvdW50X2lkIjoiYWNjb3VudC0xMjMiLCJhdWQiOiJ3cm9uZy1hdWRpZW5jZSIsImNuZiI6InRlc3QtdGh1bWJwcmludCIsImRldmljZV9pZCI6ImRldmljZS0xMjMiLCJkaXNwb3NpdGlvbiI6ImFsbG93IiwiZnJlc2hfdW50aWwiOjE3MDAwMDM2MDAsImlhdCI6MTcwMDAwMDAwMCwiaXNzIjoiYWNjcnVlLnRlc3Qub2ZmbGluZSIsInJldmlzaW9uIjo1LCJ0eXAiOiJhY2NydWUtZW50aXRsZW1lbnQifQ.6v1LxZrviSLxPXSgMaV1elIYkrBChMSHyiN8vrdsf0WvocJkMul69NnWaBVdWc7GpriznSVEfSiz_gSpQEUbnA",
+        expected_verification: "reject",
+        expected_reason: "audience",
+        expected_cache_disposition: "allow"
+      },
+      %{
+        id: "wrong_type",
+        case_id: "unmapped_verified_product",
+        compact_jws:
+          "eyJhbGciOiJFUzI1NiIsImtpZCI6ImFjY3J1ZS12MS41OS1vZmZsaW5lLXRlc3Qtb25seSJ9.eyJpc3MiOiJhY2NydWUudGVzdC5vZmZsaW5lIiwiYXVkIjoiYWNjcnVlLW9mZmxpbmUtY2xpZW50IiwidHlwIjoid3JvbmctdHlwZSIsImFjY291bnRfaWQiOiJhY2NvdW50LTEyMyIsImRldmljZV9pZCI6ImRldmljZS0xMjMiLCJjbmYiOiJ0ZXN0LXRodW1icHJpbnQiLCJyZXZpc2lvbiI6NSwiaWF0IjoxNzAwMDAwMDAwLCJmcmVzaF91bnRpbCI6MTcwMDAwMzYwMCwiZGlzcG9zaXRpb24iOiJhbGxvdyJ9.BaZWg4FGrXhFJUh-doqyd41kMl6VhCbKlJcyxkWDhbqvc6bg3dKwGT1U6eRAXrGMgu1IKWa8ZVTEHjd31QK3LQ",
+        expected_verification: "reject",
+        expected_reason: "type",
+        expected_cache_disposition: "allow"
+      },
+      %{
+        id: "wrong_algorithm",
+        case_id: "invalid_apple_evidence",
+        compact_jws:
+          "eyJhbGciOiJIUzI1NiIsImtpZCI6ImFjY3J1ZS12MS41OS1vZmZsaW5lLXRlc3Qtb25seSJ9.eyJhY2NvdW50X2lkIjoiYWNjb3VudC0xMjMiLCJhdWQiOiJhY2NydWUtb2ZmbGluZS1jbGllbnQiLCJjbmYiOiJ0ZXN0LXRodW1icHJpbnQiLCJkZXZpY2VfaWQiOiJkZXZpY2UtMTIzIiwiZGlzcG9zaXRpb24iOiJhbGxvdyIsImZyZXNoX3VudGlsIjoxNzAwMDAzNjAwLCJpYXQiOjE3MDAwMDAwMDAsImlzcyI6ImFjY3VlLnRlc3Qub2ZmbGluZSIsInJldmlzaW9uIjo1LCJ0eXAiOiJhY2NydWUtZW50aXRsZW1lbnQifQ.P1Qfjf00tfTI9dvtJojQpY_QjeOkGXygt-nQJhuyILMFrtNTspKdbfk8H1yTep10t6jUl-WH2w6ECIbrOSnpTQ",
+        expected_verification: "reject",
+        expected_reason: "algorithm",
+        expected_cache_disposition: "allow"
+      },
+      %{
+        id: "malformed_compact",
+        case_id: "invalid_apple_evidence",
+        compact_jws: "not-a-jws",
+        expected_verification: "reject",
+        expected_reason: "malformed",
+        expected_cache_disposition: "allow"
+      },
+      %{
+        id: "malformed_revision",
+        case_id: "out_of_order_positive_after_revoke",
+        compact_jws:
+          "eyJhbGciOiJFUzI1NiIsImtpZCI6ImFjY3J1ZS12MS41OS1vZmZsaW5lLXRlc3Qtb25seSJ9.eyJpc3MiOiJhY2NydWUudGVzdC5vZmZsaW5lIiwiYXVkIjoiYWNjcnVlLW9mZmxpbmUtY2xpZW50IiwidHlwIjoiYWNjcnVlLWVudGl0bGVtZW50IiwiYWNjb3VudF9pZCI6ImFjY291bnQtMTIzIiwiZGV2aWNlX2lkIjoiZGV2aWNlLTEyMyIsImNuZiI6InRlc3QtdGh1bWJwcmludCIsInJldmlzaW9uIjoiZml2ZSIsImlhdCI6MTcwMDAwMDAwMCwiZnJlc2hfdW50aWwiOjE3MDAwMDM2MDAsImRpc3Bvc2l0aW9uIjoiYWxsb3cifQ.3XNemG0CWFPnLLNZDsxVvq6DhnOX-5_9e7jHsFJkI5G0En3WhazkYS_JAuxwoaLlM4OvlpjuQLk65foUU27qlA",
+        expected_verification: "reject",
+        expected_reason: "revision",
+        expected_cache_disposition: "allow"
+      },
+      %{
+        id: "malformed_iat",
+        case_id: "duplicate_provider_event",
+        compact_jws:
+          "eyJhbGciOiJFUzI1NiIsImtpZCI6ImFjY3J1ZS12MS41OS1vZmZsaW5lLXRlc3Qtb25seSJ9.eyJpc3MiOiJhY2NydWUudGVzdC5vZmZsaW5lIiwiYXVkIjoiYWNjcnVlLW9mZmxpbmUtY2xpZW50IiwidHlwIjoiYWNjcnVlLWVudGl0bGVtZW50IiwiYWNjb3VudF9pZCI6ImFjY291bnQtMTIzIiwiZGV2aWNlX2lkIjoiZGV2aWNlLTEyMyIsImNuZiI6InRlc3QtdGh1bWJwcmludCIsInJldmlzaW9uIjo1LCJpYXQiOiJub3ciLCJmcmVzaF91bnRpbCI6MTcwMDAwMzYwMCwiZGlzcG9zaXRpb24iOiJhbGxvdyJ9.Sy1U_J0PAO1zeYDn4Tp55OJo7qqdDZVjyMijy-oFSlP5lPFoVXf0NqKHA8E-IVMd1UQkel1h9NCnAuyE6spvNw",
+        expected_verification: "reject",
+        expected_reason: "iat",
+        expected_cache_disposition: "allow"
+      },
+      %{
+        id: "malformed_freshness",
+        case_id: "stale_offline_continuity",
+        compact_jws:
+          "eyJhbGciOiJFUzI1NiIsImtpZCI6ImFjY3J1ZS12MS41OS1vZmZsaW5lLXRlc3Qtb25seSJ9.eyJpc3MiOiJhY2NydWUudGVzdC5vZmZsaW5lIiwiYXVkIjoiYWNjcnVlLW9mZmxpbmUtY2xpZW50IiwidHlwIjoiYWNjcnVlLWVudGl0bGVtZW50IiwiYWNjb3VudF9pZCI6ImFjY291bnQtMTIzIiwiZGV2aWNlX2lkIjoiZGV2aWNlLTEyMyIsImNuZiI6InRlc3QtdGh1bWJwcmludCIsInJldmlzaW9uIjo1LCJpYXQiOjE3MDAwMDAwMDAsImZyZXNoX3VudGlsIjoibGF0ZXIiLCJkaXNwb3NpdGlvbiI6ImFsbG93In0.8Lz7r30EHYUzzgBcHmmlZUTb4kkUN3C0us9DIVZZul6LaV0CBUNGlREw37pgp2RDOcPB6Y1paGhdMlLbdSmFkg",
+        expected_verification: "reject",
+        expected_reason: "freshness",
+        expected_cache_disposition: "allow"
+      },
+      %{
+        id: "unknown_disposition",
+        case_id: "reconnect_positive_replacement",
+        compact_jws:
+          "eyJhbGciOiJFUzI1NiIsImtpZCI6ImFjY3J1ZS12MS41OS1vZmZsaW5lLXRlc3Qtb25seSJ9.eyJpc3MiOiJhY2NydWUudGVzdC5vZmZsaW5lIiwiYXVkIjoiYWNjcnVlLW9mZmxpbmUtY2xpZW50IiwidHlwIjoiYWNjcnVlLWVudGl0bGVtZW50IiwiYWNjb3VudF9pZCI6ImFjY291bnQtMTIzIiwiZGV2aWNlX2lkIjoiZGV2aWNlLTEyMyIsImNuZiI6InRlc3QtdGh1bWJwcmludCIsInJldmlzaW9uIjo1LCJpYXQiOjE3MDAwMDAwMDAsImZyZXNoX3VudGlsIjoxNzAwMDAzNjAwLCJkaXNwb3NpdGlvbiI6Im1heWJlIn0.IITy6KiR_eQ-OxZ5CdsQ_byEefEfWaEdI2-AFiMygkqHufz6w4lbxtO3sHSBleOIbnRgybpSUKotJgw4MFhY6Q",
+        expected_verification: "reject",
+        expected_reason: "disposition",
+        expected_cache_disposition: "allow"
+      }
     ]
   end
 
