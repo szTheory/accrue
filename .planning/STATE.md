@@ -5,16 +5,16 @@ milestone_name: Account-Scoped Multi-Rail & Offline Entitlements
 current_phase: 215
 current_phase_name: research-contracts-and-crosswake-feasibility
 status: executing
-stopped_at: Completed 215-05-PLAN.md
-last_updated: "2026-08-01T22:30:13.648Z"
-last_activity: 2026-07-31
+stopped_at: Completed 215-06-PLAN.md
+last_updated: "2026-08-01T22:38:24.393Z"
+last_activity: 2026-08-01
 last_activity_desc: Phase 215 execution started
 progress:
   total_phases: 6
-  completed_phases: 1
+  completed_phases: 0
   total_plans: 8
-  completed_plans: 5
-  percent: 17
+  completed_plans: 6
+  percent: 0
 ---
 
 # Project State
@@ -30,9 +30,9 @@ See: `.planning/PROJECT.md` (updated 2026-07-31 after starting v1.59)
 ## Current Position
 
 Phase: 215 (research-contracts-and-crosswake-feasibility) — EXECUTING
-Plan: 5 of 5
+Plan: 6 of 8
 Status: Ready to execute
-Last activity: 2026-07-31 — Phase 215 execution started
+Last activity: 2026-08-01 — Phase 215 execution started
 
 ## Post-v1.48 Pause Rule
 
@@ -382,6 +382,7 @@ Coverage: 22/22 v1.51 requirements mapped (each REQ-ID → exactly one phase). D
 | Phase 215 P03 | 20min | 3 tasks | 7 files |
 | Phase 215 P04 | 18min | 3 tasks | 9 files |
 | Phase 215 P05 | 1h | 2 tasks | 6 files |
+| Phase 215 P06 | 9min | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -731,6 +732,8 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - [Phase ?]: Apple management returns stable external guidance; unavailable control remains a typed error.
 - [Phase ?]: Pinned ES256 fixture verification uses OTP and CryptoKit only; no runtime issuer or dependency.
 - [Phase ?]: Candidate durability plus atomic rename is the cache visibility boundary for deterministic fault tests.
+- [Phase ?]: D-07 validation uses explicit closed vocabularies and a bounded snapshot shape.
+- [Phase ?]: The contract consumer remains compiled only from test/support and interprets a caller-supplied canonical case.
 
 ### Pending Todos
 
@@ -882,8 +885,8 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 
 ## Session Continuity
 
-Last session: 2026-08-01T02:29:57.098Z
-Stopped at: Completed 215-05-PLAN.md
+Last session: 2026-08-01T22:38:07.929Z
+Stopped at: Completed 215-06-PLAN.md
 Resume file: None
 
 ## Operator Next Steps
