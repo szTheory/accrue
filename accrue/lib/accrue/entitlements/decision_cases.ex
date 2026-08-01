@@ -4,10 +4,28 @@ defmodule Accrue.Entitlements.DecisionCases do
   @version "v1.59"
   @rails [:stripe, :apple]
   @environments [:production, :sandbox, :offline]
+  @evidence_kinds [:verified_event]
+  @account_bindings [:authenticated]
+  @device_bindings [:registered]
   @relations [:newer, :equal, :older]
   @dispositions [:grant, :no_grant, :retract, :noop, :preserve]
   @leases [:fresh, :stale_offline, :reconnect_required, :denied, :unchanged]
   @eligibility [:eligible, :warn, :block, :not_applicable]
+  @continuities [:full_actions, :cached_only, :local_only, :downloaded_only]
+  @repairs [
+    :audit,
+    :catalog,
+    :duplicate,
+    :high_water,
+    :quarantine,
+    :reconnect,
+    :replace,
+    :retry,
+    :security,
+    :stale_observation,
+    :support,
+    :survivor
+  ]
 
   defmodule Evidence do
     @enforce_keys [:rail, :environment, :qualified, :kind]
@@ -70,33 +88,50 @@ defmodule Accrue.Entitlements.DecisionCases do
 
   defp valid_id?(id), do: is_binary(id) and id =~ ~r/^[a-z0-9_]{3,80}$/
 
-  defp valid_evidence?(%Evidence{rail: rail, environment: env, qualified: qualified, kind: kind}) do
-    rail in @rails and env in @environments and is_boolean(qualified) and is_atom(kind)
+  defp valid_evidence?(%Evidence{} = evidence) do
+    evidence.rail in @rails and evidence.environment in @environments and
+      is_boolean(evidence.qualified) and evidence.kind in @evidence_kinds and
+      evidence.account_binding in @account_bindings and
+      evidence.device_binding in @device_bindings
   end
 
   defp valid_evidence?(_), do: false
 
   defp valid_prior?(%PriorState{sources: sources, snapshot: snapshot, revision: revision}) do
-    is_list(sources) and is_map(snapshot) and is_integer(revision) and revision >= 0
+    is_list(sources) and sources != [] and Enum.uniq(sources) == sources and
+      Enum.all?(sources, &(&1 in @rails)) and valid_snapshot?(snapshot) and
+      is_integer(revision) and revision >= 0
   end
 
   defp valid_prior?(_), do: false
 
   defp valid_ordering?(%Ordering{provider_cursor: cursor, observed_at: at, relation: relation}) do
-    is_binary(cursor) and is_integer(at) and relation in @relations
+    is_binary(cursor) and cursor =~ ~r/^[A-Za-z0-9_:-]{1,160}$/ and
+      is_integer(at) and at >= 0 and relation in @relations
   end
 
   defp valid_ordering?(_), do: false
 
   defp valid_expected?(%Expected{} = expected) do
-    expected.disposition in @dispositions and is_map(expected.snapshot) and
-      is_integer(expected.revision_delta) and expected.eligibility in @eligibility and
-      expected.lease in @leases and is_atom(expected.continuity) and is_atom(expected.repair) and
+    expected.disposition in @dispositions and valid_snapshot?(expected.snapshot) and
+      is_integer(expected.revision_delta) and expected.revision_delta >= 0 and
+      expected.eligibility in @eligibility and expected.lease in @leases and
+      expected.continuity in @continuities and expected.repair in @repairs and
       is_boolean(expected.atomic) and is_binary(expected.reason) and
       expected.reason =~ ~r/^entitlement_[a-z0-9_]{3,80}$/
   end
 
   defp valid_expected?(_), do: false
+
+  defp valid_snapshot?(%{} = snapshot) when map_size(snapshot) == 0, do: true
+
+  defp valid_snapshot?(%{plans: plans} = snapshot) do
+    map_size(snapshot) == 1 and is_list(plans) and plans != [] and
+      Enum.uniq(plans) == plans and
+      Enum.all?(plans, &(is_binary(&1) and &1 =~ ~r/^[a-z0-9_:-]{1,80}$/))
+  end
+
+  defp valid_snapshot?(_), do: false
 
   defp case_data(id, opts) do
     evidence = %Evidence{
