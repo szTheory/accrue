@@ -1,5 +1,10 @@
 import Foundation
 import CryptoKit
+#if canImport(Darwin)
+import Darwin
+#else
+import Glibc
+#endif
 
 public enum GoldenVectorResult: String, Sendable, Equatable { case accept, reject }
 public enum GoldenVectorCache: String, Sendable, Equatable { case allow, deny }
@@ -123,28 +128,119 @@ private extension Data {
     }
 }
 
-/// File-backed, testable replacement seam. Candidates are fully written and
-/// synchronized before an atomic filesystem replacement; the fault hook models
-/// process death on either side of that single visibility boundary.
-public struct AtomicOfflineCache {
-    public enum Fault: Error { case beforeRename, afterRename }
-    public let url: URL
+/// File-backed, testable replacement seam. A coordinator is shared by every
+/// handle for one standardized path, while unrelated paths retain independent locks.
+public struct AtomicOfflineCache: @unchecked Sendable {
+    public enum Fault: Error, Sendable { case beforeRename, afterRename }
+    public enum Disposition: Sendable { case allow, deny }
+    public enum DurabilityError: Error, Equatable { case directorySynchronizationUnsupported }
 
-    public init(url: URL) { self.url = url }
+    public let url: URL
+    private let coordinator: CacheCoordinator
+
+    public init(url: URL) {
+        self.url = url.standardizedFileURL
+        coordinator = CacheCoordinatorRegistry.shared.coordinator(for: self.url.path)
+    }
 
     public func replace(with data: Data, fault: Fault? = nil) throws {
-        let candidate = url.deletingLastPathComponent().appendingPathComponent(".\(url.lastPathComponent).candidate")
-        try data.write(to: candidate, options: .atomic)
-        let handle = try FileHandle(forWritingTo: candidate)
-        try handle.synchronize()
-        try handle.close()
-        if fault == .beforeRename { try? FileManager.default.removeItem(at: candidate); throw Fault.beforeRename }
-        if FileManager.default.fileExists(atPath: url.path) {
-            _ = try FileManager.default.replaceItemAt(url, withItemAt: candidate)
-        } else {
-            try FileManager.default.moveItem(at: candidate, to: url)
+        try replace(with: data, disposition: .allow, revision: .max, fault: fault)
+    }
+
+    public func replace(
+        with data: Data,
+        disposition: Disposition,
+        revision: Int64,
+        fault: Fault? = nil
+    ) throws {
+        try coordinator.withLock {
+            guard coordinator.accepts(disposition: disposition, revision: revision) else { return }
+            let candidate = uniqueCandidateURL()
+            defer { try? FileManager.default.removeItem(at: candidate) }
+
+            try data.write(to: candidate)
+            let handle = try FileHandle(forWritingTo: candidate)
+            defer { try? handle.close() }
+            try handle.synchronize()
+            if fault == .beforeRename { throw Fault.beforeRename }
+
+            if FileManager.default.fileExists(atPath: url.path) {
+                _ = try FileManager.default.replaceItemAt(url, withItemAt: candidate)
+            } else {
+                try FileManager.default.moveItem(at: candidate, to: url)
+            }
+            try synchronizeParentDirectory()
+            coordinator.record(disposition: disposition, revision: revision)
+            if fault == .afterRename { throw Fault.afterRename }
         }
-        if fault == .afterRename { throw Fault.afterRename }
+    }
+
+    public func candidateURLs() throws -> [URL] {
+        try coordinator.withLock {
+            let prefix = ".\(url.lastPathComponent).candidate."
+            return try FileManager.default.contentsOfDirectory(
+                at: url.deletingLastPathComponent(),
+                includingPropertiesForKeys: nil
+            ).filter { $0.lastPathComponent.hasPrefix(prefix) }
+        }
+    }
+
+    private func uniqueCandidateURL() -> URL {
+        url.deletingLastPathComponent().appendingPathComponent(".\(url.lastPathComponent).candidate.\(UUID().uuidString)")
+    }
+
+    private func synchronizeParentDirectory() throws {
+        let fd = open(url.deletingLastPathComponent().path, O_RDONLY)
+        guard fd >= 0 else { throw POSIXError(POSIXErrorCode(rawValue: errno) ?? .EIO) }
+        defer { _ = close(fd) }
+        guard fsync(fd) == 0 else {
+            if errno == EINVAL || errno == ENOTSUP || errno == EOPNOTSUPP {
+                throw DurabilityError.directorySynchronizationUnsupported
+            }
+            throw POSIXError(POSIXErrorCode(rawValue: errno) ?? .EIO)
+        }
+    }
+}
+
+private final class CacheCoordinator: @unchecked Sendable {
+    private let lock = NSLock()
+    private var revision: Int64?
+    private var disposition: AtomicOfflineCache.Disposition?
+
+    func withLock<T>(_ body: () throws -> T) throws -> T {
+        lock.lock()
+        defer { lock.unlock() }
+        return try body()
+    }
+
+    func accepts(disposition candidate: AtomicOfflineCache.Disposition, revision candidateRevision: Int64) -> Bool {
+        guard let revision else { return true }
+        // The legacy raw-byte seam carries no revision metadata. Keep that test-only
+        // compatibility path explicit; verified replacements always use a real revision.
+        if candidateRevision == .max && candidate == .allow { return true }
+        if candidateRevision > revision { return true }
+        if candidateRevision < revision { return false }
+        return candidate == .deny && disposition != .deny
+    }
+
+    func record(disposition: AtomicOfflineCache.Disposition, revision: Int64) {
+        self.disposition = disposition
+        self.revision = revision
+    }
+}
+
+private final class CacheCoordinatorRegistry: @unchecked Sendable {
+    static let shared = CacheCoordinatorRegistry()
+    private let lock = NSLock()
+    private var coordinators: [String: CacheCoordinator] = [:]
+
+    func coordinator(for path: String) -> CacheCoordinator {
+        lock.lock()
+        defer { lock.unlock() }
+        if let coordinator = coordinators[path] { return coordinator }
+        let coordinator = CacheCoordinator()
+        coordinators[path] = coordinator
+        return coordinator
     }
 }
 
