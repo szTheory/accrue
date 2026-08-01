@@ -2,6 +2,7 @@ defmodule Accrue.Entitlements.DecisionCasesTest do
   use ExUnit.Case, async: true
 
   alias Accrue.Entitlements.DecisionCases
+  alias Accrue.Entitlements.DecisionCases.Markdown
 
   test "the canonical corpus has sorted unique stable IDs and one version" do
     cases = DecisionCases.all()
@@ -47,5 +48,30 @@ defmodule Accrue.Entitlements.DecisionCasesTest do
     refute DecisionCases.valid?(put_in(first.evidence.environment, :staging))
     refute DecisionCases.valid?(put_in(first.ordering.relation, :future))
     refute DecisionCases.valid?(put_in(first.expected.disposition, :maybe))
+  end
+
+  test "derived markdown and JSON have the same stable case IDs and version" do
+    markdown = Markdown.render(DecisionCases.all())
+    json = Accrue.Entitlements.DecisionCases.Export.json(DecisionCases.all())
+
+    assert markdown =~ "derived non-runtime contract"
+    assert Jason.decode!(json)["contract_version"] == DecisionCases.version()
+
+    json_ids = json |> Jason.decode!() |> Map.fetch!("cases") |> Enum.map(& &1["id"])
+    assert json_ids == Enum.map(DecisionCases.all(), & &1.id)
+    assert markdown == Markdown.render(DecisionCases.all())
+    assert json == Accrue.Entitlements.DecisionCases.Export.json(DecisionCases.all())
+  end
+
+  test "export check detects generated view drift" do
+    root = Path.join(System.tmp_dir!(), "decision-cases-#{System.unique_integer([:positive])}")
+    on_exit(fn -> File.rm_rf(root) end)
+
+    assert :ok = Accrue.Entitlements.DecisionCases.Export.write(root)
+    assert :ok = Accrue.Entitlements.DecisionCases.Export.check(root)
+
+    markdown_path = Path.join(root, ".planning/research/v1.59-DECISION-TABLE.md")
+    File.write!(markdown_path, "drift\n")
+    assert {:error, [^markdown_path]} = Accrue.Entitlements.DecisionCases.Export.check(root)
   end
 end
