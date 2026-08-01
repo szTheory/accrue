@@ -123,22 +123,22 @@ Apple controls cancellation and subscription management. Accrue exposes that tru
 
 ### Token contract
 
-Use a compact **ES256 JWS** with an explicit protocol version, key id, issuer, audience, token id, account id, device key thumbprint, account revision, issued/not-before/fresh-until/hard-expiry timestamps, effective plans/features/quantities, and denial/revocation metadata when applicable.
+Use a compact **ES256 JWS** with an explicit protocol version, key id, issuer, audience, token id, account id, device key thumbprint, account revision, issued/not-before/fresh-until timestamps, an explicit signed expiry when policy/provider bounds require one, effective plans/features/quantities, and denial/revocation metadata when applicable.
 
 Accrue owns canonical serialization, signing, verification fixtures, key selection, issuance, and reconnect reconciliation. The host mobile layer owns Keychain/Keystore storage, the client verifier, and UI mode selection. The server never trusts an offline token presented back as fresher billing evidence.
 
 ### Locked v1 policy
 
-- **Fresh lease:** rolling 30 days from a successful online reconciliation.
+- **Fresh proof:** rolling 30-day revalidation target from a successful online reconciliation.
 - **Scheduled end:** shorten `fresh_until` to a known earlier cancellation/revocation/period boundary.
-- **Offline degraded grace:** 72 hours after `fresh_until`, encoded in the signed hard expiry.
-- **No grace stacking:** a provider billing-grace period is already part of the canonical grant bound; the 72-hour window does not add another grace window after it.
-- **Hard expiry while offline:** premium mutations/actions fail closed, while the app shell and existing local user data remain accessible. The host should show a specific reconnect-required state, not erase or hide local data.
+- **Stale-offline continuity:** after `fresh_until`, already-downloaded study and local progress remain usable while new premium downloads and other value-expanding actions wait for reconnect. There is no independent 72-hour cutoff.
+- **No grace stacking:** provider billing grace remains part of the canonical grant bound; stale-offline continuity is host product policy, not additional provider billing truth.
+- **Explicit signed expiry:** when present, `exp` reflects a protocol/provider bound and is never derived as `fresh_until + 72 hours`. The host must preserve the app shell and local user data and show reconnect guidance rather than erase progress.
 - **Reconnect:** authenticate account and device, refresh every due rail, compare account revision and device status, then atomically replace the cached lease. Revocation/refund can return a signed deny tombstone so stale positive tokens cannot be reselected.
 - **Clock defense:** device verifier stores a secure high-water mark and rejects material rollback; `iat`/`nbf` skew is bounded.
-- **Key rotation:** verification keys remain available for at least 33 days plus clock skew; issuance uses the active key, and emergency compromise can force online renewal/deny.
+- **Key rotation:** verification keys remain available until no actually issued proof using them can remain valid, plus clock skew and reconnect buffer; issuance uses the active key, and emergency compromise can force online renewal/deny.
 
-This policy accepts an honest maximum stale-access exposure of roughly one billing cycle. Shorter TTLs defeat the stated extended-offline requirement; materially longer TTLs make cancellation/refund leakage unacceptable for a ~$100/month consumer product. v1 does not expose a matrix of risk knobs—the policy is a sharp default with only key/issuer wiring owned by the host.
+This policy openly accepts that a disconnected device cannot learn about a refund or revocation until it reconnects. The control is a 30-day revalidation target, value-expansion freeze while stale, authenticated reconciliation, and signed denial—not a hidden cutoff or a claim of remote DRM. v1 does not expose an arbitrary risk matrix; it ships this single reference policy while the host owns action-level continuity decisions.
 
 ## Threats and Operational Footguns
 
@@ -169,4 +169,3 @@ This policy accepts an honest maximum stale-access exposure of roughly one billi
 - Apple, [Subscriptions and Family Sharing](https://developer.apple.com/app-store/subscriptions/)
 - Google, [Subscription lifecycle](https://developer.android.com/google/play/billing/lifecycle) and [backend integration](https://developer.android.com/google/play/billing/backend)
 - IETF, [RFC 8725: JSON Web Token Best Current Practices](https://www.rfc-editor.org/info/rfc8725/)
-
