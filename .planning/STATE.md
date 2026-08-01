@@ -1,20 +1,16 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.58
-milestone_name: lattice_stripe 2.x Bump & Stripe-Native Entitlements Sync
-status: Awaiting next milestone
-stopped_at: Phase 214.2 verified 19/19 with executable UAT
-last_updated: "2026-07-31T23:46:33.515Z"
+milestone: v1.59
+milestone_name: Account-Scoped Multi-Rail & Offline Entitlements
+status: planning
+last_updated: "2026-08-01T00:24:56.227Z"
 last_activity: 2026-07-31
-last_activity_desc: Milestone v1.58 completed and archived
 progress:
-  total_phases: 5
-  completed_phases: 5
-  total_plans: 17
-  completed_plans: 17
-  percent: 100
-current_phase: 214.2
-current_phase_name: close-gap-sync-02-docs-03-surface-advisory-entitlement-diagn
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
 ---
 
 # Project State
@@ -29,10 +25,10 @@ See: `.planning/PROJECT.md` (updated 2026-07-31 after v1.58 milestone completion
 
 ## Current Position
 
-Phase: Milestone v1.58 complete
+Phase: Not started (defining requirements)
 Plan: —
-Status: Awaiting next milestone
-Last activity: 2026-07-31 — Milestone v1.58 completed and archived
+Status: Defining requirements
+Last activity: 2026-07-31 — Milestone v1.59 started
 
 ## Post-v1.48 Pause Rule
 

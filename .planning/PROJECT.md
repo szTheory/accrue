@@ -45,22 +45,22 @@ v1.49 **Realistic Demo App & Adoption Evidence** shipped on **2026-06-02**. The 
 
 The Phase 204 hardening roadmap's top slice (**Public Truth And Proof-State Baseline**) remains the highest-ranked *release-readiness* follow-up, deferred — a candidate for a later milestone.
 
-**Queued next milestone: v1.59 — Account-Scoped Multi-Rail & Offline Entitlements (SEED-006).** A concrete adopter, anonymized as **B2C Alpha**, requires one account to remain entitled across Stripe web billing, Apple in-app purchase, and extended offline use in a Phoenix/Crosswake application. This satisfies the post-v1.48 reopen bar as both a sourced adopter requirement and an explicit strategy expansion with reusable value for Phoenix apps going mobile. The approved direction is a common account entitlement projection fed by rail-specific lifecycle observers, plus a signed time-bounded offline lease; lifecycle management remains honestly rail-aware. Google Play is SEED-007 and stays dormant until Android is scheduled or a second adopter requires it. Source: `.planning/research/MULTI-RAIL-OFFLINE-ENTITLEMENTS.md`.
+**Current milestone: v1.59 — Account-Scoped Multi-Rail & Offline Entitlements (SEED-006).** A concrete adopter, anonymized as **B2C Alpha**, requires one account to remain entitled across Stripe web billing, Apple in-app purchase, and extended offline study in a Phoenix/Crosswake application. This satisfies the post-v1.48 reopen bar as both a sourced adopter requirement and an explicit strategy expansion with reusable value for Phoenix apps going mobile. The approved direction is a common account entitlement projection fed by rail-specific lifecycle observers, plus signed device-bound offline proof whose freshness state is interpreted by host policy; lifecycle management remains honestly rail-aware. Google Play is SEED-007 and stays backlogged until Android is scheduled or a second adopter requires it. Source: `.planning/research/MULTI-RAIL-OFFLINE-ENTITLEMENTS.md`.
 
-## Next Milestone Goals: v1.59 Account-Scoped Multi-Rail & Offline Entitlements
+## Current Milestone: v1.59 Account-Scoped Multi-Rail & Offline Entitlements
 
-v1.59 is queued, not active. Start it with `$gsd-new-milestone` so its archived draft requirements can be reviewed and regenerated as a fresh milestone-scoped `REQUIREMENTS.md`.
+**Goal:** Preserve one account's access across Stripe web billing, Apple in-app purchase, and extended offline study through a common entitlement projection and signed device-bound proof, while keeping lifecycle operations rail-aware and avoiding connectivity-driven learner lockout.
 
-**Goal:** Preserve one account's access across Stripe web billing, Apple in-app purchase, and extended offline use through a common entitlement projection and signed, time-bounded offline lease, while keeping lifecycle operations rail-aware.
-
-**Proposed outcomes:**
+**Target features:**
+- Durable, versioned research memory spanning stakeholder lenses, primary sources, decision tables, threats, and a monitored watchlist.
 - Concurrent Stripe and Apple rail registration plus rail-qualified product mapping and source capabilities.
 - A canonical account projection that unions effective grants without allowing one rail's revocation to erase another rail's access.
 - Verified Apple evidence and automatic `appAccountToken` linking with idempotent reconciliation.
-- A compact ES256 offline lease with 30-day freshness, one signed 72-hour degraded window, hard expiry, and secure reconnect/replacement.
-- B2C Alpha end-to-end proof, operator diagnostics, automatic repair paths, runbooks, and public contract alignment.
+- Cross-rail purchase eligibility that warns or blocks an accidental second subscription without automatic cancellation or migration.
+- A compact ES256 offline lease with a 30-day revalidation target; stale-offline study keeps downloaded lessons and progress usable while new premium downloads and other value-expanding actions wait for reconnect.
+- An anonymized B2C Alpha reference-host proof, operator diagnostics, automatic repair paths, runbooks, and public contract alignment.
 
-**Guardrails:** Existing single-processor hosts remain compatible; lifecycle management stays provider-honest; Google Play, Family Sharing, offer authoring, migration/proration, and configurable risk matrices remain deferred unless separately justified.
+**Guardrails:** Existing single-processor hosts remain compatible; lifecycle management stays provider-honest; the adopter identity and PII never enter planning, fixtures, tokens, telemetry, or diagnostics; Google Play, Family Sharing, offer authoring, automatic ownership transfer, migration/proration, and advanced risk/fraud controls remain deferred unless separately justified.
 
 ## Most recently shipped milestone: v1.57 — Admin Operator Control Plane (SEED-004, M1) (**shipped & archived 2026-07-30**)
 
@@ -617,7 +617,12 @@ The v1.50→v1.54 arc (Admin UI Foundation → Depth Pass → Brand System → D
 
 ### Active
 
-No active v1.55 requirements remain. QLT-01 through QLT-05 are validated by Phase 201; CI-01 through CI-05 are validated by Phase 202; DB-01 through DB-04 are validated by Phase 203; RD-01 through RD-04 are validated by Phase 204. The post-v1.48 pause rule remains in force: future broad feature scope still requires a concrete adopter failure mode, correctness/security/data-loss risk, repeated support issue, operational failure, or explicit strategy change.
+- [ ] Preserve durable v1.59 research, decisions, source provenance, and watchlists as discoverable project memory.
+- [ ] Add an opt-in Stripe + Apple rail contract and additive account/grant/device/observation persistence without breaking legacy hosts.
+- [ ] Project verified rail evidence into one account snapshot with resource-aware management and duplicate-purchase prevention.
+- [ ] Verify, link, reconcile, quarantine, and repair Apple subscription evidence without heuristic ownership transfer.
+- [ ] Issue device-bound offline proof that distinguishes fresh, stale-offline, denied, and invalid states while allowing host-owned study-continuity policy.
+- [ ] Prove the anonymized Phoenix/Crosswake adopter journey with diagnostics, automatic repair, runbooks, and release gates.
 
 ### Validated v1.55 (Phases 201-204 complete 2026-07-03)
 
@@ -765,4 +770,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-07-31 after v1.58 milestone completion. v1.58 shipped and archived with 11/11 requirements and 5/5 flows passing; v1.59 remains queued for `$gsd-new-milestone` review.*
+*Last updated: 2026-07-31 after starting v1.59 Account-Scoped Multi-Rail & Offline Entitlements.*

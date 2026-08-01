@@ -4,12 +4,12 @@
 
 ### ENT-RAIL-01 — Account-scoped multi-rail and offline entitlement core
 
-**Status:** Queued 2026-07-31; activates after v1.58 verified closeout
+**Status:** Active 2026-07-31; v1.58 verified closeout complete
 **Why now:** The anonymized B2C Alpha adopter has a concrete web + iOS + offline requirement that the shipped gateway-centric processor abstraction cannot satisfy safely. This is a likely recurring Phoenix-going-mobile shape and clears the stable-core reopen bar.
 
 **North star:** One host account receives coherent access from any verified payment rail, online or offline, while Accrue stays honest about which lifecycle operations it controls and which it only observes.
 
-**Success condition:** Stripe and Apple grants converge into one account snapshot; web and iOS see the same access; an ES256 device-bound lease supports the locked 30-day fresh + 72-hour degraded-offline policy; reconnect reconciles automatically; existing single-processor hosts remain additive-compatible.
+**Success condition:** Stripe and Apple grants converge into one account snapshot; web and iOS see the same access; an ES256 device-bound lease exposes a 30-day freshness target and a host-owned stale-offline policy that preserves downloaded study and progress while pausing new value expansion; reconnect reconciles automatically; existing single-processor hosts remain additive-compatible.
 
 ### PROC-08 — Official dual-provider gateway core
 
@@ -37,18 +37,18 @@
 **Theme:** Boundary hardening + thin slice  
 **Goal:** Lock the repo around a capability-explicit processor-support contract, harden the processor boundary where Stripe assumptions block expansion, and prove one real `Braintree` path through the **gateway subscription core** slice.
 
-### Queued expansion — `v1.59`
+### Active expansion — `v1.59`
 
 **Theme:** Account-scoped rail observation + offline access
-**Goal:** Deliver Phases 215–219: contract/foundation, canonical projection, Apple observer, offline lease, and B2C Alpha proof.
+**Goal:** Deliver Phases 215–220: durable research/contracts, additive foundation, canonical projection, Apple observer, offline lease, and B2C Alpha proof.
 
 ## Milestone Rollup
 
 | Milestone | Role in track | Status |
 |-----------|---------------|--------|
 | v1.31–v1.36 | Bounded Fake/Stripe/Braintree gateway core and support matrix | Shipped |
-| v1.58 | lattice_stripe 2.x + Stripe advisory entitlements | Active; closeout blocked on DOCS-03 |
-| v1.59 | Account-scoped Stripe/Apple entitlement union + offline lease | Queued after v1.58 closeout |
+| v1.58 | lattice_stripe 2.x + Stripe advisory entitlements | Shipped and archived 2026-07-31 |
+| v1.59 | Account-scoped Stripe/Apple entitlement union + offline study proof | Active 2026-07-31 |
 
 ## Decision Notes
 
@@ -66,5 +66,5 @@
 - Access aggregation is rail-neutral; lifecycle mutation is resource/rail-aware. This intentional leak is safer than forcing Apple into Stripe-shaped control semantics.
 - The Stripe-only `EntitlementSummary` remains observational diagnostics and is never promoted into canonical grant truth.
 - The v1.59 canonical projection uses rail/environment-qualified evidence and an account revision; no email-based Apple linking is permitted.
-- Offline v1 uses a sharp default: 30-day rolling full lease, shortened by known ends, then one 72-hour degraded-offline window; hard expiry denies premium actions but preserves the shell and local data.
+- Offline v1 separates proof freshness from product continuity: a 30-day revalidation target is refreshed opportunistically; stale-offline proof may preserve already-downloaded study and learner progress under host policy while new premium downloads and other value-expanding actions wait for reconnect. A verified deny tombstone supersedes stale positive proof on reconnect.
 - Google Play, Family Sharing policy, offer authoring, cross-rail migration/proration, and configurable risk matrices are later work, not v1.59 scope.
