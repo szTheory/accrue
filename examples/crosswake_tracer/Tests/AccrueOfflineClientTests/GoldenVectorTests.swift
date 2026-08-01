@@ -69,4 +69,33 @@ struct GoldenVectorTests {
         #expect(try String(contentsOf: cache.url) == "old-complete")
         #expect(try cache.candidateURLs().isEmpty)
     }
+
+    @Test("child-process crashes reopen only complete old or durable new bytes")
+    func childProcessCrashRecovery() throws {
+        let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: directory) }
+        let cache = AtomicOfflineCache(url: directory.appendingPathComponent("entitlement.json"))
+        try cache.replace(with: Data("old-complete".utf8))
+
+        try runCrashHarness(cache.url, payload: "new-before", point: "before-rename")
+        try AtomicOfflineCache(url: cache.url).recover()
+        #expect(try String(contentsOf: cache.url) == "old-complete")
+        #expect(try cache.candidateURLs().isEmpty)
+
+        try runCrashHarness(cache.url, payload: "new-durable", point: "after-directory-sync")
+        #expect(try String(contentsOf: cache.url) == "new-durable")
+    }
+
+    private func runCrashHarness(_ url: URL, payload: String, point: String) throws {
+        let harness = URL(fileURLWithPath: FileManager.default.currentDirectoryPath)
+            .appendingPathComponent(".build/debug/AccrueOfflineCacheCrashHarness")
+        #expect(FileManager.default.isExecutableFile(atPath: harness.path))
+        let process = Process()
+        process.executableURL = harness
+        process.arguments = [url.path, payload, point]
+        try process.run()
+        process.waitUntilExit()
+        #expect(process.terminationStatus != 0)
+    }
 }
