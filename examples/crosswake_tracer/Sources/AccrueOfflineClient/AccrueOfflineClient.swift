@@ -22,17 +22,26 @@ public enum OfflineGoldenVectorVerifier {
         let corpus = try JSONDecoder().decode(Corpus.self, from: Data(contentsOf: fixture))
         let keyURL = fixture.deletingLastPathComponent().appendingPathComponent("v1.59-offline-test-key.jwk.json")
         let key = try JSONDecoder().decode(TestKey.self, from: Data(contentsOf: keyURL))
-        return try corpus.vectors.map { try observe($0, key: key) }.sorted { $0.id < $1.id }
+        let observations = corpus.vectors.map { observe($0, key: key) }.sorted { $0.id < $1.id }
+        for (vector, observation) in zip(corpus.vectors.sorted { $0.id < $1.id }, observations) {
+            guard vector.expectedVerification == observation.result.rawValue,
+                  vector.expectedReason == observation.reason,
+                  vector.expectedCacheDisposition == observation.cache.rawValue
+            else { throw GoldenVectorContractError.expectationMismatch(vector.id) }
+        }
+        return observations
     }
 
-    private static func observe(_ vector: Vector, key: TestKey) throws -> GoldenVectorObservation {
+    private static func observe(_ vector: Vector, key: TestKey) -> GoldenVectorObservation {
         let context = Context.forVector(vector.id)
         do {
             let payload = try verify(vector.compactJWS, key: context.wrongKey ? TestKey.invalid : key, context: context)
-            let cache: GoldenVectorCache = vector.faultPoint == "before_rename" ? context.prior : (payload.disposition == "deny" ? .deny : .allow)
+            let cache: GoldenVectorCache = vector.faultPoint == "before_rename" ? context.prior : (payload.disposition == .deny ? .deny : .allow)
             return GoldenVectorObservation(id: vector.id, result: .accept, reason: vector.faultPoint == nil ? "ok" : vector.expectedReason, cache: cache)
         } catch let error as GoldenVectorError {
             return GoldenVectorObservation(id: vector.id, result: .reject, reason: error.reason, cache: context.prior)
+        } catch {
+            return GoldenVectorObservation(id: vector.id, result: .reject, reason: GoldenVectorError.malformed.reason, cache: context.prior)
         }
     }
 
@@ -42,15 +51,18 @@ public enum OfflineGoldenVectorVerifier {
               let headerData = Data(base64URLEncoded: String(parts[0])),
               let payloadData = Data(base64URLEncoded: String(parts[1])),
               let signatureData = Data(base64URLEncoded: String(parts[2])), signatureData.count == 64,
-              let header = try JSONSerialization.jsonObject(with: headerData) as? [String: Any],
-              header["alg"] as? String == "ES256", header["kid"] as? String == "accrue-v1.59-offline-test-only"
+              let header = try JSONSerialization.jsonObject(with: headerData) as? [String: Any]
         else { throw GoldenVectorError.malformed }
+        guard header["alg"] as? String == "ES256", header["kid"] as? String == "accrue-v1.59-offline-test-only"
+        else { throw GoldenVectorError.algorithm }
         let publicKey: P256.Signing.PublicKey
         do { publicKey = try P256.Signing.PublicKey(x963Representation: key.point) }
         catch { throw GoldenVectorError.key }
         guard let signature = try? P256.Signing.ECDSASignature(rawRepresentation: signatureData),
               publicKey.isValidSignature(signature, for: Data("\(parts[0]).\(parts[1])".utf8)) else { throw GoldenVectorError.signature }
-        let payload = try JSONDecoder().decode(Payload.self, from: payloadData)
+        let rawPayload = try JSONSerialization.jsonObject(with: payloadData)
+        guard let values = rawPayload as? [String: Any] else { throw GoldenVectorError.malformed }
+        let payload = try Payload(values: values)
         guard payload.iss == "accrue.test.offline" else { throw GoldenVectorError.issuer }
         guard payload.aud == "accrue-offline-client" else { throw GoldenVectorError.audience }
         guard payload.typ == "accrue-entitlement" else { throw GoldenVectorError.type }
@@ -73,10 +85,33 @@ public enum OfflineGoldenVectorVerifier {
         let faultPoint: String?
         enum CodingKeys: String, CodingKey { case id; case compactJWS = "compact_jws"; case expectedVerification = "expected_verification"; case expectedReason = "expected_reason"; case expectedCacheDisposition = "expected_cache_disposition"; case faultPoint = "fault_point" }
     }
-    private struct Payload: Decodable { let iss, aud, typ: String; let accountID, deviceID, cnf: String; let revision, iat, freshUntil: Int64; let disposition: String; enum CodingKeys: String, CodingKey { case iss, aud, typ, cnf, revision, iat, disposition; case accountID = "account_id"; case deviceID = "device_id"; case freshUntil = "fresh_until" } }
+    private struct Payload {
+        let iss, aud, typ: String
+        let accountID, deviceID, cnf: String
+        let revision, iat, freshUntil: Int64
+        let disposition: Disposition
+
+        init(values: [String: Any]) throws {
+            guard let iss = values["iss"] as? String,
+                  let aud = values["aud"] as? String,
+                  let typ = values["typ"] as? String,
+                  let accountID = values["account_id"] as? String,
+                  let deviceID = values["device_id"] as? String,
+                  let cnf = values["cnf"] as? String
+            else { throw GoldenVectorError.malformed }
+            guard let revision = values["revision"] as? Int64 else { throw GoldenVectorError.revision }
+            guard let iat = values["iat"] as? Int64 else { throw GoldenVectorError.iat }
+            guard let freshUntil = values["fresh_until"] as? Int64 else { throw GoldenVectorError.freshness }
+            guard let disposition = Disposition(rawValue: values["disposition"] as? String ?? "") else { throw GoldenVectorError.disposition }
+            self.iss = iss; self.aud = aud; self.typ = typ; self.accountID = accountID; self.deviceID = deviceID; self.cnf = cnf
+            self.revision = revision; self.iat = iat; self.freshUntil = freshUntil; self.disposition = disposition
+        }
+    }
+    private enum Disposition: String { case allow, deny }
     private struct TestKey: Decodable { let x: String; let y: String; var point: Data { Data([4]) + Data(base64URLEncoded: x)! + Data(base64URLEncoded: y)! }; static let invalid = TestKey(x: "bad", y: "bad") }
     private struct Context { let account, device: String; let revision, iat, freshness, now: Int64; let prior: GoldenVectorCache; let wrongKey: Bool; static func forVector(_ id: String) -> Context { switch id { case "wrong_key": return Context(account: "account-123", device: "device-123", revision: 0, iat: 0, freshness: 1_700_000_001, now: 1_700_000_001, prior: .allow, wrongKey: true); case "wrong_device": return Context(account: "account-123", device: "device-999", revision: 0, iat: 0, freshness: 1_700_000_001, now: 1_700_000_001, prior: .allow, wrongKey: false); case "rollback": return Context(account: "account-123", device: "device-123", revision: 6, iat: 1_700_000_000, freshness: 1_700_000_001, now: 1_700_000_001, prior: .deny, wrongKey: false); case "older_iat": return Context(account: "account-123", device: "device-123", revision: 5, iat: 1_700_000_001, freshness: 1_700_000_001, now: 1_700_000_001, prior: .deny, wrongKey: false); case "stale_freshness": return Context(account: "account-123", device: "device-123", revision: 5, iat: 1_700_000_000, freshness: 1_700_003_601, now: 1_700_000_001, prior: .allow, wrongKey: false); case "fault_before_replace": return Context(account: "account-123", device: "device-123", revision: 0, iat: 0, freshness: 1_700_000_001, now: 1_700_000_001, prior: .deny, wrongKey: false); default: return Context(account: "account-123", device: "device-123", revision: 0, iat: 0, freshness: 1_700_000_001, now: 1_700_000_001, prior: .allow, wrongKey: false) } } }
-    private enum GoldenVectorError: Error { case malformed, signature, key, issuer, audience, type, account, device, thumbprint, rollback, iat, freshness; var reason: String { switch self { case .malformed: "malformed"; case .signature: "signature"; case .key: "key"; case .issuer: "issuer"; case .audience: "audience"; case .type: "type"; case .account: "account"; case .device: "device"; case .thumbprint: "thumbprint"; case .rollback: "rollback"; case .iat: "iat"; case .freshness: "freshness" } } }
+    private enum GoldenVectorError: Error { case malformed, signature, key, algorithm, issuer, audience, type, account, device, thumbprint, revision, rollback, iat, freshness, disposition; var reason: String { switch self { case .malformed: "malformed"; case .signature: "signature"; case .key: "key"; case .algorithm: "algorithm"; case .issuer: "issuer"; case .audience: "audience"; case .type: "type"; case .account: "account"; case .device: "device"; case .thumbprint: "thumbprint"; case .revision: "revision"; case .rollback: "rollback"; case .iat: "iat"; case .freshness: "freshness"; case .disposition: "disposition" } } }
+    private enum GoldenVectorContractError: Error { case expectationMismatch(String) }
 
 }
 

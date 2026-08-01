@@ -1,599 +1,599 @@
 {
   "cases": [
     {
-      "id": "all_grants_revoked",
+      "contract_version": "v1.59",
+      "evidence": {
+        "account_binding": "authenticated",
+        "device_binding": "registered",
+        "environment": "production",
+        "kind": "verified_event",
+        "qualified": true,
+        "rail": "stripe"
+      },
       "expected": {
-        "reason": "entitlement_all_grants_revoked",
-        "repair": "support",
         "atomic": true,
+        "continuity": "local_only",
         "disposition": "retract",
-        "snapshot": {},
-        "revision_delta": 1,
         "eligibility": "eligible",
         "lease": "denied",
-        "continuity": "local_only"
+        "reason": "entitlement_all_grants_revoked",
+        "repair": "support",
+        "revision_delta": 1,
+        "snapshot": {}
       },
-      "contract_version": "v1.59",
-      "evidence": {
-        "kind": "verified_event",
-        "environment": "production",
-        "rail": "stripe",
-        "qualified": true,
-        "account_binding": "authenticated",
-        "device_binding": "registered"
+      "id": "all_grants_revoked",
+      "ordering": {
+        "observed_at": 1700000000,
+        "provider_cursor": "cursor_all_grants_revoked",
+        "relation": "newer"
       },
       "prior": {
-        "sources": [
-          "stripe"
-        ],
         "revision": 4,
         "snapshot": {
           "plans": [
             "pro"
           ]
-        }
-      },
-      "ordering": {
-        "relation": "newer",
-        "observed_at": 1700000000,
-        "provider_cursor": "cursor_all_grants_revoked"
+        },
+        "sources": [
+          "stripe"
+        ]
       }
     },
     {
-      "id": "apple_token_mismatch",
+      "contract_version": "v1.59",
+      "evidence": {
+        "account_binding": "authenticated",
+        "device_binding": "registered",
+        "environment": "production",
+        "kind": "verified_event",
+        "qualified": false,
+        "rail": "apple"
+      },
       "expected": {
+        "atomic": true,
+        "continuity": "cached_only",
+        "disposition": "no_grant",
+        "eligibility": "warn",
+        "lease": "unchanged",
         "reason": "entitlement_apple_token_mismatch",
         "repair": "quarantine",
-        "atomic": true,
-        "disposition": "no_grant",
-        "snapshot": {
-          "plans": [
-            "pro"
-          ]
-        },
         "revision_delta": 0,
-        "eligibility": "warn",
-        "lease": "unchanged",
-        "continuity": "cached_only"
-      },
-      "contract_version": "v1.59",
-      "evidence": {
-        "kind": "verified_event",
-        "environment": "production",
-        "rail": "apple",
-        "qualified": false,
-        "account_binding": "authenticated",
-        "device_binding": "registered"
-      },
-      "prior": {
-        "sources": [
-          "stripe"
-        ],
-        "revision": 4,
         "snapshot": {
           "plans": [
             "pro"
           ]
         }
       },
+      "id": "apple_token_mismatch",
       "ordering": {
-        "relation": "newer",
         "observed_at": 1700000000,
-        "provider_cursor": "cursor_apple_token_mismatch"
+        "provider_cursor": "cursor_apple_token_mismatch",
+        "relation": "newer"
+      },
+      "prior": {
+        "revision": 4,
+        "snapshot": {
+          "plans": [
+            "pro"
+          ]
+        },
+        "sources": [
+          "stripe"
+        ]
       }
     },
     {
-      "id": "apple_verified_grant",
+      "contract_version": "v1.59",
+      "evidence": {
+        "account_binding": "authenticated",
+        "device_binding": "registered",
+        "environment": "production",
+        "kind": "verified_event",
+        "qualified": true,
+        "rail": "apple"
+      },
       "expected": {
+        "atomic": true,
+        "continuity": "full_actions",
+        "disposition": "grant",
+        "eligibility": "warn",
+        "lease": "fresh",
         "reason": "entitlement_apple_verified_grant",
         "repair": "audit",
-        "atomic": true,
-        "disposition": "grant",
-        "snapshot": {
-          "plans": [
-            "pro"
-          ]
-        },
         "revision_delta": 1,
-        "eligibility": "warn",
-        "lease": "fresh",
-        "continuity": "full_actions"
-      },
-      "contract_version": "v1.59",
-      "evidence": {
-        "kind": "verified_event",
-        "environment": "production",
-        "rail": "apple",
-        "qualified": true,
-        "account_binding": "authenticated",
-        "device_binding": "registered"
-      },
-      "prior": {
-        "sources": [
-          "stripe",
-          "apple"
-        ],
-        "revision": 4,
         "snapshot": {
           "plans": [
             "pro"
           ]
         }
       },
+      "id": "apple_verified_grant",
       "ordering": {
-        "relation": "newer",
         "observed_at": 1700000000,
-        "provider_cursor": "cursor_apple_verified_grant"
+        "provider_cursor": "cursor_apple_verified_grant",
+        "relation": "newer"
+      },
+      "prior": {
+        "revision": 4,
+        "snapshot": {
+          "plans": [
+            "pro"
+          ]
+        },
+        "sources": [
+          "stripe",
+          "apple"
+        ]
       }
     },
     {
-      "id": "atomic_transaction_boundary",
+      "contract_version": "v1.59",
+      "evidence": {
+        "account_binding": "authenticated",
+        "device_binding": "registered",
+        "environment": "production",
+        "kind": "verified_event",
+        "qualified": true,
+        "rail": "stripe"
+      },
       "expected": {
+        "atomic": true,
+        "continuity": "full_actions",
+        "disposition": "grant",
+        "eligibility": "warn",
+        "lease": "fresh",
         "reason": "entitlement_atomic_transaction_boundary",
         "repair": "audit",
-        "atomic": true,
-        "disposition": "grant",
-        "snapshot": {
-          "plans": [
-            "pro"
-          ]
-        },
         "revision_delta": 1,
-        "eligibility": "warn",
-        "lease": "fresh",
-        "continuity": "full_actions"
-      },
-      "contract_version": "v1.59",
-      "evidence": {
-        "kind": "verified_event",
-        "environment": "production",
-        "rail": "stripe",
-        "qualified": true,
-        "account_binding": "authenticated",
-        "device_binding": "registered"
-      },
-      "prior": {
-        "sources": [
-          "stripe"
-        ],
-        "revision": 4,
         "snapshot": {
           "plans": [
             "pro"
           ]
         }
       },
+      "id": "atomic_transaction_boundary",
       "ordering": {
-        "relation": "newer",
         "observed_at": 1700000000,
-        "provider_cursor": "cursor_atomic_transaction_boundary"
+        "provider_cursor": "cursor_atomic_transaction_boundary",
+        "relation": "newer"
+      },
+      "prior": {
+        "revision": 4,
+        "snapshot": {
+          "plans": [
+            "pro"
+          ]
+        },
+        "sources": [
+          "stripe"
+        ]
       }
     },
     {
-      "id": "duplicate_provider_event",
+      "contract_version": "v1.59",
+      "evidence": {
+        "account_binding": "authenticated",
+        "device_binding": "registered",
+        "environment": "production",
+        "kind": "verified_event",
+        "qualified": true,
+        "rail": "stripe"
+      },
       "expected": {
+        "atomic": true,
+        "continuity": "cached_only",
+        "disposition": "noop",
+        "eligibility": "warn",
+        "lease": "unchanged",
         "reason": "entitlement_duplicate_provider_event",
         "repair": "duplicate",
-        "atomic": true,
-        "disposition": "noop",
-        "snapshot": {
-          "plans": [
-            "pro"
-          ]
-        },
         "revision_delta": 0,
-        "eligibility": "warn",
-        "lease": "unchanged",
-        "continuity": "cached_only"
-      },
-      "contract_version": "v1.59",
-      "evidence": {
-        "kind": "verified_event",
-        "environment": "production",
-        "rail": "stripe",
-        "qualified": true,
-        "account_binding": "authenticated",
-        "device_binding": "registered"
-      },
-      "prior": {
-        "sources": [
-          "stripe"
-        ],
-        "revision": 4,
         "snapshot": {
           "plans": [
             "pro"
           ]
         }
       },
+      "id": "duplicate_provider_event",
       "ordering": {
-        "relation": "equal",
         "observed_at": 1700000000,
-        "provider_cursor": "cursor_duplicate_provider_event"
+        "provider_cursor": "cursor_duplicate_provider_event",
+        "relation": "equal"
+      },
+      "prior": {
+        "revision": 4,
+        "snapshot": {
+          "plans": [
+            "pro"
+          ]
+        },
+        "sources": [
+          "stripe"
+        ]
       }
     },
     {
-      "id": "invalid_apple_evidence",
+      "contract_version": "v1.59",
+      "evidence": {
+        "account_binding": "authenticated",
+        "device_binding": "registered",
+        "environment": "production",
+        "kind": "verified_event",
+        "qualified": false,
+        "rail": "apple"
+      },
       "expected": {
+        "atomic": true,
+        "continuity": "cached_only",
+        "disposition": "no_grant",
+        "eligibility": "warn",
+        "lease": "unchanged",
         "reason": "entitlement_invalid_apple_evidence",
         "repair": "security",
-        "atomic": true,
-        "disposition": "no_grant",
-        "snapshot": {
-          "plans": [
-            "pro"
-          ]
-        },
         "revision_delta": 0,
-        "eligibility": "warn",
-        "lease": "unchanged",
-        "continuity": "cached_only"
-      },
-      "contract_version": "v1.59",
-      "evidence": {
-        "kind": "verified_event",
-        "environment": "production",
-        "rail": "apple",
-        "qualified": false,
-        "account_binding": "authenticated",
-        "device_binding": "registered"
-      },
-      "prior": {
-        "sources": [
-          "stripe"
-        ],
-        "revision": 4,
         "snapshot": {
           "plans": [
             "pro"
           ]
         }
       },
+      "id": "invalid_apple_evidence",
       "ordering": {
-        "relation": "newer",
         "observed_at": 1700000000,
-        "provider_cursor": "cursor_invalid_apple_evidence"
+        "provider_cursor": "cursor_invalid_apple_evidence",
+        "relation": "newer"
+      },
+      "prior": {
+        "revision": 4,
+        "snapshot": {
+          "plans": [
+            "pro"
+          ]
+        },
+        "sources": [
+          "stripe"
+        ]
       }
     },
     {
-      "id": "out_of_order_positive_after_revoke",
+      "contract_version": "v1.59",
+      "evidence": {
+        "account_binding": "authenticated",
+        "device_binding": "registered",
+        "environment": "production",
+        "kind": "verified_event",
+        "qualified": true,
+        "rail": "stripe"
+      },
       "expected": {
+        "atomic": true,
+        "continuity": "local_only",
+        "disposition": "noop",
+        "eligibility": "warn",
+        "lease": "denied",
         "reason": "entitlement_out_of_order_positive_after_revoke",
         "repair": "stale_observation",
-        "atomic": true,
-        "disposition": "noop",
-        "snapshot": {
-          "plans": [
-            "pro"
-          ]
-        },
         "revision_delta": 0,
-        "eligibility": "warn",
-        "lease": "denied",
-        "continuity": "local_only"
-      },
-      "contract_version": "v1.59",
-      "evidence": {
-        "kind": "verified_event",
-        "environment": "production",
-        "rail": "stripe",
-        "qualified": true,
-        "account_binding": "authenticated",
-        "device_binding": "registered"
-      },
-      "prior": {
-        "sources": [
-          "stripe"
-        ],
-        "revision": 4,
         "snapshot": {
           "plans": [
             "pro"
           ]
         }
       },
+      "id": "out_of_order_positive_after_revoke",
       "ordering": {
-        "relation": "older",
         "observed_at": 1700000000,
-        "provider_cursor": "cursor_out_of_order_positive_after_revoke"
-      }
-    },
-    {
-      "id": "purchase_eligibility_ambiguous",
-      "expected": {
-        "reason": "entitlement_purchase_eligibility_ambiguous",
-        "repair": "retry",
-        "atomic": true,
-        "disposition": "preserve",
+        "provider_cursor": "cursor_out_of_order_positive_after_revoke",
+        "relation": "older"
+      },
+      "prior": {
+        "revision": 4,
         "snapshot": {
           "plans": [
             "pro"
           ]
         },
-        "revision_delta": 0,
+        "sources": [
+          "stripe"
+        ]
+      }
+    },
+    {
+      "contract_version": "v1.59",
+      "evidence": {
+        "account_binding": "authenticated",
+        "device_binding": "registered",
+        "environment": "production",
+        "kind": "verified_event",
+        "qualified": true,
+        "rail": "stripe"
+      },
+      "expected": {
+        "atomic": true,
+        "continuity": "cached_only",
+        "disposition": "preserve",
         "eligibility": "block",
         "lease": "unchanged",
-        "continuity": "cached_only"
-      },
-      "contract_version": "v1.59",
-      "evidence": {
-        "kind": "verified_event",
-        "environment": "production",
-        "rail": "stripe",
-        "qualified": true,
-        "account_binding": "authenticated",
-        "device_binding": "registered"
-      },
-      "prior": {
-        "sources": [
-          "stripe"
-        ],
-        "revision": 4,
+        "reason": "entitlement_purchase_eligibility_ambiguous",
+        "repair": "retry",
+        "revision_delta": 0,
         "snapshot": {
           "plans": [
             "pro"
           ]
         }
       },
+      "id": "purchase_eligibility_ambiguous",
       "ordering": {
-        "relation": "newer",
         "observed_at": 1700000000,
-        "provider_cursor": "cursor_purchase_eligibility_ambiguous"
+        "provider_cursor": "cursor_purchase_eligibility_ambiguous",
+        "relation": "newer"
+      },
+      "prior": {
+        "revision": 4,
+        "snapshot": {
+          "plans": [
+            "pro"
+          ]
+        },
+        "sources": [
+          "stripe"
+        ]
       }
     },
     {
-      "id": "reconnect_denied_tombstone",
+      "contract_version": "v1.59",
+      "evidence": {
+        "account_binding": "authenticated",
+        "device_binding": "registered",
+        "environment": "production",
+        "kind": "verified_event",
+        "qualified": true,
+        "rail": "stripe"
+      },
       "expected": {
-        "reason": "entitlement_reconnect_denied_tombstone",
-        "repair": "support",
         "atomic": true,
+        "continuity": "local_only",
         "disposition": "retract",
-        "snapshot": {},
-        "revision_delta": 1,
         "eligibility": "block",
         "lease": "denied",
-        "continuity": "local_only"
+        "reason": "entitlement_reconnect_denied_tombstone",
+        "repair": "support",
+        "revision_delta": 1,
+        "snapshot": {}
       },
-      "contract_version": "v1.59",
-      "evidence": {
-        "kind": "verified_event",
-        "environment": "production",
-        "rail": "stripe",
-        "qualified": true,
-        "account_binding": "authenticated",
-        "device_binding": "registered"
+      "id": "reconnect_denied_tombstone",
+      "ordering": {
+        "observed_at": 1700000000,
+        "provider_cursor": "cursor_reconnect_denied_tombstone",
+        "relation": "newer"
       },
       "prior": {
-        "sources": [
-          "stripe"
-        ],
         "revision": 4,
         "snapshot": {
           "plans": [
             "pro"
           ]
-        }
-      },
-      "ordering": {
-        "relation": "newer",
-        "observed_at": 1700000000,
-        "provider_cursor": "cursor_reconnect_denied_tombstone"
+        },
+        "sources": [
+          "stripe"
+        ]
       }
     },
     {
-      "id": "reconnect_positive_replacement",
+      "contract_version": "v1.59",
+      "evidence": {
+        "account_binding": "authenticated",
+        "device_binding": "registered",
+        "environment": "production",
+        "kind": "verified_event",
+        "qualified": true,
+        "rail": "stripe"
+      },
       "expected": {
+        "atomic": true,
+        "continuity": "full_actions",
+        "disposition": "grant",
+        "eligibility": "warn",
+        "lease": "fresh",
         "reason": "entitlement_reconnect_positive_replacement",
         "repair": "replace",
-        "atomic": true,
-        "disposition": "grant",
-        "snapshot": {
-          "plans": [
-            "pro"
-          ]
-        },
         "revision_delta": 1,
-        "eligibility": "warn",
-        "lease": "fresh",
-        "continuity": "full_actions"
-      },
-      "contract_version": "v1.59",
-      "evidence": {
-        "kind": "verified_event",
-        "environment": "production",
-        "rail": "stripe",
-        "qualified": true,
-        "account_binding": "authenticated",
-        "device_binding": "registered"
-      },
-      "prior": {
-        "sources": [
-          "stripe"
-        ],
-        "revision": 4,
         "snapshot": {
           "plans": [
             "pro"
           ]
         }
       },
+      "id": "reconnect_positive_replacement",
       "ordering": {
-        "relation": "newer",
         "observed_at": 1700000000,
-        "provider_cursor": "cursor_reconnect_positive_replacement"
-      }
-    },
-    {
-      "id": "stale_offline_continuity",
-      "expected": {
-        "reason": "entitlement_stale_offline_continuity",
-        "repair": "reconnect",
-        "atomic": true,
-        "disposition": "preserve",
+        "provider_cursor": "cursor_reconnect_positive_replacement",
+        "relation": "newer"
+      },
+      "prior": {
+        "revision": 4,
         "snapshot": {
           "plans": [
             "pro"
           ]
         },
-        "revision_delta": 0,
+        "sources": [
+          "stripe"
+        ]
+      }
+    },
+    {
+      "contract_version": "v1.59",
+      "evidence": {
+        "account_binding": "authenticated",
+        "device_binding": "registered",
+        "environment": "offline",
+        "kind": "verified_event",
+        "qualified": true,
+        "rail": "stripe"
+      },
+      "expected": {
+        "atomic": true,
+        "continuity": "downloaded_only",
+        "disposition": "preserve",
         "eligibility": "not_applicable",
         "lease": "stale_offline",
-        "continuity": "downloaded_only"
-      },
-      "contract_version": "v1.59",
-      "evidence": {
-        "kind": "verified_event",
-        "environment": "offline",
-        "rail": "stripe",
-        "qualified": true,
-        "account_binding": "authenticated",
-        "device_binding": "registered"
-      },
-      "prior": {
-        "sources": [
-          "stripe"
-        ],
-        "revision": 4,
+        "reason": "entitlement_stale_offline_continuity",
+        "repair": "reconnect",
+        "revision_delta": 0,
         "snapshot": {
           "plans": [
             "pro"
           ]
         }
       },
+      "id": "stale_offline_continuity",
       "ordering": {
-        "relation": "newer",
         "observed_at": 1700000000,
-        "provider_cursor": "cursor_stale_offline_continuity"
-      }
-    },
-    {
-      "id": "stripe_revoked_apple_survives",
-      "expected": {
-        "reason": "entitlement_stripe_revoked_apple_survives",
-        "repair": "survivor",
-        "atomic": true,
-        "disposition": "retract",
+        "provider_cursor": "cursor_stale_offline_continuity",
+        "relation": "newer"
+      },
+      "prior": {
+        "revision": 4,
         "snapshot": {
           "plans": [
             "pro"
           ]
         },
-        "revision_delta": 0,
-        "eligibility": "warn",
-        "lease": "fresh",
-        "continuity": "full_actions"
-      },
+        "sources": [
+          "stripe"
+        ]
+      }
+    },
+    {
       "contract_version": "v1.59",
       "evidence": {
-        "kind": "verified_event",
-        "environment": "production",
-        "rail": "stripe",
-        "qualified": true,
         "account_binding": "authenticated",
-        "device_binding": "registered"
+        "device_binding": "registered",
+        "environment": "production",
+        "kind": "verified_event",
+        "qualified": true,
+        "rail": "stripe"
+      },
+      "expected": {
+        "atomic": true,
+        "continuity": "full_actions",
+        "disposition": "retract",
+        "eligibility": "warn",
+        "lease": "fresh",
+        "reason": "entitlement_stripe_revoked_apple_survives",
+        "repair": "survivor",
+        "revision_delta": 0,
+        "snapshot": {
+          "plans": [
+            "pro"
+          ]
+        }
+      },
+      "id": "stripe_revoked_apple_survives",
+      "ordering": {
+        "observed_at": 1700000000,
+        "provider_cursor": "cursor_stripe_revoked_apple_survives",
+        "relation": "newer"
       },
       "prior": {
+        "revision": 4,
+        "snapshot": {
+          "plans": [
+            "pro"
+          ]
+        },
         "sources": [
           "stripe",
           "apple"
-        ],
-        "revision": 4,
-        "snapshot": {
-          "plans": [
-            "pro"
-          ]
-        }
-      },
-      "ordering": {
-        "relation": "newer",
-        "observed_at": 1700000000,
-        "provider_cursor": "cursor_stripe_revoked_apple_survives"
+        ]
       }
     },
     {
-      "id": "unmapped_verified_product",
+      "contract_version": "v1.59",
+      "evidence": {
+        "account_binding": "authenticated",
+        "device_binding": "registered",
+        "environment": "production",
+        "kind": "verified_event",
+        "qualified": true,
+        "rail": "stripe"
+      },
       "expected": {
-        "reason": "entitlement_unmapped_verified_product",
-        "repair": "catalog",
         "atomic": true,
+        "continuity": "cached_only",
         "disposition": "no_grant",
-        "snapshot": {
-          "plans": [
-            "pro"
-          ]
-        },
-        "revision_delta": 0,
         "eligibility": "block",
         "lease": "unchanged",
-        "continuity": "cached_only"
-      },
-      "contract_version": "v1.59",
-      "evidence": {
-        "kind": "verified_event",
-        "environment": "production",
-        "rail": "stripe",
-        "qualified": true,
-        "account_binding": "authenticated",
-        "device_binding": "registered"
-      },
-      "prior": {
-        "sources": [
-          "stripe"
-        ],
-        "revision": 4,
+        "reason": "entitlement_unmapped_verified_product",
+        "repair": "catalog",
+        "revision_delta": 0,
         "snapshot": {
           "plans": [
             "pro"
           ]
         }
       },
+      "id": "unmapped_verified_product",
       "ordering": {
-        "relation": "newer",
         "observed_at": 1700000000,
-        "provider_cursor": "cursor_unmapped_verified_product"
-      }
-    },
-    {
-      "id": "valid_fresh_lease",
-      "expected": {
-        "reason": "entitlement_valid_fresh_lease",
-        "repair": "high_water",
-        "atomic": true,
-        "disposition": "preserve",
+        "provider_cursor": "cursor_unmapped_verified_product",
+        "relation": "newer"
+      },
+      "prior": {
+        "revision": 4,
         "snapshot": {
           "plans": [
             "pro"
           ]
         },
-        "revision_delta": 0,
-        "eligibility": "not_applicable",
-        "lease": "fresh",
-        "continuity": "full_actions"
-      },
-      "contract_version": "v1.59",
-      "evidence": {
-        "kind": "verified_event",
-        "environment": "offline",
-        "rail": "stripe",
-        "qualified": true,
-        "account_binding": "authenticated",
-        "device_binding": "registered"
-      },
-      "prior": {
         "sources": [
           "stripe"
-        ],
-        "revision": 4,
+        ]
+      }
+    },
+    {
+      "contract_version": "v1.59",
+      "evidence": {
+        "account_binding": "authenticated",
+        "device_binding": "registered",
+        "environment": "offline",
+        "kind": "verified_event",
+        "qualified": true,
+        "rail": "stripe"
+      },
+      "expected": {
+        "atomic": true,
+        "continuity": "full_actions",
+        "disposition": "preserve",
+        "eligibility": "not_applicable",
+        "lease": "fresh",
+        "reason": "entitlement_valid_fresh_lease",
+        "repair": "high_water",
+        "revision_delta": 0,
         "snapshot": {
           "plans": [
             "pro"
           ]
         }
       },
+      "id": "valid_fresh_lease",
       "ordering": {
-        "relation": "newer",
         "observed_at": 1700000000,
-        "provider_cursor": "cursor_valid_fresh_lease"
+        "provider_cursor": "cursor_valid_fresh_lease",
+        "relation": "newer"
+      },
+      "prior": {
+        "revision": 4,
+        "snapshot": {
+          "plans": [
+            "pro"
+          ]
+        },
+        "sources": [
+          "stripe"
+        ]
       }
     }
   ],

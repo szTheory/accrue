@@ -3,206 +3,206 @@
   "schema_version": "v1.59",
   "vectors": [
     {
-      "id": "valid_allow",
-      "contract_version": "v1.59",
       "case_id": "reconnect_positive_replacement",
       "compact_jws": "eyJhbGciOiJFUzI1NiIsImtpZCI6ImFjY3J1ZS12MS41OS1vZmZsaW5lLXRlc3Qtb25seSJ9.eyJpc3MiOiJhY2NydWUudGVzdC5vZmZsaW5lIiwiYXVkIjoiYWNjcnVlLW9mZmxpbmUtY2xpZW50IiwidHlwIjoiYWNjcnVlLWVudGl0bGVtZW50IiwiYWNjb3VudF9pZCI6ImFjY291bnQtMTIzIiwiZGV2aWNlX2lkIjoiZGV2aWNlLTEyMyIsImNuZiI6InRlc3QtdGh1bWJwcmludCIsInJldmlzaW9uIjo1LCJpYXQiOjE3MDAwMDAwMDAsImZyZXNoX3VudGlsIjoxNzAwMDAzNjAwLCJkaXNwb3NpdGlvbiI6ImFsbG93In0.JFnJfG7Tsj8imq2WkdKKRSAX3EdENW6FeFUkgwMpFT0Atgb3B0S9zrcRRf-UjmjfF1WMu8eBdZ1hs2GzC0kZmw",
+      "contract_version": "v1.59",
       "expected_cache_disposition": "allow",
+      "expected_disposition": "grant",
       "expected_reason": "ok",
       "expected_verification": "accept",
-      "expected_disposition": "grant"
+      "id": "valid_allow"
     },
     {
-      "id": "valid_signed_denial",
-      "contract_version": "v1.59",
       "case_id": "reconnect_denied_tombstone",
       "compact_jws": "eyJhbGciOiJFUzI1NiIsImtpZCI6ImFjY3J1ZS12MS41OS1vZmZsaW5lLXRlc3Qtb25seSJ9.eyJpc3MiOiJhY2NydWUudGVzdC5vZmZsaW5lIiwiYXVkIjoiYWNjcnVlLW9mZmxpbmUtY2xpZW50IiwidHlwIjoiYWNjcnVlLWVudGl0bGVtZW50IiwiYWNjb3VudF9pZCI6ImFjY291bnQtMTIzIiwiZGV2aWNlX2lkIjoiZGV2aWNlLTEyMyIsImNuZiI6InRlc3QtdGh1bWJwcmludCIsInJldmlzaW9uIjo1LCJpYXQiOjE3MDAwMDAwMDAsImZyZXNoX3VudGlsIjoxNzAwMDAzNjAwLCJkaXNwb3NpdGlvbiI6ImRlbnkifQ.IzhX4g4ftHpPUVHnjBGA47f0QX7IuOCUva9P-jvVH0Wv2lL1KNoCmaunfA4-BIWtQJ4F3uU3_F5xYDgWS1NVaA",
+      "contract_version": "v1.59",
       "expected_cache_disposition": "deny",
+      "expected_disposition": "retract",
       "expected_reason": "ok",
       "expected_verification": "accept",
-      "expected_disposition": "retract"
+      "id": "valid_signed_denial"
     },
     {
-      "id": "wrong_signature",
-      "contract_version": "v1.59",
       "case_id": "invalid_apple_evidence",
       "compact_jws": "eyJhbGciOiJFUzI1NiIsImtpZCI6ImFjY3J1ZS12MS41OS1vZmZsaW5lLXRlc3Qtb25seSJ9.eyJpc3MiOiJhY2NydWUudGVzdC5vZmZsaW5lIiwiYXVkIjoiYWNjcnVlLW9mZmxpbmUtY2xpZW50IiwidHlwIjoiYWNjcnVlLWVudGl0bGVtZW50IiwiYWNjb3VudF9pZCI6ImFjY291bnQtMTIzIiwiZGV2aWNlX2lkIjoiZGV2aWNlLTEyMyIsImNuZiI6InRlc3QtdGh1bWJwcmludCIsInJldmlzaW9uIjo1LCJpYXQiOjE3MDAwMDAwMDAsImZyZXNoX3VudGlsIjoxNzAwMDAzNjAwLCJkaXNwb3NpdGlvbiI6ImFsbG93In0.JFnJfG7Tsj8imq2WkdKKRSAX3EdENW6FeFUkgwMpFT0Atgb3B0S9zrcRRf-UjmjfF1WMu8eBdZ1hs2GzC0kYmw",
+      "contract_version": "v1.59",
       "expected_cache_disposition": "allow",
+      "expected_disposition": "no_grant",
       "expected_reason": "signature",
       "expected_verification": "reject",
-      "expected_disposition": "no_grant"
+      "id": "wrong_signature"
     },
     {
-      "id": "wrong_key",
-      "contract_version": "v1.59",
       "case_id": "apple_token_mismatch",
       "compact_jws": "eyJhbGciOiJFUzI1NiIsImtpZCI6ImFjY3J1ZS12MS41OS1vZmZsaW5lLXRlc3Qtb25seSJ9.eyJpc3MiOiJhY2NydWUudGVzdC5vZmZsaW5lIiwiYXVkIjoiYWNjcnVlLW9mZmxpbmUtY2xpZW50IiwidHlwIjoiYWNjcnVlLWVudGl0bGVtZW50IiwiYWNjb3VudF9pZCI6ImFjY291bnQtMTIzIiwiZGV2aWNlX2lkIjoiZGV2aWNlLTEyMyIsImNuZiI6InRlc3QtdGh1bWJwcmludCIsInJldmlzaW9uIjo1LCJpYXQiOjE3MDAwMDAwMDAsImZyZXNoX3VudGlsIjoxNzAwMDAzNjAwLCJkaXNwb3NpdGlvbiI6ImFsbG93In0.JFnJfG7Tsj8imq2WkdKKRSAX3EdENW6FeFUkgwMpFT0Atgb3B0S9zrcRRf-UjmjfF1WMu8eBdZ1hs2GzC0kZmw",
+      "contract_version": "v1.59",
       "expected_cache_disposition": "allow",
+      "expected_disposition": "no_grant",
       "expected_reason": "key",
       "expected_verification": "reject",
-      "expected_disposition": "no_grant"
+      "id": "wrong_key"
     },
     {
-      "id": "wrong_device",
-      "contract_version": "v1.59",
       "case_id": "unmapped_verified_product",
       "compact_jws": "eyJhbGciOiJFUzI1NiIsImtpZCI6ImFjY3J1ZS12MS41OS1vZmZsaW5lLXRlc3Qtb25seSJ9.eyJpc3MiOiJhY2NydWUudGVzdC5vZmZsaW5lIiwiYXVkIjoiYWNjcnVlLW9mZmxpbmUtY2xpZW50IiwidHlwIjoiYWNjcnVlLWVudGl0bGVtZW50IiwiYWNjb3VudF9pZCI6ImFjY291bnQtMTIzIiwiZGV2aWNlX2lkIjoiZGV2aWNlLTEyMyIsImNuZiI6InRlc3QtdGh1bWJwcmludCIsInJldmlzaW9uIjo1LCJpYXQiOjE3MDAwMDAwMDAsImZyZXNoX3VudGlsIjoxNzAwMDAzNjAwLCJkaXNwb3NpdGlvbiI6ImFsbG93In0.JFnJfG7Tsj8imq2WkdKKRSAX3EdENW6FeFUkgwMpFT0Atgb3B0S9zrcRRf-UjmjfF1WMu8eBdZ1hs2GzC0kZmw",
+      "contract_version": "v1.59",
       "expected_cache_disposition": "allow",
+      "expected_disposition": "no_grant",
       "expected_reason": "device",
       "expected_verification": "reject",
-      "expected_disposition": "no_grant"
+      "id": "wrong_device"
     },
     {
-      "id": "rollback",
-      "contract_version": "v1.59",
       "case_id": "out_of_order_positive_after_revoke",
       "compact_jws": "eyJhbGciOiJFUzI1NiIsImtpZCI6ImFjY3J1ZS12MS41OS1vZmZsaW5lLXRlc3Qtb25seSJ9.eyJpc3MiOiJhY2NydWUudGVzdC5vZmZsaW5lIiwiYXVkIjoiYWNjcnVlLW9mZmxpbmUtY2xpZW50IiwidHlwIjoiYWNjcnVlLWVudGl0bGVtZW50IiwiYWNjb3VudF9pZCI6ImFjY291bnQtMTIzIiwiZGV2aWNlX2lkIjoiZGV2aWNlLTEyMyIsImNuZiI6InRlc3QtdGh1bWJwcmludCIsInJldmlzaW9uIjo1LCJpYXQiOjE3MDAwMDAwMDAsImZyZXNoX3VudGlsIjoxNzAwMDAzNjAwLCJkaXNwb3NpdGlvbiI6ImFsbG93In0.JFnJfG7Tsj8imq2WkdKKRSAX3EdENW6FeFUkgwMpFT0Atgb3B0S9zrcRRf-UjmjfF1WMu8eBdZ1hs2GzC0kZmw",
+      "contract_version": "v1.59",
       "expected_cache_disposition": "deny",
+      "expected_disposition": "noop",
       "expected_reason": "rollback",
       "expected_verification": "reject",
-      "expected_disposition": "noop"
+      "id": "rollback"
     },
     {
-      "id": "older_iat",
-      "contract_version": "v1.59",
       "case_id": "duplicate_provider_event",
       "compact_jws": "eyJhbGciOiJFUzI1NiIsImtpZCI6ImFjY3J1ZS12MS41OS1vZmZsaW5lLXRlc3Qtb25seSJ9.eyJpc3MiOiJhY2NydWUudGVzdC5vZmZsaW5lIiwiYXVkIjoiYWNjcnVlLW9mZmxpbmUtY2xpZW50IiwidHlwIjoiYWNjcnVlLWVudGl0bGVtZW50IiwiYWNjb3VudF9pZCI6ImFjY291bnQtMTIzIiwiZGV2aWNlX2lkIjoiZGV2aWNlLTEyMyIsImNuZiI6InRlc3QtdGh1bWJwcmludCIsInJldmlzaW9uIjo1LCJpYXQiOjE3MDAwMDAwMDAsImZyZXNoX3VudGlsIjoxNzAwMDAzNjAwLCJkaXNwb3NpdGlvbiI6ImFsbG93In0.JFnJfG7Tsj8imq2WkdKKRSAX3EdENW6FeFUkgwMpFT0Atgb3B0S9zrcRRf-UjmjfF1WMu8eBdZ1hs2GzC0kZmw",
+      "contract_version": "v1.59",
       "expected_cache_disposition": "deny",
+      "expected_disposition": "noop",
       "expected_reason": "iat",
       "expected_verification": "reject",
-      "expected_disposition": "noop"
+      "id": "older_iat"
     },
     {
-      "id": "stale_freshness",
-      "contract_version": "v1.59",
       "case_id": "stale_offline_continuity",
       "compact_jws": "eyJhbGciOiJFUzI1NiIsImtpZCI6ImFjY3J1ZS12MS41OS1vZmZsaW5lLXRlc3Qtb25seSJ9.eyJpc3MiOiJhY2NydWUudGVzdC5vZmZsaW5lIiwiYXVkIjoiYWNjcnVlLW9mZmxpbmUtY2xpZW50IiwidHlwIjoiYWNjcnVlLWVudGl0bGVtZW50IiwiYWNjb3VudF9pZCI6ImFjY291bnQtMTIzIiwiZGV2aWNlX2lkIjoiZGV2aWNlLTEyMyIsImNuZiI6InRlc3QtdGh1bWJwcmludCIsInJldmlzaW9uIjo1LCJpYXQiOjE3MDAwMDAwMDAsImZyZXNoX3VudGlsIjoxNzAwMDAzNjAwLCJkaXNwb3NpdGlvbiI6ImFsbG93In0.JFnJfG7Tsj8imq2WkdKKRSAX3EdENW6FeFUkgwMpFT0Atgb3B0S9zrcRRf-UjmjfF1WMu8eBdZ1hs2GzC0kZmw",
+      "contract_version": "v1.59",
       "expected_cache_disposition": "allow",
+      "expected_disposition": "preserve",
       "expected_reason": "freshness",
       "expected_verification": "reject",
-      "expected_disposition": "preserve"
+      "id": "stale_freshness"
     },
     {
-      "id": "deny_precedence",
-      "contract_version": "v1.59",
       "case_id": "all_grants_revoked",
       "compact_jws": "eyJhbGciOiJFUzI1NiIsImtpZCI6ImFjY3J1ZS12MS41OS1vZmZsaW5lLXRlc3Qtb25seSJ9.eyJpc3MiOiJhY2NydWUudGVzdC5vZmZsaW5lIiwiYXVkIjoiYWNjcnVlLW9mZmxpbmUtY2xpZW50IiwidHlwIjoiYWNjcnVlLWVudGl0bGVtZW50IiwiYWNjb3VudF9pZCI6ImFjY291bnQtMTIzIiwiZGV2aWNlX2lkIjoiZGV2aWNlLTEyMyIsImNuZiI6InRlc3QtdGh1bWJwcmludCIsInJldmlzaW9uIjo1LCJpYXQiOjE3MDAwMDAwMDAsImZyZXNoX3VudGlsIjoxNzAwMDAzNjAwLCJkaXNwb3NpdGlvbiI6ImRlbnkifQ.IzhX4g4ftHpPUVHnjBGA47f0QX7IuOCUva9P-jvVH0Wv2lL1KNoCmaunfA4-BIWtQJ4F3uU3_F5xYDgWS1NVaA",
+      "contract_version": "v1.59",
       "expected_cache_disposition": "deny",
+      "expected_disposition": "retract",
       "expected_reason": "ok",
       "expected_verification": "accept",
-      "expected_disposition": "retract"
+      "id": "deny_precedence"
     },
     {
-      "id": "fault_before_replace",
-      "contract_version": "v1.59",
       "case_id": "atomic_transaction_boundary",
       "compact_jws": "eyJhbGciOiJFUzI1NiIsImtpZCI6ImFjY3J1ZS12MS41OS1vZmZsaW5lLXRlc3Qtb25seSJ9.eyJpc3MiOiJhY2NydWUudGVzdC5vZmZsaW5lIiwiYXVkIjoiYWNjcnVlLW9mZmxpbmUtY2xpZW50IiwidHlwIjoiYWNjcnVlLWVudGl0bGVtZW50IiwiYWNjb3VudF9pZCI6ImFjY291bnQtMTIzIiwiZGV2aWNlX2lkIjoiZGV2aWNlLTEyMyIsImNuZiI6InRlc3QtdGh1bWJwcmludCIsInJldmlzaW9uIjo1LCJpYXQiOjE3MDAwMDAwMDAsImZyZXNoX3VudGlsIjoxNzAwMDAzNjAwLCJkaXNwb3NpdGlvbiI6ImFsbG93In0.JFnJfG7Tsj8imq2WkdKKRSAX3EdENW6FeFUkgwMpFT0Atgb3B0S9zrcRRf-UjmjfF1WMu8eBdZ1hs2GzC0kZmw",
+      "contract_version": "v1.59",
       "expected_cache_disposition": "deny",
+      "expected_disposition": "grant",
       "expected_reason": "fault_before_replace",
       "expected_verification": "accept",
       "fault_point": "before_rename",
-      "expected_disposition": "grant"
+      "id": "fault_before_replace"
     },
     {
-      "id": "fault_after_replace",
-      "contract_version": "v1.59",
       "case_id": "stripe_revoked_apple_survives",
       "compact_jws": "eyJhbGciOiJFUzI1NiIsImtpZCI6ImFjY3J1ZS12MS41OS1vZmZsaW5lLXRlc3Qtb25seSJ9.eyJpc3MiOiJhY2NydWUudGVzdC5vZmZsaW5lIiwiYXVkIjoiYWNjcnVlLW9mZmxpbmUtY2xpZW50IiwidHlwIjoiYWNjcnVlLWVudGl0bGVtZW50IiwiYWNjb3VudF9pZCI6ImFjY291bnQtMTIzIiwiZGV2aWNlX2lkIjoiZGV2aWNlLTEyMyIsImNuZiI6InRlc3QtdGh1bWJwcmludCIsInJldmlzaW9uIjo1LCJpYXQiOjE3MDAwMDAwMDAsImZyZXNoX3VudGlsIjoxNzAwMDAzNjAwLCJkaXNwb3NpdGlvbiI6ImRlbnkifQ.IzhX4g4ftHpPUVHnjBGA47f0QX7IuOCUva9P-jvVH0Wv2lL1KNoCmaunfA4-BIWtQJ4F3uU3_F5xYDgWS1NVaA",
+      "contract_version": "v1.59",
       "expected_cache_disposition": "deny",
+      "expected_disposition": "retract",
       "expected_reason": "fault_after_replace",
       "expected_verification": "accept",
       "fault_point": "after_rename",
-      "expected_disposition": "retract"
+      "id": "fault_after_replace"
     },
     {
-      "id": "wrong_account",
-      "contract_version": "v1.59",
       "case_id": "apple_token_mismatch",
       "compact_jws": "eyJhbGciOiJFUzI1NiIsImtpZCI6ImFjY3J1ZS12MS41OS1vZmZsaW5lLXRlc3Qtb25seSJ9.eyJhY2NvdW50X2lkIjoiYWNjb3VudC05OTkiLCJhdWQiOiJhY2NydWUtb2ZmbGluZS1jbGllbnQiLCJjbmYiOiJ0ZXN0LXRodW1icHJpbnQiLCJkZXZpY2VfaWQiOiJkZXZpY2UtMTIzIiwiZGlzcG9zaXRpb24iOiJhbGxvdyIsImZyZXNoX3VudGlsIjoxNzAwMDAzNjAwLCJpYXQiOjE3MDAwMDAwMDAsImlzcyI6ImFjY3J1ZS50ZXN0Lm9mZmxpbmUiLCJyZXZpc2lvbiI6NSwidHlwIjoiYWNjcnVlLWVudGl0bGVtZW50In0.43qdmSN-I2l2HZdFom_fQonTndBVyteuUa2LO0F_QwojXrVR9ZrvtBZXmnABBwSSzdyM7iBPdgoTqFnA8b-YBg",
+      "contract_version": "v1.59",
       "expected_cache_disposition": "allow",
+      "expected_disposition": "no_grant",
       "expected_reason": "account",
       "expected_verification": "reject",
-      "expected_disposition": "no_grant"
+      "id": "wrong_account"
     },
     {
-      "id": "wrong_audience",
-      "contract_version": "v1.59",
       "case_id": "invalid_apple_evidence",
       "compact_jws": "eyJhbGciOiJFUzI1NiIsImtpZCI6ImFjY3J1ZS12MS41OS1vZmZsaW5lLXRlc3Qtb25seSJ9.eyJhY2NvdW50X2lkIjoiYWNjb3VudC0xMjMiLCJhdWQiOiJ3cm9uZy1hdWRpZW5jZSIsImNuZiI6InRlc3QtdGh1bWJwcmludCIsImRldmljZV9pZCI6ImRldmljZS0xMjMiLCJkaXNwb3NpdGlvbiI6ImFsbG93IiwiZnJlc2hfdW50aWwiOjE3MDAwMDM2MDAsImlhdCI6MTcwMDAwMDAwMCwiaXNzIjoiYWNjcnVlLnRlc3Qub2ZmbGluZSIsInJldmlzaW9uIjo1LCJ0eXAiOiJhY2NydWUtZW50aXRsZW1lbnQifQ.6v1LxZrviSLxPXSgMaV1elIYkrBChMSHyiN8vrdsf0WvocJkMul69NnWaBVdWc7GpriznSVEfSiz_gSpQEUbnA",
+      "contract_version": "v1.59",
       "expected_cache_disposition": "allow",
+      "expected_disposition": "no_grant",
       "expected_reason": "audience",
       "expected_verification": "reject",
-      "expected_disposition": "no_grant"
+      "id": "wrong_audience"
     },
     {
-      "id": "wrong_type",
-      "contract_version": "v1.59",
       "case_id": "unmapped_verified_product",
-      "compact_jws": "eyJhbGciOiJFUzI1NiIsImtpZCI6ImFjY3J1ZS12MS41OS1vZmZsaW5lLXRlc3Qtb25seSJ9.eyJhY2NvdW50X2lkIjoiYWNjb3VudC0xMjMiLCJhdWQiOiJhY2NydWUtb2ZmbGluZS1jbGllbnQiLCJjbmYiOiJ0ZXN0LXRodW1icHJpbnQiLCJkZXZpY2VfaWQiOiJkZXZpY2UtMTIzIiwiZGlzcG9zaXRpb24iOiJhbGxvdyIsImZyZXNoX3VudGlsIjoxNzAwMDAzNjAwLCJpYXQiOjE3MDAwMDAwMDAsImlzcyI6ImFjY3VlLnRlc3Qub2ZmbGluZSIsInJldmlzaW9uIjo1LCJ0eXAiOiJ3cm9uZy10eXBlIn0.djtGq2bZqZxrivYvHeHfaazs2C0kIWfiEmDnpYcX1Fiv_LQv46ah_hgSOSCEJ2lth5UWxyrazGgYImfdBCLT9w",
+      "compact_jws": "eyJhbGciOiJFUzI1NiIsImtpZCI6ImFjY3J1ZS12MS41OS1vZmZsaW5lLXRlc3Qtb25seSJ9.eyJpc3MiOiJhY2NydWUudGVzdC5vZmZsaW5lIiwiYXVkIjoiYWNjcnVlLW9mZmxpbmUtY2xpZW50IiwidHlwIjoid3JvbmctdHlwZSIsImFjY291bnRfaWQiOiJhY2NvdW50LTEyMyIsImRldmljZV9pZCI6ImRldmljZS0xMjMiLCJjbmYiOiJ0ZXN0LXRodW1icHJpbnQiLCJyZXZpc2lvbiI6NSwiaWF0IjoxNzAwMDAwMDAwLCJmcmVzaF91bnRpbCI6MTcwMDAwMzYwMCwiZGlzcG9zaXRpb24iOiJhbGxvdyJ9.BaZWg4FGrXhFJUh-doqyd41kMl6VhCbKlJcyxkWDhbqvc6bg3dKwGT1U6eRAXrGMgu1IKWa8ZVTEHjd31QK3LQ",
+      "contract_version": "v1.59",
       "expected_cache_disposition": "allow",
+      "expected_disposition": "no_grant",
       "expected_reason": "type",
       "expected_verification": "reject",
-      "expected_disposition": "no_grant"
+      "id": "wrong_type"
     },
     {
-      "id": "wrong_algorithm",
-      "contract_version": "v1.59",
       "case_id": "invalid_apple_evidence",
       "compact_jws": "eyJhbGciOiJIUzI1NiIsImtpZCI6ImFjY3J1ZS12MS41OS1vZmZsaW5lLXRlc3Qtb25seSJ9.eyJhY2NvdW50X2lkIjoiYWNjb3VudC0xMjMiLCJhdWQiOiJhY2NydWUtb2ZmbGluZS1jbGllbnQiLCJjbmYiOiJ0ZXN0LXRodW1icHJpbnQiLCJkZXZpY2VfaWQiOiJkZXZpY2UtMTIzIiwiZGlzcG9zaXRpb24iOiJhbGxvdyIsImZyZXNoX3VudGlsIjoxNzAwMDAzNjAwLCJpYXQiOjE3MDAwMDAwMDAsImlzcyI6ImFjY3VlLnRlc3Qub2ZmbGluZSIsInJldmlzaW9uIjo1LCJ0eXAiOiJhY2NydWUtZW50aXRsZW1lbnQifQ.P1Qfjf00tfTI9dvtJojQpY_QjeOkGXygt-nQJhuyILMFrtNTspKdbfk8H1yTep10t6jUl-WH2w6ECIbrOSnpTQ",
+      "contract_version": "v1.59",
       "expected_cache_disposition": "allow",
+      "expected_disposition": "no_grant",
       "expected_reason": "algorithm",
       "expected_verification": "reject",
-      "expected_disposition": "no_grant"
+      "id": "wrong_algorithm"
     },
     {
-      "id": "malformed_compact",
-      "contract_version": "v1.59",
       "case_id": "invalid_apple_evidence",
       "compact_jws": "not-a-jws",
+      "contract_version": "v1.59",
       "expected_cache_disposition": "allow",
+      "expected_disposition": "no_grant",
       "expected_reason": "malformed",
       "expected_verification": "reject",
-      "expected_disposition": "no_grant"
+      "id": "malformed_compact"
     },
     {
-      "id": "malformed_revision",
-      "contract_version": "v1.59",
       "case_id": "out_of_order_positive_after_revoke",
-      "compact_jws": "eyJhbGciOiJFUzI1NiIsImtpZCI6ImFjY3J1ZS12MS41OS1vZmZsaW5lLXRlc3Qtb25seSJ9.eyJhY2NvdW50X2lkIjoiYWNjb3VudC0xMjMiLCJhdWQiOiJhY2NydWUtb2ZmbGluZS1jbGllbnQiLCJjbmYiOiJ0ZXN0LXRodW1icHJpbnQiLCJkZXZpY2VfaWQiOiJkZXZpY2UtMTIzIiwiZGlzcG9zaXRpb24iOiJhbGxvdyIsImZyZXNoX3VudGlsIjoxNzAwMDAzNjAwLCJpYXQiOjE3MDAwMDAwMDAsImlzcyI6ImFjY3VlLnRlc3Qub2ZmbGluZSIsInJldmlzaW9uIjoiZml2ZSIsInR5cCI6ImFjY3VlLWVudGl0bGVtZW50In0.DNlIfh4aY2zkxvrccC0DTiqnlDqQO6YU_bt5YRpVBAnmsks3JiZuZXgvtVlIgwQ9Gf8RAkCPX3lhVEctI0LWXw",
+      "compact_jws": "eyJhbGciOiJFUzI1NiIsImtpZCI6ImFjY3J1ZS12MS41OS1vZmZsaW5lLXRlc3Qtb25seSJ9.eyJpc3MiOiJhY2NydWUudGVzdC5vZmZsaW5lIiwiYXVkIjoiYWNjcnVlLW9mZmxpbmUtY2xpZW50IiwidHlwIjoiYWNjcnVlLWVudGl0bGVtZW50IiwiYWNjb3VudF9pZCI6ImFjY291bnQtMTIzIiwiZGV2aWNlX2lkIjoiZGV2aWNlLTEyMyIsImNuZiI6InRlc3QtdGh1bWJwcmludCIsInJldmlzaW9uIjoiZml2ZSIsImlhdCI6MTcwMDAwMDAwMCwiZnJlc2hfdW50aWwiOjE3MDAwMDM2MDAsImRpc3Bvc2l0aW9uIjoiYWxsb3cifQ.3XNemG0CWFPnLLNZDsxVvq6DhnOX-5_9e7jHsFJkI5G0En3WhazkYS_JAuxwoaLlM4OvlpjuQLk65foUU27qlA",
+      "contract_version": "v1.59",
       "expected_cache_disposition": "allow",
+      "expected_disposition": "noop",
       "expected_reason": "revision",
       "expected_verification": "reject",
-      "expected_disposition": "noop"
+      "id": "malformed_revision"
     },
     {
-      "id": "malformed_iat",
-      "contract_version": "v1.59",
       "case_id": "duplicate_provider_event",
-      "compact_jws": "eyJhbGciOiJFUzI1NiIsImtpZCI6ImFjY3J1ZS12MS41OS1vZmZsaW5lLXRlc3Qtb25seSJ9.eyJhY2NvdW50X2lkIjoiYWNjb3VudC0xMjMiLCJhdWQiOiJhY2NydWUtb2ZmbGluZS1jbGllbnQiLCJjbmYiOiJ0ZXN0LXRodW1icHJpbnQiLCJkZXZpY2UtMTIzIiwiZGlzcG9zaXRpb24iOiJhbGxvdyIsImZyZXNoX3VudGlsIjoxNzAwMDAzNjAwLCJpYXQiOiJub3ciLCJpc3MiOiJhY2NydWUudGVzdC5vZmZsaW5lIiwicmV2aXNpb24iOjUsInR5cCI6ImFjY3VlLWVudGl0bGVtZW50In0.PG9uZhFO8HZNXWfN7b5jSLSgNEb0Dma0C_Bysyl9HrGX01qlKpTFdPdNXOR2lZIShf73-8c7_0rTaTGOV_vfIQ",
+      "compact_jws": "eyJhbGciOiJFUzI1NiIsImtpZCI6ImFjY3J1ZS12MS41OS1vZmZsaW5lLXRlc3Qtb25seSJ9.eyJpc3MiOiJhY2NydWUudGVzdC5vZmZsaW5lIiwiYXVkIjoiYWNjcnVlLW9mZmxpbmUtY2xpZW50IiwidHlwIjoiYWNjcnVlLWVudGl0bGVtZW50IiwiYWNjb3VudF9pZCI6ImFjY291bnQtMTIzIiwiZGV2aWNlX2lkIjoiZGV2aWNlLTEyMyIsImNuZiI6InRlc3QtdGh1bWJwcmludCIsInJldmlzaW9uIjo1LCJpYXQiOiJub3ciLCJmcmVzaF91bnRpbCI6MTcwMDAwMzYwMCwiZGlzcG9zaXRpb24iOiJhbGxvdyJ9.Sy1U_J0PAO1zeYDn4Tp55OJo7qqdDZVjyMijy-oFSlP5lPFoVXf0NqKHA8E-IVMd1UQkel1h9NCnAuyE6spvNw",
+      "contract_version": "v1.59",
       "expected_cache_disposition": "allow",
+      "expected_disposition": "noop",
       "expected_reason": "iat",
       "expected_verification": "reject",
-      "expected_disposition": "noop"
+      "id": "malformed_iat"
     },
     {
-      "id": "malformed_freshness",
-      "contract_version": "v1.59",
       "case_id": "stale_offline_continuity",
-      "compact_jws": "eyJhbGciOiJFUzI1NiIsImtpZCI6ImFjY3J1ZS12MS41OS1vZmZsaW5lLXRlc3Qtb25seSJ9.eyJhY2NvdW50X2lkIjoiYWNjb3VudC0xMjMiLCJhdWQiOiJhY2NydWUtb2ZmbGluZS1jbGllbnQiLCJkZXZpY2VfaWQiOiJkZXZpY2UtMTIzIiwiZGlzcG9zaXRpb24iOiJhbGxvdyIsImZyZXNoX3VudGlsIjoibGF0ZXIiLCJpYXQiOjE3MDAwMDAwMDAsImlzcyI6ImFjY3VlLnRlc3Qub2ZmbGluZSIsInJldmlzaW9uIjo1LCJ0eXAiOiJhY2NydWUtZW50aXRsZW1lbnQifQ.plF20Hmx0WQ294_ow-vD-uifN6OVA6hRYQ5kp7aMFtaQDPLmEe_GlRLPY4QUXSNtdmc3ImHj62rl89siAOT1MQ",
+      "compact_jws": "eyJhbGciOiJFUzI1NiIsImtpZCI6ImFjY3J1ZS12MS41OS1vZmZsaW5lLXRlc3Qtb25seSJ9.eyJpc3MiOiJhY2NydWUudGVzdC5vZmZsaW5lIiwiYXVkIjoiYWNjcnVlLW9mZmxpbmUtY2xpZW50IiwidHlwIjoiYWNjcnVlLWVudGl0bGVtZW50IiwiYWNjb3VudF9pZCI6ImFjY291bnQtMTIzIiwiZGV2aWNlX2lkIjoiZGV2aWNlLTEyMyIsImNuZiI6InRlc3QtdGh1bWJwcmludCIsInJldmlzaW9uIjo1LCJpYXQiOjE3MDAwMDAwMDAsImZyZXNoX3VudGlsIjoibGF0ZXIiLCJkaXNwb3NpdGlvbiI6ImFsbG93In0.8Lz7r30EHYUzzgBcHmmlZUTb4kkUN3C0us9DIVZZul6LaV0CBUNGlREw37pgp2RDOcPB6Y1paGhdMlLbdSmFkg",
+      "contract_version": "v1.59",
       "expected_cache_disposition": "allow",
+      "expected_disposition": "preserve",
       "expected_reason": "freshness",
       "expected_verification": "reject",
-      "expected_disposition": "preserve"
+      "id": "malformed_freshness"
     },
     {
-      "id": "unknown_disposition",
-      "contract_version": "v1.59",
       "case_id": "reconnect_positive_replacement",
-      "compact_jws": "eyJhbGciOiJFUzI1NiIsImtpZCI6ImFjY3J1ZS12MS41OS1vZmZsaW5lLXRlc3Qtb25seSJ9.eyJhY2NvdW50X2lkIjoiYWNjb3VudC0xMjMiLCJhdWQiOiJhY2NydWUtb2ZmbGluZS1jbGllbnQiLCJjbmYiOiJ0ZXN0LXRodW1icHJpbnQiLCJkZXZpY2VfaWQiOiJkZXZpY2UtMTIzIiwiZGlzcG9zaXRpb24iOiJtYXliZSIsImZyZXNoX3VudGlsIjoxNzAwMDAzNjAwLCJpYXQiOjE3MDAwMDAwMDAsImlzcyI6ImFjY3VlLnRlc3Qub2ZmbGluZSIsInJldmlzaW9uIjo1LCJ0eXAiOiJhY2NydWUtZW50aXRsZW1lbnQifQ.kKe8QH42UFqTDSGievkhfLguwhtYhCL-26QnHrYRervn2O03sEerEgw8r8PcXxNEJT1szjoFKRZWWaJGewXEiQ",
+      "compact_jws": "eyJhbGciOiJFUzI1NiIsImtpZCI6ImFjY3J1ZS12MS41OS1vZmZsaW5lLXRlc3Qtb25seSJ9.eyJpc3MiOiJhY2NydWUudGVzdC5vZmZsaW5lIiwiYXVkIjoiYWNjcnVlLW9mZmxpbmUtY2xpZW50IiwidHlwIjoiYWNjcnVlLWVudGl0bGVtZW50IiwiYWNjb3VudF9pZCI6ImFjY291bnQtMTIzIiwiZGV2aWNlX2lkIjoiZGV2aWNlLTEyMyIsImNuZiI6InRlc3QtdGh1bWJwcmludCIsInJldmlzaW9uIjo1LCJpYXQiOjE3MDAwMDAwMDAsImZyZXNoX3VudGlsIjoxNzAwMDAzNjAwLCJkaXNwb3NpdGlvbiI6Im1heWJlIn0.IITy6KiR_eQ-OxZ5CdsQ_byEefEfWaEdI2-AFiMygkqHufz6w4lbxtO3sHSBleOIbnRgybpSUKotJgw4MFhY6Q",
+      "contract_version": "v1.59",
       "expected_cache_disposition": "allow",
+      "expected_disposition": "grant",
       "expected_reason": "disposition",
       "expected_verification": "reject",
-      "expected_disposition": "grant"
+      "id": "unknown_disposition"
     }
   ]
 }

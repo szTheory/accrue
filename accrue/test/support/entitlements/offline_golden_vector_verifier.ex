@@ -13,15 +13,14 @@ defmodule Accrue.Entitlements.OfflineGoldenVectorVerifier do
   def verify_fixture! do
     key = @key_fixture |> File.read!() |> Jason.decode!()
 
-    observations =
+    vectors =
       @fixture
       |> File.read!()
       |> Jason.decode!()
       |> Map.fetch!("vectors")
-      |> Enum.map(&observe(&1, key))
-      |> Enum.sort_by(& &1.id)
+      |> Enum.sort_by(& &1["id"])
 
-    {:ok, observations}
+    {:ok, vectors, Enum.map(vectors, &observe(&1, key))}
   end
 
   # Kept public for mutation-sensitive contract tests. The verifier deliberately
@@ -32,6 +31,7 @@ defmodule Accrue.Entitlements.OfflineGoldenVectorVerifier do
          :ok <- fixed_header(header),
          :ok <- verify_signature(key, signing_input, signature),
          :ok <- verify_claims(payload, context),
+         :ok <- verify_disposition(payload),
          :ok <- verify_high_water(payload, context) do
       {:ok, payload}
     end
@@ -103,12 +103,18 @@ defmodule Accrue.Entitlements.OfflineGoldenVectorVerifier do
     now = Map.get(context, :now, 1_700_000_001)
 
     cond do
+      not is_integer(payload["revision"]) -> {:error, :revision}
+      not is_integer(payload["iat"]) -> {:error, :iat}
+      not is_integer(payload["fresh_until"]) -> {:error, :freshness}
       payload["revision"] < high.revision -> {:error, :rollback}
       payload["iat"] < high.iat -> {:error, :iat}
       payload["fresh_until"] < high.freshness or payload["fresh_until"] < now -> {:error, :freshness}
       true -> :ok
     end
   end
+
+  defp verify_disposition(%{"disposition" => disposition}) when disposition in ["allow", "deny"], do: :ok
+  defp verify_disposition(_payload), do: {:error, :disposition}
 
   defp cache_after(_vector, :reject, context), do: Map.get(context, :prior_cache, :allow)
   defp cache_after(vector, :accept, context) do
@@ -118,7 +124,10 @@ defmodule Accrue.Entitlements.OfflineGoldenVectorVerifier do
   defp disposition_cache(compact) do
     [_header, payload, _signature] = String.split(compact, ".")
     %{"disposition" => disposition} = payload |> Base.url_decode64!(padding: false) |> Jason.decode!()
-    if disposition == "deny", do: :deny, else: :allow
+    case disposition do
+      "allow" -> :allow
+      "deny" -> :deny
+    end
   end
 
   defp context_for("wrong_key"), do: %{key: :wrong, bindings: %{}, prior_cache: :allow}
