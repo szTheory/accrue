@@ -9,7 +9,7 @@
 ### Durable Research Memory
 
 - [x] **RSCH-01**: A future maintainer can find one versioned v1.59 research bundle that preserves stakeholder findings, primary-source provenance, accepted tradeoffs, rejected alternatives, and confidence levels without treating historical generic research as current authority.
-- [ ] **RSCH-02**: Implementers can drive reducers, fixtures, documentation, and support explanations from one evidence-to-entitlement decision table covering duplicate, out-of-order, survivor-grant, revocation, purchase-eligibility, and offline-continuity cases.
+- [x] **RSCH-02**: Implementers can drive reducers, fixtures, documentation, and support explanations from one evidence-to-entitlement decision table covering duplicate, out-of-order, survivor-grant, revocation, purchase-eligibility, and offline-continuity cases.
 - [x] **RSCH-03**: Maintainers have a dated watchlist that names Apple, Stripe, Crosswake, dependency, policy, privacy, and security change triggers plus the owning phase or runbook response.
 
 ### Rail Contract and Foundation
@@ -84,7 +84,7 @@ Filled during roadmap creation. Every v1.59 requirement must map to exactly one 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
 | RSCH-01 | Phase 215 | Complete |
-| RSCH-02 | Phase 215 | Pending |
+| RSCH-02 | Phase 215 | Complete |
 | RSCH-03 | Phase 215 | Complete |
 | RAIL-04 | Phase 215 | Pending |
 | RAIL-05 | Phase 215 | Complete |

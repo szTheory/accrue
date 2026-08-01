@@ -5,15 +5,15 @@ milestone_name: Account-Scoped Multi-Rail & Offline Entitlements
 current_phase: 215
 current_phase_name: research-contracts-and-crosswake-feasibility
 status: executing
-stopped_at: Completed 215-02-PLAN.md
-last_updated: "2026-08-01T02:01:42.355Z"
+stopped_at: Completed 215-03-PLAN.md
+last_updated: "2026-08-01T02:07:52.877Z"
 last_activity: 2026-07-31
 last_activity_desc: Phase 215 execution started
 progress:
   total_phases: 6
   completed_phases: 0
   total_plans: 5
-  completed_plans: 2
+  completed_plans: 3
   percent: 0
 ---
 
@@ -30,7 +30,7 @@ See: `.planning/PROJECT.md` (updated 2026-07-31 after starting v1.59)
 ## Current Position
 
 Phase: 215 (research-contracts-and-crosswake-feasibility) — EXECUTING
-Plan: 3 of 5
+Plan: 4 of 5
 Status: Ready to execute
 Last activity: 2026-07-31 — Phase 215 execution started
 
@@ -379,6 +379,7 @@ Coverage: 22/22 v1.51 requirements mapped (each REQ-ID → exactly one phase). D
 | Phase 214.2 P03 | 7m | 2 tasks | 6 files |
 | Phase 215 P01 | 8min | 2 tasks | 8 files |
 | Phase 215 P02 | 12min | 2 tasks | 6 files |
+| Phase 215 P03 | 20min | 3 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -722,6 +723,8 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - [Phase ?]: Client/device feasibility excludes server/vector/JWS contract-test status; those tests remain independently merge-blocking.
 - [Phase ?]: Use v1.59-AUTHORITY.md and an adjacent stable amendment ledger for precedence, dated reassessment, and history-preserving supersession.
 - [Phase ?]: Treat normalized monitor/trigger/owner/response watchlist tuples as unique and fail closed when incomplete or duplicate.
+- [Phase ?]: Decision cases remain internal data-only structs; renderers and exports do not implement reducer logic.
+- [Phase ?]: Generated Markdown and JSON fail closed on byte drift through a bounded Mix task.
 
 ### Pending Todos
 
@@ -873,8 +876,8 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 
 ## Session Continuity
 
-Last session: 2026-08-01T02:01:42.346Z
-Stopped at: Completed 215-02-PLAN.md
+Last session: 2026-08-01T02:07:52.868Z
+Stopped at: Completed 215-03-PLAN.md
 Resume file: None
 
 ## Operator Next Steps
