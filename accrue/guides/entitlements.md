@@ -1,5 +1,11 @@
 # Entitlements — gate features on what they paid for
 
+## Inspect an entitlement source
+
+Use `Accrue.Entitlements.Source.Registry`, never `Accrue.Processor`, to inspect a rail's entitlement-source capability. The fixed order is `observation`, `control`, `restore`, `reconciliation`, `management`, and `offline`; the closed states are `supported`, `externally_managed`, `host_owned`, `deferred`, `unavailable`, and `feasibility_blocked`.
+
+Apple subscription management is externally managed. Present the returned plain-language guidance and **Manage subscription** action, which links to `https://apps.apple.com/account/subscriptions`. Do not translate an Apple outcome into a Stripe cancellation, dunning, retry, swap, proration, invoice, or payment-method action. The separate [processor support matrix](../../.planning/processor-support-matrix.md) remains the gateway-control authority.
+
 For the canonical meaning of `active`, `trialing`, `paused`, `past_due`, and
 ended states — and for *which* lifecycle states grant access — see
 [Lifecycle Semantics](lifecycle_semantics.md). Use that guide for the truth of

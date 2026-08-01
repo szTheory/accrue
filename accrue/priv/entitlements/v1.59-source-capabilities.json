@@ -1,0 +1,20 @@
+{"outcomes":[
+{"source":"stripe","capability":"observation","state":"supported","guidance":{"key":"stripe_source_inspection","text":"This capability is available from the Stripe entitlement source.","action_label":"Review source contract"}},
+{"source":"stripe","capability":"control","state":"supported","guidance":{"key":"stripe_source_inspection","text":"This capability is available from the Stripe entitlement source.","action_label":"Review source contract"}},
+{"source":"stripe","capability":"restore","state":"supported","guidance":{"key":"stripe_source_inspection","text":"This capability is available from the Stripe entitlement source.","action_label":"Review source contract"}},
+{"source":"stripe","capability":"reconciliation","state":"supported","guidance":{"key":"stripe_source_inspection","text":"This capability is available from the Stripe entitlement source.","action_label":"Review source contract"}},
+{"source":"stripe","capability":"management","state":"supported","guidance":{"key":"stripe_source_inspection","text":"This capability is available from the Stripe entitlement source.","action_label":"Review source contract"}},
+{"source":"stripe","capability":"offline","state":"supported","guidance":{"key":"stripe_source_inspection","text":"This capability is available from the Stripe entitlement source.","action_label":"Review source contract"}},
+{"source":"apple","capability":"observation","state":"supported","guidance":{"key":"apple_server_evidence","text":"Use verified Apple evidence for this operation.","action_label":"Review Apple evidence"}},
+{"source":"apple","capability":"control","state":"unavailable","guidance":{"key":"manage_apple_subscription","text":"Apple manages subscription changes.","action_label":"Manage subscription","url":"https://apps.apple.com/account/subscriptions"}},
+{"source":"apple","capability":"restore","state":"supported","guidance":{"key":"apple_server_evidence","text":"Use verified Apple evidence for this operation.","action_label":"Review Apple evidence"}},
+{"source":"apple","capability":"reconciliation","state":"supported","guidance":{"key":"apple_server_evidence","text":"Use verified Apple evidence for this operation.","action_label":"Review Apple evidence"}},
+{"source":"apple","capability":"management","state":"externally_managed","guidance":{"key":"manage_apple_subscription","text":"Manage this subscription in Apple.","action_label":"Manage subscription","url":"https://apps.apple.com/account/subscriptions"}},
+{"source":"apple","capability":"offline","state":"feasibility_blocked","guidance":{"key":"apple_offline_feasibility","text":"Offline entitlement issuance needs the later Apple feasibility proof.","action_label":"Review feasibility"}},
+{"source":"host_fake","capability":"observation","state":"supported","guidance":{"key":"host_fake_source_inspection","text":"This capability is available in the deterministic host proof rail.","action_label":"Review source contract"}},
+{"source":"host_fake","capability":"control","state":"supported","guidance":{"key":"host_fake_source_inspection","text":"This capability is available in the deterministic host proof rail.","action_label":"Review source contract"}},
+{"source":"host_fake","capability":"restore","state":"supported","guidance":{"key":"host_fake_source_inspection","text":"This capability is available in the deterministic host proof rail.","action_label":"Review source contract"}},
+{"source":"host_fake","capability":"reconciliation","state":"supported","guidance":{"key":"host_fake_source_inspection","text":"This capability is available in the deterministic host proof rail.","action_label":"Review source contract"}},
+{"source":"host_fake","capability":"management","state":"host_owned","guidance":{"key":"host_fake_management","text":"Your host owns this proof-rail operation.","action_label":"Review host configuration"}},
+{"source":"host_fake","capability":"offline","state":"supported","guidance":{"key":"host_fake_source_inspection","text":"This capability is available in the deterministic host proof rail.","action_label":"Review source contract"}}
+]}

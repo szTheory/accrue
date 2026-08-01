@@ -81,7 +81,8 @@ defmodule Accrue.Entitlements.SourceTest do
       |> Jason.decode!()
 
     runtime =
-      for source <- Registry.sources(), %Outcome{} = outcome <- elem(Registry.inspect(source), 1) do
+      for source <- Registry.sources(),
+          %Outcome{} = outcome <- elem(Registry.inspect(source), 1) do
         %{
           "source" => Atom.to_string(source),
           "capability" => Atom.to_string(outcome.capability),
@@ -93,5 +94,10 @@ defmodule Accrue.Entitlements.SourceTest do
     assert fixture["outcomes"] == runtime
   end
 
-  defp atom_keys_to_strings(map), do: Map.new(map, fn {key, value} -> {Atom.to_string(key), value} end)
+  defp atom_keys_to_strings(map) do
+    Map.new(map, fn
+      {:key, value} -> {"key", Atom.to_string(value)}
+      {key, value} -> {Atom.to_string(key), value}
+    end)
+  end
 end
