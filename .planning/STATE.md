@@ -2,9 +2,11 @@
 gsd_state_version: 1.0
 milestone: v1.59
 milestone_name: Account-Scoped Multi-Rail & Offline Entitlements
+current_phase: 215
+current_phase_name: Research, contracts, and Crosswake feasibility
 status: planning
-stopped_at: v1.59 roadmap created; Phase 215 is ready for planning
-last_updated: "2026-07-31T23:59:00.000Z"
+stopped_at: Phase 215 context gathered
+last_updated: "2026-08-01T01:01:05.980Z"
 last_activity: 2026-07-31
 last_activity_desc: v1.59 six-phase roadmap created
 progress:
@@ -13,8 +15,6 @@ progress:
   total_plans: 0
   completed_plans: 0
   percent: 0
-current_phase: 215
-current_phase_name: Research, contracts, and Crosswake feasibility
 ---
 
 # Project State
@@ -867,9 +867,9 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 
 ## Session Continuity
 
-Last session: 2026-07-31T23:59:00.000Z
-Stopped at: v1.59 roadmap created; Phase 215 is ready for planning
-Resume file: `.planning/ROADMAP.md` (Phase 215)
+Last session: 2026-08-01T01:01:05.969Z
+Stopped at: Phase 215 context gathered
+Resume file: .planning/phases/215-research-contracts-and-crosswake-feasibility/215-CONTEXT.md
 
 ## Operator Next Steps
 
