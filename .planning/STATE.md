@@ -5,15 +5,15 @@ milestone_name: Account-Scoped Multi-Rail & Offline Entitlements
 current_phase: 215
 current_phase_name: research-contracts-and-crosswake-feasibility
 status: executing
-stopped_at: Completed 215-06-PLAN.md
-last_updated: "2026-08-01T22:38:24.393Z"
+stopped_at: Completed 215-07-PLAN.md
+last_updated: "2026-08-01T22:55:55.129Z"
 last_activity: 2026-08-01
 last_activity_desc: Phase 215 execution started
 progress:
   total_phases: 6
   completed_phases: 0
   total_plans: 8
-  completed_plans: 6
+  completed_plans: 7
   percent: 0
 ---
 
@@ -30,7 +30,7 @@ See: `.planning/PROJECT.md` (updated 2026-07-31 after starting v1.59)
 ## Current Position
 
 Phase: 215 (research-contracts-and-crosswake-feasibility) — EXECUTING
-Plan: 6 of 8
+Plan: 7 of 8
 Status: Ready to execute
 Last activity: 2026-08-01 — Phase 215 execution started
 
@@ -383,6 +383,7 @@ Coverage: 22/22 v1.51 requirements mapped (each REQ-ID → exactly one phase). D
 | Phase 215 P04 | 18min | 3 tasks | 9 files |
 | Phase 215 P05 | 1h | 2 tasks | 6 files |
 | Phase 215 P06 | 9min | 2 tasks | 4 files |
+| Phase 215-research-contracts-and-crosswake-feasibility P07 | 0h 25m | 2 tasks | 8 files |
 
 ## Accumulated Context
 
@@ -734,6 +735,9 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - [Phase ?]: Candidate durability plus atomic rename is the cache visibility boundary for deterministic fault tests.
 - [Phase ?]: D-07 validation uses explicit closed vocabularies and a bounded snapshot shape.
 - [Phase ?]: The contract consumer remains compiled only from test/support and interprets a caller-supplied canonical case.
+- [Phase ?]: Use ordered JSON objects so checked-in decision and golden fixtures are deterministic between VM processes.
+- [Phase ?]: Treat the corpus expectation fields as the reader oracle instead of maintaining duplicated observed-result maps.
+- [Phase ?]: Reject malformed high-water values and unknown signed dispositions before cache replacement.
 
 ### Pending Todos
 
@@ -885,8 +889,8 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 
 ## Session Continuity
 
-Last session: 2026-08-01T22:38:07.929Z
-Stopped at: Completed 215-06-PLAN.md
+Last session: 2026-08-01T22:55:55.120Z
+Stopped at: Completed 215-07-PLAN.md
 Resume file: None
 
 ## Operator Next Steps
