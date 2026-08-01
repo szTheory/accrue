@@ -32,7 +32,7 @@ Per-path serialized offline-cache replacement with collision-free candidates, or
 ## Tasks Completed
 
 1. **Serialize one real concurrent allow/deny race per cache path** — `cbcf1985`, `1f428528`
-2. **Prove parent-directory durability and crash/reopen recovery** — `987a010f`, `433840d3`
+2. **Prove parent-directory durability and crash/reopen recovery** — `987a010f`, `433840d3`, `9be7e524`
 
 ## Decisions Made
 
@@ -46,6 +46,7 @@ Per-path serialized offline-cache replacement with collision-free candidates, or
 - `bash scripts/ci/verify_entitlement_source_matrix.sh`
 - `mix accrue.entitlements.decision_cases --check` and targeted decision/vector tests
 - `swift test` in `examples/crosswake_tracer`
+- The crash harness exits after deterministic pre-rename and post-directory-sync fault points; fresh handles observe only old or durable new complete bytes.
 - Capability-report static status check and clean diff gate
 
 ## Deviations from Plan
