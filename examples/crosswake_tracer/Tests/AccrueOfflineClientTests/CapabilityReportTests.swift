@@ -10,7 +10,7 @@ struct CapabilityReportTests {
                 CapabilityEvidence(
                     capability: $0,
                     status: .proven,
-                    kind: .nativeCompileUnit,
+                    evidenceKinds: $0.requiredEvidenceKinds,
                     location: "test://native"
                 )
             }
@@ -31,7 +31,7 @@ struct CapabilityReportTests {
                 CapabilityEvidence(
                     capability: $0,
                     status: .proven,
-                    kind: .nativeCompileUnit,
+                    evidenceKinds: $0.requiredEvidenceKinds,
                     location: "test://native"
                 )
             }
@@ -46,10 +46,10 @@ struct CapabilityReportTests {
         let report = CapabilityReport(
             schemaVersion: "1.0",
             capabilities: [
-                CapabilityEvidence(capability: .networkCoalescing, status: .proven, kind: .physicalDevice, location: "device"),
-                CapabilityEvidence(capability: .storeKitPurchase, status: .proven, kind: .crosswakeBridgeCompileUnit, location: "bridge"),
-                CapabilityEvidence(capability: .authenticatedHostTransport, status: .proven, kind: .simulatorAdvisory, location: "simulator"),
-                CapabilityEvidence(capability: .durableLocalState, status: .proven, kind: .nativeCompileUnit, location: "native")
+                CapabilityEvidence(capability: .networkCoalescing, status: .proven, evidenceKinds: [.crosswakeBridgeCompileUnit, .simulatorAdvisory], location: "simulator"),
+                CapabilityEvidence(capability: .storeKitPurchase, status: .proven, evidenceKinds: [.crosswakeBridgeCompileUnit], location: "bridge"),
+                CapabilityEvidence(capability: .authenticatedHostTransport, status: .proven, evidenceKinds: [.crosswakeBridgeCompileUnit, .physicalDevice], location: "device"),
+                CapabilityEvidence(capability: .durableLocalState, status: .proven, evidenceKinds: [.nativeCompileUnit], location: "native")
             ]
         )
 
@@ -59,7 +59,7 @@ struct CapabilityReportTests {
             .durableLocalState,
             .networkCoalescing
         ])
-        #expect(Set(report.capabilities.map(\.kind)) == [
+        #expect(Set(report.capabilities.flatMap(\.evidenceKinds)) == [
             .nativeCompileUnit,
             .crosswakeBridgeCompileUnit,
             .simulatorAdvisory,

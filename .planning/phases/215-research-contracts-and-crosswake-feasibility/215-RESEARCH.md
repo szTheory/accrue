@@ -301,10 +301,10 @@ Source: Apple identifies `currentEntitlements` as the latest entitlement sequenc
 ## Open Questions (RESOLVED)
 
 1. **What exact Crosswake shell/core repository, version, and build invocation is authoritative?**
-   - **Resolved 2026-07-31:** No authoritative repository, pinned version, or documented build/bridge invocation is available in the supplied project sources or local environment. Plan 215-01 must record that evidence-unavailable result rather than infer or install a package. [VERIFIED: local environment probe] [ASSUMED]
+   - **Resolved 2026-07-31:** The checked-in Swift tracer and local environment probe found no authoritative repository, pinned version, or documented build/bridge invocation. `examples/crosswake_tracer/capability-report.json` records that evidence-unavailable result rather than inferring or installing a package. [VERIFIED: local environment probe] [ASSUMED]
    - **Consequence:** Crosswake-dependent client rows and the overall client/device feasibility report remain `feasibility_blocked`, so later mobile runtime coupling cannot begin. Plan 215-05's deterministic Elixir/Swift server/vector/JWS suites remain independently mandatory and merge-blocking; their absence or failure is not a feasibility-blocked report reason.
 2. **Where should the physical-device attestation evidence live and how is it approved?**
-   - **Resolved 2026-07-31:** Store the redacted dated evidence and approval fields in `examples/crosswake_tracer/physical-device-evidence.md`, with reproducible commands and the machine-readable disposition in `examples/crosswake_tracer/capability-report.json`. Approval requires a dated reviewer entry covering every D-11 physical-device lane; device identifiers, raw proof material, secrets, and PII are excluded. [VERIFIED: planning contract]
+   - **Resolved 2026-07-31:** The checked-in redacted template is `examples/crosswake_tracer/physical-device-evidence.md`, with reproducible commands and the machine-readable disposition in `examples/crosswake_tracer/capability-report.json`. Approval requires a dated reviewer entry covering every D-11 physical-device lane; device identifiers, raw proof material, secrets, and PII are excluded. [VERIFIED: planning contract]
    - **Consequence:** Until that approved evidence exists, the affected Crosswake/client/device rows and overall runtime-coupling result remain `feasibility_blocked`; simulator evidence remains advisory and cannot close the physical-device lane.
 
 ## Environment Availability

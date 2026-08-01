@@ -64,6 +64,23 @@ public enum Capability: String, CaseIterable, Codable, Sendable {
     case reconnect = "reconnect_recovery"
 
     public static let allRequired = Capability.allCases
+
+    public var requiredEvidenceKinds: Set<EvidenceKind> {
+        switch self {
+        case .authenticatedHostTransport:
+            [.crosswakeBridgeCompileUnit, .physicalDevice]
+        case .storeKitPurchase, .transactionUpdates, .currentEntitlements, .explicitRestore:
+            [.crosswakeBridgeCompileUnit]
+        case .secureEnclaveKey, .keychainThisDeviceOnly, .atomicVerifiedReplacement, .lifecycleRecovery:
+            [.nativeCompileUnit, .physicalDevice]
+        case .durableLocalState, .proofHighWater:
+            [.nativeCompileUnit]
+        case .networkCoalescing:
+            [.crosswakeBridgeCompileUnit, .simulatorAdvisory]
+        case .reconnect:
+            [.crosswakeBridgeCompileUnit, .physicalDevice]
+        }
+    }
 }
 
 public enum FeasibilityStatus: String, Codable, Sendable {
@@ -71,7 +88,7 @@ public enum FeasibilityStatus: String, Codable, Sendable {
     case feasibilityBlocked = "feasibility_blocked"
 }
 
-public enum EvidenceKind: String, Codable, Sendable {
+public enum EvidenceKind: String, CaseIterable, Codable, Sendable {
     case nativeCompileUnit = "native_compile_unit"
     case crosswakeBridgeCompileUnit = "crosswake_bridge_compile_unit"
     case simulatorAdvisory = "simulator_advisory"
@@ -81,13 +98,13 @@ public enum EvidenceKind: String, Codable, Sendable {
 public struct CapabilityEvidence: Codable, Sendable, Equatable {
     public let capability: Capability
     public var status: FeasibilityStatus
-    public let kind: EvidenceKind
+    public let evidenceKinds: Set<EvidenceKind>
     public let location: String
 
-    public init(capability: Capability, status: FeasibilityStatus, kind: EvidenceKind, location: String) {
+    public init(capability: Capability, status: FeasibilityStatus, evidenceKinds: Set<EvidenceKind>, location: String) {
         self.capability = capability
         self.status = status
-        self.kind = kind
+        self.evidenceKinds = evidenceKinds
         self.location = location
     }
 }
@@ -109,7 +126,9 @@ public struct CapabilityReport: Codable, Sendable, Equatable {
         let provided = Set(capabilities.map(\.capability))
         guard provided == Set(Capability.allRequired),
               capabilities.count == Capability.allRequired.count,
-              capabilities.allSatisfy({ $0.status == .proven })
+              capabilities.allSatisfy({
+                  $0.status == .proven && $0.evidenceKinds.isSuperset(of: $0.capability.requiredEvidenceKinds)
+              })
         else {
             return .feasibilityBlocked
         }
