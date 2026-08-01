@@ -113,13 +113,42 @@ defmodule Accrue.Entitlements.DecisionCasesTest do
     vectors = Accrue.Entitlements.DecisionCases.Export.offline_vectors()
     canonical = Map.new(DecisionCases.all(), &{&1.id, &1})
 
-    assert length(vectors) == length(Enum.uniq_by(vectors, & &1.case_id))
+    assert length(vectors) == length(Enum.uniq_by(vectors, & &1.id))
 
     Enum.each(vectors, fn vector ->
       case_data = Map.fetch!(canonical, vector.case_id)
       assert vector.contract_version == case_data.contract_version
       assert vector.expected_disposition == Atom.to_string(case_data.expected.disposition)
     end)
+  end
+
+  test "offline corpus preserves the prior deny cache when replacement faults before rename" do
+    vector =
+      Accrue.Entitlements.DecisionCases.Export.offline_vectors()
+      |> Enum.find(&(&1.id == "fault_before_replace"))
+
+    assert vector.expected_cache_disposition == "deny"
+  end
+
+  test "offline corpus declares every required fail-closed verifier case" do
+    ids =
+      Accrue.Entitlements.DecisionCases.Export.offline_vectors()
+      |> Enum.map(& &1.id)
+      |> MapSet.new()
+
+    for id <- [
+          "wrong_account",
+          "wrong_audience",
+          "wrong_type",
+          "wrong_algorithm",
+          "malformed_compact",
+          "malformed_revision",
+          "malformed_iat",
+          "malformed_freshness",
+          "unknown_disposition"
+        ] do
+      assert MapSet.member?(ids, id), "missing #{id}"
+    end
   end
 
   test "offline export check fails closed with named diagnostics for case drift" do
@@ -134,6 +163,25 @@ defmodule Accrue.Entitlements.DecisionCasesTest do
 
     assert {:error, paths} = Accrue.Entitlements.DecisionCases.Export.check(root)
     assert vector_path in paths
+  end
+
+  test "offline export check names every mutated expectation field and vector" do
+    root = Path.join(System.tmp_dir!(), "offline-expectations-#{System.unique_integer([:positive])}")
+    on_exit(fn -> File.rm_rf(root) end)
+
+    assert :ok = Accrue.Entitlements.DecisionCases.Export.write(root)
+    vector_path = Path.join(root, "accrue/priv/entitlements/v1.59-offline-golden-vectors.json")
+
+    for field <- ["expected_verification", "expected_reason", "expected_cache_disposition"] do
+      fixture = Jason.decode!(File.read!(vector_path))
+      [first | rest] = fixture["vectors"]
+      mutated = put_in(first[field], "mutated")
+      File.write!(vector_path, Jason.encode!(%{fixture | "vectors" => [mutated | rest]}, pretty: true) <> "\n")
+
+      assert {:error, diagnostics} = Accrue.Entitlements.DecisionCases.Export.check(root)
+      assert "#{vector_path}: vector #{first["id"]} #{field}" in diagnostics
+      assert :ok = Accrue.Entitlements.DecisionCases.Export.write(root)
+    end
   end
 
   test "offline fixture key is unmistakably test-only and private material stays out of application code" do
