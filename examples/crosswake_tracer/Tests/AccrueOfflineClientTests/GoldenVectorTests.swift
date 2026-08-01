@@ -28,4 +28,29 @@ struct GoldenVectorTests {
         #expect(throws: AtomicOfflineCache.Fault.afterRename) { try cache.replace(with: Data("deny-new".utf8), fault: AtomicOfflineCache.Fault.afterRename) }
         #expect(try String(contentsOf: cache.url) == "deny-new")
     }
+
+    @Test("independent handles serialize replacements, preserve denial precedence, and clean candidates")
+    func concurrentReplacementUsesOnePathCoordinator() async throws {
+        let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: directory) }
+
+        let url = directory.appendingPathComponent("entitlement.json").standardizedFileURL
+        let firstHandle = AtomicOfflineCache(url: url)
+        let secondHandle = AtomicOfflineCache(url: url)
+
+        try firstHandle.replace(with: Data("allow-v4".utf8), disposition: .allow, revision: 4)
+        await withTaskGroup(of: Void.self) { group in
+            group.addTask {
+                try? firstHandle.replace(with: Data("allow-v3".utf8), disposition: .allow, revision: 3)
+            }
+            group.addTask {
+                try? secondHandle.replace(with: Data("deny-v4".utf8), disposition: .deny, revision: 4)
+            }
+        }
+
+        #expect(try String(contentsOf: url) == "deny-v4")
+        #expect(try firstHandle.candidateURLs().isEmpty)
+        #expect(try secondHandle.candidateURLs().isEmpty)
+    }
 }
