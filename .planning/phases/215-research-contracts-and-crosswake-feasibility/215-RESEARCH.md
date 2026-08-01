@@ -126,12 +126,11 @@ Maintainer sources + provider sources
 
 Native iOS APIs --> narrow host-owned tracer adapter --> Crosswake shell/core
        |                    |                              |
- StoreKit, keys, cache   signed vectors + capability report  compile/runtime proof
+ StoreKit, keys, cache   client capability report       compile/runtime proof
        |                    |                              |
        +-------------------- authenticated transport -------+
-                             |
-                             v
-                   server evidence / allow-or-deny proof
+
+Canonical DecisionCases --> signed vectors --> independent Elixir/Swift contract-test gate
 ```
 
 ### Recommended Project Structure
@@ -245,7 +244,7 @@ examples/crosswake_tracer/             # minimal pinned iOS reference target and
 
 **What goes wrong:** Later phases assume device storage, lifecycle, and transport are viable without a Crosswake proof.
 
-**How to avoid:** Each RAIL-05 row must have a compile/unit/vector result and required physical-device result, otherwise emit `feasibility_blocked`. [ASSUMED]
+**How to avoid:** Each Crosswake/client/device feasibility row must have its required compile/unit and physical-device evidence, otherwise emit `feasibility_blocked`. Run canonical vector/JWS parity as a separate mandatory merge gate; its absence or failure is a test failure, never a feasibility-report reason. [ASSUMED]
 
 ## Code Examples
 
@@ -299,14 +298,14 @@ Source: Apple identifies `currentEntitlements` as the latest entitlement sequenc
 | A2 | No authoritative public Crosswake bridge API/repository is available to plan against. | Summary / Alternatives | The tracer layout may need revision when the pinned shell source is supplied. |
 | A3 | Crosswake can be represented by a minimal independently-built iOS target once its pinned source is supplied. | Recommended Structure | A different integration topology may be required. |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **What exact Crosswake shell/core repository, version, and build invocation is authoritative?**
-   - What we know: native iOS tooling is installed, but no authoritative Crosswake bridge was found. [VERIFIED: local environment probe] [ASSUMED]
-   - Recommendation: make acquisition of the pinned source a first-plan task; retain `feasibility_blocked` until all RAIL-05 checks compile and pass.
+   - **Resolved 2026-07-31:** No authoritative repository, pinned version, or documented build/bridge invocation is available in the supplied project sources or local environment. Plan 215-01 must record that evidence-unavailable result rather than infer or install a package. [VERIFIED: local environment probe] [ASSUMED]
+   - **Consequence:** Crosswake-dependent client rows and the overall client/device feasibility report remain `feasibility_blocked`, so later mobile runtime coupling cannot begin. Plan 215-05's deterministic Elixir/Swift server/vector/JWS suites remain independently mandatory and merge-blocking; their absence or failure is not a feasibility-blocked report reason.
 2. **Where should the physical-device attestation evidence live and how is it approved?**
-   - What we know: D-11 requires dated evidence but the repository has no current Crosswake tracer path. [VERIFIED: codebase grep]
-   - Recommendation: store a redacted, dated capability report and reproducible command/runbook; never commit device identifiers or raw proof material.
+   - **Resolved 2026-07-31:** Store the redacted dated evidence and approval fields in `examples/crosswake_tracer/physical-device-evidence.md`, with reproducible commands and the machine-readable disposition in `examples/crosswake_tracer/capability-report.json`. Approval requires a dated reviewer entry covering every D-11 physical-device lane; device identifiers, raw proof material, secrets, and PII are excluded. [VERIFIED: planning contract]
+   - **Consequence:** Until that approved evidence exists, the affected Crosswake/client/device rows and overall runtime-coupling result remain `feasibility_blocked`; simulator evidence remains advisory and cannot close the physical-device lane.
 
 ## Environment Availability
 
@@ -315,8 +314,8 @@ Source: Apple identifies `currentEntitlements` as the latest entitlement sequenc
 | Elixir / Mix | contract, renderer, ExUnit | ✓ | Elixir 1.19.5 / OTP 28 | — [VERIFIED: local environment probe] |
 | Xcode | Swift tracer build | ✓ | 26.6 | — [VERIFIED: local environment probe] |
 | Swift | Swift tracer build/tests | ✓ | 6.3.3 | — [VERIFIED: local environment probe] |
-| Crosswake shell/core | Crosswake bridge proof | ✗ / unresolved | — | Explicit `feasibility_blocked`; continue server/vector-only work. [ASSUMED] |
-| Physical iOS device | Secure Enclave and lifecycle proof | Unknown | — | None for D-11 acceptance. |
+| Crosswake shell/core | Crosswake bridge proof | ✗ / unavailable as of 2026-07-31 | — | Explicit `feasibility_blocked`; continue independently merge-blocked server/vector work. [ASSUMED] |
+| Physical iOS device evidence | Secure Enclave and lifecycle proof | ✗ / unavailable as of 2026-07-31 | — | Record only through the resolved redacted evidence/approval contract; no fallback for D-11 client feasibility acceptance. |
 
 **Missing dependencies with no fallback:** pinned Crosswake source and physical-device proof are blocking only for mobile runtime coupling, not the authority/case/source-contract artifacts. [VERIFIED: codebase grep]
 
@@ -339,7 +338,7 @@ Source: Apple identifies `currentEntitlements` as the latest entitlement sequenc
 | RSCH-02 | Each named case renders deterministically and JSON vectors agree; ordering/duplicate/survivor properties hold | unit + property | `cd accrue && mix test test/accrue/entitlements/decision_cases_test.exs` | ❌ Wave 0 |
 | RSCH-03 | Watchlist categories, owner and response are present | shell/doc drift | `bash scripts/ci/verify_v159_authority.sh` | ❌ Wave 0 |
 | RAIL-04 | Closed source states, outcomes, conformance and no processor leakage | unit + negative contract | `cd accrue && mix test test/accrue/entitlements/source_test.exs` | ❌ Wave 0 |
-| RAIL-05 | Golden JWS/JSON vectors, server contract and tracer report agree | unit + Swift | `cd examples/crosswake_tracer && swift test` | ❌ Wave 0 / blocked pending Crosswake |
+| RAIL-05 | Crosswake/client/device report proves or blocks runtime coupling; independently, golden JWS/JSON vectors and Elixir/Swift contract tests must pass | unit + Swift | `cd examples/crosswake_tracer && swift test` plus the Plan-215-05 ExUnit suite | ❌ Wave 0; feasibility evidence unavailable, contract tests still mandatory |
 
 ### Sampling Rate
 
