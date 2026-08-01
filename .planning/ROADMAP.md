@@ -61,7 +61,13 @@ Dependencies: 215 → 216 → 217 → {218, 219} → 220. Phase 215 must prove C
   2. An implementer can use one decision table to determine projection, eligibility, repair, and offline-continuity outcomes for duplicate, out-of-order, revocation, survivor-grant, and stale cases.
   3. A host can inspect source-specific observation, control, restore, reconciliation, management, and offline capabilities without treating the processor matrix as a rail contract.
   4. The checked-in Crosswake tracer proves every required bridge or explicitly blocks mobile runtime coupling before later phases rely on it.
-**Plans**: TBD
+**Plans**: 4 plans
+
+Plans:
+- [ ] 215-01-PLAN.md — Build the Crosswake feasibility tracer, shared vectors, and explicit prove-or-block report.
+- [ ] 215-02-PLAN.md — Establish the v1.59 authority manifest, amendment ledger, watchlist, and drift gate.
+- [ ] 215-03-PLAN.md — Define one data-only decision-case corpus and deterministic Markdown/JSON/property consumers.
+- [ ] 215-04-PLAN.md — Publish the typed entitlement-source capability registry, mirrors, conformance, and leakage gates.
 
 ### Phase 216: Additive rail and persistence foundation
 **Goal**: Hosts can represent concurrent Stripe and Apple entitlement evidence on durable, rail-qualified records while existing single-processor integrations remain valid.
