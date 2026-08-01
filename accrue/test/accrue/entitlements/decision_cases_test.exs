@@ -50,6 +50,40 @@ defmodule Accrue.Entitlements.DecisionCasesTest do
     refute DecisionCases.valid?(put_in(first.expected.disposition, :maybe))
   end
 
+  test "D-07 bindings and closed evidence outcomes fail validation when mutated" do
+    [first | _] = DecisionCases.all()
+
+    refute DecisionCases.valid?(put_in(first.evidence.account_binding, :unknown_account))
+    refute DecisionCases.valid?(put_in(first.evidence.device_binding, :unknown_device))
+    refute DecisionCases.valid?(put_in(first.evidence.kind, :unverified_payload))
+    refute DecisionCases.valid?(put_in(first.expected.continuity, :maybe_continuous))
+    refute DecisionCases.valid?(put_in(first.expected.repair, :maybe_repair))
+  end
+
+  test "D-07 revision deltas are non-negative" do
+    [first | _] = DecisionCases.all()
+
+    refute DecisionCases.valid?(put_in(first.expected.revision_delta, -1))
+    assert DecisionCases.valid?(put_in(first.expected.revision_delta, 0))
+
+    assert Enum.all?(DecisionCases.all(), fn case_data ->
+             case_data.expected.revision_delta >= 0 and DecisionCases.valid?(case_data)
+           end)
+  end
+
+  test "D-07 prior state, ordering, atomicity, and reason shapes fail closed" do
+    [first | _] = DecisionCases.all()
+
+    refute DecisionCases.valid?(put_in(first.prior.sources, [:stripe, :unknown_rail]))
+    refute DecisionCases.valid?(put_in(first.prior.sources, [:stripe, :stripe]))
+    refute DecisionCases.valid?(put_in(first.prior.snapshot, %{unknown: "shape"}))
+    refute DecisionCases.valid?(put_in(first.ordering.provider_cursor, ""))
+    refute DecisionCases.valid?(put_in(first.ordering.observed_at, -1))
+    refute DecisionCases.valid?(put_in(first.ordering.relation, :future))
+    refute DecisionCases.valid?(put_in(first.expected.atomic, nil))
+    refute DecisionCases.valid?(put_in(first.expected.reason, "unbounded reason"))
+  end
+
   test "derived markdown and JSON have the same stable case IDs and version" do
     markdown = Markdown.render(DecisionCases.all())
     json = Accrue.Entitlements.DecisionCases.Export.json(DecisionCases.all())
