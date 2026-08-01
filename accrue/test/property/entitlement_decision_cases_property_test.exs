@@ -19,10 +19,12 @@ defmodule Accrue.Property.EntitlementDecisionCasesPropertyTest do
 
   property "older generated evidence cannot restore an allow snapshot after a denied prior", _context do
     case_data = find_case!("out_of_order_positive_after_revoke")
+    %PriorState{} = canonical_prior = case_data.prior
+    %Ordering{} = canonical_ordering = case_data.ordering
 
     check all(revision <- integer(0..100), offset <- integer(0..1_000), max_runs: 50) do
-      prior = %PriorState{case_data.prior | revision: revision, snapshot: %{}}
-      ordering = %Ordering{case_data.ordering | observed_at: case_data.ordering.observed_at - offset}
+      prior = %PriorState{canonical_prior | revision: revision, snapshot: %{}}
+      ordering = %Ordering{canonical_ordering | observed_at: canonical_ordering.observed_at - offset}
 
       result = accepted!(case_data, case_data.evidence, prior, [ordering])
 
@@ -34,9 +36,10 @@ defmodule Accrue.Property.EntitlementDecisionCasesPropertyTest do
 
   property "generated source sets retain a surviving live rail after the other rail retracts", _context do
     case_data = find_case!("stripe_revoked_apple_survives")
+    %PriorState{} = canonical_prior = case_data.prior
 
     check all(sources <- member_of([[:apple], [:stripe, :apple]]), max_runs: 50) do
-      prior = %PriorState{case_data.prior | sources: sources}
+      prior = %PriorState{canonical_prior | sources: sources}
       result = accepted!(case_data, case_data.evidence, prior, [case_data.ordering])
 
       assert :apple in result.sources
@@ -47,9 +50,10 @@ defmodule Accrue.Property.EntitlementDecisionCasesPropertyTest do
 
   property "generated revisions emit only a complete atomic result", _context do
     case_data = find_case!("atomic_transaction_boundary")
+    %PriorState{} = canonical_prior = case_data.prior
 
     check all(revision <- integer(0..100), max_runs: 50) do
-      prior = %PriorState{case_data.prior | revision: revision}
+      prior = %PriorState{canonical_prior | revision: revision}
       result = accepted!(case_data, case_data.evidence, prior, [case_data.ordering])
 
       assert result.revision == revision + case_data.expected.revision_delta
@@ -80,8 +84,10 @@ defmodule Accrue.Property.EntitlementDecisionCasesPropertyTest do
   defp invalid_input(case_data, :unverified_payload),
     do: {put_in(case_data.evidence.kind, :unverified_payload), case_data.prior}
 
-  defp invalid_input(case_data, :invalid_prior),
-    do: {case_data.evidence, %PriorState{case_data.prior | revision: -1}}
+  defp invalid_input(case_data, :invalid_prior) do
+    %PriorState{} = prior = case_data.prior
+    {case_data.evidence, %PriorState{prior | revision: -1}}
+  end
 
   defp accepted!(case_data, evidence, prior, deliveries) do
     assert {:ok, result} = DecisionCaseContractConsumer.consume(case_data, evidence, prior, deliveries)
