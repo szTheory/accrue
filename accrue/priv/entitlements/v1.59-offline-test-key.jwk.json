@@ -1,0 +1,10 @@
+{
+  "kty": "EC",
+  "crv": "P-256",
+  "kid": "accrue-v1.59-offline-test-only",
+  "use": "test-only",
+  "warning": "TEST-ONLY deterministic fixture material. MUST NEVER be configured, issued, or trusted by production runtime code.",
+  "x": "ILy0daKycIXATH4kWl48vbUd4Sn9AqwHL-zPXonI8-M",
+  "y": "JdAT80VGTVn3qxGJkUZMZ9y85nUFr9TYaPkyzOpDMEc",
+  "d": "c6qeUmETG0bX6O9M2elgLGvTn0SzMwlTttpXL0NOm68"
+}

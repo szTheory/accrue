@@ -113,8 +113,8 @@ defmodule Accrue.Entitlements.DecisionCasesTest do
     private_material = Map.fetch!(key, "d")
 
     root
-    |> Path.join("lib")
-    |> Path.wildcard("**/*.ex")
+    |> Path.join("lib/**/*.ex")
+    |> Path.wildcard()
     |> Enum.each(fn path -> refute File.read!(path) =~ private_material end)
   end
 end

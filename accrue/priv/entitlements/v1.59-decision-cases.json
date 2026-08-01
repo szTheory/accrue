@@ -6,8 +6,8 @@
         "reason": "entitlement_all_grants_revoked",
         "repair": "support",
         "atomic": true,
-        "snapshot": {},
         "disposition": "retract",
+        "snapshot": {},
         "revision_delta": 1,
         "eligibility": "eligible",
         "lease": "denied",
@@ -45,12 +45,12 @@
         "reason": "entitlement_apple_token_mismatch",
         "repair": "quarantine",
         "atomic": true,
+        "disposition": "no_grant",
         "snapshot": {
           "plans": [
             "pro"
           ]
         },
-        "disposition": "no_grant",
         "revision_delta": 0,
         "eligibility": "warn",
         "lease": "unchanged",
@@ -88,12 +88,12 @@
         "reason": "entitlement_apple_verified_grant",
         "repair": "audit",
         "atomic": true,
+        "disposition": "grant",
         "snapshot": {
           "plans": [
             "pro"
           ]
         },
-        "disposition": "grant",
         "revision_delta": 1,
         "eligibility": "warn",
         "lease": "fresh",
@@ -132,12 +132,12 @@
         "reason": "entitlement_atomic_transaction_boundary",
         "repair": "audit",
         "atomic": true,
+        "disposition": "grant",
         "snapshot": {
           "plans": [
             "pro"
           ]
         },
-        "disposition": "grant",
         "revision_delta": 1,
         "eligibility": "warn",
         "lease": "fresh",
@@ -175,12 +175,12 @@
         "reason": "entitlement_duplicate_provider_event",
         "repair": "duplicate",
         "atomic": true,
+        "disposition": "noop",
         "snapshot": {
           "plans": [
             "pro"
           ]
         },
-        "disposition": "noop",
         "revision_delta": 0,
         "eligibility": "warn",
         "lease": "unchanged",
@@ -218,12 +218,12 @@
         "reason": "entitlement_invalid_apple_evidence",
         "repair": "security",
         "atomic": true,
+        "disposition": "no_grant",
         "snapshot": {
           "plans": [
             "pro"
           ]
         },
-        "disposition": "no_grant",
         "revision_delta": 0,
         "eligibility": "warn",
         "lease": "unchanged",
@@ -261,12 +261,12 @@
         "reason": "entitlement_out_of_order_positive_after_revoke",
         "repair": "stale_observation",
         "atomic": true,
+        "disposition": "noop",
         "snapshot": {
           "plans": [
             "pro"
           ]
         },
-        "disposition": "noop",
         "revision_delta": 0,
         "eligibility": "warn",
         "lease": "denied",
@@ -304,12 +304,12 @@
         "reason": "entitlement_purchase_eligibility_ambiguous",
         "repair": "retry",
         "atomic": true,
+        "disposition": "preserve",
         "snapshot": {
           "plans": [
             "pro"
           ]
         },
-        "disposition": "preserve",
         "revision_delta": 0,
         "eligibility": "block",
         "lease": "unchanged",
@@ -347,8 +347,8 @@
         "reason": "entitlement_reconnect_denied_tombstone",
         "repair": "support",
         "atomic": true,
-        "snapshot": {},
         "disposition": "retract",
+        "snapshot": {},
         "revision_delta": 1,
         "eligibility": "block",
         "lease": "denied",
@@ -386,12 +386,12 @@
         "reason": "entitlement_reconnect_positive_replacement",
         "repair": "replace",
         "atomic": true,
+        "disposition": "grant",
         "snapshot": {
           "plans": [
             "pro"
           ]
         },
-        "disposition": "grant",
         "revision_delta": 1,
         "eligibility": "warn",
         "lease": "fresh",
@@ -429,12 +429,12 @@
         "reason": "entitlement_stale_offline_continuity",
         "repair": "reconnect",
         "atomic": true,
+        "disposition": "preserve",
         "snapshot": {
           "plans": [
             "pro"
           ]
         },
-        "disposition": "preserve",
         "revision_delta": 0,
         "eligibility": "not_applicable",
         "lease": "stale_offline",
@@ -472,12 +472,12 @@
         "reason": "entitlement_stripe_revoked_apple_survives",
         "repair": "survivor",
         "atomic": true,
+        "disposition": "retract",
         "snapshot": {
           "plans": [
             "pro"
           ]
         },
-        "disposition": "retract",
         "revision_delta": 0,
         "eligibility": "warn",
         "lease": "fresh",
@@ -516,12 +516,12 @@
         "reason": "entitlement_unmapped_verified_product",
         "repair": "catalog",
         "atomic": true,
+        "disposition": "no_grant",
         "snapshot": {
           "plans": [
             "pro"
           ]
         },
-        "disposition": "no_grant",
         "revision_delta": 0,
         "eligibility": "block",
         "lease": "unchanged",
@@ -559,12 +559,12 @@
         "reason": "entitlement_valid_fresh_lease",
         "repair": "high_water",
         "atomic": true,
+        "disposition": "preserve",
         "snapshot": {
           "plans": [
             "pro"
           ]
         },
-        "disposition": "preserve",
         "revision_delta": 0,
         "eligibility": "not_applicable",
         "lease": "fresh",
