@@ -4,17 +4,17 @@ milestone: v1.59
 milestone_name: Account-Scoped Multi-Rail & Offline Entitlements
 current_phase: 215
 current_phase_name: research-contracts-and-crosswake-feasibility
-status: executing
-stopped_at: Completed 215-04-PLAN.md
-last_updated: "2026-08-01T02:14:41.375Z"
+status: verifying
+stopped_at: Completed 215-05-PLAN.md
+last_updated: "2026-08-01T02:29:57.108Z"
 last_activity: 2026-07-31
 last_activity_desc: Phase 215 execution started
 progress:
   total_phases: 6
-  completed_phases: 0
+  completed_phases: 1
   total_plans: 5
-  completed_plans: 4
-  percent: 0
+  completed_plans: 5
+  percent: 17
 ---
 
 # Project State
@@ -31,7 +31,7 @@ See: `.planning/PROJECT.md` (updated 2026-07-31 after starting v1.59)
 
 Phase: 215 (research-contracts-and-crosswake-feasibility) — EXECUTING
 Plan: 5 of 5
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-07-31 — Phase 215 execution started
 
 ## Post-v1.48 Pause Rule
@@ -381,6 +381,7 @@ Coverage: 22/22 v1.51 requirements mapped (each REQ-ID → exactly one phase). D
 | Phase 215 P02 | 12min | 2 tasks | 6 files |
 | Phase 215 P03 | 20min | 3 tasks | 7 files |
 | Phase 215 P04 | 18min | 3 tasks | 9 files |
+| Phase 215 P05 | 1h | 2 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -728,6 +729,8 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - [Phase ?]: Generated Markdown and JSON fail closed on byte drift through a bounded Mix task.
 - [Phase ?]: Entitlement source capability is a closed, processor-free inspection boundary.
 - [Phase ?]: Apple management returns stable external guidance; unavailable control remains a typed error.
+- [Phase ?]: Pinned ES256 fixture verification uses OTP and CryptoKit only; no runtime issuer or dependency.
+- [Phase ?]: Candidate durability plus atomic rename is the cache visibility boundary for deterministic fault tests.
 
 ### Pending Todos
 
@@ -879,8 +882,8 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 
 ## Session Continuity
 
-Last session: 2026-08-01T02:14:41.366Z
-Stopped at: Completed 215-04-PLAN.md
+Last session: 2026-08-01T02:29:57.098Z
+Stopped at: Completed 215-05-PLAN.md
 Resume file: None
 
 ## Operator Next Steps

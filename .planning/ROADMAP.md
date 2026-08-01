@@ -64,7 +64,7 @@ Dependencies: 215 → 216 → 217 → {218, 219} → 220. Phase 215 must prove C
   3. A host can inspect source-specific observation, control, restore, reconciliation, management, and offline capabilities without treating the processor matrix as a rail contract.
   4. The checked-in Crosswake tracer proves every required bridge or explicitly blocks mobile runtime coupling before later phases rely on it.
 
-**Plans**: 4/5 plans executed
+**Plans**: 5/5 plans executed
 
 Plans:
 **Wave 1**
@@ -79,7 +79,7 @@ Plans:
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
-- [ ] 215-05-PLAN.md — Bind signed offline vectors to DecisionCases and prove Elixir/Swift verification and atomic replacement.
+- [x] 215-05-PLAN.md — Bind signed offline vectors to DecisionCases and prove Elixir/Swift verification and atomic replacement.
 
 ### Phase 216: Additive rail and persistence foundation
 
@@ -163,7 +163,7 @@ Plans:
 | 214. Docs reconciliation | v1.58 | 3/3 | Complete | 2026-07-31 |
 | 214.1. Writer-documentation closure | v1.58 | 4/4 | Complete | 2026-07-31 |
 | 214.2. Diagnostic-display/pagination closure | v1.58 | 4/4 | Complete | 2026-07-31 |
-| 215. Research, contracts, and Crosswake feasibility | v1.59 | 4/5 | In Progress|  |
+| 215. Research, contracts, and Crosswake feasibility | v1.59 | 5/5 | In Progress|  |
 | 216. Additive rail and persistence foundation | v1.59 | 0/TBD | Not started | - |
 | 217. Canonical projection and compatibility | v1.59 | 0/TBD | Not started | - |
 | 218. Apple observation and repair | v1.59 | 0/TBD | Not started | - |
