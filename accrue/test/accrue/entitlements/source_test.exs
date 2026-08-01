@@ -5,7 +5,14 @@ defmodule Accrue.Entitlements.SourceTest do
   alias Accrue.Entitlements.Source.{CapabilityError, Outcome, Registry}
 
   test "the public vocabulary is closed and ordered" do
-    assert Source.capabilities() == [:observation, :control, :restore, :reconciliation, :management, :offline]
+    assert Source.capabilities() == [
+             :observation,
+             :control,
+             :restore,
+             :reconciliation,
+             :management,
+             :offline
+           ]
 
     assert Source.states() == [
              :supported,
@@ -25,7 +32,8 @@ defmodule Accrue.Entitlements.SourceTest do
 
   test "registry configuration rejects null empty and duplicate inputs but accepts a single source" do
     for sources <- [nil, [], [:apple, :apple]] do
-      assert {:error, %CapabilityError{code: :invalid_source_registry}} = Registry.validate(sources)
+      assert {:error, %CapabilityError{code: :invalid_source_registry}} =
+               Registry.validate(sources)
     end
 
     assert {:ok, [:apple]} = Registry.validate([:apple])
@@ -35,7 +43,11 @@ defmodule Accrue.Entitlements.SourceTest do
     assert {:ok,
             %Outcome{
               state: :externally_managed,
-              guidance: %{key: :manage_apple_subscription, action_label: "Manage subscription", url: url}
+              guidance: %{
+                key: :manage_apple_subscription,
+                action_label: "Manage subscription",
+                url: url
+              }
             }} = Registry.outcome(:apple, :management)
 
     assert url == "https://apps.apple.com/account/subscriptions"
@@ -52,7 +64,12 @@ defmodule Accrue.Entitlements.SourceTest do
   test "inspection is structurally independent from processor configuration" do
     previous = Application.get_env(:accrue, :processor)
     Application.put_env(:accrue, :processor, __MODULE__)
-    on_exit(fn -> if previous, do: Application.put_env(:accrue, :processor, previous), else: Application.delete_env(:accrue, :processor) end)
+
+    on_exit(fn ->
+      if previous,
+        do: Application.put_env(:accrue, :processor, previous),
+        else: Application.delete_env(:accrue, :processor)
+    end)
 
     assert {:ok, _} = Registry.inspect(:apple)
   end
