@@ -53,79 +53,105 @@ Dependencies: 215 → 216 → 217 → {218, 219} → 220. Phase 215 must prove C
 ## Phase Details
 
 ### Phase 215: Research, contracts, and Crosswake feasibility
+
 **Goal**: Maintainers have one current, evidence-backed multi-rail contract and know whether the required Crosswake client boundary is feasible before runtime coupling begins.
 **Depends on**: Nothing (first phase)
 **Requirements**: RSCH-01, RSCH-02, RSCH-03, RAIL-04, RAIL-05
 **Success Criteria** (what must be TRUE):
+
   1. A maintainer can find one versioned v1.59 bundle with source provenance, accepted and rejected choices, confidence, and a dated change watchlist.
   2. An implementer can use one decision table to determine projection, eligibility, repair, and offline-continuity outcomes for duplicate, out-of-order, revocation, survivor-grant, and stale cases.
   3. A host can inspect source-specific observation, control, restore, reconciliation, management, and offline capabilities without treating the processor matrix as a rail contract.
   4. The checked-in Crosswake tracer proves every required bridge or explicitly blocks mobile runtime coupling before later phases rely on it.
+
 **Plans**: 5 plans
 
 Plans:
+**Wave 1**
+
 - [ ] 215-01-PLAN.md — Build the Crosswake feasibility skeleton and explicit prove-or-block report.
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
 - [ ] 215-02-PLAN.md — Establish the v1.59 authority manifest, amendment ledger, watchlist, and drift gate.
 - [ ] 215-03-PLAN.md — Define one data-only decision-case corpus and deterministic Markdown/JSON/property consumers.
 - [ ] 215-04-PLAN.md — Publish the typed entitlement-source capability registry, mirrors, conformance, and leakage gates.
+
+**Wave 3** *(blocked on Wave 2 completion)*
+
 - [ ] 215-05-PLAN.md — Bind signed offline vectors to DecisionCases and prove Elixir/Swift verification and atomic replacement.
 
 ### Phase 216: Additive rail and persistence foundation
+
 **Goal**: Hosts can represent concurrent Stripe and Apple entitlement evidence on durable, rail-qualified records while existing single-processor integrations remain valid.
 **Depends on**: Phase 215
 **Requirements**: RAIL-01, RAIL-02, RAIL-03
 **Success Criteria** (what must be TRUE):
+
   1. A host can register Stripe and Apple together while legacy `processor` configuration continues as the supported default-rail alias.
   2. A host can map each rail/environment product identifier to one logical plan without identifier collisions across rails or Apple sandbox and production.
   3. An account’s observations, grants, devices, provenance, quarantine state, and ordering data persist with stable identity and transactional uniqueness.
+
 **Plans**: TBD
 
 ### Phase 217: Canonical projection and compatibility
+
 **Goal**: A host can make entitlement and purchase decisions from one revisioned account snapshot without changing legacy billing behavior or destroying survivor grants.
 **Depends on**: Phase 216
 **Requirements**: ACCT-01, ACCT-02, ACCT-03, ACCT-04, ACCT-05
 **Success Criteria** (what must be TRUE):
+
   1. A user with any live Stripe or Apple grant receives the union of effective plans/features, with duplicate logical grants deduplicated and maximum effective quantity used.
   2. Revoking one source leaves access granted by another source intact, and duplicate or metadata-only evidence does not advance the account revision.
   3. Lifecycle actions dispatch by the persisted rail; externally managed Apple resources give explicit guidance and never enter Accrue-owned billing mutations.
   4. Existing single-processor hosts retain deterministic customers, mappings, webhooks, Stripe subscriptions, gates, and advisory-cache isolation through an opt-in, parity-checked multi-rail cutover.
   5. An equivalent second-rail purchase is blocked by default, with an explicit host warning/override path and no automatic cancellation, transfer, refund, migration, or proration.
+
 **Plans**: TBD
 
 ### Phase 218: Apple observation and repair
+
 **Goal**: Verified Apple evidence safely contributes to the account snapshot and repairs itself without ownership reassignment or provider-lifecycle confusion.
 **Depends on**: Phase 217
 **Requirements**: AAPL-01, AAPL-02, AAPL-03, AAPL-04, AAPL-05
 **Success Criteria** (what must be TRUE):
+
   1. An authenticated account can purchase or restore through its opaque entitlement UUID; only eligible verified lineage binds once, while ownership conflicts quarantine without heuristic or automatic reassignment.
   2. Only Apple evidence verified for permitted algorithms, trust, certificates, bundle, environment, and production identity can change grants.
   3. Duplicate, delayed, and out-of-order Apple evidence converges idempotently, while invalid, unmatched, and conflicting input remains non-granting and repairable.
   4. Scheduled status and history reconciliation repairs missed notifications and accurately represents active, grace, retry, expiry, refund, and revocation boundaries.
   5. Hosts receive honest externally-managed Apple subscription guidance, with Family Sharing and offer authoring explicitly deferred.
+
 **Plans**: TBD
 
 ### Phase 219: Offline study contract
+
 **Goal**: A registered device can safely retain downloaded-study continuity while offline, then converge atomically when it reconnects.
 **Depends on**: Phase 215, Phase 217
 **Requirements**: OFF-01, OFF-02, OFF-03, OFF-04, OFF-05, OFF-06
 **Success Criteria** (what must be TRUE):
+
   1. A registered device independently verifies a versioned, compact ES256 entitlement proof with language-neutral fixtures and no signing secret.
   2. Successful reconciliation establishes a 30-day revalidation target (shortened by known provider bounds); passing it produces `stale_offline`, never an independent 72-hour cutoff.
   3. While stale, already-downloaded lessons and local progress remain usable, while new premium downloads and all other value-expanding actions wait for reconnection.
   4. Host code can distinguish fresh, stale-offline, denied, and invalid proof states with bounded reasons while existing boolean gate return types remain compatible.
   5. Reconnect authenticates account and device, refreshes due rails, and atomically replaces cached proof with a newer allow proof or signed deny tombstone; copied, replayed, wrong-device, rollback, revoked-device, and rotated-key proofs fail safely.
+
 **Plans**: TBD
 
 ### Phase 220: First-adopter proof and release gates
+
 **Goal**: The anonymized B2C Alpha reference host and public release contract prove that multi-rail access and offline study are safe, diagnosable, and operable.
 **Depends on**: Phase 218, Phase 219
 **Requirements**: PROOF-01, PROOF-02, PROOF-03, PROOF-04, PROOF-05
 **Success Criteria** (what must be TRUE):
+
   1. The reference host proves Apple-to-web and Stripe-to-iOS access converge for the same account without manual reconciliation.
   2. Deterministic, credential-free checks prove duplicate-purchase prevention, stale study continuity, restricted expansion, reconnect, revocation, survivor grants, device replacement, deny tombstones, clock rollback, and key rotation.
   3. An operator can inspect redacted account, rail, provider, revision, eligibility, device/proof, and quarantine/retry state without raw transaction data or PII.
   4. Automated repair and runbooks address missed Apple notifications, history cursor recovery, outages, conflicts, duplicate charges, stale devices, signing-key compromise, and reconciliation backlog without routine account reconstruction.
   5. Public guides, examples, capability/compatibility material, App Review guidance, release notes, threat model, watchlist, and conformance gates state one additive contract and its explicit v1.59 limits.
+
 **Plans**: TBD
 
 ## Progress
