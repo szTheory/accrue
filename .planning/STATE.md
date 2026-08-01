@@ -3,17 +3,17 @@ gsd_state_version: 1.0
 milestone: v1.59
 milestone_name: Account-Scoped Multi-Rail & Offline Entitlements
 current_phase: 215
-current_phase_name: Research, contracts, and Crosswake feasibility
-status: planning
-stopped_at: Phase 215 context gathered
-last_updated: "2026-08-01T01:01:05.980Z"
+current_phase_name: research-contracts-and-crosswake-feasibility
+status: executing
+stopped_at: Completed 215-01-PLAN.md
+last_updated: "2026-08-01T01:55:30.256Z"
 last_activity: 2026-07-31
-last_activity_desc: v1.59 six-phase roadmap created
+last_activity_desc: Phase 215 execution started
 progress:
   total_phases: 6
   completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
+  total_plans: 5
+  completed_plans: 1
   percent: 0
 ---
 
@@ -25,14 +25,14 @@ See: `.planning/PROJECT.md` (updated 2026-07-31 after starting v1.59)
 
 **Core value:** A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic Elixir DX, strong domain modeling, tamper-evident audit ledger, great observability, and zero breaking-change pain through v1.x.
 
-**Current focus:** Planning v1.59 Phase 215 — research, contracts, and Crosswake feasibility
+**Current focus:** Phase 215 — research-contracts-and-crosswake-feasibility
 
 ## Current Position
 
-Phase: 215 of 220 (Research, contracts, and Crosswake feasibility)
-Plan: —
-Status: Roadmap created; ready to plan
-Last activity: 2026-07-31 — v1.59 six-phase roadmap created
+Phase: 215 (research-contracts-and-crosswake-feasibility) — EXECUTING
+Plan: 2 of 5
+Status: Ready to execute
+Last activity: 2026-07-31 — Phase 215 execution started
 
 ## Post-v1.48 Pause Rule
 
@@ -377,6 +377,7 @@ Coverage: 22/22 v1.51 requirements mapped (each REQ-ID → exactly one phase). D
 | Phase 214.2-close-gap-sync-02-docs-03-surface-advisory-entitlement-diagn P04 | 14m | 2 tasks | 4 files |
 | Phase 214.2 P02 | 6m | 2 tasks | 3 files |
 | Phase 214.2 P03 | 7m | 2 tasks | 6 files |
+| Phase 215 P01 | 8min | 2 tasks | 8 files |
 
 ## Accumulated Context
 
@@ -716,6 +717,8 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - [Phase ?]: Advisory diagnostics use complete normalized maps with independent local and advisory failures.
 - [Phase ?]: Provenance derives only from the exact pull stamp or webhook watermark; no freshness inference is emitted.
 - [Phase ?]: Stripe observations remain separate from the local access headline; bounded previews retain full Raw data evidence.
+- [Phase ?]: Crosswake runtime coupling remains feasibility_blocked until pinned bridge and dated physical-device evidence exist.
+- [Phase ?]: Client/device feasibility excludes server/vector/JWS contract-test status; those tests remain independently merge-blocking.
 
 ### Pending Todos
 
@@ -867,9 +870,9 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 
 ## Session Continuity
 
-Last session: 2026-08-01T01:01:05.969Z
-Stopped at: Phase 215 context gathered
-Resume file: .planning/phases/215-research-contracts-and-crosswake-feasibility/215-CONTEXT.md
+Last session: 2026-08-01T01:55:30.247Z
+Stopped at: Completed 215-01-PLAN.md
+Resume file: None
 
 ## Operator Next Steps
 
