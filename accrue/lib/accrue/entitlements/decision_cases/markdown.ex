@@ -113,7 +113,7 @@ defmodule Accrue.Entitlements.DecisionCases.Export do
     [
       %{id: "valid_allow", case_id: "reconnect_positive_replacement", compact_jws: allow, expected_verification: "accept", expected_reason: "ok", expected_cache_disposition: "allow"},
       %{id: "valid_signed_denial", case_id: "reconnect_denied_tombstone", compact_jws: denial, expected_verification: "accept", expected_reason: "ok", expected_cache_disposition: "deny"},
-      %{id: "wrong_signature", case_id: "invalid_apple_evidence", compact_jws: allow <> "x", expected_verification: "reject", expected_reason: "signature", expected_cache_disposition: "allow"},
+      %{id: "wrong_signature", case_id: "invalid_apple_evidence", compact_jws: String.replace_suffix(allow, "Zmw", "Ymw"), expected_verification: "reject", expected_reason: "signature", expected_cache_disposition: "allow"},
       %{id: "wrong_key", case_id: "apple_token_mismatch", compact_jws: allow, expected_verification: "reject", expected_reason: "key", expected_cache_disposition: "allow"},
       %{id: "wrong_device", case_id: "unmapped_verified_product", compact_jws: allow, expected_verification: "reject", expected_reason: "device", expected_cache_disposition: "allow"},
       %{id: "rollback", case_id: "out_of_order_positive_after_revoke", compact_jws: allow, expected_verification: "reject", expected_reason: "rollback", expected_cache_disposition: "deny"},
