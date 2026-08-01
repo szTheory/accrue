@@ -1,4 +1,4 @@
-{"outcomes":[
+{"capabilities":["observation","control","restore","reconciliation","management","offline"],"states":["supported","externally_managed","host_owned","deferred","unavailable","feasibility_blocked"],"outcomes":[
 {"source":"stripe","capability":"observation","state":"supported","guidance":{"key":"stripe_source_inspection","text":"This capability is available from the Stripe entitlement source.","action_label":"Review source contract"}},
 {"source":"stripe","capability":"control","state":"supported","guidance":{"key":"stripe_source_inspection","text":"This capability is available from the Stripe entitlement source.","action_label":"Review source contract"}},
 {"source":"stripe","capability":"restore","state":"supported","guidance":{"key":"stripe_source_inspection","text":"This capability is available from the Stripe entitlement source.","action_label":"Review source contract"}},
