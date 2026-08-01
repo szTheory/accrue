@@ -7,7 +7,7 @@ defmodule Accrue.Entitlements.DecisionCasesTest do
     cases = DecisionCases.all()
     ids = Enum.map(cases, & &1.id)
 
-    assert cases != []
+    assert length(cases) > 0
     assert ids == Enum.sort(ids)
     assert length(ids) == length(Enum.uniq(ids))
     assert Enum.all?(cases, &(&1.contract_version == DecisionCases.version()))
@@ -15,6 +15,7 @@ defmodule Accrue.Entitlements.DecisionCasesTest do
 
   test "every case has the closed D-07 schema and a bounded privacy-safe reason" do
     assert Enum.all?(DecisionCases.all(), &DecisionCases.valid?/1)
+
     assert Enum.all?(DecisionCases.all(), fn case_data ->
              case_data.expected.reason =~ ~r/^entitlement_[a-z0-9_]{3,80}$/
            end)
