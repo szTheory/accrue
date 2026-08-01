@@ -177,12 +177,25 @@ public struct AtomicOfflineCache: @unchecked Sendable {
 
     public func candidateURLs() throws -> [URL] {
         try coordinator.withLock {
-            let prefix = ".\(url.lastPathComponent).candidate."
-            return try FileManager.default.contentsOfDirectory(
+            try abandonedCandidateURLs()
+        }
+    }
+
+    /// Open/recovery only trusts the canonical path and removes interrupted writes.
+    public func recover() throws {
+        try coordinator.withLock {
+            for candidate in try abandonedCandidateURLs() {
+                try FileManager.default.removeItem(at: candidate)
+            }
+        }
+    }
+
+    private func abandonedCandidateURLs() throws -> [URL] {
+        let prefix = ".\(url.lastPathComponent).candidate."
+        return try FileManager.default.contentsOfDirectory(
                 at: url.deletingLastPathComponent(),
                 includingPropertiesForKeys: nil
-            ).filter { $0.lastPathComponent.hasPrefix(prefix) }
-        }
+        ).filter { $0.lastPathComponent.hasPrefix(prefix) }
     }
 
     private func uniqueCandidateURL() -> URL {

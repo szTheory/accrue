@@ -1,4 +1,5 @@
 import Testing
+import Foundation
 @testable import AccrueOfflineClient
 
 struct CapabilityReportTests {
@@ -65,5 +66,22 @@ struct CapabilityReportTests {
             .simulatorAdvisory,
             .physicalDevice
         ])
+    }
+
+    @Test("checked-in capability report remains feasibility blocked without bridge and device evidence")
+    func checkedInCapabilityReportRemainsBlocked() throws {
+        let reportURL = URL(fileURLWithPath: #filePath)
+            .deletingLastPathComponent().deletingLastPathComponent().deletingLastPathComponent()
+            .appendingPathComponent("capability-report.json")
+        let report = try JSONDecoder().decode(CheckedInReport.self, from: Data(contentsOf: reportURL))
+        #expect(report.overallStatus == "feasibility_blocked")
+        #expect(report.capabilities.allSatisfy { $0.status == "feasibility_blocked" })
+    }
+
+    private struct CheckedInReport: Decodable {
+        let overallStatus: String
+        let capabilities: [Row]
+        enum CodingKeys: String, CodingKey { case overallStatus = "overall_status", capabilities }
+        struct Row: Decodable { let status: String }
     }
 }
