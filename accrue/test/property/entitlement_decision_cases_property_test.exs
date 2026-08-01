@@ -2,58 +2,92 @@ defmodule Accrue.Property.EntitlementDecisionCasesPropertyTest do
   use ExUnit.Case, async: true
   use ExUnitProperties
 
+  alias Accrue.Entitlements.DecisionCaseContractConsumer
   alias Accrue.Entitlements.DecisionCases
+  alias Accrue.Entitlements.DecisionCases.{PriorState, Ordering}
 
-  property "permuted and duplicate equivalent evidence keeps its declared expectation",
-           _context do
+  property "permuted duplicate deliveries converge to one computed transition", _context do
     case_data = find_case!("duplicate_provider_event")
 
+    check all(count <- integer(1..12), max_runs: 50) do
+      deliveries = List.duplicate(case_data.ordering, count) |> Enum.shuffle()
+
+      assert accepted!(case_data, case_data.evidence, case_data.prior, deliveries) ==
+               accepted!(case_data, case_data.evidence, case_data.prior, [case_data.ordering])
+    end
+  end
+
+  property "older generated evidence cannot restore an allow snapshot after a denied prior", _context do
+    case_data = find_case!("out_of_order_positive_after_revoke")
+
+    check all(revision <- integer(0..100), offset <- integer(0..1_000), max_runs: 50) do
+      prior = %PriorState{case_data.prior | revision: revision, snapshot: %{}}
+      ordering = %Ordering{case_data.ordering | observed_at: case_data.ordering.observed_at - offset}
+
+      result = accepted!(case_data, case_data.evidence, prior, [ordering])
+
+      assert result.snapshot == %{}
+      assert result.revision >= revision
+      assert result.disposition == :noop
+    end
+  end
+
+  property "generated source sets retain a surviving live rail after the other rail retracts", _context do
+    case_data = find_case!("stripe_revoked_apple_survives")
+
+    check all(sources <- member_of([[:apple], [:stripe, :apple]]), max_runs: 50) do
+      prior = %PriorState{case_data.prior | sources: sources}
+      result = accepted!(case_data, case_data.evidence, prior, [case_data.ordering])
+
+      assert :apple in result.sources
+      refute :stripe in result.sources
+      assert result.snapshot == case_data.expected.snapshot
+    end
+  end
+
+  property "generated revisions emit only a complete atomic result", _context do
+    case_data = find_case!("atomic_transaction_boundary")
+
+    check all(revision <- integer(0..100), max_runs: 50) do
+      prior = %PriorState{case_data.prior | revision: revision}
+      result = accepted!(case_data, case_data.evidence, prior, [case_data.ordering])
+
+      assert result.revision == revision + case_data.expected.revision_delta
+      assert result.atomic
+
+      assert Map.keys(result) |> Enum.sort() ==
+               [:atomic, :continuity, :disposition, :lease, :reason, :repair, :revision, :snapshot, :sources]
+    end
+  end
+
+  property "invalid generated evidence, bindings, and prior state are rejected before transition", _context do
+    case_data = find_case!("apple_verified_grant")
+
     check all(
-            deliveries <- list_of(member_of([case_data]), min_length: 1, max_length: 12),
+            invalid <- member_of([:unknown_binding, :unverified_payload, :invalid_prior]),
             max_runs: 50
           ) do
-      assert expected_signature(Enum.shuffle(deliveries)) == expected_signature([case_data])
+      {evidence, prior} = invalid_input(case_data, invalid)
+
+      assert {:error, _reason} =
+               DecisionCaseContractConsumer.consume(case_data, evidence, prior, [case_data.ordering])
     end
   end
 
-  property "older positive evidence cannot outrank the declared revoke ordering", _context do
-    stale = find_case!("out_of_order_positive_after_revoke")
+  defp invalid_input(case_data, :unknown_binding),
+    do: {put_in(case_data.evidence.account_binding, :unknown_binding), case_data.prior}
 
-    check all(offset <- integer(0..1), max_runs: 50) do
-      ordering = %{stale.ordering | observed_at: stale.ordering.observed_at - offset}
-      assert ordering.relation == :older
-      assert stale.expected.disposition == :noop
-      assert stale.expected.lease == :denied
-    end
-  end
+  defp invalid_input(case_data, :unverified_payload),
+    do: {put_in(case_data.evidence.kind, :unverified_payload), case_data.prior}
 
-  property "retracting a source retains the declared survivor expectation", _context do
-    survivor = find_case!("stripe_revoked_apple_survives")
+  defp invalid_input(case_data, :invalid_prior),
+    do: {case_data.evidence, %PriorState{case_data.prior | revision: -1}}
 
-    check all(
-            sources <- uniq_list_of(member_of([:stripe, :apple]), min_length: 1, max_length: 2),
-            max_runs: 50
-          ) do
-      if :apple in sources do
-        assert survivor.expected.lease == :fresh
-        assert survivor.expected.repair == :survivor
-      end
-    end
-  end
-
-  property "transaction cases declare an all-or-nothing grant snapshot revision audit boundary",
-           _context do
-    transaction = find_case!("atomic_transaction_boundary")
-
-    check all(partial_step <- member_of([:grant, :snapshot, :revision, :audit]), max_runs: 50) do
-      assert transaction.expected.atomic
-      assert transaction.expected.disposition == :grant
-      refute partial_step in [:partial_snapshot, :partial_revision]
-    end
+  defp accepted!(case_data, evidence, prior, deliveries) do
+    assert {:ok, result} = DecisionCaseContractConsumer.consume(case_data, evidence, prior, deliveries)
+    result
   end
 
   defp find_case!(id),
     do: Enum.find(DecisionCases.all(), &(&1.id == id)) || raise("missing #{id}")
-
-  defp expected_signature([case_data | _]), do: Map.from_struct(case_data.expected)
 end
