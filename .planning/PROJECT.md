@@ -47,7 +47,9 @@ The Phase 204 hardening roadmap's top slice (**Public Truth And Proof-State Base
 
 **Current milestone: v1.59 — Account-Scoped Multi-Rail & Offline Entitlements (SEED-006).** A concrete adopter, anonymized as **B2C Alpha**, requires one account to remain entitled across Stripe web billing, Apple in-app purchase, and extended offline study in a Phoenix/Crosswake application. This satisfies the post-v1.48 reopen bar as both a sourced adopter requirement and an explicit strategy expansion with reusable value for Phoenix apps going mobile. The approved direction is a common account entitlement projection fed by rail-specific lifecycle observers, plus signed device-bound offline proof whose freshness state is interpreted by host policy; lifecycle management remains honestly rail-aware. Google Play is SEED-007 and stays backlogged until Android is scheduled or a second adopter requires it. Source: `.planning/research/MULTI-RAIL-OFFLINE-ENTITLEMENTS.md`.
 
-**Phase 215 complete (2026-08-01):** the versioned v1.59 authority bundle, canonical decision-case corpus, source-capability boundary, and checked-in Crosswake prove-or-block tracer are validated (19/19 must-haves; RSCH-01..03 and RAIL-04..05 satisfied). The canonical report remains honestly `feasibility_blocked` until genuine bridge and physical-device evidence exists, and caller-selected report roots cannot manufacture proof. Next: Phase 216, additive rail and persistence foundation.
+**Phase 215 complete (2026-08-01):** the versioned v1.59 authority bundle, canonical decision-case corpus, source-capability boundary, and checked-in Crosswake prove-or-block tracer are validated (19/19 must-haves; RSCH-01..03 and RAIL-04..05 satisfied). The canonical report remains honestly `feasibility_blocked` until genuine bridge and physical-device evidence exists, and caller-selected report roots cannot manufacture proof.
+
+**Phase 216 complete (2026-08-02):** concurrent Stripe/Apple rail registration, legacy default-processor aliasing, rail/environment-qualified product mapping, and durable account/observation/grant/device persistence are validated (21/21 must-haves; RAIL-01..03 satisfied). PostgreSQL-backed automation now proves identity races, opaque cross-account ownership failures, named raw-write constraints, and whole-transaction rollback with no human UAT. The recurring persistence proofs already run in the existing PostgreSQL-backed `mix test --warnings-as-errors` CI job, so no duplicate workflow was added. Next: Phase 217, canonical projection and compatibility.
 
 ## Current Milestone: v1.59 Account-Scoped Multi-Rail & Offline Entitlements
 
@@ -619,7 +621,6 @@ The v1.50→v1.54 arc (Admin UI Foundation → Depth Pass → Brand System → D
 
 ### Active
 
-- [ ] Add an opt-in Stripe + Apple rail contract and additive account/grant/device/observation persistence without breaking legacy hosts.
 - [ ] Project verified rail evidence into one account snapshot with resource-aware management and duplicate-purchase prevention.
 - [ ] Verify, link, reconcile, quarantine, and repair Apple subscription evidence without heuristic ownership transfer.
 - [ ] Issue device-bound offline proof that distinguishes fresh, stale-offline, denied, and invalid states while allowing host-owned study-continuity policy.
@@ -634,6 +635,14 @@ Research, contracts, and Crosswake feasibility — 5/5 requirements satisfied in
 - ✓ **RSCH-03** — A dated owner/response watchlist and amendment workflow preserve current research memory.
 - ✓ **RAIL-04** — A typed, processor-independent source-capability contract exposes rail-specific observation, control, restore, reconciliation, management, and offline capabilities.
 - ✓ **RAIL-05** — The checked-in Crosswake tracer provides one provenance-bound prove-or-block boundary and remains fail-closed while required bridge and physical-device evidence is unavailable.
+
+### Validated v1.59 (Phase 216 complete 2026-08-02)
+
+Additive rail and persistence foundation — 3/3 requirements satisfied in Phase 216.
+
+- ✓ **RAIL-01** — Hosts can register Stripe and Apple concurrently while legacy `processor` configuration remains the supported default-rail alias.
+- ✓ **RAIL-02** — Rail/environment/product-qualified catalog keys map to logical plans without cross-rail or sandbox/production collisions.
+- ✓ **RAIL-03** — Durable account, observation, grant, and device records enforce stable identity, bounded provenance, quarantine/order metadata, database-decided races, and transactional rollback safety.
 
 ### Validated v1.55 (Phases 201-204 complete 2026-07-03)
 
@@ -781,4 +790,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-08-01 after completing Phase 215 research, contracts, and Crosswake feasibility.*
+*Last updated: 2026-08-02 after completing Phase 216 additive rail and persistence foundation.*
