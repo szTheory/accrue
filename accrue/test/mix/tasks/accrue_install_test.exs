@@ -149,6 +149,12 @@ defmodule Mix.Tasks.Accrue.InstallTest do
 
     assert InstallFixture.assert_contains!(
              app,
+             "priv/repo/migrations/20260802200000_bound_accrue_entitlement_provider_identity.exs",
+             "accrue_ent_obs_provider_event_id_bytes_check"
+           )
+
+    assert InstallFixture.assert_contains!(
+             app,
              "priv/repo/migrations/99999999999999_revoke_accrue_events_writes.exs",
              ~S[to_regrole('#{@app_role}') IS NOT NULL]
            )

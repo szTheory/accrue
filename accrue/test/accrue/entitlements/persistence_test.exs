@@ -373,6 +373,54 @@ defmodule Accrue.Entitlements.PersistenceTest do
     ])
   end
 
+  test "PostgreSQL exposes and enforces provider byte constraints on raw writes" do
+    names = [
+      "accrue_ent_obs_provider_event_id_bytes_check",
+      "accrue_ent_obs_provider_transaction_id_bytes_check",
+      "accrue_ent_obs_kind_bytes_check",
+      "accrue_ent_obs_provider_lineage_id_bytes_check",
+      "accrue_ent_obs_provider_product_id_bytes_check",
+      "accrue_ent_grants_provider_lineage_id_bytes_check",
+      "accrue_ent_grants_provider_product_id_bytes_check"
+    ]
+
+    %{rows: rows} =
+      Ecto.Adapters.SQL.query!(
+        TestRepo,
+        "SELECT conname FROM pg_constraint WHERE connamespace = 'billing'::regnamespace AND conname = ANY($1)",
+        [names]
+      )
+
+    assert Enum.sort(Enum.map(rows, &hd/1)) == Enum.sort(names)
+
+    account = account!("raw-provider-byte-bounds")
+
+    assert_check_violation(
+      "accrue_ent_obs_provider_event_id_bytes_check",
+      """
+      INSERT INTO billing.accrue_entitlement_observations
+        (account_id, rail, environment, provider_event_id, kind, provider_lineage_id,
+         provider_product_id, provider_order, observed_at, state, retry_count, metadata,
+         evidence_digest, inserted_at, updated_at)
+      VALUES ($1::text::uuid, 'apple', 'production', $2, 'renewal', 'lineage', 'product', 0, NOW(),
+              'qualified', 0, '{}'::jsonb, '#{String.duplicate("a", 64)}', NOW(), NOW())
+      """,
+      [account.id, String.duplicate("e", 256)]
+    )
+
+    assert_check_violation(
+      "accrue_ent_grants_provider_lineage_id_bytes_check",
+      """
+      INSERT INTO billing.accrue_entitlement_grants
+        (account_id, rail, environment, provider_lineage_id, provider_product_id,
+         source_item_id, quantity, provider_order, account_revision, effective_at,
+         inserted_at, updated_at)
+      VALUES ($1::text::uuid, 'apple', 'production', $2, 'product', 'item', 1, 0, 0, NOW(), NOW(), NOW())
+      """,
+      [account.id, String.duplicate("l", 256)]
+    )
+  end
+
   defp observation_attrs(account_id, overrides \\ %{}) do
     Map.merge(
       %{
@@ -425,6 +473,16 @@ defmodule Accrue.Entitlements.PersistenceTest do
 
   defp errors_on(changeset),
     do: Ecto.Changeset.traverse_errors(changeset, fn {message, _} -> message end)
+
+  defp assert_check_violation(constraint, sql, params) do
+    assert {:error, %Postgrex.Error{postgres: %{code: :check_violation, constraint: ^constraint}}} =
+             TestRepo.transaction(fn ->
+               case Ecto.Adapters.SQL.query(TestRepo, sql, params) do
+                 {:error, error} -> TestRepo.rollback(error)
+                 {:ok, _result} -> flunk("expected #{constraint} to reject the raw write")
+               end
+             end)
+  end
 
   defp assert_constraint_names(changeset, expected) do
     names = Enum.map(changeset.constraints, &to_string(&1.constraint))

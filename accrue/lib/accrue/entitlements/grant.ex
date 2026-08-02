@@ -9,6 +9,8 @@ defmodule Accrue.Entitlements.Grant do
   @foreign_key_type :binary_id
   @rails [:stripe, :apple]
   @environments [:production, :sandbox]
+  @provider_lineage_id_max_bytes 255
+  @provider_product_id_max_bytes 255
 
   schema "accrue_entitlement_grants" do
     belongs_to(:account, Accrue.Entitlements.Account, type: :binary_id)
@@ -39,6 +41,8 @@ defmodule Accrue.Entitlements.Grant do
     grant_or_changeset
     |> cast(attrs, @fields)
     |> validate_required(@required)
+    |> validate_length(:provider_lineage_id, max: @provider_lineage_id_max_bytes, count: :bytes)
+    |> validate_length(:provider_product_id, max: @provider_product_id_max_bytes, count: :bytes)
     |> validate_number(:quantity, greater_than: 0)
     |> validate_number(:provider_order, greater_than_or_equal_to: 0)
     |> validate_number(:account_revision, greater_than_or_equal_to: 0)
@@ -57,6 +61,12 @@ defmodule Accrue.Entitlements.Grant do
     )
     |> check_constraint(:account_revision,
       name: :accrue_entitlement_grants_account_revision_nonnegative_check
+    )
+    |> check_constraint(:provider_lineage_id,
+      name: :accrue_ent_grants_provider_lineage_id_bytes_check
+    )
+    |> check_constraint(:provider_product_id,
+      name: :accrue_ent_grants_provider_product_id_bytes_check
     )
     |> unique_constraint(:provider_lineage_id,
       name: :accrue_entitlement_grants_current_identity_index
