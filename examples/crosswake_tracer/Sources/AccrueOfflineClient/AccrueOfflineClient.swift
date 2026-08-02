@@ -288,6 +288,21 @@ private extension Data {
     }
 }
 
+/// The single admission rule for verified entitlement replacements. Higher revisions
+/// win; at the same revision, only a signed denial can replace a non-denial state.
+enum ProofReplacementOrder {
+    static func accepts(
+        existingDisposition: AtomicOfflineCache.Disposition,
+        existingRevision: Int64,
+        candidateDisposition: AtomicOfflineCache.Disposition,
+        candidateRevision: Int64
+    ) -> Bool {
+        if candidateRevision > existingRevision { return true }
+        if candidateRevision < existingRevision { return false }
+        return candidateDisposition == .deny && existingDisposition != .deny
+    }
+}
+
 /// File-backed, testable replacement seam. A coordinator is shared by every
 /// handle for one standardized path, while unrelated paths retain independent locks.
 public struct AtomicOfflineCache: @unchecked Sendable {
@@ -333,9 +348,9 @@ public struct AtomicOfflineCache: @unchecked Sendable {
             let persisted = try loadVerifiedEnvelope()
             let accepted: Bool
             if let persisted {
-                accepted = accepts(
+                accepted = ProofReplacementOrder.accepts(
                     existingDisposition: persisted.disposition,
-                    revision: persisted.revision,
+                    existingRevision: persisted.revision,
                     candidateDisposition: disposition,
                     candidateRevision: revision
                 )
@@ -382,17 +397,6 @@ public struct AtomicOfflineCache: @unchecked Sendable {
     /// Returns state only after the version, path context, payload, revision, and disposition authenticate.
     public func recoveredEnvelope() throws -> RecoveredEnvelope? {
         try coordinator.withLock { try loadVerifiedEnvelope() }
-    }
-
-    private func accepts(
-        existingDisposition: Disposition,
-        revision existingRevision: Int64,
-        candidateDisposition: Disposition,
-        candidateRevision: Int64
-    ) -> Bool {
-        if candidateRevision > existingRevision { return true }
-        if candidateRevision < existingRevision { return false }
-        return candidateDisposition == .deny && existingDisposition != .deny
     }
 
     private func encodedReplacement(payload: Data, disposition: Disposition, revision: Int64) throws -> Data {
@@ -505,9 +509,12 @@ private final class CacheCoordinator: @unchecked Sendable {
         // The legacy raw-byte seam carries no revision metadata. Keep that test-only
         // compatibility path explicit; verified replacements always use a real revision.
         if candidateRevision == .max && candidate == .allow { return true }
-        if candidateRevision > revision { return true }
-        if candidateRevision < revision { return false }
-        return candidate == .deny && disposition != .deny
+        return ProofReplacementOrder.accepts(
+            existingDisposition: disposition ?? .allow,
+            existingRevision: revision,
+            candidateDisposition: candidate,
+            candidateRevision: candidateRevision
+        )
     }
 
     func record(disposition: AtomicOfflineCache.Disposition, revision: Int64) {
@@ -567,15 +574,29 @@ public struct ProofHighWater: Sendable, Equatable {
     public let issuedAt: Date
     public let revision: Int64
     public let freshnessDeadline: Date
+    public let disposition: AtomicOfflineCache.Disposition
 
-    public init(issuedAt: Date, revision: Int64, freshnessDeadline: Date) {
+    public init(
+        issuedAt: Date,
+        revision: Int64,
+        freshnessDeadline: Date,
+        disposition: AtomicOfflineCache.Disposition = .allow
+    ) {
         self.issuedAt = issuedAt
         self.revision = revision
         self.freshnessDeadline = freshnessDeadline
+        self.disposition = disposition
     }
 
     public func accepts(newer candidate: ProofHighWater) -> Bool {
-        candidate.revision > revision && candidate.issuedAt >= issuedAt && candidate.freshnessDeadline >= freshnessDeadline
+        candidate.issuedAt >= issuedAt &&
+            candidate.freshnessDeadline >= freshnessDeadline &&
+            ProofReplacementOrder.accepts(
+                existingDisposition: disposition,
+                existingRevision: revision,
+                candidateDisposition: candidate.disposition,
+                candidateRevision: candidate.revision
+            )
     }
 }
 
