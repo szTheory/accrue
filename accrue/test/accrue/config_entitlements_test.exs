@@ -27,11 +27,21 @@ defmodule Accrue.ConfigEntitlementsTest do
 
   setup do
     prev = Application.get_env(:accrue, :entitlements, :__unset__)
+    prev_processor = Application.get_env(:accrue, :processor, :__unset__)
+    prev_rails = Application.get_env(:accrue, :rails, :__unset__)
+    prev_default_rail = Application.get_env(:accrue, :default_rail, :__unset__)
 
     on_exit(fn ->
       case prev do
         :__unset__ -> Application.delete_env(:accrue, :entitlements)
         value -> Application.put_env(:accrue, :entitlements, value)
+      end
+
+      for {key, value} <- [processor: prev_processor, rails: prev_rails, default_rail: prev_default_rail] do
+        case value do
+          :__unset__ -> Application.delete_env(:accrue, key)
+          configured -> Application.put_env(:accrue, key, configured)
+        end
       end
     end)
 
@@ -61,6 +71,38 @@ defmodule Accrue.ConfigEntitlementsTest do
                :api_access,
                :advanced_reports
              ]
+    end
+  end
+
+  describe "multi-rail entitlement catalog (RAIL-01, RAIL-02)" do
+    test "validates a Stripe default rail with Apple observer and normalizes qualified products" do
+      Application.put_env(:accrue, :processor, Accrue.Processor.Stripe)
+
+      Application.put_env(:accrue, :rails,
+        stripe: [
+          source: :stripe,
+          processor: Accrue.Processor.Stripe,
+          environments: [:production],
+          default_environment: :production
+        ],
+        apple: [
+          source: :apple,
+          environments: [:production],
+          default_environment: :production
+        ]
+      )
+
+      Application.put_env(:accrue, :default_rail, :stripe)
+
+      Application.put_env(:accrue, :entitlements,
+        plans: [pro: [products: [stripe: [production: ["price_pro"]]]]]
+      )
+
+      assert Config.validate_at_boot!() == :ok
+      assert Config.rails() |> Keyword.fetch!(:stripe) |> Keyword.fetch!(:source) == :stripe
+      assert Config.default_rail() == :stripe
+      assert Config.entitlement_product_catalog() == %{{:stripe, :production, "price_pro"} => :pro}
+      assert Application.get_env(:accrue, :processor) == Accrue.Processor.Stripe
     end
   end
 
