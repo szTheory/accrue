@@ -127,7 +127,7 @@ Plans:
   2. A host can map each rail/environment product identifier to one logical plan without identifier collisions across rails or Apple sandbox and production.
   3. An account’s observations, grants, devices, provenance, quarantine state, and ordering data persist with stable identity and transactional uniqueness.
 
-**Plans**: 4/5 plans executed
+**Plans**: 5/6 plans executed
 
 Plans:
 
@@ -146,7 +146,11 @@ Plans:
 
 **Wave 4** *(blocked on Wave 3 completion)*
 
-- [ ] 216-05-PLAN.md — Harden opaque evidence, scoped provenance, observation idempotency, and PostgreSQL domain constraints.
+- [x] 216-05-PLAN.md — Harden opaque evidence, scoped provenance, observation idempotency, and PostgreSQL domain constraints.
+
+**Wave 5** *(blocked on Wave 4 completion)*
+
+- [ ] 216-06-PLAN.md — Close remaining RAIL-03 gaps with account-safe global observation identity, provider-provenance byte limits, and executable PostgreSQL bypass proofs.
 
 ### Phase 217: Canonical projection and compatibility
 
