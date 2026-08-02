@@ -46,6 +46,9 @@ defmodule Accrue.Entitlements.Grant do
     |> foreign_key_constraint(:source_observation_id,
       name: :accrue_entitlement_grants_source_observation_id_fkey
     )
+    |> foreign_key_constraint(:source_observation_id,
+      name: :accrue_entitlement_grants_source_observation_scope_fkey
+    )
     |> unique_constraint(:provider_lineage_id,
       name: :accrue_entitlement_grants_current_identity_index
     )

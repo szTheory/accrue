@@ -20,6 +20,8 @@ defmodule Accrue.Entitlements.Observation do
   @states [:received, :qualified, :quarantined, :retrying]
   @metadata_max_keys 20
   @metadata_max_bytes 4096
+  @evidence_ref_max_bytes 255
+  @evidence_ref_pattern ~r/\Aopaque:\/\/[A-Za-z0-9_-]+(?:\/[A-Za-z0-9_-]+)*\z/
   @forbidden_metadata ~w[raw body receipt jws notification email adopter owner identity]
 
   schema "accrue_entitlement_observations" do
@@ -63,7 +65,7 @@ defmodule Accrue.Entitlements.Observation do
   @spec ingest_changeset(map()) :: Ecto.Changeset.t()
   def ingest_changeset(attrs) when is_map(attrs) do
     %__MODULE__{}
-    |> cast(attrs, @ingest_fields)
+    |> cast(normalize_optional_identities(attrs), @ingest_fields)
     |> validate_required(@required_fields)
     |> validate_identity()
     |> validate_number(:provider_order, greater_than_or_equal_to: 0)
@@ -71,6 +73,7 @@ defmodule Accrue.Entitlements.Observation do
     |> validate_format(:evidence_digest, ~r/\A[a-f0-9]{64}\z/)
     |> validate_metadata()
     |> validate_evidence_pair()
+    |> validate_evidence_reference()
     |> foreign_key_constraint(:account_id, name: :accrue_entitlement_observations_account_id_fkey)
     |> unique_constraint(:provider_event_id,
       name: :accrue_entitlement_observations_provider_event_identity_index
@@ -80,6 +83,15 @@ defmodule Accrue.Entitlements.Observation do
     )
     |> check_constraint(:evidence_ref,
       name: :accrue_entitlement_observations_evidence_reference_pair_check
+    )
+    |> check_constraint(:provider_event_id,
+      name: :accrue_entitlement_observations_identity_present_check
+    )
+    |> check_constraint(:provider_event_id,
+      name: :accrue_entitlement_observations_identity_nonblank_check
+    )
+    |> check_constraint(:evidence_ref,
+      name: :accrue_entitlement_observations_evidence_reference_locator_check
     )
   end
 
@@ -109,6 +121,22 @@ defmodule Accrue.Entitlements.Observation do
       changeset
     else
       add_error(changeset, :provider_event_id, "or provider_transaction_id must be present")
+    end
+  end
+
+  defp normalize_optional_identities(attrs) do
+    attrs
+    |> normalize_optional_identity(:provider_event_id)
+    |> normalize_optional_identity(:provider_transaction_id)
+  end
+
+  defp normalize_optional_identity(attrs, key) do
+    case Map.fetch(attrs, key) do
+      {:ok, value} when is_binary(value) ->
+        if String.trim(value) == "", do: Map.put(attrs, key, nil), else: attrs
+
+      _ ->
+        attrs
     end
   end
 
@@ -149,6 +177,21 @@ defmodule Accrue.Entitlements.Observation do
       changeset
     else
       add_error(changeset, :evidence_ref, "must be paired with evidence_expires_at")
+    end
+  end
+
+  defp validate_evidence_reference(changeset) do
+    case get_field(changeset, :evidence_ref) do
+      nil ->
+        changeset
+
+      ref when is_binary(ref) ->
+        if byte_size(ref) <= @evidence_ref_max_bytes and Regex.match?(@evidence_ref_pattern, ref),
+          do: changeset,
+          else: add_error(changeset, :evidence_ref, "must be a bounded opaque locator")
+
+      _ ->
+        add_error(changeset, :evidence_ref, "must be a bounded opaque locator")
     end
   end
 
