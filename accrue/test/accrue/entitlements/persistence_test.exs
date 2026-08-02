@@ -2,6 +2,7 @@ defmodule Accrue.Entitlements.PersistenceTest do
   use Accrue.RepoCase
 
   alias Accrue.Entitlements.Account
+  alias Accrue.Entitlements.Device
   alias Accrue.Entitlements.Grant
   alias Accrue.Entitlements.Observation
   alias Accrue.TestRepo
@@ -97,6 +98,43 @@ defmodule Accrue.Entitlements.PersistenceTest do
     account
   end
 
+  @tag :device
+  test "device registrations are account-scoped and retain revoked history" do
+    account = account!("device-one")
+    other_account = account!("device-two")
+    attrs = device_attrs(account.id)
+
+    assert {:ok, first} = TestRepo.insert(Device.changeset(%Device{}, attrs))
+    assert {:error, _} = TestRepo.insert(Device.changeset(%Device{}, attrs))
+
+    assert {:ok, _} =
+             TestRepo.insert(Device.changeset(%Device{}, %{attrs | account_id: other_account.id}))
+
+    assert {:ok, revoked} =
+             first
+             |> Device.changeset(%{state: :revoked, revoked_at: ~U[2026-08-02 16:00:00.000000Z]})
+             |> TestRepo.update()
+
+    assert {:ok, replacement} = TestRepo.insert(Device.changeset(%Device{}, attrs))
+    assert revoked.id != replacement.id
+  end
+
+  @tag :device
+  test "device registrations reject empty identity and invalid revision or lifecycle" do
+    account = account!("device-invalid")
+    attrs = device_attrs(account.id)
+
+    for invalid <- [
+          %{installation_id: ""},
+          %{key_thumbprint: nil},
+          %{state: :unknown},
+          %{last_accepted_revision: -1},
+          %{revoked_at: ~U[2026-08-02 16:00:00.000000Z]}
+        ] do
+      refute Device.changeset(%Device{}, Map.merge(attrs, invalid)).valid?
+    end
+  end
+
   @tag :grant
   test "current grants preserve complete qualified source-item history" do
     account = account!("grant-history")
@@ -170,6 +208,18 @@ defmodule Accrue.Entitlements.PersistenceTest do
       provider_order: 0,
       account_revision: 0,
       effective_at: ~U[2026-08-02 15:00:00.000000Z]
+    }
+  end
+
+  defp device_attrs(account_id) do
+    %{
+      account_id: account_id,
+      installation_id: "install-216",
+      key_thumbprint: "thumbprint-216",
+      state: :active,
+      registered_at: ~U[2026-08-02 15:00:00.000000Z],
+      last_seen_at: ~U[2026-08-02 15:01:00.000000Z],
+      last_accepted_revision: 0
     }
   end
 
