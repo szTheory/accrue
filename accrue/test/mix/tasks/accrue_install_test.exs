@@ -88,6 +88,52 @@ defmodule Mix.Tasks.Accrue.InstallTest do
              "System.get_env(\"STRIPE_WEBHOOK_SECRET\")"
            )
 
+    assert InstallFixture.assert_contains!(app, "config/runtime.exs", "config :accrue, :rails")
+
+    assert InstallFixture.assert_contains!(
+             app,
+             "config/runtime.exs",
+             "config :accrue, :default_rail, :stripe"
+           )
+
+    assert InstallFixture.assert_contains!(app, "config/runtime.exs", "products: [")
+
+    assert InstallFixture.assert_contains!(
+             app,
+             "config/runtime.exs",
+             "price_ids: [\"price_pro_monthly\"]"
+           )
+
+    assert InstallFixture.assert_contains!(
+             app,
+             "priv/repo/migrations/20260802150000_create_accrue_entitlement_persistence.exs",
+             "accrue_entitlement_devices"
+           )
+
+    for table <- [
+          "accrue_entitlement_accounts",
+          "accrue_entitlement_observations",
+          "accrue_entitlement_grants",
+          "accrue_entitlement_devices"
+        ] do
+      assert InstallFixture.assert_contains!(
+               app,
+               "priv/repo/migrations/20260802150000_create_accrue_entitlement_persistence.exs",
+               table
+             )
+    end
+
+    run_install(app, ["--yes"])
+    runtime = InstallFixture.read!(app, "config/runtime.exs")
+    assert length(String.split(runtime, "config :accrue, :rails")) == 2
+
+    assert File.exists?(
+             Path.join(
+               app,
+               "priv/repo/migrations/20260802150000_create_accrue_entitlement_persistence.exs"
+             )
+           )
+
     assert InstallFixture.assert_contains!(
              app,
              "priv/repo/migrations/99999999999999_revoke_accrue_events_writes.exs",
