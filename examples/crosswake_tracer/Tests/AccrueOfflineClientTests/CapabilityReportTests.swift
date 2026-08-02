@@ -76,6 +76,22 @@ struct CapabilityReportTests {
         let report = try JSONDecoder().decode(CheckedInReport.self, from: Data(contentsOf: reportURL))
         #expect(report.overallStatus == "feasibility_blocked")
         #expect(report.capabilities.allSatisfy { $0.status == "feasibility_blocked" })
+        #expect(try CheckedInCapabilityReportValidator.validate(Data(contentsOf: reportURL)) == .feasibilityBlocked)
+    }
+
+    @Test("checked-in report rejects duplicate, mixed, and false-proven capability states")
+    func checkedInReportValidatorRejectsIncoherentStates() throws {
+        let reportURL = URL(fileURLWithPath: #filePath)
+            .deletingLastPathComponent().deletingLastPathComponent().deletingLastPathComponent()
+            .appendingPathComponent("capability-report.json")
+        let source = try Data(contentsOf: reportURL)
+        var object = try #require(JSONSerialization.jsonObject(with: source) as? [String: Any])
+        var rows = try #require(object["capabilities"] as? [[String: Any]])
+        rows[1]["capability"] = rows[0]["capability"]
+        object["capabilities"] = rows
+        #expect(throws: CheckedInCapabilityReportValidator.ValidationError.self) {
+            try CheckedInCapabilityReportValidator.validate(JSONSerialization.data(withJSONObject: object))
+        }
     }
 
     private struct CheckedInReport: Decodable {
