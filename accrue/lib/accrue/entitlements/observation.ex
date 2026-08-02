@@ -21,6 +21,12 @@ defmodule Accrue.Entitlements.Observation do
   @metadata_max_keys 20
   @metadata_max_bytes 4096
   @evidence_ref_max_bytes 255
+  # Provider provenance is retained only as bounded normalized identifiers.
+  @provider_event_id_max_bytes 255
+  @provider_transaction_id_max_bytes 255
+  @kind_max_bytes 64
+  @provider_lineage_id_max_bytes 255
+  @provider_product_id_max_bytes 255
   @evidence_ref_pattern ~r/\Aopaque:\/\/[A-Za-z0-9_-]+(?:\/[A-Za-z0-9_-]+)*\z/
   @forbidden_metadata ~w[raw body receipt jws notification email adopter owner identity]
 
@@ -68,6 +74,7 @@ defmodule Accrue.Entitlements.Observation do
     |> cast(normalize_optional_identities(attrs), @ingest_fields)
     |> validate_required(@required_fields)
     |> validate_identity()
+    |> validate_provider_provenance_lengths()
     |> validate_number(:provider_order, greater_than_or_equal_to: 0)
     |> validate_number(:retry_count, greater_than_or_equal_to: 0)
     |> validate_format(:evidence_digest, ~r/\A[a-f0-9]{64}\z/)
@@ -104,6 +111,17 @@ defmodule Accrue.Entitlements.Observation do
     |> check_constraint(:retry_count,
       name: :accrue_entitlement_observations_retry_count_nonnegative_check
     )
+    |> check_constraint(:provider_event_id, name: :accrue_ent_obs_provider_event_id_bytes_check)
+    |> check_constraint(:provider_transaction_id,
+      name: :accrue_ent_obs_provider_transaction_id_bytes_check
+    )
+    |> check_constraint(:kind, name: :accrue_ent_obs_kind_bytes_check)
+    |> check_constraint(:provider_lineage_id,
+      name: :accrue_ent_obs_provider_lineage_id_bytes_check
+    )
+    |> check_constraint(:provider_product_id,
+      name: :accrue_ent_obs_provider_product_id_bytes_check
+    )
   end
 
   @doc "Inserts an observation once and returns the durable row selected by PostgreSQL."
@@ -116,12 +134,34 @@ defmodule Accrue.Entitlements.Observation do
              on_conflict: :nothing,
              conflict_target: conflict_target(changeset)
            ) do
-        {:ok, _observation} -> {:ok, fetch_by_identity!(repo, changeset)}
+        {:ok, _observation} -> resolve_identity_owner(repo, changeset)
         {:error, error_changeset} -> {:error, error_changeset}
       end
     else
       {:error, changeset}
     end
+  end
+
+  defp resolve_identity_owner(repo, changeset) do
+    observation = fetch_by_identity!(repo, changeset)
+
+    if observation.account_id == get_field(changeset, :account_id) do
+      {:ok, observation}
+    else
+      {:error, add_error(changeset, :account_id, "provider identity is already owned")}
+    end
+  end
+
+  defp validate_provider_provenance_lengths(changeset) do
+    changeset
+    |> validate_length(:provider_event_id, max: @provider_event_id_max_bytes, count: :bytes)
+    |> validate_length(:provider_transaction_id,
+      max: @provider_transaction_id_max_bytes,
+      count: :bytes
+    )
+    |> validate_length(:kind, max: @kind_max_bytes, count: :bytes)
+    |> validate_length(:provider_lineage_id, max: @provider_lineage_id_max_bytes, count: :bytes)
+    |> validate_length(:provider_product_id, max: @provider_product_id_max_bytes, count: :bytes)
   end
 
   defp validate_identity(changeset) do

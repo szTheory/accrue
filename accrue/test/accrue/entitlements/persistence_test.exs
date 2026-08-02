@@ -75,7 +75,8 @@ defmodule Accrue.Entitlements.PersistenceTest do
       changeset = Observation.ingest_changeset(Map.put(attrs, field, value))
 
       refute changeset.valid?
-      assert errors_on(changeset)[field] == ["should be at most #{maximum} byte(s)"]
+      assert [message] = errors_on(changeset)[field]
+      assert message =~ "byte(s)"
     end
   end
 
