@@ -4,15 +4,15 @@ milestone: v1.59
 milestone_name: Account-Scoped Multi-Rail & Offline Entitlements
 current_phase: 217
 current_phase_name: Canonical projection and compatibility
-status: planning
+status: executing
 stopped_at: Phase 217 context gathered
-last_updated: "2026-08-02T22:30:52.170Z"
+last_updated: "2026-08-02T23:18:59.902Z"
 last_activity: 2026-08-02
 last_activity_desc: Phase 216 complete, transitioned to Phase 217
 progress:
   total_phases: 6
   completed_phases: 2
-  total_plans: 21
+  total_plans: 26
   completed_plans: 21
   percent: 33
 ---
@@ -31,7 +31,7 @@ See: `.planning/PROJECT.md` (updated 2026-08-01 after completing Phase 215)
 
 Phase: 217 — Canonical projection and compatibility
 Plan: Not started
-Status: Ready to plan
+Status: Ready to execute
 Last activity: 2026-08-02 — Phase 216 complete, transitioned to Phase 217
 
 ## Post-v1.48 Pause Rule
