@@ -1,6 +1,6 @@
 ---
 phase: 215-research-contracts-and-crosswake-feasibility
-reviewed: 2026-08-02T02:20:34Z
+reviewed: 2026-08-02T02:46:30Z
 depth: standard
 files_reviewed: 20
 files_reviewed_list:
@@ -25,56 +25,44 @@ files_reviewed_list:
   - examples/crosswake_tracer/physical-device-evidence.md
   - scripts/ci/verify_v159_authority.sh
 findings:
-  critical: 1
+  critical: 0
   warning: 2
   info: 0
-  total: 3
+  total: 2
 status: issues_found
 ---
 
 # Phase 215: Code Review Report
 
-**Reviewed:** 2026-08-02T02:20:34Z
+**Reviewed:** 2026-08-02T02:46:30Z
 **Depth:** standard
 **Files Reviewed:** 20
 **Status:** issues_found
 
 ## Summary
 
-Reassessed the current HEAD, including the 215-14 capability-report changes. The public `CapabilityReport` constructor now correctly remains blocked, resolving the prior report's false-proof finding. However, the separately public URL-based validator still treats any caller-selected directory as a trusted evidence root. Two malformed-fixture paths also fail unsafely rather than producing contract diagnostics.
+Reviewed the Elixir decision corpus/exporter, offline-vector fixtures and consumers, Swift cache and feasibility gate, test coverage, and authority-verification script. The focused Elixir suite (25 tests and 5 properties) and Swift suite (23 tests) pass. However, the future transition from blocked to proven feasibility can be certified with placeholder evidence because the checked-in validator only establishes file presence and superficial text markers.
 
-Verification run: the focused Elixir suite (30 tests), `mix accrue.entitlements.decision_cases --check`, `verify_v159_authority.sh`, and `swift test` all pass. These results do not exercise the arbitrary-root provenance boundary or the malformed fixture cases below.
-
-## Critical Issues
-
-### CR-01: Arbitrary report URLs can establish false feasibility provenance
-
-**File:** `examples/crosswake_tracer/Sources/AccrueOfflineClient/AccrueOfflineClient.swift:685`
-
-**Issue:** `CheckedInCapabilityReportValidator.validate(reportURL:)` accepts a caller-selected URL and treats that URL's parent as the evidence root. A caller can create a temporary directory containing a syntactically valid `capability-report.json`, placeholder files at `Sources/AccrueOfflineClient/*.swift`, `Evidence/CrosswakeBridge/*.swift`, and `Evidence/Simulator/*.md`, plus a minimally complete `physical-device-evidence.md`; a uniformly `proven` report then passes `validProvenEvidence`. No fixed checked-in location, immutable bundle identifier, signature, or content hash ties the public entry point to the project-owned artifact. If a future feasibility gate uses this public method, untrusted local files can unlock it.
-
-**Fix:** Remove the public arbitrary-URL entry point. Expose only a validated loader anchored to a fixed bundle resource (and validate a signed/hashed evidence manifest), or require the expected canonical report URL and reject every other standardized URL before decoding.
+## Narrative Findings (AI reviewer)
 
 ## Warnings
 
-### WR-01: Fixture-controlled strings are interned as unbounded BEAM atoms
+### WR-01: Proven capability state accepts arbitrary non-empty files as evidence
 
-**File:** `accrue/test/support/entitlements/offline_golden_vector_verifier.ex:120`
+**File:** `examples/crosswake_tracer/Sources/AccrueOfflineClient/AccrueOfflineClient.swift:759`
+**Issue:** In the `.proven` branch, each evidence item is accepted when its path is beneath an allowed directory, has the expected extension, and is non-empty. For example, a one-line `Evidence/CrosswakeBridge/placeholder.swift` and any non-empty `Sources/AccrueOfflineClient/*.swift` pass. Neither the source content nor a build result is bound to the report. A later report edit can therefore turn `overall_status` to `proven` without a working Crosswake bridge or native proof, defeating the stated feasibility gate.
 
-**Issue:** The verifier calls `String.to_atom/1` on `expected_reason` from the JSON fixture. Atoms are never garbage-collected. A malformed or adversarial fixture containing many distinct fault reasons can exhaust the BEAM atom table and terminate the test VM rather than yielding a contract-validation error.
+**Fix:** Bind each evidence item to a checked, structured artifact rather than file existence. For example, require a signed/versioned manifest with immutable revision and SHA-256 for each compile unit, require bridge sources to be in a declared SwiftPM target, and validate a recorded successful build/test artifact for that pinned revision before returning `.proven`. Add a negative test using the current one-line placeholder files and assert validation rejects it.
 
-**Fix:** Use a closed mapping of permitted reasons, for example `Map.fetch(@reason_atoms, value)`, and return `{:error, :invalid_expected_reason}` for unknown values.
+### WR-02: Physical-device proof can be satisfied by template-like text
 
-### WR-02: Offline drift checking raises on scalar vectors
+**File:** `examples/crosswake_tracer/Sources/AccrueOfflineClient/AccrueOfflineClient.swift:781`
+**Issue:** `physicalDeviceEvidenceIsComplete` treats a physical-device record as complete if it lacks a few blocked words and contains any ISO date plus two headings. It does not require lane results, a device-class value, build invocation, attestor/reviewer identities, or non-placeholder evidence locations. A minimally edited template can therefore satisfy `.physicalDevice` and allow a report to become `.proven` despite no documented device run.
 
-**File:** `accrue/lib/accrue/entitlements/decision_cases/markdown.ex:167`
-
-**Issue:** If the checked-in `vectors` list contains a scalar such as `["corrupt"]`, `duplicate_id_drift/2` calls `Map.get/2` on that scalar and raises `BadMapError`. The same unsafe assumption appears in `vector_identity_drift/3` at line 176. Consequently `mix accrue.entitlements.decision_cases --check` crashes instead of issuing its normal drift failure for a malformed artifact.
-
-**Fix:** Verify every vector is a map before accessing `id` (for example, a `vector_id/1` helper with a non-map clause) and include a named invalid-vector diagnostic in the returned drift list.
+**Fix:** Parse a versioned, closed-schema evidence record and require each D-10 lane to include a real command/scenario, pass result, redacted evidence reference, UTC run date, attestation, and reviewer approval. Reject placeholders (`Pending`, `YYYY-MM-DD`, empty cells) structurally, and add mutation tests for each required field.
 
 ---
 
-_Reviewed: 2026-08-02T02:20:34Z_
+_Reviewed: 2026-08-02T02:46:30Z_
 _Reviewer: the agent (gsd-code-reviewer)_
 _Depth: standard_
