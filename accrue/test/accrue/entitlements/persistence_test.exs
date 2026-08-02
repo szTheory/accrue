@@ -58,6 +58,28 @@ defmodule Accrue.Entitlements.PersistenceTest do
   end
 
   @tag :observation
+  test "transaction fallback identity is globally idempotent but never crosses account ownership" do
+    account = account!("observation-fallback-owner")
+    other_account = account!("observation-fallback-owner-other")
+
+    attrs =
+      observation_attrs(account.id, %{
+        provider_event_id: nil,
+        provider_transaction_id: "tx-216-global-owner"
+      })
+
+    assert {:ok, first} = Observation.insert_idempotently(TestRepo, attrs)
+    assert {:ok, repeated} = Observation.insert_idempotently(TestRepo, attrs)
+    assert first.id == repeated.id
+
+    assert {:error, changeset} =
+             Observation.insert_idempotently(TestRepo, %{attrs | account_id: other_account.id})
+
+    assert %{account_id: ["provider identity is already owned"]} = errors_on(changeset)
+    assert TestRepo.aggregate(Observation, :count, :id) == 1
+  end
+
+  @tag :observation
   test "observation provider identifiers are bounded by bytes" do
     account = account!("observation-byte-bounds")
     attrs = observation_attrs(account.id, %{provider_event_id: String.duplicate("e", 255)})
@@ -277,6 +299,22 @@ defmodule Accrue.Entitlements.PersistenceTest do
   end
 
   @tag :grant
+  test "grant provenance identifiers are bounded by bytes" do
+    account = account!("grant-byte-bounds")
+    attrs = grant_attrs(account.id)
+
+    assert Grant.changeset(%Grant{}, %{attrs | provider_lineage_id: String.duplicate("l", 255)}).valid?
+    assert Grant.changeset(%Grant{}, %{attrs | provider_product_id: String.duplicate("p", 255)}).valid?
+
+    for field <- [:provider_lineage_id, :provider_product_id] do
+      changeset = Grant.changeset(%Grant{}, Map.put(attrs, field, String.duplicate("界", 86)))
+      refute changeset.valid?
+      assert [message] = errors_on(changeset)[field]
+      assert message =~ "byte(s)"
+    end
+  end
+
+  @tag :grant
   test "source observations must have the same account rail and environment" do
     account = account!("grant-provenance")
     other_account = account!("grant-provenance-other")
@@ -323,7 +361,9 @@ defmodule Accrue.Entitlements.PersistenceTest do
       :accrue_entitlement_grants_environment_domain_check,
       :accrue_entitlement_grants_quantity_positive_check,
       :accrue_entitlement_grants_provider_order_nonnegative_check,
-      :accrue_entitlement_grants_account_revision_nonnegative_check
+      :accrue_entitlement_grants_account_revision_nonnegative_check,
+      :accrue_ent_grants_provider_lineage_id_bytes_check,
+      :accrue_ent_grants_provider_product_id_bytes_check
     ])
 
     assert_constraint_names(Device.changeset(%Device{}, %{}), [
