@@ -680,13 +680,15 @@ public struct CapabilityReport: Codable, Sendable, Equatable {
 public enum CheckedInCapabilityReportValidator {
     public enum ValidationError: Error { case invalid }
 
-    /// The report URL is the evidence root; a data-only public entry point cannot
-    /// establish provenance and therefore must not decide runtime feasibility.
+    /// Only the checked-in report establishes the evidence root; a caller-selected
+    /// URL cannot decide runtime feasibility.
     public static func validate(reportURL: URL) throws -> FeasibilityStatus {
-        try validate(Data(contentsOf: reportURL), reportURL: reportURL)
+        guard hasCanonicalReportIdentity(reportURL) else { throw ValidationError.invalid }
+        return try validate(Data(contentsOf: reportURL), reportURL: reportURL)
     }
 
     static func validate(_ data: Data, reportURL: URL) throws -> FeasibilityStatus {
+        guard hasCanonicalReportIdentity(reportURL) else { throw ValidationError.invalid }
         let report: Report
         do { report = try JSONDecoder().decode(Report.self, from: data) }
         catch { throw ValidationError.invalid }
@@ -722,6 +724,17 @@ public enum CheckedInCapabilityReportValidator {
             else { throw ValidationError.invalid }
         }
         return status
+    }
+
+    private static func hasCanonicalReportIdentity(_ reportURL: URL) -> Bool {
+        reportURL.standardizedFileURL == canonicalReportURL()
+    }
+
+    private static func canonicalReportURL() -> URL {
+        URL(fileURLWithPath: #filePath)
+            .deletingLastPathComponent().deletingLastPathComponent().deletingLastPathComponent()
+            .appendingPathComponent("capability-report.json")
+            .standardizedFileURL
     }
 
     private static func terminalReason(_ reason: String, isProven: Bool) -> Bool {
