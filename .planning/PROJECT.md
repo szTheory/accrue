@@ -47,6 +47,8 @@ The Phase 204 hardening roadmap's top slice (**Public Truth And Proof-State Base
 
 **Current milestone: v1.59 — Account-Scoped Multi-Rail & Offline Entitlements (SEED-006).** A concrete adopter, anonymized as **B2C Alpha**, requires one account to remain entitled across Stripe web billing, Apple in-app purchase, and extended offline study in a Phoenix/Crosswake application. This satisfies the post-v1.48 reopen bar as both a sourced adopter requirement and an explicit strategy expansion with reusable value for Phoenix apps going mobile. The approved direction is a common account entitlement projection fed by rail-specific lifecycle observers, plus signed device-bound offline proof whose freshness state is interpreted by host policy; lifecycle management remains honestly rail-aware. Google Play is SEED-007 and stays backlogged until Android is scheduled or a second adopter requires it. Source: `.planning/research/MULTI-RAIL-OFFLINE-ENTITLEMENTS.md`.
 
+**Phase 215 complete (2026-08-01):** the versioned v1.59 authority bundle, canonical decision-case corpus, source-capability boundary, and checked-in Crosswake prove-or-block tracer are validated (19/19 must-haves; RSCH-01..03 and RAIL-04..05 satisfied). The canonical report remains honestly `feasibility_blocked` until genuine bridge and physical-device evidence exists, and caller-selected report roots cannot manufacture proof. Next: Phase 216, additive rail and persistence foundation.
+
 ## Current Milestone: v1.59 Account-Scoped Multi-Rail & Offline Entitlements
 
 **Goal:** Preserve one account's access across Stripe web billing, Apple in-app purchase, and extended offline study through a common entitlement projection and signed device-bound proof, while keeping lifecycle operations rail-aware and avoiding connectivity-driven learner lockout.
@@ -617,12 +619,21 @@ The v1.50→v1.54 arc (Admin UI Foundation → Depth Pass → Brand System → D
 
 ### Active
 
-- [ ] Preserve durable v1.59 research, decisions, source provenance, and watchlists as discoverable project memory.
 - [ ] Add an opt-in Stripe + Apple rail contract and additive account/grant/device/observation persistence without breaking legacy hosts.
 - [ ] Project verified rail evidence into one account snapshot with resource-aware management and duplicate-purchase prevention.
 - [ ] Verify, link, reconcile, quarantine, and repair Apple subscription evidence without heuristic ownership transfer.
 - [ ] Issue device-bound offline proof that distinguishes fresh, stale-offline, denied, and invalid states while allowing host-owned study-continuity policy.
 - [ ] Prove the anonymized Phoenix/Crosswake adopter journey with diagnostics, automatic repair, runbooks, and release gates.
+
+### Validated v1.59 (Phase 215 complete 2026-08-01)
+
+Research, contracts, and Crosswake feasibility — 5/5 requirements satisfied in Phase 215.
+
+- ✓ **RSCH-01** — One versioned v1.59 research authority records source provenance, accepted and rejected choices, and confidence.
+- ✓ **RSCH-02** — One canonical decision-case corpus drives deterministic Markdown, JSON, and offline-vector consumers.
+- ✓ **RSCH-03** — A dated owner/response watchlist and amendment workflow preserve current research memory.
+- ✓ **RAIL-04** — A typed, processor-independent source-capability contract exposes rail-specific observation, control, restore, reconciliation, management, and offline capabilities.
+- ✓ **RAIL-05** — The checked-in Crosswake tracer provides one provenance-bound prove-or-block boundary and remains fail-closed while required bridge and physical-device evidence is unavailable.
 
 ### Validated v1.55 (Phases 201-204 complete 2026-07-03)
 
@@ -770,4 +781,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-07-31 after starting v1.59 Account-Scoped Multi-Rail & Offline Entitlements.*
+*Last updated: 2026-08-01 after completing Phase 215 research, contracts, and Crosswake feasibility.*
