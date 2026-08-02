@@ -114,6 +114,101 @@ defmodule Accrue.ConfigEntitlementsTest do
     end
   end
 
+  describe "rail registration and legacy default aliasing (RAIL-01, D-01 to D-03, D-17)" do
+    test "legacy custom processors and price_ids remain untouched when rails are omitted" do
+      Application.put_env(:accrue, :processor, Accrue.ConfigEntitlementsTest.CustomProcessor)
+
+      Application.put_env(:accrue, :entitlements,
+        plans: [pro: [price_ids: ["legacy_price"]]]
+      )
+
+      assert Config.validate_at_boot!() == :ok
+      assert Config.rails() == []
+      assert Config.default_rail() == nil
+      assert Config.entitlement_product_catalog() == %{}
+      assert Application.get_env(:accrue, :processor) == Accrue.ConfigEntitlementsTest.CustomProcessor
+    end
+
+    test "a host-fake proof rail is controllable in test configuration" do
+      Application.put_env(:accrue, :processor, Accrue.Processor.Fake)
+
+      Application.put_env(:accrue, :rails,
+        host_fake: [
+          source: :host_fake,
+          processor: Accrue.Processor.Fake,
+          environments: [:sandbox],
+          default_environment: :sandbox
+        ]
+      )
+
+      Application.put_env(:accrue, :default_rail, :host_fake)
+
+      assert Config.validate_at_boot!() == :ok
+      assert Config.default_rail() == :host_fake
+    end
+
+    test "explicit defaults reject missing, unregistered, observer, and processor-mismatched rails" do
+      Application.put_env(:accrue, :processor, Accrue.Processor.Stripe)
+
+      Application.put_env(:accrue, :rails,
+        stripe: [source: :stripe, processor: Accrue.Processor.Stripe, environments: [:production]],
+        apple: [source: :apple, environments: [:production]]
+      )
+
+      for {default_rail, expected} <- [
+            {nil, "default_rail nil"},
+            {:missing, "default_rail :missing"},
+            {:apple, "default_rail :apple"}
+          ] do
+        Application.put_env(:accrue, :default_rail, default_rail)
+
+        error = assert_raise Accrue.ConfigError, fn -> Config.validate_at_boot!() end
+        assert Exception.message(error) =~ expected
+        assert Exception.message(error) =~ "registered controllable"
+      end
+
+      Application.put_env(:accrue, :rails,
+        stripe: [source: :stripe, processor: Accrue.Processor.Fake, environments: [:production]]
+      )
+
+      Application.put_env(:accrue, :default_rail, :stripe)
+
+      error = assert_raise Accrue.ConfigError, fn -> Config.validate_at_boot!() end
+      assert Exception.message(error) =~ "default_rail :stripe"
+      assert Exception.message(error) =~ "matching :processor"
+    end
+
+    test "rail declaration order and concurrent reads leave configuration unchanged" do
+      Application.put_env(:accrue, :processor, Accrue.Processor.Stripe)
+
+      rails = [
+        apple: [source: :apple, environments: [:sandbox, :production], default_environment: :production],
+        stripe: [
+          source: :stripe,
+          processor: Accrue.Processor.Stripe,
+          environments: [:production],
+          default_environment: :production
+        ]
+      ]
+
+      Application.put_env(:accrue, :rails, rails)
+      Application.put_env(:accrue, :default_rail, :stripe)
+      Application.put_env(:accrue, :entitlements, plans: [pro: [price_ids: ["price_pro"]]])
+
+      assert Config.validate_at_boot!() == :ok
+      expected = {Config.rails(), Config.default_rail(), Config.entitlement_product_catalog()}
+
+      assert Enum.all?(1..8, fn _ -> Config.validate_at_boot!() == :ok end)
+
+      assert Task.async_stream(1..8, fn _ ->
+               {Config.rails(), Config.default_rail(), Config.entitlement_product_catalog()}
+             end)
+             |> Enum.map(fn {:ok, value} -> value end) == List.duplicate(expected, 8)
+
+      assert Application.get_env(:accrue, :rails) == rails
+    end
+  end
+
   describe "invalid :entitlements config (ENT-01)" do
     test "a bad feature type (string instead of list) raises NimbleOptions.ValidationError" do
       Application.put_env(:accrue, :entitlements, plans: [pro: [features: "not-a-list"]])
