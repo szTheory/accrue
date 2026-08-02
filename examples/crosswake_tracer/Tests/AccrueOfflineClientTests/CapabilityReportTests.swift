@@ -108,6 +108,54 @@ struct CapabilityReportTests {
         }
     }
 
+    @Test("checked-in validator rejects false proof and terminal reason mutations")
+    func checkedInValidatorRejectsFalseProofAndReasonMutations() throws {
+        let source = try checkedInReportData()
+        var allProven = try reportObject(source)
+        allProven["overall_status"] = "proven"
+        allProven["reason"] = "Completed proof for every required lane."
+        allProven["capabilities"] = try rows(allProven).map { row in
+            row.merging(["status": "proven"], uniquingKeysWith: { _, new in new })
+        }
+        #expect(throws: CheckedInCapabilityReportValidator.ValidationError.self) {
+            try CheckedInCapabilityReportValidator.validate(try encoded(allProven))
+        }
+
+        var missingReason = try reportObject(source)
+        missingReason.removeValue(forKey: "reason")
+        #expect(throws: CheckedInCapabilityReportValidator.ValidationError.self) {
+            try CheckedInCapabilityReportValidator.validate(try encoded(missingReason))
+        }
+
+        var proofReasonWhileBlocked = try reportObject(source)
+        proofReasonWhileBlocked["reason"] = "Completed proof for every required lane."
+        #expect(throws: CheckedInCapabilityReportValidator.ValidationError.self) {
+            try CheckedInCapabilityReportValidator.validate(try encoded(proofReasonWhileBlocked))
+        }
+    }
+
+    private func checkedInReportData() throws -> Data {
+        try Data(contentsOf: reportURL())
+    }
+
+    private func reportURL() -> URL {
+        URL(fileURLWithPath: #filePath)
+            .deletingLastPathComponent().deletingLastPathComponent().deletingLastPathComponent()
+            .appendingPathComponent("capability-report.json")
+    }
+
+    private func reportObject(_ data: Data) throws -> [String: Any] {
+        try #require(JSONSerialization.jsonObject(with: data) as? [String: Any])
+    }
+
+    private func rows(_ object: [String: Any]) throws -> [[String: Any]] {
+        try #require(object["capabilities"] as? [[String: Any]])
+    }
+
+    private func encoded(_ object: [String: Any]) throws -> Data {
+        try JSONSerialization.data(withJSONObject: object, options: [.sortedKeys])
+    }
+
     private struct CheckedInReport: Decodable {
         let overallStatus: String
         let capabilities: [Row]
