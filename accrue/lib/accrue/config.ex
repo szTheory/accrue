@@ -1,4 +1,7 @@
 defmodule Accrue.Config do
+  alias Accrue.Entitlements.Source.Registry
+
+  @product_environments [:production, :sandbox]
   # --- Dunning campaign cadence (DUN-01, D-01/D-04/D-07) -----------------
   # Per-step NimbleOptions schema for a dunning campaign step. `template`
   # is `:atom` because module names ARE atoms — no `{:in, ...}` needed; the
@@ -48,6 +51,28 @@ defmodule Accrue.Config do
       type: :atom,
       default: Accrue.Processor.Fake,
       doc: "Processor adapter implementing `Accrue.Processor` behaviour."
+    ],
+    rails: [
+      type: :keyword_list,
+      default: [],
+      keys: [
+        *: [
+          type: :keyword_list,
+          keys: [
+            source: [type: :atom, required: true],
+            processor: [type: {:or, [:atom, nil]}, default: nil],
+            environments: [type: {:list, :atom}, default: []],
+            default_environment: [type: {:or, [:atom, nil]}, default: nil]
+          ]
+        ]
+      ],
+      doc:
+        "Additive entitlement rail registrations. Omit to retain legacy single-processor behaviour."
+    ],
+    default_rail: [
+      type: {:or, [:atom, nil]},
+      default: nil,
+      doc: "The registered controllable rail that agrees with the legacy :processor alias."
     ],
     mailer: [
       type: :atom,
@@ -472,7 +497,18 @@ defmodule Accrue.Config do
                   default: [],
                   keys: [*: [type: :pos_integer]]
                 ],
-                price_ids: [type: {:list, :string}, default: []]
+                price_ids: [type: {:list, :string}, default: []],
+                products: [
+                  type: :keyword_list,
+                  default: [],
+                  keys: [
+                    *: [
+                      type: :keyword_list,
+                      default: [],
+                      keys: [*: [type: {:list, :string}, default: []]]
+                    ]
+                  ]
+                ]
               ]
             ]
           ],
@@ -1168,6 +1204,20 @@ defmodule Accrue.Config do
     |> Keyword.put_new(:deny_path, "/")
   end
 
+  @doc "Returns configured entitlement rails, or [] when a host uses the legacy processor path."
+  @spec rails() :: keyword()
+  def rails, do: get!(:rails)
+
+  @doc "Returns the configured controllable entitlement rail, when rails are configured."
+  @spec default_rail() :: atom() | nil
+  def default_rail, do: get!(:default_rail)
+
+  @doc "Returns logical plans indexed by `{rail, environment, product_id}`."
+  @spec entitlement_product_catalog() :: %{optional({atom(), atom(), String.t()}) => atom()}
+  def entitlement_product_catalog do
+    normalized_entitlement_product_catalog(entitlements(), rails(), default_rail())
+  end
+
   defp maybe_validate_boot_setup!(opts) do
     _ = Keyword.fetch!(opts, :repo)
 
@@ -1180,9 +1230,177 @@ defmodule Accrue.Config do
     end
 
     _ = validate_entitlements_price_ids!(opts)
+    _ = validate_rails!(opts)
+    _ = validate_entitlement_product_catalog!(opts)
     _ = validate_dunning_campaign_grace!(opts)
 
     :ok
+  end
+
+  defp validate_rails!(opts) do
+    rails = Keyword.get(opts, :rails, [])
+    default_rail = Keyword.get(opts, :default_rail)
+
+    case rails do
+      [] when is_nil(default_rail) ->
+        :ok
+
+      [] ->
+        raise Accrue.ConfigError,
+          key: :default_rail,
+          message: "default_rail #{inspect(default_rail)} requires a registered rail"
+
+      _ ->
+        validate_registered_rail_sources!(rails)
+        Enum.each(rails, &validate_rail!/1)
+        validate_default_rail!(rails, default_rail, Keyword.fetch!(opts, :processor))
+    end
+  end
+
+  defp validate_registered_rail_sources!(rails) do
+    case Registry.validate(
+           Enum.map(rails, fn {_rail, config} -> Keyword.fetch!(config, :source) end)
+         ) do
+      {:ok, _sources} ->
+        :ok
+
+      {:error, _error} ->
+        raise Accrue.ConfigError,
+          key: :rails,
+          message:
+            "rails must use distinct sources registered by Accrue.Entitlements.Source.Registry"
+    end
+  end
+
+  defp validate_rail!({rail, config}) do
+    source = Keyword.fetch!(config, :source)
+    environments = Keyword.get(config, :environments, [])
+    default_environment = Keyword.get(config, :default_environment)
+
+    if rail != source do
+      raise Accrue.ConfigError,
+        key: :rails,
+        message: "rail #{inspect(rail)} must use matching registered source #{inspect(source)}"
+    end
+
+    if source == :apple and Keyword.get(config, :processor) do
+      raise Accrue.ConfigError,
+        key: :rails,
+        message: "Apple is an observer rail and must not configure a processor adapter"
+    end
+
+    unless Enum.all?(environments, &(&1 in @product_environments)) do
+      raise Accrue.ConfigError,
+        key: :rails,
+        message:
+          "rail #{inspect(rail)} environments must be one of #{inspect(@product_environments)}"
+    end
+
+    if default_environment && default_environment not in environments do
+      raise Accrue.ConfigError,
+        key: :rails,
+        message: "rail #{inspect(rail)} default_environment must be a configured environment"
+    end
+  end
+
+  defp validate_default_rail!(rails, default_rail, processor) do
+    rail = Keyword.get(rails, default_rail)
+
+    unless rail && Keyword.get(rail, :source) == :stripe &&
+             Keyword.get(rail, :processor) == processor do
+      raise Accrue.ConfigError,
+        key: :default_rail,
+        message:
+          "default_rail #{inspect(default_rail)} must be a registered controllable Stripe rail matching :processor"
+    end
+  end
+
+  defp validate_entitlement_product_catalog!(opts) do
+    _ =
+      normalized_entitlement_product_catalog(
+        opts |> Keyword.get(:entitlements, []),
+        Keyword.get(opts, :rails, []),
+        Keyword.get(opts, :default_rail)
+      )
+
+    :ok
+  end
+
+  defp normalized_entitlement_product_catalog(entitlements, rails, default_rail) do
+    plans = Keyword.get(entitlements, :plans, [])
+
+    Enum.reduce(plans, %{}, fn {plan, entry}, catalog ->
+      catalog
+      |> add_qualified_products!(plan, Keyword.get(entry, :products, []), rails)
+      |> add_default_rail_price_ids!(
+        plan,
+        Keyword.get(entry, :price_ids, []),
+        rails,
+        default_rail
+      )
+    end)
+  end
+
+  defp add_qualified_products!(catalog, plan, products, rails) do
+    Enum.reduce(products, catalog, fn {rail, environments}, catalog ->
+      rail_config = Keyword.get(rails, rail)
+
+      unless rail_config do
+        raise Accrue.ConfigError,
+          key: :entitlements,
+          message: "products for #{inspect(plan)} reference unregistered rail #{inspect(rail)}"
+      end
+
+      Enum.reduce(environments, catalog, fn {environment, product_ids}, catalog ->
+        unless environment in @product_environments and
+                 environment in Keyword.get(rail_config, :environments, []) do
+          raise Accrue.ConfigError,
+            key: :entitlements,
+            message:
+              "products for #{inspect(plan)} reference unconfigured #{inspect({rail, environment})}"
+        end
+
+        Enum.reduce(product_ids, catalog, fn product_id, catalog ->
+          put_catalog_entry!(catalog, {rail, environment, product_id}, plan)
+        end)
+      end)
+    end)
+  end
+
+  defp add_default_rail_price_ids!(catalog, _plan, [], _rails, _default_rail), do: catalog
+
+  defp add_default_rail_price_ids!(catalog, _plan, _price_ids, [], nil), do: catalog
+
+  defp add_default_rail_price_ids!(catalog, plan, price_ids, rails, default_rail) do
+    rail_config = Keyword.get(rails, default_rail)
+    environment = rail_config && Keyword.get(rail_config, :default_environment)
+
+    unless environment do
+      raise Accrue.ConfigError,
+        key: :entitlements,
+        message:
+          "price_ids for #{inspect(plan)} require a configured default rail and environment"
+    end
+
+    Enum.reduce(price_ids, catalog, fn price_id, catalog ->
+      put_catalog_entry!(catalog, {default_rail, environment, price_id}, plan)
+    end)
+  end
+
+  defp put_catalog_entry!(catalog, key, plan) do
+    case Map.fetch(catalog, key) do
+      {:ok, ^plan} ->
+        catalog
+
+      {:ok, other_plan} ->
+        raise Accrue.ConfigError,
+          key: :entitlements,
+          message:
+            "qualified product #{inspect(key)} mapped to both #{inspect(other_plan)} and #{inspect(plan)}"
+
+      :error ->
+        Map.put(catalog, key, plan)
+    end
   end
 
   # Cross-plan boot guard (D-04 / T-123-01): a single `price_id` mapped under

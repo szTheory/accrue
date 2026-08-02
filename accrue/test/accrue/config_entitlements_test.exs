@@ -37,7 +37,11 @@ defmodule Accrue.ConfigEntitlementsTest do
         value -> Application.put_env(:accrue, :entitlements, value)
       end
 
-      for {key, value} <- [processor: prev_processor, rails: prev_rails, default_rail: prev_default_rail] do
+      for {key, value} <- [
+            processor: prev_processor,
+            rails: prev_rails,
+            default_rail: prev_default_rail
+          ] do
         case value do
           :__unset__ -> Application.delete_env(:accrue, key)
           configured -> Application.put_env(:accrue, key, configured)
@@ -101,7 +105,11 @@ defmodule Accrue.ConfigEntitlementsTest do
       assert Config.validate_at_boot!() == :ok
       assert Config.rails() |> Keyword.fetch!(:stripe) |> Keyword.fetch!(:source) == :stripe
       assert Config.default_rail() == :stripe
-      assert Config.entitlement_product_catalog() == %{{:stripe, :production, "price_pro"} => :pro}
+
+      assert Config.entitlement_product_catalog() == %{
+               {:stripe, :production, "price_pro"} => :pro
+             }
+
       assert Application.get_env(:accrue, :processor) == Accrue.Processor.Stripe
     end
   end
