@@ -1,6 +1,6 @@
 ---
 phase: 215-research-contracts-and-crosswake-feasibility
-reviewed: 2026-08-02T01:42:00Z
+reviewed: 2026-08-02T02:20:34Z
 depth: standard
 files_reviewed: 20
 files_reviewed_list:
@@ -34,24 +34,26 @@ status: issues_found
 
 # Phase 215: Code Review Report
 
-**Reviewed:** 2026-08-02T01:42:00Z
+**Reviewed:** 2026-08-02T02:20:34Z
 **Depth:** standard
 **Files Reviewed:** 20
 **Status:** issues_found
 
 ## Summary
 
-The generated Elixir contract and Swift crash-cache paths were reviewed, including their test-only verifiers and checked-in feasibility evidence. The focused Elixir suite and `swift test` pass, but the public Swift capability model can still manufacture a `proven` status without any provenance validation. The contract verification code also has two malformed-input paths that can crash or permanently consume BEAM atoms instead of failing closed.
+Reassessed the current HEAD, including the 215-14 capability-report changes. The public `CapabilityReport` constructor now correctly remains blocked, resolving the prior report's false-proof finding. However, the separately public URL-based validator still treats any caller-selected directory as a trusted evidence root. Two malformed-fixture paths also fail unsafely rather than producing contract diagnostics.
+
+Verification run: the focused Elixir suite (30 tests), `mix accrue.entitlements.decision_cases --check`, `verify_v159_authority.sh`, and `swift test` all pass. These results do not exercise the arbitrary-root provenance boundary or the malformed fixture cases below.
 
 ## Critical Issues
 
-### CR-01: Public capability API can manufacture a false `proven` feasibility result
+### CR-01: Arbitrary report URLs can establish false feasibility provenance
 
-**File:** `examples/crosswake_tracer/Sources/AccrueOfflineClient/AccrueOfflineClient.swift:654`
+**File:** `examples/crosswake_tracer/Sources/AccrueOfflineClient/AccrueOfflineClient.swift:685`
 
-**Issue:** `CapabilityReport.init` reduces to `.proven` when callers supply every enum capability, mark each as `.proven`, and provide the required *labels* in `evidenceKinds`. It neither validates `CapabilityEvidence.location` nor validates the underlying files/device record. The included test demonstrates this exact false-proof construction with `location: "test://native"` at `CapabilityReportTests.swift:8-20`. This contradicts the stricter comment on the checked-in validator that a data-only entry point must not decide runtime feasibility. Any future runtime consumer of this public type can therefore unlock the feasibility gate using arbitrary caller-controlled strings.
+**Issue:** `CheckedInCapabilityReportValidator.validate(reportURL:)` accepts a caller-selected URL and treats that URL's parent as the evidence root. A caller can create a temporary directory containing a syntactically valid `capability-report.json`, placeholder files at `Sources/AccrueOfflineClient/*.swift`, `Evidence/CrosswakeBridge/*.swift`, and `Evidence/Simulator/*.md`, plus a minimally complete `physical-device-evidence.md`; a uniformly `proven` report then passes `validProvenEvidence`. No fixed checked-in location, immutable bundle identifier, signature, or content hash ties the public entry point to the project-owned artifact. If a future feasibility gate uses this public method, untrusted local files can unlock it.
 
-**Fix:** Do not expose a data-only initializer that returns `.proven`. Make the report construction/validation accept evidence URLs and run the same provenance checks as `CheckedInCapabilityReportValidator`, or make `CapabilityReport` an untrusted draft whose status is always blocked until a dedicated validated constructor returns a separately typed `ProvenCapabilityReport`.
+**Fix:** Remove the public arbitrary-URL entry point. Expose only a validated loader anchored to a fixed bundle resource (and validate a signed/hashed evidence manifest), or require the expected canonical report URL and reject every other standardized URL before decoding.
 
 ## Warnings
 
@@ -61,18 +63,18 @@ The generated Elixir contract and Swift crash-cache paths were reviewed, includi
 
 **Issue:** The verifier calls `String.to_atom/1` on `expected_reason` from the JSON fixture. Atoms are never garbage-collected. A malformed or adversarial fixture containing many distinct fault reasons can exhaust the BEAM atom table and terminate the test VM rather than yielding a contract-validation error.
 
-**Fix:** Use a closed mapping of permitted reasons (for example `Map.fetch(@reason_atoms, value)`) and return `{:error, :invalid_expected_reason}` for unknown text; never create atoms from fixture input.
+**Fix:** Use a closed mapping of permitted reasons, for example `Map.fetch(@reason_atoms, value)`, and return `{:error, :invalid_expected_reason}` for unknown values.
 
-### WR-02: Drift checking crashes on a non-object vector instead of reporting drift
+### WR-02: Offline drift checking raises on scalar vectors
 
 **File:** `accrue/lib/accrue/entitlements/decision_cases/markdown.ex:167`
 
-**Issue:** When the checked-in `vectors` array contains a scalar (for example `["corrupt"]`), `duplicate_id_drift/2` calls `Map.get/2` on that value and raises `BadMapError`. `mix accrue.entitlements.decision_cases --check` therefore crashes rather than returning the normal drift diagnostic. The same unchecked map assumption occurs in `vector_identity_drift/3` at line 176. This is a malformed-artifact path that the checker is expected to reject cleanly.
+**Issue:** If the checked-in `vectors` list contains a scalar such as `["corrupt"]`, `duplicate_id_drift/2` calls `Map.get/2` on that scalar and raises `BadMapError`. The same unsafe assumption appears in `vector_identity_drift/3` at line 176. Consequently `mix accrue.entitlements.decision_cases --check` crashes instead of issuing its normal drift failure for a malformed artifact.
 
-**Fix:** Validate that every vector is a map before reading `id`, or use a safe helper such as `defp vector_id(%{} = vector), do: Map.get(vector, "id"); defp vector_id(_), do: nil`, then return a named invalid-vector diagnostic.
+**Fix:** Verify every vector is a map before accessing `id` (for example, a `vector_id/1` helper with a non-map clause) and include a named invalid-vector diagnostic in the returned drift list.
 
 ---
 
-_Reviewed: 2026-08-02T01:42:00Z_
+_Reviewed: 2026-08-02T02:20:34Z_
 _Reviewer: the agent (gsd-code-reviewer)_
 _Depth: standard_
