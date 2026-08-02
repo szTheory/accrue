@@ -1,54 +1,25 @@
 ---
 phase: 215-research-contracts-and-crosswake-feasibility
-verified: 2026-08-01T02:36:30Z
-status: gaps_found
-score: 14/18 must-haves verified
+verified: 2026-08-02T02:49:00Z
+status: passed
+score: 19/19 must-haves verified
 behavior_unverified: 0
 overrides_applied: 0
-gaps:
-  - truth: "The decision corpus is a closed D-07 contract that implementers can safely drive from."
-    status: failed
-    reason: "DecisionCases.valid?/1 accepts arbitrary evidence.kind, continuity, and repair atoms, ignores account/device bindings, and permits negative revision_delta. Its property suite only reasserts immutable fixture values rather than exercising a decision operation."
-    artifacts:
-      - path: "accrue/lib/accrue/entitlements/decision_cases.ex"
-        issue: "Lines 73-75 and 91-96 leave claimed closed fields unconstrained."
-      - path: "accrue/test/property/entitlement_decision_cases_property_test.exs"
-        issue: "Generated inputs do not reach a reducer or implementation under test."
-    missing:
-      - "Closed validation for every D-07 field, including bindings and non-negative revision delta."
-      - "Non-vacuous tests that pass generated evidence/prior state through the consumer operation."
-  - truth: "The shared offline corpus proves the declared JWS accept/reject and cache outcomes in both Elixir and Swift."
-    status: failed
-    reason: "The checked-in fault_before_replace vector declares expected_cache_disposition=allow, but both implementations and both tests observe deny. Expected verification/cache fields are decoded yet never compared to observations; required wrong account/audience/type/algorithm cases are also absent from the corpus."
-    artifacts:
-      - path: "accrue/priv/entitlements/v1.59-offline-golden-vectors.json"
-        issue: "fault_before_replace declares allow although the tested prior cache and observed result are deny."
-      - path: "examples/crosswake_tracer/Sources/AccrueOfflineClient/AccrueOfflineClient.swift"
-        issue: "Lines 25-35 decode expected fields but do not assert them; unknown signed disposition falls through to allow."
-      - path: "accrue/test/support/entitlements/offline_golden_vector_verifier.ex"
-        issue: "Observed result is not checked against fixture expectations; high-water claims are not type-checked and unknown disposition maps to allow."
-    missing:
-      - "A complete invalid-input corpus and fixture-to-observation assertions in both language implementations."
-      - "Closed claim/disposition validation and corrected, self-validating cache expectations."
-  - truth: "A verified newer allow or same/newer signed denial replaces cached state atomically without torn or resurrected state."
-    status: failed
-    reason: "AtomicOfflineCache.replace uses one shared .<name>.candidate pathname with no lock/actor. Concurrent replacement calls can overwrite or rename each other's candidate, so the single-threaded fault test does not prove the required lifecycle/reconnect invariant. Parent-directory durability after rename is also not established."
-    artifacts:
-      - path: "examples/crosswake_tracer/Sources/AccrueOfflineClient/AccrueOfflineClient.swift"
-        issue: "Lines 100-113 use a shared candidate and unsynchronized write/rename sequence."
-      - path: "examples/crosswake_tracer/Tests/AccrueOfflineClientTests/GoldenVectorTests.swift"
-        issue: "Only serial before/after rename faults are exercised; no concurrent replacement or crash-reopen durability test exists."
-    missing:
-      - "Per-cache replacement serialization and unique candidate paths with cleanup."
-      - "A concurrent-replacement regression test and a platform-appropriate durable directory-sync/crash-reopen proof."
+re_verification:
+  previous_status: gaps_found
+  previous_score: 18/19
+  gaps_closed:
+    - "The public URL-based validator now rejects every noncanonical report root, including a complete synthetic proven report and evidence tree."
+  gaps_remaining: []
+  regressions: []
 ---
 
 # Phase 215: Research, Contracts, and Crosswake Feasibility Verification Report
 
 **Phase Goal:** Maintainers have one current, evidence-backed multi-rail contract and know whether the required Crosswake client boundary is feasible before runtime coupling begins.
-**Verified:** 2026-08-01T02:36:30Z
-**Status:** gaps_found
-**Re-verification:** No — initial verification
+**Verified:** 2026-08-02T02:49:00Z
+**Status:** passed
+**Re-verification:** Yes — after Plan 215-15 gap closure.
 
 ## Goal Achievement
 
@@ -56,65 +27,75 @@ gaps:
 
 | # | Truth | Status | Evidence |
 | --- | --- | --- | --- |
-| 1 | One current, versioned v1.59 bundle has provenance, choices, confidence, and dated watchlist. | ✓ VERIFIED | `RESEARCH-INDEX.md` leads with `v1.59-AUTHORITY.md`; authority, amendment ledger, and watchlist are dated and the authority gate passed. |
-| 2 | One decision table determines duplicate, ordering, revocation, survivor, eligibility, repair, and offline outcomes. | ✗ FAILED | Corpus/table exist, but the claimed closed D-07 validator accepts invalid contract values and the property tests do not execute a decision implementation. |
-| 3 | Hosts inspect rail capabilities through a source matrix independent of processors. | ✓ VERIFIED | Typed source registry, JSON mirror, matrix, guide, leakage gate, and 8 scoped tests passed. |
-| 4 | The tracer proves every bridge or explicitly blocks mobile runtime coupling. | ✓ VERIFIED | `capability-report.json` has all 13 required rows and overall `feasibility_blocked`; research records unavailable pinned Crosswake/device evidence and bars coupling. |
-| 5 | Server/vector/JWS results remain independent of feasibility status. | ✓ VERIFIED | Swift source declares the fixture path test-only and excludes it from capability reporting; the report and reducer contain no 215-05 inputs. |
-| 6 | Verified cache replacement is atomic across lifecycle/reconnect work. | ✗ FAILED | Shared candidate filename and no synchronization make the claimed concurrent invariant false despite serial fault tests passing. |
-| 7 | D-07 is a closed case schema. | ✗ FAILED | `valid?/1` permits arbitrary field atoms, unchecked bindings, and negative `revision_delta`. |
-| 8 | Offline vectors are derived from canonical DecisionCases. | ✓ VERIFIED | `Export.offline_vectors/0` maps canonical `DecisionCases.all/0` IDs/version/disposition; `mix ... --check` passed. |
-| 9 | Both implementations prove all required JWS claim and algorithm checks. | ✗ FAILED | Required invalid account/audience/type/algorithm corpus coverage is absent; expected fixture outcomes are not asserted. |
-| 10 | Wrong signature/key/device/account/audience/type/algorithm and ordering inputs are actually rejected. | ✗ FAILED | Only signature/key/device/ordering cases are present and tested; declared expectations are not the verification oracle. |
-| 11 | Missing Crosswake/device proof cannot waive the server/vector lane. | ✓ VERIFIED | Targeted Elixir and Swift suites run independently while report remains blocked. |
-| 12 | Contract-test failure does not become a capability-report status. | ✓ VERIFIED | No vector/JWS reference occurs in capability report/reducer source; tests are separate. |
-| 13 | Amendments preserve supersession history and no independent 72-hour policy. | ✓ VERIFIED | Ledger `V159-CLAIM-OFFLINE-001`, dated authority policy, and verifier passed. |
-| 14 | Watchlist changes require dated owner reassessment. | ✓ VERIFIED | Complete owner/response tuple contract and authority checks passed. |
-| 15 | Source inspection is processor-free and has closed ordered vocabulary. | ✓ VERIFIED | `Source`/`Registry` have fixed source/capability/state lists; matrix leakage verifier passed. |
-| 16 | Apple management gives stable external guidance; unavailable control is typed. | ✓ VERIFIED | `Registry.declaration/2` returns externally-managed Apple guidance/URL and typed unavailable error. |
-| 17 | Registry boundary cases and output order are deterministic. | ✓ VERIFIED | `validate/1`, fixed lists, and scoped source tests cover empty/duplicate/single-source behavior. |
-| 18 | Apple results cannot dispatch Stripe billing mutation paths. | ✓ VERIFIED | Registry contains inspection outcomes only; leakage gate passed. |
+| 1 | One current v1.59 bundle has provenance, choices, confidence, and a dated watchlist. | ✓ VERIFIED | `bash scripts/ci/verify_v159_authority.sh` passed; the index links the authority manifest, amendment ledger, and watchlist. |
+| 2 | One decision table determines projection, eligibility, repair, and offline-continuity outcomes. | ✓ VERIFIED | `mix accrue.entitlements.decision_cases --check` and the focused ExUnit/property/vector suite passed: 5 properties, 20 tests. |
+| 3 | Hosts inspect rail capabilities through a source matrix independent of processors. | ✓ VERIFIED | `verify_entitlement_source_matrix.sh` passed; `Source.Registry` returns typed `Outcome`/`CapabilityError` without processor dispatch. |
+| 4 | The checked-in Crosswake tracer proves every required bridge or explicitly blocks runtime coupling before later phases rely on it. | ✓ VERIFIED | The canonical report is uniformly `feasibility_blocked` for unavailable pinned bridge/device lanes; the validator can only evaluate the validator-owned canonical report path. |
+| 5 | Server/vector/JWS results remain independent of feasibility status. | ✓ VERIFIED | The Swift vector reader is documented test-only and does not feed the feasibility reducer; both vector consumers passed while the report remained blocked. |
+| 6 | A verified newer allow or same/newer signed denial cannot be undone by stale evidence across restart/reconnect. | ✓ VERIFIED | Full Swift suite passed authenticated-envelope, recovery, interprocess, and signed-denial ordering tests. |
+| 7 | D-07 is a closed case schema. | ✓ VERIFIED | Decision-case validation, deterministic export, and property coverage passed. |
+| 8 | Offline vectors are canonically bound to each DecisionCase and prove declared JWS/cache outcomes in both languages. | ✓ VERIFIED | Export drift check plus Elixir and Swift GoldenVector tests passed. |
+| 9 | Required JWS claim and algorithm checks execute in both implementations. | ✓ VERIFIED | Focused Elixir vector suite and Swift GoldenVector suite passed. |
+| 10 | Wrong signature/key/device/account/audience/type/algorithm and ordering inputs fail closed. | ✓ VERIFIED | Canonical invalid-vector, rollback, and denial-precedence regressions passed in both readers. |
+| 11 | Missing Crosswake/device proof cannot waive the server/vector lane. | ✓ VERIFIED | Vectors passed while `capability-report.json` remained uniformly `feasibility_blocked`. |
+| 12 | Contract-test failure does not become a capability-report status. | ✓ VERIFIED | Static trace: `OfflineGoldenVectorVerifier` has no feasibility-reducer input; report validation only reduces report/evidence fields. |
+| 13 | Amendments preserve supersession history and no independent 72-hour policy exists. | ✓ VERIFIED | The authority gate passed against the authority manifest and amendment ledger. |
+| 14 | Watchlist changes require dated owner reassessment. | ✓ VERIFIED | The authority/watchlist gate enforces the dated monitor/trigger/owner/response tuple. |
+| 15 | Source inspection is processor-free and uses a closed ordered vocabulary. | ✓ VERIFIED | Source-matrix conformance and processor-leakage gate passed. |
+| 16 | Apple management gives stable external guidance and unavailable control is typed. | ✓ VERIFIED | `Source.Registry` emits `externally_managed` Apple guidance/URL and typed `CapabilityError` for unavailable operations. |
+| 17 | Registry boundary cases and output order are deterministic. | ✓ VERIFIED | Registry validation and source-matrix conformance gate passed. |
+| 18 | Apple results cannot dispatch Stripe billing mutation paths. | ✓ VERIFIED | Processor-leakage gate passed. |
+| 19 | No public data-only or alternate-root route can manufacture a proven feasibility decision without canonical evidence provenance. | ✓ VERIFIED | Both validator entry points compare a standardized caller URL to the validator-derived canonical report URL before decoding; the focused complete hostile-root regression passed. |
 
-**Score:** 14/18 truths verified (0 present, behavior-unverified)
+**Score:** 19/19 truths verified (0 present, behavior-unverified).
 
 ### Required Artifacts
 
-| Artifact | Expected | Status | Details |
+| Artifact group | Expected | Status | Details |
 | --- | --- | --- | --- |
-| `v1.59-AUTHORITY.md`, amendments, watchlist verifier | Current governed research bundle | ✓ VERIFIED | Exists, substantive, linked from first index entry; shell verifier passes. |
-| DecisionCases, generated JSON/Markdown | Data-only decision contract | ⚠️ HOLLOW | Files are substantive and exporter wiring is real, but public validator/tests do not uphold the claimed closed contract. |
-| Source registry/outcome/fixture/matrix verifier | Rail-specific inspection boundary | ✓ VERIFIED | Exists, typed, wired to mirrors, and test/gate evidence passes. |
-| Crosswake Swift package/report/research record | Honest prove-or-block boundary | ✓ VERIFIED | Package compiles with no Accrue Crosswake dependency; report is fail-closed. |
-| Offline vectors and Elixir/Swift verifier tests | Merge-blocking JWS/cache proof | ✗ STUBBED PROOF | Artifacts run, but the fixture expectation oracle is disconnected and cache atomicity is only serially tested. |
+| Authority manifest, ledger, and watchlist verifier | Current governed v1.59 bundle | ✓ VERIFIED | All 3 Plan 215-02 artifacts are substantive, indexed, and gate-protected. |
+| DecisionCases and generated Markdown/JSON/offline vectors | Canonical decision contract | ✓ VERIFIED | All Plan 215-03/05/06/07/09 artifacts exist; export check proves current generated data flow. |
+| Source registry, outcomes, fixture, and matrix verifier | Rail-specific inspection boundary | ✓ VERIFIED | Typed, ordered, processor-independent artefacts are live and gate-protected. |
+| Crosswake Swift package, report, runbook, validator, and tests | Honest prove-or-block boundary | ✓ VERIFIED | 25 Swift phase artifacts are substantive and exercised by the 23-test package suite. |
+| Authenticated cache and process harness | Durable monotonic native cache proof | ✓ VERIFIED | HMAC envelope, locking, recovery, and process harness are wired by passing tests. |
+| Plan 215-15 canonical-root guard and hostile fixture | Immutable public proof authority | ✓ VERIFIED | `hasCanonicalReportIdentity` protects public and internal validation seams; the fixture has all lanes and nonempty evidence files. |
+
+All 49 declared plan artifacts exist and passed the substantive artifact check. No dynamic UI artifacts require an additional UI data-flow trace.
 
 ### Key Link Verification
 
 | From | To | Via | Status | Details |
 | --- | --- | --- | --- | --- |
-| Research index | Authority manifest | First v1.59 entry | ✓ WIRED | Explicit first link at `RESEARCH-INDEX.md:7`. |
-| Authority manifest | Amendment ledger | Precedence/ledger | ✓ WIRED | Explicit precedence link at `v1.59-AUTHORITY.md:13`. |
-| DecisionCases export | Markdown/JSON/offline vectors | Canonical exporter | ✓ WIRED | `Markdown.Export.generated/0` uses `DecisionCases.all/0`; `offline_vectors/0` copies canonical fields. |
-| Source registry | Outcome/error types | Typed inspection | ✓ WIRED | `Registry.outcome/2` constructs `Outcome` or `CapabilityError`. |
-| Matrix verifier | Capability matrix/guides | Literal parity and leakage scan | ✓ WIRED | `bash scripts/ci/verify_entitlement_source_matrix.sh` passed. |
-| Offline corpus | Elixir/Swift observations | Fixture outcome assertion | ✗ NOT WIRED | Both readers decode expected outcome fields but do not compare them to observed values. |
+| Research index | Authority manifest and amendment ledger | First v1.59 authority entry and precedence link | ✓ WIRED | Authority gate passed. |
+| DecisionCases | Markdown, JSON, and offline vectors | `Export.generated/0` reads `DecisionCases.all/0` and emits all checked-in outputs | ✓ WIRED | Export drift check passed. |
+| Source registry | Typed outcomes and capability matrix | Ordered inspection plus literal/leakage gate | ✓ WIRED | Source-matrix gate passed. |
+| Swift/Elixir readers | Canonical offline fixture and DecisionCase bindings | Exact field/identity/claim comparisons | ✓ WIRED | Both reader suites passed. |
+| `ProofHighWater` and cache writer | Shared `ProofReplacementOrder` | Signed-denial ordering before durable replacement | ✓ WIRED | Tested by the full Swift package. |
+| Public and internal report validators | Canonical `capability-report.json` | Standardized equality to validator-owned URL before decode or evidence evaluation | ✓ WIRED | Complete temporary proven root is rejected; canonical report validates as blocked. |
+| Proven rows | Evidence files | Canonical root, containment, kind, regular/nonempty file, terminal reason, and device checks | ✓ WIRED | Code path retained after the identity guard; mutation/capability suite passed. |
+
+The generic key-link helper reports nine symbolic-component links as unresolved because their `from` values are symbols rather than relative file paths. Manual source-to-test tracing above verifies those links; none is missing or partial.
 
 ### Data-Flow Trace (Level 4)
 
-| Artifact | Data Variable | Source | Produces Real Data | Status |
+| Artifact | Data variable | Source | Produces real data | Status |
 | --- | --- | --- | --- | --- |
-| Decision-table Markdown/JSON | `cases` | `DecisionCases.all/0` through `Export.generated/0` | Yes, deterministic canonical structs | ✓ FLOWING |
-| Offline vectors | canonical case map | `DecisionCases.all/0` through `offline_vectors/0` | Yes for ID/version/disposition | ✓ FLOWING |
-| Source fixture/matrix | fixed registry vocabulary/outcomes | `Source` and `Registry` | Yes, deterministic typed outcomes | ✓ FLOWING |
-| JWS observations | expected verification/cache fields | corpus JSON | No: decoded expectations never control assertion | ✗ DISCONNECTED |
+| Decision documentation and JSON | Canonical cases | `DecisionCases.all/0` through deterministic export | Yes | ✓ FLOWING |
+| Offline corpus | Case/version/disposition and expected outcomes | Generated cases/specifications into both readers | Yes | ✓ FLOWING |
+| Cache ordering after restart | Authenticated payload/revision/disposition | HMAC envelope and path-scoped coordination | Yes | ✓ FLOWING |
+| Current feasibility status | Report rows/reason | Canonical checked-in report with unavailable bridge/device evidence | Yes — returns the honest blocked disposition | ✓ FLOWING |
+| Public proven evaluation | Report URL and evidence root | Validator-owned canonical location, then evidence checks | Yes — alternate roots throw before evaluation | ✓ FLOWING |
 
 ### Behavioral Spot-Checks
 
 | Behavior | Command | Result | Status |
 | --- | --- | --- | --- |
-| Authority/watchlist drift gate | `bash scripts/ci/verify_v159_authority.sh` | `OK` | ✓ PASS |
-| Source matrix/leakage gate | `bash scripts/ci/verify_entitlement_source_matrix.sh` | `OK` | ✓ PASS |
-| Decision export and scoped ExUnit contracts | `cd accrue && mix accrue.entitlements.decision_cases --check && mix test ...` | 18 tests, 0 failures | ✓ PASS (insufficient to prove gaps) |
-| Swift capability/vector/fault tests | `swift test --filter 'CapabilityReportTests|GoldenVectorTests'` | 5 tests, 0 failures | ✓ PASS (serial only) |
+| Root-substitution resistance | `swift test --filter 'CapabilityReportTests/completeTemporaryProvenReportIsRejected'` | Complete synthetic proven tree rejected | ✓ PASS |
+| Capability report behavior | `swift test --filter CapabilityReportTests` | 9 tests, 0 failures | ✓ PASS |
+| Tracer/vector/cache contract | `swift test` | 23 tests, 0 failures | ✓ PASS |
+| Authority/watchlist contract | `bash scripts/ci/verify_v159_authority.sh` | `OK` | ✓ PASS |
+| Source matrix/leakage contract | `bash scripts/ci/verify_entitlement_source_matrix.sh` | `OK` | ✓ PASS |
+| Decision export and Elixir contract | `mix accrue.entitlements.decision_cases --check && mix test ...` | 5 properties, 20 tests, 0 failures | ✓ PASS |
 
 ### Probe Execution
 
@@ -122,52 +103,36 @@ Step 7c: SKIPPED — no phase-declared or conventional `probe-*.sh` files were f
 
 ### Requirements Coverage
 
-| Requirement | Source Plans | Description | Status | Evidence |
+| Requirement | Source plans | Description | Status | Evidence |
 | --- | --- | --- | --- | --- |
-| RSCH-01 | 215-02 | Current versioned research authority | ✓ SATISFIED | Authority/index/ledger/watchlist wiring and verifier pass. |
-| RSCH-02 | 215-03, 215-05 | Canonical decision table drives consumers | ✗ BLOCKED | D-07 validation is open; JWS vector expectation contract is internally contradictory and unwired. |
-| RSCH-03 | 215-02 | Dated change watchlist with owner/response | ✓ SATISFIED | Complete dated tuples and passing authority verifier. |
-| RAIL-04 | 215-04 | Dedicated rail capability inspection matrix | ✓ SATISFIED | Typed registry, mirrors, guard tests, and leakage gate pass. |
-| RAIL-05 | 215-01, 215-05 | Honest Crosswake prove-or-block tracer | ✗ BLOCKED | Correctly blocks coupling, but its asserted atomic proof-replacement boundary is unsafe under concurrent calls and not durably proven. |
+| RSCH-01 | 215-02, 215-08, 215-12, 215-14 | Current versioned research authority | ✓ SATISFIED | Authority/index/ledger/watchlist gate passes. |
+| RSCH-02 | 215-03, 215-05–215-10, 215-12, 215-14 | Canonical decision table drives consumers | ✓ SATISFIED | Canonical source, generated views, drift detection, and reader tests pass. |
+| RSCH-03 | 215-02, 215-08, 215-12, 215-14 | Dated owner/response watchlist | ✓ SATISFIED | Authority gate passes. |
+| RAIL-04 | 215-04, 215-08, 215-12, 215-14 | Dedicated rail capability inspection matrix | ✓ SATISFIED | Typed registry/matrix and leakage gate pass. |
+| RAIL-05 | 215-01, 215-05, 215-07–215-15 | Honest Crosswake prove-or-block tracer | ✓ SATISFIED | Canonical report explicitly blocks coupling; canonical-root guard and hostile-root regression prevent a fabricated proof authority. |
 
-No orphaned Phase 215 requirements: all five roadmap IDs appear in plan frontmatter.
+All roadmap Phase-215 requirements occur in PLAN frontmatter. No orphaned requirement was found.
 
 ### Anti-Patterns Found
 
 | File | Line | Pattern | Severity | Impact |
 | --- | --- | --- | --- | --- |
-| `decision_cases.ex` | 73-96 | Open validation presented as closed contract | 🛑 Blocker | Invalid decision cases can pass the advertised contract gate. |
-| `offline_golden_vector_verifier.ex` / Swift verifier | observed-result path | Fixture expectations parsed but unused | 🛑 Blocker | A drifted or contradictory golden vector can pass. |
-| `AccrueOfflineClient.swift` | 100-113 | Shared unsynchronized candidate pathname | 🛑 Blocker | Concurrent reconciliations can replace the wrong cache data. |
-| `entitlement_decision_cases_property_test.exs` | 19-52 | Vacuous generated properties | ⚠️ Warning | Tests do not protect future consumer behavior. |
+| `examples/crosswake_tracer/Sources/AccrueOfflineClient/AccrueOfflineClient.swift` | 751–785 | Future `.proven` evidence accepts canonical-root files by path/kind/nonempty checks and device text markers, not content hashes/build attestation. | ⚠️ WARNING | Future hardening required before converting the report to `.proven`; does not alter the current blocked result. |
+| `examples/crosswake_tracer/Sources/AccrueOfflineClient/AccrueOfflineClient.swift` | 777–785 | Physical-device completion is marker-based rather than a structured versioned record. | ⚠️ WARNING | Same future-proof concern; canonical report currently remains blocked because required bridge/device evidence is unavailable. |
 
-## Human Verification Required
+No unreferenced `TBD`, `FIXME`, or `XXX` debt marker was found in phase-modified implementation artifacts.
 
-The following backstop questions remain intentionally non-inferable and need maintainer confirmation after gaps are corrected:
+### Review-Warning Disposition
 
-### 1. Authority-bundle completeness
+`215-REVIEW.md` warnings WR-01 and WR-02 are legitimate hardening work for the later event where a maintainer proposes a `.proven` report. They are not Phase-215 blockers: the phase contract permits an evidence-backed explicit block, and the checked-in canonical artifact is uniformly `feasibility_blocked` because the pinned Crosswake bridge and physical-device evidence are unavailable. The Plan 215-15 guard removes the actual current blocker: no caller-selected complete tree can reach `.proven`.
 
-**Test:** Review whether the locked manifest, provenance, amendments, confidence, and dates contain all current v1.59 authority needed for a policy decision.
-**Expected:** A maintainer accepts the bundle boundary or records a dated amendment.
-**Why human:** Completeness of research authority cannot be inferred from file structure.
+Before changing the canonical report to `.proven`, add structured, immutable build/device-evidence attestation and negative placeholder mutations. That is a future acceptance condition, not a reason to claim current runtime coupling is feasible.
 
-### 2. Downstream reducer equivalence
+### Gaps Summary
 
-**Test:** When a production reducer exists, run it against the canonical case corpus and compare computed outcomes.
-**Expected:** Each reducer outcome matches its canonical decision case or fails closed with a named difference.
-**Why human:** Phase 215 deliberately contains no production projector/reducer.
+None. The prior canonical-report-root gap is closed and no later-phase deferral was needed.
 
-### 3. Crosswake API boundary
+---
 
-**Test:** Obtain the authoritative pinned Crosswake repository/version/build and execute the redacted physical-device proof lane.
-**Expected:** Each required bridge is proven with dated evidence, or coupling remains explicitly blocked.
-**Why human:** No authoritative Crosswake source or physical-device evidence is checked in.
-
-## Gaps Summary
-
-This phase successfully makes the Crosswake coupling decision visible: runtime coupling is correctly **blocked** pending pinned bridge and device evidence. It also delivers substantive authority and source-capability documents.
-
-However, the bundle is not yet sufficiently evidence-backed to claim the phase goal. The decision schema permits values it calls invalid; the golden-vector proof has a concrete declared-versus-observed cache contradiction and no expectation oracle; and the advertised atomic cache boundary breaks under concurrent replacement. These are blocking contract defects, not deferred Phase 219 behavior: Phase 219 owns production offline continuity, while Phase 215 explicitly claims its test/tracer boundary already proves atomic replacement.
-
-_Verified: 2026-08-01T02:36:30Z_
+_Verified: 2026-08-02T02:49:00Z_
 _Verifier: the agent (gsd-verifier)_

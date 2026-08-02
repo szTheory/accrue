@@ -41,7 +41,7 @@ Full history: [v1.58 roadmap archive](milestones/v1.58-ROADMAP.md).
 
 **Goal:** Preserve one account's access across Stripe web billing, Apple in-app purchase, and extended offline study through a common entitlement projection and signed, device-bound proof, while keeping lifecycle operations rail-aware.
 
-- [ ] **Phase 215: Research, contracts, and Crosswake feasibility** — Freeze the evidence-to-entitlement contract and prove or block required Crosswake client capabilities before runtime assumptions (RSCH-01..03, RAIL-04..05).
+- [x] **Phase 215: Research, contracts, and Crosswake feasibility** — Freeze the evidence-to-entitlement contract and prove or block required Crosswake client capabilities before runtime assumptions (RSCH-01..03, RAIL-04..05). (completed 2026-08-01)
 - [ ] **Phase 216: Additive rail and persistence foundation** — Add concurrent Stripe/Apple rails, qualified products, and durable account/observation/grant/device records without breaking legacy hosts (RAIL-01..03).
 - [ ] **Phase 217: Canonical projection and compatibility** — Project rail-qualified evidence into one revisioned account snapshot with provider-honest lifecycle and safe cross-rail purchase eligibility (ACCT-01..05).
 - [ ] **Phase 218: Apple observation and repair** — Verify, link, quarantine, reconcile, and present Apple lifecycle evidence without ownership heuristics or Stripe mutation leakage (AAPL-01..05).
@@ -198,7 +198,7 @@ Plans:
 | 214. Docs reconciliation | v1.58 | 3/3 | Complete | 2026-07-31 |
 | 214.1. Writer-documentation closure | v1.58 | 4/4 | Complete | 2026-07-31 |
 | 214.2. Diagnostic-display/pagination closure | v1.58 | 4/4 | Complete | 2026-07-31 |
-| 215. Research, contracts, and Crosswake feasibility | v1.59 | 15/15 | In Progress|  |
+| 215. Research, contracts, and Crosswake feasibility | v1.59 | 15/15 | Complete    | 2026-08-01 |
 | 216. Additive rail and persistence foundation | v1.59 | 0/TBD | Not started | - |
 | 217. Canonical projection and compatibility | v1.59 | 0/TBD | Not started | - |
 | 218. Apple observation and repair | v1.59 | 0/TBD | Not started | - |
