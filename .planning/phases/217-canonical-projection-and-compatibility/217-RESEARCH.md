@@ -312,21 +312,22 @@ end
 
 ## Assumptions Log
 
-| # | Claim | Section | Risk if Wrong |
+| # | Claim | Resolution | Evidence / executable consequence |
 |---|---|---|---|
-| A1 | The planned lifecycle registry can cover all Phase-217 in-scope gateway mutation facades without a public signature change. | Architecture Patterns | A deeper audit could require additional internal dispatch adapters. |
-| A2 | A transactional Oban insert is sufficient for the required follow-up handoff under the host’s existing Oban configuration. | Standard Stack | If a stricter outbox is required, an additional durable outbox table/task is needed. |
+| A1 | The planned lifecycle registry can cover all Phase-217 in-scope gateway mutation facades without a public signature change. | **RESOLVED** | The in-scope persisted-resource boundary is the public `%Billing.Subscription{}` / linked `%Billing.SubscriptionItem{}` facade set enumerated below. Plan 217-05 inventories and guards every member while explicitly keeping creation and other persisted resource types outside this phase. |
+| A2 | A transactional Oban insert is sufficient for the required follow-up handoff under the host’s existing Oban configuration. | **RESOLVED** | The repository already inserts Oban jobs inside `Accrue.Repo.transact/1` (`Accrue.Webhooks.DLQ.commit_requeue/1`), and tests start host-owned Oban against `Accrue.TestRepo`. Plan 217-01 uses a unique account/revision/action job inserted before commit, with abort, duplicate, retry, and stale-revision tests. No new outbox table is required. |
 
-## Open Questions
+## Resolved Questions
 
-1. **Exact backwards-compatible resolver configuration key and cohort selector**
-   - What we know: modes and semantics are locked; existing resolver is configured through `:entitlements, resolver:`.
-   - What's unclear: the validated public configuration shape for mode/cohorts.
-   - Recommendation: make this an early plan task with config validation and legacy-omission regression tests.
-2. **Complete lifecycle mutation audit boundary**
-   - What we know: `SubscriptionActions` has multiple `Processor.__impl__/0` sites; Billing, invoice, refund, payment-method, schedule, meter and item modules contain more global calls.
-   - What's unclear: which linked non-subscription actions are required for ACCT-03’s resource-aware guarantee in the current phase.
-   - Recommendation: begin with a static inventory; route every operation reachable from the named `%Billing.Subscription{}` facades now and add a tracked hard-fail/static guard for any out-of-scope resource type.
+1. **RESOLVED — backwards-compatible resolver configuration and cohort selector**
+   - Contract: `config :accrue, :entitlements, multi_rail: [mode: :disabled | :shadow | :enabled, cohort: {:accounts, [account_id]} | {module, function, extra_args}, clean_window: [started_at: DateTime.t(), ended_at: DateTime.t(), comparison_count: pos_integer()]]`.
+   - Omission of `:multi_rail` is exactly `:disabled` and retains the existing `resolver:`/`LocalMap` lane. `:shadow` and `:enabled` require an explicit cohort. The MFA is invoked as `apply(module, function, [account | extra_args])`; non-boolean, exception, or ambiguous results exclude the account and fail closed. Account lists are deduplicated/sorted opaque IDs.
+   - A clean window is the exact half-open interval `[started_at, ended_at)` with `started_at < ended_at`, at least one comparison, zero mismatch/unmapped/projection/resource-isolation blockers, and evidence bound to the selected cohort plus current catalog/config digest. There is no duration, sampling, rounding, or permissive default to invent; absent or stale evidence blocks enablement.
+   - Plan 217-04 validates this shape at boot and tests omitted/disabled/shadow/enabled, immediately included/excluded cohorts, exact start/end boundaries, zero/one comparison, stale digest, and MFA failure.
+2. **RESOLVED — complete Phase-217 lifecycle mutation audit boundary**
+   - In scope: `Billing.swap_plan/3` and bang, `cancel/2` and bang, `cancel_at_period_end/2` and bang, `resume/2` and bang, `pause/2` and bang, `unpause/2` and bang, `update_quantity/3` and bang, the `%Billing.Subscription{}` clause of `preview_upcoming_invoice/2` and bang, `add_item/3` and bang, `remove_item/2` and bang, and `update_item_quantity/3` and bang. Item operations must load/scope their parent subscription before registry resolution.
+   - Creation (`subscribe` and deterministic `customer/1`) remains on the configured default per D-16. Schedules, invoices, charges/refunds, payment methods, coupons, meters, and dunning are distinct persisted resource types and are outside the D-15 signature-preservation boundary; Plan 217-05 records them in the inventory and statically fails if a new resource type is silently added to the in-scope allowlist. D-18 separately proves that Apple management cannot reach any of those adapter families.
+   - Plan 217-05 owns a table-driven facade inventory plus runtime Fake assertions for every in-scope non-bang/bang pair and every explicitly excluded resource family.
 
 ## Environment Availability
 
