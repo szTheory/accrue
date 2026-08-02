@@ -26,6 +26,92 @@ defmodule Accrue.Entitlements.PersistenceTest do
     assert %DateTime{} = reloaded.updated_at
   end
 
+  test "unboxed PostgreSQL writers converge account and observation races without exposing another owner" do
+    owner_id = "owner-216-concurrent-account"
+    event_id = "evt-216-concurrent-observation"
+
+    try do
+      account_results =
+        run_unboxed_concurrently([
+          fn -> Account.fetch_or_create(TestRepo, "user", owner_id) end,
+          fn -> Account.fetch_or_create(TestRepo, "user", owner_id) end
+        ])
+
+      assert [{:ok, first_account}, {:ok, second_account}] = account_results
+      assert first_account.id == second_account.id
+
+      assert_unboxed_count(Account, [owner_type: "user", owner_id: owner_id], 1)
+
+      attrs = observation_attrs(first_account.id, %{provider_event_id: event_id})
+
+      same_account_results =
+        run_unboxed_concurrently([
+          fn -> Observation.insert_idempotently(TestRepo, attrs) end,
+          fn -> Observation.insert_idempotently(TestRepo, attrs) end
+        ])
+
+      assert [{:ok, first_observation}, {:ok, second_observation}] = same_account_results
+      assert first_observation.id == second_observation.id
+      assert_unboxed_count(Observation, [provider_event_id: event_id], 1)
+
+      {:ok, other_account} =
+        Ecto.Adapters.SQL.Sandbox.unboxed_run(TestRepo, fn ->
+          Account.fetch_or_create(TestRepo, "user", "owner-216-concurrent-other")
+        end)
+
+      # Race two accounts for one globally unique provider identity. PostgreSQL selects one durable
+      # row; the losing caller receives only the opaque ownership error, never the winner's row.
+      cross_account_attrs = %{attrs | provider_event_id: "evt-216-concurrent-owner"}
+
+      ownership_results =
+        run_unboxed_concurrently([
+          fn -> Observation.insert_idempotently(TestRepo, cross_account_attrs) end,
+          fn ->
+            Observation.insert_idempotently(
+              TestRepo,
+              %{cross_account_attrs | account_id: other_account.id}
+            )
+          end
+        ])
+
+      assert Enum.count(ownership_results, &match?({:ok, _}, &1)) == 1
+      assert Enum.count(ownership_results, &match?({:error, _}, &1)) == 1
+
+      assert Enum.any?(ownership_results, fn
+               {:error, changeset} ->
+                 %{account_id: ["provider identity is already owned"]} = errors_on(changeset)
+                 true
+
+               _ ->
+                 false
+             end)
+
+      assert_unboxed_count(Observation, [provider_event_id: "evt-216-concurrent-owner"], 1)
+    after
+      Ecto.Adapters.SQL.Sandbox.unboxed_run(TestRepo, fn ->
+        TestRepo.delete_all(
+          from(observation in Observation,
+            where:
+              observation.provider_event_id in ^[
+                event_id,
+                "evt-216-concurrent-owner"
+              ]
+          )
+        )
+
+        TestRepo.delete_all(
+          from(account in Account,
+            where:
+              account.owner_id in ^[
+                owner_id,
+                "owner-216-concurrent-other"
+              ]
+          )
+        )
+      end)
+    end
+  end
+
   @tag :observation
   test "event observations are idempotent and keep only bounded provenance" do
     account = account!("observation-event")
@@ -482,6 +568,75 @@ defmodule Accrue.Entitlements.PersistenceTest do
     end
   end
 
+  test "PostgreSQL rejects raw negative account revisions and retains a valid zero revision" do
+    owner_id = "owner-216-raw-account-revision"
+
+    %{rows: [[account_id, 0]]} =
+      Ecto.Adapters.SQL.query!(
+        TestRepo,
+        """
+        INSERT INTO billing.accrue_entitlement_accounts
+          (owner_type, owner_id, revision, inserted_at, updated_at)
+        VALUES ('user', $1, 0, NOW(), NOW())
+        RETURNING id, revision
+        """,
+        [owner_id]
+      )
+
+    assert {:ok, account_id} = Ecto.UUID.load(account_id)
+    assert %Account{revision: 0, owner_id: ^owner_id} = TestRepo.get!(Account, account_id)
+
+    assert_check_violation(
+      "accrue_entitlement_accounts_revision_nonnegative_check",
+      """
+      INSERT INTO billing.accrue_entitlement_accounts
+        (owner_type, owner_id, revision, inserted_at, updated_at)
+      VALUES ('user', 'owner-216-raw-account-negative', -1, NOW(), NOW())
+      """,
+      []
+    )
+  end
+
+  test "an interrupted persistence transaction leaves no partial Phase 216 row set" do
+    owner_id = "owner-216-rollback"
+
+    assert {:error, :interrupted} =
+             Ecto.Adapters.SQL.Sandbox.unboxed_run(TestRepo, fn ->
+               TestRepo.transaction(fn ->
+                 {:ok, account} = Account.fetch_or_create(TestRepo, "user", owner_id)
+
+                 {:ok, _observation} =
+                   Observation.insert_idempotently(
+                     TestRepo,
+                     observation_attrs(account.id, %{provider_event_id: "evt-216-rollback"})
+                   )
+
+                 {:ok, _grant} =
+                   TestRepo.insert(
+                     Grant.changeset(
+                       %Grant{},
+                       %{grant_attrs(account.id) | provider_lineage_id: "lineage-216-rollback"}
+                     )
+                   )
+
+                 {:ok, _device} =
+                   TestRepo.insert(
+                     Device.changeset(
+                       %Device{},
+                       %{device_attrs(account.id) | installation_id: "install-216-rollback"}
+                     )
+                   )
+
+                 TestRepo.rollback(:interrupted)
+               end)
+             end)
+
+    assert_unboxed_count(Account, [owner_id: owner_id], 0)
+    assert_unboxed_count(Observation, [provider_event_id: "evt-216-rollback"], 0)
+    assert_unboxed_count(Grant, [provider_lineage_id: "lineage-216-rollback"], 0)
+    assert_unboxed_count(Device, [installation_id: "install-216-rollback"], 0)
+  end
+
   defp observation_attrs(account_id, overrides \\ %{}) do
     Map.merge(
       %{
@@ -542,6 +697,38 @@ defmodule Accrue.Entitlements.PersistenceTest do
                  {:error, error} -> TestRepo.rollback(error)
                  {:ok, _result} -> flunk("expected #{constraint} to reject the raw write")
                end
+             end)
+  end
+
+  defp run_unboxed_concurrently(funs) do
+    parent = self()
+    ref = make_ref()
+
+    tasks =
+      Enum.map(funs, fn fun ->
+        Task.async(fn ->
+          Ecto.Adapters.SQL.Sandbox.unboxed_run(TestRepo, fn ->
+            send(parent, {ref, :ready, self()})
+
+            receive do
+              {^ref, :run} -> fun.()
+            end
+          end)
+        end)
+      end)
+
+    for _ <- funs do
+      assert_receive {^ref, :ready, _pid}, 5_000
+    end
+
+    Enum.each(tasks, &send(&1.pid, {ref, :run}))
+    Task.await_many(tasks, 10_000)
+  end
+
+  defp assert_unboxed_count(schema, clauses, expected) do
+    assert ^expected =
+             Ecto.Adapters.SQL.Sandbox.unboxed_run(TestRepo, fn ->
+               TestRepo.aggregate(from(row in schema, where: ^clauses), :count, :id)
              end)
   end
 
