@@ -3,17 +3,17 @@ gsd_state_version: 1.0
 milestone: v1.59
 milestone_name: Account-Scoped Multi-Rail & Offline Entitlements
 current_phase: 216
-current_phase_name: Additive rail and persistence foundation
+current_phase_name: additive-rail-and-persistence-foundation
 status: executing
-stopped_at: Phase 216 context gathered
-last_updated: "2026-08-02T15:23:23.954Z"
-last_activity: 2026-08-01
-last_activity_desc: Phase 215 complete, transitioned to Phase 216
+stopped_at: Completed 216-01-PLAN.md
+last_updated: "2026-08-02T15:36:50.900Z"
+last_activity: 2026-08-02
+last_activity_desc: Phase 216 execution started
 progress:
   total_phases: 6
   completed_phases: 1
   total_plans: 19
-  completed_plans: 15
+  completed_plans: 16
   percent: 17
 ---
 
@@ -25,14 +25,14 @@ See: `.planning/PROJECT.md` (updated 2026-08-01 after completing Phase 215)
 
 **Core value:** A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic Elixir DX, strong domain modeling, tamper-evident audit ledger, great observability, and zero breaking-change pain through v1.x.
 
-**Current focus:** Phase 216 — Additive rail and persistence foundation
+**Current focus:** Phase 216 — additive-rail-and-persistence-foundation
 
 ## Current Position
 
-Phase: 216 — Additive rail and persistence foundation
-Plan: Not started
+Phase: 216 (additive-rail-and-persistence-foundation) — EXECUTING
+Plan: 2 of 4
 Status: Ready to execute
-Last activity: 2026-08-01 — Phase 215 complete, transitioned to Phase 216
+Last activity: 2026-08-02 — Phase 216 execution started
 
 ## Post-v1.48 Pause Rule
 
@@ -392,6 +392,7 @@ Coverage: 22/22 v1.51 requirements mapped (each REQ-ID → exactly one phase). D
 | Phase 215 P13 | 5 min | 2 tasks | 6 files |
 | Phase 215 P14 | 4 min | 1 tasks | 2 files |
 | Phase 215 P15 | 2 min | 1 tasks | 2 files |
+| Phase 216 P01 | 6min | 1 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -761,6 +762,8 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - [Phase ?]: Only CheckedInCapabilityReportValidator.validate(reportURL:) may return proven because its URL establishes the evidence root.
 - [Phase ?]: Only the validator-owned checked-in capability-report.json URL may reach proven-producing evaluation.
 - [Phase ?]: The internal mutation-test validation seam inherits canonical report identity requirements.
+- [Phase ?]: Kept :processor as the default Stripe rail alias; Apple remains processor-free.
+- [Phase ?]: Reload account after conflict-safe insertion to return the database-authoritative UUID.
 
 ### Pending Todos
 
@@ -912,9 +915,9 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 
 ## Session Continuity
 
-Last session: 2026-08-02T14:34:38.336Z
-Stopped at: Phase 216 context gathered
-Resume file: .planning/phases/216-additive-rail-and-persistence-foundation/216-CONTEXT.md
+Last session: 2026-08-02T15:36:50.885Z
+Stopped at: Completed 216-01-PLAN.md
+Resume file: None
 
 ## Operator Next Steps
 
