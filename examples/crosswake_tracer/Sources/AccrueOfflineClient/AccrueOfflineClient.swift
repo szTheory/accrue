@@ -20,21 +20,144 @@ public struct GoldenVectorObservation: Sendable, Equatable {
 /// to capability-report feasibility and is intentionally unavailable to app runtime.
 public enum OfflineGoldenVectorVerifier {
     public static func verifyFixture() throws -> [GoldenVectorObservation] {
-        let fixture = URL(fileURLWithPath: #filePath)
+        let fixture = try fixtureData()
+        return try verify(
+            candidate: fixture.corpus,
+            baseline: fixture.corpus,
+            decisionCases: fixture.decisionCases,
+            keyData: fixture.key
+        )
+    }
+
+    /// Test-only seam: candidate bytes are always checked against the unmodified generated corpus.
+    static func fixtureData() throws -> (corpus: Data, decisionCases: Data, key: Data) {
+        let corpusURL = URL(fileURLWithPath: #filePath)
             .deletingLastPathComponent().deletingLastPathComponent().deletingLastPathComponent()
             .deletingLastPathComponent().deletingLastPathComponent()
             .appendingPathComponent("accrue/priv/entitlements/v1.59-offline-golden-vectors.json")
-        let corpus = try JSONDecoder().decode(Corpus.self, from: Data(contentsOf: fixture))
-        let keyURL = fixture.deletingLastPathComponent().appendingPathComponent("v1.59-offline-test-key.jwk.json")
-        let key = try JSONDecoder().decode(TestKey.self, from: Data(contentsOf: keyURL))
-        let observations = corpus.vectors.map { observe($0, key: key) }.sorted { $0.id < $1.id }
-        for (vector, observation) in zip(corpus.vectors.sorted { $0.id < $1.id }, observations) {
+        let decisionCasesURL = corpusURL.deletingLastPathComponent().appendingPathComponent("v1.59-decision-cases.json")
+        let keyURL = corpusURL.deletingLastPathComponent().appendingPathComponent("v1.59-offline-test-key.jwk.json")
+        return (try Data(contentsOf: corpusURL), try Data(contentsOf: decisionCasesURL), try Data(contentsOf: keyURL))
+    }
+
+    /// This is deliberately internal and test-only. It binds candidate fixture bytes to generated
+    /// corpus and decision-case bytes before any JWS or cache observation can execute.
+    static func verify(
+        candidate: Data,
+        baseline: Data,
+        decisionCases: Data,
+        keyData: Data
+    ) throws -> [GoldenVectorObservation] {
+        let canonical = try decodeCorpus(baseline, source: .baseline)
+        let candidateCorpus = try decodeCorpus(candidate, source: .candidate, canonical: canonical)
+        let cases = try JSONDecoder().decode(DecisionCaseCorpus.self, from: decisionCases)
+        let caseMap = Dictionary(uniqueKeysWithValues: cases.cases.map { ($0.id, $0) })
+        guard caseMap.count == cases.cases.count else { throw GoldenVectorContractError.decisionCases("duplicate id") }
+
+        for vector in candidateCorpus.vectors {
+            guard let caseData = caseMap[vector.caseID] else {
+                throw GoldenVectorContractError.vectorField(vector.id, "case_id")
+            }
+            guard vector.contractVersion == caseData.contractVersion else {
+                throw GoldenVectorContractError.vectorField(vector.id, "contract_version")
+            }
+            guard vector.expectedDisposition == caseData.expected.disposition else {
+                throw GoldenVectorContractError.vectorField(vector.id, "expected_disposition")
+            }
+        }
+
+        let key = try JSONDecoder().decode(TestKey.self, from: keyData)
+        let observations = candidateCorpus.vectors.map { observe($0, key: key) }.sorted { $0.id < $1.id }
+        for (vector, observation) in zip(candidateCorpus.vectors.sorted { $0.id < $1.id }, observations) {
             guard vector.expectedVerification == observation.result.rawValue,
                   vector.expectedReason == observation.reason,
                   vector.expectedCacheDisposition == observation.cache.rawValue
             else { throw GoldenVectorContractError.expectationMismatch(vector.id) }
         }
         return observations
+    }
+
+    private static let topLevelKeys: Set<String> = ["purpose", "schema_version", "vectors"]
+    private static let requiredVectorKeys: Set<String> = [
+        "id", "case_id", "contract_version", "expected_disposition", "compact_jws",
+        "expected_verification", "expected_reason", "expected_cache_disposition"
+    ]
+
+    private static func decodeCorpus(_ data: Data, source: CorpusSource, canonical: Corpus? = nil) throws -> Corpus {
+        guard let object = try JSONSerialization.jsonObject(with: data) as? [String: Any] else {
+            throw GoldenVectorContractError.topLevel("root")
+        }
+        try validateTopLevel(object, canonical: canonical)
+        guard let rawVectors = object["vectors"] as? [[String: Any]] else {
+            throw GoldenVectorContractError.topLevel("vectors")
+        }
+
+        var ids = Set<String>()
+        for (index, rawVector) in rawVectors.enumerated() {
+            let identifier = rawVector["id"] as? String ?? "#\(index)"
+            try validateInitialVectorKeys(rawVector, id: identifier)
+            guard let id = rawVector["id"] as? String else {
+                throw GoldenVectorContractError.vectorField(identifier, "id")
+            }
+            guard ids.insert(id).inserted else { throw GoldenVectorContractError.duplicateID(id) }
+        }
+
+        let corpus = try JSONDecoder().decode(Corpus.self, from: data)
+        guard source == .baseline || ids == Set(canonical!.vectors.map(\.id)) else {
+            throw GoldenVectorContractError.vectorIdentitySet
+        }
+        if let canonical {
+            let canonicalMap = Dictionary(uniqueKeysWithValues: canonical.vectors.map { ($0.id, $0) })
+            for vector in corpus.vectors {
+                guard let expected = canonicalMap[vector.id] else { throw GoldenVectorContractError.vectorIdentitySet }
+                try validateExactVectorKeys(rawVectors.first { ($0["id"] as? String) == vector.id }!, expected: expected, id: vector.id)
+                try validateBinding(vector, expected: expected)
+            }
+        } else {
+            for vector in corpus.vectors {
+                try validateExactVectorKeys(rawVectors.first { ($0["id"] as? String) == vector.id }!, expected: vector, id: vector.id)
+            }
+        }
+        return corpus
+    }
+
+    private static func validateTopLevel(_ object: [String: Any], canonical: Corpus?) throws {
+        guard Set(object.keys) == topLevelKeys else {
+            let difference = Set(object.keys).symmetricDifference(topLevelKeys).sorted().first ?? "root"
+            throw GoldenVectorContractError.topLevel(difference)
+        }
+        guard let purpose = object["purpose"] as? String else { throw GoldenVectorContractError.topLevel("purpose") }
+        guard let schemaVersion = object["schema_version"] as? String else { throw GoldenVectorContractError.topLevel("schema_version") }
+        if let canonical {
+            guard purpose == canonical.purpose else { throw GoldenVectorContractError.topLevel("purpose") }
+            guard schemaVersion == canonical.schemaVersion else { throw GoldenVectorContractError.topLevel("schema_version") }
+        }
+    }
+
+    private static func validateInitialVectorKeys(_ vector: [String: Any], id: String) throws {
+        let keys = Set(vector.keys)
+        for key in requiredVectorKeys where !keys.contains(key) { throw GoldenVectorContractError.vectorField(id, key) }
+        for key in keys where !requiredVectorKeys.contains(key) && key != "fault_point" { throw GoldenVectorContractError.vectorField(id, key) }
+    }
+
+    private static func validateExactVectorKeys(_ raw: [String: Any], expected: Vector, id: String) throws {
+        var expectedKeys = requiredVectorKeys
+        if expected.faultPoint != nil { expectedKeys.insert("fault_point") }
+        guard Set(raw.keys) == expectedKeys else {
+            let key = Set(raw.keys).symmetricDifference(expectedKeys).sorted().first ?? "schema"
+            throw GoldenVectorContractError.vectorField(id, key)
+        }
+    }
+
+    private static func validateBinding(_ candidate: Vector, expected: Vector) throws {
+        if candidate.caseID != expected.caseID { throw GoldenVectorContractError.vectorField(candidate.id, "case_id") }
+        if candidate.contractVersion != expected.contractVersion { throw GoldenVectorContractError.vectorField(candidate.id, "contract_version") }
+        if candidate.expectedDisposition != expected.expectedDisposition { throw GoldenVectorContractError.vectorField(candidate.id, "expected_disposition") }
+        if candidate.compactJWS != expected.compactJWS { throw GoldenVectorContractError.vectorField(candidate.id, "compact_jws") }
+        if candidate.expectedVerification != expected.expectedVerification { throw GoldenVectorContractError.vectorField(candidate.id, "expected_verification") }
+        if candidate.expectedReason != expected.expectedReason { throw GoldenVectorContractError.vectorField(candidate.id, "expected_reason") }
+        if candidate.expectedCacheDisposition != expected.expectedCacheDisposition { throw GoldenVectorContractError.vectorField(candidate.id, "expected_cache_disposition") }
+        if candidate.faultPoint != expected.faultPoint { throw GoldenVectorContractError.vectorField(candidate.id, "fault_point") }
     }
 
     private static func observe(_ vector: Vector, key: TestKey) -> GoldenVectorObservation {
@@ -80,16 +203,35 @@ public enum OfflineGoldenVectorVerifier {
         return payload
     }
 
-    private struct Corpus: Decodable { let vectors: [Vector] }
+    private enum CorpusSource { case baseline, candidate }
+    private struct Corpus: Decodable {
+        let purpose: String
+        let schemaVersion: String
+        let vectors: [Vector]
+
+        enum CodingKeys: String, CodingKey { case purpose; case schemaVersion = "schema_version"; case vectors }
+    }
     private struct Vector: Decodable {
         let id: String
+        let caseID: String
+        let contractVersion: String
+        let expectedDisposition: String
         let compactJWS: String
         let expectedVerification: String
         let expectedReason: String
         let expectedCacheDisposition: String
         let faultPoint: String?
-        enum CodingKeys: String, CodingKey { case id; case compactJWS = "compact_jws"; case expectedVerification = "expected_verification"; case expectedReason = "expected_reason"; case expectedCacheDisposition = "expected_cache_disposition"; case faultPoint = "fault_point" }
+        enum CodingKeys: String, CodingKey { case id; case caseID = "case_id"; case contractVersion = "contract_version"; case expectedDisposition = "expected_disposition"; case compactJWS = "compact_jws"; case expectedVerification = "expected_verification"; case expectedReason = "expected_reason"; case expectedCacheDisposition = "expected_cache_disposition"; case faultPoint = "fault_point" }
     }
+    private struct DecisionCaseCorpus: Decodable { let cases: [DecisionCase] }
+    private struct DecisionCase: Decodable {
+        let id: String
+        let contractVersion: String
+        let expected: Expected
+
+        enum CodingKeys: String, CodingKey { case id; case contractVersion = "contract_version"; case expected }
+    }
+    private struct Expected: Decodable { let disposition: String }
     private struct Payload {
         let iss, aud, typ: String
         let accountID, deviceID, cnf: String
@@ -116,7 +258,25 @@ public enum OfflineGoldenVectorVerifier {
     private struct TestKey: Decodable { let x: String; let y: String; var point: Data { Data([4]) + Data(base64URLEncoded: x)! + Data(base64URLEncoded: y)! }; static let invalid = TestKey(x: "bad", y: "bad") }
     private struct Context { let account, device: String; let revision, iat, freshness, now: Int64; let prior: GoldenVectorCache; let wrongKey: Bool; static func forVector(_ id: String) -> Context { switch id { case "wrong_key": return Context(account: "account-123", device: "device-123", revision: 0, iat: 0, freshness: 1_700_000_001, now: 1_700_000_001, prior: .allow, wrongKey: true); case "wrong_device": return Context(account: "account-123", device: "device-999", revision: 0, iat: 0, freshness: 1_700_000_001, now: 1_700_000_001, prior: .allow, wrongKey: false); case "rollback": return Context(account: "account-123", device: "device-123", revision: 6, iat: 1_700_000_000, freshness: 1_700_000_001, now: 1_700_000_001, prior: .deny, wrongKey: false); case "older_iat": return Context(account: "account-123", device: "device-123", revision: 5, iat: 1_700_000_001, freshness: 1_700_000_001, now: 1_700_000_001, prior: .deny, wrongKey: false); case "stale_freshness": return Context(account: "account-123", device: "device-123", revision: 5, iat: 1_700_000_000, freshness: 1_700_003_601, now: 1_700_000_001, prior: .allow, wrongKey: false); case "fault_before_replace": return Context(account: "account-123", device: "device-123", revision: 0, iat: 0, freshness: 1_700_000_001, now: 1_700_000_001, prior: .deny, wrongKey: false); default: return Context(account: "account-123", device: "device-123", revision: 0, iat: 0, freshness: 1_700_000_001, now: 1_700_000_001, prior: .allow, wrongKey: false) } } }
     private enum GoldenVectorError: Error { case malformed, signature, key, algorithm, issuer, audience, type, account, device, thumbprint, revision, rollback, iat, freshness, disposition; var reason: String { switch self { case .malformed: "malformed"; case .signature: "signature"; case .key: "key"; case .algorithm: "algorithm"; case .issuer: "issuer"; case .audience: "audience"; case .type: "type"; case .account: "account"; case .device: "device"; case .thumbprint: "thumbprint"; case .revision: "revision"; case .rollback: "rollback"; case .iat: "iat"; case .freshness: "freshness"; case .disposition: "disposition" } } }
-    private enum GoldenVectorContractError: Error { case expectationMismatch(String) }
+    private enum GoldenVectorContractError: Error, CustomStringConvertible {
+        case topLevel(String)
+        case vectorField(String, String)
+        case duplicateID(String)
+        case vectorIdentitySet
+        case decisionCases(String)
+        case expectationMismatch(String)
+
+        var description: String {
+            switch self {
+            case let .topLevel(field): "offline corpus top-level \(field) is invalid"
+            case let .vectorField(id, field): "offline corpus vector \(id) \(field) is invalid"
+            case let .duplicateID(id): "offline corpus duplicate vector id \(id)"
+            case .vectorIdentitySet: "offline corpus vector identity set is invalid"
+            case let .decisionCases(reason): "offline decision cases \(reason)"
+            case let .expectationMismatch(id): "offline corpus vector \(id) observation is invalid"
+            }
+        }
+    }
 
 }
 

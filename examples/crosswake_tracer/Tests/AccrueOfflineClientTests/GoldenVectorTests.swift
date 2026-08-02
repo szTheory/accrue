@@ -47,13 +47,20 @@ struct GoldenVectorTests {
                 vectors[0][field] = "mutated-\(field)"
             }
             candidate["vectors"] = vectors
-            #expect(try validationError(encode(candidate), fixture: fixture).contains("vector \(originalID)"))
+            let error = try validationError(encode(candidate), fixture: fixture)
+            #expect(error.contains(field == "id" ? "vector identity set" : "vector \(originalID) \(field)"))
         }
 
         var missingKey = try corpusObject(fixture.corpus)
         var vectors = missingKey["vectors"] as! [[String: Any]]
         let faultVectorIndex = vectors.firstIndex { $0["fault_point"] != nil }!
         let faultVectorID = vectors[faultVectorIndex]["id"] as! String
+        var changedFault = try corpusObject(fixture.corpus)
+        var changedFaultVectors = changedFault["vectors"] as! [[String: Any]]
+        changedFaultVectors[faultVectorIndex]["fault_point"] = "mutated-fault"
+        changedFault["vectors"] = changedFaultVectors
+        #expect(try validationError(encode(changedFault), fixture: fixture).contains("vector \(faultVectorID) fault_point"))
+
         vectors[faultVectorIndex].removeValue(forKey: "fault_point")
         missingKey["vectors"] = vectors
         #expect(try validationError(encode(missingKey), fixture: fixture).contains("vector \(faultVectorID) fault_point"))
@@ -111,19 +118,19 @@ struct GoldenVectorTests {
 
         vectors[0]["case_id"] = "unknown_case"
         baseline["vectors"] = vectors
-        #expect(try validationError(fixture.corpus, baseline: encode(baseline), fixture: fixture).contains("vector \(id) case_id"))
+        #expect(try validationError(encode(baseline), baseline: encode(baseline), fixture: fixture).contains("vector \(id) case_id"))
 
         baseline = try corpusObject(fixture.corpus)
         vectors = baseline["vectors"] as! [[String: Any]]
         vectors[0]["contract_version"] = "v0"
         baseline["vectors"] = vectors
-        #expect(try validationError(fixture.corpus, baseline: encode(baseline), fixture: fixture).contains("vector \(id) contract_version"))
+        #expect(try validationError(encode(baseline), baseline: encode(baseline), fixture: fixture).contains("vector \(id) contract_version"))
 
         baseline = try corpusObject(fixture.corpus)
         vectors = baseline["vectors"] as! [[String: Any]]
         vectors[0]["expected_disposition"] = "not-canonical"
         baseline["vectors"] = vectors
-        #expect(try validationError(fixture.corpus, baseline: encode(baseline), fixture: fixture).contains("vector \(id) expected_disposition"))
+        #expect(try validationError(encode(baseline), baseline: encode(baseline), fixture: fixture).contains("vector \(id) expected_disposition"))
     }
 
     @Test("cache replacement exposes only the old or complete new verified state")
