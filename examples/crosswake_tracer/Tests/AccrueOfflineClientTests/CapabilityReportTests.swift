@@ -20,6 +20,20 @@ struct CapabilityReportTests {
         #expect(report.overallStatus == .proven)
     }
 
+    @Test("unsupported public capability report schemas fail feasibility closed")
+    func unsupportedSchemaBlocksOtherwiseProvenReport() {
+        let evidence = Capability.allRequired.map {
+            CapabilityEvidence(
+                capability: $0,
+                status: .proven,
+                evidenceKinds: $0.requiredEvidenceKinds,
+                location: "test://native"
+            )
+        }
+
+        #expect(CapabilityReport(schemaVersion: "2.0", capabilities: evidence).overallStatus == .feasibilityBlocked)
+    }
+
     @Test("missing bridge or device evidence fails feasibility closed")
     func missingEvidenceBlocksFeasibility() {
         for failure in [
