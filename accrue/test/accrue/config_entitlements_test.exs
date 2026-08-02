@@ -209,6 +209,138 @@ defmodule Accrue.ConfigEntitlementsTest do
     end
   end
 
+  describe "qualified product catalog normalization (RAIL-02, D-04 to D-06)" do
+    setup do
+      Application.put_env(:accrue, :processor, Accrue.Processor.Stripe)
+
+      Application.put_env(:accrue, :rails,
+        stripe: [
+          source: :stripe,
+          processor: Accrue.Processor.Stripe,
+          environments: [:sandbox, :production],
+          default_environment: :production
+        ],
+        apple: [
+          source: :apple,
+          environments: [:sandbox, :production],
+          default_environment: :production
+        ]
+      )
+
+      Application.put_env(:accrue, :default_rail, :stripe)
+      :ok
+    end
+
+    test "normalizes nested products by their full rail/environment/product tuple" do
+      Application.put_env(:accrue, :entitlements,
+        plans: [
+          pro: [products: [apple: [sandbox: ["same"], production: ["apple_pro"]]]],
+          enterprise: [products: [stripe: [production: ["same"], sandbox: ["stripe_sandbox"]]]]
+        ]
+      )
+
+      assert Config.validate_at_boot!() == :ok
+
+      assert Config.entitlement_product_catalog() == %{
+               {:apple, :sandbox, "same"} => :pro,
+               {:apple, :production, "apple_pro"} => :pro,
+               {:stripe, :production, "same"} => :enterprise,
+               {:stripe, :sandbox, "stripe_sandbox"} => :enterprise
+             }
+    end
+
+    test "rejects offline and unregistered provider catalog locations" do
+      Application.put_env(:accrue, :entitlements,
+        plans: [pro: [products: [apple: [offline: ["offline_proof"]]]]]
+      )
+
+      error = assert_raise Accrue.ConfigError, fn -> Config.validate_at_boot!() end
+      assert Exception.message(error) =~ "{:apple, :offline}"
+
+      Application.put_env(:accrue, :entitlements,
+        plans: [pro: [products: [unknown: [production: ["unregistered"]]]]]
+      )
+
+      error = assert_raise Accrue.ConfigError, fn -> Config.validate_at_boot!() end
+      assert Exception.message(error) =~ "unregistered rail :unknown"
+    end
+
+    test "deduplicates same-plan tuples and names both plans for exact tuple collisions" do
+      Application.put_env(:accrue, :entitlements,
+        plans: [pro: [products: [stripe: [production: ["price_pro", "price_pro"]]]]]
+      )
+
+      assert Config.validate_at_boot!() == :ok
+      assert Config.entitlement_product_catalog() == %{{:stripe, :production, "price_pro"} => :pro}
+
+      Application.put_env(:accrue, :entitlements,
+        plans: [
+          pro: [products: [stripe: [production: ["price_shared"]]]],
+          enterprise: [products: [stripe: [production: ["price_shared"]]]]
+        ]
+      )
+
+      error = assert_raise Accrue.ConfigError, fn -> Config.validate_at_boot!() end
+      message = Exception.message(error)
+      assert message =~ "pro"
+      assert message =~ "enterprise"
+      assert message =~ "{:stripe, :production, \"price_shared\"}"
+    end
+
+    test "expands bare price_ids only into the default rail/environment and catches alias collisions" do
+      Application.put_env(:accrue, :entitlements,
+        plans: [
+          pro: [price_ids: ["price_shared"]],
+          enterprise: [products: [stripe: [production: ["price_shared"]]]]
+        ]
+      )
+
+      error = assert_raise Accrue.ConfigError, fn -> Config.validate_at_boot!() end
+      message = Exception.message(error)
+      assert message =~ "pro"
+      assert message =~ "enterprise"
+      assert message =~ "{:stripe, :production, \"price_shared\"}"
+    end
+
+    test "reports default-alias collisions as qualified tuples, not raw identifiers" do
+      Application.put_env(:accrue, :entitlements,
+        plans: [
+          pro: [price_ids: ["price_shared"]],
+          enterprise: [price_ids: ["price_shared"]]
+        ]
+      )
+
+      error = assert_raise Accrue.ConfigError, fn -> Config.validate_at_boot!() end
+      message = Exception.message(error)
+      assert message =~ "pro"
+      assert message =~ "enterprise"
+      assert message =~ "{:stripe, :production, \"price_shared\"}"
+    end
+
+    test "empty, singleton, reordered, repeated, and concurrent reads remain deterministic" do
+      Application.put_env(:accrue, :entitlements, plans: [])
+      assert Config.validate_at_boot!() == :ok
+      assert Config.entitlement_product_catalog() == %{}
+
+      plans = [
+        enterprise: [products: [apple: [production: ["apple_enterprise"]]]],
+        pro: [price_ids: ["stripe_pro"]]
+      ]
+
+      Application.put_env(:accrue, :entitlements, plans: plans)
+      assert Config.validate_at_boot!() == :ok
+      expected = Config.entitlement_product_catalog()
+      assert map_size(expected) == 2
+      assert Enum.all?(1..8, fn _ -> Config.entitlement_product_catalog() == expected end)
+
+      assert Task.async_stream(1..8, fn _ -> Config.entitlement_product_catalog() end)
+             |> Enum.map(fn {:ok, value} -> value end) == List.duplicate(expected, 8)
+
+      Application.put_env(:accrue, :entitlements, plans: Enum.reverse(plans))
+      assert Config.entitlement_product_catalog() == expected
+    end
+  end
+
   describe "invalid :entitlements config (ENT-01)" do
     test "a bad feature type (string instead of list) raises NimbleOptions.ValidationError" do
       Application.put_env(:accrue, :entitlements, plans: [pro: [features: "not-a-list"]])
