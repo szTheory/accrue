@@ -1,5 +1,6 @@
 import Testing
 import Foundation
+import CryptoKit
 @testable import AccrueOfflineClient
 
 struct GoldenVectorTests {
@@ -145,6 +146,45 @@ struct GoldenVectorTests {
         #expect(try String(contentsOf: cache.url) == "deny")
         #expect(throws: AtomicOfflineCache.Fault.afterRename) { try cache.replace(with: Data("deny-new".utf8), fault: AtomicOfflineCache.Fault.afterRename) }
         #expect(try String(contentsOf: cache.url) == "deny-new")
+    }
+
+    @Test("authenticated envelopes bind payload revision disposition and cache path")
+    func authenticatedEnvelopeRejectsTampering() throws {
+        let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: directory) }
+        let key = SymmetricKey(data: Data("test-cache-authentication-key-32bytes".utf8))
+        let cache = AtomicOfflineCache(url: directory.appendingPathComponent("entitlement.json"), authenticationKey: key)
+
+        try cache.replace(with: Data("denial-proof".utf8), disposition: .deny, revision: 9)
+        #expect(try cache.recoveredEnvelope()?.payload == Data("denial-proof".utf8))
+        #expect(try cache.recoveredEnvelope()?.revision == 9)
+        #expect(try cache.recoveredEnvelope()?.disposition == .deny)
+
+        var bytes = try Data(contentsOf: cache.url)
+        bytes[bytes.startIndex] ^= 1
+        try bytes.write(to: cache.url)
+        #expect(throws: AtomicOfflineCache.CacheError.authenticationFailed) { try cache.recoveredEnvelope() }
+    }
+
+    @Test("fresh authenticated cache restores denial high-water before replacement")
+    func freshHandleRefusesOlderAllowAfterPersistedDenial() throws {
+        let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: directory) }
+        let key = SymmetricKey(data: Data("test-cache-authentication-key-32bytes".utf8))
+        let url = directory.appendingPathComponent("entitlement.json")
+
+        try AtomicOfflineCache(url: url, authenticationKey: key).replace(
+            with: Data("deny-r7".utf8), disposition: .deny, revision: 7
+        )
+        let restarted = AtomicOfflineCache(url: url, authenticationKey: key)
+        try restarted.replace(with: Data("allow-r6".utf8), disposition: .allow, revision: 6)
+
+        let envelope = try #require(restarted.recoveredEnvelope())
+        #expect(envelope.payload == Data("deny-r7".utf8))
+        #expect(envelope.revision == 7)
+        #expect(envelope.disposition == .deny)
     }
 
     @Test("independent handles serialize replacements, preserve denial precedence, and clean candidates")
