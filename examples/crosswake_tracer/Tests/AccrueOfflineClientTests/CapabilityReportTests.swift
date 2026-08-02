@@ -90,7 +90,7 @@ struct CapabilityReportTests {
         let report = try JSONDecoder().decode(CheckedInReport.self, from: Data(contentsOf: reportURL))
         #expect(report.overallStatus == "feasibility_blocked")
         #expect(report.capabilities.allSatisfy { $0.status == "feasibility_blocked" })
-        #expect(try CheckedInCapabilityReportValidator.validate(Data(contentsOf: reportURL)) == .feasibilityBlocked)
+        #expect(try CheckedInCapabilityReportValidator.validate(reportURL: reportURL) == .feasibilityBlocked)
     }
 
     @Test("checked-in report rejects duplicate, mixed, and false-proven capability states")
@@ -104,7 +104,7 @@ struct CapabilityReportTests {
         rows[1]["capability"] = rows[0]["capability"]
         object["capabilities"] = rows
         #expect(throws: CheckedInCapabilityReportValidator.ValidationError.self) {
-            try CheckedInCapabilityReportValidator.validate(JSONSerialization.data(withJSONObject: object))
+            try CheckedInCapabilityReportValidator.validate(JSONSerialization.data(withJSONObject: object), reportURL: reportURL)
         }
     }
 
@@ -118,19 +118,19 @@ struct CapabilityReportTests {
             row.merging(["status": "proven"], uniquingKeysWith: { _, new in new })
         }
         #expect(throws: CheckedInCapabilityReportValidator.ValidationError.self) {
-            try CheckedInCapabilityReportValidator.validate(try encoded(allProven))
+            try CheckedInCapabilityReportValidator.validate(try encoded(allProven), reportURL: reportURL())
         }
 
         var missingReason = try reportObject(source)
         missingReason.removeValue(forKey: "reason")
         #expect(throws: CheckedInCapabilityReportValidator.ValidationError.self) {
-            try CheckedInCapabilityReportValidator.validate(try encoded(missingReason))
+            try CheckedInCapabilityReportValidator.validate(try encoded(missingReason), reportURL: reportURL())
         }
 
         var proofReasonWhileBlocked = try reportObject(source)
         proofReasonWhileBlocked["reason"] = "Completed proof for every required lane."
         #expect(throws: CheckedInCapabilityReportValidator.ValidationError.self) {
-            try CheckedInCapabilityReportValidator.validate(try encoded(proofReasonWhileBlocked))
+            try CheckedInCapabilityReportValidator.validate(try encoded(proofReasonWhileBlocked), reportURL: reportURL())
         }
     }
 

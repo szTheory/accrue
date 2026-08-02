@@ -681,7 +681,13 @@ public struct CapabilityReport: Codable, Sendable, Equatable {
 public enum CheckedInCapabilityReportValidator {
     public enum ValidationError: Error { case invalid }
 
-    public static func validate(_ data: Data) throws -> FeasibilityStatus {
+    /// The report URL is the evidence root; a data-only public entry point cannot
+    /// establish provenance and therefore must not decide runtime feasibility.
+    public static func validate(reportURL: URL) throws -> FeasibilityStatus {
+        try validate(Data(contentsOf: reportURL), reportURL: reportURL)
+    }
+
+    static func validate(_ data: Data, reportURL: URL) throws -> FeasibilityStatus {
         let report: Report
         do { report = try JSONDecoder().decode(Report.self, from: data) }
         catch { throw ValidationError.invalid }
@@ -695,7 +701,7 @@ public enum CheckedInCapabilityReportValidator {
                   row.requiredEvidenceKinds.count == Set(row.requiredEvidenceKinds).count,
                   Set(row.evidence.map(\.kind)) == row.capability.requiredEvidenceKinds,
                   row.evidence.count == Set(row.evidence.map(\.kind)).count,
-                  row.evidence.allSatisfy({ !$0.location.isEmpty })
+                  row.evidence.allSatisfy({ !$0.location.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty })
             else { throw ValidationError.invalid }
         }
         let statuses = Set(report.capabilities.map(\.status))
@@ -704,20 +710,77 @@ public enum CheckedInCapabilityReportValidator {
         }
         switch status {
         case .proven:
-            guard report.capabilities.allSatisfy({ $0.status == .proven }) else { throw ValidationError.invalid }
+            guard report.capabilities.allSatisfy({ $0.status == .proven }),
+                  terminalReason(report.reason, isProven: true),
+                  try report.capabilities.allSatisfy({ row in
+                      try row.evidence.allSatisfy { try validProvenEvidence($0, reportURL: reportURL) }
+                  })
+            else { throw ValidationError.invalid }
         case .feasibilityBlocked:
             guard report.capabilities.allSatisfy({ $0.status == .feasibilityBlocked }),
+                  terminalReason(report.reason, isProven: false),
                   report.capabilities.flatMap(\.evidence).contains(where: { $0.location.hasPrefix("unavailable:") })
             else { throw ValidationError.invalid }
         }
         return status
     }
 
+    private static func terminalReason(_ reason: String, isProven: Bool) -> Bool {
+        let normalized = reason.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        guard !normalized.isEmpty else { return false }
+        if isProven {
+            return normalized.contains("completed") && normalized.contains("proof") &&
+                !["unavailable", "blocked", "pending", "advisory", "template"].contains(where: normalized.contains)
+        }
+        return (normalized.contains("unavailable") || normalized.contains("blocked")) &&
+            !normalized.contains("completed proof")
+    }
+
+    private static func validProvenEvidence(_ evidence: Evidence, reportURL: URL) throws -> Bool {
+        let location = evidence.location.trimmingCharacters(in: .whitespacesAndNewlines)
+        let lowered = location.lowercased()
+        guard !location.isEmpty,
+              !location.hasPrefix("/"),
+              !["unavailable:", "pending", "advisory", "template"].contains(where: lowered.contains)
+        else { return false }
+
+        let root = reportURL.deletingLastPathComponent().standardizedFileURL
+        let resolved = root.appendingPathComponent(location).standardizedFileURL
+        guard resolved.path.hasPrefix(root.path + "/"),
+              let values = try? resolved.resourceValues(forKeys: [.isRegularFileKey, .fileSizeKey]),
+              values.isRegularFile == true,
+              (values.fileSize ?? 0) > 0
+        else { return false }
+
+        let relativePath = resolved.path.replacingOccurrences(of: root.path + "/", with: "")
+        switch evidence.kind {
+        case .nativeCompileUnit:
+            return relativePath.hasPrefix("Sources/AccrueOfflineClient/") && resolved.pathExtension == "swift"
+        case .crosswakeBridgeCompileUnit:
+            return relativePath.hasPrefix("Evidence/CrosswakeBridge/") && resolved.pathExtension == "swift"
+        case .simulatorAdvisory:
+            return relativePath.hasPrefix("Evidence/Simulator/") && resolved.pathExtension == "md"
+        case .physicalDevice:
+            guard relativePath == "physical-device-evidence.md" else { return false }
+            return physicalDeviceEvidenceIsComplete(try String(contentsOf: resolved))
+        }
+    }
+
+    private static func physicalDeviceEvidenceIsComplete(_ text: String) -> Bool {
+        let lowered = text.lowercased()
+        guard !["pending", "yyyy-mm-dd", "attestor: `pending`", "reviewer approval: `pending`", "blocked pending"].contains(where: lowered.contains),
+              lowered.contains("redaction attestation"),
+              lowered.contains("reviewer approval")
+        else { return false }
+        return text.range(of: #"\b\d{4}-\d{2}-\d{2}\b"#, options: .regularExpression) != nil
+    }
+
     private struct Report: Decodable {
         let schemaVersion: String
         let overallStatus: FeasibilityStatus
+        let reason: String
         let capabilities: [Row]
-        enum CodingKeys: String, CodingKey { case schemaVersion = "schema_version", overallStatus = "overall_status", capabilities }
+        enum CodingKeys: String, CodingKey { case schemaVersion = "schema_version", overallStatus = "overall_status", reason, capabilities }
     }
     private struct Row: Decodable {
         let capability: Capability
