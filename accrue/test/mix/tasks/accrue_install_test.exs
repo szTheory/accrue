@@ -134,6 +134,19 @@ defmodule Mix.Tasks.Accrue.InstallTest do
              )
            )
 
+    assert File.exists?(
+             Path.join(
+               app,
+               "priv/repo/migrations/20260802180000_harden_accrue_entitlement_persistence.exs"
+             )
+           )
+
+    assert InstallFixture.assert_contains!(
+             app,
+             "priv/repo/migrations/20260802180000_harden_accrue_entitlement_persistence.exs",
+             "accrue_entitlement_accounts_revision_nonnegative_check"
+           )
+
     assert InstallFixture.assert_contains!(
              app,
              "priv/repo/migrations/99999999999999_revoke_accrue_events_writes.exs",

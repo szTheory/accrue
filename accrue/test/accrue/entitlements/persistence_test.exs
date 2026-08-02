@@ -120,7 +120,10 @@ defmodule Accrue.Entitlements.PersistenceTest do
     assert is_nil(event_observation.provider_transaction_id)
 
     refute Observation.ingest_changeset(
-             observation_attrs(account.id, %{provider_event_id: " ", provider_transaction_id: "\n"})
+             observation_attrs(account.id, %{
+               provider_event_id: " ",
+               provider_transaction_id: "\n"
+             })
            ).valid?
   end
 
@@ -145,7 +148,10 @@ defmodule Accrue.Entitlements.PersistenceTest do
           String.duplicate("a", 256)
         ] do
       refute Observation.ingest_changeset(
-               observation_attrs(account.id, %{evidence_ref: reference, evidence_expires_at: expiry})
+               observation_attrs(account.id, %{
+                 evidence_ref: reference,
+                 evidence_expires_at: expiry
+               })
              ).valid?
     end
   end
@@ -243,6 +249,7 @@ defmodule Accrue.Entitlements.PersistenceTest do
 
     attrs = Map.put(grant_attrs(account.id), :source_observation_id, observation.id)
     assert {:ok, _grant} = TestRepo.insert(Grant.changeset(%Grant{}, attrs))
+
     assert {:ok, _grant} =
              TestRepo.insert(
                Grant.changeset(%Grant{}, %{grant_attrs(account.id) | source_item_id: "nil-source"})
@@ -256,6 +263,34 @@ defmodule Accrue.Entitlements.PersistenceTest do
       assert {:error, changeset} = TestRepo.insert(Grant.changeset(%Grant{}, invalid))
       assert %{source_observation_id: [_]} = errors_on(changeset)
     end
+  end
+
+  test "changesets map every durable persistence check constraint" do
+    assert_constraint_names(Account.changeset(%Account{}, %{}), [
+      :accrue_entitlement_accounts_revision_nonnegative_check
+    ])
+
+    assert_constraint_names(Observation.ingest_changeset(%{}), [
+      :accrue_entitlement_observations_rail_domain_check,
+      :accrue_entitlement_observations_environment_domain_check,
+      :accrue_entitlement_observations_state_domain_check,
+      :accrue_entitlement_observations_provider_order_nonnegative_check,
+      :accrue_entitlement_observations_retry_count_nonnegative_check
+    ])
+
+    assert_constraint_names(Grant.changeset(%Grant{}, %{}), [
+      :accrue_entitlement_grants_rail_domain_check,
+      :accrue_entitlement_grants_environment_domain_check,
+      :accrue_entitlement_grants_quantity_positive_check,
+      :accrue_entitlement_grants_provider_order_nonnegative_check,
+      :accrue_entitlement_grants_account_revision_nonnegative_check
+    ])
+
+    assert_constraint_names(Device.changeset(%Device{}, %{}), [
+      :accrue_entitlement_devices_state_domain_check,
+      :accrue_entitlement_devices_last_accepted_revision_nonnegative_check,
+      :accrue_entitlement_devices_lifecycle_check
+    ])
   end
 
   defp observation_attrs(account_id, overrides \\ %{}) do
@@ -310,4 +345,9 @@ defmodule Accrue.Entitlements.PersistenceTest do
 
   defp errors_on(changeset),
     do: Ecto.Changeset.traverse_errors(changeset, fn {message, _} -> message end)
+
+  defp assert_constraint_names(changeset, expected) do
+    names = Enum.map(changeset.constraints, & &1.constraint)
+    assert Enum.all?(expected, &(&1 in names))
+  end
 end
