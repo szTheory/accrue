@@ -4,17 +4,17 @@ milestone: v1.59
 milestone_name: Account-Scoped Multi-Rail & Offline Entitlements
 current_phase: 215
 current_phase_name: research-contracts-and-crosswake-feasibility
-status: executing
-stopped_at: Completed 215-10-PLAN.md
-last_updated: "2026-08-02T00:14:55.324Z"
+status: verifying
+stopped_at: Completed 215-11-PLAN.md
+last_updated: "2026-08-02T00:21:04.513Z"
 last_activity: 2026-08-01
 last_activity_desc: Phase 215 execution started
 progress:
   total_phases: 6
-  completed_phases: 0
+  completed_phases: 1
   total_plans: 11
-  completed_plans: 10
-  percent: 0
+  completed_plans: 11
+  percent: 17
 ---
 
 # Project State
@@ -31,7 +31,7 @@ See: `.planning/PROJECT.md` (updated 2026-07-31 after starting v1.59)
 
 Phase: 215 (research-contracts-and-crosswake-feasibility) — EXECUTING
 Plan: 11 of 11
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-08-01 — Phase 215 execution started
 
 ## Post-v1.48 Pause Rule
@@ -387,6 +387,7 @@ Coverage: 22/22 v1.51 requirements mapped (each REQ-ID → exactly one phase). D
 | Phase 215 P08 | 4m | 2 tasks | 5 files |
 | Phase 215-research-contracts-and-crosswake-feasibility P09 | 18m | 2 tasks | 6 files |
 | Phase 215 P10 | 4m | 1 tasks | 2 files |
+| Phase 215-research-contracts-and-crosswake-feasibility P11 | 6 min | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -746,6 +747,8 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - [Phase ?]: Decision table renders canonical continuity separately from lease; offline corpus validation rejects complete schema and canonical metadata drift.
 - [Phase ?]: Swift test fixtures bind exactly to the generated corpus and decision-case metadata before JWS or cache observation.
 - [Phase ?]: Passing Swift contract tests do not establish Crosswake bridge or physical-device feasibility.
+- [Phase ?]: Authenticated cache envelopes bind payload, ordering metadata, and standardized path with a caller-supplied HMAC key.
+- [Phase ?]: Per-path advisory locks serialize cache restore through durable replacement across processes.
 
 ### Pending Todos
 
@@ -897,8 +900,8 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 
 ## Session Continuity
 
-Last session: 2026-08-02T00:14:55.315Z
-Stopped at: Completed 215-10-PLAN.md
+Last session: 2026-08-02T00:21:04.503Z
+Stopped at: Completed 215-11-PLAN.md
 Resume file: None
 
 ## Operator Next Steps
