@@ -205,7 +205,11 @@ defmodule Accrue.Entitlements.Observation do
   end
 
   defp valid_metadata?(%{} = metadata) when map_size(metadata) == 0, do: true
-  defp valid_metadata?(%{"source" => source}) when source in @metadata_sources, do: true
+
+  defp valid_metadata?(%{"source" => source} = metadata)
+       when map_size(metadata) == 1 and source in @metadata_sources,
+       do: true
+
   defp valid_metadata?(_metadata), do: false
 
   defp validate_evidence_pair(changeset) do
