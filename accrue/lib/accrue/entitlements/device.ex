@@ -34,6 +34,11 @@ defmodule Accrue.Entitlements.Device do
     |> validate_required(@required)
     |> validate_number(:last_accepted_revision, greater_than_or_equal_to: 0)
     |> validate_lifecycle_timestamps()
+    |> check_constraint(:state, name: :accrue_entitlement_devices_state_domain_check)
+    |> check_constraint(:last_accepted_revision,
+      name: :accrue_entitlement_devices_last_accepted_revision_nonnegative_check
+    )
+    |> check_constraint(:state, name: :accrue_entitlement_devices_lifecycle_check)
     |> foreign_key_constraint(:account_id, name: :accrue_entitlement_devices_account_id_fkey)
     |> unique_constraint(:installation_id,
       name: :accrue_entitlement_devices_current_installation_identity_index

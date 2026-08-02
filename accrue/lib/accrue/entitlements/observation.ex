@@ -93,6 +93,17 @@ defmodule Accrue.Entitlements.Observation do
     |> check_constraint(:evidence_ref,
       name: :accrue_entitlement_observations_evidence_reference_locator_check
     )
+    |> check_constraint(:rail, name: :accrue_entitlement_observations_rail_domain_check)
+    |> check_constraint(:environment,
+      name: :accrue_entitlement_observations_environment_domain_check
+    )
+    |> check_constraint(:state, name: :accrue_entitlement_observations_state_domain_check)
+    |> check_constraint(:provider_order,
+      name: :accrue_entitlement_observations_provider_order_nonnegative_check
+    )
+    |> check_constraint(:retry_count,
+      name: :accrue_entitlement_observations_retry_count_nonnegative_check
+    )
   end
 
   @doc "Inserts an observation once and returns the durable row selected by PostgreSQL."

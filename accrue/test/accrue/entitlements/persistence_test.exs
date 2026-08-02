@@ -347,7 +347,7 @@ defmodule Accrue.Entitlements.PersistenceTest do
     do: Ecto.Changeset.traverse_errors(changeset, fn {message, _} -> message end)
 
   defp assert_constraint_names(changeset, expected) do
-    names = Enum.map(changeset.constraints, & &1.constraint)
-    assert Enum.all?(expected, &(&1 in names))
+    names = Enum.map(changeset.constraints, &to_string(&1.constraint))
+    assert Enum.all?(expected, &(to_string(&1) in names))
   end
 end

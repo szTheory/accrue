@@ -30,6 +30,9 @@ defmodule Accrue.Entitlements.Account do
     |> cast(attrs, [:owner_type, :owner_id, :revision])
     |> validate_required([:owner_type, :owner_id])
     |> validate_number(:revision, greater_than_or_equal_to: 0)
+    |> check_constraint(:revision,
+      name: :accrue_entitlement_accounts_revision_nonnegative_check
+    )
     |> unique_constraint(:owner_id, name: :accrue_entitlement_accounts_owner_identity_index)
   end
 

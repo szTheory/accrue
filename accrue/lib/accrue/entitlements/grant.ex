@@ -49,6 +49,15 @@ defmodule Accrue.Entitlements.Grant do
     |> foreign_key_constraint(:source_observation_id,
       name: :accrue_entitlement_grants_source_observation_scope_fkey
     )
+    |> check_constraint(:rail, name: :accrue_entitlement_grants_rail_domain_check)
+    |> check_constraint(:environment, name: :accrue_entitlement_grants_environment_domain_check)
+    |> check_constraint(:quantity, name: :accrue_entitlement_grants_quantity_positive_check)
+    |> check_constraint(:provider_order,
+      name: :accrue_entitlement_grants_provider_order_nonnegative_check
+    )
+    |> check_constraint(:account_revision,
+      name: :accrue_entitlement_grants_account_revision_nonnegative_check
+    )
     |> unique_constraint(:provider_lineage_id,
       name: :accrue_entitlement_grants_current_identity_index
     )
