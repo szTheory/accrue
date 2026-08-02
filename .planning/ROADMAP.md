@@ -130,10 +130,17 @@ Plans:
 **Plans**: 4 plans
 
 Plans:
+**Wave 1**
 
 - [ ] 216-01-PLAN.md — Prove concurrent rail configuration through one durable entitlement-account tracer.
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
 - [ ] 216-02-PLAN.md — Complete legacy aliasing and rail/environment-qualified catalog normalization.
 - [ ] 216-03-PLAN.md — Add qualified grants, idempotent observations, and account-scoped device persistence.
+
+**Wave 3** *(blocked on Wave 2 completion)*
+
 - [ ] 216-04-PLAN.md — Ship deterministic fixtures and propagate config/migrations through installer guidance.
 
 ### Phase 217: Canonical projection and compatibility

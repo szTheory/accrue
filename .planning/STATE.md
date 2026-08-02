@@ -4,15 +4,15 @@ milestone: v1.59
 milestone_name: Account-Scoped Multi-Rail & Offline Entitlements
 current_phase: 216
 current_phase_name: Additive rail and persistence foundation
-status: planning
+status: executing
 stopped_at: Phase 216 context gathered
-last_updated: "2026-08-02T14:34:38.357Z"
+last_updated: "2026-08-02T15:23:23.954Z"
 last_activity: 2026-08-01
 last_activity_desc: Phase 215 complete, transitioned to Phase 216
 progress:
   total_phases: 6
   completed_phases: 1
-  total_plans: 15
+  total_plans: 19
   completed_plans: 15
   percent: 17
 ---
@@ -31,7 +31,7 @@ See: `.planning/PROJECT.md` (updated 2026-08-01 after completing Phase 215)
 
 Phase: 216 — Additive rail and persistence foundation
 Plan: Not started
-Status: Ready to plan
+Status: Ready to execute
 Last activity: 2026-08-01 — Phase 215 complete, transitioned to Phase 216
 
 ## Post-v1.48 Pause Rule
