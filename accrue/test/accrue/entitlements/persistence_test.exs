@@ -53,7 +53,9 @@ defmodule Accrue.Entitlements.PersistenceTest do
 
     assert TestRepo.aggregate(Observation, :count, :id) == 2
 
-    assert Observation.ingest_changeset(Map.delete(attrs, :provider_event_id)).valid? == false
+    refute Observation.ingest_changeset(
+             Map.drop(attrs, [:provider_event_id, :provider_transaction_id])
+           ).valid?
 
     refute Observation.ingest_changeset(Map.put(attrs, :evidence_ref, "opaque://evidence/1")).valid?
 
