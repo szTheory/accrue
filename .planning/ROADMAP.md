@@ -127,7 +127,7 @@ Plans:
   2. A host can map each rail/environment product identifier to one logical plan without identifier collisions across rails or Apple sandbox and production.
   3. An account’s observations, grants, devices, provenance, quarantine state, and ordering data persist with stable identity and transactional uniqueness.
 
-**Plans**: 5/6 plans executed
+**Plans**: 6/6 plans executed
 
 Plans:
 
@@ -150,7 +150,7 @@ Plans:
 
 **Wave 5** *(blocked on Wave 4 completion)*
 
-- [ ] 216-06-PLAN.md — Close remaining RAIL-03 gaps with account-safe global observation identity, provider-provenance byte limits, and executable PostgreSQL bypass proofs.
+- [x] 216-06-PLAN.md — Close remaining RAIL-03 gaps with account-safe global observation identity, provider-provenance byte limits, and executable PostgreSQL bypass proofs.
 
 ### Phase 217: Canonical projection and compatibility
 
@@ -222,7 +222,7 @@ Plans:
 | 214.1. Writer-documentation closure | v1.58 | 4/4 | Complete | 2026-07-31 |
 | 214.2. Diagnostic-display/pagination closure | v1.58 | 4/4 | Complete | 2026-07-31 |
 | 215. Research, contracts, and Crosswake feasibility | v1.59 | 15/15 | Complete    | 2026-08-01 |
-| 216. Additive rail and persistence foundation | v1.59 | 4/5 | In Progress|  |
+| 216. Additive rail and persistence foundation | v1.59 | 6/6 | In Progress|  |
 | 217. Canonical projection and compatibility | v1.59 | 0/TBD | Not started | - |
 | 218. Apple observation and repair | v1.59 | 0/TBD | Not started | - |
 | 219. Offline study contract | v1.59 | 0/TBD | Not started | - |

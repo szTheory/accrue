@@ -14,7 +14,7 @@ Tagline: *"Billing state, modeled clearly."*
 
 **stable-core / demand-driven expansion.** As of **2026-05-31**, Accrue is considered **done enough for its declared scope**: the canonical SaaS billing loop is complete, the dual-provider gateway subscription core is bounded and documented, and the remaining work is release readiness, maintenance, support-contract hardening, or explicitly justified strategic expansion.
 
-**Verification posture:** UAT and verification should be executable by default (unit, integration, contract, browser, screenshot, or accessibility as appropriate). External credentials and irreversible publishing are authorization gates, not UAT.
+**Verification posture:** Testable behavior must use executable unit, integration, contract, browser, screenshot, or accessibility evidence; do not use human verification when that evidence exists. Genuine product decisions, credentials, and irreversible external actions remain authorization gates rather than UAT.
 
 Default future milestone posture:
 - Prefer **release-readiness, maintenance, documentation truth, verifier hardening, and adopter-proof closure** over new product surface.
