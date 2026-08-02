@@ -8,6 +8,8 @@ defmodule Accrue.Entitlements.Device do
   @primary_key {:id, :binary_id, autogenerate: true}
   @foreign_key_type :binary_id
   @states [:active, :revoked, :superseded]
+  @opaque_identifier_max_bytes 255
+  @opaque_identifier_pattern ~r/\A[A-Za-z0-9][A-Za-z0-9._:-]*\z/
 
   schema "accrue_entitlement_devices" do
     belongs_to(:account, Accrue.Entitlements.Account, type: :binary_id)
@@ -32,6 +34,8 @@ defmodule Accrue.Entitlements.Device do
     device_or_changeset
     |> cast(attrs, @fields)
     |> validate_required(@required)
+    |> validate_opaque_identifier(:installation_id)
+    |> validate_opaque_identifier(:key_thumbprint)
     |> validate_number(:last_accepted_revision, greater_than_or_equal_to: 0)
     |> validate_lifecycle_timestamps()
     |> check_constraint(:state, name: :accrue_entitlement_devices_state_domain_check)
@@ -39,6 +43,12 @@ defmodule Accrue.Entitlements.Device do
       name: :accrue_entitlement_devices_last_accepted_revision_nonnegative_check
     )
     |> check_constraint(:state, name: :accrue_entitlement_devices_lifecycle_check)
+    |> check_constraint(:installation_id,
+      name: :accrue_ent_devices_installation_id_opaque_check
+    )
+    |> check_constraint(:key_thumbprint,
+      name: :accrue_ent_devices_key_thumbprint_opaque_check
+    )
     |> foreign_key_constraint(:account_id, name: :accrue_entitlement_devices_account_id_fkey)
     |> unique_constraint(:installation_id,
       name: :accrue_entitlement_devices_current_installation_identity_index
@@ -46,6 +56,22 @@ defmodule Accrue.Entitlements.Device do
     |> unique_constraint(:key_thumbprint,
       name: :accrue_entitlement_devices_current_thumbprint_identity_index
     )
+  end
+
+  # Phase 216 treats both values as bounded opaque tokens. Proof verification,
+  # digest algorithms, and thumbprint encodings are deliberately deferred.
+  defp validate_opaque_identifier(changeset, field) do
+    case get_field(changeset, field) do
+      value when is_binary(value) ->
+        changeset
+        |> validate_length(field, max: @opaque_identifier_max_bytes, count: :bytes)
+        |> validate_format(field, @opaque_identifier_pattern,
+          message: "must be a bounded opaque identifier"
+        )
+
+      _ ->
+        changeset
+    end
   end
 
   defp validate_lifecycle_timestamps(changeset) do

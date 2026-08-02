@@ -252,19 +252,26 @@ defmodule Accrue.Entitlements.PersistenceTest do
   end
 
   @tag :device
-  test "device registrations reject empty identity and invalid revision or lifecycle" do
+  test "device registrations require bounded opaque identities and valid lifecycle state" do
     account = account!("device-invalid")
     attrs = device_attrs(account.id)
 
     for invalid <- [
           %{installation_id: ""},
           %{key_thumbprint: nil},
+          %{installation_id: "Jane Doe iPhone"},
+          %{key_thumbprint: "customer@example.com"},
+          %{installation_id: "{\"device\":\"payload\"}"},
+          %{key_thumbprint: String.duplicate("a", 256)},
           %{state: :unknown},
           %{last_accepted_revision: -1},
           %{revoked_at: ~U[2026-08-02 16:00:00.000000Z]}
         ] do
       refute Device.changeset(%Device{}, Map.merge(attrs, invalid)).valid?
     end
+
+    assert Device.changeset(%Device{}, %{attrs | installation_id: "install:216.1"}).valid?
+    assert Device.changeset(%Device{}, %{attrs | key_thumbprint: "thumbprint-216"}).valid?
   end
 
   @tag :grant
@@ -378,7 +385,9 @@ defmodule Accrue.Entitlements.PersistenceTest do
     assert_constraint_names(Device.changeset(%Device{}, %{}), [
       :accrue_entitlement_devices_state_domain_check,
       :accrue_entitlement_devices_last_accepted_revision_nonnegative_check,
-      :accrue_entitlement_devices_lifecycle_check
+      :accrue_entitlement_devices_lifecycle_check,
+      :accrue_ent_devices_installation_id_opaque_check,
+      :accrue_ent_devices_key_thumbprint_opaque_check
     ])
   end
 
@@ -446,6 +455,31 @@ defmodule Accrue.Entitlements.PersistenceTest do
       """,
       [account.id]
     )
+  end
+
+  test "PostgreSQL rejects non-opaque device identifiers on direct writes" do
+    account = account!("raw-device-identifier")
+
+    for {field, value, constraint} <- [
+          {"installation_id", "Jane Doe iPhone",
+           "accrue_ent_devices_installation_id_opaque_check"},
+          {"key_thumbprint", "customer@example.com",
+           "accrue_ent_devices_key_thumbprint_opaque_check"}
+        ] do
+      assert_check_violation(
+        constraint,
+        """
+        INSERT INTO billing.accrue_entitlement_devices
+          (account_id, installation_id, key_thumbprint, state, registered_at, last_accepted_revision,
+           inserted_at, updated_at)
+        VALUES ($1::text::uuid,
+                CASE WHEN $2 = 'installation_id' THEN $3 ELSE 'install-direct-write' END,
+                CASE WHEN $2 = 'key_thumbprint' THEN $3 ELSE 'thumbprint-direct-write' END,
+                'active', NOW(), 0, NOW(), NOW())
+        """,
+        [account.id, field, value]
+      )
+    end
   end
 
   defp observation_attrs(account_id, overrides \\ %{}) do
