@@ -16,7 +16,25 @@ defmodule Accrue.Entitlements.OfflineGoldenVectorsTest do
 
     Enum.each(observations, fn observation ->
       assert observation.result in [:accept, :reject]
-      assert observation.reason in [:ok, :signature, :key, :algorithm, :device, :account, :audience, :type, :malformed, :revision, :rollback, :iat, :freshness, :disposition, :fault_before_replace, :fault_after_replace]
+
+      assert observation.reason in [
+               :ok,
+               :signature,
+               :key,
+               :algorithm,
+               :device,
+               :account,
+               :audience,
+               :type,
+               :malformed,
+               :revision,
+               :rollback,
+               :iat,
+               :freshness,
+               :disposition,
+               :fault_before_replace,
+               :fault_after_replace
+             ]
     end)
   end
 
@@ -27,7 +45,13 @@ defmodule Accrue.Entitlements.OfflineGoldenVectorsTest do
 
     assert unknown["expected_verification"] == "reject"
     assert unknown["expected_reason"] == "disposition"
-    assert observed == %{id: "unknown_disposition", result: :reject, reason: :disposition, cache: :allow}
+
+    assert observed == %{
+             id: "unknown_disposition",
+             result: :reject,
+             reason: :disposition,
+             cache: :allow
+           }
   end
 
   test "the reader binds every vector to canonical case, version, disposition, and identity metadata" do
@@ -45,7 +69,10 @@ defmodule Accrue.Entitlements.OfflineGoldenVectorsTest do
       diagnostic = "offline corpus: vector #{first["id"]} #{field}"
 
       assert {:error, ^diagnostic} =
-               OfflineGoldenVectorVerifier.validate_corpus(%{fixture | "vectors" => [Map.put(first, field, value) | rest]})
+               OfflineGoldenVectorVerifier.validate_corpus(%{
+                 fixture
+                 | "vectors" => [Map.put(first, field, value) | rest]
+               })
     end
 
     assert canonical.contract_version == first["contract_version"]
@@ -62,7 +89,9 @@ defmodule Accrue.Entitlements.OfflineGoldenVectorsTest do
 
   defp expected_tuples(vectors) do
     Enum.map(vectors, fn vector ->
-      {vector["id"], String.to_atom(vector["expected_verification"]), String.to_atom(vector["expected_reason"]), String.to_atom(vector["expected_cache_disposition"])}
+      {vector["id"], String.to_atom(vector["expected_verification"]),
+       String.to_atom(vector["expected_reason"]),
+       String.to_atom(vector["expected_cache_disposition"])}
     end)
   end
 
@@ -73,5 +102,6 @@ defmodule Accrue.Entitlements.OfflineGoldenVectorsTest do
     |> Jason.decode!()
   end
 
-  defp observed_tuples(observations), do: Enum.map(observations, &{&1.id, &1.result, &1.reason, &1.cache})
+  defp observed_tuples(observations),
+    do: Enum.map(observations, &{&1.id, &1.result, &1.reason, &1.cache})
 end
