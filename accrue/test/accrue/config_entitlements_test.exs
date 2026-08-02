@@ -31,6 +31,16 @@ defmodule Accrue.ConfigEntitlementsTest do
     prev_rails = Application.get_env(:accrue, :rails, :__unset__)
     prev_default_rail = Application.get_env(:accrue, :default_rail, :__unset__)
 
+    prev_webhook_signing_secrets =
+      Application.get_env(:accrue, :webhook_signing_secrets, :__unset__)
+
+    # Other sync config suites intentionally exercise a missing signing-secret
+    # state. Keep this module hermetic when it selects the Stripe processor,
+    # regardless of sync-module execution order in the full suite.
+    Application.put_env(:accrue, :webhook_signing_secrets, %{
+      stripe: ["whsec_config_entitlements_test"]
+    })
+
     on_exit(fn ->
       case prev do
         :__unset__ -> Application.delete_env(:accrue, :entitlements)
@@ -40,7 +50,8 @@ defmodule Accrue.ConfigEntitlementsTest do
       for {key, value} <- [
             processor: prev_processor,
             rails: prev_rails,
-            default_rail: prev_default_rail
+            default_rail: prev_default_rail,
+            webhook_signing_secrets: prev_webhook_signing_secrets
           ] do
         case value do
           :__unset__ -> Application.delete_env(:accrue, key)
@@ -118,15 +129,15 @@ defmodule Accrue.ConfigEntitlementsTest do
     test "legacy custom processors and price_ids remain untouched when rails are omitted" do
       Application.put_env(:accrue, :processor, Accrue.ConfigEntitlementsTest.CustomProcessor)
 
-      Application.put_env(:accrue, :entitlements,
-        plans: [pro: [price_ids: ["legacy_price"]]]
-      )
+      Application.put_env(:accrue, :entitlements, plans: [pro: [price_ids: ["legacy_price"]]])
 
       assert Config.validate_at_boot!() == :ok
       assert Config.rails() == []
       assert Config.default_rail() == nil
       assert Config.entitlement_product_catalog() == %{}
-      assert Application.get_env(:accrue, :processor) == Accrue.ConfigEntitlementsTest.CustomProcessor
+
+      assert Application.get_env(:accrue, :processor) ==
+               Accrue.ConfigEntitlementsTest.CustomProcessor
     end
 
     test "a host-fake proof rail is controllable in test configuration" do
@@ -182,7 +193,11 @@ defmodule Accrue.ConfigEntitlementsTest do
       Application.put_env(:accrue, :processor, Accrue.Processor.Stripe)
 
       rails = [
-        apple: [source: :apple, environments: [:sandbox, :production], default_environment: :production],
+        apple: [
+          source: :apple,
+          environments: [:sandbox, :production],
+          default_environment: :production
+        ],
         stripe: [
           source: :stripe,
           processor: Accrue.Processor.Stripe,
@@ -271,7 +286,10 @@ defmodule Accrue.ConfigEntitlementsTest do
       )
 
       assert Config.validate_at_boot!() == :ok
-      assert Config.entitlement_product_catalog() == %{{:stripe, :production, "price_pro"} => :pro}
+
+      assert Config.entitlement_product_catalog() == %{
+               {:stripe, :production, "price_pro"} => :pro
+             }
 
       Application.put_env(:accrue, :entitlements,
         plans: [
