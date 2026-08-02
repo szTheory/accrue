@@ -1283,6 +1283,12 @@ defmodule Accrue.Config do
         message: "rail #{inspect(rail)} must use matching registered source #{inspect(source)}"
     end
 
+    if source == :host_fake and safe_mix_env() != :test do
+      raise Accrue.ConfigError,
+        key: :rails,
+        message: "host_fake is available only for deterministic test/proof rail configuration"
+    end
+
     if source == :apple and Keyword.get(config, :processor) do
       raise Accrue.ConfigError,
         key: :rails,
@@ -1306,14 +1312,21 @@ defmodule Accrue.Config do
   defp validate_default_rail!(rails, default_rail, processor) do
     rail = Keyword.get(rails, default_rail)
 
-    unless rail && Keyword.get(rail, :source) == :stripe &&
+    unless rail && controllable_rail?(Keyword.get(rail, :source)) &&
              Keyword.get(rail, :processor) == processor do
       raise Accrue.ConfigError,
         key: :default_rail,
         message:
-          "default_rail #{inspect(default_rail)} must be a registered controllable Stripe rail matching :processor"
+          "default_rail #{inspect(default_rail)} must be a registered controllable rail matching :processor"
     end
   end
+
+  # Stripe is the only production gateway rail. The existing host-fake source
+  # remains available to deterministic test/proof runs without promoting it to
+  # a production rail or treating Apple as an Accrue.Processor implementation.
+  defp controllable_rail?(:stripe), do: true
+  defp controllable_rail?(:host_fake), do: safe_mix_env() == :test
+  defp controllable_rail?(_source), do: false
 
   defp validate_entitlement_product_catalog!(opts) do
     _ =
