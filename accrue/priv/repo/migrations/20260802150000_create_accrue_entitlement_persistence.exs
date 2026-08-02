@@ -144,5 +144,43 @@ defmodule Accrue.Repo.Migrations.CreateAccrueEntitlementPersistence do
         name: :accrue_entitlement_grants_account_history_index
       )
     )
+
+    create Accrue.Migration.table(:accrue_entitlement_devices, primary_key: false) do
+      add(:id, :binary_id, primary_key: true, default: fragment("gen_random_uuid()"))
+
+      add(
+        :account_id,
+        Accrue.Migration.references(:accrue_entitlement_accounts,
+          type: :binary_id,
+          name: :accrue_entitlement_devices_account_id_fkey
+        ),
+        null: false
+      )
+
+      add(:installation_id, :string, null: false)
+      add(:key_thumbprint, :string, null: false)
+      add(:state, :string, null: false, default: "active")
+      add(:registered_at, :utc_datetime_usec, null: false)
+      add(:last_seen_at, :utc_datetime_usec)
+      add(:last_accepted_revision, :bigint, null: false, default: 0)
+      add(:revoked_at, :utc_datetime_usec)
+      add(:superseded_at, :utc_datetime_usec)
+
+      timestamps(type: :utc_datetime_usec)
+    end
+
+    create(
+      Accrue.Migration.unique_index(:accrue_entitlement_devices, [:account_id, :installation_id],
+        where: "revoked_at IS NULL AND superseded_at IS NULL",
+        name: :accrue_entitlement_devices_current_installation_identity_index
+      )
+    )
+
+    create(
+      Accrue.Migration.unique_index(:accrue_entitlement_devices, [:account_id, :key_thumbprint],
+        where: "revoked_at IS NULL AND superseded_at IS NULL",
+        name: :accrue_entitlement_devices_current_thumbprint_identity_index
+      )
+    )
   end
 end
