@@ -2,19 +2,19 @@
 gsd_state_version: 1.0
 milestone: v1.59
 milestone_name: Account-Scoped Multi-Rail & Offline Entitlements
-current_phase: 216
-current_phase_name: additive-rail-and-persistence-foundation
-status: executing
+current_phase: 217
+current_phase_name: Canonical projection and compatibility
+status: planning
 stopped_at: Completed 216-06-PLAN.md
-last_updated: "2026-08-02T18:28:12.026Z"
+last_updated: "2026-08-02T18:56:29.545Z"
 last_activity: 2026-08-02
-last_activity_desc: Phase 216 execution started
+last_activity_desc: Phase 216 complete, transitioned to Phase 217
 progress:
   total_phases: 6
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 21
-  completed_plans: 20
-  percent: 17
+  completed_plans: 21
+  percent: 33
 ---
 
 # Project State
@@ -29,10 +29,10 @@ See: `.planning/PROJECT.md` (updated 2026-08-01 after completing Phase 215)
 
 ## Current Position
 
-Phase: 216 (additive-rail-and-persistence-foundation) — EXECUTING
-Plan: 2 of 6
-Status: Ready to execute
-Last activity: 2026-08-02 — Phase 216 execution started
+Phase: 217 — Canonical projection and compatibility
+Plan: Not started
+Status: Ready to plan
+Last activity: 2026-08-02 — Phase 216 complete, transitioned to Phase 217
 
 ## Post-v1.48 Pause Rule
 
