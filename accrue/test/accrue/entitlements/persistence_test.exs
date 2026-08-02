@@ -93,6 +93,63 @@ defmodule Accrue.Entitlements.PersistenceTest do
     end
   end
 
+  @tag :observation
+  test "blank identities normalize before idempotent fallback selection" do
+    account = account!("observation-blank-identity")
+
+    attrs =
+      observation_attrs(account.id, %{
+        provider_event_id: "   ",
+        provider_transaction_id: "transaction-blank-fallback"
+      })
+
+    assert {:ok, first} = Observation.insert_idempotently(TestRepo, attrs)
+    assert {:ok, second} = Observation.insert_idempotently(TestRepo, attrs)
+    assert first.id == second.id
+    assert is_nil(first.provider_event_id)
+    assert first.provider_transaction_id == "transaction-blank-fallback"
+
+    event_attrs =
+      observation_attrs(account.id, %{
+        provider_event_id: "event-blank-fallback",
+        provider_transaction_id: " \t "
+      })
+
+    assert {:ok, event_observation} = Observation.insert_idempotently(TestRepo, event_attrs)
+    assert event_observation.provider_event_id == "event-blank-fallback"
+    assert is_nil(event_observation.provider_transaction_id)
+
+    refute Observation.ingest_changeset(
+             observation_attrs(account.id, %{provider_event_id: " ", provider_transaction_id: "\n"})
+           ).valid?
+  end
+
+  @tag :observation
+  test "observations accept only bounded opaque evidence locators" do
+    account = account!("observation-evidence-locator")
+    expiry = ~U[2026-08-03 00:00:00.000000Z]
+
+    assert Observation.ingest_changeset(
+             observation_attrs(account.id, %{
+               evidence_ref: "opaque://evidence/1",
+               evidence_expires_at: expiry
+             })
+           ).valid?
+
+    for reference <- [
+          "opaque://",
+          "https://provider.example/receipt",
+          "{\"receipt\":\"raw\"}",
+          "<receipt>raw</receipt>",
+          "eyJhbGciOiJIUzI1NiJ9.payload.signature",
+          String.duplicate("a", 256)
+        ] do
+      refute Observation.ingest_changeset(
+               observation_attrs(account.id, %{evidence_ref: reference, evidence_expires_at: expiry})
+             ).valid?
+    end
+  end
+
   defp account!(suffix) do
     {:ok, account} = Account.fetch_or_create(TestRepo, "user", "owner-#{suffix}")
     account
@@ -170,6 +227,34 @@ defmodule Accrue.Entitlements.PersistenceTest do
           %{provider_order: -1}
         ] do
       refute Grant.changeset(%Grant{}, Map.merge(attrs, invalid)).valid?
+    end
+  end
+
+  @tag :grant
+  test "source observations must have the same account rail and environment" do
+    account = account!("grant-provenance")
+    other_account = account!("grant-provenance-other")
+
+    assert {:ok, observation} =
+             Observation.insert_idempotently(
+               TestRepo,
+               observation_attrs(account.id, %{provider_event_id: "event-provenance"})
+             )
+
+    attrs = Map.put(grant_attrs(account.id), :source_observation_id, observation.id)
+    assert {:ok, _grant} = TestRepo.insert(Grant.changeset(%Grant{}, attrs))
+    assert {:ok, _grant} =
+             TestRepo.insert(
+               Grant.changeset(%Grant{}, %{grant_attrs(account.id) | source_item_id: "nil-source"})
+             )
+
+    for invalid <- [
+          %{attrs | account_id: other_account.id, source_item_id: "account-mismatch"},
+          %{attrs | rail: :stripe, source_item_id: "rail-mismatch"},
+          %{attrs | environment: :sandbox, source_item_id: "environment-mismatch"}
+        ] do
+      assert {:error, changeset} = TestRepo.insert(Grant.changeset(%Grant{}, invalid))
+      assert %{source_observation_id: [_]} = errors_on(changeset)
     end
   end
 
