@@ -671,12 +671,13 @@ public struct CapabilityReport: Codable, Sendable, Equatable {
         self.capabilities = capabilities.sorted { lhs, rhs in
             Capability.allRequired.firstIndex(of: lhs.capability)! < Capability.allRequired.firstIndex(of: rhs.capability)!
         }
-        overallStatus = Self.reduce(capabilities: self.capabilities)
+        overallStatus = Self.reduce(schemaVersion: schemaVersion, capabilities: self.capabilities)
     }
 
-    private static func reduce(capabilities: [CapabilityEvidence]) -> FeasibilityStatus {
+    private static func reduce(schemaVersion: String, capabilities: [CapabilityEvidence]) -> FeasibilityStatus {
         let provided = Set(capabilities.map(\.capability))
-        guard provided == Set(Capability.allRequired),
+        guard schemaVersion == "1.0",
+              provided == Set(Capability.allRequired),
               capabilities.count == Capability.allRequired.count,
               capabilities.allSatisfy({
                   $0.status == .proven && $0.evidenceKinds.isSuperset(of: $0.capability.requiredEvidenceKinds)
