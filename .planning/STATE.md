@@ -5,8 +5,8 @@ milestone_name: Account-Scoped Multi-Rail & Offline Entitlements
 current_phase: 216
 current_phase_name: Additive rail and persistence foundation
 status: planning
-stopped_at: Completed 215-15-PLAN.md
-last_updated: "2026-08-02T02:51:10.688Z"
+stopped_at: Phase 216 context gathered
+last_updated: "2026-08-02T14:34:38.357Z"
 last_activity: 2026-08-01
 last_activity_desc: Phase 215 complete, transitioned to Phase 216
 progress:
@@ -912,9 +912,9 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 
 ## Session Continuity
 
-Last session: 2026-08-02T02:42:28.866Z
-Stopped at: Completed 215-15-PLAN.md
-Resume file: None
+Last session: 2026-08-02T14:34:38.336Z
+Stopped at: Phase 216 context gathered
+Resume file: .planning/phases/216-additive-rail-and-persistence-foundation/216-CONTEXT.md
 
 ## Operator Next Steps
 
