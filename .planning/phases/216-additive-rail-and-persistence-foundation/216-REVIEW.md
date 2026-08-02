@@ -1,8 +1,8 @@
 ---
 phase: 216-additive-rail-and-persistence-foundation
-reviewed: 2026-08-02T16:17:27Z
+reviewed: 2026-08-02T17:47:01Z
 depth: standard
-files_reviewed: 14
+files_reviewed: 15
 files_reviewed_list:
   - accrue/guides/entitlements.md
   - accrue/lib/accrue/config.ex
@@ -12,6 +12,7 @@ files_reviewed_list:
   - accrue/lib/accrue/entitlements/observation.ex
   - accrue/priv/accrue/templates/install/runtime_config.exs.eex
   - accrue/priv/repo/migrations/20260802150000_create_accrue_entitlement_persistence.exs
+  - accrue/priv/repo/migrations/20260802180000_harden_accrue_entitlement_persistence.exs
   - accrue/test/accrue/config_entitlements_test.exs
   - accrue/test/accrue/docs/entitlements_guide_test.exs
   - accrue/test/accrue/entitlements/fake_fixture_test.exs
@@ -19,60 +20,48 @@ files_reviewed_list:
   - accrue/test/mix/tasks/accrue_install_test.exs
   - accrue/test/support/entitlements/fixtures.ex
 findings:
-  critical: 3
+  critical: 1
   warning: 1
   info: 0
-  total: 4
+  total: 2
 status: issues_found
 ---
 
 # Phase 216: Code Review Report
 
-**Reviewed:** 2026-08-02T16:17:27Z
+**Reviewed:** 2026-08-02T17:47:01Z
 **Depth:** standard
-**Files Reviewed:** 14
+**Files Reviewed:** 15
 **Status:** issues_found
 
 ## Summary
 
-The additive rail configuration is boot-validated and the focused suite passes (68 tests), but the new durable evidence boundary still permits raw sensitive material, has an input shape that crashes its idempotent-ingest API, and permits provenance to cross account/rail boundaries. The migration also relies on changesets for invariants that PostgreSQL must enforce for a durable projection.
+The reviewed persistence boundary has a cross-account observation identity flaw: a collision is treated as a successful idempotent ingest and returns another account's record. Provider-controlled identity fields are also unbounded despite being persisted indefinitely. The focused test suite passed (72 tests), but it does not exercise either boundary.
 
 ## Narrative Findings (AI reviewer)
 
 ## Critical Issues
 
-### CR-01: Blank event IDs select an inapplicable conflict target and crash ingestion
+### CR-01: Cross-account identity collisions return another account's observation
 
-**Classification:** BLOCKER
-**File:** `accrue/lib/accrue/entitlements/observation.ex:104-112,155-188`
-**Issue:** `validate_identity/1` treats a blank `provider_event_id` as absent, but it never normalizes or rejects that value. With `provider_event_id: ""` and a valid transaction ID, `conflict_target/1` selects the partial transaction index and `fetch_by_identity!/2` searches only rows where `provider_event_id IS NULL`; the row that was inserted has `provider_event_id = ''`, so `repo.one!/1` raises. Such rows also fall outside both partial unique indexes and can be duplicated indefinitely.
-**Fix:** Normalize blank optional identity fields to `nil` before `cast/3` (or reject any non-nil blank field) and add coverage for a blank event ID plus a transaction ID. The conflict target and lookup must use the exact persisted normalization.
+**File:** `/Users/jon/projects/accrue/accrue/lib/accrue/entitlements/observation.ex:115-120,219-242`; `/Users/jon/projects/accrue/accrue/priv/repo/migrations/20260802150000_create_accrue_entitlement_persistence.exs:53-69`
 
-### CR-02: Evidence reference accepts unbounded raw provider material
+**Issue:** Both unique identities exclude `account_id`, while `insert_idempotently/2` turns every conflict into `{:ok, fetch_by_identity!(...)}`. Therefore, if account B submits the same rail/environment/event ID (or transaction ID + kind) as account A, PostgreSQL discards B's insert and this function returns A's durable observation as a successful result. This crosses the durable account boundary and makes a malformed or misrouted provider event silently appear accepted for the wrong owner; callers can also read the other account's normalized provenance through the returned struct.
 
-**Classification:** BLOCKER
-**File:** `accrue/lib/accrue/entitlements/observation.ex:71-73,144-152`
-**Issue:** The privacy contract says evidence is an optional bounded reference and raw receipts/JWS/provider bodies must not enter these records, but `evidence_ref` only has a nil-pair check. A caller can persist an arbitrarily large raw receipt, signed JWS, or notification body as `evidence_ref` by providing any expiry. This defeats the explicitly privacy-bounded persistence boundary.
-**Fix:** Validate `evidence_ref` as a bounded opaque locator (for example, maximum length plus an allowed scheme/format) and reject raw-evidence signatures such as JWT/JWS payloads. Add tests that raw or oversized values are invalid even when `evidence_expires_at` is present.
-
-### CR-03: A grant can claim an observation from another account or rail
-
-**Classification:** BLOCKER
-**File:** `accrue/lib/accrue/entitlements/grant.ex:45-48`
-**Issue:** `source_observation_id` has only an independent foreign key. Nothing requires the referenced observation to have the grant's `account_id`, `rail`, or `environment`. A projector or repair job can therefore link verified evidence for one account/rail to a grant for another, breaking the provenance boundary and enabling cross-account entitlement attribution.
-**Fix:** Enforce the relationship atomically. A robust database solution is a unique key on observation `(id, account_id, rail, environment)` plus a composite foreign key from the same grant fields; alternatively, validate the observation inside the transaction that writes the grant and reject mismatches. Cover account, rail, and environment mismatch cases.
+**Fix:** Decide whether provider identities are globally unique or account-scoped, then make the API enforce that decision. If they are account-scoped, include `account_id` in both partial unique indexes, `conflict_target/1`, and `fetch_by_identity!/2`. If globally unique, retain the indexes but make the fetch query verify `observation.account_id == ^account_id` and return an explicit collision/error when it differs. Add integration tests for both event and transaction fallback collisions across two accounts.
 
 ## Warnings
 
-### WR-01: Persistence invariants disappear when changesets are bypassed
+### WR-01: Provider identity fields have no size bounds
 
-**Classification:** WARNING
-**File:** `accrue/priv/repo/migrations/20260802150000_create_accrue_entitlement_persistence.exs:32-48,110-121,160-167`
-**Issue:** The migration declares no checks for allowed rail/environment/state values, non-negative ordering/revisions/retry counts, or positive grant quantity. Those rules exist only in changesets, so `insert_all`, SQL maintenance jobs, or future import/projector code can persist invalid rows. Invalid enum strings can then make Ecto loading fail, while negative quantity/order corrupts projection semantics.
-**Fix:** Add named PostgreSQL `CHECK` constraints for the domain enums and numeric bounds, map them with `check_constraint/3` in the corresponding changesets, and add migration-level persistence tests that verify invalid direct inserts are rejected.
+**File:** `/Users/jon/projects/accrue/accrue/lib/accrue/entitlements/observation.ex:52-76`; `/Users/jon/projects/accrue/accrue/priv/repo/migrations/20260802150000_create_accrue_entitlement_persistence.exs:32-48`
+
+**Issue:** Ingest accepts unbounded `provider_event_id`, `provider_transaction_id`, `kind`, `provider_lineage_id`, and `provider_product_id`; PostgreSQL `:string` maps to unconstrained text here. These values are provider-originated and retained in rows and indexes, so an oversized event can exhaust storage/index resources even though metadata and evidence references are explicitly bounded.
+
+**Fix:** Define realistic maximum byte lengths for each normalized identifier, enforce them with `validate_length/3`, and add matching database `octet_length(...) <= N` checks so alternate writers cannot bypass the boundary. Add over-limit changeset and database tests.
 
 ---
 
-_Reviewed: 2026-08-02T16:17:27Z_
+_Reviewed: 2026-08-02T17:47:01Z_
 _Reviewer: the agent (gsd-code-reviewer)_
 _Depth: standard_
