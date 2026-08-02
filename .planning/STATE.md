@@ -4,16 +4,16 @@ milestone: v1.59
 milestone_name: Account-Scoped Multi-Rail & Offline Entitlements
 current_phase: 215
 current_phase_name: research-contracts-and-crosswake-feasibility
-status: executing
-stopped_at: Completed 215-14-PLAN.md
-last_updated: "2026-08-02T02:33:34.826Z"
+status: verifying
+stopped_at: Completed 215-15-PLAN.md
+last_updated: "2026-08-02T02:42:28.880Z"
 last_activity: 2026-08-01
 last_activity_desc: Phase 215 execution started
 progress:
   total_phases: 6
   completed_phases: 1
   total_plans: 15
-  completed_plans: 14
+  completed_plans: 15
   percent: 17
 ---
 
@@ -30,8 +30,8 @@ See: `.planning/PROJECT.md` (updated 2026-07-31 after starting v1.59)
 ## Current Position
 
 Phase: 215 (research-contracts-and-crosswake-feasibility) — EXECUTING
-Plan: 14 of 14
-Status: Ready to execute
+Plan: 15 of 15
+Status: Phase complete — ready for verification
 Last activity: 2026-08-01 — Phase 215 execution started
 
 ## Post-v1.48 Pause Rule
@@ -391,6 +391,7 @@ Coverage: 22/22 v1.51 requirements mapped (each REQ-ID → exactly one phase). D
 | Phase 215 P12 | 4 min | 2 tasks | 4 files |
 | Phase 215 P13 | 5 min | 2 tasks | 6 files |
 | Phase 215 P14 | 4 min | 1 tasks | 2 files |
+| Phase 215 P15 | 2 min | 1 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -758,6 +759,8 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - [Phase ?]: Checked-in capability proof is evaluated relative to its report root and remains blocked without pinned bridge and completed device evidence.
 - [Phase ?]: Caller-controlled capability status, evidence kind, and location data is always feasibility_blocked.
 - [Phase ?]: Only CheckedInCapabilityReportValidator.validate(reportURL:) may return proven because its URL establishes the evidence root.
+- [Phase ?]: Only the validator-owned checked-in capability-report.json URL may reach proven-producing evaluation.
+- [Phase ?]: The internal mutation-test validation seam inherits canonical report identity requirements.
 
 ### Pending Todos
 
@@ -909,8 +912,8 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 
 ## Session Continuity
 
-Last session: 2026-08-02T02:16:40.899Z
-Stopped at: Completed 215-14-PLAN.md
+Last session: 2026-08-02T02:42:28.866Z
+Stopped at: Completed 215-15-PLAN.md
 Resume file: None
 
 ## Operator Next Steps
