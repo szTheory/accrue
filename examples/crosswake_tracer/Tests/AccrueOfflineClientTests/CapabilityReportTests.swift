@@ -3,21 +3,30 @@ import Foundation
 @testable import AccrueOfflineClient
 
 struct CapabilityReportTests {
-    @Test("all required capability rows proven produce a proven report")
-    func allProvenProducesProvenReport() {
-        let report = CapabilityReport(
-            schemaVersion: "1.0",
-            capabilities: Capability.allRequired.map {
-                CapabilityEvidence(
-                    capability: $0,
-                    status: .proven,
-                    evidenceKinds: $0.requiredEvidenceKinds,
-                    location: "test://native"
-                )
-            }
-        )
+    @Test("caller-supplied evidence cannot prove feasibility at arbitrary locations")
+    func callerSuppliedEvidenceRemainsBlockedAtArbitraryLocations() {
+        let arbitraryLocations = [
+            "test://native",
+            "missing/proof.json",
+            "/tmp/untrusted-proof.json",
+            "../outside-report-root/proof.json"
+        ]
 
-        #expect(report.overallStatus == .proven)
+        for location in arbitraryLocations {
+            let report = CapabilityReport(
+                schemaVersion: "1.0",
+                capabilities: Capability.allRequired.map {
+                    CapabilityEvidence(
+                        capability: $0,
+                        status: .proven,
+                        evidenceKinds: $0.requiredEvidenceKinds,
+                        location: location
+                    )
+                }
+            )
+
+            #expect(report.overallStatus == .feasibilityBlocked, "caller location \\(location) must not establish provenance")
+        }
     }
 
     @Test("unsupported public capability report schemas fail feasibility closed")
