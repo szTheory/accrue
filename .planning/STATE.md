@@ -5,8 +5,8 @@ milestone_name: Account-Scoped Multi-Rail & Offline Entitlements
 current_phase: 217
 current_phase_name: Canonical projection and compatibility
 status: planning
-stopped_at: Completed 216-06-PLAN.md
-last_updated: "2026-08-02T18:56:29.545Z"
+stopped_at: Phase 217 context gathered
+last_updated: "2026-08-02T22:30:52.170Z"
 last_activity: 2026-08-02
 last_activity_desc: Phase 216 complete, transitioned to Phase 217
 progress:
@@ -928,9 +928,9 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 
 ## Session Continuity
 
-Last session: 2026-08-02T18:28:12.010Z
-Stopped at: Completed 216-06-PLAN.md
-Resume file: None
+Last session: 2026-08-02T22:30:52.155Z
+Stopped at: Phase 217 context gathered
+Resume file: .planning/phases/217-canonical-projection-and-compatibility/217-CONTEXT.md
 
 ## Operator Next Steps
 
