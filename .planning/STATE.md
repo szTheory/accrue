@@ -5,15 +5,15 @@ milestone_name: Account-Scoped Multi-Rail & Offline Entitlements
 current_phase: 215
 current_phase_name: research-contracts-and-crosswake-feasibility
 status: executing
-stopped_at: Completed 215-12-PLAN.md
-last_updated: "2026-08-02T01:06:42.983Z"
+stopped_at: Completed 215-13-PLAN.md
+last_updated: "2026-08-02T01:37:42.581Z"
 last_activity: 2026-08-01
 last_activity_desc: Phase 215 execution started
 progress:
   total_phases: 6
   completed_phases: 1
-  total_plans: 12
-  completed_plans: 12
+  total_plans: 13
+  completed_plans: 13
   percent: 17
 ---
 
@@ -30,7 +30,7 @@ See: `.planning/PROJECT.md` (updated 2026-07-31 after starting v1.59)
 ## Current Position
 
 Phase: 215 (research-contracts-and-crosswake-feasibility) — EXECUTING
-Plan: 2 of 12
+Plan: 2 of 13
 Status: Ready to execute
 Last activity: 2026-08-01 — Phase 215 execution started
 
@@ -389,6 +389,7 @@ Coverage: 22/22 v1.51 requirements mapped (each REQ-ID → exactly one phase). D
 | Phase 215 P10 | 4m | 1 tasks | 2 files |
 | Phase 215-research-contracts-and-crosswake-feasibility P11 | 6 min | 2 tasks | 5 files |
 | Phase 215 P12 | 4 min | 2 tasks | 4 files |
+| Phase 215 P13 | 5 min | 2 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -752,6 +753,8 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - [Phase ?]: Per-path advisory locks serialize cache restore through durable replacement across processes.
 - [Phase ?]: ProofHighWater and authenticated cache replacement share one disposition-aware ordering rule.
 - [Phase ?]: Only CapabilityReport schema 1.0 may reduce to proven; unsupported schemas fail closed.
+- [Phase ?]: Production AtomicOfflineCache construction and replacement require host authentication plus explicit disposition and revision.
+- [Phase ?]: Checked-in capability proof is evaluated relative to its report root and remains blocked without pinned bridge and completed device evidence.
 
 ### Pending Todos
 
@@ -903,8 +906,8 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 
 ## Session Continuity
 
-Last session: 2026-08-02T01:06:42.973Z
-Stopped at: Completed 215-12-PLAN.md
+Last session: 2026-08-02T01:37:42.566Z
+Stopped at: Completed 215-13-PLAN.md
 Resume file: None
 
 ## Operator Next Steps
