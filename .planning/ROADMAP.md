@@ -64,7 +64,7 @@ Dependencies: 215 → 216 → 217 → {218, 219} → 220. Phase 215 must prove C
   3. A host can inspect source-specific observation, control, restore, reconciliation, management, and offline capabilities without treating the processor matrix as a rail contract.
   4. The checked-in Crosswake tracer proves every required bridge or explicitly blocks mobile runtime coupling before later phases rely on it.
 
-**Plans**: 9/11 plans executed
+**Plans**: 10/11 plans executed
 
 Plans:
 
@@ -100,7 +100,7 @@ Plans:
 
 **Wave 8** *(blocked on Wave 7 completion)*
 
-- [ ] 215-10-PLAN.md — Enforce exact canonical offline-vector schema and binding parity in Swift.
+- [x] 215-10-PLAN.md — Enforce exact canonical offline-vector schema and binding parity in Swift.
 
 **Wave 9** *(blocked on Wave 8 completion)*
 
@@ -188,7 +188,7 @@ Plans:
 | 214. Docs reconciliation | v1.58 | 3/3 | Complete | 2026-07-31 |
 | 214.1. Writer-documentation closure | v1.58 | 4/4 | Complete | 2026-07-31 |
 | 214.2. Diagnostic-display/pagination closure | v1.58 | 4/4 | Complete | 2026-07-31 |
-| 215. Research, contracts, and Crosswake feasibility | v1.59 | 9/11 | In Progress|  |
+| 215. Research, contracts, and Crosswake feasibility | v1.59 | 10/11 | In Progress|  |
 | 216. Additive rail and persistence foundation | v1.59 | 0/TBD | Not started | - |
 | 217. Canonical projection and compatibility | v1.59 | 0/TBD | Not started | - |
 | 218. Apple observation and repair | v1.59 | 0/TBD | Not started | - |
