@@ -5,7 +5,8 @@ defmodule Accrue.Repo.Migrations.BoundAccrueEntitlementProviderIdentity do
     observations = Accrue.Migration.qualified_table(:accrue_entitlement_observations)
     grants = Accrue.Migration.qualified_table(:accrue_entitlement_grants)
 
-    for field <- ~w[provider_event_id provider_transaction_id kind provider_lineage_id provider_product_id] do
+    for field <-
+          ~w[provider_event_id provider_transaction_id kind provider_lineage_id provider_product_id] do
       execute("ALTER TABLE #{observations} ALTER COLUMN #{field} TYPE text")
     end
 
@@ -42,7 +43,8 @@ defmodule Accrue.Repo.Migrations.BoundAccrueEntitlementProviderIdentity do
       execute("ALTER TABLE #{grants} ALTER COLUMN #{field} TYPE varchar(255)")
     end
 
-    for field <- ~w[provider_event_id provider_transaction_id kind provider_lineage_id provider_product_id] do
+    for field <-
+          ~w[provider_event_id provider_transaction_id kind provider_lineage_id provider_product_id] do
       execute("ALTER TABLE #{observations} ALTER COLUMN #{field} TYPE varchar(255)")
     end
   end
@@ -57,7 +59,9 @@ defmodule Accrue.Repo.Migrations.BoundAccrueEntitlementProviderIdentity do
       {"accrue_ent_obs_provider_lineage_id_bytes_check",
        "octet_length(provider_lineage_id) <= 255"},
       {"accrue_ent_obs_provider_product_id_bytes_check",
-       "octet_length(provider_product_id) <= 255"}
+       "octet_length(provider_product_id) <= 255"},
+      {"accrue_ent_obs_metadata_projection_check",
+       "jsonb_typeof(metadata) = 'object' AND (metadata = '{}'::jsonb OR metadata = '{\"source\": \"apple_server\"}'::jsonb OR metadata = '{\"source\": \"fake_observer\"}'::jsonb)"}
     ]
   end
 

@@ -18,8 +18,6 @@ defmodule Accrue.Entitlements.Observation do
   @rails [:stripe, :apple]
   @environments [:production, :sandbox]
   @states [:received, :qualified, :quarantined, :retrying]
-  @metadata_max_keys 20
-  @metadata_max_bytes 4096
   @evidence_ref_max_bytes 255
   # Provider provenance is retained only as bounded normalized identifiers.
   @provider_event_id_max_bytes 255
@@ -28,7 +26,9 @@ defmodule Accrue.Entitlements.Observation do
   @provider_lineage_id_max_bytes 255
   @provider_product_id_max_bytes 255
   @evidence_ref_pattern ~r/\Aopaque:\/\/[A-Za-z0-9_-]+(?:\/[A-Za-z0-9_-]+)*\z/
-  @forbidden_metadata ~w[raw body receipt jws notification email adopter owner identity]
+  # The only projection metadata retained in Phase 216. Metadata is not a
+  # provider-payload escape hatch: other provenance belongs in typed fields.
+  @metadata_sources ["apple_server", "fake_observer"]
 
   schema "accrue_entitlement_observations" do
     belongs_to(:account, Accrue.Entitlements.Account, type: :binary_id)
@@ -122,6 +122,7 @@ defmodule Accrue.Entitlements.Observation do
     |> check_constraint(:provider_product_id,
       name: :accrue_ent_obs_provider_product_id_bytes_check
     )
+    |> check_constraint(:metadata, name: :accrue_ent_obs_metadata_projection_check)
   end
 
   @doc "Inserts an observation once and returns the durable row selected by PostgreSQL."
@@ -194,31 +195,18 @@ defmodule Accrue.Entitlements.Observation do
   defp validate_metadata(changeset) do
     case get_field(changeset, :metadata) do
       metadata when is_map(metadata) ->
-        valid? =
-          map_size(metadata) <= @metadata_max_keys and
-            byte_size(:erlang.term_to_binary(metadata)) <= @metadata_max_bytes and
-            Enum.all?(metadata, &valid_metadata_entry?/1)
-
-        if valid?,
+        if valid_metadata?(metadata),
           do: changeset,
-          else: add_error(changeset, :metadata, "must be bounded normalized scalar metadata")
+          else: add_error(changeset, :metadata, "must use the fixed normalized source contract")
 
       _ ->
         add_error(changeset, :metadata, "must be a map")
     end
   end
 
-  defp valid_metadata_entry?({key, value}) do
-    is_binary(key) and byte_size(key) in 1..80 and is_binary(value) and
-      byte_size(value) <= 500 and not forbidden_metadata?(key) and not forbidden_metadata?(value)
-  end
-
-  defp forbidden_metadata?(value) do
-    downcased = String.downcase(value)
-
-    Enum.any?(@forbidden_metadata, &String.contains?(downcased, &1)) or
-      String.starts_with?(value, "eyJ") or String.contains?(value, ".payload.")
-  end
+  defp valid_metadata?(%{} = metadata) when map_size(metadata) == 0, do: true
+  defp valid_metadata?(%{"source" => source}) when source in @metadata_sources, do: true
+  defp valid_metadata?(_metadata), do: false
 
   defp validate_evidence_pair(changeset) do
     ref = get_field(changeset, :evidence_ref)

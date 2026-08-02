@@ -136,7 +136,7 @@ defmodule Accrue.Entitlements.PersistenceTest do
   end
 
   @tag :observation
-  test "observation ingestion rejects raw evidence, PII, nested metadata, and invalid ordering" do
+  test "observation ingestion accepts only the fixed normalized metadata contract" do
     account = account!("observation-invalid")
     attrs = observation_attrs(account.id)
 
@@ -144,6 +144,9 @@ defmodule Accrue.Entitlements.PersistenceTest do
           %{metadata: %{"receipt" => "base64-payload"}},
           %{metadata: %{"source" => %{"nested" => "payload"}}},
           %{metadata: %{"source" => "eyJhbGciOiJIUzI1NiJ9.payload.signature"}},
+          %{metadata: %{"source" => "customer@example.com"}},
+          %{metadata: %{"context" => "Jane Doe"}},
+          %{metadata: %{"source" => "apple_server", "payload" => "{\"event\":\"renewal\"}"}},
           %{rail: :unknown},
           %{environment: :offline},
           %{state: :unknown},
@@ -153,6 +156,10 @@ defmodule Accrue.Entitlements.PersistenceTest do
         ] do
       refute Observation.ingest_changeset(Map.merge(attrs, invalid)).valid?
     end
+
+    assert Observation.ingest_changeset(%{attrs | metadata: %{}}).valid?
+
+    assert Observation.ingest_changeset(%{attrs | metadata: %{"source" => "fake_observer"}}).valid?
   end
 
   @tag :observation
@@ -304,6 +311,7 @@ defmodule Accrue.Entitlements.PersistenceTest do
     attrs = grant_attrs(account.id)
 
     assert Grant.changeset(%Grant{}, %{attrs | provider_lineage_id: String.duplicate("l", 255)}).valid?
+
     assert Grant.changeset(%Grant{}, %{attrs | provider_product_id: String.duplicate("p", 255)}).valid?
 
     for field <- [:provider_lineage_id, :provider_product_id] do
@@ -353,7 +361,8 @@ defmodule Accrue.Entitlements.PersistenceTest do
       :accrue_entitlement_observations_environment_domain_check,
       :accrue_entitlement_observations_state_domain_check,
       :accrue_entitlement_observations_provider_order_nonnegative_check,
-      :accrue_entitlement_observations_retry_count_nonnegative_check
+      :accrue_entitlement_observations_retry_count_nonnegative_check,
+      :accrue_ent_obs_metadata_projection_check
     ])
 
     assert_constraint_names(Grant.changeset(%Grant{}, %{}), [
@@ -418,6 +427,24 @@ defmodule Accrue.Entitlements.PersistenceTest do
       VALUES ($1::text::uuid, 'apple', 'production', $2, 'product', 'item', 1, 0, 0, NOW(), NOW(), NOW())
       """,
       [account.id, String.duplicate("l", 256)]
+    )
+  end
+
+  test "PostgreSQL rejects observation metadata outside the fixed projection contract" do
+    account = account!("raw-observation-metadata")
+
+    assert_check_violation(
+      "accrue_ent_obs_metadata_projection_check",
+      """
+      INSERT INTO billing.accrue_entitlement_observations
+        (account_id, rail, environment, provider_transaction_id, kind, provider_lineage_id,
+         provider_product_id, provider_order, observed_at, state, retry_count, metadata,
+         evidence_digest, inserted_at, updated_at)
+      VALUES ($1::text::uuid, 'apple', 'production', 'metadata-direct-write', 'renewal', 'lineage',
+              'product', 0, NOW(), 'qualified', 0, '{"context":"customer@example.com"}'::jsonb,
+              '#{String.duplicate("a", 64)}', NOW(), NOW())
+      """,
+      [account.id]
     )
   end
 
