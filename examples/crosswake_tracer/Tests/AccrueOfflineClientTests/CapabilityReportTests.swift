@@ -3,6 +3,19 @@ import Foundation
 @testable import AccrueOfflineClient
 
 struct CapabilityReportTests {
+    @Test("complete temporary proven report cannot impersonate the checked-in tracer")
+    func completeTemporaryProvenReportIsRejected() throws {
+        let root = FileManager.default.temporaryDirectory
+            .appendingPathComponent("accrue-crosswake-hostile-\(UUID().uuidString)", isDirectory: true)
+        defer { try? FileManager.default.removeItem(at: root) }
+
+        let reportURL = try writeCompleteProvenReport(at: root)
+
+        #expect(throws: CheckedInCapabilityReportValidator.ValidationError.self) {
+            try CheckedInCapabilityReportValidator.validate(reportURL: reportURL)
+        }
+    }
+
     @Test("caller-supplied evidence cannot prove feasibility at arbitrary locations")
     func callerSuppliedEvidenceRemainsBlockedAtArbitraryLocations() {
         let arbitraryLocations = [
@@ -187,6 +200,55 @@ struct CapabilityReportTests {
 
     private func encoded(_ object: [String: Any]) throws -> Data {
         try JSONSerialization.data(withJSONObject: object, options: [.sortedKeys])
+    }
+
+    private func writeCompleteProvenReport(at root: URL) throws -> URL {
+        try FileManager.default.createDirectory(at: root, withIntermediateDirectories: true)
+        var evidenceLocations = [EvidenceKind: String]()
+
+        for kind in EvidenceKind.allCases {
+            let location: String
+            let contents: String
+            switch kind {
+            case .nativeCompileUnit:
+                location = "Sources/AccrueOfflineClient/HostileNative.swift"
+                contents = "enum HostileNativeProof {}\n"
+            case .crosswakeBridgeCompileUnit:
+                location = "Evidence/CrosswakeBridge/HostileBridge.swift"
+                contents = "enum HostileBridgeProof {}\n"
+            case .simulatorAdvisory:
+                location = "Evidence/Simulator/hostile-simulator.md"
+                contents = "# Hostile simulator evidence\n"
+            case .physicalDevice:
+                location = "physical-device-evidence.md"
+                contents = "# Device proof\nDate: 2026-08-01\nRedaction attestation: complete\nReviewer approval: complete\n"
+            }
+
+            let evidenceURL = root.appendingPathComponent(location)
+            try FileManager.default.createDirectory(at: evidenceURL.deletingLastPathComponent(), withIntermediateDirectories: true)
+            try Data(contents.utf8).write(to: evidenceURL)
+            evidenceLocations[kind] = location
+        }
+
+        let capabilities = Capability.allRequired.map { capability in
+            [
+                "capability": capability.rawValue,
+                "status": FeasibilityStatus.proven.rawValue,
+                "required_evidence_kinds": capability.requiredEvidenceKinds.map(\.rawValue).sorted(),
+                "evidence": capability.requiredEvidenceKinds.map { kind in
+                    ["kind": kind.rawValue, "location": evidenceLocations[kind]!]
+                }
+            ] as [String: Any]
+        }
+        let report: [String: Any] = [
+            "schema_version": "1.0",
+            "overall_status": FeasibilityStatus.proven.rawValue,
+            "reason": "Completed proof for every required lane.",
+            "capabilities": capabilities
+        ]
+        let reportURL = root.appendingPathComponent("capability-report.json")
+        try JSONSerialization.data(withJSONObject: report, options: [.sortedKeys]).write(to: reportURL)
+        return reportURL
     }
 
     private struct CheckedInReport: Decodable {
