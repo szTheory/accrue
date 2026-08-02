@@ -25,6 +25,35 @@ struct AtomicOfflineCacheProcessTests {
         #expect(try cache.candidateURLs().isEmpty)
     }
 
+    @Test("obsolete no-key process invocation cannot replace an authenticated signed denial")
+    func obsoleteNoKeyInvocationPreservesAuthenticatedDenial() throws {
+        let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: directory) }
+        let keyBytes = Data("process-cache-authentication-key-32bytes".utf8)
+        let url = directory.appendingPathComponent("entitlement.json")
+
+        try runHarness(url, key: keyBytes, arguments: ["replace", "deny", "9", "deny-r9"])
+        let before = try Data(contentsOf: url)
+
+        let harness = URL(fileURLWithPath: FileManager.default.currentDirectoryPath)
+            .appendingPathComponent(".build/debug/AccrueOfflineCacheCrashHarness")
+        let process = Process()
+        process.executableURL = harness
+        process.arguments = [url.path, "legacy-allow", "after-directory-sync"]
+        try process.run()
+        process.waitUntilExit()
+
+        #expect(process.terminationStatus != 0)
+        #expect(try Data(contentsOf: url) == before)
+        let cache = AtomicOfflineCache(url: url, authenticationKey: SymmetricKey(data: keyBytes))
+        let envelope = try #require(try cache.recoveredEnvelope())
+        #expect(envelope.payload == Data("deny-r9".utf8))
+        #expect(envelope.revision == 9)
+        #expect(envelope.disposition == .deny)
+        #expect(try cache.candidateURLs().isEmpty)
+    }
+
     private func runHarness(_ url: URL, key: Data, arguments: [String]) throws {
         let harness = URL(fileURLWithPath: FileManager.default.currentDirectoryPath)
             .appendingPathComponent(".build/debug/AccrueOfflineCacheCrashHarness")
