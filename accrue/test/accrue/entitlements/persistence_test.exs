@@ -2,6 +2,7 @@ defmodule Accrue.Entitlements.PersistenceTest do
   use Accrue.RepoCase
 
   alias Accrue.Entitlements.Account
+  alias Accrue.Entitlements.Grant
   alias Accrue.Entitlements.Observation
   alias Accrue.TestRepo
 
@@ -96,6 +97,44 @@ defmodule Accrue.Entitlements.PersistenceTest do
     account
   end
 
+  @tag :grant
+  test "current grants preserve complete qualified source-item history" do
+    account = account!("grant-history")
+    attrs = grant_attrs(account.id)
+
+    assert {:ok, first} = TestRepo.insert(Grant.changeset(%Grant{}, attrs))
+    assert {:error, duplicate} = TestRepo.insert(Grant.changeset(%Grant{}, attrs))
+    assert %{provider_lineage_id: ["has already been taken"]} = errors_on(duplicate)
+
+    assert {:ok, different_source} =
+             TestRepo.insert(Grant.changeset(%Grant{}, %{attrs | source_item_id: "item-2"}))
+
+    assert {:ok, superseded} =
+             first
+             |> Grant.changeset(%{superseded_at: ~U[2026-08-02 16:00:00.000000Z]})
+             |> TestRepo.update()
+
+    assert {:ok, replacement} = TestRepo.insert(Grant.changeset(%Grant{}, attrs))
+    assert superseded.id != replacement.id
+    assert different_source.account_revision == 0
+    assert TestRepo.aggregate(Grant, :count, :id) == 3
+  end
+
+  @tag :grant
+  test "grants reject incomplete identity and non-positive quantities" do
+    account = account!("grant-invalid")
+    attrs = grant_attrs(account.id)
+
+    for invalid <- [
+          %{source_item_id: nil},
+          %{provider_lineage_id: ""},
+          %{quantity: 0},
+          %{provider_order: -1}
+        ] do
+      refute Grant.changeset(%Grant{}, Map.merge(attrs, invalid)).valid?
+    end
+  end
+
   defp observation_attrs(account_id, overrides \\ %{}) do
     Map.merge(
       %{
@@ -117,4 +156,23 @@ defmodule Accrue.Entitlements.PersistenceTest do
       overrides
     )
   end
+
+  defp grant_attrs(account_id) do
+    %{
+      account_id: account_id,
+      rail: :apple,
+      environment: :production,
+      provider_lineage_id: "lineage-grant-216",
+      provider_product_id: "product-grant-216",
+      logical_plan: "pro",
+      source_item_id: "item-1",
+      quantity: 1,
+      provider_order: 0,
+      account_revision: 0,
+      effective_at: ~U[2026-08-02 15:00:00.000000Z]
+    }
+  end
+
+  defp errors_on(changeset),
+    do: Ecto.Changeset.traverse_errors(changeset, fn {message, _} -> message end)
 end
