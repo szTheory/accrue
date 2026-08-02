@@ -1422,6 +1422,19 @@ defmodule Accrue.Config do
   # because a custom validator only sees one plan entry's value at a time and
   # cannot detect a collision ACROSS plans (RESEARCH § Pattern 3).
   defp validate_entitlements_price_ids!(opts) do
+    # Legacy-only hosts retain the raw `price_id -> plan` guard because their
+    # LocalMap resolver consumes those bare identifiers directly. Once either
+    # additive rail key is configured, D-05 gives every alias a concrete
+    # default rail/environment; defer to the qualified tuple reducer so both
+    # collision detection and error reporting use the public identity.
+    if Keyword.get(opts, :rails, []) == [] and is_nil(Keyword.get(opts, :default_rail)) do
+      validate_legacy_entitlements_price_ids!(opts)
+    else
+      :ok
+    end
+  end
+
+  defp validate_legacy_entitlements_price_ids!(opts) do
     plans =
       opts
       |> Keyword.get(:entitlements, [])
