@@ -667,3 +667,57 @@ public struct CapabilityReport: Codable, Sendable, Equatable {
         return .proven
     }
 }
+
+/// Decoder for the checked-in feasibility artifact. It admits only a complete proof
+/// set or the single honest, uniformly blocked terminal state used while Crosswake
+/// and device evidence are unavailable.
+public enum CheckedInCapabilityReportValidator {
+    public enum ValidationError: Error { case invalid }
+
+    public static func validate(_ data: Data) throws -> FeasibilityStatus {
+        let report: Report
+        do { report = try JSONDecoder().decode(Report.self, from: data) }
+        catch { throw ValidationError.invalid }
+        guard report.schemaVersion == "1.0",
+              report.capabilities.count == Capability.allRequired.count,
+              Set(report.capabilities.map(\.capability)) == Set(Capability.allRequired),
+              Set(report.capabilities.map(\.capability)).count == report.capabilities.count
+        else { throw ValidationError.invalid }
+        for row in report.capabilities {
+            guard Set(row.requiredEvidenceKinds) == row.capability.requiredEvidenceKinds,
+                  row.requiredEvidenceKinds.count == Set(row.requiredEvidenceKinds).count,
+                  Set(row.evidence.map(\.kind)) == row.capability.requiredEvidenceKinds,
+                  row.evidence.count == Set(row.evidence.map(\.kind)).count,
+                  row.evidence.allSatisfy({ !$0.location.isEmpty })
+            else { throw ValidationError.invalid }
+        }
+        let statuses = Set(report.capabilities.map(\.status))
+        guard statuses.count == 1, let status = statuses.first, status == report.overallStatus else {
+            throw ValidationError.invalid
+        }
+        switch status {
+        case .proven:
+            guard report.capabilities.allSatisfy({ $0.status == .proven }) else { throw ValidationError.invalid }
+        case .feasibilityBlocked:
+            guard report.capabilities.allSatisfy({ $0.status == .feasibilityBlocked }),
+                  report.capabilities.flatMap(\.evidence).contains(where: { $0.location.hasPrefix("unavailable:") })
+            else { throw ValidationError.invalid }
+        }
+        return status
+    }
+
+    private struct Report: Decodable {
+        let schemaVersion: String
+        let overallStatus: FeasibilityStatus
+        let capabilities: [Row]
+        enum CodingKeys: String, CodingKey { case schemaVersion = "schema_version", overallStatus = "overall_status", capabilities }
+    }
+    private struct Row: Decodable {
+        let capability: Capability
+        let status: FeasibilityStatus
+        let requiredEvidenceKinds: [EvidenceKind]
+        let evidence: [Evidence]
+        enum CodingKeys: String, CodingKey { case capability, status, requiredEvidenceKinds = "required_evidence_kinds", evidence }
+    }
+    private struct Evidence: Decodable { let kind: EvidenceKind; let location: String }
+}
