@@ -41,6 +41,45 @@ defmodule Accrue.Entitlements.PersistenceTest do
   end
 
   @tag :observation
+  test "event identity is globally idempotent but never crosses account ownership" do
+    account = account!("observation-event-owner")
+    other_account = account!("observation-event-owner-other")
+    attrs = observation_attrs(account.id, %{provider_event_id: "evt-216-global-owner"})
+
+    assert {:ok, first} = Observation.insert_idempotently(TestRepo, attrs)
+    assert {:ok, repeated} = Observation.insert_idempotently(TestRepo, attrs)
+    assert first.id == repeated.id
+
+    assert {:error, changeset} =
+             Observation.insert_idempotently(TestRepo, %{attrs | account_id: other_account.id})
+
+    assert %{account_id: ["provider identity is already owned"]} = errors_on(changeset)
+    assert TestRepo.aggregate(Observation, :count, :id) == 1
+  end
+
+  @tag :observation
+  test "observation provider identifiers are bounded by bytes" do
+    account = account!("observation-byte-bounds")
+    attrs = observation_attrs(account.id, %{provider_event_id: String.duplicate("e", 255)})
+
+    assert Observation.ingest_changeset(attrs).valid?
+
+    for {field, maximum} <- [
+          {:provider_event_id, 255},
+          {:provider_transaction_id, 255},
+          {:kind, 64},
+          {:provider_lineage_id, 255},
+          {:provider_product_id, 255}
+        ] do
+      value = String.duplicate("界", div(maximum, 3) + 1)
+      changeset = Observation.ingest_changeset(Map.put(attrs, field, value))
+
+      refute changeset.valid?
+      assert errors_on(changeset)[field] == ["should be at most #{maximum} byte(s)"]
+    end
+  end
+
+  @tag :observation
   test "observations scope identities by rail and environment and enforce paired evidence fields" do
     account = account!("observation-scope")
     attrs = observation_attrs(account.id, %{provider_event_id: "shared-event"})
