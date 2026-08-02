@@ -86,5 +86,63 @@ defmodule Accrue.Repo.Migrations.CreateAccrueEntitlementPersistence do
       "ALTER TABLE #{table} ADD CONSTRAINT accrue_entitlement_observations_evidence_reference_pair_check CHECK ((evidence_ref IS NULL) = (evidence_expires_at IS NULL))",
       "ALTER TABLE #{table} DROP CONSTRAINT accrue_entitlement_observations_evidence_reference_pair_check"
     )
+
+    create Accrue.Migration.table(:accrue_entitlement_grants, primary_key: false) do
+      add(:id, :binary_id, primary_key: true, default: fragment("gen_random_uuid()"))
+
+      add(
+        :account_id,
+        Accrue.Migration.references(:accrue_entitlement_accounts,
+          type: :binary_id,
+          name: :accrue_entitlement_grants_account_id_fkey
+        ),
+        null: false
+      )
+
+      add(
+        :source_observation_id,
+        Accrue.Migration.references(:accrue_entitlement_observations,
+          type: :binary_id,
+          name: :accrue_entitlement_grants_source_observation_id_fkey
+        )
+      )
+
+      add(:rail, :string, null: false)
+      add(:environment, :string, null: false)
+      add(:provider_lineage_id, :string, null: false)
+      add(:provider_product_id, :string, null: false)
+      add(:logical_plan, :string)
+      add(:source_item_id, :string, null: false)
+      add(:quantity, :integer, null: false)
+      add(:provider_order, :bigint, null: false, default: 0)
+      add(:account_revision, :bigint, null: false, default: 0)
+      add(:effective_at, :utc_datetime_usec, null: false)
+      add(:expires_at, :utc_datetime_usec)
+      add(:superseded_at, :utc_datetime_usec)
+
+      timestamps(type: :utc_datetime_usec)
+    end
+
+    create(
+      Accrue.Migration.unique_index(
+        :accrue_entitlement_grants,
+        [
+          :account_id,
+          :rail,
+          :environment,
+          :provider_lineage_id,
+          :provider_product_id,
+          :source_item_id
+        ],
+        where: "superseded_at IS NULL",
+        name: :accrue_entitlement_grants_current_identity_index
+      )
+    )
+
+    create(
+      Accrue.Migration.index(:accrue_entitlement_grants, [:account_id, :superseded_at],
+        name: :accrue_entitlement_grants_account_history_index
+      )
+    )
   end
 end
