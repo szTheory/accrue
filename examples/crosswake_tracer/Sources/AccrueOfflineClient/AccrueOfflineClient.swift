@@ -292,15 +292,31 @@ private extension Data {
 /// handle for one standardized path, while unrelated paths retain independent locks.
 public struct AtomicOfflineCache: @unchecked Sendable {
     public enum Fault: Error, Sendable { case beforeRename, afterRename }
-    public enum Disposition: Sendable { case allow, deny }
+    public enum Disposition: String, Codable, Sendable, Equatable { case allow, deny }
     public enum DurabilityError: Error, Equatable { case directorySynchronizationUnsupported }
+    public enum CacheError: Error, Equatable { case authenticationFailed, malformedEnvelope }
+
+    public struct RecoveredEnvelope: Sendable, Equatable {
+        public let payload: Data
+        public let revision: Int64
+        public let disposition: Disposition
+    }
 
     public let url: URL
     private let coordinator: CacheCoordinator
+    private let authenticationKey: SymmetricKey?
 
     public init(url: URL) {
         self.url = url.standardizedFileURL
         coordinator = CacheCoordinatorRegistry.shared.coordinator(for: self.url.path)
+        authenticationKey = nil
+    }
+
+    /// The host supplies key material from its secure boundary. The cache never persists it.
+    public init(url: URL, authenticationKey: SymmetricKey) {
+        self.url = url.standardizedFileURL
+        coordinator = CacheCoordinatorRegistry.shared.coordinator(for: self.url.path)
+        self.authenticationKey = authenticationKey
     }
 
     public func replace(with data: Data, fault: Fault? = nil) throws {
@@ -314,11 +330,23 @@ public struct AtomicOfflineCache: @unchecked Sendable {
         fault: Fault? = nil
     ) throws {
         try coordinator.withLock {
-            guard coordinator.accepts(disposition: disposition, revision: revision) else { return }
+            let persisted = try loadVerifiedEnvelope()
+            let accepted: Bool
+            if let persisted {
+                accepted = accepts(
+                    existingDisposition: persisted.disposition,
+                    revision: persisted.revision,
+                    candidateDisposition: disposition,
+                    candidateRevision: revision
+                )
+            } else {
+                accepted = coordinator.accepts(disposition: disposition, revision: revision)
+            }
+            guard accepted else { return }
             let candidate = uniqueCandidateURL()
             defer { try? FileManager.default.removeItem(at: candidate) }
 
-            try data.write(to: candidate)
+            try encodedReplacement(payload: data, disposition: disposition, revision: revision).write(to: candidate)
             let handle = try FileHandle(forWritingTo: candidate)
             defer { try? handle.close() }
             try handle.synchronize()
@@ -344,9 +372,87 @@ public struct AtomicOfflineCache: @unchecked Sendable {
     /// Open/recovery only trusts the canonical path and removes interrupted writes.
     public func recover() throws {
         try coordinator.withLock {
+            _ = try loadVerifiedEnvelope()
             for candidate in try abandonedCandidateURLs() {
                 try FileManager.default.removeItem(at: candidate)
             }
+        }
+    }
+
+    /// Returns state only after the version, path context, payload, revision, and disposition authenticate.
+    public func recoveredEnvelope() throws -> RecoveredEnvelope? {
+        try coordinator.withLock { try loadVerifiedEnvelope() }
+    }
+
+    private func accepts(
+        existingDisposition: Disposition,
+        revision existingRevision: Int64,
+        candidateDisposition: Disposition,
+        candidateRevision: Int64
+    ) -> Bool {
+        if candidateRevision > existingRevision { return true }
+        if candidateRevision < existingRevision { return false }
+        return candidateDisposition == .deny && existingDisposition != .deny
+    }
+
+    private func encodedReplacement(payload: Data, disposition: Disposition, revision: Int64) throws -> Data {
+        guard let authenticationKey else { return payload }
+        let unsigned = UnsignedEnvelope(version: 1, payload: payload.base64EncodedString(), revision: revision, disposition: disposition)
+        let tag = Data(HMAC<SHA256>.authenticationCode(for: try signedBytes(unsigned), using: authenticationKey))
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = [.sortedKeys]
+        return try encoder.encode(Envelope(unsigned: unsigned, authenticationTag: tag.base64EncodedString()))
+    }
+
+    private func loadVerifiedEnvelope() throws -> RecoveredEnvelope? {
+        guard let authenticationKey else { return nil }
+        guard FileManager.default.fileExists(atPath: url.path) else { return nil }
+        let envelope: Envelope
+        do { envelope = try JSONDecoder().decode(Envelope.self, from: Data(contentsOf: url)) }
+        catch { throw CacheError.malformedEnvelope }
+        guard envelope.version == 1,
+              let payload = Data(base64Encoded: envelope.payload),
+              let tag = Data(base64Encoded: envelope.authenticationTag)
+        else { throw CacheError.malformedEnvelope }
+        let unsigned = UnsignedEnvelope(version: envelope.version, payload: envelope.payload, revision: envelope.revision, disposition: envelope.disposition)
+        let expected = Data(HMAC<SHA256>.authenticationCode(for: try signedBytes(unsigned), using: authenticationKey))
+        guard tag == expected else { throw CacheError.authenticationFailed }
+        return RecoveredEnvelope(payload: payload, revision: envelope.revision, disposition: envelope.disposition)
+    }
+
+    private func signedBytes(_ envelope: UnsignedEnvelope) throws -> Data {
+        var bytes = Data("accrue.atomic-offline-cache".utf8)
+        for value in [String(envelope.version), url.path, envelope.payload, String(envelope.revision), envelope.disposition.rawValue] {
+            let field = Data(value.utf8)
+            var length = UInt64(field.count).bigEndian
+            withUnsafeBytes(of: &length) { bytes.append(contentsOf: $0) }
+            bytes.append(field)
+        }
+        return bytes
+    }
+
+    private struct UnsignedEnvelope: Codable {
+        let version: Int
+        let payload: String
+        let revision: Int64
+        let disposition: Disposition
+    }
+
+    private struct Envelope: Codable {
+        let version: Int
+        let payload: String
+        let revision: Int64
+        let disposition: Disposition
+        let authenticationTag: String
+
+        init(unsigned: UnsignedEnvelope, authenticationTag: String) {
+            version = unsigned.version; payload = unsigned.payload; revision = unsigned.revision
+            disposition = unsigned.disposition; self.authenticationTag = authenticationTag
+        }
+
+        enum CodingKeys: String, CodingKey {
+            case version, payload, revision, disposition
+            case authenticationTag = "authentication_tag"
         }
     }
 
@@ -380,9 +486,17 @@ private final class CacheCoordinator: @unchecked Sendable {
     private var revision: Int64?
     private var disposition: AtomicOfflineCache.Disposition?
 
+    let cachePath: String
+
+    init(cachePath: String) { self.cachePath = cachePath }
+
     func withLock<T>(_ body: () throws -> T) throws -> T {
         lock.lock()
         defer { lock.unlock() }
+        let fd = open("\(cachePath).lock", O_CREAT | O_RDWR, S_IRUSR | S_IWUSR)
+        guard fd >= 0 else { throw POSIXError(POSIXErrorCode(rawValue: errno) ?? .EIO) }
+        defer { _ = flock(fd, LOCK_UN); _ = close(fd) }
+        guard flock(fd, LOCK_EX) == 0 else { throw POSIXError(POSIXErrorCode(rawValue: errno) ?? .EIO) }
         return try body()
     }
 
@@ -411,7 +525,7 @@ private final class CacheCoordinatorRegistry: @unchecked Sendable {
         lock.lock()
         defer { lock.unlock() }
         if let coordinator = coordinators[path] { return coordinator }
-        let coordinator = CacheCoordinator()
+        let coordinator = CacheCoordinator(cachePath: path)
         coordinators[path] = coordinator
         return coordinator
     }

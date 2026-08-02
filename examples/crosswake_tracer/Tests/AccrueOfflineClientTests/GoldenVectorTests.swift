@@ -161,9 +161,9 @@ struct GoldenVectorTests {
         #expect(try cache.recoveredEnvelope()?.revision == 9)
         #expect(try cache.recoveredEnvelope()?.disposition == .deny)
 
-        var bytes = try Data(contentsOf: cache.url)
-        bytes[bytes.startIndex] ^= 1
-        try bytes.write(to: cache.url)
+        var envelope = try #require(JSONSerialization.jsonObject(with: Data(contentsOf: cache.url)) as? [String: Any])
+        envelope["revision"] = 10
+        try JSONSerialization.data(withJSONObject: envelope, options: [.sortedKeys]).write(to: cache.url)
         #expect(throws: AtomicOfflineCache.CacheError.authenticationFailed) { try cache.recoveredEnvelope() }
     }
 
@@ -181,7 +181,7 @@ struct GoldenVectorTests {
         let restarted = AtomicOfflineCache(url: url, authenticationKey: key)
         try restarted.replace(with: Data("allow-r6".utf8), disposition: .allow, revision: 6)
 
-        let envelope = try #require(restarted.recoveredEnvelope())
+        let envelope = try #require(try restarted.recoveredEnvelope())
         #expect(envelope.payload == Data("deny-r7".utf8))
         #expect(envelope.revision == 7)
         #expect(envelope.disposition == .deny)
