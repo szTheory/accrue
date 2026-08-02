@@ -284,16 +284,14 @@ create Accrue.Migration.unique_index(:accrue_entitlement_observations,
 
 All claims in this research were verified against the phase context, current codebase, or cited official Ecto/PostgreSQL documentation — no user confirmation needed.
 
-## Open Questions
+## Open Questions (RESOLVED)
 
-1. **Exact public `rails` / nested `products` syntax**
-   - What we know: semantics, aliases, and collision rules are locked.
-   - What's unclear: keyword-list versus map/struct surface.
-   - Recommendation: choose the smallest NimbleOptions-friendly keyword shape that yields deterministic errors; document one canonical example and test it. [VERIFIED: 216-CONTEXT.md]
-2. **Opaque encrypted-evidence store behaviour name and implementation seam**
-   - What we know: only nullable opaque reference + explicit expiry may be persisted; no universal retention duration is allowed.
-   - What's unclear: behaviour/module name and host adapter contract.
-   - Recommendation: introduce only the narrow nullable reference/expiry schema seam now; defer storage implementation and retention policy to the Apple verification phase. [VERIFIED: 216-CONTEXT.md]
+1. **Exact public `rails` / nested `products` syntax — RESOLVED**
+   - Phase 216 uses keyword lists throughout so the public shape is directly expressible in the existing NimbleOptions schema. The canonical registration is `rails: [stripe: [source: :stripe, processor: Accrue.Processor.Stripe, environments: [:production, :sandbox], default_environment: :production], apple: [source: :apple, environments: [:production, :sandbox], default_environment: :production]]` beside `default_rail: :stripe` and the unchanged top-level `processor: Accrue.Processor.Stripe`. Apple has no `processor` entry. Omitting both `rails` and `default_rail` remains legacy mode per D-01 through D-03.
+   - Each logical plan remains under `entitlements: [plans: ...]` and adds `products: [stripe: [production: ["price_pro"], sandbox: ["price_pro_test"]], apple: [production: ["com.example.pro"], sandbox: ["com.example.pro.sandbox"]]]`. Existing `price_ids: [...]` remains a sibling inside that logical plan and expands only to the configured default rail/default environment per D-04/D-05. The normalized public accessor returns a deterministic map keyed by `{rail, environment, product_id}` and valued by logical plan; D-06 governs equality and collisions.
+2. **Opaque encrypted-evidence store behaviour name and implementation seam — RESOLVED**
+   - Phase 216 defines no evidence-store behaviour, module name, adapter callback, encryption API, read/write/delete operation, or retention policy. Its complete seam is the observation schema's nullable opaque `evidence_ref` plus nullable UTC-microsecond `evidence_expires_at`; when retained material is referenced, both values are present, and otherwise both are null. The row continues to hold only normalized/redacted data and the fixed evidence digest per D-12/D-13.
+   - Phase 218 may define separately encrypted storage and purpose-specific retention when Apple verification/replay requirements are implemented. No universal duration or implicit cleanup behavior is introduced by Phase 216.
 
 ## Environment Availability
 

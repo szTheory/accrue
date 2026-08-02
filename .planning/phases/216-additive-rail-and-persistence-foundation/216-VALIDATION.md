@@ -1,10 +1,11 @@
 ---
 phase: 216
 slug: additive-rail-and-persistence-foundation
-status: draft
-nyquist_compliant: false
-wave_0_complete: false
+status: ready
+nyquist_compliant: true
+wave_0_complete: true
 created: 2026-08-02
+updated: 2026-08-02
 ---
 
 # Phase 216 — Validation Strategy
@@ -38,21 +39,26 @@ created: 2026-08-02
 
 | Task ID | Plan | Wave | Requirement | Threat Ref | Secure Behavior | Test Type | Automated Command | File Exists | Status |
 |---------|------|------|-------------|------------|-----------------|-----------|-------------------|-------------|--------|
-| 216-01-01 | 01 | 1 | RAIL-01 | — | Contradictory rail/default configuration fails closed at boot | unit/config | `cd accrue && mix test test/accrue/config_entitlements_test.exs` | ✅ extend | ⬜ pending |
-| 216-01-02 | 01 | 1 | RAIL-02 | — | Rail/environment-qualified identifiers reject only true tuple collisions | unit/config | `cd accrue && mix test test/accrue/config_entitlements_test.exs` | ✅ extend | ⬜ pending |
-| 216-02-01 | 02 | 2 | RAIL-03 | — | Database uniqueness and partial indexes reject duplicate/racing durable state | integration/DB | `cd accrue && mix test test/accrue/entitlements/persistence_test.exs` | ❌ W0 | ⬜ pending |
-| 216-02-02 | 02 | 2 | RAIL-03 | — | Superseded/revoked records retain history and stable identity | integration/DB | `cd accrue && mix test test/accrue/entitlements/persistence_test.exs` | ❌ W0 | ⬜ pending |
-
-*Task IDs and plan allocation are provisional until PLAN.md files are finalized.*
+| 216-01-01 | 01 | 1 | RAIL-01, RAIL-02, RAIL-03 | T-216-01, T-216-02, T-216-03, T-216-SC | Explicit Stripe/Apple config reaches one qualified product and one owner-stable account while boot/default and database uniqueness fail closed | tracer + unit/config + integration/DB | `cd accrue && mix test test/accrue/config_entitlements_test.exs test/accrue/entitlements/persistence_test.exs` | Task creates `accrue/test/accrue/entitlements/persistence_test.exs` and extends existing config test in RED step | ⬜ pending |
+| 216-02-01 | 02 | 2 | RAIL-01 | T-216-04, T-216-06, T-216-07, T-216-SC | Explicit defaults reject ambiguity while legacy-only and concurrent reads remain deterministic | unit/config | `cd accrue && mix test test/accrue/config_entitlements_test.exs` | ✅ extend | ⬜ pending |
+| 216-02-02 | 02 | 2 | RAIL-02 | T-216-05, T-216-06, T-216-07, T-216-SC | Qualified tuple normalization rejects only exact cross-plan collisions and preserves environment isolation | unit/config + compatibility | `cd accrue && mix test test/accrue/config_entitlements_test.exs test/accrue/entitlements/local_map_test.exs` | ✅ extend | ⬜ pending |
+| 216-03-01 | 03 | 2 | RAIL-03 | T-216-08, T-216-09, T-216-10, T-216-SC | Observation identity is database-idempotent and row-visible evidence remains bounded/redacted | integration/DB | `cd accrue && mix test test/accrue/entitlements/persistence_test.exs --only observation` | ✅ created by tracer; extend | ⬜ pending |
+| 216-03-02 | 03 | 2 | RAIL-03 | T-216-08, T-216-09, T-216-11, T-216-SC | Current-grant uniqueness preserves source-item and superseded history across qualified identities | integration/DB | `cd accrue && mix test test/accrue/entitlements/persistence_test.exs --only grant` | ✅ created by tracer; extend | ⬜ pending |
+| 216-03-03 | 03 | 2 | RAIL-03 | T-216-09, T-216-11, T-216-12, T-216-SC | Account-scoped current device uniqueness preserves switching, rotation, and revocation history | integration/DB | `cd accrue && mix test test/accrue/entitlements/persistence_test.exs --only device` | ✅ created by tracer; extend | ⬜ pending |
+| 216-04-01 | 04 | 3 | RAIL-01, RAIL-02, RAIL-03 | T-216-13, T-216-SC | Deterministic fixtures contain no live credentials, raw evidence, adopter identity, or PII | fixture + integration/DB | `cd accrue && mix test test/accrue/entitlements/fake_fixture_test.exs` | Task creates test in RED step | ⬜ pending |
+| 216-04-02 | 04 | 3 | RAIL-01, RAIL-02, RAIL-03 | T-216-14, T-216-15, T-216-SC | Generated configuration/migration is repeat-safe and guidance never grants Apple gateway authority | installer + unit/config | `cd accrue && mix test test/mix/tasks/accrue_install_test.exs test/accrue/config_entitlements_test.exs` | ✅ extend | ⬜ pending |
 
 ---
 
-## Wave 0 Requirements
+## Wave 0 Requirements (Complete)
 
-- [ ] `accrue/test/accrue/entitlements/persistence_test.exs` — migrations, constraints, idempotency, and current grant/device history for RAIL-03.
-- [ ] `accrue/test/accrue/entitlements/fake_fixture_test.exs` — deterministic fixtures covering both rails and Apple environments.
-- [ ] Extend `accrue/test/accrue/config_entitlements_test.exs` — RAIL-01/02 compatibility and catalog collision matrix.
-- [ ] Extend installer/generated-host migration tests — validate the D-17 propagation path.
+No standalone Wave 0 plan is required. The finalized plans use task-level TDD and make test creation part of the owning task before production implementation:
+
+- Plan 216-01's Wave-1 tracer creates `accrue/test/accrue/entitlements/persistence_test.exs` and extends `accrue/test/accrue/config_entitlements_test.exs` in its RED step. Plans 216-02 and 216-03 depend on 216-01, so their test expansions cannot run before that scaffold exists.
+- Plan 216-04 Task 1 creates `accrue/test/accrue/entitlements/fake_fixture_test.exs` in its RED step before fixture implementation.
+- `accrue/test/mix/tasks/accrue_install_test.exs` already exists and Plan 216-04 Task 2 extends it before changing installer output.
+
+This tracer-first dependency shape closes every previously listed missing-test reference without a separate horizontal scaffold task.
 
 ---
 
@@ -64,11 +70,11 @@ All phase behaviors have automated verification.
 
 ## Validation Sign-Off
 
-- [ ] All tasks have `<automated>` verify or Wave 0 dependencies
-- [ ] Sampling continuity: no 3 consecutive tasks without automated verify
-- [ ] Wave 0 covers all MISSING references
-- [ ] No watch-mode flags
-- [ ] Feedback latency < 120 seconds
-- [ ] `nyquist_compliant: true` set in frontmatter
+- [x] All eight finalized tasks have an exact `<automated>` verification command
+- [x] Sampling continuity: every task has automated verification
+- [x] Wave 0/test creation is reconciled through the Wave-1 tracer and owning TDD RED steps
+- [x] No watch-mode flags
+- [x] Targeted feedback commands are expected to remain below 120 seconds; execution records the measured full-suite runtime
+- [x] `wave_0_complete: true` and `nyquist_compliant: true` are set in frontmatter
 
-**Approval:** pending
+**Approval:** ready for execution
