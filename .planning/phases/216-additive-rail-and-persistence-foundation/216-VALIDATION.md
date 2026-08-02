@@ -1,7 +1,7 @@
 ---
 phase: 216
 slug: additive-rail-and-persistence-foundation
-status: ready
+status: validated
 nyquist_compliant: true
 wave_0_complete: true
 created: 2026-08-02
@@ -39,14 +39,18 @@ updated: 2026-08-02
 
 | Task ID | Plan | Wave | Requirement | Threat Ref | Secure Behavior | Test Type | Automated Command | File Exists | Status |
 |---------|------|------|-------------|------------|-----------------|-----------|-------------------|-------------|--------|
-| 216-01-01 | 01 | 1 | RAIL-01, RAIL-02, RAIL-03 | T-216-01, T-216-02, T-216-03, T-216-SC | Explicit Stripe/Apple config reaches one qualified product and one owner-stable account while boot/default and database uniqueness fail closed | tracer + unit/config + integration/DB | `cd accrue && mix test test/accrue/config_entitlements_test.exs test/accrue/entitlements/persistence_test.exs` | Task creates `accrue/test/accrue/entitlements/persistence_test.exs` and extends existing config test in RED step | ⬜ pending |
-| 216-02-01 | 02 | 2 | RAIL-01 | T-216-04, T-216-06, T-216-07, T-216-SC | Explicit defaults reject ambiguity while legacy-only and concurrent reads remain deterministic | unit/config | `cd accrue && mix test test/accrue/config_entitlements_test.exs` | ✅ extend | ⬜ pending |
-| 216-02-02 | 02 | 2 | RAIL-02 | T-216-05, T-216-06, T-216-07, T-216-SC | Qualified tuple normalization rejects only exact cross-plan collisions and preserves environment isolation | unit/config + compatibility | `cd accrue && mix test test/accrue/config_entitlements_test.exs test/accrue/entitlements/local_map_test.exs` | ✅ extend | ⬜ pending |
-| 216-03-01 | 03 | 2 | RAIL-03 | T-216-08, T-216-09, T-216-10, T-216-SC | Observation identity is database-idempotent, row-visible evidence remains bounded/redacted, and evidence reference/expiry are enforced as a both-present-or-both-null pair | integration/DB | `cd accrue && mix test test/accrue/entitlements/persistence_test.exs --only observation` | ✅ created by tracer; extend with changeset and direct-DB pair-state cases | ⬜ pending |
-| 216-03-02 | 03 | 2 | RAIL-03 | T-216-08, T-216-09, T-216-11, T-216-SC | Current-grant uniqueness preserves source-item and superseded history across qualified identities | integration/DB | `cd accrue && mix test test/accrue/entitlements/persistence_test.exs --only grant` | ✅ created by tracer; extend | ⬜ pending |
-| 216-03-03 | 03 | 2 | RAIL-03 | T-216-09, T-216-11, T-216-12, T-216-SC | Account-scoped current device uniqueness preserves switching, rotation, and revocation history | integration/DB | `cd accrue && mix test test/accrue/entitlements/persistence_test.exs --only device` | ✅ created by tracer; extend | ⬜ pending |
-| 216-04-01 | 04 | 3 | RAIL-01, RAIL-02, RAIL-03 | T-216-13, T-216-SC | Deterministic fixtures contain no live credentials, raw evidence, adopter identity, or PII | fixture + integration/DB | `cd accrue && mix test test/accrue/entitlements/fake_fixture_test.exs` | Task creates test in RED step | ⬜ pending |
-| 216-04-02 | 04 | 3 | RAIL-01, RAIL-02, RAIL-03 | T-216-14, T-216-15, T-216-SC | Generated configuration/migration is repeat-safe; guide assertions require Apple observer/non-processor semantics and exclude Phase-216 lifecycle/verification authority | installer + unit/config + docs contract | `cd accrue && mix test test/mix/tasks/accrue_install_test.exs test/accrue/config_entitlements_test.exs test/accrue/docs/entitlements_guide_test.exs` | Task creates `accrue/test/accrue/docs/entitlements_guide_test.exs` in RED step; extends installer/config tests | ⬜ pending |
+| 216-01-01 | 01 | 1 | RAIL-01, RAIL-02, RAIL-03 | T-216-01, T-216-02, T-216-03, T-216-SC | Explicit Stripe/Apple config reaches one qualified product and one owner-stable account while boot/default and database uniqueness fail closed | tracer + unit/config + integration/DB | `cd accrue && mix test test/accrue/config_entitlements_test.exs test/accrue/entitlements/persistence_test.exs` | ✅ | ✅ covered |
+| 216-02-01 | 02 | 2 | RAIL-01 | T-216-04, T-216-06, T-216-07, T-216-SC | Explicit defaults reject ambiguity while legacy-only and concurrent reads remain deterministic | unit/config | `cd accrue && mix test test/accrue/config_entitlements_test.exs` | ✅ | ✅ covered |
+| 216-02-02 | 02 | 2 | RAIL-02 | T-216-05, T-216-06, T-216-07, T-216-SC | Qualified tuple normalization rejects only exact cross-plan collisions and preserves environment isolation | unit/config + compatibility | `cd accrue && mix test test/accrue/config_entitlements_test.exs test/accrue/entitlements/local_map_test.exs` | ✅ | ✅ covered |
+| 216-03-01 | 03 | 2 | RAIL-03 | T-216-08, T-216-09, T-216-10, T-216-SC | Observation identity is database-idempotent, row-visible evidence remains bounded/redacted, and evidence reference/expiry is paired | integration/DB | `cd accrue && mix test test/accrue/entitlements/persistence_test.exs --only observation` | ✅ | ✅ covered |
+| 216-03-02 | 03 | 2 | RAIL-03 | T-216-08, T-216-09, T-216-11, T-216-SC | Current-grant uniqueness preserves source-item and superseded history across qualified identities | integration/DB | `cd accrue && mix test test/accrue/entitlements/persistence_test.exs --only grant` | ✅ | ✅ covered |
+| 216-03-03 | 03 | 2 | RAIL-03 | T-216-09, T-216-11, T-216-12, T-216-SC | Account-scoped current device uniqueness preserves switching, rotation, and revocation history | integration/DB | `cd accrue && mix test test/accrue/entitlements/persistence_test.exs --only device` | ✅ | ✅ covered |
+| 216-04-01 | 04 | 3 | RAIL-01, RAIL-02, RAIL-03 | T-216-13, T-216-SC | Deterministic fixtures contain no live credentials, raw evidence, adopter identity, or PII | fixture + integration/DB | `cd accrue && mix test test/accrue/entitlements/fake_fixture_test.exs` | ✅ | ✅ covered |
+| 216-04-02 | 04 | 3 | RAIL-01, RAIL-02, RAIL-03 | T-216-14, T-216-15, T-216-SC | Generated configuration/migration is repeat-safe; guide assertions preserve Apple observer boundaries and Phase-216 exclusions | installer + unit/config + docs contract | `cd accrue && mix test test/mix/tasks/accrue_install_test.exs test/accrue/config_entitlements_test.exs test/accrue/docs/entitlements_guide_test.exs` | ✅ | ✅ covered |
+| 216-05-01 | 05 | 4 | RAIL-03 | T-216-16, T-216-17, T-216-18, T-216-20, T-216-SC | Observation evidence locators are opaque and bounded, and grant provenance is atomically scoped to the same account, rail, and environment | integration/DB | `cd accrue && mix test test/accrue/entitlements/persistence_test.exs` | ✅ | ✅ covered |
+| 216-05-02 | 05 | 4 | RAIL-03 | T-216-18, T-216-19, T-216-20, T-216-21, T-216-SC | Named PostgreSQL checks enforce durable identity, lifecycle, metadata, ordering, revision, and numeric domains | integration/DB + installer | `cd accrue && mix test test/accrue/entitlements/persistence_test.exs test/accrue/entitlements/fake_fixture_test.exs test/mix/tasks/accrue_install_test.exs` | ✅ | ✅ covered |
+| 216-06-01 | 06 | 5 | RAIL-03 | T-216-06-01, T-216-06-02, T-216-06-03, T-216-06-04, T-216-06-SC | Global observation idempotency converges concurrent writers without disclosing another account's durable row | integration/DB + concurrency | `cd accrue && mix test test/accrue/entitlements/persistence_test.exs --only observation` | ✅ | ✅ covered |
+| 216-06-02 | 06 | 5 | RAIL-03 | T-216-06-01, T-216-06-02, T-216-06-03, T-216-06-04, T-216-06-05, T-216-06-SC | Fallback identities and provider fields are byte-bounded; raw writes, rollback, and account revision boundaries are database-proven | integration/DB + migration + installer | `cd accrue && MIX_ENV=test mix ecto.migrate --quiet && mix test test/accrue/entitlements/persistence_test.exs test/accrue/entitlements/fake_fixture_test.exs test/mix/tasks/accrue_install_test.exs` | ✅ | ✅ covered |
 
 ---
 
@@ -71,11 +75,23 @@ All phase behaviors have automated verification.
 
 ## Validation Sign-Off
 
-- [x] All eight finalized tasks have an exact `<automated>` verification command
+- [x] All twelve finalized tasks have an exact `<automated>` verification command
 - [x] Sampling continuity: every task has automated verification
 - [x] Wave 0/test creation is reconciled through the Wave-1 tracer and owning TDD RED steps
 - [x] No watch-mode flags
 - [x] Targeted feedback commands are expected to remain below 120 seconds; execution records the measured full-suite runtime
 - [x] `wave_0_complete: true` and `nyquist_compliant: true` are set in frontmatter
 
-**Approval:** ready for execution
+**Approval:** validated after execution
+
+---
+
+## Validation Audit 2026-08-02
+
+| Metric | Count |
+|--------|-------|
+| Gaps found | 0 |
+| Resolved | 0 |
+| Escalated | 0 |
+
+Audit evidence: `cd accrue && mix test test/accrue/entitlements/persistence_test.exs test/accrue/config_entitlements_test.exs test/accrue/entitlements/fake_fixture_test.exs test/mix/tasks/accrue_install_test.exs test/accrue/docs/entitlements_guide_test.exs` completed with 83 tests and 0 failures.
