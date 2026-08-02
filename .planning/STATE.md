@@ -4,15 +4,15 @@ milestone: v1.59
 milestone_name: Account-Scoped Multi-Rail & Offline Entitlements
 current_phase: 215
 current_phase_name: research-contracts-and-crosswake-feasibility
-status: verifying
+status: executing
 stopped_at: Completed 215-11-PLAN.md
-last_updated: "2026-08-02T00:21:04.513Z"
+last_updated: "2026-08-02T01:01:11.957Z"
 last_activity: 2026-08-01
 last_activity_desc: Phase 215 execution started
 progress:
   total_phases: 6
   completed_phases: 1
-  total_plans: 11
+  total_plans: 12
   completed_plans: 11
   percent: 17
 ---
@@ -31,7 +31,7 @@ See: `.planning/PROJECT.md` (updated 2026-07-31 after starting v1.59)
 
 Phase: 215 (research-contracts-and-crosswake-feasibility) — EXECUTING
 Plan: 11 of 11
-Status: Phase complete — ready for verification
+Status: Ready to execute
 Last activity: 2026-08-01 — Phase 215 execution started
 
 ## Post-v1.48 Pause Rule
