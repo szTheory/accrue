@@ -24,6 +24,34 @@ check is a database read at LiveView speed, never a blocking Stripe round-trip.
 
 ---
 
+## Additive rails and durable entitlement records
+
+The existing `:processor` configuration is the supported legacy alias for the
+single controllable billing rail. Hosts that need concurrent sources may opt in
+to `:rails` and choose a controllable `:default_rail`; keep using `price_ids`
+for the default rail/environment or use `products` for the explicit
+rail/environment/product tuple. A product identifier is equal only with its
+full qualified tuple — matching the same raw identifier on another rail or
+environment is not a collision.
+
+Apple is an entitlement source/observer. Apple does not implement `Accrue.Processor`; Stripe remains the controllable processor example. Phase 216 does not verify Apple signed material, and Phase 216 does not mutate the Apple subscription lifecycle. Hosts must retain Apple verification and lifecycle management at their own provider boundary.
+
+The durable projection boundary has four Accrue-owned tables:
+`accrue_entitlement_accounts`, `accrue_entitlement_observations`,
+`accrue_entitlement_grants`, and `accrue_entitlement_devices`. They retain
+opaque account links, normalized observations, current and superseded grant
+history, and revoked device history. Evidence is limited to a digest plus an
+optional bounded reference and expiry; do not persist raw receipts, signed
+material, provider notification bodies, adopter identity, or PII in these
+records.
+
+This foundation deliberately excludes a projector, backfill, cutover, Apple
+verification, offline issuance, Google Play, Family Sharing, and provider
+lifecycle mutation. Those later-phase concerns must not be inferred from the
+registration or persistence schema.
+
+---
+
 ## Getting Started — the fail-closed easy path
 
 The whole API collapses to one boolean. Ask whether the billable has a feature,

@@ -5,3 +5,36 @@ config :accrue, :stripe_secret_key, System.fetch_env!("STRIPE_SECRET_KEY")
 config :accrue, :webhook_signing_secrets, %{
   stripe: System.get_env("STRIPE_WEBHOOK_SECRET")
 }
+
+# Optional multi-rail entitlement catalog. Keep the legacy `:processor` setup
+# above as the active default; uncomment this coherent block when a host is
+# ready to observe Apple alongside its controllable Stripe rail.
+#
+# config :accrue, :rails,
+#   stripe: [
+#     source: :stripe,
+#     processor: Accrue.Processor.Stripe,
+#     environments: [:production, :sandbox],
+#     default_environment: :production
+#   ],
+#   apple: [
+#     source: :apple,
+#     environments: [:production, :sandbox],
+#     default_environment: :production
+#   ]
+#
+# config :accrue, :default_rail, :stripe
+#
+# config :accrue,
+#   entitlements: [
+#     plans: [
+#       pro: [
+#         products: [
+#           stripe: [production: ["price_pro_monthly"]],
+#           apple: [production: ["com.example.pro.monthly"]]
+#         ],
+#         # Legacy `price_ids` remains an alias for the default rail/environment.
+#         price_ids: ["price_pro_monthly"]
+#       ]
+#     ]
+#   ]
