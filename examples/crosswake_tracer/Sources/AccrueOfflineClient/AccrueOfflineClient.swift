@@ -319,23 +319,13 @@ public struct AtomicOfflineCache: @unchecked Sendable {
 
     public let url: URL
     private let coordinator: CacheCoordinator
-    private let authenticationKey: SymmetricKey?
-
-    public init(url: URL) {
-        self.url = url.standardizedFileURL
-        coordinator = CacheCoordinatorRegistry.shared.coordinator(for: self.url.path)
-        authenticationKey = nil
-    }
+    private let authenticationKey: SymmetricKey
 
     /// The host supplies key material from its secure boundary. The cache never persists it.
     public init(url: URL, authenticationKey: SymmetricKey) {
         self.url = url.standardizedFileURL
         coordinator = CacheCoordinatorRegistry.shared.coordinator(for: self.url.path)
         self.authenticationKey = authenticationKey
-    }
-
-    public func replace(with data: Data, fault: Fault? = nil) throws {
-        try replace(with: data, disposition: .allow, revision: .max, fault: fault)
     }
 
     public func replace(
@@ -400,7 +390,6 @@ public struct AtomicOfflineCache: @unchecked Sendable {
     }
 
     private func encodedReplacement(payload: Data, disposition: Disposition, revision: Int64) throws -> Data {
-        guard let authenticationKey else { return payload }
         let unsigned = UnsignedEnvelope(version: 1, payload: payload.base64EncodedString(), revision: revision, disposition: disposition)
         let tag = Data(HMAC<SHA256>.authenticationCode(for: try signedBytes(unsigned), using: authenticationKey))
         let encoder = JSONEncoder()
@@ -409,7 +398,6 @@ public struct AtomicOfflineCache: @unchecked Sendable {
     }
 
     private func loadVerifiedEnvelope() throws -> RecoveredEnvelope? {
-        guard let authenticationKey else { return nil }
         guard FileManager.default.fileExists(atPath: url.path) else { return nil }
         let envelope: Envelope
         do { envelope = try JSONDecoder().decode(Envelope.self, from: Data(contentsOf: url)) }
@@ -506,9 +494,6 @@ private final class CacheCoordinator: @unchecked Sendable {
 
     func accepts(disposition candidate: AtomicOfflineCache.Disposition, revision candidateRevision: Int64) -> Bool {
         guard let revision else { return true }
-        // The legacy raw-byte seam carries no revision metadata. Keep that test-only
-        // compatibility path explicit; verified replacements always use a real revision.
-        if candidateRevision == .max && candidate == .allow { return true }
         return ProofReplacementOrder.accepts(
             existingDisposition: disposition ?? .allow,
             existingRevision: revision,

@@ -164,13 +164,13 @@ struct GoldenVectorTests {
         let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
         defer { try? FileManager.default.removeItem(at: directory) }
-        let cache = AtomicOfflineCache(url: directory.appendingPathComponent("entitlement.json"))
-        try cache.replace(with: Data("deny".utf8))
-        #expect(try String(contentsOf: cache.url) == "deny")
-        #expect(throws: AtomicOfflineCache.Fault.beforeRename) { try cache.replace(with: Data("allow".utf8), fault: AtomicOfflineCache.Fault.beforeRename) }
-        #expect(try String(contentsOf: cache.url) == "deny")
-        #expect(throws: AtomicOfflineCache.Fault.afterRename) { try cache.replace(with: Data("deny-new".utf8), fault: AtomicOfflineCache.Fault.afterRename) }
-        #expect(try String(contentsOf: cache.url) == "deny-new")
+        let cache = AtomicOfflineCache(url: directory.appendingPathComponent("entitlement.json"), authenticationKey: testCacheKey)
+        try cache.replace(with: Data("deny".utf8), disposition: .deny, revision: 1)
+        #expect(try cache.recoveredEnvelope()?.payload == Data("deny".utf8))
+        #expect(throws: AtomicOfflineCache.Fault.beforeRename) { try cache.replace(with: Data("allow".utf8), disposition: .allow, revision: 2, fault: .beforeRename) }
+        #expect(try cache.recoveredEnvelope()?.payload == Data("deny".utf8))
+        #expect(throws: AtomicOfflineCache.Fault.afterRename) { try cache.replace(with: Data("deny-new".utf8), disposition: .deny, revision: 2, fault: .afterRename) }
+        #expect(try cache.recoveredEnvelope()?.payload == Data("deny-new".utf8))
     }
 
     @Test("authenticated envelopes bind payload revision disposition and cache path")
@@ -178,7 +178,7 @@ struct GoldenVectorTests {
         let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
         defer { try? FileManager.default.removeItem(at: directory) }
-        let key = SymmetricKey(data: Data("test-cache-authentication-key-32bytes".utf8))
+        let key = testCacheKey
         let cache = AtomicOfflineCache(url: directory.appendingPathComponent("entitlement.json"), authenticationKey: key)
 
         try cache.replace(with: Data("denial-proof".utf8), disposition: .deny, revision: 9)
@@ -197,7 +197,7 @@ struct GoldenVectorTests {
         let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
         defer { try? FileManager.default.removeItem(at: directory) }
-        let key = SymmetricKey(data: Data("test-cache-authentication-key-32bytes".utf8))
+        let key = testCacheKey
         let url = directory.appendingPathComponent("entitlement.json")
 
         try AtomicOfflineCache(url: url, authenticationKey: key).replace(
@@ -219,8 +219,8 @@ struct GoldenVectorTests {
         defer { try? FileManager.default.removeItem(at: directory) }
 
         let url = directory.appendingPathComponent("entitlement.json").standardizedFileURL
-        let firstHandle = AtomicOfflineCache(url: url)
-        let secondHandle = AtomicOfflineCache(url: url)
+        let firstHandle = AtomicOfflineCache(url: url, authenticationKey: testCacheKey)
+        let secondHandle = AtomicOfflineCache(url: url, authenticationKey: testCacheKey)
 
         try firstHandle.replace(with: Data("allow-v4".utf8), disposition: .allow, revision: 4)
         await withTaskGroup(of: Void.self) { group in
@@ -232,7 +232,7 @@ struct GoldenVectorTests {
             }
         }
 
-        #expect(try String(contentsOf: url) == "deny-v4")
+        #expect(try firstHandle.recoveredEnvelope()?.payload == Data("deny-v4".utf8))
         #expect(try firstHandle.candidateURLs().isEmpty)
         #expect(try secondHandle.candidateURLs().isEmpty)
     }
@@ -242,14 +242,14 @@ struct GoldenVectorTests {
         let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
         defer { try? FileManager.default.removeItem(at: directory) }
-        let cache = AtomicOfflineCache(url: directory.appendingPathComponent("entitlement.json"))
-        try cache.replace(with: Data("old-complete".utf8))
+        let cache = AtomicOfflineCache(url: directory.appendingPathComponent("entitlement.json"), authenticationKey: testCacheKey)
+        try cache.replace(with: Data("old-complete".utf8), disposition: .deny, revision: 1)
         let abandoned = directory.appendingPathComponent(".entitlement.json.candidate.crashed-child")
         try Data("new-incomplete".utf8).write(to: abandoned)
 
         try cache.recover()
 
-        #expect(try String(contentsOf: cache.url) == "old-complete")
+        #expect(try cache.recoveredEnvelope()?.payload == Data("old-complete".utf8))
         #expect(try cache.candidateURLs().isEmpty)
     }
 
@@ -258,25 +258,31 @@ struct GoldenVectorTests {
         let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
         defer { try? FileManager.default.removeItem(at: directory) }
-        let cache = AtomicOfflineCache(url: directory.appendingPathComponent("entitlement.json"))
-        try cache.replace(with: Data("old-complete".utf8))
+        let cache = AtomicOfflineCache(url: directory.appendingPathComponent("entitlement.json"), authenticationKey: testCacheKey)
+        try cache.replace(with: Data("old-complete".utf8), disposition: .deny, revision: 1)
 
-        try runCrashHarness(cache.url, payload: "new-before", point: "before-rename")
-        try AtomicOfflineCache(url: cache.url).recover()
-        #expect(try String(contentsOf: cache.url) == "old-complete")
+        try runCrashHarness(cache.url, payload: "new-before", point: "crash-before-rename", disposition: "allow", revision: 2)
+        try cache.recover()
+        #expect(try cache.recoveredEnvelope()?.payload == Data("old-complete".utf8))
         #expect(try cache.candidateURLs().isEmpty)
 
-        try runCrashHarness(cache.url, payload: "new-durable", point: "after-directory-sync")
-        #expect(try String(contentsOf: cache.url) == "new-durable")
+        try runCrashHarness(cache.url, payload: "new-durable", point: "crash-after-directory-sync", disposition: "deny", revision: 2)
+        #expect(try cache.recoveredEnvelope()?.payload == Data("new-durable".utf8))
     }
 
-    private func runCrashHarness(_ url: URL, payload: String, point: String) throws {
+    private var testCacheKey: SymmetricKey { SymmetricKey(data: Data("test-cache-authentication-key-32bytes".utf8)) }
+
+    private func runCrashHarness(_ url: URL, payload: String, point: String, disposition: String, revision: Int) throws {
         let harness = URL(fileURLWithPath: FileManager.default.currentDirectoryPath)
             .appendingPathComponent(".build/debug/AccrueOfflineCacheCrashHarness")
         #expect(FileManager.default.isExecutableFile(atPath: harness.path))
         let process = Process()
         process.executableURL = harness
-        process.arguments = [url.path, payload, point]
+        process.arguments = [url.path, point, disposition, String(revision), payload]
+        process.environment = ProcessInfo.processInfo.environment.merging(
+            ["ACCRUE_CACHE_TEST_KEY_BASE64": Data("test-cache-authentication-key-32bytes".utf8).base64EncodedString()],
+            uniquingKeysWith: { _, new in new }
+        )
         try process.run()
         process.waitUntilExit()
         #expect(process.terminationStatus != 0)
