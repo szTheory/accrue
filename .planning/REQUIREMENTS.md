@@ -14,9 +14,9 @@
 
 ### Rail Contract and Foundation
 
-- [x] **RAIL-01**: A host can register Stripe and Apple rails concurrently while the existing single `processor` configuration remains a supported default-rail alias.
-- [x] **RAIL-02**: A host can map rail-qualified product identifiers to one logical Accrue plan without cross-rail or sandbox/production identifier collisions.
-- [x] **RAIL-03**: Accrue can persist one stable entitlement account, rail/environment-qualified observations and grants, and registered devices with source-item cardinality, monotonic revision/order metadata, bounded provenance, quarantine state, and transactional uniqueness.
+- [ ] **RAIL-01**: A host can register Stripe and Apple rails concurrently while the existing single `processor` configuration remains a supported default-rail alias.
+- [ ] **RAIL-02**: A host can map rail-qualified product identifiers to one logical Accrue plan without cross-rail or sandbox/production identifier collisions.
+- [ ] **RAIL-03**: Accrue can persist one stable entitlement account, rail/environment-qualified observations and grants, and registered devices with source-item cardinality, monotonic revision/order metadata, bounded provenance, quarantine state, and transactional uniqueness.
 - [x] **RAIL-04**: A host can inspect each rail's observation, control, restore, reconciliation, management, and offline capabilities through a dedicated entitlement-source matrix rather than infer them from the gateway processor matrix.
 - [x] **RAIL-05**: A checked-in Crosswake feasibility tracer proves or explicitly blocks the required StoreKit bridge, P-256 device key, secure storage, durable local state, high-water clock, atomic proof replacement, and lifecycle/reconnect callbacks before runtime coupling is accepted.
 
@@ -88,9 +88,9 @@ Filled during roadmap creation. Every v1.59 requirement must map to exactly one 
 | RSCH-03 | Phase 215 | Complete |
 | RAIL-04 | Phase 215 | Complete |
 | RAIL-05 | Phase 215 | Complete |
-| RAIL-01 | Phase 216 | Complete |
-| RAIL-02 | Phase 216 | Complete |
-| RAIL-03 | Phase 216 | Complete |
+| RAIL-01 | Phase 216 | Gaps Found |
+| RAIL-02 | Phase 216 | Gaps Found |
+| RAIL-03 | Phase 216 | Gaps Found |
 | ACCT-01 | Phase 217 | Pending |
 | ACCT-02 | Phase 217 | Pending |
 | ACCT-03 | Phase 217 | Pending |
