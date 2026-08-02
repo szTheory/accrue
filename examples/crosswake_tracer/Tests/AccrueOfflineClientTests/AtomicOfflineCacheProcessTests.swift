@@ -4,16 +4,18 @@ import CryptoKit
 @testable import AccrueOfflineClient
 
 struct AtomicOfflineCacheProcessTests {
-    @Test("denial survives a fresh process and rejects an older allow")
-    func denialRestartRefusesStaleAllow() throws {
+    @Test("same-revision denial survives fresh processes and rejects stale or equal allow")
+    func denialRestartRefusesStaleAndEqualAllow() throws {
         let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
         defer { try? FileManager.default.removeItem(at: directory) }
         let keyBytes = Data("process-cache-authentication-key-32bytes".utf8)
         let url = directory.appendingPathComponent("entitlement.json")
 
+        try runHarness(url, key: keyBytes, arguments: ["replace", "allow", "7", "allow-r7"])
         try runHarness(url, key: keyBytes, arguments: ["replace", "deny", "7", "deny-r7"])
         try runHarness(url, key: keyBytes, arguments: ["replace", "allow", "6", "allow-r6"])
+        try runHarness(url, key: keyBytes, arguments: ["replace", "allow", "7", "allow-r7-stale"])
 
         let cache = AtomicOfflineCache(url: url, authenticationKey: SymmetricKey(data: keyBytes))
         let envelope = try #require(try cache.recoveredEnvelope())

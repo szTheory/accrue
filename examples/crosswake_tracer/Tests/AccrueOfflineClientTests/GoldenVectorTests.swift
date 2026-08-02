@@ -4,6 +4,31 @@ import CryptoKit
 @testable import AccrueOfflineClient
 
 struct GoldenVectorTests {
+    @Test("proof high-water admits a same-revision signed denial but never stale allow evidence")
+    func proofHighWaterUsesDenyPrecedenceAlongsideMonotonicClaims() {
+        let issuedAt = Date(timeIntervalSince1970: 1_700_000_000)
+        let freshness = Date(timeIntervalSince1970: 1_700_003_600)
+        let allowAtSeven = ProofHighWater(
+            issuedAt: issuedAt,
+            revision: 7,
+            freshnessDeadline: freshness,
+            disposition: .allow
+        )
+        let denialAtSeven = ProofHighWater(
+            issuedAt: issuedAt,
+            revision: 7,
+            freshnessDeadline: freshness,
+            disposition: .deny
+        )
+
+        #expect(allowAtSeven.accepts(newer: denialAtSeven))
+        #expect(!denialAtSeven.accepts(newer: allowAtSeven))
+        #expect(!allowAtSeven.accepts(newer: ProofHighWater(issuedAt: issuedAt, revision: 6, freshnessDeadline: freshness, disposition: .deny)))
+        #expect(denialAtSeven.accepts(newer: ProofHighWater(issuedAt: issuedAt, revision: 8, freshnessDeadline: freshness, disposition: .allow)))
+        #expect(!allowAtSeven.accepts(newer: ProofHighWater(issuedAt: issuedAt.addingTimeInterval(-1), revision: 8, freshnessDeadline: freshness, disposition: .allow)))
+        #expect(!allowAtSeven.accepts(newer: ProofHighWater(issuedAt: issuedAt, revision: 8, freshnessDeadline: freshness.addingTimeInterval(-1), disposition: .allow)))
+    }
+
     @Test("golden vectors are independently verified and converge on cache disposition")
     func goldenVectorsVerify() throws {
         let observations = try OfflineGoldenVectorVerifier.verifyFixture()
