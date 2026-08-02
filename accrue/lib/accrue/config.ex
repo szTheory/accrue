@@ -680,8 +680,8 @@ defmodule Accrue.Config do
       |> Application.get_all_env()
       |> Keyword.take(known_keys)
 
-    _ = NimbleOptions.validate!(opts, @schema)
-    _ = maybe_validate_boot_setup!(opts)
+    normalized_opts = NimbleOptions.validate!(opts, @schema)
+    _ = maybe_validate_boot_setup!(normalized_opts)
     :ok
   end
 

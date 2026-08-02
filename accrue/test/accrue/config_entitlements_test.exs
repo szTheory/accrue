@@ -158,6 +158,24 @@ defmodule Accrue.ConfigEntitlementsTest do
       assert Config.default_rail() == :host_fake
     end
 
+    test "a host-fake proof rail honors the schema processor default" do
+      Application.delete_env(:accrue, :processor)
+
+      Application.put_env(:accrue, :rails,
+        host_fake: [
+          source: :host_fake,
+          processor: Accrue.Processor.Fake,
+          environments: [:sandbox],
+          default_environment: :sandbox
+        ]
+      )
+
+      Application.put_env(:accrue, :default_rail, :host_fake)
+
+      assert Config.validate_at_boot!() == :ok
+      assert Config.default_rail() == :host_fake
+    end
+
     test "explicit defaults reject missing, unregistered, observer, and processor-mismatched rails" do
       Application.put_env(:accrue, :processor, Accrue.Processor.Stripe)
 
