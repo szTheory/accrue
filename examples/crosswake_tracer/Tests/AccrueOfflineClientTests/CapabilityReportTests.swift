@@ -29,6 +29,30 @@ struct CapabilityReportTests {
         }
     }
 
+    @Test("decoded caller capability reports cannot assert proven feasibility")
+    func decodedCallerSuppliedEvidenceRemainsBlocked() throws {
+        let callerReport = CapabilityReport(
+            schemaVersion: "1.0",
+            capabilities: Capability.allRequired.map {
+                CapabilityEvidence(
+                    capability: $0,
+                    status: .proven,
+                    evidenceKinds: $0.requiredEvidenceKinds,
+                    location: "test://native"
+                )
+            }
+        )
+        var object = try reportObject(try JSONEncoder().encode(callerReport))
+        object["overallStatus"] = "proven"
+
+        let decoded = try JSONDecoder().decode(
+            CapabilityReport.self,
+            from: try JSONSerialization.data(withJSONObject: object)
+        )
+
+        #expect(decoded.overallStatus == .feasibilityBlocked)
+    }
+
     @Test("unsupported public capability report schemas fail feasibility closed")
     func unsupportedSchemaBlocksOtherwiseProvenReport() {
         let evidence = Capability.allRequired.map {

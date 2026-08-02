@@ -651,27 +651,26 @@ public struct CapabilityReport: Codable, Sendable, Equatable {
     public let capabilities: [CapabilityEvidence]
     public let overallStatus: FeasibilityStatus
 
+    private enum CodingKeys: String, CodingKey {
+        case schemaVersion, capabilities, overallStatus
+    }
+
     public init(schemaVersion: String, capabilities: [CapabilityEvidence]) {
         self.schemaVersion = schemaVersion
         self.capabilities = capabilities.sorted { lhs, rhs in
             Capability.allRequired.firstIndex(of: lhs.capability)! < Capability.allRequired.firstIndex(of: rhs.capability)!
         }
-        overallStatus = Self.reduce(schemaVersion: schemaVersion, capabilities: self.capabilities)
+        // This is a caller-populatable draft. Its status/kind/location fields do not
+        // establish an evidence root, so it cannot decide runtime feasibility.
+        overallStatus = .feasibilityBlocked
     }
 
-    private static func reduce(schemaVersion: String, capabilities: [CapabilityEvidence]) -> FeasibilityStatus {
-        let provided = Set(capabilities.map(\.capability))
-        guard schemaVersion == "1.0",
-              provided == Set(Capability.allRequired),
-              capabilities.count == Capability.allRequired.count,
-              capabilities.allSatisfy({
-                  $0.status == .proven && $0.evidenceKinds.isSuperset(of: $0.capability.requiredEvidenceKinds)
-              })
-        else {
-            return .feasibilityBlocked
-        }
-
-        return .proven
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        self.init(
+            schemaVersion: try container.decode(String.self, forKey: .schemaVersion),
+            capabilities: try container.decode([CapabilityEvidence].self, forKey: .capabilities)
+        )
     }
 }
 
