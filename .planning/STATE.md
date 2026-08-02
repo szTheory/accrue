@@ -4,17 +4,17 @@ milestone: v1.59
 milestone_name: Account-Scoped Multi-Rail & Offline Entitlements
 current_phase: 216
 current_phase_name: additive-rail-and-persistence-foundation
-status: executing
-stopped_at: Completed 216-03-PLAN.md
-last_updated: "2026-08-02T16:04:47.517Z"
+status: verifying
+stopped_at: Completed 216-04-PLAN.md
+last_updated: "2026-08-02T16:13:41.185Z"
 last_activity: 2026-08-02
 last_activity_desc: Phase 216 execution started
 progress:
   total_phases: 6
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 19
-  completed_plans: 18
-  percent: 17
+  completed_plans: 19
+  percent: 33
 ---
 
 # Project State
@@ -31,7 +31,7 @@ See: `.planning/PROJECT.md` (updated 2026-08-01 after completing Phase 215)
 
 Phase: 216 (additive-rail-and-persistence-foundation) — EXECUTING
 Plan: 4 of 4
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-08-02 — Phase 216 execution started
 
 ## Post-v1.48 Pause Rule
@@ -395,6 +395,7 @@ Coverage: 22/22 v1.51 requirements mapped (each REQ-ID → exactly one phase). D
 | Phase 216 P01 | 6min | 1 tasks | 5 files |
 | Phase 216-additive-rail-and-persistence-foundation P02 | 4min | 2 tasks | 2 files |
 | Phase 216-additive-rail-and-persistence-foundation P03 | 18m | 3 tasks | 5 files |
+| Phase 216-additive-rail-and-persistence-foundation P04 | 14min | 2 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -770,6 +771,8 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - [Phase ?]: Explicit multi-rail price aliases use full qualified tuples; legacy raw price_ids retain the LocalMap guard.
 - [Phase ?]: PostgreSQL partial unique indexes are the authority for qualified observation, grant, and device identity races.
 - [Phase ?]: Observation storage is privacy-bounded: normalized metadata and digest only, with paired opaque evidence reference and expiry.
+- [Phase ?]: Keep generated hosts on the active legacy Stripe processor example; present concurrent Stripe and Apple registration as an explicitly commented opt-in block.
+- [Phase ?]: Use fixed normalized IDs, timestamps, digests, and bounded metadata for persistence fixtures rather than provider payloads.
 
 ### Pending Todos
 
@@ -921,8 +924,8 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 
 ## Session Continuity
 
-Last session: 2026-08-02T16:04:47.501Z
-Stopped at: Completed 216-03-PLAN.md
+Last session: 2026-08-02T16:13:41.171Z
+Stopped at: Completed 216-04-PLAN.md
 Resume file: None
 
 ## Operator Next Steps
