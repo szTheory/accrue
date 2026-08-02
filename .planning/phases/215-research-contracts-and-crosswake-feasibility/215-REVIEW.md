@@ -1,8 +1,8 @@
 ---
 phase: 215-research-contracts-and-crosswake-feasibility
-reviewed: 2026-08-01T19:05:00Z
+reviewed: 2026-08-02T00:24:12Z
 depth: standard
-files_reviewed: 19
+files_reviewed: 20
 files_reviewed_list:
   - accrue/lib/accrue/entitlements/decision_cases.ex
   - accrue/lib/accrue/entitlements/decision_cases/markdown.ex
@@ -18,71 +18,66 @@ files_reviewed_list:
   - examples/crosswake_tracer/Package.swift
   - examples/crosswake_tracer/Sources/AccrueOfflineCacheCrashHarness/main.swift
   - examples/crosswake_tracer/Sources/AccrueOfflineClient/AccrueOfflineClient.swift
+  - examples/crosswake_tracer/Tests/AccrueOfflineClientTests/AtomicOfflineCacheProcessTests.swift
   - examples/crosswake_tracer/Tests/AccrueOfflineClientTests/CapabilityReportTests.swift
   - examples/crosswake_tracer/Tests/AccrueOfflineClientTests/GoldenVectorTests.swift
   - examples/crosswake_tracer/capability-report.json
   - examples/crosswake_tracer/physical-device-evidence.md
   - scripts/ci/verify_v159_authority.sh
 findings:
-  critical: 2
-  warning: 3
+  critical: 1
+  warning: 1
   info: 0
-  total: 5
+  total: 2
 status: issues_found
 ---
 
 # Phase 215: Code Review Report
 
-**Reviewed:** 2026-08-01T19:05:00Z
+**Reviewed:** 2026-08-02T00:24:12Z
 **Depth:** standard
-**Files Reviewed:** 19
+**Files Reviewed:** 20
 **Status:** issues_found
 
 ## Summary
 
-The Elixir and Swift test suites pass, but this review found two fail-closed contract/security gaps.  In particular, the cache forgets its ordering state across a process restart and the checked-in golden-vector metadata can drift without any current checker or test rejecting it.  The generated decision table also publishes the wrong semantic field.
+The generated entitlement corpus, its exporters, and the authority script were reviewed alongside the Swift feasibility package. The scoped Elixir tests and `swift test` pass, but the Swift high-water abstraction rejects an equally revised signed denial, and the public capability-report reducer can mark an unsupported schema as proven.
+
+## Narrative Findings (AI reviewer)
 
 ## Critical Issues
 
-### CR-01: Cache permits a stale allow to overwrite a persisted denial after restart
+### CR-01: Equal-revision denial is rejected by the high-water gate
 
-**File:** `examples/crosswake_tracer/Sources/AccrueOfflineClient/AccrueOfflineClient.swift:156`
-**Issue:** The high-water revision and denial precedence live only in `CacheCoordinator` (lines 220-241), which is created with `revision == nil` for every new process.  `replace` persists only opaque bytes and `recover` merely deletes candidates (lines 184-190); neither restores revision/disposition from the canonical cache.  Consequently, after persisting a signed denial at revision 5, restarting the app, and receiving a verified allow at revision 4, `accepts` returns true at line 230 and overwrites the denial.  That violates the rollback/deny-precedence contract and can restore offline access from stale evidence.
+**File:** `examples/crosswake_tracer/Sources/AccrueOfflineClient/AccrueOfflineClient.swift:577`
 
-**Fix:** Persist authenticated revision and disposition alongside the cached verified entitlement, load and validate that metadata before accepting a replacement, and compare it while holding an interprocess file lock.  Reject a candidate when its revision is lower, or when it equals a persisted denial.
+**Issue:** `ProofHighWater.accepts(newer:)` requires `candidate.revision > revision` without carrying or considering disposition. A signed denial at the same revision as an already-cached allow therefore fails the gate, despite `AtomicOfflineCache` deliberately giving a same-revision denial precedence (lines 393-395) and the golden corpus including a deny-precedence case. A caller that uses this advertised `iat`/revision/freshness gate before replacing the cache can retain an allow after a valid denial.
 
-### CR-02: Golden-vector contract metadata can drift while all fixture checks pass
+**Fix:** Model the candidate disposition in the gate and accept an equal-revision denial over a non-denial state, or ensure signed denials bypass this gate. For example:
 
-**File:** `accrue/lib/accrue/entitlements/decision_cases/markdown.ex:139`
-**Issue:** The offline-drift checker compares only `expected_verification`, `expected_reason`, and `expected_cache_disposition`.  It does not compare `case_id`, `contract_version`, `expected_disposition`, `compact_jws`, or enforce unique IDs.  The independent Swift verifier similarly decodes only the three expected values plus `id`, JWS, and fault point (lines 83-91 of `AccrueOfflineClient.swift`).  For example, changing `case_id` on `v1.59-offline-golden-vectors.json:6` to a nonexistent case is accepted by `mix accrue.entitlements.decision_cases --check`, the Elixir verifier tests, and the Swift tests.  The claimed canonical server/client binding can therefore silently become false.
+```swift
+public func accepts(candidate: ProofHighWater, disposition: AtomicOfflineCache.Disposition) -> Bool {
+    if candidate.revision > revision {
+        return candidate.issuedAt >= issuedAt && candidate.freshnessDeadline >= freshnessDeadline
+    }
+    return candidate.revision == revision && disposition == .deny
+}
+```
 
-**Fix:** Make the offline fixture byte-for-byte deterministic like the other generated files, or compare every schema field and validate unique IDs, canonical case membership, version, and expected disposition.  Have the Swift fixture decoder validate those metadata fields too.
+Add a test that starts from an allow at revision `n` and verifies a signed denial at revision `n` is admitted and replaces it.
 
 ## Warnings
 
-### WR-01: Generated markdown labels a lease as continuity
+### WR-01: Invalid capability-report schema can still produce a proven result
 
-**File:** `accrue/lib/accrue/entitlements/decision_cases/markdown.ex:13`
-**Issue:** The fifth table header is `Continuity` (line 23), but each row places `expected.lease` in that column.  Generated documentation consequently reports values such as `fresh` or `denied` as a continuity value instead of `full_actions`, `cached_only`, etc., misleading contract consumers.
+**File:** `examples/crosswake_tracer/Sources/AccrueOfflineClient/AccrueOfflineClient.swift:648`
 
-**Fix:** Render `expected.continuity` in the fifth position, or rename that column to `Lease` and add a separate Continuity column.
+**Issue:** `CapabilityReport.init(schemaVersion:capabilities:)` stores `schemaVersion` but never validates it. Supplying an unsupported version such as `"999"` with a complete evidence list produces `.proven` at lines 653-667. Consumers of this public model can consequently treat data outside the defined report contract as a proven feasibility result. The checked-in JSON validator does validate its schema, but the programmatic API does not.
 
-### WR-02: Contract consumer treats unrelated deliveries as the canonical event
-
-**File:** `accrue/test/support/entitlements/decision_case_contract_consumer.ex:49`
-**Issue:** `valid_deliveries?/2` accepts any valid `Ordering` with the same relation, while ignoring `provider_cursor` and `observed_at`.  A distinct newer provider event can therefore be supplied as a delivery for this case and the consumer still applies the case's transition.  This makes the conformance/property checks unable to prove that event identity and ordering are honored.
-
-**Fix:** Require each delivery to equal `case_data.ordering`, or implement and test the intended cursor/timestamp comparison before applying a transition.
-
-### WR-03: Swift verifier accepts duplicate security-sensitive JWS claims
-
-**File:** `examples/crosswake_tracer/Sources/AccrueOfflineClient/AccrueOfflineClient.swift:59`
-**Issue:** The Swift verifier passes header and payload JSON directly to `JSONSerialization` and never rejects duplicate `alg`, `kid`, or required claim names.  The Elixir verifier explicitly performs this check at `offline_golden_vector_verifier.ex:62-63`.  A signed compact JWS with duplicate keys can therefore be interpreted differently by the two reference consumers, defeating the stated independent verifier parity.
-
-**Fix:** Before decoding, scan the raw header and payload bytes for exactly one occurrence of every security-sensitive key (matching the Elixir implementation), and add duplicate-key vectors that both implementations reject as malformed.
+**Fix:** Reject unsupported versions in the initializer (prefer a throwing initializer) or force `.feasibilityBlocked` unless the version is `"1.0"`; add a test covering the invalid-version path.
 
 ---
 
-_Reviewed: 2026-08-01T19:05:00Z_
+_Reviewed: 2026-08-02T00:24:12Z_
 _Reviewer: the agent (gsd-code-reviewer)_
 _Depth: standard_
