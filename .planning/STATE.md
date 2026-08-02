@@ -5,15 +5,15 @@ milestone_name: Account-Scoped Multi-Rail & Offline Entitlements
 current_phase: 216
 current_phase_name: additive-rail-and-persistence-foundation
 status: executing
-stopped_at: Completed 216-01-PLAN.md
-last_updated: "2026-08-02T15:36:50.900Z"
+stopped_at: Completed 216-02-PLAN.md
+last_updated: "2026-08-02T15:44:05.482Z"
 last_activity: 2026-08-02
 last_activity_desc: Phase 216 execution started
 progress:
   total_phases: 6
   completed_phases: 1
   total_plans: 19
-  completed_plans: 16
+  completed_plans: 17
   percent: 17
 ---
 
@@ -30,7 +30,7 @@ See: `.planning/PROJECT.md` (updated 2026-08-01 after completing Phase 215)
 ## Current Position
 
 Phase: 216 (additive-rail-and-persistence-foundation) — EXECUTING
-Plan: 2 of 4
+Plan: 3 of 4
 Status: Ready to execute
 Last activity: 2026-08-02 — Phase 216 execution started
 
@@ -393,6 +393,7 @@ Coverage: 22/22 v1.51 requirements mapped (each REQ-ID → exactly one phase). D
 | Phase 215 P14 | 4 min | 1 tasks | 2 files |
 | Phase 215 P15 | 2 min | 1 tasks | 2 files |
 | Phase 216 P01 | 6min | 1 tasks | 5 files |
+| Phase 216-additive-rail-and-persistence-foundation P02 | 4min | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -764,6 +765,8 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - [Phase ?]: The internal mutation-test validation seam inherits canonical report identity requirements.
 - [Phase ?]: Kept :processor as the default Stripe rail alias; Apple remains processor-free.
 - [Phase ?]: Reload account after conflict-safe insertion to return the database-authoritative UUID.
+- [Phase ?]: Host-fake is controllable only in deterministic test/proof configuration; Stripe remains the sole production gateway rail.
+- [Phase ?]: Explicit multi-rail price aliases use full qualified tuples; legacy raw price_ids retain the LocalMap guard.
 
 ### Pending Todos
 
@@ -915,8 +918,8 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 
 ## Session Continuity
 
-Last session: 2026-08-02T15:36:50.885Z
-Stopped at: Completed 216-01-PLAN.md
+Last session: 2026-08-02T15:44:05.467Z
+Stopped at: Completed 216-02-PLAN.md
 Resume file: None
 
 ## Operator Next Steps

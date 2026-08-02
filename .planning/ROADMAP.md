@@ -127,7 +127,7 @@ Plans:
   2. A host can map each rail/environment product identifier to one logical plan without identifier collisions across rails or Apple sandbox and production.
   3. An account’s observations, grants, devices, provenance, quarantine state, and ordering data persist with stable identity and transactional uniqueness.
 
-**Plans**: 1/4 plans executed
+**Plans**: 2/4 plans executed
 
 Plans:
 **Wave 1**
@@ -136,7 +136,7 @@ Plans:
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
-- [ ] 216-02-PLAN.md — Complete legacy aliasing and rail/environment-qualified catalog normalization.
+- [x] 216-02-PLAN.md — Complete legacy aliasing and rail/environment-qualified catalog normalization.
 - [ ] 216-03-PLAN.md — Add qualified grants, idempotent observations, and account-scoped device persistence.
 
 **Wave 3** *(blocked on Wave 2 completion)*
@@ -213,7 +213,7 @@ Plans:
 | 214.1. Writer-documentation closure | v1.58 | 4/4 | Complete | 2026-07-31 |
 | 214.2. Diagnostic-display/pagination closure | v1.58 | 4/4 | Complete | 2026-07-31 |
 | 215. Research, contracts, and Crosswake feasibility | v1.59 | 15/15 | Complete    | 2026-08-01 |
-| 216. Additive rail and persistence foundation | v1.59 | 1/4 | In Progress|  |
+| 216. Additive rail and persistence foundation | v1.59 | 2/4 | In Progress|  |
 | 217. Canonical projection and compatibility | v1.59 | 0/TBD | Not started | - |
 | 218. Apple observation and repair | v1.59 | 0/TBD | Not started | - |
 | 219. Offline study contract | v1.59 | 0/TBD | Not started | - |
