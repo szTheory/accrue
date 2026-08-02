@@ -83,11 +83,11 @@ Filled during roadmap creation. Every v1.59 requirement must map to exactly one 
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| RSCH-01 | Phase 215 | Gaps Found |
-| RSCH-02 | Phase 215 | Gaps Found |
-| RSCH-03 | Phase 215 | Gaps Found |
-| RAIL-04 | Phase 215 | Gaps Found |
-| RAIL-05 | Phase 215 | Gaps Found |
+| RSCH-01 | Phase 215 | Complete |
+| RSCH-02 | Phase 215 | Complete |
+| RSCH-03 | Phase 215 | Complete |
+| RAIL-04 | Phase 215 | Complete |
+| RAIL-05 | Phase 215 | Complete |
 | RAIL-01 | Phase 216 | Pending |
 | RAIL-02 | Phase 216 | Pending |
 | RAIL-03 | Phase 216 | Pending |

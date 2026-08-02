@@ -21,11 +21,11 @@ progress:
 
 ## Project Reference
 
-See: `.planning/PROJECT.md` (updated 2026-07-31 after starting v1.59)
+See: `.planning/PROJECT.md` (updated 2026-08-01 after completing Phase 215)
 
 **Core value:** A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic Elixir DX, strong domain modeling, tamper-evident audit ledger, great observability, and zero breaking-change pain through v1.x.
 
-**Current focus:** Phase 215 — research-contracts-and-crosswake-feasibility
+**Current focus:** Phase 216 — Additive rail and persistence foundation
 
 ## Current Position
 
