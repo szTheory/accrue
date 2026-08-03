@@ -5,6 +5,7 @@ defmodule Accrue.Entitlements.Apple.Intake do
 
   alias Accrue.Entitlements.{Observation, Projector, Snapshot}
   alias Accrue.Entitlements.Apple.{Lineage, ReconciliationWakeup}
+  alias Accrue.Events
 
   defmodule VerifiedEvidence do
     @enforce_keys [
@@ -41,6 +42,7 @@ defmodule Accrue.Entitlements.Apple.Intake do
   defmodule Outcome do
     @enforce_keys [:disposition, :reason, :next_action]
     defstruct [:disposition, :reason, :next_action, :snapshot, :revision]
+    @type t :: %__MODULE__{}
   end
 
   @primary_key {:id, :binary_id, autogenerate: true}
@@ -79,6 +81,23 @@ defmodule Accrue.Entitlements.Apple.Intake do
     end
   end
 
+  @doc false
+  def repair(account, lineage_id, %VerifiedEvidence{} = evidence, opts \\ []) do
+    repo = Keyword.get(opts, :repo, Accrue.Repo.repo())
+
+    try do
+      case repo.transact(fn -> {:ok, do_repair(repo, account, lineage_id, evidence, opts)} end) do
+        {:ok, result} -> {:ok, result}
+        {:error, reason} -> {:error, reason}
+      end
+    rescue
+      error in RuntimeError ->
+        if error.message == "injected_failure",
+          do: {:error, :injected_failure},
+          else: reraise(error, __STACKTRACE__)
+    end
+  end
+
   defp do_observe(repo, account, evidence, opts) do
     lineage = Lineage.lock_or_insert(repo, evidence.environment, evidence.original_transaction_id)
 
@@ -91,6 +110,23 @@ defmodule Accrue.Entitlements.Apple.Intake do
 
       {_claim, lineage} ->
         persist_and_project(repo, lineage, account, evidence, opts)
+    end
+  end
+
+  defp do_repair(repo, account, lineage_id, evidence, opts) do
+    case Lineage.repair(repo, lineage_id, account.id, evidence.app_account_token, opts) do
+      {:ownership_conflict, _lineage} ->
+        %Outcome{disposition: :quarantined, reason: :ownership_conflict, next_action: :review_ownership}
+
+      {:verified_unbound, _lineage} ->
+        %Outcome{disposition: :quarantined, reason: :verified_unbound, next_action: :repair_lineage}
+
+      {_binding, lineage} ->
+        outcome = persist_and_project(repo, lineage, account, evidence, opts)
+        record_repair_audit!(account, outcome, opts)
+        {:ok, _} = ReconciliationWakeup.enqueue_in_transaction(repo, lineage.id, evidence.environment, :repair)
+        run_after_write(opts)
+        outcome
     end
   end
 
@@ -108,15 +144,9 @@ defmodule Accrue.Entitlements.Apple.Intake do
 
         {:ok, snapshot} = normalize_projection(result, repo, account)
 
-        {:ok, _} =
-          ReconciliationWakeup.enqueue_in_transaction(
-            repo,
-            lineage.id,
-            evidence.environment,
-            :verified
-          )
+        {:ok, _} = ReconciliationWakeup.enqueue_in_transaction(repo, lineage.id, evidence.environment, :verified)
 
-        run_after_write(opts)
+        if Keyword.get(opts, :after_observe_write, false), do: run_after_write(opts)
 
         %Outcome{
           disposition: :verified,
@@ -200,6 +230,27 @@ defmodule Accrue.Entitlements.Apple.Intake do
     case Keyword.get(opts, :after_write) do
       nil -> :ok
       callback -> callback.()
+    end
+  end
+
+  defp record_repair_audit!(account, outcome, opts) do
+    actor_id =
+      case Keyword.get(opts, :actor_id) do
+        nil -> nil
+        value -> :crypto.hash(:sha256, to_string(value)) |> Base.encode16(case: :lower)
+      end
+
+    case Events.record(%{
+           type: "entitlement.apple_lineage_repaired",
+           subject_type: "EntitlementAccount",
+           subject_id: account.id,
+           actor_type: "admin",
+           actor_id: actor_id,
+           idempotency_key: "apple-lineage-repair:#{account.id}:#{outcome.revision || 0}",
+           data: %{"action" => "repair", "reason" => Atom.to_string(outcome.reason)}
+         }) do
+      {:ok, _} -> :ok
+      {:error, error} -> raise "failed to audit Apple lineage repair: #{inspect(error)}"
     end
   end
 

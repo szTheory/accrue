@@ -20,6 +20,8 @@ defmodule Accrue.Entitlements.Apple.Lineage do
     timestamps(type: :utc_datetime_usec)
   end
 
+  @type t :: %__MODULE__{}
+
   def changeset(lineage, attrs) do
     lineage
     |> cast(attrs, [
@@ -95,4 +97,17 @@ defmodule Accrue.Entitlements.Apple.Lineage do
   end
 
   def claim(_repo, lineage, _account_id, _token, _opts), do: {:verified_unbound, lineage}
+
+  @doc false
+  @spec repair(Ecto.Repo.t(), binary(), binary(), binary(), keyword()) ::
+          {:claimed | :owned | :ownership_conflict | :verified_unbound, t()}
+  def repair(repo, lineage_id, account_id, token, _opts \\ [])
+      when is_binary(lineage_id) and is_binary(account_id) and is_binary(token) do
+    lineage =
+      repo.one!(
+        from(l in __MODULE__, where: l.id == ^lineage_id, lock: "FOR UPDATE")
+      )
+
+    claim(repo, lineage, account_id, token)
+  end
 end

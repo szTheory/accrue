@@ -48,7 +48,7 @@ defmodule Accrue.Entitlements do
   """
 
   alias Accrue.Entitlements.{Account, PurchaseDecision, Resolver, Snapshot}
-  alias Accrue.Entitlements.Apple.Intake
+  alias Accrue.Entitlements.Apple.{Intake, Lineage}
 
   @doc "Returns the bounded Apple purchase context for an authenticated entitlement account."
   def apple_purchase_context(%Account{} = account, opts \\ []) do
@@ -75,6 +75,36 @@ defmodule Accrue.Entitlements do
       },
       fn -> Intake.observe(account, evidence, opts) end
     )
+  end
+
+  @doc "Repairs an authorized, currently unbound Apple lineage without exposing ownership details."
+  @spec repair_apple_lineage(Account.t(), binary(), keyword()) ::
+          {:ok, Intake.Outcome.t()} | {:error, :unauthorized | :verification_failed}
+  def repair_apple_lineage(%Account{} = account, lineage_ref, opts \\ []) when is_binary(lineage_ref) do
+    authorize = Keyword.get(opts, :authorize)
+
+    if is_function(authorize, 2) and authorize.(account, :repair_apple_lineage) == true do
+      with {:ok, %Intake.VerifiedEvidence{} = evidence} <- reverify_apple_lineage(lineage_ref, opts),
+           true <- evidence.app_account_token == account.id,
+           %Lineage{} = lineage <- Accrue.Repo.repo().get(Lineage, lineage_ref),
+           true <- lineage.environment == evidence.environment and
+                     lineage.original_transaction_id == evidence.original_transaction_id do
+        Intake.repair(account, lineage_ref, evidence, opts)
+      else
+        false -> {:error, :verification_failed}
+        _ -> {:error, :verification_failed}
+      end
+    else
+      {:error, :unauthorized}
+    end
+  end
+
+  defp reverify_apple_lineage(lineage_ref, opts) do
+    case Keyword.get(opts, :reverify) do
+      callback when is_function(callback, 1) -> callback.(lineage_ref)
+      callback when is_function(callback, 0) -> callback.()
+      _ -> {:error, :verification_failed}
+    end
   end
 
   @doc "Returns a typed, revision-bound purchase preflight decision."
