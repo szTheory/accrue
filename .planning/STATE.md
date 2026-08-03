@@ -2,13 +2,10 @@
 gsd_state_version: 1.0
 milestone: v1.59
 milestone_name: Account-Scoped Multi-Rail & Offline Entitlements
-current_phase: 218
-current_phase_name: apple-observation-and-repair
 status: planning
-stopped_at: Phase 217 verified with 5/5 must-haves and zero human verification
-last_updated: "2026-08-03T02:52:00Z"
-last_activity: 2026-08-02
-last_activity_desc: Phase 217 verified and complete; transitioned to Phase 218
+stopped_at: Phase 218 context gathered
+last_updated: "2026-08-03T03:23:56.894Z"
+last_activity: 2026-08-02 — Phase 217 verified and complete; transitioned to Phase 218
 progress:
   total_phases: 6
   completed_phases: 3
@@ -939,9 +936,9 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 
 ## Session Continuity
 
-Last session: 2026-08-03T01:52:17.144Z
-Stopped at: Completed 217-05-PLAN.md
-Resume file: None
+Last session: 2026-08-03T03:23:56.883Z
+Stopped at: Phase 218 context gathered
+Resume file: .planning/phases/218-apple-observation-and-repair/218-CONTEXT.md
 
 ## Operator Next Steps
 
