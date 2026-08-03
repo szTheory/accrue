@@ -78,7 +78,7 @@ defmodule Accrue.Entitlements.Projector do
     |> unwrap_transaction()
   end
 
-  defp apply_observation(repo, observation, _opts) do
+  defp apply_observation(repo, observation, opts) do
     current =
       repo.all(
         from(grant in Grant,
@@ -100,35 +100,45 @@ defmodule Accrue.Entitlements.Projector do
 
       current != [] ->
         supersede!(repo, current)
-        insert_grant!(repo, observation)
+        insert_grant!(repo, observation, opts)
         :changed
 
       retraction?(observation) ->
         :noop
 
       true ->
-        insert_grant!(repo, observation)
+        insert_grant!(repo, observation, opts)
         :changed
     end
   end
 
-  defp insert_grant!(repo, observation) do
-    attrs = %{
-      account_id: hashed_actor_id(observation.account_id),
-      source_observation_id: observation.id,
-      rail: observation.rail,
-      environment: observation.environment,
-      provider_lineage_id: observation.provider_lineage_id,
-      provider_product_id: observation.provider_product_id,
-      source_item_id: observation.provider_transaction_id || observation.provider_event_id,
-      quantity: 1,
-      provider_order: observation.provider_order,
-      account_revision: 0,
-      effective_at: observation.observed_at
-    }
+  defp insert_grant!(repo, observation, opts) do
+    attrs =
+      %{
+        account_id: observation.account_id,
+        source_observation_id: observation.id,
+        rail: observation.rail,
+        environment: observation.environment,
+        provider_lineage_id: observation.provider_lineage_id,
+        provider_product_id: observation.provider_product_id,
+        source_item_id: observation.provider_transaction_id || observation.provider_event_id,
+        quantity: 1,
+        provider_order: observation.provider_order,
+        account_revision: 0,
+        effective_at: observation.observed_at
+      }
+      |> maybe_put_logical_plan(Keyword.get(opts, :logical_plan))
 
     repo.insert!(Grant.changeset(%Grant{}, attrs))
   end
+
+  defp maybe_put_logical_plan(attrs, nil), do: attrs
+
+  defp maybe_put_logical_plan(attrs, plan) when is_atom(plan),
+    do: Map.put(attrs, :logical_plan, Atom.to_string(plan))
+
+  defp maybe_put_logical_plan(attrs, plan) when is_binary(plan),
+    do: Map.put(attrs, :logical_plan, plan)
 
   defp supersede!(repo, grants) do
     Enum.each(grants, fn grant ->

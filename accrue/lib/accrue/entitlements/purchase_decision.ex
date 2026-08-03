@@ -357,10 +357,14 @@ defmodule Accrue.Entitlements.PurchaseDecision do
   defp pending_reconcile(_decision, operation_id, _opts), do: reconcile_required(operation_id)
 
   defp complete_operation(decision, operation_id, subscription, opts) do
-    with {:pending, operation} <- operation_for(decision, operation_id, opts),
-         {:ok, _} <- complete_persisted_operation(operation, subscription, opts),
-         do: :ok,
-         else: (_ -> :error)
+    if persisted_account?(decision, opts) do
+      with {:pending, operation} <- operation_for(decision, operation_id, opts),
+           {:ok, _} <- complete_persisted_operation(operation, subscription, opts),
+           do: :ok,
+           else: (_ -> :error)
+    else
+      :ok
+    end
   end
 
   defp complete_persisted_operation(operation, subscription, opts) do

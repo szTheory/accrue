@@ -251,7 +251,7 @@ defmodule Accrue.Entitlements.Compatibility do
                   cursor: next_cursor
               }
 
-            _plan ->
+            plan ->
               with {:ok, account} <-
                      Account.fetch_or_create(repo, customer.owner_type, customer.owner_id),
                    {:ok, observation} <-
@@ -259,7 +259,7 @@ defmodule Accrue.Entitlements.Compatibility do
                        repo,
                        backfill_observation(account, subscription, item)
                      ) do
-                case Projector.project(observation) do
+                case Projector.project(observation, logical_plan: plan) do
                   {:ok, _snapshot} ->
                     %{
                       acc
@@ -300,7 +300,8 @@ defmodule Accrue.Entitlements.Compatibility do
 
   defp backfill_observation(account, subscription, item) do
     source_id = to_string(item.processor_id || item.id)
-    lineage = to_string(subscription.processor_id || subscription.id)
+    subscription_lineage = to_string(subscription.processor_id || subscription.id)
+    lineage = "#{subscription_lineage}:#{source_id}"
 
     observed_at =
       subscription.current_period_start || subscription.inserted_at || DateTime.utc_now()
@@ -335,7 +336,7 @@ defmodule Accrue.Entitlements.Compatibility do
 
   defp decode_cursor(cursor) when is_binary(cursor) do
     with {:ok, binary} <- Base.url_decode64(cursor, padding: false),
-         {key, []} <- :erlang.binary_to_term(binary, [:safe]),
+         key <- :erlang.binary_to_term(binary, [:safe]),
          true <- is_tuple(key) and tuple_size(key) == 5 do
       key
     else

@@ -58,26 +58,30 @@ defmodule Accrue.Entitlements.ProjectorTest do
       args: %{"account_id" => account.id, "revision" => 1}
     )
 
-    assert {:ok, apple} = Projector.project(observation!(account, :apple, "apple-1", 1))
-    assert apple.revision == 2
+    assert {:noop, :no_material_change} =
+             Projector.project(observation!(account, :apple, "apple-1", 1))
+
     assert {:ok, merged} = Accrue.Entitlements.snapshot(account)
+    assert merged.revision == 1
     assert Enum.map(merged.sources, & &1.rail) == [:apple, :stripe]
-    assert count_events(account.id) == 2
+    assert count_events(account.id) == 1
   end
 
   test "retracts one lineage without removing its surviving rail", %{account: account} do
     assert {:ok, _} = Projector.project(observation!(account, :stripe, "stripe-1", 1))
-    assert {:ok, _} = Projector.project(observation!(account, :apple, "apple-1", 1))
+
+    assert {:noop, :no_material_change} =
+             Projector.project(observation!(account, :apple, "apple-1", 1))
 
     assert {:noop, :no_material_change} =
              Projector.project(observation!(account, :stripe, "stripe-1", 2, "retract"))
 
     assert {:ok, retracted} = Accrue.Entitlements.snapshot(account)
-    assert retracted.revision == 2
+    assert retracted.revision == 1
     assert Enum.map(retracted.sources, & &1.rail) == [:apple]
     assert retracted.plans == [:pro]
     assert count_grants(account.id) == 2
-    assert count_events(account.id) == 2
+    assert count_events(account.id) == 1
   end
 
   test "duplicate, stale, quarantined, and unmapped observations are no-ops", %{account: account} do
