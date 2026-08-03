@@ -143,7 +143,10 @@ defmodule Accrue.Entitlements.Apple.Verifier.Production do
   defp validate_order_and_path(root, certs) do
     # OTP validates issuer/child order, basic constraints, keyCertSign, and the
     # configured verification time; its trusted anchor is the host-pinned root.
-    case :public_key.pkix_path_validation(root, certs, []) do
+    # OTP consumes the path from issuing certificate toward leaf, while JWS
+    # `x5c` is leaf-first. Keep the external order for leaf selection/purpose
+    # checks and reverse only for OTP path verification.
+    case :public_key.pkix_path_validation(root, Enum.reverse(certs), []) do
       {:ok, _} -> :ok
       {:error, {:bad_cert, :cert_expired}} -> {:error, :invalid_certificate_time}
       {:error, {:bad_cert, :cert_not_yet_valid}} -> {:error, :invalid_certificate_time}
@@ -186,6 +189,9 @@ defmodule Accrue.Entitlements.Apple.Verifier.Production do
       nil ->
         true
 
+      {:BasicConstraints, false, _} ->
+        true
+
       value ->
         match?({:BasicConstraints, false, _}, :public_key.der_decode(:BasicConstraints, value))
     end
@@ -197,6 +203,9 @@ defmodule Accrue.Entitlements.Apple.Verifier.Production do
     case extension_value(cert, {2, 5, 29, 15}) do
       nil ->
         false
+
+      usages when is_list(usages) ->
+        :digitalSignature in usages
 
       value ->
         case :public_key.der_decode(:KeyUsage, value) do
@@ -224,8 +233,9 @@ defmodule Accrue.Entitlements.Apple.Verifier.Production do
 
   defp leaf_key(x5c) do
     with {:ok, [leaf | _]} <- decode_chain(x5c),
-         cert <- :public_key.pkix_decode_cert(leaf, :otp) do
-      {:ok, subject_public_key_info(cert)}
+         cert <- :public_key.pkix_decode_cert(leaf, :otp),
+         info <- subject_public_key_info(cert) do
+      {:ok, {elem(info, 2), info |> elem(1) |> elem(2)}}
     else
       _ -> {:error, :invalid_chain}
     end
@@ -297,6 +307,6 @@ defmodule Accrue.Entitlements.Apple.Verifier.Production do
 
   defp facts(payload), do: Map.take(payload, @claim_keys)
 
-  defp subject_public_key(cert), do: subject_public_key_info(cert) |> elem(1)
+  defp subject_public_key(cert), do: subject_public_key_info(cert) |> elem(2)
   defp subject_public_key_info(cert), do: cert |> elem(1) |> elem(7)
 end
