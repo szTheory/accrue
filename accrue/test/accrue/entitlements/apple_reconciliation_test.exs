@@ -1,7 +1,8 @@
 defmodule Accrue.Entitlements.AppleReconciliationTest do
-  use ExUnit.Case, async: true
+  use Accrue.RepoCase, async: false
 
   alias Accrue.Entitlements.Apple.{Client, Reconciliation}
+  alias Accrue.Entitlements.Apple.Reconciliation.Checkpoint
 
   @tag :status
   test "the deterministic client preserves status authority and ascending history scripts" do
@@ -53,5 +54,26 @@ defmodule Accrue.Entitlements.AppleReconciliationTest do
                sort: :descending,
                product_types: ["AUTO_RENEWABLE"]
              })
+  end
+
+  test "history advances the completed revision only after the final ascending page" do
+    fake =
+      Client.Fake.new(
+        statuses: [{:ok, []}],
+        history: [
+          {:ok, %{signed_transactions: ["page-1"], revision: "r1", has_more: true}},
+          {:ok, %{signed_transactions: ["page-2"], revision: "r2", has_more: false}}
+        ]
+      )
+
+    lineage_id = Ecto.UUID.generate()
+    now = ~U[2026-08-03 12:00:00Z]
+    args = %{lineage_id: lineage_id, environment: :production}
+
+    assert {:ok, %Checkpoint{pending_revision: "r1", completed_revision: nil, page_count: 1}} =
+             Reconciliation.run(args, repo: Accrue.TestRepo, client: fake, now: now)
+
+    assert {:ok, %Checkpoint{pending_revision: nil, completed_revision: "r2", page_count: 0}} =
+             Reconciliation.run(args, repo: Accrue.TestRepo, client: fake, now: now)
   end
 end
