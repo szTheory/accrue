@@ -21,7 +21,7 @@ decisions:
   - Ambiguous Stripe creates persist an account-scoped operation and reconcile the same provider idempotency key before any retry dispatch.
 metrics:
   tasks_completed: 2
-  tests: 193
+  tests: 197
   completed: 2026-08-03
 status: complete
 ---
@@ -32,14 +32,14 @@ Typed preflight provisions only authenticated first-purchase accounts, blocks ex
 
 ## Completed Tasks
 
-1. Added `PurchaseDecision` with closed `eligible|block|warn` outcomes, qualified-plan-only equivalence, first-purchase authorization/provision/fetch, revision-bound override audit, and recursive privacy-negative evidence.
-2. Added the durable account-scoped Stripe operation record, Fake provider idempotency/reconciliation, and a recheck-before-dispatch continuation path. Apple continuation is typed externally-managed guidance only and cannot dispatch a lifecycle action.
+1. Added `PurchaseDecision` with closed `eligible|block|warn` outcomes, qualified-plan-only equivalence negatives, first-purchase authorization/provision/fetch, revision-bound override audit, and recursive privacy-negative evidence across start/stop/exception telemetry.
+2. Added the durable account-scoped Stripe operation record, Fake provider idempotency/reconciliation, and a recheck-before-dispatch continuation path. A concurrent Apple completion records bounded diagnostic evidence only; Apple continuation cannot dispatch a lifecycle action.
 
 ## Verification
 
 `cd accrue && mix test test/accrue/entitlements test/accrue/billing/subscription_actions_test.exs test/property/entitlement_projection_property_test.exs`
 
-Result: repeated twice — 4 properties, 193 tests, 0 failures each run. Focused purchase suite: 16 tests, 0 failures.
+Result: repeated twice — 4 properties, 197 tests, 0 failures each run. Focused purchase suite: 20 tests, 0 failures.
 
 ## Deviations from Plan
 
@@ -59,7 +59,14 @@ Result: repeated twice — 4 properties, 193 tests, 0 failures each run. Focused
 - **Files modified:** `purchase_operation.ex`, migration, `purchase_decision.ex`, `subscription_actions.ex`, `processor/fake.ex`, focused tests.
 - **Commits:** 26564f5c, 4c221aad, c71cd2fa
 
+3. [Rule 2 - Missing critical functionality] Recorded concurrent Apple-completion conflicts without granting lifecycle authority.
+- **Found during:** Final contract audit.
+- **Issue:** a changed preflight blocked safely but failed to retain bounded conflict evidence.
+- **Fix:** emit an opt-in bounded diagnostic callback and prove zero cancel/refund/transfer/update provider calls; expanded telemetry, stale-override, unmapped/incidental equivalence tests.
+- **Files modified:** `purchase_decision.ex`, `purchase_decision_test.exs`.
+- **Commit:** 867ca2ac
+
 ## Self-Check: PASSED
 
 - Required source and focused test files exist.
-- Commits `7033458a`, `ed4c8003`, `cbe12a45`, `26564f5c`, `4c221aad`, `480cb435`, `36e9dffb`, and `c71cd2fa` exist.
+- Commits `7033458a`, `ed4c8003`, `cbe12a45`, `26564f5c`, `4c221aad`, `480cb435`, `36e9dffb`, `c71cd2fa`, and `867ca2ac` exist.
