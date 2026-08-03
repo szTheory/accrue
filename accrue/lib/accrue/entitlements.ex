@@ -51,16 +51,21 @@ defmodule Accrue.Entitlements do
 
   @doc "Returns a typed, revision-bound purchase preflight decision."
   @spec purchase_decision(Account.t() | String.t(), atom(), String.t(), keyword()) ::
-          PurchaseDecision.t()
+          PurchaseDecision.t() | {:error, :unauthorized_billable_reference | :account_fetch_failed}
   def purchase_decision(account, rail, product_id, opts \\ []) do
     metadata = purchase_decision_metadata(account, rail, opts)
 
     Accrue.Telemetry.span([:accrue, :entitlements, :purchase_decision], metadata, fn ->
-      decision_snapshot(account, opts)
-      |> PurchaseDecision.evaluate(rail, product_id,
-        catalog: Keyword.get(opts, :catalog, Accrue.Config.entitlement_product_catalog()),
-        environment: Keyword.get(opts, :environment, :production)
-      )
+      case decision_snapshot(account, opts) do
+        {:ok, snapshot} ->
+          PurchaseDecision.evaluate(snapshot, rail, product_id,
+            catalog: Keyword.get(opts, :catalog, Accrue.Config.entitlement_product_catalog()),
+            environment: Keyword.get(opts, :environment, :production)
+          )
+
+        {:error, reason} ->
+          {:error, reason}
+      end
     end)
   end
 
@@ -245,13 +250,51 @@ defmodule Accrue.Entitlements do
   defp decision_snapshot(account, opts) do
     case Keyword.get(opts, :snapshot) do
       %Snapshot{} = snapshot ->
-        snapshot
+        {:ok, snapshot}
 
       nil ->
-        case snapshot(account, opts) do
-          {:ok, %Snapshot{} = snapshot} -> snapshot
-          {:error, _} -> nil
-        end
+        decision_snapshot_for_account(account, opts)
+    end
+  end
+
+  # Provisioning is deliberately an explicit authenticated branch of purchase
+  # orchestration, never part of `snapshot/2`. A billable reference must opt in
+  # with `authenticated?: true`; callers cannot create an entitlement account by
+  # merely supplying a struct that looks billable.
+  defp decision_snapshot_for_account(%{__struct__: mod, id: id} = billable, opts)
+       when not is_nil(id) do
+    with true <- Keyword.get(opts, :authenticated?, false),
+         true <- authorized_billable?(billable, opts),
+         owner_type when is_binary(owner_type) <- mod.__accrue__(:billable_type),
+         owner_id <- to_string(id),
+         account <- Accrue.Repo.get_by(Account, owner_type: owner_type, owner_id: owner_id),
+         {:ok, account} <- provision_if_absent(account, owner_type, owner_id, opts),
+         %Account{} = fetched <- Accrue.Repo.get(Account, account.id) do
+      {:ok, Snapshot.fetch(Accrue.Repo.repo(), fetched)}
+    else
+      false -> {:error, :unauthorized_billable_reference}
+      _ -> {:error, :account_fetch_failed}
+    end
+  rescue
+    _ -> {:error, :unauthorized_billable_reference}
+  end
+
+  defp decision_snapshot_for_account(account, opts) do
+    case snapshot(account, opts) do
+      {:ok, %Snapshot{} = snapshot} -> {:ok, snapshot}
+      {:error, _} -> {:ok, nil}
+    end
+  end
+
+  defp provision_if_absent(%Account{} = account, _owner_type, _owner_id, _opts), do: {:ok, account}
+
+  defp provision_if_absent(nil, owner_type, owner_id, opts),
+    do: provision_account(owner_type, owner_id, actor_id: Keyword.get(opts, :actor_id))
+
+  defp authorized_billable?(billable, opts) do
+    case Keyword.get(opts, :authorize) do
+      fun when is_function(fun, 1) -> fun.(billable) == true
+      _ -> true
     end
   end
 

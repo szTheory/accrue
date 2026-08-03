@@ -1,7 +1,16 @@
 defmodule Accrue.Entitlements.PurchaseDecisionTest do
-  use ExUnit.Case, async: true
+  use Accrue.BillingCase, async: false
 
-  alias Accrue.Entitlements.{PurchaseDecision, Snapshot}
+  alias Accrue.Entitlements.{Account, PurchaseDecision, Snapshot}
+
+  defmodule Billable do
+    use Ecto.Schema
+    use Accrue.Billable, billable_type: "PurchaseDecisionUser"
+
+    @primary_key {:id, :binary_id, autogenerate: true}
+    schema "purchase_decision_users" do
+    end
+  end
 
   @now ~U[2026-08-02 12:00:00.000000Z]
 
@@ -126,6 +135,70 @@ defmodule Accrue.Entitlements.PurchaseDecisionTest do
                operation_id: "purchase-operation-1",
                catalog: catalog()
              )
+  end
+
+  test "an ambiguous Stripe continuation returns an operation-bound reconcile result" do
+    decision = PurchaseDecision.evaluate(snapshot([], 1), :stripe, "price_pro", catalog: catalog())
+
+    assert {:error, %{reason: :reconcile_required, operation_id: "purchase-operation-2"}} =
+             PurchaseDecision.continue(decision, :not_a_billable, "price_pro",
+               snapshot: snapshot([], 1),
+               product_id: "price_pro",
+               operation_id: "purchase-operation-2",
+               catalog: catalog(),
+               subscribe: fn _billable, _price, _opts -> {:error, :ambiguous} end
+             )
+  end
+
+  test "Apple continuation is an externally-managed no-mutation outcome" do
+    decision = PurchaseDecision.evaluate(snapshot([], 1), :apple, "product_pro", catalog: catalog())
+
+    assert {:error, %{reason: :externally_managed, operation_id: "apple-operation-1"}} =
+             PurchaseDecision.continue(decision, :not_a_billable, "product_pro",
+               snapshot: snapshot([], 1),
+               product_id: "product_pro",
+               operation_id: "apple-operation-1",
+               catalog: catalog()
+             )
+  end
+
+  test "authenticated first purchase provisions exactly once then reads its empty snapshot" do
+    billable = %Billable{id: Ecto.UUID.generate()}
+
+    assert %PurchaseDecision{status: :eligible, revision: 0} =
+             Accrue.Entitlements.purchase_decision(billable, :stripe, "price_pro",
+               authenticated?: true,
+               authorize: fn ^billable -> true end,
+               catalog: catalog()
+             )
+
+    assert 1 ==
+             Accrue.TestRepo.aggregate(Account, :count, :id)
+
+    assert 0 == Accrue.Processor.Fake.call_count(:create_subscription)
+
+    assert %PurchaseDecision{status: :eligible, revision: 0} =
+             Accrue.Entitlements.purchase_decision(billable, :stripe, "price_pro",
+               authenticated?: true,
+               authorize: fn ^billable -> true end,
+               catalog: catalog()
+             )
+
+    assert 1 == Accrue.TestRepo.aggregate(Account, :count, :id)
+  end
+
+  test "unauthorized billable reference creates no entitlement account or provider resource" do
+    billable = %Billable{id: Ecto.UUID.generate()}
+
+    assert {:error, :unauthorized_billable_reference} =
+             Accrue.Entitlements.purchase_decision(billable, :stripe, "price_pro",
+               authenticated?: true,
+               authorize: fn _ -> false end,
+               catalog: catalog()
+             )
+
+    assert 0 == Accrue.TestRepo.aggregate(Account, :count, :id)
+    assert 0 == Accrue.Processor.Fake.call_count(:create_subscription)
   end
 
   defp snapshot(sources, revision) do

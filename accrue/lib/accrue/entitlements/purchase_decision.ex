@@ -89,13 +89,21 @@ defmodule Accrue.Entitlements.PurchaseDecision do
   def override(%__MODULE__{} = decision, _reason, _actor_id, _opts), do: decision
 
   @doc "Rechecks a decision immediately before delegating a controllable Stripe command."
-  @spec continue(t(), term(), term(), keyword()) :: {:ok, term()} | {:error, atom() | term()}
-  def continue(%__MODULE__{target_rail: :apple}, _billable, _price_spec, _opts),
-    do: {:error, :externally_managed}
+  @spec continue(t(), term(), term(), keyword()) :: {:ok, term()} | {:error, atom() | map() | term()}
+  def continue(%__MODULE__{target_rail: :apple}, _billable, _price_spec, opts) do
+    {:error,
+     %{
+       reason: :externally_managed,
+       operation_id: Keyword.get(opts, :operation_id),
+       guidance: "Manage this subscription in Apple."
+     }}
+  end
 
   def continue(%__MODULE__{target_rail: :stripe} = decision, billable, price_spec, opts) do
+    snapshot = current_snapshot(decision, opts)
+
     current =
-      evaluate(Keyword.get(opts, :snapshot), :stripe, Keyword.fetch!(opts, :product_id),
+      evaluate(snapshot, :stripe, Keyword.fetch!(opts, :product_id),
         catalog: Keyword.get(opts, :catalog, Accrue.Config.entitlement_product_catalog()),
         environment: Keyword.get(opts, :environment, :production)
       )
@@ -108,11 +116,12 @@ defmodule Accrue.Entitlements.PurchaseDecision do
         {:error, :changed_revision}
 
       true ->
-        case SubscriptionActions.subscribe(billable, price_spec,
-               operation_id: Keyword.fetch!(opts, :operation_id)
-             ) do
-          {:error, :ambiguous} -> {:error, :reconcile_required}
-          {:error, {:ambiguous, _}} -> {:error, :reconcile_required}
+        operation_id = Keyword.fetch!(opts, :operation_id)
+        subscribe = Keyword.get(opts, :subscribe, &SubscriptionActions.subscribe/3)
+
+        case subscribe.(billable, price_spec, operation_id: operation_id) do
+          {:error, :ambiguous} -> reconcile_required(operation_id)
+          {:error, {:ambiguous, _}} -> reconcile_required(operation_id)
           result -> result
         end
     end
@@ -184,6 +193,22 @@ defmodule Accrue.Entitlements.PurchaseDecision do
 
   defp plan_label(plan), do: plan |> Atom.to_string() |> String.capitalize()
   defp target_product_id(_decision, opts), do: Keyword.fetch!(opts, :product_id)
+
+  defp current_snapshot(decision, opts) do
+    case Keyword.get(opts, :snapshot_fetch) do
+      fetch when is_function(fetch, 1) -> fetch.(decision)
+      _ -> Keyword.get(opts, :snapshot)
+    end
+  end
+
+  defp reconcile_required(operation_id) do
+    {:error,
+     %{
+       reason: :reconcile_required,
+       operation_id: operation_id,
+       guidance: "Reconcile this purchase before retrying."
+     }}
+  end
 
   defp maybe_audit(decision, reason, actor_id, opts) do
     case Keyword.get(opts, :audit) do
