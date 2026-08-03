@@ -196,9 +196,17 @@ Plans:
   4. Scheduled status and history reconciliation repairs missed notifications and accurately represents active, grace, retry, expiry, refund, and revocation boundaries.
   5. Hosts receive honest externally-managed Apple subscription guidance, with Family Sharing and offer authoring explicitly deferred.
 
-**Plans**: 11/11 plans executed
+**Plans**: 11/13 plans executed
 
 Plans:
+
+**Wave 10** *(blocked on Wave 9 completion)*
+
+- [ ] 218-13-PLAN.md — Quarantine verified unmapped products without blocking later terminal history from retracting stale Apple access.
+
+**Wave 9** *(blocked on Wave 8 completion)*
+
+- [ ] 218-12-PLAN.md — Wire bounded evidence-time certificate validation and all configured Apple trust roots through production admission and reconciliation.
 
 - [x] 218-11-PLAN.md
 
