@@ -82,5 +82,20 @@ defmodule Accrue.Billing.ResourceDispatchTest do
       refute source =~ "Processor.__impl__().cancel_subscription"
       refute source =~ "Processor.__impl__().create_invoice_preview"
     end
+
+    test "item mutations resolve the scoped parent instead of the global processor" do
+      source = File.read!("lib/accrue/billing/subscription_items.ex")
+
+      for operation <- [
+            "subscription_item_create",
+            "subscription_item_delete",
+            "subscription_item_update"
+          ] do
+        assert source =~ "adapter.#{operation}"
+      end
+
+      assert source =~ "parent_subscription(item)"
+      refute source =~ "Processor.__impl__()"
+    end
   end
 end
