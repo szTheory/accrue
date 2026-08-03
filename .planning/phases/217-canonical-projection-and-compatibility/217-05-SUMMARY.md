@@ -59,7 +59,7 @@ Persisted subscription and item provenance now controls lifecycle dispatch, whil
 - Added Apple `Billing.management/2` guidance and bounded lifecycle/management spans; bang facades reuse their instrumented non-bang operations.
 - Added deterministic Fake call capture plus an adapter/management injection seam, making all negative dispatch proof executable without external services.
 - The eleven-action inventory now captures success, typed failure, and forced adapter exceptions, and verifies exactly one lifecycle span pair for both bang and non-bang paths.
-- Lifecycle and management spans use the privacy-safe telemetry path: raw `:actor` is excluded and an actor identifier is SHA-256 hashed when present; recursively bounded metadata rejects seeded identity, receipt/JWS, token, and provider-payload evidence.
+- Lifecycle and management spans use the privacy-safe telemetry path: raw `:actor` is excluded and an actor identifier is SHA-256 hashed when present; recursively bounded telemetry metadata and lifecycle audit data reject seeded identity, receipt/JWS, token, and provider-payload evidence.
 - Added zero-call provenance gates for missing, unknown, wrong, and unscoped resources; repeated operation IDs retain their Fake adapter/idempotency identity while global configuration flips.
 - Added Apple zero-call coverage across success, typed error, repeat, and concurrent management calls for cancellation, retry/swap/proration, refund, invoice, payment-method, item, and dunning callback families.
 
@@ -79,6 +79,7 @@ Persisted subscription and item provenance now controls lifecycle dispatch, whil
 6. Telemetry privacy closure: `f827d718` — raw actor removal and hashed actor IDs for lifecycle/management spans.
 7. Contract completion hardening: `91412591` — deterministic Fake call capture, injected exception seams, all-action failure matrices, and zero-call isolation proof.
 8. Recursive privacy closure: `81b236cd` — recursively reject forbidden telemetry keys and seeded values in every captured span phase.
+9. Audit privacy closure: `357bff2a` — recursively reject forbidden values in lifecycle audit evidence.
 
 ## Deviations from Plan
 
@@ -88,7 +89,7 @@ Persisted subscription and item provenance now controls lifecycle dispatch, whil
 - **Found during:** rejected-plan contract completion
 - **Fix:** forwarded `opts[:operation_id]` into their existing idempotency identity.
 - **Files modified:** `accrue/lib/accrue/billing/subscription_actions.ex`
-- **Commit:** `91412591`, `81b236cd`
+- **Commit:** `91412591`, `81b236cd`, `357bff2a`
 
 2. [Rule 2 - Critical verification] Fake could count calls but could not prove a callback family was untouched
 - **Found during:** Apple and scoping isolation matrix implementation
@@ -103,4 +104,4 @@ The full `mix test.all` command remains outside this plan's focused gate and wou
 ## Self-Check: PASSED
 
 - Required gateway, billing, action, item, and dispatch-test files exist.
-- Prior task commits plus `91412591` and `81b236cd` exist.
+- Prior task commits plus `91412591`, `81b236cd`, and `357bff2a` exist.
