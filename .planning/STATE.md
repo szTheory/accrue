@@ -4,16 +4,16 @@ milestone: v1.59
 milestone_name: Account-Scoped Multi-Rail & Offline Entitlements
 current_phase: 218
 current_phase_name: apple-observation-and-repair
-status: planned
-stopped_at: Planned 218-14-PLAN.md
-last_updated: "2026-08-03T19:24:46.000Z"
+status: gaps_found
+stopped_at: Phase 218 verification found 3 gaps
+last_updated: "2026-08-03T19:39:00.000Z"
 last_activity: 2026-08-03
-last_activity_desc: Phase 218 gap-closure plan 218-14 created and verified
+last_activity_desc: Phase 218 re-verification found 3 blocking gaps after Plan 218-14
 progress:
   total_phases: 6
   completed_phases: 4
   total_plans: 40
-  completed_plans: 39
+  completed_plans: 40
   percent: 67
 ---
 
@@ -29,10 +29,10 @@ See: `.planning/PROJECT.md` (updated 2026-08-01 after completing Phase 215)
 
 ## Current Position
 
-Phase: 218 (apple-observation-and-repair) — PLANNED
+Phase: 218 (apple-observation-and-repair) — GAPS FOUND
 Plan: 14 of 14
-Status: Ready to execute
-Last activity: 2026-08-03 — Phase 218 gap-closure plan 218-14 created and verified
+Status: Ready to plan verification gaps
+Last activity: 2026-08-03 — Phase 218 re-verification found 3 blocking gaps after Plan 218-14
 
 ## Post-v1.48 Pause Rule
 
@@ -409,6 +409,7 @@ Coverage: 22/22 v1.51 requirements mapped (each REQ-ID → exactly one phase). D
 | Phase 218-apple-observation-and-repair P11 | 31m | 3 tasks | 10 files |
 | Phase 218-apple-observation-and-repair P12 | 8m | 2 tasks | 7 files |
 | Phase 218 P13 | 6m | 1 tasks | 2 files |
+| Phase 218-apple-observation-and-repair P14 | 6min | 1 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -803,6 +804,7 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - [Phase ?]: Apple signedDate certificate time is selected only per delayed reconciliation JWS; live paths retain current-clock policy.
 - [Phase ?]: Apple PKIX checks every configured host-pinned root and manually validates all certificate windows at the resolved policy instant.
 - [Phase ?]: Verified unmapped Apple products preserve logical_plan: nil so existing Intake quarantine remains non-granting and reconciliation-local.
+- [Phase ?]: Notification application identity is validated only from the authenticated outer data map.
 
 ### Pending Todos
 
@@ -954,8 +956,8 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 
 ## Session Continuity
 
-Last session: 2026-08-03T18:59:51.705Z
-Stopped at: Completed 218-13-PLAN.md
+Last session: 2026-08-03T19:30:50.263Z
+Stopped at: Completed 218-14-PLAN.md
 Resume file: None
 
 ## Operator Next Steps
