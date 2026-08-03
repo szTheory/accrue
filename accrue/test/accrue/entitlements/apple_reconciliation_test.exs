@@ -3,7 +3,13 @@ defmodule Accrue.Entitlements.AppleReconciliationTest do
   use Oban.Testing, repo: Accrue.TestRepo
 
   alias Accrue.Entitlements.{Account, Grant, Observation, Projector}
-  alias Accrue.Entitlements.Apple.{Client, Lineage, Reconciliation, ReconcileWorker}
+  alias Accrue.Entitlements.Apple.{
+    Client,
+    Lineage,
+    Reconciliation,
+    ReconciliationSweeper,
+    ReconcileWorker
+  }
   alias Accrue.Entitlements.Apple.Client.Production
   alias Accrue.Entitlements.Apple.Reconciliation.Checkpoint
   alias Accrue.Entitlements.Apple.ReconciliationWakeupWorker
@@ -244,6 +250,68 @@ defmodule Accrue.Entitlements.AppleReconciliationTest do
              page_count: 0,
              run_state: :idle
            } =
+             Accrue.TestRepo.get_by!(Checkpoint, lineage_id: lineage.id, environment: :production)
+  end
+
+  test "a due checkpoint repairs Apple state after a missed notification" do
+    account = account!("apple-scheduled-repair")
+    lineage = Lineage.lock_or_insert(Accrue.TestRepo, :production, "orig-scheduled-repair")
+    {:claimed, lineage} = Lineage.claim(Accrue.TestRepo, lineage, account.id, account.id)
+    now = ~U[2026-08-03 12:00:00Z]
+
+    Accrue.TestRepo.insert!(
+      Checkpoint.changeset(%Checkpoint{}, %{
+        lineage_id: lineage.id,
+        environment: :production,
+        run_state: :idle,
+        page_count: 0,
+        page_budget: 25,
+        attempts: 0,
+        next_due_at: DateTime.add(now, -1, :second)
+      })
+    )
+
+    previous = Application.get_env(:accrue, :apple_reconciliation)
+
+    Application.put_env(:accrue, :apple_reconciliation,
+      client:
+        Client.Fake.new(
+          statuses: [{:ok, []}],
+          history: [{:ok, %{signed_transactions: ["scheduled-repair"], has_more: false}}]
+        ),
+      admission: admission(account, lineage)
+    )
+
+    on_exit(fn ->
+      if is_nil(previous),
+        do: Application.delete_env(:accrue, :apple_reconciliation),
+        else: Application.put_env(:accrue, :apple_reconciliation, previous)
+    end)
+
+    assert {:ok, 1} = ReconciliationSweeper.sweep(Accrue.TestRepo, now: now)
+
+    [job] =
+      Accrue.TestRepo.all(
+        from(job in Oban.Job,
+          where:
+            job.worker == ^worker_name(ReconcileWorker) and job.args["reason"] == "scheduled_due"
+        )
+      )
+
+    assert job.args == %{
+             "environment" => "production",
+             "lineage_id" => lineage.id,
+             "reason" => "scheduled_due"
+           }
+
+    assert %Checkpoint{run_state: :running, next_due_at: nil} =
+             Accrue.TestRepo.get_by!(Checkpoint, lineage_id: lineage.id, environment: :production)
+
+    assert :ok = perform_job(ReconcileWorker, job.args)
+    assert Accrue.TestRepo.aggregate(Observation, :count, :id) == 1
+    assert Accrue.TestRepo.aggregate(Grant, :count, :id) == 1
+
+    assert %Checkpoint{run_state: :idle, next_due_at: %DateTime{}} =
              Accrue.TestRepo.get_by!(Checkpoint, lineage_id: lineage.id, environment: :production)
   end
 
