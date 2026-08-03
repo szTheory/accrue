@@ -22,7 +22,7 @@ decisions:
   - Apple management is a successful externally-managed source outcome, never a billing mutation.
 metrics:
   tasks_completed: 2
-  tests: 196
+  tests: 203
   completed: 2026-08-03
 status: complete
 requirements-completed: [ACCT-03]
@@ -57,11 +57,12 @@ Persisted subscription and item provenance now controls lifecycle dispatch, whil
 - Added a closed `GatewayRegistry.resolve/1` boundary with stable missing/unknown processor errors.
 - Routed subscription lifecycle operations and item mutations through persisted parent provenance, preserving configured dispatch only for creation paths.
 - Added Apple `Billing.management/2` guidance and bounded lifecycle/management spans; bang facades reuse their instrumented non-bang operations.
+- Added a Fake-backed table inventory covering all eleven lifecycle non-bang/bang facade pairs under deliberately divergent global processor configuration.
 
 ## Verification
 
-- `cd accrue && mix test test/accrue/billing/resource_dispatch_test.exs test/accrue/billing/subscription_actions_test.exs test/accrue/entitlements/provider_honesty_test.exs` — 22 tests, 0 failures.
-- `cd accrue && mix test test/accrue/entitlements test/accrue/billing/resource_dispatch_test.exs --exclude live_stripe` — 196 tests, 0 failures.
+- `cd accrue && mix test test/accrue/billing/resource_dispatch_test.exs test/accrue/billing/subscription_actions_test.exs test/accrue/entitlements/provider_honesty_test.exs` — 29 tests, 0 failures.
+- `cd accrue && mix test test/accrue/entitlements test/accrue/billing/resource_dispatch_test.exs --exclude live_stripe` — repeated twice, 203 tests, 0 failures each run.
 - `mix format --check-formatted` passed for all plan-owned files.
 
 ## Task Commits
@@ -70,6 +71,7 @@ Persisted subscription and item provenance now controls lifecycle dispatch, whil
 2. Task 1: `4232be0e` — provenance-routed subscription lifecycle actions.
 3. Task 2: `d6772b4b` — parent-provenance item routing, Apple management, and spans.
 4. Task 2 verification hardening: `c92d5ba3` — item global-dispatch structural guard.
+5. Reopened inventory coverage: `5cc4ca3e` — Fake-backed table-driven lifecycle facade and telemetry coverage.
 
 ## Deviations from Plan
 
