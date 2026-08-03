@@ -6,7 +6,7 @@ defmodule Accrue.Entitlements.AppleConvergencePropertyTest do
   import Ecto.Query
 
   alias Accrue.Entitlements.{Account, Grant, Snapshot}
-  alias Accrue.Entitlements.Apple.{Client, Lineage, ReconcileWorker, Reconciliation}
+  alias Accrue.Entitlements.Apple.{Client, Lineage, ReconcileWorker, Reconciliation, ReconciliationWakeup}
   alias Accrue.Entitlements.Apple.Reconciliation.Checkpoint
   alias Accrue.Entitlements.Apple.ReconciliationWakeupWorker
 
@@ -60,17 +60,17 @@ defmodule Accrue.Entitlements.AppleConvergencePropertyTest do
 
   property "queued Apple reconciliation converges across generated delivery and page permutations" do
     check all(
-            order <- member_of([["active", "revoked"], ["revoked", "active"]]),
-            page_split <- member_of([1, 2])
+            order <- list_of(member_of(["active", "revoked"]), min_length: 1, max_length: 4),
+            page_width <- integer(1..3)
           ) do
-      first = reconcile_variant(order, page_split)
-      second = reconcile_variant(Enum.reverse(order), if(page_split == 1, do: 2, else: 1))
+      first = reconcile_variant(order, page_width)
+      second = reconcile_variant(Enum.reverse(order), rem(page_width, 3) + 1)
 
       assert first == second
     end
   end
 
-  defp reconcile_variant(events, page_split) do
+  defp reconcile_variant(events, page_width) do
     {:ok, account} =
       Account.fetch_or_create(
         Accrue.TestRepo,
@@ -86,7 +86,7 @@ defmodule Accrue.Entitlements.AppleConvergencePropertyTest do
     previous = Application.get_env(:accrue, :apple_reconciliation)
 
     Application.put_env(:accrue, :apple_reconciliation,
-      client: %ScriptedClient{pages: pages(events, page_split)},
+      client: %ScriptedClient{pages: pages(events, page_width)},
       admission: admission(account, lineage)
     )
 
@@ -94,26 +94,14 @@ defmodule Accrue.Entitlements.AppleConvergencePropertyTest do
       assert {:ok, _} =
                Reconciliation.enqueue(lineage.id, :production, :property, repo: Accrue.TestRepo)
 
-      assert :ok = perform_job(ReconciliationWakeupWorker, %{})
-
-      assert :ok =
-               perform_job(ReconcileWorker, %{
-                 "lineage_id" => lineage.id,
-                 "environment" => "production",
-                 "reason" => "property"
-               })
-
-      if page_split == 1 do
-        assert :ok =
-                 perform_job(ReconcileWorker, %{
-                   "lineage_id" => lineage.id,
-                   "environment" => "production",
-                   "reason" => "continuation"
-                 })
-      end
+      perform_persisted_jobs(ReconciliationWakeupWorker)
+      perform_persisted_jobs(ReconcileWorker)
 
       checkpoint =
         Accrue.TestRepo.get_by!(Checkpoint, lineage_id: lineage.id, environment: :production)
+
+      assert 0 == Accrue.TestRepo.aggregate(Oban.Job, :count, :id)
+      assert 0 == Accrue.TestRepo.aggregate(ReconciliationWakeup, :count, :id)
 
       grants =
         Accrue.TestRepo.all(
@@ -140,19 +128,32 @@ defmodule Accrue.Entitlements.AppleConvergencePropertyTest do
     end
   end
 
-  defp pages(events, 2),
-    do: [
-      {:ok,
-       %{prior_revision: nil, signed_transactions: events, revision: "done", has_more: false}}
-    ]
+  defp perform_persisted_jobs(worker) do
+    case Accrue.TestRepo.one(from(job in Oban.Job, where: job.worker == ^to_string(worker))) do
+      nil -> :ok
+      job ->
+        Accrue.TestRepo.delete!(job)
+        assert :ok = perform_job(worker, job.args)
+        perform_persisted_jobs(worker)
+    end
+  end
 
-  defp pages([first, second], 1),
-    do: [
+  defp pages(events, page_width) do
+    events
+    |> Enum.chunk_every(page_width)
+    |> Enum.with_index(1)
+    |> Enum.map(fn {page_events, index} ->
+      revision = "page-#{index}"
+
       {:ok,
-       %{prior_revision: nil, signed_transactions: [first], revision: "one", has_more: true}},
-      {:ok,
-       %{prior_revision: "one", signed_transactions: [second], revision: "done", has_more: false}}
-    ]
+       %{
+         prior_revision: if(index == 1, do: nil, else: "page-#{index - 1}"),
+         signed_transactions: page_events,
+         revision: revision,
+         has_more: index * page_width < length(events)
+       }}
+    end)
+  end
 
   defp admission(account, lineage),
     do: [
