@@ -4,17 +4,17 @@ milestone: v1.59
 milestone_name: Account-Scoped Multi-Rail & Offline Entitlements
 current_phase: 217
 current_phase_name: canonical-projection-and-compatibility
-status: executing
-stopped_at: Completed 217-04-PLAN.md
-last_updated: "2026-08-03T01:22:13.977Z"
+status: verifying
+stopped_at: Completed 217-05-PLAN.md
+last_updated: "2026-08-03T01:52:17.156Z"
 last_activity: 2026-08-02
 last_activity_desc: Phase 217 execution started
 progress:
   total_phases: 6
-  completed_phases: 2
+  completed_phases: 3
   total_plans: 26
-  completed_plans: 25
-  percent: 33
+  completed_plans: 26
+  percent: 50
 ---
 
 # Project State
@@ -31,7 +31,7 @@ See: `.planning/PROJECT.md` (updated 2026-08-01 after completing Phase 215)
 
 Phase: 217 (canonical-projection-and-compatibility) — EXECUTING
 Plan: 5 of 5
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-08-02 — Phase 217 execution started
 
 ## Post-v1.48 Pause Rule
@@ -402,6 +402,7 @@ Coverage: 22/22 v1.51 requirements mapped (each REQ-ID → exactly one phase). D
 | Phase 217 P02 | 24m | 2 tasks | 5 files |
 | Phase 217-canonical-projection-and-compatibility P03 | 18m | 2 tasks | 5 files |
 | Phase 217-canonical-projection-and-compatibility P04 | 17min | 2 tasks | 5 files |
+| Phase 217 P05 | 7m | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -785,6 +786,8 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - [Phase ?]: Equivalent source retractions preserve the revision when plan-level authorization bounds remain unchanged.
 - [Phase ?]: Snapshot source summaries carry bounded logical_plan provenance so purchase equivalence is exact and cross-plan-safe.
 - [Phase ?]: Compatibility multi_rail config dispatches through a fail-closed LocalMap/canonical authority seam.
+- [Phase ?]: Existing subscriptions and items resolve adapters from persisted processor provenance; configured processor remains for creation.
+- [Phase ?]: Apple management is a successful externally-managed source outcome, never a billing mutation.
 
 ### Pending Todos
 
@@ -936,8 +939,8 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 
 ## Session Continuity
 
-Last session: 2026-08-03T01:22:13.967Z
-Stopped at: Completed 217-04-PLAN.md
+Last session: 2026-08-03T01:52:17.144Z
+Stopped at: Completed 217-05-PLAN.md
 Resume file: None
 
 ## Operator Next Steps
