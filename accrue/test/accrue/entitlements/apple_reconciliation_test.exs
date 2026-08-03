@@ -83,16 +83,6 @@ defmodule Accrue.Entitlements.AppleReconciliationTest do
     signed_at = ~U[2026-08-03 12:00:00.000000Z]
     effective_at = ~U[2026-08-03 13:00:00.000000Z]
 
-    refund =
-      apple_observation!(account,
-        lifecycle: :refunded,
-        signed_at: signed_at,
-        effective_at: effective_at,
-        digest: String.duplicate("b", 64)
-      )
-
-    assert {:noop, :stale} = Projector.project(refund)
-
     active =
       apple_observation!(account,
         lifecycle: :active,
@@ -101,7 +91,27 @@ defmodule Accrue.Entitlements.AppleReconciliationTest do
         digest: String.duplicate("a", 64)
       )
 
-    assert {:noop, :stale} = Projector.project(active)
+    assert {:noop, :no_material_change} = Projector.project(active)
+
+    refund =
+      apple_observation!(account,
+        lifecycle: :refunded,
+        signed_at: signed_at,
+        effective_at: effective_at,
+        digest: String.duplicate("b", 64)
+      )
+
+    assert {:noop, :no_material_change} = Projector.project(refund)
+
+    delayed_active =
+      apple_observation!(account,
+        lifecycle: :active,
+        signed_at: signed_at,
+        effective_at: effective_at,
+        digest: String.duplicate("a", 64)
+      )
+
+    assert {:noop, :stale} = Projector.project(delayed_active)
     assert [] == current_grants(account.id)
   end
 
@@ -130,7 +140,7 @@ defmodule Accrue.Entitlements.AppleReconciliationTest do
         digest: String.duplicate("d", 64)
       )
 
-    assert {:ok, _} = Projector.project(production)
+    assert {:noop, :no_material_change} = Projector.project(production)
     assert {:noop, :no_material_change} = Projector.project(sandbox)
 
     stripe_low = stripe_observation!(account, 1)

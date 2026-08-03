@@ -94,12 +94,16 @@ defmodule Accrue.Entitlements.Projector do
             grant.account_id == ^observation.account_id and grant.rail == ^observation.rail and
               grant.environment == ^observation.environment and
               grant.provider_lineage_id == ^observation.provider_lineage_id and
+              grant.provider_product_id == ^observation.provider_product_id and
               is_nil(grant.superseded_at)
         )
       )
 
     cond do
-      current != [] and Enum.all?(current, &(&1.provider_order >= observation.provider_order)) ->
+      current != [] and Enum.all?(current, &(not newer_than?(&1, observation))) ->
+        :noop
+
+      current == [] and stale_apple_observation?(repo, observation) ->
         :noop
 
       current != [] and retraction?(observation) ->
@@ -132,8 +136,10 @@ defmodule Accrue.Entitlements.Projector do
         source_item_id: observation.provider_transaction_id || observation.provider_event_id,
         quantity: 1,
         provider_order: observation.provider_order,
+        provider_order_key: observation.provider_order_key,
         account_revision: 0,
-        effective_at: observation.observed_at
+        effective_at: observation.observed_at,
+        expires_at: observation.expires_at
       }
       |> maybe_put_logical_plan(Keyword.get(opts, :logical_plan))
 
@@ -154,8 +160,40 @@ defmodule Accrue.Entitlements.Projector do
     end)
   end
 
-  defp retraction?(%{kind: kind}) when kind in ["retract", "revoked", "expired"], do: true
+  defp retraction?(%{kind: kind}) when kind in ["retract", "revoked", "expired", "refunded"],
+    do: true
+
   defp retraction?(_), do: false
+
+  # Apple uses the complete, fixed-width key produced from verified lifecycle
+  # facts. Other rails retain the Phase 217 integer ordering contract.
+  defp newer_than?(%Grant{rail: :apple, provider_order_key: current}, %{
+         rail: :apple,
+         provider_order_key: incoming
+       })
+       when is_binary(current) and is_binary(incoming),
+       do: incoming > current
+
+  defp newer_than?(%Grant{provider_order: current}, %{provider_order: incoming}),
+    do: incoming > current
+
+  # Retractions leave no current grant to compare. Qualified Apple observations
+  # retain the terminal high-water mark for that exact source scope.
+  defp stale_apple_observation?(repo, %{rail: :apple, provider_order_key: incoming} = observation)
+       when is_binary(incoming) do
+    repo.exists?(
+      from(candidate in Observation,
+        where:
+          candidate.account_id == ^observation.account_id and candidate.rail == :apple and
+            candidate.environment == ^observation.environment and
+            candidate.provider_lineage_id == ^observation.provider_lineage_id and
+            candidate.provider_product_id == ^observation.provider_product_id and
+            candidate.state == :qualified and candidate.provider_order_key > ^incoming
+      )
+    )
+  end
+
+  defp stale_apple_observation?(_repo, _observation), do: false
 
   # A retracted source does not advance the account revision when another current
   # source preserves the same effective plan, feature, quantity, and validity

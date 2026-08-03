@@ -25,6 +25,7 @@ defmodule Accrue.Entitlements.Observation do
   @kind_max_bytes 64
   @provider_lineage_id_max_bytes 255
   @provider_product_id_max_bytes 255
+  @provider_order_key_max_bytes 128
   @evidence_ref_pattern ~r/\Aopaque:\/\/[A-Za-z0-9_-]+(?:\/[A-Za-z0-9_-]+)*\z/
   # The only projection metadata retained in Phase 216. Metadata is not a
   # provider-payload escape hatch: other provenance belongs in typed fields.
@@ -40,7 +41,9 @@ defmodule Accrue.Entitlements.Observation do
     field(:provider_lineage_id, :string)
     field(:provider_product_id, :string)
     field(:provider_order, :integer, default: 0)
+    field(:provider_order_key, :string)
     field(:observed_at, :utc_datetime_usec)
+    field(:expires_at, :utc_datetime_usec)
     field(:state, Ecto.Enum, values: @states, default: :received)
     field(:quarantine_reason, :string)
     field(:retry_count, :integer, default: 0)
@@ -57,7 +60,7 @@ defmodule Accrue.Entitlements.Observation do
 
   @ingest_fields ~w[
     account_id rail environment provider_event_id provider_transaction_id kind
-    provider_lineage_id provider_product_id provider_order observed_at state
+    provider_lineage_id provider_product_id provider_order provider_order_key observed_at expires_at state
     quarantine_reason retry_count next_retry_at metadata evidence_digest
     evidence_ref evidence_expires_at
   ]a
@@ -76,6 +79,7 @@ defmodule Accrue.Entitlements.Observation do
     |> validate_identity()
     |> validate_provider_provenance_lengths()
     |> validate_number(:provider_order, greater_than_or_equal_to: 0)
+    |> validate_length(:provider_order_key, max: @provider_order_key_max_bytes, count: :bytes)
     |> validate_number(:retry_count, greater_than_or_equal_to: 0)
     |> validate_format(:evidence_digest, ~r/\A[a-f0-9]{64}\z/)
     |> validate_metadata()
@@ -107,6 +111,9 @@ defmodule Accrue.Entitlements.Observation do
     |> check_constraint(:state, name: :accrue_entitlement_observations_state_domain_check)
     |> check_constraint(:provider_order,
       name: :accrue_entitlement_observations_provider_order_nonnegative_check
+    )
+    |> check_constraint(:provider_order_key,
+      name: :accrue_ent_obs_provider_order_key_bytes_check
     )
     |> check_constraint(:retry_count,
       name: :accrue_entitlement_observations_retry_count_nonnegative_check

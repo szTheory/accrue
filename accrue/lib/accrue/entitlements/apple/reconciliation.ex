@@ -70,6 +70,89 @@ defmodule Accrue.Entitlements.Apple.Reconciliation do
   @page_budget 25
   @regular_seconds 6 * 60 * 60
   @max_attempts 12
+  @apple_lifecycle_precedence %{
+    active: 10,
+    renewal_disabled: 20,
+    grace: 30,
+    billing_retry: 40,
+    expired: 50,
+    refunded: 60,
+    revoked: 70
+  }
+
+  @doc false
+  # This is deliberately the only Apple lifecycle/order normalization seam. It
+  # accepts facts only after verification; raw provider identifiers never take
+  # part in ordering.
+  def normalize_lifecycle(%{} = facts) do
+    lifecycle = facts |> Map.fetch!(:lifecycle) |> normalize_lifecycle_name()
+    signed_at = Map.fetch!(facts, :signed_at)
+    effective_at = Map.fetch!(facts, :effective_at)
+    evidence_digest = Map.fetch!(facts, :evidence_digest)
+
+    %{
+      kind: Atom.to_string(lifecycle),
+      expires_at: lifecycle_bound(lifecycle, facts),
+      provider_order_key: apple_order_key(signed_at, effective_at, lifecycle, evidence_digest)
+    }
+  end
+
+  @doc false
+  def apple_order_key(
+        %DateTime{} = signed_at,
+        %DateTime{} = effective_at,
+        lifecycle,
+        evidence_digest
+      )
+      when is_binary(evidence_digest) do
+    lifecycle = normalize_lifecycle_name(lifecycle)
+
+    [
+      epoch_key(signed_at),
+      epoch_key(effective_at),
+      @apple_lifecycle_precedence
+      |> Map.fetch!(lifecycle)
+      |> Integer.to_string()
+      |> String.pad_leading(2, "0"),
+      binary_part(evidence_digest, 0, min(byte_size(evidence_digest), 32))
+    ]
+    |> Enum.join(":")
+  end
+
+  defp lifecycle_bound(lifecycle, facts) when lifecycle in [:active, :renewal_disabled],
+    do: Map.get(facts, :expires_at)
+
+  defp lifecycle_bound(:grace, facts),
+    do: Map.get(facts, :grace_expires_at) || Map.get(facts, :expires_at)
+
+  defp lifecycle_bound(:billing_retry, facts),
+    do: Map.get(facts, :last_verified_expires_at) || Map.get(facts, :expires_at)
+
+  defp lifecycle_bound(_terminal, _facts), do: nil
+
+  defp normalize_lifecycle_name(lifecycle)
+       when lifecycle in [
+              :active,
+              :renewal_disabled,
+              :grace,
+              :billing_retry,
+              :expired,
+              :refunded,
+              :revoked
+            ],
+       do: lifecycle
+
+  defp normalize_lifecycle_name(lifecycle) when is_binary(lifecycle),
+    do: lifecycle |> String.to_existing_atom() |> normalize_lifecycle_name()
+
+  defp normalize_lifecycle_name(:grant), do: :active
+
+  defp epoch_key(%DateTime{} = datetime) do
+    datetime
+    |> DateTime.to_unix(:microsecond)
+    |> Integer.to_string()
+    |> String.pad_leading(20, "0")
+  end
 
   def enqueue(lineage_id, environment, reason, opts \\ []) do
     repo = Keyword.get(opts, :repo, Accrue.Repo.repo())
