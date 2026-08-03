@@ -1,9 +1,9 @@
 ---
 phase: 217
 slug: canonical-projection-and-compatibility
-status: ready
+status: validated-plan-01
 nyquist_compliant: true
-wave_0_complete: false
+wave_0_complete: true
 created: 2026-08-02
 ---
 
@@ -49,7 +49,16 @@ created: 2026-08-02
 
 ## Manual-Only Verifications
 
-All phase behaviors are expected to have automated verification. Any irreducible host-facing guidance check must be added here by the planner with explicit instructions.
+Zero-human policy for opted-in backend plans: `automation_contract: backend-zero-human` requires `type="auto"` tasks and an `<automated>` verify block. The reusable `Accrue.BackendAutomationContractTest` rejects tracer tasks, human-verify tasks, and missing automated verification blocks. Phase 217-01 is opted in; no manual verification or auto-approval is used.
+
+## Plan 217-01 Measured Evidence
+
+| Command | Result | Runtime |
+|---------|--------|---------|
+| `cd accrue && mix test test/accrue/entitlements/snapshot_test.exs test/accrue/entitlements/projector_test.exs test/accrue/backend_automation_contract_test.exs` | 10 tests, 0 failures | 0.2s |
+| `cd accrue && mix test test/accrue/entitlements --exclude live_stripe` | 159 tests, 0 failures | 1.5s |
+| `cd accrue && mix format --check-formatted lib/accrue/entitlements/snapshot.ex lib/accrue/entitlements/projector.ex lib/accrue/entitlements.ex test/accrue/entitlements/snapshot_test.exs test/accrue/entitlements/projector_test.exs test/accrue/backend_automation_contract_test.exs` | exit 0 | under 1s |
+| `cd accrue && mix compile --warnings-as-errors` | exit 0 | under 1s |
 
 ## Validation Sign-Off
 
@@ -57,7 +66,7 @@ All phase behaviors are expected to have automated verification. Any irreducible
 - [x] Sampling continuity: every task has focused automated verification
 - [x] Wave 0 covers all MISSING references through the task IDs above
 - [x] No watch-mode flags
-- [ ] Feedback latency is measured and acceptable
+- [x] Feedback latency is measured and acceptable (focused 0.2s; wave 1.5s)
 - [x] `nyquist_compliant: true` set in frontmatter
 
-**Approval:** planned; runtime/latency fields complete during execution
+**Approval:** not applicable — Plan 217-01 has executable zero-human verification.

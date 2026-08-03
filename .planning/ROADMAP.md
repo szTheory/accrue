@@ -165,13 +165,13 @@ Plans:
   4. Existing single-processor hosts retain deterministic customers, mappings, webhooks, Stripe subscriptions, gates, and advisory-cache isolation through an opt-in, parity-checked multi-rail cutover.
   5. An equivalent second-rail purchase is blocked by default, with an explicit host warning/override path and no automatic cancellation, transfer, refund, migration, or proration.
 
-**Plans**: 5 plans
+**Plans**: 1/5 plans executed
 
 Plans:
 
 **Wave 1**
 
-- [ ] 217-01-PLAN.md — Trace qualified evidence through serialized projection to a deterministic survivor-safe account snapshot.
+- [x] 217-01-PLAN.md — Trace qualified evidence through serialized projection to a deterministic survivor-safe account snapshot.
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
@@ -239,7 +239,7 @@ Plans:
 | 214.2. Diagnostic-display/pagination closure | v1.58 | 4/4 | Complete | 2026-07-31 |
 | 215. Research, contracts, and Crosswake feasibility | v1.59 | 15/15 | Complete    | 2026-08-01 |
 | 216. Additive rail and persistence foundation | v1.59 | 6/6 | Complete    | 2026-08-02 |
-| 217. Canonical projection and compatibility | v1.59 | 0/5 | Not started | - |
+| 217. Canonical projection and compatibility | v1.59 | 1/5 | In Progress|  |
 | 218. Apple observation and repair | v1.59 | 0/TBD | Not started | - |
 | 219. Offline study contract | v1.59 | 0/TBD | Not started | - |
 | 220. First-adopter proof and release gates | v1.59 | 0/TBD | Not started | - |
