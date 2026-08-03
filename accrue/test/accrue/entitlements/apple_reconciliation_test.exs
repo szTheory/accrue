@@ -7,6 +7,18 @@ defmodule Accrue.Entitlements.AppleReconciliationTest do
   alias Accrue.Entitlements.Apple.Reconciliation.Checkpoint
   alias Accrue.Entitlements.Apple.ReconciliationWakeupWorker
 
+  defmodule ConfiguredClient do
+    @behaviour Client
+    defstruct []
+
+    def subscription_statuses(_, lineage, environment),
+      do: {:ok, [%{lineage: lineage, environment: environment}]}
+
+    def transaction_history(_, _, _, _), do: {:ok, %{signed_transactions: [], has_more: false}}
+    def notification_history(_, _, _), do: {:ok, %{notifications: []}}
+    def set_app_account_token(_, _, _, _), do: :ok
+  end
+
   @tag :status
   test "the deterministic client preserves status authority and ascending history scripts" do
     fake =
@@ -26,6 +38,11 @@ defmodule Accrue.Entitlements.AppleReconciliationTest do
 
     assert {:ok, %{revision: "r2", has_more: false}} =
              Client.transaction_history(fake, "lineage", %{sort: :ascending}, "r1")
+  end
+
+  test "a configured non-Fake client dispatches through the client behaviour" do
+    assert {:ok, [%{lineage: "configured", environment: :sandbox}]} =
+             Client.subscription_statuses(%ConfiguredClient{}, "configured", :sandbox)
   end
 
   @tag :status
