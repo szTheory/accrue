@@ -51,6 +51,10 @@ The Phase 204 hardening roadmap's top slice (**Public Truth And Proof-State Base
 
 **Phase 216 complete (2026-08-02):** concurrent Stripe/Apple rail registration, legacy default-processor aliasing, rail/environment-qualified product mapping, and durable account/observation/grant/device persistence are validated (21/21 must-haves; RAIL-01..03 satisfied). PostgreSQL-backed automation now proves identity races, opaque cross-account ownership failures, named raw-write constraints, and whole-transaction rollback with no human UAT. The recurring persistence proofs already run in the existing PostgreSQL-backed `mix test --warnings-as-errors` CI job, so no duplicate workflow was added. Next: Phase 217, canonical projection and compatibility.
 
+**Phase 217 complete (2026-08-02):** rail-qualified observations now converge through one revisioned account projection, preserve cross-rail grants, expose provider-honest management, and keep legacy single-processor hosts compatible (ACCT-01..05 satisfied).
+
+**Phase 218 complete (2026-08-03):** strict Apple Notifications V2 and nested evidence verification, bind-once lineage ownership, bounded raw-body admission, durable quarantine, scheduled status/history reconciliation, lifecycle projection, and Stripe-isolated Apple management are validated (5/5 truths; AAPL-01..05 satisfied). All 16 plan summaries produce 30 deterministic automated UAT checks, `behavior_unverified` is zero, and CI rejects incomplete, forged, pending, or human-dependent acceptance evidence. Next: Phase 219, offline study contract.
+
 ## Current Milestone: v1.59 Account-Scoped Multi-Rail & Offline Entitlements
 
 **Goal:** Preserve one account's access across Stripe web billing, Apple in-app purchase, and extended offline study through a common entitlement projection and signed device-bound proof, while keeping lifecycle operations rail-aware and avoiding connectivity-driven learner lockout.

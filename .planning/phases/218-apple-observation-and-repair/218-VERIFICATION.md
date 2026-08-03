@@ -72,6 +72,7 @@ All 52 declared plan artifacts exist and are substantive (`verify.artifacts` acr
 | Behavior | Command | Result | Status |
 | --- | --- | --- | --- |
 | Complete Phase 218 executable corpus | `cd accrue && mix test test/accrue/entitlements/apple_notification_test.exs test/accrue/entitlements/apple_verifier_test.exs test/accrue/entitlements/apple_reconciliation_test.exs test/accrue/entitlements/apple_lineage_test.exs test/accrue/entitlements/apple_intake_test.exs test/accrue/entitlements/apple_observation_tracer_test.exs test/accrue/entitlements/apple_source_isolation_test.exs test/property/apple_lineage_property_test.exs test/property/apple_convergence_property_test.exs --seed 458442` | 57 tests, 2 properties, 0 failures | ✓ PASS |
+| Complete repository regression gate | `cd accrue && mix test --seed 3227 --warnings-as-errors` | 69 properties, 1939 tests, 0 failures (11 excluded) | ✓ PASS |
 | Former raw-capture/signature/URL gaps | `mix test` at the three named test locations, seed 458442 | 3 tests, 0 failures | ✓ PASS |
 | Compile and formatting | `mix format --check-formatted … && mix compile --warnings-as-errors` | exit 0 | ✓ PASS |
 | Workspace diff whitespace | `git diff --check` | exit 0 | ✓ PASS |

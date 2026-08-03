@@ -22,6 +22,10 @@ key-files:
     - accrue/guides/webhooks.md
     - accrue/test/fixtures/apple/server_evidence.exs
     - accrue/test/accrue/entitlements/apple_notification_test.exs
+    - accrue/test/accrue/entitlements/apple_lineage_test.exs
+    - accrue/test/accrue/entitlements/apple_observation_tracer_test.exs
+    - accrue/test/accrue/entitlements/apple_source_isolation_test.exs
+    - accrue/test/property/apple_convergence_property_test.exs
 key-decisions:
   - "Missing, empty, or malformed Apple body capture returns retryable 503 before verifier, quarantine, or persistence."
   - "Cryptographic tampering tests flip a fixed bit in decoded ES256 signature bytes."
@@ -52,6 +56,17 @@ coverage:
         ref: "cd accrue && mix test test/accrue/entitlements/apple_*_test.exs test/property/apple_convergence_property_test.exs"
         status: pass
     human_judgment: false
+  - id: D3
+    description: "Apple integration tests restore global application configuration, so the complete repository suite remains order-independent."
+    requirement: AAPL-03
+    verification:
+      - kind: integration
+        ref: "cd accrue && mix test --seed 3227 --warnings-as-errors"
+        status: pass
+      - kind: regression
+        ref: "cd accrue && mix test test/accrue/entitlements/apple_source_isolation_test.exs test/accrue/entitlements/apple_observation_tracer_test.exs test/accrue/entitlements/apple_lineage_test.exs test/property/apple_convergence_property_test.exs test/accrue/application_test.exs --seed 3227 --warnings-as-errors"
+        status: pass
+    human_judgment: false
 duration: 5min
 completed: 2026-08-03
 status: complete
@@ -74,6 +89,7 @@ status: complete
 - Rejects missing, empty, and malformed Apple raw-body capture with a storage-free retryable 503.
 - Adds a host-facing Apple notification route macro and documented route-scoped `CachingBodyReader` setup.
 - Replaces padding-bit text mutation with deterministic decoded-signature-byte corruption across outer, transaction, and renewal JWS values.
+- Restores process-global application configuration after Apple integration/property tests, keeping the complete CI suite order-independent.
 
 ## Task Commits
 
@@ -87,6 +103,7 @@ status: complete
 - `accrue/guides/webhooks.md` — documents Apple parser, verifier configuration, rate policy, and 503 capture failure handling.
 - `accrue/test/fixtures/apple/server_evidence.exs` — flips a decoded ES256 signature bit and exposes safe signature-byte inspection.
 - `accrue/test/accrue/entitlements/apple_notification_test.exs` — proves side-effect-free capture rejection and repeated independent JWS rejection.
+- Apple lineage, observation, source-isolation, and convergence tests — restore mutated application configuration after every test.
 
 ## Decisions Made
 
@@ -95,7 +112,7 @@ status: complete
 
 ## Deviations from Plan
 
-None - plan executed exactly as written.
+- After the phase-wide regression gate exposed order-dependent global test configuration, the Apple tests were isolated and the exact failing seed was promoted to executable acceptance coverage.
 
 ## Known Stubs
 

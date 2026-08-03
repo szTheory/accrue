@@ -2,13 +2,13 @@
 gsd_state_version: 1.0
 milestone: v1.59
 milestone_name: Account-Scoped Multi-Rail & Offline Entitlements
-current_phase: 218
-current_phase_name: apple-observation-and-repair
+current_phase: 219
+current_phase_name: Offline study contract
 status: executing
 stopped_at: Completed 218-16-PLAN.md
-last_updated: "2026-08-03T21:03:11.724Z"
+last_updated: "2026-08-03T21:19:51.901Z"
 last_activity: 2026-08-03
-last_activity_desc: Phase 218 execution started
+last_activity_desc: Phase 218 complete, transitioned to Phase 219
 progress:
   total_phases: 6
   completed_phases: 4
@@ -29,10 +29,10 @@ See: `.planning/PROJECT.md` (updated 2026-08-01 after completing Phase 215)
 
 ## Current Position
 
-Phase: 218 (apple-observation-and-repair) — EXECUTING
-Plan: 3 of 16
+Phase: 219 — Offline study contract
+Plan: Not started
 Status: Ready to execute
-Last activity: 2026-08-03 — Phase 218 execution started
+Last activity: 2026-08-03 — Phase 218 complete, transitioned to Phase 219
 
 ## Post-v1.48 Pause Rule
 
@@ -234,7 +234,7 @@ Coverage: 22/22 v1.51 requirements mapped (each REQ-ID → exactly one phase). D
 
 **Velocity:**
 
-- Total plans completed: 199
+- Total plans completed: 215
 - Average duration: 1m
 - Total execution time: 1m
 

@@ -44,7 +44,7 @@ Full history: [v1.58 roadmap archive](milestones/v1.58-ROADMAP.md).
 - [x] **Phase 215: Research, contracts, and Crosswake feasibility** — Freeze the evidence-to-entitlement contract and prove or block required Crosswake client capabilities before runtime assumptions (RSCH-01..03, RAIL-04..05). (completed 2026-08-01)
 - [x] **Phase 216: Additive rail and persistence foundation** — Add concurrent Stripe/Apple rails, qualified products, and durable account/observation/grant/device records without breaking legacy hosts (RAIL-01..03). (completed 2026-08-02)
 - [x] **Phase 217: Canonical projection and compatibility** — Project rail-qualified evidence into one revisioned account snapshot with provider-honest lifecycle and safe cross-rail purchase eligibility (ACCT-01..05). (completed 2026-08-02)
-- [ ] **Phase 218: Apple observation and repair** — Verify, link, quarantine, reconcile, and present Apple lifecycle evidence without ownership heuristics or Stripe mutation leakage (AAPL-01..05).
+- [x] **Phase 218: Apple observation and repair** — Verify, link, quarantine, reconcile, and present Apple lifecycle evidence without ownership heuristics or Stripe mutation leakage (AAPL-01..05). (completed 2026-08-03)
 - [ ] **Phase 219: Offline study contract** — Deliver device-bound ES256 proof, stale-study continuity, and atomic reconnect using the accepted no-72-hour-cutoff policy (OFF-01..06).
 - [ ] **Phase 220: First-adopter proof and release gates** — Prove the complete Stripe/Apple/offline workflow, operations, documentation, and release contract for B2C Alpha (PROOF-01..05).
 
@@ -290,6 +290,6 @@ Plans:
 | 215. Research, contracts, and Crosswake feasibility | v1.59 | 15/15 | Complete    | 2026-08-01 |
 | 216. Additive rail and persistence foundation | v1.59 | 6/6 | Complete    | 2026-08-02 |
 | 217. Canonical projection and compatibility | v1.59 | 5/5 | Complete | 2026-08-02 |
-| 218. Apple observation and repair | v1.59 | 16/16 | In Progress|  |
+| 218. Apple observation and repair | v1.59 | 16/16 | Complete    | 2026-08-03 |
 | 219. Offline study contract | v1.59 | 0/TBD | Not started | - |
 | 220. First-adopter proof and release gates | v1.59 | 0/TBD | Not started | - |
