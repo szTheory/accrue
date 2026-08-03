@@ -638,11 +638,33 @@ defmodule Accrue.Billing.ResourceDispatchTest do
     ]
 
     assert Map.keys(metadata) -- allowed == []
-    refute Enum.any?(@forbidden_telemetry_keys, &Map.has_key?(metadata, &1))
-    refute inspect(metadata) =~ "seeded@example.test"
-    refute inspect(metadata) =~ "seeded-jws"
-    refute inspect(metadata) =~ "seeded-token"
-    refute inspect(metadata) =~ "seeded-payload"
+    assert_private_value(metadata)
+  end
+
+  defp assert_private_value(%_{} = value) do
+    inspected = inspect(value)
+    refute inspected =~ "seeded@example.test"
+    refute inspected =~ "seeded-jws"
+    refute inspected =~ "seeded-token"
+    refute inspected =~ "seeded-payload"
+  end
+
+  defp assert_private_value(value) when is_map(value) do
+    Enum.each(value, fn {key, nested} ->
+      refute key in @forbidden_telemetry_keys
+      assert_private_value(nested)
+    end)
+  end
+
+  defp assert_private_value(value) when is_list(value),
+    do: Enum.each(value, &assert_private_value/1)
+
+  defp assert_private_value(value) do
+    inspected = inspect(value)
+    refute inspected =~ "seeded@example.test"
+    refute inspected =~ "seeded-jws"
+    refute inspected =~ "seeded-token"
+    refute inspected =~ "seeded-payload"
   end
 
   defp assert_success(:preview_upcoming_invoice, {:ok, value}), do: assert(is_struct(value))
