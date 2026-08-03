@@ -58,6 +58,27 @@ defmodule Accrue.Test.AppleServerEvidence do
     transaction(variant(:valid), overrides)
   end
 
+  def production_notification(overrides \\ %{}) do
+    transaction = Map.get(overrides, :transaction, production_transaction())
+    renewal = Map.get(overrides, :renewal, production_transaction())
+
+    data =
+      Map.merge(
+        %{
+          "bundleId" => "com.accrue.test",
+          "environment" => "Production",
+          "appAppleId" => 42,
+          "signedTransactionInfo" => transaction,
+          "signedRenewalInfo" => renewal
+        },
+        Map.get(overrides, :data, %{})
+      )
+
+    %{"notificationUUID" => "notification-production-1", "data" => data}
+    |> Map.merge(Map.get(overrides, :outer, %{}))
+    |> signed(variant(:valid))
+  end
+
   def hostile_transaction(kind, overrides \\ %{})
       when kind in [
              :wrong_leaf_purpose,
@@ -72,9 +93,13 @@ defmodule Accrue.Test.AppleServerEvidence do
   end
 
   defp transaction({leaf, intermediate, key}, overrides) do
+    valid_claims(overrides) |> signed({leaf, intermediate, key})
+  end
+
+  defp signed(payload, {leaf, intermediate, key}) do
     header = %{"alg" => "ES256", "x5c" => [leaf, intermediate, @root]}
     protected = encode_json(header)
-    payload = valid_claims(overrides) |> encode_json()
+    payload = encode_json(payload)
     signing_input = protected <> "." <> payload
 
     signature =

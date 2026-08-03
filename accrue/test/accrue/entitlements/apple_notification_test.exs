@@ -1,9 +1,23 @@
 defmodule Accrue.Entitlements.AppleNotificationTest do
   use Accrue.RepoCase, async: false
 
+  Code.require_file("../../fixtures/apple/server_evidence.exs", __DIR__)
+
   import Plug.Test
 
-  alias Accrue.Entitlements.Apple.{Intake, NotificationPlug, ReconciliationWakeup}
+  alias Accrue.Entitlements.{Grant, Observation}
+  alias Accrue.Entitlements.Apple.{Intake, NotificationPlug, ReconciliationWakeup, Verifier}
+  alias Accrue.Entitlements.Apple.Verifier.Production
+  alias Accrue.Test.AppleServerEvidence, as: Evidence
+
+  @production_config %Verifier.Config{
+    roots: [Evidence.production_root()],
+    bundle_id: "com.accrue.test",
+    environment: :production,
+    app_apple_id: 42,
+    verifier_version: "apple-v1",
+    config_version: "test-v1"
+  }
 
   defmodule FakeVerifier do
     def verify_notification("verified", _config) do
@@ -33,6 +47,28 @@ defmodule Accrue.Entitlements.AppleNotificationTest do
     assert conn.status == 200
     assert count(Intake) == 1
     assert count(ReconciliationWakeup) == 1
+  end
+
+  test "a signed production V2 envelope reaches one wakeup without account projection" do
+    notification = Evidence.production_notification()
+
+    assert {:ok, facts} = Production.verify_notification(notification, @production_config)
+    assert facts.notification == %{"notificationUUID" => "notification-production-1"}
+    assert facts.transaction["originalTransactionId"] == "opaque-lineage"
+
+    production_opts =
+      base_opts(
+        verifier: Production,
+        verifier_config: @production_config
+      )
+
+    assert request(notification) |> NotificationPlug.call(production_opts) |> Map.fetch!(:status) ==
+             200
+
+    assert count(Intake) == 1
+    assert count(ReconciliationWakeup) == 1
+    assert count(Observation) == 0
+    assert count(Grant) == 0
   end
 
   test "coalesces duplicate notifications into one durable wakeup" do
