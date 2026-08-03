@@ -104,24 +104,30 @@ defmodule Accrue.Billing.SubscriptionActions do
   @doc false
   @spec reconcile_subscription_create(term(), String.t(), String.t()) ::
           {:ok, map()} | {:error, term()}
-  def reconcile_subscription_create(%Customer{} = customer, _price_spec, operation_id)
+  def reconcile_subscription_create(%Customer{} = customer, price_spec, operation_id)
       when is_binary(operation_id) do
-    reconcile_subscription_create_for_customer(customer, operation_id)
+    reconcile_subscription_create_for_customer(customer, price_spec, operation_id)
   end
 
-  def reconcile_subscription_create(billable, _price_spec, operation_id)
+  def reconcile_subscription_create(billable, price_spec, operation_id)
       when is_binary(operation_id) do
     with {:ok, customer} <- Accrue.Billing.customer(billable) do
-      reconcile_subscription_create_for_customer(customer, operation_id)
+      reconcile_subscription_create_for_customer(customer, price_spec, operation_id)
     end
   end
 
-  defp reconcile_subscription_create_for_customer(customer, operation_id) do
+  defp reconcile_subscription_create_for_customer(customer, price_spec, operation_id) do
     impl = Processor.__impl__()
+    {price_id, quantity} = normalize_price_spec(price_spec)
 
     if function_exported?(impl, :reconcile_create_subscription, 1) do
       impl.reconcile_create_subscription(
-        Idempotency.key(:create_subscription, customer.id, operation_id)
+        Idempotency.key(
+          :create_subscription,
+          customer.id,
+          operation_id,
+          subscribe_sequence(price_id, quantity, [])
+        )
       )
     else
       {:error, :not_reconciled}
@@ -148,7 +154,14 @@ defmodule Accrue.Billing.SubscriptionActions do
   defp do_subscribe_supported(%Customer{} = customer, price_spec, opts) do
     {price_id, quantity} = normalize_price_spec(price_spec)
     op_id = resolve_operation_id(opts)
-    idem_key = Idempotency.key(:create_subscription, customer.id, op_id)
+
+    idem_key =
+      Idempotency.key(
+        :create_subscription,
+        customer.id,
+        op_id,
+        subscribe_sequence(price_id, quantity, opts)
+      )
 
     {item_params, trial_end} = build_subscribe_params({price_id, quantity}, opts)
 
@@ -1132,6 +1145,13 @@ defmodule Accrue.Billing.SubscriptionActions do
 
   defp resolve_operation_id(opts) do
     Keyword.get(opts, :operation_id) || Actor.current_operation_id!()
+  end
+
+  # A request operation can legitimately create different subscriptions for
+  # different price/quantity lines. Keep retries of the same line stable while
+  # preventing a second line from being collapsed onto its first provider key.
+  defp subscribe_sequence(price_id, quantity, opts) do
+    Keyword.get(opts, :idempotency_sequence, :erlang.phash2({price_id, quantity}, 2_147_483_647))
   end
 
   defp insert_subscription(customer_id, attrs) do
