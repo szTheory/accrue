@@ -33,6 +33,7 @@ status: all_fixed
 **Files modified:** `accrue/lib/accrue/entitlements/apple/reconciliation/admission.ex`, `accrue/lib/accrue/entitlements/apple/reconcile_worker.ex`, `accrue/lib/accrue/entitlements/apple/reconciliation.ex`, `accrue/test/accrue/entitlements/apple_reconciliation_test.exs`
 **Commit:** 3d0e80e2
 **Applied fix:** Replaced the host admission closure with internal verification, bound-lineage/account validation, and `Intake.observe/3` admission; invalid signed history is rejected before observation or grant writes.
+**Follow-up commit:** ebe9a9b4 — corrected the bound-lineage `:ok` contract and converted admission errors into persisted retry checkpoints.
 
 ### CR-03: The declared current-state authority is fetched then discarded
 
@@ -45,6 +46,10 @@ status: all_fixed
 **Files modified:** `accrue/test/property/apple_convergence_property_test.exs`
 **Commit:** abbb0c3b
 **Applied fix:** Replaced direct Intake calls with generated delivery/page permutations through durable wakeup drain, reconciliation continuations, checkpoints, and terminal snapshot/grant comparisons.
+
+## Verification
+
+`mix test test/accrue/entitlements/apple_*_test.exs test/property/apple_convergence_property_test.exs` — 32 tests and 1 property, 0 failures.
 
 ---
 
