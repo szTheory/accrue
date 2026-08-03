@@ -65,6 +65,8 @@ defmodule Accrue.Entitlements.Apple.Admission do
          token when is_nil(token) or (is_binary(token) and byte_size(token) in 1..255) <-
            facts["appAccountToken"],
          %DateTime{} = signed_at <- apple_time(facts["signedDate"]),
+         expires_at <- apple_time(facts["expiresDate"]),
+         {:ok, lifecycle} <- lifecycle(facts, expires_at),
          plan when not is_nil(plan) <- Map.get(product_map, product) do
       {:ok,
        %Intake.VerifiedEvidence{
@@ -75,9 +77,9 @@ defmodule Accrue.Entitlements.Apple.Admission do
          provider_transaction_id: transaction,
          product_id: product,
          logical_plan: plan,
-         lifecycle: lifecycle(facts),
+         lifecycle: lifecycle,
          effective_at: signed_at,
-         expires_at: apple_time(facts["expiresDate"]),
+         expires_at: expires_at,
          signed_at: signed_at,
          evidence_digest: :crypto.hash(:sha256, raw) |> Base.encode16(case: :lower),
          verifier_version: Keyword.get(config, :verifier_version, "apple-v1"),
@@ -88,10 +90,16 @@ defmodule Accrue.Entitlements.Apple.Admission do
     end
   end
 
-  defp lifecycle(%{"revocationDate" => value}) when not is_nil(value), do: :revoked
+  defp lifecycle(%{"revocationDate" => value}, _expires_at) when not is_nil(value),
+    do: {:ok, :revoked}
 
-  defp lifecycle(facts),
-    do: if(expired?(apple_time(facts["expiresDate"])), do: :expired, else: :active)
+  defp lifecycle(_facts, %DateTime{} = expires_at) do
+    {:ok, if(expired?(expires_at), do: :expired, else: :active)}
+  end
+
+  # Active Apple access is bounded exclusively by a verified provider expiry.
+  # Missing or malformed facts must never become an unbounded grant.
+  defp lifecycle(_facts, _expires_at), do: {:error, :invalid_payload}
 
   defp expired?(%DateTime{} = value), do: DateTime.compare(value, DateTime.utc_now()) == :lt
   defp expired?(_), do: false
