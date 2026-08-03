@@ -22,9 +22,9 @@
 
 ### Canonical Account Projection
 
-- [ ] **ACCT-01**: An account entitled through any live Stripe or Apple source receives the union of effective plans and features on web and mobile, with duplicate logical grants deduplicated and quantities resolved by maximum effective quantity.
-- [ ] **ACCT-02**: Revoking, refunding, or expiring one rail source retracts only that source and cannot remove access still supplied by another live source; duplicate or metadata-only evidence does not increment the account revision.
-- [ ] **ACCT-03**: Billing lifecycle operations dispatch by the persisted resource rail and capability; externally managed rails return explicit guidance and never enter Accrue-owned cancellation, retry, swap, proration, or dunning.
+- [x] **ACCT-01**: An account entitled through any live Stripe or Apple source receives the union of effective plans and features on web and mobile, with duplicate logical grants deduplicated and quantities resolved by maximum effective quantity.
+- [x] **ACCT-02**: Revoking, refunding, or expiring one rail source retracts only that source and cannot remove access still supplied by another live source; duplicate or metadata-only evidence does not increment the account revision.
+- [x] **ACCT-03**: Billing lifecycle operations dispatch by the persisted resource rail and capability; externally managed rails return explicit guidance and never enter Accrue-owned cancellation, retry, swap, proration, or dunning.
 - [ ] **ACCT-04**: Existing single-processor hosts retain compatible configuration, deterministic `customer/1`, billable associations, price mapping, webhook handling, Stripe subscriptions, entitlement gates, and advisory-cache isolation; multi-rail activation uses an idempotent backfill, parity check, and opt-in cutover.
 - [ ] **ACCT-05**: A host can check purchase eligibility before starting a Stripe or Apple purchase; an equivalent live grant on another rail blocks by default, may be explicitly rendered or overridden as a warning, and never triggers automatic cancellation, transfer, refund, migration, or proration.
 
@@ -88,18 +88,18 @@ Filled during roadmap creation. Every v1.59 requirement must map to exactly one 
 | RSCH-03 | Phase 215 | Complete |
 | RAIL-04 | Phase 215 | Complete |
 | RAIL-05 | Phase 215 | Complete |
-| RAIL-01 | Phase 216 | Gaps Found |
-| RAIL-02 | Phase 216 | Gaps Found |
-| RAIL-03 | Phase 216 | Gaps Found |
-| ACCT-01 | Phase 217 | Pending |
-| ACCT-02 | Phase 217 | Pending |
-| ACCT-03 | Phase 217 | Pending |
+| RAIL-01 | Phase 216 | Complete |
+| RAIL-02 | Phase 216 | Complete |
+| RAIL-03 | Phase 216 | Complete |
+| ACCT-01 | Phase 217 | Complete |
+| ACCT-02 | Phase 217 | Complete |
+| ACCT-03 | Phase 217 | Complete |
 | ACCT-04 | Phase 217 | Pending |
 | ACCT-05 | Phase 217 | Pending |
-| AAPL-01 | Phase 218 | Pending |
+| AAPL-01 | Phase 218 | Gaps Found |
 | AAPL-02 | Phase 218 | Pending |
-| AAPL-03 | Phase 218 | Pending |
-| AAPL-04 | Phase 218 | Pending |
+| AAPL-03 | Phase 218 | Gaps Found |
+| AAPL-04 | Phase 218 | Gaps Found |
 | AAPL-05 | Phase 218 | Pending |
 | OFF-01 | Phase 219 | Pending |
 | OFF-02 | Phase 219 | Pending |
