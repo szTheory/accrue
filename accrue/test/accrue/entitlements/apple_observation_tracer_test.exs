@@ -5,6 +5,12 @@ defmodule Accrue.Entitlements.AppleObservationTracerTest do
   alias Accrue.Entitlements.{Account, Grant, Observation}
   alias Accrue.Entitlements.Apple.Intake
 
+  defmodule FakeVerifier do
+    def verify_notification(_, _), do: {:error, :invalid_payload}
+    def verify_renewal(_, _), do: {:error, :invalid_payload}
+    def verify_transaction(signed, _) when is_binary(signed), do: Jason.decode(signed)
+  end
+
   setup do
     Application.put_env(:accrue, :entitlements,
       plans: [
@@ -13,6 +19,16 @@ defmodule Accrue.Entitlements.AppleObservationTracerTest do
           quotas: [seats: 3],
           products: [apple: [production: ["product_pro"]]]
         ]
+      ]
+    )
+
+    Application.put_env(:accrue, :apple_reconciliation,
+      admission: [
+        verifier: FakeVerifier,
+        verifier_config: :test,
+        product_map: %{"product_pro" => :pro},
+        verifier_version: "fake-v1",
+        config_version: "test-v1"
       ]
     )
 
@@ -31,7 +47,7 @@ defmodule Accrue.Entitlements.AppleObservationTracerTest do
   test "verified Apple evidence binds, projects, and then becomes a duplicate noop", %{
     account: account
   } do
-    evidence = verified_evidence(account)
+    evidence = signed_evidence(account)
 
     assert {:ok, %Intake.Outcome{disposition: :verified, snapshot: snapshot, revision: 1}} =
              Accrue.Entitlements.observe_apple_evidence(account, evidence)
@@ -51,11 +67,8 @@ defmodule Accrue.Entitlements.AppleObservationTracerTest do
   end
 
   test "unbound verified evidence is durable but cannot grant", %{account: account} do
-    evidence = %{
-      verified_evidence(account)
-      | app_account_token: nil,
-        provider_event_id: "evt-unbound"
-    }
+    evidence =
+      signed_evidence(account, %{"appAccountToken" => nil, "transactionId" => "txn-unbound"})
 
     assert {:ok, %Intake.Outcome{disposition: :quarantined, reason: :verified_unbound}} =
              Accrue.Entitlements.observe_apple_evidence(account, evidence)
@@ -67,19 +80,23 @@ defmodule Accrue.Entitlements.AppleObservationTracerTest do
     assert Accrue.TestRepo.get!(Account, account.id).revision == 0
   end
 
+  test "caller-created verified evidence is closed before durable writes", %{account: account} do
+    assert {:error, :invalid_input} =
+             Accrue.Entitlements.observe_apple_evidence(account, verified_evidence(account))
+
+    assert count(:accrue_entitlement_apple_lineages) == 0
+    assert count(Observation) == 0
+    assert count(Grant) == 0
+  end
+
   test "conflicting lineage ownership remains private and non-granting", %{
     account: account,
     other_account: other_account
   } do
     assert {:ok, _} =
-             Accrue.Entitlements.observe_apple_evidence(account, verified_evidence(account))
+             Accrue.Entitlements.observe_apple_evidence(account, signed_evidence(account))
 
-    conflicting =
-      %{
-        verified_evidence(other_account)
-        | provider_event_id: "evt-conflict",
-          provider_transaction_id: "txn-conflict"
-      }
+    conflicting = signed_evidence(other_account, %{"transactionId" => "txn-conflict"})
 
     assert {:ok,
             %Intake.Outcome{disposition: :quarantined, reason: :ownership_conflict} = outcome} =
@@ -107,7 +124,7 @@ defmodule Accrue.Entitlements.AppleObservationTracerTest do
     assert count(:accrue_entitlement_apple_reconciliation_wakeups) == 0
 
     assert {:ok, %Intake.Outcome{revision: 1}} =
-             Accrue.Entitlements.observe_apple_evidence(account, evidence)
+             Accrue.Entitlements.observe_apple_evidence(account, signed_evidence(account))
   end
 
   defp account!(owner_id) do
@@ -132,6 +149,18 @@ defmodule Accrue.Entitlements.AppleObservationTracerTest do
       verifier_version: "fake-v1",
       config_version: "v1"
     }
+  end
+
+  defp signed_evidence(account, overrides \\ %{}) do
+    %{
+      "originalTransactionId" => "orig-apple-1",
+      "appAccountToken" => account.id,
+      "transactionId" => "txn-apple-1",
+      "productId" => "product_pro",
+      "signedDate" => 1_754_000_000_000
+    }
+    |> Map.merge(overrides)
+    |> Jason.encode!()
   end
 
   defp count(table)

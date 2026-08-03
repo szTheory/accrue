@@ -5,6 +5,12 @@ defmodule Accrue.Entitlements.AppleSourceIsolationTest do
   alias Accrue.Entitlements.Apple.Intake
   alias Accrue.Processor.Fake
 
+  defmodule FakeVerifier do
+    def verify_notification(_, _), do: {:error, :invalid_payload}
+    def verify_renewal(_, _), do: {:error, :invalid_payload}
+    def verify_transaction(signed, _) when is_binary(signed), do: Jason.decode(signed)
+  end
+
   @forbidden_callbacks [
     :cancel_subscription,
     :update_subscription,
@@ -26,6 +32,14 @@ defmodule Accrue.Entitlements.AppleSourceIsolationTest do
 
     Application.put_env(:accrue, :entitlements,
       plans: [pro: [features: [:analytics], products: [apple: [production: ["product_pro"]]]]]
+    )
+
+    Application.put_env(:accrue, :apple_reconciliation,
+      admission: [
+        verifier: FakeVerifier,
+        verifier_config: :test,
+        product_map: %{"product_pro" => :pro}
+      ]
     )
 
     {:ok, account} = Account.fetch_or_create(Accrue.TestRepo, "test", "apple-isolation")
@@ -54,7 +68,7 @@ defmodule Accrue.Entitlements.AppleSourceIsolationTest do
   test "observation, repair, reconciliation, and concurrent calls do not reach Stripe", %{
     account: account
   } do
-    evidence = evidence(account)
+    evidence = signed_evidence(account)
 
     assert {:ok, %Intake.Outcome{disposition: :verified}} =
              Accrue.Entitlements.observe_apple_evidence(account, evidence)
@@ -78,7 +92,7 @@ defmodule Accrue.Entitlements.AppleSourceIsolationTest do
     account: account
   } do
     assert {:ok, %Intake.Outcome{} = outcome} =
-             Accrue.Entitlements.observe_apple_evidence(account, evidence(account))
+             Accrue.Entitlements.observe_apple_evidence(account, signed_evidence(account))
 
     rendered = inspect(outcome)
 
@@ -90,21 +104,13 @@ defmodule Accrue.Entitlements.AppleSourceIsolationTest do
     assert Accrue.TestRepo.aggregate(Grant, :count, :id) == 1
   end
 
-  defp evidence(account) do
-    %Intake.VerifiedEvidence{
-      environment: :production,
-      original_transaction_id: "orig-private",
-      app_account_token: account.id,
-      provider_event_id: "evt-private",
-      provider_transaction_id: "txn-private",
-      product_id: "product_pro",
-      logical_plan: :pro,
-      lifecycle: :grant,
-      effective_at: ~U[2026-08-03 12:00:00.000000Z],
-      signed_at: ~U[2026-08-03 12:00:00.000000Z],
-      evidence_digest: String.duplicate("a", 64),
-      verifier_version: "fake-v1",
-      config_version: "v1"
-    }
+  defp signed_evidence(account) do
+    Jason.encode!(%{
+      "originalTransactionId" => "orig-private",
+      "appAccountToken" => account.id,
+      "transactionId" => "txn-private",
+      "productId" => "product_pro",
+      "signedDate" => 1_754_000_000_000
+    })
   end
 end

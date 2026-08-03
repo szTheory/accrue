@@ -48,7 +48,7 @@ defmodule Accrue.Entitlements do
   """
 
   alias Accrue.Entitlements.{Account, PurchaseDecision, Resolver, Snapshot}
-  alias Accrue.Entitlements.Apple.{Intake, Lineage, Reconciliation}
+  alias Accrue.Entitlements.Apple.{Admission, Intake, Lineage, Reconciliation}
   alias Accrue.Entitlements.Source.Registry, as: SourceRegistry
 
   @doc "Returns the bounded Apple purchase context for an authenticated entitlement account."
@@ -80,18 +80,32 @@ defmodule Accrue.Entitlements do
     {:ok, deferred_apple_outcome(:offer_authoring_deferred, :review_policy)}
   end
 
-  @doc "Admits already-verified Apple evidence through the bounded ownership and projection path."
-  def observe_apple_evidence(
-        %Account{} = account,
-        %Intake.VerifiedEvidence{} = evidence,
-        opts \\ []
-      ) do
+  @doc "Observes opaque signed Apple evidence through host-configured verification."
+  def observe_apple_evidence(account, signed_transaction, opts \\ [])
+
+  def observe_apple_evidence(%Account{} = account, signed_transaction, opts)
+      when is_binary(signed_transaction) and is_list(opts) do
     Accrue.Telemetry.span_private(
       [:accrue, :entitlements, :apple, :observe],
-      apple_metadata(:observe, account, evidence.environment),
-      fn -> Intake.observe(account, evidence, opts) end
+      apple_metadata(:observe, account, Keyword.get(opts, :environment, :production)),
+      fn ->
+        case Application.get_env(:accrue, :apple_reconciliation) do
+          config when is_list(config) ->
+            Admission.observe_purchase_or_restore(
+              account,
+              signed_transaction,
+              opts,
+              Keyword.get(config, :admission)
+            )
+
+          _ ->
+            {:error, :config_invalid}
+        end
+      end
     )
   end
+
+  def observe_apple_evidence(_, _, _), do: {:error, :invalid_input}
 
   @doc "Repairs an authorized, currently unbound Apple lineage without exposing ownership details."
   @spec repair_apple_lineage(Account.t(), binary(), keyword()) ::
