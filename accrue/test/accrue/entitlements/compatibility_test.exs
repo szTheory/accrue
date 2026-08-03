@@ -1,6 +1,8 @@
 defmodule Accrue.Entitlements.CompatibilityTest do
   use Accrue.BillingCase, async: false
 
+  import Ecto.Query
+
   alias Accrue.Entitlements.Compatibility
   alias Accrue.Entitlements.{Account, Grant}
   alias Accrue.Entitlements.Resolver.{Canonical, LocalMap}
@@ -228,6 +230,93 @@ defmodule Accrue.Entitlements.CompatibilityTest do
     end)
   end
 
+  test "durable shadow evidence gates enablement, records privacy-safe blockers, and ignores advisory summaries" do
+    {billable, account_id} = compatible_billable!()
+    put_enabled_config(:shadow, account_id)
+
+    seeded = privacy_seed()
+
+    assert {:ok, %{disposition: :match}} =
+             Compatibility.compare(billable,
+               account_id: account_id,
+               actor_id: seeded.adopter_id,
+               provider_payload: seeded.provider_payload,
+               raw_receipt: seeded.raw_receipt,
+               jws: seeded.jws,
+               token: seeded.token
+             )
+
+    [evidence] = Compatibility.audit_entries(account_id, action: :compare)
+    assert evidence.disposition == :match
+    assert evidence.blocker_count == 0
+    refute_recursive_private(evidence, seeded)
+
+    put_enabled_config(:enabled, account_id)
+
+    assert :ok = Compatibility.enable(billable, account_id: account_id, actor_id: seeded.adopter_id)
+    assert {:ok, Canonical, %{authority: :canonical}} =
+             Compatibility.authority(billable, account_id: account_id)
+
+    # The advisory cache is intentionally not wired into authority, grants, or parity.
+    assert {:ok, %{disposition: :match}} = Compatibility.compare(billable, account_id: account_id)
+  end
+
+  test "unmapped blockers are stable and privacy-safe, while rollback persists only authority transition" do
+    {billable, account_id} = compatible_billable!()
+    put_enabled_config(:shadow, account_id)
+
+    assert {:ok, %{blockers: [:unmapped_legacy]}} =
+             Compatibility.compare(billable, account_id: account_id, forced_blockers: [:unmapped_legacy])
+
+    assert {:ok, %{blockers: [:unmapped_legacy]}} =
+             Compatibility.compare(billable, account_id: account_id, forced_blockers: [:unmapped_legacy])
+
+    assert {:error, :parity_blocked} = Compatibility.enable(billable, account_id: account_id)
+    assert Enum.all?(Compatibility.audit_entries(account_id, action: :compare), &(&1.reason == :unmapped_legacy))
+
+    before = canonical_bytes(account_id)
+    assert :ok = Compatibility.rollback(account_id: account_id, actor_id: "adopter-secret")
+    assert {:ok, LocalMap, %{authority: :local_map}} = Compatibility.authority(billable, account_id: account_id)
+    assert canonical_bytes(account_id) == before
+
+    [rollback] = Compatibility.audit_entries(account_id, action: :rollback)
+    assert rollback.disposition == :rolled_back
+    refute_recursive_private(rollback, privacy_seed())
+  end
+
+  test "concurrent duplicate backfills converge without provider calls or legacy/advisory mutation" do
+    owner_id = Ecto.UUID.generate()
+
+    Application.put_env(:accrue, :entitlements,
+      plans: [pro: [price_ids: ["price_compat_pro"]]],
+      multi_rail: [mode: :disabled]
+    )
+
+    %{subscription: subscription, customer: customer} =
+      Accrue.Test.Factory.active_subscription(%{owner_id: owner_id, price_id: "price_compat_pro"})
+
+    {:ok, _} =
+      subscription
+      |> Accrue.Billing.Subscription.force_status_changeset(%{processor: "stripe"})
+      |> Accrue.TestRepo.update()
+
+    before = :erlang.term_to_binary({customer, subscription})
+
+    results =
+      1..2
+      |> Task.async_stream(fn _ -> Compatibility.backfill(nil, limit: 1) end,
+        max_concurrency: 2,
+        timeout: 15_000
+      )
+      |> Enum.map(fn {:ok, result} -> result end)
+
+    assert Enum.all?(results, &match?({:ok, _}, &1))
+    assert Accrue.TestRepo.aggregate(Account, :count, :id) == 1
+    assert Accrue.TestRepo.aggregate(Grant, :count, :id) == 1
+    assert :erlang.term_to_binary({Accrue.TestRepo.get!(Accrue.Billing.Customer, customer.id),
+             Accrue.TestRepo.get!(Accrue.Billing.Subscription, subscription.id)}) == before
+  end
+
   def always_false(_billable), do: false
   def raise_mfa(_billable), do: raise("MFA failure")
 
@@ -290,5 +379,31 @@ defmodule Accrue.Entitlements.CompatibilityTest do
           )
       ]
     )
+  end
+
+  defp canonical_bytes(account_id) do
+    account = Accrue.TestRepo.get!(Account, account_id)
+    grants = Accrue.TestRepo.all(from(grant in Grant, where: grant.account_id == ^account_id))
+    :erlang.term_to_binary({account, grants})
+  end
+
+  defp privacy_seed do
+    %{
+      email: "privacy-negative@example.test",
+      adopter_id: "adopter-private-identity",
+      raw_receipt: "raw-receipt-private",
+      jws: "compact-jws-private",
+      token: "generic-token-private",
+      provider_payload: %{"private_payload" => "provider-payload-private"}
+    }
+  end
+
+  defp refute_recursive_private(value, seed) do
+    rendered = inspect(value)
+
+    for {key, private} <- seed do
+      refute String.contains?(rendered, to_string(key))
+      refute String.contains?(rendered, inspect(private))
+    end
   end
 end
