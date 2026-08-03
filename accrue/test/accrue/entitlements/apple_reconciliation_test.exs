@@ -104,6 +104,21 @@ defmodule Accrue.Entitlements.AppleReconciliationTest do
                     "https://api.storekit-sandbox.itunes.apple.com/inApps/v2/history/sandbox%20lineage?sort=ascending"}
   end
 
+  test "production adapter safely bounds numeric and malformed Retry-After headers" do
+    for {header, expected} <- [{"999999", 21_600}, {"Wed, 21 Oct 2015 07:28:00 GMT", 60}, {"invalid", 60}] do
+      client =
+        Production.new(
+          authorization: "test-token",
+          transport: fn :get, _request, _options, _body_format ->
+            {:ok, {{~c"HTTP/1.1", 429, ~c"Too Many Requests"}, [{~c"retry-after", header}], ""}}
+          end
+        )
+
+      assert {:error, {:rate_limited, ^expected}} =
+               Client.subscription_statuses(client, "lineage", :production)
+    end
+  end
+
   @tag :status
   test "cadence is bounded and preserves a known provider bound during an outage" do
     now = ~U[2026-08-03 12:00:00Z]

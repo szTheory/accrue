@@ -100,6 +100,11 @@ defmodule Accrue.Entitlements.Apple.Client.Production do
 
   @production_base_url "https://api.storekit.itunes.apple.com"
   @sandbox_base_url "https://api.storekit-sandbox.itunes.apple.com"
+  # Apple may send an HTTP-date Retry-After. We intentionally use the bounded
+  # default for date-form and malformed values because reconciliation needs a
+  # deterministic delay without trusting provider wall-clock data.
+  @default_retry_after_seconds 60
+  @max_retry_after_seconds 6 * 60 * 60
 
   defstruct [
     :authorization,
@@ -179,8 +184,15 @@ defmodule Accrue.Entitlements.Apple.Client.Production do
   defp retry_after(headers),
     do:
       headers
-      |> Enum.find_value(60, fn {key, value} ->
+      |> Enum.find_value(@default_retry_after_seconds, fn {key, value} ->
         if String.downcase(to_string(key)) == "retry-after",
-          do: String.to_integer(to_string(value))
+          do: parse_retry_after(value)
       end)
+
+  defp parse_retry_after(value) do
+    case Integer.parse(to_string(value)) do
+      {seconds, ""} when seconds >= 0 -> min(seconds, @max_retry_after_seconds)
+      _ -> @default_retry_after_seconds
+    end
+  end
 end
