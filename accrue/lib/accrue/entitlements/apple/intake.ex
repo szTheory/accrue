@@ -2,10 +2,28 @@ defmodule Accrue.Entitlements.Apple.Intake do
   @moduledoc false
   use Accrue.Schema
   import Ecto.Changeset
+  import Ecto.Query
 
   alias Accrue.Entitlements.{Observation, Projector, Snapshot}
   alias Accrue.Entitlements.Apple.{Lineage, ReconciliationWakeup}
   alias Accrue.Events
+
+  @terminal_reasons [
+    :verified_unbound,
+    :ownership_conflict,
+    :invalid_payload,
+    :invalid_algorithm,
+    :invalid_chain,
+    :invalid_certificate,
+    :wrong_bundle,
+    :wrong_environment,
+    :wrong_app,
+    :unsupported_family,
+    :unmapped_product,
+    :config_invalid
+  ]
+  @retryable_reasons [:provider_unavailable, :rate_limited, :persistence_unavailable, :reconciliation_stalled]
+  @max_attempts 12
 
   defmodule VerifiedEvidence do
     @enforce_keys [
@@ -82,6 +100,43 @@ defmodule Accrue.Entitlements.Apple.Intake do
   end
 
   @doc false
+  def retry(_account, provider_event_id, opts \\ []) when is_binary(provider_event_id) do
+    repo = Keyword.get(opts, :repo, Accrue.Repo.repo())
+
+    repo.transact(fn ->
+      intake =
+        repo.one!(
+          from(i in __MODULE__, where: i.provider_event_id == ^provider_event_id, lock: "FOR UPDATE")
+        )
+
+      reason = String.to_existing_atom(intake.reason)
+
+      {:ok,
+       cond do
+        reason in @terminal_reasons or intake.reason == "needs_repair" ->
+          %Outcome{disposition: :quarantined, reason: reason, next_action: action_for(reason)}
+
+        reason in @retryable_reasons and intake.attempts + 1 >= @max_attempts ->
+          {:ok, updated} =
+            repo.update(changeset(intake, %{attempts: @max_attempts, reason: "needs_repair", next_action: "contact_support", next_retry_at: nil}))
+
+          %Outcome{disposition: :quarantined, reason: :needs_repair, next_action: :contact_support, revision: updated.attempts}
+
+        reason in @retryable_reasons ->
+          {:ok, updated} = repo.update(changeset(intake, %{attempts: intake.attempts + 1, next_action: "retry_reconciliation"}))
+          %Outcome{disposition: :retryable, reason: reason, next_action: :retry_reconciliation, revision: updated.attempts}
+
+        true ->
+          %Outcome{disposition: :quarantined, reason: :needs_repair, next_action: :contact_support}
+       end}
+    end)
+    |> case do
+      {:ok, outcome} -> {:ok, outcome}
+      {:error, reason} -> {:error, reason}
+    end
+  end
+
+  @doc false
   def repair(account, lineage_id, %VerifiedEvidence{} = evidence, opts \\ []) do
     repo = Keyword.get(opts, :repo, Accrue.Repo.repo())
 
@@ -101,6 +156,13 @@ defmodule Accrue.Entitlements.Apple.Intake do
   defp do_observe(repo, account, evidence, opts) do
     lineage = Lineage.lock_or_insert(repo, evidence.environment, evidence.original_transaction_id)
 
+    case evidence.logical_plan do
+      nil -> persist_terminal(repo, lineage, evidence, :unmapped_product)
+      _ -> do_observe_claim(repo, lineage, account, evidence, opts)
+    end
+  end
+
+  defp do_observe_claim(repo, lineage, account, evidence, opts) do
     case Lineage.claim(repo, lineage, account.id, evidence.app_account_token) do
       {:verified_unbound, lineage} ->
         persist_terminal(repo, lineage, evidence, :verified_unbound)
@@ -122,7 +184,7 @@ defmodule Accrue.Entitlements.Apple.Intake do
         %Outcome{disposition: :quarantined, reason: :verified_unbound, next_action: :repair_lineage}
 
       {_binding, lineage} ->
-        outcome = persist_and_project(repo, lineage, account, evidence, opts)
+        outcome = persist_and_project(repo, lineage, account, evidence, Keyword.put(opts, :defer_after_write, true))
         record_repair_audit!(account, outcome, opts)
         {:ok, _} = ReconciliationWakeup.enqueue_in_transaction(repo, lineage.id, evidence.environment, :repair)
         run_after_write(opts)
@@ -146,7 +208,7 @@ defmodule Accrue.Entitlements.Apple.Intake do
 
         {:ok, _} = ReconciliationWakeup.enqueue_in_transaction(repo, lineage.id, evidence.environment, :verified)
 
-        if Keyword.get(opts, :after_observe_write, false), do: run_after_write(opts)
+        unless Keyword.get(opts, :defer_after_write, false), do: run_after_write(opts)
 
         %Outcome{
           disposition: :verified,
@@ -165,10 +227,10 @@ defmodule Accrue.Entitlements.Apple.Intake do
       evidence,
       "quarantined",
       Atom.to_string(reason),
-      "review_ownership"
+      Atom.to_string(action_for(reason))
     )
 
-    %Outcome{disposition: :quarantined, reason: reason, next_action: :review_ownership}
+    %Outcome{disposition: :quarantined, reason: reason, next_action: action_for(reason)}
   end
 
   defp insert_intake(repo, lineage, evidence, disposition, reason, next_action) do
@@ -267,7 +329,8 @@ defmodule Accrue.Entitlements.Apple.Intake do
         :disposition,
         :reason,
         :next_action,
-        :attempts
+        :attempts,
+        :next_retry_at
       ])
       |> validate_required([
         :environment,
@@ -283,4 +346,10 @@ defmodule Accrue.Entitlements.Apple.Intake do
       |> unique_constraint(:provider_event_id,
         name: :accrue_apple_intakes_environment_provider_event_index
       )
+
+  defp action_for(:verified_unbound), do: :repair_lineage
+  defp action_for(:ownership_conflict), do: :review_ownership
+  defp action_for(:unmapped_product), do: :map_product
+  defp action_for(reason) when reason in [:provider_unavailable, :rate_limited, :persistence_unavailable, :reconciliation_stalled], do: :retry_reconciliation
+  defp action_for(_reason), do: :inspect_verification
 end

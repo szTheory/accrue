@@ -24,7 +24,9 @@ defmodule Accrue.Entitlements.DecisionCases do
     :security,
     :stale_observation,
     :support,
-    :survivor
+    :survivor,
+    :repair_lineage,
+    :needs_repair
   ]
 
   defmodule Evidence do
@@ -200,6 +202,24 @@ defmodule Accrue.Entitlements.DecisionCases do
         rail: :apple,
         environment: :production,
         sources: [:stripe, :apple]
+      ),
+      case_data("apple_verified_unbound_repair",
+        rail: :apple,
+        qualified: false,
+        disposition: :no_grant,
+        revision_delta: 0,
+        lease: :unchanged,
+        continuity: :cached_only,
+        repair: :repair_lineage
+      ),
+      case_data("apple_retry_exhausted",
+        rail: :apple,
+        qualified: false,
+        disposition: :no_grant,
+        revision_delta: 0,
+        lease: :unchanged,
+        continuity: :cached_only,
+        repair: :needs_repair
       ),
       case_data("atomic_transaction_boundary", disposition: :grant, repair: :audit, atomic: true),
       case_data("duplicate_provider_event",
