@@ -18,8 +18,18 @@ defmodule Accrue.Entitlements.Apple.Verifier do
   defmodule Config do
     @moduledoc false
     @enforce_keys [:roots, :bundle_id, :environment, :verifier_version, :config_version]
-    defstruct [:roots, :bundle_id, :environment, :app_apple_id, :verification_time, :verifier_version, :config_version]
-    @type t :: %__MODULE__{}
+    defstruct [
+      :roots,
+      :bundle_id,
+      :environment,
+      :app_apple_id,
+      :verification_time,
+      :verifier_version,
+      :config_version
+    ]
+
+    @type verification_time :: nil | :current | :signed_date | DateTime.t()
+    @type t :: %__MODULE__{verification_time: verification_time()}
   end
 
   @type error :: unquote(Enum.reduce(@closed_errors, fn error, acc -> {:|, [], [error, acc]} end))

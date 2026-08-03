@@ -56,10 +56,44 @@ defmodule Accrue.Entitlements.Apple.VerifierTest do
              )
   end
 
+  test "fixed and signed-date policies validate every certificate at the resolved instant" do
+    inside_window = ~U[2026-08-04 00:00:00Z]
+    fixed_config = %{@config | verification_time: inside_window}
+    signed_date_config = %{@config | verification_time: :signed_date}
+
+    assert {:ok, _facts} =
+             Production.verify_transaction(Evidence.production_transaction(), fixed_config)
+
+    assert {:ok, _facts} =
+             Production.verify_transaction(
+               Evidence.production_transaction(%{
+                 "signedDate" => DateTime.to_unix(~U[2026-08-03 18:00:00Z], :millisecond)
+               }),
+               signed_date_config
+             )
+
+    for verification_time <- [~U[2026-08-01 00:00:00Z], ~U[2033-01-01 00:00:00Z]] do
+      assert {:error, :invalid_certificate_time} =
+               Production.verify_transaction(
+                 Evidence.production_transaction(),
+                 %{@config | verification_time: verification_time}
+               )
+    end
+  end
+
+  test "nil and current verification-time policies remain equivalent" do
+    assert Production.verify_transaction(Evidence.production_transaction(), @config) ==
+             Production.verify_transaction(
+               Evidence.production_transaction(),
+               %{@config | verification_time: :current}
+             )
+  end
+
   test "every configured pinned root participates in chain validation" do
     config = %{@config | roots: [Evidence.unrelated_root(), Evidence.production_root()]}
 
-    assert {:ok, _facts} = Production.verify_transaction(Evidence.production_transaction(), config)
+    assert {:ok, _facts} =
+             Production.verify_transaction(Evidence.production_transaction(), config)
   end
 
   test "cryptographically valid hostile purpose chains close at the purpose predicate" do

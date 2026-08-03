@@ -45,7 +45,8 @@ defmodule Accrue.Entitlements.Apple.Verifier.Production do
          {:ok, header} <- decode_json(protected64),
          :ok <- validate_header(header),
          {:ok, payload} <- decode_json(payload64),
-         :ok <- validate_chain(header["x5c"], config),
+         {:ok, verification_time} <- resolve_verification_time(payload, config),
+         :ok <- validate_chain(header["x5c"], config, verification_time),
          {:ok, leaf_key} <- leaf_key(header["x5c"]),
          :ok <- verify_signature(protected64 <> "." <> payload64, signature64, leaf_key),
          :ok <- validate_claims(payload, config) do
@@ -101,11 +102,11 @@ defmodule Accrue.Entitlements.Apple.Verifier.Production do
   end
 
   # `x5c` is leaf-first. The configured root is pinned, never taken from the JWS.
-  defp validate_chain(x5c, %Config{roots: roots}) when is_list(roots) and roots != [] do
+  defp validate_chain(x5c, %Config{roots: roots}, verification_time)
+       when is_list(roots) and roots != [] do
     with {:ok, ders} <- decode_chain(x5c),
          {:ok, certs} <- decode_certificates(ders),
-         {:ok, root} <- configured_root(roots),
-         :ok <- validate_order_and_path(root, certs),
+         :ok <- validate_roots_and_path(roots, certs, verification_time),
          :ok <- validate_leaf_purpose(certs) do
       :ok
     else
@@ -114,7 +115,7 @@ defmodule Accrue.Entitlements.Apple.Verifier.Production do
     end
   end
 
-  defp validate_chain(_, _), do: {:error, :invalid_chain}
+  defp validate_chain(_, _, _), do: {:error, :invalid_chain}
 
   defp decode_chain(x5c) do
     decoded = Enum.map(x5c, &Base.decode64/1)
@@ -131,30 +132,151 @@ defmodule Accrue.Entitlements.Apple.Verifier.Production do
     _ -> {:error, :invalid_chain}
   end
 
-  defp configured_root([root | _]) when is_binary(root) do
+  defp configured_root(root) when is_binary(root) do
     {:ok, :public_key.pkix_decode_cert(root, :otp)}
   rescue
     _ -> {:error, :invalid_chain}
   end
 
-  defp configured_root([root | _]) when is_tuple(root), do: {:ok, root}
+  defp configured_root(root) when is_tuple(root), do: {:ok, root}
   defp configured_root(_), do: {:error, :invalid_chain}
 
-  defp validate_order_and_path(root, certs) do
-    # OTP validates issuer/child order, basic constraints, keyCertSign, and the
-    # configured verification time; its trusted anchor is the host-pinned root.
-    # OTP consumes the path from issuing certificate toward leaf, while JWS
-    # `x5c` is leaf-first. Keep the external order for leaf selection/purpose
-    # checks and reverse only for OTP path verification.
-    case :public_key.pkix_path_validation(root, Enum.reverse(certs), []) do
-      {:ok, _} -> :ok
-      {:error, {:bad_cert, :cert_expired}} -> {:error, :invalid_certificate_time}
-      {:error, {:bad_cert, :cert_not_yet_valid}} -> {:error, :invalid_certificate_time}
-      _ -> {:error, :invalid_chain}
+  defp validate_roots_and_path(roots, certs, verification_time) do
+    Enum.reduce_while(roots, {:error, :invalid_chain}, fn root, result ->
+      case configured_root(root) do
+        {:ok, decoded_root} ->
+          case validate_order_and_path(decoded_root, certs, verification_time) do
+            :ok ->
+              {:halt, :ok}
+
+            {:error, :invalid_certificate_time} ->
+              {:cont, {:error, :invalid_certificate_time}}
+
+            {:error, _} ->
+              {:cont, result}
+          end
+
+        {:error, _} ->
+          {:cont, {:error, :invalid_chain}}
+      end
+    end)
+  end
+
+  defp validate_order_and_path(root, certs, verification_time) do
+    # OTP validates issuer/child order, basic constraints, keyCertSign, and
+    # signatures. It has no policy-time option, so validate that policy first.
+    with :ok <- validate_certificate_times([root | certs], verification_time) do
+      case :public_key.pkix_path_validation(
+             root,
+             Enum.reverse(certs),
+             verify_fun: {&verify_fun/3, :configured_time_checked}
+           ) do
+        {:ok, _} -> :ok
+        _ -> {:error, :invalid_chain}
+      end
     end
   rescue
     _ -> {:error, :invalid_chain}
   end
+
+  # The explicit policy check is authoritative for time. Only OTP's redundant
+  # host-clock expiry events may continue; every other PKIX event stays closed.
+  defp verify_fun(_cert, {:bad_cert, reason}, state)
+       when reason in [:cert_expired, :cert_not_yet_valid],
+       do: {:valid, state}
+
+  defp verify_fun(_cert, :valid, state), do: {:valid, state}
+  defp verify_fun(_cert, :valid_peer, state), do: {:valid_peer, state}
+  defp verify_fun(_cert, {:extension, _extension}, state), do: {:unknown, state}
+  defp verify_fun(_cert, event, _state), do: {:fail, event}
+
+  defp validate_certificate_times(certs, verification_time) do
+    if Enum.all?(certs, &certificate_valid_at?(&1, verification_time)),
+      do: :ok,
+      else: {:error, :invalid_certificate_time}
+  end
+
+  defp certificate_valid_at?(cert, verification_time) do
+    with {:Validity, not_before, not_after} <- cert |> elem(1) |> elem(5),
+         {:ok, not_before} <- certificate_time(not_before),
+         {:ok, not_after} <- certificate_time(not_after) do
+      DateTime.compare(verification_time, not_before) != :lt and
+        DateTime.compare(verification_time, not_after) != :gt
+    else
+      _ -> false
+    end
+  end
+
+  defp certificate_time({:utcTime, time}) do
+    case to_string(time) do
+      <<year::binary-size(2), month::binary-size(2), day::binary-size(2), hour::binary-size(2),
+        minute::binary-size(2), second::binary-size(2), "Z">> ->
+        year = String.to_integer(year)
+        year = if year >= 50, do: 1900 + year, else: 2000 + year
+
+        DateTime.new(
+          Date.new!(year, String.to_integer(month), String.to_integer(day)),
+          Time.new!(
+            String.to_integer(hour),
+            String.to_integer(minute),
+            String.to_integer(second)
+          ),
+          "Etc/UTC"
+        )
+
+      _ ->
+        {:error, :invalid_certificate_time}
+    end
+  rescue
+    _ -> {:error, :invalid_certificate_time}
+  end
+
+  defp certificate_time({:generalTime, time}) do
+    case to_string(time) do
+      <<year::binary-size(4), month::binary-size(2), day::binary-size(2), hour::binary-size(2),
+        minute::binary-size(2), second::binary-size(2), "Z">> ->
+        DateTime.new(
+          Date.new!(String.to_integer(year), String.to_integer(month), String.to_integer(day)),
+          Time.new!(
+            String.to_integer(hour),
+            String.to_integer(minute),
+            String.to_integer(second)
+          ),
+          "Etc/UTC"
+        )
+
+      _ ->
+        {:error, :invalid_certificate_time}
+    end
+  rescue
+    _ -> {:error, :invalid_certificate_time}
+  end
+
+  defp certificate_time(_), do: {:error, :invalid_certificate_time}
+
+  defp resolve_verification_time(_payload, %Config{verification_time: nil}),
+    do: {:ok, DateTime.utc_now()}
+
+  defp resolve_verification_time(_payload, %Config{verification_time: :current}),
+    do: {:ok, DateTime.utc_now()}
+
+  defp resolve_verification_time(payload, %Config{verification_time: :signed_date}) do
+    with value when is_integer(value) <- payload["signedDate"],
+         {:ok, instant} <- DateTime.from_unix(value, :millisecond),
+         :lt <- DateTime.compare(instant, DateTime.add(DateTime.utc_now(), 300, :second)) do
+      {:ok, instant}
+    else
+      _ -> {:error, :invalid_certificate_time}
+    end
+  end
+
+  defp resolve_verification_time(_payload, %Config{verification_time: %DateTime{} = instant}) do
+    if instant.time_zone == "Etc/UTC" and instant.utc_offset == 0 and instant.std_offset == 0,
+      do: {:ok, instant},
+      else: {:error, :invalid_certificate_time}
+  end
+
+  defp resolve_verification_time(_, _), do: {:error, :invalid_certificate_time}
 
   defp validate_leaf_purpose([leaf, intermediate, _root]) do
     # Apple's server libraries require these exact private-purpose extensions in
