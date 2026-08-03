@@ -110,7 +110,8 @@ defmodule Accrue.Entitlements.AppleSourceIsolationTest do
       "appAccountToken" => account.id,
       "transactionId" => "txn-private",
       "productId" => "product_pro",
-      "signedDate" => 1_754_000_000_000
+      "signedDate" => 1_754_000_000_000,
+      "expiresDate" => 1_800_000_000_000
     })
   end
 end

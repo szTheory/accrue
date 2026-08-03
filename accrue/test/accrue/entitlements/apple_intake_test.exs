@@ -10,10 +10,19 @@ defmodule Accrue.Entitlements.AppleIntakeTest do
 
   test "unmapped and unbound evidence remain durable and non-granting", %{account: account} do
     unmapped = evidence(account.id, "evt-unmapped", nil)
-    assert {:ok, %Intake.Outcome{disposition: :quarantined, reason: :unmapped_product, next_action: :map_product}} = Intake.observe(account, unmapped)
+
+    assert {:ok,
+            %Intake.Outcome{
+              disposition: :quarantined,
+              reason: :unmapped_product,
+              next_action: :map_product
+            }} = Intake.observe(account, unmapped)
 
     unbound = evidence(nil, "evt-unbound", :pro)
-    assert {:ok, %Intake.Outcome{reason: :verified_unbound, next_action: :repair_lineage}} = Intake.observe(account, unbound)
+
+    assert {:ok, %Intake.Outcome{reason: :verified_unbound, next_action: :repair_lineage}} =
+             Intake.observe(account, unbound)
+
     assert Accrue.TestRepo.aggregate(Observation, :count, :id) == 0
   end
 
@@ -22,9 +31,18 @@ defmodule Accrue.Entitlements.AppleIntakeTest do
     assert {:ok, _} = Intake.observe(account, evidence)
 
     intake = Accrue.TestRepo.get_by!(Intake, provider_event_id: "evt-retry")
-    {:ok, _} = Accrue.TestRepo.update(Ecto.Changeset.change(intake, reason: "provider_unavailable", disposition: "retryable", attempts: 11))
 
-    assert {:ok, %Intake.Outcome{reason: :needs_repair, next_action: :contact_support, revision: 12}} =
+    {:ok, _} =
+      Accrue.TestRepo.update(
+        Ecto.Changeset.change(intake,
+          reason: "provider_unavailable",
+          disposition: "retryable",
+          attempts: 11
+        )
+      )
+
+    assert {:ok,
+            %Intake.Outcome{reason: :needs_repair, next_action: :contact_support, revision: 12}} =
              Intake.retry(account, "evt-retry")
 
     assert {:ok, %Intake.Outcome{reason: :needs_repair}} = Intake.retry(account, "evt-retry")
@@ -46,6 +64,7 @@ defmodule Accrue.Entitlements.AppleIntakeTest do
       logical_plan: logical_plan,
       lifecycle: :grant,
       effective_at: ~U[2026-08-03 12:00:00.000000Z],
+      expires_at: ~U[2027-01-15 08:00:00.000000Z],
       signed_at: ~U[2026-08-03 12:00:00.000000Z],
       evidence_digest: String.duplicate("b", 64),
       verifier_version: "fake-v1",
