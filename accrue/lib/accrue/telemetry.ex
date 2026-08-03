@@ -82,6 +82,18 @@ defmodule Accrue.Telemetry do
     end)
   end
 
+  @doc false
+  @spec span_private(event_name(), map(), (-> result)) :: result when result: var
+  def span_private(event, metadata \\ %{}, fun)
+      when is_list(event) and is_map(metadata) and is_function(fun, 0) do
+    otel_event = event_without_span_suffix(event)
+
+    :telemetry.span(event, metadata, fn ->
+      result = Accrue.Telemetry.OTel.span(otel_event, metadata, fn -> fun.() end)
+      {result, metadata}
+    end)
+  end
+
   @doc """
   Returns the current OpenTelemetry trace id as a hex string, or `nil`
   when `:opentelemetry` is not loaded.

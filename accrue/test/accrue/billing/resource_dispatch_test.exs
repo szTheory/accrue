@@ -148,10 +148,11 @@ defmodule Accrue.Billing.ResourceDispatchTest do
                    :resource_id,
                    :account_id,
                    :operation_id,
-                   :actor,
+                   :actor_id,
                    :telemetry_span_context
                  ] == []
 
+        refute Map.has_key?(start_metadata, :actor)
         refute inspect(start_metadata) =~ "seeded@example.test"
         :telemetry.detach(handler)
       end

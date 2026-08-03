@@ -209,7 +209,7 @@ defmodule Accrue.Billing do
           {:ok, Accrue.Entitlements.Source.Outcome.t()}
           | {:error, Accrue.Entitlements.Source.CapabilityError.t()}
   def management(source, opts \\ []) do
-    Accrue.Telemetry.span(
+    Accrue.Telemetry.span_private(
       [:accrue, :billing, :management],
       lifecycle_metadata(:management, %{source: source}, opts) |> Map.put(:rail, source),
       fn -> SourceRegistry.outcome(source, :management) end
@@ -1261,7 +1261,7 @@ defmodule Accrue.Billing do
   # local resource and caller-supplied operation identity; provider payloads
   # and customer attributes never cross this boundary.
   defp span_lifecycle(action, subject, opts, fun) do
-    Accrue.Telemetry.span(
+    Accrue.Telemetry.span_private(
       [:accrue, :billing, :lifecycle, action],
       lifecycle_metadata(action, subject, opts),
       fun
@@ -1273,10 +1273,18 @@ defmodule Accrue.Billing do
       action: action,
       resource_id: subject_value(subject, :subscription_id) || subject_value(subject, :item_id),
       account_id: subject_value(subject, :customer_id),
-      operation_id: keyword_value(opts, :operation_id)
+      operation_id: keyword_value(opts, :operation_id),
+      actor_id: actor_hash()
     }
     |> Enum.reject(fn {_key, value} -> is_nil(value) end)
     |> Map.new()
+  end
+
+  defp actor_hash do
+    case Actor.current() do
+      %{id: id} when is_binary(id) -> :crypto.hash(:sha256, id) |> Base.encode16(case: :lower)
+      _ -> nil
+    end
   end
 
   defp unwrap_lifecycle!({:ok, value}, _operation), do: value
