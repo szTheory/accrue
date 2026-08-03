@@ -2,13 +2,13 @@
 gsd_state_version: 1.0
 milestone: v1.59
 milestone_name: Account-Scoped Multi-Rail & Offline Entitlements
-current_phase: 217
-current_phase_name: canonical-projection-and-compatibility
-status: verifying
-stopped_at: Completed 217-05-PLAN.md
-last_updated: "2026-08-03T01:52:17.156Z"
+current_phase: 218
+current_phase_name: apple-observation-and-repair
+status: planning
+stopped_at: Phase 217 verified with 5/5 must-haves and zero human verification
+last_updated: "2026-08-03T02:52:00Z"
 last_activity: 2026-08-02
-last_activity_desc: Phase 217 execution started
+last_activity_desc: Phase 217 verified and complete; transitioned to Phase 218
 progress:
   total_phases: 6
   completed_phases: 3
@@ -25,14 +25,14 @@ See: `.planning/PROJECT.md` (updated 2026-08-01 after completing Phase 215)
 
 **Core value:** A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic Elixir DX, strong domain modeling, tamper-evident audit ledger, great observability, and zero breaking-change pain through v1.x.
 
-**Current focus:** Phase 217 — canonical-projection-and-compatibility
+**Current focus:** Phase 218 — apple-observation-and-repair
 
 ## Current Position
 
-Phase: 217 (canonical-projection-and-compatibility) — EXECUTING
-Plan: 5 of 5
-Status: Phase complete — ready for verification
-Last activity: 2026-08-02 — Phase 217 execution started
+Phase: 218 — Apple observation and repair
+Plan: Not started
+Status: Ready for planning
+Last activity: 2026-08-02 — Phase 217 verified and complete; transitioned to Phase 218
 
 ## Post-v1.48 Pause Rule
 
@@ -68,7 +68,7 @@ Coverage: 11/11 requirements satisfied. Phases 214.1 and 214.2 supplied closure 
 |---|---|---|---|
 | 215 | Research, contracts, and Crosswake feasibility | RSCH-01..03, RAIL-04..05 | Not started |
 | 216 | Additive rail and persistence foundation | RAIL-01..03 | Not started |
-| 217 | Canonical projection and compatibility | ACCT-01..05 | Not started |
+| 217 | Canonical projection and compatibility | ACCT-01..05 | Complete (verified 5/5; zero human verification) |
 | 218 | Apple observation and repair | AAPL-01..05 | Not started |
 | 219 | Offline study contract | OFF-01..06 | Not started |
 | 220 | First-adopter proof and release gates | PROOF-01..05 | Not started |

@@ -1,7 +1,7 @@
 ---
 phase: 217
 slug: canonical-projection-and-compatibility
-status: validated-plan-01
+status: validated
 nyquist_compliant: true
 wave_0_complete: true
 created: 2026-08-02
@@ -18,25 +18,25 @@ created: 2026-08-02
 | **Framework** | ExUnit (existing project) |
 | **Config file** | `accrue/test/test_helper.exs` |
 | **Quick run command** | `cd accrue && mix test test/accrue/entitlements --exclude live_stripe` |
-| **Full suite command** | `cd accrue && mix test.all` |
-| **Estimated runtime** | Measure during Wave 0 |
+| **Full suite command** | `cd accrue && mix test --warnings-as-errors` |
+| **Estimated runtime** | ~29s full suite; focused phase gate under 2s |
 
 ## Sampling Rate
 
 - **After every task commit:** Run focused ExUnit files plus `mix format --check-formatted`
 - **After every plan wave:** Run `cd accrue && mix test test/accrue/entitlements --exclude live_stripe`
-- **Before `$gsd-verify-work`:** Run `cd accrue && mix test.all`; the full suite must be green
+- **Before phase verification:** Run `cd accrue && mix test --warnings-as-errors`; the full suite must be green
 - **Max feedback latency:** Measure and record during Wave 0
 
 ## Per-Task Verification Map
 
 | Task ID | Plan | Wave | Requirement | Threat Ref | Secure Behavior | Test Type | Automated Command | File Exists | Status |
 |---------|------|------|-------------|------------|-----------------|-----------|-------------------|-------------|--------|
-| 217-01-01, 217-02-01 | 217-01, 217-02 | 1-2 | ACCT-01 | T-217-01, T-217-05 | Deterministic union/dedupe/max snapshot without grant loss | unit + property | `cd accrue && mix test test/accrue/entitlements/snapshot_test.exs test/property/entitlement_projection_property_test.exs` | ❌ W0 planned | ⬜ pending |
-| 217-01-01, 217-02-02 | 217-01, 217-02 | 1-2 | ACCT-02 | T-217-01, T-217-06 | Source-local retraction and serialized semantic revisions | integration + property | `cd accrue && mix test test/accrue/entitlements/projector_test.exs test/property/entitlement_projection_property_test.exs` | ❌ W0 planned | ⬜ pending |
-| 217-05-01, 217-05-02 | 217-05 | 3 | ACCT-03 | T-217-16, T-217-18 | Persisted-rail dispatch prevents cross-provider mutation | unit + integration | `cd accrue && mix test test/accrue/billing/resource_dispatch_test.exs` | ❌ W0 planned | ⬜ pending |
-| 217-04-01, 217-04-02 | 217-04 | 2 | ACCT-04 | T-217-12, T-217-15 | Disabled/shadow/enabled cutover preserves legacy parity | integration | `cd accrue && mix test test/accrue/entitlements/compatibility_test.exs` | ❌ W0 planned | ⬜ pending |
-| 217-03-01, 217-03-02 | 217-03 | 2 | ACCT-05 | T-217-08, T-217-11 | Revision-bound decisions block stale or equivalent cross-rail purchases | unit + integration | `cd accrue && mix test test/accrue/entitlements/purchase_decision_test.exs` | ❌ W0 planned | ⬜ pending |
+| 217-01-01, 217-02-01 | 217-01, 217-02 | 1-2 | ACCT-01 | T-217-01, T-217-05 | Deterministic union/dedupe/max snapshot without grant loss | unit + property | `cd accrue && mix test test/accrue/entitlements/snapshot_test.exs test/property/entitlement_projection_property_test.exs` | ✅ | ✅ green |
+| 217-01-01, 217-02-02 | 217-01, 217-02 | 1-2 | ACCT-02 | T-217-01, T-217-06 | Source-local retraction and serialized semantic revisions | integration + property | `cd accrue && mix test test/accrue/entitlements/projector_test.exs test/property/entitlement_projection_property_test.exs` | ✅ | ✅ green |
+| 217-05-01, 217-05-02 | 217-05 | 3 | ACCT-03 | T-217-16, T-217-18 | Persisted-rail dispatch prevents cross-provider mutation | unit + integration | `cd accrue && mix test test/accrue/billing/resource_dispatch_test.exs` | ✅ | ✅ green |
+| 217-04-01, 217-04-02 | 217-04 | 2 | ACCT-04 | T-217-12, T-217-15 | Disabled/shadow/enabled cutover preserves legacy parity | integration | `cd accrue && mix test test/accrue/entitlements/compatibility_test.exs` | ✅ | ✅ green |
+| 217-03-01, 217-03-02 | 217-03 | 2 | ACCT-05 | T-217-08, T-217-11 | Revision-bound decisions block stale or equivalent cross-rail purchases | unit + integration | `cd accrue && mix test test/accrue/entitlements/purchase_decision_test.exs` | ✅ | ✅ green |
 
 *Status: ⬜ pending · ✅ green · ❌ red · ⚠️ flaky*
 
@@ -47,9 +47,9 @@ created: 2026-08-02
 - [x] `accrue/test/accrue/entitlements/compatibility_test.exs` and `accrue/test/accrue/entitlements/purchase_decision_test.exs` — created before implementation by 217-04-01 and 217-03-01 for ACCT-04/05 contracts
 - [x] `accrue/test/accrue/billing/resource_dispatch_test.exs` — created before implementation by 217-05-01 for ACCT-03 persisted-processor dispatch and negative Apple isolation
 
-## Manual-Only Verifications
+## Human Verification
 
-Zero-human policy for opted-in backend plans: `automation_contract: backend-zero-human` requires `type="auto"` tasks and an `<automated>` verify block. The reusable `Accrue.BackendAutomationContractTest` rejects tracer tasks, human-verify tasks, and missing automated verification blocks. Phase 217-01 is opted in; no manual verification or auto-approval is used.
+None. The zero-human policy requires `type="auto"` tasks and an `<automated>` verify block. The reusable `Accrue.BackendAutomationContractTest` rejects tracer tasks, human-verify tasks, and missing automated verification blocks. No manual verification, UAT, or auto-approval is used.
 
 ## Plan 217-01 Measured Evidence
 
@@ -68,5 +68,9 @@ Zero-human policy for opted-in backend plans: `automation_contract: backend-zero
 - [x] No watch-mode flags
 - [x] Feedback latency is measured and acceptable (focused 0.2s; wave 1.5s)
 - [x] `nyquist_compliant: true` set in frontmatter
+- [x] Two consecutive randomized full suites passed: 67 properties, 1882 tests, 0 failures at seeds 567304 and 596642
+- [x] Independent deep code review is clean with 0 residual findings
 
-**Approval:** not applicable — Plan 217-01 has executable zero-human verification.
+**Approval:** not applicable — Phase 217 has executable zero-human verification.
+
+The recurring repository CI already runs formatting, the warnings-as-errors full suite, and Credo strict. No phase-specific workflow was added because the existing gate exercises this behavior on every change.
