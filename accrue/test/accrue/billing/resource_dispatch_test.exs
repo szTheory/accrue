@@ -1,9 +1,13 @@
 defmodule Accrue.Billing.ResourceDispatchTest do
   use Accrue.BillingCase, async: false
 
+  import Ecto.Query, only: [from: 2]
+
   alias Accrue.Billing
   alias Accrue.Billing.SubscriptionItem
+  alias Accrue.Events.Event
   alias Accrue.Processor.Fake
+  alias Accrue.Repo
   alias Accrue.Rails.GatewayRegistry
   alias Accrue.Rails.GatewayRegistry.Error
   alias Accrue.Entitlements.Source.Outcome
@@ -519,6 +523,35 @@ defmodule Accrue.Billing.ResourceDispatchTest do
 
     assert Enum.map(events, &elem(&1, 0)) == [:start, :stop]
     Enum.each(events, fn {_phase, metadata} -> assert_private_metadata(metadata) end)
+    assert_audit_private(action, fixture)
+  end
+
+  defp assert_audit_private(:preview_upcoming_invoice, _fixture), do: :ok
+
+  defp assert_audit_private(_action, %{subscription: sub}) do
+    assert [%Event{data: data} | _] =
+             Repo.all(
+               from(e in Event,
+                 where: e.subject_id == ^sub.id,
+                 order_by: [desc: e.inserted_at],
+                 limit: 1
+               )
+             )
+
+    assert_private_value(data)
+  end
+
+  defp assert_audit_private(_action, %{item: item}) do
+    assert [%Event{data: data} | _] =
+             Repo.all(
+               from(e in Event,
+                 where: e.subject_id == ^item.subscription_id,
+                 order_by: [desc: e.inserted_at],
+                 limit: 1
+               )
+             )
+
+    assert_private_value(data)
   end
 
   defp assert_lifecycle_typed_failure_pair(action) do
