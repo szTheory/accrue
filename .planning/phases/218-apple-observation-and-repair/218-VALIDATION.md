@@ -1,9 +1,9 @@
 ---
 phase: 218
 slug: apple-observation-and-repair
-status: draft
-nyquist_compliant: false
-wave_0_complete: false
+status: ready
+nyquist_compliant: true
+wave_0_complete: true
 created: 2026-08-02
 ---
 
@@ -38,25 +38,25 @@ created: 2026-08-02
 
 | Task ID | Plan | Wave | Requirement | Threat Ref | Secure Behavior | Test Type | Automated Command | File Exists | Status |
 |---------|------|------|-------------|------------|-----------------|-----------|-------------------|-------------|--------|
-| TBD | TBD | 0 | AAPL-01 | Bind/reassignment | Verified UUID binds once; races and conflicts remain non-granting | integration + property | `cd accrue && mix test test/accrue/entitlements/apple_lineage_test.exs test/property/apple_lineage_property_test.exs` | ❌ W0 | ⬜ pending |
-| TBD | TBD | 0 | AAPL-02 | Forgery/algorithm confusion | Bad algorithm, root, purpose, time, bundle, environment, or app identity is rejected | unit corpus | `cd accrue && mix test test/accrue/entitlements/apple_verifier_test.exs` | ❌ W0 | ⬜ pending |
-| TBD | TBD | 0 | AAPL-03 | Replay/order/flood | Duplicate and out-of-order evidence converges; terminal quarantine never grants | integration + property | `cd accrue && mix test test/accrue/entitlements/apple_intake_test.exs test/property/apple_convergence_property_test.exs` | ❌ W0 | ⬜ pending |
-| TBD | TBD | 0 | AAPL-04 | Partial-page/cursor loss | Status/history repair commits cursors only after the final page and resumes safely | worker + integration | `cd accrue && mix test test/accrue/entitlements/apple_reconciliation_test.exs` | ❌ W0 | ⬜ pending |
-| TBD | TBD | 0 | AAPL-05 | Provider lifecycle crossover | Apple guidance is externally managed and no Apple path reaches Stripe lifecycle mutation | unit + negative guard | `cd accrue && mix test test/accrue/entitlements/apple_source_isolation_test.exs` | ❌ W0 | ⬜ pending |
+| 218-04-T1 | 218-04 | 3 | AAPL-01 | Bind/reassignment | Verified UUID binds once; races and conflicts remain non-granting | integration + property | `cd accrue && mix test test/accrue/entitlements/apple_lineage_test.exs test/property/apple_lineage_property_test.exs` | ✅ planned TDD | ⬜ pending |
+| 218-03-T2 | 218-03 | 2 | AAPL-02 | Forgery/algorithm confusion | Bad algorithm, root, purpose, time, bundle, environment, or app identity is rejected | unit corpus | `cd accrue && mix test test/accrue/entitlements/apple_verifier_test.exs` | ✅ planned TDD | ⬜ pending |
+| 218-04-T2 | 218-04 | 3 | AAPL-03 | Replay/order/flood | Duplicate and out-of-order evidence converges; terminal quarantine never grants | integration + property | `cd accrue && mix test test/accrue/entitlements/apple_intake_test.exs test/property/apple_convergence_property_test.exs` | ✅ planned TDD | ⬜ pending |
+| 218-05-T2 | 218-05 | 4 | AAPL-04 | Partial-page/cursor loss | Status/history repair commits cursors only after the final page and resumes safely | worker + integration | `cd accrue && mix test test/accrue/entitlements/apple_reconciliation_test.exs` | ✅ planned TDD | ⬜ pending |
+| 218-06-T3 | 218-06 | 5 | AAPL-05 | Provider lifecycle crossover | Apple guidance is externally managed and no Apple path reaches Stripe lifecycle mutation | unit + negative guard | `cd accrue && mix test test/accrue/entitlements/apple_source_isolation_test.exs` | ✅ planned TDD | ⬜ pending |
 
-*Status: ⬜ pending · ✅ green · ❌ red · ⚠️ flaky. Planner replaces TBD task/plan/wave values with final IDs.*
+*Status: ⬜ pending · ✅ green · ❌ red · ⚠️ flaky. Every missing test is created before implementation in its mapped TDD task.*
 
 ---
 
 ## Wave 0 Requirements
 
-- [ ] `accrue/test/accrue/entitlements/apple_verifier_test.exs` — golden and hostile JWS fixtures for AAPL-02.
-- [ ] `accrue/test/accrue/entitlements/apple_lineage_test.exs` — bind-once and conflict integration coverage for AAPL-01.
-- [ ] `accrue/test/property/apple_lineage_property_test.exs` — race/property proof for AAPL-01.
-- [ ] `accrue/test/accrue/entitlements/apple_intake_test.exs` — disposition and ordering coverage for AAPL-03.
-- [ ] `accrue/test/property/apple_convergence_property_test.exs` — convergence property proof for AAPL-03.
-- [ ] `accrue/test/accrue/entitlements/apple_reconciliation_test.exs` — paging, final-cursor, outage, status, and history coverage for AAPL-04.
-- [ ] `accrue/test/accrue/entitlements/apple_source_isolation_test.exs` — lifecycle isolation and external-management guidance for AAPL-05.
+- [x] `accrue/test/accrue/entitlements/apple_verifier_test.exs` — created first by 218-03-T1/T2 for AAPL-02.
+- [x] `accrue/test/accrue/entitlements/apple_lineage_test.exs` — created first by 218-04-T1 for AAPL-01.
+- [x] `accrue/test/property/apple_lineage_property_test.exs` — created first by 218-04-T1 for AAPL-01.
+- [x] `accrue/test/accrue/entitlements/apple_intake_test.exs` — created first by 218-04-T2 for AAPL-03.
+- [x] `accrue/test/property/apple_convergence_property_test.exs` — created first by 218-04-T2 for AAPL-03.
+- [x] `accrue/test/accrue/entitlements/apple_reconciliation_test.exs` — created first by 218-05-T1 and expanded through 218-06-T2 for AAPL-04.
+- [x] `accrue/test/accrue/entitlements/apple_source_isolation_test.exs` — created first by 218-06-T3 for AAPL-05.
 
 ---
 
@@ -71,9 +71,9 @@ created: 2026-08-02
 
 ## Validation Sign-Off
 
-- [ ] All tasks have automated verification or explicit Wave 0 dependencies.
+- [x] All tasks have automated verification or explicit Wave 0 dependencies.
 - [ ] Sampling continuity: no three consecutive tasks without automated verification.
-- [ ] Wave 0 covers every missing test reference.
+- [x] Wave 0 covers every missing test reference through test-first task mappings.
 - [ ] No watch-mode flags.
 - [ ] Feedback latency stays within one task.
 - [ ] Golden verification, bind-race, cursor, redaction, and Apple-to-Stripe negative cases are green.
