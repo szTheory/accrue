@@ -137,7 +137,7 @@ defmodule Accrue.Entitlements.AppleConvergencePropertyTest do
   end
 
   defp perform_persisted_jobs(worker) do
-    case Accrue.TestRepo.one(from(job in Oban.Job, where: job.worker == ^to_string(worker))) do
+    case Accrue.TestRepo.one(from(job in Oban.Job, where: job.worker == ^worker_name(worker))) do
       nil ->
         :ok
 
@@ -171,4 +171,6 @@ defmodule Accrue.Entitlements.AppleConvergencePropertyTest do
       verifier_config: %{account_id: account.id, original_id: lineage.original_transaction_id},
       product_map: %{"product_pro" => :pro}
     ]
+
+  defp worker_name(worker), do: worker |> Atom.to_string() |> String.trim_leading("Elixir.")
 end

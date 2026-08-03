@@ -284,7 +284,7 @@ defmodule Accrue.Entitlements.AppleReconciliationTest do
     [retry_job] =
       Accrue.TestRepo.all(
         from(job in Oban.Job,
-          where: job.worker == ^to_string(ReconcileWorker) and job.args["reason"] == "retry"
+          where: job.worker == ^worker_name(ReconcileWorker) and job.args["reason"] == "retry"
         )
       )
 
@@ -559,4 +559,6 @@ defmodule Accrue.Entitlements.AppleReconciliationTest do
       from(grant in Grant, where: grant.account_id == ^account_id and is_nil(grant.superseded_at))
     )
   end
+
+  defp worker_name(worker), do: worker |> Atom.to_string() |> String.trim_leading("Elixir.")
 end
