@@ -58,6 +58,7 @@ Persisted subscription and item provenance now controls lifecycle dispatch, whil
 - Routed subscription lifecycle operations and item mutations through persisted parent provenance, preserving configured dispatch only for creation paths.
 - Added Apple `Billing.management/2` guidance and bounded lifecycle/management spans; bang facades reuse their instrumented non-bang operations.
 - Added a Fake-backed table inventory covering all eleven lifecycle non-bang/bang facade pairs under deliberately divergent global processor configuration.
+- Lifecycle and management spans now use the privacy-safe telemetry path: raw `:actor` is excluded and an actor identifier is SHA-256 hashed when present.
 
 ## Verification
 
@@ -72,6 +73,7 @@ Persisted subscription and item provenance now controls lifecycle dispatch, whil
 3. Task 2: `d6772b4b` — parent-provenance item routing, Apple management, and spans.
 4. Task 2 verification hardening: `c92d5ba3` — item global-dispatch structural guard.
 5. Reopened inventory coverage: `5cc4ca3e` — Fake-backed table-driven lifecycle facade and telemetry coverage.
+6. Telemetry privacy closure: `f827d718` — raw actor removal and hashed actor IDs for lifecycle/management spans.
 
 ## Deviations from Plan
 
