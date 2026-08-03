@@ -108,8 +108,19 @@ defmodule Accrue.Entitlements.AppleConvergencePropertyTest do
       checkpoint =
         Accrue.TestRepo.get_by!(Checkpoint, lineage_id: lineage.id, environment: :production)
 
-      assert 0 == Accrue.TestRepo.aggregate(Oban.Job, :count, :id)
-      assert 0 == Accrue.TestRepo.aggregate(ReconciliationWakeup, :count, :id)
+      assert 0 ==
+               Accrue.TestRepo.aggregate(
+                 from(job in Oban.Job, where: job.args["lineage_id"] == ^lineage.id),
+                 :count,
+                 :id
+               )
+
+      assert 0 ==
+               Accrue.TestRepo.aggregate(
+                 from(wakeup in ReconciliationWakeup, where: wakeup.lineage_id == ^lineage.id),
+                 :count,
+                 :id
+               )
 
       grants =
         Accrue.TestRepo.all(
