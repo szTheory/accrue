@@ -16,6 +16,14 @@ defmodule Accrue.Entitlements.AppleObservationTracerTest do
   end
 
   setup do
+    previous_entitlements = Application.get_env(:accrue, :entitlements)
+    previous_reconciliation = Application.get_env(:accrue, :apple_reconciliation)
+
+    on_exit(fn ->
+      restore_env(:entitlements, previous_entitlements)
+      restore_env(:apple_reconciliation, previous_reconciliation)
+    end)
+
     Application.put_env(:accrue, :entitlements,
       plans: [
         pro: [
@@ -38,6 +46,9 @@ defmodule Accrue.Entitlements.AppleObservationTracerTest do
 
     {:ok, account: account!("apple-owner"), other_account: account!("other-apple-owner")}
   end
+
+  defp restore_env(key, nil), do: Application.delete_env(:accrue, key)
+  defp restore_env(key, value), do: Application.put_env(:accrue, key, value)
 
   test "purchase context returns only the opaque entitlement account token", %{account: account} do
     token = account.id

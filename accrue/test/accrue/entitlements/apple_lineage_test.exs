@@ -12,6 +12,14 @@ defmodule Accrue.Entitlements.AppleLineageTest do
   end
 
   setup do
+    previous_entitlements = Application.get_env(:accrue, :entitlements)
+    previous_reconciliation = Application.get_env(:accrue, :apple_reconciliation)
+
+    on_exit(fn ->
+      restore_env(:entitlements, previous_entitlements)
+      restore_env(:apple_reconciliation, previous_reconciliation)
+    end)
+
     Application.put_env(:accrue, :entitlements,
       plans: [pro: [features: [:analytics], products: [apple: [production: ["product_pro"]]]]]
     )
@@ -28,6 +36,9 @@ defmodule Accrue.Entitlements.AppleLineageTest do
 
     {:ok, account: account!("repair-owner")}
   end
+
+  defp restore_env(key, nil), do: Application.delete_env(:accrue, key)
+  defp restore_env(key, value), do: Application.put_env(:accrue, key, value)
 
   test "authorized repair binds a durable unbound lineage exactly once", %{account: account} do
     assert {:ok, %Intake.Outcome{reason: :verified_unbound}} =

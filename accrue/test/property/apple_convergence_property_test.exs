@@ -59,6 +59,14 @@ defmodule Accrue.Entitlements.AppleConvergencePropertyTest do
   end
 
   setup do
+    previous_entitlements = Application.get_env(:accrue, :entitlements)
+
+    on_exit(fn ->
+      if previous_entitlements,
+        do: Application.put_env(:accrue, :entitlements, previous_entitlements),
+        else: Application.delete_env(:accrue, :entitlements)
+    end)
+
     Application.put_env(:accrue, :entitlements,
       plans: [pro: [features: [:analytics], products: [apple: [production: ["product_pro"]]]]]
     )

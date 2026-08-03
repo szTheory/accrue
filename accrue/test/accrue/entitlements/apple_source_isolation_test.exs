@@ -30,6 +30,14 @@ defmodule Accrue.Entitlements.AppleSourceIsolationTest do
   setup do
     Fake.reset()
 
+    previous_entitlements = Application.get_env(:accrue, :entitlements)
+    previous_reconciliation = Application.get_env(:accrue, :apple_reconciliation)
+
+    on_exit(fn ->
+      restore_env(:entitlements, previous_entitlements)
+      restore_env(:apple_reconciliation, previous_reconciliation)
+    end)
+
     Application.put_env(:accrue, :entitlements,
       plans: [pro: [features: [:analytics], products: [apple: [production: ["product_pro"]]]]]
     )
@@ -45,6 +53,9 @@ defmodule Accrue.Entitlements.AppleSourceIsolationTest do
     {:ok, account} = Account.fetch_or_create(Accrue.TestRepo, "test", "apple-isolation")
     {:ok, account: account}
   end
+
+  defp restore_env(key, nil), do: Application.delete_env(:accrue, key)
+  defp restore_env(key, value), do: Application.put_env(:accrue, key, value)
 
   test "management guidance and policy deferrals are exact, typed, and bounded" do
     assert {:ok,
