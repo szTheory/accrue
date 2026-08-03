@@ -2,12 +2,14 @@ defmodule Accrue.Entitlements.PurchaseDecision do
   @moduledoc """
   Revision-bound, rail-neutral purchase preflight decisions.
 
-  The value deliberately contains only host-renderable decision facts.  It
-  never carries provider evidence, customer identity, or a mutation authority.
+  The value contains host-renderable decision facts and, only after a durable
+  override, an opaque short-lived capability. It never carries provider
+  evidence or customer identity; the public fields themselves are not
+  mutation authority.
   """
 
   alias Accrue.Billing.SubscriptionActions
-  alias Accrue.Entitlements.PurchaseOperation
+  alias Accrue.Entitlements.{PurchaseOperation, PurchaseOverride}
   alias Accrue.Entitlements.Snapshot
 
   @statuses [:eligible, :block, :warn]
@@ -23,7 +25,16 @@ defmodule Accrue.Entitlements.PurchaseDecision do
   ]
 
   @enforce_keys [:status, :reason, :target_rail, :logical_plan, :sources, :revision, :guidance]
-  defstruct [:status, :reason, :target_rail, :logical_plan, :sources, :revision, :guidance]
+  defstruct [
+    :status,
+    :reason,
+    :target_rail,
+    :logical_plan,
+    :sources,
+    :revision,
+    :guidance,
+    :override_capability
+  ]
 
   @type status :: :eligible | :block | :warn
   @type reason ::
@@ -42,7 +53,8 @@ defmodule Accrue.Entitlements.PurchaseDecision do
           logical_plan: atom() | nil,
           sources: [Snapshot.source()],
           revision: non_neg_integer() | nil,
-          guidance: String.t()
+          guidance: String.t(),
+          override_capability: String.t() | nil
         }
 
   @spec evaluate(Snapshot.t() | nil, atom(), String.t(), keyword()) :: t()
@@ -78,10 +90,30 @@ defmodule Accrue.Entitlements.PurchaseDecision do
       )
 
     if current.status == :block and current.reason == decision.reason and
-         current.revision == decision.revision do
-      warn = %{current | status: :warn, guidance: warning_copy(current)}
-      maybe_audit(warn, reason, actor_id, opts)
-      warn
+         current.revision == decision.revision and not account_context_mismatch?(snapshot, opts) do
+      account_id = snapshot_account_id(snapshot) || decision_account_id(current, opts)
+
+      with {:ok, account_id} <- Ecto.UUID.cast(account_id),
+           {:ok, capability} <-
+             PurchaseOverride.issue(
+               repo(opts),
+               account_id,
+               current,
+               bounded_reason(reason),
+               hashed_actor_id(actor_id)
+             ) do
+        warn = %{
+          current
+          | status: :warn,
+            guidance: warning_copy(current),
+            override_capability: capability
+        }
+
+        maybe_audit(warn, reason, actor_id, opts)
+        warn
+      else
+        _ -> current
+      end
     else
       %{current | reason: :changed_revision}
     end
@@ -103,6 +135,8 @@ defmodule Accrue.Entitlements.PurchaseDecision do
 
   def continue(%__MODULE__{target_rail: :stripe} = decision, billable, price_spec, opts) do
     snapshot = current_snapshot(decision, opts)
+    account_mismatch? = account_context_mismatch?(snapshot, opts)
+    opts = bind_snapshot_account(opts, snapshot)
 
     current =
       evaluate(snapshot, :stripe, Keyword.fetch!(opts, :product_id),
@@ -111,7 +145,10 @@ defmodule Accrue.Entitlements.PurchaseDecision do
       )
 
     cond do
-      current.status == :block and approved_warning_current?(decision, current) ->
+      account_mismatch? ->
+        {:error, :purchase_blocked}
+
+      current.status == :block and approved_warning_current?(decision, current, snapshot, opts) ->
         operation_id = Keyword.fetch!(opts, :operation_id)
         subscribe = Keyword.get(opts, :subscribe, &SubscriptionActions.subscribe/3)
 
@@ -255,15 +292,28 @@ defmodule Accrue.Entitlements.PurchaseDecision do
 
   defp maybe_record_apple_conflict(_decision, _current, _opts), do: :ok
 
-  # A warning is an audited approval of one precise, still-current block. It
-  # cannot be forged from a different decision or carried across a revision.
-  defp approved_warning_current?(%__MODULE__{status: :warn} = warning, %__MODULE__{} = current) do
+  # The public struct is descriptive, not authority. Continuation succeeds
+  # only with a server-issued capability stored against this exact decision,
+  # account, and durable operation identity.
+  defp approved_warning_current?(
+         %__MODULE__{status: :warn, override_capability: capability} = warning,
+         %__MODULE__{} = current,
+         snapshot,
+         opts
+       ) do
     warning.reason == current.reason and warning.target_rail == current.target_rail and
       warning.logical_plan == current.logical_plan and warning.revision == current.revision and
-      warning.sources == current.sources
+      warning.sources == current.sources and
+      PurchaseOverride.authorize_operation(
+        repo(opts),
+        capability,
+        snapshot_account_id(snapshot) || decision_account_id(current, opts),
+        current,
+        Keyword.fetch!(opts, :operation_id)
+      )
   end
 
-  defp approved_warning_current?(_, _), do: false
+  defp approved_warning_current?(_, _, _, _), do: false
 
   # A pending operation is a hard retry barrier. The original provider call may
   # have succeeded after its response was lost, so a retry must reconcile the
@@ -414,6 +464,22 @@ defmodule Accrue.Entitlements.PurchaseDecision do
     do: Ecto.UUID.cast(decision_account_id(decision, opts)) != :error
 
   defp decision_account_id(_decision, opts), do: Keyword.get(opts, :account_id)
+  defp snapshot_account_id(%Snapshot{account_id: account_id}), do: account_id
+  defp snapshot_account_id(_snapshot), do: nil
+
+  defp account_context_mismatch?(snapshot, opts) do
+    snapshot_id = snapshot_account_id(snapshot)
+    supplied_id = Keyword.get(opts, :account_id)
+    not is_nil(snapshot_id) and not is_nil(supplied_id) and snapshot_id != supplied_id
+  end
+
+  defp bind_snapshot_account(opts, snapshot) do
+    case Ecto.UUID.cast(snapshot_account_id(snapshot)) do
+      {:ok, account_id} -> Keyword.put(opts, :account_id, account_id)
+      :error -> opts
+    end
+  end
+
   defp repo(opts), do: Keyword.get(opts, :repo, Accrue.Repo.repo())
 
   defp maybe_audit(decision, reason, actor_id, opts) do

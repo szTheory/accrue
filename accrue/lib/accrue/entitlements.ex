@@ -91,6 +91,8 @@ defmodule Accrue.Entitlements do
       fn ->
         PurchaseDecision.override(decision, reason, actor_id,
           snapshot: Keyword.get(opts, :snapshot),
+          account_id: Keyword.get(opts, :account_id),
+          repo: Keyword.get(opts, :repo, Accrue.Repo.repo()),
           product_id: Keyword.fetch!(opts, :product_id),
           catalog: Keyword.get(opts, :catalog) || Accrue.Config.entitlement_product_catalog(),
           environment: Keyword.get(opts, :environment, :production),

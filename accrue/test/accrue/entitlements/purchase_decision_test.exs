@@ -1,7 +1,7 @@
 defmodule Accrue.Entitlements.PurchaseDecisionTest do
   use Accrue.BillingCase, async: false
 
-  alias Accrue.Entitlements.{Account, PurchaseDecision, Snapshot}
+  alias Accrue.Entitlements.{Account, PurchaseDecision, PurchaseOverride, Snapshot}
 
   defmodule Billable do
     use Ecto.Schema
@@ -82,10 +82,10 @@ defmodule Accrue.Entitlements.PurchaseDecisionTest do
   end
 
   test "renders the bounded Apple warning copy without provider internals" do
+    snapshot = durable_snapshot([source(:apple)], 3)
+
     decision =
-      PurchaseDecision.evaluate(snapshot([source(:apple)], 3), :stripe, "price_pro",
-        catalog: catalog()
-      )
+      PurchaseDecision.evaluate(snapshot, :stripe, "price_pro", catalog: catalog())
 
     assert %PurchaseDecision{
              guidance:
@@ -95,7 +95,7 @@ defmodule Accrue.Entitlements.PurchaseDecisionTest do
                decision,
                "because support approved",
                "operator@example.test",
-               snapshot: snapshot([source(:apple)], 3),
+               snapshot: snapshot,
                product_id: "price_pro",
                catalog: catalog()
              )
@@ -153,7 +153,7 @@ defmodule Accrue.Entitlements.PurchaseDecisionTest do
   end
 
   test "override telemetry and audit recursively exclude seeded private values" do
-    snapshot = snapshot([source(:apple)], 4)
+    snapshot = durable_snapshot([source(:apple)], 4)
     decision = PurchaseDecision.evaluate(snapshot, :stripe, "price_pro", catalog: catalog())
     parent = self()
     handler = {__MODULE__, make_ref()}
@@ -319,7 +319,7 @@ defmodule Accrue.Entitlements.PurchaseDecisionTest do
   end
 
   test "a current audited warning dispatches once, while stale or tampered warnings cannot dispatch" do
-    current_snapshot = snapshot([source(:apple)], 7)
+    current_snapshot = durable_snapshot([source(:apple)], 7)
 
     blocked =
       PurchaseDecision.evaluate(current_snapshot, :stripe, "price_pro", catalog: catalog())
@@ -331,12 +331,42 @@ defmodule Accrue.Entitlements.PurchaseDecisionTest do
         catalog: catalog()
       )
 
+    assert %PurchaseOverride{
+             account_id: account_id,
+             decision_revision: 7,
+             operation_id: nil,
+             justification: "support approved"
+           } = Accrue.TestRepo.one(PurchaseOverride)
+
+    assert account_id == current_snapshot.account_id
+
     parent = self()
 
     subscribe = fn _billable, _price, _opts ->
       send(parent, :warning_dispatched)
       {:ok, %{id: "sub_warning"}}
     end
+
+    assert {:error, :purchase_blocked} =
+             PurchaseDecision.continue(%{blocked | status: :warn}, :billable, "price_pro",
+               snapshot: current_snapshot,
+               product_id: "price_pro",
+               operation_id: "forged-warning-operation",
+               catalog: catalog(),
+               subscribe: subscribe
+             )
+
+    refute_receive :warning_dispatched
+
+    assert {:error, :purchase_blocked} =
+             PurchaseDecision.continue(warning, :billable, "price_pro",
+               snapshot: current_snapshot,
+               account_id: Ecto.UUID.generate(),
+               product_id: "price_pro",
+               operation_id: "wrong-account-operation",
+               catalog: catalog(),
+               subscribe: subscribe
+             )
 
     assert {:ok, %{id: "sub_warning"}} =
              PurchaseDecision.continue(warning, :billable, "price_pro",
@@ -348,6 +378,18 @@ defmodule Accrue.Entitlements.PurchaseDecisionTest do
              )
 
     assert_receive :warning_dispatched
+
+    assert %PurchaseOverride{operation_id: "warning-operation"} =
+             Accrue.TestRepo.one(PurchaseOverride)
+
+    assert {:error, :purchase_blocked} =
+             PurchaseDecision.continue(warning, :billable, "price_pro",
+               snapshot: current_snapshot,
+               product_id: "price_pro",
+               operation_id: "second-warning-operation",
+               catalog: catalog(),
+               subscribe: subscribe
+             )
 
     assert {:error, :purchase_blocked} =
              PurchaseDecision.continue(%{warning | sources: []}, :billable, "price_pro",
@@ -634,6 +676,13 @@ defmodule Accrue.Entitlements.PurchaseDecisionTest do
       sources: sources,
       authorization_bounds: %{}
     }
+  end
+
+  defp durable_snapshot(sources, revision) do
+    {:ok, account} =
+      Accrue.Entitlements.provision_account("PurchaseDecisionUser", Ecto.UUID.generate())
+
+    %{snapshot(sources, revision) | account_id: account.id}
   end
 
   defp source(rail, logical_plan \\ :pro) do

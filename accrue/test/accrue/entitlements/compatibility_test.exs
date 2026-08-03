@@ -193,7 +193,7 @@ defmodule Accrue.Entitlements.CompatibilityTest do
   end
 
   test "invalid cohorts, false and raising MFA, malformed mode, stale evidence, and parity blockers fail closed" do
-    {billable, account_id} = compatible_billable!()
+    {billable, _account_id} = compatible_billable!()
     start = ~U[2026-08-02 10:00:00Z]
     ending = ~U[2026-08-02 10:01:00Z]
 
