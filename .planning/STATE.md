@@ -3,17 +3,17 @@ gsd_state_version: 1.0
 milestone: v1.59
 milestone_name: Account-Scoped Multi-Rail & Offline Entitlements
 current_phase: 217
-current_phase_name: Canonical projection and compatibility
+current_phase_name: canonical-projection-and-compatibility
 status: executing
-stopped_at: Phase 217 context gathered
-last_updated: "2026-08-02T23:18:59.902Z"
+stopped_at: Completed 217-02-PLAN.md
+last_updated: "2026-08-03T00:44:52.845Z"
 last_activity: 2026-08-02
-last_activity_desc: Phase 216 complete, transitioned to Phase 217
+last_activity_desc: Phase 217 execution started
 progress:
   total_phases: 6
   completed_phases: 2
   total_plans: 26
-  completed_plans: 21
+  completed_plans: 23
   percent: 33
 ---
 
@@ -25,14 +25,14 @@ See: `.planning/PROJECT.md` (updated 2026-08-01 after completing Phase 215)
 
 **Core value:** A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic Elixir DX, strong domain modeling, tamper-evident audit ledger, great observability, and zero breaking-change pain through v1.x.
 
-**Current focus:** Phase 216 — additive-rail-and-persistence-foundation
+**Current focus:** Phase 217 — canonical-projection-and-compatibility
 
 ## Current Position
 
-Phase: 217 — Canonical projection and compatibility
-Plan: Not started
+Phase: 217 (canonical-projection-and-compatibility) — EXECUTING
+Plan: 3 of 5
 Status: Ready to execute
-Last activity: 2026-08-02 — Phase 216 complete, transitioned to Phase 217
+Last activity: 2026-08-02 — Phase 217 execution started
 
 ## Post-v1.48 Pause Rule
 
@@ -398,6 +398,8 @@ Coverage: 22/22 v1.51 requirements mapped (each REQ-ID → exactly one phase). D
 | Phase 216-additive-rail-and-persistence-foundation P04 | 14min | 2 tasks | 6 files |
 | Phase 216-additive-rail-and-persistence-foundation P05 | 5m | 2 tasks | 7 files |
 | Phase 216 P06 | 6m | 2 tasks | 6 files |
+| Phase 217 P01 | 10m | 1 tasks | 6 files |
+| Phase 217 P02 | 24m | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -777,6 +779,8 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - [Phase ?]: Use fixed normalized IDs, timestamps, digests, and bounded metadata for persistence fixtures rather than provider payloads.
 - [Phase ?]: RAIL-03 persistence hardening normalizes blank provider identities, permits only bounded opaque evidence locators, and binds grant provenance with a composite PostgreSQL foreign key.
 - [Phase ?]: Provider identity collisions retain global rail/environment keys but return an opaque ownership error across accounts.
+- [Phase ?]: Phase 217 backend verification is zero-human and rejects tracer or human-verify tasks when opted in.
+- [Phase ?]: Equivalent source retractions preserve the revision when plan-level authorization bounds remain unchanged.
 
 ### Pending Todos
 
@@ -928,9 +932,9 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 
 ## Session Continuity
 
-Last session: 2026-08-02T22:30:52.155Z
-Stopped at: Phase 217 context gathered
-Resume file: .planning/phases/217-canonical-projection-and-compatibility/217-CONTEXT.md
+Last session: 2026-08-03T00:44:52.829Z
+Stopped at: Completed 217-02-PLAN.md
+Resume file: None
 
 ## Operator Next Steps
 
