@@ -4,6 +4,7 @@ defmodule Accrue.Entitlements.AppleReconciliationTest do
 
   alias Accrue.Entitlements.{Account, Grant, Observation, Projector}
   alias Accrue.Entitlements.Apple.{Client, Lineage, Reconciliation, ReconcileWorker}
+  alias Accrue.Entitlements.Apple.Client.Production
   alias Accrue.Entitlements.Apple.Reconciliation.Checkpoint
   alias Accrue.Entitlements.Apple.ReconciliationWakeupWorker
 
@@ -14,7 +15,7 @@ defmodule Accrue.Entitlements.AppleReconciliationTest do
     def subscription_statuses(_, lineage, environment),
       do: {:ok, [%{lineage: lineage, environment: environment}]}
 
-    def transaction_history(_, _, _, _), do: {:ok, %{signed_transactions: [], has_more: false}}
+    def transaction_history(_, _, _, _, _), do: {:ok, %{signed_transactions: [], has_more: false}}
     def notification_history(_, _, _), do: {:ok, %{notifications: []}}
     def set_app_account_token(_, _, _, _), do: :ok
   end
@@ -53,15 +54,39 @@ defmodule Accrue.Entitlements.AppleReconciliationTest do
              Client.subscription_statuses(fake, "lineage", :production)
 
     assert {:ok, %{revision: "r1", has_more: true}} =
-             Client.transaction_history(fake, "lineage", %{sort: :ascending}, nil)
+             Client.transaction_history(fake, "lineage", %{sort: :ascending}, nil, :production)
 
     assert {:ok, %{revision: "r2", has_more: false}} =
-             Client.transaction_history(fake, "lineage", %{sort: :ascending}, "r1")
+             Client.transaction_history(fake, "lineage", %{sort: :ascending}, "r1", :production)
   end
 
   test "a configured non-Fake client dispatches through the client behaviour" do
     assert {:ok, [%{lineage: "configured", environment: :sandbox}]} =
              Client.subscription_statuses(%ConfiguredClient{}, "configured", :sandbox)
+  end
+
+  test "production adapter uses the environment-specific Apple endpoint for each request" do
+    test_pid = self()
+
+    client =
+      Production.new(
+        authorization: "test-token",
+        transport: fn :get, {url, _headers}, _options, _body_format ->
+          send(test_pid, {:apple_url, to_string(url)})
+          {:ok, {{~c"HTTP/1.1", 200, ~c"OK"}, [], ~s({"data":[]})}}
+        end
+      )
+
+    assert {:ok, []} = Client.subscription_statuses(client, "sandbox lineage", :sandbox)
+
+    assert_receive {:apple_url,
+                    "https://api.storekit-sandbox.itunes.apple.com/inApps/v1/subscriptions/sandbox%20lineage"}
+
+    assert {:ok, %{signed_transactions: [], has_more: false}} =
+             Client.transaction_history(client, "sandbox lineage", %{sort: :ascending}, nil, :sandbox)
+
+    assert_receive {:apple_url,
+                    "https://api.storekit-sandbox.itunes.apple.com/inApps/v2/history/sandbox%20lineage?sort=ascending"}
   end
 
   @tag :status

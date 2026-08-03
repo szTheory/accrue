@@ -296,7 +296,13 @@ defmodule Accrue.Entitlements.Apple.Reconciliation do
     with {:ok, statuses} <- Client.subscription_statuses(client, lineage_id, environment),
          :ok <- admit_statuses(repo, lineage_id, environment, statuses, opts),
          {:ok, page} <-
-           Client.transaction_history(client, lineage_id, filters, checkpoint.pending_revision) do
+           Client.transaction_history(
+             client,
+             lineage_id,
+             filters,
+             checkpoint.pending_revision,
+             environment
+           ) do
       with :ok <-
              admit_transactions(
                repo,

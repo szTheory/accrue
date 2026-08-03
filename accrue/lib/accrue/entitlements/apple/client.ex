@@ -3,7 +3,7 @@ defmodule Accrue.Entitlements.Apple.Client do
 
   @callback subscription_statuses(term(), binary(), :production | :sandbox) ::
               {:ok, [map()]} | {:error, term()}
-  @callback transaction_history(term(), binary(), map(), String.t() | nil) ::
+  @callback transaction_history(term(), binary(), map(), String.t() | nil, :production | :sandbox) ::
               {:ok, map()} | {:error, term()}
   @callback notification_history(term(), map(), :production | :sandbox) ::
               {:ok, map()} | {:error, term()}
@@ -29,7 +29,7 @@ defmodule Accrue.Entitlements.Apple.Client do
 
   def subscription_statuses(_, _, _), do: {:error, :config_invalid}
 
-  def transaction_history(%Fake{history: pages}, _lineage, _filters, revision) do
+  def transaction_history(%Fake{history: pages}, _lineage, _filters, revision, _environment) do
     pages
     |> Enum.find(fn
       {:ok, %{revision: next_revision}} -> prior_revision(next_revision, pages) == revision
@@ -41,13 +41,14 @@ defmodule Accrue.Entitlements.Apple.Client do
     end
   end
 
-  def transaction_history(%{__struct__: module} = client, lineage, filters, revision)
-      when module != Fake, do: module.transaction_history(client, lineage, filters, revision)
+  def transaction_history(%{__struct__: module} = client, lineage, filters, revision, environment)
+      when module != Fake,
+      do: module.transaction_history(client, lineage, filters, revision, environment)
 
-  def transaction_history(module, lineage, filters, revision) when is_atom(module),
-    do: module.transaction_history(nil, lineage, filters, revision)
+  def transaction_history(module, lineage, filters, revision, environment) when is_atom(module),
+    do: module.transaction_history(nil, lineage, filters, revision, environment)
 
-  def transaction_history(_, _, _, _), do: {:error, :config_invalid}
+  def transaction_history(_, _, _, _, _), do: {:error, :config_invalid}
 
   def notification_history(%Fake{notification_history: [result | _]}, _filters, _environment),
     do: result
@@ -97,16 +98,25 @@ defmodule Accrue.Entitlements.Apple.Client.Production do
   """
   @behaviour Accrue.Entitlements.Apple.Client
 
-  defstruct [:authorization, base_url: "https://api.storekit.itunes.apple.com", timeout: 15_000]
+  @production_base_url "https://api.storekit.itunes.apple.com"
+  @sandbox_base_url "https://api.storekit-sandbox.itunes.apple.com"
+
+  defstruct [
+    :authorization,
+    production_base_url: @production_base_url,
+    sandbox_base_url: @sandbox_base_url,
+    timeout: 15_000,
+    transport: &:httpc.request/4
+  ]
 
   def new(opts), do: struct!(__MODULE__, opts)
 
   @impl true
-  def subscription_statuses(%__MODULE__{} = client, lineage, _environment),
-    do: get(client, "/inApps/v1/subscriptions/#{URI.encode(lineage)}", [], &statuses/1)
+  def subscription_statuses(%__MODULE__{} = client, lineage, environment),
+    do: get(client, environment, "/inApps/v1/subscriptions/#{URI.encode(lineage)}", [], &statuses/1)
 
   @impl true
-  def transaction_history(%__MODULE__{} = client, lineage, filters, revision) do
+  def transaction_history(%__MODULE__{} = client, lineage, filters, revision, environment) do
     query =
       filters
       |> Map.take([:sort, :product_types])
@@ -116,7 +126,7 @@ defmodule Accrue.Entitlements.Apple.Client.Production do
       end)
       |> then(fn pairs -> if revision, do: [{"revision", revision} | pairs], else: pairs end)
 
-    get(client, "/inApps/v2/history/#{URI.encode(lineage)}", query, &history/1)
+    get(client, environment, "/inApps/v2/history/#{URI.encode(lineage)}", query, &history/1)
   end
 
   @impl true
@@ -125,16 +135,16 @@ defmodule Accrue.Entitlements.Apple.Client.Production do
   @impl true
   def set_app_account_token(_, _, _, _), do: {:error, :unsupported}
 
-  defp get(%__MODULE__{authorization: authorization} = client, path, query, decode)
+  defp get(%__MODULE__{authorization: authorization, transport: transport} = client, environment, path, query, decode)
        when is_binary(authorization) and byte_size(authorization) > 0 do
-    url = client.base_url <> path <> if(query == [], do: "", else: "?" <> URI.encode_query(query))
+    url = base_url(client, environment) <> path <> if(query == [], do: "", else: "?" <> URI.encode_query(query))
 
     headers = [
       {~c"authorization", String.to_charlist("Bearer " <> authorization)},
       {~c"accept", ~c"application/json"}
     ]
 
-    case :httpc.request(:get, {String.to_charlist(url), headers}, [timeout: client.timeout],
+    case transport.(:get, {String.to_charlist(url), headers}, [timeout: client.timeout],
            body_format: :binary
          ) do
       {:ok, {{_, 200, _}, _, body}} -> decode.(body)
@@ -146,7 +156,11 @@ defmodule Accrue.Entitlements.Apple.Client.Production do
     end
   end
 
-  defp get(_, _, _, _), do: {:error, :config_invalid}
+  defp get(_, _, _, _, _), do: {:error, :config_invalid}
+
+  defp base_url(%__MODULE__{production_base_url: url}, :production) when is_binary(url), do: url
+  defp base_url(%__MODULE__{sandbox_base_url: url}, :sandbox) when is_binary(url), do: url
+  defp base_url(_, _), do: @production_base_url
   defp statuses(body), do: with({:ok, %{"data" => data}} <- Jason.decode(body), do: {:ok, data})
 
   defp history(body),

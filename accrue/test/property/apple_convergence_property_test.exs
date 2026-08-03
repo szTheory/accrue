@@ -16,7 +16,7 @@ defmodule Accrue.Entitlements.AppleConvergencePropertyTest do
 
     def subscription_statuses(%__MODULE__{statuses: statuses}, _, _), do: {:ok, statuses}
 
-    def transaction_history(%__MODULE__{pages: pages}, _, _, revision) do
+    def transaction_history(%__MODULE__{pages: pages}, _, _, revision, _) do
       Enum.find(pages, {:ok, %{signed_transactions: [], has_more: false}}, fn {:ok, page} ->
         Map.get(page, :prior_revision) == revision
       end)
