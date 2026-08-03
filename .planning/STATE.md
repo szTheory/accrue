@@ -5,15 +5,15 @@ milestone_name: Account-Scoped Multi-Rail & Offline Entitlements
 current_phase: 217
 current_phase_name: canonical-projection-and-compatibility
 status: executing
-stopped_at: Completed 217-03-PLAN.md
-last_updated: "2026-08-03T00:58:17.323Z"
+stopped_at: Completed 217-04-PLAN.md
+last_updated: "2026-08-03T01:22:13.977Z"
 last_activity: 2026-08-02
 last_activity_desc: Phase 217 execution started
 progress:
   total_phases: 6
   completed_phases: 2
   total_plans: 26
-  completed_plans: 24
+  completed_plans: 25
   percent: 33
 ---
 
@@ -30,7 +30,7 @@ See: `.planning/PROJECT.md` (updated 2026-08-01 after completing Phase 215)
 ## Current Position
 
 Phase: 217 (canonical-projection-and-compatibility) — EXECUTING
-Plan: 4 of 5
+Plan: 5 of 5
 Status: Ready to execute
 Last activity: 2026-08-02 — Phase 217 execution started
 
@@ -401,6 +401,7 @@ Coverage: 22/22 v1.51 requirements mapped (each REQ-ID → exactly one phase). D
 | Phase 217 P01 | 10m | 1 tasks | 6 files |
 | Phase 217 P02 | 24m | 2 tasks | 5 files |
 | Phase 217-canonical-projection-and-compatibility P03 | 18m | 2 tasks | 5 files |
+| Phase 217-canonical-projection-and-compatibility P04 | 17min | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -783,6 +784,7 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - [Phase ?]: Phase 217 backend verification is zero-human and rejects tracer or human-verify tasks when opted in.
 - [Phase ?]: Equivalent source retractions preserve the revision when plan-level authorization bounds remain unchanged.
 - [Phase ?]: Snapshot source summaries carry bounded logical_plan provenance so purchase equivalence is exact and cross-plan-safe.
+- [Phase ?]: Compatibility multi_rail config dispatches through a fail-closed LocalMap/canonical authority seam.
 
 ### Pending Todos
 
@@ -934,8 +936,8 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 
 ## Session Continuity
 
-Last session: 2026-08-03T00:58:17.307Z
-Stopped at: Completed 217-03-PLAN.md
+Last session: 2026-08-03T01:22:13.967Z
+Stopped at: Completed 217-04-PLAN.md
 Resume file: None
 
 ## Operator Next Steps
