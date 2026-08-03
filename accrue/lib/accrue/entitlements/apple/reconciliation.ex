@@ -281,10 +281,9 @@ defmodule Accrue.Entitlements.Apple.Reconciliation do
     with {:ok, _statuses} <- Client.subscription_statuses(client, lineage_id, environment),
          {:ok, page} <-
            Client.transaction_history(client, lineage_id, filters, checkpoint.pending_revision) do
-      transactions = Map.get(page, :signed_transactions, [])
-      admit = Keyword.get(opts, :admit_transaction, fn _ -> :ok end)
-      Enum.each(transactions, admit)
-      persist_page(repo, checkpoint, page, fingerprint, now)
+      with :ok <- admit_transactions(Map.get(page, :signed_transactions, []), opts) do
+        persist_page(repo, checkpoint, page, fingerprint, now)
+      end
     else
       {:error, :config_invalid} -> mark_repair(repo, checkpoint, :config_invalid)
       {:error, :unauthorized} -> mark_repair(repo, checkpoint, :unauthorized)
@@ -379,6 +378,23 @@ defmodule Accrue.Entitlements.Apple.Reconciliation do
   defp normalize_environment(value) when value in [:production, :sandbox], do: value
   defp normalize_environment("production"), do: :production
   defp normalize_environment("sandbox"), do: :sandbox
+
+  defp admit_transactions(transactions, opts) do
+    case Keyword.get(opts, :admit_transaction) do
+      admit when is_function(admit, 1) ->
+        Enum.reduce_while(transactions, :ok, fn transaction, :ok ->
+          case admit.(transaction) do
+            :ok -> {:cont, :ok}
+            {:ok, _} -> {:cont, :ok}
+            {:error, _} = error -> {:halt, error}
+            _ -> {:halt, {:error, :admission_failed}}
+          end
+        end)
+
+      _ ->
+        {:error, :config_invalid}
+    end
+  end
 
   defp canonical(map) when is_map(map),
     do: map |> Enum.map(fn {key, value} -> {key, canonical(value)} end) |> Enum.sort()

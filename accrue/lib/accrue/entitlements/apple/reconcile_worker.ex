@@ -11,11 +11,12 @@ defmodule Accrue.Entitlements.Apple.ReconcileWorker do
       when is_binary(lineage_id) and environment in ["production", "sandbox"] do
     Accrue.Oban.Middleware.put(job)
 
-    Reconciliation.run(args,
-      client: configured_client(),
-      admit_transaction: configured_admission()
-    )
-    |> oban_result()
+    with client when not is_nil(client) <- configured_client(),
+         admit when is_function(admit, 1) <- configured_admission() do
+      Reconciliation.run(args, client: client, admit_transaction: admit) |> oban_result()
+    else
+      _ -> {:cancel, :missing_reconciliation_configuration}
+    end
   end
 
   def perform(_), do: {:cancel, :invalid_reconciliation_args}
