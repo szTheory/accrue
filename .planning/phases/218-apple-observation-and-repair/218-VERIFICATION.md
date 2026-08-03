@@ -1,54 +1,51 @@
 ---
 phase: 218-apple-observation-and-repair
-verified: 2026-08-03T17:13:57Z
+verified: 2026-08-03T18:06:02Z
 status: gaps_found
-score: 3/5 must-haves verified
-behavior_unverified: 1
+score: 2/5 must-haves verified
+behavior_unverified: 0
 overrides_applied: 0
 re_verification:
   previous_status: gaps_found
   previous_score: 3/5
   gaps_closed:
-    - "Public purchase/restore admission now accepts opaque signed evidence and resolves verifier authority only from host configuration."
-    - "Due checkpoints are now selected under SKIP LOCKED and atomically dispatched through ReconciliationSweeper into ReconcileWorker jobs."
+    - "Active or renewal-disabled evidence without a verified expiry is now rejected before durable admission."
+    - "The documented Apple wildcard regression suite now exercises opaque-evidence repair and passes."
+    - "A valid and hostile three-certificate ES256 purpose corpus now executes."
   gaps_remaining:
-    - "Active Apple evidence without an expiry can still create an unbounded grant."
-    - "The phase-wide Apple test command fails because apple_lineage_test still exercises the removed public VerifiedEvidence input."
+    - "Certificate validation does not use the configured verification_time, so delayed historical evidence cannot be reliably verified at its intended verification time."
+    - "A verified but unmapped product is rejected before Intake's terminal quarantine path; reconciliation retries, then needs manual repair, and can leave a prior grant stale."
   regressions: []
 gaps:
-  - truth: "Scheduled status and history reconciliation accurately represents active, grace, retry, expiry, refund, and revocation bounds without widening access."
+  - truth: "Only Apple evidence verified for permitted algorithms, trust, certificates, bundle, environment, and production identity can change grants."
     status: failed
-    reason: "Missing expiresDate is accepted as active evidence, normalizes to expires_at: nil, and projects an unbounded Apple grant."
+    reason: "Certificate-time verification is required by AAPL-02 but the production verifier ignores Config.verification_time and always asks OTP to validate at the host current clock."
+    artifacts:
+      - path: "accrue/lib/accrue/entitlements/apple/verifier/production.ex"
+        issue: "validate_order_and_path/2 calls :public_key.pkix_path_validation/3 with [] and has no Config argument."
+      - path: "accrue/test/accrue/entitlements/apple_verifier_test.exs"
+        issue: "No test proves a chain valid at configured verification_time but expired at the host clock, or invalid at that time."
+    missing:
+      - "Pass an explicit validated certificate-verification-time policy to PKIX path validation and test both historical-valid and historical-invalid cases."
+  - truth: "Duplicate, delayed, and out-of-order Apple evidence converges idempotently, while invalid, unmatched, and conflicting input remains non-granting and repairable."
+    status: failed
+    reason: "Verified unmapped products fail in Admission before Intake can persist :unmapped_product. In reconciliation this becomes retries followed by needs_repair, preventing later lifecycle records from repairing or retracting a prior grant."
     artifacts:
       - path: "accrue/lib/accrue/entitlements/apple/admission.ex"
-        issue: "lifecycle/1 treats an absent or malformed expiresDate as :active."
+        issue: "evidence/6 requires a non-nil product_map entry at line 70 instead of emitting VerifiedEvidence with logical_plan: nil."
       - path: "accrue/lib/accrue/entitlements/apple/reconciliation.ex"
-        issue: "active lifecycle_bound/2 passes nil expiry through to the Observation/Projector."
-      - path: "accrue/test/accrue/entitlements/apple_observation_tracer_test.exs"
-        issue: "Its successful signed-evidence fixture omits expiresDate and asserts that a Grant is created."
+        issue: "The returned admission error is routed to schedule_retry/4 and ultimately attempts_exhausted rather than a terminal non-granting disposition."
     missing:
-      - "Fail closed or quarantine subscription evidence whose active/renewal lifecycle has no valid verified expiry, and add an integration regression proving no Observation, Grant, or revision is created."
-  - truth: "Phase 218 Apple lineage/repair behavior is covered by its runnable regression suite."
-    status: partial
-    reason: "The documented phase wildcard test command fails: apple_lineage_test passes a caller-constructed VerifiedEvidence to the public facade and still expects the pre-gap-closure verified_unbound result."
-    artifacts:
-      - path: "accrue/test/accrue/entitlements/apple_lineage_test.exs"
-        issue: "Line 18 asserts obsolete public trust-by-struct behavior, so the authorized-repair scenario never executes."
-    missing:
-      - "Seed the unbound lineage through opaque configured signed evidence, then exercise authorized re-verification/repair; keep the public forged-struct rejection assertion separately."
-behavior_unverified_items:
-  - truth: "Apple certificate-purpose enforcement accepts a valid Apple-purpose three-certificate ES256 chain and rejects each wrong/missing purpose or key-usage variant before grant admission."
-    test: "Run Production.verify_transaction/2 against deterministic valid and hostile three-certificate x5c JWS fixtures, then trace the valid result through Admission and assert hostile variants create no durable effects."
-    expected: "The valid chain succeeds; missing/wrong leaf or intermediate purpose, CA leaf, and missing digitalSignature each return invalid_certificate_purpose before any Observation, Grant, or revision."
-    why_human: "The production predicate contains the OIDs, but the repository has no positive real-chain fixture or test; apple_verifier_test only tests malformed/invalid-chain cases."
+      - "Admit verified unmapped evidence with logical_plan: nil so Intake persists :unmapped_product and reconciliation continues through later provider lifecycle records."
+      - "Add an integration regression with a prior grant, an unmapped transaction, and a later terminal record proving no stale grant remains."
 ---
 
 # Phase 218: Apple Observation and Repair Verification Report
 
-**Phase Goal:** Safely observe Apple purchase evidence, bind verified lineage to accounts, reconcile missed or out-of-order lifecycle evidence, project canonical account entitlements, and expose honest externally-managed subscription repair/management behavior.
-**Verified:** 2026-08-03T17:13:57Z
+**Phase Goal:** Verified Apple evidence safely contributes to the account snapshot and repairs itself without ownership reassignment or provider-lifecycle confusion.
+**Verified:** 2026-08-03T18:06:02Z
 **Status:** gaps_found
-**Re-verification:** Yes — after Plans 218-09 and 218-10 gap closure.
+**Re-verification:** Yes — after Plan 218-11 gap closure.
 
 ## Goal Achievement
 
@@ -56,80 +53,89 @@ behavior_unverified_items:
 
 | # | Truth | Status | Evidence |
 | --- | --- | --- | --- |
-| 1 | An authenticated account can use its opaque entitlement UUID for purchase/restore; eligible verified lineage binds once and conflicts quarantine without reassignment. | ✓ VERIFIED | The configured opaque-evidence tracer binds once, duplicates without revision change, preserves unbound/conflict non-granting outcomes, and rejects a caller-created `VerifiedEvidence` before writes. `Lineage` uses the environment/original-transaction identity plus `FOR UPDATE`. |
-| 2 | Only Apple evidence verified for permitted algorithms, trust, certificate purpose/time, bundle, environment, and production identity can change grants. | ⚠️ PRESENT_BEHAVIOR_UNVERIFIED | The public facade now calls configured `Admission`, which verifies opaque bytes before `Intake`; `Production` contains the exact leaf/intermediate Apple OIDs, non-CA leaf, and digital-signature checks. But no real positive/hostile three-certificate ES256 test executes that policy. |
-| 3 | Duplicate, delayed, and out-of-order evidence converges idempotently; invalid, unmatched, and conflicting input is non-granting and repairable. | ✓ VERIFIED | The focused tracer, reconciliation, isolation, and persisted-job convergence property passed. Intake persists closed outcomes and the projector ordering test keeps delayed active evidence behind a terminal record. |
-| 4 | Scheduled status/history reconciliation repairs missed notifications and accurately represents lifecycle boundaries without notification ordering. | ✗ FAILED | The missed-notification scheduler is now real and tested, but a verified transaction without `expiresDate` is classified `active` and produces `expires_at: nil`; the tracer's successful grant fixture takes exactly that path. |
-| 5 | Hosts get honest externally-managed Apple guidance, while Family Sharing and offer authoring remain explicit deferrals. | ✓ VERIFIED | `apple_management/0` delegates to the source registry's `:externally_managed` Apple outcome; the isolation test proves the exact guidance, typed deferrals, and no Stripe callback reachability. |
+| 1 | An authenticated account can purchase or restore through its opaque entitlement UUID; only eligible verified lineage binds once, while ownership conflicts quarantine without heuristic or automatic reassignment. | ✓ VERIFIED | Public `observe_apple_evidence/3` accepts opaque bytes only and calls configured `Apple.Admission`; `Lineage.claim/5` row-locks the environment/original identity and only binds when the verified token equals the account ID. `apple_observation_tracer_test` covers bind-once, forged-struct rejection, unbound evidence, private conflict, and rollback; `apple_lineage_test` covers authorized repair. |
+| 2 | Only Apple evidence verified for permitted algorithms, trust, certificates, bundle, environment, and production identity can change grants. | ✗ FAILED | ES256, x5c, purpose, bundle/environment/app-ID checks and a real hostile corpus exist, but `Production.validate_order_and_path/2` ignores `Config.verification_time` and validates at the host current time. This does not meet AAPL-02's certificate-time contract for delayed historical evidence. |
+| 3 | Duplicate, delayed, and out-of-order Apple evidence converges idempotently, while invalid, unmatched, and conflicting input remains non-granting and repairable. | ✗ FAILED | Idempotency, ordering, unbound, and conflict paths are tested. But `Admission.evidence/6` rejects an otherwise verified unmapped product at its mapping guard, before the substantive `Intake` `logical_plan: nil -> :unmapped_product` quarantine path. The reconciliation worker retries the error and ultimately records `needs_repair`, leaving later authoritative records unprocessed. |
+| 4 | Scheduled status and history reconciliation repairs missed notifications and accurately represents active, grace, retry, expiry, refund, and revocation boundaries. | ✗ FAILED | Due rows are safely selected with `FOR UPDATE SKIP LOCKED`, and focused tests prove missed-notification repair, bounded lifecycle normalization, terminal ordering, and no unbounded active grant. Nonetheless, the unmapped-product admission failure blocks later history/status records and can retain a stale prior grant; certificate-time failure also prevents normal delayed-history verification after signing-cert expiry. |
+| 5 | Hosts receive honest externally-managed Apple subscription guidance, with Family Sharing and offer authoring explicitly deferred. | ✓ VERIFIED | `apple_management/0` delegates to `SourceRegistry`, which returns the exact externally-managed text and action. `apple_family_sharing/0` and `apple_offer_authoring/0` return typed deferrals. The isolation test proves exact output and zero Stripe callbacks for Apple operations. |
 
-**Score:** 3/5 truths verified (1 present, behavior-unverified).
+**Score:** 2/5 truths verified.
 
 ### Required Artifacts
 
+`verify.artifacts` reports every declared artifact substantive and present (32/32 across Plans 01 and 03–11; Plan 02 declares none). The two artifacts below remain unsafe at their actual data-flow boundary.
+
 | Artifact | Expected | Status | Details |
 | --- | --- | --- | --- |
-| `accrue/lib/accrue/entitlements/apple/admission.ex` | Configured opaque-evidence admission boundary | ✓ VERIFIED | Substantive and wired from the public facade and reconciliation admission; it rejects caller options other than `:environment`. |
-| `accrue/lib/accrue/entitlements/apple/verifier/production.ex` | Strict production JWS / Apple certificate policy | ⚠️ PRESENT, BEHAVIOR UNVERIFIED | The policy source is substantive and wired, but executable proof lacks the promised valid/hostile real-chain corpus. |
-| `accrue/lib/accrue/entitlements/apple/reconciliation.ex` | Status/history repair plus lifecycle bounds | ✗ UNSAFE | `enqueue_due/2` is substantive and wired, but `lifecycle_bound(:active, facts)` accepts a nil expiry. |
-| `accrue/lib/accrue/entitlements/apple/reconciliation_sweeper.ex` | Host-owned due-checkpoint dispatch | ✓ VERIFIED | Calls `Reconciliation.enqueue_due/2`; integration test finds the persisted scalar worker job and runs it after a missed notification. |
-| `accrue/lib/accrue/entitlements/apple/lineage.ex` | Environment-qualified bind-once ownership | ✓ VERIFIED | Substantive locked unique-identity claim logic, exercised by the opaque-evidence tracer. |
+| `accrue/lib/accrue/entitlements/apple/lineage.ex` | Environment-qualified bind-once ownership | ✓ VERIFIED | Unique `(environment, original_transaction_id)` identity plus `FOR UPDATE`; claim/repair do not transfer a bound lineage. |
+| `accrue/lib/accrue/entitlements/apple/admission.ex` | Configured opaque-evidence admission | ✗ UNSAFE | Is wired from public observation and reconciliation, but rejects verified unmapped evidence before `Intake` can quarantine it. |
+| `accrue/lib/accrue/entitlements/apple/intake.ex` | Sole verified-to-projection admission | ✓ VERIFIED | Normalizes bounds, quarantines `logical_plan: nil`, and only sends bound mapped evidence to projection; currently bypassed for public/reconciliation unmapped input. |
+| `accrue/lib/accrue/entitlements/apple/verifier/production.ex` | Strict JWS/certificate policy | ✗ UNSAFE | Real ES256 purpose tests pass, but configured certificate verification time is unused; multiple configured roots are also reduced to the first root. |
+| `accrue/lib/accrue/entitlements/apple/reconciliation.ex` | Durable status/history repair | ✗ PARTIAL | Locking, bounded retries, ordering, and lifecycle normalization are substantive, but an Admission error retries instead of recording a terminal unmatched result and continuing. |
+| `accrue/lib/accrue/entitlements/apple/reconciliation_sweeper.ex` | Host-owned due-checkpoint dispatch | ✓ VERIFIED | Delegates a host Cron tick to `enqueue_due/2`; no Accrue-owned scheduler is started. |
+| `accrue/lib/accrue/entitlements.ex` | Typed host-facing Apple surface | ✓ VERIFIED | Uses host configuration rather than caller-selected verifier/struct authority and exposes management/deferral outcomes. |
 
 ### Key Link Verification
 
 | From | To | Via | Status | Details |
 | --- | --- | --- | --- | --- |
-| Public `observe_apple_evidence/3` | `Apple.Admission` | opaque signed transaction and host-owned application config | ✓ WIRED | `entitlements.ex:92-99` obtains only `:apple_reconciliation` configuration and delegates to `observe_purchase_or_restore/4`; forged structs return `:invalid_input`. |
-| `Apple.Admission` | `Intake` / `Projector` | verifier success → normalized internal evidence | ✓ WIRED | `Admission` calls verifier then `Intake.observe/2`; Intake is the sole route to projection. |
-| Checkpoint `next_due_at` | `ReconcileWorker` | sweeper → locked atomic scalar job insertion | ✓ WIRED | `enqueue_due/2` selects due idle rows under `FOR UPDATE SKIP LOCKED`, inserts a worker job, and reserves the row transactionally. |
-| Reconciliation worker | strict status/history admission | configured client → bound lineage → Intake → projector | ✓ WIRED | The missed-notification and persisted-job property tests execute the worker chain. |
-| Admission lifecycle facts | bounded canonical grant | active evidence must carry verified expiry | ✗ NOT WIRED SAFELY | Missing `expiresDate` becomes `:active` with a nil bound and is projected. |
+| Public Apple observation | `Apple.Admission` | opaque signed transaction + host-owned configuration | ✓ WIRED | `Entitlements.observe_apple_evidence/3` delegates only after validating public inputs. |
+| `Apple.Admission` | `Intake.observe` | verified facts → internal evidence | ⚠️ PARTIAL | Correct for mapped products; the map guard prevents verified unmatched facts from reaching Intake's quarantine branch. |
+| `Production` | OTP PKIX validation | pinned trust root/certificate policy | ✗ NOT_WIRED CORRECTLY | `pkix_path_validation` receives `[]`, not the declared `verification_time`; `configured_root([root \| _])` ignores further pinned roots. |
+| Scheduled checkpoint | `ReconcileWorker` | lock + job insertion + durable state transition | ✓ WIRED | `enqueue_due/2` locks due idle checkpoints with `FOR UPDATE SKIP LOCKED`, inserts scalar jobs, then marks `running` in the same transaction. |
+| Reconciliation worker | strict admission / canonical projector | status and ascending history | ⚠️ PARTIAL | Valid mapped data flows through `Reconciliation.Admission` to `Intake`; unmapped data stops at Admission and prevents completion. |
+| Apple management | source registry | exact externally-managed outcome | ✓ WIRED | `Entitlements.apple_management/0` calls `SourceRegistry.outcome(:apple, :management)`. |
 
 ### Data-Flow Trace (Level 4)
 
 | Artifact | Data Variable | Source | Produces Real Data | Status |
 | --- | --- | --- | --- | --- |
-| Purchase/restore admission | internal `VerifiedEvidence` | configured verifier facts → product map → Intake | Yes, with no caller-selected verifier/configuration | ✓ FLOWING |
-| Reconciliation sweeper | due checkpoint → scalar job args | durable checkpoint table under lock | Yes; integration test consumes the persisted job after no notification | ✓ FLOWING |
-| Active lifecycle projection | `expires_at` | signed transaction `expiresDate` | No for an absent/malformed expiry: nil flows to Observation and Grant | ✗ HOLLOW / UNBOUNDED |
+| `Apple.Admission` | internal `VerifiedEvidence` | strict configured verifier + host product map | Yes for mapped evidence; verified unmapped evidence is discarded | ✗ HOLLOW FOR UNMATCHED INPUT |
+| `Reconciliation` | status/history signed transactions | configured client → strict admission → Intake/Projector | Yes for mapped verified records; blocked on an unmapped record | ✗ PARTIAL |
+| Apple management | `Source.Outcome` | static source declaration, not provider data | Yes—exact policy outcome | ✓ FLOWING |
 
 ### Behavioral Spot-Checks
 
 | Behavior | Command | Result | Status |
 | --- | --- | --- | --- |
-| Configured purchase, reconciliation, isolation, verifier and convergence paths | `cd accrue && mix test test/accrue/entitlements/apple_observation_tracer_test.exs test/accrue/entitlements/apple_reconciliation_test.exs test/accrue/entitlements/apple_verifier_test.exs test/accrue/entitlements/apple_source_isolation_test.exs test/property/apple_convergence_property_test.exs` | 29 tests + 1 property, 0 failures | ✓ PASS |
-| Reported lineage regression | `cd accrue && mix test test/accrue/entitlements/apple_lineage_test.exs` | 2 tests, 1 failure: expected `verified_unbound`, got `invalid_input` | ✗ FAIL |
-| Phase wildcard Apple command | `cd accrue && mix test test/accrue/entitlements/apple_*_test.exs test/property/apple_convergence_property_test.exs` | 38 tests + 1 property, 1 failure (the lineage test) | ✗ FAIL |
-| Missing-expiry lifecycle normalization | `cd accrue && MIX_ENV=test mix run --no-start -e '...normalize_lifecycle(active facts without expires_at)...'` | `%{kind: "active", expires_at: nil, ...}` | ✗ FAIL |
-| Missed-notification due dispatch | focused reconciliation suite above | `ReconciliationSweeper.sweep/2` inserts and executes a `scheduled_due` job | ✓ PASS |
+| Apple regression suite (including Plan 218-11 closure tests) | `mix test test/accrue/entitlements/apple_*_test.exs test/property/apple_convergence_property_test.exs` | 42 tests, 1 property, 0 failures | ✓ PASS |
+| Compilation | `mix compile --warnings-as-errors` | Exit 0 | ✓ PASS |
+| Certificate verification-time behavior | focused test enumeration/source inspection | No test; source demonstrably omits `verification_time` from the PKIX call | ✗ FAIL |
+| Unmapped reconciliation does not retain a stale grant | focused test enumeration/source inspection | No integration test; source rejects at `Admission.evidence/6` and retries error | ✗ FAIL |
+
+### Probe Execution
+
+Step 7c: SKIPPED — no Phase 218 probe scripts or probe declarations were found.
 
 ### Requirements Coverage
 
 | Requirement | Source Plan | Description | Status | Evidence |
 | --- | --- | --- | --- | --- |
-| AAPL-01 | 218-01, 218-04 | Opaque UUID and bind-once, no heuristic reassignment | ✓ SATISFIED | Opaque admission tracer, locked lineage claim, conflict/unbound non-granting cases. The stale repair test is separately a regression gap. |
-| AAPL-02 | 218-02, 218-03, 218-09 | Strict Notifications V2/nested evidence before grants | ? NEEDS HUMAN | The public bypass is closed and policy code is wired, but real positive/negative Apple-purpose certificate behavior is not exercised. |
-| AAPL-03 | 218-01, 218-04, 218-07 | Idempotent convergence, quarantine, repairability | ✓ SATISFIED | Durable intake/wakeup outcomes and the persisted-worker permutation property passed. |
-| AAPL-04 | 218-05, 218-06, 218-10 | Scheduled status/history repair and lifecycle bounds | ✗ BLOCKED | Due scheduling is repaired, but missing expiry yields an unbounded active grant. |
-| AAPL-05 | 218-08 | Honest external management and explicit deferrals | ✓ SATISFIED | Registry guidance, typed deferrals, and Stripe isolation test pass. |
+| AAPL-01 | 01, 04, 09, 11 | Opaque UUID, bind-once lineage, no automatic reassignment | ✓ SATISFIED | Opaque public boundary, row-locked lineage, private conflict outcomes, and repair tests. |
+| AAPL-02 | 02, 03, 09, 11 | Verify signed Apple evidence including certificate time/trust | ✗ BLOCKED | Certificate purpose and identity are covered, but configured certificate-time validation is absent; only first configured root is considered. |
+| AAPL-03 | 01, 04, 07, 11 | Convergent evidence and non-granting quarantine | ✗ BLOCKED | Mapped/concurrent cases pass; verified unmapped evidence cannot reach durable `:unmapped_product` quarantine and blocks reconciliation. |
+| AAPL-04 | 05, 06, 10, 11 | Scheduled reconciliation and bounded lifecycle projection | ✗ BLOCKED | Scheduler/lifecycle/order tests pass, but both the unmatched admission and certificate-time defects prevent reliable historical self-repair. |
+| AAPL-05 | 08 | Honest externally managed Apple support and deferrals | ✓ SATISFIED | Exact typed management guidance, explicit deferrals, and Stripe-isolation test pass. `REQUIREMENTS.md` remains unchecked for this ID despite implementation evidence. |
 
-All five planned AAPL IDs are accounted for; no orphaned Phase 218 requirement IDs were found. The later Phase 219/220 roadmap entries do not specifically cover either remaining Apple gap, so neither is deferred.
+No requirement mapped to Phase 218 is orphaned from the phase-plan frontmatter.
 
 ### Anti-Patterns Found
 
 | File | Line | Pattern | Severity | Impact |
 | --- | --- | --- | --- | --- |
-| `accrue/lib/accrue/entitlements/apple/admission.ex` | 93-97 | Missing expiry defaults to active | 🛑 Blocker | Validly verified but incomplete subscription facts can create access without a time bound. |
-| `accrue/test/accrue/entitlements/apple_observation_tracer_test.exs` | 154-164 | Happy-path fixture omits `expiresDate` while asserting a grant | 🛑 Blocker | The regression suite codifies the unsafe path rather than rejecting it. |
-| `accrue/test/accrue/entitlements/apple_lineage_test.exs` | 16-18 | Obsolete public trust-by-struct expectation | 🛑 Blocker | The phase wildcard test command fails and does not exercise the intended authorized-repair path. |
-| `accrue/test/accrue/entitlements/apple_verifier_test.exs` | 19-59 | Only malformed/invalid-chain fixtures | ⚠️ Warning | The certificate-purpose predicate lacks real-chain behavioral evidence. |
+| `accrue/lib/accrue/entitlements/apple/verifier/production.ex` | 149 | `verification_time` declared but not passed to PKIX validation | 🛑 BLOCKER | Valid delayed Apple evidence can be rejected solely because the host clock is later. |
+| `accrue/lib/accrue/entitlements/apple/admission.ex` | 70 | Verified unmapped product returns error instead of terminal quarantine | 🛑 BLOCKER | Reconciliation can leave a prior grant stale and requires manual repair. |
+| `accrue/lib/accrue/entitlements/apple/verifier/production.ex` | 134, 140 | `[root \| _]` silently ignores additional pinned roots | ⚠️ WARNING | A normal root rotation can reject chains under a valid later configured anchor. |
 
-No unreferenced `TBD`, `FIXME`, or `XXX` markers were found in the Phase 218 implementation and focused test files.
+No unreferenced `TBD`, `FIXME`, or `XXX` markers were found in Phase 218 production and focused test files.
 
 ### Gaps Summary
 
-Plans 218-09 and 218-10 genuinely close the original public-attestation bypass and unscheduled-checkpoint gaps. The phase still fails its safety goal: incomplete Apple subscription evidence is granted indefinitely. Additionally, the phase’s own wildcard verification command is red because the lineage-repair test was not migrated from the deliberately removed public `VerifiedEvidence` interface. The certificate-purpose source change is plausible but remains a human/evidence escalation item until a valid and hostile real-chain corpus runs it.
+The prior re-verification gaps are genuinely closed: active access is now expiry-bounded, the opaque repair regression runs, and a real certificate-purpose corpus is exercised. The phase goal is still not achieved. Certificate time is a required verification dimension but the configuration field is inert, and verified unmatched product evidence cannot reach the existing non-granting quarantine mechanism. Together these defects prevent the promised safe, self-repairing Apple snapshot path.
+
+The review's two critical findings therefore remain material blockers. Its multi-root finding is retained as a warning rather than promoted to a separate goal blocker: it rejects valid evidence during root rotation but does not admit untrusted evidence.
 
 ---
 
-_Verified: 2026-08-03T17:13:57Z_
+_Verified: 2026-08-03T18:06:02Z_
 _Verifier: the agent (gsd-verifier)_
