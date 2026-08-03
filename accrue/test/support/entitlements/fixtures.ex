@@ -129,6 +129,16 @@ defmodule Accrue.Test.EntitlementFixtures do
   def scenario(:all), do: scenarios()
   def scenario(name) when is_atom(name), do: Enum.find(scenarios(), &(&1.name == name))
 
+  @spec apple_host_outcomes() :: [map()]
+  def apple_host_outcomes do
+    [
+      %{name: :management, disposition: :externally_managed, next_action: :manage_in_apple},
+      %{name: :family_sharing, disposition: :deferred, next_action: :review_policy},
+      %{name: :offer_authoring, disposition: :deferred, next_action: :review_policy},
+      %{name: :reconciliation, disposition: :pending, next_action: :retry_reconciliation}
+    ]
+  end
+
   defp scenarios do
     [
       %{

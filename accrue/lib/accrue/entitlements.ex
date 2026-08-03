@@ -48,15 +48,36 @@ defmodule Accrue.Entitlements do
   """
 
   alias Accrue.Entitlements.{Account, PurchaseDecision, Resolver, Snapshot}
-  alias Accrue.Entitlements.Apple.{Intake, Lineage}
+  alias Accrue.Entitlements.Apple.{Intake, Lineage, Reconciliation}
+  alias Accrue.Entitlements.Source.Registry, as: SourceRegistry
 
   @doc "Returns the bounded Apple purchase context for an authenticated entitlement account."
   def apple_purchase_context(%Account{} = account, opts \\ []) do
-    %{
-      app_account_token: account.id,
-      environment: Keyword.get(opts, :environment, :production),
-      bundle_id: Keyword.get(opts, :bundle_id, "com.accrue.app")
-    }
+    apple_span(:purchase_context, account, Keyword.get(opts, :environment, :production), fn ->
+      %{
+        app_account_token: account.id,
+        environment: Keyword.get(opts, :environment, :production),
+        bundle_id: Keyword.get(opts, :bundle_id, "com.accrue.app")
+      }
+    end)
+  end
+
+  @doc "Returns the exact, externally-managed Apple subscription guidance."
+  @spec apple_management() :: {:ok, Accrue.Entitlements.Source.Outcome.t()}
+  def apple_management do
+    SourceRegistry.outcome(:apple, :management)
+  end
+
+  @doc "Returns an explicit policy deferral for Apple Family Sharing."
+  @spec apple_family_sharing() :: {:ok, Intake.Outcome.t()}
+  def apple_family_sharing do
+    {:ok, deferred_apple_outcome(:family_sharing_deferred, :review_policy)}
+  end
+
+  @doc "Returns an explicit policy deferral for Apple offer authoring."
+  @spec apple_offer_authoring() :: {:ok, Intake.Outcome.t()}
+  def apple_offer_authoring do
+    {:ok, deferred_apple_outcome(:offer_authoring_deferred, :review_policy)}
   end
 
   @doc "Admits already-verified Apple evidence through the bounded ownership and projection path."
@@ -67,12 +88,7 @@ defmodule Accrue.Entitlements do
       ) do
     Accrue.Telemetry.span_private(
       [:accrue, :entitlements, :apple, :observe],
-      %{
-        action: :observe,
-        rail: :apple,
-        environment: evidence.environment,
-        account_id: account.id
-      },
+      apple_metadata(:observe, account, evidence.environment),
       fn -> Intake.observe(account, evidence, opts) end
     )
   end
@@ -80,23 +96,58 @@ defmodule Accrue.Entitlements do
   @doc "Repairs an authorized, currently unbound Apple lineage without exposing ownership details."
   @spec repair_apple_lineage(Account.t(), binary(), keyword()) ::
           {:ok, Intake.Outcome.t()} | {:error, :unauthorized | :verification_failed}
-  def repair_apple_lineage(%Account{} = account, lineage_ref, opts \\ []) when is_binary(lineage_ref) do
-    authorize = Keyword.get(opts, :authorize)
+  def repair_apple_lineage(%Account{} = account, lineage_ref, opts \\ [])
+      when is_binary(lineage_ref) do
+    apple_span(:repair, account, Keyword.get(opts, :environment, :production), fn ->
+      authorize = Keyword.get(opts, :authorize)
 
-    if is_function(authorize, 2) and authorize.(account, :repair_apple_lineage) == true do
-      with {:ok, %Intake.VerifiedEvidence{} = evidence} <- reverify_apple_lineage(lineage_ref, opts),
-           true <- evidence.app_account_token == account.id,
-           %Lineage{} = lineage <- Accrue.Repo.repo().get(Lineage, lineage_ref),
-           true <- lineage.environment == evidence.environment and
-                     lineage.original_transaction_id == evidence.original_transaction_id do
-        Intake.repair(account, lineage_ref, evidence, opts)
+      if is_function(authorize, 2) and authorize.(account, :repair_apple_lineage) == true do
+        with {:ok, %Intake.VerifiedEvidence{} = evidence} <-
+               reverify_apple_lineage(lineage_ref, opts),
+             true <- evidence.app_account_token == account.id,
+             %Lineage{} = lineage <- Accrue.Repo.repo().get(Lineage, lineage_ref),
+             true <-
+               lineage.environment == evidence.environment and
+                 lineage.original_transaction_id == evidence.original_transaction_id do
+          Intake.repair(account, lineage_ref, evidence, opts)
+        else
+          false -> {:error, :verification_failed}
+          _ -> {:error, :verification_failed}
+        end
       else
-        false -> {:error, :verification_failed}
-        _ -> {:error, :verification_failed}
+        {:error, :unauthorized}
       end
-    else
-      {:error, :unauthorized}
-    end
+    end)
+  end
+
+  @doc "Queues bounded Apple lineage reconciliation without exposing provider history state."
+  @spec reconcile_apple_lineage(Account.t(), binary(), keyword()) ::
+          {:ok, Intake.Outcome.t()} | {:error, :unauthorized | :reconciliation_unavailable}
+  def reconcile_apple_lineage(%Account{} = account, lineage_ref, opts \\ [])
+      when is_binary(lineage_ref) do
+    apple_span(:reconcile, account, Keyword.get(opts, :environment, :production), fn ->
+      authorize = Keyword.get(opts, :authorize)
+      repo = Keyword.get(opts, :repo, Accrue.Repo.repo())
+
+      with true <-
+             is_function(authorize, 2) and authorize.(account, :reconcile_apple_lineage) == true,
+           %Lineage{account_id: account_id, environment: environment}
+           when account_id == account.id <-
+             repo.get(Lineage, lineage_ref),
+           {:ok, _} <-
+             Reconciliation.enqueue(lineage_ref, environment, :host_requested, repo: repo) do
+        {:ok,
+         %Intake.Outcome{
+           disposition: :pending,
+           reason: :reconciliation_requested,
+           next_action: :retry_reconciliation
+         }}
+      else
+        false -> {:error, :unauthorized}
+        nil -> {:error, :unauthorized}
+        {:error, _} -> {:error, :reconciliation_unavailable}
+      end
+    end)
   end
 
   defp reverify_apple_lineage(lineage_ref, opts) do
@@ -105,6 +156,27 @@ defmodule Accrue.Entitlements do
       callback when is_function(callback, 0) -> callback.()
       _ -> {:error, :verification_failed}
     end
+  end
+
+  defp deferred_apple_outcome(reason, next_action) do
+    %Intake.Outcome{disposition: :deferred, reason: reason, next_action: next_action}
+  end
+
+  defp apple_span(action, account, environment, fun) do
+    Accrue.Telemetry.span_private(
+      [:accrue, :entitlements, :apple, action],
+      apple_metadata(action, account, environment),
+      fun
+    )
+  end
+
+  defp apple_metadata(action, %Account{id: account_id}, environment) do
+    %{
+      action: action,
+      rail: :apple,
+      environment: environment,
+      account_correlation: opaque_account_id(account_id)
+    }
   end
 
   @doc "Returns a typed, revision-bound purchase preflight decision."
