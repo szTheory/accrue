@@ -5,16 +5,16 @@ milestone_name: Account-Scoped Multi-Rail & Offline Entitlements
 current_phase: 218
 current_phase_name: apple-observation-and-repair
 status: executing
-stopped_at: Completed 218-15-PLAN.md
-last_updated: "2026-08-03T21:01:39.449Z"
+stopped_at: Completed 218-16-PLAN.md
+last_updated: "2026-08-03T21:03:11.724Z"
 last_activity: 2026-08-03
 last_activity_desc: Phase 218 execution started
 progress:
   total_phases: 6
-  completed_phases: 3
+  completed_phases: 4
   total_plans: 42
-  completed_plans: 41
-  percent: 50
+  completed_plans: 42
+  percent: 67
 ---
 
 # Project State
@@ -30,7 +30,7 @@ See: `.planning/PROJECT.md` (updated 2026-08-01 after completing Phase 215)
 ## Current Position
 
 Phase: 218 (apple-observation-and-repair) — EXECUTING
-Plan: 2 of 16
+Plan: 3 of 16
 Status: Ready to execute
 Last activity: 2026-08-03 — Phase 218 execution started
 
@@ -411,6 +411,7 @@ Coverage: 22/22 v1.51 requirements mapped (each REQ-ID → exactly one phase). D
 | Phase 218 P13 | 6m | 1 tasks | 2 files |
 | Phase 218-apple-observation-and-repair P14 | 6min | 1 tasks | 3 files |
 | Phase 218-apple-observation-and-repair P15 | 5min | 2 tasks | 5 files |
+| Phase 218 P16 | 24 min | 1 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -808,6 +809,7 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - [Phase ?]: Notification application identity is validated only from the authenticated outer data map.
 - [Phase ?]: Apple Notifications V2 rejects missing, empty, or malformed raw-body capture with retryable 503 before verification or persistence.
 - [Phase ?]: Apple JWS negative tests flip decoded ES256 signature bytes while preserving protected header and payload segments.
+- [Phase ?]: Reconciliation locks the local environment-qualified lineage and sends only its original transaction ID to Apple endpoints.
 
 ### Pending Todos
 
@@ -959,8 +961,8 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 
 ## Session Continuity
 
-Last session: 2026-08-03T21:01:39.432Z
-Stopped at: Completed 218-15-PLAN.md
+Last session: 2026-08-03T21:03:11.707Z
+Stopped at: Completed 218-16-PLAN.md
 Resume file: None
 
 ## Operator Next Steps
