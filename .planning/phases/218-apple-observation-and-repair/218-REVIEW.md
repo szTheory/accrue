@@ -1,6 +1,6 @@
 ---
 phase: 218-apple-observation-and-repair
-reviewed: 2026-08-03T18:02:21Z
+reviewed: 2026-08-03T19:02:30Z
 depth: standard
 files_reviewed: 26
 files_reviewed_list:
@@ -31,60 +31,50 @@ files_reviewed_list:
   - accrue/test/property/apple_lineage_property_test.exs
   - accrue/test/support/entitlements/fixtures.ex
 findings:
-  critical: 2
-  warning: 1
+  critical: 1
+  warning: 0
   info: 0
-  total: 3
+  total: 1
 status: issues_found
 ---
 
 # Phase 218: Code Review Report
 
-**Reviewed:** 2026-08-03T18:02:21Z
+**Reviewed:** 2026-08-03T19:02:30Z
 **Depth:** standard
 **Files Reviewed:** 26
 **Status:** issues_found
 
 ## Summary
 
-The Apple verifier, admission, intake, lineage, reconciliation, projection, persistence migrations, and focused tests were reviewed. Verified but unmapped products currently abort repair instead of being quarantined, leaving prior grants unreconciled. Certificate validation also ignores its declared verification-time control and only accepts the first configured root.
+The Apple admission, reconciliation, notification, verifier, persistence, and associated test paths were reviewed. The production notification verifier validates the wrong payload level for Apple Server Notifications V2, so genuine Apple notifications are rejected before they can trigger reconciliation. The included tests use a fixture shape that masks this production incompatibility.
+
+## Narrative Findings (AI reviewer)
 
 ## Critical Issues
 
-### CR-01: An unmapped Apple product stalls reconciliation and preserves stale grants
+### CR-01: Genuine Apple V2 notifications are rejected as having the wrong bundle/environment
 
-**Classification:** BLOCKER
+**File:** `accrue/lib/accrue/entitlements/apple/verifier/production.ex:16-22`
 
-**File:** `accrue/lib/accrue/entitlements/apple/admission.ex:59-90`
+**Issue:** `verify_notification/2` first calls `verify/2` on the outer signed notification. `verify/2` unconditionally invokes `validate_claims/2` (lines 52 and 396-405), which reads `bundleId`, `environment`, and `appAppleId` from the top-level payload. In Apple Server Notifications V2 those app-identifying claims are inside the outer payload's `data` object; the outer level contains notification metadata such as `notificationType`, `notificationUUID`, and `signedDate`. Consequently valid production notifications fail at `payload["bundleId"]` with `:wrong_bundle` (or at environment/app validation), return HTTP 200 after quarantine, and never create the reconciliation wakeup. This loses the notification-driven repair signal until a later sweep catches it. The tests' generated outer notification payload incorrectly places these claims at top level, so they do not exercise the real wire format.
 
-**Issue:** The mapping guard at line 70 rejects an otherwise verified transaction whenever the product is not in `product_map`, returning `{:error, :invalid_payload}`. In the worker path, `Reconciliation.Admission.admit_transaction/5` propagates that error and `Reconciliation.reconcile_page/9` schedules retries (lines 372-395) rather than recording the intended `:unmapped_product` terminal intake. After the retry limit it marks the checkpoint `:needs_repair`; it never processes later status/history entries that could retract an existing grant. A customer who buys an unconfigured product can therefore retain stale access until manual intervention.
+**Fix:** Separate signature/chain verification from claim validation, then validate the notification's `data` map while retaining the top-level notification metadata. For example:
 
-**Fix:** Admit verified evidence with `logical_plan: nil`, then let `Intake.do_observe/4` take its existing `nil -> persist_terminal(..., :unmapped_product)` branch. The reconciliation admission path will then treat that terminal intake as a successful, non-granting observation and continue through the rest of the provider response. Add an integration test with a previously granted lineage followed by an unmapped transaction and a revocation.
+```elixir
+with {:ok, payload} <- verify_signed(jws, config),
+     %{} = data <- payload["data"],
+     :ok <- validate_claims(data, config),
+     {:ok, transaction_jws} <- nested(payload, "signedTransactionInfo"),
+     ... do
+  {:ok, %{notification: facts(payload), transaction: facts(transaction), renewal: facts(renewal)}}
+end
+```
 
-### CR-02: Certificate validation ignores the configured verification time
-
-**Classification:** BLOCKER
-
-**File:** `accrue/lib/accrue/entitlements/apple/verifier/production.ex:143-149`
-
-**Issue:** `Verifier.Config` declares `verification_time` (see `verifier.ex:18-22`) and the nearby comment promises configured-time validation, but `pkix_path_validation/3` is always called with `[]`. OTP therefore evaluates certificate validity at the host's current clock. Historic signed transactions become unverifiable when Apple's short-lived signing certificate expires, so a normal delayed reconciliation cannot repair or revoke state. The configured field has no effect.
-
-**Fix:** Implement a `verify_fun` for `pkix_path_validation/3` that evaluates certificate validity against an explicitly validated `config.verification_time` (or a verified signed timestamp, if that is the intended policy), while retaining all normal path and purpose checks. Cover both a certificate expired now but valid at the supplied verification time and a certificate invalid at that time.
-
-## Warnings
-
-### WR-01: Additional pinned roots are silently ignored
-
-**Classification:** WARNING
-
-**File:** `accrue/lib/accrue/entitlements/apple/verifier/production.ex:104-109,134-141`
-
-**Issue:** The configuration accepts `roots` as a list, but `configured_root/1` matches `[root | _]` and discards every later root. During a normal Apple root rotation, hosts can configure both anchors yet all valid chains under the new root are rejected until the old root is removed/reordered.
-
-**Fix:** Decode every configured root and attempt validation against each pinned anchor, accepting only if one complete path validates; otherwise return the closed certificate error. Add a test where the valid root is the second configured entry.
+Make `verify_transaction/2` and `verify_renewal/2` continue to validate their own top-level claims, and add an integration fixture/test matching Apple's V2 outer `data` envelope.
 
 ---
 
-_Reviewed: 2026-08-03T18:02:21Z_
+_Reviewed: 2026-08-03T19:02:30Z_
 _Reviewer: the agent (gsd-code-reviewer)_
 _Depth: standard_
