@@ -196,9 +196,13 @@ Plans:
   4. Scheduled status and history reconciliation repairs missed notifications and accurately represents active, grace, retry, expiry, refund, and revocation boundaries.
   5. Hosts receive honest externally-managed Apple subscription guidance, with Family Sharing and offer authoring explicitly deferred.
 
-**Plans**: 13/13 plans executed
+**Plans**: 13/14 plans executed
 
 Plans:
+
+**Wave 11** *(blocked on 218-12 and 218-13 completion)*
+
+- [ ] 218-14-PLAN.md — Repair Production Notifications V2 envelope validation and prove durable duplicate/concurrent wakeup coalescing.
 
 **Wave 10** *(blocked on Wave 9 completion)*
 
