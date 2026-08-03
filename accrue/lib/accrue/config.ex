@@ -571,6 +571,19 @@ defmodule Accrue.Config do
               "entitled?/has_active_plan? decisions in v1.x (local mapping stays " <>
               "canonical). The enum (not a boolean) reserves room for future additive " <>
               "modes without a breaking config change."
+        ],
+        multi_rail: [
+          type: :keyword_list,
+          default: [],
+          keys: [
+            mode: [type: {:in, [:disabled, :shadow, :enabled]}, default: :disabled],
+            cohort: [type: :any, default: nil],
+            clean_window: [type: :any, default: nil]
+          ],
+          doc:
+            "Compatibility authority lane for canonical entitlement projection. " <>
+              "Omit it (or use :disabled) to retain LocalMap authority; :shadow and " <>
+              ":enabled require an explicit approved-account/MFA cohort."
         ]
       ],
       doc:
@@ -1204,6 +1217,14 @@ defmodule Accrue.Config do
     |> Keyword.put_new(:deny_path, "/")
   end
 
+  @doc "Returns the validated compatibility authority configuration."
+  @spec multi_rail() :: keyword()
+  def multi_rail do
+    entitlements()
+    |> Keyword.get(:multi_rail, [])
+    |> normalize_multi_rail!()
+  end
+
   @doc "Returns configured entitlement rails, or [] when a host uses the legacy processor path."
   @spec rails() :: keyword()
   def rails, do: get!(:rails)
@@ -1232,9 +1253,50 @@ defmodule Accrue.Config do
     _ = validate_entitlements_price_ids!(opts)
     _ = validate_rails!(opts)
     _ = validate_entitlement_product_catalog!(opts)
+
+    _ =
+      opts
+      |> Keyword.get(:entitlements, [])
+      |> Keyword.get(:multi_rail, [])
+      |> normalize_multi_rail!()
+
     _ = validate_dunning_campaign_grace!(opts)
 
     :ok
+  end
+
+  @doc false
+  def normalize_multi_rail!(config) when is_list(config) do
+    mode = Keyword.get(config, :mode, :disabled)
+    cohort = Keyword.get(config, :cohort)
+    clean_window = Keyword.get(config, :clean_window)
+
+    unless mode in [:disabled, :shadow, :enabled] do
+      raise Accrue.ConfigError,
+        key: :multi_rail,
+        message: "mode must be :disabled, :shadow, or :enabled"
+    end
+
+    if mode in [:shadow, :enabled] and is_nil(cohort) do
+      raise Accrue.ConfigError, key: :multi_rail, message: "#{mode} requires an explicit cohort"
+    end
+
+    validate_multi_rail_cohort!(cohort)
+    %{mode: mode, cohort: cohort, clean_window: clean_window}
+  end
+
+  defp validate_multi_rail_cohort!(nil), do: :ok
+
+  defp validate_multi_rail_cohort!({:accounts, accounts})
+       when is_list(accounts) and accounts != [], do: :ok
+
+  defp validate_multi_rail_cohort!({module, function, extra_args})
+       when is_atom(module) and is_atom(function) and is_list(extra_args), do: :ok
+
+  defp validate_multi_rail_cohort!(_cohort) do
+    raise Accrue.ConfigError,
+      key: :multi_rail,
+      message: "cohort must be {:accounts, [opaque_account_id]} or {module, function, extra_args}"
   end
 
   defp validate_rails!(opts) do

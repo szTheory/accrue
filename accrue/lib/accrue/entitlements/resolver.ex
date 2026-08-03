@@ -73,7 +73,12 @@ defmodule Accrue.Entitlements.Resolver do
   @doc false
   @spec __impl__() :: module()
   def __impl__ do
-    Application.get_env(:accrue, :entitlements, [])
-    |> Keyword.get(:resolver, Accrue.Entitlements.Resolver.LocalMap)
+    config = Application.get_env(:accrue, :entitlements, [])
+
+    if Keyword.has_key?(config, :multi_rail) do
+      Accrue.Entitlements.Compatibility
+    else
+      Keyword.get(config, :resolver, Accrue.Entitlements.Resolver.LocalMap)
+    end
   end
 end
