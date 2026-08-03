@@ -5,8 +5,8 @@ milestone_name: Account-Scoped Multi-Rail & Offline Entitlements
 current_phase: 219
 current_phase_name: Offline study contract
 status: executing
-stopped_at: Completed 218-16-PLAN.md
-last_updated: "2026-08-03T21:19:51.901Z"
+stopped_at: Phase 219 context gathered
+last_updated: "2026-08-03T21:40:42.076Z"
 last_activity: 2026-08-03
 last_activity_desc: Phase 218 complete, transitioned to Phase 219
 progress:
@@ -961,9 +961,9 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 
 ## Session Continuity
 
-Last session: 2026-08-03T21:03:11.707Z
-Stopped at: Completed 218-16-PLAN.md
-Resume file: None
+Last session: 2026-08-03T21:40:42.043Z
+Stopped at: Phase 219 context gathered
+Resume file: .planning/phases/219-offline-study-contract/219-CONTEXT.md
 
 ## Operator Next Steps
 
