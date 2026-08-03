@@ -264,11 +264,24 @@ Plans:
 **Plans**: 5 plans
 
 Plans:
+**Wave 1**
 
 - [ ] 219-01-PLAN.md — Trace strict public-key-only ES256 verification and the host key-provider/JWKS boundary.
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
 - [ ] 219-02-PLAN.md — Lock the four-state, no-72-hour, stale-continuity, guidance, and legacy-gate contract.
+
+**Wave 3** *(blocked on Wave 2 completion)*
+
 - [ ] 219-03-PLAN.md — Persist and apply replay-safe device PoP, challenge, and issuance/high-water state.
+
+**Wave 4** *(blocked on Wave 3 completion)*
+
 - [ ] 219-04-PLAN.md — Reconcile due sources and issue current allow/deny proof under account/device locks.
+
+**Wave 5** *(blocked on Wave 4 completion)*
+
 - [ ] 219-05-PLAN.md — Prove full Elixir/Swift corpus parity and authenticated atomic cache replacement.
 
 ### Phase 220: First-adopter proof and release gates
