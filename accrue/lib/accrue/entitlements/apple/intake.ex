@@ -5,7 +5,7 @@ defmodule Accrue.Entitlements.Apple.Intake do
   import Ecto.Query
 
   alias Accrue.Entitlements.{Observation, Projector, Snapshot}
-  alias Accrue.Entitlements.Apple.{Lineage, Reconciliation, ReconciliationWakeup}
+  alias Accrue.Entitlements.Apple.{Lineage, Reconciliation}
   alias Accrue.Events
 
   @terminal_reasons [
@@ -271,7 +271,7 @@ defmodule Accrue.Entitlements.Apple.Intake do
 
       {:inserted, _} ->
         {:ok, _} =
-          ReconciliationWakeup.enqueue_in_transaction(
+          Reconciliation.enqueue_in_transaction(
             repo,
             lineage.id,
             evidence.environment,
@@ -325,7 +325,7 @@ defmodule Accrue.Entitlements.Apple.Intake do
         record_repair_audit!(account, outcome, opts)
 
         {:ok, _} =
-          ReconciliationWakeup.enqueue_in_transaction(
+          Reconciliation.enqueue_in_transaction(
             repo,
             lineage.id,
             evidence.environment,
@@ -352,7 +352,7 @@ defmodule Accrue.Entitlements.Apple.Intake do
         {:ok, snapshot} = normalize_projection(result, repo, account)
 
         {:ok, _} =
-          ReconciliationWakeup.enqueue_in_transaction(
+          Reconciliation.enqueue_in_transaction(
             repo,
             lineage.id,
             evidence.environment,

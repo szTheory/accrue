@@ -156,8 +156,17 @@ defmodule Accrue.Entitlements.Apple.Reconciliation do
     repo = Keyword.get(opts, :repo, Accrue.Repo.repo())
 
     repo.transact(fn ->
-      ReconciliationWakeup.enqueue_in_transaction(repo, lineage_id, environment, reason)
+      enqueue_in_transaction(repo, lineage_id, environment, reason)
     end)
+  end
+
+  @doc false
+  def enqueue_in_transaction(repo, lineage_id, environment, reason) do
+    with {:ok, wakeup} <-
+           ReconciliationWakeup.enqueue_in_transaction(repo, lineage_id, environment, reason),
+         {:ok, _job} <- Oban.insert(Accrue.Entitlements.Apple.ReconciliationWakeupWorker.new(%{})) do
+      {:ok, wakeup}
+    end
   end
 
   # A wakeup is deleted only after its job has been inserted in the same database transaction.
