@@ -311,7 +311,9 @@ defmodule Accrue.Entitlements.AppleReconciliationTest do
     assert :ok = perform_job(ReconcileWorker, retry_job.args)
     assert_receive {:resumed_from, "resume-cursor"}
 
-    assert %Checkpoint{id: ^checkpoint.id, run_state: :idle, pending_revision: nil} =
+    checkpoint_id = checkpoint.id
+
+    assert %Checkpoint{id: ^checkpoint_id, run_state: :idle, pending_revision: nil} =
              Accrue.TestRepo.get!(Checkpoint, checkpoint.id)
   end
 
