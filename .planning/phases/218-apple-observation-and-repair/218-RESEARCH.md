@@ -326,17 +326,15 @@ The normalizer supplies a qualified observation; it never calls `Accrue.Billing`
 | A1 | `app_store_server_library` can satisfy the private verifier/client adapter gates. | Standard Stack | A production dependency could be unsafe, poorly supervised, or API-incompatible; retain the fallback and human gate. |
 | A2 | A Finch + JOSE/`:public_key` fallback can implement all required Apple certificate policy safely within phase scope. | Alternatives / Don’t Hand-Roll | Underestimated PKI/OCSP complexity could make a custom adapter unsafe; require independent corpus proof. |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
-1. **Does `app_store_server_library` pass the locked adapter-admission gate?**
-   - What we know: Hex lists 2.2.0 and it is low-adoption. [VERIFIED: Hex registry]
-   - What’s unclear: Exact hostile-chain, OCSP, supervision, and privacy behavior against Accrue’s corpus.
-   - Recommendation: Make this the first bounded plan task; retain no package installation until its evidence passes human verification.
+1. **Candidate package admission — resolved conditionally by Plans 218-02/03.**
+   - `app_store_server_library` 2.2.0 remains a SUS, low-adoption candidate and is not pre-admitted. Plan 218-02 supplies the non-auto-approvable identity/legitimacy gate; Plan 218-03 evaluates every hostile-chain, independent-verification, API-shape, supervision, privacy, license, and dependency gate against the fixed production contract.
+   - Admission is permitted only when every gate is proven. A rejected, failed, or unproven gate makes the complete Accrue-owned Jason plus OTP `:public_key` fallback mandatory, with `mix.exs` and `mix.lock` byte-unchanged. This conditional decision is executable and does not leave adapter selection open to executor discretion.
 
-2. **Which Apple API credentials/trust roots will the first host configure?**
-   - What we know: Apple API requests and verification require app/environment-specific configuration. [CITED: https://developer.apple.com/documentation/appstoreserverapi]
-   - What’s unclear: The host-provided production identifiers, keys, and root-rotation process.
-   - Recommendation: Implement strict config validation and Fake-first tests without committing credentials; document a host configuration checkpoint.
+2. **Host identifiers, credentials, and trust roots — resolved as validated runtime configuration.**
+   - `APPLE_ISSUER_ID`, `APPLE_KEY_ID`, `APPLE_PRIVATE_KEY`, `APPLE_BUNDLE_ID`, production `APPLE_APP_ID`, and `APPLE_ROOT_CERT_PATH` are host-supplied runtime configuration, separate from offline-proof keys. The typed production verifier/client config validates required presence, environment-specific rules, root parsing, and bounded versions before any provider request or verification.
+   - No credentials or host-specific roots are committed. Deterministic Fake and golden/hostile fixtures remain the merge-blocking proof; live Apple sandbox/provider fidelity is advisory until a host supplies runtime configuration.
 
 ## Environment Availability
 

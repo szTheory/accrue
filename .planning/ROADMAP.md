@@ -202,7 +202,7 @@ Plans:
 
 **Wave 1**
 
-- [ ] 218-01-PLAN.md — Trace verified Apple purchase evidence through bind-once lineage to a canonical snapshot.
+- [ ] 218-01-PLAN.md — Trace verified Apple purchase evidence through bind-once lineage, canonical projection, and a rollback-safe durable reconciliation wakeup.
 - [ ] 218-02-PLAN.md — Verify the candidate Apple server package identity before any installation.
 
 **Wave 2** *(blocked on 218-01 and 218-02 completion)*
@@ -216,7 +216,7 @@ Plans:
 
 **Wave 4** *(blocked on 218-04 completion)*
 
-- [ ] 218-05-PLAN.md — Reconcile authoritative status and crash-safe ascending history.
+- [ ] 218-05-PLAN.md — Drain durable wakeups into host-owned repair and reconcile authoritative status plus crash-safe ascending history.
 
 **Wave 5** *(blocked on 218-05 completion)*
 

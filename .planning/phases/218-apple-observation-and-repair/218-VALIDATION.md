@@ -38,7 +38,7 @@ created: 2026-08-02
 
 | Task ID | Plan | Wave | Requirement | Threat Ref | Secure Behavior | Test Type | Automated Command | File Exists | Status |
 |---------|------|------|-------------|------------|-----------------|-----------|-------------------|-------------|--------|
-| 218-01-T1 | 218-01 | 1 | AAPL-01 | Atomicity/failure rollback | Bind, Observation, grant/revision, audits, Projector follow-up, and reconciliation wakeup commit or roll back together | Repo integration + failure injection | `cd accrue && mix test test/accrue/entitlements/apple_observation_tracer_test.exs test/accrue/entitlements/projector_test.exs` | ✅ planned TDD | ⬜ pending |
+| 218-01-T1 | 218-01 | 1 | AAPL-01 | Atomicity/failure rollback | Bind, Observation, grant/revision, audits, Projector follow-up job, and concrete durable reconciliation-wakeup row commit or roll back together | Repo integration + failure injection | `cd accrue && mix test test/accrue/entitlements/apple_observation_tracer_test.exs test/accrue/entitlements/projector_test.exs` | ✅ planned TDD | ⬜ pending |
 | 218-04-T1 | 218-04 | 3 | AAPL-01 | Bind/reassignment | Verified UUID binds once; races and conflicts remain non-granting | integration + property | `cd accrue && mix test test/accrue/entitlements/apple_lineage_test.exs test/property/apple_lineage_property_test.exs` | ✅ planned TDD | ⬜ pending |
 | 218-03-T2 | 218-03 | 2 | AAPL-02 | Forgery/algorithm confusion | Bad algorithm, root, purpose, time, bundle, environment, or app identity is rejected | unit corpus | `cd accrue && mix test test/accrue/entitlements/apple_verifier_test.exs` | ✅ planned TDD | ⬜ pending |
 | 218-07-T1 | 218-07 | 3 | AAPL-03 | Premature acknowledgement/flood | HTTP success follows durable disposition; rate/size rejection is storage-free | Plug integration | `cd accrue && mix test test/accrue/entitlements/apple_notification_test.exs` | ✅ planned TDD | ⬜ pending |
@@ -58,7 +58,7 @@ created: 2026-08-02
 - [x] `accrue/test/accrue/entitlements/apple_intake_test.exs` — created first by 218-04-T2 for AAPL-03.
 - [x] `accrue/test/property/apple_convergence_property_test.exs` — created first by 218-04-T2 for AAPL-03.
 - [x] `accrue/test/accrue/entitlements/apple_reconciliation_test.exs` — created first by 218-05-T1 and expanded through 218-06-T2 for AAPL-04.
-- [x] `accrue/test/accrue/entitlements/apple_source_isolation_test.exs` — created first by 218-06-T3 for AAPL-05.
+- [x] `accrue/test/accrue/entitlements/apple_source_isolation_test.exs` — created first by tracer-first TDD task 218-08-T1 for AAPL-05.
 
 ---
 
