@@ -4,7 +4,8 @@ defmodule Accrue.Entitlements.CompatibilityTest do
   import Ecto.Query
 
   alias Accrue.Entitlements.Compatibility
-  alias Accrue.Entitlements.{Account, Grant, Observation}
+  alias Accrue.Billing.EntitlementSummary
+  alias Accrue.Entitlements.{Account, Grant, Observation, Projector}
   alias Accrue.Events.Event
   alias Accrue.Entitlements.Resolver.{Canonical, LocalMap}
 
@@ -66,6 +67,13 @@ defmodule Accrue.Entitlements.CompatibilityTest do
                started_at: start,
                ended_at: ending,
                comparison_count: 0
+             )
+
+    assert {:error, :invalid_clean_window} =
+             Compatibility.validate_clean_window(
+               started_at: ending,
+               ended_at: start,
+               comparison_count: 1
              )
 
     assert {:ok, %{started_at: ^start, ended_at: ^ending, comparison_count: 1}} =
@@ -277,8 +285,20 @@ defmodule Accrue.Entitlements.CompatibilityTest do
     assert {:ok, Canonical, %{authority: :canonical}} =
              Compatibility.authority(billable, account_id: account_id)
 
-    # The advisory cache is intentionally not wired into authority, grants, or parity.
-    assert {:ok, %{disposition: :match}} = Compatibility.compare(billable, account_id: account_id)
+    local_before = LocalMap.resolve(billable, account_id: account_id)
+    canonical_before = Canonical.resolve(billable, account_id: account_id)
+    parity_before = Compatibility.compare(billable, account_id: account_id)
+    grants_before = canonical_bytes(account_id)
+    customer = Accrue.TestRepo.get_by!(Accrue.Billing.Customer, owner_id: billable.id)
+    summary = insert_conflicting_summary!(customer)
+
+    assert LocalMap.resolve(billable, account_id: account_id) == local_before
+    assert Canonical.resolve(billable, account_id: account_id) == canonical_before
+    assert Compatibility.compare(billable, account_id: account_id) == parity_before
+    assert canonical_bytes(account_id) == grants_before
+
+    assert :erlang.term_to_binary(Accrue.TestRepo.get!(EntitlementSummary, summary.id)) ==
+             :erlang.term_to_binary(summary)
   end
 
   test "unmapped blockers are stable and privacy-safe, while rollback persists only authority transition" do
@@ -305,7 +325,33 @@ defmodule Accrue.Entitlements.CompatibilityTest do
              &(&1.reason == :unmapped_legacy)
            )
 
+    {ambiguous_billable, ambiguous_account_id} = compatible_billable!()
+    put_enabled_config(:shadow, ambiguous_account_id)
+
+    for _ <- 1..2 do
+      assert {:ok, %{blockers: [:projection_ambiguous]}} =
+               Compatibility.compare(ambiguous_billable,
+                 account_id: ambiguous_account_id,
+                 forced_blockers: [:projection_ambiguous]
+               )
+    end
+
+    put_enabled_config(:enabled, ambiguous_account_id)
+
+    assert {:error, :parity_blocked} =
+             Compatibility.enable(ambiguous_billable, account_id: ambiguous_account_id)
+
+    assert Enum.all?(
+             Compatibility.audit_entries(ambiguous_account_id, action: :compare),
+             &(&1.reason == :projection_ambiguous)
+           )
+
+    Enum.each(Compatibility.audit_entries(ambiguous_account_id, action: :compare), fn audit ->
+      refute_recursive_private(audit, privacy_seed())
+    end)
+
     before = canonical_bytes(account_id)
+    audits_before = Compatibility.audit_entries(account_id)
     assert :ok = Compatibility.rollback(account_id: account_id, actor_id: "adopter-secret")
 
     assert {:ok, LocalMap, %{authority: :local_map}} =
@@ -316,6 +362,16 @@ defmodule Accrue.Entitlements.CompatibilityTest do
     [rollback] = Compatibility.audit_entries(account_id, action: :rollback)
     assert rollback.disposition == :rolled_back
     refute_recursive_private(rollback, privacy_seed())
+
+    assert Enum.take(Compatibility.audit_entries(account_id), length(audits_before)) ==
+             audits_before
+
+    observation = repair_observation!(account_id)
+    assert {:noop, :no_material_change} = Projector.project(observation)
+    assert Accrue.TestRepo.get!(Observation, observation.id).state == :qualified
+
+    assert {:ok, LocalMap, %{authority: :local_map}} =
+             Compatibility.authority(billable, account_id: account_id)
   end
 
   test "concurrent duplicate backfills converge without provider calls or legacy/advisory mutation" do
@@ -334,11 +390,24 @@ defmodule Accrue.Entitlements.CompatibilityTest do
       |> Accrue.Billing.Subscription.force_status_changeset(%{processor: "stripe"})
       |> Accrue.TestRepo.update()
 
+    summary = insert_conflicting_summary!(customer)
+
     before =
       :erlang.term_to_binary({
         Accrue.TestRepo.get!(Accrue.Billing.Customer, customer.id),
-        Accrue.TestRepo.get!(Accrue.Billing.Subscription, subscription.id)
+        Accrue.TestRepo.get!(Accrue.Billing.Subscription, subscription.id),
+        Accrue.TestRepo.get!(EntitlementSummary, summary.id)
       })
+
+    fake_counts =
+      for operation <- [
+            :create_customer,
+            :create_subscription,
+            :update_subscription,
+            :list_active_entitlements
+          ],
+          into: %{},
+          do: {operation, Accrue.Processor.Fake.call_count(operation)}
 
     results =
       1..2
@@ -354,8 +423,13 @@ defmodule Accrue.Entitlements.CompatibilityTest do
 
     assert :erlang.term_to_binary(
              {Accrue.TestRepo.get!(Accrue.Billing.Customer, customer.id),
-              Accrue.TestRepo.get!(Accrue.Billing.Subscription, subscription.id)}
+              Accrue.TestRepo.get!(Accrue.Billing.Subscription, subscription.id),
+              Accrue.TestRepo.get!(EntitlementSummary, summary.id)}
            ) == before
+
+    Enum.each(fake_counts, fn {operation, count} ->
+      assert Accrue.Processor.Fake.call_count(operation) == count
+    end)
   end
 
   def always_false(_billable), do: false
@@ -420,6 +494,46 @@ defmodule Accrue.Entitlements.CompatibilityTest do
           )
       ]
     )
+  end
+
+  defp insert_conflicting_summary!(customer) do
+    now = DateTime.utc_now()
+
+    %EntitlementSummary{}
+    |> EntitlementSummary.force_changeset(%{
+      customer_id: customer.id,
+      stripe_customer_id: customer.processor_id,
+      livemode: false,
+      entitlement_count: 1,
+      truncated: false,
+      data: %{"entitlements" => %{"data" => [%{"lookup_key" => "conflicting-advisory-private"}]}},
+      synced_at: now,
+      last_stripe_event_ts: now,
+      last_stripe_event_id: "advisory-conflict-#{System.unique_integer([:positive])}"
+    })
+    |> Accrue.TestRepo.insert!()
+  end
+
+  defp repair_observation!(account_id) do
+    {:ok, observation} =
+      Observation.insert_idempotently(Accrue.TestRepo, %{
+        account_id: account_id,
+        rail: :stripe,
+        environment: :production,
+        provider_event_id: "compatibility-repair-#{System.unique_integer([:positive])}",
+        provider_transaction_id: "compatibility-repair-txn-#{System.unique_integer([:positive])}",
+        kind: "grant",
+        provider_lineage_id: "compatibility-repair-lineage",
+        provider_product_id: "price_compat_pro",
+        provider_order: 1,
+        observed_at: DateTime.utc_now(),
+        state: :qualified,
+        retry_count: 0,
+        metadata: %{"source" => "fake_observer"},
+        evidence_digest: String.duplicate("b", 64)
+      })
+
+    observation
   end
 
   defp canonical_bytes(account_id) do

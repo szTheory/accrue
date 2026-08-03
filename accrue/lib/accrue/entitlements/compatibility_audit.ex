@@ -17,6 +17,7 @@ defmodule Accrue.Entitlements.CompatibilityAudit do
       values: [
         :none,
         :unmapped_legacy,
+        :projection_ambiguous,
         :normalized_mismatch,
         :comparison_unavailable,
         :clean_window_blocked,
