@@ -7,6 +7,8 @@ defmodule Accrue.Entitlements.Apple.Verifier.Production do
 
   @p256_order 0xFFFFFFFF00000000FFFFFFFFFFFFFFFFBCE6FAADA7179E84F3B9CAC2FC632551
   @allowed_header_keys MapSet.new(["alg", "x5c", "typ"])
+  @apple_leaf_purpose {1, 2, 840, 113_635, 100, 6, 11, 1}
+  @apple_intermediate_purpose {1, 2, 840, 113_635, 100, 6, 2, 1}
   @claim_keys ~w(bundleId environment appAppleId originalTransactionId transactionId productId appAccountToken signedDate expiresDate notificationUUID)
 
   @impl true
@@ -151,11 +153,17 @@ defmodule Accrue.Entitlements.Apple.Verifier.Production do
     _ -> {:error, :invalid_chain}
   end
 
-  defp validate_leaf_purpose([leaf | _]) do
-    # A leaf must carry an EC public key capable of digital signatures. OTP path
-    # validation rejects CA/constraint misuse before this key is used.
-    case subject_public_key(leaf) do
-      {:ECPoint, _} -> :ok
+  defp validate_leaf_purpose([leaf, intermediate, _root]) do
+    # Apple's server libraries require these exact private-purpose extensions in
+    # addition to ordinary PKIX path validation.  Do this before using the leaf
+    # key, so a valid EC certificate issued for another Apple purpose is closed.
+    with {:ECPoint, _} <- subject_public_key(leaf),
+         true <- extension?(leaf, @apple_leaf_purpose),
+         true <- extension?(intermediate, @apple_intermediate_purpose),
+         true <- non_ca_leaf?(leaf),
+         true <- digital_signature?(leaf) do
+      :ok
+    else
       _ -> {:error, :invalid_certificate_purpose}
     end
   rescue
@@ -163,6 +171,56 @@ defmodule Accrue.Entitlements.Apple.Verifier.Production do
   end
 
   defp validate_leaf_purpose(_), do: {:error, :invalid_certificate_purpose}
+
+  defp extension?(cert, oid) do
+    cert
+    |> extensions()
+    |> Enum.any?(fn
+      {:Extension, ^oid, _, _} -> true
+      _ -> false
+    end)
+  end
+
+  defp non_ca_leaf?(cert) do
+    case extension_value(cert, {2, 5, 29, 19}) do
+      nil ->
+        true
+
+      value ->
+        match?({:BasicConstraints, false, _}, :public_key.der_decode(:BasicConstraints, value))
+    end
+  rescue
+    _ -> false
+  end
+
+  defp digital_signature?(cert) do
+    case extension_value(cert, {2, 5, 29, 15}) do
+      nil ->
+        false
+
+      value ->
+        case :public_key.der_decode(:KeyUsage, value) do
+          <<1::1, _::bitstring>> -> true
+          _ -> false
+        end
+    end
+  rescue
+    _ -> false
+  end
+
+  defp extension_value(cert, oid) do
+    Enum.find_value(extensions(cert), fn
+      {:Extension, ^oid, _, value} -> value
+      _ -> nil
+    end)
+  end
+
+  defp extensions(cert) do
+    case cert |> elem(1) |> elem(10) do
+      values when is_list(values) -> values
+      _ -> []
+    end
+  end
 
   defp leaf_key(x5c) do
     with {:ok, [leaf | _]} <- decode_chain(x5c),

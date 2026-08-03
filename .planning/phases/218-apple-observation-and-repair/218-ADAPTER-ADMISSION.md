@@ -14,7 +14,7 @@ decision: reject
 | Package legitimacy | `218-02-SUMMARY.md` records `rejected` | fail — fallback selected |
 | API shape and replacement insulation | `mix test test/accrue/entitlements/apple_verifier_test.exs` | pass — private behaviour only |
 | Independent outer/nested verification | focused hostile corpus | pass |
-| Ordered x5c/root/time/purpose | focused hostile corpus and implementation review | pass |
+| Ordered x5c/root/time/purpose | `mix test test/accrue/entitlements/apple_verifier_test.exs` positive and hostile chain corpus | pass |
 | Critical-header / algorithm rejection | focused hostile corpus | pass |
 | No supervision or provider side effects | implementation review; pure functions only | pass |
 | Recursive privacy | inspect/error corpus; no raw JWS output | pass |
