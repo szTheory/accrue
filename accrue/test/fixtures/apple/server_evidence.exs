@@ -59,6 +59,7 @@ defmodule Accrue.Test.AppleServerEvidence do
   end
 
   def production_notification(overrides \\ %{}) do
+    overrides = Map.new(overrides)
     transaction = Map.get(overrides, :transaction, production_transaction())
     renewal = Map.get(overrides, :renewal, production_transaction())
 
@@ -77,6 +78,12 @@ defmodule Accrue.Test.AppleServerEvidence do
     %{"notificationUUID" => "notification-production-1", "data" => data}
     |> Map.merge(Map.get(overrides, :outer, %{}))
     |> signed(variant(:valid))
+  end
+
+  def tamper_signature(jws) when is_binary(jws) and byte_size(jws) > 0 do
+    prefix = binary_part(jws, 0, byte_size(jws) - 1)
+    suffix = binary_part(jws, byte_size(jws) - 1, 1)
+    prefix <> if(suffix == "A", do: "B", else: "A")
   end
 
   def hostile_transaction(kind, overrides \\ %{})

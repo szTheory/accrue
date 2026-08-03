@@ -71,6 +71,85 @@ defmodule Accrue.Entitlements.AppleNotificationTest do
     assert count(Grant) == 0
   end
 
+  test "production V2 delivery replays and converges concurrently on one durable wakeup" do
+    notification = Evidence.production_notification()
+    opts = production_opts()
+
+    assert request(notification) |> NotificationPlug.call(opts) |> Map.fetch!(:status) == 200
+    assert request(notification) |> NotificationPlug.call(opts) |> Map.fetch!(:status) == 200
+
+    results =
+      1..4
+      |> Task.async_stream(
+        fn _ -> request(notification) |> NotificationPlug.call(opts) |> Map.fetch!(:status) end,
+        max_concurrency: 4,
+        timeout: 5_000
+      )
+      |> Enum.to_list()
+
+    assert Enum.all?(results, &match?({:ok, 200}, &1))
+    assert count(Intake) == 1
+    assert count(ReconciliationWakeup) == 1
+  end
+
+  test "production V2 persistence rollback remains retryable and leaves no wakeup" do
+    notification = Evidence.production_notification()
+
+    opts =
+      production_opts(
+        intake: fn evidence ->
+          Intake.observe_notification(evidence,
+            repo: Accrue.TestRepo,
+            after_write: fn -> raise "injected_failure" end
+          )
+        end
+      )
+
+    assert request(notification) |> NotificationPlug.call(opts) |> Map.fetch!(:status) == 503
+    assert count(Intake) == 0
+    assert count(ReconciliationWakeup) == 0
+  end
+
+  test "production V2 rejects authenticated wrong application data without a wakeup" do
+    for {key, value, reason} <- [
+          {"bundleId", "com.example.wrong", :wrong_bundle},
+          {"environment", "Sandbox", :wrong_environment},
+          {"appAppleId", 7, :wrong_app}
+        ] do
+      notification = Evidence.production_notification(data: %{key => value})
+      assert {:error, ^reason} = Production.verify_notification(notification, @production_config)
+
+      assert request(notification)
+             |> NotificationPlug.call(production_opts())
+             |> Map.fetch!(:status) ==
+               200
+    end
+
+    assert count(ReconciliationWakeup) == 0
+  end
+
+  test "production V2 independently closes outer and nested signature tampering" do
+    outer = Evidence.tamper_signature(Evidence.production_notification())
+    transaction = Evidence.tamper_signature(Evidence.production_transaction())
+    renewal = Evidence.tamper_signature(Evidence.production_transaction())
+
+    for notification <- [
+          outer,
+          Evidence.production_notification(transaction: transaction),
+          Evidence.production_notification(renewal: renewal)
+        ] do
+      assert {:error, :invalid_signature} =
+               Production.verify_notification(notification, @production_config)
+
+      assert request(notification)
+             |> NotificationPlug.call(production_opts())
+             |> Map.fetch!(:status) ==
+               200
+    end
+
+    assert count(ReconciliationWakeup) == 0
+  end
+
   test "coalesces duplicate notifications into one durable wakeup" do
     assert request("verified") |> NotificationPlug.call(base_opts()) |> Map.fetch!(:status) == 200
     assert request("verified") |> NotificationPlug.call(base_opts()) |> Map.fetch!(:status) == 200
@@ -162,6 +241,12 @@ defmodule Accrue.Entitlements.AppleNotificationTest do
       )
     )
   end
+
+  defp production_opts(overrides \\ []),
+    do:
+      base_opts(
+        Keyword.merge([verifier: Production, verifier_config: @production_config], overrides)
+      )
 
   defp verified_evidence(facts, raw, environment) do
     transaction = facts.transaction

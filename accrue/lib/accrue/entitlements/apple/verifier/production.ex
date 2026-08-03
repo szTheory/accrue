@@ -13,9 +13,11 @@ defmodule Accrue.Entitlements.Apple.Verifier.Production do
 
   @impl true
   def verify_notification(jws, %Config{} = config) when is_binary(jws) do
-    with {:ok, payload} <- verify(jws, config),
-         {:ok, transaction_jws} <- nested(payload, "signedTransactionInfo"),
-         {:ok, renewal_jws} <- nested(payload, "signedRenewalInfo"),
+    with {:ok, payload} <- authenticate(jws, config),
+         {:ok, data} <- notification_data(payload),
+         :ok <- validate_claims(data, config),
+         {:ok, transaction_jws} <- nested(data, "signedTransactionInfo"),
+         {:ok, renewal_jws} <- nested(data, "signedRenewalInfo"),
          {:ok, transaction} <- verify(transaction_jws, config),
          {:ok, renewal} <- verify(renewal_jws, config) do
       {:ok,
@@ -41,6 +43,13 @@ defmodule Accrue.Entitlements.Apple.Verifier.Production do
   defp facts_result(error), do: error
 
   defp verify(jws, %Config{} = config) do
+    with {:ok, payload} <- authenticate(jws, config),
+         :ok <- validate_claims(payload, config) do
+      {:ok, payload}
+    end
+  end
+
+  defp authenticate(jws, %Config{} = config) do
     with {:ok, protected64, payload64, signature64} <- split(jws),
          {:ok, header} <- decode_json(protected64),
          :ok <- validate_header(header),
@@ -48,8 +57,7 @@ defmodule Accrue.Entitlements.Apple.Verifier.Production do
          {:ok, verification_time} <- resolve_verification_time(payload, config),
          :ok <- validate_chain(header["x5c"], config, verification_time),
          {:ok, leaf_key} <- leaf_key(header["x5c"]),
-         :ok <- verify_signature(protected64 <> "." <> payload64, signature64, leaf_key),
-         :ok <- validate_claims(payload, config) do
+         :ok <- verify_signature(protected64 <> "." <> payload64, signature64, leaf_key) do
       {:ok, payload}
     end
   rescue
@@ -420,8 +428,15 @@ defmodule Accrue.Entitlements.Apple.Verifier.Production do
   defp apple_environment(:sandbox), do: "Sandbox"
   defp apple_environment(_), do: ""
 
-  defp nested(payload, key) do
-    case get_in(payload, ["data", key]) do
+  defp notification_data(payload) do
+    case payload["data"] do
+      data when is_map(data) -> {:ok, data}
+      _ -> {:error, :invalid_payload}
+    end
+  end
+
+  defp nested(data, key) do
+    case data[key] do
       value when is_binary(value) and byte_size(value) > 0 -> {:ok, value}
       _ -> {:error, :invalid_payload}
     end
