@@ -18,7 +18,11 @@ defmodule Accrue.Entitlements.SnapshotTest do
         now: now,
         catalog: %{
           "pro-monthly" => %{plan: :pro, features: [:analytics, :exports], quotas: %{seats: 3}},
-          "pro-apple" => %{plan: :pro, features: [:exports, :priority_support], quotas: %{seats: 5}}
+          "pro-apple" => %{
+            plan: :pro,
+            features: [:exports, :priority_support],
+            quotas: %{seats: 5}
+          }
         }
       )
 
@@ -34,11 +38,19 @@ defmodule Accrue.Entitlements.SnapshotTest do
 
   test "excludes grants exactly at expiry and includes grants immediately before expiry" do
     expiry = ~U[2026-08-02 12:00:00.000000Z]
-    grant = %{grant(:stripe, "stripe-lineage", 3, expiry) | expires_at: expiry}
 
-    assert Snapshot.from_grants([grant], options(expiry, DateTime.add(expiry, -1, :microsecond))).plans == [:pro]
+    grant = %{
+      grant(:stripe, "stripe-lineage", 3, DateTime.add(expiry, -1, :second))
+      | expires_at: expiry
+    }
+
+    assert Snapshot.from_grants([grant], options(expiry, DateTime.add(expiry, -1, :microsecond))).plans ==
+             [:pro]
+
     assert Snapshot.from_grants([grant], options(expiry, expiry)).plans == []
-    assert Snapshot.from_grants([grant], options(expiry, DateTime.add(expiry, 1, :microsecond))).plans == []
+
+    assert Snapshot.from_grants([grant], options(expiry, DateTime.add(expiry, 1, :microsecond))).plans ==
+             []
   end
 
   defp options(_expiry, now) do

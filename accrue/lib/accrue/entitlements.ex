@@ -47,7 +47,41 @@ defmodule Accrue.Entitlements do
   `Accrue.has_active_plan?/2` facade delegates stay arity 2.
   """
 
-  alias Accrue.Entitlements.Resolver
+  alias Accrue.Entitlements.{Account, Resolver, Snapshot}
+
+  @doc "Reads a canonical entitlement snapshot without provisioning or provider I/O."
+  @spec snapshot(Account.t() | term(), keyword()) :: {:ok, Snapshot.t()} | {:error, :not_found}
+  def snapshot(account_or_billable, opts \\ []) do
+    Accrue.Telemetry.span(
+      [:accrue, :entitlements, :snapshot],
+      snapshot_metadata(account_or_billable, opts),
+      fn ->
+        case snapshot_account(account_or_billable) do
+          nil -> {:error, :not_found}
+          account -> {:ok, Snapshot.fetch(Accrue.Repo.repo(), account)}
+        end
+      end
+    )
+  end
+
+  @doc "Explicitly provisions the stable account for an authenticated host owner."
+  @spec provision_account(String.t(), String.t(), keyword()) ::
+          {:ok, Account.t()} | {:error, term()}
+  def provision_account(owner_type, owner_id, opts \\ [])
+      when is_binary(owner_type) and is_binary(owner_id) do
+    Accrue.Telemetry.span(
+      [:accrue, :entitlements, :provision_account],
+      %{
+        action: :provision_account,
+        disposition: :requested,
+        reason: nil,
+        revision: nil,
+        account_id: nil,
+        actor_id: Keyword.get(opts, :actor_id)
+      },
+      fn -> Account.fetch_or_create(Accrue.Repo.repo(), owner_type, owner_id) end
+    )
+  end
 
   @doc """
   Returns `true` iff `billable`'s resolved active feature set contains
@@ -166,6 +200,35 @@ defmodule Accrue.Entitlements do
 
     span(billable, quota_key, quantity > 0, reason, [], fn -> quantity end)
   end
+
+  defp snapshot_account(%Account{} = account), do: account
+
+  defp snapshot_account(%{id: id, __struct__: mod}) when not is_nil(id) do
+    owner_type = mod.__accrue__(:billable_type)
+    Accrue.Repo.get_by(Account, owner_type: owner_type, owner_id: to_string(id))
+  rescue
+    _ -> nil
+  end
+
+  defp snapshot_account(account_id) when is_binary(account_id),
+    do: Accrue.Repo.get(Account, account_id)
+
+  defp snapshot_account(_), do: nil
+
+  defp snapshot_metadata(account_or_billable, opts) do
+    %{
+      action: :snapshot,
+      disposition: :requested,
+      reason: nil,
+      revision: nil,
+      account_id: opaque_account_id(account_or_billable),
+      actor_id: Keyword.get(opts, :actor_id)
+    }
+  end
+
+  defp opaque_account_id(%Account{id: id}), do: id
+  defp opaque_account_id(account_id) when is_binary(account_id), do: account_id
+  defp opaque_account_id(_), do: nil
 
   # --------------------------------------------------------------------------
   # internals

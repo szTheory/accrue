@@ -1,0 +1,133 @@
+defmodule Accrue.Entitlements.Snapshot do
+  @moduledoc """
+  A deterministic, privacy-bounded view of an account's effective grants.
+
+  The snapshot is derived from current grant rows; it is never persisted and
+  never contains provider evidence or lineage identifiers.
+  """
+
+  alias Accrue.Entitlements.Grant
+
+  @enforce_keys [:account_id, :revision, :plans, :features, :quantities, :sources]
+  defstruct [:account_id, :revision, :plans, :features, :quantities, :sources]
+
+  @type source :: %{
+          required(:rail) => atom(),
+          required(:environment) => atom(),
+          required(:effective_at) => DateTime.t(),
+          optional(:expires_at) => DateTime.t() | nil,
+          optional(:revoked_at) => DateTime.t() | nil
+        }
+  @type t :: %__MODULE__{
+          account_id: Ecto.UUID.t() | String.t(),
+          revision: non_neg_integer(),
+          plans: [atom()],
+          features: [atom()],
+          quantities: %{optional(atom()) => pos_integer()},
+          sources: [source()]
+        }
+
+  @spec from_grants([Grant.t() | map()], keyword()) :: t()
+  def from_grants(grants, opts) when is_list(grants) and is_list(opts) do
+    now = Keyword.get_lazy(opts, :now, &DateTime.utc_now/0)
+    catalog = Keyword.get(opts, :catalog, catalog())
+
+    {plans, features, quantities, sources} =
+      grants
+      |> Enum.filter(&live?(&1, now))
+      |> Enum.reduce({MapSet.new(), MapSet.new(), %{}, []}, fn grant, acc ->
+        fold_grant(grant, catalog, acc)
+      end)
+
+    %__MODULE__{
+      account_id: Keyword.fetch!(opts, :account_id),
+      revision: Keyword.get(opts, :revision, 0),
+      plans: plans |> MapSet.to_list() |> Enum.sort(),
+      features: features |> MapSet.to_list() |> Enum.sort(),
+      quantities: quantities,
+      sources: Enum.sort_by(sources, &{&1.rail, &1.environment, &1.effective_at})
+    }
+  end
+
+  @doc "Fetches and folds an account's current grants without mutating state."
+  @spec fetch(Ecto.Repo.t(), map() | Ecto.UUID.t()) :: t() | nil
+  def fetch(repo, %{id: account_id, revision: revision}), do: fetch(repo, account_id, revision)
+  def fetch(repo, account_id) when is_binary(account_id), do: fetch(repo, account_id, nil)
+
+  @doc "The material authorization fields used for monotonic revision decisions."
+  @spec authorization_signature(t()) :: term()
+  def authorization_signature(%__MODULE__{} = snapshot) do
+    {snapshot.plans, snapshot.features, snapshot.quantities,
+     Enum.map(
+       snapshot.sources,
+       &Map.take(&1, [:rail, :environment, :effective_at, :expires_at, :revoked_at])
+     )}
+  end
+
+  defp fetch(repo, account_id, revision) do
+    import Ecto.Query
+
+    grants =
+      repo.all(
+        from(grant in Grant,
+          where: grant.account_id == ^account_id and is_nil(grant.superseded_at)
+        )
+      )
+
+    from_grants(grants, account_id: account_id, revision: revision || 0)
+  end
+
+  defp fold_grant(grant, catalog, {plans, features, quantities, sources}) do
+    case Map.get(catalog, product_key(grant)) || Map.get(catalog, grant.provider_product_id) do
+      nil ->
+        {plans, features, quantities, sources}
+
+      %{plan: plan} = product ->
+        quota_values = Map.get(product, :quotas, %{})
+
+        merged_quantities =
+          Enum.reduce(quota_values, quantities, fn {quota, configured_quantity}, result ->
+            quantity = max(grant.quantity, configured_quantity)
+            Map.update(result, quota, quantity, &max(&1, quantity))
+          end)
+
+        {MapSet.put(plans, plan),
+         MapSet.union(features, MapSet.new(Map.get(product, :features, []))), merged_quantities,
+         [source(grant) | sources]}
+    end
+  end
+
+  defp product_key(grant), do: {grant.rail, grant.environment, grant.provider_product_id}
+
+  defp source(grant) do
+    %{
+      rail: grant.rail,
+      environment: grant.environment,
+      effective_at: grant.effective_at,
+      expires_at: grant.expires_at,
+      revoked_at: grant.superseded_at
+    }
+  end
+
+  defp live?(grant, now) do
+    is_nil(grant.superseded_at) and DateTime.compare(grant.effective_at, now) != :gt and
+      (is_nil(grant.expires_at) or DateTime.compare(now, grant.expires_at) == :lt)
+  end
+
+  defp catalog do
+    plans = Accrue.Config.entitlements() |> Keyword.get(:plans, [])
+
+    Accrue.Config.entitlement_product_catalog()
+    |> Enum.reduce(%{}, fn {{rail, environment, product_id}, plan}, acc ->
+      entry = Keyword.get(plans, plan, [])
+
+      Map.put(acc, {rail, environment, product_id}, %{
+        plan: plan,
+        features: Keyword.get(entry, :features, []),
+        quotas: Map.new(Keyword.get(entry, :quotas, []))
+      })
+    end)
+  rescue
+    _ -> %{}
+  end
+end
