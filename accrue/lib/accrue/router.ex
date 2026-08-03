@@ -20,10 +20,20 @@ defmodule Accrue.Router do
         accrue_webhook "/stripe", :stripe
       end
 
-  Apple App Store Server Notifications V2 use the same route-scoped body reader:
+  Apple App Store Server Notifications V2 use a dedicated route-scoped body
+  reader whose parser limit matches the notification plug's 256 KiB default:
+
+      pipeline :accrue_apple_notifications_raw_body do
+        plug Plug.Parsers,
+          parsers: [:json],
+          pass: ["*/*"],
+          json_decoder: Jason,
+          body_reader: {Accrue.Webhook.CachingBodyReader, :read_body, []},
+          length: 262_144
+      end
 
       scope "/webhooks" do
-        pipe_through :accrue_webhook_raw_body
+        pipe_through :accrue_apple_notifications_raw_body
         accrue_apple_notifications "/apple", verifier_config: apple_verifier_config,
           rate_limiter: &MyApp.AppleRateLimiter.check/1
       end
@@ -83,7 +93,8 @@ defmodule Accrue.Router do
   `opts` are host-supplied `Accrue.Entitlements.Apple.NotificationPlug` options,
   including `:verifier_config` and optional `:rate_limiter`. Must be called inside
   a route-scoped `Plug.Parsers` pipeline using
-  `Accrue.Webhook.CachingBodyReader.read_body/2`; otherwise the plug returns a
+  `Accrue.Webhook.CachingBodyReader.read_body/2`, with the parser `:length`
+  matching `:max_body_bytes` (262,144 by default); otherwise the plug returns a
   retryable `503` without verifying or persisting the notification.
   """
   defmacro accrue_apple_notifications(path, opts) do

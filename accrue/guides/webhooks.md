@@ -34,11 +34,22 @@ scope "/webhooks" do
 end
 ```
 
-Apple App Store Server Notifications V2 must use that same dedicated pipeline:
+Apple App Store Server Notifications V2 must use a dedicated pipeline with the
+same raw-body reader and a parser limit matching the notification plug's 256 KiB
+default:
 
 ```elixir
+pipeline :accrue_apple_notifications_raw_body do
+  plug Plug.Parsers,
+    parsers: [:json],
+    pass: ["*/*"],
+    json_decoder: Jason,
+    body_reader: {Accrue.Webhook.CachingBodyReader, :read_body, []},
+    length: 262_144
+end
+
 scope "/webhooks" do
-  pipe_through :accrue_webhook_raw_body
+  pipe_through :accrue_apple_notifications_raw_body
 
   accrue_apple_notifications "/apple",
     verifier_config: apple_verifier_config,
@@ -46,7 +57,10 @@ scope "/webhooks" do
 end
 ```
 
-The host supplies the Apple verifier configuration and rate policy. If the route
+The host supplies the Apple verifier configuration and rate policy. Keep the
+parser `:length` equal to the plug's `:max_body_bytes` when overriding either
+limit, so oversized input is rejected while reading rather than buffered for
+later rejection. If the route
 does not preserve a non-empty exact capture in `conn.assigns[:raw_body]`, Accrue
 returns a retryable `503` before verification or persistence. Do not substitute
 parsed params, reconstructed JSON, or another byte sequence. See

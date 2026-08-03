@@ -96,6 +96,19 @@ defmodule Accrue.Entitlements.AppleNotificationTest do
     assert count(ReconciliationWakeup) == 1
   end
 
+  test "documented Apple route bounds raw capture at the notification limit" do
+    package_root = Path.expand("../../..", __DIR__)
+    guide = File.read!(Path.join(package_root, "guides/webhooks.md"))
+    router = File.read!(Path.join(package_root, "lib/accrue/router.ex"))
+
+    for source <- [guide, router] do
+      assert source =~ "pipeline :accrue_apple_notifications_raw_body"
+      assert source =~ "body_reader: {Accrue.Webhook.CachingBodyReader, :read_body, []}"
+      assert source =~ "length: 262_144"
+      assert source =~ "pipe_through :accrue_apple_notifications_raw_body"
+    end
+  end
+
   test "a signed production V2 envelope reaches one wakeup without account projection" do
     notification = Evidence.production_notification()
 
