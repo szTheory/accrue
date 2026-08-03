@@ -35,7 +35,7 @@ defmodule Accrue.Entitlements.Snapshot do
     {plans, features, quantities, sources} =
       grants
       |> Enum.filter(&live?(&1, now))
-      |> Enum.reduce({MapSet.new(), MapSet.new(), %{}, []}, fn grant, acc ->
+      |> Enum.reduce({MapSet.new(), MapSet.new(), %{}, MapSet.new()}, fn grant, acc ->
         fold_grant(grant, catalog, acc)
       end)
 
@@ -45,7 +45,10 @@ defmodule Accrue.Entitlements.Snapshot do
       plans: plans |> MapSet.to_list() |> Enum.sort(),
       features: features |> MapSet.to_list() |> Enum.sort(),
       quantities: quantities,
-      sources: Enum.sort_by(sources, &{&1.rail, &1.environment, &1.effective_at})
+      sources:
+        sources
+        |> MapSet.to_list()
+        |> Enum.sort_by(&{&1.rail, &1.environment, &1.effective_at, &1.expires_at, &1.revoked_at})
     }
   end
 
@@ -93,7 +96,7 @@ defmodule Accrue.Entitlements.Snapshot do
 
         {MapSet.put(plans, plan),
          MapSet.union(features, MapSet.new(Map.get(product, :features, []))), merged_quantities,
-         [source(grant) | sources]}
+         MapSet.put(sources, source(grant))}
     end
   end
 
