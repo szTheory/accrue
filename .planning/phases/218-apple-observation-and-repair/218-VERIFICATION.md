@@ -1,54 +1,27 @@
 ---
 phase: 218-apple-observation-and-repair
-verified: 2026-08-03T19:39:00Z
-status: gaps_found
-score: 2/5 must-haves verified
-behavior_unverified: 1
+verified: 2026-08-03T21:16:11Z
+status: passed
+score: 5/5 must-haves verified
+behavior_unverified: 0
 overrides_applied: 0
 re_verification:
   previous_status: gaps_found
-  previous_score: 3/5
+  previous_score: 2/5
   gaps_closed:
-    - "Production Notifications V2 now authenticates the outer envelope and validates application identity in its authenticated data map."
+    - "Missing or unusable Apple raw-body capture now fails retryably before verification, quarantine, Intake, or wakeup persistence."
+    - "Outer, transaction, and renewal compact-JWS tests now flip a decoded signature byte and deterministically reject each boundary."
+    - "Reconciliation retains the local lineage UUID for checkpoints/jobs but sends Apple's original transaction identifier to Production status/history URLs."
   gaps_remaining: []
-  regressions:
-    - "Reconciliation passes the local Apple lineage UUID to production Apple endpoints instead of the original transaction identifier."
-    - "A missing cached raw webhook body is treated as an empty payload, durably quarantined, and acknowledged with HTTP 200."
-    - "The V2 signature-tampering regression is non-deterministic because its mutation can decode to unchanged signature bytes."
-gaps:
-  - truth: "Duplicate, delayed, and out-of-order Apple evidence converges idempotently, while invalid, unmatched, and conflicting input remains non-granting and repairable."
-    status: failed
-    reason: "A notification request without the required captured raw body is converted to an empty body, quarantined, and acknowledged 200. Apple therefore stops retries even though the delivered notification was never authenticated or admitted as a repair wakeup."
-    artifacts:
-      - path: "accrue/lib/accrue/entitlements/apple/notification_plug.ex"
-        issue: "raw_body_or_empty/1 returns \"\" for a missing or invalid :raw_body assignment (lines 141-146); call/2 routes its verifier error to quarantine (lines 35-40, 62-79)."
-    missing:
-      - "Fail missing or invalid raw-body capture as a retryable 503 before verification or quarantine."
-      - "Wire and document the caching body reader on the Apple route and add a non-empty-body/no-assign regression proving no Intake or wakeup is persisted."
-  - truth: "Scheduled status and history reconciliation repairs missed notifications and accurately represents active, grace, retry, expiry, refund, and revocation boundaries."
-    status: failed
-    reason: "The production reconciliation client receives the local lineage primary-key UUID, not Apple's originalTransactionId. Apple endpoint requests therefore use the wrong path parameter and cannot obtain authoritative status or history."
-    artifacts:
-      - path: "accrue/lib/accrue/entitlements/apple/reconciliation.ex"
-        issue: "run/2 passes lineage_id unchanged into reconcile_page/9 (lines 318-348), which calls both client methods with it at lines 372 and 375-380."
-      - path: "accrue/lib/accrue/entitlements/apple/client.ex"
-        issue: "Production client interpolates that argument into /inApps/v1/subscriptions/{id} and /inApps/v2/history/{id} at lines 120-135."
-    missing:
-      - "Load/lock the lineage and pass lineage.original_transaction_id to Apple while retaining lineage.id for checkpoints and jobs."
-      - "Add a production-client regression asserting URLs contain the original transaction ID and never the local lineage UUID."
-behavior_unverified_items:
-  - truth: "Only Apple evidence verified for permitted algorithms, trust, certificates, bundle, environment, and production identity can change grants."
-    test: "Independently corrupt an outer, transaction, and renewal JWS signature, then assert Production rejects each before any wakeup or grant path."
-    expected: "Each cryptographically altered compact JWS returns :invalid_signature and leaves no verified wakeup or grant."
-    why_human: "The intended automated regression is not a valid proof: tamper_signature/1 only changes the final Base64url character and can decode to identical signature bytes. The focused suite reproduced a successful Production verification for one purportedly tampered value."
+  regressions: []
 ---
 
 # Phase 218: Apple Observation and Repair Verification Report
 
 **Phase Goal:** Verified Apple evidence safely contributes to the account snapshot and repairs itself without ownership reassignment or provider-lifecycle confusion.
-**Verified:** 2026-08-03T19:39:00Z
-**Status:** gaps_found
-**Re-verification:** Yes — after Plan 218-14.
+**Verified:** 2026-08-03T21:16:11Z
+**Status:** passed
+**Re-verification:** Yes — after Plan 218-15 and Plan 218-16 gap closure
 
 ## Goal Achievement
 
@@ -56,83 +29,86 @@ behavior_unverified_items:
 
 | # | Truth | Status | Evidence |
 | --- | --- | --- | --- |
-| 1 | An authenticated account can purchase or restore through its opaque entitlement UUID; only eligible verified lineage binds once, while ownership conflicts quarantine without heuristic or automatic reassignment. | ✓ VERIFIED | Prior real-Repo tracer and locked-lineage coverage remain present; the notification repair is account-independent and Plan 14 asserts no Observation, Grant, or revision. |
-| 2 | Only Apple evidence verified for permitted algorithms, trust, certificates, bundle, environment, and production identity can change grants. | ⚠️ PRESENT_BEHAVIOR_UNVERIFIED | Plan 14 correctly separates outer-envelope authentication from authenticated `data` claim validation, but its only independent outer/nested tampering proof is flaky and reproduced as a false success. |
-| 3 | Duplicate, delayed, and out-of-order Apple evidence converges idempotently, while invalid, unmatched, and conflicting input remains non-granting and repairable. | ✗ FAILED | Missing raw-body capture turns an unverified non-empty delivery into `""`, persists terminal quarantine, and returns 200; Apple will not retry the lost wakeup. |
-| 4 | Scheduled status and history reconciliation repairs missed notifications and accurately represents active, grace, retry, expiry, refund, and revocation boundaries. | ✗ FAILED | The production endpoint path is constructed from the Accrue lineage UUID rather than `original_transaction_id`; fakes obscure this because they ignore the argument. |
-| 5 | Hosts receive honest externally-managed Apple subscription guidance, with Family Sharing and offer authoring explicitly deferred. | ✓ VERIFIED | Typed source-registry management and explicit deferrals remain isolated from Stripe and are covered by the Apple source-isolation test. |
+| 1 | An authenticated account can purchase or restore through its opaque entitlement UUID; only eligible verified lineage binds once, while ownership conflicts quarantine without heuristic or automatic reassignment. | ✓ VERIFIED | Real-Repo tracer/property tests cover opaque purchase context, bind-once, conflict privacy/non-granting behavior, authorized repair, and rollback (`apple_observation_tracer_test`, `apple_lineage_test`, `apple_lineage_property_test`). `Lineage.claim/4` and terminal Intake paths are the only ownership transitions. |
+| 2 | Only Apple evidence verified for permitted algorithms, trust, certificates, bundle, environment, and production identity can change grants. | ✓ VERIFIED | Production verifier tests exercise ES256/x5c purpose/time/root policies and closed failures. The notification regression mechanically proves header/payload preservation plus changed decoded signature bytes, then independently rejects outer, transaction, and renewal corruption before wakeup, observation, or grant authority. |
+| 3 | Duplicate, delayed, and out-of-order Apple evidence converges idempotently, while invalid, unmatched, and conflicting input remains non-granting and repairable. | ✓ VERIFIED | Valid parallel V2 replay coalesces to one Intake/wakeup. Missing, empty, or malformed raw capture returns 503 with zero Intake/wakeup/observation/grant rows. Terminal invalid evidence is durably quarantined; unmapped history remains terminal quarantine while later revocation retracts stale access. |
+| 4 | Scheduled status and history reconciliation repairs missed notifications and accurately represents active, grace, retry, expiry, refund, and revocation boundaries. | ✓ VERIFIED | `Reconciliation.run/2` locks local lineage/checkpoint then passes `original_transaction_id` only to both Apple calls. Production URL test proves both encoded URLs include the original ID and exclude local UUID; reconciliation tests cover scheduled recovery, cursor completion, retry/resume, lifecycle normalization, terminal ordering, and revocation. |
+| 5 | Hosts receive honest externally-managed Apple subscription guidance, with Family Sharing and offer authoring explicitly deferred. | ✓ VERIFIED | `apple_source_isolation_test` asserts exact typed Apple management guidance, two `:deferred/:review_policy` outcomes, and zero calls to every forbidden Stripe lifecycle callback across observation, repair, reconciliation, and concurrent management use. |
 
-**Score:** 2/5 truths verified (1 present, behavior-unverified).
+**Score:** 5/5 truths verified (0 present, behavior-unverified).
 
 ### Required Artifacts
 
-| Artifact | Expected | Status | Details |
+All 52 declared plan artifacts exist and are substantive (`verify.artifacts` across Plans 01–16). Manual source and executable checks confirmed consumer wiring for the key dynamic artifacts below; the generic verifier reported several false negatives where plan `from` values are concepts rather than file paths.
+
+| Artifact group | Expected | Status | Details |
 | --- | --- | --- | --- |
-| `apple/verifier/production.ex` | Strict independent outer/nested V2 verification | ⚠️ PRESENT, TEST UNRELIABLE | Correct structural split is wired; a deterministic negative signature test is still missing. |
-| `apple/notification_plug.ex` | Durable, retry-safe V2 notification boundary | ✗ UNSAFE | Missing raw-body assignment becomes empty-body terminal quarantine/200. |
-| `apple/reconciliation.ex` + `apple/client.ex` | Authoritative status/history repair | ✗ NOT WIRED CORRECTLY | Local UUID crosses the provider boundary as Apple’s original transaction identifier. |
-| `apple/intake.ex`, `lineage.ex`, `projector.ex` | Opaque bind-once admission and sole-writer projection | ✓ VERIFIED | Existing real-Repo ownership, transaction, and canonical-projection tracer coverage remains wired. |
-| Apple management/source declarations | Honest external management and deferrals | ✓ VERIFIED | Exact typed outcome and Stripe-isolation coverage remains present. |
+| `apple/lineage.ex`, `intake.ex`, `projector.ex`, `reconciliation_wakeup.ex` | Bind-once admission and sole transactional grant writer | ✓ VERIFIED | `Intake.persist_and_project/5` inserts qualified evidence, calls `Projector.project_in_transaction/3`, and queues reconciliation in the same transaction. |
+| `apple/verifier.ex`, `apple/verifier/production.ex`, fixture corpus | Independent strict outer/nested verification | ✓ VERIFIED | Production adapter uses Jason and OTP `:public_key`; fixtures sign real ES256 chains and mutate decoded signature bytes deterministically. |
+| `apple/notification_plug.ex`, `router.ex`, `guides/webhooks.md` | Exact raw-body ingress and durable acknowledgement | ✓ VERIFIED | Only a non-empty binary or valid captured chunk list reaches verification/quarantine. Router/docs bind the Apple endpoint to `CachingBodyReader.read_body/2` and a 262,144-byte parser limit. |
+| `apple/reconciliation.ex`, `client.ex`, workers/sweeper | Locked reconciliation and provider-boundary identity | ✓ VERIFIED | Local `lineage.id` remains checkpoint/job identity while `lineage.original_transaction_id` is URL-encoded for the two Production endpoints. |
+| `apple_source_isolation_test.exs`, source registry/facade | Honest management and no Stripe mutation | ✓ VERIFIED | Exact external-management/deferred results and complete forbidden-callback inventory are executable. |
 
 ### Key Link Verification
 
 | From | To | Via | Status | Details |
 | --- | --- | --- | --- | --- |
-| Production V2 JWS | `NotificationPlug` → Intake wakeup | authenticated outer data + independent nested JWS | ✓ WIRED | `verify_notification/2` now validates authenticated `data`, preserves outer UUID, and Plan 14’s valid production fixture reaches one Intake/wakeup. |
-| `NotificationPlug` raw request | verifier/quarantine | cached raw bytes | ✗ NOT WIRED SAFELY | Absent `conn.assigns[:raw_body]` is silently converted to `""`. |
-| Reconcile job lineage identity | Apple status/history URLs | `original_transaction_id` | ✗ NOT WIRED | `lineage_id` is sent directly to both client calls. |
-| Verified evidence | canonical Projector | Intake in one repository transaction | ✓ WIRED | Admission remains the sole route to the existing Projector writer. |
+| Verified bound Apple evidence | Observation → Projector → reconciliation wakeup | `Intake.persist_and_project/5` | ✓ WIRED | Source trace confirms the idempotent Observation, sole writer, and `Reconciliation.enqueue_in_transaction/4` share the outer transaction; tracer rollback test passes. |
+| Captured Apple route body | `NotificationPlug` verifier/quarantine | `CachingBodyReader` → `conn.assigns[:raw_body]` | ✓ WIRED | Router macro/docs specify the scoped reader; `captured_raw_body/1` rejects absent/empty/malformed values before rate/verifier/quarantine branches. |
+| Decoded ES256 signature mutation | `Production.verify_notification/2` | byte flip → base64url re-encode | ✓ WIRED | Test verifies modified bytes with unchanged protected/payload segments and gets `:invalid_signature` for every JWS boundary. |
+| Local reconciliation job | Apple status/history transport | locked lineage’s `original_transaction_id` | ✓ WIRED | Code at `reconciliation.ex` passes original ID to `Client.subscription_statuses/3` and `transaction_history/5`; Production URL capture passes. |
+| Apple paths | Stripe lifecycle gateway | forbidden-callback guard | ✓ WIRED | Executable guard asserts all callback counts stay zero. |
 
 ### Data-Flow Trace (Level 4)
 
 | Artifact | Data Variable | Source | Produces Real Data | Status |
 | --- | --- | --- | --- | --- |
-| Production notification | outer `data`, nested JWS facts | signed V2 fixture → Production → Plug → Intake | Yes | ✓ FLOWING for valid captured bodies |
-| Notification raw body | `conn.assigns[:raw_body]` | route body reader | No fallback-safe source | ✗ HOLLOW — missing source is replaced by empty bytes |
-| Reconciliation client identity | provider endpoint path parameter | job `lineage_id` | No: database UUID, not Apple original transaction ID | ✗ DISCONNECTED |
+| Notification admission | exact raw request bytes | scoped Phoenix body reader | Valid binary/chunk capture reaches strict Production fixture and durable wakeup | ✓ FLOWING |
+| Reconciliation transport | Apple original transaction identifier | locked durable lineage row | Production capture observes the encoded original ID; checkpoint retains local UUID | ✓ FLOWING |
+| Account snapshot | verified normalized lifecycle facts | status/history admission → Observation → Projector | Repo tests produce/retract real grants and advance account revisions | ✓ FLOWING |
 
 ### Behavioral Spot-Checks
 
 | Behavior | Command | Result | Status |
 | --- | --- | --- | --- |
-| Apple notification/reconciliation/verifier regressions | `cd accrue && mix test test/accrue/entitlements/apple_notification_test.exs test/accrue/entitlements/apple_reconciliation_test.exs test/accrue/entitlements/apple_verifier_test.exs --seed 458442` | 37 tests, 1 failure: `production V2 independently closes outer and nested signature tampering` received `{:ok, ...}` for a purportedly tampered JWS. | ✗ FAIL |
-| Warning-free compilation and diff whitespace | `cd accrue && mix compile --warnings-as-errors && git diff --check` | Exit 0 | ✓ PASS |
-| Production reconciliation endpoint identity | Source trace from `Reconciliation.run/2` to `Client` URL construction | `lineage_id` is passed at reconciliation lines 372/375 and interpolated into both Apple URLs. | ✗ FAIL |
-| Missing raw-body safety | Source trace through `NotificationPlug.raw_body_or_empty/1` | Missing assignment returns `""`, then terminal verification errors quarantine and acknowledge 200. | ✗ FAIL |
+| Complete Phase 218 executable corpus | `cd accrue && mix test test/accrue/entitlements/apple_notification_test.exs test/accrue/entitlements/apple_verifier_test.exs test/accrue/entitlements/apple_reconciliation_test.exs test/accrue/entitlements/apple_lineage_test.exs test/accrue/entitlements/apple_intake_test.exs test/accrue/entitlements/apple_observation_tracer_test.exs test/accrue/entitlements/apple_source_isolation_test.exs test/property/apple_lineage_property_test.exs test/property/apple_convergence_property_test.exs --seed 458442` | 57 tests, 2 properties, 0 failures | ✓ PASS |
+| Former raw-capture/signature/URL gaps | `mix test` at the three named test locations, seed 458442 | 3 tests, 0 failures | ✓ PASS |
+| Compile and formatting | `mix format --check-formatted … && mix compile --warnings-as-errors` | exit 0 | ✓ PASS |
+| Workspace diff whitespace | `git diff --check` | exit 0 | ✓ PASS |
 
 ### Probe Execution
 
-Step 7c: SKIPPED — no Phase 218 probes were declared and no conventional probe scripts were found.
+Step 7c: SKIPPED — no Phase 218 probe was declared and no conventional probe script exists. Executable ExUnit/property coverage is the documented acceptance mechanism.
 
-### Requirements Coverage
+### Plan Must-Haves and Requirements Coverage
+
+Every Plan 01–16 frontmatter requirement is represented below; the 16-plan artifact scan passed 52/52 artifacts. Non-file-shaped key-link entries were manually traced to their actual source functions and their associated focused tests rather than treated as missing implementation.
 
 | Requirement | Source Plans | Description | Status | Evidence |
 | --- | --- | --- | --- | --- |
-| AAPL-01 | 01, 04, 11 | Opaque UUID and bind-once ownership | ✓ SATISFIED | Locked lineage, closed unbound/conflict outcomes, and sole Projector writer remain covered. |
-| AAPL-02 | 02, 03, 09, 11, 12, 14 | Strict V2/nested verification | ? NEEDS HUMAN | The production data-envelope correction is present, but the required independent tampering test is nondeterministic and cannot certify the negative invariant. |
-| AAPL-03 | 01, 04, 07, 11, 13, 14 | Convergent non-granting, repairable evidence | ✗ BLOCKED | A missing raw body loses a genuine delivery behind a terminal 200 acknowledgement. |
-| AAPL-04 | 05, 06, 10, 11, 12, 13 | Scheduled reconciliation and lifecycle projection | ✗ BLOCKED | Production calls Apple with the local lineage UUID; status/history repair cannot work. |
-| AAPL-05 | 08 | Honest external management and deferrals | ✓ SATISFIED | Typed management/deferral and Stripe isolation are implemented. |
+| AAPL-01 | 01, 04, 11 | Opaque UUID, bind-once ownership, no reassignment | ✓ SATISFIED | Transactional tracer, conflict/private result tests, authorized repair, and mismatched-token property test pass. |
+| AAPL-02 | 02, 03, 09, 11, 12, 14, 15 | Strict V2/nested evidence verification | ✓ SATISFIED | Candidate package is absent; private fallback admission evidence and Production ES256/root/time/identity tests pass, including deterministic byte corruption. |
+| AAPL-03 | 01, 04, 07, 11, 13, 14, 15 | Convergent non-granting and repairable evidence | ✓ SATISFIED | Replay/concurrency, capture retry/no-write, durable terminal quarantine, and later-terminal retraction tests pass. |
+| AAPL-04 | 05, 06, 10, 11, 12, 13, 16 | Scheduled status/history repair and lifecycle projection | ✓ SATISFIED | Scheduled/retry/cursor/lifecycle/ordering tests pass; Production URLs use Apple original ID, not the local key. |
+| AAPL-05 | 08 | Honest external management and policy deferrals | ✓ SATISFIED | Typed exact guidance/deferral and zero-Stripe-mutation negative guard pass. |
 
-Every ID declared by the fourteen plan frontmatters is accounted for. No additional Phase 218 requirement is orphaned from plan coverage. Later phases 219–220 address offline/release work, not these Apple provider-boundary gaps; none is deferred.
+No Phase 218 requirement is orphaned: ROADMAP and all plan frontmatter map only AAPL-01 through AAPL-05. Later phases 219–220 do not defer any failed Phase 218 contract.
 
 ### Anti-Patterns Found
 
 | File | Line | Pattern | Severity | Impact |
-| --- | --- | --- | --- | --- |
-| `accrue/lib/accrue/entitlements/apple/reconciliation.ex` | 318-380 | Local persistence identity crosses the Apple provider boundary | 🛑 BLOCKER | All production reconciliation requests use an invalid original-transaction ID. |
-| `accrue/lib/accrue/entitlements/apple/notification_plug.ex` | 40, 133-146 | Missing security-critical input silently becomes empty input | 🛑 BLOCKER | A genuine notification can be permanently acknowledged without verification or wakeup. |
-| `accrue/test/fixtures/apple/server_evidence.exs` | 83-87 | Last Base64url-character mutation may not alter decoded bytes | ⚠️ WARNING | The negative cryptographic regression is non-deterministic; the focused test run failed. |
+| --- | --- | --- | --- |
+| — | — | No unreferenced `TBD`, `FIXME`, or `XXX`; no raw-evidence fallback; no Apple-to-Stripe mutation path found. | ℹ️ None | No blocker or warning. |
 
-No unreferenced `TBD`, `FIXME`, or `XXX` markers were found in Phase 218 implementation or test files.
+### Human Verification Required
+
+None. `218-VALIDATION.md` explicitly declares no manual-only acceptance checks, and executable tests cover the prior runtime invariants. There are no human-verification or UAT items.
 
 ### Gaps Summary
 
-Plan 14 fixes the previous V2 envelope-claim-level defect: a valid production outer envelope now reaches one durable wakeup. That repair is insufficient for the phase goal. The scheduled repair path uses the wrong provider identifier, and the webhook boundary can acknowledge an uncaptured body instead of asking Apple to retry. Both defects are observable in live production paths, not test-only concerns.
-
-The signature helper is a separate warning rather than an inferred production vulnerability: changing an unused Base64url bit is not a cryptographic alteration. It nevertheless invalidates the claimed regression evidence and leaves AAPL-02 behavior-unverified until a deterministic byte-changing negative test is added.
+None. The prior three blocking defects are closed with source-level wiring and named executable regressions. Durable terminal quarantine remains D-09’s terminal handling for verified invalid evidence; missing raw capture is deliberately distinct and retryable before any quarantine or persistence.
 
 ---
 
-_Verified: 2026-08-03T19:39:00Z_
+_Verified: 2026-08-03T21:16:11Z_
 _Verifier: the agent (gsd-verifier)_

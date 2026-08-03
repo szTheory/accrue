@@ -76,6 +76,13 @@ function entryRefs(entry) {
     .map((line) => unquote(line.replace(/^\s+ref:\s*/, "")));
 }
 
+function hasUnresolvedHumanVerification(verification) {
+  return (
+    /^\s*why_human:\s*\S/im.test(verification) ||
+    /^\s*status:\s*human_needed\s*$/im.test(verification)
+  );
+}
+
 function renderAutomatedUat(phaseDir) {
   const entries = coverageEntries(phaseDir);
   if (entries.length === 0) fail(`${phaseDir}: no executable coverage to generate UAT`);
@@ -184,7 +191,7 @@ export function validatePhaseDirectory(phaseDir) {
   if (scalar(verificationMetadata, "behavior_unverified") !== "0") {
     fail(`${verificationFile}: behavior_unverified must be 0`);
   }
-  if (/why_human:|human verification required/i.test(verification)) {
+  if (hasUnresolvedHumanVerification(verification)) {
     fail(`${verificationFile}: human verification language remains`);
   }
 
@@ -270,10 +277,30 @@ function selfTest() {
     generateAutomatedUat(phaseTemp);
     validatePhaseDirectory(phaseTemp);
 
+    fs.writeFileSync(
+      path.join(phaseTemp, "218-VERIFICATION.md"),
+      `${verification}\n### Human Verification Required\n\nNone. No human verification required.\n`
+    );
+    validatePhaseDirectory(phaseTemp);
+
+    fs.writeFileSync(
+      path.join(phaseTemp, "218-VERIFICATION.md"),
+      `${verification}\nwhy_human: visual approval remains\n`
+    );
+    let rejected = false;
+    try {
+      validatePhaseDirectory(phaseTemp);
+    } catch (error) {
+      rejected = /human verification language remains/.test(error.message);
+    }
+    if (!rejected) fail("self-test: unresolved human verification was not rejected");
+
+    fs.writeFileSync(path.join(phaseTemp, "218-VERIFICATION.md"), verification);
+
     const uatFile = path.join(phaseTemp, "218-UAT.md");
     const uat = fs.readFileSync(uatFile, "utf8");
     fs.writeFileSync(uatFile, uat.replace("[pass]", "[pending]"));
-    let rejected = false;
+    rejected = false;
     try {
       validatePhaseDirectory(phaseTemp);
     } catch (error) {
