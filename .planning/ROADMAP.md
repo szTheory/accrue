@@ -196,7 +196,7 @@ Plans:
   4. Scheduled status and history reconciliation repairs missed notifications and accurately represents active, grace, retry, expiry, refund, and revocation boundaries.
   5. Hosts receive honest externally-managed Apple subscription guidance, with Family Sharing and offer authoring explicitly deferred.
 
-**Plans**: 6 plans
+**Plans**: 8 plans
 
 Plans:
 
@@ -207,11 +207,12 @@ Plans:
 
 **Wave 2** *(blocked on 218-01 and 218-02 completion)*
 
-- [ ] 218-03-PLAN.md — Admit strict Apple verification and durably acknowledge bounded Notifications V2 input.
+- [ ] 218-03-PLAN.md — Admit strict Apple verification through candidate gates or the complete Jason/OTP fallback.
 
 **Wave 3** *(blocked on 218-03 completion)*
 
 - [ ] 218-04-PLAN.md — Serialize explicit unbound repair and close convergent intake dispositions.
+- [ ] 218-07-PLAN.md — Durably acknowledge bounded Notifications V2 input through the strict verifier.
 
 **Wave 4** *(blocked on 218-04 completion)*
 
@@ -219,7 +220,11 @@ Plans:
 
 **Wave 5** *(blocked on 218-05 completion)*
 
-- [ ] 218-06-PLAN.md — Normalize Apple lifecycle ordering and prove exact external management plus Stripe isolation.
+- [ ] 218-06-PLAN.md — Persist and normalize complete Apple lifecycle ordering through the sole-writer Projector.
+
+**Wave 6** *(blocked on 218-06 and 218-07 completion)*
+
+- [ ] 218-08-PLAN.md — Finalize typed Apple outcomes, exact external management, and Stripe isolation.
 
 ### Phase 219: Offline study contract
 
