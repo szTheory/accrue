@@ -310,6 +310,12 @@ defmodule Accrue.Processor.Fake do
     call({:create_subscription, params, opts})
   end
 
+  @doc "Returns the completed create result held by a provider idempotency key."
+  @spec reconcile_create_subscription(String.t()) :: {:ok, map()} | {:error, :not_found}
+  def reconcile_create_subscription(idempotency_key) when is_binary(idempotency_key) do
+    call({:reconcile_create_subscription, idempotency_key})
+  end
+
   @impl Accrue.Processor
   def retrieve_subscription(id, opts \\ []) when is_binary(id) and is_list(opts) do
     call({:retrieve_subscription, id, opts})
@@ -989,11 +995,26 @@ defmodule Accrue.Processor.Fake do
 
   def handle_call({:create_subscription, params, opts}, _from, state) do
     with_script_or_stub(state, :create_subscription, [params, opts], fn state ->
-      state = bump(state, :subscription)
-      id = id_for(:subscription, state.counters.subscription)
-      sub = build_subscription(state, id, params)
-      state = %{state | subscriptions: Map.put(state.subscriptions, id, sub)}
-      {{:ok, sub}, state}
+      case Keyword.get(opts, :idempotency_key) do
+        key when is_binary(key) ->
+          case Map.fetch(state.idempotency_cache, {:create_subscription, key}) do
+            {:ok, result} ->
+              {result, state}
+
+            :error ->
+              {result, state} = create_subscription_result(state, params)
+
+              {result,
+               %{
+                 state
+                 | idempotency_cache:
+                     Map.put(state.idempotency_cache, {:create_subscription, key}, result)
+               }}
+          end
+
+        _ ->
+          create_subscription_result(state, params)
+      end
     end)
   end
 
@@ -1001,6 +1022,17 @@ defmodule Accrue.Processor.Fake do
     with_script_or_stub(state, :retrieve_subscription, [id, opts], fn state ->
       lookup(state.subscriptions, id, state)
     end)
+  end
+
+  def handle_call({:reconcile_create_subscription, idempotency_key}, _from, state) do
+    reply =
+      Map.get(
+        state.idempotency_cache,
+        {:create_subscription, idempotency_key},
+        {:error, :not_found}
+      )
+
+    {:reply, reply, state}
   end
 
   def handle_call({:update_subscription, id, params, opts}, _from, state) do
@@ -2051,6 +2083,13 @@ defmodule Accrue.Processor.Fake do
             {:reply, result, state}
         end
     end
+  end
+
+  defp create_subscription_result(state, params) do
+    state = bump(state, :subscription)
+    id = id_for(:subscription, state.counters.subscription)
+    sub = build_subscription(state, id, params)
+    {{:ok, sub}, %{state | subscriptions: Map.put(state.subscriptions, id, sub)}}
   end
 
   defp bump_call_count(%State{call_counts: counts} = state, op) do

@@ -101,6 +101,33 @@ defmodule Accrue.Billing.SubscriptionActions do
     end
   end
 
+  @doc false
+  @spec reconcile_subscription_create(term(), String.t(), String.t()) ::
+          {:ok, map()} | {:error, term()}
+  def reconcile_subscription_create(%Customer{} = customer, _price_spec, operation_id)
+      when is_binary(operation_id) do
+    reconcile_subscription_create_for_customer(customer, operation_id)
+  end
+
+  def reconcile_subscription_create(billable, _price_spec, operation_id)
+      when is_binary(operation_id) do
+    with {:ok, customer} <- Accrue.Billing.customer(billable) do
+      reconcile_subscription_create_for_customer(customer, operation_id)
+    end
+  end
+
+  defp reconcile_subscription_create_for_customer(customer, operation_id) do
+    impl = Processor.__impl__()
+
+    if function_exported?(impl, :reconcile_create_subscription, 1) do
+      impl.reconcile_create_subscription(
+        Idempotency.key(:create_subscription, customer.id, operation_id)
+      )
+    else
+      {:error, :not_reconciled}
+    end
+  end
+
   @doc "Raising variant of `subscribe/3`."
   @spec subscribe!(term(), term(), keyword()) :: Subscription.t()
   def subscribe!(billable, price_spec, opts \\ []) do

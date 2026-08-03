@@ -138,7 +138,8 @@ defmodule Accrue.Entitlements.PurchaseDecisionTest do
   end
 
   test "an ambiguous Stripe continuation returns an operation-bound reconcile result" do
-    decision = PurchaseDecision.evaluate(snapshot([], 1), :stripe, "price_pro", catalog: catalog())
+    decision =
+      PurchaseDecision.evaluate(snapshot([], 1), :stripe, "price_pro", catalog: catalog())
 
     assert {:error, %{reason: :reconcile_required, operation_id: "purchase-operation-2"}} =
              PurchaseDecision.continue(decision, :not_a_billable, "price_pro",
@@ -151,7 +152,8 @@ defmodule Accrue.Entitlements.PurchaseDecisionTest do
   end
 
   test "Apple continuation is an externally-managed no-mutation outcome" do
-    decision = PurchaseDecision.evaluate(snapshot([], 1), :apple, "product_pro", catalog: catalog())
+    decision =
+      PurchaseDecision.evaluate(snapshot([], 1), :apple, "product_pro", catalog: catalog())
 
     assert {:error, %{reason: :externally_managed, operation_id: "apple-operation-1"}} =
              PurchaseDecision.continue(decision, :not_a_billable, "product_pro",
@@ -202,8 +204,14 @@ defmodule Accrue.Entitlements.PurchaseDecisionTest do
   end
 
   test "an ambiguous durable operation reconciles before retrying and never dispatches a second create" do
-    {:ok, account} = Accrue.Entitlements.provision_account("PurchaseDecisionUser", Ecto.UUID.generate())
-    decision = PurchaseDecision.evaluate(%{snapshot([], 1) | account_id: account.id}, :stripe, "price_pro", catalog: catalog())
+    {:ok, account} =
+      Accrue.Entitlements.provision_account("PurchaseDecisionUser", Ecto.UUID.generate())
+
+    decision =
+      PurchaseDecision.evaluate(%{snapshot([], 1) | account_id: account.id}, :stripe, "price_pro",
+        catalog: catalog()
+      )
+
     parent = self()
 
     subscribe = fn _billable, _price, _opts ->
@@ -226,14 +234,69 @@ defmodule Accrue.Entitlements.PurchaseDecisionTest do
     assert_receive :create_dispatched
 
     assert {:ok, %{id: "sub_provider_completed"}} =
-             PurchaseDecision.continue(decision, :billable, "price_pro",
-               Keyword.put(opts, :reconcile, fn _operation -> {:ok, %{id: "sub_provider_completed"}} end)
+             PurchaseDecision.continue(
+               decision,
+               :billable,
+               "price_pro",
+               Keyword.put(opts, :reconcile, fn _operation ->
+                 {:ok, %{id: "sub_provider_completed"}}
+               end)
              )
 
     refute_receive :create_dispatched
 
     assert {:ok, %{status: :already_completed, operation_id: "purchase-operation-durable"}} =
              PurchaseDecision.continue(decision, :billable, "price_pro", opts)
+  end
+
+  test "Fake returns the same provider subscription for one idempotency key" do
+    params = %{customer: "cus_fake_purchase", items: [%{price: "price_pro"}]}
+
+    assert {:ok, first} =
+             Accrue.Processor.Fake.create_subscription(params,
+               idempotency_key: "purchase-idem-key"
+             )
+
+    assert {:ok, second} =
+             Accrue.Processor.Fake.create_subscription(params,
+               idempotency_key: "purchase-idem-key"
+             )
+
+    assert first.id == second.id
+    assert [stored] = Accrue.Processor.Fake.subscriptions_on(:platform)
+    assert stored.id == first.id
+  end
+
+  test "default continuation reconciles a Fake provider success after an ambiguous response" do
+    %{customer: customer} = Accrue.Test.Factory.customer()
+
+    {:ok, account} =
+      Accrue.Entitlements.provision_account("PurchaseDecisionUser", Ecto.UUID.generate())
+
+    snapshot = %{snapshot([], 1) | account_id: account.id}
+    decision = PurchaseDecision.evaluate(snapshot, :stripe, "price_pro", catalog: catalog())
+
+    opts = [
+      snapshot: snapshot,
+      account_id: account.id,
+      product_id: "price_pro",
+      operation_id: "purchase-operation-fake-default",
+      catalog: catalog(),
+      subscribe: fn billable, price, subscribe_opts ->
+        assert {:ok, _subscription} =
+                 Accrue.Billing.SubscriptionActions.subscribe(billable, price, subscribe_opts)
+
+        {:error, :ambiguous}
+      end
+    ]
+
+    assert {:error, %{reason: :reconcile_required}} =
+             PurchaseDecision.continue(decision, customer, "price_pro", opts)
+
+    assert {:ok, %{id: "sub_fake_00001"}} =
+             PurchaseDecision.continue(decision, customer, "price_pro", opts)
+
+    assert 1 == length(Accrue.Processor.Fake.subscriptions_on(:platform))
   end
 
   defp snapshot(sources, revision) do
