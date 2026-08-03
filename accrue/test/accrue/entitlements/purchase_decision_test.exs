@@ -201,6 +201,41 @@ defmodule Accrue.Entitlements.PurchaseDecisionTest do
     assert 0 == Accrue.Processor.Fake.call_count(:create_subscription)
   end
 
+  test "an ambiguous durable operation reconciles before retrying and never dispatches a second create" do
+    {:ok, account} = Accrue.Entitlements.provision_account("PurchaseDecisionUser", Ecto.UUID.generate())
+    decision = PurchaseDecision.evaluate(%{snapshot([], 1) | account_id: account.id}, :stripe, "price_pro", catalog: catalog())
+    parent = self()
+
+    subscribe = fn _billable, _price, _opts ->
+      send(parent, :create_dispatched)
+      {:error, :ambiguous}
+    end
+
+    opts = [
+      snapshot: %{snapshot([], 1) | account_id: account.id},
+      account_id: account.id,
+      product_id: "price_pro",
+      operation_id: "purchase-operation-durable",
+      catalog: catalog(),
+      subscribe: subscribe
+    ]
+
+    assert {:error, %{reason: :reconcile_required}} =
+             PurchaseDecision.continue(decision, :billable, "price_pro", opts)
+
+    assert_receive :create_dispatched
+
+    assert {:ok, %{id: "sub_provider_completed"}} =
+             PurchaseDecision.continue(decision, :billable, "price_pro",
+               Keyword.put(opts, :reconcile, fn _operation -> {:ok, %{id: "sub_provider_completed"}} end)
+             )
+
+    refute_receive :create_dispatched
+
+    assert {:ok, %{status: :already_completed, operation_id: "purchase-operation-durable"}} =
+             PurchaseDecision.continue(decision, :billable, "price_pro", opts)
+  end
+
   defp snapshot(sources, revision) do
     %Snapshot{
       account_id: "opaque-account-id",

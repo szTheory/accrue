@@ -7,6 +7,7 @@ defmodule Accrue.Entitlements.PurchaseDecision do
   """
 
   alias Accrue.Billing.SubscriptionActions
+  alias Accrue.Entitlements.PurchaseOperation
   alias Accrue.Entitlements.Snapshot
 
   @statuses [:eligible, :block, :warn]
@@ -119,11 +120,7 @@ defmodule Accrue.Entitlements.PurchaseDecision do
         operation_id = Keyword.fetch!(opts, :operation_id)
         subscribe = Keyword.get(opts, :subscribe, &SubscriptionActions.subscribe/3)
 
-        case subscribe.(billable, price_spec, operation_id: operation_id) do
-          {:error, :ambiguous} -> reconcile_required(operation_id)
-          {:error, {:ambiguous, _}} -> reconcile_required(operation_id)
-          result -> result
-        end
+        continue_operation(current, billable, price_spec, operation_id, subscribe, opts)
     end
   end
 
@@ -209,6 +206,78 @@ defmodule Accrue.Entitlements.PurchaseDecision do
        guidance: "Reconcile this purchase before retrying."
      }}
   end
+
+  # A pending operation is a hard retry barrier. The original provider call may
+  # have succeeded after its response was lost, so a retry must reconcile the
+  # same durable identity before it can ever issue another create command.
+  defp continue_operation(decision, billable, price_spec, operation_id, subscribe, opts) do
+    case operation_for(decision, operation_id, opts) do
+      {:completed, operation} -> {:ok, %{status: :already_completed, subscription_id: operation.subscription_id, operation_id: operation_id}}
+      {:pending, operation} -> reconcile_operation(operation, operation_id, opts)
+      :none -> dispatch_operation(decision, billable, price_spec, operation_id, subscribe, opts)
+    end
+  end
+
+  defp dispatch_operation(decision, billable, price_spec, operation_id, subscribe, opts) do
+    case subscribe.(billable, price_spec, operation_id: operation_id) do
+      {:error, :ambiguous} -> pending_reconcile(decision, operation_id, opts)
+      {:error, {:ambiguous, _}} -> pending_reconcile(decision, operation_id, opts)
+      {:ok, subscription} = result -> complete_operation(decision, operation_id, subscription, opts); result
+      result -> result
+    end
+  end
+
+  defp reconcile_operation(operation, operation_id, opts) do
+    reconcile = Keyword.get(opts, :reconcile, fn _operation -> {:error, :not_reconciled} end)
+
+    case reconcile.(operation) do
+      {:ok, subscription} ->
+        complete_persisted_operation(operation, subscription, opts)
+        {:ok, subscription}
+
+      _ -> reconcile_required(operation_id)
+    end
+  end
+
+  defp pending_reconcile(decision, operation_id, opts) do
+    _ = persist_pending(decision, operation_id, opts)
+    reconcile_required(operation_id)
+  end
+
+  defp complete_operation(decision, operation_id, subscription, opts) do
+    case persist_pending(decision, operation_id, opts) do
+      %PurchaseOperation{} = operation -> complete_persisted_operation(operation, subscription, opts)
+      _ -> :ok
+    end
+  end
+
+  defp complete_persisted_operation(operation, subscription, opts) do
+    subscription_id = Map.get(subscription, :id) || Map.get(subscription, "id")
+    if is_binary(subscription_id), do: PurchaseOperation.complete(repo(opts), operation, subscription_id), else: :ok
+  end
+
+  defp operation_for(%__MODULE__{revision: _revision} = decision, operation_id, opts) do
+    with true <- persisted_account?(decision, opts),
+         %PurchaseOperation{} = operation <- PurchaseOperation.fetch(repo(opts), decision_account_id(decision, opts), operation_id) do
+      if operation.status == :completed, do: {:completed, operation}, else: {:pending, operation}
+    else
+      _ -> :none
+    end
+  end
+
+  defp persist_pending(decision, operation_id, opts) do
+    if persisted_account?(decision, opts) do
+      case PurchaseOperation.put_pending(repo(opts), decision_account_id(decision, opts), operation_id, Keyword.fetch!(opts, :product_id)) do
+        {:ok, operation} -> operation
+        _ -> PurchaseOperation.fetch(repo(opts), decision_account_id(decision, opts), operation_id)
+      end
+    end
+  end
+
+  defp persisted_account?(%__MODULE__{} = decision, opts),
+    do: Ecto.UUID.cast(decision_account_id(decision, opts)) != :error
+  defp decision_account_id(_decision, opts), do: Keyword.get(opts, :account_id)
+  defp repo(opts), do: Keyword.get(opts, :repo, Accrue.Repo.repo())
 
   defp maybe_audit(decision, reason, actor_id, opts) do
     case Keyword.get(opts, :audit) do
