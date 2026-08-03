@@ -22,6 +22,7 @@ defmodule Accrue.Entitlements.Snapshot do
   @type source :: %{
           required(:rail) => atom(),
           required(:environment) => atom(),
+          required(:logical_plan) => atom(),
           required(:effective_at) => DateTime.t(),
           optional(:expires_at) => DateTime.t() | nil,
           optional(:revoked_at) => DateTime.t() | nil
@@ -56,7 +57,10 @@ defmodule Accrue.Entitlements.Snapshot do
       sources:
         sources
         |> MapSet.to_list()
-        |> Enum.sort_by(&{&1.rail, &1.environment, &1.effective_at, &1.expires_at, &1.revoked_at}),
+        |> Enum.sort_by(
+          &{&1.rail, &1.environment, &1.logical_plan, &1.effective_at, &1.expires_at,
+           &1.revoked_at}
+        ),
       authorization_bounds: authorization_bounds
     }
   end
@@ -72,7 +76,7 @@ defmodule Accrue.Entitlements.Snapshot do
     {snapshot.plans, snapshot.features, snapshot.quantities,
      Enum.map(
        snapshot.sources,
-       &Map.take(&1, [:rail, :environment, :effective_at, :expires_at, :revoked_at])
+       &Map.take(&1, [:rail, :environment, :logical_plan, :effective_at, :expires_at, :revoked_at])
      )}
   end
 
@@ -113,17 +117,18 @@ defmodule Accrue.Entitlements.Snapshot do
 
         {MapSet.put(plans, plan),
          MapSet.union(features, MapSet.new(Map.get(product, :features, []))), merged_quantities,
-         MapSet.put(sources, source(grant)),
+         MapSet.put(sources, source(grant, plan)),
          Map.update(authorization_bounds, plan, bounds(grant), &merge_bounds(&1, bounds(grant)))}
     end
   end
 
   defp product_key(grant), do: {grant.rail, grant.environment, grant.provider_product_id}
 
-  defp source(grant) do
+  defp source(grant, logical_plan) do
     %{
       rail: grant.rail,
       environment: grant.environment,
+      logical_plan: logical_plan,
       effective_at: grant.effective_at,
       expires_at: grant.expires_at,
       revoked_at: grant.superseded_at

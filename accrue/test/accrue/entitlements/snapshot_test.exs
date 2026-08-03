@@ -32,6 +32,7 @@ defmodule Accrue.Entitlements.SnapshotTest do
     assert snapshot.features == [:analytics, :exports, :priority_support]
     assert snapshot.quantities == %{seats: 5}
     assert Enum.map(snapshot.sources, & &1.rail) == [:apple, :stripe]
+    assert Enum.map(snapshot.sources, & &1.logical_plan) == [:pro, :pro]
     refute inspect(snapshot) =~ "stripe-lineage"
     refute inspect(snapshot) =~ "apple-lineage"
   end

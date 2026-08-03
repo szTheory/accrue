@@ -120,17 +120,10 @@ defmodule Accrue.Entitlements.PurchaseDecision do
 
   def continue(%__MODULE__{}, _billable, _price_spec, _opts), do: {:error, :unsupported_rail}
 
-  defp evaluate_live(snapshot, target_rail, logical_plan, catalog) do
+  defp evaluate_live(snapshot, target_rail, logical_plan, _catalog) do
     sources =
       Enum.filter(snapshot.sources, fn source ->
-        source.rail != target_rail and
-          Enum.any?(catalog, fn
-            {{rail, environment, _product_id}, ^logical_plan} ->
-              rail == source.rail and environment == source.environment
-
-            _ ->
-              false
-          end)
+        source.rail != target_rail and source.logical_plan == logical_plan
       end)
 
     if sources == [] do

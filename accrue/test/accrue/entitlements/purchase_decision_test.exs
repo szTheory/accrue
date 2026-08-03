@@ -30,6 +30,13 @@ defmodule Accrue.Entitlements.PurchaseDecisionTest do
              )
   end
 
+  test "does not over-block another plan on the same source rail" do
+    snapshot = snapshot([source(:apple, :starter), source(:apple, :team)], 2)
+
+    assert %PurchaseDecision{status: :eligible, sources: []} =
+             PurchaseDecision.evaluate(snapshot, :stripe, "price_pro", catalog: catalog())
+  end
+
   test "fails closed for missing, stale, repairing, and ambiguous snapshot states" do
     for {snapshot, reason} <- [
           {nil, :missing_snapshot},
@@ -133,8 +140,15 @@ defmodule Accrue.Entitlements.PurchaseDecisionTest do
     }
   end
 
-  defp source(rail) do
-    %{rail: rail, environment: :production, effective_at: @now, expires_at: nil, revoked_at: nil}
+  defp source(rail, logical_plan \\ :pro) do
+    %{
+      rail: rail,
+      environment: :production,
+      logical_plan: logical_plan,
+      effective_at: @now,
+      expires_at: nil,
+      revoked_at: nil
+    }
   end
 
   defp catalog,
