@@ -167,13 +167,16 @@ defmodule Accrue.Entitlements.ProjectorPropertyTest do
 
     on_exit(fn ->
       {entitlements, rails, default_rail} = original
-      Application.put_env(:accrue, :entitlements, entitlements)
-      Application.put_env(:accrue, :rails, rails)
-      Application.put_env(:accrue, :default_rail, default_rail)
+      restore_env(:entitlements, entitlements)
+      restore_env(:rails, rails)
+      restore_env(:default_rail, default_rail)
     end)
 
     :ok
   end
+
+  defp restore_env(key, nil), do: Application.delete_env(:accrue, key)
+  defp restore_env(key, value), do: Application.put_env(:accrue, key, value)
 
   property "repeated identical qualified evidence is idempotent in PostgreSQL" do
     check all(order <- integer(1..1_000_000)) do

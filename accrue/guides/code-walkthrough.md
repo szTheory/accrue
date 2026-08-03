@@ -142,7 +142,13 @@ end
 defp do_subscribe_supported(%Customer{} = customer, price_spec, opts) do
   {price_id, quantity} = normalize_price_spec(price_spec)
   op_id = resolve_operation_id(opts)
-  idem_key = Idempotency.key(:create_subscription, customer.id, op_id)
+  idem_key =
+    Idempotency.key(
+      :create_subscription,
+      customer.id,
+      op_id,
+      subscribe_sequence(price_id, quantity, opts)
+    )
 
   {item_params, trial_end} = build_subscribe_params({price_id, quantity}, opts)
 

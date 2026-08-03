@@ -138,7 +138,7 @@ defmodule Accrue.Docs.ArchitectureCodeWalkthroughTest do
         )
       },
       {
-        "Idempotency.key(:create_subscription, customer.id, op_id)",
+        "subscribe_sequence(price_id, quantity, opts)",
         Path.expand("../../../lib/accrue/billing/subscription_actions.ex", __DIR__)
       },
       {

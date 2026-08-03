@@ -31,13 +31,16 @@ defmodule Accrue.Entitlements.ProjectorTest do
     Application.put_env(:accrue, :default_rail, :stripe)
 
     on_exit(fn ->
-      Application.put_env(:accrue, :entitlements, original)
-      Application.put_env(:accrue, :rails, original_rails)
-      Application.put_env(:accrue, :default_rail, original_default_rail)
+      restore_env(:entitlements, original)
+      restore_env(:rails, original_rails)
+      restore_env(:default_rail, original_default_rail)
     end)
 
     {:ok, account: account!("projector-owner")}
   end
+
+  defp restore_env(key, nil), do: Application.delete_env(:accrue, key)
+  defp restore_env(key, value), do: Application.put_env(:accrue, key, value)
 
   test "projects qualified cross-rail observations through SQL state, audit, Oban, and public snapshot",
        %{account: account} do

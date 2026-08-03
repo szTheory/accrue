@@ -60,6 +60,36 @@ Ecto.Adapters.SQL.Sandbox.mode(Accrue.TestRepo, {:shared, self()})
     Ecto.Migrator.run(repo, "priv/repo/migrations", :up, all: true, log: false)
   end)
 
+# Some integration tests intentionally leave the SQL sandbox to exercise real
+# concurrency and process boundaries. Reset the dedicated test database at the
+# start of every Mix run so those committed rows cannot make a later local or
+# CI run order-dependent. Keep migration history intact, then let each test's
+# sandbox transaction provide the usual per-test isolation.
+%Postgrex.Result{rows: rows} =
+  Ecto.Adapters.SQL.query!(
+    Accrue.TestRepo,
+    """
+    SELECT quote_ident(schemaname) || '.' || quote_ident(tablename)
+    FROM pg_tables
+    WHERE schemaname IN ('billing', 'public')
+      AND tablename <> 'schema_migrations'
+    ORDER BY schemaname, tablename
+    """,
+    []
+  )
+
+case Enum.map_join(rows, ", ", fn [table] -> table end) do
+  "" ->
+    :ok
+
+  tables ->
+    Ecto.Adapters.SQL.query!(
+      Accrue.TestRepo,
+      "TRUNCATE TABLE #{tables} RESTART IDENTITY CASCADE",
+      []
+    )
+end
+
 Ecto.Adapters.SQL.Sandbox.mode(Accrue.TestRepo, :manual)
 
 # Start Oban in :manual testing mode against Accrue.TestRepo so Plan 05's

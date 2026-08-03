@@ -244,7 +244,8 @@ defmodule Accrue.Billing.SubscriptionCancelTest do
   describe "update_quantity multi-item guard" do
     test "raises MultiItemSubscription on multi-item subs", %{customer: customer} do
       # Seed a subscription then manually insert a second item to exercise the guard.
-      {:ok, sub} = Billing.subscribe(customer, "price_basic")
+      {:ok, sub} =
+        Billing.subscribe(customer, "price_basic", operation_id: "multi-item-guard-subscription")
 
       {:ok, _extra} =
         %SubscriptionItem{}
