@@ -60,10 +60,12 @@ defmodule Accrue.Entitlements.Apple.Reconciliation.Admission do
          },
          facts
        ) do
-    facts["originalTransactionId"] == original and facts["appAccountToken"] == account_id
+    if facts["originalTransactionId"] == original and facts["appAccountToken"] == account_id,
+      do: :ok,
+      else: :verification_failed
   end
 
-  defp bound_lineage?(_, _), do: false
+  defp bound_lineage?(_, _), do: :verification_failed
 
   defp evidence(facts, raw, environment, account, config) do
     with original when is_binary(original) and byte_size(original) in 1..255 <-
@@ -106,9 +108,11 @@ defmodule Accrue.Entitlements.Apple.Reconciliation.Admission do
   defp apple_time(value) when is_integer(value),
     do: DateTime.from_unix(value, :millisecond) |> elem(1)
 
-  defp apple_time(value) when is_binary(value), do: case(Integer.parse(value)) do
-    {number, ""} -> apple_time(number)
-    _ -> nil
+  defp apple_time(value) when is_binary(value) do
+    case Integer.parse(value) do
+      {number, ""} -> apple_time(number)
+      _ -> nil
+    end
   end
 
   defp apple_time(_), do: nil

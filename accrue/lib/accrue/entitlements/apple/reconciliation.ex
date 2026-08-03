@@ -249,28 +249,34 @@ defmodule Accrue.Entitlements.Apple.Reconciliation do
       checkpoint = lock_checkpoint(repo, lineage_id, environment)
       fingerprint = query_fingerprint(filters)
 
+      result =
+        cond do
+          checkpoint.query_fingerprint not in [nil, fingerprint] and
+              not is_nil(checkpoint.pending_revision) ->
+            mark_repair(repo, checkpoint, :cursor_corruption)
+
+          checkpoint.attempts >= @max_attempts ->
+            mark_repair(repo, checkpoint, :attempts_exhausted)
+
+          true ->
+            reconcile_page(
+              repo,
+              checkpoint,
+              client,
+              lineage_id,
+              environment,
+              filters,
+              fingerprint,
+              now,
+              opts
+            )
+        end
+
       {:ok,
-       cond do
-         checkpoint.query_fingerprint not in [nil, fingerprint] and
-             not is_nil(checkpoint.pending_revision) ->
-           mark_repair(repo, checkpoint, :cursor_corruption)
-
-         checkpoint.attempts >= @max_attempts ->
-           mark_repair(repo, checkpoint, :attempts_exhausted)
-
-         true ->
-           reconcile_page(
-             repo,
-             checkpoint,
-             client,
-             lineage_id,
-             environment,
-             filters,
-             fingerprint,
-             now,
-             opts
-           )
-       end}
+       if(match?({:error, _}, result),
+         do: schedule_retry(repo, checkpoint, result, now),
+         else: result
+       )}
     end)
   end
 

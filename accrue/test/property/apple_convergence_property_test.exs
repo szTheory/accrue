@@ -119,7 +119,7 @@ defmodule Accrue.Entitlements.AppleConvergencePropertyTest do
         Accrue.TestRepo.all(
           from(grant in Grant,
             where: grant.account_id == ^account.id,
-            select: {grant.logical_plan, grant.superseded_at}
+            select: {grant.logical_plan, not is_nil(grant.superseded_at)}
           )
         )
 

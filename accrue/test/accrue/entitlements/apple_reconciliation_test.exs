@@ -100,8 +100,8 @@ defmodule Accrue.Entitlements.AppleReconciliationTest do
       Client.Fake.new(
         statuses: [{:ok, []}],
         history: [
-          {:ok, %{signed_transactions: ["page-1"], revision: "r1", has_more: true}},
-          {:ok, %{signed_transactions: ["page-2"], revision: "r2", has_more: false}}
+          {:ok, %{signed_transactions: [], revision: "r1", has_more: true}},
+          {:ok, %{signed_transactions: [], revision: "r2", has_more: false}}
         ]
       )
 
