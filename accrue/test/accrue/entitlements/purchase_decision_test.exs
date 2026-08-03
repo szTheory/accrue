@@ -46,6 +46,29 @@ defmodule Accrue.Entitlements.PurchaseDecisionTest do
              PurchaseDecision.evaluate(snapshot, :stripe, "price_pro", catalog: catalog())
   end
 
+  test "never infers equivalence from incidental grant or identity attributes" do
+    incidental =
+      source(:apple, :starter)
+      |> Map.merge(%{
+        provider_id: "price_pro",
+        customer_id: "customer@example.test",
+        email: "customer@example.test",
+        device_id: "device-1",
+        features: [:reports],
+        quantity: 99
+      })
+
+    assert %PurchaseDecision{status: :eligible} =
+             PurchaseDecision.evaluate(snapshot([incidental], 2), :stripe, "price_pro",
+               catalog: catalog()
+             )
+
+    assert %PurchaseDecision{status: :block, reason: :unmapped_target} =
+             PurchaseDecision.evaluate(snapshot([], 2), :stripe, "unmapped-product",
+               catalog: catalog()
+             )
+  end
+
   test "fails closed for missing, stale, repairing, and ambiguous snapshot states" do
     for {snapshot, reason} <- [
           {nil, :missing_snapshot},
@@ -195,6 +218,90 @@ defmodule Accrue.Entitlements.PurchaseDecisionTest do
     end
   end
 
+  test "both public telemetry families emit start, stop, and exception with bounded metadata" do
+    events = [
+      [:accrue, :entitlements, :purchase_decision, :start],
+      [:accrue, :entitlements, :purchase_decision, :stop],
+      [:accrue, :entitlements, :purchase_decision, :exception],
+      [:accrue, :entitlements, :override_purchase_decision, :start],
+      [:accrue, :entitlements, :override_purchase_decision, :stop],
+      [:accrue, :entitlements, :override_purchase_decision, :exception]
+    ]
+
+    handler = {__MODULE__, make_ref()}
+    parent = self()
+
+    :ok =
+      :telemetry.attach_many(
+        handler,
+        events,
+        fn event, _measurements, metadata, _ ->
+          send(parent, {:telemetry, event, metadata})
+        end,
+        nil
+      )
+
+    decision =
+      PurchaseDecision.evaluate(snapshot([source(:apple)], 3), :stripe, "price_pro",
+        catalog: catalog()
+      )
+
+    try do
+      _ =
+        Accrue.Entitlements.purchase_decision("opaque-account", :stripe, "price_pro",
+          snapshot: snapshot([], 1),
+          catalog: catalog(),
+          actor_id: "actor@example.test"
+        )
+
+      _ =
+        Accrue.Entitlements.override_purchase_decision(decision, "approved", "actor@example.test",
+          snapshot: snapshot([source(:apple)], 3),
+          product_id: "price_pro",
+          catalog: catalog()
+        )
+
+      assert_raise FunctionClauseError, fn ->
+        Accrue.Entitlements.purchase_decision("opaque-account", "not-a-rail", "price_pro",
+          snapshot: snapshot([], 1),
+          catalog: catalog()
+        )
+      end
+
+      assert_raise KeyError, fn ->
+        Accrue.Entitlements.override_purchase_decision(decision, "approved", "actor@example.test",
+          snapshot: snapshot([source(:apple)], 3),
+          catalog: catalog()
+        )
+      end
+
+      for event <- events do
+        assert_receive {:telemetry, ^event, metadata}
+
+        assert Map.keys(metadata) --
+                 [
+                   :revision,
+                   :action,
+                   :rail,
+                   :environment,
+                   :disposition,
+                   :reason,
+                   :account_id,
+                   :actor_id,
+                   :telemetry_span_context,
+                   :kind,
+                   :reason,
+                   :stacktrace
+                 ] == []
+
+        refute contains_key?(metadata, :email)
+        refute inspect(metadata) =~ "actor@example.test"
+      end
+    after
+      :telemetry.detach(handler)
+    end
+  end
+
   test "continuation refuses a changed blocking state before any provider command" do
     stale = PurchaseDecision.evaluate(snapshot([], 1), :stripe, "price_pro", catalog: catalog())
 
@@ -205,6 +312,52 @@ defmodule Accrue.Entitlements.PurchaseDecisionTest do
                operation_id: "purchase-operation-1",
                catalog: catalog()
              )
+  end
+
+  test "stale override is neither audited nor upgraded" do
+    stale =
+      PurchaseDecision.evaluate(snapshot([source(:apple)], 1), :stripe, "price_pro",
+        catalog: catalog()
+      )
+
+    parent = self()
+
+    assert %PurchaseDecision{status: :block, reason: :changed_revision} =
+             PurchaseDecision.override(stale, "approved", "actor",
+               snapshot: snapshot([source(:apple)], 2),
+               product_id: "price_pro",
+               catalog: catalog(),
+               audit: fn audit -> send(parent, {:audit, audit}) end
+             )
+
+    refute_receive {:audit, _}
+  end
+
+  test "concurrent Apple completion records only a bounded diagnostic and no lifecycle action" do
+    decision =
+      PurchaseDecision.evaluate(snapshot([], 1), :stripe, "price_pro", catalog: catalog())
+
+    parent = self()
+
+    assert {:error, :purchase_blocked} =
+             PurchaseDecision.continue(decision, :not_a_billable, "price_pro",
+               snapshot: snapshot([source(:apple)], 2),
+               product_id: "price_pro",
+               operation_id: "apple-race-operation",
+               catalog: catalog(),
+               diagnostic: fn diagnostic -> send(parent, {:diagnostic, diagnostic}) end
+             )
+
+    assert_receive {:diagnostic,
+                    %{
+                      action: :concurrent_apple_completion,
+                      disposition: :diagnostic_conflict,
+                      sources: [%{rail: :apple}]
+                    }}
+
+    for callback <- [:cancel_subscription, :create_refund, :create_transfer, :update_subscription] do
+      assert 0 == Accrue.Processor.Fake.call_count(callback)
+    end
   end
 
   test "an ambiguous Stripe continuation returns an operation-bound reconcile result" do
@@ -399,9 +552,7 @@ defmodule Accrue.Entitlements.PurchaseDecisionTest do
     }
 
   defp contains_key?(term, key) when is_map(term),
-    do:
-      Map.has_key?(term, key) or
-        Enum.any?(term, fn {_key, value} -> contains_key?(value, key) end)
+    do: Map.has_key?(term, key) or Enum.any?(Map.values(term), &contains_key?(&1, key))
 
   defp contains_key?(term, key) when is_list(term), do: Enum.any?(term, &contains_key?(&1, key))
   defp contains_key?(_term, _key), do: false

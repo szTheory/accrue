@@ -112,6 +112,7 @@ defmodule Accrue.Entitlements.PurchaseDecision do
 
     cond do
       current.status == :block ->
+        maybe_record_apple_conflict(decision, current, opts)
         {:error, :purchase_blocked}
 
       current.revision != decision.revision ->
@@ -214,6 +215,32 @@ defmodule Accrue.Entitlements.PurchaseDecision do
        guidance: "Reconcile this purchase before retrying."
      }}
   end
+
+  defp maybe_record_apple_conflict(
+         %__MODULE__{status: status},
+         %__MODULE__{reason: :equivalent_other_rail, sources: sources} = current,
+         opts
+       )
+       when status != :block do
+    if Enum.any?(sources, &(&1.rail == :apple)) do
+      case Keyword.get(opts, :diagnostic) do
+        diagnostic when is_function(diagnostic, 1) ->
+          diagnostic.(%{
+            action: :concurrent_apple_completion,
+            disposition: :diagnostic_conflict,
+            reason: :equivalent_other_rail,
+            target_rail: current.target_rail,
+            revision: current.revision,
+            sources: Enum.map(sources, &Map.take(&1, [:rail, :environment]))
+          })
+
+        _ ->
+          :ok
+      end
+    end
+  end
+
+  defp maybe_record_apple_conflict(_decision, _current, _opts), do: :ok
 
   # A pending operation is a hard retry barrier. The original provider call may
   # have succeeded after its response was lost, so a retry must reconcile the
