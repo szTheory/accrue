@@ -111,6 +111,19 @@ defmodule Accrue.Entitlements.PurchaseDecision do
       )
 
     cond do
+      current.status == :block and approved_warning_current?(decision, current) ->
+        operation_id = Keyword.fetch!(opts, :operation_id)
+        subscribe = Keyword.get(opts, :subscribe, &SubscriptionActions.subscribe/3)
+
+        continue_operation(
+          current,
+          billable,
+          price_spec,
+          operation_id,
+          subscribe,
+          Keyword.merge(opts, billable: billable, price_spec: price_spec)
+        )
+
       current.status == :block ->
         maybe_record_apple_conflict(decision, current, opts)
         {:error, :purchase_blocked}
@@ -242,6 +255,16 @@ defmodule Accrue.Entitlements.PurchaseDecision do
 
   defp maybe_record_apple_conflict(_decision, _current, _opts), do: :ok
 
+  # A warning is an audited approval of one precise, still-current block. It
+  # cannot be forged from a different decision or carried across a revision.
+  defp approved_warning_current?(%__MODULE__{status: :warn} = warning, %__MODULE__{} = current) do
+    warning.reason == current.reason and warning.target_rail == current.target_rail and
+      warning.logical_plan == current.logical_plan and warning.revision == current.revision and
+      warning.sources == current.sources
+  end
+
+  defp approved_warning_current?(_, _), do: false
+
   # A pending operation is a hard retry barrier. The original provider call may
   # have succeeded after its response was lost, so a retry must reconcile the
   # same durable identity before it can ever issue another create command.
@@ -259,7 +282,34 @@ defmodule Accrue.Entitlements.PurchaseDecision do
         reconcile_operation(operation, operation_id, opts)
 
       :none ->
+        claim_and_dispatch(decision, billable, price_spec, operation_id, subscribe, opts)
+    end
+  end
+
+  defp claim_and_dispatch(decision, billable, price_spec, operation_id, subscribe, opts) do
+    case claim_pending(decision, operation_id, opts) do
+      {:claimed, _operation} ->
         dispatch_operation(decision, billable, price_spec, operation_id, subscribe, opts)
+
+      {:completed, operation} ->
+        {:ok,
+         %{
+           status: :already_completed,
+           subscription_id: operation.subscription_id,
+           operation_id: operation_id
+         }}
+
+      {:pending, operation} ->
+        reconcile_operation(operation, operation_id, opts)
+
+      :none ->
+        # No durable account is available for this continuation. Preserve the
+        # existing in-memory compatibility behavior, but never bypass a claim
+        # when an account identifier is present.
+        dispatch_operation(decision, billable, price_spec, operation_id, subscribe, opts)
+
+      :error ->
+        reconcile_required(operation_id)
     end
   end
 
@@ -272,8 +322,10 @@ defmodule Accrue.Entitlements.PurchaseDecision do
         pending_reconcile(decision, operation_id, opts)
 
       {:ok, subscription} = result ->
-        complete_operation(decision, operation_id, subscription, opts)
-        result
+        case complete_operation(decision, operation_id, subscription, opts) do
+          :ok -> result
+          :error -> reconcile_required(operation_id)
+        end
 
       result ->
         result
@@ -292,27 +344,23 @@ defmodule Accrue.Entitlements.PurchaseDecision do
 
     case reconcile.(operation) do
       {:ok, subscription} ->
-        complete_persisted_operation(operation, subscription, opts)
-        {:ok, subscription}
+        case complete_persisted_operation(operation, subscription, opts) do
+          {:ok, _} -> {:ok, subscription}
+          _ -> reconcile_required(operation_id)
+        end
 
       _ ->
         reconcile_required(operation_id)
     end
   end
 
-  defp pending_reconcile(decision, operation_id, opts) do
-    _ = persist_pending(decision, operation_id, opts)
-    reconcile_required(operation_id)
-  end
+  defp pending_reconcile(_decision, operation_id, _opts), do: reconcile_required(operation_id)
 
   defp complete_operation(decision, operation_id, subscription, opts) do
-    case persist_pending(decision, operation_id, opts) do
-      %PurchaseOperation{} = operation ->
-        complete_persisted_operation(operation, subscription, opts)
-
-      _ ->
-        :ok
-    end
+    with {:pending, operation} <- operation_for(decision, operation_id, opts),
+         {:ok, _} <- complete_persisted_operation(operation, subscription, opts),
+         do: :ok,
+         else: (_ -> :error)
   end
 
   defp complete_persisted_operation(operation, subscription, opts) do
@@ -320,7 +368,7 @@ defmodule Accrue.Entitlements.PurchaseDecision do
 
     if is_binary(subscription_id),
       do: PurchaseOperation.complete(repo(opts), operation, subscription_id),
-      else: :ok
+      else: {:error, :missing_subscription_id}
   end
 
   defp operation_for(%__MODULE__{revision: _revision} = decision, operation_id, opts) do
@@ -333,20 +381,28 @@ defmodule Accrue.Entitlements.PurchaseDecision do
     end
   end
 
-  defp persist_pending(decision, operation_id, opts) do
+  defp claim_pending(decision, operation_id, opts) do
     if persisted_account?(decision, opts) do
-      case PurchaseOperation.put_pending(
+      case PurchaseOperation.claim_pending(
              repo(opts),
              decision_account_id(decision, opts),
              operation_id,
              Keyword.fetch!(opts, :product_id)
            ) do
-        {:ok, operation} ->
-          operation
+        {:claimed, operation} ->
+          {:claimed, operation}
+
+        {:existing, %PurchaseOperation{status: :completed} = operation} ->
+          {:completed, operation}
+
+        {:existing, %PurchaseOperation{} = operation} ->
+          {:pending, operation}
 
         _ ->
-          PurchaseOperation.fetch(repo(opts), decision_account_id(decision, opts), operation_id)
+          :error
       end
+    else
+      :none
     end
   end
 

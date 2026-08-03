@@ -33,7 +33,14 @@ defmodule Accrue.Entitlements.PurchaseOperation do
     )
   end
 
-  def put_pending(repo, account_id, operation_id, product_id) do
+  @doc """
+  Claims an operation before a provider create is dispatched.
+
+  The database's account/operation unique index is the synchronization point:
+  exactly one caller receives `:claimed`; every contender receives the durable
+  operation that it must reconcile instead of creating another subscription.
+  """
+  def claim_pending(repo, account_id, operation_id, product_id) do
     attrs = %{
       account_id: account_id,
       operation_id: operation_id,
@@ -42,10 +49,14 @@ defmodule Accrue.Entitlements.PurchaseOperation do
       status: :pending_reconcile
     }
 
-    repo.insert(changeset(%__MODULE__{}, attrs),
-      on_conflict: :nothing,
-      conflict_target: [:account_id, :operation_id]
-    )
+    case repo.insert(changeset(%__MODULE__{}, attrs),
+           on_conflict: :nothing,
+           conflict_target: [:account_id, :operation_id]
+         ) do
+      {:ok, %__MODULE__{id: nil}} -> {:existing, fetch(repo, account_id, operation_id)}
+      {:ok, %__MODULE__{} = operation} -> {:claimed, operation}
+      {:error, changeset} -> {:error, changeset}
+    end
   end
 
   def complete(repo, %__MODULE__{} = operation, subscription_id) do

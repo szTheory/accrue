@@ -120,11 +120,13 @@ defmodule Accrue.Entitlements.PurchaseDecisionTest do
 
     try do
       decision =
-        Accrue.Entitlements.purchase_decision("opaque-account-id", :stripe, "price_pro",
-          snapshot: snapshot([source(:apple)], 4),
-          catalog: catalog(),
-          actor_id: "operator@example.test"
-        )
+        Accrue.Actor.with_actor(%{type: :admin, id: "current-actor-secret@example.test"}, fn ->
+          Accrue.Entitlements.purchase_decision("opaque-account-id", :stripe, "price_pro",
+            snapshot: snapshot([source(:apple)], 4),
+            catalog: catalog(),
+            actor_id: "operator@example.test"
+          )
+        end)
 
       assert decision.status == :block
       assert_receive {:purchase_span, _event, metadata}
@@ -143,6 +145,8 @@ defmodule Accrue.Entitlements.PurchaseDecisionTest do
                ] == []
 
       refute inspect(metadata) =~ "operator@example.test"
+      refute Map.has_key?(metadata, :actor)
+      refute inspect(metadata) =~ "current-actor-secret@example.test"
     after
       :telemetry.detach(handler)
     end
@@ -314,6 +318,58 @@ defmodule Accrue.Entitlements.PurchaseDecisionTest do
              )
   end
 
+  test "a current audited warning dispatches once, while stale or tampered warnings cannot dispatch" do
+    current_snapshot = snapshot([source(:apple)], 7)
+
+    blocked =
+      PurchaseDecision.evaluate(current_snapshot, :stripe, "price_pro", catalog: catalog())
+
+    warning =
+      PurchaseDecision.override(blocked, "support approved", "operator",
+        snapshot: current_snapshot,
+        product_id: "price_pro",
+        catalog: catalog()
+      )
+
+    parent = self()
+
+    subscribe = fn _billable, _price, _opts ->
+      send(parent, :warning_dispatched)
+      {:ok, %{id: "sub_warning"}}
+    end
+
+    assert {:ok, %{id: "sub_warning"}} =
+             PurchaseDecision.continue(warning, :billable, "price_pro",
+               snapshot: current_snapshot,
+               product_id: "price_pro",
+               operation_id: "warning-operation",
+               catalog: catalog(),
+               subscribe: subscribe
+             )
+
+    assert_receive :warning_dispatched
+
+    assert {:error, :purchase_blocked} =
+             PurchaseDecision.continue(%{warning | sources: []}, :billable, "price_pro",
+               snapshot: current_snapshot,
+               product_id: "price_pro",
+               operation_id: "tampered-warning-operation",
+               catalog: catalog(),
+               subscribe: subscribe
+             )
+
+    assert {:error, :purchase_blocked} =
+             PurchaseDecision.continue(warning, :billable, "price_pro",
+               snapshot: snapshot([source(:apple)], 8),
+               product_id: "price_pro",
+               operation_id: "stale-warning-operation",
+               catalog: catalog(),
+               subscribe: subscribe
+             )
+
+    refute_receive :warning_dispatched
+  end
+
   test "stale override is neither audited nor upgraded" do
     stale =
       PurchaseDecision.evaluate(snapshot([source(:apple)], 1), :stripe, "price_pro",
@@ -470,6 +526,52 @@ defmodule Accrue.Entitlements.PurchaseDecisionTest do
 
     assert {:ok, %{status: :already_completed, operation_id: "purchase-operation-durable"}} =
              PurchaseDecision.continue(decision, :billable, "price_pro", opts)
+  end
+
+  test "concurrent continuations atomically claim one durable operation before provider dispatch" do
+    {:ok, account} =
+      Accrue.Entitlements.provision_account("PurchaseDecisionUser", Ecto.UUID.generate())
+
+    current_snapshot = %{snapshot([], 1) | account_id: account.id}
+
+    decision =
+      PurchaseDecision.evaluate(current_snapshot, :stripe, "price_pro", catalog: catalog())
+
+    parent = self()
+
+    opts = [
+      snapshot: current_snapshot,
+      account_id: account.id,
+      product_id: "price_pro",
+      operation_id: "concurrent-claim-operation",
+      catalog: catalog(),
+      subscribe: fn _billable, _price, _opts ->
+        send(parent, :provider_dispatch)
+
+        receive do
+          :release_provider -> {:error, :ambiguous}
+        end
+      end,
+      reconcile: fn _operation ->
+        send(parent, :reconcile_attempted)
+        {:error, :not_yet_reconciled}
+      end
+    ]
+
+    first =
+      Task.async(fn -> PurchaseDecision.continue(decision, :billable, "price_pro", opts) end)
+
+    assert_receive :provider_dispatch
+
+    second =
+      Task.async(fn -> PurchaseDecision.continue(decision, :billable, "price_pro", opts) end)
+
+    assert_receive :reconcile_attempted
+    refute_receive :provider_dispatch, 100
+
+    send(first.pid, :release_provider)
+    assert {:error, %{reason: :reconcile_required}} = Task.await(first)
+    assert {:error, %{reason: :reconcile_required}} = Task.await(second)
   end
 
   test "Fake returns the same provider subscription for one idempotency key" do
