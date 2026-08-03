@@ -138,7 +138,7 @@ defmodule Accrue.Entitlements.CompatibilityTest do
   end
 
   test "invalid cohorts, false and raising MFA, malformed mode, stale evidence, and parity blockers fail closed" do
-    billable = %TestUser{id: Ecto.UUID.generate()}
+    {billable, account_id} = compatible_billable!()
     start = ~U[2026-08-02 10:00:00Z]
     ending = ~U[2026-08-02 10:01:00Z]
 
@@ -197,39 +197,54 @@ defmodule Accrue.Entitlements.CompatibilityTest do
 
     on_exit(fn -> :telemetry.detach(id) end)
 
-    billable = %TestUser{id: Ecto.UUID.generate()}
+    {billable, account_id} = compatible_billable!()
+    seeded = privacy_seed()
     Application.put_env(:accrue, :entitlements, multi_rail: [mode: :disabled])
-    assert {:ok, _} = Compatibility.compare(billable)
-    assert {:ok, _, _} = Compatibility.authority(billable)
-    assert {:error, :not_enabled} = Compatibility.enable(billable)
-    assert {:ok, _} = Compatibility.backfill(nil, limit: 1)
-    assert :ok = Compatibility.rollback()
+
+    telemetry_opts =
+      [account_id: account_id, actor_id: seeded.adopter_id] ++ Map.to_list(seeded)
+
+    assert {:ok, _} = Compatibility.compare(billable, telemetry_opts)
+    assert {:ok, _, _} = Compatibility.authority(billable, telemetry_opts)
+    assert {:error, :not_enabled} = Compatibility.enable(billable, telemetry_opts)
+    assert {:ok, _} = Compatibility.backfill(nil, [limit: 1] ++ telemetry_opts)
+    assert :ok = Compatibility.rollback(telemetry_opts)
 
     Enum.each([:compare, :authority, :enable, :backfill, :rollback], fn operation ->
-      assert_receive {[:accrue, :entitlements, :compatibility, ^operation, :start], metadata}
+      assert_receive {[:accrue, :entitlements, :compatibility, ^operation, :start],
+                      start_metadata}
 
-      assert Map.keys(metadata) --
-               [
-                 :revision,
-                 :action,
-                 :rail,
-                 :environment,
-                 :disposition,
-                 :reason,
-                 :cohort,
-                 :mode,
-                 :account_id,
-                 :actor_id,
-                 :telemetry_span_context
-               ] == []
+      assert_receive {[:accrue, :entitlements, :compatibility, ^operation, :stop], stop_metadata}
+
+      Enum.each([start_metadata, stop_metadata], fn metadata ->
+        assert Map.keys(metadata) --
+                 [
+                   :revision,
+                   :action,
+                   :rail,
+                   :environment,
+                   :disposition,
+                   :reason,
+                   :cohort,
+                   :mode,
+                   :account_id,
+                   :actor_id,
+                   :telemetry_span_context
+                 ] == []
+
+        refute_recursive_private(metadata, seeded)
+      end)
 
       assert_raise RuntimeError, fn ->
         if operation == :rollback,
-          do: Compatibility.rollback(raise: true),
-          else: apply(Compatibility, operation, [billable, [raise: true]])
+          do: Compatibility.rollback([raise: true] ++ telemetry_opts),
+          else: apply(Compatibility, operation, [billable, [raise: true] ++ telemetry_opts])
       end
 
-      assert_receive {[:accrue, :entitlements, :compatibility, ^operation, :exception], _}
+      assert_receive {[:accrue, :entitlements, :compatibility, ^operation, :exception],
+                      exception_metadata}
+
+      refute_recursive_private(exception_metadata, seeded)
     end)
   end
 
@@ -438,11 +453,29 @@ defmodule Accrue.Entitlements.CompatibilityTest do
   end
 
   defp refute_recursive_private(value, seed) do
-    rendered = inspect(value)
-
     for {key, private} <- seed do
-      refute String.contains?(rendered, to_string(key))
-      refute String.contains?(rendered, inspect(private))
+      refute contains_key?(value, key)
+      refute contains_value?(value, private)
     end
   end
+
+  defp contains_key?(value, key) when is_map(value),
+    do:
+      Map.has_key?(value, key) or
+        Enum.any?(Map.to_list(value), fn {_key, nested} -> contains_key?(nested, key) end)
+
+  defp contains_key?(value, key) when is_list(value),
+    do: Enum.any?(value, &contains_key?(&1, key))
+
+  defp contains_key?(_, _), do: false
+
+  defp contains_value?(value, private) when value == private, do: true
+
+  defp contains_value?(value, private) when is_map(value),
+    do: Enum.any?(Map.to_list(value), fn {_key, nested} -> contains_value?(nested, private) end)
+
+  defp contains_value?(value, private) when is_list(value),
+    do: Enum.any?(value, &contains_value?(&1, private))
+
+  defp contains_value?(_, _), do: false
 end
