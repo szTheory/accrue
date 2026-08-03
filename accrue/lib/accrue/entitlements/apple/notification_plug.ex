@@ -34,10 +34,11 @@ defmodule Accrue.Entitlements.Apple.NotificationPlug do
       acknowledge_verification(conn, result, raw_body, opts)
     else
       {:error, :too_large} -> respond(conn, 413, :rejected)
+      {:error, :missing_raw_body} -> respond(conn, 503, :retryable)
       {:deny, _retry_after_seconds} -> respond(conn, 429, :rejected)
       {:error, :invalid_payload} -> respond(conn, 400, :rejected)
       {:error, reason} when reason in @retryable_reasons -> respond(conn, 503, :retryable)
-      {:error, reason} -> quarantine(conn, reason, raw_body_or_empty(conn), opts)
+      {:error, _reason} -> respond(conn, 503, :retryable)
     end
   rescue
     _ -> respond(conn, 503, :retryable)
@@ -131,18 +132,28 @@ defmodule Accrue.Entitlements.Apple.NotificationPlug do
   defp acknowledge_outcome(conn, _), do: respond(conn, 503, :retryable)
 
   defp raw_body(conn, opts) do
-    raw_body = raw_body_or_empty(conn)
-
-    if byte_size(raw_body) <= Keyword.fetch!(opts, :max_body_bytes),
-      do: {:ok, raw_body},
-      else: {:error, :too_large}
+    with {:ok, raw_body} <- captured_raw_body(conn) do
+      if byte_size(raw_body) <= Keyword.fetch!(opts, :max_body_bytes),
+        do: {:ok, raw_body},
+        else: {:error, :too_large}
+    end
   end
 
-  defp raw_body_or_empty(conn) do
+  defp captured_raw_body(conn) do
     case conn.assigns[:raw_body] do
-      chunks when is_list(chunks) -> chunks |> Enum.reverse() |> IO.iodata_to_binary()
-      binary when is_binary(binary) -> binary
-      _ -> ""
+      binary when is_binary(binary) and byte_size(binary) > 0 ->
+        {:ok, binary}
+
+      chunks when is_list(chunks) ->
+        if chunks != [] and Enum.all?(chunks, &is_binary/1) do
+          raw_body = chunks |> Enum.reverse() |> IO.iodata_to_binary()
+          if byte_size(raw_body) > 0, do: {:ok, raw_body}, else: {:error, :missing_raw_body}
+        else
+          {:error, :missing_raw_body}
+        end
+
+      _ ->
+        {:error, :missing_raw_body}
     end
   end
 

@@ -41,10 +41,57 @@ defmodule Accrue.Entitlements.AppleNotificationTest do
     def verify_notification("retry", _config), do: {:error, :provider_unavailable}
   end
 
+  defmodule CaptureVerifier do
+    def verify_notification(_body, _config) do
+      send(self(), :verifier_called)
+      {:error, :wrong_bundle}
+    end
+  end
+
   test "acknowledges verified notifications only after durable intake" do
     conn = request("verified") |> NotificationPlug.call(base_opts())
 
     assert conn.status == 200
+    assert count(Intake) == 1
+    assert count(ReconciliationWakeup) == 1
+  end
+
+  test "retries a non-empty delivery whose exact raw capture is absent or unusable" do
+    for capture <- [:missing, "", [], ["payload", :not_a_binary], %{body: "payload"}] do
+      conn = conn(:post, "/apple/notifications", "payload")
+
+      conn =
+        if capture == :missing,
+          do: conn,
+          else: Plug.Conn.assign(conn, :raw_body, capture)
+
+      assert conn
+             |> NotificationPlug.call(
+               base_opts(
+                 verifier: CaptureVerifier,
+                 intake: fn _evidence -> send(self(), :intake_called) end
+               )
+             )
+             |> Map.fetch!(:status) == 503
+
+      refute_received :verifier_called
+      refute_received :intake_called
+    end
+
+    assert count(Intake) == 0
+    assert count(ReconciliationWakeup) == 0
+    assert count(Observation) == 0
+    assert count(Grant) == 0
+  end
+
+  test "accepts binary and reverse-captured binary chunks byte-exactly" do
+    for capture <- ["verified", ["ified", "ver"]] do
+      assert conn(:post, "/apple/notifications", "verified")
+             |> Plug.Conn.assign(:raw_body, capture)
+             |> NotificationPlug.call(base_opts())
+             |> Map.fetch!(:status) == 200
+    end
+
     assert count(Intake) == 1
     assert count(ReconciliationWakeup) == 1
   end

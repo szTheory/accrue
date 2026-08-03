@@ -34,6 +34,25 @@ scope "/webhooks" do
 end
 ```
 
+Apple App Store Server Notifications V2 must use that same dedicated pipeline:
+
+```elixir
+scope "/webhooks" do
+  pipe_through :accrue_webhook_raw_body
+
+  accrue_apple_notifications "/apple",
+    verifier_config: apple_verifier_config,
+    rate_limiter: &MyApp.AppleRateLimiter.check/1
+end
+```
+
+The host supplies the Apple verifier configuration and rate policy. If the route
+does not preserve a non-empty exact capture in `conn.assigns[:raw_body]`, Accrue
+returns a retryable `503` before verification or persistence. Do not substitute
+parsed params, reconstructed JSON, or another byte sequence. See
+[Troubleshooting — `ACCRUE-DX-WEBHOOK-RAW-BODY`](troubleshooting.md#accrue-dx-webhook-raw-body)
+for parser placement and capture diagnostics.
+
 Braintree does not require Stripe's raw-body reader. The handler still belongs
 at the same host boundary, but the plug path reads `bt_signature` and
 `bt_payload`, then passes them through `Signature.parse_braintree!/2` before

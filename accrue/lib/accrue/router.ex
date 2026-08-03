@@ -20,6 +20,14 @@ defmodule Accrue.Router do
         accrue_webhook "/stripe", :stripe
       end
 
+  Apple App Store Server Notifications V2 use the same route-scoped body reader:
+
+      scope "/webhooks" do
+        pipe_through :accrue_webhook_raw_body
+        accrue_apple_notifications "/apple", verifier_config: apple_verifier_config,
+          rate_limiter: &MyApp.AppleRateLimiter.check/1
+      end
+
   ## Multi-endpoint (Phase 4 Connect ready, D2-18)
 
   The macro accepts a processor atom. Calling `accrue_webhook/2` multiple
@@ -66,6 +74,25 @@ defmodule Accrue.Router do
   defmacro accrue_webhook(path, processor) do
     quote do
       forward(unquote(path), Accrue.Webhook.Plug, processor: unquote(processor))
+    end
+  end
+
+  @doc """
+  Mounts the Apple App Store Server Notifications V2 plug at `path`.
+
+  `opts` are host-supplied `Accrue.Entitlements.Apple.NotificationPlug` options,
+  including `:verifier_config` and optional `:rate_limiter`. Must be called inside
+  a route-scoped `Plug.Parsers` pipeline using
+  `Accrue.Webhook.CachingBodyReader.read_body/2`; otherwise the plug returns a
+  retryable `503` without verifying or persisting the notification.
+  """
+  defmacro accrue_apple_notifications(path, opts) do
+    quote do
+      forward(
+        unquote(path),
+        Accrue.Entitlements.Apple.NotificationPlug,
+        unquote(opts)
+      )
     end
   end
 
