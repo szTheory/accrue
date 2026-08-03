@@ -40,6 +40,21 @@ defmodule Accrue.Entitlements.Apple.VerifierTest do
              ]
   end
 
+  test "cryptographically valid hostile purpose chains close at the purpose predicate" do
+    for kind <- [
+          :wrong_leaf_purpose,
+          :missing_leaf_purpose,
+          :wrong_intermediate_purpose,
+          :missing_intermediate_purpose,
+          :ca_leaf,
+          :missing_digital_signature,
+          :ca_signing_only
+        ] do
+      assert {:error, :invalid_certificate_purpose} =
+               Production.verify_transaction(Evidence.hostile_transaction(kind), @config)
+    end
+  end
+
   test "algorithm, header, chain, and signature failures are closed" do
     assert {:error, :invalid_algorithm} =
              Production.verify_transaction(

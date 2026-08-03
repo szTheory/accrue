@@ -2,8 +2,12 @@ defmodule Accrue.Entitlements.AppleObservationTracerTest do
   use Accrue.RepoCase, async: false
   use Oban.Testing, repo: Accrue.TestRepo
 
+  Code.require_file("../../fixtures/apple/server_evidence.exs", __DIR__)
+
   alias Accrue.Entitlements.{Account, Grant, Observation}
   alias Accrue.Entitlements.Apple.Intake
+  alias Accrue.Entitlements.Apple.Verifier.{Config, Production}
+  alias Accrue.Test.AppleServerEvidence, as: Evidence
 
   defmodule FakeVerifier do
     def verify_notification(_, _), do: {:error, :invalid_payload}
@@ -84,6 +88,53 @@ defmodule Accrue.Entitlements.AppleObservationTracerTest do
                    "transactionId" => "txn-invalid-expiry-#{inspect(expires_date)}",
                    "expiresDate" => expires_date
                  })
+               )
+
+      assert durable_counts(account) == before
+    end
+  end
+
+  test "Production purpose variants cannot create durable entitlement effects", %{
+    account: account
+  } do
+    Application.put_env(:accrue, :apple_reconciliation,
+      admission: [
+        verifier: Production,
+        verifier_config: %Config{
+          roots: [Evidence.production_root()],
+          bundle_id: "com.accrue.test",
+          environment: :production,
+          app_apple_id: 42,
+          verifier_version: "apple-v1",
+          config_version: "test-v1"
+        },
+        product_map: %{"product_pro" => :pro},
+        verifier_version: "apple-v1",
+        config_version: "test-v1"
+      ]
+    )
+
+    assert {:ok, %Intake.Outcome{disposition: :verified, revision: 1}} =
+             Accrue.Entitlements.observe_apple_evidence(
+               account,
+               Evidence.production_transaction(%{"appAccountToken" => account.id})
+             )
+
+    before = durable_counts(account)
+
+    for kind <- [
+          :wrong_leaf_purpose,
+          :missing_leaf_purpose,
+          :wrong_intermediate_purpose,
+          :missing_intermediate_purpose,
+          :ca_leaf,
+          :missing_digital_signature,
+          :ca_signing_only
+        ] do
+      assert {:error, :invalid_certificate_purpose} =
+               Accrue.Entitlements.observe_apple_evidence(
+                 account,
+                 Evidence.hostile_transaction(kind)
                )
 
       assert durable_counts(account) == before
