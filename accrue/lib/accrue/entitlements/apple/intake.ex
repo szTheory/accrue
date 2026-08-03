@@ -351,13 +351,15 @@ defmodule Accrue.Entitlements.Apple.Intake do
 
         {:ok, snapshot} = normalize_projection(result, repo, account)
 
-        {:ok, _} =
-          Reconciliation.enqueue_in_transaction(
-            repo,
-            lineage.id,
-            evidence.environment,
-            :verified
-          )
+        unless Keyword.get(opts, :suppress_reconciliation_enqueue, false) do
+          {:ok, _} =
+            Reconciliation.enqueue_in_transaction(
+              repo,
+              lineage.id,
+              evidence.environment,
+              :verified
+            )
+        end
 
         unless Keyword.get(opts, :defer_after_write, false), do: run_after_write(opts)
 

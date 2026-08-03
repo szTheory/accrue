@@ -18,7 +18,11 @@ defmodule Accrue.Entitlements.Apple.Reconciliation.Admission do
          :ok <- bound_lineage?(lineage, facts),
          %Account{} = account <- repo.get(Account, lineage.account_id),
          {:ok, evidence} <- evidence(facts, signed_transaction, environment, account, config),
-         {:ok, _outcome} <- Intake.observe(account, evidence, repo: repo) do
+         {:ok, _outcome} <-
+           Intake.observe(account, evidence,
+             repo: repo,
+             suppress_reconciliation_enqueue: true
+           ) do
       :ok
     else
       nil -> {:error, :config_invalid}
