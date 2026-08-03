@@ -5,8 +5,50 @@ defmodule Accrue.Entitlements.AppleConvergencePropertyTest do
 
   import Ecto.Query
 
-  alias Accrue.Entitlements.{Account, Grant}
-  alias Accrue.Entitlements.Apple.Intake
+  alias Accrue.Entitlements.{Account, Grant, Snapshot}
+  alias Accrue.Entitlements.Apple.{Client, Lineage, ReconcileWorker, Reconciliation}
+  alias Accrue.Entitlements.Apple.Reconciliation.Checkpoint
+  alias Accrue.Entitlements.Apple.ReconciliationWakeupWorker
+
+  defmodule ScriptedClient do
+    @behaviour Client
+    defstruct statuses: [], pages: []
+
+    def subscription_statuses(%__MODULE__{statuses: statuses}, _, _), do: {:ok, statuses}
+
+    def transaction_history(%__MODULE__{pages: pages}, _, _, revision) do
+      Enum.find(pages, {:ok, %{signed_transactions: [], has_more: false}}, fn {:ok, page} ->
+        Map.get(page, :prior_revision) == revision
+      end)
+      |> then(fn {:ok, page} -> {:ok, Map.delete(page, :prior_revision)} end)
+    end
+
+    def notification_history(_, _, _), do: {:ok, %{notifications: []}}
+    def set_app_account_token(_, _, _, _), do: :ok
+  end
+
+  defmodule ScriptedVerifier do
+    @behaviour Accrue.Entitlements.Apple.Verifier
+    def verify_notification(_, _), do: {:error, :invalid_payload}
+    def verify_renewal(_, _), do: {:error, :invalid_payload}
+
+    def verify_transaction(event, %{account_id: account_id, original_id: original_id}) do
+      facts = %{
+        "originalTransactionId" => original_id,
+        "transactionId" => event,
+        "productId" => "product_pro",
+        "appAccountToken" => account_id,
+        "signedDate" => 1_754_000_000_000,
+        "expiresDate" => 1_800_000_000_000
+      }
+
+      {:ok,
+       if(event == "revoked",
+         do: Map.put(facts, "revocationDate", 1_754_000_000_001),
+         else: facts
+       )}
+    end
+  end
 
   setup do
     Application.put_env(:accrue, :entitlements,
@@ -16,50 +58,106 @@ defmodule Accrue.Entitlements.AppleConvergencePropertyTest do
     :ok
   end
 
-  property "verified Apple observations converge regardless of provider delivery order" do
-    check all(ordered <- member_of([[:active, :refunded], [:refunded, :active]])) do
-      {:ok, account} =
-        Account.fetch_or_create(
-          Accrue.TestRepo,
-          "property",
-          "apple-convergence-#{System.unique_integer([:positive])}"
-        )
+  property "queued Apple reconciliation converges across generated delivery and page permutations" do
+    check all(
+            order <- member_of([["active", "revoked"], ["revoked", "active"]]),
+            page_split <- member_of([1, 2])
+          ) do
+      first = reconcile_variant(order, page_split)
+      second = reconcile_variant(Enum.reverse(order), if(page_split == 1, do: 2, else: 1))
 
-      Enum.each(ordered, fn lifecycle ->
-        assert {:ok, %Intake.Outcome{disposition: :verified}} =
-                 Intake.observe(account, evidence(account, lifecycle), repo: Accrue.TestRepo)
-      end)
-
-      assert [] ==
-               Accrue.TestRepo.all(
-                 from(grant in Grant,
-                   where: grant.account_id == ^account.id and is_nil(grant.superseded_at)
-                 )
-               )
+      assert first == second
     end
   end
 
-  defp evidence(account, lifecycle) do
-    digest =
-      case lifecycle do
-        :active -> String.duplicate("a", 64)
-        :refunded -> String.duplicate("b", 64)
+  defp reconcile_variant(events, page_split) do
+    {:ok, account} =
+      Account.fetch_or_create(
+        Accrue.TestRepo,
+        "property",
+        "apple-#{System.unique_integer([:positive])}"
+      )
+
+    lineage =
+      Lineage.lock_or_insert(Accrue.TestRepo, :production, "property-original-#{account.id}")
+
+    {:claimed, lineage} = Lineage.claim(Accrue.TestRepo, lineage, account.id, account.id)
+
+    previous = Application.get_env(:accrue, :apple_reconciliation)
+
+    Application.put_env(:accrue, :apple_reconciliation,
+      client: %ScriptedClient{pages: pages(events, page_split)},
+      admission: admission(account, lineage)
+    )
+
+    try do
+      assert {:ok, _} =
+               Reconciliation.enqueue(lineage.id, :production, :property, repo: Accrue.TestRepo)
+
+      assert :ok = perform_job(ReconciliationWakeupWorker, %{})
+
+      assert :ok =
+               perform_job(ReconcileWorker, %{
+                 "lineage_id" => lineage.id,
+                 "environment" => "production",
+                 "reason" => "property"
+               })
+
+      if page_split == 1 do
+        assert :ok =
+                 perform_job(ReconcileWorker, %{
+                   "lineage_id" => lineage.id,
+                   "environment" => "production",
+                   "reason" => "continuation"
+                 })
       end
 
-    %Intake.VerifiedEvidence{
-      environment: :production,
-      original_transaction_id: "property-original-#{account.id}",
-      app_account_token: account.id,
-      provider_event_id: "property-#{account.id}-#{lifecycle}",
-      provider_transaction_id: "property-transaction-#{lifecycle}",
-      product_id: "product_pro",
-      logical_plan: :pro,
-      lifecycle: lifecycle,
-      effective_at: ~U[2026-08-03 12:00:00.000000Z],
-      signed_at: ~U[2026-08-03 12:00:00.000000Z],
-      evidence_digest: digest,
-      verifier_version: "property-v1",
-      config_version: "property-v1"
-    }
+      checkpoint =
+        Accrue.TestRepo.get_by!(Checkpoint, lineage_id: lineage.id, environment: :production)
+
+      grants =
+        Accrue.TestRepo.all(
+          from(grant in Grant,
+            where: grant.account_id == ^account.id,
+            select: {grant.logical_plan, grant.superseded_at}
+          )
+        )
+
+      snapshot =
+        Snapshot.fetch(Accrue.TestRepo, account)
+        |> Map.take([:revision, :active_plans, :features])
+
+      %{
+        snapshot: snapshot,
+        grants: grants,
+        checkpoint:
+          Map.take(checkpoint, [:pending_revision, :completed_revision, :page_count, :run_state])
+      }
+    after
+      if is_nil(previous),
+        do: Application.delete_env(:accrue, :apple_reconciliation),
+        else: Application.put_env(:accrue, :apple_reconciliation, previous)
+    end
   end
+
+  defp pages(events, 2),
+    do: [
+      {:ok,
+       %{prior_revision: nil, signed_transactions: events, revision: "done", has_more: false}}
+    ]
+
+  defp pages([first, second], 1),
+    do: [
+      {:ok,
+       %{prior_revision: nil, signed_transactions: [first], revision: "one", has_more: true}},
+      {:ok,
+       %{prior_revision: "one", signed_transactions: [second], revision: "done", has_more: false}}
+    ]
+
+  defp admission(account, lineage),
+    do: [
+      verifier: ScriptedVerifier,
+      verifier_config: %{account_id: account.id, original_id: lineage.original_transaction_id},
+      product_map: %{"product_pro" => :pro}
+    ]
 end
