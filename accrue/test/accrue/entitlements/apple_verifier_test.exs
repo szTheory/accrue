@@ -8,7 +8,7 @@ defmodule Accrue.Entitlements.Apple.VerifierTest do
   alias Accrue.Test.AppleServerEvidence, as: Evidence
 
   @config %Verifier.Config{
-    roots: [],
+    roots: [Evidence.production_root()],
     bundle_id: "com.accrue.test",
     environment: :production,
     app_apple_id: 42,
@@ -19,6 +19,25 @@ defmodule Accrue.Entitlements.Apple.VerifierTest do
   test "malformed compact input has a closed error" do
     assert {:error, :invalid_payload} =
              Production.verify_notification(Evidence.malformed(), @config)
+  end
+
+  test "a real Apple-purpose ES256 chain verifies only allowlisted transaction facts" do
+    assert {:ok, facts} =
+             Production.verify_transaction(Evidence.production_transaction(), @config)
+
+    assert facts["expiresDate"] == 1_800_000_000_000
+
+    assert Map.keys(facts) |> Enum.sort() ==
+             [
+               "appAppleId",
+               "bundleId",
+               "environment",
+               "expiresDate",
+               "originalTransactionId",
+               "productId",
+               "signedDate",
+               "transactionId"
+             ]
   end
 
   test "algorithm, header, chain, and signature failures are closed" do
