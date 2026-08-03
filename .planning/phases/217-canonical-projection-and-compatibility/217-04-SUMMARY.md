@@ -57,7 +57,7 @@ coverage:
         ref: cd accrue && mix test test/accrue/entitlements --exclude live_stripe (twice)
         status: pass
     human_judgment: false
-duration: 19min
+duration: 24min
 completed: 2026-08-03
 status: complete
 ---
@@ -68,8 +68,8 @@ status: complete
 
 ## Performance
 
-- **Duration:** 19 min
-- **Completed:** 2026-08-03T01:40:00Z
+- **Duration:** 24 min
+- **Completed:** 2026-08-03T01:45:00Z
 - **Tasks:** 2/2
 - **Files modified:** 8
 
@@ -78,6 +78,7 @@ status: complete
 - Added normalized account cohorts, MFA fail-closed handling, and digest-bound half-open clean-window validation.
 - Persisted comparison/blocker evidence plus account-scoped canonical/LocalMap transitions; rollback changes only authority state and leaves canonical rows byte-equivalent.
 - Added recursive privacy-negative telemetry proof for every start/stop/exception event, advisory isolation, and concurrent backfill convergence.
+- Proved conflicting persisted advisory summaries and Fake lifecycle counters cannot affect compatibility results; verified stable projection ambiguity and canonical repair after rollback.
 
 ## Task Commits
 
@@ -85,6 +86,7 @@ status: complete
 2. **Task 2: Backfill mapped Stripe truth idempotently and prove evidence-preserving cutover rollback** - `dd24c162`
 3. **Audit remediation: authority/evidence hardening** - `31a34a32`, `558871a5`
 4. **Durable compatibility evidence and state** - `8f1e9e31`, `567a4715`, `c0c148b8`
+5. **Targeted isolation and repair audit closure** - `64e3b908`
 
 ## Verification
 
@@ -114,6 +116,14 @@ status: complete
 - **Verification:** direct matrix (27/0), full entitlement suite twice (191/0 each), compile and format pass.
 - **Committed in:** `567a4715`, `c0c148b8`
 
+**3. [Rule 2 - Critical correctness] Added executable advisory/provider isolation and repair evidence**
+- **Found during:** final audit
+- **Issue:** Existing coverage did not persist a conflicting advisory row, assert provider lifecycle call invariance during concurrent backfill, or prove an ongoing canonical projector run after rollback.
+- **Fix:** Seeded and byte-compared a contradictory `EntitlementSummary`; captured customer/subscription/advisory bytes and Fake lifecycle counters; added repeated privacy-safe `:projection_ambiguous` blockers; and projected a qualified repair observation after rollback while LocalMap stayed authoritative.
+- **Files modified:** `accrue/lib/accrue/entitlements/compatibility_audit.ex`, `accrue/test/accrue/entitlements/compatibility_test.exs`
+- **Verification:** required direct matrix (27/0), full entitlement suite twice (191/0 each), compile and format pass.
+- **Committed in:** `64e3b908`
+
 ## Known Stubs
 
 None.
@@ -121,7 +131,7 @@ None.
 ## Self-Check: PASSED
 
 - Required source, state/audit schema, migration, and test files exist.
-- Task commits `97e40381`, `348ffa85`, `dd24c162`, `567a4715`, and `c0c148b8` exist in git history.
+- Task commits `97e40381`, `348ffa85`, `dd24c162`, `567a4715`, `c0c148b8`, and `64e3b908` exist in git history.
 
 ## User Setup Required
 
