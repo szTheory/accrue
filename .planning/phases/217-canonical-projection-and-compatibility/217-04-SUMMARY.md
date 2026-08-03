@@ -59,32 +59,33 @@ status: complete
 
 # Phase 217 Plan 04: Canonical Projection and Compatibility Summary
 
-**Fail-closed LocalMap/canonical authority lane with canonical snapshot resolution and idempotent mapped Stripe backfill.**
+**Fail-closed LocalMap/canonical authority lane with canonical legacy projection, clean-window evidence, rollback authority state, and idempotent mapped Stripe backfill.**
 
 ## Performance
 
 - **Duration:** 17 min
 - **Completed:** 2026-08-03T01:21:36Z
 - **Tasks:** 2/2
-- **Files modified:** 5
+- **Files modified:** 6
 
 ## Accomplishments
 
-- Added validated `multi_rail` modes, explicit cohort requirements, and half-open clean-window validation.
-- Added a Resolver-compatible canonical Snapshot projection and compatibility telemetry spans for comparison, authority, enablement, backfill, and rollback paths.
-- Added stable, mapped Stripe backfill with account/current-grant database identities and repeat/cursor coverage.
+- Added normalized account cohorts, MFA fail-closed handling, and clean-window digest validation.
+- Added legacy logical-plan canonical Snapshot projection and LocalMap rollback authority restoration without deleting evidence.
+- Added direct authority, rollback, telemetry, and backfill coverage; full entitlement regression passes twice.
 
 ## Task Commits
 
 1. **Task 1: Lock deterministic resolver authority and normalized shadow parity** - `97e40381`, `348ffa85`
 2. **Task 2: Backfill mapped Stripe truth idempotently and prove evidence-preserving cutover rollback** - `dd24c162`
+3. **Audit remediation: authority/evidence hardening** - `31a34a32`, `558871a5`
 
 ## Verification
 
 - `mix compile --warnings-as-errors` — pass
-- Focused compatibility/resolver/isolation suite — 20 tests, 0 failures
-- `mix test test/accrue/entitlements --exclude live_stripe` — 184 tests, 0 failures (run 1)
-- `mix test test/accrue/entitlements --exclude live_stripe` — 184 tests, 0 failures (run 2)
+- Direct compatibility suite — 8 tests, 0 failures
+- `mix test test/accrue/entitlements --exclude live_stripe` — 188 tests, 0 failures (run 1)
+- `mix test test/accrue/entitlements --exclude live_stripe` — 188 tests, 0 failures (run 2)
 
 ## Deviations from Plan
 
@@ -100,7 +101,7 @@ status: complete
 
 ## Known Stubs
 
-None.
+The remaining D-19 privacy-negative, advisory-isolation, and concurrent-backfill matrix cases require additional direct assertions before an independent audit can treat every locked detail as proved.
 
 ## Self-Check: PASSED
 
