@@ -105,6 +105,7 @@ defmodule Accrue.Entitlements.AppleObservationTracerTest do
           bundle_id: "com.accrue.test",
           environment: :production,
           app_apple_id: 42,
+          verification_time: nil,
           verifier_version: "apple-v1",
           config_version: "test-v1"
         },

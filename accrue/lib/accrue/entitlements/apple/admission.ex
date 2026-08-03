@@ -3,6 +3,7 @@ defmodule Accrue.Entitlements.Apple.Admission do
 
   alias Accrue.Entitlements.Account
   alias Accrue.Entitlements.Apple.Intake
+  alias Accrue.Entitlements.Apple.Verifier.Config
 
   @allowed_options [:environment]
 
@@ -28,12 +29,15 @@ defmodule Accrue.Entitlements.Apple.Admission do
         environment,
         %Account{} = account,
         config,
-        _opts
+        opts
       )
       when is_binary(signed_transaction) and environment in [:production, :sandbox] and
              is_list(config) do
     with verifier when is_atom(verifier) <- Keyword.get(config, :verifier),
-         verifier_config when not is_nil(verifier_config) <- Keyword.get(config, :verifier_config),
+         verifier_config when not is_nil(verifier_config) <-
+           config
+           |> Keyword.get(:verifier_config)
+           |> with_verification_time(Keyword.get(opts, :verification_time)),
          product_map when is_map(product_map) <- Keyword.get(config, :product_map),
          {:ok, facts} when is_map(facts) <-
            verifier.verify_transaction(signed_transaction, verifier_config),
@@ -55,6 +59,17 @@ defmodule Accrue.Entitlements.Apple.Admission do
       do: :ok,
       else: {:error, :invalid_input}
   end
+
+  # This internal override is intentionally unavailable through the public
+  # purchase/restore options. Non-Production verifier configurations retain
+  # their exact term so deterministic fakes stay compatible.
+  defp with_verification_time(config, nil), do: config
+
+  defp with_verification_time(%Config{} = config, verification_time)
+       when verification_time in [:current, :signed_date],
+       do: %Config{config | verification_time: verification_time}
+
+  defp with_verification_time(config, _verification_time), do: config
 
   defp evidence(facts, raw, environment, _account, config, product_map) do
     with original when is_binary(original) and byte_size(original) in 1..255 <-

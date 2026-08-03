@@ -14,7 +14,9 @@ defmodule Accrue.Entitlements.Apple.Reconciliation.Admission do
     with %Lineage{} = lineage <- locked_lineage(repo, lineage_id, environment),
          %Account{} = account <- repo.get(Account, lineage.account_id),
          {:ok, evidence} <-
-           Admission.admit_transaction(signed_transaction, environment, account, config),
+           Admission.admit_transaction(signed_transaction, environment, account, config,
+             verification_time: :signed_date
+           ),
          :ok <- bound_lineage?(lineage, evidence),
          {:ok, _outcome} <-
            Intake.observe(account, evidence,
