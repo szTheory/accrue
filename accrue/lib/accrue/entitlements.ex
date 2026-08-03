@@ -56,7 +56,7 @@ defmodule Accrue.Entitlements do
   def purchase_decision(account, rail, product_id, opts \\ []) do
     metadata = purchase_decision_metadata(account, rail, opts)
 
-    Accrue.Telemetry.span([:accrue, :entitlements, :purchase_decision], metadata, fn ->
+    Accrue.Telemetry.span_private([:accrue, :entitlements, :purchase_decision], metadata, fn ->
       case decision_snapshot(account, opts) do
         {:ok, snapshot} ->
           PurchaseDecision.evaluate(snapshot, rail, product_id,
@@ -81,25 +81,29 @@ defmodule Accrue.Entitlements do
       environment: Keyword.get(opts, :environment, :production),
       disposition: decision.status,
       reason: decision.reason,
-      account_id: Keyword.get(opts, :account_id),
+      account_id: opaque_account_id(Keyword.get(opts, :account_id)),
       actor_id: hashed_actor_id(actor_id)
     }
 
-    Accrue.Telemetry.span([:accrue, :entitlements, :override_purchase_decision], metadata, fn ->
-      PurchaseDecision.override(decision, reason, actor_id,
-        snapshot: Keyword.get(opts, :snapshot),
-        product_id: Keyword.fetch!(opts, :product_id),
-        catalog: Keyword.get(opts, :catalog) || Accrue.Config.entitlement_product_catalog(),
-        environment: Keyword.get(opts, :environment, :production),
-        audit: Keyword.get(opts, :audit)
-      )
-    end)
+    Accrue.Telemetry.span_private(
+      [:accrue, :entitlements, :override_purchase_decision],
+      metadata,
+      fn ->
+        PurchaseDecision.override(decision, reason, actor_id,
+          snapshot: Keyword.get(opts, :snapshot),
+          product_id: Keyword.fetch!(opts, :product_id),
+          catalog: Keyword.get(opts, :catalog) || Accrue.Config.entitlement_product_catalog(),
+          environment: Keyword.get(opts, :environment, :production),
+          audit: Keyword.get(opts, :audit)
+        )
+      end
+    )
   end
 
   @doc "Reads a canonical entitlement snapshot without provisioning or provider I/O."
   @spec snapshot(Account.t() | term(), keyword()) :: {:ok, Snapshot.t()} | {:error, :not_found}
   def snapshot(account_or_billable, opts \\ []) do
-    Accrue.Telemetry.span(
+    Accrue.Telemetry.span_private(
       [:accrue, :entitlements, :snapshot],
       snapshot_metadata(account_or_billable, opts),
       fn ->
@@ -116,7 +120,7 @@ defmodule Accrue.Entitlements do
           {:ok, Account.t()} | {:error, term()}
   def provision_account(owner_type, owner_id, opts \\ [])
       when is_binary(owner_type) and is_binary(owner_id) do
-    Accrue.Telemetry.span(
+    Accrue.Telemetry.span_private(
       [:accrue, :entitlements, :provision_account],
       %{
         action: :provision_account,
@@ -124,7 +128,7 @@ defmodule Accrue.Entitlements do
         reason: nil,
         revision: nil,
         account_id: nil,
-        actor_id: Keyword.get(opts, :actor_id)
+        actor_id: hashed_actor_id(Keyword.get(opts, :actor_id))
       },
       fn -> Account.fetch_or_create(Accrue.Repo.repo(), owner_type, owner_id) end
     )
@@ -339,12 +343,12 @@ defmodule Accrue.Entitlements do
       reason: nil,
       revision: nil,
       account_id: opaque_account_id(account_or_billable),
-      actor_id: Keyword.get(opts, :actor_id)
+      actor_id: hashed_actor_id(Keyword.get(opts, :actor_id))
     }
   end
 
-  defp opaque_account_id(%Account{id: id}), do: id
-  defp opaque_account_id(account_id) when is_binary(account_id), do: account_id
+  defp opaque_account_id(%Account{id: id}), do: opaque_account_id(id)
+  defp opaque_account_id(account_id) when is_binary(account_id), do: hashed_actor_id(account_id)
   defp opaque_account_id(_), do: nil
 
   # --------------------------------------------------------------------------

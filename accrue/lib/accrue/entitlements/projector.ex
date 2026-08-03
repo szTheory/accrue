@@ -22,7 +22,7 @@ defmodule Accrue.Entitlements.Projector do
   def project(%Observation{} = observation, opts \\ []) do
     metadata = metadata(observation, opts)
 
-    Accrue.Telemetry.span([:accrue, :entitlements, :projector, :project], metadata, fn ->
+    Accrue.Telemetry.span_private([:accrue, :entitlements, :projector, :project], metadata, fn ->
       do_project(observation, opts)
     end)
   end
@@ -114,7 +114,7 @@ defmodule Accrue.Entitlements.Projector do
 
   defp insert_grant!(repo, observation) do
     attrs = %{
-      account_id: observation.account_id,
+      account_id: hashed_actor_id(observation.account_id),
       source_observation_id: observation.id,
       rail: observation.rail,
       environment: observation.environment,
