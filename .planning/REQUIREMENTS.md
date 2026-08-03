@@ -30,10 +30,10 @@
 
 ### Apple Observation Rail
 
-- [ ] **AAPL-01**: An authenticated account can start or restore an Apple purchase using its opaque entitlement-account UUID as `appAccountToken`; unbound verified lineage can bind once, while email, product, device, unverified claims, and automatic reassignment of existing lineage fail closed.
-- [ ] **AAPL-02**: Accrue verifies App Store Server Notifications V2 and nested signed transaction evidence against allowed algorithms, Apple trust roots, certificate purpose/time, bundle, environment, and production app identity before changing grants.
-- [ ] **AAPL-03**: Duplicate, delayed, and out-of-order Apple evidence converges idempotently within rail/environment/lineage, while invalid, unmatched, or ownership-conflicting evidence is quarantined and retried without granting access.
-- [ ] **AAPL-04**: Scheduled Apple status and transaction-history reconciliation repairs missed notifications and projects active, grace, billing-retry, expiry, refund, and revocation bounds without widening the Stripe subscription enum or relying on notification order.
+- [x] **AAPL-01**: An authenticated account can start or restore an Apple purchase using its opaque entitlement-account UUID as `appAccountToken`; unbound verified lineage can bind once, while email, product, device, unverified claims, and automatic reassignment of existing lineage fail closed.
+- [x] **AAPL-02**: Accrue verifies App Store Server Notifications V2 and nested signed transaction evidence against allowed algorithms, Apple trust roots, certificate purpose/time, bundle, environment, and production app identity before changing grants.
+- [x] **AAPL-03**: Duplicate, delayed, and out-of-order Apple evidence converges idempotently within rail/environment/lineage, while invalid, unmatched, or ownership-conflicting evidence is quarantined and retried without granting access.
+- [x] **AAPL-04**: Scheduled Apple status and transaction-history reconciliation repairs missed notifications and projects active, grace, billing-retry, expiry, refund, and revocation bounds without widening the Stripe subscription enum or relying on notification order.
 - [ ] **AAPL-05**: A host can present Apple subscription management honestly as externally managed; v1.59 defers Family Sharing and offer-authoring policy while preserving bounded ownership and offer provenance.
 
 ### Offline Study Contract
@@ -97,7 +97,7 @@ Filled during roadmap creation. Every v1.59 requirement must map to exactly one 
 | ACCT-04 | Phase 217 | Pending |
 | ACCT-05 | Phase 217 | Pending |
 | AAPL-01 | Phase 218 | Gaps Found |
-| AAPL-02 | Phase 218 | Pending |
+| AAPL-02 | Phase 218 | Complete |
 | AAPL-03 | Phase 218 | Gaps Found |
 | AAPL-04 | Phase 218 | Gaps Found |
 | AAPL-05 | Phase 218 | Pending |
