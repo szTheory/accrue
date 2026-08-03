@@ -373,13 +373,32 @@ defmodule Accrue.Entitlements.Apple.Reconciliation do
 
     if attempt >= @max_attempts,
       do: mark_repair(repo, checkpoint, :attempts_exhausted),
-      else:
-        update_checkpoint(repo, checkpoint, %{
-          attempts: attempt,
-          run_state: :retrying,
-          retry_after_at: retry_after(error, attempt, now),
-          last_provider_class: provider_class(error)
-        })
+      else do
+        retry_at = retry_after(error, attempt, now)
+
+        checkpoint =
+          update_checkpoint(repo, checkpoint, %{
+            attempts: attempt,
+            run_state: :retrying,
+            retry_after_at: retry_at,
+            last_provider_class: provider_class(error)
+          })
+
+        retry_job =
+          Accrue.Entitlements.Apple.ReconcileWorker.new(
+            %{
+              "lineage_id" => checkpoint.lineage_id,
+              "environment" => Atom.to_string(checkpoint.environment),
+              "reason" => "retry"
+            },
+            scheduled_at: retry_at
+          )
+
+        case Oban.insert(retry_job) do
+          {:ok, _job} -> checkpoint
+          {:error, reason} -> repo.rollback({:retry_insert_failed, reason})
+        end
+      end
   end
 
   defp mark_repair(repo, checkpoint, reason),

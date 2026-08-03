@@ -39,6 +39,21 @@ defmodule Accrue.Entitlements.AppleReconciliationTest do
          }}
   end
 
+  defmodule ResumeClient do
+    @behaviour Client
+    defstruct [:test_pid]
+
+    def subscription_statuses(_, _, _), do: {:ok, []}
+
+    def transaction_history(%__MODULE__{test_pid: test_pid}, _, _, revision, _) do
+      send(test_pid, {:resumed_from, revision})
+      {:ok, %{signed_transactions: [], revision: "complete", has_more: false}}
+    end
+
+    def notification_history(_, _, _), do: {:ok, %{notifications: []}}
+    def set_app_account_token(_, _, _, _), do: :ok
+  end
+
   @tag :status
   test "the deterministic client preserves status authority and ascending history scripts" do
     fake =
@@ -227,6 +242,52 @@ defmodule Accrue.Entitlements.AppleReconciliationTest do
 
     assert Accrue.TestRepo.aggregate(Observation, :count, :id) == 0
     assert Accrue.TestRepo.aggregate(Grant, :count, :id) == 0
+  end
+
+  test "a failed reconciliation persists and dispatches a scheduled retry that resumes its cursor" do
+    lineage = Lineage.lock_or_insert(Accrue.TestRepo, :production, "orig-retry")
+    now = ~U[2026-08-03 12:00:00Z]
+
+    assert {:ok, %Checkpoint{run_state: :retrying, retry_after_at: retry_at}} =
+             Reconciliation.run(%{lineage_id: lineage.id, environment: :production},
+               repo: Accrue.TestRepo,
+               client: Client.Fake.new(statuses: [{:error, :provider_unavailable}]),
+               now: now,
+               admission: []
+             )
+
+    [retry_job] =
+      Accrue.TestRepo.all(
+        from(job in Oban.Job,
+          where: job.worker == ^to_string(ReconcileWorker) and job.args["reason"] == "retry"
+        )
+      )
+
+    assert retry_job.scheduled_at == retry_at
+
+    checkpoint =
+      Accrue.TestRepo.get_by!(Checkpoint, lineage_id: lineage.id, environment: :production)
+      |> Ecto.Changeset.change(pending_revision: "resume-cursor")
+      |> Accrue.TestRepo.update!()
+
+    previous = Application.get_env(:accrue, :apple_reconciliation)
+
+    Application.put_env(:accrue, :apple_reconciliation,
+      client: %ResumeClient{test_pid: self()},
+      admission: []
+    )
+
+    on_exit(fn ->
+      if is_nil(previous),
+        do: Application.delete_env(:accrue, :apple_reconciliation),
+        else: Application.put_env(:accrue, :apple_reconciliation, previous)
+    end)
+
+    assert :ok = perform_job(ReconcileWorker, retry_job.args)
+    assert_receive {:resumed_from, "resume-cursor"}
+
+    assert %Checkpoint{id: ^checkpoint.id, run_state: :idle, pending_revision: nil} =
+             Accrue.TestRepo.get!(Checkpoint, checkpoint.id)
   end
 
   test "current status is admitted when transaction history is empty" do
