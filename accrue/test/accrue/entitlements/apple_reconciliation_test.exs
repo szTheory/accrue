@@ -34,6 +34,31 @@ defmodule Accrue.Entitlements.AppleReconciliationTest do
     def verify_renewal(_, _), do: {:error, :invalid_payload}
     def verify_transaction("invalid", _), do: {:error, :invalid_signature}
 
+    def verify_transaction("unmapped", %{account_id: account_id, original_id: original_id}) do
+      {:ok,
+       %{
+         "originalTransactionId" => original_id,
+         "transactionId" => "unmapped",
+         "productId" => "product_unmapped",
+         "appAccountToken" => account_id,
+         "signedDate" => 1_754_000_001_000,
+         "expiresDate" => 1_800_000_000_000
+       }}
+    end
+
+    def verify_transaction("revoked", %{account_id: account_id, original_id: original_id}) do
+      {:ok,
+       %{
+         "originalTransactionId" => original_id,
+         "transactionId" => "revoked",
+         "productId" => "product_pro",
+         "appAccountToken" => account_id,
+         "signedDate" => 1_754_000_002_000,
+         "expiresDate" => 1_800_000_000_000,
+         "revocationDate" => 1_754_000_002_000
+       }}
+    end
+
     def verify_transaction(transaction, %{account_id: account_id, original_id: original_id}),
       do:
         {:ok,
@@ -449,6 +474,66 @@ defmodule Accrue.Entitlements.AppleReconciliationTest do
 
     assert Accrue.TestRepo.aggregate(Observation, :count, :id) == 1
     assert Accrue.TestRepo.aggregate(Grant, :count, :id) == 1
+  end
+
+  test "unmapped history quarantines once and allows later terminal evidence to retract a grant" do
+    account = account!("apple-unmapped-history")
+    lineage = Lineage.lock_or_insert(Accrue.TestRepo, :production, "orig-unmapped-history")
+    {:claimed, lineage} = Lineage.claim(Accrue.TestRepo, lineage, account.id, account.id)
+
+    assert {:ok, %Checkpoint{run_state: :idle}} =
+             Reconciliation.run(%{lineage_id: lineage.id, environment: :production},
+               repo: Accrue.TestRepo,
+               client:
+                 Client.Fake.new(
+                   statuses: [{:ok, []}],
+                   history: [{:ok, %{signed_transactions: ["active"], has_more: false}}]
+                 ),
+               admission: admission(account, lineage)
+             )
+
+    assert [_grant] = current_grants(account.id)
+
+    client =
+      Client.Fake.new(
+        statuses: [{:ok, []}],
+        history: [
+          {:ok,
+           %{
+             signed_transactions: ["unmapped", "revoked"],
+             revision: "unmapped-terminal",
+             has_more: false
+           }}
+        ]
+      )
+
+    assert {:ok, %Checkpoint{run_state: :idle, completed_revision: "unmapped-terminal"}} =
+             Reconciliation.run(%{lineage_id: lineage.id, environment: :production},
+               repo: Accrue.TestRepo,
+               client: client,
+               admission: admission(account, lineage)
+             )
+
+    assert %{disposition: "quarantined", reason: "unmapped_product", next_action: "map_product"} =
+             Accrue.TestRepo.get_by!(
+               Accrue.Entitlements.Apple.Intake,
+               provider_event_id: "purchase:unmapped"
+             )
+
+    assert Accrue.TestRepo.aggregate(Observation, :count, :id) == 2
+    assert Accrue.TestRepo.aggregate(Grant, :count, :id) == 2
+    assert [] == current_grants(account.id)
+
+    assert {:ok, %Checkpoint{run_state: :idle, completed_revision: "unmapped-terminal"}} =
+             Reconciliation.run(%{lineage_id: lineage.id, environment: :production},
+               repo: Accrue.TestRepo,
+               client: client,
+               admission: admission(account, lineage)
+             )
+
+    assert Accrue.TestRepo.aggregate(Observation, :count, :id) == 2
+    assert Accrue.TestRepo.aggregate(Grant, :count, :id) == 2
+    assert [] == current_grants(account.id)
   end
 
   test "complete Apple order keeps delayed positive evidence behind terminal evidence" do
