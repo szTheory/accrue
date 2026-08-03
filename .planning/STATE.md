@@ -2,15 +2,18 @@
 gsd_state_version: 1.0
 milestone: v1.59
 milestone_name: Account-Scoped Multi-Rail & Offline Entitlements
-status: planning
-stopped_at: Phase 218 context gathered
-last_updated: "2026-08-03T03:23:56.894Z"
-last_activity: 2026-08-02 — Phase 217 verified and complete; transitioned to Phase 218
+current_phase: 218
+current_phase_name: apple-observation-and-repair
+status: executing
+stopped_at: Completed 218-10-PLAN.md
+last_updated: "2026-08-03T17:01:30.392Z"
+last_activity: 2026-08-03
+last_activity_desc: Phase 218 execution started
 progress:
   total_phases: 6
   completed_phases: 3
-  total_plans: 26
-  completed_plans: 26
+  total_plans: 36
+  completed_plans: 35
   percent: 50
 ---
 
@@ -26,10 +29,10 @@ See: `.planning/PROJECT.md` (updated 2026-08-01 after completing Phase 215)
 
 ## Current Position
 
-Phase: 218 — Apple observation and repair
-Plan: Not started
-Status: Ready for planning
-Last activity: 2026-08-02 — Phase 217 verified and complete; transitioned to Phase 218
+Phase: 218 (apple-observation-and-repair) — EXECUTING
+Plan: 2 of 10
+Status: Ready to execute
+Last activity: 2026-08-03 — Phase 218 execution started
 
 ## Post-v1.48 Pause Rule
 
@@ -400,6 +403,9 @@ Coverage: 22/22 v1.51 requirements mapped (each REQ-ID → exactly one phase). D
 | Phase 217-canonical-projection-and-compatibility P03 | 18m | 2 tasks | 5 files |
 | Phase 217-canonical-projection-and-compatibility P04 | 17min | 2 tasks | 5 files |
 | Phase 217 P05 | 7m | 2 tasks | 5 files |
+| Phase 218-apple-observation-and-repair P01 | 0 | 1 tasks | 8 files |
+| Phase 218 P02 | 3m | 1 tasks | 1 files |
+| Phase 218-apple-observation-and-repair P10 | 7m | 1 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -785,6 +791,10 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - [Phase ?]: Compatibility multi_rail config dispatches through a fail-closed LocalMap/canonical authority seam.
 - [Phase ?]: Existing subscriptions and items resolve adapters from persisted processor provenance; configured processor remains for creation.
 - [Phase ?]: Apple management is a successful externally-managed source outcome, never a billing mutation.
+- [Phase ?]: Apple lineage claims compare verified account tokens under a PostgreSQL row lock; projector remains the sole grant and revision writer.
+- [Phase ?]: Rejected app_store_server_library; Plan 218-03 uses Accrue-owned private verifier fallback with no verifier dependency.
+- [Phase ?]: Due checkpoint locks and state transitions, not Oban uniqueness, are the scheduled dispatch authority.
+- [Phase ?]: Missing or malformed scheduled-worker configuration persists needs_repair before cancellation.
 
 ### Pending Todos
 
@@ -936,9 +946,9 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 
 ## Session Continuity
 
-Last session: 2026-08-03T03:23:56.883Z
-Stopped at: Phase 218 context gathered
-Resume file: .planning/phases/218-apple-observation-and-repair/218-CONTEXT.md
+Last session: 2026-08-03T17:01:30.380Z
+Stopped at: Completed 218-10-PLAN.md
+Resume file: None
 
 ## Operator Next Steps
 

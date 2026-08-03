@@ -196,35 +196,40 @@ Plans:
   4. Scheduled status and history reconciliation repairs missed notifications and accurately represents active, grace, retry, expiry, refund, and revocation boundaries.
   5. Hosts receive honest externally-managed Apple subscription guidance, with Family Sharing and offer authoring explicitly deferred.
 
-**Plans**: 8 plans
+**Plans**: 10/11 plans executed
 
 Plans:
 
+- [ ] 218-11-PLAN.md
+
+- [x] 218-09-PLAN.md
+- [x] 218-10-PLAN.md
+
 **Wave 1**
 
-- [ ] 218-01-PLAN.md — Trace verified Apple purchase evidence through bind-once lineage, canonical projection, and a rollback-safe durable reconciliation wakeup.
-- [ ] 218-02-PLAN.md — Verify the candidate Apple server package identity before any installation.
+- [x] 218-01-PLAN.md — Trace verified Apple purchase evidence through bind-once lineage, canonical projection, and a rollback-safe durable reconciliation wakeup.
+- [x] 218-02-PLAN.md — Verify the candidate Apple server package identity before any installation.
 
 **Wave 2** *(blocked on 218-01 and 218-02 completion)*
 
-- [ ] 218-03-PLAN.md — Admit strict Apple verification through candidate gates or the complete Jason/OTP fallback.
+- [x] 218-03-PLAN.md — Admit strict Apple verification through candidate gates or the complete Jason/OTP fallback.
 
 **Wave 3** *(blocked on 218-03 completion)*
 
-- [ ] 218-04-PLAN.md — Serialize explicit unbound repair and close convergent intake dispositions.
-- [ ] 218-07-PLAN.md — Durably acknowledge bounded Notifications V2 input through the strict verifier.
+- [x] 218-04-PLAN.md — Serialize explicit unbound repair and close convergent intake dispositions.
+- [x] 218-07-PLAN.md — Durably acknowledge bounded Notifications V2 input through the strict verifier.
 
 **Wave 4** *(blocked on 218-04 completion)*
 
-- [ ] 218-05-PLAN.md — Drain durable wakeups into host-owned repair and reconcile authoritative status plus crash-safe ascending history.
+- [x] 218-05-PLAN.md — Drain durable wakeups into host-owned repair and reconcile authoritative status plus crash-safe ascending history.
 
 **Wave 5** *(blocked on 218-05 completion)*
 
-- [ ] 218-06-PLAN.md — Persist and normalize complete Apple lifecycle ordering through the sole-writer Projector.
+- [x] 218-06-PLAN.md — Persist and normalize complete Apple lifecycle ordering through the sole-writer Projector.
 
 **Wave 6** *(blocked on 218-06 and 218-07 completion)*
 
-- [ ] 218-08-PLAN.md — Finalize typed Apple outcomes, exact external management, and Stripe isolation.
+- [x] 218-08-PLAN.md — Finalize typed Apple outcomes, exact external management, and Stripe isolation.
 
 ### Phase 219: Offline study contract
 
@@ -268,6 +273,6 @@ Plans:
 | 215. Research, contracts, and Crosswake feasibility | v1.59 | 15/15 | Complete    | 2026-08-01 |
 | 216. Additive rail and persistence foundation | v1.59 | 6/6 | Complete    | 2026-08-02 |
 | 217. Canonical projection and compatibility | v1.59 | 5/5 | Complete | 2026-08-02 |
-| 218. Apple observation and repair | v1.59 | 0/TBD | Not started | - |
+| 218. Apple observation and repair | v1.59 | 10/11 | In Progress|  |
 | 219. Offline study contract | v1.59 | 0/TBD | Not started | - |
 | 220. First-adopter proof and release gates | v1.59 | 0/TBD | Not started | - |
