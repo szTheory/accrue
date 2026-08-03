@@ -122,11 +122,9 @@ defmodule Accrue.Entitlements.Apple.Reconciliation do
   defp lifecycle_bound(lifecycle, facts) when lifecycle in [:active, :renewal_disabled],
     do: Map.get(facts, :expires_at)
 
-  defp lifecycle_bound(:grace, facts),
-    do: Map.get(facts, :grace_expires_at) || Map.get(facts, :expires_at)
+  defp lifecycle_bound(:grace, facts), do: Map.get(facts, :grace_expires_at)
 
-  defp lifecycle_bound(:billing_retry, facts),
-    do: Map.get(facts, :last_verified_expires_at) || Map.get(facts, :expires_at)
+  defp lifecycle_bound(:billing_retry, facts), do: Map.get(facts, :last_verified_expires_at)
 
   defp lifecycle_bound(_terminal, _facts), do: nil
 
