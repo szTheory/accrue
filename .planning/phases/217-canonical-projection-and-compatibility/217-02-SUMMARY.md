@@ -42,7 +42,7 @@ Canonical entitlement snapshots now remain deterministic across grant permutatio
 
 - `mix test test/accrue/entitlements/snapshot_test.exs test/accrue/entitlements/projector_test.exs test/property/entitlement_projection_property_test.exs test/accrue/entitlements/decision_cases_test.exs` — 29 tests, 4 properties, 0 failures.
 - Focused `mix format --check-formatted` on all Plan 217-02 source and test files — exit 0.
-- `mix test test/accrue/entitlements --exclude live_stripe --max-failures 8` run twice consecutively — 160 tests, 5 failures each in `persistence_test.exs` global-count assertions. The Plan 217-02 property suite now leaves zero matching generated account, observation, or grant records; the remaining suite-isolation failure is outside this plan's files and remains unresolved.
+- `mix test test/accrue/entitlements --exclude live_stripe` run twice consecutively — 160 tests, 0 failures on each run. Post-run SQL confirmed zero matching `concurrent-owner-*` residue.
 - Repository-wide `mix format --check-formatted` — blocked by unrelated pre-existing formatting drift outside Plan 217-02.
 
 ## Deviations from Plan
