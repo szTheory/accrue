@@ -529,7 +529,7 @@ defmodule Accrue.Entitlements.AppleReconciliationTest do
     expiry = DateTime.add(effective_at, 30, :day)
     grace_expiry = DateTime.add(expiry, 3, :day)
 
-    assert %{kind: "active", expires_at: ^expiry} =
+    assert {:ok, %{kind: "active", expires_at: ^expiry}} =
              Reconciliation.normalize_lifecycle(%{
                lifecycle: :active,
                signed_at: signed_at,
@@ -538,7 +538,7 @@ defmodule Accrue.Entitlements.AppleReconciliationTest do
                evidence_digest: String.duplicate("f", 64)
              })
 
-    assert %{kind: "renewal_disabled", expires_at: ^expiry} =
+    assert {:ok, %{kind: "renewal_disabled", expires_at: ^expiry}} =
              Reconciliation.normalize_lifecycle(%{
                lifecycle: :renewal_disabled,
                signed_at: signed_at,
@@ -547,7 +547,7 @@ defmodule Accrue.Entitlements.AppleReconciliationTest do
                evidence_digest: String.duplicate("f", 64)
              })
 
-    assert %{kind: "grace", expires_at: ^grace_expiry} =
+    assert {:ok, %{kind: "grace", expires_at: ^grace_expiry}} =
              Reconciliation.normalize_lifecycle(%{
                lifecycle: :grace,
                signed_at: signed_at,
@@ -557,7 +557,7 @@ defmodule Accrue.Entitlements.AppleReconciliationTest do
                evidence_digest: String.duplicate("f", 64)
              })
 
-    assert %{kind: "grace", expires_at: nil} =
+    assert {:error, :invalid_lifecycle_bound} =
              Reconciliation.normalize_lifecycle(%{
                lifecycle: :grace,
                signed_at: signed_at,
@@ -566,7 +566,7 @@ defmodule Accrue.Entitlements.AppleReconciliationTest do
                evidence_digest: String.duplicate("f", 64)
              })
 
-    assert %{kind: "billing_retry", expires_at: ^expiry} =
+    assert {:ok, %{kind: "billing_retry", expires_at: ^expiry}} =
              Reconciliation.normalize_lifecycle(%{
                lifecycle: :billing_retry,
                signed_at: signed_at,
@@ -577,7 +577,7 @@ defmodule Accrue.Entitlements.AppleReconciliationTest do
              })
 
     for lifecycle <- [:expired, :refunded, :revoked] do
-      assert %{kind: kind, expires_at: nil} =
+      assert {:ok, %{kind: kind, expires_at: nil}} =
                Reconciliation.normalize_lifecycle(%{
                  lifecycle: lifecycle,
                  signed_at: signed_at,
@@ -587,6 +587,16 @@ defmodule Accrue.Entitlements.AppleReconciliationTest do
                })
 
       assert kind == Atom.to_string(lifecycle)
+    end
+
+    for lifecycle <- [:active, :renewal_disabled, :billing_retry] do
+      assert {:error, :invalid_lifecycle_bound} =
+               Reconciliation.normalize_lifecycle(%{
+                 lifecycle: lifecycle,
+                 signed_at: signed_at,
+                 effective_at: effective_at,
+                 evidence_digest: String.duplicate("f", 64)
+               })
     end
   end
 
@@ -613,7 +623,7 @@ defmodule Accrue.Entitlements.AppleReconciliationTest do
     effective_at = Keyword.fetch!(opts, :effective_at)
     digest = Keyword.fetch!(opts, :digest)
 
-    normalized =
+    {:ok, normalized} =
       Reconciliation.normalize_lifecycle(%{
         lifecycle: lifecycle,
         signed_at: signed_at,
