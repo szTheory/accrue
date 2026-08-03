@@ -1,0 +1,297 @@
+defmodule Accrue.Entitlements.Apple.Reconciliation.Checkpoint do
+  @moduledoc false
+  use Accrue.Schema
+  import Ecto.Changeset
+
+  @primary_key {:id, :binary_id, autogenerate: true}
+  @foreign_key_type :binary_id
+  schema "accrue_entitlement_apple_reconciliation_checkpoints" do
+    field(:lineage_id, :binary_id)
+    field(:environment, Ecto.Enum, values: [:production, :sandbox])
+    field(:query_fingerprint, :string)
+    field(:pending_revision, :string)
+    field(:completed_revision, :string)
+
+    field(:run_state, Ecto.Enum,
+      values: [:idle, :running, :retrying, :needs_repair],
+      default: :idle
+    )
+
+    field(:page_count, :integer, default: 0)
+    field(:page_budget, :integer, default: 25)
+    field(:attempts, :integer, default: 0)
+    field(:last_success_at, :utc_datetime_usec)
+    field(:next_due_at, :utc_datetime_usec)
+    field(:retry_after_at, :utc_datetime_usec)
+    field(:last_provider_class, :string)
+    timestamps(type: :utc_datetime_usec)
+  end
+
+  def changeset(checkpoint, attrs) do
+    checkpoint
+    |> cast(attrs, [
+      :lineage_id,
+      :environment,
+      :query_fingerprint,
+      :pending_revision,
+      :completed_revision,
+      :run_state,
+      :page_count,
+      :page_budget,
+      :attempts,
+      :last_success_at,
+      :next_due_at,
+      :retry_after_at,
+      :last_provider_class
+    ])
+    |> validate_required([
+      :lineage_id,
+      :environment,
+      :run_state,
+      :page_count,
+      :page_budget,
+      :attempts
+    ])
+    |> validate_number(:page_count, greater_than_or_equal_to: 0)
+    |> validate_number(:page_budget, greater_than: 0, less_than_or_equal_to: 25)
+    |> unique_constraint(:lineage_id,
+      name: :accrue_apple_reconciliation_lineage_environment_index
+    )
+  end
+end
+
+defmodule Accrue.Entitlements.Apple.Reconciliation do
+  @moduledoc false
+  import Ecto.Query
+
+  alias Accrue.Entitlements.Apple.{Client, ReconciliationWakeup}
+  alias Accrue.Entitlements.Apple.Reconciliation.Checkpoint
+
+  @page_budget 25
+  @regular_seconds 6 * 60 * 60
+  @max_attempts 12
+
+  def enqueue(lineage_id, environment, reason, opts \\ []) do
+    repo = Keyword.get(opts, :repo, Accrue.Repo.repo())
+
+    repo.transact(fn ->
+      ReconciliationWakeup.enqueue_in_transaction(repo, lineage_id, environment, reason)
+    end)
+  end
+
+  # A wakeup is deleted only after its job has been inserted in the same database transaction.
+  # PostgreSQL row locking, rather than Oban uniqueness, is the execution ownership boundary.
+  def drain_wakeups(repo, opts \\ []) do
+    insert_job = Keyword.get(opts, :insert_job, &Oban.insert/1)
+
+    repo.transact(fn ->
+      repo.all(
+        from(w in ReconciliationWakeup,
+          order_by: [asc: w.requested_at],
+          lock: "FOR UPDATE SKIP LOCKED"
+        )
+      )
+      |> Enum.reduce_while({:ok, 0}, fn wakeup, {:ok, count} ->
+        job =
+          Accrue.Entitlements.Apple.ReconcileWorker.new(%{
+            "lineage_id" => wakeup.lineage_id,
+            "environment" => Atom.to_string(wakeup.environment),
+            "reason" => wakeup.reason
+          })
+
+        case insert_job.(job) do
+          {:ok, _} ->
+            {1, nil} = repo.delete(wakeup)
+            {:cont, {:ok, count + 1}}
+
+          {:error, reason} ->
+            repo.rollback({:job_insert_failed, reason})
+        end
+      end)
+    end)
+  end
+
+  def due(%{next_due_at: nil}, _now), do: true
+  def due(%{next_due_at: %DateTime{} = due}, now), do: DateTime.compare(due, now) != :gt
+  def due(_, _), do: false
+
+  def query_fingerprint(filters) when is_map(filters) do
+    filters
+    |> canonical()
+    |> :erlang.term_to_binary()
+    |> then(&:crypto.hash(:sha256, &1))
+    |> Base.encode16(case: :lower)
+  end
+
+  def retry_after({:error, {:rate_limited, seconds}}, _attempt, now)
+      when is_integer(seconds) and seconds >= 0,
+      do: DateTime.add(now, seconds, :second)
+
+  def retry_after({:error, _}, attempt, now) do
+    # Deterministic positive jitter is intentionally bounded at ten percent so tests and
+    # host telemetry retain a reproducible upper bound.
+    seconds = min(30 * trunc(:math.pow(2, max(attempt - 1, 0))), @regular_seconds)
+    DateTime.add(now, min(trunc(seconds * 1.1), @regular_seconds), :second)
+  end
+
+  def run(args, opts \\ [])
+
+  def run(%{"lineage_id" => _lineage_id, "environment" => environment} = args, opts) do
+    run(Map.put(args, "environment", normalize_environment(environment)), opts)
+  end
+
+  def run(%{lineage_id: lineage_id, environment: environment} = args, opts) do
+    repo = Keyword.get(opts, :repo, Accrue.Repo.repo())
+    client = Keyword.fetch!(opts, :client)
+    filters = Map.get(args, :filters, %{sort: :ascending, product_types: ["AUTO_RENEWABLE"]})
+    now = Keyword.get(opts, :now, DateTime.utc_now())
+
+    repo.transact(fn ->
+      checkpoint = lock_checkpoint(repo, lineage_id, environment)
+      fingerprint = query_fingerprint(filters)
+
+      cond do
+        checkpoint.query_fingerprint not in [nil, fingerprint] and
+            not is_nil(checkpoint.pending_revision) ->
+          mark_repair(repo, checkpoint, :cursor_corruption)
+
+        checkpoint.attempts >= @max_attempts ->
+          mark_repair(repo, checkpoint, :attempts_exhausted)
+
+        true ->
+          reconcile_page(
+            repo,
+            checkpoint,
+            client,
+            lineage_id,
+            environment,
+            filters,
+            fingerprint,
+            now,
+            opts
+          )
+      end
+    end)
+  end
+
+  defp reconcile_page(
+         repo,
+         checkpoint,
+         client,
+         lineage_id,
+         environment,
+         filters,
+         fingerprint,
+         now,
+         opts
+       ) do
+    # Status is current-state authority; notification history is intentionally absent from
+    # this admission path because it can only seed another durable wakeup.
+    with {:ok, _statuses} <- Client.subscription_statuses(client, lineage_id, environment),
+         {:ok, page} <-
+           Client.transaction_history(client, lineage_id, filters, checkpoint.pending_revision) do
+      transactions = Map.get(page, :signed_transactions, [])
+      admit = Keyword.get(opts, :admit_transaction, fn _ -> :ok end)
+      Enum.each(transactions, admit)
+      persist_page(repo, checkpoint, page, fingerprint, now)
+    else
+      {:error, :config_invalid} -> mark_repair(repo, checkpoint, :config_invalid)
+      {:error, :unauthorized} -> mark_repair(repo, checkpoint, :unauthorized)
+      error -> schedule_retry(repo, checkpoint, error, now)
+    end
+  end
+
+  defp persist_page(repo, checkpoint, page, fingerprint, now) do
+    pages = checkpoint.page_count + 1
+
+    cond do
+      pages > min(checkpoint.page_budget, @page_budget) ->
+        mark_repair(repo, checkpoint, :page_budget_exhausted)
+
+      Map.get(page, :has_more, false) ->
+        update_checkpoint(repo, checkpoint, %{
+          query_fingerprint: fingerprint,
+          pending_revision: Map.get(page, :revision),
+          page_count: pages,
+          run_state: :running,
+          retry_after_at: nil
+        })
+
+      true ->
+        revision = Map.get(page, :revision, checkpoint.pending_revision)
+
+        update_checkpoint(repo, checkpoint, %{
+          query_fingerprint: fingerprint,
+          pending_revision: nil,
+          completed_revision: revision,
+          page_count: 0,
+          attempts: 0,
+          run_state: :idle,
+          last_success_at: now,
+          next_due_at: DateTime.add(now, @regular_seconds, :second),
+          retry_after_at: nil,
+          last_provider_class: "ok"
+        })
+    end
+  end
+
+  defp schedule_retry(repo, checkpoint, error, now) do
+    attempt = checkpoint.attempts + 1
+
+    if attempt >= @max_attempts,
+      do: mark_repair(repo, checkpoint, :attempts_exhausted),
+      else:
+        update_checkpoint(repo, checkpoint, %{
+          attempts: attempt,
+          run_state: :retrying,
+          retry_after_at: retry_after(error, attempt, now),
+          last_provider_class: provider_class(error)
+        })
+  end
+
+  defp mark_repair(repo, checkpoint, reason),
+    do:
+      update_checkpoint(repo, checkpoint, %{
+        run_state: :needs_repair,
+        retry_after_at: nil,
+        last_provider_class: to_string(reason)
+      })
+
+  defp update_checkpoint(repo, checkpoint, attrs),
+    do: repo.update!(Checkpoint.changeset(checkpoint, attrs))
+
+  defp lock_checkpoint(repo, lineage_id, environment) do
+    repo.insert!(
+      Checkpoint.changeset(%Checkpoint{}, %{
+        lineage_id: lineage_id,
+        environment: environment,
+        run_state: :idle,
+        page_count: 0,
+        page_budget: @page_budget,
+        attempts: 0
+      }),
+      on_conflict: :nothing,
+      conflict_target: [:lineage_id, :environment]
+    )
+
+    repo.one!(
+      from(c in Checkpoint,
+        where: c.lineage_id == ^lineage_id and c.environment == ^environment,
+        lock: "FOR UPDATE"
+      )
+    )
+  end
+
+  defp provider_class({:error, {:rate_limited, _}}), do: "rate_limited"
+  defp provider_class({:error, reason}), do: to_string(reason)
+  defp provider_class(_), do: "provider_unavailable"
+  defp normalize_environment(value) when value in [:production, :sandbox], do: value
+  defp normalize_environment("production"), do: :production
+  defp normalize_environment("sandbox"), do: :sandbox
+
+  defp canonical(map) when is_map(map),
+    do: map |> Enum.map(fn {key, value} -> {key, canonical(value)} end) |> Enum.sort()
+
+  defp canonical(list) when is_list(list), do: Enum.map(list, &canonical/1)
+  defp canonical(value), do: value
+end
