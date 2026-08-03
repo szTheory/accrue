@@ -272,14 +272,18 @@ The real implementation must run this only after all cryptographic, binding, lif
 | A1 | The reference host/client owns durable atomic filesystem/cache replacement, while core publishes the contract and server components. | Architectural Responsibility Map | Plan may misassign client implementation work to core. |
 | A2 | `fresh_until` is computed as the minimum of 30 days and known provider/access bound. | Common Pitfalls | Exact existing snapshot-bound semantics may need an adapter. |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
-1. **Which host-owned device proof-of-possession wire shape and nonce persistence interface should the public facade expose?**
-   - What we know: nonce, installation ID, key proof, authentication, and idempotency are locked; exact arities are discretionary. [VERIFIED: project authority]
-   - Recommendation: define a typed request/value object and test replay/nonce expiry without exposing transport/controller details. [ASSUMED]
-2. **Which persisted fields are necessary for issuance/high-water/audit metadata?**
-   - What we know: device currently stores only `last_accepted_revision`; privacy-safe issuance metadata must be durable. [VERIFIED: codebase grep]
-   - Recommendation: plan a narrow migration after modelling ordering/rotation queries, not a raw-proof archive. [ASSUMED]
+1. **RESOLVED — Host-owned device proof-of-possession wire shape and nonce persistence interface.**
+   - Selection: expose `Offline.challenge(account, installation_id, opts \\ [])` returning `%Offline.Challenge.Value{nonce, expires_at, purpose}` and `Offline.register_device(account, %Offline.Registration.Request{}, opts \\ [])`, where the request contains exactly `installation_id`, `device_public_jwk`, `challenge_id`, `nonce_signature`, and `idempotency_key`. The host authentication/authorization callback remains in `opts`; no controller or route is owned by Accrue.
+   - Signed input: a canonical length-prefixed byte sequence over protocol version, purpose, opaque account UUID, installation ID, challenge ID, raw one-time nonce, and the idempotency-key digest. The server validates the submitted public P-256 JWK, recomputes its RFC-7638 thumbprint, verifies the signature, and never accepts a client-supplied thumbprint.
+   - Persistence: `accrue_entitlement_offline_challenges` stores `id`, `account_id`, `installation_id`, `nonce_digest`, `purpose`, `expires_at`, `consumed_at`, `idempotency_digest`, and timestamps. The raw nonce is returned once and is not persisted; challenge consumption and device insertion occur under one database transaction/row lock.
+   - Rationale: typed values preserve the small Phoenix-style public facade while binding PoP to account, installation, purpose, one-time state, and exact idempotent body without exposing transport or secret material. This is the exact interface used by Plan 219-03.
+2. **RESOLVED — Persisted issuance/high-water/audit and key-retirement fields.**
+   - Selection: `accrue_entitlement_offline_issuances` stores exactly `id`, `account_id`, `device_id`, `token_id_hash`, `kid`, `revision`, `disposition`, `issued_at`, `fresh_until`, nullable `expires_at`, `correlation_hash`, and timestamps. Existing `Device.last_accepted_revision` remains the device revision high-water; the Device extension stores only validated public `kty`, `crv`, `x`, and `y` plus the recomputed thumbprint.
+   - Ordering/index contract: token identity is unique; `(device_id, revision, disposition, issued_at)` is indexed for deterministic ordering; database checks enforce closed disposition, nonnegative revision, and `issued_at <= fresh_until <= expires_at` when `expires_at` is present.
+   - Rotation query: `Issuance.retirement_requirements(repo, now, opts)` groups actual rows by `kid`. Retirement eligibility is `max(expires_at) + 86,400 seconds` using the documented minimum clock-skew/reconnect buffer; if any issuance for the key has null `expires_at`, that key is `:never` eligible for normal retirement. `Offline.verification_keys/1` rejects provider omission of an active or not-yet-eligible key as `{:error, :config_invalid}`.
+   - Rationale: this is the narrow durable set needed for atomic issuance ordering, privacy-safe correlation, denial precedence, and D-11 actual-proof retention. It supports before/at/after retirement queries without archiving compact proofs, raw nonce/idempotency values, account tokens, provider evidence, PII, or private keys. These are the exact fields and interfaces used by Plans 219-03 and 219-04.
 
 ## Environment Availability
 
