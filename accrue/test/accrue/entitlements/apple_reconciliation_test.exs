@@ -150,6 +150,73 @@ defmodule Accrue.Entitlements.AppleReconciliationTest do
     assert {:noop, :stale} = Projector.project(stripe_low)
   end
 
+  test "lifecycle normalization preserves only verified provider bounds" do
+    signed_at = ~U[2026-08-03 12:00:00.000000Z]
+    effective_at = ~U[2026-08-03 13:00:00.000000Z]
+    expiry = DateTime.add(effective_at, 30, :day)
+    grace_expiry = DateTime.add(expiry, 3, :day)
+
+    assert %{kind: "active", expires_at: ^expiry} =
+             Reconciliation.normalize_lifecycle(%{
+               lifecycle: :active,
+               signed_at: signed_at,
+               effective_at: effective_at,
+               expires_at: expiry,
+               evidence_digest: String.duplicate("f", 64)
+             })
+
+    assert %{kind: "renewal_disabled", expires_at: ^expiry} =
+             Reconciliation.normalize_lifecycle(%{
+               lifecycle: :renewal_disabled,
+               signed_at: signed_at,
+               effective_at: effective_at,
+               expires_at: expiry,
+               evidence_digest: String.duplicate("f", 64)
+             })
+
+    assert %{kind: "grace", expires_at: ^grace_expiry} =
+             Reconciliation.normalize_lifecycle(%{
+               lifecycle: :grace,
+               signed_at: signed_at,
+               effective_at: effective_at,
+               expires_at: expiry,
+               grace_expires_at: grace_expiry,
+               evidence_digest: String.duplicate("f", 64)
+             })
+
+    assert %{kind: "grace", expires_at: nil} =
+             Reconciliation.normalize_lifecycle(%{
+               lifecycle: :grace,
+               signed_at: signed_at,
+               effective_at: effective_at,
+               expires_at: expiry,
+               evidence_digest: String.duplicate("f", 64)
+             })
+
+    assert %{kind: "billing_retry", expires_at: ^expiry} =
+             Reconciliation.normalize_lifecycle(%{
+               lifecycle: :billing_retry,
+               signed_at: signed_at,
+               effective_at: effective_at,
+               expires_at: grace_expiry,
+               last_verified_expires_at: expiry,
+               evidence_digest: String.duplicate("f", 64)
+             })
+
+    for lifecycle <- [:expired, :refunded, :revoked] do
+      assert %{kind: kind, expires_at: nil} =
+               Reconciliation.normalize_lifecycle(%{
+                 lifecycle: lifecycle,
+                 signed_at: signed_at,
+                 effective_at: effective_at,
+                 expires_at: expiry,
+                 evidence_digest: String.duplicate("f", 64)
+               })
+
+      assert kind == Atom.to_string(lifecycle)
+    end
+  end
+
   defp account!(owner_id) do
     {:ok, account} = Account.fetch_or_create(Accrue.TestRepo, "test", owner_id)
     account
