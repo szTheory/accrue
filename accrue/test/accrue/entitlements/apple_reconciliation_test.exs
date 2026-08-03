@@ -19,14 +19,33 @@ defmodule Accrue.Entitlements.AppleReconciliationTest do
     def set_app_account_token(_, _, _, _), do: :ok
   end
 
+  defmodule ReconciliationVerifier do
+    @behaviour Accrue.Entitlements.Apple.Verifier
+    def verify_notification(_, _), do: {:error, :invalid_payload}
+    def verify_renewal(_, _), do: {:error, :invalid_payload}
+    def verify_transaction("invalid", _), do: {:error, :invalid_signature}
+
+    def verify_transaction(transaction, %{account_id: account_id, original_id: original_id}),
+      do:
+        {:ok,
+         %{
+           "originalTransactionId" => original_id,
+           "transactionId" => transaction,
+           "productId" => "product_pro",
+           "appAccountToken" => account_id,
+           "signedDate" => 1_754_000_000_000,
+           "expiresDate" => 1_800_000_000_000
+         }}
+  end
+
   @tag :status
   test "the deterministic client preserves status authority and ascending history scripts" do
     fake =
       Client.Fake.new(
         statuses: [{:ok, [%{transaction: "status-1"}]}],
         history: [
-          {:ok, %{signed_transactions: ["page-1"], revision: "r1", has_more: true}},
-          {:ok, %{signed_transactions: ["page-2"], revision: "r2", has_more: false}}
+          {:ok, %{signed_transactions: [], revision: "r1", has_more: true}},
+          {:ok, %{signed_transactions: [], revision: "r2", has_more: false}}
         ]
       )
 
@@ -95,7 +114,7 @@ defmodule Accrue.Entitlements.AppleReconciliationTest do
                repo: Accrue.TestRepo,
                client: fake,
                now: now,
-               admit_transaction: fn _ -> :ok end,
+               admission: [],
                continue: fn _ -> {:ok, :continued} end
              )
 
@@ -104,7 +123,7 @@ defmodule Accrue.Entitlements.AppleReconciliationTest do
                repo: Accrue.TestRepo,
                client: fake,
                now: now,
-               admit_transaction: fn _ -> :ok end
+               admission: []
              )
   end
 
@@ -126,7 +145,7 @@ defmodule Accrue.Entitlements.AppleReconciliationTest do
 
     Application.put_env(:accrue, :apple_reconciliation,
       client: fake,
-      admit_transaction: verified_admission(account, lineage)
+      admission: admission(account, lineage)
     )
 
     on_exit(fn ->
@@ -161,6 +180,28 @@ defmodule Accrue.Entitlements.AppleReconciliationTest do
              run_state: :idle
            } =
              Accrue.TestRepo.get_by!(Checkpoint, lineage_id: lineage.id, environment: :production)
+  end
+
+  test "invalid signed history is rejected before it writes an observation or grant" do
+    account = account!("invalid-apple-history")
+    lineage = Lineage.lock_or_insert(Accrue.TestRepo, :production, "orig-invalid-history")
+    {:claimed, lineage} = Lineage.claim(Accrue.TestRepo, lineage, account.id, account.id)
+
+    client =
+      Client.Fake.new(
+        statuses: [{:ok, []}],
+        history: [{:ok, %{signed_transactions: ["invalid"], has_more: false}}]
+      )
+
+    assert {:ok, %Checkpoint{run_state: :retrying}} =
+             Reconciliation.run(%{lineage_id: lineage.id, environment: :production},
+               repo: Accrue.TestRepo,
+               client: client,
+               admission: admission(account, lineage)
+             )
+
+    assert Accrue.TestRepo.aggregate(Observation, :count, :id) == 0
+    assert Accrue.TestRepo.aggregate(Grant, :count, :id) == 0
   end
 
   test "complete Apple order keeps delayed positive evidence behind terminal evidence" do
@@ -302,46 +343,14 @@ defmodule Accrue.Entitlements.AppleReconciliationTest do
     end
   end
 
-  defp verified_admission(account, lineage) do
-    fn signed_transaction ->
-      suffix = :crypto.hash(:sha256, signed_transaction) |> Base.encode16(case: :lower)
-      signed_at = ~U[2026-08-03 12:00:00.000000Z]
-      effective_at = ~U[2026-08-03 12:00:00.000000Z]
-
-      normalized =
-        Reconciliation.normalize_lifecycle(%{
-          lifecycle: :grant,
-          signed_at: signed_at,
-          effective_at: effective_at,
-          evidence_digest: suffix
-        })
-
-      with {:ok, observation} <-
-             Observation.insert_idempotently(Accrue.TestRepo, %{
-               account_id: account.id,
-               rail: :apple,
-               environment: lineage.environment,
-               provider_event_id: "verified-reconciliation-#{suffix}",
-               provider_transaction_id: "transaction-#{suffix}",
-               kind: normalized.kind,
-               provider_lineage_id: lineage.original_transaction_id,
-               provider_product_id: "product_pro",
-               provider_order: 1,
-               provider_order_key: normalized.provider_order_key,
-               observed_at: effective_at,
-               state: :qualified,
-               retry_count: 0,
-               metadata: %{"source" => "apple_server"},
-               evidence_digest: suffix
-             }),
-           result <-
-             Projector.project_in_transaction(Accrue.TestRepo, observation, logical_plan: :pro),
-           true <- match?({:ok, _}, result) or match?({:noop, _}, result) do
-        :ok
-      else
-        _ -> {:error, :admission_failed}
-      end
-    end
+  defp admission(account, lineage) do
+    [
+      verifier: ReconciliationVerifier,
+      verifier_config: %{account_id: account.id, original_id: lineage.original_transaction_id},
+      product_map: %{"product_pro" => :pro},
+      verifier_version: "test-v1",
+      config_version: "test-v1"
+    ]
   end
 
   defp account!(owner_id) do

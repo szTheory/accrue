@@ -65,6 +65,7 @@ defmodule Accrue.Entitlements.Apple.Reconciliation do
   import Ecto.Query
 
   alias Accrue.Entitlements.Apple.{Client, ReconciliationWakeup}
+  alias Accrue.Entitlements.Apple.Reconciliation.Admission
   alias Accrue.Entitlements.Apple.Reconciliation.Checkpoint
 
   @page_budget 25
@@ -289,7 +290,14 @@ defmodule Accrue.Entitlements.Apple.Reconciliation do
     with {:ok, _statuses} <- Client.subscription_statuses(client, lineage_id, environment),
          {:ok, page} <-
            Client.transaction_history(client, lineage_id, filters, checkpoint.pending_revision) do
-      with :ok <- admit_transactions(Map.get(page, :signed_transactions, []), opts) do
+      with :ok <-
+             admit_transactions(
+               repo,
+               lineage_id,
+               environment,
+               Map.get(page, :signed_transactions, []),
+               opts
+             ) do
         persist_page(repo, checkpoint, page, fingerprint, now, opts)
       end
     else
@@ -401,11 +409,11 @@ defmodule Accrue.Entitlements.Apple.Reconciliation do
   defp normalize_environment("production"), do: :production
   defp normalize_environment("sandbox"), do: :sandbox
 
-  defp admit_transactions(transactions, opts) do
-    case Keyword.get(opts, :admit_transaction) do
-      admit when is_function(admit, 1) ->
+  defp admit_transactions(repo, lineage_id, environment, transactions, opts) do
+    case Keyword.get(opts, :admission) do
+      admission when is_list(admission) ->
         Enum.reduce_while(transactions, :ok, fn transaction, :ok ->
-          case admit.(transaction) do
+          case Admission.admit_transaction(repo, lineage_id, environment, transaction, admission) do
             :ok -> {:cont, :ok}
             {:ok, _} -> {:cont, :ok}
             {:error, _} = error -> {:halt, error}

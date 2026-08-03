@@ -12,8 +12,8 @@ defmodule Accrue.Entitlements.Apple.ReconcileWorker do
     Accrue.Oban.Middleware.put(job)
 
     with client when not is_nil(client) <- configured_client(),
-         admit when is_function(admit, 1) <- configured_admission() do
-      Reconciliation.run(args, client: client, admit_transaction: admit) |> oban_result()
+         admission when is_list(admission) <- configured_admission() do
+      Reconciliation.run(args, client: client, admission: admission) |> oban_result()
     else
       _ -> {:cancel, :missing_reconciliation_configuration}
     end
@@ -28,7 +28,7 @@ defmodule Accrue.Entitlements.Apple.ReconcileWorker do
 
   defp configured_admission do
     Application.get_env(:accrue, :apple_reconciliation, [])
-    |> Keyword.get(:admit_transaction)
+    |> Keyword.get(:admission)
   end
 
   defp oban_result({:ok, _}), do: :ok
