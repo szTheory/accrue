@@ -1,0 +1,219 @@
+defmodule Accrue.Entitlements.PurchaseDecision do
+  @moduledoc """
+  Revision-bound, rail-neutral purchase preflight decisions.
+
+  The value deliberately contains only host-renderable decision facts.  It
+  never carries provider evidence, customer identity, or a mutation authority.
+  """
+
+  alias Accrue.Billing.SubscriptionActions
+  alias Accrue.Entitlements.Snapshot
+
+  @statuses [:eligible, :block, :warn]
+  @reasons [
+    :no_equivalent_grant,
+    :equivalent_other_rail,
+    :missing_snapshot,
+    :stale_snapshot,
+    :repairing_snapshot,
+    :ambiguous_snapshot,
+    :unmapped_target,
+    :changed_revision
+  ]
+
+  @enforce_keys [:status, :reason, :target_rail, :logical_plan, :sources, :revision, :guidance]
+  defstruct [:status, :reason, :target_rail, :logical_plan, :sources, :revision, :guidance]
+
+  @type status :: :eligible | :block | :warn
+  @type reason ::
+          :no_equivalent_grant
+          | :equivalent_other_rail
+          | :missing_snapshot
+          | :stale_snapshot
+          | :repairing_snapshot
+          | :ambiguous_snapshot
+          | :unmapped_target
+          | :changed_revision
+  @type t :: %__MODULE__{
+          status: status(),
+          reason: reason(),
+          target_rail: atom(),
+          logical_plan: atom() | nil,
+          sources: [Snapshot.source()],
+          revision: non_neg_integer() | nil,
+          guidance: String.t()
+        }
+
+  @spec evaluate(Snapshot.t() | nil, atom(), String.t(), keyword()) :: t()
+  def evaluate(snapshot, target_rail, product_id, opts \\ [])
+      when is_atom(target_rail) and is_binary(product_id) and is_list(opts) do
+    catalog = Keyword.get(opts, :catalog, Accrue.Config.entitlement_product_catalog())
+    environment = Keyword.get(opts, :environment, :production)
+    logical_plan = Map.get(catalog, {target_rail, environment, product_id})
+
+    case snapshot_reason(snapshot) do
+      nil when is_nil(logical_plan) ->
+        decision(:block, :unmapped_target, target_rail, nil, [], nil)
+
+      nil ->
+        evaluate_live(snapshot, target_rail, logical_plan, catalog)
+
+      reason ->
+        decision(:block, reason, target_rail, logical_plan, [], snapshot_revision(snapshot))
+    end
+  end
+
+  @spec override(t(), String.t(), term(), keyword()) :: t()
+  def override(decision, reason, actor_id, opts \\ [])
+
+  def override(%__MODULE__{status: :block} = decision, reason, actor_id, opts)
+      when is_binary(reason) and byte_size(reason) <= 280 and is_list(opts) do
+    snapshot = Keyword.get(opts, :snapshot)
+
+    current =
+      evaluate(snapshot, decision.target_rail, target_product_id(decision, opts),
+        catalog: Keyword.get(opts, :catalog, Accrue.Config.entitlement_product_catalog()),
+        environment: Keyword.get(opts, :environment, :production)
+      )
+
+    if current.status == :block and current.reason == decision.reason and
+         current.revision == decision.revision do
+      warn = %{current | status: :warn, guidance: warning_copy(current)}
+      maybe_audit(warn, reason, actor_id, opts)
+      warn
+    else
+      %{current | reason: :changed_revision}
+    end
+  end
+
+  def override(%__MODULE__{} = decision, _reason, _actor_id, _opts), do: decision
+
+  @doc "Rechecks a decision immediately before delegating a controllable Stripe command."
+  @spec continue(t(), term(), term(), keyword()) :: {:ok, term()} | {:error, atom() | term()}
+  def continue(%__MODULE__{target_rail: :apple}, _billable, _price_spec, _opts),
+    do: {:error, :externally_managed}
+
+  def continue(%__MODULE__{target_rail: :stripe} = decision, billable, price_spec, opts) do
+    current =
+      evaluate(Keyword.get(opts, :snapshot), :stripe, Keyword.fetch!(opts, :product_id),
+        catalog: Keyword.get(opts, :catalog, Accrue.Config.entitlement_product_catalog()),
+        environment: Keyword.get(opts, :environment, :production)
+      )
+
+    cond do
+      current.status == :block ->
+        {:error, :purchase_blocked}
+
+      current.revision != decision.revision ->
+        {:error, :changed_revision}
+
+      true ->
+        case SubscriptionActions.subscribe(billable, price_spec,
+               operation_id: Keyword.fetch!(opts, :operation_id)
+             ) do
+          {:error, :ambiguous} -> {:error, :reconcile_required}
+          {:error, {:ambiguous, _}} -> {:error, :reconcile_required}
+          result -> result
+        end
+    end
+  end
+
+  def continue(%__MODULE__{}, _billable, _price_spec, _opts), do: {:error, :unsupported_rail}
+
+  defp evaluate_live(snapshot, target_rail, logical_plan, catalog) do
+    sources =
+      Enum.filter(snapshot.sources, fn source ->
+        source.rail != target_rail and
+          Enum.any?(catalog, fn
+            {{rail, environment, _product_id}, ^logical_plan} ->
+              rail == source.rail and environment == source.environment
+
+            _ ->
+              false
+          end)
+      end)
+
+    if sources == [] do
+      decision(:eligible, :no_equivalent_grant, target_rail, logical_plan, [], snapshot.revision)
+    else
+      decision(
+        :block,
+        :equivalent_other_rail,
+        target_rail,
+        logical_plan,
+        sources,
+        snapshot.revision
+      )
+    end
+  end
+
+  defp snapshot_reason(nil), do: :missing_snapshot
+
+  defp snapshot_reason(%Snapshot{authorization_bounds: state})
+       when state in [:stale, :repairing, :ambiguous], do: String.to_atom("#{state}_snapshot")
+
+  defp snapshot_reason(%Snapshot{}), do: nil
+  defp snapshot_reason(_), do: :missing_snapshot
+  defp snapshot_revision(%Snapshot{revision: revision}), do: revision
+  defp snapshot_revision(_), do: nil
+
+  defp decision(status, reason, rail, plan, sources, revision)
+       when status in @statuses and reason in @reasons do
+    %__MODULE__{
+      status: status,
+      reason: reason,
+      target_rail: rail,
+      logical_plan: plan,
+      sources: sources,
+      revision: revision,
+      guidance: guidance(reason)
+    }
+  end
+
+  defp guidance(:equivalent_other_rail), do: "Review the existing subscription before continuing."
+  defp guidance(:missing_snapshot), do: "Fetch the entitlement account before continuing."
+  defp guidance(:stale_snapshot), do: "Refresh entitlement state before continuing."
+  defp guidance(:repairing_snapshot), do: "Wait for entitlement repair before continuing."
+  defp guidance(:ambiguous_snapshot), do: "Resolve entitlement state before continuing."
+
+  defp guidance(:unmapped_target),
+    do: "Configure the requested subscription product before continuing."
+
+  defp guidance(:changed_revision), do: "Recheck the purchase decision before continuing."
+  defp guidance(_), do: "No equivalent subscription is active."
+
+  defp warning_copy(%__MODULE__{logical_plan: :pro, sources: [%{rail: :apple} | _]}),
+    do: "This account already has Pro through Apple. Continuing creates another subscription."
+
+  defp warning_copy(decision),
+    do:
+      "This account already has #{plan_label(decision.logical_plan)} through another rail. Continuing creates another subscription."
+
+  defp plan_label(plan), do: plan |> Atom.to_string() |> String.capitalize()
+  defp target_product_id(_decision, opts), do: Keyword.fetch!(opts, :product_id)
+
+  defp maybe_audit(decision, reason, actor_id, opts) do
+    case Keyword.get(opts, :audit) do
+      audit when is_function(audit, 1) ->
+        audit.(%{
+          action: :purchase_override,
+          reason: bounded_reason(reason),
+          target_rail: decision.target_rail,
+          logical_plan: decision.logical_plan,
+          sources: Enum.map(decision.sources, &Map.take(&1, [:rail, :environment])),
+          revision: decision.revision,
+          outcome: decision.status,
+          actor_id: hashed_actor_id(actor_id)
+        })
+
+      _ ->
+        :ok
+    end
+  end
+
+  defp bounded_reason(reason), do: String.slice(reason, 0, 280)
+  defp hashed_actor_id(nil), do: nil
+
+  defp hashed_actor_id(actor_id),
+    do: :crypto.hash(:sha256, to_string(actor_id)) |> Base.encode16(case: :lower)
+end

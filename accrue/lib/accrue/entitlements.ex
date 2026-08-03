@@ -47,7 +47,48 @@ defmodule Accrue.Entitlements do
   `Accrue.has_active_plan?/2` facade delegates stay arity 2.
   """
 
-  alias Accrue.Entitlements.{Account, Resolver, Snapshot}
+  alias Accrue.Entitlements.{Account, PurchaseDecision, Resolver, Snapshot}
+
+  @doc "Returns a typed, revision-bound purchase preflight decision."
+  @spec purchase_decision(Account.t() | String.t(), atom(), String.t(), keyword()) ::
+          PurchaseDecision.t()
+  def purchase_decision(account, rail, product_id, opts \\ []) do
+    metadata = purchase_decision_metadata(account, rail, opts)
+
+    Accrue.Telemetry.span([:accrue, :entitlements, :purchase_decision], metadata, fn ->
+      decision_snapshot(account, opts)
+      |> PurchaseDecision.evaluate(rail, product_id,
+        catalog: Keyword.get(opts, :catalog, Accrue.Config.entitlement_product_catalog()),
+        environment: Keyword.get(opts, :environment, :production)
+      )
+    end)
+  end
+
+  @doc "Explicitly converts a still-current block to a bounded warning decision."
+  @spec override_purchase_decision(PurchaseDecision.t(), String.t(), term(), keyword()) ::
+          PurchaseDecision.t()
+  def override_purchase_decision(decision, reason, actor_id, opts \\ []) do
+    metadata = %{
+      revision: decision.revision,
+      action: :override_purchase_decision,
+      rail: decision.target_rail,
+      environment: Keyword.get(opts, :environment, :production),
+      disposition: decision.status,
+      reason: decision.reason,
+      account_id: Keyword.get(opts, :account_id),
+      actor_id: hashed_actor_id(actor_id)
+    }
+
+    Accrue.Telemetry.span([:accrue, :entitlements, :override_purchase_decision], metadata, fn ->
+      PurchaseDecision.override(decision, reason, actor_id,
+        snapshot: Keyword.get(opts, :snapshot),
+        product_id: Keyword.fetch!(opts, :product_id),
+        catalog: Keyword.get(opts, :catalog, Accrue.Config.entitlement_product_catalog()),
+        environment: Keyword.get(opts, :environment, :production),
+        audit: Keyword.get(opts, :audit)
+      )
+    end)
+  end
 
   @doc "Reads a canonical entitlement snapshot without provisioning or provider I/O."
   @spec snapshot(Account.t() | term(), keyword()) :: {:ok, Snapshot.t()} | {:error, :not_found}
@@ -200,6 +241,37 @@ defmodule Accrue.Entitlements do
 
     span(billable, quota_key, quantity > 0, reason, [], fn -> quantity end)
   end
+
+  defp decision_snapshot(account, opts) do
+    case Keyword.get(opts, :snapshot) do
+      %Snapshot{} = snapshot ->
+        snapshot
+
+      nil ->
+        case snapshot(account, opts) do
+          {:ok, %Snapshot{} = snapshot} -> snapshot
+          {:error, _} -> nil
+        end
+    end
+  end
+
+  defp purchase_decision_metadata(account, rail, opts) do
+    %{
+      revision: Keyword.get(opts, :revision),
+      action: :purchase_decision,
+      rail: rail,
+      environment: Keyword.get(opts, :environment, :production),
+      disposition: :requested,
+      reason: nil,
+      account_id: opaque_account_id(account),
+      actor_id: hashed_actor_id(Keyword.get(opts, :actor_id))
+    }
+  end
+
+  defp hashed_actor_id(nil), do: nil
+
+  defp hashed_actor_id(actor_id),
+    do: :crypto.hash(:sha256, to_string(actor_id)) |> Base.encode16(case: :lower)
 
   defp snapshot_account(%Account{} = account), do: account
 
