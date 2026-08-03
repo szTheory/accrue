@@ -107,6 +107,53 @@ defmodule Accrue.Entitlements.CompatibilityTest do
     assert {:ok, %{processed: 1}} = Compatibility.backfill(nil, limit: 1)
     assert Accrue.TestRepo.aggregate(Account, :count, :id) == 1
     assert Accrue.TestRepo.aggregate(Grant, :count, :id) == 1
+
+    [account] = Accrue.TestRepo.all(Account)
+    assert account.revision == 1
+
+    assert 1 ==
+             Accrue.TestRepo.aggregate(
+               from(event in Event, where: event.subject_id == ^account.id),
+               :count,
+               :id
+             )
+  end
+
+  test "backfill cursor retains every mapped item for one customer at a page size of one" do
+    owner_id = Ecto.UUID.generate()
+
+    Application.put_env(:accrue, :entitlements,
+      plans: [pro: [price_ids: ["price_compat_pro", "price_compat_pro_second"]]],
+      multi_rail: [mode: :disabled]
+    )
+
+    %{subscription: subscription} =
+      Accrue.Test.Factory.active_subscription(%{owner_id: owner_id, price_id: "price_compat_pro"})
+
+    {:ok, _} =
+      subscription
+      |> Accrue.Billing.Subscription.force_status_changeset(%{processor: "stripe"})
+      |> Accrue.TestRepo.update()
+
+    {:ok, _second_item} =
+      %SubscriptionItem{}
+      |> SubscriptionItem.changeset(%{
+        subscription_id: subscription.id,
+        processor: "stripe",
+        processor_id: "si-compat-second",
+        price_id: "price_compat_pro_second",
+        quantity: 1
+      })
+      |> Accrue.TestRepo.insert()
+
+    assert {:ok, %{processed: 1, cursor: first_cursor}} = Compatibility.backfill(nil, limit: 1)
+
+    assert {:ok, %{processed: 1, cursor: second_cursor}} =
+             Compatibility.backfill(first_cursor, limit: 1)
+
+    refute first_cursor == second_cursor
+    assert {:ok, %{processed: 0}} = Compatibility.backfill(second_cursor, limit: 1)
+    assert 2 == Accrue.TestRepo.aggregate(Grant, :count, :id)
   end
 
   test "shadow compares an included account but keeps the exact LocalMap authority; excluded is LocalMap too" do

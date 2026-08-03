@@ -199,17 +199,17 @@ defmodule Accrue.Entitlements.Compatibility do
 
   defp normalize(resolved), do: Map.take(resolved, [:active_plans, :features, :quantities])
 
-  # Reads legacy records in a stable owner identity order and writes only the
-  # canonical account/grant projection. It deliberately has no processor or
-  # advisory-summary dependency; repeats converge through the partial current
-  # grant identity installed by Phase 216.
+  # Reads legacy records in a total legacy-item order and converts each mapped
+  # item into a qualified observation. The projector remains the only writer
+  # of current grants, revisions, audit events, and follow-up jobs.
   defp do_backfill(cursor, opts) do
     alias Accrue.Billing.{Customer, Query, Subscription, SubscriptionItem}
-    alias Accrue.Entitlements.{Account, Grant}
+    alias Accrue.Entitlements.{Account, Observation, Projector}
 
     repo = Accrue.Repo.repo()
     limit = Keyword.get(opts, :limit, 100)
     after_cursor = cursor || Keyword.get(opts, :cursor)
+    after_key = decode_cursor(after_cursor)
 
     rows =
       Subscription
@@ -221,15 +221,17 @@ defmodule Accrue.Entitlements.Compatibility do
       |> join(:inner, [subscription, _customer], item in SubscriptionItem,
         on: item.subscription_id == subscription.id
       )
-      |> order_by([_subscription, customer],
+      |> order_by([subscription, customer, item],
         asc: customer.owner_type,
         asc: customer.owner_id,
-        asc: customer.id
+        asc: customer.id,
+        asc: subscription.id,
+        asc: item.id
       )
       |> select([subscription, customer, item], {customer, subscription, item})
       |> repo.all()
-      |> Enum.filter(fn {customer, _subscription, _item} ->
-        is_nil(after_cursor) or customer.id > after_cursor
+      |> Enum.filter(fn row ->
+        is_nil(after_key) or cursor_key(row) > after_key
       end)
       |> Enum.take(limit)
 
@@ -237,68 +239,53 @@ defmodule Accrue.Entitlements.Compatibility do
       Enum.reduce(
         rows,
         %{processed: 0, inserted: 0, skipped: 0, cursor: after_cursor},
-        fn {customer, subscription, item}, acc ->
+        fn {customer, subscription, item} = row, acc ->
+          next_cursor = encode_cursor(cursor_key(row))
+
           case mapped_plan(item.price_id) do
             nil ->
               %{
                 acc
                 | processed: acc.processed + 1,
                   skipped: acc.skipped + 1,
-                  cursor: customer.id
+                  cursor: next_cursor
               }
 
-            plan ->
-              case repo.transact(fn transaction_repo ->
-                     {:ok, account} =
-                       Account.fetch_or_create(
-                         transaction_repo,
-                         customer.owner_type,
-                         customer.owner_id
-                       )
+            _plan ->
+              with {:ok, account} <-
+                     Account.fetch_or_create(repo, customer.owner_type, customer.owner_id),
+                   {:ok, observation} <-
+                     Observation.insert_idempotently(
+                       repo,
+                       backfill_observation(account, subscription, item)
+                     ) do
+                case Projector.project(observation) do
+                  {:ok, _snapshot} ->
+                    %{
+                      acc
+                      | processed: acc.processed + 1,
+                        inserted: acc.inserted + 1,
+                        cursor: next_cursor
+                    }
 
-                     attrs = %{
-                       account_id: account.id,
-                       rail: :stripe,
-                       environment: stripe_environment(),
-                       provider_lineage_id: subscription.processor_id || subscription.id,
-                       provider_product_id: item.price_id,
-                       logical_plan: Atom.to_string(plan),
-                       source_item_id: item.processor_id || item.id,
-                       quantity: item.quantity || 1,
-                       provider_order: 0,
-                       account_revision: account.revision,
-                       effective_at:
-                         subscription.current_period_start || subscription.inserted_at ||
-                           DateTime.utc_now()
-                     }
+                  {:noop, _reason} ->
+                    %{acc | processed: acc.processed + 1, cursor: next_cursor}
 
-                     case transaction_repo.insert(Grant.changeset(%Grant{}, attrs),
-                            on_conflict: :nothing,
-                            conflict_target:
-                              {:unsafe_fragment,
-                               "(account_id, rail, environment, provider_lineage_id, provider_product_id, source_item_id) WHERE superseded_at IS NULL"}
-                          ) do
-                       {:ok, _grant} ->
-                         {:ok, :inserted}
-
-                       {:error, changeset} ->
-                         transaction_repo.rollback({:invalid_grant, changeset})
-                     end
-                   end) do
-                {:ok, :inserted} ->
-                  %{
-                    acc
-                    | processed: acc.processed + 1,
-                      inserted: acc.inserted + 1,
-                      cursor: customer.id
-                  }
-
-                {:error, _} ->
+                  _ ->
+                    %{
+                      acc
+                      | processed: acc.processed + 1,
+                        skipped: acc.skipped + 1,
+                        cursor: next_cursor
+                    }
+                end
+              else
+                _ ->
                   %{
                     acc
                     | processed: acc.processed + 1,
                       skipped: acc.skipped + 1,
-                      cursor: customer.id
+                      cursor: next_cursor
                   }
               end
           end
@@ -309,6 +296,51 @@ defmodule Accrue.Entitlements.Compatibility do
     {:ok, Map.put(result, :blockers, [])}
   rescue
     _ -> {:error, :backfill_failed}
+  end
+
+  defp backfill_observation(account, subscription, item) do
+    source_id = to_string(item.processor_id || item.id)
+    lineage = to_string(subscription.processor_id || subscription.id)
+
+    observed_at =
+      subscription.current_period_start || subscription.inserted_at || DateTime.utc_now()
+
+    %{
+      account_id: account.id,
+      rail: :stripe,
+      environment: stripe_environment(),
+      provider_event_id: "compatibility-backfill:#{source_id}",
+      provider_transaction_id: "compatibility-backfill:#{source_id}",
+      kind: "grant",
+      provider_lineage_id: lineage,
+      provider_product_id: item.price_id,
+      provider_order: 0,
+      observed_at: observed_at,
+      state: :qualified,
+      retry_count: 0,
+      metadata: %{"source" => "fake_observer"},
+      evidence_digest:
+        :crypto.hash(:sha256, "compatibility-backfill:#{source_id}")
+        |> Base.encode16(case: :lower)
+    }
+  end
+
+  defp cursor_key({customer, subscription, item}),
+    do: {customer.owner_type, customer.owner_id, customer.id, subscription.id, item.id}
+
+  defp encode_cursor(key),
+    do: key |> :erlang.term_to_binary() |> Base.url_encode64(padding: false)
+
+  defp decode_cursor(nil), do: nil
+
+  defp decode_cursor(cursor) when is_binary(cursor) do
+    with {:ok, binary} <- Base.url_decode64(cursor, padding: false),
+         {key, []} <- :erlang.binary_to_term(binary, [:safe]),
+         true <- is_tuple(key) and tuple_size(key) == 5 do
+      key
+    else
+      _ -> nil
+    end
   end
 
   defp mapped_plan(price_id) do
@@ -559,15 +591,19 @@ defmodule Accrue.Entitlements.Compatibility do
       %{
         action: operation,
         mode: safe_mode(),
-        account_id: opts[:account_id],
+        account_id: hashed(opts[:account_id]),
         actor_id: hashed(opts[:actor_id])
       }
       |> Map.take(@metadata_keys)
 
-    Accrue.Telemetry.span([:accrue, :entitlements, :compatibility, operation], metadata, fn ->
-      if Keyword.get(opts, :raise, false), do: raise("compatibility telemetry probe")
-      fun.()
-    end)
+    Accrue.Telemetry.span_private(
+      [:accrue, :entitlements, :compatibility, operation],
+      metadata,
+      fn ->
+        if Keyword.get(opts, :raise, false), do: raise("compatibility telemetry probe")
+        fun.()
+      end
+    )
   end
 
   defp safe_mode do
