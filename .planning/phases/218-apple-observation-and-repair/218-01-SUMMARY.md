@@ -22,6 +22,15 @@ key_files:
 decisions:
   - Apple lineage claims compare the verified opaque account token under a PostgreSQL row lock.
   - The projector retains sole ownership of grants and revisions through an in-transaction seam.
+coverage:
+  - id: D1
+    description: "Verified Apple evidence binds one environment-qualified lineage once and projects through the canonical transaction with a durable reconciliation wakeup."
+    requirement: AAPL-01
+    verification:
+      - kind: integration
+        ref: "cd accrue && mix test test/accrue/entitlements/apple_observation_tracer_test.exs test/accrue/entitlements/projector_test.exs"
+        status: pass
+    human_judgment: false
 metrics:
   tasks_completed: 1
 status: complete

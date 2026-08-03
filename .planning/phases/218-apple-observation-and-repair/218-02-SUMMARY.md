@@ -24,13 +24,13 @@ key-decisions:
 requirements-completed: []
 coverage:
   - id: D1
-    description: Explicit blocking legitimacy decision selects the private Apple verifier path.
+    description: "The rejected third-party verifier remains absent while the Accrue-owned strict production verifier and hostile-chain corpus are executable."
     verification:
-      - kind: manual_procedural
-        ref: "User checkpoint response: rejected"
+      - kind: contract
+        ref: "git diff --quiet -- accrue/mix.exs accrue/mix.lock"
         status: pass
-      - kind: other
-        ref: "git diff --quiet -- mix.exs mix.lock"
+      - kind: integration
+        ref: "cd accrue && mix test test/accrue/entitlements/apple_verifier_test.exs"
         status: pass
     human_judgment: false
 duration: 3min

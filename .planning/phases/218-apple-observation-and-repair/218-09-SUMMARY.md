@@ -19,6 +19,23 @@ key-files:
 decisions:
   - Public Apple observation accepts only opaque signed bytes and reads verifier configuration from host-owned application config.
   - Apple signing chains require the documented leaf and intermediate purpose extensions before the leaf key is used.
+coverage:
+  - id: D1
+    description: "Opaque Apple evidence crosses one configured strict verifier boundary before Intake, projection, grants, or snapshot revision."
+    requirement: AAPL-02
+    verification:
+      - kind: integration
+        ref: "cd accrue && mix test test/accrue/entitlements/apple_observation_tracer_test.exs test/accrue/entitlements/apple_source_isolation_test.exs"
+        status: pass
+    human_judgment: false
+  - id: D2
+    description: "Production certificate-purpose enforcement is covered by a real valid and hostile ES256 chain corpus."
+    requirement: AAPL-02
+    verification:
+      - kind: integration
+        ref: "cd accrue && mix test test/accrue/entitlements/apple_verifier_test.exs"
+        status: pass
+    human_judgment: false
 metrics:
   tasks_completed: 2
 status: complete

@@ -4,6 +4,18 @@ This directory hosts merge-adjacent bash gates and host-app checks. Use it as th
 
 **After a push:** from the repo root, **`bash scripts/ci/watch_ci.sh`** waits on the latest GitHub Actions **CI** run for **`main`** (optional branch argument). Requires the **`gh`** CLI and auth (`gh auth login`).
 
+## Executable acceptance ratchet (Phase 218+)
+
+`docs-contracts-shift-left` runs `node scripts/ci/verify_executable_uat_contract.mjs --all-since 218` as a merge-blocking project policy. Any phase at or after 218 with completed summaries must carry executable coverage, `human_judgment: false`, a generated automated UAT artifact, and a passed verification report with zero unverified behavior.
+
+Generate or refresh a phase artifact after its executable checks and verifier pass:
+
+```bash
+node scripts/ci/verify_executable_uat_contract.mjs --phase 218 --write
+```
+
+Use `--all-since 218` to reproduce CI. Live provider checks are added as scheduled automation only when credentials exist and upstream-drift coverage has recurring value; they do not create manual UAT.
+
 ## ADOPT gates (v1.7 adoption milestone)
 
 Evidence for **ADOPT-01..06** is summarized in **`.planning/milestones/v1.7-ROADMAP.md`** / **`.planning/milestones/v1.7-REQUIREMENTS.md`** (milestone archives). Granular phase **`*-VERIFICATION.md`** ledgers for phases **32–36** live in **git history** (trees under `.planning/phases/` were pruned after **`phases.clear`** on **2026-04-23**).

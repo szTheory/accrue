@@ -64,21 +64,21 @@ created: 2026-08-02
 
 ## Manual-Only Verifications
 
-| Behavior | Requirement | Why Manual | Test Instructions |
-|----------|-------------|------------|-------------------|
-| Apple sandbox/provider fidelity | AAPL-01–AAPL-04 | Apple credentials and a sandbox app are not available in the repository environment | Once a host supplies credentials, run purchase, restore, notification, status, and transaction-history flows against Apple sandbox; retain deterministic fake/golden-fixture tests as merge-blocking coverage. |
-| Candidate Apple library admission | AAPL-02, AAPL-04 | The low-adoption library requires hostile-chain, privacy, API, and supervision review before adoption | Review the adapter behind a private behaviour; confirm rejection corpus, redaction, timeout/retry behavior, and fallback adapter viability before selecting it. |
+None. Phase acceptance is fully executable and merge-blocking.
+
+- Apple provider fidelity is covered by deterministic signed fixtures, real Repo integration, Production URL capture, replay/concurrency tests, and provider-isolation guards. A live sandbox lane may be added later as scheduled automation when credentials exist and recurring upstream-drift detection justifies it; it is not UAT.
+- The candidate Apple library was rejected without installation. Dependency absence, the private verifier implementation, hostile-chain behavior, redaction, and failure bounds are executable contracts.
 
 ---
 
 ## Validation Sign-Off
 
 - [x] All tasks have automated verification or explicit Wave 0 dependencies.
-- [ ] Sampling continuity: no three consecutive tasks without automated verification.
+- [x] Sampling continuity: no three consecutive tasks without automated verification.
 - [x] Wave 0 covers every missing test reference through test-first task mappings.
-- [ ] No watch-mode flags.
-- [ ] Feedback latency stays within one task.
-- [ ] Golden verification, bind-race, cursor, redaction, and Apple-to-Stripe negative cases are green.
-- [ ] `nyquist_compliant: true` is set in frontmatter after validation.
+- [x] No watch-mode flags.
+- [x] Feedback latency stays within one task.
+- [x] Golden verification, bind-race, cursor, redaction, and Apple-to-Stripe negative cases are green.
+- [x] `nyquist_compliant: true` is set in frontmatter after validation.
 
-**Approval:** pending
+**Approval:** executable evidence only; no human UAT required

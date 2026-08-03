@@ -18,6 +18,7 @@
     "verifier": true,
     "nyquist_validation": true,
     "auto_advance": false,
+    "human_verify_mode": "end-of-phase",
     "node_repair": true,
     "node_repair_budget": 2,
     "ui_phase": true,

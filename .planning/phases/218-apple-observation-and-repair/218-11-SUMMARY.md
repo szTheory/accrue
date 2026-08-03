@@ -25,6 +25,31 @@ key-decisions:
   - "Positive Apple lifecycle evidence requires its verified provider-specific bound."
   - "JWS x5c remains leaf-first while OTP path validation receives the reversed chain."
 requirements-completed: [AAPL-01, AAPL-02, AAPL-03, AAPL-04]
+coverage:
+  - id: D1
+    description: "Real valid and hostile ES256 Apple-purpose chains exercise path order, certificate purpose, key usage, and closed admission."
+    requirement: AAPL-02
+    verification:
+      - kind: integration
+        ref: "cd accrue && mix test test/accrue/entitlements/apple_verifier_test.exs"
+        status: pass
+    human_judgment: false
+  - id: D2
+    description: "Opaque authorized repair remains bind-once and forged public structs cannot bypass configured admission."
+    requirement: AAPL-01
+    verification:
+      - kind: integration
+        ref: "cd accrue && mix test test/accrue/entitlements/apple_observation_tracer_test.exs test/accrue/entitlements/apple_lineage_test.exs"
+        status: pass
+    human_judgment: false
+  - id: D3
+    description: "Active lifecycle evidence requires a verified provider bound before reconciliation can affect canonical projection."
+    requirement: AAPL-04
+    verification:
+      - kind: integration
+        ref: "cd accrue && mix test test/accrue/entitlements/apple_reconciliation_test.exs"
+        status: pass
+    human_judgment: false
 status: complete
 ---
 

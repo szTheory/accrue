@@ -19,6 +19,15 @@ key_files:
 decisions:
   - Notifications are account-independent durable reconciliation signals and never claim ownership or project grants.
   - Only committed verified, noop, or quarantined intake dispositions receive HTTP 200; transient outcomes remain retryable.
+coverage:
+  - id: D1
+    description: "Notifications V2 acknowledges only durable bounded dispositions, coalesces repair wakeups, and keeps raw evidence and grants out of the ingress path."
+    requirement: AAPL-03
+    verification:
+      - kind: integration
+        ref: "cd accrue && mix test test/accrue/entitlements/apple_notification_test.exs"
+        status: pass
+    human_judgment: false
 metrics:
   tasks_completed: 1
   tests_added: 5

@@ -101,6 +101,9 @@ jobs:
       - name: Phase 214.2 executable UAT contract
         run: node scripts/ci/verify_executable_uat_contract.mjs --phase 214.2
 
+      - name: Project-wide zero-human-UAT contract (Phase 218+)
+        run: node scripts/ci/verify_executable_uat_contract.mjs --all-since 218
+
       - name: Install tokens harness
         run: cd brandbook/tokens/harness && npm ci
 
