@@ -40,6 +40,28 @@ defmodule Accrue.Entitlements.Apple.VerifierTest do
              ]
   end
 
+  test "signed-date policy rejects malformed and excessively future certificate instants" do
+    signed_date_config = %{@config | verification_time: :signed_date}
+
+    assert {:error, :invalid_certificate_time} =
+             Production.verify_transaction(
+               Evidence.production_transaction(%{"signedDate" => "not-a-millisecond-instant"}),
+               signed_date_config
+             )
+
+    assert {:error, :invalid_certificate_time} =
+             Production.verify_transaction(
+               Evidence.production_transaction(%{"signedDate" => 9_999_999_999_999}),
+               signed_date_config
+             )
+  end
+
+  test "every configured pinned root participates in chain validation" do
+    config = %{@config | roots: [Evidence.unrelated_root(), Evidence.production_root()]}
+
+    assert {:ok, _facts} = Production.verify_transaction(Evidence.production_transaction(), config)
+  end
+
   test "cryptographically valid hostile purpose chains close at the purpose predicate" do
     for kind <- [
           :wrong_leaf_purpose,

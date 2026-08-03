@@ -52,6 +52,7 @@ defmodule Accrue.Test.AppleServerEvidence do
   @valid_missing_intermediate_leaf_key "MHcCAQEEIO61eG1ABTXdyhurJnXDbOQPRClZ8Hr5bm3jU1f3xgOHoAoGCCqGSM49AwEHoUQDQgAEecH4oKESMVtr4IsL55OtIw4BTmyDCSazrOaSFzcvIW9bFpX69m73Y/a0ypV7kmSPT4kFXonuAUa09KvViCCqXQ=="
 
   def production_root, do: Base.decode64!(@root)
+  def unrelated_root, do: Base.decode64!(@leaf)
 
   def production_transaction(overrides \\ %{}) do
     transaction(variant(:valid), overrides)
