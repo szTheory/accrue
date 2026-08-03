@@ -82,7 +82,7 @@ defmodule Accrue.Entitlements.Apple.Admission do
          %DateTime{} = signed_at <- apple_time(facts["signedDate"]),
          expires_at <- apple_time(facts["expiresDate"]),
          {:ok, lifecycle} <- lifecycle(facts, expires_at),
-         plan when not is_nil(plan) <- Map.get(product_map, product) do
+         plan <- Map.get(product_map, product) do
       {:ok,
        %Intake.VerifiedEvidence{
          environment: environment,

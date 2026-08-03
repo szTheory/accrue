@@ -521,7 +521,7 @@ defmodule Accrue.Entitlements.AppleReconciliationTest do
              )
 
     assert Accrue.TestRepo.aggregate(Observation, :count, :id) == 2
-    assert Accrue.TestRepo.aggregate(Grant, :count, :id) == 2
+    assert Accrue.TestRepo.aggregate(Grant, :count, :id) == 1
     assert [] == current_grants(account.id)
 
     assert {:ok, %Checkpoint{run_state: :idle, completed_revision: "unmapped-terminal"}} =
@@ -532,7 +532,7 @@ defmodule Accrue.Entitlements.AppleReconciliationTest do
              )
 
     assert Accrue.TestRepo.aggregate(Observation, :count, :id) == 2
-    assert Accrue.TestRepo.aggregate(Grant, :count, :id) == 2
+    assert Accrue.TestRepo.aggregate(Grant, :count, :id) == 1
     assert [] == current_grants(account.id)
   end
 
