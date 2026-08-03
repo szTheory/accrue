@@ -100,6 +100,68 @@ defmodule Accrue.Entitlements.Apple.Intake do
   end
 
   @doc false
+  # Notifications are an account-independent reconciliation signal. They must
+  # become durable before Apple receives an acknowledgement, but they never
+  # claim a lineage or write an account observation directly.
+  def observe_notification(%VerifiedEvidence{} = evidence, opts \\ []) do
+    repo = Keyword.get(opts, :repo, Accrue.Repo.repo())
+
+    try do
+      case repo.transact(fn -> {:ok, do_observe_notification(repo, evidence, opts)} end) do
+        {:ok, result} -> {:ok, result}
+        {:error, reason} -> {:error, reason}
+      end
+    rescue
+      error in RuntimeError ->
+        if error.message == "injected_failure",
+          do: {:error, :injected_failure},
+          else: reraise(error, __STACKTRACE__)
+    end
+  end
+
+  @doc false
+  def quarantine_notification(
+        environment,
+        evidence_digest,
+        verifier_version,
+        config_version,
+        reason,
+        opts \\ []
+      )
+      when is_atom(environment) and is_binary(evidence_digest) and is_atom(reason) do
+    evidence = %VerifiedEvidence{
+      environment: environment,
+      original_transaction_id: "quarantine:" <> evidence_digest,
+      provider_event_id: "quarantine:" <> evidence_digest,
+      provider_transaction_id: "quarantine:" <> evidence_digest,
+      product_id: "quarantine",
+      lifecycle: :grant,
+      effective_at: DateTime.utc_now(),
+      signed_at: DateTime.utc_now(),
+      evidence_digest: evidence_digest,
+      verifier_version: verifier_version,
+      config_version: config_version
+    }
+
+    repo = Keyword.get(opts, :repo, Accrue.Repo.repo())
+
+    try do
+      case repo.transact(fn ->
+             lineage = Lineage.lock_or_insert(repo, environment, evidence.original_transaction_id)
+             {:ok, persist_terminal(repo, lineage, evidence, reason)}
+           end) do
+        {:ok, result} -> {:ok, result}
+        {:error, reason} -> {:error, reason}
+      end
+    rescue
+      error in RuntimeError ->
+        if error.message == "injected_failure",
+          do: {:error, :injected_failure},
+          else: reraise(error, __STACKTRACE__)
+    end
+  end
+
+  @doc false
   def retry(_account, provider_event_id, opts \\ []) when is_binary(provider_event_id) do
     repo = Keyword.get(opts, :repo, Accrue.Repo.repo())
 
@@ -159,6 +221,27 @@ defmodule Accrue.Entitlements.Apple.Intake do
     case evidence.logical_plan do
       nil -> persist_terminal(repo, lineage, evidence, :unmapped_product)
       _ -> do_observe_claim(repo, lineage, account, evidence, opts)
+    end
+  end
+
+  defp do_observe_notification(repo, evidence, opts) do
+    lineage = Lineage.lock_or_insert(repo, evidence.environment, evidence.original_transaction_id)
+
+    case insert_intake(repo, lineage, evidence, "verified", "verified", "reconcile") do
+      {:duplicate, _} ->
+        %Outcome{disposition: :noop, reason: :duplicate, next_action: :none}
+
+      {:inserted, _} ->
+        {:ok, _} =
+          ReconciliationWakeup.enqueue_in_transaction(
+            repo,
+            lineage.id,
+            evidence.environment,
+            :notification
+          )
+
+        run_after_write(opts)
+        %Outcome{disposition: :verified, reason: :verified, next_action: :reconcile}
     end
   end
 
