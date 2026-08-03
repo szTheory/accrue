@@ -1,9 +1,9 @@
 ---
 phase: 219
 slug: offline-study-contract
-status: draft
-nyquist_compliant: false
-wave_0_complete: false
+status: ready
+nyquist_compliant: true
+wave_0_complete: true
 created: 2026-08-03
 ---
 
@@ -38,12 +38,12 @@ created: 2026-08-03
 
 | Task ID | Plan | Wave | Requirement | Threat Ref | Secure Behavior | Test Type | Automated Command | File Exists | Status |
 |---------|------|------|-------------|------------|-----------------|-----------|-------------------|-------------|--------|
-| 219-TBD | TBD | TBD | OFF-01 | JWS algorithm/key confusion | Public-only compact ES256 proof and JWKS verification | unit + fixture | `cd accrue && mix test test/accrue/entitlements/offline_protocol_test.exs` | ❌ W0 | ⬜ pending |
-| 219-TBD | TBD | TBD | OFF-02 | Clock rollback/overlong continuity | Fresh/stale/provider-expiry boundaries with no independent 72-hour cutoff | unit + property | `cd accrue && mix test test/accrue/entitlements/offline_test.exs` | ❌ W0 | ⬜ pending |
-| 219-TBD | TBD | TBD | OFF-03 | Stale value expansion | Stale permits only downloaded lessons and local progress | unit | `cd accrue && mix test test/accrue/entitlements/offline_test.exs` | ❌ W0 | ⬜ pending |
-| 219-TBD | TBD | TBD | OFF-04 | State collapse/fail-open compatibility | Fresh, stale-offline, denied, and invalid remain distinguishable while boolean gates stay compatible | unit + regression | `cd accrue && mix test test/accrue/entitlements/offline_test.exs test/accrue/entitlements_test.exs` | ❌ W0 / ✅ | ⬜ pending |
-| 219-TBD | TBD | TBD | OFF-05 | Partial reconciliation/replay | Due rails settle before final lock and atomic proof replacement | integration + fault injection | `cd accrue && mix test test/accrue/entitlements/offline_reconnect_test.exs` | ❌ W0 | ⬜ pending |
-| 219-TBD | TBD | TBD | OFF-06 | Binding, rollback, revocation, rotation | Negative corpus fails safely without private material leakage | unit + property | `cd accrue && mix test test/accrue/entitlements/offline_protocol_test.exs` | ❌ W0 | ⬜ pending |
+| 219-01-T1/T2 | 219-01 | 1 | OFF-01 | JWS algorithm/key confusion | Public-only compact ES256 proof and JWKS verification | unit + fixture | `cd accrue && mix test test/accrue/entitlements/offline_protocol_test.exs` | ✅ planned TDD | ⬜ pending |
+| 219-02-T1 | 219-02 | 2 | OFF-02 | Clock rollback/overlong continuity | Fresh/stale/provider-expiry boundaries with no independent 72-hour cutoff | unit + property | `cd accrue && mix test test/accrue/entitlements/offline_test.exs` | ✅ planned TDD | ⬜ pending |
+| 219-02-T2 | 219-02 | 2 | OFF-03 | Stale value expansion | Stale permits only downloaded lessons and local progress | unit | `cd accrue && mix test test/accrue/entitlements/offline_test.exs` | ✅ planned TDD | ⬜ pending |
+| 219-02-T1/T2 | 219-02 | 2 | OFF-04 | State collapse/fail-open compatibility | Fresh, stale-offline, denied, and invalid remain distinguishable while boolean gates stay compatible | unit + regression | `cd accrue && mix test test/accrue/entitlements/offline_test.exs test/accrue/entitlements_test.exs` | ✅ planned TDD / ✅ existing | ⬜ pending |
+| 219-03-T2, 219-04-T1/T2 | 219-03, 219-04 | 3-4 | OFF-05 | Partial reconciliation/replay | PoP, due rails, final locks, issuance, and atomic replacement ordering | integration + fault injection | `cd accrue && mix test test/accrue/entitlements/offline_registration_test.exs test/accrue/entitlements/offline_reconnect_test.exs` | ✅ planned TDD | ⬜ pending |
+| 219-01-T1, 219-05-T1/T2 | 219-01, 219-05 | 1,5 | OFF-06 | Binding, rollback, revocation, rotation | Negative Elixir/Swift corpus fails safely without private material leakage | unit + property + process crash | `cd accrue && mix test test/accrue/entitlements/offline_protocol_test.exs test/accrue/entitlements/offline_golden_vectors_test.exs && cd ../examples/crosswake_tracer && swift test` | ✅ planned TDD / ✅ seed | ⬜ pending |
 
 *Status: ⬜ pending · ✅ green · ❌ red · ⚠️ flaky*
 
@@ -51,10 +51,10 @@ created: 2026-08-03
 
 ## Wave 0 Requirements
 
-- [ ] `accrue/test/accrue/entitlements/offline_protocol_test.exs` — public profile, JWKS, binding, rotation, and negative vectors for OFF-01/OFF-06
-- [ ] `accrue/test/accrue/entitlements/offline_test.exs` — state/action policy, time boundaries, and boolean compatibility for OFF-02/OFF-03/OFF-04
-- [ ] `accrue/test/accrue/entitlements/offline_reconnect_test.exs` — transaction locking, due/pending/final issuance, and crash replacement for OFF-05
-- [ ] Property cases for ordering, deny precedence, clock rollback, and no-private-material regression
+- [x] `accrue/test/accrue/entitlements/offline_protocol_test.exs` — created first by 219-01-T1/T2 for public profile, JWKS, binding, rotation, and OFF-01/OFF-06 negatives.
+- [x] `accrue/test/accrue/entitlements/offline_test.exs` — created first by 219-02-T1/T2 for OFF-02/OFF-03/OFF-04 state/action, time boundaries, and gate compatibility.
+- [x] `accrue/test/accrue/entitlements/offline_registration_test.exs` and `offline_reconnect_test.exs` — created first by 219-03/04 TDD tasks for OFF-05 PoP, locks, due/pending, and terminal issuance.
+- [x] Ordering, denial precedence, clock rollback, privacy, and replacement-crash properties are authored test-first across 219-02 and 219-05.
 
 ---
 
@@ -66,11 +66,11 @@ All phase behaviors are expected to have automated verification. Any platform-sp
 
 ## Validation Sign-Off
 
-- [ ] All tasks have `<automated>` verify or Wave 0 dependencies
-- [ ] Sampling continuity: no 3 consecutive tasks without automated verify
-- [ ] Wave 0 covers all MISSING references
-- [ ] No watch-mode flags
-- [ ] Feedback latency < 30s for targeted checks
-- [ ] `nyquist_compliant: true` set in frontmatter
+- [x] All tasks have `<automated>` verify or create their Wave 0 dependency before production code.
+- [x] Sampling continuity: every task has focused automated verification.
+- [x] Wave 0 covers all MISSING references through the mapped TDD tasks.
+- [x] No watch-mode flags.
+- [x] Targeted commands are scoped to the under-30-second feedback goal; runtime is recorded during execution.
+- [x] `nyquist_compliant: true` set in frontmatter.
 
-**Approval:** pending
+**Approval:** executable evidence only; no manual-only phase acceptance is planned

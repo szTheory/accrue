@@ -261,7 +261,15 @@ Plans:
   4. Host code can distinguish fresh, stale-offline, denied, and invalid proof states with bounded reasons while existing boolean gate return types remain compatible.
   5. Reconnect authenticates account and device, refreshes due rails, and atomically replaces cached proof with a newer allow proof or signed deny tombstone; copied, replayed, wrong-device, rollback, revoked-device, and rotated-key proofs fail safely.
 
-**Plans**: TBD
+**Plans**: 5 plans
+
+Plans:
+
+- [ ] 219-01-PLAN.md — Trace strict public-key-only ES256 verification and the host key-provider/JWKS boundary.
+- [ ] 219-02-PLAN.md — Lock the four-state, no-72-hour, stale-continuity, guidance, and legacy-gate contract.
+- [ ] 219-03-PLAN.md — Persist and apply replay-safe device PoP, challenge, and issuance/high-water state.
+- [ ] 219-04-PLAN.md — Reconcile due sources and issue current allow/deny proof under account/device locks.
+- [ ] 219-05-PLAN.md — Prove full Elixir/Swift corpus parity and authenticated atomic cache replacement.
 
 ### Phase 220: First-adopter proof and release gates
 
