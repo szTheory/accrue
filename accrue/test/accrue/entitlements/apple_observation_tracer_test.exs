@@ -59,11 +59,35 @@ defmodule Accrue.Entitlements.AppleObservationTracerTest do
     assert count(Grant) == 1
     assert count(:accrue_entitlement_apple_reconciliation_wakeups) == 1
 
+    expected_expiry = ~U[2027-01-15 08:00:00.000000Z]
+
+    assert Accrue.TestRepo.one!(from(observation in Observation, select: observation.expires_at)) ==
+             expected_expiry
+
+    assert Accrue.TestRepo.one!(from(grant in Grant, select: grant.expires_at)) == expected_expiry
+
     assert {:ok, %Intake.Outcome{disposition: :noop, reason: :duplicate, revision: nil}} =
              Accrue.Entitlements.observe_apple_evidence(account, evidence)
 
     assert Accrue.TestRepo.get!(Account, account.id).revision == 1
     assert count(Grant) == 1
+  end
+
+  test "missing or invalid active expiry is rejected before durable writes", %{account: account} do
+    for expires_date <- [nil, "not-a-timestamp", -9_999_999_999_999_999] do
+      before = durable_counts(account)
+
+      assert {:error, :invalid_payload} =
+               Accrue.Entitlements.observe_apple_evidence(
+                 account,
+                 signed_evidence(account, %{
+                   "transactionId" => "txn-invalid-expiry-#{inspect(expires_date)}",
+                   "expiresDate" => expires_date
+                 })
+               )
+
+      assert durable_counts(account) == before
+    end
   end
 
   test "unbound verified evidence is durable but cannot grant", %{account: account} do
@@ -157,7 +181,8 @@ defmodule Accrue.Entitlements.AppleObservationTracerTest do
       "appAccountToken" => account.id,
       "transactionId" => "txn-apple-1",
       "productId" => "product_pro",
-      "signedDate" => 1_754_000_000_000
+      "signedDate" => 1_754_000_000_000,
+      "expiresDate" => 1_800_000_000_000
     }
     |> Map.merge(overrides)
     |> Jason.encode!()
@@ -180,4 +205,15 @@ defmodule Accrue.Entitlements.AppleObservationTracerTest do
   end
 
   defp count(schema), do: Accrue.TestRepo.aggregate(schema, :count, :id)
+
+  defp durable_counts(account) do
+    %{
+      lineages: count(:accrue_entitlement_apple_lineages),
+      intakes: count(:accrue_entitlement_apple_intakes),
+      observations: count(Observation),
+      grants: count(Grant),
+      wakeups: count(:accrue_entitlement_apple_reconciliation_wakeups),
+      revision: Accrue.TestRepo.get!(Account, account.id).revision
+    }
+  end
 end
