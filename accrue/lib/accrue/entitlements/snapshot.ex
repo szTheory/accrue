@@ -102,7 +102,8 @@ defmodule Accrue.Entitlements.Snapshot do
   end
 
   defp fold_grant(grant, catalog, {plans, features, quantities, sources, authorization_bounds}) do
-    case Map.get(catalog, product_key(grant)) || Map.get(catalog, grant.provider_product_id) do
+    case Map.get(catalog, product_key(grant)) || Map.get(catalog, grant.provider_product_id) ||
+           legacy_product(grant, catalog) do
       nil ->
         {plans, features, quantities, sources, authorization_bounds}
 
@@ -123,6 +124,26 @@ defmodule Accrue.Entitlements.Snapshot do
   end
 
   defp product_key(grant), do: {grant.rail, grant.environment, grant.provider_product_id}
+
+  defp legacy_product(%{logical_plan: logical_plan}, catalog) when is_binary(logical_plan) do
+    Enum.find_value(catalog, &legacy_catalog_match(&1, logical_plan)) ||
+      Accrue.Config.entitlements()
+      |> Keyword.get(:plans, [])
+      |> Enum.find_value(fn {plan, entry} ->
+        if Atom.to_string(plan) == logical_plan,
+          do: %{
+            plan: plan,
+            features: Keyword.get(entry, :features, []),
+            quotas: Map.new(Keyword.get(entry, :limits, []))
+          }
+      end)
+  end
+
+  defp legacy_product(_, _), do: nil
+
+  defp legacy_catalog_match({_key, product}, logical_plan) do
+    if Atom.to_string(product.plan) == logical_plan, do: product
+  end
 
   defp source(grant, logical_plan) do
     %{

@@ -1282,7 +1282,7 @@ defmodule Accrue.Config do
     end
 
     validate_multi_rail_cohort!(cohort)
-    %{mode: mode, cohort: cohort, clean_window: clean_window}
+    %{mode: mode, cohort: normalize_multi_rail_cohort(cohort), clean_window: clean_window}
   end
 
   defp validate_multi_rail_cohort!(nil), do: :ok
@@ -1298,6 +1298,11 @@ defmodule Accrue.Config do
       key: :multi_rail,
       message: "cohort must be {:accounts, [opaque_account_id]} or {module, function, extra_args}"
   end
+
+  defp normalize_multi_rail_cohort({:accounts, accounts}),
+    do: {:accounts, accounts |> Enum.uniq() |> Enum.sort()}
+
+  defp normalize_multi_rail_cohort(cohort), do: cohort
 
   defp validate_rails!(opts) do
     rails = Keyword.get(opts, :rails, [])

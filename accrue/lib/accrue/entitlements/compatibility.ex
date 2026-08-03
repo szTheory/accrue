@@ -17,6 +17,7 @@ defmodule Accrue.Entitlements.Compatibility do
     :account_id,
     :actor_id
   ]
+  @rollback_key {__MODULE__, :rolled_back_accounts}
 
   @impl true
   def resolve(billable, opts \\ []) do
@@ -36,7 +37,9 @@ defmodule Accrue.Entitlements.Compatibility do
           shadow_authority(billable, opts, config)
 
         {:ok, %{mode: :enabled} = config} ->
-          enabled_authority(billable, opts, config)
+          if rolled_back?(opts),
+            do: {:ok, LocalMap, Map.put(config, :authority, :local_map)},
+            else: enabled_authority(billable, opts, config)
 
         {:error, _} = error ->
           error
@@ -53,13 +56,15 @@ defmodule Accrue.Entitlements.Compatibility do
         local = normalize(local)
         canonical = normalize(canonical)
 
-        if local == canonical do
+        blockers = parity_blockers(local, canonical, billable)
+
+        if blockers == [] do
           {:ok, %{disposition: :match, blockers: [], local: local, canonical: canonical}}
         else
           {:ok,
            %{
              disposition: :mismatch,
-             blockers: [:normalized_mismatch],
+             blockers: blockers,
              local: local,
              canonical: canonical
            }}
@@ -86,7 +91,18 @@ defmodule Accrue.Entitlements.Compatibility do
 
   @spec rollback(keyword()) :: :ok
   def rollback(opts \\ []) do
-    with_telemetry(:rollback, opts, fn -> :ok end)
+    with_telemetry(:rollback, opts, fn ->
+      case Keyword.get(opts, :account_id) do
+        nil ->
+          :ok
+
+        account_id ->
+          rolled_back = :persistent_term.get(@rollback_key, MapSet.new())
+          :persistent_term.put(@rollback_key, MapSet.put(rolled_back, account_id))
+      end
+
+      :ok
+    end)
   end
 
   @spec backfill(keyword(), keyword()) :: {:ok, map()} | {:error, atom()}
@@ -296,13 +312,72 @@ defmodule Accrue.Entitlements.Compatibility do
   defp window_matches_current_config?(window, config) do
     Keyword.get(config.clean_window || [], :cohort_digest) == digest(config.cohort) and
       Keyword.get(config.clean_window || [], :catalog_digest) ==
-        digest(Accrue.Config.entitlements()) and
-      Keyword.get(config.clean_window || [], :config_digest) == digest(config) and
+        digest(Accrue.Config.entitlement_product_catalog()) and
+      Keyword.get(config.clean_window || [], :config_digest) ==
+        digest(Map.drop(config, [:clean_window])) and
       window.comparison_count > 0
   end
 
   defp digest(value),
     do: :crypto.hash(:sha256, :erlang.term_to_binary(value)) |> Base.encode16(case: :lower)
+
+  @doc false
+  def clean_window_digests(cohort, config) do
+    cohort = normalize_cohort(cohort)
+    config = Map.put(config, :cohort, cohort)
+
+    %{
+      cohort_digest: digest(cohort),
+      catalog_digest: digest(Accrue.Config.entitlement_product_catalog()),
+      config_digest: digest(Map.drop(config, [:clean_window]))
+    }
+  end
+
+  defp normalize_cohort({:accounts, accounts}),
+    do: {:accounts, accounts |> Enum.uniq() |> Enum.sort()}
+
+  defp normalize_cohort(cohort), do: cohort
+
+  defp parity_blockers(local, canonical, billable) do
+    unmapped =
+      case customer_for(billable) do
+        nil -> []
+        customer -> Accrue.Entitlements.Resolver.LocalMap.unmapped_entitling_price_ids(customer)
+      end
+
+    cond do
+      unmapped != [] -> [:unmapped_legacy]
+      local != canonical -> [:normalized_mismatch]
+      true -> []
+    end
+  rescue
+    _ -> [:comparison_unavailable]
+  end
+
+  defp customer_for(%{__struct__: module, id: id}) when not is_nil(id) do
+    import Ecto.Query
+    alias Accrue.Billing.Customer
+
+    Accrue.Repo.one(
+      from(customer in Customer,
+        where:
+          customer.owner_type == ^module.__accrue__(:billable_type) and
+            customer.owner_id == ^to_string(id),
+        limit: 1
+      )
+    )
+  rescue
+    _ -> nil
+  end
+
+  defp customer_for(_), do: nil
+
+  defp rolled_back?(opts) do
+    rolled_back = :persistent_term.get(@rollback_key, MapSet.new())
+
+    MapSet.member?(rolled_back, :all) or
+      MapSet.member?(rolled_back, Keyword.get(opts, :account_id))
+  end
 
   defp with_telemetry(operation, opts, fun) do
     metadata =
@@ -314,7 +389,10 @@ defmodule Accrue.Entitlements.Compatibility do
       }
       |> Map.take(@metadata_keys)
 
-    Accrue.Telemetry.span([:accrue, :entitlements, :compatibility, operation], metadata, fun)
+    Accrue.Telemetry.span([:accrue, :entitlements, :compatibility, operation], metadata, fn ->
+      if Keyword.get(opts, :raise, false), do: raise("compatibility telemetry probe")
+      fun.()
+    end)
   end
 
   defp safe_mode do
