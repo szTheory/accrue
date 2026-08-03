@@ -68,7 +68,7 @@ None. The zero-human policy requires `type="auto"` tasks and an `<automated>` ve
 - [x] No watch-mode flags
 - [x] Feedback latency is measured and acceptable (focused 0.2s; wave 1.5s)
 - [x] `nyquist_compliant: true` set in frontmatter
-- [x] Two consecutive randomized full suites passed: 67 properties, 1882 tests, 0 failures at seeds 567304 and 596642
+- [x] Three consecutive randomized full suites passed: 67 properties, 1882 tests, 0 failures at seeds 567304, 596642, and 581628
 - [x] Independent deep code review is clean with 0 residual findings
 
 **Approval:** not applicable — Phase 217 has executable zero-human verification.
