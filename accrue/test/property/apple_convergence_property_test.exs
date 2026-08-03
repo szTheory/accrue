@@ -51,7 +51,7 @@ defmodule Accrue.Entitlements.AppleConvergencePropertyTest do
       }
 
       {:ok,
-       if(event == "revoked",
+       if(String.starts_with?(event, "revoked-"),
          do: Map.put(facts, "revocationDate", 1_754_000_000_001),
          else: facts
        )}
@@ -94,7 +94,9 @@ defmodule Accrue.Entitlements.AppleConvergencePropertyTest do
     previous = Application.get_env(:accrue, :apple_reconciliation)
 
     Application.put_env(:accrue, :apple_reconciliation,
-      client: %ScriptedClient{pages: pages(events, page_width)},
+      client: %ScriptedClient{
+        pages: pages(Enum.map(events, &"#{&1}-#{account.id}"), page_width)
+      },
       admission: admission(account, lineage)
     )
 
