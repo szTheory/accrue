@@ -22,8 +22,9 @@ defmodule Accrue.Billing.SubscriptionItems do
 
   alias Accrue.Actor
   alias Accrue.Billing.{Subscription, SubscriptionItem}
-  alias Accrue.{Events, Processor, Repo}
+  alias Accrue.{Events, Repo}
   alias Accrue.Processor.Idempotency
+  alias Accrue.Rails.GatewayRegistry
 
   @add_schema [
     quantity: [type: :pos_integer, default: 1],
@@ -61,28 +62,30 @@ defmodule Accrue.Billing.SubscriptionItems do
     op_id = v[:operation_id] || Actor.current_operation_id!()
     idem_key = Idempotency.key(:subscription_item_create, sub.id, op_id)
 
-    Repo.transact(fn ->
-      with {:ok, stripe_item} <-
-             Processor.__impl__().subscription_item_create(
-               %{
-                 subscription: sub.processor_id,
-                 price: price_id,
-                 quantity: v[:quantity],
-                 proration_behavior: proration_to_stripe(v[:proration])
-               },
-               idempotency_key: idem_key
-             ),
-           {:ok, item} <- insert_item(sub, stripe_item, price_id, v[:quantity]),
-           {:ok, _} <-
-             Events.record(%{
-               type: "subscription.item_added",
-               subject_type: "Subscription",
-               subject_id: sub.id,
-               data: %{item_id: item.id, price_id: price_id}
-             }) do
-        {:ok, item}
-      end
-    end)
+    with {:ok, adapter} <- resolve_adapter(sub) do
+      Repo.transact(fn ->
+        with {:ok, stripe_item} <-
+               adapter.subscription_item_create(
+                 %{
+                   subscription: sub.processor_id,
+                   price: price_id,
+                   quantity: v[:quantity],
+                   proration_behavior: proration_to_stripe(v[:proration])
+                 },
+                 idempotency_key: idem_key
+               ),
+             {:ok, item} <- insert_item(sub, stripe_item, price_id, v[:quantity]),
+             {:ok, _} <-
+               Events.record(%{
+                 type: "subscription.item_added",
+                 subject_type: "Subscription",
+                 subject_id: sub.id,
+                 data: %{item_id: item.id, price_id: price_id}
+               }) do
+          {:ok, item}
+        end
+      end)
+    end
   end
 
   @spec add_item!(Subscription.t(), String.t(), keyword()) :: SubscriptionItem.t()
@@ -99,24 +102,27 @@ defmodule Accrue.Billing.SubscriptionItems do
     op_id = v[:operation_id] || Actor.current_operation_id!()
     idem_key = Idempotency.key(:subscription_item_delete, item.id, op_id)
 
-    Repo.transact(fn ->
-      with {:ok, _stripe_result} <-
-             Processor.__impl__().subscription_item_delete(
-               item.processor_id,
-               %{proration_behavior: proration_to_stripe(v[:proration])},
-               idempotency_key: idem_key
-             ),
-           {:ok, deleted} <- Repo.delete(item),
-           {:ok, _} <-
-             Events.record(%{
-               type: "subscription.item_removed",
-               subject_type: "Subscription",
-               subject_id: item.subscription_id,
-               data: %{item_id: item.id, price_id: item.price_id}
-             }) do
-        {:ok, deleted}
-      end
-    end)
+    with {:ok, sub} <- parent_subscription(item),
+         {:ok, adapter} <- resolve_adapter(sub) do
+      Repo.transact(fn ->
+        with {:ok, _stripe_result} <-
+               adapter.subscription_item_delete(
+                 item.processor_id,
+                 %{proration_behavior: proration_to_stripe(v[:proration])},
+                 idempotency_key: idem_key
+               ),
+             {:ok, deleted} <- Repo.delete(item),
+             {:ok, _} <-
+               Events.record(%{
+                 type: "subscription.item_removed",
+                 subject_type: "Subscription",
+                 subject_id: item.subscription_id,
+                 data: %{item_id: item.id, price_id: item.price_id}
+               }) do
+          {:ok, deleted}
+        end
+      end)
+    end
   end
 
   @spec remove_item!(SubscriptionItem.t(), keyword()) :: SubscriptionItem.t()
@@ -134,27 +140,30 @@ defmodule Accrue.Billing.SubscriptionItems do
     op_id = v[:operation_id] || Actor.current_operation_id!()
     idem_key = Idempotency.key(:subscription_item_update, item.id, op_id)
 
-    Repo.transact(fn ->
-      with {:ok, stripe_item} <-
-             Processor.__impl__().subscription_item_update(
-               item.processor_id,
-               %{
-                 quantity: new_quantity,
-                 proration_behavior: proration_to_stripe(v[:proration])
-               },
-               idempotency_key: idem_key
-             ),
-           {:ok, updated} <- update_item(item, stripe_item, new_quantity),
-           {:ok, _} <-
-             Events.record(%{
-               type: "subscription.item_quantity_updated",
-               subject_type: "Subscription",
-               subject_id: item.subscription_id,
-               data: %{item_id: item.id, quantity: new_quantity}
-             }) do
-        {:ok, updated}
-      end
-    end)
+    with {:ok, sub} <- parent_subscription(item),
+         {:ok, adapter} <- resolve_adapter(sub) do
+      Repo.transact(fn ->
+        with {:ok, stripe_item} <-
+               adapter.subscription_item_update(
+                 item.processor_id,
+                 %{
+                   quantity: new_quantity,
+                   proration_behavior: proration_to_stripe(v[:proration])
+                 },
+                 idempotency_key: idem_key
+               ),
+             {:ok, updated} <- update_item(item, stripe_item, new_quantity),
+             {:ok, _} <-
+               Events.record(%{
+                 type: "subscription.item_quantity_updated",
+                 subject_type: "Subscription",
+                 subject_id: item.subscription_id,
+                 data: %{item_id: item.id, quantity: new_quantity}
+               }) do
+          {:ok, updated}
+        end
+      end)
+    end
   end
 
   @spec update_item_quantity!(SubscriptionItem.t(), pos_integer(), keyword()) ::
@@ -175,7 +184,7 @@ defmodule Accrue.Billing.SubscriptionItems do
 
     attrs = %{
       subscription_id: sub.id,
-      processor: processor_name(),
+      processor: sub.processor,
       processor_id: processor_id,
       price_id: price_id,
       processor_plan_id: price_id,
@@ -202,13 +211,15 @@ defmodule Accrue.Billing.SubscriptionItems do
     |> Repo.update()
   end
 
-  defp processor_name do
-    case Processor.__impl__() do
-      Accrue.Processor.Fake -> "fake"
-      Accrue.Processor.Stripe -> "stripe"
-      other -> other |> Module.split() |> List.last() |> String.downcase()
+  defp parent_subscription(%SubscriptionItem{} = item) do
+    case Repo.preload(item, :subscription).subscription do
+      %Subscription{} = sub -> {:ok, sub}
+      _ -> {:error, :subscription_not_found}
     end
   end
+
+  defp resolve_adapter(%Subscription{processor: processor}),
+    do: GatewayRegistry.resolve(processor)
 
   defp unwrap!({:ok, v}), do: v
   defp unwrap!({:error, err}) when is_exception(err), do: raise(err)

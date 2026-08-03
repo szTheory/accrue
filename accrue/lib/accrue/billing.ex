@@ -42,6 +42,7 @@ defmodule Accrue.Billing do
   }
 
   alias Accrue.Events
+  alias Accrue.Entitlements.Source.Registry, as: SourceRegistry
   alias Accrue.Processor
   alias Accrue.Repo
   alias Accrue.Telemetry.Ops
@@ -87,70 +88,57 @@ defmodule Accrue.Billing do
   provider-honest support boundary.
   """
   def swap_plan(sub, new_price_id, opts) do
-    span_billing(:subscription, :swap_plan, sub, opts, fn ->
+    span_lifecycle(:swap_plan, sub, opts, fn ->
       SubscriptionActions.swap_plan(sub, new_price_id, opts)
     end)
   end
 
   @doc "Raising variant of `swap_plan/3`."
   def swap_plan!(sub, new_price_id, opts) do
-    span_billing(:subscription, :swap_plan, sub, opts, fn ->
-      SubscriptionActions.swap_plan!(sub, new_price_id, opts)
-    end)
+    unwrap_lifecycle!(swap_plan(sub, new_price_id, opts), "swap_plan/3")
   end
 
   def cancel(sub, opts \\ []),
-    do: span_subscription(:cancel, sub, opts, &SubscriptionActions.cancel/2)
+    do: span_lifecycle(:cancel, sub, opts, fn -> SubscriptionActions.cancel(sub, opts) end)
 
   def cancel!(sub, opts \\ []),
-    do: span_subscription(:cancel, sub, opts, &SubscriptionActions.cancel!/2)
+    do: unwrap_lifecycle!(cancel(sub, opts), "cancel/2")
 
   def cancel_at_period_end(sub, opts \\ []),
     do:
-      span_subscription(
-        :cancel_at_period_end,
-        sub,
-        opts,
-        &SubscriptionActions.cancel_at_period_end/2
-      )
+      span_lifecycle(:cancel_at_period_end, sub, opts, fn ->
+        SubscriptionActions.cancel_at_period_end(sub, opts)
+      end)
 
   def cancel_at_period_end!(sub, opts \\ []),
-    do:
-      span_subscription(
-        :cancel_at_period_end,
-        sub,
-        opts,
-        &SubscriptionActions.cancel_at_period_end!/2
-      )
+    do: unwrap_lifecycle!(cancel_at_period_end(sub, opts), "cancel_at_period_end/2")
 
   def resume(sub, opts \\ []),
-    do: span_subscription(:resume, sub, opts, &SubscriptionActions.resume/2)
+    do: span_lifecycle(:resume, sub, opts, fn -> SubscriptionActions.resume(sub, opts) end)
 
   def resume!(sub, opts \\ []),
-    do: span_subscription(:resume, sub, opts, &SubscriptionActions.resume!/2)
+    do: unwrap_lifecycle!(resume(sub, opts), "resume/2")
 
   def pause(sub, opts \\ []),
-    do: span_subscription(:pause, sub, opts, &SubscriptionActions.pause/2)
+    do: span_lifecycle(:pause, sub, opts, fn -> SubscriptionActions.pause(sub, opts) end)
 
   def pause!(sub, opts \\ []),
-    do: span_subscription(:pause, sub, opts, &SubscriptionActions.pause!/2)
+    do: unwrap_lifecycle!(pause(sub, opts), "pause/2")
 
   def unpause(sub, opts \\ []),
-    do: span_subscription(:unpause, sub, opts, &SubscriptionActions.unpause/2)
+    do: span_lifecycle(:unpause, sub, opts, fn -> SubscriptionActions.unpause(sub, opts) end)
 
   def unpause!(sub, opts \\ []),
-    do: span_subscription(:unpause, sub, opts, &SubscriptionActions.unpause!/2)
+    do: unwrap_lifecycle!(unpause(sub, opts), "unpause/2")
 
   def update_quantity(sub, quantity, opts \\ []) do
-    span_billing(:subscription, :update_quantity, sub, opts, fn ->
+    span_lifecycle(:update_quantity, sub, opts, fn ->
       SubscriptionActions.update_quantity(sub, quantity, opts)
     end)
   end
 
   def update_quantity!(sub, quantity, opts \\ []) do
-    span_billing(:subscription, :update_quantity, sub, opts, fn ->
-      SubscriptionActions.update_quantity!(sub, quantity, opts)
-    end)
+    unwrap_lifecycle!(update_quantity(sub, quantity, opts), "update_quantity/3")
   end
 
   @doc """
@@ -163,16 +151,17 @@ defmodule Accrue.Billing do
   including Braintree's explicit preview boundary.
   """
   def preview_upcoming_invoice(sub_or_customer, opts \\ []) do
-    span_billing(:invoice, :preview_upcoming, sub_or_customer, opts, fn ->
+    span_lifecycle(:preview_upcoming_invoice, sub_or_customer, opts, fn ->
       SubscriptionActions.preview_upcoming_invoice(sub_or_customer, opts)
     end)
   end
 
   @doc "Raising variant of `preview_upcoming_invoice/2`."
   def preview_upcoming_invoice!(sub_or_customer, opts \\ []) do
-    span_billing(:invoice, :preview_upcoming, sub_or_customer, opts, fn ->
-      SubscriptionActions.preview_upcoming_invoice!(sub_or_customer, opts)
-    end)
+    unwrap_lifecycle!(
+      preview_upcoming_invoice(sub_or_customer, opts),
+      "preview_upcoming_invoice/2"
+    )
   end
 
   # ── Advanced subscription management ──────────────────────────────
@@ -189,33 +178,42 @@ defmodule Accrue.Billing do
   end
 
   def add_item(sub, price_id, opts \\ []) do
-    span_billing(:subscription_item, :add, sub, opts, fn ->
+    span_lifecycle(:add_item, sub, opts, fn ->
       SubscriptionItems.add_item(sub, price_id, opts)
     end)
   end
 
   def add_item!(sub, price_id, opts \\ []) do
-    span_billing(:subscription_item, :add, sub, opts, fn ->
-      SubscriptionItems.add_item!(sub, price_id, opts)
-    end)
+    unwrap_lifecycle!(add_item(sub, price_id, opts), "add_item/3")
   end
 
   def remove_item(item, opts \\ []),
-    do: span_subscription_item(:remove, item, opts, &SubscriptionItems.remove_item/2)
+    do:
+      span_lifecycle(:remove_item, item, opts, fn -> SubscriptionItems.remove_item(item, opts) end)
 
   def remove_item!(item, opts \\ []),
-    do: span_subscription_item(:remove, item, opts, &SubscriptionItems.remove_item!/2)
+    do: unwrap_lifecycle!(remove_item(item, opts), "remove_item/2")
 
   def update_item_quantity(item, quantity, opts \\ []) do
-    span_billing(:subscription_item, :update_quantity, item, opts, fn ->
+    span_lifecycle(:update_item_quantity, item, opts, fn ->
       SubscriptionItems.update_item_quantity(item, quantity, opts)
     end)
   end
 
   def update_item_quantity!(item, quantity, opts \\ []) do
-    span_billing(:subscription_item, :update_quantity, item, opts, fn ->
-      SubscriptionItems.update_item_quantity!(item, quantity, opts)
-    end)
+    unwrap_lifecycle!(update_item_quantity(item, quantity, opts), "update_item_quantity/3")
+  end
+
+  @doc "Returns the source-owned management outcome without attempting a gateway mutation."
+  @spec management(Accrue.Entitlements.Source.source(), keyword()) ::
+          {:ok, Accrue.Entitlements.Source.Outcome.t()}
+          | {:error, Accrue.Entitlements.Source.CapabilityError.t()}
+  def management(source, opts \\ []) do
+    Accrue.Telemetry.span(
+      [:accrue, :billing, :management],
+      lifecycle_metadata(:management, %{source: source}, opts) |> Map.put(:rail, source),
+      fn -> SourceRegistry.outcome(source, :management) end
+    )
   end
 
   # ── SubscriptionSchedule management ───────────────────────────────
@@ -1258,13 +1256,38 @@ defmodule Accrue.Billing do
     end)
   end
 
-  defp span_subscription(action, sub, opts, delegate) do
-    span_billing(:subscription, action, sub, opts, fn -> delegate.(sub, opts) end)
+  # Lifecycle operations are intentionally a separate telemetry family from
+  # the broad historical billing spans.  The metadata is derived only from the
+  # local resource and caller-supplied operation identity; provider payloads
+  # and customer attributes never cross this boundary.
+  defp span_lifecycle(action, subject, opts, fun) do
+    Accrue.Telemetry.span(
+      [:accrue, :billing, :lifecycle, action],
+      lifecycle_metadata(action, subject, opts),
+      fun
+    )
   end
 
-  defp span_subscription_item(action, item, opts, delegate) do
-    span_billing(:subscription_item, action, item, opts, fn -> delegate.(item, opts) end)
+  defp lifecycle_metadata(action, subject, opts) do
+    %{
+      action: action,
+      resource_id: subject_value(subject, :subscription_id) || subject_value(subject, :item_id),
+      account_id: subject_value(subject, :customer_id),
+      operation_id: keyword_value(opts, :operation_id)
+    }
+    |> Enum.reject(fn {_key, value} -> is_nil(value) end)
+    |> Map.new()
   end
+
+  defp unwrap_lifecycle!({:ok, value}, _operation), do: value
+
+  defp unwrap_lifecycle!({:ok, :requires_action, intent}, _operation),
+    do: raise(Accrue.ActionRequiredError, payment_intent: intent)
+
+  defp unwrap_lifecycle!({:error, error}, _operation) when is_exception(error), do: raise(error)
+
+  defp unwrap_lifecycle!({:error, error}, operation),
+    do: raise("#{operation} failed: #{inspect(error)}")
 
   defp span_schedule(action, sched, opts, delegate) do
     span_billing(:subscription_schedule, action, sched, opts, fn -> delegate.(sched, opts) end)
@@ -1348,6 +1371,8 @@ defmodule Accrue.Billing do
 
   defp subject_value(%Customer{id: id}, :customer_id), do: id
   defp subject_value(%{customer_id: id}, :customer_id), do: id
+  defp subject_value(%{id: id}, :subscription_id), do: id
+  defp subject_value(%{id: id}, :item_id), do: id
   defp subject_value(%{"customer_id" => id}, :customer_id), do: id
   defp subject_value(%{subscription_id: id}, :subscription_id), do: id
   defp subject_value(%{"subscription_id" => id}, :subscription_id), do: id
