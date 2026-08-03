@@ -125,6 +125,76 @@ defmodule Accrue.Entitlements.PurchaseDecisionTest do
     end
   end
 
+  test "override telemetry and audit recursively exclude seeded private values" do
+    snapshot = snapshot([source(:apple)], 4)
+    decision = PurchaseDecision.evaluate(snapshot, :stripe, "price_pro", catalog: catalog())
+    parent = self()
+    handler = {__MODULE__, make_ref()}
+
+    :ok =
+      :telemetry.attach(
+        handler,
+        [:accrue, :entitlements, :override_purchase_decision, :stop],
+        fn _event, _measurements, metadata, _ -> send(parent, {:override_span, metadata}) end,
+        nil
+      )
+
+    seeds = [
+      "operator@seeded.example",
+      "adopter-identity-seeded",
+      "raw-receipt-seeded",
+      "jws-seeded",
+      "apple-token-seeded",
+      "provider-payload-seeded"
+    ]
+
+    try do
+      assert %PurchaseDecision{status: :warn} =
+               Accrue.Entitlements.override_purchase_decision(
+                 decision,
+                 "support-approved",
+                 hd(seeds),
+                 snapshot: snapshot,
+                 product_id: "price_pro",
+                 catalog: catalog(),
+                 audit: fn audit -> send(parent, {:override_audit, audit}) end,
+                 email: hd(seeds),
+                 adopter_id: Enum.at(seeds, 1),
+                 raw_receipt: Enum.at(seeds, 2),
+                 jws: Enum.at(seeds, 3),
+                 apple_account_token: Enum.at(seeds, 4),
+                 provider_payload: Enum.at(seeds, 5)
+               )
+
+      assert_receive {:override_span, metadata}
+      assert_receive {:override_audit, audit}
+
+      for forbidden <- [
+            :email,
+            :adopter,
+            :adopter_id,
+            :identity,
+            :raw_receipt,
+            :receipt,
+            :jws,
+            :apple_account_token,
+            :token,
+            :provider_payload,
+            :payload
+          ] do
+        refute contains_key?(metadata, forbidden)
+        refute contains_key?(audit, forbidden)
+      end
+
+      for seed <- seeds do
+        refute inspect(metadata) =~ seed
+        refute inspect(audit) =~ seed
+      end
+    after
+      :telemetry.detach(handler)
+    end
+  end
+
   test "continuation refuses a changed blocking state before any provider command" do
     stale = PurchaseDecision.evaluate(snapshot([], 1), :stripe, "price_pro", catalog: catalog())
 
@@ -327,4 +397,12 @@ defmodule Accrue.Entitlements.PurchaseDecisionTest do
       {:stripe, :production, "price_pro"} => :pro,
       {:apple, :production, "product_pro"} => :pro
     }
+
+  defp contains_key?(term, key) when is_map(term),
+    do:
+      Map.has_key?(term, key) or
+        Enum.any?(term, fn {_key, value} -> contains_key?(value, key) end)
+
+  defp contains_key?(term, key) when is_list(term), do: Enum.any?(term, &contains_key?(&1, key))
+  defp contains_key?(_term, _key), do: false
 end

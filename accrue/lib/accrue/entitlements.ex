@@ -51,7 +51,8 @@ defmodule Accrue.Entitlements do
 
   @doc "Returns a typed, revision-bound purchase preflight decision."
   @spec purchase_decision(Account.t() | String.t(), atom(), String.t(), keyword()) ::
-          PurchaseDecision.t() | {:error, :unauthorized_billable_reference | :account_fetch_failed}
+          PurchaseDecision.t()
+          | {:error, :unauthorized_billable_reference | :account_fetch_failed}
   def purchase_decision(account, rail, product_id, opts \\ []) do
     metadata = purchase_decision_metadata(account, rail, opts)
 
@@ -286,7 +287,8 @@ defmodule Accrue.Entitlements do
     end
   end
 
-  defp provision_if_absent(%Account{} = account, _owner_type, _owner_id, _opts), do: {:ok, account}
+  defp provision_if_absent(%Account{} = account, _owner_type, _owner_id, _opts),
+    do: {:ok, account}
 
   defp provision_if_absent(nil, owner_type, owner_id, opts),
     do: provision_account(owner_type, owner_id, actor_id: Keyword.get(opts, :actor_id))

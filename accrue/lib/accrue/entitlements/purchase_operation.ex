@@ -26,15 +26,31 @@ defmodule Accrue.Entitlements.PurchaseOperation do
   end
 
   def fetch(repo, account_id, operation_id) do
-    repo.one(from operation in __MODULE__, where: operation.account_id == ^account_id and operation.operation_id == ^operation_id)
+    repo.one(
+      from(operation in __MODULE__,
+        where: operation.account_id == ^account_id and operation.operation_id == ^operation_id
+      )
+    )
   end
 
   def put_pending(repo, account_id, operation_id, product_id) do
-    attrs = %{account_id: account_id, operation_id: operation_id, rail: :stripe, product_id: product_id, status: :pending_reconcile}
-    repo.insert(changeset(%__MODULE__{}, attrs), on_conflict: :nothing, conflict_target: [:account_id, :operation_id])
+    attrs = %{
+      account_id: account_id,
+      operation_id: operation_id,
+      rail: :stripe,
+      product_id: product_id,
+      status: :pending_reconcile
+    }
+
+    repo.insert(changeset(%__MODULE__{}, attrs),
+      on_conflict: :nothing,
+      conflict_target: [:account_id, :operation_id]
+    )
   end
 
   def complete(repo, %__MODULE__{} = operation, subscription_id) do
-    operation |> changeset(%{status: :completed, subscription_id: subscription_id}) |> repo.update()
+    operation
+    |> changeset(%{status: :completed, subscription_id: subscription_id})
+    |> repo.update()
   end
 end
