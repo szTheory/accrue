@@ -143,6 +143,79 @@ defmodule Accrue.Entitlements.AppleReconciliationTest do
                     "https://api.storekit-sandbox.itunes.apple.com/inApps/v2/history/sandbox%20lineage?sort=ascending"}
   end
 
+  test "reconciliation keeps its local checkpoint identity while Production uses Apple's original transaction identifier" do
+    test_pid = self()
+    original_transaction_id = "original / transaction? id"
+
+    lineage =
+      Lineage.lock_or_insert(Accrue.TestRepo, :production, original_transaction_id)
+
+    client =
+      Production.new(
+        authorization: "test-token",
+        transport: fn :get, {url, _headers}, _options, _body_format ->
+          send(test_pid, {:apple_url, to_string(url)})
+
+          body =
+            if String.contains?(to_string(url), "/subscriptions/") do
+              ~s({"data":[]})
+            else
+              ~s({"signedTransactions":[],"revision":"complete","hasMore":false})
+            end
+
+          {:ok, {{~c"HTTP/1.1", 200, ~c"OK"}, [], body}}
+        end
+      )
+
+    assert {:ok, %Checkpoint{lineage_id: checkpoint_lineage_id, completed_revision: "complete"}} =
+             Reconciliation.run(%{lineage_id: lineage.id, environment: :production},
+               repo: Accrue.TestRepo,
+               client: client,
+               admission: []
+             )
+
+    assert checkpoint_lineage_id == lineage.id
+    encoded_original_transaction_id = URI.encode(original_transaction_id)
+
+    assert_receive {:apple_url, status_url}
+    assert status_url =~ "/inApps/v1/subscriptions/#{encoded_original_transaction_id}"
+    refute status_url =~ lineage.id
+
+    assert_receive {:apple_url, history_url}
+    assert history_url =~ "/inApps/v2/history/#{encoded_original_transaction_id}"
+    refute history_url =~ lineage.id
+
+    assert %Checkpoint{lineage_id: checkpoint_lineage_id} =
+             Accrue.TestRepo.get_by!(Checkpoint, lineage_id: lineage.id, environment: :production)
+
+    assert checkpoint_lineage_id == lineage.id
+  end
+
+  test "a missing or environment-mismatched lineage fails before Apple transport" do
+    test_pid = self()
+
+    client =
+      Production.new(
+        authorization: "test-token",
+        transport: fn :get, _request, _options, _body_format ->
+          send(test_pid, :unexpected_apple_transport)
+          {:ok, {{~c"HTTP/1.1", 200, ~c"OK"}, [], ~s({"data":[]})}}
+        end
+      )
+
+    lineage = Lineage.lock_or_insert(Accrue.TestRepo, :sandbox, "sandbox-original")
+
+    assert {:error, :lineage_not_found} =
+             Reconciliation.run(%{lineage_id: lineage.id, environment: :production},
+               repo: Accrue.TestRepo,
+               client: client,
+               admission: []
+             )
+
+    refute_received :unexpected_apple_transport
+    assert Accrue.TestRepo.aggregate(Checkpoint, :count, :id) == 0
+  end
+
   test "production adapter safely bounds numeric and malformed Retry-After headers" do
     for {header, expected} <- [
           {"999999", 21_600},
