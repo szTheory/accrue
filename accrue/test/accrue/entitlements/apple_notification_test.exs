@@ -176,25 +176,50 @@ defmodule Accrue.Entitlements.AppleNotificationTest do
   end
 
   test "production V2 independently closes outer and nested signature tampering" do
-    outer = Evidence.tamper_signature(Evidence.production_notification())
-    transaction = Evidence.tamper_signature(Evidence.production_transaction())
-    renewal = Evidence.tamper_signature(Evidence.production_transaction())
+    outer = Evidence.production_notification()
+    transaction = Evidence.production_transaction()
+    renewal = Evidence.production_transaction()
 
-    for notification <- [
-          outer,
-          Evidence.production_notification(transaction: transaction),
-          Evidence.production_notification(renewal: renewal)
-        ] do
+    cases = [
+      outer: {outer, Evidence.tamper_signature(outer)},
+      transaction: {transaction, Evidence.tamper_signature(transaction)},
+      renewal: {renewal, Evidence.tamper_signature(renewal)}
+    ]
+
+    for {boundary, {original, corrupted}} <- cases do
+      assert [protected, payload, _signature] = String.split(original, ".", trim: false)
+      assert [^protected, ^payload, _signature] = String.split(corrupted, ".", trim: false)
+      assert {:ok, original_signature} = Evidence.signature_bytes(original)
+      assert {:ok, corrupted_signature} = Evidence.signature_bytes(corrupted)
+      refute original_signature == corrupted_signature
+
+      notification =
+        case boundary do
+          :outer ->
+            corrupted
+
+          :transaction ->
+            Evidence.production_notification(transaction: corrupted, renewal: renewal)
+
+          :renewal ->
+            Evidence.production_notification(transaction: transaction, renewal: corrupted)
+        end
+
       assert {:error, :invalid_signature} =
                Production.verify_notification(notification, @production_config)
 
-      assert request(notification)
-             |> NotificationPlug.call(production_opts())
-             |> Map.fetch!(:status) ==
-               200
+      for _ <- 1..2 do
+        assert request(notification)
+               |> NotificationPlug.call(production_opts())
+               |> Map.fetch!(:status) ==
+                 200
+      end
     end
 
+    assert count(Intake) == 3
     assert count(ReconciliationWakeup) == 0
+    assert count(Observation) == 0
+    assert count(Grant) == 0
   end
 
   test "coalesces duplicate notifications into one durable wakeup" do

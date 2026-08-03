@@ -81,9 +81,25 @@ defmodule Accrue.Test.AppleServerEvidence do
   end
 
   def tamper_signature(jws) when is_binary(jws) and byte_size(jws) > 0 do
-    prefix = binary_part(jws, 0, byte_size(jws) - 1)
-    suffix = binary_part(jws, byte_size(jws) - 1, 1)
-    prefix <> if(suffix == "A", do: "B", else: "A")
+    [protected, payload, signature] = split_jws!(jws)
+    {:ok, decoded_signature} = Base.url_decode64(signature, padding: false)
+    <<first_byte, rest::binary>> = decoded_signature
+
+    corrupted_signature =
+      (<<Bitwise.bxor(first_byte, 1)>> <> rest)
+      |> Base.url_encode64(padding: false)
+
+    Enum.join([protected, payload, corrupted_signature], ".")
+  end
+
+  def signature_bytes(jws) when is_binary(jws) do
+    with [_, _, signature] <- String.split(jws, ".", trim: false),
+         {:ok, decoded_signature} when byte_size(decoded_signature) > 0 <-
+           Base.url_decode64(signature, padding: false) do
+      {:ok, decoded_signature}
+    else
+      _ -> {:error, :invalid_compact_jws}
+    end
   end
 
   def hostile_transaction(kind, overrides \\ %{})
@@ -101,6 +117,17 @@ defmodule Accrue.Test.AppleServerEvidence do
 
   defp transaction({leaf, intermediate, key}, overrides) do
     valid_claims(overrides) |> signed({leaf, intermediate, key})
+  end
+
+  defp split_jws!(jws) do
+    case String.split(jws, ".", trim: false) do
+      [protected, payload, signature]
+      when byte_size(protected) > 0 and byte_size(payload) > 0 and byte_size(signature) > 0 ->
+        [protected, payload, signature]
+
+      _ ->
+        raise ArgumentError, "expected a compact JWS with three non-empty segments"
+    end
   end
 
   defp signed(payload, {leaf, intermediate, key}) do
