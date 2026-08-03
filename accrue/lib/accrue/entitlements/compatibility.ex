@@ -3,7 +3,10 @@ defmodule Accrue.Entitlements.Compatibility do
 
   @behaviour Accrue.Entitlements.Resolver
 
+  import Ecto.Query
+
   alias Accrue.Entitlements.Resolver.{Canonical, LocalMap}
+  alias Accrue.Entitlements.{CompatibilityAudit, CompatibilityState}
 
   @metadata_keys [
     :revision,
@@ -17,7 +20,6 @@ defmodule Accrue.Entitlements.Compatibility do
     :account_id,
     :actor_id
   ]
-  @rollback_key {__MODULE__, :rolled_back_accounts}
 
   @impl true
   def resolve(billable, opts \\ []) do
@@ -37,7 +39,7 @@ defmodule Accrue.Entitlements.Compatibility do
           shadow_authority(billable, opts, config)
 
         {:ok, %{mode: :enabled} = config} ->
-          if rolled_back?(opts),
+          if local_map_override?(opts),
             do: {:ok, LocalMap, Map.put(config, :authority, :local_map)},
             else: enabled_authority(billable, opts, config)
 
@@ -56,7 +58,10 @@ defmodule Accrue.Entitlements.Compatibility do
         local = normalize(local)
         canonical = normalize(canonical)
 
-        blockers = parity_blockers(local, canonical, billable)
+        blockers =
+          Keyword.get(opts, :forced_blockers) || parity_blockers(local, canonical, billable)
+
+        persist_comparison(opts, compatibility_config_value(), blockers, canonical)
 
         if blockers == [] do
           {:ok, %{disposition: :match, blockers: [], local: local, canonical: canonical}}
@@ -78,8 +83,10 @@ defmodule Accrue.Entitlements.Compatibility do
     with_telemetry(:enable, opts, fn ->
       with {:ok, %{mode: :enabled} = config} <- compatibility_config(),
            :ok <- cohort_admits?(billable, opts, config.cohort),
+           :ok <- no_window_blockers?(opts[:account_id], config),
            :ok <- clean_window_ok?(config, opts),
-           {:ok, %{blockers: []}} <- compare(billable, opts) do
+           {:ok, %{blockers: []}} <- compare(billable, opts),
+           :ok <- persist_authority(opts, :canonical, config, :enabled) do
         :ok
       else
         {:ok, %{blockers: _}} -> {:error, :parity_blocked}
@@ -97,8 +104,8 @@ defmodule Accrue.Entitlements.Compatibility do
           :ok
 
         account_id ->
-          rolled_back = :persistent_term.get(@rollback_key, MapSet.new())
-          :persistent_term.put(@rollback_key, MapSet.put(rolled_back, account_id))
+          config = compatibility_config_value()
+          :ok = persist_authority([account_id: account_id], :local_map, config, :rolled_back)
       end
 
       :ok
@@ -120,6 +127,18 @@ defmodule Accrue.Entitlements.Compatibility do
     else
       _ -> {:error, :invalid_clean_window}
     end
+  end
+
+  @doc false
+  def audit_entries(account_id, opts \\ []) when is_binary(account_id) do
+    action = Keyword.get(opts, :action)
+
+    CompatibilityAudit
+    |> where([audit], audit.account_id == ^account_id)
+    |> maybe_filter_action(action)
+    |> order_by([audit], asc: audit.inserted_at, asc: audit.id)
+    |> Accrue.Repo.repo().all()
+    |> Enum.map(&audit_view/1)
   end
 
   defp shadow_authority(billable, opts, config) do
@@ -170,8 +189,8 @@ defmodule Accrue.Entitlements.Compatibility do
 
   defp clean_window_ok?(config, opts) do
     with {:ok, window} <- validate_clean_window(config.clean_window || []),
-         true <- Keyword.get(opts, :clean_window_verified, false),
-         true <- window_matches_current_config?(window, config) do
+         true <- window_matches_current_config?(window, config),
+         true <- clean_shadow_evidence?(opts[:account_id], window, config) do
       :ok
     else
       _ -> {:error, :clean_window_blocked}
@@ -185,8 +204,6 @@ defmodule Accrue.Entitlements.Compatibility do
   # advisory-summary dependency; repeats converge through the partial current
   # grant identity installed by Phase 216.
   defp do_backfill(cursor, opts) do
-    import Ecto.Query
-
     alias Accrue.Billing.{Customer, Query, Subscription, SubscriptionItem}
     alias Accrue.Entitlements.{Account, Grant}
 
@@ -212,7 +229,7 @@ defmodule Accrue.Entitlements.Compatibility do
       |> select([subscription, customer, item], {customer, subscription, item})
       |> repo.all()
       |> Enum.filter(fn {customer, _subscription, _item} ->
-        is_nil(after_cursor) or customer_cursor(customer) > after_cursor
+        is_nil(after_cursor) or customer.id > after_cursor
       end)
       |> Enum.take(limit)
 
@@ -227,7 +244,7 @@ defmodule Accrue.Entitlements.Compatibility do
                 acc
                 | processed: acc.processed + 1,
                   skipped: acc.skipped + 1,
-                  cursor: customer_cursor(customer)
+                  cursor: customer.id
               }
 
             plan ->
@@ -273,7 +290,7 @@ defmodule Accrue.Entitlements.Compatibility do
                     acc
                     | processed: acc.processed + 1,
                       inserted: acc.inserted + 1,
-                      cursor: customer_cursor(customer)
+                      cursor: customer.id
                   }
 
                 {:error, _} ->
@@ -281,19 +298,18 @@ defmodule Accrue.Entitlements.Compatibility do
                     acc
                     | processed: acc.processed + 1,
                       skipped: acc.skipped + 1,
-                      cursor: customer_cursor(customer)
+                      cursor: customer.id
                   }
               end
           end
         end
       )
 
+    persist_backfill_audit(result, opts)
     {:ok, Map.put(result, :blockers, [])}
   rescue
     _ -> {:error, :backfill_failed}
   end
-
-  defp customer_cursor(customer), do: {customer.owner_type, customer.owner_id, customer.id}
 
   defp mapped_plan(price_id) do
     Accrue.Config.entitlements()
@@ -314,7 +330,7 @@ defmodule Accrue.Entitlements.Compatibility do
       Keyword.get(config.clean_window || [], :catalog_digest) ==
         digest(Accrue.Config.entitlement_product_catalog()) and
       Keyword.get(config.clean_window || [], :config_digest) ==
-        digest(Map.drop(config, [:clean_window])) and
+        digest(Map.drop(config, [:clean_window, :mode])) and
       window.comparison_count > 0
   end
 
@@ -329,7 +345,7 @@ defmodule Accrue.Entitlements.Compatibility do
     %{
       cohort_digest: digest(cohort),
       catalog_digest: digest(Accrue.Config.entitlement_product_catalog()),
-      config_digest: digest(Map.drop(config, [:clean_window]))
+      config_digest: digest(Map.drop(config, [:clean_window, :mode]))
     }
   end
 
@@ -372,11 +388,170 @@ defmodule Accrue.Entitlements.Compatibility do
 
   defp customer_for(_), do: nil
 
-  defp rolled_back?(opts) do
-    rolled_back = :persistent_term.get(@rollback_key, MapSet.new())
+  defp local_map_override?(opts) do
+    case opts[:account_id] do
+      account_id when is_binary(account_id) ->
+        case Accrue.Repo.repo().get_by(CompatibilityState, account_id: account_id) do
+          %{authority: :local_map} -> true
+          _ -> false
+        end
 
-    MapSet.member?(rolled_back, :all) or
-      MapSet.member?(rolled_back, Keyword.get(opts, :account_id))
+      _ ->
+        false
+    end
+  end
+
+  defp compatibility_config_value do
+    case compatibility_config() do
+      {:ok, config} -> config
+      _ -> %{mode: :disabled, cohort: nil, clean_window: nil}
+    end
+  end
+
+  defp clean_shadow_evidence?(account_id, window, config)
+       when is_binary(account_id) and byte_size(account_id) == 36 do
+    digests = clean_window_digests(config.cohort, config)
+
+    count =
+      Accrue.Repo.repo().aggregate(
+        from(audit in CompatibilityAudit,
+          where:
+            audit.account_id == ^account_id and audit.action == :compare and
+              audit.disposition == :match and audit.blocker_count == 0 and
+              audit.inserted_at >= ^window.started_at and audit.inserted_at < ^window.ended_at and
+              audit.cohort_digest == ^digests.cohort_digest and
+              audit.catalog_digest == ^digests.catalog_digest and
+              audit.config_digest == ^digests.config_digest
+        ),
+        :count,
+        :id
+      )
+
+    count >= window.comparison_count
+  end
+
+  defp clean_shadow_evidence?(_, _, _), do: false
+
+  defp no_window_blockers?(account_id, config)
+       when is_binary(account_id) and byte_size(account_id) == 36 do
+    digests = clean_window_digests(config.cohort, config)
+
+    case Accrue.Repo.repo().aggregate(
+           from(audit in CompatibilityAudit,
+             where:
+               audit.account_id == ^account_id and audit.action == :compare and
+                 audit.blocker_count > 0 and audit.cohort_digest == ^digests.cohort_digest and
+                 audit.catalog_digest == ^digests.catalog_digest and
+                 audit.config_digest == ^digests.config_digest
+           ),
+           :count,
+           :id
+         ) do
+      0 -> :ok
+      _ -> {:error, :parity_blocked}
+    end
+  end
+
+  defp no_window_blockers?(_, _), do: {:error, :parity_blocked}
+
+  defp persist_comparison(opts, config, blockers, canonical) do
+    account_id = opts[:account_id]
+
+    if is_binary(account_id) do
+      digests = clean_window_digests(config.cohort, config)
+      reason = List.first(blockers) || :none
+
+      %CompatibilityAudit{}
+      |> CompatibilityAudit.changeset(%{
+        account_id: account_id,
+        action: :compare,
+        disposition: if(blockers == [], do: :match, else: :blocked),
+        reason: reason,
+        blocker_count: length(blockers),
+        comparison_count: 1,
+        cohort_digest: digests.cohort_digest,
+        catalog_digest: digests.catalog_digest,
+        config_digest: digests.config_digest,
+        state_digest: digest(normalize(canonical))
+      })
+      |> Accrue.Repo.repo().insert!()
+    end
+  end
+
+  defp persist_authority(opts, authority, config, disposition) do
+    case opts[:account_id] do
+      account_id when is_binary(account_id) ->
+        digests = clean_window_digests(config.cohort, config)
+        repo = Accrue.Repo.repo()
+
+        state = %{
+          account_id: account_id,
+          authority: authority,
+          transition_digest: digest({authority, digests.config_digest})
+        }
+
+        repo.insert(CompatibilityState.changeset(%CompatibilityState{}, state),
+          on_conflict: [
+            set: [
+              authority: authority,
+              transition_digest: state.transition_digest,
+              updated_at: DateTime.utc_now()
+            ]
+          ],
+          conflict_target: [:account_id]
+        )
+
+        %CompatibilityAudit{}
+        |> CompatibilityAudit.changeset(%{
+          account_id: account_id,
+          action: if(disposition == :enabled, do: :enable, else: :rollback),
+          disposition: disposition,
+          reason: :none,
+          blocker_count: 0,
+          comparison_count: 0,
+          cohort_digest: digests.cohort_digest,
+          catalog_digest: digests.catalog_digest,
+          config_digest: digests.config_digest,
+          state_digest: state.transition_digest
+        })
+        |> repo.insert!()
+
+        :ok
+
+      _ ->
+        :ok
+    end
+  end
+
+  defp persist_backfill_audit(result, opts) do
+    %CompatibilityAudit{}
+    |> CompatibilityAudit.changeset(%{
+      account_id: opts[:account_id],
+      action: :backfill,
+      disposition: :completed,
+      reason: :none,
+      blocker_count: 0,
+      comparison_count: 0,
+      state_digest: digest(Map.take(result, [:processed, :inserted, :skipped]))
+    })
+    |> Accrue.Repo.repo().insert!()
+  end
+
+  defp maybe_filter_action(query, nil), do: query
+  defp maybe_filter_action(query, action), do: where(query, [audit], audit.action == ^action)
+
+  defp audit_view(audit) do
+    Map.take(audit, [
+      :action,
+      :disposition,
+      :reason,
+      :blocker_count,
+      :comparison_count,
+      :cohort_digest,
+      :catalog_digest,
+      :config_digest,
+      :state_digest
+    ])
   end
 
   defp with_telemetry(operation, opts, fun) do

@@ -4,7 +4,8 @@ defmodule Accrue.Entitlements.CompatibilityTest do
   import Ecto.Query
 
   alias Accrue.Entitlements.Compatibility
-  alias Accrue.Entitlements.{Account, Grant}
+  alias Accrue.Entitlements.{Account, Grant, Observation}
+  alias Accrue.Events.Event
   alias Accrue.Entitlements.Resolver.{Canonical, LocalMap}
 
   defmodule TestUser do
@@ -113,6 +114,8 @@ defmodule Accrue.Entitlements.CompatibilityTest do
 
   test "enabled selects Canonical only after exact clean evidence and rollback restores LocalMap without deleting evidence" do
     {billable, account_id} = compatible_billable!()
+    put_enabled_config(:shadow, account_id)
+    assert {:ok, %{disposition: :match}} = Compatibility.compare(billable, account_id: account_id)
     put_enabled_config(:enabled, account_id)
 
     assert {:ok, Canonical, %{authority: :canonical}} =
@@ -173,7 +176,7 @@ defmodule Accrue.Entitlements.CompatibilityTest do
       ]
     )
 
-    assert {:error, :clean_window_blocked} =
+    assert {:error, :parity_blocked} =
              Compatibility.enable(billable, account_id: "a", clean_window_verified: true)
   end
 
@@ -253,7 +256,9 @@ defmodule Accrue.Entitlements.CompatibilityTest do
 
     put_enabled_config(:enabled, account_id)
 
-    assert :ok = Compatibility.enable(billable, account_id: account_id, actor_id: seeded.adopter_id)
+    assert :ok =
+             Compatibility.enable(billable, account_id: account_id, actor_id: seeded.adopter_id)
+
     assert {:ok, Canonical, %{authority: :canonical}} =
              Compatibility.authority(billable, account_id: account_id)
 
@@ -266,17 +271,31 @@ defmodule Accrue.Entitlements.CompatibilityTest do
     put_enabled_config(:shadow, account_id)
 
     assert {:ok, %{blockers: [:unmapped_legacy]}} =
-             Compatibility.compare(billable, account_id: account_id, forced_blockers: [:unmapped_legacy])
+             Compatibility.compare(billable,
+               account_id: account_id,
+               forced_blockers: [:unmapped_legacy]
+             )
 
     assert {:ok, %{blockers: [:unmapped_legacy]}} =
-             Compatibility.compare(billable, account_id: account_id, forced_blockers: [:unmapped_legacy])
+             Compatibility.compare(billable,
+               account_id: account_id,
+               forced_blockers: [:unmapped_legacy]
+             )
 
+    put_enabled_config(:enabled, account_id)
     assert {:error, :parity_blocked} = Compatibility.enable(billable, account_id: account_id)
-    assert Enum.all?(Compatibility.audit_entries(account_id, action: :compare), &(&1.reason == :unmapped_legacy))
+
+    assert Enum.all?(
+             Compatibility.audit_entries(account_id, action: :compare),
+             &(&1.reason == :unmapped_legacy)
+           )
 
     before = canonical_bytes(account_id)
     assert :ok = Compatibility.rollback(account_id: account_id, actor_id: "adopter-secret")
-    assert {:ok, LocalMap, %{authority: :local_map}} = Compatibility.authority(billable, account_id: account_id)
+
+    assert {:ok, LocalMap, %{authority: :local_map}} =
+             Compatibility.authority(billable, account_id: account_id)
+
     assert canonical_bytes(account_id) == before
 
     [rollback] = Compatibility.audit_entries(account_id, action: :rollback)
@@ -300,7 +319,11 @@ defmodule Accrue.Entitlements.CompatibilityTest do
       |> Accrue.Billing.Subscription.force_status_changeset(%{processor: "stripe"})
       |> Accrue.TestRepo.update()
 
-    before = :erlang.term_to_binary({customer, subscription})
+    before =
+      :erlang.term_to_binary({
+        Accrue.TestRepo.get!(Accrue.Billing.Customer, customer.id),
+        Accrue.TestRepo.get!(Accrue.Billing.Subscription, subscription.id)
+      })
 
     results =
       1..2
@@ -313,8 +336,11 @@ defmodule Accrue.Entitlements.CompatibilityTest do
     assert Enum.all?(results, &match?({:ok, _}, &1))
     assert Accrue.TestRepo.aggregate(Account, :count, :id) == 1
     assert Accrue.TestRepo.aggregate(Grant, :count, :id) == 1
-    assert :erlang.term_to_binary({Accrue.TestRepo.get!(Accrue.Billing.Customer, customer.id),
-             Accrue.TestRepo.get!(Accrue.Billing.Subscription, subscription.id)}) == before
+
+    assert :erlang.term_to_binary(
+             {Accrue.TestRepo.get!(Accrue.Billing.Customer, customer.id),
+              Accrue.TestRepo.get!(Accrue.Billing.Subscription, subscription.id)}
+           ) == before
   end
 
   def always_false(_billable), do: false
@@ -371,8 +397,8 @@ defmodule Accrue.Entitlements.CompatibilityTest do
         clean_window:
           Keyword.merge(
             [
-              started_at: ~U[2026-08-02 10:00:00Z],
-              ended_at: ~U[2026-08-02 10:01:00Z],
+              started_at: DateTime.add(DateTime.utc_now(), -60, :second),
+              ended_at: DateTime.add(DateTime.utc_now(), 60, :second),
               comparison_count: 1
             ],
             Map.to_list(digests)
@@ -384,7 +410,20 @@ defmodule Accrue.Entitlements.CompatibilityTest do
   defp canonical_bytes(account_id) do
     account = Accrue.TestRepo.get!(Account, account_id)
     grants = Accrue.TestRepo.all(from(grant in Grant, where: grant.account_id == ^account_id))
-    :erlang.term_to_binary({account, grants})
+
+    observations =
+      Accrue.TestRepo.all(
+        from(observation in Observation, where: observation.account_id == ^account_id)
+      )
+
+    audits =
+      Accrue.TestRepo.all(
+        from(event in Event,
+          where: event.subject_type == "EntitlementAccount" and event.subject_id == ^account_id
+        )
+      )
+
+    :erlang.term_to_binary({account, grants, observations, audits})
   end
 
   defp privacy_seed do
