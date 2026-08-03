@@ -196,13 +196,13 @@ Plans:
   4. Scheduled status and history reconciliation repairs missed notifications and accurately represents active, grace, retry, expiry, refund, and revocation boundaries.
   5. Hosts receive honest externally-managed Apple subscription guidance, with Family Sharing and offer authoring explicitly deferred.
 
-**Plans**: 12/13 plans executed
+**Plans**: 13/13 plans executed
 
 Plans:
 
 **Wave 10** *(blocked on Wave 9 completion)*
 
-- [ ] 218-13-PLAN.md — Quarantine verified unmapped products without blocking later terminal history from retracting stale Apple access.
+- [x] 218-13-PLAN.md — Quarantine verified unmapped products without blocking later terminal history from retracting stale Apple access.
 
 **Wave 9** *(blocked on Wave 8 completion)*
 
@@ -281,6 +281,6 @@ Plans:
 | 215. Research, contracts, and Crosswake feasibility | v1.59 | 15/15 | Complete    | 2026-08-01 |
 | 216. Additive rail and persistence foundation | v1.59 | 6/6 | Complete    | 2026-08-02 |
 | 217. Canonical projection and compatibility | v1.59 | 5/5 | Complete | 2026-08-02 |
-| 218. Apple observation and repair | v1.59 | 12/13 | In Progress|  |
+| 218. Apple observation and repair | v1.59 | 13/13 | In Progress|  |
 | 219. Offline study contract | v1.59 | 0/TBD | Not started | - |
 | 220. First-adopter proof and release gates | v1.59 | 0/TBD | Not started | - |

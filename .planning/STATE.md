@@ -5,16 +5,16 @@ milestone_name: Account-Scoped Multi-Rail & Offline Entitlements
 current_phase: 218
 current_phase_name: apple-observation-and-repair
 status: executing
-stopped_at: Completed 218-12-PLAN.md
-last_updated: "2026-08-03T18:55:12.922Z"
+stopped_at: Completed 218-13-PLAN.md
+last_updated: "2026-08-03T18:59:51.716Z"
 last_activity: 2026-08-03
 last_activity_desc: Phase 218 execution started
 progress:
   total_phases: 6
-  completed_phases: 3
+  completed_phases: 4
   total_plans: 39
-  completed_plans: 38
-  percent: 50
+  completed_plans: 39
+  percent: 67
 ---
 
 # Project State
@@ -30,7 +30,7 @@ See: `.planning/PROJECT.md` (updated 2026-08-01 after completing Phase 215)
 ## Current Position
 
 Phase: 218 (apple-observation-and-repair) — EXECUTING
-Plan: 2 of 13
+Plan: 3 of 13
 Status: Ready to execute
 Last activity: 2026-08-03 — Phase 218 execution started
 
@@ -408,6 +408,7 @@ Coverage: 22/22 v1.51 requirements mapped (each REQ-ID → exactly one phase). D
 | Phase 218-apple-observation-and-repair P10 | 7m | 1 tasks | 5 files |
 | Phase 218-apple-observation-and-repair P11 | 31m | 3 tasks | 10 files |
 | Phase 218-apple-observation-and-repair P12 | 8m | 2 tasks | 7 files |
+| Phase 218 P13 | 6m | 1 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -801,6 +802,7 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - [Phase ?]: Apple JWS x5c stays leaf-first externally and is reversed only for OTP path validation.
 - [Phase ?]: Apple signedDate certificate time is selected only per delayed reconciliation JWS; live paths retain current-clock policy.
 - [Phase ?]: Apple PKIX checks every configured host-pinned root and manually validates all certificate windows at the resolved policy instant.
+- [Phase ?]: Verified unmapped Apple products preserve logical_plan: nil so existing Intake quarantine remains non-granting and reconciliation-local.
 
 ### Pending Todos
 
@@ -952,8 +954,8 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 
 ## Session Continuity
 
-Last session: 2026-08-03T18:55:12.910Z
-Stopped at: Completed 218-12-PLAN.md
+Last session: 2026-08-03T18:59:51.705Z
+Stopped at: Completed 218-13-PLAN.md
 Resume file: None
 
 ## Operator Next Steps
