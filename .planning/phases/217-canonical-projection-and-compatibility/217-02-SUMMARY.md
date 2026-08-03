@@ -42,7 +42,7 @@ Canonical entitlement snapshots now remain deterministic across grant permutatio
 
 - `mix test test/accrue/entitlements/snapshot_test.exs test/accrue/entitlements/projector_test.exs test/property/entitlement_projection_property_test.exs test/accrue/entitlements/decision_cases_test.exs` — 29 tests, 4 properties, 0 failures.
 - Focused `mix format --check-formatted` on all Plan 217-02 source and test files — exit 0.
-- `mix test test/accrue/entitlements --exclude live_stripe` — 160 tests, 6 failures in pre-existing global-count assertions in `persistence_test.exs`; the run reused a dirty PostgreSQL test database and is recorded for follow-up.
+- `mix test test/accrue/entitlements --exclude live_stripe --max-failures 8` run twice consecutively — 160 tests, 5 failures each in `persistence_test.exs` global-count assertions. The Plan 217-02 property suite now leaves zero matching generated account, observation, or grant records; the remaining suite-isolation failure is outside this plan's files and remains unresolved.
 - Repository-wide `mix format --check-formatted` — blocked by unrelated pre-existing formatting drift outside Plan 217-02.
 
 ## Deviations from Plan
@@ -67,5 +67,5 @@ None.
 
 ## Self-Check: PASSED
 
-- Task commits `d73fadf0` and `ef464979` exist.
+- Task commits `d73fadf0`, `ef464979`, and `e7888a65` exist.
 - Snapshot, projector, property, decision-case, and projector test files exist.
