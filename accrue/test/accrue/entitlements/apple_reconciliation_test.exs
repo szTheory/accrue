@@ -1,6 +1,7 @@
 defmodule Accrue.Entitlements.AppleReconciliationTest do
   use Accrue.RepoCase, async: false
 
+  alias Accrue.Entitlements.{Account, Grant, Observation, Projector}
   alias Accrue.Entitlements.Apple.{Client, Reconciliation}
   alias Accrue.Entitlements.Apple.Reconciliation.Checkpoint
 
@@ -75,5 +76,139 @@ defmodule Accrue.Entitlements.AppleReconciliationTest do
 
     assert {:ok, %Checkpoint{pending_revision: nil, completed_revision: "r2", page_count: 0}} =
              Reconciliation.run(args, repo: Accrue.TestRepo, client: fake, now: now)
+  end
+
+  test "complete Apple order keeps delayed positive evidence behind terminal evidence" do
+    account = account!("apple-order-terminal")
+    signed_at = ~U[2026-08-03 12:00:00.000000Z]
+    effective_at = ~U[2026-08-03 13:00:00.000000Z]
+
+    refund =
+      apple_observation!(account,
+        lifecycle: :refunded,
+        signed_at: signed_at,
+        effective_at: effective_at,
+        digest: String.duplicate("b", 64)
+      )
+
+    assert {:noop, :stale} = Projector.project(refund)
+
+    active =
+      apple_observation!(account,
+        lifecycle: :active,
+        signed_at: signed_at,
+        effective_at: effective_at,
+        digest: String.duplicate("a", 64)
+      )
+
+    assert {:noop, :stale} = Projector.project(active)
+    assert [] == current_grants(account.id)
+  end
+
+  test "Apple ordering is deterministic per scope while Stripe retains numeric ordering" do
+    account = account!("apple-order-scopes")
+    signed_at = ~U[2026-08-03 12:00:00.000000Z]
+    effective_at = ~U[2026-08-03 13:00:00.000000Z]
+
+    production =
+      apple_observation!(account,
+        environment: :production,
+        lineage: "lineage-production",
+        lifecycle: :active,
+        signed_at: signed_at,
+        effective_at: effective_at,
+        digest: String.duplicate("c", 64)
+      )
+
+    sandbox =
+      apple_observation!(account,
+        environment: :sandbox,
+        lineage: "lineage-sandbox",
+        lifecycle: :active,
+        signed_at: signed_at,
+        effective_at: effective_at,
+        digest: String.duplicate("d", 64)
+      )
+
+    assert {:ok, _} = Projector.project(production)
+    assert {:noop, :no_material_change} = Projector.project(sandbox)
+
+    stripe_low = stripe_observation!(account, 1)
+    stripe_high = stripe_observation!(account, 2)
+    assert {:noop, :no_material_change} = Projector.project(stripe_low)
+    assert {:noop, :no_material_change} = Projector.project(stripe_high)
+    assert {:noop, :stale} = Projector.project(stripe_low)
+  end
+
+  defp account!(owner_id) do
+    {:ok, account} = Account.fetch_or_create(Accrue.TestRepo, "test", owner_id)
+    account
+  end
+
+  defp apple_observation!(account, opts) do
+    lifecycle = Keyword.fetch!(opts, :lifecycle)
+    environment = Keyword.get(opts, :environment, :production)
+    lineage = Keyword.get(opts, :lineage, "lineage-apple")
+    signed_at = Keyword.fetch!(opts, :signed_at)
+    effective_at = Keyword.fetch!(opts, :effective_at)
+    digest = Keyword.fetch!(opts, :digest)
+
+    normalized =
+      Reconciliation.normalize_lifecycle(%{
+        lifecycle: lifecycle,
+        signed_at: signed_at,
+        effective_at: effective_at,
+        expires_at: DateTime.add(effective_at, 30, :day),
+        evidence_digest: digest
+      })
+
+    {:ok, observation} =
+      Observation.insert_idempotently(Accrue.TestRepo, %{
+        account_id: account.id,
+        rail: :apple,
+        environment: environment,
+        provider_event_id: "apple-#{environment}-#{lineage}-#{lifecycle}-#{digest}",
+        provider_transaction_id: "transaction-#{digest}",
+        kind: normalized.kind,
+        provider_lineage_id: lineage,
+        provider_product_id: "product_pro",
+        provider_order: 1,
+        provider_order_key: normalized.provider_order_key,
+        observed_at: effective_at,
+        state: :qualified,
+        retry_count: 0,
+        metadata: %{"source" => "apple_server"},
+        evidence_digest: digest
+      })
+
+    observation
+  end
+
+  defp stripe_observation!(account, order) do
+    {:ok, observation} =
+      Observation.insert_idempotently(Accrue.TestRepo, %{
+        account_id: account.id,
+        rail: :stripe,
+        environment: :production,
+        provider_event_id: "stripe-#{order}",
+        provider_transaction_id: "stripe-transaction-#{order}",
+        kind: "grant",
+        provider_lineage_id: "stripe-lineage",
+        provider_product_id: "price_pro",
+        provider_order: order,
+        observed_at: ~U[2026-08-03 12:00:00.000000Z],
+        state: :qualified,
+        retry_count: 0,
+        metadata: %{"source" => "fake_observer"},
+        evidence_digest: String.duplicate("e", 64)
+      })
+
+    observation
+  end
+
+  defp current_grants(account_id) do
+    Accrue.TestRepo.all(
+      from(grant in Grant, where: grant.account_id == ^account_id and is_nil(grant.superseded_at))
+    )
   end
 end
