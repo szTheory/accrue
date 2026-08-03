@@ -64,7 +64,7 @@ defmodule Accrue.Entitlements.Apple.Reconciliation do
   @moduledoc false
   import Ecto.Query
 
-  alias Accrue.Entitlements.Apple.{Client, ReconciliationWakeup}
+  alias Accrue.Entitlements.Apple.{Client, Lineage, ReconciliationWakeup}
   alias Accrue.Entitlements.Apple.Reconciliation.Admission
   alias Accrue.Entitlements.Apple.Reconciliation.Checkpoint
 
@@ -322,37 +322,48 @@ defmodule Accrue.Entitlements.Apple.Reconciliation do
     now = Keyword.get(opts, :now, DateTime.utc_now())
 
     repo.transact(fn ->
-      checkpoint = lock_checkpoint(repo, lineage_id, environment)
-      fingerprint = query_fingerprint(filters)
+      case lock_lineage(repo, lineage_id, environment) do
+        %Lineage{original_transaction_id: original_transaction_id} = lineage
+        when is_binary(original_transaction_id) and byte_size(original_transaction_id) > 0 ->
+          checkpoint = lock_checkpoint(repo, lineage.id, environment)
+          fingerprint = query_fingerprint(filters)
 
-      result =
-        cond do
-          checkpoint.query_fingerprint not in [nil, fingerprint] and
-              not is_nil(checkpoint.pending_revision) ->
-            mark_repair(repo, checkpoint, :cursor_corruption)
+          result =
+            cond do
+              checkpoint.query_fingerprint not in [nil, fingerprint] and
+                  not is_nil(checkpoint.pending_revision) ->
+                mark_repair(repo, checkpoint, :cursor_corruption)
 
-          checkpoint.attempts >= @max_attempts ->
-            mark_repair(repo, checkpoint, :attempts_exhausted)
+              checkpoint.attempts >= @max_attempts ->
+                mark_repair(repo, checkpoint, :attempts_exhausted)
 
-          true ->
-            reconcile_page(
-              repo,
-              checkpoint,
-              client,
-              lineage_id,
-              environment,
-              filters,
-              fingerprint,
-              now,
-              opts
-            )
-        end
+              true ->
+                reconcile_page(
+                  repo,
+                  checkpoint,
+                  client,
+                  lineage.id,
+                  original_transaction_id,
+                  environment,
+                  filters,
+                  fingerprint,
+                  now,
+                  opts
+                )
+            end
 
-      {:ok,
-       if(match?({:error, _}, result),
-         do: schedule_retry(repo, checkpoint, result, now),
-         else: result
-       )}
+          {:ok,
+           if(match?({:error, _}, result),
+             do: schedule_retry(repo, checkpoint, result, now),
+             else: result
+           )}
+
+        %Lineage{} ->
+          repo.rollback(:invalid_provider_identifier)
+
+        nil ->
+          repo.rollback(:lineage_not_found)
+      end
     end)
   end
 
@@ -361,6 +372,7 @@ defmodule Accrue.Entitlements.Apple.Reconciliation do
          checkpoint,
          client,
          lineage_id,
+         original_transaction_id,
          environment,
          filters,
          fingerprint,
@@ -369,12 +381,13 @@ defmodule Accrue.Entitlements.Apple.Reconciliation do
        ) do
     # Status is current-state authority; notification history is intentionally absent from
     # this admission path because it can only seed another durable wakeup.
-    with {:ok, statuses} <- Client.subscription_statuses(client, lineage_id, environment),
+    with {:ok, statuses} <-
+           Client.subscription_statuses(client, original_transaction_id, environment),
          :ok <- admit_statuses(repo, lineage_id, environment, statuses, opts),
          {:ok, page} <-
            Client.transaction_history(
              client,
-             lineage_id,
+             original_transaction_id,
              filters,
              checkpoint.pending_revision,
              environment
@@ -505,6 +518,15 @@ defmodule Accrue.Entitlements.Apple.Reconciliation do
     repo.one!(
       from(c in Checkpoint,
         where: c.lineage_id == ^lineage_id and c.environment == ^environment,
+        lock: "FOR UPDATE"
+      )
+    )
+  end
+
+  defp lock_lineage(repo, lineage_id, environment) do
+    repo.one(
+      from(l in Lineage,
+        where: l.id == ^lineage_id and l.environment == ^environment,
         lock: "FOR UPDATE"
       )
     )
