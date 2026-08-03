@@ -287,7 +287,8 @@ defmodule Accrue.Entitlements.Apple.Reconciliation do
        ) do
     # Status is current-state authority; notification history is intentionally absent from
     # this admission path because it can only seed another durable wakeup.
-    with {:ok, _statuses} <- Client.subscription_statuses(client, lineage_id, environment),
+    with {:ok, statuses} <- Client.subscription_statuses(client, lineage_id, environment),
+         :ok <- admit_statuses(repo, lineage_id, environment, statuses, opts),
          {:ok, page} <-
            Client.transaction_history(client, lineage_id, filters, checkpoint.pending_revision) do
       with :ok <-
@@ -425,6 +426,23 @@ defmodule Accrue.Entitlements.Apple.Reconciliation do
         {:error, :config_invalid}
     end
   end
+
+  defp admit_statuses(repo, lineage_id, environment, statuses, opts) when is_list(statuses) do
+    case Keyword.get(opts, :admission) do
+      admission when is_list(admission) ->
+        Enum.reduce_while(statuses, :ok, fn status, :ok ->
+          case Admission.admit_status(repo, lineage_id, environment, status, admission) do
+            :ok -> {:cont, :ok}
+            {:error, _} = error -> {:halt, error}
+          end
+        end)
+
+      _ ->
+        {:error, :config_invalid}
+    end
+  end
+
+  defp admit_statuses(_, _, _, _, _), do: {:error, :invalid_payload}
 
   defp canonical(map) when is_map(map),
     do: map |> Enum.map(fn {key, value} -> {key, canonical(value)} end) |> Enum.sort()

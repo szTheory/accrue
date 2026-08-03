@@ -204,6 +204,28 @@ defmodule Accrue.Entitlements.AppleReconciliationTest do
     assert Accrue.TestRepo.aggregate(Grant, :count, :id) == 0
   end
 
+  test "current status is admitted when transaction history is empty" do
+    account = account!("apple-status-authority")
+    lineage = Lineage.lock_or_insert(Accrue.TestRepo, :production, "orig-status-authority")
+    {:claimed, lineage} = Lineage.claim(Accrue.TestRepo, lineage, account.id, account.id)
+
+    client =
+      Client.Fake.new(
+        statuses: [{:ok, [%{"signedTransactionInfo" => "status-only"}]}],
+        history: [{:ok, %{signed_transactions: [], has_more: false}}]
+      )
+
+    assert {:ok, %Checkpoint{run_state: :idle}} =
+             Reconciliation.run(%{lineage_id: lineage.id, environment: :production},
+               repo: Accrue.TestRepo,
+               client: client,
+               admission: admission(account, lineage)
+             )
+
+    assert Accrue.TestRepo.aggregate(Observation, :count, :id) == 1
+    assert Accrue.TestRepo.aggregate(Grant, :count, :id) == 1
+  end
+
   test "complete Apple order keeps delayed positive evidence behind terminal evidence" do
     account = account!("apple-order-terminal")
     signed_at = ~U[2026-08-03 12:00:00.000000Z]

@@ -30,6 +30,19 @@ defmodule Accrue.Entitlements.Apple.Reconciliation.Admission do
 
   def admit_transaction(_, _, _, _, _), do: {:error, :invalid_payload}
 
+  def admit_status(repo, lineage_id, environment, status, config) when is_map(status) do
+    status
+    |> signed_transactions()
+    |> Enum.reduce_while(:ok, fn signed_transaction, :ok ->
+      case admit_transaction(repo, lineage_id, environment, signed_transaction, config) do
+        :ok -> {:cont, :ok}
+        {:error, _} = error -> {:halt, error}
+      end
+    end)
+  end
+
+  def admit_status(_, _, _, _, _), do: {:error, :invalid_payload}
+
   defp locked_lineage(repo, lineage_id, environment) do
     repo.one(
       from(lineage in Lineage,
@@ -101,4 +114,15 @@ defmodule Accrue.Entitlements.Apple.Reconciliation.Admission do
   defp apple_time(_), do: nil
   defp digest(value), do: :crypto.hash(:sha256, value) |> Base.encode16(case: :lower)
   defp version(config, key), do: Keyword.get(config, key, "reconciliation-v1")
+
+  defp signed_transactions(value) when is_map(value) do
+    direct = [Map.get(value, "signedTransactionInfo"), Map.get(value, :signed_transaction)]
+    nested = value |> Map.values() |> Enum.flat_map(&signed_transactions/1)
+    Enum.filter(direct ++ nested, &(is_binary(&1) and byte_size(&1) > 0))
+  end
+
+  defp signed_transactions(values) when is_list(values),
+    do: Enum.flat_map(values, &signed_transactions/1)
+
+  defp signed_transactions(_), do: []
 end
