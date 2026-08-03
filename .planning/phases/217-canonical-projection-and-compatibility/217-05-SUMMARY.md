@@ -78,6 +78,7 @@ Persisted subscription and item provenance now controls lifecycle dispatch, whil
 5. Reopened inventory coverage: `5cc4ca3e` — Fake-backed table-driven lifecycle facade and telemetry coverage.
 6. Telemetry privacy closure: `f827d718` — raw actor removal and hashed actor IDs for lifecycle/management spans.
 7. Contract completion hardening: `91412591` — deterministic Fake call capture, injected exception seams, all-action failure matrices, and zero-call isolation proof.
+8. Recursive privacy closure: `81b236cd` — recursively reject forbidden telemetry keys and seeded values in every captured span phase.
 
 ## Deviations from Plan
 
@@ -87,13 +88,13 @@ Persisted subscription and item provenance now controls lifecycle dispatch, whil
 - **Found during:** rejected-plan contract completion
 - **Fix:** forwarded `opts[:operation_id]` into their existing idempotency identity.
 - **Files modified:** `accrue/lib/accrue/billing/subscription_actions.ex`
-- **Commit:** `91412591`
+- **Commit:** `91412591`, `81b236cd`
 
 2. [Rule 2 - Critical verification] Fake could count calls but could not prove a callback family was untouched
 - **Found during:** Apple and scoping isolation matrix implementation
 - **Fix:** added deterministic Fake call capture and test-only configuration seams that permit a direct adapter/management exception without network access.
 - **Files modified:** `accrue/lib/accrue/processor/fake.ex`, `accrue/lib/accrue/processor/fake/state.ex`, `accrue/lib/accrue/rails/gateway_registry.ex`, `accrue/lib/accrue/billing.ex`
-- **Commit:** `91412591`
+- **Commit:** `91412591`, `81b236cd`
 
 ## Issues Encountered
 
@@ -102,4 +103,4 @@ The full `mix test.all` command remains outside this plan's focused gate and wou
 ## Self-Check: PASSED
 
 - Required gateway, billing, action, item, and dispatch-test files exist.
-- Prior task commits and `91412591` exist.
+- Prior task commits plus `91412591` and `81b236cd` exist.
