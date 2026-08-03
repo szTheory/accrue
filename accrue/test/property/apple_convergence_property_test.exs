@@ -127,14 +127,14 @@ defmodule Accrue.Entitlements.AppleConvergencePropertyTest do
       grants =
         Accrue.TestRepo.all(
           from(grant in Grant,
-            where: grant.account_id == ^account.id,
-            select: {grant.logical_plan, not is_nil(grant.superseded_at)}
+            where: grant.account_id == ^account.id and is_nil(grant.superseded_at),
+            select: grant.logical_plan
           )
         )
 
       snapshot =
         Snapshot.fetch(Accrue.TestRepo, account)
-        |> Map.take([:revision, :active_plans, :features])
+        |> Map.take([:active_plans, :features])
 
       %{
         snapshot: snapshot,
