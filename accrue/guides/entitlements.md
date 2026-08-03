@@ -36,6 +36,43 @@ environment is not a collision.
 
 Apple is an entitlement source/observer. Apple does not implement `Accrue.Processor`; Stripe remains the controllable processor example. Phase 216 does not verify Apple signed material, and Phase 216 does not mutate the Apple subscription lifecycle. Hosts must retain Apple verification and lifecycle management at their own provider boundary.
 
+### Schedule Apple reconciliation
+
+Accrue does not start an Oban instance, a Cron plugin, or a timer. A host that
+enables Apple reconciliation must add the queue and periodic worker to its
+existing Oban configuration, alongside the configured Apple client and strict
+admission settings:
+
+```elixir
+config :my_app, Oban,
+  queues: [accrue_entitlements: 10],
+  plugins: [
+    {Oban.Plugins.Cron,
+     crontab: [{"*/15 * * * *", Accrue.Entitlements.Apple.ReconciliationSweeper}]}
+  ]
+
+config :accrue, :apple_reconciliation,
+  client: MyApp.AppleClient.new(...),
+  admission: [
+    verifier: MyApp.AppleVerifier,
+    verifier_config: [...],
+    product_map: %{"apple_product_id" => :pro},
+    verifier_version: "v1",
+    config_version: "v1"
+  ]
+```
+
+The Cron worker finds persisted idle checkpoints whose `next_due_at` is due,
+locks each row, inserts a privacy-safe reconciliation job (lineage UUID,
+environment, and bounded reason only), and marks the checkpoint running in the
+same transaction. Apple status/history remains the authority; a scheduler tick
+never grants access by itself. Oban uniqueness is not the execution lock.
+
+To disable scheduled repair safely, first remove the Cron entry, then drain
+queued `Accrue.Entitlements.Apple.ReconcileWorker` jobs or atomically release
+any scheduler-reserved running checkpoints back to `idle`. Do not delete the
+checkpoint rows or add an Accrue supervision child.
+
 The durable projection boundary has four Accrue-owned tables:
 `accrue_entitlement_accounts`, `accrue_entitlement_observations`,
 `accrue_entitlement_grants`, and `accrue_entitlement_devices`. They retain

@@ -3,6 +3,7 @@ defmodule Accrue.Entitlements.AppleReconciliationTest do
   use Oban.Testing, repo: Accrue.TestRepo
 
   alias Accrue.Entitlements.{Account, Grant, Observation, Projector}
+
   alias Accrue.Entitlements.Apple.{
     Client,
     Lineage,
@@ -10,6 +11,7 @@ defmodule Accrue.Entitlements.AppleReconciliationTest do
     ReconciliationSweeper,
     ReconcileWorker
   }
+
   alias Accrue.Entitlements.Apple.Client.Production
   alias Accrue.Entitlements.Apple.Reconciliation.Checkpoint
   alias Accrue.Entitlements.Apple.ReconciliationWakeupWorker
@@ -313,6 +315,48 @@ defmodule Accrue.Entitlements.AppleReconciliationTest do
 
     assert %Checkpoint{run_state: :idle, next_due_at: %DateTime{}} =
              Accrue.TestRepo.get_by!(Checkpoint, lineage_id: lineage.id, environment: :production)
+  end
+
+  test "missing scheduled-worker configuration records needs_repair before cancellation" do
+    lineage = Lineage.lock_or_insert(Accrue.TestRepo, :production, "orig-missing-config")
+
+    checkpoint =
+      Accrue.TestRepo.insert!(
+        Checkpoint.changeset(%Checkpoint{}, %{
+          lineage_id: lineage.id,
+          environment: :production,
+          run_state: :running,
+          page_count: 0,
+          page_budget: 25,
+          attempts: 0
+        })
+      )
+
+    previous = Application.get_env(:accrue, :apple_reconciliation)
+    Application.delete_env(:accrue, :apple_reconciliation)
+
+    on_exit(fn ->
+      if is_nil(previous),
+        do: Application.delete_env(:accrue, :apple_reconciliation),
+        else: Application.put_env(:accrue, :apple_reconciliation, previous)
+    end)
+
+    assert {:cancel, :needs_repair} =
+             perform_job(ReconcileWorker, %{
+               "lineage_id" => lineage.id,
+               "environment" => "production",
+               "reason" => "scheduled_due"
+             })
+
+    assert %Checkpoint{
+             id: checkpoint_id,
+             run_state: :needs_repair,
+             retry_after_at: nil,
+             next_due_at: nil,
+             last_provider_class: "missing_reconciliation_configuration"
+           } = Accrue.TestRepo.get!(Checkpoint, checkpoint.id)
+
+    assert checkpoint_id == checkpoint.id
   end
 
   test "invalid signed history is rejected before it writes an observation or grant" do

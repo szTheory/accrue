@@ -202,6 +202,71 @@ defmodule Accrue.Entitlements.Apple.Reconciliation do
     end)
   end
 
+  @doc false
+  # A due checkpoint is claimed by changing its durable state in the same
+  # transaction that creates its worker. The row lock, not Oban uniqueness,
+  # is the concurrency authority for scheduled reconciliation.
+  def enqueue_due(repo, opts \\ []) do
+    now = Keyword.get(opts, :now, DateTime.utc_now())
+    limit = Keyword.get(opts, :limit, 100)
+    insert_job = Keyword.get(opts, :insert_job, &repo.insert/1)
+
+    repo.transact(fn ->
+      from(c in Checkpoint,
+        where:
+          c.run_state == :idle and not is_nil(c.next_due_at) and c.next_due_at <= ^now and
+            (is_nil(c.retry_after_at) or c.retry_after_at <= ^now),
+        order_by: [asc: c.next_due_at, asc: c.id],
+        limit: ^limit,
+        lock: "FOR UPDATE SKIP LOCKED"
+      )
+      |> repo.all()
+      |> Enum.reduce_while({:ok, 0}, fn checkpoint, {:ok, count} ->
+        job =
+          Accrue.Entitlements.Apple.ReconcileWorker.new(%{
+            "lineage_id" => checkpoint.lineage_id,
+            "environment" => Atom.to_string(checkpoint.environment),
+            "reason" => "scheduled_due"
+          })
+
+        with {:ok, _job} <- insert_job.(job),
+             {:ok, _checkpoint} <-
+               repo.update(
+                 Checkpoint.changeset(checkpoint, %{run_state: :running, next_due_at: nil})
+               ) do
+          {:cont, {:ok, count + 1}}
+        else
+          {:error, reason} -> repo.rollback({:scheduled_due_insert_failed, reason})
+        end
+      end)
+    end)
+  end
+
+  @doc false
+  def mark_configuration_failure(
+        %{"lineage_id" => lineage_id, "environment" => environment},
+        reason,
+        opts \\ []
+      )
+      when reason in [
+             :missing_reconciliation_configuration,
+             :invalid_reconciliation_configuration
+           ] do
+    repo = Keyword.get(opts, :repo, Accrue.Repo.repo())
+
+    repo.transact(fn ->
+      checkpoint = lock_checkpoint(repo, lineage_id, normalize_environment(environment))
+
+      {:ok,
+       update_checkpoint(repo, checkpoint, %{
+         run_state: :needs_repair,
+         retry_after_at: nil,
+         next_due_at: nil,
+         last_provider_class: Atom.to_string(reason)
+       })}
+    end)
+  end
+
   def due(%{next_due_at: nil}, _now), do: true
   def due(%{next_due_at: %DateTime{} = due}, now), do: DateTime.compare(due, now) != :gt
   def due(_, _), do: false
