@@ -1,99 +1,81 @@
 ---
 phase: 218-apple-observation-and-repair
-reviewed: 2026-08-03T19:35:14Z
+reviewed: 2026-08-03T21:10:19Z
 depth: standard
-files_reviewed: 26
+files_reviewed: 11
 files_reviewed_list:
-  - accrue/guides/entitlements.md
-  - accrue/lib/accrue/entitlements.ex
-  - accrue/lib/accrue/entitlements/apple/admission.ex
-  - accrue/lib/accrue/entitlements/apple/client.ex
-  - accrue/lib/accrue/entitlements/apple/intake.ex
-  - accrue/lib/accrue/entitlements/apple/lineage.ex
   - accrue/lib/accrue/entitlements/apple/notification_plug.ex
-  - accrue/lib/accrue/entitlements/apple/reconcile_worker.ex
-  - accrue/lib/accrue/entitlements/apple/reconciliation.ex
-  - accrue/lib/accrue/entitlements/apple/reconciliation/admission.ex
-  - accrue/lib/accrue/entitlements/apple/reconciliation_wakeup.ex
-  - accrue/lib/accrue/entitlements/apple/verifier.ex
-  - accrue/lib/accrue/entitlements/apple/verifier/production.ex
-  - accrue/lib/accrue/entitlements/decision_cases.ex
-  - accrue/lib/accrue/entitlements/projector.ex
-  - accrue/priv/repo/migrations/20260803030000_create_accrue_apple_lineages_and_intakes.exs
-  - accrue/priv/repo/migrations/20260803031000_create_accrue_apple_reconciliation_checkpoints.exs
-  - accrue/test/accrue/entitlements/apple_intake_test.exs
-  - accrue/test/accrue/entitlements/apple_lineage_test.exs
-  - accrue/test/accrue/entitlements/apple_notification_test.exs
-  - accrue/test/accrue/entitlements/apple_reconciliation_test.exs
-  - accrue/test/accrue/entitlements/apple_verifier_test.exs
+  - accrue/lib/accrue/router.ex
+  - accrue/guides/webhooks.md
   - accrue/test/fixtures/apple/server_evidence.exs
-  - accrue/test/property/apple_convergence_property_test.exs
-  - accrue/test/property/apple_lineage_property_test.exs
-  - accrue/test/support/entitlements/fixtures.ex
+  - accrue/test/accrue/entitlements/apple_notification_test.exs
+  - accrue/lib/accrue/entitlements/apple/reconciliation.ex
+  - accrue/test/accrue/entitlements/apple_reconciliation_test.exs
+  - scripts/ci/verify_executable_uat_contract.mjs
+  - .github/workflows/ci.yml
+  - scripts/ci/README.md
+  - CLAUDE.md
 findings:
-  critical: 2
-  warning: 1
+  critical: 4
+  warning: 2
   info: 0
-  total: 3
+  total: 6
 status: issues_found
 ---
 
 # Phase 218: Code Review Report
 
-**Reviewed:** 2026-08-03T19:35:14Z
+**Reviewed:** 2026-08-03T21:10:19Z
 **Depth:** standard
-**Files Reviewed:** 26
+**Files Reviewed:** 11
 **Status:** issues_found
 
 ## Summary
 
-The Apple observation and repair paths were reviewed in full at standard depth, including the production HTTP adapter, verifier, intake/projector flow, checkpoint state machine, migrations, and supplied tests. Two production paths prevent reliable reconciliation or can irreversibly acknowledge unprocessed notifications. The targeted test run also exposes a non-deterministic signature-tampering helper.
-
-## Narrative Findings (AI reviewer)
+The Apple route and reconciliation code preserve the local-lineage versus provider-transaction distinction in the reviewed path. The new merge-blocking executable-UAT enforcement, however, both blocks CI in the submitted tree and can be satisfied by untrusted hand-authored artifacts. The notification endpoint also persists arbitrary unauthenticated payloads and its advertised body limit is applied after the raw body has already been captured.
 
 ## Critical Issues
 
-### CR-01: Reconciliation sends a local lineage UUID to Apple
+### CR-01: The new merge-blocking CI job fails on the submitted repository state
 
-**File:** `accrue/lib/accrue/entitlements/apple/reconciliation.ex:372`
+**File:** `.github/workflows/ci.yml:104`
+**Issue:** The workflow unconditionally runs `--all-since 218`, but Phase 218 has 16 `status: complete` summaries and lacks `218-UAT.md`; its committed `218-VERIFICATION.md` is also `status: gaps_found` with `behavior_unverified: 1`. Running the exact new CI command fails immediately with `missing automated UAT artifact`. Consequently every non-scheduled push/PR is blocked until artifacts outside this change are manually repaired.
+**Fix:** Generate and commit the Phase 218 UAT only after correcting its verification report, or defer/condition the project-wide gate until the phase is actually complete. Add a CI fixture that exercises the repository’s current Phase 218 state so this cannot be merged while permanently red.
 
-**Issue:** `run/2` passes `lineage_id` (the UUID primary key of `accrue_entitlement_apple_lineages`) to both `Client.subscription_statuses/3` and `Client.transaction_history/5`. The production client interpolates that argument directly into Apple’s `/inApps/v1/subscriptions/{originalTransactionId}` and `/inApps/v2/history/{originalTransactionId}` endpoints (`client.ex:122`, `client.ex:135`). Apple therefore receives an Accrue UUID rather than the original transaction ID and rejects the request; every production reconciliation will retry and then enter `needs_repair` without observing the customer’s Apple state. The fakes hide this because they ignore the supplied lineage argument.
+### CR-02: A hand-written UAT can bypass the executable-coverage policy
 
-**Fix:** Lock/load the lineage inside the reconciliation transaction and pass `lineage.original_transaction_id` to the client while retaining `lineage.id` for checkpoint and job identity. For example:
+**File:** `scripts/ci/verify_executable_uat_contract.mjs:140`
+**Issue:** Validation only checks that an existing UAT has syntactically plausible `source: automated`, nonempty `verification:`, and `[pass]` fields (lines 140-156). It never regenerates the expected artifact or compares its tests, results, and references with the completed summary coverage. A contributor can commit a one-test UAT containing a made-up command and `[pass]`, while omitting failed/required coverage, and the zero-human-UAT gate passes.
+**Fix:** During validation, derive the expected UAT content from the summary coverage and require byte-for-byte equality (or parse both and require an exact normalized mapping of coverage IDs, refs, and pass statuses). Do not accept author-controlled UAT result fields as independent evidence.
 
-```elixir
-lineage = repo.get!(Accrue.Entitlements.Apple.Lineage, lineage_id)
-apple_lineage = lineage.original_transaction_id
+### CR-03: Incomplete plan summaries are silently excluded from phase validation
 
-with {:ok, statuses} <- Client.subscription_statuses(client, apple_lineage, environment),
-     {:ok, page} <- Client.transaction_history(client, apple_lineage, filters,
-       checkpoint.pending_revision, environment) do
-  # ...
-end
-```
+**File:** `scripts/ci/verify_executable_uat_contract.mjs:119`
+**Issue:** Both `coverageEntries` (line 43) and `validatePhaseDirectory` skip every SUMMARY whose frontmatter status is not exactly `complete`. Therefore a phase directory with one incomplete/failed plan summary and one complete summary can still generate a passing UAT and validation result for only the completed plan. This turns an incomplete phase into an apparently passed zero-human-UAT phase.
+**Fix:** Treat any SUMMARY in an in-scope phase whose status is not `complete` as a validation failure, and require the generated UAT to cover every SUMMARY. If partial phases need to exist, exclude their directory from CI through an explicit, reviewed lifecycle manifest rather than silently filtering files.
 
-Add a production-adapter regression test that asserts the URL contains the original transaction ID and never the database lineage UUID.
+### CR-04: Invalid signatures are durably stored and acknowledged as success
 
-### CR-02: Missing raw-body capture converts every notification into an acknowledged quarantine
-
-**File:** `accrue/lib/accrue/entitlements/apple/notification_plug.ex:141`
-
-**Issue:** When the route has not installed a `body_reader` that populates `conn.assigns[:raw_body]`, `raw_body_or_empty/1` silently returns `""`. `call/2` then verifies the empty string, treats the resulting terminal verification error as a quarantine, persists it, and responds `200` (`lines 40, 62-79`). Apple stops retrying even though the real notification body was never read or verified, so the reconciliation wakeup is lost. The existing Stripe webhook plug explicitly diagnoses a missing raw body rather than accepting an empty one; this new plug lacks that safety boundary.
-
-**Fix:** Make a missing/invalid raw-body assignment a retryable configuration failure, not an empty payload. Return `{:error, :raw_body_missing}` from `raw_body/2` unless the assignment is a valid binary/iodata list, map it to `503`, and document/use `Accrue.Webhook.CachingBodyReader` on the Apple route. Add a regression test with a normal non-empty request body but no `:raw_body` assign and assert `503`, no intake, and no wakeup.
+**File:** `accrue/lib/accrue/entitlements/apple/notification_plug.ex:63`
+**Issue:** Every verifier error except `:invalid_payload` and the retryable set is sent to `quarantine/4`, which writes an Intake/Lineage row keyed by the submitted body digest and returns HTTP 200 (lines 63-79). This includes `:invalid_signature`, `:invalid_chain`, and `:invalid_header`. An unauthenticated caller can send unbounded unique malformed JWS bodies to consume persistent database rows; the default rate limiter is permissive (line 21). The test at `apple_notification_test.exs:178-220` explicitly codifies this behavior.
+**Fix:** Return 400 without persistence for signature, chain, header, algorithm, and application-identity failures. Reserve durable quarantine for authenticated but operationally unprocessable Apple evidence, and require an explicit production rate limiter as defense in depth.
 
 ## Warnings
 
-### WR-01: The signature-tampering test can leave the decoded signature unchanged
+### WR-01: Generated UAT output is nondeterministic when `verified:` is absent
 
-**File:** `accrue/test/fixtures/apple/server_evidence.exs:83`
+**File:** `scripts/ci/verify_executable_uat_contract.mjs:87`
+**Issue:** `generateAutomatedUat` falls back to `new Date().toISOString()` for both output timestamps. A valid verification artifact without optional `verified:` produces a different committed UAT on every `--write` invocation, defeating deterministic artifact generation and creating needless CI/review churn.
+**Fix:** Require a valid `verified:` timestamp before generation, or use a deterministic source such as the verification file’s committed timestamp. Add a self-test that generates twice from an artifact without `verified:` and asserts rejection or identical output.
 
-**Issue:** `tamper_signature/1` changes only the final Base64url character, choosing `A`/`B`. For an unpadded signature segment, low-order bits of the final Base64url character can be unused. `A` and `B` can therefore decode to identical signature bytes, leaving a valid JWS unchanged. The supplied targeted suite demonstrably fails at `apple_notification_test.exs:131` with `Production.verify_notification/2` returning `{:ok, ...}` instead of `{:error, :invalid_signature}`. This makes the negative authentication regression flaky.
+### WR-02: The Apple body-size limit is enforced only after full raw-body capture
 
-**Fix:** Alter a character with meaningful encoded bits (for example, mutate a character before the last Base64url quantum) or decode the signature, flip a byte, and re-encode it before rebuilding the compact JWS. Keep the assertion that the altered compact string must fail verification.
+**File:** `accrue/lib/accrue/entitlements/apple/notification_plug.ex:134`
+**Issue:** The plug reconstructs `conn.assigns[:raw_body]` before applying `max_body_bytes` (lines 135-150). That capture was already read by `CachingBodyReader`; the documented pipeline at `accrue/guides/webhooks.md:23-29` does not set a parser `length` at all. A caller can therefore force substantially more than the advertised 256 KiB to be buffered/decoded before receiving 413, creating avoidable request-memory pressure.
+**Fix:** Document and enforce a route-scoped `Plug.Parsers` `length` no greater than the notification maximum (with a small protocol allowance only if necessary), and pass the same configured limit to both parser and plug. Add an integration test proving oversize input is rejected by the parser/body reader without a full raw capture.
 
 ---
 
-_Reviewed: 2026-08-03T19:35:14Z_
+_Reviewed: 2026-08-03T21:10:19Z_
 _Reviewer: the agent (gsd-code-reviewer)_
 _Depth: standard_
