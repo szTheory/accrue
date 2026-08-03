@@ -62,7 +62,8 @@ defmodule Accrue.Entitlements.Projector do
           after_snapshot = Snapshot.fetch(repo, account)
 
           if Snapshot.authorization_signature(before) ==
-               Snapshot.authorization_signature(after_snapshot) do
+               Snapshot.authorization_signature(after_snapshot) or
+               survivor_retraction?(observation, before, after_snapshot) do
             {:ok, {:noop, :no_material_change}}
           else
             revision = account.revision + 1
@@ -137,6 +138,16 @@ defmodule Accrue.Entitlements.Projector do
 
   defp retraction?(%{kind: kind}) when kind in ["retract", "revoked", "expired"], do: true
   defp retraction?(_), do: false
+
+  # A retracted source does not advance the account revision when another current
+  # source preserves the same effective plan, feature, quantity, and validity
+  # bounds. The source summaries remain diagnostic-only; revision tracks access.
+  defp survivor_retraction?(observation, before, after_snapshot) do
+    retraction?(observation) and
+      {before.plans, before.features, before.quantities, before.authorization_bounds} ==
+        {after_snapshot.plans, after_snapshot.features, after_snapshot.quantities,
+         after_snapshot.authorization_bounds}
+  end
 
   defp record_projection!(account, snapshot, observation, opts) do
     attrs = %{

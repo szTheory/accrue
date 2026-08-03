@@ -41,6 +41,34 @@ defmodule Accrue.Entitlements.DecisionCasesTest do
     end
   end
 
+  test "projector-visible Phase-215 cases carry closed revision and reason outcomes" do
+    projector_cases =
+      DecisionCases.all()
+      |> Enum.filter(
+        &(&1.id in [
+            "all_grants_revoked",
+            "atomic_transaction_boundary",
+            "duplicate_provider_event",
+            "out_of_order_positive_after_revoke",
+            "stripe_revoked_apple_survives"
+          ])
+      )
+
+    assert Enum.map(projector_cases, & &1.id) == [
+             "all_grants_revoked",
+             "atomic_transaction_boundary",
+             "duplicate_provider_event",
+             "out_of_order_positive_after_revoke",
+             "stripe_revoked_apple_survives"
+           ]
+
+    Enum.each(projector_cases, fn case_data ->
+      assert case_data.expected.atomic
+      assert is_integer(case_data.expected.revision_delta)
+      assert case_data.expected.reason == "entitlement_#{case_data.id}"
+    end)
+  end
+
   test "malformed closed values fail validation" do
     [first | _] = DecisionCases.all()
 

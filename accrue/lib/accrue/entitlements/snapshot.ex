@@ -9,7 +9,15 @@ defmodule Accrue.Entitlements.Snapshot do
   alias Accrue.Entitlements.Grant
 
   @enforce_keys [:account_id, :revision, :plans, :features, :quantities, :sources]
-  defstruct [:account_id, :revision, :plans, :features, :quantities, :sources]
+  defstruct [
+    :account_id,
+    :revision,
+    :plans,
+    :features,
+    :quantities,
+    :sources,
+    :authorization_bounds
+  ]
 
   @type source :: %{
           required(:rail) => atom(),
@@ -32,10 +40,10 @@ defmodule Accrue.Entitlements.Snapshot do
     now = Keyword.get_lazy(opts, :now, &DateTime.utc_now/0)
     catalog = Keyword.get(opts, :catalog, catalog())
 
-    {plans, features, quantities, sources} =
+    {plans, features, quantities, sources, authorization_bounds} =
       grants
       |> Enum.filter(&live?(&1, now))
-      |> Enum.reduce({MapSet.new(), MapSet.new(), %{}, MapSet.new()}, fn grant, acc ->
+      |> Enum.reduce({MapSet.new(), MapSet.new(), %{}, MapSet.new(), %{}}, fn grant, acc ->
         fold_grant(grant, catalog, acc)
       end)
 
@@ -48,7 +56,8 @@ defmodule Accrue.Entitlements.Snapshot do
       sources:
         sources
         |> MapSet.to_list()
-        |> Enum.sort_by(&{&1.rail, &1.environment, &1.effective_at, &1.expires_at, &1.revoked_at})
+        |> Enum.sort_by(&{&1.rail, &1.environment, &1.effective_at, &1.expires_at, &1.revoked_at}),
+      authorization_bounds: authorization_bounds
     }
   end
 
@@ -70,6 +79,14 @@ defmodule Accrue.Entitlements.Snapshot do
   defp fetch(repo, account_id, revision) do
     import Ecto.Query
 
+    revision =
+      case repo.one(
+             from(account in Accrue.Entitlements.Account, where: account.id == ^account_id)
+           ) do
+        %{revision: current_revision} -> current_revision
+        nil -> revision || 0
+      end
+
     grants =
       repo.all(
         from(grant in Grant,
@@ -77,13 +94,13 @@ defmodule Accrue.Entitlements.Snapshot do
         )
       )
 
-    from_grants(grants, account_id: account_id, revision: revision || 0)
+    from_grants(grants, account_id: account_id, revision: revision)
   end
 
-  defp fold_grant(grant, catalog, {plans, features, quantities, sources}) do
+  defp fold_grant(grant, catalog, {plans, features, quantities, sources, authorization_bounds}) do
     case Map.get(catalog, product_key(grant)) || Map.get(catalog, grant.provider_product_id) do
       nil ->
-        {plans, features, quantities, sources}
+        {plans, features, quantities, sources, authorization_bounds}
 
       %{plan: plan} = product ->
         quota_values = Map.get(product, :quotas, %{})
@@ -96,7 +113,8 @@ defmodule Accrue.Entitlements.Snapshot do
 
         {MapSet.put(plans, plan),
          MapSet.union(features, MapSet.new(Map.get(product, :features, []))), merged_quantities,
-         MapSet.put(sources, source(grant))}
+         MapSet.put(sources, source(grant)),
+         Map.update(authorization_bounds, plan, bounds(grant), &merge_bounds(&1, bounds(grant)))}
     end
   end
 
@@ -110,6 +128,26 @@ defmodule Accrue.Entitlements.Snapshot do
       expires_at: grant.expires_at,
       revoked_at: grant.superseded_at
     }
+  end
+
+  defp bounds(grant), do: %{effective_at: grant.effective_at, expires_at: grant.expires_at}
+
+  defp merge_bounds(left, right) do
+    %{
+      effective_at: earliest(left.effective_at, right.effective_at),
+      expires_at: latest_expiry(left.expires_at, right.expires_at)
+    }
+  end
+
+  defp earliest(left, right) do
+    if DateTime.compare(left, right) == :gt, do: right, else: left
+  end
+
+  defp latest_expiry(nil, _right), do: nil
+  defp latest_expiry(_left, nil), do: nil
+
+  defp latest_expiry(left, right) do
+    if DateTime.compare(left, right) == :lt, do: right, else: left
   end
 
   defp live?(grant, now) do
