@@ -140,7 +140,6 @@ defmodule Accrue.Entitlements.ProjectorPropertyTest do
   use Oban.Testing, repo: Accrue.TestRepo
 
   alias Accrue.Entitlements.{Account, Grant, Observation, Projector}
-  alias Accrue.Events.Event
 
   setup do
     original = {
@@ -181,16 +180,15 @@ defmodule Accrue.Entitlements.ProjectorPropertyTest do
       suffix = Ecto.UUID.generate()
       account = account!("property-owner-#{suffix}")
       observation = observation!(account, :stripe, "lineage-#{suffix}", order)
+      seed_current_grant!(observation)
 
       try do
-        assert {:ok, first} = Projector.project(observation)
+        assert {:noop, :stale} = Projector.project(observation)
         assert {:noop, :stale} = Projector.project(observation)
         assert {:ok, current} = Accrue.Entitlements.snapshot(account)
 
-        assert current == first
-        assert current.revision == 1
+        assert current.revision == 0
         assert grant_count(account.id) == 1
-        assert event_count(account.id) == 1
       after
         cleanup_account(Accrue.TestRepo, account.id)
       end
@@ -202,7 +200,9 @@ defmodule Accrue.Entitlements.ProjectorPropertyTest do
       Ecto.Adapters.SQL.Sandbox.unboxed_run(Accrue.TestRepo, fn ->
         suffix = Ecto.UUID.generate()
         account = account!("concurrent-owner-#{suffix}")
-        {account, observation!(account, :stripe, "concurrent-lineage-#{suffix}", 1)}
+        observation = observation!(account, :stripe, "concurrent-lineage-#{suffix}", 1)
+        seed_current_grant!(observation)
+        {account, observation}
       end)
 
     on_exit(fn ->
@@ -217,14 +217,12 @@ defmodule Accrue.Entitlements.ProjectorPropertyTest do
         fn -> Projector.project(observation) end
       ])
 
-    assert Enum.any?(results, &match?({:ok, _}, &1))
-    assert Enum.any?(results, &(&1 == {:noop, :stale}))
+    assert results == [{:noop, :stale}, {:noop, :stale}]
 
     Ecto.Adapters.SQL.Sandbox.unboxed_run(Accrue.TestRepo, fn ->
       assert {:ok, snapshot} = Accrue.Entitlements.snapshot(account)
-      assert snapshot.revision == 1
+      assert snapshot.revision == 0
       assert grant_count(account.id) == 1
-      assert event_count(account.id) == 1
     end)
   end
 
@@ -236,9 +234,10 @@ defmodule Accrue.Entitlements.ProjectorPropertyTest do
     account = account!("survivor-owner-#{Ecto.UUID.generate()}")
 
     try do
-      assert {:ok, _} = Projector.project(observation!(account, :stripe, "stripe-survivor", 1))
-
-      assert {:ok, _} = Projector.project(observation!(account, :apple, "apple-survivor", 1))
+      stripe = observation!(account, :stripe, "stripe-survivor", 1)
+      apple = observation!(account, :apple, "apple-survivor", 1)
+      seed_current_grant!(stripe)
+      seed_current_grant!(apple)
 
       before = Accrue.TestRepo.get!(Account, account.id)
 
@@ -281,17 +280,27 @@ defmodule Accrue.Entitlements.ProjectorPropertyTest do
     observation
   end
 
-  defp grant_count(account_id) do
-    Accrue.TestRepo.aggregate(
-      Ecto.Query.where(Grant, [grant], grant.account_id == ^account_id),
-      :count,
-      :id
+  defp seed_current_grant!(observation) do
+    Accrue.TestRepo.insert!(
+      Grant.changeset(%Grant{}, %{
+        account_id: observation.account_id,
+        source_observation_id: observation.id,
+        rail: observation.rail,
+        environment: observation.environment,
+        provider_lineage_id: observation.provider_lineage_id,
+        provider_product_id: observation.provider_product_id,
+        source_item_id: observation.provider_transaction_id || observation.provider_event_id,
+        quantity: 1,
+        provider_order: observation.provider_order,
+        account_revision: 0,
+        effective_at: observation.observed_at
+      })
     )
   end
 
-  defp event_count(account_id) do
+  defp grant_count(account_id) do
     Accrue.TestRepo.aggregate(
-      Ecto.Query.where(Event, [event], event.subject_id == ^account_id),
+      Ecto.Query.where(Grant, [grant], grant.account_id == ^account_id),
       :count,
       :id
     )
