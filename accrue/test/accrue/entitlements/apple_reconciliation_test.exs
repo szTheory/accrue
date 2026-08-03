@@ -1,9 +1,11 @@
 defmodule Accrue.Entitlements.AppleReconciliationTest do
   use Accrue.RepoCase, async: false
+  use Oban.Testing, repo: Accrue.TestRepo
 
   alias Accrue.Entitlements.{Account, Grant, Observation, Projector}
-  alias Accrue.Entitlements.Apple.{Client, Reconciliation}
+  alias Accrue.Entitlements.Apple.{Client, Lineage, Reconciliation, ReconcileWorker}
   alias Accrue.Entitlements.Apple.Reconciliation.Checkpoint
+  alias Accrue.Entitlements.Apple.ReconciliationWakeupWorker
 
   @tag :status
   test "the deterministic client preserves status authority and ascending history scripts" do
@@ -67,15 +69,81 @@ defmodule Accrue.Entitlements.AppleReconciliationTest do
         ]
       )
 
-    lineage_id = Ecto.UUID.generate()
+    lineage_id = Lineage.lock_or_insert(Accrue.TestRepo, :production, "orig-history").id
     now = ~U[2026-08-03 12:00:00Z]
     args = %{lineage_id: lineage_id, environment: :production}
 
     assert {:ok, %Checkpoint{pending_revision: "r1", completed_revision: nil, page_count: 1}} =
-             Reconciliation.run(args, repo: Accrue.TestRepo, client: fake, now: now)
+             Reconciliation.run(args,
+               repo: Accrue.TestRepo,
+               client: fake,
+               now: now,
+               admit_transaction: fn _ -> :ok end,
+               continue: fn _ -> {:ok, :continued} end
+             )
 
     assert {:ok, %Checkpoint{pending_revision: nil, completed_revision: "r2", page_count: 0}} =
-             Reconciliation.run(args, repo: Accrue.TestRepo, client: fake, now: now)
+             Reconciliation.run(args,
+               repo: Accrue.TestRepo,
+               client: fake,
+               now: now,
+               admit_transaction: fn _ -> :ok end
+             )
+  end
+
+  test "a durable wakeup drains through configured admission across every history page" do
+    account = account!("apple-reconciliation-worker")
+    lineage = Lineage.lock_or_insert(Accrue.TestRepo, :production, "orig-worker")
+    {:claimed, lineage} = Lineage.claim(Accrue.TestRepo, lineage, account.id, account.id)
+
+    fake =
+      Client.Fake.new(
+        statuses: [{:ok, []}],
+        history: [
+          {:ok, %{signed_transactions: ["page-1"], revision: "r1", has_more: true}},
+          {:ok, %{signed_transactions: ["page-2"], revision: "r2", has_more: false}}
+        ]
+      )
+
+    previous = Application.get_env(:accrue, :apple_reconciliation)
+
+    Application.put_env(:accrue, :apple_reconciliation,
+      client: fake,
+      admit_transaction: verified_admission(account, lineage)
+    )
+
+    on_exit(fn ->
+      if is_nil(previous),
+        do: Application.delete_env(:accrue, :apple_reconciliation),
+        else: Application.put_env(:accrue, :apple_reconciliation, previous)
+    end)
+
+    assert {:ok, _} =
+             Reconciliation.enqueue(lineage.id, :production, :host_requested,
+               repo: Accrue.TestRepo
+             )
+
+    assert :ok = perform_job(ReconciliationWakeupWorker, %{})
+
+    args = %{
+      "lineage_id" => lineage.id,
+      "environment" => "production",
+      "reason" => "host_requested"
+    }
+
+    assert :ok = perform_job(ReconcileWorker, args)
+
+    assert :ok = perform_job(ReconcileWorker, args)
+    assert Accrue.TestRepo.aggregate(Observation, :count, :id) == 2
+    assert Accrue.TestRepo.aggregate(Grant, :count, :id) == 2
+
+    assert %Checkpoint{
+             pending_revision: nil,
+             completed_revision: "r2",
+             page_count: 0,
+             run_state: :idle
+           } =
+             Accrue.TestRepo.get_by!(Checkpoint, lineage_id: lineage.id, environment: :production)
   end
 
   test "complete Apple order keeps delayed positive evidence behind terminal evidence" do
@@ -214,6 +282,48 @@ defmodule Accrue.Entitlements.AppleReconciliationTest do
                })
 
       assert kind == Atom.to_string(lifecycle)
+    end
+  end
+
+  defp verified_admission(account, lineage) do
+    fn signed_transaction ->
+      suffix = :crypto.hash(:sha256, signed_transaction) |> Base.encode16(case: :lower)
+      signed_at = ~U[2026-08-03 12:00:00.000000Z]
+      effective_at = ~U[2026-08-03 12:00:00.000000Z]
+
+      normalized =
+        Reconciliation.normalize_lifecycle(%{
+          lifecycle: :grant,
+          signed_at: signed_at,
+          effective_at: effective_at,
+          evidence_digest: suffix
+        })
+
+      with {:ok, observation} <-
+             Observation.insert_idempotently(Accrue.TestRepo, %{
+               account_id: account.id,
+               rail: :apple,
+               environment: lineage.environment,
+               provider_event_id: "verified-reconciliation-#{suffix}",
+               provider_transaction_id: "transaction-#{suffix}",
+               kind: normalized.kind,
+               provider_lineage_id: lineage.original_transaction_id,
+               provider_product_id: "product_pro",
+               provider_order: 1,
+               provider_order_key: normalized.provider_order_key,
+               observed_at: effective_at,
+               state: :qualified,
+               retry_count: 0,
+               metadata: %{"source" => "apple_server"},
+               evidence_digest: suffix
+             }),
+           result <-
+             Projector.project_in_transaction(Accrue.TestRepo, observation, logical_plan: :pro),
+           true <- match?({:ok, _}, result) or match?({:noop, _}, result) do
+        :ok
+      else
+        _ -> {:error, :admission_failed}
+      end
     end
   end
 

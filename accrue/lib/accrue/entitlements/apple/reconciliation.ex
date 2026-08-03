@@ -191,7 +191,7 @@ defmodule Accrue.Entitlements.Apple.Reconciliation do
 
         case insert_job.(job) do
           {:ok, _} ->
-            {1, nil} = repo.delete(wakeup)
+            {:ok, _} = repo.delete(wakeup)
             {:cont, {:ok, count + 1}}
 
           {:error, reason} ->
@@ -226,8 +226,16 @@ defmodule Accrue.Entitlements.Apple.Reconciliation do
 
   def run(args, opts \\ [])
 
-  def run(%{"lineage_id" => _lineage_id, "environment" => environment} = args, opts) do
-    run(Map.put(args, "environment", normalize_environment(environment)), opts)
+  def run(%{"lineage_id" => lineage_id, "environment" => environment} = args, opts)
+      when is_binary(environment) do
+    run(
+      %{
+        lineage_id: lineage_id,
+        environment: normalize_environment(environment),
+        filters: Map.get(args, "filters", %{sort: :ascending, product_types: ["AUTO_RENEWABLE"]})
+      },
+      opts
+    )
   end
 
   def run(%{lineage_id: lineage_id, environment: environment} = args, opts) do
@@ -282,7 +290,7 @@ defmodule Accrue.Entitlements.Apple.Reconciliation do
          {:ok, page} <-
            Client.transaction_history(client, lineage_id, filters, checkpoint.pending_revision) do
       with :ok <- admit_transactions(Map.get(page, :signed_transactions, []), opts) do
-        persist_page(repo, checkpoint, page, fingerprint, now)
+        persist_page(repo, checkpoint, page, fingerprint, now, opts)
       end
     else
       {:error, :config_invalid} -> mark_repair(repo, checkpoint, :config_invalid)
@@ -291,7 +299,7 @@ defmodule Accrue.Entitlements.Apple.Reconciliation do
     end
   end
 
-  defp persist_page(repo, checkpoint, page, fingerprint, now) do
+  defp persist_page(repo, checkpoint, page, fingerprint, now, opts) do
     pages = checkpoint.page_count + 1
 
     cond do
@@ -299,13 +307,27 @@ defmodule Accrue.Entitlements.Apple.Reconciliation do
         mark_repair(repo, checkpoint, :page_budget_exhausted)
 
       Map.get(page, :has_more, false) ->
-        update_checkpoint(repo, checkpoint, %{
-          query_fingerprint: fingerprint,
-          pending_revision: Map.get(page, :revision),
-          page_count: pages,
-          run_state: :running,
-          retry_after_at: nil
-        })
+        checkpoint =
+          update_checkpoint(repo, checkpoint, %{
+            query_fingerprint: fingerprint,
+            pending_revision: Map.get(page, :revision),
+            page_count: pages,
+            run_state: :running,
+            retry_after_at: nil
+          })
+
+        with {:ok, _job} <-
+               Keyword.get(opts, :continue, &Oban.insert/1).(
+                 Accrue.Entitlements.Apple.ReconcileWorker.new(%{
+                   "lineage_id" => checkpoint.lineage_id,
+                   "environment" => Atom.to_string(checkpoint.environment),
+                   "reason" => "continuation"
+                 })
+               ) do
+          checkpoint
+        else
+          {:error, reason} -> repo.rollback({:continuation_insert_failed, reason})
+        end
 
       true ->
         revision = Map.get(page, :revision, checkpoint.pending_revision)
