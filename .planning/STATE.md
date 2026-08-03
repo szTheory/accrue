@@ -4,17 +4,17 @@ milestone: v1.59
 milestone_name: Account-Scoped Multi-Rail & Offline Entitlements
 current_phase: 218
 current_phase_name: apple-observation-and-repair
-status: ready_to_execute
-stopped_at: Phase 218 gap-closure plans 15-16 planned
-last_updated: "2026-08-03T19:58:40.622Z"
+status: executing
+stopped_at: Completed 218-15-PLAN.md
+last_updated: "2026-08-03T21:01:39.449Z"
 last_activity: 2026-08-03
-last_activity_desc: Phase 218 gap-closure plans 15-16 created and verified
+last_activity_desc: Phase 218 execution started
 progress:
   total_phases: 6
-  completed_phases: 4
+  completed_phases: 3
   total_plans: 42
-  completed_plans: 40
-  percent: 67
+  completed_plans: 41
+  percent: 50
 ---
 
 # Project State
@@ -29,10 +29,10 @@ See: `.planning/PROJECT.md` (updated 2026-08-01 after completing Phase 215)
 
 ## Current Position
 
-Phase: 218 (apple-observation-and-repair) — GAP CLOSURE PLANNED
-Plan: 14 of 16
-Status: Ready to execute Plans 218-15 and 218-16
-Last activity: 2026-08-03 — Phase 218 gap-closure plans 15-16 created and verified
+Phase: 218 (apple-observation-and-repair) — EXECUTING
+Plan: 2 of 16
+Status: Ready to execute
+Last activity: 2026-08-03 — Phase 218 execution started
 
 ## Post-v1.48 Pause Rule
 
@@ -410,6 +410,7 @@ Coverage: 22/22 v1.51 requirements mapped (each REQ-ID → exactly one phase). D
 | Phase 218-apple-observation-and-repair P12 | 8m | 2 tasks | 7 files |
 | Phase 218 P13 | 6m | 1 tasks | 2 files |
 | Phase 218-apple-observation-and-repair P14 | 6min | 1 tasks | 3 files |
+| Phase 218-apple-observation-and-repair P15 | 5min | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -805,6 +806,8 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - [Phase ?]: Apple PKIX checks every configured host-pinned root and manually validates all certificate windows at the resolved policy instant.
 - [Phase ?]: Verified unmapped Apple products preserve logical_plan: nil so existing Intake quarantine remains non-granting and reconciliation-local.
 - [Phase ?]: Notification application identity is validated only from the authenticated outer data map.
+- [Phase ?]: Apple Notifications V2 rejects missing, empty, or malformed raw-body capture with retryable 503 before verification or persistence.
+- [Phase ?]: Apple JWS negative tests flip decoded ES256 signature bytes while preserving protected header and payload segments.
 
 ### Pending Todos
 
@@ -956,8 +959,8 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 
 ## Session Continuity
 
-Last session: 2026-08-03T19:30:50.263Z
-Stopped at: Completed 218-14-PLAN.md
+Last session: 2026-08-03T21:01:39.432Z
+Stopped at: Completed 218-15-PLAN.md
 Resume file: None
 
 ## Operator Next Steps
