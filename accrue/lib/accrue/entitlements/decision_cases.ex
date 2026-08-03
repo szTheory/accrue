@@ -77,7 +77,7 @@ defmodule Accrue.Entitlements.DecisionCases do
   def version, do: @version
 
   @spec all() :: [DecisionCase.t()]
-  def all, do: cases()
+  def all, do: cases() |> Enum.sort_by(& &1.id)
 
   @spec valid?(DecisionCase.t()) :: boolean()
   def valid?(%DecisionCase{} = value) do
