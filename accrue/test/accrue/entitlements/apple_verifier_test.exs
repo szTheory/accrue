@@ -1,6 +1,8 @@
 defmodule Accrue.Entitlements.Apple.VerifierTest do
   use ExUnit.Case, async: true
 
+  Code.require_file("../../fixtures/apple/server_evidence.exs", __DIR__)
+
   alias Accrue.Entitlements.Apple.Verifier
   alias Accrue.Entitlements.Apple.Verifier.Production
   alias Accrue.Test.AppleServerEvidence, as: Evidence
@@ -15,23 +17,39 @@ defmodule Accrue.Entitlements.Apple.VerifierTest do
   }
 
   test "malformed compact input has a closed error" do
-    assert {:error, :invalid_payload} = Production.verify_notification(Evidence.malformed(), @config)
+    assert {:error, :invalid_payload} =
+             Production.verify_notification(Evidence.malformed(), @config)
   end
 
   test "algorithm, header, chain, and signature failures are closed" do
     assert {:error, :invalid_algorithm} =
-             Production.verify_transaction(Evidence.jws(%{"alg" => "none", "x5c" => ["x"]}, Evidence.valid_claims()), @config)
+             Production.verify_transaction(
+               Evidence.jws(%{"alg" => "none", "x5c" => ["x"]}, Evidence.valid_claims()),
+               @config
+             )
 
     assert {:error, :invalid_header} =
-             Production.verify_transaction(Evidence.jws(%{"alg" => "ES256", "crit" => ["b64"], "x5c" => ["x"]}, Evidence.valid_claims()), @config)
+             Production.verify_transaction(
+               Evidence.jws(
+                 %{"alg" => "ES256", "crit" => ["b64"], "x5c" => ["x"]},
+                 Evidence.valid_claims()
+               ),
+               @config
+             )
 
     assert {:error, :invalid_chain} =
-             Production.verify_renewal(Evidence.jws(%{"alg" => "ES256", "x5c" => ["x"]}, Evidence.valid_claims()), @config)
+             Production.verify_renewal(
+               Evidence.jws(%{"alg" => "ES256", "x5c" => ["x"]}, Evidence.valid_claims()),
+               @config
+             )
   end
 
   test "verification is stateless and never returns raw signed evidence" do
     input = Evidence.malformed()
-    results = for _ <- 1..8, do: Task.async(fn -> Production.verify_notification(input, @config) end)
+
+    results =
+      for _ <- 1..8, do: Task.async(fn -> Production.verify_notification(input, @config) end)
+
     assert Enum.uniq(Enum.map(results, &Task.await/1)) == [{:error, :invalid_payload}]
   end
 
