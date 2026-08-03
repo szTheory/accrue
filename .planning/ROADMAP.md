@@ -196,12 +196,17 @@ Plans:
   4. Scheduled status and history reconciliation repairs missed notifications and accurately represents active, grace, retry, expiry, refund, and revocation boundaries.
   5. Hosts receive honest externally-managed Apple subscription guidance, with Family Sharing and offer authoring explicitly deferred.
 
-**Plans**: 14/14 plans executed
+**Plans**: 14/16 plans executed
 
 Plans:
 
+**Wave 12** *(blocked on 218-14 completion)*
+
+- [ ] 218-15-PLAN.md — Fail missing Apple raw-body capture retryably and prove deterministic outer/nested JWS corruption.
+
 **Wave 11** *(blocked on 218-12 and 218-13 completion)*
 
+- [ ] 218-16-PLAN.md — Separate local lineage identity from Apple's original transaction identifier during reconciliation.
 - [x] 218-14-PLAN.md — Repair Production Notifications V2 envelope validation and prove durable duplicate/concurrent wakeup coalescing.
 
 **Wave 10** *(blocked on Wave 9 completion)*
@@ -285,6 +290,6 @@ Plans:
 | 215. Research, contracts, and Crosswake feasibility | v1.59 | 15/15 | Complete    | 2026-08-01 |
 | 216. Additive rail and persistence foundation | v1.59 | 6/6 | Complete    | 2026-08-02 |
 | 217. Canonical projection and compatibility | v1.59 | 5/5 | Complete | 2026-08-02 |
-| 218. Apple observation and repair | v1.59 | 14/14 | In Progress|  |
+| 218. Apple observation and repair | v1.59 | 14/16 | In Progress|  |
 | 219. Offline study contract | v1.59 | 0/TBD | Not started | - |
 | 220. First-adopter proof and release gates | v1.59 | 0/TBD | Not started | - |

@@ -4,15 +4,15 @@ milestone: v1.59
 milestone_name: Account-Scoped Multi-Rail & Offline Entitlements
 current_phase: 218
 current_phase_name: apple-observation-and-repair
-status: gaps_found
-stopped_at: Phase 218 verification found 3 gaps
-last_updated: "2026-08-03T19:39:00.000Z"
+status: ready_to_execute
+stopped_at: Phase 218 gap-closure plans 15-16 planned
+last_updated: "2026-08-03T19:58:40.622Z"
 last_activity: 2026-08-03
-last_activity_desc: Phase 218 re-verification found 3 blocking gaps after Plan 218-14
+last_activity_desc: Phase 218 gap-closure plans 15-16 created and verified
 progress:
   total_phases: 6
   completed_phases: 4
-  total_plans: 40
+  total_plans: 42
   completed_plans: 40
   percent: 67
 ---
@@ -29,10 +29,10 @@ See: `.planning/PROJECT.md` (updated 2026-08-01 after completing Phase 215)
 
 ## Current Position
 
-Phase: 218 (apple-observation-and-repair) — GAPS FOUND
-Plan: 14 of 14
-Status: Ready to plan verification gaps
-Last activity: 2026-08-03 — Phase 218 re-verification found 3 blocking gaps after Plan 218-14
+Phase: 218 (apple-observation-and-repair) — GAP CLOSURE PLANNED
+Plan: 14 of 16
+Status: Ready to execute Plans 218-15 and 218-16
+Last activity: 2026-08-03 — Phase 218 gap-closure plans 15-16 created and verified
 
 ## Post-v1.48 Pause Rule
 
