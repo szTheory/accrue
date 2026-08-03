@@ -98,14 +98,24 @@ defmodule Accrue.Entitlements.AppleReconciliationTest do
                     "https://api.storekit-sandbox.itunes.apple.com/inApps/v1/subscriptions/sandbox%20lineage"}
 
     assert {:ok, %{signed_transactions: [], has_more: false}} =
-             Client.transaction_history(client, "sandbox lineage", %{sort: :ascending}, nil, :sandbox)
+             Client.transaction_history(
+               client,
+               "sandbox lineage",
+               %{sort: :ascending},
+               nil,
+               :sandbox
+             )
 
     assert_receive {:apple_url,
                     "https://api.storekit-sandbox.itunes.apple.com/inApps/v2/history/sandbox%20lineage?sort=ascending"}
   end
 
   test "production adapter safely bounds numeric and malformed Retry-After headers" do
-    for {header, expected} <- [{"999999", 21_600}, {"Wed, 21 Oct 2015 07:28:00 GMT", 60}, {"invalid", 60}] do
+    for {header, expected} <- [
+          {"999999", 21_600},
+          {"Wed, 21 Oct 2015 07:28:00 GMT", 60},
+          {"invalid", 60}
+        ] do
       client =
         Production.new(
           authorization: "test-token",

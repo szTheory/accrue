@@ -6,7 +6,15 @@ defmodule Accrue.Entitlements.AppleConvergencePropertyTest do
   import Ecto.Query
 
   alias Accrue.Entitlements.{Account, Grant, Snapshot}
-  alias Accrue.Entitlements.Apple.{Client, Lineage, ReconcileWorker, Reconciliation, ReconciliationWakeup}
+
+  alias Accrue.Entitlements.Apple.{
+    Client,
+    Lineage,
+    ReconcileWorker,
+    Reconciliation,
+    ReconciliationWakeup
+  }
+
   alias Accrue.Entitlements.Apple.Reconciliation.Checkpoint
   alias Accrue.Entitlements.Apple.ReconciliationWakeupWorker
 
@@ -130,7 +138,9 @@ defmodule Accrue.Entitlements.AppleConvergencePropertyTest do
 
   defp perform_persisted_jobs(worker) do
     case Accrue.TestRepo.one(from(job in Oban.Job, where: job.worker == ^to_string(worker))) do
-      nil -> :ok
+      nil ->
+        :ok
+
       job ->
         Accrue.TestRepo.delete!(job)
         assert :ok = perform_job(worker, job.args)

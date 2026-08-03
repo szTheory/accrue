@@ -118,7 +118,8 @@ defmodule Accrue.Entitlements.Apple.Client.Production do
 
   @impl true
   def subscription_statuses(%__MODULE__{} = client, lineage, environment),
-    do: get(client, environment, "/inApps/v1/subscriptions/#{URI.encode(lineage)}", [], &statuses/1)
+    do:
+      get(client, environment, "/inApps/v1/subscriptions/#{URI.encode(lineage)}", [], &statuses/1)
 
   @impl true
   def transaction_history(%__MODULE__{} = client, lineage, filters, revision, environment) do
@@ -140,9 +141,17 @@ defmodule Accrue.Entitlements.Apple.Client.Production do
   @impl true
   def set_app_account_token(_, _, _, _), do: {:error, :unsupported}
 
-  defp get(%__MODULE__{authorization: authorization, transport: transport} = client, environment, path, query, decode)
+  defp get(
+         %__MODULE__{authorization: authorization, transport: transport} = client,
+         environment,
+         path,
+         query,
+         decode
+       )
        when is_binary(authorization) and byte_size(authorization) > 0 do
-    url = base_url(client, environment) <> path <> if(query == [], do: "", else: "?" <> URI.encode_query(query))
+    url =
+      base_url(client, environment) <>
+        path <> if(query == [], do: "", else: "?" <> URI.encode_query(query))
 
     headers = [
       {~c"authorization", String.to_charlist("Bearer " <> authorization)},
