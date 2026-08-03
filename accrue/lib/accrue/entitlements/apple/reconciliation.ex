@@ -165,7 +165,7 @@ defmodule Accrue.Entitlements.Apple.Reconciliation do
   def enqueue_in_transaction(repo, lineage_id, environment, reason) do
     with {:ok, wakeup} <-
            ReconciliationWakeup.enqueue_in_transaction(repo, lineage_id, environment, reason),
-         {:ok, _job} <- Oban.insert(Accrue.Entitlements.Apple.ReconciliationWakeupWorker.new(%{})) do
+         {:ok, _job} <- repo.insert(Accrue.Entitlements.Apple.ReconciliationWakeupWorker.new(%{})) do
       {:ok, wakeup}
     end
   end
@@ -173,7 +173,7 @@ defmodule Accrue.Entitlements.Apple.Reconciliation do
   # A wakeup is deleted only after its job has been inserted in the same database transaction.
   # PostgreSQL row locking, rather than Oban uniqueness, is the execution ownership boundary.
   def drain_wakeups(repo, opts \\ []) do
-    insert_job = Keyword.get(opts, :insert_job, &Oban.insert/1)
+    insert_job = Keyword.get(opts, :insert_job, &repo.insert/1)
 
     repo.transact(fn ->
       repo.all(
@@ -338,7 +338,7 @@ defmodule Accrue.Entitlements.Apple.Reconciliation do
           })
 
         with {:ok, _job} <-
-               Keyword.get(opts, :continue, &Oban.insert/1).(
+               Keyword.get(opts, :continue, &repo.insert/1).(
                  Accrue.Entitlements.Apple.ReconcileWorker.new(%{
                    "lineage_id" => checkpoint.lineage_id,
                    "environment" => Atom.to_string(checkpoint.environment),
@@ -394,7 +394,7 @@ defmodule Accrue.Entitlements.Apple.Reconciliation do
           scheduled_at: retry_at
         )
 
-      case Oban.insert(retry_job) do
+      case repo.insert(retry_job) do
         {:ok, _job} -> checkpoint
         {:error, reason} -> repo.rollback({:retry_insert_failed, reason})
       end
