@@ -139,8 +139,12 @@ defmodule Accrue.Entitlements.AppleConvergencePropertyTest do
       %{
         snapshot: snapshot,
         grants: grants,
-        checkpoint:
-          Map.take(checkpoint, [:pending_revision, :completed_revision, :page_count, :run_state])
+        checkpoint: %{
+          pending_revision: checkpoint.pending_revision,
+          completed?: not is_nil(checkpoint.completed_revision),
+          page_count: checkpoint.page_count,
+          run_state: checkpoint.run_state
+        }
       }
     after
       if is_nil(previous),
