@@ -43,39 +43,47 @@ defmodule Accrue.Entitlements.Projector do
   defp do_project(%{state: state}, _opts) when state != :qualified, do: {:noop, :not_qualified}
 
   defp do_project(observation, opts) do
-    Accrue.Repo.transact(fn repo ->
-      account =
-        repo.one!(
-          from(account in Account,
-            where: account.id == ^observation.account_id,
-            lock: "FOR UPDATE"
-          )
-        )
-
-      before = Snapshot.fetch(repo, account)
-
-      case apply_observation(repo, observation, opts) do
-        :noop ->
-          {:ok, {:noop, :stale}}
-
-        :changed ->
-          after_snapshot = Snapshot.fetch(repo, account)
-
-          if Snapshot.authorization_signature(before) ==
-               Snapshot.authorization_signature(after_snapshot) or
-               survivor_retraction?(observation, before, after_snapshot) do
-            {:ok, {:noop, :no_material_change}}
-          else
-            revision = account.revision + 1
-            {:ok, updated} = repo.update(Account.changeset(account, %{revision: revision}))
-            snapshot = %{Snapshot.fetch(repo, updated) | revision: revision}
-            record_projection!(account, snapshot, observation, opts)
-            insert_follow_up!(snapshot, observation)
-            {:ok, {:ok, snapshot}}
-          end
-      end
-    end)
+    Accrue.Repo.transact(fn repo -> {:ok, project_in_transaction(repo, observation, opts)} end)
     |> unwrap_transaction()
+  end
+
+  @doc false
+  def project_in_transaction(repo, observation, opts \\ [])
+
+  def project_in_transaction(_repo, %{state: state}, _opts) when state != :qualified,
+    do: {:noop, :not_qualified}
+
+  def project_in_transaction(repo, observation, opts) do
+    account =
+      repo.one!(
+        from(account in Account,
+          where: account.id == ^observation.account_id,
+          lock: "FOR UPDATE"
+        )
+      )
+
+    before = Snapshot.fetch(repo, account)
+
+    case apply_observation(repo, observation, opts) do
+      :noop ->
+        {:noop, :stale}
+
+      :changed ->
+        after_snapshot = Snapshot.fetch(repo, account)
+
+        if Snapshot.authorization_signature(before) ==
+             Snapshot.authorization_signature(after_snapshot) or
+             survivor_retraction?(observation, before, after_snapshot) do
+          {:noop, :no_material_change}
+        else
+          revision = account.revision + 1
+          {:ok, updated} = repo.update(Account.changeset(account, %{revision: revision}))
+          snapshot = %{Snapshot.fetch(repo, updated) | revision: revision}
+          record_projection!(account, snapshot, observation, opts)
+          insert_follow_up!(snapshot, observation)
+          {:ok, snapshot}
+        end
+    end
   end
 
   defp apply_observation(repo, observation, opts) do

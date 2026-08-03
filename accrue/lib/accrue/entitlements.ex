@@ -48,6 +48,34 @@ defmodule Accrue.Entitlements do
   """
 
   alias Accrue.Entitlements.{Account, PurchaseDecision, Resolver, Snapshot}
+  alias Accrue.Entitlements.Apple.Intake
+
+  @doc "Returns the bounded Apple purchase context for an authenticated entitlement account."
+  def apple_purchase_context(%Account{} = account, opts \\ []) do
+    %{
+      app_account_token: account.id,
+      environment: Keyword.get(opts, :environment, :production),
+      bundle_id: Keyword.get(opts, :bundle_id, "com.accrue.app")
+    }
+  end
+
+  @doc "Admits already-verified Apple evidence through the bounded ownership and projection path."
+  def observe_apple_evidence(
+        %Account{} = account,
+        %Intake.VerifiedEvidence{} = evidence,
+        opts \\ []
+      ) do
+    Accrue.Telemetry.span_private(
+      [:accrue, :entitlements, :apple, :observe],
+      %{
+        action: :observe,
+        rail: :apple,
+        environment: evidence.environment,
+        account_id: account.id
+      },
+      fn -> Intake.observe(account, evidence, opts) end
+    )
+  end
 
   @doc "Returns a typed, revision-bound purchase preflight decision."
   @spec purchase_decision(Account.t() | String.t(), atom(), String.t(), keyword()) ::

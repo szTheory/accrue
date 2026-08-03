@@ -2,8 +2,6 @@ defmodule Accrue.Entitlements.AppleObservationTracerTest do
   use Accrue.RepoCase, async: false
   use Oban.Testing, repo: Accrue.TestRepo
 
-  import Ecto.Query
-
   alias Accrue.Entitlements.{Account, Grant, Observation}
   alias Accrue.Entitlements.Apple.Intake
 
@@ -30,7 +28,9 @@ defmodule Accrue.Entitlements.AppleObservationTracerTest do
     assert is_binary(bundle_id)
   end
 
-  test "verified Apple evidence binds, projects, and then becomes a duplicate noop", %{account: account} do
+  test "verified Apple evidence binds, projects, and then becomes a duplicate noop", %{
+    account: account
+  } do
     evidence = verified_evidence(account)
 
     assert {:ok, %Intake.Outcome{disposition: :verified, snapshot: snapshot, revision: 1}} =
@@ -51,7 +51,11 @@ defmodule Accrue.Entitlements.AppleObservationTracerTest do
   end
 
   test "unbound verified evidence is durable but cannot grant", %{account: account} do
-    evidence = %{verified_evidence(account) | app_account_token: nil, provider_event_id: "evt-unbound"}
+    evidence = %{
+      verified_evidence(account)
+      | app_account_token: nil,
+        provider_event_id: "evt-unbound"
+    }
 
     assert {:ok, %Intake.Outcome{disposition: :quarantined, reason: :verified_unbound}} =
              Accrue.Entitlements.observe_apple_evidence(account, evidence)
@@ -67,18 +71,24 @@ defmodule Accrue.Entitlements.AppleObservationTracerTest do
     account: account,
     other_account: other_account
   } do
-    assert {:ok, _} = Accrue.Entitlements.observe_apple_evidence(account, verified_evidence(account))
+    assert {:ok, _} =
+             Accrue.Entitlements.observe_apple_evidence(account, verified_evidence(account))
 
     conflicting =
-      %{verified_evidence(other_account) | provider_event_id: "evt-conflict", provider_transaction_id: "txn-conflict"}
+      %{
+        verified_evidence(other_account)
+        | provider_event_id: "evt-conflict",
+          provider_transaction_id: "txn-conflict"
+      }
 
-    assert {:ok, %Intake.Outcome{disposition: :quarantined, reason: :ownership_conflict} = outcome} =
+    assert {:ok,
+            %Intake.Outcome{disposition: :quarantined, reason: :ownership_conflict} = outcome} =
              Accrue.Entitlements.observe_apple_evidence(other_account, conflicting)
 
     refute inspect(outcome) =~ account.id
     assert count(Observation) == 1
     assert count(Grant) == 1
-    assert Accrue.TestRepo.get!(other_account.id).revision == 0
+    assert Accrue.TestRepo.get!(Account, other_account.id).revision == 0
   end
 
   test "a callback failure rolls all in-transaction writes back", %{account: account} do
@@ -124,7 +134,12 @@ defmodule Accrue.Entitlements.AppleObservationTracerTest do
     }
   end
 
-  defp count(table) when is_atom(table) do
+  defp count(table)
+       when table in [
+              :accrue_entitlement_apple_lineages,
+              :accrue_entitlement_apple_intakes,
+              :accrue_entitlement_apple_reconciliation_wakeups
+            ] do
     %{rows: [[count]]} =
       Ecto.Adapters.SQL.query!(
         Accrue.TestRepo,
