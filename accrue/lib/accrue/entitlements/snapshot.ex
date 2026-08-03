@@ -73,12 +73,14 @@ defmodule Accrue.Entitlements.Snapshot do
   @doc "The material authorization fields used for monotonic revision decisions."
   @spec authorization_signature(t()) :: term()
   def authorization_signature(%__MODULE__{} = snapshot) do
+    # Sources explain *why* access exists, but they are diagnostic provenance.
+    # Revisions track only the effective authorization presented to consumers.
     {snapshot.plans, snapshot.features, snapshot.quantities,
-     Enum.map(
-       snapshot.sources,
-       &Map.take(&1, [:rail, :environment, :logical_plan, :effective_at, :expires_at, :revoked_at])
-     )}
+     normalize_authorization_bounds(snapshot.authorization_bounds)}
   end
+
+  defp normalize_authorization_bounds(bounds) when is_map(bounds), do: bounds
+  defp normalize_authorization_bounds(_), do: %{}
 
   defp fetch(repo, account_id, revision) do
     import Ecto.Query
