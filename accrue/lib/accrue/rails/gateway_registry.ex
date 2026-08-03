@@ -20,7 +20,6 @@ defmodule Accrue.Rails.GatewayRegistry do
   end
 
   @adapters %{
-    "fake" => Accrue.Processor.Fake,
     "stripe" => Accrue.Processor.Stripe,
     "braintree" => Accrue.Processor.Braintree
   }
@@ -32,7 +31,9 @@ defmodule Accrue.Rails.GatewayRegistry do
   def resolve(processor) when is_atom(processor), do: resolve(Atom.to_string(processor))
 
   def resolve(processor) when is_binary(processor) do
-    case Map.fetch(@adapters, String.downcase(processor)) do
+    normalized = String.downcase(processor)
+
+    case adapter_for(normalized) do
       {:ok, adapter} -> {:ok, adapter}
       :error -> unknown_processor_error(processor)
     end
@@ -57,4 +58,9 @@ defmodule Accrue.Rails.GatewayRegistry do
        next_action: :inspect_resource_provenance
      }}
   end
+
+  defp adapter_for("fake"),
+    do: {:ok, Application.get_env(:accrue, :gateway_fake_adapter, Accrue.Processor.Fake)}
+
+  defp adapter_for(processor), do: Map.fetch(@adapters, processor)
 end

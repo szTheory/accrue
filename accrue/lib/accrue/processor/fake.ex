@@ -211,6 +211,10 @@ defmodule Accrue.Processor.Fake do
     call({:stub, callback, fun})
   end
 
+  @doc "Removes a callback override without resetting deterministic resources."
+  @spec unstub(atom()) :: :ok
+  def unstub(callback) when is_atom(callback), do: call({:unstub, callback})
+
   @doc """
   Pre-programs a one-shot return value for the named op. The next call
   to that op consumes the scripted response; subsequent calls fall back
@@ -759,6 +763,10 @@ defmodule Accrue.Processor.Fake do
     call({:call_count, callback})
   end
 
+  @doc "Returns deterministic callback arguments captured since the last reset."
+  @spec calls() :: [{atom(), [term()]}]
+  def calls, do: call(:calls)
+
   # ---------------------------------------------------------------------------
   # Behaviour callbacks — fetch dispatch (D3-48)
   # ---------------------------------------------------------------------------
@@ -901,6 +909,10 @@ defmodule Accrue.Processor.Fake do
 
   def handle_call({:stub, callback, fun}, _from, %State{stubs: stubs} = state) do
     {:reply, :ok, %{state | stubs: Map.put(stubs, callback, fun)}}
+  end
+
+  def handle_call({:unstub, callback}, _from, %State{stubs: stubs} = state) do
+    {:reply, :ok, %{state | stubs: Map.delete(stubs, callback)}}
   end
 
   def handle_call({:script, op, result}, _from, %State{scripts: scripts} = state) do
@@ -1979,6 +1991,8 @@ defmodule Accrue.Processor.Fake do
     {:reply, Map.get(state.call_counts, op, 0), state}
   end
 
+  def handle_call(:calls, _from, state), do: {:reply, Enum.reverse(state.calls), state}
+
   def handle_call(:accounts_list, _from, state) do
     {:reply, Map.values(state.connect_accounts), state}
   end
@@ -2066,7 +2080,7 @@ defmodule Accrue.Processor.Fake do
   end
 
   defp with_script_or_stub(state, op, args, fun) do
-    state = bump_call_count(state, op)
+    state = state |> bump_call_count(op) |> capture_call(op, args)
 
     case Map.fetch(state.scripts, op) do
       {:ok, scripted_result} ->
@@ -2095,6 +2109,9 @@ defmodule Accrue.Processor.Fake do
   defp bump_call_count(%State{call_counts: counts} = state, op) do
     %{state | call_counts: Map.update(counts, op, 1, &(&1 + 1))}
   end
+
+  defp capture_call(%State{calls: calls} = state, op, args),
+    do: %{state | calls: [{op, args} | calls]}
 
   defp lookup(map, id, state) do
     case Map.fetch(map, id) do

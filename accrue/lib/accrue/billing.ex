@@ -212,7 +212,7 @@ defmodule Accrue.Billing do
     Accrue.Telemetry.span_private(
       [:accrue, :billing, :management],
       lifecycle_metadata(:management, %{source: source}, opts) |> Map.put(:rail, source),
-      fn -> SourceRegistry.outcome(source, :management) end
+      fn -> management_registry().outcome(source, :management) end
     )
   end
 
@@ -1285,6 +1285,12 @@ defmodule Accrue.Billing do
       %{id: id} when is_binary(id) -> :crypto.hash(:sha256, id) |> Base.encode16(case: :lower)
       _ -> nil
     end
+  end
+
+  # A configuration-only seam keeps management outcome tests deterministic
+  # without widening the public facade or making a provider call possible.
+  defp management_registry do
+    Application.get_env(:accrue, :management_source_registry, SourceRegistry)
   end
 
   defp unwrap_lifecycle!({:ok, value}, _operation), do: value

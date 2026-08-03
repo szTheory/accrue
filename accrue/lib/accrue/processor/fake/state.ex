@@ -31,6 +31,7 @@ defmodule Accrue.Processor.Fake.State do
           connect_accounts: %{optional(id()) => map()},
           transfers: %{optional(id()) => map()},
           call_counts: %{optional(atom()) => non_neg_integer()},
+          calls: [{atom(), [term()]}],
           counters: %{
             customer: non_neg_integer(),
             subscription: non_neg_integer(),
@@ -79,6 +80,7 @@ defmodule Accrue.Processor.Fake.State do
             connect_accounts: %{},
             transfers: %{},
             call_counts: %{},
+            calls: [],
             counters: %{
               customer: 0,
               subscription: 0,

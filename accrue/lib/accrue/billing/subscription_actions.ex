@@ -719,7 +719,7 @@ defmodule Accrue.Billing.SubscriptionActions do
   @spec resume(Subscription.t(), keyword()) :: {:ok, Subscription.t()} | {:error, term()}
   def resume(sub, opts \\ [])
 
-  def resume(%Subscription{} = sub, _opts) do
+  def resume(%Subscription{} = sub, opts) do
     unless Subscription.canceling?(sub) do
       raise Accrue.Error.InvalidState,
         current: sub.status,
@@ -741,7 +741,7 @@ defmodule Accrue.Billing.SubscriptionActions do
                "Create a new subscription when service should restart after cancellation."
          }}
       else
-        op_id = Actor.current_operation_id!()
+        op_id = Keyword.get(opts, :operation_id) || Actor.current_operation_id!()
         idem_key = Idempotency.key(:resume_subscription, sub.id, op_id)
 
         Repo.transact(fn ->
@@ -930,7 +930,7 @@ defmodule Accrue.Billing.SubscriptionActions do
   @spec unpause(Subscription.t(), keyword()) :: {:ok, Subscription.t()} | {:error, term()}
   def unpause(sub, opts \\ [])
 
-  def unpause(%Subscription{} = sub, _opts) do
+  def unpause(%Subscription{} = sub, opts) do
     unless Subscription.paused?(sub) do
       raise Accrue.Error.InvalidState,
         current: sub.status,
@@ -949,7 +949,7 @@ defmodule Accrue.Billing.SubscriptionActions do
            message: "Braintree does not expose Accrue's unpause/2 collection semantic."
          }}
       else
-        op_id = Actor.current_operation_id!()
+        op_id = Keyword.get(opts, :operation_id) || Actor.current_operation_id!()
         idem_key = Idempotency.key(:unpause_subscription, sub.id, op_id)
 
         Repo.transact(fn ->
