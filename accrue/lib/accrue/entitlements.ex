@@ -60,7 +60,7 @@ defmodule Accrue.Entitlements do
       case decision_snapshot(account, opts) do
         {:ok, snapshot} ->
           PurchaseDecision.evaluate(snapshot, rail, product_id,
-            catalog: Keyword.get(opts, :catalog, Accrue.Config.entitlement_product_catalog()),
+            catalog: Keyword.get(opts, :catalog) || Accrue.Config.entitlement_product_catalog(),
             environment: Keyword.get(opts, :environment, :production)
           )
 
@@ -89,7 +89,7 @@ defmodule Accrue.Entitlements do
       PurchaseDecision.override(decision, reason, actor_id,
         snapshot: Keyword.get(opts, :snapshot),
         product_id: Keyword.fetch!(opts, :product_id),
-        catalog: Keyword.get(opts, :catalog, Accrue.Config.entitlement_product_catalog()),
+        catalog: Keyword.get(opts, :catalog) || Accrue.Config.entitlement_product_catalog(),
         environment: Keyword.get(opts, :environment, :production),
         audit: Keyword.get(opts, :audit)
       )

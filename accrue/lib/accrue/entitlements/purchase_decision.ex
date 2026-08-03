@@ -48,7 +48,7 @@ defmodule Accrue.Entitlements.PurchaseDecision do
   @spec evaluate(Snapshot.t() | nil, atom(), String.t(), keyword()) :: t()
   def evaluate(snapshot, target_rail, product_id, opts \\ [])
       when is_atom(target_rail) and is_binary(product_id) and is_list(opts) do
-    catalog = Keyword.get(opts, :catalog, Accrue.Config.entitlement_product_catalog())
+    catalog = Keyword.get(opts, :catalog) || Accrue.Config.entitlement_product_catalog()
     environment = Keyword.get(opts, :environment, :production)
     logical_plan = Map.get(catalog, {target_rail, environment, product_id})
 
@@ -73,7 +73,7 @@ defmodule Accrue.Entitlements.PurchaseDecision do
 
     current =
       evaluate(snapshot, decision.target_rail, target_product_id(decision, opts),
-        catalog: Keyword.get(opts, :catalog, Accrue.Config.entitlement_product_catalog()),
+        catalog: Keyword.get(opts, :catalog) || Accrue.Config.entitlement_product_catalog(),
         environment: Keyword.get(opts, :environment, :production)
       )
 
@@ -106,7 +106,7 @@ defmodule Accrue.Entitlements.PurchaseDecision do
 
     current =
       evaluate(snapshot, :stripe, Keyword.fetch!(opts, :product_id),
-        catalog: Keyword.get(opts, :catalog, Accrue.Config.entitlement_product_catalog()),
+        catalog: Keyword.get(opts, :catalog) || Accrue.Config.entitlement_product_catalog(),
         environment: Keyword.get(opts, :environment, :production)
       )
 
