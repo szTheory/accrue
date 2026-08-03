@@ -1212,6 +1212,7 @@ defmodule Accrue.Config do
     # re-running the full validator or applying the `:plans` nested defaults.
     :entitlements
     |> get!()
+    |> then(fn value -> if is_list(value), do: value, else: [] end)
     |> Keyword.put_new(:billable, nil)
     |> Keyword.put_new(:on_deny, :forbidden)
     |> Keyword.put_new(:deny_path, "/")
@@ -1227,7 +1228,7 @@ defmodule Accrue.Config do
 
   @doc "Returns configured entitlement rails, or [] when a host uses the legacy processor path."
   @spec rails() :: keyword()
-  def rails, do: get!(:rails)
+  def rails, do: get!(:rails) || []
 
   @doc "Returns the configured controllable entitlement rail, when rails are configured."
   @spec default_rail() :: atom() | nil
