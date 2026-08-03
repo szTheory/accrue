@@ -22,7 +22,7 @@ decisions:
   - Apple management is a successful externally-managed source outcome, never a billing mutation.
 metrics:
   tasks_completed: 2
-  tests: 203
+  tests: 210
   completed: 2026-08-03
 status: complete
 requirements-completed: [ACCT-03]
@@ -57,14 +57,17 @@ Persisted subscription and item provenance now controls lifecycle dispatch, whil
 - Added a closed `GatewayRegistry.resolve/1` boundary with stable missing/unknown processor errors.
 - Routed subscription lifecycle operations and item mutations through persisted parent provenance, preserving configured dispatch only for creation paths.
 - Added Apple `Billing.management/2` guidance and bounded lifecycle/management spans; bang facades reuse their instrumented non-bang operations.
-- Added a Fake-backed table inventory covering all eleven lifecycle non-bang/bang facade pairs under deliberately divergent global processor configuration.
-- Lifecycle and management spans now use the privacy-safe telemetry path: raw `:actor` is excluded and an actor identifier is SHA-256 hashed when present.
+- Added deterministic Fake call capture plus an adapter/management injection seam, making all negative dispatch proof executable without external services.
+- The eleven-action inventory now captures success, typed failure, and forced adapter exceptions, and verifies exactly one lifecycle span pair for both bang and non-bang paths.
+- Lifecycle and management spans use the privacy-safe telemetry path: raw `:actor` is excluded and an actor identifier is SHA-256 hashed when present; recursively bounded metadata rejects seeded identity, receipt/JWS, token, and provider-payload evidence.
+- Added zero-call provenance gates for missing, unknown, wrong, and unscoped resources; repeated operation IDs retain their Fake adapter/idempotency identity while global configuration flips.
+- Added Apple zero-call coverage across success, typed error, repeat, and concurrent management calls for cancellation, retry/swap/proration, refund, invoice, payment-method, item, and dunning callback families.
 
 ## Verification
 
-- `cd accrue && mix test test/accrue/billing/resource_dispatch_test.exs test/accrue/billing/subscription_actions_test.exs test/accrue/entitlements/provider_honesty_test.exs` — 29 tests, 0 failures.
-- `cd accrue && mix test test/accrue/entitlements test/accrue/billing/resource_dispatch_test.exs --exclude live_stripe` — repeated twice, 203 tests, 0 failures each run.
-- `mix format --check-formatted` passed for all plan-owned files.
+- `cd accrue && mix test test/accrue/billing/resource_dispatch_test.exs test/accrue/billing/subscription_actions_test.exs test/accrue/entitlements/provider_honesty_test.exs` — 36 tests, 0 failures.
+- `cd accrue && mix test test/accrue/entitlements test/accrue/billing/resource_dispatch_test.exs --exclude live_stripe` — repeated twice, 210 tests, 0 failures each run.
+- `mix compile --warnings-as-errors` and `mix format --check-formatted` passed for all plan-owned files.
 
 ## Task Commits
 
@@ -74,16 +77,29 @@ Persisted subscription and item provenance now controls lifecycle dispatch, whil
 4. Task 2 verification hardening: `c92d5ba3` — item global-dispatch structural guard.
 5. Reopened inventory coverage: `5cc4ca3e` — Fake-backed table-driven lifecycle facade and telemetry coverage.
 6. Telemetry privacy closure: `f827d718` — raw actor removal and hashed actor IDs for lifecycle/management spans.
+7. Contract completion hardening: `91412591` — deterministic Fake call capture, injected exception seams, all-action failure matrices, and zero-call isolation proof.
 
 ## Deviations from Plan
 
-None - implementation followed the requested persisted-provenance and external-management boundaries.
+### Auto-fixed Issues
+
+1. [Rule 1 - Bug] Resume and unpause dropped an explicit operation ID
+- **Found during:** rejected-plan contract completion
+- **Fix:** forwarded `opts[:operation_id]` into their existing idempotency identity.
+- **Files modified:** `accrue/lib/accrue/billing/subscription_actions.ex`
+- **Commit:** `91412591`
+
+2. [Rule 2 - Critical verification] Fake could count calls but could not prove a callback family was untouched
+- **Found during:** Apple and scoping isolation matrix implementation
+- **Fix:** added deterministic Fake call capture and test-only configuration seams that permit a direct adapter/management exception without network access.
+- **Files modified:** `accrue/lib/accrue/processor/fake.ex`, `accrue/lib/accrue/processor/fake/state.ex`, `accrue/lib/accrue/rails/gateway_registry.ex`, `accrue/lib/accrue/billing.ex`
+- **Commit:** `91412591`
 
 ## Issues Encountered
 
-`mix test.all` could not start because the shared checkout has an unrelated unformatted dirty file: `accrue/test/accrue/docs/package_docs_verifier_test.exs`. It was deliberately left untouched per shared-worktree isolation instructions. Focused plan-owned and phase gates passed.
+The full `mix test.all` command remains outside this plan's focused gate and would consume unrelated dirty documentation/property work in the shared checkout. The focused direct suite and the complete phase gate both pass without touching those files.
 
 ## Self-Check: PASSED
 
 - Required gateway, billing, action, item, and dispatch-test files exist.
-- Commits `3fe73ebb`, `4232be0e`, `d6772b4b`, and `c92d5ba3` exist.
+- Prior task commits and `91412591` exist.
