@@ -256,9 +256,15 @@ defmodule Accrue.Entitlements.Apple.Intake do
   defp do_observe(repo, account, evidence, opts) do
     lineage = Lineage.lock_or_insert(repo, evidence.environment, evidence.original_transaction_id)
 
-    case evidence.logical_plan do
-      nil -> persist_terminal(repo, lineage, evidence, :unmapped_product)
-      _ -> do_observe_claim(repo, lineage, account, evidence, opts)
+    case Reconciliation.normalize_lifecycle(Map.from_struct(evidence)) do
+      {:error, :invalid_lifecycle_bound} ->
+        persist_terminal(repo, lineage, evidence, :invalid_payload)
+
+      {:ok, _normalized} ->
+        case evidence.logical_plan do
+          nil -> persist_terminal(repo, lineage, evidence, :unmapped_product)
+          _ -> do_observe_claim(repo, lineage, account, evidence, opts)
+        end
     end
   end
 
@@ -297,6 +303,19 @@ defmodule Accrue.Entitlements.Apple.Intake do
   end
 
   defp do_repair(repo, account, lineage_id, evidence, opts) do
+    case Reconciliation.normalize_lifecycle(Map.from_struct(evidence)) do
+      {:error, :invalid_lifecycle_bound} ->
+        case repo.get(Lineage, lineage_id) do
+          nil -> %Outcome{disposition: :quarantined, reason: :invalid_payload, next_action: :none}
+          lineage -> persist_terminal(repo, lineage, evidence, :invalid_payload)
+        end
+
+      {:ok, _normalized} ->
+        do_repair_with_valid_bound(repo, account, lineage_id, evidence, opts)
+    end
+  end
+
+  defp do_repair_with_valid_bound(repo, account, lineage_id, evidence, opts) do
     case Lineage.repair(repo, lineage_id, account.id, evidence.app_account_token, opts) do
       {:ownership_conflict, _lineage} ->
         %Outcome{
@@ -420,7 +439,7 @@ defmodule Accrue.Entitlements.Apple.Intake do
   end
 
   defp observation_attrs(account, evidence) do
-    normalized = Reconciliation.normalize_lifecycle(Map.from_struct(evidence))
+    {:ok, normalized} = Reconciliation.normalize_lifecycle(Map.from_struct(evidence))
 
     %{
       account_id: account.id,

@@ -91,11 +91,14 @@ defmodule Accrue.Entitlements.Apple.Reconciliation do
     effective_at = Map.fetch!(facts, :effective_at)
     evidence_digest = Map.fetch!(facts, :evidence_digest)
 
-    %{
-      kind: Atom.to_string(lifecycle),
-      expires_at: lifecycle_bound(lifecycle, facts),
-      provider_order_key: apple_order_key(signed_at, effective_at, lifecycle, evidence_digest)
-    }
+    with {:ok, expires_at} <- lifecycle_bound(lifecycle, facts) do
+      {:ok,
+       %{
+         kind: Atom.to_string(lifecycle),
+         expires_at: expires_at,
+         provider_order_key: apple_order_key(signed_at, effective_at, lifecycle, evidence_digest)
+       }}
+    end
   end
 
   @doc false
@@ -121,13 +124,21 @@ defmodule Accrue.Entitlements.Apple.Reconciliation do
   end
 
   defp lifecycle_bound(lifecycle, facts) when lifecycle in [:active, :renewal_disabled],
-    do: Map.get(facts, :expires_at)
+    do: required_bound(facts, :expires_at)
 
-  defp lifecycle_bound(:grace, facts), do: Map.get(facts, :grace_expires_at)
+  defp lifecycle_bound(:grace, facts), do: required_bound(facts, :grace_expires_at)
 
-  defp lifecycle_bound(:billing_retry, facts), do: Map.get(facts, :last_verified_expires_at)
+  defp lifecycle_bound(:billing_retry, facts),
+    do: required_bound(facts, :last_verified_expires_at)
 
-  defp lifecycle_bound(_terminal, _facts), do: nil
+  defp lifecycle_bound(_terminal, _facts), do: {:ok, nil}
+
+  defp required_bound(facts, key) do
+    case Map.get(facts, key) do
+      %DateTime{} = bound -> {:ok, bound}
+      _ -> {:error, :invalid_lifecycle_bound}
+    end
+  end
 
   defp normalize_lifecycle_name(lifecycle)
        when lifecycle in [

@@ -167,7 +167,7 @@ defmodule Accrue.Entitlements.AppleObservationTracerTest do
       logical_plan: :pro,
       lifecycle: :grant,
       effective_at: ~U[2026-08-03 12:00:00.000000Z],
-      expires_at: nil,
+      expires_at: ~U[2027-01-15 08:00:00.000000Z],
       signed_at: ~U[2026-08-03 12:00:00.000000Z],
       evidence_digest: String.duplicate("a", 64),
       verifier_version: "fake-v1",
