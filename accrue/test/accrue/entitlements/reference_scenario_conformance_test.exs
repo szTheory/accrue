@@ -4,13 +4,16 @@ defmodule Accrue.Entitlements.ReferenceScenarioConformanceTest do
   alias Accrue.Entitlements.ReferenceScenarios
 
   @tag :tracer
-  test "apple purchase to web login is a deterministic shared scenario" do
+  test "apple purchase to web login exposes closed production operation inputs" do
     scenario = ReferenceScenarios.fetch!("apple_purchase_to_web_login")
 
     assert scenario.id == "apple_purchase_to_web_login"
     assert scenario.evidence_lane == :deterministic_conformance
     assert scenario.expected.snapshot.revision == 1
     assert scenario.expected.purchase.status == :block
+    assert [%{kind: "apple_verified_purchase", operation: operation} | _] = scenario.actions
+    assert operation.rail == :apple
+    assert operation.logical_product == "pro"
     assert ReferenceScenarios.valid?(scenario)
   end
 
