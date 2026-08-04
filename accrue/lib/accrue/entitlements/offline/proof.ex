@@ -7,6 +7,14 @@ defmodule Accrue.Entitlements.Offline.Proof do
   @max_collection 100
   @sensitive_claims ~w(version iss aud jti sub cnf revision iat nbf fresh_until exp disposition plans features quantities denial_reason)
   @allow_claims Enum.sort(List.delete(@sensitive_claims, "denial_reason"))
+  # The signed denial reason is part of the public wire contract, not a free-form
+  # provider diagnostic. Keep this list shared with issuance.
+  @denial_reasons ~w(signed_denial superseded device_revoked)
+
+  @spec denial_reason?(atom() | String.t()) :: boolean()
+  def denial_reason?(reason) when is_atom(reason), do: denial_reason?(Atom.to_string(reason))
+  def denial_reason?(reason) when is_binary(reason), do: reason in @denial_reasons
+  def denial_reason?(_), do: false
   @deny_claims Enum.sort(@sensitive_claims)
 
   defmodule VerificationContext do
@@ -497,9 +505,10 @@ defmodule Accrue.Entitlements.Offline.Proof do
     do: if(Map.has_key?(payload, "denial_reason"), do: {:error, :malformed}, else: :ok)
 
   defp validate_denial(%{"disposition" => "deny", "denial_reason" => reason})
-       when is_binary(reason) and byte_size(reason) <= @max_string, do: :ok
+       when is_binary(reason) and byte_size(reason) <= @max_string and reason in @denial_reasons,
+       do: :ok
 
-  defp validate_denial(%{"disposition" => "deny"}), do: :ok
+  defp validate_denial(%{"disposition" => "deny"}), do: {:error, :malformed}
   defp validate_denial(_), do: {:error, :malformed}
 
   # A signed allow without at least one effective entitlement is indistinguishable

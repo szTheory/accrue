@@ -43,6 +43,7 @@ defmodule Accrue.Entitlements.Offline.Issuer do
 
     with %Account{} = account <- account,
          %Device{} = device <- device,
+         :ok <- validate_denial_reason(request.denial_reason),
          snapshot <- Snapshot.fetch(repo, account),
          {disposition, reason} <- disposition(snapshot, device, request),
          expires_at <- expiry(snapshot, disposition),
@@ -100,6 +101,13 @@ defmodule Accrue.Entitlements.Offline.Issuer do
        do: {:deny, :signed_denial}
 
   defp disposition(_, _, _), do: {:allow, nil}
+
+  defp validate_denial_reason(nil), do: :ok
+
+  defp validate_denial_reason(reason) when is_atom(reason) and Proof.denial_reason?(reason),
+    do: :ok
+
+  defp validate_denial_reason(_), do: {:error, :invalid_request}
 
   defp expiry(_, :deny), do: nil
 
