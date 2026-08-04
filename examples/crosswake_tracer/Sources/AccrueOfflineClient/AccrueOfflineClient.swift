@@ -195,12 +195,16 @@ public enum OfflineGoldenVectorVerifier {
         guard Set(header.keys) == ["alg", "typ", "kid"] else { throw GoldenVectorError.malformed }
         guard header["alg"] as? String == "ES256" else { throw GoldenVectorError.algorithm }
         guard header["typ"] as? String == "accrue-entitlement-proof+jwt" else { throw GoldenVectorError.type }
-        guard let kid = header["kid"] as? String, let key = keys.first(where: { $0.kid == kid }) else { throw GoldenVectorError.key }
+        guard let kid = header["kid"] as? String, let key = keys.first(where: { $0.kid == kid }), key.isValid else { throw GoldenVectorError.key }
         let publicKey: P256.Signing.PublicKey
         do { publicKey = try P256.Signing.PublicKey(x963Representation: key.point) }
         catch { throw GoldenVectorError.key }
         guard let signature = try? P256.Signing.ECDSASignature(rawRepresentation: signatureData),
               publicKey.isValidSignature(signature, for: Data("\(parts[0]).\(parts[1])".utf8)) else { throw GoldenVectorError.signature }
+        // JSONSerialization is only used after a lexical duplicate-key pass.  Its
+        // dictionary bridge otherwise silently keeps the last duplicate member.
+        try StrictJSON.rejectDuplicateKeys(in: headerData)
+        try StrictJSON.rejectDuplicateKeys(in: payloadData)
         let rawPayload = try JSONSerialization.jsonObject(with: payloadData)
         guard let values = rawPayload as? [String: Any] else { throw GoldenVectorError.malformed }
         let payload = try Payload(values: values)
@@ -274,6 +278,9 @@ public enum OfflineGoldenVectorVerifier {
         let disposition: Disposition
 
         init(values: [String: Any]) throws {
+            let common: Set<String> = ["version", "iss", "aud", "jti", "sub", "cnf", "revision", "iat", "nbf", "fresh_until", "exp", "disposition", "plans", "features", "quantities"]
+            let expected = (values["disposition"] as? String) == "deny" ? common.union(["denial_reason"]) : common
+            guard Set(values.keys) == expected else { throw GoldenVectorError.malformed }
             guard let version = values["version"] as? String,
                   let iss = values["iss"] as? String,
                   let aud = values["aud"] as? String,
@@ -285,14 +292,26 @@ public enum OfflineGoldenVectorVerifier {
             guard let iat = values["iat"] as? Int64 else { throw GoldenVectorError.iat }
             guard let nbf = values["nbf"] as? Int64 else { throw GoldenVectorError.malformed }
             guard let freshUntil = values["fresh_until"] as? Int64 else { throw GoldenVectorError.freshness }
-            let exp = values["exp"] as? Int64
+            let exp: Int64?
+            if values["exp"] is NSNull { exp = nil }
+            else if let value = values["exp"] as? Int64 { exp = value }
+            else { throw GoldenVectorError.malformed }
             guard let disposition = Disposition(rawValue: values["disposition"] as? String ?? "") else { throw GoldenVectorError.disposition }
+            guard let plans = values["plans"] as? [String], plans.allSatisfy({ !$0.isEmpty && $0.utf8.count <= 128 }),
+                  let features = values["features"] as? [String], features.allSatisfy({ !$0.isEmpty && $0.utf8.count <= 128 }),
+                  let quantities = values["quantities"] as? [String: Int64], quantities.count <= 64,
+                  quantities.values.allSatisfy({ $0 >= 0 }) else { throw GoldenVectorError.malformed }
+            if disposition == .deny { guard values["denial_reason"] as? String != nil else { throw GoldenVectorError.malformed } }
             self.version = version; self.iss = iss; self.aud = aud; self.jti = jti; self.accountID = accountID; self.cnf = cnf
             self.revision = revision; self.iat = iat; self.nbf = nbf; self.exp = exp; self.freshUntil = freshUntil; self.disposition = disposition
         }
     }
     private enum Disposition: String { case allow, deny }
-    private struct TestKey: Decodable { let kid: String; let x: String; let y: String; var point: Data { Data([4]) + Data(base64URLEncoded: x)! + Data(base64URLEncoded: y)! } }
+    private struct TestKey: Decodable {
+        let kid: String; let kty: String; let crv: String; let use: String; let alg: String; let x: String; let y: String
+        var point: Data { Data([4]) + Data(base64URLEncoded: x)! + Data(base64URLEncoded: y)! }
+        var isValid: Bool { kty == "EC" && crv == "P-256" && use == "sig" && alg == "ES256" && !kid.isEmpty && Data(base64URLEncoded: x)?.count == 32 && Data(base64URLEncoded: y)?.count == 32 }
+    }
     private struct Context {
         let issuer, audience, account, thumbprint: String; let revision, iat, freshness, now, clockNow: Int64; let prior: GoldenVectorCache; let hasLocalKey: Bool
         init(_ values: [String: JSONValue]) throws {
@@ -304,6 +323,19 @@ public enum OfflineGoldenVectorVerifier {
         }
     }
     private enum GoldenVectorError: Error { case malformed, signature, key, algorithm, issuer, audience, type, account, device, thumbprint, revision, rollback, iat, freshness, disposition, clock, expired, notYetValid; var reason: String { switch self { case .malformed, .signature, .revision, .disposition: "malformed"; case .iat, .freshness, .rollback: "superseded"; case .algorithm: "wrong_algorithm"; case .type: "wrong_type"; case .key: "unknown_key"; case .issuer: "wrong_issuer"; case .audience: "wrong_audience"; case .account, .device, .thumbprint: "device_mismatch"; case .clock: "clock_rollback"; case .expired: "hard_expired"; case .notYetValid: "future_not_valid" } } }
+    private enum StrictJSON {
+        static func rejectDuplicateKeys(in data: Data) throws {
+            guard let text = String(data: data, encoding: .utf8) else { throw GoldenVectorError.malformed }
+            let pattern = #"(?:\{|,)[[:space:]]*(\"(?:\\.|[^\"])*\")[[:space:]]*:"#
+            let regex = try NSRegularExpression(pattern: pattern)
+            var keys = Set<String>()
+            for match in regex.matches(in: text, range: NSRange(text.startIndex..., in: text)) {
+                guard let range = Range(match.range(at: 1), in: text),
+                      let key = try? JSONDecoder().decode(String.self, from: Data(text[range].utf8)),
+                      keys.insert(key).inserted else { throw GoldenVectorError.malformed }
+            }
+        }
+    }
     private enum GoldenVectorContractError: Error, CustomStringConvertible {
         case topLevel(String)
         case vectorField(String, String)
@@ -333,6 +365,7 @@ private extension Data {
         self.init(base64Encoded: base64)
     }
 }
+
 
 /// The single admission rule for verified entitlement replacements. Higher revisions
 /// win; at the same revision, only a signed denial can replace a non-denial state.
