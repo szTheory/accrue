@@ -197,6 +197,12 @@ defmodule Mix.Tasks.Accrue.InstallTest do
 
     assert InstallFixture.assert_contains!(
              app,
+             "priv/repo/migrations/20260804030000_add_execution_token_to_offline_reconnect_attempts.exs",
+             "execution_token"
+           )
+
+    assert InstallFixture.assert_contains!(
+             app,
              "priv/repo/migrations/99999999999999_revoke_accrue_events_writes.exs",
              ~S[to_regrole('#{@app_role}') IS NOT NULL]
            )
