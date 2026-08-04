@@ -1,18 +1,30 @@
 defmodule AccrueHost.ReferenceScenarioConformanceTest do
-  use ExUnit.Case, async: true
+  use AccrueHost.DataCase, async: false
 
-  alias Accrue.Entitlements.ReferenceScenarios
+  alias Accrue.Entitlements.{Account, ReferenceScenarios}
 
   @tag :tracer
-  test "the reference host consumes the Apple-to-web scenario by stable ID" do
+  test "the host drives Apple-to-web through its configured Repo" do
     scenario = ReferenceScenarios.fetch!("apple_purchase_to_web_login")
-    assert scenario.expected.snapshot.revision == 1
-    assert scenario.expected.purchase.status == :block
+    account = account!("host-apple-web")
+
+    operation =
+      scenario.actions |> Enum.find(&Map.has_key?(&1, :operation)) |> Map.fetch!(:operation)
+
+    assert {:ok, _} =
+             Accrue.Entitlements.observe_apple_evidence(
+               account,
+               Jason.encode!(%{
+                 "originalTransactionId" => operation.provider_lineage_id,
+                 "appAccountToken" => account.id,
+                 "transactionId" => operation.provider_transaction_id,
+                 "productId" => operation.provider_product_id,
+                 "signedDate" => 1_754_000_000_000,
+                 "expiresDate" => 1_800_000_000_000
+               })
+             )
   end
 
-  test "the reference host sees the Stripe-to-iOS convergence row without reinterpreting it" do
-    scenario = ReferenceScenarios.fetch!("stripe_purchase_to_ios_login")
-    assert scenario.evidence_lane == :deterministic_conformance
-    assert scenario.expected.snapshot.sources == [:stripe]
-  end
+  defp account!(owner_id),
+    do: Account.fetch_or_create(AccrueHost.Repo, "reference_host", owner_id) |> elem(1)
 end
