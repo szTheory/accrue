@@ -164,7 +164,10 @@ defmodule AccrueHost.BillingFacadeTest do
              Billing.subscribe(user, "price_basic", trial_end: {:days, 14})
 
     assert {:ok, %Subscription{} = latest_subscription} =
-             Billing.subscribe(user, "price_basic", trial_end: {:days, 14})
+             Billing.subscribe(user, "price_basic",
+               trial_end: {:days, 14},
+               operation_id: "billing-state-latest-" <> Ecto.UUID.generate()
+             )
 
     assert {:ok,
             %{customer: %Customer{} = customer, subscription: %Subscription{} = subscription}} =
