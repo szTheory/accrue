@@ -23,6 +23,14 @@ defmodule Accrue.Entitlements.Offline do
 
   def verify(_, _, _), do: {:ok, Proof.invalid(:malformed)}
 
+  @doc "Returns the bounded client-side action policy for a verified offline decision."
+  @spec action_policy(Proof.Decision.t(), atom()) :: Proof.ActionPolicy.t()
+  def action_policy(decision, action), do: Proof.action_policy(decision, action)
+
+  @doc "Returns the typed learner-facing guidance seed for a public proof state."
+  @spec guidance(:fresh | :stale_offline | :denied | :invalid) :: Proof.Guidance.t()
+  def guidance(state), do: Proof.guidance(state)
+
   @spec verification_keys(keyword()) ::
           {:ok, %{required(String.t()) => [map()]}} | {:error, :config_invalid}
   def verification_keys(opts \\ [])

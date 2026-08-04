@@ -1,5 +1,6 @@
 defmodule Accrue.Entitlements.OfflineTest do
   use ExUnit.Case, async: true
+  use ExUnitProperties
 
   alias Accrue.Entitlements.Offline
 
@@ -93,6 +94,49 @@ defmodule Accrue.Entitlements.OfflineTest do
           ] do
         assert {:ok, %{state: :invalid}} =
                  Offline.verify(compact(signing_key, claims(base, changes)), base)
+      end
+    end
+
+    property "signed time boundaries always map to one of the closed public states" do
+      check all(
+              fresh_window <- integer(1..100),
+              expiry_window <- integer(1..100),
+              scenario <-
+                member_of([:before_freshness, :at_freshness, :after_freshness, :at_expiry])
+            ) do
+        signing_key = signing_key()
+        public_key = public_key(signing_key)
+        issued_at = 1_700_000_000
+        fresh_until = issued_at + fresh_window
+        expires_at = fresh_until + expiry_window
+
+        now =
+          case scenario do
+            :before_freshness -> fresh_until - 1
+            :at_freshness -> fresh_until
+            :after_freshness -> fresh_until + 1
+            :at_expiry -> expires_at
+          end
+
+        context = verification_context(public_key, now)
+
+        assert {:ok, %{state: state, reason: reason, next_action: next_action}} =
+                 Offline.verify(
+                   compact(
+                     signing_key,
+                     claims(context, %{
+                       "iat" => issued_at,
+                       "nbf" => issued_at,
+                       "fresh_until" => fresh_until,
+                       "exp" => expires_at
+                     })
+                   ),
+                   context
+                 )
+
+        assert state in [:fresh, :stale_offline, :denied, :invalid]
+        assert reason in [:ok, :revalidation_due, :hard_expired]
+        assert next_action in [:none, :reconnect_required]
       end
     end
   end

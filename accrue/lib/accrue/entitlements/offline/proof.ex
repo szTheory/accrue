@@ -116,6 +116,81 @@ defmodule Accrue.Entitlements.Offline.Proof do
           }
   end
 
+  defmodule ActionPolicy do
+    @moduledoc false
+    @enforce_keys [:action, :allowed, :next_action, :guidance_key]
+    defstruct [:action, :allowed, :next_action, :guidance_key]
+
+    @type t :: %__MODULE__{
+            action: atom(),
+            allowed: boolean(),
+            next_action: :none | :reconnect_required | :access_unavailable | :check_access,
+            guidance_key: :fresh | :stale_offline | :denied | :invalid
+          }
+  end
+
+  defmodule Guidance do
+    @moduledoc false
+    @enforce_keys [:key, :text, :action_label]
+    defstruct [:key, :text, :action_label]
+
+    @type t :: %__MODULE__{
+            key: :fresh | :stale_offline | :denied | :invalid,
+            text: binary(),
+            action_label: binary()
+          }
+  end
+
+  @actions [
+    :read_downloaded_lesson,
+    :read_local_progress,
+    :write_local_progress,
+    :download_premium,
+    :enroll,
+    :export,
+    :purchase,
+    :mutate_account,
+    :mutate_rail,
+    :other_value_expansion
+  ]
+
+  @spec action_policy(Decision.t(), atom()) :: ActionPolicy.t()
+  def action_policy(%Decision{state: state, claims: claims}, action)
+      when state in [:fresh, :stale_offline, :denied, :invalid] do
+    cond do
+      action not in @actions -> policy(action, false, :reconnect_required, state)
+      state == :fresh -> fresh_policy(action, claims)
+      state == :stale_offline -> stale_policy(action)
+      state in [:denied, :invalid] -> unavailable_policy(action, state)
+    end
+  end
+
+  def action_policy(_decision, action), do: policy(action, false, :reconnect_required, :invalid)
+
+  @spec guidance(:fresh | :stale_offline | :denied | :invalid) :: Guidance.t()
+  def guidance(:fresh),
+    do: %Guidance{key: :fresh, text: "Access is up to date.", action_label: "Continue"}
+
+  def guidance(:stale_offline),
+    do: %Guidance{
+      key: :stale_offline,
+      text:
+        "Reconnect to update access. Downloaded lessons and progress stay available on this device.",
+      action_label: "Reconnect"
+    }
+
+  def guidance(:denied),
+    do: %Guidance{
+      key: :denied,
+      text: "Access is unavailable. Downloaded lessons and progress stay on this device.",
+      action_label: "Check access"
+    }
+
+  def guidance(:invalid),
+    do: %Guidance{key: :invalid, text: "Reconnect to check access.", action_label: "Reconnect"}
+
+  def guidance(_), do: guidance(:invalid)
+
   @spec verify(binary(), VerificationContext.t() | map(), keyword()) :: Decision.t()
   def verify(compact, context, _opts \\ []) do
     with {:ok, context} <- VerificationContext.new(context),
@@ -356,6 +431,65 @@ defmodule Accrue.Entitlements.Offline.Proof do
       next_action: :reconnect_required,
       claims: claims
     }
+
+  defp fresh_policy(action, %Claims{} = claims) do
+    allowed =
+      case action do
+        :read_downloaded_lesson ->
+          feature?(claims, "offline_study")
+
+        :read_local_progress ->
+          feature?(claims, "offline_study")
+
+        :write_local_progress ->
+          feature?(claims, "offline_study")
+
+        :download_premium ->
+          feature?(claims, "offline_study") and positive_quantity?(claims, "downloads")
+
+        :enroll ->
+          plan?(claims, "pro")
+
+        :export ->
+          feature?(claims, "export")
+
+        _ ->
+          false
+      end
+
+    policy(action, allowed, if(allowed, do: :none, else: :reconnect_required), :fresh)
+  end
+
+  defp fresh_policy(action, _), do: policy(action, false, :reconnect_required, :fresh)
+
+  defp stale_policy(action)
+       when action in [:read_downloaded_lesson, :read_local_progress, :write_local_progress],
+       do: policy(action, true, :none, :stale_offline)
+
+  defp stale_policy(action), do: policy(action, false, :reconnect_required, :stale_offline)
+
+  defp unavailable_policy(action, state)
+       when action in [:read_local_progress, :write_local_progress],
+       do: policy(action, true, :none, state)
+
+  defp unavailable_policy(action, :denied),
+    do: policy(action, false, :access_unavailable, :denied)
+
+  defp unavailable_policy(action, :invalid), do: policy(action, false, :check_access, :invalid)
+
+  defp policy(action, allowed, next_action, guidance_key),
+    do: %ActionPolicy{
+      action: action,
+      allowed: allowed,
+      next_action: next_action,
+      guidance_key: guidance_key
+    }
+
+  defp feature?(%Claims{features: features}, feature), do: feature in features
+  defp plan?(%Claims{plans: plans}, plan), do: plan in plans
+
+  defp positive_quantity?(%Claims{quantities: quantities}, key),
+    do: is_integer(quantities[key]) and quantities[key] > 0
 
   defp confirmation_matches?(%{"jkt" => thumbprint}, expected),
     do: bounded_string?(thumbprint, @max_string) and thumbprint == expected
