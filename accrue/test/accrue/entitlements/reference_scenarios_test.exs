@@ -87,6 +87,49 @@ defmodule Accrue.Entitlements.ReferenceScenariosTest do
     assert {:error, _reason} = Markdown.render(root)
   end
 
+  test "release gate fails closed on every prohibited public claim family" do
+    for {claim, failure} <- [
+          {"Crosswake runtime is supported.", "runtime-capability inflation"},
+          {"Apple lifecycle control is available.", "Apple lifecycle control"},
+          {"Cross-rail refund mutation is supported.", "cross-rail mutation"},
+          {"Stale access permits premium expansion.", "stale premium expansion"},
+          {"Raw transaction data and signed proof material are exposed.", "private-data claim"}
+        ] do
+      root = gate_fixture_root!()
+      matrix = Path.join(root, "examples/accrue_host/docs/capability-limits-matrix.md")
+      File.write!(matrix, File.read!(matrix) <> "\n#{claim}\n")
+
+      {output, status} = run_gate(root)
+      assert status != 0
+      assert output =~ failure
+    end
+  end
+
+  test "release gate requires its pull-request CI invocation and current generated output" do
+    root = gate_fixture_root!()
+    workflow = Path.join(root, ".github/workflows/ci.yml")
+
+    File.write!(
+      workflow,
+      File.read!(workflow)
+      |> String.replace("bash scripts/ci/verify_reference_scenario_contract.sh", "true",
+        global: false
+      )
+    )
+
+    {output, status} = run_gate(root)
+    assert status != 0
+    assert output =~ "docs-contracts-shift-left invocation"
+
+    root = gate_fixture_root!()
+    matrix = Path.join(root, "examples/accrue_host/docs/capability-limits-matrix.md")
+    File.write!(matrix, "stale generated output\n")
+
+    {output, status} = run_gate(root)
+    assert status != 0
+    assert output =~ "generated matrix drift"
+  end
+
   defp fixture_root! do
     root =
       Path.join(System.tmp_dir!(), "reference-scenarios-#{System.unique_integer([:positive])}")
@@ -109,5 +152,28 @@ defmodule Accrue.Entitlements.ReferenceScenariosTest do
     destination = Path.join(root, path)
     File.mkdir_p!(Path.dirname(destination))
     File.cp!(Path.join(@repo_root, path), destination)
+  end
+
+  defp gate_fixture_root! do
+    root = fixture_root!()
+
+    for path <- [
+          "examples/accrue_host/docs/capability-limits-matrix.md",
+          "examples/crosswake_tracer/physical-device-evidence.md",
+          ".github/workflows/ci.yml"
+        ] do
+      copy_fixture_file!(root, path)
+    end
+
+    root
+  end
+
+  defp run_gate(root) do
+    System.cmd(
+      "bash",
+      [Path.join(@repo_root, "scripts/ci/verify_reference_scenario_contract.sh")],
+      env: [{"ROOT_DIR", root}, {"ACCRUE_DIR", Path.join(@repo_root, "accrue")}],
+      stderr_to_stdout: true
+    )
   end
 end
