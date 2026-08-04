@@ -512,10 +512,12 @@ defmodule Accrue.Entitlements.Offline.Reconnect do
     provider = Keyword.get(config, :key_provider)
 
     if Keyword.keyword?(config) and is_atom(coordinator) and not is_nil(coordinator) and
+         Code.ensure_loaded?(coordinator) and
          function_exported?(coordinator, :due_sources, 3) and
          function_exported?(coordinator, :refresh, 4) and
          function_exported?(coordinator, :enqueue_repair, 4) and is_atom(provider) and
-         not is_nil(provider) and function_exported?(provider, :sign, 2) and
+         not is_nil(provider) and Code.ensure_loaded?(provider) and
+         function_exported?(provider, :sign, 2) and
          function_exported?(provider, :public_keys, 1) do
       {:ok, config}
     else
