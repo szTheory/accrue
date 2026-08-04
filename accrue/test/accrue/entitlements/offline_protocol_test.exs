@@ -54,6 +54,8 @@ defmodule Accrue.Entitlements.OfflineProtocolTest do
        :malformed},
       {"malformed compact", "not-a-jws", :malformed},
       {"duplicate issuer", duplicate_issuer_compact(signing_key, payload), :malformed},
+      {"escaped duplicate issuer", escaped_duplicate_issuer_compact(signing_key, payload),
+       :malformed},
       {"invalid signature", invalidate_signature(compact(signing_key, payload)),
        :signature_invalid}
     ]
@@ -198,6 +200,22 @@ defmodule Accrue.Entitlements.OfflineProtocolTest do
     payload_json =
       Jason.encode!(payload)
       |> String.replace(~s("iss":"#{@issuer}"), ~s("iss":"#{@issuer}","iss":"#{@issuer}"))
+
+    key
+    |> JOSE.JWK.from()
+    |> JOSE.JWS.sign(payload_json, %{
+      "alg" => "ES256",
+      "typ" => "accrue-entitlement-proof+jwt",
+      "kid" => @kid
+    })
+    |> JOSE.JWS.compact()
+    |> elem(1)
+  end
+
+  defp escaped_duplicate_issuer_compact(key, payload) do
+    payload_json =
+      Jason.encode!(payload)
+      |> String.replace(~s("iss":"#{@issuer}"), ~s("\\u0069ss":"#{@issuer}","iss":"#{@issuer}"))
 
     key
     |> JOSE.JWK.from()

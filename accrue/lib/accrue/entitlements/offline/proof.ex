@@ -220,9 +220,8 @@ defmodule Accrue.Entitlements.Offline.Proof do
              {:ok, payload_json} <- Base.url_decode64(payload64, padding: false),
              {:ok, signature} <- Base.url_decode64(signature64, padding: false),
              true <- byte_size(signature) == 64,
-             true <-
-               unique_members?(protected_json, ["alg", "typ", "kid", "crit", "jku", "x5u", "jwk"]),
-             true <- unique_members?(payload_json, @sensitive_claims),
+             true <- duplicate_free_json?(protected_json),
+             true <- duplicate_free_json?(payload_json),
              {:ok, header} <- Jason.decode(protected_json),
              {:ok, payload} <- Jason.decode(payload_json),
              true <- is_map(header) and is_map(payload) do
@@ -298,7 +297,7 @@ defmodule Accrue.Entitlements.Offline.Proof do
   end
 
   defp validate_claims(payload, payload_json, context) do
-    with true <- unique_members?(payload_json, @sensitive_claims),
+    with true <- duplicate_free_json?(payload_json),
          true <- Enum.sort(Map.keys(payload)) in [@allow_claims, @deny_claims],
          true <- payload["version"] == @version,
          :ok <- validate_identity(payload, context),
@@ -400,13 +399,10 @@ defmodule Accrue.Entitlements.Offline.Proof do
           claims.disposition == :allow ->
         {:error, :superseded}
 
-      claims.revision == context.accepted_revision and
-          claims.issued_at < max_integer(context.accepted_iat, Map.get(high, :iat)) ->
+      claims.issued_at < max_integer(context.accepted_iat, Map.get(high, :iat)) ->
         {:error, :superseded}
 
-      claims.revision == context.accepted_revision and
-          claims.fresh_until <
-            max_integer(context.accepted_fresh_until, Map.get(high, :fresh_until)) ->
+      claims.fresh_until < max_integer(context.accepted_fresh_until, Map.get(high, :fresh_until)) ->
         {:error, :superseded}
 
       true ->
@@ -531,10 +527,31 @@ defmodule Accrue.Entitlements.Offline.Proof do
 
   defp normalized_quantities(_), do: {:error, :malformed}
 
-  defp unique_members?(json, fields), do: Enum.all?(fields, &(count_member(json, &1) <= 1))
+  # Ordered objects preserve parsed (and therefore JSON-unescaped) member names.
+  # Checking this tree rejects duplicate keys at every nesting level before the
+  # ordinary map decoder is allowed to choose one of the ambiguous values.
+  defp duplicate_free_json?(json) do
+    with {:ok, value} <- Jason.decode(json, objects: :ordered_objects) do
+      duplicate_free_value?(value)
+    else
+      _ -> false
+    end
+  end
 
-  defp count_member(json, member),
-    do: Regex.scan(~r/"#{Regex.escape(member)}"\s*:/, json) |> length()
+  defp duplicate_free_value?(%Jason.OrderedObject{values: values}) do
+    keys = Enum.map(values, &elem(&1, 0))
+
+    length(keys) == MapSet.size(MapSet.new(keys)) and
+      Enum.all?(values, fn {_, value} -> duplicate_free_value?(value) end)
+  end
+
+  defp duplicate_free_value?(values) when is_list(values),
+    do: Enum.all?(values, &duplicate_free_value?/1)
+
+  defp duplicate_free_value?(value) when is_map(value),
+    do: Enum.all?(value, fn {_, nested} -> duplicate_free_value?(nested) end)
+
+  defp duplicate_free_value?(_), do: true
 
   defp bounded_string?(value, max),
     do: is_binary(value) and byte_size(value) > 0 and byte_size(value) <= max
