@@ -26,6 +26,11 @@ defmodule Accrue.Entitlements.Offline.Challenge do
 
   @type t :: %__MODULE__{}
 
+  defmodule Value do
+    @enforce_keys [:id, :nonce, :expires_at, :purpose]
+    defstruct [:id, :nonce, :expires_at, :purpose]
+  end
+
   @spec changeset(t() | Ecto.Changeset.t(), map()) :: Ecto.Changeset.t()
   def changeset(challenge_or_changeset, attrs \\ %{}) do
     challenge_or_changeset

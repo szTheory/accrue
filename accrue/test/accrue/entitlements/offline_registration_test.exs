@@ -110,6 +110,12 @@ defmodule Accrue.Entitlements.OfflineRegistrationTest do
     )
 
     assert_check_violation(
+      "accrue_entitlement_devices_public_jwk_check",
+      "UPDATE billing.accrue_entitlement_devices SET public_jwk = $2::jsonb WHERE id = $1::text::uuid",
+      [device.id, Jason.encode!(Map.put(@public_jwk, "d", "never-persist"))]
+    )
+
+    assert_check_violation(
       "accrue_entitlement_offline_issuances_time_order_check",
       """
       INSERT INTO billing.accrue_entitlement_offline_issuances
@@ -162,6 +168,7 @@ defmodule Accrue.Entitlements.OfflineRegistrationTest do
       installation_id: "install-219-pop",
       device_public_jwk: public_jwk,
       challenge_id: value.id,
+      nonce: value.nonce,
       nonce_signature:
         sign(
           device_key,
@@ -208,6 +215,14 @@ defmodule Accrue.Entitlements.OfflineRegistrationTest do
 
     assert File.exists?(migration)
     assert File.read!(migration) =~ "accrue_entitlement_offline_challenges"
+
+    assert [^migration] =
+             Path.wildcard(
+               Path.join(
+                 __DIR__,
+                 "../../../priv/repo/migrations/*_create_accrue_offline_proof_state.exs"
+               )
+             )
   end
 
   defp account!(suffix) do

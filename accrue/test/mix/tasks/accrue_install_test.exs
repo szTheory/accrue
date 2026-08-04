@@ -134,6 +134,17 @@ defmodule Mix.Tasks.Accrue.InstallTest do
              )
            )
 
+    offline_migration =
+      Path.join(app, "priv/repo/migrations/20260803040000_create_accrue_offline_proof_state.exs")
+
+    assert [^offline_migration] =
+             Path.wildcard(
+               Path.join(
+                 app,
+                 "priv/repo/migrations/*_create_accrue_offline_proof_state.exs"
+               )
+             )
+
     assert File.exists?(
              Path.join(
                app,
@@ -157,6 +168,19 @@ defmodule Mix.Tasks.Accrue.InstallTest do
              app,
              "priv/repo/migrations/20260802200000_bound_accrue_entitlement_provider_identity.exs",
              "accrue_ent_devices_installation_id_opaque_check"
+           )
+
+    assert File.exists?(
+             Path.join(
+               app,
+               "priv/repo/migrations/20260803040000_create_accrue_offline_proof_state.exs"
+             )
+           )
+
+    assert InstallFixture.assert_contains!(
+             app,
+             "priv/repo/migrations/20260803040000_create_accrue_offline_proof_state.exs",
+             "accrue_entitlement_offline_challenges_purpose_check"
            )
 
     assert InstallFixture.assert_contains!(
