@@ -79,7 +79,7 @@ defmodule Accrue.Entitlements.Offline.Reconnect do
     result =
       with {:ok, statuses} <- due_statuses(account, now, opts),
            {:ok, refreshed} <- refresh_due(account, statuses, now, opts),
-           {:ok, outcome} <- settle(account, device, request, refreshed, now, opts) do
+           {:ok, outcome} <- settle(account, device, challenge, request, refreshed, now, opts) do
         {:ok, outcome}
       end
 
@@ -137,14 +137,16 @@ defmodule Accrue.Entitlements.Offline.Reconnect do
     end
   end
 
-  defp settle(account, device, _request, statuses, now, opts) do
+  defp settle(account, device, challenge, _request, statuses, now, opts) do
     due = Enum.filter(statuses, & &1.due)
     unresolved = Enum.reject(due, &(&1.state == :resolved))
 
     if unresolved == [] do
       issuer = %Issuer.Request{account_id: account.id, device_id: device.id, now: now}
 
-      case Issuer.issue_after_admission(account, issuer, opts) do
+      admission = Issuer.Admission.from_reconnect_challenge(challenge, device)
+
+      case Issuer.issue_after_admission(account, issuer, admission, opts) do
         {:ok, result} ->
           {:ok,
            %Outcome{

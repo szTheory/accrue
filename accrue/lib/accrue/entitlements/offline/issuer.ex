@@ -3,7 +3,7 @@ defmodule Accrue.Entitlements.Offline.Issuer do
   import Ecto.Query
 
   alias Accrue.Entitlements.{Account, Device, Snapshot}
-  alias Accrue.Entitlements.Offline.{Issuance, Proof}
+  alias Accrue.Entitlements.Offline.{Challenge, Issuance, Proof}
 
   defmodule Request do
     @enforce_keys [:account_id, :device_id, :now]
@@ -15,15 +15,59 @@ defmodule Accrue.Entitlements.Offline.Issuer do
     defstruct [:compact, :disposition, :revision, :fresh_until]
   end
 
+  # This is an identity for an admission already persisted by Reconnect, not a
+  # bearer proof. The issuer always re-loads and locks the challenge before it
+  # mints, so constructing this struct cannot grant issuance authority.
+  defmodule Admission do
+    @enforce_keys [:challenge_id, :account_id, :device_id, :installation_id, :idempotency_digest]
+    defstruct [:challenge_id, :account_id, :device_id, :installation_id, :idempotency_digest]
+
+    @opaque t :: %__MODULE__{
+              challenge_id: binary(),
+              account_id: binary(),
+              device_id: binary(),
+              installation_id: binary(),
+              idempotency_digest: binary()
+            }
+
+    @doc false
+    @spec from_reconnect_challenge(Challenge.t(), Device.t()) :: t()
+    def from_reconnect_challenge(
+          %Challenge{
+            id: challenge_id,
+            account_id: account_id,
+            installation_id: installation_id,
+            idempotency_digest: idempotency_digest
+          },
+          %Device{id: device_id}
+        ) do
+      %__MODULE__{
+        challenge_id: challenge_id,
+        account_id: account_id,
+        device_id: device_id,
+        installation_id: installation_id,
+        idempotency_digest: idempotency_digest
+      }
+    end
+  end
+
   @freshness_seconds 30 * 24 * 60 * 60
 
-  # Internal reconnect seam. The caller must have established host account
-  # authentication and consumed a one-time, device-bound proof-of-possession
-  # challenge; this is not a public issuance API.
+  # Compatibility entry point: a caller assertion is not an admission.
   @doc false
   @spec issue_after_admission(Account.t(), Request.t(), keyword()) ::
+          {:error, :unauthorized}
+  def issue_after_admission(_, _, _), do: {:error, :unauthorized}
+
+  @doc false
+  @spec issue_after_admission(Account.t(), Request.t(), Admission.t(), keyword()) ::
           {:ok, Result.t()} | {:error, atom()}
-  def issue_after_admission(%Account{id: id}, %Request{account_id: id} = request, opts)
+  def issue_after_admission(
+        %Account{id: id},
+        %Request{account_id: id} = request,
+        %Admission{} = admission,
+        opts
+      )
       when is_list(opts) do
     repo = Keyword.get(opts, :repo, Accrue.Repo.repo())
 
@@ -31,7 +75,7 @@ defmodule Accrue.Entitlements.Offline.Issuer do
       [:accrue, :entitlements, :offline, :issue],
       %{action: :offline_issue, disposition: :admitted},
       fn ->
-        case repo.transaction(fn -> issue_in_transaction(repo, request, opts) end) do
+        case repo.transaction(fn -> issue_in_transaction(repo, request, admission, opts) end) do
           {:ok, {:ok, result}} -> {:ok, result}
           {:ok, {:error, reason}} -> {:error, reason}
           {:error, reason} when is_atom(reason) -> {:error, reason}
@@ -41,13 +85,20 @@ defmodule Accrue.Entitlements.Offline.Issuer do
     )
   end
 
-  def issue_after_admission(_, _, _), do: {:error, :invalid_request}
+  def issue_after_admission(_, _, _, _), do: {:error, :unauthorized}
 
   @doc false
   @spec issue(Account.t(), Request.t(), keyword()) :: {:error, :unauthorized}
   def issue(_, _, _), do: {:error, :unauthorized}
 
-  def issue_in_transaction(repo, %Request{} = request, opts) do
+  @doc false
+  @spec issue_in_transaction(Ecto.Repo.t(), Request.t(), keyword()) :: {:error, :unauthorized}
+  def issue_in_transaction(_, _, _), do: {:error, :unauthorized}
+
+  @doc false
+  @spec issue_in_transaction(Ecto.Repo.t(), Request.t(), Admission.t(), keyword()) ::
+          {:ok, Result.t()} | {:error, atom()}
+  def issue_in_transaction(repo, %Request{} = request, %Admission{} = admission, opts) do
     account = repo.one(from(a in Account, where: a.id == ^request.account_id, lock: "FOR UPDATE"))
 
     device =
@@ -60,6 +111,7 @@ defmodule Accrue.Entitlements.Offline.Issuer do
 
     with %Account{} = account <- account,
          %Device{} = device <- device,
+         :ok <- consume_admission(repo, account, device, admission),
          :ok <- validate_denial_reason(request.denial_reason),
          snapshot <- Snapshot.fetch(repo, account),
          {disposition, reason} <- disposition(snapshot, device, request),
@@ -104,6 +156,42 @@ defmodule Accrue.Entitlements.Offline.Issuer do
       nil -> repo.rollback(:not_found)
       {:error, reason} -> repo.rollback(reason)
       _ -> repo.rollback(:issuance_failed)
+    end
+  end
+
+  defp consume_admission(repo, account, device, admission) do
+    challenge =
+      repo.one(
+        from(c in Challenge,
+          where: c.id == ^admission.challenge_id and c.account_id == ^account.id,
+          lock: "FOR UPDATE"
+        )
+      )
+
+    case challenge do
+      %Challenge{
+        purpose: :reconnect,
+        consumed_at: %DateTime{},
+        account_id: account_id,
+        installation_id: installation_id,
+        idempotency_digest: idempotency_digest,
+        reconnect_outcome: %{"state" => "admitted"} = outcome
+      }
+      when account_id == admission.account_id and account_id == account.id and
+             installation_id == admission.installation_id and
+             installation_id == device.installation_id and device.id == admission.device_id and
+             idempotency_digest == admission.idempotency_digest ->
+        case repo.update(
+               Challenge.changeset(challenge, %{
+                 reconnect_outcome: Map.put(outcome, "state", "minting")
+               })
+             ) do
+          {:ok, _} -> :ok
+          _ -> {:error, :admission_invalid}
+        end
+
+      _ ->
+        {:error, :admission_invalid}
     end
   end
 

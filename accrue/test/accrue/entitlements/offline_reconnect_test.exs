@@ -121,50 +121,76 @@ defmodule Accrue.Entitlements.OfflineReconnectTest do
   end
 
   @tag :issuance
-  test "locked canonical snapshot issues a self-verified allow and persists its retirement horizon",
-       ctx do
+  test "legacy issuer entry points reject caller assertions without an admission", ctx do
     project_grant!(ctx.account)
 
     request = %Issuer.Request{account_id: ctx.account.id, device_id: ctx.device.id, now: @now}
 
-    assert {:ok, result} =
-             Issuer.issue_after_admission(ctx.account, request,
-               repo: TestRepo,
-               key_provider: SigningProvider,
-               signing_key: ctx.signing_key,
-               public_key: ctx.public_key,
-               issuer: "accrue.test.offline",
-               audience: "accrue-offline-client"
-             )
+    assert {:error, :unauthorized} = Issuer.issue(ctx.account, request, issuer_opts(ctx))
 
-    assert is_binary(result.compact)
-    assert result.disposition == :allow
-    assert result.revision == 1
-    assert result.fresh_until == DateTime.add(@now, 30 * 24 * 60 * 60, :second)
+    assert {:error, :unauthorized} =
+             Issuer.issue_after_admission(ctx.account, request, issuer_opts(ctx))
 
-    assert [%Issuance{kid: "accrue-v1.59-offline-test-only", disposition: :allow}] =
-             TestRepo.all(Issuance)
+    assert {:error, :unauthorized} =
+             Issuer.issue_in_transaction(TestRepo, request, issuer_opts(ctx))
 
-    assert %{"accrue-v1.59-offline-test-only" => :never} =
-             Issuance.retirement_requirements(TestRepo, @now)
+    assert [] == TestRepo.all(Issuance)
   end
 
-  @tag :issuance
-  test "an empty locked snapshot returns a signed deny tombstone", ctx do
-    request = %Issuer.Request{account_id: ctx.account.id, device_id: ctx.device.id, now: @now}
+  test "issuer re-locks a consumed PoP admission and rejects forged, cross-bound, and replayed use",
+       ctx do
+    project_grant!(ctx.account)
+    opts = issuer_opts(ctx) ++ [source_coordinator: NoDueSources, authorize: fn _, _ -> true end]
+    request = reconnect_request!(ctx, opts, "issuer-admission-capability")
 
-    assert {:ok, %{disposition: :deny, compact: compact}} =
-             Issuer.issue_after_admission(ctx.account, request,
-               repo: TestRepo,
-               key_provider: SigningProvider,
-               signing_key: ctx.signing_key,
-               public_key: ctx.public_key,
-               issuer: "accrue.test.offline",
-               audience: "accrue-offline-client"
+    assert {:error, :admission_interrupted} =
+             Offline.reconnect(
+               ctx.account,
+               request,
+               Keyword.put(opts, :after_admission, fn -> :interrupted end)
              )
 
-    assert {:ok, %{state: :denied, reason: :signed_denial}} =
-             Offline.verify(compact, verification_context(ctx))
+    challenge = TestRepo.get!(Accrue.Entitlements.Offline.Challenge, request.challenge_id)
+    admission = Issuer.Admission.from_reconnect_challenge(challenge, ctx.device)
+
+    issuer_request = %Issuer.Request{
+      account_id: ctx.account.id,
+      device_id: ctx.device.id,
+      now: @now
+    }
+
+    forged = %{admission | idempotency_digest: digest("forged-idempotency")}
+
+    assert {:error, :admission_invalid} =
+             Issuer.issue_after_admission(ctx.account, issuer_request, forged, opts)
+
+    {other_device, _} = device!(ctx.account, "install-219-cross-device")
+    cross_device_request = %{issuer_request | device_id: other_device.id}
+
+    assert {:error, :admission_invalid} =
+             Issuer.issue_after_admission(ctx.account, cross_device_request, admission, opts)
+
+    other_account = account!("issuer-cross-account")
+    {other_account_device, _} = device!(other_account, "install-219-cross-account")
+
+    cross_account_request = %{
+      issuer_request
+      | account_id: other_account.id,
+        device_id: other_account_device.id
+    }
+
+    assert {:error, :admission_invalid} =
+             Issuer.issue_after_admission(other_account, cross_account_request, admission, opts)
+
+    assert {:ok, %{compact: compact, disposition: :allow}} =
+             Issuer.issue_after_admission(ctx.account, issuer_request, admission, opts)
+
+    assert is_binary(compact)
+
+    assert {:error, :admission_invalid} =
+             Issuer.issue_after_admission(ctx.account, issuer_request, admission, opts)
+
+    assert 1 == TestRepo.aggregate(Issuance, :count)
   end
 
   test "a public reconnect challenge completes authenticated reconnect issuance", ctx do
@@ -482,22 +508,5 @@ defmodule Accrue.Entitlements.OfflineReconnectTest do
     |> Path.join("../../../priv/entitlements/v1.59-offline-test-key.jwk.json")
     |> File.read!()
     |> Jason.decode!()
-  end
-
-  defp verification_context(ctx) do
-    %{
-      issuer: "accrue.test.offline",
-      audience: "accrue-offline-client",
-      account_subject: ctx.account.id,
-      installation_id: ctx.device.installation_id,
-      device_thumbprint: ctx.device.key_thumbprint,
-      now: DateTime.to_unix(@now),
-      clock_high_water: %{revision: 0, iat: 0, fresh_until: 0},
-      accepted_revision: 0,
-      accepted_disposition: nil,
-      accepted_iat: 0,
-      accepted_fresh_until: 0,
-      public_keys: [ctx.public_key]
-    }
   end
 end
