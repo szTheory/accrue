@@ -80,6 +80,12 @@ defmodule Accrue.Entitlements.ReferenceScenarios do
     ]
   end
 
+  defmodule ExecutionInput do
+    @moduledoc false
+    @enforce_keys [:account, :operation]
+    defstruct [:account, :operation]
+  end
+
   @spec version() :: String.t()
   def version, do: @version
 
@@ -89,6 +95,36 @@ defmodule Accrue.Entitlements.ReferenceScenarios do
   @spec fetch!(String.t()) :: Scenario.t()
   def fetch!(id) when is_binary(id),
     do: Enum.find(all(), &(&1.id == id)) || raise(KeyError, key: id)
+
+  @doc "The merge-blocking rows; runtime/advisory evidence is never an execution authority."
+  @spec deterministic_scenarios() :: [Scenario.t()]
+  def deterministic_scenarios,
+    do: Enum.filter(all(), &(&1.evidence_lane == :deterministic_conformance))
+
+  @spec production_execution_ids() :: [String.t()]
+  def production_execution_ids, do: Enum.map(deterministic_scenarios(), & &1.id)
+
+  @doc """
+  Returns the bounded, synthetic input used to select a production context.
+
+  This deliberately carries identifiers and an operation only. Snapshot,
+  purchase, offline, and audit results stay in the fixture and are supplied by
+  the production contexts rather than reconstructed here.
+  """
+  @spec execution_input!(Scenario.t()) :: ExecutionInput.t()
+  def execution_input!(%Scenario{} = scenario) when scenario.evidence_lane == :deterministic_conformance do
+    operation =
+      scenario.actions
+      |> Enum.find_value(&Map.get(&1, :operation))
+      |> case do
+        %Operation{} = operation -> operation
+        nil -> synthetic_operation(scenario)
+      end
+
+    %ExecutionInput{account: %{owner_id: "reference-scenario-#{scenario.id}"}, operation: operation}
+  end
+
+  def execution_input!(_), do: raise(ArgumentError, "scenario is not production-executable")
 
   @spec valid?(Scenario.t()) :: boolean()
   def valid?(%Scenario{} = scenario) do
@@ -331,6 +367,27 @@ defmodule Accrue.Entitlements.ReferenceScenarios do
         end)
 
   defp valid_id?(value), do: is_binary(value) and value =~ ~r/^[a-z0-9_]{3,80}$/
+
+  # The synthetic operation selects the already-existing public Intake /
+  # Observation / Projector path. It is intentionally not an entitlement
+  # reducer: no decision outcome is derived from the scenario here.
+  defp synthetic_operation(%Scenario{id: id, expected: %Expected{snapshot: snapshot}}) do
+    rail = List.first(snapshot.sources) || :stripe
+    product = if rail == :apple, do: "product_pro", else: "price_pro"
+
+    %Operation{
+      rail: rail,
+      environment: :production,
+      logical_product: "pro",
+      provider_product_id: product,
+      provider_event_id: "reference_#{id}_event",
+      provider_transaction_id: "reference_#{id}_transaction",
+      provider_lineage_id: "reference_#{id}_lineage",
+      provider_order: 1,
+      offline_vector: "valid_allow",
+      offline_action: :read_downloaded_lesson
+    }
+  end
   defp lane_atom!("deterministic_conformance"), do: :deterministic_conformance
   defp lane_atom!("runtime_capability"), do: :runtime_capability
   defp lane_atom!("advisory_parity"), do: :advisory_parity
