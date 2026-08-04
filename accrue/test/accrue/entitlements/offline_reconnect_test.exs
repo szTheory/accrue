@@ -172,6 +172,18 @@ defmodule Accrue.Entitlements.OfflineReconnectTest do
              Offline.reconnect(ctx.account, request, opts)
 
     assert is_binary(proof)
+
+    # A lost response is retried with exactly the authenticated request binding;
+    # replay returns the durable result rather than consuming another challenge or
+    # issuing a second proof.
+    assert {:ok, %{disposition: :issued, proof: ^proof, due_source_count: 0}} =
+             Offline.reconnect(ctx.account, request, opts)
+
+    assert 1 == TestRepo.aggregate(Issuance, :count)
+  end
+
+  test "an empty due schedule is a resolved source set" do
+    assert :ok = SourceCoordinator.validate([])
   end
 
   @tag :issuance

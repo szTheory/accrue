@@ -37,11 +37,19 @@ defmodule Accrue.Entitlements.Offline.Reconnect do
 
     with :ok <- validate_request(request),
          true <- authorized?(opts, account),
-         {:ok, device} <- consume_pop(account, request, now, opts),
-         {:ok, statuses} <- due_statuses(account, now, opts),
-         {:ok, refreshed} <- refresh_due(account, statuses, now, opts),
-         {:ok, outcome} <- settle(account, device, request, refreshed, now, opts) do
-      {:ok, outcome}
+         {:ok, admission} <- consume_pop(account, request, now, opts) do
+      case admission do
+        {:replay, outcome} ->
+          {:ok, outcome}
+
+        {:new, device, challenge} ->
+          with {:ok, statuses} <- due_statuses(account, now, opts),
+               {:ok, refreshed} <- refresh_due(account, statuses, now, opts),
+               {:ok, outcome} <- settle(account, device, request, refreshed, now, opts),
+               :ok <- persist_outcome(challenge, outcome, opts) do
+            {:ok, outcome}
+          end
+      end
     else
       false -> {:error, :unauthorized}
       {:error, reason} -> {:error, reason}
@@ -175,18 +183,48 @@ defmodule Accrue.Entitlements.Offline.Reconnect do
                    idempotency_digest: digest(request.idempotency_key)
                  })
                ) do
-          {:ok, device}
+          {:ok, {:new, device, challenge}}
         else
-          _ -> repo.rollback(:challenge_invalid)
+          %Challenge{
+            purpose: :reconnect,
+            consumed_at: consumed_at,
+            idempotency_digest: stored_digest,
+            reconnect_outcome: outcome
+          } = challenge
+          when not is_nil(consumed_at) and is_map(outcome) ->
+            if stored_digest == digest(request.idempotency_key) and
+                 challenge.installation_id == request.installation_id,
+               do: {:ok, {:replay, outcome_from_map(outcome)}},
+               else: repo.rollback(:challenge_invalid)
+
+          _ ->
+            repo.rollback(:challenge_invalid)
         end
       end)
 
     case result do
-      {:ok, {:ok, device}} -> {:ok, device}
+      {:ok, {:ok, admission}} -> {:ok, admission}
       {:error, reason} -> {:error, reason}
       _ -> {:error, :challenge_invalid}
     end
   end
+
+  defp persist_outcome(challenge, outcome, opts) do
+    repo = Keyword.get(opts, :repo, Accrue.Repo.repo())
+
+    case repo.update(Challenge.changeset(challenge, %{reconnect_outcome: outcome_map(outcome)})) do
+      {:ok, _} -> :ok
+      _ -> {:error, :persistence_failed}
+    end
+  end
+
+  defp outcome_map(outcome),
+    do:
+      outcome |> Map.from_struct() |> Map.new(fn {key, value} -> {Atom.to_string(key), value} end)
+
+  defp outcome_from_map(map),
+    do:
+      struct(Outcome, Map.new(map, fn {key, value} -> {String.to_existing_atom(key), value} end))
 
   defp validate_request(%Request{} = request) do
     if Enum.all?(

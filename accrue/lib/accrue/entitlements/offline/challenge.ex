@@ -8,7 +8,7 @@ defmodule Accrue.Entitlements.Offline.Challenge do
   @primary_key {:id, :binary_id, autogenerate: true}
   @foreign_key_type :binary_id
   @purposes [:registration, :reconnect]
-  @fields ~w[account_id installation_id nonce_digest purpose expires_at consumed_at idempotency_digest]a
+  @fields ~w[account_id installation_id nonce_digest purpose expires_at consumed_at idempotency_digest reconnect_outcome]a
   @required ~w[account_id installation_id nonce_digest purpose expires_at]a
   @digest_pattern ~r/\A[A-Za-z0-9_-]{43}\z/
   @opaque_identifier_pattern ~r/\A[A-Za-z0-9][A-Za-z0-9._:-]*\z/
@@ -21,6 +21,7 @@ defmodule Accrue.Entitlements.Offline.Challenge do
     field(:expires_at, :utc_datetime_usec)
     field(:consumed_at, :utc_datetime_usec)
     field(:idempotency_digest, :string)
+    field(:reconnect_outcome, :map)
     timestamps(type: :utc_datetime_usec)
   end
 
