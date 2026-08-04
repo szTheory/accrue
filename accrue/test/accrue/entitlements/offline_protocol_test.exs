@@ -50,6 +50,49 @@ defmodule Accrue.Entitlements.OfflineProtocolTest do
     end
   end
 
+  test "public JWKS rendering is deterministic, public-only, and retention-aware" do
+    key = public_key(signing_key())
+    rotated = Map.put(key, "kid", "accrue-v1.59-offline-next")
+
+    assert {:ok, %{"keys" => keys}} =
+             Offline.verification_keys(
+               keys: [rotated, key],
+               retention_requirements: %{key["kid"] => :required, rotated["kid"] => :eligible}
+             )
+
+    assert Enum.map(keys, & &1["kid"]) == [key["kid"], rotated["kid"]]
+
+    assert Enum.all?(
+             keys,
+             &(Map.keys(&1) |> Enum.sort() == ["alg", "crv", "kid", "kty", "use", "x", "y"])
+           )
+
+    refute Enum.any?(keys, &Map.has_key?(&1, "d"))
+
+    assert {:error, :config_invalid} =
+             Offline.verification_keys(
+               keys: [rotated],
+               retention_requirements: %{key["kid"] => :required}
+             )
+  end
+
+  test "invalid provider public-key output never becomes a JWKS" do
+    key = public_key(signing_key())
+
+    for invalid <- [
+          Map.put(key, "d", "private"),
+          %{"kty" => "oct", "k" => "symmetric", "kid" => "symmetric"},
+          Map.put(key, "crv", "P-384"),
+          Map.put(key, "use", "enc"),
+          Map.put(key, "alg", "ES384"),
+          Map.put(key, "unknown", "member")
+        ] do
+      assert {:error, :config_invalid} = Offline.verification_keys(keys: [invalid])
+    end
+
+    assert {:error, :config_invalid} = Offline.verification_keys(keys: [key, key])
+  end
+
   defp signing_key do
     __DIR__
     |> Path.join("../../../priv/entitlements/v1.59-offline-test-key.jwk.json")
