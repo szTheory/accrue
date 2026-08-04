@@ -1,8 +1,8 @@
 ---
 phase: 219
 slug: offline-study-contract
-status: ready
-nyquist_compliant: true
+status: validated
+nyquist_compliant: false
 wave_0_complete: true
 created: 2026-08-03
 ---
@@ -38,14 +38,14 @@ created: 2026-08-03
 
 | Task ID | Plan | Wave | Requirement | Threat Ref | Secure Behavior | Test Type | Automated Command | File Exists | Status |
 |---------|------|------|-------------|------------|-----------------|-----------|-------------------|-------------|--------|
-| 219-01-T1/T2 | 219-01 | 1 | OFF-01 | JWS algorithm/key confusion | Public-only compact ES256 proof and JWKS verification | unit + fixture | `cd accrue && mix test test/accrue/entitlements/offline_protocol_test.exs` | ✅ planned TDD | ⬜ pending |
-| 219-02-T1 | 219-02 | 2 | OFF-02 | Clock rollback/overlong continuity | Fresh/stale/provider-expiry boundaries with no independent 72-hour cutoff | unit + property | `cd accrue && mix test test/accrue/entitlements/offline_test.exs` | ✅ planned TDD | ⬜ pending |
-| 219-02-T2 | 219-02 | 2 | OFF-03 | Stale value expansion | Stale permits only downloaded lessons and local progress | unit | `cd accrue && mix test test/accrue/entitlements/offline_test.exs` | ✅ planned TDD | ⬜ pending |
-| 219-02-T1/T2 | 219-02 | 2 | OFF-04 | State collapse/fail-open compatibility | Fresh, stale-offline, denied, and invalid remain distinguishable while boolean gates stay compatible | unit + regression | `cd accrue && mix test test/accrue/entitlements/offline_test.exs test/accrue/entitlements_test.exs` | ✅ planned TDD / ✅ existing | ⬜ pending |
-| 219-03-T1 | 219-03 | 3 | OFF-05, OFF-06 | Constraint bypass/privacy | Apply the real test migration, then execute direct database-constraint, public-JWK, nonce, issuance-ordering, and privacy invariants | integration + direct constraint | `cd accrue && MIX_ENV=test mix ecto.migrate --quiet && mix test test/accrue/entitlements/offline_registration_test.exs` | ✅ planned TDD | ⬜ pending |
-| 219-03-T2, 219-04-T1/T2 | 219-03, 219-04 | 3-4 | OFF-05 | Partial reconciliation/replay | PoP, due rails, final locks, issuance, and atomic replacement ordering | integration + fault injection | `cd accrue && mix test test/accrue/entitlements/offline_registration_test.exs test/accrue/entitlements/offline_reconnect_test.exs` | ✅ planned TDD | ⬜ pending |
-| 219-04-T1, 219-05-T1 | 219-04, 219-05 | 4-5 | OFF-06 | Early verification-key retirement | Derive each old key's eligibility from actual issued proof expiry plus the 86,400-second buffer; reject early removal and retain keys indefinitely for unbounded proofs | integration + fixture boundary | `cd accrue && mix test test/accrue/entitlements/offline_reconnect_test.exs --only issuance && mix test test/accrue/entitlements/offline_golden_vectors_test.exs` | ✅ planned TDD | ⬜ pending |
-| 219-01-T1, 219-05-T1/T2 | 219-01, 219-05 | 1,5 | OFF-06 | Binding, rollback, revocation, rotation | Negative Elixir/Swift corpus fails safely without private material leakage | unit + property + process crash | `cd accrue && mix test test/accrue/entitlements/offline_protocol_test.exs test/accrue/entitlements/offline_golden_vectors_test.exs && cd ../examples/crosswake_tracer && swift test` | ✅ planned TDD / ✅ seed | ⬜ pending |
+| 219-01-T1/T2 | 219-01 | 1 | OFF-01 | JWS algorithm/key confusion | Public-only compact ES256 proof and JWKS verification | unit + fixture | `cd accrue && mix test test/accrue/entitlements/offline_protocol_test.exs` | ✅ | ✅ green |
+| 219-02-T1 | 219-02 | 2 | OFF-02 | Clock rollback/overlong continuity | Fresh/stale/provider-expiry boundaries with no independent 72-hour cutoff | unit + property | `cd accrue && mix test test/accrue/entitlements/offline_test.exs` | ✅ | ✅ green |
+| 219-02-T2 | 219-02 | 2 | OFF-03 | Stale value expansion | Stale permits only downloaded lessons and local progress | unit | `cd accrue && mix test test/accrue/entitlements/offline_test.exs` | ✅ | ✅ green |
+| 219-02-T1/T2 | 219-02 | 2 | OFF-04 | State collapse/fail-open compatibility | Fresh, stale-offline, denied, and invalid remain distinguishable while boolean gates stay compatible | unit + regression | `cd accrue && mix test test/accrue/entitlements/offline_test.exs test/accrue/entitlements_test.exs` | ✅ | ✅ green |
+| 219-03-T1 | 219-03 | 3 | OFF-05, OFF-06 | Constraint bypass/privacy | Apply the real test migration, then execute direct database-constraint, public-JWK, nonce, issuance-ordering, and privacy invariants | integration + direct constraint | `cd accrue && MIX_ENV=test mix ecto.migrate --quiet && mix test test/accrue/entitlements/offline_registration_test.exs` | ✅ | ✅ green |
+| 219-03-T2, 219-04-T1/T2 | 219-03, 219-04 | 3-4 | OFF-05 | Partial reconciliation/replay | PoP, durable no-replay work, final locks, issuance, and atomic replacement ordering | integration + fault injection | `cd accrue && mix test test/accrue/entitlements/offline_registration_test.exs test/accrue/entitlements/offline_reconnect_test.exs` | ✅ | ✅ green |
+| 219-04-T1, 219-05-T1 | 219-04, 219-05 | 4-5 | OFF-06 | Early verification-key retirement | Reject early removal and retain keys indefinitely for unbounded proofs | integration + fixture boundary | `cd accrue && mix test test/accrue/entitlements/offline_reconnect_test.exs --only issuance` | ✅ | ✅ green |
+| 219-01-T1, 219-05-T1/T2 | 219-01, 219-05 | 1,5 | OFF-06 | Binding, rollback, revocation, rotation | Negative Elixir/Swift corpus fails safely; rotation rows remain a Phase 220 corpus obligation | unit + property + process crash | `cd accrue && mix test test/accrue/entitlements/offline_protocol_test.exs test/accrue/entitlements/offline_golden_vectors_test.exs && cd ../examples/crosswake_tracer && swift test` | ✅ | ⚠️ partial — rotation corpus deferred to 220 |
 
 *Status: ⬜ pending · ✅ green · ❌ red · ⚠️ flaky*
 
@@ -62,7 +62,7 @@ created: 2026-08-03
 
 ## Manual-Only Verifications
 
-All phase behaviors are expected to have automated verification. Any platform-specific fixture-consumer check that cannot run locally must be recorded by the planner with its exact external command and evidence requirement.
+No Phase 219 behavior requires manual verification. The missing cross-language rotation/retirement corpus rows are an automated Phase 220 acceptance obligation; Phase 219's retirement implementation and finite/unbounded boundaries are automated and green.
 
 ---
 
@@ -73,6 +73,17 @@ All phase behaviors are expected to have automated verification. Any platform-sp
 - [x] Wave 0 covers all MISSING references through the mapped TDD tasks.
 - [x] No watch-mode flags.
 - [x] Targeted commands are scoped to the under-30-second feedback goal; runtime is recorded during execution.
-- [x] `nyquist_compliant: true` set in frontmatter.
+- [ ] `nyquist_compliant: true` — deferred until Phase 220 supplies cross-language rotation/retirement corpus rows.
 
 **Approval:** executable evidence only; no manual-only phase acceptance is planned
+
+## Validation Audit 2026-08-04
+
+| Metric | Count |
+|--------|-------|
+| Gaps found | 2 |
+| Resolved | 1 |
+| Escalated to Phase 220 | 1 |
+
+- Added an unbounded key-retention regression proving an old key cannot be omitted even ten years later (`1a0930e5`).
+- Fresh focused evidence: 45 Elixir tests, 1 property, 0 failures; 27 Swift tests, 0 failures.
