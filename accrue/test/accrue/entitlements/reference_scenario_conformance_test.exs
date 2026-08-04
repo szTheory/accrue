@@ -107,6 +107,48 @@ defmodule Accrue.Entitlements.ReferenceScenarioConformanceTest do
     end
   end
 
+  test "every deterministic scenario executes a production projection, snapshot, purchase, offline, and audit path" do
+    executed =
+      for scenario <- ReferenceScenarios.deterministic_scenarios() do
+        %{account: %{owner_id: owner_id}, operation: operation} =
+          ReferenceScenarios.execution_input!(scenario)
+
+        account = account!(owner_id)
+
+        if scenario.id != "empty_evidence_fails_closed" do
+          assert {:ok, observation} =
+                   Observation.insert_idempotently(Accrue.TestRepo, observation_attrs(account, operation))
+
+          assert {:ok, _snapshot} = Projector.project(observation, logical_plan: operation.logical_product)
+        end
+
+        # These are independent production contexts. The fixture supplies the
+        # expected tuple; this helper only selects and normalizes their bounded
+        # public outputs and deliberately contains no entitlement rules.
+        assert {:ok, snapshot} = Accrue.Entitlements.snapshot(account)
+        decision = Accrue.Entitlements.purchase_decision(account.id, opposite_rail(operation.rail), opposite_product(opposite_rail(operation.rail)))
+        assert %{status: status, reason: reason} = decision
+
+        assert {:ok, offline} =
+                 Offline.verify(offline_vector(operation.offline_vector)["compact_jws"], offline_context(operation.offline_vector))
+
+        assert %{action: action, allowed: allowed} = Offline.action_policy(offline, operation.offline_action)
+
+        audit_count =
+          Accrue.TestRepo.aggregate(from(event in Event, where: event.subject_id == ^account.id), :count, :id)
+
+        assert is_integer(snapshot.revision)
+        assert status in [:eligible, :warn, :block]
+        assert is_atom(reason)
+        assert is_atom(action)
+        assert is_boolean(allowed)
+        assert is_integer(audit_count)
+        scenario.id
+      end
+
+    assert Enum.sort(executed) == Enum.sort(ReferenceScenarios.production_execution_ids())
+  end
+
   defp assert_production_result(scenario, account, operation, opposite_rail) do
     assert {:ok, snapshot} = Accrue.Entitlements.snapshot(account)
 
@@ -154,6 +196,8 @@ defmodule Accrue.Entitlements.ReferenceScenarioConformanceTest do
 
   defp opposite_product(:stripe), do: "price_pro"
   defp opposite_product(:apple), do: "product_pro"
+  defp opposite_rail(:stripe), do: :apple
+  defp opposite_rail(:apple), do: :stripe
 
   defp apple_evidence(account, operation) do
     Jason.encode!(%{
