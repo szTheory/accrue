@@ -297,9 +297,31 @@ Plans:
   4. Automated repair and runbooks address missed Apple notifications, history cursor recovery, outages, conflicts, duplicate charges, stale devices, signing-key compromise, and reconciliation backlog without routine account reconstruction.
   5. Public guides, examples, capability/compatibility material, App Review guidance, release notes, threat model, watchlist, and conformance gates state one additive contract and its explicit v1.59 limits.
 
-**Plans**: 10/12 plans executed
+**Plans**: 10/20 plans executed
 
 Plans:
+
+**PROOF-02 final gap-closure waves** *(from 220-VERIFICATION.md; execute with `--gaps-only`)*
+
+**Wave 1**
+
+- [ ] 220-13-PLAN.md — Replace the hollow generic contract with strict 27-action dispatch and a real purchase/lifecycle/refund/retraction tracer.
+
+**Wave 2** *(parallel after 220-13; exclusive family modules/tests)*
+
+- [ ] 220-14-PLAN.md — Execute read/login, duplicate-purchase preflight, and three expiry-boundary actions through production reads.
+- [ ] 220-15-PLAN.md — Execute stale study, restricted expansion, signed deny, rollback, and empty evidence through Offline verification/policy.
+- [ ] 220-16-PLAN.md — Execute signed reconnect and verified complete-cache replacement with durable attempt/issuance collection.
+- [ ] 220-17-PLAN.md — Integrate the 220-12 device API and prove issuance-backed verification-key retention.
+- [ ] 220-18-PLAN.md — Execute fixture-complete equal-order, repeat, and barrier-controlled parallel deliveries.
+
+**Wave 3** *(after 220-16)*
+
+- [ ] 220-19-PLAN.md — Execute durable reconnect interruption and exact resume to one issuance/cache tuple.
+
+**Wave 4** *(after all family plans)*
+
+- [ ] 220-20-PLAN.md — Remove every aggregate bypass, migrate host/Swift consumers, and install the final credential-free phase verifier.
 
 - [ ] 220-10-PLAN.md
 - [ ] 220-11-PLAN.md
