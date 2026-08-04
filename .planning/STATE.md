@@ -5,8 +5,8 @@ milestone_name: Account-Scoped Multi-Rail & Offline Entitlements
 current_phase: 220
 current_phase_name: First-adopter proof and release gates
 status: planning
-stopped_at: Completed 219-05-PLAN.md
-last_updated: "2026-08-04T03:33:09.930Z"
+stopped_at: Phase 220 context gathered
+last_updated: "2026-08-04T14:33:49.950Z"
 last_activity: 2026-08-03
 last_activity_desc: Phase 219 complete, transitioned to Phase 220
 progress:
@@ -976,9 +976,9 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 
 ## Session Continuity
 
-Last session: 2026-08-04T01:04:36.745Z
-Stopped at: Completed 219-05-PLAN.md
-Resume file: None
+Last session: 2026-08-04T14:33:49.924Z
+Stopped at: Phase 220 context gathered
+Resume file: .planning/phases/220-first-adopter-proof-and-release-gates/220-CONTEXT.md
 
 ## Operator Next Steps
 
