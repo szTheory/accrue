@@ -104,8 +104,9 @@ defmodule Accrue.Entitlements.Offline.Issuer do
 
   defp validate_denial_reason(nil), do: :ok
 
-  defp validate_denial_reason(reason) when is_atom(reason) and Proof.denial_reason?(reason),
-    do: :ok
+  defp validate_denial_reason(reason) when is_atom(reason) do
+    if Proof.denial_reason?(reason), do: :ok, else: {:error, :invalid_request}
+  end
 
   defp validate_denial_reason(_), do: {:error, :invalid_request}
 
