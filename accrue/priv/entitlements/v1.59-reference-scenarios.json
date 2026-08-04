@@ -1,0 +1,22 @@
+{
+  "version": "v1.59",
+  "scenarios": [
+    {
+      "id": "apple_purchase_to_web_login",
+      "evidence_lane": "deterministic_conformance",
+      "frozen_clock": "2026-08-04T12:00:00Z",
+      "actions": [
+        {"kind": "apple_verified_purchase", "order": 1, "at": "2026-08-04T12:00:00Z"},
+        {"kind": "web_login", "order": 2, "at": "2026-08-04T12:00:01Z"}
+      ],
+      "expected": {
+        "snapshot": {"revision": 1, "plans": ["pro"], "sources": ["apple"]},
+        "purchase": {"status": "block", "reason": "equivalent_other_rail"},
+        "offline_policy": {"action": "allow_downloaded_study"},
+        "audit_count": 1
+      },
+      "required_artifacts": ["v1.59-decision-cases.json"],
+      "diagnostic": {"scenario": "apple_purchase_to_web_login"}
+    }
+  ]
+}

@@ -11,5 +11,11 @@ defmodule Accrue.Entitlements.ReferenceScenarioConformanceTest do
     assert scenario.evidence_lane == :deterministic_conformance
     assert scenario.expected.snapshot.revision == 1
     assert scenario.expected.purchase.status == :block
+    assert ReferenceScenarios.valid?(scenario)
+  end
+
+  test "the loader exposes only the closed scenario contract" do
+    refute ReferenceScenarios.valid?(%{id: "apple_purchase_to_web_login"})
+    assert Enum.map(ReferenceScenarios.all(), & &1.id) == ["apple_purchase_to_web_login"]
   end
 end

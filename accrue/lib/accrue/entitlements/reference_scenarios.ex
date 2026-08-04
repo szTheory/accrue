@@ -1,0 +1,289 @@
+defmodule Accrue.Entitlements.ReferenceScenarios do
+  @moduledoc "Strict, data-only reader for the v1.59 cross-consumer reference scenarios."
+
+  @version "v1.59"
+  @lanes ~w(deterministic_conformance runtime_capability advisory_parity)
+  @artifact_names ~w(v1.59-decision-cases.json v1.59-offline-golden-vectors.json capability-report.json)
+  @scenario_keys ~w(id evidence_lane frozen_clock actions expected required_artifacts diagnostic)
+  @action_keys ~w(kind order at)
+  @expected_keys ~w(snapshot purchase offline_policy audit_count)
+  @snapshot_keys ~w(revision plans sources)
+  @purchase_keys ~w(status reason)
+  @offline_policy_keys ~w(action)
+
+  defmodule Snapshot do
+    @enforce_keys [:revision, :plans, :sources]
+    defstruct [:revision, :plans, :sources]
+  end
+
+  defmodule Purchase do
+    @enforce_keys [:status, :reason]
+    defstruct [:status, :reason]
+  end
+
+  defmodule OfflinePolicy do
+    @enforce_keys [:action]
+    defstruct [:action]
+  end
+
+  defmodule Expected do
+    @enforce_keys [:snapshot, :purchase, :offline_policy, :audit_count]
+    defstruct [:snapshot, :purchase, :offline_policy, :audit_count]
+  end
+
+  defmodule Scenario do
+    @enforce_keys [
+      :id,
+      :evidence_lane,
+      :frozen_clock,
+      :actions,
+      :expected,
+      :required_artifacts,
+      :diagnostic
+    ]
+    defstruct [
+      :id,
+      :evidence_lane,
+      :frozen_clock,
+      :actions,
+      :expected,
+      :required_artifacts,
+      :diagnostic
+    ]
+  end
+
+  @spec version() :: String.t()
+  def version, do: @version
+
+  @spec all() :: [Scenario.t()]
+  def all, do: scenarios()
+
+  @spec fetch!(String.t()) :: Scenario.t()
+  def fetch!(id) when is_binary(id),
+    do: Enum.find(all(), &(&1.id == id)) || raise(KeyError, key: id)
+
+  @spec valid?(Scenario.t()) :: boolean()
+  def valid?(%Scenario{} = scenario) do
+    scenario.evidence_lane in Enum.map(@lanes, &String.to_atom/1) and valid_id?(scenario.id) and
+      utc?(scenario.frozen_clock) and ordered_actions?(scenario.actions) and
+      valid_expected?(scenario.expected) and valid_artifacts?(scenario.required_artifacts) and
+      safe_diagnostic?(scenario.diagnostic)
+  end
+
+  def valid?(_), do: false
+
+  defp scenarios do
+    path = Path.join(:code.priv_dir(:accrue), "entitlements/v1.59-reference-scenarios.json")
+    json = File.read!(path)
+    reject_duplicate_keys!(json)
+
+    decoded = Jason.decode!(json)
+    require_keys!(decoded, ["version", "scenarios"], "root")
+    decoded["version"] == @version || raise ArgumentError, "invalid reference scenario version"
+
+    (is_list(decoded["scenarios"]) and decoded["scenarios"] != []) ||
+      raise ArgumentError, "missing scenarios"
+
+    scenarios = Enum.map(decoded["scenarios"], &scenario!/1)
+    ids = Enum.map(scenarios, & &1.id)
+    length(ids) == MapSet.size(MapSet.new(ids)) || raise ArgumentError, "duplicate scenario id"
+    Enum.sort_by(scenarios, & &1.id)
+  end
+
+  defp scenario!(value) when is_map(value) do
+    require_keys!(value, @scenario_keys, "scenario")
+    lane = value["evidence_lane"]
+    lane in @lanes || raise ArgumentError, "invalid evidence lane"
+    valid_id?(value["id"]) || raise ArgumentError, "invalid scenario id"
+    utc!(value["frozen_clock"], "frozen clock")
+    actions = actions!(value["actions"])
+    expected = expected!(value["expected"])
+    artifacts = artifacts!(value["required_artifacts"])
+    diagnostic = diagnostic!(value["diagnostic"])
+
+    scenario = %Scenario{
+      id: value["id"],
+      evidence_lane: lane_atom!(lane),
+      frozen_clock: value["frozen_clock"],
+      actions: actions,
+      expected: expected,
+      required_artifacts: artifacts,
+      diagnostic: diagnostic
+    }
+
+    valid?(scenario) || raise ArgumentError, "invalid scenario"
+    scenario
+  end
+
+  defp scenario!(_), do: raise(ArgumentError, "scenario must be an object")
+
+  defp actions!(actions) when is_list(actions) and actions != [] do
+    parsed =
+      Enum.map(actions, fn action ->
+        require_keys!(action, @action_keys, "action")
+
+        (is_binary(action["kind"]) and action["kind"] =~ ~r/^[a-z0-9_]{3,80}$/) ||
+          raise ArgumentError, "invalid action kind"
+
+        (is_integer(action["order"]) and action["order"] > 0) ||
+          raise ArgumentError, "invalid action order"
+
+        utc!(action["at"], "action clock")
+        %{kind: action["kind"], order: action["order"], at: action["at"]}
+      end)
+
+    ordered_actions?(parsed) || raise ArgumentError, "unordered actions"
+    parsed
+  end
+
+  defp actions!(_), do: raise(ArgumentError, "missing actions")
+
+  defp expected!(value) when is_map(value) do
+    require_keys!(value, @expected_keys, "expected")
+    snapshot = value["snapshot"]
+    require_keys!(snapshot, @snapshot_keys, "snapshot")
+    purchase = value["purchase"]
+    require_keys!(purchase, @purchase_keys, "purchase")
+    policy = value["offline_policy"]
+    require_keys!(policy, @offline_policy_keys, "offline policy")
+
+    (is_integer(snapshot["revision"]) and snapshot["revision"] >= 0) ||
+      raise ArgumentError, "invalid revision"
+
+    (is_list(snapshot["plans"]) and snapshot["plans"] != [] and
+       Enum.all?(snapshot["plans"], &valid_id?/1)) || raise ArgumentError, "invalid plans"
+
+    (is_list(snapshot["sources"]) and snapshot["sources"] != [] and
+       Enum.all?(snapshot["sources"], &(&1 in ["stripe", "apple"]))) ||
+      raise ArgumentError, "invalid sources"
+
+    purchase["status"] in ["eligible", "warn", "block"] ||
+      raise ArgumentError, "invalid purchase status"
+
+    (is_binary(purchase["reason"]) and purchase["reason"] =~ ~r/^[a-z0-9_]{3,80}$/) ||
+      raise ArgumentError, "invalid purchase reason"
+
+    policy["action"] in ["allow_downloaded_study", "reconnect_required", "deny"] ||
+      raise ArgumentError, "invalid offline policy"
+
+    (is_integer(value["audit_count"]) and value["audit_count"] >= 0) ||
+      raise ArgumentError, "invalid audit count"
+
+    %Expected{
+      snapshot: %Snapshot{
+        revision: snapshot["revision"],
+        plans: snapshot["plans"],
+        sources: Enum.map(snapshot["sources"], &source_atom!/1)
+      },
+      purchase: %Purchase{
+        status: purchase_status!(purchase["status"]),
+        reason: purchase["reason"]
+      },
+      offline_policy: %OfflinePolicy{action: offline_action!(policy["action"])},
+      audit_count: value["audit_count"]
+    }
+  end
+
+  defp expected!(_), do: raise(ArgumentError, "expected must be an object")
+
+  defp artifacts!(artifacts) when is_list(artifacts) and artifacts != [] do
+    (Enum.all?(artifacts, &(&1 in @artifact_names)) and artifacts == Enum.uniq(artifacts)) ||
+      raise ArgumentError, "invalid artifacts"
+
+    artifacts
+  end
+
+  defp artifacts!(_), do: raise(ArgumentError, "missing artifacts")
+
+  defp diagnostic!(diagnostic) when is_map(diagnostic) and map_size(diagnostic) > 0 do
+    Enum.all?(diagnostic, fn {key, value} ->
+      is_binary(key) and key =~ ~r/^[a-z][a-z0-9_]{2,40}$/ and is_binary(value) and
+        byte_size(value) <= 80
+    end) || raise ArgumentError, "unsafe diagnostic"
+
+    diagnostic
+  end
+
+  defp diagnostic!(_), do: raise(ArgumentError, "missing diagnostic")
+
+  defp valid_expected?(%Expected{
+         snapshot: %Snapshot{revision: revision, plans: plans, sources: sources},
+         purchase: %Purchase{status: status, reason: reason},
+         offline_policy: %OfflinePolicy{action: action},
+         audit_count: count
+       }),
+       do:
+         is_integer(revision) and revision >= 0 and is_list(plans) and plans != [] and
+           Enum.all?(plans, &valid_id?/1) and is_list(sources) and
+           Enum.all?(sources, &(&1 in [:stripe, :apple])) and status in [:eligible, :warn, :block] and
+           is_binary(reason) and reason =~ ~r/^[a-z0-9_]{3,80}$/ and
+           action in [:allow_downloaded_study, :reconnect_required, :deny] and
+           is_integer(count) and count >= 0
+
+  defp valid_expected?(_), do: false
+
+  defp valid_artifacts?(items),
+    do:
+      is_list(items) and items != [] and Enum.all?(items, &(&1 in @artifact_names)) and
+        items == Enum.uniq(items)
+
+  defp safe_diagnostic?(value),
+    do:
+      is_map(value) and map_size(value) > 0 and
+        Enum.all?(value, fn {key, item} ->
+          is_binary(key) and key =~ ~r/^[a-z][a-z0-9_]{2,40}$/ and is_binary(item) and
+            byte_size(item) <= 80
+        end)
+
+  defp ordered_actions?(actions),
+    do:
+      is_list(actions) and actions != [] and
+        Enum.map(actions, & &1.order) == Enum.to_list(1..length(actions)) and
+        Enum.all?(actions, fn %{at: at} -> utc?(at) end)
+
+  defp valid_id?(value), do: is_binary(value) and value =~ ~r/^[a-z0-9_]{3,80}$/
+  defp lane_atom!("deterministic_conformance"), do: :deterministic_conformance
+  defp lane_atom!("runtime_capability"), do: :runtime_capability
+  defp lane_atom!("advisory_parity"), do: :advisory_parity
+  defp source_atom!("stripe"), do: :stripe
+  defp source_atom!("apple"), do: :apple
+  defp purchase_status!("eligible"), do: :eligible
+  defp purchase_status!("warn"), do: :warn
+  defp purchase_status!("block"), do: :block
+  defp offline_action!("allow_downloaded_study"), do: :allow_downloaded_study
+  defp offline_action!("reconnect_required"), do: :reconnect_required
+  defp offline_action!("deny"), do: :deny
+  defp utc?(value), do: is_binary(value) and match?({:ok, _, 0}, DateTime.from_iso8601(value))
+
+  defp utc!(value, name),
+    do: if(utc?(value), do: value, else: raise(ArgumentError, "invalid #{name}"))
+
+  defp require_keys!(map, keys, name) when is_map(map) do
+    Map.keys(map) |> Enum.sort() == Enum.sort(keys) ||
+      raise ArgumentError, "unknown or missing #{name} fields"
+  end
+
+  defp require_keys!(_, _, name), do: raise(ArgumentError, "#{name} must be an object")
+
+  defp reject_duplicate_keys!(json) do
+    case Jason.decode(json, objects: :ordered_objects) do
+      {:ok, value} ->
+        if(duplicate_free?(value), do: :ok, else: raise(ArgumentError, "duplicate JSON key"))
+
+      _ ->
+        raise ArgumentError, "duplicate JSON key"
+    end
+  end
+
+  defp duplicate_free?(%Jason.OrderedObject{values: values}),
+    do:
+      Enum.map(values, &elem(&1, 0)) |> then(&(length(&1) == MapSet.size(MapSet.new(&1)))) and
+        Enum.all?(values, fn {_, value} -> duplicate_free?(value) end)
+
+  defp duplicate_free?(values) when is_list(values), do: Enum.all?(values, &duplicate_free?/1)
+
+  defp duplicate_free?(value) when is_map(value),
+    do: Enum.all?(value, fn {_, nested} -> duplicate_free?(nested) end)
+
+  defp duplicate_free?(_), do: true
+end
