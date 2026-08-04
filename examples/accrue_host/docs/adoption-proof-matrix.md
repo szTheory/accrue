@@ -21,7 +21,11 @@ incident response:
 3. Consult the generated
    [`capability and limits matrix`](capability-limits-matrix.md) for exact
    support and privacy cells; do not copy those cells into host policy.
-4. Record the failing stable scenario ID and follow the matching
+4. Follow the canonical
+   [`multi-rail/offline release guide`](../../../accrue/guides/multi-rail-offline-release.md)
+   for App Review, privacy/security limits, and release-checklist procedure.
+   This host documentation intentionally has no duplicate release guide.
+5. Record the failing stable scenario ID and follow the matching
    [v1.59 operator runbook](../../../accrue/guides/operator-runbooks.md#v159-multi-rail-and-offline-runbooks).
 
 The deterministic lane proves Apple-to-web and Stripe-to-iOS account-projection

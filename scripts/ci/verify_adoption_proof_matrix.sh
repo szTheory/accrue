@@ -4,9 +4,18 @@ set -euo pipefail
 
 repo_root="${ROOT_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}"
 matrix="${repo_root}/examples/accrue_host/docs/adoption-proof-matrix.md"
+canonical_guide="${repo_root}/accrue/guides/multi-rail-offline-release.md"
 
 if [[ ! -f "${matrix}" ]]; then
   echo "verify_adoption_proof_matrix: missing ${matrix}" >&2
+  exit 1
+fi
+
+# D-09 ownership: the release explanation is canonical in accrue/guides. There
+# is intentionally no duplicate host guide; this adoption gate validates that
+# one canonical artifact directly.
+if [[ ! -f "${canonical_guide}" ]]; then
+  echo "verify_adoption_proof_matrix: missing accrue/guides/multi-rail-offline-release.md" >&2
   exit 1
 fi
 
@@ -93,6 +102,20 @@ require_substring "capability-limits-matrix.md" "generated v1.59 matrix link"
 require_substring "operator-runbooks.md#v159-multi-rail-and-offline-runbooks" "v1.59 runbook link"
 require_substring "Apple-to-web and Stripe-to-iOS" "cross-rail convergence boundary"
 require_substring "feasibility_blocked" "blocked runtime-capability boundary"
+require_substring "../../../accrue/guides/multi-rail-offline-release.md" "canonical multi-rail release guide link"
+
+require_guide_substring() {
+  local needle="$1"
+  local label="$2"
+  if ! grep -Fq "${needle}" "${canonical_guide}"; then
+    echo "verify_adoption_proof_matrix: accrue/guides/multi-rail-offline-release.md missing ${label} (expected substring: ${needle})" >&2
+    exit 1
+  fi
+}
+
+require_guide_substring "## Evidence and App Review" "evidence and App Review section"
+require_guide_substring "## Privacy and security limits" "privacy/security limits section"
+require_guide_substring "## Release checklist" "release checklist section"
 
 if grep -Eq 'Crosswake runtime (is )?(supported|feasible)' "${matrix}"; then
   echo "verify_adoption_proof_matrix: examples/accrue_host/docs/adoption-proof-matrix.md has runtime-capability inflation" >&2
