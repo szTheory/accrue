@@ -3,7 +3,7 @@ defmodule AccrueHostWeb.EntitlementDiagnosticsLive do
 
   use AccrueHostWeb, :live_view
 
-  alias Accrue.Entitlements.{Account, Admin}
+  alias Accrue.Entitlements.{Account, Admin, Repair}
   alias AccrueHost.Auth
   alias AccrueHostWeb.Layouts
 
@@ -15,6 +15,8 @@ defmodule AccrueHostWeb.EntitlementDiagnosticsLive do
           {:ok,
            socket
            |> assign(:page_title, "Access diagnostic")
+           |> assign(:repair, nil)
+           |> assign(:repair_notice, nil)
            |> assign(:diagnostic, load_diagnostic(user))}
         else
           {:ok,
@@ -97,6 +99,64 @@ defmodule AccrueHostWeb.EntitlementDiagnosticsLive do
                 Refreshing access is disabled here because this page is read-only.
               </p>
             </section>
+
+            <section
+              class="rounded-lg border border-base-300 bg-base-100 p-6 shadow-sm"
+              aria-labelledby="safe-repairs-heading"
+            >
+              <h2 id="safe-repairs-heading" class="text-2xl font-semibold">Safe repairs</h2>
+              <p class="mt-2 text-base leading-7 text-base-content/70">
+                Use these controls only when the access diagnostic or incident procedure calls for
+                them. No subscription, payment, or account ownership will change.
+              </p>
+              <button
+                type="button"
+                class="btn btn-outline btn-sm mt-4"
+                phx-click="prepare_repair"
+                phx-value-action="rotate_signing_keys"
+              >
+                Prepare signing-key rotation guidance
+              </button>
+              <%= if @repair_notice do %>
+                <p id="repair-status" tabindex="-1" class="mt-3 text-sm font-medium" role="status">
+                  {@repair_notice}
+                </p>
+              <% end %>
+            </section>
+
+            <%= if @repair do %>
+              <div class="fixed inset-0 z-50 flex items-center justify-center bg-base-content/30 p-4">
+                <section
+                  class="w-full max-w-lg rounded-lg bg-base-100 p-6 shadow-xl"
+                  role="dialog"
+                  aria-modal="true"
+                  aria-labelledby="repair-confirmation-heading"
+                >
+                  <h2 id="repair-confirmation-heading" class="text-xl font-semibold">
+                    Confirm repair
+                  </h2>
+                  <p class="mt-2 text-base leading-7 text-base-content/70">
+                    This records the operator action and refreshes this access diagnostic.
+                  </p>
+                  <p class="mt-2 text-sm text-base-content/60">
+                    No subscription, payment, or account ownership will change.
+                  </p>
+                  <form
+                    id="repair-confirmation-form"
+                    phx-submit="execute_repair"
+                    class="mt-5 flex gap-3"
+                  >
+                    <button type="submit" class="btn btn-primary">Confirm repair</button>
+                    <button type="button" class="btn btn-ghost" phx-click="cancel_repair">
+                      Cancel
+                    </button>
+                    <button type="button" class="btn btn-outline" phx-click="preview_repair">
+                      Preview outcome
+                    </button>
+                  </form>
+                </section>
+              </div>
+            <% end %>
           <% {:error, :not_found} -> %>
             <.unavailable />
           <% {:error, :unavailable} -> %>
@@ -105,6 +165,32 @@ defmodule AccrueHostWeb.EntitlementDiagnosticsLive do
       </section>
     </Layouts.app>
     """
+  end
+
+  @impl true
+  def handle_event("prepare_repair", %{"action" => "rotate_signing_keys"}, socket) do
+    {:noreply,
+     socket
+     |> assign(:repair, %{action: :rotate_signing_keys, operation_id: Ecto.UUID.generate()})
+     |> assign(:repair_notice, nil)}
+  end
+
+  def handle_event("prepare_repair", _params, socket), do: {:noreply, socket}
+
+  def handle_event("cancel_repair", _params, socket), do: {:noreply, assign(socket, :repair, nil)}
+
+  def handle_event("preview_repair", _params, socket) do
+    case perform_repair(socket, true) do
+      {:ok, socket} -> {:noreply, socket}
+      {:error, socket} -> {:noreply, socket}
+    end
+  end
+
+  def handle_event("execute_repair", _params, socket) do
+    case perform_repair(socket, false) do
+      {:ok, socket} -> {:noreply, socket}
+      {:error, socket} -> {:noreply, socket}
+    end
   end
 
   attr :label, :string, required: true
@@ -143,6 +229,52 @@ defmodule AccrueHostWeb.EntitlementDiagnosticsLive do
     end
   rescue
     _ -> {:error, :unavailable}
+  end
+
+  defp perform_repair(%{assigns: %{repair: nil}} = socket, _dry_run), do: {:error, socket}
+
+  defp perform_repair(socket, dry_run) do
+    user = socket.assigns.current_scope.user
+    repo = Accrue.Repo.repo()
+
+    with %Account{} = account <- repo.get_by(Account, owner_type: "User", owner_id: user.id),
+         %{action: :rotate_signing_keys, operation_id: operation_id} <- socket.assigns.repair,
+         {:ok, outcome} <-
+           Repair.rotate_signing_keys(account, %{key_set: "offline-proof"},
+             repo: repo,
+             actor: %{type: :admin, id: user.id},
+             reason: "Prepare safe signing-key rotation guidance",
+             operation_id: operation_id,
+             authorized?: Auth.admin?(user),
+             dry_run: dry_run
+           ) do
+      notice =
+        case outcome.disposition do
+          :dry_run ->
+            "Preview ready. Confirm when you are ready to record this repair."
+
+          :already_completed ->
+            "This repair was already recorded. The access diagnostic has been refreshed."
+
+          _ ->
+            "Repair recorded. The access diagnostic has been refreshed."
+        end
+
+      {:ok,
+       socket
+       |> assign(:diagnostic, load_diagnostic(user))
+       |> assign(:repair, if(dry_run, do: socket.assigns.repair, else: nil))
+       |> assign(:repair_notice, notice)}
+    else
+      _ ->
+        {:error,
+         socket
+         |> assign(:repair, nil)
+         |> assign(
+           :repair_notice,
+           "This repair could not be recorded. Review access and try again."
+         )}
+    end
   end
 
   defp snapshot_copy(:available), do: "Access is available from the current account record."
