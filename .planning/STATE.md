@@ -2,13 +2,13 @@
 gsd_state_version: 1.0
 milestone: v1.59
 milestone_name: Account-Scoped Multi-Rail & Offline Entitlements
-current_phase: 219
-current_phase_name: offline-study-contract
-status: verifying
+current_phase: 220
+current_phase_name: First-adopter proof and release gates
+status: planning
 stopped_at: Completed 219-05-PLAN.md
-last_updated: "2026-08-04T01:04:36.765Z"
+last_updated: "2026-08-04T03:33:09.930Z"
 last_activity: 2026-08-03
-last_activity_desc: Phase 219 execution started
+last_activity_desc: Phase 219 complete, transitioned to Phase 220
 progress:
   total_phases: 6
   completed_phases: 5
@@ -29,10 +29,10 @@ See: `.planning/PROJECT.md` (updated 2026-08-01 after completing Phase 215)
 
 ## Current Position
 
-Phase: 219 (offline-study-contract) — EXECUTING
-Plan: 5 of 5
-Status: Phase complete — ready for verification
-Last activity: 2026-08-03 — Phase 219 execution started
+Phase: 220 — First-adopter proof and release gates
+Plan: Not started
+Status: Ready to plan
+Last activity: 2026-08-03 — Phase 219 complete, transitioned to Phase 220
 
 ## Post-v1.48 Pause Rule
 

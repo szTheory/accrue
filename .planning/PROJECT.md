@@ -55,6 +55,8 @@ The Phase 204 hardening roadmap's top slice (**Public Truth And Proof-State Base
 
 **Phase 218 complete (2026-08-03):** strict Apple Notifications V2 and nested evidence verification, bind-once lineage ownership, bounded raw-body admission, durable quarantine, scheduled status/history reconciliation, lifecycle projection, and Stripe-isolated Apple management are validated (5/5 truths; AAPL-01..05 satisfied). All 16 plan summaries produce 30 deterministic automated UAT checks, `behavior_unverified` is zero, and CI rejects incomplete, forged, pending, or human-dependent acceptance evidence. Next: Phase 219, offline study contract.
 
+**Phase 219 complete (2026-08-03):** registered devices now verify strict public-key ES256 proofs, preserve downloaded-study/local-progress continuity without a 72-hour cutoff, and converge through authenticated atomic reconnect. Durable attempt/wakeup workers, crash and race recovery, verified-only Swift cache replacement, key-retirement enforcement, and privacy-safe telemetry are executable (OFF-01..06 satisfied). Final evidence: clean independent review, 23/23 threats closed, 70 properties and 1,981 Elixir tests green, plus 27 Swift tests. Cross-language rotation/retirement corpus rows remain an explicit automated Phase 220 obligation. Next: Phase 220, first-adopter proof and release gates.
+
 ## Current Milestone: v1.59 Account-Scoped Multi-Rail & Offline Entitlements
 
 **Goal:** Preserve one account's access across Stripe web billing, Apple in-app purchase, and extended offline study through a common entitlement projection and signed device-bound proof, while keeping lifecycle operations rail-aware and avoiding connectivity-driven learner lockout.
@@ -627,8 +629,18 @@ The v1.50→v1.54 arc (Admin UI Foundation → Depth Pass → Brand System → D
 
 - [ ] Project verified rail evidence into one account snapshot with resource-aware management and duplicate-purchase prevention.
 - [ ] Verify, link, reconcile, quarantine, and repair Apple subscription evidence without heuristic ownership transfer.
-- [ ] Issue device-bound offline proof that distinguishes fresh, stale-offline, denied, and invalid states while allowing host-owned study-continuity policy.
 - [ ] Prove the anonymized Phoenix/Crosswake adopter journey with diagnostics, automatic repair, runbooks, and release gates.
+
+### Validated v1.59 (Phase 219 complete 2026-08-03)
+
+Offline study contract — 6/6 requirements satisfied in Phase 219.
+
+- ✓ **OFF-01** — Registered devices independently verify compact versioned ES256 proofs using public material only.
+- ✓ **OFF-02** — Freshness is 30 days or an earlier provider bound; equality becomes stale and no independent 72-hour cutoff exists.
+- ✓ **OFF-03** — Stale-offline continuity permits downloaded lessons and local progress while blocking value expansion.
+- ✓ **OFF-04** — Fresh, stale-offline, denied, and invalid remain distinct without changing legacy server gates.
+- ✓ **OFF-05** — Host-authenticated device PoP and durable due-source work converge through atomic allow/deny issuance and verified cache replacement.
+- ✓ **OFF-06** — Confusion, replay, rollback, revocation, rotation-retention, crash, concurrency, and privacy paths fail closed; Phase 220 owns the remaining cross-language rotation corpus rows.
 
 ### Validated v1.59 (Phase 215 complete 2026-08-01)
 
@@ -794,4 +806,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-08-02 after completing Phase 216 additive rail and persistence foundation.*
+*Last updated: 2026-08-03 after completing Phase 219 offline study contract.*
