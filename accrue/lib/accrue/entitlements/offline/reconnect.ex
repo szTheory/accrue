@@ -246,9 +246,13 @@ defmodule Accrue.Entitlements.Offline.Reconnect do
                    reconnect_outcome: admission_map(request, now)
                  })
                ),
-             {:ok, _attempt} <- schedule_attempt(repo, account, device, persisted_challenge, now) do
+             {:ok, _attempt} <-
+               schedule_attempt(repo, account, device, persisted_challenge, now, opts) do
           {:ok, {:new, device, persisted_challenge}}
         else
+          {:error, reason} ->
+            repo.rollback(reason)
+
           %Challenge{
             purpose: :reconnect,
             consumed_at: consumed_at,
@@ -272,7 +276,9 @@ defmodule Accrue.Entitlements.Offline.Reconnect do
     end
   end
 
-  defp schedule_attempt(repo, account, device, challenge, now) do
+  defp schedule_attempt(repo, account, device, challenge, now, opts) do
+    insert_job = Keyword.get(opts, :insert_wakeup_job, &repo.insert/1)
+
     with {:ok, attempt} <-
            repo.insert(
              ReconnectAttempt.changeset(%ReconnectAttempt{}, %{
@@ -286,7 +292,7 @@ defmodule Accrue.Entitlements.Offline.Reconnect do
              })
            ),
          {:ok, _} <- ReconnectWakeup.enqueue_in_transaction(repo, attempt.id, now),
-         {:ok, _} <- repo.insert(Accrue.Entitlements.Offline.ReconnectWakeupWorker.new(%{})) do
+         {:ok, _} <- insert_job.(Accrue.Entitlements.Offline.ReconnectWakeupWorker.new(%{})) do
       {:ok, attempt}
     end
   end
@@ -363,22 +369,30 @@ defmodule Accrue.Entitlements.Offline.Reconnect do
   def enqueue_due(repo, opts \\ []) do
     now = Keyword.get(opts, :now, DateTime.utc_now())
     insert_job = Keyword.get(opts, :insert_job, &repo.insert/1)
+    lease_cutoff = DateTime.add(now, -Keyword.get(opts, :lease_seconds, 300), :second)
 
     repo.transact(fn ->
       repo.all(
         from(a in ReconnectAttempt,
           where:
-            a.state in [:admitted, :retrying] and
-              (is_nil(a.next_attempt_at) or a.next_attempt_at <= ^now),
+            (a.state in [:admitted, :retrying] and
+               (is_nil(a.next_attempt_at) or a.next_attempt_at <= ^now)) or
+              (a.state == :running and not is_nil(a.started_at) and a.started_at <= ^lease_cutoff),
           limit: 100,
           lock: "FOR UPDATE SKIP LOCKED"
         )
       )
       |> Enum.reduce_while({:ok, 0}, fn attempt, {:ok, count} ->
-        case insert_job.(
-               Accrue.Entitlements.Offline.ReconnectWorker.new(%{"attempt_id" => attempt.id})
-             ) do
-          {:ok, _} -> {:cont, {:ok, count + 1}}
+        with {:ok, _} <-
+               repo.update(
+                 ReconnectAttempt.changeset(attempt, %{state: :retrying, next_attempt_at: now})
+               ),
+             {:ok, _} <-
+               insert_job.(
+                 Accrue.Entitlements.Offline.ReconnectWorker.new(%{"attempt_id" => attempt.id})
+               ) do
+          {:cont, {:ok, count + 1}}
+        else
           {:error, reason} -> repo.rollback({:sweep_insert_failed, reason})
         end
       end)
@@ -459,7 +473,7 @@ defmodule Accrue.Entitlements.Offline.Reconnect do
                  attempt_count: attempt.attempt_count + 1
                })
              ) do
-        {account, device, challenge}
+        {:ok, {account, device, challenge}}
       else
         _ -> repo.rollback(:attempt_unavailable)
       end

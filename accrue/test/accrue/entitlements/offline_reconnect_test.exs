@@ -3,7 +3,16 @@ defmodule Accrue.Entitlements.OfflineReconnectTest do
 
   alias Accrue.Entitlements.{Account, Device, Observation, Projector}
   alias Accrue.Entitlements.Offline
-  alias Accrue.Entitlements.Offline.{Issuance, Issuer, Reconnect, SourceCoordinator}
+
+  alias Accrue.Entitlements.Offline.{
+    Issuance,
+    Issuer,
+    Reconnect,
+    ReconnectAttempt,
+    ReconnectWakeup,
+    SourceCoordinator
+  }
+
   alias Accrue.TestRepo
 
   @now ~U[2026-08-04 01:00:00.000000Z]
@@ -258,6 +267,69 @@ defmodule Accrue.Entitlements.OfflineReconnectTest do
 
     assert is_binary(proof)
     assert 1 == TestRepo.aggregate(Issuance, :count)
+  end
+
+  test "a host worker advances an admitted attempt without a client replay", ctx do
+    project_grant!(ctx.account)
+    opts = issuer_opts(ctx) ++ [source_coordinator: NoDueSources, authorize: fn _, _ -> true end]
+    request = reconnect_request!(ctx, opts, "reconnect-worker-after-crash")
+
+    assert {:error, :admission_interrupted} =
+             Offline.reconnect(
+               ctx.account,
+               request,
+               Keyword.put(opts, :after_admission, fn -> :interrupted end)
+             )
+
+    attempt = TestRepo.one!(ReconnectAttempt)
+    assert attempt.state == :admitted
+    assert 1 == TestRepo.aggregate(ReconnectWakeup, :count)
+
+    assert :ok =
+             Reconnect.execute_attempt(attempt.id,
+               offline_reconnect: opts,
+               repo: TestRepo,
+               now: @now
+             )
+
+    assert %{state: :completed} = TestRepo.get!(ReconnectAttempt, attempt.id)
+    assert 1 == TestRepo.aggregate(Issuance, :count)
+  end
+
+  test "a failed wakeup job insertion rolls back wakeup draining", ctx do
+    opts = issuer_opts(ctx) ++ [source_coordinator: NoDueSources, authorize: fn _, _ -> true end]
+    request = reconnect_request!(ctx, opts, "reconnect-wakeup-rollback")
+
+    assert {:error, :admission_interrupted} =
+             Offline.reconnect(
+               ctx.account,
+               request,
+               Keyword.put(opts, :after_admission, fn -> :interrupted end)
+             )
+
+    assert {:error, {:job_insert_failed, :unavailable}} =
+             Reconnect.drain_wakeups(TestRepo, insert_job: fn _ -> {:error, :unavailable} end)
+
+    assert 1 == TestRepo.aggregate(ReconnectWakeup, :count)
+  end
+
+  test "wakeup insertion failure rolls back PoP consumption and durable rows", ctx do
+    opts =
+      issuer_opts(ctx) ++
+        [
+          source_coordinator: NoDueSources,
+          authorize: fn _, _ -> true end,
+          insert_wakeup_job: fn _ -> {:error, :unavailable} end
+        ]
+
+    request = reconnect_request!(ctx, opts, "reconnect-admission-enqueue-rollback")
+    assert {:error, :unavailable} = Offline.reconnect(ctx.account, request, opts)
+
+    assert %{consumed_at: nil} =
+             TestRepo.get!(Accrue.Entitlements.Offline.Challenge, request.challenge_id)
+
+    assert 0 == TestRepo.aggregate(ReconnectAttempt, :count)
+    assert 0 == TestRepo.aggregate(ReconnectWakeup, :count)
   end
 
   test "a failed durable repair enqueue becomes an explicit terminal escalation", ctx do
