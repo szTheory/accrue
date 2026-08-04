@@ -97,6 +97,107 @@ defmodule Accrue.Entitlements.OfflineTest do
     end
   end
 
+  describe "continuity action policy and guidance" do
+    test "fresh actions require their signed plan, feature, or positive quantity" do
+      decision = fresh_decision(["pro"], ["export", "offline_study"], %{"downloads" => 1})
+
+      for action <- [
+            :read_downloaded_lesson,
+            :read_local_progress,
+            :write_local_progress,
+            :download_premium,
+            :enroll,
+            :export
+          ] do
+        assert %{action: ^action, allowed: true, next_action: :none} =
+                 Offline.action_policy(decision, action)
+      end
+
+      assert %{allowed: false, next_action: :reconnect_required} =
+               Offline.action_policy(
+                 fresh_decision([], ["offline_study"], %{}),
+                 :download_premium
+               )
+    end
+
+    test "stale proofs permit only downloaded-study and local-progress continuity" do
+      decision = %{
+        fresh_decision(["pro"], ["export", "offline_study"], %{"downloads" => 1})
+        | state: :stale_offline,
+          reason: :revalidation_due,
+          next_action: :reconnect_required
+      }
+
+      for action <- [:read_downloaded_lesson, :read_local_progress, :write_local_progress] do
+        assert %{action: ^action, allowed: true, next_action: :none} =
+                 Offline.action_policy(decision, action)
+      end
+
+      for action <- [
+            :download_premium,
+            :enroll,
+            :export,
+            :purchase,
+            :mutate_account,
+            :mutate_rail,
+            :other_value_expansion,
+            :unknown
+          ] do
+        assert %{action: ^action, allowed: false, next_action: :reconnect_required} =
+                 Offline.action_policy(decision, action)
+      end
+    end
+
+    test "denied and invalid preserve local progress without emitting local-data deletion actions" do
+      for state <- [:denied, :invalid] do
+        decision = %{
+          fresh_decision([], [], %{})
+          | state: state,
+            reason: if(state == :denied, do: :signed_denial, else: :hard_expired)
+        }
+
+        for action <- [:read_local_progress, :write_local_progress] do
+          assert %{action: ^action, allowed: true} = Offline.action_policy(decision, action)
+        end
+
+        for action <- [
+              :read_downloaded_lesson,
+              :download_premium,
+              :enroll,
+              :export,
+              :purchase,
+              :mutate_account,
+              :mutate_rail,
+              :other_value_expansion
+            ] do
+          assert %{action: ^action, allowed: false, next_action: next_action} =
+                   Offline.action_policy(decision, action)
+
+          assert next_action in [:access_unavailable, :check_access]
+        end
+      end
+    end
+
+    test "guidance uses bounded learner-facing next actions without restoration promises" do
+      assert %{key: :stale_offline, text: stale, action_label: "Reconnect"} =
+               Offline.guidance(:stale_offline)
+
+      assert stale ==
+               "Reconnect to update access. Downloaded lessons and progress stay available on this device."
+
+      assert %{key: :invalid, text: invalid, action_label: "Reconnect"} =
+               Offline.guidance(:invalid)
+
+      assert invalid == "Reconnect to check access."
+
+      assert %{key: :denied, text: denied, action_label: "Check access"} =
+               Offline.guidance(:denied)
+
+      assert denied =~ "Access is unavailable"
+      refute denied =~ "restore"
+    end
+  end
+
   defp signing_key do
     __DIR__
     |> Path.join("../../../priv/entitlements/v1.59-offline-test-key.jwk.json")
@@ -148,6 +249,31 @@ defmodule Accrue.Entitlements.OfflineTest do
       },
       changes
     )
+  end
+
+  defp fresh_decision(plans, features, quantities) do
+    %Accrue.Entitlements.Offline.Proof.Decision{
+      state: :fresh,
+      reason: :ok,
+      next_action: :none,
+      claims: %Accrue.Entitlements.Offline.Proof.Claims{
+        version: "v1.59",
+        issuer: @issuer,
+        audience: @audience,
+        token_id: "token-123",
+        subject: "account-123",
+        confirmation: "thumbprint",
+        revision: 1,
+        issued_at: 1_700_000_000,
+        not_before: 1_700_000_000,
+        fresh_until: 1_700_003_600,
+        expires_at: 1_700_007_200,
+        disposition: :allow,
+        plans: plans,
+        features: features,
+        quantities: quantities
+      }
+    }
   end
 
   defp compact(key, payload) do
