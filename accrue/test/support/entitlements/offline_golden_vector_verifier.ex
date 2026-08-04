@@ -170,7 +170,8 @@ defmodule Accrue.Entitlements.OfflineGoldenVectorVerifier do
   defp cache_after(
          %{"fault_point" => "before_rename", "expected_cache_disposition" => cache},
          _decision
-       ), do: String.to_atom(cache)
+       ),
+       do: String.to_atom(cache)
 
   defp cache_after(_vector, %{state: :denied}), do: :deny
   defp cache_after(%{"expected_cache_disposition" => cache}, _decision), do: String.to_atom(cache)
