@@ -3,7 +3,23 @@ defmodule Accrue.Entitlements.Offline do
   Public, public-key-only verification support for versioned offline entitlement proofs.
   """
 
-  alias Accrue.Entitlements.Offline.{Challenge, KeyProvider, Proof, Registration}
+  alias Accrue.Entitlements.Offline.{
+    Challenge,
+    Issuance,
+    Issuer,
+    KeyProvider,
+    Proof,
+    Registration
+  }
+
+  @spec issue(Accrue.Entitlements.Account.t(), Issuer.Request.t(), keyword()) ::
+          {:ok, Issuer.Result.t()} | {:error, atom()}
+  def issue(account, request, opts \\ [])
+
+  def issue(account, %Issuer.Request{} = request, opts),
+    do: Issuer.issue(account, request, opts)
+
+  def issue(_, _, _), do: {:error, :invalid_request}
 
   @spec challenge(Accrue.Entitlements.Account.t(), String.t(), keyword()) ::
           {:ok, Challenge.Value.t()} | {:error, :unauthorized | :invalid_request}
@@ -74,8 +90,16 @@ defmodule Accrue.Entitlements.Offline do
   def verification_keys(_), do: {:error, :config_invalid}
 
   defp render_verification_keys(opts) do
+    repo = Keyword.get(opts, :repo, Accrue.Repo.repo())
+    now = Keyword.get(opts, :now, DateTime.utc_now())
+
+    requirements =
+      Keyword.get_lazy(opts, :retention_requirements, fn ->
+        Issuance.retirement_requirements(repo, now, opts)
+      end)
+
     with {:ok, keys} <- public_keys(opts) do
-      KeyProvider.render_public_keys(keys, Keyword.get(opts, :retention_requirements, %{}))
+      KeyProvider.render_public_keys(keys, requirements)
     else
       _ -> {:error, :config_invalid}
     end

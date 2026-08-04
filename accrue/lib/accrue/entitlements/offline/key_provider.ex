@@ -78,7 +78,8 @@ defmodule Accrue.Entitlements.Offline.KeyProvider do
     if Enum.all?(requirements, fn
          {kid, requirement}
          when is_binary(kid) and byte_size(kid) > 0 and byte_size(kid) <= @max_kid_bytes ->
-           requirement == :eligible or (requirement == :required and MapSet.member?(kids, kid))
+           requirement == :eligible or
+             (requirement in [:required, :never] and MapSet.member?(kids, kid))
 
          _ ->
            false

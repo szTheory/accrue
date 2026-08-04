@@ -30,6 +30,8 @@ defmodule Accrue.Entitlements.OfflineReconnectTest do
 
   setup do
     original = Application.get_env(:accrue, :entitlements)
+    original_rails = Application.get_env(:accrue, :rails)
+    original_default_rail = Application.get_env(:accrue, :default_rail)
 
     Application.put_env(:accrue, :entitlements,
       plans: [
@@ -41,10 +43,24 @@ defmodule Accrue.Entitlements.OfflineReconnectTest do
       ]
     )
 
+    Application.put_env(:accrue, :rails,
+      stripe: [environments: [:production], default_environment: :production]
+    )
+
+    Application.put_env(:accrue, :default_rail, :stripe)
+
     on_exit(fn ->
       if original,
         do: Application.put_env(:accrue, :entitlements, original),
         else: Application.delete_env(:accrue, :entitlements)
+
+      if original_rails,
+        do: Application.put_env(:accrue, :rails, original_rails),
+        else: Application.delete_env(:accrue, :rails)
+
+      if original_default_rail,
+        do: Application.put_env(:accrue, :default_rail, original_default_rail),
+        else: Application.delete_env(:accrue, :default_rail)
     end)
 
     signing_key = test_key()
@@ -144,7 +160,9 @@ defmodule Accrue.Entitlements.OfflineReconnectTest do
         provider_lineage_id: "lineage-219-issuer",
         provider_product_id: "price_pro",
         provider_order: 1,
-        observed_at: @now,
+        # Projection evaluates the committed snapshot at the database/test clock;
+        # keep the fixture effective before that clock while issuing at @now.
+        observed_at: DateTime.add(@now, -2 * 60 * 60, :second),
         state: :qualified,
         retry_count: 0,
         metadata: %{},

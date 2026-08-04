@@ -316,9 +316,10 @@ defmodule Accrue.Entitlements.Offline.Proof do
          true <- is_integer(payload["revision"]) and payload["revision"] >= 0,
          true <-
            Enum.all?(
-             ["iat", "nbf", "fresh_until", "exp"],
+             ["iat", "nbf", "fresh_until"],
              &(is_integer(payload[&1]) and payload[&1] >= 0)
            ),
+         true <- is_nil(payload["exp"]) or (is_integer(payload["exp"]) and payload["exp"] >= 0),
          true <- payload["disposition"] in ["allow", "deny"],
          {:ok, plans} <- normalized_strings(payload["plans"]),
          {:ok, features} <- normalized_strings(payload["features"]),
@@ -371,13 +372,13 @@ defmodule Accrue.Entitlements.Offline.Proof do
   defp validate_temporal_bounds(claims, now) do
     cond do
       claims.issued_at > claims.not_before or claims.not_before > claims.fresh_until or
-          claims.fresh_until > claims.expires_at ->
+          (is_integer(claims.expires_at) and claims.fresh_until > claims.expires_at) ->
         {:error, :malformed}
 
       claims.not_before > now or claims.issued_at > now ->
         {:error, :future_not_valid}
 
-      claims.expires_at <= now ->
+      is_integer(claims.expires_at) and claims.expires_at <= now ->
         {:error, :hard_expired}
 
       true ->

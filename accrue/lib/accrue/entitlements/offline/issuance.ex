@@ -29,6 +29,34 @@ defmodule Accrue.Entitlements.Offline.Issuance do
 
   @type t :: %__MODULE__{}
 
+  @retirement_buffer_seconds 86_400
+
+  @spec retirement_requirements(Ecto.Repo.t(), DateTime.t(), keyword()) ::
+          %{String.t() => :required | :eligible | :never}
+  def retirement_requirements(repo, now, opts \\ []) do
+    buffer =
+      max(
+        Keyword.get(opts, :key_retirement_buffer_seconds, @retirement_buffer_seconds),
+        @retirement_buffer_seconds
+      )
+
+    import Ecto.Query
+
+    repo.all(from(issuance in __MODULE__, select: {issuance.kid, issuance.expires_at}))
+    |> Enum.group_by(&elem(&1, 0), &elem(&1, 1))
+    |> Map.new(fn {kid, expiries} ->
+      requirement =
+        if Enum.any?(expiries, &is_nil/1) do
+          :never
+        else
+          horizon = expiries |> Enum.max_by(&DateTime.to_unix/1) |> DateTime.add(buffer, :second)
+          if DateTime.compare(now, horizon) in [:eq, :gt], do: :eligible, else: :required
+        end
+
+      {kid, requirement}
+    end)
+  end
+
   @spec changeset(t() | Ecto.Changeset.t(), map()) :: Ecto.Changeset.t()
   def changeset(issuance_or_changeset, attrs \\ %{}) do
     issuance_or_changeset
@@ -76,7 +104,8 @@ defmodule Accrue.Entitlements.Offline.Issuance do
 
     if is_struct(issued_at, DateTime) and is_struct(fresh_until, DateTime) and
          (is_nil(expires_at) or is_struct(expires_at, DateTime)) and
-         issued_at <= fresh_until and (is_nil(expires_at) or fresh_until <= expires_at) do
+         DateTime.compare(issued_at, fresh_until) in [:lt, :eq] and
+         (is_nil(expires_at) or DateTime.compare(fresh_until, expires_at) in [:lt, :eq]) do
       changeset
     else
       add_error(changeset, :issued_at, "must not be after freshness or expiry")
