@@ -71,6 +71,7 @@ defmodule Accrue.MixProject do
       {:nimble_options, "~> 1.1"},
       {:telemetry, "~> 1.3"},
       {:jason, "~> 1.4"},
+      {:jose, "~> 1.11"},
       {:decimal, "~> 2.0"},
       {:plug, "~> 1.16"},
       {:plug_crypto, "~> 2.1"},

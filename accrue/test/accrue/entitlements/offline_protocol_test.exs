@@ -34,11 +34,14 @@ defmodule Accrue.Entitlements.OfflineProtocolTest do
       {"wrong issuer", compact(signing_key, Map.put(payload, "iss", "wrong")), :wrong_issuer},
       {"wrong audience", compact(signing_key, Map.put(payload, "aud", "wrong")), :wrong_audience},
       {"unknown key", compact(signing_key, payload, %{"kid" => "unknown"}), :unknown_key},
-      {"remote key header", compact(signing_key, payload, %{"jku" => "https://invalid.test/jwks"}), :malformed},
-      {"unknown critical header", compact(signing_key, payload, %{"crit" => ["exp"]}), :malformed},
+      {"remote key header",
+       compact(signing_key, payload, %{"jku" => "https://invalid.test/jwks"}), :malformed},
+      {"unknown critical header", compact(signing_key, payload, %{"crit" => ["exp"]}),
+       :malformed},
       {"malformed compact", "not-a-jws", :malformed},
       {"duplicate issuer", duplicate_issuer_compact(signing_key, payload), :malformed},
-      {"invalid signature", invalidate_signature(compact(signing_key, payload)), :signature_invalid}
+      {"invalid signature", invalidate_signature(compact(signing_key, payload)),
+       :signature_invalid}
     ]
 
     for {_name, compact, reason} <- cases do
@@ -54,7 +57,11 @@ defmodule Accrue.Entitlements.OfflineProtocolTest do
     |> Jason.decode!()
   end
 
-  defp public_key(key), do: Map.take(key, ["kty", "crv", "kid", "x", "y"]) |> Map.put("use", "sig") |> Map.put("alg", "ES256")
+  defp public_key(key),
+    do:
+      Map.take(key, ["kty", "crv", "kid", "x", "y"])
+      |> Map.put("use", "sig")
+      |> Map.put("alg", "ES256")
 
   defp verification_context(key) do
     %{
@@ -94,7 +101,11 @@ defmodule Accrue.Entitlements.OfflineProtocolTest do
   end
 
   defp compact(key, payload, header \\ %{}) do
-    header = Map.merge(%{"alg" => "ES256", "typ" => "accrue-entitlement-proof+jwt", "kid" => @kid}, header)
+    header =
+      Map.merge(
+        %{"alg" => "ES256", "typ" => "accrue-entitlement-proof+jwt", "kid" => @kid},
+        header
+      )
 
     key
     |> JOSE.JWK.from()
@@ -104,19 +115,30 @@ defmodule Accrue.Entitlements.OfflineProtocolTest do
   end
 
   defp duplicate_issuer_compact(key, payload) do
-    payload_json = Jason.encode!(payload) |> String.replace(~s("iss":"#{@issuer}"), ~s("iss":"#{@issuer}","iss":"#{@issuer}"))
+    payload_json =
+      Jason.encode!(payload)
+      |> String.replace(~s("iss":"#{@issuer}"), ~s("iss":"#{@issuer}","iss":"#{@issuer}"))
 
     key
     |> JOSE.JWK.from()
-    |> JOSE.JWS.sign(payload_json, %{"alg" => "ES256", "typ" => "accrue-entitlement-proof+jwt", "kid" => @kid})
+    |> JOSE.JWS.sign(payload_json, %{
+      "alg" => "ES256",
+      "typ" => "accrue-entitlement-proof+jwt",
+      "kid" => @kid
+    })
     |> JOSE.JWS.compact()
     |> elem(1)
   end
 
   defp invalidate_signature(compact) do
     [header, payload, signature] = String.split(compact, ".")
-    <<first, rest::binary>> = signature
-    header <> "." <> payload <> "." <> <<Bitwise.bxor(first, 1)>> <> rest
+    {:ok, <<first, rest::binary>>} = Base.url_decode64(signature, padding: false)
+
+    header <>
+      "." <>
+      payload <>
+      "." <>
+      Base.url_encode64(<<Bitwise.bxor(first, 1)>> <> rest, padding: false)
   end
 
   defp replace_header(compact, changes) do
