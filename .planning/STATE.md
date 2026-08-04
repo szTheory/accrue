@@ -5,16 +5,16 @@ milestone_name: Account-Scoped Multi-Rail & Offline Entitlements
 current_phase: 220
 current_phase_name: first-adopter-proof-and-release-gates
 status: executing
-stopped_at: Completed 220-06-PLAN.md
-last_updated: "2026-08-04T16:38:46.332Z"
+stopped_at: Completed 220-07-PLAN.md
+last_updated: "2026-08-04T17:36:20.097Z"
 last_activity: 2026-08-04
 last_activity_desc: Phase 220 execution started
 progress:
   total_phases: 6
-  completed_phases: 6
+  completed_phases: 5
   total_plans: 55
-  completed_plans: 53
-  percent: 100
+  completed_plans: 54
+  percent: 83
 ---
 
 # Project State
@@ -30,7 +30,7 @@ See: `.planning/PROJECT.md` (updated 2026-08-01 after completing Phase 215)
 ## Current Position
 
 Phase: 220 (first-adopter-proof-and-release-gates) — EXECUTING
-Plan: 6 of 6
+Plan: 2 of 8
 Status: Ready to execute
 Last activity: 2026-08-04 — Phase 220 execution started
 
@@ -423,6 +423,7 @@ Coverage: 22/22 v1.51 requirements mapped (each REQ-ID → exactly one phase). D
 | Phase 220 P03 | 8min | 2 tasks | 18 files |
 | Phase 220-first-adopter-proof-and-release-gates P05 | 3min | 2 tasks | 8 files |
 | Phase 220-first-adopter-proof-and-release-gates P06 | 7min | 1 tasks | 4 files |
+| Phase 220 P07 | 6m | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -841,6 +842,8 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - [Phase ?]: v1.59 repairs stay host-authorized, bounded, and explicitly exclude financial or ownership mutation.
 - [Phase ?]: Composed the release gate from the canonical fixture check instead of duplicating generated exact-fact assertions.
 - [Phase ?]: Scoped prose rejection checks to public and procedural regions so runbook prohibition text remains valid.
+- [Phase ?]: Fixture operation payloads select bounded production commands but contain no result reducer.
+- [Phase ?]: Crosswake remains feasibility_blocked; Swift coverage is client-schema evidence only.
 
 ### Pending Todos
 
@@ -992,8 +995,8 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 
 ## Session Continuity
 
-Last session: 2026-08-04T16:16:21.361Z
-Stopped at: Completed 220-06-PLAN.md
+Last session: 2026-08-04T17:36:20.079Z
+Stopped at: Completed 220-07-PLAN.md
 Resume file: None
 
 ## Operator Next Steps
