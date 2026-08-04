@@ -3,7 +3,7 @@ defmodule Accrue.Entitlements.ReferenceScenarioConformanceTest do
 
   import Ecto.Query
 
-  alias Accrue.Entitlements.{Account, Offline, Observation, Projector, ReferenceScenarios}
+  alias Accrue.Entitlements.{Account, Grant, Offline, Observation, Projector, ReferenceScenarios, Snapshot}
   alias Accrue.Events.Event
 
   defmodule FakeVerifier do
@@ -130,6 +130,40 @@ defmodule Accrue.Entitlements.ReferenceScenarioConformanceTest do
       end
 
     assert Enum.sort(executed) == Enum.sort(ReferenceScenarios.production_execution_ids())
+  end
+
+  test "expiry adjacency scenarios fold production grants at their frozen microsecond clocks" do
+    expiry = ~U[2026-08-04 12:17:00.000001Z]
+
+    grant = %Grant{
+      rail: :apple,
+      environment: :production,
+      provider_lineage_id: "expiry-adjacency",
+      provider_product_id: "product_pro",
+      source_item_id: "expiry-adjacency-source",
+      quantity: 1,
+      effective_at: ~U[2026-08-04 12:16:59.000000Z],
+      expires_at: expiry
+    }
+
+    for {id, expected_plans} <- [
+          {"expiry_immediately_before_boundary", [:pro]},
+          {"expiry_at_boundary", []},
+          {"expiry_immediately_after_boundary", []}
+        ] do
+      scenario = ReferenceScenarios.fetch!(id)
+      {:ok, now, 0} = DateTime.from_iso8601(scenario.frozen_clock)
+
+      snapshot =
+        Snapshot.from_grants([grant],
+          account_id: "expiry-adjacency",
+          revision: 1,
+          now: now,
+          catalog: %{ "product_pro" => %{plan: :pro, features: [:analytics], quotas: %{seats: 3}} }
+        )
+
+      assert snapshot.plans == expected_plans
+    end
   end
 
   defp assert_production_result(scenario, account, operation, opposite_rail) do

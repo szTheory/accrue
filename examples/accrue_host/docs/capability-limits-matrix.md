@@ -34,6 +34,9 @@ Runtime capability is `feasibility_blocked` until the tracer records both `cross
 | `duplicate_purchase_prevention` | `deterministic_conformance` |
 | `empty_evidence_fails_closed` | `deterministic_conformance` |
 | `equal_order_stability` | `deterministic_conformance` |
+| `expiry_at_boundary` | `deterministic_conformance` |
+| `expiry_immediately_after_boundary` | `deterministic_conformance` |
+| `expiry_immediately_before_boundary` | `deterministic_conformance` |
 | `interrupted_resume` | `deterministic_conformance` |
 | `key_rotation` | `deterministic_conformance` |
 | `offline_reconnect` | `deterministic_conformance` |
