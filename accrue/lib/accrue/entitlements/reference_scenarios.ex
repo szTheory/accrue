@@ -15,6 +15,37 @@ defmodule Accrue.Entitlements.ReferenceScenarios do
   @operation_keys ~w(rail environment logical_product provider_product_id provider_event_id provider_transaction_id provider_lineage_id provider_order offline_vector offline_action)
   @base_payload_keys ~w(account_ref clock)
   @device_replace_payload_keys ~w(account_ref clock prior_device_ref replacement_installation_ref replacement_key_fixture challenge_ref idempotency_ref prior_transition reason actor_ref)
+  @lifecycle_payload_keys @base_payload_keys ++ @operation_keys
+  @offline_payload_keys @base_payload_keys ++ @operation_keys
+  @reconnect_payload_keys @base_payload_keys ++ @operation_keys
+  @ordering_payload_keys @base_payload_keys ++ @operation_keys
+  @resume_payload_keys @base_payload_keys ++ @operation_keys
+  @expiry_payload_keys @base_payload_keys ++ @operation_keys
+  @payload_keys_by_kind %{
+    "apple_verified_purchase" => @lifecycle_payload_keys,
+    "stripe_verified_purchase" => @lifecycle_payload_keys,
+    "grant_observation" => @lifecycle_payload_keys,
+    "refund_observation" => @lifecycle_payload_keys,
+    "stripe_retraction" => @lifecycle_payload_keys,
+    "web_login" => @base_payload_keys,
+    "ios_login" => @base_payload_keys,
+    "purchase_preflight" => @lifecycle_payload_keys,
+    "expiry_boundary" => @expiry_payload_keys,
+    "offline_proof_stale" => @offline_payload_keys,
+    "offline_expansion_request" => @offline_payload_keys,
+    "signed_deny" => @offline_payload_keys,
+    "rollback_proof" => @offline_payload_keys,
+    "empty_evidence" => @offline_payload_keys,
+    "reconnect_request" => @reconnect_payload_keys,
+    "verified_cache_replace" => @base_payload_keys,
+    "device_replace" => @device_replace_payload_keys,
+    "rotated_key_proof" => @offline_payload_keys,
+    "equal_order_delivery" => @ordering_payload_keys,
+    "repeat_delivery" => @ordering_payload_keys,
+    "parallel_delivery" => @ordering_payload_keys,
+    "durable_interruption" => @resume_payload_keys,
+    "resume_delivery" => @base_payload_keys
+  }
   @expected_keys ~w(snapshot purchase offline_policy audit_count)
 
   defmodule Snapshot, do: defstruct([:revision, :plans, :sources])
@@ -46,6 +77,8 @@ defmodule Accrue.Entitlements.ReferenceScenarios do
 
   def production_execution_ids, do: Enum.map(deterministic_scenarios(), & &1.id)
   def action_families, do: @action_kinds
+
+  def action_family!(kind), do: Map.fetch!(@payload_keys_by_kind, kind)
 
   def command!(%Scenario{evidence_lane: :deterministic_conformance, actions: actions}, order) do
     case Enum.find(actions, &(&1.order == order)) do
@@ -151,9 +184,7 @@ defmodule Accrue.Entitlements.ReferenceScenarios do
   end
 
   defp command!(_, _, _), do: raise(ArgumentError, "invalid command")
-  defp payload_keys(kind) when kind in @read_kinds, do: @base_payload_keys
-  defp payload_keys("device_replace"), do: @device_replace_payload_keys
-  defp payload_keys(kind) when kind in @action_kinds, do: @base_payload_keys ++ @operation_keys
+  defp payload_keys(kind), do: action_family!(kind)
 
   defp validate_payload!(kind, p) do
     utc!(p.clock, "command clock")

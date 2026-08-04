@@ -106,6 +106,16 @@ defmodule Accrue.Entitlements.ReferenceScenarioLifecycleTest do
     end)
   end
 
+  test "every deterministic command has one named closed payload inventory" do
+    for scenario <- ReferenceScenarios.deterministic_scenarios(), action <- scenario.actions do
+      assert action.command.payload |> Map.keys() |> Enum.sort() ==
+               action.kind
+               |> ReferenceScenarios.action_family!()
+               |> Enum.map(&String.to_atom/1)
+               |> Enum.sort()
+    end
+  end
+
   test "actual generic-grant and no-effect substitutions cannot satisfy a refund collection" do
     scenario = ReferenceScenarios.fetch!("refund_revocation")
     [grant, refund] = scenario.actions
