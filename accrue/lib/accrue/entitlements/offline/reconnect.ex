@@ -506,22 +506,39 @@ defmodule Accrue.Entitlements.Offline.Reconnect do
   end
 
   defp mark_configuration_failure(repo, attempt_id, now) do
-    case repo.get(ReconnectAttempt, attempt_id) do
-      nil ->
-        {:error, :attempt_unavailable}
+    result =
+      repo.transaction(fn ->
+        case repo.one(from(a in ReconnectAttempt, where: a.id == ^attempt_id, lock: "FOR UPDATE")) do
+          nil ->
+            :attempt_unavailable
 
-      attempt ->
-        case repo.update(
-               ReconnectAttempt.changeset(attempt, %{
-                 state: :needs_repair,
-                 failure_reason: "config_invalid",
-                 completed_at: now,
-                 next_attempt_at: nil
-               })
-             ) do
-          {:ok, _} -> {:error, :config_invalid}
-          _ -> {:error, :persistence_failed}
+          %ReconnectAttempt{state: state} when state in [:completed, :needs_repair] ->
+            :already_terminal
+
+          %ReconnectAttempt{state: state} = attempt when state in [:admitted, :retrying] ->
+            case repo.update(
+                   ReconnectAttempt.changeset(attempt, %{
+                     state: :needs_repair,
+                     failure_reason: "config_invalid",
+                     completed_at: now,
+                     next_attempt_at: nil,
+                     execution_token: nil
+                   })
+                 ) do
+              {:ok, _} -> :config_invalid
+              _ -> repo.rollback(:persistence_failed)
+            end
+
+          %ReconnectAttempt{} ->
+            :attempt_unavailable
         end
+      end)
+
+    case result do
+      {:ok, :already_terminal} -> :ok
+      {:ok, :config_invalid} -> {:error, :config_invalid}
+      {:ok, :attempt_unavailable} -> {:error, :attempt_unavailable}
+      _ -> {:error, :persistence_failed}
     end
   end
 

@@ -382,6 +382,19 @@ defmodule Accrue.Entitlements.OfflineReconnectTest do
              Offline.reconnect(ctx.account, request, opts)
 
     assert 1 == TestRepo.aggregate(Issuance, :count)
+
+    completed = TestRepo.get!(ReconnectAttempt, attempt.id)
+    completed_revision = completed.revision
+
+    assert :ok =
+             Reconnect.execute_attempt(attempt.id,
+               offline_reconnect: nil,
+               repo: TestRepo,
+               now: DateTime.add(@now, 60, :second)
+             )
+
+    assert %{state: :completed, revision: ^completed_revision, failure_reason: nil} =
+             TestRepo.get!(ReconnectAttempt, attempt.id)
   end
 
   test "inline claim coalesces a wakeup worker during a deterministic refresh race", ctx do
