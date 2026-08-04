@@ -210,12 +210,12 @@ defmodule Accrue.Entitlements.ReferenceScenarioConformanceTest do
       for suffix <- ["first", "second"] do
         account = account!("equal-order-#{suffix}")
         first = %{operation | provider_event_id: "equal-#{suffix}-1", provider_transaction_id: "equal-#{suffix}-1", provider_lineage_id: "equal-lineage-#{suffix}"}
-        second = %{first | provider_order: 2, provider_event_id: "equal-#{suffix}-2", provider_transaction_id: "equal-#{suffix}-2"}
+        second = %{first | provider_event_id: "equal-#{suffix}-2", provider_transaction_id: "equal-#{suffix}-2"}
 
         for item <- [first, second] do
-          assert {:ok, observation} = Observation.insert_idempotently(Accrue.TestRepo, observation_attrs(account, item))
-          assert result = Projector.project(observation, logical_plan: item.logical_product)
-          assert match?({:ok, _}, result) or result == {:noop, :no_material_change}
+          assert result = deliver_observation(account, item, "grant")
+          assert match?({:ok, _}, result) or result == {:noop, :no_material_change} or
+                   result == {:noop, :stale}
         end
 
         assert_bounded_result(scenario, account, first)
@@ -229,12 +229,11 @@ defmodule Accrue.Entitlements.ReferenceScenarioConformanceTest do
       scenario = ReferenceScenarios.fetch!(scenario_id)
       operation = ReferenceScenarios.execution_input!(scenario).operation
       account = account!("#{scenario_id}-named")
-      assert {:ok, observation} = Observation.insert_idempotently(Accrue.TestRepo, observation_attrs(account, operation))
 
       if scenario_id == "parallel_execution" do
         results =
           Ecto.Adapters.SQL.Sandbox.unboxed_run(Accrue.TestRepo, fn ->
-            Task.async_stream([:one, :two], fn _ -> Projector.project(observation, logical_plan: operation.logical_product) end,
+            Task.async_stream([:one, :two], fn _ -> deliver_observation(account, operation, "grant") end,
               max_concurrency: 2,
               timeout: 10_000
             )
@@ -243,8 +242,8 @@ defmodule Accrue.Entitlements.ReferenceScenarioConformanceTest do
 
         assert Enum.all?(results, fn {:ok, result} -> match?({:ok, _}, result) or match?({:noop, _}, result) end)
       else
-        assert {:ok, _} = Projector.project(observation, logical_plan: operation.logical_product)
-        assert {:noop, :stale} = Projector.project(observation, logical_plan: operation.logical_product)
+        assert {:ok, _} = deliver_observation(account, operation, "grant")
+        assert {:noop, :stale} = deliver_observation(account, operation, "grant")
       end
 
       assert_bounded_result(scenario, account, operation)
@@ -391,6 +390,16 @@ defmodule Accrue.Entitlements.ReferenceScenarioConformanceTest do
            ),
          {:ok, snapshot} <- Projector.project(observation, logical_plan: operation.logical_product) do
       {:ok, snapshot}
+    end
+  end
+
+  defp deliver_observation(account, operation, kind) do
+    with {:ok, observation} <-
+           Observation.insert_idempotently(
+             Accrue.TestRepo,
+             observation_attrs(account, operation) |> Map.put(:kind, kind)
+           ) do
+      Projector.project(observation, logical_plan: operation.logical_product)
     end
   end
 

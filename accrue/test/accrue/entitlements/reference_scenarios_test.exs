@@ -1,6 +1,7 @@
 defmodule Accrue.Entitlements.ReferenceScenariosTest do
   use ExUnit.Case, async: true
 
+  alias Accrue.Entitlements.ReferenceScenarios
   alias Accrue.Entitlements.ReferenceScenarios.Markdown
 
   @repo_root Path.expand("../../../..", __DIR__)
@@ -25,6 +26,14 @@ defmodule Accrue.Entitlements.ReferenceScenariosTest do
         ] do
       assert matrix =~ claim
     end
+  end
+
+  test "deterministic action kinds remain a closed command inventory" do
+    scenario = ReferenceScenarios.fetch!("refund_revocation")
+    [action | rest] = scenario.actions
+
+    refute ReferenceScenarios.valid?(%{scenario | actions: [%{action | kind: "grant_everything"} | rest]})
+    refute ReferenceScenarios.valid?(%{scenario | actions: [%{action | order: 9} | rest]})
   end
 
   test "write and check reject stale generated output" do

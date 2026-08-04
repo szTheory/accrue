@@ -6,6 +6,15 @@ defmodule Accrue.Entitlements.ReferenceScenarios do
   @artifact_names ~w(v1.59-decision-cases.json v1.59-offline-golden-vectors.json capability-report.json)
   @scenario_keys ~w(id evidence_lane frozen_clock actions expected required_artifacts diagnostic)
   @action_keys ~w(kind order at operation)
+  @action_kinds ~w(
+    apple_verified_purchase stripe_verified_purchase web_login ios_login
+    purchase_preflight offline_proof_stale offline_expansion_request
+    reconnect_request verified_cache_replace grant_observation refund_observation
+    stripe_retraction device_replace signed_deny rollback_proof rotated_key_proof
+    empty_evidence equal_order_delivery repeat_delivery parallel_delivery
+    durable_interruption resume_delivery expiry_boundary
+    capability_report_read provider_advisory_read
+  )
   @operation_keys ~w(rail environment logical_product provider_product_id provider_event_id provider_transaction_id provider_lineage_id provider_order offline_vector offline_action)
   @expected_keys ~w(snapshot purchase offline_policy audit_count)
   @snapshot_keys ~w(revision plans sources)
@@ -199,7 +208,7 @@ defmodule Accrue.Entitlements.ReferenceScenarios do
 
         require_keys!(action, action_keys, "action")
 
-        (is_binary(action["kind"]) and action["kind"] =~ ~r/^[a-z0-9_]{3,80}$/) ||
+        (is_binary(action["kind"]) and action["kind"] in @action_kinds) ||
           raise ArgumentError, "invalid action kind"
 
         (is_integer(action["order"]) and action["order"] > 0) ||
@@ -368,7 +377,7 @@ defmodule Accrue.Entitlements.ReferenceScenarios do
       is_list(actions) and actions != [] and
         Enum.map(actions, & &1.order) == Enum.to_list(1..length(actions)) and
         Enum.all?(actions, fn action ->
-          utc?(action.at) and
+          action.kind in @action_kinds and utc?(action.at) and
             (not Map.has_key?(action, :operation) or match?(%Operation{}, action.operation))
         end)
 
