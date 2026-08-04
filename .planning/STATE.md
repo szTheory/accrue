@@ -3,17 +3,17 @@ gsd_state_version: 1.0
 milestone: v1.59
 milestone_name: Account-Scoped Multi-Rail & Offline Entitlements
 current_phase: 219
-current_phase_name: Offline study contract
+current_phase_name: offline-study-contract
 status: executing
-stopped_at: Phase 219 context gathered
-last_updated: "2026-08-03T21:40:42.076Z"
+stopped_at: Completed 219-01-PLAN.md
+last_updated: "2026-08-04T00:04:34.713Z"
 last_activity: 2026-08-03
-last_activity_desc: Phase 218 complete, transitioned to Phase 219
+last_activity_desc: Phase 219 execution started
 progress:
   total_phases: 6
   completed_phases: 4
-  total_plans: 42
-  completed_plans: 42
+  total_plans: 47
+  completed_plans: 43
   percent: 67
 ---
 
@@ -25,14 +25,14 @@ See: `.planning/PROJECT.md` (updated 2026-08-01 after completing Phase 215)
 
 **Core value:** A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic Elixir DX, strong domain modeling, tamper-evident audit ledger, great observability, and zero breaking-change pain through v1.x.
 
-**Current focus:** Phase 218 — apple-observation-and-repair
+**Current focus:** Phase 219 — offline-study-contract
 
 ## Current Position
 
-Phase: 219 — Offline study contract
-Plan: Not started
+Phase: 219 (offline-study-contract) — EXECUTING
+Plan: 2 of 5
 Status: Ready to execute
-Last activity: 2026-08-03 — Phase 218 complete, transitioned to Phase 219
+Last activity: 2026-08-03 — Phase 219 execution started
 
 ## Post-v1.48 Pause Rule
 
@@ -412,6 +412,7 @@ Coverage: 22/22 v1.51 requirements mapped (each REQ-ID → exactly one phase). D
 | Phase 218-apple-observation-and-repair P14 | 6min | 1 tasks | 3 files |
 | Phase 218-apple-observation-and-repair P15 | 5min | 2 tasks | 5 files |
 | Phase 218 P16 | 24 min | 1 tasks | 2 files |
+| Phase 219 P01 | 16min | 2 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -810,6 +811,9 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - [Phase ?]: Apple Notifications V2 rejects missing, empty, or malformed raw-body capture with retryable 503 before verification or persistence.
 - [Phase ?]: Apple JWS negative tests flip decoded ES256 signature bytes while preserving protected header and payload segments.
 - [Phase ?]: Reconciliation locks the local environment-qualified lineage and sends only its original transaction ID to Apple endpoints.
+- [Phase ?]: D-09 v1.59 ES256 compact proof profile is published with local stable kid selection.
+- [Phase ?]: Offline verification returns bounded four-state decisions and never exposes JOSE/provider details.
+- [Phase ?]: Offline JWKS rendering is public-only, deterministic, and retention-aware behind a host key-provider behaviour.
 
 ### Pending Todos
 
@@ -961,9 +965,9 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 
 ## Session Continuity
 
-Last session: 2026-08-03T21:40:42.043Z
-Stopped at: Phase 219 context gathered
-Resume file: .planning/phases/219-offline-study-contract/219-CONTEXT.md
+Last session: 2026-08-04T00:04:34.701Z
+Stopped at: Completed 219-01-PLAN.md
+Resume file: None
 
 ## Operator Next Steps
 

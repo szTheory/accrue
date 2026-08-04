@@ -38,12 +38,12 @@
 
 ### Offline Study Contract
 
-- [ ] **OFF-01**: A registered device can independently verify an Accrue-issued compact ES256 entitlement proof using a published, versioned protocol and language-neutral golden fixtures without possessing a signing secret.
+- [x] **OFF-01**: A registered device can independently verify an Accrue-issued compact ES256 entitlement proof using a published, versioned protocol and language-neutral golden fixtures without possessing a signing secret.
 - [ ] **OFF-02**: Successful reconciliation sets a 30-day revalidation target, shortened by a known earlier provider access bound; crossing it yields `stale_offline` rather than an independent 72-hour cutoff or silent revocation.
 - [ ] **OFF-03**: The reference host keeps already-downloaded lessons and local learner progress usable while proof is stale, but pauses new premium downloads, enrollment, export, purchase, account/rail mutation, and other value-expanding actions until reconnect.
 - [ ] **OFF-04**: Verification distinguishes `fresh`, `stale_offline`, `denied`, and `invalid` with bounded reason metadata so host code can render policy without changing existing boolean entitlement-gate return types or deleting local data.
 - [ ] **OFF-05**: Reconnect authenticates account and device, refreshes due rails under an explicit schedule, compares account revision and device state, and atomically replaces cached proof with a newer allow proof or signed deny tombstone; client proof is never accepted as provider truth.
-- [ ] **OFF-06**: Issuance and verification resist algorithm/type/audience confusion, copied proof, wrong device/key, clock rollback, replay, superseded revisions, revoked devices, and key compromise/rotation while exposing no adopter identity, PII, raw receipt, notification body, or provider payload.
+- [x] **OFF-06**: Issuance and verification resist algorithm/type/audience confusion, copied proof, wrong device/key, clock rollback, replay, superseded revisions, revoked devices, and key compromise/rotation while exposing no adopter identity, PII, raw receipt, notification body, or provider payload.
 
 ### Adopter Proof and Operations
 
@@ -101,12 +101,12 @@ Filled during roadmap creation. Every v1.59 requirement must map to exactly one 
 | AAPL-03 | Phase 218 | Complete |
 | AAPL-04 | Phase 218 | Complete |
 | AAPL-05 | Phase 218 | Complete |
-| OFF-01 | Phase 219 | Pending |
+| OFF-01 | Phase 219 | Complete |
 | OFF-02 | Phase 219 | Pending |
 | OFF-03 | Phase 219 | Pending |
 | OFF-04 | Phase 219 | Pending |
 | OFF-05 | Phase 219 | Pending |
-| OFF-06 | Phase 219 | Pending |
+| OFF-06 | Phase 219 | Complete |
 | PROOF-01 | Phase 220 | Pending |
 | PROOF-02 | Phase 220 | Pending |
 | PROOF-03 | Phase 220 | Pending |

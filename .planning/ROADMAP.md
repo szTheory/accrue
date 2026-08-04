@@ -261,12 +261,12 @@ Plans:
   4. Host code can distinguish fresh, stale-offline, denied, and invalid proof states with bounded reasons while existing boolean gate return types remain compatible.
   5. Reconnect authenticates account and device, refreshes due rails, and atomically replaces cached proof with a newer allow proof or signed deny tombstone; copied, replayed, wrong-device, rollback, revoked-device, and rotated-key proofs fail safely.
 
-**Plans**: 5 plans
+**Plans**: 1/5 plans executed
 
 Plans:
 **Wave 1**
 
-- [ ] 219-01-PLAN.md — Trace strict public-key-only ES256 verification and the host key-provider/JWKS boundary.
+- [x] 219-01-PLAN.md — Trace strict public-key-only ES256 verification and the host key-provider/JWKS boundary.
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
@@ -312,5 +312,5 @@ Plans:
 | 216. Additive rail and persistence foundation | v1.59 | 6/6 | Complete    | 2026-08-02 |
 | 217. Canonical projection and compatibility | v1.59 | 5/5 | Complete | 2026-08-02 |
 | 218. Apple observation and repair | v1.59 | 16/16 | Complete    | 2026-08-03 |
-| 219. Offline study contract | v1.59 | 0/TBD | Not started | - |
+| 219. Offline study contract | v1.59 | 1/5 | In Progress|  |
 | 220. First-adopter proof and release gates | v1.59 | 0/TBD | Not started | - |
