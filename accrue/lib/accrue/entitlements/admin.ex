@@ -34,6 +34,10 @@ defmodule Accrue.Entitlements.Admin do
   catalog does not map — the operator's drift signal.
   """
 
+  import Ecto.Query
+
+  alias Accrue.Entitlements.{Account, Device, Observation, Snapshot}
+  alias Accrue.Entitlements.Offline.ReconnectAttempt
   alias Accrue.Entitlements.Resolver.LocalMap
   alias Accrue.Entitlements.StripeSync
 
@@ -64,6 +68,54 @@ defmodule Accrue.Entitlements.Admin do
       stripe_advisory: safe_stripe_advisory_diagnostic(customer)
     }
   end
+
+  @doc """
+  Returns the closed, read-only diagnostic for one already-authorized entitlement
+  account. The host is responsible for resolving and authorizing `account` before
+  it reaches this seam; this function deliberately never provisions an account,
+  calls a provider, queues work, or records an audit event.
+
+  The result is a support contract, not an explorer: it contains only normalized
+  states, bounded ages, and a stable opaque correlation. Raw observations,
+  account ownership, device identifiers, proof material, queue data, and provider
+  responses are intentionally excluded.
+  """
+  @spec diagnostic_for_account(Account.t(), keyword()) ::
+          {:ok, map()} | {:error, :not_found | :unavailable}
+  def diagnostic_for_account(account, opts \\ [])
+
+  def diagnostic_for_account(%Account{id: account_id}, opts) when is_binary(account_id) do
+    repo = Keyword.get(opts, :repo, Accrue.Repo.repo())
+    now = Keyword.get(opts, :now, DateTime.utc_now())
+
+    case repo.get(Account, account_id) do
+      %Account{} = account ->
+        snapshot = Snapshot.fetch(repo, account)
+
+        observations =
+          repo.all(from(observation in Observation, where: observation.account_id == ^account.id))
+
+        devices = repo.all(from(device in Device, where: device.account_id == ^account.id))
+
+        attempts =
+          repo.all(
+            from(attempt in ReconnectAttempt,
+              where: attempt.account_id == ^account.id,
+              order_by: [desc: attempt.inserted_at],
+              limit: 1
+            )
+          )
+
+        {:ok, closed_diagnostic(account, snapshot, observations, devices, attempts, now)}
+
+      nil ->
+        {:error, :not_found}
+    end
+  rescue
+    _ -> {:error, :unavailable}
+  end
+
+  def diagnostic_for_account(_, _opts), do: {:error, :not_found}
 
   defp safe_local_diagnostic(customer) do
     {resolved, unmapped_price_ids} = resolve_for_customer(customer)
@@ -165,5 +217,140 @@ defmodule Accrue.Entitlements.Admin do
         "completeness" => Atom.to_string(completeness)
       }
     }
+  end
+
+  defp closed_diagnostic(account, %Snapshot{} = snapshot, observations, devices, attempts, now) do
+    provider = provider_summary(observations, now)
+    recovery = recovery_summary(observations, attempts, now)
+
+    %{
+      account: %{
+        state: :available,
+        revision: snapshot.revision,
+        correlation: correlation(account.id)
+      },
+      snapshot: %{
+        state: snapshot_state(snapshot),
+        revision: snapshot.revision,
+        plans: Enum.map(snapshot.plans, &Atom.to_string/1),
+        source_count: length(snapshot.sources)
+      },
+      sources: Enum.map(snapshot.sources, &safe_source(&1, now)),
+      provider: provider,
+      eligibility: eligibility_summary(snapshot),
+      devices: device_summary(devices, now),
+      recovery: recovery,
+      next_action: next_action(snapshot, provider, recovery)
+    }
+  end
+
+  defp snapshot_state(%Snapshot{authorization_bounds: bounds})
+       when bounds in [:stale, :repairing, :ambiguous],
+       do: bounds
+
+  defp snapshot_state(_), do: :available
+
+  defp safe_source(source, now) do
+    %{
+      rail: source.rail,
+      environment: source.environment,
+      provenance: :canonical_projection,
+      age_seconds: age_seconds(source.effective_at, now)
+    }
+  end
+
+  defp provider_summary([], _now), do: %{state: :not_observed, age_seconds: nil}
+
+  defp provider_summary(observations, now) do
+    latest = Enum.max_by(observations, & &1.observed_at, DateTime)
+
+    %{
+      state: provider_state(latest.state),
+      age_seconds: age_seconds(latest.observed_at, now)
+    }
+  end
+
+  defp provider_state(:quarantined), do: :quarantined
+  defp provider_state(:retrying), do: :retrying
+  defp provider_state(:qualified), do: :available
+  defp provider_state(:received), do: :pending
+  defp provider_state(_), do: :unavailable
+
+  defp eligibility_summary(%Snapshot{authorization_bounds: state})
+       when state in [:stale, :repairing, :ambiguous] do
+    %{
+      state: :blocked,
+      reason: String.to_existing_atom("#{state}_snapshot"),
+      next_action: :review_access
+    }
+  end
+
+  defp eligibility_summary(_),
+    do: %{state: :unknown, reason: :not_requested, next_action: :review_access}
+
+  defp device_summary([], _now), do: %{state: :not_registered, count: 0, proof_horizon: :unknown}
+
+  defp device_summary(devices, now) do
+    active = Enum.count(devices, &(&1.state == :active))
+
+    %{
+      state: if(active > 0, do: :available, else: :needs_attention),
+      count: length(devices),
+      proof_horizon: proof_horizon(devices, now)
+    }
+  end
+
+  defp proof_horizon(devices, now) do
+    case devices |> Enum.map(& &1.last_seen_at) |> Enum.reject(&is_nil/1) |> Enum.max(DateTime) do
+      nil -> :unknown
+      seen_at -> if(age_seconds(seen_at, now) <= 30 * 86_400, do: :recent, else: :stale)
+    end
+  end
+
+  defp recovery_summary(observations, [%ReconnectAttempt{} = attempt], now) do
+    %{
+      state: recovery_state(attempt.state, observations),
+      retry_state: retry_state(attempt.state),
+      age_seconds: age_seconds(attempt.updated_at, now)
+    }
+  end
+
+  defp recovery_summary(observations, [], _now) do
+    %{
+      state:
+        if(Enum.any?(observations, &(&1.state == :quarantined)), do: :needs_repair, else: :clear),
+      retry_state:
+        if(Enum.any?(observations, &(&1.state == :retrying)), do: :scheduled, else: :none),
+      age_seconds: nil
+    }
+  end
+
+  defp recovery_state(:needs_repair, _), do: :needs_repair
+  defp recovery_state(:retrying, _), do: :retrying
+
+  defp recovery_state(_, observations),
+    do: if(Enum.any?(observations, &(&1.state == :quarantined)), do: :needs_repair, else: :clear)
+
+  defp retry_state(state) when state in [:admitted, :running, :retrying], do: :scheduled
+  defp retry_state(_), do: :none
+
+  defp next_action(_snapshot, %{state: :quarantined}, _recovery), do: :review_access
+  defp next_action(_snapshot, _provider, %{state: :needs_repair}), do: :review_access
+
+  defp next_action(%Snapshot{authorization_bounds: state}, _provider, _recovery)
+       when state in [:stale, :repairing, :ambiguous], do: :review_access
+
+  defp next_action(_, _, _), do: :review_access
+
+  defp age_seconds(%DateTime{} = timestamp, %DateTime{} = now),
+    do: max(DateTime.diff(now, timestamp, :second), 0)
+
+  defp age_seconds(_, _), do: nil
+
+  defp correlation(account_id) do
+    account_id
+    |> then(&:crypto.hash(:sha256, &1))
+    |> Base.url_encode64(padding: false)
+    |> binary_part(0, 16)
   end
 end
