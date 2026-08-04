@@ -134,21 +134,38 @@ defmodule Accrue.Entitlements.ReferenceScenarioConformanceTest do
 
         account = account!(owner_id)
 
-        if scenario.id != "empty_evidence_fails_closed" do
-          assert {:ok, observation} =
-                   Observation.insert_idempotently(Accrue.TestRepo, observation_attrs(account, operation))
-
-          assert {:ok, _snapshot} = Projector.project(observation, logical_plan: operation.logical_product)
+        for action <- scenario.actions do
+          dispatch_fixture_action(account, action)
         end
 
         # These are independent production contexts. The fixture supplies the
         # expected tuple; this helper only selects and normalizes their bounded
         # public outputs and deliberately contains no entitlement rules.
-        assert_bounded_result(scenario, account, operation)
-        scenario.id
+        matching_operation =
+          Enum.find_value(scenario.actions, fn action ->
+            case Map.get(action, :operation) do
+              %{rail: rail} = candidate ->
+                if rail in scenario.expected.snapshot.sources, do: candidate
+
+              _ -> nil
+            end
+          end)
+
+        result_operation = matching_operation || operation
+
+        assert_bounded_result(scenario, account, result_operation)
+        {scenario.id, Enum.map(scenario.actions, &{&1.order, &1.kind})}
       end
 
-    assert Enum.sort(executed) == Enum.sort(ReferenceScenarios.production_execution_ids())
+    assert Enum.map(executed, &elem(&1, 0)) |> Enum.sort() ==
+             ReferenceScenarios.production_execution_ids() |> Enum.sort()
+
+    assert executed
+           |> Enum.flat_map(fn {id, actions} -> Enum.map(actions, fn {order, kind} -> {id, order, kind} end) end)
+           |> Enum.sort() ==
+             ReferenceScenarios.deterministic_scenarios()
+             |> Enum.flat_map(fn scenario -> Enum.map(scenario.actions, &{scenario.id, &1.order, &1.kind}) end)
+             |> Enum.sort()
   end
 
   test "expiry adjacency scenarios fold production grants at their frozen microsecond clocks" do
@@ -379,6 +396,37 @@ defmodule Accrue.Entitlements.ReferenceScenarioConformanceTest do
 
   defp observation_kind!("grant_observation"), do: "grant"
   defp observation_kind!("refund_observation"), do: "refunded"
+  defp observation_kind!("stripe_retraction"), do: "retract"
+
+  defp observation_kind!(kind)
+       when kind in [
+              "apple_verified_purchase",
+              "stripe_verified_purchase",
+              "purchase_preflight",
+              "offline_proof_stale",
+              "offline_expansion_request",
+              "reconnect_request",
+              "device_replace",
+              "signed_deny",
+              "rollback_proof",
+              "rotated_key_proof",
+              "equal_order_delivery",
+              "repeat_delivery",
+              "parallel_delivery",
+              "durable_interruption",
+              "expiry_boundary"
+            ],
+       do: "grant"
+
+  # Command-only actions are still executed through the production offline
+  # verifier; their follow-up output is asserted by the bounded result below.
+  # They never manufacture entitlement state in the fixture consumer.
+  defp dispatch_fixture_action(_account, %{kind: kind})
+       when kind in ["web_login", "ios_login", "verified_cache_replace", "resume_delivery", "empty_evidence"],
+       do: :ok
+
+  defp dispatch_fixture_action(account, %{operation: _operation} = action),
+    do: dispatch_observation(account, action)
 
   defp offline_vector(id), do: offline_fixture()["vectors"] |> Enum.find(&(&1["id"] == id))
 
