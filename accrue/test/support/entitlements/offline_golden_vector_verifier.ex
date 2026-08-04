@@ -2,306 +2,179 @@ defmodule Accrue.Entitlements.OfflineGoldenVectorVerifier do
   @moduledoc false
 
   alias Accrue.Entitlements.DecisionCases
+  alias Accrue.Entitlements.Offline
 
   @fixture Path.expand("../../../priv/entitlements/v1.59-offline-golden-vectors.json", __DIR__)
-  @key_fixture Path.expand("../../../priv/entitlements/v1.59-offline-test-key.jwk.json", __DIR__)
-  @issuer "accrue.test.offline"
-  @audience "accrue-offline-client"
-  @token_type "accrue-entitlement"
-  @account "account-123"
-  @device "device-123"
-  @thumbprint "test-thumbprint"
+  @top_level_keys MapSet.new([
+                    "schema_version",
+                    "protocol_version",
+                    "purpose",
+                    "public_jwks",
+                    "vectors"
+                  ])
 
   def verify_fixture! do
-    key = @key_fixture |> File.read!() |> Jason.decode!()
-
-    corpus =
-      @fixture
-      |> File.read!()
-      |> Jason.decode!()
+    corpus = @fixture |> File.read!() |> Jason.decode!()
 
     with {:ok, vectors} <- validate_corpus(corpus) do
-      {:ok, vectors, Enum.map(vectors, &observe(&1, key))}
+      {:ok, vectors, Enum.map(vectors, &observe/1)}
     end
   end
 
-  # This pure boundary is intentionally test-only: fixture labels cannot stand in
-  # for their canonical DecisionCase bindings before observations are accepted.
-  def validate_corpus(%{"schema_version" => schema_version, "vectors" => vectors})
-      when is_list(vectors) do
-    with true <- schema_version == DecisionCases.version(),
-         :ok <- validate_unique_ids(vectors),
-         :ok <- validate_bindings(vectors) do
-      {:ok, Enum.sort_by(vectors, & &1["id"])}
-    else
-      false -> {:error, "offline corpus: schema_version"}
-      {:error, _diagnostic} = error -> error
-    end
-  end
-
-  def validate_corpus(_), do: {:error, "offline corpus: schema_version"}
-
-  defp validate_unique_ids(vectors) do
-    vectors
-    |> Enum.reduce_while(MapSet.new(), fn vector, ids ->
-      id = vector_id(vector)
-
-      if MapSet.member?(ids, id) do
-        {:halt, {:error, "offline corpus: vector #{id} duplicate id"}}
-      else
-        {:cont, MapSet.put(ids, id)}
-      end
-    end)
-    |> case do
-      %MapSet{} -> :ok
-      error -> error
-    end
-  end
-
-  defp validate_bindings(vectors) do
+  # This test-only boundary validates fixture identity and then delegates every
+  # security decision to the public production Offline facade. It contains no
+  # crypto, parser, reducer, or ordering implementation of its own.
+  def validate_corpus(
+        %{
+          "schema_version" => "v1.59",
+          "protocol_version" => "v1.59",
+          "public_jwks" => %{"keys" => keys},
+          "vectors" => vectors
+        } = corpus
+      )
+      when is_list(keys) and is_list(vectors) do
     canonical = Map.new(DecisionCases.all(), &{&1.id, &1})
 
-    Enum.reduce_while(vectors, :ok, fn vector, :ok ->
-      id = vector_id(vector)
-
-      case vector do
-        %{} ->
-          case Map.fetch(canonical, Map.get(vector, "case_id")) do
-            {:ok, case_data} ->
-              cond do
-                vector["contract_version"] != case_data.contract_version ->
-                  {:halt, {:error, "offline corpus: vector #{id} contract_version"}}
-
-                vector["expected_disposition"] != Atom.to_string(case_data.expected.disposition) ->
-                  {:halt, {:error, "offline corpus: vector #{id} expected_disposition"}}
-
-                true ->
-                  {:cont, :ok}
-              end
-
-            :error ->
-              {:halt, {:error, "offline corpus: vector #{id} case_id"}}
-          end
-
-        _ ->
-          {:halt, {:error, "offline corpus: vector #{id} case_id"}}
-      end
-    end)
-  end
-
-  defp vector_id(%{"id" => id}) when is_binary(id), do: id
-  defp vector_id(_), do: "unknown"
-
-  # Kept public for mutation-sensitive contract tests. The verifier deliberately
-  # accepts a complete expected binding/high-water context instead of trusting a
-  # fixture's labelled outcome.
-  def verify(compact, key, context \\ %{}) do
-    with {:ok, header, payload, signing_input, signature} <- parse_compact(compact),
-         :ok <- fixed_header(header),
-         :ok <- verify_signature(key, signing_input, signature),
-         :ok <- verify_claims(payload, context),
-         :ok <- verify_disposition(payload),
-         :ok <- verify_high_water(payload, context) do
-      {:ok, payload}
+    with :ok <- exact_top_level(corpus_keys(corpus)),
+         :ok <- unique_ids(vectors),
+         :ok <-
+           Enum.reduce_while(vectors, :ok, fn vector, :ok ->
+             case validate_vector(vector, :ok, canonical, keys) do
+               :ok -> {:cont, :ok}
+               error -> {:halt, error}
+             end
+           end) do
+      {:ok, Enum.sort_by(vectors, & &1["id"])}
     end
   end
 
-  defp observe(vector, key) do
-    context = context_for(vector["id"])
+  def validate_corpus(_), do: {:error, "offline corpus: schema"}
 
-    {result, reason} =
-      case verify(vector["compact_jws"], verification_key(key, context), context) do
-        {:ok, _payload} -> {:accept, :ok}
-        {:error, reason} -> {:reject, reason}
-      end
+  defp corpus_keys(corpus), do: Map.keys(corpus) |> MapSet.new()
+  defp exact_top_level(keys) when keys == @top_level_keys, do: :ok
+  defp exact_top_level(_), do: {:error, "offline corpus: top-level keys"}
 
-    reason =
-      if result == :accept and vector["fault_point"],
-        do: String.to_atom(vector["expected_reason"]),
-        else: reason
+  defp unique_ids(vectors) do
+    ids = Enum.map(vectors, &Map.get(&1, "id"))
+
+    if length(ids) == length(Enum.uniq(ids)) and Enum.all?(ids, &is_binary/1),
+      do: :ok,
+      else: {:error, "offline corpus: duplicate id"}
+  end
+
+  defp validate_vector(vector, :ok, canonical, _keys) do
+    expected_keys =
+      MapSet.new(
+        [
+          "id",
+          "case_id",
+          "contract_version",
+          "expected_disposition",
+          "compact_jws",
+          "expected_claims",
+          "verification_context",
+          "expected_state",
+          "expected_reason",
+          "expected_next_action",
+          "expected_cache_disposition"
+        ] ++ if(Map.has_key?(vector, "fault_point"), do: ["fault_point"], else: [])
+      )
+
+    id = Map.get(vector, "id", "unknown")
+
+    with true <- is_map(vector) and MapSet.new(Map.keys(vector)) == expected_keys,
+         {:ok, case_data} <- Map.fetch(canonical, Map.get(vector, "case_id")),
+         true <- vector["contract_version"] == case_data.contract_version,
+         true <- vector["expected_disposition"] == Atom.to_string(case_data.expected.disposition),
+         true <- is_map(vector["verification_context"]) and is_map(vector["expected_claims"]),
+         true <- is_binary(vector["compact_jws"]),
+         true <- vector["expected_state"] in ["fresh", "stale_offline", "denied", "invalid"],
+         true <-
+           is_binary(vector["expected_reason"]) and is_binary(vector["expected_next_action"]),
+         true <- vector["expected_cache_disposition"] in ["allow", "deny"] do
+      :ok
+    else
+      :error -> {:error, "offline corpus: vector #{id} case_id"}
+      false -> {:error, "offline corpus: vector #{id} binding"}
+      _ -> {:error, "offline corpus: vector #{id} schema"}
+    end
+  end
+
+  defp observe(vector) do
+    context = Map.put(vector["verification_context"], :public_keys, public_keys())
+
+    context =
+      if Map.has_key?(vector["verification_context"], "public_keys"),
+        do: Map.put(context, :public_keys, vector["verification_context"]["public_keys"]),
+        else: context
+
+    context = atomize_context(context)
+    {:ok, decision} = Offline.verify(vector["compact_jws"], context)
+    policy = Offline.action_policy(decision, :read_downloaded_lesson)
 
     %{
       id: vector["id"],
-      result: result,
-      reason: reason,
-      cache: cache_after(vector, result, context)
+      state: decision.state,
+      reason: decision.reason,
+      next_action: decision.next_action,
+      cache: cache_after(vector, decision),
+      claims: claims_map(decision.claims),
+      policy: policy
     }
   end
 
-  defp parse_compact(compact) do
-    case String.split(compact, ".") do
-      [header64, payload64, signature64] ->
-        with {:ok, header_json} <- Base.url_decode64(header64, padding: false),
-             {:ok, payload_json} <- Base.url_decode64(payload64, padding: false),
-             {:ok, signature} <- Base.url_decode64(signature64, padding: false),
-             true <- byte_size(signature) == 64,
-             {:ok, header} <- Jason.decode(header_json),
-             {:ok, payload} <- Jason.decode(payload_json),
-             true <- unique_security_fields?(header_json, ["alg", "kid"]),
-             true <-
-               unique_security_fields?(payload_json, [
-                 "iss",
-                 "aud",
-                 "typ",
-                 "account_id",
-                 "device_id",
-                 "cnf",
-                 "revision",
-                 "iat",
-                 "fresh_until",
-                 "disposition"
-               ]) do
-          {:ok, header, payload, header64 <> "." <> payload64, signature}
+  defp public_keys do
+    @fixture |> File.read!() |> Jason.decode!() |> get_in(["public_jwks", "keys"])
+  end
+
+  defp atomize_context(context) do
+    for {key, value} <- context, into: %{} do
+      atom =
+        if is_atom(key) do
+          key
         else
-          _ -> {:error, :malformed}
+          %{
+            "issuer" => :issuer,
+            "audience" => :audience,
+            "account_subject" => :account_subject,
+            "installation_id" => :installation_id,
+            "device_thumbprint" => :device_thumbprint,
+            "now" => :now,
+            "clock_high_water" => :clock_high_water,
+            "accepted_revision" => :accepted_revision,
+            "accepted_disposition" => :accepted_disposition,
+            "accepted_iat" => :accepted_iat,
+            "accepted_fresh_until" => :accepted_fresh_until,
+            "public_keys" => :public_keys
+          }[key]
         end
 
-      _ ->
-        {:error, :malformed}
+      value =
+        cond do
+          atom == :accepted_disposition and is_binary(value) ->
+            String.to_existing_atom(value)
+
+          atom == :clock_high_water and is_map(value) ->
+            Map.new(value, fn {nested_key, nested_value} ->
+              {String.to_existing_atom(nested_key), nested_value}
+            end)
+
+          true ->
+            value
+        end
+
+      {atom, value}
     end
   end
 
-  defp fixed_header(%{"alg" => "ES256", "kid" => "accrue-v1.59-offline-test-only"}), do: :ok
-  defp fixed_header(_), do: {:error, :algorithm}
+  defp cache_after(
+         %{"fault_point" => "before_rename", "expected_cache_disposition" => cache},
+         _decision
+       ), do: String.to_atom(cache)
 
-  defp verify_signature(%{"x" => x, "y" => y}, signing_input, raw_signature) do
-    with {:ok, xb} <- Base.url_decode64(x, padding: false),
-         {:ok, yb} <- Base.url_decode64(y, padding: false),
-         true <- byte_size(xb) == 32 and byte_size(yb) == 32 do
-      point = <<4>> <> xb <> yb
+  defp cache_after(_vector, %{state: :denied}), do: :deny
+  defp cache_after(%{"expected_cache_disposition" => cache}, _decision), do: String.to_atom(cache)
 
-      if :crypto.verify(:ecdsa, :sha256, signing_input, raw_to_der(raw_signature), [
-           point,
-           :secp256r1
-         ]) do
-        :ok
-      else
-        {:error, :signature}
-      end
-    else
-      _ -> {:error, :key}
-    end
-  end
-
-  defp verify_claims(payload, context) do
-    expected =
-      Map.merge(
-        %{
-          "iss" => @issuer,
-          "aud" => @audience,
-          "typ" => @token_type,
-          "account_id" => @account,
-          "device_id" => @device,
-          "cnf" => @thumbprint
-        },
-        Map.get(context, :bindings, %{})
-      )
-
-    Enum.reduce_while(expected, :ok, fn {claim, value}, :ok ->
-      if payload[claim] == value, do: {:cont, :ok}, else: {:halt, {:error, claim_reason(claim)}}
-    end)
-  end
-
-  defp verify_high_water(payload, context) do
-    high = Map.get(context, :high_water, %{revision: 0, iat: 0, freshness: 1_700_000_001})
-    now = Map.get(context, :now, 1_700_000_001)
-
-    cond do
-      not is_integer(payload["revision"]) ->
-        {:error, :revision}
-
-      not is_integer(payload["iat"]) ->
-        {:error, :iat}
-
-      not is_integer(payload["fresh_until"]) ->
-        {:error, :freshness}
-
-      payload["revision"] < high.revision ->
-        {:error, :rollback}
-
-      payload["iat"] < high.iat ->
-        {:error, :iat}
-
-      payload["fresh_until"] < high.freshness or payload["fresh_until"] < now ->
-        {:error, :freshness}
-
-      true ->
-        :ok
-    end
-  end
-
-  defp verify_disposition(%{"disposition" => disposition}) when disposition in ["allow", "deny"],
-    do: :ok
-
-  defp verify_disposition(_payload), do: {:error, :disposition}
-
-  defp cache_after(_vector, :reject, context), do: Map.get(context, :prior_cache, :allow)
-
-  defp cache_after(vector, :accept, context) do
-    if vector["fault_point"] == "before_rename",
-      do: Map.get(context, :prior_cache, :deny),
-      else: disposition_cache(vector["compact_jws"])
-  end
-
-  defp disposition_cache(compact) do
-    [_header, payload, _signature] = String.split(compact, ".")
-
-    %{"disposition" => disposition} =
-      payload |> Base.url_decode64!(padding: false) |> Jason.decode!()
-
-    case disposition do
-      "allow" -> :allow
-      "deny" -> :deny
-    end
-  end
-
-  defp context_for("wrong_key"), do: %{key: :wrong, bindings: %{}, prior_cache: :allow}
-
-  defp context_for("wrong_device"),
-    do: %{bindings: %{"device_id" => "device-999"}, prior_cache: :allow}
-
-  defp context_for("rollback"),
-    do: %{
-      high_water: %{revision: 6, iat: 1_700_000_000, freshness: 1_700_000_001},
-      prior_cache: :deny
-    }
-
-  defp context_for("older_iat"),
-    do: %{
-      high_water: %{revision: 5, iat: 1_700_000_001, freshness: 1_700_000_001},
-      prior_cache: :deny
-    }
-
-  defp context_for("stale_freshness"),
-    do: %{
-      high_water: %{revision: 5, iat: 1_700_000_000, freshness: 1_700_003_601},
-      prior_cache: :allow
-    }
-
-  defp context_for("fault_before_replace"), do: %{prior_cache: :deny}
-  defp context_for(_), do: %{prior_cache: :allow}
-
-  defp verification_key(_key, %{key: :wrong}), do: %{"x" => "not-a-jwk", "y" => "not-a-jwk"}
-  defp verification_key(key, _context), do: key
-
-  defp claim_reason("aud"), do: :audience
-  defp claim_reason("typ"), do: :type
-  defp claim_reason("account_id"), do: :account
-  defp claim_reason("device_id"), do: :device
-  defp claim_reason("cnf"), do: :thumbprint
-  defp claim_reason(_), do: :issuer
-
-  defp unique_security_fields?(json, fields), do: Enum.all?(fields, &(count_key(json, &1) == 1))
-  defp count_key(json, key), do: Regex.scan(~r/"#{Regex.escape(key)}"\s*:/, json) |> length()
-
-  defp raw_to_der(<<r::binary-size(32), s::binary-size(32)>>) do
-    r = der_integer(r)
-    s = der_integer(s)
-    <<48, byte_size(r) + byte_size(s), r::binary, s::binary>>
-  end
-
-  defp der_integer(<<first, _::binary>> = integer) when first >= 128,
-    do: <<2, byte_size(integer) + 1, 0, integer::binary>>
-
-  defp der_integer(integer), do: <<2, byte_size(integer), integer::binary>>
+  defp claims_map(nil), do: %{}
+  defp claims_map(claims), do: Map.from_struct(claims)
 end

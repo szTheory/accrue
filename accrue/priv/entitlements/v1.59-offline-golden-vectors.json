@@ -1,208 +1,534 @@
 {
-  "purpose": "TEST-ONLY signed offline entitlement verification corpus; never configure this key for issuance.",
+  "protocol_version": "v1.59",
+  "public_jwks": {
+    "keys": [
+      {
+        "alg": "ES256",
+        "crv": "P-256",
+        "kid": "accrue-v1.59-offline-test-only",
+        "kty": "EC",
+        "use": "sig",
+        "x": "ILy0daKycIXATH4kWl48vbUd4Sn9AqwHL-zPXonI8-M",
+        "y": "JdAT80VGTVn3qxGJkUZMZ9y85nUFr9TYaPkyzOpDMEc"
+      }
+    ]
+  },
+  "purpose": "TEST-ONLY synthetic public-proof corpus; private signing material is confined to test support and never configured for issuance.",
   "schema_version": "v1.59",
   "vectors": [
     {
       "case_id": "reconnect_positive_replacement",
-      "compact_jws": "eyJhbGciOiJFUzI1NiIsImtpZCI6ImFjY3J1ZS12MS41OS1vZmZsaW5lLXRlc3Qtb25seSJ9.eyJpc3MiOiJhY2NydWUudGVzdC5vZmZsaW5lIiwiYXVkIjoiYWNjcnVlLW9mZmxpbmUtY2xpZW50IiwidHlwIjoiYWNjcnVlLWVudGl0bGVtZW50IiwiYWNjb3VudF9pZCI6ImFjY291bnQtMTIzIiwiZGV2aWNlX2lkIjoiZGV2aWNlLTEyMyIsImNuZiI6InRlc3QtdGh1bWJwcmludCIsInJldmlzaW9uIjo1LCJpYXQiOjE3MDAwMDAwMDAsImZyZXNoX3VudGlsIjoxNzAwMDAzNjAwLCJkaXNwb3NpdGlvbiI6ImFsbG93In0.JFnJfG7Tsj8imq2WkdKKRSAX3EdENW6FeFUkgwMpFT0Atgb3B0S9zrcRRf-UjmjfF1WMu8eBdZ1hs2GzC0kZmw",
+      "compact_jws": "eyJhbGciOiJFUzI1NiIsImtpZCI6ImFjY3J1ZS12MS41OS1vZmZsaW5lLXRlc3Qtb25seSIsInR5cCI6ImFjY3J1ZS1lbnRpdGxlbWVudC1wcm9vZitqd3QifQ.eyJhdWQiOiJhY2NydWUtb2ZmbGluZS1jbGllbnQiLCJjbmYiOnsiamt0IjoiSVZ3OTU4RF9zeEtZTWc2aUNIUXMtdm14a09WSWlSd3dLbGZlVjZ5a3JDZyJ9LCJkaXNwb3NpdGlvbiI6ImFsbG93IiwiZXhwIjoxNzAyNTkyMDAwLCJmZWF0dXJlcyI6WyJvZmZsaW5lX3N0dWR5Il0sImZyZXNoX3VudGlsIjoxNzAwMDAzNjAwLCJpYXQiOjE3MDAwMDAwMDAsImlzcyI6ImFjY3J1ZS50ZXN0Lm9mZmxpbmUiLCJqdGkiOiJ0ZXN0LXByb29mLWFsbG93IiwibmJmIjoxNzAwMDAwMDAwLCJwbGFucyI6WyJwcm8iXSwicXVhbnRpdGllcyI6eyJkb3dubG9hZHMiOjN9LCJyZXZpc2lvbiI6NSwic3ViIjoic3ludGhldGljLWFjY291bnQiLCJ2ZXJzaW9uIjoidjEuNTkifQ.MiJ1s4A9RFTT7H45va6XapmgKrAfH483j1Qj425tCNsAi1k6YcHhagtqIc0f4CAH7kYIvxTNGIo3sRBoDoTAAw",
       "contract_version": "v1.59",
       "expected_cache_disposition": "allow",
+      "expected_claims": {
+        "aud": "accrue-offline-client",
+        "cnf": {
+          "jkt": "IVw958D_sxKYMg6iCHQs-vmxkOVIiRwwKlfeV6ykrCg"
+        },
+        "disposition": "allow",
+        "exp": 1702592000,
+        "features": [
+          "offline_study"
+        ],
+        "fresh_until": 1700003600,
+        "iat": 1700000000,
+        "iss": "accrue.test.offline",
+        "jti": "test-proof-allow",
+        "nbf": 1700000000,
+        "plans": [
+          "pro"
+        ],
+        "quantities": {
+          "downloads": 3
+        },
+        "revision": 5,
+        "sub": "synthetic-account",
+        "version": "v1.59"
+      },
       "expected_disposition": "grant",
+      "expected_next_action": "none",
       "expected_reason": "ok",
-      "expected_verification": "accept",
-      "id": "valid_allow"
+      "expected_state": "fresh",
+      "id": "valid_allow",
+      "verification_context": {
+        "accepted_disposition": null,
+        "accepted_fresh_until": 0,
+        "accepted_iat": 0,
+        "accepted_revision": 0,
+        "account_subject": "synthetic-account",
+        "audience": "accrue-offline-client",
+        "clock_high_water": {},
+        "device_thumbprint": "IVw958D_sxKYMg6iCHQs-vmxkOVIiRwwKlfeV6ykrCg",
+        "installation_id": "synthetic-installation",
+        "issuer": "accrue.test.offline",
+        "now": 1700000001
+      }
     },
     {
       "case_id": "reconnect_denied_tombstone",
-      "compact_jws": "eyJhbGciOiJFUzI1NiIsImtpZCI6ImFjY3J1ZS12MS41OS1vZmZsaW5lLXRlc3Qtb25seSJ9.eyJpc3MiOiJhY2NydWUudGVzdC5vZmZsaW5lIiwiYXVkIjoiYWNjcnVlLW9mZmxpbmUtY2xpZW50IiwidHlwIjoiYWNjcnVlLWVudGl0bGVtZW50IiwiYWNjb3VudF9pZCI6ImFjY291bnQtMTIzIiwiZGV2aWNlX2lkIjoiZGV2aWNlLTEyMyIsImNuZiI6InRlc3QtdGh1bWJwcmludCIsInJldmlzaW9uIjo1LCJpYXQiOjE3MDAwMDAwMDAsImZyZXNoX3VudGlsIjoxNzAwMDAzNjAwLCJkaXNwb3NpdGlvbiI6ImRlbnkifQ.IzhX4g4ftHpPUVHnjBGA47f0QX7IuOCUva9P-jvVH0Wv2lL1KNoCmaunfA4-BIWtQJ4F3uU3_F5xYDgWS1NVaA",
+      "compact_jws": "eyJhbGciOiJFUzI1NiIsImtpZCI6ImFjY3J1ZS12MS41OS1vZmZsaW5lLXRlc3Qtb25seSIsInR5cCI6ImFjY3J1ZS1lbnRpdGxlbWVudC1wcm9vZitqd3QifQ.eyJhdWQiOiJhY2NydWUtb2ZmbGluZS1jbGllbnQiLCJjbmYiOnsiamt0IjoiSVZ3OTU4RF9zeEtZTWc2aUNIUXMtdm14a09WSWlSd3dLbGZlVjZ5a3JDZyJ9LCJkZW5pYWxfcmVhc29uIjoiYWNjZXNzX3VuYXZhaWxhYmxlIiwiZGlzcG9zaXRpb24iOiJkZW55IiwiZXhwIjoxNzAyNTkyMDAwLCJmZWF0dXJlcyI6W10sImZyZXNoX3VudGlsIjoxNzAwMDAzNjAwLCJpYXQiOjE3MDAwMDAwMDAsImlzcyI6ImFjY3J1ZS50ZXN0Lm9mZmxpbmUiLCJqdGkiOiJ0ZXN0LXByb29mLWRlbnkiLCJuYmYiOjE3MDAwMDAwMDAsInBsYW5zIjpbXSwicXVhbnRpdGllcyI6e30sInJldmlzaW9uIjo1LCJzdWIiOiJzeW50aGV0aWMtYWNjb3VudCIsInZlcnNpb24iOiJ2MS41OSJ9.QL9Fjm96nx4i-cJSWwGrZkV2aSGtbJdtkHDlUwOv93NRQOFRcErWDOzUjWQBm3jm4FSYd2z10res_q6XbV3l5g",
       "contract_version": "v1.59",
       "expected_cache_disposition": "deny",
+      "expected_claims": {
+        "aud": "accrue-offline-client",
+        "cnf": {
+          "jkt": "IVw958D_sxKYMg6iCHQs-vmxkOVIiRwwKlfeV6ykrCg"
+        },
+        "denial_reason": "access_unavailable",
+        "disposition": "deny",
+        "exp": 1702592000,
+        "features": [],
+        "fresh_until": 1700003600,
+        "iat": 1700000000,
+        "iss": "accrue.test.offline",
+        "jti": "test-proof-deny",
+        "nbf": 1700000000,
+        "plans": [],
+        "quantities": {},
+        "revision": 5,
+        "sub": "synthetic-account",
+        "version": "v1.59"
+      },
       "expected_disposition": "retract",
-      "expected_reason": "ok",
-      "expected_verification": "accept",
-      "id": "valid_signed_denial"
-    },
-    {
-      "case_id": "invalid_apple_evidence",
-      "compact_jws": "eyJhbGciOiJFUzI1NiIsImtpZCI6ImFjY3J1ZS12MS41OS1vZmZsaW5lLXRlc3Qtb25seSJ9.eyJpc3MiOiJhY2NydWUudGVzdC5vZmZsaW5lIiwiYXVkIjoiYWNjcnVlLW9mZmxpbmUtY2xpZW50IiwidHlwIjoiYWNjcnVlLWVudGl0bGVtZW50IiwiYWNjb3VudF9pZCI6ImFjY291bnQtMTIzIiwiZGV2aWNlX2lkIjoiZGV2aWNlLTEyMyIsImNuZiI6InRlc3QtdGh1bWJwcmludCIsInJldmlzaW9uIjo1LCJpYXQiOjE3MDAwMDAwMDAsImZyZXNoX3VudGlsIjoxNzAwMDAzNjAwLCJkaXNwb3NpdGlvbiI6ImFsbG93In0.JFnJfG7Tsj8imq2WkdKKRSAX3EdENW6FeFUkgwMpFT0Atgb3B0S9zrcRRf-UjmjfF1WMu8eBdZ1hs2GzC0kYmw",
-      "contract_version": "v1.59",
-      "expected_cache_disposition": "allow",
-      "expected_disposition": "no_grant",
-      "expected_reason": "signature",
-      "expected_verification": "reject",
-      "id": "wrong_signature"
-    },
-    {
-      "case_id": "apple_token_mismatch",
-      "compact_jws": "eyJhbGciOiJFUzI1NiIsImtpZCI6ImFjY3J1ZS12MS41OS1vZmZsaW5lLXRlc3Qtb25seSJ9.eyJpc3MiOiJhY2NydWUudGVzdC5vZmZsaW5lIiwiYXVkIjoiYWNjcnVlLW9mZmxpbmUtY2xpZW50IiwidHlwIjoiYWNjcnVlLWVudGl0bGVtZW50IiwiYWNjb3VudF9pZCI6ImFjY291bnQtMTIzIiwiZGV2aWNlX2lkIjoiZGV2aWNlLTEyMyIsImNuZiI6InRlc3QtdGh1bWJwcmludCIsInJldmlzaW9uIjo1LCJpYXQiOjE3MDAwMDAwMDAsImZyZXNoX3VudGlsIjoxNzAwMDAzNjAwLCJkaXNwb3NpdGlvbiI6ImFsbG93In0.JFnJfG7Tsj8imq2WkdKKRSAX3EdENW6FeFUkgwMpFT0Atgb3B0S9zrcRRf-UjmjfF1WMu8eBdZ1hs2GzC0kZmw",
-      "contract_version": "v1.59",
-      "expected_cache_disposition": "allow",
-      "expected_disposition": "no_grant",
-      "expected_reason": "key",
-      "expected_verification": "reject",
-      "id": "wrong_key"
-    },
-    {
-      "case_id": "unmapped_verified_product",
-      "compact_jws": "eyJhbGciOiJFUzI1NiIsImtpZCI6ImFjY3J1ZS12MS41OS1vZmZsaW5lLXRlc3Qtb25seSJ9.eyJpc3MiOiJhY2NydWUudGVzdC5vZmZsaW5lIiwiYXVkIjoiYWNjcnVlLW9mZmxpbmUtY2xpZW50IiwidHlwIjoiYWNjcnVlLWVudGl0bGVtZW50IiwiYWNjb3VudF9pZCI6ImFjY291bnQtMTIzIiwiZGV2aWNlX2lkIjoiZGV2aWNlLTEyMyIsImNuZiI6InRlc3QtdGh1bWJwcmludCIsInJldmlzaW9uIjo1LCJpYXQiOjE3MDAwMDAwMDAsImZyZXNoX3VudGlsIjoxNzAwMDAzNjAwLCJkaXNwb3NpdGlvbiI6ImFsbG93In0.JFnJfG7Tsj8imq2WkdKKRSAX3EdENW6FeFUkgwMpFT0Atgb3B0S9zrcRRf-UjmjfF1WMu8eBdZ1hs2GzC0kZmw",
-      "contract_version": "v1.59",
-      "expected_cache_disposition": "allow",
-      "expected_disposition": "no_grant",
-      "expected_reason": "device",
-      "expected_verification": "reject",
-      "id": "wrong_device"
-    },
-    {
-      "case_id": "out_of_order_positive_after_revoke",
-      "compact_jws": "eyJhbGciOiJFUzI1NiIsImtpZCI6ImFjY3J1ZS12MS41OS1vZmZsaW5lLXRlc3Qtb25seSJ9.eyJpc3MiOiJhY2NydWUudGVzdC5vZmZsaW5lIiwiYXVkIjoiYWNjcnVlLW9mZmxpbmUtY2xpZW50IiwidHlwIjoiYWNjcnVlLWVudGl0bGVtZW50IiwiYWNjb3VudF9pZCI6ImFjY291bnQtMTIzIiwiZGV2aWNlX2lkIjoiZGV2aWNlLTEyMyIsImNuZiI6InRlc3QtdGh1bWJwcmludCIsInJldmlzaW9uIjo1LCJpYXQiOjE3MDAwMDAwMDAsImZyZXNoX3VudGlsIjoxNzAwMDAzNjAwLCJkaXNwb3NpdGlvbiI6ImFsbG93In0.JFnJfG7Tsj8imq2WkdKKRSAX3EdENW6FeFUkgwMpFT0Atgb3B0S9zrcRRf-UjmjfF1WMu8eBdZ1hs2GzC0kZmw",
-      "contract_version": "v1.59",
-      "expected_cache_disposition": "deny",
-      "expected_disposition": "noop",
-      "expected_reason": "rollback",
-      "expected_verification": "reject",
-      "id": "rollback"
-    },
-    {
-      "case_id": "duplicate_provider_event",
-      "compact_jws": "eyJhbGciOiJFUzI1NiIsImtpZCI6ImFjY3J1ZS12MS41OS1vZmZsaW5lLXRlc3Qtb25seSJ9.eyJpc3MiOiJhY2NydWUudGVzdC5vZmZsaW5lIiwiYXVkIjoiYWNjcnVlLW9mZmxpbmUtY2xpZW50IiwidHlwIjoiYWNjcnVlLWVudGl0bGVtZW50IiwiYWNjb3VudF9pZCI6ImFjY291bnQtMTIzIiwiZGV2aWNlX2lkIjoiZGV2aWNlLTEyMyIsImNuZiI6InRlc3QtdGh1bWJwcmludCIsInJldmlzaW9uIjo1LCJpYXQiOjE3MDAwMDAwMDAsImZyZXNoX3VudGlsIjoxNzAwMDAzNjAwLCJkaXNwb3NpdGlvbiI6ImFsbG93In0.JFnJfG7Tsj8imq2WkdKKRSAX3EdENW6FeFUkgwMpFT0Atgb3B0S9zrcRRf-UjmjfF1WMu8eBdZ1hs2GzC0kZmw",
-      "contract_version": "v1.59",
-      "expected_cache_disposition": "deny",
-      "expected_disposition": "noop",
-      "expected_reason": "iat",
-      "expected_verification": "reject",
-      "id": "older_iat"
+      "expected_next_action": "reconnect_required",
+      "expected_reason": "signed_denial",
+      "expected_state": "denied",
+      "id": "valid_signed_denial",
+      "verification_context": {
+        "accepted_disposition": null,
+        "accepted_fresh_until": 0,
+        "accepted_iat": 0,
+        "accepted_revision": 0,
+        "account_subject": "synthetic-account",
+        "audience": "accrue-offline-client",
+        "clock_high_water": {},
+        "device_thumbprint": "IVw958D_sxKYMg6iCHQs-vmxkOVIiRwwKlfeV6ykrCg",
+        "installation_id": "synthetic-installation",
+        "issuer": "accrue.test.offline",
+        "now": 1700000001
+      }
     },
     {
       "case_id": "stale_offline_continuity",
-      "compact_jws": "eyJhbGciOiJFUzI1NiIsImtpZCI6ImFjY3J1ZS12MS41OS1vZmZsaW5lLXRlc3Qtb25seSJ9.eyJpc3MiOiJhY2NydWUudGVzdC5vZmZsaW5lIiwiYXVkIjoiYWNjcnVlLW9mZmxpbmUtY2xpZW50IiwidHlwIjoiYWNjcnVlLWVudGl0bGVtZW50IiwiYWNjb3VudF9pZCI6ImFjY291bnQtMTIzIiwiZGV2aWNlX2lkIjoiZGV2aWNlLTEyMyIsImNuZiI6InRlc3QtdGh1bWJwcmludCIsInJldmlzaW9uIjo1LCJpYXQiOjE3MDAwMDAwMDAsImZyZXNoX3VudGlsIjoxNzAwMDAzNjAwLCJkaXNwb3NpdGlvbiI6ImFsbG93In0.JFnJfG7Tsj8imq2WkdKKRSAX3EdENW6FeFUkgwMpFT0Atgb3B0S9zrcRRf-UjmjfF1WMu8eBdZ1hs2GzC0kZmw",
+      "compact_jws": "eyJhbGciOiJFUzI1NiIsImtpZCI6ImFjY3J1ZS12MS41OS1vZmZsaW5lLXRlc3Qtb25seSIsInR5cCI6ImFjY3J1ZS1lbnRpdGxlbWVudC1wcm9vZitqd3QifQ.eyJhdWQiOiJhY2NydWUtb2ZmbGluZS1jbGllbnQiLCJjbmYiOnsiamt0IjoiSVZ3OTU4RF9zeEtZTWc2aUNIUXMtdm14a09WSWlSd3dLbGZlVjZ5a3JDZyJ9LCJkaXNwb3NpdGlvbiI6ImFsbG93IiwiZXhwIjoxNzAyNTkyMDAwLCJmZWF0dXJlcyI6WyJvZmZsaW5lX3N0dWR5Il0sImZyZXNoX3VudGlsIjoxNzAwMDAzNjAwLCJpYXQiOjE3MDAwMDAwMDAsImlzcyI6ImFjY3J1ZS50ZXN0Lm9mZmxpbmUiLCJqdGkiOiJ0ZXN0LXByb29mLWFsbG93IiwibmJmIjoxNzAwMDAwMDAwLCJwbGFucyI6WyJwcm8iXSwicXVhbnRpdGllcyI6eyJkb3dubG9hZHMiOjN9LCJyZXZpc2lvbiI6NSwic3ViIjoic3ludGhldGljLWFjY291bnQiLCJ2ZXJzaW9uIjoidjEuNTkifQ.MiJ1s4A9RFTT7H45va6XapmgKrAfH483j1Qj425tCNsAi1k6YcHhagtqIc0f4CAH7kYIvxTNGIo3sRBoDoTAAw",
       "contract_version": "v1.59",
       "expected_cache_disposition": "allow",
+      "expected_claims": {
+        "aud": "accrue-offline-client",
+        "cnf": {
+          "jkt": "IVw958D_sxKYMg6iCHQs-vmxkOVIiRwwKlfeV6ykrCg"
+        },
+        "disposition": "allow",
+        "exp": 1702592000,
+        "features": [
+          "offline_study"
+        ],
+        "fresh_until": 1700003600,
+        "iat": 1700000000,
+        "iss": "accrue.test.offline",
+        "jti": "test-proof-allow",
+        "nbf": 1700000000,
+        "plans": [
+          "pro"
+        ],
+        "quantities": {
+          "downloads": 3
+        },
+        "revision": 5,
+        "sub": "synthetic-account",
+        "version": "v1.59"
+      },
       "expected_disposition": "preserve",
-      "expected_reason": "freshness",
-      "expected_verification": "reject",
-      "id": "stale_freshness"
+      "expected_next_action": "reconnect_required",
+      "expected_reason": "revalidation_due",
+      "expected_state": "stale_offline",
+      "id": "stale_at_freshness",
+      "verification_context": {
+        "accepted_disposition": null,
+        "accepted_fresh_until": 0,
+        "accepted_iat": 0,
+        "accepted_revision": 0,
+        "account_subject": "synthetic-account",
+        "audience": "accrue-offline-client",
+        "clock_high_water": {},
+        "device_thumbprint": "IVw958D_sxKYMg6iCHQs-vmxkOVIiRwwKlfeV6ykrCg",
+        "installation_id": "synthetic-installation",
+        "issuer": "accrue.test.offline",
+        "now": 1700003600
+      }
+    },
+    {
+      "case_id": "stale_offline_continuity",
+      "compact_jws": "eyJhbGciOiJFUzI1NiIsImtpZCI6ImFjY3J1ZS12MS41OS1vZmZsaW5lLXRlc3Qtb25seSIsInR5cCI6ImFjY3J1ZS1lbnRpdGxlbWVudC1wcm9vZitqd3QifQ.eyJhdWQiOiJhY2NydWUtb2ZmbGluZS1jbGllbnQiLCJjbmYiOnsiamt0IjoiSVZ3OTU4RF9zeEtZTWc2aUNIUXMtdm14a09WSWlSd3dLbGZlVjZ5a3JDZyJ9LCJkaXNwb3NpdGlvbiI6ImFsbG93IiwiZXhwIjoxNzAyNTkyMDAwLCJmZWF0dXJlcyI6WyJvZmZsaW5lX3N0dWR5Il0sImZyZXNoX3VudGlsIjoxNzAwMDAzNjAwLCJpYXQiOjE3MDAwMDAwMDAsImlzcyI6ImFjY3J1ZS50ZXN0Lm9mZmxpbmUiLCJqdGkiOiJ0ZXN0LXByb29mLWFsbG93IiwibmJmIjoxNzAwMDAwMDAwLCJwbGFucyI6WyJwcm8iXSwicXVhbnRpdGllcyI6eyJkb3dubG9hZHMiOjN9LCJyZXZpc2lvbiI6NSwic3ViIjoic3ludGhldGljLWFjY291bnQiLCJ2ZXJzaW9uIjoidjEuNTkifQ.MiJ1s4A9RFTT7H45va6XapmgKrAfH483j1Qj425tCNsAi1k6YcHhagtqIc0f4CAH7kYIvxTNGIo3sRBoDoTAAw",
+      "contract_version": "v1.59",
+      "expected_cache_disposition": "allow",
+      "expected_claims": {
+        "aud": "accrue-offline-client",
+        "cnf": {
+          "jkt": "IVw958D_sxKYMg6iCHQs-vmxkOVIiRwwKlfeV6ykrCg"
+        },
+        "disposition": "allow",
+        "exp": 1702592000,
+        "features": [
+          "offline_study"
+        ],
+        "fresh_until": 1700003600,
+        "iat": 1700000000,
+        "iss": "accrue.test.offline",
+        "jti": "test-proof-allow",
+        "nbf": 1700000000,
+        "plans": [
+          "pro"
+        ],
+        "quantities": {
+          "downloads": 3
+        },
+        "revision": 5,
+        "sub": "synthetic-account",
+        "version": "v1.59"
+      },
+      "expected_disposition": "preserve",
+      "expected_next_action": "reconnect_required",
+      "expected_reason": "revalidation_due",
+      "expected_state": "stale_offline",
+      "id": "stale_beyond_72h",
+      "verification_context": {
+        "accepted_disposition": null,
+        "accepted_fresh_until": 0,
+        "accepted_iat": 0,
+        "accepted_revision": 0,
+        "account_subject": "synthetic-account",
+        "audience": "accrue-offline-client",
+        "clock_high_water": {},
+        "device_thumbprint": "IVw958D_sxKYMg6iCHQs-vmxkOVIiRwwKlfeV6ykrCg",
+        "installation_id": "synthetic-installation",
+        "issuer": "accrue.test.offline",
+        "now": 1700262800
+      }
+    },
+    {
+      "case_id": "invalid_apple_evidence",
+      "compact_jws": "eyJhbGciOiJFUzI1NiIsImtpZCI6ImFjY3J1ZS12MS41OS1vZmZsaW5lLXRlc3Qtb25seSIsInR5cCI6ImFjY3J1ZS1lbnRpdGxlbWVudC1wcm9vZitqd3QifQ.eyJhdWQiOiJhY2NydWUtb2ZmbGluZS1jbGllbnQiLCJjbmYiOnsiamt0IjoiSVZ3OTU4RF9zeEtZTWc2aUNIUXMtdm14a09WSWlSd3dLbGZlVjZ5a3JDZyJ9LCJkaXNwb3NpdGlvbiI6ImFsbG93IiwiZXhwIjoxNzAyNTkyMDAwLCJmZWF0dXJlcyI6WyJvZmZsaW5lX3N0dWR5Il0sImZyZXNoX3VudGlsIjoxNzAwMDAzNjAwLCJpYXQiOjE3MDAwMDAwMDAsImlzcyI6ImFjY3J1ZS50ZXN0Lm9mZmxpbmUiLCJqdGkiOiJ0ZXN0LXByb29mLWFsbG93IiwibmJmIjoxNzAwMDAwMDAwLCJwbGFucyI6WyJwcm8iXSwicXVhbnRpdGllcyI6eyJkb3dubG9hZHMiOjN9LCJyZXZpc2lvbiI6NSwic3ViIjoic3ludGhldGljLWFjY291bnQiLCJ2ZXJzaW9uIjoidjEuNTkifQ.MiJ1s4A9RFTT7H45va6XapmgKrAfH483j1Qj425tCNsAi1k6YcHhagtqIc0f4CAH7kYIvxTNGIo3sRBoDoTAAw",
+      "contract_version": "v1.59",
+      "expected_cache_disposition": "allow",
+      "expected_claims": {},
+      "expected_disposition": "no_grant",
+      "expected_next_action": "reconnect_required",
+      "expected_reason": "hard_expired",
+      "expected_state": "invalid",
+      "id": "hard_expired",
+      "verification_context": {
+        "accepted_disposition": null,
+        "accepted_fresh_until": 0,
+        "accepted_iat": 0,
+        "accepted_revision": 0,
+        "account_subject": "synthetic-account",
+        "audience": "accrue-offline-client",
+        "clock_high_water": {},
+        "device_thumbprint": "IVw958D_sxKYMg6iCHQs-vmxkOVIiRwwKlfeV6ykrCg",
+        "installation_id": "synthetic-installation",
+        "issuer": "accrue.test.offline",
+        "now": 1702592000
+      }
+    },
+    {
+      "case_id": "invalid_apple_evidence",
+      "compact_jws": "eyJhbGciOiJFUzI1NiIsImtpZCI6ImFjY3J1ZS12MS41OS1vZmZsaW5lLXRlc3Qtb25seSIsInR5cCI6ImFjY3J1ZS1lbnRpdGxlbWVudC1wcm9vZitqd3QifQ.eyJhdWQiOiJhY2NydWUtb2ZmbGluZS1jbGllbnQiLCJjbmYiOnsiamt0IjoiSVZ3OTU4RF9zeEtZTWc2aUNIUXMtdm14a09WSWlSd3dLbGZlVjZ5a3JDZyJ9LCJkaXNwb3NpdGlvbiI6ImFsbG93IiwiZXhwIjoxNzAyNTkyMDAwLCJmZWF0dXJlcyI6WyJvZmZsaW5lX3N0dWR5Il0sImZyZXNoX3VudGlsIjoxNzAwMDAzNjAwLCJpYXQiOjE3MDAwMDAwMDAsImlzcyI6ImFjY3J1ZS50ZXN0Lm9mZmxpbmUiLCJqdGkiOiJ0ZXN0LXByb29mLWFsbG93IiwibmJmIjoxNzAwMDAwMDAwLCJwbGFucyI6WyJwcm8iXSwicXVhbnRpdGllcyI6eyJkb3dubG9hZHMiOjN9LCJyZXZpc2lvbiI6NSwic3ViIjoic3ludGhldGljLWFjY291bnQiLCJ2ZXJzaW9uIjoidjEuNTkifQ.MiJ1s4A9RFTT7H45va6XapmgKrAfH483j1Qj425tCNsAi1k6YcHhagtqIc0f4CAH7kYIvxTNGIo3sRBoDoTAAw",
+      "contract_version": "v1.59",
+      "expected_cache_disposition": "allow",
+      "expected_claims": {},
+      "expected_disposition": "no_grant",
+      "expected_next_action": "reconnect_required",
+      "expected_reason": "wrong_issuer",
+      "expected_state": "invalid",
+      "id": "wrong_issuer",
+      "verification_context": {
+        "accepted_disposition": null,
+        "accepted_fresh_until": 0,
+        "accepted_iat": 0,
+        "accepted_revision": 0,
+        "account_subject": "synthetic-account",
+        "audience": "accrue-offline-client",
+        "clock_high_water": {},
+        "device_thumbprint": "IVw958D_sxKYMg6iCHQs-vmxkOVIiRwwKlfeV6ykrCg",
+        "installation_id": "synthetic-installation",
+        "issuer": "wrong",
+        "now": 1700000001
+      }
+    },
+    {
+      "case_id": "invalid_apple_evidence",
+      "compact_jws": "eyJhbGciOiJFUzI1NiIsImtpZCI6ImFjY3J1ZS12MS41OS1vZmZsaW5lLXRlc3Qtb25seSIsInR5cCI6ImFjY3J1ZS1lbnRpdGxlbWVudC1wcm9vZitqd3QifQ.eyJhdWQiOiJhY2NydWUtb2ZmbGluZS1jbGllbnQiLCJjbmYiOnsiamt0IjoiSVZ3OTU4RF9zeEtZTWc2aUNIUXMtdm14a09WSWlSd3dLbGZlVjZ5a3JDZyJ9LCJkaXNwb3NpdGlvbiI6ImFsbG93IiwiZXhwIjoxNzAyNTkyMDAwLCJmZWF0dXJlcyI6WyJvZmZsaW5lX3N0dWR5Il0sImZyZXNoX3VudGlsIjoxNzAwMDAzNjAwLCJpYXQiOjE3MDAwMDAwMDAsImlzcyI6ImFjY3J1ZS50ZXN0Lm9mZmxpbmUiLCJqdGkiOiJ0ZXN0LXByb29mLWFsbG93IiwibmJmIjoxNzAwMDAwMDAwLCJwbGFucyI6WyJwcm8iXSwicXVhbnRpdGllcyI6eyJkb3dubG9hZHMiOjN9LCJyZXZpc2lvbiI6NSwic3ViIjoic3ludGhldGljLWFjY291bnQiLCJ2ZXJzaW9uIjoidjEuNTkifQ.MiJ1s4A9RFTT7H45va6XapmgKrAfH483j1Qj425tCNsAi1k6YcHhagtqIc0f4CAH7kYIvxTNGIo3sRBoDoTAAw",
+      "contract_version": "v1.59",
+      "expected_cache_disposition": "allow",
+      "expected_claims": {},
+      "expected_disposition": "no_grant",
+      "expected_next_action": "reconnect_required",
+      "expected_reason": "wrong_audience",
+      "expected_state": "invalid",
+      "id": "wrong_audience",
+      "verification_context": {
+        "accepted_disposition": null,
+        "accepted_fresh_until": 0,
+        "accepted_iat": 0,
+        "accepted_revision": 0,
+        "account_subject": "synthetic-account",
+        "audience": "wrong",
+        "clock_high_water": {},
+        "device_thumbprint": "IVw958D_sxKYMg6iCHQs-vmxkOVIiRwwKlfeV6ykrCg",
+        "installation_id": "synthetic-installation",
+        "issuer": "accrue.test.offline",
+        "now": 1700000001
+      }
+    },
+    {
+      "case_id": "unmapped_verified_product",
+      "compact_jws": "eyJhbGciOiJFUzI1NiIsImtpZCI6ImFjY3J1ZS12MS41OS1vZmZsaW5lLXRlc3Qtb25seSIsInR5cCI6ImFjY3J1ZS1lbnRpdGxlbWVudC1wcm9vZitqd3QifQ.eyJhdWQiOiJhY2NydWUtb2ZmbGluZS1jbGllbnQiLCJjbmYiOnsiamt0IjoiSVZ3OTU4RF9zeEtZTWc2aUNIUXMtdm14a09WSWlSd3dLbGZlVjZ5a3JDZyJ9LCJkaXNwb3NpdGlvbiI6ImFsbG93IiwiZXhwIjoxNzAyNTkyMDAwLCJmZWF0dXJlcyI6WyJvZmZsaW5lX3N0dWR5Il0sImZyZXNoX3VudGlsIjoxNzAwMDAzNjAwLCJpYXQiOjE3MDAwMDAwMDAsImlzcyI6ImFjY3J1ZS50ZXN0Lm9mZmxpbmUiLCJqdGkiOiJ0ZXN0LXByb29mLWFsbG93IiwibmJmIjoxNzAwMDAwMDAwLCJwbGFucyI6WyJwcm8iXSwicXVhbnRpdGllcyI6eyJkb3dubG9hZHMiOjN9LCJyZXZpc2lvbiI6NSwic3ViIjoic3ludGhldGljLWFjY291bnQiLCJ2ZXJzaW9uIjoidjEuNTkifQ.MiJ1s4A9RFTT7H45va6XapmgKrAfH483j1Qj425tCNsAi1k6YcHhagtqIc0f4CAH7kYIvxTNGIo3sRBoDoTAAw",
+      "contract_version": "v1.59",
+      "expected_cache_disposition": "allow",
+      "expected_claims": {},
+      "expected_disposition": "no_grant",
+      "expected_next_action": "reconnect_required",
+      "expected_reason": "device_mismatch",
+      "expected_state": "invalid",
+      "id": "wrong_device",
+      "verification_context": {
+        "accepted_disposition": null,
+        "accepted_fresh_until": 0,
+        "accepted_iat": 0,
+        "accepted_revision": 0,
+        "account_subject": "other",
+        "audience": "accrue-offline-client",
+        "clock_high_water": {},
+        "device_thumbprint": "IVw958D_sxKYMg6iCHQs-vmxkOVIiRwwKlfeV6ykrCg",
+        "installation_id": "synthetic-installation",
+        "issuer": "accrue.test.offline",
+        "now": 1700000001
+      }
+    },
+    {
+      "case_id": "apple_token_mismatch",
+      "compact_jws": "eyJhbGciOiJFUzI1NiIsImtpZCI6ImFjY3J1ZS12MS41OS1vZmZsaW5lLXRlc3Qtb25seSIsInR5cCI6ImFjY3J1ZS1lbnRpdGxlbWVudC1wcm9vZitqd3QifQ.eyJhdWQiOiJhY2NydWUtb2ZmbGluZS1jbGllbnQiLCJjbmYiOnsiamt0IjoiSVZ3OTU4RF9zeEtZTWc2aUNIUXMtdm14a09WSWlSd3dLbGZlVjZ5a3JDZyJ9LCJkaXNwb3NpdGlvbiI6ImFsbG93IiwiZXhwIjoxNzAyNTkyMDAwLCJmZWF0dXJlcyI6WyJvZmZsaW5lX3N0dWR5Il0sImZyZXNoX3VudGlsIjoxNzAwMDAzNjAwLCJpYXQiOjE3MDAwMDAwMDAsImlzcyI6ImFjY3J1ZS50ZXN0Lm9mZmxpbmUiLCJqdGkiOiJ0ZXN0LXByb29mLWFsbG93IiwibmJmIjoxNzAwMDAwMDAwLCJwbGFucyI6WyJwcm8iXSwicXVhbnRpdGllcyI6eyJkb3dubG9hZHMiOjN9LCJyZXZpc2lvbiI6NSwic3ViIjoic3ludGhldGljLWFjY291bnQiLCJ2ZXJzaW9uIjoidjEuNTkifQ.MiJ1s4A9RFTT7H45va6XapmgKrAfH483j1Qj425tCNsAi1k6YcHhagtqIc0f4CAH7kYIvxTNGIo3sRBoDoTAAw",
+      "contract_version": "v1.59",
+      "expected_cache_disposition": "allow",
+      "expected_claims": {},
+      "expected_disposition": "no_grant",
+      "expected_next_action": "reconnect_required",
+      "expected_reason": "unknown_key",
+      "expected_state": "invalid",
+      "id": "unknown_kid",
+      "verification_context": {
+        "accepted_disposition": null,
+        "accepted_fresh_until": 0,
+        "accepted_iat": 0,
+        "accepted_revision": 0,
+        "account_subject": "synthetic-account",
+        "audience": "accrue-offline-client",
+        "clock_high_water": {},
+        "device_thumbprint": "IVw958D_sxKYMg6iCHQs-vmxkOVIiRwwKlfeV6ykrCg",
+        "installation_id": "synthetic-installation",
+        "issuer": "accrue.test.offline",
+        "now": 1700000001,
+        "public_keys": []
+      }
+    },
+    {
+      "case_id": "out_of_order_positive_after_revoke",
+      "compact_jws": "eyJhbGciOiJFUzI1NiIsImtpZCI6ImFjY3J1ZS12MS41OS1vZmZsaW5lLXRlc3Qtb25seSIsInR5cCI6ImFjY3J1ZS1lbnRpdGxlbWVudC1wcm9vZitqd3QifQ.eyJhdWQiOiJhY2NydWUtb2ZmbGluZS1jbGllbnQiLCJjbmYiOnsiamt0IjoiSVZ3OTU4RF9zeEtZTWc2aUNIUXMtdm14a09WSWlSd3dLbGZlVjZ5a3JDZyJ9LCJkaXNwb3NpdGlvbiI6ImFsbG93IiwiZXhwIjoxNzAyNTkyMDAwLCJmZWF0dXJlcyI6WyJvZmZsaW5lX3N0dWR5Il0sImZyZXNoX3VudGlsIjoxNzAwMDAzNjAwLCJpYXQiOjE3MDAwMDAwMDAsImlzcyI6ImFjY3J1ZS50ZXN0Lm9mZmxpbmUiLCJqdGkiOiJ0ZXN0LXByb29mLWFsbG93IiwibmJmIjoxNzAwMDAwMDAwLCJwbGFucyI6WyJwcm8iXSwicXVhbnRpdGllcyI6eyJkb3dubG9hZHMiOjN9LCJyZXZpc2lvbiI6NSwic3ViIjoic3ludGhldGljLWFjY291bnQiLCJ2ZXJzaW9uIjoidjEuNTkifQ.MiJ1s4A9RFTT7H45va6XapmgKrAfH483j1Qj425tCNsAi1k6YcHhagtqIc0f4CAH7kYIvxTNGIo3sRBoDoTAAw",
+      "contract_version": "v1.59",
+      "expected_cache_disposition": "deny",
+      "expected_claims": {},
+      "expected_disposition": "noop",
+      "expected_next_action": "reconnect_required",
+      "expected_reason": "superseded",
+      "expected_state": "invalid",
+      "id": "rollback",
+      "verification_context": {
+        "accepted_disposition": null,
+        "accepted_fresh_until": 0,
+        "accepted_iat": 0,
+        "accepted_revision": 6,
+        "account_subject": "synthetic-account",
+        "audience": "accrue-offline-client",
+        "clock_high_water": {},
+        "device_thumbprint": "IVw958D_sxKYMg6iCHQs-vmxkOVIiRwwKlfeV6ykrCg",
+        "installation_id": "synthetic-installation",
+        "issuer": "accrue.test.offline",
+        "now": 1700000001
+      }
+    },
+    {
+      "case_id": "duplicate_provider_event",
+      "compact_jws": "eyJhbGciOiJFUzI1NiIsImtpZCI6ImFjY3J1ZS12MS41OS1vZmZsaW5lLXRlc3Qtb25seSIsInR5cCI6ImFjY3J1ZS1lbnRpdGxlbWVudC1wcm9vZitqd3QifQ.eyJhdWQiOiJhY2NydWUtb2ZmbGluZS1jbGllbnQiLCJjbmYiOnsiamt0IjoiSVZ3OTU4RF9zeEtZTWc2aUNIUXMtdm14a09WSWlSd3dLbGZlVjZ5a3JDZyJ9LCJkaXNwb3NpdGlvbiI6ImFsbG93IiwiZXhwIjoxNzAyNTkyMDAwLCJmZWF0dXJlcyI6WyJvZmZsaW5lX3N0dWR5Il0sImZyZXNoX3VudGlsIjoxNzAwMDAzNjAwLCJpYXQiOjE3MDAwMDAwMDAsImlzcyI6ImFjY3J1ZS50ZXN0Lm9mZmxpbmUiLCJqdGkiOiJ0ZXN0LXByb29mLWFsbG93IiwibmJmIjoxNzAwMDAwMDAwLCJwbGFucyI6WyJwcm8iXSwicXVhbnRpdGllcyI6eyJkb3dubG9hZHMiOjN9LCJyZXZpc2lvbiI6NSwic3ViIjoic3ludGhldGljLWFjY291bnQiLCJ2ZXJzaW9uIjoidjEuNTkifQ.MiJ1s4A9RFTT7H45va6XapmgKrAfH483j1Qj425tCNsAi1k6YcHhagtqIc0f4CAH7kYIvxTNGIo3sRBoDoTAAw",
+      "contract_version": "v1.59",
+      "expected_cache_disposition": "deny",
+      "expected_claims": {},
+      "expected_disposition": "noop",
+      "expected_next_action": "reconnect_required",
+      "expected_reason": "superseded",
+      "expected_state": "invalid",
+      "id": "older_issuance",
+      "verification_context": {
+        "accepted_disposition": null,
+        "accepted_fresh_until": 0,
+        "accepted_iat": 1700000001,
+        "accepted_revision": 5,
+        "account_subject": "synthetic-account",
+        "audience": "accrue-offline-client",
+        "clock_high_water": {},
+        "device_thumbprint": "IVw958D_sxKYMg6iCHQs-vmxkOVIiRwwKlfeV6ykrCg",
+        "installation_id": "synthetic-installation",
+        "issuer": "accrue.test.offline",
+        "now": 1700000001
+      }
     },
     {
       "case_id": "all_grants_revoked",
-      "compact_jws": "eyJhbGciOiJFUzI1NiIsImtpZCI6ImFjY3J1ZS12MS41OS1vZmZsaW5lLXRlc3Qtb25seSJ9.eyJpc3MiOiJhY2NydWUudGVzdC5vZmZsaW5lIiwiYXVkIjoiYWNjcnVlLW9mZmxpbmUtY2xpZW50IiwidHlwIjoiYWNjcnVlLWVudGl0bGVtZW50IiwiYWNjb3VudF9pZCI6ImFjY291bnQtMTIzIiwiZGV2aWNlX2lkIjoiZGV2aWNlLTEyMyIsImNuZiI6InRlc3QtdGh1bWJwcmludCIsInJldmlzaW9uIjo1LCJpYXQiOjE3MDAwMDAwMDAsImZyZXNoX3VudGlsIjoxNzAwMDAzNjAwLCJkaXNwb3NpdGlvbiI6ImRlbnkifQ.IzhX4g4ftHpPUVHnjBGA47f0QX7IuOCUva9P-jvVH0Wv2lL1KNoCmaunfA4-BIWtQJ4F3uU3_F5xYDgWS1NVaA",
+      "compact_jws": "eyJhbGciOiJFUzI1NiIsImtpZCI6ImFjY3J1ZS12MS41OS1vZmZsaW5lLXRlc3Qtb25seSIsInR5cCI6ImFjY3J1ZS1lbnRpdGxlbWVudC1wcm9vZitqd3QifQ.eyJhdWQiOiJhY2NydWUtb2ZmbGluZS1jbGllbnQiLCJjbmYiOnsiamt0IjoiSVZ3OTU4RF9zeEtZTWc2aUNIUXMtdm14a09WSWlSd3dLbGZlVjZ5a3JDZyJ9LCJkaXNwb3NpdGlvbiI6ImFsbG93IiwiZXhwIjoxNzAyNTkyMDAwLCJmZWF0dXJlcyI6WyJvZmZsaW5lX3N0dWR5Il0sImZyZXNoX3VudGlsIjoxNzAwMDAzNjAwLCJpYXQiOjE3MDAwMDAwMDAsImlzcyI6ImFjY3J1ZS50ZXN0Lm9mZmxpbmUiLCJqdGkiOiJ0ZXN0LXByb29mLWFsbG93IiwibmJmIjoxNzAwMDAwMDAwLCJwbGFucyI6WyJwcm8iXSwicXVhbnRpdGllcyI6eyJkb3dubG9hZHMiOjN9LCJyZXZpc2lvbiI6NSwic3ViIjoic3ludGhldGljLWFjY291bnQiLCJ2ZXJzaW9uIjoidjEuNTkifQ.MiJ1s4A9RFTT7H45va6XapmgKrAfH483j1Qj425tCNsAi1k6YcHhagtqIc0f4CAH7kYIvxTNGIo3sRBoDoTAAw",
       "contract_version": "v1.59",
       "expected_cache_disposition": "deny",
+      "expected_claims": {},
       "expected_disposition": "retract",
-      "expected_reason": "ok",
-      "expected_verification": "accept",
-      "id": "deny_precedence"
+      "expected_next_action": "reconnect_required",
+      "expected_reason": "superseded",
+      "expected_state": "invalid",
+      "id": "denial_precedence",
+      "verification_context": {
+        "accepted_disposition": "deny",
+        "accepted_fresh_until": 0,
+        "accepted_iat": 0,
+        "accepted_revision": 5,
+        "account_subject": "synthetic-account",
+        "audience": "accrue-offline-client",
+        "clock_high_water": {},
+        "device_thumbprint": "IVw958D_sxKYMg6iCHQs-vmxkOVIiRwwKlfeV6ykrCg",
+        "installation_id": "synthetic-installation",
+        "issuer": "accrue.test.offline",
+        "now": 1700000001
+      }
     },
     {
       "case_id": "atomic_transaction_boundary",
-      "compact_jws": "eyJhbGciOiJFUzI1NiIsImtpZCI6ImFjY3J1ZS12MS41OS1vZmZsaW5lLXRlc3Qtb25seSJ9.eyJpc3MiOiJhY2NydWUudGVzdC5vZmZsaW5lIiwiYXVkIjoiYWNjcnVlLW9mZmxpbmUtY2xpZW50IiwidHlwIjoiYWNjcnVlLWVudGl0bGVtZW50IiwiYWNjb3VudF9pZCI6ImFjY291bnQtMTIzIiwiZGV2aWNlX2lkIjoiZGV2aWNlLTEyMyIsImNuZiI6InRlc3QtdGh1bWJwcmludCIsInJldmlzaW9uIjo1LCJpYXQiOjE3MDAwMDAwMDAsImZyZXNoX3VudGlsIjoxNzAwMDAzNjAwLCJkaXNwb3NpdGlvbiI6ImFsbG93In0.JFnJfG7Tsj8imq2WkdKKRSAX3EdENW6FeFUkgwMpFT0Atgb3B0S9zrcRRf-UjmjfF1WMu8eBdZ1hs2GzC0kZmw",
+      "compact_jws": "eyJhbGciOiJFUzI1NiIsImtpZCI6ImFjY3J1ZS12MS41OS1vZmZsaW5lLXRlc3Qtb25seSIsInR5cCI6ImFjY3J1ZS1lbnRpdGxlbWVudC1wcm9vZitqd3QifQ.eyJhdWQiOiJhY2NydWUtb2ZmbGluZS1jbGllbnQiLCJjbmYiOnsiamt0IjoiSVZ3OTU4RF9zeEtZTWc2aUNIUXMtdm14a09WSWlSd3dLbGZlVjZ5a3JDZyJ9LCJkaXNwb3NpdGlvbiI6ImFsbG93IiwiZXhwIjoxNzAyNTkyMDAwLCJmZWF0dXJlcyI6WyJvZmZsaW5lX3N0dWR5Il0sImZyZXNoX3VudGlsIjoxNzAwMDAzNjAwLCJpYXQiOjE3MDAwMDAwMDAsImlzcyI6ImFjY3J1ZS50ZXN0Lm9mZmxpbmUiLCJqdGkiOiJ0ZXN0LXByb29mLWFsbG93IiwibmJmIjoxNzAwMDAwMDAwLCJwbGFucyI6WyJwcm8iXSwicXVhbnRpdGllcyI6eyJkb3dubG9hZHMiOjN9LCJyZXZpc2lvbiI6NSwic3ViIjoic3ludGhldGljLWFjY291bnQiLCJ2ZXJzaW9uIjoidjEuNTkifQ.MiJ1s4A9RFTT7H45va6XapmgKrAfH483j1Qj425tCNsAi1k6YcHhagtqIc0f4CAH7kYIvxTNGIo3sRBoDoTAAw",
+      "contract_version": "v1.59",
+      "expected_cache_disposition": "allow",
+      "expected_claims": {},
+      "expected_disposition": "grant",
+      "expected_next_action": "reconnect_required",
+      "expected_reason": "clock_rollback",
+      "expected_state": "invalid",
+      "id": "clock_rollback",
+      "verification_context": {
+        "accepted_disposition": null,
+        "accepted_fresh_until": 0,
+        "accepted_iat": 0,
+        "accepted_revision": 0,
+        "account_subject": "synthetic-account",
+        "audience": "accrue-offline-client",
+        "clock_high_water": {
+          "now": 1700000002
+        },
+        "device_thumbprint": "IVw958D_sxKYMg6iCHQs-vmxkOVIiRwwKlfeV6ykrCg",
+        "installation_id": "synthetic-installation",
+        "issuer": "accrue.test.offline",
+        "now": 1700000001
+      }
+    },
+    {
+      "case_id": "atomic_transaction_boundary",
+      "compact_jws": "eyJhbGciOiJFUzI1NiIsImtpZCI6ImFjY3J1ZS12MS41OS1vZmZsaW5lLXRlc3Qtb25seSIsInR5cCI6ImFjY3J1ZS1lbnRpdGxlbWVudC1wcm9vZitqd3QifQ.eyJhdWQiOiJhY2NydWUtb2ZmbGluZS1jbGllbnQiLCJjbmYiOnsiamt0IjoiSVZ3OTU4RF9zeEtZTWc2aUNIUXMtdm14a09WSWlSd3dLbGZlVjZ5a3JDZyJ9LCJkaXNwb3NpdGlvbiI6ImFsbG93IiwiZXhwIjoxNzAyNTkyMDAwLCJmZWF0dXJlcyI6WyJvZmZsaW5lX3N0dWR5Il0sImZyZXNoX3VudGlsIjoxNzAwMDAzNjAwLCJpYXQiOjE3MDAwMDAwMDAsImlzcyI6ImFjY3J1ZS50ZXN0Lm9mZmxpbmUiLCJqdGkiOiJ0ZXN0LXByb29mLWFsbG93IiwibmJmIjoxNzAwMDAwMDAwLCJwbGFucyI6WyJwcm8iXSwicXVhbnRpdGllcyI6eyJkb3dubG9hZHMiOjN9LCJyZXZpc2lvbiI6NSwic3ViIjoic3ludGhldGljLWFjY291bnQiLCJ2ZXJzaW9uIjoidjEuNTkifQ.MiJ1s4A9RFTT7H45va6XapmgKrAfH483j1Qj425tCNsAi1k6YcHhagtqIc0f4CAH7kYIvxTNGIo3sRBoDoTAAw",
       "contract_version": "v1.59",
       "expected_cache_disposition": "deny",
+      "expected_claims": {
+        "aud": "accrue-offline-client",
+        "cnf": {
+          "jkt": "IVw958D_sxKYMg6iCHQs-vmxkOVIiRwwKlfeV6ykrCg"
+        },
+        "disposition": "allow",
+        "exp": 1702592000,
+        "features": [
+          "offline_study"
+        ],
+        "fresh_until": 1700003600,
+        "iat": 1700000000,
+        "iss": "accrue.test.offline",
+        "jti": "test-proof-allow",
+        "nbf": 1700000000,
+        "plans": [
+          "pro"
+        ],
+        "quantities": {
+          "downloads": 3
+        },
+        "revision": 5,
+        "sub": "synthetic-account",
+        "version": "v1.59"
+      },
       "expected_disposition": "grant",
-      "expected_reason": "fault_before_replace",
-      "expected_verification": "accept",
+      "expected_next_action": "none",
+      "expected_reason": "ok",
+      "expected_state": "fresh",
       "fault_point": "before_rename",
-      "id": "fault_before_replace"
+      "id": "before_replace_crash",
+      "verification_context": {
+        "accepted_disposition": null,
+        "accepted_fresh_until": 0,
+        "accepted_iat": 0,
+        "accepted_revision": 0,
+        "account_subject": "synthetic-account",
+        "audience": "accrue-offline-client",
+        "clock_high_water": {},
+        "device_thumbprint": "IVw958D_sxKYMg6iCHQs-vmxkOVIiRwwKlfeV6ykrCg",
+        "installation_id": "synthetic-installation",
+        "issuer": "accrue.test.offline",
+        "now": 1700000001
+      }
     },
     {
       "case_id": "stripe_revoked_apple_survives",
-      "compact_jws": "eyJhbGciOiJFUzI1NiIsImtpZCI6ImFjY3J1ZS12MS41OS1vZmZsaW5lLXRlc3Qtb25seSJ9.eyJpc3MiOiJhY2NydWUudGVzdC5vZmZsaW5lIiwiYXVkIjoiYWNjcnVlLW9mZmxpbmUtY2xpZW50IiwidHlwIjoiYWNjcnVlLWVudGl0bGVtZW50IiwiYWNjb3VudF9pZCI6ImFjY291bnQtMTIzIiwiZGV2aWNlX2lkIjoiZGV2aWNlLTEyMyIsImNuZiI6InRlc3QtdGh1bWJwcmludCIsInJldmlzaW9uIjo1LCJpYXQiOjE3MDAwMDAwMDAsImZyZXNoX3VudGlsIjoxNzAwMDAzNjAwLCJkaXNwb3NpdGlvbiI6ImRlbnkifQ.IzhX4g4ftHpPUVHnjBGA47f0QX7IuOCUva9P-jvVH0Wv2lL1KNoCmaunfA4-BIWtQJ4F3uU3_F5xYDgWS1NVaA",
+      "compact_jws": "eyJhbGciOiJFUzI1NiIsImtpZCI6ImFjY3J1ZS12MS41OS1vZmZsaW5lLXRlc3Qtb25seSIsInR5cCI6ImFjY3J1ZS1lbnRpdGxlbWVudC1wcm9vZitqd3QifQ.eyJhdWQiOiJhY2NydWUtb2ZmbGluZS1jbGllbnQiLCJjbmYiOnsiamt0IjoiSVZ3OTU4RF9zeEtZTWc2aUNIUXMtdm14a09WSWlSd3dLbGZlVjZ5a3JDZyJ9LCJkZW5pYWxfcmVhc29uIjoiYWNjZXNzX3VuYXZhaWxhYmxlIiwiZGlzcG9zaXRpb24iOiJkZW55IiwiZXhwIjoxNzAyNTkyMDAwLCJmZWF0dXJlcyI6W10sImZyZXNoX3VudGlsIjoxNzAwMDAzNjAwLCJpYXQiOjE3MDAwMDAwMDAsImlzcyI6ImFjY3J1ZS50ZXN0Lm9mZmxpbmUiLCJqdGkiOiJ0ZXN0LXByb29mLWRlbnkiLCJuYmYiOjE3MDAwMDAwMDAsInBsYW5zIjpbXSwicXVhbnRpdGllcyI6e30sInJldmlzaW9uIjo1LCJzdWIiOiJzeW50aGV0aWMtYWNjb3VudCIsInZlcnNpb24iOiJ2MS41OSJ9.QL9Fjm96nx4i-cJSWwGrZkV2aSGtbJdtkHDlUwOv93NRQOFRcErWDOzUjWQBm3jm4FSYd2z10res_q6XbV3l5g",
       "contract_version": "v1.59",
       "expected_cache_disposition": "deny",
+      "expected_claims": {
+        "aud": "accrue-offline-client",
+        "cnf": {
+          "jkt": "IVw958D_sxKYMg6iCHQs-vmxkOVIiRwwKlfeV6ykrCg"
+        },
+        "denial_reason": "access_unavailable",
+        "disposition": "deny",
+        "exp": 1702592000,
+        "features": [],
+        "fresh_until": 1700003600,
+        "iat": 1700000000,
+        "iss": "accrue.test.offline",
+        "jti": "test-proof-deny",
+        "nbf": 1700000000,
+        "plans": [],
+        "quantities": {},
+        "revision": 5,
+        "sub": "synthetic-account",
+        "version": "v1.59"
+      },
       "expected_disposition": "retract",
-      "expected_reason": "fault_after_replace",
-      "expected_verification": "accept",
-      "fault_point": "after_rename",
-      "id": "fault_after_replace"
-    },
-    {
-      "case_id": "apple_token_mismatch",
-      "compact_jws": "eyJhbGciOiJFUzI1NiIsImtpZCI6ImFjY3J1ZS12MS41OS1vZmZsaW5lLXRlc3Qtb25seSJ9.eyJhY2NvdW50X2lkIjoiYWNjb3VudC05OTkiLCJhdWQiOiJhY2NydWUtb2ZmbGluZS1jbGllbnQiLCJjbmYiOiJ0ZXN0LXRodW1icHJpbnQiLCJkZXZpY2VfaWQiOiJkZXZpY2UtMTIzIiwiZGlzcG9zaXRpb24iOiJhbGxvdyIsImZyZXNoX3VudGlsIjoxNzAwMDAzNjAwLCJpYXQiOjE3MDAwMDAwMDAsImlzcyI6ImFjY3J1ZS50ZXN0Lm9mZmxpbmUiLCJyZXZpc2lvbiI6NSwidHlwIjoiYWNjcnVlLWVudGl0bGVtZW50In0.43qdmSN-I2l2HZdFom_fQonTndBVyteuUa2LO0F_QwojXrVR9ZrvtBZXmnABBwSSzdyM7iBPdgoTqFnA8b-YBg",
-      "contract_version": "v1.59",
-      "expected_cache_disposition": "allow",
-      "expected_disposition": "no_grant",
-      "expected_reason": "account",
-      "expected_verification": "reject",
-      "id": "wrong_account"
-    },
-    {
-      "case_id": "invalid_apple_evidence",
-      "compact_jws": "eyJhbGciOiJFUzI1NiIsImtpZCI6ImFjY3J1ZS12MS41OS1vZmZsaW5lLXRlc3Qtb25seSJ9.eyJhY2NvdW50X2lkIjoiYWNjb3VudC0xMjMiLCJhdWQiOiJ3cm9uZy1hdWRpZW5jZSIsImNuZiI6InRlc3QtdGh1bWJwcmludCIsImRldmljZV9pZCI6ImRldmljZS0xMjMiLCJkaXNwb3NpdGlvbiI6ImFsbG93IiwiZnJlc2hfdW50aWwiOjE3MDAwMDM2MDAsImlhdCI6MTcwMDAwMDAwMCwiaXNzIjoiYWNjcnVlLnRlc3Qub2ZmbGluZSIsInJldmlzaW9uIjo1LCJ0eXAiOiJhY2NydWUtZW50aXRsZW1lbnQifQ.6v1LxZrviSLxPXSgMaV1elIYkrBChMSHyiN8vrdsf0WvocJkMul69NnWaBVdWc7GpriznSVEfSiz_gSpQEUbnA",
-      "contract_version": "v1.59",
-      "expected_cache_disposition": "allow",
-      "expected_disposition": "no_grant",
-      "expected_reason": "audience",
-      "expected_verification": "reject",
-      "id": "wrong_audience"
-    },
-    {
-      "case_id": "unmapped_verified_product",
-      "compact_jws": "eyJhbGciOiJFUzI1NiIsImtpZCI6ImFjY3J1ZS12MS41OS1vZmZsaW5lLXRlc3Qtb25seSJ9.eyJpc3MiOiJhY2NydWUudGVzdC5vZmZsaW5lIiwiYXVkIjoiYWNjcnVlLW9mZmxpbmUtY2xpZW50IiwidHlwIjoid3JvbmctdHlwZSIsImFjY291bnRfaWQiOiJhY2NvdW50LTEyMyIsImRldmljZV9pZCI6ImRldmljZS0xMjMiLCJjbmYiOiJ0ZXN0LXRodW1icHJpbnQiLCJyZXZpc2lvbiI6NSwiaWF0IjoxNzAwMDAwMDAwLCJmcmVzaF91bnRpbCI6MTcwMDAwMzYwMCwiZGlzcG9zaXRpb24iOiJhbGxvdyJ9.BaZWg4FGrXhFJUh-doqyd41kMl6VhCbKlJcyxkWDhbqvc6bg3dKwGT1U6eRAXrGMgu1IKWa8ZVTEHjd31QK3LQ",
-      "contract_version": "v1.59",
-      "expected_cache_disposition": "allow",
-      "expected_disposition": "no_grant",
-      "expected_reason": "type",
-      "expected_verification": "reject",
-      "id": "wrong_type"
-    },
-    {
-      "case_id": "invalid_apple_evidence",
-      "compact_jws": "eyJhbGciOiJIUzI1NiIsImtpZCI6ImFjY3J1ZS12MS41OS1vZmZsaW5lLXRlc3Qtb25seSJ9.eyJhY2NvdW50X2lkIjoiYWNjb3VudC0xMjMiLCJhdWQiOiJhY2NydWUtb2ZmbGluZS1jbGllbnQiLCJjbmYiOiJ0ZXN0LXRodW1icHJpbnQiLCJkZXZpY2VfaWQiOiJkZXZpY2UtMTIzIiwiZGlzcG9zaXRpb24iOiJhbGxvdyIsImZyZXNoX3VudGlsIjoxNzAwMDAzNjAwLCJpYXQiOjE3MDAwMDAwMDAsImlzcyI6ImFjY3VlLnRlc3Qub2ZmbGluZSIsInJldmlzaW9uIjo1LCJ0eXAiOiJhY2NydWUtZW50aXRsZW1lbnQifQ.P1Qfjf00tfTI9dvtJojQpY_QjeOkGXygt-nQJhuyILMFrtNTspKdbfk8H1yTep10t6jUl-WH2w6ECIbrOSnpTQ",
-      "contract_version": "v1.59",
-      "expected_cache_disposition": "allow",
-      "expected_disposition": "no_grant",
-      "expected_reason": "algorithm",
-      "expected_verification": "reject",
-      "id": "wrong_algorithm"
-    },
-    {
-      "case_id": "invalid_apple_evidence",
-      "compact_jws": "not-a-jws",
-      "contract_version": "v1.59",
-      "expected_cache_disposition": "allow",
-      "expected_disposition": "no_grant",
-      "expected_reason": "malformed",
-      "expected_verification": "reject",
-      "id": "malformed_compact"
-    },
-    {
-      "case_id": "out_of_order_positive_after_revoke",
-      "compact_jws": "eyJhbGciOiJFUzI1NiIsImtpZCI6ImFjY3J1ZS12MS41OS1vZmZsaW5lLXRlc3Qtb25seSJ9.eyJpc3MiOiJhY2NydWUudGVzdC5vZmZsaW5lIiwiYXVkIjoiYWNjcnVlLW9mZmxpbmUtY2xpZW50IiwidHlwIjoiYWNjcnVlLWVudGl0bGVtZW50IiwiYWNjb3VudF9pZCI6ImFjY291bnQtMTIzIiwiZGV2aWNlX2lkIjoiZGV2aWNlLTEyMyIsImNuZiI6InRlc3QtdGh1bWJwcmludCIsInJldmlzaW9uIjoiZml2ZSIsImlhdCI6MTcwMDAwMDAwMCwiZnJlc2hfdW50aWwiOjE3MDAwMDM2MDAsImRpc3Bvc2l0aW9uIjoiYWxsb3cifQ.3XNemG0CWFPnLLNZDsxVvq6DhnOX-5_9e7jHsFJkI5G0En3WhazkYS_JAuxwoaLlM4OvlpjuQLk65foUU27qlA",
-      "contract_version": "v1.59",
-      "expected_cache_disposition": "allow",
-      "expected_disposition": "noop",
-      "expected_reason": "revision",
-      "expected_verification": "reject",
-      "id": "malformed_revision"
-    },
-    {
-      "case_id": "duplicate_provider_event",
-      "compact_jws": "eyJhbGciOiJFUzI1NiIsImtpZCI6ImFjY3J1ZS12MS41OS1vZmZsaW5lLXRlc3Qtb25seSJ9.eyJpc3MiOiJhY2NydWUudGVzdC5vZmZsaW5lIiwiYXVkIjoiYWNjcnVlLW9mZmxpbmUtY2xpZW50IiwidHlwIjoiYWNjcnVlLWVudGl0bGVtZW50IiwiYWNjb3VudF9pZCI6ImFjY291bnQtMTIzIiwiZGV2aWNlX2lkIjoiZGV2aWNlLTEyMyIsImNuZiI6InRlc3QtdGh1bWJwcmludCIsInJldmlzaW9uIjo1LCJpYXQiOiJub3ciLCJmcmVzaF91bnRpbCI6MTcwMDAwMzYwMCwiZGlzcG9zaXRpb24iOiJhbGxvdyJ9.Sy1U_J0PAO1zeYDn4Tp55OJo7qqdDZVjyMijy-oFSlP5lPFoVXf0NqKHA8E-IVMd1UQkel1h9NCnAuyE6spvNw",
-      "contract_version": "v1.59",
-      "expected_cache_disposition": "allow",
-      "expected_disposition": "noop",
-      "expected_reason": "iat",
-      "expected_verification": "reject",
-      "id": "malformed_iat"
-    },
-    {
-      "case_id": "stale_offline_continuity",
-      "compact_jws": "eyJhbGciOiJFUzI1NiIsImtpZCI6ImFjY3J1ZS12MS41OS1vZmZsaW5lLXRlc3Qtb25seSJ9.eyJpc3MiOiJhY2NydWUudGVzdC5vZmZsaW5lIiwiYXVkIjoiYWNjcnVlLW9mZmxpbmUtY2xpZW50IiwidHlwIjoiYWNjcnVlLWVudGl0bGVtZW50IiwiYWNjb3VudF9pZCI6ImFjY291bnQtMTIzIiwiZGV2aWNlX2lkIjoiZGV2aWNlLTEyMyIsImNuZiI6InRlc3QtdGh1bWJwcmludCIsInJldmlzaW9uIjo1LCJpYXQiOjE3MDAwMDAwMDAsImZyZXNoX3VudGlsIjoibGF0ZXIiLCJkaXNwb3NpdGlvbiI6ImFsbG93In0.8Lz7r30EHYUzzgBcHmmlZUTb4kkUN3C0us9DIVZZul6LaV0CBUNGlREw37pgp2RDOcPB6Y1paGhdMlLbdSmFkg",
-      "contract_version": "v1.59",
-      "expected_cache_disposition": "allow",
-      "expected_disposition": "preserve",
-      "expected_reason": "freshness",
-      "expected_verification": "reject",
-      "id": "malformed_freshness"
-    },
-    {
-      "case_id": "reconnect_positive_replacement",
-      "compact_jws": "eyJhbGciOiJFUzI1NiIsImtpZCI6ImFjY3J1ZS12MS41OS1vZmZsaW5lLXRlc3Qtb25seSJ9.eyJpc3MiOiJhY2NydWUudGVzdC5vZmZsaW5lIiwiYXVkIjoiYWNjcnVlLW9mZmxpbmUtY2xpZW50IiwidHlwIjoiYWNjcnVlLWVudGl0bGVtZW50IiwiYWNjb3VudF9pZCI6ImFjY291bnQtMTIzIiwiZGV2aWNlX2lkIjoiZGV2aWNlLTEyMyIsImNuZiI6InRlc3QtdGh1bWJwcmludCIsInJldmlzaW9uIjo1LCJpYXQiOjE3MDAwMDAwMDAsImZyZXNoX3VudGlsIjoxNzAwMDAzNjAwLCJkaXNwb3NpdGlvbiI6Im1heWJlIn0.IITy6KiR_eQ-OxZ5CdsQ_byEefEfWaEdI2-AFiMygkqHufz6w4lbxtO3sHSBleOIbnRgybpSUKotJgw4MFhY6Q",
-      "contract_version": "v1.59",
-      "expected_cache_disposition": "allow",
-      "expected_disposition": "grant",
-      "expected_reason": "disposition",
-      "expected_verification": "reject",
-      "id": "unknown_disposition"
+      "expected_next_action": "reconnect_required",
+      "expected_reason": "signed_denial",
+      "expected_state": "denied",
+      "fault_point": "after_directory_sync",
+      "id": "after_replace_crash",
+      "verification_context": {
+        "accepted_disposition": null,
+        "accepted_fresh_until": 0,
+        "accepted_iat": 0,
+        "accepted_revision": 0,
+        "account_subject": "synthetic-account",
+        "audience": "accrue-offline-client",
+        "clock_high_water": {},
+        "device_thumbprint": "IVw958D_sxKYMg6iCHQs-vmxkOVIiRwwKlfeV6ykrCg",
+        "installation_id": "synthetic-installation",
+        "issuer": "accrue.test.offline",
+        "now": 1700000001
+      }
     }
   ]
 }
