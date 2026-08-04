@@ -96,6 +96,7 @@ defmodule Accrue.Entitlements.OfflineRegistrationTest do
 
   test "database constraints protect challenge and issuance state from direct invalid writes" do
     account = account!("direct-constraints")
+    device = device!(account, "install-219-direct")
 
     assert_check_violation(
       "accrue_entitlement_offline_challenges_purpose_check",
@@ -113,10 +114,10 @@ defmodule Accrue.Entitlements.OfflineRegistrationTest do
       INSERT INTO billing.accrue_entitlement_offline_issuances
         (account_id, device_id, token_id_hash, kid, revision, disposition, issued_at, fresh_until,
          expires_at, inserted_at, updated_at)
-      VALUES ($1::text::uuid, NULL, $2, 'offline-v1', 0, 'allow', NOW(), NOW() - INTERVAL '1 second',
+      VALUES ($1::text::uuid, $2::text::uuid, $3, 'offline-v1', 0, 'allow', NOW(), NOW() - INTERVAL '1 second',
               NOW(), NOW(), NOW())
       """,
-      [account.id, digest("issuance-direct")]
+      [account.id, device.id, digest("issuance-direct")]
     )
   end
 
@@ -140,6 +141,23 @@ defmodule Accrue.Entitlements.OfflineRegistrationTest do
   defp account!(suffix) do
     {:ok, account} = Account.fetch_or_create(TestRepo, "user", "owner-219-#{suffix}")
     account
+  end
+
+  defp device!(account, installation_id) do
+    {:ok, device} =
+      TestRepo.insert(
+        Device.changeset(%Device{}, %{
+          account_id: account.id,
+          installation_id: installation_id,
+          public_jwk: @public_jwk,
+          key_thumbprint: Device.thumbprint(@public_jwk),
+          state: :active,
+          registered_at: ~U[2026-08-03 04:00:00.000000Z],
+          last_accepted_revision: 0
+        })
+      )
+
+    device
   end
 
   defp digest(value), do: :crypto.hash(:sha256, value) |> Base.url_encode64(padding: false)
