@@ -9,6 +9,28 @@ This matrix is refreshed for the linked `1.0.0` pair: the same merge-blocking ho
 
 This matrix is a proof mirror. Canonical support-boundary semantics and stable-core policy live in the public guides, especially [`../../../accrue/guides/first_hour.md`](../../../accrue/guides/first_hour.md), [`../../../accrue/guides/jobs_to_be_done.md#scope-and-maturity`](../../../accrue/guides/jobs_to_be_done.md#scope-and-maturity), and [`../../../accrue/guides/maturity-and-maintenance.md`](../../../accrue/guides/maturity-and-maintenance.md). Use this file for adoption-proof coverage and lane realism, not as the policy authority.
 
+## v1.59 first-adopter path
+
+For the additive multi-rail and offline contract, use one route from setup to
+incident response:
+
+1. Adopt this anonymized reference host and run `mix verify` from
+   `examples/accrue_host`.
+2. Run `cd accrue && mix accrue.entitlements.reference_scenarios --check` from
+   the repository root for the deterministic semantic contract.
+3. Consult the generated
+   [`capability and limits matrix`](capability-limits-matrix.md) for exact
+   support and privacy cells; do not copy those cells into host policy.
+4. Record the failing stable scenario ID and follow the matching
+   [v1.59 operator runbook](../../../accrue/guides/operator-runbooks.md#v159-multi-rail-and-offline-runbooks).
+
+The deterministic lane proves Apple-to-web and Stripe-to-iOS account-projection
+convergence. It is merge-blocking semantic evidence, not Crosswake mobile
+runtime evidence. The tracer remains `feasibility_blocked` until its exact
+bridge and physical-device evidence exists. Advisory provider parity and
+browser rendering are useful complementary evidence, but neither promotes a
+runtime-capability claim or replaces the semantic contract.
+
 ## Layering note (local proof vs merge-blocking CI)
 
 **Layer B (local Fake-backed proof):** running `mix verify` or `mix verify.full` inside `examples/accrue_host` exercises the host proof aliases (bounded vs full stack).

@@ -476,6 +476,54 @@ A few rules worth pinning:
 
 ## Related guides
 
+## v1.59 multi-rail and offline adoption path
+
+Use this path when a host needs the additive Stripe, Apple, and offline-study
+contract. It is deliberately short: the generated matrix owns exact support
+cells; this guide explains how to evaluate and operate the contract.
+
+1. Start with the anonymized reference-host recipe in
+   [`examples/accrue_host/docs/adoption-proof-matrix.md`](../../examples/accrue_host/docs/adoption-proof-matrix.md)
+   and run its local `mix verify` proof.
+2. From the repository root, run the deterministic contract check:
+
+   ```sh
+   cd accrue && mix accrue.entitlements.reference_scenarios --check
+   ```
+
+3. Read the generated
+   [`capability and limits matrix`](../../examples/accrue_host/docs/capability-limits-matrix.md)
+   for the exact supported, unsupported, privacy, and merge-authority cells.
+4. If a scenario does not converge, record its stable scenario ID and follow the
+   matching procedure in [Operator runbooks](operator-runbooks.md#v159-multi-rail-and-offline-runbooks).
+
+### Evidence is deliberately split
+
+`deterministic_conformance` is the merge-blocking semantic lane. It proves the
+same account projection for Apple-to-web and Stripe-to-iOS scenarios without
+claiming a mobile runtime. `runtime_capability` is a separate, non-blocking
+lane; the checked-in Crosswake tracer is `feasibility_blocked` until it has the
+required bridge compile/unit and physical-device evidence. Fake, browser,
+simulator, and Swift-vector results do not change that status.
+
+`advisory_parity` is non-blocking provider comparison evidence. Browser and
+Playwright coverage is a complementary rendered-host check for accessible copy
+and flows, not the semantic oracle for StoreKit, signed proof, offline cache
+replacement, ordering, or key rotation.
+
+### Compatibility and privacy boundary
+
+This is additive: legacy hosts remain compatible. Apple subscriptions stay
+externally managed, and Accrue does not transfer, merge, migrate, refund, or
+prorate lifecycle state across rails. When an offline lease is stale, a learner
+may continue downloaded study and local progress only; new value waits for a
+reconnect.
+
+Keep raw transaction data, signed proof material, tokens, PII, provider
+payloads, and credential values out of diagnostics, telemetry, guides, and
+support tickets. Use the bounded diagnostic's state, reason, next action, age,
+and safe correlation instead.
+
 - [Lifecycle Semantics](lifecycle_semantics.md) — the SSOT for which lifecycle
   states grant entitlement (the truth `entitling?/1` encodes).
 - [Telemetry](telemetry.md) — the `[:accrue, ...]` span catalog and OTel wiring
