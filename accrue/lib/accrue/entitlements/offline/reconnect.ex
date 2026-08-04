@@ -2,7 +2,14 @@ defmodule Accrue.Entitlements.Offline.Reconnect do
   @moduledoc false
   import Ecto.Query
   alias Accrue.Entitlements.{Account, Device}
-  alias Accrue.Entitlements.Offline.{Challenge, Issuer, SourceCoordinator}
+
+  alias Accrue.Entitlements.Offline.{
+    Challenge,
+    Issuer,
+    ReconnectAttempt,
+    ReconnectWakeup,
+    SourceCoordinator
+  }
 
   defmodule Request do
     @enforce_keys [:installation_id, :challenge_id, :nonce, :nonce_signature, :idempotency_key]
@@ -34,6 +41,7 @@ defmodule Accrue.Entitlements.Offline.Reconnect do
   @spec reconnect(Account.t(), Request.t(), keyword()) :: {:ok, Outcome.t()} | {:error, atom()}
   def reconnect(%Account{} = account, %Request{} = request, opts) do
     now = Keyword.get(opts, :now, DateTime.utc_now())
+    started_at = System.monotonic_time(:millisecond)
 
     Accrue.Telemetry.span_private(
       [:accrue, :entitlements, :offline, :reconnect],
@@ -44,7 +52,7 @@ defmodule Accrue.Entitlements.Offline.Reconnect do
       },
       fn ->
         result = do_reconnect(account, request, now, opts)
-        emit_telemetry(result, request, now)
+        emit_telemetry(result, request, now, started_at, opts)
         result
       end
     )
@@ -237,7 +245,8 @@ defmodule Accrue.Entitlements.Offline.Reconnect do
                    idempotency_digest: digest(request.idempotency_key),
                    reconnect_outcome: admission_map(request, now)
                  })
-               ) do
+               ),
+             {:ok, _attempt} <- schedule_attempt(repo, account, device, persisted_challenge, now) do
           {:ok, {:new, device, persisted_challenge}}
         else
           %Challenge{
@@ -263,12 +272,201 @@ defmodule Accrue.Entitlements.Offline.Reconnect do
     end
   end
 
+  defp schedule_attempt(repo, account, device, challenge, now) do
+    with {:ok, attempt} <-
+           repo.insert(
+             ReconnectAttempt.changeset(%ReconnectAttempt{}, %{
+               challenge_id: challenge.id,
+               account_id: account.id,
+               device_id: device.id,
+               state: :admitted,
+               scheduled_at: now,
+               attempt_count: 0,
+               due_source_count: 0
+             })
+           ),
+         {:ok, _} <- ReconnectWakeup.enqueue_in_transaction(repo, attempt.id, now),
+         {:ok, _} <- repo.insert(Accrue.Entitlements.Offline.ReconnectWakeupWorker.new(%{})) do
+      {:ok, attempt}
+    end
+  end
+
   defp persist_outcome(challenge, outcome, opts) do
     repo = Keyword.get(opts, :repo, Accrue.Repo.repo())
 
-    case repo.update(Challenge.changeset(challenge, %{reconnect_outcome: outcome_map(outcome)})) do
-      {:ok, _} -> :ok
+    case repo.transact(fn ->
+           with {:ok, _} <-
+                  repo.update(
+                    Challenge.changeset(challenge, %{reconnect_outcome: outcome_map(outcome)})
+                  ),
+                {:ok, _} <- complete_attempt(repo, challenge.id, outcome) do
+             {:ok, :ok}
+           else
+             {:error, reason} -> repo.rollback(reason)
+           end
+         end) do
+      {:ok, :ok} -> :ok
       _ -> {:error, :persistence_failed}
+    end
+  end
+
+  defp complete_attempt(repo, challenge_id, outcome) do
+    case repo.one(
+           from(a in ReconnectAttempt, where: a.challenge_id == ^challenge_id, lock: "FOR UPDATE")
+         ) do
+      nil ->
+        {:error, :attempt_missing}
+
+      attempt ->
+        repo.update(
+          ReconnectAttempt.changeset(attempt, %{
+            state: if(outcome.disposition == :needs_repair, do: :needs_repair, else: :completed),
+            completed_at: DateTime.utc_now(),
+            due_source_count: outcome.due_source_count,
+            revision: outcome.revision,
+            failure_reason:
+              if(outcome.reason == :ok, do: nil, else: Atom.to_string(outcome.reason))
+          })
+        )
+    end
+  end
+
+  @doc false
+  def drain_wakeups(repo, opts \\ []) do
+    insert_job = Keyword.get(opts, :insert_job, &repo.insert/1)
+
+    repo.transact(fn ->
+      repo.all(
+        from(w in ReconnectWakeup,
+          order_by: [asc: w.requested_at],
+          lock: "FOR UPDATE SKIP LOCKED"
+        )
+      )
+      |> Enum.reduce_while({:ok, 0}, fn wakeup, {:ok, count} ->
+        case insert_job.(
+               Accrue.Entitlements.Offline.ReconnectWorker.new(%{
+                 "attempt_id" => wakeup.attempt_id
+               })
+             ) do
+          {:ok, _} ->
+            {:ok, _} = repo.delete(wakeup)
+            {:cont, {:ok, count + 1}}
+
+          {:error, reason} ->
+            repo.rollback({:job_insert_failed, reason})
+        end
+      end)
+    end)
+  end
+
+  @doc false
+  def enqueue_due(repo, opts \\ []) do
+    now = Keyword.get(opts, :now, DateTime.utc_now())
+    insert_job = Keyword.get(opts, :insert_job, &repo.insert/1)
+
+    repo.transact(fn ->
+      repo.all(
+        from(a in ReconnectAttempt,
+          where:
+            a.state in [:admitted, :retrying] and
+              (is_nil(a.next_attempt_at) or a.next_attempt_at <= ^now),
+          limit: 100,
+          lock: "FOR UPDATE SKIP LOCKED"
+        )
+      )
+      |> Enum.reduce_while({:ok, 0}, fn attempt, {:ok, count} ->
+        case insert_job.(
+               Accrue.Entitlements.Offline.ReconnectWorker.new(%{"attempt_id" => attempt.id})
+             ) do
+          {:ok, _} -> {:cont, {:ok, count + 1}}
+          {:error, reason} -> repo.rollback({:sweep_insert_failed, reason})
+        end
+      end)
+    end)
+  end
+
+  @doc false
+  def execute_attempt(attempt_id, opts \\ []) when is_binary(attempt_id) do
+    repo = Keyword.get(opts, :repo, Accrue.Repo.repo())
+    now = Keyword.get(opts, :now, DateTime.utc_now())
+
+    config =
+      Keyword.get(opts, :offline_reconnect, Application.get_env(:accrue, :offline_reconnect))
+
+    with true <- is_list(config),
+         coordinator when is_atom(coordinator) <- Keyword.get(config, :source_coordinator),
+         provider when is_atom(provider) <- Keyword.get(config, :key_provider),
+         {:ok, {account, device, challenge}} <- claim_attempt(repo, attempt_id, now),
+         {:ok, _} <-
+           run_attempt(
+             account,
+             device,
+             challenge,
+             %Request{
+               installation_id: device.installation_id,
+               challenge_id: challenge.id,
+               nonce: "worker",
+               nonce_signature: "worker",
+               idempotency_key: "worker"
+             },
+             now,
+             Keyword.merge(config, repo: repo)
+           ) do
+      :ok
+    else
+      false -> mark_configuration_failure(repo, attempt_id, now)
+      _ -> {:error, :attempt_unavailable}
+    end
+  end
+
+  defp mark_configuration_failure(repo, attempt_id, now) do
+    case repo.get(ReconnectAttempt, attempt_id) do
+      nil ->
+        {:error, :attempt_unavailable}
+
+      attempt ->
+        case repo.update(
+               ReconnectAttempt.changeset(attempt, %{
+                 state: :needs_repair,
+                 failure_reason: "config_invalid",
+                 completed_at: now,
+                 next_attempt_at: nil
+               })
+             ) do
+          {:ok, _} -> {:error, :config_invalid}
+          _ -> {:error, :persistence_failed}
+        end
+    end
+  end
+
+  defp claim_attempt(repo, attempt_id, now) do
+    repo.transact(fn ->
+      with %ReconnectAttempt{} = attempt <-
+             repo.one(
+               from(a in ReconnectAttempt,
+                 where: a.id == ^attempt_id and a.state in [:admitted, :retrying],
+                 lock: "FOR UPDATE"
+               )
+             ),
+           %Account{} = account <- repo.get(Account, attempt.account_id),
+           %Device{} = device <- repo.get(Device, attempt.device_id),
+           %Challenge{} = challenge <- repo.get(Challenge, attempt.challenge_id),
+           {:ok, _} <-
+             repo.update(
+               ReconnectAttempt.changeset(attempt, %{
+                 state: :running,
+                 started_at: now,
+                 attempt_count: attempt.attempt_count + 1
+               })
+             ) do
+        {account, device, challenge}
+      else
+        _ -> repo.rollback(:attempt_unavailable)
+      end
+    end)
+    |> case do
+      {:ok, value} -> {:ok, value}
+      _ -> {:error, :attempt_unavailable}
     end
   end
 
@@ -425,7 +623,7 @@ defmodule Accrue.Entitlements.Offline.Reconnect do
     end
   end
 
-  defp emit_telemetry(result, request, now) do
+  defp emit_telemetry(result, request, now, started_at, opts) do
     outcome =
       case result do
         {:ok, %Outcome{} = value} -> value
@@ -434,7 +632,7 @@ defmodule Accrue.Entitlements.Offline.Reconnect do
 
     :telemetry.execute(
       [:accrue, :entitlements, :offline, :reconnect],
-      %{count: 1, latency_ms: elapsed_ms(now)},
+      %{count: 1, latency_ms: elapsed_ms(started_at)},
       %{
         action: :reconnect,
         disposition: if(outcome, do: outcome.disposition, else: :rejected),
@@ -443,15 +641,34 @@ defmodule Accrue.Entitlements.Offline.Reconnect do
         revision_delta: revision_delta(request, outcome),
         due_source_count: if(outcome, do: outcome.due_source_count, else: 0),
         retry_after: if(outcome, do: outcome.retry_after, else: nil),
-        queue_age_ms: elapsed_ms(now),
+        queue_age_ms: queue_age_ms(request.challenge_id, now, opts),
         protocol_version: "v1.59",
         correlation_hash: correlation_hash(request)
       }
     )
   end
 
-  defp elapsed_ms(now),
-    do: DateTime.diff(DateTime.utc_now(), now, :millisecond) |> max(0) |> min(86_400_000)
+  defp elapsed_ms(started_at),
+    do: (System.monotonic_time(:millisecond) - started_at) |> max(0) |> min(86_400_000)
+
+  defp queue_age_ms(challenge_id, now, opts) do
+    repo = Keyword.get(opts, :repo, Accrue.Repo.repo())
+
+    case repo.one(
+           from(a in ReconnectAttempt,
+             where: a.challenge_id == ^challenge_id,
+             select: a.scheduled_at
+           )
+         ) do
+      %DateTime{} = scheduled ->
+        DateTime.diff(now, scheduled, :millisecond) |> max(0) |> min(86_400_000)
+
+      _ ->
+        0
+    end
+  rescue
+    _ -> 0
+  end
 
   defp correlation_hash(%Request{idempotency_key: key}) when is_binary(key), do: digest(key)
   defp correlation_hash(_), do: nil
