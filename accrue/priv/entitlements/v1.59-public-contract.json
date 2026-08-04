@@ -1,0 +1,51 @@
+{
+  "version": "v1.59",
+  "verification_command": "cd accrue && mix accrue.entitlements.reference_scenarios --check",
+  "evidence_lanes": {
+    "deterministic_conformance": "merge_blocking",
+    "runtime_capability": "not_merge_blocking",
+    "advisory_parity": "not_merge_blocking"
+  },
+  "support": {
+    "legacy_hosts": "compatible",
+    "apple_subscription_management": "externally_managed",
+    "cross_rail_lifecycle_mutation": "not_supported",
+    "stale_offline_continuity": "downloaded_study_and_local_progress_only"
+  },
+  "privacy_exclusions": [
+    "raw_transaction_data",
+    "signed_proof_material",
+    "account_tokens",
+    "personally_identifiable_information"
+  ],
+  "scenario_ids": [
+    "apple_purchase_to_web_login",
+    "clock_rollback",
+    "crosswake_runtime_capability",
+    "deny_tombstone",
+    "device_replacement",
+    "duplicate_purchase_prevention",
+    "empty_evidence_fails_closed",
+    "equal_order_stability",
+    "interrupted_resume",
+    "key_rotation",
+    "offline_reconnect",
+    "parallel_execution",
+    "provider_advisory_parity",
+    "refund_revocation",
+    "repeat_idempotency",
+    "restricted_expansion",
+    "stale_downloaded_study_continuity",
+    "stripe_purchase_to_ios_login",
+    "survivor_grant"
+  ],
+  "runtime_capability": {
+    "scenario_id": "crosswake_runtime_capability",
+    "report": "examples/crosswake_tracer/capability-report.json",
+    "status": "feasibility_blocked",
+    "required_evidence_kinds": [
+      "crosswake_bridge_compile_unit",
+      "physical_device"
+    ]
+  }
+}

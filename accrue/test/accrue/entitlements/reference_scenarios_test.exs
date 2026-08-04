@@ -61,8 +61,36 @@ defmodule Accrue.Entitlements.ReferenceScenariosTest do
     end
   end
 
+  test "public contract rejects duplicate JSON keys and missing closed fields" do
+    root = fixture_root!()
+    fixture_path = Path.join(root, "accrue/priv/entitlements/v1.59-public-contract.json")
+
+    File.write!(
+      fixture_path,
+      File.read!(fixture_path)
+      |> String.replace(~s("version": "v1.59",), ~s("version": "v1.59",\n  "version": "v1.59",),
+        global: false
+      )
+    )
+
+    assert {:error, _reason} = Markdown.render(root)
+    copy_fixture_file!(root, "accrue/priv/entitlements/v1.59-public-contract.json")
+
+    fixture_path
+    |> File.read!()
+    |> Jason.decode!()
+    |> Map.delete("privacy_exclusions")
+    |> Jason.encode!(pretty: true)
+    |> Kernel.<>("\n")
+    |> then(&File.write!(fixture_path, &1))
+
+    assert {:error, _reason} = Markdown.render(root)
+  end
+
   defp fixture_root! do
-    root = Path.join(System.tmp_dir!(), "reference-scenarios-#{System.unique_integer([:positive])}")
+    root =
+      Path.join(System.tmp_dir!(), "reference-scenarios-#{System.unique_integer([:positive])}")
+
     File.rm_rf!(root)
     on_exit(fn -> File.rm_rf(root) end)
 
