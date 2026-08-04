@@ -508,7 +508,15 @@ defmodule Accrue.Entitlements.Offline.Reconnect do
          } = map
        )
        when disposition in ["issued", "pending", "needs_repair"] and
-              reason in ["ok", "pending", "needs_repair"] and
+              reason in [
+                "ok",
+                "pending",
+                "needs_repair",
+                "repair_enqueue_failed",
+                "source_unavailable",
+                "config_invalid",
+                "admission_invalid"
+              ] and
               next_action in ["none", "reconnect_required"] and is_integer(due_source_count) do
     %Outcome{
       disposition: String.to_existing_atom(disposition),
@@ -522,6 +530,12 @@ defmodule Accrue.Entitlements.Offline.Reconnect do
   end
 
   defp outcome_from_map(_), do: :resume
+
+  defp bounded_outcome_reason(reason)
+       when reason in [:source_unavailable, :config_invalid, :admission_invalid],
+       do: reason
+
+  defp bounded_outcome_reason(_), do: :needs_repair
 
   defp replay_admission(device, challenge, outcome) do
     case outcome_from_map(outcome) do
@@ -545,7 +559,7 @@ defmodule Accrue.Entitlements.Offline.Reconnect do
     }
   end
 
-  defp repair_outbox_state(%Outcome{reason: :needs_repair}),
+  defp repair_outbox_state(%Outcome{reason: :repair_enqueue_failed}),
     do: %{"state" => "repair_escalated", "reason" => "repair_enqueue_failed"}
 
   defp repair_outbox_state(%Outcome{disposition: disposition})
@@ -559,15 +573,15 @@ defmodule Accrue.Entitlements.Offline.Reconnect do
   defp outcome_for_result({:error, :repair_enqueue_failed}),
     do: %Outcome{
       disposition: :needs_repair,
-      reason: :needs_repair,
+      reason: :repair_enqueue_failed,
       next_action: :reconnect_required,
       due_source_count: 0
     }
 
-  defp outcome_for_result({:error, _}),
+  defp outcome_for_result({:error, reason}),
     do: %Outcome{
       disposition: :needs_repair,
-      reason: :needs_repair,
+      reason: bounded_outcome_reason(reason),
       next_action: :reconnect_required,
       due_source_count: 0
     }

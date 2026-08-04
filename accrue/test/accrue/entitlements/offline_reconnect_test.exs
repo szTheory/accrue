@@ -75,6 +75,13 @@ defmodule Accrue.Entitlements.OfflineReconnectTest do
     end
   end
 
+  defmodule UnavailableSource do
+    @behaviour SourceCoordinator
+    def due_sources(_, _, _), do: {:error, :provider_timeout}
+    def refresh(_, status, _, _), do: {:ok, status}
+    def enqueue_repair(_, _, _, _), do: :ok
+  end
+
   setup do
     original = Application.get_env(:accrue, :entitlements)
     original_rails = Application.get_env(:accrue, :rails)
@@ -296,6 +303,56 @@ defmodule Accrue.Entitlements.OfflineReconnectTest do
     assert 1 == TestRepo.aggregate(Issuance, :count)
   end
 
+  test "the sweeper requeues an expired running lease and converges once", ctx do
+    project_grant!(ctx.account)
+    opts = issuer_opts(ctx) ++ [source_coordinator: NoDueSources, authorize: fn _, _ -> true end]
+    request = reconnect_request!(ctx, opts, "reconnect-expired-lease")
+
+    assert {:error, :admission_interrupted} =
+             Offline.reconnect(
+               ctx.account,
+               request,
+               Keyword.put(opts, :after_admission, fn -> :interrupted end)
+             )
+
+    attempt = TestRepo.one!(ReconnectAttempt)
+
+    {:ok, _} =
+      TestRepo.update(
+        ReconnectAttempt.changeset(attempt, %{
+          state: :running,
+          started_at: DateTime.add(@now, -301, :second)
+        })
+      )
+
+    assert {:ok, 1} =
+             Reconnect.enqueue_due(TestRepo,
+               now: @now,
+               lease_seconds: 300,
+               insert_job: fn job ->
+                 send(
+                   self(),
+                   {:requeued_attempt, Ecto.Changeset.get_change(job, :args)["attempt_id"]}
+                 )
+
+                 {:ok, job}
+               end
+             )
+
+    assert_receive {:requeued_attempt, attempt_id}
+    assert attempt_id == attempt.id
+
+    assert :ok =
+             Reconnect.execute_attempt(attempt.id,
+               offline_reconnect: opts,
+               repo: TestRepo,
+               now: @now
+             )
+
+    assert %{state: :completed, attempt_count: 1} = TestRepo.get!(ReconnectAttempt, attempt.id)
+    assert 1 == TestRepo.aggregate(Issuance, :count)
+  end
+
   test "a failed wakeup job insertion rolls back wakeup draining", ctx do
     opts = issuer_opts(ctx) ++ [source_coordinator: NoDueSources, authorize: fn _, _ -> true end]
     request = reconnect_request!(ctx, opts, "reconnect-wakeup-rollback")
@@ -344,7 +401,7 @@ defmodule Accrue.Entitlements.OfflineReconnectTest do
 
     request = reconnect_request!(ctx, opts, "reconnect-enqueue-failure")
 
-    assert {:ok, %{disposition: :needs_repair, reason: :needs_repair, proof: nil}} =
+    assert {:ok, %{disposition: :needs_repair, reason: :repair_enqueue_failed, proof: nil}} =
              Offline.reconnect(ctx.account, request, opts)
 
     assert_receive {:repair_enqueued, :stripe}
@@ -428,6 +485,33 @@ defmodule Accrue.Entitlements.OfflineReconnectTest do
     end
 
     refute_receive {:reconnect_telemetry, %{proof: _}}
+  end
+
+  test "telemetry uses monotonic latency, persisted queue age, and exact failure reasons", ctx do
+    handler_id = "offline-reconnect-clock-#{System.unique_integer([:positive])}"
+
+    :ok =
+      :telemetry.attach(
+        handler_id,
+        [:accrue, :entitlements, :offline, :reconnect],
+        fn _, measures, metadata, pid -> send(pid, {:clock_telemetry, measures, metadata}) end,
+        self()
+      )
+
+    on_exit(fn -> :telemetry.detach(handler_id) end)
+
+    opts =
+      issuer_opts(ctx) ++ [source_coordinator: UnavailableSource, authorize: fn _, _ -> true end]
+
+    request = reconnect_request!(ctx, opts, "telemetry-source-unavailable")
+
+    assert {:ok, %{disposition: :needs_repair, reason: :source_unavailable}} =
+             Offline.reconnect(ctx.account, request, opts)
+
+    assert_receive {:clock_telemetry, %{latency_ms: latency, queue_age_ms: 0}, metadata}
+    assert is_integer(latency) and latency >= 0 and latency < 1_000
+    assert metadata.reason == :source_unavailable
+    refute contains_secret?(metadata)
   end
 
   test "an empty due schedule is a resolved source set" do
@@ -550,6 +634,23 @@ defmodule Accrue.Entitlements.OfflineReconnectTest do
   end
 
   defp digest(value), do: :crypto.hash(:sha256, value) |> Base.url_encode64(padding: false)
+
+  defp contains_secret?(value) when is_map(value),
+    do:
+      Enum.any?(value, fn {k, v} ->
+        to_string(k) in [
+          "proof",
+          "account_id",
+          "device_id",
+          "nonce",
+          "nonce_signature",
+          "public_jwk",
+          "evidence"
+        ] or contains_secret?(v)
+      end)
+
+  defp contains_secret?(value) when is_list(value), do: Enum.any?(value, &contains_secret?/1)
+  defp contains_secret?(_), do: false
 
   defp project_grant!(account) do
     {:ok, observation} =
