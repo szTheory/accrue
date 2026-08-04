@@ -9,8 +9,18 @@ defmodule Accrue.Entitlements.Offline do
     Issuer,
     KeyProvider,
     Proof,
+    Reconnect,
     Registration
   }
+
+  @spec reconnect(Accrue.Entitlements.Account.t(), Reconnect.Request.t(), keyword()) ::
+          {:ok, Reconnect.Outcome.t()} | {:error, atom()}
+  def reconnect(account, request, opts \\ [])
+
+  def reconnect(account, %Reconnect.Request{} = request, opts),
+    do: Reconnect.reconnect(account, request, opts)
+
+  def reconnect(_, _, _), do: {:error, :invalid_request}
 
   @spec issue(Accrue.Entitlements.Account.t(), Issuer.Request.t(), keyword()) ::
           {:ok, Issuer.Result.t()} | {:error, atom()}
