@@ -233,16 +233,15 @@ end
 |---|---|---|---|
 | — | None. Research recommendations are constrained to existing repository assets and locked decisions. | — | — |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
-1. **Which bounded diagnostic action should be exposed through the reference host versus a CLI-only runbook?**
+1. **RESOLVED — Which bounded diagnostic action should be exposed through the reference host versus a CLI-only runbook?**
    - What we know: the host owns authorization/rendering and the planner has discretion over the presentation split. [VERIFIED: codebase `220-CONTEXT.md`]
-   - What's unclear: no locked list specifies which repair actions need a GUI control.
-   - Recommendation: keep all repair behavior in contexts; expose only actions with a meaningful confirmation/dry-run and test both the context and any UI wrapper.
+   - Resolution: Plan 03 keeps every repair behavior in `Accrue.Entitlements.Repair` and exposes host controls only for the bounded actions that have a meaningful confirmation or dry-run. Review/escalation-only and non-interactive operational paths remain available through the typed context contract and scenario-ID-linked CLI/runbook procedures rather than arbitrary GUI controls. Both the context and each selected host wrapper receive focused automated coverage.
 
-2. **What is the exact public-contract fixture location/schema?**
+2. **RESOLVED — What is the exact public-contract fixture location/schema?**
    - What we know: v1.59 JSON fixture/export precedents already exist. [VERIFIED: codebase `accrue/priv/entitlements/`]
-   - Recommendation: select a sibling `accrue/priv/entitlements/v1.59-*.json` path and give its validator a deterministic `--check` mode.
+   - Resolution: Plan 04 uses `accrue/priv/entitlements/v1.59-public-contract.json`, a sibling versioned fixture with closed support, limit, and evidence-lane states plus references to unique scenario IDs and required public artifacts. `Accrue.Entitlements.ReferenceScenarios.Markdown` validates that schema and deterministically generates `examples/accrue_host/docs/capability-limits-matrix.md`; `mix accrue.entitlements.reference_scenarios --check` fails on malformed facts, broken cross-references, or generated-output drift.
 
 ## Environment Availability
 
