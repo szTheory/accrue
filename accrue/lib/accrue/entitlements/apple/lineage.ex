@@ -104,9 +104,7 @@ defmodule Accrue.Entitlements.Apple.Lineage do
   def repair(repo, lineage_id, account_id, token, _opts \\ [])
       when is_binary(lineage_id) and is_binary(account_id) and is_binary(token) do
     lineage =
-      repo.one!(
-        from(l in __MODULE__, where: l.id == ^lineage_id, lock: "FOR UPDATE")
-      )
+      repo.one!(from(l in __MODULE__, where: l.id == ^lineage_id, lock: "FOR UPDATE"))
 
     claim(repo, lineage, account_id, token)
   end
