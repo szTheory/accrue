@@ -46,7 +46,7 @@ The adoption matrix now links to, and CI directly validates, the canonical multi
 
 ## Blocker
 
-Task 1 cannot truthfully be marked complete. The corpus has no per-case closed operation payloads for the lifecycle/offline/order/replay/race/resume rows, and the conformance suite therefore still only performs real Intake/Observation/Projector/Snapshot/PurchaseDecision/Offline assertions for the two Plan-220-07 tracer rows. Implementing the missing cases requires defining their operation inputs and expected production transitions without deriving decisions from fixture helpers.
+Task 1 cannot truthfully be marked complete. The conformance suite now drives every deterministic ID through production projection, snapshot, purchase, Offline, and audit contexts, but the corpus still has no per-case closed operation payloads for lifecycle/offline/order/replay/race/resume rows and the test does not compare each resulting bounded tuple to its fixture expectation. Implementing the remaining work requires defining those operation payloads and explicit expected production transitions without deriving decisions from fixture helpers.
 
 ## Deviations from Plan
 
@@ -54,9 +54,9 @@ None auto-fixed. Execution stopped before claiming the unimplemented production-
 
 ## Known Stubs
 
-- `accrue/lib/accrue/entitlements/reference_scenarios.ex`: `synthetic_operation/1` enumerates bounded inputs for non-tracer rows but is not yet consumed by a real-context bounded-output comparator; this does not fulfill PROOF-02 and must be replaced by per-case execution data and tests.
+- `accrue/lib/accrue/entitlements/reference_scenarios.ex`: `synthetic_operation/1` enumerates bounded inputs for non-tracer rows; it is now consumed by production-context execution, but not yet by a per-case bounded-output comparator. This does not fulfill PROOF-02 and must be replaced by per-case execution data and fixture comparisons.
 
 ## Self-Check: PASSED
 
-- Task commits `364038e4`, `aeadfac8`, `f5b9c6c8`, and `7c901f94` exist.
+- Task commits `364038e4`, `aeadfac8`, `f5b9c6c8`, `7c901f94`, and `00efdd57` exist.
 - The canonical guide remains the only hand-authored release guide used by the adoption path.
