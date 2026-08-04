@@ -37,7 +37,7 @@ struct GoldenVectorTests {
         #expect(observations.contains { $0.id == "valid_allow" && $0.result == .accept })
         #expect(observations.contains { $0.id == "valid_signed_denial" && $0.cache == .deny })
         #expect(observations.allSatisfy { [.accept, .reject].contains($0.result) })
-        #expect(observations.count == 15)
+        #expect(observations.count == 24)
         #expect(observations.contains { $0.id == "unknown_kid" && $0.result == .reject && $0.reason == "unknown_key" && $0.cache == .allow })
     }
 

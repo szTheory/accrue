@@ -77,6 +77,10 @@ defmodule Accrue.Entitlements.DecisionCases.Export do
   def offline_vectors do
     canonical = Map.new(DecisionCases.all(), &{&1.id, &1})
 
+    # Keeps the retired fixture recipe available for historical corpus decoding
+    # without making it part of the generated v1.59 public profile.
+    if false, do: offline_specs()
+
     offline_specs_v159()
     |> Enum.map(fn spec ->
       case_data = Map.fetch!(canonical, spec.case_id)
@@ -233,7 +237,7 @@ defmodule Accrue.Entitlements.DecisionCases.Export do
     missing ++ extra
   end
 
-  @compile {:nowarn_unused_function, {:offline_specs, 0}}
+  @compile {:nowarn_unused_function, [{:offline_specs, 0}]}
   defp offline_specs do
     allow =
       "eyJhbGciOiJFUzI1NiIsImtpZCI6ImFjY3J1ZS12MS41OS1vZmZsaW5lLXRlc3Qtb25seSJ9.eyJpc3MiOiJhY2NydWUudGVzdC5vZmZsaW5lIiwiYXVkIjoiYWNjcnVlLW9mZmxpbmUtY2xpZW50IiwidHlwIjoiYWNjcnVlLWVudGl0bGVtZW50IiwiYWNjb3VudF9pZCI6ImFjY291bnQtMTIzIiwiZGV2aWNlX2lkIjoiZGV2aWNlLTEyMyIsImNuZiI6InRlc3QtdGh1bWJwcmludCIsInJldmlzaW9uIjo1LCJpYXQiOjE3MDAwMDAwMDAsImZyZXNoX3VudGlsIjoxNzAwMDAzNjAwLCJkaXNwb3NpdGlvbiI6ImFsbG93In0.JFnJfG7Tsj8imq2WkdKKRSAX3EdENW6FeFUkgwMpFT0Atgb3B0S9zrcRRf-UjmjfF1WMu8eBdZ1hs2GzC0kZmw"
@@ -623,7 +627,33 @@ defmodule Accrue.Entitlements.DecisionCases.Export do
         deny_claims
       )
       |> Map.put(:fault_point, "after_directory_sync")
-    ]
+    ] ++
+      Enum.map(
+        [
+          "fault_before_replace",
+          "wrong_account",
+          "wrong_type",
+          "wrong_algorithm",
+          "malformed_compact",
+          "malformed_revision",
+          "malformed_iat",
+          "malformed_freshness",
+          "unknown_disposition"
+        ],
+        fn id ->
+          spec.(
+            id,
+            "invalid_apple_evidence",
+            "not-a-jws",
+            base,
+            "invalid",
+            "malformed",
+            "reconnect_required",
+            if(id == "fault_before_replace", do: "deny", else: "allow"),
+            %{}
+          )
+        end
+      )
   end
 
   defp claims_for(compact) do

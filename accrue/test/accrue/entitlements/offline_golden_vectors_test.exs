@@ -49,7 +49,8 @@ defmodule Accrue.Entitlements.OfflineGoldenVectorsTest do
                :device_mismatch,
                :unknown_key,
                :superseded,
-               :clock_rollback
+               :clock_rollback,
+               :malformed
              ]
     end)
   end
