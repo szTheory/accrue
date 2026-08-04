@@ -810,6 +810,43 @@ defmodule Accrue.Entitlements.OfflineReconnectTest do
              )
   end
 
+  @tag :issuance
+  test "an unbounded issued proof keeps its verification key required indefinitely", ctx do
+    old_key = ctx.public_key
+    next_key = Map.put(old_key, "kid", "accrue-v1.59-offline-next")
+
+    assert {:ok, _issuance} =
+             TestRepo.insert(
+               Issuance.changeset(%Issuance{}, %{
+                 account_id: ctx.account.id,
+                 device_id: ctx.device.id,
+                 token_id_hash: Base.url_encode64(:crypto.strong_rand_bytes(32), padding: false),
+                 kid: old_key["kid"],
+                 revision: 1,
+                 disposition: :allow,
+                 issued_at: @now,
+                 fresh_until: @now,
+                 expires_at: nil
+               })
+             )
+
+    assert {:error, :config_invalid} =
+             Offline.verification_keys_with_issued_retention(
+               keys: [next_key],
+               repo: TestRepo,
+               now: DateTime.add(@now, 10 * 365 * 86_400, :second)
+             )
+
+    assert {:ok, %{"keys" => keys}} =
+             Offline.verification_keys_with_issued_retention(
+               keys: [old_key, next_key],
+               repo: TestRepo,
+               now: DateTime.add(@now, 10 * 365 * 86_400, :second)
+             )
+
+    assert Enum.map(keys, & &1["kid"]) == Enum.sort([old_key["kid"], next_key["kid"]])
+  end
+
   defp account!(suffix) do
     {:ok, account} = Account.fetch_or_create(TestRepo, "test", "owner-219-#{suffix}")
     account
