@@ -297,7 +297,7 @@ Plans:
   4. Automated repair and runbooks address missed Apple notifications, history cursor recovery, outages, conflicts, duplicate charges, stale devices, signing-key compromise, and reconciliation backlog without routine account reconstruction.
   5. Public guides, examples, capability/compatibility material, App Review guidance, release notes, threat model, watchlist, and conformance gates state one additive contract and its explicit v1.59 limits.
 
-**Plans**: 2/6 plans executed
+**Plans**: 3/6 plans executed
 
 Plans:
 
@@ -308,7 +308,7 @@ Plans:
 **Wave 2** *(blocked on 220-01 completion)*
 
 - [x] 220-02-PLAN.md — Publish and render one privacy-bounded, revision-consistent entitlement diagnostic.
-- [ ] 220-04-PLAN.md — Generate exact capability/limits facts and block evidence-lane or release-contract drift in CI.
+- [x] 220-04-PLAN.md — Generate exact capability/limits facts and block evidence-lane or release-contract drift in CI.
 
 **Wave 3** *(blocked on 220-02 completion)*
 
@@ -336,4 +336,4 @@ Plans:
 | 217. Canonical projection and compatibility | v1.59 | 5/5 | Complete | 2026-08-02 |
 | 218. Apple observation and repair | v1.59 | 16/16 | Complete    | 2026-08-03 |
 | 219. Offline study contract | v1.59 | 5/5 | Complete    | 2026-08-03 |
-| 220. First-adopter proof and release gates | v1.59 | 2/6 | In Progress|  |
+| 220. First-adopter proof and release gates | v1.59 | 3/6 | In Progress|  |
