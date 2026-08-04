@@ -34,7 +34,7 @@ Phase 219 passed a deep review/remediation convergence loop. Every critical and 
 ## Verification evidence
 
 - Focused issuance, reconnect, registration, and installer tests: 41 tests, 0 failures before the final state guards; reconnect suite: 18 tests, 0 failures after the final fixes.
-- Full Elixir gate: 70 properties, 1,980 tests, 0 failures (11 excluded).
+- Final full Elixir gate: 70 properties, 1,981 tests, 0 failures (11 excluded).
 - Swift client: 27 tests, 0 failures.
 - Schema drift: clean.
 - Codebase drift: not applicable (`no-structure-md`).
