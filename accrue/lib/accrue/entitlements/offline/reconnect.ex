@@ -68,12 +68,26 @@ defmodule Accrue.Entitlements.Offline.Reconnect do
         {:replay, outcome} ->
           {:ok, outcome}
 
-        {kind, device, challenge} when kind in [:new, :resume] ->
+        {kind, _device, _challenge, attempt_id} when kind in [:new, :resume] ->
           # This hook is deliberately after the admission transaction. It gives
           # hosts a deterministic fault-injection seam and proves that a restart
           # leaves a durable attempt which an exact replay can resume.
+          repo = Keyword.get(opts, :repo, Accrue.Repo.repo())
+
           with :ok <- after_admission(opts),
-               {:ok, outcome} <- run_attempt(account, device, challenge, request, now, opts) do
+               {:ok, {claimed_account, claimed_device, claimed_challenge, token}} <-
+                 claim_attempt(repo, attempt_id, now),
+               {:ok, outcome} <-
+                 run_attempt(
+                   claimed_account,
+                   claimed_device,
+                   claimed_challenge,
+                   request,
+                   now,
+                   opts,
+                   attempt_id,
+                   token
+                 ) do
             {:ok, outcome}
           end
       end
@@ -83,11 +97,12 @@ defmodule Accrue.Entitlements.Offline.Reconnect do
     end
   end
 
-  defp run_attempt(account, device, challenge, request, now, opts) do
+  defp run_attempt(account, device, challenge, request, now, opts, attempt_id, token) do
     result =
       with {:ok, statuses} <- due_statuses(account, now, opts),
            {:ok, refreshed} <- refresh_due(account, statuses, now, opts),
-           {:ok, outcome} <- settle(account, device, challenge, request, refreshed, now, opts) do
+           {:ok, outcome} <-
+             settle(account, device, challenge, request, refreshed, now, opts, attempt_id, token) do
         {:ok, outcome}
       end
 
@@ -97,9 +112,18 @@ defmodule Accrue.Entitlements.Offline.Reconnect do
     # a replayable pending response.
     outcome = outcome_for_result(result)
 
-    case persist_outcome(challenge, outcome, opts) do
-      :ok -> {:ok, outcome}
-      {:error, _} -> {:error, :persistence_failed}
+    case outcome.disposition do
+      :issued ->
+        case after_issuance_commit(opts) do
+          :ok -> {:ok, outcome}
+          _ -> {:error, :issuance_interrupted}
+        end
+
+      _ ->
+        case persist_outcome(challenge, attempt_id, token, outcome, opts) do
+          :ok -> {:ok, outcome}
+          {:error, _} -> {:error, :persistence_failed}
+        end
     end
   end
 
@@ -145,7 +169,7 @@ defmodule Accrue.Entitlements.Offline.Reconnect do
     end
   end
 
-  defp settle(account, device, challenge, _request, statuses, now, opts) do
+  defp settle(account, device, challenge, _request, statuses, now, opts, attempt_id, token) do
     due = Enum.filter(statuses, & &1.due)
     unresolved = Enum.reject(due, &(&1.state == :resolved))
 
@@ -154,7 +178,19 @@ defmodule Accrue.Entitlements.Offline.Reconnect do
 
       admission = Issuer.Admission.from_reconnect_challenge(challenge, device)
 
-      case Issuer.issue_after_admission(account, issuer, admission, opts) do
+      issuer_opts =
+        Keyword.put(opts, :persist_issued_outcome, fn repo, minting_challenge, result ->
+          complete_issued_in_transaction(
+            repo,
+            minting_challenge,
+            attempt_id,
+            token,
+            result,
+            length(due)
+          )
+        end)
+
+      case Issuer.issue_after_admission(account, issuer, admission, issuer_opts) do
         {:ok, result} ->
           {:ok,
            %Outcome{
@@ -246,9 +282,9 @@ defmodule Accrue.Entitlements.Offline.Reconnect do
                    reconnect_outcome: admission_map(request, now)
                  })
                ),
-             {:ok, _attempt} <-
+             {:ok, attempt} <-
                schedule_attempt(repo, account, device, persisted_challenge, now, opts) do
-          {:ok, {:new, device, persisted_challenge}}
+          {:ok, {:new, device, persisted_challenge, attempt.id}}
         else
           {:error, reason} ->
             repo.rollback(reason)
@@ -261,7 +297,7 @@ defmodule Accrue.Entitlements.Offline.Reconnect do
           } = challenge
           when not is_nil(consumed_at) and is_map(outcome) ->
             if replay_binding?(account, device, challenge, request, stored_digest),
-              do: replay_admission(device, challenge, outcome),
+              do: replay_admission(repo, device, challenge, outcome),
               else: repo.rollback(:challenge_invalid)
 
           _ ->
@@ -297,18 +333,28 @@ defmodule Accrue.Entitlements.Offline.Reconnect do
     end
   end
 
-  defp persist_outcome(challenge, outcome, opts) do
+  defp persist_outcome(challenge, attempt_id, token, outcome, opts) do
     repo = Keyword.get(opts, :repo, Accrue.Repo.repo())
 
     case repo.transact(fn ->
-           with {:ok, _} <-
-                  repo.update(
-                    Challenge.changeset(challenge, %{reconnect_outcome: outcome_map(outcome)})
+           with %ReconnectAttempt{state: :running, execution_token: ^token} = attempt <-
+                  repo.one(
+                    from(a in ReconnectAttempt, where: a.id == ^attempt_id, lock: "FOR UPDATE")
                   ),
-                {:ok, _} <- complete_attempt(repo, challenge.id, outcome) do
+                %Challenge{} = locked_challenge <-
+                  repo.one(from(c in Challenge, where: c.id == ^challenge.id, lock: "FOR UPDATE")),
+                true <-
+                  get_in(locked_challenge.reconnect_outcome, ["state"]) in ["admitted", "minting"],
+                {:ok, _} <-
+                  repo.update(
+                    Challenge.changeset(locked_challenge, %{
+                      reconnect_outcome: outcome_map(outcome)
+                    })
+                  ),
+                {:ok, _} <- complete_attempt(repo, attempt, outcome) do
              {:ok, :ok}
            else
-             {:error, reason} -> repo.rollback(reason)
+             _ -> repo.rollback(:attempt_unavailable)
            end
          end) do
       {:ok, :ok} -> :ok
@@ -316,24 +362,39 @@ defmodule Accrue.Entitlements.Offline.Reconnect do
     end
   end
 
-  defp complete_attempt(repo, challenge_id, outcome) do
-    case repo.one(
-           from(a in ReconnectAttempt, where: a.challenge_id == ^challenge_id, lock: "FOR UPDATE")
-         ) do
-      nil ->
-        {:error, :attempt_missing}
+  defp complete_attempt(repo, attempt, outcome) do
+    repo.update(
+      ReconnectAttempt.changeset(attempt, %{
+        state: if(outcome.disposition == :needs_repair, do: :needs_repair, else: :completed),
+        completed_at: DateTime.utc_now(),
+        due_source_count: outcome.due_source_count,
+        revision: outcome.revision,
+        failure_reason: if(outcome.reason == :ok, do: nil, else: Atom.to_string(outcome.reason)),
+        execution_token: nil
+      })
+    )
+  end
 
-      attempt ->
-        repo.update(
-          ReconnectAttempt.changeset(attempt, %{
-            state: if(outcome.disposition == :needs_repair, do: :needs_repair, else: :completed),
-            completed_at: DateTime.utc_now(),
-            due_source_count: outcome.due_source_count,
-            revision: outcome.revision,
-            failure_reason:
-              if(outcome.reason == :ok, do: nil, else: Atom.to_string(outcome.reason))
-          })
-        )
+  @doc false
+  def complete_issued_in_transaction(repo, challenge, attempt_id, token, result, due_source_count) do
+    outcome = %Outcome{
+      disposition: :issued,
+      reason: :ok,
+      next_action: :none,
+      proof: result.compact,
+      revision: result.revision,
+      due_source_count: due_source_count
+    }
+
+    with %ReconnectAttempt{state: :running, execution_token: ^token} = attempt <-
+           repo.one(from(a in ReconnectAttempt, where: a.id == ^attempt_id, lock: "FOR UPDATE")),
+         true <- get_in(challenge.reconnect_outcome, ["state"]) == "minting",
+         {:ok, _} <-
+           repo.update(Challenge.changeset(challenge, %{reconnect_outcome: outcome_map(outcome)})),
+         {:ok, _} <- complete_attempt(repo, attempt, outcome) do
+      :ok
+    else
+      _ -> {:error, :attempt_unavailable}
     end
   end
 
@@ -385,7 +446,11 @@ defmodule Accrue.Entitlements.Offline.Reconnect do
       |> Enum.reduce_while({:ok, 0}, fn attempt, {:ok, count} ->
         with {:ok, _} <-
                repo.update(
-                 ReconnectAttempt.changeset(attempt, %{state: :retrying, next_attempt_at: now})
+                 ReconnectAttempt.changeset(attempt, %{
+                   state: :retrying,
+                   next_attempt_at: now,
+                   execution_token: nil
+                 })
                ),
              {:ok, _} <-
                insert_job.(
@@ -410,7 +475,7 @@ defmodule Accrue.Entitlements.Offline.Reconnect do
     with true <- is_list(config),
          coordinator when is_atom(coordinator) <- Keyword.get(config, :source_coordinator),
          provider when is_atom(provider) <- Keyword.get(config, :key_provider),
-         {:ok, {account, device, challenge}} <- claim_attempt(repo, attempt_id, now),
+         {:ok, {account, device, challenge, token}} <- claim_attempt(repo, attempt_id, now),
          {:ok, _} <-
            run_attempt(
              account,
@@ -424,7 +489,9 @@ defmodule Accrue.Entitlements.Offline.Reconnect do
                idempotency_key: "worker"
              },
              now,
-             Keyword.merge(config, repo: repo)
+             Keyword.merge(config, repo: repo),
+             attempt_id,
+             token
            ) do
       :ok
     else
@@ -465,15 +532,17 @@ defmodule Accrue.Entitlements.Offline.Reconnect do
            %Account{} = account <- repo.get(Account, attempt.account_id),
            %Device{} = device <- repo.get(Device, attempt.device_id),
            %Challenge{} = challenge <- repo.get(Challenge, attempt.challenge_id),
+           token = Ecto.UUID.generate(),
            {:ok, _} <-
              repo.update(
                ReconnectAttempt.changeset(attempt, %{
                  state: :running,
                  started_at: now,
-                 attempt_count: attempt.attempt_count + 1
+                 attempt_count: attempt.attempt_count + 1,
+                 execution_token: token
                })
              ) do
-        {:ok, {account, device, challenge}}
+        {:ok, {account, device, challenge, token}}
       else
         _ -> repo.rollback(:attempt_unavailable)
       end
@@ -537,10 +606,18 @@ defmodule Accrue.Entitlements.Offline.Reconnect do
 
   defp bounded_outcome_reason(_), do: :needs_repair
 
-  defp replay_admission(device, challenge, outcome) do
+  defp replay_admission(repo, device, challenge, outcome) do
     case outcome_from_map(outcome) do
-      %Outcome{} = terminal -> {:ok, {:replay, terminal}}
-      :resume -> {:ok, {:resume, device, challenge}}
+      %Outcome{} = terminal ->
+        {:ok, {:replay, terminal}}
+
+      :resume ->
+        case repo.one(
+               from(a in ReconnectAttempt, where: a.challenge_id == ^challenge.id, select: a.id)
+             ) do
+          attempt_id when is_binary(attempt_id) -> {:ok, {:resume, device, challenge, attempt_id}}
+          _ -> {:error, :attempt_unavailable}
+        end
     end
   end
 
@@ -648,6 +725,15 @@ defmodule Accrue.Entitlements.Offline.Reconnect do
 
       _ ->
         :ok
+    end
+  end
+
+  # This seam represents a process loss after the atomic issuance/final-outcome
+  # commit and before response delivery. Replays must return that final result.
+  defp after_issuance_commit(opts) do
+    case Keyword.get(opts, :after_issuance_commit) do
+      callback when is_function(callback, 0) -> callback.()
+      _ -> :ok
     end
   end
 

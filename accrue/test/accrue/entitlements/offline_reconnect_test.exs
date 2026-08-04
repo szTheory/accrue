@@ -303,6 +303,51 @@ defmodule Accrue.Entitlements.OfflineReconnectTest do
     assert 1 == TestRepo.aggregate(Issuance, :count)
   end
 
+  test "a committed issuance is replayable after response delivery is interrupted", ctx do
+    project_grant!(ctx.account)
+    opts = issuer_opts(ctx) ++ [source_coordinator: NoDueSources, authorize: fn _, _ -> true end]
+    request = reconnect_request!(ctx, opts, "reconnect-after-issuance-commit")
+
+    assert {:error, :issuance_interrupted} =
+             Offline.reconnect(
+               ctx.account,
+               request,
+               Keyword.put(opts, :after_issuance_commit, fn -> :interrupted end)
+             )
+
+    assert 1 == TestRepo.aggregate(Issuance, :count)
+
+    assert {:ok, %{disposition: :issued, proof: proof}} =
+             Offline.reconnect(ctx.account, request, opts)
+
+    assert is_binary(proof)
+    assert 1 == TestRepo.aggregate(Issuance, :count)
+    assert %{state: :completed} = TestRepo.one!(ReconnectAttempt)
+  end
+
+  test "a late worker cannot replace an inline issued replay outcome", ctx do
+    project_grant!(ctx.account)
+    opts = issuer_opts(ctx) ++ [source_coordinator: NoDueSources, authorize: fn _, _ -> true end]
+    request = reconnect_request!(ctx, opts, "reconnect-inline-worker-owner")
+
+    assert {:ok, %{disposition: :issued, proof: proof}} =
+             Offline.reconnect(ctx.account, request, opts)
+
+    attempt = TestRepo.one!(ReconnectAttempt)
+
+    assert {:error, :attempt_unavailable} =
+             Reconnect.execute_attempt(attempt.id,
+               offline_reconnect: opts,
+               repo: TestRepo,
+               now: @now
+             )
+
+    assert {:ok, %{disposition: :issued, proof: ^proof}} =
+             Offline.reconnect(ctx.account, request, opts)
+
+    assert 1 == TestRepo.aggregate(Issuance, :count)
+  end
+
   test "the sweeper requeues an expired running lease and converges once", ctx do
     project_grant!(ctx.account)
     opts = issuer_opts(ctx) ++ [source_coordinator: NoDueSources, authorize: fn _, _ -> true end]

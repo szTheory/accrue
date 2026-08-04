@@ -70,19 +70,19 @@ defmodule Accrue.Entitlements.Offline.Issuer do
       )
       when is_list(opts) do
     repo = Keyword.get(opts, :repo, Accrue.Repo.repo())
+    started_at = System.monotonic_time(:millisecond)
 
-    Accrue.Telemetry.span_private(
-      [:accrue, :entitlements, :offline, :issue],
-      %{action: :offline_issue, disposition: :admitted},
-      fn ->
-        case repo.transaction(fn -> issue_in_transaction(repo, request, admission, opts) end) do
-          {:ok, {:ok, result}} -> {:ok, result}
-          {:ok, {:error, reason}} -> {:error, reason}
-          {:error, reason} when is_atom(reason) -> {:error, reason}
-          _ -> {:error, :issuance_failed}
-        end
+    result =
+      case repo.transaction(fn -> issue_in_transaction(repo, request, admission, opts) end) do
+        {:ok, {:ok, result}} -> {:ok, result}
+        {:ok, {:error, reason}} -> {:error, reason}
+        {:error, {:persistence_failed, _}} -> {:error, :persistence_failed}
+        {:error, reason} when is_atom(reason) -> {:error, reason}
+        _ -> {:error, :issuance_failed}
       end
-    )
+
+    emit_completion(result, started_at)
+    result
   end
 
   def issue_after_admission(_, _, _, _), do: {:error, :unauthorized}
@@ -111,7 +111,7 @@ defmodule Accrue.Entitlements.Offline.Issuer do
 
     with %Account{} = account <- account,
          %Device{} = device <- device,
-         :ok <- consume_admission(repo, account, device, admission),
+         {:ok, challenge} <- consume_admission(repo, account, device, admission),
          :ok <- validate_denial_reason(request.denial_reason),
          snapshot <- Snapshot.fetch(repo, account),
          {disposition, reason} <- disposition(snapshot, device, request),
@@ -144,14 +144,15 @@ defmodule Accrue.Entitlements.Offline.Issuer do
              disposition,
              fresh_until,
              expires_at
-           ) do
-      {:ok,
-       %Result{
-         compact: compact,
-         disposition: disposition,
-         revision: account.revision,
-         fresh_until: fresh_until
-       }}
+           ),
+         result = %Result{
+           compact: compact,
+           disposition: disposition,
+           revision: account.revision,
+           fresh_until: fresh_until
+         },
+         :ok <- persist_terminal_outcome(repo, challenge, result, opts) do
+      {:ok, result}
     else
       nil -> repo.rollback(:not_found)
       {:error, reason} -> repo.rollback(reason)
@@ -186,7 +187,7 @@ defmodule Accrue.Entitlements.Offline.Issuer do
                  reconnect_outcome: Map.put(outcome, "state", "minting")
                })
              ) do
-          {:ok, _} -> :ok
+          {:ok, minting_challenge} -> {:ok, minting_challenge}
           _ -> {:error, :admission_invalid}
         end
 
@@ -336,4 +337,56 @@ defmodule Accrue.Entitlements.Offline.Issuer do
   end
 
   defp digest(value), do: :crypto.hash(:sha256, value) |> Base.url_encode64(padding: false)
+
+  # Reconnect supplies this callback when an admitted attempt owns issuance.
+  # It executes inside the same database transaction as the issuance record,
+  # so a committed compact proof can always be replayed from the challenge.
+  defp persist_terminal_outcome(repo, challenge, result, opts) do
+    case Keyword.get(opts, :persist_issued_outcome) do
+      callback when is_function(callback, 3) -> callback.(repo, challenge, result)
+      _ -> :ok
+    end
+  end
+
+  defp emit_completion(result, started_at) do
+    {disposition, reason, revision, key_version} =
+      case result do
+        {:ok, %Result{disposition: disposition, revision: revision, compact: compact}} ->
+          {disposition, :ok, revision, compact |> kid_for_telemetry()}
+
+        {:error, reason} ->
+          {:rejected, bounded_reason(reason), nil, nil}
+      end
+
+    :telemetry.execute(
+      [:accrue, :entitlements, :offline, :issue],
+      %{count: 1, latency_ms: elapsed_ms(started_at)},
+      %{
+        action: :offline_issue,
+        disposition: disposition,
+        reason: reason,
+        revision_delta: if(is_integer(revision), do: 0, else: nil),
+        key_version: key_version,
+        config_version: "v1.59"
+      }
+    )
+  end
+
+  defp kid_for_telemetry(compact) do
+    case kid(compact) do
+      {:ok, value} -> value
+      _ -> nil
+    end
+  end
+
+  defp bounded_reason(reason)
+       when reason in [:admission_invalid, :not_found, :config_invalid, :verification_failed],
+       do: reason
+
+  defp bounded_reason({:persistence_failed, _}), do: :persistence_failed
+  defp bounded_reason(:persistence_failed), do: :persistence_failed
+  defp bounded_reason(_), do: :issuance_failed
+
+  defp elapsed_ms(started_at),
+    do: (System.monotonic_time(:millisecond) - started_at) |> max(0) |> min(86_400_000)
 end

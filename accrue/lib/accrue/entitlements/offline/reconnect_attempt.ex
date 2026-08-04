@@ -18,6 +18,7 @@ defmodule Accrue.Entitlements.Offline.ReconnectAttempt do
     field(:failure_reason, :string)
     field(:due_source_count, :integer, default: 0)
     field(:revision, :integer)
+    field(:execution_token, :string)
     timestamps(type: :utc_datetime_usec)
   end
 
@@ -35,7 +36,8 @@ defmodule Accrue.Entitlements.Offline.ReconnectAttempt do
       :attempt_count,
       :failure_reason,
       :due_source_count,
-      :revision
+      :revision,
+      :execution_token
     ])
     |> validate_required([
       :challenge_id,
