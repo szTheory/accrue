@@ -44,7 +44,7 @@ defmodule Accrue.Entitlements.OfflineIssuanceBoundaryTest do
                [:accrue, :entitlements, :offline, :issue, :stop]
              ]
 
-      assert metadata == %{action: :offline_issue, disposition: :rejected, reason: :unauthorized}
+      assert %{action: :offline_issue, disposition: :rejected, reason: :unauthorized} = metadata
 
       assert_receive {:issuance_telemetry, event, metadata}
 
@@ -53,7 +53,7 @@ defmodule Accrue.Entitlements.OfflineIssuanceBoundaryTest do
                [:accrue, :entitlements, :offline, :issue, :stop]
              ]
 
-      assert metadata == %{action: :offline_issue, disposition: :rejected, reason: :unauthorized}
+      assert %{action: :offline_issue, disposition: :rejected, reason: :unauthorized} = metadata
 
       refute Map.has_key?(metadata, :account_id)
       refute Map.has_key?(metadata, :installation_id)
