@@ -87,7 +87,11 @@ defmodule Accrue.Docs.V159ReleaseContractTest do
     seed_v159_fixture!(tmp_dir)
 
     release_guide = Path.join(tmp_dir, "accrue/guides/multi-rail-offline-release.md")
-    File.write!(release_guide, String.replace(File.read!(release_guide), "## Evidence and App Review", "## Evidence"))
+
+    File.write!(
+      release_guide,
+      String.replace(File.read!(release_guide), "## Evidence and App Review", "## Evidence")
+    )
 
     {app_review_output, app_review_status} = run_release_contract(tmp_dir)
     assert app_review_status != 0
@@ -96,7 +100,13 @@ defmodule Accrue.Docs.V159ReleaseContractTest do
 
     seed_v159_fixture!(tmp_dir)
     runbooks = Path.join(tmp_dir, "accrue/guides/operator-runbooks.md")
-    File.write!(runbooks, String.replace(File.read!(runbooks), "V159-RUN-APP-REVIEW", "V159-RUN-REMOVED", global: false))
+
+    File.write!(
+      runbooks,
+      String.replace(File.read!(runbooks), "V159-RUN-APP-REVIEW", "V159-RUN-REMOVED",
+        global: false
+      )
+    )
 
     {runbook_output, runbook_status} = run_release_contract(tmp_dir)
     assert runbook_status != 0
@@ -105,7 +115,11 @@ defmodule Accrue.Docs.V159ReleaseContractTest do
 
     seed_v159_fixture!(tmp_dir)
     watchlist = Path.join(tmp_dir, ".planning/research/v1.59-WATCHLIST.md")
-    File.write!(watchlist, String.replace(File.read!(watchlist), "V159-WL-PRIVACY", "V159-WL-REMOVED", global: false))
+
+    File.write!(
+      watchlist,
+      String.replace(File.read!(watchlist), "V159-WL-PRIVACY", "V159-WL-REMOVED", global: false)
+    )
 
     {watchlist_output, watchlist_status} = run_release_contract(tmp_dir)
     assert watchlist_status != 0
@@ -121,7 +135,9 @@ defmodule Accrue.Docs.V159ReleaseContractTest do
   end
 
   defp release_fixture_dir! do
-    tmp_dir = Path.join(System.tmp_dir!(), "accrue-v159-release-#{System.unique_integer([:positive])}")
+    tmp_dir =
+      Path.join(System.tmp_dir!(), "accrue-v159-release-#{System.unique_integer([:positive])}")
+
     File.rm_rf!(tmp_dir)
     on_exit(fn -> File.rm_rf(tmp_dir) end)
     tmp_dir
