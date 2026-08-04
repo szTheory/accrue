@@ -5,15 +5,15 @@ milestone_name: Account-Scoped Multi-Rail & Offline Entitlements
 current_phase: 219
 current_phase_name: offline-study-contract
 status: executing
-stopped_at: Completed 219-03-PLAN.md
-last_updated: "2026-08-04T00:33:09.651Z"
+stopped_at: Completed 219-04-PLAN.md
+last_updated: "2026-08-04T00:46:22.404Z"
 last_activity: 2026-08-03
 last_activity_desc: Phase 219 execution started
 progress:
   total_phases: 6
   completed_phases: 4
   total_plans: 47
-  completed_plans: 45
+  completed_plans: 46
   percent: 67
 ---
 
@@ -30,7 +30,7 @@ See: `.planning/PROJECT.md` (updated 2026-08-01 after completing Phase 215)
 ## Current Position
 
 Phase: 219 (offline-study-contract) — EXECUTING
-Plan: 4 of 5
+Plan: 5 of 5
 Status: Ready to execute
 Last activity: 2026-08-03 — Phase 219 execution started
 
@@ -415,6 +415,7 @@ Coverage: 22/22 v1.51 requirements mapped (each REQ-ID → exactly one phase). D
 | Phase 219 P01 | 16min | 2 tasks | 6 files |
 | Phase 219 P02 | 4min | 2 tasks | 3 files |
 | Phase 219 P03 | 8m | 2 tasks | 8 files |
+| Phase 219-offline-study-contract P04 | 6m | 2 tasks | 8 files |
 
 ## Accumulated Context
 
@@ -821,6 +822,8 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - [Phase ?]: Denied and invalid preserve local-progress handling without authorizing entitlement-gated study or value expansion.
 - [Phase ?]: Offline registration stores exact public P-256 JWK material and recomputed RFC-7638 thumbprints only.
 - [Phase ?]: One-time challenge authority is serialized with PostgreSQL locks; raw nonce and idempotency key are digested before persistence.
+- [Phase ?]: Locked issuance uses account/device FOR UPDATE and canonical Snapshot reads.
+- [Phase ?]: Unbounded offline proofs retain their verification key indefinitely.
 
 ### Pending Todos
 
@@ -972,8 +975,8 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 
 ## Session Continuity
 
-Last session: 2026-08-04T00:33:09.639Z
-Stopped at: Completed 219-03-PLAN.md
+Last session: 2026-08-04T00:46:22.391Z
+Stopped at: Completed 219-04-PLAN.md
 Resume file: None
 
 ## Operator Next Steps
