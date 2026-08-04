@@ -3,6 +3,16 @@ defmodule Accrue.Entitlements.OfflineProtocolTest do
 
   alias Accrue.Entitlements.Offline
 
+  defmodule Provider do
+    @behaviour Accrue.Entitlements.Offline.KeyProvider
+
+    @impl true
+    def sign(_, _), do: {:error, :unavailable}
+
+    @impl true
+    def public_keys(opts), do: {:ok, Keyword.fetch!(opts, :provider_keys)}
+  end
+
   @issuer "accrue.test.offline"
   @audience "accrue-offline-client"
   @kid "accrue-v1.59-offline-test-only"
@@ -60,7 +70,7 @@ defmodule Accrue.Entitlements.OfflineProtocolTest do
                retention_requirements: %{key["kid"] => :required, rotated["kid"] => :eligible}
              )
 
-    assert Enum.map(keys, & &1["kid"]) == [key["kid"], rotated["kid"]]
+    assert Enum.map(keys, & &1["kid"]) == Enum.sort([key["kid"], rotated["kid"]])
 
     assert Enum.all?(
              keys,
@@ -74,6 +84,9 @@ defmodule Accrue.Entitlements.OfflineProtocolTest do
                keys: [rotated],
                retention_requirements: %{key["kid"] => :required}
              )
+
+    assert {:ok, %{"keys" => ^keys}} =
+             Offline.verification_keys(provider: Provider, provider_keys: [rotated, key])
   end
 
   test "invalid provider public-key output never becomes a JWKS" do
@@ -91,6 +104,22 @@ defmodule Accrue.Entitlements.OfflineProtocolTest do
     end
 
     assert {:error, :config_invalid} = Offline.verification_keys(keys: [key, key])
+  end
+
+  test "overlapping local public keys select proofs by their own stable kid" do
+    signing_key = signing_key()
+    current = public_key(signing_key)
+    next = Map.put(current, "kid", "accrue-v1.59-offline-next")
+    context = verification_context(current) |> Map.put(:public_keys, [current, next])
+
+    assert {:ok, %{state: :fresh}} =
+             Offline.verify(compact(signing_key, claims(context)), context)
+
+    assert {:ok, %{state: :fresh}} =
+             Offline.verify(
+               compact(signing_key, claims(context), %{"kid" => next["kid"]}),
+               context
+             )
   end
 
   defp signing_key do
