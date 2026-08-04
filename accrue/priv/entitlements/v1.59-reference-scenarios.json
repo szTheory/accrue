@@ -1,24 +1,936 @@
 {
   "version": "v1.59",
   "scenarios": [
-    {"id":"apple_purchase_to_web_login","evidence_lane":"deterministic_conformance","frozen_clock":"2026-08-04T12:00:00Z","actions":[{"kind":"apple_verified_purchase","order":1,"at":"2026-08-04T12:00:00Z","operation":{"rail":"apple","environment":"production","logical_product":"pro","provider_product_id":"product_pro","provider_event_id":"scenario_apple_web_event","provider_transaction_id":"scenario_apple_web_transaction","provider_lineage_id":"scenario_apple_web_lineage","provider_order":1,"offline_vector":"valid_allow","offline_action":"read_downloaded_lesson"}},{"kind":"web_login","order":2,"at":"2026-08-04T12:00:01Z"}],"expected":{"snapshot":{"revision":1,"plans":["pro"],"sources":["apple"]},"purchase":{"status":"block","reason":"equivalent_other_rail"},"offline_policy":{"action":"allow_downloaded_study"},"audit_count":1},"required_artifacts":["v1.59-decision-cases.json"],"diagnostic":{"scenario":"apple_purchase_to_web_login"}},
-    {"id":"stripe_purchase_to_ios_login","evidence_lane":"deterministic_conformance","frozen_clock":"2026-08-04T12:01:00Z","actions":[{"kind":"stripe_verified_purchase","order":1,"at":"2026-08-04T12:01:00Z","operation":{"rail":"stripe","environment":"production","logical_product":"pro","provider_product_id":"price_pro","provider_event_id":"scenario_stripe_ios_event","provider_transaction_id":"scenario_stripe_ios_transaction","provider_lineage_id":"scenario_stripe_ios_lineage","provider_order":1,"offline_vector":"valid_allow","offline_action":"read_downloaded_lesson"}},{"kind":"ios_login","order":2,"at":"2026-08-04T12:01:01Z"}],"expected":{"snapshot":{"revision":1,"plans":["pro"],"sources":["stripe"]},"purchase":{"status":"block","reason":"equivalent_other_rail"},"offline_policy":{"action":"allow_downloaded_study"},"audit_count":1},"required_artifacts":["v1.59-decision-cases.json"],"diagnostic":{"scenario":"stripe_purchase_to_ios_login"}},
-    {"id":"duplicate_purchase_prevention","evidence_lane":"deterministic_conformance","frozen_clock":"2026-08-04T12:02:00Z","actions":[{"kind":"purchase_preflight","order":1,"at":"2026-08-04T12:02:00Z"}],"expected":{"snapshot":{"revision":1,"plans":["pro"],"sources":["apple"]},"purchase":{"status":"block","reason":"equivalent_other_rail"},"offline_policy":{"action":"allow_downloaded_study"},"audit_count":1},"required_artifacts":["v1.59-decision-cases.json"],"diagnostic":{"scenario":"duplicate_purchase_prevention"}},
-    {"id":"stale_downloaded_study_continuity","evidence_lane":"deterministic_conformance","frozen_clock":"2026-08-04T12:03:00Z","actions":[{"kind":"offline_proof_stale","order":1,"at":"2026-08-04T12:03:00Z"}],"expected":{"snapshot":{"revision":1,"plans":["pro"],"sources":["stripe"]},"purchase":{"status":"block","reason":"stale_snapshot"},"offline_policy":{"action":"allow_downloaded_study"},"audit_count":1},"required_artifacts":["v1.59-decision-cases.json","v1.59-offline-golden-vectors.json"],"diagnostic":{"scenario":"stale_downloaded_study_continuity"}},
-    {"id":"restricted_expansion","evidence_lane":"deterministic_conformance","frozen_clock":"2026-08-04T12:04:00Z","actions":[{"kind":"offline_expansion_request","order":1,"at":"2026-08-04T12:04:00Z"}],"expected":{"snapshot":{"revision":1,"plans":["pro"],"sources":["stripe"]},"purchase":{"status":"block","reason":"stale_snapshot"},"offline_policy":{"action":"reconnect_required"},"audit_count":1},"required_artifacts":["v1.59-decision-cases.json","v1.59-offline-golden-vectors.json"],"diagnostic":{"scenario":"restricted_expansion"}},
-    {"id":"offline_reconnect","evidence_lane":"deterministic_conformance","frozen_clock":"2026-08-04T12:05:00Z","actions":[{"kind":"reconnect_request","order":1,"at":"2026-08-04T12:05:00Z"},{"kind":"verified_cache_replace","order":2,"at":"2026-08-04T12:05:01Z"}],"expected":{"snapshot":{"revision":2,"plans":["pro"],"sources":["stripe"]},"purchase":{"status":"block","reason":"equivalent_other_rail"},"offline_policy":{"action":"allow_downloaded_study"},"audit_count":2},"required_artifacts":["v1.59-decision-cases.json","v1.59-offline-golden-vectors.json"],"diagnostic":{"scenario":"offline_reconnect"}},
-    {"id":"refund_revocation","evidence_lane":"deterministic_conformance","frozen_clock":"2026-08-04T12:06:00Z","actions":[{"kind":"refund_observation","order":1,"at":"2026-08-04T12:06:00Z"}],"expected":{"snapshot":{"revision":2,"plans":["pro"],"sources":["apple"]},"purchase":{"status":"block","reason":"equivalent_other_rail"},"offline_policy":{"action":"deny"},"audit_count":2},"required_artifacts":["v1.59-decision-cases.json"],"diagnostic":{"scenario":"refund_revocation"}},
-    {"id":"survivor_grant","evidence_lane":"deterministic_conformance","frozen_clock":"2026-08-04T12:07:00Z","actions":[{"kind":"stripe_retraction","order":1,"at":"2026-08-04T12:07:00Z"}],"expected":{"snapshot":{"revision":1,"plans":["pro"],"sources":["apple"]},"purchase":{"status":"block","reason":"equivalent_other_rail"},"offline_policy":{"action":"allow_downloaded_study"},"audit_count":1},"required_artifacts":["v1.59-decision-cases.json"],"diagnostic":{"scenario":"survivor_grant"}},
-    {"id":"device_replacement","evidence_lane":"deterministic_conformance","frozen_clock":"2026-08-04T12:08:00Z","actions":[{"kind":"device_replace","order":1,"at":"2026-08-04T12:08:00Z"}],"expected":{"snapshot":{"revision":2,"plans":["pro"],"sources":["stripe"]},"purchase":{"status":"block","reason":"equivalent_other_rail"},"offline_policy":{"action":"allow_downloaded_study"},"audit_count":2},"required_artifacts":["v1.59-decision-cases.json","v1.59-offline-golden-vectors.json"],"diagnostic":{"scenario":"device_replacement"}},
-    {"id":"deny_tombstone","evidence_lane":"deterministic_conformance","frozen_clock":"2026-08-04T12:09:00Z","actions":[{"kind":"signed_deny","order":1,"at":"2026-08-04T12:09:00Z"}],"expected":{"snapshot":{"revision":2,"plans":["pro"],"sources":["stripe"]},"purchase":{"status":"block","reason":"stale_snapshot"},"offline_policy":{"action":"deny"},"audit_count":2},"required_artifacts":["v1.59-decision-cases.json","v1.59-offline-golden-vectors.json"],"diagnostic":{"scenario":"deny_tombstone"}},
-    {"id":"clock_rollback","evidence_lane":"deterministic_conformance","frozen_clock":"2026-08-04T12:10:00Z","actions":[{"kind":"rollback_proof","order":1,"at":"2026-08-04T12:10:00Z"}],"expected":{"snapshot":{"revision":2,"plans":["pro"],"sources":["stripe"]},"purchase":{"status":"block","reason":"stale_snapshot"},"offline_policy":{"action":"deny"},"audit_count":2},"required_artifacts":["v1.59-decision-cases.json","v1.59-offline-golden-vectors.json"],"diagnostic":{"scenario":"clock_rollback"}},
-    {"id":"key_rotation","evidence_lane":"deterministic_conformance","frozen_clock":"2026-08-04T12:11:00Z","actions":[{"kind":"rotated_key_proof","order":1,"at":"2026-08-04T12:11:00Z"}],"expected":{"snapshot":{"revision":2,"plans":["pro"],"sources":["stripe"]},"purchase":{"status":"block","reason":"equivalent_other_rail"},"offline_policy":{"action":"allow_downloaded_study"},"audit_count":2},"required_artifacts":["v1.59-decision-cases.json","v1.59-offline-golden-vectors.json"],"diagnostic":{"scenario":"key_rotation"}},
-    {"id":"empty_evidence_fails_closed","evidence_lane":"deterministic_conformance","frozen_clock":"2026-08-04T12:12:00Z","actions":[{"kind":"empty_evidence","order":1,"at":"2026-08-04T12:12:00Z"}],"expected":{"snapshot":{"revision":0,"plans":["pro"],"sources":["stripe"]},"purchase":{"status":"block","reason":"missing_snapshot"},"offline_policy":{"action":"deny"},"audit_count":0},"required_artifacts":["v1.59-decision-cases.json"],"diagnostic":{"scenario":"empty_evidence_fails_closed"}},
-    {"id":"equal_order_stability","evidence_lane":"deterministic_conformance","frozen_clock":"2026-08-04T12:13:00Z","actions":[{"kind":"equal_order_delivery","order":1,"at":"2026-08-04T12:13:00Z"}],"expected":{"snapshot":{"revision":1,"plans":["pro"],"sources":["apple"]},"purchase":{"status":"block","reason":"equivalent_other_rail"},"offline_policy":{"action":"allow_downloaded_study"},"audit_count":1},"required_artifacts":["v1.59-decision-cases.json"],"diagnostic":{"scenario":"equal_order_stability"}},
-    {"id":"repeat_idempotency","evidence_lane":"deterministic_conformance","frozen_clock":"2026-08-04T12:14:00Z","actions":[{"kind":"repeat_delivery","order":1,"at":"2026-08-04T12:14:00Z"}],"expected":{"snapshot":{"revision":1,"plans":["pro"],"sources":["apple"]},"purchase":{"status":"block","reason":"equivalent_other_rail"},"offline_policy":{"action":"allow_downloaded_study"},"audit_count":1},"required_artifacts":["v1.59-decision-cases.json"],"diagnostic":{"scenario":"repeat_idempotency"}},
-    {"id":"parallel_execution","evidence_lane":"deterministic_conformance","frozen_clock":"2026-08-04T12:15:00Z","actions":[{"kind":"parallel_delivery","order":1,"at":"2026-08-04T12:15:00Z"}],"expected":{"snapshot":{"revision":1,"plans":["pro"],"sources":["apple"]},"purchase":{"status":"block","reason":"equivalent_other_rail"},"offline_policy":{"action":"allow_downloaded_study"},"audit_count":1},"required_artifacts":["v1.59-decision-cases.json"],"diagnostic":{"scenario":"parallel_execution"}},
-    {"id":"interrupted_resume","evidence_lane":"deterministic_conformance","frozen_clock":"2026-08-04T12:16:00Z","actions":[{"kind":"durable_interruption","order":1,"at":"2026-08-04T12:16:00Z"},{"kind":"resume_delivery","order":2,"at":"2026-08-04T12:16:01Z"}],"expected":{"snapshot":{"revision":1,"plans":["pro"],"sources":["stripe"]},"purchase":{"status":"block","reason":"equivalent_other_rail"},"offline_policy":{"action":"allow_downloaded_study"},"audit_count":1},"required_artifacts":["v1.59-decision-cases.json","v1.59-offline-golden-vectors.json"],"diagnostic":{"scenario":"interrupted_resume"}},
-    {"id":"crosswake_runtime_capability","evidence_lane":"runtime_capability","frozen_clock":"2026-08-04T12:17:00Z","actions":[{"kind":"capability_report_read","order":1,"at":"2026-08-04T12:17:00Z"}],"expected":{"snapshot":{"revision":0,"plans":["pro"],"sources":["apple"]},"purchase":{"status":"block","reason":"missing_snapshot"},"offline_policy":{"action":"deny"},"audit_count":0},"required_artifacts":["capability-report.json"],"diagnostic":{"scenario":"crosswake_runtime_capability"}},
-    {"id":"provider_advisory_parity","evidence_lane":"advisory_parity","frozen_clock":"2026-08-04T12:18:00Z","actions":[{"kind":"provider_advisory_read","order":1,"at":"2026-08-04T12:18:00Z"}],"expected":{"snapshot":{"revision":0,"plans":["pro"],"sources":["stripe"]},"purchase":{"status":"block","reason":"missing_snapshot"},"offline_policy":{"action":"deny"},"audit_count":0},"required_artifacts":["v1.59-decision-cases.json"],"diagnostic":{"scenario":"provider_advisory_parity"}}
+    {
+      "id": "apple_purchase_to_web_login",
+      "evidence_lane": "deterministic_conformance",
+      "frozen_clock": "2026-08-04T12:00:00Z",
+      "actions": [
+        {
+          "kind": "apple_verified_purchase",
+          "order": 1,
+          "at": "2026-08-04T12:00:00Z",
+          "operation": {
+            "rail": "apple",
+            "environment": "production",
+            "logical_product": "pro",
+            "provider_product_id": "product_pro",
+            "provider_event_id": "scenario_apple_web_event",
+            "provider_transaction_id": "scenario_apple_web_transaction",
+            "provider_lineage_id": "scenario_apple_web_lineage",
+            "provider_order": 1,
+            "offline_vector": "valid_allow",
+            "offline_action": "read_downloaded_lesson"
+          }
+        },
+        {
+          "kind": "web_login",
+          "order": 2,
+          "at": "2026-08-04T12:00:01Z"
+        }
+      ],
+      "expected": {
+        "snapshot": {
+          "revision": 1,
+          "plans": [
+            "pro"
+          ],
+          "sources": [
+            "apple"
+          ]
+        },
+        "purchase": {
+          "status": "block",
+          "reason": "equivalent_other_rail"
+        },
+        "offline_policy": {
+          "action": "allow_downloaded_study"
+        },
+        "audit_count": 1
+      },
+      "required_artifacts": [
+        "v1.59-decision-cases.json"
+      ],
+      "diagnostic": {
+        "scenario": "apple_purchase_to_web_login"
+      }
+    },
+    {
+      "id": "stripe_purchase_to_ios_login",
+      "evidence_lane": "deterministic_conformance",
+      "frozen_clock": "2026-08-04T12:01:00Z",
+      "actions": [
+        {
+          "kind": "stripe_verified_purchase",
+          "order": 1,
+          "at": "2026-08-04T12:01:00Z",
+          "operation": {
+            "rail": "stripe",
+            "environment": "production",
+            "logical_product": "pro",
+            "provider_product_id": "price_pro",
+            "provider_event_id": "scenario_stripe_ios_event",
+            "provider_transaction_id": "scenario_stripe_ios_transaction",
+            "provider_lineage_id": "scenario_stripe_ios_lineage",
+            "provider_order": 1,
+            "offline_vector": "valid_allow",
+            "offline_action": "read_downloaded_lesson"
+          }
+        },
+        {
+          "kind": "ios_login",
+          "order": 2,
+          "at": "2026-08-04T12:01:01Z"
+        }
+      ],
+      "expected": {
+        "snapshot": {
+          "revision": 1,
+          "plans": [
+            "pro"
+          ],
+          "sources": [
+            "stripe"
+          ]
+        },
+        "purchase": {
+          "status": "block",
+          "reason": "equivalent_other_rail"
+        },
+        "offline_policy": {
+          "action": "allow_downloaded_study"
+        },
+        "audit_count": 1
+      },
+      "required_artifacts": [
+        "v1.59-decision-cases.json"
+      ],
+      "diagnostic": {
+        "scenario": "stripe_purchase_to_ios_login"
+      }
+    },
+    {
+      "id": "duplicate_purchase_prevention",
+      "evidence_lane": "deterministic_conformance",
+      "frozen_clock": "2026-08-04T12:02:00Z",
+      "actions": [
+        {
+          "kind": "purchase_preflight",
+          "order": 1,
+          "at": "2026-08-04T12:02:00Z",
+          "operation": {
+            "rail": "apple",
+            "environment": "production",
+            "logical_product": "pro",
+            "provider_product_id": "product_pro",
+            "provider_event_id": "reference_duplicate_purchase_prevention_event",
+            "provider_transaction_id": "reference_duplicate_purchase_prevention_transaction",
+            "provider_lineage_id": "reference_duplicate_purchase_prevention_lineage",
+            "provider_order": 1,
+            "offline_vector": "valid_allow",
+            "offline_action": "read_downloaded_lesson"
+          }
+        }
+      ],
+      "expected": {
+        "snapshot": {
+          "revision": 1,
+          "plans": [
+            "pro"
+          ],
+          "sources": [
+            "apple"
+          ]
+        },
+        "purchase": {
+          "status": "block",
+          "reason": "equivalent_other_rail"
+        },
+        "offline_policy": {
+          "action": "allow_downloaded_study"
+        },
+        "audit_count": 1
+      },
+      "required_artifacts": [
+        "v1.59-decision-cases.json"
+      ],
+      "diagnostic": {
+        "scenario": "duplicate_purchase_prevention"
+      }
+    },
+    {
+      "id": "stale_downloaded_study_continuity",
+      "evidence_lane": "deterministic_conformance",
+      "frozen_clock": "2026-08-04T12:03:00Z",
+      "actions": [
+        {
+          "kind": "offline_proof_stale",
+          "order": 1,
+          "at": "2026-08-04T12:03:00Z",
+          "operation": {
+            "rail": "stripe",
+            "environment": "production",
+            "logical_product": "pro",
+            "provider_product_id": "price_pro",
+            "provider_event_id": "reference_stale_downloaded_study_continuity_event",
+            "provider_transaction_id": "reference_stale_downloaded_study_continuity_transaction",
+            "provider_lineage_id": "reference_stale_downloaded_study_continuity_lineage",
+            "provider_order": 1,
+            "offline_vector": "valid_allow",
+            "offline_action": "read_downloaded_lesson"
+          }
+        }
+      ],
+      "expected": {
+        "snapshot": {
+          "revision": 1,
+          "plans": [
+            "pro"
+          ],
+          "sources": [
+            "stripe"
+          ]
+        },
+        "purchase": {
+          "status": "block",
+          "reason": "equivalent_other_rail"
+        },
+        "offline_policy": {
+          "action": "allow_downloaded_study"
+        },
+        "audit_count": 1
+      },
+      "required_artifacts": [
+        "v1.59-decision-cases.json",
+        "v1.59-offline-golden-vectors.json"
+      ],
+      "diagnostic": {
+        "scenario": "stale_downloaded_study_continuity"
+      }
+    },
+    {
+      "id": "restricted_expansion",
+      "evidence_lane": "deterministic_conformance",
+      "frozen_clock": "2026-08-04T12:04:00Z",
+      "actions": [
+        {
+          "kind": "offline_expansion_request",
+          "order": 1,
+          "at": "2026-08-04T12:04:00Z",
+          "operation": {
+            "rail": "stripe",
+            "environment": "production",
+            "logical_product": "pro",
+            "provider_product_id": "price_pro",
+            "provider_event_id": "reference_restricted_expansion_event",
+            "provider_transaction_id": "reference_restricted_expansion_transaction",
+            "provider_lineage_id": "reference_restricted_expansion_lineage",
+            "provider_order": 1,
+            "offline_vector": "stale_at_freshness",
+            "offline_action": "download_lesson"
+          }
+        }
+      ],
+      "expected": {
+        "snapshot": {
+          "revision": 1,
+          "plans": [
+            "pro"
+          ],
+          "sources": [
+            "stripe"
+          ]
+        },
+        "purchase": {
+          "status": "block",
+          "reason": "equivalent_other_rail"
+        },
+        "offline_policy": {
+          "action": "reconnect_required"
+        },
+        "audit_count": 1
+      },
+      "required_artifacts": [
+        "v1.59-decision-cases.json",
+        "v1.59-offline-golden-vectors.json"
+      ],
+      "diagnostic": {
+        "scenario": "restricted_expansion"
+      }
+    },
+    {
+      "id": "offline_reconnect",
+      "evidence_lane": "deterministic_conformance",
+      "frozen_clock": "2026-08-04T12:05:00Z",
+      "actions": [
+        {
+          "kind": "reconnect_request",
+          "order": 1,
+          "at": "2026-08-04T12:05:00Z",
+          "operation": {
+            "rail": "stripe",
+            "environment": "production",
+            "logical_product": "pro",
+            "provider_product_id": "price_pro",
+            "provider_event_id": "reference_offline_reconnect_event",
+            "provider_transaction_id": "reference_offline_reconnect_transaction",
+            "provider_lineage_id": "reference_offline_reconnect_lineage",
+            "provider_order": 1,
+            "offline_vector": "valid_allow",
+            "offline_action": "read_downloaded_lesson"
+          }
+        },
+        {
+          "kind": "verified_cache_replace",
+          "order": 2,
+          "at": "2026-08-04T12:05:01Z"
+        }
+      ],
+      "expected": {
+        "snapshot": {
+          "revision": 1,
+          "plans": [
+            "pro"
+          ],
+          "sources": [
+            "stripe"
+          ]
+        },
+        "purchase": {
+          "status": "block",
+          "reason": "equivalent_other_rail"
+        },
+        "offline_policy": {
+          "action": "allow_downloaded_study"
+        },
+        "audit_count": 1
+      },
+      "required_artifacts": [
+        "v1.59-decision-cases.json",
+        "v1.59-offline-golden-vectors.json"
+      ],
+      "diagnostic": {
+        "scenario": "offline_reconnect"
+      }
+    },
+    {
+      "id": "refund_revocation",
+      "evidence_lane": "deterministic_conformance",
+      "frozen_clock": "2026-08-04T12:06:00Z",
+      "actions": [
+        {
+          "kind": "refund_observation",
+          "order": 1,
+          "at": "2026-08-04T12:06:00Z",
+          "operation": {
+            "rail": "apple",
+            "environment": "production",
+            "logical_product": "pro",
+            "provider_product_id": "product_pro",
+            "provider_event_id": "reference_refund_revocation_event",
+            "provider_transaction_id": "reference_refund_revocation_transaction",
+            "provider_lineage_id": "reference_refund_revocation_lineage",
+            "provider_order": 1,
+            "offline_vector": "valid_signed_denial",
+            "offline_action": "read_downloaded_lesson"
+          }
+        }
+      ],
+      "expected": {
+        "snapshot": {
+          "revision": 1,
+          "plans": [
+            "pro"
+          ],
+          "sources": [
+            "apple"
+          ]
+        },
+        "purchase": {
+          "status": "block",
+          "reason": "equivalent_other_rail"
+        },
+        "offline_policy": {
+          "action": "deny"
+        },
+        "audit_count": 1
+      },
+      "required_artifacts": [
+        "v1.59-decision-cases.json"
+      ],
+      "diagnostic": {
+        "scenario": "refund_revocation"
+      }
+    },
+    {
+      "id": "survivor_grant",
+      "evidence_lane": "deterministic_conformance",
+      "frozen_clock": "2026-08-04T12:07:00Z",
+      "actions": [
+        {
+          "kind": "stripe_retraction",
+          "order": 1,
+          "at": "2026-08-04T12:07:00Z",
+          "operation": {
+            "rail": "apple",
+            "environment": "production",
+            "logical_product": "pro",
+            "provider_product_id": "product_pro",
+            "provider_event_id": "reference_survivor_grant_event",
+            "provider_transaction_id": "reference_survivor_grant_transaction",
+            "provider_lineage_id": "reference_survivor_grant_lineage",
+            "provider_order": 1,
+            "offline_vector": "valid_allow",
+            "offline_action": "read_downloaded_lesson"
+          }
+        }
+      ],
+      "expected": {
+        "snapshot": {
+          "revision": 1,
+          "plans": [
+            "pro"
+          ],
+          "sources": [
+            "apple"
+          ]
+        },
+        "purchase": {
+          "status": "block",
+          "reason": "equivalent_other_rail"
+        },
+        "offline_policy": {
+          "action": "allow_downloaded_study"
+        },
+        "audit_count": 1
+      },
+      "required_artifacts": [
+        "v1.59-decision-cases.json"
+      ],
+      "diagnostic": {
+        "scenario": "survivor_grant"
+      }
+    },
+    {
+      "id": "device_replacement",
+      "evidence_lane": "deterministic_conformance",
+      "frozen_clock": "2026-08-04T12:08:00Z",
+      "actions": [
+        {
+          "kind": "device_replace",
+          "order": 1,
+          "at": "2026-08-04T12:08:00Z",
+          "operation": {
+            "rail": "stripe",
+            "environment": "production",
+            "logical_product": "pro",
+            "provider_product_id": "price_pro",
+            "provider_event_id": "reference_device_replacement_event",
+            "provider_transaction_id": "reference_device_replacement_transaction",
+            "provider_lineage_id": "reference_device_replacement_lineage",
+            "provider_order": 1,
+            "offline_vector": "valid_allow",
+            "offline_action": "read_downloaded_lesson"
+          }
+        }
+      ],
+      "expected": {
+        "snapshot": {
+          "revision": 1,
+          "plans": [
+            "pro"
+          ],
+          "sources": [
+            "stripe"
+          ]
+        },
+        "purchase": {
+          "status": "block",
+          "reason": "equivalent_other_rail"
+        },
+        "offline_policy": {
+          "action": "allow_downloaded_study"
+        },
+        "audit_count": 1
+      },
+      "required_artifacts": [
+        "v1.59-decision-cases.json",
+        "v1.59-offline-golden-vectors.json"
+      ],
+      "diagnostic": {
+        "scenario": "device_replacement"
+      }
+    },
+    {
+      "id": "deny_tombstone",
+      "evidence_lane": "deterministic_conformance",
+      "frozen_clock": "2026-08-04T12:09:00Z",
+      "actions": [
+        {
+          "kind": "signed_deny",
+          "order": 1,
+          "at": "2026-08-04T12:09:00Z",
+          "operation": {
+            "rail": "stripe",
+            "environment": "production",
+            "logical_product": "pro",
+            "provider_product_id": "price_pro",
+            "provider_event_id": "reference_deny_tombstone_event",
+            "provider_transaction_id": "reference_deny_tombstone_transaction",
+            "provider_lineage_id": "reference_deny_tombstone_lineage",
+            "provider_order": 1,
+            "offline_vector": "valid_signed_denial",
+            "offline_action": "read_downloaded_lesson"
+          }
+        }
+      ],
+      "expected": {
+        "snapshot": {
+          "revision": 1,
+          "plans": [
+            "pro"
+          ],
+          "sources": [
+            "stripe"
+          ]
+        },
+        "purchase": {
+          "status": "block",
+          "reason": "equivalent_other_rail"
+        },
+        "offline_policy": {
+          "action": "deny"
+        },
+        "audit_count": 1
+      },
+      "required_artifacts": [
+        "v1.59-decision-cases.json",
+        "v1.59-offline-golden-vectors.json"
+      ],
+      "diagnostic": {
+        "scenario": "deny_tombstone"
+      }
+    },
+    {
+      "id": "clock_rollback",
+      "evidence_lane": "deterministic_conformance",
+      "frozen_clock": "2026-08-04T12:10:00Z",
+      "actions": [
+        {
+          "kind": "rollback_proof",
+          "order": 1,
+          "at": "2026-08-04T12:10:00Z",
+          "operation": {
+            "rail": "stripe",
+            "environment": "production",
+            "logical_product": "pro",
+            "provider_product_id": "price_pro",
+            "provider_event_id": "reference_clock_rollback_event",
+            "provider_transaction_id": "reference_clock_rollback_transaction",
+            "provider_lineage_id": "reference_clock_rollback_lineage",
+            "provider_order": 1,
+            "offline_vector": "valid_signed_denial",
+            "offline_action": "read_downloaded_lesson"
+          }
+        }
+      ],
+      "expected": {
+        "snapshot": {
+          "revision": 1,
+          "plans": [
+            "pro"
+          ],
+          "sources": [
+            "stripe"
+          ]
+        },
+        "purchase": {
+          "status": "block",
+          "reason": "equivalent_other_rail"
+        },
+        "offline_policy": {
+          "action": "deny"
+        },
+        "audit_count": 1
+      },
+      "required_artifacts": [
+        "v1.59-decision-cases.json",
+        "v1.59-offline-golden-vectors.json"
+      ],
+      "diagnostic": {
+        "scenario": "clock_rollback"
+      }
+    },
+    {
+      "id": "key_rotation",
+      "evidence_lane": "deterministic_conformance",
+      "frozen_clock": "2026-08-04T12:11:00Z",
+      "actions": [
+        {
+          "kind": "rotated_key_proof",
+          "order": 1,
+          "at": "2026-08-04T12:11:00Z",
+          "operation": {
+            "rail": "stripe",
+            "environment": "production",
+            "logical_product": "pro",
+            "provider_product_id": "price_pro",
+            "provider_event_id": "reference_key_rotation_event",
+            "provider_transaction_id": "reference_key_rotation_transaction",
+            "provider_lineage_id": "reference_key_rotation_lineage",
+            "provider_order": 1,
+            "offline_vector": "valid_allow",
+            "offline_action": "read_downloaded_lesson"
+          }
+        }
+      ],
+      "expected": {
+        "snapshot": {
+          "revision": 1,
+          "plans": [
+            "pro"
+          ],
+          "sources": [
+            "stripe"
+          ]
+        },
+        "purchase": {
+          "status": "block",
+          "reason": "equivalent_other_rail"
+        },
+        "offline_policy": {
+          "action": "allow_downloaded_study"
+        },
+        "audit_count": 1
+      },
+      "required_artifacts": [
+        "v1.59-decision-cases.json",
+        "v1.59-offline-golden-vectors.json"
+      ],
+      "diagnostic": {
+        "scenario": "key_rotation"
+      }
+    },
+    {
+      "id": "empty_evidence_fails_closed",
+      "evidence_lane": "deterministic_conformance",
+      "frozen_clock": "2026-08-04T12:12:00Z",
+      "actions": [
+        {
+          "kind": "empty_evidence",
+          "order": 1,
+          "at": "2026-08-04T12:12:00Z",
+          "operation": {
+            "rail": "stripe",
+            "environment": "production",
+            "logical_product": "pro",
+            "provider_product_id": "price_pro",
+            "provider_event_id": "reference_empty_evidence_fails_closed_event",
+            "provider_transaction_id": "reference_empty_evidence_fails_closed_transaction",
+            "provider_lineage_id": "reference_empty_evidence_fails_closed_lineage",
+            "provider_order": 1,
+            "offline_vector": "valid_signed_denial",
+            "offline_action": "read_downloaded_lesson"
+          }
+        }
+      ],
+      "expected": {
+        "snapshot": {
+          "revision": 0,
+          "plans": [],
+          "sources": []
+        },
+        "purchase": {
+          "status": "eligible",
+          "reason": "no_equivalent_grant"
+        },
+        "offline_policy": {
+          "action": "deny"
+        },
+        "audit_count": 0
+      },
+      "required_artifacts": [
+        "v1.59-decision-cases.json"
+      ],
+      "diagnostic": {
+        "scenario": "empty_evidence_fails_closed"
+      }
+    },
+    {
+      "id": "equal_order_stability",
+      "evidence_lane": "deterministic_conformance",
+      "frozen_clock": "2026-08-04T12:13:00Z",
+      "actions": [
+        {
+          "kind": "equal_order_delivery",
+          "order": 1,
+          "at": "2026-08-04T12:13:00Z",
+          "operation": {
+            "rail": "apple",
+            "environment": "production",
+            "logical_product": "pro",
+            "provider_product_id": "product_pro",
+            "provider_event_id": "reference_equal_order_stability_event",
+            "provider_transaction_id": "reference_equal_order_stability_transaction",
+            "provider_lineage_id": "reference_equal_order_stability_lineage",
+            "provider_order": 1,
+            "offline_vector": "valid_allow",
+            "offline_action": "read_downloaded_lesson"
+          }
+        }
+      ],
+      "expected": {
+        "snapshot": {
+          "revision": 1,
+          "plans": [
+            "pro"
+          ],
+          "sources": [
+            "apple"
+          ]
+        },
+        "purchase": {
+          "status": "block",
+          "reason": "equivalent_other_rail"
+        },
+        "offline_policy": {
+          "action": "allow_downloaded_study"
+        },
+        "audit_count": 1
+      },
+      "required_artifacts": [
+        "v1.59-decision-cases.json"
+      ],
+      "diagnostic": {
+        "scenario": "equal_order_stability"
+      }
+    },
+    {
+      "id": "repeat_idempotency",
+      "evidence_lane": "deterministic_conformance",
+      "frozen_clock": "2026-08-04T12:14:00Z",
+      "actions": [
+        {
+          "kind": "repeat_delivery",
+          "order": 1,
+          "at": "2026-08-04T12:14:00Z",
+          "operation": {
+            "rail": "apple",
+            "environment": "production",
+            "logical_product": "pro",
+            "provider_product_id": "product_pro",
+            "provider_event_id": "reference_repeat_idempotency_event",
+            "provider_transaction_id": "reference_repeat_idempotency_transaction",
+            "provider_lineage_id": "reference_repeat_idempotency_lineage",
+            "provider_order": 1,
+            "offline_vector": "valid_allow",
+            "offline_action": "read_downloaded_lesson"
+          }
+        }
+      ],
+      "expected": {
+        "snapshot": {
+          "revision": 1,
+          "plans": [
+            "pro"
+          ],
+          "sources": [
+            "apple"
+          ]
+        },
+        "purchase": {
+          "status": "block",
+          "reason": "equivalent_other_rail"
+        },
+        "offline_policy": {
+          "action": "allow_downloaded_study"
+        },
+        "audit_count": 1
+      },
+      "required_artifacts": [
+        "v1.59-decision-cases.json"
+      ],
+      "diagnostic": {
+        "scenario": "repeat_idempotency"
+      }
+    },
+    {
+      "id": "parallel_execution",
+      "evidence_lane": "deterministic_conformance",
+      "frozen_clock": "2026-08-04T12:15:00Z",
+      "actions": [
+        {
+          "kind": "parallel_delivery",
+          "order": 1,
+          "at": "2026-08-04T12:15:00Z",
+          "operation": {
+            "rail": "apple",
+            "environment": "production",
+            "logical_product": "pro",
+            "provider_product_id": "product_pro",
+            "provider_event_id": "reference_parallel_execution_event",
+            "provider_transaction_id": "reference_parallel_execution_transaction",
+            "provider_lineage_id": "reference_parallel_execution_lineage",
+            "provider_order": 1,
+            "offline_vector": "valid_allow",
+            "offline_action": "read_downloaded_lesson"
+          }
+        }
+      ],
+      "expected": {
+        "snapshot": {
+          "revision": 1,
+          "plans": [
+            "pro"
+          ],
+          "sources": [
+            "apple"
+          ]
+        },
+        "purchase": {
+          "status": "block",
+          "reason": "equivalent_other_rail"
+        },
+        "offline_policy": {
+          "action": "allow_downloaded_study"
+        },
+        "audit_count": 1
+      },
+      "required_artifacts": [
+        "v1.59-decision-cases.json"
+      ],
+      "diagnostic": {
+        "scenario": "parallel_execution"
+      }
+    },
+    {
+      "id": "interrupted_resume",
+      "evidence_lane": "deterministic_conformance",
+      "frozen_clock": "2026-08-04T12:16:00Z",
+      "actions": [
+        {
+          "kind": "durable_interruption",
+          "order": 1,
+          "at": "2026-08-04T12:16:00Z",
+          "operation": {
+            "rail": "stripe",
+            "environment": "production",
+            "logical_product": "pro",
+            "provider_product_id": "price_pro",
+            "provider_event_id": "reference_interrupted_resume_event",
+            "provider_transaction_id": "reference_interrupted_resume_transaction",
+            "provider_lineage_id": "reference_interrupted_resume_lineage",
+            "provider_order": 1,
+            "offline_vector": "valid_allow",
+            "offline_action": "read_downloaded_lesson"
+          }
+        },
+        {
+          "kind": "resume_delivery",
+          "order": 2,
+          "at": "2026-08-04T12:16:01Z"
+        }
+      ],
+      "expected": {
+        "snapshot": {
+          "revision": 1,
+          "plans": [
+            "pro"
+          ],
+          "sources": [
+            "stripe"
+          ]
+        },
+        "purchase": {
+          "status": "block",
+          "reason": "equivalent_other_rail"
+        },
+        "offline_policy": {
+          "action": "allow_downloaded_study"
+        },
+        "audit_count": 1
+      },
+      "required_artifacts": [
+        "v1.59-decision-cases.json",
+        "v1.59-offline-golden-vectors.json"
+      ],
+      "diagnostic": {
+        "scenario": "interrupted_resume"
+      }
+    },
+    {
+      "id": "crosswake_runtime_capability",
+      "evidence_lane": "runtime_capability",
+      "frozen_clock": "2026-08-04T12:17:00Z",
+      "actions": [
+        {
+          "kind": "capability_report_read",
+          "order": 1,
+          "at": "2026-08-04T12:17:00Z"
+        }
+      ],
+      "expected": {
+        "snapshot": {
+          "revision": 0,
+          "plans": [
+            "pro"
+          ],
+          "sources": [
+            "apple"
+          ]
+        },
+        "purchase": {
+          "status": "block",
+          "reason": "missing_snapshot"
+        },
+        "offline_policy": {
+          "action": "deny"
+        },
+        "audit_count": 0
+      },
+      "required_artifacts": [
+        "capability-report.json"
+      ],
+      "diagnostic": {
+        "scenario": "crosswake_runtime_capability"
+      }
+    },
+    {
+      "id": "provider_advisory_parity",
+      "evidence_lane": "advisory_parity",
+      "frozen_clock": "2026-08-04T12:18:00Z",
+      "actions": [
+        {
+          "kind": "provider_advisory_read",
+          "order": 1,
+          "at": "2026-08-04T12:18:00Z"
+        }
+      ],
+      "expected": {
+        "snapshot": {
+          "revision": 0,
+          "plans": [
+            "pro"
+          ],
+          "sources": [
+            "stripe"
+          ]
+        },
+        "purchase": {
+          "status": "block",
+          "reason": "missing_snapshot"
+        },
+        "offline_policy": {
+          "action": "deny"
+        },
+        "audit_count": 0
+      },
+      "required_artifacts": [
+        "v1.59-decision-cases.json"
+      ],
+      "diagnostic": {
+        "scenario": "provider_advisory_parity"
+      }
+    }
   ]
 }

@@ -125,24 +125,7 @@ defmodule Accrue.Entitlements.ReferenceScenarioConformanceTest do
         # These are independent production contexts. The fixture supplies the
         # expected tuple; this helper only selects and normalizes their bounded
         # public outputs and deliberately contains no entitlement rules.
-        assert {:ok, snapshot} = Accrue.Entitlements.snapshot(account)
-        decision = Accrue.Entitlements.purchase_decision(account.id, opposite_rail(operation.rail), opposite_product(opposite_rail(operation.rail)))
-        assert %{status: status, reason: reason} = decision
-
-        assert {:ok, offline} =
-                 Offline.verify(offline_vector(operation.offline_vector)["compact_jws"], offline_context(operation.offline_vector))
-
-        assert %{action: action, allowed: allowed} = Offline.action_policy(offline, operation.offline_action)
-
-        audit_count =
-          Accrue.TestRepo.aggregate(from(event in Event, where: event.subject_id == ^account.id), :count, :id)
-
-        assert is_integer(snapshot.revision)
-        assert status in [:eligible, :warn, :block]
-        assert is_atom(reason)
-        assert is_atom(action)
-        assert is_boolean(allowed)
-        assert is_integer(audit_count)
+        assert_bounded_result(scenario, account, operation)
         scenario.id
       end
 
@@ -180,6 +163,39 @@ defmodule Accrue.Entitlements.ReferenceScenarioConformanceTest do
 
     assert action == operation.offline_action
     assert scenario.expected.offline_policy.action == :allow_downloaded_study
+
+    assert Accrue.TestRepo.aggregate(
+             from(event in Event, where: event.subject_id == ^account.id),
+             :count,
+             :id
+           ) == scenario.expected.audit_count
+  end
+
+  # This is intentionally only a bounded-result normalizer. It does not infer
+  # an entitlement decision from fixture data: the persisted projection,
+  # purchase context, Offline verifier, and audit ledger remain authoritative.
+  defp assert_bounded_result(scenario, account, operation) do
+    assert {:ok, snapshot} = Accrue.Entitlements.snapshot(account)
+    assert snapshot.revision == scenario.expected.snapshot.revision
+    assert snapshot.plans == Enum.map(scenario.expected.snapshot.plans, &String.to_existing_atom/1)
+    assert Enum.map(snapshot.sources, & &1.rail) == scenario.expected.snapshot.sources
+
+    decision =
+      Accrue.Entitlements.purchase_decision(
+        account.id,
+        opposite_rail(operation.rail),
+        opposite_product(opposite_rail(operation.rail))
+      )
+
+    assert decision.status == scenario.expected.purchase.status
+    assert Atom.to_string(decision.reason) == scenario.expected.purchase.reason
+
+    assert {:ok, offline} =
+             Offline.verify(offline_vector(operation.offline_vector)["compact_jws"], offline_context(operation.offline_vector))
+
+    assert %{action: action, allowed: allowed} = Offline.action_policy(offline, operation.offline_action)
+    assert action == operation.offline_action
+    assert is_boolean(allowed)
 
     assert Accrue.TestRepo.aggregate(
              from(event in Event, where: event.subject_id == ^account.id),

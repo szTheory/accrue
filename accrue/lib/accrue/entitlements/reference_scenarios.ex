@@ -105,9 +105,10 @@ defmodule Accrue.Entitlements.ReferenceScenarios do
   def production_execution_ids, do: Enum.map(deterministic_scenarios(), & &1.id)
 
   @doc """
-  Returns the bounded, synthetic input used to select a production context.
+  Returns the bounded, fixture-declared input used to select a production context.
 
-  This deliberately carries identifiers and an operation only. Snapshot,
+  This deliberately carries identifiers and an operation only. Every
+  deterministic row must declare its operation; snapshot,
   purchase, offline, and audit results stay in the fixture and are supplied by
   the production contexts rather than reconstructed here.
   """
@@ -118,7 +119,7 @@ defmodule Accrue.Entitlements.ReferenceScenarios do
       |> Enum.find_value(&Map.get(&1, :operation))
       |> case do
         %Operation{} = operation -> operation
-        nil -> synthetic_operation(scenario)
+        nil -> raise ArgumentError, "deterministic scenario is missing a closed operation"
       end
 
     %ExecutionInput{account: %{owner_id: "reference-scenario-#{scenario.id}"}, operation: operation}
@@ -132,6 +133,7 @@ defmodule Accrue.Entitlements.ReferenceScenarios do
       valid_id?(scenario.id) and
       utc?(scenario.frozen_clock) and ordered_actions?(scenario.actions) and
       valid_expected?(scenario.expected) and
+      deterministic_operation_valid?(scenario) and
       lane_artifacts_valid?(scenario.evidence_lane, scenario.required_artifacts) and
       safe_diagnostic?(scenario.diagnostic)
   end
@@ -217,15 +219,12 @@ defmodule Accrue.Entitlements.ReferenceScenarios do
 
   defp actions!(_), do: raise(ArgumentError, "missing actions")
 
-  defp operation!(value, kind)
-       when is_map(value) and kind in ["apple_verified_purchase", "stripe_verified_purchase"] do
+  defp operation!(value, _kind) when is_map(value) do
     require_keys!(value, @operation_keys, "operation")
     rail = value["rail"]
     valid_ids = @operation_keys -- ["rail", "environment", "provider_order", "offline_action"]
 
     if rail in ["apple", "stripe"] and
-         ((kind == "apple_verified_purchase" and rail == "apple") or
-            (kind == "stripe_verified_purchase" and rail == "stripe")) and
          value["environment"] in ["production", "sandbox"] and
          Enum.all?(valid_ids, &valid_id?(value[&1])) and
          is_integer(value["provider_order"]) and value["provider_order"] > 0 and
@@ -264,10 +263,10 @@ defmodule Accrue.Entitlements.ReferenceScenarios do
     (is_integer(snapshot["revision"]) and snapshot["revision"] >= 0) ||
       raise ArgumentError, "invalid revision"
 
-    (is_list(snapshot["plans"]) and snapshot["plans"] != [] and
+    (is_list(snapshot["plans"]) and
        Enum.all?(snapshot["plans"], &valid_id?/1)) || raise ArgumentError, "invalid plans"
 
-    (is_list(snapshot["sources"]) and snapshot["sources"] != [] and
+    (is_list(snapshot["sources"]) and
        Enum.all?(snapshot["sources"], &(&1 in ["stripe", "apple"]))) ||
       raise ArgumentError, "invalid sources"
 
@@ -327,7 +326,7 @@ defmodule Accrue.Entitlements.ReferenceScenarios do
          audit_count: count
        }),
        do:
-         is_integer(revision) and revision >= 0 and is_list(plans) and plans != [] and
+         is_integer(revision) and revision >= 0 and is_list(plans) and
            Enum.all?(plans, &valid_id?/1) and is_list(sources) and
            Enum.all?(sources, &(&1 in [:stripe, :apple])) and status in [:eligible, :warn, :block] and
            is_binary(reason) and reason =~ ~r/^[a-z0-9_]{3,80}$/ and
@@ -335,6 +334,13 @@ defmodule Accrue.Entitlements.ReferenceScenarios do
            is_integer(count) and count >= 0
 
   defp valid_expected?(_), do: false
+
+  # Empty snapshots are an intentional closed result only at revision zero.
+  # Non-empty authorization state must retain its source evidence.
+  defp deterministic_operation_valid?(%Scenario{evidence_lane: :deterministic_conformance, actions: actions}),
+    do: Enum.any?(actions, &match?(%Operation{}, Map.get(&1, :operation)))
+
+  defp deterministic_operation_valid?(%Scenario{}), do: true
 
   defp valid_artifacts?(items),
     do:
@@ -368,26 +374,6 @@ defmodule Accrue.Entitlements.ReferenceScenarios do
 
   defp valid_id?(value), do: is_binary(value) and value =~ ~r/^[a-z0-9_]{3,80}$/
 
-  # The synthetic operation selects the already-existing public Intake /
-  # Observation / Projector path. It is intentionally not an entitlement
-  # reducer: no decision outcome is derived from the scenario here.
-  defp synthetic_operation(%Scenario{id: id, expected: %Expected{snapshot: snapshot}}) do
-    rail = List.first(snapshot.sources) || :stripe
-    product = if rail == :apple, do: "product_pro", else: "price_pro"
-
-    %Operation{
-      rail: rail,
-      environment: :production,
-      logical_product: "pro",
-      provider_product_id: product,
-      provider_event_id: "reference_#{id}_event",
-      provider_transaction_id: "reference_#{id}_transaction",
-      provider_lineage_id: "reference_#{id}_lineage",
-      provider_order: 1,
-      offline_vector: "valid_allow",
-      offline_action: :read_downloaded_lesson
-    }
-  end
   defp lane_atom!("deterministic_conformance"), do: :deterministic_conformance
   defp lane_atom!("runtime_capability"), do: :runtime_capability
   defp lane_atom!("advisory_parity"), do: :advisory_parity
