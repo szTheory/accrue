@@ -658,9 +658,11 @@ defmodule Accrue.Entitlements.Offline.Reconnect do
         _ -> nil
       end
 
+    queue_age_ms = queue_age_ms(request.challenge_id, now, opts)
+
     :telemetry.execute(
       [:accrue, :entitlements, :offline, :reconnect],
-      %{count: 1, latency_ms: elapsed_ms(started_at)},
+      %{count: 1, latency_ms: elapsed_ms(started_at), queue_age_ms: queue_age_ms},
       %{
         action: :reconnect,
         disposition: if(outcome, do: outcome.disposition, else: :rejected),
@@ -669,7 +671,6 @@ defmodule Accrue.Entitlements.Offline.Reconnect do
         revision_delta: revision_delta(request, outcome),
         due_source_count: if(outcome, do: outcome.due_source_count, else: 0),
         retry_after: if(outcome, do: outcome.retry_after, else: nil),
-        queue_age_ms: queue_age_ms(request.challenge_id, now, opts),
         protocol_version: "v1.59",
         correlation_hash: correlation_hash(request)
       }

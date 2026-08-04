@@ -185,6 +185,18 @@ defmodule Mix.Tasks.Accrue.InstallTest do
 
     assert InstallFixture.assert_contains!(
              app,
+             "priv/repo/migrations/20260804010000_create_accrue_offline_reconnect_attempts.exs",
+             "accrue_entitlement_offline_reconnect_wakeups"
+           )
+
+    assert InstallFixture.assert_contains!(
+             app,
+             "priv/repo/migrations/20260804020000_allow_base64url_device_thumbprints.exs",
+             "^[A-Za-z0-9_-]"
+           )
+
+    assert InstallFixture.assert_contains!(
+             app,
              "priv/repo/migrations/99999999999999_revoke_accrue_events_writes.exs",
              ~S[to_regrole('#{@app_role}') IS NOT NULL]
            )

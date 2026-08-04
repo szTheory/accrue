@@ -14,6 +14,13 @@ defmodule Accrue.Entitlements.OfflineRegistrationTest do
     "y" => "x_FEzRu9P7PZxqTQ7P3U-DxhPSe07uyRfrn41XPRP1Q"
   }
 
+  @leading_base64url_thumbprint_jwk %{
+    "kty" => "EC",
+    "crv" => "P-256",
+    "x" => "leZmbbEdAugFc25AK5o1ZH1zES7MnIEtjFXO0Pr6Mrk",
+    "y" => "HGQ62cKyAs1t-UzCr3_nif4ElqKUePtzDaD4G978QbU"
+  }
+
   test "bounded public JWK, challenge digests, and issuance ordering persist without secret material" do
     account = account!("durable-values")
     thumbprint = Device.thumbprint(@public_jwk)
@@ -93,6 +100,28 @@ defmodule Accrue.Entitlements.OfflineRegistrationTest do
     end
 
     refute Device.changeset(%Device{}, %{attrs | key_thumbprint: "client-supplied"}).valid?
+  end
+
+  test "database accepts canonical base64url thumbprints beginning with dash or underscore" do
+    account = account!("leading-base64url-thumbprint")
+    thumbprint = Device.thumbprint(@leading_base64url_thumbprint_jwk)
+
+    assert String.starts_with?(thumbprint, ["-", "_"])
+
+    assert {:ok, device} =
+             TestRepo.insert(
+               Device.changeset(%Device{}, %{
+                 account_id: account.id,
+                 installation_id: "install-219-leading-thumbprint",
+                 public_jwk: @leading_base64url_thumbprint_jwk,
+                 key_thumbprint: thumbprint,
+                 state: :active,
+                 registered_at: ~U[2026-08-03 04:00:00.000000Z],
+                 last_accepted_revision: 0
+               })
+             )
+
+    assert device.key_thumbprint == thumbprint
   end
 
   test "database constraints protect challenge and issuance state from direct invalid writes" do
