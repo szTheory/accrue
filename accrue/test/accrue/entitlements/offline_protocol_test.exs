@@ -13,6 +13,10 @@ defmodule Accrue.Entitlements.OfflineProtocolTest do
     def public_keys(opts), do: {:ok, Keyword.fetch!(opts, :provider_keys)}
   end
 
+  defmodule RepoThatMustNotBeUsed do
+    def all(_query), do: raise("pure JWKS rendering must not access the Repo")
+  end
+
   @issuer "accrue.test.offline"
   @audience "accrue-offline-client"
   @kid "accrue-v1.59-offline-test-only"
@@ -86,7 +90,11 @@ defmodule Accrue.Entitlements.OfflineProtocolTest do
              )
 
     assert {:ok, %{"keys" => ^keys}} =
-             Offline.verification_keys(provider: Provider, provider_keys: [rotated, key])
+             Offline.verification_keys(
+               provider: Provider,
+               provider_keys: [rotated, key],
+               repo: RepoThatMustNotBeUsed
+             )
   end
 
   test "invalid provider public-key output never becomes a JWKS" do

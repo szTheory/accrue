@@ -99,17 +99,31 @@ defmodule Accrue.Entitlements.Offline do
 
   def verification_keys(_), do: {:error, :config_invalid}
 
-  defp render_verification_keys(opts) do
+  @doc """
+  Renders public verification keys while enforcing retirement requirements derived
+  from actual issued proofs.
+
+  Unlike `verification_keys/1`, this operation requires a Repo. Call it from the
+  host's JWKS publication path; explicit keys and injected providers can use the
+  pure renderer with precomputed `:retention_requirements` instead.
+  """
+  @spec verification_keys_with_issued_retention(keyword()) ::
+          {:ok, %{required(String.t()) => [map()]}} | {:error, :config_invalid}
+  def verification_keys_with_issued_retention(opts \\ [])
+
+  def verification_keys_with_issued_retention(opts) when is_list(opts) do
     repo = Keyword.get(opts, :repo, Accrue.Repo.repo())
     now = Keyword.get(opts, :now, DateTime.utc_now())
+    requirements = Issuance.retirement_requirements(repo, now, opts)
 
-    requirements =
-      Keyword.get_lazy(opts, :retention_requirements, fn ->
-        Issuance.retirement_requirements(repo, now, opts)
-      end)
+    verification_keys(Keyword.put(opts, :retention_requirements, requirements))
+  end
 
+  def verification_keys_with_issued_retention(_), do: {:error, :config_invalid}
+
+  defp render_verification_keys(opts) do
     with {:ok, keys} <- public_keys(opts) do
-      KeyProvider.render_public_keys(keys, requirements)
+      KeyProvider.render_public_keys(keys, Keyword.get(opts, :retention_requirements, %{}))
     else
       _ -> {:error, :config_invalid}
     end
