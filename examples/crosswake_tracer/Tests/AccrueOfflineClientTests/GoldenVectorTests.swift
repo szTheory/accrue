@@ -41,6 +41,44 @@ struct GoldenVectorTests {
         #expect(observations.contains { $0.id == "unknown_kid" && $0.result == .reject && $0.reason == "unknown_key" && $0.cache == .allow })
     }
 
+    @Test("escaped duplicate JSON members fail closed in corpus, JWS header, and payload")
+    func escapedDuplicateMembersFailClosed() throws {
+        let fixture = try OfflineGoldenVectorVerifier.fixtureData()
+        let corpusText = try #require(String(data: fixture.corpus, encoding: .utf8))
+        let duplicateJWK = corpusText.replacingOccurrences(
+            of: #""kty": "EC""#,
+            with: #""kty": "EC", "\u006bty": "EC""#,
+            options: [],
+            range: corpusText.range(of: #""kty": "EC""#)
+        )
+        #expect(try validationError(Data(duplicateJWK.utf8), fixture: fixture).contains("malformed"))
+
+        let cache = AtomicOfflineCache(
+            url: FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString),
+            authenticationKey: testCacheKey
+        )
+        let compact = try signedCandidate(revision: 8, iat: 200, freshUntil: 400, disposition: "allow")
+        let duplicateHeader = try duplicateJWSMember(
+            compact,
+            segment: 0,
+            original: #""alg":"ES256""#,
+            duplicate: #""alg":"ES256","\u0061lg":"ES256""#
+        )
+        let duplicatePayload = try duplicateJWSMember(
+            compact,
+            segment: 1,
+            original: #""iss":"accrue.test.offline""#,
+            duplicate: #""iss":"accrue.test.offline","\u0069ss":"accrue.test.offline""#
+        )
+
+        #expect(throws: (any Error).self) {
+            try OfflineGoldenVectorVerifier.replaceVerifiedTestProof(duplicateHeader, in: cache)
+        }
+        #expect(throws: (any Error).self) {
+            try OfflineGoldenVectorVerifier.replaceVerifiedTestProof(duplicatePayload, in: cache)
+        }
+    }
+
     @Test("canonical corpus rejects top-level schema and value drift before observation")
     func canonicalCorpusRejectsTopLevelDrift() throws {
         let fixture = try OfflineGoldenVectorVerifier.fixtureData()
@@ -355,6 +393,21 @@ struct GoldenVectorTests {
         let signingInput = "\(header).\(payload)"
         let signature = try privateKey.signature(for: Data(signingInput.utf8)).rawRepresentation.base64URLEncodedString()
         return "\(signingInput).\(signature)"
+    }
+
+    private func duplicateJWSMember(
+        _ compact: String,
+        segment: Int,
+        original: String,
+        duplicate: String
+    ) throws -> String {
+        var parts = compact.split(separator: ".", omittingEmptySubsequences: false).map(String.init)
+        let decoded = try #require(Data(base64URLEncoded: parts[segment]))
+        var json = try #require(String(data: decoded, encoding: .utf8))
+        let range = try #require(json.range(of: original))
+        json.replaceSubrange(range, with: duplicate)
+        parts[segment] = Data(json.utf8).base64URLEncodedString()
+        return parts.joined(separator: ".")
     }
 
     private func corpusObject(_ data: Data) throws -> [String: Any] {

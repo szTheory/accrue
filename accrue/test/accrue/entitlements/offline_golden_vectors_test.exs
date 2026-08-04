@@ -46,6 +46,8 @@ defmodule Accrue.Entitlements.OfflineGoldenVectorsTest do
                :hard_expired,
                :wrong_issuer,
                :wrong_audience,
+               :wrong_algorithm,
+               :wrong_type,
                :device_mismatch,
                :unknown_key,
                :superseded,
@@ -64,6 +66,42 @@ defmodule Accrue.Entitlements.OfflineGoldenVectorsTest do
     assert unknown["expected_reason"] == "unknown_key"
 
     assert %{id: "unknown_kid", state: :invalid, reason: :unknown_key, cache: :allow} = observed
+  end
+
+  test "declared strict negatives carry independent evidence and cache faults retain an authenticated prior proof" do
+    fixture = offline_fixture()
+
+    ids = ~w(
+      fault_before_replace wrong_account wrong_type wrong_algorithm malformed_compact
+      malformed_revision malformed_iat malformed_freshness unknown_disposition
+    )
+
+    vectors =
+      fixture["vectors"]
+      |> Enum.filter(&(&1["id"] in ids))
+      |> Map.new(&{&1["id"], &1})
+
+    assert Map.keys(vectors) |> Enum.sort() == Enum.sort(ids)
+
+    assert MapSet.size(
+             MapSet.new(Enum.map(vectors, fn {_id, vector} -> vector["compact_jws"] end))
+           ) == length(ids)
+
+    assert Enum.all?(vectors, fn {_id, vector} -> map_size(vector["verification_context"]) > 0 end)
+
+    assert {:ok, _vectors, observations} = OfflineGoldenVectorVerifier.verify_fixture!()
+
+    assert %{state: :denied, reason: :signed_denial, cache: :allow} =
+             Enum.find(observations, &(&1.id == "fault_before_replace"))
+
+    assert %{state: :invalid, reason: :device_mismatch} =
+             Enum.find(observations, &(&1.id == "wrong_account"))
+
+    assert %{state: :invalid, reason: :wrong_type} =
+             Enum.find(observations, &(&1.id == "wrong_type"))
+
+    assert %{state: :invalid, reason: :wrong_algorithm} =
+             Enum.find(observations, &(&1.id == "wrong_algorithm"))
   end
 
   test "the reader binds every vector to canonical case, version, disposition, and identity metadata" do

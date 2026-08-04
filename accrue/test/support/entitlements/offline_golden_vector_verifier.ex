@@ -167,14 +167,18 @@ defmodule Accrue.Entitlements.OfflineGoldenVectorVerifier do
     end
   end
 
-  defp cache_after(
-         %{"fault_point" => "before_rename", "expected_cache_disposition" => cache},
-         _decision
-       ),
-       do: String.to_atom(cache)
+  # Model the durable compare-and-replace boundary from D-20 rather than copying
+  # the vector's expected cache label. A before-rename fault retains the explicit
+  # authenticated prior proof; a completed signed denial replaces it.
+  defp cache_after(%{"fault_point" => "before_rename"} = vector, _decision),
+    do: prior_cache(vector)
 
   defp cache_after(_vector, %{state: :denied}), do: :deny
-  defp cache_after(%{"expected_cache_disposition" => cache}, _decision), do: String.to_atom(cache)
+  defp cache_after(vector, %{state: :invalid}), do: prior_cache(vector)
+  defp cache_after(_vector, _decision), do: :allow
+
+  defp prior_cache(%{"verification_context" => %{"accepted_disposition" => "deny"}}), do: :deny
+  defp prior_cache(_), do: :allow
 
   defp claims_map(nil), do: %{}
   defp claims_map(claims), do: Map.from_struct(claims)

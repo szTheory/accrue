@@ -459,6 +459,9 @@ defmodule Accrue.Entitlements.DecisionCases.Export do
       }
     end
 
+    # Every negative below has its own signed (or deliberately malformed) compact
+    # input and its own context.  These are not labels for one shared bad token:
+    # the corpus is the language-neutral proof that each D-09/D-12 branch is live.
     [
       spec.(
         "valid_allow",
@@ -563,7 +566,7 @@ defmodule Accrue.Entitlements.DecisionCases.Export do
         "rollback",
         "out_of_order_positive_after_revoke",
         allow,
-        %{base | accepted_revision: 6},
+        %{base | accepted_revision: 6, accepted_disposition: :deny},
         "invalid",
         "superseded",
         "reconnect_required",
@@ -628,32 +631,108 @@ defmodule Accrue.Entitlements.DecisionCases.Export do
       )
       |> Map.put(:fault_point, "after_directory_sync")
     ] ++
-      Enum.map(
-        [
+      [
+        spec.(
           "fault_before_replace",
+          "atomic_transaction_boundary",
+          deny,
+          %{base | accepted_disposition: :allow, accepted_revision: 5},
+          "denied",
+          "signed_denial",
+          "reconnect_required",
+          "allow",
+          deny_claims
+        )
+        |> Map.put(:fault_point, "before_rename"),
+        spec.(
           "wrong_account",
+          "apple_token_mismatch",
+          "eyJhbGciOiJFUzI1NiIsImtpZCI6ImFjY3J1ZS12MS41OS1vZmZsaW5lLXRlc3Qtb25seSIsInR5cCI6ImFjY3J1ZS1lbnRpdGxlbWVudC1wcm9vZitqd3QifQ.eyJhdWQiOiJhY2NydWUtb2ZmbGluZS1jbGllbnQiLCJjbmYiOnsiamt0IjoiSVZ3OTU4RF9zeEtZTWc2aUNIUXMtdm14a09WSWlSd3dLbGZlVjZ5a3JDZyJ9LCJkaXNwb3NpdGlvbiI6ImFsbG93IiwiZXhwIjoxNzAyNTkyMDAwLCJmZWF0dXJlcyI6WyJvZmZsaW5lX3N0dWR5Il0sImZyZXNoX3VudGlsIjoxNzAwMDAzNjAwLCJpYXQiOjE3MDAwMDAwMDAsImlzcyI6ImFjY3J1ZS50ZXN0Lm9mZmxpbmUiLCJqdGkiOiJ0ZXN0LXByb29mLWFsbG93IiwibmJmIjoxNzAwMDAwMDAwLCJwbGFucyI6WyJwcm8iXSwicXVhbnRpdGllcyI6eyJkb3dubG9hZHMiOjN9LCJyZXZpc2lvbiI6NSwic3ViIjoib3RoZXItYWNjb3VudCIsInZlcnNpb24iOiJ2MS41OSJ9.S5WocwDaOfrmdLIqrXDdA73hpyX9lpuxbH8gRbAQUBttkwIkHKwe_FZ02zG1q5JxLqcIoldHSNYyV8_c6ntxGQ",
+          %{base | account_subject: "synthetic-account"},
+          "invalid",
+          "device_mismatch",
+          "reconnect_required",
+          "allow",
+          %{}
+        ),
+        spec.(
           "wrong_type",
+          "unmapped_verified_product",
+          "eyJhbGciOiJFUzI1NiIsImtpZCI6ImFjY3J1ZS12MS41OS1vZmZsaW5lLXRlc3Qtb25seSIsInR5cCI6Indyb25nLXR5cGUifQ.eyJhdWQiOiJhY2NydWUtb2ZmbGluZS1jbGllbnQiLCJjbmYiOnsiamt0IjoiSVZ3OTU4RF9zeEtZTWc2aUNIUXMtdm14a09WSWlSd3dLbGZlVjZ5a3JDZyJ9LCJkaXNwb3NpdGlvbiI6ImFsbG93IiwiZXhwIjoxNzAyNTkyMDAwLCJmZWF0dXJlcyI6WyJvZmZsaW5lX3N0dWR5Il0sImZyZXNoX3VudGlsIjoxNzAwMDAzNjAwLCJpYXQiOjE3MDAwMDAwMDAsImlzcyI6ImFjY3VlLnRlc3Qub2ZmbGluZSIsImp0aSI6InRlc3QtcHJvb2YtYWxsb3ciLCJuYmYiOjE3MDAwMDAwMDAsInBsYW5zIjpbInBybyJdLCJxdWFudGl0aWVzIjp7ImRvd25sb2FkcyI6M30sInJldmlzaW9uIjo1LCJzdWIiOiJzeW50aGV0aWMtYWNjb3VudCIsInZlcnNpb24iOiJ2MS41OSJ9.qL97V9kcx2CtCAY7igO-m0Gvv3kCtOvD_uUVWshA2vtV1TlvMcYOeinDQ4NLYwXrG5kEhZRIatm_8HhCJDOHMA",
+          %{base | now: 1_700_000_002},
+          "invalid",
+          "wrong_type",
+          "reconnect_required",
+          "allow",
+          %{}
+        ),
+        spec.(
           "wrong_algorithm",
+          "invalid_apple_evidence",
+          "eyJhbGciOiJIUzI1NiIsImtpZCI6ImFjY3J1ZS12MS41OS1vZmZsaW5lLXRlc3Qtb25seSIsInR5cCI6ImFjY3J1ZS1lbnRpdGxlbWVudC1wcm9vZitqd3QifQ.eyJhdWQiOiJhY2NydWUtb2ZmbGluZS1jbGllbnQiLCJjbmYiOnsiamt0IjoiSVZ3OTU4RF9zeEtZTWc2aUNIUXMtdm14a09WSWlSd3dLbGZlVjZ5a3JDZyJ9LCJkaXNwb3NpdGlvbiI6ImFsbG93IiwiZXhwIjoxNzAyNTkyMDAwLCJmZWF0dXJlcyI6WyJvZmZsaW5lX3N0dWR5Il0sImZyZXNoX3VudGlsIjoxNzAwMDAzNjAwLCJpYXQiOjE3MDAwMDAwMDAsImlzcyI6ImFjY3VlLnRlc3Qub2ZmbGluZSIsImp0aSI6InRlc3QtcHJvb2YtYWxsb3ciLCJuYmYiOjE3MDAwMDAwMDAsInBsYW5zIjpbInBybyJdLCJxdWFudGl0aWVzIjp7ImRvd25sb2FkcyI6M30sInJldmlzaW9uIjo1LCJzdWIiOiJzeW50aGV0aWMtYWNjb3VudCIsInZlcnNpb24iOiJ2MS41OSJ9.O7ju-BXSsqbT1OrzJhn95tZBczEEE-7BgSZJ0Hexpl3q6NRKr2K-5qFZ-HijRGpASfcU-RmEjG3DiIKmTu0BDw",
+          %{base | accepted_iat: 1},
+          "invalid",
+          "wrong_algorithm",
+          "reconnect_required",
+          "allow",
+          %{}
+        ),
+        spec.(
           "malformed_compact",
+          "invalid_apple_evidence",
+          "not-a-jws",
+          %{base | installation_id: "malformed"},
+          "invalid",
+          "malformed",
+          "reconnect_required",
+          "allow",
+          %{}
+        ),
+        spec.(
           "malformed_revision",
+          "out_of_order_positive_after_revoke",
+          "eyJhbGciOiJFUzI1NiIsImtpZCI6ImFjY3J1ZS12MS41OS1vZmZsaW5lLXRlc3Qtb25seSIsInR5cCI6ImFjY3J1ZS1lbnRpdGxlbWVudC1wcm9vZitqd3QifQ.eyJhdWQiOiJhY2NydWUtb2ZmbGluZS1jbGllbnQiLCJjbmYiOnsiamt0IjoiSVZ3OTU4RF9zeEtZTWc2aUNIUXMtdm14a09WSWlSd3dLbGZlVjZ5a3JDZyJ9LCJkaXNwb3NpdGlvbiI6ImFsbG93IiwiZXhwIjoxNzAyNTkyMDAwLCJmZWF0dXJlcyI6WyJvZmZsaW5lX3N0dWR5Il0sImZyZXNoX3VudGlsIjoxNzAwMDAzNjAwLCJpYXQiOjE3MDAwMDAwMDAsImlzcyI6ImFjY3J1ZS50ZXN0Lm9mZmxpbmUiLCJqdGkiOiJ0ZXN0LXByb29mLWFsbG93IiwibmJmIjoxNzAwMDAwMDAwLCJwbGFucyI6WyJwcm8iXSwicXVhbnRpdGllcyI6eyJkb3dubG9hZHMiOjN9LCJyZXZpc2lvbiI6ImZpdmUiLCJzdWIiOiJzeW50aGV0aWMtYWNjb3VudCIsInZlcnNpb24iOiJ2MS41OSJ9.jlWtv4AKsff3KJjTGQbvgOMF0GimbQCPd1ADt3KLsNYSY5YOVqNpb95W6vYQ-4LpB7HbJcYwckHu1-S4NmJy6A",
+          %{base | accepted_revision: 1},
+          "invalid",
+          "malformed",
+          "reconnect_required",
+          "allow",
+          %{}
+        ),
+        spec.(
           "malformed_iat",
+          "duplicate_provider_event",
+          "eyJhbGciOiJFUzI1NiIsImtpZCI6ImFjY3J1ZS12MS41OS1vZmZsaW5lLXRlc3Qtb25seSIsInR5cCI6ImFjY3J1ZS1lbnRpdGxlbWVudC1wcm9vZitqd3QifQ.eyJhdWQiOiJhY2NydWUtb2ZmbGluZS1jbGllbnQiLCJjbmYiOnsiamt0IjoiSVZ3OTU4RF9zeEtZTWc2aUNIUXMtdm14a09WSWlSd3dLbGZlVjZ5a3JDZyJ9LCJkaXNwb3NpdGlvbiI6ImFsbG93IiwiZXhwIjoxNzAyNTkyMDAwLCJmZWF0dXJlcyI6WyJvZmZsaW5lX3N0dWR5Il0sImZyZXNoX3VudGlsIjoxNzAwMDAzNjAwLCJpYXQiOiJub3ciLCJpc3MiOiJhY2NydWUudGVzdC5vZmZsaW5lIiwianRpIjoidGVzdC1wcm9vZi1hbGxvdyIsIm5iZiI6MTcwMDAwMDAwMCwicGxhbnMiOlsicHJvIl0sInF1YW50aXRpZXMiOnsiZG93bmxvYWRzIjozfSwicmV2aXNpb24iOjUsInN1YiI6InN5bnRoZXRpYy1hY2NvdW50IiwidmVyc2lvbiI6InYxLjU5In0.SiANA7tFoVf07njkKxXECoZE-toAfukqhdsslVp6KJF-_EMLYVY8FJ5Fgt4gTtRF4lR9B4kJt_EPJqbaugozYQ",
+          %{base | accepted_iat: 1},
+          "invalid",
+          "malformed",
+          "reconnect_required",
+          "allow",
+          %{}
+        ),
+        spec.(
           "malformed_freshness",
-          "unknown_disposition"
-        ],
-        fn id ->
-          spec.(
-            id,
-            "invalid_apple_evidence",
-            "not-a-jws",
-            base,
-            "invalid",
-            "malformed",
-            "reconnect_required",
-            "allow",
-            %{}
-          )
-        end
-      )
+          "stale_offline_continuity",
+          "eyJhbGciOiJFUzI1NiIsImtpZCI6ImFjY3J1ZS12MS41OS1vZmZsaW5lLXRlc3Qtb25seSIsInR5cCI6ImFjY3J1ZS1lbnRpdGxlbWVudC1wcm9vZitqd3QifQ.eyJhdWQiOiJhY2NydWUtb2ZmbGluZS1jbGllbnQiLCJjbmYiOnsiamt0IjoiSVZ3OTU4RF9zeEtZTWc2aUNIUXMtdm14a09WSWlSd3dLbGZlVjZ5a3JDZyJ9LCJkaXNwb3NpdGlvbiI6ImFsbG93IiwiZXhwIjoxNzAyNTkyMDAwLCJmZWF0dXJlcyI6WyJvZmZsaW5lX3N0dWR5Il0sImZyZXNoX3VudGlsIjoibGF0ZXIiLCJpYXQiOjE3MDAwMDAwMDAsImlzcyI6ImFjY3J1ZS50ZXN0Lm9mZmxpbmUiLCJqdGkiOiJ0ZXN0LXByb29mLWFsbG93IiwibmJmIjoxNzAwMDAwMDAwLCJwbGFucyI6WyJwcm8iXSwicXVhbnRpdGllcyI6eyJkb3dubG9hZHMiOjN9LCJyZXZpc2lvbiI6NSwic3ViIjoic3ludGhldGljLWFjY291bnQiLCJ2ZXJzaW9uIjoidjEuNTkifQ.44Xk-4mVg5olVSqLKze7MAdIM6-Kriye86MuzhccDP-baYlcZIkTcZJ3jp5hEzNV2iIWg1BgweMSCEMyR6JCJQ",
+          %{base | accepted_fresh_until: 1},
+          "invalid",
+          "malformed",
+          "reconnect_required",
+          "allow",
+          %{}
+        ),
+        spec.(
+          "unknown_disposition",
+          "reconnect_positive_replacement",
+          "eyJhbGciOiJFUzI1NiIsImtpZCI6ImFjY3J1ZS12MS41OS1vZmZsaW5lLXRlc3Qtb25seSIsInR5cCI6ImFjY3J1ZS1lbnRpdGxlbWVudC1wcm9vZitqd3QifQ.eyJhdWQiOiJhY2NydWUtb2ZmbGluZS1jbGllbnQiLCJjbmYiOnsiamt0IjoiSVZ3OTU4RF9zeEtZTWc2aUNIUXMtdm14a09WSWlSd3dLbGZlVjZ5a3JDZyJ9LCJkaXNwb3NpdGlvbiI6Im1heWJlIiwiZXhwIjoxNzAyNTkyMDAwLCJmZWF0dXJlcyI6WyJvZmZsaW5lX3N0dWR5Il0sImZyZXNoX3VudGlsIjoxNzAwMDAzNjAwLCJpYXQiOjE3MDAwMDAwMDAsImlzcyI6ImFjY3J1ZS50ZXN0Lm9mZmxpbmUiLCJqdGkiOiJ0ZXN0LXByb29mLWFsbG93IiwibmJmIjoxNzAwMDAwMDAwLCJwbGFucyI6WyJwcm8iXSwicXVhbnRpdGllcyI6eyJkb3dubG9hZHMiOjN9LCJyZXZpc2lvbiI6NSwic3ViIjoic3ludGhldGljLWFjY291bnQiLCJ2ZXJzaW9uIjoidjEuNTkifQ.kc7cRWxUT1y2bR9rWeefB44e4LdBBpjtx1ew8cx6iNUFqJEX6vbYy77ScByxb8bvj6Kc_hQgTadJvU4nkH1bTg",
+          %{base | accepted_disposition: :allow},
+          "invalid",
+          "malformed",
+          "reconnect_required",
+          "allow",
+          %{}
+        )
+      ]
   end
 
   defp claims_for(compact) do

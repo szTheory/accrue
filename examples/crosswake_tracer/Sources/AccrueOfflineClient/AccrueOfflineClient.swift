@@ -131,6 +131,10 @@ public enum OfflineGoldenVectorVerifier {
     ]
 
     private static func decodeCorpus(_ data: Data, source: CorpusSource, canonical: Corpus? = nil) throws -> Corpus {
+        // This also covers every decoded corpus object, including JWKS/JWK
+        // metadata. Decodable/JSONSerialization otherwise silently choose a
+        // duplicate member before TestKey performs its exact-key validation.
+        try StrictJSON.rejectDuplicateKeys(in: data)
         guard let object = try JSONSerialization.jsonObject(with: data) as? [String: Any] else {
             throw GoldenVectorContractError.topLevel("root")
         }
@@ -238,25 +242,25 @@ public enum OfflineGoldenVectorVerifier {
         guard parts.count == 3,
               let headerData = Data(base64URLEncoded: String(parts[0])),
               let payloadData = Data(base64URLEncoded: String(parts[1])),
-              let signatureData = Data(base64URLEncoded: String(parts[2])), signatureData.count == 64,
-              let header = try JSONSerialization.jsonObject(with: headerData) as? [String: Any]
+              let signatureData = Data(base64URLEncoded: String(parts[2])), signatureData.count == 64
+        else { throw GoldenVectorError.malformed }
+        // Decode only after an object-aware lexical pass. JSONSerialization keeps
+        // the last duplicate member, which is not an admissible JWS profile.
+        try StrictJSON.rejectDuplicateKeys(in: headerData)
+        try StrictJSON.rejectDuplicateKeys(in: payloadData)
+        guard let header = try JSONSerialization.jsonObject(with: headerData) as? [String: Any],
+              let values = try JSONSerialization.jsonObject(with: payloadData) as? [String: Any]
         else { throw GoldenVectorError.malformed }
         guard Set(header.keys) == ["alg", "typ", "kid"] else { throw GoldenVectorError.malformed }
         guard header["alg"] as? String == "ES256" else { throw GoldenVectorError.algorithm }
         guard header["typ"] as? String == "accrue-entitlement-proof+jwt" else { throw GoldenVectorError.type }
         guard let kid = header["kid"] as? String, let key = keys.first(where: { $0.kid == kid }), key.isValid else { throw GoldenVectorError.key }
+        let payload = try Payload(values: values)
         let publicKey: P256.Signing.PublicKey
         do { publicKey = try P256.Signing.PublicKey(x963Representation: key.point) }
         catch { throw GoldenVectorError.key }
         guard let signature = try? P256.Signing.ECDSASignature(rawRepresentation: signatureData),
               publicKey.isValidSignature(signature, for: Data("\(parts[0]).\(parts[1])".utf8)) else { throw GoldenVectorError.signature }
-        // JSONSerialization is only used after a lexical duplicate-key pass.  Its
-        // dictionary bridge otherwise silently keeps the last duplicate member.
-        try StrictJSON.rejectDuplicateKeys(in: headerData)
-        try StrictJSON.rejectDuplicateKeys(in: payloadData)
-        let rawPayload = try JSONSerialization.jsonObject(with: payloadData)
-        guard let values = rawPayload as? [String: Any] else { throw GoldenVectorError.malformed }
-        let payload = try Payload(values: values)
         guard payload.version == "v1.59", !payload.jti.isEmpty else { throw GoldenVectorError.malformed }
         guard payload.iss == context.issuer else { throw GoldenVectorError.issuer }
         guard payload.aud == context.audience else { throw GoldenVectorError.audience }
@@ -330,29 +334,51 @@ public enum OfflineGoldenVectorVerifier {
             let common: Set<String> = ["version", "iss", "aud", "jti", "sub", "cnf", "revision", "iat", "nbf", "fresh_until", "exp", "disposition", "plans", "features", "quantities"]
             let expected = (values["disposition"] as? String) == "deny" ? common.union(["denial_reason"]) : common
             guard Set(values.keys) == expected else { throw GoldenVectorError.malformed }
-            guard let version = values["version"] as? String,
+            guard let version = values["version"] as? String, version.utf8.count <= 256,
                   let iss = values["iss"] as? String,
                   let aud = values["aud"] as? String,
                   let jti = values["jti"] as? String,
                   let accountID = values["sub"] as? String,
-                  let cnf = (values["cnf"] as? [String: Any])?["jkt"] as? String
+                  let cnfMap = values["cnf"] as? [String: Any], Set(cnfMap.keys) == ["jkt"],
+                  let cnf = cnfMap["jkt"] as? String, !cnf.isEmpty, cnf.utf8.count <= 256,
+                  !iss.isEmpty, iss.utf8.count <= 256, !aud.isEmpty, aud.utf8.count <= 256,
+                  !jti.isEmpty, jti.utf8.count <= 256, !accountID.isEmpty, accountID.utf8.count <= 256
             else { throw GoldenVectorError.malformed }
-            guard let revision = values["revision"] as? Int64 else { throw GoldenVectorError.revision }
-            guard let iat = values["iat"] as? Int64 else { throw GoldenVectorError.iat }
-            guard let nbf = values["nbf"] as? Int64 else { throw GoldenVectorError.malformed }
-            guard let freshUntil = values["fresh_until"] as? Int64 else { throw GoldenVectorError.freshness }
+            guard let revision = values["revision"] as? Int64, revision >= 0 else { throw GoldenVectorError.malformed }
+            guard let iat = values["iat"] as? Int64 else { throw GoldenVectorError.malformed }
+            guard let nbf = values["nbf"] as? Int64, nbf >= 0 else { throw GoldenVectorError.malformed }
+            guard let freshUntil = values["fresh_until"] as? Int64, freshUntil >= 0 else { throw GoldenVectorError.malformed }
             let exp: Int64?
             if values["exp"] is NSNull { exp = nil }
-            else if let value = values["exp"] as? Int64 { exp = value }
+            else if let value = values["exp"] as? Int64, value >= 0 { exp = value }
             else { throw GoldenVectorError.malformed }
             guard let disposition = Disposition(rawValue: values["disposition"] as? String ?? "") else { throw GoldenVectorError.disposition }
-            guard let plans = values["plans"] as? [String], plans.allSatisfy({ !$0.isEmpty && $0.utf8.count <= 128 }),
-                  let features = values["features"] as? [String], features.allSatisfy({ !$0.isEmpty && $0.utf8.count <= 128 }),
-                  let quantities = values["quantities"] as? [String: Int64], quantities.count <= 64,
-                  quantities.values.allSatisfy({ $0 >= 0 }) else { throw GoldenVectorError.malformed }
-            if disposition == .deny { guard values["denial_reason"] as? String != nil else { throw GoldenVectorError.malformed } }
+            guard let plans = Self.normalizedStrings(values["plans"]),
+                  let features = Self.normalizedStrings(values["features"]),
+                  let quantities = Self.normalizedQuantities(values["quantities"]),
+                  !(disposition == .allow && plans.isEmpty && features.isEmpty && quantities.isEmpty),
+                  iat >= 0, iat <= nbf, nbf <= freshUntil,
+                  exp.map({ freshUntil <= $0 }) ?? true else { throw GoldenVectorError.malformed }
+            if disposition == .deny {
+                guard let reason = values["denial_reason"] as? String,
+                      ["signed_denial", "access_unavailable", "superseded", "device_revoked"].contains(reason)
+                else { throw GoldenVectorError.malformed }
+            }
             self.version = version; self.iss = iss; self.aud = aud; self.jti = jti; self.accountID = accountID; self.cnf = cnf
             self.revision = revision; self.iat = iat; self.nbf = nbf; self.exp = exp; self.freshUntil = freshUntil; self.disposition = disposition
+        }
+
+        private static func normalizedStrings(_ value: Any?) -> [String]? {
+            guard let strings = value as? [String], strings.count <= 100,
+                  strings.allSatisfy({ !$0.isEmpty && $0.utf8.count <= 256 }),
+                  strings == strings.sorted(), Set(strings).count == strings.count else { return nil }
+            return strings
+        }
+
+        private static func normalizedQuantities(_ value: Any?) -> [String: Int64]? {
+            guard let quantities = value as? [String: Int64], quantities.count <= 100,
+                  quantities.allSatisfy({ !$0.key.isEmpty && $0.key.utf8.count <= 256 && $0.value > 0 }) else { return nil }
+            return quantities
         }
     }
     private enum Disposition: String { case allow, deny }
@@ -374,15 +400,98 @@ public enum OfflineGoldenVectorVerifier {
     private enum GoldenVectorError: Error { case malformed, signature, key, algorithm, issuer, audience, type, account, device, thumbprint, revision, rollback, iat, freshness, disposition, clock, expired, notYetValid; var reason: String { switch self { case .malformed, .signature, .revision, .disposition: "malformed"; case .iat, .freshness, .rollback: "superseded"; case .algorithm: "wrong_algorithm"; case .type: "wrong_type"; case .key: "unknown_key"; case .issuer: "wrong_issuer"; case .audience: "wrong_audience"; case .account, .device, .thumbprint: "device_mismatch"; case .clock: "clock_rollback"; case .expired: "hard_expired"; case .notYetValid: "future_not_valid" } } }
     private enum StrictJSON {
         static func rejectDuplicateKeys(in data: Data) throws {
-            guard let text = String(data: data, encoding: .utf8) else { throw GoldenVectorError.malformed }
-            let pattern = #"(?:\{|,)[[:space:]]*(\"(?:\\.|[^\"])*\")[[:space:]]*:"#
-            let regex = try NSRegularExpression(pattern: pattern)
-            var keys = Set<String>()
-            for match in regex.matches(in: text, range: NSRange(text.startIndex..., in: text)) {
-                guard let range = Range(match.range(at: 1), in: text),
-                      let key = try? JSONDecoder().decode(String.self, from: Data(text[range].utf8)),
-                      keys.insert(key).inserted else { throw GoldenVectorError.malformed }
+            var parser = Parser(data)
+            try parser.parseValue()
+            try parser.requireEnd()
+        }
+
+        private struct Parser {
+            let bytes: [UInt8]
+            var index = 0
+
+            init(_ data: Data) { bytes = Array(data) }
+
+            mutating func requireEnd() throws {
+                skipWhitespace()
+                guard index == bytes.count else { throw GoldenVectorError.malformed }
             }
+
+            mutating func parseValue() throws {
+                skipWhitespace()
+                guard index < bytes.count else { throw GoldenVectorError.malformed }
+                switch bytes[index] {
+                case 123: try parseObject()
+                case 91: try parseArray()
+                case 34: _ = try parseString()
+                case 116: try consume("true")
+                case 102: try consume("false")
+                case 110: try consume("null")
+                case 45, 48...57: try parseNumber()
+                default: throw GoldenVectorError.malformed
+                }
+            }
+
+            mutating func parseObject() throws {
+                index += 1; skipWhitespace()
+                if take(125) { return }
+                var keys = Set<String>()
+                while true {
+                    skipWhitespace()
+                    let key = try parseString()
+                    guard keys.insert(key).inserted else { throw GoldenVectorError.malformed }
+                    skipWhitespace(); guard take(58) else { throw GoldenVectorError.malformed }
+                    try parseValue(); skipWhitespace()
+                    if take(125) { return }
+                    guard take(44) else { throw GoldenVectorError.malformed }
+                }
+            }
+
+            mutating func parseArray() throws {
+                index += 1; skipWhitespace()
+                if take(93) { return }
+                while true {
+                    try parseValue(); skipWhitespace()
+                    if take(93) { return }
+                    guard take(44) else { throw GoldenVectorError.malformed }
+                }
+            }
+
+            mutating func parseString() throws -> String {
+                guard index < bytes.count, bytes[index] == 34 else { throw GoldenVectorError.malformed }
+                let start = index; index += 1
+                while index < bytes.count {
+                    let byte = bytes[index]
+                    if byte == 34 { index += 1; break }
+                    if byte < 32 { throw GoldenVectorError.malformed }
+                    if byte == 92 {
+                        index += 1; guard index < bytes.count else { throw GoldenVectorError.malformed }
+                        if bytes[index] == 117 {
+                            guard index + 4 < bytes.count, bytes[(index + 1)...(index + 4)].allSatisfy(isHex) else { throw GoldenVectorError.malformed }
+                            index += 4
+                        } else if ![34, 92, 47, 98, 102, 110, 114, 116].contains(bytes[index]) { throw GoldenVectorError.malformed }
+                    }
+                    index += 1
+                }
+                guard index <= bytes.count, index > start + 1,
+                      let decoded = try? JSONDecoder().decode(String.self, from: Data(bytes[start..<index])) else { throw GoldenVectorError.malformed }
+                return decoded
+            }
+
+            mutating func parseNumber() throws {
+                let start = index
+                _ = take(45)
+                guard index < bytes.count else { throw GoldenVectorError.malformed }
+                if take(48) { } else { try digits() }
+                if take(46) { try digits() }
+                if take(69) || take(101) { _ = take(43) || take(45); try digits() }
+                guard index > start else { throw GoldenVectorError.malformed }
+            }
+
+            mutating func digits() throws { let start = index; while index < bytes.count, bytes[index] >= 48, bytes[index] <= 57 { index += 1 }; guard index > start else { throw GoldenVectorError.malformed } }
+            mutating func consume(_ value: String) throws { for byte in value.utf8 { guard take(byte) else { throw GoldenVectorError.malformed } } }
+            mutating func take(_ byte: UInt8) -> Bool { guard index < bytes.count, bytes[index] == byte else { return false }; index += 1; return true }
+            mutating func skipWhitespace() { while index < bytes.count, [9, 10, 13, 32].contains(bytes[index]) { index += 1 } }
+            private func isHex(_ byte: UInt8) -> Bool { (48...57).contains(byte) || (65...70).contains(byte) || (97...102).contains(byte) }
         }
     }
     private enum GoldenVectorContractError: Error, CustomStringConvertible {
