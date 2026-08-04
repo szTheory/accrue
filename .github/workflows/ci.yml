@@ -76,6 +76,9 @@ jobs:
       - name: Adoption proof matrix contract
         run: bash scripts/ci/verify_adoption_proof_matrix.sh
 
+      - name: Reference scenario public-contract gate
+        run: bash scripts/ci/verify_reference_scenario_contract.sh
+
       - name: Core admin invoice VERIFY flow id drift guard
         run: bash scripts/ci/verify_core_admin_invoice_verify_ids.sh
 
