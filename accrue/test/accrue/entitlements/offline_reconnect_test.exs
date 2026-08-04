@@ -37,6 +37,12 @@ defmodule Accrue.Entitlements.OfflineReconnectTest do
     def public_keys(opts), do: {:ok, [Keyword.fetch!(opts, :public_key)]}
   end
 
+  defmodule UnverifiableSigningProvider do
+    @behaviour Accrue.Entitlements.Offline.KeyProvider
+    def sign(payload, opts), do: SigningProvider.sign(payload, opts)
+    def public_keys(_opts), do: {:ok, []}
+  end
+
   defmodule NoDueSources do
     @behaviour SourceCoordinator
     @impl true
@@ -79,6 +85,36 @@ defmodule Accrue.Entitlements.OfflineReconnectTest do
     @behaviour SourceCoordinator
     def due_sources(_, _, _), do: {:error, :provider_timeout}
     def refresh(_, status, _, _), do: {:ok, status}
+    def enqueue_repair(_, _, _, _), do: :ok
+  end
+
+  defmodule BarrierSource do
+    @behaviour SourceCoordinator
+
+    @impl true
+    def due_sources(_, _, _) do
+      {:ok,
+       [
+         %SourceCoordinator.SourceStatus{
+           source: :stripe,
+           environment: :production,
+           due: true,
+           state: :resolved,
+           next_action: :none
+         }
+       ]}
+    end
+
+    @impl true
+    def refresh(_, status, _, opts) do
+      send(Keyword.fetch!(opts, :test_pid), {:refresh_claimed, self()})
+
+      receive do
+        :continue_refresh -> {:ok, status}
+      end
+    end
+
+    @impl true
     def enqueue_repair(_, _, _, _), do: :ok
   end
 
@@ -348,6 +384,51 @@ defmodule Accrue.Entitlements.OfflineReconnectTest do
     assert 1 == TestRepo.aggregate(Issuance, :count)
   end
 
+  test "inline claim coalesces a wakeup worker during a deterministic refresh race", ctx do
+    project_grant!(ctx.account)
+
+    opts =
+      issuer_opts(ctx) ++
+        [source_coordinator: BarrierSource, authorize: fn _, _ -> true end, test_pid: self()]
+
+    request = reconnect_request!(ctx, opts, "reconnect-inline-worker-barrier")
+    parent = self()
+
+    inline =
+      Task.async(fn ->
+        send(parent, {:inline_result, Offline.reconnect(ctx.account, request, opts)})
+      end)
+
+    assert_receive {:refresh_claimed, refresh_pid}
+    attempt = TestRepo.one!(ReconnectAttempt)
+
+    assert {:error, :attempt_unavailable} =
+             Reconnect.execute_attempt(attempt.id,
+               offline_reconnect: opts,
+               repo: TestRepo,
+               now: @now
+             )
+
+    # A stale token cannot claim or terminalize the running attempt.
+    assert {0, _} =
+             TestRepo.update_all(
+               from(a in ReconnectAttempt,
+                 where: a.id == ^attempt.id and a.execution_token == "stale-token"
+               ),
+               set: [state: :completed]
+             )
+
+    send(refresh_pid, :continue_refresh)
+    assert_receive {:inline_result, {:ok, %{disposition: :issued, proof: proof}}}
+    assert is_binary(proof)
+    assert {:inline_result, {:ok, %{disposition: :issued, proof: ^proof}}} = Task.await(inline)
+
+    assert 1 == TestRepo.aggregate(Issuance, :count)
+
+    assert {:ok, %{disposition: :issued, proof: ^proof}} =
+             Offline.reconnect(ctx.account, request, opts)
+  end
+
   test "the sweeper requeues an expired running lease and converges once", ctx do
     project_grant!(ctx.account)
     opts = issuer_opts(ctx) ++ [source_coordinator: NoDueSources, authorize: fn _, _ -> true end]
@@ -463,6 +544,90 @@ defmodule Accrue.Entitlements.OfflineReconnectTest do
 
     assert {:ok, %{disposition: :needs_repair}} = Offline.reconnect(ctx.account, request, opts)
     refute_receive {:repair_enqueued, :stripe}
+  end
+
+  test "issuer completion telemetry reports bounded final outcomes", ctx do
+    handler_id = "offline-issuer-#{System.unique_integer([:positive])}"
+
+    :ok =
+      :telemetry.attach(
+        handler_id,
+        [:accrue, :entitlements, :offline, :issue],
+        fn _, measures, metadata, pid -> send(pid, {:issuer_telemetry, measures, metadata}) end,
+        self()
+      )
+
+    on_exit(fn -> :telemetry.detach(handler_id) end)
+
+    base_opts =
+      issuer_opts(ctx) ++ [source_coordinator: NoDueSources, authorize: fn _, _ -> true end]
+
+    # A no-grant account receives a signed denial, not an issuance failure.
+    deny_request = reconnect_request!(ctx, base_opts, "issuer-telemetry-deny")
+
+    assert {:ok, %{disposition: :issued}} =
+             Offline.reconnect(ctx.account, deny_request, base_opts)
+
+    assert_receive {:issuer_telemetry, %{latency_ms: deny_latency},
+                    %{disposition: :deny, reason: :signed_denial} = deny}
+
+    project_grant!(ctx.account)
+    allow_request = reconnect_request!(ctx, base_opts, "issuer-telemetry-allow")
+
+    assert {:ok, %{disposition: :issued}} =
+             Offline.reconnect(ctx.account, allow_request, base_opts)
+
+    assert_receive {:issuer_telemetry, %{latency_ms: allow_latency},
+                    %{disposition: :allow, reason: :ok} = allow}
+
+    config_request = reconnect_request!(ctx, base_opts, "issuer-telemetry-config")
+
+    assert {:ok, %{disposition: :needs_repair}} =
+             Offline.reconnect(
+               ctx.account,
+               config_request,
+               Keyword.delete(base_opts, :key_provider)
+             )
+
+    assert_receive {:issuer_telemetry, _,
+                    %{disposition: :rejected, reason: :config_invalid} = config}
+
+    verify_request = reconnect_request!(ctx, base_opts, "issuer-telemetry-verify")
+
+    assert {:ok, %{disposition: :needs_repair}} =
+             Offline.reconnect(
+               ctx.account,
+               verify_request,
+               Keyword.put(base_opts, :key_provider, UnverifiableSigningProvider)
+             )
+
+    assert_receive {:issuer_telemetry, _,
+                    %{disposition: :rejected, reason: :verification_failed} = verify}
+
+    persistence_request = reconnect_request!(ctx, base_opts, "issuer-telemetry-persistence")
+
+    assert {:ok, %{disposition: :needs_repair}} =
+             Offline.reconnect(
+               ctx.account,
+               persistence_request,
+               Keyword.put(base_opts, :force_persistence_failure, true)
+             )
+
+    assert_receive {:issuer_telemetry, _,
+                    %{disposition: :rejected, reason: :persistence_failed} = persistence}
+
+    for {latency, metadata} <- [
+          {deny_latency, deny},
+          {allow_latency, allow},
+          {0, config},
+          {0, verify},
+          {0, persistence}
+        ] do
+      assert is_integer(latency) and latency >= 0
+      assert metadata.config_version == "v1.59"
+      assert is_nil(metadata.revision_delta) or is_integer(metadata.revision_delta)
+      refute contains_secret?(metadata)
+    end
   end
 
   test "reconnect telemetry is bounded and excludes request or proof material", ctx do

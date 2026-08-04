@@ -7,7 +7,7 @@ defmodule Accrue.Entitlements.Offline.Issuer do
 
   defmodule Request do
     @enforce_keys [:account_id, :device_id, :now]
-    defstruct [:account_id, :device_id, :now, :correlation_id, :denial_reason]
+    defstruct [:account_id, :device_id, :now, :correlation_id, :denial_reason, :client_revision]
   end
 
   defmodule Result do
@@ -81,7 +81,7 @@ defmodule Accrue.Entitlements.Offline.Issuer do
         _ -> {:error, :issuance_failed}
       end
 
-    emit_completion(result, started_at)
+    emit_completion(result, request, started_at)
     result
   end
 
@@ -143,7 +143,8 @@ defmodule Accrue.Entitlements.Offline.Issuer do
              kid,
              disposition,
              fresh_until,
-             expires_at
+             expires_at,
+             opts
            ),
          result = %Result{
            compact: compact,
@@ -306,6 +307,35 @@ defmodule Accrue.Entitlements.Offline.Issuer do
          kid,
          disposition,
          fresh_until,
+         expires_at,
+         opts
+       ) do
+    if Keyword.get(opts, :force_persistence_failure, false) do
+      {:error, :persistence_failed}
+    else
+      do_persist(
+        repo,
+        account,
+        device,
+        request,
+        token_id,
+        kid,
+        disposition,
+        fresh_until,
+        expires_at
+      )
+    end
+  end
+
+  defp do_persist(
+         repo,
+         account,
+         device,
+         request,
+         token_id,
+         kid,
+         disposition,
+         fresh_until,
          expires_at
        ) do
     issuance =
@@ -348,11 +378,12 @@ defmodule Accrue.Entitlements.Offline.Issuer do
     end
   end
 
-  defp emit_completion(result, started_at) do
+  defp emit_completion(result, request, started_at) do
     {disposition, reason, revision, key_version} =
       case result do
         {:ok, %Result{disposition: disposition, revision: revision, compact: compact}} ->
-          {disposition, :ok, revision, compact |> kid_for_telemetry()}
+          reason = if(disposition == :deny, do: :signed_denial, else: :ok)
+          {disposition, reason, revision, compact |> kid_for_telemetry()}
 
         {:error, reason} ->
           {:rejected, bounded_reason(reason), nil, nil}
@@ -365,7 +396,7 @@ defmodule Accrue.Entitlements.Offline.Issuer do
         action: :offline_issue,
         disposition: disposition,
         reason: reason,
-        revision_delta: if(is_integer(revision), do: 0, else: nil),
+        revision_delta: revision_delta(request.client_revision, revision),
         key_version: key_version,
         config_version: "v1.59"
       }
@@ -389,4 +420,9 @@ defmodule Accrue.Entitlements.Offline.Issuer do
 
   defp elapsed_ms(started_at),
     do: (System.monotonic_time(:millisecond) - started_at) |> max(0) |> min(86_400_000)
+
+  defp revision_delta(client, revision) when is_integer(client) and is_integer(revision),
+    do: (revision - client) |> max(-1_000_000) |> min(1_000_000)
+
+  defp revision_delta(_, _), do: nil
 end

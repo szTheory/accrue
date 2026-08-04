@@ -169,12 +169,17 @@ defmodule Accrue.Entitlements.Offline.Reconnect do
     end
   end
 
-  defp settle(account, device, challenge, _request, statuses, now, opts, attempt_id, token) do
+  defp settle(account, device, challenge, request, statuses, now, opts, attempt_id, token) do
     due = Enum.filter(statuses, & &1.due)
     unresolved = Enum.reject(due, &(&1.state == :resolved))
 
     if unresolved == [] do
-      issuer = %Issuer.Request{account_id: account.id, device_id: device.id, now: now}
+      issuer = %Issuer.Request{
+        account_id: account.id,
+        device_id: device.id,
+        now: now,
+        client_revision: request.client_revision
+      }
 
       admission = Issuer.Admission.from_reconnect_challenge(challenge, device)
 
