@@ -5,7 +5,8 @@ defmodule Accrue.Entitlements.ReferenceScenarios do
   @lanes ~w(deterministic_conformance runtime_capability advisory_parity)
   @artifact_names ~w(v1.59-decision-cases.json v1.59-offline-golden-vectors.json capability-report.json)
   @scenario_keys ~w(id evidence_lane frozen_clock actions expected required_artifacts diagnostic)
-  @action_keys ~w(kind order at)
+  @action_keys ~w(kind order at operation)
+  @operation_keys ~w(rail environment logical_product provider_product_id provider_event_id provider_transaction_id provider_lineage_id provider_order offline_vector offline_action)
   @expected_keys ~w(snapshot purchase offline_policy audit_count)
   @snapshot_keys ~w(revision plans sources)
   @purchase_keys ~w(status reason)
@@ -49,6 +50,33 @@ defmodule Accrue.Entitlements.ReferenceScenarios do
       :expected,
       :required_artifacts,
       :diagnostic
+    ]
+  end
+
+  defmodule Operation do
+    @enforce_keys [
+      :rail,
+      :environment,
+      :logical_product,
+      :provider_product_id,
+      :provider_event_id,
+      :provider_transaction_id,
+      :provider_lineage_id,
+      :provider_order,
+      :offline_vector,
+      :offline_action
+    ]
+    defstruct [
+      :rail,
+      :environment,
+      :logical_product,
+      :provider_product_id,
+      :provider_event_id,
+      :provider_transaction_id,
+      :provider_lineage_id,
+      :provider_order,
+      :offline_vector,
+      :offline_action
     ]
   end
 
@@ -126,7 +154,12 @@ defmodule Accrue.Entitlements.ReferenceScenarios do
   defp actions!(actions) when is_list(actions) and actions != [] do
     parsed =
       Enum.map(actions, fn action ->
-        require_keys!(action, @action_keys, "action")
+        action_keys =
+          if Map.has_key?(action, "operation"),
+            do: @action_keys,
+            else: @action_keys -- ["operation"]
+
+        require_keys!(action, action_keys, "action")
 
         (is_binary(action["kind"]) and action["kind"] =~ ~r/^[a-z0-9_]{3,80}$/) ||
           raise ArgumentError, "invalid action kind"
@@ -135,7 +168,11 @@ defmodule Accrue.Entitlements.ReferenceScenarios do
           raise ArgumentError, "invalid action order"
 
         utc!(action["at"], "action clock")
-        %{kind: action["kind"], order: action["order"], at: action["at"]}
+        parsed = %{kind: action["kind"], order: action["order"], at: action["at"]}
+
+        if Map.has_key?(action, "operation"),
+          do: Map.put(parsed, :operation, operation!(action["operation"], action["kind"])),
+          else: parsed
       end)
 
     ordered_actions?(parsed) || raise ArgumentError, "unordered actions"
@@ -143,6 +180,41 @@ defmodule Accrue.Entitlements.ReferenceScenarios do
   end
 
   defp actions!(_), do: raise(ArgumentError, "missing actions")
+
+  defp operation!(value, kind)
+       when is_map(value) and kind in ["apple_verified_purchase", "stripe_verified_purchase"] do
+    require_keys!(value, @operation_keys, "operation")
+    rail = value["rail"]
+    valid_ids = @operation_keys -- ["rail", "environment", "provider_order", "offline_action"]
+
+    if rail in ["apple", "stripe"] and
+         ((kind == "apple_verified_purchase" and rail == "apple") or
+            (kind == "stripe_verified_purchase" and rail == "stripe")) and
+         value["environment"] in ["production", "sandbox"] and
+         Enum.all?(valid_ids, &valid_id?(value[&1])) and
+         is_integer(value["provider_order"]) and value["provider_order"] > 0 and
+         value["offline_action"] in ["read_downloaded_lesson", "download_lesson"] do
+      %Operation{
+        rail: source_atom!(rail),
+        environment: String.to_existing_atom(value["environment"]),
+        logical_product: value["logical_product"],
+        provider_product_id: value["provider_product_id"],
+        provider_event_id: value["provider_event_id"],
+        provider_transaction_id: value["provider_transaction_id"],
+        provider_lineage_id: value["provider_lineage_id"],
+        provider_order: value["provider_order"],
+        offline_vector: value["offline_vector"],
+        offline_action: offline_operation_action!(value["offline_action"])
+      }
+    else
+      raise ArgumentError, "invalid operation"
+    end
+  end
+
+  defp operation!(_, _), do: raise(ArgumentError, "invalid operation")
+
+  defp offline_operation_action!("read_downloaded_lesson"), do: :read_downloaded_lesson
+  defp offline_operation_action!("download_lesson"), do: :download_lesson
 
   defp expected!(value) when is_map(value) do
     require_keys!(value, @expected_keys, "expected")
