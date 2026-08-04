@@ -297,7 +297,7 @@ Plans:
   4. Automated repair and runbooks address missed Apple notifications, history cursor recovery, outages, conflicts, duplicate charges, stale devices, signing-key compromise, and reconciliation backlog without routine account reconstruction.
   5. Public guides, examples, capability/compatibility material, App Review guidance, release notes, threat model, watchlist, and conformance gates state one additive contract and its explicit v1.59 limits.
 
-**Plans**: 5 plans
+**Plans**: 6 plans
 
 Plans:
 
@@ -316,7 +316,11 @@ Plans:
 
 **Wave 4** *(blocked on 220-03 and 220-04 completion)*
 
-- [ ] 220-05-PLAN.md — Publish the compact adopter recipe, App Review/security material, runbooks, release notes, and coordinated gates.
+- [ ] 220-05-PLAN.md — Publish the compact adopter recipe, App Review/security material, runbooks, release notes, and watchlist updates.
+
+**Wave 5** *(blocked on 220-05 completion)*
+
+- [ ] 220-06-PLAN.md — Coordinate public-contract, adoption, and release drift gates with non-vacuous failure evidence.
 
 ## Progress
 
