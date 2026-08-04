@@ -5,15 +5,15 @@ milestone_name: Account-Scoped Multi-Rail & Offline Entitlements
 current_phase: 220
 current_phase_name: first-adopter-proof-and-release-gates
 status: executing
-stopped_at: Completed 220-01-PLAN.md
-last_updated: "2026-08-04T15:35:45.772Z"
+stopped_at: Completed 220-02-PLAN.md
+last_updated: "2026-08-04T15:43:48.980Z"
 last_activity: 2026-08-04
 last_activity_desc: Phase 220 execution started
 progress:
   total_phases: 6
   completed_phases: 5
   total_plans: 53
-  completed_plans: 48
+  completed_plans: 49
   percent: 83
 ---
 
@@ -30,7 +30,7 @@ See: `.planning/PROJECT.md` (updated 2026-08-01 after completing Phase 215)
 ## Current Position
 
 Phase: 220 (first-adopter-proof-and-release-gates) — EXECUTING
-Plan: 2 of 6
+Plan: 3 of 6
 Status: Ready to execute
 Last activity: 2026-08-04 — Phase 220 execution started
 
@@ -418,6 +418,7 @@ Coverage: 22/22 v1.51 requirements mapped (each REQ-ID → exactly one phase). D
 | Phase 219-offline-study-contract P04 | 6m | 2 tasks | 8 files |
 | Phase 219-offline-study-contract P05 | 25m | 2 tasks | 6 files |
 | Phase 220-first-adopter-proof-and-release-gates P01 | 15m | 2 tasks | 6 files |
+| Phase 220 P02 | 9min | 2 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -827,6 +828,7 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - [Phase ?]: Locked issuance uses account/device FOR UPDATE and canonical Snapshot reads.
 - [Phase ?]: Unbounded offline proofs retain their verification key indefinitely.
 - [Phase ?]: Reference scenarios are strict data-only contracts with closed evidence lanes.
+- [Phase ?]: Closed entitlement diagnostics expose only normalized state, bounded ages, and opaque correlation; host authorization resolves the account before the call.
 
 ### Pending Todos
 
@@ -978,8 +980,8 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 
 ## Session Continuity
 
-Last session: 2026-08-04T15:35:45.754Z
-Stopped at: Completed 220-01-PLAN.md
+Last session: 2026-08-04T15:43:48.968Z
+Stopped at: Completed 220-02-PLAN.md
 Resume file: None
 
 ## Operator Next Steps

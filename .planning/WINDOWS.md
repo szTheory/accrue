@@ -1,10 +1,10 @@
 ---
 schema_version: 1
-open_count: 4
+open_count: 5
 waived_count: 0
 fixed_count: 0
-total_count: 4
-last_updated: 2026-08-03T01:52:16.732Z
+total_count: 5
+last_updated: 2026-08-04T15:43:48.620Z
 ---
 
 # Broken Windows Ledger
@@ -19,6 +19,7 @@ last_updated: 2026-08-03T01:52:16.732Z
 | 2 | 215 | deviation | examples/crosswake_tracer/Tests/AccrueOfflineClientTests/CapabilityReportTests.swift |  | Corrected stale capability case name in the tracer test. | open |  | 2026-08-01T01:55:48.046Z |  |
 | 3 | 215 | deviation | examples/crosswake_tracer/Sources/AccrueOfflineClient/AccrueOfflineClient.swift |  | Reducer now requires every declared evidence lane before reporting proven. | open |  | 2026-08-01T01:55:48.106Z |  |
 | 4 | 217 | unrun-verify | accrue/test/accrue/docs/package_docs_verifier_test.exs |  | mix test.all could not start because unrelated shared dirty file is not formatted | open |  | 2026-08-03T01:52:16.732Z |  |
+| 5 | 220 | unrun-verify | examples/accrue_host/test/accrue_host/billing_facade_test.exs | 160 | Full mix verify could not complete because the pre-existing fake subscription uniqueness test failed. | open |  | 2026-08-04T15:43:48.620Z |  |
 
 ````json
 [
@@ -68,6 +69,18 @@ last_updated: 2026-08-03T01:52:16.732Z
     "status": "open",
     "reason": "",
     "recorded_at": "2026-08-03T01:52:16.732Z",
+    "resolved_at": null
+  },
+  {
+    "id": 5,
+    "kind": "unrun-verify",
+    "phase": "220",
+    "file": "examples/accrue_host/test/accrue_host/billing_facade_test.exs",
+    "line": 160,
+    "description": "Full mix verify could not complete because the pre-existing fake subscription uniqueness test failed.",
+    "status": "open",
+    "reason": "",
+    "recorded_at": "2026-08-04T15:43:48.620Z",
     "resolved_at": null
   }
 ]

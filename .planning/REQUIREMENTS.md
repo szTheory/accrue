@@ -49,7 +49,7 @@
 
 - [x] **PROOF-01**: An anonymized Phoenix/Crosswake reference host proves Apple purchase to web login and Stripe purchase to iOS login produce coherent access for the same account without manual reconciliation.
 - [x] **PROOF-02**: The reference host deterministically proves duplicate-purchase prevention, extended stale-offline study, restricted value expansion, reconnect, refund/revocation, survivor grants, device replacement, deny tombstones, clock rollback, and key rotation without live-store credentials in merge CI.
-- [ ] **PROOF-03**: A solo operator can diagnose account snapshot, source rail/environment/provenance, provider state, reconciliation freshness, account revision, purchase eligibility, device/proof horizon, and quarantine/retry state without raw transaction data or PII.
+- [x] **PROOF-03**: A solo operator can diagnose account snapshot, source rail/environment/provenance, provider state, reconciliation freshness, account revision, purchase eligibility, device/proof horizon, and quarantine/retry state without raw transaction data or PII.
 - [ ] **PROOF-04**: Automatic repair and runbooks cover missed Apple notifications, history cursor recovery, provider outages, ownership conflicts, duplicate charges, stale devices, signing-key rotation/compromise, and reconciliation backlog without routine manual account reconstruction.
 - [ ] **PROOF-05**: Public guides, examples, capability matrices, compatibility notes, App Review guidance, release notes, threat model, watchlist, and conformance gates describe one additive multi-rail/offline contract and its explicit v1.59 limits.
 
@@ -109,7 +109,7 @@ Filled during roadmap creation. Every v1.59 requirement must map to exactly one 
 | OFF-06 | Phase 219 | Complete |
 | PROOF-01 | Phase 220 | Complete |
 | PROOF-02 | Phase 220 | Complete |
-| PROOF-03 | Phase 220 | Pending |
+| PROOF-03 | Phase 220 | Complete |
 | PROOF-04 | Phase 220 | Pending |
 | PROOF-05 | Phase 220 | Pending |
 
