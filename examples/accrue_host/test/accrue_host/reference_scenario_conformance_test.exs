@@ -47,12 +47,12 @@ defmodule AccrueHost.ReferenceScenarioConformanceTest do
   test "the host drives Apple-to-web through its configured Repo" do
     scenario = ReferenceScenarios.fetch!("apple_purchase_to_web_login")
     account = account!("host-apple-web")
-    operation = operation!(scenario)
+    payload = payload!(scenario)
 
     assert {:ok, _} =
              Accrue.Entitlements.observe_apple_evidence(
                account,
-               apple_evidence(account, operation)
+               apple_evidence(account, payload)
              )
 
     assert_host_result(scenario, account, :stripe, "price_pro")
@@ -62,12 +62,12 @@ defmodule AccrueHost.ReferenceScenarioConformanceTest do
   test "the host drives Stripe-to-iOS through its configured Repo" do
     scenario = ReferenceScenarios.fetch!("stripe_purchase_to_ios_login")
     account = account!("host-stripe-ios")
-    operation = operation!(scenario)
+    payload = payload!(scenario)
 
     assert {:ok, observation} =
              Observation.insert_idempotently(
                AccrueHost.Repo,
-               observation_attrs(account, operation)
+               observation_attrs(account, payload)
              )
 
     assert {:ok, _} = Projector.project(observation)
@@ -86,8 +86,17 @@ defmodule AccrueHost.ReferenceScenarioConformanceTest do
     assert other_snapshot.plans == []
   end
 
-  defp operation!(scenario),
-    do: scenario.actions |> Enum.find(&Map.has_key?(&1, :operation)) |> Map.fetch!(:operation)
+  defp payload!(scenario) do
+    scenario.actions
+    |> Enum.find(
+      &match?(
+        %{command: %{kind: kind}}
+        when kind in ["apple_verified_purchase", "stripe_verified_purchase"],
+        &1
+      )
+    )
+    |> then(& &1.command.payload)
+  end
 
   defp account!(owner_id),
     do: Account.fetch_or_create(AccrueHost.Repo, "reference_host", owner_id) |> elem(1)
