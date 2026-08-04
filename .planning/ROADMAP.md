@@ -297,7 +297,26 @@ Plans:
   4. Automated repair and runbooks address missed Apple notifications, history cursor recovery, outages, conflicts, duplicate charges, stale devices, signing-key compromise, and reconciliation backlog without routine account reconstruction.
   5. Public guides, examples, capability/compatibility material, App Review guidance, release notes, threat model, watchlist, and conformance gates state one additive contract and its explicit v1.59 limits.
 
-**Plans**: TBD
+**Plans**: 5 plans
+
+Plans:
+
+**Wave 1**
+
+- [ ] 220-01-PLAN.md — Trace one shared data-only scenario through real core, host, and Swift consumers, then cover the complete deterministic proof boundary.
+
+**Wave 2** *(blocked on 220-01 completion)*
+
+- [ ] 220-02-PLAN.md — Publish and render one privacy-bounded, revision-consistent entitlement diagnostic.
+- [ ] 220-04-PLAN.md — Generate exact capability/limits facts and block evidence-lane or release-contract drift in CI.
+
+**Wave 3** *(blocked on 220-02 completion)*
+
+- [ ] 220-03-PLAN.md — Deliver distinct lock-safe repair actions, deterministic drills, and confirmed operator controls.
+
+**Wave 4** *(blocked on 220-03 and 220-04 completion)*
+
+- [ ] 220-05-PLAN.md — Publish the compact adopter recipe, App Review/security material, runbooks, release notes, and coordinated gates.
 
 ## Progress
 
