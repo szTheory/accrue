@@ -17,6 +17,13 @@ defmodule Accrue.Docs.V159ReleaseContractTest do
     assert release_output =~ "verify_release_contract: v1.59 OK"
   end
 
+  test "the adoption gate directly owns the canonical multi-rail release guide" do
+    script = File.read!(@adoption_script)
+
+    assert script =~ "accrue/guides/multi-rail-offline-release.md"
+    assert script =~ "no duplicate host guide"
+  end
+
   test "v1.59 release gate rejects inflated runtime claims in an isolated guide copy" do
     tmp_dir = release_fixture_dir!()
     seed_v159_fixture!(tmp_dir)
