@@ -15,6 +15,26 @@ This page is the **story** of what shipped—not a commit list. For every line i
 
 Accrue follows a **stable-core / demand-driven expansion** posture. Release notes are a change story, not the static support contract. For canonical posture and boundaries, use [`maturity-and-maintenance.md`](maturity-and-maintenance.md), [`first_hour.md`](first_hour.md), and [`jobs_to_be_done.md`](jobs_to_be_done.md#scope-and-maturity).
 
+## v1.59 release contract
+
+v1.59 documents an additive multi-rail and offline-study contract around the
+existing billing surface. Legacy hosts remain compatible. Apple subscriptions
+remain externally managed, and Accrue does not transfer, merge, migrate, refund,
+cancel, or prorate lifecycle state across rails. A stale offline lease preserves
+downloaded study and local progress only; expansion waits for reconnect.
+
+The exact support and privacy facts live in the generated
+[capability and limits matrix](https://github.com/szTheory/accrue/blob/main/examples/accrue_host/docs/capability-limits-matrix.md).
+The first-adopter procedure, App Review boundary, threat review, and release
+checklist live in the [v1.59 multi-rail and offline release guide](multi-rail-offline-release.md).
+Deterministic account-projection conformance is merge-blocking. Crosswake mobile
+runtime feasibility remains `feasibility_blocked` until its bridge and physical
+device evidence exists; browser and advisory evidence do not promote that claim.
+
+Release evidence and support records use bounded diagnostics and safe
+correlations. They never include raw transaction data, signed proof material,
+tokens, credentials, provider payloads, or PII.
+
 ## accrue
 
 ### 1.5.0

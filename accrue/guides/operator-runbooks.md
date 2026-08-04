@@ -126,6 +126,120 @@ this flow.
 - **Full ops tuple list and one-line first actions** live under **`## Operator runbooks (first actions)`** in [`telemetry.md`](telemetry.md) — bookmark that table for **every** RUN-01 class, including `:connect_account_deauthorized`, `:connect_payout_failed`, `:dunning_exhaustion`, `:charge_failed`, `:incomplete_expired`, `:pdf_adapter_unavailable`, replay (`:webhook_dlq, :replay`), and prune (`:webhook_dlq, :prune`).
 - **This file** adds **depth** for the four classic mini-playbooks above plus the Braintree metered-billing recovery sequence.
 
+## v1.59 multi-rail and offline runbooks
+
+These procedures use the bounded actions in `Accrue.Entitlements.Repair`. The
+host authorizes every action and supplies the account, actor, reason, operation
+ID, and bounded target. Start with a read-only diagnostic and a dry run where
+the action supports it. Record only the scenario/runbook ID, safe correlation,
+actor, reason, and before/after revision. Stop when authorization, target
+identity, provider health, or the post-action convergence check is uncertain.
+
+No procedure here may automatically reconstruct an account, transfer or merge
+ownership, refund, cancel, migrate, prorate, or otherwise mutate provider or
+financial state. Escalate those decisions to the host's approved finance or
+product process.
+
+### `V159-RUN-MISSED-NOTIFICATION` — missed notification recovery
+
+1. Confirm `apple_purchase_to_web_login` or the affected scenario ID, account
+   revision, and safe lineage correlation from the bounded diagnostic.
+2. An authorized operator records the reason and runs a dry-run of
+   `retry_missed_notification` against that one lineage/environment target.
+3. If the dry run is correct, queue the named action once and wait for the
+   diagnostic's next revision; stop on an ambiguous lineage or provider error.
+4. Record the post-convergence revision. Do not replay raw notification data or
+   alter a provider purchase.
+
+### `V159-RUN-CURSOR` — history cursor recovery
+
+1. Confirm the affected lineage, environment, cursor age, and the
+   `interrupted_resume` or related scenario ID.
+2. An authorized operator dry-runs `recover_history_cursor` for the bounded
+   lineage/environment target, then confirms the recorded reason.
+3. Run the action only after confirming it resumes a known cursor; stop if a
+   cursor would be guessed, rewound without evidence, or crosses environments.
+4. Verify the new diagnostic revision and record the safe correlation.
+
+### `V159-RUN-PROVIDER-OUTAGE` — provider outage or rate limit
+
+1. Confirm the provider freshness state, retry age, and safe correlation; do
+   not copy provider payloads or credentials into the incident.
+2. Hold new issuance when key or provider health is unsafe, preserve the last
+   known canonical snapshot, and use bounded retry/backoff.
+3. An authorized operator dry-runs `retry_provider_check` for one lineage and
+   environment, then queues it when the provider has recovered.
+4. Stop on repeated rate limits or an unknown response; record the post-action
+   revision and open `V159-WL-APPLE-API` or `V159-WL-STRIPE` reassessment.
+
+### `V159-RUN-OWNERSHIP-CONFLICT` — ownership conflict containment
+
+1. Confirm the bounded diagnostic state and `survivor_grant` scenario; retain
+   the safe correlation and current revision.
+2. An authorized operator dry-runs `review_ownership_conflict` and records the
+   actor and reason.
+3. Submit the review action only to contain and audit the conflict. Stop when a
+   resolution would require account reconstruction, transfer, or merge.
+4. Verify the review disposition and route any ownership decision to the host's
+   approved product/support process.
+
+### `V159-RUN-DUPLICATE` — duplicate-charge escalation
+
+1. Confirm `duplicate_purchase_prevention`, the bounded diagnostic, and a safe
+   correlation; never place charge or transaction material in the ticket.
+2. An authorized operator dry-runs `escalate_duplicate_charge`, then records
+   the actor, reason, and current revision.
+3. Submit only the escalation action and stop. It does not refund, cancel,
+   adjust, or mutate a provider charge.
+4. Verify the escalation disposition and hand finance resolution to the host's
+   approved process. Reassess `V159-WL-SUPPORT` when the trigger recurs.
+
+### `V159-RUN-DEVICE` — stale or revoked device replacement
+
+1. Confirm `device_replacement` or `refund_revocation`, the device state, safe
+   correlation, and canonical revision from the bounded diagnostic.
+2. An authorized operator dry-runs `replace_revoked_device`; it accepts no
+   proof material, token, or credential.
+3. Give the learner the literal next action to reconnect and register the
+   replacement device. Stop if a stale state would expand access before
+   reconnect.
+4. Verify the new revision and retain only the redacted outcome.
+
+### `V159-RUN-KEY-ROTATION` — signing-key compromise or rotation
+
+1. Treat a suspected compromise as a security incident. Record the affected key
+   set identifier and safe correlation, never key material or signed proof.
+2. Pause issuance where the host cannot verify safe key access, then have an
+   authorized operator dry-run `rotate_signing_keys` for the bounded key-set
+   target.
+3. Run the named action after the host's key-management approval; stop on any
+   algorithm fallback, unverifiable proof, or unknown key state.
+4. Verify post-rotation convergence, run the relevant golden vectors, and open
+   the dated `V159-WL-SECURITY` reassessment.
+
+### `V159-RUN-BACKLOG` — reconciliation backlog drain
+
+1. Confirm backlog age, queue health, limit, and safe correlation from the
+   bounded diagnostic; do not inspect or publish worker arguments.
+2. An authorized operator dry-runs `drain_reconciliation_backlog` with a small,
+   bounded limit and recorded reason.
+3. Run the action only while provider and queue health are stable. Stop on a
+   growing backlog, rate limit, or post-action convergence failure.
+4. Verify the revision and backlog age after each bounded batch. Open
+   `V159-WL-HOST` when host queue or resource changes are implicated.
+
+### `V159-RUN-APP-REVIEW`, `V159-RUN-PRIVACY`, and `V159-RUN-ROADMAP`
+
+- **App Review:** record the storefront change or rejection, review only
+  supported in-app purchase/restore/management wording, obtain product/legal
+  approval, and stop before publishing an external-purchase or runtime claim.
+- **Privacy:** record the jurisdiction, DSR, retention proposal, or redaction
+  finding; confirm bounded diagnostic access and remove sensitive evidence
+  before release. Stop until the host's privacy owner signs the reassessment.
+- **Roadmap:** when Android or a second adopter triggers Google Play work,
+  create a dated proposal for a separate rail-policy research milestone. Do not
+  add Play parity opportunistically.
+
 ## See also
 
 - [`guides/telemetry.md`](telemetry.md) — ops catalog SSOT and **Operator runbooks (first actions)** table

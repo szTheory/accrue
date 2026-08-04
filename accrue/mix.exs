@@ -156,7 +156,10 @@ defmodule Accrue.MixProject do
       logo: "priv/ex_doc/accrue-mark.svg",
       favicon: "priv/ex_doc/favicon.svg",
       extras: ["README.md" | Path.wildcard("guides/*.md")],
-      groups_for_extras: [Guides: Path.wildcard("guides/*.md")],
+      groups_for_extras: [
+        "v1.59 multi-rail and offline": ["guides/multi-rail-offline-release.md"],
+        Guides: Path.wildcard("guides/*.md")
+      ],
       before_closing_body_tag: &before_closing_body_tag/1,
       skip_undefined_reference_warnings_on: &skip_undefined_reference_warning?/1
     ]
