@@ -22,6 +22,11 @@ defmodule Accrue.Entitlements.Offline.SourceCoordinator do
               :ok | {:error, atom()}
 
   @spec validate([SourceStatus.t()]) :: :ok | {:error, :invalid_source_status}
+  # An empty schedule is a resolved schedule: reconnect must be able to issue when
+  # no entitlement source is currently due.  Non-empty lists still go through the
+  # registry and shape checks below.
+  def validate([]), do: :ok
+
   def validate(statuses) when is_list(statuses) do
     with {:ok, _} <- Registry.validate(Enum.map(statuses, & &1.source)),
          true <- Enum.all?(statuses, &valid_status?/1),
