@@ -17,18 +17,35 @@ defmodule Accrue.Entitlements.Offline.Issuer do
 
   @freshness_seconds 30 * 24 * 60 * 60
 
-  def issue(%Account{id: id}, %Request{account_id: id} = request, opts) do
+  # Internal reconnect seam. The caller must have established host account
+  # authentication and consumed a one-time, device-bound proof-of-possession
+  # challenge; this is not a public issuance API.
+  @doc false
+  @spec issue_after_admission(Account.t(), Request.t(), keyword()) ::
+          {:ok, Result.t()} | {:error, atom()}
+  def issue_after_admission(%Account{id: id}, %Request{account_id: id} = request, opts)
+      when is_list(opts) do
     repo = Keyword.get(opts, :repo, Accrue.Repo.repo())
 
-    case repo.transaction(fn -> issue_in_transaction(repo, request, opts) end) do
-      {:ok, {:ok, result}} -> {:ok, result}
-      {:ok, {:error, reason}} -> {:error, reason}
-      {:error, reason} when is_atom(reason) -> {:error, reason}
-      _ -> {:error, :issuance_failed}
-    end
+    Accrue.Telemetry.span_private(
+      [:accrue, :entitlements, :offline, :issue],
+      %{action: :offline_issue, disposition: :admitted},
+      fn ->
+        case repo.transaction(fn -> issue_in_transaction(repo, request, opts) end) do
+          {:ok, {:ok, result}} -> {:ok, result}
+          {:ok, {:error, reason}} -> {:error, reason}
+          {:error, reason} when is_atom(reason) -> {:error, reason}
+          _ -> {:error, :issuance_failed}
+        end
+      end
+    )
   end
 
-  def issue(_, _, _), do: {:error, :invalid_request}
+  def issue_after_admission(_, _, _), do: {:error, :invalid_request}
+
+  @doc false
+  @spec issue(Account.t(), Request.t(), keyword()) :: {:error, :unauthorized}
+  def issue(_, _, _), do: {:error, :unauthorized}
 
   def issue_in_transaction(repo, %Request{} = request, opts) do
     account = repo.one(from(a in Account, where: a.id == ^request.account_id, lock: "FOR UPDATE"))

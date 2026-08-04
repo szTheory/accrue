@@ -22,14 +22,27 @@ defmodule Accrue.Entitlements.Offline do
 
   def reconnect(_, _, _), do: {:error, :invalid_request}
 
+  @doc """
+  Rejects direct proof issuance.
+
+  A compact entitlement proof is minted only after the authenticated reconnect
+  flow has verified a one-time device proof-of-possession. Hosts must use
+  `reconnect/3`; accepting an account and device id here would make either an
+  allow proof or a deny tombstone forgeable without that admission boundary.
+  """
   @spec issue(Accrue.Entitlements.Account.t(), Issuer.Request.t(), keyword()) ::
-          {:ok, Issuer.Result.t()} | {:error, atom()}
+          {:error, :unauthorized}
   def issue(account, request, opts \\ [])
 
-  def issue(account, %Issuer.Request{} = request, opts),
-    do: Issuer.issue(account, request, opts)
+  def issue(%Accrue.Entitlements.Account{}, %Issuer.Request{}, opts) when is_list(opts) do
+    Accrue.Telemetry.span_private(
+      [:accrue, :entitlements, :offline, :issue],
+      %{action: :offline_issue, disposition: :rejected, reason: :unauthorized},
+      fn -> {:error, :unauthorized} end
+    )
+  end
 
-  def issue(_, _, _), do: {:error, :invalid_request}
+  def issue(_, _, _), do: {:error, :unauthorized}
 
   @spec challenge(Accrue.Entitlements.Account.t(), String.t(), keyword()) ::
           {:ok, Challenge.Value.t()} | {:error, :unauthorized | :invalid_request}
