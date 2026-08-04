@@ -483,7 +483,7 @@ contract. It is deliberately short: the generated matrix owns exact support
 cells; this guide explains how to evaluate and operate the contract.
 
 1. Start with the anonymized reference-host recipe in
-   [`examples/accrue_host/docs/adoption-proof-matrix.md`](../../examples/accrue_host/docs/adoption-proof-matrix.md)
+   [`examples/accrue_host/docs/adoption-proof-matrix.md`](https://github.com/szTheory/accrue/blob/main/examples/accrue_host/docs/adoption-proof-matrix.md)
    and run its local `mix verify` proof.
 2. From the repository root, run the deterministic contract check:
 
@@ -492,7 +492,7 @@ cells; this guide explains how to evaluate and operate the contract.
    ```
 
 3. Read the generated
-   [`capability and limits matrix`](../../examples/accrue_host/docs/capability-limits-matrix.md)
+   [`capability and limits matrix`](https://github.com/szTheory/accrue/blob/main/examples/accrue_host/docs/capability-limits-matrix.md)
    for the exact supported, unsupported, privacy, and merge-authority cells.
 4. If a scenario does not converge, record its stable scenario ID and follow the
    matching procedure in [Operator runbooks](operator-runbooks.md#v159-multi-rail-and-offline-runbooks).
