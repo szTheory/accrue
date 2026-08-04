@@ -40,11 +40,27 @@ defmodule Accrue.Entitlements.Offline do
     Accrue.Telemetry.span_private(
       [:accrue, :entitlements, :offline, :challenge],
       %{action: :offline_challenge, outcome: :requested},
-      fn -> create_challenge(account, installation_id, opts) end
+      fn -> create_challenge(account, installation_id, :registration, opts) end
     )
   end
 
   def challenge(_, _, _), do: {:error, :invalid_request}
+
+  @doc "Creates a one-time challenge for an authenticated device reconnect."
+  @spec reconnect_challenge(Accrue.Entitlements.Account.t(), String.t(), keyword()) ::
+          {:ok, Challenge.Value.t()} | {:error, :unauthorized | :invalid_request}
+  def reconnect_challenge(account, installation_id, opts \\ [])
+
+  def reconnect_challenge(%Accrue.Entitlements.Account{} = account, installation_id, opts)
+      when is_binary(installation_id) and is_list(opts) do
+    Accrue.Telemetry.span_private(
+      [:accrue, :entitlements, :offline, :reconnect_challenge],
+      %{action: :offline_reconnect_challenge, outcome: :requested},
+      fn -> create_challenge(account, installation_id, :reconnect, opts) end
+    )
+  end
+
+  def reconnect_challenge(_, _, _), do: {:error, :invalid_request}
 
   @spec register_device(Accrue.Entitlements.Account.t(), Registration.Request.t(), keyword()) ::
           {:ok, Registration.Result.t()} | {:error, atom()}
@@ -149,8 +165,8 @@ defmodule Accrue.Entitlements.Offline do
     _ -> {:error, :config_invalid}
   end
 
-  defp create_challenge(account, installation_id, opts) do
-    if authorized?(opts, account, :offline_challenge) do
+  defp create_challenge(account, installation_id, purpose, opts) do
+    if authorized?(opts, account, challenge_action(purpose)) do
       now = Keyword.get(opts, :now, DateTime.utc_now())
       expires_at = DateTime.add(now, Keyword.get(opts, :challenge_ttl_seconds, 300), :second)
       nonce = Base.url_encode64(:crypto.strong_rand_bytes(32), padding: false)
@@ -161,7 +177,7 @@ defmodule Accrue.Entitlements.Offline do
                account_id: account.id,
                installation_id: installation_id,
                nonce_digest: digest(nonce),
-               purpose: :registration,
+               purpose: purpose,
                expires_at: expires_at
              })
            ) do
@@ -181,6 +197,9 @@ defmodule Accrue.Entitlements.Offline do
       {:error, :unauthorized}
     end
   end
+
+  defp challenge_action(:registration), do: :offline_challenge
+  defp challenge_action(:reconnect), do: :offline_reconnect_challenge
 
   defp authorized?(opts, account, action) do
     case Keyword.get(opts, :authorize) do

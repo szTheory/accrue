@@ -3,7 +3,7 @@ defmodule Accrue.Entitlements.OfflineReconnectTest do
 
   alias Accrue.Entitlements.{Account, Device, Observation, Projector}
   alias Accrue.Entitlements.Offline
-  alias Accrue.Entitlements.Offline.{Issuance, Issuer}
+  alias Accrue.Entitlements.Offline.{Issuance, Issuer, Reconnect, SourceCoordinator}
   alias Accrue.TestRepo
 
   @now ~U[2026-08-04 01:00:00.000000Z]
@@ -26,6 +26,16 @@ defmodule Accrue.Entitlements.OfflineReconnectTest do
 
     @impl true
     def public_keys(opts), do: {:ok, [Keyword.fetch!(opts, :public_key)]}
+  end
+
+  defmodule NoDueSources do
+    @behaviour SourceCoordinator
+    @impl true
+    def due_sources(_, _, _), do: {:ok, []}
+    @impl true
+    def refresh(_, status, _, _), do: {:ok, status}
+    @impl true
+    def enqueue_repair(_, _, _, _), do: :ok
   end
 
   setup do
@@ -71,9 +81,15 @@ defmodule Accrue.Entitlements.OfflineReconnectTest do
       |> Map.merge(%{"alg" => "ES256", "use" => "sig"})
 
     account = account!("issuer")
-    device = device!(account, "install-219-issuer")
+    {device, device_key} = device!(account, "install-219-issuer")
 
-    %{account: account, device: device, signing_key: signing_key, public_key: public_key}
+    %{
+      account: account,
+      device: device,
+      device_key: device_key,
+      signing_key: signing_key,
+      public_key: public_key
+    }
   end
 
   @tag :issuance
@@ -121,6 +137,41 @@ defmodule Accrue.Entitlements.OfflineReconnectTest do
 
     assert {:ok, %{state: :denied, reason: :signed_denial}} =
              Offline.verify(compact, verification_context(ctx))
+  end
+
+  test "a public reconnect challenge completes authenticated reconnect issuance", ctx do
+    project_grant!(ctx.account)
+
+    opts = issuer_opts(ctx) ++ [source_coordinator: NoDueSources, authorize: fn _, _ -> true end]
+
+    assert {:ok, %{purpose: :reconnect} = challenge} =
+             Offline.reconnect_challenge(ctx.account, ctx.device.installation_id, opts)
+
+    signature =
+      reconnect_signing_input(
+        ctx.account.id,
+        ctx.device.installation_id,
+        challenge.id,
+        challenge.nonce,
+        "reconnect-idempotency"
+      )
+      |> then(fn input ->
+        {_, private_key} = JOSE.JWK.to_key(ctx.device_key)
+        :public_key.sign(input, :sha256, private_key)
+      end)
+
+    request = %Reconnect.Request{
+      installation_id: ctx.device.installation_id,
+      challenge_id: challenge.id,
+      nonce: challenge.nonce,
+      nonce_signature: signature,
+      idempotency_key: "reconnect-idempotency"
+    }
+
+    assert {:ok, %{disposition: :issued, proof: proof, due_source_count: 0}} =
+             Offline.reconnect(ctx.account, request, opts)
+
+    assert is_binary(proof)
   end
 
   @tag :issuance
@@ -190,8 +241,29 @@ defmodule Accrue.Entitlements.OfflineReconnectTest do
         })
       )
 
-    device
+    {device, key}
   end
+
+  defp issuer_opts(ctx) do
+    [
+      repo: TestRepo,
+      key_provider: SigningProvider,
+      signing_key: ctx.signing_key,
+      public_key: ctx.public_key,
+      issuer: "accrue.test.offline",
+      audience: "accrue-offline-client",
+      now: @now
+    ]
+  end
+
+  defp reconnect_signing_input(account, installation, challenge, nonce, key) do
+    ["v1.59", "reconnect", account, installation, challenge, nonce, digest(key)]
+    |> Enum.map_join(fn value ->
+      <<byte_size(value)::unsigned-big-integer-size(32), value::binary>>
+    end)
+  end
+
+  defp digest(value), do: :crypto.hash(:sha256, value) |> Base.url_encode64(padding: false)
 
   defp project_grant!(account) do
     {:ok, observation} =
