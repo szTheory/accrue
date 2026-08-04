@@ -3,7 +3,8 @@ defmodule Accrue.Entitlements.OfflineRegistrationTest do
 
   alias Accrue.Entitlements.Account
   alias Accrue.Entitlements.Device
-  alias Accrue.Entitlements.Offline.{Challenge, Issuance}
+  alias Accrue.Entitlements.Offline
+  alias Accrue.Entitlements.Offline.{Challenge, Issuance, Registration}
   alias Accrue.TestRepo
 
   @public_jwk %{
@@ -138,6 +139,77 @@ defmodule Accrue.Entitlements.OfflineRegistrationTest do
     assert %{nonce_digest: ["has already been taken"]} = errors_on(duplicate)
   end
 
+  test "authorized proof-of-possession registration consumes one nonce and coalesces exact idempotent replay" do
+    account = account!("proof-of-possession")
+    device_key = JOSE.JWK.generate_key({:ec, "P-256"})
+
+    public_jwk =
+      device_key |> JOSE.JWK.to_public_map() |> elem(1) |> Map.take(["kty", "crv", "x", "y"])
+
+    authorize = fn %Account{id: account_id}, action ->
+      account_id == account.id and action in [:offline_challenge, :offline_registration]
+    end
+
+    assert {:ok, %Challenge.Value{} = value} =
+             Offline.challenge(account, "install-219-pop",
+               authorize: authorize,
+               now: ~U[2026-08-03 04:00:00Z]
+             )
+
+    idempotency_key = "idem-219-pop"
+
+    request = %Registration.Request{
+      installation_id: "install-219-pop",
+      device_public_jwk: public_jwk,
+      challenge_id: value.id,
+      nonce_signature:
+        sign(
+          device_key,
+          signing_input(account.id, "install-219-pop", value.id, value.nonce, idempotency_key)
+        ),
+      idempotency_key: idempotency_key
+    }
+
+    assert {:ok,
+            %Registration.Result{state: :active, installation_id: "install-219-pop"} = result} =
+             Offline.register_device(account, request,
+               authorize: authorize,
+               now: ~U[2026-08-03 04:01:00Z]
+             )
+
+    assert result.key_thumbprint == Device.thumbprint(public_jwk)
+
+    assert %Challenge{consumed_at: %DateTime{}, nonce_digest: nonce_digest} =
+             TestRepo.get!(Challenge, value.id)
+
+    refute nonce_digest == value.nonce
+
+    assert %Device{public_jwk: ^public_jwk} =
+             TestRepo.get_by!(Device, account_id: account.id, installation_id: "install-219-pop")
+
+    assert {:ok, ^result} =
+             Offline.register_device(account, request,
+               authorize: authorize,
+               now: ~U[2026-08-03 04:01:00Z]
+             )
+
+    assert {:error, :unauthorized} =
+             Offline.challenge(account, "install-219-unauthorized",
+               authorize: fn _, _ -> false end
+             )
+  end
+
+  test "installer copies the offline proof-state migration exactly once" do
+    migration =
+      Path.join([
+        __DIR__,
+        "../../../priv/repo/migrations/20260803040000_create_accrue_offline_proof_state.exs"
+      ])
+
+    assert File.exists?(migration)
+    assert File.read!(migration) =~ "accrue_entitlement_offline_challenges"
+  end
+
   defp account!(suffix) do
     {:ok, account} = Account.fetch_or_create(TestRepo, "user", "owner-219-#{suffix}")
     account
@@ -173,5 +245,19 @@ defmodule Accrue.Entitlements.OfflineRegistrationTest do
                  {:ok, _result} -> flunk("expected #{constraint} to reject direct write")
                end
              end)
+  end
+
+  defp signing_input(account_id, installation_id, challenge_id, nonce, idempotency_key) do
+    digest = digest(idempotency_key)
+
+    ["v1.59", "registration", account_id, installation_id, challenge_id, nonce, digest]
+    |> Enum.map_join(fn value ->
+      <<byte_size(value)::unsigned-big-integer-size(32), value::binary>>
+    end)
+  end
+
+  defp sign(key, input) do
+    {_, private_key} = JOSE.JWK.to_key(key)
+    :public_key.sign(input, :sha256, private_key)
   end
 end
