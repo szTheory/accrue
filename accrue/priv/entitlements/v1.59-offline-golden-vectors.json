@@ -370,7 +370,7 @@
       "expected_state": "invalid",
       "id": "older_issuance",
       "verification_context": {
-        "accepted_disposition": null,
+        "accepted_disposition": "deny",
         "accepted_fresh_until": 0,
         "accepted_iat": 1700000001,
         "accepted_revision": 5,
@@ -472,7 +472,7 @@
       "fault_point": "before_rename",
       "id": "before_replace_crash",
       "verification_context": {
-        "accepted_disposition": null,
+        "accepted_disposition": "deny",
         "accepted_fresh_until": 0,
         "accepted_iat": 0,
         "accepted_revision": 0,
@@ -534,7 +534,7 @@
       "case_id": "invalid_apple_evidence",
       "compact_jws": "not-a-jws",
       "contract_version": "v1.59",
-      "expected_cache_disposition": "deny",
+      "expected_cache_disposition": "allow",
       "expected_claims": {},
       "expected_disposition": "no_grant",
       "expected_next_action": "reconnect_required",

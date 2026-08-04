@@ -574,7 +574,7 @@ defmodule Accrue.Entitlements.DecisionCases.Export do
         "older_issuance",
         "duplicate_provider_event",
         allow,
-        %{base | accepted_revision: 5, accepted_iat: 1_700_000_001},
+        %{base | accepted_revision: 5, accepted_disposition: :deny, accepted_iat: 1_700_000_001},
         "invalid",
         "superseded",
         "reconnect_required",
@@ -607,7 +607,7 @@ defmodule Accrue.Entitlements.DecisionCases.Export do
         "before_replace_crash",
         "atomic_transaction_boundary",
         allow,
-        base,
+        %{base | accepted_disposition: :deny},
         "fresh",
         "ok",
         "none",
@@ -649,7 +649,7 @@ defmodule Accrue.Entitlements.DecisionCases.Export do
             "invalid",
             "malformed",
             "reconnect_required",
-            if(id == "fault_before_replace", do: "deny", else: "allow"),
+            "allow",
             %{}
           )
         end
