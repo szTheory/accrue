@@ -29,6 +29,55 @@ public enum OfflineGoldenVectorVerifier {
         )
     }
 
+    /// Test-only cache admission seam.  The only public cache writer accepts a
+    /// fixture identifier, then verifies its compact proof and binding before it
+    /// reaches the durable replacement boundary.  Runtime integrations must use
+    /// their production verifier to construct the same internal proof value.
+    public static func replaceVerifiedFixture(
+        _ fixtureID: String,
+        in cache: AtomicOfflineCache,
+        fault: AtomicOfflineCache.Fault? = nil
+    ) throws {
+        let fixture = try fixtureData()
+        let corpus = try decodeCorpus(fixture.corpus, source: .baseline)
+        guard let vector = corpus.vectors.first(where: { $0.id == fixtureID }) else {
+            throw GoldenVectorContractError.vectorField(fixtureID, "id")
+        }
+        let context = try Context(vector.verificationContext)
+        let payload = try verify(vector.compactJWS, keys: corpus.publicJwks["keys"] ?? [], context: context)
+        try cache.replace(with: VerifiedOfflineProof(
+            compactProof: Data(vector.compactJWS.utf8),
+            issuedAt: payload.iat,
+            revision: payload.revision,
+            freshUntil: payload.freshUntil,
+            disposition: payload.disposition == .deny ? .deny : .allow
+        ), fault: fault)
+    }
+
+    /// Internal test seam for exercising cache ordering with independently signed
+    /// candidates. It still runs the full JWS/profile/binding verification before
+    /// constructing the opaque admission token; tests cannot inject a disposition,
+    /// revision, issuance time, or freshness value separately from the proof.
+    static func replaceVerifiedTestProof(
+        _ compactProof: String,
+        in cache: AtomicOfflineCache,
+        fault: AtomicOfflineCache.Fault? = nil
+    ) throws {
+        let fixture = try fixtureData()
+        let corpus = try decodeCorpus(fixture.corpus, source: .baseline)
+        guard let baseline = corpus.vectors.first(where: { $0.id == "valid_allow" }) else {
+            throw GoldenVectorContractError.vectorField("valid_allow", "id")
+        }
+        let payload = try verify(compactProof, keys: corpus.publicJwks["keys"] ?? [], context: try Context(baseline.verificationContext))
+        try cache.replace(with: VerifiedOfflineProof(
+            compactProof: Data(compactProof.utf8),
+            issuedAt: payload.iat,
+            revision: payload.revision,
+            freshUntil: payload.freshUntil,
+            disposition: payload.disposition == .deny ? .deny : .allow
+        ), fault: fault)
+    }
+
     /// Test-only seam: candidate bytes are always checked against the unmodified generated corpus.
     static func fixtureData() throws -> (corpus: Data, decisionCases: Data, key: Data) {
         let corpusURL = URL(fileURLWithPath: #filePath)
@@ -382,6 +431,24 @@ enum ProofReplacementOrder {
     }
 }
 
+/// An opaque admission token.  Its initializer is intentionally private to this
+/// file: only the JWS verifier above may couple compact bytes to authenticated
+/// claims and high-water ordering metadata.
+private struct VerifiedOfflineProof: Sendable {
+    let compactProof: Data
+    let highWater: ProofHighWater
+
+    init(compactProof: Data, issuedAt: Int64, revision: Int64, freshUntil: Int64, disposition: AtomicOfflineCache.Disposition) {
+        self.compactProof = compactProof
+        highWater = ProofHighWater(
+            issuedAt: Date(timeIntervalSince1970: TimeInterval(issuedAt)),
+            revision: revision,
+            freshnessDeadline: Date(timeIntervalSince1970: TimeInterval(freshUntil)),
+            disposition: disposition
+        )
+    }
+}
+
 /// File-backed, testable replacement seam. A coordinator is shared by every
 /// handle for one standardized path, while unrelated paths retain independent locks.
 public struct AtomicOfflineCache: @unchecked Sendable {
@@ -391,9 +458,19 @@ public struct AtomicOfflineCache: @unchecked Sendable {
     public enum CacheError: Error, Equatable { case authenticationFailed, malformedEnvelope }
 
     public struct RecoveredEnvelope: Sendable, Equatable {
-        public let payload: Data
+        /// Compact JWS bytes, never a caller-selected application payload.
+        public let compactProof: Data
         public let revision: Int64
         public let disposition: Disposition
+        public let issuedAt: Date
+        public let freshnessDeadline: Date
+
+        @available(*, deprecated, message: "Use compactProof; cache payloads are verified compact proofs.")
+        public var payload: Data { compactProof }
+
+        public var highWater: ProofHighWater {
+            ProofHighWater(issuedAt: issuedAt, revision: revision, freshnessDeadline: freshnessDeadline, disposition: disposition)
+        }
     }
 
     public let url: URL
@@ -407,30 +484,22 @@ public struct AtomicOfflineCache: @unchecked Sendable {
         self.authenticationKey = authenticationKey
     }
 
-    public func replace(
-        with data: Data,
-        disposition: Disposition,
-        revision: Int64,
-        fault: Fault? = nil
-    ) throws {
+    /// Deliberately file-private: a replacement can only be supplied by the
+    /// verifier after JWS/profile/device-binding validation has succeeded.
+    fileprivate func replace(with proof: VerifiedOfflineProof, fault: Fault? = nil) throws {
         try coordinator.withLock {
             let persisted = try loadVerifiedEnvelope()
             let accepted: Bool
             if let persisted {
-                accepted = ProofReplacementOrder.accepts(
-                    existingDisposition: persisted.disposition,
-                    existingRevision: persisted.revision,
-                    candidateDisposition: disposition,
-                    candidateRevision: revision
-                )
+                accepted = persisted.highWater.accepts(newer: proof.highWater)
             } else {
-                accepted = coordinator.accepts(disposition: disposition, revision: revision)
+                accepted = coordinator.accepts(proof.highWater)
             }
             guard accepted else { return }
             let candidate = uniqueCandidateURL()
             defer { try? FileManager.default.removeItem(at: candidate) }
 
-            try encodedReplacement(payload: data, disposition: disposition, revision: revision).write(to: candidate)
+            try encodedReplacement(proof).write(to: candidate)
             let handle = try FileHandle(forWritingTo: candidate)
             defer { try? handle.close() }
             try handle.synchronize()
@@ -442,7 +511,7 @@ public struct AtomicOfflineCache: @unchecked Sendable {
                 try FileManager.default.moveItem(at: candidate, to: url)
             }
             try synchronizeParentDirectory()
-            coordinator.record(disposition: disposition, revision: revision)
+            coordinator.record(proof.highWater)
             if fault == .afterRename { throw Fault.afterRename }
         }
     }
@@ -468,8 +537,15 @@ public struct AtomicOfflineCache: @unchecked Sendable {
         try coordinator.withLock { try loadVerifiedEnvelope() }
     }
 
-    private func encodedReplacement(payload: Data, disposition: Disposition, revision: Int64) throws -> Data {
-        let unsigned = UnsignedEnvelope(version: 1, payload: payload.base64EncodedString(), revision: revision, disposition: disposition)
+    private func encodedReplacement(_ proof: VerifiedOfflineProof) throws -> Data {
+        let unsigned = UnsignedEnvelope(
+            version: 2,
+            compactProof: proof.compactProof.base64EncodedString(),
+            revision: proof.highWater.revision,
+            disposition: proof.highWater.disposition,
+            issuedAt: Int64(proof.highWater.issuedAt.timeIntervalSince1970),
+            freshUntil: Int64(proof.highWater.freshnessDeadline.timeIntervalSince1970)
+        )
         let tag = Data(HMAC<SHA256>.authenticationCode(for: try signedBytes(unsigned), using: authenticationKey))
         let encoder = JSONEncoder()
         encoder.outputFormatting = [.sortedKeys]
@@ -481,19 +557,19 @@ public struct AtomicOfflineCache: @unchecked Sendable {
         let envelope: Envelope
         do { envelope = try JSONDecoder().decode(Envelope.self, from: Data(contentsOf: url)) }
         catch { throw CacheError.malformedEnvelope }
-        guard envelope.version == 1,
-              let payload = Data(base64Encoded: envelope.payload),
+        guard envelope.version == 2,
+              let compactProof = Data(base64Encoded: envelope.compactProof),
               let tag = Data(base64Encoded: envelope.authenticationTag)
         else { throw CacheError.malformedEnvelope }
-        let unsigned = UnsignedEnvelope(version: envelope.version, payload: envelope.payload, revision: envelope.revision, disposition: envelope.disposition)
+        let unsigned = UnsignedEnvelope(version: envelope.version, compactProof: envelope.compactProof, revision: envelope.revision, disposition: envelope.disposition, issuedAt: envelope.issuedAt, freshUntil: envelope.freshUntil)
         let expected = Data(HMAC<SHA256>.authenticationCode(for: try signedBytes(unsigned), using: authenticationKey))
         guard tag == expected else { throw CacheError.authenticationFailed }
-        return RecoveredEnvelope(payload: payload, revision: envelope.revision, disposition: envelope.disposition)
+        return RecoveredEnvelope(compactProof: compactProof, revision: envelope.revision, disposition: envelope.disposition, issuedAt: Date(timeIntervalSince1970: TimeInterval(envelope.issuedAt)), freshnessDeadline: Date(timeIntervalSince1970: TimeInterval(envelope.freshUntil)))
     }
 
     private func signedBytes(_ envelope: UnsignedEnvelope) throws -> Data {
         var bytes = Data("accrue.atomic-offline-cache".utf8)
-        for value in [String(envelope.version), url.path, envelope.payload, String(envelope.revision), envelope.disposition.rawValue] {
+        for value in [String(envelope.version), url.path, envelope.compactProof, String(envelope.revision), envelope.disposition.rawValue, String(envelope.issuedAt), String(envelope.freshUntil)] {
             let field = Data(value.utf8)
             var length = UInt64(field.count).bigEndian
             withUnsafeBytes(of: &length) { bytes.append(contentsOf: $0) }
@@ -504,25 +580,39 @@ public struct AtomicOfflineCache: @unchecked Sendable {
 
     private struct UnsignedEnvelope: Codable {
         let version: Int
-        let payload: String
+        let compactProof: String
         let revision: Int64
         let disposition: Disposition
+        let issuedAt: Int64
+        let freshUntil: Int64
+
+        enum CodingKeys: String, CodingKey {
+            case version, revision, disposition
+            case compactProof = "compact_proof"
+            case issuedAt = "iat"
+            case freshUntil = "fresh_until"
+        }
     }
 
     private struct Envelope: Codable {
         let version: Int
-        let payload: String
+        let compactProof: String
         let revision: Int64
         let disposition: Disposition
+        let issuedAt: Int64
+        let freshUntil: Int64
         let authenticationTag: String
 
         init(unsigned: UnsignedEnvelope, authenticationTag: String) {
-            version = unsigned.version; payload = unsigned.payload; revision = unsigned.revision
-            disposition = unsigned.disposition; self.authenticationTag = authenticationTag
+            version = unsigned.version; compactProof = unsigned.compactProof; revision = unsigned.revision
+            disposition = unsigned.disposition; issuedAt = unsigned.issuedAt; freshUntil = unsigned.freshUntil; self.authenticationTag = authenticationTag
         }
 
         enum CodingKeys: String, CodingKey {
-            case version, payload, revision, disposition
+            case version, revision, disposition
+            case compactProof = "compact_proof"
+            case issuedAt = "iat"
+            case freshUntil = "fresh_until"
             case authenticationTag = "authentication_tag"
         }
     }
@@ -554,8 +644,7 @@ public struct AtomicOfflineCache: @unchecked Sendable {
 
 private final class CacheCoordinator: @unchecked Sendable {
     private let lock = NSLock()
-    private var revision: Int64?
-    private var disposition: AtomicOfflineCache.Disposition?
+    private var highWater: ProofHighWater?
 
     let cachePath: String
 
@@ -571,19 +660,13 @@ private final class CacheCoordinator: @unchecked Sendable {
         return try body()
     }
 
-    func accepts(disposition candidate: AtomicOfflineCache.Disposition, revision candidateRevision: Int64) -> Bool {
-        guard let revision else { return true }
-        return ProofReplacementOrder.accepts(
-            existingDisposition: disposition ?? .allow,
-            existingRevision: revision,
-            candidateDisposition: candidate,
-            candidateRevision: candidateRevision
-        )
+    func accepts(_ candidate: ProofHighWater) -> Bool {
+        guard let highWater else { return true }
+        return highWater.accepts(newer: candidate)
     }
 
-    func record(disposition: AtomicOfflineCache.Disposition, revision: Int64) {
-        self.disposition = disposition
-        self.revision = revision
+    func record(_ highWater: ProofHighWater) {
+        self.highWater = highWater
     }
 }
 

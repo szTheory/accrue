@@ -164,12 +164,12 @@ struct GoldenVectorTests {
         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
         defer { try? FileManager.default.removeItem(at: directory) }
         let cache = AtomicOfflineCache(url: directory.appendingPathComponent("entitlement.json"), authenticationKey: testCacheKey)
-        try cache.replace(with: Data("deny".utf8), disposition: .deny, revision: 1)
-        #expect(try cache.recoveredEnvelope()?.payload == Data("deny".utf8))
-        #expect(throws: AtomicOfflineCache.Fault.beforeRename) { try cache.replace(with: Data("allow".utf8), disposition: .allow, revision: 2, fault: .beforeRename) }
-        #expect(try cache.recoveredEnvelope()?.payload == Data("deny".utf8))
-        #expect(throws: AtomicOfflineCache.Fault.afterRename) { try cache.replace(with: Data("deny-new".utf8), disposition: .deny, revision: 2, fault: .afterRename) }
-        #expect(try cache.recoveredEnvelope()?.payload == Data("deny-new".utf8))
+        try OfflineGoldenVectorVerifier.replaceVerifiedFixture("valid_allow", in: cache)
+        #expect(try cache.recoveredEnvelope()?.disposition == .allow)
+        #expect(throws: AtomicOfflineCache.Fault.beforeRename) { try OfflineGoldenVectorVerifier.replaceVerifiedFixture("valid_signed_denial", in: cache, fault: .beforeRename) }
+        #expect(try cache.recoveredEnvelope()?.disposition == .allow)
+        #expect(throws: AtomicOfflineCache.Fault.afterRename) { try OfflineGoldenVectorVerifier.replaceVerifiedFixture("valid_signed_denial", in: cache, fault: .afterRename) }
+        #expect(try cache.recoveredEnvelope()?.disposition == .deny)
     }
 
     @Test("authenticated envelopes bind payload revision disposition and cache path")
@@ -180,10 +180,12 @@ struct GoldenVectorTests {
         let key = testCacheKey
         let cache = AtomicOfflineCache(url: directory.appendingPathComponent("entitlement.json"), authenticationKey: key)
 
-        try cache.replace(with: Data("denial-proof".utf8), disposition: .deny, revision: 9)
-        #expect(try cache.recoveredEnvelope()?.payload == Data("denial-proof".utf8))
-        #expect(try cache.recoveredEnvelope()?.revision == 9)
-        #expect(try cache.recoveredEnvelope()?.disposition == .deny)
+        try OfflineGoldenVectorVerifier.replaceVerifiedFixture("valid_allow", in: cache)
+        #expect(try cache.recoveredEnvelope()?.compactProof.starts(with: Data("eyJ".utf8)) == true)
+        #expect(try cache.recoveredEnvelope()?.revision == 5)
+        #expect(try cache.recoveredEnvelope()?.disposition == .allow)
+        #expect(try cache.recoveredEnvelope()?.highWater.issuedAt == Date(timeIntervalSince1970: 1_700_000_000))
+        #expect(try cache.recoveredEnvelope()?.highWater.freshnessDeadline == Date(timeIntervalSince1970: 1_700_003_600))
 
         var envelope = try #require(JSONSerialization.jsonObject(with: Data(contentsOf: cache.url)) as? [String: Any])
         envelope["revision"] = 10
@@ -199,16 +201,56 @@ struct GoldenVectorTests {
         let key = testCacheKey
         let url = directory.appendingPathComponent("entitlement.json")
 
-        try AtomicOfflineCache(url: url, authenticationKey: key).replace(
-            with: Data("deny-r7".utf8), disposition: .deny, revision: 7
-        )
+        try OfflineGoldenVectorVerifier.replaceVerifiedFixture("valid_signed_denial", in: AtomicOfflineCache(url: url, authenticationKey: key))
         let restarted = AtomicOfflineCache(url: url, authenticationKey: key)
-        try restarted.replace(with: Data("allow-r6".utf8), disposition: .allow, revision: 6)
+        try OfflineGoldenVectorVerifier.replaceVerifiedFixture("valid_allow", in: restarted)
 
         let envelope = try #require(try restarted.recoveredEnvelope())
-        #expect(envelope.payload == Data("deny-r7".utf8))
-        #expect(envelope.revision == 7)
+        #expect(envelope.revision == 5)
         #expect(envelope.disposition == .deny)
+    }
+
+    @Test("reopened cache retains every high-water component before replacement")
+    func persistedHighWaterRejectsHigherRevisionWithOlderIssueOrFreshness() throws {
+        let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: directory) }
+        let url = directory.appendingPathComponent("entitlement.json")
+        let cache = AtomicOfflineCache(url: url, authenticationKey: testCacheKey)
+
+        let accepted = try signedCandidate(revision: 10, iat: 200, freshUntil: 400, disposition: "allow")
+        try OfflineGoldenVectorVerifier.replaceVerifiedTestProof(accepted, in: cache)
+
+        let restarted = AtomicOfflineCache(url: url, authenticationKey: testCacheKey)
+        try OfflineGoldenVectorVerifier.replaceVerifiedTestProof(
+            try signedCandidate(revision: 11, iat: 199, freshUntil: 500, disposition: "allow"), in: restarted
+        )
+        try OfflineGoldenVectorVerifier.replaceVerifiedTestProof(
+            try signedCandidate(revision: 12, iat: 200, freshUntil: 399, disposition: "allow"), in: restarted
+        )
+
+        let envelope = try #require(try restarted.recoveredEnvelope())
+        #expect(envelope.compactProof == Data(accepted.utf8))
+        #expect(envelope.highWater == ProofHighWater(
+            issuedAt: Date(timeIntervalSince1970: 200), revision: 10,
+            freshnessDeadline: Date(timeIntervalSince1970: 400), disposition: .allow
+        ))
+    }
+
+    @Test("verified same-revision denial wins and unauthenticated bytes never recover")
+    func verifiedOnlyAdmissionAndDenialPrecedence() throws {
+        let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: directory) }
+        let cache = AtomicOfflineCache(url: directory.appendingPathComponent("entitlement.json"), authenticationKey: testCacheKey)
+        try OfflineGoldenVectorVerifier.replaceVerifiedTestProof(try signedCandidate(revision: 8, iat: 200, freshUntil: 400, disposition: "allow"), in: cache)
+        let denial = try signedCandidate(revision: 8, iat: 200, freshUntil: 400, disposition: "deny")
+        try OfflineGoldenVectorVerifier.replaceVerifiedTestProof(denial, in: cache)
+        try OfflineGoldenVectorVerifier.replaceVerifiedTestProof(try signedCandidate(revision: 8, iat: 201, freshUntil: 401, disposition: "allow"), in: cache)
+        #expect(try cache.recoveredEnvelope()?.compactProof == Data(denial.utf8))
+
+        try Data("caller-selected bytes".utf8).write(to: cache.url)
+        #expect(throws: AtomicOfflineCache.CacheError.malformedEnvelope) { try cache.recoveredEnvelope() }
     }
 
     @Test("independent handles serialize replacements, preserve denial precedence, and clean candidates")
@@ -221,17 +263,17 @@ struct GoldenVectorTests {
         let firstHandle = AtomicOfflineCache(url: url, authenticationKey: testCacheKey)
         let secondHandle = AtomicOfflineCache(url: url, authenticationKey: testCacheKey)
 
-        try firstHandle.replace(with: Data("allow-v4".utf8), disposition: .allow, revision: 4)
+        try OfflineGoldenVectorVerifier.replaceVerifiedFixture("valid_allow", in: firstHandle)
         await withTaskGroup(of: Void.self) { group in
             group.addTask {
-                try? firstHandle.replace(with: Data("allow-v3".utf8), disposition: .allow, revision: 3)
+                try? OfflineGoldenVectorVerifier.replaceVerifiedFixture("valid_allow", in: firstHandle)
             }
             group.addTask {
-                try? secondHandle.replace(with: Data("deny-v4".utf8), disposition: .deny, revision: 4)
+                try? OfflineGoldenVectorVerifier.replaceVerifiedFixture("valid_signed_denial", in: secondHandle)
             }
         }
 
-        #expect(try firstHandle.recoveredEnvelope()?.payload == Data("deny-v4".utf8))
+        #expect(try firstHandle.recoveredEnvelope()?.disposition == .deny)
         #expect(try firstHandle.candidateURLs().isEmpty)
         #expect(try secondHandle.candidateURLs().isEmpty)
     }
@@ -242,13 +284,13 @@ struct GoldenVectorTests {
         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
         defer { try? FileManager.default.removeItem(at: directory) }
         let cache = AtomicOfflineCache(url: directory.appendingPathComponent("entitlement.json"), authenticationKey: testCacheKey)
-        try cache.replace(with: Data("old-complete".utf8), disposition: .deny, revision: 1)
+        try OfflineGoldenVectorVerifier.replaceVerifiedFixture("valid_allow", in: cache)
         let abandoned = directory.appendingPathComponent(".entitlement.json.candidate.crashed-child")
         try Data("new-incomplete".utf8).write(to: abandoned)
 
         try cache.recover()
 
-        #expect(try cache.recoveredEnvelope()?.payload == Data("old-complete".utf8))
+        #expect(try cache.recoveredEnvelope()?.disposition == .allow)
         #expect(try cache.candidateURLs().isEmpty)
     }
 
@@ -258,26 +300,26 @@ struct GoldenVectorTests {
         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
         defer { try? FileManager.default.removeItem(at: directory) }
         let cache = AtomicOfflineCache(url: directory.appendingPathComponent("entitlement.json"), authenticationKey: testCacheKey)
-        try cache.replace(with: Data("old-complete".utf8), disposition: .deny, revision: 1)
+        try OfflineGoldenVectorVerifier.replaceVerifiedFixture("valid_allow", in: cache)
 
-        try runCrashHarness(cache.url, payload: "new-before", point: "crash-before-rename", disposition: "allow", revision: 2)
+        try runCrashHarness(cache.url, fixtureID: "valid_signed_denial", point: "crash-before-rename")
         try cache.recover()
-        #expect(try cache.recoveredEnvelope()?.payload == Data("old-complete".utf8))
+        #expect(try cache.recoveredEnvelope()?.disposition == .allow)
         #expect(try cache.candidateURLs().isEmpty)
 
-        try runCrashHarness(cache.url, payload: "new-durable", point: "crash-after-directory-sync", disposition: "deny", revision: 2)
-        #expect(try cache.recoveredEnvelope()?.payload == Data("new-durable".utf8))
+        try runCrashHarness(cache.url, fixtureID: "valid_signed_denial", point: "crash-after-directory-sync")
+        #expect(try cache.recoveredEnvelope()?.disposition == .deny)
     }
 
     private var testCacheKey: SymmetricKey { SymmetricKey(data: Data("test-cache-authentication-key-32bytes".utf8)) }
 
-    private func runCrashHarness(_ url: URL, payload: String, point: String, disposition: String, revision: Int) throws {
+    private func runCrashHarness(_ url: URL, fixtureID: String, point: String) throws {
         let harness = URL(fileURLWithPath: FileManager.default.currentDirectoryPath)
             .appendingPathComponent(".build/debug/AccrueOfflineCacheCrashHarness")
         #expect(FileManager.default.isExecutableFile(atPath: harness.path))
         let process = Process()
         process.executableURL = harness
-        process.arguments = [url.path, point, disposition, String(revision), payload]
+        process.arguments = [url.path, point, fixtureID]
         process.environment = ProcessInfo.processInfo.environment.merging(
             ["ACCRUE_CACHE_TEST_KEY_BASE64": Data("test-cache-authentication-key-32bytes".utf8).base64EncodedString()],
             uniquingKeysWith: { _, new in new }
@@ -285,6 +327,34 @@ struct GoldenVectorTests {
         try process.run()
         process.waitUntilExit()
         #expect(process.terminationStatus != 0)
+    }
+
+    private func signedCandidate(revision: Int64, iat: Int64, freshUntil: Int64, disposition: String) throws -> String {
+        let fixture = try OfflineGoldenVectorVerifier.fixtureData()
+        let corpus = try #require(JSONSerialization.jsonObject(with: fixture.corpus) as? [String: Any])
+        let vectors = try #require(corpus["vectors"] as? [[String: Any]])
+        let compact = try #require(vectors.first { $0["id"] as? String == "valid_allow" }?["compact_jws"] as? String)
+        let parts = compact.split(separator: ".", omittingEmptySubsequences: false)
+        var claims = try #require(JSONSerialization.jsonObject(with: Data(base64URLEncoded: String(parts[1]))!) as? [String: Any])
+        claims["revision"] = revision
+        claims["iat"] = iat
+        claims["nbf"] = iat
+        claims["fresh_until"] = freshUntil
+        claims["disposition"] = disposition
+        if disposition == "deny" {
+            claims["denial_reason"] = "access_unavailable"
+            claims["plans"] = []
+            claims["features"] = []
+            claims["quantities"] = [:]
+        }
+        let header = String(parts[0])
+        let payload = try JSONSerialization.data(withJSONObject: claims, options: [.sortedKeys]).base64URLEncodedString()
+        let key = try #require(JSONSerialization.jsonObject(with: fixture.key) as? [String: Any])
+        let privateBytes = try #require(Data(base64URLEncoded: key["d"] as? String ?? ""))
+        let privateKey = try P256.Signing.PrivateKey(rawRepresentation: privateBytes)
+        let signingInput = "\(header).\(payload)"
+        let signature = try privateKey.signature(for: Data(signingInput.utf8)).rawRepresentation.base64URLEncodedString()
+        return "\(signingInput).\(signature)"
     }
 
     private func corpusObject(_ data: Data) throws -> [String: Any] {
@@ -311,5 +381,17 @@ struct GoldenVectorTests {
         } catch {
             return String(describing: error)
         }
+    }
+}
+
+private extension Data {
+    init?(base64URLEncoded value: String) {
+        var base64 = value.replacingOccurrences(of: "-", with: "+").replacingOccurrences(of: "_", with: "/")
+        base64 += String(repeating: "=", count: (4 - base64.count % 4) % 4)
+        self.init(base64Encoded: base64)
+    }
+
+    func base64URLEncodedString() -> String {
+        base64EncodedString().replacingOccurrences(of: "+", with: "-").replacingOccurrences(of: "/", with: "_").replacingOccurrences(of: "=", with: "")
     }
 }
