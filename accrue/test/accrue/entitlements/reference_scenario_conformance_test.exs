@@ -166,6 +166,68 @@ defmodule Accrue.Entitlements.ReferenceScenarioConformanceTest do
     end
   end
 
+  test "equal-order permutations converge to the fixture tuple" do
+    scenario = ReferenceScenarios.fetch!("equal_order_stability")
+    operation = ReferenceScenarios.execution_input!(scenario).operation
+
+    tuples =
+      for suffix <- ["first", "second"] do
+        account = account!("equal-order-#{suffix}")
+        first = %{operation | provider_event_id: "equal-#{suffix}-1", provider_transaction_id: "equal-#{suffix}-1", provider_lineage_id: "equal-lineage-#{suffix}"}
+        second = %{first | provider_order: 2, provider_event_id: "equal-#{suffix}-2", provider_transaction_id: "equal-#{suffix}-2"}
+
+        for item <- [first, second] do
+          assert {:ok, observation} = Observation.insert_idempotently(Accrue.TestRepo, observation_attrs(account, item))
+          assert result = Projector.project(observation, logical_plan: item.logical_product)
+          assert match?({:ok, _}, result) or result == {:noop, :no_material_change}
+        end
+
+        assert_bounded_result(scenario, account, first)
+      end
+
+    assert Enum.uniq(tuples) == [true]
+  end
+
+  test "repeat idempotency and parallel delivery leave one fixture-authoritative durable result" do
+    for scenario_id <- ["repeat_idempotency", "parallel_execution"] do
+      scenario = ReferenceScenarios.fetch!(scenario_id)
+      operation = ReferenceScenarios.execution_input!(scenario).operation
+      account = account!("#{scenario_id}-named")
+      assert {:ok, observation} = Observation.insert_idempotently(Accrue.TestRepo, observation_attrs(account, operation))
+
+      if scenario_id == "parallel_execution" do
+        results =
+          Ecto.Adapters.SQL.Sandbox.unboxed_run(Accrue.TestRepo, fn ->
+            Task.async_stream([:one, :two], fn _ -> Projector.project(observation, logical_plan: operation.logical_product) end,
+              max_concurrency: 2,
+              timeout: 10_000
+            )
+            |> Enum.to_list()
+          end)
+
+        assert Enum.all?(results, fn {:ok, result} -> match?({:ok, _}, result) or match?({:noop, _}, result) end)
+      else
+        assert {:ok, _} = Projector.project(observation, logical_plan: operation.logical_product)
+        assert {:noop, :stale} = Projector.project(observation, logical_plan: operation.logical_product)
+      end
+
+      assert_bounded_result(scenario, account, operation)
+    end
+  end
+
+  test "interrupted resume replays the committed projection exactly once without a torn tuple" do
+    scenario = ReferenceScenarios.fetch!("interrupted_resume")
+    operation = ReferenceScenarios.execution_input!(scenario).operation
+    account = account!("interrupted-resume-named")
+    assert {:ok, observation} = Observation.insert_idempotently(Accrue.TestRepo, observation_attrs(account, operation))
+
+    # The durable projector is the resume seam: after the commit boundary a
+    # replay is a no-op, so a lost response cannot create a second grant/audit.
+    assert {:ok, _} = Projector.project(observation, logical_plan: operation.logical_product)
+    assert {:noop, :stale} = Projector.project(observation, logical_plan: operation.logical_product)
+    assert_bounded_result(scenario, account, operation)
+  end
+
   defp assert_production_result(scenario, account, operation, opposite_rail) do
     assert {:ok, snapshot} = Accrue.Entitlements.snapshot(account)
 
