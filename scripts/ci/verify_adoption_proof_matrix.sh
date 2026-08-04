@@ -99,4 +99,5 @@ if grep -Eq 'Crosswake runtime (is )?(supported|feasible)' "${matrix}"; then
   exit 1
 fi
 
+echo "verify_adoption_proof_matrix: OK"
 echo "verify_adoption_proof_matrix: v1.59 OK"
