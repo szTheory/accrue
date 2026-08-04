@@ -2,6 +2,31 @@
 
 This directory hosts merge-adjacent bash gates and host-app checks. Use it as the first stop when CI fails on documentation or VERIFY-01 contracts.
 
+## v1.59 first-adopter release contract
+
+Run one coordinated, credential-free release-contract check from the repository
+root:
+
+```bash
+bash scripts/ci/verify_release_contract.sh
+```
+
+`docs-contracts-shift-left` owns this merge-blocking command. It first invokes
+`verify_reference_scenario_contract.sh`, which owns the versioned fixture and
+generated capability matrix, then checks the hand-authored adoption recipe,
+App Review and privacy guide, scenario/runbook inventory, release notes, and
+watchlist responsibilities. Do not copy generated support cells into a guide:
+update the fixture and regenerate the matrix for exact facts; update guides and
+runbooks only for explanation or procedure.
+
+When it fails, fix the artifact named in the failure: the fixture or generated
+matrix for exact-fact drift; the guide for public wording or App Review/privacy
+content; `operator-runbooks.md` for a missing incident procedure or job/next
+action copy; and `v1.59-WATCHLIST.md` for owner/reassessment drift. Keep the
+fixture, generated matrix, linked scenario IDs, release guide, runbooks, notes,
+and watchlist together in the same review whenever the v1.59 public contract
+changes.
+
 **After a push:** from the repo root, **`bash scripts/ci/watch_ci.sh`** waits on the latest GitHub Actions **CI** run for **`main`** (optional branch argument). Requires the **`gh`** CLI and auth (`gh auth login`).
 
 ## Executable acceptance ratchet (Phase 218+)

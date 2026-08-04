@@ -2,7 +2,7 @@
 # Shift-left gate: ORG-09 literals in adoption-proof-matrix.md must stay aligned with docs + CI.
 set -euo pipefail
 
-repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+repo_root="${ROOT_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}"
 matrix="${repo_root}/examples/accrue_host/docs/adoption-proof-matrix.md"
 
 if [[ ! -f "${matrix}" ]]; then
@@ -84,4 +84,19 @@ if grep -Eq 'preview parity|pseudo-preview' "${matrix}"; then
   exit 1
 fi
 
-echo "verify_adoption_proof_matrix: OK"
+# v1.59 uses this hand-authored path to explain how adopters move from the
+# reference host to the generated exact-fact matrix. The fixture/matrix itself
+# remains owned by verify_reference_scenario_contract.sh.
+require_substring "## v1.59 first-adopter path" "v1.59 path heading"
+require_substring "mix accrue.entitlements.reference_scenarios --check" "v1.59 deterministic command"
+require_substring "capability-limits-matrix.md" "generated v1.59 matrix link"
+require_substring "operator-runbooks.md#v159-multi-rail-and-offline-runbooks" "v1.59 runbook link"
+require_substring "Apple-to-web and Stripe-to-iOS" "cross-rail convergence boundary"
+require_substring "feasibility_blocked" "blocked runtime-capability boundary"
+
+if grep -Eq 'Crosswake runtime (is )?(supported|feasible)' "${matrix}"; then
+  echo "verify_adoption_proof_matrix: examples/accrue_host/docs/adoption-proof-matrix.md has runtime-capability inflation" >&2
+  exit 1
+fi
+
+echo "verify_adoption_proof_matrix: v1.59 OK"
