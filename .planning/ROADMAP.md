@@ -297,13 +297,13 @@ Plans:
   4. Automated repair and runbooks address missed Apple notifications, history cursor recovery, outages, conflicts, duplicate charges, stale devices, signing-key compromise, and reconciliation backlog without routine account reconstruction.
   5. Public guides, examples, capability/compatibility material, App Review guidance, release notes, threat model, watchlist, and conformance gates state one additive contract and its explicit v1.59 limits.
 
-**Plans**: 6 plans
+**Plans**: 1/6 plans executed
 
 Plans:
 
 **Wave 1**
 
-- [ ] 220-01-PLAN.md — Trace one shared data-only scenario through real core, host, and Swift consumers, then cover the complete deterministic proof boundary.
+- [x] 220-01-PLAN.md — Trace one shared data-only scenario through real core, host, and Swift consumers, then cover the complete deterministic proof boundary.
 
 **Wave 2** *(blocked on 220-01 completion)*
 
@@ -336,4 +336,4 @@ Plans:
 | 217. Canonical projection and compatibility | v1.59 | 5/5 | Complete | 2026-08-02 |
 | 218. Apple observation and repair | v1.59 | 16/16 | Complete    | 2026-08-03 |
 | 219. Offline study contract | v1.59 | 5/5 | Complete    | 2026-08-03 |
-| 220. First-adopter proof and release gates | v1.59 | 0/TBD | Not started | - |
+| 220. First-adopter proof and release gates | v1.59 | 1/6 | In Progress|  |
