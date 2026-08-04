@@ -89,6 +89,24 @@ defmodule Accrue.Entitlements.ReferenceScenarioConformanceTest do
     assert "feasibility_blocked" == capability_report()["overall_status"]
   end
 
+  test "every deterministic row has a closed production execution input" do
+    deterministic_ids =
+      ReferenceScenarios.all()
+      |> Enum.filter(&(&1.evidence_lane == :deterministic_conformance))
+      |> Enum.map(& &1.id)
+
+    assert Enum.sort(deterministic_ids) ==
+             Enum.sort(ReferenceScenarios.production_execution_ids())
+
+    for scenario <- ReferenceScenarios.deterministic_scenarios() do
+      assert %{account: account, operation: operation} =
+               ReferenceScenarios.execution_input!(scenario)
+
+      assert is_binary(account.owner_id)
+      assert is_map(operation)
+    end
+  end
+
   defp assert_production_result(scenario, account, operation, opposite_rail) do
     assert {:ok, snapshot} = Accrue.Entitlements.snapshot(account)
 
