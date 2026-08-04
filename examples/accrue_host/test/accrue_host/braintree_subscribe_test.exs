@@ -157,13 +157,35 @@ defmodule AccrueHost.BraintreeSubscribeTest do
     def portal_session_create(_, _), do: {:error, %Accrue.APIError{message: "Unsupported"}}
   end
 
+  defmodule SubscriptionGatewayStub do
+    def cancel(id, _opts) do
+      {:ok,
+       struct!(Braintree.Subscription,
+         id: id,
+         plan_id: "plan_sandbox_recurring",
+         status: "Canceled",
+         billing_period_start_date: "2024-01-01T00:00:00Z",
+         billing_period_end_date: "2024-02-01T00:00:00Z",
+         updated_at: "2024-01-03T00:00:00Z"
+       )}
+    end
+  end
+
   setup do
     # Save original processor config
     orig_processor = Application.get_env(:accrue, :processor)
+    previous_gateway = Application.get_env(:accrue, :braintree_subscription_gateway)
     Application.put_env(:accrue, :processor, BraintreeMockAdapter.Braintree)
+    Application.put_env(:accrue, :braintree_subscription_gateway, SubscriptionGatewayStub)
 
     on_exit(fn ->
       Application.put_env(:accrue, :processor, orig_processor)
+
+      if previous_gateway do
+        Application.put_env(:accrue, :braintree_subscription_gateway, previous_gateway)
+      else
+        Application.delete_env(:accrue, :braintree_subscription_gateway)
+      end
     end)
 
     user = AccountsFixtures.user_fixture()
