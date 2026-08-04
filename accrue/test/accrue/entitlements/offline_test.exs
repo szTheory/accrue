@@ -58,7 +58,7 @@ defmodule Accrue.Entitlements.OfflineTest do
                    claims(base, %{
                      "revision" => 2,
                      "disposition" => "deny",
-                     "denial_reason" => "access_unavailable",
+                     "denial_reason" => "signed_denial",
                      "plans" => [],
                      "features" => [],
                      "quantities" => %{}

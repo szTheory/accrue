@@ -9,7 +9,7 @@ defmodule Accrue.Entitlements.Offline.Proof do
   @allow_claims Enum.sort(List.delete(@sensitive_claims, "denial_reason"))
   # The signed denial reason is part of the public wire contract, not a free-form
   # provider diagnostic. Keep this list shared with issuance.
-  @denial_reasons ~w(signed_denial superseded device_revoked)
+  @denial_reasons ~w(signed_denial access_unavailable superseded device_revoked)
 
   @spec denial_reason?(atom() | String.t()) :: boolean()
   def denial_reason?(reason) when is_atom(reason), do: denial_reason?(Atom.to_string(reason))
