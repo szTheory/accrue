@@ -38,6 +38,34 @@ defmodule Accrue.Entitlements.OfflineReconnectTest do
     def enqueue_repair(_, _, _, _), do: :ok
   end
 
+  defmodule PendingRepairSource do
+    @behaviour SourceCoordinator
+
+    @impl true
+    def due_sources(_, _, _) do
+      {:ok,
+       [
+         %SourceCoordinator.SourceStatus{
+           source: :stripe,
+           environment: :production,
+           due: true,
+           state: :pending,
+           retry_after: 60,
+           next_action: :reconnect_required
+         }
+       ]}
+    end
+
+    @impl true
+    def refresh(_, status, _, _), do: {:ok, status}
+
+    @impl true
+    def enqueue_repair(_, status, _, opts) do
+      send(Keyword.fetch!(opts, :test_pid), {:repair_enqueued, status.source})
+      Keyword.get(opts, :enqueue_result, :ok)
+    end
+  end
+
   setup do
     original = Application.get_env(:accrue, :entitlements)
     original_rails = Application.get_env(:accrue, :rails)
@@ -100,7 +128,7 @@ defmodule Accrue.Entitlements.OfflineReconnectTest do
     request = %Issuer.Request{account_id: ctx.account.id, device_id: ctx.device.id, now: @now}
 
     assert {:ok, result} =
-             Offline.issue(ctx.account, request,
+             Issuer.issue_after_admission(ctx.account, request,
                repo: TestRepo,
                key_provider: SigningProvider,
                signing_key: ctx.signing_key,
@@ -126,7 +154,7 @@ defmodule Accrue.Entitlements.OfflineReconnectTest do
     request = %Issuer.Request{account_id: ctx.account.id, device_id: ctx.device.id, now: @now}
 
     assert {:ok, %{disposition: :deny, compact: compact}} =
-             Offline.issue(ctx.account, request,
+             Issuer.issue_after_admission(ctx.account, request,
                repo: TestRepo,
                key_provider: SigningProvider,
                signing_key: ctx.signing_key,
@@ -180,6 +208,128 @@ defmodule Accrue.Entitlements.OfflineReconnectTest do
              Offline.reconnect(ctx.account, request, opts)
 
     assert 1 == TestRepo.aggregate(Issuance, :count)
+  end
+
+  test "an admitted reconnect resumes after an interruption before source scheduling", ctx do
+    project_grant!(ctx.account)
+    opts = issuer_opts(ctx) ++ [source_coordinator: NoDueSources, authorize: fn _, _ -> true end]
+    request = reconnect_request!(ctx, opts, "reconnect-crash-after-admission")
+
+    assert {:error, :admission_interrupted} =
+             Offline.reconnect(
+               ctx.account,
+               request,
+               Keyword.put(opts, :after_admission, fn -> :interrupted end)
+             )
+
+    challenge = TestRepo.get!(Accrue.Entitlements.Offline.Challenge, request.challenge_id)
+
+    assert %{"state" => "admitted", "repair_outbox" => %{"state" => "scheduled"}} =
+             challenge.reconnect_outcome
+
+    assert {:ok, %{disposition: :issued, proof: proof}} =
+             Offline.reconnect(ctx.account, request, opts)
+
+    assert is_binary(proof)
+    assert 1 == TestRepo.aggregate(Issuance, :count)
+  end
+
+  test "a failed durable repair enqueue becomes an explicit terminal escalation", ctx do
+    opts =
+      issuer_opts(ctx) ++
+        [
+          source_coordinator: PendingRepairSource,
+          authorize: fn _, _ -> true end,
+          test_pid: self(),
+          enqueue_result: {:error, :oban_unavailable}
+        ]
+
+    request = reconnect_request!(ctx, opts, "reconnect-enqueue-failure")
+
+    assert {:ok, %{disposition: :needs_repair, reason: :needs_repair, proof: nil}} =
+             Offline.reconnect(ctx.account, request, opts)
+
+    assert_receive {:repair_enqueued, :stripe}
+
+    challenge = TestRepo.get!(Accrue.Entitlements.Offline.Challenge, request.challenge_id)
+
+    assert %{
+             "state" => "final",
+             "repair_outbox" => %{
+               "state" => "repair_escalated",
+               "reason" => "repair_enqueue_failed"
+             }
+           } = challenge.reconnect_outcome
+
+    assert {:ok, %{disposition: :needs_repair}} = Offline.reconnect(ctx.account, request, opts)
+    refute_receive {:repair_enqueued, :stripe}
+  end
+
+  test "reconnect telemetry is bounded and excludes request or proof material", ctx do
+    handler_id = "offline-reconnect-#{System.unique_integer([:positive])}"
+
+    :ok =
+      :telemetry.attach(
+        handler_id,
+        [:accrue, :entitlements, :offline, :reconnect],
+        fn _, _, metadata, pid ->
+          send(pid, {:reconnect_telemetry, metadata})
+        end,
+        self()
+      )
+
+    on_exit(fn -> :telemetry.detach(handler_id) end)
+
+    project_grant!(ctx.account)
+
+    issued_opts =
+      issuer_opts(ctx) ++ [source_coordinator: NoDueSources, authorize: fn _, _ -> true end]
+
+    issued_request = reconnect_request!(ctx, issued_opts, "telemetry-issued")
+
+    assert {:ok, %{disposition: :issued}} =
+             Offline.reconnect(ctx.account, issued_request, issued_opts)
+
+    pending_opts =
+      issuer_opts(ctx) ++
+        [
+          source_coordinator: PendingRepairSource,
+          authorize: fn _, _ -> true end,
+          test_pid: self()
+        ]
+
+    pending_request = reconnect_request!(ctx, pending_opts, "telemetry-pending")
+
+    assert {:ok, %{disposition: :pending}} =
+             Offline.reconnect(ctx.account, pending_request, pending_opts)
+
+    assert_receive {:repair_enqueued, :stripe}
+
+    repair_opts = Keyword.put(pending_opts, :enqueue_result, {:error, :unavailable})
+    repair_request = reconnect_request!(ctx, repair_opts, "telemetry-repair")
+
+    assert {:ok, %{disposition: :needs_repair}} =
+             Offline.reconnect(ctx.account, repair_request, repair_opts)
+
+    assert_receive {:repair_enqueued, :stripe}
+
+    invalid_request = %{issued_request | nonce_signature: <<>>}
+
+    assert {:error, :invalid_request} =
+             Offline.reconnect(ctx.account, invalid_request, issued_opts)
+
+    for expected <- [:issued, :pending, :needs_repair, :rejected] do
+      assert_receive {:reconnect_telemetry,
+                      %{
+                        action: :reconnect,
+                        disposition: ^expected,
+                        correlation_hash: correlation_hash
+                      }}
+
+      assert is_binary(correlation_hash) or is_nil(correlation_hash)
+    end
+
+    refute_receive {:reconnect_telemetry, %{proof: _}}
   end
 
   test "an empty due schedule is a resolved source set" do
@@ -266,6 +416,32 @@ defmodule Accrue.Entitlements.OfflineReconnectTest do
       audience: "accrue-offline-client",
       now: @now
     ]
+  end
+
+  defp reconnect_request!(ctx, opts, idempotency_key) do
+    assert {:ok, %{purpose: :reconnect} = challenge} =
+             Offline.reconnect_challenge(ctx.account, ctx.device.installation_id, opts)
+
+    signature =
+      reconnect_signing_input(
+        ctx.account.id,
+        ctx.device.installation_id,
+        challenge.id,
+        challenge.nonce,
+        idempotency_key
+      )
+      |> then(fn input ->
+        {_, private_key} = JOSE.JWK.to_key(ctx.device_key)
+        :public_key.sign(input, :sha256, private_key)
+      end)
+
+    %Reconnect.Request{
+      installation_id: ctx.device.installation_id,
+      challenge_id: challenge.id,
+      nonce: challenge.nonce,
+      nonce_signature: signature,
+      idempotency_key: idempotency_key
+    }
   end
 
   defp reconnect_signing_input(account, installation, challenge, nonce, key) do

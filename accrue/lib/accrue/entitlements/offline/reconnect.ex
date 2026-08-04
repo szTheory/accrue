@@ -35,6 +35,24 @@ defmodule Accrue.Entitlements.Offline.Reconnect do
   def reconnect(%Account{} = account, %Request{} = request, opts) do
     now = Keyword.get(opts, :now, DateTime.utc_now())
 
+    Accrue.Telemetry.span_private(
+      [:accrue, :entitlements, :offline, :reconnect],
+      %{
+        action: :reconnect,
+        protocol_version: "v1.59",
+        correlation_hash: correlation_hash(request)
+      },
+      fn ->
+        result = do_reconnect(account, request, now, opts)
+        emit_telemetry(result, request, now)
+        result
+      end
+    )
+  end
+
+  def reconnect(_, _, _), do: {:error, :invalid_request}
+
+  defp do_reconnect(account, request, now, opts) do
     with :ok <- validate_request(request),
          true <- authorized?(opts, account),
          {:ok, admission} <- consume_pop(account, request, now, opts) do
@@ -42,21 +60,13 @@ defmodule Accrue.Entitlements.Offline.Reconnect do
         {:replay, outcome} ->
           {:ok, outcome}
 
-        {:new, device, challenge} ->
-          result =
-            with {:ok, statuses} <- due_statuses(account, now, opts),
-                 {:ok, refreshed} <- refresh_due(account, statuses, now, opts),
-                 {:ok, outcome} <- settle(account, device, request, refreshed, now, opts) do
-              {:ok, outcome}
-            end
-
-          # A consumed challenge always has a durable, typed terminal result.
-          # This also turns provider failures into replayable repair outcomes.
-          outcome = outcome_for_result(result)
-
-          case persist_outcome(challenge, outcome, opts) do
-            :ok -> {:ok, outcome}
-            {:error, _} -> {:ok, pending_outcome(outcome.due_source_count)}
+        {kind, device, challenge} when kind in [:new, :resume] ->
+          # This hook is deliberately after the admission transaction. It gives
+          # hosts a deterministic fault-injection seam and proves that a restart
+          # leaves a durable attempt which an exact replay can resume.
+          with :ok <- after_admission(opts),
+               {:ok, outcome} <- run_attempt(account, device, challenge, request, now, opts) do
+            {:ok, outcome}
           end
       end
     else
@@ -65,7 +75,25 @@ defmodule Accrue.Entitlements.Offline.Reconnect do
     end
   end
 
-  def reconnect(_, _, _), do: {:error, :invalid_request}
+  defp run_attempt(account, device, challenge, request, now, opts) do
+    result =
+      with {:ok, statuses} <- due_statuses(account, now, opts),
+           {:ok, refreshed} <- refresh_due(account, statuses, now, opts),
+           {:ok, outcome} <- settle(account, device, request, refreshed, now, opts) do
+        {:ok, outcome}
+      end
+
+    # The admission row is a durable outbox: it exists before any provider call
+    # or host enqueue, and an exact replay re-enters this path until it reaches a
+    # terminal outcome. A failed enqueue is explicitly escalated, never hidden as
+    # a replayable pending response.
+    outcome = outcome_for_result(result)
+
+    case persist_outcome(challenge, outcome, opts) do
+      :ok -> {:ok, outcome}
+      {:error, _} -> {:error, :persistence_failed}
+    end
+  end
 
   defp due_statuses(account, now, opts) do
     coordinator = Keyword.get(opts, :source_coordinator)
@@ -113,14 +141,10 @@ defmodule Accrue.Entitlements.Offline.Reconnect do
     due = Enum.filter(statuses, & &1.due)
     unresolved = Enum.reject(due, &(&1.state == :resolved))
 
-    Enum.each(unresolved, fn status ->
-      Keyword.fetch!(opts, :source_coordinator).enqueue_repair(account, status, now, opts)
-    end)
-
     if unresolved == [] do
       issuer = %Issuer.Request{account_id: account.id, device_id: device.id, now: now}
 
-      case Issuer.issue(account, issuer, opts) do
+      case Issuer.issue_after_admission(account, issuer, opts) do
         {:ok, result} ->
           {:ok,
            %Outcome{
@@ -136,24 +160,43 @@ defmodule Accrue.Entitlements.Offline.Reconnect do
           {:error, reason}
       end
     else
-      state =
-        if Enum.any?(unresolved, &(&1.state == :needs_repair)), do: :needs_repair, else: :pending
+      case enqueue_repairs(account, unresolved, now, opts) do
+        :ok ->
+          state =
+            if Enum.any?(unresolved, &(&1.state == :needs_repair)),
+              do: :needs_repair,
+              else: :pending
 
-      retry =
-        unresolved
-        |> Enum.map(& &1.retry_after)
-        |> Enum.filter(&is_integer/1)
-        |> Enum.min(fn -> nil end)
+          retry =
+            unresolved
+            |> Enum.map(& &1.retry_after)
+            |> Enum.filter(&is_integer/1)
+            |> Enum.min(fn -> nil end)
 
-      {:ok,
-       %Outcome{
-         disposition: state,
-         reason: state,
-         next_action: :reconnect_required,
-         retry_after: retry,
-         due_source_count: length(due)
-       }}
+          {:ok,
+           %Outcome{
+             disposition: state,
+             reason: state,
+             next_action: :reconnect_required,
+             retry_after: retry,
+             due_source_count: length(due)
+           }}
+
+        {:error, :repair_enqueue_failed} ->
+          {:error, :repair_enqueue_failed}
+      end
     end
+  end
+
+  defp enqueue_repairs(account, unresolved, now, opts) do
+    coordinator = Keyword.fetch!(opts, :source_coordinator)
+
+    Enum.reduce_while(unresolved, :ok, fn status, :ok ->
+      case coordinator.enqueue_repair(account, status, now, opts) do
+        :ok -> {:cont, :ok}
+        _ -> {:halt, {:error, :repair_enqueue_failed}}
+      end
+    end)
   end
 
   defp consume_pop(account, request, now, opts) do
@@ -185,15 +228,15 @@ defmodule Accrue.Entitlements.Offline.Reconnect do
                  challenge.nonce_digest == digest(request.nonce) and
                  DateTime.compare(challenge.expires_at, now) == :gt,
              true <- valid_signature?(account, device, challenge, request),
-             {:ok, _} <-
+             {:ok, persisted_challenge} <-
                repo.update(
                  Challenge.changeset(challenge, %{
                    consumed_at: now,
                    idempotency_digest: digest(request.idempotency_key),
-                   reconnect_outcome: pending_map(now)
+                   reconnect_outcome: admission_map(request, now)
                  })
                ) do
-          {:ok, {:new, device, challenge}}
+          {:ok, {:new, device, persisted_challenge}}
         else
           %Challenge{
             purpose: :reconnect,
@@ -203,7 +246,7 @@ defmodule Accrue.Entitlements.Offline.Reconnect do
           } = challenge
           when not is_nil(consumed_at) and is_map(outcome) ->
             if replay_binding?(account, device, challenge, request, stored_digest),
-              do: {:ok, {:replay, outcome_from_map(outcome)}},
+              do: replay_admission(device, challenge, outcome),
               else: repo.rollback(:challenge_invalid)
 
           _ ->
@@ -236,11 +279,10 @@ defmodule Accrue.Entitlements.Offline.Reconnect do
       "retry_after" => outcome.retry_after,
       "proof" => outcome.proof,
       "revision" => outcome.revision,
-      "due_source_count" => outcome.due_source_count
+      "due_source_count" => outcome.due_source_count,
+      "repair_outbox" => repair_outbox_state(outcome)
     }
   end
-
-  defp outcome_from_map(%{"state" => "pending"}), do: pending_outcome(0)
 
   defp outcome_from_map(
          %{
@@ -265,19 +307,48 @@ defmodule Accrue.Entitlements.Offline.Reconnect do
     }
   end
 
-  defp outcome_from_map(_), do: pending_outcome(0)
+  defp outcome_from_map(_), do: :resume
 
-  defp pending_map(now), do: %{"state" => "pending", "started_at" => DateTime.to_iso8601(now)}
+  defp replay_admission(device, challenge, outcome) do
+    case outcome_from_map(outcome) do
+      %Outcome{} = terminal -> {:ok, {:replay, terminal}}
+      :resume -> {:ok, {:resume, device, challenge}}
+    end
+  end
 
-  defp pending_outcome(due_source_count),
-    do: %Outcome{
-      disposition: :pending,
-      reason: :pending,
-      next_action: :reconnect_required,
-      due_source_count: due_source_count
+  defp admission_map(request, now) do
+    %{
+      "state" => "admitted",
+      "attempt_version" => 1,
+      "started_at" => DateTime.to_iso8601(now),
+      # The request binding itself remains in dedicated challenge columns. This
+      # outbox stores only bounded, one-way diagnostic values.
+      "request" => %{
+        "idempotency_digest" => digest(request.idempotency_key),
+        "client_revision" => bounded_revision(request.client_revision)
+      },
+      "repair_outbox" => %{"state" => "scheduled", "scheduled_at" => DateTime.to_iso8601(now)}
     }
+  end
+
+  defp repair_outbox_state(%Outcome{reason: :needs_repair}),
+    do: %{"state" => "repair_escalated", "reason" => "repair_enqueue_failed"}
+
+  defp repair_outbox_state(%Outcome{disposition: disposition})
+       when disposition in [:pending, :needs_repair],
+       do: %{"state" => "enqueued"}
+
+  defp repair_outbox_state(_), do: %{"state" => "not_required"}
 
   defp outcome_for_result({:ok, outcome}), do: outcome
+
+  defp outcome_for_result({:error, :repair_enqueue_failed}),
+    do: %Outcome{
+      disposition: :needs_repair,
+      reason: :needs_repair,
+      next_action: :reconnect_required,
+      due_source_count: 0
+    }
 
   defp outcome_for_result({:error, _}),
     do: %Outcome{
@@ -338,6 +409,70 @@ defmodule Accrue.Entitlements.Offline.Reconnect do
       _ -> false
     end
   end
+
+  defp after_admission(opts) do
+    case Keyword.get(opts, :after_admission) do
+      callback when is_function(callback, 0) ->
+        case callback.() do
+          :ok -> :ok
+          _ -> {:error, :admission_interrupted}
+        end
+
+      _ ->
+        :ok
+    end
+  end
+
+  defp emit_telemetry(result, request, now) do
+    outcome =
+      case result do
+        {:ok, %Outcome{} = value} -> value
+        _ -> nil
+      end
+
+    :telemetry.execute(
+      [:accrue, :entitlements, :offline, :reconnect],
+      %{count: 1, latency_ms: elapsed_ms(now)},
+      %{
+        action: :reconnect,
+        disposition: if(outcome, do: outcome.disposition, else: :rejected),
+        reason: if(outcome, do: outcome.reason, else: result_reason(result)),
+        proof_state: if(outcome && is_binary(outcome.proof), do: :issued, else: :none),
+        revision_delta: revision_delta(request, outcome),
+        due_source_count: if(outcome, do: outcome.due_source_count, else: 0),
+        retry_after: if(outcome, do: outcome.retry_after, else: nil),
+        queue_age_ms: elapsed_ms(now),
+        protocol_version: "v1.59",
+        correlation_hash: correlation_hash(request)
+      }
+    )
+  end
+
+  defp elapsed_ms(now),
+    do: DateTime.diff(DateTime.utc_now(), now, :millisecond) |> max(0) |> min(86_400_000)
+
+  defp correlation_hash(%Request{idempotency_key: key}) when is_binary(key), do: digest(key)
+  defp correlation_hash(_), do: nil
+  defp bounded_revision(value) when is_integer(value) and value >= 0, do: value
+  defp bounded_revision(_), do: nil
+
+  defp revision_delta(%Request{client_revision: client}, %Outcome{revision: revision})
+       when is_integer(client) and is_integer(revision),
+       do: (revision - client) |> max(-1_000_000) |> min(1_000_000)
+
+  defp revision_delta(_, _), do: nil
+
+  defp result_reason({:error, reason})
+       when reason in [
+              :unauthorized,
+              :invalid_request,
+              :challenge_invalid,
+              :admission_interrupted,
+              :persistence_failed
+            ],
+       do: reason
+
+  defp result_reason(_), do: :rejected
 
   defp signing_input(account, installation, challenge, nonce, key),
     do:
