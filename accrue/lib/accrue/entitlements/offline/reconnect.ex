@@ -43,11 +43,20 @@ defmodule Accrue.Entitlements.Offline.Reconnect do
           {:ok, outcome}
 
         {:new, device, challenge} ->
-          with {:ok, statuses} <- due_statuses(account, now, opts),
-               {:ok, refreshed} <- refresh_due(account, statuses, now, opts),
-               {:ok, outcome} <- settle(account, device, request, refreshed, now, opts),
-               :ok <- persist_outcome(challenge, outcome, opts) do
-            {:ok, outcome}
+          result =
+            with {:ok, statuses} <- due_statuses(account, now, opts),
+                 {:ok, refreshed} <- refresh_due(account, statuses, now, opts),
+                 {:ok, outcome} <- settle(account, device, request, refreshed, now, opts) do
+              {:ok, outcome}
+            end
+
+          # A consumed challenge always has a durable, typed terminal result.
+          # This also turns provider failures into replayable repair outcomes.
+          outcome = outcome_for_result(result)
+
+          case persist_outcome(challenge, outcome, opts) do
+            :ok -> {:ok, outcome}
+            {:error, _} -> {:ok, pending_outcome(outcome.due_source_count)}
           end
       end
     else
@@ -180,7 +189,8 @@ defmodule Accrue.Entitlements.Offline.Reconnect do
                repo.update(
                  Challenge.changeset(challenge, %{
                    consumed_at: now,
-                   idempotency_digest: digest(request.idempotency_key)
+                   idempotency_digest: digest(request.idempotency_key),
+                   reconnect_outcome: pending_map(now)
                  })
                ) do
           {:ok, {:new, device, challenge}}
@@ -192,10 +202,9 @@ defmodule Accrue.Entitlements.Offline.Reconnect do
             reconnect_outcome: outcome
           } = challenge
           when not is_nil(consumed_at) and is_map(outcome) ->
-            if stored_digest == digest(request.idempotency_key) and
-                 challenge.installation_id == request.installation_id,
-               do: {:ok, {:replay, outcome_from_map(outcome)}},
-               else: repo.rollback(:challenge_invalid)
+            if replay_binding?(account, device, challenge, request, stored_digest),
+              do: {:ok, {:replay, outcome_from_map(outcome)}},
+              else: repo.rollback(:challenge_invalid)
 
           _ ->
             repo.rollback(:challenge_invalid)
@@ -218,13 +227,72 @@ defmodule Accrue.Entitlements.Offline.Reconnect do
     end
   end
 
-  defp outcome_map(outcome),
-    do:
-      outcome |> Map.from_struct() |> Map.new(fn {key, value} -> {Atom.to_string(key), value} end)
+  defp outcome_map(%Outcome{} = outcome) do
+    %{
+      "state" => "final",
+      "disposition" => Atom.to_string(outcome.disposition),
+      "reason" => Atom.to_string(outcome.reason),
+      "next_action" => Atom.to_string(outcome.next_action),
+      "retry_after" => outcome.retry_after,
+      "proof" => outcome.proof,
+      "revision" => outcome.revision,
+      "due_source_count" => outcome.due_source_count
+    }
+  end
 
-  defp outcome_from_map(map),
+  defp outcome_from_map(%{"state" => "pending"}), do: pending_outcome(0)
+
+  defp outcome_from_map(
+         %{
+           "state" => "final",
+           "disposition" => disposition,
+           "reason" => reason,
+           "next_action" => next_action,
+           "due_source_count" => due_source_count
+         } = map
+       )
+       when disposition in ["issued", "pending", "needs_repair"] and
+              reason in ["ok", "pending", "needs_repair"] and
+              next_action in ["none", "reconnect_required"] and is_integer(due_source_count) do
+    %Outcome{
+      disposition: String.to_existing_atom(disposition),
+      reason: String.to_existing_atom(reason),
+      next_action: String.to_existing_atom(next_action),
+      retry_after: map["retry_after"],
+      proof: map["proof"],
+      revision: map["revision"],
+      due_source_count: due_source_count
+    }
+  end
+
+  defp outcome_from_map(_), do: pending_outcome(0)
+
+  defp pending_map(now), do: %{"state" => "pending", "started_at" => DateTime.to_iso8601(now)}
+
+  defp pending_outcome(due_source_count),
+    do: %Outcome{
+      disposition: :pending,
+      reason: :pending,
+      next_action: :reconnect_required,
+      due_source_count: due_source_count
+    }
+
+  defp outcome_for_result({:ok, outcome}), do: outcome
+
+  defp outcome_for_result({:error, _}),
+    do: %Outcome{
+      disposition: :needs_repair,
+      reason: :needs_repair,
+      next_action: :reconnect_required,
+      due_source_count: 0
+    }
+
+  defp replay_binding?(account, device, challenge, request, stored_digest),
     do:
-      struct(Outcome, Map.new(map, fn {key, value} -> {String.to_existing_atom(key), value} end))
+      stored_digest == digest(request.idempotency_key) and
+        challenge.installation_id == request.installation_id and
+        challenge.nonce_digest == digest(request.nonce) and
+        valid_signature?(account, device, challenge, request)
 
   defp validate_request(%Request{} = request) do
     if Enum.all?(
