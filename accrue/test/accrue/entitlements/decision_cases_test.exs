@@ -160,12 +160,13 @@ defmodule Accrue.Entitlements.DecisionCasesTest do
     end)
   end
 
-  test "offline corpus preserves the prior deny cache when replacement faults before rename" do
+  test "offline corpus preserves the authenticated prior cache when replacement faults before rename" do
     vector =
       Accrue.Entitlements.DecisionCases.Export.offline_vectors()
       |> Enum.find(&(&1.id == "fault_before_replace"))
 
-    assert vector.expected_cache_disposition == "deny"
+    assert vector.expected_cache_disposition == "allow"
+    assert vector.verification_context.accepted_disposition == :allow
   end
 
   test "offline corpus declares every required fail-closed verifier case" do
