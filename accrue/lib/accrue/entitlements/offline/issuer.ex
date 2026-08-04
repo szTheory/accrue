@@ -89,8 +89,10 @@ defmodule Accrue.Entitlements.Offline.Issuer do
     end
   end
 
-  defp disposition(_, %Device{state: :revoked}, request),
-    do: {:deny, request.denial_reason || :device_revoked}
+  defp disposition(_, %Device{state: state}, request) when state in [:revoked, :superseded],
+    do:
+      {:deny,
+       request.denial_reason || if(state == :revoked, do: :device_revoked, else: :superseded)}
 
   defp disposition(snapshot, _, _)
        when snapshot.plans == [] and snapshot.features == [] and
@@ -150,7 +152,8 @@ defmodule Accrue.Entitlements.Offline.Issuer do
   defp kid(compact) do
     with [header | _] <- String.split(compact, "."),
          {:ok, json} <- Base.url_decode64(header, padding: false),
-         %{"kid" => kid} <- Jason.decode!(json),
+         {:ok, %{"kid" => kid}} <- Jason.decode(json),
+         true <- is_binary(kid) and byte_size(kid) in 1..128,
          do: {:ok, kid},
          else: (_ -> {:error, :config_invalid})
   end
