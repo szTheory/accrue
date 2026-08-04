@@ -66,7 +66,7 @@ public enum OfflineGoldenVectorVerifier {
             }
         }
 
-        let observations = candidateCorpus.vectors.map { observe($0) }.sorted { $0.id < $1.id }
+        let observations = try candidateCorpus.vectors.map { try observe($0, jwks: candidateCorpus.publicJwks) }.sorted { $0.id < $1.id }
         for (vector, observation) in zip(candidateCorpus.vectors.sorted { $0.id < $1.id }, observations) {
             guard vector.expectedReason == observation.reason,
                   vector.expectedCacheDisposition == observation.cache.rawValue
@@ -161,14 +161,24 @@ public enum OfflineGoldenVectorVerifier {
         if candidate.faultPoint != expected.faultPoint { throw GoldenVectorContractError.vectorField(candidate.id, "fault_point") }
     }
 
-    private static func observe(_ vector: Vector) -> GoldenVectorObservation {
-        // The semantic outcome remains independently checked by CryptoKit below for
-        // valid compact proofs; fixture metadata is exact-bound before observation.
-        let result: GoldenVectorResult = vector.expectedState == "invalid" ? .reject : .accept
-        return GoldenVectorObservation(id: vector.id, result: result, reason: vector.expectedReason, cache: GoldenVectorCache(rawValue: vector.expectedCacheDisposition)!)
+    private static func observe(_ vector: Vector, jwks: [String: [TestKey]]) throws -> GoldenVectorObservation {
+        let context = try Context(vector.verificationContext)
+        do {
+            let payload = try verify(vector.compactJWS, keys: context.hasLocalKey ? (jwks["keys"] ?? []) : [], context: context)
+            let state: String
+            let reason: String
+            if payload.disposition == .deny { state = "denied"; reason = "signed_denial" }
+            else if payload.freshUntil > context.now { state = "fresh"; reason = "ok" }
+            else { state = "stale_offline"; reason = "revalidation_due" }
+            guard state == vector.expectedState else { throw GoldenVectorContractError.expectationMismatch(vector.id) }
+            let cache: GoldenVectorCache = vector.faultPoint == "before_rename" ? .deny : (payload.disposition == .deny ? .deny : .allow)
+            return GoldenVectorObservation(id: vector.id, result: .accept, reason: reason, cache: cache)
+        } catch let error as GoldenVectorError {
+            return GoldenVectorObservation(id: vector.id, result: .reject, reason: error.reason, cache: context.prior)
+        }
     }
 
-    private static func verify(_ compact: String, key: TestKey, context: Context) throws -> Payload {
+    private static func verify(_ compact: String, keys: [TestKey], context: Context) throws -> Payload {
         let parts = compact.split(separator: ".", omittingEmptySubsequences: false)
         guard parts.count == 3,
               let headerData = Data(base64URLEncoded: String(parts[0])),
@@ -176,8 +186,9 @@ public enum OfflineGoldenVectorVerifier {
               let signatureData = Data(base64URLEncoded: String(parts[2])), signatureData.count == 64,
               let header = try JSONSerialization.jsonObject(with: headerData) as? [String: Any]
         else { throw GoldenVectorError.malformed }
-        guard header["alg"] as? String == "ES256", header["kid"] as? String == "accrue-v1.59-offline-test-only"
-        else { throw GoldenVectorError.algorithm }
+        guard header["alg"] as? String == "ES256" else { throw GoldenVectorError.algorithm }
+        guard header["typ"] as? String == "accrue-entitlement-proof+jwt" else { throw GoldenVectorError.type }
+        guard let kid = header["kid"] as? String, let key = keys.first(where: { $0.kid == kid }) else { throw GoldenVectorError.key }
         let publicKey: P256.Signing.PublicKey
         do { publicKey = try P256.Signing.PublicKey(x963Representation: key.point) }
         catch { throw GoldenVectorError.key }
@@ -186,13 +197,13 @@ public enum OfflineGoldenVectorVerifier {
         let rawPayload = try JSONSerialization.jsonObject(with: payloadData)
         guard let values = rawPayload as? [String: Any] else { throw GoldenVectorError.malformed }
         let payload = try Payload(values: values)
-        guard payload.iss == "accrue.test.offline" else { throw GoldenVectorError.issuer }
-        guard payload.aud == "accrue-offline-client" else { throw GoldenVectorError.audience }
-        guard payload.typ == "accrue-entitlement" else { throw GoldenVectorError.type }
+        guard payload.iss == context.issuer else { throw GoldenVectorError.issuer }
+        guard payload.aud == context.audience else { throw GoldenVectorError.audience }
         guard payload.accountID == context.account else { throw GoldenVectorError.account }
-        guard payload.deviceID == context.device else { throw GoldenVectorError.device }
-        guard payload.cnf == "test-thumbprint" else { throw GoldenVectorError.thumbprint }
+        guard payload.cnf == context.thumbprint else { throw GoldenVectorError.device }
+        guard context.clockNow <= context.now else { throw GoldenVectorError.clock }
         guard payload.revision >= context.revision else { throw GoldenVectorError.rollback }
+        guard !(payload.revision == context.revision && context.prior == .deny && payload.disposition == .allow) else { throw GoldenVectorError.rollback }
         guard payload.iat >= context.iat else { throw GoldenVectorError.iat }
         guard payload.freshUntil >= context.freshness, payload.freshUntil >= context.now else { throw GoldenVectorError.freshness }
         return payload
@@ -245,31 +256,38 @@ public enum OfflineGoldenVectorVerifier {
     }
     private struct Expected: Decodable { let disposition: String }
     private struct Payload {
-        let iss, aud, typ: String
-        let accountID, deviceID, cnf: String
+        let iss, aud: String
+        let accountID, cnf: String
         let revision, iat, freshUntil: Int64
         let disposition: Disposition
 
         init(values: [String: Any]) throws {
             guard let iss = values["iss"] as? String,
                   let aud = values["aud"] as? String,
-                  let typ = values["typ"] as? String,
-                  let accountID = values["account_id"] as? String,
-                  let deviceID = values["device_id"] as? String,
-                  let cnf = values["cnf"] as? String
+                  let accountID = values["sub"] as? String,
+                  let cnf = (values["cnf"] as? [String: Any])?["jkt"] as? String
             else { throw GoldenVectorError.malformed }
             guard let revision = values["revision"] as? Int64 else { throw GoldenVectorError.revision }
             guard let iat = values["iat"] as? Int64 else { throw GoldenVectorError.iat }
             guard let freshUntil = values["fresh_until"] as? Int64 else { throw GoldenVectorError.freshness }
             guard let disposition = Disposition(rawValue: values["disposition"] as? String ?? "") else { throw GoldenVectorError.disposition }
-            self.iss = iss; self.aud = aud; self.typ = typ; self.accountID = accountID; self.deviceID = deviceID; self.cnf = cnf
+            self.iss = iss; self.aud = aud; self.accountID = accountID; self.cnf = cnf
             self.revision = revision; self.iat = iat; self.freshUntil = freshUntil; self.disposition = disposition
         }
     }
     private enum Disposition: String { case allow, deny }
-    private struct TestKey: Decodable { let x: String; let y: String; var point: Data { Data([4]) + Data(base64URLEncoded: x)! + Data(base64URLEncoded: y)! }; static let invalid = TestKey(x: "bad", y: "bad") }
-    private struct Context { let account, device: String; let revision, iat, freshness, now: Int64; let prior: GoldenVectorCache; let wrongKey: Bool; static func forVector(_ id: String) -> Context { switch id { case "wrong_key": return Context(account: "account-123", device: "device-123", revision: 0, iat: 0, freshness: 1_700_000_001, now: 1_700_000_001, prior: .allow, wrongKey: true); case "wrong_device": return Context(account: "account-123", device: "device-999", revision: 0, iat: 0, freshness: 1_700_000_001, now: 1_700_000_001, prior: .allow, wrongKey: false); case "rollback": return Context(account: "account-123", device: "device-123", revision: 6, iat: 1_700_000_000, freshness: 1_700_000_001, now: 1_700_000_001, prior: .deny, wrongKey: false); case "older_iat": return Context(account: "account-123", device: "device-123", revision: 5, iat: 1_700_000_001, freshness: 1_700_000_001, now: 1_700_000_001, prior: .deny, wrongKey: false); case "stale_freshness": return Context(account: "account-123", device: "device-123", revision: 5, iat: 1_700_000_000, freshness: 1_700_003_601, now: 1_700_000_001, prior: .allow, wrongKey: false); case "fault_before_replace": return Context(account: "account-123", device: "device-123", revision: 0, iat: 0, freshness: 1_700_000_001, now: 1_700_000_001, prior: .deny, wrongKey: false); default: return Context(account: "account-123", device: "device-123", revision: 0, iat: 0, freshness: 1_700_000_001, now: 1_700_000_001, prior: .allow, wrongKey: false) } } }
-    private enum GoldenVectorError: Error { case malformed, signature, key, algorithm, issuer, audience, type, account, device, thumbprint, revision, rollback, iat, freshness, disposition; var reason: String { switch self { case .malformed: "malformed"; case .signature: "signature"; case .key: "key"; case .algorithm: "algorithm"; case .issuer: "issuer"; case .audience: "audience"; case .type: "type"; case .account: "account"; case .device: "device"; case .thumbprint: "thumbprint"; case .revision: "revision"; case .rollback: "rollback"; case .iat: "iat"; case .freshness: "freshness"; case .disposition: "disposition" } } }
+    private struct TestKey: Decodable { let kid: String; let x: String; let y: String; var point: Data { Data([4]) + Data(base64URLEncoded: x)! + Data(base64URLEncoded: y)! } }
+    private struct Context {
+        let issuer, audience, account, thumbprint: String; let revision, iat, freshness, now, clockNow: Int64; let prior: GoldenVectorCache; let hasLocalKey: Bool
+        init(_ values: [String: JSONValue]) throws {
+            guard case let .string(issuer)? = values["issuer"], case let .string(audience)? = values["audience"], case let .string(account)? = values["account_subject"], case let .string(thumbprint)? = values["device_thumbprint"], case let .integer(revision)? = values["accepted_revision"], case let .integer(iat)? = values["accepted_iat"], case let .integer(freshness)? = values["accepted_fresh_until"], case let .integer(now)? = values["now"] else { throw GoldenVectorError.malformed }
+            self.issuer = issuer; self.audience = audience; self.account = account; self.thumbprint = thumbprint; self.revision = revision; self.iat = iat; self.freshness = freshness; self.now = now
+            self.prior = (values["accepted_disposition"] == .string("deny")) ? .deny : .allow
+            self.hasLocalKey = values["public_keys"] != .array([])
+            if case let .object(high)? = values["clock_high_water"], case let .integer(clockNow)? = high["now"] { self.clockNow = clockNow } else { self.clockNow = 0 }
+        }
+    }
+    private enum GoldenVectorError: Error { case malformed, signature, key, algorithm, issuer, audience, type, account, device, thumbprint, revision, rollback, iat, freshness, disposition, clock; var reason: String { switch self { case .malformed, .signature, .type, .algorithm, .account, .revision, .iat, .freshness, .disposition: "malformed"; case .key: "unknown_key"; case .issuer: "wrong_issuer"; case .audience: "wrong_audience"; case .device, .thumbprint: "device_mismatch"; case .rollback: "superseded"; case .clock: "clock_rollback" } } }
     private enum GoldenVectorContractError: Error, CustomStringConvertible {
         case topLevel(String)
         case vectorField(String, String)
