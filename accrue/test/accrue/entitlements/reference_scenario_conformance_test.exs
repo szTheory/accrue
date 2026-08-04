@@ -89,6 +89,25 @@ defmodule Accrue.Entitlements.ReferenceScenarioConformanceTest do
     assert "feasibility_blocked" == capability_report()["overall_status"]
   end
 
+  @tag :action_dispatch_tracer
+  test "refund revocation dispatches its ordered grant and retract observations" do
+    scenario = ReferenceScenarios.fetch!("refund_revocation")
+
+    assert [
+             %{kind: "grant_observation", order: 1, operation: grant},
+             %{kind: "refund_observation", order: 2, operation: retract}
+           ] = scenario.actions
+
+    account = account!("refund-action-dispatch")
+
+    assert {:ok, _} = dispatch_observation(account, grant)
+    assert {:ok, _} = dispatch_observation(account, retract)
+    assert {:ok, snapshot} = Accrue.Entitlements.snapshot(account)
+
+    assert snapshot.plans == []
+    assert snapshot.sources == []
+  end
+
   test "every deterministic row has a closed production execution input" do
     deterministic_ids =
       ReferenceScenarios.all()
