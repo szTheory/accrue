@@ -248,6 +248,7 @@ defmodule Accrue.Entitlements.Offline.Proof do
          {:ok, plans} <- normalized_strings(payload["plans"]),
          {:ok, features} <- normalized_strings(payload["features"]),
          {:ok, quantities} <- normalized_quantities(payload["quantities"]),
+         :ok <- validate_allow_authority(payload["disposition"], plans, features, quantities),
          :ok <- validate_denial(payload) do
       {:ok,
        %Claims{
@@ -345,7 +346,7 @@ defmodule Accrue.Entitlements.Offline.Proof do
       claims: claims
     }
 
-  defp classify(%Claims{fresh_until: fresh_until} = claims, now) when fresh_until >= now,
+  defp classify(%Claims{fresh_until: fresh_until} = claims, now) when fresh_until > now,
     do: %Decision{state: :fresh, reason: :ok, next_action: :none, claims: claims}
 
   defp classify(claims, _now),
@@ -369,6 +370,15 @@ defmodule Accrue.Entitlements.Offline.Proof do
 
   defp validate_denial(%{"disposition" => "deny"}), do: :ok
   defp validate_denial(_), do: {:error, :malformed}
+
+  # A signed allow without at least one effective entitlement is indistinguishable
+  # from an accidental empty snapshot. Issuers must publish a deny tombstone instead.
+  defp validate_allow_authority("allow", [], [], quantities) when map_size(quantities) == 0,
+    do: {:error, :malformed}
+
+  defp validate_allow_authority("allow", _plans, _features, _quantities), do: :ok
+  defp validate_allow_authority("deny", _plans, _features, _quantities), do: :ok
+  defp validate_allow_authority(_, _, _, _), do: {:error, :malformed}
 
   defp normalized_strings(values) when is_list(values) and length(values) <= @max_collection do
     if Enum.all?(values, &bounded_string?(&1, @max_string)) and values == Enum.sort(values) and

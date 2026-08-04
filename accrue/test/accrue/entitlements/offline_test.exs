@@ -14,7 +14,8 @@ defmodule Accrue.Entitlements.OfflineTest do
       base = verification_context(public_key, 1_700_003_600)
       proof = compact(signing_key, claims(base, %{"exp" => 1_700_400_000}))
 
-      assert {:ok, %{state: :fresh, reason: :ok}} = Offline.verify(proof, %{base | now: 1_700_003_599})
+      assert {:ok, %{state: :fresh, reason: :ok}} =
+               Offline.verify(proof, %{base | now: 1_700_003_599})
 
       assert {:ok, %{state: :stale_offline, reason: :revalidation_due}} =
                Offline.verify(proof, base)
@@ -50,7 +51,20 @@ defmodule Accrue.Entitlements.OfflineTest do
       deny_context = %{base | accepted_revision: 2, accepted_disposition: :deny}
 
       assert {:ok, %{state: :denied, reason: :signed_denial}} =
-               Offline.verify(compact(signing_key, claims(base, %{"revision" => 2, "disposition" => "deny", "denial_reason" => "access_unavailable", "plans" => [], "features" => [], "quantities" => %{}})), deny_context)
+               Offline.verify(
+                 compact(
+                   signing_key,
+                   claims(base, %{
+                     "revision" => 2,
+                     "disposition" => "deny",
+                     "denial_reason" => "access_unavailable",
+                     "plans" => [],
+                     "features" => [],
+                     "quantities" => %{}
+                   })
+                 ),
+                 deny_context
+               )
 
       for {context, changes} <- [
             {%{base | accepted_revision: 2}, %{"revision" => 1}},
@@ -90,19 +104,69 @@ defmodule Accrue.Entitlements.OfflineTest do
     |> Jason.decode!()
   end
 
-  defp public_key(key), do: key |> Map.take(["kty", "crv", "kid", "x", "y"]) |> Map.merge(%{"use" => "sig", "alg" => "ES256"})
+  defp public_key(key),
+    do:
+      key
+      |> Map.take(["kty", "crv", "kid", "x", "y"])
+      |> Map.merge(%{"use" => "sig", "alg" => "ES256"})
 
   defp verification_context(key, now) do
-    %{issuer: @issuer, audience: @audience, account_subject: "account-123", installation_id: "device-123", device_thumbprint: thumbprint(key), now: now, clock_high_water: %{revision: 0, iat: 0, fresh_until: 0}, accepted_revision: 0, accepted_disposition: nil, accepted_iat: 0, accepted_fresh_until: 0, public_keys: [key]}
+    %{
+      issuer: @issuer,
+      audience: @audience,
+      account_subject: "account-123",
+      installation_id: "device-123",
+      device_thumbprint: thumbprint(key),
+      now: now,
+      clock_high_water: %{revision: 0, iat: 0, fresh_until: 0},
+      accepted_revision: 0,
+      accepted_disposition: nil,
+      accepted_iat: 0,
+      accepted_fresh_until: 0,
+      public_keys: [key]
+    }
   end
 
   defp claims(context, changes \\ %{}) do
-    Map.merge(%{"version" => "v1.59", "iss" => @issuer, "aud" => @audience, "jti" => "token-123", "sub" => context.account_subject, "cnf" => %{"jkt" => context.device_thumbprint}, "revision" => 1, "iat" => 1_700_000_000, "nbf" => 1_700_000_000, "fresh_until" => 1_700_003_600, "exp" => 1_700_007_200, "disposition" => "allow", "plans" => ["pro"], "features" => ["offline_study"], "quantities" => %{"downloads" => 3}}, changes)
+    Map.merge(
+      %{
+        "version" => "v1.59",
+        "iss" => @issuer,
+        "aud" => @audience,
+        "jti" => "token-123",
+        "sub" => context.account_subject,
+        "cnf" => %{"jkt" => context.device_thumbprint},
+        "revision" => 1,
+        "iat" => 1_700_000_000,
+        "nbf" => 1_700_000_000,
+        "fresh_until" => 1_700_003_600,
+        "exp" => 1_700_007_200,
+        "disposition" => "allow",
+        "plans" => ["pro"],
+        "features" => ["offline_study"],
+        "quantities" => %{"downloads" => 3}
+      },
+      changes
+    )
   end
 
   defp compact(key, payload) do
-    key |> JOSE.JWK.from() |> JOSE.JWS.sign(Jason.encode!(payload), %{"alg" => "ES256", "typ" => "accrue-entitlement-proof+jwt", "kid" => @kid}) |> JOSE.JWS.compact() |> elem(1)
+    key
+    |> JOSE.JWK.from()
+    |> JOSE.JWS.sign(Jason.encode!(payload), %{
+      "alg" => "ES256",
+      "typ" => "accrue-entitlement-proof+jwt",
+      "kid" => @kid
+    })
+    |> JOSE.JWS.compact()
+    |> elem(1)
   end
 
-  defp thumbprint(key), do: key |> Map.take(["crv", "kty", "x", "y"]) |> Jason.encode!() |> then(&:crypto.hash(:sha256, &1)) |> Base.url_encode64(padding: false)
+  defp thumbprint(key),
+    do:
+      key
+      |> Map.take(["crv", "kty", "x", "y"])
+      |> Jason.encode!()
+      |> then(&:crypto.hash(:sha256, &1))
+      |> Base.url_encode64(padding: false)
 end
