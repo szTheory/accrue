@@ -4,17 +4,17 @@ milestone: v1.59
 milestone_name: Account-Scoped Multi-Rail & Offline Entitlements
 current_phase: 219
 current_phase_name: offline-study-contract
-status: executing
-stopped_at: Completed 219-04-PLAN.md
-last_updated: "2026-08-04T00:46:22.404Z"
+status: verifying
+stopped_at: Completed 219-05-PLAN.md
+last_updated: "2026-08-04T01:04:36.765Z"
 last_activity: 2026-08-03
 last_activity_desc: Phase 219 execution started
 progress:
   total_phases: 6
-  completed_phases: 4
+  completed_phases: 5
   total_plans: 47
-  completed_plans: 46
-  percent: 67
+  completed_plans: 47
+  percent: 83
 ---
 
 # Project State
@@ -31,7 +31,7 @@ See: `.planning/PROJECT.md` (updated 2026-08-01 after completing Phase 215)
 
 Phase: 219 (offline-study-contract) — EXECUTING
 Plan: 5 of 5
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-08-03 — Phase 219 execution started
 
 ## Post-v1.48 Pause Rule
@@ -416,6 +416,7 @@ Coverage: 22/22 v1.51 requirements mapped (each REQ-ID → exactly one phase). D
 | Phase 219 P02 | 4min | 2 tasks | 3 files |
 | Phase 219 P03 | 8m | 2 tasks | 8 files |
 | Phase 219-offline-study-contract P04 | 6m | 2 tasks | 8 files |
+| Phase 219-offline-study-contract P05 | 25m | 2 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -975,8 +976,8 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 
 ## Session Continuity
 
-Last session: 2026-08-04T00:46:22.391Z
-Stopped at: Completed 219-04-PLAN.md
+Last session: 2026-08-04T01:04:36.745Z
+Stopped at: Completed 219-05-PLAN.md
 Resume file: None
 
 ## Operator Next Steps

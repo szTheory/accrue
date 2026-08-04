@@ -261,7 +261,7 @@ Plans:
   4. Host code can distinguish fresh, stale-offline, denied, and invalid proof states with bounded reasons while existing boolean gate return types remain compatible.
   5. Reconnect authenticates account and device, refreshes due rails, and atomically replaces cached proof with a newer allow proof or signed deny tombstone; copied, replayed, wrong-device, rollback, revoked-device, and rotated-key proofs fail safely.
 
-**Plans**: 4/5 plans executed
+**Plans**: 5/5 plans executed
 
 Plans:
 **Wave 1**
@@ -282,7 +282,7 @@ Plans:
 
 **Wave 5** *(blocked on Wave 4 completion)*
 
-- [ ] 219-05-PLAN.md — Prove full Elixir/Swift corpus parity and authenticated atomic cache replacement.
+- [x] 219-05-PLAN.md — Prove full Elixir/Swift corpus parity and authenticated atomic cache replacement.
 
 ### Phase 220: First-adopter proof and release gates
 
@@ -312,5 +312,5 @@ Plans:
 | 216. Additive rail and persistence foundation | v1.59 | 6/6 | Complete    | 2026-08-02 |
 | 217. Canonical projection and compatibility | v1.59 | 5/5 | Complete | 2026-08-02 |
 | 218. Apple observation and repair | v1.59 | 16/16 | Complete    | 2026-08-03 |
-| 219. Offline study contract | v1.59 | 4/5 | In Progress|  |
+| 219. Offline study contract | v1.59 | 5/5 | In Progress|  |
 | 220. First-adopter proof and release gates | v1.59 | 0/TBD | Not started | - |
