@@ -18,6 +18,7 @@ defmodule Accrue.Entitlements.AdminTest do
   use Accrue.BillingCase, async: false
 
   alias Accrue.Entitlements.Admin
+  alias Accrue.Entitlements.Account
   alias Accrue.Entitlements.Reconcile
   alias Accrue.Billing.EntitlementSummary
   alias Accrue.TestRepo
@@ -407,6 +408,83 @@ defmodule Accrue.Entitlements.AdminTest do
 
       assert_raise RuntimeError, ~r/unmapped/, fn ->
         Admin.resolve_for_customer(customer)
+      end
+    end
+  end
+
+  describe "diagnostic_for_account/2" do
+    test "returns one closed, privacy-bounded account diagnostic without mutating the account" do
+      {:ok, account} =
+        Account.fetch_or_create(
+          TestRepo,
+          "test",
+          "diagnostic-owner-#{System.unique_integer([:positive])}"
+        )
+
+      revision = account.revision
+
+      assert {:ok, diagnostic} = Admin.diagnostic_for_account(account, repo: TestRepo)
+
+      assert Map.keys(diagnostic) |> Enum.sort() ==
+               [
+                 :account,
+                 :devices,
+                 :eligibility,
+                 :next_action,
+                 :provider,
+                 :recovery,
+                 :snapshot,
+                 :sources
+               ]
+
+      assert diagnostic.account.state == :available
+      assert diagnostic.account.revision == revision
+      assert is_binary(diagnostic.account.correlation)
+
+      assert diagnostic.snapshot == %{
+               state: :available,
+               revision: revision,
+               plans: [],
+               source_count: 0
+             }
+
+      assert diagnostic.sources == []
+
+      assert diagnostic.eligibility == %{
+               state: :unknown,
+               reason: :not_requested,
+               next_action: :review_access
+             }
+
+      assert diagnostic.next_action == :review_access
+
+      refute inspect(diagnostic) =~ account.owner_id
+      refute inspect(diagnostic) =~ account.id
+      assert TestRepo.get!(Account, account.id).revision == revision
+    end
+
+    test "does not expose seeded sensitive values through a diagnostic" do
+      {:ok, account} =
+        Account.fetch_or_create(
+          TestRepo,
+          "test",
+          "secret-owner-#{System.unique_integer([:positive])}"
+        )
+
+      assert {:ok, diagnostic} = Admin.diagnostic_for_account(account, repo: TestRepo)
+
+      rendered = inspect(diagnostic)
+
+      for forbidden <- [
+            "secret-owner",
+            "raw-transaction",
+            "raw-receipt",
+            "account-token",
+            "proof-bytes",
+            "metadata",
+            "oban"
+          ] do
+        refute rendered =~ forbidden
       end
     end
   end
