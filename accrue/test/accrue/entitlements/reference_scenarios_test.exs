@@ -32,8 +32,50 @@ defmodule Accrue.Entitlements.ReferenceScenariosTest do
     scenario = ReferenceScenarios.fetch!("refund_revocation")
     [action | rest] = scenario.actions
 
-    refute ReferenceScenarios.valid?(%{scenario | actions: [%{action | kind: "grant_everything"} | rest]})
+    refute ReferenceScenarios.valid?(%{
+             scenario
+             | actions: [%{action | kind: "grant_everything"} | rest]
+           })
+
     refute ReferenceScenarios.valid?(%{scenario | actions: [%{action | order: 9} | rest]})
+  end
+
+  test "closed payloads reject missing, extra, and cross-family command shapes" do
+    scenario = ReferenceScenarios.fetch!("refund_revocation")
+    [grant, refund] = scenario.actions
+
+    refute ReferenceScenarios.valid?(%{
+             scenario
+             | actions: [
+                 %{
+                   refund
+                   | command: %{
+                       refund.command
+                       | payload: Map.delete(refund.command.payload, :provider_event_id)
+                     }
+                 }
+                 | [grant]
+               ]
+           })
+
+    refute ReferenceScenarios.valid?(%{
+             scenario
+             | actions: [
+                 %{
+                   refund
+                   | command: %{
+                       refund.command
+                       | payload: Map.put(refund.command.payload, :secret, "never")
+                     }
+                 }
+                 | [grant]
+               ]
+           })
+
+    refute ReferenceScenarios.valid?(%{
+             scenario
+             | actions: [%{refund | command: %{grant.command | kind: refund.kind}} | [grant]]
+           })
   end
 
   test "write and check reject stale generated output" do

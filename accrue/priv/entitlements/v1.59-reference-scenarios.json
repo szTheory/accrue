@@ -10,23 +10,67 @@
           "kind": "apple_verified_purchase",
           "order": 1,
           "at": "2026-08-04T12:00:00Z",
-          "operation": {
-            "rail": "apple",
-            "environment": "production",
-            "logical_product": "pro",
-            "provider_product_id": "product_pro",
-            "provider_event_id": "scenario_apple_web_event",
-            "provider_transaction_id": "scenario_apple_web_transaction",
-            "provider_lineage_id": "scenario_apple_web_lineage",
-            "provider_order": 1,
-            "offline_vector": "valid_allow",
-            "offline_action": "read_downloaded_lesson"
+          "command": {
+            "kind": "apple_verified_purchase",
+            "payload": {
+              "account_ref": "reference_scenario_apple_verified_purchase",
+              "clock": "2026-08-04T12:00:00Z",
+              "rail": "apple",
+              "environment": "production",
+              "logical_product": "pro",
+              "provider_product_id": "product_pro",
+              "provider_event_id": "scenario_apple_web_event",
+              "provider_transaction_id": "scenario_apple_web_transaction",
+              "provider_lineage_id": "scenario_apple_web_lineage",
+              "provider_order": 1,
+              "offline_vector": "valid_allow",
+              "offline_action": "read_downloaded_lesson"
+            }
+          },
+          "expected_transition": {
+            "kind": "apple_verified_purchase",
+            "seam": "apple_admission",
+            "result": {
+              "tag": "executed",
+              "disposition": "apple_verified_purchase"
+            },
+            "durable": {
+              "state": "observed",
+              "observation_kind": "grant",
+              "snapshot_revision": 1
+            },
+            "cache": {
+              "disposition": "preserve"
+            }
           }
         },
         {
           "kind": "web_login",
           "order": 2,
-          "at": "2026-08-04T12:00:01Z"
+          "at": "2026-08-04T12:00:01Z",
+          "command": {
+            "kind": "web_login",
+            "payload": {
+              "account_ref": "reference_scenario_web_login",
+              "clock": "2026-08-04T12:00:01Z"
+            }
+          },
+          "expected_transition": {
+            "kind": "web_login",
+            "seam": "snapshot",
+            "result": {
+              "tag": "executed",
+              "disposition": "web_login"
+            },
+            "durable": {
+              "state": "unchanged",
+              "observation_kind": "none",
+              "snapshot_revision": 1
+            },
+            "cache": {
+              "disposition": "preserve"
+            }
+          }
         }
       ],
       "expected": {
@@ -64,23 +108,67 @@
           "kind": "stripe_verified_purchase",
           "order": 1,
           "at": "2026-08-04T12:01:00Z",
-          "operation": {
-            "rail": "stripe",
-            "environment": "production",
-            "logical_product": "pro",
-            "provider_product_id": "price_pro",
-            "provider_event_id": "scenario_stripe_ios_event",
-            "provider_transaction_id": "scenario_stripe_ios_transaction",
-            "provider_lineage_id": "scenario_stripe_ios_lineage",
-            "provider_order": 1,
-            "offline_vector": "valid_allow",
-            "offline_action": "read_downloaded_lesson"
+          "command": {
+            "kind": "stripe_verified_purchase",
+            "payload": {
+              "account_ref": "reference_scenario_stripe_verified_purchase",
+              "clock": "2026-08-04T12:01:00Z",
+              "rail": "stripe",
+              "environment": "production",
+              "logical_product": "pro",
+              "provider_product_id": "price_pro",
+              "provider_event_id": "scenario_stripe_ios_event",
+              "provider_transaction_id": "scenario_stripe_ios_transaction",
+              "provider_lineage_id": "scenario_stripe_ios_lineage",
+              "provider_order": 1,
+              "offline_vector": "valid_allow",
+              "offline_action": "read_downloaded_lesson"
+            }
+          },
+          "expected_transition": {
+            "kind": "stripe_verified_purchase",
+            "seam": "observation_projector",
+            "result": {
+              "tag": "executed",
+              "disposition": "stripe_verified_purchase"
+            },
+            "durable": {
+              "state": "observed",
+              "observation_kind": "grant",
+              "snapshot_revision": 1
+            },
+            "cache": {
+              "disposition": "preserve"
+            }
           }
         },
         {
           "kind": "ios_login",
           "order": 2,
-          "at": "2026-08-04T12:01:01Z"
+          "at": "2026-08-04T12:01:01Z",
+          "command": {
+            "kind": "ios_login",
+            "payload": {
+              "account_ref": "reference_scenario_ios_login",
+              "clock": "2026-08-04T12:01:01Z"
+            }
+          },
+          "expected_transition": {
+            "kind": "ios_login",
+            "seam": "snapshot",
+            "result": {
+              "tag": "executed",
+              "disposition": "ios_login"
+            },
+            "durable": {
+              "state": "unchanged",
+              "observation_kind": "none",
+              "snapshot_revision": 1
+            },
+            "cache": {
+              "disposition": "preserve"
+            }
+          }
         }
       ],
       "expected": {
@@ -118,17 +206,38 @@
           "kind": "purchase_preflight",
           "order": 1,
           "at": "2026-08-04T12:02:00Z",
-          "operation": {
-            "rail": "apple",
-            "environment": "production",
-            "logical_product": "pro",
-            "provider_product_id": "product_pro",
-            "provider_event_id": "reference_duplicate_purchase_prevention_event",
-            "provider_transaction_id": "reference_duplicate_purchase_prevention_transaction",
-            "provider_lineage_id": "reference_duplicate_purchase_prevention_lineage",
-            "provider_order": 1,
-            "offline_vector": "valid_allow",
-            "offline_action": "read_downloaded_lesson"
+          "command": {
+            "kind": "purchase_preflight",
+            "payload": {
+              "account_ref": "reference_scenario_purchase_preflight",
+              "clock": "2026-08-04T12:02:00Z",
+              "rail": "apple",
+              "environment": "production",
+              "logical_product": "pro",
+              "provider_product_id": "product_pro",
+              "provider_event_id": "reference_duplicate_purchase_prevention_event",
+              "provider_transaction_id": "reference_duplicate_purchase_prevention_transaction",
+              "provider_lineage_id": "reference_duplicate_purchase_prevention_lineage",
+              "provider_order": 1,
+              "offline_vector": "valid_allow",
+              "offline_action": "read_downloaded_lesson"
+            }
+          },
+          "expected_transition": {
+            "kind": "purchase_preflight",
+            "seam": "purchase_decision",
+            "result": {
+              "tag": "executed",
+              "disposition": "purchase_preflight"
+            },
+            "durable": {
+              "state": "unchanged",
+              "observation_kind": "none",
+              "snapshot_revision": 1
+            },
+            "cache": {
+              "disposition": "preserve"
+            }
           }
         }
       ],
@@ -167,17 +276,38 @@
           "kind": "offline_proof_stale",
           "order": 1,
           "at": "2026-08-04T12:03:00Z",
-          "operation": {
-            "rail": "stripe",
-            "environment": "production",
-            "logical_product": "pro",
-            "provider_product_id": "price_pro",
-            "provider_event_id": "reference_stale_downloaded_study_continuity_event",
-            "provider_transaction_id": "reference_stale_downloaded_study_continuity_transaction",
-            "provider_lineage_id": "reference_stale_downloaded_study_continuity_lineage",
-            "provider_order": 1,
-            "offline_vector": "valid_allow",
-            "offline_action": "read_downloaded_lesson"
+          "command": {
+            "kind": "offline_proof_stale",
+            "payload": {
+              "account_ref": "reference_scenario_offline_proof_stale",
+              "clock": "2026-08-04T12:03:00Z",
+              "rail": "stripe",
+              "environment": "production",
+              "logical_product": "pro",
+              "provider_product_id": "price_pro",
+              "provider_event_id": "reference_stale_downloaded_study_continuity_event",
+              "provider_transaction_id": "reference_stale_downloaded_study_continuity_transaction",
+              "provider_lineage_id": "reference_stale_downloaded_study_continuity_lineage",
+              "provider_order": 1,
+              "offline_vector": "valid_allow",
+              "offline_action": "read_downloaded_lesson"
+            }
+          },
+          "expected_transition": {
+            "kind": "offline_proof_stale",
+            "seam": "offline_verify_policy",
+            "result": {
+              "tag": "executed",
+              "disposition": "offline_proof_stale"
+            },
+            "durable": {
+              "state": "unchanged",
+              "observation_kind": "none",
+              "snapshot_revision": 1
+            },
+            "cache": {
+              "disposition": "preserve"
+            }
           }
         }
       ],
@@ -217,17 +347,38 @@
           "kind": "offline_expansion_request",
           "order": 1,
           "at": "2026-08-04T12:04:00Z",
-          "operation": {
-            "rail": "stripe",
-            "environment": "production",
-            "logical_product": "pro",
-            "provider_product_id": "price_pro",
-            "provider_event_id": "reference_restricted_expansion_event",
-            "provider_transaction_id": "reference_restricted_expansion_transaction",
-            "provider_lineage_id": "reference_restricted_expansion_lineage",
-            "provider_order": 1,
-            "offline_vector": "stale_at_freshness",
-            "offline_action": "download_lesson"
+          "command": {
+            "kind": "offline_expansion_request",
+            "payload": {
+              "account_ref": "reference_scenario_offline_expansion_request",
+              "clock": "2026-08-04T12:04:00Z",
+              "rail": "stripe",
+              "environment": "production",
+              "logical_product": "pro",
+              "provider_product_id": "price_pro",
+              "provider_event_id": "reference_restricted_expansion_event",
+              "provider_transaction_id": "reference_restricted_expansion_transaction",
+              "provider_lineage_id": "reference_restricted_expansion_lineage",
+              "provider_order": 1,
+              "offline_vector": "stale_at_freshness",
+              "offline_action": "download_lesson"
+            }
+          },
+          "expected_transition": {
+            "kind": "offline_expansion_request",
+            "seam": "offline_verify_policy",
+            "result": {
+              "tag": "executed",
+              "disposition": "offline_expansion_request"
+            },
+            "durable": {
+              "state": "unchanged",
+              "observation_kind": "none",
+              "snapshot_revision": 1
+            },
+            "cache": {
+              "disposition": "preserve"
+            }
           }
         }
       ],
@@ -267,23 +418,67 @@
           "kind": "reconnect_request",
           "order": 1,
           "at": "2026-08-04T12:05:00Z",
-          "operation": {
-            "rail": "stripe",
-            "environment": "production",
-            "logical_product": "pro",
-            "provider_product_id": "price_pro",
-            "provider_event_id": "reference_offline_reconnect_event",
-            "provider_transaction_id": "reference_offline_reconnect_transaction",
-            "provider_lineage_id": "reference_offline_reconnect_lineage",
-            "provider_order": 1,
-            "offline_vector": "valid_allow",
-            "offline_action": "read_downloaded_lesson"
+          "command": {
+            "kind": "reconnect_request",
+            "payload": {
+              "account_ref": "reference_scenario_reconnect_request",
+              "clock": "2026-08-04T12:05:00Z",
+              "rail": "stripe",
+              "environment": "production",
+              "logical_product": "pro",
+              "provider_product_id": "price_pro",
+              "provider_event_id": "reference_offline_reconnect_event",
+              "provider_transaction_id": "reference_offline_reconnect_transaction",
+              "provider_lineage_id": "reference_offline_reconnect_lineage",
+              "provider_order": 1,
+              "offline_vector": "valid_allow",
+              "offline_action": "read_downloaded_lesson"
+            }
+          },
+          "expected_transition": {
+            "kind": "reconnect_request",
+            "seam": "offline_reconnect",
+            "result": {
+              "tag": "executed",
+              "disposition": "reconnect_request"
+            },
+            "durable": {
+              "state": "unchanged",
+              "observation_kind": "none",
+              "snapshot_revision": 1
+            },
+            "cache": {
+              "disposition": "replace"
+            }
           }
         },
         {
           "kind": "verified_cache_replace",
           "order": 2,
-          "at": "2026-08-04T12:05:01Z"
+          "at": "2026-08-04T12:05:01Z",
+          "command": {
+            "kind": "verified_cache_replace",
+            "payload": {
+              "account_ref": "reference_scenario_verified_cache_replace",
+              "clock": "2026-08-04T12:05:01Z"
+            }
+          },
+          "expected_transition": {
+            "kind": "verified_cache_replace",
+            "seam": "offline_verify_cache",
+            "result": {
+              "tag": "executed",
+              "disposition": "verified_cache_replace"
+            },
+            "durable": {
+              "state": "unchanged",
+              "observation_kind": "none",
+              "snapshot_revision": 1
+            },
+            "cache": {
+              "disposition": "replace"
+            }
+          }
         }
       ],
       "expected": {
@@ -322,34 +517,76 @@
           "kind": "grant_observation",
           "order": 1,
           "at": "2026-08-04T12:06:00Z",
-          "operation": {
-            "rail": "apple",
-            "environment": "production",
-            "logical_product": "pro",
-            "provider_product_id": "product_pro",
-            "provider_event_id": "reference_refund_revocation_grant_event",
-            "provider_transaction_id": "reference_refund_revocation_grant_transaction",
-            "provider_lineage_id": "reference_refund_revocation_lineage",
-            "provider_order": 1,
-            "offline_vector": "valid_signed_denial",
-            "offline_action": "read_downloaded_lesson"
+          "command": {
+            "kind": "grant_observation",
+            "payload": {
+              "account_ref": "reference_scenario_grant_observation",
+              "clock": "2026-08-04T12:06:00Z",
+              "rail": "apple",
+              "environment": "production",
+              "logical_product": "pro",
+              "provider_product_id": "product_pro",
+              "provider_event_id": "reference_refund_revocation_grant_event",
+              "provider_transaction_id": "reference_refund_revocation_grant_transaction",
+              "provider_lineage_id": "reference_refund_revocation_lineage",
+              "provider_order": 1,
+              "offline_vector": "valid_signed_denial",
+              "offline_action": "read_downloaded_lesson"
+            }
+          },
+          "expected_transition": {
+            "kind": "grant_observation",
+            "seam": "observation_projector",
+            "result": {
+              "tag": "executed",
+              "disposition": "grant_observation"
+            },
+            "durable": {
+              "state": "observed",
+              "observation_kind": "grant",
+              "snapshot_revision": 2
+            },
+            "cache": {
+              "disposition": "preserve"
+            }
           }
         },
         {
           "kind": "refund_observation",
           "order": 2,
           "at": "2026-08-04T12:06:01Z",
-          "operation": {
-            "rail": "apple",
-            "environment": "production",
-            "logical_product": "pro",
-            "provider_product_id": "product_pro",
-            "provider_event_id": "reference_refund_revocation_refund_event",
-            "provider_transaction_id": "reference_refund_revocation_refund_transaction",
-            "provider_lineage_id": "reference_refund_revocation_lineage",
-            "provider_order": 2,
-            "offline_vector": "valid_signed_denial",
-            "offline_action": "read_downloaded_lesson"
+          "command": {
+            "kind": "refund_observation",
+            "payload": {
+              "account_ref": "reference_scenario_refund_observation",
+              "clock": "2026-08-04T12:06:01Z",
+              "rail": "apple",
+              "environment": "production",
+              "logical_product": "pro",
+              "provider_product_id": "product_pro",
+              "provider_event_id": "reference_refund_revocation_refund_event",
+              "provider_transaction_id": "reference_refund_revocation_refund_transaction",
+              "provider_lineage_id": "reference_refund_revocation_lineage",
+              "provider_order": 2,
+              "offline_vector": "valid_signed_denial",
+              "offline_action": "read_downloaded_lesson"
+            }
+          },
+          "expected_transition": {
+            "kind": "refund_observation",
+            "seam": "observation_projector",
+            "result": {
+              "tag": "executed",
+              "disposition": "refund_observation"
+            },
+            "durable": {
+              "state": "observed",
+              "observation_kind": "retract",
+              "snapshot_revision": 2
+            },
+            "cache": {
+              "disposition": "preserve"
+            }
           }
         }
       ],
@@ -384,51 +621,114 @@
           "kind": "grant_observation",
           "order": 1,
           "at": "2026-08-04T12:07:00Z",
-          "operation": {
-            "rail": "stripe",
-            "environment": "production",
-            "logical_product": "pro",
-            "provider_product_id": "price_pro",
-            "provider_event_id": "reference_survivor_stripe_grant_event",
-            "provider_transaction_id": "reference_survivor_stripe_grant_transaction",
-            "provider_lineage_id": "reference_survivor_stripe_lineage",
-            "provider_order": 1,
-            "offline_vector": "valid_allow",
-            "offline_action": "read_downloaded_lesson"
+          "command": {
+            "kind": "grant_observation",
+            "payload": {
+              "account_ref": "reference_scenario_grant_observation",
+              "clock": "2026-08-04T12:07:00Z",
+              "rail": "stripe",
+              "environment": "production",
+              "logical_product": "pro",
+              "provider_product_id": "price_pro",
+              "provider_event_id": "reference_survivor_stripe_grant_event",
+              "provider_transaction_id": "reference_survivor_stripe_grant_transaction",
+              "provider_lineage_id": "reference_survivor_stripe_lineage",
+              "provider_order": 1,
+              "offline_vector": "valid_allow",
+              "offline_action": "read_downloaded_lesson"
+            }
+          },
+          "expected_transition": {
+            "kind": "grant_observation",
+            "seam": "observation_projector",
+            "result": {
+              "tag": "executed",
+              "disposition": "grant_observation"
+            },
+            "durable": {
+              "state": "observed",
+              "observation_kind": "grant",
+              "snapshot_revision": 2
+            },
+            "cache": {
+              "disposition": "preserve"
+            }
           }
         },
         {
           "kind": "grant_observation",
           "order": 2,
           "at": "2026-08-04T12:07:01Z",
-          "operation": {
-            "rail": "apple",
-            "environment": "production",
-            "logical_product": "pro",
-            "provider_product_id": "product_pro",
-            "provider_event_id": "reference_survivor_apple_grant_event",
-            "provider_transaction_id": "reference_survivor_apple_grant_transaction",
-            "provider_lineage_id": "reference_survivor_apple_lineage",
-            "provider_order": 1,
-            "offline_vector": "valid_allow",
-            "offline_action": "read_downloaded_lesson"
+          "command": {
+            "kind": "grant_observation",
+            "payload": {
+              "account_ref": "reference_scenario_grant_observation",
+              "clock": "2026-08-04T12:07:01Z",
+              "rail": "apple",
+              "environment": "production",
+              "logical_product": "pro",
+              "provider_product_id": "product_pro",
+              "provider_event_id": "reference_survivor_apple_grant_event",
+              "provider_transaction_id": "reference_survivor_apple_grant_transaction",
+              "provider_lineage_id": "reference_survivor_apple_lineage",
+              "provider_order": 1,
+              "offline_vector": "valid_allow",
+              "offline_action": "read_downloaded_lesson"
+            }
+          },
+          "expected_transition": {
+            "kind": "grant_observation",
+            "seam": "observation_projector",
+            "result": {
+              "tag": "executed",
+              "disposition": "grant_observation"
+            },
+            "durable": {
+              "state": "observed",
+              "observation_kind": "grant",
+              "snapshot_revision": 2
+            },
+            "cache": {
+              "disposition": "preserve"
+            }
           }
         },
         {
           "kind": "stripe_retraction",
           "order": 3,
           "at": "2026-08-04T12:07:02Z",
-          "operation": {
-            "rail": "stripe",
-            "environment": "production",
-            "logical_product": "pro",
-            "provider_product_id": "price_pro",
-            "provider_event_id": "reference_survivor_stripe_retract_event",
-            "provider_transaction_id": "reference_survivor_stripe_retract_transaction",
-            "provider_lineage_id": "reference_survivor_stripe_lineage",
-            "provider_order": 2,
-            "offline_vector": "valid_allow",
-            "offline_action": "read_downloaded_lesson"
+          "command": {
+            "kind": "stripe_retraction",
+            "payload": {
+              "account_ref": "reference_scenario_stripe_retraction",
+              "clock": "2026-08-04T12:07:02Z",
+              "rail": "stripe",
+              "environment": "production",
+              "logical_product": "pro",
+              "provider_product_id": "price_pro",
+              "provider_event_id": "reference_survivor_stripe_retract_event",
+              "provider_transaction_id": "reference_survivor_stripe_retract_transaction",
+              "provider_lineage_id": "reference_survivor_stripe_lineage",
+              "provider_order": 2,
+              "offline_vector": "valid_allow",
+              "offline_action": "read_downloaded_lesson"
+            }
+          },
+          "expected_transition": {
+            "kind": "stripe_retraction",
+            "seam": "observation_projector",
+            "result": {
+              "tag": "executed",
+              "disposition": "stripe_retraction"
+            },
+            "durable": {
+              "state": "observed",
+              "observation_kind": "retract",
+              "snapshot_revision": 2
+            },
+            "cache": {
+              "disposition": "preserve"
+            }
           }
         }
       ],
@@ -467,17 +767,38 @@
           "kind": "device_replace",
           "order": 1,
           "at": "2026-08-04T12:08:00Z",
-          "operation": {
-            "rail": "stripe",
-            "environment": "production",
-            "logical_product": "pro",
-            "provider_product_id": "price_pro",
-            "provider_event_id": "reference_device_replacement_event",
-            "provider_transaction_id": "reference_device_replacement_transaction",
-            "provider_lineage_id": "reference_device_replacement_lineage",
-            "provider_order": 1,
-            "offline_vector": "valid_allow",
-            "offline_action": "read_downloaded_lesson"
+          "command": {
+            "kind": "device_replace",
+            "payload": {
+              "account_ref": "reference_scenario_device_replace",
+              "clock": "2026-08-04T12:08:00Z",
+              "rail": "stripe",
+              "environment": "production",
+              "logical_product": "pro",
+              "provider_product_id": "price_pro",
+              "provider_event_id": "reference_device_replacement_event",
+              "provider_transaction_id": "reference_device_replacement_transaction",
+              "provider_lineage_id": "reference_device_replacement_lineage",
+              "provider_order": 1,
+              "offline_vector": "valid_allow",
+              "offline_action": "read_downloaded_lesson"
+            }
+          },
+          "expected_transition": {
+            "kind": "device_replace",
+            "seam": "offline_register_device",
+            "result": {
+              "tag": "executed",
+              "disposition": "device_replace"
+            },
+            "durable": {
+              "state": "unchanged",
+              "observation_kind": "none",
+              "snapshot_revision": 1
+            },
+            "cache": {
+              "disposition": "preserve"
+            }
           }
         }
       ],
@@ -517,17 +838,38 @@
           "kind": "signed_deny",
           "order": 1,
           "at": "2026-08-04T12:09:00Z",
-          "operation": {
-            "rail": "stripe",
-            "environment": "production",
-            "logical_product": "pro",
-            "provider_product_id": "price_pro",
-            "provider_event_id": "reference_deny_tombstone_event",
-            "provider_transaction_id": "reference_deny_tombstone_transaction",
-            "provider_lineage_id": "reference_deny_tombstone_lineage",
-            "provider_order": 1,
-            "offline_vector": "valid_signed_denial",
-            "offline_action": "read_downloaded_lesson"
+          "command": {
+            "kind": "signed_deny",
+            "payload": {
+              "account_ref": "reference_scenario_signed_deny",
+              "clock": "2026-08-04T12:09:00Z",
+              "rail": "stripe",
+              "environment": "production",
+              "logical_product": "pro",
+              "provider_product_id": "price_pro",
+              "provider_event_id": "reference_deny_tombstone_event",
+              "provider_transaction_id": "reference_deny_tombstone_transaction",
+              "provider_lineage_id": "reference_deny_tombstone_lineage",
+              "provider_order": 1,
+              "offline_vector": "valid_signed_denial",
+              "offline_action": "read_downloaded_lesson"
+            }
+          },
+          "expected_transition": {
+            "kind": "signed_deny",
+            "seam": "offline_verify_policy",
+            "result": {
+              "tag": "executed",
+              "disposition": "signed_deny"
+            },
+            "durable": {
+              "state": "unchanged",
+              "observation_kind": "none",
+              "snapshot_revision": 1
+            },
+            "cache": {
+              "disposition": "preserve"
+            }
           }
         }
       ],
@@ -567,17 +909,38 @@
           "kind": "rollback_proof",
           "order": 1,
           "at": "2026-08-04T12:10:00Z",
-          "operation": {
-            "rail": "stripe",
-            "environment": "production",
-            "logical_product": "pro",
-            "provider_product_id": "price_pro",
-            "provider_event_id": "reference_clock_rollback_event",
-            "provider_transaction_id": "reference_clock_rollback_transaction",
-            "provider_lineage_id": "reference_clock_rollback_lineage",
-            "provider_order": 1,
-            "offline_vector": "valid_signed_denial",
-            "offline_action": "read_downloaded_lesson"
+          "command": {
+            "kind": "rollback_proof",
+            "payload": {
+              "account_ref": "reference_scenario_rollback_proof",
+              "clock": "2026-08-04T12:10:00Z",
+              "rail": "stripe",
+              "environment": "production",
+              "logical_product": "pro",
+              "provider_product_id": "price_pro",
+              "provider_event_id": "reference_clock_rollback_event",
+              "provider_transaction_id": "reference_clock_rollback_transaction",
+              "provider_lineage_id": "reference_clock_rollback_lineage",
+              "provider_order": 1,
+              "offline_vector": "valid_signed_denial",
+              "offline_action": "read_downloaded_lesson"
+            }
+          },
+          "expected_transition": {
+            "kind": "rollback_proof",
+            "seam": "offline_verify_policy",
+            "result": {
+              "tag": "executed",
+              "disposition": "rollback_proof"
+            },
+            "durable": {
+              "state": "unchanged",
+              "observation_kind": "none",
+              "snapshot_revision": 1
+            },
+            "cache": {
+              "disposition": "preserve"
+            }
           }
         }
       ],
@@ -617,17 +980,38 @@
           "kind": "rotated_key_proof",
           "order": 1,
           "at": "2026-08-04T12:11:00Z",
-          "operation": {
-            "rail": "stripe",
-            "environment": "production",
-            "logical_product": "pro",
-            "provider_product_id": "price_pro",
-            "provider_event_id": "reference_key_rotation_event",
-            "provider_transaction_id": "reference_key_rotation_transaction",
-            "provider_lineage_id": "reference_key_rotation_lineage",
-            "provider_order": 1,
-            "offline_vector": "valid_allow",
-            "offline_action": "read_downloaded_lesson"
+          "command": {
+            "kind": "rotated_key_proof",
+            "payload": {
+              "account_ref": "reference_scenario_rotated_key_proof",
+              "clock": "2026-08-04T12:11:00Z",
+              "rail": "stripe",
+              "environment": "production",
+              "logical_product": "pro",
+              "provider_product_id": "price_pro",
+              "provider_event_id": "reference_key_rotation_event",
+              "provider_transaction_id": "reference_key_rotation_transaction",
+              "provider_lineage_id": "reference_key_rotation_lineage",
+              "provider_order": 1,
+              "offline_vector": "valid_allow",
+              "offline_action": "read_downloaded_lesson"
+            }
+          },
+          "expected_transition": {
+            "kind": "rotated_key_proof",
+            "seam": "verification_key_retention",
+            "result": {
+              "tag": "executed",
+              "disposition": "rotated_key_proof"
+            },
+            "durable": {
+              "state": "unchanged",
+              "observation_kind": "none",
+              "snapshot_revision": 1
+            },
+            "cache": {
+              "disposition": "preserve"
+            }
           }
         }
       ],
@@ -667,17 +1051,38 @@
           "kind": "empty_evidence",
           "order": 1,
           "at": "2026-08-04T12:12:00Z",
-          "operation": {
-            "rail": "stripe",
-            "environment": "production",
-            "logical_product": "pro",
-            "provider_product_id": "price_pro",
-            "provider_event_id": "reference_empty_evidence_fails_closed_event",
-            "provider_transaction_id": "reference_empty_evidence_fails_closed_transaction",
-            "provider_lineage_id": "reference_empty_evidence_fails_closed_lineage",
-            "provider_order": 1,
-            "offline_vector": "valid_signed_denial",
-            "offline_action": "read_downloaded_lesson"
+          "command": {
+            "kind": "empty_evidence",
+            "payload": {
+              "account_ref": "reference_scenario_empty_evidence",
+              "clock": "2026-08-04T12:12:00Z",
+              "rail": "stripe",
+              "environment": "production",
+              "logical_product": "pro",
+              "provider_product_id": "price_pro",
+              "provider_event_id": "reference_empty_evidence_fails_closed_event",
+              "provider_transaction_id": "reference_empty_evidence_fails_closed_transaction",
+              "provider_lineage_id": "reference_empty_evidence_fails_closed_lineage",
+              "provider_order": 1,
+              "offline_vector": "valid_signed_denial",
+              "offline_action": "read_downloaded_lesson"
+            }
+          },
+          "expected_transition": {
+            "kind": "empty_evidence",
+            "seam": "offline_verify",
+            "result": {
+              "tag": "executed",
+              "disposition": "empty_evidence"
+            },
+            "durable": {
+              "state": "unchanged",
+              "observation_kind": "none",
+              "snapshot_revision": 0
+            },
+            "cache": {
+              "disposition": "preserve"
+            }
           }
         }
       ],
@@ -712,17 +1117,38 @@
           "kind": "equal_order_delivery",
           "order": 1,
           "at": "2026-08-04T12:13:00Z",
-          "operation": {
-            "rail": "apple",
-            "environment": "production",
-            "logical_product": "pro",
-            "provider_product_id": "product_pro",
-            "provider_event_id": "reference_equal_order_stability_event",
-            "provider_transaction_id": "reference_equal_order_stability_transaction",
-            "provider_lineage_id": "reference_equal_order_stability_lineage",
-            "provider_order": 1,
-            "offline_vector": "valid_allow",
-            "offline_action": "read_downloaded_lesson"
+          "command": {
+            "kind": "equal_order_delivery",
+            "payload": {
+              "account_ref": "reference_scenario_equal_order_delivery",
+              "clock": "2026-08-04T12:13:00Z",
+              "rail": "apple",
+              "environment": "production",
+              "logical_product": "pro",
+              "provider_product_id": "product_pro",
+              "provider_event_id": "reference_equal_order_stability_event",
+              "provider_transaction_id": "reference_equal_order_stability_transaction",
+              "provider_lineage_id": "reference_equal_order_stability_lineage",
+              "provider_order": 1,
+              "offline_vector": "valid_allow",
+              "offline_action": "read_downloaded_lesson"
+            }
+          },
+          "expected_transition": {
+            "kind": "equal_order_delivery",
+            "seam": "observation_projector",
+            "result": {
+              "tag": "executed",
+              "disposition": "equal_order_delivery"
+            },
+            "durable": {
+              "state": "observed",
+              "observation_kind": "grant",
+              "snapshot_revision": 1
+            },
+            "cache": {
+              "disposition": "preserve"
+            }
           }
         }
       ],
@@ -761,17 +1187,38 @@
           "kind": "repeat_delivery",
           "order": 1,
           "at": "2026-08-04T12:14:00Z",
-          "operation": {
-            "rail": "apple",
-            "environment": "production",
-            "logical_product": "pro",
-            "provider_product_id": "product_pro",
-            "provider_event_id": "reference_repeat_idempotency_event",
-            "provider_transaction_id": "reference_repeat_idempotency_transaction",
-            "provider_lineage_id": "reference_repeat_idempotency_lineage",
-            "provider_order": 1,
-            "offline_vector": "valid_allow",
-            "offline_action": "read_downloaded_lesson"
+          "command": {
+            "kind": "repeat_delivery",
+            "payload": {
+              "account_ref": "reference_scenario_repeat_delivery",
+              "clock": "2026-08-04T12:14:00Z",
+              "rail": "apple",
+              "environment": "production",
+              "logical_product": "pro",
+              "provider_product_id": "product_pro",
+              "provider_event_id": "reference_repeat_idempotency_event",
+              "provider_transaction_id": "reference_repeat_idempotency_transaction",
+              "provider_lineage_id": "reference_repeat_idempotency_lineage",
+              "provider_order": 1,
+              "offline_vector": "valid_allow",
+              "offline_action": "read_downloaded_lesson"
+            }
+          },
+          "expected_transition": {
+            "kind": "repeat_delivery",
+            "seam": "observation_projector",
+            "result": {
+              "tag": "executed",
+              "disposition": "repeat_delivery"
+            },
+            "durable": {
+              "state": "observed",
+              "observation_kind": "grant",
+              "snapshot_revision": 1
+            },
+            "cache": {
+              "disposition": "preserve"
+            }
           }
         }
       ],
@@ -810,17 +1257,38 @@
           "kind": "parallel_delivery",
           "order": 1,
           "at": "2026-08-04T12:15:00Z",
-          "operation": {
-            "rail": "apple",
-            "environment": "production",
-            "logical_product": "pro",
-            "provider_product_id": "product_pro",
-            "provider_event_id": "reference_parallel_execution_event",
-            "provider_transaction_id": "reference_parallel_execution_transaction",
-            "provider_lineage_id": "reference_parallel_execution_lineage",
-            "provider_order": 1,
-            "offline_vector": "valid_allow",
-            "offline_action": "read_downloaded_lesson"
+          "command": {
+            "kind": "parallel_delivery",
+            "payload": {
+              "account_ref": "reference_scenario_parallel_delivery",
+              "clock": "2026-08-04T12:15:00Z",
+              "rail": "apple",
+              "environment": "production",
+              "logical_product": "pro",
+              "provider_product_id": "product_pro",
+              "provider_event_id": "reference_parallel_execution_event",
+              "provider_transaction_id": "reference_parallel_execution_transaction",
+              "provider_lineage_id": "reference_parallel_execution_lineage",
+              "provider_order": 1,
+              "offline_vector": "valid_allow",
+              "offline_action": "read_downloaded_lesson"
+            }
+          },
+          "expected_transition": {
+            "kind": "parallel_delivery",
+            "seam": "observation_projector",
+            "result": {
+              "tag": "executed",
+              "disposition": "parallel_delivery"
+            },
+            "durable": {
+              "state": "observed",
+              "observation_kind": "grant",
+              "snapshot_revision": 1
+            },
+            "cache": {
+              "disposition": "preserve"
+            }
           }
         }
       ],
@@ -859,23 +1327,67 @@
           "kind": "durable_interruption",
           "order": 1,
           "at": "2026-08-04T12:16:00Z",
-          "operation": {
-            "rail": "stripe",
-            "environment": "production",
-            "logical_product": "pro",
-            "provider_product_id": "price_pro",
-            "provider_event_id": "reference_interrupted_resume_event",
-            "provider_transaction_id": "reference_interrupted_resume_transaction",
-            "provider_lineage_id": "reference_interrupted_resume_lineage",
-            "provider_order": 1,
-            "offline_vector": "valid_allow",
-            "offline_action": "read_downloaded_lesson"
+          "command": {
+            "kind": "durable_interruption",
+            "payload": {
+              "account_ref": "reference_scenario_durable_interruption",
+              "clock": "2026-08-04T12:16:00Z",
+              "rail": "stripe",
+              "environment": "production",
+              "logical_product": "pro",
+              "provider_product_id": "price_pro",
+              "provider_event_id": "reference_interrupted_resume_event",
+              "provider_transaction_id": "reference_interrupted_resume_transaction",
+              "provider_lineage_id": "reference_interrupted_resume_lineage",
+              "provider_order": 1,
+              "offline_vector": "valid_allow",
+              "offline_action": "read_downloaded_lesson"
+            }
+          },
+          "expected_transition": {
+            "kind": "durable_interruption",
+            "seam": "offline_reconnect",
+            "result": {
+              "tag": "executed",
+              "disposition": "durable_interruption"
+            },
+            "durable": {
+              "state": "unchanged",
+              "observation_kind": "none",
+              "snapshot_revision": 1
+            },
+            "cache": {
+              "disposition": "preserve"
+            }
           }
         },
         {
           "kind": "resume_delivery",
           "order": 2,
-          "at": "2026-08-04T12:16:01Z"
+          "at": "2026-08-04T12:16:01Z",
+          "command": {
+            "kind": "resume_delivery",
+            "payload": {
+              "account_ref": "reference_scenario_resume_delivery",
+              "clock": "2026-08-04T12:16:01Z"
+            }
+          },
+          "expected_transition": {
+            "kind": "resume_delivery",
+            "seam": "offline_reconnect",
+            "result": {
+              "tag": "executed",
+              "disposition": "resume_delivery"
+            },
+            "durable": {
+              "state": "unchanged",
+              "observation_kind": "none",
+              "snapshot_revision": 1
+            },
+            "cache": {
+              "disposition": "replace"
+            }
+          }
         }
       ],
       "expected": {
@@ -988,17 +1500,38 @@
           "kind": "expiry_boundary",
           "order": 1,
           "at": "2026-08-04T12:17:00.000000Z",
-          "operation": {
-            "rail": "apple",
-            "environment": "production",
-            "logical_product": "pro",
-            "provider_product_id": "product_pro",
-            "provider_event_id": "reference_expiry_immediately_before_boundary_event",
-            "provider_transaction_id": "reference_expiry_immediately_before_boundary_transaction",
-            "provider_lineage_id": "reference_expiry_immediately_before_boundary_lineage",
-            "provider_order": 1,
-            "offline_vector": "valid_allow",
-            "offline_action": "read_downloaded_lesson"
+          "command": {
+            "kind": "expiry_boundary",
+            "payload": {
+              "account_ref": "reference_scenario_expiry_boundary",
+              "clock": "2026-08-04T12:17:00.000000Z",
+              "rail": "apple",
+              "environment": "production",
+              "logical_product": "pro",
+              "provider_product_id": "product_pro",
+              "provider_event_id": "reference_expiry_immediately_before_boundary_event",
+              "provider_transaction_id": "reference_expiry_immediately_before_boundary_transaction",
+              "provider_lineage_id": "reference_expiry_immediately_before_boundary_lineage",
+              "provider_order": 1,
+              "offline_vector": "valid_allow",
+              "offline_action": "read_downloaded_lesson"
+            }
+          },
+          "expected_transition": {
+            "kind": "expiry_boundary",
+            "seam": "snapshot",
+            "result": {
+              "tag": "executed",
+              "disposition": "expiry_boundary"
+            },
+            "durable": {
+              "state": "unchanged",
+              "observation_kind": "none",
+              "snapshot_revision": 1
+            },
+            "cache": {
+              "disposition": "preserve"
+            }
           }
         }
       ],
@@ -1037,17 +1570,38 @@
           "kind": "expiry_boundary",
           "order": 1,
           "at": "2026-08-04T12:17:00.000001Z",
-          "operation": {
-            "rail": "apple",
-            "environment": "production",
-            "logical_product": "pro",
-            "provider_product_id": "product_pro",
-            "provider_event_id": "reference_expiry_at_boundary_event",
-            "provider_transaction_id": "reference_expiry_at_boundary_transaction",
-            "provider_lineage_id": "reference_expiry_at_boundary_lineage",
-            "provider_order": 1,
-            "offline_vector": "valid_allow",
-            "offline_action": "read_downloaded_lesson"
+          "command": {
+            "kind": "expiry_boundary",
+            "payload": {
+              "account_ref": "reference_scenario_expiry_boundary",
+              "clock": "2026-08-04T12:17:00.000001Z",
+              "rail": "apple",
+              "environment": "production",
+              "logical_product": "pro",
+              "provider_product_id": "product_pro",
+              "provider_event_id": "reference_expiry_at_boundary_event",
+              "provider_transaction_id": "reference_expiry_at_boundary_transaction",
+              "provider_lineage_id": "reference_expiry_at_boundary_lineage",
+              "provider_order": 1,
+              "offline_vector": "valid_allow",
+              "offline_action": "read_downloaded_lesson"
+            }
+          },
+          "expected_transition": {
+            "kind": "expiry_boundary",
+            "seam": "snapshot",
+            "result": {
+              "tag": "executed",
+              "disposition": "expiry_boundary"
+            },
+            "durable": {
+              "state": "unchanged",
+              "observation_kind": "none",
+              "snapshot_revision": 1
+            },
+            "cache": {
+              "disposition": "preserve"
+            }
           }
         }
       ],
@@ -1086,17 +1640,38 @@
           "kind": "expiry_boundary",
           "order": 1,
           "at": "2026-08-04T12:17:00.000002Z",
-          "operation": {
-            "rail": "apple",
-            "environment": "production",
-            "logical_product": "pro",
-            "provider_product_id": "product_pro",
-            "provider_event_id": "reference_expiry_immediately_after_boundary_event",
-            "provider_transaction_id": "reference_expiry_immediately_after_boundary_transaction",
-            "provider_lineage_id": "reference_expiry_immediately_after_boundary_lineage",
-            "provider_order": 1,
-            "offline_vector": "valid_allow",
-            "offline_action": "read_downloaded_lesson"
+          "command": {
+            "kind": "expiry_boundary",
+            "payload": {
+              "account_ref": "reference_scenario_expiry_boundary",
+              "clock": "2026-08-04T12:17:00.000002Z",
+              "rail": "apple",
+              "environment": "production",
+              "logical_product": "pro",
+              "provider_product_id": "product_pro",
+              "provider_event_id": "reference_expiry_immediately_after_boundary_event",
+              "provider_transaction_id": "reference_expiry_immediately_after_boundary_transaction",
+              "provider_lineage_id": "reference_expiry_immediately_after_boundary_lineage",
+              "provider_order": 1,
+              "offline_vector": "valid_allow",
+              "offline_action": "read_downloaded_lesson"
+            }
+          },
+          "expected_transition": {
+            "kind": "expiry_boundary",
+            "seam": "snapshot",
+            "result": {
+              "tag": "executed",
+              "disposition": "expiry_boundary"
+            },
+            "durable": {
+              "state": "unchanged",
+              "observation_kind": "none",
+              "snapshot_revision": 1
+            },
+            "cache": {
+              "disposition": "preserve"
+            }
           }
         }
       ],

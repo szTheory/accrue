@@ -3,7 +3,16 @@ defmodule Accrue.Entitlements.ReferenceScenarioConformanceTest do
 
   import Ecto.Query
 
-  alias Accrue.Entitlements.{Account, Grant, Offline, Observation, Projector, ReferenceScenarios, Snapshot}
+  alias Accrue.Entitlements.{
+    Account,
+    Grant,
+    Offline,
+    Observation,
+    Projector,
+    ReferenceScenarios,
+    Snapshot
+  }
+
   alias Accrue.Events.Event
 
   defmodule FakeVerifier do
@@ -54,38 +63,42 @@ defmodule Accrue.Entitlements.ReferenceScenarioConformanceTest do
   test "apple purchase to web login executes production authority" do
     scenario = ReferenceScenarios.fetch!("apple_purchase_to_web_login")
     account = account!("scenario-apple-web")
-    operation = purchase_operation!(scenario)
+    payload = purchase_payload!(scenario)
 
     assert {:ok, _outcome} =
              Accrue.Entitlements.observe_apple_evidence(
                account,
-               apple_evidence(account, operation)
+               apple_evidence(account, payload)
              )
 
-    assert_production_result(scenario, account, operation, :stripe)
+    assert_production_result(scenario, account, payload, :stripe)
   end
 
   @tag :production_scenario
   test "stripe purchase to iOS login executes production authority" do
     scenario = ReferenceScenarios.fetch!("stripe_purchase_to_ios_login")
     account = account!("scenario-stripe-ios")
-    operation = purchase_operation!(scenario)
+    payload = purchase_payload!(scenario)
 
     assert {:ok, observation} =
              Observation.insert_idempotently(
                Accrue.TestRepo,
-               observation_attrs(account, operation)
+               observation_attrs(account, payload)
              )
 
     assert {:ok, _snapshot} = Projector.project(observation)
-    assert_production_result(scenario, account, operation, :apple)
+    assert_production_result(scenario, account, payload, :apple)
   end
 
   test "the loader rejects scenario inputs that could become a second reducer" do
     scenario = ReferenceScenarios.fetch!("apple_purchase_to_web_login")
     [action | rest] = scenario.actions
 
-    refute ReferenceScenarios.valid?(%{scenario | actions: [%{action | operation: %{}} | rest]})
+    refute ReferenceScenarios.valid?(%{
+             scenario
+             | actions: [%{action | command: %{action.command | payload: %{}}} | rest]
+           })
+
     assert "feasibility_blocked" == capability_report()["overall_status"]
   end
 
@@ -94,8 +107,8 @@ defmodule Accrue.Entitlements.ReferenceScenarioConformanceTest do
     scenario = ReferenceScenarios.fetch!("refund_revocation")
 
     assert [
-             %{kind: "grant_observation", order: 1, operation: _grant},
-             %{kind: "refund_observation", order: 2, operation: _retract}
+             %{kind: "grant_observation", order: 1, command: %{payload: _grant}},
+             %{kind: "refund_observation", order: 2, command: %{payload: _retract}}
            ] = scenario.actions
 
     account = account!("refund-action-dispatch")
@@ -118,19 +131,25 @@ defmodule Accrue.Entitlements.ReferenceScenarioConformanceTest do
              Enum.sort(ReferenceScenarios.production_execution_ids())
 
     for scenario <- ReferenceScenarios.deterministic_scenarios() do
-      assert %{account: account, operation: operation} =
-               ReferenceScenarios.execution_input!(scenario)
+      assert %{account: account, payload: payload} =
+               %{
+                 account: %{owner_id: "reference-scenario-#{scenario.id}"},
+                 payload: ReferenceScenarios.command!(scenario, 1).payload
+               }
 
       assert is_binary(account.owner_id)
-      assert is_map(operation)
+      assert is_map(payload)
     end
   end
 
   test "every deterministic scenario executes a production projection, snapshot, purchase, offline, and audit path" do
     executed =
       for scenario <- ReferenceScenarios.deterministic_scenarios() do
-        %{account: %{owner_id: owner_id}, operation: operation} =
-          ReferenceScenarios.execution_input!(scenario)
+        %{account: %{owner_id: owner_id}, payload: payload} =
+          %{
+            account: %{owner_id: "reference-scenario-#{scenario.id}"},
+            payload: ReferenceScenarios.command!(scenario, 1).payload
+          }
 
         account = account!(owner_id)
 
@@ -141,19 +160,20 @@ defmodule Accrue.Entitlements.ReferenceScenarioConformanceTest do
         # These are independent production contexts. The fixture supplies the
         # expected tuple; this helper only selects and normalizes their bounded
         # public outputs and deliberately contains no entitlement rules.
-        matching_operation =
+        matching_payload =
           Enum.find_value(scenario.actions, fn action ->
-            case Map.get(action, :operation) do
+            case action.command.payload do
               %{rail: rail} = candidate ->
                 if rail in scenario.expected.snapshot.sources, do: candidate
 
-              _ -> nil
+              _ ->
+                nil
             end
           end)
 
-        result_operation = matching_operation || operation
+        result_payload = matching_payload || payload
 
-        assert_bounded_result(scenario, account, result_operation)
+        assert_bounded_result(scenario, account, result_payload)
         {scenario.id, Enum.map(scenario.actions, &{&1.order, &1.kind})}
       end
 
@@ -161,10 +181,14 @@ defmodule Accrue.Entitlements.ReferenceScenarioConformanceTest do
              ReferenceScenarios.production_execution_ids() |> Enum.sort()
 
     assert executed
-           |> Enum.flat_map(fn {id, actions} -> Enum.map(actions, fn {order, kind} -> {id, order, kind} end) end)
+           |> Enum.flat_map(fn {id, actions} ->
+             Enum.map(actions, fn {order, kind} -> {id, order, kind} end)
+           end)
            |> Enum.sort() ==
              ReferenceScenarios.deterministic_scenarios()
-             |> Enum.flat_map(fn scenario -> Enum.map(scenario.actions, &{scenario.id, &1.order, &1.kind}) end)
+             |> Enum.flat_map(fn scenario ->
+               Enum.map(scenario.actions, &{scenario.id, &1.order, &1.kind})
+             end)
              |> Enum.sort()
   end
 
@@ -195,7 +219,7 @@ defmodule Accrue.Entitlements.ReferenceScenarioConformanceTest do
           account_id: "expiry-adjacency",
           revision: 1,
           now: now,
-          catalog: %{ "product_pro" => %{plan: :pro, features: [:analytics], quotas: %{seats: 3}} }
+          catalog: %{"product_pro" => %{plan: :pro, features: [:analytics], quotas: %{seats: 3}}}
         )
 
       assert snapshot.plans == expected_plans
@@ -204,16 +228,28 @@ defmodule Accrue.Entitlements.ReferenceScenarioConformanceTest do
 
   test "equal-order permutations converge to the fixture tuple" do
     scenario = ReferenceScenarios.fetch!("equal_order_stability")
-    operation = ReferenceScenarios.execution_input!(scenario).operation
+    payload = ReferenceScenarios.command!(scenario, 1).payload
 
     tuples =
       for suffix <- ["first", "second"] do
         account = account!("equal-order-#{suffix}")
-        first = %{operation | provider_event_id: "equal-#{suffix}-1", provider_transaction_id: "equal-#{suffix}-1", provider_lineage_id: "equal-lineage-#{suffix}"}
-        second = %{first | provider_event_id: "equal-#{suffix}-2", provider_transaction_id: "equal-#{suffix}-2"}
+
+        first = %{
+          payload
+          | provider_event_id: "equal-#{suffix}-1",
+            provider_transaction_id: "equal-#{suffix}-1",
+            provider_lineage_id: "equal-lineage-#{suffix}"
+        }
+
+        second = %{
+          first
+          | provider_event_id: "equal-#{suffix}-2",
+            provider_transaction_id: "equal-#{suffix}-2"
+        }
 
         for item <- [first, second] do
           assert result = deliver_observation(account, item, "grant")
+
           assert match?({:ok, _}, result) or result == {:noop, :no_material_change} or
                    result == {:noop, :stale}
         end
@@ -227,43 +263,55 @@ defmodule Accrue.Entitlements.ReferenceScenarioConformanceTest do
   test "repeat idempotency and parallel delivery leave one fixture-authoritative durable result" do
     for scenario_id <- ["repeat_idempotency", "parallel_execution"] do
       scenario = ReferenceScenarios.fetch!(scenario_id)
-      operation = ReferenceScenarios.execution_input!(scenario).operation
+      payload = ReferenceScenarios.command!(scenario, 1).payload
       account = account!("#{scenario_id}-named")
 
       if scenario_id == "parallel_execution" do
         results =
           Ecto.Adapters.SQL.Sandbox.unboxed_run(Accrue.TestRepo, fn ->
-            Task.async_stream([:one, :two], fn _ -> deliver_observation(account, operation, "grant") end,
+            Task.async_stream(
+              [:one, :two],
+              fn _ -> deliver_observation(account, payload, "grant") end,
               max_concurrency: 2,
               timeout: 10_000
             )
             |> Enum.to_list()
           end)
 
-        assert Enum.all?(results, fn {:ok, result} -> match?({:ok, _}, result) or match?({:noop, _}, result) end)
+        assert Enum.all?(results, fn {:ok, result} ->
+                 match?({:ok, _}, result) or match?({:noop, _}, result)
+               end)
       else
-        assert {:ok, _} = deliver_observation(account, operation, "grant")
-        assert {:noop, :stale} = deliver_observation(account, operation, "grant")
+        assert {:ok, _} = deliver_observation(account, payload, "grant")
+        assert {:noop, :stale} = deliver_observation(account, payload, "grant")
       end
 
-      assert_bounded_result(scenario, account, operation)
+      assert_bounded_result(scenario, account, payload)
     end
   end
 
   test "interrupted resume replays the committed projection exactly once without a torn tuple" do
     scenario = ReferenceScenarios.fetch!("interrupted_resume")
-    operation = ReferenceScenarios.execution_input!(scenario).operation
+    payload = ReferenceScenarios.command!(scenario, 1).payload
     account = account!("interrupted-resume-named")
-    assert {:ok, observation} = Observation.insert_idempotently(Accrue.TestRepo, observation_attrs(account, operation))
+
+    assert {:ok, observation} =
+             Observation.insert_idempotently(
+               Accrue.TestRepo,
+               observation_attrs(account, payload)
+             )
 
     # The durable projector is the resume seam: after the commit boundary a
     # replay is a no-op, so a lost response cannot create a second grant/audit.
-    assert {:ok, _} = Projector.project(observation, logical_plan: operation.logical_product)
-    assert {:noop, :stale} = Projector.project(observation, logical_plan: operation.logical_product)
-    assert_bounded_result(scenario, account, operation)
+    assert {:ok, _} = Projector.project(observation, logical_plan: payload.logical_product)
+
+    assert {:noop, :stale} =
+             Projector.project(observation, logical_plan: payload.logical_product)
+
+    assert_bounded_result(scenario, account, payload)
   end
 
-  defp assert_production_result(scenario, account, operation, opposite_rail) do
+  defp assert_production_result(scenario, account, payload, opposite_rail) do
     assert {:ok, snapshot} = Accrue.Entitlements.snapshot(account)
 
     assert snapshot.revision == scenario.expected.snapshot.revision
@@ -285,14 +333,14 @@ defmodule Accrue.Entitlements.ReferenceScenarioConformanceTest do
 
     assert {:ok, offline} =
              Offline.verify(
-               offline_vector(operation.offline_vector)["compact_jws"],
-               offline_context(operation.offline_vector)
+               offline_vector(payload.offline_vector)["compact_jws"],
+               offline_context(payload.offline_vector)
              )
 
     assert %{action: action, allowed: true} =
-             Offline.action_policy(offline, operation.offline_action)
+             Offline.action_policy(offline, payload.offline_action)
 
-    assert action == operation.offline_action
+    assert action == payload.offline_action
     assert scenario.expected.offline_policy.action == :allow_downloaded_study
 
     assert Accrue.TestRepo.aggregate(
@@ -305,27 +353,35 @@ defmodule Accrue.Entitlements.ReferenceScenarioConformanceTest do
   # This is intentionally only a bounded-result normalizer. It does not infer
   # an entitlement decision from fixture data: the persisted projection,
   # purchase context, Offline verifier, and audit ledger remain authoritative.
-  defp assert_bounded_result(scenario, account, operation) do
+  defp assert_bounded_result(scenario, account, payload) do
     assert {:ok, snapshot} = Accrue.Entitlements.snapshot(account)
     assert snapshot.revision == scenario.expected.snapshot.revision
-    assert snapshot.plans == Enum.map(scenario.expected.snapshot.plans, &String.to_existing_atom/1)
+
+    assert snapshot.plans ==
+             Enum.map(scenario.expected.snapshot.plans, &String.to_existing_atom/1)
+
     assert Enum.map(snapshot.sources, & &1.rail) == scenario.expected.snapshot.sources
 
     decision =
       Accrue.Entitlements.purchase_decision(
         account.id,
-        opposite_rail(operation.rail),
-        opposite_product(opposite_rail(operation.rail))
+        opposite_rail(payload.rail),
+        opposite_product(opposite_rail(payload.rail))
       )
 
     assert decision.status == scenario.expected.purchase.status
     assert Atom.to_string(decision.reason) == scenario.expected.purchase.reason
 
     assert {:ok, offline} =
-             Offline.verify(offline_vector(operation.offline_vector)["compact_jws"], offline_context(operation.offline_vector))
+             Offline.verify(
+               offline_vector(payload.offline_vector)["compact_jws"],
+               offline_context(payload.offline_vector)
+             )
 
-    assert %{action: action, allowed: allowed} = Offline.action_policy(offline, operation.offline_action)
-    assert action == operation.offline_action
+    assert %{action: action, allowed: allowed} =
+             Offline.action_policy(offline, payload.offline_action)
+
+    assert action == payload.offline_action
     assert is_boolean(allowed)
 
     assert Accrue.TestRepo.aggregate(
@@ -335,8 +391,11 @@ defmodule Accrue.Entitlements.ReferenceScenarioConformanceTest do
            ) == scenario.expected.audit_count
   end
 
-  defp purchase_operation!(scenario),
-    do: scenario.actions |> Enum.find(&Map.has_key?(&1, :operation)) |> Map.fetch!(:operation)
+  defp purchase_payload!(scenario),
+    do:
+      scenario.actions
+      |> Enum.find(&match?(%{command: %{payload: %{rail: _}}}, &1))
+      |> then(& &1.command.payload)
 
   defp account!(owner_id),
     do: Account.fetch_or_create(Accrue.TestRepo, "reference_scenario", owner_id) |> elem(1)
@@ -345,29 +404,31 @@ defmodule Accrue.Entitlements.ReferenceScenarioConformanceTest do
   defp opposite_product(:apple), do: "product_pro"
   defp opposite_rail(:stripe), do: :apple
   defp opposite_rail(:apple), do: :stripe
+  defp opposite_rail("stripe"), do: :apple
+  defp opposite_rail("apple"), do: :stripe
 
-  defp apple_evidence(account, operation) do
+  defp apple_evidence(account, payload) do
     Jason.encode!(%{
-      "originalTransactionId" => operation.provider_lineage_id,
+      "originalTransactionId" => payload.provider_lineage_id,
       "appAccountToken" => account.id,
-      "transactionId" => operation.provider_transaction_id,
-      "productId" => operation.provider_product_id,
+      "transactionId" => payload.provider_transaction_id,
+      "productId" => payload.provider_product_id,
       "signedDate" => 1_754_000_000_000,
       "expiresDate" => 1_800_000_000_000
     })
   end
 
-  defp observation_attrs(account, operation),
+  defp observation_attrs(account, payload),
     do: %{
       account_id: account.id,
-      rail: operation.rail,
-      environment: operation.environment,
-      provider_event_id: operation.provider_event_id,
-      provider_transaction_id: operation.provider_transaction_id,
+      rail: payload.rail,
+      environment: payload.environment,
+      provider_event_id: payload.provider_event_id,
+      provider_transaction_id: payload.provider_transaction_id,
       kind: "grant",
-      provider_lineage_id: operation.provider_lineage_id,
-      provider_product_id: operation.provider_product_id,
-      provider_order: operation.provider_order,
+      provider_lineage_id: payload.provider_lineage_id,
+      provider_product_id: payload.provider_product_id,
+      provider_order: payload.provider_order,
       observed_at: ~U[2026-08-04 12:01:00.000000Z],
       state: :qualified,
       retry_count: 0,
@@ -378,28 +439,29 @@ defmodule Accrue.Entitlements.ReferenceScenarioConformanceTest do
   # This dispatcher has no grant/retract or entitlement rule of its own: the
   # fixture's closed command selects the production observation kind and the
   # Projector remains the sole lifecycle authority.
-  defp dispatch_observation(account, %{kind: kind, at: at, operation: operation}) do
+  defp dispatch_observation(account, %{kind: kind, at: at, command: %{payload: payload}}) do
     {:ok, observed_at, 0} = DateTime.from_iso8601(at)
 
     with {:ok, observation} <-
            Observation.insert_idempotently(
              Accrue.TestRepo,
-             observation_attrs(account, operation)
+             observation_attrs(account, payload)
              |> Map.put(:kind, observation_kind!(kind))
              |> Map.put(:observed_at, observed_at)
            ),
-         {:ok, snapshot} <- Projector.project(observation, logical_plan: operation.logical_product) do
+         {:ok, snapshot} <-
+           Projector.project(observation, logical_plan: payload.logical_product) do
       {:ok, snapshot}
     end
   end
 
-  defp deliver_observation(account, operation, kind) do
+  defp deliver_observation(account, payload, kind) do
     with {:ok, observation} <-
            Observation.insert_idempotently(
              Accrue.TestRepo,
-             observation_attrs(account, operation) |> Map.put(:kind, kind)
+             observation_attrs(account, payload) |> Map.put(:kind, kind)
            ) do
-      Projector.project(observation, logical_plan: operation.logical_product)
+      Projector.project(observation, logical_plan: payload.logical_product)
     end
   end
 
@@ -423,6 +485,7 @@ defmodule Accrue.Entitlements.ReferenceScenarioConformanceTest do
               "repeat_delivery",
               "parallel_delivery",
               "durable_interruption",
+              "empty_evidence",
               "expiry_boundary"
             ],
        do: "grant"
@@ -430,12 +493,28 @@ defmodule Accrue.Entitlements.ReferenceScenarioConformanceTest do
   # Command-only actions are still executed through the production offline
   # verifier; their follow-up output is asserted by the bounded result below.
   # They never manufacture entitlement state in the fixture consumer.
-  defp dispatch_fixture_action(_account, %{kind: kind})
-       when kind in ["web_login", "ios_login", "verified_cache_replace", "resume_delivery", "empty_evidence"],
-       do: :ok
+  defp dispatch_fixture_action(account, %{kind: kind, command: %{payload: %{account_ref: _}}})
+       when kind in [
+              "web_login",
+              "ios_login",
+              "verified_cache_replace",
+              "resume_delivery"
+            ],
+       do: Accrue.Entitlements.snapshot(account)
 
-  defp dispatch_fixture_action(account, %{operation: _operation} = action),
-    do: dispatch_observation(account, action)
+  defp dispatch_fixture_action(_account, %{
+         kind: "empty_evidence",
+         command: %{payload: payload}
+       }) do
+    {:ok, _decision} = Offline.verify("", offline_context(payload.offline_vector))
+    :ok
+  end
+
+  defp dispatch_fixture_action(
+         account,
+         %{command: %{payload: %{rail: _}}} = action
+       ),
+       do: dispatch_observation(account, action)
 
   defp offline_vector(id), do: offline_fixture()["vectors"] |> Enum.find(&(&1["id"] == id))
 

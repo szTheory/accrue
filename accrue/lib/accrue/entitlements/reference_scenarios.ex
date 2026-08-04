@@ -5,146 +5,62 @@ defmodule Accrue.Entitlements.ReferenceScenarios do
   @lanes ~w(deterministic_conformance runtime_capability advisory_parity)
   @artifact_names ~w(v1.59-decision-cases.json v1.59-offline-golden-vectors.json capability-report.json)
   @scenario_keys ~w(id evidence_lane frozen_clock actions expected required_artifacts diagnostic)
-  @action_keys ~w(kind order at operation)
-  @action_kinds ~w(
-    apple_verified_purchase stripe_verified_purchase web_login ios_login
-    purchase_preflight offline_proof_stale offline_expansion_request
-    reconnect_request verified_cache_replace grant_observation refund_observation
-    stripe_retraction device_replace signed_deny rollback_proof rotated_key_proof
-    empty_evidence equal_order_delivery repeat_delivery parallel_delivery
-    durable_interruption resume_delivery expiry_boundary
-    capability_report_read provider_advisory_read
-  )
+  @action_keys ~w(kind order at command expected_transition)
+  @command_keys ~w(kind payload)
+  @transition_keys ~w(kind seam result durable cache)
+  @action_kinds ~w(apple_verified_purchase stripe_verified_purchase web_login ios_login purchase_preflight offline_proof_stale offline_expansion_request reconnect_request verified_cache_replace grant_observation refund_observation stripe_retraction device_replace signed_deny rollback_proof rotated_key_proof empty_evidence equal_order_delivery repeat_delivery parallel_delivery durable_interruption resume_delivery expiry_boundary capability_report_read provider_advisory_read)
+  @observation_kinds ~w(apple_verified_purchase stripe_verified_purchase grant_observation refund_observation stripe_retraction equal_order_delivery repeat_delivery parallel_delivery)
+  @read_kinds ~w(web_login ios_login verified_cache_replace resume_delivery)
+  @offline_kinds ~w(offline_proof_stale offline_expansion_request signed_deny rollback_proof empty_evidence)
   @operation_keys ~w(rail environment logical_product provider_product_id provider_event_id provider_transaction_id provider_lineage_id provider_order offline_vector offline_action)
+  @base_payload_keys ~w(account_ref clock)
   @expected_keys ~w(snapshot purchase offline_policy audit_count)
-  @snapshot_keys ~w(revision plans sources)
-  @purchase_keys ~w(status reason)
-  @offline_policy_keys ~w(action)
 
-  defmodule Snapshot do
-    @enforce_keys [:revision, :plans, :sources]
-    defstruct [:revision, :plans, :sources]
-  end
+  defmodule Snapshot, do: defstruct([:revision, :plans, :sources])
+  defmodule Purchase, do: defstruct([:status, :reason])
+  defmodule OfflinePolicy, do: defstruct([:action])
+  defmodule Expected, do: defstruct([:snapshot, :purchase, :offline_policy, :audit_count])
 
-  defmodule Purchase do
-    @enforce_keys [:status, :reason]
-    defstruct [:status, :reason]
-  end
+  defmodule Scenario,
+    do:
+      defstruct([
+        :id,
+        :evidence_lane,
+        :frozen_clock,
+        :actions,
+        :expected,
+        :required_artifacts,
+        :diagnostic
+      ])
 
-  defmodule OfflinePolicy do
-    @enforce_keys [:action]
-    defstruct [:action]
-  end
+  defmodule Command, do: defstruct([:kind, :payload])
+  defmodule ExpectedTransition, do: defstruct([:kind, :seam, :result, :durable, :cache])
 
-  defmodule Expected do
-    @enforce_keys [:snapshot, :purchase, :offline_policy, :audit_count]
-    defstruct [:snapshot, :purchase, :offline_policy, :audit_count]
-  end
-
-  defmodule Scenario do
-    @enforce_keys [
-      :id,
-      :evidence_lane,
-      :frozen_clock,
-      :actions,
-      :expected,
-      :required_artifacts,
-      :diagnostic
-    ]
-    defstruct [
-      :id,
-      :evidence_lane,
-      :frozen_clock,
-      :actions,
-      :expected,
-      :required_artifacts,
-      :diagnostic
-    ]
-  end
-
-  defmodule Operation do
-    @enforce_keys [
-      :rail,
-      :environment,
-      :logical_product,
-      :provider_product_id,
-      :provider_event_id,
-      :provider_transaction_id,
-      :provider_lineage_id,
-      :provider_order,
-      :offline_vector,
-      :offline_action
-    ]
-    defstruct [
-      :rail,
-      :environment,
-      :logical_product,
-      :provider_product_id,
-      :provider_event_id,
-      :provider_transaction_id,
-      :provider_lineage_id,
-      :provider_order,
-      :offline_vector,
-      :offline_action
-    ]
-  end
-
-  defmodule ExecutionInput do
-    @moduledoc false
-    @enforce_keys [:account, :operation]
-    defstruct [:account, :operation]
-  end
-
-  @spec version() :: String.t()
   def version, do: @version
-
-  @spec all() :: [Scenario.t()]
   def all, do: scenarios()
+  def fetch!(id), do: Enum.find(all(), &(&1.id == id)) || raise(KeyError, key: id)
 
-  @spec fetch!(String.t()) :: Scenario.t()
-  def fetch!(id) when is_binary(id),
-    do: Enum.find(all(), &(&1.id == id)) || raise(KeyError, key: id)
-
-  @doc "The merge-blocking rows; runtime/advisory evidence is never an execution authority."
-  @spec deterministic_scenarios() :: [Scenario.t()]
   def deterministic_scenarios,
     do: Enum.filter(all(), &(&1.evidence_lane == :deterministic_conformance))
 
-  @spec production_execution_ids() :: [String.t()]
   def production_execution_ids, do: Enum.map(deterministic_scenarios(), & &1.id)
+  def action_families, do: @action_kinds
 
-  @doc """
-  Returns the bounded, fixture-declared input used to select a production context.
-
-  This deliberately carries identifiers and an operation only. Every
-  deterministic row must declare its operation; snapshot,
-  purchase, offline, and audit results stay in the fixture and are supplied by
-  the production contexts rather than reconstructed here.
-  """
-  @spec execution_input!(Scenario.t()) :: ExecutionInput.t()
-  def execution_input!(%Scenario{} = scenario) when scenario.evidence_lane == :deterministic_conformance do
-    operation =
-      scenario.actions
-      |> Enum.find_value(&Map.get(&1, :operation))
-      |> case do
-        %Operation{} = operation -> operation
-        nil -> raise ArgumentError, "deterministic scenario is missing a closed operation"
-      end
-
-    %ExecutionInput{account: %{owner_id: "reference-scenario-#{scenario.id}"}, operation: operation}
+  def command!(%Scenario{evidence_lane: :deterministic_conformance, actions: actions}, order) do
+    case Enum.find(actions, &(&1.order == order)) do
+      %{command: %Command{} = command} -> command
+      _ -> raise ArgumentError, "deterministic action is missing a closed command"
+    end
   end
 
-  def execution_input!(_), do: raise(ArgumentError, "scenario is not production-executable")
+  def command!(_, _), do: raise(ArgumentError, "scenario is not production-executable")
 
-  @spec valid?(Scenario.t()) :: boolean()
-  def valid?(%Scenario{} = scenario) do
-    scenario.evidence_lane in [:deterministic_conformance, :runtime_capability, :advisory_parity] and
-      valid_id?(scenario.id) and
-      utc?(scenario.frozen_clock) and ordered_actions?(scenario.actions) and
-      valid_expected?(scenario.expected) and
-      deterministic_operation_valid?(scenario) and
-      lane_artifacts_valid?(scenario.evidence_lane, scenario.required_artifacts) and
-      safe_diagnostic?(scenario.diagnostic)
+  def valid?(%Scenario{} = s) do
+    s.evidence_lane in [:deterministic_conformance, :runtime_capability, :advisory_parity] and
+      valid_id?(s.id) and utc?(s.frozen_clock) and ordered_actions?(s.actions) and
+      valid_commands?(s.actions) and valid_expected?(s.expected) and
+      lane_artifacts_valid?(s.evidence_lane, s.required_artifacts) and
+      safe_diagnostic?(s.diagnostic)
   end
 
   def valid?(_), do: false
@@ -153,7 +69,6 @@ defmodule Accrue.Entitlements.ReferenceScenarios do
     path = Path.join(:code.priv_dir(:accrue), "entitlements/v1.59-reference-scenarios.json")
     json = File.read!(path)
     reject_duplicate_keys!(json)
-
     decoded = Jason.decode!(json)
     require_keys!(decoded, ["version", "scenarios"], "root")
     decoded["version"] == @version || raise ArgumentError, "invalid reference scenario version"
@@ -161,35 +76,26 @@ defmodule Accrue.Entitlements.ReferenceScenarios do
     (is_list(decoded["scenarios"]) and decoded["scenarios"] != []) ||
       raise ArgumentError, "missing scenarios"
 
-    scenarios = Enum.map(decoded["scenarios"], &scenario!/1)
-    ids = Enum.map(scenarios, & &1.id)
+    rows = Enum.map(decoded["scenarios"], &scenario!/1)
+    ids = Enum.map(rows, & &1.id)
     length(ids) == MapSet.size(MapSet.new(ids)) || raise ArgumentError, "duplicate scenario id"
-    Enum.sort_by(scenarios, & &1.id)
+    Enum.sort_by(rows, & &1.id)
   end
 
   defp scenario!(value) when is_map(value) do
     require_keys!(value, @scenario_keys, "scenario")
-    lane = value["evidence_lane"]
-    lane in @lanes || raise ArgumentError, "invalid evidence lane"
+    lane = lane!(value["evidence_lane"])
     valid_id?(value["id"]) || raise ArgumentError, "invalid scenario id"
     utc!(value["frozen_clock"], "frozen clock")
-    actions = actions!(value["actions"])
-    expected = expected!(value["expected"])
-    artifacts = artifacts!(value["required_artifacts"])
-
-    lane_artifacts_valid?(lane_atom!(lane), artifacts) ||
-      raise ArgumentError, "contradictory required artifacts"
-
-    diagnostic = diagnostic!(value["diagnostic"])
 
     scenario = %Scenario{
       id: value["id"],
-      evidence_lane: lane_atom!(lane),
+      evidence_lane: lane,
       frozen_clock: value["frozen_clock"],
-      actions: actions,
-      expected: expected,
-      required_artifacts: artifacts,
-      diagnostic: diagnostic
+      actions: actions!(value["actions"], lane),
+      expected: expected!(value["expected"]),
+      required_artifacts: artifacts!(value["required_artifacts"]),
+      diagnostic: diagnostic!(value["diagnostic"])
     }
 
     valid?(scenario) || raise ArgumentError, "invalid scenario"
@@ -198,233 +104,280 @@ defmodule Accrue.Entitlements.ReferenceScenarios do
 
   defp scenario!(_), do: raise(ArgumentError, "scenario must be an object")
 
-  defp actions!(actions) when is_list(actions) and actions != [] do
+  defp actions!(actions, lane) when is_list(actions) and actions != [] do
     parsed =
       Enum.map(actions, fn action ->
-        action_keys =
-          if Map.has_key?(action, "operation"),
-            do: @action_keys,
-            else: @action_keys -- ["operation"]
+        require_keys!(
+          action,
+          if(lane == :deterministic_conformance, do: @action_keys, else: ~w(kind order at)),
+          "action"
+        )
 
-        require_keys!(action, action_keys, "action")
-
-        (is_binary(action["kind"]) and action["kind"] in @action_kinds) ||
-          raise ArgumentError, "invalid action kind"
+        kind = action["kind"]
+        kind in @action_kinds || raise ArgumentError, "invalid action kind"
 
         (is_integer(action["order"]) and action["order"] > 0) ||
           raise ArgumentError, "invalid action order"
 
         utc!(action["at"], "action clock")
-        parsed = %{kind: action["kind"], order: action["order"], at: action["at"]}
+        base = %{kind: kind, order: action["order"], at: action["at"]}
 
-        if Map.has_key?(action, "operation"),
-          do: Map.put(parsed, :operation, operation!(action["operation"], action["kind"])),
-          else: parsed
+        if lane == :deterministic_conformance,
+          do:
+            Map.merge(base, %{
+              command: command!(action["command"], kind, action["at"]),
+              expected_transition: transition!(action["expected_transition"], kind)
+            }),
+          else: base
       end)
 
     ordered_actions?(parsed) || raise ArgumentError, "unordered actions"
     parsed
   end
 
-  defp actions!(_), do: raise(ArgumentError, "missing actions")
+  defp actions!(_, _), do: raise(ArgumentError, "missing actions")
 
-  defp operation!(value, _kind) when is_map(value) do
-    require_keys!(value, @operation_keys, "operation")
-    rail = value["rail"]
-    valid_ids = @operation_keys -- ["rail", "environment", "provider_order", "offline_action"]
+  # One family selects one exact key inventory. The fixture is input only: it
+  # cannot name an observation default, reducer output, or executable callback.
+  defp command!(%{"kind" => kind, "payload" => payload}, kind, at) when is_map(payload) do
+    keys = payload_keys(kind)
+    require_keys!(payload, keys, "#{kind} payload")
+    payload["clock"] == at || raise ArgumentError, "command clock mismatch"
+    valid_id?(payload["account_ref"]) || raise ArgumentError, "invalid command account reference"
+    normalized = Enum.into(payload, %{}, fn {k, v} -> {String.to_atom(k), v} end)
+    validate_payload!(kind, normalized)
+    %Command{kind: kind, payload: normalize_payload(normalized)}
+  end
 
-    if rail in ["apple", "stripe"] and
-         value["environment"] in ["production", "sandbox"] and
-         Enum.all?(valid_ids, &valid_id?(value[&1])) and
-         is_integer(value["provider_order"]) and value["provider_order"] > 0 and
-         value["offline_action"] in ["read_downloaded_lesson", "download_lesson"] do
-      %Operation{
-        rail: source_atom!(rail),
-        environment: String.to_existing_atom(value["environment"]),
-        logical_product: value["logical_product"],
-        provider_product_id: value["provider_product_id"],
-        provider_event_id: value["provider_event_id"],
-        provider_transaction_id: value["provider_transaction_id"],
-        provider_lineage_id: value["provider_lineage_id"],
-        provider_order: value["provider_order"],
-        offline_vector: value["offline_vector"],
-        offline_action: offline_operation_action!(value["offline_action"])
-      }
-    else
-      raise ArgumentError, "invalid operation"
+  defp command!(_, _, _), do: raise(ArgumentError, "invalid command")
+  defp payload_keys(kind) when kind in @read_kinds, do: @base_payload_keys
+  defp payload_keys(kind) when kind in @action_kinds, do: @base_payload_keys ++ @operation_keys
+
+  defp validate_payload!(kind, p) do
+    utc!(p.clock, "command clock")
+
+    if kind not in @read_kinds do
+      (p.rail in ["apple", "stripe", :apple, :stripe] and
+         p.environment in ["production", "sandbox", :production, :sandbox] and
+         Enum.all?(
+           @operation_keys -- ~w(rail environment provider_order offline_action),
+           &valid_id?(Map.fetch!(p, String.to_atom(&1)))
+         ) and is_integer(p.provider_order) and p.provider_order > 0 and
+         p.offline_action in [
+           "read_downloaded_lesson",
+           "download_lesson",
+           :read_downloaded_lesson,
+           :download_lesson
+         ]) ||
+        raise ArgumentError, "invalid #{kind} payload"
     end
   end
 
-  defp operation!(_, _), do: raise(ArgumentError, "invalid operation")
+  defp normalize_payload(
+         %{rail: rail, environment: environment, offline_action: action} = payload
+       ) do
+    %{
+      payload
+      | rail: source_atom!(rail),
+        environment: environment_atom!(environment),
+        offline_action: offline_action_atom!(action)
+    }
+  end
 
-  defp offline_operation_action!("read_downloaded_lesson"), do: :read_downloaded_lesson
-  defp offline_operation_action!("download_lesson"), do: :download_lesson
+  defp normalize_payload(payload), do: payload
 
-  defp expected!(value) when is_map(value) do
-    require_keys!(value, @expected_keys, "expected")
-    snapshot = value["snapshot"]
-    require_keys!(snapshot, @snapshot_keys, "snapshot")
-    purchase = value["purchase"]
-    require_keys!(purchase, @purchase_keys, "purchase")
-    policy = value["offline_policy"]
-    require_keys!(policy, @offline_policy_keys, "offline policy")
+  defp transition!(
+         %{
+           "kind" => kind,
+           "seam" => seam,
+           "result" => result,
+           "durable" => durable,
+           "cache" => cache
+         },
+         kind
+       )
+       when is_map(result) and is_map(durable) and is_map(cache) do
+    require_keys!(result, ~w(tag disposition), "expected transition result")
 
-    (is_integer(snapshot["revision"]) and snapshot["revision"] >= 0) ||
-      raise ArgumentError, "invalid revision"
+    require_keys!(
+      durable,
+      ~w(state observation_kind snapshot_revision),
+      "expected transition durable"
+    )
 
-    (is_list(snapshot["plans"]) and
-       Enum.all?(snapshot["plans"], &valid_id?/1)) || raise ArgumentError, "invalid plans"
+    require_keys!(cache, ~w(disposition), "expected transition cache")
+    seam in transition_seams(kind) || raise ArgumentError, "invalid expected transition seam"
 
-    (is_list(snapshot["sources"]) and
-       Enum.all?(snapshot["sources"], &(&1 in ["stripe", "apple"]))) ||
-      raise ArgumentError, "invalid sources"
+    (result["tag"] == "executed" and result["disposition"] == kind) ||
+      raise ArgumentError, "invalid expected transition result"
 
-    purchase["status"] in ["eligible", "warn", "block"] ||
-      raise ArgumentError, "invalid purchase status"
+    (durable["state"] in ["observed", "unchanged"] and
+       durable["observation_kind"] in ["grant", "retract", "none"] and
+       is_integer(durable["snapshot_revision"]) and durable["snapshot_revision"] >= 0) ||
+      raise ArgumentError, "invalid expected transition durable"
 
-    (is_binary(purchase["reason"]) and purchase["reason"] =~ ~r/^[a-z0-9_]{3,80}$/) ||
-      raise ArgumentError, "invalid purchase reason"
+    cache["disposition"] in ["replace", "preserve", "none"] ||
+      raise ArgumentError, "invalid expected transition cache"
 
-    policy["action"] in ["allow_downloaded_study", "reconnect_required", "deny"] ||
-      raise ArgumentError, "invalid offline policy"
+    %ExpectedTransition{
+      kind: kind,
+      seam: seam,
+      result: atomize(result),
+      durable: atomize(durable),
+      cache: atomize(cache)
+    }
+  end
 
-    (is_integer(value["audit_count"]) and value["audit_count"] >= 0) ||
-      raise ArgumentError, "invalid audit count"
+  defp transition!(_, _), do: raise(ArgumentError, "invalid expected transition")
+  defp atomize(map), do: Enum.into(map, %{}, fn {k, v} -> {String.to_atom(k), v} end)
+
+  defp transition_seams(kind) when kind in @observation_kinds,
+    do: ["observation_projector", "apple_admission"]
+
+  defp transition_seams("resume_delivery"), do: ["offline_reconnect"]
+  defp transition_seams("expiry_boundary"), do: ["snapshot"]
+  defp transition_seams(kind) when kind in @read_kinds, do: ["snapshot", "offline_verify_cache"]
+  defp transition_seams("purchase_preflight"), do: ["purchase_decision"]
+
+  defp transition_seams(kind) when kind in @offline_kinds,
+    do: ["offline_verify_policy", "offline_verify"]
+
+  defp transition_seams(kind)
+       when kind in ["reconnect_request", "durable_interruption"],
+       do: ["offline_reconnect"]
+
+  defp transition_seams("device_replace"), do: ["offline_register_device"]
+  defp transition_seams("rotated_key_proof"), do: ["verification_key_retention"]
+  defp transition_seams(_), do: []
+
+  defp expected!(%{
+         "snapshot" => s,
+         "purchase" => p,
+         "offline_policy" => o,
+         "audit_count" => count
+       }) do
+    require_keys!(s, ~w(revision plans sources), "snapshot")
+    require_keys!(p, ~w(status reason), "purchase")
+    require_keys!(o, ~w(action), "offline policy")
+
+    (is_integer(s["revision"]) and s["revision"] >= 0 and is_list(s["plans"]) and
+       Enum.all?(s["plans"], &valid_id?/1) and is_list(s["sources"]) and
+       Enum.all?(s["sources"], &(&1 in ["stripe", "apple"])) and
+       p["status"] in ["eligible", "warn", "block"] and is_binary(p["reason"]) and
+       o["action"] in ["allow_downloaded_study", "reconnect_required", "deny"] and
+       is_integer(count) and count >= 0) || raise ArgumentError, "invalid expected"
 
     %Expected{
       snapshot: %Snapshot{
-        revision: snapshot["revision"],
-        plans: snapshot["plans"],
-        sources: Enum.map(snapshot["sources"], &source_atom!/1)
+        revision: s["revision"],
+        plans: s["plans"],
+        sources: Enum.map(s["sources"], &source_atom!/1)
       },
-      purchase: %Purchase{
-        status: purchase_status!(purchase["status"]),
-        reason: purchase["reason"]
-      },
-      offline_policy: %OfflinePolicy{action: offline_action!(policy["action"])},
-      audit_count: value["audit_count"]
+      purchase: %Purchase{status: status_atom!(p["status"]), reason: p["reason"]},
+      offline_policy: %OfflinePolicy{action: offline_policy_atom!(o["action"])},
+      audit_count: count
     }
   end
 
   defp expected!(_), do: raise(ArgumentError, "expected must be an object")
 
-  defp artifacts!(artifacts) when is_list(artifacts) and artifacts != [] do
-    (Enum.all?(artifacts, &(&1 in @artifact_names)) and artifacts == Enum.uniq(artifacts)) ||
-      raise ArgumentError, "invalid artifacts"
+  defp artifacts!(xs) when is_list(xs) and xs != [] do
+    (Enum.all?(xs, &(&1 in @artifact_names)) and xs == Enum.uniq(xs)) ||
+      raise(ArgumentError, "invalid artifacts")
 
-    artifacts
+    xs
   end
 
-  defp artifacts!(_), do: raise(ArgumentError, "missing artifacts")
+  defp artifacts!(_), do: raise(ArgumentError, "invalid artifacts")
 
-  defp diagnostic!(diagnostic) when is_map(diagnostic) and map_size(diagnostic) > 0 do
-    Enum.all?(diagnostic, fn {key, value} ->
-      is_binary(key) and key =~ ~r/^[a-z][a-z0-9_]{2,40}$/ and is_binary(value) and
-        byte_size(value) <= 80
-    end) || raise ArgumentError, "unsafe diagnostic"
+  defp diagnostic!(m) when is_map(m) and map_size(m) > 0 do
+    Enum.all?(m, fn {k, v} -> is_binary(k) and is_binary(v) and byte_size(v) <= 80 end) ||
+      raise(ArgumentError, "unsafe diagnostic")
 
-    diagnostic
+    m
   end
 
   defp diagnostic!(_), do: raise(ArgumentError, "missing diagnostic")
-
-  defp valid_expected?(%Expected{
-         snapshot: %Snapshot{revision: revision, plans: plans, sources: sources},
-         purchase: %Purchase{status: status, reason: reason},
-         offline_policy: %OfflinePolicy{action: action},
-         audit_count: count
-       }),
-       do:
-         is_integer(revision) and revision >= 0 and is_list(plans) and
-           Enum.all?(plans, &valid_id?/1) and is_list(sources) and
-           Enum.all?(sources, &(&1 in [:stripe, :apple])) and status in [:eligible, :warn, :block] and
-           is_binary(reason) and reason =~ ~r/^[a-z0-9_]{3,80}$/ and
-           action in [:allow_downloaded_study, :reconnect_required, :deny] and
-           is_integer(count) and count >= 0
-
+  defp valid_expected?(%Expected{}), do: true
   defp valid_expected?(_), do: false
 
-  # Empty snapshots are an intentional closed result only at revision zero.
-  # Non-empty authorization state must retain its source evidence.
-  defp deterministic_operation_valid?(%Scenario{evidence_lane: :deterministic_conformance, actions: actions}),
-    do: Enum.any?(actions, &match?(%Operation{}, Map.get(&1, :operation)))
+  defp valid_commands?(actions) do
+    Enum.all?(actions, fn
+      %{kind: kind, command: %Command{kind: command_kind, payload: payload}}
+      when is_map(payload) ->
+        kind == command_kind and
+          Map.keys(payload) |> Enum.sort() ==
+            payload_keys(kind) |> Enum.map(&String.to_atom/1) |> Enum.sort() and
+          try do
+            validate_payload!(kind, payload)
+            true
+          rescue
+            ArgumentError -> false
+          end
 
-  defp deterministic_operation_valid?(%Scenario{}), do: true
+      %{command: nil} ->
+        true
 
-  defp valid_artifacts?(items),
-    do:
-      is_list(items) and items != [] and Enum.all?(items, &(&1 in @artifact_names)) and
-        items == Enum.uniq(items)
+      %{command: %Command{}} ->
+        false
 
-  defp lane_artifacts_valid?(:deterministic_conformance, items),
-    do:
-      valid_artifacts?(items) and "v1.59-decision-cases.json" in items and
-        "capability-report.json" not in items
+      _ ->
+        true
+    end)
+  end
 
-  defp lane_artifacts_valid?(:runtime_capability, items), do: items == ["capability-report.json"]
-  defp lane_artifacts_valid?(:advisory_parity, items), do: valid_artifacts?(items)
+  defp lane_artifacts_valid?(:deterministic_conformance, xs),
+    do: "v1.59-decision-cases.json" in xs and "capability-report.json" not in xs
 
-  defp safe_diagnostic?(value),
-    do:
-      is_map(value) and map_size(value) > 0 and
-        Enum.all?(value, fn {key, item} ->
-          is_binary(key) and key =~ ~r/^[a-z][a-z0-9_]{2,40}$/ and is_binary(item) and
-            byte_size(item) <= 80
-        end)
+  defp lane_artifacts_valid?(:runtime_capability, xs), do: xs == ["capability-report.json"]
+  defp lane_artifacts_valid?(:advisory_parity, xs), do: is_list(xs) and xs != []
+  defp safe_diagnostic?(m), do: is_map(m) and map_size(m) > 0
 
   defp ordered_actions?(actions),
     do:
-      is_list(actions) and actions != [] and
-        Enum.map(actions, & &1.order) == Enum.to_list(1..length(actions)) and
-        Enum.all?(actions, fn action ->
-          action.kind in @action_kinds and utc?(action.at) and
-            (not Map.has_key?(action, :operation) or match?(%Operation{}, action.operation))
+      Enum.map(actions, & &1.order) == Enum.to_list(1..length(actions)) and
+        Enum.all?(actions, fn a ->
+          a.kind in @action_kinds and utc?(a.at) and
+            (not Map.has_key?(a, :command) or
+               (a.command.kind == a.kind and a.expected_transition.kind == a.kind))
         end)
 
-  defp valid_id?(value), do: is_binary(value) and value =~ ~r/^[a-z0-9_]{3,80}$/
-
-  defp lane_atom!("deterministic_conformance"), do: :deterministic_conformance
-  defp lane_atom!("runtime_capability"), do: :runtime_capability
-  defp lane_atom!("advisory_parity"), do: :advisory_parity
+  defp valid_id?(x), do: is_binary(x) and x =~ ~r/^[a-z0-9_]{3,80}$/
   defp source_atom!("stripe"), do: :stripe
   defp source_atom!("apple"), do: :apple
-  defp purchase_status!("eligible"), do: :eligible
-  defp purchase_status!("warn"), do: :warn
-  defp purchase_status!("block"), do: :block
-  defp offline_action!("allow_downloaded_study"), do: :allow_downloaded_study
-  defp offline_action!("reconnect_required"), do: :reconnect_required
-  defp offline_action!("deny"), do: :deny
-  defp utc?(value), do: is_binary(value) and match?({:ok, _, 0}, DateTime.from_iso8601(value))
+  defp environment_atom!("production"), do: :production
+  defp environment_atom!("sandbox"), do: :sandbox
+  defp offline_action_atom!("read_downloaded_lesson"), do: :read_downloaded_lesson
+  defp offline_action_atom!("download_lesson"), do: :download_lesson
+  defp status_atom!("eligible"), do: :eligible
+  defp status_atom!("warn"), do: :warn
+  defp status_atom!("block"), do: :block
+  defp offline_policy_atom!("allow_downloaded_study"), do: :allow_downloaded_study
+  defp offline_policy_atom!("reconnect_required"), do: :reconnect_required
+  defp offline_policy_atom!("deny"), do: :deny
+  defp lane!(x) when x in @lanes, do: String.to_existing_atom(x)
+  defp lane!(_), do: raise(ArgumentError, "invalid evidence lane")
+  defp utc?(x), do: is_binary(x) and match?({:ok, _, 0}, DateTime.from_iso8601(x))
+  defp utc!(x, n), do: if(utc?(x), do: x, else: raise(ArgumentError, "invalid #{n}"))
 
-  defp utc!(value, name),
-    do: if(utc?(value), do: value, else: raise(ArgumentError, "invalid #{name}"))
-
-  defp require_keys!(map, keys, name) when is_map(map) do
-    Map.keys(map) |> Enum.sort() == Enum.sort(keys) ||
-      raise ArgumentError, "unknown or missing #{name} fields"
-  end
+  defp require_keys!(m, keys, name) when is_map(m),
+    do:
+      Map.keys(m) |> Enum.sort() == Enum.sort(keys) ||
+        raise(ArgumentError, "unknown or missing #{name} fields")
 
   defp require_keys!(_, _, name), do: raise(ArgumentError, "#{name} must be an object")
 
   defp reject_duplicate_keys!(json) do
-    case Jason.decode(json, objects: :ordered_objects) do
-      {:ok, value} ->
-        if(duplicate_free?(value), do: :ok, else: raise(ArgumentError, "duplicate JSON key"))
-
-      _ ->
-        raise ArgumentError, "duplicate JSON key"
-    end
+    {:ok, value} = Jason.decode(json, objects: :ordered_objects)
+    duplicate_free?(value) || raise ArgumentError, "duplicate JSON key"
   end
 
   defp duplicate_free?(%Jason.OrderedObject{values: values}),
     do:
-      Enum.map(values, &elem(&1, 0)) |> then(&(length(&1) == MapSet.size(MapSet.new(&1)))) and
-        Enum.all?(values, fn {_, value} -> duplicate_free?(value) end)
+      length(values) == MapSet.size(MapSet.new(Enum.map(values, &elem(&1, 0)))) and
+        Enum.all?(values, fn {_, v} -> duplicate_free?(v) end)
 
-  defp duplicate_free?(values) when is_list(values), do: Enum.all?(values, &duplicate_free?/1)
-
-  defp duplicate_free?(value) when is_map(value),
-    do: Enum.all?(value, fn {_, nested} -> duplicate_free?(nested) end)
-
+  defp duplicate_free?(xs) when is_list(xs), do: Enum.all?(xs, &duplicate_free?/1)
+  defp duplicate_free?(m) when is_map(m), do: Enum.all?(m, fn {_, v} -> duplicate_free?(v) end)
   defp duplicate_free?(_), do: true
 end
