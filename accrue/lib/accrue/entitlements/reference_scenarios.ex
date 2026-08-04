@@ -325,7 +325,10 @@ defmodule Accrue.Entitlements.ReferenceScenarios do
     do:
       is_list(actions) and actions != [] and
         Enum.map(actions, & &1.order) == Enum.to_list(1..length(actions)) and
-        Enum.all?(actions, fn %{at: at} -> utc?(at) end)
+        Enum.all?(actions, fn action ->
+          utc?(action.at) and
+            (not Map.has_key?(action, :operation) or match?(%Operation{}, action.operation))
+        end)
 
   defp valid_id?(value), do: is_binary(value) and value =~ ~r/^[a-z0-9_]{3,80}$/
   defp lane_atom!("deterministic_conformance"), do: :deterministic_conformance

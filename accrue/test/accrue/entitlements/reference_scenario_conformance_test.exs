@@ -177,7 +177,7 @@ defmodule Accrue.Entitlements.ReferenceScenarioConformanceTest do
 
   defp capability_report,
     do:
-      "../../../examples/crosswake_tracer/capability-report.json"
+      "../../../../examples/crosswake_tracer/capability-report.json"
       |> Path.expand(__DIR__)
       |> File.read!()
       |> Jason.decode!()
