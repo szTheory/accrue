@@ -53,7 +53,8 @@ defmodule Accrue.Entitlements.ReferenceScenarioExecutor do
              "verified_cache_replace",
              "resume_delivery",
              "expiry_boundary"
-           ], do: observe(action, Accrue.Entitlements.snapshot(account))
+           ],
+      do: observe(action, Accrue.Entitlements.snapshot(account))
 
   def execute_action(
         _repo,
