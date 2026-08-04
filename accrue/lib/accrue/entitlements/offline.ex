@@ -85,6 +85,19 @@ defmodule Accrue.Entitlements.Offline do
 
   def register_device(_, _, _), do: {:error, :invalid_request}
 
+  @spec replace_device(
+          Accrue.Entitlements.Account.t(),
+          Registration.ReplacementRequest.t(),
+          keyword()
+        ) :: {:ok, Registration.ReplacementResult.t()} | {:error, atom()}
+  def replace_device(account, request, opts \\ [])
+
+  def replace_device(account, %Registration.ReplacementRequest{} = request, opts) do
+    Registration.replace(account, request, opts)
+  end
+
+  def replace_device(_, _, _), do: {:error, :invalid_request}
+
   @spec verify(binary(), Proof.VerificationContext.t() | map(), keyword()) ::
           {:ok, Proof.Decision.t()}
   def verify(compact, context, opts \\ [])

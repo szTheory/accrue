@@ -235,6 +235,102 @@ defmodule Accrue.Entitlements.OfflineRegistrationTest do
              )
   end
 
+  test "authorized planned replacement atomically supersedes the prior device and records bounded audit data" do
+    account = account!("replacement")
+    prior_key = JOSE.JWK.generate_key({:ec, "P-256"})
+    replacement_key = JOSE.JWK.generate_key({:ec, "P-256"})
+    prior = device!(account, "install-220-prior", public_jwk(prior_key))
+    replacement_jwk = public_jwk(replacement_key)
+    actor = %{type: :user, id: "owner-220-replacement"}
+
+    authorize = fn %Account{id: account_id}, :offline_device_replacement ->
+      account_id == account.id
+    end
+
+    assert {:ok, value} =
+             Offline.challenge(account, "install-220-replacement",
+               authorize: fn %Account{id: id}, action ->
+                 id == account.id and action == :offline_challenge
+               end,
+               now: ~U[2026-08-04 12:08:00Z]
+             )
+
+    request = %Registration.ReplacementRequest{
+      prior_device_id: prior.id,
+      replacement_installation_id: "install-220-replacement",
+      replacement_public_jwk: replacement_jwk,
+      challenge_id: value.id,
+      nonce: value.nonce,
+      idempotency_key: "replace-220-planned",
+      prior_transition: :superseded,
+      reason: :planned_replacement,
+      nonce_signature: nil
+    }
+
+    request = %{
+      request
+      | nonce_signature:
+          sign(
+            replacement_key,
+            Registration.replacement_signing_input(
+              account.id,
+              request.prior_device_id,
+              request.replacement_installation_id,
+              Device.thumbprint(replacement_jwk),
+              request.challenge_id,
+              request.nonce,
+              request.idempotency_key,
+              request.prior_transition,
+              request.reason
+            )
+          )
+    }
+
+    assert {:ok,
+            %Registration.ReplacementResult{
+              disposition: :replaced,
+              prior_device_id: prior_id,
+              prior_installation_id: "install-220-prior",
+              prior_state: :superseded,
+              replacement_installation_id: "install-220-replacement",
+              replacement_key_thumbprint: thumbprint,
+              replacement_state: :active,
+              audit_id: audit_id
+            } = result} =
+             Offline.replace_device(account, request,
+               authorize: authorize,
+               actor: actor,
+               repo: TestRepo,
+               now: ~U[2026-08-04 12:09:00Z]
+             )
+
+    assert prior_id == prior.id
+    assert thumbprint == Device.thumbprint(replacement_jwk)
+    assert is_binary(result.replacement_device_id)
+    assert is_integer(audit_id)
+
+    assert %Device{state: :superseded, superseded_at: %DateTime{}} =
+             TestRepo.get!(Device, prior.id)
+
+    assert %Device{state: :active} = TestRepo.get!(Device, result.replacement_device_id)
+    assert %Challenge{consumed_at: %DateTime{}} = TestRepo.get!(Challenge, value.id)
+
+    assert %{
+             type: "entitlements.offline.device_replaced",
+             actor_type: "user",
+             actor_id: "owner-220-replacement"
+           } =
+             TestRepo.get!(Accrue.Events.Event, audit_id)
+
+    assert {:ok, %{disposition: :already_completed, audit_id: ^audit_id}} =
+             Offline.replace_device(account, request,
+               authorize: authorize,
+               actor: actor,
+               repo: TestRepo,
+               now: ~U[2026-08-04 12:10:00Z]
+             )
+  end
+
   test "installer copies the offline proof-state migration exactly once" do
     migration =
       Path.join([
@@ -259,14 +355,14 @@ defmodule Accrue.Entitlements.OfflineRegistrationTest do
     account
   end
 
-  defp device!(account, installation_id) do
+  defp device!(account, installation_id, public_jwk \\ @public_jwk) do
     {:ok, device} =
       TestRepo.insert(
         Device.changeset(%Device{}, %{
           account_id: account.id,
           installation_id: installation_id,
-          public_jwk: @public_jwk,
-          key_thumbprint: Device.thumbprint(@public_jwk),
+          public_jwk: public_jwk,
+          key_thumbprint: Device.thumbprint(public_jwk),
           state: :active,
           registered_at: ~U[2026-08-03 04:00:00.000000Z],
           last_accepted_revision: 0
@@ -304,4 +400,7 @@ defmodule Accrue.Entitlements.OfflineRegistrationTest do
     {_, private_key} = JOSE.JWK.to_key(key)
     :public_key.sign(input, :sha256, private_key)
   end
+
+  defp public_jwk(key),
+    do: key |> JOSE.JWK.to_public_map() |> elem(1) |> Map.take(["kty", "crv", "x", "y"])
 end
