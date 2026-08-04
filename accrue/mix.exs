@@ -129,7 +129,7 @@ defmodule Accrue.MixProject do
     [
       "test.all": [
         "format --check-formatted",
-        "credo --strict",
+        "cmd mix credo --strict",
         "compile --warnings-as-errors",
         "test"
       ],
