@@ -74,6 +74,7 @@ defmodule AccrueHostWeb.Router do
       session: {__MODULE__, :__live_session__, [@host_live_session_keys]},
       on_mount: @live_acceptance_hooks ++ [{AccrueHostWeb.UserAuth, :require_authenticated}] do
       live("/app/billing", SubscriptionLive, :show)
+      live("/app/entitlements/diagnostics", EntitlementDiagnosticsLive, :show)
       live("/users/settings", UserLive.Settings, :edit)
       live("/users/settings/confirm-email/:token", UserLive.Settings, :confirm_email)
     end
