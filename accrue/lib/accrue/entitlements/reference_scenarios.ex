@@ -64,9 +64,11 @@ defmodule Accrue.Entitlements.ReferenceScenarios do
 
   @spec valid?(Scenario.t()) :: boolean()
   def valid?(%Scenario{} = scenario) do
-    scenario.evidence_lane in Enum.map(@lanes, &String.to_atom/1) and valid_id?(scenario.id) and
+    scenario.evidence_lane in [:deterministic_conformance, :runtime_capability, :advisory_parity] and
+      valid_id?(scenario.id) and
       utc?(scenario.frozen_clock) and ordered_actions?(scenario.actions) and
-      valid_expected?(scenario.expected) and valid_artifacts?(scenario.required_artifacts) and
+      valid_expected?(scenario.expected) and
+      lane_artifacts_valid?(scenario.evidence_lane, scenario.required_artifacts) and
       safe_diagnostic?(scenario.diagnostic)
   end
 
@@ -99,6 +101,10 @@ defmodule Accrue.Entitlements.ReferenceScenarios do
     actions = actions!(value["actions"])
     expected = expected!(value["expected"])
     artifacts = artifacts!(value["required_artifacts"])
+
+    lane_artifacts_valid?(lane_atom!(lane), artifacts) ||
+      raise ArgumentError, "contradictory required artifacts"
+
     diagnostic = diagnostic!(value["diagnostic"])
 
     scenario = %Scenario{
@@ -226,6 +232,14 @@ defmodule Accrue.Entitlements.ReferenceScenarios do
     do:
       is_list(items) and items != [] and Enum.all?(items, &(&1 in @artifact_names)) and
         items == Enum.uniq(items)
+
+  defp lane_artifacts_valid?(:deterministic_conformance, items),
+    do:
+      valid_artifacts?(items) and "v1.59-decision-cases.json" in items and
+        "capability-report.json" not in items
+
+  defp lane_artifacts_valid?(:runtime_capability, items), do: items == ["capability-report.json"]
+  defp lane_artifacts_valid?(:advisory_parity, items), do: valid_artifacts?(items)
 
   defp safe_diagnostic?(value),
     do:
