@@ -94,14 +94,14 @@ defmodule Accrue.Entitlements.ReferenceScenarioConformanceTest do
     scenario = ReferenceScenarios.fetch!("refund_revocation")
 
     assert [
-             %{kind: "grant_observation", order: 1, operation: grant},
-             %{kind: "refund_observation", order: 2, operation: retract}
+             %{kind: "grant_observation", order: 1, operation: _grant},
+             %{kind: "refund_observation", order: 2, operation: _retract}
            ] = scenario.actions
 
     account = account!("refund-action-dispatch")
 
-    assert {:ok, _} = dispatch_observation(account, grant)
-    assert {:ok, _} = dispatch_observation(account, retract)
+    assert {:ok, _} = dispatch_observation(account, Enum.at(scenario.actions, 0))
+    assert {:ok, _} = dispatch_observation(account, Enum.at(scenario.actions, 1))
     assert {:ok, snapshot} = Accrue.Entitlements.snapshot(account)
 
     assert snapshot.plans == []
@@ -358,6 +358,27 @@ defmodule Accrue.Entitlements.ReferenceScenarioConformanceTest do
       metadata: %{"source" => "fake_observer"},
       evidence_digest: String.duplicate("a", 64)
     }
+
+  # This dispatcher has no grant/retract or entitlement rule of its own: the
+  # fixture's closed command selects the production observation kind and the
+  # Projector remains the sole lifecycle authority.
+  defp dispatch_observation(account, %{kind: kind, at: at, operation: operation}) do
+    {:ok, observed_at, 0} = DateTime.from_iso8601(at)
+
+    with {:ok, observation} <-
+           Observation.insert_idempotently(
+             Accrue.TestRepo,
+             observation_attrs(account, operation)
+             |> Map.put(:kind, observation_kind!(kind))
+             |> Map.put(:observed_at, observed_at)
+           ),
+         {:ok, snapshot} <- Projector.project(observation, logical_plan: operation.logical_product) do
+      {:ok, snapshot}
+    end
+  end
+
+  defp observation_kind!("grant_observation"), do: "grant"
+  defp observation_kind!("refund_observation"), do: "refunded"
 
   defp offline_vector(id), do: offline_fixture()["vectors"] |> Enum.find(&(&1["id"] == id))
 
