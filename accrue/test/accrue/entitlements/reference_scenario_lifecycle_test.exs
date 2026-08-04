@@ -8,8 +8,16 @@ defmodule Accrue.Entitlements.ReferenceScenarioLifecycleTest do
   alias Accrue.Entitlements.ReferenceScenarioExecutor
   alias Accrue.Events.Event
 
+  defmodule FakeVerifier do
+    def verify_notification(_, _), do: {:error, :invalid_payload}
+    def verify_renewal(_, _), do: {:error, :invalid_payload}
+    def verify_transaction(signed, _) when is_binary(signed), do: Jason.decode(signed)
+  end
+
   setup do
     previous = Application.get_env(:accrue, :entitlements)
+    previous_apple = Application.get_env(:accrue, :apple_reconciliation)
+    previous_rails = Application.get_env(:accrue, :rails)
 
     Application.put_env(:accrue, :entitlements,
       plans: [
@@ -21,8 +29,33 @@ defmodule Accrue.Entitlements.ReferenceScenarioLifecycleTest do
       ]
     )
 
+    Application.put_env(:accrue, :rails,
+      stripe: [environments: [:production], default_environment: :production],
+      apple: [environments: [:production], default_environment: :production]
+    )
+
+    Application.put_env(:accrue, :apple_reconciliation,
+      admission: [
+        verifier: FakeVerifier,
+        verifier_config: :test,
+        product_map: %{"product_pro" => :pro},
+        verifier_version: "fake-v1",
+        config_version: "test-v1"
+      ]
+    )
+
     on_exit(fn ->
-      if previous, do: Application.put_env(:accrue, :entitlements, previous), else: Application.delete_env(:accrue, :entitlements)
+      if previous,
+        do: Application.put_env(:accrue, :entitlements, previous),
+        else: Application.delete_env(:accrue, :entitlements)
+
+      if previous_apple,
+        do: Application.put_env(:accrue, :apple_reconciliation, previous_apple),
+        else: Application.delete_env(:accrue, :apple_reconciliation)
+
+      if previous_rails,
+        do: Application.put_env(:accrue, :rails, previous_rails),
+        else: Application.delete_env(:accrue, :rails)
     end)
   end
 
@@ -45,8 +78,73 @@ defmodule Accrue.Entitlements.ReferenceScenarioLifecycleTest do
     assert durable.source_count == 0
     assert durable.audit_delta == 1
     assert cache.disposition == "replace"
-    assert Accrue.TestRepo.aggregate(from(event in Event, where: event.subject_id == ^account.id), :count, :id) == 2
+
+    assert Accrue.TestRepo.aggregate(
+             from(event in Event, where: event.subject_id == ^account.id),
+             :count,
+             :id
+           ) == 2
   end
 
-  defp account!(owner_id), do: Account.fetch_or_create(Accrue.TestRepo, "reference_scenario", owner_id) |> elem(1)
+  test "every lifecycle command is dispatched to the lifecycle family and collected after its write" do
+    actions =
+      for scenario <- ReferenceScenarios.deterministic_scenarios(),
+          action <- scenario.actions,
+          ReferenceScenarioExecutor.family_for!(action.kind) ==
+            Accrue.Entitlements.ReferenceScenarioExecutor.Lifecycle,
+          do: {scenario, action}
+
+    assert length(actions) == 7
+
+    Enum.each(actions, fn {scenario, action} ->
+      account = account!("reference-scenario-lifecycle-#{scenario.id}")
+      observed = ReferenceScenarioExecutor.execute_action(Accrue.TestRepo, account, action)
+
+      assert observed.result.disposition == action.kind
+      assert observed.durable.observation_count >= 1
+      assert is_integer(observed.durable.snapshot_revision)
+    end)
+  end
+
+  test "actual generic-grant and no-effect substitutions cannot satisfy a refund collection" do
+    scenario = ReferenceScenarios.fetch!("refund_revocation")
+    [grant, refund] = scenario.actions
+
+    generic_account = account!("reference-scenario-refund-generic")
+    generic_refund = %{refund | kind: "grant_observation"}
+    _ = ReferenceScenarioExecutor.execute_action(Accrue.TestRepo, generic_account, grant)
+
+    generic =
+      ReferenceScenarioExecutor.execute_action(Accrue.TestRepo, generic_account, generic_refund)
+
+    assert generic.durable.plan_count == 1
+    assert generic.durable.source_count == 1
+    assert generic.cache.disposition == "preserve"
+
+    replay_account = account!("reference-scenario-refund-replay")
+    _ = ReferenceScenarioExecutor.execute_action(Accrue.TestRepo, replay_account, grant)
+    _ = ReferenceScenarioExecutor.execute_action(Accrue.TestRepo, replay_account, refund)
+
+    replay_refund = %{
+      refund
+      | command: %{
+          refund.command
+          | payload: %{
+              refund.command.payload
+              | provider_event_id: "reference_refund_revocation_refund_replay_event",
+                provider_transaction_id: "reference_refund_revocation_refund_replay_transaction",
+                provider_order: 1
+            }
+        }
+    }
+
+    replay =
+      ReferenceScenarioExecutor.execute_action(Accrue.TestRepo, replay_account, replay_refund)
+
+    assert replay.result.projection == "stale"
+    assert replay.durable.audit_delta == 0
+  end
+
+  defp account!(owner_id),
+    do: Account.fetch_or_create(Accrue.TestRepo, "reference_scenario", owner_id) |> elem(1)
 end
