@@ -14,6 +14,7 @@ defmodule Accrue.Entitlements.ReferenceScenarios do
   @offline_kinds ~w(offline_proof_stale offline_expansion_request signed_deny rollback_proof empty_evidence)
   @operation_keys ~w(rail environment logical_product provider_product_id provider_event_id provider_transaction_id provider_lineage_id provider_order offline_vector offline_action)
   @base_payload_keys ~w(account_ref clock)
+  @device_replace_payload_keys ~w(account_ref clock prior_device_ref replacement_installation_ref replacement_key_fixture challenge_ref idempotency_ref prior_transition reason actor_ref)
   @expected_keys ~w(snapshot purchase offline_policy audit_count)
 
   defmodule Snapshot, do: defstruct([:revision, :plans, :sources])
@@ -151,25 +152,35 @@ defmodule Accrue.Entitlements.ReferenceScenarios do
 
   defp command!(_, _, _), do: raise(ArgumentError, "invalid command")
   defp payload_keys(kind) when kind in @read_kinds, do: @base_payload_keys
+  defp payload_keys("device_replace"), do: @device_replace_payload_keys
   defp payload_keys(kind) when kind in @action_kinds, do: @base_payload_keys ++ @operation_keys
 
   defp validate_payload!(kind, p) do
     utc!(p.clock, "command clock")
 
-    if kind not in @read_kinds do
-      (p.rail in ["apple", "stripe", :apple, :stripe] and
-         p.environment in ["production", "sandbox", :production, :sandbox] and
-         Enum.all?(
-           @operation_keys -- ~w(rail environment provider_order offline_action),
-           &valid_id?(Map.fetch!(p, String.to_atom(&1)))
-         ) and is_integer(p.provider_order) and p.provider_order > 0 and
-         p.offline_action in [
-           "read_downloaded_lesson",
-           "download_lesson",
-           :read_downloaded_lesson,
-           :download_lesson
-         ]) ||
-        raise ArgumentError, "invalid #{kind} payload"
+    if kind == "device_replace" do
+      (Enum.all?(@device_replace_payload_keys -- ~w(clock prior_transition reason), fn key ->
+         valid_id?(Map.fetch!(p, String.to_atom(key)))
+       end) and p.prior_transition in ["superseded", "revoked"] and
+         ((p.prior_transition == "superseded" and p.reason == "planned_replacement") or
+            (p.prior_transition == "revoked" and p.reason == "lost_or_compromised"))) ||
+        raise ArgumentError, "invalid device_replace payload"
+    else
+      if kind not in @read_kinds do
+        (p.rail in ["apple", "stripe", :apple, :stripe] and
+           p.environment in ["production", "sandbox", :production, :sandbox] and
+           Enum.all?(
+             @operation_keys -- ~w(rail environment provider_order offline_action),
+             &valid_id?(Map.fetch!(p, String.to_atom(&1)))
+           ) and is_integer(p.provider_order) and p.provider_order > 0 and
+           p.offline_action in [
+             "read_downloaded_lesson",
+             "download_lesson",
+             :read_downloaded_lesson,
+             :download_lesson
+           ]) ||
+          raise ArgumentError, "invalid #{kind} payload"
+      end
     end
   end
 
@@ -196,7 +207,7 @@ defmodule Accrue.Entitlements.ReferenceScenarios do
          },
          kind
        )
-       when is_map(result) and is_map(durable) and is_map(cache) do
+       when kind != "device_replace" and is_map(result) and is_map(durable) and is_map(cache) do
     require_keys!(result, ~w(tag disposition), "expected transition result")
 
     require_keys!(
@@ -228,7 +239,56 @@ defmodule Accrue.Entitlements.ReferenceScenarios do
     }
   end
 
+  defp transition!(
+         %{
+           "kind" => "device_replace",
+           "seam" => "offline_replace_device",
+           "result" => result,
+           "durable" => durable,
+           "cache" => cache
+         },
+         "device_replace"
+       ) do
+    require_keys!(
+      result,
+      ~w(tag disposition prior_state replacement_state),
+      "device replacement result"
+    )
+
+    require_keys!(
+      durable,
+      ~w(prior_device_count replacement_device_count prior_state replacement_state challenge_consumed audit_type audit_delta snapshot_revision),
+      "device replacement durable"
+    )
+
+    require_keys!(cache, ~w(prior replacement), "device replacement cache")
+
+    (result == %{
+       "tag" => "replaced",
+       "disposition" => "replaced",
+       "prior_state" => durable["prior_state"],
+       "replacement_state" => durable["replacement_state"]
+     } and durable["prior_device_count"] == 1 and durable["replacement_device_count"] == 1 and
+       durable["prior_state"] in ["superseded", "revoked"] and
+       durable["replacement_state"] == "active" and durable["challenge_consumed"] == true and
+       durable["audit_type"] == "entitlements.offline.device_replaced" and
+       durable["audit_delta"] == 1 and is_integer(durable["snapshot_revision"]) and
+       cache == %{
+         "prior" => "server_reject_on_next_contact",
+         "replacement" => "reconnect_required"
+       }) || raise ArgumentError, "invalid device replacement transition"
+
+    %ExpectedTransition{
+      kind: "device_replace",
+      seam: "offline_replace_device",
+      result: atomize(result),
+      durable: atomize(durable),
+      cache: atomize(cache)
+    }
+  end
+
   defp transition!(_, _), do: raise(ArgumentError, "invalid expected transition")
+
   defp atomize(map), do: Enum.into(map, %{}, fn {k, v} -> {String.to_atom(k), v} end)
 
   defp transition_seams(kind) when kind in @observation_kinds,

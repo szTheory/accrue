@@ -197,7 +197,19 @@ defmodule Accrue.Entitlements.ReferenceScenarioConformanceTest do
 
         result_payload = matching_payload || payload
 
-        assert_bounded_result(scenario, account, result_payload)
+        if scenario.id == "device_replacement" do
+          observed =
+            ReferenceScenarioExecutor.execute_action(
+              Accrue.TestRepo,
+              account,
+              hd(scenario.actions)
+            )
+
+          ReferenceScenarioExecutor.assert_transition(hd(scenario.actions), observed)
+        else
+          assert_bounded_result(scenario, account, result_payload)
+        end
+
         {scenario.id, Enum.map(scenario.actions, &{&1.order, &1.kind})}
       end
 
@@ -533,6 +545,8 @@ defmodule Accrue.Entitlements.ReferenceScenarioConformanceTest do
     {:ok, _decision} = Offline.verify("", offline_context(payload.offline_vector))
     :ok
   end
+
+  defp dispatch_fixture_action(_account, %{kind: "device_replace"}), do: :ok
 
   defp dispatch_fixture_action(
          account,

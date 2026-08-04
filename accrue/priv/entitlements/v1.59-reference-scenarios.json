@@ -772,32 +772,38 @@
             "payload": {
               "account_ref": "reference_scenario_device_replace",
               "clock": "2026-08-04T12:08:00Z",
-              "rail": "stripe",
-              "environment": "production",
-              "logical_product": "pro",
-              "provider_product_id": "price_pro",
-              "provider_event_id": "reference_device_replacement_event",
-              "provider_transaction_id": "reference_device_replacement_transaction",
-              "provider_lineage_id": "reference_device_replacement_lineage",
-              "provider_order": 1,
-              "offline_vector": "valid_allow",
-              "offline_action": "read_downloaded_lesson"
+              "prior_device_ref": "reference_prior_device",
+              "replacement_installation_ref": "reference_replacement_installation",
+              "replacement_key_fixture": "reference_replacement_p256",
+              "challenge_ref": "reference_replacement_challenge",
+              "idempotency_ref": "reference_replacement_operation",
+              "prior_transition": "superseded",
+              "reason": "planned_replacement",
+              "actor_ref": "reference_device_actor"
             }
           },
           "expected_transition": {
             "kind": "device_replace",
-            "seam": "offline_register_device",
+            "seam": "offline_replace_device",
             "result": {
-              "tag": "executed",
-              "disposition": "device_replace"
+              "tag": "replaced",
+              "disposition": "replaced",
+              "prior_state": "superseded",
+              "replacement_state": "active"
             },
             "durable": {
-              "state": "unchanged",
-              "observation_kind": "none",
+              "prior_device_count": 1,
+              "replacement_device_count": 1,
+              "prior_state": "superseded",
+              "replacement_state": "active",
+              "challenge_consumed": true,
+              "audit_type": "entitlements.offline.device_replaced",
+              "audit_delta": 1,
               "snapshot_revision": 1
             },
             "cache": {
-              "disposition": "preserve"
+              "prior": "server_reject_on_next_contact",
+              "replacement": "reconnect_required"
             }
           }
         }
