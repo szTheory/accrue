@@ -509,6 +509,30 @@ defmodule Accrue.Entitlements.OfflineReconnectTest do
     assert 1 == TestRepo.aggregate(ReconnectWakeup, :count)
   end
 
+  test "an incomplete list-shaped worker config becomes a terminal configuration failure", ctx do
+    opts = issuer_opts(ctx) ++ [source_coordinator: NoDueSources, authorize: fn _, _ -> true end]
+    request = reconnect_request!(ctx, opts, "reconnect-invalid-worker-config")
+
+    assert {:error, :admission_interrupted} =
+             Offline.reconnect(
+               ctx.account,
+               request,
+               Keyword.put(opts, :after_admission, fn -> :interrupted end)
+             )
+
+    attempt = TestRepo.one!(ReconnectAttempt)
+
+    assert {:error, :config_invalid} =
+             Reconnect.execute_attempt(attempt.id,
+               offline_reconnect: [source_coordinator: NoDueSources],
+               repo: TestRepo,
+               now: @now
+             )
+
+    assert %{state: :needs_repair, failure_reason: "config_invalid"} =
+             TestRepo.get!(ReconnectAttempt, attempt.id)
+  end
+
   test "wakeup insertion failure rolls back PoP consumption and durable rows", ctx do
     opts =
       issuer_opts(ctx) ++

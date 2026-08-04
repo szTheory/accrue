@@ -477,33 +477,53 @@ defmodule Accrue.Entitlements.Offline.Reconnect do
     config =
       Keyword.get(opts, :offline_reconnect, Application.get_env(:accrue, :offline_reconnect))
 
-    with true <- is_list(config),
-         coordinator when is_atom(coordinator) <- Keyword.get(config, :source_coordinator),
-         provider when is_atom(provider) <- Keyword.get(config, :key_provider),
-         {:ok, {account, device, challenge, token}} <- claim_attempt(repo, attempt_id, now),
-         {:ok, _} <-
-           run_attempt(
-             account,
-             device,
-             challenge,
-             %Request{
-               installation_id: device.installation_id,
-               challenge_id: challenge.id,
-               nonce: "worker",
-               nonce_signature: "worker",
-               idempotency_key: "worker"
-             },
-             now,
-             Keyword.merge(config, repo: repo),
-             attempt_id,
-             token
-           ) do
-      :ok
-    else
-      false -> mark_configuration_failure(repo, attempt_id, now)
-      _ -> {:error, :attempt_unavailable}
+    case validate_worker_config(config) do
+      {:ok, config} ->
+        with {:ok, {account, device, challenge, token}} <- claim_attempt(repo, attempt_id, now),
+             {:ok, _} <-
+               run_attempt(
+                 account,
+                 device,
+                 challenge,
+                 %Request{
+                   installation_id: device.installation_id,
+                   challenge_id: challenge.id,
+                   nonce: "worker",
+                   nonce_signature: "worker",
+                   idempotency_key: "worker"
+                 },
+                 now,
+                 Keyword.merge(config, repo: repo),
+                 attempt_id,
+                 token
+               ) do
+          :ok
+        else
+          _ -> {:error, :attempt_unavailable}
+        end
+
+      {:error, :config_invalid} ->
+        mark_configuration_failure(repo, attempt_id, now)
     end
   end
+
+  defp validate_worker_config(config) when is_list(config) do
+    coordinator = Keyword.get(config, :source_coordinator)
+    provider = Keyword.get(config, :key_provider)
+
+    if Keyword.keyword?(config) and is_atom(coordinator) and not is_nil(coordinator) and
+         function_exported?(coordinator, :due_sources, 3) and
+         function_exported?(coordinator, :refresh, 4) and
+         function_exported?(coordinator, :enqueue_repair, 4) and is_atom(provider) and
+         not is_nil(provider) and function_exported?(provider, :sign, 2) and
+         function_exported?(provider, :public_keys, 1) do
+      {:ok, config}
+    else
+      {:error, :config_invalid}
+    end
+  end
+
+  defp validate_worker_config(_), do: {:error, :config_invalid}
 
   defp mark_configuration_failure(repo, attempt_id, now) do
     result =
