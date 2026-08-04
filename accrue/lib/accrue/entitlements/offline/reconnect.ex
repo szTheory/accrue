@@ -35,7 +35,8 @@ defmodule Accrue.Entitlements.Offline.Reconnect do
   def reconnect(%Account{} = account, %Request{} = request, opts) do
     now = Keyword.get(opts, :now, DateTime.utc_now())
 
-    with true <- authorized?(opts, account),
+    with :ok <- validate_request(request),
+         true <- authorized?(opts, account),
          {:ok, device} <- consume_pop(account, request, now, opts),
          {:ok, statuses} <- due_statuses(account, now, opts),
          {:ok, refreshed} <- refresh_due(account, statuses, now, opts),
@@ -68,8 +69,11 @@ defmodule Accrue.Entitlements.Offline.Reconnect do
         if status.due, do: coordinator.refresh(account, status, now, opts), else: {:ok, status}
 
       case result do
-        {:ok, %SourceCoordinator.SourceStatus{} = refreshed} ->
-          {:cont, {:ok, [refreshed | accepted]}}
+        {:ok, %SourceCoordinator.SourceStatus{} = refreshed}
+        when refreshed.source == status.source and refreshed.environment == status.environment ->
+          # Due membership belongs to this reconnect attempt, not to a provider response.
+          # A refresh may advance state/retry metadata but cannot make required work disappear.
+          {:cont, {:ok, [%{refreshed | due: status.due} | accepted]}}
 
         _ ->
           {:halt, {:error, :source_unavailable}}
@@ -183,6 +187,25 @@ defmodule Accrue.Entitlements.Offline.Reconnect do
       _ -> {:error, :challenge_invalid}
     end
   end
+
+  defp validate_request(%Request{} = request) do
+    if Enum.all?(
+         [
+           request.installation_id,
+           request.challenge_id,
+           request.nonce,
+           request.nonce_signature,
+           request.idempotency_key
+         ],
+         &bounded_binary?/1
+       ) and byte_size(request.nonce_signature) <= 256 do
+      :ok
+    else
+      {:error, :invalid_request}
+    end
+  end
+
+  defp bounded_binary?(value), do: is_binary(value) and byte_size(value) in 1..512
 
   defp valid_signature?(account, device, challenge, request) do
     {_, key} = JOSE.JWK.from(device.public_jwk) |> JOSE.JWK.to_public_key()
