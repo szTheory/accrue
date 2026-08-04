@@ -13,6 +13,8 @@ defmodule Accrue.Entitlements.ReferenceScenarioConformanceTest do
     Snapshot
   }
 
+  alias Accrue.Entitlements.ReferenceScenarioExecutor
+
   alias Accrue.Events.Event
 
   defmodule FakeVerifier do
@@ -100,6 +102,28 @@ defmodule Accrue.Entitlements.ReferenceScenarioConformanceTest do
            })
 
     assert "feasibility_blocked" == capability_report()["overall_status"]
+  end
+
+  test "generic grant and no-effect adapters cannot satisfy exact family transitions" do
+    for scenario <- ReferenceScenarios.deterministic_scenarios(), action <- scenario.actions do
+      expected = action.expected_transition
+
+      assert_raise ExUnit.AssertionError, fn ->
+        ReferenceScenarioExecutor.assert_transition(action, %{
+          result: %{tag: "executed", disposition: "generic_grant"},
+          durable: expected.durable,
+          cache: expected.cache
+        })
+      end
+
+      assert_raise ExUnit.AssertionError, fn ->
+        ReferenceScenarioExecutor.assert_transition(action, %{
+          result: expected.result,
+          durable: %{state: "unchanged", observation_kind: "none", snapshot_revision: 0},
+          cache: %{disposition: "none"}
+        })
+      end
+    end
   end
 
   @tag :action_dispatch_tracer
