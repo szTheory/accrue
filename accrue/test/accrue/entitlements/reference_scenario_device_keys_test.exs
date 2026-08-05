@@ -4,7 +4,7 @@ defmodule Accrue.Entitlements.ReferenceScenarioDeviceKeysTest do
   import Ecto.Query
 
   alias Accrue.Entitlements.{Account, Device, ReferenceScenarios}
-  alias Accrue.Entitlements.Offline.Challenge
+  alias Accrue.Entitlements.Offline.{Challenge, Issuance}
   alias Accrue.Entitlements.ReferenceScenarioExecutor.DeviceKeys
   alias Accrue.Events.Event
 
@@ -60,6 +60,50 @@ defmodule Accrue.Entitlements.ReferenceScenarioDeviceKeysTest do
                :count,
                :id
              )
+  end
+
+  test "issued retention keeps the old public kid until its finite horizon then retires it" do
+    account = account!("key-retention")
+    [action] = ReferenceScenarios.fetch!("key_rotation").actions
+
+    observed = DeviceKeys.execute(Accrue.TestRepo, account, action)
+
+    assert observed.result == %{tag: "executed", disposition: "rotated_key_proof"}
+    assert observed.durable.retirement_requirement == "required"
+    assert observed.cache.public_kids == ["reference-next-key", "reference-old-key"]
+    assert observed.after_retention.cache.public_kids == ["reference-next-key"]
+
+    assert 1 ==
+             Accrue.TestRepo.aggregate(
+               from(issuance in Issuance, where: issuance.account_id == ^account.id),
+               :count,
+               :id
+             )
+
+    refute contains_secret?(observed)
+  end
+
+  test "real generic, no-effect, registration, and snapshot substitutes fail device/key matching" do
+    device_action = ReferenceScenarios.fetch!("device_replacement").actions |> hd()
+    key_action = ReferenceScenarios.fetch!("key_rotation").actions |> hd()
+
+    Enum.each([:generic_grant, :no_effect, :registration_only, :snapshot_only], fn adapter ->
+      account = account!("adversarial-device-#{adapter}")
+
+      refute DeviceKeys.matches_expected?(
+               device_action,
+               DeviceKeys.adversarial_result(Accrue.TestRepo, account, device_action,
+                 adapter: adapter
+               )
+             )
+
+      refute DeviceKeys.matches_expected?(
+               key_action,
+               DeviceKeys.adversarial_result(Accrue.TestRepo, account, key_action,
+                 adapter: adapter
+               )
+             )
+    end)
   end
 
   defp account!(suffix),
