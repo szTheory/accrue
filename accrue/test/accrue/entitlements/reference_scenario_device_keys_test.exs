@@ -138,7 +138,10 @@ defmodule Accrue.Entitlements.ReferenceScenarioDeviceKeysTest do
         true -> "not-#{value}"
       end
 
-    %{action | expected_transition: Map.update!(expected, section, &Map.put(&1, leaf, replacement))}
+    %{
+      action
+      | expected_transition: Map.update!(expected, section, &Map.put(&1, leaf, replacement))
+    }
   end
 
   defp contains_secret?(%_{}), do: false

@@ -66,7 +66,9 @@ defmodule Accrue.Entitlements.ReferenceScenarioReconnectTest do
     assert observed.result.reason == "verification_failed"
   end
 
-  test "declared reconnect leaves are load-bearing after the signed operation", %{scenario: scenario} do
+  test "declared reconnect leaves are load-bearing after the signed operation", %{
+    scenario: scenario
+  } do
     [reconnect, cache_replace] = scenario.actions
     account = account!("reference-scenario-reconnect-mutation")
     {first, runtime} = ReconnectCache.execute(Accrue.TestRepo, account, reconnect, %{})
@@ -117,7 +119,10 @@ defmodule Accrue.Entitlements.ReferenceScenarioReconnectTest do
     value = Map.fetch!(Map.fetch!(expected, section), leaf)
     replacement = if is_integer(value), do: value + 1, else: "preserve"
 
-    %{action | expected_transition: Map.update!(expected, section, &Map.put(&1, leaf, replacement))}
+    %{
+      action
+      | expected_transition: Map.update!(expected, section, &Map.put(&1, leaf, replacement))
+    }
   end
 
   defp contains_secret?(value) when is_map(value),
