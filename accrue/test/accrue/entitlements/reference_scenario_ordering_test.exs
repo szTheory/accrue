@@ -59,6 +59,32 @@ defmodule Accrue.Entitlements.ReferenceScenarioOrderingTest do
            )
   end
 
+  test "parallel delivery releases declared workers through a real barrier and rejects substitutes" do
+    action = action!("parallel_execution")
+    observed = Ordering.parallel(Accrue.TestRepo, "parallel", action)
+
+    assert Ordering.matches_parallel_expected?(action, observed)
+    assert observed.worker_count == length(action.command.payload.workers)
+    assert observed.durable == %{
+             observation_count: 1,
+             grant_count: 1,
+             snapshot_revision: 1,
+             audit_count: 1
+           }
+
+    assert Enum.all?(observed.results, &(&1.insert in [:owner, :existing]))
+    assert Enum.all?(observed.results, &(&1.projection in [:projected, :stale, :no_material_change]))
+
+    Enum.each([:generic_grant, :no_effect], fn adapter ->
+      refute Ordering.matches_parallel_expected?(
+               action,
+               Ordering.parallel_adversarial(Accrue.TestRepo, "parallel-#{adapter}", action,
+                 adapter: adapter
+               )
+             )
+    end)
+  end
+
   defp action!(scenario_id), do: ReferenceScenarios.fetch!(scenario_id).actions |> hd()
 
   defp account!(owner_id),
