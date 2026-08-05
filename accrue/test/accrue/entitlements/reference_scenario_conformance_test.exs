@@ -60,6 +60,7 @@ defmodule Accrue.Entitlements.ReferenceScenarioConformanceTest do
         # key calculation with only the issuer rows it provisions itself.
         if action.kind == "rotated_key_proof", do: Accrue.TestRepo.delete_all(Issuance)
 
+        action = annotated_action(scenario.id, action)
         observed = ReferenceScenarioExecutor.execute_action(Accrue.TestRepo, account, action)
         assert :ok = ReferenceScenarioExecutor.assert_transition(action, observed)
         {scenario.id, action.order, action.kind}
@@ -68,6 +69,40 @@ defmodule Accrue.Entitlements.ReferenceScenarioConformanceTest do
     assert observed_rows == expected_rows
     assert length(observed_rows) == 27
     assert Enum.uniq(observed_rows) == observed_rows
+  end
+
+  @tag :action_contract
+  test "every declared transition leaf rejects a mutation against its unchanged production observation" do
+    paths =
+      for scenario <- ReferenceScenarios.deterministic_scenarios(), action <- scenario.actions do
+        account =
+          if action.kind == "parallel_delivery",
+            do: %{owner_id: "mutation-#{scenario.id}"},
+            else: account!("mutation-#{scenario.id}")
+
+        if action.kind == "rotated_key_proof", do: Accrue.TestRepo.delete_all(Issuance)
+
+        action = annotated_action(scenario.id, action)
+        observed = ReferenceScenarioExecutor.execute_action(Accrue.TestRepo, account, action)
+        assert :ok = ReferenceScenarioExecutor.assert_transition(action, observed)
+
+        declared_paths = scalar_paths(action.expected_transition)
+        assert scalar_paths(observed.declared_transition) == declared_paths
+
+        Enum.each(declared_paths, fn path ->
+          mutated = mutate_expected(action, path)
+
+          assert_raise ExUnit.AssertionError,
+                       ~r/family transition mismatch for scenario #{scenario.id} order #{action.order} kind #{action.kind} path #{Regex.escape(Enum.join(path, "."))}/,
+                       fn ->
+                         ReferenceScenarioExecutor.assert_transition(mutated, observed)
+                       end
+        end)
+
+        Enum.map(declared_paths, &{scenario.id, action.order, action.kind, &1})
+      end
+
+    assert paths |> List.flatten() |> Enum.sort() == Enum.sort(expected_scalar_paths())
   end
 
   @tag :action_contract
@@ -115,6 +150,39 @@ defmodule Accrue.Entitlements.ReferenceScenarioConformanceTest do
         action <- scenario.actions,
         do: {scenario.id, action.order, action.kind}
   end
+
+  defp expected_scalar_paths do
+    for scenario <- ReferenceScenarios.deterministic_scenarios(),
+        action <- scenario.actions,
+        path <- scalar_paths(action.expected_transition),
+        do: {scenario.id, action.order, action.kind, path}
+  end
+
+  defp annotated_action(scenario_id, action), do: Map.put(action, :scenario_id, scenario_id)
+
+  defp scalar_paths(expected) do
+    for section <- [:result, :durable, :cache],
+        path <- scalar_paths(Map.fetch!(expected, section), [section]),
+        do: path
+  end
+
+  defp scalar_paths(value, path) when is_map(value) do
+    Enum.flat_map(value, fn {key, nested} -> scalar_paths(nested, path ++ [key]) end)
+  end
+
+  defp scalar_paths(_value, path), do: [path]
+
+  defp mutate_expected(action, [section | rest]) do
+    expected = action.expected_transition
+    %{action | expected_transition: Map.update!(expected, section, &mutate_value(&1, rest))}
+  end
+
+  defp mutate_value(value, [leaf]), do: Map.update!(value, leaf, &unequal_value/1)
+  defp mutate_value(value, [key | rest]), do: Map.update!(value, key, &mutate_value(&1, rest))
+  defp unequal_value(value) when is_boolean(value), do: not value
+  defp unequal_value(value) when is_integer(value), do: value + 1
+  defp unequal_value(value) when is_atom(value), do: "not-#{value}"
+  defp unequal_value(value) when is_binary(value), do: "not-#{value}"
 
   defp account!(owner_id),
     do: Account.fetch_or_create(Accrue.TestRepo, "reference_scenario", owner_id) |> elem(1)

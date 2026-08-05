@@ -35,7 +35,13 @@ defmodule Accrue.Entitlements.ReferenceScenarioExecutor.Resume do
       hook
     )
 
-    {collect(repo, account, device.id, challenge.id, "interrupted", "preserve"),
+    observed = collect(repo, account, device.id, challenge.id, "interrupted", "preserve")
+
+    {Map.put(
+       observed,
+       :declared_transition,
+       declared_transition("durable_interruption", observed)
+     ),
      %{
        request_ref: payload.request_ref,
        request: request,
@@ -68,7 +74,10 @@ defmodule Accrue.Entitlements.ReferenceScenarioExecutor.Resume do
     replay = Offline.reconnect(account, request, runtime.reconnect_opts)
     true = stable_replay?(replay, proof)
 
-    {Map.put(observed, :replay, "stable"), %{runtime | cache: next_cache}}
+    observed = Map.put(observed, :replay, "stable")
+
+    {Map.put(observed, :declared_transition, declared_transition("resume_delivery", observed)),
+     %{runtime | cache: next_cache}}
   end
 
   def matches_expected?(%{kind: "durable_interruption"}, %{
@@ -106,6 +115,18 @@ defmodule Accrue.Entitlements.ReferenceScenarioExecutor.Resume do
 
   def adversarial_result(_repo, _account, %{kind: "resume_delivery"}, adapter),
     do: %{operation: Atom.to_string(adapter), cache: "unverified"}
+
+  defp declared_transition(kind, observed) do
+    %{
+      result: %{tag: "executed", disposition: kind},
+      durable: %{
+        state: "unchanged",
+        observation_kind: "none",
+        snapshot_revision: observed.durable.snapshot_revision
+      },
+      cache: %{disposition: observed.cache.replacement}
+    }
+  end
 
   defp collect(repo, account, device_id, challenge_id, disposition, replacement) do
     challenge = repo.get!(Challenge, challenge_id)

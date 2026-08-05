@@ -32,18 +32,31 @@ defmodule Accrue.Entitlements.ReferenceScenarioExecutor.Ordering do
         observed
       end)
 
-    %{permutations: finals}
+    observed = %{permutations: finals}
+    snapshot_revision = finals |> hd() |> Map.fetch!(:final) |> Map.fetch!(:snapshot_revision)
+
+    Map.put(
+      observed,
+      :declared_transition,
+      declared_transition("equal_order_delivery", snapshot_revision)
+    )
   end
 
   def repeat(repo, account, %{command: %{payload: payload}}) do
     delivery = hd(payload.deliveries)
     results = Enum.map(1..payload.repeat_count, fn _ -> deliver(repo, account, delivery) end)
 
-    %{
+    observed = %{
       delivery_count: length(results),
       results: results,
       durable: durable_facts(repo, account)
     }
+
+    Map.put(
+      observed,
+      :declared_transition,
+      declared_transition("repeat_delivery", observed.durable.snapshot_revision)
+    )
   end
 
   def parallel(repo, owner_id, %{command: %{payload: payload}}) do
@@ -52,12 +65,18 @@ defmodule Accrue.Entitlements.ReferenceScenarioExecutor.Ordering do
     try do
       results = release_workers(repo, account.id, payload)
 
-      %{
+      observed = %{
         execution: :barrier,
         worker_count: length(payload.workers),
         results: Enum.sort(results),
         durable: unboxed(repo, fn -> durable_facts(repo, repo.get!(Account, account.id)) end)
       }
+
+      Map.put(
+        observed,
+        :declared_transition,
+        declared_transition("parallel_delivery", observed.durable.snapshot_revision)
+      )
     after
       cleanup_unboxed(repo, account.id)
     end
@@ -137,6 +156,18 @@ defmodule Accrue.Entitlements.ReferenceScenarioExecutor.Ordering do
         audit_count: 1
       } and Enum.count(observed.results, &(&1.projection == :projected)) == 1 and
       Enum.all?(observed.results, &(&1.projection in [:projected, :stale, :no_material_change]))
+  end
+
+  defp declared_transition(kind, snapshot_revision) do
+    %{
+      result: %{tag: "executed", disposition: kind},
+      durable: %{
+        state: "observed",
+        observation_kind: "grant",
+        snapshot_revision: snapshot_revision
+      },
+      cache: %{disposition: "preserve"}
+    }
   end
 
   defp release_workers(repo, account_id, payload) do

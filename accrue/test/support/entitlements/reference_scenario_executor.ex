@@ -157,7 +157,7 @@ defmodule Accrue.Entitlements.ReferenceScenarioExecutor do
   # Collectors intentionally return their own bounded facts. This check verifies
   # that a real collector produced the declared family outcome without projecting
   # fixture expectations back into the observation.
-  def assert_transition(%{kind: kind, expected_transition: expected}, observed)
+  def assert_transition(%{kind: kind, expected_transition: expected} = action, observed)
       when is_map(observed) do
     case family_for!(kind) do
       Lifecycle ->
@@ -177,14 +177,15 @@ defmodule Accrue.Entitlements.ReferenceScenarioExecutor do
         reconnect_match?(kind, observed) and declared_transition_matches?(expected, observed)
 
       :resume ->
-        resume_match?(kind, observed)
+        resume_match?(kind, observed) and declared_transition_matches?(expected, observed)
 
       :ordering ->
-        ordering_match?(kind, observed)
+        ordering_match?(kind, observed) and declared_transition_matches?(expected, observed)
     end ||
       raise ExUnit.AssertionError,
         message:
-          "family transition mismatch for #{kind}: expected #{inspect(expected)}; declared #{inspect(Map.get(observed, :declared_transition))}"
+          "family transition mismatch for scenario #{Map.get(action, :scenario_id, "unknown")} " <>
+            "order #{action.order} kind #{kind} path #{mismatch_path(expected, observed)}"
 
     :ok
   end
@@ -226,6 +227,26 @@ defmodule Accrue.Entitlements.ReferenceScenarioExecutor do
 
   defp declared_transition_matches?(_, _), do: false
 
+  defp mismatch_path(expected, %{declared_transition: declared}) do
+    Enum.find_value([:result, :durable, :cache], "unknown", fn section ->
+      case first_mismatch(Map.get(expected, section), Map.get(declared, section), [section]) do
+        nil -> nil
+        path -> Enum.join(path, ".")
+      end
+    end)
+  end
+
+  defp mismatch_path(_, _), do: "declared_transition"
+
+  defp first_mismatch(expected, actual, path) when is_map(expected) and is_map(actual) do
+    Enum.find_value(expected, fn {key, value} ->
+      first_mismatch(value, Map.get(actual, key), path ++ [key])
+    end)
+  end
+
+  defp first_mismatch(expected, expected, _path), do: nil
+  defp first_mismatch(_, _, path), do: path
+
   defp reconnect_match?("reconnect_request", observed),
     do: ReconnectCache.matches_expected?(%{kind: "reconnect_request"}, observed)
 
@@ -241,5 +262,5 @@ defmodule Accrue.Entitlements.ReferenceScenarioExecutor do
     do: Ordering.matches_expected?(%{kind: "repeat_delivery"}, observed)
 
   defp ordering_match?("parallel_delivery", observed),
-    do: Map.get(observed, :execution) == :barrier
+    do: Ordering.matches_parallel_expected?(%{kind: "parallel_delivery"}, observed)
 end
