@@ -50,13 +50,6 @@ defmodule Accrue.Entitlements.ReferenceScenarioExecutor.DeviceKeys do
     {observed, %{request: request, now: now, actor: %{type: :user, id: payload.actor_ref}}}
   end
 
-  def replay(repo, account, %{request: request, now: now, actor: actor}) do
-    with {:ok, result} <-
-           Offline.replace_device(account, request, replacement_opts(repo, account, now, actor)) do
-      %{result: %{tag: "replaced", disposition: Atom.to_string(result.disposition)}}
-    end
-  end
-
   def execute(repo, account, %{kind: "rotated_key_proof", command: %{payload: payload}}) do
     now = datetime!(payload.clock)
     :ok = Read.seed_declared_grant(repo, account, payload)
@@ -128,6 +121,13 @@ defmodule Accrue.Entitlements.ReferenceScenarioExecutor.DeviceKeys do
       },
       cache: %{disposition: "preserve"}
     })
+  end
+
+  def replay(repo, account, %{request: request, now: now, actor: actor}) do
+    with {:ok, result} <-
+           Offline.replace_device(account, request, replacement_opts(repo, account, now, actor)) do
+      %{result: %{tag: "replaced", disposition: Atom.to_string(result.disposition)}}
+    end
   end
 
   def divergent_replay(repo, account, %{request: request, now: now, actor: actor}) do

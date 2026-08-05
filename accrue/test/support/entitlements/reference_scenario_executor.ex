@@ -159,33 +159,36 @@ defmodule Accrue.Entitlements.ReferenceScenarioExecutor do
   # fixture expectations back into the observation.
   def assert_transition(%{kind: kind, expected_transition: expected} = action, observed)
       when is_map(observed) do
-    case family_for!(kind) do
-      Lifecycle ->
-        lifecycle_match?(kind, expected, observed)
+    unless (case family_for!(kind) do
+              Lifecycle ->
+                lifecycle_match?(kind, expected, observed)
 
-      Read ->
-        read_match?(kind, expected, observed)
+              Read ->
+                read_match?(kind, expected, observed)
 
-      OfflinePolicy ->
-        offline_match?(kind, expected, observed)
+              OfflinePolicy ->
+                offline_match?(kind, expected, observed)
 
-      DeviceKeys ->
-        DeviceKeys.matches_expected?(%{kind: kind}, observed) and
-          declared_transition_matches?(expected, observed)
+              DeviceKeys ->
+                DeviceKeys.matches_expected?(%{kind: kind}, observed) and
+                  declared_transition_matches?(expected, observed)
 
-      :reconnect ->
-        reconnect_match?(kind, observed) and declared_transition_matches?(expected, observed)
+              :reconnect ->
+                reconnect_match?(kind, observed) and
+                  declared_transition_matches?(expected, observed)
 
-      :resume ->
-        resume_match?(kind, observed) and declared_transition_matches?(expected, observed)
+              :resume ->
+                resume_match?(kind, observed) and declared_transition_matches?(expected, observed)
 
-      :ordering ->
-        ordering_match?(kind, observed) and declared_transition_matches?(expected, observed)
-    end ||
+              :ordering ->
+                ordering_match?(kind, observed) and
+                  declared_transition_matches?(expected, observed)
+            end) do
       raise ExUnit.AssertionError,
         message:
           "family transition mismatch for scenario #{Map.get(action, :scenario_id, "unknown")} " <>
             "order #{action.order} kind #{kind} path #{mismatch_path(expected, observed)}"
+    end
 
     :ok
   end

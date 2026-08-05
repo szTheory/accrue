@@ -230,12 +230,6 @@ defmodule Accrue.Entitlements.ReferenceScenarioExecutor.Read do
   defp preflight_match(%{result: %{status: "block", reason: "equivalent_other_rail"}}), do: :ok
   defp preflight_match(_), do: {:error, :preflight_mismatch}
 
-  defp expiry_match(%{
-         snapshot: %{plans: [], sources: []},
-         durable: %{grant_expires_at: %DateTime{}}
-       }),
-       do: :ok
-
   defp expiry_match(_), do: {:error, :expiry_mismatch}
 
   defp seed_grant_on_target_rail(repo, account, payload) do
