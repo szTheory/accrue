@@ -117,6 +117,17 @@ defmodule Accrue.Entitlements.ReferenceScenarioExecutor.ReconnectCache do
       cache: %{prior: "allow", replacement: "pending", current: "allow"}
     }
 
+    observed =
+      Map.put(observed, :declared_transition, %{
+        result: observed.result,
+        durable: %{
+          state: "unchanged",
+          observation_kind: "none",
+          snapshot_revision: snapshot.revision
+        },
+        cache: %{disposition: "replace"}
+      })
+
     next_runtime = %{
       proofs: Map.put(Map.get(runtime, :proofs, %{}), action.order, proof),
       device: device,
@@ -174,15 +185,26 @@ defmodule Accrue.Entitlements.ReferenceScenarioExecutor.ReconnectCache do
            }}
       end
 
-    {%{
-       result: result,
-       durable: %{snapshot_revision: account.revision},
-       cache: %{
-         prior: Atom.to_string(cache.disposition),
-         replacement: replacement,
-         current: Atom.to_string(next_cache.disposition)
-       }
-     }, %{runtime | cache: next_cache}}
+    observed =
+      %{
+        result: result,
+        durable: %{snapshot_revision: account.revision},
+        cache: %{
+          prior: Atom.to_string(cache.disposition),
+          replacement: replacement,
+          current: Atom.to_string(next_cache.disposition)
+        }
+      }
+
+    {Map.put(observed, :declared_transition, %{
+       result: %{tag: "executed", disposition: "verified_cache_replace"},
+       durable: %{
+         state: "unchanged",
+         observation_kind: "none",
+         snapshot_revision: account.revision
+       },
+       cache: %{disposition: replacement}
+     }), %{runtime | cache: next_cache}}
   end
 
   def adversarial_result(

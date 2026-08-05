@@ -160,13 +160,27 @@ defmodule Accrue.Entitlements.ReferenceScenarioExecutor do
   def assert_transition(%{kind: kind, expected_transition: expected}, observed)
       when is_map(observed) do
     case family_for!(kind) do
-      Lifecycle -> lifecycle_match?(kind, expected, observed)
-      Read -> read_match?(kind, expected, observed)
-      OfflinePolicy -> offline_match?(kind, expected, observed)
-      DeviceKeys -> DeviceKeys.matches_expected?(%{kind: kind}, observed)
-      :reconnect -> reconnect_match?(kind, observed)
-      :resume -> resume_match?(kind, observed)
-      :ordering -> ordering_match?(kind, observed)
+      Lifecycle ->
+        lifecycle_match?(kind, expected, observed)
+
+      Read ->
+        read_match?(kind, expected, observed)
+
+      OfflinePolicy ->
+        offline_match?(kind, expected, observed)
+
+      DeviceKeys ->
+        DeviceKeys.matches_expected?(%{kind: kind}, observed) and
+          declared_transition_matches?(expected, observed)
+
+      :reconnect ->
+        reconnect_match?(kind, observed) and declared_transition_matches?(expected, observed)
+
+      :resume ->
+        resume_match?(kind, observed)
+
+      :ordering ->
+        ordering_match?(kind, observed)
     end ||
       raise ExUnit.AssertionError,
         message:

@@ -40,6 +40,13 @@ defmodule Accrue.Entitlements.ReferenceScenarioExecutor.DeviceKeys do
 
     observed = collect(repo, account, prior.id, challenge.id, replacement, before_audits)
 
+    observed =
+      Map.put(observed, :declared_transition, %{
+        result: observed.result,
+        durable: observed.durable,
+        cache: observed.cache
+      })
+
     {observed, %{request: request, now: now, actor: %{type: :user, id: payload.actor_ref}}}
   end
 
@@ -52,6 +59,8 @@ defmodule Accrue.Entitlements.ReferenceScenarioExecutor.DeviceKeys do
 
   def execute(repo, account, %{kind: "rotated_key_proof", command: %{payload: payload}}) do
     now = datetime!(payload.clock)
+    :ok = Read.seed_declared_grant(repo, account, payload)
+    account = repo.get!(Account, account.id)
 
     device =
       prior_device!(
@@ -99,7 +108,7 @@ defmodule Accrue.Entitlements.ReferenceScenarioExecutor.DeviceKeys do
         now: after_retention
       )
 
-    %{
+    observed = %{
       result: %{tag: "executed", disposition: "rotated_key_proof"},
       durable: %{
         retirement_requirement: requirements |> Map.fetch!(old_key["kid"]) |> Atom.to_string()
@@ -107,6 +116,18 @@ defmodule Accrue.Entitlements.ReferenceScenarioExecutor.DeviceKeys do
       cache: %{public_kids: Enum.map(current_keys, & &1["kid"])},
       after_retention: %{cache: %{public_kids: Enum.map(retired_keys, & &1["kid"])}}
     }
+
+    {:ok, snapshot} = Accrue.Entitlements.snapshot(account)
+
+    Map.put(observed, :declared_transition, %{
+      result: observed.result,
+      durable: %{
+        state: "unchanged",
+        observation_kind: "none",
+        snapshot_revision: snapshot.revision
+      },
+      cache: %{disposition: "preserve"}
+    })
   end
 
   def divergent_replay(repo, account, %{request: request, now: now, actor: actor}) do
