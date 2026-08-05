@@ -62,7 +62,13 @@ created: 2026-08-03
 
 ## Manual-Only Verifications
 
-No Phase 219 behavior requires manual verification. The missing cross-language rotation/retirement corpus rows are an automated Phase 220 acceptance obligation; Phase 219's retirement implementation and finite/unbounded boundaries are automated and green.
+No Phase 219 behavior requires manual verification. The missing cross-language rotation/retirement corpus rows remain an automated Phase 220 acceptance obligation: the Phase 219 public corpus schema and its Elixir/Swift consumers model compact-proof verification against supplied JWKS, not durable issuance history or retention timelines. Phase 219's implementation-level finite/unbounded retention boundaries remain automated and green in `offline_reconnect_test.exs`.
+
+### Escalated Automated Coverage
+
+| Requirement | Gap | Disposition |
+|-------------|-----|-------------|
+| OFF-06 | Cross-language corpus scenarios for pre-retirement verification, early key omission rejection, expiry-plus-buffer retirement, and indefinite retention for `exp: nil` proofs | Requires a corpus-contract/consumer extension to model issued-proof history; deferred to Phase 220 rather than weakening the test-only boundary. |
 
 ---
 
@@ -73,7 +79,7 @@ No Phase 219 behavior requires manual verification. The missing cross-language r
 - [x] Wave 0 covers all MISSING references through the mapped TDD tasks.
 - [x] No watch-mode flags.
 - [x] Targeted commands are scoped to the under-30-second feedback goal; runtime is recorded during execution.
-- [ ] `nyquist_compliant: true` — deferred until Phase 220 supplies cross-language rotation/retirement corpus rows.
+- [ ] `nyquist_compliant: true` — deferred until Phase 220 supplies cross-language rotation/retirement corpus rows and corpus-contract support for durable issuance history.
 
 **Approval:** executable evidence only; no manual-only phase acceptance is planned
 
@@ -87,3 +93,14 @@ No Phase 219 behavior requires manual verification. The missing cross-language r
 
 - Added an unbounded key-retention regression proving an old key cannot be omitted even ten years later (`1a0930e5`).
 - Fresh focused evidence: 45 Elixir tests, 1 property, 0 failures; 27 Swift tests, 0 failures.
+
+## Validation Audit 2026-08-05
+
+| Metric | Count |
+|--------|-------|
+| Gaps found | 1 |
+| Resolved | 0 |
+| Escalated | 1 |
+
+- Re-audited the deferred OFF-06 corpus rotation/retirement coverage. The existing public corpus and both language consumers cannot represent issued-proof history or retention eligibility without production-facing corpus-contract changes; no implementation changes were made during this validation pass.
+- Confirmed focused implementation-level issuance-retention coverage remains green: `cd accrue && mix test test/accrue/entitlements/offline_reconnect_test.exs --only issuance` (3 tests, 0 failures).
