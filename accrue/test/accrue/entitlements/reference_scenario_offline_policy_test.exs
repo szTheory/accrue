@@ -28,7 +28,21 @@ defmodule Accrue.Entitlements.ReferenceScenarioOfflinePolicyTest do
     action = ReferenceScenarios.fetch!("stale_downloaded_study_continuity") |> hd_action()
     account = account!("reference-scenario-offline-stale")
 
-    assert %{result: %{state: "stale_offline", reason: "revalidation_due", next_action: "reconnect_required", revision: 5}, policy: %{action: :read_downloaded_lesson, allowed: true, reason: "allow_downloaded_study"}, durable: %{write_delta: 0}, cache: %{disposition: "preserve"}} =
+    assert %{
+             result: %{
+               state: "stale_offline",
+               reason: "revalidation_due",
+               next_action: "reconnect_required",
+               revision: 5
+             },
+             policy: %{
+               action: :read_downloaded_lesson,
+               allowed: true,
+               reason: "allow_downloaded_study"
+             },
+             durable: %{write_delta: 0},
+             cache: %{disposition: "preserve"}
+           } =
              OfflinePolicy.execute(Accrue.TestRepo, account, action)
   end
 
@@ -36,7 +50,12 @@ defmodule Accrue.Entitlements.ReferenceScenarioOfflinePolicyTest do
     action = ReferenceScenarios.fetch!("restricted_expansion") |> hd_action()
     account = account!("reference-scenario-offline-expansion")
 
-    assert %{result: %{state: "stale_offline", reason: "revalidation_due"}, policy: %{action: :download_premium, allowed: false, reason: "reconnect_required"}, durable: %{write_delta: 0}, cache: %{disposition: "preserve"}} =
+    assert %{
+             result: %{state: "stale_offline", reason: "revalidation_due"},
+             policy: %{action: :download_premium, allowed: false, reason: "reconnect_required"},
+             durable: %{write_delta: 0},
+             cache: %{disposition: "preserve"}
+           } =
              OfflinePolicy.execute(Accrue.TestRepo, account, action)
   end
 
@@ -51,14 +70,20 @@ defmodule Accrue.Entitlements.ReferenceScenarioOfflinePolicyTest do
       action = ReferenceScenarios.fetch!(scenario_id) |> hd_action()
       account = account!("reference-scenario-offline-#{scenario_id}")
 
-      assert %{result: %{state: ^state, reason: ^reason}, policy: %{action: ^action_name, allowed: false}, durable: %{write_delta: 0}, cache: %{disposition: "preserve"}} =
+      assert %{
+               result: %{state: ^state, reason: ^reason},
+               policy: %{action: ^action_name, allowed: false},
+               durable: %{write_delta: 0},
+               cache: %{disposition: "preserve"}
+             } =
                OfflinePolicy.execute(Accrue.TestRepo, account, action)
     end)
   end
 
   test "actual generic-grant and no-effect adapters fail every offline expectation" do
     actions =
-      for scenario_id <- ~w(stale_downloaded_study_continuity restricted_expansion deny_tombstone clock_rollback empty_evidence_fails_closed) do
+      for scenario_id <-
+            ~w(stale_downloaded_study_continuity restricted_expansion deny_tombstone clock_rollback empty_evidence_fails_closed) do
         ReferenceScenarios.fetch!(scenario_id) |> hd_action()
       end
 
@@ -66,8 +91,15 @@ defmodule Accrue.Entitlements.ReferenceScenarioOfflinePolicyTest do
       generic_account = account!("reference-scenario-offline-generic-#{action.kind}")
       replay_account = account!("reference-scenario-offline-replay-#{action.kind}")
 
-      generic = OfflinePolicy.adversarial_result(Accrue.TestRepo, generic_account, action, adapter: :generic_grant)
-      replay = OfflinePolicy.adversarial_result(Accrue.TestRepo, replay_account, action, adapter: :no_effect)
+      generic =
+        OfflinePolicy.adversarial_result(Accrue.TestRepo, generic_account, action,
+          adapter: :generic_grant
+        )
+
+      replay =
+        OfflinePolicy.adversarial_result(Accrue.TestRepo, replay_account, action,
+          adapter: :no_effect
+        )
 
       refute OfflinePolicy.matches_expected?(action, generic)
       refute OfflinePolicy.matches_expected?(action, replay)
@@ -85,7 +117,8 @@ defmodule Accrue.Entitlements.ReferenceScenarioOfflinePolicyTest do
              if action.kind == "empty_evidence" do
                OfflinePolicy.compact_for(action) == ""
              else
-               is_binary(OfflinePolicy.compact_for(action)) and OfflinePolicy.compact_for(action) != ""
+               is_binary(OfflinePolicy.compact_for(action)) and
+                 OfflinePolicy.compact_for(action) != ""
              end
            end)
   end

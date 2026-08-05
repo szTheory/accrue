@@ -42,8 +42,16 @@ defmodule Accrue.Entitlements.ReferenceScenarioExecutor.Read do
         target_rail: Atom.to_string(decision.target_rail),
         product_id: payload.provider_product_id
       },
-      snapshot: %{revision: decision.revision, plans: [decision.logical_plan], sources: source_rails(decision.sources)},
-      durable: Map.merge(after_counts, Map.put(deltas(before, after_counts), :snapshot_revision, decision.revision))
+      snapshot: %{
+        revision: decision.revision,
+        plans: [decision.logical_plan],
+        sources: source_rails(decision.sources)
+      },
+      durable:
+        Map.merge(
+          after_counts,
+          Map.put(deltas(before, after_counts), :snapshot_revision, decision.revision)
+        )
     }
   end
 
@@ -80,7 +88,14 @@ defmodule Accrue.Entitlements.ReferenceScenarioExecutor.Read do
   end
 
   def seed_declared_grant(repo, account, payload) do
-    seed_grant(repo, account, payload, rail!(payload.rail), payload.provider_product_id, "declared")
+    seed_grant(
+      repo,
+      account,
+      payload,
+      rail!(payload.rail),
+      payload.provider_product_id,
+      "declared"
+    )
   end
 
   def seed_expiry_grant(repo, account, payload) do
@@ -96,7 +111,6 @@ defmodule Accrue.Entitlements.ReferenceScenarioExecutor.Read do
   end
 
   defp seed_grant(repo, account, payload, rail, product_id, suffix, opts \\ []) do
-
     {:ok, observation} =
       Observation.insert_idempotently(repo, %{
         account_id: account.id,
@@ -120,7 +134,9 @@ defmodule Accrue.Entitlements.ReferenceScenarioExecutor.Read do
     :ok
   end
 
-  def adversarial_result(repo, account, %{kind: "purchase_preflight"} = action, adapter: :generic_grant) do
+  def adversarial_result(repo, account, %{kind: "purchase_preflight"} = action,
+        adapter: :generic_grant
+      ) do
     %{command: %{payload: payload}} = action
     :ok = seed_grant_on_target_rail(repo, account, payload)
 
@@ -132,21 +148,44 @@ defmodule Accrue.Entitlements.ReferenceScenarioExecutor.Read do
         environment: rail!(payload.environment)
       )
 
-    preflight_match(%{result: %{status: Atom.to_string(decision.status), reason: Atom.to_string(decision.reason)}})
+    preflight_match(%{
+      result: %{status: Atom.to_string(decision.status), reason: Atom.to_string(decision.reason)}
+    })
   end
 
-  def adversarial_result(_repo, account, %{kind: "purchase_preflight", command: %{payload: payload}},
+  def adversarial_result(
+        _repo,
+        account,
+        %{kind: "purchase_preflight", command: %{payload: payload}},
         adapter: :no_effect
       ) do
     {:ok, _snapshot} = Accrue.Entitlements.snapshot(account)
-    preflight_match(%{result: %{status: "eligible", reason: "no_effect", product_id: payload.provider_product_id}})
+
+    preflight_match(%{
+      result: %{status: "eligible", reason: "no_effect", product_id: payload.provider_product_id}
+    })
   end
 
-  def adversarial_result(_repo, account, %{kind: "purchase_preflight", command: %{payload: payload}},
+  def adversarial_result(
+        _repo,
+        account,
+        %{kind: "purchase_preflight", command: %{payload: payload}},
         adapter: :snapshot_only
       ) do
-    _snapshot = Snapshot.from_grants([], account_id: account.id, revision: 0, now: DateTime.from_iso8601(payload.clock) |> elem(1))
-    preflight_match(%{result: %{status: "snapshot_only", reason: "no_decision", product_id: payload.provider_product_id}})
+    _snapshot =
+      Snapshot.from_grants([],
+        account_id: account.id,
+        revision: 0,
+        now: DateTime.from_iso8601(payload.clock) |> elem(1)
+      )
+
+    preflight_match(%{
+      result: %{
+        status: "snapshot_only",
+        reason: "no_decision",
+        product_id: payload.provider_product_id
+      }
+    })
   end
 
   def adversarial_result(repo, account, %{kind: "expiry_boundary", command: %{payload: payload}},
@@ -169,14 +208,25 @@ defmodule Accrue.Entitlements.ReferenceScenarioExecutor.Read do
   def adversarial_result(_repo, account, %{kind: "expiry_boundary", command: %{payload: payload}},
         adapter: :in_memory_snapshot
       ) do
-    _snapshot = Snapshot.from_grants([], account_id: account.id, revision: 0, now: DateTime.from_iso8601(payload.clock) |> elem(1))
+    _snapshot =
+      Snapshot.from_grants([],
+        account_id: account.id,
+        revision: 0,
+        now: DateTime.from_iso8601(payload.clock) |> elem(1)
+      )
+
     expiry_match(%{snapshot: %{plans: [], sources: []}, durable: %{grant_expires_at: nil}})
   end
 
   defp preflight_match(%{result: %{status: "block", reason: "equivalent_other_rail"}}), do: :ok
   defp preflight_match(_), do: {:error, :preflight_mismatch}
 
-  defp expiry_match(%{snapshot: %{plans: [], sources: []}, durable: %{grant_expires_at: %DateTime{}}}), do: :ok
+  defp expiry_match(%{
+         snapshot: %{plans: [], sources: []},
+         durable: %{grant_expires_at: %DateTime{}}
+       }),
+       do: :ok
+
   defp expiry_match(_), do: {:error, :expiry_mismatch}
 
   defp seed_grant_on_target_rail(repo, account, payload) do
@@ -201,7 +251,8 @@ defmodule Accrue.Entitlements.ReferenceScenarioExecutor.Read do
 
   defp counts(repo, account_id) do
     %{
-      observations: repo.aggregate(from(o in Observation, where: o.account_id == ^account_id), :count, :id),
+      observations:
+        repo.aggregate(from(o in Observation, where: o.account_id == ^account_id), :count, :id),
       grants: repo.aggregate(from(g in Grant, where: g.account_id == ^account_id), :count, :id),
       audits: repo.aggregate(from(e in Event, where: e.subject_id == ^account_id), :count, :id)
     }
@@ -216,7 +267,11 @@ defmodule Accrue.Entitlements.ReferenceScenarioExecutor.Read do
   end
 
   defp snapshot_facts(snapshot),
-    do: %{revision: snapshot.revision, plans: snapshot.plans, sources: source_rails(snapshot.sources)}
+    do: %{
+      revision: snapshot.revision,
+      plans: snapshot.plans,
+      sources: source_rails(snapshot.sources)
+    }
 
   defp source_rails(sources), do: sources |> Enum.map(& &1.rail) |> Enum.sort()
   defp rail!(value) when is_atom(value), do: value

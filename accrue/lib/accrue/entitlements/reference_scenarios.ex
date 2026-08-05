@@ -525,7 +525,11 @@ defmodule Accrue.Entitlements.ReferenceScenarios do
   end
 
   defp valid_commands?(actions, _lane),
-    do: Enum.all?(actions, &(not Map.has_key?(&1, :command) and not Map.has_key?(&1, :expected_transition)))
+    do:
+      Enum.all?(
+        actions,
+        &(not Map.has_key?(&1, :command) and not Map.has_key?(&1, :expected_transition))
+      )
 
   defp lane_artifacts_valid?(:deterministic_conformance, xs),
     do: "v1.59-decision-cases.json" in xs and "capability-report.json" not in xs

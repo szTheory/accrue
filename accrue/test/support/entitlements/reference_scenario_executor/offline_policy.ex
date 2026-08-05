@@ -10,7 +10,13 @@ defmodule Accrue.Entitlements.ReferenceScenarioExecutor.OfflinePolicy do
   @fixture Path.expand("../../../../priv/entitlements/v1.59-offline-golden-vectors.json", __DIR__)
 
   def execute(repo, account, %{kind: kind, command: %{payload: payload}})
-      when kind in ["offline_proof_stale", "offline_expansion_request", "signed_deny", "rollback_proof", "empty_evidence"] do
+      when kind in [
+             "offline_proof_stale",
+             "offline_expansion_request",
+             "signed_deny",
+             "rollback_proof",
+             "empty_evidence"
+           ] do
     before = counts(repo, account.id)
     vector = vector_for!(kind, payload.offline_vector)
     compact = compact_for(%{kind: kind, command: %{payload: payload}})
@@ -50,8 +56,12 @@ defmodule Accrue.Entitlements.ReferenceScenarioExecutor.OfflinePolicy do
 
   def matches_expected?(_, _), do: false
 
-  defp expected_result!("offline_proof_stale"), do: %{state: "stale_offline", reason: "revalidation_due"}
-  defp expected_result!("offline_expansion_request"), do: %{state: "stale_offline", reason: "revalidation_due"}
+  defp expected_result!("offline_proof_stale"),
+    do: %{state: "stale_offline", reason: "revalidation_due"}
+
+  defp expected_result!("offline_expansion_request"),
+    do: %{state: "stale_offline", reason: "revalidation_due"}
+
   defp expected_result!("signed_deny"), do: %{state: "denied", reason: "signed_denial"}
   defp expected_result!("rollback_proof"), do: %{state: "invalid", reason: "clock_rollback"}
   defp expected_result!("empty_evidence"), do: %{state: "invalid", reason: "malformed"}
@@ -140,18 +150,24 @@ defmodule Accrue.Entitlements.ReferenceScenarioExecutor.OfflinePolicy do
   end
 
   defp policy_reason(%{allowed: true, guidance_key: :stale_offline}), do: "allow_downloaded_study"
-  defp policy_reason(%{allowed: false, next_action: :reconnect_required}), do: "reconnect_required"
+
+  defp policy_reason(%{allowed: false, next_action: :reconnect_required}),
+    do: "reconnect_required"
+
   defp policy_reason(%{allowed: false, next_action: next_action}), do: Atom.to_string(next_action)
   defp policy_reason(_), do: "allowed"
 
   defp counts(repo, account_id) do
     %{
-      observations: repo.aggregate(from(o in Observation, where: o.account_id == ^account_id), :count, :id),
+      observations:
+        repo.aggregate(from(o in Observation, where: o.account_id == ^account_id), :count, :id),
       grants: repo.aggregate(from(g in Grant, where: g.account_id == ^account_id), :count, :id),
       audits: repo.aggregate(from(e in Event, where: e.subject_id == ^account_id), :count, :id)
     }
   end
 
   defp write_delta(before, after_counts),
-    do: after_counts.observations + after_counts.grants + after_counts.audits - before.observations - before.grants - before.audits
+    do:
+      after_counts.observations + after_counts.grants + after_counts.audits - before.observations -
+        before.grants - before.audits
 end

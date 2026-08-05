@@ -78,17 +78,26 @@ defmodule Accrue.Entitlements.ReferenceScenarioReadTest do
     [preflight] = scenario.actions
 
     assert {:error, :preflight_mismatch} =
-             Read.adversarial_result(Accrue.TestRepo, account!("reference-scenario-read-generic"), preflight,
+             Read.adversarial_result(
+               Accrue.TestRepo,
+               account!("reference-scenario-read-generic"),
+               preflight,
                adapter: :generic_grant
              )
 
     assert {:error, :preflight_mismatch} =
-             Read.adversarial_result(Accrue.TestRepo, account!("reference-scenario-read-no-effect"), preflight,
+             Read.adversarial_result(
+               Accrue.TestRepo,
+               account!("reference-scenario-read-no-effect"),
+               preflight,
                adapter: :no_effect
              )
 
     assert {:error, :preflight_mismatch} =
-             Read.adversarial_result(Accrue.TestRepo, account!("reference-scenario-read-snapshot-only"), preflight,
+             Read.adversarial_result(
+               Accrue.TestRepo,
+               account!("reference-scenario-read-snapshot-only"),
+               preflight,
                adapter: :snapshot_only
              )
   end
