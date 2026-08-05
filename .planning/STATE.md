@@ -4,16 +4,16 @@ milestone: v1.59
 milestone_name: Account-Scoped Multi-Rail & Offline Entitlements
 current_phase: 220
 status: completed
-stopped_at: Completed 220-13-PLAN.md
-last_updated: "2026-08-05T15:19:16.456Z"
+stopped_at: Phase 221 context gathered
+last_updated: "2026-08-05T16:44:33.958Z"
 last_activity: 2026-08-05
 last_activity_desc: Phase 220 complete
 progress:
-  total_phases: 6
+  total_phases: 7
   completed_phases: 6
   total_plans: 70
   completed_plans: 70
-  percent: 100
+  percent: 86
 current_phase_name: first-adopter-proof-and-release-gates
 ---
 
@@ -518,6 +518,7 @@ Coverage: 22/22 v1.51 requirements mapped (each REQ-ID → exactly one phase). D
 - v1.57 opened 2026-07-19 and shipped 2026-07-30: Phases 209-211
 - v1.58 opened 2026-07-30: Phases 212-214 — roadmap created, ready to plan Phase 212
 - v1.59 activated 2026-07-31: Phases 215-220 — 29/29 requirements mapped; dependency shape 215→216→217→{218,219}→220; ready to plan Phase 215
+- Phase 221 added: Close gap: reference-host Apple notification ingress
 - Phase 214.1 inserted after Phase 214: Close gap: DOCS-03 — reconcile StripeSync writer documentation (URGENT)
 - Phase 214.2 inserted after Phase 214: Close gap: SYNC-02/DOCS-03 — surface advisory entitlement diagnostics (URGENT)
 
@@ -1002,9 +1003,9 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 
 ## Session Continuity
 
-Last session: 2026-08-05T00:47:23.893Z
-Stopped at: Completed 220-13-PLAN.md
-Resume file: None
+Last session: 2026-08-05T16:44:33.927Z
+Stopped at: Phase 221 context gathered
+Resume file: .planning/phases/221-close-gap-reference-host-apple-notification-ingress/221-CONTEXT.md
 
 ## Operator Next Steps
 
