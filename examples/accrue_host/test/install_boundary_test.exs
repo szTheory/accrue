@@ -92,9 +92,7 @@ defmodule AccrueHost.InstallBoundaryTest do
 
   test "bounded verification registers every Apple Wave 0 proof with warnings as errors" do
     script =
-      File.read!(
-        Path.expand("../../../scripts/ci/accrue_host_verify_test_bounded.sh", __DIR__)
-      )
+      File.read!(Path.expand("../../../scripts/ci/accrue_host_verify_test_bounded.sh", __DIR__))
 
     for test_file <- [
           "test/accrue_host_web/apple_notification_ingest_test.exs",
