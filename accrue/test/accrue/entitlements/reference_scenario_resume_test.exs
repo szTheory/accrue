@@ -50,10 +50,13 @@ defmodule Accrue.Entitlements.ReferenceScenarioResumeTest do
     {second, _runtime} = Resume.execute(Accrue.TestRepo, account, resume, runtime)
 
     assert first.durable.attempt_id == second.durable.attempt_id
+    assert first.durable.challenge_id == second.durable.challenge_id
     assert second.result == %{tag: "resumed", disposition: "issued"}
     assert second.durable.attempt_state == "completed"
     assert second.durable.challenge_consumed
     assert second.durable.issuance_count == 1
+    assert second.durable.issuance_revision == 1
+    assert second.durable.issuance_disposition == "allow"
     assert second.cache == %{prior: "allow", replacement: "replace", current: "allow"}
     assert second.replay == "stable"
     refute contains_secret?(second)

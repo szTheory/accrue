@@ -111,6 +111,7 @@ defmodule Accrue.Entitlements.ReferenceScenarioExecutor.Resume do
     challenge = repo.get!(Challenge, challenge_id)
     attempt = repo.one!(from(item in ReconnectAttempt, where: item.challenge_id == ^challenge_id))
     device = repo.get!(Device, device_id)
+    issuance = repo.one(from(item in Issuance, where: item.account_id == ^account.id))
     {:ok, snapshot} = Accrue.Entitlements.snapshot(account)
 
     %{
@@ -120,6 +121,7 @@ defmodule Accrue.Entitlements.ReferenceScenarioExecutor.Resume do
       },
       durable: %{
         attempt_id: attempt.id,
+        challenge_id: challenge.id,
         attempt_state: Atom.to_string(attempt.state),
         attempt_token: if(is_binary(attempt.execution_token), do: "claimed", else: "none"),
         challenge_consumed: not is_nil(challenge.consumed_at),
@@ -130,6 +132,8 @@ defmodule Accrue.Entitlements.ReferenceScenarioExecutor.Resume do
             :count,
             :id
           ),
+        issuance_revision: issuance && issuance.revision,
+        issuance_disposition: issuance && Atom.to_string(issuance.disposition),
         snapshot_revision: snapshot.revision
       },
       cache: %{
