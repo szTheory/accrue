@@ -27,7 +27,9 @@ defmodule Accrue.Entitlements.ReferenceScenarioReconnectTest do
     %{scenario: ReferenceScenarios.fetch!("offline_reconnect")}
   end
 
-  test "reconnect and verified cache replacement are one signed, bounded flow", %{scenario: scenario} do
+  test "reconnect and verified cache replacement are one signed, bounded flow", %{
+    scenario: scenario
+  } do
     [reconnect, cache_replace] = scenario.actions
     account = account!("reference-scenario-reconnect")
 
@@ -64,17 +66,28 @@ defmodule Accrue.Entitlements.ReferenceScenarioReconnectTest do
     assert observed.result.reason == "verification_failed"
   end
 
-  test "generic, replay, snapshot, and registration substitutes cannot satisfy reconnect actions", %{
-    scenario: scenario
-  } do
+  test "generic, replay, snapshot, and registration substitutes cannot satisfy reconnect actions",
+       %{
+         scenario: scenario
+       } do
     [reconnect, cache_replace] = scenario.actions
 
     Enum.each([:generic_grant, :no_effect, :snapshot_only, :registration_only], fn adapter ->
       account = account!("reference-scenario-reconnect-#{adapter}")
 
-      refute ReconnectCache.matches_expected?(reconnect, ReconnectCache.adversarial_result(Accrue.TestRepo, account, reconnect, adapter: adapter))
+      refute ReconnectCache.matches_expected?(
+               reconnect,
+               ReconnectCache.adversarial_result(Accrue.TestRepo, account, reconnect,
+                 adapter: adapter
+               )
+             )
 
-      refute ReconnectCache.matches_expected?(cache_replace, ReconnectCache.adversarial_result(Accrue.TestRepo, account, cache_replace, adapter: adapter))
+      refute ReconnectCache.matches_expected?(
+               cache_replace,
+               ReconnectCache.adversarial_result(Accrue.TestRepo, account, cache_replace,
+                 adapter: adapter
+               )
+             )
     end)
   end
 
@@ -82,7 +95,11 @@ defmodule Accrue.Entitlements.ReferenceScenarioReconnectTest do
     do: Account.fetch_or_create(Accrue.TestRepo, "reference_scenario", owner_id) |> elem(1)
 
   defp contains_secret?(value) when is_map(value),
-    do: Enum.any?(value, fn {key, item} -> to_string(key) in ~w(proof nonce signature private_key idempotency_key) or contains_secret?(item) end)
+    do:
+      Enum.any?(value, fn {key, item} ->
+        to_string(key) in ~w(proof nonce signature private_key idempotency_key) or
+          contains_secret?(item)
+      end)
 
   defp contains_secret?(value) when is_list(value), do: Enum.any?(value, &contains_secret?/1)
   defp contains_secret?(_), do: false
