@@ -15,6 +15,9 @@ test_files=(
   test/accrue_host/billing_facade_test.exs
   test/accrue_host_web/subscription_flow_test.exs
   test/accrue_host_web/webhook_ingest_test.exs
+  test/accrue_host_web/apple_notification_ingest_test.exs
+  test/accrue_host/apple_rate_policy_test.exs
+  test/accrue_host/recovery_wiring_test.exs
   test/accrue_host_web/trust_smoke_test.exs
   test/accrue_host_web/admin_webhook_replay_test.exs
   test/accrue_host_web/admin_mount_test.exs
