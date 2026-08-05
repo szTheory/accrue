@@ -65,6 +65,7 @@ defmodule Accrue.Entitlements.ReferenceScenarioOrderingTest do
 
     assert Ordering.matches_parallel_expected?(action, observed)
     assert observed.worker_count == length(action.command.payload.workers)
+
     assert observed.durable == %{
              observation_count: 1,
              grant_count: 1,
@@ -73,7 +74,11 @@ defmodule Accrue.Entitlements.ReferenceScenarioOrderingTest do
            }
 
     assert Enum.all?(observed.results, &(&1.insert in [:owner, :existing]))
-    assert Enum.all?(observed.results, &(&1.projection in [:projected, :stale, :no_material_change]))
+
+    assert Enum.all?(
+             observed.results,
+             &(&1.projection in [:projected, :stale, :no_material_change])
+           )
 
     Enum.each([:generic_grant, :no_effect], fn adapter ->
       refute Ordering.matches_parallel_expected?(
