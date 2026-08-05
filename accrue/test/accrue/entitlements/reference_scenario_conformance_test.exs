@@ -364,20 +364,10 @@ defmodule Accrue.Entitlements.ReferenceScenarioConformanceTest do
         opposite_product(opposite_rail)
       )
 
-    assert decision.status == scenario.expected.purchase.status
+    assert decision.status == scenario.expected.purchase.status, "scenario=#{scenario.id}"
     assert Atom.to_string(decision.reason) == scenario.expected.purchase.reason
 
-    assert {:ok, offline} =
-             Offline.verify(
-               offline_vector(payload.offline_vector)["compact_jws"],
-               offline_context(payload.offline_vector)
-             )
-
-    assert %{action: action, allowed: true} =
-             Offline.action_policy(offline, payload.offline_action)
-
-    assert action == payload.offline_action
-    assert scenario.expected.offline_policy.action == :allow_downloaded_study
+    assert_offline_if_requested(payload, scenario)
 
     assert Accrue.TestRepo.aggregate(
              from(event in Event, where: event.subject_id == ^account.id),
@@ -398,27 +388,18 @@ defmodule Accrue.Entitlements.ReferenceScenarioConformanceTest do
 
     assert Enum.map(snapshot.sources, & &1.rail) == scenario.expected.snapshot.sources
 
-    decision =
-      Accrue.Entitlements.purchase_decision(
-        account.id,
-        opposite_rail(payload.rail),
-        opposite_product(opposite_rail(payload.rail))
-      )
+    if Map.has_key?(payload, :offline_vector) do
+      decision =
+        Accrue.Entitlements.purchase_decision(
+          account.id,
+          opposite_rail(payload.rail),
+          opposite_product(opposite_rail(payload.rail))
+        )
 
-    assert decision.status == scenario.expected.purchase.status
-    assert Atom.to_string(decision.reason) == scenario.expected.purchase.reason
-
-    assert {:ok, offline} =
-             Offline.verify(
-               offline_vector(payload.offline_vector)["compact_jws"],
-               offline_context(payload.offline_vector)
-             )
-
-    assert %{action: action, allowed: allowed} =
-             Offline.action_policy(offline, payload.offline_action)
-
-    assert action == payload.offline_action
-    assert is_boolean(allowed)
+      assert decision.status == scenario.expected.purchase.status, "scenario=#{scenario.id}"
+      assert Atom.to_string(decision.reason) == scenario.expected.purchase.reason
+      assert_offline_if_requested(payload, scenario)
+    end
 
     assert Accrue.TestRepo.aggregate(
              from(event in Event, where: event.subject_id == ^account.id),
@@ -432,6 +413,22 @@ defmodule Accrue.Entitlements.ReferenceScenarioConformanceTest do
       scenario.actions
       |> Enum.find(&match?(%{command: %{payload: %{rail: _}}}, &1))
       |> then(& &1.command.payload)
+
+  defp assert_offline_if_requested(%{offline_vector: vector, offline_action: action}, scenario) do
+    assert {:ok, offline} =
+             Offline.verify(offline_vector(vector)["compact_jws"], offline_context(vector))
+
+    assert %{action: ^action, allowed: allowed} = Offline.action_policy(offline, action)
+    assert is_boolean(allowed)
+
+    assert scenario.expected.offline_policy.action in [
+             :allow_downloaded_study,
+             :reconnect_required,
+             :deny
+           ]
+  end
+
+  defp assert_offline_if_requested(_payload, _scenario), do: :ok
 
   defp account!(owner_id),
     do: Account.fetch_or_create(Accrue.TestRepo, "reference_scenario", owner_id) |> elem(1)

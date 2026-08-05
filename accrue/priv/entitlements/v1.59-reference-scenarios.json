@@ -22,9 +22,7 @@
               "provider_event_id": "scenario_apple_web_event",
               "provider_transaction_id": "scenario_apple_web_transaction",
               "provider_lineage_id": "scenario_apple_web_lineage",
-              "provider_order": 1,
-              "offline_vector": "valid_allow",
-              "offline_action": "read_downloaded_lesson"
+              "provider_order": 1
             }
           },
           "expected_transition": {
@@ -120,9 +118,7 @@
               "provider_event_id": "scenario_stripe_ios_event",
               "provider_transaction_id": "scenario_stripe_ios_transaction",
               "provider_lineage_id": "scenario_stripe_ios_lineage",
-              "provider_order": 1,
-              "offline_vector": "valid_allow",
-              "offline_action": "read_downloaded_lesson"
+              "provider_order": 1
             }
           },
           "expected_transition": {
@@ -218,9 +214,7 @@
               "provider_event_id": "reference_duplicate_purchase_prevention_event",
               "provider_transaction_id": "reference_duplicate_purchase_prevention_transaction",
               "provider_lineage_id": "reference_duplicate_purchase_prevention_lineage",
-              "provider_order": 1,
-              "offline_vector": "valid_allow",
-              "offline_action": "read_downloaded_lesson"
+              "provider_order": 1
             }
           },
           "expected_transition": {
@@ -430,9 +424,7 @@
               "provider_event_id": "reference_offline_reconnect_event",
               "provider_transaction_id": "reference_offline_reconnect_transaction",
               "provider_lineage_id": "reference_offline_reconnect_lineage",
-              "provider_order": 1,
-              "offline_vector": "valid_allow",
-              "offline_action": "read_downloaded_lesson"
+              "provider_order": 1
             }
           },
           "expected_transition": {
@@ -529,9 +521,7 @@
               "provider_event_id": "reference_refund_revocation_grant_event",
               "provider_transaction_id": "reference_refund_revocation_grant_transaction",
               "provider_lineage_id": "reference_refund_revocation_lineage",
-              "provider_order": 1,
-              "offline_vector": "valid_signed_denial",
-              "offline_action": "read_downloaded_lesson"
+              "provider_order": 1
             }
           },
           "expected_transition": {
@@ -567,9 +557,7 @@
               "provider_event_id": "reference_refund_revocation_refund_event",
               "provider_transaction_id": "reference_refund_revocation_refund_transaction",
               "provider_lineage_id": "reference_refund_revocation_lineage",
-              "provider_order": 2,
-              "offline_vector": "valid_signed_denial",
-              "offline_action": "read_downloaded_lesson"
+              "provider_order": 2
             }
           },
           "expected_transition": {
@@ -633,9 +621,7 @@
               "provider_event_id": "reference_survivor_stripe_grant_event",
               "provider_transaction_id": "reference_survivor_stripe_grant_transaction",
               "provider_lineage_id": "reference_survivor_stripe_lineage",
-              "provider_order": 1,
-              "offline_vector": "valid_allow",
-              "offline_action": "read_downloaded_lesson"
+              "provider_order": 1
             }
           },
           "expected_transition": {
@@ -671,9 +657,7 @@
               "provider_event_id": "reference_survivor_apple_grant_event",
               "provider_transaction_id": "reference_survivor_apple_grant_transaction",
               "provider_lineage_id": "reference_survivor_apple_lineage",
-              "provider_order": 1,
-              "offline_vector": "valid_allow",
-              "offline_action": "read_downloaded_lesson"
+              "provider_order": 1
             }
           },
           "expected_transition": {
@@ -709,9 +693,7 @@
               "provider_event_id": "reference_survivor_stripe_retract_event",
               "provider_transaction_id": "reference_survivor_stripe_retract_transaction",
               "provider_lineage_id": "reference_survivor_stripe_lineage",
-              "provider_order": 2,
-              "offline_vector": "valid_allow",
-              "offline_action": "read_downloaded_lesson"
+              "provider_order": 2
             }
           },
           "expected_transition": {
@@ -1135,9 +1117,7 @@
               "provider_event_id": "reference_equal_order_stability_event",
               "provider_transaction_id": "reference_equal_order_stability_transaction",
               "provider_lineage_id": "reference_equal_order_stability_lineage",
-              "provider_order": 1,
-              "offline_vector": "valid_allow",
-              "offline_action": "read_downloaded_lesson"
+              "provider_order": 1
             }
           },
           "expected_transition": {
@@ -1205,9 +1185,7 @@
               "provider_event_id": "reference_repeat_idempotency_event",
               "provider_transaction_id": "reference_repeat_idempotency_transaction",
               "provider_lineage_id": "reference_repeat_idempotency_lineage",
-              "provider_order": 1,
-              "offline_vector": "valid_allow",
-              "offline_action": "read_downloaded_lesson"
+              "provider_order": 1
             }
           },
           "expected_transition": {
@@ -1275,9 +1253,7 @@
               "provider_event_id": "reference_parallel_execution_event",
               "provider_transaction_id": "reference_parallel_execution_transaction",
               "provider_lineage_id": "reference_parallel_execution_lineage",
-              "provider_order": 1,
-              "offline_vector": "valid_allow",
-              "offline_action": "read_downloaded_lesson"
+              "provider_order": 1
             }
           },
           "expected_transition": {
@@ -1345,9 +1321,7 @@
               "provider_event_id": "reference_interrupted_resume_event",
               "provider_transaction_id": "reference_interrupted_resume_transaction",
               "provider_lineage_id": "reference_interrupted_resume_lineage",
-              "provider_order": 1,
-              "offline_vector": "valid_allow",
-              "offline_action": "read_downloaded_lesson"
+              "provider_order": 1
             }
           },
           "expected_transition": {
@@ -1518,9 +1492,7 @@
               "provider_event_id": "reference_expiry_immediately_before_boundary_event",
               "provider_transaction_id": "reference_expiry_immediately_before_boundary_transaction",
               "provider_lineage_id": "reference_expiry_immediately_before_boundary_lineage",
-              "provider_order": 1,
-              "offline_vector": "valid_allow",
-              "offline_action": "read_downloaded_lesson"
+              "provider_order": 1
             }
           },
           "expected_transition": {
@@ -1588,9 +1560,7 @@
               "provider_event_id": "reference_expiry_at_boundary_event",
               "provider_transaction_id": "reference_expiry_at_boundary_transaction",
               "provider_lineage_id": "reference_expiry_at_boundary_lineage",
-              "provider_order": 1,
-              "offline_vector": "valid_allow",
-              "offline_action": "read_downloaded_lesson"
+              "provider_order": 1
             }
           },
           "expected_transition": {
@@ -1658,9 +1628,7 @@
               "provider_event_id": "reference_expiry_immediately_after_boundary_event",
               "provider_transaction_id": "reference_expiry_immediately_after_boundary_transaction",
               "provider_lineage_id": "reference_expiry_immediately_after_boundary_lineage",
-              "provider_order": 1,
-              "offline_vector": "valid_allow",
-              "offline_action": "read_downloaded_lesson"
+              "provider_order": 1
             }
           },
           "expected_transition": {

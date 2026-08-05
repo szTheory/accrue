@@ -116,6 +116,35 @@ defmodule Accrue.Entitlements.ReferenceScenarioLifecycleTest do
     end
   end
 
+  test "the strict contract rejects universal, cross-family, secret, null, and extra payload fields" do
+    scenario = ReferenceScenarios.fetch!("apple_purchase_to_web_login")
+    [action | rest] = scenario.actions
+
+    for {field, value} <- [
+          {:offline_vector, "valid_allow"},
+          {:offline_action, :read_downloaded_lesson},
+          {:secret, "receipt-not-allowed"},
+          {:provider_event_id, nil},
+          {:unexpected, "no"}
+        ] do
+      invalid = %{
+        scenario
+        | actions: [
+            %{
+              action
+              | command: %{
+                  action.command
+                  | payload: Map.put(action.command.payload, field, value)
+                }
+            }
+            | rest
+          ]
+      }
+
+      refute ReferenceScenarios.valid?(invalid)
+    end
+  end
+
   test "actual generic-grant and no-effect substitutions cannot satisfy a refund collection" do
     scenario = ReferenceScenarios.fetch!("refund_revocation")
     [grant, refund] = scenario.actions

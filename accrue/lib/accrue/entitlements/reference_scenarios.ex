@@ -12,15 +12,21 @@ defmodule Accrue.Entitlements.ReferenceScenarios do
   @observation_kinds ~w(apple_verified_purchase stripe_verified_purchase grant_observation refund_observation stripe_retraction equal_order_delivery repeat_delivery parallel_delivery)
   @read_kinds ~w(web_login ios_login verified_cache_replace resume_delivery)
   @offline_kinds ~w(offline_proof_stale offline_expansion_request signed_deny rollback_proof empty_evidence)
+  @offline_context_kinds @offline_kinds ++ ["rotated_key_proof"]
   @operation_keys ~w(rail environment logical_product provider_product_id provider_event_id provider_transaction_id provider_lineage_id provider_order offline_vector offline_action)
   @base_payload_keys ~w(account_ref clock)
   @device_replace_payload_keys ~w(account_ref clock prior_device_ref replacement_installation_ref replacement_key_fixture challenge_ref idempotency_ref prior_transition reason actor_ref)
-  @lifecycle_payload_keys @base_payload_keys ++ @operation_keys
+  @lifecycle_payload_keys @base_payload_keys ++
+                            (@operation_keys -- ~w(offline_vector offline_action))
   @offline_payload_keys @base_payload_keys ++ @operation_keys
-  @reconnect_payload_keys @base_payload_keys ++ @operation_keys
-  @ordering_payload_keys @base_payload_keys ++ @operation_keys
-  @resume_payload_keys @base_payload_keys ++ @operation_keys
-  @expiry_payload_keys @base_payload_keys ++ @operation_keys
+  @reconnect_payload_keys @base_payload_keys ++
+                            (@operation_keys -- ~w(offline_vector offline_action))
+  @ordering_payload_keys @base_payload_keys ++
+                           (@operation_keys -- ~w(offline_vector offline_action))
+  @resume_payload_keys @base_payload_keys ++
+                         (@operation_keys -- ~w(offline_vector offline_action))
+  @expiry_payload_keys @base_payload_keys ++
+                         (@operation_keys -- ~w(offline_vector offline_action))
   @payload_keys_by_kind %{
     "apple_verified_purchase" => @lifecycle_payload_keys,
     "stripe_verified_purchase" => @lifecycle_payload_keys,
@@ -201,19 +207,27 @@ defmodule Accrue.Entitlements.ReferenceScenarios do
         (p.rail in ["apple", "stripe", :apple, :stripe] and
            p.environment in ["production", "sandbox", :production, :sandbox] and
            Enum.all?(
-             @operation_keys -- ~w(rail environment provider_order offline_action),
+             @operation_keys -- ~w(rail environment provider_order offline_vector offline_action),
              &valid_id?(Map.fetch!(p, String.to_atom(&1)))
            ) and is_integer(p.provider_order) and p.provider_order > 0 and
-           p.offline_action in [
-             "read_downloaded_lesson",
-             "download_lesson",
-             :read_downloaded_lesson,
-             :download_lesson
-           ]) ||
+           offline_context_valid?(kind, p)) ||
           raise ArgumentError, "invalid #{kind} payload"
       end
     end
   end
+
+  defp offline_context_valid?(kind, p) when kind in @offline_context_kinds,
+    do:
+      valid_id?(p.offline_vector) and
+        p.offline_action in [
+          "read_downloaded_lesson",
+          "download_lesson",
+          :read_downloaded_lesson,
+          :download_lesson
+        ]
+
+  defp offline_context_valid?(_kind, p),
+    do: not Map.has_key?(p, :offline_vector) and not Map.has_key?(p, :offline_action)
 
   defp normalize_payload(
          %{rail: rail, environment: environment, offline_action: action} = payload
