@@ -91,7 +91,8 @@ grep -Eq '^  pull_request:' "$workflow" || fail "workflow lacks pull-request tri
 
 # Fixture roots are used by the contract's own mutation tests. The complete
 # credential-free evidence lane runs only from the checked-out project root.
-if [ "$ROOT_DIR" = "$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)" ]; then
+if [ "$ROOT_DIR" = "$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)" ] &&
+  [ "${V159_SKIP_RELEASE_CONTRACT:-false}" != "true" ]; then
   (
     cd "$ACCRUE_DIR"
     mix test test/accrue/entitlements/reference_scenarios_test.exs \

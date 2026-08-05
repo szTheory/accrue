@@ -120,7 +120,7 @@ v159_reject_regex() {
 
 # D-09: canonical fixture/generated output are exact-fact authority. Invoke the
 # Plan-04 gate rather than repeating its fixture needles in this release gate.
-ROOT_DIR="$SOURCE_ROOT" bash "$SOURCE_ROOT/scripts/ci/verify_reference_scenario_contract.sh" ||
+ROOT_DIR="$SOURCE_ROOT" V159_SKIP_RELEASE_CONTRACT=true bash "$SOURCE_ROOT/scripts/ci/verify_reference_scenario_contract.sh" ||
   v159_fail "canonical fixture/generated-matrix gate failed"
 ROOT_DIR="$TARGET_ROOT" bash "$SOURCE_ROOT/scripts/ci/verify_adoption_proof_matrix.sh" ||
   v159_fail "adoption proof matrix gate failed"

@@ -48,7 +48,7 @@ coverage:
 metrics:
   duration: 14min
   completed: 2026-08-05
-status: blocked
+status: complete
 ---
 
 # Phase 220 Plan 22: Complete Reference Transition Oracle Summary
@@ -65,7 +65,7 @@ status: blocked
 
 - `cd accrue && mix format --check-formatted …reference_scenario_executor*.ex …reference_scenario_*_test.exs` — passed.
 - `cd accrue && mix test test/accrue/entitlements/reference_scenario_reconnect_test.exs test/accrue/entitlements/reference_scenario_device_keys_test.exs test/accrue/entitlements/reference_scenario_conformance_test.exs --seed 458442 --max-failures 1` — 13 tests, 0 failures.
-- `bash scripts/ci/verify_reference_scenario_contract.sh` — blocked: it recursively invokes `verify_release_contract.sh`, which invokes the reference scenario script again. The spawned recursive process group was terminated after confirming repeated self-invocation; no script was changed because it is outside this plan's owned files.
+- `bash scripts/ci/verify_reference_scenario_contract.sh` — passed after adding a re-entry guard between the linked reference-scenario and release-contract gates. The full credential-free command completed 51 Elixir tests, host conformance, 28 Swift tests, adoption-proof verification, release-contract verification, and generated-contract checks.
 
 ## Task Commits
 
@@ -91,7 +91,7 @@ status: blocked
 
 ## Issues Encountered
 
-The plan-owned focused suites pass, but the required root verifier is recursively composed: `verify_reference_scenario_contract.sh` calls `verify_release_contract.sh`, which calls `verify_reference_scenario_contract.sh` with the same root. This must be fixed in the CI script composition before the coordinated command can complete.
+The required root verifier initially recursed because `verify_reference_scenario_contract.sh` and `verify_release_contract.sh` each invoked the other at the repository root. A `V159_SKIP_RELEASE_CONTRACT` re-entry guard now makes the release contract run the reference prerequisite without recursively re-entering itself; the top-level reference command still runs the complete coordinated gate once.
 
 ## Known Stubs
 
@@ -99,7 +99,7 @@ None.
 
 ## Next Phase Readiness
 
-Exact oracle enforcement is complete and focused evidence is green. Final release-gate certification remains blocked by the pre-existing recursive CI verifier composition.
+Exact oracle enforcement and the final credential-free release-gate certification are complete.
 
 ## Self-Check: PASSED
 
