@@ -64,9 +64,9 @@ defmodule Accrue.Entitlements.ReferenceScenarioExecutor.Resume do
     {replacement, next_cache} =
       verified_cache(proof, account, runtime.device_id, cache, payload.clock)
 
-    observed = collect(repo, account, device_id, challenge_id, "resumed", replacement, proof)
+    observed = collect(repo, account, device_id, challenge_id, "resumed", replacement)
     replay = Offline.reconnect(account, request, runtime.reconnect_opts)
-    true = stable_replay?(replay, observed)
+    true = stable_replay?(replay, proof)
 
     {Map.put(observed, :replay, "stable"), %{runtime | cache: next_cache}}
   end
@@ -94,7 +94,7 @@ defmodule Accrue.Entitlements.ReferenceScenarioExecutor.Resume do
         %{kind: "durable_interruption", command: %{payload: payload}},
         :generic_grant
       ) do
-    :ok = Read.seed_declared_grant(repo, account, payload)
+    :ok = Read.seed_declared_grant(repo, account, isolated_payload(payload, account.id))
     %{operation: "generic_grant", attempt_count: repo.aggregate(ReconnectAttempt, :count, :id)}
   end
 
@@ -107,7 +107,7 @@ defmodule Accrue.Entitlements.ReferenceScenarioExecutor.Resume do
   def adversarial_result(_repo, _account, %{kind: "resume_delivery"}, adapter),
     do: %{operation: Atom.to_string(adapter), cache: "unverified"}
 
-  defp collect(repo, account, device_id, challenge_id, disposition, replacement, proof \\ nil) do
+  defp collect(repo, account, device_id, challenge_id, disposition, replacement) do
     challenge = repo.get!(Challenge, challenge_id)
     attempt = repo.one!(from(item in ReconnectAttempt, where: item.challenge_id == ^challenge_id))
     device = repo.get!(Device, device_id)
@@ -138,11 +138,7 @@ defmodule Accrue.Entitlements.ReferenceScenarioExecutor.Resume do
         current: if(replacement == "replace", do: "allow", else: "allow")
       }
     }
-    |> maybe_proof(proof)
   end
-
-  defp maybe_proof(observed, nil), do: observed
-  defp maybe_proof(observed, proof), do: Map.put(observed, :proof, proof)
 
   defp verified_cache(proof, account, device_id, cache, clock) do
     device = Accrue.TestRepo.get!(Device, device_id)
@@ -169,7 +165,7 @@ defmodule Accrue.Entitlements.ReferenceScenarioExecutor.Resume do
     {"replace", %{revision: revision, disposition: disposition, proof: "verified"}}
   end
 
-  defp stable_replay?({:ok, %{proof: proof}}, %{proof: proof}), do: true
+  defp stable_replay?({:ok, %{proof: proof}}, proof), do: true
   defp stable_replay?(_, _), do: false
   defp assert_interruption!({:error, :admission_interrupted}, :after_admission), do: :ok
   defp assert_interruption!({:error, :issuance_interrupted}, :after_issuance_commit), do: :ok
@@ -237,6 +233,14 @@ defmodule Accrue.Entitlements.ReferenceScenarioExecutor.Resume do
 
   defp authorized?(_account, action),
     do: action in [:offline_challenge, :offline_reconnect_challenge, :offline_reconnect]
+
+  defp isolated_payload(payload, account_id) do
+    Enum.reduce(
+      [:provider_event_id, :provider_transaction_id, :provider_lineage_id],
+      payload,
+      &Map.update!(&2, &1, fn value -> "#{value}-#{account_id}" end)
+    )
+  end
 
   defp datetime!(value), do: value |> DateTime.from_iso8601() |> elem(1)
 
