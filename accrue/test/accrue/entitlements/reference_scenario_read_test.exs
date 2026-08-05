@@ -38,7 +38,7 @@ defmodule Accrue.Entitlements.ReferenceScenarioReadTest do
       [purchase, login] = scenario.actions
       account = account!("reference-scenario-read-#{scenario_id}")
 
-      :ok = Read.seed_equivalent_grant(Accrue.TestRepo, account, purchase.command.payload)
+      :ok = Read.seed_declared_grant(Accrue.TestRepo, account, purchase.command.payload)
       result = Read.execute(Accrue.TestRepo, account, login)
 
       assert result.result.disposition == login.kind

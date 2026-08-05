@@ -5,6 +5,7 @@ defmodule Accrue.Entitlements.ReferenceScenarioExecutor do
   alias Accrue.Entitlements.Offline
   alias Accrue.Entitlements.Offline.Registration
   alias Accrue.Entitlements.ReferenceScenarioExecutor.Lifecycle
+  alias Accrue.Entitlements.ReferenceScenarioExecutor.Read
   alias Accrue.Events.Event
 
   @family_by_kind %{
@@ -50,6 +51,10 @@ defmodule Accrue.Entitlements.ReferenceScenarioExecutor do
              "stripe_retraction"
            ],
       do: Lifecycle.execute(repo, account, action)
+
+  def execute_action(repo, account, %{kind: kind} = action)
+      when kind in ["web_login", "ios_login", "purchase_preflight", "expiry_boundary"],
+      do: Read.execute(repo, account, action)
 
   def execute_action(repo, account, %{kind: "device_replace", command: %{payload: p}}) do
     prior_key = JOSE.JWK.generate_key({:ec, "P-256"})
