@@ -2,8 +2,8 @@
 import PackageDescription
 
 let package = Package(
-    name: "CrosswakeTracer",
-    platforms: [.macOS(.v10_15)],
+    name: "AccrueOfflineClient",
+    platforms: [.macOS(.v10_15), .iOS(.v16)],
     products: [
         .library(name: "AccrueOfflineClient", targets: ["AccrueOfflineClient"]),
         .executable(name: "AccrueOfflineCacheCrashHarness", targets: ["AccrueOfflineCacheCrashHarness"])

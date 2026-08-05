@@ -1,4 +1,14 @@
-# Crosswake feasibility tracer
+# Accrue Offline Client and Crosswake feasibility tracer
+
+`AccrueOfflineClient` is a reusable SwiftPM product. Hosts may depend on this
+directory at a pinned Accrue revision and import `AccrueOfflineClient` for the
+verified offline-proof cache primitives. The client intentionally does not
+contain StoreKit, networking, host authentication, or entitlement authority;
+those remain host-owned.
+
+The same package also carries the Crosswake feasibility tracer below. Its
+capability report remains independent of successful package compilation or
+golden-vector checks.
 
 This Swift package records the host-owned client boundary that a pinned Crosswake shell/core must prove before Accrue accepts mobile runtime coupling. It does not add Crosswake to Accrue and does not infer an undocumented bridge API.
 
