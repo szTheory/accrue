@@ -83,7 +83,10 @@ defmodule Accrue.Entitlements.ReferenceScenariosTest do
     for scenario <- ReferenceScenarios.deterministic_scenarios(), action <- scenario.actions do
       remaining = List.delete(scenario.actions, action)
 
-      refute ReferenceScenarios.valid?(%{scenario | actions: [%{action | command: nil} | remaining]})
+      refute ReferenceScenarios.valid?(%{
+               scenario
+               | actions: [%{action | command: nil} | remaining]
+             })
 
       refute ReferenceScenarios.valid?(%{
                scenario
@@ -132,7 +135,11 @@ defmodule Accrue.Entitlements.ReferenceScenariosTest do
     repeat = ReferenceScenarios.fetch!("repeat_idempotency") |> hd_action()
     parallel = ReferenceScenarios.fetch!("parallel_execution") |> hd_action()
     interruption = ReferenceScenarios.fetch!("interrupted_resume") |> hd_action()
-    resume = ReferenceScenarios.fetch!("interrupted_resume").actions |> List.last() |> Map.fetch!(:command)
+
+    resume =
+      ReferenceScenarios.fetch!("interrupted_resume").actions
+      |> List.last()
+      |> Map.fetch!(:command)
 
     assert equal_order.command.payload.permutations == [[0, 1], [1, 0]]
     assert length(equal_order.command.payload.deliveries) == 2
