@@ -297,9 +297,12 @@ Plans:
   4. Automated repair and runbooks address missed Apple notifications, history cursor recovery, outages, conflicts, duplicate charges, stale devices, signing-key compromise, and reconciliation backlog without routine account reconstruction.
   5. Public guides, examples, capability/compatibility material, App Review guidance, release notes, threat model, watchlist, and conformance gates state one additive contract and its explicit v1.59 limits.
 
-**Plans**: 11/20 plans executed
+**Plans**: 22/22 plans executed
 
 Plans:
+
+- [x] 220-21-PLAN.md
+- [x] 220-22-PLAN.md
 
 **PROOF-02 final gap-closure waves** *(from 220-VERIFICATION.md; execute with `--gaps-only`)*
 
@@ -309,22 +312,22 @@ Plans:
 
 **Wave 2** *(parallel after 220-13; exclusive family modules/tests)*
 
-- [ ] 220-14-PLAN.md — Execute read/login, duplicate-purchase preflight, and three expiry-boundary actions through production reads.
-- [ ] 220-15-PLAN.md — Execute stale study, restricted expansion, signed deny, rollback, and empty evidence through Offline verification/policy.
-- [ ] 220-16-PLAN.md — Execute signed reconnect and verified complete-cache replacement with durable attempt/issuance collection.
-- [ ] 220-17-PLAN.md — Integrate the 220-12 device API and prove issuance-backed verification-key retention.
-- [ ] 220-18-PLAN.md — Execute fixture-complete equal-order, repeat, and barrier-controlled parallel deliveries.
+- [x] 220-14-PLAN.md — Execute read/login, duplicate-purchase preflight, and three expiry-boundary actions through production reads.
+- [x] 220-15-PLAN.md — Execute stale study, restricted expansion, signed deny, rollback, and empty evidence through Offline verification/policy.
+- [x] 220-16-PLAN.md — Execute signed reconnect and verified complete-cache replacement with durable attempt/issuance collection.
+- [x] 220-17-PLAN.md — Integrate the 220-12 device API and prove issuance-backed verification-key retention.
+- [x] 220-18-PLAN.md — Execute fixture-complete equal-order, repeat, and barrier-controlled parallel deliveries.
 
 **Wave 3** *(after 220-16)*
 
-- [ ] 220-19-PLAN.md — Execute durable reconnect interruption and exact resume to one issuance/cache tuple.
+- [x] 220-19-PLAN.md — Execute durable reconnect interruption and exact resume to one issuance/cache tuple.
 
 **Wave 4** *(after all family plans)*
 
-- [ ] 220-20-PLAN.md — Remove every aggregate bypass, migrate host/Swift consumers, and install the final credential-free phase verifier.
+- [x] 220-20-PLAN.md — Remove every aggregate bypass, migrate host/Swift consumers, and install the final credential-free phase verifier.
 
-- [ ] 220-10-PLAN.md
-- [ ] 220-11-PLAN.md
+- [x] 220-10-PLAN.md
+- [x] 220-11-PLAN.md
 - [x] 220-12-PLAN.md
 
 - [x] 220-09-PLAN.md
@@ -367,4 +370,4 @@ Plans:
 | 217. Canonical projection and compatibility | v1.59 | 5/5 | Complete | 2026-08-02 |
 | 218. Apple observation and repair | v1.59 | 16/16 | Complete    | 2026-08-03 |
 | 219. Offline study contract | v1.59 | 5/5 | Complete    | 2026-08-03 |
-| 220. First-adopter proof and release gates | v1.59 | 11/20 | In Progress|  |
+| 220. First-adopter proof and release gates | v1.59 | 22/22 | In Progress|  |
