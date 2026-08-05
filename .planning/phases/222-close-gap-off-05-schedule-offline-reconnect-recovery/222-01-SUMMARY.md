@@ -39,6 +39,7 @@ The reference host now runs the existing offline reconnect sweeper every fifteen
 - Extended the non-async host recovery authority with static Oban validation and a real `AccrueHost.Repo` recovery proof: admission interruption, durable attempt/wakeup, production sweeper, persisted `ReconnectWorker`, one issuance, and fresh proof verification.
 - The proof asserts one configured Stripe status moves unchanged from `due_sources/3` to `refresh/4`, records one call of each, excludes `:proof` and `:client_proof` options, and leaves database locks/execution tokens as ownership authority.
 - Nested test adapters and application configuration are restored exactly on exit. Production `:offline_reconnect` adapters are host-owned and explicitly out of scope; scheduled Cron wiring alone does not configure a production reconnect endpoint.
+- Follow-up review hardening removes the queued `ReconnectWakeupWorker` job while retaining its durable `ReconnectWakeup` record before invoking `ReconnectSweeper`. This proves the Cron sweep, rather than an immediate wakeup, reclaims the stranded attempt.
 
 ## Verification
 
@@ -53,7 +54,7 @@ The reference host now runs the existing offline reconnect sweeper every fifteen
 
 ## Deviations from Plan
 
-None - plan executed exactly as written.
+The post-execution review identified that the fixture left the immediate wakeup job available. The follow-up test-only change deletes that queued job before sweeping, then reruns the complete verification suite successfully.
 
 ## Known Stubs
 

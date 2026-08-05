@@ -8,10 +8,10 @@ files_reviewed_list:
   - examples/accrue_host/test/accrue_host/recovery_wiring_test.exs
 findings:
   critical: 0
-  warning: 1
+  warning: 0
   info: 0
-  total: 1
-status: issues_found
+  total: 0
+status: clean
 ---
 
 # Phase 222: Code Review Report
@@ -19,7 +19,7 @@ status: issues_found
 **Reviewed:** 2026-08-05T19:57:29Z
 **Depth:** standard
 **Files Reviewed:** 2
-**Status:** issues_found
+**Status:** clean — re-reviewed after follow-up
 
 ## Summary
 
@@ -27,7 +27,7 @@ The Cron entry is additive and correctly uses the existing entitlement queue. Th
 
 ## Narrative Findings (AI reviewer)
 
-## Warnings
+## Resolved Findings
 
 ### WR-01: Recovery test does not suppress the immediate wakeup job
 
@@ -35,7 +35,9 @@ The Cron entry is additive and correctly uses the existing entitlement queue. Th
 
 **Issue:** Admission always persists a `ReconnectWakeup` *and* inserts a `ReconnectWakeupWorker` job (`Reconnect.schedule_attempt/5`). This test asserts only that no `ReconnectWorker` exists, then invokes `ReconnectSweeper` while the normal wakeup worker remains queued. Therefore it does not establish the required “stranded/lost immediate work” condition: the live wakeup worker could drain the same wakeup and enqueue the normal worker, allowing the test to pass without proving the scheduled recovery path is necessary. It also leaves a duplicate-work race unrepresented.
 
-**Fix:** After asserting the durable `ReconnectWakeup` exists, query and delete (or otherwise mark unavailable) the `ReconnectWakeupWorker` Oban job before invoking `ReconnectSweeper`, while retaining the durable wakeup record. Assert that job is absent, then assert the sweeper alone inserts the `ReconnectWorker` for the attempt.
+**Resolution:** The test now deletes the queued `ReconnectWakeupWorker` job after asserting durable admission/wakeup persistence and confirms it is absent before invoking `ReconnectSweeper`. The durable `ReconnectWakeup` record remains, so the test establishes that the scheduled sweep alone enqueues the resulting `ReconnectWorker`.
+
+**Reverification:** Focused recovery test (7 tests), host `mix verify` (64 tests), and the core reconnect regression (19 tests) all passed after this change.
 
 ---
 

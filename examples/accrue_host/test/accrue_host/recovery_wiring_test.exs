@@ -19,6 +19,7 @@ defmodule AccrueHost.RecoveryWiringTest do
     ReconnectAttempt,
     ReconnectSweeper,
     ReconnectWakeup,
+    ReconnectWakeupWorker,
     ReconnectWorker,
     SourceCoordinator
   }
@@ -253,9 +254,18 @@ defmodule AccrueHost.RecoveryWiringTest do
       assert attempt.state == :admitted
       assert 1 == Repo.aggregate(ReconnectWakeup, :count)
       reconnect_worker = Oban.Worker.to_string(ReconnectWorker)
+      reconnect_wakeup_worker = Oban.Worker.to_string(ReconnectWakeupWorker)
 
       assert [] ==
                Repo.all(from(job in Oban.Job, where: job.worker == ^reconnect_worker))
+
+      assert {1, _} =
+               Repo.delete_all(
+                 from(job in Oban.Job, where: job.worker == ^reconnect_wakeup_worker)
+               )
+
+      assert [] ==
+               Repo.all(from(job in Oban.Job, where: job.worker == ^reconnect_wakeup_worker))
 
       assert :ok = ReconnectSweeper.perform(%Oban.Job{})
       [job] = Repo.all(from(job in Oban.Job, where: job.worker == ^reconnect_worker))

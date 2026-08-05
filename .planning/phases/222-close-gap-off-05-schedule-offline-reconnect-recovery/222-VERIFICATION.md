@@ -1,6 +1,6 @@
 ---
 phase: 222-close-gap-off-05-schedule-offline-reconnect-recovery
-verified: 2026-08-05T19:55:05Z
+verified: 2026-08-05T20:11:24Z
 status: passed
 score: 4/4 must-haves verified
 behavior_unverified: 0
@@ -15,7 +15,7 @@ overrides_applied: 0
 
 **Status:** passed
 
-**Re-verification:** No — initial verification
+**Re-verification:** Yes — after the post-review fixture hardening
 
 ## Goal Achievement
 
@@ -24,7 +24,7 @@ overrides_applied: 0
 | # | Truth | Status | Evidence |
 | --- | --- | --- | --- |
 | 1 | The reference host schedules exactly one offline reconnect recovery sweep every 15 minutes while preserving every existing Oban queue, plugin, and Cron entry. | ✓ VERIFIED | `config/config.exs` has exactly one `{"*/15 * * * *", Accrue.Entitlements.Offline.ReconnectSweeper}` tuple alongside all five prior entries. `RecoveryWiringTest` reads the real config, validates it through `Oban.Config.validate/1`, and checks workers, both relevant Cron cardinalities, and the entitlement queue. The focused test passed. |
-| 2 | A PoP-authenticated stranded reconnect is reclaimed by the real sweeper and worker, then terminalizes once with one cryptographically fresh signed replacement. | ✓ VERIFIED | The focused host test executes real challenge/signature admission, interrupts after durable admission, invokes `ReconnectSweeper.perform/1`, loads the persisted `ReconnectWorker` job, and calls `ReconnectWorker.perform/1`. It asserts `:completed`, `attempt_count: 1`, one `Issuance`, and `Offline.verify/3 == {:ok, %{state: :fresh}}`; 7/7 focused tests passed. |
+| 2 | A PoP-authenticated stranded reconnect is reclaimed by the real sweeper and worker, then terminalizes once with one cryptographically fresh signed replacement. | ✓ VERIFIED | The focused host test executes real challenge/signature admission, interrupts after durable admission, removes the queued immediate `ReconnectWakeupWorker` job while retaining the durable wakeup record, then invokes `ReconnectSweeper.perform/1`, loads the persisted `ReconnectWorker` job, and calls `ReconnectWorker.perform/1`. It asserts `:completed`, `attempt_count: 1`, one `Issuance`, and `Offline.verify/3 == {:ok, %{state: :fresh}}`; 7/7 focused tests passed. |
 | 3 | Recovery gets provider status only from the host-configured coordinator; `due_sources/3` hands its configured status to `refresh/4` and neither receives client proof authority. | ✓ VERIFIED | The integration test asserts one callback of each kind for the persisted account and identical worker clock/status fixture, with observed authority keys exactly `[:provider_fixture]`. Production `Reconnect.execute_attempt/2` merges only validated host `:offline_reconnect` configuration before running the coordinator. |
 | 4 | Production reconnect adapters remain host-owned and out of scope; Cron presence is not treated as a configured production endpoint. | ✓ VERIFIED | `examples/accrue_host/config/` contains no `:offline_reconnect` adapter configuration. The source/key implementations exist only as nested test modules and setup restores every mutated application key. `Reconnect.execute_attempt/2` validates runtime host configuration and terminalizes invalid configuration rather than inventing an adapter. |
 
@@ -81,6 +81,6 @@ No gaps found. There are no later roadmap phases to which a missing Phase 222 ob
 
 ---
 
-_Verified: 2026-08-05T19:55:05Z_
+_Verified: 2026-08-05T20:11:24Z_
 
 _Verifier: the agent (gsd-verifier)_
