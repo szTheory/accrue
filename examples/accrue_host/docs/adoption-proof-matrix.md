@@ -64,6 +64,7 @@ paths. Live Stripe parity remains advisory evidence only.
 | Visual screenshots (maintainers / evaluators) | `npm run e2e:visuals`, CI artifact `accrue-host-phase15-screenshots` | README VERIFY-01 + visuals section |
 | Dunning campaign wiring — `accrue_dunning` queue + `Oban.Plugins.Cron` DunningSweeper in host config; Fake-backed failed-payment → campaign-step → recovery loop through the real webhook entry point | `dunning_wiring_test.exs` (host wiring smoke) + `dunning_full_journey_test.exs` (accrue package full journey) | `examples/accrue_host/test/accrue_host/dunning_wiring_test.exs` + `accrue/test/accrue/dunning/dunning_full_journey_test.exs` |
 | Recovery wiring (PROOF-06) — base `config/config.exs` proof validates `Oban` config, requires queues `accrue_webhooks`, `accrue_mailers`, `accrue_dunning`, `accrue_meters`, `accrue_scheduled`, and requires `Oban.Plugins.Cron` workers `DunningSweeper`, `DetectExpiringCards`, `MeterEventsReconciler`, `MeteredRenewalReconciler`; see canonical append-merge teaching in `config/config.exs` (`append-merge` comment) | `recovery_wiring_test.exs` (host wiring smoke) | `examples/accrue_host/test/accrue_host/recovery_wiring_test.exs` |
+| Apple V2 ingress — dedicated `/webhooks/apple` boundary, durable intake/quarantine, backpressure classes, duplicate/concurrent convergence, and recovery wakeup | Fake-backed `apple_notification_ingest_test.exs`, `apple_rate_policy_test.exs`, `recovery_wiring_test.exs`, and source contract in `mix verify` | Merge-blocking bounded host proof |
 | Entitlement gating (`Accrue.Live.Entitlements`) | Gated `/app/reports/advanced` with `{:require_feature, :advanced_reports}` ; `entitlements_guard_test.exs` | `examples/accrue_host` router + `Accrue.Config.entitlements()` configuration |
 | Stripe-native advisory entitlement sync boundary | `verify_package_docs.sh` pins default-off/advisory/local-grant wording; `verify_entitlement_sync_isolation.sh` blocks gate-path references to the advisory cache/client-fetch/reconcile seam | `scripts/ci/verify_package_docs.sh`, `scripts/ci/verify_entitlement_sync_isolation.sh`, `accrue/guides/entitlements.md`, `.planning/processor-support-matrix.md` |
 | Recovered Revenue Dashboard | Deterministic seeds and UI rendering proof (`recovery_analytics_test.exs`) | [`priv/repo/seeds.exs`](../priv/repo/seeds.exs), `/admin/analytics/recovery`, `test-results/recovery-dashboard.png` |
@@ -96,6 +97,14 @@ paths. Live Stripe parity remains advisory evidence only.
 | CI schedule + manual dispatch | Job id `live-stripe` (display name references test-mode keys) | `.github/workflows/ci.yml`, `guides/testing-live-stripe.md` |
 
 Requires repository secrets; failures do not block merge (`continue-on-error: true`).
+
+## Advisory: Apple deployment delivery
+
+App Store Request a Test Notification and notification-status evidence are advisory
+deployment checks. They can confirm a deployed endpoint is reachable, but do not
+replace the Fake-backed router proof or `mix verify` as merge authority. They also
+do not establish Crosswake bridge/device evidence or external Alpha integration
+evidence; those remain separately owned non-claims.
 
 ### Trust and versioning (v1.15+)
 

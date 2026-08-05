@@ -112,6 +112,46 @@ cd examples/accrue_host
 mix verify
 ```
 
+## Apple notification ingress
+
+Cadence exposes the production-only Apple V2 endpoint at `POST /webhooks/apple`.
+It is a dedicated JSON/raw-body boundary, separate from the Stripe webhook route:
+the exact request body is limited to **262,144 bytes** before the host delegates
+to Accrue's Apple notification ingress.
+
+Production supplies these six runtime inputs by name, with deployment values kept
+outside this repository: `APPLE_TRUST_ROOTS_PEM_PATH`, `APPLE_BUNDLE_ID`,
+`APPLE_APP_ID`, `APPLE_VERIFIER_CONFIG_VERSION`,
+`APPLE_SERVER_API_BEARER_TOKEN`, and `APPLE_PRODUCT_MAP_JSON`. The host pins the
+trust-root/config-version identity to a production verifier configuration and
+shares that same configuration with Apple admission and reconciliation. This
+recipe does not describe a sandbox route; a future sandbox endpoint needs its own
+configuration and proof.
+
+The host adds Apple intake to the existing reconciliation queue and sweeper. A
+`200` means the notification reached a durable verified, no-op, or quarantined
+terminal outcome; it does not mean the request directly changed an entitlement.
+`400` is malformed input, `413` is an oversized body, `429` is temporary
+backpressure, and `503` means a required capture, configuration, verification, or
+persistence dependency could not complete. PostgreSQL constraints and locks own
+duplicate and concurrent-delivery correctness. The local direct-peer rate policy
+is a single-node backstop only; deployment edge or shared infrastructure is the
+authority for multi-node and internet-scale limits.
+
+For a safe first response, compare response-class trends first, then quarantine
+growth, reconciliation age/backlog, and `needs_repair` in the authenticated
+diagnostic. Confirm the named queue and sweeper are running, let bounded
+reconciliation work converge, and escalate a growing backlog, repeated `429`, or
+`needs_repair` rather than attempting a manual entitlement change. Record only a
+safe correlation and the next action.
+
+Run the credential-free host proof exactly as follows:
+
+```bash
+cd examples/accrue_host
+mix verify
+```
+
 For native Phoenix contributor work, use the same app without Docker:
 
 ```bash

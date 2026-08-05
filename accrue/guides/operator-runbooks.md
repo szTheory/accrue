@@ -228,6 +228,21 @@ product process.
 4. Verify the revision and backlog age after each bounded batch. Open
    `V159-WL-HOST` when host queue or resource changes are implicated.
 
+### `V159-RUN-APPLE-INGRESS` — Apple notification ingress triage
+
+1. Read response-class trends and retain only a safe correlation. Treat `429` as
+   temporary backpressure; compare it with the trusted deployment edge or shared
+   rate policy before changing the host's single-node backstop.
+2. Review quarantine growth, reconciliation age/backlog, and `needs_repair` in the
+   authenticated diagnostic. Do not inspect or attach provider evidence, worker
+   arguments, or failure detail to the incident.
+3. Confirm the named `:accrue_entitlements` queue and reconciliation sweeper are
+   healthy, then allow the existing bounded job to converge. Stop and escalate if
+   backlog age grows, a dependency remains unavailable, or `needs_repair` persists.
+4. Record the response trend, safe correlation, job state, and next action. This
+   runbook does not authorize an automatic grant, ownership, finance, or provider
+   mutation.
+
 ### `V159-RUN-APP-REVIEW`, `V159-RUN-PRIVACY`, and `V159-RUN-ROADMAP`
 
 - **App Review:** record the storefront change or rejection, review only
