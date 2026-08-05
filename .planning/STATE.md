@@ -5,15 +5,15 @@ milestone_name: Account-Scoped Multi-Rail & Offline Entitlements
 current_phase: 221
 current_phase_name: close-gap-reference-host-apple-notification-ingress
 status: executing
-stopped_at: Completed 221-03-PLAN.md
-last_updated: "2026-08-05T17:36:16.512Z"
+stopped_at: Completed 221-04-PLAN.md
+last_updated: "2026-08-05T17:40:21.131Z"
 last_activity: 2026-08-05
 last_activity_desc: Phase 221 execution started
 progress:
   total_phases: 7
   completed_phases: 6
   total_plans: 75
-  completed_plans: 73
+  completed_plans: 74
   percent: 86
 ---
 
@@ -30,7 +30,7 @@ See: `.planning/PROJECT.md` (updated 2026-08-05 after completing Phase 220)
 ## Current Position
 
 Phase: 221 (close-gap-reference-host-apple-notification-ingress) — EXECUTING
-Plan: 4 of 5
+Plan: 5 of 5
 Status: Ready to execute
 Last activity: 2026-08-05 — Phase 221 execution started
 
@@ -430,6 +430,7 @@ Coverage: 22/22 v1.51 requirements mapped (each REQ-ID → exactly one phase). D
 | Phase 221-close-gap-reference-host-apple-notification-ingress P01 | 1 | 2 tasks | 1 files |
 | Phase 221 P02 | 14min | 1 tasks | 4 files |
 | Phase 221-close-gap-reference-host-apple-notification-ingress P03 | 17min | 2 tasks | 5 files |
+| Phase 221 P04 | 8min | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -861,6 +862,8 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - [Phase ?]: D-04/D-05: one production Verifier.Config term is reused by ingress and reconciliation admission.
 - [Phase ?]: Use a bounded, single-node direct-peer fixed window as a temporary host backstop; shared edge infrastructure remains authoritative across nodes.
 - [Phase ?]: Keep response, quarantine, duplicate, and privacy proof at the host router while using only Fake verifier controls.
+- [Phase ?]: Use the existing :accrue_entitlements queue at concurrency 10 and one 15-minute ReconciliationSweeper Cron entry.
+- [Phase ?]: Oban uniqueness coalesces wakeups only; PostgreSQL constraints, transactions, and locks remain recovery ownership authority.
 
 ### Pending Todos
 
@@ -1012,8 +1015,8 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 
 ## Session Continuity
 
-Last session: 2026-08-05T17:36:16.493Z
-Stopped at: Completed 221-03-PLAN.md
+Last session: 2026-08-05T17:40:21.112Z
+Stopped at: Completed 221-04-PLAN.md
 Resume file: None
 
 ## Operator Next Steps
