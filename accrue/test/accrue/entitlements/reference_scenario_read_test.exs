@@ -2,6 +2,7 @@ defmodule Accrue.Entitlements.ReferenceScenarioReadTest do
   use Accrue.RepoCase, async: false
 
   alias Accrue.Entitlements.{Account, ReferenceScenarios}
+  alias Accrue.Entitlements.ReferenceScenarioExecutor
   alias Accrue.Entitlements.ReferenceScenarioExecutor.Read
 
   setup do
@@ -137,6 +138,34 @@ defmodule Accrue.Entitlements.ReferenceScenarioReadTest do
                  adapter: adapter
                )
     end
+  end
+
+  test "each declared read leaf rejects a type-compatible mutation" do
+    action = ReferenceScenarios.fetch!("duplicate_purchase_prevention").actions |> hd()
+
+    observed =
+      ReferenceScenarioExecutor.execute_action(
+        Accrue.TestRepo,
+        account!("reference-scenario-read-leaves"),
+        action
+      )
+
+    Enum.each(transition_mutations(action), fn mutated ->
+      assert_raise ExUnit.AssertionError, fn ->
+        ReferenceScenarioExecutor.assert_transition(mutated, observed)
+      end
+    end)
+  end
+
+  defp transition_mutations(action) do
+    [
+      put_in(action.expected_transition.result.tag, "noop"),
+      put_in(action.expected_transition.result.disposition, "web_login"),
+      put_in(action.expected_transition.durable.state, "changed"),
+      put_in(action.expected_transition.durable.observation_kind, "written"),
+      put_in(action.expected_transition.durable.snapshot_revision, 99),
+      put_in(action.expected_transition.cache.disposition, "replace")
+    ]
   end
 
   defp account!(owner_id),

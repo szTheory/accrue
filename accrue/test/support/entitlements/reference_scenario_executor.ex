@@ -168,7 +168,9 @@ defmodule Accrue.Entitlements.ReferenceScenarioExecutor do
       :resume -> resume_match?(kind, observed)
       :ordering -> ordering_match?(kind, observed)
     end ||
-      raise ExUnit.AssertionError, message: "family transition mismatch for #{kind}"
+      raise ExUnit.AssertionError,
+        message:
+          "family transition mismatch for #{kind}: expected #{inspect(expected)}; declared #{inspect(Map.get(observed, :declared_transition))}"
 
     :ok
   end

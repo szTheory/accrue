@@ -17,6 +17,11 @@ defmodule Accrue.Entitlements.ReferenceScenarioExecutor.OfflinePolicy do
              "rollback_proof",
              "empty_evidence"
            ] do
+    # Signed-policy rows exercise a previously persisted entitlement proof. The
+    # setup is complete before the measured verification operation, so the
+    # declared transition still records whether verification itself wrote.
+    if kind != "empty_evidence", do: :ok = Read.seed_declared_grant(repo, account, payload)
+
     before = counts(repo, account.id)
     vector = vector_for!(kind, payload.offline_vector)
     compact = compact_for(%{kind: kind, command: %{payload: payload}})
@@ -25,13 +30,24 @@ defmodule Accrue.Entitlements.ReferenceScenarioExecutor.OfflinePolicy do
     {:ok, decision} = Offline.verify(compact, context)
     policy = Offline.action_policy(decision, requested_action!(kind, payload.offline_action))
     after_counts = counts(repo, account.id)
+    {:ok, snapshot} = Accrue.Entitlements.snapshot(account)
+    write_delta = write_delta(before, after_counts)
 
     %{
       result: decision_facts(decision),
       operation: "offline_verify",
       policy: policy_facts(policy),
-      durable: Map.merge(after_counts, %{write_delta: write_delta(before, after_counts)}),
-      cache: %{disposition: "preserve"}
+      durable: Map.merge(after_counts, %{write_delta: write_delta}),
+      cache: %{disposition: "preserve"},
+      declared_transition: %{
+        result: %{tag: "executed", disposition: kind},
+        durable: %{
+          state: if(write_delta == 0, do: "unchanged", else: "changed"),
+          observation_kind: if(write_delta == 0, do: "none", else: "written"),
+          snapshot_revision: snapshot.revision
+        },
+        cache: %{disposition: if(write_delta == 0, do: "preserve", else: "replace")}
+      }
     }
   end
 

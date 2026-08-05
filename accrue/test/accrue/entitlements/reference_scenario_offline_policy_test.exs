@@ -2,6 +2,7 @@ defmodule Accrue.Entitlements.ReferenceScenarioOfflinePolicyTest do
   use Accrue.RepoCase, async: false
 
   alias Accrue.Entitlements.{Account, ReferenceScenarios}
+  alias Accrue.Entitlements.ReferenceScenarioExecutor
   alias Accrue.Entitlements.ReferenceScenarioExecutor.OfflinePolicy
 
   setup do
@@ -121,6 +122,34 @@ defmodule Accrue.Entitlements.ReferenceScenarioOfflinePolicyTest do
                  OfflinePolicy.compact_for(action) != ""
              end
            end)
+  end
+
+  test "each declared offline leaf rejects a type-compatible mutation" do
+    action = ReferenceScenarios.fetch!("stale_downloaded_study_continuity") |> hd_action()
+
+    observed =
+      ReferenceScenarioExecutor.execute_action(
+        Accrue.TestRepo,
+        account!("reference-scenario-offline-leaves"),
+        action
+      )
+
+    Enum.each(transition_mutations(action), fn mutated ->
+      assert_raise ExUnit.AssertionError, fn ->
+        ReferenceScenarioExecutor.assert_transition(mutated, observed)
+      end
+    end)
+  end
+
+  defp transition_mutations(action) do
+    [
+      put_in(action.expected_transition.result.tag, "noop"),
+      put_in(action.expected_transition.result.disposition, "signed_deny"),
+      put_in(action.expected_transition.durable.state, "changed"),
+      put_in(action.expected_transition.durable.observation_kind, "written"),
+      put_in(action.expected_transition.durable.snapshot_revision, 99),
+      put_in(action.expected_transition.cache.disposition, "replace")
+    ]
   end
 
   defp hd_action(scenario), do: hd(scenario.actions)

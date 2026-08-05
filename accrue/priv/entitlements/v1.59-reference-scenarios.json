@@ -534,7 +534,7 @@
             "durable": {
               "state": "observed",
               "observation_kind": "grant",
-              "snapshot_revision": 2
+              "snapshot_revision": 1
             },
             "cache": {
               "disposition": "preserve"
@@ -634,7 +634,7 @@
             "durable": {
               "state": "observed",
               "observation_kind": "grant",
-              "snapshot_revision": 2
+              "snapshot_revision": 1
             },
             "cache": {
               "disposition": "preserve"
@@ -1521,7 +1521,7 @@
             "durable": {
               "state": "unchanged",
               "observation_kind": "none",
-              "snapshot_revision": 1
+              "snapshot_revision": 0
             },
             "cache": {
               "disposition": "preserve"
@@ -1589,7 +1589,7 @@
             "durable": {
               "state": "unchanged",
               "observation_kind": "none",
-              "snapshot_revision": 1
+              "snapshot_revision": 0
             },
             "cache": {
               "disposition": "preserve"
@@ -1657,7 +1657,7 @@
             "durable": {
               "state": "unchanged",
               "observation_kind": "none",
-              "snapshot_revision": 1
+              "snapshot_revision": 0
             },
             "cache": {
               "disposition": "preserve"

@@ -11,11 +11,14 @@ defmodule Accrue.Entitlements.ReferenceScenarioExecutor.Read do
   def execute(repo, account, %{kind: kind}) when kind in @login_kinds do
     before = counts(repo, account.id)
     {:ok, snapshot} = Accrue.Entitlements.snapshot(account)
+    after_counts = counts(repo, account.id)
 
     %{
       result: %{tag: "executed", disposition: kind},
       snapshot: snapshot_facts(snapshot),
-      durable: Map.merge(counts(repo, account.id), deltas(before, counts(repo, account.id)))
+      durable: Map.merge(after_counts, deltas(before, after_counts)),
+      cache: %{disposition: "preserve"},
+      declared_transition: unchanged_transition(kind, snapshot.revision, before, after_counts)
     }
   end
 
@@ -51,7 +54,10 @@ defmodule Accrue.Entitlements.ReferenceScenarioExecutor.Read do
         Map.merge(
           after_counts,
           Map.put(deltas(before, after_counts), :snapshot_revision, decision.revision)
-        )
+        ),
+      cache: %{disposition: "preserve"},
+      declared_transition:
+        unchanged_transition("purchase_preflight", decision.revision, before, after_counts)
     }
   end
 
@@ -77,7 +83,10 @@ defmodule Accrue.Entitlements.ReferenceScenarioExecutor.Read do
         after_counts
         |> Map.merge(deltas(before, after_counts))
         |> Map.put(:snapshot_revision, snapshot.revision)
-        |> Map.put(:grant_expires_at, grant_expires_at)
+        |> Map.put(:grant_expires_at, grant_expires_at),
+      cache: %{disposition: "preserve"},
+      declared_transition:
+        unchanged_transition("expiry_boundary", snapshot.revision, before, after_counts)
     }
   end
 
@@ -274,6 +283,22 @@ defmodule Accrue.Entitlements.ReferenceScenarioExecutor.Read do
     }
 
   defp source_rails(sources), do: sources |> Enum.map(& &1.rail) |> Enum.sort()
+
+  defp unchanged_transition(kind, revision, before, after_counts) do
+    unchanged? =
+      deltas(before, after_counts) == %{observation_delta: 0, grant_delta: 0, audit_delta: 0}
+
+    %{
+      result: %{tag: "executed", disposition: kind},
+      durable: %{
+        state: if(unchanged?, do: "unchanged", else: "changed"),
+        observation_kind: if(unchanged?, do: "none", else: "written"),
+        snapshot_revision: revision
+      },
+      cache: %{disposition: if(unchanged?, do: "preserve", else: "replace")}
+    }
+  end
+
   defp rail!(value) when is_atom(value), do: value
   defp rail!(value) when is_binary(value), do: String.to_existing_atom(value)
 end
