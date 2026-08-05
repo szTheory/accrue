@@ -1,10 +1,10 @@
 ---
 schema_version: 1
-open_count: 5
+open_count: 6
 waived_count: 0
 fixed_count: 0
-total_count: 5
-last_updated: 2026-08-04T15:43:48.620Z
+total_count: 6
+last_updated: 2026-08-05T02:02:05.577Z
 ---
 
 # Broken Windows Ledger
@@ -20,6 +20,7 @@ last_updated: 2026-08-04T15:43:48.620Z
 | 3 | 215 | deviation | examples/crosswake_tracer/Sources/AccrueOfflineClient/AccrueOfflineClient.swift |  | Reducer now requires every declared evidence lane before reporting proven. | open |  | 2026-08-01T01:55:48.106Z |  |
 | 4 | 217 | unrun-verify | accrue/test/accrue/docs/package_docs_verifier_test.exs |  | mix test.all could not start because unrelated shared dirty file is not formatted | open |  | 2026-08-03T01:52:16.732Z |  |
 | 5 | 220 | unrun-verify | examples/accrue_host/test/accrue_host/billing_facade_test.exs | 160 | Full mix verify could not complete because the pre-existing fake subscription uniqueness test failed. | open |  | 2026-08-04T15:43:48.620Z |  |
+| 6 | 220 | deviation | accrue/lib/accrue/entitlements/snapshot.ex |  | Forwarded snapshot :now option to repository folding for frozen expiry-boundary proof. | open |  | 2026-08-05T02:02:05.577Z |  |
 
 ````json
 [
@@ -81,6 +82,18 @@ last_updated: 2026-08-04T15:43:48.620Z
     "status": "open",
     "reason": "",
     "recorded_at": "2026-08-04T15:43:48.620Z",
+    "resolved_at": null
+  },
+  {
+    "id": 6,
+    "kind": "deviation",
+    "phase": "220",
+    "file": "accrue/lib/accrue/entitlements/snapshot.ex",
+    "line": null,
+    "description": "Forwarded snapshot :now option to repository folding for frozen expiry-boundary proof.",
+    "status": "open",
+    "reason": "",
+    "recorded_at": "2026-08-05T02:02:05.577Z",
     "resolved_at": null
   }
 ]
