@@ -7,6 +7,7 @@ defmodule AccrueHost.InstallBoundaryTest do
   @handler_path Path.join(@host_root, "lib/accrue_host/billing_handler.ex")
   @router_path Path.join(@host_root, "lib/accrue_host_web/router.ex")
   @runtime_path Path.join(@host_root, "config/runtime.exs")
+  @readme_path Path.join(@host_root, "README.md")
   @webhook_route ~r/accrue_webhook\s*\(?\s*"\/stripe",\s*:stripe\s*\)?/
   @apple_forward ~r/forward\s*\(?\s*"\/apple",\s*AccrueHost\.AppleNotificationIngress\s*\)?/
   @admin_mount ~r/accrue_admin\s*\(?\s*"\/admin",\s*session_keys:\s*\[:user_token\],\s*allow_live_reload:\s*false\s*\)?/
@@ -87,11 +88,24 @@ defmodule AccrueHost.InstallBoundaryTest do
     assert runtime =~ "environment: :production"
     assert runtime =~ "max_body_bytes: 262_144"
     assert runtime =~ "rate_limiter: &AccrueHost.AppleRatePolicy.check/1"
+    assert runtime =~ "APPLE_TRUSTED_PROXY_IPS"
+    assert runtime =~ "AppleRatePolicy.parse_trusted_proxies!"
+    assert runtime =~ "trusted_proxies: trusted_proxies"
     assert runtime =~ "config :accrue, :apple_reconciliation"
     assert runtime =~ "Application.fetch_env!(:entitlements)"
     assert runtime =~ "configured_plan_keys"
     assert runtime =~ "decode_product_map!("
     assert runtime =~ "configured_plan_keys"
+  end
+
+  test "Apple rate guidance defines the trusted-edge contract and local scope" do
+    readme = File.read!(@readme_path)
+
+    assert readme =~ "APPLE_TRUSTED_PROXY_IPS"
+    assert readme =~ "x-forwarded-for"
+    assert readme =~ "strip and overwrite"
+    assert readme =~ "direct clients"
+    assert readme =~ "single-node backstop"
   end
 
   test "bounded verification registers every Apple Wave 0 proof with warnings as errors" do
