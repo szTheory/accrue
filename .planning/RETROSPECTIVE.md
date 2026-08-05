@@ -1583,12 +1583,57 @@ The first slice (M1) of the SEED-004 redesign of `accrue_admin` from a CRUD surf
 
 ---
 
+## Milestone: v1.59 — Account-Scoped Multi-Rail & Offline Entitlements
+
+**Shipped:** 2026-08-05
+**Phases:** 8 (215-222) | **Plans:** 77 | **Tasks:** 135
+
+### What Was Built
+
+- Concurrent Stripe and Apple rail configuration, qualified durable entitlement records, and a survivor-safe revisioned account projection.
+- Strict Apple notification/intake/reconciliation, reference-host ingress, and provider-honest lifecycle guidance.
+- Device-bound ES256 offline proofs with stale-study continuity, authenticated reconnect, signed deny replacement, and scheduled recovery.
+- Deterministic first-adopter scenarios, operator diagnostics/repairs/runbooks, and release-contract gates.
+
+### What Worked
+
+- The decision corpus kept projection, offline verification, fixtures, and support language aligned without becoming a second runtime reducer.
+- Audit-driven closure phases isolated the two genuine host-composition gaps: Apple ingress and stranded reconnect recovery.
+- Credential-free host integration proof caught boundary issues that core-only tests could not.
+
+### What Was Inefficient
+
+- The first audit occurred before the final closure phase, requiring a rerun to distinguish stale findings from remaining gaps.
+- Summary metadata produced noisy archive accomplishments and undercounted tasks, requiring manual milestone statistics.
+- Several resolved debugging and external-smoke items stayed open in planning state until closeout.
+
+### Patterns Established
+
+- Every provider-facing feature needs a host route/scheduler composition test in the release lane.
+- Keep external-provider delivery smoke tests advisory and privacy-bounded; deterministic fake-backed tests remain merge authority.
+- Treat `feasibility_blocked` as a successful prove-or-block result, never as runtime readiness.
+
+### Key Lessons
+
+1. Run the milestone audit after every closure phase, not merely after the nominal final phase.
+2. Keep `VALIDATION.md`, `SUMMARY.md`, and requirement traceability synchronized while executing, not during archive preparation.
+3. A dedicated host scheduling proof is required for durable recovery claims; worker implementation alone is insufficient.
+
+### Cost Observations
+
+- Model mix: not reliably recorded.
+- Sessions: multi-session implementation, audit, closure, and archive cycle across 2026-07-31 to 2026-08-05.
+- Notable: the largest avoidable cost was audit-driven host wiring closure; focused host proofs then made confirmation fast and deterministic.
+
+---
+
 ## Cross-Milestone Trends
 
 ### Process Evolution
 
 | Milestone | Sessions | Phases | Key Change |
 |-----------|----------|--------|------------|
+| v1.59 | multi (2026-07-31→08-05) | 8 | **MULTI-RAIL/OFFLINE** — concurrent Stripe/Apple account projection, strict Apple intake/repair, device-bound offline proof/recovery, and first-adopter release proof. Audit `tech_debt`: 29/29 requirements, 11/11 integrations, 5/5 flows, and Nyquist validation passed; Crosswake runtime remains intentionally feasibility-blocked. |
 | v1.58 | multi (2026-07-30→07-31) | 5 | **BUMP/SYNC/DOCS** — moved all packages to `lattice_stripe ~> 2.0`, shipped client-backed advisory entitlements with static/runtime grant isolation, surfaced diagnostics in the existing admin detail, and closed writer/pagination truth through two audit-driven decimal phases. Audit `tech_debt`: 11/11 requirements and 5/5 flows pass. |
 | v1.57 | multi (2026-07-19→07-30) | 3 | **REIGN/IA/COPY/COMP** — SEED-004 M1: reigned the two outlier admin pages (Home + Subscriptions) onto the shared operator-first component vocabulary + answer-first IA, retired 97 dead bespoke `.ax-*` selectors (grep-gated), and closed UAT with **0 human checkpoints** via a new deterministic Playwright `toHaveScreenshot` pixel-diff gate. Reopen class: explicit strategy change. Non-convergence of the parked v1.56 ratchet on IA findings was the trigger. Audit `passed`; phases **209–211** under **`milestones/v1.57-phases/`**; archives **`milestones/v1.57-*`**. |
 | v1.55 | short | 4 | **QLT/CI/DB/RD** - audit-only maintenance milestone: evidence-backed software-quality audit, static-first CI/CD audit, accepted DB schema-contract ADR, and ranked top-10 hardening roadmap. Audit `passed`; phases archived under **`milestones/v1.55-phases/`**; archives **`milestones/v1.55-*`**. |
@@ -1629,6 +1674,7 @@ The first slice (M1) of the SEED-004 redesign of `accrue_admin` from a CRUD surf
 
 | Milestone | Tests | Coverage | Zero-Dep Additions |
 |-----------|-------|----------|-------------------|
+| v1.59 | 8/8 phase verifications; reference-host Apple ingress/recovery, deterministic scenarios, and release-contract gates. | 29/29 requirements; 11/11 integrations; 5/5 flows; all phases Nyquist-compliant. | No required dependency addition; Apple/Crosswake remain bounded host/runtime evidence lanes. |
 | v1.58 | Five phase verifications (63/63 combined must-haves), isolation verifier, package-doc verifier, 81 focused core tests, 37 focused admin/LiveView tests, and executable desktop/Pixel 5 browser UAT. | 11/11 requirements; 10/11 integrations; 5/5 flows | No new required dependency; existing `lattice_stripe` pin advanced to `~> 2.0`. Advisory sync remains default-off and non-authoritative. |
 | v1.57 | Full `accrue_admin` unit suite 514/0 + e2e 200/0 + storybook gate green with zero regressions; new deterministic Playwright `toHaveScreenshot` pixel-diff gate (4 admin surfaces × light/dark) blocking in browser-uat; grep-gate + orphan/dangling `ax-*` census guard proving 97 selectors retired with zero live-class over-deletion. Milestone audit `passed` (11/11 reqs, 3/3 phases, 5/5 integration, 5/5 flows). | 11/11 requirements archived | No dependency changes; admin-only CSS/template reign (no core `accrue` change, no new nav rooms, no Tailwind migration); both generated artifacts (`accrue_admin.css`, `copy_strings.json`) rebuilt in-repo. |
 | v1.55 | Milestone audit passed with 4/4 phase verifications, 18/18 requirements clean by REQUIREMENTS/VERIFICATION/SUMMARY extraction, 8/8 integration checks, 6/6 audit-only flows, zero blockers, and Nyquist-compliant validation metadata. | 18/18 requirements archived | No runtime/package dependency changes; audit-only roadmap and ADR artifacts. |

@@ -2,18 +2,18 @@
 gsd_state_version: 1.0
 milestone: v1.59
 milestone_name: Account-Scoped Multi-Rail & Offline Entitlements
-current_phase: 222
-status: completed
+status: Awaiting next milestone
 stopped_at: Completed 222-01-PLAN.md
-last_updated: "2026-08-05T20:12:33Z"
+last_updated: "2026-08-05T20:30:07.030Z"
 last_activity: 2026-08-05
-last_activity_desc: Phase 222 complete
+last_activity_desc: Milestone v1.59 completed and archived
 progress:
   total_phases: 8
   completed_phases: 8
   total_plans: 77
   completed_plans: 77
   percent: 100
+current_phase: 222
 current_phase_name: close-gap-off-05-schedule-offline-reconnect-recovery
 ---
 
@@ -21,18 +21,18 @@ current_phase_name: close-gap-off-05-schedule-offline-reconnect-recovery
 
 ## Project Reference
 
-See: `.planning/PROJECT.md` (updated 2026-08-05 after completing Phase 220)
+See: `.planning/PROJECT.md` (updated 2026-08-05 after shipping v1.59)
 
 **Core value:** A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic Elixir DX, strong domain modeling, tamper-evident audit ledger, great observability, and zero breaking-change pain through v1.x.
 
-**Current focus:** Phase 222 — close-gap-off-05-schedule-offline-reconnect-recovery
+**Current focus:** Planning the next milestone
 
 ## Current Position
 
-Phase: 222
-Plan: Not started
-Status: All phases complete
-Last activity: 2026-08-05 — Phase 222 complete
+Phase: Milestone v1.59 complete
+Plan: —
+Status: Awaiting next milestone
+Last activity: 2026-08-05 — Milestone v1.59 completed and archived
 
 ## Post-v1.48 Pause Rule
 
@@ -62,18 +62,20 @@ Coverage: 11/11 requirements satisfied. Phases 214.1 and 214.2 supplied closure 
 
 **Closeout evidence:** Five phase verifications passed; the independent audit reports 11/11 requirements, 10/11 integrations, and 5/5 flows. Archives live under `.planning/milestones/v1.58-*`; remaining warning-level items are recorded under Deferred Items below.
 
-### v1.59 Phase Summary (ACTIVE — Account-Scoped Multi-Rail & Offline Entitlements, SEED-006)
+### v1.59 Phase Summary (SHIPPED & ARCHIVED 2026-08-05 — Account-Scoped Multi-Rail & Offline Entitlements, SEED-006)
 
 | Phase | Name | Requirements | Status |
 |---|---|---|---|
-| 215 | Research, contracts, and Crosswake feasibility | RSCH-01..03, RAIL-04..05 | Not started |
-| 216 | Additive rail and persistence foundation | RAIL-01..03 | Not started |
+| 215 | Research, contracts, and Crosswake feasibility | RSCH-01..03, RAIL-04..05 | Complete |
+| 216 | Additive rail and persistence foundation | RAIL-01..03 | Complete |
 | 217 | Canonical projection and compatibility | ACCT-01..05 | Complete (verified 5/5; zero human verification) |
-| 218 | Apple observation and repair | AAPL-01..05 | Not started |
-| 219 | Offline study contract | OFF-01..06 | Not started |
-| 220 | First-adopter proof and release gates | PROOF-01..05 | Not started |
+| 218 | Apple observation and repair | AAPL-01..05 | Complete |
+| 219 | Offline study contract | OFF-01..06 | Complete |
+| 220 | First-adopter proof and release gates | PROOF-01..05 | Complete |
+| 221 | Reference-host Apple notification ingress closure | AAPL-01..04, PROOF-01..02 | Complete |
+| 222 | Offline reconnect recovery scheduling closure | OFF-05, PROOF-02 | Complete |
 
-Coverage: 29/29 requirements mapped exactly once; dependency shape 215→216→217→{218,219}→220. Phase 215 must prove Crosswake feasibility before later client assumptions; Phase 219 needs the accepted Phase-215 contract and Phase 217 projection, not Apple runtime implementation. v1 scope is Stripe + Apple with a 30-day revalidation target: stale offline preserves downloaded lessons/progress while all value expansion waits for reconnect, with no independent 72-hour cutoff. Google Play, Family Sharing, offer authoring, migration/proration, and configurable risk matrices remain later.
+Coverage: 29/29 requirements satisfied; 8/8 phase verifications, 11/11 integration links, 5/5 E2E flows, and Nyquist validation all passed. Phase 221 closed the Apple host-ingress composition gap; Phase 222 closed offline reconnect recovery scheduling. Archives live under `.planning/milestones/v1.59-*`. Crosswake remains feasibility-blocked pending bridge/device evidence; Google Play, Family Sharing, offer authoring, migration/proration, and configurable risk matrices remain later.
 
 ### v1.57 Phase Summary (SHIPPED & ARCHIVED 2026-07-30 — Admin Operator Control Plane (SEED-004 M1); phase dirs in `milestones/v1.57-phases/`)
 
@@ -1026,4 +1028,4 @@ Resume file: None
 
 ## Operator Next Steps
 
-- Plan Phase 215 with $gsd-plan-phase 215
+- Start the next milestone with $gsd-new-milestone

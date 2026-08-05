@@ -33,7 +33,11 @@ v1.49 **Realistic Demo App & Adoption Evidence** shipped on **2026-06-02**. The 
 
 ## Current State
 
-**Latest shipped milestone: v1.58 — lattice_stripe 2.x Bump & Stripe-Native Entitlements Sync (SEED-005), shipped 2026-07-31.** All resolving packages now use `lattice_stripe ~> 2.0` (resolving 2.1.0). The client-backed Stripe entitlement refresh is opt-in and advisory-only, converges with webhook observations through the shared reconciler, never participates in grants, and is visible through the existing core diagnostic and admin customer detail.
+**Latest shipped milestone: v1.59 — Account-Scoped Multi-Rail & Offline Entitlements, shipped 2026-08-05.** Accrue now supports concurrent Stripe and Apple rail evidence through one revisioned account projection, provider-honest lifecycle management, device-bound ES256 offline proof, host Apple ingress/repair, and deterministic first-adopter proof. Crosswake remains explicitly `feasibility_blocked` pending bridge/device evidence; Alpha production integration remains external and unasserted.
+
+## Next Milestone Goals
+
+Return to stable-core, demand-driven planning. The next milestone should begin only from a concrete adopter failure, correctness/security/data-loss risk, repeated support issue, operational failure, or explicit strategy change. Retained follow-ups are the advisory live Apple delivery smoke run, Crosswake bridge/device feasibility evidence, and public-material human review.
 
 **Closeout:** Phases 212, 213, 214, 214.1, and 214.2 completed across 17 plans and 33 tasks. The audit passed 11/11 requirements and 5/5 flows with 10/11 integrations fully wired; the host-owned worker's lack of a production enqueuer and four other warning-level items remain documented technical debt. Phase 214.2 passed 19/19 verification with executable desktop/mobile UAT; its post-execution Nyquist metadata remains `ready` rather than authoritative `validated`.
 
@@ -817,4 +821,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-08-05 after completing Phase 220 first-adopter proof and release gates.*
+*Last updated: 2026-08-05 after shipping v1.59 Account-Scoped Multi-Rail & Offline Entitlements.*

@@ -1,1 +1,0 @@
-No external API integration: Phase 220 exercises already-shipped Accrue production contexts, deterministic fixtures, host rendering, and release gates without adding or extending a third-party API, SDK, or service integration.

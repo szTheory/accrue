@@ -1,5 +1,72 @@
 # Milestones
 
+## v1.59 Account-Scoped Multi-Rail & Offline Entitlements (Shipped: 2026-08-05)
+
+**Phases completed:** 8 phases, 77 plans, 66 tasks
+
+**Key accomplishments:**
+
+- A standalone Swift client boundary now records every required evidence lane and fails closed to `feasibility_blocked` until Crosswake and physical-device proof exist.
+- A single v1.59 authority entry point now locks policy precedence, preserves claim history, and mechanically rejects malformed watchlist governance.
+- A versioned, privacy-safe entitlement decision corpus now deterministically drives maintainer Markdown, language-neutral JSON, exhaustive validation, and property evidence without becoming runtime logic.
+- Typed, ordered entitlement-source inspection with actionable Apple management guidance and CI-enforced processor separation.
+- Pinned ES256 offline-entitlement vectors now execute real Elixir and Swift verification, high-water denial handling, and atomic cache-fault assertions.
+- Closed D-07 decision-case validation and generated conformance transitions without introducing a production entitlement reducer.
+- Canonical v1.59 decision-table semantics and Elixir corpus validation now reject lease/continuity confusion and every tested metadata drift before vector observations run.
+- Swift now rejects every tested deviation from the generated offline corpus and canonical decision cases before running its JWS/cache oracle, while retaining the existing feasibility-blocked boundary.
+- HMAC-authenticated entitlement cache envelopes preserve denial high-water across process restarts under per-path advisory locking.
+- One shared proof-replacement order keeps same-revision signed denials authoritative across public high-water, authenticated persistence, and reconnect-style restarts.
+- Signed denial state can no longer be overwritten by a no-key process, and report evidence can no longer turn unavailable Crosswake lanes into false proof.
+- Crosswake feasibility is now fail-closed for all caller-controlled data, with proven reserved for the checked-in report validator's evidence-root-aware checks.
+- The Crosswake validator now authenticates the checked-in capability report location before it trusts report bytes or evidence, so a complete temporary proof tree cannot manufacture `.proven`.
+- Validated Stripe-plus-Apple rail configuration with rail-qualified product lookup and durable, owner-stable PostgreSQL entitlement accounts.
+- Rail-qualified catalog normalization now preserves processor-only hosts while making explicit Stripe/Apple mappings collision-safe and deterministic.
+- Deterministic multi-rail persistence fixtures, opt-in generated host configuration, and executable Apple observer boundaries.
+- 1. [Rule 1 - Bug] Corrected a test helper’s atom/string constraint-name comparison.
+- Fail-closed LocalMap/canonical authority lane with durable clean-window evidence, rollback-only authority state, privacy-safe telemetry, and idempotent mapped Stripe backfill.
+- The candidate `app_store_server_library` was rejected, locking Plan 218-03 to an Accrue-owned private verifier with no additional verifier dependency.
+- Private, pure Apple ES256 verifier with pinned OTP certificate-path validation, independent nested evidence checks, bounded facts, and no new dependency.
+- Authorized, row-locked Apple lineage repair with durable terminal quarantine and twelve-attempt retry exhaustion.
+- Durable Apple reconciliation checkpoints with replay-safe Oban wakeups and final-page-only history completion.
+- Complete scoped Apple lifecycle ordering with durable bounds that prevents delayed evidence from resurrecting retracted access.
+- 1. [Rule 2 - Missing critical functionality] Added account-independent notification intake to the existing intake transaction boundary.
+- Bounded Apple host reconciliation, explicit policy deferrals, exact management guidance, and Stripe-lifecycle isolation proof.
+- Host-scheduled, row-locked Apple reconciliation repairs missed notifications without making Oban or timers entitlement authority.
+- Fail-closed Apple expiry admission and normalization, opaque repair coverage, and real valid plus hostile ES256 Apple-purpose chain verification.
+- Apple JWS validation now resolves bounded certificate time per verification policy, checks every pinned root, and restricts historical signed-date verification to delayed reconciliation.
+- Verified unmapped Apple history now reaches the existing durable quarantine path, allowing later terminal facts to remove stale Apple access without retrying the scan.
+- Production App Store Notifications V2 now authenticate outer envelopes, validate signed `data` claims, and independently verify nested evidence before one durable repair wakeup is acknowledged.
+- Apple Notifications V2 now requires exact cached request bytes before any admission, while deterministic byte-level ES256 corruption proves every JWS boundary closes before entitlement authority.
+- Scheduled Apple repair now locks a local lineage for durable work while using only its stored original transaction identifier in Apple status and history URLs.
+- Strict v1.59 ES256 compact-proof verification with public-only JWKS rendering and host-retained signing custody.
+- Four-state offline proof classification with signed-boundary enforcement, continuity-only stale access, and typed learner guidance.
+- PostgreSQL-backed public P-256 device registration with hashed one-time challenges, issuance ordering metadata, and row-locked proof-of-possession.
+- Versioned synthetic scenario corpus with closed evidence lanes, strict Elixir loading, Phoenix-host consumption, and Swift feasibility-truth checks.
+- A closed account diagnostic projection with host-authorized, accessible job-and-next-action rendering.
+- Host-authorized, lock-safe entitlement repairs with immutable operator audit records and a confirmed reference-host key-rotation guidance control.
+- Fixture-derived v1.59 capability limits matrix with deterministic Mix checks and a merge-blocking public-contract drift gate.
+- First-adopter recipe, bounded incident runbooks, and a v1.59 release guide that preserve generated facts and honest Crosswake evidence lanes.
+- One v1.59 merge gate now composes generated evidence, adopter guidance, release procedures, and adversarial documentation checks without competing with fixture authority.
+- 1. [Rule 1 - Contract bug] Require action contracts only in the deterministic lane
+- 1. [Rule 3 - Blocking verification] Formatted Plan 11 and superseding action-contract sources.
+- A host-authorized Offline.replace_device/3 operation atomically replaces or revokes a device, proves replacement possession, records one bounded audit event, and is exercised by the shared v1 action-contract corpus.
+- 1. [Rule 1 - Contract mismatch] Normalized the fixture's expansion label to the production action vocabulary
+- A real signed reconnect now settles durable admission and issuance before its opaque proof is verified for complete cache replacement.
+- Device replacement now runs through the shipped public facade with fresh durable evidence, while key rotation proves finite issuance-backed JWKS retention without exposing proof or private-key material.
+- Fixture-declared reconnect interruption now resumes the same signed durable authority to one verified cache replacement without exposing proof material.
+- All 27 deterministic scenario actions now traverse their declared production family through one aggregate proof and one credential-free release command.
+- Lifecycle, read, and signed-offline fixtures now compare every closed transition leaf against independently collected production facts.
+- Every declared transition leaf now has a production-derived comparison and unchanged-observation mutation proof across the 27 deterministic actions.
+- A concise first-adopter evidence map now distinguishes reusable Accrue contract proof from Crosswake runtime proof and Alpha's external production integration.
+- Recorded the approved wrapper-forward route composition and production-only immutable Apple verifier contract that unblock the reference-host ingress tracer.
+- A host-owned `/webhooks/apple` route now preserves exact request bytes through Accrue verification, PostgreSQL intake, and reconciliation wakeup before acknowledging delivery.
+- The reference host now applies bounded local direct-peer backpressure and proves its Apple ingress contract across response, durability, concurrency, and privacy boundaries.
+- The reference host now schedules Apple reconciliation additively and proves that durable ingress wakeups flow into the existing, production-configured repair path.
+- Production-only Apple notification ingress guidance and a merge-blocking Fake-backed host verifier contract.
+- Apple product maps now resolve only configured entitlement plans, while the local rate backstop safely resolves a client peer across an explicit trusted edge.
+
+---
+
 ## v1.58 lattice_stripe 2.x Bump & Stripe-Native Entitlements Sync (Shipped: 2026-07-31)
 
 **Delivered:** Upgraded every resolving package to `lattice_stripe ~> 2.0` and shipped an opt-in, client-backed Stripe entitlement sync whose output remains advisory-only while becoming visible in existing operator diagnostics.
