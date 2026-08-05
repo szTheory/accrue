@@ -68,8 +68,9 @@ defmodule Accrue.Entitlements.ReferenceScenarioExecutor.Lifecycle do
     })
   end
 
-  defp collect(repo, account, kind, _observation, outcome, before_audits) do
+  defp collect(repo, account, kind, observation, outcome, before_audits) do
     {:ok, snapshot} = Accrue.Entitlements.snapshot(account)
+    cache_disposition = cache_disposition(kind, outcome)
 
     %{
       result: %{
@@ -92,7 +93,19 @@ defmodule Accrue.Entitlements.ReferenceScenarioExecutor.Lifecycle do
         snapshot_revision: snapshot.revision,
         audit_delta: audit_count(repo, account.id) - before_audits
       },
-      cache: %{disposition: cache_disposition(kind, outcome)}
+      cache: %{disposition: cache_disposition(kind, outcome)},
+      # This intentionally closed projection is built only after the production
+      # operation and fresh snapshot read. It is assertion evidence, never input
+      # to lifecycle execution.
+      declared_transition: %{
+        result: %{tag: execution_tag(outcome), disposition: kind},
+        durable: %{
+          state: observation_state(observation),
+          observation_kind: observation_kind(kind),
+          snapshot_revision: snapshot.revision
+        },
+        cache: %{disposition: cache_disposition}
+      }
     }
   end
 
@@ -105,6 +118,12 @@ defmodule Accrue.Entitlements.ReferenceScenarioExecutor.Lifecycle do
 
   defp outcome_tag(%{disposition: disposition}) when is_atom(disposition),
     do: Atom.to_string(disposition)
+
+  defp execution_tag({tag, _}) when tag in [:ok, :noop, :error], do: "executed"
+  defp execution_tag(%{disposition: _}), do: "executed"
+
+  defp observation_state(%Observation{state: :qualified}), do: "observed"
+  defp observation_state(%Observation{state: state}), do: Atom.to_string(state)
 
   defp projection_disposition({:ok, _}), do: "material_change"
   defp projection_disposition({:noop, reason}), do: Atom.to_string(reason)

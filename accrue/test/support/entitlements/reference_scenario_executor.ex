@@ -162,7 +162,7 @@ defmodule Accrue.Entitlements.ReferenceScenarioExecutor do
     case family_for!(kind) do
       Lifecycle -> lifecycle_match?(kind, expected, observed)
       Read -> read_match?(kind, expected, observed)
-      OfflinePolicy -> OfflinePolicy.matches_expected?(%{kind: kind}, observed)
+      OfflinePolicy -> offline_match?(kind, expected, observed)
       DeviceKeys -> DeviceKeys.matches_expected?(%{kind: kind}, observed)
       :reconnect -> reconnect_match?(kind, observed)
       :resume -> resume_match?(kind, observed)
@@ -180,10 +180,11 @@ defmodule Accrue.Entitlements.ReferenceScenarioExecutor do
 
   defp runtime_for(account), do: Process.get({__MODULE__, account.id}, %{})
 
-  defp lifecycle_match?(kind, _expected, observed) do
+  defp lifecycle_match?(kind, expected, observed) do
     observed.result.disposition == kind and
       observed.durable.observation_kind ==
-        if(kind in ["refund_observation", "stripe_retraction"], do: "retract", else: "grant")
+        if(kind in ["refund_observation", "stripe_retraction"], do: "retract", else: "grant") and
+      declared_transition_matches?(expected, observed)
   end
 
   defp read_match?(kind, expected, observed) do
@@ -191,8 +192,23 @@ defmodule Accrue.Entitlements.ReferenceScenarioExecutor do
       (kind == "expiry_boundary" or
          (Map.get(observed.snapshot || %{}, :revision) ||
             Map.get(observed.durable || %{}, :snapshot_revision)) ==
-           expected.durable.snapshot_revision)
+           expected.durable.snapshot_revision) and
+      declared_transition_matches?(expected, observed)
   end
+
+  defp offline_match?(kind, expected, observed) do
+    OfflinePolicy.matches_expected?(%{kind: kind}, observed) and
+      declared_transition_matches?(expected, observed)
+  end
+
+  # Expectations cross the fixture boundary only here, after the collector has
+  # independently returned a bounded, production-derived transition projection.
+  defp declared_transition_matches?(expected, %{declared_transition: declared}) do
+    declared.result == expected.result and declared.durable == expected.durable and
+      declared.cache == expected.cache
+  end
+
+  defp declared_transition_matches?(_, _), do: false
 
   defp reconnect_match?("reconnect_request", observed),
     do: ReconnectCache.matches_expected?(%{kind: "reconnect_request"}, observed)

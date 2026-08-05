@@ -573,7 +573,7 @@
               "snapshot_revision": 2
             },
             "cache": {
-              "disposition": "preserve"
+              "disposition": "replace"
             }
           }
         }
@@ -709,7 +709,7 @@
               "snapshot_revision": 2
             },
             "cache": {
-              "disposition": "preserve"
+              "disposition": "replace"
             }
           }
         }
