@@ -46,7 +46,7 @@ Full history: [v1.58 roadmap archive](milestones/v1.58-ROADMAP.md).
 - [x] **Phase 217: Canonical projection and compatibility** — Project rail-qualified evidence into one revisioned account snapshot with provider-honest lifecycle and safe cross-rail purchase eligibility (ACCT-01..05). (completed 2026-08-02)
 - [x] **Phase 218: Apple observation and repair** — Verify, link, quarantine, reconcile, and present Apple lifecycle evidence without ownership heuristics or Stripe mutation leakage (AAPL-01..05). (completed 2026-08-03)
 - [x] **Phase 219: Offline study contract** — Deliver device-bound ES256 proof, stale-study continuity, and atomic reconnect using the accepted no-72-hour-cutoff policy (OFF-01..06). (completed 2026-08-03)
-- [ ] **Phase 220: First-adopter proof and release gates** — Prove the complete Stripe/Apple/offline workflow, operations, documentation, and release contract for B2C Alpha (PROOF-01..05). See the [Alpha/Crosswake readiness boundary](phases/220-first-adopter-proof-and-release-gates/220-ALPHA-CROSSWAKE-READINESS-BOUNDARY.md) for the separate Accrue, Crosswake, and external Alpha evidence owners.
+- [x] **Phase 220: First-adopter proof and release gates** — Prove the complete Stripe/Apple/offline workflow, operations, documentation, and release contract for B2C Alpha (PROOF-01..05). See the [Alpha/Crosswake readiness boundary](phases/220-first-adopter-proof-and-release-gates/220-ALPHA-CROSSWAKE-READINESS-BOUNDARY.md) for the separate Accrue, Crosswake, and external Alpha evidence owners. (completed 2026-08-05)
 
 Dependencies: 215 → 216 → 217 → {218, 219} → 220. Phase 215 must prove Crosswake feasibility before later client assumptions; Phase 219 depends on Phase 217 and the accepted Phase-215 contract, not on Apple runtime implementation.
 
@@ -371,4 +371,4 @@ Plans:
 | 217. Canonical projection and compatibility | v1.59 | 5/5 | Complete | 2026-08-02 |
 | 218. Apple observation and repair | v1.59 | 16/16 | Complete    | 2026-08-03 |
 | 219. Offline study contract | v1.59 | 5/5 | Complete    | 2026-08-03 |
-| 220. First-adopter proof and release gates | v1.59 | 23/23 | In Progress|  |
+| 220. First-adopter proof and release gates | v1.59 | 23/23 | Complete    | 2026-08-05 |

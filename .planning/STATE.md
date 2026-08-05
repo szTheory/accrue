@@ -3,36 +3,36 @@ gsd_state_version: 1.0
 milestone: v1.59
 milestone_name: Account-Scoped Multi-Rail & Offline Entitlements
 current_phase: 220
-current_phase_name: first-adopter-proof-and-release-gates
-status: executing
+status: completed
 stopped_at: Completed 220-13-PLAN.md
-last_updated: "2026-08-05T00:47:23.906Z"
-last_activity: 2026-08-04
-last_activity_desc: Phase 220 execution started
+last_updated: "2026-08-05T15:19:16.456Z"
+last_activity: 2026-08-05
+last_activity_desc: Phase 220 complete
 progress:
   total_phases: 6
-  completed_phases: 5
-  total_plans: 67
-  completed_plans: 58
-  percent: 83
+  completed_phases: 6
+  total_plans: 70
+  completed_plans: 70
+  percent: 100
+current_phase_name: first-adopter-proof-and-release-gates
 ---
 
 # Project State
 
 ## Project Reference
 
-See: `.planning/PROJECT.md` (updated 2026-08-01 after completing Phase 215)
+See: `.planning/PROJECT.md` (updated 2026-08-05 after completing Phase 220)
 
 **Core value:** A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic Elixir DX, strong domain modeling, tamper-evident audit ledger, great observability, and zero breaking-change pain through v1.x.
 
-**Current focus:** Phase 220 — first-adopter-proof-and-release-gates
+**Current focus:** v1.59 milestone completion and release preparation
 
 ## Current Position
 
-Phase: 220 (first-adopter-proof-and-release-gates) — EXECUTING
-Plan: 11 of 12
-Status: Ready to execute
-Last activity: 2026-08-04 — Phase 220 execution started
+Phase: 220
+Plan: Not started
+Status: All phases complete
+Last activity: 2026-08-05 — Phase 220 complete
 
 ## Post-v1.48 Pause Rule
 

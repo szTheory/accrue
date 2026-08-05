@@ -57,6 +57,8 @@ The Phase 204 hardening roadmap's top slice (**Public Truth And Proof-State Base
 
 **Phase 219 complete (2026-08-03):** registered devices now verify strict public-key ES256 proofs, preserve downloaded-study/local-progress continuity without a 72-hour cutoff, and converge through authenticated atomic reconnect. Durable attempt/wakeup workers, crash and race recovery, verified-only Swift cache replacement, key-retirement enforcement, and privacy-safe telemetry are executable (OFF-01..06 satisfied). Final evidence: clean independent review, 23/23 threats closed, 70 properties and 1,981 Elixir tests green, plus 27 Swift tests. Cross-language rotation/retirement corpus rows remain an explicit automated Phase 220 obligation. Next: Phase 220, first-adopter proof and release gates.
 
+**Phase 220 complete (2026-08-05):** the anonymized Alpha reference-host and public-release contract are backed by 27 credential-free, production-derived scenario actions; a privacy-bounded operator diagnostic; bounded repair drills and runbooks; and coordinated release/adoption gates. The completed UAT confirms the Crosswake/Alpha evidence boundary remains honest: Accrue contract proof does not claim Crosswake bridge/device runtime proof or Alpha's external production integration evidence. PROOF-01..05 are satisfied; Crosswake stays `feasibility_blocked` until its separately owned bridge-compile and physical-device evidence exists.
+
 ## Current Milestone: v1.59 Account-Scoped Multi-Rail & Offline Entitlements
 
 **Goal:** Preserve one account's access across Stripe web billing, Apple in-app purchase, and extended offline study through a common entitlement projection and signed device-bound proof, while keeping lifecycle operations rail-aware and avoiding connectivity-driven learner lockout.
@@ -629,7 +631,16 @@ The v1.50→v1.54 arc (Admin UI Foundation → Depth Pass → Brand System → D
 
 - [ ] Project verified rail evidence into one account snapshot with resource-aware management and duplicate-purchase prevention.
 - [ ] Verify, link, reconcile, quarantine, and repair Apple subscription evidence without heuristic ownership transfer.
-- [ ] Prove the anonymized Phoenix/Crosswake adopter journey with diagnostics, automatic repair, runbooks, and release gates.
+
+### Validated v1.59 (Phase 220 complete 2026-08-05)
+
+First-adopter proof and release gates — 5/5 requirements satisfied in Phase 220.
+
+- ✓ **PROOF-01** — Apple-to-web and Stripe-to-iOS access converge for one account without manual reconciliation.
+- ✓ **PROOF-02** — Credential-free, production-derived deterministic checks cover duplicate purchases, offline continuity, restricted expansion, reconnect, revocation, device replacement, deny tombstones, clock rollback, and key rotation.
+- ✓ **PROOF-03** — Operators can inspect a closed, privacy-bounded account diagnostic without raw transaction data or PII.
+- ✓ **PROOF-04** — Bounded repair actions and runbooks cover required operational incidents without routine account reconstruction.
+- ✓ **PROOF-05** — Public material and conformance gates define the additive v1.59 contract and its limits.
 
 ### Validated v1.59 (Phase 219 complete 2026-08-03)
 
@@ -806,4 +817,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-08-03 after completing Phase 219 offline study contract.*
+*Last updated: 2026-08-05 after completing Phase 220 first-adopter proof and release gates.*
