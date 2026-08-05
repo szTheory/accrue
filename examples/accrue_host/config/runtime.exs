@@ -40,6 +40,7 @@ config :accrue, :webhook_signing_secrets, %{
 
 if config_env() == :prod do
   alias Accrue.Entitlements.Apple.{Client, Verifier}
+  alias AccrueHost.AppleRatePolicy
 
   database_url =
     System.get_env("DATABASE_URL") ||
@@ -82,6 +83,11 @@ if config_env() == :prod do
       System.fetch_env!("APPLE_PRODUCT_MAP_JSON"),
       configured_plan_keys
     )
+
+  trusted_proxies =
+    AppleRatePolicy.parse_trusted_proxies!(System.fetch_env!("APPLE_TRUSTED_PROXY_IPS"))
+
+  config :accrue_host, :apple_rate_policy, trusted_proxies: trusted_proxies
 
   config :accrue_host, :apple_notification_ingress,
     verifier: Verifier.Production,

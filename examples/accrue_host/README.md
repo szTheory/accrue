@@ -134,9 +134,15 @@ terminal outcome; it does not mean the request directly changed an entitlement.
 `400` is malformed input, `413` is an oversized body, `429` is temporary
 backpressure, and `503` means a required capture, configuration, verification, or
 persistence dependency could not complete. PostgreSQL constraints and locks own
-duplicate and concurrent-delivery correctness. The local direct-peer rate policy
-is a single-node backstop only; deployment edge or shared infrastructure is the
-authority for multi-node and internet-scale limits.
+duplicate and concurrent-delivery correctness. Set `APPLE_TRUSTED_PROXY_IPS` to
+an explicit comma-separated allowlist of numeric proxy IP addresses; set it to the
+explicit empty string for direct-peer mode. Forwarded identity is used only when
+the direct peer exactly matches that allowlist. A trusted edge must strip and
+overwrite inbound `x-forwarded-for` with exactly one canonical client address;
+missing, repeated, malformed, or multi-hop values are temporarily denied. Headers
+from direct clients are never trusted. The local rate policy is a single-node
+backstop only; deployment edge or shared infrastructure is the authority for
+multi-node and internet-scale limits.
 
 For a safe first response, compare response-class trends first, then quarantine
 growth, reconciliation age/backlog, and `needs_repair` in the authenticated

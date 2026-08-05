@@ -103,9 +103,11 @@ defmodule AccrueHost.InstallBoundaryTest do
 
     assert readme =~ "APPLE_TRUSTED_PROXY_IPS"
     assert readme =~ "x-forwarded-for"
-    assert readme =~ "strip and overwrite"
+    assert readme =~ "strip and"
+    assert readme =~ "overwrite inbound `x-forwarded-for`"
     assert readme =~ "direct clients"
-    assert readme =~ "single-node backstop"
+    assert readme =~ "single-node"
+    assert readme =~ "backstop only"
   end
 
   test "bounded verification registers every Apple Wave 0 proof with warnings as errors" do
