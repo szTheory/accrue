@@ -10,6 +10,7 @@ defmodule AccrueHost.RecoveryWiringTest do
   alias Accrue.Jobs.MeteredRenewalReconciler
   alias Accrue.Jobs.MeterEventsReconciler
   alias Accrue.Entitlements.Apple.ReconciliationSweeper
+  alias Accrue.Entitlements.Offline.ReconnectSweeper
 
   describe "base config wiring proof" do
     test "base Oban config validates and preserves every recovery cron worker" do
@@ -25,8 +26,10 @@ defmodule AccrueHost.RecoveryWiringTest do
       assert MeterEventsReconciler in workers
       assert MeteredRenewalReconciler in workers
       assert ReconciliationSweeper in workers
+      assert ReconnectSweeper in workers
 
       assert Enum.count(crontab, &(&1 == {"*/15 * * * *", ReconciliationSweeper})) == 1
+      assert Enum.count(crontab, &(&1 == {"*/15 * * * *", ReconnectSweeper})) == 1
     end
 
     test "base Oban config preserves host queues and adds the Apple repair queue" do
