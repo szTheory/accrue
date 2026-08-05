@@ -1,7 +1,7 @@
 ---
 phase: 223
 slug: ios-compatible-accrue-offline-client
-status: draft
+status: approved
 shadcn_initialized: false
 preset: none
 created: 2026-08-05
@@ -93,18 +93,13 @@ State naming contract: host-visible text maps explicitly to the locked four stat
 
 > Populated by the ui-phase UI-consideration probe and lifted by plan-phase's UI-considerations rule. Empty-state and error-state copy lives in the Copywriting Contract above; this section covers state coverage without restating it.
 
-Applicable state considerations resolved: 6 covered, 0 backstop, 0 unresolved.
+Applicable state considerations resolved: 2 covered, 0 backstop, 0 unresolved, 1 dismissed.
 
 | Category | Element(s) | Status | Resolution / Reason |
 |----------|------------|--------|---------------------|
-| empty | Host rendering of a missing cached proof | ✅ covered | The facade returns the bounded `invalid` outcome rather than rendering; host documentation maps that absence to the documented empty-state copy and `Reconnect` action. |
-| loading | Host-owned reconnect flow | ✅ covered | `OfflineProofReconnectTransport.fetchOfflineProof()` is async; the host owns in-flight presentation. The package renders no spinner, overlay, or progress UI. |
-| error | Proof verification, cache write/recovery, or reconnect failure | ✅ covered | The facade returns a bounded reason and next action. Hosts render the documented error copy without raw transport, cache, or crypto diagnostics. |
-| populated | Four-state facade result | ✅ covered | Each successful load/apply/reconnect resolves to exactly `fresh`, `stale_offline`, `denied`, or `invalid`; values are immutable and `Sendable`. |
-| partial | Cache/recovery result | ✅ covered | A failed candidate write or recovery preserves the prior complete authenticated envelope; a partial cache is never surfaced as accepted state. |
-| long-text | Host-visible reason and next-action labels | ✅ covered | Public vocabulary is bounded domain values, not unbounded server error text. Hosts may localize labels but must retain explicit text and action. |
-| overflow | Package UI | dismissed | No list, navigation, or static rendered surface is introduced in this phase. |
-| zero-one-many | Package UI | dismissed | The facade returns one state value, not a collection or list UI. |
+| overflow | Host state content | dismissed | The SwiftPM package renders no layout, width, or truncation behavior, so it cannot prescribe overflow mechanics. Host integration guidance must preserve the complete state and next action in text and select native wrapping, expansion, scrolling, or detail presentation appropriate to its platform; clipped or color-only meaning is not sufficient. |
+| long-text | Host state content | ✅ covered | Every host-renderable result is limited to closed `fresh`, `stale_offline`, `denied`, and `invalid` states plus bounded reason and next-action values. No remote response text or transport, cache, cryptographic, or backend diagnostic prose may enter the public display seam. Hosts localize the semantic mapping and must keep its full meaning available at supported text sizes and through platform accessibility APIs. |
+| long-text | Reconnect control | ✅ covered | `.reconnect` remains a bounded next-action token with the normative English reference label `Reconnect`; it is never a fifth proof state or a generic `Retry`. A host may localize it, but any visible label must remain represented in the control's accessible name and must not be understandable only through truncation, iconography, or color. |
 
 ---
 
@@ -120,11 +115,11 @@ No third-party dependency or UI registry is introduced; the package uses Apple s
 
 ## Checker Sign-Off
 
-- [ ] Dimension 1 Copywriting: PASS
-- [ ] Dimension 2 Visuals: N/A — no rendered UI in phase scope
-- [ ] Dimension 3 Color: N/A — host-owned presentation only
-- [ ] Dimension 4 Typography: N/A — host-owned presentation only
-- [ ] Dimension 5 Spacing: N/A — no package layout
-- [ ] Dimension 6 Registry Safety: PASS
+- [x] Dimension 1 Copywriting: PASS (one non-blocking CTA recommendation recorded)
+- [x] Dimension 2 Visuals: N/A — no rendered UI in phase scope
+- [x] Dimension 3 Color: N/A — host-owned presentation only
+- [x] Dimension 4 Typography: N/A — host-owned presentation only
+- [x] Dimension 5 Spacing: N/A — no package layout
+- [x] Dimension 6 Registry Safety: PASS
 
-**Approval:** pending
+**Approval:** approved — UI checker verified 2026-08-05
