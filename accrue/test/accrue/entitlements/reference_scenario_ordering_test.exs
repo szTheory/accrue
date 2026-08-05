@@ -34,7 +34,11 @@ defmodule Accrue.Entitlements.ReferenceScenarioOrderingTest do
     assert Ordering.matches_expected?(action, observed)
     assert length(observed.permutations) == length(action.command.payload.permutations)
     assert Enum.uniq(Enum.map(observed.permutations, & &1.final)) |> length() == 1
-    assert Enum.all?(observed.permutations, &(&1.delivery_count == length(action.command.payload.deliveries)))
+
+    assert Enum.all?(
+             observed.permutations,
+             &(&1.delivery_count == length(action.command.payload.deliveries))
+           )
   end
 
   test "repeat delivery takes its count and complete payload from the fixture" do
@@ -48,7 +52,11 @@ defmodule Accrue.Entitlements.ReferenceScenarioOrderingTest do
     assert observed.durable.snapshot_revision == 1
     assert observed.durable.audit_count == 1
     assert Enum.count(observed.results, &(&1.insert == :owner)) == 1
-    assert Enum.all?(observed.results, &(&1.projection in [:projected, :stale, :no_material_change]))
+
+    assert Enum.all?(
+             observed.results,
+             &(&1.projection in [:projected, :stale, :no_material_change])
+           )
   end
 
   defp action!(scenario_id), do: ReferenceScenarios.fetch!(scenario_id).actions |> hd()

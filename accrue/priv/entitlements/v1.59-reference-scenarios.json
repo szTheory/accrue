@@ -1117,7 +1117,12 @@
               "provider_event_id": "reference_equal_order_stability_event",
               "provider_transaction_id": "reference_equal_order_stability_transaction",
               "provider_lineage_id": "reference_equal_order_stability_lineage",
-              "provider_order": 1
+              "provider_order": 1,
+              "deliveries": [
+                {"clock": "2026-08-04T12:13:00Z", "rail": "apple", "environment": "production", "logical_product": "pro", "provider_product_id": "product_pro", "provider_event_id": "reference_equal_order_stability_first_event", "provider_transaction_id": "reference_equal_order_stability_first_transaction", "provider_lineage_id": "reference_equal_order_stability_lineage", "provider_order": 1},
+                {"clock": "2026-08-04T12:13:00Z", "rail": "apple", "environment": "production", "logical_product": "pro", "provider_product_id": "product_pro", "provider_event_id": "reference_equal_order_stability_second_event", "provider_transaction_id": "reference_equal_order_stability_second_transaction", "provider_lineage_id": "reference_equal_order_stability_lineage", "provider_order": 1}
+              ],
+              "permutations": [[0, 1], [1, 0]]
             }
           },
           "expected_transition": {
@@ -1185,7 +1190,11 @@
               "provider_event_id": "reference_repeat_idempotency_event",
               "provider_transaction_id": "reference_repeat_idempotency_transaction",
               "provider_lineage_id": "reference_repeat_idempotency_lineage",
-              "provider_order": 1
+              "provider_order": 1,
+              "deliveries": [
+                {"clock": "2026-08-04T12:14:00Z", "rail": "apple", "environment": "production", "logical_product": "pro", "provider_product_id": "product_pro", "provider_event_id": "reference_repeat_idempotency_event", "provider_transaction_id": "reference_repeat_idempotency_transaction", "provider_lineage_id": "reference_repeat_idempotency_lineage", "provider_order": 1}
+              ],
+              "repeat_count": 3
             }
           },
           "expected_transition": {
@@ -1253,7 +1262,11 @@
               "provider_event_id": "reference_parallel_execution_event",
               "provider_transaction_id": "reference_parallel_execution_transaction",
               "provider_lineage_id": "reference_parallel_execution_lineage",
-              "provider_order": 1
+              "provider_order": 1,
+              "deliveries": [
+                {"clock": "2026-08-04T12:15:00Z", "rail": "apple", "environment": "production", "logical_product": "pro", "provider_product_id": "product_pro", "provider_event_id": "reference_parallel_execution_event", "provider_transaction_id": "reference_parallel_execution_transaction", "provider_lineage_id": "reference_parallel_execution_lineage", "provider_order": 1}
+              ],
+              "workers": [0, 0]
             }
           },
           "expected_transition": {

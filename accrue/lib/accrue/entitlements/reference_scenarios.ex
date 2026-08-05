@@ -23,6 +23,9 @@ defmodule Accrue.Entitlements.ReferenceScenarios do
                             (@operation_keys -- ~w(offline_vector offline_action))
   @ordering_payload_keys @base_payload_keys ++
                            (@operation_keys -- ~w(offline_vector offline_action))
+  @equal_order_payload_keys @ordering_payload_keys ++ ~w(deliveries permutations)
+  @repeat_delivery_payload_keys @ordering_payload_keys ++ ~w(deliveries repeat_count)
+  @parallel_delivery_payload_keys @ordering_payload_keys ++ ~w(deliveries workers)
   @resume_payload_keys @base_payload_keys ++
                          (@operation_keys -- ~w(offline_vector offline_action))
   @expiry_payload_keys @base_payload_keys ++
@@ -46,9 +49,9 @@ defmodule Accrue.Entitlements.ReferenceScenarios do
     "verified_cache_replace" => @base_payload_keys,
     "device_replace" => @device_replace_payload_keys,
     "rotated_key_proof" => @offline_payload_keys,
-    "equal_order_delivery" => @ordering_payload_keys,
-    "repeat_delivery" => @ordering_payload_keys,
-    "parallel_delivery" => @ordering_payload_keys,
+    "equal_order_delivery" => @equal_order_payload_keys,
+    "repeat_delivery" => @repeat_delivery_payload_keys,
+    "parallel_delivery" => @parallel_delivery_payload_keys,
     "durable_interruption" => @resume_payload_keys,
     "resume_delivery" => @base_payload_keys
   }
@@ -195,26 +198,87 @@ defmodule Accrue.Entitlements.ReferenceScenarios do
   defp validate_payload!(kind, p) do
     utc!(p.clock, "command clock")
 
-    if kind == "device_replace" do
-      (Enum.all?(@device_replace_payload_keys -- ~w(clock prior_transition reason), fn key ->
-         valid_id?(Map.fetch!(p, String.to_atom(key)))
-       end) and p.prior_transition in ["superseded", "revoked"] and
-         ((p.prior_transition == "superseded" and p.reason == "planned_replacement") or
-            (p.prior_transition == "revoked" and p.reason == "lost_or_compromised"))) ||
-        raise ArgumentError, "invalid device_replace payload"
+    if kind in @observation_kinds and
+         kind not in [
+           "apple_verified_purchase",
+           "stripe_verified_purchase",
+           "grant_observation",
+           "refund_observation",
+           "stripe_retraction"
+         ] do
+      valid_ordering_schedule!(kind, p)
     else
-      if kind not in @read_kinds do
-        (p.rail in ["apple", "stripe", :apple, :stripe] and
-           p.environment in ["production", "sandbox", :production, :sandbox] and
-           Enum.all?(
-             @operation_keys -- ~w(rail environment provider_order offline_vector offline_action),
-             &valid_id?(Map.fetch!(p, String.to_atom(&1)))
-           ) and is_integer(p.provider_order) and p.provider_order > 0 and
-           offline_context_valid?(kind, p)) ||
-          raise ArgumentError, "invalid #{kind} payload"
+      if kind == "device_replace" do
+        (Enum.all?(@device_replace_payload_keys -- ~w(clock prior_transition reason), fn key ->
+           valid_id?(Map.fetch!(p, String.to_atom(key)))
+         end) and p.prior_transition in ["superseded", "revoked"] and
+           ((p.prior_transition == "superseded" and p.reason == "planned_replacement") or
+              (p.prior_transition == "revoked" and p.reason == "lost_or_compromised"))) ||
+          raise ArgumentError, "invalid device_replace payload"
+      else
+        if kind not in @read_kinds do
+          (p.rail in ["apple", "stripe", :apple, :stripe] and
+             p.environment in ["production", "sandbox", :production, :sandbox] and
+             Enum.all?(
+               @operation_keys --
+                 ~w(rail environment provider_order offline_vector offline_action),
+               &valid_id?(Map.fetch!(p, String.to_atom(&1)))
+             ) and is_integer(p.provider_order) and p.provider_order > 0 and
+             offline_context_valid?(kind, p)) ||
+            raise ArgumentError, "invalid #{kind} payload"
+        end
       end
     end
   end
+
+  defp valid_ordering_schedule!(kind, p) do
+    deliveries = Map.fetch!(p, :deliveries)
+
+    (is_list(deliveries) and deliveries != [] and
+       Enum.all?(deliveries, &valid_ordering_delivery?/1)) ||
+      raise ArgumentError, "invalid #{kind} deliveries"
+
+    case kind do
+      "equal_order_delivery" ->
+        permutations = Map.fetch!(p, :permutations)
+
+        (is_list(permutations) and permutations != [] and
+           Enum.all?(permutations, &valid_permutation?(&1, length(deliveries)))) ||
+          raise ArgumentError, "invalid equal_order_delivery permutations"
+
+      "repeat_delivery" ->
+        (is_integer(p.repeat_count) and p.repeat_count > 1) ||
+          raise ArgumentError, "invalid repeat_delivery count"
+
+      "parallel_delivery" ->
+        workers = Map.fetch!(p, :workers)
+
+        (is_list(workers) and length(workers) > 1 and
+           Enum.all?(workers, &valid_delivery_index?(&1, length(deliveries)))) ||
+          raise ArgumentError, "invalid parallel_delivery workers"
+    end
+  end
+
+  defp valid_ordering_delivery?(delivery) when is_map(delivery) do
+    keys = ["clock" | @operation_keys -- ~w(offline_vector offline_action)]
+
+    Map.keys(delivery) |> Enum.map(&to_string/1) |> Enum.sort() == Enum.sort(keys) and
+      field(delivery, :rail) in ["apple", "stripe", :apple, :stripe] and
+      field(delivery, :environment) in ["production", "sandbox", :production, :sandbox] and
+      Enum.all?(@operation_keys -- ~w(rail environment offline_vector offline_action), fn key ->
+        value = field(delivery, String.to_atom(key))
+        if key == "provider_order", do: is_integer(value) and value > 0, else: valid_id?(value)
+      end) and utc?(field(delivery, :clock))
+  end
+
+  defp valid_ordering_delivery?(_), do: false
+  defp valid_delivery_index?(index, count), do: is_integer(index) and index >= 0 and index < count
+
+  defp valid_permutation?(indexes, count) when is_list(indexes),
+    do: Enum.sort(indexes) == Enum.to_list(0..(count - 1))
+
+  defp valid_permutation?(_, _), do: false
+  defp field(map, key), do: Map.get(map, key) || Map.get(map, Atom.to_string(key))
 
   defp offline_context_valid?(kind, p) when kind in @offline_context_kinds,
     do:
@@ -229,6 +293,10 @@ defmodule Accrue.Entitlements.ReferenceScenarios do
   defp offline_context_valid?(_kind, p),
     do: not Map.has_key?(p, :offline_vector) and not Map.has_key?(p, :offline_action)
 
+  defp normalize_payload(%{deliveries: deliveries} = payload) do
+    %{payload | deliveries: Enum.map(deliveries, &normalize_delivery/1)}
+  end
+
   defp normalize_payload(
          %{rail: rail, environment: environment, offline_action: action} = payload
        ) do
@@ -241,6 +309,13 @@ defmodule Accrue.Entitlements.ReferenceScenarios do
   end
 
   defp normalize_payload(payload), do: payload
+
+  defp normalize_delivery(delivery) do
+    delivery
+    |> Enum.into(%{}, fn {key, value} -> {String.to_atom(key), value} end)
+    |> Map.update!(:rail, &source_atom!/1)
+    |> Map.update!(:environment, &environment_atom!/1)
+  end
 
   defp transition!(
          %{
