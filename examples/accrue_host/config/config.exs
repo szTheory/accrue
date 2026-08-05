@@ -51,7 +51,8 @@ config :accrue_host, Oban,
     accrue_pdf: 5,
     accrue_dunning: 2,
     accrue_meters: 5,
-    accrue_scheduled: 5
+    accrue_scheduled: 5,
+    accrue_entitlements: 10
   ],
   plugins: [
     {Oban.Plugins.Pruner, max_age: 60 * 60 * 24},
@@ -63,7 +64,8 @@ config :accrue_host, Oban,
         {"*/15 * * * *", Accrue.Jobs.DunningSweeper},
         {"@daily", Accrue.Jobs.DetectExpiringCards},
         {"* * * * *", Accrue.Jobs.MeterEventsReconciler},
-        {"*/5 * * * *", Accrue.Jobs.MeteredRenewalReconciler}
+        {"*/5 * * * *", Accrue.Jobs.MeteredRenewalReconciler},
+        {"*/15 * * * *", Accrue.Entitlements.Apple.ReconciliationSweeper}
       ]
     }
   ]
