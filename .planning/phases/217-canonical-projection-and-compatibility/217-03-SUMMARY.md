@@ -16,6 +16,7 @@ tech-stack:
 key-files:
   created: [accrue/lib/accrue/entitlements/purchase_decision.ex, accrue/lib/accrue/entitlements/purchase_operation.ex, accrue/priv/repo/migrations/20260803010000_create_accrue_entitlement_purchase_operations.exs, accrue/test/accrue/entitlements/purchase_decision_test.exs]
   modified: [accrue/lib/accrue/entitlements.ex, accrue/lib/accrue/entitlements/snapshot.ex, accrue/lib/accrue/billing/subscription_actions.ex, accrue/lib/accrue/processor/fake.ex]
+requirements-completed: [ACCT-05]
 decisions:
   - Source summaries expose bounded logical_plan provenance so preflight compares exact live qualified plans without provider identifiers.
   - Ambiguous Stripe creates persist an account-scoped operation and reconcile the same provider idempotency key before any retry dispatch.
