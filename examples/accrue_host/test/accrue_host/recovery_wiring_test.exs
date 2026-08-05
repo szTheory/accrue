@@ -63,6 +63,21 @@ defmodule AccrueHost.RecoveryWiringTest do
       assert runtime =~ "verifier_version: \"apple-production-v1\""
       assert runtime =~ "config_version: System.fetch_env!(\"APPLE_VERIFIER_CONFIG_VERSION\")"
     end
+
+    test "durable ingress wakeups drain through the scheduled existing recovery workers" do
+      ingress_test =
+        File.read!(Path.expand("../accrue_host_web/apple_notification_ingest_test.exs", __DIR__))
+
+      sweeper = apple_source("reconciliation_sweeper.ex")
+      worker = apple_source("reconcile_worker.ex")
+      crontab = cron_entries(base_oban_config())
+
+      assert ingress_test =~ "preserves exact bytes before durable intake and wakeup"
+      assert ingress_test =~ "Repo.one!(ReconciliationWakeup)"
+      assert sweeper =~ "queue: :accrue_entitlements"
+      assert worker =~ "queue: :accrue_entitlements"
+      assert Enum.count(crontab, &(&1 == {"*/15 * * * *", ReconciliationSweeper})) == 1
+    end
   end
 
   describe "runtime test safety config" do
@@ -97,5 +112,8 @@ defmodule AccrueHost.RecoveryWiringTest do
   end
 
   defp apple_source(filename),
-    do: File.read!(Path.expand("../../../../accrue/lib/accrue/entitlements/apple/#{filename}", __DIR__))
+    do:
+      File.read!(
+        Path.expand("../../../../accrue/lib/accrue/entitlements/apple/#{filename}", __DIR__)
+      )
 end
