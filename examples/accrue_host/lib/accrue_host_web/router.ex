@@ -112,6 +112,21 @@ defmodule AccrueHostWeb.Router do
     accrue_webhook("/stripe", :stripe)
   end
 
+  pipeline :accrue_apple_notifications_raw_body do
+    plug(Plug.Parsers,
+      parsers: [:json],
+      pass: ["*/*"],
+      json_decoder: Jason,
+      body_reader: {Accrue.Webhook.CachingBodyReader, :read_body, []},
+      length: 262_144
+    )
+  end
+
+  scope "/webhooks" do
+    pipe_through(:accrue_apple_notifications_raw_body)
+    forward("/apple", AccrueHost.AppleNotificationIngress)
+  end
+
   # Protect these mounts with package auth hooks via accrue_admin/2 and accrue_portal/2.
   # Hosts with custom routers may also pipe through Accrue.Auth.require_admin_plug().
   if Application.compile_env(:accrue_host, :sql_sandbox) do

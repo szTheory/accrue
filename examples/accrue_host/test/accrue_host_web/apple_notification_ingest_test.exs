@@ -28,7 +28,12 @@ defmodule AccrueHostWeb.AppleNotificationIngestTest do
 
     Application.put_env(:accrue_host, :apple_notification_ingress,
       verifier: FakeVerifier,
-      verifier_config: %{test_pid: self(), environment: :production, verifier_version: "fake-v1", config_version: "host-test-v1"},
+      verifier_config: %{
+        test_pid: self(),
+        environment: :production,
+        verifier_version: "fake-v1",
+        config_version: "host-test-v1"
+      },
       repo: Repo,
       max_body_bytes: 262_144
     )

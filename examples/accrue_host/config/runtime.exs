@@ -39,6 +39,8 @@ config :accrue, :webhook_signing_secrets, %{
 }
 
 if config_env() == :prod do
+  alias Accrue.Entitlements.Apple.{Client, Verifier}
+
   database_url =
     System.get_env("DATABASE_URL") ||
       raise """
@@ -55,6 +57,40 @@ if config_env() == :prod do
     # For machines with several cores, consider starting multiple pools of `pool_size`
     # pool_count: 4,
     socket_options: maybe_ipv6
+
+  verifier_config = %Verifier.Config{
+    roots:
+      AccrueHost.AppleNotificationIngress.load_trust_roots!(
+        System.fetch_env!("APPLE_TRUST_ROOTS_PEM_PATH")
+      ),
+    bundle_id: System.fetch_env!("APPLE_BUNDLE_ID"),
+    app_apple_id: System.fetch_env!("APPLE_APP_ID"),
+    environment: :production,
+    verification_time: :current,
+    verifier_version: "apple-production-v1",
+    config_version: System.fetch_env!("APPLE_VERIFIER_CONFIG_VERSION")
+  }
+
+  product_map =
+    AccrueHost.AppleNotificationIngress.decode_product_map!(
+      System.fetch_env!("APPLE_PRODUCT_MAP_JSON")
+    )
+
+  config :accrue_host, :apple_notification_ingress,
+    verifier: Verifier.Production,
+    verifier_config: verifier_config,
+    max_body_bytes: 262_144
+
+  config :accrue, :apple_reconciliation,
+    client:
+      Client.Production.new(authorization: System.fetch_env!("APPLE_SERVER_API_BEARER_TOKEN")),
+    admission: [
+      verifier: Verifier.Production,
+      verifier_config: verifier_config,
+      product_map: product_map,
+      verifier_version: "apple-production-v1",
+      config_version: System.fetch_env!("APPLE_VERIFIER_CONFIG_VERSION")
+    ]
 
   # The secret key base is used to sign/encrypt cookies and other secrets.
   # A default value is used in config/dev.exs and config/test.exs but you
