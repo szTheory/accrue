@@ -92,6 +92,40 @@ defmodule Accrue.Entitlements.ReferenceScenariosTest do
     end
   end
 
+  @tag :special_dispatch
+  test "special action families retain a declared production seam" do
+    seams =
+      for scenario <- ReferenceScenarios.deterministic_scenarios(),
+          action <- scenario.actions,
+          action.kind in [
+            "apple_verified_purchase",
+            "stripe_verified_purchase",
+            "purchase_preflight",
+            "offline_proof_stale",
+            "offline_expansion_request",
+            "signed_deny",
+            "rollback_proof",
+            "rotated_key_proof",
+            "empty_evidence",
+            "device_replace"
+          ],
+          into: %{},
+          do: {action.kind, action.expected_transition.seam}
+
+    assert seams == %{
+             "apple_verified_purchase" => "apple_admission",
+             "stripe_verified_purchase" => "observation_projector",
+             "purchase_preflight" => "purchase_decision",
+             "offline_proof_stale" => "offline_verify_policy",
+             "offline_expansion_request" => "offline_verify_policy",
+             "signed_deny" => "offline_verify_policy",
+             "rollback_proof" => "offline_verify_policy",
+             "rotated_key_proof" => "verification_key_retention",
+             "empty_evidence" => "offline_verify",
+             "device_replace" => "offline_replace_device"
+           }
+  end
+
   test "write and check reject stale generated output" do
     root = fixture_root!()
 

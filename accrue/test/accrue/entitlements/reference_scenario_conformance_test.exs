@@ -44,6 +44,7 @@ defmodule Accrue.Entitlements.ReferenceScenarioConformanceTest do
     )
   end
 
+  @tag :special_dispatch
   test "every deterministic corpus action reaches its declared executor in declared order" do
     expected_rows = deterministic_rows()
 
@@ -88,6 +89,7 @@ defmodule Accrue.Entitlements.ReferenceScenarioConformanceTest do
     end
   end
 
+  @tag :special_dispatch
   test "aggregate proof retains closed production-only action routing" do
     source = File.read!(__ENV__.file)
 
