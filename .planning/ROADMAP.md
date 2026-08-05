@@ -378,7 +378,7 @@ Plans:
 **Goal:** The reference host accepts App Store Server Notifications V2 through the existing Accrue contract with exact raw-body verification, durable intake and repair, deterministic host-boundary proof, and privacy-safe adopter guidance.
 **Requirements**: TBD
 **Depends on:** Phase 220
-**Plans:** 4/5 plans executed
+**Plans:** 5/5 plans executed
 
 Plans:
 
@@ -397,6 +397,6 @@ Plans:
 
 **Wave 4** *(blocked on 221-03 and 221-04)*
 
-- [ ] 221-05-PLAN.md — Publish adoption/runbook evidence boundaries and bind every Wave 0 proof into `mix verify`.
+- [x] 221-05-PLAN.md — Publish adoption/runbook evidence boundaries and bind every Wave 0 proof into `mix verify`.
 
 - [ ] TBD (run $gsd-plan-phase 221 to break down)
