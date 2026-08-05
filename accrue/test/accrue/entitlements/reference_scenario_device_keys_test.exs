@@ -3,7 +3,7 @@ defmodule Accrue.Entitlements.ReferenceScenarioDeviceKeysTest do
 
   import Ecto.Query
 
-  alias Accrue.Entitlements.{Account, Device, ReferenceScenarios}
+  alias Accrue.Entitlements.{Account, Device, ReferenceScenarioExecutor, ReferenceScenarios}
   alias Accrue.Entitlements.Offline.{Challenge, Issuance}
   alias Accrue.Entitlements.ReferenceScenarioExecutor.DeviceKeys
   alias Accrue.Events.Event
@@ -83,6 +83,24 @@ defmodule Accrue.Entitlements.ReferenceScenarioDeviceKeysTest do
     refute contains_secret?(observed)
   end
 
+  test "every device replacement declaration leaf is load-bearing" do
+    account = account!("device-replace-mutation")
+    [action] = ReferenceScenarios.fetch!("device_replacement").actions
+    {observed, _runtime} = DeviceKeys.execute(Accrue.TestRepo, account, action)
+
+    for {section, leaf} <- [
+          {:result, :prior_state},
+          {:durable, :challenge_consumed},
+          {:cache, :replacement}
+        ] do
+      mutated = mutate_expected(action, section, leaf)
+
+      assert_raise ExUnit.AssertionError, ~r/family transition mismatch/, fn ->
+        ReferenceScenarioExecutor.assert_transition(mutated, observed)
+      end
+    end
+  end
+
   test "real generic, no-effect, registration, and snapshot substitutes fail device/key matching" do
     device_action = ReferenceScenarios.fetch!("device_replacement").actions |> hd()
     key_action = ReferenceScenarios.fetch!("key_rotation").actions |> hd()
@@ -108,6 +126,20 @@ defmodule Accrue.Entitlements.ReferenceScenarioDeviceKeysTest do
 
   defp account!(suffix),
     do: Account.fetch_or_create(Accrue.TestRepo, "reference_scenario", suffix) |> elem(1)
+
+  defp mutate_expected(action, section, leaf) do
+    expected = action.expected_transition
+    value = Map.fetch!(Map.fetch!(expected, section), leaf)
+
+    replacement =
+      cond do
+        is_boolean(value) -> not value
+        is_integer(value) -> value + 1
+        true -> "not-#{value}"
+      end
+
+    %{action | expected_transition: Map.update!(expected, section, &Map.put(&1, leaf, replacement))}
+  end
 
   defp contains_secret?(%_{}), do: false
 

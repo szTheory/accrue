@@ -3,7 +3,7 @@ defmodule Accrue.Entitlements.ReferenceScenarioReconnectTest do
 
   import Ecto.Query
 
-  alias Accrue.Entitlements.{Account, ReferenceScenarios}
+  alias Accrue.Entitlements.{Account, ReferenceScenarioExecutor, ReferenceScenarios}
   alias Accrue.Entitlements.Offline.{Challenge, Issuance, ReconnectAttempt}
   alias Accrue.Entitlements.ReferenceScenarioExecutor.ReconnectCache
 
@@ -66,6 +66,24 @@ defmodule Accrue.Entitlements.ReferenceScenarioReconnectTest do
     assert observed.result.reason == "verification_failed"
   end
 
+  test "declared reconnect leaves are load-bearing after the signed operation", %{scenario: scenario} do
+    [reconnect, cache_replace] = scenario.actions
+    account = account!("reference-scenario-reconnect-mutation")
+    {first, runtime} = ReconnectCache.execute(Accrue.TestRepo, account, reconnect, %{})
+    {second, _runtime} = ReconnectCache.execute(Accrue.TestRepo, account, cache_replace, runtime)
+
+    for {action, observed, path} <- [
+          {reconnect, first, [:durable, :snapshot_revision]},
+          {cache_replace, second, [:cache, :disposition]}
+        ] do
+      mutated = mutate_expected(action, path)
+
+      assert_raise ExUnit.AssertionError, ~r/family transition mismatch/, fn ->
+        ReferenceScenarioExecutor.assert_transition(mutated, observed)
+      end
+    end
+  end
+
   test "generic, replay, snapshot, and registration substitutes cannot satisfy reconnect actions",
        %{
          scenario: scenario
@@ -93,6 +111,14 @@ defmodule Accrue.Entitlements.ReferenceScenarioReconnectTest do
 
   defp account!(owner_id),
     do: Account.fetch_or_create(Accrue.TestRepo, "reference_scenario", owner_id) |> elem(1)
+
+  defp mutate_expected(action, [section, leaf]) do
+    expected = action.expected_transition
+    value = Map.fetch!(Map.fetch!(expected, section), leaf)
+    replacement = if is_integer(value), do: value + 1, else: "preserve"
+
+    %{action | expected_transition: Map.update!(expected, section, &Map.put(&1, leaf, replacement))}
+  end
 
   defp contains_secret?(value) when is_map(value),
     do:
