@@ -71,9 +71,16 @@ if config_env() == :prod do
     config_version: System.fetch_env!("APPLE_VERIFIER_CONFIG_VERSION")
   }
 
+  configured_plan_keys =
+    :accrue
+    |> Application.fetch_env!(:entitlements)
+    |> Keyword.fetch!(:plans)
+    |> Keyword.keys()
+
   product_map =
     AccrueHost.AppleNotificationIngress.decode_product_map!(
-      System.fetch_env!("APPLE_PRODUCT_MAP_JSON")
+      System.fetch_env!("APPLE_PRODUCT_MAP_JSON"),
+      configured_plan_keys
     )
 
   config :accrue_host, :apple_notification_ingress,
