@@ -34,6 +34,24 @@ v1.60 clears that bar through an active first-adopter iOS delivery. It reuses th
 
 **Dependency shape:** 223 → 225; 224 → 225; 225 → 226. Phase 226 never claims runtime proof until the separately authorized physical-iPhone artifact exists.
 
+### Phase 223: iOS-compatible Accrue offline client
+
+**Goal**: Extract the verified Crosswake tracer foundation into an iOS-compatible, reusable SwiftPM offline client while retaining canonical ES256 verification, device binding, high-water and signed-deny ordering, verified atomic cache replacement, and an honest iOS compilation boundary.
+
+**Depends on**: Nothing (first phase of v1.60; reuses the locked v1.59 offline-entitlements contract)
+
+**Requirements**: IOS-01, IOS-02, IOS-03
+
+**Success Criteria** (what must be TRUE):
+
+1. A host can import the standalone iOS-compatible SwiftPM client and obtain canonical-vector-conformant proof verification, high-water ordering, and allow/deny cache replacement.
+2. The public client exposes a narrow immutable `Sendable` four-state result boundary; only verified server ES256 proof bound to the registered device can replace cached state, and stale continuity never becomes a local grant.
+3. A host-owned authenticated reconnect path feeds compact proof bytes through the same private verification and verified atomic replacement boundary; cache write or recovery failures preserve the previous complete authenticated cache.
+4. Public-package tests exercise the canonical corpus, malformed input, rotation, high-water/deny ordering, and crash/recovery behavior; an iOS 16 SDK library-compilation lane is merge-blocking while Crosswake/device feasibility remains separately classified.
+5. StoreKit, purchase/restore behavior, host authentication, host UI, Crosswake bridge APIs, simulator evidence, and physical-device runtime proof remain out of scope and cannot be promoted by package test or compile success.
+
+**Plans**: 0/0 plans executed
+
 <details>
 <summary>✅ v1.58 lattice_stripe 2.x Bump & Stripe-Native Entitlements Sync (Phases 212-214.2) — SHIPPED 2026-07-31</summary>
 
