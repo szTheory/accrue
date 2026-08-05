@@ -14,6 +14,7 @@ defmodule AccrueHost.Application do
       {Oban, Application.fetch_env!(:accrue_host, Oban)},
       {DNSCluster, query: Application.get_env(:accrue_host, :dns_cluster_query) || :ignore},
       {Phoenix.PubSub, name: AccrueHost.PubSub},
+      {AccrueHost.AppleRatePolicy, Application.get_env(:accrue_host, :apple_rate_policy, [])},
       # Start a worker by calling: AccrueHost.Worker.start_link(arg)
       # {AccrueHost.Worker, arg},
       # Start to serve requests, typically the last entry

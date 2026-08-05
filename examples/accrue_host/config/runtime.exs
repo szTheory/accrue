@@ -79,7 +79,8 @@ if config_env() == :prod do
   config :accrue_host, :apple_notification_ingress,
     verifier: Verifier.Production,
     verifier_config: verifier_config,
-    max_body_bytes: 262_144
+    max_body_bytes: 262_144,
+    rate_limiter: &AccrueHost.AppleRatePolicy.check/1
 
   config :accrue, :apple_reconciliation,
     client:
