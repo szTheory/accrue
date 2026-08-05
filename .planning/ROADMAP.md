@@ -402,3 +402,16 @@ Plans:
 **Wave 5** *(gap closure; blocked on 221-05)*
 
 - [x] 221-06-PLAN.md — Close configured-plan admission and trusted-proxy peer-resolution blockers with deterministic regressions.
+
+### Phase 222: Close gap: OFF-05 — schedule offline reconnect recovery
+
+**Goal:** The reference host schedules durable offline reconnect recovery and proves that an interrupted reconnect is reclaimed through the existing locked, provider-authoritative worker path to one signed proof replacement.
+**Requirements**: OFF-05
+**Depends on:** Phase 221
+**Plans:** 1 plan
+
+Plans:
+
+**Wave 1**
+
+- [ ] 222-01-PLAN.md — Add one 15-minute reconnect sweep and prove stranded authenticated recovery through the real worker chain to one verified signed replacement.
