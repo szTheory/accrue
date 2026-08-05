@@ -4,8 +4,8 @@ milestone: v1.59
 milestone_name: Account-Scoped Multi-Rail & Offline Entitlements
 current_phase: 222
 status: completed
-stopped_at: Completed 221-05-PLAN.md
-last_updated: "2026-08-05T20:10:46.184Z"
+stopped_at: Completed 222-01-PLAN.md
+last_updated: "2026-08-05T20:12:33Z"
 last_activity: 2026-08-05
 last_activity_desc: Phase 222 complete
 progress:
@@ -14,7 +14,7 @@ progress:
   total_plans: 77
   completed_plans: 77
   percent: 100
-current_phase_name: close-gap-reference-host-apple-notification-ingress
+current_phase_name: close-gap-off-05-schedule-offline-reconnect-recovery
 ---
 
 # Project State
@@ -25,7 +25,7 @@ See: `.planning/PROJECT.md` (updated 2026-08-05 after completing Phase 220)
 
 **Core value:** A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic Elixir DX, strong domain modeling, tamper-evident audit ledger, great observability, and zero breaking-change pain through v1.x.
 
-**Current focus:** Phase 221 — close-gap-reference-host-apple-notification-ingress
+**Current focus:** Phase 222 — close-gap-off-05-schedule-offline-reconnect-recovery
 
 ## Current Position
 
