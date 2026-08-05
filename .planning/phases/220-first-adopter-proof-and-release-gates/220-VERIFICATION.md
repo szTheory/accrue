@@ -1,16 +1,15 @@
 ---
 phase: 220-first-adopter-proof-and-release-gates
-verified: 2026-08-05T14:40:00Z
+verified: 2026-08-05T15:12:52Z
 status: human_needed
 score: 5/5 must-haves verified
 behavior_unverified: 2
 overrides_applied: 0
 re_verification:
-  previous_status: gaps_found
-  previous_score: 4/5
+  previous_status: human_needed
+  previous_score: 5/5
   gaps_closed:
-    - "The deterministic 27-action aggregate now compares every declared result, durable, and cache leaf with an independently collected production transition."
-    - "The refund/retraction fixture is aligned with the production cache-replacement outcome, and unchanged-observation mutations prove every declared scalar leaf is load-bearing."
+    - "G-220-1's explanation/ownership gap: the three evidence owners, non-claims, and native/billing seams are explicit and discoverable."
   gaps_remaining: []
   regressions: []
 behavior_unverified_items:
@@ -35,9 +34,9 @@ human_verification:
 
 **Phase Goal:** The anonymized B2C Alpha reference host and public release contract prove that multi-rail access and offline study are safe, diagnosable, and operable.
 
-**Verified:** 2026-08-05T14:40:00Z  
+**Verified:** 2026-08-05T15:12:52Z
 **Status:** human_needed  
-**Re-verification:** Yes — after Plans 220-21 and 220-22 closed the prior fixture-oracle gap.
+**Re-verification:** Yes — after Plan 220-23 closed G-220-1's documentation/ownership gap.
 
 ## Goal Achievement
 
@@ -86,9 +85,9 @@ human_verification:
 
 | Behavior | Command | Result | Status |
 | --- | --- | --- | --- |
-| Complete credential-free Phase 220 gate | `bash scripts/ci/verify_reference_scenario_contract.sh` | Exit 0: 51 Elixir tests, 2 host conformance tests, 28 Swift tests, generated/adoption/release-contract checks all passed. | ✓ PASS |
+| Current release-contract chain | `bash scripts/ci/verify_release_contract.sh` | Exit 0; its chained reference-scenario and adoption gates also passed. | ✓ PASS |
 | Exact fixture-oracle enforcement | Included `every declared transition leaf rejects a mutation against its unchanged production observation` test | The command passed after enumerating every action's expected scalar leaves and requiring each mutation to fail. | ✓ PASS |
-| Crosswake evidence boundary | Included Swift capability-report tests | Checked-in report remains `feasibility_blocked`; missing bridge/device evidence fails closed. | ✓ PASS (blocked-state contract) |
+| Crosswake evidence boundary | `swift test --filter 'CapabilityReportTests/checkedInCapabilityReportRemainsBlocked'` and `swift test --filter 'CapabilityReportTests/missingEvidenceBlocksFeasibility'` | Both focused tests passed: the checked-in report is blocked and missing bridge/device evidence fails closed. | ✓ PASS (blocked-state contract) |
 | Alpha/Crosswake readiness explanation | `220-ALPHA-CROSSWAKE-READINESS-BOUNDARY.md` | Maps the three proof owners and their non-implications without claiming external Alpha evidence. | ✓ PASS (documentation boundary) |
 
 ### Requirements Coverage
@@ -136,5 +135,5 @@ The previous fixture-oracle blocker is closed: production-derived transitions ar
 
 ---
 
-_Verified: 2026-08-05T14:40:00Z_  
+_Verified: 2026-08-05T15:12:52Z_
 _Verifier: the agent (gsd-verifier)_
