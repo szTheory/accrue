@@ -20,6 +20,56 @@ defmodule Accrue.Entitlements.ReferenceScenarioOfflinePolicyTest do
              OfflinePolicy.execute(Accrue.TestRepo, account, action)
   end
 
+  test "signed deny, rollback, and empty evidence retain distinct verifier reasons" do
+    cases = [
+      {"deny_tombstone", "denied", "signed_denial", :read_downloaded_lesson},
+      {"clock_rollback", "invalid", "clock_rollback", :read_downloaded_lesson},
+      {"empty_evidence_fails_closed", "invalid", "malformed", :read_downloaded_lesson}
+    ]
+
+    Enum.each(cases, fn {scenario_id, state, reason, action_name} ->
+      action = ReferenceScenarios.fetch!(scenario_id) |> hd_action()
+      account = account!("reference-scenario-offline-#{scenario_id}")
+
+      assert %{result: %{state: ^state, reason: ^reason}, policy: %{action: ^action_name, allowed: false}, durable: %{write_delta: 0}, cache: %{disposition: "preserve"}} =
+               OfflinePolicy.execute(Accrue.TestRepo, account, action)
+    end)
+  end
+
+  test "actual generic-grant and no-effect adapters fail every offline expectation" do
+    actions =
+      for scenario_id <- ~w(stale_downloaded_study_continuity restricted_expansion deny_tombstone clock_rollback empty_evidence_fails_closed) do
+        ReferenceScenarios.fetch!(scenario_id) |> hd_action()
+      end
+
+    Enum.each(actions, fn action ->
+      generic_account = account!("reference-scenario-offline-generic-#{action.kind}")
+      replay_account = account!("reference-scenario-offline-replay-#{action.kind}")
+
+      generic = OfflinePolicy.adversarial_result(Accrue.TestRepo, generic_account, action, adapter: :generic_grant)
+      replay = OfflinePolicy.adversarial_result(Accrue.TestRepo, replay_account, action, adapter: :no_effect)
+
+      refute OfflinePolicy.matches_expected?(action, generic)
+      refute OfflinePolicy.matches_expected?(action, replay)
+    end)
+  end
+
+  test "only empty evidence may call the verifier with an empty compact value" do
+    actions =
+      for scenario <- ReferenceScenarios.deterministic_scenarios(),
+          action <- scenario.actions,
+          ReferenceScenarios.action_family!(action.kind) |> Enum.member?("offline_vector"),
+          do: action
+
+    assert Enum.all?(actions, fn action ->
+             if action.kind == "empty_evidence" do
+               OfflinePolicy.compact_for(action) == ""
+             else
+               is_binary(OfflinePolicy.compact_for(action)) and OfflinePolicy.compact_for(action) != ""
+             end
+           end)
+  end
+
   defp hd_action(scenario), do: hd(scenario.actions)
 
   defp account!(owner_id),
