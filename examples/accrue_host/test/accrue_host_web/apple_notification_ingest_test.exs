@@ -87,6 +87,36 @@ defmodule AccrueHostWeb.AppleNotificationIngestTest do
     assert runtime =~ "verifier_config: verifier_config"
   end
 
+  test "product maps admit only configured entitlement plan keys" do
+    assert %{"com.example.scale" => :scale} =
+             AppleNotificationIngress.decode_product_map!(
+               ~s({"com.example.scale":"scale"}),
+               [:scale]
+             )
+
+    assert_raise ArgumentError, "APPLE_PRODUCT_MAP_JSON contains an unknown plan", fn ->
+      AppleNotificationIngress.decode_product_map!(
+        ~s({"com.example.pro":"production"}),
+        [:scale]
+      )
+    end
+  end
+
+  test "product map loader fails closed for invalid catalog and map inputs" do
+    for {json, catalog} <- [
+          {"", [:scale]},
+          {"{}", [:scale]},
+          {~s({"":"scale"}), [:scale]},
+          {~s({"com.example.scale":""}), [:scale]},
+          {~s({"com.example.scale":"scale"}), []},
+          {~s({"com.example.scale":"scale"}), ["scale"]}
+        ] do
+      assert_raise ArgumentError, fn ->
+        AppleNotificationIngress.decode_product_map!(json, catalog)
+      end
+    end
+  end
+
   test "router maps verification, rate, and quarantine outcomes to empty response classes" do
     assert_response_class({:error, :invalid_payload}, :allow, 400)
     assert_response_class({:ok, valid_facts()}, {:deny, 15}, 429)

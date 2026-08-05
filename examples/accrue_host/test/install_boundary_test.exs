@@ -88,6 +88,10 @@ defmodule AccrueHost.InstallBoundaryTest do
     assert runtime =~ "max_body_bytes: 262_144"
     assert runtime =~ "rate_limiter: &AccrueHost.AppleRatePolicy.check/1"
     assert runtime =~ "config :accrue, :apple_reconciliation"
+    assert runtime =~ "Application.fetch_env!(:accrue, :entitlements)"
+    assert runtime =~ "configured_plan_keys"
+    assert runtime =~ "decode_product_map!("
+    assert runtime =~ "configured_plan_keys"
   end
 
   test "bounded verification registers every Apple Wave 0 proof with warnings as errors" do
