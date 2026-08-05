@@ -37,7 +37,9 @@ v1.49 **Realistic Demo App & Adoption Evidence** shipped on **2026-06-02**. The 
 
 ## Next Milestone Goals
 
-Return to stable-core, demand-driven planning. The next milestone should begin only from a concrete adopter failure, correctness/security/data-loss risk, repeated support issue, operational failure, or explicit strategy change. Retained follow-ups are the advisory live Apple delivery smoke run, Crosswake bridge/device feasibility evidence, and public-material human review.
+**v1.60 — First-Adopter iOS Bridge & Proof** opens under the stable-core reopen rule as a concrete active iOS adopter delivery, not speculative billing expansion. Its goal is to connect the already-shipped Apple/offline contract to the First B2C Adopter through a Crosswake shell bridge and host-owned StoreKit adapter, while retaining an honest physical-device gate.
+
+The milestone promotes the verified Accrue Swift tracer into the reusable, iOS-compatible offline-proof client; Crosswake supplies only a route-scoped host-command extension; the adopter host owns StoreKit and every Accrue binding. Android, generic Crosswake commerce, generic sync/storage, Google Play, and any claim that runtime capability is proven before a redacted physical-iPhone artifact remain out of scope.
 
 **Closeout:** Phases 212, 213, 214, 214.1, and 214.2 completed across 17 plans and 33 tasks. The audit passed 11/11 requirements and 5/5 flows with 10/11 integrations fully wired; the host-owned worker's lack of a production enqueuer and four other warning-level items remain documented technical debt. Phase 214.2 passed 19/19 verification with executable desktop/mobile UAT; its post-execution Nyquist metadata remains `ready` rather than authoritative `validated`.
 
@@ -63,20 +65,18 @@ The Phase 204 hardening roadmap's top slice (**Public Truth And Proof-State Base
 
 **Phase 220 complete (2026-08-05):** the anonymized Alpha reference-host and public-release contract are backed by 27 credential-free, production-derived scenario actions; a privacy-bounded operator diagnostic; bounded repair drills and runbooks; and coordinated release/adoption gates. The completed UAT confirms the Crosswake/Alpha evidence boundary remains honest: Accrue contract proof does not claim Crosswake bridge/device runtime proof or Alpha's external production integration evidence. PROOF-01..05 are satisfied; Crosswake stays `feasibility_blocked` until its separately owned bridge-compile and physical-device evidence exists.
 
-## Current Milestone: v1.59 Account-Scoped Multi-Rail & Offline Entitlements
+## Current Milestone: v1.60 First-Adopter iOS Bridge & Proof
 
-**Goal:** Preserve one account's access across Stripe web billing, Apple in-app purchase, and extended offline study through a common entitlement projection and signed device-bound proof, while keeping lifecycle operations rail-aware and avoiding connectivity-driven learner lockout.
+**Goal:** Make the verified Accrue Apple/offline contract usable by one active iOS first adopter through a Crosswake bridge and host-local StoreKit adapter, without widening either project into a generic mobile billing framework.
 
 **Target features:**
-- Durable, versioned research memory spanning stakeholder lenses, primary sources, decision tables, threats, and a monitored watchlist.
-- Concurrent Stripe and Apple rail registration plus rail-qualified product mapping and source capabilities.
-- A canonical account projection that unions effective grants without allowing one rail's revocation to erase another rail's access.
-- Verified Apple evidence and automatic `appAccountToken` linking with idempotent reconciliation.
-- Cross-rail purchase eligibility that warns or blocks an accidental second subscription without automatic cancellation or migration.
-- A compact ES256 offline lease with a 30-day revalidation target; stale-offline study keeps downloaded lessons and progress usable while new premium downloads and other value-expanding actions wait for reconnect.
-- An anonymized B2C Alpha reference-host proof, operator diagnostics, automatic repair paths, runbooks, and public contract alignment.
+- A pinned, iOS-compatible SwiftPM offline client that preserves canonical proof, high-water, and cache semantics.
+- A Crosswake route-scoped host command seam which retains the core bridge's validation boundary.
+- A host-owned StoreKit 2 adapter for purchase, updates, entitlement refresh, restore, and offline reconnect evidence.
+- Deterministic cross-repository proofs plus an explicit device-gated runtime status.
+- Closeout of the retained v1.59 warning, public-review, and advisory Apple-delivery items.
 
-**Guardrails:** Existing single-processor hosts remain compatible; lifecycle management stays provider-honest; the adopter identity and PII never enter planning, fixtures, tokens, telemetry, or diagnostics; Google Play, Family Sharing, offer authoring, automatic ownership transfer, migration/proration, and advanced risk/fraud controls remain deferred unless separately justified.
+**Guardrails:** Existing hosts remain compatible; lifecycle management stays provider-honest; the adopter identity and PII never enter artifacts; Crosswake must not acquire an Accrue dependency or generic commerce API; the host bridge remains route-, origin-, version-, and manifest-bound; physical-device authorization is an external gate, not something tests or documentation may simulate.
 
 ## Most recently shipped milestone: v1.57 — Admin Operator Control Plane (SEED-004, M1) (**shipped & archived 2026-07-30**)
 
@@ -821,4 +821,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-08-05 after shipping v1.59 Account-Scoped Multi-Rail & Offline Entitlements.*
+*Last updated: 2026-08-05 after starting v1.60 First-Adopter iOS Bridge & Proof.*

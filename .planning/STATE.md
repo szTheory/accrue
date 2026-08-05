@@ -1,20 +1,16 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.59
-milestone_name: Account-Scoped Multi-Rail & Offline Entitlements
-status: Awaiting next milestone
-stopped_at: Completed 222-01-PLAN.md
-last_updated: "2026-08-05T20:30:07.030Z"
+milestone: v1.60
+milestone_name: First-Adopter iOS Bridge & Proof
+status: planning
+last_updated: "2026-08-05T20:54:12.851Z"
 last_activity: 2026-08-05
-last_activity_desc: Milestone v1.59 completed and archived
 progress:
-  total_phases: 8
-  completed_phases: 8
-  total_plans: 77
-  completed_plans: 77
-  percent: 100
-current_phase: 222
-current_phase_name: close-gap-off-05-schedule-offline-reconnect-recovery
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
 ---
 
 # Project State
@@ -29,10 +25,10 @@ See: `.planning/PROJECT.md` (updated 2026-08-05 after shipping v1.59)
 
 ## Current Position
 
-Phase: Milestone v1.59 complete
+Phase: Not started (defining requirements)
 Plan: —
-Status: Awaiting next milestone
-Last activity: 2026-08-05 — Milestone v1.59 completed and archived
+Status: Defining requirements
+Last activity: 2026-08-05 — Milestone v1.60 started
 
 ## Post-v1.48 Pause Rule
 

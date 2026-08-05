@@ -15,14 +15,24 @@
 - ✅ **v1.57 Admin Operator Control Plane (SEED-004 M1)** — Phases 209-211 (shipped 2026-07-30) — [archive](milestones/v1.57-ROADMAP.md)
 - ✅ **v1.58 lattice_stripe 2.x Bump & Stripe-Native Entitlements Sync** — Phases 212-214.2 (shipped 2026-07-31; 11/11 requirements and 5/5 flows passed with documented non-blocking tech debt) — [archive](milestones/v1.58-ROADMAP.md)
 - ✅ **v1.59 Account-Scoped Multi-Rail & Offline Entitlements** — Phases 215-222 (shipped 2026-08-05; 29/29 requirements, 11/11 integration links, and 5/5 E2E flows passed) — [archive](milestones/v1.59-ROADMAP.md)
+- ◆ **v1.60 First-Adopter iOS Bridge & Proof** — Phases 223-226 (active)
 
 ## Planning Doctrine
 
 Accrue remains in **stable-core / demand-driven expansion** posture. New feature milestones require a concrete adopter failure mode, correctness/security/data-loss risk, repeated support issue, operational failure, or explicit strategy change recorded in `PROJECT.md` or `STRATEGY.md`.
 
-v1.59 clears that bar through B2C Alpha's sourced need for coherent Stripe/Apple access and extended offline use. Google Play remains backlogged in SEED-007 until Android is scheduled or a second adopter requires it.
+v1.60 clears that bar through an active first-adopter iOS delivery. It reuses the v1.59 Apple/offline contract, keeps StoreKit binding host-owned, and cannot promote Crosswake runtime capability without its separate physical-device proof. Google Play remains backlogged in SEED-007 until Android is scheduled or a second adopter requires it.
 
 ## Phases
+
+### v1.60 First-Adopter iOS Bridge & Proof
+
+- [ ] **Phase 223: iOS-compatible Accrue offline client** — Extract the verified tracer into a reusable SwiftPM module, retain canonical vectors, and prove iOS compilation/cache semantics. Covers IOS-01..03.
+- [ ] **Phase 224: Crosswake host-command bridge seam** — Add a manifest- and route-scoped host delegate behind the existing safe bridge validation boundary. Covers BRDG-01..02.
+- [ ] **Phase 225: First-adopter host StoreKit adapter** — Implement the host-local StoreKit 2, Apple-evidence, proof, and reconnect integration plus StoreKit Test evidence. Covers HOST-01..03.
+- [ ] **Phase 226: Readiness truth and external-gate handoff** — Remove retained warnings, refresh public/release truth, execute available advisory checks, and preserve device-gated status. Covers READY-01..02.
+
+**Dependency shape:** 223 → 225; 224 → 225; 225 → 226. Phase 226 never claims runtime proof until the separately authorized physical-iPhone artifact exists.
 
 <details>
 <summary>✅ v1.58 lattice_stripe 2.x Bump & Stripe-Native Entitlements Sync (Phases 212-214.2) — SHIPPED 2026-07-31</summary>
