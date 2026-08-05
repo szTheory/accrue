@@ -372,3 +372,31 @@ Plans:
 | 218. Apple observation and repair | v1.59 | 16/16 | Complete    | 2026-08-03 |
 | 219. Offline study contract | v1.59 | 5/5 | Complete    | 2026-08-03 |
 | 220. First-adopter proof and release gates | v1.59 | 23/23 | Complete    | 2026-08-05 |
+
+### Phase 221: Close gap: reference-host Apple notification ingress
+
+**Goal:** The reference host accepts App Store Server Notifications V2 through the existing Accrue contract with exact raw-body verification, durable intake and repair, deterministic host-boundary proof, and privacy-safe adopter guidance.
+**Requirements**: TBD
+**Depends on:** Phase 220
+**Plans:** 1/5 plans executed
+
+Plans:
+
+**Wave 1**
+
+- [x] 221-01-PLAN.md — Resolve the macro/wrapper composition and production runtime identity at explicit decision checkpoints.
+
+**Wave 2** *(blocked on 221-01)*
+
+- [ ] 221-02-PLAN.md — Trace one exact-byte Apple delivery from the real host route to durable intake and reconciliation wakeup.
+
+**Wave 3** *(parallel after 221-02)*
+
+- [ ] 221-03-PLAN.md — Add bounded direct-peer backpressure and close response, concurrency, quarantine, and privacy proof.
+- [ ] 221-04-PLAN.md — Append and prove the existing Apple reconciliation queue and sweeper wiring.
+
+**Wave 4** *(blocked on 221-03 and 221-04)*
+
+- [ ] 221-05-PLAN.md — Publish adoption/runbook evidence boundaries and bind every Wave 0 proof into `mix verify`.
+
+- [ ] TBD (run $gsd-plan-phase 221 to break down)
