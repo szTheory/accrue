@@ -670,7 +670,7 @@
             "durable": {
               "state": "observed",
               "observation_kind": "grant",
-              "snapshot_revision": 2
+              "snapshot_revision": 1
             },
             "cache": {
               "disposition": "preserve"
