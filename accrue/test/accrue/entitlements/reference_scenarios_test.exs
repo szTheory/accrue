@@ -78,6 +78,20 @@ defmodule Accrue.Entitlements.ReferenceScenariosTest do
            })
   end
 
+  @tag :action_contract
+  test "every deterministic action requires its own closed command and expected transition" do
+    for scenario <- ReferenceScenarios.deterministic_scenarios(), action <- scenario.actions do
+      remaining = List.delete(scenario.actions, action)
+
+      refute ReferenceScenarios.valid?(%{scenario | actions: [%{action | command: nil} | remaining]})
+
+      refute ReferenceScenarios.valid?(%{
+               scenario
+               | actions: [%{action | expected_transition: nil} | remaining]
+             })
+    end
+  end
+
   test "write and check reject stale generated output" do
     root = fixture_root!()
 

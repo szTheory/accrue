@@ -103,7 +103,7 @@ defmodule Accrue.Entitlements.ReferenceScenarios do
   def valid?(%Scenario{} = s) do
     s.evidence_lane in [:deterministic_conformance, :runtime_capability, :advisory_parity] and
       valid_id?(s.id) and utc?(s.frozen_clock) and ordered_actions?(s.actions) and
-      valid_commands?(s.actions) and valid_expected?(s.expected) and
+      valid_commands?(s.actions, s.evidence_lane) and valid_expected?(s.expected) and
       lane_artifacts_valid?(s.evidence_lane, s.required_artifacts) and
       safe_diagnostic?(s.diagnostic)
   end
@@ -505,7 +505,7 @@ defmodule Accrue.Entitlements.ReferenceScenarios do
   defp valid_expected?(%Expected{}), do: true
   defp valid_expected?(_), do: false
 
-  defp valid_commands?(actions) do
+  defp valid_commands?(actions, :deterministic_conformance) do
     Enum.all?(actions, fn
       %{kind: kind, command: %Command{kind: command_kind, payload: payload}}
       when is_map(payload) ->
@@ -519,16 +519,13 @@ defmodule Accrue.Entitlements.ReferenceScenarios do
             ArgumentError -> false
           end
 
-      %{command: nil} ->
-        true
-
-      %{command: %Command{}} ->
-        false
-
       _ ->
-        true
+        false
     end)
   end
+
+  defp valid_commands?(actions, _lane),
+    do: Enum.all?(actions, &(not Map.has_key?(&1, :command) and not Map.has_key?(&1, :expected_transition)))
 
   defp lane_artifacts_valid?(:deterministic_conformance, xs),
     do: "v1.59-decision-cases.json" in xs and "capability-report.json" not in xs
@@ -543,7 +540,9 @@ defmodule Accrue.Entitlements.ReferenceScenarios do
         Enum.all?(actions, fn a ->
           a.kind in @action_kinds and utc?(a.at) and
             (not Map.has_key?(a, :command) or
-               (a.command.kind == a.kind and a.expected_transition.kind == a.kind))
+               (match?(%Command{}, a.command) and a.command.kind == a.kind and
+                  match?(%ExpectedTransition{}, a.expected_transition) and
+                  a.expected_transition.kind == a.kind))
         end)
 
   defp valid_id?(x), do: is_binary(x) and x =~ ~r/^[a-z0-9_]{3,80}$/

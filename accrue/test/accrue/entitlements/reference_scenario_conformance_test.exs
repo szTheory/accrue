@@ -69,6 +69,25 @@ defmodule Accrue.Entitlements.ReferenceScenarioConformanceTest do
     assert Enum.uniq(observed_rows) == observed_rows
   end
 
+  @tag :action_contract
+  test "generic grant and no-effect controls fail every declared action transition" do
+    for scenario <- ReferenceScenarios.deterministic_scenarios(), action <- scenario.actions do
+      account =
+        if action.kind == "parallel_delivery",
+          do: %{owner_id: "fallback-#{scenario.id}-#{action.order}"},
+          else: account!("fallback-#{scenario.id}-#{action.order}")
+
+      for adapter <- [:generic_grant, :no_effect] do
+        observed =
+          ReferenceScenarioExecutor.adversarial_action(Accrue.TestRepo, account, action, adapter)
+
+        assert_raise ExUnit.AssertionError, fn ->
+          ReferenceScenarioExecutor.assert_transition(action, observed)
+        end
+      end
+    end
+  end
+
   test "aggregate proof retains closed production-only action routing" do
     source = File.read!(__ENV__.file)
 

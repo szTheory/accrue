@@ -126,6 +126,8 @@ defmodule Accrue.Entitlements.ReferenceScenarioExecutor.Ordering do
       Enum.count(observed.results, &(&1.insert == :owner)) == 1
   end
 
+  def matches_expected?(_, _), do: false
+
   def matches_parallel_expected?(%{kind: "parallel_delivery"}, observed) do
     observed.execution == :barrier and observed.worker_count > 1 and
       observed.durable == %{

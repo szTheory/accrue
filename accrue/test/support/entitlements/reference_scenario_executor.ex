@@ -105,6 +105,43 @@ defmodule Accrue.Entitlements.ReferenceScenarioExecutor do
     raise ArgumentError, "#{kind} requires its named family executor"
   end
 
+  # Negative controls deliberately perform a different bounded operation from
+  # the fixture-selected production seam.  They never inspect expectations:
+  # their only role is to prove the assertion rejects a generic grant or a
+  # read/no-op substitute for the declared action.
+  def adversarial_action(repo, account, %{kind: "parallel_delivery"} = action, adapter)
+      when adapter in [:generic_grant, :no_effect] do
+    Ordering.parallel_adversarial(repo, account.owner_id, action, adapter: adapter)
+  end
+
+  def adversarial_action(repo, account, %{kind: kind} = action, adapter)
+      when adapter in [:generic_grant, :no_effect] do
+    result =
+      case family_for!(kind) do
+        DeviceKeys -> DeviceKeys.adversarial_result(repo, account, action, adapter: adapter)
+        OfflinePolicy -> OfflinePolicy.adversarial_result(repo, account, action, adapter: adapter)
+        :reconnect -> ReconnectCache.adversarial_result(repo, account, action, adapter: adapter)
+        :resume -> Resume.adversarial_result(repo, account, action, adapter)
+        Read when kind in ["purchase_preflight", "expiry_boundary"] ->
+          Read.adversarial_result(repo, account, action, adapter: adapter)
+        _ ->
+          {:ok, snapshot} = Accrue.Entitlements.snapshot(account)
+
+          %{
+            result: %{tag: "executed", disposition: Atom.to_string(adapter)},
+            durable: %{snapshot_revision: snapshot.revision, operation: Atom.to_string(adapter)},
+            cache: %{disposition: "none"}
+          }
+      end
+
+    normalize_adversarial_result(result, adapter)
+  end
+
+  defp normalize_adversarial_result(result, _adapter) when is_map(result), do: result
+
+  defp normalize_adversarial_result(_result, adapter),
+    do: %{result: %{tag: "executed", disposition: Atom.to_string(adapter)}, durable: %{operation: "rejected"}}
+
   # Collectors intentionally return their own bounded facts. This check verifies
   # that a real collector produced the declared family outcome without projecting
   # fixture expectations back into the observation.
