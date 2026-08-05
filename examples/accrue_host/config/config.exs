@@ -65,7 +65,8 @@ config :accrue_host, Oban,
         {"@daily", Accrue.Jobs.DetectExpiringCards},
         {"* * * * *", Accrue.Jobs.MeterEventsReconciler},
         {"*/5 * * * *", Accrue.Jobs.MeteredRenewalReconciler},
-        {"*/15 * * * *", Accrue.Entitlements.Apple.ReconciliationSweeper}
+        {"*/15 * * * *", Accrue.Entitlements.Apple.ReconciliationSweeper},
+        {"*/15 * * * *", Accrue.Entitlements.Offline.ReconnectSweeper}
       ]
     }
   ]
