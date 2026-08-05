@@ -4,6 +4,7 @@ defmodule Accrue.Entitlements.ReferenceScenarioExecutor.OfflinePolicy do
   import Ecto.Query
 
   alias Accrue.Entitlements.{Grant, Offline, Observation}
+  alias Accrue.Entitlements.ReferenceScenarioExecutor.Read
   alias Accrue.Events.Event
 
   @fixture Path.expand("../../../../priv/entitlements/v1.59-offline-golden-vectors.json", __DIR__)
@@ -12,7 +13,7 @@ defmodule Accrue.Entitlements.ReferenceScenarioExecutor.OfflinePolicy do
       when kind in ["offline_proof_stale", "offline_expansion_request", "signed_deny", "rollback_proof", "empty_evidence"] do
     before = counts(repo, account.id)
     vector = vector_for!(kind, payload.offline_vector)
-    compact = if(kind == "empty_evidence", do: "", else: vector["compact_jws"])
+    compact = compact_for(%{kind: kind, command: %{payload: payload}})
     context = verification_context(vector)
 
     {:ok, decision} = Offline.verify(compact, context)
@@ -21,17 +22,46 @@ defmodule Accrue.Entitlements.ReferenceScenarioExecutor.OfflinePolicy do
 
     %{
       result: decision_facts(decision),
+      operation: "offline_verify",
       policy: policy_facts(policy),
       durable: Map.merge(after_counts, %{write_delta: write_delta(before, after_counts)}),
       cache: %{disposition: "preserve"}
     }
   end
 
+  def compact_for(%{kind: "empty_evidence"}), do: ""
+
+  def compact_for(%{kind: kind, command: %{payload: payload}}),
+    do: vector_for!(kind, payload.offline_vector)["compact_jws"]
+
+  def adversarial_result(repo, account, %{command: %{payload: payload}}, adapter: :generic_grant) do
+    :ok = Read.seed_declared_grant(repo, account, payload)
+    %{operation: "generic_grant", durable: counts(repo, account.id)}
+  end
+
+  def adversarial_result(_repo, account, _action, adapter: :no_effect) do
+    {:ok, _snapshot} = Accrue.Entitlements.snapshot(account)
+    %{operation: "no_effect", durable: %{account_id: account.id}}
+  end
+
+  def matches_expected?(%{kind: kind}, %{operation: "offline_verify", result: result}) do
+    Map.take(result, [:state, :reason]) == expected_result!(kind)
+  end
+
+  def matches_expected?(_, _), do: false
+
+  defp expected_result!("offline_proof_stale"), do: %{state: "stale_offline", reason: "revalidation_due"}
+  defp expected_result!("offline_expansion_request"), do: %{state: "stale_offline", reason: "revalidation_due"}
+  defp expected_result!("signed_deny"), do: %{state: "denied", reason: "signed_denial"}
+  defp expected_result!("rollback_proof"), do: %{state: "invalid", reason: "clock_rollback"}
+  defp expected_result!("empty_evidence"), do: %{state: "invalid", reason: "malformed"}
+
   defp vector_for!("offline_proof_stale", _), do: vector!("stale_at_freshness")
   defp vector_for!("offline_expansion_request", _), do: vector!("stale_at_freshness")
   defp vector_for!("signed_deny", _), do: vector!("valid_signed_denial")
   defp vector_for!("rollback_proof", _), do: vector!("clock_rollback")
   defp vector_for!("empty_evidence", _), do: vector!("valid_signed_denial")
+  defp vector_for!(_, vector_id), do: vector!(vector_id)
 
   defp requested_action!("offline_expansion_request", "download_lesson"), do: :download_premium
   defp requested_action!("offline_expansion_request", :download_lesson), do: :download_premium

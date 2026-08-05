@@ -4,6 +4,26 @@ defmodule Accrue.Entitlements.ReferenceScenarioOfflinePolicyTest do
   alias Accrue.Entitlements.{Account, ReferenceScenarios}
   alias Accrue.Entitlements.ReferenceScenarioExecutor.OfflinePolicy
 
+  setup do
+    previous = Application.get_env(:accrue, :entitlements)
+
+    Application.put_env(:accrue, :entitlements,
+      plans: [
+        pro: [
+          features: [:analytics],
+          quotas: [seats: 3],
+          products: [stripe: [production: ["price_pro"]], apple: [production: ["product_pro"]]]
+        ]
+      ]
+    )
+
+    on_exit(fn ->
+      if previous,
+        do: Application.put_env(:accrue, :entitlements, previous),
+        else: Application.delete_env(:accrue, :entitlements)
+    end)
+  end
+
   test "stale proof executes the signed vector and keeps downloaded study available" do
     action = ReferenceScenarios.fetch!("stale_downloaded_study_continuity") |> hd_action()
     account = account!("reference-scenario-offline-stale")
