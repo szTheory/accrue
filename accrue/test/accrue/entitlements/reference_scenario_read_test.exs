@@ -93,6 +93,43 @@ defmodule Accrue.Entitlements.ReferenceScenarioReadTest do
              )
   end
 
+  test "expiry boundary rows read persisted grants at their declared frozen microseconds" do
+    for {scenario_id, expected_plans} <- [
+          {"expiry_immediately_before_boundary", [:pro]},
+          {"expiry_at_boundary", []},
+          {"expiry_immediately_after_boundary", []}
+        ] do
+      scenario = ReferenceScenarios.fetch!(scenario_id)
+      [action] = scenario.actions
+      account = account!("reference-scenario-expiry-#{scenario_id}")
+
+      result = Read.execute(Accrue.TestRepo, account, action)
+
+      assert result.result == %{tag: "executed", disposition: "expiry_boundary"}
+      assert result.snapshot.plans == expected_plans
+      assert result.snapshot.sources == if(expected_plans == [], do: [], else: [:apple])
+      assert result.durable.grant_expires_at == ~U[2026-08-04 12:17:00.000001Z]
+      assert result.durable.observation_delta == 0
+      assert result.durable.grant_delta == 0
+      assert result.durable.audit_delta == 0
+    end
+  end
+
+  test "generic-grant, no-effect, and in-memory snapshot substitutions fail expiry collection" do
+    scenario = ReferenceScenarios.fetch!("expiry_at_boundary")
+    [action] = scenario.actions
+
+    for adapter <- [:generic_grant, :no_effect, :in_memory_snapshot] do
+      assert {:error, :expiry_mismatch} =
+               Read.adversarial_result(
+                 Accrue.TestRepo,
+                 account!("reference-scenario-expiry-adversarial-#{adapter}"),
+                 action,
+                 adapter: adapter
+               )
+    end
+  end
+
   defp account!(owner_id),
     do: Account.fetch_or_create(Accrue.TestRepo, "reference_scenario", owner_id) |> elem(1)
 
