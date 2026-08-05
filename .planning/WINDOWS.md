@@ -1,10 +1,10 @@
 ---
 schema_version: 1
-open_count: 6
+open_count: 7
 waived_count: 0
 fixed_count: 0
-total_count: 6
-last_updated: 2026-08-05T02:02:05.577Z
+total_count: 7
+last_updated: 2026-08-05T17:28:54.045Z
 ---
 
 # Broken Windows Ledger
@@ -21,6 +21,7 @@ last_updated: 2026-08-05T02:02:05.577Z
 | 4 | 217 | unrun-verify | accrue/test/accrue/docs/package_docs_verifier_test.exs |  | mix test.all could not start because unrelated shared dirty file is not formatted | open |  | 2026-08-03T01:52:16.732Z |  |
 | 5 | 220 | unrun-verify | examples/accrue_host/test/accrue_host/billing_facade_test.exs | 160 | Full mix verify could not complete because the pre-existing fake subscription uniqueness test failed. | open |  | 2026-08-04T15:43:48.620Z |  |
 | 6 | 220 | deviation | accrue/lib/accrue/entitlements/snapshot.ex |  | Forwarded snapshot :now option to repository folding for frozen expiry-boundary proof. | open |  | 2026-08-05T02:02:05.577Z |  |
+| 7 | 221 | unrun-verify | examples/accrue_host |  | mix verify blocked by unrelated tracked formatting violations before its test suite | open |  | 2026-08-05T17:28:54.045Z |  |
 
 ````json
 [
@@ -94,6 +95,18 @@ last_updated: 2026-08-05T02:02:05.577Z
     "status": "open",
     "reason": "",
     "recorded_at": "2026-08-05T02:02:05.577Z",
+    "resolved_at": null
+  },
+  {
+    "id": 7,
+    "kind": "unrun-verify",
+    "phase": "221",
+    "file": "examples/accrue_host",
+    "line": null,
+    "description": "mix verify blocked by unrelated tracked formatting violations before its test suite",
+    "status": "open",
+    "reason": "",
+    "recorded_at": "2026-08-05T17:28:54.045Z",
     "resolved_at": null
   }
 ]

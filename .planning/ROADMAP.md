@@ -378,7 +378,7 @@ Plans:
 **Goal:** The reference host accepts App Store Server Notifications V2 through the existing Accrue contract with exact raw-body verification, durable intake and repair, deterministic host-boundary proof, and privacy-safe adopter guidance.
 **Requirements**: TBD
 **Depends on:** Phase 220
-**Plans:** 1/5 plans executed
+**Plans:** 2/5 plans executed
 
 Plans:
 
@@ -388,7 +388,7 @@ Plans:
 
 **Wave 2** *(blocked on 221-01)*
 
-- [ ] 221-02-PLAN.md — Trace one exact-byte Apple delivery from the real host route to durable intake and reconciliation wakeup.
+- [x] 221-02-PLAN.md — Trace one exact-byte Apple delivery from the real host route to durable intake and reconciliation wakeup.
 
 **Wave 3** *(parallel after 221-02)*
 

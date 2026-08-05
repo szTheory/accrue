@@ -5,15 +5,15 @@ milestone_name: Account-Scoped Multi-Rail & Offline Entitlements
 current_phase: 221
 current_phase_name: close-gap-reference-host-apple-notification-ingress
 status: executing
-stopped_at: Completed 221-01-PLAN.md
-last_updated: "2026-08-05T17:24:13.099Z"
+stopped_at: Completed 221-02-PLAN.md
+last_updated: "2026-08-05T17:29:02.746Z"
 last_activity: 2026-08-05
 last_activity_desc: Phase 221 execution started
 progress:
   total_phases: 7
   completed_phases: 6
   total_plans: 75
-  completed_plans: 71
+  completed_plans: 72
   percent: 86
 ---
 
@@ -30,7 +30,7 @@ See: `.planning/PROJECT.md` (updated 2026-08-05 after completing Phase 220)
 ## Current Position
 
 Phase: 221 (close-gap-reference-host-apple-notification-ingress) — EXECUTING
-Plan: 2 of 5
+Plan: 3 of 5
 Status: Ready to execute
 Last activity: 2026-08-05 — Phase 221 execution started
 
@@ -428,6 +428,7 @@ Coverage: 22/22 v1.51 requirements mapped (each REQ-ID → exactly one phase). D
 | Phase 220 P12 | 1m | 3 tasks | 7 files |
 | Phase 220 P13 | 65m | 2 tasks | 6 files |
 | Phase 221-close-gap-reference-host-apple-notification-ingress P01 | 1 | 2 tasks | 1 files |
+| Phase 221 P02 | 14min | 1 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -855,6 +856,8 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - [Phase ?]: Non-offline reference commands reject offline verification fields; lifecycle collection reads production facts.
 - [Phase ?]: D-01/D-06: wrapper-forward—mount AccrueHost.AppleNotificationIngress with Phoenix forward/3; delegate unchanged to Accrue.Entitlements.Apple.NotificationPlug; no Accrue public API expansion.
 - [Phase ?]: D-04/D-05: production-only apple-production-v1 Verifier.Config; require six APPLE_* inputs, decode pinned PEM roots to DER at boot, and reuse one immutable config for ingress and reconciliation admission.
+- [Phase ?]: D-01/D-06: host wrapper forwards the dedicated Apple route to the unchanged NotificationPlug.
+- [Phase ?]: D-04/D-05: one production Verifier.Config term is reused by ingress and reconciliation admission.
 
 ### Pending Todos
 
@@ -1006,8 +1009,8 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 
 ## Session Continuity
 
-Last session: 2026-08-05T17:24:13.080Z
-Stopped at: Completed 221-01-PLAN.md
+Last session: 2026-08-05T17:29:02.726Z
+Stopped at: Completed 221-02-PLAN.md
 Resume file: None
 
 ## Operator Next Steps
