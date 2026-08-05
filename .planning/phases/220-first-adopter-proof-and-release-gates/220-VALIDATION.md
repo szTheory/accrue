@@ -1,9 +1,9 @@
 ---
 phase: 220
 slug: first-adopter-proof-and-release-gates
-status: draft
-nyquist_compliant: false
-wave_0_complete: false
+status: validated
+nyquist_compliant: true
+wave_0_complete: true
 created: 2026-08-04
 ---
 
@@ -38,21 +38,21 @@ created: 2026-08-04
 
 | Requirement | Secure behavior | Test type | Automated command | File exists | Status |
 |-------------|-----------------|-----------|-------------------|-------------|--------|
-| PROOF-01 | Same-account Apple→web and Stripe→iOS projections converge without reconciliation; no client reducer becomes authoritative. | Repo + host integration | Focused `mix test` plus `cd examples/accrue_host && mix verify` | ❌ Wave 0 | ⬜ pending |
-| PROOF-02 | Closed scenario lanes and public-only fixtures cover duplicate prevention, offline continuity, reconnect, revocation, device replacement, deny tombstones, clock rollback, and key rotation. | Unit, integration, Swift vector | Focused Elixir tests plus `cd examples/crosswake_tracer && swift test` | ❌ Wave 0 | ⬜ pending |
-| PROOF-03 | Diagnostic projection exposes only closed redacted values; host mutation controls are authorized, understandable, and keyboard-safe. | Unit + ConnTest/LiveView | Focused Admin and host tests | ❌ Wave 0 | ⬜ pending |
-| PROOF-04 | Repairs are lock-safe, idempotent, audited, bounded, and converge without hidden finance/provider mutation. | Transactional integration + property | Focused repair-drill tests | ❌ Wave 0 | ⬜ pending |
-| PROOF-05 | Versioned facts generate exact capability limits, and gates reject contrary public claims or runtime-feasibility inflation. | Shell + docs tests | `bash scripts/ci/verify_*` and focused docs tests | ❌ Wave 0 | ⬜ pending |
+| PROOF-01 | Same-account Apple→web and Stripe→iOS projections converge without reconciliation; no client reducer becomes authoritative. | Repo + host integration | `bash scripts/ci/verify_release_contract.sh` | ✅ `reference_scenario_conformance_test.exs`, host conformance | ✅ covered |
+| PROOF-02 | Closed scenario lanes and public-only fixtures cover duplicate prevention, offline continuity, reconnect, revocation, device replacement, deny tombstones, clock rollback, and key rotation. | Unit, integration, Swift vector | `bash scripts/ci/verify_release_contract.sh` | ✅ reference-scenario family suites and Swift consumer tests | ✅ covered |
+| PROOF-03 | Diagnostic projection exposes only closed redacted values; host mutation controls are authorized, understandable, and keyboard-safe. | Unit + ConnTest/LiveView | `bash scripts/ci/verify_release_contract.sh` | ✅ `admin_test.exs` and diagnostic LiveView/browser tests | ✅ covered |
+| PROOF-04 | Repairs are lock-safe, idempotent, audited, bounded, and converge without hidden finance/provider mutation. | Transactional integration + property | `bash scripts/ci/verify_release_contract.sh` | ✅ `repair_drills_test.exs` | ✅ covered |
+| PROOF-05 | Versioned facts generate exact capability limits, and gates reject contrary public claims or runtime-feasibility inflation. | Shell + docs tests | `bash scripts/ci/verify_release_contract.sh` | ✅ reference-contract, adoption-matrix, release-contract, and docs tests | ✅ covered |
 
 ---
 
 ## Wave 0 Requirements
 
-- [ ] `accrue/priv/entitlements/v1.59-reference-scenarios.json` and a strict parser/checker — stable schema, IDs, closed lanes, and redaction contract.
-- [ ] Elixir consumer tests that invoke production contexts rather than interpreting fixture semantics.
-- [ ] Host and Swift scenario consumers keyed by the same IDs.
-- [ ] Bounded diagnostic-projection allowlist/forbidden-field tests and repair-drill transaction tests.
-- [ ] Fixture-to-public-matrix generator/check plus a CI script rejecting contradictory claims.
+- [x] Strict scenario schema/parser with stable IDs, closed lanes, and redaction contract.
+- [x] Elixir consumers invoke production contexts; the exact-oracle mutation proof covers all 224 declared transition leaves.
+- [x] Host and Swift scenario consumers are keyed by the same IDs.
+- [x] Diagnostic allowlist/forbidden-field and transactional repair-drill coverage exists.
+- [x] Fixture-to-public-matrix generator/check and contradictory-claim CI gates exist.
 
 ---
 
@@ -60,16 +60,27 @@ created: 2026-08-04
 
 | Behavior | Requirement | Why manual | Test instructions |
 |----------|-------------|------------|-------------------|
-| Physical-device and required bridge evidence for Crosswake runtime feasibility | PROOF-01, PROOF-02, PROOF-05 | The tracer currently reports `feasibility_blocked`; vectors, simulators, and browser checks cannot promote that claim. | Verify the capability report remains blocked unless the required bridge and physical-device evidence are attached; confirm public material retains the same lane/status. |
+| Physical-device and required bridge evidence for Crosswake runtime feasibility | PROOF-01, PROOF-02, PROOF-05 | The tracer correctly reports `feasibility_blocked`; vectors, simulators, and browser checks cannot establish mobile runtime feasibility. | Verify the capability report remains blocked unless the required bridge and physical-device evidence are attached; confirm public material retains the same lane/status. |
+| Whole-contract review of public v1.59 material | PROOF-05 | Structural gates enforce the generated contract and known prohibitions, but cannot assess every prose implication. | Review the matrix, release guide, runbooks, App Review guidance, release notes, and adopter copy together for privacy, lifecycle, finance, and offline-expansion overclaims. |
 
 ---
 
 ## Validation Sign-Off
 
-- [ ] All planned tasks have an automated verify command or Wave 0 dependency.
-- [ ] Sampling continuity: no three consecutive tasks lack automated verification.
-- [ ] Wave 0 covers all missing references.
-- [ ] No watch-mode flags are used.
-- [ ] `nyquist_compliant: true` is set only after execution validates this strategy.
+- [x] All planned tasks have automated verification or are covered by the coordinated release gate.
+- [x] Sampling continuity: no three consecutive tasks lack automated verification.
+- [x] Wave 0 requirements are implemented and covered.
+- [x] No watch-mode flags are used.
+- [x] `nyquist_compliant: true` was set after the coordinated release gate passed on 2026-08-05.
 
-**Approval:** pending
+**Approval:** validated — automated coverage is complete; two judgment/runtime backstops remain manual-only.
+
+## Validation Audit 2026-08-05
+
+| Metric | Count |
+|--------|-------|
+| Gaps found | 0 |
+| Resolved | 0 |
+| Escalated | 2 |
+
+The existing strategy was audited against all 23 PLAN/SUMMARY pairs and the phase verification report. The coordinated `bash scripts/ci/verify_release_contract.sh` gate passed on 2026-08-05. It exercises the fixture/matrix, adoption, release-contract, and linked-release checks; requirement-specific tests named above provide the corresponding behavioral evidence.
