@@ -1,0 +1,36 @@
+name: Apple notification delivery smoke
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Apple App Store Server API environment
+        required: true
+        default: production
+        type: choice
+        options: [production, sandbox]
+  schedule:
+    - cron: '13 7 * * 1'
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    name: Advisory App Store notification delivery
+    runs-on: ubuntu-24.04
+    environment: apple-notification-smoke
+    timeout-minutes: 5
+    env:
+      APPLE_SERVER_API_ENVIRONMENT: ${{ inputs.environment || 'production' }}
+      APPLE_SERVER_API_KEY_ID: ${{ secrets.APPLE_SERVER_API_KEY_ID }}
+      APPLE_SERVER_API_ISSUER_ID: ${{ secrets.APPLE_SERVER_API_ISSUER_ID }}
+      APPLE_SERVER_API_BUNDLE_ID: ${{ secrets.APPLE_SERVER_API_BUNDLE_ID }}
+      APPLE_SERVER_API_PRIVATE_KEY: ${{ secrets.APPLE_SERVER_API_PRIVATE_KEY }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+      - name: Request and inspect Apple TEST notification
+        run: node scripts/ci/apple_notification_delivery_smoke.mjs

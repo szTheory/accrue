@@ -158,6 +158,22 @@ cd examples/accrue_host
 mix verify
 ```
 
+### Advisory external-delivery smoke test
+
+The repository also provides the scheduled/manual **Apple notification delivery
+smoke** workflow. It requests Apple’s `TEST` notification and polls Apple’s
+recorded delivery result; it prints only the result class and attempt count, never
+the notification token or signed payload. It is advisory and is not a pull-request
+required check — the credential-free `mix verify` lane above remains merge
+authority.
+
+Configure the protected `apple-notification-smoke` GitHub environment with
+`APPLE_SERVER_API_KEY_ID`, `APPLE_SERVER_API_ISSUER_ID`,
+`APPLE_SERVER_API_BUNDLE_ID`, and `APPLE_SERVER_API_PRIVATE_KEY`. Use a dedicated
+non-customer App Store Connect app whose configured notification URL targets the
+stable staging host. Select `production` or `sandbox` when manually dispatching;
+the selected Apple endpoint must match that app’s configured notification URL.
+
 For native Phoenix contributor work, use the same app without Docker:
 
 ```bash
