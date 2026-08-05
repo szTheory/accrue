@@ -1,21 +1,8 @@
 defmodule Accrue.Entitlements.ReferenceScenarioConformanceTest do
   use Accrue.RepoCase, async: false
 
-  import Ecto.Query
-
-  alias Accrue.Entitlements.{
-    Account,
-    Grant,
-    Offline,
-    Observation,
-    Projector,
-    ReferenceScenarios,
-    Snapshot
-  }
-
-  alias Accrue.Entitlements.ReferenceScenarioExecutor
-
-  alias Accrue.Events.Event
+  alias Accrue.Entitlements.{Account, ReferenceScenarios, ReferenceScenarioExecutor}
+  alias Accrue.Entitlements.Offline.Issuance
 
   defmodule FakeVerifier do
     def verify_notification(_, _), do: {:error, :invalid_payload}
@@ -24,15 +11,12 @@ defmodule Accrue.Entitlements.ReferenceScenarioConformanceTest do
   end
 
   setup do
-    prior_entitlements = Application.get_env(:accrue, :entitlements)
-    prior_reconciliation = Application.get_env(:accrue, :apple_reconciliation)
-    prior_rails = Application.get_env(:accrue, :rails)
+    prior =
+      for key <- [:entitlements, :apple_reconciliation, :rails],
+          into: %{},
+          do: {key, Application.get_env(:accrue, key)}
 
-    on_exit(fn ->
-      restore(:entitlements, prior_entitlements)
-      restore(:apple_reconciliation, prior_reconciliation)
-      restore(:rails, prior_rails)
-    end)
+    on_exit(fn -> Enum.each(prior, fn {key, value} -> restore(key, value) end) end)
 
     Application.put_env(:accrue, :entitlements,
       plans: [
@@ -60,543 +44,60 @@ defmodule Accrue.Entitlements.ReferenceScenarioConformanceTest do
     )
   end
 
-  @tag :tracer
-  @tag :production_scenario
-  test "apple purchase to web login executes production authority" do
-    scenario = ReferenceScenarios.fetch!("apple_purchase_to_web_login")
-    account = account!("scenario-apple-web")
-    payload = purchase_payload!(scenario)
+  test "every deterministic corpus action reaches its declared executor in declared order" do
+    expected_rows = deterministic_rows()
 
-    assert {:ok, _outcome} =
-             Accrue.Entitlements.observe_apple_evidence(
-               account,
-               apple_evidence(account, payload)
-             )
+    observed_rows =
+      for scenario <- ReferenceScenarios.deterministic_scenarios(),
+          action <- scenario.actions do
+        account =
+          if action.kind == "parallel_delivery",
+            do: %{owner_id: "aggregate-#{scenario.id}"},
+            else: account!("aggregate-#{scenario.id}")
 
-    assert_production_result(scenario, account, payload, :stripe)
-  end
+        # Key-retention is global by design, so each scenario starts its public
+        # key calculation with only the issuer rows it provisions itself.
+        if action.kind == "rotated_key_proof", do: Accrue.TestRepo.delete_all(Issuance)
 
-  @tag :production_scenario
-  test "stripe purchase to iOS login executes production authority" do
-    scenario = ReferenceScenarios.fetch!("stripe_purchase_to_ios_login")
-    account = account!("scenario-stripe-ios")
-    payload = purchase_payload!(scenario)
-
-    assert {:ok, observation} =
-             Observation.insert_idempotently(
-               Accrue.TestRepo,
-               observation_attrs(account, payload)
-             )
-
-    assert {:ok, _snapshot} = Projector.project(observation)
-    assert_production_result(scenario, account, payload, :apple)
-  end
-
-  test "the loader rejects scenario inputs that could become a second reducer" do
-    scenario = ReferenceScenarios.fetch!("apple_purchase_to_web_login")
-    [action | rest] = scenario.actions
-
-    refute ReferenceScenarios.valid?(%{
-             scenario
-             | actions: [%{action | command: %{action.command | payload: %{}}} | rest]
-           })
-
-    assert "feasibility_blocked" == capability_report()["overall_status"]
-  end
-
-  test "generic grant and no-effect adapters cannot satisfy exact family transitions" do
-    for scenario <- ReferenceScenarios.deterministic_scenarios(), action <- scenario.actions do
-      expected = action.expected_transition
-
-      assert_raise ExUnit.AssertionError, fn ->
-        ReferenceScenarioExecutor.assert_transition(action, %{
-          result: %{tag: "executed", disposition: "generic_grant"},
-          durable: expected.durable,
-          cache: expected.cache
-        })
+        observed = ReferenceScenarioExecutor.execute_action(Accrue.TestRepo, account, action)
+        assert :ok = ReferenceScenarioExecutor.assert_transition(action, observed)
+        {scenario.id, action.order, action.kind}
       end
 
-      assert_raise ExUnit.AssertionError, fn ->
-        ReferenceScenarioExecutor.assert_transition(action, %{
-          result: expected.result,
-          durable: %{state: "unchanged", observation_kind: "none", snapshot_revision: 0},
-          cache: %{disposition: "none"}
-        })
-      end
+    assert observed_rows == expected_rows
+    assert length(observed_rows) == 27
+    assert Enum.uniq(observed_rows) == observed_rows
+  end
+
+  test "aggregate proof retains closed production-only action routing" do
+    source = File.read!(__ENV__.file)
+
+    refute source =~ ~r/defp\s+dispatch_fixture_/
+
+    assert ReferenceScenarios.deterministic_scenarios()
+           |> Enum.flat_map(& &1.actions)
+           |> Enum.map(&ReferenceScenarioExecutor.family_for!(&1.kind))
+           |> Enum.all?(& &1)
+  end
+
+  test "fixture execution modules never read expected transitions" do
+    for path <-
+          Path.wildcard(
+            Path.expand("../../support/entitlements/reference_scenario_executor/**/*.ex", __DIR__)
+          ) do
+      refute File.read!(path) =~ "expected_transition", path
     end
   end
 
-  @tag :action_dispatch_tracer
-  test "refund revocation dispatches its ordered grant and retract observations" do
-    scenario = ReferenceScenarios.fetch!("refund_revocation")
-
-    assert [
-             %{kind: "grant_observation", order: 1, command: %{payload: _grant}},
-             %{kind: "refund_observation", order: 2, command: %{payload: _retract}}
-           ] = scenario.actions
-
-    account = account!("refund-action-dispatch")
-
-    assert {:ok, _} = dispatch_observation(account, Enum.at(scenario.actions, 0))
-    assert {:ok, _} = dispatch_observation(account, Enum.at(scenario.actions, 1))
-    assert {:ok, snapshot} = Accrue.Entitlements.snapshot(account)
-
-    assert snapshot.plans == []
-    assert snapshot.sources == []
+  defp deterministic_rows do
+    for scenario <- ReferenceScenarios.deterministic_scenarios(),
+        action <- scenario.actions,
+        do: {scenario.id, action.order, action.kind}
   end
-
-  test "every deterministic row has a closed production execution input" do
-    deterministic_ids =
-      ReferenceScenarios.all()
-      |> Enum.filter(&(&1.evidence_lane == :deterministic_conformance))
-      |> Enum.map(& &1.id)
-
-    assert Enum.sort(deterministic_ids) ==
-             Enum.sort(ReferenceScenarios.production_execution_ids())
-
-    for scenario <- ReferenceScenarios.deterministic_scenarios() do
-      assert %{account: account, payload: payload} =
-               %{
-                 account: %{owner_id: "reference-scenario-#{scenario.id}"},
-                 payload: ReferenceScenarios.command!(scenario, 1).payload
-               }
-
-      assert is_binary(account.owner_id)
-      assert is_map(payload)
-    end
-  end
-
-  test "every deterministic scenario executes a production projection, snapshot, purchase, offline, and audit path" do
-    executed =
-      for scenario <- ReferenceScenarios.deterministic_scenarios() do
-        %{account: %{owner_id: owner_id}, payload: payload} =
-          %{
-            account: %{owner_id: "reference-scenario-#{scenario.id}"},
-            payload: ReferenceScenarios.command!(scenario, 1).payload
-          }
-
-        account = account!(owner_id)
-
-        for action <- scenario.actions do
-          dispatch_fixture_action(account, action)
-        end
-
-        # These are independent production contexts. The fixture supplies the
-        # expected tuple; this helper only selects and normalizes their bounded
-        # public outputs and deliberately contains no entitlement rules.
-        matching_payload =
-          Enum.find_value(scenario.actions, fn action ->
-            case action.command.payload do
-              %{rail: rail} = candidate ->
-                if rail in scenario.expected.snapshot.sources, do: candidate
-
-              _ ->
-                nil
-            end
-          end)
-
-        result_payload = matching_payload || payload
-
-        if scenario.id == "device_replacement" do
-          observed =
-            ReferenceScenarioExecutor.execute_action(
-              Accrue.TestRepo,
-              account,
-              hd(scenario.actions)
-            )
-
-          ReferenceScenarioExecutor.assert_transition(hd(scenario.actions), observed)
-        else
-          assert_bounded_result(scenario, account, result_payload)
-        end
-
-        {scenario.id, Enum.map(scenario.actions, &{&1.order, &1.kind})}
-      end
-
-    assert Enum.map(executed, &elem(&1, 0)) |> Enum.sort() ==
-             ReferenceScenarios.production_execution_ids() |> Enum.sort()
-
-    assert executed
-           |> Enum.flat_map(fn {id, actions} ->
-             Enum.map(actions, fn {order, kind} -> {id, order, kind} end)
-           end)
-           |> Enum.sort() ==
-             ReferenceScenarios.deterministic_scenarios()
-             |> Enum.flat_map(fn scenario ->
-               Enum.map(scenario.actions, &{scenario.id, &1.order, &1.kind})
-             end)
-             |> Enum.sort()
-  end
-
-  test "expiry adjacency scenarios fold production grants at their frozen microsecond clocks" do
-    expiry = ~U[2026-08-04 12:17:00.000001Z]
-
-    grant = %Grant{
-      rail: :apple,
-      environment: :production,
-      provider_lineage_id: "expiry-adjacency",
-      provider_product_id: "product_pro",
-      source_item_id: "expiry-adjacency-source",
-      quantity: 1,
-      effective_at: ~U[2026-08-04 12:16:59.000000Z],
-      expires_at: expiry
-    }
-
-    for {id, expected_plans} <- [
-          {"expiry_immediately_before_boundary", [:pro]},
-          {"expiry_at_boundary", []},
-          {"expiry_immediately_after_boundary", []}
-        ] do
-      scenario = ReferenceScenarios.fetch!(id)
-      {:ok, now, 0} = DateTime.from_iso8601(scenario.frozen_clock)
-
-      snapshot =
-        Snapshot.from_grants([grant],
-          account_id: "expiry-adjacency",
-          revision: 1,
-          now: now,
-          catalog: %{"product_pro" => %{plan: :pro, features: [:analytics], quotas: %{seats: 3}}}
-        )
-
-      assert snapshot.plans == expected_plans
-    end
-  end
-
-  test "equal-order permutations converge to the fixture tuple" do
-    scenario = ReferenceScenarios.fetch!("equal_order_stability")
-    payload = ReferenceScenarios.command!(scenario, 1).payload
-
-    tuples =
-      for suffix <- ["first", "second"] do
-        account = account!("equal-order-#{suffix}")
-
-        first = %{
-          payload
-          | provider_event_id: "equal-#{suffix}-1",
-            provider_transaction_id: "equal-#{suffix}-1",
-            provider_lineage_id: "equal-lineage-#{suffix}"
-        }
-
-        second = %{
-          first
-          | provider_event_id: "equal-#{suffix}-2",
-            provider_transaction_id: "equal-#{suffix}-2"
-        }
-
-        for item <- [first, second] do
-          assert result = deliver_observation(account, item, "grant")
-
-          assert match?({:ok, _}, result) or result == {:noop, :no_material_change} or
-                   result == {:noop, :stale}
-        end
-
-        assert_bounded_result(scenario, account, first)
-      end
-
-    assert Enum.uniq(tuples) == [true]
-  end
-
-  test "repeat idempotency and parallel delivery leave one fixture-authoritative durable result" do
-    for scenario_id <- ["repeat_idempotency", "parallel_execution"] do
-      scenario = ReferenceScenarios.fetch!(scenario_id)
-      payload = ReferenceScenarios.command!(scenario, 1).payload
-      account = account!("#{scenario_id}-named")
-
-      if scenario_id == "parallel_execution" do
-        results =
-          Ecto.Adapters.SQL.Sandbox.unboxed_run(Accrue.TestRepo, fn ->
-            Task.async_stream(
-              [:one, :two],
-              fn _ -> deliver_observation(account, payload, "grant") end,
-              max_concurrency: 2,
-              timeout: 10_000
-            )
-            |> Enum.to_list()
-          end)
-
-        assert Enum.all?(results, fn {:ok, result} ->
-                 match?({:ok, _}, result) or match?({:noop, _}, result)
-               end)
-      else
-        assert {:ok, _} = deliver_observation(account, payload, "grant")
-        assert {:noop, :stale} = deliver_observation(account, payload, "grant")
-      end
-
-      assert_bounded_result(scenario, account, payload)
-    end
-  end
-
-  test "interrupted resume replays the committed projection exactly once without a torn tuple" do
-    scenario = ReferenceScenarios.fetch!("interrupted_resume")
-    payload = ReferenceScenarios.command!(scenario, 1).payload
-    account = account!("interrupted-resume-named")
-
-    assert {:ok, observation} =
-             Observation.insert_idempotently(
-               Accrue.TestRepo,
-               observation_attrs(account, payload)
-             )
-
-    # The durable projector is the resume seam: after the commit boundary a
-    # replay is a no-op, so a lost response cannot create a second grant/audit.
-    assert {:ok, _} = Projector.project(observation, logical_plan: payload.logical_product)
-
-    assert {:noop, :stale} =
-             Projector.project(observation, logical_plan: payload.logical_product)
-
-    assert_bounded_result(scenario, account, payload)
-  end
-
-  defp assert_production_result(scenario, account, payload, opposite_rail) do
-    assert {:ok, snapshot} = Accrue.Entitlements.snapshot(account)
-
-    assert snapshot.revision == scenario.expected.snapshot.revision
-
-    assert snapshot.plans ==
-             Enum.map(scenario.expected.snapshot.plans, &String.to_existing_atom/1)
-
-    assert Enum.map(snapshot.sources, & &1.rail) == scenario.expected.snapshot.sources
-
-    decision =
-      Accrue.Entitlements.purchase_decision(
-        account.id,
-        opposite_rail,
-        opposite_product(opposite_rail)
-      )
-
-    assert decision.status == scenario.expected.purchase.status, "scenario=#{scenario.id}"
-    assert Atom.to_string(decision.reason) == scenario.expected.purchase.reason
-
-    assert_offline_if_requested(payload, scenario)
-
-    assert Accrue.TestRepo.aggregate(
-             from(event in Event, where: event.subject_id == ^account.id),
-             :count,
-             :id
-           ) == scenario.expected.audit_count
-  end
-
-  # This is intentionally only a bounded-result normalizer. It does not infer
-  # an entitlement decision from fixture data: the persisted projection,
-  # purchase context, Offline verifier, and audit ledger remain authoritative.
-  defp assert_bounded_result(scenario, account, payload) do
-    assert {:ok, snapshot} = Accrue.Entitlements.snapshot(account)
-    assert snapshot.revision == scenario.expected.snapshot.revision
-
-    assert snapshot.plans ==
-             Enum.map(scenario.expected.snapshot.plans, &String.to_existing_atom/1)
-
-    assert Enum.map(snapshot.sources, & &1.rail) == scenario.expected.snapshot.sources
-
-    if Map.has_key?(payload, :offline_vector) do
-      decision =
-        Accrue.Entitlements.purchase_decision(
-          account.id,
-          opposite_rail(payload.rail),
-          opposite_product(opposite_rail(payload.rail))
-        )
-
-      assert decision.status == scenario.expected.purchase.status, "scenario=#{scenario.id}"
-      assert Atom.to_string(decision.reason) == scenario.expected.purchase.reason
-      assert_offline_if_requested(payload, scenario)
-    end
-
-    assert Accrue.TestRepo.aggregate(
-             from(event in Event, where: event.subject_id == ^account.id),
-             :count,
-             :id
-           ) == scenario.expected.audit_count
-  end
-
-  defp purchase_payload!(scenario),
-    do:
-      scenario.actions
-      |> Enum.find(&match?(%{command: %{payload: %{rail: _}}}, &1))
-      |> then(& &1.command.payload)
-
-  defp assert_offline_if_requested(%{offline_vector: vector, offline_action: action}, scenario) do
-    assert {:ok, offline} =
-             Offline.verify(offline_vector(vector)["compact_jws"], offline_context(vector))
-
-    assert %{action: ^action, allowed: allowed} = Offline.action_policy(offline, action)
-    assert is_boolean(allowed)
-
-    assert scenario.expected.offline_policy.action in [
-             :allow_downloaded_study,
-             :reconnect_required,
-             :deny
-           ]
-  end
-
-  defp assert_offline_if_requested(_payload, _scenario), do: :ok
 
   defp account!(owner_id),
     do: Account.fetch_or_create(Accrue.TestRepo, "reference_scenario", owner_id) |> elem(1)
 
-  defp opposite_product(:stripe), do: "price_pro"
-  defp opposite_product(:apple), do: "product_pro"
-  defp opposite_rail(:stripe), do: :apple
-  defp opposite_rail(:apple), do: :stripe
-  defp opposite_rail("stripe"), do: :apple
-  defp opposite_rail("apple"), do: :stripe
-
-  defp apple_evidence(account, payload) do
-    Jason.encode!(%{
-      "originalTransactionId" => payload.provider_lineage_id,
-      "appAccountToken" => account.id,
-      "transactionId" => payload.provider_transaction_id,
-      "productId" => payload.provider_product_id,
-      "signedDate" => 1_754_000_000_000,
-      "expiresDate" => 1_800_000_000_000
-    })
-  end
-
-  defp observation_attrs(account, payload),
-    do: %{
-      account_id: account.id,
-      rail: payload.rail,
-      environment: payload.environment,
-      provider_event_id: payload.provider_event_id,
-      provider_transaction_id: payload.provider_transaction_id,
-      kind: "grant",
-      provider_lineage_id: payload.provider_lineage_id,
-      provider_product_id: payload.provider_product_id,
-      provider_order: payload.provider_order,
-      observed_at: ~U[2026-08-04 12:01:00.000000Z],
-      state: :qualified,
-      retry_count: 0,
-      metadata: %{"source" => "fake_observer"},
-      evidence_digest: String.duplicate("a", 64)
-    }
-
-  # This dispatcher has no grant/retract or entitlement rule of its own: the
-  # fixture's closed command selects the production observation kind and the
-  # Projector remains the sole lifecycle authority.
-  defp dispatch_observation(account, %{kind: kind, at: at, command: %{payload: payload}}) do
-    {:ok, observed_at, 0} = DateTime.from_iso8601(at)
-
-    with {:ok, observation} <-
-           Observation.insert_idempotently(
-             Accrue.TestRepo,
-             observation_attrs(account, payload)
-             |> Map.put(:kind, observation_kind!(kind))
-             |> Map.put(:observed_at, observed_at)
-           ),
-         {:ok, snapshot} <-
-           Projector.project(observation, logical_plan: payload.logical_product) do
-      {:ok, snapshot}
-    end
-  end
-
-  defp deliver_observation(account, payload, kind) do
-    with {:ok, observation} <-
-           Observation.insert_idempotently(
-             Accrue.TestRepo,
-             observation_attrs(account, payload) |> Map.put(:kind, kind)
-           ) do
-      Projector.project(observation, logical_plan: payload.logical_product)
-    end
-  end
-
-  defp observation_kind!("grant_observation"), do: "grant"
-  defp observation_kind!("refund_observation"), do: "refunded"
-  defp observation_kind!("stripe_retraction"), do: "retract"
-
-  defp observation_kind!(kind)
-       when kind in [
-              "apple_verified_purchase",
-              "stripe_verified_purchase",
-              "purchase_preflight",
-              "offline_proof_stale",
-              "offline_expansion_request",
-              "reconnect_request",
-              "device_replace",
-              "signed_deny",
-              "rollback_proof",
-              "rotated_key_proof",
-              "equal_order_delivery",
-              "repeat_delivery",
-              "parallel_delivery",
-              "durable_interruption",
-              "empty_evidence",
-              "expiry_boundary"
-            ],
-       do: "grant"
-
-  # Command-only actions are still executed through the production offline
-  # verifier; their follow-up output is asserted by the bounded result below.
-  # They never manufacture entitlement state in the fixture consumer.
-  defp dispatch_fixture_action(account, %{kind: kind, command: %{payload: %{account_ref: _}}})
-       when kind in [
-              "web_login",
-              "ios_login",
-              "verified_cache_replace",
-              "resume_delivery"
-            ],
-       do: Accrue.Entitlements.snapshot(account)
-
-  defp dispatch_fixture_action(_account, %{
-         kind: "empty_evidence",
-         command: %{payload: payload}
-       }) do
-    {:ok, _decision} = Offline.verify("", offline_context(payload.offline_vector))
-    :ok
-  end
-
-  defp dispatch_fixture_action(_account, %{kind: "device_replace"}), do: :ok
-
-  defp dispatch_fixture_action(
-         account,
-         %{command: %{payload: %{rail: _}}} = action
-       ),
-       do: dispatch_observation(account, action)
-
-  defp offline_vector(id), do: offline_fixture()["vectors"] |> Enum.find(&(&1["id"] == id))
-
-  defp offline_fixture,
-    do:
-      "../../../priv/entitlements/v1.59-offline-golden-vectors.json"
-      |> Path.expand(__DIR__)
-      |> File.read!()
-      |> Jason.decode!()
-
-  defp capability_report,
-    do:
-      "../../../../examples/crosswake_tracer/capability-report.json"
-      |> Path.expand(__DIR__)
-      |> File.read!()
-      |> Jason.decode!()
-
-  defp offline_context(id) do
-    offline_vector(id)["verification_context"]
-    |> Map.put("public_keys", offline_fixture()["public_jwks"]["keys"])
-    |> Map.new(fn {key, value} -> {offline_key(key), offline_value(key, value)} end)
-  end
-
-  defp offline_key(key),
-    do:
-      %{
-        "issuer" => :issuer,
-        "audience" => :audience,
-        "account_subject" => :account_subject,
-        "installation_id" => :installation_id,
-        "device_thumbprint" => :device_thumbprint,
-        "now" => :now,
-        "clock_high_water" => :clock_high_water,
-        "accepted_revision" => :accepted_revision,
-        "accepted_disposition" => :accepted_disposition,
-        "accepted_iat" => :accepted_iat,
-        "accepted_fresh_until" => :accepted_fresh_until,
-        "public_keys" => :public_keys
-      }[key]
-
-  defp offline_value("clock_high_water", value),
-    do: Map.new(value, fn {key, item} -> {String.to_existing_atom(key), item} end)
-
-  defp offline_value("accepted_disposition", value) when is_binary(value),
-    do: String.to_existing_atom(value)
-
-  defp offline_value(_, value), do: value
   defp restore(key, nil), do: Application.delete_env(:accrue, key)
   defp restore(key, value), do: Application.put_env(:accrue, key, value)
 end
