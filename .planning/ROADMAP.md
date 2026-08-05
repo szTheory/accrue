@@ -408,10 +408,10 @@ Plans:
 **Goal:** The reference host schedules durable offline reconnect recovery and proves that an interrupted reconnect is reclaimed through the existing locked, provider-authoritative worker path to one signed proof replacement.
 **Requirements**: OFF-05
 **Depends on:** Phase 221
-**Plans:** 1 plan
+**Plans:** 1/1 plans complete
 
 Plans:
 
 **Wave 1**
 
-- [ ] 222-01-PLAN.md — Add one 15-minute reconnect sweep and prove stranded authenticated recovery through the real worker chain to one verified signed replacement.
+- [x] 222-01-PLAN.md — Add one 15-minute reconnect sweep and prove stranded authenticated recovery through the real worker chain to one verified signed replacement.

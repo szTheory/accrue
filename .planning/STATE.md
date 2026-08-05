@@ -2,17 +2,17 @@
 gsd_state_version: 1.0
 milestone: v1.59
 milestone_name: Account-Scoped Multi-Rail & Offline Entitlements
-current_phase: 221
+current_phase: 222
 status: completed
 stopped_at: Completed 221-05-PLAN.md
-last_updated: "2026-08-05T18:28:54.522Z"
+last_updated: "2026-08-05T20:10:46.184Z"
 last_activity: 2026-08-05
-last_activity_desc: Phase 221 complete
+last_activity_desc: Phase 222 complete
 progress:
-  total_phases: 7
-  completed_phases: 7
-  total_plans: 76
-  completed_plans: 76
+  total_phases: 8
+  completed_phases: 8
+  total_plans: 77
+  completed_plans: 77
   percent: 100
 current_phase_name: close-gap-reference-host-apple-notification-ingress
 ---
@@ -29,10 +29,10 @@ See: `.planning/PROJECT.md` (updated 2026-08-05 after completing Phase 220)
 
 ## Current Position
 
-Phase: 221
+Phase: 222
 Plan: Not started
 Status: All phases complete
-Last activity: 2026-08-05 — Phase 221 complete
+Last activity: 2026-08-05 — Phase 222 complete
 
 ## Post-v1.48 Pause Rule
 
@@ -524,6 +524,7 @@ Coverage: 22/22 v1.51 requirements mapped (each REQ-ID → exactly one phase). D
 - v1.58 opened 2026-07-30: Phases 212-214 — roadmap created, ready to plan Phase 212
 - v1.59 activated 2026-07-31: Phases 215-220 — 29/29 requirements mapped; dependency shape 215→216→217→{218,219}→220; ready to plan Phase 215
 - Phase 221 added: Close gap: reference-host Apple notification ingress
+- Phase 222 added: Close gap: OFF-05 — schedule offline reconnect recovery
 - Phase 214.1 inserted after Phase 214: Close gap: DOCS-03 — reconcile StripeSync writer documentation (URGENT)
 - Phase 214.2 inserted after Phase 214: Close gap: SYNC-02/DOCS-03 — surface advisory entitlement diagnostics (URGENT)
 
