@@ -378,7 +378,7 @@ Plans:
 **Goal:** The reference host accepts App Store Server Notifications V2 through the existing Accrue contract with exact raw-body verification, durable intake and repair, deterministic host-boundary proof, and privacy-safe adopter guidance.
 **Requirements**: TBD
 **Depends on:** Phase 220
-**Plans:** 5/6 plans executed
+**Plans:** 6/6 plans complete
 
 Plans:
 
@@ -401,4 +401,4 @@ Plans:
 
 **Wave 5** *(gap closure; blocked on 221-05)*
 
-- [ ] 221-06-PLAN.md — Close configured-plan admission and trusted-proxy peer-resolution blockers with deterministic regressions.
+- [x] 221-06-PLAN.md — Close configured-plan admission and trusted-proxy peer-resolution blockers with deterministic regressions.

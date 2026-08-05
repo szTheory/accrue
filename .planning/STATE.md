@@ -3,18 +3,18 @@ gsd_state_version: 1.0
 milestone: v1.59
 milestone_name: Account-Scoped Multi-Rail & Offline Entitlements
 current_phase: 221
-current_phase_name: close-gap-reference-host-apple-notification-ingress
-status: verifying
+status: completed
 stopped_at: Completed 221-05-PLAN.md
-last_updated: "2026-08-05T17:45:07.595Z"
+last_updated: "2026-08-05T18:28:54.522Z"
 last_activity: 2026-08-05
-last_activity_desc: Phase 221 execution started
+last_activity_desc: Phase 221 complete
 progress:
   total_phases: 7
   completed_phases: 7
-  total_plans: 75
-  completed_plans: 75
+  total_plans: 76
+  completed_plans: 76
   percent: 100
+current_phase_name: close-gap-reference-host-apple-notification-ingress
 ---
 
 # Project State
@@ -29,10 +29,10 @@ See: `.planning/PROJECT.md` (updated 2026-08-05 after completing Phase 220)
 
 ## Current Position
 
-Phase: 221 (close-gap-reference-host-apple-notification-ingress) — EXECUTING
-Plan: 5 of 5
-Status: Phase complete — ready for verification
-Last activity: 2026-08-05 — Phase 221 execution started
+Phase: 221
+Plan: Not started
+Status: All phases complete
+Last activity: 2026-08-05 — Phase 221 complete
 
 ## Post-v1.48 Pause Rule
 
@@ -870,6 +870,7 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 
 ### Pending Todos
 
+- **Automate Apple delivery smoke test** (`.planning/todos/pending/2026-08-05-automate-apple-delivery-smoke-test.md`) — Minor follow-up: use a dedicated App Store Connect test app, the existing stable staging host, and a scheduled/manual CI lane. Keep deterministic host verification as PR merge authority.
 - **White-label billing portal design system** (`.planning/todos/pending/2026-06-19-white-label-billing-portal-design-system.md`) — Capture follow-up from CohortFlow `/billing` UAT: make `accrue_portal` white-label friendly, align the demo portal with host brand colors, style the unstyled `/billing/subscriptions` `View details` link, and plan a broader portal UI component/design-system pass.
 - **[RESOLVED 2026-06-18 via `/gsd-debug`] Phase-187 `Admin live interaction baseline` e2e times out (>300s).** Root cause was NOT DOM-size/per-node iteration (disproven — selectors resolve in 10–80ms): `probeAffordanceAndStates` called unbounded `await locator.hover()` on a disabled `.ax-button` (Phase 189 added disabled specimens to the kitchen); `.ax-button:disabled` has `pointer-events: none` (app.css:1332), so Playwright's hover actionability check never resolves and inherits the 180s test budget — ×2 serial projects → >300s. Fix: bound `hover()`/`focus()` with `{ timeout: 1_000 }` in `accrue_admin/e2e/admin-interactions.spec.js`. Re-verified: 2 passed (25.7s) both projects. Session: `.planning/debug/resolved/phase-187-baseline-timeout.md`.
 - **[RESOLVED 2026-06-18 via `/gsd-quick` 260618-3pu] Component-lab family headers used `String.upcase(family)`** (rendered "BUTTON"/"FORM-FIELD"). Replaced with a `family_label/1` map in `accrue_admin/lib/accrue_admin/dev/component_kitchen_live.ex` covering all 16 `applicable_states` families with the approved Phase-189 UI-SPEC `####` copywriting labels + a humanizing catch-all for future families. `189-UI-REVIEW.md` WARNING discharged.
