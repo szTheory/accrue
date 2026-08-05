@@ -126,6 +126,24 @@ defmodule Accrue.Entitlements.ReferenceScenariosTest do
            }
   end
 
+  @tag :special_dispatch
+  test "ordering and resume rows declare complete delivery and recovery commands" do
+    equal_order = ReferenceScenarios.fetch!("equal_order_stability") |> hd_action()
+    repeat = ReferenceScenarios.fetch!("repeat_idempotency") |> hd_action()
+    parallel = ReferenceScenarios.fetch!("parallel_execution") |> hd_action()
+    interruption = ReferenceScenarios.fetch!("interrupted_resume") |> hd_action()
+    resume = ReferenceScenarios.fetch!("interrupted_resume").actions |> List.last() |> Map.fetch!(:command)
+
+    assert equal_order.command.payload.permutations == [[0, 1], [1, 0]]
+    assert length(equal_order.command.payload.deliveries) == 2
+    assert repeat.command.payload.repeat_count == 3
+    assert length(repeat.command.payload.deliveries) == 1
+    assert parallel.command.payload.workers == [0, 0]
+    assert length(parallel.command.payload.deliveries) == 1
+    assert interruption.command.payload.interruption_hook == "after_admission"
+    assert resume.payload.request_ref == interruption.command.payload.request_ref
+  end
+
   test "write and check reject stale generated output" do
     root = fixture_root!()
 
@@ -275,4 +293,6 @@ defmodule Accrue.Entitlements.ReferenceScenariosTest do
       stderr_to_stdout: true
     )
   end
+
+  defp hd_action(scenario), do: hd(scenario.actions)
 end
