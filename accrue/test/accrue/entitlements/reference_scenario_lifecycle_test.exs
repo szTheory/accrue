@@ -184,6 +184,32 @@ defmodule Accrue.Entitlements.ReferenceScenarioLifecycleTest do
     assert replay.durable.audit_delta == 0
   end
 
+  test "every lifecycle declared transition leaf rejects a changed expectation" do
+    scenario = ReferenceScenarios.fetch!("refund_revocation")
+    [grant, refund] = scenario.actions
+    account = account!("reference-scenario-lifecycle-declared-leaves")
+
+    _ = ReferenceScenarioExecutor.execute_action(Accrue.TestRepo, account, grant)
+    observed = ReferenceScenarioExecutor.execute_action(Accrue.TestRepo, account, refund)
+
+    Enum.each(lifecycle_leaf_mutations(refund), fn mutated ->
+      assert_raise ExUnit.AssertionError, fn ->
+        ReferenceScenarioExecutor.assert_transition(mutated, observed)
+      end
+    end)
+  end
+
+  defp lifecycle_leaf_mutations(action) do
+    [
+      put_in(action.expected_transition.result.tag, "noop"),
+      put_in(action.expected_transition.result.disposition, "grant_observation"),
+      put_in(action.expected_transition.durable.state, "unchanged"),
+      put_in(action.expected_transition.durable.observation_kind, "grant"),
+      put_in(action.expected_transition.durable.snapshot_revision, 99),
+      put_in(action.expected_transition.cache.disposition, "preserve")
+    ]
+  end
+
   defp account!(owner_id),
     do: Account.fetch_or_create(Accrue.TestRepo, "reference_scenario", owner_id) |> elem(1)
 end
