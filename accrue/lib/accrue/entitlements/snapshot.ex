@@ -66,9 +66,10 @@ defmodule Accrue.Entitlements.Snapshot do
   end
 
   @doc "Fetches and folds an account's current grants without mutating state."
-  @spec fetch(Ecto.Repo.t(), map() | Ecto.UUID.t()) :: t() | nil
-  def fetch(repo, %{id: account_id, revision: revision}), do: fetch(repo, account_id, revision)
-  def fetch(repo, account_id) when is_binary(account_id), do: fetch(repo, account_id, nil)
+  @spec fetch(Ecto.Repo.t(), map() | Ecto.UUID.t(), keyword()) :: t() | nil
+  def fetch(repo, account, opts \\ [])
+  def fetch(repo, %{id: account_id, revision: revision}, opts), do: fetch(repo, account_id, revision, opts)
+  def fetch(repo, account_id, opts) when is_binary(account_id), do: fetch(repo, account_id, nil, opts)
 
   @doc "The material authorization fields used for monotonic revision decisions."
   @spec authorization_signature(t()) :: term()
@@ -82,7 +83,7 @@ defmodule Accrue.Entitlements.Snapshot do
   defp normalize_authorization_bounds(bounds) when is_map(bounds), do: bounds
   defp normalize_authorization_bounds(_), do: %{}
 
-  defp fetch(repo, account_id, revision) do
+  defp fetch(repo, account_id, revision, opts) do
     import Ecto.Query
 
     revision =
@@ -100,7 +101,7 @@ defmodule Accrue.Entitlements.Snapshot do
         )
       )
 
-    from_grants(grants, account_id: account_id, revision: revision)
+    from_grants(grants, account_id: account_id, revision: revision, now: Keyword.get_lazy(opts, :now, &DateTime.utc_now/0))
   end
 
   defp fold_grant(grant, catalog, {plans, features, quantities, sources, authorization_bounds}) do

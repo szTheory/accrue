@@ -255,7 +255,7 @@ defmodule Accrue.Entitlements do
       fn ->
         case snapshot_account(account_or_billable) do
           nil -> {:error, :not_found}
-          account -> {:ok, Snapshot.fetch(Accrue.Repo.repo(), account)}
+          account -> {:ok, Snapshot.fetch(Accrue.Repo.repo(), account, opts)}
         end
       end
     )
