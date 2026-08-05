@@ -79,6 +79,78 @@ defmodule AccrueHostWeb.AppleNotificationIngestTest do
     assert runtime =~ "verifier_config: verifier_config"
   end
 
+  test "router maps verification, rate, and quarantine outcomes to empty response classes" do
+    assert_response_class({:error, :invalid_payload}, :allow, 400)
+    assert_response_class({:ok, valid_facts()}, {:deny, 15}, 429)
+    assert_response_class({:error, :provider_unavailable}, :allow, 503)
+    assert_response_class({:error, :wrong_bundle}, :allow, 200)
+
+    assert %Intake{disposition: "quarantined", reason: "wrong_bundle"} =
+             Repo.get_by!(Intake, provider_event_id: "quarantine:" <> digest(payload()))
+  end
+
+  test "serial and concurrent router duplicates converge to one intake and wakeup" do
+    assert 200 == post_apple(payload()).status
+    assert 200 == post_apple(payload()).status
+
+    concurrent_statuses =
+      1..2
+      |> Task.async_stream(fn _ -> post_apple(payload()).status end, timeout: 5_000)
+      |> Enum.map(fn {:ok, status} -> status end)
+
+    assert concurrent_statuses == [200, 200]
+    assert Repo.aggregate(Intake, :count) == 1
+    assert Repo.aggregate(ReconciliationWakeup, :count) == 1
+  end
+
+  test "router rejects an Apple body above the shared 262,144-byte boundary" do
+    oversized = ~s({"opaque":"#{String.duplicate("x", 262_145)}"})
+    assert 413 == post_apple(oversized).status
+  end
+
+  defp assert_response_class(verifier_result, rate_limiter, expected_status) do
+    configure_ingress(verifier_result, rate_limiter)
+    conn = post_apple(payload())
+
+    assert conn.status == expected_status
+    assert conn.resp_body == ""
+  end
+
+  defp configure_ingress(verifier_result, rate_limiter) do
+    Application.put_env(:accrue_host, :apple_notification_ingress,
+      verifier: FakeVerifier,
+      verifier_config: %{
+        test_pid: self(),
+        result: verifier_result,
+        environment: :production,
+        verifier_version: "fake-v1",
+        config_version: "host-test-v1"
+      },
+      rate_limiter: fn _conn -> rate_limiter end,
+      repo: Repo,
+      max_body_bytes: 262_144
+    )
+  end
+
+  defp post_apple(payload) do
+    Plug.Test.conn(:post, "/webhooks/apple", payload)
+    |> Plug.Conn.put_req_header("content-type", "application/json")
+    |> AccrueHostWeb.Router.call(AccrueHostWeb.Router.init([]))
+  end
+
+  defp payload, do: ~s({"opaque":"host-router-apple-notification"})
+
+  defp valid_facts do
+    %{
+      notification: %{"notificationUUID" => "host-apple-notification-001"},
+      transaction: %{
+        "originalTransactionId" => "host-apple-lineage-001",
+        "transactionId" => "host-apple-transaction-001",
+        "productId" => "host-apple-product-001"
+      }
+    }
+  end
+
   defp digest(payload), do: :crypto.hash(:sha256, payload) |> Base.encode16(case: :lower)
 
   defp restore_env(app, key, nil), do: Application.delete_env(app, key)
