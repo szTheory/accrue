@@ -34,6 +34,10 @@ tracer remains `feasibility_blocked` until its documented bridge and physical
 device evidence is present. Fake, browser, simulator, and vector results cannot
 promote that runtime claim.
 
+For an active Crosswake iOS host, follow the
+[first-adopter iOS bridge contract](first_adopter_ios_bridge.md). It keeps
+StoreKit binding host-owned and preserves this runtime-evidence boundary.
+
 `advisory_parity` is provider-comparison evidence and is not merge-blocking.
 Browser/Playwright coverage is complementary rendered-host evidence for copy and
 flows. It is not an oracle for StoreKit, proof verification, cache rollback,
