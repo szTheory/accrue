@@ -1334,7 +1334,9 @@
               "provider_event_id": "reference_interrupted_resume_event",
               "provider_transaction_id": "reference_interrupted_resume_transaction",
               "provider_lineage_id": "reference_interrupted_resume_lineage",
-              "provider_order": 1
+              "provider_order": 1,
+              "request_ref": "interrupted_resume_request",
+              "interruption_hook": "after_admission"
             }
           },
           "expected_transition": {
@@ -1362,7 +1364,8 @@
             "kind": "resume_delivery",
             "payload": {
               "account_ref": "reference_scenario_resume_delivery",
-              "clock": "2026-08-04T12:16:01Z"
+              "clock": "2026-08-04T12:16:01Z",
+              "request_ref": "interrupted_resume_request"
             }
           },
           "expected_transition": {

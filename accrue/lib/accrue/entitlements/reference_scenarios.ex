@@ -28,6 +28,8 @@ defmodule Accrue.Entitlements.ReferenceScenarios do
   @parallel_delivery_payload_keys @ordering_payload_keys ++ ~w(deliveries workers)
   @resume_payload_keys @base_payload_keys ++
                          (@operation_keys -- ~w(offline_vector offline_action))
+  @durable_interruption_payload_keys @resume_payload_keys ++ ~w(request_ref interruption_hook)
+  @resume_delivery_payload_keys @base_payload_keys ++ ~w(request_ref)
   @expiry_payload_keys @base_payload_keys ++
                          (@operation_keys -- ~w(offline_vector offline_action))
   @payload_keys_by_kind %{
@@ -52,8 +54,8 @@ defmodule Accrue.Entitlements.ReferenceScenarios do
     "equal_order_delivery" => @equal_order_payload_keys,
     "repeat_delivery" => @repeat_delivery_payload_keys,
     "parallel_delivery" => @parallel_delivery_payload_keys,
-    "durable_interruption" => @resume_payload_keys,
-    "resume_delivery" => @base_payload_keys
+    "durable_interruption" => @durable_interruption_payload_keys,
+    "resume_delivery" => @resume_delivery_payload_keys
   }
   @expected_keys ~w(snapshot purchase offline_policy audit_count)
 
@@ -198,37 +200,59 @@ defmodule Accrue.Entitlements.ReferenceScenarios do
   defp validate_payload!(kind, p) do
     utc!(p.clock, "command clock")
 
-    if kind in @observation_kinds and
-         kind not in [
-           "apple_verified_purchase",
-           "stripe_verified_purchase",
-           "grant_observation",
-           "refund_observation",
-           "stripe_retraction"
-         ] do
-      valid_ordering_schedule!(kind, p)
+    if kind == "durable_interruption" do
+      (p.interruption_hook in ["after_admission", "after_issuance_commit"] and
+         valid_id?(p.request_ref) and valid_resume_operation?(p)) ||
+        raise ArgumentError, "invalid durable_interruption payload"
     else
-      if kind == "device_replace" do
-        (Enum.all?(@device_replace_payload_keys -- ~w(clock prior_transition reason), fn key ->
-           valid_id?(Map.fetch!(p, String.to_atom(key)))
-         end) and p.prior_transition in ["superseded", "revoked"] and
-           ((p.prior_transition == "superseded" and p.reason == "planned_replacement") or
-              (p.prior_transition == "revoked" and p.reason == "lost_or_compromised"))) ||
-          raise ArgumentError, "invalid device_replace payload"
+      if kind == "resume_delivery" do
+        valid_id?(p.request_ref) || raise ArgumentError, "invalid resume_delivery payload"
       else
-        if kind not in @read_kinds do
-          (p.rail in ["apple", "stripe", :apple, :stripe] and
-             p.environment in ["production", "sandbox", :production, :sandbox] and
-             Enum.all?(
-               @operation_keys --
-                 ~w(rail environment provider_order offline_vector offline_action),
-               &valid_id?(Map.fetch!(p, String.to_atom(&1)))
-             ) and is_integer(p.provider_order) and p.provider_order > 0 and
-             offline_context_valid?(kind, p)) ||
-            raise ArgumentError, "invalid #{kind} payload"
+        if kind in @observation_kinds and
+             kind not in [
+               "apple_verified_purchase",
+               "stripe_verified_purchase",
+               "grant_observation",
+               "refund_observation",
+               "stripe_retraction"
+             ] do
+          valid_ordering_schedule!(kind, p)
+        else
+          if kind == "device_replace" do
+            (Enum.all?(
+               @device_replace_payload_keys -- ~w(clock prior_transition reason),
+               fn key ->
+                 valid_id?(Map.fetch!(p, String.to_atom(key)))
+               end
+             ) and p.prior_transition in ["superseded", "revoked"] and
+               ((p.prior_transition == "superseded" and p.reason == "planned_replacement") or
+                  (p.prior_transition == "revoked" and p.reason == "lost_or_compromised"))) ||
+              raise ArgumentError, "invalid device_replace payload"
+          else
+            if kind not in @read_kinds do
+              (p.rail in ["apple", "stripe", :apple, :stripe] and
+                 p.environment in ["production", "sandbox", :production, :sandbox] and
+                 Enum.all?(
+                   @operation_keys --
+                     ~w(rail environment provider_order offline_vector offline_action),
+                   &valid_id?(Map.fetch!(p, String.to_atom(&1)))
+                 ) and is_integer(p.provider_order) and p.provider_order > 0 and
+                 offline_context_valid?(kind, p)) ||
+                raise ArgumentError, "invalid #{kind} payload"
+            end
+          end
         end
       end
     end
+  end
+
+  defp valid_resume_operation?(p) do
+    p.rail in ["apple", "stripe", :apple, :stripe] and
+      p.environment in ["production", "sandbox", :production, :sandbox] and
+      Enum.all?(
+        @operation_keys -- ~w(rail environment provider_order offline_vector offline_action),
+        &valid_id?(Map.fetch!(p, String.to_atom(&1)))
+      ) and is_integer(p.provider_order) and p.provider_order > 0
   end
 
   defp valid_ordering_schedule!(kind, p) do
