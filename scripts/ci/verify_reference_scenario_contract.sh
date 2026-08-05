@@ -89,4 +89,21 @@ grep -Eq '^  pull_request:' "$workflow" || fail "workflow lacks pull-request tri
 (cd "$ACCRUE_DIR" && mix accrue.entitlements.reference_scenarios --check --root "$ROOT_DIR") ||
   fail "generated matrix drift"
 
+# Fixture roots are used by the contract's own mutation tests. The complete
+# credential-free evidence lane runs only from the checked-out project root.
+if [ "$ROOT_DIR" = "$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)" ]; then
+  (
+    cd "$ACCRUE_DIR"
+    mix test test/accrue/entitlements/reference_scenarios_test.exs \
+      test/accrue/entitlements/reference_scenario_*_test.exs \
+      test/accrue/entitlements/repair_drills_test.exs \
+      --seed 458442 --max-failures 1
+    mix accrue.entitlements.reference_scenarios --check --root ..
+  )
+  (cd "$ROOT_DIR/examples/accrue_host" && mix test test/accrue_host/reference_scenario_conformance_test.exs)
+  (cd "$ROOT_DIR/examples/crosswake_tracer" && swift test)
+  bash "$ROOT_DIR/scripts/ci/verify_adoption_proof_matrix.sh"
+  bash "$ROOT_DIR/scripts/ci/verify_release_contract.sh"
+fi
+
 echo "verify_reference_scenario_contract: OK"

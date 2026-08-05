@@ -95,7 +95,10 @@ defmodule AccrueHost.ReferenceScenarioConformanceTest do
         &1
       )
     )
-    |> then(& &1.command.payload)
+    |> then(fn action ->
+      assert action.command.kind == action.kind
+      action.command.payload
+    end)
   end
 
   defp account!(owner_id),

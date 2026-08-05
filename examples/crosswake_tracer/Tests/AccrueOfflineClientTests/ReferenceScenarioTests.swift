@@ -25,6 +25,16 @@ struct ReferenceScenarioTests {
         #expect((transition["cache"] as? [String: Any])?["disposition"] as? String == "preserve")
         let stripe = try #require(scenarios.first { ($0["id"] as? String) == "stripe_purchase_to_ios_login" })
         #expect(stripe["evidence_lane"] as? String == "deterministic_conformance")
+        for scenarioID in ["stale_downloaded_study_continuity", "offline_reconnect", "device_replacement", "key_rotation"] {
+            let vector = try #require(scenarios.first { ($0["id"] as? String) == scenarioID })
+            let action = try #require((vector["actions"] as? [[String: Any]])?.first)
+            let taggedCommand = try #require(action["command"] as? [String: Any])
+            let expected = try #require(action["expected_transition"] as? [String: Any])
+            #expect(taggedCommand["kind"] as? String == action["kind"] as? String)
+            #expect(expected["result"] is [String: Any])
+            #expect(expected["durable"] is [String: Any])
+            #expect(expected["cache"] is [String: Any])
+        }
         let runtime = try #require(scenarios.first { ($0["id"] as? String) == "crosswake_runtime_capability" })
         #expect(runtime["evidence_lane"] as? String == "runtime_capability")
         let reportObject = try #require(JSONSerialization.jsonObject(with: Data(contentsOf: report)) as? [String: Any])
