@@ -62,6 +62,7 @@ human_verification:
 | `accrue/test/accrue/entitlements/reference_scenario_conformance_test.exs` | Aggregate exact-oracle and mutation proof | ✓ VERIFIED | Test asserts declared/observed leaf-path inventory equality and requires an assertion failure for each unequal mutation. |
 | `accrue/lib/accrue/entitlements/admin.ex` | Closed privacy-bounded diagnostic projection | ✓ VERIFIED | Builds bounded snapshot/provider/eligibility/device/recovery/next-action maps from the Repo, with documented exclusions. |
 | `scripts/ci/verify_reference_scenario_contract.sh` | Credential-free coordinated release gate | ✓ VERIFIED | Invokes core scenario/repair tests, host conformance, Swift tests, adoption proof, and release contract; it passed from repository root. |
+| `220-ALPHA-CROSSWAKE-READINESS-BOUNDARY.md` | Three-owner readiness explanation and seam checklist | ✓ VERIFIED | Separates Accrue contract proof, Crosswake runtime proof, and Alpha-owned production integration evidence; Alpha remains external and unevaluated. |
 
 ### Key Link Verification
 
@@ -88,6 +89,7 @@ human_verification:
 | Complete credential-free Phase 220 gate | `bash scripts/ci/verify_reference_scenario_contract.sh` | Exit 0: 51 Elixir tests, 2 host conformance tests, 28 Swift tests, generated/adoption/release-contract checks all passed. | ✓ PASS |
 | Exact fixture-oracle enforcement | Included `every declared transition leaf rejects a mutation against its unchanged production observation` test | The command passed after enumerating every action's expected scalar leaves and requiring each mutation to fail. | ✓ PASS |
 | Crosswake evidence boundary | Included Swift capability-report tests | Checked-in report remains `feasibility_blocked`; missing bridge/device evidence fails closed. | ✓ PASS (blocked-state contract) |
+| Alpha/Crosswake readiness explanation | `220-ALPHA-CROSSWAKE-READINESS-BOUNDARY.md` | Maps the three proof owners and their non-implications without claiming external Alpha evidence. | ✓ PASS (documentation boundary) |
 
 ### Requirements Coverage
 
@@ -112,13 +114,13 @@ No `TBD`, `FIXME`, or `XXX` markers, placeholder returns, empty implementation p
 
 ## Human Verification Required
 
-### 1. Crosswake evidence boundary
+### 1. Alpha/Crosswake runtime boundary
 
-**Test:** Compare the capability report to actual bridge-compile and physical-device evidence.
+**Test:** Read the [Alpha/Crosswake readiness boundary](220-ALPHA-CROSSWAKE-READINESS-BOUNDARY.md), then compare the capability report to actual bridge-compile and physical-device evidence.
 
-**Expected:** It remains `feasibility_blocked` until both evidence kinds exist; no public material promotes it based on fixture or server evidence.
+**Expected:** The three owners remain distinct: Accrue contract proof is reusable conformance evidence, Crosswake runtime proof remains `feasibility_blocked` until both evidence kinds exist, and Alpha-owned production integration evidence remains external and unevaluated here. No public material promotes runtime or Alpha integration based on fixture or server evidence.
 
-**Why human:** Automated tests verify the fail-closed blocked state, not real mobile runtime feasibility.
+**Why human:** Automated tests verify the fail-closed blocked state and documentation structure, not real mobile runtime feasibility or Alpha's separately owned integration/release evidence.
 
 ### 2. Public v1.59 boundary review
 
@@ -130,7 +132,7 @@ No `TBD`, `FIXME`, or `XXX` markers, placeholder returns, empty implementation p
 
 ## Gaps Summary
 
-The previous blocker is closed: production-derived transitions are now compared exactly, and a mutation proof prevents declared leaves from becoming decorative. No code or wiring gap remains. The phase awaits only the two explicitly retained human backstop reviews above.
+The previous fixture-oracle blocker is closed: production-derived transitions are now compared exactly, and a mutation proof prevents declared leaves from becoming decorative. G-220-1 is also resolved only as an explanation/ownership gap through the [Alpha/Crosswake readiness boundary](220-ALPHA-CROSSWAKE-READINESS-BOUNDARY.md); it does not claim Crosswake runtime or Alpha integration evidence. No code or wiring gap remains. The phase awaits only the two explicitly retained human backstop reviews above.
 
 ---
 
