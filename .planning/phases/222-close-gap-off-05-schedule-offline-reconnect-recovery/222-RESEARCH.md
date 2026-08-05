@@ -215,12 +215,12 @@ Oban documents static Cron worker tuples and supports validating Cron/Oban confi
 |---|---|---|---|
 | A1 | A 15-minute reconnect sweep is the intended cadence because it matches the already-deployed Apple reconciliation sweep. The audit requires an explicit cadence but does not prescribe a number. | Summary / Architecture Patterns | A different operational SLO may require a shorter or longer cadence; planner should confirm only if altering the established cadence is material. |
 
-## Open Questions
+## Resolved Questions
 
-1. **Does Phase 222 need to complete production `:offline_reconnect` host configuration, or only close the audited scheduler integration?**
-   - What we know: `ReconnectWorker` requires a host-owned source coordinator and key provider. The current reference-host runtime configuration contains Apple reconciliation configuration but no `:offline_reconnect` configuration, and no production host implementation of `Accrue.Entitlements.Offline.KeyProvider` or `SourceCoordinator` was found. [VERIFIED: codebase `reconnect.ex`, `examples/accrue_host/config/runtime.exs`, `key_provider.ex`, `source_coordinator.ex`]
-   - What's unclear: The milestone audit frames the required closure as Cron wiring plus a signed host recovery proof, but adding only Cron would cause a real production worker to terminate with `config_invalid` if a reconnect attempt reaches it. [VERIFIED: codebase `.planning/v1.59-v1.59-MILESTONE-AUDIT.md`, `reconnect.ex`]
-   - Recommendation: Keep production signing custody/provider-specific refresh implementation out of this narrow schedule phase unless the planner confirms it is already supplied externally. Make the host test use a test-only configured coordinator/provider and add an explicit planner checkpoint: do not claim the reference host’s production reconnect endpoint is operational until production `:offline_reconnect` configuration exists. [VERIFIED: codebase `key_provider.ex`, `source_coordinator.ex`, `reconnect.ex`]
+1. **RESOLVED — Does Phase 222 need to complete production `:offline_reconnect` host configuration, or only close the audited scheduler integration?**
+   - **RESOLVED:** This phase delivers only Cron wiring and a test-only recovery proof; production source/key adapters remain host-owned and out of scope.
+   - Evidence: `ReconnectWorker` requires a host-owned source coordinator and key provider, while the current reference-host runtime configuration contains neither production adapter. The milestone audit scopes closure to the missing Cron link plus a signed host recovery proof. [VERIFIED: codebase `reconnect.ex`, `examples/accrue_host/config/runtime.exs`, `key_provider.ex`, `source_coordinator.ex`, `.planning/v1.59-v1.59-MILESTONE-AUDIT.md`]
+   - Consequence: The host proof must install test-only behavior implementations, exercise an observable due-source refresh, and restore configuration on exit. Phase documentation must not claim the reference host production reconnect endpoint is operational from Cron wiring alone. [VERIFIED: codebase `source_coordinator.ex`, `reconnect.ex`]
 
 ## Environment Availability
 

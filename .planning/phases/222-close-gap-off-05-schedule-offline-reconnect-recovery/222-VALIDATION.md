@@ -32,12 +32,14 @@ created: 2026-08-05
 
 | Task ID | Plan | Wave | Requirement | Threat Ref | Secure Behavior | Test Type | Automated Command | File Exists | Status |
 |---------|------|------|-------------|------------|-----------------|-----------|-------------------|-------------|--------|
-| 222-01-01 | 01 | 1 | OFF-05 | T-222-01 | Cron triggers the existing reconnect sweeper without replacing other schedules or queues. | configuration integration | `cd examples/accrue_host && MIX_ENV=test mix test test/accrue_host/recovery_wiring_test.exs --warnings-as-errors` | ✅ extend | ⬜ pending |
-| 222-01-02 | 01 | 1 | OFF-05 | T-222-02 | A durable stranded reconnect is swept, executes once under configured test-only providers, and reaches signed issuance. | Ecto + Oban integration | `cd examples/accrue_host && MIX_ENV=test mix test test/accrue_host/recovery_wiring_test.exs --warnings-as-errors` | ✅ extend | ⬜ pending |
+| 222-01-01 | 01 | 1 | OFF-05 | T-222-01 | A real one-time challenge and P-256 device signature admit the durable attempt before interruption; the worker receives no fabricated authentication input. | PoP + Ecto integration | `cd examples/accrue_host && MIX_ENV=test mix test test/accrue_host/recovery_wiring_test.exs --warnings-as-errors` | ✅ extend | ⬜ pending |
+| 222-01-02 | 01 | 1 | OFF-05 | T-222-02 | Cron preserves existing schedules; a durable stranded reconnect is swept and terminalizes exactly once through the persisted worker job. | configuration + Oban/Ecto integration | `cd examples/accrue_host && MIX_ENV=test mix test test/accrue_host/recovery_wiring_test.exs --warnings-as-errors` | ✅ extend | ⬜ pending |
+| 222-01-03 | 01 | 1 | OFF-05 | T-222-03 | Instrumented `due_sources/3` and `refresh/4` calls prove a controlled provider status flows from host configuration through refresh without any client-proof input. | behavior-contract integration | `cd examples/accrue_host && MIX_ENV=test mix test test/accrue_host/recovery_wiring_test.exs --warnings-as-errors` | ✅ extend | ⬜ pending |
+| 222-01-04 | 01 | 1 | OFF-05 | T-222-04 | Signing/source adapters remain nested test modules and every mutated application key is restored by the non-async fixture. | isolation integration | `cd examples/accrue_host && MIX_ENV=test mix test test/accrue_host/recovery_wiring_test.exs --warnings-as-errors` | ✅ extend | ⬜ pending |
 
 ## Wave 0 Requirements
 
-- [ ] Extend `examples/accrue_host/test/accrue_host/recovery_wiring_test.exs` with test-only offline reconnect key-provider/source-coordinator fixtures and safe application-environment restoration.
+- [ ] Extend `examples/accrue_host/test/accrue_host/recovery_wiring_test.exs` with test-only offline reconnect key-provider/instrumented due-source coordinator fixtures, exact callback-input assertions, and safe application-environment restoration.
 - [ ] Extend the same test with static Cron assertions and durable stranded-attempt recovery proof.
 
 ## Manual-Only Verifications
