@@ -330,17 +330,15 @@ The implementation must append to the existing queue and Cron configuration, the
 |---|---|---|---|
 | A1 | A process-local fixed-window or token-bucket limiter is suitable as a deterministic reference-host backstop once trusted peer normalization is specified. | Architecture Patterns | The chosen API/semantics could be unsuitable for test determinism; implementation should select and document the exact algorithm. [ASSUMED] |
 
-## Open Questions
+## Resolved Questions
 
-1. **Which deterministic verifier fixture mechanism best proves byte identity without introducing sensitive-like signed samples?**
+1. **RESOLVED — Which deterministic verifier fixture mechanism best proves byte identity without introducing sensitive-like signed samples?**
    - What we know: The host can use a fake verifier and existing tests already mutate app config for host-local fakes. [VERIFIED: codebase `reference_scenario_conformance_test.exs`]
-   - What's unclear: Whether an existing safe fixture can be reused or a purpose-built test fake should capture bytes in a supervised process/Agent.
-   - Recommendation: Use a purpose-built test fake with opaque synthetic JSON and a minimal captured-byte assertion unless a current fixture exactly meets the privacy rule.
+   - Resolution: Plan 221-02 uses a test-local opaque `FakeVerifier` that captures the exact input bytes by reporting them to a test PID. Tests post opaque synthetic JSON and assert byte-for-byte equality; they do not reuse or introduce signed provider fixtures.
 
-2. **What is the exact trusted peer identity contract behind a proxy?**
+2. **RESOLVED — What is the exact trusted peer identity contract behind a proxy?**
    - What we know: D-08 permits a single-node backstop only when keyed from trusted peer identity. [VERIFIED: context D-08]
-   - What's unclear: Which proxy/forwarded-header trust configuration the reference deployment guarantees.
-   - Recommendation: Define a conservative direct-peer default for the reference host and document that production proxy normalization is host/deployment configuration, not an Apple header claim.
+   - Resolution: Plan 221-03 keys the host seam only from the normalized direct `remote_ip`. It does not parse or trust forwarded headers or Apple-supplied identity claims. Any deployment proxy must normalize the peer before the request reaches this host seam; proxy trust handling remains outside this phase's reference-host contract.
 
 ## Environment Availability
 
