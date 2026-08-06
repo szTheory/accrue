@@ -257,17 +257,16 @@ The WebKit API is explicitly designed to receive a JavaScript message and provid
 |---|---|---|---|
 | A1 | Suggested Crosswake folder/type names and the illustrative Swift snippets match a plausible structure, but cannot be verified without the pinned source. | Architecture Patterns / Code Examples | Planner could misname files; resolve immediately after source-access gate. |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
-1. **Which immutable Crosswake revision and source location will own the patch?**
-   - What we know: The local capability report records the source as unavailable. [VERIFIED: examples/crosswake_tracer/capability-report.json]
-   - What's unclear: Upstream acceptance timing, exact module names, test target, and current validator seam.
-   - Recommendation: Gate all implementation tasks on recording the revision, base/diff, source audit, and convergence record; use the exact discovered safe dispatch point.
+1. **Which immutable Crosswake revision and source location will own the patch? — RESOLVED by a deterministic two-stage source gate.**
+   - Execution receives an authorized clean checkout only through `CROSSWAKE_SOURCE_ROOT`; absence or an unauthorized remote/lane halts with no Crosswake edit. The task first performs read-only inspection, records the sanitized remote, authorized upstream-or-Alpha-fork lane, immutable starting HEAD/base, clean-tree result, exact validator/reply/lifecycle owners, module/test commands, and convergence metadata in `224-CROSSWAKE-SOURCE-AUDIT.md`, and writes `crosswake-source-lock.json` in `base_locked` state. [VERIFIED: 224-CONTEXT.md D-01/D-02]
+   - `scripts/ci/verify_crosswake_host_commands.sh source-gate` verifies remote identity, authorization record, clean tree, and audit digest. In `base_locked` state it requires HEAD to equal the immutable base before the first production or test edit; in `reviewed_patch` state it requires HEAD to equal the reviewed patch, proves the recorded base is its ancestor, and verifies the base-to-patch diff identity. The pre-edit audit/lock/runner record is committed in Accrue. No Crosswake path or symbol is named by the plan beyond what that read-only audit discovers. [VERIFIED: 224-CONTEXT.md D-01/D-07]
+   - After the Crosswake patch is tested, reviewed, and committed in the authorized lane, the lock advances to `reviewed_patch` with exact patch revision and stable diff identity while preserving the original remote/lane/base fields. The audit gains the reviewed diff range, exhaustive changed path/symbol inventory, and updated convergence state. Plans 02-04 accept only that reviewed exact revision. [VERIFIED: 224-CONTEXT.md D-01/D-03]
 
-2. **Which precise fixed schemas fit the four literal commands without sensitive payloads?**
-   - What we know: Arbitrary maps and raw proofs/receipts/tokens/identifiers are prohibited. [VERIFIED: 224-CONTEXT.md]
-   - What's unclear: The first-adopter's minimal non-sensitive request/response fields.
-   - Recommendation: Define descriptors as fixed zero/small-field contracts in Crosswake after host review; reject oversize/unknown/duplicate fields and defer StoreKit/Accrue semantics to Phase 225.
+2. **Which precise fixed schemas fit the four literal commands without sensitive payloads? — RESOLVED as strict zero-field transport contracts.**
+   - All four D-05 commands use fixed no-field request schemas and fixed no-field success-response schemas. Command identity selects the host-owned action; StoreKit context, authentication, receipts/proofs/tokens, product/account/device identifiers, Accrue state, and user-facing results do not cross this Phase 224 seam. [VERIFIED: 224-CONTEXT.md D-05/D-08/D-09]
+   - Exact descriptor encoding and numeric byte/container limits are selected only after the immutable source gate, using Crosswake's discovered bounded-envelope and manifest conventions. The implementation rejects unknown or duplicate members, wrong types, and over-bound encodings. If the pinned source cannot represent strict zero-field descriptors without contradicting its validated protocol, execution halts for discuss-phase instead of inventing fields or a second bridge. [VERIFIED: 224-CONTEXT.md D-07/D-09]
 
 ## Environment Availability
 
