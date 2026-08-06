@@ -1,4 +1,5 @@
 import CoreFoundation
+import Foundation
 import Security
 import Testing
 @testable import AccrueOfflineClientApple
@@ -26,5 +27,15 @@ struct KeychainCacheKeyTests {
         #expect(KeychainCacheKeyOutcome.classify(errSecItemNotFound) == .missing)
         #expect(KeychainCacheKeyOutcome.classify(errSecSuccess) == .success)
         #expect(KeychainCacheKeyOutcome.classify(errSecAuthFailed) == .failure)
+    }
+
+    @Test("policy helper source has no key-custody operation")
+    func policyHelperDoesNotOwnKeyBytes() throws {
+        let source = try String(contentsOf: URL(fileURLWithPath: #filePath)
+            .deletingLastPathComponent().deletingLastPathComponent().deletingLastPathComponent()
+            .appendingPathComponent("Sources/AccrueOfflineClientApple/KeychainCacheKey.swift"))
+        for operation in ["SecItemAdd", "SecItemUpdate", "SecItemCopyMatching", "SecKeyGeneratePair"] {
+            #expect(!source.contains(operation), "policy helper must not perform \(operation)")
+        }
     }
 }
