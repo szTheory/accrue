@@ -24,11 +24,11 @@ is the executable backstop; it is not a claim of exhaustive SPEC coverage.
 
 | Role | Owner | Evidence |
 | --- | --- | --- |
-| Bounded envelope decode / protocol-runtime validation | `packages/crosswake-shell-core-ios/Sources/CrosswakeShellCore/BridgeChannel.swift`, `BridgeChannel.userContentController(_:didReceive:)` and `evaluate(_:completion:)` | `BridgeRequestEnvelope` is decoded before evaluation; `evaluate` checks `crosswake.bridge`, bridge/runtime SemVer compatibility. |
+| Envelope decode / protocol-runtime validation | `packages/crosswake-shell-core-ios/Sources/CrosswakeShellCore/BridgeChannel.swift`, `BridgeChannel.userContentController(_:didReceive:)` and `evaluate(_:completion:)` | `BridgeRequestEnvelope` is decoded before evaluation; `evaluate` checks `crosswake.bridge`, bridge/runtime SemVer compatibility. The tracer itself has a zero-field schema: any payload is denied before the delegate. |
 | Route, exact origin, command, installed-pack and manifest capability gates | same file, `BridgeChannel.evaluate(_:completion:)` / `capabilityAvailable(for:request:)` | Existing order is protocol/runtime → active route → exact `allowedOrigin` → bounded command/capability → required packs → route capability/version → configured delegate. |
 | Route/manifest state owner | `packages/crosswake-shell-core-ios/Sources/CrosswakeShellCore/ActivationCoordinator.swift`, `ShellManifest.Route`, `LiveViewSession` | Route manifest carries capabilities/packs/origins; activation resolves the active session. |
 | Reply terminalization owner | `packages/crosswake-shell-core-ios/Sources/CrosswakeShellCore/CrosswakeShell.swift`, `BridgeReplyDelivery.sink(evaluate:)` | Crosswake serializes an immutable reply envelope and the host supplies only script execution. |
-| Navigation invalidation hook | `examples/ios_shell_host/CrosswakeShell/LiveViewContainerViewController.swift`, `webView(_:decidePolicyFor:decisionHandler:)` | The host gate enforces same-origin navigation. No route epoch exists at the locked base; the tracer will introduce an explicit monotonic epoch on the `BridgeChannel` session update seam. |
+| Navigation invalidation hook | `examples/ios_shell_host/CrosswakeShell/LiveViewContainerViewController.swift`, `webView(_:decidePolicyFor:decisionHandler:)`; `BridgeChannel.update(session:transferCoordinator:)` | The host gate enforces same-origin navigation. The tracer increments a monotonic `routeEpoch` whenever its session changes and suppresses a delegate outcome whose captured epoch is stale. |
 | Telemetry seam | none in the bridge dispatch path | The tracer adds no telemetry to avoid payload/identity leakage. |
 
 ## Test targets and commands
@@ -45,16 +45,29 @@ revision and line-level symbols after the Crosswake commit.
 
 | File | Planned symbols / scope |
 | --- | --- |
-| `packages/crosswake-shell-core-ios/Sources/CrosswakeShellCore/BridgeChannel.swift` | `BridgeCommand.accrueEntitlementsRefresh`, bounded envelope limits, `HostCommandDescriptor`, immutable `HostCommandRequest`, `HostCommandCancellationContext`, `HostCommandOutcome`, manifest/registry intersection, and guarded dispatch. |
-| `packages/crosswake-shell-core-ios/Sources/CrosswakeShellCore/CrosswakeDelegates.swift` | `HostCommandDelegate` only; it receives no WebKit/reply transport object. |
-| `packages/crosswake-shell-core-ios/Sources/CrosswakeShellCore/CrosswakeShellConfig.swift` | host-command registration and delegate configuration. |
-| `packages/crosswake-shell-core-ios/Tests/CrosswakeShellCoreTests/HostCommandAdmissionTests.swift` | declared-and-registered tracer and declaration-only/registration-only/version-denial coverage. |
+| `packages/crosswake-shell-core-ios/Sources/CrosswakeShellCore/BridgeChannel.swift` | Added `BridgeCommand.accrueEntitlementsRefresh`, `routeEpoch`, and the guarded `accrueEntitlementsRefresh` switch case. It admits only a no-field request whose exact capability/version is present in both session manifest state and host registration, invokes the typed delegate, and retains reply ownership. |
+| `packages/crosswake-shell-core-ios/Sources/CrosswakeShellCore/CrosswakeDelegates.swift` | Added immutable `HostCommandRequest`, transport-free `HostCommandCancellationContext`, closed `HostCommandOutcome`, and `HostCommandDelegate`. |
+| `packages/crosswake-shell-core-ios/Sources/CrosswakeShellCore/CrosswakeShellConfig.swift` | Added `HostCommandDescriptor`, its public alias, weak `hostCommandDelegate`, and immutable descriptor registration. |
+| `packages/crosswake-shell-core-ios/Tests/CrosswakeShellCoreTests/HostCommandAdmissionTests.swift` | Added the production tracer: admitted path plus declaration-only, registration-only, exact-version mismatch, and no-field-schema denial coverage. |
 
 No Accrue bridge, WebKit handler, host transport wrapper, account/device identifier, proof,
 receipt, JWS, token, or arbitrary payload map is part of this delivery.
 
-## Review record
+## Reviewed patch record
 
-The immutable base is the sole pre-edit identity. `crosswake-source-lock.json` is in
-`base_locked` state and its audit digest covers this file. The reviewed patch fields are
-intentionally absent until the Crosswake diff is tested and committed.
+| Field | Value |
+| --- | --- |
+| Patch revision | `e04928e36381fbbf076ec72eed09737f39c94986` |
+| Diff range | `932b4f32bf087b8e4c0c36c3e54b1031839e867d..e04928e36381fbbf076ec72eed09737f39c94986` |
+| Review status | local diff reviewed; full SwiftPM suite and tracer filter passed |
+| Upstream convergence | still `alpha_fork_pending_upstream_review`; no upstream acceptance is claimed |
+
+### Security boundary finding
+
+The discovered `WKScriptMessageHandler` base seam exposes the decoded message and frame
+metadata but has no content-world identity in its current public contract. This patch does
+not claim a content-world check that is not present. It preserves the existing protocol,
+runtime, route, origin, pack, manifest, and capability checks, adds a strict manifest/host
+registration intersection for the tracer, and leaves broader message-context hardening for
+the later lifecycle/admission plans and security review. The bridge remains feasibility
+evidence only; it is not entitlement authority or physical-device proof.
