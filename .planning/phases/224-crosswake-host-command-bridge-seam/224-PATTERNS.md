@@ -1,7 +1,7 @@
 # Phase 224: Crosswake host-command bridge seam - Pattern Map
 
-**Mapped:** 2026-08-06  
-**Files analyzed:** 6 anticipated files/records (all implementation files are in the not-yet-pinned Crosswake source)  
+**Mapped:** 2026-08-06
+**Files analyzed:** 6 anticipated files/records (all implementation files are in the not-yet-pinned Crosswake source)
 **Analogs found:** 2 / 6 locally; the Crosswake source analogs are intentionally unavailable until the source-access gate resolves.
 
 ## Scope Gate
@@ -199,6 +199,6 @@ catch { return invalid(.cacheWriteFailed) }
 
 ## Metadata
 
-**Analog search scope:** `packages/accrue-offline-client`, `examples/crosswake_tracer`, `accrue/lib`, `accrue/guides`, and phase/project contracts.  
-**Files scanned:** 13 primary source, test, contract, and evidence files.  
+**Analog search scope:** `packages/accrue-offline-client`, `examples/crosswake_tracer`, `accrue/lib`, `accrue/guides`, and phase/project contracts.
+**Files scanned:** 13 primary source, test, contract, and evidence files.
 **Pattern extraction date:** 2026-08-06
