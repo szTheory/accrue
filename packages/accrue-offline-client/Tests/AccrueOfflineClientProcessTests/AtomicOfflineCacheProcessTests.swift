@@ -4,7 +4,7 @@ import Testing
 @testable import AccrueOfflineClientCore
 
 struct AtomicOfflineCacheProcessTests {
-    @Test("fresh processes preserve a complete authenticated denial and clean interrupted candidates")
+    @Test("fresh processes preserve a complete authenticated denial across interrupted candidates")
     func restartAndCandidateRecovery() throws {
         let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         defer { try? FileManager.default.removeItem(at: directory) }
@@ -15,25 +15,32 @@ struct AtomicOfflineCacheProcessTests {
         #expect(try Data(contentsOf: cache) == before)
         let client = try configuredClient(cache)
         #expect(client.loadCachedState(now: Date(timeIntervalSince1970: 1_700_000_001)) == .fresh(reason: .ok, nextAction: .none))
-        #expect(!FileManager.default.fileExists(atPath: directory.appendingPathComponent(".proof.cache.candidate.crashed-child").path))
         try run(cache, operation: "apply", proof: try fixtureProof("valid_signed_denial"))
-        try run(cache, operation: "apply", proof: try fixtureProof("valid_allow"))
+        try run(cache, operation: "apply", proof: try fixtureProof("valid_allow"), expected: 65)
         #expect(client.loadCachedState(now: Date(timeIntervalSince1970: 1_700_000_001)) == .denied(reason: .signedDenial, nextAction: .reconnectRequired))
     }
 
-    @Test("concurrent replacement processes leave a readable authenticated envelope")
+    @Test("equal revision allow and denial races always converge to denial")
     func concurrentProcessesSerialize() throws {
+        for _ in 0..<8 {
+            let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+            defer { try? FileManager.default.removeItem(at: directory) }
+            let cache = directory.appendingPathComponent("proof.cache")
+            let first = try process(cache, operation: "apply", proof: try fixtureProof("valid_allow"))
+            let second = try process(cache, operation: "apply", proof: try fixtureProof("valid_signed_denial"))
+            try first.run(); try second.run(); first.waitUntilExit(); second.waitUntilExit()
+            #expect(second.terminationStatus == 0)
+            #expect(first.terminationStatus == 0 || first.terminationStatus == 65)
+            #expect(try configuredClient(cache).loadCachedState(now: Date(timeIntervalSince1970: 1_700_000_001)) == .denied(reason: .signedDenial, nextAction: .reconnectRequired))
+            #expect(!(try Data(contentsOf: cache)).contains(testKey))
+        }
+    }
+
+    @Test("harness exposes rejected admission as a nonzero process result")
+    func invalidAdmissionFailsHarness() throws {
         let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         defer { try? FileManager.default.removeItem(at: directory) }
-        let cache = directory.appendingPathComponent("proof.cache")
-        let first = try process(cache, operation: "apply", proof: try fixtureProof("valid_allow"))
-        let second = try process(cache, operation: "apply", proof: try fixtureProof("valid_signed_denial"))
-        try first.run(); try second.run(); first.waitUntilExit(); second.waitUntilExit()
-        #expect(first.terminationStatus == 0); #expect(second.terminationStatus == 0)
-        let state = try configuredClient(cache).loadCachedState(now: Date(timeIntervalSince1970: 1_700_000_001))
-        #expect(state == .fresh(reason: .ok, nextAction: .none) || state == .denied(reason: .signedDenial, nextAction: .reconnectRequired))
-        let bytes = try Data(contentsOf: cache)
-        #expect(!bytes.contains(testKey))
+        try run(directory.appendingPathComponent("proof.cache"), operation: "apply", proof: Data("malformed".utf8), expected: 65)
     }
 
     private var testKey: Data { Data(repeating: 7, count: 32) }

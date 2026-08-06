@@ -21,6 +21,7 @@ let client = OfflineEntitlementClient(configuration: .init(
     deviceThumbprint: "IVw958D_sxKYMg6iCHQs-vmxkOVIiRwwKlfeV6ykrCg", publicJWKS: jwks, cacheURL: cacheURL,
     cacheAuthenticationKey: SymmetricKey(data: key)
 ))
-_ = client.applyServerProof(proof, now: Date(timeIntervalSince1970: 1_700_000_001))
+let state = client.applyServerProof(proof, now: Date(timeIntervalSince1970: 1_700_000_001))
 if arguments[2] == "crash-after-apply" { exit(75) }
+if case .invalid = state { exit(65) }
 exit(0)
