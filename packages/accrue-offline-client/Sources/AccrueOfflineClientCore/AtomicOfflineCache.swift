@@ -36,6 +36,7 @@ struct AtomicOfflineCache: @unchecked Sendable {
             defer { try? FileManager.default.removeItem(at: candidate) }
             if case .invalid = prior { try FileManager.default.moveItem(at: url, to: quarantine) }
             if case .authenticated = prior { try FileManager.default.copyItem(at: url, to: backup) }
+            try fail(.authenticatedRecovery)
             do {
             try fail(.candidateWrite); try encodedReplacement(proof).write(to: candidate)
             let handle = try FileHandle(forWritingTo: candidate)
@@ -50,7 +51,7 @@ struct AtomicOfflineCache: @unchecked Sendable {
             return .replaced
             } catch {
                 if case .authenticated = prior {
-                    do { try fail(.authenticatedRecovery); if FileManager.default.fileExists(atPath: url.path) { try FileManager.default.removeItem(at: url) }; try FileManager.default.moveItem(at: backup, to: url); try synchronizeParentDirectory() } catch { }
+                    do { if FileManager.default.fileExists(atPath: url.path) { try FileManager.default.removeItem(at: url) }; try FileManager.default.moveItem(at: backup, to: url); try synchronizeParentDirectory() } catch { }
                 } else if case .invalid = prior, !FileManager.default.fileExists(atPath: url.path) { try? FileManager.default.moveItem(at: quarantine, to: url) }
                 throw error
             }

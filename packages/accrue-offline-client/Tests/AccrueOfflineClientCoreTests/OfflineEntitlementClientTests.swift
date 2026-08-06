@@ -1,3 +1,4 @@
+import CryptoKit
 import Foundation
 import Testing
 @testable import AccrueOfflineClientCore
@@ -108,6 +109,21 @@ struct OfflineEntitlementClientTests {
         #expect(client.loadCachedState(now: GoldenVectorFixtureSupport.now) == .invalid(reason: .malformed, nextAction: .reconnectRequired))
         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true); let invalid = Data("tampered".utf8); try invalid.write(to: cache)
         #expect(client.loadCachedState(now: GoldenVectorFixtureSupport.now) == .invalid(reason: .cacheRecoveryFailed, nextAction: .reconnectRequired)); #expect(try Data(contentsOf: cache) == invalid)
+    }
+
+    @Test("every transactional cache fault preserves the authenticated prior envelope")
+    func atomicStageFaultsPreservePriorEnvelope() throws {
+        let stages: [AtomicOfflineCache.FaultStage] = [.candidateWrite, .candidateFileSync, .atomicReplace, .parentDirectorySync, .authenticatedRecovery]
+        for stage in stages {
+            let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString); defer { try? FileManager.default.removeItem(at: directory) }
+            let url = directory.appendingPathComponent("proof.cache"); let key = SymmetricKey(data: Data(repeating: 7, count: 32))
+            let prior = VerifiedOfflineProof(compactProof: try GoldenVectorFixtureSupport.validAllowProof(), highWater: ProofHighWater(revision: 1, issuedAt: 1_700_000_000, freshUntil: 1_700_000_100, disposition: "allow"))
+            let candidate = VerifiedOfflineProof(compactProof: try GoldenVectorFixtureSupport.validDenyProof(), highWater: ProofHighWater(revision: 2, issuedAt: 1_700_000_001, freshUntil: 1_700_000_101, disposition: "deny"))
+            _ = try AtomicOfflineCache(url: url, key: key).replace(prior); let before = try Data(contentsOf: url)
+            #expect(throws: (any Error).self) { try AtomicOfflineCache(url: url, key: key, fault: stage).replace(candidate) }
+            #expect(try Data(contentsOf: url) == before)
+            #expect(try AtomicOfflineCache(url: url, key: key).recoverProof() == prior.compactProof)
+        }
     }
 
     private func json(_ part: String) throws -> String { var value = part.replacingOccurrences(of: "-", with: "+").replacingOccurrences(of: "_", with: "/"); value += String(repeating: "=", count: (4 - value.count % 4) % 4); return String(data: try #require(Data(base64Encoded: value)), encoding: .utf8)! }
