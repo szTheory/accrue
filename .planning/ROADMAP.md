@@ -27,7 +27,7 @@ v1.60 clears that bar through an active first-adopter iOS delivery. It reuses th
 
 ### v1.60 First-Adopter iOS Bridge & Proof
 
-- [ ] **Phase 223: iOS-compatible Accrue offline client** — Extract the verified tracer into a reusable SwiftPM module, retain canonical vectors, and prove iOS compilation/cache semantics. Covers IOS-01..03.
+- [x] **Phase 223: iOS-compatible Accrue offline client** — Extract the verified tracer into a reusable SwiftPM module, retain canonical vectors, and prove iOS compilation/cache semantics. Covers IOS-01..03. (completed 2026-08-06)
 - [ ] **Phase 224: Crosswake host-command bridge seam** — Add a manifest- and route-scoped host delegate behind the existing safe bridge validation boundary. Covers BRDG-01..02.
 - [ ] **Phase 225: First-adopter host StoreKit adapter** — Implement the host-local StoreKit 2, Apple-evidence, proof, and reconnect integration plus StoreKit Test evidence. Covers HOST-01..03.
 - [ ] **Phase 226: Readiness truth and external-gate handoff** — Remove retained warnings, refresh public/release truth, execute available advisory checks, and preserve device-gated status. Covers READY-01..02.

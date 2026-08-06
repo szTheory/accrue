@@ -2,13 +2,13 @@
 gsd_state_version: 1.0
 milestone: v1.60
 milestone_name: First-Adopter iOS Bridge & Proof
-current_phase: 223
-current_phase_name: ios-compatible-accrue-offline-client
-status: executing
+current_phase: 224
+current_phase_name: crosswake host command bridge seam
+status: planning
 stopped_at: Completed 223-07-PLAN.md
-last_updated: "2026-08-06T17:41:08.120Z"
+last_updated: "2026-08-06T17:48:43.566Z"
 last_activity: 2026-08-06
-last_activity_desc: Phase 223 execution started
+last_activity_desc: Phase 223 complete, transitioned to Phase 224
 progress:
   total_phases: 1
   completed_phases: 1
@@ -29,10 +29,10 @@ See: `.planning/PROJECT.md` (updated 2026-08-05 after shipping v1.59)
 
 ## Current Position
 
-Phase: 223 (ios-compatible-accrue-offline-client) — EXECUTING
-Plan: 2 of 6
-Status: Ready to execute
-Last activity: 2026-08-06 — Phase 223 execution started
+Phase: 224 — crosswake host command bridge seam
+Plan: Not started
+Status: Ready to plan
+Last activity: 2026-08-06 — Phase 223 complete, transitioned to Phase 224
 
 ## Post-v1.48 Pause Rule
 

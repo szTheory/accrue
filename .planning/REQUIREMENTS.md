@@ -10,7 +10,7 @@
 
 - [x] **IOS-01**: A host can import an iOS-compatible Accrue SwiftPM client whose proof verification, high-water, and allow/deny replacement match the canonical vectors.
 - [x] **IOS-02**: The client verifies only server-issued ES256 proof, binds it to the registered device, and preserves stale-study-only continuity.
-- [ ] **IOS-03**: The client performs authenticated reconnect and replaces cached state only with a verified newer allow or signed deny.
+- [x] **IOS-03**: The client performs authenticated reconnect and replaces cached state only with a verified newer allow or signed deny.
 
 ### Crosswake bridge
 
