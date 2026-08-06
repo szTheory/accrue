@@ -27,3 +27,10 @@ The host owns authenticated transport, StoreKit, lifecycle, content policy, and 
 Only verified newer server allow proofs or signed denials can replace offline cache
 state; stale continuity is limited to downloaded study and local progress and never
 creates new value.
+
+## Public adoption boundary
+
+The reference host can establish deterministic account-projection and offline-client
+conformance. It does not establish Crosswake mobile runtime feasibility. Public
+guidance must keep that runtime lane `feasibility_blocked` until the required bridge
+and separately authorized physical-device evidence are recorded.

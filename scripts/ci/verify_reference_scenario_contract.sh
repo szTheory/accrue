@@ -93,6 +93,7 @@ grep -Eq '^  pull_request:' "$workflow" || fail "workflow lacks pull-request tri
 # credential-free evidence lane runs only from the checked-out project root.
 if [ "$ROOT_DIR" = "$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)" ] &&
   [ "${V159_SKIP_RELEASE_CONTRACT:-false}" != "true" ]; then
+  bash "$ROOT_DIR/scripts/ci/verify_ios_offline_client.sh"
   (
     cd "$ACCRUE_DIR"
     mix test test/accrue/entitlements/reference_scenarios_test.exs \
