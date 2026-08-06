@@ -4,6 +4,20 @@ import Testing
 @testable import AccrueOfflineClientCore
 
 struct OfflineEntitlementClientTests {
+    @Test("durable observed time rejects rollback across fresh clients and recovery")
+    func durableObservedTimeRejectsRollbackAcrossFreshClientsAndRecovery() throws {
+        let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        defer { try? FileManager.default.removeItem(at: directory) }
+        let cache = directory.appendingPathComponent("proof.cache")
+        let configuration = try GoldenVectorFixtureSupport.configuration(cacheURL: cache)
+        let proof = try GoldenVectorFixtureSupport.validAllowProof()
+        let freshUntil = Date(timeIntervalSince1970: 1_700_003_600)
+
+        #expect(OfflineEntitlementClient(configuration: configuration).applyServerProof(proof, now: GoldenVectorFixtureSupport.now) == .fresh(reason: .ok, nextAction: .none))
+        #expect(OfflineEntitlementClient(configuration: configuration).loadCachedState(now: freshUntil) == .staleOffline(reason: .revalidationDue, nextAction: .reconnectRequired))
+        #expect(OfflineEntitlementClient(configuration: configuration).loadCachedState(now: GoldenVectorFixtureSupport.now) == .invalid(reason: .clockRollback, nextAction: .reconnectRequired))
+    }
+
     @Test("canonical corpus rows have exact public state, reason, and action")
     func canonicalCorpusParity() throws {
         for vector in try GoldenVectorFixtureSupport.vectors() {
