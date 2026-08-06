@@ -91,6 +91,23 @@ registration intersection for the tracer, and leaves broader message-context har
 the later lifecycle/admission plans and security review. The bridge remains feasibility
 evidence only; it is not entitlement authority or physical-device proof.
 
+## Plan 04 final exact-revision inventory
+
+The final reviewed delivery is limited to the four files below. This is the exhaustive
+production/test inventory for the reviewed diff
+`932b4f32bf087b8e4c0c36c3e54b1031839e867d..57e03b61082b1f865bc31c5e8b6dcee444f56dad`:
+
+| File | Final bounded symbols / responsibility |
+| --- | --- |
+| `packages/crosswake-shell-core-ios/Sources/CrosswakeShellCore/BridgeChannel.swift` | The four literal `BridgeCommand` cases share the existing ordered validation path; `routeEpoch`, `terminalizeHostCommand`, and `emitHostCommandTelemetry` retain one Crosswake-owned, stale-safe terminal reply. |
+| `packages/crosswake-shell-core-ios/Sources/CrosswakeShellCore/CrosswakeDelegates.swift` | `HostCommandRequest`, `HostCommandCancellationContext`, `HostCommandOutcome`, and throwing `HostCommandDelegate.handle` expose only normalized command intent and cancellation. |
+| `packages/crosswake-shell-core-ios/Sources/CrosswakeShellCore/CrosswakeShellConfig.swift` | `HostCommandDescriptor`, `HostCommandConfigurationError`, and validating descriptor registration restrict setup to the literal four-command capability intersection. |
+| `packages/crosswake-shell-core-ios/Tests/CrosswakeShellCoreTests/HostCommandAdmissionTests.swift` | Deterministic admission, schema, descriptor, throwing-delegate, API-surface, route-epoch, and one-shot denial coverage. |
+
+No StoreKit, Accrue binding, host UI/authentication, simulator promotion, physical-device
+run, generic plugin API, or additional command appears in that diff. The checked-in
+conformance record is revision-bound to this inventory; it is compile/unit evidence only.
+
 ## Plan 02 expansion inventory
 
 | File | Created / modified symbols and bounded responsibility |

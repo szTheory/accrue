@@ -1,9 +1,9 @@
 ---
 phase: 224
 slug: crosswake-host-command-bridge-seam
-status: draft
-nyquist_compliant: false
-wave_0_complete: false
+status: validated
+nyquist_compliant: true
+wave_0_complete: true
 created: 2026-08-06
 ---
 
@@ -37,8 +37,8 @@ created: 2026-08-06
 | 224-02-02 | 02 | 2 | BRDG-02 | T-224-06..08 | Navigation invalidation, route-binding recheck, cancellation, and one-shot terminalization pass the lifecycle suite without regressing admission. | Crosswake lifecycle/race | `bash scripts/ci/verify_crosswake_host_commands.sh lifecycle && bash scripts/ci/verify_crosswake_host_commands.sh admission` | ❌ W0 | ⬜ pending |
 | 224-03-01 | 03 | 3 | BRDG-01, BRDG-02 | T-224-10, T-224-12..13 | Ordered zero-delegate negatives, fixed request/response bounds, delegate API isolation, and telemetry/evidence privacy pass the admission/API suite. | Crosswake admission/API/privacy negative | `bash scripts/ci/verify_crosswake_host_commands.sh admission` | ❌ W0 | ⬜ pending |
 | 224-03-02 | 03 | 3 | BRDG-02 | T-224-11..12 | Handler failure, cancellation, duplicate completion, and origin/manifest/route/epoch races remain stale-reply-safe under lifecycle and combined exact-pin execution. | Crosswake lifecycle/race + full runner | `bash scripts/ci/verify_crosswake_host_commands.sh lifecycle && bash scripts/ci/verify_crosswake_host_commands.sh full` | ❌ W0 | ⬜ pending |
-| 224-04-01 | 04 | 4 | BRDG-01, BRDG-02 | T-224-15 | Locked D-03 is asserted automatically: overall and every capability remain blocked before evidence publication, or execution halts without mutation. | checked-in status contract | `jq -e '.overall_status == "feasibility_blocked" and all(.capabilities[]; .status == "feasibility_blocked")' examples/crosswake_tracer/capability-report.json` | ✅ | ⬜ pending |
-| 224-04-02 | 04 | 4 | BRDG-01, BRDG-02 | T-224-14..16 | Exact-revision evidence, complete native runner, tracer consumer, evidence location, and blocked-status assertions pass together without a runtime promotion. | full runner + tracer + blocked evidence contract | `bash scripts/ci/verify_crosswake_host_commands.sh full && swift test --package-path examples/crosswake_tracer && jq -e '.overall_status == "feasibility_blocked" and all(.capabilities[]; .status == "feasibility_blocked") and all(.capabilities[] | .evidence[]; (.kind != "crosswake_bridge_compile_unit") or (.location | contains("224-BRIDGE-CONFORMANCE-EVIDENCE.md")))' examples/crosswake_tracer/capability-report.json` | ❌ W0 | ⬜ pending |
+| 224-04-01 | 04 | 4 | BRDG-01, BRDG-02 | T-224-15 | Locked D-03 was asserted automatically: overall and every capability remained blocked before evidence publication. | checked-in status contract | `jq -e '.overall_status == "feasibility_blocked" and all(.capabilities[]; .status == "feasibility_blocked")' examples/crosswake_tracer/capability-report.json` | ✅ | ✅ pass |
+| 224-04-02 | 04 | 4 | BRDG-01, BRDG-02 | T-224-14..16 | Exact-revision evidence, complete native runner, tracer consumer, evidence location, and blocked-status assertions passed together without a runtime promotion. | full runner + tracer + blocked evidence contract | `CROSSWAKE_SOURCE_ROOT=/Users/jon/projects/crosswake-accrue-bridge bash scripts/ci/verify_crosswake_host_commands.sh full && swift test --package-path examples/crosswake_tracer && jq -e '.overall_status == "feasibility_blocked" and all(.capabilities[]; .status == "feasibility_blocked") and all(.capabilities[] | .evidence[]; (.kind != "crosswake_bridge_compile_unit") or (.location | contains("224-BRIDGE-CONFORMANCE-EVIDENCE.md")))' examples/crosswake_tracer/capability-report.json` | ✅ | ✅ pass |
 
 ## Wave 0 Requirements
 
@@ -55,11 +55,11 @@ created: 2026-08-06
 
 ## Validation Sign-Off
 
-- [ ] All tasks have `<automated>` verification or Wave 0 dependencies.
-- [ ] Sampling continuity: no three consecutive tasks without automated verification.
-- [ ] Wave 0 covers all missing pinned-source references.
-- [ ] No watch-mode flags.
-- [ ] Feedback latency is one task commit.
-- [ ] `nyquist_compliant: true` set in frontmatter after execution evidence is available.
+- [x] All tasks have `<automated>` verification or Wave 0 dependencies.
+- [x] Sampling continuity: no three consecutive tasks without automated verification.
+- [x] Wave 0 covered all missing pinned-source references.
+- [x] No watch-mode flags.
+- [x] Feedback latency is one task commit.
+- [x] `nyquist_compliant: true` is set after execution evidence became available.
 
-**Approval:** pending
+**Approval:** deterministic validation complete; physical-device readiness remains explicitly blocked.

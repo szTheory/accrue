@@ -15,6 +15,8 @@ fi
 repo_root="$(cd "$(dirname "$0")/../.." && pwd)"
 lock="$repo_root/.planning/phases/224-crosswake-host-command-bridge-seam/crosswake-source-lock.json"
 audit="$repo_root/.planning/phases/224-crosswake-host-command-bridge-seam/224-CROSSWAKE-SOURCE-AUDIT.md"
+evidence="$repo_root/.planning/phases/224-crosswake-host-command-bridge-seam/224-BRIDGE-CONFORMANCE-EVIDENCE.md"
+report="$repo_root/examples/crosswake_tracer/capability-report.json"
 
 [[ -f "$lock" && -f "$audit" ]] || { echo "source lock and audit are required" >&2; exit 66; }
 command -v jq >/dev/null || { echo "jq is required" >&2; exit 67; }
@@ -47,6 +49,15 @@ esac
 
 if [[ "$mode" == "full" ]]; then
   (cd "$CROSSWAKE_SOURCE_ROOT" && swift test --package-path packages/crosswake-shell-core-ios)
+  (cd "$repo_root" && swift test --package-path examples/crosswake_tracer)
+  [[ -f "$evidence" && -f "$report" ]] || { echo "conformance evidence and capability report are required" >&2; exit 77; }
+  evidence_sha="$(shasum -a 256 "$evidence" | awk '{print $1}')"
+  [[ "$evidence_sha" == "$(jq -er '.conformance_evidence_sha256' "$lock")" ]] || { echo "conformance evidence digest mismatch" >&2; exit 78; }
+  jq -e '
+    .overall_status == "feasibility_blocked" and
+    all(.capabilities[]; .status == "feasibility_blocked") and
+    all(.capabilities[] | .evidence[]; (.kind != "crosswake_bridge_compile_unit") or (.location | contains("224-BRIDGE-CONFORMANCE-EVIDENCE.md")))
+  ' "$report" >/dev/null || { echo "capability report must retain blocked statuses and evidence locations" >&2; exit 79; }
 elif [[ "$mode" == "tracer" || "$mode" == "admission" || "$mode" == "lifecycle" ]]; then
   [[ "$state" == "reviewed_patch" ]] || { echo "tracer requires reviewed_patch lock state" >&2; exit 76; }
   test_target="$(jq -er '.test_target' "$lock")"
