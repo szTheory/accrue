@@ -35,6 +35,8 @@ v1.49 **Realistic Demo App & Adoption Evidence** shipped on **2026-06-02**. The 
 
 **Latest shipped milestone: v1.59 — Account-Scoped Multi-Rail & Offline Entitlements, shipped 2026-08-05.** Accrue now supports concurrent Stripe and Apple rail evidence through one revisioned account projection, provider-honest lifecycle management, device-bound ES256 offline proof, host Apple ingress/repair, and deterministic first-adopter proof. Crosswake remains explicitly `feasibility_blocked` pending bridge/device evidence; Alpha production integration remains external and unasserted.
 
+**Phase 223 complete (2026-08-06):** the reusable iOS-compatible SwiftPM offline client now preserves canonical ES256 proof verification, authenticated atomic cache recovery, durable observed-time rollback protection, bounded compact-proof/JSON admission, host-owned reconnect and display seams, and deterministic package/iOS/reference evidence. IOS-01 through IOS-03 verified 28/28 must-haves; Phase 224 owns the Crosswake host-command bridge seam. Advisory code review recorded a follow-up cached-read versus concurrent signed-denial race in `223-REVIEW.md`; it must be resolved before relying on concurrent-cache behavior beyond the verified scenario coverage.
+
 ## Next Milestone Goals
 
 **v1.60 — First-Adopter iOS Bridge & Proof** opens under the stable-core reopen rule as a concrete active iOS adopter delivery, not speculative billing expansion. Its goal is to connect the already-shipped Apple/offline contract to the First B2C Adopter through a Crosswake shell bridge and host-owned StoreKit adapter, while retaining an honest physical-device gate.
@@ -821,4 +823,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-08-05 after starting v1.60 First-Adopter iOS Bridge & Proof.*
+*Last updated: 2026-08-06 after completing Phase 223 of v1.60 First-Adopter iOS Bridge & Proof.*
