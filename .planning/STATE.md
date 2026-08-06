@@ -5,16 +5,16 @@ milestone_name: First-Adopter iOS Bridge & Proof
 current_phase: 223
 current_phase_name: ios-compatible-accrue-offline-client
 status: executing
-stopped_at: Phase 223 UI-SPEC approved
-last_updated: "2026-08-06T17:25:49.909Z"
+stopped_at: Completed 223-07-PLAN.md
+last_updated: "2026-08-06T17:41:08.120Z"
 last_activity: 2026-08-06
 last_activity_desc: Phase 223 execution started
 progress:
   total_phases: 1
-  completed_phases: 0
+  completed_phases: 1
   total_plans: 7
-  completed_plans: 5
-  percent: 0
+  completed_plans: 7
+  percent: 100
 ---
 
 # Project State
@@ -30,7 +30,7 @@ See: `.planning/PROJECT.md` (updated 2026-08-05 after shipping v1.59)
 ## Current Position
 
 Phase: 223 (ios-compatible-accrue-offline-client) — EXECUTING
-Plan: 1 of 6
+Plan: 2 of 6
 Status: Ready to execute
 Last activity: 2026-08-06 — Phase 223 execution started
 
@@ -434,6 +434,7 @@ Coverage: 22/22 v1.51 requirements mapped (each REQ-ID → exactly one phase). D
 | Phase 221-close-gap-reference-host-apple-notification-ingress P03 | 17min | 2 tasks | 5 files |
 | Phase 221 P04 | 8min | 2 tasks | 2 files |
 | Phase 221-close-gap-reference-host-apple-notification-ingress P05 | 2min | 2 tasks | 5 files |
+| Phase 223 P07 | 6min | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -870,6 +871,8 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - [Phase ?]: Oban uniqueness coalesces wakeups only; PostgreSQL constraints, transactions, and locks remain recovery ownership authority.
 - [Phase ?]: Fake-backed Apple host-router proof and mix verify are merge authority; App Store delivery remains advisory.
 - [Phase ?]: Apple source checks pin the dedicated 262,144-byte route and shared production verifier identity without asserting values.
+- [Phase ?]: Observed time is a version-3 HMAC-authenticated cache-envelope field; authenticated version-2 envelopes migrate only through verified admission.
+- [Phase ?]: Compact proof admission is bounded to 256 KiB total, 1 KiB decoded header, 128 KiB decoded payload, and 32 JSON containers.
 
 ### Pending Todos
 
@@ -1022,9 +1025,9 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 
 ## Session Continuity
 
-Last session: 2026-08-05T23:46:23.289Z
-Stopped at: Phase 223 UI-SPEC approved
-Resume file: .planning/phases/223-ios-compatible-accrue-offline-client/223-UI-SPEC.md
+Last session: 2026-08-06T17:41:08.112Z
+Stopped at: Completed 223-07-PLAN.md
+Resume file: None
 
 ## Operator Next Steps
 
