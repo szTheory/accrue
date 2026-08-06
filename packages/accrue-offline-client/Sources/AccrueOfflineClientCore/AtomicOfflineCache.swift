@@ -1,81 +1,113 @@
 import CryptoKit
 import Foundation
+#if canImport(Darwin)
+import Darwin
+#else
+import Glibc
+#endif
 
-/// The authenticated persistence boundary. It deliberately accepts only the verifier's
-/// file-private admission value, never caller-selected cache metadata.
-struct AtomicOfflineCache: Sendable {
+/// The sole durable authority boundary. Only verifier-created proofs cross it.
+struct AtomicOfflineCache: @unchecked Sendable {
+    enum Admission { case replaced, identical, superseded }
     private let url: URL
     private let key: SymmetricKey
+    private let coordinator: CacheCoordinator
 
     init(url: URL, key: SymmetricKey) {
         self.url = url.standardizedFileURL
         self.key = key
+        coordinator = CacheCoordinatorRegistry.shared.coordinator(for: self.url.path)
     }
 
-    func replace(_ proof: VerifiedOfflineProof) throws {
-        let unsigned = UnsignedEnvelope(
-            version: 1,
-            proof: proof.compactProof.base64EncodedString(),
-            revision: proof.revision,
-            issuedAt: proof.issuedAt,
-            freshUntil: proof.freshUntil,
-            disposition: proof.disposition
-        )
-        let tag = Data(HMAC<SHA256>.authenticationCode(for: try canonicalBytes(unsigned), using: key))
-        let envelope = Envelope(unsigned: unsigned, tag: tag.base64EncodedString())
-        let candidate = url.deletingLastPathComponent().appendingPathComponent(".\(url.lastPathComponent).candidate.\(UUID().uuidString)")
-        defer { try? FileManager.default.removeItem(at: candidate) }
+    func replace(_ proof: VerifiedOfflineProof) throws -> Admission {
         try FileManager.default.createDirectory(at: url.deletingLastPathComponent(), withIntermediateDirectories: true)
-        let encoder = JSONEncoder()
-        encoder.outputFormatting = [.sortedKeys]
-        try encoder.encode(envelope).write(to: candidate, options: .atomic)
-        if FileManager.default.fileExists(atPath: url.path) {
-            _ = try FileManager.default.replaceItemAt(url, withItemAt: candidate)
-        } else {
-            try FileManager.default.moveItem(at: candidate, to: url)
+        return try coordinator.withLock {
+            let persisted = try loadVerifiedEnvelope()
+            if let persisted {
+                if persisted.highWater == proof.highWater { return .identical }
+                guard persisted.highWater.accepts(newer: proof.highWater) else { return .superseded }
+            }
+            let candidate = uniqueCandidateURL()
+            defer { try? FileManager.default.removeItem(at: candidate) }
+            try encodedReplacement(proof).write(to: candidate)
+            let handle = try FileHandle(forWritingTo: candidate)
+            defer { try? handle.close() }
+            try handle.synchronize()
+            if FileManager.default.fileExists(atPath: url.path) { _ = try FileManager.default.replaceItemAt(url, withItemAt: candidate) }
+            else { try FileManager.default.moveItem(at: candidate, to: url) }
+            try synchronizeParentDirectory()
+            coordinator.record(proof.highWater)
+            return .replaced
         }
     }
 
     func recoverProof() throws -> Data? {
-        guard FileManager.default.fileExists(atPath: url.path) else { return nil }
-        let raw = try Data(contentsOf: url)
-        guard let object = try? JSONSerialization.jsonObject(with: raw) as? [String: Any],
-              Set(object.keys) == Set(["version", "compact_proof", "revision", "iat", "fresh_until", "disposition", "authentication_tag"])
-        else { throw CacheError.malformed }
-        let envelope: Envelope
-        do { envelope = try JSONDecoder().decode(Envelope.self, from: raw) }
-        catch { throw CacheError.malformed }
-        let unsigned = UnsignedEnvelope(version: envelope.version, proof: envelope.proof, revision: envelope.revision, issuedAt: envelope.issuedAt, freshUntil: envelope.freshUntil, disposition: envelope.disposition)
-        guard envelope.version == 1,
-              let proof = Data(base64Encoded: envelope.proof),
-              let tag = Data(base64Encoded: envelope.tag),
-              tag == Data(HMAC<SHA256>.authenticationCode(for: try canonicalBytes(unsigned), using: key))
-        else { throw CacheError.authentication }
-        let encoder = JSONEncoder()
-        encoder.outputFormatting = [.sortedKeys]
-        guard try encoder.encode(envelope) == raw else { throw CacheError.malformed }
-        return proof
+        try coordinator.withLock {
+            let envelope = try loadVerifiedEnvelope()
+            for candidate in try abandonedCandidateURLs() { try FileManager.default.removeItem(at: candidate) }
+            return envelope?.compactProof
+        }
     }
 
-    private func canonicalBytes(_ value: UnsignedEnvelope) throws -> Data {
-        var bytes = Data("accrue.offline.cache.v1".utf8)
-        for field in [String(value.version), url.path, value.proof, String(value.revision), String(value.issuedAt), String(value.freshUntil), value.disposition] {
-            let data = Data(field.utf8)
-            var length = UInt64(data.count).bigEndian
-            withUnsafeBytes(of: &length) { bytes.append(contentsOf: $0) }
-            bytes.append(data)
+    private func encodedReplacement(_ proof: VerifiedOfflineProof) throws -> Data {
+        let unsigned = UnsignedEnvelope(version: 2, compactProof: proof.compactProof.base64EncodedString(), revision: proof.highWater.revision, disposition: proof.highWater.disposition, issuedAt: proof.highWater.issuedAt, freshUntil: proof.highWater.freshUntil)
+        let tag = Data(HMAC<SHA256>.authenticationCode(for: try signedBytes(unsigned), using: key)).base64EncodedString()
+        let encoder = JSONEncoder(); encoder.outputFormatting = [.sortedKeys]
+        return try encoder.encode(Envelope(unsigned: unsigned, authenticationTag: tag))
+    }
+
+    private func loadVerifiedEnvelope() throws -> RecoveredEnvelope? {
+        guard FileManager.default.fileExists(atPath: url.path) else { return nil }
+        let raw = try Data(contentsOf: url)
+        guard let envelope = try? JSONDecoder().decode(Envelope.self, from: raw), envelope.version == 2,
+              let proof = Data(base64Encoded: envelope.compactProof), let tag = Data(base64Encoded: envelope.authenticationTag) else { throw CacheError.malformed }
+        let unsigned = UnsignedEnvelope(version: envelope.version, compactProof: envelope.compactProof, revision: envelope.revision, disposition: envelope.disposition, issuedAt: envelope.issuedAt, freshUntil: envelope.freshUntil)
+        let expected = Data(HMAC<SHA256>.authenticationCode(for: try signedBytes(unsigned), using: key))
+        guard tag == expected else { throw CacheError.authentication }
+        let encoder = JSONEncoder(); encoder.outputFormatting = [.sortedKeys]
+        guard try encoder.encode(envelope) == raw else { throw CacheError.malformed }
+        return RecoveredEnvelope(compactProof: proof, highWater: ProofHighWater(revision: envelope.revision, issuedAt: envelope.issuedAt, freshUntil: envelope.freshUntil, disposition: envelope.disposition))
+    }
+
+    private func signedBytes(_ value: UnsignedEnvelope) throws -> Data {
+        var bytes = Data("accrue.atomic-offline-cache".utf8)
+        for item in [String(value.version), url.path, value.compactProof, String(value.revision), value.disposition, String(value.issuedAt), String(value.freshUntil)] {
+            let data = Data(item.utf8); var length = UInt64(data.count).bigEndian
+            withUnsafeBytes(of: &length) { bytes.append(contentsOf: $0) }; bytes.append(data)
         }
         return bytes
     }
 
-    private enum CacheError: Error { case authentication, malformed }
-    private struct UnsignedEnvelope: Codable {
-        let version: Int; let proof: String; let revision: Int64; let issuedAt: Int64; let freshUntil: Int64; let disposition: String
-        enum CodingKeys: String, CodingKey { case version, proof = "compact_proof", revision, issuedAt = "iat", freshUntil = "fresh_until", disposition }
+    private func abandonedCandidateURLs() throws -> [URL] {
+        let prefix = ".\(url.lastPathComponent).candidate."
+        return try FileManager.default.contentsOfDirectory(at: url.deletingLastPathComponent(), includingPropertiesForKeys: nil).filter { $0.lastPathComponent.hasPrefix(prefix) }
     }
-    private struct Envelope: Codable {
-        let version: Int; let proof: String; let revision: Int64; let issuedAt: Int64; let freshUntil: Int64; let disposition: String; let tag: String
-        init(unsigned: UnsignedEnvelope, tag: String) { version = unsigned.version; proof = unsigned.proof; revision = unsigned.revision; issuedAt = unsigned.issuedAt; freshUntil = unsigned.freshUntil; disposition = unsigned.disposition; self.tag = tag }
-        enum CodingKeys: String, CodingKey { case version, proof = "compact_proof", revision, issuedAt = "iat", freshUntil = "fresh_until", disposition, tag = "authentication_tag" }
+    private func uniqueCandidateURL() -> URL { url.deletingLastPathComponent().appendingPathComponent(".\(url.lastPathComponent).candidate.\(UUID().uuidString)") }
+    private func synchronizeParentDirectory() throws {
+        let descriptor = open(url.deletingLastPathComponent().path, O_RDONLY)
+        guard descriptor >= 0 else { throw POSIXError(POSIXErrorCode(rawValue: errno) ?? .EIO) }
+        defer { _ = close(descriptor) }
+        // Darwin/APFS may not support directory fsync; replacement is still atomic.
+        if fsync(descriptor) != 0, errno != EINVAL, errno != ENOTSUP, errno != EOPNOTSUPP { throw POSIXError(POSIXErrorCode(rawValue: errno) ?? .EIO) }
+    }
+
+    private enum CacheError: Error { case authentication, malformed }
+    private struct RecoveredEnvelope { let compactProof: Data; let highWater: ProofHighWater }
+    private struct UnsignedEnvelope: Codable { let version: Int; let compactProof: String; let revision: Int64; let disposition: String; let issuedAt: Int64; let freshUntil: Int64; enum CodingKeys: String, CodingKey { case version, revision, disposition; case compactProof = "compact_proof"; case issuedAt = "iat"; case freshUntil = "fresh_until" } }
+    private struct Envelope: Codable { let version: Int; let compactProof: String; let revision: Int64; let disposition: String; let issuedAt: Int64; let freshUntil: Int64; let authenticationTag: String; init(unsigned: UnsignedEnvelope, authenticationTag: String) { version = unsigned.version; compactProof = unsigned.compactProof; revision = unsigned.revision; disposition = unsigned.disposition; issuedAt = unsigned.issuedAt; freshUntil = unsigned.freshUntil; self.authenticationTag = authenticationTag }; enum CodingKeys: String, CodingKey { case version, revision, disposition; case compactProof = "compact_proof"; case issuedAt = "iat"; case freshUntil = "fresh_until"; case authenticationTag = "authentication_tag" } }
+}
+
+struct ProofHighWater: Equatable, Sendable {
+    let revision: Int64; let issuedAt: Int64; let freshUntil: Int64; let disposition: String
+    func accepts(newer candidate: ProofHighWater) -> Bool {
+        candidate.issuedAt >= issuedAt && candidate.freshUntil >= freshUntil && (candidate.revision > revision || (candidate.revision == revision && candidate.disposition == "deny" && disposition != "deny"))
     }
 }
+
+private final class CacheCoordinator: @unchecked Sendable {
+    private let lock = NSLock(); private let path: String; private var highWater: ProofHighWater?
+    init(path: String) { self.path = path }
+    func withLock<T>(_ body: () throws -> T) throws -> T { lock.lock(); defer { lock.unlock() }; let descriptor = open("\(path).lock", O_CREAT | O_RDWR, S_IRUSR | S_IWUSR); guard descriptor >= 0 else { throw POSIXError(POSIXErrorCode(rawValue: errno) ?? .EIO) }; defer { _ = flock(descriptor, LOCK_UN); _ = close(descriptor) }; guard flock(descriptor, LOCK_EX) == 0 else { throw POSIXError(POSIXErrorCode(rawValue: errno) ?? .EIO) }; return try body() }
+    func record(_ highWater: ProofHighWater) { self.highWater = highWater }
+}
+private final class CacheCoordinatorRegistry: @unchecked Sendable { static let shared = CacheCoordinatorRegistry(); private let lock = NSLock(); private var values: [String: CacheCoordinator] = [:]; func coordinator(for path: String) -> CacheCoordinator { lock.lock(); defer { lock.unlock() }; if let value = values[path] { return value }; let value = CacheCoordinator(path: path); values[path] = value; return value } }

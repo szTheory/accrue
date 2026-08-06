@@ -17,9 +17,9 @@ public enum OfflineEntitlementState: Sendable, Equatable {
 
 public struct OfflineEntitlementClient: Sendable {
     public struct Configuration: Sendable {
-        public let issuer: String; public let audience: String; public let accountSubject: String; public let deviceThumbprint: String; public let publicJWKS: Data; public let cacheURL: URL; public let cacheAuthenticationKey: SymmetricKey
-        public init(issuer: String, audience: String, accountSubject: String, deviceThumbprint: String, publicJWKS: Data, cacheURL: URL, cacheAuthenticationKey: SymmetricKey) {
-            self.issuer = issuer; self.audience = audience; self.accountSubject = accountSubject; self.deviceThumbprint = deviceThumbprint; self.publicJWKS = publicJWKS; self.cacheURL = cacheURL; self.cacheAuthenticationKey = cacheAuthenticationKey
+        public let issuer: String; public let audience: String; public let accountSubject: String; public let deviceThumbprint: String; public let publicJWKS: Data; public let cacheURL: URL; public let cacheAuthenticationKey: SymmetricKey; public let clockHighWater: Date?
+        public init(issuer: String, audience: String, accountSubject: String, deviceThumbprint: String, publicJWKS: Data, cacheURL: URL, cacheAuthenticationKey: SymmetricKey, clockHighWater: Date? = nil) {
+            self.issuer = issuer; self.audience = audience; self.accountSubject = accountSubject; self.deviceThumbprint = deviceThumbprint; self.publicJWKS = publicJWKS; self.cacheURL = cacheURL; self.cacheAuthenticationKey = cacheAuthenticationKey; self.clockHighWater = clockHighWater
         }
     }
 
@@ -32,7 +32,10 @@ public struct OfflineEntitlementClient: Sendable {
         guard !proof.isEmpty else { return invalid(.malformed) }
         do {
             let verified = try verify(proof, now: now)
-            try cache.replace(verified)
+            switch try cache.replace(verified) {
+            case .replaced, .identical: break
+            case .superseded: return invalid(.superseded)
+            }
             return state(for: verified, now: now)
         } catch let error as VerificationError { return invalid(error.reason) }
         catch { return invalid(.cacheWriteFailed) }
@@ -57,7 +60,8 @@ public struct OfflineEntitlementClient: Sendable {
         guard let compact = String(data: compactBytes, encoding: .utf8) else { throw VerificationError(.malformed) }
         let parts = compact.split(separator: ".", omittingEmptySubsequences: false)
         guard parts.count == 3, let headerData = Data(base64URL: String(parts[0])), let payloadData = Data(base64URL: String(parts[1])), let signature = Data(base64URL: String(parts[2])), signature.count == 64 else { throw VerificationError(.malformed) }
-        guard let header = try? JSONSerialization.jsonObject(with: headerData) as? [String: Any], Set(header.keys) == ["alg", "typ", "kid"], header["alg"] as? String == "ES256" else { throw VerificationError(.wrongAlgorithm) }
+        guard let header = try? JSONSerialization.jsonObject(with: headerData) as? [String: Any], Set(header.keys) == ["alg", "typ", "kid"] else { throw VerificationError(.malformed) }
+        guard header["alg"] as? String == "ES256" else { throw VerificationError(.wrongAlgorithm) }
         guard header["typ"] as? String == "accrue-entitlement-proof+jwt" else { throw VerificationError(.wrongType) }
         guard let kid = header["kid"] as? String, let payload = try? JSONSerialization.jsonObject(with: payloadData) as? [String: Any] else { throw VerificationError(.malformed) }
         let key = try publicKey(kid: kid)
@@ -65,11 +69,13 @@ public struct OfflineEntitlementClient: Sendable {
         guard payload["iss"] as? String == configuration.issuer else { throw VerificationError(.wrongIssuer) }
         guard payload["aud"] as? String == configuration.audience else { throw VerificationError(.wrongAudience) }
         guard payload["sub"] as? String == configuration.accountSubject, ((payload["cnf"] as? [String: Any])?["jkt"] as? String) == configuration.deviceThumbprint else { throw VerificationError(.deviceMismatch) }
-        guard payload["version"] as? String == "v1.59", let disposition = payload["disposition"] as? String, ["allow", "deny"].contains(disposition), let revision = payload["revision"] as? Int64, let iat = payload["iat"] as? Int64, let nbf = payload["nbf"] as? Int64, let freshUntil = payload["fresh_until"] as? Int64, let exp = payload["exp"] as? Int64 else { throw VerificationError(.malformed) }
+        let common: Set<String> = ["version", "iss", "aud", "jti", "sub", "cnf", "revision", "iat", "nbf", "fresh_until", "exp", "disposition", "plans", "features", "quantities"]
+        guard payload["version"] as? String == "v1.59", let disposition = payload["disposition"] as? String, ["allow", "deny"].contains(disposition), Set(payload.keys) == (disposition == "deny" ? common.union(["denial_reason"]) : common), let revision = payload["revision"] as? Int64, revision >= 0, let iat = payload["iat"] as? Int64, iat >= 0, let nbf = payload["nbf"] as? Int64, nbf >= iat, let freshUntil = payload["fresh_until"] as? Int64, freshUntil >= nbf, let exp = payload["exp"] as? Int64, exp >= freshUntil else { throw VerificationError(.malformed) }
         let timestamp = Int64(now.timeIntervalSince1970)
+        guard configuration.clockHighWater.map({ timestamp >= Int64($0.timeIntervalSince1970) }) ?? true else { throw VerificationError(.clockRollback) }
         guard nbf <= timestamp else { throw VerificationError(.malformed) }
         guard timestamp < exp else { throw VerificationError(.hardExpired) }
-        return VerifiedOfflineProof(compactProof: compactBytes, revision: revision, issuedAt: iat, freshUntil: freshUntil, disposition: disposition)
+        return VerifiedOfflineProof(compactProof: compactBytes, highWater: ProofHighWater(revision: revision, issuedAt: iat, freshUntil: freshUntil, disposition: disposition))
     }
 
     private func publicKey(kid: String) throws -> P256.Signing.PublicKey {
@@ -82,6 +88,6 @@ public struct OfflineEntitlementClient: Sendable {
 
 /// Internal-only verifier admission value. Its memberwise initializer is unavailable
 /// outside this module, so hosts cannot construct cache replacements.
-struct VerifiedOfflineProof: Sendable { let compactProof: Data; let revision: Int64; let issuedAt: Int64; let freshUntil: Int64; let disposition: String }
+struct VerifiedOfflineProof: Sendable { let compactProof: Data; let highWater: ProofHighWater; var disposition: String { highWater.disposition }; var freshUntil: Int64 { highWater.freshUntil } }
 private struct VerificationError: Error { let reason: OfflineEntitlementReason; init(_ reason: OfflineEntitlementReason) { self.reason = reason } }
 private extension Data { init?(base64URL value: String) { var base64 = value.replacingOccurrences(of: "-", with: "+").replacingOccurrences(of: "_", with: "/"); base64 += String(repeating: "=", count: (4 - base64.count % 4) % 4); self.init(base64Encoded: base64) } }
