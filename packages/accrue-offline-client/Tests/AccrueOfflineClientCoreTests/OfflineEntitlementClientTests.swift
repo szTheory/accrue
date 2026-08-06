@@ -18,6 +18,28 @@ struct OfflineEntitlementClientTests {
         #expect(OfflineEntitlementClient(configuration: configuration).loadCachedState(now: GoldenVectorFixtureSupport.now) == .invalid(reason: .clockRollback, nextAction: .reconnectRequired))
     }
 
+    @Test("bounded malformed proof admission does not mutate cache")
+    func boundedMalformedProofAdmissionDoesNotMutateCache() throws {
+        let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        defer { try? FileManager.default.removeItem(at: directory) }
+        let cache = directory.appendingPathComponent("proof.cache")
+        let client = OfflineEntitlementClient(configuration: try GoldenVectorFixtureSupport.configuration(cacheURL: cache))
+        #expect(client.applyServerProof(try GoldenVectorFixtureSupport.validAllowProof(), now: GoldenVectorFixtureSupport.now) == .fresh(reason: .ok, nextAction: .none))
+        let before = try Data(contentsOf: cache)
+        let signature = String(repeating: "a", count: 86)
+        let oversized = Data("\(String(repeating: "a", count: 262_145)).e30.\(signature)".utf8)
+        let overHeader = Data("\(String(repeating: "a", count: 1_367)).e30.\(signature)".utf8)
+        let overPayload = Data("e30.\(String(repeating: "a", count: 174_763)).\(signature)".utf8)
+        let depth33 = Data((String(repeating: "[", count: 33) + "0" + String(repeating: "]", count: 33)).utf8)
+        let deepProof = Data("e30.\(depth33.base64EncodedString().replacingOccurrences(of: "+", with: "-").replacingOccurrences(of: "/", with: "_").replacingOccurrences(of: "=", with: "")).\(signature)".utf8)
+
+        #expect(throws: (any Error).self) { try CanonicalJSONAdmission.validate(depth33) }
+        for proof in [oversized, overHeader, overPayload, deepProof] {
+            #expect(client.applyServerProof(proof, now: GoldenVectorFixtureSupport.now) == .invalid(reason: .malformed, nextAction: .reconnectRequired))
+            #expect(try Data(contentsOf: cache) == before)
+        }
+    }
+
     @Test("canonical corpus rows have exact public state, reason, and action")
     func canonicalCorpusParity() throws {
         for vector in try GoldenVectorFixtureSupport.vectors() {
