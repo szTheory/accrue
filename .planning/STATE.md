@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.60
 milestone_name: First-Adopter iOS Bridge & Proof
 current_phase_name: defining requirements
-status: planning
-stopped_at: Phase 223 context gathered
-last_updated: "2026-08-05T21:53:32.321Z"
+status: executing
+stopped_at: Phase 223 UI-SPEC approved
+last_updated: "2026-08-06T15:17:46.300Z"
 last_activity: 2026-08-05
 last_activity_desc: Milestone v1.60 started
 progress:
   total_phases: 1
   completed_phases: 0
-  total_plans: 0
+  total_plans: 4
   completed_plans: 0
   percent: 0
 ---
@@ -30,7 +30,7 @@ See: `.planning/PROJECT.md` (updated 2026-08-05 after shipping v1.59)
 
 Phase: Not started (defining requirements)
 Plan: —
-Status: Defining requirements
+Status: Ready to execute
 Last activity: 2026-08-05 — Milestone v1.60 started
 
 ## Post-v1.48 Pause Rule
@@ -1021,9 +1021,9 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 
 ## Session Continuity
 
-Last session: 2026-08-05T21:53:32.313Z
-Stopped at: Phase 223 context gathered
-Resume file: .planning/phases/223-ios-compatible-accrue-offline-client/223-CONTEXT.md
+Last session: 2026-08-05T23:46:23.289Z
+Stopped at: Phase 223 UI-SPEC approved
+Resume file: .planning/phases/223-ios-compatible-accrue-offline-client/223-UI-SPEC.md
 
 ## Operator Next Steps
 
