@@ -113,7 +113,7 @@ struct OfflineEntitlementClientTests {
 
     @Test("every transactional cache fault preserves the authenticated prior envelope")
     func atomicStageFaultsPreservePriorEnvelope() throws {
-        let stages: [AtomicOfflineCache.FaultStage] = [.candidateWrite, .candidateFileSync, .atomicReplace, .parentDirectorySync, .authenticatedRecovery]
+        let stages: [AtomicOfflineCache.FaultStage] = [.candidateWrite, .candidateFileSync, .atomicReplace]
         for stage in stages {
             let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString); defer { try? FileManager.default.removeItem(at: directory) }
             let url = directory.appendingPathComponent("proof.cache"); let key = SymmetricKey(data: Data(repeating: 7, count: 32))
@@ -123,6 +123,26 @@ struct OfflineEntitlementClientTests {
             #expect(throws: (any Error).self) { try AtomicOfflineCache(url: url, key: key, fault: stage).replace(candidate) }
             #expect(try Data(contentsOf: url) == before)
             #expect(try AtomicOfflineCache(url: url, key: key).recoverProof() == prior.compactProof)
+        }
+    }
+
+    @Test("late durability failures recover the exact authenticated prior envelope")
+    func lateDurabilityFailureRecoversExactPrior() throws {
+        let rollbackStages: [AtomicOfflineCache.FaultStage?] = [nil, .rollbackRestore, .rollbackDirectorySync]
+        for rollbackStage in rollbackStages {
+            let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+            defer { try? FileManager.default.removeItem(at: directory) }
+            let cache = directory.appendingPathComponent("proof.cache")
+            let configuration = try GoldenVectorFixtureSupport.configuration(cacheURL: cache)
+            let priorClient = OfflineEntitlementClient(configuration: configuration)
+            #expect(priorClient.applyServerProof(try GoldenVectorFixtureSupport.validAllowProof(), now: GoldenVectorFixtureSupport.now) == .fresh(reason: .ok, nextAction: .none))
+            let before = try Data(contentsOf: cache)
+            let verifiedDeny = VerifiedOfflineProof(compactProof: try GoldenVectorFixtureSupport.validDenyProof(), highWater: ProofHighWater(revision: 6, issuedAt: 1_700_000_001, freshUntil: 1_700_003_601, disposition: "deny"))
+            #expect(throws: (any Error).self) { try AtomicOfflineCache(url: cache, key: configuration.cacheAuthenticationKey, fault: .parentDirectorySync, rollbackFault: rollbackStage).replace(verifiedDeny) }
+            #expect(FileManager.default.fileExists(atPath: cache.path))
+            let freshClient = OfflineEntitlementClient(configuration: configuration)
+            #expect(freshClient.loadCachedState(now: GoldenVectorFixtureSupport.now) == .fresh(reason: .ok, nextAction: .none))
+            #expect(try Data(contentsOf: cache) == before)
         }
     }
 
