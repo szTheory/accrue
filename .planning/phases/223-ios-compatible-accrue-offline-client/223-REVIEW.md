@@ -1,65 +1,84 @@
 ---
 phase: 223-ios-compatible-accrue-offline-client
-reviewed: 2026-08-06T16:46:04Z
+reviewed: 2026-08-06T17:11:38Z
 depth: standard
-files_reviewed: 11
+files_reviewed: 18
 files_reviewed_list:
   - packages/accrue-offline-client/Package.swift
   - packages/accrue-offline-client/Sources/AccrueOfflineClientCore/OfflineEntitlementClient.swift
-  - packages/accrue-offline-client/Sources/AccrueOfflineClientCore/CanonicalJSONAdmission.swift
   - packages/accrue-offline-client/Sources/AccrueOfflineClientCore/AtomicOfflineCache.swift
-  - packages/accrue-offline-client/Sources/AccrueOfflineClientCore/OfflineReconnect.swift
-  - packages/accrue-offline-client/Sources/AccrueOfflineClientApple/KeychainCacheKey.swift
-  - packages/accrue-offline-client/Sources/AccrueOfflineCacheCrashHarness/main.swift
   - packages/accrue-offline-client/Tests/AccrueOfflineClientCoreTests/GoldenVectorFixtureSupport.swift
   - packages/accrue-offline-client/Tests/AccrueOfflineClientCoreTests/OfflineEntitlementClientTests.swift
-  - packages/accrue-offline-client/Tests/AccrueOfflineClientCoreTests/OfflineReconnectTests.swift
+  - packages/accrue-offline-client/Sources/AccrueOfflineCacheCrashHarness/main.swift
   - packages/accrue-offline-client/Tests/AccrueOfflineClientProcessTests/AtomicOfflineCacheProcessTests.swift
+  - packages/accrue-offline-client/Sources/AccrueOfflineClientCore/OfflineReconnect.swift
+  - packages/accrue-offline-client/Sources/AccrueOfflineClientApple/KeychainCacheKey.swift
+  - packages/accrue-offline-client/Tests/AccrueOfflineClientCoreTests/OfflineReconnectTests.swift
+  - packages/accrue-offline-client/Tests/AccrueOfflineClientAppleTests/KeychainCacheKeyTests.swift
+  - packages/accrue-offline-client/README.md
+  - examples/crosswake_tracer/Package.swift
+  - examples/crosswake_tracer/Sources/AccrueOfflineClient/AccrueOfflineClient.swift
+  - examples/crosswake_tracer/README.md
+  - scripts/ci/verify_ios_offline_client.sh
+  - scripts/ci/verify_reference_scenario_contract.sh
+  - .github/workflows/ci.yml
 findings:
-  critical: 1
+  critical: 2
   warning: 1
   info: 0
-  total: 2
+  total: 3
 status: issues_found
 ---
 
 # Phase 223: Code Review Report
 
-**Reviewed:** 2026-08-06T16:46:04Z
+**Reviewed:** 2026-08-06T17:11:38Z
 **Depth:** standard
-**Files Reviewed:** 11
+**Files Reviewed:** 18
 **Status:** issues_found
 
 ## Summary
 
-The Swift package and its scoped tests were reviewed at standard depth. `swift test --package-path packages/accrue-offline-client` passes (16 tests), but an unauthenticated compact-JWS input can exhaust the process, and the duplicate-member scanner rejects valid JSON strings containing escaped supplementary Unicode characters.
+The package facade, verifier/cache call path, reconnect seam, Apple policy helper, test harnesses, documentation, and CI integration were reviewed. Package tests and the iOS compatibility gate pass, but those checks do not exercise a persistent clock rollback and do not bound attacker-controlled JSON parser depth/size. Both defects can violate the offline authority boundary.
+
+## Narrative Findings (AI reviewer)
 
 ## Critical Issues
 
-### CR-01: Unbounded recursive admission parser lets unauthenticated proof bytes crash the host
+### CR-01: The public API cannot maintain its required clock high-water mark
 
 **Classification:** BLOCKER
 
-**File:** `packages/accrue-offline-client/Sources/AccrueOfflineClientCore/CanonicalJSONAdmission.swift:7-8`
+**File:** `packages/accrue-offline-client/Sources/AccrueOfflineClientCore/OfflineEntitlementClient.swift:20-22, 84`
 
-**Issue:** `applyServerProof` invokes `CanonicalJSONAdmission.validate` before signature verification. The scanner copies the complete attacker-controlled decoded segment into an array and descends recursively through every array/object with no byte-size or nesting limit. A response such as a compact JWS whose payload decodes to tens of thousands of nested arrays reaches `value`/`array` recursively before the signature is checked; it can overflow the Swift stack and terminate the app. Very large segments can also force disproportionate allocations. The reconnect transport accepts arbitrary response bytes, so a malicious/captive network response can trigger this without a signing key.
+**Issue:** Rollback detection only compares `now` with the optional, construction-time `Configuration.clockHighWater`; the client never records a successful observation, exposes no updated high-water value for the host to persist, and the authenticated cache stores no wall-clock high-water. With the README's normal configuration (the default is `nil`), a user can first load an otherwise-valid proof near its `fresh_until`, then set the device clock back to any time after `nbf` and before `fresh_until`. `loadCachedState(now:)` verifies the same cached proof as fresh again, extending fresh access after it should have become stale. The existing test supplies a static high-water only for a rejection case and therefore does not test this transition.
 
-**Fix:** Put a small, documented maximum on compact-proof and decoded header/payload lengths before Base64URL decoding, and make the scanner enforce a maximum nesting depth (or rewrite it as an iterative parser). Return `.malformed` when either limit is exceeded. Add tests using an unsigned, deeply nested payload and an oversized payload to ensure `applyServerProof` returns the bounded invalid state rather than crashing.
+**Fix:** Make last-seen wall-clock time a durable authenticated cache invariant (updated only monotonically under the same lock) or add a required host-owned persistent clock store with an atomic read/update API. Reject any operation where `now` is below the persisted value, and add a test that advances beyond `fresh_until`, rolls back to an earlier post-`nbf` time, and expects `.clockRollback` rather than `.fresh`.
+
+### CR-02: Unbounded pre-verification JSON parsing permits a malicious proof to crash the host
+
+**Classification:** BLOCKER
+
+**File:** `packages/accrue-offline-client/Sources/AccrueOfflineClientCore/OfflineEntitlementClient.swift:62-64`
+
+**Issue:** The facade invokes the internal duplicate-member scanner before signature verification, but it applies no compact-proof/decoded-segment size limit or nesting limit. The scanner recursively descends every attacker-controlled array/object. A reconnect response containing a base64url payload with sufficiently deep nesting can overflow the Swift stack before the signature is checked; a huge segment also forces unbounded allocation. This is reachable through the public host transport without a signing key and terminates the host instead of returning the required bounded invalid outcome.
+
+**Fix:** Before decoding, cap compact-proof and header/payload byte lengths. Make the duplicate-member scanner iterative or enforce a small maximum nesting depth, returning `.malformed` for either limit. Add unsigned oversized and deeply nested compact-JWS cases that verify `applyServerProof` returns `.invalid(.malformed, .reconnectRequired)` without crashing.
 
 ## Warnings
 
-### WR-01: Valid JWT JSON using surrogate-pair escapes is rejected as malformed
+### WR-01: Valid signed JSON containing escaped supplementary Unicode is rejected
 
 **Classification:** WARNING
 
-**File:** `packages/accrue-offline-client/Sources/AccrueOfflineClientCore/CanonicalJSONAdmission.swift:59-61`
+**File:** `packages/accrue-offline-client/Sources/AccrueOfflineClientCore/OfflineEntitlementClient.swift:63`
 
-**Issue:** JSON represents non-BMP characters with two `\\u` escapes (for example, `"\\uD83D\\uDE00"`). `UnicodeScalar(0xD83D)` is nil because a surrogate is not a standalone Unicode scalar, so the guard rejects the first half even when it is followed by a valid low surrogate. Foundation accepts this JSON. Consequently, a correctly signed proof whose bounded `plans`, `features`, or another string claim contains an escaped supplementary Unicode character is refused before signature verification. The test suite covers duplicate members but has no escaped-Unicode vector.
+**Issue:** The duplicate-member admission dependency used at this line treats each `\\uXXXX` escape as an independent Unicode scalar. JSON represents non-BMP characters as a high/low-surrogate pair, so a valid signed claim such as `"\\uD83D\\uDE00"` is rejected before Foundation decodes it. This unnecessarily refuses valid proofs whose bounded string values contain escaped supplementary Unicode; no scoped test covers that interoperability case.
 
-**Fix:** Decode `\\u` escapes according to the JSON surrogate-pair rules: require a following `\\uDC00...\\uDFFF` after a high surrogate, combine the pair into one scalar, and reject lone high/low surrogates. Add signed fixtures for a valid surrogate pair and invalid lone surrogates.
+**Fix:** Update the admission scanner to combine valid JSON surrogate pairs and reject only lone/mismatched surrogates. Add signed fixtures for a valid pair and for invalid lone-surrogate input.
 
 ---
 
-_Reviewed: 2026-08-06T16:46:04Z_
+_Reviewed: 2026-08-06T17:11:38Z_
 _Reviewer: the agent (gsd-code-reviewer)_
 _Depth: standard_
