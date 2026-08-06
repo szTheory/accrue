@@ -260,14 +260,12 @@ The lock permits no fifth `reconnect_required` state; stale is continuity only, 
 | A2 | `AccrueOfflineClientCore`, `OfflineEntitlementClient`, and `OfflineProofReconnectTransport` are suitable exact public names. | Architecture Patterns / Code Examples | Public SwiftPM names are costly to change after first adoption. |
 | A3 | The shown `swift build --product` command is the final CI invocation after package extraction. | Code Examples | The actual package product graph may require a small CI command adjustment. |
 
-## Open Questions
+## Resolved Questions
 
-1. **Does the core need a macOS/Linux supported product after extraction?**
-   - What we know: the current tracer’s process/fault tests run locally on macOS; the Phase requirement is iOS compatibility. [VERIFIED: local `swift test`; VERIFIED: REQUIREMENTS.md]
-   - Recommendation: keep the core source portable enough for those test lanes, but publish only iOS/macOS support actually declared in the new manifest until a second host demands more. [ASSUMED]
-2. **What exact bounded reason/next-action enums should public API use?**
-   - What we know: four top-level states and bounded vocabulary are locked. [VERIFIED: 223-CONTEXT.md]
-   - Recommendation: derive exact cases from canonical decision vectors, keep them domain/host-action oriented, and make their names a plan task with vector-backed tests. [ASSUMED]
+1. **RESOLVED — What platform support does the extracted core declare?**
+   - Phase 223 publishes one `AccrueOfflineClientCore` product with an iOS 16 deployment floor and the explicit macOS floor needed by the package's macOS test lane. It does not add a Linux-specific product or make a Linux public-support promise. Core source and process/fault tests remain Linux-compatible per D-05/D-06/D-11, but that portability evidence does not expand the phase beyond iOS compatibility or establish another supported host platform. [VERIFIED: 223-CONTEXT.md D-05/D-06/D-11; VERIFIED: REQUIREMENTS.md]
+2. **RESOLVED — What bounded reason/next-action enums does the public API use?**
+   - `OfflineEntitlementReason` uses the canonical raw-value cases `ok`, `signed_denial`, `revalidation_due`, `clock_rollback`, `device_mismatch`, `hard_expired`, `malformed`, `superseded`, `unknown_key`, `wrong_algorithm`, `wrong_audience`, `wrong_issuer`, and `wrong_type`, plus the bounded operational failures `reconnect_failed`, `cache_write_failed`, and `cache_recovery_failed`. `OfflineNextAction` uses only `none` and `reconnect_required`. These cases are derived from the canonical corpus and locked host actions; Plan 223-02 must assert exact state/reason/action mappings, while Plan 223-03 may only exercise the three named operational failures and may not introduce another state or action. [VERIFIED: 223-CONTEXT.md D-02/D-10/D-14; VERIFIED: canonical vector contract; VERIFIED: 223-01-PLAN.md]
 
 ## Environment Availability
 
