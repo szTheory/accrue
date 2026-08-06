@@ -5,17 +5,20 @@ let package = Package(
     name: "AccrueOfflineClient",
     platforms: [.macOS(.v10_15), .iOS(.v16)],
     products: [
-        .library(name: "AccrueOfflineClient", targets: ["AccrueOfflineClient"]),
-        .executable(name: "AccrueOfflineCacheCrashHarness", targets: ["AccrueOfflineCacheCrashHarness"])
+        .library(name: "AccrueOfflineClientTracer", targets: ["AccrueOfflineClient"])
+    ],
+    dependencies: [
+        .package(path: "../../packages/accrue-offline-client")
     ],
     targets: [
-        .target(name: "AccrueOfflineClient"),
-        .executableTarget(
-            name: "AccrueOfflineCacheCrashHarness",
-            dependencies: ["AccrueOfflineClient"]
+        .target(
+            name: "AccrueOfflineClient",
+            dependencies: [
+                .product(name: "AccrueOfflineClientCore", package: "accrue-offline-client")
+            ]
         ),
         .testTarget(
-            name: "AccrueOfflineClientTests",
+            name: "AccrueOfflineClientTracerTests",
             dependencies: ["AccrueOfflineClient"]
         )
     ]
