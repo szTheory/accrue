@@ -7,6 +7,8 @@ let package = Package(
     products: [.library(name: "AccrueOfflineClientCore", targets: ["AccrueOfflineClientCore"])],
     targets: [
         .target(name: "AccrueOfflineClientCore"),
-        .testTarget(name: "AccrueOfflineClientCoreTests", dependencies: ["AccrueOfflineClientCore"])
+        .executableTarget(name: "AccrueOfflineCacheCrashHarness", dependencies: ["AccrueOfflineClientCore"]),
+        .testTarget(name: "AccrueOfflineClientCoreTests", dependencies: ["AccrueOfflineClientCore"]),
+        .testTarget(name: "AccrueOfflineClientProcessTests", dependencies: ["AccrueOfflineClientCore"])
     ]
 )
