@@ -51,4 +51,38 @@ struct OfflineEntitlementClientTests {
         #expect(client.applyServerProof(deny, now: GoldenVectorFixtureSupport.now) == .denied(reason: .signedDenial, nextAction: .reconnectRequired))
         #expect(client.loadCachedState(now: GoldenVectorFixtureSupport.now) == .denied(reason: .signedDenial, nextAction: .reconnectRequired))
     }
+
+    @Test("genuinely signed duplicate JSON members are rejected without replacing authenticated cache")
+    func signedDuplicateMembersDoNotMutateCache() throws {
+        let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        defer { try? FileManager.default.removeItem(at: directory) }
+        let cache = directory.appendingPathComponent("proof.cache")
+        let client = OfflineEntitlementClient(configuration: try GoldenVectorFixtureSupport.configuration(cacheURL: cache))
+        #expect(client.applyServerProof(try GoldenVectorFixtureSupport.validAllowProof(), now: GoldenVectorFixtureSupport.now) == .fresh(reason: .ok, nextAction: .none))
+        let before = try Data(contentsOf: cache)
+        let valid = String(data: try GoldenVectorFixtureSupport.validAllowProof(), encoding: .utf8)!
+        let parts = valid.split(separator: ".", omittingEmptySubsequences: false).map(String.init)
+        let header = try json(parts[0]); let payload = try json(parts[1])
+        let duplicateHeader = try GoldenVectorFixtureSupport.signedRaw(header: "{\"alg\":\"ES256\"," + String(header.dropFirst()), payload: payload)
+        let duplicatePayload = try GoldenVectorFixtureSupport.signedRaw(payload: "{\"jti\":\"duplicate\"," + String(payload.dropFirst()))
+        for proof in [duplicateHeader, duplicatePayload] {
+            #expect(client.applyServerProof(proof, now: GoldenVectorFixtureSupport.now) == .invalid(reason: .malformed, nextAction: .reconnectRequired))
+            #expect(try Data(contentsOf: cache) == before)
+        }
+    }
+
+    @Test("verified proof replaces malformed and unauthenticated prior cache bytes")
+    func verifiedRecoveryReplacesInvalidCache() throws {
+        for invalid in [Data("not-json".utf8), Data("{\"version\":2}".utf8)] {
+            let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+            defer { try? FileManager.default.removeItem(at: directory) }
+            let cache = directory.appendingPathComponent("proof.cache"); try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true); try invalid.write(to: cache)
+            let client = OfflineEntitlementClient(configuration: try GoldenVectorFixtureSupport.configuration(cacheURL: cache))
+            #expect(client.applyServerProof(try GoldenVectorFixtureSupport.validDenyProof(), now: GoldenVectorFixtureSupport.now) == .denied(reason: .signedDenial, nextAction: .reconnectRequired))
+            let replacement = OfflineEntitlementClient(configuration: try GoldenVectorFixtureSupport.configuration(cacheURL: cache))
+            #expect(replacement.loadCachedState(now: GoldenVectorFixtureSupport.now) == .denied(reason: .signedDenial, nextAction: .reconnectRequired))
+        }
+    }
+
+    private func json(_ part: String) throws -> String { var value = part.replacingOccurrences(of: "-", with: "+").replacingOccurrences(of: "_", with: "/"); value += String(repeating: "=", count: (4 - value.count % 4) % 4); return String(data: try #require(Data(base64Encoded: value)), encoding: .utf8)! }
 }

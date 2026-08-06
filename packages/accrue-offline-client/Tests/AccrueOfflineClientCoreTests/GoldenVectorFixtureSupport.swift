@@ -65,6 +65,16 @@ enum GoldenVectorFixtureSupport {
         let input = "\(headerPart).\(payloadPart)"
         return Data("\(input).\(try privateKey.signature(for: Data(input.utf8)).rawRepresentation.base64URL)".utf8)
     }
+    static func signedRaw(header: String? = nil, payload: String? = nil) throws -> Data {
+        let compact = String(data: try validAllowProof(), encoding: .utf8)!
+        let parts = compact.split(separator: ".", omittingEmptySubsequences: false).map(String.init)
+        let rawHeader = header ?? String(data: Data(base64URL: parts[0])!, encoding: .utf8)!
+        let rawPayload = payload ?? String(data: Data(base64URL: parts[1])!, encoding: .utf8)!
+        let key = try JSONSerialization.jsonObject(with: try Data(contentsOf: root().appendingPathComponent("accrue/priv/entitlements/v1.59-offline-test-key.jwk.json"))) as! [String: Any]
+        let privateKey = try P256.Signing.PrivateKey(rawRepresentation: Data(base64URL: key["d"] as! String)!)
+        let input = "\(Data(rawHeader.utf8).base64URL).\(Data(rawPayload.utf8).base64URL)"
+        return Data("\(input).\(try privateKey.signature(for: Data(input.utf8)).rawRepresentation.base64URL)".utf8)
+    }
     static func signedPrior(revision: Int64, iat: Int64, freshUntil: Int64, disposition: String) throws -> Data {
         try signedMutation { _, claims in
             claims["revision"] = revision; claims["iat"] = iat; claims["nbf"] = iat; claims["fresh_until"] = max(freshUntil, iat); claims["disposition"] = disposition
