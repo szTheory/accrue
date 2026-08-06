@@ -17,6 +17,7 @@ lock="$repo_root/.planning/phases/224-crosswake-host-command-bridge-seam/crosswa
 audit="$repo_root/.planning/phases/224-crosswake-host-command-bridge-seam/224-CROSSWAKE-SOURCE-AUDIT.md"
 evidence="$repo_root/.planning/phases/224-crosswake-host-command-bridge-seam/224-BRIDGE-CONFORMANCE-EVIDENCE.md"
 report="$repo_root/examples/crosswake_tracer/capability-report.json"
+expected_test_target='swift test --package-path packages/crosswake-shell-core-ios --filter HostCommandAdmissionTests'
 
 [[ -f "$lock" && -f "$audit" ]] || { echo "source lock and audit are required" >&2; exit 66; }
 command -v jq >/dev/null || { echo "jq is required" >&2; exit 67; }
@@ -61,7 +62,10 @@ if [[ "$mode" == "full" ]]; then
 elif [[ "$mode" == "tracer" || "$mode" == "admission" || "$mode" == "lifecycle" || "$mode" == "trusted-frame" ]]; then
   [[ "$state" == "reviewed_patch" ]] || { echo "tracer requires reviewed_patch lock state" >&2; exit 76; }
   test_target="$(jq -er '.test_target' "$lock")"
-  (cd "$CROSSWAKE_SOURCE_ROOT" && eval "$test_target")
+  [[ "$test_target" == "$expected_test_target" ]] || { echo "unexpected pinned test target" >&2; exit 80; }
+  (cd "$CROSSWAKE_SOURCE_ROOT" && swift test \
+    --package-path packages/crosswake-shell-core-ios \
+    --filter HostCommandAdmissionTests)
 fi
 
 echo "Crosswake ${mode} verification passed (${state})"
