@@ -5,16 +5,16 @@ milestone_name: First-Adopter iOS Bridge & Proof
 current_phase: 224
 current_phase_name: crosswake host command bridge seam
 status: planning
-stopped_at: Completed 223-07-PLAN.md
-last_updated: "2026-08-06T17:48:43.566Z"
+stopped_at: Phase 224 context gathered
+last_updated: "2026-08-06T18:31:14.275Z"
 last_activity: 2026-08-06
 last_activity_desc: Phase 223 complete, transitioned to Phase 224
 progress:
-  total_phases: 1
+  total_phases: 2
   completed_phases: 1
   total_plans: 7
   completed_plans: 7
-  percent: 100
+  percent: 50
 ---
 
 # Project State
@@ -530,6 +530,7 @@ Coverage: 22/22 v1.51 requirements mapped (each REQ-ID → exactly one phase). D
 - Phase 222 added: Close gap: OFF-05 — schedule offline reconnect recovery
 - Phase 214.1 inserted after Phase 214: Close gap: DOCS-03 — reconcile StripeSync writer documentation (URGENT)
 - Phase 214.2 inserted after Phase 214: Close gap: SYNC-02/DOCS-03 — surface advisory entitlement diagnostics (URGENT)
+- Phase 224 edited: restored missing canonical phase definition
 
 ### Decisions
 
@@ -1025,9 +1026,9 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 
 ## Session Continuity
 
-Last session: 2026-08-06T17:41:08.112Z
-Stopped at: Completed 223-07-PLAN.md
-Resume file: None
+Last session: 2026-08-06T18:31:14.262Z
+Stopped at: Phase 224 context gathered
+Resume file: .planning/phases/224-crosswake-host-command-bridge-seam/224-CONTEXT.md
 
 ## Operator Next Steps
 
