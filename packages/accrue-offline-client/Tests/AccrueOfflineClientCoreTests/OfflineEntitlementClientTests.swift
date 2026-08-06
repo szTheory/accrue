@@ -146,5 +146,55 @@ struct OfflineEntitlementClientTests {
         }
     }
 
+    @Test("concurrent signed invalid contexts cannot persist authority")
+    func concurrentInvalidContextsCannotPersist() async throws {
+        let cases: [(String, Data, OfflineEntitlementReason, Date?)] = [
+            ("profile", try GoldenVectorFixtureSupport.signedMutation { header, _ in header["typ"] = "other" }, .wrongType, nil),
+            ("account", try GoldenVectorFixtureSupport.signedMutation { _, claims in claims["sub"] = "other-account" }, .deviceMismatch, nil),
+            ("device", try GoldenVectorFixtureSupport.signedMutation { _, claims in claims["cnf"] = ["jkt": "other-device"] }, .deviceMismatch, nil),
+            ("future-not-before", try GoldenVectorFixtureSupport.signedMutation { _, claims in claims["nbf"] = Int64(1_700_000_002) }, .malformed, nil),
+            ("expired", try GoldenVectorFixtureSupport.signedMutation { _, claims in claims["fresh_until"] = Int64(1_700_000_000); claims["exp"] = Int64(1_700_000_001) }, .hardExpired, nil),
+            ("clock-rollback", try GoldenVectorFixtureSupport.validAllowProof(), .clockRollback, Date(timeIntervalSince1970: 1_700_000_002))
+        ]
+        for _ in 0..<8 {
+            let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+            defer { try? FileManager.default.removeItem(at: directory) }
+            let cache = directory.appendingPathComponent("proof.cache")
+            let configuration = try GoldenVectorFixtureSupport.configuration(cacheURL: cache)
+            let gate = ConcurrentStartGate(expected: cases.count + 1)
+            let results = await withTaskGroup(of: (String, OfflineEntitlementState).self, returning: [String: OfflineEntitlementState].self) { group in
+                group.addTask {
+                    await gate.arrive()
+                    return ("valid", OfflineEntitlementClient(configuration: configuration).applyServerProof(try! GoldenVectorFixtureSupport.validAllowProof(), now: GoldenVectorFixtureSupport.now))
+                }
+                for (name, proof, _, clockHighWater) in cases {
+                    group.addTask {
+                        await gate.arrive()
+                        let clientConfiguration = OfflineEntitlementClient.Configuration(issuer: configuration.issuer, audience: configuration.audience, accountSubject: configuration.accountSubject, deviceThumbprint: configuration.deviceThumbprint, publicJWKS: configuration.publicJWKS, cacheURL: cache, cacheAuthenticationKey: configuration.cacheAuthenticationKey, clockHighWater: clockHighWater)
+                        return (name, OfflineEntitlementClient(configuration: clientConfiguration).applyServerProof(proof, now: GoldenVectorFixtureSupport.now))
+                    }
+                }
+                var values: [String: OfflineEntitlementState] = [:]
+                for await (name, state) in group { values[name] = state }
+                return values
+            }
+            #expect(results["valid"] == .fresh(reason: .ok, nextAction: .none))
+            for (name, _, reason, _) in cases { #expect(results[name] == .invalid(reason: reason, nextAction: .reconnectRequired), Comment(rawValue: name)) }
+            #expect(OfflineEntitlementClient(configuration: configuration).loadCachedState(now: GoldenVectorFixtureSupport.now) == .fresh(reason: .ok, nextAction: .none))
+        }
+    }
+
     private func json(_ part: String) throws -> String { var value = part.replacingOccurrences(of: "-", with: "+").replacingOccurrences(of: "_", with: "/"); value += String(repeating: "=", count: (4 - value.count % 4) % 4); return String(data: try #require(Data(base64Encoded: value)), encoding: .utf8)! }
+}
+
+private actor ConcurrentStartGate {
+    private let expected: Int
+    private var arrivals = 0
+    private var waiters: [CheckedContinuation<Void, Never>] = []
+    init(expected: Int) { self.expected = expected }
+    func arrive() async {
+        arrivals += 1
+        if arrivals == expected { let pending = waiters; waiters.removeAll(); pending.forEach { $0.resume() }; return }
+        await withCheckedContinuation { waiters.append($0) }
+    }
 }

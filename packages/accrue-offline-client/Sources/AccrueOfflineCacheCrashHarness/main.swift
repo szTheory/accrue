@@ -3,10 +3,9 @@ import Foundation
 import AccrueOfflineClientCore
 
 let arguments = CommandLine.arguments
-guard arguments.count == 4,
+guard arguments.count >= 3,
       let keyText = ProcessInfo.processInfo.environment["ACCRUE_CACHE_TEST_KEY_BASE64"], let key = Data(base64Encoded: keyText),
-      let jwksText = ProcessInfo.processInfo.environment["ACCRUE_CACHE_JWKS_BASE64"], let jwks = Data(base64Encoded: jwksText),
-      let proof = Data(base64Encoded: arguments[3])
+      let jwksText = ProcessInfo.processInfo.environment["ACCRUE_CACHE_JWKS_BASE64"], let jwks = Data(base64Encoded: jwksText)
 else { exit(64) }
 
 let cacheURL = URL(fileURLWithPath: arguments[1])
@@ -21,6 +20,12 @@ let client = OfflineEntitlementClient(configuration: .init(
     deviceThumbprint: "IVw958D_sxKYMg6iCHQs-vmxkOVIiRwwKlfeV6ykrCg", publicJWKS: jwks, cacheURL: cacheURL,
     cacheAuthenticationKey: SymmetricKey(data: key)
 ))
+if arguments[2] == "load" {
+    let state = client.loadCachedState(now: Date(timeIntervalSince1970: 1_700_000_001))
+    if case .fresh(reason: .ok, nextAction: .none) = state { exit(0) }
+    exit(65)
+}
+guard arguments.count == 4, let proof = Data(base64Encoded: arguments[3]) else { exit(64) }
 let state = client.applyServerProof(proof, now: Date(timeIntervalSince1970: 1_700_000_001))
 if arguments[2] == "crash-after-apply" { exit(75) }
 if case .invalid = state { exit(65) }
