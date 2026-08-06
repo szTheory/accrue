@@ -2,8 +2,8 @@
 set -euo pipefail
 
 mode="${1:-}"
-if [[ "$mode" != "source-gate" && "$mode" != "tracer" && "$mode" != "admission" && "$mode" != "lifecycle" ]]; then
-  echo "usage: $0 {source-gate|tracer|admission|lifecycle}" >&2
+if [[ "$mode" != "source-gate" && "$mode" != "tracer" && "$mode" != "admission" && "$mode" != "lifecycle" && "$mode" != "full" ]]; then
+  echo "usage: $0 {source-gate|tracer|admission|lifecycle|full}" >&2
   exit 64
 fi
 
@@ -45,7 +45,9 @@ case "$state" in
   *) echo "unsupported lock state: $state" >&2; exit 75 ;;
 esac
 
-if [[ "$mode" == "tracer" || "$mode" == "admission" || "$mode" == "lifecycle" ]]; then
+if [[ "$mode" == "full" ]]; then
+  (cd "$CROSSWAKE_SOURCE_ROOT" && swift test --package-path packages/crosswake-shell-core-ios)
+elif [[ "$mode" == "tracer" || "$mode" == "admission" || "$mode" == "lifecycle" ]]; then
   [[ "$state" == "reviewed_patch" ]] || { echo "tracer requires reviewed_patch lock state" >&2; exit 76; }
   test_target="$(jq -er '.test_target' "$lock")"
   (cd "$CROSSWAKE_SOURCE_ROOT" && eval "$test_target")

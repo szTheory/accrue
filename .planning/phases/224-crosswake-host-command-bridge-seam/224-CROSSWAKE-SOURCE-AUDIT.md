@@ -62,6 +62,25 @@ receipt, JWS, token, or arbitrary payload map is part of this delivery.
 | Review status | local diff reviewed; full SwiftPM suite and tracer filter passed |
 | Upstream convergence | still `alpha_fork_pending_upstream_review`; no upstream acceptance is claimed |
 
+## Plan 03 final proof inventory
+
+| File | Created / modified symbols and bounded responsibility |
+| --- | --- |
+| `packages/crosswake-shell-core-ios/Sources/CrosswakeShellCore/CrosswakeDelegates.swift` | `HostCommandDelegate.handle` is throwing; the delegate remains limited to `HostCommandRequest` and `HostCommandCancellationContext`, with no WebKit, raw envelope, callback, reply, or frame control. |
+| `packages/crosswake-shell-core-ios/Sources/CrosswakeShellCore/BridgeChannel.swift` | The sole ordered dispatcher catches a host delegate failure and sends the existing bounded `handler_failed` denial through the route-epoch-bound terminalizer. |
+| `packages/crosswake-shell-core-ios/Tests/CrosswakeShellCoreTests/HostCommandAdmissionTests.swift` | Proves a synthetic throwing delegate produces exactly one opaque bounded denial, keeps normalized delegate fields transport-free, and retains the four-command/intersection/no-field/epoch negative coverage. |
+
+The deterministic runner's `full` mode runs the pinned source gate followed by the entire native SwiftPM suite. It is deterministic; this synchronous source has no scheduler/seed facility, so cancellation and route invalidation remain represented by the captured immutable cancellation context and epoch terminalization tested in the same target.
+
+## Plan 03 reviewed patch record
+
+| Field | Value |
+| --- | --- |
+| Patch revision | `57e03b61082b1f865bc31c5e8b6dcee444f56dad` |
+| Diff range | `932b4f32bf087b8e4c0c36c3e54b1031839e867d..57e03b61082b1f865bc31c5e8b6dcee444f56dad` |
+| Review status | local diff reviewed; full SwiftPM suite plus admission, lifecycle, and full runner modes passed |
+| Upstream convergence | still `alpha_fork_pending_upstream_review`; no upstream acceptance is claimed |
+
 ### Security boundary finding
 
 The discovered `WKScriptMessageHandler` base seam exposes the decoded message and frame
