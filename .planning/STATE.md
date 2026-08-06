@@ -2,12 +2,13 @@
 gsd_state_version: 1.0
 milestone: v1.60
 milestone_name: First-Adopter iOS Bridge & Proof
-current_phase_name: defining requirements
+current_phase: 223
+current_phase_name: ios-compatible-accrue-offline-client
 status: executing
 stopped_at: Phase 223 UI-SPEC approved
-last_updated: "2026-08-06T15:17:46.300Z"
-last_activity: 2026-08-05
-last_activity_desc: Milestone v1.60 started
+last_updated: "2026-08-06T15:20:34.836Z"
+last_activity: 2026-08-06
+last_activity_desc: Phase 223 execution started
 progress:
   total_phases: 1
   completed_phases: 0
@@ -24,14 +25,14 @@ See: `.planning/PROJECT.md` (updated 2026-08-05 after shipping v1.59)
 
 **Core value:** A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic Elixir DX, strong domain modeling, tamper-evident audit ledger, great observability, and zero breaking-change pain through v1.x.
 
-**Current focus:** Planning the next milestone
+**Current focus:** Phase 223 — ios-compatible-accrue-offline-client
 
 ## Current Position
 
-Phase: Not started (defining requirements)
-Plan: —
-Status: Ready to execute
-Last activity: 2026-08-05 — Milestone v1.60 started
+Phase: 223 (ios-compatible-accrue-offline-client) — EXECUTING
+Plan: 1 of 4
+Status: Executing Phase 223
+Last activity: 2026-08-06 — Phase 223 execution started
 
 ## Post-v1.48 Pause Rule
 
