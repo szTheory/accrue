@@ -3,9 +3,11 @@ import Foundation
 /// A deliberately small JSON scanner used before Foundation turns objects into maps.
 /// It only admits well-formed JSON with unique object member names at every depth.
 enum CanonicalJSONAdmission {
+    static let maximumNestingDepth = 32
+
     static func validate(_ data: Data) throws {
         var scanner = Scanner(bytes: Array(data))
-        try scanner.value()
+        try scanner.value(depth: 0)
         scanner.space()
         guard scanner.index == scanner.bytes.count else { throw Error.malformed }
     }
@@ -17,29 +19,31 @@ enum CanonicalJSONAdmission {
         var index = 0
 
         mutating func space() { while index < bytes.count && [9, 10, 13, 32].contains(bytes[index]) { index += 1 } }
-        mutating func value() throws {
+        mutating func value(depth: Int) throws {
             space(); guard index < bytes.count else { throw Error.malformed }
             switch bytes[index] {
-            case 123: try object()
-            case 91: try array()
+            case 123: try object(depth: depth)
+            case 91: try array(depth: depth)
             case 34: _ = try string()
             case 45, 48...57: try number()
             default:
                 guard consume("true") || consume("false") || consume("null") else { throw Error.malformed }
             }
         }
-        mutating func object() throws {
+        mutating func object(depth: Int) throws {
+            guard depth < CanonicalJSONAdmission.maximumNestingDepth else { throw Error.malformed }
             index += 1; space(); if take(125) { return }; var names = Set<String>()
             while true {
                 space(); let name = try string()
                 guard names.insert(name).inserted else { throw Error.duplicateMember }
-                space(); guard take(58) else { throw Error.malformed }; try value(); space()
+                space(); guard take(58) else { throw Error.malformed }; try value(depth: depth + 1); space()
                 if take(125) { return }; guard take(44) else { throw Error.malformed }
             }
         }
-        mutating func array() throws {
+        mutating func array(depth: Int) throws {
+            guard depth < CanonicalJSONAdmission.maximumNestingDepth else { throw Error.malformed }
             index += 1; space(); if take(93) { return }
-            while true { try value(); space(); if take(93) { return }; guard take(44) else { throw Error.malformed } }
+            while true { try value(depth: depth + 1); space(); if take(93) { return }; guard take(44) else { throw Error.malformed } }
         }
         mutating func string() throws -> String {
             guard take(34) else { throw Error.malformed }; var value = ""

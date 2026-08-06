@@ -16,6 +16,13 @@ public enum OfflineEntitlementState: Sendable, Equatable {
 }
 
 public struct OfflineEntitlementClient: Sendable {
+    private static let maximumCompactProofBytes = 256 * 1024
+    private static let maximumHeaderBytes = 1024
+    private static let maximumPayloadBytes = 128 * 1024
+    private static let maximumHeaderSegmentBytes = 1366
+    private static let maximumPayloadSegmentBytes = 174_763
+    private static let maximumSignatureSegmentBytes = 86
+
     public struct Configuration: Sendable {
         public let issuer: String; public let audience: String; public let accountSubject: String; public let deviceThumbprint: String; public let publicJWKS: Data; public let cacheURL: URL; public let cacheAuthenticationKey: SymmetricKey; public let clockHighWater: Date?
         public init(issuer: String, audience: String, accountSubject: String, deviceThumbprint: String, publicJWKS: Data, cacheURL: URL, cacheAuthenticationKey: SymmetricKey, clockHighWater: Date? = nil) {
@@ -62,9 +69,16 @@ public struct OfflineEntitlementClient: Sendable {
     }
 
     private func verify(_ compactBytes: Data, now: Date) throws -> VerifiedOfflineProof {
+        guard compactBytes.count <= Self.maximumCompactProofBytes else { throw VerificationError(.malformed) }
         guard let compact = String(data: compactBytes, encoding: .utf8) else { throw VerificationError(.malformed) }
         let parts = compact.split(separator: ".", omittingEmptySubsequences: false)
-        guard parts.count == 3, let headerData = Data(base64URL: String(parts[0])), let payloadData = Data(base64URL: String(parts[1])), let signature = Data(base64URL: String(parts[2])), signature.count == 64 else { throw VerificationError(.malformed) }
+        guard parts.count == 3,
+              parts[0].utf8.count <= Self.maximumHeaderSegmentBytes,
+              parts[1].utf8.count <= Self.maximumPayloadSegmentBytes,
+              parts[2].utf8.count == Self.maximumSignatureSegmentBytes,
+              let headerData = Data(base64URL: String(parts[0])), headerData.count <= Self.maximumHeaderBytes,
+              let payloadData = Data(base64URL: String(parts[1])), payloadData.count <= Self.maximumPayloadBytes,
+              let signature = Data(base64URL: String(parts[2])), signature.count == 64 else { throw VerificationError(.malformed) }
         do { try CanonicalJSONAdmission.validate(headerData); try CanonicalJSONAdmission.validate(payloadData) }
         catch { throw VerificationError(.malformed) }
         guard let header = try? JSONSerialization.jsonObject(with: headerData) as? [String: Any], Set(header.keys) == ["alg", "typ", "kid"] else { throw VerificationError(.malformed) }
