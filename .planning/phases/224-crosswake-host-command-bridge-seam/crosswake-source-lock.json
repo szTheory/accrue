@@ -4,11 +4,11 @@
   "sanitized_remote": "https://github.com/szTheory/crosswake.git",
   "delivery_lane": "alpha_fork:chore/accrue-host-command-bridge",
   "upstream_base_revision": "932b4f32bf087b8e4c0c36c3e54b1031839e867d",
-  "audit_sha256": "77a82b66f8d15eaaf0c44136eb77d47049579071486ee9b7e87db432b98e5fb9",
-  "conformance_evidence_sha256": "bc9a47c2a7457de3f6cfd7f004fcafbf497a7d3348258f3a0c33128f29700973",
+  "audit_sha256": "339f07e7f03617b1fcb9071714885f84517c32b8eb2e23a1646ccb9cc8fa7c94",
+  "conformance_evidence_sha256": "d3cfae5e8ec5914e09c317ab7ed0a5bef8cf4039170764e438187fc75bce33e0",
   "test_target": "swift test --package-path packages/crosswake-shell-core-ios --filter HostCommandAdmissionTests",
   "upstream_convergence_status": "alpha_fork_pending_upstream_review",
-  "patch_revision": "57e03b61082b1f865bc31c5e8b6dcee444f56dad",
-  "diff_identity": "9d5330a471d7446fb8657fa22c5c41ade458b4eb739c50cbf245a1457d954e31",
-  "reviewed_diff_range": "932b4f32bf087b8e4c0c36c3e54b1031839e867d..57e03b61082b1f865bc31c5e8b6dcee444f56dad"
+  "patch_revision": "fc5e399fcb46d78b610c81e13c644277f3fcf1c5",
+  "diff_identity": "af1dd2259a6d18645169375298e0adb8accdaf9945f98496b2a593bbdbf01176",
+  "reviewed_diff_range": "932b4f32bf087b8e4c0c36c3e54b1031839e867d..fc5e399fcb46d78b610c81e13c644277f3fcf1c5"
 }

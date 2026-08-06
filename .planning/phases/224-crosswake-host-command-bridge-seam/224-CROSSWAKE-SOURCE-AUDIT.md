@@ -1,4 +1,4 @@
-# Crosswake Source Audit — Phase 224 Plans 01–02
+# Crosswake Source Audit — Phase 224 Plans 01–05
 
 **Audit status:** base locked; source inspected before any Crosswake edit.
 
@@ -61,6 +61,30 @@ receipt, JWS, token, or arbitrary payload map is part of this delivery.
 | Diff range | `932b4f32bf087b8e4c0c36c3e54b1031839e867d..e04928e36381fbbf076ec72eed09737f39c94986` |
 | Review status | local diff reviewed; full SwiftPM suite and tracer filter passed |
 | Upstream convergence | still `alpha_fork_pending_upstream_review`; no upstream acceptance is claimed |
+
+## Plan 05 trusted sender-frame closure
+
+| Field | Value |
+| --- | --- |
+| Patch revision | `fc5e399fcb46d78b610c81e13c644277f3fcf1c5` |
+| Immutable base-to-patch range | `932b4f32bf087b8e4c0c36c3e54b1031839e867d..fc5e399fcb46d78b610c81e13c644277f3fcf1c5` |
+| Binary diff identity (SHA-256) | `af1dd2259a6d18645169375298e0adb8accdaf9945f98496b2a593bbdbf01176` |
+| Review status | clean checkout; local diff reviewed; focused 14-test and full 28-test SwiftPM suites passed |
+| Upstream convergence | still `alpha_fork_pending_upstream_review`; no upstream acceptance is claimed |
+| iOS availability | `CrosswakeShellCore` targets iOS 15; installed iPhoneOS SDK exposes `WKScriptMessage.world` from iOS 14 |
+
+The prior WebKit boundary finding is closed. At the real `BridgeChannel.userContentController(_:didReceive:)` entry point, production derives an internal immutable value-only sender context solely from `message.frameInfo.isMainFrame`, `message.frameInfo.securityOrigin` (protocol, case-normalized host, effective port), and `message.world == WKContentWorld.page`.
+
+It compares those components to `session.allowedOrigin` before JSON body decode, evaluation, delegate invocation, or reply-sink delivery. Missing, opaque, malformed, subframe, cross-origin, and non-page-world contexts fail closed; the existing envelope `request.origin == session.allowedOrigin.absoluteString` remains defense in depth after trusted-frame admission.
+
+The exhaustive two-file Plan 05 gap-closure inventory is:
+
+| File | Final bounded symbols / responsibility |
+| --- | --- |
+| `packages/crosswake-shell-core-ios/Sources/CrosswakeShellCore/BridgeChannel.swift` | `BridgeMessageSenderContext`, `userContentController(_:didReceive:)`, `receive(_:from:completion:)`, and internal `evaluate(_:completion:)`; the seam is not public authority and no host delegate receives WebKit objects, origin metadata, a reply closure, or evaluator access. |
+| `packages/crosswake-shell-core-ios/Tests/CrosswakeShellCoreTests/HostCommandAdmissionTests.swift` | Trusted main-frame/page-world/exact-origin tracer and forged-envelope subframe, cross-origin-main-frame, and non-page-world negatives; each proves zero delegate calls and zero reply deliveries while retained protocol/version, route, pack, manifest, descriptor/version, schema, failure, epoch, and one-terminal-reply coverage stays green. |
+
+The full reviewed range contains the earlier four-file Phase 224 foundation; only the two files above implement this sender-frame repair. No Accrue-local handler/wrapper, StoreKit, host UI/authentication, generic commerce API, additional command, simulator/physical-device claim, or capability-report status change was introduced.
 
 ## Plan 03 final proof inventory
 

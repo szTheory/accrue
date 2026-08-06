@@ -10,9 +10,9 @@
 | Sanitized remote | `https://github.com/szTheory/crosswake.git` |
 | Delivery lane | Alpha-owned short-lived `chore/accrue-host-command-bridge` |
 | Immutable upstream base | `932b4f32bf087b8e4c0c36c3e54b1031839e867d` |
-| Reviewed patch revision | `57e03b61082b1f865bc31c5e8b6dcee444f56dad` |
-| Reviewed diff range | `932b4f32bf087b8e4c0c36c3e54b1031839e867d..57e03b61082b1f865bc31c5e8b6dcee444f56dad` |
-| Binary diff identity (SHA-256) | `9d5330a471d7446fb8657fa22c5c41ade458b4eb739c50cbf245a1457d954e31` |
+| Reviewed patch revision | `fc5e399fcb46d78b610c81e13c644277f3fcf1c5` |
+| Reviewed diff range | `932b4f32bf087b8e4c0c36c3e54b1031839e867d..fc5e399fcb46d78b610c81e13c644277f3fcf1c5` |
+| Binary diff identity (SHA-256) | `af1dd2259a6d18645169375298e0adb8accdaf9945f98496b2a593bbdbf01176` |
 | Audit digest | Bound through `crosswake-source-lock.json` |
 | Review status | Local diff reviewed; deterministic suites passed |
 | Upstream convergence | `alpha_fork_pending_upstream_review`; no upstream acceptance or PR is asserted |
@@ -40,10 +40,14 @@ evidence-location assertion.
 
 ## Observed deterministic results
 
+### Trusted sender-frame assertions
+
+At the real WebKit entry point, only a page-world main frame whose WebKit security-origin components exactly match the active session is admitted before decoding or evaluation. The positive trusted tracer invokes the typed delegate once and emits one terminal reply. A forged allowlisted envelope from a subframe, cross-origin main frame, or non-page content world invokes the delegate zero times and delivers zero replies. The existing envelope-origin guard remains after this trusted metadata admission as defense in depth.
+
 | Check | Result | Scope proved |
 | --- | --- | --- |
 | Exact source lock and native suite | pass | Reviewed Crosswake source compiles and its deterministic unit suite passes at the pinned revision. |
-| Host-command admission/lifecycle coverage | pass | Literal descriptor intersection, fixed schemas, opaque handler failure, one-shot terminalization, and stale epoch suppression remain covered by the exact native target. |
+| Host-command admission/lifecycle coverage | pass | Trusted-frame positive plus subframe, cross-origin, and non-page-world reply-suppression regressions; literal descriptor intersection, fixed schemas, opaque handler failure, one-shot terminalization, and stale epoch suppression remain covered by the exact native target. |
 | Accrue tracer consumer | pass | The local SwiftPM conformance consumer still resolves and tests without becoming a runtime authority. |
 | Capability report assertions | pass | Overall and every capability remain `feasibility_blocked`; every Crosswake compile/unit evidence entry points here. |
 

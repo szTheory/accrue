@@ -2,8 +2,8 @@
 set -euo pipefail
 
 mode="${1:-}"
-if [[ "$mode" != "source-gate" && "$mode" != "tracer" && "$mode" != "admission" && "$mode" != "lifecycle" && "$mode" != "full" ]]; then
-  echo "usage: $0 {source-gate|tracer|admission|lifecycle|full}" >&2
+if [[ "$mode" != "source-gate" && "$mode" != "tracer" && "$mode" != "admission" && "$mode" != "lifecycle" && "$mode" != "trusted-frame" && "$mode" != "full" ]]; then
+  echo "usage: $0 {source-gate|tracer|admission|lifecycle|trusted-frame|full}" >&2
   exit 64
 fi
 
@@ -58,7 +58,7 @@ if [[ "$mode" == "full" ]]; then
     all(.capabilities[]; .status == "feasibility_blocked") and
     all(.capabilities[] | .evidence[]; (.kind != "crosswake_bridge_compile_unit") or (.location | contains("224-BRIDGE-CONFORMANCE-EVIDENCE.md")))
   ' "$report" >/dev/null || { echo "capability report must retain blocked statuses and evidence locations" >&2; exit 79; }
-elif [[ "$mode" == "tracer" || "$mode" == "admission" || "$mode" == "lifecycle" ]]; then
+elif [[ "$mode" == "tracer" || "$mode" == "admission" || "$mode" == "lifecycle" || "$mode" == "trusted-frame" ]]; then
   [[ "$state" == "reviewed_patch" ]] || { echo "tracer requires reviewed_patch lock state" >&2; exit 76; }
   test_target="$(jq -er '.test_target' "$lock")"
   (cd "$CROSSWAKE_SOURCE_ROOT" && eval "$test_target")
