@@ -1,4 +1,4 @@
-# Crosswake Source Audit — Phase 224 Plan 01
+# Crosswake Source Audit — Phase 224 Plans 01–02
 
 **Audit status:** base locked; source inspected before any Crosswake edit.
 
@@ -71,3 +71,22 @@ runtime, route, origin, pack, manifest, and capability checks, adds a strict man
 registration intersection for the tracer, and leaves broader message-context hardening for
 the later lifecycle/admission plans and security review. The bridge remains feasibility
 evidence only; it is not entitlement authority or physical-device proof.
+
+## Plan 02 expansion inventory
+
+| File | Created / modified symbols and bounded responsibility |
+| --- | --- |
+| `packages/crosswake-shell-core-ios/Sources/CrosswakeShellCore/BridgeChannel.swift` | Added `BridgeCommand.accruePurchase`, `.accrueRestore`, `.accrueOfflineReconnect`, `hostAccrueCommands`, `HostCommandTelemetryEvent`, `terminalizeHostCommand`, and `emitHostCommandTelemetry`. Four literal no-field commands share the one ordered admission path; reply delivery is rechecked against the captured `LiveViewSession` and `routeEpoch`, and duplicate/stale terminalization is suppressed. |
+| `packages/crosswake-shell-core-ios/Sources/CrosswakeShellCore/CrosswakeShellConfig.swift` | Added `HostCommandConfigurationError` and `CrosswakeShellConfig.validating(hostCommandDescriptors:hostCommandDelegate:)`, which rejects unsupported, malformed, and duplicate closed descriptors before bridge installation. |
+| `packages/crosswake-shell-core-ios/Tests/CrosswakeShellCoreTests/HostCommandAdmissionTests.swift` | Added literal-four-command admission, configuration diagnostic, bounded request-field, and navigation/epoch reply-suppression coverage. |
+
+The available lifecycle hook in this pinned source is `BridgeChannel.update(session:transferCoordinator:)`, called by the audited container as its session changes. Its monotonic epoch invalidates an admitted binding before the new session is installed. This synchronous source contract exposes cooperative cancellation to the delegate; non-cooperative results are suppressed before delivery. No host receives a reply closure, WebKit target, raw route binding, or terminalizer.
+
+## Plan 02 reviewed patch record
+
+| Field | Value |
+| --- | --- |
+| Patch revision | `8611c09d4c9e6a32233425b3d876321632b89aef` |
+| Diff range | `932b4f32bf087b8e4c0c36c3e54b1031839e867d..8611c09d4c9e6a32233425b3d876321632b89aef` |
+| Review status | local diff reviewed; full SwiftPM suite plus admission and lifecycle filters passed |
+| Upstream convergence | still `alpha_fork_pending_upstream_review`; no upstream acceptance is claimed |
