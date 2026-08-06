@@ -58,9 +58,13 @@ struct AtomicOfflineCache: @unchecked Sendable {
     }
 
     func recoverProof() throws -> Data? {
-        try coordinator.withLock {
-            guard case let .authenticated(envelope) = try priorState() else { return nil }
-            return envelope.compactProof
+        guard FileManager.default.fileExists(atPath: url.deletingLastPathComponent().path) else { return nil }
+        return try coordinator.withLock {
+            switch try priorState() {
+            case .absent: return Optional<Data>.none
+            case let .authenticated(envelope): return envelope.compactProof
+            case .invalid: throw CacheError.malformed
+            }
         }
     }
 

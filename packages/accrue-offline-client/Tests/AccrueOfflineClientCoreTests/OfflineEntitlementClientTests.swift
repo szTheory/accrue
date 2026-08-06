@@ -84,5 +84,31 @@ struct OfflineEntitlementClientTests {
         }
     }
 
+    @Test("strict claim profile rejects schema and normalization variants without mutation")
+    func strictClaimProfilePreservesAuthenticatedCache() throws {
+        let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        defer { try? FileManager.default.removeItem(at: directory) }
+        let cache = directory.appendingPathComponent("proof.cache"); let client = OfflineEntitlementClient(configuration: try GoldenVectorFixtureSupport.configuration(cacheURL: cache))
+        #expect(client.applyServerProof(try GoldenVectorFixtureSupport.validAllowProof(), now: GoldenVectorFixtureSupport.now) == .fresh(reason: .ok, nextAction: .none)); let before = try Data(contentsOf: cache)
+        let variants = [
+            try GoldenVectorFixtureSupport.signedMutation { _, claims in claims["jti"] = "" },
+            try GoldenVectorFixtureSupport.signedMutation { _, claims in claims["cnf"] = ["jkt": "IVw958D_sxKYMg6iCHQs-vmxkOVIiRwwKlfeV6ykrCg", "extra": "x"] },
+            try GoldenVectorFixtureSupport.signedMutation { _, claims in claims["plans"] = ["z", "a"] },
+            try GoldenVectorFixtureSupport.signedMutation { _, claims in claims["quantities"] = ["seat": 0] },
+            try GoldenVectorFixtureSupport.signedMutation { _, claims in claims["revision"] = true },
+            try GoldenVectorFixtureSupport.signedMutation { _, claims in claims["denial_reason"] = "signed_denial" }
+        ]
+        for proof in variants { #expect(client.applyServerProof(proof, now: GoldenVectorFixtureSupport.now) == .invalid(reason: .malformed, nextAction: .reconnectRequired)); #expect(try Data(contentsOf: cache) == before) }
+    }
+
+    @Test("cache loads are read-only and distinguish absent from tampered state")
+    func loadRecoveryIsReadOnly() throws {
+        let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString); defer { try? FileManager.default.removeItem(at: directory) }
+        let cache = directory.appendingPathComponent("proof.cache"); let client = OfflineEntitlementClient(configuration: try GoldenVectorFixtureSupport.configuration(cacheURL: cache))
+        #expect(client.loadCachedState(now: GoldenVectorFixtureSupport.now) == .invalid(reason: .malformed, nextAction: .reconnectRequired))
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true); let invalid = Data("tampered".utf8); try invalid.write(to: cache)
+        #expect(client.loadCachedState(now: GoldenVectorFixtureSupport.now) == .invalid(reason: .cacheRecoveryFailed, nextAction: .reconnectRequired)); #expect(try Data(contentsOf: cache) == invalid)
+    }
+
     private func json(_ part: String) throws -> String { var value = part.replacingOccurrences(of: "-", with: "+").replacingOccurrences(of: "_", with: "/"); value += String(repeating: "=", count: (4 - value.count % 4) % 4); return String(data: try #require(Data(base64Encoded: value)), encoding: .utf8)! }
 }

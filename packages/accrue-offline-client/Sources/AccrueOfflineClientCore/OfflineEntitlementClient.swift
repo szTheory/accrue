@@ -70,8 +70,10 @@ public struct OfflineEntitlementClient: Sendable {
         guard let parsedSignature = try? P256.Signing.ECDSASignature(rawRepresentation: signature), key.isValidSignature(parsedSignature, for: Data("\(parts[0]).\(parts[1])".utf8)) else { throw VerificationError(.malformed) }
         guard payload["iss"] as? String == configuration.issuer else { throw VerificationError(.wrongIssuer) }
         guard payload["aud"] as? String == configuration.audience else { throw VerificationError(.wrongAudience) }
-        guard boundedString(payload["jti"], maximum: 256) != nil, boundedString(payload["sub"], maximum: 256) == configuration.accountSubject else { throw VerificationError(.deviceMismatch) }
-        guard let cnf = payload["cnf"] as? [String: Any], Set(cnf.keys) == ["jkt"], boundedString(cnf["jkt"], maximum: 256) == configuration.deviceThumbprint else { throw VerificationError(.deviceMismatch) }
+        guard boundedString(payload["jti"], maximum: 256) != nil else { throw VerificationError(.malformed) }
+        guard boundedString(payload["sub"], maximum: 256) == configuration.accountSubject else { throw VerificationError(.deviceMismatch) }
+        guard let cnf = payload["cnf"] as? [String: Any], Set(cnf.keys) == ["jkt"], let jkt = boundedString(cnf["jkt"], maximum: 256) else { throw VerificationError(.malformed) }
+        guard jkt == configuration.deviceThumbprint else { throw VerificationError(.deviceMismatch) }
         let common: Set<String> = ["version", "iss", "aud", "jti", "sub", "cnf", "revision", "iat", "nbf", "fresh_until", "exp", "disposition", "plans", "features", "quantities"]
         guard payload["version"] as? String == "v1.59", let disposition = payload["disposition"] as? String, ["allow", "deny"].contains(disposition), Set(payload.keys) == (disposition == "deny" ? common.union(["denial_reason"]) : common), let revision = integer(payload["revision"]), revision >= 0, let iat = integer(payload["iat"]), iat >= 0, let nbf = integer(payload["nbf"]), nbf >= iat, let freshUntil = integer(payload["fresh_until"]), freshUntil >= nbf, let exp = integer(payload["exp"]), exp >= freshUntil else { throw VerificationError(.malformed) }
         guard validStrings(payload["plans"]), validStrings(payload["features"]), validQuantities(payload["quantities"]) else { throw VerificationError(.malformed) }
