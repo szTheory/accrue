@@ -1,84 +1,88 @@
 ---
 phase: 223-ios-compatible-accrue-offline-client
-reviewed: 2026-08-06T17:11:38Z
+reviewed: 2026-08-06T17:47:45Z
 depth: standard
-files_reviewed: 18
+files_reviewed: 20
 files_reviewed_list:
+  - .github/workflows/ci.yml
+  - examples/crosswake_tracer/Package.swift
+  - examples/crosswake_tracer/README.md
+  - examples/crosswake_tracer/Sources/AccrueOfflineClient/AccrueOfflineClient.swift
+  - examples/crosswake_tracer/Tests/AccrueOfflineClientTracerTests/PackageConformanceTests.swift
   - packages/accrue-offline-client/Package.swift
-  - packages/accrue-offline-client/Sources/AccrueOfflineClientCore/OfflineEntitlementClient.swift
+  - packages/accrue-offline-client/README.md
+  - packages/accrue-offline-client/Sources/AccrueOfflineCacheCrashHarness/main.swift
+  - packages/accrue-offline-client/Sources/AccrueOfflineClientApple/KeychainCacheKey.swift
   - packages/accrue-offline-client/Sources/AccrueOfflineClientCore/AtomicOfflineCache.swift
+  - packages/accrue-offline-client/Sources/AccrueOfflineClientCore/CanonicalJSONAdmission.swift
+  - packages/accrue-offline-client/Sources/AccrueOfflineClientCore/OfflineEntitlementClient.swift
+  - packages/accrue-offline-client/Sources/AccrueOfflineClientCore/OfflineReconnect.swift
+  - packages/accrue-offline-client/Tests/AccrueOfflineClientAppleTests/KeychainCacheKeyTests.swift
   - packages/accrue-offline-client/Tests/AccrueOfflineClientCoreTests/GoldenVectorFixtureSupport.swift
   - packages/accrue-offline-client/Tests/AccrueOfflineClientCoreTests/OfflineEntitlementClientTests.swift
-  - packages/accrue-offline-client/Sources/AccrueOfflineCacheCrashHarness/main.swift
-  - packages/accrue-offline-client/Tests/AccrueOfflineClientProcessTests/AtomicOfflineCacheProcessTests.swift
-  - packages/accrue-offline-client/Sources/AccrueOfflineClientCore/OfflineReconnect.swift
-  - packages/accrue-offline-client/Sources/AccrueOfflineClientApple/KeychainCacheKey.swift
   - packages/accrue-offline-client/Tests/AccrueOfflineClientCoreTests/OfflineReconnectTests.swift
-  - packages/accrue-offline-client/Tests/AccrueOfflineClientAppleTests/KeychainCacheKeyTests.swift
-  - packages/accrue-offline-client/README.md
-  - examples/crosswake_tracer/Package.swift
-  - examples/crosswake_tracer/Sources/AccrueOfflineClient/AccrueOfflineClient.swift
-  - examples/crosswake_tracer/README.md
+  - packages/accrue-offline-client/Tests/AccrueOfflineClientProcessTests/AtomicOfflineCacheProcessTests.swift
   - scripts/ci/verify_ios_offline_client.sh
   - scripts/ci/verify_reference_scenario_contract.sh
-  - .github/workflows/ci.yml
 findings:
-  critical: 2
+  critical: 1
   warning: 1
-  info: 0
+  info: 1
   total: 3
 status: issues_found
 ---
 
 # Phase 223: Code Review Report
 
-**Reviewed:** 2026-08-06T17:11:38Z
+**Reviewed:** 2026-08-06T17:47:45Z
 **Depth:** standard
-**Files Reviewed:** 18
+**Files Reviewed:** 20
 **Status:** issues_found
 
 ## Summary
 
-The package facade, verifier/cache call path, reconnect seam, Apple policy helper, test harnesses, documentation, and CI integration were reviewed. Package tests and the iOS compatibility gate pass, but those checks do not exercise a persistent clock rollback and do not bound attacker-controlled JSON parser depth/size. Both defects can violate the offline authority boundary.
+All scoped package, consumer, test, and CI files were reviewed against Phase 223 plans and history. The package suite and `verify_ios_offline_client.sh` pass, but a cached-read/replacement race can return a superseded allow after a signed denial is installed. Cache reuse across security contexts is also not safely namespaced.
 
 ## Narrative Findings (AI reviewer)
 
 ## Critical Issues
 
-### CR-01: The public API cannot maintain its required clock high-water mark
+### CR-01: Cached reads can return an allow after a concurrent signed denial wins
 
 **Classification:** BLOCKER
 
-**File:** `packages/accrue-offline-client/Sources/AccrueOfflineClientCore/OfflineEntitlementClient.swift:20-22, 84`
+**File:** `packages/accrue-offline-client/Sources/AccrueOfflineClientCore/OfflineEntitlementClient.swift:54-57`; `packages/accrue-offline-client/Sources/AccrueOfflineClientCore/AtomicOfflineCache.swift:101-103,105-114`
 
-**Issue:** Rollback detection only compares `now` with the optional, construction-time `Configuration.clockHighWater`; the client never records a successful observation, exposes no updated high-water value for the host to persist, and the authenticated cache stores no wall-clock high-water. With the README's normal configuration (the default is `nil`), a user can first load an otherwise-valid proof near its `fresh_until`, then set the device clock back to any time after `nbf` and before `fresh_until`. `loadCachedState(now:)` verifies the same cached proof as fresh again, extending fresh access after it should have become stale. The existing test supplies a static high-water only for a rejection case and therefore does not test this transition.
+**Issue:** `loadCachedState` reads proof A under the cache lock, releases that lock, verifies A, then calls `observe`. A concurrent `applyServerProof` can install a newer (or equal-revision) signed-denial proof B in that gap. `observe` calls `replace(A, ...)`, but discards its `.superseded` result; `loadCachedState` then derives and returns A's `.fresh` state. This directly violates the phase requirement that cached recovery, proof order, and observation remain one locked operation and lets a host act on stale allow authority after denial is durable.
 
-**Fix:** Make last-seen wall-clock time a durable authenticated cache invariant (updated only monotonically under the same lock) or add a required host-owned persistent clock store with an atomic read/update API. Reject any operation where `now` is below the persisted value, and add a test that advances beyond `fresh_until`, rolls back to an earlier post-`nbf` time, and expects `.clockRollback` rather than `.fresh`.
-
-### CR-02: Unbounded pre-verification JSON parsing permits a malicious proof to crash the host
-
-**Classification:** BLOCKER
-
-**File:** `packages/accrue-offline-client/Sources/AccrueOfflineClientCore/OfflineEntitlementClient.swift:62-64`
-
-**Issue:** The facade invokes the internal duplicate-member scanner before signature verification, but it applies no compact-proof/decoded-segment size limit or nesting limit. The scanner recursively descends every attacker-controlled array/object. A reconnect response containing a base64url payload with sufficiently deep nesting can overflow the Swift stack before the signature is checked; a huge segment also forces unbounded allocation. This is reachable through the public host transport without a signing key and terminates the host instead of returning the required bounded invalid outcome.
-
-**Fix:** Before decoding, cap compact-proof and header/payload byte lengths. Make the duplicate-member scanner iterative or enforce a small maximum nesting depth, returning `.malformed` for either limit. Add unsigned oversized and deeply nested compact-JWS cases that verify `applyServerProof` returns `.invalid(.malformed, .reconnectRequired)` without crashing.
+**Fix:** Add a single locked cache operation that authenticates/retrieves the envelope, verifies it, compares/commits observed time, and returns the proof that is still current. Alternatively, make `observe` return `Admission` and retry recovery when it is `.superseded`; never derive a public result from a proof that was not current at the final lock boundary. Add a deterministic race test: pause a cached load after recovery, admit a same-revision denial, resume, and assert the load returns `.denied` (or a bounded non-grant), never `.fresh`.
 
 ## Warnings
 
-### WR-01: Valid signed JSON containing escaped supplementary Unicode is rejected
+### WR-01: Cache high-water is not bound to the configured account/device context
 
 **Classification:** WARNING
 
-**File:** `packages/accrue-offline-client/Sources/AccrueOfflineClientCore/OfflineEntitlementClient.swift:63`
+**File:** `packages/accrue-offline-client/Sources/AccrueOfflineClientCore/AtomicOfflineCache.swift:154-176`; `packages/accrue-offline-client/Sources/AccrueOfflineClientCore/OfflineEntitlementClient.swift:41-45`
 
-**Issue:** The duplicate-member admission dependency used at this line treats each `\\uXXXX` escape as an independent Unicode scalar. JSON represents non-BMP characters as a high/low-surrogate pair, so a valid signed claim such as `"\\uD83D\\uDE00"` is rejected before Foundation decodes it. This unnecessarily refuses valid proofs whose bounded string values contain escaped supplementary Unicode; no scoped test covers that interoperability case.
+**Issue:** Authenticated envelopes bind their HMAC to the cache path but contain no issuer, audience, account subject, device thumbprint, or JWKS-context fingerprint. If a host reuses one cache URL/key while switching accounts or device registrations, a valid higher-revision proof from the old context remains trusted for ordering. A newly verified proof for the current context can consequently be reported `.superseded` and never cached, even though `loadCachedState` later rejects the old proof's bindings. This creates a persistent denial/reconnect loop after a normal identity transition.
 
-**Fix:** Update the admission scanner to combine valid JSON surrogate pairs and reject only lone/mismatched surrogates. Add signed fixtures for a valid pair and for invalid lone-surrogate input.
+**Fix:** Include a stable fingerprint of the verification context (at least issuer, audience, subject, device thumbprint, and key-set version/hash) in the authenticated envelope and transaction records. On mismatch, treat the prior cache as non-authoritative for ordering and replace/quarantine it only after the current proof verifies. Add a regression using the same URL/key with two account configurations.
+
+## Info
+
+### IN-01: Coordinator high-water state is dead and misleading
+
+**Classification:** INFO
+
+**File:** `packages/accrue-offline-client/Sources/AccrueOfflineClientCore/AtomicOfflineCache.swift:282-285`
+
+**Issue:** `CacheCoordinator.highWater` is written by `record` but never read; authoritative ordering always reparses the persisted envelope. The unused mutable state makes it appear that ordering has an in-memory component when it does not.
+
+**Fix:** Remove `highWater` and `record`, or use it deliberately with an invariant-preserving read path and tests.
 
 ---
 
-_Reviewed: 2026-08-06T17:11:38Z_
+_Reviewed: 2026-08-06T17:47:45Z_
 _Reviewer: the agent (gsd-code-reviewer)_
 _Depth: standard_
