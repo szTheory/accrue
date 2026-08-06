@@ -9,6 +9,7 @@ import Glibc
 /// The sole durable authority boundary. Only verifier-created proofs cross it.
 struct AtomicOfflineCache: @unchecked Sendable {
     enum Admission { case replaced, identical, superseded }
+    enum ObservationError: Error { case clockRollback }
     enum FaultStage: Hashable { case candidateWrite, candidateFileSync, atomicReplace, parentDirectorySync, rollbackRestore, rollbackDirectorySync }
     private let url: URL
     private let key: SymmetricKey
@@ -22,14 +23,29 @@ struct AtomicOfflineCache: @unchecked Sendable {
         faults = Set([fault, rollbackFault].compactMap { $0 })
     }
 
-    func replace(_ proof: VerifiedOfflineProof) throws -> Admission {
+    /// `observedAt` is committed with the authenticated envelope; legacy callers leave it nil.
+    func replace(_ proof: VerifiedOfflineProof, observedAt: Int64? = nil, minimumObservedAt: Int64? = nil) throws -> Admission {
         try FileManager.default.createDirectory(at: url.deletingLastPathComponent(), withIntermediateDirectories: true)
         return try coordinator.withLock {
             try recoverPendingTransaction()
             let prior = try priorState()
+            let priorObservation: Int64?
+            switch prior { case let .authenticated(persisted): priorObservation = persisted.observedAt; default: priorObservation = nil }
+            if let observedAt, observedAt < max(priorObservation ?? Int64.min, minimumObservedAt ?? Int64.min) {
+                throw ObservationError.clockRollback
+            }
+            let persistedObservation = max(priorObservation ?? Int64.min, observedAt ?? Int64.min)
+            var candidateProof = proof
+            var admission: Admission = .replaced
             if case let .authenticated(persisted) = prior {
-                if persisted.highWater == proof.highWater { return .identical }
-                guard persisted.highWater.accepts(newer: proof.highWater) else { return .superseded }
+                if persisted.highWater == proof.highWater {
+                    if persisted.observedAt ?? Int64.min >= persistedObservation { return .identical }
+                    admission = .identical
+                } else if !persisted.highWater.accepts(newer: proof.highWater) {
+                    if persisted.observedAt ?? Int64.min >= persistedObservation { return .superseded }
+                    candidateProof = VerifiedOfflineProof(compactProof: persisted.compactProof, highWater: persisted.highWater)
+                    admission = .superseded
+                }
             }
 
             let candidate = uniqueCandidateURL()
@@ -50,7 +66,7 @@ struct AtomicOfflineCache: @unchecked Sendable {
 
             do {
                 try fail(.candidateWrite)
-                try encodedReplacement(proof).write(to: candidate)
+                try encodedReplacement(candidateProof, observedAt: persistedObservation == Int64.min ? nil : persistedObservation).write(to: candidate)
                 try fail(.candidateFileSync)
                 try synchronizeFile(at: candidate)
                 try fail(.atomicReplace)
@@ -62,8 +78,8 @@ struct AtomicOfflineCache: @unchecked Sendable {
                     try cleanupTransaction(record, transaction: transaction)
                 }
                 try? FileManager.default.removeItem(at: quarantine)
-                coordinator.record(proof.highWater)
-                return .replaced
+                coordinator.record(candidateProof.highWater)
+                return admission
             } catch {
                 if let record {
                     do {
@@ -79,6 +95,11 @@ struct AtomicOfflineCache: @unchecked Sendable {
                 throw error
             }
         }
+    }
+
+    /// Advances time for a reverified cache proof. The caller must verify `proof` first.
+    func observe(_ proof: VerifiedOfflineProof, at now: Int64, minimumObservedAt: Int64?) throws {
+        _ = try replace(proof, observedAt: now, minimumObservedAt: minimumObservedAt)
     }
 
     func recoverProof() throws -> Data? {
@@ -130,8 +151,8 @@ struct AtomicOfflineCache: @unchecked Sendable {
         try synchronizeParentDirectory()
     }
 
-    private func encodedReplacement(_ proof: VerifiedOfflineProof) throws -> Data {
-        let unsigned = UnsignedEnvelope(version: 2, compactProof: proof.compactProof.base64EncodedString(), revision: proof.highWater.revision, disposition: proof.highWater.disposition, issuedAt: proof.highWater.issuedAt, freshUntil: proof.highWater.freshUntil)
+    private func encodedReplacement(_ proof: VerifiedOfflineProof, observedAt: Int64?) throws -> Data {
+        let unsigned = UnsignedEnvelope(version: 3, compactProof: proof.compactProof.base64EncodedString(), revision: proof.highWater.revision, disposition: proof.highWater.disposition, issuedAt: proof.highWater.issuedAt, freshUntil: proof.highWater.freshUntil, observedAt: observedAt ?? Int64.min)
         let tag = Data(HMAC<SHA256>.authenticationCode(for: try signedBytes(unsigned), using: key)).base64EncodedString()
         let encoder = JSONEncoder(); encoder.outputFormatting = [.sortedKeys]
         return try encoder.encode(Envelope(unsigned: unsigned, authenticationTag: tag))
@@ -139,14 +160,20 @@ struct AtomicOfflineCache: @unchecked Sendable {
 
     private func loadVerifiedEnvelope(at location: URL) throws -> RecoveredEnvelope {
         let raw = try Data(contentsOf: location)
-        guard let envelope = try? JSONDecoder().decode(Envelope.self, from: raw), envelope.version == 2,
+        guard let version = (try? JSONSerialization.jsonObject(with: raw) as? [String: Any])?["version"] as? Int else { throw CacheError.malformed }
+        let decoder = JSONDecoder(); let encoder = JSONEncoder(); encoder.outputFormatting = [.sortedKeys]
+        if version == 2, let envelope = try? decoder.decode(LegacyEnvelope.self, from: raw), let proof = Data(base64Encoded: envelope.compactProof), let tag = Data(base64Encoded: envelope.authenticationTag) {
+            let unsigned = LegacyUnsignedEnvelope(version: envelope.version, compactProof: envelope.compactProof, revision: envelope.revision, disposition: envelope.disposition, issuedAt: envelope.issuedAt, freshUntil: envelope.freshUntil)
+            let expected = Data(HMAC<SHA256>.authenticationCode(for: try signedBytes(unsigned), using: key))
+            guard tag == expected, try encoder.encode(envelope) == raw else { throw CacheError.authentication }
+            return RecoveredEnvelope(compactProof: proof, highWater: ProofHighWater(revision: envelope.revision, issuedAt: envelope.issuedAt, freshUntil: envelope.freshUntil, disposition: envelope.disposition), observedAt: nil)
+        }
+        guard let envelope = try? decoder.decode(Envelope.self, from: raw), envelope.version == 3,
               let proof = Data(base64Encoded: envelope.compactProof), let tag = Data(base64Encoded: envelope.authenticationTag) else { throw CacheError.malformed }
-        let unsigned = UnsignedEnvelope(version: envelope.version, compactProof: envelope.compactProof, revision: envelope.revision, disposition: envelope.disposition, issuedAt: envelope.issuedAt, freshUntil: envelope.freshUntil)
+        let unsigned = UnsignedEnvelope(version: envelope.version, compactProof: envelope.compactProof, revision: envelope.revision, disposition: envelope.disposition, issuedAt: envelope.issuedAt, freshUntil: envelope.freshUntil, observedAt: envelope.observedAt)
         let expected = Data(HMAC<SHA256>.authenticationCode(for: try signedBytes(unsigned), using: key))
-        guard tag == expected else { throw CacheError.authentication }
-        let encoder = JSONEncoder(); encoder.outputFormatting = [.sortedKeys]
-        guard try encoder.encode(envelope) == raw else { throw CacheError.malformed }
-        return RecoveredEnvelope(compactProof: proof, highWater: ProofHighWater(revision: envelope.revision, issuedAt: envelope.issuedAt, freshUntil: envelope.freshUntil, disposition: envelope.disposition))
+        guard tag == expected, try encoder.encode(envelope) == raw else { throw CacheError.authentication }
+        return RecoveredEnvelope(compactProof: proof, highWater: ProofHighWater(revision: envelope.revision, issuedAt: envelope.issuedAt, freshUntil: envelope.freshUntil, disposition: envelope.disposition), observedAt: envelope.observedAt)
     }
 
     private enum PriorState { case absent, authenticated(RecoveredEnvelope), invalid }
@@ -166,12 +193,18 @@ struct AtomicOfflineCache: @unchecked Sendable {
         try handle.synchronize()
     }
 
-    private func signedBytes(_ value: UnsignedEnvelope) throws -> Data {
+    private func signedBytes(_ value: LegacyUnsignedEnvelope) throws -> Data {
         var bytes = Data("accrue.atomic-offline-cache".utf8)
         for item in [String(value.version), url.path, value.compactProof, String(value.revision), value.disposition, String(value.issuedAt), String(value.freshUntil)] {
             let data = Data(item.utf8); var length = UInt64(data.count).bigEndian
             withUnsafeBytes(of: &length) { bytes.append(contentsOf: $0) }; bytes.append(data)
         }
+        return bytes
+    }
+    private func signedBytes(_ value: UnsignedEnvelope) throws -> Data {
+        var bytes = try signedBytes(LegacyUnsignedEnvelope(version: value.version, compactProof: value.compactProof, revision: value.revision, disposition: value.disposition, issuedAt: value.issuedAt, freshUntil: value.freshUntil))
+        let data = Data(String(value.observedAt).utf8); var length = UInt64(data.count).bigEndian
+        withUnsafeBytes(of: &length) { bytes.append(contentsOf: $0) }; bytes.append(data)
         return bytes
     }
 
@@ -233,9 +266,11 @@ struct AtomicOfflineCache: @unchecked Sendable {
     }
 
     private enum CacheError: Error { case authentication, malformed, injected }
-    private struct RecoveredEnvelope { let compactProof: Data; let highWater: ProofHighWater }
-    private struct UnsignedEnvelope: Codable { let version: Int; let compactProof: String; let revision: Int64; let disposition: String; let issuedAt: Int64; let freshUntil: Int64; enum CodingKeys: String, CodingKey { case version, revision, disposition; case compactProof = "compact_proof"; case issuedAt = "iat"; case freshUntil = "fresh_until" } }
-    private struct Envelope: Codable { let version: Int; let compactProof: String; let revision: Int64; let disposition: String; let issuedAt: Int64; let freshUntil: Int64; let authenticationTag: String; init(unsigned: UnsignedEnvelope, authenticationTag: String) { version = unsigned.version; compactProof = unsigned.compactProof; revision = unsigned.revision; disposition = unsigned.disposition; issuedAt = unsigned.issuedAt; freshUntil = unsigned.freshUntil; self.authenticationTag = authenticationTag }; enum CodingKeys: String, CodingKey { case version, revision, disposition; case compactProof = "compact_proof"; case issuedAt = "iat"; case freshUntil = "fresh_until"; case authenticationTag = "authentication_tag" } }
+    private struct RecoveredEnvelope { let compactProof: Data; let highWater: ProofHighWater; let observedAt: Int64? }
+    private struct LegacyUnsignedEnvelope: Codable { let version: Int; let compactProof: String; let revision: Int64; let disposition: String; let issuedAt: Int64; let freshUntil: Int64; enum CodingKeys: String, CodingKey { case version, revision, disposition; case compactProof = "compact_proof"; case issuedAt = "iat"; case freshUntil = "fresh_until" } }
+    private struct UnsignedEnvelope: Codable { let version: Int; let compactProof: String; let revision: Int64; let disposition: String; let issuedAt: Int64; let freshUntil: Int64; let observedAt: Int64; enum CodingKeys: String, CodingKey { case version, revision, disposition; case compactProof = "compact_proof"; case issuedAt = "iat"; case freshUntil = "fresh_until"; case observedAt = "observed_at" } }
+    private struct LegacyEnvelope: Codable { let version: Int; let compactProof: String; let revision: Int64; let disposition: String; let issuedAt: Int64; let freshUntil: Int64; let authenticationTag: String; enum CodingKeys: String, CodingKey { case version, revision, disposition; case compactProof = "compact_proof"; case issuedAt = "iat"; case freshUntil = "fresh_until"; case authenticationTag = "authentication_tag" } }
+    private struct Envelope: Codable { let version: Int; let compactProof: String; let revision: Int64; let disposition: String; let issuedAt: Int64; let freshUntil: Int64; let observedAt: Int64; let authenticationTag: String; init(unsigned: UnsignedEnvelope, authenticationTag: String) { version = unsigned.version; compactProof = unsigned.compactProof; revision = unsigned.revision; disposition = unsigned.disposition; issuedAt = unsigned.issuedAt; freshUntil = unsigned.freshUntil; observedAt = unsigned.observedAt; self.authenticationTag = authenticationTag }; enum CodingKeys: String, CodingKey { case version, revision, disposition; case compactProof = "compact_proof"; case issuedAt = "iat"; case freshUntil = "fresh_until"; case observedAt = "observed_at"; case authenticationTag = "authentication_tag" } }
 }
 
 struct ProofHighWater: Equatable, Sendable {

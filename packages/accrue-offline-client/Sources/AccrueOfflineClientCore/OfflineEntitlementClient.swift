@@ -32,24 +32,29 @@ public struct OfflineEntitlementClient: Sendable {
         guard !proof.isEmpty else { return invalid(.malformed) }
         do {
             let verified = try verify(proof, now: now)
-            switch try cache.replace(verified) {
+            switch try cache.replace(verified, observedAt: timestamp(now), minimumObservedAt: configuration.clockHighWater.map(timestamp)) {
             case .replaced, .identical: break
             case .superseded: return invalid(.superseded)
             }
             return state(for: verified, now: now)
-        } catch let error as VerificationError { return invalid(error.reason) }
+        } catch AtomicOfflineCache.ObservationError.clockRollback { return invalid(.clockRollback) }
+        catch let error as VerificationError { return invalid(error.reason) }
         catch { return invalid(.cacheWriteFailed) }
     }
 
     public func loadCachedState(now: Date) -> OfflineEntitlementState {
         do {
             guard let proof = try cache.recoverProof() else { return invalid(.malformed) }
-            return state(for: try verify(proof, now: now), now: now)
-        } catch let error as VerificationError { return invalid(error.reason) }
+            let verified = try verify(proof, now: now)
+            try cache.observe(verified, at: timestamp(now), minimumObservedAt: configuration.clockHighWater.map(timestamp))
+            return state(for: verified, now: now)
+        } catch AtomicOfflineCache.ObservationError.clockRollback { return invalid(.clockRollback) }
+        catch let error as VerificationError { return invalid(error.reason) }
         catch { return invalid(.cacheRecoveryFailed) }
     }
 
     private func invalid(_ reason: OfflineEntitlementReason) -> OfflineEntitlementState { .invalid(reason: reason, nextAction: .reconnectRequired) }
+    private func timestamp(_ date: Date) -> Int64 { Int64(date.timeIntervalSince1970) }
     private func state(for proof: VerifiedOfflineProof, now: Date) -> OfflineEntitlementState {
         if proof.disposition == "deny" { return .denied(reason: .signedDenial, nextAction: .reconnectRequired) }
         if Date(timeIntervalSince1970: TimeInterval(proof.freshUntil)) > now { return .fresh(reason: .ok, nextAction: .none) }
@@ -80,7 +85,7 @@ public struct OfflineEntitlementClient: Sendable {
         let plans = payload["plans"] as! [String]; let features = payload["features"] as! [String]; let quantities = payload["quantities"] as! [String: Any]
         if disposition == "allow" { guard plans.isEmpty == false || features.isEmpty == false || quantities.isEmpty == false else { throw VerificationError(.malformed) } }
         else { guard let reason = boundedString(payload["denial_reason"], maximum: 64), ["signed_denial", "access_unavailable", "superseded", "device_revoked"].contains(reason) else { throw VerificationError(.malformed) } }
-        let timestamp = Int64(now.timeIntervalSince1970)
+        let timestamp = timestamp(now)
         guard configuration.clockHighWater.map({ timestamp >= Int64($0.timeIntervalSince1970) }) ?? true else { throw VerificationError(.clockRollback) }
         guard nbf <= timestamp else { throw VerificationError(.malformed) }
         guard timestamp < exp else { throw VerificationError(.hardExpired) }
