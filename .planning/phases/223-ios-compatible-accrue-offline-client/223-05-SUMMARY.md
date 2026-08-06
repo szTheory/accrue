@@ -47,6 +47,7 @@ Strict duplicate-safe JWS admission, canonical claim validation, cache recovery,
 - `40537755` feat(223-05): harden signed proof admission and recovery
 - `5176f966` feat(223-05): validate canonical claim profile
 - `8814d1fe` test(223-05): enforce deny race process evidence
+- `f499bec7` test(223-05): cover cache transaction fault stages
 
 ## Deviations from Plan
 
@@ -54,10 +55,6 @@ Strict duplicate-safe JWS admission, canonical claim validation, cache recovery,
 
 1. [Rule 1 - Bug] Mapped duplicate-scanner failures to the public bounded malformed result rather than a cache-write failure.
 2. [Rule 1 - Bug] Kept cache loading read-only while preserving the documented malformed versus cache-recovery failure distinction.
-
-## Known Stubs
-
-The plan's deterministic per-stage filesystem fault seam is internal but does not yet have direct test coverage for every named stage. The production transactional path and process ordering coverage passed; explicit stage-fault coverage remains for a follow-up hardening plan.
 
 ## Self-Check: PASSED
 
