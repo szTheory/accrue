@@ -1,6 +1,6 @@
-# Crosswake Source Audit — Phase 224 Plans 01–05
+# Crosswake Source Audit — Phase 224 Plans 01–07
 
-**Audit status:** base locked; source inspected before any Crosswake edit.
+**Audit status:** exact reviewed patch re-pinned after the Plan 07 safety closures.
 
 ## Authorized delivery source
 
@@ -61,6 +61,28 @@ receipt, JWS, token, or arbitrary payload map is part of this delivery.
 | Diff range | `932b4f32bf087b8e4c0c36c3e54b1031839e867d..e04928e36381fbbf076ec72eed09737f39c94986` |
 | Review status | local diff reviewed; full SwiftPM suite and tracer filter passed |
 | Upstream convergence | still `alpha_fork_pending_upstream_review`; no upstream acceptance is claimed |
+
+## Plan 07 replay and configuration closure
+
+| Field | Value |
+| --- | --- |
+| Patch revision | `789175f219de03047456e098fedf4a97891feff2` |
+| Immutable base-to-patch range | `932b4f32bf087b8e4c0c36c3e54b1031839e867d..789175f219de03047456e098fedf4a97891feff2` |
+| Binary diff identity (SHA-256) | `d4380733c61521060cbb7c7c50b522a6c7b08234ddfd83757cb2cb993a8479d4` |
+| Review status | Local base-to-patch diff reviewed; focused 17-test and full 31-test native suites passed before re-pin; command-safe source-gate, trusted-frame, and full gates rerun at this exact revision. |
+| Upstream convergence | still `alpha_fork_pending_upstream_review`; no upstream acceptance is claimed |
+
+This closure addresses both verifier findings without changing the validated admission
+order, literal four-command allowlist, narrow delegate surface, reply ownership,
+telemetry privacy boundary, delivery lane, sanitized remote, or runtime classification.
+
+| File | Exhaustive Plan 07 changed symbols / test coverage |
+| --- | --- |
+| `packages/crosswake-shell-core-ios/Sources/CrosswakeShellCore/BridgeChannel.swift` | `HostCommandInvocationKey`, `HostCommandInvocationLifecycle`, `hostCommandInvocationLock`, `hostCommandInvocations`, `claimHostCommandInvocation`, and `isRouteEpochActive`; the epoch/correlation claim is atomic after all admission guards and before attempt telemetry or `HostCommandDelegate.handle`; `update(session:transferCoordinator:)` advances the epoch and retires lifecycle state under the same lock; terminalization transitions only an admitted claim. |
+| `packages/crosswake-shell-core-ios/Sources/CrosswakeShellCore/CrosswakeShellConfig.swift` | Ordinary public initializer has no descriptor/delegate inputs and produces a non-host config; private descriptor-bearing initializer, `validating(hostCommandDescriptors:hostCommandDelegate:)`, and `isStrictSemanticVersion` make validated construction the sole public host path; duplicate command IDs and malformed versions produce bounded actionable diagnostics. |
+| `packages/crosswake-shell-core-ios/Tests/CrosswakeShellCoreTests/HostCommandAdmissionTests.swift` | Real trusted-sender duplicate-correlation, post-navigation reuse, and 32-way contention regressions prove one host call/terminal reply; real factory/channel/navigation coverage proves valid construction; malformed, identical-duplicate, and conflicting-version descriptors assert bounded diagnostics. |
+
+Actual native commands and results: `swift test --package-path packages/crosswake-shell-core-ios --filter HostCommandAdmissionTests` passed 17 tests; `swift test --package-path packages/crosswake-shell-core-ios` passed 31 tests. The deterministic runner then passed `source-gate`, `trusted-frame`, and `full` at this pinned revision; the full mode also passed the Accrue tracer, evidence digest, and blocked-status/evidence-location assertions. This remains deterministic compile/unit evidence only: no simulator, StoreKit, host integration, physical device, UI, entitlement authority, or runtime-readiness proof is claimed.
 
 ## Plan 05 trusted sender-frame closure
 

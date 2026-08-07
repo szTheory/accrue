@@ -10,9 +10,9 @@
 | Sanitized remote | `https://github.com/szTheory/crosswake.git` |
 | Delivery lane | Alpha-owned short-lived `chore/accrue-host-command-bridge` |
 | Immutable upstream base | `932b4f32bf087b8e4c0c36c3e54b1031839e867d` |
-| Reviewed patch revision | `fc5e399fcb46d78b610c81e13c644277f3fcf1c5` |
-| Reviewed diff range | `932b4f32bf087b8e4c0c36c3e54b1031839e867d..fc5e399fcb46d78b610c81e13c644277f3fcf1c5` |
-| Binary diff identity (SHA-256) | `af1dd2259a6d18645169375298e0adb8accdaf9945f98496b2a593bbdbf01176` |
+| Reviewed patch revision | `789175f219de03047456e098fedf4a97891feff2` |
+| Reviewed diff range | `932b4f32bf087b8e4c0c36c3e54b1031839e867d..789175f219de03047456e098fedf4a97891feff2` |
+| Binary diff identity (SHA-256) | `d4380733c61521060cbb7c7c50b522a6c7b08234ddfd83757cb2cb993a8479d4` |
 | Audit digest | Bound through `crosswake-source-lock.json` |
 | Review status | Local diff reviewed; deterministic suites passed |
 | Upstream convergence | `alpha_fork_pending_upstream_review`; no upstream acceptance or PR is asserted |
@@ -54,6 +54,24 @@ At the real WebKit entry point, only a page-world main frame whose WebKit securi
 No pass count is inferred beyond the test tools' own output. No raw test log, payload,
 credential, account/device identifier, adopter identity, receipt, JWS, proof byte, or
 correlation value is retained in this record.
+
+### Plan 07 replay and setup assertions
+
+At the real trusted-sender bridge entry, a fully admitted `(routeEpoch, correlationID)` is
+claimed under the Crosswake lifecycle lock after protocol/version, trusted-frame/origin,
+route, pack, manifest, descriptor/version, registration, and fixed-schema checks—and before
+attempt telemetry or host dispatch. The same correlation therefore invokes the host once and
+produces at most one terminal reply. A replacement session advances the epoch and retires the
+old claim namespace, so the same correlation is admitted once on the replacement route while
+an old captured outcome remains reply-expired.
+
+The ordinary `CrosswakeShellConfig` initializer cannot accept host-command descriptors or a
+delegate. The only public descriptor-bearing path is the throwing `validating` factory; it
+rejects malformed semantic versions plus identical and conflicting same-command duplicates
+with bounded diagnostics naming the affected command and error class before channel creation.
+A valid factory result traverses the actual bridge and replacement-route test path. The
+focused native target passed 17 tests and the complete native target passed 31 tests at the
+reviewed revision, including deterministic 32-way duplicate contention.
 
 ## BRDG conformance matrix
 
