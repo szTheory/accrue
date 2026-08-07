@@ -22,7 +22,7 @@ expected_test_target='swift test --package-path packages/crosswake-shell-core-io
 [[ -f "$lock" && -f "$audit" ]] || { echo "source lock and audit are required" >&2; exit 66; }
 command -v jq >/dev/null || { echo "jq is required" >&2; exit 67; }
 
-remote="$(git -C "$CROSSWAKE_SOURCE_ROOT" remote get-url origin | sed -E 's#(https?://)[^/@]+@#\\1***@#')"
+remote="$(git -C "$CROSSWAKE_SOURCE_ROOT" remote get-url origin | sed -E 's#(https?://)[^/@]+@#\1#')"
 expected_remote="$(jq -er '.sanitized_remote' "$lock")"
 [[ "$remote" == "$expected_remote" ]] || { echo "Crosswake remote does not match the pinned sanitized identity" >&2; exit 68; }
 

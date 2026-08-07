@@ -52,7 +52,7 @@ if [[ "${1:-}" == "-C" ]]; then
 fi
 case "${1:-}" in
   remote)
-    printf '%s\n' 'https://github.com/szTheory/crosswake.git'
+    printf '%s\n' 'https://token@github.com/szTheory/crosswake.git'
     ;;
   status)
     ;;
