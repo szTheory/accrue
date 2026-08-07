@@ -1,56 +1,71 @@
 ---
 phase: 224-crosswake-host-command-bridge-seam
-reviewed: 2026-08-06T22:10:00Z
+reviewed: 2026-08-07T01:14:12Z
 depth: standard
-files_reviewed: 6
+files_reviewed: 5
 files_reviewed_list:
-  - scripts/ci/verify_crosswake_host_commands.sh
-  - scripts/ci/test_verify_crosswake_host_commands.sh
   - /Users/jon/projects/crosswake-accrue-bridge/packages/crosswake-shell-core-ios/Sources/CrosswakeShellCore/BridgeChannel.swift
-  - /Users/jon/projects/crosswake-accrue-bridge/packages/crosswake-shell-core-ios/Sources/CrosswakeShellCore/CrosswakeDelegates.swift
   - /Users/jon/projects/crosswake-accrue-bridge/packages/crosswake-shell-core-ios/Sources/CrosswakeShellCore/CrosswakeShellConfig.swift
   - /Users/jon/projects/crosswake-accrue-bridge/packages/crosswake-shell-core-ios/Tests/CrosswakeShellCoreTests/HostCommandAdmissionTests.swift
+  - scripts/ci/verify_crosswake_host_commands.sh
+  - scripts/ci/test_verify_crosswake_host_commands.sh
 findings:
-  critical: 2
-  warning: 0
+  critical: 1
+  warning: 2
   info: 0
-  total: 2
+  total: 3
 status: issues_found
 ---
 
 # Phase 224: Code Review Report
 
-**Reviewed:** 2026-08-06T22:10:00Z
+**Reviewed:** 2026-08-07T01:14:12Z
 **Depth:** standard
-**Files Reviewed:** 6
+**Files Reviewed:** 5
 **Status:** issues_found
 
 ## Summary
 
-The focused evidence runner now correctly compares the mutable lock target as data and invokes the reviewed SwiftPM arguments literally; its isolated regression and the exact-pinned `trusted-frame` and `full` modes pass. The Crosswake host-command seam still has two correctness/security defects that allow duplicate side-effecting delegate calls and let hosts bypass mandatory descriptor validation.
+The literal-argv runner is safe against the tested lock-target substitution path, and the focused 17-test suite passes at the requested pin. The host-command lifecycle is still not atomic with route replacement: an old route can be admitted, claimed in the new epoch, and executed after navigation. The configuration factory also makes host-command configurations discard every pre-existing bridge delegate and accepts versions that are not strict SemVer.
 
 ## Narrative Findings (AI reviewer)
 
 ## Critical Issues
 
-### CR-01: Duplicate correlation IDs invoke a side-effecting host delegate more than once
+### CR-01: Route replacement can authorize and execute a request validated for the prior route
 
-**File:** `/Users/jon/projects/crosswake-accrue-bridge/packages/crosswake-shell-core-ios/Sources/CrosswakeShellCore/BridgeChannel.swift:358`
+**Classification:** BLOCKER
 
-**Issue:** The code invokes `delegate.handle` at lines 365-369 before it checks or reserves `terminalizedHostCommandCorrelations` (lines 376 and 401-404). Repeating an otherwise valid request with the same caller-controlled `correlationID` therefore runs the delegate every time; only subsequent replies are suppressed. A repeated `host.accrue.purchase` request can consequently cause multiple purchase attempts while the page receives at most one reply. The set also persists over session/epoch changes, so a reused ID can silently suppress a later legitimate reply.
+**File:** `/Users/jon/projects/crosswake-accrue-bridge/packages/crosswake-shell-core-ios/Sources/CrosswakeShellCore/BridgeChannel.swift:310-378`
 
-**Fix:** Claim an invocation key before calling the delegate, scoped at least to the admitted route epoch/session and correlation ID; reject or suppress duplicate claims before the delegate executes. Remove/expire that scoped key when the route is replaced, and retain a separate terminalization guard only if asynchronous completion makes one necessary. Add tests that send the same admitted request twice and after a route update, asserting one delegate call per invocation key and one reply per accepted invocation.
+**Issue:** The protocol, route, origin, pack, and descriptor guards read `session` without `hostCommandInvocationLock`; only `claimHostCommandInvocation` locks and snapshots it. `update` changes both `session` and `routeEpoch` under that lock at lines 278-284. An invocation can therefore pass all guards using the old `dashboard` session, be pre-empted by `update(settings)`, then claim `(newEpoch, correlationID)` and snapshot the new `settings` session at lines 372-378. It dispatches the host delegate and terminalizes successfully because the claim and snapshot are now internally consistent, even though its request was authorized for a route that has been replaced. This violates the claimed route-scoped admission boundary and can run a stale side effect after navigation.
 
-### CR-02: The public initializer bypasses required host-command descriptor validation
+**Fix:** Serialize taking a session/epoch snapshot and all host-command admission checks with route replacement. For example, lock once, copy `(session, routeEpoch)`, validate the request against that copy, and atomically insert the invocation key only if the current epoch/session still equal the copy; release the lock before telemetry/delegate work. Add an interleaving regression that pauses after validation, calls `update`, then resumes and asserts no delegate call and no reply.
 
-**File:** `/Users/jon/projects/crosswake-accrue-bridge/packages/crosswake-shell-core-ios/Sources/CrosswakeShellCore/CrosswakeShellConfig.swift:39`
+## Warnings
 
-**Issue:** `CrosswakeShellConfig.init` stores `hostCommandDescriptors` unchanged at line 56, while the validation that is meant to reject unsupported, malformed, and duplicate descriptors exists only in the optional `validating` factory at lines 64-83. The bridge tests and production construction path use the unchecked initializer. A host can therefore install duplicate descriptors or an invalid version such as `1..` and still admit it when the route and request echo that same value, violating the setup-time closed-contract guarantee.
+### WR-01: Validated host configuration silently disables all existing bridge delegates
 
-**Fix:** Make the only host-command-bearing construction path validate descriptors (for example, make the initializer `throws` or keep the legacy initializer unable to accept host-command descriptors and require `validating` for them). Validate a real SemVer value, reject duplicate command/capability pairs, and add regression tests proving the ordinary production construction path cannot install invalid descriptors.
+**Classification:** WARNING
+
+**File:** `/Users/jon/projects/crosswake-accrue-bridge/packages/crosswake-shell-core-ios/Sources/CrosswakeShellCore/CrosswakeShellConfig.swift:59-89`
+
+**Issue:** `validating` is the only public way to configure host commands, but it calls the private initializer that sets every existing delegate (`appInfo`, haptics, permissions, notification token, share, files, and route) to `nil` at lines 60-68. A shell configured for an admitted host command consequently loses all normal bridge capabilities instead of extending its existing safe bridge configuration.
+
+**Fix:** Let the validated construction path accept and preserve the ordinary delegate parameters (or provide a throwing host-command addition method that returns a copy retaining them). Add a regression that configures an ordinary delegate and a host descriptor together, then verifies both commands remain usable.
+
+### WR-02: The descriptor validator is not strict Semantic Versioning
+
+**Classification:** WARNING
+
+**File:** `/Users/jon/projects/crosswake-accrue-bridge/packages/crosswake-shell-core-ios/Sources/CrosswakeShellCore/CrosswakeShellConfig.swift:92-96`
+
+**Issue:** `Character.isNumber` accepts non-ASCII numeral characters, and the check also permits leading zero components (for example, `01.0.0`). Both are invalid under SemVer's numeric identifier grammar, despite this being the sole strict descriptor-validation gate. Since bridge admission compares descriptor, manifest, and request versions for exact equality, such a malformed value can be configured and admitted if each input repeats it.
+
+**Fix:** Validate against SemVer's ASCII grammar, including the no-leading-zero rule, or reuse a parser that exposes strict parsing. For a release-only three-component form, require each component to be `0` or `[1-9][0-9]*`; add rejection tests for `01.0.0` and a Unicode-digit version.
 
 ---
 
-_Reviewed: 2026-08-06T22:10:00Z_
+_Reviewed: 2026-08-07T01:14:12Z_
 _Reviewer: the agent (gsd-code-reviewer)_
 _Depth: standard_
