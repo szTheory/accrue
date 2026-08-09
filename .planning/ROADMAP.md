@@ -51,7 +51,12 @@ Completed and deferred v1.60 details are retained in [the milestone archive](mil
   2. Required release and Admin checks pass after the responsible cause is repaired, while their meaningful assertions and failure artifacts remain available.
   3. A shared signature across release-matrix cells is recorded and triaged as one root-cause incident rather than counted once per cell.
   4. The Admin Playwright timeout has trace-first evidence and a diagnosis or repair path; no retry-only, masking, or test-deletion workaround represents resolution.
-**Plans**: TBD
+**Plans:** 3 plans
+
+Plans:
+- [ ] 225-01-PLAN.md — Normalize both incidents and repair webhook test isolation with event-owned proof.
+- [ ] 225-02-PLAN.md — Partition the Admin page-flow budget and repair Phase 192 artifact truth.
+- [ ] 225-03-PLAN.md — Record full local evidence and bind closure to a fresh repair-commit Actions run.
 
 ### Phase 226: CI Baseline & Proof Semantics
 **Goal**: Maintainers can use a durable, privacy-safe account of comparable CI runs to distinguish the actual critical path, setup ownership, and provider proof state.
@@ -79,7 +84,7 @@ Completed and deferred v1.60 details are retained in [the milestone archive](mil
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 225. Required-Lane Signal Repair | 0/TBD | Not started | - |
+| 225. Required-Lane Signal Repair | 0/3 | Not started | - |
 | 226. CI Baseline & Proof Semantics | 0/TBD | Not started | - |
 | 227. Measured Critical-Path Improvement | 0/TBD | Not started | - |
 

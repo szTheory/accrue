@@ -1,0 +1,1 @@
+No external API integration: Phase 225 repairs first-party ExUnit, Playwright, GitHub Actions, and maintainer-evidence contracts; it does not add or extend any third-party API, SDK, endpoint, or service capability.
