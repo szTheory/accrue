@@ -10,7 +10,7 @@ PHYSICAL_EVIDENCE="$TRACER_DIR/physical-device-evidence.md"
 
 fail() { echo "verify_ios_offline_client: FAIL: $1" >&2; exit 1; }
 
-for command in swift xcrun jq shasum cmp rg; do
+for command in swift xcrun jq shasum cmp grep; do
   command -v "$command" >/dev/null 2>&1 || fail "$command is required"
 done
 for file in "$PACKAGE_DIR/Package.swift" "$REPORT" "$PHYSICAL_EVIDENCE"; do
@@ -26,10 +26,10 @@ shasum -a 256 "$PHYSICAL_EVIDENCE" >"$evidence_before"
 # Repository fixtures, private keys, and process fault harnesses are test-only.
 runtime_sources="$PACKAGE_DIR/Sources/AccrueOfflineClientCore"
 [ -d "$runtime_sources" ] || fail "missing core runtime sources"
-if rg -n '#filePath|v1\.59-offline-test-key|v1\.59-offline-golden-vectors|Crosswake|StoreKit|SwiftUI|UIKit' "$runtime_sources"; then
+if grep -R -n -E '#filePath|v1\.59-offline-test-key|v1\.59-offline-golden-vectors|Crosswake|StoreKit|SwiftUI|UIKit' "$runtime_sources"; then
   fail "core runtime source exposes a test fixture, key, or host runtime API"
 fi
-rg -q 'v1\.59-offline-golden-vectors|v1\.59-offline-test-key' "$PACKAGE_DIR/Tests" ||
+grep -R -q -E 'v1\.59-offline-golden-vectors|v1\.59-offline-test-key' "$PACKAGE_DIR/Tests" ||
   fail "test support no longer references the canonical corpus and key"
 if ! swift package --package-path "$PACKAGE_DIR" dump-package | jq -e '
   ([.products[] | select(.name == "AccrueOfflineClientCore") | .targets] == [["AccrueOfflineClientCore"]]) and

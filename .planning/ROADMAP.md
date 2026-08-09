@@ -21,6 +21,8 @@
 
 Accrue remains in **stable-core / demand-driven expansion** posture. New feature milestones require a concrete adopter failure mode, correctness/security/data-loss risk, repeated support issue, operational failure, or explicit strategy change recorded in `PROJECT.md` or `STRATEGY.md`.
 
+Historical friction-backlog anchors remain canonical in the [v1.17 inventory](research/v1.17-FRICTION-INVENTORY.md): [INT-10 / Phase 63](research/v1.17-FRICTION-INVENTORY.md#backlog--int-10-phase-63), [BIL-03 / Phase 64](research/v1.17-FRICTION-INVENTORY.md#backlog--bil-03-phase-64), and [ADM-12 / Phase 65](research/v1.17-FRICTION-INVENTORY.md#backlog--adm-12-phase-65).
+
 v1.60 clears that bar through an active first-adopter iOS delivery. It reuses the v1.59 Apple/offline contract, keeps StoreKit binding host-owned, and cannot promote Crosswake runtime capability without its separate physical-device proof. Google Play remains backlogged in SEED-007 until Android is scheduled or a second adopter requires it.
 
 ## Phases
