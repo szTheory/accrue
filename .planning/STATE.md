@@ -2,9 +2,13 @@
 gsd_state_version: 1.0
 milestone: v1.61
 milestone_name: CI Evidence & Critical-Path Hardening
+current_phase: 225
+current_phase_name: Required-Lane Signal Repair
 status: planning
-last_updated: "2026-08-09T02:17:35.876Z"
+stopped_at: Phase 225 context gathered
+last_updated: "2026-08-09T02:35:04.115Z"
 last_activity: 2026-08-08
+last_activity_desc: v1.61 roadmap created; 10/10 requirements mapped
 progress:
   total_phases: 3
   completed_phases: 0
@@ -1043,9 +1047,9 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 
 ## Session Continuity
 
-Last session: 2026-08-06T18:31:14.262Z
-Stopped at: Phase 224 context gathered
-Resume file: .planning/phases/224-crosswake-host-command-bridge-seam/224-CONTEXT.md
+Last session: 2026-08-09T02:35:04.105Z
+Stopped at: Phase 225 context gathered
+Resume file: .planning/phases/225-required-lane-signal-repair/225-CONTEXT.md
 
 ## Operator Next Steps
 
