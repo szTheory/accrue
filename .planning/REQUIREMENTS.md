@@ -7,9 +7,9 @@
 
 ### Required-Lane Reliability
 
-- [ ] **REL-01**: A maintainer can reproduce and classify each currently failing required CI signature as deterministic code/configuration, test-isolation, lifecycle, or external-infrastructure failure.
+- [x] **REL-01**: A maintainer can reproduce and classify each currently failing required CI signature as deterministic code/configuration, test-isolation, lifecycle, or external-infrastructure failure.
 - [ ] **REL-02**: Required release and admin checks pass with the repaired root cause, while their meaningful assertions and failure artifacts remain available.
-- [ ] **REL-03**: A matrix-wide symptom is reported and triaged as one root-cause incident when its failing signature is the same across matrix cells.
+- [x] **REL-03**: A matrix-wide symptom is reported and triaged as one root-cause incident when its failing signature is the same across matrix cells.
 
 ### Evidence Baseline
 
@@ -47,9 +47,9 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| REL-01 | Phase 225 | Pending |
+| REL-01 | Phase 225 | Complete |
 | REL-02 | Phase 225 | Pending |
-| REL-03 | Phase 225 | Pending |
+| REL-03 | Phase 225 | Complete |
 | BASE-01 | Phase 226 | Pending |
 | BASE-02 | Phase 226 | Pending |
 | PATH-01 | Phase 227 | Pending |
@@ -59,6 +59,7 @@
 | SAFE-02 | Phase 227 | Pending |
 
 **Coverage:**
+
 - v1 requirements: 10 total
 - Mapped to phases: 10
 - Unmapped: 0

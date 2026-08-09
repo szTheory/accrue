@@ -59,7 +59,7 @@ Completed and deferred v1.60 details are retained in [the milestone archive](mil
 Plans:
 **Wave 1**
 
-- [ ] 225-01-PLAN.md — Normalize both incidents and repair webhook test isolation with event-owned proof.
+- [x] 225-01-PLAN.md — Normalize both incidents and repair webhook test isolation with event-owned proof.
 
 **Wave 2** *(blocked on Wave 1 completion)*
 

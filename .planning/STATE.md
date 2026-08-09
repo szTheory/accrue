@@ -3,17 +3,17 @@ gsd_state_version: 1.0
 milestone: v1.61
 milestone_name: CI Evidence & Critical-Path Hardening
 current_phase: 225
-current_phase_name: Required-Lane Signal Repair
+current_phase_name: required-lane-signal-repair
 status: executing
-stopped_at: Phase 225 context gathered
-last_updated: "2026-08-09T03:20:02.936Z"
+stopped_at: Completed 225-01-PLAN.md
+last_updated: "2026-08-09T03:27:10.872Z"
 last_activity: 2026-08-08
-last_activity_desc: v1.61 roadmap created; 10/10 requirements mapped
+last_activity_desc: Phase 225 execution resumed (wave continue)
 progress:
   total_phases: 3
   completed_phases: 0
   total_plans: 3
-  completed_plans: 0
+  completed_plans: 1
   percent: 0
 ---
 
@@ -25,16 +25,16 @@ See: `.planning/PROJECT.md` (updated 2026-08-05 after shipping v1.59)
 
 **Core value:** A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic Elixir DX, strong domain modeling, tamper-evident audit ledger, great observability, and zero breaking-change pain through v1.x.
 
-**Current focus:** Phase 225 — Required-Lane Signal Repair
+**Current focus:** Phase 225 — required-lane-signal-repair
 
 ## Current Position
 
-Phase: 225 of 227 (Required-Lane Signal Repair)
-Plan: —
+Phase: 225 (required-lane-signal-repair) — EXECUTING
+Plan: 2 of 3
 Status: Ready to execute
-Last activity: 2026-08-08 — v1.61 roadmap created; 10/10 requirements mapped
+Last activity: 2026-08-08 — Phase 225 execution resumed (wave continue)
 
-Progress: [░░░░░░░░░░] 0%
+Progress: [███░░░░░░░] 33%
 
 ## v1.61 Roadmap
 
@@ -456,6 +456,7 @@ Coverage: 22/22 v1.51 requirements mapped (each REQ-ID → exactly one phase). D
 | Phase 221 P04 | 8min | 2 tasks | 2 files |
 | Phase 221-close-gap-reference-host-apple-notification-ingress P05 | 2min | 2 tasks | 5 files |
 | Phase 223 P07 | 6min | 2 tasks | 4 files |
+| Phase 225-required-lane-signal-repair P01 | 8min | 3 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -895,6 +896,8 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - [Phase ?]: Apple source checks pin the dedicated 262,144-byte route and shared production verifier identity without asserting values.
 - [Phase ?]: Observed time is a version-3 HMAC-authenticated cache-envelope field; authenticated version-2 envelopes migrate only through verified admission.
 - [Phase ?]: Compact proof admission is bounded to 256 KiB total, 1 KiB decoded header, 128 KiB decoded payload, and 32 JSON containers.
+- [Phase ?]: Normalized the release webhook failures as one incident with required/advisory cells visibly separated.
+- [Phase ?]: Webhook tests now query event-owned webhook, dispatch-job, and ledger facts rather than whole tables.
 
 ### Pending Todos
 
@@ -1047,9 +1050,9 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 
 ## Session Continuity
 
-Last session: 2026-08-09T02:35:04.105Z
-Stopped at: Phase 225 context gathered
-Resume file: .planning/phases/225-required-lane-signal-repair/225-CONTEXT.md
+Last session: 2026-08-09T03:27:10.863Z
+Stopped at: Completed 225-01-PLAN.md
+Resume file: None
 
 ## Operator Next Steps
 
