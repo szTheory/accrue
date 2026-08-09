@@ -47,22 +47,22 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| REL-01 | TBD | Pending |
-| REL-02 | TBD | Pending |
-| REL-03 | TBD | Pending |
-| BASE-01 | TBD | Pending |
-| BASE-02 | TBD | Pending |
-| PATH-01 | TBD | Pending |
-| PATH-02 | TBD | Pending |
-| OWN-01 | TBD | Pending |
-| SAFE-01 | TBD | Pending |
-| SAFE-02 | TBD | Pending |
+| REL-01 | Phase 225 | Pending |
+| REL-02 | Phase 225 | Pending |
+| REL-03 | Phase 225 | Pending |
+| BASE-01 | Phase 226 | Pending |
+| BASE-02 | Phase 226 | Pending |
+| PATH-01 | Phase 227 | Pending |
+| PATH-02 | Phase 227 | Pending |
+| OWN-01 | Phase 226 | Pending |
+| SAFE-01 | Phase 227 | Pending |
+| SAFE-02 | Phase 227 | Pending |
 
 **Coverage:**
 - v1 requirements: 10 total
-- Mapped to phases: 0
-- Unmapped: 10 — roadmap pending
+- Mapped to phases: 10
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-08-08*
-*Last updated: 2026-08-08 after v1.61 scoping*
+*Last updated: 2026-08-08 after v1.61 roadmap creation*

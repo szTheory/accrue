@@ -16,6 +16,7 @@
 - ✅ **v1.58 lattice_stripe 2.x Bump & Stripe-Native Entitlements Sync** — Phases 212-214.2 (shipped 2026-07-31; 11/11 requirements and 5/5 flows passed with documented non-blocking tech debt) — [archive](milestones/v1.58-ROADMAP.md)
 - ✅ **v1.59 Account-Scoped Multi-Rail & Offline Entitlements** — Phases 215-222 (shipped 2026-08-05; 29/29 requirements, 11/11 integration links, and 5/5 E2E flows passed) — [archive](milestones/v1.59-ROADMAP.md)
 - ⏸️ **v1.60 First-Adopter iOS Bridge & Proof** — override closeout 2026-08-08; Phases 223-224 verified, Phases 225-226 deferred — [archive](milestones/v1.60-ROADMAP.md)
+- 🚧 **v1.61 CI Evidence & Critical-Path Hardening** — Phases 225-227 (planned)
 
 ## Planning Doctrine
 
@@ -28,6 +29,59 @@ v1.60 clears that bar through an active first-adopter iOS delivery. It reuses th
 ## Phases
 
 Completed and deferred v1.60 details are retained in [the milestone archive](milestones/v1.60-ROADMAP.md). A future milestone must explicitly re-scope the deferred StoreKit and readiness work.
+
+### 🚧 v1.61 CI Evidence & Critical-Path Hardening (Planned)
+
+**Milestone Goal:** Restore trustworthy required CI evidence, then reduce proven critical-path waste without weakening release, host, browser, or provider proof.
+
+**Constraints:** Treat one shared release-matrix failure signature as one incident, not four cell incidents. Investigate the recent Admin Playwright timeout trace-first; do not mask it with retries or deletion. Baseline evidence must precede topology, cache, matrix, branch-protection, or required-gate changes. Keep stable required-check identities, artifacts, and explicit provider `proved` / `skipped` / `advisory` status. StoreKit/iPhone/Crosswake and the parked Admin UI ratchet are out of scope.
+
+- [ ] **Phase 225: Required-Lane Signal Repair** - Classify and repair current required CI failures without hiding their diagnostic evidence.
+- [ ] **Phase 226: CI Baseline & Proof Semantics** - Publish the comparable-run baseline and make provider/setup ownership legible.
+- [ ] **Phase 227: Measured Critical-Path Improvement** - Remove one proven setup or dependency cost while retaining every required proof.
+
+## Phase Details
+
+### Phase 225: Required-Lane Signal Repair
+**Goal**: Maintainers can trust the current required release and Admin CI signal because every active failure has a trace-backed classification and its actual cause is repaired.
+**Depends on**: Nothing (first v1.61 phase)
+**Requirements**: REL-01, REL-02, REL-03
+**Success Criteria** (what must be TRUE):
+  1. A maintainer can reproduce each current required-lane failing signature and read its classification as deterministic code/configuration, test-isolation, lifecycle, or external infrastructure.
+  2. Required release and Admin checks pass after the responsible cause is repaired, while their meaningful assertions and failure artifacts remain available.
+  3. A shared signature across release-matrix cells is recorded and triaged as one root-cause incident rather than counted once per cell.
+  4. The Admin Playwright timeout has trace-first evidence and a diagnosis or repair path; no retry-only, masking, or test-deletion workaround represents resolution.
+**Plans**: TBD
+
+### Phase 226: CI Baseline & Proof Semantics
+**Goal**: Maintainers can use a durable, privacy-safe account of comparable CI runs to distinguish the actual critical path, setup ownership, and provider proof state.
+**Depends on**: Phase 225
+**Requirements**: BASE-01, BASE-02, OWN-01
+**Success Criteria** (what must be TRUE):
+  1. A maintainer can inspect a durable comparable-run baseline containing workflow wall time, queue delay, job/step durations, reruns, cache behavior, Docker/browser setup cost, provider state, and root-failure signature without sensitive values.
+  2. Required, skipped, and advisory provider evidence is visibly distinct, so a skipped or non-run lane cannot be read as release proof.
+  3. A host maintainer can identify whether Node, browser installation, and Playwright setup belong to the host or CI and can follow documented diagnostics for each setup failure mode.
+  4. The baseline confirms the roughly 33–36 minute green-run critical path is staged release → host integration → Playwright work rather than runner queueing, or records a contrary measured result.
+**Plans**: TBD
+
+### Phase 227: Measured Critical-Path Improvement
+**Goal**: Maintainers receive one demonstrably faster CI critical path while every required release, host, browser, and provider proof remains equally identifiable and recoverable.
+**Depends on**: Phase 226
+**Requirements**: PATH-01, PATH-02, SAFE-01, SAFE-02
+**Success Criteria** (what must be TRUE):
+  1. A maintainer can see the measured critical path, the selected duplicated dependency or setup cost, its before-state evidence, and an explicit rollback procedure.
+  2. One validated change reduces measured wait or duplicate work on the critical path without removing required release, host, browser, or provider evidence.
+  3. Stable required-check identities and failure artifacts remain visible while relevance, dependency ordering, or caching behavior is evaluated.
+  4. Each CI change has an executable or recorded negative-control and rollback result; no test is deleted or retried merely to hide a failure.
+**Plans**: TBD
+
+## Progress
+
+| Phase | Plans Complete | Status | Completed |
+|-------|----------------|--------|-----------|
+| 225. Required-Lane Signal Repair | 0/TBD | Not started | - |
+| 226. CI Baseline & Proof Semantics | 0/TBD | Not started | - |
+| 227. Measured Critical-Path Improvement | 0/TBD | Not started | - |
 
 <details>
 <summary>✅ v1.58 lattice_stripe 2.x Bump & Stripe-Native Entitlements Sync (Phases 212-214.2) — SHIPPED 2026-07-31</summary>

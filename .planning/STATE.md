@@ -6,7 +6,7 @@ status: planning
 last_updated: "2026-08-09T02:17:35.876Z"
 last_activity: 2026-08-08
 progress:
-  total_phases: 0
+  total_phases: 3
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
@@ -21,14 +21,28 @@ See: `.planning/PROJECT.md` (updated 2026-08-05 after shipping v1.59)
 
 **Core value:** A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic Elixir DX, strong domain modeling, tamper-evident audit ledger, great observability, and zero breaking-change pain through v1.x.
 
-**Current focus:** Planning the next milestone
+**Current focus:** Phase 225 — Required-Lane Signal Repair
 
 ## Current Position
 
-Phase: Not started (defining requirements)
+Phase: 225 of 227 (Required-Lane Signal Repair)
 Plan: —
-Status: Defining requirements
-Last activity: 2026-08-08 — Milestone v1.61 started
+Status: Ready to plan
+Last activity: 2026-08-08 — v1.61 roadmap created; 10/10 requirements mapped
+
+Progress: [░░░░░░░░░░] 0%
+
+## v1.61 Roadmap
+
+| Phase | Goal | Requirements | Status |
+|---|---|---|---|
+| 225 | Restore trustworthy required release/Admin CI signal through trace-backed root-cause repair. | REL-01, REL-02, REL-03 | Ready to plan |
+| 226 | Establish comparable-run baseline, provider proof semantics, and host/browser setup ownership. | BASE-01, BASE-02, OWN-01 | Not started |
+| 227 | Make one measured critical-path improvement with stable checks, artifacts, negative controls, and rollback. | PATH-01, PATH-02, SAFE-01, SAFE-02 | Not started |
+
+**Dependency shape:** 225 → 226 → 227. **Coverage:** 10/10 requirements mapped exactly once.
+
+**Binding guardrails:** Matrix-wide identical failures are one root-cause incident. The Admin Playwright timeout is trace-first, never retry-masked or deleted. No matrix collapse, branch-protection change, cache rewrite, or required-gate demotion before baseline and negative-control proof. Preserve required-check identity, artifacts, and `proved` / `skipped` / `advisory` provider semantics. StoreKit/iPhone/Crosswake and the parked Admin UI ratchet are out of scope.
 
 ## Deferred Items
 
