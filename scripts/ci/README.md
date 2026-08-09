@@ -159,6 +159,19 @@ Surface-to-script map:
 - If you edit `examples/accrue_host/README.md`, expect `verify_verify01_readme_contract.sh` plus `verify_package_docs.sh` for shared structural pins.
 - If you edit `examples/accrue_host/docs/adoption-proof-matrix.md`, expect `verify_adoption_proof_matrix.sh`.
 
+### Local required-lane preflight
+
+Before pushing a release-sensitive repair, run:
+
+```bash
+bash scripts/ci/verify_release_preflight.sh
+```
+
+It runs the deterministic docs-contract bundle and the local core release checks
+(format, compile, tests, Credo, Dialyzer, and ExDoc with warnings as errors).
+It does not replace GitHub's clean-host matrix, service-container, browser, or
+artifact proof, so a fresh Actions run remains required for release evidence.
+
 ## PRS gates (v1.22 production path discoverability)
 
 | REQ-ID | Primary script(s) or artifact | Package ExUnit (if any) | Phase VERIFICATION owner |
