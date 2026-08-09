@@ -697,12 +697,12 @@ jobs:
         with:
           name: phase192-generated-evidence
           path: |
-            .planning/phases/192-idempotent-verification-sign-off/final.cells.json
-            .planning/phases/192-idempotent-verification-sign-off/scorecard.delta.json
-            .planning/phases/192-idempotent-verification-sign-off/regressions.ndjson
-            .planning/phases/192-idempotent-verification-sign-off/artifacts.manifest.json
-            .planning/phases/192-idempotent-verification-sign-off/192-SCORECARD.md
-          if-no-files-found: ignore
+            .planning/milestones/v1.53-phases/192-idempotent-verification-sign-off/final.cells.json
+            .planning/milestones/v1.53-phases/192-idempotent-verification-sign-off/scorecard.delta.json
+            .planning/milestones/v1.53-phases/192-idempotent-verification-sign-off/regressions.ndjson
+            .planning/milestones/v1.53-phases/192-idempotent-verification-sign-off/artifacts.manifest.json
+            .planning/milestones/v1.53-phases/192-idempotent-verification-sign-off/192-SCORECARD.md
+          if-no-files-found: error
 
   admin-phase200-guardrails:
     name: Admin Phase 200 deterministic guardrails
