@@ -86,7 +86,7 @@ Plans:
 Plans:
 **Wave 1**
 
-- [ ] 226-01-PLAN.md — Trace one real Actions run through the metadata-only collector, privacy contract, and typed proof baseline.
+- [x] 226-01-PLAN.md — Trace one real Actions run through the metadata-only collector, privacy contract, and typed proof baseline.
 
 **Wave 2** *(blocked on Wave 1 completion)*
 

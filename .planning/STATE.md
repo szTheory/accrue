@@ -5,15 +5,15 @@ milestone_name: CI Evidence & Critical-Path Hardening
 current_phase: 225
 current_phase_name: required-lane-signal-repair
 status: verifying
-stopped_at: Completed 225-required-lane-signal-repair-03-PLAN.md
-last_updated: "2026-08-09T16:53:33.416Z"
+stopped_at: Completed 226-ci-baseline-proof-semantics-01-PLAN.md
+last_updated: "2026-08-09T19:45:07.903Z"
 last_activity: 2026-08-08
 last_activity_desc: Phase 225 execution resumed (wave continue)
 progress:
   total_phases: 3
   completed_phases: 1
-  total_plans: 3
-  completed_plans: 3
+  total_plans: 6
+  completed_plans: 4
   percent: 33
 ---
 
@@ -34,7 +34,7 @@ Plan: 3 of 3
 Status: Phase complete — ready for verification
 Last activity: 2026-08-08 — Phase 225 execution resumed (wave continue)
 
-Progress: [██████████] 100%
+Progress: [███████░░░] 67%
 
 ## v1.61 Roadmap
 
@@ -459,6 +459,7 @@ Coverage: 22/22 v1.51 requirements mapped (each REQ-ID → exactly one phase). D
 | Phase 225-required-lane-signal-repair P01 | 8min | 3 tasks | 4 files |
 | Phase 225-required-lane-signal-repair P02 | 6min | 2 tasks | 4 files |
 | Phase 225-required-lane-signal-repair P03 | 13h 18m | 2 tasks | 2 files |
+| Phase 226-ci-baseline-proof-semantics P01 | 35m | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -904,6 +905,8 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - [Phase ?]: Use archived Phase 192 evidence paths and fail closed when generated evidence is absent.
 - [Phase ?]: Fresh CI proof is accepted only from workflow_dispatch run 31322443304 whose head SHA exactly matches ee940cf9e1f86b4d7c551b15ce113feb7f2a2997.
 - [Phase ?]: Floor, Primary, and Primary + OpenTelemetry are required proof; Sigra remains separately recorded advisory evidence.
+- [Phase ?]: GitHub effective rules plus classic branch protection, not CI YAML, define external enforcement.
+- [Phase ?]: Unsafe metadata shapes and query-bearing URLs fail closed rather than being redacted.
 
 ### Pending Todos
 
@@ -1056,8 +1059,8 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 
 ## Session Continuity
 
-Last session: 2026-08-09T16:53:33.402Z
-Stopped at: Completed 225-required-lane-signal-repair-03-PLAN.md
+Last session: 2026-08-09T19:45:07.890Z
+Stopped at: Completed 226-ci-baseline-proof-semantics-01-PLAN.md
 Resume file: None
 
 ## Operator Next Steps
