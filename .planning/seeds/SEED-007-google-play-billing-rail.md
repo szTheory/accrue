@@ -1,6 +1,6 @@
 ---
 id: SEED-007
-status: dormant
+status: backlogged
 planted: 2026-07-31
 planted_during: v1.59 roadmap update
 trigger_when: when Android delivery is scheduled or a second concrete adopter requires Google Play Billing
@@ -30,4 +30,3 @@ Surface when either:
 - conformance against the v1.59 rail behavior and offline lease fixtures
 
 Do not create a second entitlement model or widen the common projection merely to mimic every Google lifecycle operation.
-

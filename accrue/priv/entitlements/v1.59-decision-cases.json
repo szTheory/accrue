@@ -46,6 +46,135 @@
         "device_binding": "registered",
         "environment": "production",
         "kind": "verified_event",
+        "qualified": true,
+        "rail": "apple"
+      },
+      "expected": {
+        "atomic": true,
+        "continuity": "cached_only",
+        "disposition": "preserve",
+        "eligibility": "not_applicable",
+        "lease": "unchanged",
+        "reason": "entitlement_apple_family_sharing_deferred",
+        "repair": "support",
+        "revision_delta": 0,
+        "snapshot": {
+          "plans": [
+            "pro"
+          ]
+        }
+      },
+      "id": "apple_family_sharing_deferred",
+      "ordering": {
+        "observed_at": 1700000000,
+        "provider_cursor": "cursor_apple_family_sharing_deferred",
+        "relation": "newer"
+      },
+      "prior": {
+        "revision": 4,
+        "snapshot": {
+          "plans": [
+            "pro"
+          ]
+        },
+        "sources": [
+          "stripe"
+        ]
+      }
+    },
+    {
+      "contract_version": "v1.59",
+      "evidence": {
+        "account_binding": "authenticated",
+        "device_binding": "registered",
+        "environment": "production",
+        "kind": "verified_event",
+        "qualified": true,
+        "rail": "apple"
+      },
+      "expected": {
+        "atomic": true,
+        "continuity": "cached_only",
+        "disposition": "preserve",
+        "eligibility": "not_applicable",
+        "lease": "unchanged",
+        "reason": "entitlement_apple_offer_authoring_deferred",
+        "repair": "support",
+        "revision_delta": 0,
+        "snapshot": {
+          "plans": [
+            "pro"
+          ]
+        }
+      },
+      "id": "apple_offer_authoring_deferred",
+      "ordering": {
+        "observed_at": 1700000000,
+        "provider_cursor": "cursor_apple_offer_authoring_deferred",
+        "relation": "newer"
+      },
+      "prior": {
+        "revision": 4,
+        "snapshot": {
+          "plans": [
+            "pro"
+          ]
+        },
+        "sources": [
+          "stripe"
+        ]
+      }
+    },
+    {
+      "contract_version": "v1.59",
+      "evidence": {
+        "account_binding": "authenticated",
+        "device_binding": "registered",
+        "environment": "production",
+        "kind": "verified_event",
+        "qualified": false,
+        "rail": "apple"
+      },
+      "expected": {
+        "atomic": true,
+        "continuity": "cached_only",
+        "disposition": "no_grant",
+        "eligibility": "warn",
+        "lease": "unchanged",
+        "reason": "entitlement_apple_retry_exhausted",
+        "repair": "needs_repair",
+        "revision_delta": 0,
+        "snapshot": {
+          "plans": [
+            "pro"
+          ]
+        }
+      },
+      "id": "apple_retry_exhausted",
+      "ordering": {
+        "observed_at": 1700000000,
+        "provider_cursor": "cursor_apple_retry_exhausted",
+        "relation": "newer"
+      },
+      "prior": {
+        "revision": 4,
+        "snapshot": {
+          "plans": [
+            "pro"
+          ]
+        },
+        "sources": [
+          "stripe"
+        ]
+      }
+    },
+    {
+      "contract_version": "v1.59",
+      "evidence": {
+        "account_binding": "authenticated",
+        "device_binding": "registered",
+        "environment": "production",
+        "kind": "verified_event",
         "qualified": false,
         "rail": "apple"
       },
@@ -123,6 +252,49 @@
         "sources": [
           "stripe",
           "apple"
+        ]
+      }
+    },
+    {
+      "contract_version": "v1.59",
+      "evidence": {
+        "account_binding": "authenticated",
+        "device_binding": "registered",
+        "environment": "production",
+        "kind": "verified_event",
+        "qualified": false,
+        "rail": "apple"
+      },
+      "expected": {
+        "atomic": true,
+        "continuity": "cached_only",
+        "disposition": "no_grant",
+        "eligibility": "warn",
+        "lease": "unchanged",
+        "reason": "entitlement_apple_verified_unbound_repair",
+        "repair": "repair_lineage",
+        "revision_delta": 0,
+        "snapshot": {
+          "plans": [
+            "pro"
+          ]
+        }
+      },
+      "id": "apple_verified_unbound_repair",
+      "ordering": {
+        "observed_at": 1700000000,
+        "provider_cursor": "cursor_apple_verified_unbound_repair",
+        "relation": "newer"
+      },
+      "prior": {
+        "revision": 4,
+        "snapshot": {
+          "plans": [
+            "pro"
+          ]
+        },
+        "sources": [
+          "stripe"
         ]
       }
     },
