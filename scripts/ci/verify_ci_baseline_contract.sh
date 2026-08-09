@@ -41,6 +41,7 @@ validate_input() {
       (.run.head_sha | type == "string" and test("^[0-9a-f]{40}$")) and
       (.run.attempt | type == "number") and
       (.run.wall_seconds | type == "number" or . == null) and
+      (.run.critical_queue_seconds | type == "number" or . == null) and
       (.jobs | type == "array") and
       all(.jobs[];
         (.policy == "required" or .policy == "advisory" or .policy == "conditional") and
@@ -70,10 +71,16 @@ if [ "$self_test" = true ]; then
   printf '%s\n' '{"response_state":"not-found"}' >"$fixture_dir/required_status_checks.json"
   bash "$root_dir/scripts/ci/capture_ci_baseline.sh" --run-id 1 --fixture-dir "$fixture_dir" --output "$tmp_dir/safe.json"
   validate_input "$tmp_dir/safe.json"
+  jq '.id = 2 | .event = "schedule" | .html_url = "https://github.com/szTheory/accrue/actions/runs/2"' "$fixture_dir/run-1.json" >"$fixture_dir/run-2.json"
+  cp "$fixture_dir/jobs-1.json" "$fixture_dir/jobs-2.json"
+  cp "$fixture_dir/artifacts-1.json" "$fixture_dir/artifacts-2.json"
+  bash "$root_dir/scripts/ci/capture_ci_baseline.sh" --run-id 2 --fixture-dir "$fixture_dir" --output "$tmp_dir/scheduled.json"
+  jq -e '.runs[0].jobs[0].proof_state == "not-applicable"' "$tmp_dir/scheduled.json" >/dev/null || fail "event-excluded lane was not not-applicable"
   jq '.runs[0].jobs[0].env = {"BAD_SECRET":"value"}' "$tmp_dir/safe.json" >"$tmp_dir/unsafe.json"
   if (validate_input "$tmp_dir/unsafe.json"); then fail "unsafe synthetic input unexpectedly passed"; fi
   jq '.runs[0].run.url = "https://example.test/run?token=bad"' "$tmp_dir/safe.json" >"$tmp_dir/query-url.json"
   if (validate_input "$tmp_dir/query-url.json"); then fail "query URL synthetic input unexpectedly passed"; fi
+  jq -e '[.runs[0].jobs[].proof_state] | index("proved") and index("skipped") and index("advisory")' "$tmp_dir/safe.json" >/dev/null || fail "synthetic proof states incomplete"
   echo "verify_ci_baseline_contract: self-test ok"
   exit 0
 fi

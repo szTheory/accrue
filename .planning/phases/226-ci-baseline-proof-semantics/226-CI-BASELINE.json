@@ -10,7 +10,7 @@
   },
   "required_check_snapshot": {"rules_response_state": "ok", "rules": [], "classic_response_state": "not-found", "classic_checks": [], "enforcement_state": "none-enforced"},
   "runs": [{
-    "run": {"id": 31322443304, "workflow": "CI", "event": "workflow_dispatch", "head_sha": "ee940cf9e1f86b4d7c551b15ce113feb7f2a2997", "attempt": 1, "status": "completed", "conclusion": "success", "created_at": "2026-08-09T15:56:11Z", "completed_at": "2026-08-09T16:35:51Z", "url": "https://github.com/szTheory/accrue/actions/runs/31322443304", "wall_seconds": 2380, "eligible": true, "exclusion_reason": null},
+    "run": {"id": 31322443304, "workflow": "CI", "event": "workflow_dispatch", "head_sha": "ee940cf9e1f86b4d7c551b15ce113feb7f2a2997", "attempt": 1, "status": "completed", "conclusion": "success", "created_at": "2026-08-09T15:56:11Z", "completed_at": "2026-08-09T16:35:51Z", "url": "https://github.com/szTheory/accrue/actions/runs/31322443304", "wall_seconds": 2380, "critical_queue_seconds": 11, "eligible": true, "exclusion_reason": null},
     "jobs": [
       {"id":93267406295,"name":"Release manifest SSOT (REL-02)","policy":"required","conclusion":"success","proof_state":"proved","duration_seconds":166,"cache_state":"unknown","steps":[]},
       {"id":93267406332,"name":"iOS offline client package compatibility","policy":"required","conclusion":"success","proof_state":"proved","duration_seconds":40,"cache_state":"unknown","steps":[]},
