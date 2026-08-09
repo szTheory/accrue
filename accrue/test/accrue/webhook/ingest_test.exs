@@ -14,6 +14,11 @@ defmodule Accrue.Webhook.IngestTest do
 
   describe "run/4" do
     test "persists exactly one webhook_event row and enqueues one Oban job" do
+      {other_body, _sig} = signed_event()
+      other_event = build_lattice_event(other_body)
+      other_conn = Plug.Test.conn(:post, "/webhook/stripe")
+      assert %{status: 200} = Ingest.run(other_conn, @processor, other_event, other_body)
+
       {body, _sig} = signed_event()
       stripe_event = build_lattice_event(body)
 
