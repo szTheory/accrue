@@ -45,4 +45,15 @@ run "accrue Credo" bash -c 'cd accrue && mix credo --strict'
 run "accrue Dialyzer" bash -c 'cd accrue && MIX_ENV=test mix dialyzer --format short'
 run "accrue docs" bash -c 'cd accrue && MIX_ENV=dev mix docs --warnings-as-errors'
 
+run "accrue_admin format" bash -c 'cd accrue_admin && mix format --check-formatted'
+run "accrue_admin compile" bash -c 'cd accrue_admin && mix compile --warnings-as-errors'
+run "accrue_admin tests" bash -c 'cd accrue_admin && mix test --warnings-as-errors'
+run "accrue_admin Credo" bash -c 'cd accrue_admin && mix credo --strict'
+run "accrue_admin Dialyzer" bash -c 'cd accrue_admin && mix dialyzer --format short'
+run "accrue_admin docs" bash -c 'cd accrue_admin && MIX_ENV=dev mix docs --warnings-as-errors'
+
+run "accrue_portal format" bash -c 'cd accrue_portal && mix format --check-formatted'
+run "accrue_portal compile" bash -c 'cd accrue_portal && mix compile --warnings-as-errors'
+run "accrue_portal tests" bash -c 'cd accrue_portal && mix test --warnings-as-errors'
+
 printf '\nverify_release_preflight: OK\n'

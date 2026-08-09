@@ -167,8 +167,9 @@ Before pushing a release-sensitive repair, run:
 bash scripts/ci/verify_release_preflight.sh
 ```
 
-It runs the deterministic docs-contract bundle and the local core release checks
-(format, compile, tests, Credo, Dialyzer, and ExDoc with warnings as errors).
+It runs the deterministic docs-contract bundle plus local format, compile,
+tests, Credo, Dialyzer, and ExDoc checks for `accrue` and `accrue_admin`, and
+format, compile, and test checks for `accrue_portal`.
 It does not replace GitHub's clean-host matrix, service-container, browser, or
 artifact proof, so a fresh Actions run remains required for release evidence.
 
