@@ -196,6 +196,9 @@ test.describe("Phase 191 page-flow regression harness", () => {
     const flows = phase191PageFlows();
 
     expect(flows).toHaveLength(21);
+    expect(PHASE191_VIEWPORTS).toHaveLength(5);
+    expect(PHASE191_THEMES).toEqual(["light", "dark"]);
+    expect(PHASE191_VIEWPORTS.length * PHASE191_THEMES.length * flows.length).toBe(210);
     expect(PHASE191_STATES).toEqual([
       "default-populated",
       "empty",
