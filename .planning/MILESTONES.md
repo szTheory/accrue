@@ -1,6 +1,6 @@
 # Milestones
 
-## v1.60 First-Adopter iOS Bridge & Proof (Shipped: 2026-08-08)
+## v1.60 First-Adopter iOS Bridge & Proof (Override closeout: 2026-08-08)
 
 **Closeout type:** Override closeout — Phases 223–224 are verified; Phases 225–226 and HOST-01..03/READY-01..02 are deferred. This archive does not claim StoreKit, full first-adopter integration, or physical-device runtime proof.
 

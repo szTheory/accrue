@@ -69,7 +69,7 @@ The Phase 204 hardening roadmap's top slice (**Public Truth And Proof-State Base
 
 **Phase 220 complete (2026-08-05):** the anonymized Alpha reference-host and public-release contract are backed by 27 credential-free, production-derived scenario actions; a privacy-bounded operator diagnostic; bounded repair drills and runbooks; and coordinated release/adoption gates. The completed UAT confirms the Crosswake/Alpha evidence boundary remains honest: Accrue contract proof does not claim Crosswake bridge/device runtime proof or Alpha's external production integration evidence. PROOF-01..05 are satisfied; Crosswake stays `feasibility_blocked` until its separately owned bridge-compile and physical-device evidence exists.
 
-## Current Milestone: v1.60 First-Adopter iOS Bridge & Proof
+## Archived v1.60 Context
 
 **Goal:** Make the verified Accrue Apple/offline contract usable by one active iOS first adopter through a Crosswake bridge and host-local StoreKit adapter, without widening either project into a generic mobile billing framework.
 

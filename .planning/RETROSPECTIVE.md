@@ -1627,6 +1627,39 @@ The first slice (M1) of the SEED-004 redesign of `accrue_admin` from a CRUD surf
 
 ---
 
+## Milestone: v1.60 — First-Adopter iOS Bridge & Proof (Override Closeout)
+
+**Closed:** 2026-08-08
+**Delivered phases:** 2 (223–224) | **Plans:** 14 | **Tasks:** 13
+
+### What Was Built
+
+- An iOS-compatible SwiftPM offline client with canonical ES256 proof verification, authenticated cache replacement, and bounded failure handling.
+- A route- and manifest-scoped Crosswake host-command seam with exact-revision, denial, replay, and route-epoch evidence.
+
+### What Worked
+
+- The phase verification records separated reusable package and bridge evidence from unproven device-runtime capability.
+- Archiving phase directories retained the complete execution record while keeping active planning space clear.
+
+### What Was Inefficient
+
+- ROADMAP and REQUIREMENTS status drifted behind completed Phase 224 evidence, requiring reconciliation during closeout.
+- The generated archive initially labeled an override closeout as shipped and needed an explicit editorial correction.
+
+### Key Lessons
+
+1. Keep requirement traceability synchronized with phase verification before running closeout.
+2. A verified host seam is not equivalent to StoreKit integration or physical-device proof; preserve that boundary in every public summary.
+3. Use an override closeout only when deferred scope is named precisely and re-entry requires fresh authorization.
+
+### Cost Observations
+
+- Model mix and session count: not tracked.
+- Notable: the closeout was documentation/archive work; no unverified runtime claim was promoted.
+
+---
+
 ## Cross-Milestone Trends
 
 ### Process Evolution
