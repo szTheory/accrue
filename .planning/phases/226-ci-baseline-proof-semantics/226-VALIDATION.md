@@ -18,7 +18,7 @@ created: 2026-08-09
 | **Framework** | Bash contract test plus read-only GitHub Actions metadata smoke check |
 | **Config file** | none — Phase 226 adds its dedicated contract script |
 | **Quick run command** | `bash scripts/ci/verify_ci_baseline_contract.sh` |
-| **Full suite command** | `bash scripts/ci/capture_ci_baseline.sh 31322443304 && bash scripts/ci/verify_ci_baseline_contract.sh` |
+| **Full suite command** | `tmp_file="$(mktemp)" && trap 'rm -f "$tmp_file"' EXIT && bash scripts/ci/capture_ci_baseline.sh --run-id 31322443304 --output "$tmp_file" && bash scripts/ci/verify_ci_baseline_contract.sh --input "$tmp_file"` |
 | **Estimated runtime** | ~30 seconds locally; live API time excluded |
 
 ## Sampling Rate

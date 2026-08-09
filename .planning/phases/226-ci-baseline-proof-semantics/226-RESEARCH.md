@@ -26,7 +26,7 @@ Phase 226 should create a **versioned, privacy-safe baseline record** for a smal
 
 The measured release-critical chain is not the roadmap’s tentative 33–36 minutes: its wall time is **39m40s** (15:56:11–16:35:51 UTC), and the dependency chain through the latest required release cell, `admin-drift-docs`, `host-integration`, and the slowest Playwright shard is about **39m36s**. The critical release cell began 11 seconds after run creation, so this sample does not support runner queueing as the main cause. [VERIFIED: GitHub Actions API run/job timestamps for 31322443304] Phase 226 must record this contrary result rather than optimize against the unmeasured assumption.
 
-**Primary recommendation:** Add a metadata-only collector and a committed baseline/runbook that classify each job as `proved`, `skipped`, `advisory`, or `not-applicable`; use the Phase 225 repair run as the first datum, then require at least two more fresh, first-attempt, same-workflow-shape green `workflow_dispatch` runs before Phase 227 chooses an optimization.
+**Resolved implementation policy:** Add a metadata-only collector and a committed baseline/runbook that classify each job as `proved`, `skipped`, `advisory`, or `not-applicable`; use the Phase 225 repair run as the first datum, then require exactly two more fresh, first-attempt, same-workflow-shape green `workflow_dispatch` runs before Phase 227 chooses an optimization. Publish the post-Plan-01 commit to a dedicated remote branch named `phase-226-baseline-<12-char-SHA>`, verify that branch resolves remotely to the full local SHA, dispatch both runs from that branch, and require each provider-reported `head_sha` to equal the verified remote SHA. This three-run, dispatch-only policy is accepted for Phase 226; PR runs, reruns, historical dispatches, and replacement runs after a failed candidate are ineligible.
 
 ## Architectural Responsibility Map
 
@@ -100,7 +100,11 @@ scripts/ci/
 
 **What:** Treat runs as comparable only when all of these match: workflow name/file, triggering event, head SHA policy, attempt number, stable job-id topology, runner OS/image family, release matrix definitions, and relevant lockfile hashes. Store excluded runs with a reason rather than averaging them in. [VERIFIED: .github/workflows/ci.yml; CITED: https://docs.github.com/en/rest/actions/workflow-runs?apiVersion=2022-11-28]
 
-**Use:** Start with the repaired first-attempt `workflow_dispatch` run. Capture two additional fresh green first-attempt dispatches of the same CI YAML before computing median and range. The only other successful dispatch currently visible (`28652090155`, 2026-07-03) predates this workflow shape and must be recorded as non-comparable, not used in the baseline. [VERIFIED: `gh run list --workflow ci.yml --event workflow_dispatch --status success`]
+**Use:** Start with the repaired first-attempt `workflow_dispatch` run. After Plan 01 is committed, push that exact commit to `refs/heads/phase-226-baseline-<12-char-SHA>`, prove `git ls-remote` returns the full commit SHA for that ref, and capture two additional fresh green first-attempt dispatches from the verified branch before computing median and range. The snapshot is comparable to the anchor only when the `.github/workflows/ci.yml` blob OID and the blob OIDs for `accrue/mix.lock`, `accrue_admin/mix.lock`, `accrue_admin/package-lock.json`, `examples/accrue_host/mix.lock`, `examples/accrue_host/package-lock.json`, and `examples/accrue_host/assets/package-lock.json` match the anchor commit. The only other successful dispatch currently visible (`28652090155`, 2026-07-03) predates this workflow shape and must be recorded as non-comparable, not used in the baseline. [VERIFIED: `gh run list --workflow ci.yml --event workflow_dispatch --status success`]
+
+### Pattern 1a: Provider policy snapshot is authoritative for required checks
+
+**Decision:** The authoritative GitHub-enforced required-check snapshot is the union of the effective ruleset response from `GET /repos/szTheory/accrue/rules/branches/main` and classic branch-protection status checks from `GET /repos/szTheory/accrue/branches/main/protection/required_status_checks`, captured with API version `2022-11-28`. Record response status plus allowlisted required-check names/app IDs; an empty rules response and classic-protection 404 mean GitHub currently enforces no required checks on `main`, not that workflow success or YAML comments imply protection. The 2026-08-09 read returned `[]` from effective rules and `404 Branch not protected` from classic protection. Workflow `support`, `continue-on-error`, job identity, and dependency edges remain the repository's proof taxonomy, but they are not represented as external branch protection unless the provider APIs say so.
 
 **Required fields:**
 
@@ -234,17 +238,12 @@ The actual implementation should accept `owner/repo` from `git remote`, validate
 
 | # | Claim | Section | Risk if Wrong |
 |---|---|---|---|
-| A1 | Two additional eligible green dispatches are sufficient to establish a pre-optimization cohort. | Summary / Patterns | The project may prefer a larger sample or a fixed time window; Phase 227 selection could be noisier than desired. |
-| A2 | Baseline artifacts should live in the Phase 226 directory rather than a long-lived CI evidence directory. | Project Structure | Future maintainers may want a promoted central index; no implementation should assume the location until planning confirms it. |
+| A1 | Baseline artifacts live in the Phase 226 directory rather than a long-lived CI evidence directory. | Project Structure | Future maintainers may want a promoted central index; Phase 227 must consume the committed Phase 226 path unless a later decision promotes it. |
 
-## Open Questions
+## Resolved Questions
 
-1. **Cohort size and trigger policy**
-   - What we know: only one current-shape successful first-attempt dispatch is available; the prior July dispatch is not comparable.
-   - Recommendation: plan an explicit three-run cohort with `workflow_dispatch`, then record median/min/max. Do not block on PR-run comparison unless exact ref/topology criteria are locked.
-2. **Branch-protection source of truth**
-   - What we know: CI YAML comments name merge-blocking jobs, but branch-protection rules are external state.
-   - Recommendation: include a read-only `gh api`/manual snapshot of required check names in the baseline appendix, mark it unavailable if permissions prevent it, and never infer policy solely from workflow success.
+1. **RESOLVED — Cohort size, trigger, and ref policy:** The accepted cohort is the anchor plus exactly two new `workflow_dispatch` runs, all attempt 1. The new runs use the dedicated verified remote branch `phase-226-baseline-<12-char-SHA>` pointing to the exact post-Plan-01 commit. Eligibility requires provider `head_sha` equality plus exact anchor equality for the workflow blob and the six listed critical-chain lockfile blobs. A failed dispatched candidate is retained and halts the cohort; it is not replaced.
+2. **RESOLVED — Branch-protection source of truth:** GitHub's effective branch-rules API and classic required-status-check protection API are authoritative for externally enforced checks. Capture both read-only responses for `main`, including explicit empty/404 state. The current snapshot has no provider-enforced required checks; YAML declarations remain the repository proof taxonomy only and must not be described as branch protection.
 
 ## Environment Availability
 
@@ -266,7 +265,7 @@ The actual implementation should accept `owner/repo` from `git remote`, validate
 | Framework | Bash contract test plus live read-only `gh` smoke |
 | Config file | none — add a dedicated contract script |
 | Quick run command | `bash scripts/ci/verify_ci_baseline_contract.sh` |
-| Full evidence command | `bash scripts/ci/capture_ci_baseline.sh 31322443304 && bash scripts/ci/verify_ci_baseline_contract.sh` |
+| Full evidence command | `tmp_file="$(mktemp)" && trap 'rm -f "$tmp_file"' EXIT && bash scripts/ci/capture_ci_baseline.sh --run-id 31322443304 --output "$tmp_file" && bash scripts/ci/verify_ci_baseline_contract.sh --input "$tmp_file"` |
 
 ### Phase Requirements → Test Map
 
@@ -307,7 +306,7 @@ The actual implementation should accept `owner/repo` from `git remote`, validate
 ## Plan Recommendations
 
 1. **Plan 226-01 — Establish collector, schema, and privacy contract.** Add a metadata-only `gh`/`jq` collector with fixture input, exact field allowlist, attempt/event capture, duration derivation, cache-state enum, and a negative test proving logs/env/query-string URLs are rejected. Keep raw artifacts in Actions.
-2. **Plan 226-02 — Publish measured baseline and proof-state/ownership runbook.** Capture run 31322443304, dispatch two current-shape comparison runs, render the chain and cache/setup figures, make the 39m36 contrary result explicit, classify every required/advisory/skipped/not-applicable lane, and document Node/Playwright ownership diagnostics.
+2. **Plan 226-02 — Publish measured baseline and proof-state/ownership runbook.** Publish and verify the immutable post-Plan-01 cohort branch, capture run 31322443304, dispatch two comparison runs from that branch, verify their returned head SHA plus anchor workflow/lock blob equality, render the chain and cache/setup figures, make the 39m36 contrary result explicit, classify every required/advisory/skipped/not-applicable lane, and document Node/Playwright ownership diagnostics.
 3. **Plan 226-03 — Bind durable docs to workflow semantics.** Add the contract to the existing shift-left or release-facing CI surface without changing required-check topology. Assert stable job IDs, matrix support labels, required/advisory taxonomy, artifact names, and ownership command references; preserve Phase 225’s proof semantics.
 
 ## Sources
