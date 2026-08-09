@@ -291,17 +291,19 @@ test("coherent bounded scenario", async ({ page }) => {
 |---|-------|---------|---------------|
 | A1 | `actions/upload-artifact` current upstream tag/version is 7.0.1; the phase does not install or upgrade it. | Standard Stack | None for implementation; retain the workflow’s existing pinned `@v7` reference rather than changing it. |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **Should the misleading rollback test be renamed or receive a deterministic failure seam?**
    - What we know: Its present body proves successful co-presence of three writes, not an Oban insertion failure. [VERIFIED: codebase grep]
    - What's unclear: Whether the repository has an existing injectable repository/Oban failure seam that makes a true rollback test small and trustworthy. [VERIFIED: codebase grep]
    - Recommendation: Inspect `Accrue.Repo.transact/1` and test support before implementation; choose a truthful rename by default, and only add a failure seam if it is narrow, deterministic, and does not expand production API surface. [VERIFIED: codebase grep]
+   - **Resolution:** Use the truthful rename. Code inspection found that the current path proves successful webhook/job/ledger co-presence and found no existing narrow deterministic Oban-insertion failure seam. Plan 225-01 therefore renames the test and preserves the actually proven atomic co-presence contract per D-07; it does not add production injection surface or claim rollback-on-failure proof. [RESOLVED: planner selection]
 
 2. **Which generated Phase 192 evidence should be preserved?**
    - What we know: The configured legacy source paths are absent, although the upload step and CI contract require their names. [VERIFIED: codebase grep]
    - What's unclear: Whether an equivalent current generator/output should be restored or whether the artifact contract should point to a replacement. [VERIFIED: codebase grep]
    - Recommendation: Trace the historical generator before editing CI; preserve the report and test-results uploads regardless, then make the generated-evidence contract name and actual producer agree. [VERIFIED: codebase grep]
+   - **Resolution:** Replace the missing legacy source paths with the five existing checked-in Phase 192 outputs under `.planning/milestones/v1.53-phases/192-idempotent-verification-sign-off/`: `final.cells.json`, `scorecard.delta.json`, `regressions.ndjson`, `artifacts.manifest.json`, and `192-SCORECARD.md`. Plan 225-02 synchronizes the workflow and static contract, changes generated-evidence absence from silent ignore to fail-closed, and preserves the separate always-run Playwright report/test-results uploads. This uses durable evidence already produced by the completed Phase 192 closeout rather than asserting availability for nonexistent paths per D-11. [RESOLVED: planner selection]
 
 ## Environment Availability
 
