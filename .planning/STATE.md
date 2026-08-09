@@ -1,20 +1,16 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.60
-milestone_name: First-Adopter iOS Bridge & Proof
-status: Override closeout — awaiting next milestone
-stopped_at: v1.60 override closeout; Phases 225-226 deferred
-last_updated: "2026-08-09T00:42:43.728Z"
+milestone: v1.61
+milestone_name: CI Evidence & Critical-Path Hardening
+status: planning
+last_updated: "2026-08-09T02:17:35.876Z"
 last_activity: 2026-08-08
-last_activity_desc: v1.60 override closeout archived; 5 requirements deferred
 progress:
-  total_phases: 2
-  completed_phases: 2
-  total_plans: 14
-  completed_plans: 14
-  percent: 100
-current_phase: 224
-current_phase_name: crosswake-host-command-bridge-seam
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
 ---
 
 # Project State
@@ -29,10 +25,10 @@ See: `.planning/PROJECT.md` (updated 2026-08-05 after shipping v1.59)
 
 ## Current Position
 
-Phase: Milestone v1.60 override closeout
+Phase: Not started (defining requirements)
 Plan: —
-Status: Awaiting next milestone
-Last activity: 2026-08-08 — Phases 223–224 archived; StoreKit and readiness work deferred
+Status: Defining requirements
+Last activity: 2026-08-08 — Milestone v1.61 started
 
 ## Deferred Items
 

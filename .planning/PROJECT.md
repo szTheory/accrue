@@ -39,6 +39,19 @@ v1.49 **Realistic Demo App & Adoption Evidence** shipped on **2026-06-02**. The 
 
 ## Next Milestone Goals
 
+## Current Milestone: v1.61 CI Evidence & Critical-Path Hardening
+
+**Goal:** Restore trustworthy required CI evidence, then reduce proven critical-path waste without weakening release, host, browser, or provider proof for Accrue adopters.
+
+**Target features:**
+- A diagnosed and repaired required-lane baseline that distinguishes deterministic defects from genuine intermittent infrastructure or lifecycle failures.
+- Durable CI timing, cache, provider-state, rerun, and root-cause summaries that make later topology or cache changes evidence-led.
+- One measured critical-path improvement and explicit host/browser setup ownership, with the existing proof semantics and stable required-check identity retained.
+
+**Key context:** Live Actions history shows green PR/push runs are bottlenecked by staged release → host integration → Playwright work rather than runner queueing. Recent four-cell release failures are one root cause amplified by the matrix; the Admin browser timeout must be trace-first investigated, not masked by retries. SEED-003 hygiene applies. This is stable-core maintenance/release-readiness work, not a new product feature, StoreKit effort, Crosswake change, or parked-admin-ratchet revival.
+
+**Guardrails:** No test deletion, matrix collapse, branch-protection edit, cache rewrite, or required-gate demotion without recorded baseline evidence and a negative-control proof. Provider lanes remain visibly classified as proved, skipped, or advisory. Physical iPhone/StoreKit and Crosswake runtime work remain host/external-owner scope.
+
 **v1.60 override closeout (2026-08-08):** Phases 223–224 validated the reusable iOS offline client and the Crosswake host-command bridge seam. HOST-01..03 and READY-01..02 remain deferred: the host-local StoreKit adapter, StoreKit Test proof, release/readiness truth, and physical-device gate were not delivered and must be explicitly re-scoped before work resumes.
 
 The next milestone starts with fresh requirements via `$gsd-new-milestone`; it may choose to resume the deferred work only with an active adopter need and current external-device authorization.
@@ -637,8 +650,9 @@ The v1.50→v1.54 arc (Admin UI Foundation → Depth Pass → Brand System → D
 
 ### Active
 
-- [ ] Project verified rail evidence into one account snapshot with resource-aware management and duplicate-purchase prevention.
-- [ ] Verify, link, reconcile, quarantine, and repair Apple subscription evidence without heuristic ownership transfer.
+- [ ] Restore deterministic, trustworthy required CI evidence before optimizing the pipeline.
+- [ ] Measure CI timing, cache, provider-state, rerun, and failure-signature baselines before changing gate shape or cache policy.
+- [ ] Reduce one measured CI critical-path cost while retaining required proof and clear host/browser setup ownership.
 
 ### Validated v1.59 (Phase 220 complete 2026-08-05)
 
@@ -825,4 +839,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-08-08 after v1.60 override closeout.*
+*Last updated: 2026-08-08 after opening v1.61 CI Evidence & Critical-Path Hardening.*
