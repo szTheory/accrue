@@ -67,7 +67,7 @@ Plans:
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
-- [ ] 225-03-PLAN.md — Record full local evidence and bind closure to a fresh repair-commit Actions run.
+- [x] 225-03-PLAN.md — Record full local evidence and bind closure to a fresh repair-commit Actions run.
 
 ### Phase 226: CI Baseline & Proof Semantics
 

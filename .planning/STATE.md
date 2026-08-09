@@ -4,17 +4,17 @@ milestone: v1.61
 milestone_name: CI Evidence & Critical-Path Hardening
 current_phase: 225
 current_phase_name: required-lane-signal-repair
-status: executing
-stopped_at: Completed 225-required-lane-signal-repair-02-PLAN.md
-last_updated: "2026-08-09T03:32:48.358Z"
+status: verifying
+stopped_at: Completed 225-required-lane-signal-repair-03-PLAN.md
+last_updated: "2026-08-09T16:53:33.416Z"
 last_activity: 2026-08-08
 last_activity_desc: Phase 225 execution resumed (wave continue)
 progress:
   total_phases: 3
-  completed_phases: 0
+  completed_phases: 1
   total_plans: 3
-  completed_plans: 2
-  percent: 0
+  completed_plans: 3
+  percent: 33
 ---
 
 # Project State
@@ -31,10 +31,10 @@ See: `.planning/PROJECT.md` (updated 2026-08-05 after shipping v1.59)
 
 Phase: 225 (required-lane-signal-repair) — EXECUTING
 Plan: 3 of 3
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-08-08 — Phase 225 execution resumed (wave continue)
 
-Progress: [███████░░░] 67%
+Progress: [██████████] 100%
 
 ## v1.61 Roadmap
 
@@ -458,6 +458,7 @@ Coverage: 22/22 v1.51 requirements mapped (each REQ-ID → exactly one phase). D
 | Phase 223 P07 | 6min | 2 tasks | 4 files |
 | Phase 225-required-lane-signal-repair P01 | 8min | 3 tasks | 4 files |
 | Phase 225-required-lane-signal-repair P02 | 6min | 2 tasks | 4 files |
+| Phase 225-required-lane-signal-repair P03 | 13h 18m | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -901,6 +902,8 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - [Phase ?]: Webhook tests now query event-owned webhook, dispatch-job, and ledger facts rather than whole tables.
 - [Phase ?]: Partition Phase 191 by viewport with per-case 30-second budgets while retaining 5 × 2 × 21 coverage.
 - [Phase ?]: Use archived Phase 192 evidence paths and fail closed when generated evidence is absent.
+- [Phase ?]: Fresh CI proof is accepted only from workflow_dispatch run 31322443304 whose head SHA exactly matches ee940cf9e1f86b4d7c551b15ce113feb7f2a2997.
+- [Phase ?]: Floor, Primary, and Primary + OpenTelemetry are required proof; Sigra remains separately recorded advisory evidence.
 
 ### Pending Todos
 
@@ -1053,8 +1056,8 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 
 ## Session Continuity
 
-Last session: 2026-08-09T03:32:48.349Z
-Stopped at: Completed 225-required-lane-signal-repair-02-PLAN.md
+Last session: 2026-08-09T16:53:33.402Z
+Stopped at: Completed 225-required-lane-signal-repair-03-PLAN.md
 Resume file: None
 
 ## Operator Next Steps
