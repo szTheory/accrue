@@ -31,7 +31,7 @@ changes.
 
 ## Executable acceptance ratchet (Phase 218+)
 
-`docs-contracts-shift-left` runs `node scripts/ci/verify_executable_uat_contract.mjs --all-since 218` as a merge-blocking project policy. Any phase at or after 218 with completed summaries must carry executable coverage, `human_judgment: false`, a generated automated UAT artifact, and a passed verification report with zero unverified behavior.
+`verify_executable_uat_contract.mjs` remains available for phase-scoped acceptance checks. The former project-wide historical scan is parked with the archived v1.59 phase tree; it should be re-enabled only when a new milestone explicitly adopts the executable-UAT contract.
 
 Generate or refresh a phase artifact after its executable checks and verifier pass:
 

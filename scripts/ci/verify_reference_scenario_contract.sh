@@ -80,7 +80,7 @@ if ! awk '
   /^  docs-contracts-shift-left:/ { in_job = 1; next }
   in_job && /^  [[:alnum:]_-]+:/ { exit }
   in_job { print }
-' "$workflow" | grep -Fq 'bash scripts/ci/verify_reference_scenario_contract.sh'; then
+' "$workflow" | grep -Fq 'scripts/ci/verify_reference_scenario_contract.sh'; then
   fail "missing docs-contracts-shift-left invocation"
 fi
 

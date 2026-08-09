@@ -42,7 +42,7 @@ defmodule Accrue.BackendAutomationContractTest do
 
   defp plan(name) do
     Path.expand(
-      "../../../.planning/phases/217-canonical-projection-and-compatibility/#{name}",
+      "../../../.planning/milestones/v1.59-phases/217-canonical-projection-and-compatibility/#{name}",
       __DIR__
     )
     |> File.read!()
