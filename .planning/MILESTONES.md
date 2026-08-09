@@ -1,5 +1,29 @@
 # Milestones
 
+## v1.60 First-Adopter iOS Bridge & Proof (Shipped: 2026-08-08)
+
+**Closeout type:** Override closeout — Phases 223–224 are verified; Phases 225–226 and HOST-01..03/READY-01..02 are deferred. This archive does not claim StoreKit, full first-adopter integration, or physical-device runtime proof.
+
+**Phases completed:** 2 phases, 14 plans, 13 tasks
+
+**Key accomplishments:**
+
+- A standalone SwiftPM core verifies canonical ES256 proofs, persists only authenticated cache envelopes, and exposes the locked four-state offline result facade.
+- 1. [Rule 3 - Blocking] Added a minimal tracer conformance test target
+- Authenticated prepared transactions now retain and recover the exact prior offline envelope across late replacement and rollback durability failures, with fresh-process and concurrent-admission evidence.
+- The offline client now durably rejects clock rollback after a later verified observation and fails oversized or overly nested compact proofs at the existing bounded invalid state.
+- Immutable Crosswake source pin and one typed, zero-field entitlement-refresh tracer guarded by exact manifest and host-registration versions.
+- Four literal Accrue host commands, validated before installation and terminalized once against the captured Crosswake route epoch.
+- Pinned Crosswake host commands now turn delegate exceptions into one opaque, route-epoch-bound denial and verify the complete native suite at revision `57e03b61`.
+- Sanitized, exact-revision Crosswake bridge compile/unit evidence with a combined integrity gate, while every runtime capability remains feasibility-blocked.
+- Host-command dispatch now requires trusted page-world, main-frame, exact-origin WebKit metadata before body decoding, with immutable evidence pinned to Crosswake `fc5e399f`.
+- Focused Crosswake evidence now accepts only the reviewed target and starts `HostCommandAdmissionTests` through fixed literal SwiftPM argv.
+- Atomic epoch-scoped host-command replay protection and mandatory descriptor validation, re-pinned to reviewed Crosswake revision `789175f2`.
+
+**Known gaps:** HOST-01..03 (host-local StoreKit adapter and StoreKit Test) and READY-01..02 (public truth, warning cleanup, and delivery smoke) were not implemented. They require a new milestone scope before work resumes.
+
+---
+
 ## v1.59 Account-Scoped Multi-Rail & Offline Entitlements (Shipped: 2026-08-05)
 
 **Phases completed:** 8 phases, 77 plans, 66 tasks

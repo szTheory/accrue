@@ -2,19 +2,19 @@
 gsd_state_version: 1.0
 milestone: v1.60
 milestone_name: First-Adopter iOS Bridge & Proof
-current_phase: 224
-current_phase_name: crosswake host command bridge seam
-status: planning
-stopped_at: Phase 224 context gathered
-last_updated: "2026-08-06T18:31:14.275Z"
-last_activity: 2026-08-06
-last_activity_desc: Phase 223 complete, transitioned to Phase 224
+status: Override closeout — awaiting next milestone
+stopped_at: v1.60 override closeout; Phases 225-226 deferred
+last_updated: "2026-08-09T00:42:43.728Z"
+last_activity: 2026-08-08
+last_activity_desc: v1.60 override closeout archived; 5 requirements deferred
 progress:
   total_phases: 2
-  completed_phases: 1
-  total_plans: 7
-  completed_plans: 7
-  percent: 50
+  completed_phases: 2
+  total_plans: 14
+  completed_plans: 14
+  percent: 100
+current_phase: 224
+current_phase_name: crosswake-host-command-bridge-seam
 ---
 
 # Project State
@@ -25,14 +25,21 @@ See: `.planning/PROJECT.md` (updated 2026-08-05 after shipping v1.59)
 
 **Core value:** A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic Elixir DX, strong domain modeling, tamper-evident audit ledger, great observability, and zero breaking-change pain through v1.x.
 
-**Current focus:** Phase 223 — ios-compatible-accrue-offline-client
+**Current focus:** Planning the next milestone
 
 ## Current Position
 
-Phase: 224 — crosswake host command bridge seam
-Plan: Not started
-Status: Ready to plan
-Last activity: 2026-08-06 — Phase 223 complete, transitioned to Phase 224
+Phase: Milestone v1.60 override closeout
+Plan: —
+Status: Awaiting next milestone
+Last activity: 2026-08-08 — Phases 223–224 archived; StoreKit and readiness work deferred
+
+## Deferred Items
+
+| Category | Item | Status |
+|---|---|---|
+| requirement | HOST-01..03 | Deferred at v1.60 override closeout |
+| requirement | READY-01..02 | Deferred at v1.60 override closeout |
 
 ## Post-v1.48 Pause Rule
 

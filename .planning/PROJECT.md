@@ -33,13 +33,15 @@ v1.49 **Realistic Demo App & Adoption Evidence** shipped on **2026-06-02**. The 
 
 ## Current State
 
-**Latest shipped milestone: v1.59 — Account-Scoped Multi-Rail & Offline Entitlements, shipped 2026-08-05.** Accrue now supports concurrent Stripe and Apple rail evidence through one revisioned account projection, provider-honest lifecycle management, device-bound ES256 offline proof, host Apple ingress/repair, and deterministic first-adopter proof. Crosswake remains explicitly `feasibility_blocked` pending bridge/device evidence; Alpha production integration remains external and unasserted.
+**Latest fully shipped milestone: v1.59 — Account-Scoped Multi-Rail & Offline Entitlements, shipped 2026-08-05.** Accrue supports concurrent Stripe and Apple rail evidence through one revisioned account projection, provider-honest lifecycle management, device-bound ES256 offline proof, host Apple ingress/repair, and deterministic first-adopter proof. Crosswake runtime capability remains `feasibility_blocked` pending physical-device evidence.
 
 **Phase 223 complete (2026-08-06):** the reusable iOS-compatible SwiftPM offline client now preserves canonical ES256 proof verification, authenticated atomic cache recovery, durable observed-time rollback protection, bounded compact-proof/JSON admission, host-owned reconnect and display seams, and deterministic package/iOS/reference evidence. IOS-01 through IOS-03 verified 28/28 must-haves; Phase 224 owns the Crosswake host-command bridge seam. Advisory code review recorded a follow-up cached-read versus concurrent signed-denial race in `223-REVIEW.md`; it must be resolved before relying on concurrent-cache behavior beyond the verified scenario coverage.
 
 ## Next Milestone Goals
 
-**v1.60 — First-Adopter iOS Bridge & Proof** opens under the stable-core reopen rule as a concrete active iOS adopter delivery, not speculative billing expansion. Its goal is to connect the already-shipped Apple/offline contract to the First B2C Adopter through a Crosswake shell bridge and host-owned StoreKit adapter, while retaining an honest physical-device gate.
+**v1.60 override closeout (2026-08-08):** Phases 223–224 validated the reusable iOS offline client and the Crosswake host-command bridge seam. HOST-01..03 and READY-01..02 remain deferred: the host-local StoreKit adapter, StoreKit Test proof, release/readiness truth, and physical-device gate were not delivered and must be explicitly re-scoped before work resumes.
+
+The next milestone starts with fresh requirements via `$gsd-new-milestone`; it may choose to resume the deferred work only with an active adopter need and current external-device authorization.
 
 The milestone promotes the verified Accrue Swift tracer into the reusable, iOS-compatible offline-proof client; Crosswake supplies only a route-scoped host-command extension; the adopter host owns StoreKit and every Accrue binding. Android, generic Crosswake commerce, generic sync/storage, Google Play, and any claim that runtime capability is proven before a redacted physical-iPhone artifact remain out of scope.
 
@@ -823,4 +825,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-08-06 after completing Phase 223 of v1.60 First-Adopter iOS Bridge & Proof.*
+*Last updated: 2026-08-08 after v1.60 override closeout.*
