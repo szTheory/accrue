@@ -43,41 +43,58 @@ Completed and deferred v1.60 details are retained in [the milestone archive](mil
 ## Phase Details
 
 ### Phase 225: Required-Lane Signal Repair
+
 **Goal**: Maintainers can trust the current required release and Admin CI signal because every active failure has a trace-backed classification and its actual cause is repaired.
 **Depends on**: Nothing (first v1.61 phase)
 **Requirements**: REL-01, REL-02, REL-03
 **Success Criteria** (what must be TRUE):
+
   1. A maintainer can reproduce each current required-lane failing signature and read its classification as deterministic code/configuration, test-isolation, lifecycle, or external infrastructure.
   2. Required release and Admin checks pass after the responsible cause is repaired, while their meaningful assertions and failure artifacts remain available.
   3. A shared signature across release-matrix cells is recorded and triaged as one root-cause incident rather than counted once per cell.
   4. The Admin Playwright timeout has trace-first evidence and a diagnosis or repair path; no retry-only, masking, or test-deletion workaround represents resolution.
+
 **Plans:** 3 plans
 
 Plans:
+**Wave 1**
+
 - [ ] 225-01-PLAN.md — Normalize both incidents and repair webhook test isolation with event-owned proof.
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
 - [ ] 225-02-PLAN.md — Partition the Admin page-flow budget and repair Phase 192 artifact truth.
+
+**Wave 3** *(blocked on Wave 2 completion)*
+
 - [ ] 225-03-PLAN.md — Record full local evidence and bind closure to a fresh repair-commit Actions run.
 
 ### Phase 226: CI Baseline & Proof Semantics
+
 **Goal**: Maintainers can use a durable, privacy-safe account of comparable CI runs to distinguish the actual critical path, setup ownership, and provider proof state.
 **Depends on**: Phase 225
 **Requirements**: BASE-01, BASE-02, OWN-01
 **Success Criteria** (what must be TRUE):
+
   1. A maintainer can inspect a durable comparable-run baseline containing workflow wall time, queue delay, job/step durations, reruns, cache behavior, Docker/browser setup cost, provider state, and root-failure signature without sensitive values.
   2. Required, skipped, and advisory provider evidence is visibly distinct, so a skipped or non-run lane cannot be read as release proof.
   3. A host maintainer can identify whether Node, browser installation, and Playwright setup belong to the host or CI and can follow documented diagnostics for each setup failure mode.
   4. The baseline confirms the roughly 33–36 minute green-run critical path is staged release → host integration → Playwright work rather than runner queueing, or records a contrary measured result.
+
 **Plans**: TBD
 
 ### Phase 227: Measured Critical-Path Improvement
+
 **Goal**: Maintainers receive one demonstrably faster CI critical path while every required release, host, browser, and provider proof remains equally identifiable and recoverable.
 **Depends on**: Phase 226
 **Requirements**: PATH-01, PATH-02, SAFE-01, SAFE-02
 **Success Criteria** (what must be TRUE):
+
   1. A maintainer can see the measured critical path, the selected duplicated dependency or setup cost, its before-state evidence, and an explicit rollback procedure.
   2. One validated change reduces measured wait or duplicate work on the critical path without removing required release, host, browser, or provider evidence.
   3. Stable required-check identities and failure artifacts remain visible while relevance, dependency ordering, or caching behavior is evaluated.
   4. Each CI change has an executable or recorded negative-control and rollback result; no test is deleted or retried merely to hide a failure.
+
 **Plans**: TBD
 
 ## Progress

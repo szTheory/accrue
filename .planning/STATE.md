@@ -4,15 +4,15 @@ milestone: v1.61
 milestone_name: CI Evidence & Critical-Path Hardening
 current_phase: 225
 current_phase_name: Required-Lane Signal Repair
-status: planning
+status: executing
 stopped_at: Phase 225 context gathered
-last_updated: "2026-08-09T02:35:04.115Z"
+last_updated: "2026-08-09T03:20:02.936Z"
 last_activity: 2026-08-08
 last_activity_desc: v1.61 roadmap created; 10/10 requirements mapped
 progress:
   total_phases: 3
   completed_phases: 0
-  total_plans: 0
+  total_plans: 3
   completed_plans: 0
   percent: 0
 ---
@@ -31,7 +31,7 @@ See: `.planning/PROJECT.md` (updated 2026-08-05 after shipping v1.59)
 
 Phase: 225 of 227 (Required-Lane Signal Repair)
 Plan: —
-Status: Ready to plan
+Status: Ready to execute
 Last activity: 2026-08-08 — v1.61 roadmap created; 10/10 requirements mapped
 
 Progress: [░░░░░░░░░░] 0%
