@@ -42,8 +42,8 @@ swift test --package-path "$PACKAGE_DIR"
 
 SDKROOT="$(xcrun --sdk iphoneos --show-sdk-path)"
 [ -d "$SDKROOT" ] || fail "iphoneos SDK path is unavailable"
-swift build --package-path "$PACKAGE_DIR" --triple arm64-apple-ios16.0 \
-  --target AccrueOfflineClientCore -Xswiftc -sdk -Xswiftc "$SDKROOT"
+swift build --package-path "$PACKAGE_DIR" --triple arm64-apple-ios16.0 --sdk "$SDKROOT" \
+  --target AccrueOfflineClientCore
 
 # This compilation is a compatibility check only. The capability report remains
 # independently feasibility-blocked unless the external device-evidence process acts.
