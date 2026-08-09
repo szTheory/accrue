@@ -5,15 +5,15 @@ milestone_name: CI Evidence & Critical-Path Hardening
 current_phase: 225
 current_phase_name: required-lane-signal-repair
 status: executing
-stopped_at: Completed 225-01-PLAN.md
-last_updated: "2026-08-09T03:27:10.872Z"
+stopped_at: Completed 225-required-lane-signal-repair-02-PLAN.md
+last_updated: "2026-08-09T03:32:48.358Z"
 last_activity: 2026-08-08
 last_activity_desc: Phase 225 execution resumed (wave continue)
 progress:
   total_phases: 3
   completed_phases: 0
   total_plans: 3
-  completed_plans: 1
+  completed_plans: 2
   percent: 0
 ---
 
@@ -30,11 +30,11 @@ See: `.planning/PROJECT.md` (updated 2026-08-05 after shipping v1.59)
 ## Current Position
 
 Phase: 225 (required-lane-signal-repair) — EXECUTING
-Plan: 2 of 3
+Plan: 3 of 3
 Status: Ready to execute
 Last activity: 2026-08-08 — Phase 225 execution resumed (wave continue)
 
-Progress: [███░░░░░░░] 33%
+Progress: [███████░░░] 67%
 
 ## v1.61 Roadmap
 
@@ -457,6 +457,7 @@ Coverage: 22/22 v1.51 requirements mapped (each REQ-ID → exactly one phase). D
 | Phase 221-close-gap-reference-host-apple-notification-ingress P05 | 2min | 2 tasks | 5 files |
 | Phase 223 P07 | 6min | 2 tasks | 4 files |
 | Phase 225-required-lane-signal-repair P01 | 8min | 3 tasks | 4 files |
+| Phase 225-required-lane-signal-repair P02 | 6min | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -898,6 +899,8 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - [Phase ?]: Compact proof admission is bounded to 256 KiB total, 1 KiB decoded header, 128 KiB decoded payload, and 32 JSON containers.
 - [Phase ?]: Normalized the release webhook failures as one incident with required/advisory cells visibly separated.
 - [Phase ?]: Webhook tests now query event-owned webhook, dispatch-job, and ledger facts rather than whole tables.
+- [Phase ?]: Partition Phase 191 by viewport with per-case 30-second budgets while retaining 5 × 2 × 21 coverage.
+- [Phase ?]: Use archived Phase 192 evidence paths and fail closed when generated evidence is absent.
 
 ### Pending Todos
 
@@ -1050,8 +1053,8 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 
 ## Session Continuity
 
-Last session: 2026-08-09T03:27:10.863Z
-Stopped at: Completed 225-01-PLAN.md
+Last session: 2026-08-09T03:32:48.349Z
+Stopped at: Completed 225-required-lane-signal-repair-02-PLAN.md
 Resume file: None
 
 ## Operator Next Steps

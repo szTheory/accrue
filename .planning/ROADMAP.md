@@ -63,7 +63,7 @@ Plans:
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
-- [ ] 225-02-PLAN.md — Partition the Admin page-flow budget and repair Phase 192 artifact truth.
+- [x] 225-02-PLAN.md — Partition the Admin page-flow budget and repair Phase 192 artifact truth.
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
