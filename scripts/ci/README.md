@@ -2,6 +2,13 @@
 
 This directory hosts merge-adjacent bash gates and host-app checks. Use it as the first stop when CI fails on documentation or VERIFY-01 contracts.
 
+### Triage: Phase 225 required-lane incidents
+
+- **Release webhook test-isolation signal:** run `cd accrue && mix test test/accrue/webhook/ingest_test.exs --warnings-as-errors`. The responsible source is `accrue/test/accrue/webhook/ingest_test.exs`; it must assert facts owned by its created webhook event rather than suite-global tables.
+- **Admin page-flow budget signal:** run `bash scripts/ci/verify_phase192_admin_guardrails.sh`. The responsible source is `accrue_admin/e2e/admin-page-flow-phase191.spec.js`; it owns the bounded browser traversal, not CI retries or topology.
+
+For classification, immutable Actions evidence links, current proof status, and the required/advisory distinction, see [Phase 225's causal index](../../.planning/phases/225-required-lane-signal-repair/225-CI-INCIDENTS.md). Keep raw logs, reports, traces, screenshots, and payloads in Actions artifacts.
+
 ## v1.59 first-adopter release contract
 
 Run one coordinated, credential-free release-contract check from the repository
