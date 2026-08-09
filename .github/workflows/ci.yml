@@ -44,6 +44,12 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
+      - name: Set up BEAM for reference-scenario verification
+        uses: erlef/setup-beam@v1
+        with:
+          otp-version: '28.0'
+          elixir-version: '1.19.5'
+
       - name: verify_package_docs.sh
         env:
           RELEASE_PLEASE_PR: ${{ github.event_name == 'pull_request' && startsWith(github.head_ref, 'release-please--') && '1' || '' }}
