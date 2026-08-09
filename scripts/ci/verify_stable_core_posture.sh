@@ -25,18 +25,13 @@ require_absent_regex() {
   fi
 }
 
-state_file="$ROOT_DIR/.planning/STATE.md"
 requirements_file="$ROOT_DIR/.planning/REQUIREMENTS.md"
 
 if [[ ! -f "$requirements_file" ]]; then
-  current_milestone="$(
-    awk -F': ' '/^milestone:/ { gsub(/"/, "", $2); print $2; exit }' "$state_file" 2>/dev/null || true
-  )"
-  archived_requirements="$ROOT_DIR/.planning/milestones/${current_milestone}-REQUIREMENTS.md"
-
-  if [[ -n "$current_milestone" && -f "$archived_requirements" ]]; then
-    requirements_file="$archived_requirements"
-  fi
+  # POS-03 was defined and completed by v1.48.  Later milestones may omit the
+  # standing posture anchors entirely, so the state file's current milestone is
+  # not a reliable authority for this long-lived contract.
+  requirements_file="$ROOT_DIR/.planning/milestones/v1.48-REQUIREMENTS.md"
 fi
 
 public_anchor_files=(

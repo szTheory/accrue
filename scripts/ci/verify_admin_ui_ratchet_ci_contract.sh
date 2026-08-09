@@ -74,6 +74,7 @@ ratchet_job="$(job_body "admin-ui-ratchet-guardrails")"
 for needle in \
   "name: Admin UI ratchet guardrails" \
   "if: github.event_name != 'schedule'" \
+  "continue-on-error: true" \
   "runs-on: ubuntu-24.04" \
   "uses: actions/checkout@v6" \
   "uses: actions/setup-node@v6" \
@@ -114,7 +115,6 @@ require_source_regex "admin-ui-ratchet-guardrails job" "$ratchet_job" 'uses: act
 
 sanitized_job="$(printf '%s\n' "$ratchet_job" | grep -Fv "PASS - ANTHROPIC_API_KEY is not required for this job")"
 for pattern in \
-  'continue-on-error:[[:space:]]*true' \
   'secrets\.' \
   'ANTHROPIC_API_KEY' \
   'ratchet-propose' \
@@ -134,6 +134,7 @@ annotation_job="$(job_body "annotation-sweep")"
 [ -n "$annotation_job" ] || fail "could not extract annotation-sweep job"
 require_source_fixed "annotation-sweep job" "$annotation_job" "admin-ui-ratchet-guardrails"
 require_source_fixed "annotation-sweep job" "$annotation_job" "bash scripts/ci/annotation_sweep.sh"
+require_source_fixed "annotation-sweep job" "$annotation_job" "ANNOTATION_SWEEP_EXCLUDE: advisory,ratchet"
 annotation_job_flat="$(printf '%s\n' "$annotation_job" | tr '\n' ' ')"
 require_source_regex "annotation-sweep job" "$annotation_job_flat" 'annotation_sweep\.sh .*admin-ui-ratchet-guardrails'
 

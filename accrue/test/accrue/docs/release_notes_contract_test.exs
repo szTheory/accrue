@@ -195,7 +195,9 @@ defmodule Accrue.Docs.ReleaseNotesContractTest do
 
     assert status != 0
     assert output =~ "verify_release_notes_contract:"
-    assert output =~ "accrue_admin/CHANGELOG.md missing top-level Unreleased before latest release"
+
+    assert output =~
+             "accrue_admin/CHANGELOG.md missing top-level Unreleased before latest release"
   end
 
   test "release notes contract rejects package ownership inversions" do
