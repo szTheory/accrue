@@ -1,10 +1,10 @@
 ---
 schema_version: 1
-open_count: 8
+open_count: 9
 waived_count: 0
 fixed_count: 0
-total_count: 8
-last_updated: 2026-08-05T17:40:05.349Z
+total_count: 9
+last_updated: 2026-08-09T03:32:55.284Z
 ---
 
 # Broken Windows Ledger
@@ -23,6 +23,7 @@ last_updated: 2026-08-05T17:40:05.349Z
 | 6 | 220 | deviation | accrue/lib/accrue/entitlements/snapshot.ex |  | Forwarded snapshot :now option to repository folding for frozen expiry-boundary proof. | open |  | 2026-08-05T02:02:05.577Z |  |
 | 7 | 221 | unrun-verify | examples/accrue_host |  | mix verify blocked by unrelated tracked formatting violations before its test suite | open |  | 2026-08-05T17:28:54.045Z |  |
 | 8 | 221 | unrun-verify | examples/accrue_host/lib/accrue_host_web/components/layouts.ex |  | Full mix format --check-formatted is blocked by unrelated tracked formatting violations in layouts and existing migrations. | open |  | 2026-08-05T17:40:05.349Z |  |
+| 9 | 225 | deviation | accrue_admin/mix.lock | 41 | Locked already-declared jose dependency so the Admin Playwright web server starts in a clean checkout. | open |  | 2026-08-09T03:32:55.284Z |  |
 
 ````json
 [
@@ -120,6 +121,18 @@ last_updated: 2026-08-05T17:40:05.349Z
     "status": "open",
     "reason": "",
     "recorded_at": "2026-08-05T17:40:05.349Z",
+    "resolved_at": null
+  },
+  {
+    "id": 9,
+    "kind": "deviation",
+    "phase": "225",
+    "file": "accrue_admin/mix.lock",
+    "line": 41,
+    "description": "Locked already-declared jose dependency so the Admin Playwright web server starts in a clean checkout.",
+    "status": "open",
+    "reason": "",
+    "recorded_at": "2026-08-09T03:32:55.284Z",
     "resolved_at": null
   }
 ]
