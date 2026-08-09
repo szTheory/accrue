@@ -78,6 +78,7 @@ const PHASE191_HANDOFF_SOURCE_MARKERS = Object.freeze({
 const COPY_RECOVERY_PATTERN =
   /No billing records yet|No records match these filters|Access restricted|Connection lost|This .* could not load|Retry|Clear filters|owner scope/i;
 const GENERIC_ERROR_COPY_PATTERN = /\boops\b|\bforbidden\b|\binvalid (request|state|input)\b/i;
+const PHASE191_THEMES = Object.freeze(["light", "dark"]);
 
 async function reset(request) {
   const response = await request.post("/__e2e__/reset");
@@ -219,18 +220,17 @@ test.describe("Phase 191 page-flow regression harness", () => {
     }
   });
 
-  test("AX187-436 AX187-437 AX187-438 AX187-439 AX187-446 AX187-447 page flows avoid clipping at required widths @responsive @scroll @copy", async ({
-    page,
-    request,
-  }) => {
-    test.setTimeout(60_000);
-    await reset(request);
-    const fixtureData = await seedPhase191Matrix(request);
-
-    for (const viewport of PHASE191_VIEWPORTS) {
+  for (const viewport of PHASE191_VIEWPORTS) {
+    test(`AX187-436 AX187-437 AX187-438 AX187-439 AX187-446 AX187-447 page flows avoid clipping at required widths @responsive @scroll @copy ${viewport.name}`, async ({
+      page,
+      request,
+    }) => {
+      test.setTimeout(30_000);
+      await reset(request);
+      const fixtureData = await seedPhase191Matrix(request);
       await page.setViewportSize({ width: viewport.width, height: viewport.height });
 
-      for (const theme of ["light", "dark"]) {
+      for (const theme of PHASE191_THEMES) {
         for (const flow of phase191PageFlows()) {
           await login(page, resolvePhase191Route(flow, fixtureData));
           await setPhase191Theme(page, theme);
@@ -242,8 +242,8 @@ test.describe("Phase 191 page-flow regression harness", () => {
           await expect(page.locator("body")).not.toContainText(GENERIC_ERROR_COPY_PATTERN);
         }
       }
-    }
-  });
+    });
+  }
 
   test("AX187-097 AX187-098 AX187-099 AX187-100 AX187-101 AX187-102 AX187-103 AX187-111 AX187-112 AX187-113 AX187-114 AX187-117 AX187-118 overlays trap focus, layer above scrims, and dismiss safely @overlay @focus @floating @ax187", async ({
     page,
