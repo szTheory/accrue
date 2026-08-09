@@ -21,7 +21,8 @@ defmodule Accrue.Entitlements.DecisionCaseContractConsumer do
         }
 
   @spec consume(DecisionCase.t(), term(), term(), [term()]) :: {:ok, result()} | {:error, atom()}
-  def consume(%DecisionCase{} = case_data, evidence, prior, deliveries) when is_list(deliveries) do
+  def consume(%DecisionCase{} = case_data, evidence, prior, deliveries)
+      when is_list(deliveries) do
     cond do
       not DecisionCases.valid?(case_data) ->
         {:error, :invalid_case}
@@ -72,7 +73,9 @@ defmodule Accrue.Entitlements.DecisionCaseContractConsumer do
     }
   end
 
-  defp snapshot_for(disposition, _expected, prior) when disposition in [:noop, :preserve], do: prior
+  defp snapshot_for(disposition, _expected, prior) when disposition in [:noop, :preserve],
+    do: prior
+
   defp snapshot_for(_disposition, expected, _prior), do: expected
 
   defp sources_for(disposition, sources, rail) when disposition in [:retract, :no_grant],

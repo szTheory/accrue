@@ -805,7 +805,10 @@ defmodule Accrue.Docs.PackageDocsVerifierTest do
 
     File.write!(
       stripe_sync_path,
-      String.replace(File.read!(stripe_sync_path), ~s(@doc since: "1.5.0"), ~s(@doc since: "1.4.0"),
+      String.replace(
+        File.read!(stripe_sync_path),
+        ~s(@doc since: "1.5.0"),
+        ~s(@doc since: "1.4.0"),
         global: false
       )
     )

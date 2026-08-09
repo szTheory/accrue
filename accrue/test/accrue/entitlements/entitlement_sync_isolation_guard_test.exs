@@ -134,7 +134,10 @@ defmodule Accrue.Entitlements.EntitlementSyncIsolationGuardTest do
 
   defp fixture_root! do
     tmp_dir =
-      Path.join(System.tmp_dir!(), "accrue-entitlement-sync-isolation-#{System.unique_integer([:positive])}")
+      Path.join(
+        System.tmp_dir!(),
+        "accrue-entitlement-sync-isolation-#{System.unique_integer([:positive])}"
+      )
 
     File.rm_rf!(tmp_dir)
     on_exit(fn -> File.rm_rf(tmp_dir) end)
@@ -159,7 +162,11 @@ defmodule Accrue.Entitlements.EntitlementSyncIsolationGuardTest do
   defp inject_before_comment!(tmp_dir, relative_path, code) do
     path = Path.join(tmp_dir, relative_path)
     original = File.read!(path)
-    File.write!(path, String.replace(original, "def clean, do: :ok", code <> "\n  def clean, do: :ok"))
+
+    File.write!(
+      path,
+      String.replace(original, "def clean, do: :ok", code <> "\n  def clean, do: :ok")
+    )
   end
 
   defp write_gate_file!(tmp_dir, relative_path, contents) do

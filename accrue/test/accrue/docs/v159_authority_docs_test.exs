@@ -22,12 +22,14 @@ defmodule Accrue.Docs.V159AuthorityDocsTest do
     assert output =~ "missing authority manifest"
 
     fixture = fixture_root!()
+
     replace!(
       fixture,
       ".planning/research/RESEARCH-INDEX.md",
       "- [v1.59-AUTHORITY.md](v1.59-AUTHORITY.md)",
       "- [v1.59-SUMMARY.md](v1.59-SUMMARY.md)"
     )
+
     assert {output, status} = run_verifier(fixture)
     assert status != 0
     assert output =~ "first v1.59 index entry"
@@ -35,13 +37,27 @@ defmodule Accrue.Docs.V159AuthorityDocsTest do
 
   test "v1.59 authority verifier rejects malformed ledger claims" do
     fixture = fixture_root!()
-    replace!(fixture, ".planning/research/v1.59-AMENDMENTS.md", "V159-CLAIM-RAIL-001", "V159-CLAIM-OFFLINE-001")
+
+    replace!(
+      fixture,
+      ".planning/research/v1.59-AMENDMENTS.md",
+      "V159-CLAIM-RAIL-001",
+      "V159-CLAIM-OFFLINE-001"
+    )
+
     assert {output, status} = run_verifier(fixture)
     assert status != 0
     assert output =~ "duplicate claim_id"
 
     fixture = fixture_root!()
-    replace!(fixture, ".planning/research/v1.59-AMENDMENTS.md", "no independent 72-hour cutoff", "72-hour cutoff")
+
+    replace!(
+      fixture,
+      ".planning/research/v1.59-AMENDMENTS.md",
+      "no independent 72-hour cutoff",
+      "72-hour cutoff"
+    )
+
     assert {output, status} = run_verifier(fixture)
     assert status != 0
     assert output =~ "no-72-hour claim"
@@ -55,12 +71,20 @@ defmodule Accrue.Docs.V159AuthorityDocsTest do
     assert output =~ "watchlist row"
 
     fixture = fixture_root!()
-    replace!(fixture, ".planning/research/v1.59-WATCHLIST.md", "Phase 218 Apple observer and repair runbook", "null")
+
+    replace!(
+      fixture,
+      ".planning/research/v1.59-WATCHLIST.md",
+      "Phase 218 Apple observer and repair runbook",
+      "null"
+    )
+
     assert {output, status} = run_verifier(fixture)
     assert status != 0
     assert output =~ "null"
 
     fixture = fixture_root!()
+
     apple_row =
       fixture
       |> Path.join(".planning/research/v1.59-WATCHLIST.md")
@@ -69,7 +93,8 @@ defmodule Accrue.Docs.V159AuthorityDocsTest do
       |> Enum.find(&String.starts_with?(&1, "| V159-WL-APPLE-API |"))
       |> String.split("|", parts: 3)
       |> List.last()
-      |> then(&"| V159-WL-DUPLICATE |" <> &1)
+      |> then(&("| V159-WL-DUPLICATE |" <> &1))
+
     append!(fixture, ".planning/research/v1.59-WATCHLIST.md", "\n" <> apple_row)
     assert {output, status} = run_verifier(fixture)
     assert status != 0
@@ -87,7 +112,9 @@ defmodule Accrue.Docs.V159AuthorityDocsTest do
   defp repo_root, do: Path.expand("../../../..", __DIR__)
 
   defp fixture_root! do
-    fixture = Path.join(System.tmp_dir!(), "accrue-v159-authority-#{System.unique_integer([:positive])}")
+    fixture =
+      Path.join(System.tmp_dir!(), "accrue-v159-authority-#{System.unique_integer([:positive])}")
+
     File.rm_rf!(fixture)
     on_exit(fn -> File.rm_rf(fixture) end)
 
@@ -119,5 +146,6 @@ defmodule Accrue.Docs.V159AuthorityDocsTest do
     File.write!(path, String.replace(File.read!(path), needle, replacement))
   end
 
-  defp append!(root, relative_path, contents), do: File.write!(Path.join(root, relative_path), contents, [:append])
+  defp append!(root, relative_path, contents),
+    do: File.write!(Path.join(root, relative_path), contents, [:append])
 end

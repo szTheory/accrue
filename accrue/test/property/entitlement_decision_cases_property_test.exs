@@ -17,14 +17,19 @@ defmodule Accrue.Property.EntitlementDecisionCasesPropertyTest do
     end
   end
 
-  property "older generated evidence cannot restore an allow snapshot after a denied prior", _context do
+  property "older generated evidence cannot restore an allow snapshot after a denied prior",
+           _context do
     case_data = find_case!("out_of_order_positive_after_revoke")
     %PriorState{} = canonical_prior = case_data.prior
     %Ordering{} = canonical_ordering = case_data.ordering
 
     check all(revision <- integer(0..100), offset <- integer(0..1_000), max_runs: 50) do
       prior = %PriorState{canonical_prior | revision: revision, snapshot: %{}}
-      ordering = %Ordering{canonical_ordering | observed_at: canonical_ordering.observed_at - offset}
+
+      ordering = %Ordering{
+        canonical_ordering
+        | observed_at: canonical_ordering.observed_at - offset
+      }
 
       result = accepted!(case_data, case_data.evidence, prior, [ordering])
 
@@ -34,7 +39,8 @@ defmodule Accrue.Property.EntitlementDecisionCasesPropertyTest do
     end
   end
 
-  property "generated source sets retain a surviving live rail after the other rail retracts", _context do
+  property "generated source sets retain a surviving live rail after the other rail retracts",
+           _context do
     case_data = find_case!("stripe_revoked_apple_survives")
     %PriorState{} = canonical_prior = case_data.prior
 
@@ -60,11 +66,22 @@ defmodule Accrue.Property.EntitlementDecisionCasesPropertyTest do
       assert result.atomic
 
       assert Map.keys(result) |> Enum.sort() ==
-               [:atomic, :continuity, :disposition, :lease, :reason, :repair, :revision, :snapshot, :sources]
+               [
+                 :atomic,
+                 :continuity,
+                 :disposition,
+                 :lease,
+                 :reason,
+                 :repair,
+                 :revision,
+                 :snapshot,
+                 :sources
+               ]
     end
   end
 
-  property "invalid generated evidence, bindings, and prior state are rejected before transition", _context do
+  property "invalid generated evidence, bindings, and prior state are rejected before transition",
+           _context do
     case_data = find_case!("apple_verified_grant")
 
     check all(
@@ -74,7 +91,9 @@ defmodule Accrue.Property.EntitlementDecisionCasesPropertyTest do
       {evidence, prior} = invalid_input(case_data, invalid)
 
       assert {:error, _reason} =
-               DecisionCaseContractConsumer.consume(case_data, evidence, prior, [case_data.ordering])
+               DecisionCaseContractConsumer.consume(case_data, evidence, prior, [
+                 case_data.ordering
+               ])
     end
   end
 
@@ -90,7 +109,9 @@ defmodule Accrue.Property.EntitlementDecisionCasesPropertyTest do
   end
 
   defp accepted!(case_data, evidence, prior, deliveries) do
-    assert {:ok, result} = DecisionCaseContractConsumer.consume(case_data, evidence, prior, deliveries)
+    assert {:ok, result} =
+             DecisionCaseContractConsumer.consume(case_data, evidence, prior, deliveries)
+
     result
   end
 
