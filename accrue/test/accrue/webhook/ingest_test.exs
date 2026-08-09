@@ -13,7 +13,7 @@ defmodule Accrue.Webhook.IngestTest do
   end
 
   describe "run/4" do
-    test "persists exactly one webhook_event row and enqueues one Oban job" do
+    test "persists event-owned webhook, dispatch job, and received ledger facts" do
       {other_body, _sig} = signed_event()
       other_event = build_lattice_event(other_body)
       other_conn = Plug.Test.conn(:post, "/webhook/stripe")
@@ -28,89 +28,65 @@ defmodule Accrue.Webhook.IngestTest do
       assert result_conn.status == 200
       assert result_conn.halted
 
-      # Verify exactly one webhook_event row
-      events = Accrue.TestRepo.all(WebhookEvent)
-      assert length(events) == 1
-
-      [event] = events
+      event = webhook_event!(stripe_event)
       assert event.processor == "stripe"
       assert event.processor_event_id == stripe_event.id
       assert event.type == stripe_event.type
       assert event.status == :received
 
-      # Verify Oban job enqueued with correct args
-      jobs = Accrue.TestRepo.all(Oban.Job)
-      assert length(jobs) == 1
-      [job] = jobs
+      assert [job] = dispatch_jobs_for(event.id)
       assert job.worker == "Accrue.Webhook.DispatchWorker"
       assert job.args["webhook_event_id"] == event.id
+
+      assert [ledger_event] = received_ledger_events_for(event.id)
+      assert ledger_event.data["event_type"] == stripe_event.type
     end
 
-    test "duplicate POST returns 200 with no second row or Oban job" do
+    test "duplicate POST returns 200 with one event-owned webhook, job, and ledger fact" do
       {body, _sig} = signed_event()
       stripe_event = build_lattice_event(body)
 
       conn1 = Plug.Test.conn(:post, "/webhook/stripe")
       result1 = Ingest.run(conn1, @processor, stripe_event, body)
       assert result1.status == 200
+      first_event_id = webhook_event!(stripe_event).id
 
       # Second call with same event
       conn2 = Plug.Test.conn(:post, "/webhook/stripe")
       result2 = Ingest.run(conn2, @processor, stripe_event, body)
       assert result2.status == 200
 
-      # Still only one row
-      events = Accrue.TestRepo.all(WebhookEvent)
-      assert length(events) == 1
-
-      # Only one Oban job (from first call)
-      jobs = Accrue.TestRepo.all(Oban.Job)
-      assert length(jobs) == 1
+      assert [event] = webhook_events_for(stripe_event)
+      assert event.id == first_event_id
+      assert [_job] = dispatch_jobs_for(first_event_id)
+      assert [_ledger_event] = received_ledger_events_for(first_event_id)
     end
 
-    test "accrue_events row with type webhook.received created in same transaction" do
+    test "records an event-owned webhook.received ledger row" do
       {body, _sig} = signed_event()
       stripe_event = build_lattice_event(body)
 
       conn = Plug.Test.conn(:post, "/webhook/stripe")
       Ingest.run(conn, @processor, stripe_event, body)
 
-      # Verify accrue_events ledger entry
-      ledger_events =
-        Accrue.TestRepo.all(from(e in Accrue.Events.Event, where: e.type == "webhook.received"))
-
-      assert length(ledger_events) == 1
-
-      [ledger_event] = ledger_events
+      event = webhook_event!(stripe_event)
+      assert [ledger_event] = received_ledger_events_for(event.id)
       assert ledger_event.type == "webhook.received"
       assert ledger_event.subject_type == "WebhookEvent"
+      assert ledger_event.subject_id == to_string(event.id)
       assert ledger_event.data["event_type"] == stripe_event.type
     end
 
-    test "Oban insert failure causes transaction rollback - no webhook_event or accrue_events row" do
-      # To simulate Oban insert failure, we insert a job with invalid args
-      # that causes the Multi to fail. Instead, we test the rollback guarantee
-      # by checking that after a successful insert, all three rows exist together.
-      # A direct failure simulation would require mocking Oban.insert which
-      # we avoid per Mox-only policy. The transaction guarantee is inherent
-      # to Ecto.Multi.
+    test "successful ingest keeps event-owned webhook, dispatch job, and ledger facts together" do
       {body, _sig} = signed_event()
       stripe_event = build_lattice_event(body)
 
       conn = Plug.Test.conn(:post, "/webhook/stripe")
       Ingest.run(conn, @processor, stripe_event, body)
 
-      # All three artifacts exist together (atomic guarantee)
-      assert Accrue.TestRepo.aggregate(WebhookEvent, :count) == 1
-      assert Accrue.TestRepo.aggregate(Oban.Job, :count) == 1
-
-      ledger_count =
-        Accrue.TestRepo.aggregate(
-          from(e in Accrue.Events.Event, where: e.type == "webhook.received"),
-          :count
-        )
-
-      assert ledger_count == 1
+      event = webhook_event!(stripe_event)
+      assert [_job] = dispatch_jobs_for(event.id)
+      assert [_ledger_event] = received_ledger_events_for(event.id)
     end
 
     test "request completes in reasonable time" do
@@ -134,5 +110,39 @@ defmodule Accrue.Webhook.IngestTest do
     body
     |> Jason.decode!()
     |> LatticeStripe.Event.from_map()
+  end
+
+  defp webhook_event!(stripe_event) do
+    Accrue.TestRepo.get_by!(WebhookEvent,
+      processor: "stripe",
+      processor_event_id: stripe_event.id
+    )
+  end
+
+  defp webhook_events_for(stripe_event) do
+    Accrue.TestRepo.all(
+      from(event in WebhookEvent,
+        where: event.processor == "stripe" and event.processor_event_id == ^stripe_event.id
+      )
+    )
+  end
+
+  defp dispatch_jobs_for(event_id) do
+    Accrue.TestRepo.all(
+      from(job in Oban.Job,
+        where: job.worker == "Accrue.Webhook.DispatchWorker",
+        where: fragment("? ->> 'webhook_event_id' = ?", job.args, ^event_id)
+      )
+    )
+  end
+
+  defp received_ledger_events_for(event_id) do
+    Accrue.TestRepo.all(
+      from(event in Accrue.Events.Event,
+        where:
+          event.type == "webhook.received" and event.subject_type == "WebhookEvent" and
+            event.subject_id == ^to_string(event_id)
+      )
+    )
   end
 end
