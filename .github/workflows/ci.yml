@@ -50,6 +50,9 @@ jobs:
           otp-version: '28.0'
           elixir-version: '1.19.5'
 
+      - name: Install Accrue dependencies for reference-scenario verification
+        run: cd accrue && mix deps.get
+
       - name: verify_package_docs.sh
         env:
           RELEASE_PLEASE_PR: ${{ github.event_name == 'pull_request' && startsWith(github.head_ref, 'release-please--') && '1' || '' }}
@@ -83,7 +86,7 @@ jobs:
         run: bash scripts/ci/verify_adoption_proof_matrix.sh
 
       - name: Reference scenario public-contract gate
-        run: bash scripts/ci/verify_reference_scenario_contract.sh
+        run: V159_SKIP_RELEASE_CONTRACT=true bash scripts/ci/verify_reference_scenario_contract.sh
 
       - name: Core admin invoice VERIFY flow id drift guard
         run: bash scripts/ci/verify_core_admin_invoice_verify_ids.sh
@@ -158,6 +161,9 @@ jobs:
         with:
           otp-version: '28.0'
           elixir-version: '1.19.5'
+
+      - name: Install Accrue dependencies for reference-scenario verification
+        run: cd accrue && mix deps.get
 
       - name: Verify Release Please manifest ↔ mix.exs @version
         run: bash scripts/ci/verify_release_manifest_alignment.sh
