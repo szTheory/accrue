@@ -25,7 +25,11 @@ This is the privacy-safe causal index for the active required-lane signatures. R
 - **Root cause:** the tests read whole shared tables and asserted global cardinality even though SQL-sandbox isolation does not promise those tables are globally empty.
 - **Corrective change:** select the event by `(processor, processor_event_id)`, then query its `DispatchWorker` job and `webhook.received` ledger event by the persisted event ID.
 - **Negative-control proof:** a same `(processor, processor_event_id)` replay returns 200 while identity-scoped webhook, dispatch-job, and ledger predicates each remain exactly one.
-- **Targeted/full-local/fresh-run evidence:** targeted suite — pending; full local suite — pending; fresh repair-run evidence — pending.
+- **Targeted/negative-control/full-local/fresh-run evidence:**
+  - **Targeted reproduction:** `cd accrue && mix test test/accrue/webhook/ingest_test.exs --warnings-as-errors` — PASS at `2026-08-09T03:35:04Z` on `9d7b9ccb092ffcdeae71a2ca25dfa28fad18d8b0` (`5 tests, 0 failures`). This proves the repaired event-owned persistence contract.
+  - **Negative control:** the same targeted command includes `duplicate POST returns 200 with one event-owned webhook, job, and ledger fact` — PASS at `2026-08-09T03:35:04Z` on `9d7b9ccb092ffcdeae71a2ca25dfa28fad18d8b0`. It proves replay for the same `(processor, processor_event_id)` cannot create a second identity-owned fact.
+  - **Full local suite:** `cd accrue && mix test --warnings-as-errors` — PASS at `2026-08-09T03:34:23Z` on `9d7b9ccb092ffcdeae71a2ca25dfa28fad18d8b0`. The runner emitted its configured `test/fixtures/apple/server_evidence.exs` load-filter warning but exited zero; no suite count is claimed because the runner stream did not retain one in this evidence capture.
+  - **Fresh repair-run evidence:** pending Task 2 workflow-dispatch proof for the committed evidence SHA; no rerun or advisory result is treated as required proof.
 - **Residual owner/status:** Accrue maintainers — pending fresh repair-commit Actions evidence across the three required cells; advisory Sigra remains observational.
 
 ## INC-225-ADMIN-PAGEFLOW
@@ -38,7 +42,7 @@ This is the privacy-safe causal index for the active required-lane signatures. R
 
 **Evidence:** immutable [Admin hardening guardrails job](https://github.com/szTheory/accrue/actions/runs/31289155535/job/93183274999) in [run 31289155535](https://github.com/szTheory/accrue/actions/runs/31289155535).
 
-- **Incident ID/status:** `INC-225-ADMIN-PAGEFLOW` — repair pending a bounded traversal plan.
+- **Incident ID/status:** `INC-225-ADMIN-PAGEFLOW` — repair implemented; fresh Actions proof pending.
 - **Normalized signature:** one Phase 191 Playwright test traverses `5 viewports × 2 themes × 21 flows` (210 login/navigate/check cycles) under a 60-second test budget.
 - **Classification/confidence:** capacity/topology versus whole-test-budget; high. The trace reached ordinary successful Dunning Timeline checks near 64 seconds rather than showing a stuck selector or network call.
 - **First run/SHA:** [run 31289155535](https://github.com/szTheory/accrue/actions/runs/31289155535) / `702dc482df0f65c332be1d4dfb821c4fe60aec49`.
@@ -49,7 +53,10 @@ This is the privacy-safe causal index for the active required-lane signatures. R
 - **Immutable evidence/artifact links:** [job](https://github.com/szTheory/accrue/actions/runs/31289155535/job/93183274999), [run](https://github.com/szTheory/accrue/actions/runs/31289155535), and that job's retained Actions report, test-results, and generated-evidence artifacts.
 - **Ruled-out hypotheses:** no trace-backed browser lifecycle, external-service, selector-stall, or network-stall failure was observed; retries, sleeps, global timeout inflation, and topology changes are not corrective evidence.
 - **Root cause:** a 210-cycle serial traversal was assigned one 60-second test budget despite ordinary progress beyond that budget.
-- **Corrective change:** pending a later plan that partitions the traversal into bounded, independently reported tests while preserving all viewports, themes, flows, single-worker execution, retries=0, assertions, and artifacts.
-- **Negative-control proof:** pending — demonstrate that each bounded test retains its assigned viewport/theme/flow coverage and no whole-test budget masks the original traversal.
-- **Targeted/full-local/fresh-run evidence:** targeted guardrail — pending; full local browser suite — pending; fresh repair-run evidence — pending.
+- **Corrective change:** Plan 225-02 partitions the traversal into five bounded, independently reported viewport tests while preserving both themes, all 21 flows, single-worker execution, retries=0, assertions, and artifacts.
+- **Negative-control proof:** `bash scripts/ci/verify_phase192_ci_contract.sh && bash scripts/ci/verify_phase192_guardrail_contract.sh` — PASS at `2026-08-09T03:34:23Z` on `9d7b9ccb092ffcdeae71a2ca25dfa28fad18d8b0`. The contracts prove five viewport partitions, `5 × 2 × 21` coverage, zero retries/single worker, stable Phase 192 check identity, report/generated artifact contracts, and first-failure `test-results` semantics.
+- **Targeted/full-local/fresh-run evidence:**
+  - **Targeted reproduction:** `bash scripts/ci/verify_phase192_admin_guardrails.sh` is the credential-free narrow gate retained by the incident. Its static contract companions above passed on the repair SHA and preserve the required report/generated evidence paths.
+  - **Full local browser suite:** `cd accrue_admin && npm run e2e:phase191` — PASS at `2026-08-09T03:34:23Z` on `9d7b9ccb092ffcdeae71a2ca25dfa28fad18d8b0`. It ran the five independently reported viewport partitions with both themes and all 21 flows under one worker and zero retries. Local paths remain `accrue_admin/playwright-report` and `accrue_admin/test-results`; the latter is a preserved first-failure affordance and may contain no payload after a clean run.
+  - **Fresh repair-run evidence:** pending Task 2 workflow-dispatch proof for the committed evidence SHA; no rerun is treated as proof.
 - **Residual owner/status:** Admin maintainers — pending the bounded-test repair and a fresh required-job Actions run.
