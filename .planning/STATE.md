@@ -5,16 +5,16 @@ milestone_name: CI Evidence & Critical-Path Hardening
 current_phase: 226
 current_phase_name: ci-baseline-proof-semantics
 status: executing
-stopped_at: Completed 226-05-PLAN.md
-last_updated: "2026-08-10T23:30:54.013Z"
+stopped_at: Completed 226-06-PLAN.md
+last_updated: "2026-08-10T23:54:54.590Z"
 last_activity: 2026-08-10
 last_activity_desc: Phase 226 execution started
 progress:
   total_phases: 3
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 9
-  completed_plans: 8
-  percent: 33
+  completed_plans: 9
+  percent: 67
 ---
 
 # Project State
@@ -30,11 +30,11 @@ See: `.planning/PROJECT.md` (updated 2026-08-05 after shipping v1.59)
 ## Current Position
 
 Phase: 226 (ci-baseline-proof-semantics) — EXECUTING
-Plan: 2 of 6
+Plan: 3 of 6
 Status: Ready to execute
 Last activity: 2026-08-10 — Phase 226 execution started
 
-Progress: [█████████░] 89%
+Progress: [██████████] 100%
 
 ## v1.61 Roadmap
 
@@ -463,6 +463,7 @@ Coverage: 22/22 v1.51 requirements mapped (each REQ-ID → exactly one phase). D
 | Phase 226 P02 | remote CI plus execution | 2 tasks | 3 files |
 | Phase 226-ci-baseline-proof-semantics P04 | 6 min | 3 tasks | 5 files |
 | Phase 226 P05 | 24m | 3 tasks | 3 files |
+| Phase 226-ci-baseline-proof-semantics P06 | 30min | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -916,6 +917,8 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - [Phase ?]: Derive proof and queue aggregates from eligible run records and policy rather than stored booleans.
 - [Phase ?]: Collector records use schema version 2 with an explicit document discriminator.
 - [Phase ?]: Only confirmed classic HTTP 404 is provider absence.
+- [Phase ?]: Separate initial runner queue from staged critical-chain duration in canonical CI evidence.
+- [Phase ?]: Use bounded total_count pagination for live GitHub Actions list metadata.
 
 ### Pending Todos
 
@@ -1068,8 +1071,8 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 
 ## Session Continuity
 
-Last session: 2026-08-10T23:30:54.002Z
-Stopped at: Completed 226-05-PLAN.md
+Last session: 2026-08-10T23:54:54.575Z
+Stopped at: Completed 226-06-PLAN.md
 Resume file: None
 
 ## Operator Next Steps

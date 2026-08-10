@@ -106,7 +106,7 @@ Plans:
 
 **Wave 6** *(gap closure; blocked on Wave 5 completion)*
 
-- [ ] 226-06-PLAN.md — Regenerate and certify canonical JSON/Markdown from corrected three-run facts while preserving ownership, topology, and Phase 192 proof.
+- [x] 226-06-PLAN.md — Regenerate and certify canonical JSON/Markdown from corrected three-run facts while preserving ownership, topology, and Phase 192 proof.
 
 ### Phase 227: Measured Critical-Path Improvement
 
