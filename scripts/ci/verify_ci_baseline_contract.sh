@@ -105,6 +105,9 @@ if [ "$self_test" = true ]; then
   expect_invalid secret-like-unknown '.runs[0].root_failure_signature.token = "ghp_synthetic_secret_value"'
   expect_invalid invalid-run-type '.runs[0].run.eligible = "true"'
   expect_invalid query-url '.runs[0].run.url = "https://github.com/a/b?token=no"'
+  expect_invalid queue-drift '.runs[0].run.runner_queue_seconds += 1'
+  expect_invalid signature-pair '.runs[0].root_failure_signature.lane_conclusions += [{"manifest_identity":"docs-contracts-shift-left","conclusion":"failure"}]'
+  expect_invalid ineligible-proved '(.runs[0].run.eligible = false) | (.runs[0].jobs[0].proof_state = "proved")'
   # Provider ambiguity and pagination must fail before a record is published.
   cp "$fixture_dir/rules.json" "$tmp_dir/rules.good.json"
   for status in 401 403 429 500; do
