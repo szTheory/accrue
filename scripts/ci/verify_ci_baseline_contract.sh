@@ -23,6 +23,11 @@ fi
 
 [ -x "$root_dir/scripts/ci/capture_ci_baseline.sh" ] || fail "missing executable collector: scripts/ci/capture_ci_baseline.sh"
 
+# Phase 226 topology regression: the baseline contract must run in the existing
+# shift-left job. The rest of this test is added in the GREEN step.
+grep -Fq 'bash scripts/ci/verify_ci_baseline_contract.sh' "$root_dir/.github/workflows/ci.yml" ||
+  fail "missing baseline contract invocation in docs-contracts-shift-left"
+
 validate_input() {
   local candidate="$1"
   [ -f "$candidate" ] || fail "missing baseline input: ${candidate#$root_dir/}"
