@@ -2,6 +2,11 @@
 
 This directory hosts merge-adjacent bash gates and host-app checks. Use it as the first stop when CI fails on documentation or VERIFY-01 contracts.
 
+### Triage: Phase 226 baseline and setup ownership
+
+- **Baseline/proof taxonomy:** run `bash scripts/ci/verify_ci_baseline_contract.sh`. It validates metadata-only baseline facts and repository required/advisory/skipped/not-applicable semantics; it does not claim GitHub branch protection. The effective-rules plus classic-protection snapshot is the authority for externally enforced checks.
+- **CI versus local host setup:** read [Phase 226 setup ownership](../../.planning/phases/226-ci-baseline-proof-semantics/226-SETUP-OWNERSHIP.md), then start with `bash scripts/ci/accrue_host_uat.sh` (repo/CI gate) or `cd examples/accrue_host && mix verify.full` (native host gate). Node/npm/Chromium/Postgres/ports are host-maintained locally; the existing host scripts own fixture, Phoenix-server, Playwright reuse, and cleanup.
+
 ### Triage: Phase 225 required-lane incidents
 
 - **Release webhook test-isolation signal:** run `cd accrue && mix test test/accrue/webhook/ingest_test.exs --warnings-as-errors`. The responsible source is `accrue/test/accrue/webhook/ingest_test.exs`; it must assert facts owned by its created webhook event rather than suite-global tables.
