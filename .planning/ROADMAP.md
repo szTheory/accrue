@@ -54,7 +54,7 @@ Completed and deferred v1.60 details are retained in [the milestone archive](mil
   3. A shared signature across release-matrix cells is recorded and triaged as one root-cause incident rather than counted once per cell.
   4. The Admin Playwright timeout has trace-first evidence and a diagnosis or repair path; no retry-only, masking, or test-deletion workaround represents resolution.
 
-**Plans:** 4 plans
+**Plans:** 3 plans
 
 Plans:
 **Wave 1**
@@ -81,7 +81,7 @@ Plans:
   3. A host maintainer can identify whether Node, browser installation, and Playwright setup belong to the host or CI and can follow documented diagnostics for each setup failure mode.
   4. The baseline confirms the roughly 33–36 minute green-run critical path is staged release → host integration → Playwright work rather than runner queueing, or records a contrary measured result.
 
-**Plans:** 3 plans
+**Plans:** 4 plans
 
 Plans:
 **Wave 1**
