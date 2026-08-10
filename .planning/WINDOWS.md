@@ -1,10 +1,10 @@
 ---
 schema_version: 1
-open_count: 9
+open_count: 10
 waived_count: 0
 fixed_count: 0
-total_count: 9
-last_updated: 2026-08-09T03:32:55.284Z
+total_count: 10
+last_updated: 2026-08-10T23:31:15.701Z
 ---
 
 # Broken Windows Ledger
@@ -24,6 +24,7 @@ last_updated: 2026-08-09T03:32:55.284Z
 | 7 | 221 | unrun-verify | examples/accrue_host |  | mix verify blocked by unrelated tracked formatting violations before its test suite | open |  | 2026-08-05T17:28:54.045Z |  |
 | 8 | 221 | unrun-verify | examples/accrue_host/lib/accrue_host_web/components/layouts.ex |  | Full mix format --check-formatted is blocked by unrelated tracked formatting violations in layouts and existing migrations. | open |  | 2026-08-05T17:40:05.349Z |  |
 | 9 | 225 | deviation | accrue_admin/mix.lock | 41 | Locked already-declared jose dependency so the Admin Playwright web server starts in a clean checkout. | open |  | 2026-08-09T03:32:55.284Z |  |
+| 10 | 226 | stub | scripts/ci/verify_ci_baseline_contract.sh | 67 | Legacy canonical v1 validation is transitional until Plan 06 regenerates the v2 canonical artifact. | open |  | 2026-08-10T23:31:15.701Z |  |
 
 ````json
 [
@@ -133,6 +134,18 @@ last_updated: 2026-08-09T03:32:55.284Z
     "status": "open",
     "reason": "",
     "recorded_at": "2026-08-09T03:32:55.284Z",
+    "resolved_at": null
+  },
+  {
+    "id": 10,
+    "kind": "stub",
+    "phase": "226",
+    "file": "scripts/ci/verify_ci_baseline_contract.sh",
+    "line": 67,
+    "description": "Legacy canonical v1 validation is transitional until Plan 06 regenerates the v2 canonical artifact.",
+    "status": "open",
+    "reason": "",
+    "recorded_at": "2026-08-10T23:31:15.701Z",
     "resolved_at": null
   }
 ]
