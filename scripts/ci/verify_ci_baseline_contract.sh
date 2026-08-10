@@ -55,6 +55,14 @@ validate_collector_record() {
     def sig: exact(["affected_jobs","category","id","lane_conclusions"]) and (.id|type=="string" and test("^ci-root-v2-[A-Za-z0-9_-]+$")) and (.category=="no-failure" or .=="failed-lane") and (.affected_jobs|type=="array" and .==sort and .==unique) and (.lane_conclusions|type=="array" and .==sort_by(.manifest_identity,.conclusion) and .==unique and all(.[]; exact(["conclusion","manifest_identity"]) and (.manifest_identity|type=="string") and (.conclusion=="failure" or .=="timed_out" or .=="cancelled")));
     exact(["document_type","policy_manifest","privacy","repository","required_check_snapshot","runs","schema_version"]) and .schema_version==2 and .document_type=="ci-baseline-collector-record" and (.repository|type=="string" and test("^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$")) and (.policy_manifest|exact(["schema_version","workflow"]) and .schema_version==$policy[0].schema_version and .workflow==$policy[0].workflow) and (.privacy|exact(["allowlist","artifact_archives_downloaded","env_values_recorded","logs_downloaded","raw_payloads_recorded"]) and .logs_downloaded==false and .artifact_archives_downloaded==false and .env_values_recorded==false and .raw_payloads_recorded==false) and (.required_check_snapshot|exact(["captured_at","classic_checks","classic_response_state","enforcement_state","rules","rules_response_state"])) and (.runs|type=="array" and length>0 and all(.[]; exact(["artifacts","jobs","root_failure_signature","run"]) and (.run|exact(["attempt","completed_at","conclusion","created_at","eligible","event","exclusion_reason","head_sha","id","runner_queue_omission_reason","runner_queue_seconds","staged_critical_chain_omission_reason","staged_critical_chain_seconds","status","url","wall_seconds","workflow"]) and (.eligible|type=="boolean") and (.runner_queue_seconds|type=="number" or .==null) and (.staged_critical_chain_seconds|type=="number" or .==null)) and (.jobs|type=="array" and all(.[]; exact(["cache_state","completed_at","conclusion","duration_seconds","id","initial_queue_root","manifest_identity","name","policy","proof_state","required_for_release_proof","staged_critical_chain_order","started_at","status","steps"]) and (.id|type=="number") and (.initial_queue_root|type=="boolean") and (.required_for_release_proof|type=="boolean") and (.steps|type=="array"))) and (.artifacts|type=="array" and all(.[]; exact(["expired","expires_at","id","name","size_in_bytes"]) and (.id|type=="number"))) and (.root_failure_signature|exact(["affected_jobs","category","id","lane_conclusions"]) and (.lane_conclusions|type=="array"))))
   ' "$candidate" >/dev/null || fail "collector record schema failed: ${candidate#$root_dir/}"
+  jq -e '
+    def pairs: ([.jobs[]|select(.conclusion=="failure" or .conclusion=="timed_out" or .conclusion=="cancelled")|{manifest_identity,conclusion}]|unique|sort_by(.manifest_identity,.conclusion));
+    all(.runs[]; . as $record |
+      ([.jobs[]|select(.initial_queue_root)|.started_at] | if length>0 and all(.!=null) then map(fromdateiso8601)|min-($record.run.created_at|fromdateiso8601) else null end) as $queue |
+      (if $record.run.eligible then ($queue != null and $record.run.runner_queue_seconds == $queue and ([.jobs[]|select(.staged_critical_chain_order!=null)]|length)>0 and $record.run.staged_critical_chain_seconds != null) else ([.jobs[]|select(.proof_state=="proved")]|length)==0 end) and
+      (pairs) as $pairs | $record.root_failure_signature.lane_conclusions==$pairs and $record.root_failure_signature.affected_jobs==($pairs|map(.manifest_identity)|unique|sort) and $record.root_failure_signature.id == ("ci-root-v2-"+(([$record.root_failure_signature.category,$pairs]|tojson|@base64)|gsub("=";"")))
+    )
+  ' "$candidate" >/dev/null || fail "collector derived facts failed: ${candidate#$root_dir/}"
   if jq -e '.. | strings | select(test("https?://[^[:space:]]+\\?"))' "$candidate" >/dev/null; then fail "privacy contract rejected query-bearing URL"; fi
 }
 
@@ -88,7 +96,7 @@ if [ "$self_test" = true ]; then
   if bash "$root_dir/scripts/ci/capture_ci_baseline.sh" --run-id 1 --fixture-dir "$fixture_dir" --output "$tmp_dir/unknown.json"; then fail "unknown workflow job unexpectedly captured"; fi
   # RED gate for the public collector-to-contract path.  The implementation must
   # accept this reduced one-run document without importing cohort-only fields.
-  jq '.body.jobs[0].name = "Docs and bash contracts (shift-left)"' "$fixture_dir/jobs-1-1.json" >"$fixture_dir/jobs-1.valid.json"
+  jq '.body.total_count = 2 | .body.jobs[0].name = "Docs and bash contracts (shift-left)" | .body.jobs += [{"id":3,"name":"Release gate (Primary dev target; elixir=1.19.5 otp=28.0 sigra=off opentelemetry=off)","status":"completed","conclusion":"success","started_at":"2026-08-09T15:56:12Z","completed_at":"2026-08-09T15:56:20Z","steps":[]}]' "$fixture_dir/jobs-1-1.json" >"$fixture_dir/jobs-1.valid.json"
   mv "$fixture_dir/jobs-1.valid.json" "$fixture_dir/jobs-1-1.json"
   bash "$root_dir/scripts/ci/capture_ci_baseline.sh" --run-id 1 --fixture-dir "$fixture_dir" --output "$tmp_dir/collector-record.json"
   validate_input "$tmp_dir/collector-record.json"
@@ -97,6 +105,19 @@ if [ "$self_test" = true ]; then
   expect_invalid secret-like-unknown '.runs[0].root_failure_signature.token = "ghp_synthetic_secret_value"'
   expect_invalid invalid-run-type '.runs[0].run.eligible = "true"'
   expect_invalid query-url '.runs[0].run.url = "https://github.com/a/b?token=no"'
+  # Provider ambiguity and pagination must fail before a record is published.
+  cp "$fixture_dir/rules.json" "$tmp_dir/rules.good.json"
+  for status in 401 403 429 500; do
+    jq --argjson status "$status" '.status = $status' "$tmp_dir/rules.good.json" >"$fixture_dir/rules.json"
+    if bash "$root_dir/scripts/ci/capture_ci_baseline.sh" --run-id 1 --fixture-dir "$fixture_dir" --output "$tmp_dir/http-$status.json"; then fail "effective-rules HTTP $status unexpectedly captured"; fi
+  done
+  cp "$tmp_dir/rules.good.json" "$fixture_dir/rules.json"
+  cp "$fixture_dir/required_status_checks.json" "$tmp_dir/classic.good.json"
+  for status in 401 403 429 500; do
+    jq --argjson status "$status" '.status = $status' "$tmp_dir/classic.good.json" >"$fixture_dir/required_status_checks.json"
+    if bash "$root_dir/scripts/ci/capture_ci_baseline.sh" --run-id 1 --fixture-dir "$fixture_dir" --output "$tmp_dir/classic-$status.json"; then fail "classic HTTP $status unexpectedly captured"; fi
+  done
+  cp "$tmp_dir/classic.good.json" "$fixture_dir/required_status_checks.json"
   validate_repository_contract
   cp "$ci_file" "$tmp_dir/ci.yml"; sed -i.bak 's/  host-integration:/  host-integration-renamed:/' "$tmp_dir/ci.yml"; ci_file="$tmp_dir/ci.yml"; if (validate_repository_contract); then fail "renamed required job unexpectedly passed"; fi; ci_file="$root_dir/.github/workflows/ci.yml"
   cp "$ownership_file" "$tmp_dir/ownership.md"; sed -i.bak 's/npm run e2e:install/npm run e2e-install/g' "$tmp_dir/ownership.md"; ownership_file="$tmp_dir/ownership.md"; if (validate_repository_contract); then fail "missing ownership command unexpectedly passed"; fi
