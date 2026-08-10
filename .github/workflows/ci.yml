@@ -131,6 +131,9 @@ jobs:
       - name: Parity drift detection proof (SC#2 both directions)
         run: cd brandbook/tokens/harness && npm run parity-test
 
+      - name: CI baseline proof semantics contract
+        run: bash scripts/ci/verify_ci_baseline_contract.sh
+
   ios-offline-client:
     name: iOS offline client package compatibility
     if: github.event_name != 'schedule'

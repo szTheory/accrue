@@ -3,6 +3,8 @@ set -euo pipefail
 
 root_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 canonical_input="$root_dir/.planning/phases/226-ci-baseline-proof-semantics/226-CI-BASELINE.json"
+ci_file="$root_dir/.github/workflows/ci.yml"
+ownership_file="$root_dir/.planning/phases/226-ci-baseline-proof-semantics/226-SETUP-OWNERSHIP.md"
 
 fail() {
   echo "verify_ci_baseline_contract: $*" >&2
@@ -23,10 +25,73 @@ fi
 
 [ -x "$root_dir/scripts/ci/capture_ci_baseline.sh" ] || fail "missing executable collector: scripts/ci/capture_ci_baseline.sh"
 
-# Phase 226 topology regression: the baseline contract must run in the existing
-# shift-left job. The rest of this test is added in the GREEN step.
-grep -Fq 'bash scripts/ci/verify_ci_baseline_contract.sh' "$root_dir/.github/workflows/ci.yml" ||
-  fail "missing baseline contract invocation in docs-contracts-shift-left"
+require_source_fixed() {
+  local label="$1" source="$2" needle="$3"
+  printf '%s\n' "$source" | grep -Fq "$needle" || fail "missing '${needle}' in ${label}"
+}
+
+job_body() {
+  local job_id="$1"
+  awk -v job_id="$job_id" '
+    $0 == "  " job_id ":" { in_job = 1 }
+    in_job && $0 ~ /^  [A-Za-z0-9_-]+:/ && $0 != "  " job_id ":" { exit }
+    in_job { print }
+  ' "$ci_file"
+}
+
+validate_repository_contract() {
+  [ -f "$ci_file" ] || fail "missing workflow: .github/workflows/ci.yml"
+  [ -f "$ownership_file" ] || fail "missing ownership runbook"
+
+  local docs_job release_job admin_drift_job host_job playwright_job annotation_job invocations required_cells
+  docs_job="$(job_body docs-contracts-shift-left)"
+  release_job="$(job_body release-gate)"
+  admin_drift_job="$(job_body admin-drift-docs)"
+  host_job="$(job_body host-integration)"
+  playwright_job="$(job_body playwright-e2e)"
+  annotation_job="$(job_body annotation-sweep)"
+  [ -n "$docs_job" ] && [ -n "$release_job" ] && [ -n "$admin_drift_job" ] && [ -n "$host_job" ] && [ -n "$playwright_job" ] && [ -n "$annotation_job" ] || fail "missing stable CI job identity"
+
+  invocations="$(printf '%s\n' "$docs_job" | grep -Fc 'bash scripts/ci/verify_ci_baseline_contract.sh' || true)"
+  [ "$invocations" -eq 1 ] || fail "baseline contract must have exactly one docs-contracts-shift-left invocation"
+  ! printf '%s\n' "$ci_file" | awk '/^  docs-contracts-shift-left:/{seen=1; next} seen && /^  [A-Za-z0-9_-]+:/{seen=0} !seen{print}' | grep -Fq 'bash scripts/ci/verify_ci_baseline_contract.sh' || fail "baseline contract invocation escaped docs-contracts-shift-left"
+
+  for needle in "needs: [release-gate]" "needs: [admin-drift-docs, docs-contracts-shift-left]" "needs: [host-integration]" "release-gate" "admin-drift-docs" "host-integration" "playwright-e2e"; do
+    require_source_fixed "critical CI chain" "$admin_drift_job$host_job$playwright_job$annotation_job" "$needle"
+  done
+  require_source_fixed "release-gate matrix" "$release_job" "support: 'required'"
+  required_cells="$(grep -Fc "support: 'required'" <<<"$release_job")"
+  [ "$required_cells" -eq 3 ] || fail "release-gate must retain three required cells"
+  require_source_fixed "release-gate matrix" "$release_job" "sigra: 'on'"
+  require_source_fixed "release-gate matrix" "$release_job" "support: 'advisory'"
+  require_source_fixed "release-gate policy" "$release_job" "continue-on-error:"
+  require_source_fixed "release-gate policy" "$release_job" "matrix.support == 'advisory'"
+
+  for artifact in phase192-admin-playwright-report phase192-admin-playwright-evidence phase192-generated-evidence; do
+    require_source_fixed "Phase 192 artifacts" "$(job_body admin-hardening-guardrails)" "$artifact"
+  done
+  for command in "bash scripts/ci/accrue_host_uat.sh" "cd examples/accrue_host && mix verify.full" "npm ci" "npm run e2e:install" "accrue_host_verify_browser.sh"; do
+    require_source_fixed "ownership runbook" "$(cat "$ownership_file")" "$command"
+  done
+  for proof_state in required advisory skipped not-applicable; do
+    require_source_fixed "ownership proof taxonomy" "$(cat "$ownership_file")" "$proof_state"
+  done
+
+  jq -e '
+    .privacy.logs_downloaded == false and
+    .privacy.artifact_archives_downloaded == false and
+    .privacy.env_values_recorded == false and
+    .privacy.raw_payloads_recorded == false and
+    .required_check_snapshot.rules_response_state == "ok" and
+    .required_check_snapshot.classic_response_state == "not-found" and
+    .required_check_snapshot.enforcement_state == "none-enforced" and
+    (.required_check_snapshot.rules | length == 0) and
+    (.required_check_snapshot.classic_checks | length == 0) and
+    (.phase_227_selection_gate.required_evidence_fields | sort == ["affected_critical_path_stage", "baseline_median_or_range", "eligible_run_ids", "json_paths"]) and
+    (.phase_227_selection_gate.candidates | length >= 1) and
+    all(.phase_227_selection_gate.candidates[]; (.eligible_run_ids | length > 0) and (.json_paths | length > 0) and (.affected_critical_path_stage | type == "string") and (.baseline_median_or_range | type == "string"))
+  ' "$canonical_input" >/dev/null || fail "baseline privacy, provider snapshot, or Phase 227 selection contract failed"
+}
 
 validate_input() {
   local candidate="$1"
@@ -86,9 +151,25 @@ if [ "$self_test" = true ]; then
   jq '.runs[0].run.url = "https://example.test/run?token=bad"' "$tmp_dir/safe.json" >"$tmp_dir/query-url.json"
   if (validate_input "$tmp_dir/query-url.json"); then fail "query URL synthetic input unexpectedly passed"; fi
   jq -e '[.runs[0].jobs[].proof_state] | index("proved") and index("skipped") and index("advisory")' "$tmp_dir/safe.json" >/dev/null || fail "synthetic proof states incomplete"
+  validate_repository_contract
+  cp "$ci_file" "$tmp_dir/ci.yml"
+  sed -i.bak 's/  host-integration:/  host-integration-renamed:/' "$tmp_dir/ci.yml"
+  ci_file="$tmp_dir/ci.yml"
+  if (validate_repository_contract); then fail "renamed required job unexpectedly passed"; fi
+  ci_file="$root_dir/.github/workflows/ci.yml"
+  cp "$ownership_file" "$tmp_dir/ownership.md"
+  sed -i.bak 's/npm run e2e:install/npm run e2e-install/g' "$tmp_dir/ownership.md"
+  ownership_file="$tmp_dir/ownership.md"
+  if (validate_repository_contract); then fail "missing ownership command unexpectedly passed"; fi
+  ownership_file="$root_dir/.planning/phases/226-ci-baseline-proof-semantics/226-SETUP-OWNERSHIP.md"
+  jq 'del(.privacy.raw_payloads_recorded)' "$canonical_input" >"$tmp_dir/no-privacy-field.json"
+  canonical_input="$tmp_dir/no-privacy-field.json"
+  if (validate_repository_contract); then fail "missing privacy field unexpectedly passed"; fi
+  canonical_input="$root_dir/.planning/phases/226-ci-baseline-proof-semantics/226-CI-BASELINE.json"
   echo "verify_ci_baseline_contract: self-test ok"
   exit 0
 fi
 
 validate_input "$input"
+validate_repository_contract
 echo "verify_ci_baseline_contract: ok"

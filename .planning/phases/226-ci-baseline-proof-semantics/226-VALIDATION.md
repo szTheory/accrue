@@ -1,9 +1,9 @@
 ---
 phase: 226
 slug: ci-baseline-proof-semantics
-status: draft
-nyquist_compliant: false
-wave_0_complete: false
+status: complete
+nyquist_compliant: true
+wave_0_complete: true
 created: 2026-08-09
 ---
 
@@ -32,17 +32,17 @@ created: 2026-08-09
 
 | Task ID | Plan | Wave | Requirement | Threat Ref | Secure Behavior | Test Type | Automated Command | File Exists | Status |
 |---------|------|------|-------------|------------|-----------------|-----------|-------------------|-------------|--------|
-| 226-01-01 | 01 | 1 | BASE-01 | T-226-01 | Collector emits only allowlisted Actions metadata, never log or secret-bearing content. | contract | `bash scripts/ci/verify_ci_baseline_contract.sh` | ❌ W0 | ⬜ pending |
-| 226-02-01 | 02 | 2 | BASE-01, BASE-02 | T-226-02 | Baseline records comparable/excluded runs and typed proof states. | contract | `bash scripts/ci/verify_ci_baseline_contract.sh` | ❌ W0 | ⬜ pending |
-| 226-03-01 | 03 | 3 | OWN-01 | T-226-03 | Ownership runbook links CI and host diagnostics without changing release topology. | contract | `bash scripts/ci/verify_ci_baseline_contract.sh` | ❌ W0 | ⬜ pending |
+| 226-01-01 | 01 | 1 | BASE-01 | T-226-01 | Collector emits only allowlisted Actions metadata, never log or secret-bearing content. | contract | `bash scripts/ci/verify_ci_baseline_contract.sh --self-test` | ✅ | ✅ green |
+| 226-02-01 | 02 | 2 | BASE-01, BASE-02 | T-226-02 | Baseline records comparable/excluded runs and typed proof states. | contract | `bash scripts/ci/verify_ci_baseline_contract.sh --self-test` | ✅ | ✅ green |
+| 226-03-01 | 03 | 3 | OWN-01 | T-226-03 | Ownership runbook links CI and host diagnostics without changing release topology. | contract | `bash scripts/ci/verify_ci_baseline_contract.sh --self-test && bash scripts/ci/verify_phase192_ci_contract.sh` | ✅ | ✅ green |
 
 *Status: ⬜ pending · ✅ green · ❌ red · ⚠️ flaky*
 
 ## Wave 0 Requirements
 
-- [ ] `scripts/ci/capture_ci_baseline.sh` — API-only collector with fixture mode
-- [ ] `scripts/ci/verify_ci_baseline_contract.sh` — privacy, schema, taxonomy, and ownership checks
-- [ ] `.planning/phases/226-ci-baseline-proof-semantics/226-CI-BASELINE.{md,json}` — measured baseline fixture
+- [x] `scripts/ci/capture_ci_baseline.sh` — API-only collector with fixture mode
+- [x] `scripts/ci/verify_ci_baseline_contract.sh` — privacy, schema, taxonomy, ownership, and topology checks
+- [x] `.planning/phases/226-ci-baseline-proof-semantics/226-CI-BASELINE.{md,json}` — measured baseline fixture
 
 ## Manual-Only Verifications
 
@@ -52,11 +52,11 @@ created: 2026-08-09
 
 ## Validation Sign-Off
 
-- [ ] All tasks have `<automated>` verification or Wave 0 dependencies
-- [ ] Sampling continuity: no 3 consecutive tasks without automated verification
-- [ ] Wave 0 covers all missing references
-- [ ] No watch-mode flags
-- [ ] Feedback latency < 30 seconds for local checks
-- [ ] `nyquist_compliant: true` set in frontmatter
+- [x] All tasks have `<automated>` verification or Wave 0 dependencies
+- [x] Sampling continuity: no 3 consecutive tasks without automated verification
+- [x] Wave 0 covers all missing references
+- [x] No watch-mode flags
+- [x] Feedback latency < 30 seconds for local checks
+- [x] `nyquist_compliant: true` set in frontmatter
 
-**Approval:** pending
+**Approval:** automated gates green: `bash scripts/ci/verify_ci_baseline_contract.sh --self-test` and `bash scripts/ci/verify_phase192_ci_contract.sh`.
