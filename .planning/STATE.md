@@ -5,15 +5,15 @@ milestone_name: CI Evidence & Critical-Path Hardening
 current_phase: 225
 current_phase_name: required-lane-signal-repair
 status: verifying
-stopped_at: Completed 226-ci-baseline-proof-semantics-01-PLAN.md
-last_updated: "2026-08-09T19:45:07.903Z"
+stopped_at: Completed 226-02-PLAN.md
+last_updated: "2026-08-10T20:34:13.700Z"
 last_activity: 2026-08-08
 last_activity_desc: Phase 225 execution resumed (wave continue)
 progress:
   total_phases: 3
   completed_phases: 1
   total_plans: 6
-  completed_plans: 4
+  completed_plans: 5
   percent: 33
 ---
 
@@ -34,7 +34,7 @@ Plan: 3 of 3
 Status: Phase complete — ready for verification
 Last activity: 2026-08-08 — Phase 225 execution resumed (wave continue)
 
-Progress: [███████░░░] 67%
+Progress: [████████░░] 83%
 
 ## v1.61 Roadmap
 
@@ -460,6 +460,7 @@ Coverage: 22/22 v1.51 requirements mapped (each REQ-ID → exactly one phase). D
 | Phase 225-required-lane-signal-repair P02 | 6min | 2 tasks | 4 files |
 | Phase 225-required-lane-signal-repair P03 | 13h 18m | 2 tasks | 2 files |
 | Phase 226-ci-baseline-proof-semantics P01 | 35m | 2 tasks | 5 files |
+| Phase 226 P02 | remote CI plus execution | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -907,6 +908,7 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - [Phase ?]: Floor, Primary, and Primary + OpenTelemetry are required proof; Sigra remains separately recorded advisory evidence.
 - [Phase ?]: GitHub effective rules plus classic branch protection, not CI YAML, define external enforcement.
 - [Phase ?]: Unsafe metadata shapes and query-bearing URLs fail closed rather than being redacted.
+- [Phase ?]: Phase 227 selection requires eligible run IDs, JSON paths, critical-path stage, and baseline median/range.
 
 ### Pending Todos
 
@@ -1059,8 +1061,8 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 
 ## Session Continuity
 
-Last session: 2026-08-09T19:45:07.890Z
-Stopped at: Completed 226-ci-baseline-proof-semantics-01-PLAN.md
+Last session: 2026-08-10T20:34:13.687Z
+Stopped at: Completed 226-02-PLAN.md
 Resume file: None
 
 ## Operator Next Steps

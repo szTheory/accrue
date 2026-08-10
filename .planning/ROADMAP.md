@@ -90,7 +90,7 @@ Plans:
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
-- [ ] 226-02-PLAN.md — Dispatch and publish the comparable three-run cohort with measured Phase 227 selection inputs.
+- [x] 226-02-PLAN.md — Dispatch and publish the comparable three-run cohort with measured Phase 227 selection inputs.
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
