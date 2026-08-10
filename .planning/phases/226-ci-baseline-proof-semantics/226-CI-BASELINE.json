@@ -35,282 +35,3312 @@
         "completed_at": "2026-08-09T16:35:51Z",
         "url": "https://github.com/szTheory/accrue/actions/runs/31322443304",
         "wall_seconds": 2380,
-        "critical_queue_seconds": 11,
         "eligible": true,
-        "exclusion_reason": null
+        "exclusion_reason": null,
+        "critical_queue_seconds": 2366,
+        "critical_queue_omission_reason": null
       },
       "jobs": [
         {
           "id": 93267406295,
           "name": "Release manifest SSOT (REL-02)",
-          "policy": "required",
+          "status": "completed",
           "conclusion": "success",
+          "started_at": "2026-08-09T15:56:15Z",
+          "completed_at": "2026-08-09T15:59:01Z",
+          "steps": [
+            {
+              "name": "Set up job",
+              "conclusion": "success",
+              "started_at": "2026-08-09T15:56:15Z",
+              "completed_at": "2026-08-09T15:56:17Z",
+              "duration_seconds": 2
+            },
+            {
+              "name": "Run actions/checkout@v6",
+              "conclusion": "success",
+              "started_at": "2026-08-09T15:56:17Z",
+              "completed_at": "2026-08-09T15:56:21Z",
+              "duration_seconds": 4
+            },
+            {
+              "name": "Set up BEAM for reference-scenario verification",
+              "conclusion": "success",
+              "started_at": "2026-08-09T15:56:21Z",
+              "completed_at": "2026-08-09T15:56:27Z",
+              "duration_seconds": 6
+            },
+            {
+              "name": "Install Accrue dependencies for reference-scenario verification",
+              "conclusion": "success",
+              "started_at": "2026-08-09T15:56:27Z",
+              "completed_at": "2026-08-09T15:56:31Z",
+              "duration_seconds": 4
+            },
+            {
+              "name": "Verify Release Please manifest ↔ mix.exs @version",
+              "conclusion": "success",
+              "started_at": "2026-08-09T15:56:31Z",
+              "completed_at": "2026-08-09T15:56:31Z",
+              "duration_seconds": 0
+            },
+            {
+              "name": "Verify linked release contract",
+              "conclusion": "success",
+              "started_at": "2026-08-09T15:56:31Z",
+              "completed_at": "2026-08-09T15:58:59Z",
+              "duration_seconds": 148
+            },
+            {
+              "name": "Post Run actions/checkout@v6",
+              "conclusion": "success",
+              "started_at": "2026-08-09T15:58:59Z",
+              "completed_at": "2026-08-09T15:58:59Z",
+              "duration_seconds": 0
+            },
+            {
+              "name": "Complete job",
+              "conclusion": "success",
+              "started_at": "2026-08-09T15:58:59Z",
+              "completed_at": "2026-08-09T15:58:59Z",
+              "duration_seconds": 0
+            }
+          ],
+          "manifest_identity": "release-manifest-ssot",
+          "policy": "required",
+          "required_for_release_proof": true,
+          "critical_chain_root": false,
           "proof_state": "proved",
           "duration_seconds": 166,
-          "cache_state": "unknown",
-          "steps": []
+          "cache_state": "unknown"
         },
         {
           "id": 93267406332,
           "name": "iOS offline client package compatibility",
-          "policy": "required",
+          "status": "completed",
           "conclusion": "success",
+          "started_at": "2026-08-09T15:56:14Z",
+          "completed_at": "2026-08-09T15:56:54Z",
+          "steps": [
+            {
+              "name": "Set up job",
+              "conclusion": "success",
+              "started_at": "2026-08-09T15:56:14Z",
+              "completed_at": "2026-08-09T15:56:15Z",
+              "duration_seconds": 1
+            },
+            {
+              "name": "Run actions/checkout@v6",
+              "conclusion": "success",
+              "started_at": "2026-08-09T15:56:15Z",
+              "completed_at": "2026-08-09T15:56:21Z",
+              "duration_seconds": 6
+            },
+            {
+              "name": "Verify iOS offline client package boundary",
+              "conclusion": "success",
+              "started_at": "2026-08-09T15:56:21Z",
+              "completed_at": "2026-08-09T15:56:52Z",
+              "duration_seconds": 31
+            },
+            {
+              "name": "Post Run actions/checkout@v6",
+              "conclusion": "success",
+              "started_at": "2026-08-09T15:56:52Z",
+              "completed_at": "2026-08-09T15:56:52Z",
+              "duration_seconds": 0
+            },
+            {
+              "name": "Complete job",
+              "conclusion": "success",
+              "started_at": "2026-08-09T15:56:52Z",
+              "completed_at": "2026-08-09T15:56:52Z",
+              "duration_seconds": 0
+            }
+          ],
+          "manifest_identity": "ios-offline-client",
+          "policy": "required",
+          "required_for_release_proof": true,
+          "critical_chain_root": false,
           "proof_state": "proved",
           "duration_seconds": 40,
-          "cache_state": "unknown",
-          "steps": []
+          "cache_state": "unknown"
         },
         {
           "id": 93267406335,
           "name": "Admin group contracts (Phase 190)",
-          "policy": "required",
+          "status": "completed",
           "conclusion": "success",
+          "started_at": "2026-08-09T15:56:13Z",
+          "completed_at": "2026-08-09T16:01:03Z",
+          "steps": [
+            {
+              "name": "Set up job",
+              "conclusion": "success",
+              "started_at": "2026-08-09T15:56:14Z",
+              "completed_at": "2026-08-09T15:56:17Z",
+              "duration_seconds": 3
+            },
+            {
+              "name": "Initialize containers",
+              "conclusion": "success",
+              "started_at": "2026-08-09T15:56:17Z",
+              "completed_at": "2026-08-09T15:56:51Z",
+              "duration_seconds": 34
+            },
+            {
+              "name": "Run actions/checkout@v6",
+              "conclusion": "success",
+              "started_at": "2026-08-09T15:56:51Z",
+              "completed_at": "2026-08-09T15:56:55Z",
+              "duration_seconds": 4
+            },
+            {
+              "name": "Detect Phase 190 browser-relevant changes",
+              "conclusion": "success",
+              "started_at": "2026-08-09T15:56:55Z",
+              "completed_at": "2026-08-09T15:56:55Z",
+              "duration_seconds": 0
+            },
+            {
+              "name": "Phase 190 automation contract",
+              "conclusion": "success",
+              "started_at": "2026-08-09T15:56:55Z",
+              "completed_at": "2026-08-09T15:56:56Z",
+              "duration_seconds": 1
+            },
+            {
+              "name": "Set up BEAM",
+              "conclusion": "success",
+              "started_at": "2026-08-09T15:56:56Z",
+              "completed_at": "2026-08-09T15:57:02Z",
+              "duration_seconds": 6
+            },
+            {
+              "name": "Install Hex",
+              "conclusion": "success",
+              "started_at": "2026-08-09T15:57:02Z",
+              "completed_at": "2026-08-09T15:57:03Z",
+              "duration_seconds": 1
+            },
+            {
+              "name": "Set up Node",
+              "conclusion": "success",
+              "started_at": "2026-08-09T15:57:03Z",
+              "completed_at": "2026-08-09T15:57:07Z",
+              "duration_seconds": 4
+            },
+            {
+              "name": "Restore accrue_admin deps cache",
+              "conclusion": "success",
+              "started_at": "2026-08-09T15:57:07Z",
+              "completed_at": "2026-08-09T15:57:08Z",
+              "duration_seconds": 1
+            },
+            {
+              "name": "Install admin deps",
+              "conclusion": "success",
+              "started_at": "2026-08-09T15:57:08Z",
+              "completed_at": "2026-08-09T15:57:10Z",
+              "duration_seconds": 2
+            },
+            {
+              "name": "Compile admin package",
+              "conclusion": "success",
+              "started_at": "2026-08-09T15:57:10Z",
+              "completed_at": "2026-08-09T15:59:34Z",
+              "duration_seconds": 144
+            },
+            {
+              "name": "Install browser deps",
+              "conclusion": "success",
+              "started_at": "2026-08-09T15:59:34Z",
+              "completed_at": "2026-08-09T15:59:36Z",
+              "duration_seconds": 2
+            },
+            {
+              "name": "Install Chromium",
+              "conclusion": "success",
+              "started_at": "2026-08-09T15:59:36Z",
+              "completed_at": "2026-08-09T16:00:09Z",
+              "duration_seconds": 33
+            },
+            {
+              "name": "Run Phase 190 group-contract browser gate",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:00:09Z",
+              "completed_at": "2026-08-09T16:01:00Z",
+              "duration_seconds": 51
+            },
+            {
+              "name": "Upload Playwright report",
+              "conclusion": "skipped",
+              "started_at": "2026-08-09T16:01:00Z",
+              "completed_at": "2026-08-09T16:01:00Z",
+              "duration_seconds": 0
+            },
+            {
+              "name": "Upload Playwright traces",
+              "conclusion": "skipped",
+              "started_at": "2026-08-09T16:01:00Z",
+              "completed_at": "2026-08-09T16:01:00Z",
+              "duration_seconds": 0
+            },
+            {
+              "name": "Post Restore accrue_admin deps cache",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:01:00Z",
+              "completed_at": "2026-08-09T16:01:00Z",
+              "duration_seconds": 0
+            },
+            {
+              "name": "Post Set up Node",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:01:00Z",
+              "completed_at": "2026-08-09T16:01:00Z",
+              "duration_seconds": 0
+            },
+            {
+              "name": "Post Run actions/checkout@v6",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:01:00Z",
+              "completed_at": "2026-08-09T16:01:01Z",
+              "duration_seconds": 1
+            },
+            {
+              "name": "Stop containers",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:01:01Z",
+              "completed_at": "2026-08-09T16:01:01Z",
+              "duration_seconds": 0
+            },
+            {
+              "name": "Complete job",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:01:01Z",
+              "completed_at": "2026-08-09T16:01:01Z",
+              "duration_seconds": 0
+            }
+          ],
+          "manifest_identity": "admin-group-contracts",
+          "policy": "required",
+          "required_for_release_proof": true,
+          "critical_chain_root": false,
           "proof_state": "proved",
           "duration_seconds": 290,
-          "cache_state": "unknown",
-          "steps": []
+          "cache_state": "unknown"
         },
         {
           "id": 93267406338,
           "name": "Phase 18 Stripe Tax gate",
-          "policy": "required",
+          "status": "completed",
           "conclusion": "success",
+          "started_at": "2026-08-09T15:56:14Z",
+          "completed_at": "2026-08-09T15:59:38Z",
+          "steps": [
+            {
+              "name": "Set up job",
+              "conclusion": "success",
+              "started_at": "2026-08-09T15:56:14Z",
+              "completed_at": "2026-08-09T15:56:16Z",
+              "duration_seconds": 2
+            },
+            {
+              "name": "Initialize containers",
+              "conclusion": "success",
+              "started_at": "2026-08-09T15:56:16Z",
+              "completed_at": "2026-08-09T15:56:48Z",
+              "duration_seconds": 32
+            },
+            {
+              "name": "Run actions/checkout@v6",
+              "conclusion": "success",
+              "started_at": "2026-08-09T15:56:48Z",
+              "completed_at": "2026-08-09T15:56:50Z",
+              "duration_seconds": 2
+            },
+            {
+              "name": "Set up BEAM",
+              "conclusion": "success",
+              "started_at": "2026-08-09T15:56:50Z",
+              "completed_at": "2026-08-09T15:56:56Z",
+              "duration_seconds": 6
+            },
+            {
+              "name": "Install Hex",
+              "conclusion": "success",
+              "started_at": "2026-08-09T15:56:56Z",
+              "completed_at": "2026-08-09T15:56:57Z",
+              "duration_seconds": 1
+            },
+            {
+              "name": "Restore accrue deps cache",
+              "conclusion": "success",
+              "started_at": "2026-08-09T15:56:57Z",
+              "completed_at": "2026-08-09T15:56:58Z",
+              "duration_seconds": 1
+            },
+            {
+              "name": "Install accrue deps",
+              "conclusion": "success",
+              "started_at": "2026-08-09T15:56:58Z",
+              "completed_at": "2026-08-09T15:57:00Z",
+              "duration_seconds": 2
+            },
+            {
+              "name": "Run Phase 18 Stripe Tax gate",
+              "conclusion": "success",
+              "started_at": "2026-08-09T15:57:00Z",
+              "completed_at": "2026-08-09T15:59:34Z",
+              "duration_seconds": 154
+            },
+            {
+              "name": "Post Restore accrue deps cache",
+              "conclusion": "success",
+              "started_at": "2026-08-09T15:59:34Z",
+              "completed_at": "2026-08-09T15:59:34Z",
+              "duration_seconds": 0
+            },
+            {
+              "name": "Post Run actions/checkout@v6",
+              "conclusion": "success",
+              "started_at": "2026-08-09T15:59:34Z",
+              "completed_at": "2026-08-09T15:59:34Z",
+              "duration_seconds": 0
+            },
+            {
+              "name": "Stop containers",
+              "conclusion": "success",
+              "started_at": "2026-08-09T15:59:34Z",
+              "completed_at": "2026-08-09T15:59:35Z",
+              "duration_seconds": 1
+            },
+            {
+              "name": "Complete job",
+              "conclusion": "success",
+              "started_at": "2026-08-09T15:59:35Z",
+              "completed_at": "2026-08-09T15:59:35Z",
+              "duration_seconds": 0
+            }
+          ],
+          "manifest_identity": "phase18-tax-gate",
+          "policy": "required",
+          "required_for_release_proof": true,
+          "critical_chain_root": false,
           "proof_state": "proved",
           "duration_seconds": 204,
-          "cache_state": "unknown",
-          "steps": []
+          "cache_state": "unknown"
         },
         {
           "id": 93267406344,
           "name": "Docs and bash contracts (shift-left)",
-          "policy": "required",
+          "status": "completed",
           "conclusion": "success",
+          "started_at": "2026-08-09T15:56:14Z",
+          "completed_at": "2026-08-09T15:59:04Z",
+          "steps": [
+            {
+              "name": "Set up job",
+              "conclusion": "success",
+              "started_at": "2026-08-09T15:56:15Z",
+              "completed_at": "2026-08-09T15:56:17Z",
+              "duration_seconds": 2
+            },
+            {
+              "name": "Run actions/checkout@v6",
+              "conclusion": "success",
+              "started_at": "2026-08-09T15:56:17Z",
+              "completed_at": "2026-08-09T15:56:22Z",
+              "duration_seconds": 5
+            },
+            {
+              "name": "Set up BEAM for reference-scenario verification",
+              "conclusion": "success",
+              "started_at": "2026-08-09T15:56:22Z",
+              "completed_at": "2026-08-09T15:56:30Z",
+              "duration_seconds": 8
+            },
+            {
+              "name": "Install Accrue dependencies for reference-scenario verification",
+              "conclusion": "success",
+              "started_at": "2026-08-09T15:56:30Z",
+              "completed_at": "2026-08-09T15:56:34Z",
+              "duration_seconds": 4
+            },
+            {
+              "name": "verify_package_docs.sh",
+              "conclusion": "success",
+              "started_at": "2026-08-09T15:56:34Z",
+              "completed_at": "2026-08-09T15:56:35Z",
+              "duration_seconds": 1
+            },
+            {
+              "name": "Processor support matrix contract",
+              "conclusion": "success",
+              "started_at": "2026-08-09T15:56:35Z",
+              "completed_at": "2026-08-09T15:56:35Z",
+              "duration_seconds": 0
+            },
+            {
+              "name": "Core stays LiveView-runtime-free (ENT-07 D-05)",
+              "conclusion": "success",
+              "started_at": "2026-08-09T15:56:35Z",
+              "completed_at": "2026-08-09T15:56:35Z",
+              "duration_seconds": 0
+            },
+            {
+              "name": "Entitlement gate path stays advisory-cache-free (ENT-10 D-04)",
+              "conclusion": "success",
+              "started_at": "2026-08-09T15:56:35Z",
+              "completed_at": "2026-08-09T15:56:36Z",
+              "duration_seconds": 1
+            },
+            {
+              "name": "Dunning core stays Chimeway-free (DUN-03 D-04)",
+              "conclusion": "success",
+              "started_at": "2026-08-09T15:56:36Z",
+              "completed_at": "2026-08-09T15:56:36Z",
+              "duration_seconds": 0
+            },
+            {
+              "name": "v1.17 friction + north-star SSOT contract",
+              "conclusion": "success",
+              "started_at": "2026-08-09T15:56:36Z",
+              "completed_at": "2026-08-09T15:56:36Z",
+              "duration_seconds": 0
+            },
+            {
+              "name": "VERIFY-01 README contract",
+              "conclusion": "success",
+              "started_at": "2026-08-09T15:56:36Z",
+              "completed_at": "2026-08-09T15:56:36Z",
+              "duration_seconds": 0
+            },
+            {
+              "name": "Docker DX contract",
+              "conclusion": "success",
+              "started_at": "2026-08-09T15:56:36Z",
+              "completed_at": "2026-08-09T15:56:37Z",
+              "duration_seconds": 1
+            },
+            {
+              "name": "Production readiness discoverability contract",
+              "conclusion": "success",
+              "started_at": "2026-08-09T15:56:37Z",
+              "completed_at": "2026-08-09T15:56:37Z",
+              "duration_seconds": 0
+            },
+            {
+              "name": "Adoption proof matrix contract",
+              "conclusion": "success",
+              "started_at": "2026-08-09T15:56:37Z",
+              "completed_at": "2026-08-09T15:56:37Z",
+              "duration_seconds": 0
+            },
+            {
+              "name": "Reference scenario public-contract gate",
+              "conclusion": "success",
+              "started_at": "2026-08-09T15:56:37Z",
+              "completed_at": "2026-08-09T15:58:53Z",
+              "duration_seconds": 136
+            },
+            {
+              "name": "Core admin invoice VERIFY flow id drift guard",
+              "conclusion": "success",
+              "started_at": "2026-08-09T15:58:53Z",
+              "completed_at": "2026-08-09T15:58:53Z",
+              "duration_seconds": 0
+            },
+            {
+              "name": "Stable-core posture contract",
+              "conclusion": "success",
+              "started_at": "2026-08-09T15:58:53Z",
+              "completed_at": "2026-08-09T15:58:53Z",
+              "duration_seconds": 0
+            },
+            {
+              "name": "Roadmap hygiene contract",
+              "conclusion": "success",
+              "started_at": "2026-08-09T15:58:53Z",
+              "completed_at": "2026-08-09T15:58:53Z",
+              "duration_seconds": 0
+            },
+            {
+              "name": "Release notes freshness contract",
+              "conclusion": "success",
+              "started_at": "2026-08-09T15:58:53Z",
+              "completed_at": "2026-08-09T15:58:53Z",
+              "duration_seconds": 0
+            },
+            {
+              "name": "Set up Node (tokens harness)",
+              "conclusion": "success",
+              "started_at": "2026-08-09T15:58:53Z",
+              "completed_at": "2026-08-09T15:58:55Z",
+              "duration_seconds": 2
+            },
+            {
+              "name": "Executable UAT contract self-test",
+              "conclusion": "success",
+              "started_at": "2026-08-09T15:58:55Z",
+              "completed_at": "2026-08-09T15:58:55Z",
+              "duration_seconds": 0
+            },
+            {
+              "name": "Install tokens harness",
+              "conclusion": "success",
+              "started_at": "2026-08-09T15:58:55Z",
+              "completed_at": "2026-08-09T15:58:59Z",
+              "duration_seconds": 4
+            },
+            {
+              "name": "Regenerate tokens + specimens",
+              "conclusion": "success",
+              "started_at": "2026-08-09T15:58:59Z",
+              "completed_at": "2026-08-09T15:59:00Z",
+              "duration_seconds": 1
+            },
+            {
+              "name": "Tokens/specimens are reproducible (determinism gate, D-17)",
+              "conclusion": "success",
+              "started_at": "2026-08-09T15:59:00Z",
+              "completed_at": "2026-08-09T15:59:01Z",
+              "duration_seconds": 1
+            },
+            {
+              "name": "Verify tokens completeness (SC#1)",
+              "conclusion": "success",
+              "started_at": "2026-08-09T15:59:01Z",
+              "completed_at": "2026-08-09T15:59:01Z",
+              "duration_seconds": 0
+            },
+            {
+              "name": "Verify specimen content coverage (SC#3)",
+              "conclusion": "success",
+              "started_at": "2026-08-09T15:59:01Z",
+              "completed_at": "2026-08-09T15:59:01Z",
+              "duration_seconds": 0
+            },
+            {
+              "name": "Brand↔admin token parity (SC#2)",
+              "conclusion": "success",
+              "started_at": "2026-08-09T15:59:01Z",
+              "completed_at": "2026-08-09T15:59:01Z",
+              "duration_seconds": 0
+            },
+            {
+              "name": "Parity drift detection proof (SC#2 both directions)",
+              "conclusion": "success",
+              "started_at": "2026-08-09T15:59:01Z",
+              "completed_at": "2026-08-09T15:59:01Z",
+              "duration_seconds": 0
+            },
+            {
+              "name": "Post Set up Node (tokens harness)",
+              "conclusion": "success",
+              "started_at": "2026-08-09T15:59:01Z",
+              "completed_at": "2026-08-09T15:59:01Z",
+              "duration_seconds": 0
+            },
+            {
+              "name": "Post Run actions/checkout@v6",
+              "conclusion": "success",
+              "started_at": "2026-08-09T15:59:01Z",
+              "completed_at": "2026-08-09T15:59:02Z",
+              "duration_seconds": 1
+            },
+            {
+              "name": "Complete job",
+              "conclusion": "success",
+              "started_at": "2026-08-09T15:59:02Z",
+              "completed_at": "2026-08-09T15:59:02Z",
+              "duration_seconds": 0
+            }
+          ],
+          "manifest_identity": "docs-contracts-shift-left",
+          "policy": "required",
+          "required_for_release_proof": true,
+          "critical_chain_root": true,
           "proof_state": "proved",
           "duration_seconds": 170,
-          "cache_state": "unknown",
-          "steps": []
+          "cache_state": "unknown"
         },
         {
           "id": 93267406348,
           "name": "Admin Phase 200 deterministic guardrails",
-          "policy": "required",
+          "status": "completed",
           "conclusion": "success",
+          "started_at": "2026-08-09T15:56:14Z",
+          "completed_at": "2026-08-09T16:04:23Z",
+          "steps": [
+            {
+              "name": "Set up job",
+              "conclusion": "success",
+              "started_at": "2026-08-09T15:56:14Z",
+              "completed_at": "2026-08-09T15:56:16Z",
+              "duration_seconds": 2
+            },
+            {
+              "name": "Initialize containers",
+              "conclusion": "success",
+              "started_at": "2026-08-09T15:56:16Z",
+              "completed_at": "2026-08-09T15:56:47Z",
+              "duration_seconds": 31
+            },
+            {
+              "name": "Run actions/checkout@v6",
+              "conclusion": "success",
+              "started_at": "2026-08-09T15:56:47Z",
+              "completed_at": "2026-08-09T15:56:49Z",
+              "duration_seconds": 2
+            },
+            {
+              "name": "Set up BEAM",
+              "conclusion": "success",
+              "started_at": "2026-08-09T15:56:49Z",
+              "completed_at": "2026-08-09T15:56:56Z",
+              "duration_seconds": 7
+            },
+            {
+              "name": "Install Hex",
+              "conclusion": "success",
+              "started_at": "2026-08-09T15:56:56Z",
+              "completed_at": "2026-08-09T15:56:56Z",
+              "duration_seconds": 0
+            },
+            {
+              "name": "Set up Node",
+              "conclusion": "success",
+              "started_at": "2026-08-09T15:56:56Z",
+              "completed_at": "2026-08-09T15:56:58Z",
+              "duration_seconds": 2
+            },
+            {
+              "name": "Restore accrue_admin deps cache",
+              "conclusion": "success",
+              "started_at": "2026-08-09T15:56:58Z",
+              "completed_at": "2026-08-09T15:56:59Z",
+              "duration_seconds": 1
+            },
+            {
+              "name": "Install admin deps",
+              "conclusion": "success",
+              "started_at": "2026-08-09T15:56:59Z",
+              "completed_at": "2026-08-09T15:57:01Z",
+              "duration_seconds": 2
+            },
+            {
+              "name": "Compile admin package",
+              "conclusion": "success",
+              "started_at": "2026-08-09T15:57:01Z",
+              "completed_at": "2026-08-09T15:59:20Z",
+              "duration_seconds": 139
+            },
+            {
+              "name": "Install browser deps",
+              "conclusion": "success",
+              "started_at": "2026-08-09T15:59:20Z",
+              "completed_at": "2026-08-09T15:59:22Z",
+              "duration_seconds": 2
+            },
+            {
+              "name": "Install Chromium",
+              "conclusion": "success",
+              "started_at": "2026-08-09T15:59:22Z",
+              "completed_at": "2026-08-09T15:59:53Z",
+              "duration_seconds": 31
+            },
+            {
+              "name": "Phase 200 CI contract",
+              "conclusion": "success",
+              "started_at": "2026-08-09T15:59:53Z",
+              "completed_at": "2026-08-09T15:59:53Z",
+              "duration_seconds": 0
+            },
+            {
+              "name": "Phase 200 local guardrail contract",
+              "conclusion": "success",
+              "started_at": "2026-08-09T15:59:53Z",
+              "completed_at": "2026-08-09T15:59:53Z",
+              "duration_seconds": 0
+            },
+            {
+              "name": "Run Phase 200 deterministic guardrails",
+              "conclusion": "success",
+              "started_at": "2026-08-09T15:59:53Z",
+              "completed_at": "2026-08-09T16:04:18Z",
+              "duration_seconds": 265
+            },
+            {
+              "name": "Upload Phase 200 Playwright report",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:04:18Z",
+              "completed_at": "2026-08-09T16:04:19Z",
+              "duration_seconds": 1
+            },
+            {
+              "name": "Upload Phase 200 Playwright evidence",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:04:19Z",
+              "completed_at": "2026-08-09T16:04:19Z",
+              "duration_seconds": 0
+            },
+            {
+              "name": "Upload Phase 200 generated evidence",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:04:19Z",
+              "completed_at": "2026-08-09T16:04:21Z",
+              "duration_seconds": 2
+            },
+            {
+              "name": "Post Restore accrue_admin deps cache",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:04:21Z",
+              "completed_at": "2026-08-09T16:04:21Z",
+              "duration_seconds": 0
+            },
+            {
+              "name": "Post Set up Node",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:04:21Z",
+              "completed_at": "2026-08-09T16:04:21Z",
+              "duration_seconds": 0
+            },
+            {
+              "name": "Post Run actions/checkout@v6",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:04:21Z",
+              "completed_at": "2026-08-09T16:04:21Z",
+              "duration_seconds": 0
+            },
+            {
+              "name": "Stop containers",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:04:21Z",
+              "completed_at": "2026-08-09T16:04:21Z",
+              "duration_seconds": 0
+            },
+            {
+              "name": "Complete job",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:04:21Z",
+              "completed_at": "2026-08-09T16:04:21Z",
+              "duration_seconds": 0
+            }
+          ],
+          "manifest_identity": "admin-phase200-guardrails",
+          "policy": "required",
+          "required_for_release_proof": true,
+          "critical_chain_root": false,
           "proof_state": "proved",
           "duration_seconds": 489,
-          "cache_state": "unknown",
-          "steps": []
+          "cache_state": "unknown"
         },
         {
           "id": 93267406377,
           "name": "Admin hardening guardrails (Phase 192)",
-          "policy": "required",
+          "status": "completed",
           "conclusion": "success",
+          "started_at": "2026-08-09T15:56:13Z",
+          "completed_at": "2026-08-09T16:05:40Z",
+          "steps": [
+            {
+              "name": "Set up job",
+              "conclusion": "success",
+              "started_at": "2026-08-09T15:56:14Z",
+              "completed_at": "2026-08-09T15:56:15Z",
+              "duration_seconds": 1
+            },
+            {
+              "name": "Initialize containers",
+              "conclusion": "success",
+              "started_at": "2026-08-09T15:56:15Z",
+              "completed_at": "2026-08-09T15:56:35Z",
+              "duration_seconds": 20
+            },
+            {
+              "name": "Run actions/checkout@v6",
+              "conclusion": "success",
+              "started_at": "2026-08-09T15:56:35Z",
+              "completed_at": "2026-08-09T15:56:39Z",
+              "duration_seconds": 4
+            },
+            {
+              "name": "Phase 192 CI contract",
+              "conclusion": "success",
+              "started_at": "2026-08-09T15:56:39Z",
+              "completed_at": "2026-08-09T15:56:39Z",
+              "duration_seconds": 0
+            },
+            {
+              "name": "Set up BEAM",
+              "conclusion": "success",
+              "started_at": "2026-08-09T15:56:39Z",
+              "completed_at": "2026-08-09T15:56:45Z",
+              "duration_seconds": 6
+            },
+            {
+              "name": "Install Hex",
+              "conclusion": "success",
+              "started_at": "2026-08-09T15:56:45Z",
+              "completed_at": "2026-08-09T15:56:46Z",
+              "duration_seconds": 1
+            },
+            {
+              "name": "Set up Node",
+              "conclusion": "success",
+              "started_at": "2026-08-09T15:56:46Z",
+              "completed_at": "2026-08-09T15:56:47Z",
+              "duration_seconds": 1
+            },
+            {
+              "name": "Restore accrue_admin deps cache",
+              "conclusion": "success",
+              "started_at": "2026-08-09T15:56:47Z",
+              "completed_at": "2026-08-09T15:56:48Z",
+              "duration_seconds": 1
+            },
+            {
+              "name": "Install admin deps",
+              "conclusion": "success",
+              "started_at": "2026-08-09T15:56:48Z",
+              "completed_at": "2026-08-09T15:56:49Z",
+              "duration_seconds": 1
+            },
+            {
+              "name": "Compile admin package",
+              "conclusion": "success",
+              "started_at": "2026-08-09T15:56:49Z",
+              "completed_at": "2026-08-09T15:59:53Z",
+              "duration_seconds": 184
+            },
+            {
+              "name": "Install browser deps",
+              "conclusion": "success",
+              "started_at": "2026-08-09T15:59:53Z",
+              "completed_at": "2026-08-09T15:59:54Z",
+              "duration_seconds": 1
+            },
+            {
+              "name": "Install Chromium",
+              "conclusion": "success",
+              "started_at": "2026-08-09T15:59:54Z",
+              "completed_at": "2026-08-09T16:00:14Z",
+              "duration_seconds": 20
+            },
+            {
+              "name": "Phase 192 local guardrail contract",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:00:14Z",
+              "completed_at": "2026-08-09T16:00:14Z",
+              "duration_seconds": 0
+            },
+            {
+              "name": "Phase 214.2 advisory entitlement integration and browser gate",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:00:14Z",
+              "completed_at": "2026-08-09T16:00:27Z",
+              "duration_seconds": 13
+            },
+            {
+              "name": "Run Phase 192 admin hardening guardrails",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:00:27Z",
+              "completed_at": "2026-08-09T16:05:36Z",
+              "duration_seconds": 309
+            },
+            {
+              "name": "Upload Phase 192 Playwright report",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:05:36Z",
+              "completed_at": "2026-08-09T16:05:36Z",
+              "duration_seconds": 0
+            },
+            {
+              "name": "Upload Phase 192 Playwright evidence",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:05:36Z",
+              "completed_at": "2026-08-09T16:05:36Z",
+              "duration_seconds": 0
+            },
+            {
+              "name": "Upload Phase 192 generated evidence",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:05:36Z",
+              "completed_at": "2026-08-09T16:05:37Z",
+              "duration_seconds": 1
+            },
+            {
+              "name": "Post Restore accrue_admin deps cache",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:05:37Z",
+              "completed_at": "2026-08-09T16:05:37Z",
+              "duration_seconds": 0
+            },
+            {
+              "name": "Post Set up Node",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:05:37Z",
+              "completed_at": "2026-08-09T16:05:37Z",
+              "duration_seconds": 0
+            },
+            {
+              "name": "Post Run actions/checkout@v6",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:05:37Z",
+              "completed_at": "2026-08-09T16:05:38Z",
+              "duration_seconds": 1
+            },
+            {
+              "name": "Stop containers",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:05:38Z",
+              "completed_at": "2026-08-09T16:05:38Z",
+              "duration_seconds": 0
+            },
+            {
+              "name": "Complete job",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:05:38Z",
+              "completed_at": "2026-08-09T16:05:38Z",
+              "duration_seconds": 0
+            }
+          ],
+          "manifest_identity": "admin-hardening-guardrails",
+          "policy": "required",
+          "required_for_release_proof": true,
+          "critical_chain_root": false,
           "proof_state": "proved",
           "duration_seconds": 567,
-          "cache_state": "unknown",
-          "steps": []
+          "cache_state": "unknown"
         },
         {
           "id": 93267406378,
           "name": "Release gate (Primary dev target; elixir=1.19.5 otp=28.0 sigra=off opentelemetry=off)",
-          "policy": "required",
+          "status": "completed",
           "conclusion": "success",
-          "proof_state": "proved",
-          "duration_seconds": 1274,
-          "cache_state": "observed-hit",
+          "started_at": "2026-08-09T15:56:14Z",
+          "completed_at": "2026-08-09T16:17:28Z",
           "steps": [
+            {
+              "name": "Set up job",
+              "conclusion": "success",
+              "started_at": "2026-08-09T15:56:14Z",
+              "completed_at": "2026-08-09T15:56:16Z",
+              "duration_seconds": 2
+            },
+            {
+              "name": "Initialize containers",
+              "conclusion": "success",
+              "started_at": "2026-08-09T15:56:16Z",
+              "completed_at": "2026-08-09T15:56:38Z",
+              "duration_seconds": 22
+            },
+            {
+              "name": "Run actions/checkout@v6",
+              "conclusion": "success",
+              "started_at": "2026-08-09T15:56:38Z",
+              "completed_at": "2026-08-09T15:56:42Z",
+              "duration_seconds": 4
+            },
+            {
+              "name": "Set up BEAM",
+              "conclusion": "success",
+              "started_at": "2026-08-09T15:56:42Z",
+              "completed_at": "2026-08-09T15:56:47Z",
+              "duration_seconds": 5
+            },
+            {
+              "name": "Install Hex",
+              "conclusion": "success",
+              "started_at": "2026-08-09T15:56:47Z",
+              "completed_at": "2026-08-09T15:56:48Z",
+              "duration_seconds": 1
+            },
+            {
+              "name": "Restore accrue deps cache",
+              "conclusion": "success",
+              "started_at": "2026-08-09T15:56:48Z",
+              "completed_at": "2026-08-09T15:56:48Z",
+              "duration_seconds": 0
+            },
+            {
+              "name": "Install accrue deps",
+              "conclusion": "success",
+              "started_at": "2026-08-09T15:56:48Z",
+              "completed_at": "2026-08-09T15:56:51Z",
+              "duration_seconds": 3
+            },
+            {
+              "name": "Accrue format",
+              "conclusion": "success",
+              "started_at": "2026-08-09T15:56:51Z",
+              "completed_at": "2026-08-09T15:56:52Z",
+              "duration_seconds": 1
+            },
+            {
+              "name": "Accrue compile",
+              "conclusion": "success",
+              "started_at": "2026-08-09T15:56:52Z",
+              "completed_at": "2026-08-09T15:59:27Z",
+              "duration_seconds": 155
+            },
+            {
+              "name": "Accrue test",
+              "conclusion": "success",
+              "started_at": "2026-08-09T15:59:27Z",
+              "completed_at": "2026-08-09T16:00:26Z",
+              "duration_seconds": 59
+            },
+            {
+              "name": "Accrue credo",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:00:26Z",
+              "completed_at": "2026-08-09T16:00:27Z",
+              "duration_seconds": 1
+            },
+            {
+              "name": "Restore accrue PLT cache",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:00:27Z",
+              "completed_at": "2026-08-09T16:00:28Z",
+              "duration_seconds": 1
+            },
             {
               "name": "Create accrue PLTs",
               "conclusion": "skipped",
               "started_at": "2026-08-09T16:00:28Z",
               "completed_at": "2026-08-09T16:00:28Z",
               "duration_seconds": 0
+            },
+            {
+              "name": "Save accrue PLT cache",
+              "conclusion": "skipped",
+              "started_at": "2026-08-09T16:00:28Z",
+              "completed_at": "2026-08-09T16:00:28Z",
+              "duration_seconds": 0
+            },
+            {
+              "name": "Accrue dialyzer",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:00:28Z",
+              "completed_at": "2026-08-09T16:00:49Z",
+              "duration_seconds": 21
+            },
+            {
+              "name": "Accrue docs",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:00:49Z",
+              "completed_at": "2026-08-09T16:03:23Z",
+              "duration_seconds": 154
+            },
+            {
+              "name": "Verify ExDoc @doc since: badges",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:03:23Z",
+              "completed_at": "2026-08-09T16:03:23Z",
+              "duration_seconds": 0
+            },
+            {
+              "name": "Accrue retired package audit",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:03:23Z",
+              "completed_at": "2026-08-09T16:03:24Z",
+              "duration_seconds": 1
+            },
+            {
+              "name": "Restore accrue_admin deps cache",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:03:24Z",
+              "completed_at": "2026-08-09T16:03:24Z",
+              "duration_seconds": 0
+            },
+            {
+              "name": "Install accrue_admin deps",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:03:24Z",
+              "completed_at": "2026-08-09T16:03:27Z",
+              "duration_seconds": 3
+            },
+            {
+              "name": "Accrue admin format",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:03:27Z",
+              "completed_at": "2026-08-09T16:03:28Z",
+              "duration_seconds": 1
+            },
+            {
+              "name": "Accrue admin compile",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:03:28Z",
+              "completed_at": "2026-08-09T16:06:31Z",
+              "duration_seconds": 183
+            },
+            {
+              "name": "Accrue admin test",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:06:31Z",
+              "completed_at": "2026-08-09T16:06:48Z",
+              "duration_seconds": 17
+            },
+            {
+              "name": "Accrue admin credo",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:06:48Z",
+              "completed_at": "2026-08-09T16:06:53Z",
+              "duration_seconds": 5
+            },
+            {
+              "name": "Restore accrue_admin PLT cache",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:06:53Z",
+              "completed_at": "2026-08-09T16:06:54Z",
+              "duration_seconds": 1
+            },
+            {
+              "name": "Create accrue_admin PLTs",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:06:54Z",
+              "completed_at": "2026-08-09T16:11:25Z",
+              "duration_seconds": 271
+            },
+            {
+              "name": "Save accrue_admin PLT cache",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:11:25Z",
+              "completed_at": "2026-08-09T16:11:26Z",
+              "duration_seconds": 1
+            },
+            {
+              "name": "Accrue admin dialyzer",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:11:26Z",
+              "completed_at": "2026-08-09T16:11:46Z",
+              "duration_seconds": 20
+            },
+            {
+              "name": "Accrue admin docs",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:11:46Z",
+              "completed_at": "2026-08-09T16:14:32Z",
+              "duration_seconds": 166
+            },
+            {
+              "name": "Accrue admin retired package audit",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:14:32Z",
+              "completed_at": "2026-08-09T16:14:33Z",
+              "duration_seconds": 1
+            },
+            {
+              "name": "Restore accrue_portal deps cache",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:14:33Z",
+              "completed_at": "2026-08-09T16:14:33Z",
+              "duration_seconds": 0
+            },
+            {
+              "name": "Install accrue_portal deps",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:14:33Z",
+              "completed_at": "2026-08-09T16:14:35Z",
+              "duration_seconds": 2
+            },
+            {
+              "name": "Accrue portal format",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:14:35Z",
+              "completed_at": "2026-08-09T16:14:36Z",
+              "duration_seconds": 1
+            },
+            {
+              "name": "Accrue portal compile",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:14:36Z",
+              "completed_at": "2026-08-09T16:17:17Z",
+              "duration_seconds": 161
+            },
+            {
+              "name": "Accrue portal test",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:17:17Z",
+              "completed_at": "2026-08-09T16:17:21Z",
+              "duration_seconds": 4
+            },
+            {
+              "name": "Accrue portal retired package audit",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:17:21Z",
+              "completed_at": "2026-08-09T16:17:22Z",
+              "duration_seconds": 1
+            },
+            {
+              "name": "Post Restore accrue_portal deps cache",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:17:22Z",
+              "completed_at": "2026-08-09T16:17:23Z",
+              "duration_seconds": 1
+            },
+            {
+              "name": "Post Restore accrue_admin deps cache",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:17:23Z",
+              "completed_at": "2026-08-09T16:17:24Z",
+              "duration_seconds": 1
+            },
+            {
+              "name": "Post Restore accrue deps cache",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:17:24Z",
+              "completed_at": "2026-08-09T16:17:25Z",
+              "duration_seconds": 1
+            },
+            {
+              "name": "Post Run actions/checkout@v6",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:17:25Z",
+              "completed_at": "2026-08-09T16:17:25Z",
+              "duration_seconds": 0
+            },
+            {
+              "name": "Stop containers",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:17:25Z",
+              "completed_at": "2026-08-09T16:17:26Z",
+              "duration_seconds": 1
+            },
+            {
+              "name": "Complete job",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:17:26Z",
+              "completed_at": "2026-08-09T16:17:26Z",
+              "duration_seconds": 0
             }
-          ]
+          ],
+          "manifest_identity": "release-gate-primary",
+          "policy": "required",
+          "required_for_release_proof": true,
+          "critical_chain_root": true,
+          "proof_state": "proved",
+          "duration_seconds": 1274,
+          "cache_state": "inferred-setup-bypass"
         },
         {
           "id": 93267406379,
           "name": "Release gate (Floor; elixir=1.19.0 otp=28.0 sigra=off opentelemetry=off)",
-          "policy": "required",
+          "status": "completed",
           "conclusion": "success",
-          "proof_state": "proved",
-          "duration_seconds": 1279,
-          "cache_state": "observed-hit",
+          "started_at": "2026-08-09T15:56:14Z",
+          "completed_at": "2026-08-09T16:17:33Z",
           "steps": [
+            {
+              "name": "Set up job",
+              "conclusion": "success",
+              "started_at": "2026-08-09T15:56:15Z",
+              "completed_at": "2026-08-09T15:56:16Z",
+              "duration_seconds": 1
+            },
+            {
+              "name": "Initialize containers",
+              "conclusion": "success",
+              "started_at": "2026-08-09T15:56:16Z",
+              "completed_at": "2026-08-09T15:56:38Z",
+              "duration_seconds": 22
+            },
+            {
+              "name": "Run actions/checkout@v6",
+              "conclusion": "success",
+              "started_at": "2026-08-09T15:56:38Z",
+              "completed_at": "2026-08-09T15:56:42Z",
+              "duration_seconds": 4
+            },
+            {
+              "name": "Set up BEAM",
+              "conclusion": "success",
+              "started_at": "2026-08-09T15:56:42Z",
+              "completed_at": "2026-08-09T15:56:49Z",
+              "duration_seconds": 7
+            },
+            {
+              "name": "Install Hex",
+              "conclusion": "success",
+              "started_at": "2026-08-09T15:56:49Z",
+              "completed_at": "2026-08-09T15:56:49Z",
+              "duration_seconds": 0
+            },
+            {
+              "name": "Restore accrue deps cache",
+              "conclusion": "success",
+              "started_at": "2026-08-09T15:56:49Z",
+              "completed_at": "2026-08-09T15:56:50Z",
+              "duration_seconds": 1
+            },
+            {
+              "name": "Install accrue deps",
+              "conclusion": "success",
+              "started_at": "2026-08-09T15:56:50Z",
+              "completed_at": "2026-08-09T15:56:53Z",
+              "duration_seconds": 3
+            },
+            {
+              "name": "Accrue format",
+              "conclusion": "success",
+              "started_at": "2026-08-09T15:56:53Z",
+              "completed_at": "2026-08-09T15:56:54Z",
+              "duration_seconds": 1
+            },
+            {
+              "name": "Accrue compile",
+              "conclusion": "success",
+              "started_at": "2026-08-09T15:56:54Z",
+              "completed_at": "2026-08-09T15:59:28Z",
+              "duration_seconds": 154
+            },
+            {
+              "name": "Accrue test",
+              "conclusion": "success",
+              "started_at": "2026-08-09T15:59:28Z",
+              "completed_at": "2026-08-09T16:00:28Z",
+              "duration_seconds": 60
+            },
+            {
+              "name": "Accrue credo",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:00:28Z",
+              "completed_at": "2026-08-09T16:00:29Z",
+              "duration_seconds": 1
+            },
+            {
+              "name": "Restore accrue PLT cache",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:00:29Z",
+              "completed_at": "2026-08-09T16:00:30Z",
+              "duration_seconds": 1
+            },
             {
               "name": "Create accrue PLTs",
               "conclusion": "skipped",
               "started_at": "2026-08-09T16:00:30Z",
               "completed_at": "2026-08-09T16:00:30Z",
               "duration_seconds": 0
+            },
+            {
+              "name": "Save accrue PLT cache",
+              "conclusion": "skipped",
+              "started_at": "2026-08-09T16:00:30Z",
+              "completed_at": "2026-08-09T16:00:30Z",
+              "duration_seconds": 0
+            },
+            {
+              "name": "Accrue dialyzer",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:00:30Z",
+              "completed_at": "2026-08-09T16:00:50Z",
+              "duration_seconds": 20
+            },
+            {
+              "name": "Accrue docs",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:00:50Z",
+              "completed_at": "2026-08-09T16:03:24Z",
+              "duration_seconds": 154
+            },
+            {
+              "name": "Verify ExDoc @doc since: badges",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:03:24Z",
+              "completed_at": "2026-08-09T16:03:24Z",
+              "duration_seconds": 0
+            },
+            {
+              "name": "Accrue retired package audit",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:03:24Z",
+              "completed_at": "2026-08-09T16:03:25Z",
+              "duration_seconds": 1
+            },
+            {
+              "name": "Restore accrue_admin deps cache",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:03:25Z",
+              "completed_at": "2026-08-09T16:03:25Z",
+              "duration_seconds": 0
+            },
+            {
+              "name": "Install accrue_admin deps",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:03:25Z",
+              "completed_at": "2026-08-09T16:03:28Z",
+              "duration_seconds": 3
+            },
+            {
+              "name": "Accrue admin format",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:03:28Z",
+              "completed_at": "2026-08-09T16:03:29Z",
+              "duration_seconds": 1
+            },
+            {
+              "name": "Accrue admin compile",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:03:29Z",
+              "completed_at": "2026-08-09T16:06:34Z",
+              "duration_seconds": 185
+            },
+            {
+              "name": "Accrue admin test",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:06:34Z",
+              "completed_at": "2026-08-09T16:06:54Z",
+              "duration_seconds": 20
+            },
+            {
+              "name": "Accrue admin credo",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:06:54Z",
+              "completed_at": "2026-08-09T16:06:59Z",
+              "duration_seconds": 5
+            },
+            {
+              "name": "Restore accrue_admin PLT cache",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:06:59Z",
+              "completed_at": "2026-08-09T16:07:00Z",
+              "duration_seconds": 1
+            },
+            {
+              "name": "Create accrue_admin PLTs",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:07:00Z",
+              "completed_at": "2026-08-09T16:11:25Z",
+              "duration_seconds": 265
+            },
+            {
+              "name": "Save accrue_admin PLT cache",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:11:25Z",
+              "completed_at": "2026-08-09T16:11:26Z",
+              "duration_seconds": 1
+            },
+            {
+              "name": "Accrue admin dialyzer",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:11:26Z",
+              "completed_at": "2026-08-09T16:11:47Z",
+              "duration_seconds": 21
+            },
+            {
+              "name": "Accrue admin docs",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:11:47Z",
+              "completed_at": "2026-08-09T16:14:32Z",
+              "duration_seconds": 165
+            },
+            {
+              "name": "Accrue admin retired package audit",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:14:32Z",
+              "completed_at": "2026-08-09T16:14:34Z",
+              "duration_seconds": 2
+            },
+            {
+              "name": "Restore accrue_portal deps cache",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:14:34Z",
+              "completed_at": "2026-08-09T16:14:34Z",
+              "duration_seconds": 0
+            },
+            {
+              "name": "Install accrue_portal deps",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:14:34Z",
+              "completed_at": "2026-08-09T16:14:37Z",
+              "duration_seconds": 3
+            },
+            {
+              "name": "Accrue portal format",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:14:37Z",
+              "completed_at": "2026-08-09T16:14:37Z",
+              "duration_seconds": 0
+            },
+            {
+              "name": "Accrue portal compile",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:14:37Z",
+              "completed_at": "2026-08-09T16:17:20Z",
+              "duration_seconds": 163
+            },
+            {
+              "name": "Accrue portal test",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:17:20Z",
+              "completed_at": "2026-08-09T16:17:25Z",
+              "duration_seconds": 5
+            },
+            {
+              "name": "Accrue portal retired package audit",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:17:25Z",
+              "completed_at": "2026-08-09T16:17:26Z",
+              "duration_seconds": 1
+            },
+            {
+              "name": "Post Restore accrue_portal deps cache",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:17:26Z",
+              "completed_at": "2026-08-09T16:17:27Z",
+              "duration_seconds": 1
+            },
+            {
+              "name": "Post Restore accrue_admin deps cache",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:17:27Z",
+              "completed_at": "2026-08-09T16:17:29Z",
+              "duration_seconds": 2
+            },
+            {
+              "name": "Post Restore accrue deps cache",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:17:29Z",
+              "completed_at": "2026-08-09T16:17:30Z",
+              "duration_seconds": 1
+            },
+            {
+              "name": "Post Run actions/checkout@v6",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:17:30Z",
+              "completed_at": "2026-08-09T16:17:30Z",
+              "duration_seconds": 0
+            },
+            {
+              "name": "Stop containers",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:17:30Z",
+              "completed_at": "2026-08-09T16:17:30Z",
+              "duration_seconds": 0
+            },
+            {
+              "name": "Complete job",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:17:30Z",
+              "completed_at": "2026-08-09T16:17:30Z",
+              "duration_seconds": 0
             }
-          ]
+          ],
+          "manifest_identity": "release-gate-floor",
+          "policy": "required",
+          "required_for_release_proof": true,
+          "critical_chain_root": true,
+          "proof_state": "proved",
+          "duration_seconds": 1279,
+          "cache_state": "inferred-setup-bypass"
         },
         {
           "id": 93267406380,
           "name": "Release gate (Primary dev target; elixir=1.19.5 otp=28.0 sigra=on opentelemetry=off) [advisory]",
-          "policy": "advisory",
+          "status": "completed",
           "conclusion": "success",
-          "proof_state": "advisory",
-          "duration_seconds": 1283,
-          "cache_state": "observed-hit",
+          "started_at": "2026-08-09T15:56:14Z",
+          "completed_at": "2026-08-09T16:17:37Z",
           "steps": [
+            {
+              "name": "Set up job",
+              "conclusion": "success",
+              "started_at": "2026-08-09T15:56:15Z",
+              "completed_at": "2026-08-09T15:56:17Z",
+              "duration_seconds": 2
+            },
+            {
+              "name": "Initialize containers",
+              "conclusion": "success",
+              "started_at": "2026-08-09T15:56:17Z",
+              "completed_at": "2026-08-09T15:56:39Z",
+              "duration_seconds": 22
+            },
+            {
+              "name": "Run actions/checkout@v6",
+              "conclusion": "success",
+              "started_at": "2026-08-09T15:56:39Z",
+              "completed_at": "2026-08-09T15:56:43Z",
+              "duration_seconds": 4
+            },
+            {
+              "name": "Set up BEAM",
+              "conclusion": "success",
+              "started_at": "2026-08-09T15:56:43Z",
+              "completed_at": "2026-08-09T15:56:48Z",
+              "duration_seconds": 5
+            },
+            {
+              "name": "Install Hex",
+              "conclusion": "success",
+              "started_at": "2026-08-09T15:56:48Z",
+              "completed_at": "2026-08-09T15:56:49Z",
+              "duration_seconds": 1
+            },
+            {
+              "name": "Restore accrue deps cache",
+              "conclusion": "success",
+              "started_at": "2026-08-09T15:56:49Z",
+              "completed_at": "2026-08-09T15:56:50Z",
+              "duration_seconds": 1
+            },
+            {
+              "name": "Install accrue deps",
+              "conclusion": "success",
+              "started_at": "2026-08-09T15:56:50Z",
+              "completed_at": "2026-08-09T15:56:53Z",
+              "duration_seconds": 3
+            },
+            {
+              "name": "Accrue format",
+              "conclusion": "success",
+              "started_at": "2026-08-09T15:56:53Z",
+              "completed_at": "2026-08-09T15:56:54Z",
+              "duration_seconds": 1
+            },
+            {
+              "name": "Accrue compile",
+              "conclusion": "success",
+              "started_at": "2026-08-09T15:56:54Z",
+              "completed_at": "2026-08-09T15:59:26Z",
+              "duration_seconds": 152
+            },
+            {
+              "name": "Accrue test",
+              "conclusion": "success",
+              "started_at": "2026-08-09T15:59:26Z",
+              "completed_at": "2026-08-09T16:00:26Z",
+              "duration_seconds": 60
+            },
+            {
+              "name": "Accrue credo",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:00:26Z",
+              "completed_at": "2026-08-09T16:00:27Z",
+              "duration_seconds": 1
+            },
+            {
+              "name": "Restore accrue PLT cache",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:00:27Z",
+              "completed_at": "2026-08-09T16:00:29Z",
+              "duration_seconds": 2
+            },
             {
               "name": "Create accrue PLTs",
               "conclusion": "skipped",
               "started_at": "2026-08-09T16:00:29Z",
               "completed_at": "2026-08-09T16:00:29Z",
               "duration_seconds": 0
+            },
+            {
+              "name": "Save accrue PLT cache",
+              "conclusion": "skipped",
+              "started_at": "2026-08-09T16:00:29Z",
+              "completed_at": "2026-08-09T16:00:29Z",
+              "duration_seconds": 0
+            },
+            {
+              "name": "Accrue dialyzer",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:00:29Z",
+              "completed_at": "2026-08-09T16:00:49Z",
+              "duration_seconds": 20
+            },
+            {
+              "name": "Accrue docs",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:00:49Z",
+              "completed_at": "2026-08-09T16:03:23Z",
+              "duration_seconds": 154
+            },
+            {
+              "name": "Verify ExDoc @doc since: badges",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:03:23Z",
+              "completed_at": "2026-08-09T16:03:23Z",
+              "duration_seconds": 0
+            },
+            {
+              "name": "Accrue retired package audit",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:03:23Z",
+              "completed_at": "2026-08-09T16:03:24Z",
+              "duration_seconds": 1
+            },
+            {
+              "name": "Restore accrue_admin deps cache",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:03:24Z",
+              "completed_at": "2026-08-09T16:03:24Z",
+              "duration_seconds": 0
+            },
+            {
+              "name": "Install accrue_admin deps",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:03:24Z",
+              "completed_at": "2026-08-09T16:03:27Z",
+              "duration_seconds": 3
+            },
+            {
+              "name": "Accrue admin format",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:03:27Z",
+              "completed_at": "2026-08-09T16:03:28Z",
+              "duration_seconds": 1
+            },
+            {
+              "name": "Accrue admin compile",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:03:28Z",
+              "completed_at": "2026-08-09T16:06:32Z",
+              "duration_seconds": 184
+            },
+            {
+              "name": "Accrue admin test",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:06:32Z",
+              "completed_at": "2026-08-09T16:06:50Z",
+              "duration_seconds": 18
+            },
+            {
+              "name": "Accrue admin credo",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:06:50Z",
+              "completed_at": "2026-08-09T16:06:55Z",
+              "duration_seconds": 5
+            },
+            {
+              "name": "Restore accrue_admin PLT cache",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:06:55Z",
+              "completed_at": "2026-08-09T16:06:56Z",
+              "duration_seconds": 1
+            },
+            {
+              "name": "Create accrue_admin PLTs",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:06:56Z",
+              "completed_at": "2026-08-09T16:11:22Z",
+              "duration_seconds": 266
+            },
+            {
+              "name": "Save accrue_admin PLT cache",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:11:22Z",
+              "completed_at": "2026-08-09T16:11:24Z",
+              "duration_seconds": 2
+            },
+            {
+              "name": "Accrue admin dialyzer",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:11:24Z",
+              "completed_at": "2026-08-09T16:11:44Z",
+              "duration_seconds": 20
+            },
+            {
+              "name": "Accrue admin docs",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:11:44Z",
+              "completed_at": "2026-08-09T16:14:29Z",
+              "duration_seconds": 165
+            },
+            {
+              "name": "Accrue admin retired package audit",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:14:29Z",
+              "completed_at": "2026-08-09T16:14:30Z",
+              "duration_seconds": 1
+            },
+            {
+              "name": "Restore accrue_portal deps cache",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:14:30Z",
+              "completed_at": "2026-08-09T16:14:31Z",
+              "duration_seconds": 1
+            },
+            {
+              "name": "Install accrue_portal deps",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:14:31Z",
+              "completed_at": "2026-08-09T16:14:33Z",
+              "duration_seconds": 2
+            },
+            {
+              "name": "Accrue portal format",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:14:33Z",
+              "completed_at": "2026-08-09T16:14:34Z",
+              "duration_seconds": 1
+            },
+            {
+              "name": "Accrue portal compile",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:14:34Z",
+              "completed_at": "2026-08-09T16:17:22Z",
+              "duration_seconds": 168
+            },
+            {
+              "name": "Accrue portal test",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:17:22Z",
+              "completed_at": "2026-08-09T16:17:26Z",
+              "duration_seconds": 4
+            },
+            {
+              "name": "Accrue portal retired package audit",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:17:26Z",
+              "completed_at": "2026-08-09T16:17:27Z",
+              "duration_seconds": 1
+            },
+            {
+              "name": "Post Restore accrue_portal deps cache",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:17:27Z",
+              "completed_at": "2026-08-09T16:17:29Z",
+              "duration_seconds": 2
+            },
+            {
+              "name": "Post Restore accrue_admin deps cache",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:17:29Z",
+              "completed_at": "2026-08-09T16:17:31Z",
+              "duration_seconds": 2
+            },
+            {
+              "name": "Post Restore accrue deps cache",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:17:31Z",
+              "completed_at": "2026-08-09T16:17:33Z",
+              "duration_seconds": 2
+            },
+            {
+              "name": "Post Run actions/checkout@v6",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:17:33Z",
+              "completed_at": "2026-08-09T16:17:33Z",
+              "duration_seconds": 0
+            },
+            {
+              "name": "Stop containers",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:17:33Z",
+              "completed_at": "2026-08-09T16:17:33Z",
+              "duration_seconds": 0
+            },
+            {
+              "name": "Complete job",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:17:33Z",
+              "completed_at": "2026-08-09T16:17:34Z",
+              "duration_seconds": 1
             }
-          ]
+          ],
+          "manifest_identity": "release-gate-primary-sigra",
+          "policy": "advisory",
+          "required_for_release_proof": false,
+          "critical_chain_root": false,
+          "proof_state": "advisory",
+          "duration_seconds": 1283,
+          "cache_state": "inferred-setup-bypass"
         },
         {
           "id": 93267406381,
           "name": "Release gate (Primary dev target; elixir=1.19.5 otp=28.0 sigra=off opentelemetry=on)",
-          "policy": "required",
+          "status": "completed",
           "conclusion": "success",
-          "proof_state": "proved",
-          "duration_seconds": 1334,
-          "cache_state": "observed-hit",
+          "started_at": "2026-08-09T15:56:22Z",
+          "completed_at": "2026-08-09T16:18:36Z",
           "steps": [
+            {
+              "name": "Set up job",
+              "conclusion": "success",
+              "started_at": "2026-08-09T15:56:23Z",
+              "completed_at": "2026-08-09T15:56:24Z",
+              "duration_seconds": 1
+            },
+            {
+              "name": "Initialize containers",
+              "conclusion": "success",
+              "started_at": "2026-08-09T15:56:24Z",
+              "completed_at": "2026-08-09T15:56:48Z",
+              "duration_seconds": 24
+            },
+            {
+              "name": "Run actions/checkout@v6",
+              "conclusion": "success",
+              "started_at": "2026-08-09T15:56:48Z",
+              "completed_at": "2026-08-09T15:56:52Z",
+              "duration_seconds": 4
+            },
+            {
+              "name": "Set up BEAM",
+              "conclusion": "success",
+              "started_at": "2026-08-09T15:56:52Z",
+              "completed_at": "2026-08-09T15:56:58Z",
+              "duration_seconds": 6
+            },
+            {
+              "name": "Install Hex",
+              "conclusion": "success",
+              "started_at": "2026-08-09T15:56:58Z",
+              "completed_at": "2026-08-09T15:56:59Z",
+              "duration_seconds": 1
+            },
+            {
+              "name": "Restore accrue deps cache",
+              "conclusion": "success",
+              "started_at": "2026-08-09T15:56:59Z",
+              "completed_at": "2026-08-09T15:57:00Z",
+              "duration_seconds": 1
+            },
+            {
+              "name": "Install accrue deps",
+              "conclusion": "success",
+              "started_at": "2026-08-09T15:57:00Z",
+              "completed_at": "2026-08-09T15:57:03Z",
+              "duration_seconds": 3
+            },
+            {
+              "name": "Accrue format",
+              "conclusion": "success",
+              "started_at": "2026-08-09T15:57:03Z",
+              "completed_at": "2026-08-09T15:57:04Z",
+              "duration_seconds": 1
+            },
+            {
+              "name": "Accrue compile",
+              "conclusion": "success",
+              "started_at": "2026-08-09T15:57:04Z",
+              "completed_at": "2026-08-09T15:59:43Z",
+              "duration_seconds": 159
+            },
+            {
+              "name": "Accrue test",
+              "conclusion": "success",
+              "started_at": "2026-08-09T15:59:43Z",
+              "completed_at": "2026-08-09T16:00:46Z",
+              "duration_seconds": 63
+            },
+            {
+              "name": "Accrue credo",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:00:46Z",
+              "completed_at": "2026-08-09T16:00:47Z",
+              "duration_seconds": 1
+            },
+            {
+              "name": "Restore accrue PLT cache",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:00:47Z",
+              "completed_at": "2026-08-09T16:00:49Z",
+              "duration_seconds": 2
+            },
             {
               "name": "Create accrue PLTs",
               "conclusion": "skipped",
               "started_at": "2026-08-09T16:00:49Z",
               "completed_at": "2026-08-09T16:00:49Z",
               "duration_seconds": 0
+            },
+            {
+              "name": "Save accrue PLT cache",
+              "conclusion": "skipped",
+              "started_at": "2026-08-09T16:00:49Z",
+              "completed_at": "2026-08-09T16:00:49Z",
+              "duration_seconds": 0
+            },
+            {
+              "name": "Accrue dialyzer",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:00:49Z",
+              "completed_at": "2026-08-09T16:01:10Z",
+              "duration_seconds": 21
+            },
+            {
+              "name": "Accrue docs",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:01:10Z",
+              "completed_at": "2026-08-09T16:03:50Z",
+              "duration_seconds": 160
+            },
+            {
+              "name": "Verify ExDoc @doc since: badges",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:03:50Z",
+              "completed_at": "2026-08-09T16:03:50Z",
+              "duration_seconds": 0
+            },
+            {
+              "name": "Accrue retired package audit",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:03:50Z",
+              "completed_at": "2026-08-09T16:03:52Z",
+              "duration_seconds": 2
+            },
+            {
+              "name": "Restore accrue_admin deps cache",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:03:52Z",
+              "completed_at": "2026-08-09T16:03:52Z",
+              "duration_seconds": 0
+            },
+            {
+              "name": "Install accrue_admin deps",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:03:52Z",
+              "completed_at": "2026-08-09T16:03:55Z",
+              "duration_seconds": 3
+            },
+            {
+              "name": "Accrue admin format",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:03:55Z",
+              "completed_at": "2026-08-09T16:03:56Z",
+              "duration_seconds": 1
+            },
+            {
+              "name": "Accrue admin compile",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:03:56Z",
+              "completed_at": "2026-08-09T16:07:18Z",
+              "duration_seconds": 202
+            },
+            {
+              "name": "Accrue admin test",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:07:18Z",
+              "completed_at": "2026-08-09T16:07:37Z",
+              "duration_seconds": 19
+            },
+            {
+              "name": "Accrue admin credo",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:07:37Z",
+              "completed_at": "2026-08-09T16:07:43Z",
+              "duration_seconds": 6
+            },
+            {
+              "name": "Restore accrue_admin PLT cache",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:07:43Z",
+              "completed_at": "2026-08-09T16:07:43Z",
+              "duration_seconds": 0
+            },
+            {
+              "name": "Create accrue_admin PLTs",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:07:43Z",
+              "completed_at": "2026-08-09T16:12:17Z",
+              "duration_seconds": 274
+            },
+            {
+              "name": "Save accrue_admin PLT cache",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:12:17Z",
+              "completed_at": "2026-08-09T16:12:18Z",
+              "duration_seconds": 1
+            },
+            {
+              "name": "Accrue admin dialyzer",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:12:18Z",
+              "completed_at": "2026-08-09T16:12:39Z",
+              "duration_seconds": 21
+            },
+            {
+              "name": "Accrue admin docs",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:12:39Z",
+              "completed_at": "2026-08-09T16:15:32Z",
+              "duration_seconds": 173
+            },
+            {
+              "name": "Accrue admin retired package audit",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:15:32Z",
+              "completed_at": "2026-08-09T16:15:33Z",
+              "duration_seconds": 1
+            },
+            {
+              "name": "Restore accrue_portal deps cache",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:15:33Z",
+              "completed_at": "2026-08-09T16:15:34Z",
+              "duration_seconds": 1
+            },
+            {
+              "name": "Install accrue_portal deps",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:15:34Z",
+              "completed_at": "2026-08-09T16:15:37Z",
+              "duration_seconds": 3
+            },
+            {
+              "name": "Accrue portal format",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:15:37Z",
+              "completed_at": "2026-08-09T16:15:37Z",
+              "duration_seconds": 0
+            },
+            {
+              "name": "Accrue portal compile",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:15:37Z",
+              "completed_at": "2026-08-09T16:18:20Z",
+              "duration_seconds": 163
+            },
+            {
+              "name": "Accrue portal test",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:18:20Z",
+              "completed_at": "2026-08-09T16:18:25Z",
+              "duration_seconds": 5
+            },
+            {
+              "name": "Accrue portal retired package audit",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:18:25Z",
+              "completed_at": "2026-08-09T16:18:26Z",
+              "duration_seconds": 1
+            },
+            {
+              "name": "Post Restore accrue_portal deps cache",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:18:26Z",
+              "completed_at": "2026-08-09T16:18:28Z",
+              "duration_seconds": 2
+            },
+            {
+              "name": "Post Restore accrue_admin deps cache",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:18:28Z",
+              "completed_at": "2026-08-09T16:18:30Z",
+              "duration_seconds": 2
+            },
+            {
+              "name": "Post Restore accrue deps cache",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:18:30Z",
+              "completed_at": "2026-08-09T16:18:32Z",
+              "duration_seconds": 2
+            },
+            {
+              "name": "Post Run actions/checkout@v6",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:18:32Z",
+              "completed_at": "2026-08-09T16:18:32Z",
+              "duration_seconds": 0
+            },
+            {
+              "name": "Stop containers",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:18:32Z",
+              "completed_at": "2026-08-09T16:18:32Z",
+              "duration_seconds": 0
+            },
+            {
+              "name": "Complete job",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:18:32Z",
+              "completed_at": "2026-08-09T16:18:32Z",
+              "duration_seconds": 0
             }
-          ]
+          ],
+          "manifest_identity": "release-gate-primary-opentelemetry",
+          "policy": "required",
+          "required_for_release_proof": true,
+          "critical_chain_root": true,
+          "proof_state": "proved",
+          "duration_seconds": 1334,
+          "cache_state": "inferred-setup-bypass"
         },
         {
           "id": 93267406391,
           "name": "Stripe test-mode parity (mandatory periodic)",
-          "policy": "required",
+          "status": "completed",
           "conclusion": "success",
-          "proof_state": "proved",
+          "started_at": "2026-08-09T15:56:13Z",
+          "completed_at": "2026-08-09T15:59:39Z",
+          "steps": [
+            {
+              "name": "Set up job",
+              "conclusion": "success",
+              "started_at": "2026-08-09T15:56:14Z",
+              "completed_at": "2026-08-09T15:56:15Z",
+              "duration_seconds": 1
+            },
+            {
+              "name": "Initialize containers",
+              "conclusion": "success",
+              "started_at": "2026-08-09T15:56:15Z",
+              "completed_at": "2026-08-09T15:56:37Z",
+              "duration_seconds": 22
+            },
+            {
+              "name": "Run actions/checkout@v6",
+              "conclusion": "success",
+              "started_at": "2026-08-09T15:56:37Z",
+              "completed_at": "2026-08-09T15:56:39Z",
+              "duration_seconds": 2
+            },
+            {
+              "name": "Set up BEAM",
+              "conclusion": "success",
+              "started_at": "2026-08-09T15:56:39Z",
+              "completed_at": "2026-08-09T15:56:45Z",
+              "duration_seconds": 6
+            },
+            {
+              "name": "Install Hex",
+              "conclusion": "success",
+              "started_at": "2026-08-09T15:56:45Z",
+              "completed_at": "2026-08-09T15:56:46Z",
+              "duration_seconds": 1
+            },
+            {
+              "name": "Install deps",
+              "conclusion": "success",
+              "started_at": "2026-08-09T15:56:46Z",
+              "completed_at": "2026-08-09T15:56:49Z",
+              "duration_seconds": 3
+            },
+            {
+              "name": "Compile",
+              "conclusion": "success",
+              "started_at": "2026-08-09T15:56:49Z",
+              "completed_at": "2026-08-09T15:59:20Z",
+              "duration_seconds": 151
+            },
+            {
+              "name": "Create + migrate test DB",
+              "conclusion": "success",
+              "started_at": "2026-08-09T15:59:20Z",
+              "completed_at": "2026-08-09T15:59:23Z",
+              "duration_seconds": 3
+            },
+            {
+              "name": "Run live-Stripe suite",
+              "conclusion": "success",
+              "started_at": "2026-08-09T15:59:23Z",
+              "completed_at": "2026-08-09T15:59:37Z",
+              "duration_seconds": 14
+            },
+            {
+              "name": "Post Run actions/checkout@v6",
+              "conclusion": "success",
+              "started_at": "2026-08-09T15:59:37Z",
+              "completed_at": "2026-08-09T15:59:37Z",
+              "duration_seconds": 0
+            },
+            {
+              "name": "Stop containers",
+              "conclusion": "success",
+              "started_at": "2026-08-09T15:59:37Z",
+              "completed_at": "2026-08-09T15:59:37Z",
+              "duration_seconds": 0
+            },
+            {
+              "name": "Complete job",
+              "conclusion": "success",
+              "started_at": "2026-08-09T15:59:37Z",
+              "completed_at": "2026-08-09T15:59:37Z",
+              "duration_seconds": 0
+            }
+          ],
+          "manifest_identity": "live-stripe",
+          "policy": "conditional",
+          "required_for_release_proof": false,
+          "critical_chain_root": false,
+          "proof_state": "not-applicable",
           "duration_seconds": 206,
-          "cache_state": "unknown",
-          "steps": []
+          "cache_state": "unknown"
         },
         {
           "id": 93267715591,
           "name": "Host Docker boot smoke",
-          "policy": "required",
+          "status": "completed",
           "conclusion": "success",
+          "started_at": "2026-08-09T15:59:06Z",
+          "completed_at": "2026-08-09T16:05:57Z",
+          "steps": [
+            {
+              "name": "Set up job",
+              "conclusion": "success",
+              "started_at": "2026-08-09T15:59:07Z",
+              "completed_at": "2026-08-09T15:59:08Z",
+              "duration_seconds": 1
+            },
+            {
+              "name": "Run actions/checkout@v6",
+              "conclusion": "success",
+              "started_at": "2026-08-09T15:59:08Z",
+              "completed_at": "2026-08-09T15:59:12Z",
+              "duration_seconds": 4
+            },
+            {
+              "name": "Ensure Docker proxy network exists",
+              "conclusion": "success",
+              "started_at": "2026-08-09T15:59:12Z",
+              "completed_at": "2026-08-09T15:59:14Z",
+              "duration_seconds": 2
+            },
+            {
+              "name": "Build and boot Docker host app",
+              "conclusion": "success",
+              "started_at": "2026-08-09T15:59:14Z",
+              "completed_at": "2026-08-09T16:00:45Z",
+              "duration_seconds": 91
+            },
+            {
+              "name": "Wait for Docker host app",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:00:45Z",
+              "completed_at": "2026-08-09T16:05:54Z",
+              "duration_seconds": 309
+            },
+            {
+              "name": "Stop Docker host app",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:05:54Z",
+              "completed_at": "2026-08-09T16:05:56Z",
+              "duration_seconds": 2
+            },
+            {
+              "name": "Post Run actions/checkout@v6",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:05:56Z",
+              "completed_at": "2026-08-09T16:05:56Z",
+              "duration_seconds": 0
+            },
+            {
+              "name": "Complete job",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:05:56Z",
+              "completed_at": "2026-08-09T16:05:56Z",
+              "duration_seconds": 0
+            }
+          ],
+          "manifest_identity": "host-docker-smoke",
+          "policy": "required",
+          "required_for_release_proof": true,
+          "critical_chain_root": false,
           "proof_state": "proved",
           "duration_seconds": 411,
-          "cache_state": "unknown",
-          "steps": []
+          "cache_state": "unknown"
         },
         {
           "id": 93268469556,
           "name": "Admin UI ratchet guardrails",
-          "policy": "advisory",
+          "status": "completed",
           "conclusion": "failure",
+          "started_at": "2026-08-09T16:05:41Z",
+          "completed_at": "2026-08-09T16:05:53Z",
+          "steps": [
+            {
+              "name": "Set up job",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:05:42Z",
+              "completed_at": "2026-08-09T16:05:43Z",
+              "duration_seconds": 1
+            },
+            {
+              "name": "Run actions/checkout@v6",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:05:43Z",
+              "completed_at": "2026-08-09T16:05:47Z",
+              "duration_seconds": 4
+            },
+            {
+              "name": "Set up Node",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:05:47Z",
+              "completed_at": "2026-08-09T16:05:48Z",
+              "duration_seconds": 1
+            },
+            {
+              "name": "Install admin Node dependencies",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:05:48Z",
+              "completed_at": "2026-08-09T16:05:49Z",
+              "duration_seconds": 1
+            },
+            {
+              "name": "Run ratchet ledger self-tests",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:05:49Z",
+              "completed_at": "2026-08-09T16:05:50Z",
+              "duration_seconds": 1
+            },
+            {
+              "name": "Verify frozen ratchet evidence",
+              "conclusion": "failure",
+              "started_at": "2026-08-09T16:05:50Z",
+              "completed_at": "2026-08-09T16:05:50Z",
+              "duration_seconds": 0
+            },
+            {
+              "name": "Verify UI ratchet sign-off self-test",
+              "conclusion": "skipped",
+              "started_at": "2026-08-09T16:05:50Z",
+              "completed_at": "2026-08-09T16:05:50Z",
+              "duration_seconds": 0
+            },
+            {
+              "name": "Verify UI ratchet sign-off",
+              "conclusion": "skipped",
+              "started_at": "2026-08-09T16:05:50Z",
+              "completed_at": "2026-08-09T16:05:50Z",
+              "duration_seconds": 0
+            },
+            {
+              "name": "Phase 208 CI contract",
+              "conclusion": "skipped",
+              "started_at": "2026-08-09T16:05:50Z",
+              "completed_at": "2026-08-09T16:05:50Z",
+              "duration_seconds": 0
+            },
+            {
+              "name": "Ratchet status summary",
+              "conclusion": "skipped",
+              "started_at": "2026-08-09T16:05:50Z",
+              "completed_at": "2026-08-09T16:05:50Z",
+              "duration_seconds": 0
+            },
+            {
+              "name": "Upload Phase 208 ratchet evidence",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:05:50Z",
+              "completed_at": "2026-08-09T16:05:51Z",
+              "duration_seconds": 1
+            },
+            {
+              "name": "Post Set up Node",
+              "conclusion": "skipped",
+              "started_at": "2026-08-09T16:05:51Z",
+              "completed_at": "2026-08-09T16:05:51Z",
+              "duration_seconds": 0
+            },
+            {
+              "name": "Post Run actions/checkout@v6",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:05:51Z",
+              "completed_at": "2026-08-09T16:05:51Z",
+              "duration_seconds": 0
+            },
+            {
+              "name": "Complete job",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:05:51Z",
+              "completed_at": "2026-08-09T16:05:51Z",
+              "duration_seconds": 0
+            }
+          ],
+          "manifest_identity": "admin-ui-ratchet-guardrails",
+          "policy": "advisory",
+          "required_for_release_proof": false,
+          "critical_chain_root": false,
           "proof_state": "advisory",
           "duration_seconds": 12,
-          "cache_state": "unknown",
-          "steps": []
+          "cache_state": "unknown"
         },
         {
           "id": 93269932669,
           "name": "Admin drift and docs",
-          "policy": "required",
+          "status": "completed",
           "conclusion": "success",
+          "started_at": "2026-08-09T16:18:44Z",
+          "completed_at": "2026-08-09T16:22:06Z",
+          "steps": [
+            {
+              "name": "Set up job",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:18:45Z",
+              "completed_at": "2026-08-09T16:18:46Z",
+              "duration_seconds": 1
+            },
+            {
+              "name": "Run actions/checkout@v6",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:18:46Z",
+              "completed_at": "2026-08-09T16:18:49Z",
+              "duration_seconds": 3
+            },
+            {
+              "name": "Set up BEAM",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:18:49Z",
+              "completed_at": "2026-08-09T16:18:56Z",
+              "duration_seconds": 7
+            },
+            {
+              "name": "Install Hex",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:18:56Z",
+              "completed_at": "2026-08-09T16:18:57Z",
+              "duration_seconds": 1
+            },
+            {
+              "name": "Install deps",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:18:57Z",
+              "completed_at": "2026-08-09T16:19:00Z",
+              "duration_seconds": 3
+            },
+            {
+              "name": "Rebuild package assets",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:19:00Z",
+              "completed_at": "2026-08-09T16:22:04Z",
+              "duration_seconds": 184
+            },
+            {
+              "name": "Ensure committed bundle is fresh",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:22:04Z",
+              "completed_at": "2026-08-09T16:22:05Z",
+              "duration_seconds": 1
+            },
+            {
+              "name": "Verify guide mentions mount path and asset task",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:22:05Z",
+              "completed_at": "2026-08-09T16:22:05Z",
+              "duration_seconds": 0
+            },
+            {
+              "name": "Post Run actions/checkout@v6",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:22:05Z",
+              "completed_at": "2026-08-09T16:22:05Z",
+              "duration_seconds": 0
+            },
+            {
+              "name": "Complete job",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:22:05Z",
+              "completed_at": "2026-08-09T16:22:05Z",
+              "duration_seconds": 0
+            }
+          ],
+          "manifest_identity": "admin-drift-docs",
+          "policy": "required",
+          "required_for_release_proof": true,
+          "critical_chain_root": true,
           "proof_state": "proved",
           "duration_seconds": 202,
-          "cache_state": "unknown",
-          "steps": []
+          "cache_state": "unknown"
         },
         {
           "id": 93270329839,
           "name": "Host integration (required deterministic gate)",
-          "policy": "required",
+          "status": "completed",
           "conclusion": "success",
-          "proof_state": "proved",
-          "duration_seconds": 544,
-          "cache_state": "unknown",
+          "started_at": "2026-08-09T16:22:22Z",
+          "completed_at": "2026-08-09T16:31:26Z",
           "steps": [
+            {
+              "name": "Set up job",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:22:23Z",
+              "completed_at": "2026-08-09T16:22:25Z",
+              "duration_seconds": 2
+            },
+            {
+              "name": "Initialize containers",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:22:25Z",
+              "completed_at": "2026-08-09T16:22:59Z",
+              "duration_seconds": 34
+            },
+            {
+              "name": "Run actions/checkout@v6",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:22:59Z",
+              "completed_at": "2026-08-09T16:23:03Z",
+              "duration_seconds": 4
+            },
+            {
+              "name": "Set up BEAM",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:23:03Z",
+              "completed_at": "2026-08-09T16:23:11Z",
+              "duration_seconds": 8
+            },
+            {
+              "name": "Install Hex",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:23:11Z",
+              "completed_at": "2026-08-09T16:23:12Z",
+              "duration_seconds": 1
+            },
+            {
+              "name": "Set up Node",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:23:12Z",
+              "completed_at": "2026-08-09T16:23:14Z",
+              "duration_seconds": 2
+            },
+            {
+              "name": "Restore host deps cache",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:23:14Z",
+              "completed_at": "2026-08-09T16:23:14Z",
+              "duration_seconds": 0
+            },
+            {
+              "name": "Install host deps",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:23:14Z",
+              "completed_at": "2026-08-09T16:23:17Z",
+              "duration_seconds": 3
+            },
+            {
+              "name": "Install browser deps",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:23:17Z",
+              "completed_at": "2026-08-09T16:23:20Z",
+              "duration_seconds": 3
+            },
+            {
+              "name": "Install Chromium",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:23:20Z",
+              "completed_at": "2026-08-09T16:23:29Z",
+              "duration_seconds": 9
+            },
             {
               "name": "Run host integration gate",
               "conclusion": "success",
               "started_at": "2026-08-09T16:23:29Z",
               "completed_at": "2026-08-09T16:31:19Z",
               "duration_seconds": 470
+            },
+            {
+              "name": "Run host Hex smoke",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:31:19Z",
+              "completed_at": "2026-08-09T16:31:20Z",
+              "duration_seconds": 1
+            },
+            {
+              "name": "Upload Playwright report",
+              "conclusion": "skipped",
+              "started_at": "2026-08-09T16:31:20Z",
+              "completed_at": "2026-08-09T16:31:20Z",
+              "duration_seconds": 0
+            },
+            {
+              "name": "Upload Playwright traces",
+              "conclusion": "skipped",
+              "started_at": "2026-08-09T16:31:20Z",
+              "completed_at": "2026-08-09T16:31:20Z",
+              "duration_seconds": 0
+            },
+            {
+              "name": "Upload Phase 15 trust screenshots",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:31:20Z",
+              "completed_at": "2026-08-09T16:31:21Z",
+              "duration_seconds": 1
+            },
+            {
+              "name": "Upload host server log",
+              "conclusion": "skipped",
+              "started_at": "2026-08-09T16:31:21Z",
+              "completed_at": "2026-08-09T16:31:21Z",
+              "duration_seconds": 0
+            },
+            {
+              "name": "Post Restore host deps cache",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:31:21Z",
+              "completed_at": "2026-08-09T16:31:22Z",
+              "duration_seconds": 1
+            },
+            {
+              "name": "Post Set up Node",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:31:22Z",
+              "completed_at": "2026-08-09T16:31:24Z",
+              "duration_seconds": 2
+            },
+            {
+              "name": "Post Run actions/checkout@v6",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:31:24Z",
+              "completed_at": "2026-08-09T16:31:24Z",
+              "duration_seconds": 0
+            },
+            {
+              "name": "Stop containers",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:31:24Z",
+              "completed_at": "2026-08-09T16:31:25Z",
+              "duration_seconds": 1
+            },
+            {
+              "name": "Complete job",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:31:25Z",
+              "completed_at": "2026-08-09T16:31:25Z",
+              "duration_seconds": 0
             }
-          ]
+          ],
+          "manifest_identity": "host-integration",
+          "policy": "required",
+          "required_for_release_proof": true,
+          "critical_chain_root": true,
+          "proof_state": "proved",
+          "duration_seconds": 544,
+          "cache_state": "unknown"
         },
         {
           "id": 93271358733,
           "name": "Playwright E2E shard 2/3",
-          "policy": "required",
+          "status": "completed",
           "conclusion": "success",
-          "proof_state": "proved",
-          "duration_seconds": 214,
-          "cache_state": "unknown",
+          "started_at": "2026-08-09T16:31:28Z",
+          "completed_at": "2026-08-09T16:35:02Z",
           "steps": [
+            {
+              "name": "Set up job",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:31:29Z",
+              "completed_at": "2026-08-09T16:31:33Z",
+              "duration_seconds": 4
+            },
+            {
+              "name": "Initialize containers",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:31:33Z",
+              "completed_at": "2026-08-09T16:31:57Z",
+              "duration_seconds": 24
+            },
+            {
+              "name": "Run actions/checkout@v6",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:31:57Z",
+              "completed_at": "2026-08-09T16:32:02Z",
+              "duration_seconds": 5
+            },
+            {
+              "name": "Set up BEAM",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:32:02Z",
+              "completed_at": "2026-08-09T16:32:07Z",
+              "duration_seconds": 5
+            },
+            {
+              "name": "Install Hex",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:32:07Z",
+              "completed_at": "2026-08-09T16:32:08Z",
+              "duration_seconds": 1
+            },
+            {
+              "name": "Set up Node",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:32:08Z",
+              "completed_at": "2026-08-09T16:32:09Z",
+              "duration_seconds": 1
+            },
+            {
+              "name": "Restore host deps cache",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:32:09Z",
+              "completed_at": "2026-08-09T16:32:10Z",
+              "duration_seconds": 1
+            },
+            {
+              "name": "Install host deps",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:32:10Z",
+              "completed_at": "2026-08-09T16:32:14Z",
+              "duration_seconds": 4
+            },
+            {
+              "name": "Install browser deps",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:32:14Z",
+              "completed_at": "2026-08-09T16:32:17Z",
+              "duration_seconds": 3
+            },
+            {
+              "name": "Compile host",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:32:17Z",
+              "completed_at": "2026-08-09T16:34:29Z",
+              "duration_seconds": 132
+            },
+            {
+              "name": "Build host assets",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:34:29Z",
+              "completed_at": "2026-08-09T16:34:32Z",
+              "duration_seconds": 3
+            },
+            {
+              "name": "Prepare E2E database fixture",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:34:32Z",
+              "completed_at": "2026-08-09T16:34:38Z",
+              "duration_seconds": 6
+            },
+            {
+              "name": "Install Chromium",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:34:38Z",
+              "completed_at": "2026-08-09T16:34:46Z",
+              "duration_seconds": 8
+            },
             {
               "name": "Run Playwright shard",
               "conclusion": "success",
               "started_at": "2026-08-09T16:34:46Z",
               "completed_at": "2026-08-09T16:34:53Z",
               "duration_seconds": 7
+            },
+            {
+              "name": "Upload Playwright report",
+              "conclusion": "skipped",
+              "started_at": "2026-08-09T16:34:53Z",
+              "completed_at": "2026-08-09T16:34:53Z",
+              "duration_seconds": 0
+            },
+            {
+              "name": "Upload Playwright traces",
+              "conclusion": "skipped",
+              "started_at": "2026-08-09T16:34:53Z",
+              "completed_at": "2026-08-09T16:34:53Z",
+              "duration_seconds": 0
+            },
+            {
+              "name": "Post Restore host deps cache",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:34:53Z",
+              "completed_at": "2026-08-09T16:34:54Z",
+              "duration_seconds": 1
+            },
+            {
+              "name": "Post Set up Node",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:34:54Z",
+              "completed_at": "2026-08-09T16:34:56Z",
+              "duration_seconds": 2
+            },
+            {
+              "name": "Post Run actions/checkout@v6",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:34:56Z",
+              "completed_at": "2026-08-09T16:34:56Z",
+              "duration_seconds": 0
+            },
+            {
+              "name": "Stop containers",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:34:56Z",
+              "completed_at": "2026-08-09T16:35:00Z",
+              "duration_seconds": 4
+            },
+            {
+              "name": "Complete job",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:35:00Z",
+              "completed_at": "2026-08-09T16:35:00Z",
+              "duration_seconds": 0
             }
-          ]
+          ],
+          "manifest_identity": "playwright-e2e",
+          "policy": "required",
+          "required_for_release_proof": true,
+          "critical_chain_root": true,
+          "proof_state": "proved",
+          "duration_seconds": 214,
+          "cache_state": "unknown"
         },
         {
           "id": 93271358734,
           "name": "Playwright E2E shard 3/3",
-          "policy": "required",
+          "status": "completed",
           "conclusion": "success",
-          "proof_state": "proved",
-          "duration_seconds": 239,
-          "cache_state": "unknown",
+          "started_at": "2026-08-09T16:31:29Z",
+          "completed_at": "2026-08-09T16:35:28Z",
           "steps": [
+            {
+              "name": "Set up job",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:31:30Z",
+              "completed_at": "2026-08-09T16:31:31Z",
+              "duration_seconds": 1
+            },
+            {
+              "name": "Initialize containers",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:31:31Z",
+              "completed_at": "2026-08-09T16:31:53Z",
+              "duration_seconds": 22
+            },
+            {
+              "name": "Run actions/checkout@v6",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:31:53Z",
+              "completed_at": "2026-08-09T16:31:56Z",
+              "duration_seconds": 3
+            },
+            {
+              "name": "Set up BEAM",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:31:56Z",
+              "completed_at": "2026-08-09T16:32:02Z",
+              "duration_seconds": 6
+            },
+            {
+              "name": "Install Hex",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:32:02Z",
+              "completed_at": "2026-08-09T16:32:04Z",
+              "duration_seconds": 2
+            },
+            {
+              "name": "Set up Node",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:32:04Z",
+              "completed_at": "2026-08-09T16:32:05Z",
+              "duration_seconds": 1
+            },
+            {
+              "name": "Restore host deps cache",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:32:05Z",
+              "completed_at": "2026-08-09T16:32:05Z",
+              "duration_seconds": 0
+            },
+            {
+              "name": "Install host deps",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:32:05Z",
+              "completed_at": "2026-08-09T16:32:09Z",
+              "duration_seconds": 4
+            },
+            {
+              "name": "Install browser deps",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:32:09Z",
+              "completed_at": "2026-08-09T16:32:12Z",
+              "duration_seconds": 3
+            },
+            {
+              "name": "Compile host",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:32:12Z",
+              "completed_at": "2026-08-09T16:34:51Z",
+              "duration_seconds": 159
+            },
+            {
+              "name": "Build host assets",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:34:51Z",
+              "completed_at": "2026-08-09T16:34:54Z",
+              "duration_seconds": 3
+            },
+            {
+              "name": "Prepare E2E database fixture",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:34:54Z",
+              "completed_at": "2026-08-09T16:35:00Z",
+              "duration_seconds": 6
+            },
+            {
+              "name": "Install Chromium",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:35:00Z",
+              "completed_at": "2026-08-09T16:35:10Z",
+              "duration_seconds": 10
+            },
             {
               "name": "Run Playwright shard",
               "conclusion": "success",
               "started_at": "2026-08-09T16:35:10Z",
               "completed_at": "2026-08-09T16:35:23Z",
               "duration_seconds": 13
+            },
+            {
+              "name": "Upload Playwright report",
+              "conclusion": "skipped",
+              "started_at": "2026-08-09T16:35:23Z",
+              "completed_at": "2026-08-09T16:35:23Z",
+              "duration_seconds": 0
+            },
+            {
+              "name": "Upload Playwright traces",
+              "conclusion": "skipped",
+              "started_at": "2026-08-09T16:35:23Z",
+              "completed_at": "2026-08-09T16:35:23Z",
+              "duration_seconds": 0
+            },
+            {
+              "name": "Post Restore host deps cache",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:35:23Z",
+              "completed_at": "2026-08-09T16:35:24Z",
+              "duration_seconds": 1
+            },
+            {
+              "name": "Post Set up Node",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:35:24Z",
+              "completed_at": "2026-08-09T16:35:24Z",
+              "duration_seconds": 0
+            },
+            {
+              "name": "Post Run actions/checkout@v6",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:35:24Z",
+              "completed_at": "2026-08-09T16:35:24Z",
+              "duration_seconds": 0
+            },
+            {
+              "name": "Stop containers",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:35:24Z",
+              "completed_at": "2026-08-09T16:35:26Z",
+              "duration_seconds": 2
+            },
+            {
+              "name": "Complete job",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:35:26Z",
+              "completed_at": "2026-08-09T16:35:26Z",
+              "duration_seconds": 0
             }
-          ]
+          ],
+          "manifest_identity": "playwright-e2e",
+          "policy": "required",
+          "required_for_release_proof": true,
+          "critical_chain_root": true,
+          "proof_state": "proved",
+          "duration_seconds": 239,
+          "cache_state": "unknown"
         },
         {
           "id": 93271358750,
           "name": "Playwright E2E shard 1/3",
-          "policy": "required",
+          "status": "completed",
           "conclusion": "success",
-          "proof_state": "proved",
-          "duration_seconds": 233,
-          "cache_state": "unknown",
+          "started_at": "2026-08-09T16:31:28Z",
+          "completed_at": "2026-08-09T16:35:21Z",
           "steps": [
+            {
+              "name": "Set up job",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:31:29Z",
+              "completed_at": "2026-08-09T16:31:32Z",
+              "duration_seconds": 3
+            },
+            {
+              "name": "Initialize containers",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:31:32Z",
+              "completed_at": "2026-08-09T16:32:01Z",
+              "duration_seconds": 29
+            },
+            {
+              "name": "Run actions/checkout@v6",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:32:01Z",
+              "completed_at": "2026-08-09T16:32:05Z",
+              "duration_seconds": 4
+            },
+            {
+              "name": "Set up BEAM",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:32:05Z",
+              "completed_at": "2026-08-09T16:32:11Z",
+              "duration_seconds": 6
+            },
+            {
+              "name": "Install Hex",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:32:11Z",
+              "completed_at": "2026-08-09T16:32:12Z",
+              "duration_seconds": 1
+            },
+            {
+              "name": "Set up Node",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:32:12Z",
+              "completed_at": "2026-08-09T16:32:13Z",
+              "duration_seconds": 1
+            },
+            {
+              "name": "Restore host deps cache",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:32:13Z",
+              "completed_at": "2026-08-09T16:32:13Z",
+              "duration_seconds": 0
+            },
+            {
+              "name": "Install host deps",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:32:13Z",
+              "completed_at": "2026-08-09T16:32:17Z",
+              "duration_seconds": 4
+            },
+            {
+              "name": "Install browser deps",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:32:17Z",
+              "completed_at": "2026-08-09T16:32:19Z",
+              "duration_seconds": 2
+            },
+            {
+              "name": "Compile host",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:32:19Z",
+              "completed_at": "2026-08-09T16:34:27Z",
+              "duration_seconds": 128
+            },
+            {
+              "name": "Build host assets",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:34:27Z",
+              "completed_at": "2026-08-09T16:34:30Z",
+              "duration_seconds": 3
+            },
+            {
+              "name": "Prepare E2E database fixture",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:34:30Z",
+              "completed_at": "2026-08-09T16:34:35Z",
+              "duration_seconds": 5
+            },
+            {
+              "name": "Install Chromium",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:34:35Z",
+              "completed_at": "2026-08-09T16:34:43Z",
+              "duration_seconds": 8
+            },
             {
               "name": "Run Playwright shard",
               "conclusion": "success",
               "started_at": "2026-08-09T16:34:43Z",
               "completed_at": "2026-08-09T16:35:15Z",
               "duration_seconds": 32
+            },
+            {
+              "name": "Upload Playwright report",
+              "conclusion": "skipped",
+              "started_at": "2026-08-09T16:35:15Z",
+              "completed_at": "2026-08-09T16:35:15Z",
+              "duration_seconds": 0
+            },
+            {
+              "name": "Upload Playwright traces",
+              "conclusion": "skipped",
+              "started_at": "2026-08-09T16:35:15Z",
+              "completed_at": "2026-08-09T16:35:15Z",
+              "duration_seconds": 0
+            },
+            {
+              "name": "Post Restore host deps cache",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:35:15Z",
+              "completed_at": "2026-08-09T16:35:16Z",
+              "duration_seconds": 1
+            },
+            {
+              "name": "Post Set up Node",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:35:16Z",
+              "completed_at": "2026-08-09T16:35:16Z",
+              "duration_seconds": 0
+            },
+            {
+              "name": "Post Run actions/checkout@v6",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:35:16Z",
+              "completed_at": "2026-08-09T16:35:16Z",
+              "duration_seconds": 0
+            },
+            {
+              "name": "Stop containers",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:35:16Z",
+              "completed_at": "2026-08-09T16:35:19Z",
+              "duration_seconds": 3
+            },
+            {
+              "name": "Complete job",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:35:19Z",
+              "completed_at": "2026-08-09T16:35:19Z",
+              "duration_seconds": 0
             }
-          ]
+          ],
+          "manifest_identity": "playwright-e2e",
+          "policy": "required",
+          "required_for_release_proof": true,
+          "critical_chain_root": true,
+          "proof_state": "proved",
+          "duration_seconds": 233,
+          "cache_state": "unknown"
         },
         {
           "id": 93271799488,
           "name": "Annotation sweep",
-          "policy": "required",
+          "status": "completed",
           "conclusion": "success",
-          "proof_state": "proved",
-          "duration_seconds": 13,
-          "cache_state": "unknown",
+          "started_at": "2026-08-09T16:35:37Z",
+          "completed_at": "2026-08-09T16:35:50Z",
           "steps": [
+            {
+              "name": "Set up job",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:35:38Z",
+              "completed_at": "2026-08-09T16:35:38Z",
+              "duration_seconds": 0
+            },
+            {
+              "name": "Run actions/checkout@v6",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:35:38Z",
+              "completed_at": "2026-08-09T16:35:42Z",
+              "duration_seconds": 4
+            },
             {
               "name": "Sweep release-facing annotations",
               "conclusion": "success",
               "started_at": "2026-08-09T16:35:42Z",
               "completed_at": "2026-08-09T16:35:49Z",
               "duration_seconds": 7
+            },
+            {
+              "name": "Post Run actions/checkout@v6",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:35:49Z",
+              "completed_at": "2026-08-09T16:35:49Z",
+              "duration_seconds": 0
+            },
+            {
+              "name": "Complete job",
+              "conclusion": "success",
+              "started_at": "2026-08-09T16:35:49Z",
+              "completed_at": "2026-08-09T16:35:49Z",
+              "duration_seconds": 0
             }
-          ]
+          ],
+          "manifest_identity": "annotation-sweep",
+          "policy": "required",
+          "required_for_release_proof": true,
+          "critical_chain_root": true,
+          "proof_state": "proved",
+          "duration_seconds": 13,
+          "cache_state": "unknown"
         }
       ],
       "artifacts": [
@@ -356,7 +3386,14 @@
           "expires_at": "2026-11-07T15:56:12Z",
           "expired": false
         }
-      ]
+      ],
+      "root_failure_signature": {
+        "id": "ci-root-v1-ZmFpbGVkLWxhbmU6YWRtaW4tdWktcmF0Y2hldC1ndWFyZHJhaWxz",
+        "category": "failed-lane",
+        "affected_jobs": [
+          "admin-ui-ratchet-guardrails"
+        ]
+      }
     },
     {
       "run": {
@@ -372,7 +3409,9 @@
         "url": "https://github.com/szTheory/accrue/actions/runs/31332551817",
         "wall_seconds": 2686,
         "eligible": true,
-        "exclusion_reason": null
+        "exclusion_reason": null,
+        "critical_queue_seconds": 2670,
+        "critical_queue_omission_reason": null
       },
       "jobs": [
         {
@@ -440,7 +3479,10 @@
               "duration_seconds": 0
             }
           ],
+          "manifest_identity": "release-manifest-ssot",
           "policy": "required",
+          "required_for_release_proof": true,
+          "critical_chain_root": false,
           "proof_state": "proved",
           "duration_seconds": 165,
           "cache_state": "unknown"
@@ -538,7 +3580,10 @@
               "duration_seconds": 0
             }
           ],
+          "manifest_identity": "phase18-tax-gate",
           "policy": "required",
+          "required_for_release_proof": true,
+          "critical_chain_root": false,
           "proof_state": "proved",
           "duration_seconds": 194,
           "cache_state": "unknown"
@@ -636,8 +3681,11 @@
               "duration_seconds": 0
             }
           ],
-          "policy": "required",
-          "proof_state": "proved",
+          "manifest_identity": "live-stripe",
+          "policy": "conditional",
+          "required_for_release_proof": false,
+          "critical_chain_root": false,
+          "proof_state": "not-applicable",
           "duration_seconds": 193,
           "cache_state": "unknown"
         },
@@ -804,7 +3852,10 @@
               "duration_seconds": 0
             }
           ],
+          "manifest_identity": "admin-phase200-guardrails",
           "policy": "required",
+          "required_for_release_proof": true,
+          "critical_chain_root": false,
           "proof_state": "proved",
           "duration_seconds": 575,
           "cache_state": "unknown"
@@ -853,7 +3904,10 @@
               "duration_seconds": 0
             }
           ],
+          "manifest_identity": "ios-offline-client",
           "policy": "required",
+          "required_for_release_proof": true,
+          "critical_chain_root": false,
           "proof_state": "proved",
           "duration_seconds": 41,
           "cache_state": "unknown"
@@ -1084,7 +4138,10 @@
               "duration_seconds": 1
             }
           ],
+          "manifest_identity": "docs-contracts-shift-left",
           "policy": "required",
+          "required_for_release_proof": true,
+          "critical_chain_root": true,
           "proof_state": "proved",
           "duration_seconds": 178,
           "cache_state": "unknown"
@@ -1245,7 +4302,10 @@
               "duration_seconds": 0
             }
           ],
+          "manifest_identity": "admin-group-contracts",
           "policy": "required",
+          "required_for_release_proof": true,
+          "critical_chain_root": false,
           "proof_state": "proved",
           "duration_seconds": 332,
           "cache_state": "unknown"
@@ -1420,7 +4480,10 @@
               "duration_seconds": 0
             }
           ],
+          "manifest_identity": "admin-hardening-guardrails",
           "policy": "required",
+          "required_for_release_proof": true,
+          "critical_chain_root": false,
           "proof_state": "proved",
           "duration_seconds": 571,
           "cache_state": "unknown"
@@ -1728,7 +4791,10 @@
               "duration_seconds": 1
             }
           ],
+          "manifest_identity": "release-gate-primary-sigra",
           "policy": "advisory",
+          "required_for_release_proof": false,
+          "critical_chain_root": false,
           "proof_state": "advisory",
           "duration_seconds": 1500,
           "cache_state": "observed-miss"
@@ -2036,7 +5102,10 @@
               "duration_seconds": 0
             }
           ],
+          "manifest_identity": "release-gate-primary-opentelemetry",
           "policy": "required",
+          "required_for_release_proof": true,
+          "critical_chain_root": true,
           "proof_state": "proved",
           "duration_seconds": 1523,
           "cache_state": "observed-miss"
@@ -2344,7 +5413,10 @@
               "duration_seconds": 0
             }
           ],
+          "manifest_identity": "release-gate-primary",
           "policy": "required",
+          "required_for_release_proof": true,
+          "critical_chain_root": true,
           "proof_state": "proved",
           "duration_seconds": 1487,
           "cache_state": "observed-miss"
@@ -2652,10 +5724,13 @@
               "duration_seconds": 0
             }
           ],
+          "manifest_identity": "release-gate-floor",
           "policy": "required",
+          "required_for_release_proof": true,
+          "critical_chain_root": true,
           "proof_state": "proved",
           "duration_seconds": 774,
-          "cache_state": "observed-hit"
+          "cache_state": "inferred-setup-bypass"
         },
         {
           "id": 93293314880,
@@ -2722,7 +5797,10 @@
               "duration_seconds": 0
             }
           ],
+          "manifest_identity": "host-docker-smoke",
           "policy": "required",
+          "required_for_release_proof": true,
+          "critical_chain_root": false,
           "proof_state": "proved",
           "duration_seconds": 395,
           "cache_state": "unknown"
@@ -2834,7 +5912,10 @@
               "duration_seconds": 0
             }
           ],
+          "manifest_identity": "admin-ui-ratchet-guardrails",
           "policy": "advisory",
+          "required_for_release_proof": false,
+          "critical_chain_root": false,
           "proof_state": "advisory",
           "duration_seconds": 10,
           "cache_state": "unknown"
@@ -2918,7 +5999,10 @@
               "duration_seconds": 0
             }
           ],
+          "manifest_identity": "admin-drift-docs",
           "policy": "required",
+          "required_for_release_proof": true,
+          "critical_chain_root": true,
           "proof_state": "proved",
           "duration_seconds": 166,
           "cache_state": "unknown"
@@ -3079,7 +6163,10 @@
               "duration_seconds": 0
             }
           ],
+          "manifest_identity": "host-integration",
           "policy": "required",
+          "required_for_release_proof": true,
+          "critical_chain_root": true,
           "proof_state": "proved",
           "duration_seconds": 691,
           "cache_state": "unknown"
@@ -3240,7 +6327,10 @@
               "duration_seconds": 0
             }
           ],
+          "manifest_identity": "playwright-e2e",
           "policy": "required",
+          "required_for_release_proof": true,
+          "critical_chain_root": true,
           "proof_state": "proved",
           "duration_seconds": 272,
           "cache_state": "unknown"
@@ -3401,7 +6491,10 @@
               "duration_seconds": 0
             }
           ],
+          "manifest_identity": "playwright-e2e",
           "policy": "required",
+          "required_for_release_proof": true,
+          "critical_chain_root": true,
           "proof_state": "proved",
           "duration_seconds": 242,
           "cache_state": "unknown"
@@ -3562,7 +6655,10 @@
               "duration_seconds": 0
             }
           ],
+          "manifest_identity": "playwright-e2e",
           "policy": "required",
+          "required_for_release_proof": true,
+          "critical_chain_root": true,
           "proof_state": "proved",
           "duration_seconds": 252,
           "cache_state": "unknown"
@@ -3611,7 +6707,10 @@
               "duration_seconds": 0
             }
           ],
+          "manifest_identity": "annotation-sweep",
           "policy": "required",
+          "required_for_release_proof": true,
+          "critical_chain_root": true,
           "proof_state": "proved",
           "duration_seconds": 16,
           "cache_state": "unknown"
@@ -3660,7 +6759,14 @@
           "expires_at": "2026-11-07T19:47:00Z",
           "expired": false
         }
-      ]
+      ],
+      "root_failure_signature": {
+        "id": "ci-root-v1-ZmFpbGVkLWxhbmU6YWRtaW4tdWktcmF0Y2hldC1ndWFyZHJhaWxz",
+        "category": "failed-lane",
+        "affected_jobs": [
+          "admin-ui-ratchet-guardrails"
+        ]
+      }
     },
     {
       "run": {
@@ -3676,7 +6782,9 @@
         "url": "https://github.com/szTheory/accrue/actions/runs/31344524124",
         "wall_seconds": 2182,
         "eligible": true,
-        "exclusion_reason": null
+        "exclusion_reason": null,
+        "critical_queue_seconds": 2167,
+        "critical_queue_omission_reason": null
       },
       "jobs": [
         {
@@ -3723,7 +6831,10 @@
               "duration_seconds": 1
             }
           ],
+          "manifest_identity": "ios-offline-client",
           "policy": "required",
+          "required_for_release_proof": true,
+          "critical_chain_root": false,
           "proof_state": "proved",
           "duration_seconds": 49,
           "cache_state": "unknown"
@@ -3821,8 +6932,11 @@
               "duration_seconds": 0
             }
           ],
-          "policy": "required",
-          "proof_state": "proved",
+          "manifest_identity": "live-stripe",
+          "policy": "conditional",
+          "required_for_release_proof": false,
+          "critical_chain_root": false,
+          "proof_state": "not-applicable",
           "duration_seconds": 215,
           "cache_state": "unknown"
         },
@@ -3982,7 +7096,10 @@
               "duration_seconds": 0
             }
           ],
+          "manifest_identity": "admin-group-contracts",
           "policy": "required",
+          "required_for_release_proof": true,
+          "critical_chain_root": false,
           "proof_state": "proved",
           "duration_seconds": 352,
           "cache_state": "unknown"
@@ -4080,7 +7197,10 @@
               "duration_seconds": 0
             }
           ],
+          "manifest_identity": "phase18-tax-gate",
           "policy": "required",
+          "required_for_release_proof": true,
+          "critical_chain_root": false,
           "proof_state": "proved",
           "duration_seconds": 192,
           "cache_state": "unknown"
@@ -4248,7 +7368,10 @@
               "duration_seconds": 0
             }
           ],
+          "manifest_identity": "admin-phase200-guardrails",
           "policy": "required",
+          "required_for_release_proof": true,
+          "critical_chain_root": false,
           "proof_state": "proved",
           "duration_seconds": 578,
           "cache_state": "unknown"
@@ -4479,7 +7602,10 @@
               "duration_seconds": 0
             }
           ],
+          "manifest_identity": "docs-contracts-shift-left",
           "policy": "required",
+          "required_for_release_proof": true,
+          "critical_chain_root": true,
           "proof_state": "proved",
           "duration_seconds": 164,
           "cache_state": "unknown"
@@ -4549,7 +7675,10 @@
               "duration_seconds": 0
             }
           ],
+          "manifest_identity": "release-manifest-ssot",
           "policy": "required",
+          "required_for_release_proof": true,
+          "critical_chain_root": false,
           "proof_state": "proved",
           "duration_seconds": 170,
           "cache_state": "unknown"
@@ -4857,10 +7986,13 @@
               "duration_seconds": 0
             }
           ],
+          "manifest_identity": "release-gate-floor",
           "policy": "required",
+          "required_for_release_proof": true,
+          "critical_chain_root": true,
           "proof_state": "proved",
           "duration_seconds": 1027,
-          "cache_state": "observed-hit"
+          "cache_state": "inferred-setup-bypass"
         },
         {
           "id": 93323881035,
@@ -5032,7 +8164,10 @@
               "duration_seconds": 0
             }
           ],
+          "manifest_identity": "admin-hardening-guardrails",
           "policy": "required",
+          "required_for_release_proof": true,
+          "critical_chain_root": false,
           "proof_state": "proved",
           "duration_seconds": 579,
           "cache_state": "unknown"
@@ -5340,10 +8475,13 @@
               "duration_seconds": 0
             }
           ],
+          "manifest_identity": "release-gate-primary",
           "policy": "required",
+          "required_for_release_proof": true,
+          "critical_chain_root": true,
           "proof_state": "proved",
           "duration_seconds": 1011,
-          "cache_state": "observed-hit"
+          "cache_state": "inferred-setup-bypass"
         },
         {
           "id": 93323881050,
@@ -5648,10 +8786,13 @@
               "duration_seconds": 0
             }
           ],
+          "manifest_identity": "release-gate-primary-sigra",
           "policy": "advisory",
+          "required_for_release_proof": false,
+          "critical_chain_root": false,
           "proof_state": "advisory",
           "duration_seconds": 975,
-          "cache_state": "observed-hit"
+          "cache_state": "inferred-setup-bypass"
         },
         {
           "id": 93323881124,
@@ -5956,10 +9097,13 @@
               "duration_seconds": 0
             }
           ],
+          "manifest_identity": "release-gate-primary-opentelemetry",
           "policy": "required",
+          "required_for_release_proof": true,
+          "critical_chain_root": true,
           "proof_state": "proved",
           "duration_seconds": 979,
-          "cache_state": "observed-hit"
+          "cache_state": "inferred-setup-bypass"
         },
         {
           "id": 93324224548,
@@ -6026,7 +9170,10 @@
               "duration_seconds": 0
             }
           ],
+          "manifest_identity": "host-docker-smoke",
           "policy": "required",
+          "required_for_release_proof": true,
+          "critical_chain_root": false,
           "proof_state": "proved",
           "duration_seconds": 396,
           "cache_state": "unknown"
@@ -6138,7 +9285,10 @@
               "duration_seconds": 0
             }
           ],
+          "manifest_identity": "admin-ui-ratchet-guardrails",
           "policy": "advisory",
+          "required_for_release_proof": false,
+          "critical_chain_root": false,
           "proof_state": "advisory",
           "duration_seconds": 14,
           "cache_state": "unknown"
@@ -6222,7 +9372,10 @@
               "duration_seconds": 0
             }
           ],
+          "manifest_identity": "admin-drift-docs",
           "policy": "required",
+          "required_for_release_proof": true,
+          "critical_chain_root": true,
           "proof_state": "proved",
           "duration_seconds": 200,
           "cache_state": "unknown"
@@ -6383,7 +9536,10 @@
               "duration_seconds": 0
             }
           ],
+          "manifest_identity": "host-integration",
           "policy": "required",
+          "required_for_release_proof": true,
+          "critical_chain_root": true,
           "proof_state": "proved",
           "duration_seconds": 674,
           "cache_state": "unknown"
@@ -6544,7 +9700,10 @@
               "duration_seconds": 0
             }
           ],
+          "manifest_identity": "playwright-e2e",
           "policy": "required",
+          "required_for_release_proof": true,
+          "critical_chain_root": true,
           "proof_state": "proved",
           "duration_seconds": 243,
           "cache_state": "unknown"
@@ -6705,7 +9864,10 @@
               "duration_seconds": 1
             }
           ],
+          "manifest_identity": "playwright-e2e",
           "policy": "required",
+          "required_for_release_proof": true,
+          "critical_chain_root": true,
           "proof_state": "proved",
           "duration_seconds": 243,
           "cache_state": "unknown"
@@ -6866,7 +10028,10 @@
               "duration_seconds": 0
             }
           ],
+          "manifest_identity": "playwright-e2e",
           "policy": "required",
+          "required_for_release_proof": true,
+          "critical_chain_root": true,
           "proof_state": "proved",
           "duration_seconds": 233,
           "cache_state": "unknown"
@@ -6915,7 +10080,10 @@
               "duration_seconds": 0
             }
           ],
+          "manifest_identity": "annotation-sweep",
           "policy": "required",
+          "required_for_release_proof": true,
+          "critical_chain_root": true,
           "proof_state": "proved",
           "duration_seconds": 14,
           "cache_state": "unknown"
@@ -6964,7 +10132,14 @@
           "expires_at": "2026-11-08T00:28:00Z",
           "expired": false
         }
-      ]
+      ],
+      "root_failure_signature": {
+        "id": "ci-root-v1-ZmFpbGVkLWxhbmU6YWRtaW4tdWktcmF0Y2hldC1ndWFyZHJhaWxz",
+        "category": "failed-lane",
+        "affected_jobs": [
+          "admin-ui-ratchet-guardrails"
+        ]
+      }
     }
   ],
   "anchor": {
@@ -7001,9 +10176,37 @@
         "examples/accrue_host/mix.lock": "0d951842a525b2025b27f0fc2a6c3b07cba495c0",
         "examples/accrue_host/package-lock.json": "ff5672dd1f92a89c9144c282df1541422e56117f",
         "examples/accrue_host/assets/package-lock.json": "f2d5573185606f87a0eff72902fc7956bf75a6cb"
-      }
+      },
+      "ref": "refs/heads/phase-226-baseline-5da8e6b88735"
     },
-    "exclusions": []
+    "exclusions": [],
+    "eligible_run_ids": [
+      31322443304,
+      31332551817,
+      31344524124
+    ],
+    "anchor": {
+      "sha": "ee940cf9e1f86b4d7c551b15ce113feb7f2a2997",
+      "workflow_blob_oid": "0d01e6da639f2e1d5967e3cbb4a489510e34d29e",
+      "lockfile_blob_oids": {
+        "accrue/mix.lock": "3d90c2f62747bcaaa9b3bc4601cbaacc05a7e4cd",
+        "accrue_admin/mix.lock": "b3bf10d8531a1355211f020b796df51356b8f3ba",
+        "accrue_admin/package-lock.json": "1153a04cf06b5296713fd072797e903f681be647",
+        "examples/accrue_host/mix.lock": "0d951842a525b2025b27f0fc2a6c3b07cba495c0",
+        "examples/accrue_host/package-lock.json": "ff5672dd1f92a89c9144c282df1541422e56117f",
+        "examples/accrue_host/assets/package-lock.json": "f2d5573185606f87a0eff72902fc7956bf75a6cb"
+      },
+      "runner_image_family": "ubuntu-24.04 and macos-15",
+      "stable_job_ids": [
+        "release-gate",
+        "admin-drift-docs",
+        "host-integration",
+        "playwright-e2e",
+        "annotation-sweep"
+      ],
+      "ref": "refs/heads/main",
+      "remote_sha": "ee940cf9e1f86b4d7c551b15ce113feb7f2a2997"
+    }
   },
   "aggregates": {
     "wall_seconds": {
@@ -7026,12 +10229,118 @@
       "maximum": 2686
     },
     "proof": {
-      "required_proved": true,
+      "eligible_run_ids": [
+        31322443304,
+        31332551817,
+        31344524124
+      ],
+      "required_lane_identities": [
+        "admin-drift-docs",
+        "admin-group-contracts",
+        "admin-hardening-guardrails",
+        "admin-phase200-guardrails",
+        "annotation-sweep",
+        "docs-contracts-shift-left",
+        "host-docker-smoke",
+        "host-integration",
+        "ios-offline-client",
+        "phase18-tax-gate",
+        "playwright-e2e",
+        "release-gate-floor",
+        "release-gate-primary",
+        "release-gate-primary-opentelemetry",
+        "release-manifest-ssot"
+      ],
+      "per_run": [
+        {
+          "run_id": 31322443304,
+          "required_proved_lane_identities": [
+            "admin-drift-docs",
+            "admin-group-contracts",
+            "admin-hardening-guardrails",
+            "admin-phase200-guardrails",
+            "annotation-sweep",
+            "docs-contracts-shift-left",
+            "host-docker-smoke",
+            "host-integration",
+            "ios-offline-client",
+            "phase18-tax-gate",
+            "playwright-e2e",
+            "release-gate-floor",
+            "release-gate-primary",
+            "release-gate-primary-opentelemetry",
+            "release-manifest-ssot"
+          ],
+          "required_proved_count": 15
+        },
+        {
+          "run_id": 31332551817,
+          "required_proved_lane_identities": [
+            "admin-drift-docs",
+            "admin-group-contracts",
+            "admin-hardening-guardrails",
+            "admin-phase200-guardrails",
+            "annotation-sweep",
+            "docs-contracts-shift-left",
+            "host-docker-smoke",
+            "host-integration",
+            "ios-offline-client",
+            "phase18-tax-gate",
+            "playwright-e2e",
+            "release-gate-floor",
+            "release-gate-primary",
+            "release-gate-primary-opentelemetry",
+            "release-manifest-ssot"
+          ],
+          "required_proved_count": 15
+        },
+        {
+          "run_id": 31344524124,
+          "required_proved_lane_identities": [
+            "admin-drift-docs",
+            "admin-group-contracts",
+            "admin-hardening-guardrails",
+            "admin-phase200-guardrails",
+            "annotation-sweep",
+            "docs-contracts-shift-left",
+            "host-docker-smoke",
+            "host-integration",
+            "ios-offline-client",
+            "phase18-tax-gate",
+            "playwright-e2e",
+            "release-gate-floor",
+            "release-gate-primary",
+            "release-gate-primary-opentelemetry",
+            "release-manifest-ssot"
+          ],
+          "required_proved_count": 15
+        }
+      ],
+      "all_required_lanes_proved": true,
       "advisory_not_proof": true,
       "skipped_not_proof": true,
       "not_applicable_not_proof": true
     },
-    "reruns": "none; all eligible runs are attempt 1"
+    "reruns": "none; all eligible runs are attempt 1",
+    "queue_seconds": {
+      "per_run": [
+        {
+          "run_id": 31322443304,
+          "seconds": 2366
+        },
+        {
+          "run_id": 31332551817,
+          "seconds": 2670
+        },
+        {
+          "run_id": 31344524124,
+          "seconds": 2167
+        }
+      ],
+      "minimum": 2167,
+      "median": 2366,
+      "maximum": 2670
+    }
   },
   "phase_227_selection_gate": {
     "required_evidence_fields": [
@@ -7072,5 +10381,9 @@
         "baseline_median_or_range": "per-run duration retained"
       }
     ]
+  },
+  "policy_manifest": {
+    "schema_version": 1,
+    "workflow": "CI"
   }
 }
