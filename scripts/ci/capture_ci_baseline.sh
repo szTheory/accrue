@@ -65,10 +65,18 @@ pages() { # $1 stem, $2 jobs|artifacts, $3 output
   while :; do
     local page_file="$tmp_dir/$stem-$page.json" body
     if [ -n "$fixture_dir" ]; then fixture_response "$stem-$page" "$page_file" 200; else api_get_200 "/repos/$repo/actions/runs/$run_id/$key?per_page=100&page=$page" "$page_file"; fi
-    jq -e --arg k "$key" '((keys|sort)==(["next_page","total_count",$k]|sort)) and (.total_count|type=="number" and floor==. and .>=0) and (.next_page == null or (.next_page|type=="number" and floor==. and .>0)) and (.[$k]|type=="array")' "$page_file" >/dev/null || fail "malformed $key page $page"
-    local count next; count="$(jq -r .total_count "$page_file")"; next="$(jq -r .next_page "$page_file")"
+    if [ -n "$fixture_dir" ]; then
+      jq -e --arg k "$key" '((keys|sort)==(["next_page","total_count",$k]|sort)) and (.total_count|type=="number" and floor==. and .>=0) and (.next_page == null or (.next_page|type=="number" and floor==. and .>0)) and (.[$k]|type=="array")' "$page_file" >/dev/null || fail "malformed $key fixture page $page"
+    else
+      # GitHub REST list bodies expose total_count and the item array. Pagination
+      # links live in response headers, so a metadata-only collector derives the
+      # bounded next page from total_count instead of inventing a body field.
+      jq -e --arg k "$key" '((keys|sort)==(["total_count",$k]|sort)) and (.total_count|type=="number" and floor==. and .>=0) and (.[$k]|type=="array" and length<=100)' "$page_file" >/dev/null || fail "malformed $key page $page"
+    fi
+    local count next; count="$(jq -r .total_count "$page_file")"
     [ -z "$total" ] && total="$count"; [ "$total" = "$count" ] || fail "contradictory $key total_count"
     item_pages+=("$page_file")
+    if [ -n "$fixture_dir" ]; then next="$(jq -r .next_page "$page_file")"; else if [ $((page * 100)) -lt "$total" ]; then next=$((page + 1)); else next=null; fi; fi
     [ "$next" = null ] && break
     [ "$next" -gt "$page" ] || fail "cyclic or non-forward $key pagination"
     [ "$next" -le 1000 ] || fail "unbounded $key pagination"

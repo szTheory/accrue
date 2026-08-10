@@ -1,6 +1,11 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
+  "document_type": "ci-baseline-canonical",
   "repository": "szTheory/accrue",
+  "policy_manifest": {
+    "schema_version": 2,
+    "workflow": "CI"
+  },
   "privacy": {
     "logs_downloaded": false,
     "artifact_archives_downloaded": false,
@@ -19,7 +24,74 @@
     "rules": [],
     "classic_response_state": "not-found",
     "classic_checks": [],
+    "captured_at": "2026-08-10T23:52:12Z",
     "enforcement_state": "none-enforced"
+  },
+  "anchor": {
+    "sha": "ee940cf9e1f86b4d7c551b15ce113feb7f2a2997",
+    "workflow_blob_oid": "0d01e6da639f2e1d5967e3cbb4a489510e34d29e",
+    "lockfile_blob_oids": {
+      "accrue/mix.lock": "3d90c2f62747bcaaa9b3bc4601cbaacc05a7e4cd",
+      "accrue_admin/mix.lock": "b3bf10d8531a1355211f020b796df51356b8f3ba",
+      "accrue_admin/package-lock.json": "1153a04cf06b5296713fd072797e903f681be647",
+      "examples/accrue_host/mix.lock": "0d951842a525b2025b27f0fc2a6c3b07cba495c0",
+      "examples/accrue_host/package-lock.json": "ff5672dd1f92a89c9144c282df1541422e56117f",
+      "examples/accrue_host/assets/package-lock.json": "f2d5573185606f87a0eff72902fc7956bf75a6cb"
+    },
+    "runner_image_family": "ubuntu-24.04 and macos-15",
+    "stable_job_ids": [
+      "release-gate",
+      "admin-drift-docs",
+      "host-integration",
+      "playwright-e2e",
+      "annotation-sweep"
+    ]
+  },
+  "cohort": {
+    "eligible_count": 3,
+    "remote_snapshot": {
+      "sha": "5da8e6b887354eded1b6dc25968ad7679d6bbd83",
+      "remote_sha": "5da8e6b887354eded1b6dc25968ad7679d6bbd83",
+      "branch": "phase-226-baseline-5da8e6b88735",
+      "workflow_blob_oid": "0d01e6da639f2e1d5967e3cbb4a489510e34d29e",
+      "lockfile_blob_oids": {
+        "accrue/mix.lock": "3d90c2f62747bcaaa9b3bc4601cbaacc05a7e4cd",
+        "accrue_admin/mix.lock": "b3bf10d8531a1355211f020b796df51356b8f3ba",
+        "accrue_admin/package-lock.json": "1153a04cf06b5296713fd072797e903f681be647",
+        "examples/accrue_host/mix.lock": "0d951842a525b2025b27f0fc2a6c3b07cba495c0",
+        "examples/accrue_host/package-lock.json": "ff5672dd1f92a89c9144c282df1541422e56117f",
+        "examples/accrue_host/assets/package-lock.json": "f2d5573185606f87a0eff72902fc7956bf75a6cb"
+      },
+      "ref": "refs/heads/phase-226-baseline-5da8e6b88735"
+    },
+    "exclusions": [],
+    "eligible_run_ids": [
+      31322443304,
+      31332551817,
+      31344524124
+    ],
+    "anchor": {
+      "sha": "ee940cf9e1f86b4d7c551b15ce113feb7f2a2997",
+      "workflow_blob_oid": "0d01e6da639f2e1d5967e3cbb4a489510e34d29e",
+      "lockfile_blob_oids": {
+        "accrue/mix.lock": "3d90c2f62747bcaaa9b3bc4601cbaacc05a7e4cd",
+        "accrue_admin/mix.lock": "b3bf10d8531a1355211f020b796df51356b8f3ba",
+        "accrue_admin/package-lock.json": "1153a04cf06b5296713fd072797e903f681be647",
+        "examples/accrue_host/mix.lock": "0d951842a525b2025b27f0fc2a6c3b07cba495c0",
+        "examples/accrue_host/package-lock.json": "ff5672dd1f92a89c9144c282df1541422e56117f",
+        "examples/accrue_host/assets/package-lock.json": "f2d5573185606f87a0eff72902fc7956bf75a6cb"
+      },
+      "runner_image_family": "ubuntu-24.04 and macos-15",
+      "stable_job_ids": [
+        "release-gate",
+        "admin-drift-docs",
+        "host-integration",
+        "playwright-e2e",
+        "annotation-sweep"
+      ],
+      "ref": "refs/heads/main",
+      "remote_sha": "ee940cf9e1f86b4d7c551b15ce113feb7f2a2997"
+    }
   },
   "runs": [
     {
@@ -37,8 +109,10 @@
         "wall_seconds": 2380,
         "eligible": true,
         "exclusion_reason": null,
-        "critical_queue_seconds": 2366,
-        "critical_queue_omission_reason": null
+        "runner_queue_seconds": 2,
+        "runner_queue_omission_reason": null,
+        "staged_critical_chain_seconds": 2376,
+        "staged_critical_chain_omission_reason": null
       },
       "jobs": [
         {
@@ -109,10 +183,11 @@
           "manifest_identity": "release-manifest-ssot",
           "policy": "required",
           "required_for_release_proof": true,
-          "critical_chain_root": false,
-          "proof_state": "proved",
+          "initial_queue_root": true,
+          "staged_critical_chain_order": null,
           "duration_seconds": 166,
-          "cache_state": "unknown"
+          "cache_state": "unknown",
+          "proof_state": "proved"
         },
         {
           "id": 93267406332,
@@ -161,10 +236,11 @@
           "manifest_identity": "ios-offline-client",
           "policy": "required",
           "required_for_release_proof": true,
-          "critical_chain_root": false,
-          "proof_state": "proved",
+          "initial_queue_root": true,
+          "staged_critical_chain_order": null,
           "duration_seconds": 40,
-          "cache_state": "unknown"
+          "cache_state": "unknown",
+          "proof_state": "proved"
         },
         {
           "id": 93267406335,
@@ -325,10 +401,11 @@
           "manifest_identity": "admin-group-contracts",
           "policy": "required",
           "required_for_release_proof": true,
-          "critical_chain_root": false,
-          "proof_state": "proved",
+          "initial_queue_root": true,
+          "staged_critical_chain_order": null,
           "duration_seconds": 290,
-          "cache_state": "unknown"
+          "cache_state": "unknown",
+          "proof_state": "proved"
         },
         {
           "id": 93267406338,
@@ -426,10 +503,11 @@
           "manifest_identity": "phase18-tax-gate",
           "policy": "required",
           "required_for_release_proof": true,
-          "critical_chain_root": false,
-          "proof_state": "proved",
+          "initial_queue_root": true,
+          "staged_critical_chain_order": null,
           "duration_seconds": 204,
-          "cache_state": "unknown"
+          "cache_state": "unknown",
+          "proof_state": "proved"
         },
         {
           "id": 93267406344,
@@ -660,10 +738,11 @@
           "manifest_identity": "docs-contracts-shift-left",
           "policy": "required",
           "required_for_release_proof": true,
-          "critical_chain_root": true,
-          "proof_state": "proved",
+          "initial_queue_root": true,
+          "staged_critical_chain_order": null,
           "duration_seconds": 170,
-          "cache_state": "unknown"
+          "cache_state": "unknown",
+          "proof_state": "proved"
         },
         {
           "id": 93267406348,
@@ -831,10 +910,11 @@
           "manifest_identity": "admin-phase200-guardrails",
           "policy": "required",
           "required_for_release_proof": true,
-          "critical_chain_root": false,
-          "proof_state": "proved",
+          "initial_queue_root": true,
+          "staged_critical_chain_order": null,
           "duration_seconds": 489,
-          "cache_state": "unknown"
+          "cache_state": "unknown",
+          "proof_state": "proved"
         },
         {
           "id": 93267406377,
@@ -1009,10 +1089,11 @@
           "manifest_identity": "admin-hardening-guardrails",
           "policy": "required",
           "required_for_release_proof": true,
-          "critical_chain_root": false,
-          "proof_state": "proved",
+          "initial_queue_root": true,
+          "staged_critical_chain_order": null,
           "duration_seconds": 567,
-          "cache_state": "unknown"
+          "cache_state": "unknown",
+          "proof_state": "proved"
         },
         {
           "id": 93267406378,
@@ -1320,10 +1401,11 @@
           "manifest_identity": "release-gate-primary",
           "policy": "required",
           "required_for_release_proof": true,
-          "critical_chain_root": true,
-          "proof_state": "proved",
+          "initial_queue_root": true,
+          "staged_critical_chain_order": 1,
           "duration_seconds": 1274,
-          "cache_state": "inferred-setup-bypass"
+          "cache_state": "inferred-setup-bypass",
+          "proof_state": "proved"
         },
         {
           "id": 93267406379,
@@ -1631,10 +1713,11 @@
           "manifest_identity": "release-gate-floor",
           "policy": "required",
           "required_for_release_proof": true,
-          "critical_chain_root": true,
-          "proof_state": "proved",
+          "initial_queue_root": true,
+          "staged_critical_chain_order": 1,
           "duration_seconds": 1279,
-          "cache_state": "inferred-setup-bypass"
+          "cache_state": "inferred-setup-bypass",
+          "proof_state": "proved"
         },
         {
           "id": 93267406380,
@@ -1942,10 +2025,11 @@
           "manifest_identity": "release-gate-primary-sigra",
           "policy": "advisory",
           "required_for_release_proof": false,
-          "critical_chain_root": false,
-          "proof_state": "advisory",
+          "initial_queue_root": true,
+          "staged_critical_chain_order": null,
           "duration_seconds": 1283,
-          "cache_state": "inferred-setup-bypass"
+          "cache_state": "inferred-setup-bypass",
+          "proof_state": "advisory"
         },
         {
           "id": 93267406381,
@@ -2253,10 +2337,11 @@
           "manifest_identity": "release-gate-primary-opentelemetry",
           "policy": "required",
           "required_for_release_proof": true,
-          "critical_chain_root": true,
-          "proof_state": "proved",
+          "initial_queue_root": true,
+          "staged_critical_chain_order": 1,
           "duration_seconds": 1334,
-          "cache_state": "inferred-setup-bypass"
+          "cache_state": "inferred-setup-bypass",
+          "proof_state": "proved"
         },
         {
           "id": 93267406391,
@@ -2354,10 +2439,11 @@
           "manifest_identity": "live-stripe",
           "policy": "conditional",
           "required_for_release_proof": false,
-          "critical_chain_root": false,
-          "proof_state": "not-applicable",
+          "initial_queue_root": false,
+          "staged_critical_chain_order": null,
           "duration_seconds": 206,
-          "cache_state": "unknown"
+          "cache_state": "unknown",
+          "proof_state": "not-applicable"
         },
         {
           "id": 93267715591,
@@ -2427,10 +2513,11 @@
           "manifest_identity": "host-docker-smoke",
           "policy": "required",
           "required_for_release_proof": true,
-          "critical_chain_root": false,
-          "proof_state": "proved",
+          "initial_queue_root": true,
+          "staged_critical_chain_order": null,
           "duration_seconds": 411,
-          "cache_state": "unknown"
+          "cache_state": "unknown",
+          "proof_state": "proved"
         },
         {
           "id": 93268469556,
@@ -2542,10 +2629,11 @@
           "manifest_identity": "admin-ui-ratchet-guardrails",
           "policy": "advisory",
           "required_for_release_proof": false,
-          "critical_chain_root": false,
-          "proof_state": "advisory",
+          "initial_queue_root": true,
+          "staged_critical_chain_order": null,
           "duration_seconds": 12,
-          "cache_state": "unknown"
+          "cache_state": "unknown",
+          "proof_state": "advisory"
         },
         {
           "id": 93269932669,
@@ -2629,10 +2717,11 @@
           "manifest_identity": "admin-drift-docs",
           "policy": "required",
           "required_for_release_proof": true,
-          "critical_chain_root": true,
-          "proof_state": "proved",
+          "initial_queue_root": false,
+          "staged_critical_chain_order": 2,
           "duration_seconds": 202,
-          "cache_state": "unknown"
+          "cache_state": "unknown",
+          "proof_state": "proved"
         },
         {
           "id": 93270329839,
@@ -2793,10 +2882,11 @@
           "manifest_identity": "host-integration",
           "policy": "required",
           "required_for_release_proof": true,
-          "critical_chain_root": true,
-          "proof_state": "proved",
+          "initial_queue_root": false,
+          "staged_critical_chain_order": 3,
           "duration_seconds": 544,
-          "cache_state": "unknown"
+          "cache_state": "unknown",
+          "proof_state": "proved"
         },
         {
           "id": 93271358733,
@@ -2957,10 +3047,11 @@
           "manifest_identity": "playwright-e2e",
           "policy": "required",
           "required_for_release_proof": true,
-          "critical_chain_root": true,
-          "proof_state": "proved",
+          "initial_queue_root": false,
+          "staged_critical_chain_order": 4,
           "duration_seconds": 214,
-          "cache_state": "unknown"
+          "cache_state": "unknown",
+          "proof_state": "proved"
         },
         {
           "id": 93271358734,
@@ -3121,10 +3212,11 @@
           "manifest_identity": "playwright-e2e",
           "policy": "required",
           "required_for_release_proof": true,
-          "critical_chain_root": true,
-          "proof_state": "proved",
+          "initial_queue_root": false,
+          "staged_critical_chain_order": 4,
           "duration_seconds": 239,
-          "cache_state": "unknown"
+          "cache_state": "unknown",
+          "proof_state": "proved"
         },
         {
           "id": 93271358750,
@@ -3285,10 +3377,11 @@
           "manifest_identity": "playwright-e2e",
           "policy": "required",
           "required_for_release_proof": true,
-          "critical_chain_root": true,
-          "proof_state": "proved",
+          "initial_queue_root": false,
+          "staged_critical_chain_order": 4,
           "duration_seconds": 233,
-          "cache_state": "unknown"
+          "cache_state": "unknown",
+          "proof_state": "proved"
         },
         {
           "id": 93271799488,
@@ -3337,10 +3430,11 @@
           "manifest_identity": "annotation-sweep",
           "policy": "required",
           "required_for_release_proof": true,
-          "critical_chain_root": true,
-          "proof_state": "proved",
+          "initial_queue_root": false,
+          "staged_critical_chain_order": 5,
           "duration_seconds": 13,
-          "cache_state": "unknown"
+          "cache_state": "unknown",
+          "proof_state": "proved"
         }
       ],
       "artifacts": [
@@ -3388,10 +3482,16 @@
         }
       ],
       "root_failure_signature": {
-        "id": "ci-root-v1-ZmFpbGVkLWxhbmU6YWRtaW4tdWktcmF0Y2hldC1ndWFyZHJhaWxz",
+        "id": "ci-root-v2-WyJmYWlsZWQtbGFuZSIsW3sibWFuaWZlc3RfaWRlbnRpdHkiOiJhZG1pbi11aS1yYXRjaGV0LWd1YXJkcmFpbHMiLCJjb25jbHVzaW9uIjoiZmFpbHVyZSJ9XV0",
         "category": "failed-lane",
         "affected_jobs": [
           "admin-ui-ratchet-guardrails"
+        ],
+        "lane_conclusions": [
+          {
+            "manifest_identity": "admin-ui-ratchet-guardrails",
+            "conclusion": "failure"
+          }
         ]
       }
     },
@@ -3410,8 +3510,10 @@
         "wall_seconds": 2686,
         "eligible": true,
         "exclusion_reason": null,
-        "critical_queue_seconds": 2670,
-        "critical_queue_omission_reason": null
+        "runner_queue_seconds": 3,
+        "runner_queue_omission_reason": null,
+        "staged_critical_chain_seconds": 2683,
+        "staged_critical_chain_omission_reason": null
       },
       "jobs": [
         {
@@ -3482,10 +3584,11 @@
           "manifest_identity": "release-manifest-ssot",
           "policy": "required",
           "required_for_release_proof": true,
-          "critical_chain_root": false,
-          "proof_state": "proved",
+          "initial_queue_root": true,
+          "staged_critical_chain_order": null,
           "duration_seconds": 165,
-          "cache_state": "unknown"
+          "cache_state": "unknown",
+          "proof_state": "proved"
         },
         {
           "id": 93292993174,
@@ -3583,10 +3686,11 @@
           "manifest_identity": "phase18-tax-gate",
           "policy": "required",
           "required_for_release_proof": true,
-          "critical_chain_root": false,
-          "proof_state": "proved",
+          "initial_queue_root": true,
+          "staged_critical_chain_order": null,
           "duration_seconds": 194,
-          "cache_state": "unknown"
+          "cache_state": "unknown",
+          "proof_state": "proved"
         },
         {
           "id": 93292993176,
@@ -3684,10 +3788,11 @@
           "manifest_identity": "live-stripe",
           "policy": "conditional",
           "required_for_release_proof": false,
-          "critical_chain_root": false,
-          "proof_state": "not-applicable",
+          "initial_queue_root": false,
+          "staged_critical_chain_order": null,
           "duration_seconds": 193,
-          "cache_state": "unknown"
+          "cache_state": "unknown",
+          "proof_state": "not-applicable"
         },
         {
           "id": 93292993185,
@@ -3855,10 +3960,11 @@
           "manifest_identity": "admin-phase200-guardrails",
           "policy": "required",
           "required_for_release_proof": true,
-          "critical_chain_root": false,
-          "proof_state": "proved",
+          "initial_queue_root": true,
+          "staged_critical_chain_order": null,
           "duration_seconds": 575,
-          "cache_state": "unknown"
+          "cache_state": "unknown",
+          "proof_state": "proved"
         },
         {
           "id": 93292993187,
@@ -3907,10 +4013,11 @@
           "manifest_identity": "ios-offline-client",
           "policy": "required",
           "required_for_release_proof": true,
-          "critical_chain_root": false,
-          "proof_state": "proved",
+          "initial_queue_root": true,
+          "staged_critical_chain_order": null,
           "duration_seconds": 41,
-          "cache_state": "unknown"
+          "cache_state": "unknown",
+          "proof_state": "proved"
         },
         {
           "id": 93292993195,
@@ -4141,10 +4248,11 @@
           "manifest_identity": "docs-contracts-shift-left",
           "policy": "required",
           "required_for_release_proof": true,
-          "critical_chain_root": true,
-          "proof_state": "proved",
+          "initial_queue_root": true,
+          "staged_critical_chain_order": null,
           "duration_seconds": 178,
-          "cache_state": "unknown"
+          "cache_state": "unknown",
+          "proof_state": "proved"
         },
         {
           "id": 93292993201,
@@ -4305,10 +4413,11 @@
           "manifest_identity": "admin-group-contracts",
           "policy": "required",
           "required_for_release_proof": true,
-          "critical_chain_root": false,
-          "proof_state": "proved",
+          "initial_queue_root": true,
+          "staged_critical_chain_order": null,
           "duration_seconds": 332,
-          "cache_state": "unknown"
+          "cache_state": "unknown",
+          "proof_state": "proved"
         },
         {
           "id": 93292993209,
@@ -4483,10 +4592,11 @@
           "manifest_identity": "admin-hardening-guardrails",
           "policy": "required",
           "required_for_release_proof": true,
-          "critical_chain_root": false,
-          "proof_state": "proved",
+          "initial_queue_root": true,
+          "staged_critical_chain_order": null,
           "duration_seconds": 571,
-          "cache_state": "unknown"
+          "cache_state": "unknown",
+          "proof_state": "proved"
         },
         {
           "id": 93292993240,
@@ -4794,10 +4904,11 @@
           "manifest_identity": "release-gate-primary-sigra",
           "policy": "advisory",
           "required_for_release_proof": false,
-          "critical_chain_root": false,
-          "proof_state": "advisory",
+          "initial_queue_root": true,
+          "staged_critical_chain_order": null,
           "duration_seconds": 1500,
-          "cache_state": "observed-miss"
+          "cache_state": "observed-miss",
+          "proof_state": "advisory"
         },
         {
           "id": 93292993246,
@@ -5105,10 +5216,11 @@
           "manifest_identity": "release-gate-primary-opentelemetry",
           "policy": "required",
           "required_for_release_proof": true,
-          "critical_chain_root": true,
-          "proof_state": "proved",
+          "initial_queue_root": true,
+          "staged_critical_chain_order": 1,
           "duration_seconds": 1523,
-          "cache_state": "observed-miss"
+          "cache_state": "observed-miss",
+          "proof_state": "proved"
         },
         {
           "id": 93292993258,
@@ -5416,10 +5528,11 @@
           "manifest_identity": "release-gate-primary",
           "policy": "required",
           "required_for_release_proof": true,
-          "critical_chain_root": true,
-          "proof_state": "proved",
+          "initial_queue_root": true,
+          "staged_critical_chain_order": 1,
           "duration_seconds": 1487,
-          "cache_state": "observed-miss"
+          "cache_state": "observed-miss",
+          "proof_state": "proved"
         },
         {
           "id": 93292993286,
@@ -5727,10 +5840,11 @@
           "manifest_identity": "release-gate-floor",
           "policy": "required",
           "required_for_release_proof": true,
-          "critical_chain_root": true,
-          "proof_state": "proved",
+          "initial_queue_root": true,
+          "staged_critical_chain_order": 1,
           "duration_seconds": 774,
-          "cache_state": "inferred-setup-bypass"
+          "cache_state": "inferred-setup-bypass",
+          "proof_state": "proved"
         },
         {
           "id": 93293314880,
@@ -5800,10 +5914,11 @@
           "manifest_identity": "host-docker-smoke",
           "policy": "required",
           "required_for_release_proof": true,
-          "critical_chain_root": false,
-          "proof_state": "proved",
+          "initial_queue_root": true,
+          "staged_critical_chain_order": null,
           "duration_seconds": 395,
-          "cache_state": "unknown"
+          "cache_state": "unknown",
+          "proof_state": "proved"
         },
         {
           "id": 93294031477,
@@ -5915,10 +6030,11 @@
           "manifest_identity": "admin-ui-ratchet-guardrails",
           "policy": "advisory",
           "required_for_release_proof": false,
-          "critical_chain_root": false,
-          "proof_state": "advisory",
+          "initial_queue_root": true,
+          "staged_critical_chain_order": null,
           "duration_seconds": 10,
-          "cache_state": "unknown"
+          "cache_state": "unknown",
+          "proof_state": "advisory"
         },
         {
           "id": 93295801296,
@@ -6002,10 +6118,11 @@
           "manifest_identity": "admin-drift-docs",
           "policy": "required",
           "required_for_release_proof": true,
-          "critical_chain_root": true,
-          "proof_state": "proved",
+          "initial_queue_root": false,
+          "staged_critical_chain_order": 2,
           "duration_seconds": 166,
-          "cache_state": "unknown"
+          "cache_state": "unknown",
+          "proof_state": "proved"
         },
         {
           "id": 93296110811,
@@ -6166,10 +6283,11 @@
           "manifest_identity": "host-integration",
           "policy": "required",
           "required_for_release_proof": true,
-          "critical_chain_root": true,
-          "proof_state": "proved",
+          "initial_queue_root": false,
+          "staged_critical_chain_order": 3,
           "duration_seconds": 691,
-          "cache_state": "unknown"
+          "cache_state": "unknown",
+          "proof_state": "proved"
         },
         {
           "id": 93297423677,
@@ -6330,10 +6448,11 @@
           "manifest_identity": "playwright-e2e",
           "policy": "required",
           "required_for_release_proof": true,
-          "critical_chain_root": true,
-          "proof_state": "proved",
+          "initial_queue_root": false,
+          "staged_critical_chain_order": 4,
           "duration_seconds": 272,
-          "cache_state": "unknown"
+          "cache_state": "unknown",
+          "proof_state": "proved"
         },
         {
           "id": 93297423678,
@@ -6494,10 +6613,11 @@
           "manifest_identity": "playwright-e2e",
           "policy": "required",
           "required_for_release_proof": true,
-          "critical_chain_root": true,
-          "proof_state": "proved",
+          "initial_queue_root": false,
+          "staged_critical_chain_order": 4,
           "duration_seconds": 242,
-          "cache_state": "unknown"
+          "cache_state": "unknown",
+          "proof_state": "proved"
         },
         {
           "id": 93297423700,
@@ -6658,10 +6778,11 @@
           "manifest_identity": "playwright-e2e",
           "policy": "required",
           "required_for_release_proof": true,
-          "critical_chain_root": true,
-          "proof_state": "proved",
+          "initial_queue_root": false,
+          "staged_critical_chain_order": 4,
           "duration_seconds": 252,
-          "cache_state": "unknown"
+          "cache_state": "unknown",
+          "proof_state": "proved"
         },
         {
           "id": 93297929529,
@@ -6710,10 +6831,11 @@
           "manifest_identity": "annotation-sweep",
           "policy": "required",
           "required_for_release_proof": true,
-          "critical_chain_root": true,
-          "proof_state": "proved",
+          "initial_queue_root": false,
+          "staged_critical_chain_order": 5,
           "duration_seconds": 16,
-          "cache_state": "unknown"
+          "cache_state": "unknown",
+          "proof_state": "proved"
         }
       ],
       "artifacts": [
@@ -6761,10 +6883,16 @@
         }
       ],
       "root_failure_signature": {
-        "id": "ci-root-v1-ZmFpbGVkLWxhbmU6YWRtaW4tdWktcmF0Y2hldC1ndWFyZHJhaWxz",
+        "id": "ci-root-v2-WyJmYWlsZWQtbGFuZSIsW3sibWFuaWZlc3RfaWRlbnRpdHkiOiJhZG1pbi11aS1yYXRjaGV0LWd1YXJkcmFpbHMiLCJjb25jbHVzaW9uIjoiZmFpbHVyZSJ9XV0",
         "category": "failed-lane",
         "affected_jobs": [
           "admin-ui-ratchet-guardrails"
+        ],
+        "lane_conclusions": [
+          {
+            "manifest_identity": "admin-ui-ratchet-guardrails",
+            "conclusion": "failure"
+          }
         ]
       }
     },
@@ -6783,8 +6911,10 @@
         "wall_seconds": 2182,
         "eligible": true,
         "exclusion_reason": null,
-        "critical_queue_seconds": 2167,
-        "critical_queue_omission_reason": null
+        "runner_queue_seconds": 5,
+        "runner_queue_omission_reason": null,
+        "staged_critical_chain_seconds": 2176,
+        "staged_critical_chain_omission_reason": null
       },
       "jobs": [
         {
@@ -6834,10 +6964,11 @@
           "manifest_identity": "ios-offline-client",
           "policy": "required",
           "required_for_release_proof": true,
-          "critical_chain_root": false,
-          "proof_state": "proved",
+          "initial_queue_root": true,
+          "staged_critical_chain_order": null,
           "duration_seconds": 49,
-          "cache_state": "unknown"
+          "cache_state": "unknown",
+          "proof_state": "proved"
         },
         {
           "id": 93323880989,
@@ -6935,10 +7066,11 @@
           "manifest_identity": "live-stripe",
           "policy": "conditional",
           "required_for_release_proof": false,
-          "critical_chain_root": false,
-          "proof_state": "not-applicable",
+          "initial_queue_root": false,
+          "staged_critical_chain_order": null,
           "duration_seconds": 215,
-          "cache_state": "unknown"
+          "cache_state": "unknown",
+          "proof_state": "not-applicable"
         },
         {
           "id": 93323880992,
@@ -7099,10 +7231,11 @@
           "manifest_identity": "admin-group-contracts",
           "policy": "required",
           "required_for_release_proof": true,
-          "critical_chain_root": false,
-          "proof_state": "proved",
+          "initial_queue_root": true,
+          "staged_critical_chain_order": null,
           "duration_seconds": 352,
-          "cache_state": "unknown"
+          "cache_state": "unknown",
+          "proof_state": "proved"
         },
         {
           "id": 93323880996,
@@ -7200,10 +7333,11 @@
           "manifest_identity": "phase18-tax-gate",
           "policy": "required",
           "required_for_release_proof": true,
-          "critical_chain_root": false,
-          "proof_state": "proved",
+          "initial_queue_root": true,
+          "staged_critical_chain_order": null,
           "duration_seconds": 192,
-          "cache_state": "unknown"
+          "cache_state": "unknown",
+          "proof_state": "proved"
         },
         {
           "id": 93323880998,
@@ -7371,10 +7505,11 @@
           "manifest_identity": "admin-phase200-guardrails",
           "policy": "required",
           "required_for_release_proof": true,
-          "critical_chain_root": false,
-          "proof_state": "proved",
+          "initial_queue_root": true,
+          "staged_critical_chain_order": null,
           "duration_seconds": 578,
-          "cache_state": "unknown"
+          "cache_state": "unknown",
+          "proof_state": "proved"
         },
         {
           "id": 93323881001,
@@ -7605,10 +7740,11 @@
           "manifest_identity": "docs-contracts-shift-left",
           "policy": "required",
           "required_for_release_proof": true,
-          "critical_chain_root": true,
-          "proof_state": "proved",
+          "initial_queue_root": true,
+          "staged_critical_chain_order": null,
           "duration_seconds": 164,
-          "cache_state": "unknown"
+          "cache_state": "unknown",
+          "proof_state": "proved"
         },
         {
           "id": 93323881009,
@@ -7678,10 +7814,11 @@
           "manifest_identity": "release-manifest-ssot",
           "policy": "required",
           "required_for_release_proof": true,
-          "critical_chain_root": false,
-          "proof_state": "proved",
+          "initial_queue_root": true,
+          "staged_critical_chain_order": null,
           "duration_seconds": 170,
-          "cache_state": "unknown"
+          "cache_state": "unknown",
+          "proof_state": "proved"
         },
         {
           "id": 93323881033,
@@ -7989,10 +8126,11 @@
           "manifest_identity": "release-gate-floor",
           "policy": "required",
           "required_for_release_proof": true,
-          "critical_chain_root": true,
-          "proof_state": "proved",
+          "initial_queue_root": true,
+          "staged_critical_chain_order": 1,
           "duration_seconds": 1027,
-          "cache_state": "inferred-setup-bypass"
+          "cache_state": "inferred-setup-bypass",
+          "proof_state": "proved"
         },
         {
           "id": 93323881035,
@@ -8167,10 +8305,11 @@
           "manifest_identity": "admin-hardening-guardrails",
           "policy": "required",
           "required_for_release_proof": true,
-          "critical_chain_root": false,
-          "proof_state": "proved",
+          "initial_queue_root": true,
+          "staged_critical_chain_order": null,
           "duration_seconds": 579,
-          "cache_state": "unknown"
+          "cache_state": "unknown",
+          "proof_state": "proved"
         },
         {
           "id": 93323881042,
@@ -8478,10 +8617,11 @@
           "manifest_identity": "release-gate-primary",
           "policy": "required",
           "required_for_release_proof": true,
-          "critical_chain_root": true,
-          "proof_state": "proved",
+          "initial_queue_root": true,
+          "staged_critical_chain_order": 1,
           "duration_seconds": 1011,
-          "cache_state": "inferred-setup-bypass"
+          "cache_state": "inferred-setup-bypass",
+          "proof_state": "proved"
         },
         {
           "id": 93323881050,
@@ -8789,10 +8929,11 @@
           "manifest_identity": "release-gate-primary-sigra",
           "policy": "advisory",
           "required_for_release_proof": false,
-          "critical_chain_root": false,
-          "proof_state": "advisory",
+          "initial_queue_root": true,
+          "staged_critical_chain_order": null,
           "duration_seconds": 975,
-          "cache_state": "inferred-setup-bypass"
+          "cache_state": "inferred-setup-bypass",
+          "proof_state": "advisory"
         },
         {
           "id": 93323881124,
@@ -9100,10 +9241,11 @@
           "manifest_identity": "release-gate-primary-opentelemetry",
           "policy": "required",
           "required_for_release_proof": true,
-          "critical_chain_root": true,
-          "proof_state": "proved",
+          "initial_queue_root": true,
+          "staged_critical_chain_order": 1,
           "duration_seconds": 979,
-          "cache_state": "inferred-setup-bypass"
+          "cache_state": "inferred-setup-bypass",
+          "proof_state": "proved"
         },
         {
           "id": 93324224548,
@@ -9173,10 +9315,11 @@
           "manifest_identity": "host-docker-smoke",
           "policy": "required",
           "required_for_release_proof": true,
-          "critical_chain_root": false,
-          "proof_state": "proved",
+          "initial_queue_root": true,
+          "staged_critical_chain_order": null,
           "duration_seconds": 396,
-          "cache_state": "unknown"
+          "cache_state": "unknown",
+          "proof_state": "proved"
         },
         {
           "id": 93325147657,
@@ -9288,10 +9431,11 @@
           "manifest_identity": "admin-ui-ratchet-guardrails",
           "policy": "advisory",
           "required_for_release_proof": false,
-          "critical_chain_root": false,
-          "proof_state": "advisory",
+          "initial_queue_root": true,
+          "staged_critical_chain_order": null,
           "duration_seconds": 14,
-          "cache_state": "unknown"
+          "cache_state": "unknown",
+          "proof_state": "advisory"
         },
         {
           "id": 93325980138,
@@ -9375,10 +9519,11 @@
           "manifest_identity": "admin-drift-docs",
           "policy": "required",
           "required_for_release_proof": true,
-          "critical_chain_root": true,
-          "proof_state": "proved",
+          "initial_queue_root": false,
+          "staged_critical_chain_order": 2,
           "duration_seconds": 200,
-          "cache_state": "unknown"
+          "cache_state": "unknown",
+          "proof_state": "proved"
         },
         {
           "id": 93326379284,
@@ -9539,10 +9684,11 @@
           "manifest_identity": "host-integration",
           "policy": "required",
           "required_for_release_proof": true,
-          "critical_chain_root": true,
-          "proof_state": "proved",
+          "initial_queue_root": false,
+          "staged_critical_chain_order": 3,
           "duration_seconds": 674,
-          "cache_state": "unknown"
+          "cache_state": "unknown",
+          "proof_state": "proved"
         },
         {
           "id": 93327692287,
@@ -9703,10 +9849,11 @@
           "manifest_identity": "playwright-e2e",
           "policy": "required",
           "required_for_release_proof": true,
-          "critical_chain_root": true,
-          "proof_state": "proved",
+          "initial_queue_root": false,
+          "staged_critical_chain_order": 4,
           "duration_seconds": 243,
-          "cache_state": "unknown"
+          "cache_state": "unknown",
+          "proof_state": "proved"
         },
         {
           "id": 93327692304,
@@ -9867,10 +10014,11 @@
           "manifest_identity": "playwright-e2e",
           "policy": "required",
           "required_for_release_proof": true,
-          "critical_chain_root": true,
-          "proof_state": "proved",
+          "initial_queue_root": false,
+          "staged_critical_chain_order": 4,
           "duration_seconds": 243,
-          "cache_state": "unknown"
+          "cache_state": "unknown",
+          "proof_state": "proved"
         },
         {
           "id": 93327692347,
@@ -10031,10 +10179,11 @@
           "manifest_identity": "playwright-e2e",
           "policy": "required",
           "required_for_release_proof": true,
-          "critical_chain_root": true,
-          "proof_state": "proved",
+          "initial_queue_root": false,
+          "staged_critical_chain_order": 4,
           "duration_seconds": 233,
-          "cache_state": "unknown"
+          "cache_state": "unknown",
+          "proof_state": "proved"
         },
         {
           "id": 93328203115,
@@ -10083,10 +10232,11 @@
           "manifest_identity": "annotation-sweep",
           "policy": "required",
           "required_for_release_proof": true,
-          "critical_chain_root": true,
-          "proof_state": "proved",
+          "initial_queue_root": false,
+          "staged_critical_chain_order": 5,
           "duration_seconds": 14,
-          "cache_state": "unknown"
+          "cache_state": "unknown",
+          "proof_state": "proved"
         }
       ],
       "artifacts": [
@@ -10134,81 +10284,59 @@
         }
       ],
       "root_failure_signature": {
-        "id": "ci-root-v1-ZmFpbGVkLWxhbmU6YWRtaW4tdWktcmF0Y2hldC1ndWFyZHJhaWxz",
+        "id": "ci-root-v2-WyJmYWlsZWQtbGFuZSIsW3sibWFuaWZlc3RfaWRlbnRpdHkiOiJhZG1pbi11aS1yYXRjaGV0LWd1YXJkcmFpbHMiLCJjb25jbHVzaW9uIjoiZmFpbHVyZSJ9XV0",
         "category": "failed-lane",
         "affected_jobs": [
           "admin-ui-ratchet-guardrails"
+        ],
+        "lane_conclusions": [
+          {
+            "manifest_identity": "admin-ui-ratchet-guardrails",
+            "conclusion": "failure"
+          }
         ]
       }
     }
   ],
-  "anchor": {
-    "sha": "ee940cf9e1f86b4d7c551b15ce113feb7f2a2997",
-    "workflow_blob_oid": "0d01e6da639f2e1d5967e3cbb4a489510e34d29e",
-    "lockfile_blob_oids": {
-      "accrue/mix.lock": "3d90c2f62747bcaaa9b3bc4601cbaacc05a7e4cd",
-      "accrue_admin/mix.lock": "b3bf10d8531a1355211f020b796df51356b8f3ba",
-      "accrue_admin/package-lock.json": "1153a04cf06b5296713fd072797e903f681be647",
-      "examples/accrue_host/mix.lock": "0d951842a525b2025b27f0fc2a6c3b07cba495c0",
-      "examples/accrue_host/package-lock.json": "ff5672dd1f92a89c9144c282df1541422e56117f",
-      "examples/accrue_host/assets/package-lock.json": "f2d5573185606f87a0eff72902fc7956bf75a6cb"
-    },
-    "runner_image_family": "ubuntu-24.04 and macos-15",
-    "stable_job_ids": [
-      "release-gate",
-      "admin-drift-docs",
-      "host-integration",
-      "playwright-e2e",
-      "annotation-sweep"
-    ]
-  },
-  "cohort": {
-    "eligible_count": 3,
-    "remote_snapshot": {
-      "sha": "5da8e6b887354eded1b6dc25968ad7679d6bbd83",
-      "remote_sha": "5da8e6b887354eded1b6dc25968ad7679d6bbd83",
-      "branch": "phase-226-baseline-5da8e6b88735",
-      "workflow_blob_oid": "0d01e6da639f2e1d5967e3cbb4a489510e34d29e",
-      "lockfile_blob_oids": {
-        "accrue/mix.lock": "3d90c2f62747bcaaa9b3bc4601cbaacc05a7e4cd",
-        "accrue_admin/mix.lock": "b3bf10d8531a1355211f020b796df51356b8f3ba",
-        "accrue_admin/package-lock.json": "1153a04cf06b5296713fd072797e903f681be647",
-        "examples/accrue_host/mix.lock": "0d951842a525b2025b27f0fc2a6c3b07cba495c0",
-        "examples/accrue_host/package-lock.json": "ff5672dd1f92a89c9144c282df1541422e56117f",
-        "examples/accrue_host/assets/package-lock.json": "f2d5573185606f87a0eff72902fc7956bf75a6cb"
-      },
-      "ref": "refs/heads/phase-226-baseline-5da8e6b88735"
-    },
-    "exclusions": [],
-    "eligible_run_ids": [
-      31322443304,
-      31332551817,
-      31344524124
-    ],
-    "anchor": {
-      "sha": "ee940cf9e1f86b4d7c551b15ce113feb7f2a2997",
-      "workflow_blob_oid": "0d01e6da639f2e1d5967e3cbb4a489510e34d29e",
-      "lockfile_blob_oids": {
-        "accrue/mix.lock": "3d90c2f62747bcaaa9b3bc4601cbaacc05a7e4cd",
-        "accrue_admin/mix.lock": "b3bf10d8531a1355211f020b796df51356b8f3ba",
-        "accrue_admin/package-lock.json": "1153a04cf06b5296713fd072797e903f681be647",
-        "examples/accrue_host/mix.lock": "0d951842a525b2025b27f0fc2a6c3b07cba495c0",
-        "examples/accrue_host/package-lock.json": "ff5672dd1f92a89c9144c282df1541422e56117f",
-        "examples/accrue_host/assets/package-lock.json": "f2d5573185606f87a0eff72902fc7956bf75a6cb"
-      },
-      "runner_image_family": "ubuntu-24.04 and macos-15",
-      "stable_job_ids": [
-        "release-gate",
-        "admin-drift-docs",
-        "host-integration",
-        "playwright-e2e",
-        "annotation-sweep"
-      ],
-      "ref": "refs/heads/main",
-      "remote_sha": "ee940cf9e1f86b4d7c551b15ce113feb7f2a2997"
-    }
-  },
   "aggregates": {
+    "runner_queue_seconds": {
+      "per_run": [
+        {
+          "run_id": 31322443304,
+          "seconds": 2
+        },
+        {
+          "run_id": 31332551817,
+          "seconds": 3
+        },
+        {
+          "run_id": 31344524124,
+          "seconds": 5
+        }
+      ],
+      "minimum": 2,
+      "median": 3,
+      "maximum": 5
+    },
+    "staged_critical_chain_seconds": {
+      "per_run": [
+        {
+          "run_id": 31322443304,
+          "seconds": 2376
+        },
+        {
+          "run_id": 31332551817,
+          "seconds": 2683
+        },
+        {
+          "run_id": 31344524124,
+          "seconds": 2176
+        }
+      ],
+      "minimum": 2176,
+      "median": 2376,
+      "maximum": 2683
+    },
     "wall_seconds": {
       "per_run": [
         {
@@ -10321,26 +10449,7 @@
       "skipped_not_proof": true,
       "not_applicable_not_proof": true
     },
-    "reruns": "none; all eligible runs are attempt 1",
-    "queue_seconds": {
-      "per_run": [
-        {
-          "run_id": 31322443304,
-          "seconds": 2366
-        },
-        {
-          "run_id": 31332551817,
-          "seconds": 2670
-        },
-        {
-          "run_id": 31344524124,
-          "seconds": 2167
-        }
-      ],
-      "minimum": 2167,
-      "median": 2366,
-      "maximum": 2670
-    }
+    "reruns": "none; all eligible runs are attempt 1"
   },
   "phase_227_selection_gate": {
     "required_evidence_fields": [
@@ -10381,9 +10490,5 @@
         "baseline_median_or_range": "per-run duration retained"
       }
     ]
-  },
-  "policy_manifest": {
-    "schema_version": 1,
-    "workflow": "CI"
   }
 }

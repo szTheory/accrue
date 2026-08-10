@@ -32,15 +32,17 @@ validate_aggregates() {
   jq -e --argjson expected_ids "$expected_ids" --slurpfile policy "$policy_manifest" '
     ([.runs[] | select(.run.eligible == true)]) as $eligible |
     ($policy[0].lanes | map(select(.required_for_release_proof)) | map(.identity) | sort) as $required |
-    ($eligible | map(.run.critical_queue_seconds) | sort) as $queues |
+    ($eligible | map(.run.runner_queue_seconds) | sort) as $queues |
+    ($eligible | map(.run.staged_critical_chain_seconds) | sort) as $chains |
     ($eligible | map(.run.wall_seconds) | sort) as $walls |
-    (.aggregates.queue_seconds == {per_run: ($eligible | map({run_id: .run.id, seconds: .run.critical_queue_seconds})), minimum: $queues[0], median: $queues[($queues|length)/2], maximum: $queues[-1]}) and
+    (.aggregates.runner_queue_seconds == {per_run: ($eligible | map({run_id: .run.id, seconds: .run.runner_queue_seconds})), minimum: $queues[0], median: $queues[($queues|length)/2], maximum: $queues[-1]}) and
+    (.aggregates.staged_critical_chain_seconds == {per_run: ($eligible | map({run_id: .run.id, seconds: .run.staged_critical_chain_seconds})), minimum: $chains[0], median: $chains[($chains|length)/2], maximum: $chains[-1]}) and
     (.aggregates.wall_seconds == {per_run: ($eligible | map({run_id: .run.id, seconds: .run.wall_seconds})), minimum: $walls[0], median: $walls[($walls|length)/2], maximum: $walls[-1]}) and
     (.aggregates.proof.eligible_run_ids == $expected_ids) and
     (.aggregates.proof.required_lane_identities == $required) and
     (.aggregates.proof.per_run == ($eligible | map({run_id: .run.id, required_proved_lane_identities: ([.jobs[] | select(.proof_state == "proved" and .required_for_release_proof == true) | .manifest_identity] | unique | sort), required_proved_count: ([.jobs[] | select(.proof_state == "proved" and .required_for_release_proof == true) | .manifest_identity] | unique | length)}))) and
     (.aggregates.proof.all_required_lanes_proved == ([$eligible[] | ([.jobs[] | select(.proof_state == "proved" and .required_for_release_proof == true) | .manifest_identity] | unique | sort) == $required] | all))
-  ' "$candidate" >/dev/null || fail "derived queue or required-proof aggregate mismatch"
+  ' "$candidate" >/dev/null || fail "derived timing or required-proof aggregate mismatch"
 }
 
 validate_collector_record() {
@@ -66,10 +68,23 @@ validate_collector_record() {
   if jq -e '.. | strings | select(test("https?://[^[:space:]]+\\?"))' "$candidate" >/dev/null; then fail "privacy contract rejected query-bearing URL"; fi
 }
 
-validate_canonical_cohort() { # v1 remains readable only until Plan 06 regenerates the v2 canonical artifact.
-  jq -e --argjson expected_ids "$expected_ids" '.schema_version == 1 and (.runs|type=="array") and ([.runs[]|select(.run.eligible==true)|.run.id] == $expected_ids) and (.cohort.eligible_count==3) and (.aggregates|type=="object") and (.phase_227_selection_gate|type=="object")' "$1" >/dev/null || fail "canonical cohort contract failed: ${1#$root_dir/}"
+validate_canonical_cohort() {
+  jq -e --argjson expected_ids "$expected_ids" '
+    .schema_version == 2 and .document_type == "ci-baseline-canonical" and
+    (.runs|type=="array") and ([.runs[]|select(.run.eligible==true)|.run.id] == $expected_ids) and
+    (.cohort.eligible_count==3) and
+    (.cohort.anchor.workflow_blob_oid == "0d01e6da639f2e1d5967e3cbb4a489510e34d29e") and
+    ((.cohort.anchor.lockfile_blob_oids|keys|sort) == ["accrue/mix.lock","accrue_admin/mix.lock","accrue_admin/package-lock.json","examples/accrue_host/assets/package-lock.json","examples/accrue_host/mix.lock","examples/accrue_host/package-lock.json"]) and
+    (.aggregates|type=="object") and (.phase_227_selection_gate|type=="object") and
+    (.required_check_snapshot.rules_response_state == "ok") and
+    (.required_check_snapshot.classic_response_state == "not-found") and
+    (.required_check_snapshot.enforcement_state == "none-enforced") and
+    (.required_check_snapshot.captured_at|type=="string" and test("^[0-9]{4}-[0-9]{2}-[0-9]{2}T")) and
+    all(.runs[]; (.run.runner_queue_seconds|type=="number" and .>=0) and (.run.staged_critical_chain_seconds|type=="number" and .>0) and (.root_failure_signature.id|test("^ci-root-v2-")))
+  ' "$1" >/dev/null || fail "canonical cohort contract failed: ${1#$root_dir/}"
+  validate_aggregates "$1"
 }
-validate_input() { local candidate="$1"; [ -f "$candidate" ] || fail "missing baseline input: ${candidate#$root_dir/}"; case "$(jq -r '.document_type // "canonical-v1"' "$candidate")" in ci-baseline-collector-record) validate_collector_record "$candidate";; canonical-v1) validate_canonical_cohort "$candidate";; *) fail "unknown document discriminator";; esac; }
+validate_input() { local candidate="$1"; [ -f "$candidate" ] || fail "missing baseline input: ${candidate#$root_dir/}"; case "$(jq -r '.document_type // "canonical-v1"' "$candidate")" in ci-baseline-collector-record) validate_collector_record "$candidate";; ci-baseline-canonical) validate_canonical_cohort "$candidate";; *) fail "unknown document discriminator";; esac; }
 
 validate_repository_contract() {
   [ -f "$ci_file" ] && [ -f "$ownership_file" ] || fail "missing workflow or ownership runbook"
@@ -100,6 +115,10 @@ if [ "$self_test" = true ]; then
   mv "$fixture_dir/jobs-1.valid.json" "$fixture_dir/jobs-1-1.json"
   bash "$root_dir/scripts/ci/capture_ci_baseline.sh" --run-id 1 --fixture-dir "$fixture_dir" --output "$tmp_dir/collector-record.json"
   validate_input "$tmp_dir/collector-record.json"
+  # Live GitHub list response bodies do not carry fixture-only next_page fields.
+  jq 'del(.body.next_page)' "$fixture_dir/jobs-1-1.json" >"$tmp_dir/live-jobs.json"; mv "$tmp_dir/live-jobs.json" "$fixture_dir/jobs-1-1.json"
+  jq 'del(.body.next_page)' "$fixture_dir/artifacts-1-1.json" >"$tmp_dir/live-artifacts.json"; mv "$tmp_dir/live-artifacts.json" "$fixture_dir/artifacts-1-1.json"
+  if bash "$root_dir/scripts/ci/capture_ci_baseline.sh" --run-id 1 --fixture-dir "$fixture_dir" --output "$tmp_dir/live-shape.json"; then fail "fixture-only pagination unexpectedly accepted as live shape"; fi
   expect_invalid unknown-root '.evidence = "ghp_synthetic_secret_value"'
   expect_invalid unknown-nested '.runs[0].jobs[0].evidence = "harmless"'
   expect_invalid secret-like-unknown '.runs[0].root_failure_signature.token = "ghp_synthetic_secret_value"'
