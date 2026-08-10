@@ -54,7 +54,7 @@ Completed and deferred v1.60 details are retained in [the milestone archive](mil
   3. A shared signature across release-matrix cells is recorded and triaged as one root-cause incident rather than counted once per cell.
   4. The Admin Playwright timeout has trace-first evidence and a diagnosis or repair path; no retry-only, masking, or test-deletion workaround represents resolution.
 
-**Plans:** 3 plans
+**Plans:** 4 plans
 
 Plans:
 **Wave 1**
@@ -95,6 +95,10 @@ Plans:
 **Wave 3** *(blocked on Wave 2 completion)*
 
 - [x] 226-03-PLAN.md — Publish setup ownership and gate proof semantics in the existing shift-left topology.
+
+**Wave 4** *(gap closure; blocked on Wave 3 completion)*
+
+- [ ] 226-04-PLAN.md — Close queue/signature, aggregate-proof, and immutable-provenance verification gaps with fail-closed negative controls.
 
 ### Phase 227: Measured Critical-Path Improvement
 
