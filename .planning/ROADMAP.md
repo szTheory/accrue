@@ -102,7 +102,7 @@ Plans:
 
 **Wave 5** *(gap closure; blocked on Wave 4 completion)*
 
-- [ ] 226-05-PLAN.md — Repair exact-schema privacy, provider status, record/cohort modes, eligibility-aware proof, pagination, queue/chain, and signature semantics.
+- [x] 226-05-PLAN.md — Repair exact-schema privacy, provider status, record/cohort modes, eligibility-aware proof, pagination, queue/chain, and signature semantics.
 
 **Wave 6** *(gap closure; blocked on Wave 5 completion)*
 

@@ -5,16 +5,16 @@ milestone_name: CI Evidence & Critical-Path Hardening
 current_phase: 226
 current_phase_name: ci-baseline-proof-semantics
 status: executing
-stopped_at: Completed 226-04-PLAN.md
-last_updated: "2026-08-10T21:49:14.610Z"
+stopped_at: Completed 226-05-PLAN.md
+last_updated: "2026-08-10T23:30:54.013Z"
 last_activity: 2026-08-10
-last_activity_desc: Phase 226 execution resumed (wave continue)
+last_activity_desc: Phase 226 execution started
 progress:
   total_phases: 3
-  completed_phases: 2
-  total_plans: 7
-  completed_plans: 7
-  percent: 67
+  completed_phases: 1
+  total_plans: 9
+  completed_plans: 8
+  percent: 33
 ---
 
 # Project State
@@ -30,11 +30,11 @@ See: `.planning/PROJECT.md` (updated 2026-08-05 after shipping v1.59)
 ## Current Position
 
 Phase: 226 (ci-baseline-proof-semantics) — EXECUTING
-Plan: 2 of 3
+Plan: 2 of 6
 Status: Ready to execute
-Last activity: 2026-08-10 — Phase 226 execution resumed (wave continue)
+Last activity: 2026-08-10 — Phase 226 execution started
 
-Progress: [██████████] 100%
+Progress: [█████████░] 89%
 
 ## v1.61 Roadmap
 
@@ -462,6 +462,7 @@ Coverage: 22/22 v1.51 requirements mapped (each REQ-ID → exactly one phase). D
 | Phase 226-ci-baseline-proof-semantics P01 | 35m | 2 tasks | 5 files |
 | Phase 226 P02 | remote CI plus execution | 2 tasks | 3 files |
 | Phase 226-ci-baseline-proof-semantics P04 | 6 min | 3 tasks | 5 files |
+| Phase 226 P05 | 24m | 3 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -913,6 +914,8 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - [Phase ?]: Use stable manifest identities rather than job-name heuristics for CI proof semantics.
 - [Phase ?]: Treat provider-omitted critical-root timestamps as ineligible evidence, never as estimated queue time.
 - [Phase ?]: Derive proof and queue aggregates from eligible run records and policy rather than stored booleans.
+- [Phase ?]: Collector records use schema version 2 with an explicit document discriminator.
+- [Phase ?]: Only confirmed classic HTTP 404 is provider absence.
 
 ### Pending Todos
 
@@ -1065,8 +1068,8 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 
 ## Session Continuity
 
-Last session: 2026-08-10T21:49:14.598Z
-Stopped at: Completed 226-04-PLAN.md
+Last session: 2026-08-10T23:30:54.002Z
+Stopped at: Completed 226-05-PLAN.md
 Resume file: None
 
 ## Operator Next Steps
