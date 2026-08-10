@@ -98,7 +98,7 @@ Plans:
 
 **Wave 4** *(gap closure; blocked on Wave 3 completion)*
 
-- [ ] 226-04-PLAN.md — Close queue/signature, aggregate-proof, and immutable-provenance verification gaps with fail-closed negative controls.
+- [x] 226-04-PLAN.md — Close queue/signature, aggregate-proof, and immutable-provenance verification gaps with fail-closed negative controls.
 
 ### Phase 227: Measured Critical-Path Improvement
 
