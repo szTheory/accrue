@@ -105,6 +105,12 @@ if [ "$self_test" = true ]; then
   printf '%s\n' '{"jobs":[{"id":2,"name":"unknown job","status":"completed","conclusion":"success","started_at":"2026-08-09T15:56:12Z","completed_at":"2026-08-09T15:56:20Z","steps":[]}]}' >"$fixture_dir/jobs-1.json"
   printf '%s\n' '{"artifacts":[]}' >"$fixture_dir/artifacts-1.json"; printf '%s\n' '[]' >"$fixture_dir/rules.json"; printf '%s\n' '{"response_state":"not-found"}' >"$fixture_dir/required_status_checks.json"
   if bash "$root_dir/scripts/ci/capture_ci_baseline.sh" --run-id 1 --fixture-dir "$fixture_dir" --output "$tmp_dir/unknown.json"; then fail "unknown workflow job unexpectedly captured"; fi
+  # RED gate for the public collector-to-contract path.  The implementation must
+  # accept this reduced one-run document without importing cohort-only fields.
+  jq '.jobs[0].name = "Docs and bash contracts (shift-left)"' "$fixture_dir/jobs-1.json" >"$fixture_dir/jobs-1.valid.json"
+  mv "$fixture_dir/jobs-1.valid.json" "$fixture_dir/jobs-1.json"
+  bash "$root_dir/scripts/ci/capture_ci_baseline.sh" --run-id 1 --fixture-dir "$fixture_dir" --output "$tmp_dir/collector-record.json"
+  validate_input "$tmp_dir/collector-record.json"
   validate_repository_contract
   cp "$ci_file" "$tmp_dir/ci.yml"; sed -i.bak 's/  host-integration:/  host-integration-renamed:/' "$tmp_dir/ci.yml"; ci_file="$tmp_dir/ci.yml"; if (validate_repository_contract); then fail "renamed required job unexpectedly passed"; fi; ci_file="$root_dir/.github/workflows/ci.yml"
   cp "$ownership_file" "$tmp_dir/ownership.md"; sed -i.bak 's/npm run e2e:install/npm run e2e-install/g' "$tmp_dir/ownership.md"; ownership_file="$tmp_dir/ownership.md"; if (validate_repository_contract); then fail "missing ownership command unexpectedly passed"; fi
