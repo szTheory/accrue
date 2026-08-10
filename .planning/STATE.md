@@ -2,19 +2,19 @@
 gsd_state_version: 1.0
 milestone: v1.61
 milestone_name: CI Evidence & Critical-Path Hardening
-current_phase: 225
-current_phase_name: required-lane-signal-repair
-status: verifying
+current_phase: 226
+current_phase_name: ci-baseline-proof-semantics
+status: executing
 stopped_at: Completed 226-02-PLAN.md
-last_updated: "2026-08-10T20:34:13.700Z"
-last_activity: 2026-08-08
-last_activity_desc: Phase 225 execution resumed (wave continue)
+last_updated: "2026-08-10T21:11:08.943Z"
+last_activity: 2026-08-10
+last_activity_desc: Phase 226 execution started
 progress:
   total_phases: 3
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 6
-  completed_plans: 5
-  percent: 33
+  completed_plans: 6
+  percent: 67
 ---
 
 # Project State
@@ -25,14 +25,14 @@ See: `.planning/PROJECT.md` (updated 2026-08-05 after shipping v1.59)
 
 **Core value:** A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic Elixir DX, strong domain modeling, tamper-evident audit ledger, great observability, and zero breaking-change pain through v1.x.
 
-**Current focus:** Phase 225 — required-lane-signal-repair
+**Current focus:** Phase 226 — ci-baseline-proof-semantics
 
 ## Current Position
 
-Phase: 225 (required-lane-signal-repair) — EXECUTING
-Plan: 3 of 3
-Status: Phase complete — ready for verification
-Last activity: 2026-08-08 — Phase 225 execution resumed (wave continue)
+Phase: 226 (ci-baseline-proof-semantics) — EXECUTING
+Plan: 1 of 3
+Status: Executing Phase 226
+Last activity: 2026-08-10 — Phase 226 execution started
 
 Progress: [████████░░] 83%
 

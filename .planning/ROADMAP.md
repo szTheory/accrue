@@ -94,7 +94,7 @@ Plans:
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
-- [ ] 226-03-PLAN.md — Publish setup ownership and gate proof semantics in the existing shift-left topology.
+- [x] 226-03-PLAN.md — Publish setup ownership and gate proof semantics in the existing shift-left topology.
 
 ### Phase 227: Measured Critical-Path Improvement
 
