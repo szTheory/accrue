@@ -87,7 +87,7 @@ Plans:
 **Wave 1**
 
 - [x] 226-01-PLAN.md — Build the comparable-run schema, collector, renderer, and deterministic validation engine.
-- [ ] 226-03-PLAN.md — Build exhaustive provider-proof classification and a privacy-safe live-suite manifest seam.
+- [x] 226-03-PLAN.md — Build exhaustive provider-proof classification and a privacy-safe live-suite manifest seam.
 - [ ] 226-04-PLAN.md — Build stable owner-first setup diagnostics in the canonical host proof path.
 
 **Wave 2** *(blocked on 226-01)*

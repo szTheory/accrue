@@ -5,15 +5,15 @@ milestone_name: CI Evidence & Critical-Path Hardening
 current_phase: 226
 current_phase_name: ci-baseline-proof-semantics
 status: executing
-stopped_at: Completed 226-01-PLAN.md
-last_updated: "2026-08-11T18:13:53.538Z"
+stopped_at: Completed 226-03-PLAN.md
+last_updated: "2026-08-11T18:20:35.732Z"
 last_activity: 2026-08-11
 last_activity_desc: Phase 226 execution started
 progress:
   total_phases: 3
   completed_phases: 1
   total_plans: 8
-  completed_plans: 4
+  completed_plans: 5
   percent: 33
 ---
 
@@ -30,11 +30,11 @@ See: `.planning/PROJECT.md` (updated 2026-08-05 after shipping v1.59)
 ## Current Position
 
 Phase: 226 (ci-baseline-proof-semantics) — EXECUTING
-Plan: 2 of 5
+Plan: 3 of 5
 Status: Ready to execute
 Last activity: 2026-08-11 — Phase 226 execution started
 
-Progress: [█████░░░░░] 50%
+Progress: [██████░░░░] 63%
 
 ## v1.61 Roadmap
 
@@ -460,6 +460,7 @@ Coverage: 22/22 v1.51 requirements mapped (each REQ-ID → exactly one phase). D
 | Phase 225-required-lane-signal-repair P02 | 6min | 2 tasks | 4 files |
 | Phase 225-required-lane-signal-repair P03 | 13h 18m | 2 tasks | 2 files |
 | Phase 226 P01 | 16m | 2 tasks | 5 files |
+| Phase 226 P03 | 12 minutes | 2 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -907,6 +908,8 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - [Phase ?]: Floor, Primary, and Primary + OpenTelemetry are required proof; Sigra remains separately recorded advisory evidence.
 - [Phase ?]: CI baseline records use strict schema-v1 allowlists and branch classes; privacy-sensitive Actions metadata fails closed.
 - [Phase ?]: Comparable CI timing requires 20 first-attempt full-CI successes within 90 days; otherwise report insufficient_sample.
+- [Phase ?]: Use a 24-hour provider cadence plus 48-hour grace only to derive stale; proof state remains independent.
+- [Phase ?]: Require selected, configured, nonzero, all-passing privacy-safe manifests before Stripe parity can be proved.
 
 ### Pending Todos
 
@@ -1059,8 +1062,8 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 
 ## Session Continuity
 
-Last session: 2026-08-11T18:13:53.528Z
-Stopped at: Completed 226-01-PLAN.md
+Last session: 2026-08-11T18:20:35.723Z
+Stopped at: Completed 226-03-PLAN.md
 Resume file: None
 
 ## Operator Next Steps
