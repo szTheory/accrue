@@ -182,6 +182,8 @@ if [ "$self_test" = true ]; then
   tmp_dir="$(mktemp -d)"; cleanup() { rm -rf "$tmp_dir"; }; trap cleanup EXIT
   expect_invalid() { local label="$1" filter="$2" path; path="$tmp_dir/$label.json"; jq "$filter" "$tmp_dir/collector-record.json" >"$path"; if bash "$root_dir/scripts/ci/verify_ci_baseline_contract.sh" --input "$path" >/dev/null 2>&1; then fail "$label mutation unexpectedly passed"; fi; }
   expect_canonical_invalid() { local label="$1" filter="$2" path; path="$tmp_dir/canonical-$label.json"; jq "$filter" "$canonical_input" >"$path"; if bash "$root_dir/scripts/ci/verify_ci_baseline_contract.sh" --input "$path" >/dev/null 2>&1; then fail "canonical $label mutation unexpectedly passed"; fi; }
+  expect_semantic_invalid() { local label="$1" filter="$2" path; path="$tmp_dir/semantic-$label.json"; jq "$filter" "$tmp_dir/collector-semantic-record.json" >"$path"; if bash "$root_dir/scripts/ci/verify_ci_baseline_contract.sh" --input "$path" >/dev/null 2>&1; then fail "collector $label mutation unexpectedly passed"; fi; }
+  expect_semantic_valid() { local label="$1" filter="$2" path; path="$tmp_dir/semantic-$label.json"; jq "$filter" "$tmp_dir/collector-semantic-record.json" >"$path"; bash "$root_dir/scripts/ci/verify_ci_baseline_contract.sh" --input "$path" >/dev/null || fail "collector $label derived-state fixture unexpectedly failed"; }
   validate_input "$canonical_input"
   # RED gate: the public canonical path must reject fields not in the durable schema.
   expect_canonical_invalid canonical-unknown-root '.evidence = "ghp_synthetic_secret_value"'
@@ -196,6 +198,10 @@ if [ "$self_test" = true ]; then
   mv "$fixture_dir/jobs-1.valid.json" "$fixture_dir/jobs-1-1.json"
   bash "$root_dir/scripts/ci/capture_ci_baseline.sh" --run-id 1 --fixture-dir "$fixture_dir" --output "$tmp_dir/collector-record.json"
   validate_input "$tmp_dir/collector-record.json"
+  # Reuse the canonical run as a semantically complete collector record so the
+  # public mutation matrix can exercise required, advisory, and conditional lanes.
+  jq --slurpfile canonical "$canonical_input" '.runs[0] = $canonical[0].runs[0]' "$tmp_dir/collector-record.json" >"$tmp_dir/collector-semantic-record.json"
+  validate_input "$tmp_dir/collector-semantic-record.json"
   # Live GitHub list response bodies do not carry fixture-only next_page fields.
   jq 'del(.body.next_page)' "$fixture_dir/jobs-1-1.json" >"$tmp_dir/live-jobs.json"; mv "$tmp_dir/live-jobs.json" "$fixture_dir/jobs-1-1.json"
   jq 'del(.body.next_page)' "$fixture_dir/artifacts-1-1.json" >"$tmp_dir/live-artifacts.json"; mv "$tmp_dir/live-artifacts.json" "$fixture_dir/artifacts-1-1.json"
@@ -211,6 +217,32 @@ if [ "$self_test" = true ]; then
   # RED gates: both public document discriminators must reject unknown lane names.
   expect_invalid collector-fabricated-job '.runs[0].jobs[0].name = "Fabricated release lane"'
   expect_canonical_invalid canonical-fabricated-job '.runs[0].jobs[0].name = "Fabricated release lane"'
+  # Each policy-owned field is an assertion in input, never a source of truth.
+  expect_semantic_invalid collector-forged-manifest-identity '.runs[0].jobs[0].manifest_identity = "fabricated-release"'
+  expect_canonical_invalid canonical-forged-manifest-identity '.runs[0].jobs[0].manifest_identity = "fabricated-release"'
+  expect_semantic_invalid collector-forged-policy '.runs[0].jobs[0].policy = "advisory"'
+  expect_canonical_invalid canonical-forged-policy '.runs[0].jobs[0].policy = "advisory"'
+  expect_semantic_invalid collector-forged-required '.runs[0].jobs[0].required_for_release_proof = false'
+  expect_canonical_invalid canonical-forged-required '.runs[0].jobs[0].required_for_release_proof = false'
+  expect_semantic_invalid collector-forged-queue-root '.runs[0].jobs[0].initial_queue_root = false'
+  expect_canonical_invalid canonical-forged-queue-root '.runs[0].jobs[0].initial_queue_root = false'
+  expect_semantic_invalid collector-forged-chain-order '.runs[0].jobs[7].staged_critical_chain_order = 99'
+  expect_canonical_invalid canonical-forged-chain-order '.runs[0].jobs[7].staged_critical_chain_order = 99'
+  expect_semantic_invalid collector-forged-proof-state '.runs[0].jobs[0].proof_state = "not-applicable"'
+  expect_canonical_invalid canonical-forged-proof-state '.runs[0].jobs[0].proof_state = "not-applicable"'
+  # Public positive/negative pairs pin proof derivation precedence.
+  expect_semantic_valid proof-eligible-required-success '.'
+  expect_semantic_invalid proof-eligible-required-success-forged '.runs[0].jobs[0].proof_state = "skipped"'
+  expect_semantic_valid proof-skipped '(.runs[0].jobs[0].conclusion = "skipped") | (.runs[0].jobs[0].proof_state = "skipped")'
+  expect_semantic_invalid proof-skipped-forged '(.runs[0].jobs[0].conclusion = "skipped") | (.runs[0].jobs[0].proof_state = "proved")'
+  expect_semantic_valid proof-advisory '.'
+  expect_semantic_invalid proof-advisory-forged '.runs[0].jobs[9].proof_state = "proved"'
+  expect_semantic_valid proof-conditional '.'
+  expect_semantic_invalid proof-conditional-forged '.runs[0].jobs[11].proof_state = "proved"'
+  expect_semantic_valid proof-unsuccessful-required '(.runs[0].jobs[0].conclusion = "failure") | (.runs[0].jobs[0].proof_state = "not-applicable") | ([.runs[0].jobs[] | select(.conclusion == "failure" or .conclusion == "timed_out" or .conclusion == "cancelled") | {manifest_identity, conclusion}] | unique | sort_by(.manifest_identity, .conclusion)) as $pairs | .runs[0].root_failure_signature = {id:("ci-root-v2-" + ((["failed-lane", $pairs] | tojson | @base64) | gsub("="; ""))), category:"failed-lane", affected_jobs:($pairs | map(.manifest_identity) | unique | sort), lane_conclusions:$pairs}'
+  expect_semantic_invalid proof-unsuccessful-required-forged '(.runs[0].jobs[0].conclusion = "failure") | (.runs[0].jobs[0].proof_state = "proved") | ([.runs[0].jobs[] | select(.conclusion == "failure" or .conclusion == "timed_out" or .conclusion == "cancelled") | {manifest_identity, conclusion}] | unique | sort_by(.manifest_identity, .conclusion)) as $pairs | .runs[0].root_failure_signature = {id:("ci-root-v2-" + ((["failed-lane", $pairs] | tojson | @base64) | gsub("="; ""))), category:"failed-lane", affected_jobs:($pairs | map(.manifest_identity) | unique | sort), lane_conclusions:$pairs}'
+  expect_semantic_valid proof-ineligible '(.runs[0].run.eligible = false) | (.runs[0].jobs |= map(if .conclusion == "skipped" then .proof_state = "skipped" elif .policy == "advisory" then .proof_state = "advisory" else .proof_state = "not-applicable" end))'
+  expect_semantic_invalid proof-ineligible-forged '(.runs[0].run.eligible = false) | (.runs[0].jobs |= map(if .conclusion == "skipped" then .proof_state = "skipped" elif .policy == "advisory" then .proof_state = "advisory" else .proof_state = "not-applicable" end)) | (.runs[0].jobs[0].proof_state = "proved")'
   # Canonical mutation matrix: each copy goes through the public discriminator.
   expect_canonical_invalid canonical-policy-unknown '.policy_manifest.evidence = "harmless"'
   expect_canonical_invalid canonical-privacy-unknown '.privacy.evidence = "harmless"'
