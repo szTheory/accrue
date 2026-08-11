@@ -118,4 +118,10 @@ Ecto.Adapters.SQL.Sandbox.mode(Accrue.TestRepo, :manual)
 # three scaffold files run in the default suite (exclusion removed).
 ExUnit.configure(exclude: [:live_stripe, :slow, :compile_matrix])
 
-ExUnit.start()
+provider_formatters =
+  case System.get_env("ACCRUE_PROVIDER_MANIFEST", "") |> String.trim() do
+    "" -> []
+    _path -> [Accrue.Test.LiveProofFormatter]
+  end
+
+ExUnit.start(formatters: [ExUnit.CLIFormatter | provider_formatters])

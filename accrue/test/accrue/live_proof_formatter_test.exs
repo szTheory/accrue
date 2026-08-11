@@ -7,7 +7,7 @@ defmodule Accrue.Test.LiveProofFormatterTest do
     path = Path.join(System.tmp_dir!(), "live-proof-#{System.unique_integer([:positive])}.json")
     on_exit(fn -> File.rm(path) end)
 
-    state = LiveProofFormatter.init(path: path, now: fn -> ~U[2026-08-11 06:00:00Z] end)
+    {:ok, state} = LiveProofFormatter.init(path: path, now: fn -> ~U[2026-08-11 06:00:00Z] end)
     {:noreply, state} = LiveProofFormatter.handle_cast({:test_finished, %{state: nil}}, state)
     {:noreply, state} = LiveProofFormatter.handle_cast({:test_finished, %{state: {:skipped, "no key"}}}, state)
     {:noreply, state} = LiveProofFormatter.handle_cast({:test_finished, %{state: {:failed, "sk_test_secret provider payload"}}}, state)
@@ -34,7 +34,7 @@ defmodule Accrue.Test.LiveProofFormatterTest do
     File.write!(path, "stale")
     on_exit(fn -> File.rm(path) end)
 
-    state = LiveProofFormatter.init(path: path, now: fn -> ~U[2026-08-11 06:00:00Z] end)
+    {:ok, state} = LiveProofFormatter.init(path: path, now: fn -> ~U[2026-08-11 06:00:00Z] end)
     {:noreply, state} = LiveProofFormatter.handle_cast({:test_finished, %{state: nil}}, state)
     {:noreply, _state} = LiveProofFormatter.handle_cast({:suite_finished, %{}}, state)
 
