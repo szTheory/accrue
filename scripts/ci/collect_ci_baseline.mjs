@@ -158,7 +158,7 @@ export function summarizeCohorts(runs, { windowDays = 90, sampleSize = 20, now =
       if (!current || member.normalized.run_attempt < current.normalized.run_attempt) firstByIdentity.set(identity, member);
     }
     const qualifying = [...firstByIdentity.values()]
-      .filter(({ normalized }) => normalized.provider_state !== "non_run" && normalized.conclusion === "success" && normalized.run_attempt === 1 && Date.parse(normalized.completed_at) >= cutoff)
+      .filter(({ normalized }) => normalized.event_class !== "schedule" && normalized.conclusion === "success" && normalized.run_attempt === 1 && Date.parse(normalized.completed_at) >= cutoff)
       .sort((a, b) => Date.parse(b.normalized.completed_at) - Date.parse(a.normalized.completed_at))
       .slice(0, sampleSize);
     const durations = qualifying.map(({ normalized }) => normalized.workflow_duration_ms);
