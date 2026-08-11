@@ -15,6 +15,21 @@ function fixturePath() {
   return path.resolve(".planning/phases/226-ci-baseline-proof-semantics/fixtures/ci-baseline-cases.json");
 }
 
+function rejectsForbiddenFields(fixture) {
+  for (const field of ["actor", "logs", "secret_metadata", "provider_payload", "artifact_content", "user_data"]) {
+    assert.throws(
+      () => collectBaseline([{ ...fixture.successful_run, [field]: "forbidden" }]),
+      new RegExp(`forbidden field: ${field}`),
+      `${field} is rejected`
+    );
+  }
+  assert.throws(
+    () => collectBaseline([{ ...fixture.successful_run, head_branch: undefined, raw_branch: "forbidden" }]),
+    /forbidden field: raw_branch/,
+    "raw branch fields are rejected"
+  );
+}
+
 export function verifyFixtures() {
   const fixture = JSON.parse(fs.readFileSync(fixturePath(), "utf8"));
   const temp = fs.mkdtempSync(path.join(os.tmpdir(), "accrue-ci-baseline-"));
@@ -26,6 +41,7 @@ export function verifyFixtures() {
     const markdown = renderBaseline(records);
     assert.match(markdown, /Comparable timing/, "renderer includes timing table");
     assert.doesNotMatch(markdown, /unsafe-branch-name/, "renderer never receives raw branch name");
+    rejectsForbiddenFields(fixture);
   } finally {
     fs.rmSync(temp, { recursive: true, force: true });
   }
