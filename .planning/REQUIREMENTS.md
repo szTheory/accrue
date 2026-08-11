@@ -13,7 +13,7 @@
 
 ### Evidence Baseline
 
-- [x] **BASE-01**: A maintainer can review a durable, privacy-safe baseline of workflow wall time, queue delay, job/step duration, reruns, cache behavior, Docker/browser setup cost, provider state, and root failure signature across comparable runs.
+- [ ] **BASE-01**: A maintainer can review a durable, privacy-safe baseline of workflow wall time, queue delay, job/step duration, reruns, cache behavior, Docker/browser setup cost, provider state, and root failure signature across comparable runs.
 - [ ] **BASE-02**: Required, skipped, and advisory provider evidence is visibly distinguished so a non-run provider lane cannot be mistaken for release proof.
 
 ### Critical Path and Ownership
