@@ -45,6 +45,16 @@ validate_aggregates() {
   ' "$candidate" >/dev/null || fail "derived timing or required-proof aggregate mismatch"
 }
 
+reject_sensitive_strings() {
+  local candidate="$1"
+  if jq -e '.. | strings | select(test("(ghp_|github_pat_|sk_(live|test)_|bearer[[:space:]]+[A-Za-z0-9._-]+|-----BEGIN (RSA |EC |OPENSSH )?PRIVATE KEY-----|raw (request|response|event) payload)"; "i"))' "$candidate" >/dev/null; then
+    fail "privacy contract rejected secret-like or raw payload content"
+  fi
+  if jq -e '.. | strings | select(test("https?://[^[:space:]]+\\?"))' "$candidate" >/dev/null; then
+    fail "privacy contract rejected query-bearing URL"
+  fi
+}
+
 validate_collector_record() {
   local candidate="$1"
   validate_policy_manifest
@@ -65,12 +75,40 @@ validate_collector_record() {
       (pairs) as $pairs | $record.root_failure_signature.lane_conclusions==$pairs and $record.root_failure_signature.affected_jobs==($pairs|map(.manifest_identity)|unique|sort) and $record.root_failure_signature.id == ("ci-root-v2-"+(([$record.root_failure_signature.category,$pairs]|tojson|@base64)|gsub("=";"")))
     )
   ' "$candidate" >/dev/null || fail "collector derived facts failed: ${candidate#$root_dir/}"
-  if jq -e '.. | strings | select(test("https?://[^[:space:]]+\\?"))' "$candidate" >/dev/null; then fail "privacy contract rejected query-bearing URL"; fi
+  reject_sensitive_strings "$candidate"
 }
 
 validate_canonical_cohort() {
-  jq -e --argjson expected_ids "$expected_ids" '
-    .schema_version == 2 and .document_type == "ci-baseline-canonical" and
+  jq -e --argjson expected_ids "$expected_ids" --slurpfile canonical_reference "$canonical_input" '
+    def exact($x): (keys | sort) == $x;
+    def iso: type == "string" and test("^[0-9]{4}-[0-9]{2}-[0-9]{2}T.*Z$");
+    def num: type == "number" and isfinite and . >= 0;
+    def integer: num and floor == .;
+    def sha40: type == "string" and test("^[0-9a-f]{40}$");
+    def string_array: type == "array" and all(.[]; type == "string");
+    def lockfile_map: exact(["accrue/mix.lock","accrue_admin/mix.lock","accrue_admin/package-lock.json","examples/accrue_host/assets/package-lock.json","examples/accrue_host/mix.lock","examples/accrue_host/package-lock.json"]) and all(.[]; sha40);
+    def step: exact(["completed_at","conclusion","duration_seconds","name","started_at"]) and (.name|type == "string") and (.conclusion|type == "string" or . == null) and (.started_at|iso or . == null) and (.completed_at|iso or . == null) and (.duration_seconds|num or . == null);
+    def job: exact(["cache_state","completed_at","conclusion","duration_seconds","id","initial_queue_root","manifest_identity","name","policy","proof_state","required_for_release_proof","staged_critical_chain_order","started_at","status","steps"]) and (.id|integer) and (.name|type == "string") and (.status|type == "string") and (.conclusion|type == "string" or . == null) and (.started_at|iso or . == null) and (.completed_at|iso or . == null) and (.duration_seconds|num or . == null) and (.steps|type == "array" and all(.[]; step)) and (.manifest_identity|type == "string") and (.policy == "required" or . == "advisory" or . == "conditional") and (.required_for_release_proof|type == "boolean") and (.initial_queue_root|type == "boolean") and (.staged_critical_chain_order == null or (.staged_critical_chain_order|integer and . > 0)) and (.proof_state == "proved" or . == "skipped" or . == "advisory" or . == "not-applicable") and (.cache_state == "observed-hit" or . == "observed-miss" or . == "inferred-setup-bypass" or . == "unknown");
+    def artifact: exact(["expired","expires_at","id","name","size_in_bytes"]) and (.id|integer) and (.name|type == "string") and (.size_in_bytes|num) and (.expires_at|iso or . == null) and (.expired|type == "boolean");
+    def lane_conclusion: exact(["conclusion","manifest_identity"]) and (.manifest_identity|type == "string") and (.conclusion == "failure" or . == "timed_out" or . == "cancelled");
+    def signature: exact(["affected_jobs","category","id","lane_conclusions"]) and (.id|type == "string" and test("^ci-root-v2-")) and (.category == "no-failure" or . == "failed-lane") and (.affected_jobs|string_array) and (.lane_conclusions|type == "array" and all(.[]; lane_conclusion));
+    def run: exact(["attempt","completed_at","conclusion","created_at","eligible","event","exclusion_reason","head_sha","id","runner_queue_omission_reason","runner_queue_seconds","staged_critical_chain_omission_reason","staged_critical_chain_seconds","status","url","wall_seconds","workflow"]) and (.id|integer) and (.workflow|type == "string") and (.event|type == "string") and (.head_sha|sha40) and (.attempt|integer and . > 0) and (.status|type == "string") and (.conclusion|type == "string" or . == null) and (.created_at|iso) and (.completed_at|iso) and (.url|type == "string" and test("^https://")) and (.wall_seconds|num) and (.eligible|type == "boolean") and (.exclusion_reason|type == "string" or . == null) and (.runner_queue_seconds|num or . == null) and (.runner_queue_omission_reason == null or . == "provider-omitted-initial-root-started-at") and (.staged_critical_chain_seconds|num or . == null) and (.staged_critical_chain_omission_reason == null or . == "provider-omitted-staged-chain-timestamp");
+    def run_record: exact(["artifacts","jobs","root_failure_signature","run"]) and (.run|run) and (.jobs|type == "array" and all(.[]; job)) and (.artifacts|type == "array" and all(.[]; artifact)) and (.root_failure_signature|signature);
+    def anchor: exact(["lockfile_blob_oids","runner_image_family","sha","stable_job_ids","workflow_blob_oid"]) and (.sha|sha40) and (.workflow_blob_oid|sha40) and (.lockfile_blob_oids|lockfile_map) and (.runner_image_family|type == "string") and (.stable_job_ids|string_array);
+    def cohort_anchor: exact(["lockfile_blob_oids","ref","remote_sha","runner_image_family","sha","stable_job_ids","workflow_blob_oid"]) and (.sha|sha40) and (.workflow_blob_oid|sha40) and (.lockfile_blob_oids|lockfile_map) and (.runner_image_family|type == "string") and (.stable_job_ids|string_array) and (.ref|type == "string") and (.remote_sha|sha40);
+    def remote_snapshot: exact(["branch","lockfile_blob_oids","ref","remote_sha","sha","workflow_blob_oid"]) and (.sha|sha40) and (.remote_sha|sha40) and (.branch|type == "string") and (.ref|type == "string") and (.workflow_blob_oid|sha40) and (.lockfile_blob_oids|lockfile_map);
+    def metric_row: exact(["run_id","seconds"]) and (.run_id|integer) and (.seconds|num);
+    def metric: exact(["maximum","median","minimum","per_run"]) and (.per_run|type == "array" and all(.[]; metric_row)) and (.minimum|num) and (.median|num) and (.maximum|num);
+    def proof_row: exact(["required_proved_count","required_proved_lane_identities","run_id"]) and (.run_id|integer) and (.required_proved_count|integer) and (.required_proved_lane_identities|string_array);
+    def proof: exact(["advisory_not_proof","all_required_lanes_proved","eligible_run_ids","not_applicable_not_proof","per_run","required_lane_identities","skipped_not_proof"]) and (.eligible_run_ids|type == "array" and all(.[]; integer)) and (.required_lane_identities|string_array) and (.per_run|type == "array" and all(.[]; proof_row)) and (.all_required_lanes_proved|type == "boolean") and (.advisory_not_proof|type == "boolean") and (.skipped_not_proof|type == "boolean") and (.not_applicable_not_proof|type == "boolean");
+    def selection_candidate: exact(["affected_critical_path_stage","baseline_median_or_range","candidate","eligible_run_ids","json_paths","rank"]) and (.rank|integer and . > 0) and (.candidate|type == "string") and (.eligible_run_ids|type == "array" and all(.[]; integer)) and (.json_paths|string_array) and (.affected_critical_path_stage|type == "string") and (.baseline_median_or_range|type == "string");
+    def canonical: exact(["aggregates","anchor","cohort","document_type","phase_227_selection_gate","policy_manifest","privacy","repository","required_check_snapshot","runs","schema_version"]) and .schema_version == 2 and .document_type == "ci-baseline-canonical" and (.repository|type == "string" and test("^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$")) and (.policy_manifest|exact(["schema_version","workflow"]) and (.schema_version|integer) and (.workflow|type == "string")) and (.privacy|exact(["allowlist","artifact_archives_downloaded","env_values_recorded","logs_downloaded","raw_payloads_recorded"]) and (.allowlist|string_array) and (.artifact_archives_downloaded|type == "boolean") and (.env_values_recorded|type == "boolean") and (.logs_downloaded|type == "boolean") and (.raw_payloads_recorded|type == "boolean")) and (.required_check_snapshot|exact(["captured_at","classic_checks","classic_response_state","enforcement_state","rules","rules_response_state"]) and (.captured_at|iso) and (.rules|type == "array" and length == 0) and (.classic_checks|type == "array" and length == 0) and (.rules_response_state == "ok") and (.classic_response_state == "not-found") and (.enforcement_state == "none-enforced")) and (.anchor|anchor) and (.cohort|exact(["anchor","eligible_count","eligible_run_ids","exclusions","remote_snapshot"]) and (.eligible_count|integer) and (.eligible_run_ids|type == "array" and all(.[]; integer)) and (.exclusions|type == "array" and length == 0) and (.anchor|cohort_anchor) and (.remote_snapshot|remote_snapshot)) and (.runs|type == "array" and all(.[]; run_record)) and (.aggregates|exact(["proof","reruns","runner_queue_seconds","staged_critical_chain_seconds","wall_seconds"]) and (.runner_queue_seconds|metric) and (.staged_critical_chain_seconds|metric) and (.wall_seconds|metric) and (.proof|proof) and (.reruns|type == "string")) and (.phase_227_selection_gate|exact(["candidates","required_evidence_fields","rule"]) and (.required_evidence_fields|string_array) and (.rule|type == "string") and (.candidates|type == "array" and all(.[]; selection_candidate)));
+    # The canonical cohort is a fixed, versioned durable document.  Matching its
+    # recursive type/key tree closes every object and array boundary, including
+    # intentionally empty arrays (which therefore cannot admit an element).
+    def type_tree: if type == "object" then with_entries(.value |= type_tree) elif type == "array" then map(type_tree) else type end;
+    def canonical: (type_tree == ($canonical_reference[0] | type_tree));
+    canonical and
     (.runs|type=="array") and ([.runs[]|select(.run.eligible==true)|.run.id] == $expected_ids) and
     (.cohort.eligible_count==3) and
     (.cohort.anchor.workflow_blob_oid == "0d01e6da639f2e1d5967e3cbb4a489510e34d29e") and
@@ -82,6 +120,7 @@ validate_canonical_cohort() {
     (.required_check_snapshot.captured_at|type=="string" and test("^[0-9]{4}-[0-9]{2}-[0-9]{2}T")) and
     all(.runs[]; (.run.runner_queue_seconds|type=="number" and .>=0) and (.run.staged_critical_chain_seconds|type=="number" and .>0) and (.root_failure_signature.id|test("^ci-root-v2-")))
   ' "$1" >/dev/null || fail "canonical cohort contract failed: ${1#$root_dir/}"
+  reject_sensitive_strings "$1"
   validate_aggregates "$1"
 }
 validate_input() { local candidate="$1"; [ -f "$candidate" ] || fail "missing baseline input: ${candidate#$root_dir/}"; case "$(jq -r '.document_type // "canonical-v1"' "$candidate")" in ci-baseline-collector-record) validate_collector_record "$candidate";; ci-baseline-canonical) validate_canonical_cohort "$candidate";; *) fail "unknown document discriminator";; esac; }
