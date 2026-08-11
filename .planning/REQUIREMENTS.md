@@ -20,7 +20,7 @@
 
 - [ ] **PATH-01**: A maintainer can identify the measured critical path and the exact dependency or duplicated work selected for the first optimization, with before-state evidence and a documented rollback.
 - [ ] **PATH-02**: One validated CI critical-path improvement reduces measured wait or duplicate work without removing required release, host, browser, or provider evidence.
-- [ ] **OWN-01**: A host maintainer can determine whether Node, browser installation, and Playwright setup are owned by the host or CI, and can diagnose the documented setup failure modes.
+- [x] **OWN-01**: A host maintainer can determine whether Node, browser installation, and Playwright setup are owned by the host or CI, and can diagnose the documented setup failure modes.
 
 ### Safety and Operability
 
@@ -50,11 +50,11 @@
 | REL-01 | Phase 225 | Complete |
 | REL-02 | Phase 225 | Complete |
 | REL-03 | Phase 225 | Complete |
-| BASE-01 | Phase 226 | Gaps Found |
-| BASE-02 | Phase 226 | Gaps Found |
+| BASE-01 | Phase 226 | Complete |
+| BASE-02 | Phase 226 | Complete |
 | PATH-01 | Phase 227 | Pending |
 | PATH-02 | Phase 227 | Pending |
-| OWN-01 | Phase 226 | Gaps Found |
+| OWN-01 | Phase 226 | Complete |
 | SAFE-01 | Phase 227 | Pending |
 | SAFE-02 | Phase 227 | Pending |
 

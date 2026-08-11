@@ -5,16 +5,16 @@ milestone_name: CI Evidence & Critical-Path Hardening
 current_phase: 226
 current_phase_name: ci-baseline-proof-semantics
 status: executing
-stopped_at: Completed 226-06-PLAN.md
-last_updated: "2026-08-11T21:15:17.491Z"
+stopped_at: Completed 226-12-PLAN.md
+last_updated: "2026-08-11T22:40:20.030Z"
 last_activity: 2026-08-11
-last_activity_desc: Phase 226 execution started
+last_activity_desc: Phase 226 execution resumed (wave continue)
 progress:
   total_phases: 3
-  completed_phases: 1
-  total_plans: 10
-  completed_plans: 8
-  percent: 33
+  completed_phases: 2
+  total_plans: 11
+  completed_plans: 11
+  percent: 67
 ---
 
 # Project State
@@ -32,9 +32,9 @@ See: `.planning/PROJECT.md` (updated 2026-08-05 after shipping v1.59)
 Phase: 226 (ci-baseline-proof-semantics) — EXECUTING
 Plan: 2 of 7
 Status: Ready to execute
-Last activity: 2026-08-11 — Phase 226 execution started
+Last activity: 2026-08-11 — Phase 226 execution resumed (wave continue)
 
-Progress: [████████░░] 80%
+Progress: [██████████] 100%
 
 ## v1.61 Roadmap
 
@@ -465,6 +465,7 @@ Coverage: 22/22 v1.51 requirements mapped (each REQ-ID → exactly one phase). D
 | Phase 226 P02 | ~35 minutes | 2 tasks | 6 files |
 | Phase 226-ci-baseline-proof-semantics P05 | 14min | 2 tasks | 8 files |
 | Phase 226-ci-baseline-proof-semantics P06 | 12min | 2 tasks | 4 files |
+| Phase 226-ci-baseline-proof-semantics P12 | 20m | 2 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -921,6 +922,8 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - [Phase ?]: Host setup facts remain additive inside host-integration; duplicate provisioning and CI topology are preserved for Phase 227.
 - [Phase ?]: Full-CI timing eligibility is independent of provider proof state; non_run remains recorded as no provider proof.
 - [Phase ?]: Baseline and provider timestamps must round-trip through canonical UTC before duration or freshness arithmetic.
+- [Phase ?]: Use latest 20 compatible complete CI paths across visible fingerprint sensitivity strata.
+- [Phase ?]: Measure each path through the latest Playwright shard completion; never sum parallel shards.
 
 ### Pending Todos
 
@@ -1073,8 +1076,8 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 
 ## Session Continuity
 
-Last session: 2026-08-11T21:15:17.477Z
-Stopped at: Completed 226-06-PLAN.md
+Last session: 2026-08-11T22:40:20.019Z
+Stopped at: Completed 226-12-PLAN.md
 Resume file: None
 
 ## Operator Next Steps
