@@ -198,10 +198,20 @@ if [ "$self_test" = true ]; then
   mv "$fixture_dir/jobs-1.valid.json" "$fixture_dir/jobs-1-1.json"
   bash "$root_dir/scripts/ci/capture_ci_baseline.sh" --run-id 1 --fixture-dir "$fixture_dir" --output "$tmp_dir/collector-record.json"
   validate_input "$tmp_dir/collector-record.json"
+  # Workflow provenance and complete proof are public-path gates, not inferred
+  # from aggregate fields or a matching policy snapshot alone.
+  cp "$fixture_dir/run-1.json" "$tmp_dir/run.good.json"
+  jq '.body.name = "Other workflow"' "$tmp_dir/run.good.json" >"$fixture_dir/run-1.json"
+  if bash "$root_dir/scripts/ci/capture_ci_baseline.sh" --run-id 1 --fixture-dir "$fixture_dir" --output "$tmp_dir/other-workflow.json"; then fail "other workflow unexpectedly captured"; fi
+  cp "$tmp_dir/run.good.json" "$fixture_dir/run-1.json"
+  expect_invalid collector-workflow-mismatch '.runs[0].run.workflow = "Other workflow"'
+  expect_canonical_invalid canonical-workflow-mismatch '.runs[0].run.workflow = "Other workflow"'
   # Reuse the canonical run as a semantically complete collector record so the
   # public mutation matrix can exercise required, advisory, and conditional lanes.
   jq --slurpfile canonical "$canonical_input" '.runs[0] = $canonical[0].runs[0]' "$tmp_dir/collector-record.json" >"$tmp_dir/collector-semantic-record.json"
   validate_input "$tmp_dir/collector-semantic-record.json"
+  expect_semantic_invalid collector-required-lane-removal '([.runs[0].jobs[] | select(.required_for_release_proof) | .manifest_identity] | first) as $identity | (.runs[0].jobs |= map(select(.manifest_identity != $identity)))'
+  expect_canonical_invalid canonical-required-lane-removal '([.runs[0].jobs[] | select(.required_for_release_proof) | .manifest_identity] | first) as $identity | (.runs[0].jobs |= map(select(.manifest_identity != $identity)))'
   # Live GitHub list response bodies do not carry fixture-only next_page fields.
   jq 'del(.body.next_page)' "$fixture_dir/jobs-1-1.json" >"$tmp_dir/live-jobs.json"; mv "$tmp_dir/live-jobs.json" "$fixture_dir/jobs-1-1.json"
   jq 'del(.body.next_page)' "$fixture_dir/artifacts-1-1.json" >"$tmp_dir/live-artifacts.json"; mv "$tmp_dir/live-artifacts.json" "$fixture_dir/artifacts-1-1.json"
