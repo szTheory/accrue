@@ -15,6 +15,7 @@ export function renderBaseline(records) {
   const jobRows = rows(records, "job");
   const cohortRows = rows(records, "cohort");
   const snapshot = rows(records, "snapshot")[0];
+  const phase225Boundary = runRows.find((run) => run.run_id === 31322443304);
   const rootJobs = jobRows.filter((job) => job.runner_queue_ms !== null);
   const dependentJobs = jobRows.filter((job) => job.dag_wait_ms !== null);
   const pathJobs = jobRows.filter((job) => /release-gate|host-integration|playwright-e2e/.test(job.stable_identity));
@@ -22,7 +23,7 @@ export function renderBaseline(records) {
   const stagedConclusion = cohortRows.some((cohort) => cohort.sample_status === "ready") ? (pathDuration >= 1_980_000 && pathDuration <= 2_160_000 ? "confirmed" : "contrary measured result") : "insufficient_sample — no critical-path percentile claim";
   return [
     "# CI Baseline", "", "## Current fact", "", `**State:** ${stagedConclusion}. **Owner:** CI maintainers. **Next command:** \`node scripts/ci/verify_ci_baseline.mjs --records .planning/phases/226-ci-baseline-proof-semantics/226-CI-BASELINE.ndjson --rendered .planning/phases/226-ci-baseline-proof-semantics/226-CI-BASELINE.md\`. Evidence is the immutable Actions links below.`, "", "Privacy-safe, schema-v1 evidence. Raw logs, actors, branches, secrets, payloads, and artifact contents are not persisted.", "",
-    "## Comparable cohort", "", snapshot ? `Snapshot generated: ${snapshot.snapshot_generated_at}. Window: ${snapshot.window_start} to ${snapshot.window_end}. Target: ${snapshot.sample_target}.` : "Snapshot metadata unavailable.", "", "### Comparable timing", "", "| Run | Cohort | State | Wall time | Evidence |", "| --- | --- | --- | --- | --- |",
+    "## Comparable cohort", "", snapshot ? `Snapshot generated: ${snapshot.snapshot_generated_at}. Window: ${snapshot.window_start} to ${snapshot.window_end}. Target: ${snapshot.sample_target}.` : "Snapshot metadata unavailable.", phase225Boundary ? `Immediate Phase 225 repair boundary: run [31322443304](${phase225Boundary.run_url}) at SHA \`${phase225Boundary.sha}\`. It is retained as evidence, not substituted for the full cohort.` : "Phase 225 repair boundary is unavailable from this snapshot.", "", "### Comparable timing", "", "| Run | Cohort | State | Wall time | Evidence |", "| --- | --- | --- | --- | --- |",
     ...runRows.map((run) => `| ${run.run_id} | ${escapeMarkdown(run.cohort_fingerprint)} | ${run.conclusion} | ${milliseconds(run.workflow_duration_ms)} | [run](${run.run_url}) |`), "",
     "## Measured critical path", "", `Expected staged release → host integration → Playwright path (33–36 minutes): **${stagedConclusion}**. Measured named-path work plus recorded DAG waits: ${milliseconds(pathDuration)}. This is not runner queue time.`, "", "| Cohort | Qualifying successes | Status | p50 | p95 |", "| --- | --- | --- | --- | --- |",
     ...cohortRows.map((cohort) => `| ${escapeMarkdown(cohort.cohort_fingerprint)} | ${cohort.sample_count} | ${cohort.sample_status} | ${milliseconds(cohort.p50_ms)} | ${milliseconds(cohort.p95_ms)} |`), "",
