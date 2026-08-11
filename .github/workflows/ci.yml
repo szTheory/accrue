@@ -925,6 +925,7 @@ jobs:
       ACCRUE_HOST_TEST_POOL_SIZE: 8
       ACCRUE_HOST_PLAYWRIGHT_WORKERS: 1
       ACCRUE_HOST_BROWSER_LOG: ${{ github.workspace }}/accrue-host-server.log
+      ACCRUE_CI_SETUP_FACTS: ${{ runner.temp }}/accrue-host-ci-setup-facts.ndjson
 
     steps:
       - uses: actions/checkout@v6
@@ -963,12 +964,41 @@ jobs:
           cd examples/accrue_host && npm ci
           cd assets && npm ci
 
-      - name: Install Chromium
-        run: cd examples/accrue_host && npm run e2e:install
+      - id: install_chromium
+        name: Install Chromium
+        run: |
+          setup_started=$(( $(date +%s) * 1000 ))
+          if ! (cd examples/accrue_host && npm run e2e:install); then
+            setup_finished=$(( $(date +%s) * 1000 ))
+            bash scripts/ci/ci_setup_diagnostic.sh emit linux_browser_dependency --result failure --duration-ms "$(( setup_finished - setup_started ))" --node-identity node-22 --playwright-identity chromium-install --lockfile-identity package-lock --browser-class linux-dependency --cache-state uncached
+            bash scripts/ci/ci_setup_diagnostic.sh render linux_browser_dependency
+            exit 1
+          fi
 
-      - name: Run host integration gate
+      - id: host_integration_gate
+        name: Run host integration gate
         # Canonical trust lane: seeded performance smoke + browser accessibility/responsive checks.
         run: bash scripts/ci/accrue_host_uat.sh
+
+      - id: host_setup_summary
+        name: Summarize host and CI setup evidence
+        if: always()
+        run: |
+          echo "## Host and CI setup evidence" >> "$GITHUB_STEP_SUMMARY"
+          if [ -s "$ACCRUE_CI_SETUP_FACTS" ]; then
+            node -e 'const fs=require("fs"); for (const line of fs.readFileSync(process.argv[1], "utf8").trim().split("\n")) { const fact=JSON.parse(line); console.log(`- **Fact:** ${fact.code}; **State:** ${fact.result}; **Owner:** ${fact.owner}; **Next command:** see scripts/ci/ci_setup_diagnostic.sh describe ${fact.code}; **Evidence:** accrue-host-ci-setup-facts artifact`); }' "$ACCRUE_CI_SETUP_FACTS" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "- **Fact:** setup record; **State:** no validated setup fact was emitted; **Owner:** CI; **Next command:** inspect the failing host-integration step; **Evidence:** accrue-host-ci-setup-facts artifact" >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - id: host_setup_artifact
+        name: Upload host and CI setup facts
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: accrue-host-ci-setup-facts
+          path: ${{ runner.temp }}/accrue-host-ci-setup-facts.ndjson
+          if-no-files-found: ignore
 
       - name: Run host Hex smoke
         # Release Please PRs bump the example to the next Hex version before it is published;
@@ -1251,6 +1281,7 @@ jobs:
       STRIPE_TEST_SECRET_KEY: ${{ secrets.STRIPE_TEST_SECRET_KEY }}
       ACCRUE_LIVE_BASIC_PRICE: ${{ secrets.ACCRUE_LIVE_BASIC_PRICE }}
       ACCRUE_LIVE_PRO_PRICE: ${{ secrets.ACCRUE_LIVE_PRO_PRICE }}
+      ACCRUE_PROVIDER_PROOF_RECORD: ${{ runner.temp }}/accrue-provider-proof.json
 
     steps:
       - uses: actions/checkout@v6
@@ -1276,5 +1307,43 @@ jobs:
           mix ecto.create
           mix ecto.migrate
 
-      - name: Run live-Stripe suite
-        run: cd accrue && mix test.live
+      - id: provider_preflight
+        name: Preflight live-Stripe provider configuration
+        run: |
+          if [ -n "${STRIPE_TEST_SECRET_KEY:-}" ] && [ -n "${ACCRUE_LIVE_BASIC_PRICE:-}" ] && [ -n "${ACCRUE_LIVE_PRO_PRICE:-}" ]; then
+            echo "configured=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "configured=false" >> "$GITHUB_OUTPUT"
+            echo "Live-Stripe configuration is incomplete; no credential values were printed." >&2
+            exit 1
+          fi
+
+      - id: live_stripe_suite
+        name: Run live-Stripe suite
+        run: cd accrue && ACCRUE_PROVIDER_MANIFEST="$RUNNER_TEMP/accrue-provider-manifest.json" mix test.live
+
+      - id: provider_proof_finalize
+        name: Finalize live-Stripe provider proof
+        if: always()
+        run: >-
+          node scripts/ci/provider_proof.mjs --finalize --trigger "${{ github.event_name }}"
+          --sha "${{ github.sha }}" --policy required --raw-conclusion "${{ job.status }}"
+          --configured "${{ steps.provider_preflight.outputs.configured }}"
+          --manifest "$RUNNER_TEMP/accrue-provider-manifest.json"
+          --out "$ACCRUE_PROVIDER_PROOF_RECORD"
+
+      - id: provider_proof_summary
+        name: Summarize live-Stripe provider proof
+        if: always()
+        run: node scripts/ci/render_provider_summary.mjs --record "$ACCRUE_PROVIDER_PROOF_RECORD" >> "$GITHUB_STEP_SUMMARY"
+
+      - id: provider_proof_artifact
+        name: Upload live-Stripe provider proof
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: live-stripe-proof
+          path: |
+            ${{ runner.temp }}/accrue-provider-proof.json
+            ${{ runner.temp }}/accrue-provider-manifest.json
+          if-no-files-found: ignore

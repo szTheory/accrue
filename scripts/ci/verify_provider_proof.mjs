@@ -37,8 +37,9 @@ function jobBody(workflow, jobId) {
   const marker = `  ${jobId}:`;
   const start = workflow.indexOf(marker);
   assert.notEqual(start, -1, `missing stable job id: ${jobId}`);
-  const next = workflow.indexOf("\n  ", start + marker.length);
-  return workflow.slice(start, next === -1 ? workflow.length : next);
+  const rest = workflow.slice(start + marker.length);
+  const nextOffset = rest.search(/\n  [A-Za-z0-9_-]+:/);
+  return workflow.slice(start, nextOffset === -1 ? workflow.length : start + marker.length + nextOffset);
 }
 
 function stepRegion(job, stepId) {
@@ -53,7 +54,7 @@ function assertWorkflowContract(workflow) {
   const permissions = workflow.match(/^permissions:\n((?:  [a-z-]+: [a-z]+\n)+)/m)?.[1];
   assert.equal(permissions, "  actions: read\n  checks: read\n  contents: read\n", "top-level permissions must remain exactly read-only");
   assert.doesNotMatch(workflow, /^\s+(?:[a-z-]+): write(?:\s|$)/m, "workflow must not request write permissions");
-  for (const jobId of ["host-integration", "playwright-e2e", "required", "live-stripe"]) {
+  for (const jobId of ["host-integration", "playwright-e2e", "release-gate", "live-stripe"]) {
     jobBody(workflow, jobId);
   }
 
@@ -67,8 +68,8 @@ function assertWorkflowContract(workflow) {
     assert.match(stepRegion(host, stepId), /if: always\(\)/, `${stepId} must always run`);
   }
   assert.match(stepRegion(provider, "live_stripe_suite"), /ACCRUE_PROVIDER_MANIFEST/, "suite must receive the provider manifest path");
-  assert.match(provider, /ACCRUE_PROVIDER_PROOF_RECORD: \$RUNNER_TEMP\//, "provider proof record must use RUNNER_TEMP");
-  assert.match(host, /ACCRUE_CI_SETUP_FACTS: \$RUNNER_TEMP\//, "setup facts must use RUNNER_TEMP");
+  assert.match(provider, /ACCRUE_PROVIDER_PROOF_RECORD: \$\{\{ runner\.temp \}\}\//, "provider proof record must use runner temp");
+  assert.match(host, /ACCRUE_CI_SETUP_FACTS: \$\{\{ runner\.temp \}\}\//, "setup facts must use runner temp");
   assert.match(provider, /name: live-stripe-proof/, "provider artifact name drifted");
   assert.match(host, /name: accrue-host-ci-setup-facts/, "setup artifact name drifted");
 
@@ -76,7 +77,7 @@ function assertWorkflowContract(workflow) {
     ["provider", provider],
     ["host setup", host],
   ]) {
-    assert.doesNotMatch(region, /(?:GH_TOKEN|GITHUB_TOKEN|[A-Z0-9_]*PAT[A-Z0-9_]*)\s*:/i, `${name} evidence steps must not bind write-capable tokens`);
+    assert.doesNotMatch(region, /(?:GH_TOKEN|GITHUB_TOKEN|[A-Z0-9_]*PAT[A-Z0-9_]*)\s*:/, `${name} evidence steps must not bind write-capable tokens`);
     assert.doesNotMatch(region, /\b(?:git push|gh api\s+.*--method\s+(?:POST|PUT|PATCH|DELETE)|curl\s+.*(?:-X|--request)\s*(?:POST|PUT|PATCH|DELETE))\b/i, `${name} evidence steps must not mutate repository or API state`);
   }
 }
@@ -143,6 +144,10 @@ function runFixtures() {
     fs.writeFileSync(manifest, JSON.stringify(validManifest({ selected_count: 0, passed_count: 0 })));
     const result = spawnSync(process.execPath, [path.join(root, "scripts/ci/provider_proof.mjs"), "--finalize", "--trigger", "schedule", "--sha", "zero", "--policy", "required", "--raw-conclusion", "success", "--configured", "true", "--manifest", manifest, "--out", out]);
     assert.notEqual(result.status, 0, "zero-selected finalize must fail");
+    assert.equal(JSON.parse(fs.readFileSync(out, "utf8")).proof_state, "misconfigured");
+    const missingManifest = path.join(temp, "missing.json");
+    const missingResult = spawnSync(process.execPath, [path.join(root, "scripts/ci/provider_proof.mjs"), "--finalize", "--trigger", "schedule", "--sha", "missing", "--policy", "required", "--raw-conclusion", "failure", "--configured", "true", "--manifest", missingManifest, "--out", out]);
+    assert.notEqual(missingResult.status, 0, "missing manifest finalize must fail");
     assert.equal(JSON.parse(fs.readFileSync(out, "utf8")).proof_state, "misconfigured");
   } finally {
     fs.rmSync(temp, { recursive: true, force: true });

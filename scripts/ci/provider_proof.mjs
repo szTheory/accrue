@@ -148,7 +148,13 @@ function cliInput(values) {
     cadence_hours: values["cadence-hours"] ? Number(values["cadence-hours"]) : undefined,
     grace_hours: values["grace-hours"] ? Number(values["grace-hours"]) : undefined,
   };
-  if (values.manifest) input.manifest = JSON.parse(fs.readFileSync(values.manifest, "utf8"));
+  if (values.manifest) {
+    try {
+      input.manifest = JSON.parse(fs.readFileSync(values.manifest, "utf8"));
+    } catch (_error) {
+      input.manifest = undefined;
+    }
+  }
   return input;
 }
 
