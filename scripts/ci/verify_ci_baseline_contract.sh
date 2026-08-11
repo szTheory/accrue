@@ -272,6 +272,10 @@ if [ "$self_test" = true ]; then
   # public mutation matrix can exercise required, advisory, and conditional lanes.
   cp "$tmp_dir/collector-record.json" "$tmp_dir/collector-semantic-record.json"
   validate_input "$tmp_dir/collector-semantic-record.json"
+  # RED gates: public timing inputs must be derived from policy-bound timestamps,
+  # not merely agree with candidate-supplied aggregate arithmetic.
+  expect_invalid collector-chain-duration-drift '.runs[0].run.staged_critical_chain_seconds += 42'
+  expect_canonical_invalid canonical-coherent-chain-duration-forgery '(.runs[0].run.staged_critical_chain_seconds += 42) | ([.runs[] | select(.run.eligible) | .run.staged_critical_chain_seconds] | sort) as $chains | .aggregates.staged_critical_chain_seconds = {per_run: ([.runs[] | select(.run.eligible) | {run_id: .run.id, seconds: .run.staged_critical_chain_seconds}]), minimum: $chains[0], median: $chains[($chains | length) / 2], maximum: $chains[-1]}'
   expect_semantic_invalid collector-required-lane-removal '([.runs[0].jobs[] | select(.required_for_release_proof) | .manifest_identity] | first) as $identity | (.runs[0].jobs |= map(select(.manifest_identity != $identity)))'
   expect_canonical_invalid canonical-required-lane-removal '([.runs[0].jobs[] | select(.required_for_release_proof) | .manifest_identity] | first) as $identity | (.runs[0].jobs |= map(select(.manifest_identity != $identity)))'
   # Live GitHub list response bodies do not carry fixture-only next_page fields.
