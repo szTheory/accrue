@@ -103,6 +103,22 @@ function cohortControls(fixture) {
   assert.deepEqual(instrumentedJob.setup_costs, { node_ms: 5, npm_ms: 6, browser_ms: 7, playwright_ms: 8 });
 
   assert.throws(() => collectBaseline([datedRun(fixture.successful_run, 601, 25, { updated_at: "not-a-time" })]), /updated_at/);
+  const validLeapDay = datedRun({ ...fixture.successful_run, created_at: "2024-02-29T00:00:00Z" }, 602, 0);
+  assert.doesNotThrow(() => collectBaseline([validLeapDay]), "real leap-day run timestamps are accepted");
+  for (const invalid of ["2026-02-30T00:00:00Z", "2025-02-29T00:00:00Z"]) {
+    assert.throws(
+      () => collectBaseline([datedRun({ ...fixture.successful_run, created_at: "2024-02-29T00:00:00Z" }, 603, 0, { updated_at: invalid })]),
+      /run.updated_at must be an ISO-8601 UTC timestamp/,
+      `baseline run rejects impossible UTC calendar date: ${invalid}`
+    );
+    const invalidJob = datedRun({ ...fixture.successful_run, created_at: "2024-02-29T00:00:00Z" }, 604, 0);
+    invalidJob.jobs[0].completed_at = invalid;
+    assert.throws(
+      () => collectBaseline([invalidJob]),
+      /job.completed_at must be an ISO-8601 UTC timestamp/,
+      `baseline job rejects impossible UTC calendar date: ${invalid}`
+    );
+  }
   assert.throws(() => collectBaseline([{ ...fixture.successful_run, jobs: [{ ...fixture.successful_run.jobs[0], name: "!!!" }] }]), /job.name/);
 }
 

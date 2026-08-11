@@ -119,6 +119,12 @@ function runFixtures() {
   rejects(() => validateProviderManifest(validManifest({ passed_count: 1 })), /count/);
   rejects(() => classifyProviderProof({ trigger: "schedule", sha: "a", policy: "required", raw_job_conclusion: "skipped", intentional_bypass: true }), /reason/);
   rejects(() => validateProviderManifest(validManifest({ started_at: "not-a-time" })), /timestamp/);
+  assert.doesNotThrow(() => validateProviderManifest(validManifest({ started_at: "2024-02-29T00:00:00Z", finished_at: "2024-02-29T00:01:00Z" })), "real leap-day provider manifest timestamps are accepted");
+  for (const invalid of ["2026-02-30T00:00:00Z", "2025-02-29T00:00:00Z"]) {
+    rejects(() => validateProviderManifest(validManifest({ started_at: invalid })), /manifest started_at must be an ISO timestamp/);
+    rejects(() => deriveFreshness({ latest_proved_at: invalid, now: "2026-08-11T06:00:00Z" }), /latest_proved_at must be an ISO timestamp/);
+    rejects(() => deriveFreshness({ latest_proved_at: "2026-08-11T06:00:00Z", now: invalid }), /now must be an ISO timestamp/);
+  }
 
   const staleBoundary = "2026-08-14T06:00:00Z";
   assert.equal(deriveFreshness({ latest_proved_at: "2026-08-11T06:00:00Z", now: staleBoundary, cadence_hours: 24, grace_hours: 48 }), false);
