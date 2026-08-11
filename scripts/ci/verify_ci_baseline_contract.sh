@@ -47,7 +47,7 @@ validate_aggregates() {
 
 reject_sensitive_strings() {
   local candidate="$1"
-  if jq -e '.. | strings | select(test("(ghp_|github_pat_|sk_(live|test)_|bearer[[:space:]]+[A-Za-z0-9._-]+|-----BEGIN (RSA |EC |OPENSSH )?PRIVATE KEY-----|raw (request|response|event) payload)"; "i"))' "$candidate" >/dev/null; then
+  if jq -e '.. | strings | select(test("(ghp_|github_pat_|sk_(live|test)_|bearer[[:space:]]+[A-Za-z0-9._-]+|-----BEGIN (RSA |EC |OPENSSH )?PRIVATE KEY-----|raw( (request|response|event))? payload)"; "i"))' "$candidate" >/dev/null; then
     fail "privacy contract rejected secret-like or raw payload content"
   fi
   if jq -e '.. | strings | select(test("https?://[^[:space:]]+\\?"))' "$candidate" >/dev/null; then
@@ -109,6 +109,13 @@ validate_canonical_cohort() {
     def type_tree: if type == "object" then with_entries(.value |= type_tree) elif type == "array" then map(type_tree) else type end;
     def canonical: (type_tree == ($canonical_reference[0] | type_tree));
     canonical and
+    (.required_check_snapshot.captured_at | iso) and
+    (.anchor.sha | sha40) and (.anchor.workflow_blob_oid | sha40) and
+    all(.runs[];
+      (.run.id | integer) and (.run.head_sha | sha40) and (.run.created_at | iso) and (.run.completed_at | iso) and (.run.url | test("^https://") and (contains("?") | not)) and
+      all(.jobs[]; (.id | integer) and (.started_at | iso or . == null) and (.completed_at | iso or . == null) and (.duration_seconds | num or . == null) and all(.steps[]; (.started_at | iso or . == null) and (.completed_at | iso or . == null) and (.duration_seconds | num or . == null))) and
+      all(.artifacts[]; (.id | integer) and (.size_in_bytes | num) and (.expires_at | iso or . == null))
+    ) and
     (.runs|type=="array") and ([.runs[]|select(.run.eligible==true)|.run.id] == $expected_ids) and
     (.cohort.eligible_count==3) and
     (.cohort.anchor.workflow_blob_oid == "0d01e6da639f2e1d5967e3cbb4a489510e34d29e") and
@@ -169,6 +176,45 @@ if [ "$self_test" = true ]; then
   expect_invalid queue-drift '.runs[0].run.runner_queue_seconds += 1'
   expect_invalid signature-pair '.runs[0].root_failure_signature.lane_conclusions += [{"manifest_identity":"docs-contracts-shift-left","conclusion":"failure"}]'
   expect_invalid ineligible-proved '(.runs[0].run.eligible = false) | (.runs[0].jobs[0].proof_state = "proved")'
+  # Canonical mutation matrix: each copy goes through the public discriminator.
+  expect_canonical_invalid canonical-policy-unknown '.policy_manifest.evidence = "harmless"'
+  expect_canonical_invalid canonical-privacy-unknown '.privacy.evidence = "harmless"'
+  expect_canonical_invalid canonical-snapshot-unknown '.required_check_snapshot.evidence = "harmless"'
+  expect_canonical_invalid canonical-anchor-unknown '.anchor.evidence = "harmless"'
+  expect_canonical_invalid canonical-cohort-unknown '.cohort.evidence = "harmless"'
+  expect_canonical_invalid canonical-remote-unknown '.cohort.remote_snapshot.evidence = "harmless"'
+  expect_canonical_invalid canonical-aggregate-unknown '.aggregates.evidence = "harmless"'
+  expect_canonical_invalid canonical-metric-unknown '.aggregates.wall_seconds.per_run[0].evidence = "harmless"'
+  expect_canonical_invalid canonical-proof-unknown '.aggregates.proof.evidence = "harmless"'
+  expect_canonical_invalid canonical-proof-row-unknown '.aggregates.proof.per_run[0].evidence = "harmless"'
+  expect_canonical_invalid canonical-selection-unknown '.phase_227_selection_gate.evidence = "harmless"'
+  expect_canonical_invalid canonical-candidate-unknown '.phase_227_selection_gate.candidates[0].evidence = "harmless"'
+  expect_canonical_invalid canonical-run-record-unknown '.runs[0].evidence = "harmless"'
+  expect_canonical_invalid canonical-run-unknown '.runs[0].run.evidence = "harmless"'
+  expect_canonical_invalid canonical-job-unknown '.runs[0].jobs[0].evidence = "harmless"'
+  expect_canonical_invalid canonical-step-unknown '.runs[0].jobs[0].steps[0].evidence = "harmless"'
+  expect_canonical_invalid canonical-artifact-unknown '.runs[0].artifacts[0].evidence = "harmless"'
+  expect_canonical_invalid canonical-signature-unknown '.runs[0].root_failure_signature.evidence = "harmless"'
+  expect_canonical_invalid canonical-lane-unknown '.runs[0].root_failure_signature.lane_conclusions[0].evidence = "harmless"'
+  expect_canonical_invalid canonical-empty-rules '.required_check_snapshot.rules += [{}]'
+  expect_canonical_invalid canonical-empty-classic '.required_check_snapshot.classic_checks += [{}]'
+  expect_canonical_invalid canonical-empty-exclusions '.cohort.exclusions += [{}]'
+  expect_canonical_invalid canonical-object-type '.aggregates = []'
+  expect_canonical_invalid canonical-array-type '.runs = {}'
+  expect_canonical_invalid canonical-string-type '.repository = 1'
+  expect_canonical_invalid canonical-number-type '.aggregates.wall_seconds.minimum = "2182"'
+  expect_canonical_invalid canonical-integer-type '.runs[0].run.id = 1.5'
+  expect_canonical_invalid canonical-boolean-type '.runs[0].run.eligible = "true"'
+  expect_canonical_invalid canonical-nullability '.runs[0].run.conclusion = 1'
+  expect_canonical_invalid canonical-enum '.runs[0].jobs[0].proof_state = "uncertain"'
+  expect_canonical_invalid canonical-timestamp '.runs[0].run.created_at = "yesterday"'
+  expect_canonical_invalid canonical-url '.runs[0].run.url = "ftp://example.test/run"'
+  expect_canonical_invalid canonical-sha '.runs[0].run.head_sha = "not-a-sha"'
+  expect_canonical_invalid canonical-duration '.runs[0].jobs[0].duration_seconds = -1'
+  expect_canonical_invalid canonical-scalar-array '.privacy.allowlist[0] = 1'
+  expect_canonical_invalid canonical-secret-allowed '.privacy.allowlist[0] = "ghp_synthetic_secret_value"'
+  expect_canonical_invalid canonical-payload-allowed '.phase_227_selection_gate.rule = "synthetic raw payload"'
+  expect_canonical_invalid canonical-query-url '.runs[0].run.url = "https://github.com/a/b?token=no"'
   # Provider ambiguity and pagination must fail before a record is published.
   cp "$fixture_dir/rules.json" "$tmp_dir/rules.good.json"
   for status in 401 403 429 500; do

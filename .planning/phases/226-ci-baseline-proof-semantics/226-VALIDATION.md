@@ -18,14 +18,14 @@ rendering. The commands below use only read-only Actions metadata GETs.
 | --- | --- |
 | Framework | Bash contract tests plus authenticated read-only GitHub metadata collection |
 | Quick command | `bash scripts/ci/verify_ci_baseline_contract.sh --self-test` |
-| Full command | `tmp_file="$(mktemp)" && trap 'rm -f "$tmp_file"' EXIT && bash scripts/ci/capture_ci_baseline.sh --run-id 31322443304 --output "$tmp_file" && bash scripts/ci/verify_ci_baseline_contract.sh --input "$tmp_file" && bash scripts/ci/verify_ci_baseline_contract.sh && bash scripts/ci/verify_phase192_ci_contract.sh` |
+| Full command | `bash scripts/ci/verify_ci_baseline_contract.sh && bash scripts/ci/verify_phase192_ci_contract.sh` |
 | Sampling | Quick command after each task; full command before phase verification |
 
 ## Gap-Closure Coverage
 
 | Gap / threat | Named adversarial control | Final positive gate |
 | --- | --- | --- |
-| Exact recursive privacy schema (T-226-21) | `unknown-root`, `unknown-nested`, `secret-like-unknown`, `invalid-run-type`, `query-url` mutations | Collector record and canonical contract both validate. |
+| Exact recursive canonical schema/privacy (T-226-27/28/29) | Named `canonical-*-unknown` mutations cover root, policy, privacy, snapshot, anchor, cohort, aggregates, selection, run/job/step/artifact/signature/lane/proof elements; empty rules/classic/exclusions mutations reject inserted objects; type, secret, raw-payload, and query-URL mutations all use public `--input`. | The unchanged three-run canonical document passes the exact recursive type/key tree before semantic aggregates. |
 | Provider snapshot truth (T-226-23) | Rules and classic 401, 403, 429, and 500 fixture envelopes | Successful effective rules plus confirmed classic 404 is the sole `none-enforced` path. |
 | Pagination completeness (T-226-22) | Fixture-only `next_page` rejection for live-shape coverage; contradictory/unknown fixture paths fail closed | Live list bodies use bounded `total_count` pagination; flattened ID count must equal total. |
 | Record/canonical separation | One-run collector record through `--input` | Exact three-run v2 canonical cohort validates separately. |
@@ -43,6 +43,8 @@ rendering. The commands below use only read-only Actions metadata GETs.
 | 226-05-03 | 05 | OWN-01 | `bash scripts/ci/verify_ci_baseline_contract.sh && bash scripts/ci/verify_phase192_ci_contract.sh` | ✅ green |
 | 226-06-01 | 06 | BASE-01, BASE-02 | Full command above | ✅ green |
 | 226-06-02 | 06 | BASE-01, BASE-02, OWN-01 | `bash scripts/ci/verify_ci_baseline_contract.sh --self-test && bash scripts/ci/verify_phase192_ci_contract.sh && git diff --check` | ✅ green |
+| 226-07-01 | 07 | BASE-01 | `bash scripts/ci/verify_ci_baseline_contract.sh --self-test && bash scripts/ci/verify_ci_baseline_contract.sh` | ✅ green |
+| 226-07-02 | 07 | BASE-01, BASE-02, OWN-01 | `bash scripts/ci/verify_ci_baseline_contract.sh --self-test && bash scripts/ci/verify_ci_baseline_contract.sh && bash scripts/ci/verify_phase192_ci_contract.sh && git diff --check` | ✅ green |
 
 ## Stable Contracts
 
@@ -55,6 +57,10 @@ rendering. The commands below use only read-only Actions metadata GETs.
 ```bash
 test -z "$(git diff -- .github/workflows/ci.yml scripts/ci/README.md .planning/phases/226-ci-baseline-proof-semantics/226-SETUP-OWNERSHIP.md scripts/ci/verify_phase192_ci_contract.sh)"
 ```
+
+Plan 07 additionally protects the canonical JSON/Markdown, collector, policy manifest,
+workflow, ownership docs, required identities, matrix/cache topology, and Phase 192 files
+from change while the stored-document boundary is tightened.
 
 ## Validation Sign-Off
 
