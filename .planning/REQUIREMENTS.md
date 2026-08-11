@@ -13,14 +13,14 @@
 
 ### Evidence Baseline
 
-- [x] **BASE-01**: A maintainer can review a durable, privacy-safe baseline of workflow wall time, queue delay, job/step duration, reruns, cache behavior, Docker/browser setup cost, provider state, and root failure signature across comparable runs.
-- [x] **BASE-02**: Required, skipped, and advisory provider evidence is visibly distinguished so a non-run provider lane cannot be mistaken for release proof.
+- [ ] **BASE-01**: A maintainer can review a durable, privacy-safe baseline of workflow wall time, queue delay, job/step duration, reruns, cache behavior, Docker/browser setup cost, provider state, and root failure signature across comparable runs.
+- [ ] **BASE-02**: Required, skipped, and advisory provider evidence is visibly distinguished so a non-run provider lane cannot be mistaken for release proof.
 
 ### Critical Path and Ownership
 
 - [ ] **PATH-01**: A maintainer can identify the measured critical path and the exact dependency or duplicated work selected for the first optimization, with before-state evidence and a documented rollback.
 - [ ] **PATH-02**: One validated CI critical-path improvement reduces measured wait or duplicate work without removing required release, host, browser, or provider evidence.
-- [x] **OWN-01**: A host maintainer can determine whether Node, browser installation, and Playwright setup are owned by the host or CI, and can diagnose the documented setup failure modes.
+- [ ] **OWN-01**: A host maintainer can determine whether Node, browser installation, and Playwright setup are owned by the host or CI, and can diagnose the documented setup failure modes.
 
 ### Safety and Operability
 
@@ -50,11 +50,11 @@
 | REL-01 | Phase 225 | Complete |
 | REL-02 | Phase 225 | Complete |
 | REL-03 | Phase 225 | Complete |
-| BASE-01 | Phase 226 | Complete |
-| BASE-02 | Phase 226 | Complete |
+| BASE-01 | Phase 226 | Gaps Found |
+| BASE-02 | Phase 226 | Gaps Found |
 | PATH-01 | Phase 227 | Pending |
 | PATH-02 | Phase 227 | Pending |
-| OWN-01 | Phase 226 | Complete |
+| OWN-01 | Phase 226 | Gaps Found |
 | SAFE-01 | Phase 227 | Pending |
 | SAFE-02 | Phase 227 | Pending |
 
