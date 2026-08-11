@@ -1,75 +1,61 @@
 ---
 phase: 226-ci-baseline-proof-semantics
-reviewed: 2026-08-10T21:52:21Z
+reviewed: 2026-08-11T00:23:30Z
 depth: standard
 files_reviewed: 5
 files_reviewed_list:
-  - scripts/ci/ci_baseline_workflow_policy.json
-  - scripts/ci/capture_ci_baseline.sh
-  - scripts/ci/verify_ci_baseline_contract.sh
   - .github/workflows/ci.yml
   - scripts/ci/README.md
+  - scripts/ci/capture_ci_baseline.sh
+  - scripts/ci/ci_baseline_workflow_policy.json
+  - scripts/ci/verify_ci_baseline_contract.sh
 findings:
-  critical: 3
-  warning: 3
+  critical: 2
+  warning: 0
   info: 0
-  total: 6
+  total: 2
 status: issues_found
 ---
 
 # Phase 226: Code Review Report
 
-**Reviewed:** 2026-08-10T21:52:21Z
+**Reviewed:** 2026-08-11T00:23:30Z
 **Depth:** standard
 **Files Reviewed:** 5
 **Status:** issues_found
 
 ## Summary
 
-The manifest and CI hook are narrowly scoped, but the collector and verifier do not uphold several of the stated fail-closed evidence guarantees. In particular, an API failure can be reported as an authenticated absence, arbitrary sensitive data can be inserted into an otherwise-valid baseline, and the documented collector-to-verifier path is unusable.
+The collector now handles pagination and the self-test passes, but the verifier does not actually bind stored job evidence to the workflow policy in either input mode. A fabricated or relabeled job can therefore remain valid evidence, defeating the baseline's required-lane proof claim.
 
 ## Critical Issues
 
-### CR-01: Any classic-protection API failure is misreported as `not-found`
+### CR-01: Collector-record schema declares strict validators but never applies them
 
-**File:** `scripts/ci/capture_ci_baseline.sh:74`
-**Issue:** The `if ! api_get ...; then` branch converts every non-zero `gh api` result into `{"response_state":"not-found"}`. A network failure, expired token, 401/403, 5xx response, or malformed provider response therefore produces `none-enforced` whenever the effective-rules response is empty. This directly violates D-08's requirement that only a confirmed authenticated 404 may mean not-found, and can falsely assert that no checks are externally enforced.
-**Fix:** Capture the HTTP status (for example with `gh api --include`), map only an authenticated 404 to `not-found`, and fail collection for every other status or transport error. Add fixtures/tests for 401, 403, 500, and network failures.
+**File:** `/Users/jon/projects/accrue/scripts/ci/verify_ci_baseline_contract.sh:62-68`
+**Issue:** `step`, `job`, `artifact`, `run`, and `sig` are fully defined at lines 62-67, but the predicate at line 68 repeats only shallow key/type checks instead of calling them. Consequently a collector record can contain arbitrary job names, policy/manifest identities, proof states, timestamps, cache states, or failure signatures as long as the few shallow fields still have the expected container types. The derived-facts pass only recalculates queue time and signatures; it never verifies that a job maps exactly once to `ci_baseline_workflow_policy.json` or that its proof state was derived from that mapping. A forged collector record can thus assert required-lane evidence that was not observed from a recognized CI job.
+**Fix:** Apply the declared predicates to every nested value and bind every job to exactly one manifest lane, for example:
 
-### CR-02: The privacy verifier permits raw secrets under arbitrary keys
+```jq
+(.runs | type == "array" and length > 0 and all(.[];
+  exact(["artifacts", "jobs", "root_failure_signature", "run"])
+  and (.run | run)
+  and (.jobs | type == "array" and all(.[]; job))
+  and (.artifacts | type == "array" and all(.[]; artifact))
+  and (.root_failure_signature | sig)
+))
+```
 
-**File:** `scripts/ci/verify_ci_baseline_contract.sh:67-68`
-**Issue:** Privacy validation rejects only key names matching a short forbidden-word list and query-bearing URLs. It does not enforce the advertised allowlisted schema. Consequently, a candidate that is otherwise identical to the canonical baseline but adds `.runs[0].run.evidence = "ghp_exampletokenvalue"` passes `--input`; this was reproduced during review. A secret, payload, trace, or log content placed beneath a benign key can therefore be committed and pass the CI contract.
-**Fix:** Validate exact allowed keys recursively for each schema object (and expected scalar/array types), rejecting all unknown keys rather than trying to blacklist sensitive key names. Add a self-test mutation that inserts a sensitive value below a benign unknown key.
+Then add an invariant that each job name matches exactly one policy lane and that its copied policy fields and `proof_state` equal the policy-derived values.
 
-### CR-03: `--input` cannot validate any JSON emitted by the collector
+### CR-02: Canonical validation accepts fabricated job identities
 
-**File:** `scripts/ci/verify_ci_baseline_contract.sh:50-65`
-**Issue:** The collector outputs a top-level metadata record containing `runs`, policy metadata, and the provider snapshot, but no `.cohort` or `.aggregates`. `validate_input` unconditionally requires the fixed three-run IDs plus complete cohort provenance and aggregates. A successful fixture collection of run `31322443304` was rejected by `verify_ci_baseline_contract.sh --input` during review. This breaks the documented contract that `--input PATH` validates a collected file and prevents validating a newly captured or single-run result before it is manually transformed into the checked-in cohort.
-**Fix:** Split validation into a collector-output schema/privacy validator and a canonical-cohort validator. Have `--input` run the former (and optionally a clearly named `--canonical`/default mode run both), with tests proving that collector output is accepted and malformed output is rejected.
-
-## Warnings
-
-### WR-01: Collector can label an ineligible run's required job as proved
-
-**File:** `scripts/ci/capture_ci_baseline.sh:67`
-**Issue:** `proof_state` is derived solely from job policy and conclusion. A successful required job in a rerun, non-dispatch run, or otherwise ineligible run becomes `proved`, despite Phase 226's definition that proof requires an eligible first-attempt run. The aggregate currently ignores ineligible records, but the per-lane evidence is semantically false and can mislead future consumers.
-**Fix:** Pass the run eligibility/attempt facts into job classification and emit `proved` only when the run is eligible, attempt one, the lane is required, and the conclusion is success; otherwise choose the appropriate non-proof state. Add an ineligible-rerun fixture assertion.
-
-### WR-02: Failure signatures discard the failure conclusion
-
-**File:** `scripts/ci/capture_ci_baseline.sh:69`
-**Issue:** The signature tuple includes only `failed-lane` and lane identities. A failure, timeout, and cancellation of the same lane produce the same signature, although the Phase 226 contract calls for the signature to derive from normalized conclusions as well. This loses a material diagnostic distinction and makes a timeout indistinguishable from a test failure.
-**Fix:** Construct the normalized tuple from sorted `{manifest_identity, normalized_conclusion}` pairs and validate/recompute that representation in the verifier. Add a mutation that changes a failed lane's conclusion and requires the signature to change.
-
-### WR-03: Jobs and artifacts are silently truncated after the first API page
-
-**File:** `scripts/ci/capture_ci_baseline.sh:59-60`
-**Issue:** Both endpoints request `per_page=100` but do not follow pagination. When a workflow run has more than 100 jobs or artifacts, later records are omitted while capture still succeeds; omitted required jobs can make the evidence and derived proof incomplete.
-**Fix:** Use `gh api --paginate` and merge/reduce each page before classification, or inspect and reject a response that advertises a next page. Add a multi-page fixture regression test.
+**File:** `/Users/jon/projects/accrue/scripts/ci/verify_ci_baseline_contract.sh:91-131`
+**Issue:** The canonical path validates recursive keys and scalar types, then validates aggregates, but never checks a job's `name`, `manifest_identity`, policy fields, or proof state against the policy manifest. This was reproduced by changing `.runs[0].jobs[0].name` to `"Fabricated release lane"` in a copy of `226-CI-BASELINE.json`; `bash scripts/ci/verify_ci_baseline_contract.sh --input <copy>` returned success. The stored JSON is supposed to be authoritative required/advisory proof, so accepting arbitrary relabeling makes it possible to preserve a green aggregate while losing the link to the actual Actions job.
+**Fix:** Reuse the collector semantic validator for canonical runs (or define a shared `validate_run_record` jq predicate), and require a one-to-one match from each job name to the manifest regex with equal `manifest_identity`, `policy`, `required_for_release_proof`, `initial_queue_root`, and `staged_critical_chain_order`. Add a self-test that mutates a canonical job name and expects `--input` to fail.
 
 ---
 
-_Reviewed: 2026-08-10T21:52:21Z_
+_Reviewed: 2026-08-11T00:23:30Z_
 _Reviewer: the agent (gsd-code-reviewer)_
 _Depth: standard_
