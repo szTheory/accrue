@@ -16,11 +16,13 @@ function verifyCriticalPath(records, rendered) {
   assert.equal(staged.sample_count, 20, "critical path requires exactly 20 complete staged observations");
   assert.notEqual(staged.p50_ms, null, "critical path p50 must be present");
   assert.notEqual(staged.p95_ms, null, "critical path p95 must be present");
-  assert.match(rendered, new RegExp(`Cohort: ${staged.cohort_fingerprint}`), "rendered Markdown names the staged cohort");
+  assert.match(rendered, /Fingerprint strata/, "rendered Markdown discloses fingerprint strata");
+  assert.match(rendered, /Sensitivity/, "rendered Markdown discloses per-stratum sensitivity");
   assert.match(rendered, new RegExp(`qualifying successes: ${staged.sample_count}`), "rendered Markdown names the staged sample count");
   assert.match(rendered, new RegExp(`staged-path p50: ${Math.round(staged.p50_ms / 1000)}s`), "rendered Markdown reports staged p50");
   assert.match(rendered, new RegExp(`staged-path p95: ${Math.round(staged.p95_ms / 1000)}s`), "rendered Markdown reports staged p95");
   assert.match(rendered, new RegExp(`\\*\\*${staged.conclusion}\\*\\*`), "rendered Markdown states the explicit conclusion");
+  assert.equal(staged.fingerprint_distribution.reduce((total, stratum) => total + stratum.sample_count, 0), 20, "fingerprint distribution accounts for every selected observation");
   return staged;
 }
 
@@ -171,6 +173,25 @@ function stagedPathControls(fixture) {
   const rerun = [...runs.slice(0, 19), stagedRun(fixture.successful_run, 720, 20, { original_run_id: 700, run_attempt: 2, head_sha: runs[0].head_sha })];
   assert.throws(() => deriveStagedPathPercentiles([...collectBaseline(rerun), ...summarizeCohorts(rerun)]), /ready cohort|exactly 20 successful first-attempt runs/, "rerun inflation cannot satisfy the stage cohort");
   assert.throws(() => deriveStagedPathPercentiles([...collectBaseline(runs.slice(0, 19)), ...summarizeCohorts(runs.slice(0, 19))]), /ready cohort/, "nineteen observations cannot satisfy the stage cohort");
+
+  const multiFingerprintRuns = runs.map((run, index) => ({
+    ...run,
+    workflow_revision: `critical-path-${index % 4}`
+  }));
+  const multiFingerprintRecords = [...collectBaseline(multiFingerprintRuns), ...summarizeCohorts(multiFingerprintRuns)];
+  const compatible = deriveStagedPathPercentiles(multiFingerprintRecords);
+  assert.equal(compatible.sample_count, 20, "latest compatible complete paths span fingerprints without weakening the sample size");
+  assert.equal(compatible.fingerprint_distribution.length, 4, "fingerprint distribution retains every observed topology stratum");
+  assert.deepEqual(compatible.fingerprint_distribution.map((stratum) => stratum.sample_count), [5, 5, 5, 5], "fingerprint sensitivity is deterministic");
+  assert.equal(compatible.fingerprint_distribution.reduce((total, stratum) => total + stratum.sample_count, 0), 20, "strata sum to the selected population");
+  const compatibleMarkdown = renderBaseline(multiFingerprintRecords);
+  assert.match(compatibleMarkdown, /Fingerprint strata/, "compatible-path report labels fingerprint distribution");
+  assert.match(compatibleMarkdown, /Sensitivity/, "compatible-path report labels per-stratum sensitivity");
+
+  const duplicateIdentity = multiFingerprintRuns.map((run, index) => index === 19 ? { ...run, original_run_id: multiFingerprintRuns[0].original_run_id, head_sha: multiFingerprintRuns[0].head_sha } : run);
+  assert.throws(() => deriveStagedPathPercentiles([...collectBaseline(duplicateIdentity), ...summarizeCohorts(duplicateIdentity)]), /20 unique successful first-attempt/, "duplicate original-run/SHA identity cannot fill the compatible population");
+  const scheduledCompatible = multiFingerprintRuns.map((run, index) => index === 19 ? { ...run, event: "schedule" } : run);
+  assert.throws(() => deriveStagedPathPercentiles([...collectBaseline(scheduledCompatible), ...summarizeCohorts(scheduledCompatible)]), /20 compatible complete paths/, "schedule/provider-only runs cannot fill the compatible population");
 }
 
 export function verifyFixtures() {
