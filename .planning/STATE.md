@@ -5,9 +5,9 @@ milestone_name: CI Evidence & Critical-Path Hardening
 current_phase: 226
 current_phase_name: ci-baseline-proof-semantics
 status: executing
-stopped_at: Completed 226-10-PLAN.md
-last_updated: "2026-08-11T14:18:26.671Z"
-last_activity: 2026-08-10
+stopped_at: "Phase 226 Plan 11 Task 2 blocked: promote verified Phase 225 CI repairs to origin/main, then authorize a fresh three-run cohort"
+last_updated: "2026-08-11T15:52:32.514Z"
+last_activity: 2026-08-11
 last_activity_desc: Phase 226 execution started
 progress:
   total_phases: 3
@@ -31,8 +31,8 @@ See: `.planning/PROJECT.md` (updated 2026-08-05 after shipping v1.59)
 
 Phase: 226 (ci-baseline-proof-semantics) — EXECUTING
 Plan: 1 of 11
-Status: Ready to execute
-Last activity: 2026-08-10 — Phase 226 execution started
+Status: Executing Phase 226
+Last activity: 2026-08-11 — Phase 226 execution started
 
 Progress: [██████████] 100%
 
@@ -1082,8 +1082,8 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 
 ## Session Continuity
 
-Last session: 2026-08-11T02:23:04.191Z
-Stopped at: Completed 226-10-PLAN.md
+Last session: 2026-08-11T15:52:32.491Z
+Stopped at: Phase 226 Plan 11 Task 2 blocked: promote verified Phase 225 CI repairs to origin/main, then authorize a fresh three-run cohort
 Resume file: None
 
 ## Operator Next Steps
