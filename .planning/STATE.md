@@ -5,15 +5,15 @@ milestone_name: CI Evidence & Critical-Path Hardening
 current_phase: 226
 current_phase_name: ci-baseline-proof-semantics
 status: executing
-stopped_at: Completed 226-07-PLAN.md
-last_updated: "2026-08-11T00:19:52.661Z"
+stopped_at: Completed 226-08-PLAN.md
+last_updated: "2026-08-11T01:13:48.602Z"
 last_activity: 2026-08-10
 last_activity_desc: Phase 226 execution started
 progress:
   total_phases: 3
   completed_phases: 2
-  total_plans: 10
-  completed_plans: 10
+  total_plans: 11
+  completed_plans: 11
   percent: 67
 ---
 
@@ -30,7 +30,7 @@ See: `.planning/PROJECT.md` (updated 2026-08-05 after shipping v1.59)
 ## Current Position
 
 Phase: 226 (ci-baseline-proof-semantics) — EXECUTING
-Plan: 2 of 7
+Plan: 2 of 8
 Status: Ready to execute
 Last activity: 2026-08-10 — Phase 226 execution started
 
@@ -465,6 +465,7 @@ Coverage: 22/22 v1.51 requirements mapped (each REQ-ID → exactly one phase). D
 | Phase 226 P05 | 24m | 3 tasks | 3 files |
 | Phase 226-ci-baseline-proof-semantics P06 | 30min | 2 tasks | 5 files |
 | Phase 226 P07 | 4min | 2 tasks | 2 files |
+| Phase 226 P08 | 31min | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -921,6 +922,8 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - [Phase ?]: Separate initial runner queue from staged critical-chain duration in canonical CI evidence.
 - [Phase ?]: Use bounded total_count pagination for live GitHub Actions list metadata.
 - [Phase ?]: Canonical evidence uses a fixed recursive type/key tree and public-CLI mutation matrix.
+- [Phase ?]: Manifest policy is the trusted interpretation boundary; candidate job facts are re-derived before proof aggregation.
+- [Phase ?]: Public --input mutation coverage supplies deterministic end-to-end tracer verification with no human UAT.
 
 ### Pending Todos
 
@@ -1073,8 +1076,8 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 
 ## Session Continuity
 
-Last session: 2026-08-11T00:19:52.634Z
-Stopped at: Completed 226-07-PLAN.md
+Last session: 2026-08-11T01:13:48.592Z
+Stopped at: Completed 226-08-PLAN.md
 Resume file: None
 
 ## Operator Next Steps

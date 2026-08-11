@@ -114,7 +114,7 @@ Plans:
 
 **Wave 8** *(gap closure; blocked on Wave 7 completion)*
 
-- [ ] 226-08-PLAN.md — Bind collector and canonical job/proof facts to the versioned workflow-policy manifest with fail-closed public mutations.
+- [x] 226-08-PLAN.md — Bind collector and canonical job/proof facts to the versioned workflow-policy manifest with fail-closed public mutations.
 
 ### Phase 227: Measured Critical-Path Improvement
 
