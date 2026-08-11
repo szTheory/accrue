@@ -12,18 +12,20 @@ fail() {
 
 [ -x "$diagnostic" ] || fail "missing executable setup diagnostic registry"
 
-assert_node_contract() {
-  local output
-  output="$("$diagnostic" describe node_missing_or_version)" || fail "node setup code must resolve"
+assert_registry_contract() {
+  local code expected_owner output
+  for code in node_missing_or_version npm_lock_or_registry playwright_binary_or_revision linux_browser_dependency browser_launch port_or_server_readiness fixture_or_database; do
+    case "$code" in linux_browser_dependency) expected_owner=CI ;; *) expected_owner=host ;; esac
+    output="$("$diagnostic" describe "$code")" || fail "setup code must resolve: $code"
+    printf '%s\n' "$output" | grep -Fx "code=$code" >/dev/null || fail "missing stable code: $code"
+    printf '%s\n' "$output" | grep -Fx "owner=$expected_owner" >/dev/null || fail "wrong owner for $code"
+    printf '%s\n' "$output" | grep -E '^next_command=.{8,}$' >/dev/null || fail "missing narrow repair command for $code"
+    printf '%s\n' "$output" | grep -E '^evidence_location=.{4,}$' >/dev/null || fail "missing evidence location for $code"
+  done
 
-  printf '%s\n' "$output" | grep -Fx 'code=node_missing_or_version' >/dev/null ||
-    fail "missing stable Node code"
-  printf '%s\n' "$output" | grep -Fx 'owner=host' >/dev/null ||
-    fail "Node preflight must be host-owned"
-  printf '%s\n' "$output" | grep -Fx 'next_command=Install Node 22 with your version manager, then run mix verify.full.' >/dev/null ||
-    fail "Node preflight must provide the fixed repair command"
-  printf '%s\n' "$output" | grep -Fx 'evidence_location=local host preflight stderr' >/dev/null ||
-    fail "Node preflight must provide its evidence location"
+  if "$diagnostic" describe unknown_setup_code >/dev/null 2>&1; then
+    fail "unknown setup codes must fail closed"
+  fi
 }
 
 assert_node_preflight_fixture() {
@@ -63,7 +65,28 @@ assert_privacy_rejection() {
   [ ! -s "$facts" ] || fail "unsafe dynamic values must not reach facts"
 }
 
-assert_node_contract
+assert_browser_boundary_contract() {
+  local browser_script="$root_dir/scripts/ci/accrue_host_verify_browser.sh"
+  local wrapper_script="$root_dir/scripts/ci/accrue_host_uat.sh"
+  local config="$root_dir/examples/accrue_host/playwright.config.js"
+
+  for code in npm_lock_or_registry playwright_binary_or_revision fixture_or_database browser_launch port_or_server_readiness; do
+    grep -Fq "$code" "$browser_script" || fail "browser script must classify $code"
+  done
+  grep -Fq 'mix verify.full' "$wrapper_script" || fail "wrapper must preserve host proof delegation"
+  [ "$(grep -Fc 'mix verify.full' "$wrapper_script")" -eq 1 ] || fail "wrapper must delegate exactly once"
+  grep -Fq 'fullyParallel: false' "$config" || fail "Playwright must stay single-flow"
+  grep -Fq ': 1' "$config" || fail "Playwright must retain one worker"
+  ! grep -Eq '^[[:space:]]*retries:' "$config" || fail "Playwright retries must remain at the zero default"
+  grep -Fq 'trace: "retain-on-failure"' "$config" || fail "failure trace retention changed"
+  grep -Fq 'screenshot: "only-on-failure"' "$config" || fail "failure screenshot retention changed"
+  grep -Fq 'verify01-admin-a11y.spec.js' "$browser_script" || fail "accessibility evidence comment missing"
+  grep -Fq 'npm ci' "$browser_script" || fail "host duplicate npm provisioning must remain"
+  grep -Fq 'npm run e2e:install' "$browser_script" || fail "host duplicate browser provisioning must remain"
+}
+
+assert_registry_contract
 assert_node_preflight_fixture
 assert_privacy_rejection
+assert_browser_boundary_contract
 echo "verify_ci_setup_diagnostics: ok"
