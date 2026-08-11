@@ -28,7 +28,11 @@ export function deriveStagedPathPercentiles(records) {
     const jobs = jobRows.filter((job) => job.run_id === run.run_id && job.conclusion === "success");
     const release = jobs.find((job) => job.stable_identity === "release-gate");
     const host = jobs.find((job) => job.stable_identity === "host-integration");
-    const playwright = jobs.filter((job) => job.stable_identity === "playwright-e2e");
+    // GitHub preserves matrix shard labels in job names (for example,
+    // `playwright-e2e-shard-1/3`).  These are parallel instances of the same
+    // Playwright stage, so include every stable shard identity in the path and
+    // use only the latest completion below; never sum shard durations.
+    const playwright = jobs.filter((job) => job.stable_identity === "playwright-e2e" || job.stable_identity.startsWith("playwright-e2e-"));
     if (!release) throw new Error("critical path is missing release-gate stage");
     if (!host) throw new Error("critical path is missing host-integration stage");
     if (playwright.length === 0) throw new Error("critical path is missing playwright-e2e stage");

@@ -18,7 +18,7 @@ function verifyCriticalPath(records, rendered) {
   assert.notEqual(staged.p95_ms, null, "critical path p95 must be present");
   assert.match(rendered, /Fingerprint strata/, "rendered Markdown discloses fingerprint strata");
   assert.match(rendered, /Sensitivity/, "rendered Markdown discloses per-stratum sensitivity");
-  assert.match(rendered, new RegExp(`qualifying successes: ${staged.sample_count}`), "rendered Markdown names the staged sample count");
+  assert.match(rendered, new RegExp(`Latest compatible complete paths: ${staged.sample_count}`), "rendered Markdown names the staged sample count");
   assert.match(rendered, new RegExp(`staged-path p50: ${Math.round(staged.p50_ms / 1000)}s`), "rendered Markdown reports staged p50");
   assert.match(rendered, new RegExp(`staged-path p95: ${Math.round(staged.p95_ms / 1000)}s`), "rendered Markdown reports staged p95");
   assert.match(rendered, new RegExp(`\\*\\*${staged.conclusion}\\*\\*`), "rendered Markdown states the explicit conclusion");
