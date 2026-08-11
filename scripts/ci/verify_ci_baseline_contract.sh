@@ -112,6 +112,34 @@ candidate_required_proof_completeness() {
   ' "$candidate" >/dev/null || fail "candidate required release proof is incomplete: ${candidate#$root_dir/}"
 }
 
+# This runs only after candidate_job_semantics has bound every job's chain role
+# to the checked-in policy.  Timing is then independently recovered from the
+# durable job timestamps, never from a candidate aggregate or job duration.
+candidate_derived_run_semantics() {
+  local candidate="$1"
+  jq -e '
+    def chain_seconds:
+      [.jobs[] | select(.staged_critical_chain_order != null)] as $chain |
+      if ($chain | length) > 0 and all($chain[]; .started_at != null and .completed_at != null)
+      then (($chain | map(.started_at | fromdateiso8601) | min) as $start |
+            ($chain | map(.completed_at | fromdateiso8601) | max) - $start)
+      else null
+      end;
+    all(.runs[]; . as $record |
+      (chain_seconds) as $chain |
+      (($chain == null) == ($record.run.staged_critical_chain_seconds == null)) and
+      (if $chain == null
+       then $record.run.staged_critical_chain_omission_reason == "provider-omitted-staged-chain-timestamp"
+       else $record.run.staged_critical_chain_omission_reason == null
+       end) and
+      (if $record.run.eligible
+       then $chain != null and $record.run.staged_critical_chain_seconds == $chain
+       else ([.jobs[] | select(.proof_state == "proved")] | length) == 0
+       end)
+    )
+  ' "$candidate" >/dev/null || fail "candidate staged critical-chain timing failed: ${candidate#$root_dir/}"
+}
+
 validate_collector_record() {
   local candidate="$1"
   jq -e --slurpfile policy "$policy_manifest" '
@@ -126,6 +154,7 @@ validate_collector_record() {
   candidate_job_semantics "$candidate"
   candidate_workflow_semantics "$candidate"
   candidate_required_proof_completeness "$candidate"
+  candidate_derived_run_semantics "$candidate"
   jq -e '
     def pairs: ([.jobs[]|select(.conclusion=="failure" or .conclusion=="timed_out" or .conclusion=="cancelled")|{manifest_identity,conclusion}]|unique|sort_by(.manifest_identity,.conclusion));
     all(.runs[]; . as $record |
@@ -189,6 +218,7 @@ validate_canonical_cohort() {
   candidate_job_semantics "$1"
   candidate_workflow_semantics "$1"
   candidate_required_proof_completeness "$1"
+  candidate_derived_run_semantics "$1"
   reject_sensitive_strings "$1"
   validate_aggregates "$1"
 }
