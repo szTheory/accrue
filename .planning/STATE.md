@@ -4,16 +4,16 @@ milestone: v1.61
 milestone_name: CI Evidence & Critical-Path Hardening
 current_phase: 226
 current_phase_name: ci-baseline-proof-semantics
-status: planned
-stopped_at: Planned 226-09-PLAN.md
-last_updated: "2026-08-11T01:39:30Z"
+status: verifying
+stopped_at: Completed 226-09-PLAN.md
+last_updated: "2026-08-11T01:50:02.032Z"
 last_activity: 2026-08-10
-last_activity_desc: Phase 226 gap closure planning complete — 1 plan ready
+last_activity_desc: Phase 226 execution started
 progress:
   total_phases: 3
   completed_phases: 2
   total_plans: 12
-  completed_plans: 11
+  completed_plans: 12
   percent: 67
 ---
 
@@ -29,12 +29,12 @@ See: `.planning/PROJECT.md` (updated 2026-08-05 after shipping v1.59)
 
 ## Current Position
 
-Phase: 226 (ci-baseline-proof-semantics) — PLANNED
-Plan: 8 of 9
-Status: Ready to execute
-Last activity: 2026-08-10 — Phase 226 gap closure planning complete
+Phase: 226 (ci-baseline-proof-semantics) — EXECUTING
+Plan: 9 of 9
+Status: Phase complete — ready for verification
+Last activity: 2026-08-10 — Phase 226 execution started
 
-Progress: [█████████░] 89%
+Progress: [██████████] 100%
 
 ## v1.61 Roadmap
 
@@ -466,6 +466,7 @@ Coverage: 22/22 v1.51 requirements mapped (each REQ-ID → exactly one phase). D
 | Phase 226-ci-baseline-proof-semantics P06 | 30min | 2 tasks | 5 files |
 | Phase 226 P07 | 4min | 2 tasks | 2 files |
 | Phase 226 P08 | 31min | 2 tasks | 2 files |
+| Phase 226-ci-baseline-proof-semantics P09 | unknown | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -924,6 +925,8 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - [Phase ?]: Canonical evidence uses a fixed recursive type/key tree and public-CLI mutation matrix.
 - [Phase ?]: Manifest policy is the trusted interpretation boundary; candidate job facts are re-derived before proof aggregation.
 - [Phase ?]: Public --input mutation coverage supplies deterministic end-to-end tracer verification with no human UAT.
+- [Phase ?]: CI baseline validators require exact policy workflow identity and complete eligible-run proof.
+- [Phase ?]: Complete CI job topology is versioned and validated against the live workflow.
 
 ### Pending Todos
 
@@ -1076,8 +1079,8 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 
 ## Session Continuity
 
-Last session: 2026-08-11T01:13:48.592Z
-Stopped at: Completed 226-08-PLAN.md
+Last session: 2026-08-11T01:49:48.418Z
+Stopped at: Completed 226-09-PLAN.md
 Resume file: None
 
 ## Operator Next Steps

@@ -118,7 +118,7 @@ Plans:
 
 **Wave 9** *(gap closure; blocked on Wave 8 completion)*
 
-- [ ] 226-09-PLAN.md — Bind exact workflow identity, complete eligible required-lane proof, and full live CI topology to the versioned policy with fail-closed public mutations.
+- [x] 226-09-PLAN.md — Bind exact workflow identity, complete eligible required-lane proof, and full live CI topology to the versioned policy with fail-closed public mutations.
 
 ### Phase 227: Measured Critical-Path Improvement
 
