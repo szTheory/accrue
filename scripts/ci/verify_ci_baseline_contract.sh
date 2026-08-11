@@ -23,7 +23,7 @@ require_source_fixed() { printf '%s\n' "$2" | grep -Fq "$3" || fail "missing '$3
 job_body() { awk -v job_id="$1" '$0 == "  " job_id ":" {in_job=1} in_job && $0 ~ /^  [A-Za-z0-9_-]+:/ && $0 != "  " job_id ":" {exit} in_job {print}' "$ci_file"; }
 
 validate_policy_manifest() {
-  jq -e '.schema_version == 2 and (.workflow | type == "string" and length > 0) and (.lanes | type == "array" and length > 0) and all(.lanes[]; (keys|sort) == ["identity","initial_queue_root","match","policy","required_for_release_proof","staged_critical_chain_order"] and (.identity | type == "string" and test("^[a-z0-9-]+$")) and (.match | type == "string" and length > 0) and (.policy == "required" or .policy == "advisory" or .policy == "conditional") and (.required_for_release_proof | type == "boolean") and (.initial_queue_root | type == "boolean") and (.staged_critical_chain_order == null or (.staged_critical_chain_order | type == "number" and floor == . and . > 0))) and ([.lanes[].identity] | unique | length == length)' "$policy_manifest" >/dev/null || fail "invalid workflow policy manifest"
+  jq -e '.schema_version == 3 and (.workflow | type == "string" and length > 0) and (.lanes | type == "array" and length > 0) and (.workflow_topology | type == "array" and length > 0) and all(.lanes[]; (keys|sort) == ["identity","initial_queue_root","match","policy","required_for_release_proof","staged_critical_chain_order"] and (.identity | type == "string" and test("^[a-z0-9-]+$")) and (.match | type == "string" and length > 0) and (.policy == "required" or .policy == "advisory" or .policy == "conditional") and (.required_for_release_proof | type == "boolean") and (.initial_queue_root | type == "boolean") and (.staged_critical_chain_order == null or (.staged_critical_chain_order | type == "number" and floor == . and . > 0))) and all(.workflow_topology[]; (keys|sort)==["condition","display_names","expected_instances","job_id","lane_identities","matrix_role","name"] and (.job_id|type=="string") and (.name|type=="string") and (.condition|type=="string") and (.display_names|type=="array" and length>0) and (.expected_instances|type=="number" and floor==. and .>0) and (.lane_identities|type=="array" and length>0)) and ([.lanes[].identity] | unique | length == length) and ([.workflow_topology[].job_id] | unique | length == length) and (([.workflow_topology[].lane_identities[]] | sort) == ([.lanes[].identity] | sort))' "$policy_manifest" >/dev/null || fail "invalid workflow policy manifest"
   jq -n --slurpfile policy "$policy_manifest" --slurpfile baseline "$canonical_input" 'all($baseline[0].runs[].jobs[]; . as $job | ([ $policy[0].lanes[] | .match as $match | select($job.name | test($match)) ] | length) == 1)' >/dev/null || fail "policy manifest does not classify canonical job identities exactly once"
 }
 
@@ -194,8 +194,38 @@ validate_canonical_cohort() {
 }
 validate_input() { local candidate="$1"; [ -f "$candidate" ] || fail "missing baseline input: ${candidate#$root_dir/}"; validate_policy_manifest; case "$(jq -r '.document_type // "canonical-v1"' "$candidate")" in ci-baseline-collector-record) validate_collector_record "$candidate";; ci-baseline-canonical) validate_canonical_cohort "$candidate";; *) fail "unknown document discriminator";; esac; }
 
+validate_workflow_topology() {
+  local expected_ids actual_ids row job_id expected_name expected_condition body actual_name actual_condition role
+  expected_ids="$(jq -r '[.workflow_topology[].job_id] | sort | join(" ")' "$policy_manifest")"
+  actual_ids="$(awk 'BEGIN { jobs=0 } /^jobs:$/ { jobs=1; next } jobs && /^  [A-Za-z0-9_-]+:$/ { sub(/^  /, ""); sub(/:$/, ""); print }' "$ci_file" | sort | tr '\n' ' ' | sed 's/ $//')"
+  [ "$actual_ids" = "$expected_ids" ] || fail "workflow job topology does not match policy"
+  while IFS= read -r row; do
+    job_id="$(jq -r '.job_id' <<<"$row")"; expected_name="$(jq -r '.name' <<<"$row")"; expected_condition="$(jq -r '.condition' <<<"$row")"; role="$(jq -r '.matrix_role' <<<"$row")"
+    body="$(job_body "$job_id")"; [ -n "$body" ] || fail "missing topology job: $job_id"
+    actual_name="$(awk -F'name: ' '/^    name: / {print $2; exit}' <<<"$body")"
+    actual_condition="$(awk -F'if: ' '/^    if: / {print $2; exit}' <<<"$body")"
+    [ "$actual_name" = "$expected_name" ] || fail "workflow job name drift: $job_id"
+    [ "$actual_condition" = "$expected_condition" ] || fail "workflow job condition drift: $job_id"
+    case "$role" in
+      scalar|conditional) ;;
+      release-support)
+        [ "$(grep -Fc "support: 'required'" <<<"$body" || true)" -eq 3 ] || fail "release support topology drift"
+        grep -Fq "support: 'advisory'" <<<"$body" || fail "release advisory topology drift"
+        grep -Fq "continue-on-error: \${{ matrix.support == 'advisory' }}" <<<"$body" || fail "release advisory condition drift"
+        for name in $(jq -r '.display_names[]' <<<"$row" | sed 's/ /_/g'); do :; done
+        ;;
+      playwright-shards)
+        grep -Fq 'shard: [1, 2, 3]' <<<"$body" || fail "Playwright shard topology drift"
+        ;;
+      *) fail "unknown topology matrix role: $role" ;;
+    esac
+  done < <(jq -c '.workflow_topology[]' "$policy_manifest")
+}
+
 validate_repository_contract() {
   [ -f "$ci_file" ] && [ -f "$ownership_file" ] || fail "missing workflow or ownership runbook"
+  validate_policy_manifest
+  validate_workflow_topology
   local docs_job release_job admin_drift_job host_job playwright_job annotation_job
   docs_job="$(job_body docs-contracts-shift-left)"; release_job="$(job_body release-gate)"; admin_drift_job="$(job_body admin-drift-docs)"; host_job="$(job_body host-integration)"; playwright_job="$(job_body playwright-e2e)"; annotation_job="$(job_body annotation-sweep)"
   [ -n "$docs_job" ] && [ -n "$release_job" ] && [ -n "$admin_drift_job" ] && [ -n "$host_job" ] && [ -n "$playwright_job" ] && [ -n "$annotation_job" ] || fail "missing stable CI job identity"
@@ -347,6 +377,9 @@ if [ "$self_test" = true ]; then
   cp "$ci_file" "$tmp_dir/ci.yml"
   printf '\n  unmanifested-topology-job:\n    name: Unmanifested topology job\n    runs-on: ubuntu-24.04\n    steps: []\n' >>"$tmp_dir/ci.yml"
   ci_file="$tmp_dir/ci.yml"; if (validate_repository_contract); then fail "added topology job unexpectedly passed"; fi; ci_file="$root_dir/.github/workflows/ci.yml"
+  cp "$ci_file" "$tmp_dir/ci.yml"; sed -i.bak "/- elixir: '1.19.0'/,+6 s/support: 'required'/support: 'advisory'/" "$tmp_dir/ci.yml"; ci_file="$tmp_dir/ci.yml"; if (validate_repository_contract); then fail "release support mutation unexpectedly passed"; fi; ci_file="$root_dir/.github/workflows/ci.yml"
+  cp "$ci_file" "$tmp_dir/ci.yml"; sed -i.bak 's/shard: \[1, 2, 3\]/shard: [1, 2]/' "$tmp_dir/ci.yml"; ci_file="$tmp_dir/ci.yml"; if (validate_repository_contract); then fail "Playwright shard mutation unexpectedly passed"; fi; ci_file="$root_dir/.github/workflows/ci.yml"
+  cp "$ci_file" "$tmp_dir/ci.yml"; sed -i.bak "s/github.event_name == 'workflow_dispatch' || github.event_name == 'schedule'/github.event_name == 'schedule'/" "$tmp_dir/ci.yml"; ci_file="$tmp_dir/ci.yml"; if (validate_repository_contract); then fail "conditional topology mutation unexpectedly passed"; fi; ci_file="$root_dir/.github/workflows/ci.yml"
   cp "$ownership_file" "$tmp_dir/ownership.md"; sed -i.bak 's/npm run e2e:install/npm run e2e-install/g' "$tmp_dir/ownership.md"; ownership_file="$tmp_dir/ownership.md"; if (validate_repository_contract); then fail "missing ownership command unexpectedly passed"; fi
   echo "verify_ci_baseline_contract: self-test ok"
   exit 0
