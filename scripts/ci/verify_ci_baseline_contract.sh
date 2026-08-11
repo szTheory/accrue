@@ -103,7 +103,10 @@ validate_repository_contract() {
 if [ "$self_test" = true ]; then
   tmp_dir="$(mktemp -d)"; cleanup() { rm -rf "$tmp_dir"; }; trap cleanup EXIT
   expect_invalid() { local label="$1" filter="$2" path; path="$tmp_dir/$label.json"; jq "$filter" "$tmp_dir/collector-record.json" >"$path"; if (validate_input "$path"); then fail "$label mutation unexpectedly passed"; fi; }
+  expect_canonical_invalid() { local label="$1" filter="$2" path; path="$tmp_dir/canonical-$label.json"; jq "$filter" "$canonical_input" >"$path"; if bash "$root_dir/scripts/ci/verify_ci_baseline_contract.sh" --input "$path" >/dev/null 2>&1; then fail "canonical $label mutation unexpectedly passed"; fi; }
   validate_input "$canonical_input"
+  # RED gate: the public canonical path must reject fields not in the durable schema.
+  expect_canonical_invalid canonical-unknown-root '.evidence = "ghp_synthetic_secret_value"'
   fixture_dir="$tmp_dir/fixture"; mkdir "$fixture_dir"
   printf '%s\n' '{"status":200,"body":{"id":1,"name":"CI","event":"workflow_dispatch","head_sha":"1111111111111111111111111111111111111111","run_attempt":1,"status":"completed","conclusion":"success","created_at":"2026-08-09T15:56:11Z","updated_at":"2026-08-09T15:56:21Z","html_url":"https://github.com/szTheory/accrue/actions/runs/1"}}' >"$fixture_dir/run-1.json"
   printf '%s\n' '{"status":200,"body":{"total_count":1,"next_page":null,"jobs":[{"id":2,"name":"unknown job","status":"completed","conclusion":"success","started_at":"2026-08-09T15:56:12Z","completed_at":"2026-08-09T15:56:20Z","steps":[]}]}}' >"$fixture_dir/jobs-1-1.json"
