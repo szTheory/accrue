@@ -148,7 +148,7 @@ validate_repository_contract() {
 
 if [ "$self_test" = true ]; then
   tmp_dir="$(mktemp -d)"; cleanup() { rm -rf "$tmp_dir"; }; trap cleanup EXIT
-  expect_invalid() { local label="$1" filter="$2" path; path="$tmp_dir/$label.json"; jq "$filter" "$tmp_dir/collector-record.json" >"$path"; if (validate_input "$path"); then fail "$label mutation unexpectedly passed"; fi; }
+  expect_invalid() { local label="$1" filter="$2" path; path="$tmp_dir/$label.json"; jq "$filter" "$tmp_dir/collector-record.json" >"$path"; if bash "$root_dir/scripts/ci/verify_ci_baseline_contract.sh" --input "$path" >/dev/null 2>&1; then fail "$label mutation unexpectedly passed"; fi; }
   expect_canonical_invalid() { local label="$1" filter="$2" path; path="$tmp_dir/canonical-$label.json"; jq "$filter" "$canonical_input" >"$path"; if bash "$root_dir/scripts/ci/verify_ci_baseline_contract.sh" --input "$path" >/dev/null 2>&1; then fail "canonical $label mutation unexpectedly passed"; fi; }
   validate_input "$canonical_input"
   # RED gate: the public canonical path must reject fields not in the durable schema.
@@ -176,6 +176,9 @@ if [ "$self_test" = true ]; then
   expect_invalid queue-drift '.runs[0].run.runner_queue_seconds += 1'
   expect_invalid signature-pair '.runs[0].root_failure_signature.lane_conclusions += [{"manifest_identity":"docs-contracts-shift-left","conclusion":"failure"}]'
   expect_invalid ineligible-proved '(.runs[0].run.eligible = false) | (.runs[0].jobs[0].proof_state = "proved")'
+  # RED gates: both public document discriminators must reject unknown lane names.
+  expect_invalid collector-fabricated-job '.runs[0].jobs[0].name = "Fabricated release lane"'
+  expect_canonical_invalid canonical-fabricated-job '.runs[0].jobs[0].name = "Fabricated release lane"'
   # Canonical mutation matrix: each copy goes through the public discriminator.
   expect_canonical_invalid canonical-policy-unknown '.policy_manifest.evidence = "harmless"'
   expect_canonical_invalid canonical-privacy-unknown '.privacy.evidence = "harmless"'
