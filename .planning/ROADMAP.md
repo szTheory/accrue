@@ -110,7 +110,7 @@ Plans:
 
 **Wave 7** *(gap closure; blocked on Wave 6 completion)*
 
-- [ ] 226-07-PLAN.md — Enforce exact recursive canonical schema/privacy validation and prove hostile root, nested, type, and sensitive-string mutations fail closed.
+- [x] 226-07-PLAN.md — Enforce exact recursive canonical schema/privacy validation and prove hostile root, nested, type, and sensitive-string mutations fail closed.
 
 ### Phase 227: Measured Critical-Path Improvement
 
