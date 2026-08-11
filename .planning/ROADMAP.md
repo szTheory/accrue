@@ -81,7 +81,7 @@ Plans:
   3. A host maintainer can identify whether Node, browser installation, and Playwright setup belong to the host or CI and can follow documented diagnostics for each setup failure mode.
   4. The baseline confirms the roughly 33–36 minute green-run critical path is staged release → host integration → Playwright work rather than runner queueing, or records a contrary measured result.
 
-**Plans:** 5 plans
+**Plans:** 7 plans
 
 Plans:
 **Wave 1**
@@ -97,6 +97,14 @@ Plans:
 **Wave 3** *(blocked on Waves 1–2)*
 
 - [x] 226-05-PLAN.md — Wire always-run CI summaries/artifacts, reconcile maintainer docs, and close validation.
+
+**Wave 4** *(blocked on Wave 3)*
+
+- [ ] 226-06-PLAN.md — Repair full-CI timing qualification and fail closed on calendar-impossible timestamps.
+
+**Wave 5** *(blocked on Wave 4)*
+
+- [ ] 226-07-PLAN.md — Recollect the frozen baseline and require a reproducible cohort-percentile critical-path conclusion.
 
 ### Phase 227: Measured Critical-Path Improvement
 
