@@ -118,6 +118,8 @@ candidate_required_proof_completeness() {
 candidate_derived_run_semantics() {
   local candidate="$1"
   jq -e '
+    def failure_pairs:
+      [.jobs[] | select(.conclusion == "failure" or .conclusion == "timed_out" or .conclusion == "cancelled") | {manifest_identity, conclusion}] | unique | sort_by(.manifest_identity, .conclusion);
     def chain_seconds:
       [.jobs[] | select(.staged_critical_chain_order != null)] as $chain |
       if ($chain | length) > 0 and all($chain[]; .started_at != null and .completed_at != null)
@@ -127,6 +129,8 @@ candidate_derived_run_semantics() {
       end;
     all(.runs[]; . as $record |
       (chain_seconds) as $chain |
+      (failure_pairs) as $pairs |
+      (if ($pairs | length) == 0 then "no-failure" else "failed-lane" end) as $category |
       (($chain == null) == ($record.run.staged_critical_chain_seconds == null)) and
       (if $chain == null
        then $record.run.staged_critical_chain_omission_reason == "provider-omitted-staged-chain-timestamp"
@@ -135,7 +139,11 @@ candidate_derived_run_semantics() {
       (if $record.run.eligible
        then $chain != null and $record.run.staged_critical_chain_seconds == $chain
        else ([.jobs[] | select(.proof_state == "proved")] | length) == 0
-       end)
+       end) and
+      ($record.root_failure_signature.lane_conclusions == $pairs) and
+      ($record.root_failure_signature.affected_jobs == ($pairs | map(.manifest_identity) | unique | sort)) and
+      ($record.root_failure_signature.category == $category) and
+      ($record.root_failure_signature.id == ("ci-root-v2-" + (([$category, $pairs] | tojson | @base64) | gsub("="; ""))))
     )
   ' "$candidate" >/dev/null || fail "candidate staged critical-chain timing failed: ${candidate#$root_dir/}"
 }
