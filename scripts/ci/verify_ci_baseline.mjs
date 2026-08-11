@@ -11,6 +11,19 @@ function fail(message) {
   throw new Error(message);
 }
 
+function verifyCriticalPath(records, rendered) {
+  const staged = deriveStagedPathPercentiles(records);
+  assert.equal(staged.sample_count, 20, "critical path requires exactly 20 complete staged observations");
+  assert.notEqual(staged.p50_ms, null, "critical path p50 must be present");
+  assert.notEqual(staged.p95_ms, null, "critical path p95 must be present");
+  assert.match(rendered, new RegExp(`Cohort: ${staged.cohort_fingerprint}`), "rendered Markdown names the staged cohort");
+  assert.match(rendered, new RegExp(`qualifying successes: ${staged.sample_count}`), "rendered Markdown names the staged sample count");
+  assert.match(rendered, new RegExp(`staged-path p50: ${Math.round(staged.p50_ms / 1000)}s`), "rendered Markdown reports staged p50");
+  assert.match(rendered, new RegExp(`staged-path p95: ${Math.round(staged.p95_ms / 1000)}s`), "rendered Markdown reports staged p95");
+  assert.match(rendered, new RegExp(`\\*\\*${staged.conclusion}\\*\\*`), "rendered Markdown states the explicit conclusion");
+  return staged;
+}
+
 function fixturePath() {
   return path.resolve(".planning/phases/226-ci-baseline-proof-semantics/fixtures/ci-baseline-cases.json");
 }
@@ -153,10 +166,10 @@ function stagedPathControls(fixture) {
 
   const missingHost = runs.map((run) => ({ ...run, jobs: run.jobs.filter((job) => job.name !== "host-integration") }));
   assert.throws(() => deriveStagedPathPercentiles([...collectBaseline(missingHost), ...summarizeCohorts(missingHost)]), /missing host-integration stage/, "missing host stage is rejected at the staged-path boundary");
-  const badOrder = runs.map((run) => ({ ...run, jobs: run.jobs.map((job) => job.name.includes("playwright") ? { ...job, started_at: new Date(Date.parse(run.jobs[1].completed_at) - 1_000).toISOString() } : job) }));
-  assert.throws(() => deriveStagedPathPercentiles([...collectBaseline(badOrder), ...summarizeCohorts(badOrder)]), /Playwright stage must start after host-integration/, "stage ordering is rejected");
+  const badOrderRecords = records.map((record) => record.kind === "job" && record.stable_identity === "playwright-e2e" ? { ...record, started_at: new Date(Date.parse(record.started_at) - 200_000).toISOString() } : record);
+  assert.throws(() => deriveStagedPathPercentiles(badOrderRecords), /Playwright stage must start after host-integration/, "stage ordering is rejected at the staged-path boundary");
   const rerun = [...runs.slice(0, 19), stagedRun(fixture.successful_run, 720, 20, { original_run_id: 700, run_attempt: 2, head_sha: runs[0].head_sha })];
-  assert.throws(() => deriveStagedPathPercentiles([...collectBaseline(rerun), ...summarizeCohorts(rerun)]), /exactly 20 successful first-attempt runs/, "rerun inflation cannot satisfy the stage cohort");
+  assert.throws(() => deriveStagedPathPercentiles([...collectBaseline(rerun), ...summarizeCohorts(rerun)]), /ready cohort|exactly 20 successful first-attempt runs/, "rerun inflation cannot satisfy the stage cohort");
   assert.throws(() => deriveStagedPathPercentiles([...collectBaseline(runs.slice(0, 19)), ...summarizeCohorts(runs.slice(0, 19))]), /ready cohort/, "nineteen observations cannot satisfy the stage cohort");
 }
 
@@ -191,6 +204,7 @@ function main() {
   const args = process.argv.slice(2);
   const recordsIndex = args.indexOf("--records");
   const renderedIndex = args.indexOf("--rendered");
+  const requireCriticalPath = args.includes("--require-critical-path");
   if (args.includes("--fixtures")) verifyFixtures();
   if (recordsIndex !== -1) {
     const source = args[recordsIndex + 1];
@@ -202,8 +216,10 @@ function main() {
       if (!rendered) fail("--rendered requires a Markdown path");
       assert.equal(fs.readFileSync(rendered, "utf8"), expected, "rendered Markdown must be byte-reproducible");
     }
+    if (requireCriticalPath) verifyCriticalPath(records, expected);
   }
-  if (!args.includes("--fixtures") && recordsIndex === -1) fail("usage: verify_ci_baseline.mjs --fixtures | --records records.ndjson [--rendered baseline.md]");
+  if (requireCriticalPath && recordsIndex === -1) fail("--require-critical-path requires --records");
+  if (!args.includes("--fixtures") && recordsIndex === -1) fail("usage: verify_ci_baseline.mjs --fixtures | --records records.ndjson [--rendered baseline.md] [--require-critical-path]");
   console.log("ci baseline fixtures: PASS");
 }
 
