@@ -3,7 +3,8 @@
   "record_kinds": {
     "run": ["schema_version", "kind", "run_id", "run_url", "sha", "created_at", "started_at", "completed_at", "event_class", "branch_class", "cohort_fingerprint", "workflow_duration_ms", "conclusion", "run_attempt", "original_run_id", "provider_state"],
     "job": ["schema_version", "kind", "run_id", "job_id", "job_url", "job_name", "stable_identity", "matrix_identity", "started_at", "completed_at", "conclusion", "duration_ms", "runner_queue_ms", "dag_wait_ms", "failure_signature", "setup_costs", "cache"],
-    "cohort": ["schema_version", "kind", "cohort_fingerprint", "sample_count", "sample_status", "p50_ms", "p95_ms", "reliability"]
+    "cohort": ["schema_version", "kind", "cohort_fingerprint", "sample_count", "sample_status", "p50_ms", "p95_ms", "reliability"],
+    "snapshot": ["schema_version", "kind", "snapshot_generated_at", "window_start", "window_end", "repository", "workflow", "sample_target"]
   },
   "enums": {
     "conclusion": ["success", "failure", "cancelled", "skipped", "neutral", "timed_out", "action_required", "stale", "unknown"],

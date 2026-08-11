@@ -3,13 +3,13 @@
 import crypto from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
-import { spawnSync } from "node:child_process";
+import { spawn, spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 
 const SCHEMA_VERSION = 1;
 const CONCLUSIONS = new Set(["success", "failure", "cancelled", "skipped", "neutral", "timed_out", "action_required", "stale", "unknown"]);
 const PROVIDER_STATES = new Set(["proved", "failed", "misconfigured", "blocked", "skipped", "non_run"]);
-const RUN_INPUT_FIELDS = new Set(["id", "html_url", "head_sha", "created_at", "run_started_at", "updated_at", "event", "head_branch", "conclusion", "run_attempt", "original_run_id", "workflow_path", "provider_state", "jobs"]);
+const RUN_INPUT_FIELDS = new Set(["id", "html_url", "head_sha", "created_at", "run_started_at", "updated_at", "event", "head_branch", "conclusion", "run_attempt", "original_run_id", "workflow_path", "workflow_revision", "provider_state", "jobs"]);
 const JOB_INPUT_FIELDS = new Set(["id", "html_url", "name", "started_at", "completed_at", "conclusion", "runner_image", "needs", "steps", "cache", "setup_costs", "failure_message"]);
 const SCHEMA_PATH = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../.planning/phases/226-ci-baseline-proof-semantics/schema-v1.json");
 
@@ -30,7 +30,7 @@ function immutableUrl(value, label) {
   return value;
 }
 function normalizedIdentity(value, label) {
-  if (typeof value !== "string" || value.length === 0 || value.length > 160) fail(`${label} must be a bounded string`);
+  if (typeof value !== "string" || value.length === 0 || value.length > 400) fail(`${label} must be a bounded string`);
   const normalized = value.toLowerCase().replace(/\([^)]*\)/g, "").replace(/[^a-z0-9._/-]+/g, "-").replace(/^-+|-+$/g, "");
   if (!normalized) fail(`${label} has no stable identity`);
   return normalized;
@@ -56,7 +56,7 @@ function duration(start, end, label) {
 export function cohortFingerprint(run, jobs = run.jobs || []) {
   const required = jobs.map((job) => normalizedIdentity(job.name, "job.name")).sort();
   const inputs = {
-    workflow_revision: String(run.workflow_path || "unknown").replace(/[^a-zA-Z0-9@._/-]/g, "_"),
+    workflow_revision: String(run.workflow_revision || run.workflow_path || "unknown").replace(/[^a-zA-Z0-9@._/-]/g, "_"),
     event_class: eventClass(run.event),
     branch_class: branchClass(run.event, run.head_branch),
     runner_images: [...new Set(jobs.map((job) => normalizedIdentity(job.runner_image || "unknown", "job.runner_image")))].sort(),
@@ -189,24 +189,95 @@ export function validateRecord(record) {
   const allowed = new Set(schema.record_kinds[record.kind]);
   for (const key of allowed) if (!(key in record)) fail(`record is missing required field: ${key}`);
   for (const key of Object.keys(record)) if (!allowed.has(key)) fail(`record contains forbidden field: ${key}`);
-  if (record.kind !== "cohort" && !CONCLUSIONS.has(record.conclusion)) fail("record contains unsupported conclusion");
+  if (["run", "job"].includes(record.kind) && !CONCLUSIONS.has(record.conclusion)) fail("record contains unsupported conclusion");
   if (record.kind === "run" && !PROVIDER_STATES.has(record.provider_state)) fail("record contains unsupported provider state");
   if (record.kind === "cohort" && !["ready", "insufficient_sample"].includes(record.sample_status)) fail("record contains unsupported sample status");
   return record;
 }
 
 function args(argv) { const out = {}; for (let i = 0; i < argv.length; i += 2) { if (!argv[i]?.startsWith("--")) fail(`unexpected argument: ${argv[i]}`); out[argv[i].slice(2)] = argv[i + 1] ?? true; } return out; }
-function main() {
+function ghJson(endpoint, paginate = false) {
+  const response = spawnSync("gh", ["api", endpoint, ...(paginate ? ["--paginate", "--slurp"] : [])], { encoding: "utf8", shell: false, maxBuffer: 64 * 1024 * 1024 });
+  if (response.status !== 0) fail(`gh api failed for ${endpoint}: ${response.stderr.trim() || "unknown error"}`);
+  const value = JSON.parse(response.stdout);
+  return paginate ? value.flat() : value;
+}
+function ghJsonAsync(endpoint, paginate = false) {
+  return new Promise((resolve, reject) => {
+    const child = spawn("gh", ["api", endpoint, ...(paginate ? ["--paginate", "--slurp"] : [])], { shell: false });
+    let stdout = ""; let stderr = "";
+    child.stdout.on("data", (chunk) => { stdout += chunk; }); child.stderr.on("data", (chunk) => { stderr += chunk; });
+    child.on("error", reject); child.on("close", (status) => {
+      if (status !== 0) reject(new Error(`gh api failed for ${endpoint}: ${stderr.trim() || "unknown error"}`));
+      else { const value = JSON.parse(stdout); resolve(paginate ? value.flat() : value); }
+    });
+  });
+}
+function workflowNeeds(name) {
+  const normalized = normalizedIdentity(name, "job.name");
+  if (normalized.startsWith("host-integration")) return ["admin-drift-docs", "docs-contracts-shift-left"];
+  if (normalized.startsWith("playwright-e2e")) return ["host-integration"];
+  if (normalized.startsWith("admin-drift-and-docs")) return ["release-gate"];
+  if (normalized.startsWith("admin-ui-ratchet-guardrails")) return ["admin-hardening-guardrails", "admin-phase200-guardrails"];
+  if (normalized.startsWith("host-docker-boot-smoke")) return ["docs-contracts-shift-left"];
+  return [];
+}
+function setupCosts(steps = []) {
+  const costs = {};
+  for (const step of steps) {
+    if (!step.started_at || !step.completed_at) continue;
+    const ms = duration(step.started_at, step.completed_at, "step");
+    const name = String(step.name || "").toLowerCase();
+    const key = name.includes("docker") || name.includes("container") ? "docker_ms"
+      : name.includes("chromium") || name.includes("browser") ? "browser_ms"
+      : name.includes("set up node") ? "node_ms"
+      : name.includes("npm ci") || name.includes("install admin deps") || name.includes("install assets deps") ? "npm_ms"
+      : name.includes("phoenix") || name.includes("compile admin") ? "phoenix_ms"
+      : name.includes("fixture") || name.includes("seed") ? "fixture_ms"
+      : name.includes("playwright") ? "playwright_ms" : null;
+    if (key) costs[key] = (costs[key] || 0) + ms;
+  }
+  return costs;
+}
+function cacheFacts(steps = []) {
+  const matched = steps.filter((step) => /cache/i.test(String(step.name || "")) && step.started_at && step.completed_at);
+  if (!matched.length) return {};
+  return { hit: matched.some((step) => /restore/i.test(String(step.name || ""))), restore_ms: matched.filter((step) => /restore/i.test(String(step.name || ""))).reduce((sum, step) => sum + duration(step.started_at, step.completed_at, "step"), 0), save_ms: matched.filter((step) => /save/i.test(String(step.name || ""))).reduce((sum, step) => sum + duration(step.started_at, step.completed_at, "step"), 0), size_bytes: 0 };
+}
+async function liveRuns(repo, workflow, windowDays) {
+  const cutoff = new Date(Date.now() - windowDays * 86_400_000).toISOString().slice(0, 10);
+  const listed = ghJson(`/repos/${repo}/actions/workflows/${workflow}/runs?per_page=100&created=>=${cutoff}`, true).flatMap((page) => page.workflow_runs || []);
+  const results = [];
+  for (let index = 0; index < listed.length; index += 12) {
+    results.push(...await Promise.all(listed.slice(index, index + 12).map(async (run) => {
+    const jobs = (await ghJsonAsync(`/repos/${repo}/actions/runs/${run.id}/jobs?filter=all&per_page=100`, true)).flatMap((page) => page.jobs || []).filter((job) => typeof job.name === "string" && /[A-Za-z0-9]/.test(job.name) && job.started_at && job.completed_at && Date.parse(job.completed_at) >= Date.parse(job.started_at)).map((job) => ({
+      id: job.id, html_url: job.html_url, name: job.name, started_at: job.started_at, completed_at: job.completed_at,
+      conclusion: CONCLUSIONS.has(job.conclusion) ? job.conclusion : "unknown", runner_image: job.runner_name ? "github-hosted" : "unknown", needs: workflowNeeds(job.name),
+      setup_costs: setupCosts(job.steps), cache: cacheFacts(job.steps)
+    }));
+    const completed = new Map(jobs.map((job) => [normalizedIdentity(job.name, "job.name"), Date.parse(job.completed_at)]));
+    for (const job of jobs) job.needs = job.needs.filter((need) => completed.has(normalizedIdentity(need, "job.needs")) && completed.get(normalizedIdentity(need, "job.needs")) <= Date.parse(job.started_at));
+    const createdAt = run.created_at;
+    const startedAt = Date.parse(run.run_started_at || createdAt) < Date.parse(createdAt) ? createdAt : (run.run_started_at || createdAt);
+    const updatedAt = Date.parse(run.updated_at) < Date.parse(startedAt) ? startedAt : run.updated_at;
+    return { id: run.id, html_url: run.html_url, head_sha: run.head_sha, created_at: createdAt, run_started_at: startedAt, updated_at: updatedAt, event: run.event, head_branch: run.head_branch, conclusion: CONCLUSIONS.has(run.conclusion) ? run.conclusion : "unknown", run_attempt: run.run_attempt || 1, original_run_id: run.id, workflow_path: workflow, provider_state: "non_run", jobs };
+    })));
+  }
+  return results;
+}
+async function main() {
   const options = args(process.argv.slice(2));
-  let runs;
+  const windowDays = Number(options["window-days"] || 90); const sampleSize = Number(options["sample-size"] || 20);
+  let runs; let snapshot = null;
   if (options.input || options.fixtures) runs = JSON.parse(fs.readFileSync(options.input || options.fixtures, "utf8")).runs || Object.values(JSON.parse(fs.readFileSync(options.input || options.fixtures, "utf8")));
   else {
     if (!options.repo || !options.workflow) fail("live collection requires --repo and --workflow");
-    const response = spawnSync("gh", ["api", `/repos/${options.repo}/actions/workflows/${options.workflow}/runs?per_page=100`], { encoding: "utf8", shell: false });
-    if (response.status !== 0) fail(`gh api failed: ${response.stderr.trim() || "unknown error"}`);
-    runs = JSON.parse(response.stdout).workflow_runs || [];
+    runs = await liveRuns(options.repo, options.workflow, windowDays);
+    const now = new Date().toISOString();
+    snapshot = { schema_version: SCHEMA_VERSION, kind: "snapshot", snapshot_generated_at: now, window_start: new Date(Date.now() - windowDays * 86_400_000).toISOString(), window_end: now, repository: options.repo, workflow: options.workflow, sample_target: sampleSize };
   }
-  const output = `${collectBaseline(runs).map((record) => JSON.stringify(validateRecord(record))).join("\n")}\n`;
+  const records = collectBaseline(runs); const cohorts = summarizeCohorts(runs, { windowDays, sampleSize });
+  const output = `${[...(snapshot ? [snapshot] : []), ...records, ...cohorts].map((record) => JSON.stringify(validateRecord(record))).sort((left, right) => left.localeCompare(right)).join("\n")}\n`;
   if (options.out) fs.writeFileSync(options.out, output); else process.stdout.write(output);
 }
-if (process.argv[1] === fileURLToPath(import.meta.url)) { try { main(); } catch (error) { console.error(`collect ci baseline: FAIL: ${error.message}`); process.exitCode = 1; } }
+if (process.argv[1] === fileURLToPath(import.meta.url)) main().catch((error) => { console.error(`collect ci baseline: FAIL: ${error.message}`); process.exitCode = 1; });
