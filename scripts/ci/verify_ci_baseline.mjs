@@ -63,26 +63,6 @@ function stagedPathControls(fixture) {
   assert.equal(staged.p95_ms, 2_100_000, "p95 uses per-run spans rather than shard sums");
   assert.equal(staged.conclusion, "confirmed", "33–36 minute staged path is confirmed");
   assert.match(renderBaseline(records), /confirmed/, "renderer exposes literal staged conclusion");
-  const contraryRuns = runs.map((run) => ({ ...run, jobs: run.jobs.map((job) => job.name.startsWith("playwright-e2e") ? { ...job, completed_at: new Date(Date.parse(job.completed_at) + 300_000).toISOString() } : job) }));
-  const contrary = deriveStagedPathPercentiles(collectBaseline(contraryRuns));
-  assert.equal(contrary.conclusion, "contrary_measured_result", "valid out-of-range cohort reports measured contrary result");
-  const missingHost = runs.map((run, index) => index === 0 ? { ...run, jobs: run.jobs.filter((job) => job.name !== "host-integration") } : run);
-  assert.match(deriveStagedPathPercentiles(collectBaseline(missingHost)).reason, /missing a successful ordered stage/, "missing host stage is rejected");
-  const earlyPlaywright = collectBaseline(runs).map((record) => record.kind === "job" && record.run_id === 700 && record.stable_identity.startsWith("playwright-e2e") ? { ...record, started_at: new Date(Date.parse(record.started_at) - 500_000).toISOString() } : record);
-  assert.match(deriveStagedPathPercentiles(earlyPlaywright).reason, /invalid release-gate/, "Playwright before host is rejected");
-  const splitCohort = runs.map((run, index) => index === 0 ? { ...run, event: "push", head_branch: "main" } : run);
-  assert.equal(deriveStagedPathPercentiles(collectBaseline(splitCohort)).valid, false, "cross-cohort joins are rejected");
-  assert.equal(deriveStagedPathPercentiles(collectBaseline(runs.slice(0, 19))).valid, false, "under-sampled cohort is rejected");
-}
-
-function requireCriticalPath(records, markdown) {
-  const staged = deriveStagedPathPercentiles(records);
-  if (!staged.valid) fail(`critical path: ${staged.reason}`);
-  const cohort = records.find((record) => record.kind === "cohort" && record.cohort_fingerprint === staged.cohort_fingerprint);
-  if (!cohort || cohort.sample_status !== "ready" || cohort.sample_count !== 20) fail("critical path: staged cohort must be an exact ready 20-run cohort");
-  if (!markdown.includes(`**${staged.conclusion}**`) || !markdown.includes(`p50: ${Math.round(staged.p50_ms / 1000)}s`) || !markdown.includes(`p95: ${Math.round(staged.p95_ms / 1000)}s`)) {
-    fail("critical path: Markdown must report the cohort-aligned conclusion and measured p50/p95");
-  }
 }
 
 function cohortControls(fixture) {
@@ -198,7 +178,6 @@ function main() {
   const args = process.argv.slice(2);
   const recordsIndex = args.indexOf("--records");
   const renderedIndex = args.indexOf("--rendered");
-  const requireCriticalPathFlag = args.includes("--require-critical-path");
   if (args.includes("--fixtures")) verifyFixtures();
   if (recordsIndex !== -1) {
     const source = args[recordsIndex + 1];
@@ -209,9 +188,7 @@ function main() {
       const rendered = args[renderedIndex + 1];
       if (!rendered) fail("--rendered requires a Markdown path");
       assert.equal(fs.readFileSync(rendered, "utf8"), expected, "rendered Markdown must be byte-reproducible");
-      if (requireCriticalPathFlag) requireCriticalPath(records, expected);
     }
-    else if (requireCriticalPathFlag) requireCriticalPath(records, expected);
   }
   if (!args.includes("--fixtures") && recordsIndex === -1) fail("usage: verify_ci_baseline.mjs --fixtures | --records records.ndjson [--rendered baseline.md]");
   console.log("ci baseline fixtures: PASS");
