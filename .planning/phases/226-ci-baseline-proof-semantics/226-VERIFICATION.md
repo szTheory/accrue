@@ -1,49 +1,52 @@
 ---
 phase: 226-ci-baseline-proof-semantics
-verified: 2026-08-11T19:01:13Z
+verified: 2026-08-11T22:47:47Z
 status: gaps_found
 score: 2/4 must-haves verified
 behavior_unverified: 0
 overrides_applied: 0
+re_verification:
+  previous_status: gaps_found
+  previous_score: 2/4
+  gaps_closed:
+    - "Full-CI timing qualification now ignores provider_state and accepts non_run push/pull-request fixture cohorts."
+    - "Baseline and provider timestamp validators now reject calendar-impossible UTC values via canonical round trips."
+    - "The frozen report now contains a 20-run compatible staged-path measurement with p50/p95 values."
+  gaps_remaining: []
+  regressions: []
 gaps:
-  - truth: "A maintainer can inspect a durable comparable-run baseline containing workflow wall time, queue delay, job/step durations, reruns, cache behavior, Docker/browser setup cost, provider state, and root-failure signature without sensitive values."
+  - truth: "The durable comparable-run baseline never records ordinary full-CI input as provider proof unless that proof was explicitly supplied."
     status: failed
-    reason: "The live collector labels every ordinary full-CI run provider_state: non_run, while cohort qualification rejects non_run. It therefore excludes every live full-CI success from timing samples and can never produce a ready 20-run timing cohort."
+    reason: "normalizeRun() defaults a missing provider_state to proved for every non-scheduled run; direct collector input can therefore persist false provider proof."
     artifacts:
       - path: "scripts/ci/collect_ci_baseline.mjs"
-        issue: "liveRuns() sets provider_state to non_run (line 263); summarizeCohorts() filters non_run from qualifying samples (line 161)."
-      - path: "scripts/ci/verify_ci_baseline.mjs"
-        issue: "The 20-run ready fixture uses the default proved state and contains no full-CI non_run regression case."
+        issue: "Line 95 selects proved when provider_state is omitted; the fixture gate contains no omitted-state negative control."
     missing:
-      - "Qualify timing by full-CI topology/event rather than provider proof state, and add a 20-run non_run push/pull-request regression fixture."
-  - truth: "The baseline records a measured roughly 33–36 minute staged release → host integration → Playwright critical path, or a contrary measured result, rather than runner queueing."
+      - "Default omitted state to non_run or reject it, then add a successful push/pull-request missing-provider-state regression."
+  - truth: "The durable baseline distinguishes root runner queue from dependent-job DAG wait without silently corrupting incomplete dependency topology."
     status: failed
-    reason: "All frozen cohorts report sample_count 0 because of the live qualification defect; the report consequently makes no comparable timing claim. Its named-path total is not a valid cohort percentile."
-    artifacts:
-      - path: ".planning/phases/226-ci-baseline-proof-semantics/226-CI-BASELINE.ndjson"
-        issue: "Every cohort record is insufficient_sample with sample_count 0."
-      - path: ".planning/phases/226-ci-baseline-proof-semantics/226-CI-BASELINE.md"
-        issue: "It states no critical-path percentile claim, so it cannot distinguish the requested actual critical path."
-    missing:
-      - "Repair qualification, recollect the frozen snapshot, regenerate the Markdown, and retain either a valid staged-path measurement or a valid contrary result."
-  - truth: "CI baseline and provider-proof timestamp arithmetic fail closed on invalid timestamps."
-    status: failed
-    reason: "Both timestamp validators accept calendar-impossible canonical-looking strings because Date.parse normalizes them instead of rejecting them. This contradicts the plan's malformed-timestamp fail-first coverage and allows corrupted timing/freshness facts."
+    reason: "normalizeJob() drops unresolved prerequisites, then serializes an Infinity DAG wait as null; liveRuns() also removes unavailable dependencies before normalization."
     artifacts:
       - path: "scripts/ci/collect_ci_baseline.mjs"
-        issue: "timestamp() at lines 22-26 accepts 2026-02-30T00:00:00Z."
-      - path: "scripts/ci/provider_proof.mjs"
-        issue: "timestamp() at lines 21-24 also accepts the impossible date."
+        issue: "Lines 114-117 use filter(Boolean) before Math.max, while lines 260-261 erase unresolved needs; incomplete topology is reported as null rather than rejected."
     missing:
-      - "Require canonical UTC format plus a toISOString() round-trip, and add invalid-day and invalid-leap-day tests to both fixture gates."
+      - "Fail closed when any declared prerequisite lacks a completion and add a missing-prerequisite fixture."
+  - truth: "Host setup diagnostics report the literal failing boundary and owner rather than reclassifying unrelated host-gate failures as browser-launch failures."
+    status: failed
+    reason: "The host wrapper emits browser_launch for every mix verify.full failure, including compile, database, formatting, generated-artifact, or other non-browser failures."
+    artifacts:
+      - path: "scripts/ci/accrue_host_uat.sh"
+        issue: "Lines 48-50 unconditionally emit and render browser_launch after any delegated gate failure."
+    missing:
+      - "Preserve an inner emitted setup fact, or use a distinct accurately named wrapper failure code only when no lower-level diagnostic exists."
 ---
 
 # Phase 226: CI Baseline & Proof Semantics Verification Report
 
 **Phase Goal:** Maintainers can use a durable, privacy-safe account of comparable CI runs to distinguish the actual critical path, setup ownership, and provider proof state.
-**Verified:** 2026-08-11T19:01:13Z
+**Verified:** 2026-08-11T22:47:47Z
 **Status:** gaps_found
-**Re-verification:** No — initial verification
+**Re-verification:** Yes — after gap closure
 
 ## Goal Achievement
 
@@ -51,10 +54,10 @@ gaps:
 
 | # | Truth | Status | Evidence |
 | --- | --- | --- | --- |
-| 1 | Durable privacy-safe comparable-run baseline exposes the required timing, reliability, cache/setup, provider, and failure facts. | ✗ FAILED | Records and rendering are present and privacy checks pass, but live full-CI runs are all excluded from timing cohorts by their `non_run` provider state. |
-| 2 | Required, skipped, and advisory provider evidence is visibly distinct; a non-run lane cannot be release proof. | ✓ VERIFIED | `verify_provider_proof.mjs --fixtures` passes; it exercises both policies and all six states. `ci.yml` finalizes and renders the record in the `live-stripe` job; the guide explicitly states that `non_run` provides no proof. |
-| 3 | Host maintainers can determine ownership of Node/browser/Playwright setup and follow setup diagnostics. | ✓ VERIFIED | `verify_ci_setup_diagnostics.sh` passes; the host README has the host/CI ownership matrix and fixed next commands; the CI workflow exports the redacted setup-facts artifact. |
-| 4 | Baseline confirms the staged 33–36 minute critical path or records a valid contrary measured result rather than queueing. | ✗ FAILED | The frozen report declares `insufficient_sample` for every cohort and no percentile claim. Its zero qualifying counts stem from the collector predicate, not valid full-CI scarcity. |
+| 1 | A durable, privacy-safe comparable-run baseline records trustworthy timing, reliability, cache/setup, queue/DAG-wait, and provider-state facts. | ✗ FAILED | Schema, redaction checks, and frozen records exist, but missing provider state becomes `proved` and an unresolved dependency becomes an indistinguishable null DAG wait. |
+| 2 | The report provides a measured actual staged critical path rather than runner queueing or a summed aggregate. | ✓ VERIFIED | Frozen-record gate with `--require-critical-path` passes; the generated report states 20 compatible paths, p50 2083s and p95 2602s from release-gate start through the latest Playwright shard. |
+| 3 | Required, skipped, advisory, and non-run provider evidence remain visibly distinct, so the checked-in full-CI account does not claim provider proof. | ✓ VERIFIED | `verify_provider_proof.mjs --fixtures` passes; all 228 frozen run records are `non_run`; the report explicitly says full-CI success is not live-provider proof. |
+| 4 | Host maintainers receive literal, owner-first setup diagnostics across the documented failure boundaries. | ✗ FAILED | The shell contract passes its covered cases, but the top-level wrapper labels every `mix verify.full` failure `browser_launch`, including failures outside the browser boundary. |
 
 **Score:** 2/4 truths verified (0 present, behavior-unverified)
 
@@ -62,66 +65,67 @@ gaps:
 
 | Artifact group | Expected | Status | Details |
 | --- | --- | --- | --- |
-| Collector, renderer, verifier, schema, baseline fixtures | Normalization and deterministic rendering | ⚠️ HOLLOW | All five are substantive and wired; fixture and byte-render checks pass, but the live collector's qualifying data flow is wrong. |
-| Frozen NDJSON, generated Markdown, validation ledger | Durable before-state account | ⚠️ HOLLOW | Files exist and `verify_ci_baseline --records --rendered` plus a fresh renderer/cmp pass, but every cohort has zero qualifying samples. |
-| Provider classifier, summary renderer, verifier, ExUnit manifest/fixture | Fail-closed provider state | ✓ VERIFIED | Artifacts are substantive; `node scripts/ci/verify_provider_proof.mjs --fixtures` and the single formatter test both pass. |
-| Setup diagnostics, host wrapper/preflight, host package declaration | Owner-first setup diagnostics | ✓ VERIFIED | Artifacts are substantive, exercised by the shell contract, and used from the host wrapper/CI workflow. |
-| CI workflow and maintainer docs | Always-run evidence plumbing and triage | ✓ VERIFIED | `ci.yml` wires provider preflight/finalize/summary/artifact and CI setup facts; README/guides link the commands and ownership matrix. |
+| Collector, schema, renderer, and baseline fixture gate | Privacy-safe normalization and comparable timing/reliability facts | ⚠️ HOLLOW | Files are substantive and wired; 2 provider/topology error paths can write misleading facts. |
+| Frozen NDJSON and generated Markdown | Durable measured before-state | ✓ VERIFIED | 3,020 records (228 runs, 2,642 jobs, 149 cohort rows); fresh validation and byte comparison pass. |
+| Provider classifier, summary renderer, and ExUnit formatter | Fail-closed, visible provider proof state | ✓ VERIFIED | State-machine fixture gate and focused formatter test pass; workflow wiring is present. |
+| Setup diagnostic registry and host wrappers | Literal owner-first host/CI diagnostics | ⚠️ PARTIAL | Registry and verifier are substantive, but `accrue_host_uat.sh` overwrites unrelated final failures as browser failures. |
+| CI workflow and maintainer documentation | Always-run evidence plumbing and triage | ✓ VERIFIED | Workflow exports provider/setup artifacts and docs point maintainers to the generated report and diagnostics. |
 
 ### Key Link Verification
 
 | From | To | Via | Status | Details |
 | --- | --- | --- | --- | --- |
-| Collector | schema-v1 | strict record allowlists | ✓ WIRED | `validateRecord()` reads schema-v1; artifact verifier reports the link. |
-| Fixture verifier | collector/renderer | imported exports and end-to-end fixture | ✓ WIRED | Direct imports run collection and render assertions. |
-| Frozen NDJSON | Markdown | deterministic renderer | ✓ WIRED | Fresh `/tmp` render byte-compared equal to checked-in Markdown. |
-| ExUnit formatter | provider classifier | manifest environment and CI finalize | ✓ WIRED | `ACCRUE_PROVIDER_MANIFEST` is written by the test formatter and consumed by `provider_proof.mjs` from `ci.yml`. |
-| Host scripts/workflow | setup diagnostic registry | emitted facts and always-run summary | ✓ WIRED | `accrue_host_*` scripts invoke `ci_setup_diagnostic.sh`; `host-integration` publishes the artifact/summary. |
+| `collect_ci_baseline.mjs` | `schema-v1.json` | strict record allowlists | ✓ WIRED | `validateRecord()` reads the schema and rejects unknown record fields. |
+| `verify_ci_baseline.mjs` | collector and renderer | imported exports and fixture/record gates | ✓ WIRED | Both `--fixtures` and frozen-record/byte-render gates passed. |
+| Frozen NDJSON | `226-CI-BASELINE.md` | deterministic renderer | ✓ WIRED | The rendered file is byte-identical under the verifier. |
+| ExUnit formatter | provider classifier | `ACCRUE_PROVIDER_MANIFEST` in workflow finalize | ✓ WIRED | Provider fixtures and focused ExUnit test passed. |
+| Host wrapper/workflow | setup diagnostic registry | emitted facts and always-run summary | ⚠️ PARTIAL | Wiring exists, but the wrapper's fallback code is too broad to preserve literal failure classification. |
 
 ### Data-Flow Trace (Level 4)
 
 | Artifact | Data variable | Source | Produces real data | Status |
 | --- | --- | --- | --- | --- |
-| `collect_ci_baseline.mjs` | qualifying cohort durations | GitHub Actions run/job metadata | No — ordinary live full-CI records are filtered out by `provider_state !== non_run`. | ✗ DISCONNECTED |
-| `226-CI-BASELINE.md` | cohort/reliability tables | checked-in NDJSON via `renderBaseline` | Yes, but timing sample data is hollow because upstream qualification yields zero. | ⚠️ HOLLOW |
-| Provider summary | classified record | CI manifest → `provider_proof.mjs` → renderer | Yes in deterministic fixtures and workflow wiring. | ✓ FLOWING |
-| Setup summary | `ACCRUE_CI_SETUP_FACTS` | diagnostic registry → host workflow artifact/summary | Yes in shell contract and workflow wiring. | ✓ FLOWING |
+| Baseline collector | run/job/cohort timing facts | GitHub Actions run and job metadata | Yes, but omitted provider state and incomplete `needs` topology are not fail-closed. | ⚠️ PARTIAL |
+| Critical-path report | selected per-run staged spans | Frozen NDJSON → `deriveStagedPathPercentiles` | Yes — 20 compatible complete paths, with eight visible fingerprint strata. | ✓ FLOWING |
+| Provider summary | classified proof record | CI manifest → provider classifier → summary | Yes in fixtures, formatter test, and CI wiring. | ✓ FLOWING |
+| Setup summary | setup fact record | host/CI scripts → diagnostic registry → artifact/summary | Partial — wrapper can append a false browser classification. | ⚠️ PARTIAL |
 
 ### Behavioral Spot-Checks
 
 | Behavior | Command | Result | Status |
 | --- | --- | --- | --- |
-| Baseline fixture engine | `node scripts/ci/verify_ci_baseline.mjs --fixtures` | PASS | ✓ PASS (but insufficient coverage) |
-| Frozen baseline reproducibility | `verify_ci_baseline --records ... --rendered ...` and fresh render/cmp | PASS | ✓ PASS |
+| Baseline fixture engine | `node scripts/ci/verify_ci_baseline.mjs --fixtures` | PASS | ✓ PASS |
+| Frozen critical-path report | `node scripts/ci/verify_ci_baseline.mjs --records … --rendered … --require-critical-path` | PASS | ✓ PASS |
 | Provider proof state machine | `node scripts/ci/verify_provider_proof.mjs --fixtures` | PASS | ✓ PASS |
 | Formatter manifest contract | `cd accrue && mix test test/accrue/live_proof_formatter_test.exs --warnings-as-errors` | 2 tests, 0 failures | ✓ PASS |
-| Setup diagnostic contract | `scripts/ci/verify_ci_setup_diagnostics.sh` | PASS | ✓ PASS |
-| Live full-CI timing qualification | 20 current full-CI `non_run` runs passed to `summarizeCohorts()` | `sample_count: 0`, `insufficient_sample` | ✗ FAIL |
-| Calendar-invalid timestamps | `normalizeRun()` and `validateProviderManifest()` with `2026-02-30T00:00:00Z` | accepted | ✗ FAIL |
+| Setup diagnostic contract | `bash scripts/ci/verify_ci_setup_diagnostics.sh` | PASS | ✓ PASS |
+| Required-lane boundary | `bash scripts/ci/verify_phase225_required_lane_evidence.sh` | PASS | ✓ PASS |
+| Missing provider state | `collectBaseline()` with a valid push fixture minus `provider_state` | Output persisted `provider_state: "proved"` | ✗ FAIL |
+| Missing prerequisite | `collectBaseline()` with `needs: ["missing-prerequisite"]` | Output serialized `dag_wait_ms: null` rather than rejecting topology | ✗ FAIL |
 
 ### Requirements Coverage
 
 | Requirement | Source Plans | Description | Status | Evidence |
 | --- | --- | --- | --- | --- |
-| BASE-01 | 01, 02, 05 | Durable privacy-safe comparable CI baseline | ✗ BLOCKED | The data flow makes every live full-CI timing cohort empty; invalid calendar timestamps also do not fail closed. |
-| BASE-02 | 03, 05 | Provider evidence visibly distinguishes required/skipped/advisory proof | ✓ SATISFIED | State-machine fixtures, formatter test, always-run workflow wiring, and maintainer guide corroborate it. |
-| OWN-01 | 04, 05 | Host/CI ownership and setup diagnostics | ✓ SATISFIED | Shell verifier passes; owner-first registry, host wrapper, CI artifact, and docs are wired. |
+| BASE-01 | 01, 02, 05, 06, 07, 12 | Durable privacy-safe comparable CI baseline | ✗ BLOCKED | Core staged-path measurement is sound, but provider-state defaulting and DAG-wait topology corruption make the broader durable facts account unreliable. |
+| BASE-02 | 03, 05, 06, 07, 12 | Provider evidence visibly distinguishes proof states | ✓ SATISFIED | Classifier/formatter fixture evidence, CI wiring, and the all-`non_run` frozen account meet the requirement. |
+| OWN-01 | 04, 05, 07, 12 | Host/CI ownership and setup diagnostics | ✗ BLOCKED | A generic top-level browser failure code masks the actual owner/boundary for non-browser host-gate failures. |
 
-All three requirement IDs declared in phase PLAN frontmatter are accounted for. No orphaned Phase 226 requirements were found in `REQUIREMENTS.md`.
+All requirement IDs declared in Phase 226 PLAN frontmatter are accounted for. `REQUIREMENTS.md` maps no additional Phase 226 requirements, so none are orphaned.
 
 ### Anti-Patterns Found
 
 | File | Line | Pattern | Severity | Impact |
 | --- | --- | --- | --- | --- |
-| `scripts/ci/collect_ci_baseline.mjs` | 161, 263 | Contradictory qualification state | 🛑 Blocker | Valid full-CI live data can never establish a timing cohort. |
-| `scripts/ci/collect_ci_baseline.mjs` | 22-26 | `Date.parse` accepts normalized impossible dates | 🛑 Blocker | Corrupt timing data can be persisted and used in cohort arithmetic. |
-| `scripts/ci/provider_proof.mjs` | 21-24 | `Date.parse` accepts normalized impossible dates | 🛑 Blocker | Corrupt timestamps can alter freshness outcomes. |
+| `scripts/ci/collect_ci_baseline.mjs` | 95 | Non-scheduled input defaults to `proved` | 🛑 Blocker | A durable baseline can falsely claim provider proof. |
+| `scripts/ci/collect_ci_baseline.mjs` | 114-117, 260-261 | Missing dependencies are erased/null-serialized | 🛑 Blocker | DAG wait is confused with absent wait, corrupting timing evidence. |
+| `scripts/ci/accrue_host_uat.sh` | 48-50 | Unconditional `browser_launch` fallback | 🛑 Blocker | Host failure ownership/repair guidance can be false. |
 
-No unreferenced `TBD`, `FIXME`, or `XXX` markers were found in the phase implementation files. The word “placeholder” occurs only in user-facing Stripe test-data guidance, not an implementation stub.
+No unreferenced `TBD`, `FIXME`, or `XXX` markers were found in the phase implementation files. The existing code-review findings were independently reproduced: CR-01 and WR-02 block the baseline truth; WR-01 blocks the ownership/diagnostic truth.
 
 ### Gaps Summary
 
-The phase has strong deterministic provider and ownership contracts, and the privacy-safe renderer is reproducible. However, the core BASE-01 live collection path has a contradictory predicate: it deliberately classifies ordinary CI as `non_run` for provider proof, then excludes that same state from CI timing. This makes the frozen baseline incapable of measuring a comparable green CI cohort and therefore incapable of distinguishing the actual critical path. Calendar-invalid timestamps also pass both relevant validators, contrary to the planned malformed-timestamp controls. These are blocking implementation gaps, not human-UAT uncertainty.
+The preceding re-verification gaps are closed: the non-run cohort predicate, canonical timestamp validation, and frozen critical-path evidence all work and their deterministic gates pass. However, three observable error paths still produce misleading durable facts. They are not deferred by Phase 227, whose roadmap contract is an optimization phase rather than a correction to baseline/proof/ownership semantics. The phase goal therefore remains unachieved until the collector and host wrapper fail closed or retain literal classifications.
 
-_Verified: 2026-08-11T19:01:13Z_
+_Verified: 2026-08-11T22:47:47Z_
 _Verifier: the agent (gsd-verifier)_
