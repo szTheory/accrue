@@ -33,6 +33,9 @@ rendering. The commands below use only read-only Actions metadata GETs.
 | Timing semantics (T-226-22) | `queue-drift` mutation | Runner queue and staged chain are independently recomputed. |
 | Normalized diagnosis (T-226-21/T-226-22) | `signature-pair` mutation | Versioned v2 signature contains sorted lane/conclusion pairs only. |
 | Stable topology / Phase 192 (T-226-26) | Renamed host job and missing ownership-command mutations | Phase 192 verifier and protected-file empty-diff gate pass. |
+| Candidate identity binding (T-226-32) | Fresh public `--input` collector and canonical mutations reject `Fabricated release lane`; the shared predicate requires exactly one workflow-policy regex match. | The unchanged collector fixture and checked-in canonical cohort validate after every candidate job is matched to exactly one policy lane. |
+| Candidate policy/proof integrity (T-226-33/34) | Fresh public collector/canonical mutations independently forge `manifest_identity`, `policy`, `required_for_release_proof`, `initial_queue_root`, `staged_critical_chain_order`, and `proof_state`; positive/negative proof pairs cover eligible success, skipped, advisory, conditional, unsuccessful required, and ineligible runs. | The validator derives the complete tuple and proof state from the checked-in policy plus observed eligibility/conclusion before aggregate proof recomputation. |
+| Preserved stable contracts (T-226-35/36) | Retain Plan 07 recursive schema/privacy cases plus repository and Phase 192 contract checks; protected evidence/topology files must have an empty diff. | `verify_ci_baseline_contract.sh`, `verify_phase192_ci_contract.sh`, the local no-external-API declaration, and the protected-file gate all pass. |
 
 ## Per-Task Verification Map
 
@@ -45,6 +48,8 @@ rendering. The commands below use only read-only Actions metadata GETs.
 | 226-06-02 | 06 | BASE-01, BASE-02, OWN-01 | `bash scripts/ci/verify_ci_baseline_contract.sh --self-test && bash scripts/ci/verify_phase192_ci_contract.sh && git diff --check` | ✅ green |
 | 226-07-01 | 07 | BASE-01 | `bash scripts/ci/verify_ci_baseline_contract.sh --self-test && bash scripts/ci/verify_ci_baseline_contract.sh` | ✅ green |
 | 226-07-02 | 07 | BASE-01, BASE-02, OWN-01 | `bash scripts/ci/verify_ci_baseline_contract.sh --self-test && bash scripts/ci/verify_ci_baseline_contract.sh && bash scripts/ci/verify_phase192_ci_contract.sh && git diff --check` | ✅ green |
+| 226-08-01 | 08 | BASE-01, BASE-02 | `bash scripts/ci/verify_ci_baseline_contract.sh --self-test && bash scripts/ci/verify_ci_baseline_contract.sh --input .planning/phases/226-ci-baseline-proof-semantics/226-CI-BASELINE.json` | ✅ green |
+| 226-08-02 | 08 | BASE-01, BASE-02, OWN-01 | `bash scripts/ci/verify_ci_baseline_contract.sh --self-test && bash scripts/ci/verify_ci_baseline_contract.sh && bash scripts/ci/verify_phase192_ci_contract.sh && node /Users/jon/.codex/gsd-core/bin/gsd-tools.cjs query check.api-coverage-verify-pre 226 | jq -e '.passed == true' && git diff --check` | ✅ green |
 
 ## Stable Contracts
 
