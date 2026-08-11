@@ -1,6 +1,6 @@
 ---
 phase: 226-ci-baseline-proof-semantics
-reviewed: 2026-08-11T00:23:30Z
+reviewed: 2026-08-11T01:17:35Z
 depth: standard
 files_reviewed: 5
 files_reviewed_list:
@@ -10,52 +10,46 @@ files_reviewed_list:
   - scripts/ci/ci_baseline_workflow_policy.json
   - scripts/ci/verify_ci_baseline_contract.sh
 findings:
-  critical: 2
+  critical: 3
   warning: 0
   info: 0
-  total: 2
+  total: 3
 status: issues_found
 ---
 
 # Phase 226: Code Review Report
 
-**Reviewed:** 2026-08-11T00:23:30Z
+**Reviewed:** 2026-08-11T01:17:35Z
 **Depth:** standard
 **Files Reviewed:** 5
 **Status:** issues_found
 
 ## Summary
 
-The collector now handles pagination and the self-test passes, but the verifier does not actually bind stored job evidence to the workflow policy in either input mode. A fabricated or relabeled job can therefore remain valid evidence, defeating the baseline's required-lane proof claim.
+The metadata and schema checks are extensive, and the self-test passes. However, the collector and verifier do not establish that evidence came from the declared `CI` workflow or that it covers every required lane. They can therefore certify incomplete or unrelated successful work as release proof. The policy manifest is also not checked against the complete live workflow topology, so it can silently become stale.
 
 ## Critical Issues
 
-### CR-01: Collector-record schema declares strict validators but never applies them
+### CR-01: Collector accepts a run from any workflow
 
-**File:** `/Users/jon/projects/accrue/scripts/ci/verify_ci_baseline_contract.sh:62-68`
-**Issue:** `step`, `job`, `artifact`, `run`, and `sig` are fully defined at lines 62-67, but the predicate at line 68 repeats only shallow key/type checks instead of calling them. Consequently a collector record can contain arbitrary job names, policy/manifest identities, proof states, timestamps, cache states, or failure signatures as long as the few shallow fields still have the expected container types. The derived-facts pass only recalculates queue time and signatures; it never verifies that a job maps exactly once to `ci_baseline_workflow_policy.json` or that its proof state was derived from that mapping. A forged collector record can thus assert required-lane evidence that was not observed from a recognized CI job.
-**Fix:** Apply the declared predicates to every nested value and bind every job to exactly one manifest lane, for example:
+**File:** `scripts/ci/capture_ci_baseline.sh:91-105`
+**Issue:** The collector reads `$raw.name` into `run.workflow`, but never compares it with `policy.workflow`. The verifier repeats this gap: its record schema only requires `run.workflow` to be a non-empty string (`verify_ci_baseline_contract.sh:96-99`) and candidate semantics only classify job display names (`:70-85`). A workflow other than `CI` that emits matching job names can consequently be captured and given `proof_state: "proved"` for required lanes.
+**Fix:** Fail closed in the collector unless `$raw.name == $policy.workflow`, and independently require `.run.workflow == $policy[0].workflow` in both collector-record and canonical validation. Add a fixture that changes only the run name to a non-`CI` value and expects both collection and validation to fail.
 
-```jq
-(.runs | type == "array" and length > 0 and all(.[];
-  exact(["artifacts", "jobs", "root_failure_signature", "run"])
-  and (.run | run)
-  and (.jobs | type == "array" and all(.[]; job))
-  and (.artifacts | type == "array" and all(.[]; artifact))
-  and (.root_failure_signature | sig)
-))
-```
+### CR-02: A partial successful run is accepted as required-lane proof
 
-Then add an invariant that each job name matches exactly one policy lane and that its copied policy fields and `proof_state` equal the policy-derived values.
+**File:** `scripts/ci/verify_ci_baseline_contract.sh:70-85`
+**Issue:** `candidate_job_semantics` validates `all(.jobs[]; ...)`, but never requires the observed job identities to include the policy's complete `required_for_release_proof` set. This is not merely theoretical: the self-test constructs a record containing only the docs and primary release-gate jobs and explicitly accepts it at lines 197-200. Such a record can contain `proved` required lanes despite omitting all other required gates, making it unsafe to consume as release proof.
+**Fix:** For an eligible record, derive the unique observed `manifest_identity` values and require them to equal (or, where intentional conditional lanes are modeled, contain) the manifest's required lane identities; separately require all those required lanes to be `proved`. Add a negative fixture that removes one required lane from an otherwise valid eligible record.
 
-### CR-02: Canonical validation accepts fabricated job identities
+### CR-03: The policy manifest is not bound to the complete live CI topology
 
-**File:** `/Users/jon/projects/accrue/scripts/ci/verify_ci_baseline_contract.sh:91-131`
-**Issue:** The canonical path validates recursive keys and scalar types, then validates aggregates, but never checks a job's `name`, `manifest_identity`, policy fields, or proof state against the policy manifest. This was reproduced by changing `.runs[0].jobs[0].name` to `"Fabricated release lane"` in a copy of `226-CI-BASELINE.json`; `bash scripts/ci/verify_ci_baseline_contract.sh --input <copy>` returned success. The stored JSON is supposed to be authoritative required/advisory proof, so accepting arbitrary relabeling makes it possible to preserve a green aggregate while losing the link to the actual Actions job.
-**Fix:** Reuse the collector semantic validator for canonical runs (or define a shared `validate_run_record` jq predicate), and require a one-to-one match from each job name to the manifest regex with equal `manifest_identity`, `policy`, `required_for_release_proof`, `initial_queue_root`, and `staged_critical_chain_order`. Add a self-test that mutates a canonical job name and expects `--input` to fail.
+**File:** `scripts/ci/verify_ci_baseline_contract.sh:167-178`
+**Issue:** `validate_repository_contract` checks only six hard-coded job IDs plus a few chain substrings. It never verifies every policy lane's regex, policy tier, matrix expansion, or `initial_queue_root`/critical-chain designation against `.github/workflows/ci.yml`. `validate_policy_manifest` only compares the manifest to the fixed historical canonical document (lines 25-28). A later workflow edit can demote, rename, remove, or add a required lane while this CI gate continues to pass and the collector continues to assign proof according to stale policy.
+**Fix:** Add a deterministic workflow-to-policy conformance check covering every configured lane and all matrix display-name expansions, including required/advisory behavior and the conditional `live-stripe` trigger. Make the CI contract fail when the policy and current workflow differ, and add mutation tests for a non-hard-coded lane (for example `phase18-tax-gate`) and a matrix support-tier change.
 
 ---
 
-_Reviewed: 2026-08-11T00:23:30Z_
+_Reviewed: 2026-08-11T01:17:35Z_
 _Reviewer: the agent (gsd-code-reviewer)_
 _Depth: standard_
