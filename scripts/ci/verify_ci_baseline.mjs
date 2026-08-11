@@ -171,8 +171,8 @@ function stagedPathControls(fixture) {
   const badOrderRecords = records.map((record) => record.kind === "job" && record.stable_identity === "playwright-e2e" ? { ...record, started_at: new Date(Date.parse(record.started_at) - 200_000).toISOString() } : record);
   assert.throws(() => deriveStagedPathPercentiles(badOrderRecords), /Playwright stage must start after host-integration/, "stage ordering is rejected at the staged-path boundary");
   const rerun = [...runs.slice(0, 19), stagedRun(fixture.successful_run, 720, 20, { original_run_id: 700, run_attempt: 2, head_sha: runs[0].head_sha })];
-  assert.throws(() => deriveStagedPathPercentiles([...collectBaseline(rerun), ...summarizeCohorts(rerun)]), /ready cohort|exactly 20 successful first-attempt runs/, "rerun inflation cannot satisfy the stage cohort");
-  assert.throws(() => deriveStagedPathPercentiles([...collectBaseline(runs.slice(0, 19)), ...summarizeCohorts(runs.slice(0, 19))]), /ready cohort/, "nineteen observations cannot satisfy the stage cohort");
+  assert.throws(() => deriveStagedPathPercentiles([...collectBaseline(rerun), ...summarizeCohorts(rerun)]), /20 compatible complete paths/, "rerun inflation cannot satisfy the stage cohort");
+  assert.throws(() => deriveStagedPathPercentiles([...collectBaseline(runs.slice(0, 19)), ...summarizeCohorts(runs.slice(0, 19))]), /20 compatible complete paths/, "nineteen observations cannot satisfy the stage cohort");
 
   const multiFingerprintRuns = runs.map((run, index) => ({
     ...run,
@@ -188,7 +188,7 @@ function stagedPathControls(fixture) {
   assert.match(compatibleMarkdown, /Fingerprint strata/, "compatible-path report labels fingerprint distribution");
   assert.match(compatibleMarkdown, /Sensitivity/, "compatible-path report labels per-stratum sensitivity");
 
-  const duplicateIdentity = multiFingerprintRuns.map((run, index) => index === 19 ? { ...run, original_run_id: multiFingerprintRuns[0].original_run_id, head_sha: multiFingerprintRuns[0].head_sha } : run);
+  const duplicateIdentity = multiFingerprintRuns.map((run, index) => index === 19 ? { ...run, original_run_id: multiFingerprintRuns[0].id, head_sha: multiFingerprintRuns[0].head_sha } : run);
   assert.throws(() => deriveStagedPathPercentiles([...collectBaseline(duplicateIdentity), ...summarizeCohorts(duplicateIdentity)]), /20 unique successful first-attempt/, "duplicate original-run/SHA identity cannot fill the compatible population");
   const scheduledCompatible = multiFingerprintRuns.map((run, index) => index === 19 ? { ...run, event: "schedule" } : run);
   assert.throws(() => deriveStagedPathPercentiles([...collectBaseline(scheduledCompatible), ...summarizeCohorts(scheduledCompatible)]), /20 compatible complete paths/, "schedule/provider-only runs cannot fill the compatible population");
