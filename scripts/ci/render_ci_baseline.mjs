@@ -13,10 +13,13 @@ export function renderBaseline(records) {
   records.forEach(validateRecord);
   const runRows = rows(records, "run");
   const jobRows = rows(records, "job");
+  const cohortRows = rows(records, "cohort");
   return [
     "# CI Baseline", "", "Privacy-safe, schema-v1 evidence. Raw logs, actors, branches, secrets, payloads, and artifacts are not persisted.", "",
     "## Comparable timing", "", "| Run | Cohort | State | Wall time | Evidence |", "| --- | --- | --- | --- | --- |",
     ...runRows.map((run) => `| ${run.run_id} | ${escapeMarkdown(run.cohort_fingerprint)} | ${run.conclusion} | ${milliseconds(run.workflow_duration_ms)} | [run](${run.run_url}) |`), "",
+    "## Cohort claims", "", "| Cohort | Qualifying successes | Status | p50 | p95 |", "| --- | --- | --- | --- | --- |",
+    ...cohortRows.map((cohort) => `| ${escapeMarkdown(cohort.cohort_fingerprint)} | ${cohort.sample_count} | ${cohort.sample_status} | ${milliseconds(cohort.p50_ms)} | ${milliseconds(cohort.p95_ms)} |`), "",
     "## Reliability and job timing", "", "| Job | State | Runner queue | DAG wait | Duration | Evidence |", "| --- | --- | --- | --- | --- |",
     ...jobRows.map((job) => `| ${escapeMarkdown(job.stable_identity)} | ${job.conclusion} | ${milliseconds(job.runner_queue_ms)} | ${milliseconds(job.dag_wait_ms)} | ${milliseconds(job.duration_ms)} | [job](${job.job_url}) |`), ""
   ].join("\n");

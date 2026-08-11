@@ -31,7 +31,9 @@ function immutableUrl(value, label) {
 }
 function normalizedIdentity(value, label) {
   if (typeof value !== "string" || value.length === 0 || value.length > 160) fail(`${label} must be a bounded string`);
-  return value.toLowerCase().replace(/\([^)]*\)/g, "").replace(/[^a-z0-9._/-]+/g, "-").replace(/^-+|-+$/g, "") || "unnamed";
+  const normalized = value.toLowerCase().replace(/\([^)]*\)/g, "").replace(/[^a-z0-9._/-]+/g, "-").replace(/^-+|-+$/g, "");
+  if (!normalized) fail(`${label} has no stable identity`);
+  return normalized;
 }
 function eventClass(event) {
   return ({ pull_request: "pull_request", push: "push", workflow_dispatch: "workflow_dispatch", schedule: "schedule" })[event] || "other";
@@ -66,9 +68,18 @@ export function cohortFingerprint(run, jobs = run.jobs || []) {
 
 export function normalizeFailureSignature(job) {
   if (!job.failure_message || job.conclusion === "success") return null;
-  const stable = normalizedIdentity(job.name, "job.name");
   const message = String(job.failure_message).replace(/[0-9a-f]{8,}/gi, "sha").replace(/\d+/g, "n").replace(/[^a-zA-Z0-9 ]+/g, " ").toLowerCase().trim();
-  return `failure-v1-${hash(`${stable}:${message}`)}`;
+  return `failure-v1-${hash(message)}`;
+}
+
+function normalizedMetrics(value, allowed, label) {
+  if (value == null) return {};
+  allowedFields(value, new Set(allowed), label);
+  return Object.fromEntries(Object.entries(value).map(([key, metric]) => {
+    if (key === "hit") { if (typeof metric !== "boolean") fail(`${label}.hit must be boolean`); return [key, metric]; }
+    if (!Number.isInteger(metric) || metric < 0) fail(`${label}.${key} must be a non-negative integer`);
+    return [key, metric];
+  }));
 }
 
 export function normalizeRun(run) {
@@ -108,7 +119,9 @@ export function normalizeJob(job, run, completedByName = new Map()) {
     schema_version: SCHEMA_VERSION, kind: "job", run_id: run.id, job_id: job.id, job_url: immutableUrl(job.html_url, "job.html_url"), job_name: stableIdentity,
     stable_identity: stableIdentity, matrix_identity: `matrix-v1-${hash(stableIdentity)}`, started_at: job.started_at, completed_at: job.completed_at,
     conclusion: conclusion(job.conclusion, "job.conclusion"), duration_ms: duration(job.started_at, job.completed_at, "job"), runner_queue_ms: runnerQueue, dag_wait_ms: dagWait,
-    failure_signature: normalizeFailureSignature(job), setup_costs: {}, cache: {}
+    failure_signature: normalizeFailureSignature(job),
+    setup_costs: normalizedMetrics(job.setup_costs, ["docker_ms", "browser_ms", "node_ms", "npm_ms", "phoenix_ms", "fixture_ms", "playwright_ms"], "job.setup_costs"),
+    cache: normalizedMetrics(job.cache, ["hit", "restore_ms", "save_ms", "size_bytes"], "job.cache")
   };
 }
 
@@ -121,12 +134,64 @@ export function collectBaseline(runs) {
   });
 }
 
+function percentile(values, fraction) {
+  const ordered = [...values].sort((a, b) => a - b);
+  return ordered[Math.ceil(fraction * ordered.length) - 1];
+}
+
+export function summarizeCohorts(runs, { windowDays = 90, sampleSize = 20, now = Date.now() } = {}) {
+  if (!Array.isArray(runs)) fail("runs must be an array");
+  if (!Number.isInteger(windowDays) || windowDays < 1 || !Number.isInteger(sampleSize) || sampleSize < 1) fail("window-days and sample-size must be positive integers");
+  const cutoff = now - (windowDays * 86_400_000);
+  const groups = new Map();
+  for (const run of runs) {
+    const normalized = normalizeRun(run);
+    const key = normalized.cohort_fingerprint;
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key).push({ raw: run, normalized });
+  }
+  return [...groups.entries()].sort(([left], [right]) => left.localeCompare(right)).map(([fingerprint, members]) => {
+    const firstByIdentity = new Map();
+    for (const member of members.sort((a, b) => Date.parse(b.normalized.completed_at) - Date.parse(a.normalized.completed_at))) {
+      const identity = `${member.normalized.original_run_id}:${member.normalized.sha}`;
+      const current = firstByIdentity.get(identity);
+      if (!current || member.normalized.run_attempt < current.normalized.run_attempt) firstByIdentity.set(identity, member);
+    }
+    const qualifying = [...firstByIdentity.values()]
+      .filter(({ normalized }) => normalized.provider_state !== "non_run" && normalized.conclusion === "success" && normalized.run_attempt === 1 && Date.parse(normalized.completed_at) >= cutoff)
+      .sort((a, b) => Date.parse(b.normalized.completed_at) - Date.parse(a.normalized.completed_at))
+      .slice(0, sampleSize);
+    const durations = qualifying.map(({ normalized }) => normalized.workflow_duration_ms);
+    const signatures = new Map();
+    for (const { raw, normalized } of members) for (const job of raw.jobs || []) {
+      const signature = normalizeFailureSignature(job);
+      if (!signature) continue;
+      if (!signatures.has(signature)) signatures.set(signature, new Set());
+      signatures.get(signature).add(normalizedIdentity(job.name, "job.name"));
+    }
+    const uniqueIdentities = new Set(members.map(({ normalized }) => `${normalized.original_run_id}:${normalized.sha}`));
+    const reliability = {
+      total_runs: members.length,
+      failure_count: members.filter(({ normalized }) => normalized.conclusion === "failure").length,
+      cancellation_count: members.filter(({ normalized }) => normalized.conclusion === "cancelled").length,
+      skipped_count: members.filter(({ normalized }) => normalized.conclusion === "skipped").length,
+      rerun_count: members.length - uniqueIdentities.size,
+      root_incidents: [...signatures.entries()].map(([signature, cells]) => ({ signature, affected_cells: [...cells].sort() }))
+    };
+    const ready = durations.length >= sampleSize;
+    return { schema_version: SCHEMA_VERSION, kind: "cohort", cohort_fingerprint: fingerprint, sample_count: durations.length, sample_status: ready ? "ready" : "insufficient_sample", p50_ms: ready ? percentile(durations, 0.5) : null, p95_ms: ready ? percentile(durations, 0.95) : null, reliability };
+  });
+}
+
 export function validateRecord(record) {
   const schema = JSON.parse(fs.readFileSync(SCHEMA_PATH, "utf8"));
   if (!record || record.schema_version !== schema.schema_version || !schema.record_kinds[record.kind]) fail("record has unsupported schema version or kind");
   const allowed = new Set(schema.record_kinds[record.kind]);
+  for (const key of allowed) if (!(key in record)) fail(`record is missing required field: ${key}`);
   for (const key of Object.keys(record)) if (!allowed.has(key)) fail(`record contains forbidden field: ${key}`);
-  if (!CONCLUSIONS.has(record.conclusion ?? "success")) fail("record contains unsupported conclusion");
+  if (record.kind !== "cohort" && !CONCLUSIONS.has(record.conclusion)) fail("record contains unsupported conclusion");
+  if (record.kind === "run" && !PROVIDER_STATES.has(record.provider_state)) fail("record contains unsupported provider state");
+  if (record.kind === "cohort" && !["ready", "insufficient_sample"].includes(record.sample_status)) fail("record contains unsupported sample status");
   return record;
 }
 

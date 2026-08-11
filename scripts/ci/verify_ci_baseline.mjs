@@ -54,15 +54,22 @@ function cohortControls(fixture) {
   assert.equal(ready[0].p95_ms, 300000);
 
   const original = datedRun(fixture.successful_run, 301, 21, { original_run_id: 300, run_attempt: 1, conclusion: "failure" });
-  const retry = datedRun(fixture.successful_run, 302, 22, { original_run_id: 300, run_attempt: 2 });
+  const retry = datedRun(fixture.successful_run, 302, 22, { original_run_id: 300, run_attempt: 2, head_sha: original.head_sha });
   const rerun = summarizeCohorts([...twenty, original, retry])[0];
   assert.equal(rerun.sample_count, 20, "a later retry cannot inflate green samples");
   assert.equal(rerun.reliability.rerun_count, 1, "reliability retains rerun facts");
 
-  const failed = datedRun(fixture.successful_run, 401, 23, { conclusion: "failure", jobs: fixture.successful_run.jobs.map((job, index) => ({ ...job, id: 4010 + index, html_url: `https://github.com/acme/accrue/actions/runs/401/job/${4010 + index}`, conclusion: "failure", failure_message: "Timeout request 1234567890abcdef" })) });
+  const failed = datedRun(fixture.successful_run, 401, 23, { conclusion: "failure" });
+  failed.jobs = failed.jobs.map((job) => ({ ...job, conclusion: "failure", failure_message: "Timeout request 1234567890abcdef" }));
   const failedRecords = collectBaseline([failed]).filter((record) => record.kind === "job");
   assert.equal(new Set(failedRecords.map((job) => job.failure_signature)).size, 1, "matrix failures collapse to one root signature");
   assert.deepEqual(summarizeCohorts([failed])[0].reliability.root_incidents[0].affected_cells.sort(), ["build", "test"]);
+  const cancelled = datedRun(fixture.successful_run, 402, 23, { conclusion: "cancelled" });
+  const skipped = datedRun(fixture.successful_run, 403, 23, { conclusion: "skipped" });
+  const reliability = summarizeCohorts([failed, cancelled, skipped])[0].reliability;
+  assert.equal(reliability.failure_count, 1);
+  assert.equal(reliability.cancellation_count, 1);
+  assert.equal(reliability.skipped_count, 1);
 
   const scheduled = datedRun(fixture.successful_run, 501, 24, { event: "schedule", provider_state: "non_run" });
   const dispatch = datedRun(fixture.successful_run, 502, 24, { event: "workflow_dispatch", provider_state: "misconfigured" });
@@ -70,12 +77,22 @@ function cohortControls(fixture) {
   assert.equal(collectBaseline([scheduled])[0].provider_state, "non_run");
   assert.equal(collectBaseline([dispatch])[0].provider_state, "misconfigured");
 
+  const instrumented = datedRun(fixture.successful_run, 550, 25);
+  instrumented.jobs[0].cache = { hit: true, restore_ms: 12, save_ms: 2, size_bytes: 128 };
+  instrumented.jobs[0].setup_costs = { node_ms: 5, npm_ms: 6, browser_ms: 7, playwright_ms: 8 };
+  const instrumentedJob = collectBaseline([instrumented]).find((record) => record.kind === "job");
+  assert.deepEqual(instrumentedJob.cache, { hit: true, restore_ms: 12, save_ms: 2, size_bytes: 128 });
+  assert.deepEqual(instrumentedJob.setup_costs, { node_ms: 5, npm_ms: 6, browser_ms: 7, playwright_ms: 8 });
+
   assert.throws(() => collectBaseline([datedRun(fixture.successful_run, 601, 25, { updated_at: "not-a-time" })]), /updated_at/);
   assert.throws(() => collectBaseline([{ ...fixture.successful_run, jobs: [{ ...fixture.successful_run.jobs[0], name: "!!!" }] }]), /job.name/);
 }
 
 export function verifyFixtures() {
   const fixture = JSON.parse(fs.readFileSync(fixturePath(), "utf8"));
+  for (const scenario of ["successful_first_attempt", "failure", "cancellation", "rerun", "provider_non_run", "provider_misconfigured", "repeated_matrix_signature", "privacy_rejection", "arithmetic", "insufficient_sample"]) {
+    assert.ok(fixture.scenarios.includes(scenario), `fixture inventory includes ${scenario}`);
+  }
   const temp = fs.mkdtempSync(path.join(os.tmpdir(), "accrue-ci-baseline-"));
   try {
     const records = collectBaseline([fixture.successful_run]);
@@ -85,6 +102,11 @@ export function verifyFixtures() {
     const markdown = renderBaseline(records);
     assert.match(markdown, /Comparable timing/, "renderer includes timing table");
     assert.doesNotMatch(markdown, /unsafe-branch-name/, "renderer never receives raw branch name");
+    const jobs = records.filter((record) => record.kind === "job");
+    assert.equal(jobs[0].runner_queue_ms, 10_000, "root queue is measured from workflow creation");
+    assert.equal(jobs[0].dag_wait_ms, null, "root jobs have no DAG wait");
+    assert.equal(jobs[1].runner_queue_ms, null, "dependent jobs do not masquerade DAG wait as queue");
+    assert.equal(jobs[1].dag_wait_ms, 10_000, "dependent wait uses latest prerequisite completion");
     rejectsForbiddenFields(fixture);
     cohortControls(fixture);
   } finally {
@@ -93,8 +115,22 @@ export function verifyFixtures() {
 }
 
 function main() {
-  if (!process.argv.includes("--fixtures")) fail("usage: verify_ci_baseline.mjs --fixtures");
-  verifyFixtures();
+  const args = process.argv.slice(2);
+  const recordsIndex = args.indexOf("--records");
+  const renderedIndex = args.indexOf("--rendered");
+  if (args.includes("--fixtures")) verifyFixtures();
+  if (recordsIndex !== -1) {
+    const source = args[recordsIndex + 1];
+    if (!source) fail("--records requires an NDJSON path");
+    const records = fs.readFileSync(source, "utf8").trim().split("\n").filter(Boolean).map((line) => JSON.parse(line));
+    const expected = renderBaseline(records);
+    if (renderedIndex !== -1) {
+      const rendered = args[renderedIndex + 1];
+      if (!rendered) fail("--rendered requires a Markdown path");
+      assert.equal(fs.readFileSync(rendered, "utf8"), expected, "rendered Markdown must be byte-reproducible");
+    }
+  }
+  if (!args.includes("--fixtures") && recordsIndex === -1) fail("usage: verify_ci_baseline.mjs --fixtures | --records records.ndjson [--rendered baseline.md]");
   console.log("ci baseline fixtures: PASS");
 }
 
