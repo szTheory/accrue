@@ -2,13 +2,13 @@
 
 ## Current fact
 
-**State:** insufficient_sample — no critical-path percentile claim. **Owner:** CI maintainers. **Next command:** `node scripts/ci/verify_ci_baseline.mjs --records .planning/phases/226-ci-baseline-proof-semantics/226-CI-BASELINE.ndjson --rendered .planning/phases/226-ci-baseline-proof-semantics/226-CI-BASELINE.md`. Evidence is the immutable Actions links below.
+**State:** confirmed. **Owner:** CI maintainers. **Next command:** `node scripts/ci/verify_ci_baseline.mjs --records .planning/phases/226-ci-baseline-proof-semantics/226-CI-BASELINE.ndjson --rendered .planning/phases/226-ci-baseline-proof-semantics/226-CI-BASELINE.md`. Evidence is the immutable Actions links below.
 
 Privacy-safe, schema-v1 evidence. Raw logs, actors, branches, secrets, payloads, and artifact contents are not persisted.
 
 ## Comparable cohort
 
-Snapshot generated: 2026-08-11T18:47:03.246Z. Window: 2026-05-13T18:47:03.246Z to 2026-08-11T18:47:03.246Z. Target: 20.
+Snapshot generated: 2026-08-11T22:37:56.586Z. Window: 2026-05-13T22:37:56.586Z to 2026-08-11T22:37:56.586Z. Target: 20.
 Immediate Phase 225 repair boundary: run [31322443304](https://github.com/szTheory/accrue/actions/runs/31322443304) at SHA `ee940cf9e1f8`. It is retained as evidence, not substituted for the full cohort.
 
 ### Comparable timing
@@ -246,7 +246,20 @@ Immediate Phase 225 repair boundary: run [31322443304](https://github.com/szTheo
 
 ## Measured critical path
 
-Expected staged release → host integration → Playwright path (33–36 minutes): **insufficient_sample — no critical-path percentile claim**. Measured named-path work plus recorded DAG waits: 428289s. This is not runner queue time.
+Expected staged release → host integration → Playwright path (33–36 minutes): **confirmed**. Latest compatible complete paths: 20; staged-path p50: 2083s; staged-path p95: 2602s. Each observation measures release-gate start through the latest Playwright shard completion after host-integration; parallel shards are never summed.
+
+### Fingerprint strata and sensitivity
+Topology fingerprints remain visible strata; they are not an all-or-nothing availability gate.
+| Fingerprint | Count | Sensitivity range | Sensitivity p50 | Sensitivity p95 |
+| --- | --- | --- | --- | --- |
+| cohort-v1-10c9504272c076e2 | 2 | 2042s–2072s | 2042s | 2072s |
+| cohort-v1-526b2d90aec89c21 | 2 | 2056s–2115s | 2056s | 2115s |
+| cohort-v1-7d2025a688e120a2 | 4 | 2083s–2174s | 2124s | 2174s |
+| cohort-v1-8e2e3f3667c2438d | 3 | 2159s–2659s | 2354s | 2659s |
+| cohort-v1-9ae002a16ab4a8e2 | 3 | 1959s–2097s | 1989s | 2097s |
+| cohort-v1-ad50a516ce649a8a | 4 | 1965s–2116s | 2055s | 2116s |
+| cohort-v1-ce03c8490d7b7fc9 | 1 | 2602s–2602s | — | — |
+| cohort-v1-e11b6142698c65da | 1 | 2051s–2051s | — | — |
 
 | Cohort | Qualifying successes | Status | p50 | p95 |
 | --- | --- | --- | --- | --- |
@@ -257,7 +270,7 @@ Expected staged release → host integration → Playwright path (33–36 minute
 | cohort-v1-0e0bb74c299e39fd | 0 | insufficient_sample | — | — |
 | cohort-v1-0f45bd49fc92a1ce | 0 | insufficient_sample | — | — |
 | cohort-v1-10b916e881550d13 | 0 | insufficient_sample | — | — |
-| cohort-v1-10c9504272c076e2 | 0 | insufficient_sample | — | — |
+| cohort-v1-10c9504272c076e2 | 3 | insufficient_sample | — | — |
 | cohort-v1-11642c93410f8861 | 0 | insufficient_sample | — | — |
 | cohort-v1-159dcea475191c42 | 0 | insufficient_sample | — | — |
 | cohort-v1-16c5b430c3bb58df | 0 | insufficient_sample | — | — |
@@ -292,11 +305,11 @@ Expected staged release → host integration → Playwright path (33–36 minute
 | cohort-v1-4b8580890148f12a | 0 | insufficient_sample | — | — |
 | cohort-v1-4c4c0669e8bec90b | 0 | insufficient_sample | — | — |
 | cohort-v1-4cfa63b01578bd88 | 0 | insufficient_sample | — | — |
-| cohort-v1-4ea0fef1c3794585 | 0 | insufficient_sample | — | — |
+| cohort-v1-4ea0fef1c3794585 | 1 | insufficient_sample | — | — |
 | cohort-v1-50606510a3b5755f | 0 | insufficient_sample | — | — |
 | cohort-v1-5155945b6a39674d | 0 | insufficient_sample | — | — |
 | cohort-v1-517416de548c1b58 | 0 | insufficient_sample | — | — |
-| cohort-v1-526b2d90aec89c21 | 0 | insufficient_sample | — | — |
+| cohort-v1-526b2d90aec89c21 | 2 | insufficient_sample | — | — |
 | cohort-v1-52921be73adeb77c | 0 | insufficient_sample | — | — |
 | cohort-v1-533b67bd967711d4 | 0 | insufficient_sample | — | — |
 | cohort-v1-53e9fe5002759b63 | 0 | insufficient_sample | — | — |
@@ -330,7 +343,7 @@ Expected staged release → host integration → Playwright path (33–36 minute
 | cohort-v1-7ad6b40f24c5b4cf | 0 | insufficient_sample | — | — |
 | cohort-v1-7b92761770119de1 | 0 | insufficient_sample | — | — |
 | cohort-v1-7ca379bca09b88ce | 0 | insufficient_sample | — | — |
-| cohort-v1-7d2025a688e120a2 | 0 | insufficient_sample | — | — |
+| cohort-v1-7d2025a688e120a2 | 4 | insufficient_sample | — | — |
 | cohort-v1-7f6eb806106981ec | 0 | insufficient_sample | — | — |
 | cohort-v1-7f99a799b526b5df | 0 | insufficient_sample | — | — |
 | cohort-v1-84273f61af54e69b | 0 | insufficient_sample | — | — |
@@ -339,7 +352,7 @@ Expected staged release → host integration → Playwright path (33–36 minute
 | cohort-v1-89e25508f1e2880c | 0 | insufficient_sample | — | — |
 | cohort-v1-8ad471692d781784 | 0 | insufficient_sample | — | — |
 | cohort-v1-8ce4dc9bb9088e53 | 0 | insufficient_sample | — | — |
-| cohort-v1-8e2e3f3667c2438d | 0 | insufficient_sample | — | — |
+| cohort-v1-8e2e3f3667c2438d | 3 | insufficient_sample | — | — |
 | cohort-v1-8f046f41c8588577 | 0 | insufficient_sample | — | — |
 | cohort-v1-8f76022b6ddcd26a | 0 | insufficient_sample | — | — |
 | cohort-v1-91e3fbef00493264 | 0 | insufficient_sample | — | — |
@@ -347,13 +360,13 @@ Expected staged release → host integration → Playwright path (33–36 minute
 | cohort-v1-96feda5a3eb69d18 | 0 | insufficient_sample | — | — |
 | cohort-v1-97d36f279a1498b7 | 0 | insufficient_sample | — | — |
 | cohort-v1-99b8f3285c789992 | 0 | insufficient_sample | — | — |
-| cohort-v1-9ae002a16ab4a8e2 | 0 | insufficient_sample | — | — |
+| cohort-v1-9ae002a16ab4a8e2 | 3 | insufficient_sample | — | — |
 | cohort-v1-9b1023e14f5ecc19 | 0 | insufficient_sample | — | — |
 | cohort-v1-9d04a5d568b4c66c | 0 | insufficient_sample | — | — |
 | cohort-v1-a00b805e2eef6c37 | 0 | insufficient_sample | — | — |
 | cohort-v1-a2687e57d137e6cc | 0 | insufficient_sample | — | — |
 | cohort-v1-aceed27c41f5aaf5 | 0 | insufficient_sample | — | — |
-| cohort-v1-ad50a516ce649a8a | 0 | insufficient_sample | — | — |
+| cohort-v1-ad50a516ce649a8a | 4 | insufficient_sample | — | — |
 | cohort-v1-ae1293e8232d40a1 | 0 | insufficient_sample | — | — |
 | cohort-v1-ae61652d16e039e5 | 0 | insufficient_sample | — | — |
 | cohort-v1-aefb593215185388 | 0 | insufficient_sample | — | — |
@@ -376,17 +389,17 @@ Expected staged release → host integration → Playwright path (33–36 minute
 | cohort-v1-cc5c7b86b4bf053c | 0 | insufficient_sample | — | — |
 | cohort-v1-ccd979c3217f8d71 | 0 | insufficient_sample | — | — |
 | cohort-v1-cd75010eeecb68a0 | 0 | insufficient_sample | — | — |
-| cohort-v1-ce03c8490d7b7fc9 | 0 | insufficient_sample | — | — |
+| cohort-v1-ce03c8490d7b7fc9 | 1 | insufficient_sample | — | — |
 | cohort-v1-cf2f39c044ceef95 | 0 | insufficient_sample | — | — |
 | cohort-v1-d20dd856a377aaa0 | 0 | insufficient_sample | — | — |
-| cohort-v1-d3d2f21e547890e6 | 0 | insufficient_sample | — | — |
+| cohort-v1-d3d2f21e547890e6 | 3 | insufficient_sample | — | — |
 | cohort-v1-d43e74cb1c635072 | 0 | insufficient_sample | — | — |
 | cohort-v1-d4e7047c2e0d590d | 0 | insufficient_sample | — | — |
-| cohort-v1-d8f0a362896ba95e | 0 | insufficient_sample | — | — |
+| cohort-v1-d8f0a362896ba95e | 2 | insufficient_sample | — | — |
 | cohort-v1-d9ae4dd33a11e195 | 0 | insufficient_sample | — | — |
 | cohort-v1-d9e3ccb5fe54cb66 | 0 | insufficient_sample | — | — |
 | cohort-v1-dd1c3e67616b88df | 0 | insufficient_sample | — | — |
-| cohort-v1-e11b6142698c65da | 0 | insufficient_sample | — | — |
+| cohort-v1-e11b6142698c65da | 1 | insufficient_sample | — | — |
 | cohort-v1-e5485db3216cc250 | 0 | insufficient_sample | — | — |
 | cohort-v1-e7d1a24a01f4031f | 0 | insufficient_sample | — | — |
 | cohort-v1-e9fece75b22952fe | 0 | insufficient_sample | — | — |
@@ -395,7 +408,7 @@ Expected staged release → host integration → Playwright path (33–36 minute
 | cohort-v1-f26f217c7d9c34e2 | 0 | insufficient_sample | — | — |
 | cohort-v1-f3436afd3c8b9fa9 | 0 | insufficient_sample | — | — |
 | cohort-v1-f7e3e0e765ed5441 | 0 | insufficient_sample | — | — |
-| cohort-v1-f9db6391d96e7295 | 0 | insufficient_sample | — | — |
+| cohort-v1-f9db6391d96e7295 | 1 | insufficient_sample | — | — |
 | cohort-v1-f9ecd868f5ce565a | 0 | insufficient_sample | — | — |
 | cohort-v1-fa1463ffd9d675fc | 0 | insufficient_sample | — | — |
 | cohort-v1-ffed52761c1864cb | 0 | insufficient_sample | — | — |
