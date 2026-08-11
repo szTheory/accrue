@@ -8,6 +8,28 @@ echo "[host-integration] phase=browser_playwright" >&2
 
 repo_root="$(cd "$(dirname "$0")/../.." && pwd)"
 host_dir="$repo_root/examples/accrue_host"
+diagnostic="$repo_root/scripts/ci/ci_setup_diagnostic.sh"
+setup_started_ms=$(( $(date +%s) * 1000 ))
+
+setup_failure() {
+  local code="$1"
+  local now_ms duration_ms
+  now_ms=$(( $(date +%s) * 1000 ))
+  duration_ms=$(( now_ms - setup_started_ms ))
+  "$diagnostic" emit "$code" --result failure --duration-ms "$duration_ms" --node-identity node-preflight --playwright-identity unknown --lockfile-identity package-lock --browser-class unknown --cache-state unknown
+  "$diagnostic" render "$code"
+  exit 1
+}
+
+if ! command -v node >/dev/null 2>&1; then
+  setup_failure node_missing_or_version
+fi
+
+node_major="$(node -p 'process.versions.node.split(".")[0]' 2>/dev/null || true)"
+if [ "$node_major" != "22" ]; then
+  setup_failure node_missing_or_version
+fi
+
 cd "$host_dir"
 
 if [ "${ACCRUE_HOST_SKIP_BROWSER:-}" = "1" ]; then
