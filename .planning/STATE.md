@@ -5,8 +5,8 @@ milestone_name: CI Evidence & Critical-Path Hardening
 current_phase: 225
 current_phase_name: required-lane-signal-repair
 status: verifying
-stopped_at: Completed 225-required-lane-signal-repair-03-PLAN.md
-last_updated: "2026-08-09T16:53:33.416Z"
+stopped_at: Phase 226 context gathered
+last_updated: "2026-08-11T16:48:27.571Z"
 last_activity: 2026-08-08
 last_activity_desc: Phase 225 execution resumed (wave continue)
 progress:
@@ -1056,9 +1056,9 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 
 ## Session Continuity
 
-Last session: 2026-08-09T16:53:33.402Z
-Stopped at: Completed 225-required-lane-signal-repair-03-PLAN.md
-Resume file: None
+Last session: 2026-08-11T16:48:27.556Z
+Stopped at: Phase 226 context gathered
+Resume file: .planning/phases/226-ci-baseline-proof-semantics/226-CONTEXT.md
 
 ## Operator Next Steps
 
