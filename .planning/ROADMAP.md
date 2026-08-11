@@ -122,7 +122,7 @@ Plans:
 
 **Wave 10** *(gap closure; blocked on Wave 9 completion)*
 
-- [ ] 226-10-PLAN.md — Authenticate staged-chain duration and root-failure category from policy-bound job facts in both public validation modes.
+- [x] 226-10-PLAN.md — Authenticate staged-chain duration and root-failure category from policy-bound job facts in both public validation modes.
 
 ### Phase 227: Measured Critical-Path Improvement
 

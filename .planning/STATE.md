@@ -4,16 +4,16 @@ milestone: v1.61
 milestone_name: CI Evidence & Critical-Path Hardening
 current_phase: 226
 current_phase_name: ci-baseline-proof-semantics
-status: executing
-stopped_at: Completed 226-09-PLAN.md
-last_updated: "2026-08-11T02:14:45.852Z"
+status: verifying
+stopped_at: Completed 226-10-PLAN.md
+last_updated: "2026-08-11T02:23:04.201Z"
 last_activity: 2026-08-10
 last_activity_desc: Phase 226 execution started
 progress:
   total_phases: 3
   completed_phases: 2
   total_plans: 13
-  completed_plans: 12
+  completed_plans: 13
   percent: 67
 ---
 
@@ -30,8 +30,8 @@ See: `.planning/PROJECT.md` (updated 2026-08-05 after shipping v1.59)
 ## Current Position
 
 Phase: 226 (ci-baseline-proof-semantics) — EXECUTING
-Plan: 9 of 9
-Status: Ready to execute
+Plan: 10 of 10
+Status: Phase complete — ready for verification
 Last activity: 2026-08-10 — Phase 226 execution started
 
 Progress: [██████████] 100%
@@ -467,6 +467,7 @@ Coverage: 22/22 v1.51 requirements mapped (each REQ-ID → exactly one phase). D
 | Phase 226 P07 | 4min | 2 tasks | 2 files |
 | Phase 226 P08 | 31min | 2 tasks | 2 files |
 | Phase 226-ci-baseline-proof-semantics P09 | unknown | 2 tasks | 3 files |
+| Phase 226-ci-baseline-proof-semantics P10 | 4min | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -927,6 +928,8 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - [Phase ?]: Public --input mutation coverage supplies deterministic end-to-end tracer verification with no human UAT.
 - [Phase ?]: CI baseline validators require exact policy workflow identity and complete eligible-run proof.
 - [Phase ?]: Complete CI job topology is versioned and validated against the live workflow.
+- [Phase ?]: Derive chain timing and signatures only after policy-authenticating every candidate job.
+- [Phase ?]: Compute canonical aggregates only after each eligible run passes timestamp derivation.
 
 ### Pending Todos
 
@@ -1079,8 +1082,8 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 
 ## Session Continuity
 
-Last session: 2026-08-11T01:49:48.418Z
-Stopped at: Completed 226-09-PLAN.md
+Last session: 2026-08-11T02:23:04.191Z
+Stopped at: Completed 226-10-PLAN.md
 Resume file: None
 
 ## Operator Next Steps
