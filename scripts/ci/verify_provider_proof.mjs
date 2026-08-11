@@ -61,9 +61,9 @@ function runFixtures() {
   rejects(() => classifyProviderProof({ trigger: "schedule", sha: "a", policy: "required", raw_job_conclusion: "skipped", intentional_bypass: true }), /reason/);
   rejects(() => validateProviderManifest(validManifest({ started_at: "not-a-time" })), /timestamp/);
 
-  const staleBoundary = "2026-08-13T06:00:00Z";
+  const staleBoundary = "2026-08-14T06:00:00Z";
   assert.equal(deriveFreshness({ latest_proved_at: "2026-08-11T06:00:00Z", now: staleBoundary, cadence_hours: 24, grace_hours: 48 }), false);
-  assert.equal(deriveFreshness({ latest_proved_at: "2026-08-11T06:00:00Z", now: "2026-08-13T06:00:01Z", cadence_hours: 24, grace_hours: 48 }), true);
+  assert.equal(deriveFreshness({ latest_proved_at: "2026-08-11T06:00:00Z", now: "2026-08-14T06:00:01Z", cadence_hours: 24, grace_hours: 48 }), true);
   const differentSha = classifyProviderProof({ trigger: "push", sha: "current", policy: "required", raw_job_conclusion: "success", latest_proved_sha: "previous", latest_proved_at: "2026-08-11T06:00:00Z" });
   assert.equal(differentSha.proof_state, "non_run");
   assert.equal(differentSha.latest_proved_sha, "previous");
