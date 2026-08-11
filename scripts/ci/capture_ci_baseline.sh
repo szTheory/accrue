@@ -20,6 +20,7 @@ for id in "${run_ids[@]}"; do [[ "$id" =~ ^[0-9]+$ ]] || fail "run ID must be nu
 command -v jq >/dev/null || fail "jq is required"
 [ -f "$policy_manifest" ] || fail "missing workflow policy manifest"
 jq -e '(.schema_version == 2) and (.workflow|type=="string" and length>0) and (.lanes|type=="array" and length>0) and ([.lanes[].identity]|unique|length==length) and all(.lanes[]; (keys|sort)==["identity","initial_queue_root","match","policy","required_for_release_proof","staged_critical_chain_order"] and (.identity|type=="string" and test("^[a-z0-9-]+$")) and (.match|type=="string") and (.policy=="required" or .policy=="advisory" or .policy=="conditional") and (.required_for_release_proof|type=="boolean") and (.initial_queue_root|type=="boolean") and (.staged_critical_chain_order == null or (.staged_critical_chain_order|type=="number" and floor==. and .>0)))' "$policy_manifest" >/dev/null || fail "invalid workflow policy manifest"
+policy_workflow="$(jq -r '.workflow' "$policy_manifest")"
 
 repo="${GITHUB_REPOSITORY:-}"
 if [ -z "$repo" ]; then remote="$(git -C "$root_dir" config --get remote.origin.url 2>/dev/null || true)"; repo="$(printf %s "$remote" | sed -E 's#^(git@github.com:|https://github.com/)##;s#\.git$##')"; fi
@@ -89,6 +90,7 @@ build_run() {
   local id="$1" run="$tmp_dir/run-$id.json" jobs="$tmp_dir/jobs-flat-$id.json" artifacts="$tmp_dir/artifacts-flat-$id.json"
   if [ -n "$fixture_dir" ]; then fixture_response "run-$id" "$run" 200; else api_get_200 "/repos/$repo/actions/runs/$id" "$run"; fi
   jq -e '(.id|type=="number") and (.name|type=="string") and (.event|type=="string") and (.head_sha|type=="string") and (.run_attempt|type=="number") and (.created_at|type=="string") and (.updated_at|type=="string") and (.html_url|type=="string")' "$run" >/dev/null || fail "malformed run response"
+  [ "$(jq -r '.name' "$run")" = "$policy_workflow" ] || fail "run workflow does not match policy workflow: $policy_workflow"
   local attempt; attempt="$(jq -r .run_attempt "$run")"; pages "jobs-$id" jobs "$jobs"; pages "artifacts-$id" artifacts "$artifacts"
   jq -e --argjson policy "$(cat "$policy_manifest")" --argjson jobs "$(cat "$jobs")" --argjson artifacts "$(cat "$artifacts")" '
     def lane($name): [$policy.lanes[]|select(.match as $m | $name|test($m))]|if length==1 then .[0] else error("unknown job") end;

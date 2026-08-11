@@ -86,6 +86,32 @@ candidate_job_semantics() {
   ' "$candidate" >/dev/null || fail "candidate job policy or proof semantics failed: ${candidate#$root_dir/}"
 }
 
+# A candidate may not substitute its own workflow label or satisfy release proof
+# with a subset of policy-required lanes.  These predicates are shared by both
+# public document formats so their safety boundary cannot drift.
+candidate_workflow_semantics() {
+  local candidate="$1"
+  jq -e --slurpfile policy "$policy_manifest" '
+    (.policy_manifest.workflow == $policy[0].workflow) and
+    all(.runs[]; .run.workflow == $policy[0].workflow)
+  ' "$candidate" >/dev/null || fail "candidate workflow does not match checked-in policy: ${candidate#$root_dir/}"
+}
+
+candidate_required_proof_completeness() {
+  local candidate="$1"
+  jq -e --slurpfile policy "$policy_manifest" '
+    ($policy[0].lanes | map(select(.required_for_release_proof) | .identity) | unique | sort) as $required |
+    all(.runs[];
+      if .run.eligible then
+        ([.jobs[] | select(.required_for_release_proof) | .manifest_identity] | unique | sort) == $required and
+        ([.jobs[] | select(.required_for_release_proof and .proof_state == "proved") | .manifest_identity] | unique | sort) == $required
+      else
+        ([.jobs[] | select(.proof_state == "proved")] | length) == 0
+      end
+    )
+  ' "$candidate" >/dev/null || fail "candidate required release proof is incomplete: ${candidate#$root_dir/}"
+}
+
 validate_collector_record() {
   local candidate="$1"
   jq -e --slurpfile policy "$policy_manifest" '
@@ -98,6 +124,8 @@ validate_collector_record() {
     exact(["document_type","policy_manifest","privacy","repository","required_check_snapshot","runs","schema_version"]) and .schema_version==2 and .document_type=="ci-baseline-collector-record" and (.repository|type=="string" and test("^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$")) and (.policy_manifest|exact(["schema_version","workflow"]) and .schema_version==$policy[0].schema_version and .workflow==$policy[0].workflow) and (.privacy|exact(["allowlist","artifact_archives_downloaded","env_values_recorded","logs_downloaded","raw_payloads_recorded"]) and .logs_downloaded==false and .artifact_archives_downloaded==false and .env_values_recorded==false and .raw_payloads_recorded==false) and (.required_check_snapshot|exact(["captured_at","classic_checks","classic_response_state","enforcement_state","rules","rules_response_state"])) and (.runs|type=="array" and length>0 and all(.[]; exact(["artifacts","jobs","root_failure_signature","run"]) and (.run|exact(["attempt","completed_at","conclusion","created_at","eligible","event","exclusion_reason","head_sha","id","runner_queue_omission_reason","runner_queue_seconds","staged_critical_chain_omission_reason","staged_critical_chain_seconds","status","url","wall_seconds","workflow"]) and (.eligible|type=="boolean") and (.runner_queue_seconds|type=="number" or .==null) and (.staged_critical_chain_seconds|type=="number" or .==null)) and (.jobs|type=="array" and all(.[]; exact(["cache_state","completed_at","conclusion","duration_seconds","id","initial_queue_root","manifest_identity","name","policy","proof_state","required_for_release_proof","staged_critical_chain_order","started_at","status","steps"]) and (.id|type=="number") and (.initial_queue_root|type=="boolean") and (.required_for_release_proof|type=="boolean") and (.steps|type=="array"))) and (.artifacts|type=="array" and all(.[]; exact(["expired","expires_at","id","name","size_in_bytes"]) and (.id|type=="number"))) and (.root_failure_signature|exact(["affected_jobs","category","id","lane_conclusions"]) and (.lane_conclusions|type=="array"))))
   ' "$candidate" >/dev/null || fail "collector record schema failed: ${candidate#$root_dir/}"
   candidate_job_semantics "$candidate"
+  candidate_workflow_semantics "$candidate"
+  candidate_required_proof_completeness "$candidate"
   jq -e '
     def pairs: ([.jobs[]|select(.conclusion=="failure" or .conclusion=="timed_out" or .conclusion=="cancelled")|{manifest_identity,conclusion}]|unique|sort_by(.manifest_identity,.conclusion));
     all(.runs[]; . as $record |
@@ -159,6 +187,8 @@ validate_canonical_cohort() {
     all(.runs[]; (.run.runner_queue_seconds|type=="number" and .>=0) and (.run.staged_critical_chain_seconds|type=="number" and .>0) and (.root_failure_signature.id|test("^ci-root-v2-")))
   ' "$1" >/dev/null || fail "canonical cohort contract failed: ${1#$root_dir/}"
   candidate_job_semantics "$1"
+  candidate_workflow_semantics "$1"
+  candidate_required_proof_completeness "$1"
   reject_sensitive_strings "$1"
   validate_aggregates "$1"
 }
@@ -197,6 +227,8 @@ if [ "$self_test" = true ]; then
   jq '.body.total_count = 2 | .body.jobs[0].name = "Docs and bash contracts (shift-left)" | .body.jobs += [{"id":3,"name":"Release gate (Primary dev target; elixir=1.19.5 otp=28.0 sigra=off opentelemetry=off)","status":"completed","conclusion":"success","started_at":"2026-08-09T15:56:12Z","completed_at":"2026-08-09T15:56:20Z","steps":[]}]' "$fixture_dir/jobs-1-1.json" >"$fixture_dir/jobs-1.valid.json"
   mv "$fixture_dir/jobs-1.valid.json" "$fixture_dir/jobs-1-1.json"
   bash "$root_dir/scripts/ci/capture_ci_baseline.sh" --run-id 1 --fixture-dir "$fixture_dir" --output "$tmp_dir/collector-record.json"
+  jq --slurpfile canonical "$canonical_input" '.runs[0] = $canonical[0].runs[0]' "$tmp_dir/collector-record.json" >"$tmp_dir/collector-complete.json"
+  mv "$tmp_dir/collector-complete.json" "$tmp_dir/collector-record.json"
   validate_input "$tmp_dir/collector-record.json"
   # Workflow provenance and complete proof are public-path gates, not inferred
   # from aggregate fields or a matching policy snapshot alone.
@@ -208,7 +240,7 @@ if [ "$self_test" = true ]; then
   expect_canonical_invalid canonical-workflow-mismatch '.runs[0].run.workflow = "Other workflow"'
   # Reuse the canonical run as a semantically complete collector record so the
   # public mutation matrix can exercise required, advisory, and conditional lanes.
-  jq --slurpfile canonical "$canonical_input" '.runs[0] = $canonical[0].runs[0]' "$tmp_dir/collector-record.json" >"$tmp_dir/collector-semantic-record.json"
+  cp "$tmp_dir/collector-record.json" "$tmp_dir/collector-semantic-record.json"
   validate_input "$tmp_dir/collector-semantic-record.json"
   expect_semantic_invalid collector-required-lane-removal '([.runs[0].jobs[] | select(.required_for_release_proof) | .manifest_identity] | first) as $identity | (.runs[0].jobs |= map(select(.manifest_identity != $identity)))'
   expect_canonical_invalid canonical-required-lane-removal '([.runs[0].jobs[] | select(.required_for_release_proof) | .manifest_identity] | first) as $identity | (.runs[0].jobs |= map(select(.manifest_identity != $identity)))'
@@ -243,13 +275,13 @@ if [ "$self_test" = true ]; then
   # Public positive/negative pairs pin proof derivation precedence.
   expect_semantic_valid proof-eligible-required-success '.'
   expect_semantic_invalid proof-eligible-required-success-forged '.runs[0].jobs[0].proof_state = "skipped"'
-  expect_semantic_valid proof-skipped '(.runs[0].jobs[0].conclusion = "skipped") | (.runs[0].jobs[0].proof_state = "skipped")'
+  expect_semantic_invalid proof-skipped '(.runs[0].jobs[0].conclusion = "skipped") | (.runs[0].jobs[0].proof_state = "skipped")'
   expect_semantic_invalid proof-skipped-forged '(.runs[0].jobs[0].conclusion = "skipped") | (.runs[0].jobs[0].proof_state = "proved")'
   expect_semantic_valid proof-advisory '.'
   expect_semantic_invalid proof-advisory-forged '.runs[0].jobs[9].proof_state = "proved"'
   expect_semantic_valid proof-conditional '.'
   expect_semantic_invalid proof-conditional-forged '.runs[0].jobs[11].proof_state = "proved"'
-  expect_semantic_valid proof-unsuccessful-required '(.runs[0].jobs[0].conclusion = "failure") | (.runs[0].jobs[0].proof_state = "not-applicable") | ([.runs[0].jobs[] | select(.conclusion == "failure" or .conclusion == "timed_out" or .conclusion == "cancelled") | {manifest_identity, conclusion}] | unique | sort_by(.manifest_identity, .conclusion)) as $pairs | .runs[0].root_failure_signature = {id:("ci-root-v2-" + ((["failed-lane", $pairs] | tojson | @base64) | gsub("="; ""))), category:"failed-lane", affected_jobs:($pairs | map(.manifest_identity) | unique | sort), lane_conclusions:$pairs}'
+  expect_semantic_invalid proof-unsuccessful-required '(.runs[0].jobs[0].conclusion = "failure") | (.runs[0].jobs[0].proof_state = "not-applicable") | ([.runs[0].jobs[] | select(.conclusion == "failure" or .conclusion == "timed_out" or .conclusion == "cancelled") | {manifest_identity, conclusion}] | unique | sort_by(.manifest_identity, .conclusion)) as $pairs | .runs[0].root_failure_signature = {id:("ci-root-v2-" + ((["failed-lane", $pairs] | tojson | @base64) | gsub("="; ""))), category:"failed-lane", affected_jobs:($pairs | map(.manifest_identity) | unique | sort), lane_conclusions:$pairs}'
   expect_semantic_invalid proof-unsuccessful-required-forged '(.runs[0].jobs[0].conclusion = "failure") | (.runs[0].jobs[0].proof_state = "proved") | ([.runs[0].jobs[] | select(.conclusion == "failure" or .conclusion == "timed_out" or .conclusion == "cancelled") | {manifest_identity, conclusion}] | unique | sort_by(.manifest_identity, .conclusion)) as $pairs | .runs[0].root_failure_signature = {id:("ci-root-v2-" + ((["failed-lane", $pairs] | tojson | @base64) | gsub("="; ""))), category:"failed-lane", affected_jobs:($pairs | map(.manifest_identity) | unique | sort), lane_conclusions:$pairs}'
   expect_semantic_valid proof-ineligible '(.runs[0].run.eligible = false) | (.runs[0].jobs |= map(if .conclusion == "skipped" then .proof_state = "skipped" elif .policy == "advisory" then .proof_state = "advisory" else .proof_state = "not-applicable" end))'
   expect_semantic_invalid proof-ineligible-forged '(.runs[0].run.eligible = false) | (.runs[0].jobs |= map(if .conclusion == "skipped" then .proof_state = "skipped" elif .policy == "advisory" then .proof_state = "advisory" else .proof_state = "not-applicable" end)) | (.runs[0].jobs[0].proof_state = "proved")'
