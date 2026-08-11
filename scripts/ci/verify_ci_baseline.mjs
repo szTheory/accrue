@@ -77,6 +77,16 @@ function stagedPathControls(fixture) {
   assert.equal(deriveStagedPathPercentiles(collectBaseline(runs.slice(0, 19))).valid, false, "under-sampled cohort is rejected");
 }
 
+function requireCriticalPath(records, markdown) {
+  const staged = deriveStagedPathPercentiles(records);
+  if (!staged.valid) fail(`critical path: ${staged.reason}`);
+  const cohort = records.find((record) => record.kind === "cohort" && record.cohort_fingerprint === staged.cohort_fingerprint);
+  if (!cohort || cohort.sample_status !== "ready" || cohort.sample_count !== 20) fail("critical path: staged cohort must be an exact ready 20-run cohort");
+  if (!markdown.includes(`**${staged.conclusion}**`) || !markdown.includes(`p50: ${Math.round(staged.p50_ms / 1000)}s`) || !markdown.includes(`p95: ${Math.round(staged.p95_ms / 1000)}s`)) {
+    fail("critical path: Markdown must report the cohort-aligned conclusion and measured p50/p95");
+  }
+}
+
 function cohortControls(fixture) {
   const nineteen = Array.from({ length: 19 }, (_, index) => datedRun(fixture.successful_run, 200 + index, index));
   const twenty = [...nineteen, datedRun(fixture.successful_run, 220, 20)];
@@ -190,6 +200,7 @@ function main() {
   const args = process.argv.slice(2);
   const recordsIndex = args.indexOf("--records");
   const renderedIndex = args.indexOf("--rendered");
+  const requireCriticalPathFlag = args.includes("--require-critical-path");
   if (args.includes("--fixtures")) verifyFixtures();
   if (recordsIndex !== -1) {
     const source = args[recordsIndex + 1];
@@ -200,7 +211,9 @@ function main() {
       const rendered = args[renderedIndex + 1];
       if (!rendered) fail("--rendered requires a Markdown path");
       assert.equal(fs.readFileSync(rendered, "utf8"), expected, "rendered Markdown must be byte-reproducible");
+      if (requireCriticalPathFlag) requireCriticalPath(records, expected);
     }
+    else if (requireCriticalPathFlag) requireCriticalPath(records, expected);
   }
   if (!args.includes("--fixtures") && recordsIndex === -1) fail("usage: verify_ci_baseline.mjs --fixtures | --records records.ndjson [--rendered baseline.md]");
   console.log("ci baseline fixtures: PASS");
