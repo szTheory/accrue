@@ -40,11 +40,14 @@ export ACCRUE_HOST_SKIP_DEV_BOOT="${ACCRUE_HOST_SKIP_DEV_BOOT:-}"
 export ACCRUE_HOST_SKIP_BROWSER="${ACCRUE_HOST_SKIP_BROWSER:-}"
 export ACCRUE_HOST_ALLOW_GENERATED_DRIFT="${ACCRUE_HOST_ALLOW_GENERATED_DRIFT:-}"
 export ACCRUE_HOST_BROWSER_LOG="${ACCRUE_HOST_BROWSER_LOG:-}"
+export ACCRUE_CI_SETUP_FACTS="${ACCRUE_CI_SETUP_FACTS:-}"
 
 echo ""
 echo "--- delegating to host-local mix verify.full ---"
 cd "$host_dir"
 if ! mix verify.full; then
+  "$repo_root/scripts/ci/ci_setup_diagnostic.sh" emit browser_launch --result failure --duration-ms 0 --node-identity wrapper --playwright-identity delegated --lockfile-identity package-lock --browser-class host-proof --cache-state inherited >/dev/null 2>&1 || true
+  "$repo_root/scripts/ci/ci_setup_diagnostic.sh" render browser_launch
   echo "FAILED_GATE=host-integration" >&2
   exit 1
 fi

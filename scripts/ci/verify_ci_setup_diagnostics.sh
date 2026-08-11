@@ -69,12 +69,13 @@ assert_browser_boundary_contract() {
   local browser_script="$root_dir/scripts/ci/accrue_host_verify_browser.sh"
   local wrapper_script="$root_dir/scripts/ci/accrue_host_uat.sh"
   local config="$root_dir/examples/accrue_host/playwright.config.js"
+  local temp_dir code output facts command_status
 
   for code in npm_lock_or_registry playwright_binary_or_revision fixture_or_database browser_launch port_or_server_readiness; do
     grep -Fq "$code" "$browser_script" || fail "browser script must classify $code"
   done
   grep -Fq 'mix verify.full' "$wrapper_script" || fail "wrapper must preserve host proof delegation"
-  [ "$(grep -Fc 'mix verify.full' "$wrapper_script")" -eq 1 ] || fail "wrapper must delegate exactly once"
+  [ "$(grep -Fc 'if ! mix verify.full; then' "$wrapper_script")" -eq 1 ] || fail "wrapper must delegate exactly once"
   grep -Fq 'fullyParallel: false' "$config" || fail "Playwright must stay single-flow"
   grep -Fq ': 1' "$config" || fail "Playwright must retain one worker"
   ! grep -Eq '^[[:space:]]*retries:' "$config" || fail "Playwright retries must remain at the zero default"
@@ -83,6 +84,19 @@ assert_browser_boundary_contract() {
   grep -Fq 'verify01-admin-a11y.spec.js' "$browser_script" || fail "accessibility evidence comment missing"
   grep -Fq 'npm ci' "$browser_script" || fail "host duplicate npm provisioning must remain"
   grep -Fq 'npm run e2e:install' "$browser_script" || fail "host duplicate browser provisioning must remain"
+
+  temp_dir="$(mktemp -d)"
+  facts="$temp_dir/facts.ndjson"
+  trap 'rm -rf "$temp_dir"' RETURN
+  for code in npm_lock_or_registry playwright_binary_or_revision fixture_or_database browser_launch port_or_server_readiness; do
+    set +e
+    output="$(ACCRUE_CI_SETUP_FACTS="$facts" ACCRUE_HOST_SETUP_DIAGNOSTIC_FIXTURE="$code" bash "$browser_script" 2>&1)"
+    command_status=$?
+    set -e
+    [ "$command_status" -ne 0 ] || fail "fixture must fail for $code"
+    printf '%s\n' "$output" | grep -Fx "SETUP_CODE=$code" >/dev/null || fail "fixture did not classify $code"
+    printf '%s\n' "$output" | grep -Fx 'OWNER=host' >/dev/null || fail "fixture ownership drifted for $code"
+  done
 }
 
 assert_registry_contract
