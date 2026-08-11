@@ -23,6 +23,8 @@ function timestamp(value, label) {
   if (typeof value !== "string" || !/^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d(?:\.\d{3})?Z$/.test(value)) fail(`${label} must be an ISO-8601 UTC timestamp`);
   const ms = Date.parse(value);
   if (Number.isNaN(ms)) fail(`${label} is invalid`);
+  const canonical = value.includes(".") ? value : value.replace("Z", ".000Z");
+  if (new Date(ms).toISOString() !== canonical) fail(`${label} must be an ISO-8601 UTC timestamp`);
   return ms;
 }
 function immutableUrl(value, label) {

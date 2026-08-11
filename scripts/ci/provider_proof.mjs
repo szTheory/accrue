@@ -20,7 +20,11 @@ function nonEmptyString(value, field) {
 
 function timestamp(value, field) {
   nonEmptyString(value, field);
-  if (Number.isNaN(Date.parse(value))) fail(`${field} must be an ISO timestamp`);
+  if (!/^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d(?:\.\d{3})?Z$/.test(value)) fail(`${field} must be an ISO timestamp`);
+  const ms = Date.parse(value);
+  if (Number.isNaN(ms)) fail(`${field} must be an ISO timestamp`);
+  const canonical = value.includes(".") ? value : value.replace("Z", ".000Z");
+  if (new Date(ms).toISOString() !== canonical) fail(`${field} must be an ISO timestamp`);
   return value;
 }
 
