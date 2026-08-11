@@ -10,12 +10,13 @@ expected_ids='[31322443304,31332551817,31344524124]'
 required_lockfiles='["accrue/mix.lock","accrue_admin/mix.lock","accrue_admin/package-lock.json","examples/accrue_host/mix.lock","examples/accrue_host/package-lock.json","examples/accrue_host/assets/package-lock.json"]'
 
 fail() { echo "verify_ci_baseline_contract: $*" >&2; exit 1; }
-input="$canonical_input"; self_test=false
+input="$canonical_input"; self_test=false; self_test_collector=false
 case "${1:-}" in
   --self-test) [ "$#" -eq 1 ] || fail "--self-test accepts no other arguments"; self_test=true ;;
+  --self-test-collector) [ "$#" -eq 1 ] || fail "--self-test-collector accepts no other arguments"; self_test_collector=true ;;
   --input) [ "$#" -eq 2 ] || fail "--input requires a path"; input="$2" ;;
   "") ;;
-  *) fail "usage: $0 [--input PATH]" ;;
+  *) fail "usage: $0 [--input PATH|--self-test|--self-test-collector]" ;;
 esac
 [ -x "$root_dir/scripts/ci/capture_ci_baseline.sh" ] || fail "missing executable collector"
 
@@ -153,16 +154,17 @@ validate_collector_record() {
   jq -e --slurpfile policy "$policy_manifest" '
     def exact($x): (keys|sort)==$x; def iso: type=="string" and test("^[0-9]{4}-[0-9]{2}-[0-9]{2}T.*Z$"); def num: type=="number" and isfinite and .>=0;
     def step: exact(["completed_at","conclusion","duration_seconds","name","started_at"]) and (.name|type=="string") and (.conclusion|type=="string" or .==null) and (.started_at|iso or .==null) and (.completed_at|iso or .==null) and (.duration_seconds|num or .==null);
-    def job: exact(["cache_state","completed_at","conclusion","duration_seconds","id","initial_queue_root","manifest_identity","name","policy","proof_state","required_for_release_proof","staged_critical_chain_order","started_at","status","steps"]) and (.id|type=="number") and (.name|type=="string") and (.status|type=="string") and (.conclusion|type=="string" or .==null) and (.started_at|iso or .==null) and (.completed_at|iso or .==null) and (.duration_seconds|num or .==null) and (.steps|type=="array" and all(.[];step)) and (.policy=="required" or .=="advisory" or .=="conditional") and (.required_for_release_proof|type=="boolean") and (.initial_queue_root|type=="boolean") and (.staged_critical_chain_order==null or (.staged_critical_chain_order|type=="number" and floor==. and .>0)) and (.proof_state=="proved" or .=="skipped" or .=="advisory" or .=="not-applicable") and (.cache_state=="observed-hit" or .=="observed-miss" or .=="inferred-setup-bypass" or .=="unknown");
-    def artifact: exact(["expired","expires_at","id","name","size_in_bytes"]) and (.id|type=="number") and (.name|type=="string") and (.size_in_bytes|num) and (.expires_at|iso or .==null) and (.expired|type=="boolean");
-    def run: exact(["attempt","completed_at","conclusion","created_at","eligible","event","exclusion_reason","head_sha","id","runner_queue_omission_reason","runner_queue_seconds","staged_critical_chain_omission_reason","staged_critical_chain_seconds","status","url","wall_seconds","workflow"]) and (.id|type=="number") and (.workflow|type=="string") and (.event|type=="string") and (.head_sha|type=="string" and test("^[0-9a-f]{40}$")) and (.attempt|type=="number" and floor==. and .>0) and (.status|type=="string") and (.conclusion|type=="string" or .==null) and (.created_at|iso) and (.completed_at|iso) and (.url | (type=="string" and test("^https://") and (contains("?")|not))) and (.wall_seconds|num) and (.eligible|type=="boolean") and (.exclusion_reason|type=="string" or .==null) and (.runner_queue_seconds|num or .==null) and (.runner_queue_omission_reason==null or .=="provider-omitted-initial-root-started-at") and (.staged_critical_chain_seconds|num or .==null) and (.staged_critical_chain_omission_reason==null or .=="provider-omitted-staged-chain-timestamp");
+    def job: exact(["cache_state","completed_at","conclusion","duration_seconds","id","initial_queue_root","manifest_identity","name","policy","proof_state","required_for_release_proof","staged_critical_chain_order","started_at","status","steps"]) and (.id|type=="number" and floor==.) and (.name|type=="string") and (.status|type=="string") and (.conclusion|type=="string" or .==null) and (.started_at|iso or .==null) and (.completed_at|iso or .==null) and (.duration_seconds|num or .==null) and (.steps|type=="array" and all(.[];step)) and (.policy=="required" or .=="advisory" or .=="conditional") and (.required_for_release_proof|type=="boolean") and (.initial_queue_root|type=="boolean") and (.staged_critical_chain_order==null or (.staged_critical_chain_order|type=="number" and floor==. and .>0)) and (.proof_state=="proved" or .=="skipped" or .=="advisory" or .=="not-applicable") and (.cache_state=="observed-hit" or .=="observed-miss" or .=="inferred-setup-bypass" or .=="unknown");
+    def artifact: exact(["expired","expires_at","id","name","size_in_bytes"]) and (.id|type=="number" and floor==.) and (.name|type=="string") and (.size_in_bytes|num) and (.expires_at|iso or .==null) and (.expired|type=="boolean");
+    def run: exact(["attempt","completed_at","conclusion","created_at","eligible","event","exclusion_reason","head_branch","head_sha","id","ref","runner_queue_omission_reason","runner_queue_seconds","staged_critical_chain_omission_reason","staged_critical_chain_seconds","status","url","wall_seconds","workflow"]) and (.id|type=="number" and floor==.) and (.workflow|type=="string") and (.event|type=="string") and (.head_branch|type=="string" and length>0) and (.ref|type=="string") and (.head_sha|type=="string" and test("^[0-9a-f]{40}$")) and (.attempt|type=="number" and floor==. and .>0) and (.status|type=="string") and (.conclusion|type=="string" or .==null) and (.created_at|iso) and (.completed_at|iso) and (.url | (type=="string" and test("^https://") and (contains("?")|not))) and (.wall_seconds|num) and (.eligible|type=="boolean") and (.exclusion_reason|type=="string" or .==null) and (.runner_queue_seconds|num or .==null) and (.runner_queue_omission_reason==null or .=="provider-omitted-initial-root-started-at") and (.staged_critical_chain_seconds|num or .==null) and (.staged_critical_chain_omission_reason==null or .=="provider-omitted-staged-chain-timestamp");
     def sig: exact(["affected_jobs","category","id","lane_conclusions"]) and (.id|type=="string" and test("^ci-root-v2-[A-Za-z0-9_-]+$")) and (.category=="no-failure" or .=="failed-lane") and (.affected_jobs|type=="array" and .==sort and .==unique) and (.lane_conclusions|type=="array" and .==sort_by(.manifest_identity,.conclusion) and .==unique and all(.[]; exact(["conclusion","manifest_identity"]) and (.manifest_identity|type=="string") and (.conclusion=="failure" or .=="timed_out" or .=="cancelled")));
-    exact(["document_type","policy_manifest","privacy","repository","required_check_snapshot","runs","schema_version"]) and .schema_version==2 and .document_type=="ci-baseline-collector-record" and (.repository|type=="string" and test("^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$")) and (.policy_manifest|exact(["schema_version","workflow"]) and .schema_version==$policy[0].schema_version and .workflow==$policy[0].workflow) and (.privacy|exact(["allowlist","artifact_archives_downloaded","env_values_recorded","logs_downloaded","raw_payloads_recorded"]) and .logs_downloaded==false and .artifact_archives_downloaded==false and .env_values_recorded==false and .raw_payloads_recorded==false) and (.required_check_snapshot|exact(["captured_at","classic_checks","classic_response_state","enforcement_state","rules","rules_response_state"])) and (.runs|type=="array" and length>0 and all(.[]; exact(["artifacts","jobs","root_failure_signature","run"]) and (.run|exact(["attempt","completed_at","conclusion","created_at","eligible","event","exclusion_reason","head_sha","id","runner_queue_omission_reason","runner_queue_seconds","staged_critical_chain_omission_reason","staged_critical_chain_seconds","status","url","wall_seconds","workflow"]) and (.eligible|type=="boolean") and (.runner_queue_seconds|type=="number" or .==null) and (.staged_critical_chain_seconds|type=="number" or .==null)) and (.jobs|type=="array" and all(.[]; exact(["cache_state","completed_at","conclusion","duration_seconds","id","initial_queue_root","manifest_identity","name","policy","proof_state","required_for_release_proof","staged_critical_chain_order","started_at","status","steps"]) and (.id|type=="number") and (.initial_queue_root|type=="boolean") and (.required_for_release_proof|type=="boolean") and (.steps|type=="array"))) and (.artifacts|type=="array" and all(.[]; exact(["expired","expires_at","id","name","size_in_bytes"]) and (.id|type=="number"))) and (.root_failure_signature|exact(["affected_jobs","category","id","lane_conclusions"]) and (.lane_conclusions|type=="array"))))
+    exact(["document_type","policy_manifest","privacy","repository","required_check_snapshot","runs","schema_version"]) and .schema_version==2 and .document_type=="ci-baseline-collector-record" and (.repository|type=="string" and test("^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$")) and (.policy_manifest|exact(["schema_version","workflow"]) and .schema_version==$policy[0].schema_version and .workflow==$policy[0].workflow) and (.privacy|exact(["allowlist","artifact_archives_downloaded","env_values_recorded","logs_downloaded","raw_payloads_recorded"]) and .logs_downloaded==false and .artifact_archives_downloaded==false and .env_values_recorded==false and .raw_payloads_recorded==false) and (.required_check_snapshot|exact(["captured_at","classic_checks","classic_response_state","enforcement_state","rules","rules_response_state"])) and (.runs|type=="array" and length>0 and all(.[]; (.run|run) and (.jobs|type=="array" and length>0) and (.artifacts|type=="array") and (.root_failure_signature|sig)))
   ' "$candidate" >/dev/null || fail "collector record schema failed: ${candidate#$root_dir/}"
   candidate_job_semantics "$candidate"
   candidate_workflow_semantics "$candidate"
   candidate_required_proof_completeness "$candidate"
   candidate_derived_run_semantics "$candidate"
+  jq -e 'all(.runs[]; if .run.eligible then (.run.head_branch == "main" and .run.ref == "refs/heads/main" and .run.exclusion_reason == null) else (.run.ref == ("refs/heads/" + .run.head_branch) and ([.jobs[] | select(.proof_state == "proved")] | length) == 0 and (.run.exclusion_reason | type == "string" and length > 0)) end)' "$candidate" >/dev/null || fail "collector branch/ref proof scope failed: ${candidate#$root_dir/}"
   jq -e '
     def pairs: ([.jobs[]|select(.conclusion=="failure" or .conclusion=="timed_out" or .conclusion=="cancelled")|{manifest_identity,conclusion}]|unique|sort_by(.manifest_identity,.conclusion));
     all(.runs[]; . as $record |
@@ -232,6 +234,26 @@ validate_canonical_cohort() {
 }
 validate_input() { local candidate="$1"; [ -f "$candidate" ] || fail "missing baseline input: ${candidate#$root_dir/}"; validate_policy_manifest; case "$(jq -r '.document_type // "canonical-v1"' "$candidate")" in ci-baseline-collector-record) validate_collector_record "$candidate";; ci-baseline-canonical) validate_canonical_cohort "$candidate";; *) fail "unknown document discriminator";; esac; }
 
+run_collector_self_test() {
+  local tmp fixture names
+  tmp="$(mktemp -d)"; trap 'rm -rf "$tmp"' RETURN
+  fixture="$tmp/fixture"; mkdir "$fixture"
+  names='["Docs and bash contracts (shift-left)","iOS offline client package compatibility","Release manifest SSOT (REL-02)","Release gate (Floor; elixir=1.19.0 otp=28.0 sigra=off opentelemetry=off)","Release gate (Primary dev target; elixir=1.19.5 otp=28.0 sigra=off opentelemetry=off)","Release gate (Primary dev target; elixir=1.19.5 otp=28.0 sigra=on opentelemetry=off) [advisory]","Release gate (Primary dev target; elixir=1.19.5 otp=28.0 sigra=off opentelemetry=on)","Phase 18 Stripe Tax gate","Admin drift and docs","Admin group contracts (Phase 190)","Admin hardening guardrails (Phase 192)","Admin Phase 200 deterministic guardrails","Admin UI ratchet guardrails","Host integration (required deterministic gate)","Playwright E2E shard 1/3","Playwright E2E shard 2/3","Playwright E2E shard 3/3","Host Docker boot smoke","Annotation sweep","Stripe test-mode parity (mandatory periodic)"]'
+  jq -n '{status:200,body:{id:1,name:"CI",event:"workflow_dispatch",head_branch:"main",head_sha:"1111111111111111111111111111111111111111",run_attempt:1,status:"completed",conclusion:"success",created_at:"2026-08-09T15:56:11Z",updated_at:"2026-08-09T15:56:21Z",html_url:"https://github.com/szTheory/accrue/actions/runs/1"}}' >"$fixture/run-1.json"
+  jq -n --argjson names "$names" '{status:200,body:{total_count:($names|length),next_page:null,jobs:[$names | to_entries[] | {id:(100 + .key),name:.value,status:"completed",conclusion:"success",started_at:"2026-08-09T15:56:12Z",completed_at:"2026-08-09T15:56:20Z",steps:[]}]}}' >"$fixture/jobs-1-1.json"
+  jq -n '{status:200,body:{total_count:0,next_page:null,artifacts:[]}}' >"$fixture/artifacts-1-1.json"
+  jq -n '{status:200,body:[]}' >"$fixture/rules.json"
+  jq -n '{status:404,body:null}' >"$fixture/required_status_checks.json"
+  bash "$root_dir/scripts/ci/capture_ci_baseline.sh" --run-id 1 --fixture-dir "$fixture" --output "$tmp/main.json"
+  validate_input "$tmp/main.json"
+  jq '.body.head_branch = "feature/proof-scope"' "$fixture/run-1.json" >"$tmp/feature-run.json" && mv "$tmp/feature-run.json" "$fixture/run-1.json"
+  bash "$root_dir/scripts/ci/capture_ci_baseline.sh" --run-id 1 --fixture-dir "$fixture" --output "$tmp/feature.json"
+  validate_input "$tmp/feature.json"
+  jq '(.runs[0].run.eligible = true) | (.runs[0].jobs[0].proof_state = "proved")' "$tmp/feature.json" >"$tmp/forged.json"
+  if bash "$root_dir/scripts/ci/verify_ci_baseline_contract.sh" --input "$tmp/forged.json" >/dev/null 2>&1; then fail "feature-branch proof mutation unexpectedly passed"; fi
+  echo "verify_ci_baseline_contract: collector self-test ok"
+}
+
 validate_workflow_topology() {
   local expected_ids actual_ids row job_id expected_name expected_condition body actual_name actual_condition role
   expected_ids="$(jq -r '[.workflow_topology[].job_id] | sort | join(" ")' "$policy_manifest")"
@@ -275,6 +297,11 @@ validate_repository_contract() {
   for proof_state in required advisory skipped not-applicable; do require_source_fixed "ownership proof taxonomy" "$(cat "$ownership_file")" "$proof_state"; done
   jq -e '.required_check_snapshot.rules_response_state == "ok" and .required_check_snapshot.classic_response_state == "not-found" and .required_check_snapshot.enforcement_state == "none-enforced" and (.phase_227_selection_gate.required_evidence_fields | sort == ["affected_critical_path_stage","baseline_median_or_range","eligible_run_ids","json_paths"])' "$canonical_input" >/dev/null || fail "provider snapshot or Phase 227 selection contract failed"
 }
+
+if [ "$self_test_collector" = true ]; then
+  run_collector_self_test
+  exit 0
+fi
 
 if [ "$self_test" = true ]; then
   tmp_dir="$(mktemp -d)"; cleanup() { rm -rf "$tmp_dir"; }; trap cleanup EXIT
