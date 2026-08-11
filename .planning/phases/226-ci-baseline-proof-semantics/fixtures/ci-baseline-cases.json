@@ -15,5 +15,10 @@
       {"id": 1, "html_url": "https://github.com/acme/accrue/actions/runs/101/job/1", "name": "build (os: ubuntu)", "started_at": "2026-08-01T10:00:10.000Z", "completed_at": "2026-08-01T10:03:10.000Z", "conclusion": "success", "runner_image": "ubuntu-24.04", "needs": []},
       {"id": 2, "html_url": "https://github.com/acme/accrue/actions/runs/101/job/2", "name": "test (os: ubuntu)", "started_at": "2026-08-01T10:03:20.000Z", "completed_at": "2026-08-01T10:05:00.000Z", "conclusion": "success", "runner_image": "ubuntu-24.04", "needs": ["build (os: ubuntu)"]}
     ]
-  }
+  },
+  "scenarios": [
+    "successful_first_attempt", "failure", "cancellation", "rerun", "provider_non_run",
+    "provider_misconfigured", "repeated_matrix_signature", "privacy_rejection", "arithmetic",
+    "insufficient_sample", "schedule_cohort_isolation", "unstable_identity", "cache_setup"
+  ]
 }
