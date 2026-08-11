@@ -339,6 +339,14 @@ if [ "$self_test" = true ]; then
   cp "$tmp_dir/classic.good.json" "$fixture_dir/required_status_checks.json"
   validate_repository_contract
   cp "$ci_file" "$tmp_dir/ci.yml"; sed -i.bak 's/  host-integration:/  host-integration-renamed:/' "$tmp_dir/ci.yml"; ci_file="$tmp_dir/ci.yml"; if (validate_repository_contract); then fail "renamed required job unexpectedly passed"; fi; ci_file="$root_dir/.github/workflows/ci.yml"
+  # Topology mutations must be rejected even for jobs that older targeted checks
+  # do not mention.  These copies exercise the repository-facing gate.
+  cp "$ci_file" "$tmp_dir/ci.yml"
+  sed -i.bak 's/name: Release manifest SSOT (REL-02)/name: Release manifest SSOT (renamed)/' "$tmp_dir/ci.yml"
+  ci_file="$tmp_dir/ci.yml"; if (validate_repository_contract); then fail "scalar topology rename unexpectedly passed"; fi; ci_file="$root_dir/.github/workflows/ci.yml"
+  cp "$ci_file" "$tmp_dir/ci.yml"
+  printf '\n  unmanifested-topology-job:\n    name: Unmanifested topology job\n    runs-on: ubuntu-24.04\n    steps: []\n' >>"$tmp_dir/ci.yml"
+  ci_file="$tmp_dir/ci.yml"; if (validate_repository_contract); then fail "added topology job unexpectedly passed"; fi; ci_file="$root_dir/.github/workflows/ci.yml"
   cp "$ownership_file" "$tmp_dir/ownership.md"; sed -i.bak 's/npm run e2e:install/npm run e2e-install/g' "$tmp_dir/ownership.md"; ownership_file="$tmp_dir/ownership.md"; if (validate_repository_contract); then fail "missing ownership command unexpectedly passed"; fi
   echo "verify_ci_baseline_contract: self-test ok"
   exit 0
