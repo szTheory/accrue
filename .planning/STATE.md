@@ -4,15 +4,15 @@ milestone: v1.61
 milestone_name: CI Evidence & Critical-Path Hardening
 current_phase: 225
 current_phase_name: required-lane-signal-repair
-status: verifying
+status: executing
 stopped_at: Phase 226 context gathered
-last_updated: "2026-08-11T16:48:27.571Z"
+last_updated: "2026-08-11T18:02:53.457Z"
 last_activity: 2026-08-08
 last_activity_desc: Phase 225 execution resumed (wave continue)
 progress:
   total_phases: 3
   completed_phases: 1
-  total_plans: 3
+  total_plans: 8
   completed_plans: 3
   percent: 33
 ---
@@ -31,7 +31,7 @@ See: `.planning/PROJECT.md` (updated 2026-08-05 after shipping v1.59)
 
 Phase: 225 (required-lane-signal-repair) — EXECUTING
 Plan: 3 of 3
-Status: Phase complete — ready for verification
+Status: Ready to execute
 Last activity: 2026-08-08 — Phase 225 execution resumed (wave continue)
 
 Progress: [██████████] 100%

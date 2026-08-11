@@ -258,19 +258,17 @@ The renderer must print literal `policy`, `proof_state`, counts, SHA, freshness,
 
 | # | Claim | Section | Risk if Wrong |
 |---|-------|---------|---------------|
-| A1 | A 48-hour provider freshness grace is a suitable default for a daily cadence. | Open Questions | It changes stale reporting only; planner must choose/document it. |
+| A1 | A 48-hour provider freshness grace is the selected default for a daily cadence. | Open Questions (RESOLVED) | Resolved under planner discretion; it changes stale reporting only and remains an explicit configuration constant. |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **Provider freshness grace window**
    - What we know: The cadence must be documented and `stale` derived, but its exact grace window is discretionary. [VERIFIED: CONTEXT.md D-11]
-   - What's unclear: The maintainer-approved tolerance for delayed scheduled Actions runs.
-   - Recommendation: Start with a documented 48-hour grace, make it a schema/config constant, and label it `[ASSUMED]` until maintainer confirmation.
+   - Resolution: **RESOLVED — choose a documented 48-hour grace under the agent's discretion.** Implement it as an explicit schema/config constant so a later policy change does not rewrite historical proof state.
 
 2. **Current cohort cardinality by fingerprint**
    - What we know: Recent Actions history contains multiple event classes and successful full runs, including the Phase 225 repair run and Phase 226 baseline branch runs. [VERIFIED: GitHub Actions API]
-   - What's unclear: Whether any exact immutable fingerprint has 20 successful first-attempt full-CI observations in the rolling 90 days.
-   - Recommendation: Have the collector calculate and record exact count/`insufficient sample`; do not infer it from the visible run list. [VERIFIED: CONTEXT.md D-03]
+   - Resolution: **RESOLVED — cardinality is execution-derived.** The collector calculates and records the exact qualifying count for each immutable fingerprint during execution; when fewer than 20 successful first attempts qualify, it records that exact count and `insufficient_sample` rather than inferring cardinality from the visible run list. [VERIFIED: CONTEXT.md D-03]
 
 ## Environment Availability
 
@@ -297,11 +295,11 @@ The renderer must print literal `policy`, `proof_state`, counts, SHA, freshness,
 
 ### Phase Requirements → Test Map
 
-| Req ID | Behavior | Test Type | Automated Command | File Exists? |
-|--------|----------|-----------|-------------------|-------------|
-| BASE-01 | schema, privacy allowlist, cohort exclusion, duration arithmetic, rerun and signature grouping | deterministic unit/fixture | `node scripts/ci/verify_ci_baseline.mjs --fixtures` | ❌ Wave 0 |
-| BASE-02 | every policy/state branch and no `success`→`proved` shortcut | deterministic unit/fixture | `node scripts/ci/verify_provider_proof.mjs --fixtures` | ❌ Wave 0 |
-| OWN-01 | ownership matrix and each stable setup code returns owner/next command | deterministic integration/contract | `bash scripts/ci/verify_ci_setup_diagnostics.sh` | ❌ Wave 0 |
+| Req ID | Behavior | Test Type | Automated Command | Planned Creation |
+|--------|----------|-----------|-------------------|------------------|
+| BASE-01 | schema, privacy allowlist, cohort exclusion, duration arithmetic, rerun and signature grouping | deterministic unit/fixture | `node scripts/ci/verify_ci_baseline.mjs --fixtures` | Plan 01, Wave 1 |
+| BASE-02 | every policy/state branch and no `success`→`proved` shortcut | deterministic unit/fixture | `node scripts/ci/verify_provider_proof.mjs --fixtures` | Plan 03, Wave 1 |
+| OWN-01 | ownership matrix and each stable setup code returns owner/next command | deterministic integration/contract | `bash scripts/ci/verify_ci_setup_diagnostics.sh` | Plan 04, Wave 1 |
 
 ### Sampling Rate
 
@@ -309,11 +307,9 @@ The renderer must print literal `policy`, `proof_state`, counts, SHA, freshness,
 - **Per wave merge:** all three Phase 226 verification commands. [VERIFIED: requirement coverage]
 - **Phase gate:** Full Phase 226 validation green and frozen snapshot inspected before Phase 227 planning. [VERIFIED: CONTEXT.md D-01 through D-07]
 
-### Wave 0 Gaps
+### Automated Reference Coverage
 
-- [ ] `scripts/ci/verify_ci_baseline.mjs` and fixtures — BASE-01
-- [ ] `scripts/ci/verify_provider_proof.mjs` and fixtures — BASE-02
-- [ ] `scripts/ci/verify_ci_setup_diagnostics.sh` — OWN-01
+No Wave 0 plan is required: every task has a concrete automated command at planning time. Plans 01, 03, and 04 create and exercise the three verifier artifacts in Wave 1; later plans reuse them. These are planned files until execution, not artifacts claimed to exist now.
 
 ## Security Domain
 
@@ -353,7 +349,7 @@ The renderer must print literal `policy`, `proof_state`, counts, SHA, freshness,
 
 ### Tertiary (LOW confidence)
 
-- None, except the explicitly logged renderer-escaping and 48-hour-grace assumptions.
+- None, except the explicitly logged renderer-escaping assumption; the 48-hour grace is resolved planner-discretion policy.
 
 ## Metadata
 
