@@ -5,7 +5,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { collectBaseline, cohortFingerprint, summarizeCohorts } from "./collect_ci_baseline.mjs";
-import { renderBaseline } from "./render_ci_baseline.mjs";
+import { deriveStagedPathPercentiles, renderBaseline } from "./render_ci_baseline.mjs";
 
 function fail(message) {
   throw new Error(message);
@@ -38,6 +38,31 @@ function datedRun(base, id, offset, overrides = {}) {
     jobs: base.jobs.map((job, index) => ({ ...job, id: (id * 10) + index, html_url: `https://github.com/acme/accrue/actions/runs/${id}/job/${(id * 10) + index}`, started_at: stamp(index ? 200 : 10), completed_at: stamp(index ? 300 : 190) })),
     ...overrides
   };
+}
+
+function stagedRun(base, id, offset, overrides = {}) {
+  const start = Date.parse(base.created_at) + (offset * 86_400_000);
+  const stamp = (seconds) => new Date(start + (seconds * 1_000)).toISOString();
+  return datedRun(base, id, offset, {
+    jobs: [
+      { id: id * 10 + 1, html_url: `https://github.com/acme/accrue/actions/runs/${id}/job/${id * 10 + 1}`, name: "release-gate", started_at: stamp(10), completed_at: stamp(100), conclusion: "success", runner_image: "ubuntu", needs: [] },
+      { id: id * 10 + 2, html_url: `https://github.com/acme/accrue/actions/runs/${id}/job/${id * 10 + 2}`, name: "host-integration", started_at: stamp(300), completed_at: stamp(600), conclusion: "success", runner_image: "ubuntu", needs: ["release-gate"] },
+      { id: id * 10 + 3, html_url: `https://github.com/acme/accrue/actions/runs/${id}/job/${id * 10 + 3}`, name: "playwright-e2e (1)", started_at: stamp(650), completed_at: stamp(2_050), conclusion: "success", runner_image: "ubuntu", needs: ["host-integration"] },
+      { id: id * 10 + 4, html_url: `https://github.com/acme/accrue/actions/runs/${id}/job/${id * 10 + 4}`, name: "playwright-e2e (2)", started_at: stamp(650), completed_at: stamp(2_110), conclusion: "success", runner_image: "ubuntu", needs: ["host-integration"] }
+    ],
+    ...overrides
+  });
+}
+
+function stagedPathControls(fixture) {
+  const runs = Array.from({ length: 20 }, (_, index) => stagedRun(fixture.successful_run, 700 + index, index));
+  const records = collectBaseline(runs);
+  const staged = deriveStagedPathPercentiles(records);
+  assert.equal(staged.sample_count, 20, "exactly twenty staged spans qualify");
+  assert.equal(staged.p50_ms, 2_100_000, "p50 uses release start through latest Playwright completion");
+  assert.equal(staged.p95_ms, 2_100_000, "p95 uses per-run spans rather than shard sums");
+  assert.equal(staged.conclusion, "confirmed", "33–36 minute staged path is confirmed");
+  assert.match(renderBaseline(records), /confirmed/, "renderer exposes literal staged conclusion");
 }
 
 function cohortControls(fixture) {
@@ -143,6 +168,7 @@ export function verifyFixtures() {
     assert.equal(jobs[1].dag_wait_ms, 10_000, "dependent wait uses latest prerequisite completion");
     rejectsForbiddenFields(fixture);
     cohortControls(fixture);
+    stagedPathControls(fixture);
   } finally {
     fs.rmSync(temp, { recursive: true, force: true });
   }
