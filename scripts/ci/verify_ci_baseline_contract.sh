@@ -55,9 +55,39 @@ reject_sensitive_strings() {
   fi
 }
 
+# Candidate documents are untrusted assertions.  Re-derive each job's policy-owned
+# tuple from the versioned manifest before trusting signatures or aggregates.
+candidate_job_semantics() {
+  local candidate="$1"
+  jq -e --slurpfile policy "$policy_manifest" '
+    def expected_proof($eligible; $lane; $conclusion):
+      if $conclusion == "skipped" then "skipped"
+      elif $lane.policy == "advisory" then "advisory"
+      elif $lane.policy == "conditional" then "not-applicable"
+      elif ($eligible and $lane.required_for_release_proof and $conclusion == "success") then "proved"
+      else "not-applicable"
+      end;
+    all(.runs[];
+      .run.eligible as $eligible |
+      all(.jobs[];
+        . as $job |
+        [$policy[0].lanes[] | select(.match as $match | ($job.name | test($match)))] as $matches |
+        ($matches | length == 1) and
+        ($matches[0] as $lane |
+          ($job.manifest_identity == $lane.identity) and
+          ($job.policy == $lane.policy) and
+          ($job.required_for_release_proof == $lane.required_for_release_proof) and
+          ($job.initial_queue_root == $lane.initial_queue_root) and
+          ($job.staged_critical_chain_order == $lane.staged_critical_chain_order) and
+          ($job.proof_state == expected_proof($eligible; $lane; $job.conclusion))
+        )
+      )
+    )
+  ' "$candidate" >/dev/null || fail "candidate job policy or proof semantics failed: ${candidate#$root_dir/}"
+}
+
 validate_collector_record() {
   local candidate="$1"
-  validate_policy_manifest
   jq -e --slurpfile policy "$policy_manifest" '
     def exact($x): (keys|sort)==$x; def iso: type=="string" and test("^[0-9]{4}-[0-9]{2}-[0-9]{2}T.*Z$"); def num: type=="number" and isfinite and .>=0;
     def step: exact(["completed_at","conclusion","duration_seconds","name","started_at"]) and (.name|type=="string") and (.conclusion|type=="string" or .==null) and (.started_at|iso or .==null) and (.completed_at|iso or .==null) and (.duration_seconds|num or .==null);
@@ -67,6 +97,7 @@ validate_collector_record() {
     def sig: exact(["affected_jobs","category","id","lane_conclusions"]) and (.id|type=="string" and test("^ci-root-v2-[A-Za-z0-9_-]+$")) and (.category=="no-failure" or .=="failed-lane") and (.affected_jobs|type=="array" and .==sort and .==unique) and (.lane_conclusions|type=="array" and .==sort_by(.manifest_identity,.conclusion) and .==unique and all(.[]; exact(["conclusion","manifest_identity"]) and (.manifest_identity|type=="string") and (.conclusion=="failure" or .=="timed_out" or .=="cancelled")));
     exact(["document_type","policy_manifest","privacy","repository","required_check_snapshot","runs","schema_version"]) and .schema_version==2 and .document_type=="ci-baseline-collector-record" and (.repository|type=="string" and test("^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$")) and (.policy_manifest|exact(["schema_version","workflow"]) and .schema_version==$policy[0].schema_version and .workflow==$policy[0].workflow) and (.privacy|exact(["allowlist","artifact_archives_downloaded","env_values_recorded","logs_downloaded","raw_payloads_recorded"]) and .logs_downloaded==false and .artifact_archives_downloaded==false and .env_values_recorded==false and .raw_payloads_recorded==false) and (.required_check_snapshot|exact(["captured_at","classic_checks","classic_response_state","enforcement_state","rules","rules_response_state"])) and (.runs|type=="array" and length>0 and all(.[]; exact(["artifacts","jobs","root_failure_signature","run"]) and (.run|exact(["attempt","completed_at","conclusion","created_at","eligible","event","exclusion_reason","head_sha","id","runner_queue_omission_reason","runner_queue_seconds","staged_critical_chain_omission_reason","staged_critical_chain_seconds","status","url","wall_seconds","workflow"]) and (.eligible|type=="boolean") and (.runner_queue_seconds|type=="number" or .==null) and (.staged_critical_chain_seconds|type=="number" or .==null)) and (.jobs|type=="array" and all(.[]; exact(["cache_state","completed_at","conclusion","duration_seconds","id","initial_queue_root","manifest_identity","name","policy","proof_state","required_for_release_proof","staged_critical_chain_order","started_at","status","steps"]) and (.id|type=="number") and (.initial_queue_root|type=="boolean") and (.required_for_release_proof|type=="boolean") and (.steps|type=="array"))) and (.artifacts|type=="array" and all(.[]; exact(["expired","expires_at","id","name","size_in_bytes"]) and (.id|type=="number"))) and (.root_failure_signature|exact(["affected_jobs","category","id","lane_conclusions"]) and (.lane_conclusions|type=="array"))))
   ' "$candidate" >/dev/null || fail "collector record schema failed: ${candidate#$root_dir/}"
+  candidate_job_semantics "$candidate"
   jq -e '
     def pairs: ([.jobs[]|select(.conclusion=="failure" or .conclusion=="timed_out" or .conclusion=="cancelled")|{manifest_identity,conclusion}]|unique|sort_by(.manifest_identity,.conclusion));
     all(.runs[]; . as $record |
@@ -127,10 +158,11 @@ validate_canonical_cohort() {
     (.required_check_snapshot.captured_at|type=="string" and test("^[0-9]{4}-[0-9]{2}-[0-9]{2}T")) and
     all(.runs[]; (.run.runner_queue_seconds|type=="number" and .>=0) and (.run.staged_critical_chain_seconds|type=="number" and .>0) and (.root_failure_signature.id|test("^ci-root-v2-")))
   ' "$1" >/dev/null || fail "canonical cohort contract failed: ${1#$root_dir/}"
+  candidate_job_semantics "$1"
   reject_sensitive_strings "$1"
   validate_aggregates "$1"
 }
-validate_input() { local candidate="$1"; [ -f "$candidate" ] || fail "missing baseline input: ${candidate#$root_dir/}"; case "$(jq -r '.document_type // "canonical-v1"' "$candidate")" in ci-baseline-collector-record) validate_collector_record "$candidate";; ci-baseline-canonical) validate_canonical_cohort "$candidate";; *) fail "unknown document discriminator";; esac; }
+validate_input() { local candidate="$1"; [ -f "$candidate" ] || fail "missing baseline input: ${candidate#$root_dir/}"; validate_policy_manifest; case "$(jq -r '.document_type // "canonical-v1"' "$candidate")" in ci-baseline-collector-record) validate_collector_record "$candidate";; ci-baseline-canonical) validate_canonical_cohort "$candidate";; *) fail "unknown document discriminator";; esac; }
 
 validate_repository_contract() {
   [ -f "$ci_file" ] && [ -f "$ownership_file" ] || fail "missing workflow or ownership runbook"
