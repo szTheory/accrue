@@ -4,15 +4,15 @@ milestone: v1.61
 milestone_name: CI Evidence & Critical-Path Hardening
 current_phase: 226
 current_phase_name: ci-baseline-proof-semantics
-status: executing
-stopped_at: Completed 226-08-PLAN.md
-last_updated: "2026-08-11T01:13:48.602Z"
+status: planned
+stopped_at: Planned 226-09-PLAN.md
+last_updated: "2026-08-11T01:39:30Z"
 last_activity: 2026-08-10
-last_activity_desc: Phase 226 execution started
+last_activity_desc: Phase 226 gap closure planning complete — 1 plan ready
 progress:
   total_phases: 3
   completed_phases: 2
-  total_plans: 11
+  total_plans: 12
   completed_plans: 11
   percent: 67
 ---
@@ -29,12 +29,12 @@ See: `.planning/PROJECT.md` (updated 2026-08-05 after shipping v1.59)
 
 ## Current Position
 
-Phase: 226 (ci-baseline-proof-semantics) — EXECUTING
-Plan: 2 of 8
+Phase: 226 (ci-baseline-proof-semantics) — PLANNED
+Plan: 8 of 9
 Status: Ready to execute
-Last activity: 2026-08-10 — Phase 226 execution started
+Last activity: 2026-08-10 — Phase 226 gap closure planning complete
 
-Progress: [██████████] 100%
+Progress: [█████████░] 89%
 
 ## v1.61 Roadmap
 
