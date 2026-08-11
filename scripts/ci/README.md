@@ -1,5 +1,27 @@
 # scripts/ci — contributor map
 
+## Phase 226 CI evidence: read this first
+
+Phase 226 keeps one durable baseline and two small, privacy-safe runtime records. Read every incident in this order: **fact**, **literal state**, **owner**, **next command**, then the linked evidence artifact or log. A green job conclusion is a raw fact; it is not provider proof by itself.
+
+| Evidence | What it answers | Command |
+| --- | --- | --- |
+| [CI baseline](../../.planning/phases/226-ci-baseline-proof-semantics/226-CI-BASELINE.md) and [NDJSON record](../../.planning/phases/226-ci-baseline-proof-semantics/226-CI-BASELINE.ndjson) | Which fixed workflow cohort was measured, where time went, and which critical-path claim is comparable | `node scripts/ci/verify_ci_baseline.mjs --fixtures` |
+| `live-stripe-proof` Actions artifact | Whether the selected Stripe test-mode suite produced proof for its own SHA | `node scripts/ci/verify_provider_proof.mjs --fixtures` |
+| `accrue-host-ci-setup-facts` Actions artifact | Whether the host or CI owns the setup failure and the narrow repair command | `bash scripts/ci/verify_ci_setup_diagnostics.sh` |
+
+Run the complete contract before changing any of these surfaces:
+
+```bash
+node scripts/ci/verify_ci_baseline.mjs --fixtures && \
+node scripts/ci/verify_ci_baseline.mjs --records .planning/phases/226-ci-baseline-proof-semantics/226-CI-BASELINE.ndjson --rendered .planning/phases/226-ci-baseline-proof-semantics/226-CI-BASELINE.md && \
+node scripts/ci/verify_provider_proof.mjs --fixtures && \
+bash scripts/ci/verify_ci_setup_diagnostics.sh && \
+bash scripts/ci/verify_phase225_required_lane_evidence.sh
+```
+
+Provider triage is literal: `proved` means the selected suite executed, selected tests, passed, and wrote its manifest. `misconfigured` means configuration, fixtures, or selection was absent; `failed` means selected assertions failed; `blocked` means the runner or upstream could not complete; `skipped` is an intentional bypass with a reason; `non_run` means a PR or push has no provider proof for that SHA. Start a local repair with `cd accrue && mix test.live`. Setup codes and their owners are listed in the [host setup matrix](../../examples/accrue_host/README.md#phase-226-setup-ownership).
+
 This directory hosts merge-adjacent bash gates and host-app checks. Use it as the first stop when CI fails on documentation or VERIFY-01 contracts.
 
 ### Triage: Phase 225 required-lane incidents

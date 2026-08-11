@@ -308,6 +308,22 @@ Keep cancellation and other secondary proofs here instead of in the main story.
 
 ## Proof and verification
 
+### Phase 226 setup ownership
+
+The host owns declared Node and Playwright versions, lockfiles, fixtures, database/seed, server lifecycle, test semantics, and the canonical proof path. CI owns its Linux runner, Node provisioning, browser/OS dependencies, cache transport/observation, timing, and retained failure artifacts. Both use the same proof command: `cd examples/accrue_host && mix verify.full` (the CI wrapper is `bash scripts/ci/accrue_host_uat.sh`). Read diagnostics as fact, state, owner, next command, then evidence; do not infer an owner from color or a generic browser failure.
+
+| Code | Owner | Exact next command | Evidence |
+| --- | --- | --- | --- |
+| `node_missing_or_version` | host | `Install Node 22 with your version manager, then run mix verify.full.` | local host preflight stderr |
+| `npm_lock_or_registry` | host | `cd examples/accrue_host && npm ci` | local host preflight stderr |
+| `playwright_binary_or_revision` | host | `cd examples/accrue_host && npm run e2e:install` | local host preflight stderr |
+| `linux_browser_dependency` | CI | `Review the host-integration CI provisioning step.` | GitHub Actions host-integration setup log |
+| `browser_launch` | host | `cd examples/accrue_host && npm run e2e` | Playwright report, trace, screenshot, and host browser log |
+| `port_or_server_readiness` | host | `cd examples/accrue_host && mix verify.full` | host browser log |
+| `fixture_or_database` | host | `cd examples/accrue_host && mix verify.full` | local host preflight stderr |
+
+CI retains its `accrue-host-ci-setup-facts` artifact for a redacted machine record. Current duplicate npm/browser provisioning is deliberately measured, not removed; Phase 227 owns any optimization decision.
+
 Use the smallest proof that answers your question:
 
 - **Explore:** `make build` (first run) / `make up` (daily) runs the demo app and

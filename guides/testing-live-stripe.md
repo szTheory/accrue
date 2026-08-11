@@ -23,6 +23,21 @@ be triggered on demand via the Actions tab.
 
 This lane uses Stripe test mode and should be treated as `provider-parity checks`, not as the canonical local demo or the required release lane. The `live-stripe` GitHub Actions job is **not** the PR merge-blocking lane; that contract is documented under [Proof and verification](examples/accrue_host/README.md#proof-and-verification) in the host demo README. On pull requests, merge-blocking proof is job id `host-integration`; `live-stripe` stays advisory (manual/cron only). For the finalized `gateway subscription core` contract, Fake remains the merge-blocking SSOT and provider-backed Stripe and Braintree proof stays explicitly advisory. This lane only spot-checks real Stripe behavior against that bounded slice. Checkout and billing portal already ship as first-party shared-facade surfaces; Stripe proves the upstream hosted side here, while the mounted-local Braintree side stays covered by the canonical matrix, package guides, and Fake-backed host proof.
 
+## Phase 226 provider proof state
+
+The policy, raw GitHub job conclusion, and proof state are independent facts. The job runs daily at 06:00 UTC and on manual dispatch; its documented freshness allowance is a **48-hour planner-discretion grace** after the daily cadence. A fresh earlier record never proves the current SHA unless `latest_proved_sha` equals that SHA.
+
+| State | Literal meaning | Next action |
+| --- | --- | --- |
+| `proved` | The selected scheduled/manual suite had complete test-mode configuration and fixtures, selected at least one test, passed assertions, and wrote the redacted manifest. | Retain the `live-stripe-proof` artifact. |
+| `misconfigured` | A selected scheduled/manual run lacked credentials or fixtures, did not write a valid manifest, or selected zero tests. This fails the periodic lane. | Configure test-mode secrets/fixtures, then run `cd accrue && mix test.live`. |
+| `failed` | Selected provider assertions ran and failed. | Run `cd accrue && mix test.live`; inspect the linked artifact without copying provider payloads. |
+| `blocked` | Cancellation, timeout, or an upstream inability prevented a completed provider result. | Re-run the selected job after the upstream condition is resolved. |
+| `skipped` | An explicitly selected execution was intentionally bypassed with a recorded reason. It is not proof. | Record the reason and schedule the next selected run. |
+| `non_run` | A push or pull request did not select this scheduled/manual lane. It provides no provider proof for that SHA. | Use the Fake-backed required host proof; dispatch live Stripe only when provider parity is needed. |
+
+`policy: required` labels the periodic canary's enforcement decision; it never promotes a raw `success`, `skipped`, or a Fake result to `proved`. The deterministic Fake lane remains contributor-facing merge proof. Required release evidence remains Floor, Primary, and Primary plus OpenTelemetry; Sigra is advisory. Do not use this guide to weaken those boundaries.
+
 ## What the live-Stripe suite covers
 
 See `accrue/test/live_stripe/`. Current modules:
