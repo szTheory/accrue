@@ -5,7 +5,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { collectBaseline, cohortFingerprint, summarizeCohorts } from "./collect_ci_baseline.mjs";
-import { renderBaseline } from "./render_ci_baseline.mjs";
+import { deriveStagedPathPercentiles, renderBaseline } from "./render_ci_baseline.mjs";
 
 function fail(message) {
   throw new Error(message);
@@ -122,6 +122,44 @@ function cohortControls(fixture) {
   assert.throws(() => collectBaseline([{ ...fixture.successful_run, jobs: [{ ...fixture.successful_run.jobs[0], name: "!!!" }] }]), /job.name/);
 }
 
+function stagedRun(base, id, offset, overrides = {}) {
+  const stamp = (seconds) => new Date(Date.parse(base.created_at) + (offset * 86_400_000) + (seconds * 1_000)).toISOString();
+  const run = datedRun(base, id, offset, {
+    updated_at: stamp(2_100),
+    workflow_path: ".github/workflows/ci.yml@critical-path",
+    jobs: [
+      { id: (id * 10) + 1, html_url: `https://github.com/acme/accrue/actions/runs/${id}/job/${(id * 10) + 1}`, name: "release-gate", started_at: stamp(10), completed_at: stamp(300), conclusion: "success", runner_image: "ubuntu-24.04", needs: [] },
+      { id: (id * 10) + 2, html_url: `https://github.com/acme/accrue/actions/runs/${id}/job/${(id * 10) + 2}`, name: "host-integration", started_at: stamp(360), completed_at: stamp(900), conclusion: "success", runner_image: "ubuntu-24.04", needs: ["release-gate"] },
+      { id: (id * 10) + 3, html_url: `https://github.com/acme/accrue/actions/runs/${id}/job/${(id * 10) + 3}`, name: "playwright-e2e (shard 1)", started_at: stamp(960), completed_at: stamp(1_800), conclusion: "success", runner_image: "ubuntu-24.04", needs: ["host-integration"] },
+      { id: (id * 10) + 4, html_url: `https://github.com/acme/accrue/actions/runs/${id}/job/${(id * 10) + 4}`, name: "playwright-e2e (shard 2)", started_at: stamp(970), completed_at: stamp(2_050), conclusion: "success", runner_image: "ubuntu-24.04", needs: ["host-integration"] }
+    ]
+  });
+  return { ...run, ...overrides };
+}
+
+function stagedPathControls(fixture) {
+  const runs = Array.from({ length: 20 }, (_, index) => stagedRun(fixture.successful_run, 700 + index, index));
+  const records = [...collectBaseline(runs), ...summarizeCohorts(runs)];
+  const staged = deriveStagedPathPercentiles(records);
+  assert.equal(staged.sample_count, 20, "one ready cohort contributes exactly 20 staged observations");
+  assert.equal(staged.p50_ms, 2_040_000, "p50 measures per-run release start to latest Playwright completion");
+  assert.equal(staged.p95_ms, 2_040_000, "p95 uses the same per-run span population");
+  assert.equal(staged.conclusion, "confirmed", "33–36 minute staged path is confirmed");
+  assert.match(renderBaseline(records), /confirmed/, "renderer reports the cohort conclusion");
+
+  const contraryRuns = runs.map((run) => ({ ...run, jobs: run.jobs.map((job) => job.name.includes("shard 2") ? { ...job, completed_at: new Date(Date.parse(job.completed_at) + 300_000).toISOString() } : job) }));
+  const contrary = deriveStagedPathPercentiles([...collectBaseline(contraryRuns), ...summarizeCohorts(contraryRuns)]);
+  assert.equal(contrary.conclusion, "contrary_measured_result", "out-of-range staged path reports a measured contrary result");
+
+  const missingHost = runs.map((run) => ({ ...run, jobs: run.jobs.filter((job) => job.name !== "host-integration") }));
+  assert.throws(() => deriveStagedPathPercentiles([...collectBaseline(missingHost), ...summarizeCohorts(missingHost)]), /missing host-integration stage/, "missing host stage is rejected at the staged-path boundary");
+  const badOrder = runs.map((run) => ({ ...run, jobs: run.jobs.map((job) => job.name.includes("playwright") ? { ...job, started_at: new Date(Date.parse(run.jobs[1].completed_at) - 1_000).toISOString() } : job) }));
+  assert.throws(() => deriveStagedPathPercentiles([...collectBaseline(badOrder), ...summarizeCohorts(badOrder)]), /Playwright stage must start after host-integration/, "stage ordering is rejected");
+  const rerun = [...runs.slice(0, 19), stagedRun(fixture.successful_run, 720, 20, { original_run_id: 700, run_attempt: 2, head_sha: runs[0].head_sha })];
+  assert.throws(() => deriveStagedPathPercentiles([...collectBaseline(rerun), ...summarizeCohorts(rerun)]), /exactly 20 successful first-attempt runs/, "rerun inflation cannot satisfy the stage cohort");
+  assert.throws(() => deriveStagedPathPercentiles([...collectBaseline(runs.slice(0, 19)), ...summarizeCohorts(runs.slice(0, 19))]), /ready cohort/, "nineteen observations cannot satisfy the stage cohort");
+}
+
 export function verifyFixtures() {
   const fixture = JSON.parse(fs.readFileSync(fixturePath(), "utf8"));
   for (const scenario of ["successful_first_attempt", "failure", "cancellation", "rerun", "provider_non_run", "provider_misconfigured", "repeated_matrix_signature", "privacy_rejection", "arithmetic", "insufficient_sample"]) {
@@ -143,6 +181,7 @@ export function verifyFixtures() {
     assert.equal(jobs[1].dag_wait_ms, 10_000, "dependent wait uses latest prerequisite completion");
     rejectsForbiddenFields(fixture);
     cohortControls(fixture);
+    stagedPathControls(fixture);
   } finally {
     fs.rmSync(temp, { recursive: true, force: true });
   }
