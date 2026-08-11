@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "cases": [
+    {
+      "name": "scheduled-success-zero-selected-is-misconfigured",
+      "input": {"trigger": "schedule", "sha": "a1", "policy": "required", "raw_job_conclusion": "success", "configuration_complete": true, "manifest": {"schema_version": 1, "selected_count": 0, "passed_count": 0, "skipped_count": 0, "failed_count": 0, "started_at": "2026-08-11T06:00:00Z", "finished_at": "2026-08-11T06:01:00Z"}},
+      "expect": {"proof_state": "misconfigured", "reason_code": "zero_selected_tests"}
+    },
+    {
+      "name": "push-is-explicit-non-run",
+      "input": {"trigger": "push", "sha": "a2", "policy": "required", "raw_job_conclusion": "skipped", "reason": "provider lane is only selected on schedule or dispatch"},
+      "expect": {"proof_state": "non_run", "reason_code": "trigger_not_selected"}
+    },
+    {
+      "name": "required-proved",
+      "input": {"trigger": "workflow_dispatch", "sha": "a3", "policy": "required", "raw_job_conclusion": "success", "configuration_complete": true, "manifest": {"schema_version": 1, "selected_count": 2, "passed_count": 2, "skipped_count": 0, "failed_count": 0, "started_at": "2026-08-11T06:00:00Z", "finished_at": "2026-08-11T06:01:00Z"}, "latest_proved_sha": "older", "latest_proved_at": "2026-08-10T06:00:00Z", "now": "2026-08-11T06:00:00Z"},
+      "expect": {"proof_state": "proved", "reason_code": "complete_provider_evidence"}
+    },
+    {
+      "name": "advisory-executed-failure-is-failed",
+      "input": {"trigger": "schedule", "sha": "a4", "policy": "advisory", "raw_job_conclusion": "failure", "configuration_complete": true, "manifest": {"schema_version": 1, "selected_count": 2, "passed_count": 1, "skipped_count": 0, "failed_count": 1, "started_at": "2026-08-11T06:00:00Z", "finished_at": "2026-08-11T06:01:00Z"}},
+      "expect": {"proof_state": "failed", "reason_code": "selected_assertions_failed"}
+    },
+    {
+      "name": "cancelled-is-blocked",
+      "input": {"trigger": "schedule", "sha": "a5", "policy": "required", "raw_job_conclusion": "cancelled", "configuration_complete": true, "manifest": {"schema_version": 1, "selected_count": 1, "passed_count": 1, "skipped_count": 0, "failed_count": 0, "started_at": "2026-08-11T06:00:00Z", "finished_at": "2026-08-11T06:01:00Z"}},
+      "expect": {"proof_state": "blocked", "reason_code": "job_cancelled"}
+    },
+    {
+      "name": "intentional-bypass-is-skipped",
+      "input": {"trigger": "schedule", "sha": "a6", "policy": "advisory", "raw_job_conclusion": "skipped", "intentional_bypass": true, "reason": "maintenance window"},
+      "expect": {"proof_state": "skipped", "reason_code": "intentional_bypass"}
+    }
+  ]
+}
