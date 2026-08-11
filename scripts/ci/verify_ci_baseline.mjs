@@ -53,6 +53,24 @@ function cohortControls(fixture) {
   assert.equal(ready[0].p50_ms, 300000);
   assert.equal(ready[0].p95_ms, 300000);
 
+  const nonRunPopulation = (event, startId) => Array.from(
+    { length: 20 },
+    (_, index) => datedRun(fixture.successful_run, startId + index, index, { event, provider_state: "non_run" })
+  );
+  const nonRunPush = nonRunPopulation("push", 230);
+  const nonRunPullRequest = nonRunPopulation("pull_request", 260);
+  const nonRunCohorts = summarizeCohorts([...nonRunPush, ...nonRunPullRequest]);
+  assert.equal(nonRunCohorts.length, 2, "push and pull_request remain separate timing cohorts");
+  for (const cohort of nonRunCohorts) {
+    assert.equal(cohort.sample_count, 20, "non_run full-CI cohort has the locked sample count");
+    assert.equal(cohort.sample_status, "ready", "non_run full-CI cohort is ready");
+    assert.notEqual(cohort.p50_ms, null, "non_run full-CI cohort emits p50");
+    assert.notEqual(cohort.p95_ms, null, "non_run full-CI cohort emits p95");
+  }
+  for (const run of [...nonRunPush, ...nonRunPullRequest]) {
+    assert.equal(collectBaseline([run])[0].provider_state, "non_run", "timing eligibility does not manufacture provider proof");
+  }
+
   const original = datedRun(fixture.successful_run, 301, 21, { original_run_id: 300, run_attempt: 1, conclusion: "failure" });
   const retry = datedRun(fixture.successful_run, 302, 22, { original_run_id: 300, run_attempt: 2, head_sha: original.head_sha });
   const rerun = summarizeCohorts([...twenty, original, retry])[0];
