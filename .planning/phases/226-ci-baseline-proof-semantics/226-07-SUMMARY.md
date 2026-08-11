@@ -19,7 +19,7 @@ key-files:
   modified: [scripts/ci/render_ci_baseline.mjs, scripts/ci/verify_ci_baseline.mjs]
 key-decisions:
   - "Measure release-gate start through the latest Playwright shard completion; never sum parallel shards."
-  - "Split live recollection into Plan 226-08 after direct history inspection disproved the exact-20-fingerprint availability assumption."
+  - "Split live recollection into Plan 226-12 after direct history inspection disproved the exact-20-fingerprint availability assumption."
 patterns-established:
   - "Critical-path evidence: derive spans per successful first-attempt run and render literal p50/p95 plus confirmed or contrary_measured_result."
 requirements-completed: []
@@ -39,14 +39,14 @@ status: complete
 
 # Phase 226 Plan 07: Staged Critical-Path Derivation Summary
 
-**Per-run release-to-latest-Playwright percentile derivation is deterministic and tested; live recollection moved to Plan 226-08 because direct Actions history invalidated the exact-fingerprint readiness assumption.**
+**Per-run release-to-latest-Playwright percentile derivation is deterministic and tested; live recollection moved to Plan 226-12 because direct Actions history invalidated the exact-fingerprint readiness assumption.**
 
 ## Performance
 
 - **Duration:** 12 min
 - **Started:** 2026-08-11T21:58:00Z
 - **Completed:** 2026-08-11T22:10:00Z
-- **Tasks:** 1/1 implemented; the original live-evidence task was superseded by Plan 226-08
+- **Tasks:** 1/1 implemented; the original live-evidence task was superseded by Plan 226-12
 - **Files modified:** 2
 
 ## Accomplishments
@@ -75,7 +75,7 @@ status: complete
 
 - **Found during:** Original Task 2 live recollection
 - **Issue:** The plan assumed one exact fingerprint could supply 20 successes. Live history instead contains 28 complete eligible paths across 12 strata, with a maximum stratum size of four.
-- **Resolution:** Preserve the completed, tested derivation work in this summary and transfer recollection plus compatible-sample semantics to Plan 226-08.
+- **Resolution:** Preserve the completed, tested derivation work in this summary and transfer recollection plus compatible-sample semantics to Plan 226-12.
 - **Impact:** No evidence was fabricated or broadened silently; the changed comparability rule is explicit and independently testable.
 
 ## Issues Encountered
@@ -98,7 +98,7 @@ None.
 
 ## Next Phase Readiness
 
-Plan 226-08 can revise the compatibility predicate, recollect the already-sufficient live history, freeze byte-reproducible artifacts, and run the complete Phase 226 contract.
+Plan 226-12 can revise the compatibility predicate, recollect the already-sufficient live history, freeze byte-reproducible artifacts, and run the complete Phase 226 contract.
 
 ## Self-Check: PASSED
 
