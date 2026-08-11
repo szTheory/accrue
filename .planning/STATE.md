@@ -4,17 +4,17 @@ milestone: v1.61
 milestone_name: CI Evidence & Critical-Path Hardening
 current_phase: 226
 current_phase_name: ci-baseline-proof-semantics
-status: executing
-stopped_at: Completed 226-02-PLAN.md
-last_updated: "2026-08-11T18:48:16.208Z"
+status: verifying
+stopped_at: Completed 226-05-PLAN.md
+last_updated: "2026-08-11T18:55:18.816Z"
 last_activity: 2026-08-11
 last_activity_desc: Phase 226 execution started
 progress:
   total_phases: 3
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 8
-  completed_plans: 6
-  percent: 33
+  completed_plans: 8
+  percent: 67
 ---
 
 # Project State
@@ -31,10 +31,10 @@ See: `.planning/PROJECT.md` (updated 2026-08-05 after shipping v1.59)
 
 Phase: 226 (ci-baseline-proof-semantics) — EXECUTING
 Plan: 5 of 5
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-08-11 — Phase 226 execution started
 
-Progress: [████████░░] 75%
+Progress: [██████████] 100%
 
 ## v1.61 Roadmap
 
@@ -463,6 +463,7 @@ Coverage: 22/22 v1.51 requirements mapped (each REQ-ID → exactly one phase). D
 | Phase 226 P03 | 12 minutes | 2 tasks | 7 files |
 | Phase 226 P04 | 15 minutes | 2 tasks | 5 files |
 | Phase 226 P02 | ~35 minutes | 2 tasks | 6 files |
+| Phase 226-ci-baseline-proof-semantics P05 | 14min | 2 tasks | 8 files |
 
 ## Accumulated Context
 
@@ -915,6 +916,8 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - [Phase ?]: Setup ownership, repair commands, and evidence locations are fixed registry values rather than caller-provided text.
 - [Phase ?]: CI retains linux_browser_dependency ownership; the host script only classifies host proof boundaries.
 - [Phase ?]: Freeze a 90-day Actions snapshot with exact fingerprint cohorts; report insufficient_sample rather than broaden the timing cohort.
+- [Phase ?]: Provider proof finalizes independently from raw job conclusion and fails closed on missing configuration or manifests.
+- [Phase ?]: Host setup facts remain additive inside host-integration; duplicate provisioning and CI topology are preserved for Phase 227.
 
 ### Pending Todos
 
@@ -1067,8 +1070,8 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 
 ## Session Continuity
 
-Last session: 2026-08-11T18:48:16.198Z
-Stopped at: Completed 226-02-PLAN.md
+Last session: 2026-08-11T18:55:18.807Z
+Stopped at: Completed 226-05-PLAN.md
 Resume file: None
 
 ## Operator Next Steps

@@ -92,11 +92,11 @@ Plans:
 
 **Wave 2** *(blocked on 226-01)*
 
-- [ ] 226-02-PLAN.md — Collect and publish the frozen comparable-run critical-path before-state.
+- [x] 226-02-PLAN.md — Collect and publish the frozen comparable-run critical-path before-state.
 
 **Wave 3** *(blocked on Waves 1–2)*
 
-- [ ] 226-05-PLAN.md — Wire always-run CI summaries/artifacts, reconcile maintainer docs, and close validation.
+- [x] 226-05-PLAN.md — Wire always-run CI summaries/artifacts, reconcile maintainer docs, and close validation.
 
 ### Phase 227: Measured Critical-Path Improvement
 
