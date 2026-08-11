@@ -99,8 +99,19 @@ assert_browser_boundary_contract() {
   done
 }
 
+assert_workflow_setup_contract() {
+  local workflow host_region
+  workflow="$(cat "$root_dir/.github/workflows/ci.yml")"
+  host_region="$(printf '%s\n' "$workflow" | sed -n '/^  host-integration:/,/^  playwright-e2e:/p')"
+  printf '%s\n' "$host_region" | grep -Fq 'id: host_setup_summary' || fail "host setup summary step id missing"
+  printf '%s\n' "$host_region" | grep -Fq 'id: host_setup_artifact' || fail "host setup artifact step id missing"
+  printf '%s\n' "$host_region" | grep -Fq 'ACCRUE_CI_SETUP_FACTS: $RUNNER_TEMP/' || fail "setup facts must be rooted under RUNNER_TEMP"
+  printf '%s\n' "$host_region" | grep -Fq 'accrue-host-ci-setup-facts' || fail "setup artifact name drifted"
+}
+
 assert_registry_contract
 assert_node_preflight_fixture
 assert_privacy_rejection
 assert_browser_boundary_contract
+assert_workflow_setup_contract
 echo "verify_ci_setup_diagnostics: ok"

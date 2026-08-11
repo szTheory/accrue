@@ -14,6 +14,7 @@ import { renderProviderSummary } from "./render_provider_summary.mjs";
 
 const root = path.resolve(path.dirname(new URL(import.meta.url).pathname), "../..");
 const fixturesPath = path.join(root, ".planning/phases/226-ci-baseline-proof-semantics/fixtures/provider-proof-cases.json");
+const workflowPath = path.join(root, ".github/workflows/ci.yml");
 
 function rejects(fn, pattern) {
   assert.throws(fn, pattern);
@@ -32,7 +33,64 @@ function validManifest(overrides = {}) {
   };
 }
 
+function jobBody(workflow, jobId) {
+  const marker = `  ${jobId}:`;
+  const start = workflow.indexOf(marker);
+  assert.notEqual(start, -1, `missing stable job id: ${jobId}`);
+  const next = workflow.indexOf("\n  ", start + marker.length);
+  return workflow.slice(start, next === -1 ? workflow.length : next);
+}
+
+function stepRegion(job, stepId) {
+  const marker = `id: ${stepId}`;
+  const start = job.indexOf(marker);
+  assert.notEqual(start, -1, `missing required step id: ${stepId}`);
+  const next = job.indexOf("\n      - ", start + marker.length);
+  return job.slice(start, next === -1 ? job.length : next);
+}
+
+function assertWorkflowContract(workflow) {
+  const permissions = workflow.match(/^permissions:\n((?:  [a-z-]+: [a-z]+\n)+)/m)?.[1];
+  assert.equal(permissions, "  actions: read\n  checks: read\n  contents: read\n", "top-level permissions must remain exactly read-only");
+  assert.doesNotMatch(workflow, /^\s+(?:[a-z-]+): write(?:\s|$)/m, "workflow must not request write permissions");
+  for (const jobId of ["host-integration", "playwright-e2e", "required", "live-stripe"]) {
+    jobBody(workflow, jobId);
+  }
+
+  const provider = jobBody(workflow, "live-stripe");
+  const host = jobBody(workflow, "host-integration");
+  for (const stepId of ["provider_preflight", "live_stripe_suite", "provider_proof_finalize", "provider_proof_summary", "provider_proof_artifact"]) {
+    const region = stepRegion(provider, stepId);
+    if (stepId !== "provider_preflight" && stepId !== "live_stripe_suite") assert.match(region, /if: always\(\)/, `${stepId} must always run`);
+  }
+  for (const stepId of ["host_setup_summary", "host_setup_artifact"]) {
+    assert.match(stepRegion(host, stepId), /if: always\(\)/, `${stepId} must always run`);
+  }
+  assert.match(stepRegion(provider, "live_stripe_suite"), /ACCRUE_PROVIDER_MANIFEST/, "suite must receive the provider manifest path");
+  assert.match(provider, /ACCRUE_PROVIDER_PROOF_RECORD: \$RUNNER_TEMP\//, "provider proof record must use RUNNER_TEMP");
+  assert.match(host, /ACCRUE_CI_SETUP_FACTS: \$RUNNER_TEMP\//, "setup facts must use RUNNER_TEMP");
+  assert.match(provider, /name: live-stripe-proof/, "provider artifact name drifted");
+  assert.match(host, /name: accrue-host-ci-setup-facts/, "setup artifact name drifted");
+
+  for (const [name, region] of [
+    ["provider", provider],
+    ["host setup", host],
+  ]) {
+    assert.doesNotMatch(region, /(?:GH_TOKEN|GITHUB_TOKEN|[A-Z0-9_]*PAT[A-Z0-9_]*)\s*:/i, `${name} evidence steps must not bind write-capable tokens`);
+    assert.doesNotMatch(region, /\b(?:git push|gh api\s+.*--method\s+(?:POST|PUT|PATCH|DELETE)|curl\s+.*(?:-X|--request)\s*(?:POST|PUT|PATCH|DELETE))\b/i, `${name} evidence steps must not mutate repository or API state`);
+  }
+}
+
 function runFixtures() {
+  const workflow = fs.readFileSync(workflowPath, "utf8");
+  assertWorkflowContract(workflow);
+  for (const [name, mutate] of [
+    ["write permission", (text) => text.replace("contents: read", "contents: write")],
+    ["provider token", (text) => text.replace("id: provider_preflight", "id: provider_preflight\n        env:\n          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}")],
+    ["mutation command", (text) => text.replace("id: provider_proof_summary", "id: provider_proof_summary\n        run: git push")],
+  ]) {
+    rejects(() => assertWorkflowContract(mutate(workflow)), new RegExp(name === "write permission" ? "permissions|write" : name === "provider token" ? "token" : "mutate"));
+  }
   const { cases } = JSON.parse(fs.readFileSync(fixturesPath, "utf8"));
   for (const fixture of cases) {
     const record = classifyProviderProof(fixture.input);
