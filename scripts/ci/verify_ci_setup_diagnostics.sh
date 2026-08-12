@@ -126,20 +126,23 @@ esac
 EOF
   chmod +x "$temp_dir/bin/mix"
 
-  cat >"$temp_dir/bin/pg_isready" <<'EOF'
+cat >"$temp_dir/bin/pg_isready" <<'EOF'
 #!/usr/bin/env bash
-exit 47
+if [ "${ACCRUE_TEST_PG_ISREADY_MODE:-}" = "initial_failure" ]; then
+  exit 47
+fi
+exit 0
 EOF
   chmod +x "$temp_dir/bin/pg_isready"
 
   facts="$temp_dir/initial-readiness.ndjson"
   mix_calls="$temp_dir/initial-readiness-mix-calls.log"
   set +e
-  output="$(PATH="$temp_dir/bin:$PATH" ACCRUE_CI_SETUP_FACTS="$facts" ACCRUE_TEST_MIX_CALLS="$mix_calls" PGHOST='db.internal.example' PGPORT='6543' PGUSER='billing_user' PGPASSWORD='private-password' PGDATABASE='billing_database' bash "$wrapper_script" 2>&1)"
+  output="$(PATH="$temp_dir/bin:$PATH" ACCRUE_CI_SETUP_FACTS="$facts" ACCRUE_TEST_MIX_CALLS="$mix_calls" ACCRUE_TEST_PG_ISREADY_MODE=initial_failure PGHOST='db.internal.example' PGPORT='6543' PGUSER='billing_user' PGPASSWORD='private-password' PGDATABASE='billing_database' bash "$wrapper_script" 2>&1)"
   command_status=$?
   set -e
   [ "$command_status" -eq 47 ] || fail "initial readiness fixture must preserve pg_isready status"
-  [ "$(grep -Fc '\"code\":\"fixture_or_database\"' "$facts")" -eq 1 ] || fail "initial readiness fixture must emit exactly one database fact"
+  [ "$(grep -Fc '"code":"fixture_or_database"' "$facts")" -eq 1 ] || fail "initial readiness fixture must emit exactly one database fact"
   ! grep -Fq '"code":"host_gate_failure"' "$facts" || fail "initial readiness fixture must not add aggregate classification"
   printf '%s\n' "$output" | grep -Fx 'SETUP_CODE=fixture_or_database' >/dev/null || fail "initial readiness fixture must render database setup code"
   printf '%s\n' "$output" | grep -Fx 'OWNER=host' >/dev/null || fail "initial readiness fixture must render host ownership"

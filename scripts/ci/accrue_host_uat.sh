@@ -22,16 +22,29 @@ host_dir="$repo_root/examples/accrue_host"
 port="${ACCRUE_HOST_PORT:-4100}"
 browser_port="${ACCRUE_HOST_BROWSER_PORT:-4101}"
 
+# Make the fact sink available to the initial readiness diagnostic, before any
+# host-local delegation or later wrapper setup runs.
+export ACCRUE_CI_SETUP_FACTS="${ACCRUE_CI_SETUP_FACTS:-}"
+
 echo "=== Accrue host UAT — repo root: $repo_root ==="
 echo "[host-integration] entry=accrue_host_uat delegating_to=mix_verify.full" >&2
 
 if command -v pg_isready >/dev/null 2>&1; then
   echo "--- checking Postgres availability ---"
+  set +e
   pg_isready \
     -h "${PGHOST:-localhost}" \
     -p "${PGPORT:-5432}" \
     -U "${PGUSER:-postgres}" \
     ${PGDATABASE:+-d "$PGDATABASE"}
+  readiness_status=$?
+  set -e
+  if [ "$readiness_status" -ne 0 ]; then
+    "$repo_root/scripts/ci/ci_setup_diagnostic.sh" emit fixture_or_database --result failure --duration-ms 0 --node-identity postgres-readiness --playwright-identity not-started --lockfile-identity not-applicable --browser-class not-started --cache-state not-applicable
+    "$repo_root/scripts/ci/ci_setup_diagnostic.sh" render fixture_or_database
+    echo "FAILED_GATE=host-integration" >&2
+    exit "$readiness_status"
+  fi
 fi
 
 export ACCRUE_HOST_PORT="$port"
@@ -40,7 +53,6 @@ export ACCRUE_HOST_SKIP_DEV_BOOT="${ACCRUE_HOST_SKIP_DEV_BOOT:-}"
 export ACCRUE_HOST_SKIP_BROWSER="${ACCRUE_HOST_SKIP_BROWSER:-}"
 export ACCRUE_HOST_ALLOW_GENERATED_DRIFT="${ACCRUE_HOST_ALLOW_GENERATED_DRIFT:-}"
 export ACCRUE_HOST_BROWSER_LOG="${ACCRUE_HOST_BROWSER_LOG:-}"
-export ACCRUE_CI_SETUP_FACTS="${ACCRUE_CI_SETUP_FACTS:-}"
 
 setup_fact_count() {
   local facts="${ACCRUE_CI_SETUP_FACTS:-}"
