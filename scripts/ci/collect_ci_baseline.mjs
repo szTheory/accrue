@@ -9,6 +9,8 @@ import { fileURLToPath } from "node:url";
 const SCHEMA_VERSION = 1;
 const CONCLUSIONS = new Set(["success", "failure", "cancelled", "skipped", "neutral", "timed_out", "action_required", "stale", "unknown"]);
 const PROVIDER_STATES = new Set(["proved", "failed", "misconfigured", "blocked", "skipped", "non_run"]);
+const DOCS_DISPLAY_NAME = "Docs and bash contracts (shift-left)";
+const DOCS_PREREQUISITE = "docs-and-bash-contracts-shift-left";
 const RUN_INPUT_FIELDS = new Set(["id", "html_url", "head_sha", "created_at", "run_started_at", "updated_at", "event", "head_branch", "conclusion", "run_attempt", "original_run_id", "workflow_path", "workflow_revision", "provider_state", "jobs"]);
 const JOB_INPUT_FIELDS = new Set(["id", "html_url", "name", "started_at", "completed_at", "conclusion", "runner_image", "needs", "steps", "cache", "setup_costs", "failure_message"]);
 const SCHEMA_PATH = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../.planning/phases/226-ci-baseline-proof-semantics/schema-v1.json");
@@ -33,6 +35,7 @@ function immutableUrl(value, label) {
 }
 function normalizedIdentity(value, label) {
   if (typeof value !== "string" || value.length === 0 || value.length > 400) fail(`${label} must be a bounded string`);
+  if (value === DOCS_DISPLAY_NAME) return DOCS_PREREQUISITE;
   const normalized = value.toLowerCase().replace(/\([^)]*\)/g, "").replace(/[^a-z0-9._/-]+/g, "-").replace(/^-+|-+$/g, "");
   if (!normalized) fail(`${label} has no stable identity`);
   return normalized;
@@ -232,11 +235,11 @@ function ghJsonAsync(endpoint, paginate = false) {
 function workflowNeeds(name) {
   const normalized = normalizedIdentity(name, "job.name");
   // Dependencies are matched against normalized Actions display names, never YAML job IDs.
-  if (normalized.startsWith("host-integration")) return ["admin-drift-and-docs", "docs-contracts-shift-left"];
+  if (normalized.startsWith("host-integration")) return ["admin-drift-and-docs", DOCS_PREREQUISITE];
   if (normalized.startsWith("playwright-e2e")) return ["host-integration"];
   if (normalized.startsWith("admin-drift-and-docs")) return ["release-gate"];
   if (normalized.startsWith("admin-ui-ratchet-guardrails")) return ["admin-hardening-guardrails", "admin-phase200-guardrails"];
-  if (normalized.startsWith("host-docker-boot-smoke")) return ["docs-contracts-shift-left"];
+  if (normalized.startsWith("host-docker-boot-smoke")) return [DOCS_PREREQUISITE];
   return [];
 }
 function setupCosts(steps = []) {
