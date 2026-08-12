@@ -1,7 +1,7 @@
 ---
 phase: 226
 slug: ci-baseline-proof-semantics
-status: complete
+status: in_progress
 nyquist_compliant: true
 wave_0_complete: true
 created: 2026-08-11
@@ -56,6 +56,8 @@ created: 2026-08-11
 | 226-12-02 | 12 | 6 | BASE-01, BASE-02, OWN-01 | T-226-27, T-226-28, T-226-29 | The 90-day read-only Actions snapshot has 20 compatible complete paths, explicit stratum sensitivity, byte-identical rendering, and unchanged inherited proof contracts | live-record contract | `node --check scripts/ci/collect_ci_baseline.mjs && node --check scripts/ci/render_ci_baseline.mjs && node --check scripts/ci/verify_ci_baseline.mjs && node --check scripts/ci/verify_provider_proof.mjs && node scripts/ci/verify_ci_baseline.mjs --fixtures && node scripts/ci/verify_ci_baseline.mjs --records .planning/phases/226-ci-baseline-proof-semantics/226-CI-BASELINE.ndjson --rendered .planning/phases/226-ci-baseline-proof-semantics/226-CI-BASELINE.md --require-critical-path && node scripts/ci/verify_provider_proof.mjs --fixtures && (cd accrue && mix test test/accrue/live_proof_formatter_test.exs --warnings-as-errors) && bash scripts/ci/verify_ci_setup_diagnostics.sh && bash scripts/ci/verify_phase225_required_lane_evidence.sh` | Executed 2026-08-11 after temporary collection, dual rendering, and atomic evidence replacement | ✅ green |
 | 226-13-01 | 13 | 7 | OWN-01 | T-226-32, T-226-33 | A delegated host gate preserves a narrower setup fact or emits one honest `host_gate_failure` fallback while retaining its status and compatibility marker | shell contract | `bash -n scripts/ci/ci_setup_diagnostic.sh && bash -n scripts/ci/accrue_host_uat.sh && bash -n scripts/ci/verify_ci_setup_diagnostics.sh && bash scripts/ci/verify_ci_setup_diagnostics.sh` | Executed 2026-08-11 against inner-fact, aggregate-fallback, and success fixtures | ✅ green |
 | 226-13-02 | 13 | 7 | BASE-01, BASE-02, OWN-01 | T-226-30, T-226-31, T-226-32, T-226-33 | Collector fail-closed controls and literal host-gate diagnostics preserve the frozen report and inherited provider, formatter, and required-lane contracts | phase contract | `bash scripts/ci/verify_ci_setup_diagnostics.sh && node scripts/ci/verify_ci_baseline.mjs --fixtures && node scripts/ci/verify_ci_baseline.mjs --records .planning/phases/226-ci-baseline-proof-semantics/226-CI-BASELINE.ndjson --rendered .planning/phases/226-ci-baseline-proof-semantics/226-CI-BASELINE.md --require-critical-path && node scripts/ci/verify_provider_proof.mjs --fixtures && (cd accrue && mix test test/accrue/live_proof_formatter_test.exs --warnings-as-errors) && bash scripts/ci/verify_phase225_required_lane_evidence.sh` | Executed 2026-08-11 after Plan 13 gap closure | ✅ green |
+| 226-14-01 | 14 | 8 | BASE-01 | T-226-35 | Current Actions display identities traverse the production live collector into durable records while unresolved or temporally impossible prerequisites fail closed | integration/fixture contract | `node --check scripts/ci/collect_ci_baseline.mjs && node --check scripts/ci/verify_ci_baseline.mjs && node scripts/ci/verify_ci_baseline.mjs --fixtures && node scripts/ci/verify_ci_baseline.mjs --records .planning/phases/226-ci-baseline-proof-semantics/226-CI-BASELINE.ndjson --rendered .planning/phases/226-ci-baseline-proof-semantics/226-CI-BASELINE.md --require-critical-path` | Planned by 226-14; replace with executed evidence after Task 1 passes | ⬜ pending |
+| 226-14-02 | 14 | 8 | BASE-01, BASE-02, OWN-01 | T-226-36, T-226-37, T-226-38 | A current manifest-backed proved record is fresh for its own SHA, weaker states stay literal, and static workflow verification preserves the existing finalization path | phase contract | `node --check scripts/ci/provider_proof.mjs && node --check scripts/ci/verify_provider_proof.mjs && node scripts/ci/verify_provider_proof.mjs --fixtures && node scripts/ci/verify_ci_baseline.mjs --fixtures && node scripts/ci/verify_ci_baseline.mjs --records .planning/phases/226-ci-baseline-proof-semantics/226-CI-BASELINE.ndjson --rendered .planning/phases/226-ci-baseline-proof-semantics/226-CI-BASELINE.md --require-critical-path && (cd accrue && mix test test/accrue/live_proof_formatter_test.exs --warnings-as-errors) && bash scripts/ci/verify_ci_setup_diagnostics.sh && bash scripts/ci/verify_phase225_required_lane_evidence.sh` | Planned by 226-14; replace with executed evidence after Task 2 passes | ⬜ pending |
 
 *Status: ⬜ pending · ✅ green · ❌ red · ⚠️ flaky*
 
@@ -79,7 +81,7 @@ There is no separate Wave 0 plan. Every task already has a concrete executable `
 
 ## Validation Sign-Off
 
-- [x] All sixteen tasks have a concrete `<automated>` verify command
+- [x] All eighteen tasks have a concrete `<automated>` verify command
 - [x] Sampling continuity: no 3 consecutive tasks without automated verify
 - [x] No `MISSING` automated references exist at planning time (`wave_0_complete: true`)
 - [x] BASE-01 recorded assertions pass against checked-in compatible-path evidence and deterministic fixtures; BASE-02 provider fixtures pass with cadence, grace, SHA, and state transitions
@@ -87,4 +89,4 @@ There is no separate Wave 0 plan. Every task already has a concrete executable `
 - [x] Feedback latency < 120s
 - [x] `nyquist_compliant: true` set in frontmatter for the complete planning-time verification map
 
-**Approval:** approved 2026-08-11 after all 16 task rows, the compatible-path/stratum-disclosure assertion, and the full Phase 226 command completed with zero behavior-unverified rows. Plan 12 is the collision-free successor to the retired Plan 08 alias.
+**Approval:** existing evidence approved 2026-08-11 for the 16 completed task rows. Final Phase 226 approval remains pending until `226-14-01` and `226-14-02` are green, all 18 task rows have executed, and the full Phase 226 command completes with zero behavior-unverified rows. Plan 12 is the collision-free successor to the retired Plan 08 alias.

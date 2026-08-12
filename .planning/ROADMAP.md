@@ -137,7 +137,7 @@ Plans:
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 225. Required-Lane Signal Repair | 0/3 | Not started | - |
-| 226. CI Baseline & Proof Semantics | 0/5 | Not started | - |
+| 226. CI Baseline & Proof Semantics | 9/10 | In progress | - |
 | 227. Measured Critical-Path Improvement | 0/TBD | Not started | - |
 
 <details>
