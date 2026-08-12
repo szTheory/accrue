@@ -37,6 +37,8 @@ v1.49 **Realistic Demo App & Adoption Evidence** shipped on **2026-06-02**. The 
 
 **Phase 223 complete (2026-08-06):** the reusable iOS-compatible SwiftPM offline client now preserves canonical ES256 proof verification, authenticated atomic cache recovery, durable observed-time rollback protection, bounded compact-proof/JSON admission, host-owned reconnect and display seams, and deterministic package/iOS/reference evidence. IOS-01 through IOS-03 verified 28/28 must-haves; Phase 224 owns the Crosswake host-command bridge seam. Advisory code review recorded a follow-up cached-read versus concurrent signed-denial race in `223-REVIEW.md`; it must be resolved before relying on concurrent-cache behavior beyond the verified scenario coverage.
 
+**Phase 226 complete (2026-08-12):** maintainers now have a durable, privacy-safe comparable-run baseline with repository-bound GitHub Actions evidence, explicit provider proof states, and owner-first host/browser setup diagnostics. BASE-01, BASE-02, and OWN-01 verified 5/5 must-haves; Phase 227 owns the measured critical-path improvement.
+
 ## Next Milestone Goals
 
 ## Current Milestone: v1.61 CI Evidence & Critical-Path Hardening
@@ -651,8 +653,15 @@ The v1.50→v1.54 arc (Admin UI Foundation → Depth Pass → Brand System → D
 ### Active
 
 - [ ] Restore deterministic, trustworthy required CI evidence before optimizing the pipeline.
-- [ ] Measure CI timing, cache, provider-state, rerun, and failure-signature baselines before changing gate shape or cache policy.
-- [ ] Reduce one measured CI critical-path cost while retaining required proof and clear host/browser setup ownership.
+- [ ] Reduce one measured CI critical-path cost while retaining required proof.
+
+### Validated v1.61 (Phase 226 complete 2026-08-12)
+
+CI baseline and proof semantics — 3/3 requirements satisfied in Phase 226.
+
+- ✓ **BASE-01** — A durable privacy-safe comparable-run baseline records timing, reruns, cache/setup cost, provider state, root-failure signatures, and repository-bound immutable evidence.
+- ✓ **BASE-02** — Required, skipped, advisory, failed, stale, and non-run provider states remain visibly distinct and cannot be promoted into release proof.
+- ✓ **OWN-01** — Host and CI setup ownership is explicit, with stable diagnostics for Node, browser, Playwright, database, and fixture failure modes.
 
 ### Validated v1.59 (Phase 220 complete 2026-08-05)
 
@@ -839,4 +848,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-08-08 after opening v1.61 CI Evidence & Critical-Path Hardening.*
+*Last updated: 2026-08-12 after completing Phase 226 CI Baseline & Proof Semantics.*
