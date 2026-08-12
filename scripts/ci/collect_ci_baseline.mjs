@@ -377,7 +377,7 @@ export async function liveRuns(repo, workflow, windowDays, { fetchPages = fetchG
     const attemptJobs = (await fetchPages(`/repos/${repo}/actions/runs/${run.id}/attempts/${attempt}/jobs?per_page=100`)).flatMap((page) => page.jobs || []).map((job) => {
       if (job.run_attempt != null && job.run_attempt !== attempt) fail("job.run_attempt must match run.run_attempt");
       return job;
-    }).filter((job) => typeof job.name === "string" && /[A-Za-z0-9]/.test(job.name) && job.started_at && job.completed_at && Date.parse(job.completed_at) >= Date.parse(job.started_at));
+    }).filter((job) => job.conclusion !== "skipped" && typeof job.name === "string" && /[A-Za-z0-9]/.test(job.name) && job.started_at && job.completed_at && Date.parse(job.completed_at) >= Date.parse(job.started_at));
     const present = new Set(attemptJobs.map((job) => normalizedIdentity(job.name, "job.name")));
     const jobs = attemptJobs.map((job) => ({
       id: job.id, html_url: job.html_url, name: job.name, started_at: job.started_at, completed_at: job.completed_at,
