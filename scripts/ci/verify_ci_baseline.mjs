@@ -256,12 +256,19 @@ function historicalRevisionAndIdentityControls() {
     "Playwright E2E shard 1/3",
     "Playwright E2E shard 2/3",
     "Playwright E2E shard 3/3",
+    "playwright-e2e-shard-matrix.shard-/-strategy.job-total",
     "Release gate (Floor; elixir=1.19.0 otp=28.0 sigra=off opentelemetry=off)",
     "Release gate (Primary dev target; elixir=1.19.5 otp=28.0 sigra=off opentelemetry=off)",
     "Release gate (Primary dev target; elixir=1.19.5 otp=28.0 sigra=on opentelemetry=off) [advisory]",
     "Release gate (Primary dev target; elixir=1.19.5 otp=28.0 sigra=off opentelemetry=on)"
   ]) {
     assert.doesNotThrow(() => workflowRunnerImage(name), `declared matrix identity resolves: ${name}`);
+  }
+  for (const name of [
+    "playwright-e2e-shard-matrix.shard-/-strategy.job-total-attacker",
+    "playwright-e2e-shard-matrix.shard-1-strategy.job-total-3"
+  ]) {
+    assert.throws(() => workflowRunnerImage(name), /unresolved workflow runner contract/, `non-enumerated matrix identity remains rejected: ${name}`);
   }
 }
 
