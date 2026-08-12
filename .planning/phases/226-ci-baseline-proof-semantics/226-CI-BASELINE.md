@@ -2,7 +2,7 @@
 
 ## Current fact
 
-**State:** confirmed. **Owner:** CI maintainers. **Next command:** `node scripts/ci/verify_ci_baseline.mjs --records .planning/phases/226-ci-baseline-proof-semantics/226-CI-BASELINE.ndjson --rendered .planning/phases/226-ci-baseline-proof-semantics/226-CI-BASELINE.md`. Evidence is the immutable Actions links below.
+**State:** confirmed. **Owner:** CI maintainers. **Next command:** `node scripts/ci/verify_ci_baseline.mjs --records .planning/phases/226-ci-baseline-proof-semantics/226-CI-BASELINE.ndjson --rendered .planning/phases/226-ci-baseline-proof-semantics/226-CI-BASELINE.md --expected-repository szTheory/accrue`. Evidence is the immutable Actions links below.
 
 Privacy-safe, schema-v1 evidence. Raw logs, actors, branches, secrets, payloads, and artifact contents are not persisted.
 
@@ -3547,7 +3547,7 @@ Failed, cancelled, skipped, and rerun attempts remain reliability evidence and n
 ```sh
 gh auth status
 node scripts/ci/collect_ci_baseline.mjs --repo szTheory/accrue --workflow ci.yml --window-days 90 --sample-size 20 --out .planning/phases/226-ci-baseline-proof-semantics/226-CI-BASELINE.ndjson
-node scripts/ci/render_ci_baseline.mjs --input .planning/phases/226-ci-baseline-proof-semantics/226-CI-BASELINE.ndjson --out /tmp/226-CI-BASELINE.md
+node scripts/ci/render_ci_baseline.mjs --input .planning/phases/226-ci-baseline-proof-semantics/226-CI-BASELINE.ndjson --out /tmp/226-CI-BASELINE.md --expected-repository szTheory/accrue
 cmp /tmp/226-CI-BASELINE.md .planning/phases/226-ci-baseline-proof-semantics/226-CI-BASELINE.md
-node scripts/ci/verify_ci_baseline.mjs --fixtures
+node scripts/ci/verify_ci_baseline.mjs --fixtures --expected-repository acme/accrue
 ```

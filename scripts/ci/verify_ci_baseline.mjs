@@ -5,15 +5,27 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
-import { collectBaseline, cohortFingerprint, liveRuns, summarizeCohorts, unresolvedPrerequisites, workflowRunnerImage } from "./collect_ci_baseline.mjs";
+import { collectBaseline as collectBaselineWithContext, cohortFingerprint, createRepositoryValidationContext, liveRuns, normalizeJob, normalizeRun, summarizeCohorts as summarizeCohortsWithContext, unresolvedPrerequisites, validateRecord, workflowRunnerImage } from "./collect_ci_baseline.mjs";
 import { deriveStagedPathPercentiles, renderBaseline } from "./render_ci_baseline.mjs";
+
+const fixtureValidationContext = (runs = []) => {
+  const match = runs[0]?.html_url?.match(/^https:\/\/github\.com\/([^/]+\/[^/]+)\/actions\/runs\//);
+  return createRepositoryValidationContext({ expectedRepository: match?.[1] || "acme/accrue" });
+};
+// Existing regression helpers model the fixed acme/accrue fixture.  The exported
+// production APIs remain context-required; these adapters keep historical tests
+// concise while every CLI path receives caller-supplied context.
+const collectBaseline = (runs, validationContext = fixtureValidationContext(runs)) => collectBaselineWithContext(runs, validationContext);
+const summarizeCohorts = (runs, validationContext = fixtureValidationContext(runs), options = {}) => summarizeCohortsWithContext(runs, validationContext, options);
+const derive = (records, validationContext = fixtureValidationContext()) => deriveStagedPathPercentiles(records, validationContext);
+const render = (records, validationContext = fixtureValidationContext()) => renderBaseline(records, validationContext);
 
 function fail(message) {
   throw new Error(message);
 }
 
-function verifyCriticalPath(records, rendered) {
-  const staged = deriveStagedPathPercentiles(records);
+function verifyCriticalPath(records, rendered, validationContext) {
+  const staged = deriveStagedPathPercentiles(records, validationContext);
   assert.equal(staged.sample_count, 20, "critical path requires exactly 20 complete staged observations");
   assert.notEqual(staged.p50_ms, null, "critical path p50 must be present");
   assert.notEqual(staged.p95_ms, null, "critical path p95 must be present");
@@ -178,46 +190,46 @@ function stagedRun(base, id, offset, overrides = {}) {
   return { ...run, ...overrides };
 }
 
-function stagedPathControls(fixture) {
+function stagedPathControls(fixture, validationContext) {
   const runs = Array.from({ length: 20 }, (_, index) => stagedRun(fixture.successful_run, 700 + index, index));
   const records = [...collectBaseline(runs), ...summarizeCohorts(runs)];
-  const staged = deriveStagedPathPercentiles(records);
+  const staged = deriveStagedPathPercentiles(records, validationContext);
   assert.equal(staged.sample_count, 20, "one ready cohort contributes exactly 20 staged observations");
   assert.equal(staged.p50_ms, 2_040_000, "p50 measures per-run release start to latest Playwright completion");
   assert.equal(staged.p95_ms, 2_040_000, "p95 uses the same per-run span population");
   assert.equal(staged.conclusion, "confirmed", "33–36 minute staged path is confirmed");
-  assert.match(renderBaseline(records), /confirmed/, "renderer reports the cohort conclusion");
+  assert.match(renderBaseline(records, validationContext), /confirmed/, "renderer reports the cohort conclusion");
 
   const contraryRuns = runs.map((run) => ({ ...run, jobs: run.jobs.map((job) => job.name.includes("shard 2") ? { ...job, completed_at: new Date(Date.parse(job.completed_at) + 300_000).toISOString() } : job) }));
-  const contrary = deriveStagedPathPercentiles([...collectBaseline(contraryRuns), ...summarizeCohorts(contraryRuns)]);
+  const contrary = deriveStagedPathPercentiles([...collectBaseline(contraryRuns, validationContext), ...summarizeCohorts(contraryRuns, validationContext)], validationContext);
   assert.equal(contrary.conclusion, "contrary_measured_result", "out-of-range staged path reports a measured contrary result");
 
   const missingHost = runs.map((run) => ({ ...run, jobs: run.jobs.filter((job) => job.name !== "host-integration") }));
-  assert.throws(() => deriveStagedPathPercentiles([...collectBaseline(missingHost), ...summarizeCohorts(missingHost)]), /unresolved prerequisite host-integration|missing host-integration stage/, "missing host stage is rejected before staged-path arithmetic");
+  assert.throws(() => deriveStagedPathPercentiles([...collectBaseline(missingHost, validationContext), ...summarizeCohorts(missingHost, validationContext)], validationContext), /unresolved prerequisite host-integration|missing host-integration stage/, "missing host stage is rejected before staged-path arithmetic");
   const badOrderRecords = records.map((record) => record.kind === "job" && record.stable_identity === "playwright-e2e" ? { ...record, started_at: new Date(Date.parse(record.started_at) - 200_000).toISOString(), duration_ms: record.duration_ms + 200_000 } : record);
-  assert.throws(() => deriveStagedPathPercentiles(badOrderRecords), /Playwright stage must start after host-integration/, "stage ordering is rejected at the staged-path boundary");
+  assert.throws(() => deriveStagedPathPercentiles(badOrderRecords, validationContext), /Playwright stage must start after host-integration/, "stage ordering is rejected at the staged-path boundary");
   const rerun = [...runs.slice(0, 19), stagedRun(fixture.successful_run, 720, 20, { original_run_id: 700, run_attempt: 2, head_sha: runs[0].head_sha })];
-  assert.throws(() => deriveStagedPathPercentiles([...collectBaseline(rerun), ...summarizeCohorts(rerun)]), /20 compatible complete paths/, "rerun inflation cannot satisfy the stage cohort");
-  assert.throws(() => deriveStagedPathPercentiles([...collectBaseline(runs.slice(0, 19)), ...summarizeCohorts(runs.slice(0, 19))]), /20 compatible complete paths/, "nineteen observations cannot satisfy the stage cohort");
+  assert.throws(() => deriveStagedPathPercentiles([...collectBaseline(rerun, validationContext), ...summarizeCohorts(rerun, validationContext)], validationContext), /20 compatible complete paths/, "rerun inflation cannot satisfy the stage cohort");
+  assert.throws(() => deriveStagedPathPercentiles([...collectBaseline(runs.slice(0, 19), validationContext), ...summarizeCohorts(runs.slice(0, 19), validationContext)], validationContext), /20 compatible complete paths/, "nineteen observations cannot satisfy the stage cohort");
 
   const multiFingerprintRuns = runs.map((run, index) => ({
     ...run,
     workflow_revision: `critical-path-${index % 4}`
   }));
   const multiFingerprintRecords = [...collectBaseline(multiFingerprintRuns), ...summarizeCohorts(multiFingerprintRuns)];
-  const compatible = deriveStagedPathPercentiles(multiFingerprintRecords);
+  const compatible = deriveStagedPathPercentiles(multiFingerprintRecords, validationContext);
   assert.equal(compatible.sample_count, 20, "latest compatible complete paths span fingerprints without weakening the sample size");
   assert.equal(compatible.fingerprint_distribution.length, 4, "fingerprint distribution retains every observed topology stratum");
   assert.deepEqual(compatible.fingerprint_distribution.map((stratum) => stratum.sample_count), [5, 5, 5, 5], "fingerprint sensitivity is deterministic");
   assert.equal(compatible.fingerprint_distribution.reduce((total, stratum) => total + stratum.sample_count, 0), 20, "strata sum to the selected population");
-  const compatibleMarkdown = renderBaseline(multiFingerprintRecords);
+  const compatibleMarkdown = renderBaseline(multiFingerprintRecords, validationContext);
   assert.match(compatibleMarkdown, /Fingerprint strata/, "compatible-path report labels fingerprint distribution");
   assert.match(compatibleMarkdown, /Sensitivity/, "compatible-path report labels per-stratum sensitivity");
 
   const duplicateIdentity = multiFingerprintRuns.map((run, index) => index === 19 ? { ...run, original_run_id: multiFingerprintRuns[0].id, head_sha: multiFingerprintRuns[0].head_sha } : run);
-  assert.throws(() => deriveStagedPathPercentiles([...collectBaseline(duplicateIdentity), ...summarizeCohorts(duplicateIdentity)]), /20 unique successful first-attempt/, "duplicate original-run/SHA identity cannot fill the compatible population");
+  assert.throws(() => deriveStagedPathPercentiles([...collectBaseline(duplicateIdentity, validationContext), ...summarizeCohorts(duplicateIdentity, validationContext)], validationContext), /20 unique successful first-attempt/, "duplicate original-run/SHA identity cannot fill the compatible population");
   const scheduledCompatible = multiFingerprintRuns.map((run, index) => index === 19 ? { ...run, event: "schedule" } : run);
-  assert.throws(() => deriveStagedPathPercentiles([...collectBaseline(scheduledCompatible), ...summarizeCohorts(scheduledCompatible)]), /20 compatible complete paths/, "schedule/provider-only runs cannot fill the compatible population");
+  assert.throws(() => deriveStagedPathPercentiles([...collectBaseline(scheduledCompatible, validationContext), ...summarizeCohorts(scheduledCompatible, validationContext)], validationContext), /20 compatible complete paths/, "schedule/provider-only runs cannot fill the compatible population");
 }
 
 function historicalRevisionAndIdentityControls() {
@@ -496,18 +508,20 @@ async function liveDisplayIdentityControls() {
   assert.ok(unresolvedPrerequisites(futureScheduledRatchet).some((message) => message.endsWith(" admin-hardening-guardrails")), "future scheduled ratchet runs remain fail-closed for the historical hardening prerequisite");
 }
 
-export async function verifyFixtures() {
+export async function verifyFixtures(validationContext) {
+  if (!validationContext) fail("--expected-repository is required");
+  if (validationContext.expectedRepository !== "acme/accrue") fail("fixture snapshot.repository must match expectedRepository");
   const fixture = JSON.parse(fs.readFileSync(fixturePath(), "utf8"));
   for (const scenario of ["successful_first_attempt", "failure", "cancellation", "rerun", "provider_non_run", "provider_misconfigured", "repeated_matrix_signature", "privacy_rejection", "arithmetic", "insufficient_sample"]) {
     assert.ok(fixture.scenarios.includes(scenario), `fixture inventory includes ${scenario}`);
   }
   const temp = fs.mkdtempSync(path.join(os.tmpdir(), "accrue-ci-baseline-"));
   try {
-    const records = collectBaseline([fixture.successful_run]);
+    const records = collectBaseline([fixture.successful_run], validationContext);
     assert.equal(records.length, 3, "successful fixture emits run plus two jobs");
     const ndjsonPath = path.join(temp, "baseline.ndjson");
     fs.writeFileSync(ndjsonPath, `${records.map((record) => JSON.stringify(record)).join("\n")}\n`);
-    const markdown = renderBaseline(records);
+    const markdown = renderBaseline(records, validationContext);
     assert.match(markdown, /Comparable timing/, "renderer includes timing table");
     assert.doesNotMatch(markdown, /unsafe-branch-name/, "renderer never receives raw branch name");
     const jobs = records.filter((record) => record.kind === "job");
@@ -519,14 +533,22 @@ export async function verifyFixtures() {
     const forgedInput = path.join(temp, "forged.ndjson");
     const forgedOutput = path.join(temp, "forged.md");
     fs.writeFileSync(forgedInput, `${JSON.stringify(forged)}\n`);
-    const forgedRender = spawnSync(process.execPath, [path.resolve("scripts/ci/render_ci_baseline.mjs"), "--input", forgedInput, "--out", forgedOutput], { encoding: "utf8" });
+    const snapshot = { schema_version: 1, kind: "snapshot", snapshot_generated_at: "2026-08-11T00:00:00Z", window_start: "2026-08-10T00:00:00Z", window_end: "2026-08-11T00:00:00Z", repository: "acme/accrue", workflow: "ci.yml", sample_target: 20 };
+    fs.writeFileSync(forgedInput, `${JSON.stringify(snapshot)}\n${JSON.stringify(forged)}\n`);
+    const forgedRender = spawnSync(process.execPath, [path.resolve("scripts/ci/render_ci_baseline.mjs"), "--input", forgedInput, "--out", forgedOutput, "--expected-repository", "acme/accrue"], { encoding: "utf8" });
     assert.notEqual(forgedRender.status, 0, "production renderer rejects forged NDJSON before output");
     assert.ok(!fs.existsSync(forgedOutput), "forged renderer invocation leaves no output");
-    rejectsForbiddenFields(fixture);
-    cohortControls(fixture);
-    stagedPathControls(fixture);
-    historicalRevisionAndIdentityControls();
-    await liveDisplayIdentityControls();
+    const foreign = { ...records[0], run_url: "https://github.com/attacker/forged/actions/runs/42" };
+    const foreignInput = path.join(temp, "foreign.ndjson"); const foreignOutput = path.join(temp, "foreign.md");
+    fs.writeFileSync(foreignInput, `${JSON.stringify(snapshot)}\n${JSON.stringify(foreign)}\n`);
+    const foreignRender = spawnSync(process.execPath, [path.resolve("scripts/ci/render_ci_baseline.mjs"), "--input", foreignInput, "--out", foreignOutput, "--expected-repository", "acme/accrue"], { encoding: "utf8" });
+    assert.notEqual(foreignRender.status, 0, "production renderer rejects foreign repository evidence");
+    assert.ok(!fs.existsSync(foreignOutput), "foreign renderer invocation leaves no output");
+    rejectsForbiddenFields(fixture, validationContext);
+    cohortControls(fixture, validationContext);
+    stagedPathControls(fixture, validationContext);
+    historicalRevisionAndIdentityControls(validationContext);
+    await liveDisplayIdentityControls(validationContext);
   } finally {
     fs.rmSync(temp, { recursive: true, force: true });
   }
@@ -537,21 +559,24 @@ async function main() {
   const recordsIndex = args.indexOf("--records");
   const renderedIndex = args.indexOf("--rendered");
   const requireCriticalPath = args.includes("--require-critical-path");
-  if (args.includes("--fixtures")) await verifyFixtures();
+  const expectedRepository = args[args.indexOf("--expected-repository") + 1];
+  if (!expectedRepository) fail("--expected-repository is required");
+  const validationContext = createRepositoryValidationContext({ expectedRepository });
+  if (args.includes("--fixtures")) await verifyFixtures(validationContext);
   if (recordsIndex !== -1) {
     const source = args[recordsIndex + 1];
     if (!source) fail("--records requires an NDJSON path");
     const records = fs.readFileSync(source, "utf8").trim().split("\n").filter(Boolean).map((line) => JSON.parse(line));
-    const expected = renderBaseline(records);
+    const expected = renderBaseline(records, validationContext);
     if (renderedIndex !== -1) {
       const rendered = args[renderedIndex + 1];
       if (!rendered) fail("--rendered requires a Markdown path");
       assert.equal(fs.readFileSync(rendered, "utf8"), expected, "rendered Markdown must be byte-reproducible");
     }
-    if (requireCriticalPath) verifyCriticalPath(records, expected);
+    if (requireCriticalPath) verifyCriticalPath(records, expected, validationContext);
   }
   if (requireCriticalPath && recordsIndex === -1) fail("--require-critical-path requires --records");
-  if (!args.includes("--fixtures") && recordsIndex === -1) fail("usage: verify_ci_baseline.mjs --fixtures | --records records.ndjson [--rendered baseline.md] [--require-critical-path]");
+  if (!args.includes("--fixtures") && recordsIndex === -1) fail("usage: verify_ci_baseline.mjs --fixtures | --records records.ndjson [--rendered baseline.md] [--require-critical-path] --expected-repository owner/repository");
   console.log("ci baseline fixtures: PASS");
 }
 

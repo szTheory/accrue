@@ -6,15 +6,15 @@ Phase 226 keeps one durable baseline and two small, privacy-safe runtime records
 
 | Evidence | What it answers | Command |
 | --- | --- | --- |
-| [CI baseline](../../.planning/phases/226-ci-baseline-proof-semantics/226-CI-BASELINE.md) and [NDJSON record](../../.planning/phases/226-ci-baseline-proof-semantics/226-CI-BASELINE.ndjson) | Which fixed workflow cohort was measured, where time went, and which critical-path claim is comparable | `node scripts/ci/verify_ci_baseline.mjs --fixtures` |
+| [CI baseline](../../.planning/phases/226-ci-baseline-proof-semantics/226-CI-BASELINE.md) and [NDJSON record](../../.planning/phases/226-ci-baseline-proof-semantics/226-CI-BASELINE.ndjson) | Which fixed workflow cohort was measured, where time went, and which critical-path claim is comparable | `node scripts/ci/verify_ci_baseline.mjs --fixtures --expected-repository acme/accrue` |
 | `live-stripe-proof` Actions artifact | Whether the selected Stripe test-mode suite produced proof for its own SHA | `node scripts/ci/verify_provider_proof.mjs --fixtures` |
 | `accrue-host-ci-setup-facts` Actions artifact | Whether the host or CI owns the setup failure and the narrow repair command | `bash scripts/ci/verify_ci_setup_diagnostics.sh` |
 
 Run the complete contract before changing any of these surfaces:
 
 ```bash
-node scripts/ci/verify_ci_baseline.mjs --fixtures && \
-node scripts/ci/verify_ci_baseline.mjs --records .planning/phases/226-ci-baseline-proof-semantics/226-CI-BASELINE.ndjson --rendered .planning/phases/226-ci-baseline-proof-semantics/226-CI-BASELINE.md && \
+node scripts/ci/verify_ci_baseline.mjs --fixtures --expected-repository acme/accrue && \
+node scripts/ci/verify_ci_baseline.mjs --records .planning/phases/226-ci-baseline-proof-semantics/226-CI-BASELINE.ndjson --rendered .planning/phases/226-ci-baseline-proof-semantics/226-CI-BASELINE.md --expected-repository szTheory/accrue && \
 node scripts/ci/verify_provider_proof.mjs --fixtures && \
 bash scripts/ci/verify_ci_setup_diagnostics.sh && \
 bash scripts/ci/verify_phase225_required_lane_evidence.sh

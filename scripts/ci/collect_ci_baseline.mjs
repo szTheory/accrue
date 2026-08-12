@@ -17,6 +17,7 @@ const WORKFLOW_RUNNER_PATH = path.resolve(path.dirname(fileURLToPath(import.meta
 const RUN_INPUT_FIELDS = new Set(["id", "html_url", "head_sha", "created_at", "run_started_at", "updated_at", "event", "head_branch", "conclusion", "run_attempt", "original_run_id", "workflow_path", "workflow_revision", "provider_state", "jobs"]);
 const JOB_INPUT_FIELDS = new Set(["id", "html_url", "name", "started_at", "completed_at", "conclusion", "runner_image", "needs", "steps", "cache", "setup_costs", "failure_message"]);
 const SCHEMA_PATH = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../.planning/phases/226-ci-baseline-proof-semantics/schema-v1.json");
+const REPOSITORY_CONTEXT = Symbol("repository-validation-context");
 
 function fail(message) { throw new Error(message); }
 function hash(value) { return crypto.createHash("sha256").update(value).digest("hex").slice(0, 16); }
@@ -34,8 +35,19 @@ function timestamp(value, label) {
   if (new Date(ms).toISOString() !== canonical) fail(`${label} must be an ISO-8601 UTC timestamp`);
   return ms;
 }
-function immutableUrl(value, label, expectedRunId = null, expectedJobId = null) {
+export function createRepositoryValidationContext({ expectedRepository } = {}) {
+  if (typeof expectedRepository !== "string" || !/^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/.test(expectedRepository)) fail("expectedRepository must be an owner/repository string");
+  return Object.freeze({ expectedRepository: String(expectedRepository), [REPOSITORY_CONTEXT]: true });
+}
+function requireValidationContext(validationContext) {
+  if (!validationContext || validationContext[REPOSITORY_CONTEXT] !== true || typeof validationContext.expectedRepository !== "string" || !Object.isFrozen(validationContext)) fail("validationContext must be created by createRepositoryValidationContext");
+  return validationContext;
+}
+function immutableUrl(value, label, validationContext, expectedRunId = null, expectedJobId = null) {
+  requireValidationContext(validationContext);
   if (typeof value !== "string" || !/^https:\/\/github\.com\/[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+\/actions\/runs\/\d+(?:\/job\/\d+)?$/.test(value)) fail(`${label} must be an immutable GitHub Actions URL`);
+  const repository = new URL(value).pathname.split("/").slice(1, 3).join("/");
+  if (repository !== validationContext.expectedRepository) fail(`${label} repository must match expectedRepository`);
   const match = value.match(/\/actions\/runs\/(\d+)(?:\/job\/(\d+))?$/);
   if (expectedRunId !== null && Number(match[1]) !== expectedRunId) fail(`${label} must match run_id`);
   if (expectedJobId !== null && Number(match[2]) !== expectedJobId) fail(`${label} must match job_id`);
@@ -95,7 +107,8 @@ function normalizedMetrics(value, allowed, label) {
   }));
 }
 
-export function normalizeRun(run) {
+export function normalizeRun(run, validationContext) {
+  requireValidationContext(validationContext);
   allowedFields(run, RUN_INPUT_FIELDS, "run");
   if (!Number.isInteger(run.id) || run.id < 1) fail("run.id must be a positive integer");
   if (typeof run.head_sha !== "string" || !/^[0-9a-f]{40}$/i.test(run.head_sha)) fail("run.head_sha must be a full SHA");
@@ -106,7 +119,7 @@ export function normalizeRun(run) {
   const providerState = run.provider_state ?? "non_run";
   if (!PROVIDER_STATES.has(providerState)) fail(`run.provider_state is unsupported: ${providerState}`);
   return {
-    schema_version: SCHEMA_VERSION, kind: "run", run_id: run.id, run_url: immutableUrl(run.html_url, "run.html_url"), sha: run.head_sha.slice(0, 12),
+    schema_version: SCHEMA_VERSION, kind: "run", run_id: run.id, run_url: immutableUrl(run.html_url, "run.html_url", validationContext), sha: run.head_sha.slice(0, 12),
     created_at: run.created_at, started_at: run.run_started_at, completed_at: run.updated_at, event_class: eventClass(run.event), branch_class: branchClass(run.event, run.head_branch),
     cohort_fingerprint: cohortFingerprint(run), workflow_duration_ms: completed - started, conclusion: conclusion(run.conclusion, "run.conclusion"),
     run_attempt: Number.isInteger(run.run_attempt) && run.run_attempt > 0 ? run.run_attempt : 1, original_run_id: Number.isInteger(run.original_run_id) ? run.original_run_id : run.id, provider_state: providerState
@@ -127,7 +140,8 @@ function prerequisiteCompletions(needs, dependentIdentity, dependentStart, compl
   });
 }
 
-export function normalizeJob(job, run, completedByName = new Map()) {
+export function normalizeJob(job, run, validationContext, completedByName = new Map()) {
+  requireValidationContext(validationContext);
   allowedFields(job, JOB_INPUT_FIELDS, "job");
   if (!Number.isInteger(job.id) || job.id < 1) fail("job.id must be a positive integer");
   const stableIdentity = normalizedIdentity(job.name, "job.name");
@@ -143,7 +157,7 @@ export function normalizeJob(job, run, completedByName = new Map()) {
   if (runnerQueue !== null && runnerQueue < 0) fail("root job runner queue is negative");
   if (dagWait !== null && dagWait < 0) fail("dependent job DAG wait is negative");
   return {
-    schema_version: SCHEMA_VERSION, kind: "job", run_id: run.id, job_id: job.id, job_url: immutableUrl(job.html_url, "job.html_url"), job_name: stableIdentity,
+    schema_version: SCHEMA_VERSION, kind: "job", run_id: run.id, job_id: job.id, job_url: immutableUrl(job.html_url, "job.html_url", validationContext), job_name: stableIdentity,
     stable_identity: stableIdentity, matrix_identity: `matrix-v1-${hash(stableIdentity)}`, started_at: job.started_at, completed_at: job.completed_at,
     conclusion: conclusion(job.conclusion, "job.conclusion"), duration_ms: duration(job.started_at, job.completed_at, "job"), runner_queue_ms: runnerQueue, dag_wait_ms: dagWait,
     failure_signature: normalizeFailureSignature(job),
@@ -152,14 +166,15 @@ export function normalizeJob(job, run, completedByName = new Map()) {
   };
 }
 
-export function collectBaseline(runs) {
+export function collectBaseline(runs, validationContext) {
+  requireValidationContext(validationContext);
   if (!Array.isArray(runs)) fail("runs must be an array");
   const unresolved = unresolvedPrerequisites(runs);
   if (unresolved.length > 0) fail(unresolved.join("; "));
   return runs.flatMap((run) => {
-    const normalizedRun = normalizeRun(run);
+    const normalizedRun = normalizeRun(run, validationContext);
     const completed = new Map((run.jobs || []).map((job) => [normalizedIdentity(job.name, "job.name"), timestamp(job.completed_at, "job.completed_at")]));
-    return [normalizedRun, ...(run.jobs || []).map((job) => normalizeJob(job, run, completed))];
+    return [normalizedRun, ...(run.jobs || []).map((job) => normalizeJob(job, run, validationContext, completed))];
   });
 }
 
@@ -168,13 +183,14 @@ function percentile(values, fraction) {
   return ordered[Math.ceil(fraction * ordered.length) - 1];
 }
 
-export function summarizeCohorts(runs, { windowDays = 90, sampleSize = 20, now = Date.now() } = {}) {
+export function summarizeCohorts(runs, validationContext, { windowDays = 90, sampleSize = 20, now = Date.now() } = {}) {
+  requireValidationContext(validationContext);
   if (!Array.isArray(runs)) fail("runs must be an array");
   if (!Number.isInteger(windowDays) || windowDays < 1 || !Number.isInteger(sampleSize) || sampleSize < 1) fail("window-days and sample-size must be positive integers");
   const cutoff = now - (windowDays * 86_400_000);
   const groups = new Map();
   for (const run of runs) {
-    const normalized = normalizeRun(run);
+    const normalized = normalizeRun(run, validationContext);
     const key = normalized.cohort_fingerprint;
     if (!groups.has(key)) groups.set(key, []);
     groups.get(key).push({ raw: run, normalized });
@@ -212,7 +228,8 @@ export function summarizeCohorts(runs, { windowDays = 90, sampleSize = 20, now =
   });
 }
 
-export function validateRecord(record) {
+export function validateRecord(record, validationContext) {
+  requireValidationContext(validationContext);
   const schema = JSON.parse(fs.readFileSync(SCHEMA_PATH, "utf8"));
   if (!record || record.schema_version !== schema.schema_version || !schema.record_kinds[record.kind]) fail("record has unsupported schema version or kind");
   const allowed = new Set(schema.record_kinds[record.kind]);
@@ -224,9 +241,9 @@ export function validateRecord(record) {
   if (record.kind === "snapshot") {
     const generated = timestamp(record.snapshot_generated_at, "snapshot.snapshot_generated_at"); const start = timestamp(record.window_start, "snapshot.window_start"); const end = timestamp(record.window_end, "snapshot.window_end");
     if (start > end || end > generated) fail("snapshot timestamps are not monotonic");
-    if (!/^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/.test(record.repository) || !/^[A-Za-z0-9_.-]+\.ya?ml$/.test(record.workflow)) fail("snapshot has invalid repository or workflow"); positive(record.sample_target, "snapshot.sample_target");
+    if (!/^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/.test(record.repository) || !/^[A-Za-z0-9_.-]+\.ya?ml$/.test(record.workflow)) fail("snapshot has invalid repository or workflow"); if (record.repository !== validationContext.expectedRepository) fail("snapshot.repository must match expectedRepository"); positive(record.sample_target, "snapshot.sample_target");
   } else if (record.kind === "run") {
-    positive(record.run_id, "run.run_id"); positive(record.run_attempt, "run.run_attempt"); positive(record.original_run_id, "run.original_run_id"); immutableUrl(record.run_url, "run.run_url", record.run_id);
+    positive(record.run_id, "run.run_id"); positive(record.run_attempt, "run.run_attempt"); positive(record.original_run_id, "run.original_run_id"); immutableUrl(record.run_url, "run.run_url", validationContext, record.run_id);
     if (!/^[a-f0-9]{12}$/.test(record.sha)) fail("run.sha must be a 12-hex SHA");
     if (!["pull_request", "push", "workflow_dispatch", "schedule", "other"].includes(record.event_class) || !["pull_request", "default_branch", "non_default"].includes(record.branch_class)) fail("run has unsupported event or branch class");
     normalized(record.cohort_fingerprint, "run.cohort_fingerprint", /^cohort-v1-[a-f0-9]{16}$/);
@@ -234,7 +251,7 @@ export function validateRecord(record) {
     if (created > started || started > completed) fail("run timestamps are not monotonic"); nonNegative(record.workflow_duration_ms, "run.workflow_duration_ms"); if (record.workflow_duration_ms !== completed - started) fail("run workflow duration disagrees with timestamps");
     if (!CONCLUSIONS.has(record.conclusion) || !PROVIDER_STATES.has(record.provider_state)) fail("record contains unsupported run state");
   } else if (record.kind === "job") {
-    positive(record.run_id, "job.run_id"); positive(record.job_id, "job.job_id"); immutableUrl(record.job_url, "job.job_url", record.run_id, record.job_id);
+    positive(record.run_id, "job.run_id"); positive(record.job_id, "job.job_id"); immutableUrl(record.job_url, "job.job_url", validationContext, record.run_id, record.job_id);
     normalized(record.job_name, "job.job_name"); normalized(record.stable_identity, "job.stable_identity"); normalized(record.matrix_identity, "job.matrix_identity", /^matrix-v1-[a-f0-9]{16}$/);
     const started = timestamp(record.started_at, "job.started_at"); const completed = timestamp(record.completed_at, "job.completed_at"); if (started > completed) fail("job timestamps are not monotonic"); nonNegative(record.duration_ms, "job.duration_ms"); if (record.duration_ms !== completed - started) fail("job duration disagrees with timestamps");
     for (const [label, value] of [["job.runner_queue_ms", record.runner_queue_ms], ["job.dag_wait_ms", record.dag_wait_ms]]) if (value !== null) nonNegative(value, label);
@@ -448,17 +465,19 @@ export async function liveRuns(repo, workflow, windowDays, { fetchPages = fetchG
 }
 async function main() {
   const options = args(process.argv.slice(2));
+  if (!options.repo) fail("--repo is required");
+  const validationContext = createRepositoryValidationContext({ expectedRepository: options.repo });
   const windowDays = Number(options["window-days"] || 90); const sampleSize = Number(options["sample-size"] || 20);
   let runs; let snapshot = null;
   if (options.input || options.fixtures) runs = JSON.parse(fs.readFileSync(options.input || options.fixtures, "utf8")).runs || Object.values(JSON.parse(fs.readFileSync(options.input || options.fixtures, "utf8")));
   else {
-    if (!options.repo || !options.workflow) fail("live collection requires --repo and --workflow");
+    if (!options.workflow) fail("live collection requires --workflow");
     runs = await liveRuns(options.repo, options.workflow, windowDays);
     const now = new Date().toISOString();
     snapshot = { schema_version: SCHEMA_VERSION, kind: "snapshot", snapshot_generated_at: now, window_start: new Date(Date.now() - windowDays * 86_400_000).toISOString(), window_end: now, repository: options.repo, workflow: options.workflow, sample_target: sampleSize };
   }
-  const records = collectBaseline(runs); const cohorts = summarizeCohorts(runs, { windowDays, sampleSize });
-  const output = `${[...(snapshot ? [snapshot] : []), ...records, ...cohorts].map((record) => JSON.stringify(validateRecord(record))).sort((left, right) => left.localeCompare(right)).join("\n")}\n`;
+  const records = collectBaseline(runs, validationContext); const cohorts = summarizeCohorts(runs, validationContext, { windowDays, sampleSize });
+  const output = `${[...(snapshot ? [snapshot] : []), ...records, ...cohorts].map((record) => JSON.stringify(validateRecord(record, validationContext))).sort((left, right) => left.localeCompare(right)).join("\n")}\n`;
   if (options.out) fs.writeFileSync(options.out, output); else process.stdout.write(output);
 }
 if (process.argv[1] === fileURLToPath(import.meta.url)) main().catch((error) => { console.error(`collect ci baseline: FAIL: ${error.message}`); process.exitCode = 1; });
