@@ -4,7 +4,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { collectBaseline, cohortFingerprint, liveRuns, summarizeCohorts } from "./collect_ci_baseline.mjs";
+import { collectBaseline, cohortFingerprint, liveRuns, summarizeCohorts, workflowRunnerImage } from "./collect_ci_baseline.mjs";
 import { deriveStagedPathPercentiles, renderBaseline } from "./render_ci_baseline.mjs";
 
 function fail(message) {
@@ -227,15 +227,25 @@ async function liveDisplayIdentityControls() {
     /^  docs-contracts-shift-left:\n    name: Docs and bash contracts \(shift-left\)$/m,
     "the live fixture remains coupled to the docs-contracts-shift-left workflow display name"
   );
-  const run = { id: 980, html_url: "https://github.com/acme/accrue/actions/runs/980", head_sha: "a".repeat(40), created_at: "2026-08-11T06:00:00Z", run_started_at: "2026-08-11T06:00:10Z", updated_at: "2026-08-11T06:04:00Z", event: "push", head_branch: "main", conclusion: "success", run_attempt: 1 };
+  const run = { id: 980, html_url: "https://github.com/acme/accrue/actions/runs/980", head_sha: "a".repeat(40), created_at: "2026-08-11T06:00:00Z", run_started_at: "2026-08-11T06:00:10Z", updated_at: "2026-08-11T06:04:00Z", event: "push", head_branch: "main", conclusion: "success", run_attempt: 2 };
   const jobs = [
     [9800, "Release gate (Primary dev target)", "2026-08-11T06:00:15Z", "2026-08-11T06:00:19Z"],
     [9801, "Admin drift and docs", "2026-08-11T06:00:20Z", "2026-08-11T06:01:00Z"],
     [9802, docsDisplayName, "2026-08-11T06:00:25Z", "2026-08-11T06:01:10Z"],
     [9803, "Host integration (required deterministic gate)", "2026-08-11T06:01:20Z", "2026-08-11T06:03:00Z"],
-  ].map(([id, name, started_at, completed_at]) => ({ id, html_url: `https://github.com/acme/accrue/actions/runs/980/job/${id}`, name, started_at, completed_at, conclusion: "success", runner_name: "github-hosted", steps: [] }));
-  const fetchPages = async (endpoint) => endpoint.includes("/jobs?") ? [{ jobs }] : [{ workflow_runs: [run] }];
+  ].map(([id, name, started_at, completed_at]) => ({ id, html_url: `https://github.com/acme/accrue/actions/runs/980/job/${id}`, name, started_at, completed_at, conclusion: "success", run_attempt: 2, runner_name: "self-hosted-looking-name", steps: [] }));
+  const stale = { ...jobs[0], id: 9799, run_attempt: 1, conclusion: "failure", started_at: "2026-08-11T06:00:11Z", completed_at: "2026-08-11T06:03:59Z" };
+  const endpoints = [];
+  const fetchPages = async (endpoint) => {
+    endpoints.push(endpoint);
+    if (endpoint.includes("/jobs?filter=all")) return [{ jobs: [stale, ...jobs] }];
+    if (endpoint.includes("/attempts/2/jobs?")) return [{ jobs }];
+    return [{ workflow_runs: [run] }];
+  };
   const records = collectBaseline(await liveRuns("acme/accrue", "ci.yml", 90, { fetchPages, now: () => Date.parse("2026-08-11T06:04:00Z") }));
+  assert.ok(endpoints.some((endpoint) => endpoint.includes("/attempts/2/jobs?")), "live collector requests only the exact run-attempt jobs endpoint");
+  assert.ok(endpoints.every((endpoint) => !endpoint.includes("/jobs?filter=all")), "live collector never requests all-attempt jobs");
+  assert.deepEqual(records.filter((record) => record.kind === "job").map((record) => record.job_id), jobs.map((job) => job.id), "only current-attempt jobs reach normalized records");
   const host = records.find((record) => record.kind === "job" && record.stable_identity === "host-integration");
   assert.equal(host.dag_wait_ms, 10_000, "host resolves current display-name prerequisites in the live collector");
   for (const [name, mutate, pattern] of [
@@ -246,6 +256,17 @@ async function liveDisplayIdentityControls() {
     const broken = await liveRuns("acme/accrue", "ci.yml", 90, { fetchPages: async (endpoint) => endpoint.includes("/jobs?") ? [{ jobs: mutate(jobs) }] : [{ workflow_runs: [run] }], now: () => Date.parse("2026-08-11T06:04:00Z") });
     assert.throws(() => collectBaseline(broken), pattern, `${name} live prerequisite fails closed`);
   }
+
+  const mismatchedFetch = async (endpoint) => endpoint.includes("/attempts/2/jobs?") ? [{ jobs: [{ ...jobs[0], run_attempt: 1 }] }] : [{ workflow_runs: [run] }];
+  await assert.rejects(() => liveRuns("acme/accrue", "ci.yml", 90, { fetchPages: mismatchedFetch, now: () => Date.parse("2026-08-11T06:04:00Z") }), /job.run_attempt must match run.run_attempt/, "mismatched attempt is rejected before normalization");
+
+  assert.equal(workflowRunnerImage("Docs and bash contracts (shift-left)"), "github-hosted/ubuntu-24.04", "docs runner class comes from the trusted workflow contract");
+  assert.equal(workflowRunnerImage("iOS offline client package compatibility"), "github-hosted/macos-15", "iOS runner class comes from the trusted workflow contract");
+  assert.equal(workflowRunnerImage("controlled self-hosted job", [{ identity: "controlled-self-hosted-job", runsOn: "[self-hosted, linux, x64]" }]), "self-hosted/declared", "self-hosted classification omits raw labels");
+  assert.throws(() => workflowRunnerImage("unknown external job"), /unresolved workflow runner contract/, "unknown runner identity fails closed");
+  assert.throws(() => workflowRunnerImage("Release gate", [{ identity: "release-gate", runsOn: "ubuntu-24.04" }, { identity: "release-gate", runsOn: "macos-15" }]), /ambiguous workflow runner contract/, "ambiguous runner identity fails closed");
+  assert.notEqual(cohortFingerprint({ ...run, jobs: [{ ...jobs[0], runner_image: "github-hosted/ubuntu-24.04" }] }), cohortFingerprint({ ...run, jobs: [{ ...jobs[0], runner_image: "github-hosted/macos-15" }] }), "different workflow-declared runner images produce distinct fingerprints");
+  assert.notEqual(cohortFingerprint({ ...run, jobs: [{ ...jobs[0], runner_image: "github-hosted/ubuntu-24.04" }] }), cohortFingerprint({ ...run, jobs: [{ ...jobs[0], runner_image: "self-hosted/declared" }] }), "self-hosted work cannot share a hosted cohort");
 }
 
 export async function verifyFixtures() {
