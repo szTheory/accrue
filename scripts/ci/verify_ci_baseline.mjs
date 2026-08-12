@@ -287,6 +287,13 @@ async function liveDisplayIdentityControls() {
     [9802, docsDisplayName, "2026-08-11T06:00:25Z", "2026-08-11T06:01:10Z"],
     [9803, "Host integration (required deterministic gate)", "2026-08-11T06:01:20Z", "2026-08-11T06:03:00Z"],
   ].map(([id, name, started_at, completed_at]) => ({ id, html_url: `https://github.com/acme/accrue/actions/runs/980/job/${id}`, name, started_at, completed_at, conclusion: "success", run_attempt: 2, runner_name: "self-hosted-looking-name", steps: [] }));
+  const skippedOnlyRun = { ...run, id: 979, event: "schedule", run_attempt: 1 };
+  const skippedOnlyJob = { ...jobs[0], id: 9790, name: "Release gate (${{ matrix.compatibility }}; elixir=${{ matrix.elixir }} otp=${{ matrix.otp }} sigra=${{ matrix.sigra }} opentelemetry=${{ matrix.opentelemetry }})", conclusion: "skipped", run_attempt: 1 };
+  const skippedOnly = await liveRuns("acme/accrue", "ci.yml", 90, {
+    fetchPages: async (endpoint) => endpoint.includes("/jobs?") ? [{ jobs: [skippedOnlyJob] }] : [{ workflow_runs: [skippedOnlyRun] }],
+    now: () => Date.parse("2026-08-11T06:04:00Z")
+  });
+  assert.deepEqual(skippedOnly[0].jobs, [], "skipped workflow nodes cannot enter timing or DAG admission");
   const stale = { ...jobs[0], id: 9799, run_attempt: 1, conclusion: "failure", started_at: "2026-08-11T06:00:11Z", completed_at: "2026-08-11T06:03:59Z" };
   const endpoints = [];
   const fetchPages = async (endpoint) => {
