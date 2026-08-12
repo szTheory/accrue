@@ -1,6 +1,6 @@
 ---
 phase: 226-ci-baseline-proof-semantics
-reviewed: 2026-08-12T17:56:43Z
+reviewed: 2026-08-12T00:00:00Z
 depth: standard
 files_reviewed: 16
 files_reviewed_list:
@@ -21,8 +21,8 @@ files_reviewed_list:
   - scripts/ci/verify_ci_setup_diagnostics.sh
   - scripts/ci/verify_provider_proof.mjs
 findings:
-  critical: 2
-  warning: 0
+  critical: 0
+  warning: 2
   info: 0
   total: 2
 status: issues_found
@@ -30,37 +30,45 @@ status: issues_found
 
 # Phase 226: Code Review Report
 
-**Reviewed:** 2026-08-12T17:56:43Z
+**Reviewed:** 2026-08-12T00:00:00Z
 **Depth:** standard
 **Files Reviewed:** 16
 **Status:** issues_found
 
 ## Summary
 
-The provider-proof, host-diagnostic, and CI-baseline sources were reviewed in context, including the CI workflow they consume. The included fixture suites pass, but two defects make the resulting CI evidence unreliable: historical runs are evaluated against the current workflow DAG, and a syntactically complete but forged NDJSON record can alter the rendered evidence report.
+The reviewed proof scripts now fetch and parse each run's workflow at its head SHA, and summary fields are escaped before Markdown rendering. The focused baseline, provider-proof, and setup-diagnostic verification suites pass. Two warnings remain: one breaks valid Postgres connection inputs, and one leaves conflicting operator guidance about live-provider enforcement.
 
 ## Narrative Findings (AI reviewer)
 
-## Critical Issues
+## Warnings
 
-### CR-01: Historical runs are parsed with the current workflow topology
+### WR-01: Database name is not passed as one shell argument
 
-**Classification:** BLOCKER
-**File:** `/Users/jon/projects/accrue/scripts/ci/collect_ci_baseline.mjs:280-385`
-**Issue:** `liveRuns` fetches the workflow file at each run's `head_sha` only to hash it at line 365. All subsequent identity, runner, and dependency resolution at lines 372-385 calls `workflowRunnerContracts()` without that fetched content, which defaults to the repository's current `ci.yml`. A legitimate historical run whose job names, matrix aliases, or `needs` differ from the current workflow is therefore rejected as unresolved or assigned the wrong DAG/runner metrics. This defeats the collector's stated revision-aware historical baseline and can produce a falsely incomplete or incorrect timing cohort after normal workflow evolution.
+**File:** `scripts/ci/accrue_host_uat.sh:39`
 
-**Fix:** Parse and retain contracts from the fetched `workflowSource` for that run, then pass those contracts to `resolveWorkflowJobIdentity`, `workflowRunnerImage`, and `workflowNeeds`. Use the current workflow only when collecting a current local fixture intentionally has no historical source.
+**Issue:** `${PGDATABASE:+-d "$PGDATABASE"}` is unquoted as a whole. Quotes produced inside a parameter expansion do not protect its result from word splitting or pathname expansion. A valid database name containing whitespace (or shell glob characters) is split into multiple arguments, so the readiness preflight can check the wrong database or fail before the host proof runs.
 
-### CR-02: Renderer validates field names but permits forged Markdown evidence
+**Fix:** Build an argument array and append the database only when set.
 
-**Classification:** BLOCKER
-**File:** `/Users/jon/projects/accrue/scripts/ci/render_ci_baseline.mjs:84-90`
-**Issue:** The renderer calls `validateRecord`, but that function only checks schema version, record kind, allowed fields, and a few enums; it does not validate URLs, timestamps, IDs, or numeric fields. The raw `run_url` and `job_url` are then interpolated directly into Markdown links. For example, a valid-field run record with `run_url: "https://x.test/)\\n# forged"` renders an injected `# forged` heading. Since this command accepts arbitrary `--input` NDJSON and produces an artifact presented as immutable, privacy-safe CI evidence, a tampered record can forge report content and evidence links.
+```bash
+pg_args=(-h "${PGHOST:-localhost}" -p "${PGPORT:-5432}" -U "${PGUSER:-postgres}")
+if [ -n "${PGDATABASE:-}" ]; then
+  pg_args+=(-d "$PGDATABASE")
+fi
+pg_isready "${pg_args[@]}"
+```
 
-**Fix:** Make `validateRecord` perform full per-kind semantic validation (or re-normalize each record) before rendering, including `immutableUrl` for URL fields and timestamp/integer validation. Additionally escape or reject `]`, `(`, `)`, and line breaks in link destinations rather than interpolating untrusted URL strings.
+### WR-02: Host README contradicts the selected provider lane's required policy
+
+**File:** `examples/accrue_host/README.md:394-397`
+
+**Issue:** This section calls live Stripe “optional and advisory only,” while the phase's provider guide and implementation classify scheduled/manual selected executions with `policy: required` and fail that lane on missing configuration, invalid manifests, zero selection, or assertion failures. The contradictory instruction can lead maintainers to treat a failed selected provider proof as advisory and skip the required remediation.
+
+**Fix:** Distinguish merge-gate scope from selected-lane enforcement. For example: “Live Stripe is not a PR merge check; however, every scheduled/manual selected execution is a required provider-parity lane and must be remediated when it fails.”
 
 ---
 
-_Reviewed: 2026-08-12T17:56:43Z_
+_Reviewed: 2026-08-12T00:00:00Z_
 _Reviewer: the agent (gsd-code-reviewer)_
 _Depth: standard_
