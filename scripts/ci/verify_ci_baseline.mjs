@@ -248,6 +248,20 @@ async function liveDisplayIdentityControls() {
   assert.deepEqual(records.filter((record) => record.kind === "job").map((record) => record.job_id), jobs.map((job) => job.id), "only current-attempt jobs reach normalized records");
   const host = records.find((record) => record.kind === "job" && record.stable_identity === "host-integration");
   assert.equal(host.dag_wait_ms, 10_000, "host resolves current display-name prerequisites in the live collector");
+  const historicalScheduledRun = { ...run, id: 981, event: "schedule" };
+  const historicalScheduledJobs = jobs.filter((job) => job.name !== "Release gate (Primary dev target)");
+  const historicalScheduledFetch = async (endpoint) => endpoint.includes("/jobs?")
+    ? [{ jobs: historicalScheduledJobs }]
+    : [{ workflow_runs: [historicalScheduledRun] }];
+  const historicalScheduledRecords = collectBaseline(await liveRuns("acme/accrue", "ci.yml", 90, {
+    fetchPages: historicalScheduledFetch,
+    now: () => Date.parse("2026-08-11T06:04:00Z")
+  }));
+  assert.equal(
+    historicalScheduledRecords.find((record) => record.kind === "job" && record.stable_identity === "admin-drift-and-docs").dag_wait_ms,
+    null,
+    "historical scheduled admin drift job retains its explicit no-prerequisite topology"
+  );
   for (const [name, mutate, pattern] of [
     ["absent", (items) => items.filter((job) => job.name !== docsDisplayName), /unresolved prerequisite docs-and-bash-contracts-shift-left/],
     ["spelling drift", (items) => items.map((job) => job.name === docsDisplayName ? { ...job, name: "Docs and bash contract (shift-left)" } : job), /unresolved prerequisite docs-and-bash-contracts-shift-left/],
