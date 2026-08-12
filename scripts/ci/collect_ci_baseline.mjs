@@ -231,7 +231,8 @@ function ghJsonAsync(endpoint, paginate = false) {
 }
 function workflowNeeds(name) {
   const normalized = normalizedIdentity(name, "job.name");
-  if (normalized.startsWith("host-integration")) return ["admin-drift-docs", "docs-contracts-shift-left"];
+  // Dependencies are matched against normalized Actions display names, never YAML job IDs.
+  if (normalized.startsWith("host-integration")) return ["admin-drift-and-docs", "docs-contracts-shift-left"];
   if (normalized.startsWith("playwright-e2e")) return ["host-integration"];
   if (normalized.startsWith("admin-drift-and-docs")) return ["release-gate"];
   if (normalized.startsWith("admin-ui-ratchet-guardrails")) return ["admin-hardening-guardrails", "admin-phase200-guardrails"];
@@ -260,13 +261,16 @@ function cacheFacts(steps = []) {
   if (!matched.length) return {};
   return { hit: matched.some((step) => /restore/i.test(String(step.name || ""))), restore_ms: matched.filter((step) => /restore/i.test(String(step.name || ""))).reduce((sum, step) => sum + duration(step.started_at, step.completed_at, "step"), 0), save_ms: matched.filter((step) => /save/i.test(String(step.name || ""))).reduce((sum, step) => sum + duration(step.started_at, step.completed_at, "step"), 0), size_bytes: 0 };
 }
-async function liveRuns(repo, workflow, windowDays) {
-  const cutoff = new Date(Date.now() - windowDays * 86_400_000).toISOString().slice(0, 10);
-  const listed = ghJson(`/repos/${repo}/actions/workflows/${workflow}/runs?per_page=100&created=>=${cutoff}`, true).flatMap((page) => page.workflow_runs || []);
+async function fetchGhPages(endpoint) {
+  return endpoint.includes("/jobs?") ? ghJsonAsync(endpoint, true) : ghJson(endpoint, true);
+}
+export async function liveRuns(repo, workflow, windowDays, { fetchPages = fetchGhPages, now = Date.now } = {}) {
+  const cutoff = new Date(now() - windowDays * 86_400_000).toISOString().slice(0, 10);
+  const listed = (await fetchPages(`/repos/${repo}/actions/workflows/${workflow}/runs?per_page=100&created=>=${cutoff}`)).flatMap((page) => page.workflow_runs || []);
   const results = [];
   for (let index = 0; index < listed.length; index += 12) {
     results.push(...await Promise.all(listed.slice(index, index + 12).map(async (run) => {
-    const jobs = (await ghJsonAsync(`/repos/${repo}/actions/runs/${run.id}/jobs?filter=all&per_page=100`, true)).flatMap((page) => page.jobs || []).filter((job) => typeof job.name === "string" && /[A-Za-z0-9]/.test(job.name) && job.started_at && job.completed_at && Date.parse(job.completed_at) >= Date.parse(job.started_at)).map((job) => ({
+    const jobs = (await fetchPages(`/repos/${repo}/actions/runs/${run.id}/jobs?filter=all&per_page=100`)).flatMap((page) => page.jobs || []).filter((job) => typeof job.name === "string" && /[A-Za-z0-9]/.test(job.name) && job.started_at && job.completed_at && Date.parse(job.completed_at) >= Date.parse(job.started_at)).map((job) => ({
       id: job.id, html_url: job.html_url, name: job.name, started_at: job.started_at, completed_at: job.completed_at,
       conclusion: CONCLUSIONS.has(job.conclusion) ? job.conclusion : "unknown", runner_image: job.runner_name ? "github-hosted" : "unknown", needs: workflowNeeds(job.name),
       setup_costs: setupCosts(job.steps), cache: cacheFacts(job.steps)

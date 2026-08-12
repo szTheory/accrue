@@ -222,6 +222,7 @@ function stagedPathControls(fixture) {
 async function liveDisplayIdentityControls() {
   const run = { id: 980, html_url: "https://github.com/acme/accrue/actions/runs/980", head_sha: "a".repeat(40), created_at: "2026-08-11T06:00:00Z", run_started_at: "2026-08-11T06:00:10Z", updated_at: "2026-08-11T06:04:00Z", event: "push", head_branch: "main", conclusion: "success", run_attempt: 1 };
   const jobs = [
+    [9800, "Release gate (Primary dev target)", "2026-08-11T06:00:15Z", "2026-08-11T06:00:19Z"],
     [9801, "Admin drift and docs", "2026-08-11T06:00:20Z", "2026-08-11T06:01:00Z"],
     [9802, "Docs contracts shift-left", "2026-08-11T06:00:25Z", "2026-08-11T06:01:10Z"],
     [9803, "Host integration (required deterministic gate)", "2026-08-11T06:01:20Z", "2026-08-11T06:03:00Z"],
