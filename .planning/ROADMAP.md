@@ -136,7 +136,7 @@ Plans:
 
 **Wave 13** *(gap closure; blocked on Wave 12)*
 
-- [ ] 226-19-PLAN.md — Repair excluded-test manifest accounting, prove real tagged-suite promotion, and reconcile required provider-proof guidance.
+- [x] 226-19-PLAN.md — Repair excluded-test manifest accounting, prove real tagged-suite promotion, and reconcile required provider-proof guidance.
 
 ### Phase 227: Measured Critical-Path Improvement
 
