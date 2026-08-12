@@ -4,6 +4,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import { spawnSync } from "node:child_process";
 import { collectBaseline, cohortFingerprint, liveRuns, summarizeCohorts, unresolvedPrerequisites, workflowRunnerImage } from "./collect_ci_baseline.mjs";
 import { deriveStagedPathPercentiles, renderBaseline } from "./render_ci_baseline.mjs";
 
@@ -193,7 +194,7 @@ function stagedPathControls(fixture) {
 
   const missingHost = runs.map((run) => ({ ...run, jobs: run.jobs.filter((job) => job.name !== "host-integration") }));
   assert.throws(() => deriveStagedPathPercentiles([...collectBaseline(missingHost), ...summarizeCohorts(missingHost)]), /unresolved prerequisite host-integration|missing host-integration stage/, "missing host stage is rejected before staged-path arithmetic");
-  const badOrderRecords = records.map((record) => record.kind === "job" && record.stable_identity === "playwright-e2e" ? { ...record, started_at: new Date(Date.parse(record.started_at) - 200_000).toISOString() } : record);
+  const badOrderRecords = records.map((record) => record.kind === "job" && record.stable_identity === "playwright-e2e" ? { ...record, started_at: new Date(Date.parse(record.started_at) - 200_000).toISOString(), duration_ms: record.duration_ms + 200_000 } : record);
   assert.throws(() => deriveStagedPathPercentiles(badOrderRecords), /Playwright stage must start after host-integration/, "stage ordering is rejected at the staged-path boundary");
   const rerun = [...runs.slice(0, 19), stagedRun(fixture.successful_run, 720, 20, { original_run_id: 700, run_attempt: 2, head_sha: runs[0].head_sha })];
   assert.throws(() => deriveStagedPathPercentiles([...collectBaseline(rerun), ...summarizeCohorts(rerun)]), /20 compatible complete paths/, "rerun inflation cannot satisfy the stage cohort");
@@ -273,6 +274,31 @@ function historicalRevisionAndIdentityControls() {
 }
 
 async function liveDisplayIdentityControls() {
+  const historicalSource = `jobs:\n  release-gate:\n    name: Historical release gate\n    runs-on: ubuntu-24.04\n  host-integration:\n    name: Historical host integration\n    needs: [release-gate]\n    runs-on: macos-15\n`;
+  const historicalRun = { id: 976, html_url: "https://github.com/acme/accrue/actions/runs/976", head_sha: "b".repeat(40), created_at: "2026-08-11T05:00:00Z", run_started_at: "2026-08-11T05:00:10Z", updated_at: "2026-08-11T05:04:00Z", event: "push", head_branch: "main", conclusion: "success", run_attempt: 1 };
+  const historicalJobs = [
+    { id: 9760, html_url: "https://github.com/acme/accrue/actions/runs/976/job/9760", name: "Historical release gate", started_at: "2026-08-11T05:00:15Z", completed_at: "2026-08-11T05:01:00Z", conclusion: "success", run_attempt: 1, steps: [] },
+    { id: 9761, html_url: "https://github.com/acme/accrue/actions/runs/976/job/9761", name: "Historical host integration", started_at: "2026-08-11T05:01:10Z", completed_at: "2026-08-11T05:03:00Z", conclusion: "success", run_attempt: 1, steps: [] }
+  ];
+  const workflowCalls = [];
+  const historical = await liveRuns("acme/accrue", "ci.yml", 90, {
+    fetchPages: async (endpoint) => endpoint.includes("/jobs?") ? [{ jobs: historicalJobs }] : [{ workflow_runs: [historicalRun] }],
+    fetchWorkflow: async (...args) => { workflowCalls.push(args); return historicalSource; },
+    now: () => Date.parse("2026-08-11T05:04:00Z")
+  });
+  assert.deepEqual(workflowCalls, [["acme/accrue", "ci.yml", "b".repeat(40)]], "historical workflow source is fetched at the exact head SHA");
+  const historicalRecords = collectBaseline(historical);
+  const historicalHost = historicalRecords.find((record) => record.kind === "job" && record.job_id === 9761);
+  assert.equal(historicalHost.stable_identity, "historical-host-integration", "historical display identity is preserved");
+  assert.equal(historicalHost.dag_wait_ms, 10_000, "historical prerequisite supplies DAG timing");
+  assert.match(historicalHost.matrix_identity, /^matrix-v1-/, "historical contract produces normalized matrix identity");
+  assert.equal(historical[0].jobs.find((job) => job.id === 9761).runner_image, "github-hosted/macos-15", "historical runner declaration is authoritative");
+  const missingHistoricalPrerequisite = await liveRuns("acme/accrue", "ci.yml", 90, {
+    fetchPages: async (endpoint) => endpoint.includes("/jobs?") ? [{ jobs: [historicalJobs[1]] }] : [{ workflow_runs: [historicalRun] }],
+    fetchWorkflow: async () => historicalSource,
+    now: () => Date.parse("2026-08-11T05:04:00Z")
+  });
+  assert.deepEqual(missingHistoricalPrerequisite[0].jobs, [], "missing historical prerequisite remains fail-closed");
   const workflow = fs.readFileSync(path.resolve(".github/workflows/ci.yml"), "utf8");
   const docsDisplayName = "Docs and bash contracts (shift-left)";
   assert.match(
@@ -489,6 +515,13 @@ export async function verifyFixtures() {
     assert.equal(jobs[0].dag_wait_ms, null, "root jobs have no DAG wait");
     assert.equal(jobs[1].runner_queue_ms, null, "dependent jobs do not masquerade DAG wait as queue");
     assert.equal(jobs[1].dag_wait_ms, 10_000, "dependent wait uses latest prerequisite completion");
+    const forged = { ...records[0], run_url: "https://github.com/acme/accrue/actions/runs/42)\n# forged" };
+    const forgedInput = path.join(temp, "forged.ndjson");
+    const forgedOutput = path.join(temp, "forged.md");
+    fs.writeFileSync(forgedInput, `${JSON.stringify(forged)}\n`);
+    const forgedRender = spawnSync(process.execPath, [path.resolve("scripts/ci/render_ci_baseline.mjs"), "--input", forgedInput, "--out", forgedOutput], { encoding: "utf8" });
+    assert.notEqual(forgedRender.status, 0, "production renderer rejects forged NDJSON before output");
+    assert.ok(!fs.existsSync(forgedOutput), "forged renderer invocation leaves no output");
     rejectsForbiddenFields(fixture);
     cohortControls(fixture);
     stagedPathControls(fixture);

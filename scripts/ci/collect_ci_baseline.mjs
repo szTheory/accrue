@@ -34,8 +34,11 @@ function timestamp(value, label) {
   if (new Date(ms).toISOString() !== canonical) fail(`${label} must be an ISO-8601 UTC timestamp`);
   return ms;
 }
-function immutableUrl(value, label) {
+function immutableUrl(value, label, expectedRunId = null, expectedJobId = null) {
   if (typeof value !== "string" || !/^https:\/\/github\.com\/[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+\/actions\/runs\/\d+(?:\/job\/\d+)?$/.test(value)) fail(`${label} must be an immutable GitHub Actions URL`);
+  const match = value.match(/\/actions\/runs\/(\d+)(?:\/job\/(\d+))?$/);
+  if (expectedRunId !== null && Number(match[1]) !== expectedRunId) fail(`${label} must match run_id`);
+  if (expectedJobId !== null && Number(match[2]) !== expectedJobId) fail(`${label} must match job_id`);
   return value;
 }
 function normalizedIdentity(value, label) {
@@ -215,9 +218,38 @@ export function validateRecord(record) {
   const allowed = new Set(schema.record_kinds[record.kind]);
   for (const key of allowed) if (!(key in record)) fail(`record is missing required field: ${key}`);
   for (const key of Object.keys(record)) if (!allowed.has(key)) fail(`record contains forbidden field: ${key}`);
-  if (["run", "job"].includes(record.kind) && !CONCLUSIONS.has(record.conclusion)) fail("record contains unsupported conclusion");
-  if (record.kind === "run" && !PROVIDER_STATES.has(record.provider_state)) fail("record contains unsupported provider state");
-  if (record.kind === "cohort" && !["ready", "insufficient_sample"].includes(record.sample_status)) fail("record contains unsupported sample status");
+  const positive = (value, label) => { if (!Number.isInteger(value) || value < 1) fail(`${label} must be a positive integer`); };
+  const nonNegative = (value, label) => { if (!Number.isInteger(value) || value < 0) fail(`${label} must be a non-negative integer`); };
+  const normalized = (value, label, pattern = /^[a-z0-9][a-z0-9._/-]{0,399}$/) => { if (typeof value !== "string" || !pattern.test(value)) fail(`${label} must be normalized`); };
+  if (record.kind === "snapshot") {
+    const generated = timestamp(record.snapshot_generated_at, "snapshot.snapshot_generated_at"); const start = timestamp(record.window_start, "snapshot.window_start"); const end = timestamp(record.window_end, "snapshot.window_end");
+    if (start > end || end > generated) fail("snapshot timestamps are not monotonic");
+    if (!/^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/.test(record.repository) || !/^[A-Za-z0-9_.-]+\.ya?ml$/.test(record.workflow)) fail("snapshot has invalid repository or workflow"); positive(record.sample_target, "snapshot.sample_target");
+  } else if (record.kind === "run") {
+    positive(record.run_id, "run.run_id"); positive(record.run_attempt, "run.run_attempt"); positive(record.original_run_id, "run.original_run_id"); immutableUrl(record.run_url, "run.run_url", record.run_id);
+    if (!/^[a-f0-9]{12}$/.test(record.sha)) fail("run.sha must be a 12-hex SHA");
+    if (!["pull_request", "push", "workflow_dispatch", "schedule", "other"].includes(record.event_class) || !["pull_request", "default_branch", "non_default"].includes(record.branch_class)) fail("run has unsupported event or branch class");
+    normalized(record.cohort_fingerprint, "run.cohort_fingerprint", /^cohort-v1-[a-f0-9]{16}$/);
+    const created = timestamp(record.created_at, "run.created_at"); const started = timestamp(record.started_at, "run.started_at"); const completed = timestamp(record.completed_at, "run.completed_at");
+    if (created > started || started > completed) fail("run timestamps are not monotonic"); nonNegative(record.workflow_duration_ms, "run.workflow_duration_ms"); if (record.workflow_duration_ms !== completed - started) fail("run workflow duration disagrees with timestamps");
+    if (!CONCLUSIONS.has(record.conclusion) || !PROVIDER_STATES.has(record.provider_state)) fail("record contains unsupported run state");
+  } else if (record.kind === "job") {
+    positive(record.run_id, "job.run_id"); positive(record.job_id, "job.job_id"); immutableUrl(record.job_url, "job.job_url", record.run_id, record.job_id);
+    normalized(record.job_name, "job.job_name"); normalized(record.stable_identity, "job.stable_identity"); normalized(record.matrix_identity, "job.matrix_identity", /^matrix-v1-[a-f0-9]{16}$/);
+    const started = timestamp(record.started_at, "job.started_at"); const completed = timestamp(record.completed_at, "job.completed_at"); if (started > completed) fail("job timestamps are not monotonic"); nonNegative(record.duration_ms, "job.duration_ms"); if (record.duration_ms !== completed - started) fail("job duration disagrees with timestamps");
+    for (const [label, value] of [["job.runner_queue_ms", record.runner_queue_ms], ["job.dag_wait_ms", record.dag_wait_ms]]) if (value !== null) nonNegative(value, label);
+    if (record.failure_signature !== null && !/^failure-v1-[a-f0-9]{16}$/.test(record.failure_signature)) fail("job.failure_signature must be normalized");
+    normalizedMetrics(record.setup_costs, ["docker_ms", "browser_ms", "node_ms", "npm_ms", "phoenix_ms", "fixture_ms", "playwright_ms"], "job.setup_costs"); normalizedMetrics(record.cache, ["hit", "restore_ms", "save_ms", "size_bytes"], "job.cache");
+    if (!CONCLUSIONS.has(record.conclusion)) fail("record contains unsupported conclusion");
+  } else if (record.kind === "cohort") {
+    normalized(record.cohort_fingerprint, "cohort.cohort_fingerprint", /^cohort-v1-[a-f0-9]{16}$/); nonNegative(record.sample_count, "cohort.sample_count");
+    if (!["ready", "insufficient_sample"].includes(record.sample_status)) fail("record contains unsupported sample status");
+    if (record.sample_status === "ready") { positive(record.p50_ms, "cohort.p50_ms"); positive(record.p95_ms, "cohort.p95_ms"); } else if (record.p50_ms !== null || record.p95_ms !== null) fail("insufficient cohort must omit percentiles");
+    const reliability = record.reliability; allowedFields(reliability, new Set(["total_runs", "failure_count", "cancellation_count", "skipped_count", "rerun_count", "root_incidents"]), "cohort.reliability");
+    for (const key of ["total_runs", "failure_count", "cancellation_count", "skipped_count", "rerun_count"]) nonNegative(reliability[key], `cohort.reliability.${key}`);
+    if (!Array.isArray(reliability.root_incidents)) fail("cohort.reliability.root_incidents must be an array");
+    for (const incident of reliability.root_incidents) { allowedFields(incident, new Set(["signature", "affected_cells"]), "cohort.root_incident"); if (!/^failure-v1-[a-f0-9]{16}$/.test(incident.signature) || !Array.isArray(incident.affected_cells)) fail("cohort root incident is invalid"); incident.affected_cells.forEach((cell) => normalized(cell, "cohort.root_incident.affected_cell")); }
+  }
   return record;
 }
 
@@ -277,7 +309,7 @@ function matrixAliases(identity, body, display) {
     normalizedIdentity(`Release gate (${compatibility}; elixir=${elixir} otp=${otp} sigra=${sigra} opentelemetry=${opentelemetry})${support === "advisory" ? " [advisory]" : ""}`, "workflow matrix job")
   );
 }
-function workflowRunnerContracts(source = fs.readFileSync(WORKFLOW_RUNNER_PATH, "utf8")) {
+export function workflowRunnerContracts(source = fs.readFileSync(WORKFLOW_RUNNER_PATH, "utf8")) {
   const contracts = [];
   const pattern = /^  ([A-Za-z0-9_-]+):\n([\s\S]*?)(?=^  [A-Za-z0-9_-]+:\n|(?![\s\S]))/gm;
   for (const match of source.matchAll(pattern)) {
@@ -311,10 +343,10 @@ function workflowNeeds(name, run, present = new Set(), repo = "", contracts = wo
   return declared.filter((prerequisite) => !compatibilityRule(repo, run, normalized, prerequisite, present));
 }
 
-export function unresolvedPrerequisites(runs) {
+export function unresolvedPrerequisites(runs, contractsByRun = new Map()) {
   if (!Array.isArray(runs)) fail("runs must be an array");
   return runs.flatMap((run) => {
-    const contracts = workflowRunnerContracts();
+    const contracts = contractsByRun.get(run) || workflowRunnerContracts();
     const present = new Set((run.jobs || []).map((job) => normalizedIdentity(job.name, "job.name")));
     return (run.jobs || []).flatMap((job) => (job.needs === undefined ? workflowNeeds(job.name, run, present, run.repository || "szTheory/accrue", contracts) : job.needs)
       .map((prerequisite) => normalizedIdentity(prerequisite, "job.needs"))
@@ -374,13 +406,17 @@ export async function liveRuns(repo, workflow, windowDays, { fetchPages = fetchG
     results.push(...await Promise.all(listed.slice(index, index + LIVE_RUN_CONCURRENCY).map(async (run) => {
     if (!Number.isInteger(run.run_attempt) || run.run_attempt < 1) fail("run.run_attempt must be a positive integer");
     if (typeof run.head_sha !== "string" || !/^[0-9a-f]{40}$/i.test(run.head_sha)) fail("run.head_sha must be a full SHA");
-    const revision = validWorkflowRevision(run.workflow_revision) ? run.workflow_revision : workflowRevision(await loadWorkflow(repo, workflow, run.head_sha));
+    const source = await loadWorkflow(repo, workflow, run.head_sha);
+    if (typeof source !== "string" || source.length === 0) fail("workflow source must be a non-empty string");
+    // Fixture callers may supply a recorded historical digest without a Contents
+    // transport.  Production collection always uses the fetched bytes below.
+    const revision = fetchWorkflow || fetchPages === fetchGhPages ? workflowRevision(source) : (validWorkflowRevision(run.workflow_revision) ? run.workflow_revision : workflowRevision(source));
+    const contracts = workflowRunnerContracts(source);
     const attempt = run.run_attempt;
     const attemptJobs = (await fetchPages(`/repos/${repo}/actions/runs/${run.id}/attempts/${attempt}/jobs?per_page=100`)).flatMap((page) => page.jobs || []).map((job) => {
       if (job.run_attempt != null && job.run_attempt !== attempt) fail("job.run_attempt must match run.run_attempt");
       return job;
     }).filter((job) => job.conclusion !== "skipped" && typeof job.name === "string" && /[A-Za-z0-9]/.test(job.name) && job.started_at && job.completed_at && Date.parse(job.completed_at) >= Date.parse(job.started_at));
-    const contracts = workflowRunnerContracts();
     const eligibleJobs = attemptJobs.filter((job) => {
       const contract = resolveWorkflowJobIdentity(job.name, contracts);
       if (!TIMING_NODES_REQUIRING_COMPLETE_PREREQUISITES.has(contract.identity)) return true;
