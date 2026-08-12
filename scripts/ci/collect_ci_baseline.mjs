@@ -261,10 +261,14 @@ function compatibilityRule(repo, run, job, prerequisite, present) {
   ) || null;
 }
 
-function matrixAliases(identity, body) {
+function matrixAliases(identity, body, display) {
   if (identity === "playwright-e2e") {
     const shards = body.match(/shard:\s*\[([^\]]+)\]/)?.[1]?.split(",").map((value) => value.trim()).filter(Boolean) || [];
-    return shards.map((shard) => `playwright-e2e-shard-${shard}/${shards.length}`);
+    const aliases = shards.map((shard) => `playwright-e2e-shard-${shard}/${shards.length}`);
+    if (display === "Playwright E2E shard ${{ matrix.shard }}/${{ strategy.job-total }}" && shards.length > 0) {
+      aliases.push(normalizedIdentity(display, "workflow matrix job"));
+    }
+    return aliases;
   }
   if (identity !== "release-gate") return [];
   return [...body.matchAll(/- elixir: '([^']+)'\s+otp: '([^']+)'\s+sigra: '([^']+)'\s+opentelemetry: '([^']+)'\s+compatibility: '([^']+)'\s+support: '([^']+)'/g)].map(([, elixir, otp, sigra, opentelemetry, compatibility, support]) =>
@@ -282,7 +286,7 @@ function workflowRunnerContracts(source = fs.readFileSync(WORKFLOW_RUNNER_PATH, 
     if (!runsOn) continue;
     const canonical = display && !display.includes("${{") ? normalizedIdentity(display, "workflow job name") : identity;
     const needs = (body.match(/^    needs:\s*\[([^\]]*)\]$/m)?.[1]?.split(",").map((value) => value.trim()).filter(Boolean).map((value) => normalizedIdentity(value, "workflow prerequisite")) || []);
-    contracts.push({ identity, canonical, aliases: new Set([identity, canonical, ...matrixAliases(identity, body)]), needs, runsOn });
+    contracts.push({ identity, canonical, aliases: new Set([identity, canonical, ...matrixAliases(identity, body, display)]), needs, runsOn });
   }
   if (contracts.length === 0) fail("workflow runner contract has no jobs");
   return contracts;
