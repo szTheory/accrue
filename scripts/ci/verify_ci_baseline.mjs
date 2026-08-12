@@ -219,6 +219,52 @@ function stagedPathControls(fixture) {
   assert.throws(() => deriveStagedPathPercentiles([...collectBaseline(scheduledCompatible), ...summarizeCohorts(scheduledCompatible)]), /20 compatible complete paths/, "schedule/provider-only runs cannot fill the compatible population");
 }
 
+function historicalRevisionAndIdentityControls() {
+  const base = {
+    id: 1_700,
+    html_url: "https://github.com/szTheory/accrue/actions/runs/1700",
+    head_sha: "b".repeat(40),
+    created_at: "2026-08-11T06:00:00Z",
+    run_started_at: "2026-08-11T06:00:10Z",
+    updated_at: "2026-08-11T06:02:00Z",
+    event: "push",
+    head_branch: "main",
+    conclusion: "success",
+    run_attempt: 1,
+    workflow_revision: "sha256:4b6434c1d8e8472e3f93bdfc15f5a4d3d5d08d888f01f4a5f64ad11c4edba220"
+  };
+  const job = (name, id = 17_000) => ({
+    id,
+    html_url: `https://github.com/szTheory/accrue/actions/runs/1700/job/${id}`,
+    name,
+    started_at: "2026-08-11T06:00:20Z",
+    completed_at: "2026-08-11T06:01:00Z",
+    conclusion: "success"
+  });
+  const historicalHost = { ...base, jobs: [job("Host integration (required deterministic gate)")] };
+  assert.deepEqual(unresolvedPrerequisites([historicalHost]), [], "an audited historical revision admits its exact documented missing prerequisite");
+  for (const [label, run, expected] of [
+    ["unknown historical revision", { ...historicalHost, workflow_revision: "sha256:" + "0".repeat(64) }, /admin-drift-and-docs|docs-and-bash-contracts-shift-left/],
+    ["unknown historical topology", { ...base, jobs: [job("Host integration unknown topology")] }, /unresolved workflow job identity/],
+    ["malicious host suffix", { ...base, jobs: [job("Host integration attacker")] }, /unresolved workflow job identity/],
+    ["release suffix", { ...base, jobs: [job("Release gate attacker")] }, /unresolved workflow job identity/],
+    ["out-of-range Playwright shard", { ...base, jobs: [job("Playwright E2E shard 4/3")] }, /unresolved workflow job identity/]
+  ]) {
+    assert.throws(() => collectBaseline([run]), expected, `${label} fails before durable record emission`);
+  }
+  for (const name of [
+    "Playwright E2E shard 1/3",
+    "Playwright E2E shard 2/3",
+    "Playwright E2E shard 3/3",
+    "Release gate (Floor; elixir=1.19.0 otp=28.0 sigra=off opentelemetry=off)",
+    "Release gate (Primary dev target; elixir=1.19.5 otp=28.0 sigra=off opentelemetry=off)",
+    "Release gate (Primary dev target; elixir=1.19.5 otp=28.0 sigra=on opentelemetry=off) [advisory]",
+    "Release gate (Primary dev target; elixir=1.19.5 otp=28.0 sigra=off opentelemetry=on)"
+  ]) {
+    assert.doesNotThrow(() => workflowRunnerImage(name), `declared matrix identity resolves: ${name}`);
+  }
+}
+
 async function liveDisplayIdentityControls() {
   const workflow = fs.readFileSync(path.resolve(".github/workflows/ci.yml"), "utf8");
   const docsDisplayName = "Docs and bash contracts (shift-left)";
@@ -371,6 +417,7 @@ export async function verifyFixtures() {
     rejectsForbiddenFields(fixture);
     cohortControls(fixture);
     stagedPathControls(fixture);
+    historicalRevisionAndIdentityControls();
     await liveDisplayIdentityControls();
   } finally {
     fs.rmSync(temp, { recursive: true, force: true });
