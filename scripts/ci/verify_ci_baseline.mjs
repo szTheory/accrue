@@ -192,7 +192,7 @@ function stagedPathControls(fixture) {
   assert.equal(contrary.conclusion, "contrary_measured_result", "out-of-range staged path reports a measured contrary result");
 
   const missingHost = runs.map((run) => ({ ...run, jobs: run.jobs.filter((job) => job.name !== "host-integration") }));
-  assert.throws(() => deriveStagedPathPercentiles([...collectBaseline(missingHost), ...summarizeCohorts(missingHost)]), /missing host-integration stage/, "missing host stage is rejected at the staged-path boundary");
+  assert.throws(() => deriveStagedPathPercentiles([...collectBaseline(missingHost), ...summarizeCohorts(missingHost)]), /unresolved prerequisite host-integration|missing host-integration stage/, "missing host stage is rejected before staged-path arithmetic");
   const badOrderRecords = records.map((record) => record.kind === "job" && record.stable_identity === "playwright-e2e" ? { ...record, started_at: new Date(Date.parse(record.started_at) - 200_000).toISOString() } : record);
   assert.throws(() => deriveStagedPathPercentiles(badOrderRecords), /Playwright stage must start after host-integration/, "stage ordering is rejected at the staged-path boundary");
   const rerun = [...runs.slice(0, 19), stagedRun(fixture.successful_run, 720, 20, { original_run_id: 700, run_attempt: 2, head_sha: runs[0].head_sha })];

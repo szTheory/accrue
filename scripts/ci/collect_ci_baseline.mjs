@@ -92,7 +92,7 @@ export function normalizeRun(run) {
   const started = timestamp(run.run_started_at, "run.run_started_at");
   const completed = timestamp(run.updated_at, "run.updated_at");
   if (started < created || completed < started) fail("run timestamps are not monotonic");
-  const providerState = run.provider_state || (eventClass(run.event) === "schedule" ? "non_run" : "proved");
+  const providerState = run.provider_state ?? "non_run";
   if (!PROVIDER_STATES.has(providerState)) fail(`run.provider_state is unsupported: ${providerState}`);
   return {
     schema_version: SCHEMA_VERSION, kind: "run", run_id: run.id, run_url: immutableUrl(run.html_url, "run.html_url"), sha: run.head_sha.slice(0, 12),
@@ -100,6 +100,20 @@ export function normalizeRun(run) {
     cohort_fingerprint: cohortFingerprint(run), workflow_duration_ms: completed - started, conclusion: conclusion(run.conclusion, "run.conclusion"),
     run_attempt: Number.isInteger(run.run_attempt) && run.run_attempt > 0 ? run.run_attempt : 1, original_run_id: Number.isInteger(run.original_run_id) ? run.original_run_id : run.id, provider_state: providerState
   };
+}
+
+function prerequisiteCompletions(needs, dependentIdentity, dependentStart, completedByName) {
+  return needs.map((need) => {
+    const prerequisiteIdentity = normalizedIdentity(need, "job.needs");
+    const completion = completedByName.get(prerequisiteIdentity);
+    if (!Number.isFinite(completion)) {
+      fail(`job ${dependentIdentity} has unresolved prerequisite ${prerequisiteIdentity}`);
+    }
+    if (completion > dependentStart) {
+      fail(`job ${dependentIdentity} starts before prerequisite ${prerequisiteIdentity} completes`);
+    }
+    return completion;
+  });
 }
 
 export function normalizeJob(job, run, completedByName = new Map()) {
@@ -111,7 +125,7 @@ export function normalizeJob(job, run, completedByName = new Map()) {
   if (end < start) fail("job has negative duration");
   const needs = job.needs || [];
   if (!Array.isArray(needs) || needs.some((item) => typeof item !== "string")) fail("job.needs must be a string array");
-  const prerequisiteEnds = needs.map((need) => completedByName.get(normalizedIdentity(need, "job.needs"))).filter(Boolean);
+  const prerequisiteEnds = prerequisiteCompletions(needs, stableIdentity, start, completedByName);
   const runCreated = timestamp(run.created_at, "run.created_at");
   const runnerQueue = needs.length === 0 ? start - runCreated : null;
   const dagWait = needs.length === 0 ? null : start - Math.max(...prerequisiteEnds);
@@ -257,8 +271,6 @@ async function liveRuns(repo, workflow, windowDays) {
       conclusion: CONCLUSIONS.has(job.conclusion) ? job.conclusion : "unknown", runner_image: job.runner_name ? "github-hosted" : "unknown", needs: workflowNeeds(job.name),
       setup_costs: setupCosts(job.steps), cache: cacheFacts(job.steps)
     }));
-    const completed = new Map(jobs.map((job) => [normalizedIdentity(job.name, "job.name"), Date.parse(job.completed_at)]));
-    for (const job of jobs) job.needs = job.needs.filter((need) => completed.has(normalizedIdentity(need, "job.needs")) && completed.get(normalizedIdentity(need, "job.needs")) <= Date.parse(job.started_at));
     const createdAt = run.created_at;
     const startedAt = Date.parse(run.run_started_at || createdAt) < Date.parse(createdAt) ? createdAt : (run.run_started_at || createdAt);
     const updatedAt = Date.parse(run.updated_at) < Date.parse(startedAt) ? startedAt : run.updated_at;
