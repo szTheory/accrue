@@ -253,7 +253,7 @@ async function liveDisplayIdentityControls() {
   const historicalScheduledFetch = async (endpoint) => endpoint.includes("/jobs?")
     ? [{ jobs: historicalScheduledJobs }]
     : [{ workflow_runs: [historicalScheduledRun] }];
-  const historicalScheduledRecords = collectBaseline(await liveRuns("acme/accrue", "ci.yml", 90, {
+  const historicalScheduledRecords = collectBaseline(await liveRuns("szTheory/accrue", "ci.yml", 90, {
     fetchPages: historicalScheduledFetch,
     now: () => Date.parse("2026-08-11T06:04:00Z")
   }));
@@ -265,7 +265,7 @@ async function liveDisplayIdentityControls() {
   const historicalNonScheduledFetch = async (endpoint) => endpoint.includes("/jobs?")
     ? [{ jobs: historicalScheduledJobs }]
     : [{ workflow_runs: [{ ...historicalScheduledRun, event: "push" }] }];
-  const historicalNonScheduledRuns = await liveRuns("acme/accrue", "ci.yml", 90, {
+  const historicalNonScheduledRuns = await liveRuns("szTheory/accrue", "ci.yml", 90, {
     fetchPages: historicalNonScheduledFetch,
     now: () => Date.parse("2026-08-11T06:04:00Z")
   });
@@ -305,10 +305,11 @@ async function liveDisplayIdentityControls() {
     created_at: "2026-08-11T06:00:00Z",
     event: "workflow_dispatch",
     jobs: [
+      { ...jobs[0], id: 9819, name: "Admin hardening guardrails (Phase 192)", started_at: "2026-08-11T06:00:15Z", completed_at: "2026-08-11T06:00:19Z" },
       { ...jobs[0], id: 9820, name: "Admin UI ratchet guardrails", started_at: "2026-08-11T06:00:20Z", completed_at: "2026-08-11T06:01:00Z" }
     ]
   };
-  const historicalRatchet = await liveRuns("acme/accrue", "ci.yml", 90, {
+  const historicalRatchet = await liveRuns("szTheory/accrue", "ci.yml", 90, {
     fetchPages: async (endpoint) => endpoint.includes("/jobs?") ? [{ jobs: historicalRatchetRun.jobs }] : [{ workflow_runs: [historicalRatchetRun] }],
     now: () => Date.parse("2026-08-11T06:04:00Z")
   });
@@ -317,7 +318,7 @@ async function liveDisplayIdentityControls() {
     [],
     "the audited historical ratchet compatibility rule resolves its absent Phase 200 prerequisite"
   );
-  const futureRatchet = await liveRuns("acme/accrue", "ci.yml", 90, {
+  const futureRatchet = await liveRuns("szTheory/accrue", "ci.yml", 90, {
     fetchPages: async (endpoint) => endpoint.includes("/jobs?") ? [{ jobs: historicalRatchetRun.jobs }] : [{ workflow_runs: [{ ...historicalRatchetRun, created_at: "2026-08-13T06:00:00Z" }] }],
     now: () => Date.parse("2026-08-13T06:04:00Z")
   });
@@ -326,6 +327,26 @@ async function liveDisplayIdentityControls() {
     ["job admin-ui-ratchet-guardrails has unresolved prerequisite admin-phase200-guardrails"],
     "future ratchet runs cannot inherit the historical compatibility rule"
   );
+
+  const compatibilityCases = [
+    { event: "schedule", name: "Admin drift and docs", expected: "release-gate" },
+    { event: "push", name: "Host Docker boot smoke", expected: "docs-and-bash-contracts-shift-left" },
+    { event: "push", name: "Host integration (required deterministic gate)", expected: "admin-drift-and-docs" },
+    { event: "push", name: "Playwright E2E shard 1/3", expected: "host-integration" }
+  ];
+  for (const [index, compatibility] of compatibilityCases.entries()) {
+    const historicalRun = { ...run, id: 990 + index, event: compatibility.event, created_at: "2026-08-11T06:00:00Z", jobs: [{ ...jobs[0], id: 9900 + index, name: compatibility.name, started_at: "2026-08-11T06:00:20Z", completed_at: "2026-08-11T06:01:00Z" }] };
+    const fetch = async (endpoint) => endpoint.includes("/jobs?") ? [{ jobs: historicalRun.jobs }] : [{ workflow_runs: [historicalRun] }];
+    const historical = await liveRuns("szTheory/accrue", "ci.yml", 90, { fetchPages: fetch, now: () => Date.parse("2026-08-11T06:04:00Z") });
+    assert.deepEqual(unresolvedPrerequisites(historical), [], `historical compatibility accepts ${compatibility.name} only in its audited era`);
+    const future = await liveRuns("szTheory/accrue", "ci.yml", 90, { fetchPages: async (endpoint) => endpoint.includes("/jobs?") ? [{ jobs: historicalRun.jobs }] : [{ workflow_runs: [{ ...historicalRun, created_at: "2026-08-13T06:00:00Z" }] }], now: () => Date.parse("2026-08-13T06:04:00Z") });
+    assert.ok(unresolvedPrerequisites(future).some((message) => message.endsWith(` ${compatibility.expected}`)), `future ${compatibility.name} remains fail-closed for ${compatibility.expected}`);
+  }
+  const scheduledRatchetOnly = { ...run, id: 998, event: "schedule", created_at: "2026-08-11T06:00:00Z", jobs: [{ ...jobs[0], id: 9980, name: "Admin UI ratchet guardrails", started_at: "2026-08-11T06:00:20Z", completed_at: "2026-08-11T06:01:00Z" }] };
+  const scheduledRatchet = await liveRuns("szTheory/accrue", "ci.yml", 90, { fetchPages: async (endpoint) => endpoint.includes("/jobs?") ? [{ jobs: scheduledRatchetOnly.jobs }] : [{ workflow_runs: [scheduledRatchetOnly] }], now: () => Date.parse("2026-08-11T06:04:00Z") });
+  assert.deepEqual(unresolvedPrerequisites(scheduledRatchet), [], "scheduled ratchet compatibility includes its historical hardening prerequisite absence");
+  const futureScheduledRatchet = await liveRuns("szTheory/accrue", "ci.yml", 90, { fetchPages: async (endpoint) => endpoint.includes("/jobs?") ? [{ jobs: scheduledRatchetOnly.jobs }] : [{ workflow_runs: [{ ...scheduledRatchetOnly, created_at: "2026-08-13T06:00:00Z" }] }], now: () => Date.parse("2026-08-13T06:04:00Z") });
+  assert.ok(unresolvedPrerequisites(futureScheduledRatchet).some((message) => message.endsWith(" admin-hardening-guardrails")), "future scheduled ratchet runs remain fail-closed for the historical hardening prerequisite");
 }
 
 export async function verifyFixtures() {

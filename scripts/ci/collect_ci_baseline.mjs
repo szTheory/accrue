@@ -147,6 +147,8 @@ export function normalizeJob(job, run, completedByName = new Map()) {
 
 export function collectBaseline(runs) {
   if (!Array.isArray(runs)) fail("runs must be an array");
+  const unresolved = unresolvedPrerequisites(runs);
+  if (unresolved.length > 0) fail(unresolved.join("; "));
   return runs.flatMap((run) => {
     const normalizedRun = normalizeRun(run);
     const completed = new Map((run.jobs || []).map((job) => [normalizedIdentity(job.name, "job.name"), timestamp(job.completed_at, "job.completed_at")]));
@@ -233,21 +235,48 @@ function ghJsonAsync(endpoint, paginate = false) {
     });
   });
 }
-const HISTORICAL_SCHEDULED_ROOT_JOBS = new Set(["admin-drift-and-docs"]);
+// This is deliberately a closed, time-bounded inventory rather than a fallback for
+// missing jobs.  Each row was established from the repository's workflow history
+// and the authenticated 90-day Actions inventory on 2026-08-12.  It describes old
+// workflow generations only; current and future runs still use the declared DAG.
+const HISTORICAL_DAG_COMPATIBILITY_CUTOFF = "2026-08-12T14:00:00Z";
+const HISTORICAL_DAG_COMPATIBILITY = [
+  { job: "admin-drift-and-docs", prerequisite: "release-gate", events: ["schedule"], era: "scheduled-provider-only root before the 226 baseline snapshot", rule: "treat as scheduled root", evidence: "090685036" },
+  { job: "admin-ui-ratchet-guardrails", prerequisite: "admin-hardening-guardrails", events: ["schedule"], era: "parked scheduled ratchet before the 226 baseline snapshot", rule: "treat as scheduled root", evidence: "737c07f5" },
+  { job: "admin-ui-ratchet-guardrails", prerequisite: "admin-phase200-guardrails", events: ["push", "pull_request", "workflow_dispatch", "schedule"], era: "parked ratchet workflow generation before the 226 baseline snapshot", rule: "retain the observed ratchet root when Phase 200 is absent", evidence: "79f268eb,737c07f5" },
+  { job: "host-docker-boot-smoke", prerequisite: DOCS_PREREQUISITE, events: ["push", "pull_request", "workflow_dispatch", "schedule"], era: "pre-226 host-smoke workflow generation", rule: "treat the retired/missing docs prerequisite as absent from this historical lane", evidence: "332bddce,c1ea350a" },
+  { job: "host-integration", prerequisite: "admin-drift-and-docs", events: ["push", "pull_request", "workflow_dispatch", "schedule"], era: "pre-226 host-integration workflow generation", rule: "retain the observed host root when admin drift is absent", evidence: "1426a6b3" },
+  { job: "host-integration", prerequisite: DOCS_PREREQUISITE, events: ["push", "pull_request", "workflow_dispatch", "schedule"], era: "pre-226 host-integration workflow generation", rule: "retain the observed host root when docs is absent", evidence: "332bddce,1426a6b3" },
+  { job: "playwright-e2e", prerequisite: "host-integration", events: ["push", "pull_request", "workflow_dispatch", "schedule"], era: "pre-226 Playwright workflow generation", rule: "retain the observed Playwright root when host integration is absent", evidence: "c1ea350a" }
+];
 
-function workflowNeeds(name, event) {
+function compatibilityRule(repo, run, job, prerequisite, present) {
+  const created = Date.parse(run.created_at);
+  if (repo !== "szTheory/accrue" || !Number.isFinite(created) || created >= Date.parse(HISTORICAL_DAG_COMPATIBILITY_CUTOFF) || present.has(prerequisite)) return null;
+  return HISTORICAL_DAG_COMPATIBILITY.find((rule) =>
+    (rule.job === job || job.startsWith(`${rule.job}-`)) && rule.prerequisite === prerequisite && rule.events.includes(run.event)
+  ) || null;
+}
+
+function workflowNeeds(name, run, present = new Set(), repo = "") {
   const normalized = normalizedIdentity(name, "job.name");
   // Dependencies are matched against normalized Actions display names, never YAML job IDs.
-  // Historical scheduled runs predate the release-gate dependency for this job. This
-  // narrow mapping preserves that observed topology; all other missing prerequisites
-  // continue to fail closed in normalizeJob().
-  if (event === "schedule" && HISTORICAL_SCHEDULED_ROOT_JOBS.has(normalized)) return [];
-  if (normalized.startsWith("host-integration")) return ["admin-drift-and-docs", DOCS_PREREQUISITE];
-  if (normalized.startsWith("playwright-e2e")) return ["host-integration"];
-  if (normalized.startsWith("admin-drift-and-docs")) return ["release-gate"];
-  if (normalized.startsWith("admin-ui-ratchet-guardrails")) return ["admin-hardening-guardrails", "admin-phase200-guardrails"];
-  if (normalized.startsWith("host-docker-boot-smoke")) return [DOCS_PREREQUISITE];
-  return [];
+  const declared = normalized.startsWith("host-integration") ? ["admin-drift-and-docs", DOCS_PREREQUISITE]
+    : normalized.startsWith("playwright-e2e") ? ["host-integration"]
+      : normalized.startsWith("admin-drift-and-docs") ? ["release-gate"]
+        : normalized.startsWith("admin-ui-ratchet-guardrails") ? ["admin-hardening-guardrails", "admin-phase200-guardrails"]
+          : normalized.startsWith("host-docker-boot-smoke") ? [DOCS_PREREQUISITE] : [];
+  return declared.filter((prerequisite) => !compatibilityRule(repo, run, normalized, prerequisite, present));
+}
+
+export function unresolvedPrerequisites(runs) {
+  if (!Array.isArray(runs)) fail("runs must be an array");
+  return runs.flatMap((run) => {
+    const present = new Set((run.jobs || []).map((job) => normalizedIdentity(job.name, "job.name")));
+    return (run.jobs || []).flatMap((job) => (job.needs || []).map((prerequisite) => normalizedIdentity(prerequisite, "job.needs"))
+      .filter((prerequisite) => !present.has(prerequisite))
+      .map((prerequisite) => `job ${normalizedIdentity(job.name, "job.name")} has unresolved prerequisite ${prerequisite}`));
+  }).sort();
 }
 function setupCosts(steps = []) {
   const costs = {};
@@ -311,12 +340,14 @@ export async function liveRuns(repo, workflow, windowDays, { fetchPages = fetchG
     results.push(...await Promise.all(listed.slice(index, index + 12).map(async (run) => {
     if (!Number.isInteger(run.run_attempt) || run.run_attempt < 1) fail("run.run_attempt must be a positive integer");
     const attempt = run.run_attempt;
-    const jobs = (await fetchPages(`/repos/${repo}/actions/runs/${run.id}/attempts/${attempt}/jobs?per_page=100`)).flatMap((page) => page.jobs || []).map((job) => {
+    const attemptJobs = (await fetchPages(`/repos/${repo}/actions/runs/${run.id}/attempts/${attempt}/jobs?per_page=100`)).flatMap((page) => page.jobs || []).map((job) => {
       if (job.run_attempt != null && job.run_attempt !== attempt) fail("job.run_attempt must match run.run_attempt");
       return job;
-    }).filter((job) => typeof job.name === "string" && /[A-Za-z0-9]/.test(job.name) && job.started_at && job.completed_at && Date.parse(job.completed_at) >= Date.parse(job.started_at)).map((job) => ({
+    }).filter((job) => typeof job.name === "string" && /[A-Za-z0-9]/.test(job.name) && job.started_at && job.completed_at && Date.parse(job.completed_at) >= Date.parse(job.started_at));
+    const present = new Set(attemptJobs.map((job) => normalizedIdentity(job.name, "job.name")));
+    const jobs = attemptJobs.map((job) => ({
       id: job.id, html_url: job.html_url, name: job.name, started_at: job.started_at, completed_at: job.completed_at,
-      conclusion: CONCLUSIONS.has(job.conclusion) ? job.conclusion : "unknown", runner_image: workflowRunnerImage(job.name), needs: workflowNeeds(job.name, run.event),
+      conclusion: CONCLUSIONS.has(job.conclusion) ? job.conclusion : "unknown", runner_image: workflowRunnerImage(job.name), needs: workflowNeeds(job.name, run, present, repo),
       setup_costs: setupCosts(job.steps), cache: cacheFacts(job.steps)
     }));
     const createdAt = run.created_at;
