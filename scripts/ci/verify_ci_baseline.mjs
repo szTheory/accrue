@@ -220,11 +220,18 @@ function stagedPathControls(fixture) {
 }
 
 async function liveDisplayIdentityControls() {
+  const workflow = fs.readFileSync(path.resolve(".github/workflows/ci.yml"), "utf8");
+  const docsDisplayName = "Docs and bash contracts (shift-left)";
+  assert.match(
+    workflow,
+    /^  docs-contracts-shift-left:\n    name: Docs and bash contracts \(shift-left\)$/m,
+    "the live fixture remains coupled to the docs-contracts-shift-left workflow display name"
+  );
   const run = { id: 980, html_url: "https://github.com/acme/accrue/actions/runs/980", head_sha: "a".repeat(40), created_at: "2026-08-11T06:00:00Z", run_started_at: "2026-08-11T06:00:10Z", updated_at: "2026-08-11T06:04:00Z", event: "push", head_branch: "main", conclusion: "success", run_attempt: 1 };
   const jobs = [
     [9800, "Release gate (Primary dev target)", "2026-08-11T06:00:15Z", "2026-08-11T06:00:19Z"],
     [9801, "Admin drift and docs", "2026-08-11T06:00:20Z", "2026-08-11T06:01:00Z"],
-    [9802, "Docs contracts shift-left", "2026-08-11T06:00:25Z", "2026-08-11T06:01:10Z"],
+    [9802, docsDisplayName, "2026-08-11T06:00:25Z", "2026-08-11T06:01:10Z"],
     [9803, "Host integration (required deterministic gate)", "2026-08-11T06:01:20Z", "2026-08-11T06:03:00Z"],
   ].map(([id, name, started_at, completed_at]) => ({ id, html_url: `https://github.com/acme/accrue/actions/runs/980/job/${id}`, name, started_at, completed_at, conclusion: "success", runner_name: "github-hosted", steps: [] }));
   const fetchPages = async (endpoint) => endpoint.includes("/jobs?") ? [{ jobs }] : [{ workflow_runs: [run] }];
@@ -232,8 +239,9 @@ async function liveDisplayIdentityControls() {
   const host = records.find((record) => record.kind === "job" && record.stable_identity === "host-integration");
   assert.equal(host.dag_wait_ms, 10_000, "host resolves current display-name prerequisites in the live collector");
   for (const [name, mutate, pattern] of [
-    ["absent", (items) => items.filter((job) => job.name !== "Docs contracts shift-left"), /unresolved prerequisite docs-contracts-shift-left/],
-    ["temporal", (items) => items.map((job) => job.name === "Docs contracts shift-left" ? { ...job, completed_at: "2026-08-11T06:01:30Z" } : job), /starts before prerequisite docs-contracts-shift-left completes/],
+    ["absent", (items) => items.filter((job) => job.name !== docsDisplayName), /unresolved prerequisite docs-and-bash-contracts-shift-left/],
+    ["spelling drift", (items) => items.map((job) => job.name === docsDisplayName ? { ...job, name: "Docs and bash contract (shift-left)" } : job), /unresolved prerequisite docs-and-bash-contracts-shift-left/],
+    ["temporal", (items) => items.map((job) => job.name === docsDisplayName ? { ...job, completed_at: "2026-08-11T06:01:30Z" } : job), /starts before prerequisite docs-and-bash-contracts-shift-left completes/],
   ]) {
     const broken = await liveRuns("acme/accrue", "ci.yml", 90, { fetchPages: async (endpoint) => endpoint.includes("/jobs?") ? [{ jobs: mutate(jobs) }] : [{ workflow_runs: [run] }], now: () => Date.parse("2026-08-11T06:04:00Z") });
     assert.throws(() => collectBaseline(broken), pattern, `${name} live prerequisite fails closed`);
