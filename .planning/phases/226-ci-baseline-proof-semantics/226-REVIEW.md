@@ -1,6 +1,6 @@
 ---
 phase: 226-ci-baseline-proof-semantics
-reviewed: 2026-08-11T00:00:00Z
+reviewed: 2026-08-12T15:43:15Z
 depth: standard
 files_reviewed: 15
 files_reviewed_list:
@@ -21,50 +21,61 @@ files_reviewed_list:
   - scripts/ci/verify_provider_proof.mjs
 findings:
   critical: 2
-  warning: 0
+  warning: 1
   info: 0
-  total: 2
+  total: 3
 status: issues_found
 ---
 
 # Phase 226: Code Review Report
 
-**Reviewed:** 2026-08-11T00:00:00Z
+**Reviewed:** 2026-08-12T15:43:15Z
 **Depth:** standard
 **Files Reviewed:** 15
 **Status:** issues_found
 
 ## Summary
 
-The host diagnostics and provider-proof path were reviewed along with the CI-baseline collector and renderers. Fixture suites pass, but the live collector can combine data from different rerun attempts and incorrectly labels every executed runner as GitHub-hosted. Either defect can produce a false comparable-cohort/critical-path claim.
+The CI evidence and provider-proof changes were reviewed, including the attempt-specific Actions fetch, privacy-safe records, trusted runner classification, and bounded historical DAG logic. The supplied fixture suites pass, but the new collector is not fail-closed for all unknown historical topology or job identities. The host wrapper also bypasses its diagnostic contract when its initial database readiness check fails.
 
 ## Narrative Findings (AI reviewer)
 
 ## Critical Issues
 
-### CR-01: Historical jobs from earlier workflow attempts contaminate the current run
+### CR-01: Historical DAG compatibility accepts unaudited pre-cutoff topology
 
-**File:** `scripts/ci/collect_ci_baseline.mjs:276`
-**Issue:** The collector requests `jobs?filter=all` but emits one run record using the workflow run's current `run_attempt` and conclusion. GitHub's `all` filter includes jobs from prior attempts of the same workflow run. Those prior jobs are then put in the same run as the current attempt without an attempt identifier. A failed first attempt followed by a successful rerun can therefore contribute old successful stage timings, old failure signatures, or duplicate stage identities to the successful run. The renderer selects jobs by `run_id`, so its release/host/Playwright path can be assembled from different attempts and reported as valid evidence.
+**Classification:** BLOCKER
 
-**Fix:** Request only the latest attempt's jobs (use `filter=latest`, or omit the filter if that is the documented API default), and add a fixture with two attempts to prove previous jobs cannot appear in the normalized run.
+**File:** `scripts/ci/collect_ci_baseline.mjs:253-258`
 
-```js
-const jobs = (await fetchPages(
-  `/repos/${repo}/actions/runs/${run.id}/jobs?filter=latest&per_page=100`
-))
-  .flatMap((page) => page.jobs || []);
-```
+**Issue:** A compatibility exception is granted solely from repository name, `created_at` being before the cutoff, event name, and a job-name prefix. It never verifies the immutable workflow revision that the run actually executed. Consequently, any unknown old `szTheory/accrue` run with a matching display name and a missing prerequisite is accepted as one of the audited historical workflow generations. This contradicts the stated bounded-inventory/fail-closed contract and can create durable timing/DAG evidence from an incompatible topology.
 
-### CR-02: Runner-image cohorting is fabricated instead of observed
+**Fix:** Bind every compatibility row to an immutable workflow identity. Fetch and parse the workflow at the run's `head_sha` (or use a verified immutable workflow revision supplied by the API), and apply an exception only when that revision and the exact job identity match the allowlist; otherwise retain the missing prerequisite and fail collection. Add fixtures for an unknown pre-cutoff revision and a same-name job that must be rejected.
 
-**File:** `scripts/ci/collect_ci_baseline.mjs:278`
-**Issue:** `runner_image` is set to `"github-hosted"` whenever GitHub supplies a `runner_name`. Both GitHub-hosted and self-hosted jobs have a runner name, and the value does not identify the OS/image. The cohort fingerprint relies on this field (lines 67-68), so changes from Ubuntu 22 to Ubuntu 24, or a switch to self-hosted runners, can be silently mixed into a supposedly comparable timing cohort. That makes the p50/p95 and critical-path evidence materially incorrect after a runner change.
+### CR-02: Prefix matching turns unknown jobs into trusted runner contracts
 
-**Fix:** Obtain and persist a real, privacy-safe runner class/image from a trusted workflow/config mapping (for example, map known workflow job identities to their `runs-on` class), fail closed when it cannot be determined, and include tests that demonstrate distinct images/classes yield distinct fingerprints.
+**Classification:** BLOCKER
+
+**File:** `scripts/ci/collect_ci_baseline.mjs:322-330`
+
+**Issue:** `workflowRunnerImage` accepts any normalized name beginning with a workflow job ID or display name. For example, the current implementation classifies `Host integration (required deterministic gate) malicious-shard` and `Release gate attacker` as `github-hosted/ubuntu-24.04`, rather than rejecting them. The same broad prefix strategy is used by `workflowNeeds` at lines 264-268 and historical matching at line 257. This makes unknown jobs look like trusted, declared jobs and defeats the required fail-closed runner/topology boundary; their measurements can enter cohort evidence under an incorrect runner class.
+
+**Fix:** Use exact normalized identities by default. Where a job legitimately has matrix-generated names, enumerate the expected identities or accept only a narrowly defined matrix suffix (for example, a shard-number pattern) associated with that one job. Reject every other suffix and add regression fixtures for spoofed prefix names.
+
+## Warnings
+
+### WR-01: Postgres readiness failure skips the setup diagnostic entirely
+
+**Classification:** WARNING
+
+**File:** `scripts/ci/accrue_host_uat.sh:28-35`
+
+**Issue:** With `set -e`, a nonzero `pg_isready` exits the wrapper before `mix verify.full` and before the failure branch that emits/renders `host_gate_failure`. The setup-facts artifact is therefore empty and no stable `SETUP_CODE`/owner/repair command is printed for a common host-integration prerequisite failure, despite this script being the diagnostic boundary.
+
+**Fix:** Run `pg_isready` under an explicit status check. On failure, emit the appropriate fixed registry code (for example `fixture_or_database`), render it, print `FAILED_GATE=host-integration`, and exit with the captured status. Add a fixture that shadows `pg_isready` to fail and asserts the fact and rendered diagnostic.
 
 ---
 
-_Reviewed: 2026-08-11T00:00:00Z_
+_Reviewed: 2026-08-12T15:43:15Z_
 _Reviewer: the agent (gsd-code-reviewer)_
 _Depth: standard_
