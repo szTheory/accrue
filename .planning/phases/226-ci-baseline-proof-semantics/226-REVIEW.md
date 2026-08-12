@@ -1,17 +1,15 @@
 ---
 phase: 226-ci-baseline-proof-semantics
-reviewed: 2026-08-12T17:21:00Z
+reviewed: 2026-08-12T17:56:43Z
 depth: standard
-files_reviewed: 18
+files_reviewed: 16
 files_reviewed_list:
-  - .github/workflows/ci.yml
   - accrue/test/accrue/live_proof_formatter_test.exs
   - accrue/test/support/live_proof_formatter.ex
   - accrue/test/test_helper.exs
   - examples/accrue_host/README.md
   - examples/accrue_host/package.json
   - guides/testing-live-stripe.md
-  - scripts/ci/README.md
   - scripts/ci/accrue_host_uat.sh
   - scripts/ci/accrue_host_verify_browser.sh
   - scripts/ci/ci_setup_diagnostic.sh
@@ -23,8 +21,8 @@ files_reviewed_list:
   - scripts/ci/verify_ci_setup_diagnostics.sh
   - scripts/ci/verify_provider_proof.mjs
 findings:
-  critical: 1
-  warning: 1
+  critical: 2
+  warning: 0
   info: 0
   total: 2
 status: issues_found
@@ -32,47 +30,37 @@ status: issues_found
 
 # Phase 226: Code Review Report
 
-**Reviewed:** 2026-08-12T17:21:00Z
+**Reviewed:** 2026-08-12T17:56:43Z
 **Depth:** standard
-**Files Reviewed:** 18
+**Files Reviewed:** 16
 **Status:** issues_found
 
 ## Summary
 
-The CI proof, host diagnostic, baseline, and documentation changes were reviewed in context. The supplied fixture verifiers pass, but a direct `ACCRUE_PROVIDER_MANIFEST=<temp> mix test.live --trace` run produced `10 tests, 0 failures, 10 skipped (2114 excluded)` while the emitted manifest recorded `selected_count: 2124`, `failed_count: 2114`, and `skipped_count: 10`. Consequently, the required periodic provider-proof job classifies a valid live suite as `misconfigured`/`failed`, rather than `proved`.
+The provider-proof, host-diagnostic, and CI-baseline sources were reviewed in context, including the CI workflow they consume. The included fixture suites pass, but two defects make the resulting CI evidence unreliable: historical runs are evaluated against the current workflow DAG, and a syntactically complete but forged NDJSON record can alter the rendered evidence report.
+
+## Narrative Findings (AI reviewer)
 
 ## Critical Issues
 
-### CR-01: Excluded tests are recorded as selected failures in the live-provider manifest
+### CR-01: Historical runs are parsed with the current workflow topology
 
-**File:** `accrue/test/support/live_proof_formatter.ex:31-49`
+**Classification:** BLOCKER
+**File:** `/Users/jon/projects/accrue/scripts/ci/collect_ci_baseline.mjs:280-385`
+**Issue:** `liveRuns` fetches the workflow file at each run's `head_sha` only to hash it at line 365. All subsequent identity, runner, and dependency resolution at lines 372-385 calls `workflowRunnerContracts()` without that fetched content, which defaults to the repository's current `ci.yml`. A legitimate historical run whose job names, matrix aliases, or `needs` differ from the current workflow is therefore rejected as unresolved or assigned the wrong DAG/runner metrics. This defeats the collector's stated revision-aware historical baseline and can produce a falsely incomplete or incorrect timing cohort after normal workflow evolution.
 
-**Issue:** `mix test.live` is implemented as `mix test --only live_stripe`, so ExUnit emits `{:excluded, ...}` completion states for every untagged test. The formatter only treats `nil` as passed and `{:skipped, ...}` as skipped; its catch-all increments `failed_count`. In the direct run, 2,114 excluded tests became failures. The workflow finalizer then rejects the manifest (`skipped_count > 0` or `failed_count > 0`), so the scheduled/manual live-Stripe job can never produce its intended `proved` record even when all selected provider tests pass.
+**Fix:** Parse and retain contracts from the fetched `workflowSource` for that run, then pass those contracts to `resolveWorkflowJobIdentity`, `workflowRunnerImage`, and `workflowNeeds`. Use the current workflow only when collecting a current local fixture intentionally has no historical source.
 
-**Fix:** Ignore excluded completions entirely and add an integration test that runs the formatter against `mix test --only live_stripe` semantics (or explicitly sends `{:excluded, _}`), asserting only selected tests enter the manifest.
+### CR-02: Renderer validates field names but permits forged Markdown evidence
 
-```elixir
-defp increment(state, {:excluded, _reason}), do: state
+**Classification:** BLOCKER
+**File:** `/Users/jon/projects/accrue/scripts/ci/render_ci_baseline.mjs:84-90`
+**Issue:** The renderer calls `validateRecord`, but that function only checks schema version, record kind, allowed fields, and a few enums; it does not validate URLs, timestamps, IDs, or numeric fields. The raw `run_url` and `job_url` are then interpolated directly into Markdown links. For example, a valid-field run record with `run_url: "https://x.test/)\\n# forged"` renders an injected `# forged` heading. Since this command accepts arbitrary `--input` NDJSON and produces an artifact presented as immutable, privacy-safe CI evidence, a tampered record can forge report content and evidence links.
 
-defp increment(state, nil),
-  do: %{state | selected_count: state.selected_count + 1, passed_count: state.passed_count + 1}
-
-defp increment(state, {:skipped, _reason}),
-  do: %{state | selected_count: state.selected_count + 1, skipped_count: state.skipped_count + 1}
-```
-
-## Warnings
-
-### WR-01: Live-Stripe enforcement documentation contradicts the workflow
-
-**File:** `guides/testing-live-stripe.md:125-132`
-
-**Issue:** The guide states that `continue-on-error: true` makes the manual-dispatch job advisory. The actual `live-stripe` job has no `continue-on-error` and passes `--policy required` to the finalizer in `.github/workflows/ci.yml:1254-1333`. This gives maintainers the wrong incident-response expectation when the periodic proof fails.
-
-**Fix:** Replace the advisory/`continue-on-error` claim with the current required periodic-proof policy, and explain that it is scheduled/manual-only rather than a pull-request gate.
+**Fix:** Make `validateRecord` perform full per-kind semantic validation (or re-normalize each record) before rendering, including `immutableUrl` for URL fields and timestamp/integer validation. Additionally escape or reject `]`, `(`, `)`, and line breaks in link destinations rather than interpolating untrusted URL strings.
 
 ---
 
-_Reviewed: 2026-08-12T17:21:00Z_
+_Reviewed: 2026-08-12T17:56:43Z_
 _Reviewer: the agent (gsd-code-reviewer)_
 _Depth: standard_
