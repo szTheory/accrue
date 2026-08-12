@@ -11,6 +11,7 @@ const CONCLUSIONS = new Set(["success", "failure", "cancelled", "skipped", "neut
 const PROVIDER_STATES = new Set(["proved", "failed", "misconfigured", "blocked", "skipped", "non_run"]);
 const DOCS_DISPLAY_NAME = "Docs and bash contracts (shift-left)";
 const DOCS_PREREQUISITE = "docs-and-bash-contracts-shift-left";
+const LIVE_RUN_CONCURRENCY = 24;
 const WORKFLOW_RUNNER_PATH = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../.github/workflows/ci.yml");
 const RUN_INPUT_FIELDS = new Set(["id", "html_url", "head_sha", "created_at", "run_started_at", "updated_at", "event", "head_branch", "conclusion", "run_attempt", "original_run_id", "workflow_path", "workflow_revision", "provider_state", "jobs"]);
 const JOB_INPUT_FIELDS = new Set(["id", "html_url", "name", "started_at", "completed_at", "conclusion", "runner_image", "needs", "steps", "cache", "setup_costs", "failure_message"]);
@@ -368,8 +369,8 @@ export async function liveRuns(repo, workflow, windowDays, { fetchPages = fetchG
   const cutoff = new Date(now() - windowDays * 86_400_000).toISOString().slice(0, 10);
   const listed = (await fetchPages(`/repos/${repo}/actions/workflows/${workflow}/runs?per_page=100&created=>=${cutoff}`)).flatMap((page) => page.workflow_runs || []);
   const results = [];
-  for (let index = 0; index < listed.length; index += 12) {
-    results.push(...await Promise.all(listed.slice(index, index + 12).map(async (run) => {
+  for (let index = 0; index < listed.length; index += LIVE_RUN_CONCURRENCY) {
+    results.push(...await Promise.all(listed.slice(index, index + LIVE_RUN_CONCURRENCY).map(async (run) => {
     if (!Number.isInteger(run.run_attempt) || run.run_attempt < 1) fail("run.run_attempt must be a positive integer");
     if (typeof run.head_sha !== "string" || !/^[0-9a-f]{40}$/i.test(run.head_sha)) fail("run.head_sha must be a full SHA");
     const revision = validWorkflowRevision(run.workflow_revision) ? run.workflow_revision : workflowRevision(await loadWorkflow(repo, workflow, run.head_sha));
