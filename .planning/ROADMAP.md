@@ -144,7 +144,7 @@ Plans:
 
 **Wave 15** *(gap closure; blocked on Wave 14)*
 
-- [ ] 226-21-PLAN.md — Bind all CI evidence URLs to independently supplied repository trust context and reject compound cross-repository forgery before rendering.
+- [x] 226-21-PLAN.md — Bind all CI evidence URLs to independently supplied repository trust context and reject compound cross-repository forgery before rendering.
 
 ### Phase 227: Measured Critical-Path Improvement
 
