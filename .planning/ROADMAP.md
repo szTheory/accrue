@@ -81,7 +81,7 @@ Plans:
   3. A host maintainer can identify whether Node, browser installation, and Playwright setup belong to the host or CI and can follow documented diagnostics for each setup failure mode.
   4. The baseline confirms the roughly 33–36 minute green-run critical path is staged release → host integration → Playwright work rather than runner queueing, or records a contrary measured result.
 
-**Plans:** 12 plans
+**Plans:** 14 plans
 
 Plans:
 **Wave 1**
@@ -125,6 +125,14 @@ Plans:
 **Wave 10** *(gap closure; blocked on Wave 9)*
 
 - [x] 226-16-PLAN.md — Isolate exact run-attempt jobs, derive auditable runner cohorts, then recollect and byte-verify the frozen baseline.
+
+**Wave 11** *(gap closure; blocked on Wave 10)*
+
+- [ ] 226-17-PLAN.md — Bind historical compatibility to audited workflow revisions, reject spoofed job identities, and diagnose initial Postgres readiness failures.
+
+**Wave 12** *(gap closure; blocked on Wave 11)*
+
+- [ ] 226-18-PLAN.md — Recollect the authenticated 90-day baseline and byte-verify the final critical-path proof.
 
 ### Phase 227: Measured Critical-Path Improvement
 
