@@ -294,6 +294,27 @@ async function liveDisplayIdentityControls() {
     now: () => Date.parse("2026-08-11T06:04:00Z")
   });
   assert.deepEqual(skippedOnly[0].jobs, [], "skipped workflow nodes cannot enter timing or DAG admission");
+  const annotationPrerequisites = [
+    "Release manifest SSOT (REL-02)", docsDisplayName, "Release gate (Primary dev target)", "Phase 18 Stripe Tax gate",
+    "Admin drift and docs", "Admin group contracts (Phase 190)", "Admin hardening guardrails (Phase 192)",
+    "Admin Phase 200 deterministic guardrails", "Admin UI ratchet guardrails", "Host integration (required deterministic gate)",
+    "Playwright E2E shard 1/3", "Host Docker boot smoke"
+  ].map((name, index) => ({
+    id: 97_000 + index, html_url: `https://github.com/acme/accrue/actions/runs/977/job/${97_000 + index}`, name,
+    started_at: `2026-08-11T06:${String(index).padStart(2, "0")}:00Z`, completed_at: `2026-08-11T06:${String(index).padStart(2, "0")}:30Z`,
+    conclusion: "success", run_attempt: 1, steps: []
+  }));
+  const annotation = { id: 97_099, html_url: "https://github.com/acme/accrue/actions/runs/977/job/97099", name: "Annotation sweep", started_at: "2026-08-11T06:20:00Z", completed_at: "2026-08-11T06:21:00Z", conclusion: "success", run_attempt: 1, steps: [] };
+  const annotationRun = { ...run, id: 977, run_attempt: 1 };
+  const annotationFetch = (jobsForRun) => async (endpoint) => endpoint.includes("/jobs?") ? [{ jobs: jobsForRun }] : [{ workflow_runs: [annotationRun] }];
+  const incompleteAnnotation = await liveRuns("acme/accrue", "ci.yml", 90, {
+    fetchPages: annotationFetch([...annotationPrerequisites.filter((job) => job.name !== "Host Docker boot smoke"), annotation]), now: () => Date.parse("2026-08-11T06:22:00Z")
+  });
+  assert.ok(!incompleteAnnotation[0].jobs.some((job) => job.name === "Annotation sweep"), "annotation sweep with an absent declared prerequisite is excluded from timing evidence");
+  const completeAnnotation = await liveRuns("acme/accrue", "ci.yml", 90, {
+    fetchPages: annotationFetch([...annotationPrerequisites, annotation]), now: () => Date.parse("2026-08-11T06:22:00Z")
+  });
+  assert.ok(completeAnnotation[0].jobs.some((job) => job.name === "Annotation sweep"), "annotation sweep with every declared successful prerequisite remains eligible");
   const stale = { ...jobs[0], id: 9799, run_attempt: 1, conclusion: "failure", started_at: "2026-08-11T06:00:11Z", completed_at: "2026-08-11T06:03:59Z" };
   const endpoints = [];
   const fetchPages = async (endpoint) => {
