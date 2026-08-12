@@ -233,9 +233,15 @@ function ghJsonAsync(endpoint, paginate = false) {
     });
   });
 }
-function workflowNeeds(name) {
+const HISTORICAL_SCHEDULED_ROOT_JOBS = new Set(["admin-drift-and-docs"]);
+
+function workflowNeeds(name, event) {
   const normalized = normalizedIdentity(name, "job.name");
   // Dependencies are matched against normalized Actions display names, never YAML job IDs.
+  // Historical scheduled runs predate the release-gate dependency for this job. This
+  // narrow mapping preserves that observed topology; all other missing prerequisites
+  // continue to fail closed in normalizeJob().
+  if (event === "schedule" && HISTORICAL_SCHEDULED_ROOT_JOBS.has(normalized)) return [];
   if (normalized.startsWith("host-integration")) return ["admin-drift-and-docs", DOCS_PREREQUISITE];
   if (normalized.startsWith("playwright-e2e")) return ["host-integration"];
   if (normalized.startsWith("admin-drift-and-docs")) return ["release-gate"];
@@ -310,7 +316,7 @@ export async function liveRuns(repo, workflow, windowDays, { fetchPages = fetchG
       return job;
     }).filter((job) => typeof job.name === "string" && /[A-Za-z0-9]/.test(job.name) && job.started_at && job.completed_at && Date.parse(job.completed_at) >= Date.parse(job.started_at)).map((job) => ({
       id: job.id, html_url: job.html_url, name: job.name, started_at: job.started_at, completed_at: job.completed_at,
-      conclusion: CONCLUSIONS.has(job.conclusion) ? job.conclusion : "unknown", runner_image: workflowRunnerImage(job.name), needs: workflowNeeds(job.name),
+      conclusion: CONCLUSIONS.has(job.conclusion) ? job.conclusion : "unknown", runner_image: workflowRunnerImage(job.name), needs: workflowNeeds(job.name, run.event),
       setup_costs: setupCosts(job.steps), cache: cacheFacts(job.steps)
     }));
     const createdAt = run.created_at;

@@ -262,6 +262,18 @@ async function liveDisplayIdentityControls() {
     null,
     "historical scheduled admin drift job retains its explicit no-prerequisite topology"
   );
+  const historicalNonScheduledFetch = async (endpoint) => endpoint.includes("/jobs?")
+    ? [{ jobs: historicalScheduledJobs }]
+    : [{ workflow_runs: [{ ...historicalScheduledRun, event: "push" }] }];
+  const historicalNonScheduledRuns = await liveRuns("acme/accrue", "ci.yml", 90, {
+    fetchPages: historicalNonScheduledFetch,
+    now: () => Date.parse("2026-08-11T06:04:00Z")
+  });
+  assert.throws(
+    () => collectBaseline(historicalNonScheduledRuns),
+    /job admin-drift-and-docs has unresolved prerequisite release-gate/,
+    "the scheduled compatibility mapping cannot hide a missing non-scheduled release gate"
+  );
   for (const [name, mutate, pattern] of [
     ["absent", (items) => items.filter((job) => job.name !== docsDisplayName), /unresolved prerequisite docs-and-bash-contracts-shift-left/],
     ["spelling drift", (items) => items.map((job) => job.name === docsDisplayName ? { ...job, name: "Docs and bash contract (shift-left)" } : job), /unresolved prerequisite docs-and-bash-contracts-shift-left/],
