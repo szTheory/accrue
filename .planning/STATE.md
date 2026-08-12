@@ -4,16 +4,16 @@ milestone: v1.61
 milestone_name: CI Evidence & Critical-Path Hardening
 current_phase: 226
 current_phase_name: ci-baseline-proof-semantics
-status: planned
-stopped_at: Phase 226 planned — ready to execute 226-15-PLAN.md
-last_updated: "2026-08-12T03:00:00.000Z"
+status: executing
+stopped_at: Completed 226-15-PLAN.md
+last_updated: "2026-08-12T03:08:03.374Z"
 last_activity: 2026-08-11
-last_activity_desc: Phase 226 gap-closure plan 15 created and verified
+last_activity_desc: Phase 226 execution started
 progress:
   total_phases: 3
   completed_phases: 2
   total_plans: 14
-  completed_plans: 13
+  completed_plans: 14
   percent: 67
 ---
 
@@ -29,12 +29,12 @@ See: `.planning/PROJECT.md` (updated 2026-08-05 after shipping v1.59)
 
 ## Current Position
 
-Phase: 226 (ci-baseline-proof-semantics) — PLANNED
-Plan: 10 of 11
+Phase: 226 (ci-baseline-proof-semantics) — EXECUTING
+Plan: 2 of 11
 Status: Ready to execute
-Last activity: 2026-08-11 — Phase 226 gap-closure plan 15 created and verified
+Last activity: 2026-08-11 — Phase 226 execution started
 
-Progress: [█████████░] 91%
+Progress: [██████████] 100%
 
 ## v1.61 Roadmap
 
@@ -468,6 +468,7 @@ Coverage: 22/22 v1.51 requirements mapped (each REQ-ID → exactly one phase). D
 | Phase 226-ci-baseline-proof-semantics P12 | 20m | 2 tasks | 6 files |
 | Phase 226-ci-baseline-proof-semantics P13 | 14min | 2 tasks | 7 files |
 | Phase 226 P14 | 3min | 2 tasks | 5 files |
+| Phase 226 P15 | 9m | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -930,6 +931,8 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - [Phase ?]: Host wrapper preserves inner setup facts and emits host_gate_failure only when delegation added none.
 - [Phase ?]: Workflow dependencies resolve in normalized observed display-name space, not YAML job-ID space.
 - [Phase ?]: Only a fully validated proved record rebases freshness to its own SHA and manifest completion.
+- [Phase ?]: Map the exact Docs and bash contracts (shift-left) workflow display name to docs-and-bash-contracts-shift-left for live DAG prerequisites.
+- [Phase ?]: Keep YAML job IDs confined to bounded verifier assertions while live collection indexes observed display identities.
 
 ### Pending Todos
 
@@ -1082,8 +1085,8 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 
 ## Session Continuity
 
-Last session: 2026-08-12T02:40:38.852Z
-Stopped at: Completed 226-14-PLAN.md
+Last session: 2026-08-12T03:08:03.357Z
+Stopped at: Completed 226-15-PLAN.md
 Resume file: None
 
 ## Operator Next Steps

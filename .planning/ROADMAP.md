@@ -120,7 +120,7 @@ Plans:
 
 **Wave 9** *(gap closure; blocked on Wave 8)*
 
-- [ ] 226-15-PLAN.md — Bind the collector and its live-path regression fixture to the exact docs workflow display identity.
+- [x] 226-15-PLAN.md — Bind the collector and its live-path regression fixture to the exact docs workflow display identity.
 
 ### Phase 227: Measured Critical-Path Improvement
 
