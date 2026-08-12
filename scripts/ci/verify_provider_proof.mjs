@@ -129,6 +129,12 @@ function runFixtures() {
   const staleBoundary = "2026-08-14T06:00:00Z";
   assert.equal(deriveFreshness({ latest_proved_at: "2026-08-11T06:00:00Z", now: staleBoundary, cadence_hours: 24, grace_hours: 48 }), false);
   assert.equal(deriveFreshness({ latest_proved_at: "2026-08-11T06:00:00Z", now: "2026-08-14T06:00:01Z", cadence_hours: 24, grace_hours: 48 }), true);
+  const currentProof = classifyProviderProof({ trigger: "workflow_dispatch", sha: "current-proof-sha", policy: "required", raw_job_conclusion: "success", configuration_complete: true, manifest: validManifest(), now: "2026-08-11T06:02:00Z" });
+  assert.equal(currentProof.proof_state, "proved", "a successful selected suite is proved");
+  assert.equal(currentProof.latest_proved_sha, "current-proof-sha", "a newly proved record anchors its current SHA");
+  assert.equal(currentProof.latest_proved_at, "2026-08-11T06:01:00Z", "a newly proved record anchors validated manifest completion");
+  assert.equal(currentProof.stale, false, "a newly proved record is fresh within cadence and grace");
+  assert.match(renderProviderSummary(currentProof), /Freshness:\*\* fresh/, "the real summary renders a newly proved record as fresh");
   const differentSha = classifyProviderProof({ trigger: "push", sha: "current", policy: "required", raw_job_conclusion: "success", latest_proved_sha: "previous", latest_proved_at: "2026-08-11T06:00:00Z" });
   assert.equal(differentSha.proof_state, "non_run");
   assert.equal(differentSha.latest_proved_sha, "previous");
