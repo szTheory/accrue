@@ -101,7 +101,7 @@ assert_browser_boundary_contract() {
 
 assert_wrapper_diagnostic_contract() {
   local wrapper_script="$root_dir/scripts/ci/accrue_host_uat.sh"
-  local temp_dir facts output command_status
+  local temp_dir facts output command_status mix_calls
   temp_dir="$(mktemp -d)"
   trap 'rm -rf "$temp_dir"' RETURN
 
@@ -111,6 +111,9 @@ assert_wrapper_diagnostic_contract() {
 set -euo pipefail
 
 [ "$1" = "verify.full" ] || exit 64
+if [ -n "${ACCRUE_TEST_MIX_CALLS:-}" ]; then
+  printf '%s\n' "$*" >>"$ACCRUE_TEST_MIX_CALLS"
+fi
 case "${ACCRUE_TEST_MIX_MODE:-}" in
   inner_failure)
     "$ACCRUE_TEST_DIAGNOSTIC" emit fixture_or_database --result failure --duration-ms 0 --node-identity fixture --playwright-identity fixture --lockfile-identity fixture --browser-class fixture --cache-state fixture
@@ -122,6 +125,32 @@ case "${ACCRUE_TEST_MIX_MODE:-}" in
 esac
 EOF
   chmod +x "$temp_dir/bin/mix"
+
+  cat >"$temp_dir/bin/pg_isready" <<'EOF'
+#!/usr/bin/env bash
+exit 47
+EOF
+  chmod +x "$temp_dir/bin/pg_isready"
+
+  facts="$temp_dir/initial-readiness.ndjson"
+  mix_calls="$temp_dir/initial-readiness-mix-calls.log"
+  set +e
+  output="$(PATH="$temp_dir/bin:$PATH" ACCRUE_CI_SETUP_FACTS="$facts" ACCRUE_TEST_MIX_CALLS="$mix_calls" PGHOST='db.internal.example' PGPORT='6543' PGUSER='billing_user' PGPASSWORD='private-password' PGDATABASE='billing_database' bash "$wrapper_script" 2>&1)"
+  command_status=$?
+  set -e
+  [ "$command_status" -eq 47 ] || fail "initial readiness fixture must preserve pg_isready status"
+  [ "$(grep -Fc '\"code\":\"fixture_or_database\"' "$facts")" -eq 1 ] || fail "initial readiness fixture must emit exactly one database fact"
+  ! grep -Fq '"code":"host_gate_failure"' "$facts" || fail "initial readiness fixture must not add aggregate classification"
+  printf '%s\n' "$output" | grep -Fx 'SETUP_CODE=fixture_or_database' >/dev/null || fail "initial readiness fixture must render database setup code"
+  printf '%s\n' "$output" | grep -Fx 'OWNER=host' >/dev/null || fail "initial readiness fixture must render host ownership"
+  printf '%s\n' "$output" | grep -Fx 'NEXT_COMMAND=cd examples/accrue_host && mix verify.full' >/dev/null || fail "initial readiness fixture must render exact repair command"
+  printf '%s\n' "$output" | grep -Fx 'EVIDENCE_LOCATION=local host preflight stderr' >/dev/null || fail "initial readiness fixture must render evidence location"
+  printf '%s\n' "$output" | grep -Fx 'FAILED_GATE=host-integration' >/dev/null || fail "initial readiness fixture must preserve FAILED_GATE compatibility"
+  [ ! -s "$mix_calls" ] || fail "initial readiness fixture must not invoke mix verify.full"
+  for sensitive_value in db.internal.example 6543 billing_user private-password billing_database; do
+    ! grep -Fq "$sensitive_value" "$facts" || fail "initial readiness facts must not contain database values"
+    ! printf '%s\n' "$output" | grep -Fq "$sensitive_value" || fail "initial readiness output must not contain database values"
+  done
 
   for mode in inner_failure aggregate_failure success; do
     facts="$temp_dir/$mode.ndjson"
