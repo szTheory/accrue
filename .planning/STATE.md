@@ -5,16 +5,16 @@ milestone_name: CI Evidence & Critical-Path Hardening
 current_phase: 226
 current_phase_name: ci-baseline-proof-semantics
 status: executing
-stopped_at: Completed 226-17-PLAN.md
-last_updated: "2026-08-12T16:38:21.017Z"
+stopped_at: Completed 226-18-PLAN.md
+last_updated: "2026-08-12T17:17:16.146Z"
 last_activity: 2026-08-12
 last_activity_desc: Phase 226 execution started
 progress:
   total_phases: 3
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 17
-  completed_plans: 16
-  percent: 33
+  completed_plans: 17
+  percent: 67
 ---
 
 # Project State
@@ -30,11 +30,11 @@ See: `.planning/PROJECT.md` (updated 2026-08-05 after shipping v1.59)
 ## Current Position
 
 Phase: 226 (ci-baseline-proof-semantics) — EXECUTING
-Plan: 2 of 14
+Plan: 3 of 14
 Status: Ready to execute
 Last activity: 2026-08-12 — Phase 226 execution started
 
-Progress: [█████████░] 94%
+Progress: [██████████] 100%
 
 ## v1.61 Roadmap
 
@@ -471,6 +471,7 @@ Coverage: 22/22 v1.51 requirements mapped (each REQ-ID → exactly one phase). D
 | Phase 226 P15 | 9m | 2 tasks | 3 files |
 | Phase 226 P16 | 50m | 2 tasks | 5 files |
 | Phase 226 P17 | 21min | 2 tasks | 4 files |
+| Phase 226-ci-baseline-proof-semantics P18 | 6 minutes | 1 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -939,6 +940,7 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - [Phase ?]: Canonical CI baseline evidence is replaced only after fresh temporary collection, critical-path validation, and dual-render byte equality.
 - [Phase ?]: Historical CI exceptions require immutable workflow-revision and exact identity binding.
 - [Phase ?]: Initial Postgres readiness uses the existing fixture_or_database owner-first diagnostic before delegation.
+- [Phase ?]: Playwright timing is admitted only with a complete declared host-integration prerequisite.
 
 ### Pending Todos
 
@@ -1091,8 +1093,8 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 
 ## Session Continuity
 
-Last session: 2026-08-12T16:38:21.006Z
-Stopped at: Completed 226-17-PLAN.md
+Last session: 2026-08-12T17:17:16.128Z
+Stopped at: Completed 226-18-PLAN.md
 Resume file: None
 
 ## Operator Next Steps

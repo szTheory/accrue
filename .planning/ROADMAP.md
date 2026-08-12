@@ -132,7 +132,7 @@ Plans:
 
 **Wave 12** *(gap closure; blocked on Wave 11)*
 
-- [ ] 226-18-PLAN.md — Recollect the authenticated 90-day baseline and byte-verify the final critical-path proof.
+- [x] 226-18-PLAN.md — Recollect the authenticated 90-day baseline and byte-verify the final critical-path proof.
 
 ### Phase 227: Measured Critical-Path Improvement
 
