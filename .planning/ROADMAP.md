@@ -116,7 +116,7 @@ Plans:
 
 **Wave 8** *(gap closure; blocked on Wave 7)*
 
-- [ ] 226-14-PLAN.md — Unify live collector job identities and make newly completed provider proof visibly fresh.
+- [x] 226-14-PLAN.md — Unify live collector job identities and make newly completed provider proof visibly fresh.
 
 ### Phase 227: Measured Critical-Path Improvement
 
