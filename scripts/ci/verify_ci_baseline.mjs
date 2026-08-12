@@ -457,7 +457,7 @@ async function liveDisplayIdentityControls() {
     const historical = await liveRuns("szTheory/accrue", "ci.yml", 90, { fetchPages: fetch, now: () => Date.parse("2026-08-11T06:04:00Z") });
     assert.deepEqual(unresolvedPrerequisites(historical), [], `historical compatibility accepts ${compatibility.name} only in its audited era`);
     const future = await liveRuns("szTheory/accrue", "ci.yml", 90, { fetchPages: async (endpoint) => endpoint.includes("/jobs?") ? [{ jobs: historicalRun.jobs }] : [{ workflow_runs: [{ ...historicalRun, created_at: "2026-08-13T06:00:00Z" }] }], now: () => Date.parse("2026-08-13T06:04:00Z") });
-    if (compatibility.name === "Host integration (required deterministic gate)") {
+    if (compatibility.name === "Host integration (required deterministic gate)" || compatibility.name === "Playwright E2E shard 1/3") {
       assert.ok(!future[0].jobs.some((job) => job.name === compatibility.name), `future ${compatibility.name} is excluded when its declared prerequisite is incomplete`);
       continue;
     }
