@@ -56,6 +56,31 @@ function datedRun(base, id, offset, overrides = {}) {
 }
 
 function cohortControls(fixture) {
+  for (const event of ["push", "pull_request"]) {
+    const omittedProviderState = { ...fixture.successful_run, event };
+    delete omittedProviderState.provider_state;
+    assert.equal(
+      collectBaseline([omittedProviderState])[0].provider_state,
+      "non_run",
+      `successful ${event} input without provider evidence remains non_run`
+    );
+  }
+  for (const providerState of ["proved", "failed", "misconfigured", "blocked", "skipped", "non_run"]) {
+    assert.equal(
+      collectBaseline([{ ...fixture.successful_run, provider_state: providerState }])[0].provider_state,
+      providerState,
+      `explicit ${providerState} provider state is preserved`
+    );
+  }
+
+  const unresolvedPrerequisite = structuredClone(fixture.successful_run);
+  unresolvedPrerequisite.jobs[1].needs = ["required-release-gate"];
+  assert.throws(
+    () => collectBaseline([unresolvedPrerequisite]),
+    /test.*required-release-gate|required-release-gate.*test/,
+    "an absent prerequisite fails with both dependent and prerequisite identities"
+  );
+
   const nineteen = Array.from({ length: 19 }, (_, index) => datedRun(fixture.successful_run, 200 + index, index));
   const twenty = [...nineteen, datedRun(fixture.successful_run, 220, 20)];
   const insufficient = summarizeCohorts(nineteen);
