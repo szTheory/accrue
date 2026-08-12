@@ -42,14 +42,33 @@ export ACCRUE_HOST_ALLOW_GENERATED_DRIFT="${ACCRUE_HOST_ALLOW_GENERATED_DRIFT:-}
 export ACCRUE_HOST_BROWSER_LOG="${ACCRUE_HOST_BROWSER_LOG:-}"
 export ACCRUE_CI_SETUP_FACTS="${ACCRUE_CI_SETUP_FACTS:-}"
 
+setup_fact_count() {
+  local facts="${ACCRUE_CI_SETUP_FACTS:-}"
+  if [ -z "$facts" ] || [ ! -f "$facts" ]; then
+    printf '0\n'
+    return
+  fi
+
+  grep -cE '^\{"schema_version":"1","code":"[A-Za-z0-9._:-]{1,80}",' "$facts" || true
+}
+
 echo ""
 echo "--- delegating to host-local mix verify.full ---"
 cd "$host_dir"
-if ! mix verify.full; then
-  "$repo_root/scripts/ci/ci_setup_diagnostic.sh" emit browser_launch --result failure --duration-ms 0 --node-identity wrapper --playwright-identity delegated --lockfile-identity package-lock --browser-class host-proof --cache-state inherited >/dev/null 2>&1 || true
-  "$repo_root/scripts/ci/ci_setup_diagnostic.sh" render browser_launch
+setup_fact_count_before="$(setup_fact_count)"
+set +e
+mix verify.full
+delegated_status=$?
+set -e
+
+if [ "$delegated_status" -ne 0 ]; then
+  setup_fact_count_after="$(setup_fact_count)"
+  if [ "$setup_fact_count_after" -le "$setup_fact_count_before" ]; then
+    "$repo_root/scripts/ci/ci_setup_diagnostic.sh" emit host_gate_failure --result failure --duration-ms 0 --node-identity wrapper --playwright-identity delegated --lockfile-identity package-lock --browser-class host-gate --cache-state inherited >/dev/null 2>&1 || true
+    "$repo_root/scripts/ci/ci_setup_diagnostic.sh" render host_gate_failure
+  fi
   echo "FAILED_GATE=host-integration" >&2
-  exit 1
+  exit "$delegated_status"
 fi
 
 echo ""

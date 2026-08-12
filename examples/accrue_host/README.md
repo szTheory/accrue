@@ -321,6 +321,7 @@ The host owns declared Node and Playwright versions, lockfiles, fixtures, databa
 | `browser_launch` | host | `cd examples/accrue_host && npm run e2e` | Playwright report, trace, screenshot, and host browser log |
 | `port_or_server_readiness` | host | `cd examples/accrue_host && mix verify.full` | host browser log |
 | `fixture_or_database` | host | `cd examples/accrue_host && mix verify.full` | local host preflight stderr |
+| `host_gate_failure` | host | `cd examples/accrue_host && mix verify.full` | GitHub Actions host-integration command log |
 
 CI retains its `accrue-host-ci-setup-facts` artifact for a redacted machine record. Current duplicate npm/browser provisioning is deliberately measured, not removed; Phase 227 owns any optimization decision.
 

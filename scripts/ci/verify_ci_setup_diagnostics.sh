@@ -14,7 +14,7 @@ fail() {
 
 assert_registry_contract() {
   local code expected_owner output
-  for code in node_missing_or_version npm_lock_or_registry playwright_binary_or_revision linux_browser_dependency browser_launch port_or_server_readiness fixture_or_database; do
+  for code in node_missing_or_version npm_lock_or_registry playwright_binary_or_revision linux_browser_dependency browser_launch port_or_server_readiness fixture_or_database host_gate_failure; do
     case "$code" in linux_browser_dependency) expected_owner=CI ;; *) expected_owner=host ;; esac
     output="$("$diagnostic" describe "$code")" || fail "setup code must resolve: $code"
     printf '%s\n' "$output" | grep -Fx "code=$code" >/dev/null || fail "missing stable code: $code"
@@ -75,7 +75,7 @@ assert_browser_boundary_contract() {
     grep -Fq "$code" "$browser_script" || fail "browser script must classify $code"
   done
   grep -Fq 'mix verify.full' "$wrapper_script" || fail "wrapper must preserve host proof delegation"
-  [ "$(grep -Fc 'if ! mix verify.full; then' "$wrapper_script")" -eq 1 ] || fail "wrapper must delegate exactly once"
+  [ "$(grep -Ec '^[[:space:]]*mix verify\.full$' "$wrapper_script")" -eq 1 ] || fail "wrapper must delegate exactly once"
   grep -Fq 'fullyParallel: false' "$config" || fail "Playwright must stay single-flow"
   grep -Fq ': 1' "$config" || fail "Playwright must retain one worker"
   ! grep -Eq '^[[:space:]]*retries:' "$config" || fail "Playwright retries must remain at the zero default"
@@ -156,7 +156,7 @@ EOF
   done
 
   grep -Fq 'mix verify.full' "$wrapper_script" || fail "wrapper must preserve host proof delegation"
-  [ "$(grep -Fc 'mix verify.full' "$wrapper_script")" -eq 1 ] || fail "wrapper must delegate exactly once"
+  [ "$(grep -Ec '^[[:space:]]*mix verify\.full$' "$wrapper_script")" -eq 1 ] || fail "wrapper must delegate exactly once"
 }
 
 assert_workflow_setup_contract() {

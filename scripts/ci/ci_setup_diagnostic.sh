@@ -36,6 +36,9 @@ registry() {
     fixture_or_database)
       printf '%s\n' 'host|browser fixture and database setup|cd examples/accrue_host && mix verify.full|local host preflight stderr|host_browser_proof'
       ;;
+    host_gate_failure)
+      printf '%s\n' 'host|host verification gate failure|cd examples/accrue_host && mix verify.full|GitHub Actions host-integration command log|host_integration_gate'
+      ;;
     *) return 1 ;;
   esac
 }
