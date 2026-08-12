@@ -124,7 +124,7 @@ Plans:
 
 **Wave 10** *(gap closure; blocked on Wave 9)*
 
-- [ ] 226-16-PLAN.md — Isolate exact run-attempt jobs, derive auditable runner cohorts, then recollect and byte-verify the frozen baseline.
+- [x] 226-16-PLAN.md — Isolate exact run-attempt jobs, derive auditable runner cohorts, then recollect and byte-verify the frozen baseline.
 
 ### Phase 227: Measured Critical-Path Improvement
 

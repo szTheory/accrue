@@ -5,15 +5,15 @@ milestone_name: CI Evidence & Critical-Path Hardening
 current_phase: 226
 current_phase_name: ci-baseline-proof-semantics
 status: executing
-stopped_at: Completed 226-15-PLAN.md
-last_updated: "2026-08-12T03:08:03.374Z"
-last_activity: 2026-08-11
+stopped_at: Completed 226-16-PLAN.md
+last_updated: "2026-08-12T15:39:18.035Z"
+last_activity: 2026-08-12
 last_activity_desc: Phase 226 execution started
 progress:
   total_phases: 3
   completed_phases: 2
-  total_plans: 14
-  completed_plans: 14
+  total_plans: 15
+  completed_plans: 15
   percent: 67
 ---
 
@@ -30,9 +30,9 @@ See: `.planning/PROJECT.md` (updated 2026-08-05 after shipping v1.59)
 ## Current Position
 
 Phase: 226 (ci-baseline-proof-semantics) — EXECUTING
-Plan: 2 of 11
+Plan: 2 of 12
 Status: Ready to execute
-Last activity: 2026-08-11 — Phase 226 execution started
+Last activity: 2026-08-12 — Phase 226 execution started
 
 Progress: [██████████] 100%
 
@@ -469,6 +469,7 @@ Coverage: 22/22 v1.51 requirements mapped (each REQ-ID → exactly one phase). D
 | Phase 226-ci-baseline-proof-semantics P13 | 14min | 2 tasks | 7 files |
 | Phase 226 P14 | 3min | 2 tasks | 5 files |
 | Phase 226 P15 | 9m | 2 tasks | 3 files |
+| Phase 226 P16 | 50m | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -933,6 +934,8 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - [Phase ?]: Only a fully validated proved record rebases freshness to its own SHA and manifest completion.
 - [Phase ?]: Map the exact Docs and bash contracts (shift-left) workflow display name to docs-and-bash-contracts-shift-left for live DAG prerequisites.
 - [Phase ?]: Keep YAML job IDs confined to bounded verifier assertions while live collection indexes observed display identities.
+- [Phase ?]: Historical DAG compatibility is repository-, event-, identity-, and time-bounded; future and unknown runs fail closed.
+- [Phase ?]: Canonical CI baseline evidence is replaced only after fresh temporary collection, critical-path validation, and dual-render byte equality.
 
 ### Pending Todos
 
@@ -1085,8 +1088,8 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 
 ## Session Continuity
 
-Last session: 2026-08-12T03:08:03.357Z
-Stopped at: Completed 226-15-PLAN.md
+Last session: 2026-08-12T15:39:18.019Z
+Stopped at: Completed 226-16-PLAN.md
 Resume file: None
 
 ## Operator Next Steps
