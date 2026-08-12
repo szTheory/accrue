@@ -330,6 +330,22 @@ async function liveDisplayIdentityControls() {
     fetchPages: annotationFetch(hostAttemptJobs), now: () => Date.parse("2026-08-11T06:04:00Z")
   });
   assert.ok(completeHost[0].jobs.some((job) => job.name === "Host integration (required deterministic gate)"), "host integration with every declared successful prerequisite remains eligible");
+  const playwright = { id: 9804, html_url: "https://github.com/acme/accrue/actions/runs/980/job/9804", name: "Playwright E2E shard 1/3", started_at: "2026-08-11T06:03:10Z", completed_at: "2026-08-11T06:04:00Z", conclusion: "success", run_attempt: 1, steps: [] };
+  const playwrightPrerequisiteCases = [
+    ["absent", (items) => items.filter((job) => job.name !== "Host integration (required deterministic gate)")],
+    ["skipped", (items) => items.map((job) => job.name === "Host integration (required deterministic gate)" ? { ...job, conclusion: "skipped" } : job)],
+    ["incomplete", (items) => items.map((job) => job.name === "Host integration (required deterministic gate)" ? { ...job, conclusion: "failure" } : job)]
+  ];
+  for (const [state, mutate] of playwrightPrerequisiteCases) {
+    const incompletePlaywright = await liveRuns("acme/accrue", "ci.yml", 90, {
+      fetchPages: annotationFetch(mutate([...hostAttemptJobs, playwright])), now: () => Date.parse("2026-08-11T06:04:00Z")
+    });
+    assert.ok(!incompletePlaywright[0].jobs.some((job) => job.name === "Playwright E2E shard 1/3"), `Playwright with ${state} declared host-integration prerequisite is excluded from timing evidence`);
+  }
+  const completePlaywright = await liveRuns("acme/accrue", "ci.yml", 90, {
+    fetchPages: annotationFetch([...hostAttemptJobs, playwright]), now: () => Date.parse("2026-08-11T06:04:00Z")
+  });
+  assert.ok(completePlaywright[0].jobs.some((job) => job.name === "Playwright E2E shard 1/3"), "complete release to host-integration to Playwright staged path remains eligible");
   const stale = { ...jobs[0], id: 9799, run_attempt: 1, conclusion: "failure", started_at: "2026-08-11T06:00:11Z", completed_at: "2026-08-11T06:03:59Z" };
   const endpoints = [];
   const fetchPages = async (endpoint) => {
