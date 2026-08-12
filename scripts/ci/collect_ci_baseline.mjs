@@ -11,6 +11,7 @@ const CONCLUSIONS = new Set(["success", "failure", "cancelled", "skipped", "neut
 const PROVIDER_STATES = new Set(["proved", "failed", "misconfigured", "blocked", "skipped", "non_run"]);
 const DOCS_DISPLAY_NAME = "Docs and bash contracts (shift-left)";
 const DOCS_PREREQUISITE = "docs-and-bash-contracts-shift-left";
+const WORKFLOW_RUNNER_PATH = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../.github/workflows/ci.yml");
 const RUN_INPUT_FIELDS = new Set(["id", "html_url", "head_sha", "created_at", "run_started_at", "updated_at", "event", "head_branch", "conclusion", "run_attempt", "original_run_id", "workflow_path", "workflow_revision", "provider_state", "jobs"]);
 const JOB_INPUT_FIELDS = new Set(["id", "html_url", "name", "started_at", "completed_at", "conclusion", "runner_image", "needs", "steps", "cache", "setup_costs", "failure_message"]);
 const SCHEMA_PATH = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../.planning/phases/226-ci-baseline-proof-semantics/schema-v1.json");
@@ -264,6 +265,35 @@ function cacheFacts(steps = []) {
   if (!matched.length) return {};
   return { hit: matched.some((step) => /restore/i.test(String(step.name || ""))), restore_ms: matched.filter((step) => /restore/i.test(String(step.name || ""))).reduce((sum, step) => sum + duration(step.started_at, step.completed_at, "step"), 0), save_ms: matched.filter((step) => /save/i.test(String(step.name || ""))).reduce((sum, step) => sum + duration(step.started_at, step.completed_at, "step"), 0), size_bytes: 0 };
 }
+function workflowRunnerContracts(source = fs.readFileSync(WORKFLOW_RUNNER_PATH, "utf8")) {
+  const contracts = [];
+  const pattern = /^  ([A-Za-z0-9_-]+):\n([\s\S]*?)(?=^  [A-Za-z0-9_-]+:\n|(?![\s\S]))/gm;
+  for (const match of source.matchAll(pattern)) {
+    const [, identity, body] = match;
+    const display = body.match(/^    name:\s*(.+)$/m)?.[1]?.trim();
+    const runsOn = body.match(/^    runs-on:\s*(.+)$/m)?.[1]?.trim();
+    if (!runsOn) continue;
+    contracts.push({ identity: normalizedIdentity(identity, "workflow job id"), display: display ? normalizedIdentity(display, "workflow job name") : null, runsOn });
+  }
+  if (contracts.length === 0) fail("workflow runner contract has no jobs");
+  return contracts;
+}
+function runnerClassImage(runsOn) {
+  const declared = String(runsOn).trim().replace(/^['"]|['"]$/g, "");
+  if (/\bself-hosted\b/i.test(declared)) return "self-hosted/declared";
+  if (/^(ubuntu|macos|windows)-[a-z0-9.-]+$/i.test(declared)) return `github-hosted/${declared.toLowerCase()}`;
+  fail("workflow runner contract has unsupported runs-on declaration");
+}
+export function workflowRunnerImage(jobName, contracts = workflowRunnerContracts()) {
+  const observed = normalizedIdentity(jobName, "job.name");
+  const matches = contracts.filter((contract) =>
+    observed === contract.identity || observed.startsWith(`${contract.identity}-`) ||
+    (contract.display && (observed === contract.display || observed.startsWith(`${contract.display}-`)))
+  );
+  if (matches.length === 0) fail(`job ${observed} has unresolved workflow runner contract`);
+  if (matches.length !== 1) fail(`job ${observed} has ambiguous workflow runner contract`);
+  return runnerClassImage(matches[0].runsOn);
+}
 async function fetchGhPages(endpoint) {
   return endpoint.includes("/jobs?") ? ghJsonAsync(endpoint, true) : ghJson(endpoint, true);
 }
@@ -273,15 +303,20 @@ export async function liveRuns(repo, workflow, windowDays, { fetchPages = fetchG
   const results = [];
   for (let index = 0; index < listed.length; index += 12) {
     results.push(...await Promise.all(listed.slice(index, index + 12).map(async (run) => {
-    const jobs = (await fetchPages(`/repos/${repo}/actions/runs/${run.id}/jobs?filter=all&per_page=100`)).flatMap((page) => page.jobs || []).filter((job) => typeof job.name === "string" && /[A-Za-z0-9]/.test(job.name) && job.started_at && job.completed_at && Date.parse(job.completed_at) >= Date.parse(job.started_at)).map((job) => ({
+    if (!Number.isInteger(run.run_attempt) || run.run_attempt < 1) fail("run.run_attempt must be a positive integer");
+    const attempt = run.run_attempt;
+    const jobs = (await fetchPages(`/repos/${repo}/actions/runs/${run.id}/attempts/${attempt}/jobs?per_page=100`)).flatMap((page) => page.jobs || []).map((job) => {
+      if (job.run_attempt != null && job.run_attempt !== attempt) fail("job.run_attempt must match run.run_attempt");
+      return job;
+    }).filter((job) => typeof job.name === "string" && /[A-Za-z0-9]/.test(job.name) && job.started_at && job.completed_at && Date.parse(job.completed_at) >= Date.parse(job.started_at)).map((job) => ({
       id: job.id, html_url: job.html_url, name: job.name, started_at: job.started_at, completed_at: job.completed_at,
-      conclusion: CONCLUSIONS.has(job.conclusion) ? job.conclusion : "unknown", runner_image: job.runner_name ? "github-hosted" : "unknown", needs: workflowNeeds(job.name),
+      conclusion: CONCLUSIONS.has(job.conclusion) ? job.conclusion : "unknown", runner_image: workflowRunnerImage(job.name), needs: workflowNeeds(job.name),
       setup_costs: setupCosts(job.steps), cache: cacheFacts(job.steps)
     }));
     const createdAt = run.created_at;
     const startedAt = Date.parse(run.run_started_at || createdAt) < Date.parse(createdAt) ? createdAt : (run.run_started_at || createdAt);
     const updatedAt = Date.parse(run.updated_at) < Date.parse(startedAt) ? startedAt : run.updated_at;
-    return { id: run.id, html_url: run.html_url, head_sha: run.head_sha, created_at: createdAt, run_started_at: startedAt, updated_at: updatedAt, event: run.event, head_branch: run.head_branch, conclusion: CONCLUSIONS.has(run.conclusion) ? run.conclusion : "unknown", run_attempt: run.run_attempt || 1, original_run_id: run.id, workflow_path: workflow, provider_state: "non_run", jobs };
+    return { id: run.id, html_url: run.html_url, head_sha: run.head_sha, created_at: createdAt, run_started_at: startedAt, updated_at: updatedAt, event: run.event, head_branch: run.head_branch, conclusion: CONCLUSIONS.has(run.conclusion) ? run.conclusion : "unknown", run_attempt: attempt, original_run_id: run.id, workflow_path: workflow, provider_state: "non_run", jobs };
     })));
   }
   return results;

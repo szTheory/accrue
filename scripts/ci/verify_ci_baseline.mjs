@@ -253,7 +253,12 @@ async function liveDisplayIdentityControls() {
     ["spelling drift", (items) => items.map((job) => job.name === docsDisplayName ? { ...job, name: "Docs and bash contract (shift-left)" } : job), /unresolved prerequisite docs-and-bash-contracts-shift-left/],
     ["temporal", (items) => items.map((job) => job.name === docsDisplayName ? { ...job, completed_at: "2026-08-11T06:01:30Z" } : job), /starts before prerequisite docs-and-bash-contracts-shift-left completes/],
   ]) {
-    const broken = await liveRuns("acme/accrue", "ci.yml", 90, { fetchPages: async (endpoint) => endpoint.includes("/jobs?") ? [{ jobs: mutate(jobs) }] : [{ workflow_runs: [run] }], now: () => Date.parse("2026-08-11T06:04:00Z") });
+    const brokenFetch = async (endpoint) => endpoint.includes("/jobs?") ? [{ jobs: mutate(jobs) }] : [{ workflow_runs: [run] }];
+    if (name === "spelling drift") {
+      await assert.rejects(() => liveRuns("acme/accrue", "ci.yml", 90, { fetchPages: brokenFetch, now: () => Date.parse("2026-08-11T06:04:00Z") }), /unresolved workflow runner contract/, `${name} cannot fabricate a runner contract`);
+      continue;
+    }
+    const broken = await liveRuns("acme/accrue", "ci.yml", 90, { fetchPages: brokenFetch, now: () => Date.parse("2026-08-11T06:04:00Z") });
     assert.throws(() => collectBaseline(broken), pattern, `${name} live prerequisite fails closed`);
   }
 
