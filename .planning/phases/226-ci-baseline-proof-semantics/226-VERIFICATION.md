@@ -1,47 +1,55 @@
 ---
 phase: 226-ci-baseline-proof-semantics
-verified: 2026-08-12T03:16:00Z
+verified: 2026-08-12T15:47:17Z
 status: gaps_found
-score: 2/4 must-haves verified
+score: 1/4 must-haves verified
 behavior_unverified: 0
 overrides_applied: 0
 re_verification:
   previous_status: gaps_found
-  previous_score: 3/4
+  previous_score: 2/4
   gaps_closed:
-    - "The exact Docs and bash contracts (shift-left) display identity now resolves to docs-and-bash-contracts-shift-left in the live collector."
+    - "Exact Actions attempt-scoped job retrieval and per-job attempt validation replace the prior all-attempt job fetch."
+    - "Runner cohorts now originate in the workflow runs-on contract rather than a raw runner_name projection."
   gaps_remaining: []
   regressions:
-    - "Comparable-run collection still merges jobs from prior rerun attempts into the current workflow run."
-    - "Comparable-run cohorting labels every runner with a runner name github-hosted rather than preserving an observed runner class or image."
+    - "Historical DAG compatibility accepts an unknown pre-cutoff topology solely by repository, date, event, and broad job-name prefix."
+    - "Runner resolution accepts spoofed job-name prefixes as declared workflow jobs."
+    - "A failing initial Postgres readiness check exits the host wrapper before it emits a stable setup diagnostic."
 gaps:
   - truth: "A maintainer can inspect a durable comparable-run baseline containing workflow wall time, queue delay, job/step durations, reruns, cache behavior, Docker/browser setup cost, provider state, and root-failure signature without sensitive values."
     status: failed
-    reason: "The live collector can assemble one current run from jobs belonging to different rerun attempts and places both self-hosted and GitHub-hosted jobs in the same fabricated github-hosted runner-image cohort. This invalidates the comparable-run data flow that BASE-01 requires."
+    reason: "The production collector does not fail closed for unknown historical topology or job identity, so untrusted job timings can enter an apparently trusted cohort."
     artifacts:
       - path: "scripts/ci/collect_ci_baseline.mjs"
-        issue: "liveRuns() requests jobs?filter=all while retaining only the workflow run's run_attempt; it discards per-job attempt identity before collectBaseline()."
+        issue: "compatibilityRule() accepts any pre-cutoff szTheory/accrue job whose normalized name equals or starts with an inventory job name, without binding the run to an immutable workflow revision."
       - path: "scripts/ci/collect_ci_baseline.mjs"
-        issue: "runner_image is inferred as github-hosted whenever runner_name is present, although runner_name does not establish hostedness or an image/version."
-      - path: "scripts/ci/verify_ci_baseline.mjs"
-        issue: "Fixtures cover separate rerun run objects and hand-authored ubuntu-24.04 images, not a live API-shaped all-attempt job response or runner-class/image distinction."
+        issue: "workflowRunnerImage() accepts broad identity/display-name prefixes, classifying spoofed names as workflow-declared runner contracts."
     missing:
-      - "Request latest-attempt jobs (or otherwise bind every retained job to the workflow run's attempt) and add a liveRuns() regression that proves older-attempt jobs cannot reach normalized records."
-      - "Derive an auditable, privacy-safe runner class/image from trusted workflow configuration or fail closed when it cannot be resolved; prove distinct runner classes produce distinct cohort fingerprints."
+      - "Bind every historical compatibility exception to an immutable audited workflow revision and exact job identity."
+      - "Use exact identities or narrowly enumerated matrix suffixes for workflow needs and runner resolution; reject arbitrary suffixes."
+  - truth: "A host maintainer can identify whether Node, browser installation, and Playwright setup belong to the host or CI and can follow documented diagnostics for each setup failure mode."
+    status: failed
+    reason: "The wrapper has set -e enabled when pg_isready fails, so it exits before the existing host_gate_failure diagnostic fallback and emits no setup fact, owner, or repair command."
+    artifacts:
+      - path: "scripts/ci/accrue_host_uat.sh"
+        issue: "Lines 28-35 invoke pg_isready outside an explicit status branch; the fallback at lines 64-71 is unreachable for this prerequisite failure."
+    missing:
+      - "Handle pg_isready failure explicitly, emit/render the stable diagnostic fact, print FAILED_GATE=host-integration, and add a failing-readiness regression."
   - truth: "The baseline confirms the roughly 33–36 minute green-run critical path is staged release → host integration → Playwright work rather than runner queueing, or records a contrary measured result."
     status: failed
-    reason: "The checked-in renderer is reproducible, but its selected staged paths inherit the collector's attempt mixing and fabricated runner-image cohorting. Therefore the report cannot establish that its 33–36 minute conclusion is an actual comparable-run result."
+    reason: "The frozen report is reproducible, but its selected paths are derived by a collector that can classify unknown topology and spoofed identities as trusted. Reproducibility cannot establish that the measured paths are comparable."
     artifacts:
-      - path: "scripts/ci/collect_ci_baseline.mjs"
-        issue: "Invalid live cohort inputs flow directly into the frozen-record generation and staged-path derivation."
+      - path: ".planning/phases/226-ci-baseline-proof-semantics/226-CI-BASELINE.ndjson"
+        issue: "Fresh records pass the renderer gate but retain evidence collected through the non-fail-closed topology/runner resolver."
     missing:
-      - "Repair and regression-test attempt isolation and real runner classification, then recollect and byte-verify the baseline before treating the critical-path statement as measured evidence."
+      - "Repair the collector boundaries, add adversarial regressions, recollect the 90-day evidence, and re-run the byte/critical-path gate."
 ---
 
 # Phase 226: CI Baseline & Proof Semantics Verification Report
 
 **Phase Goal:** Maintainers can use a durable, privacy-safe account of comparable CI runs to distinguish the actual critical path, setup ownership, and provider proof state.
-**Verified:** 2026-08-12T03:16:00Z
+**Verified:** 2026-08-12T15:47:17Z
 **Status:** gaps_found
 **Re-verification:** Yes — after gap closure
 
@@ -51,77 +59,80 @@ gaps:
 
 | # | Truth | Status | Evidence |
 | --- | --- | --- | --- |
-| 1 | A maintainer can inspect a durable comparable-run baseline containing workflow wall time, queue delay, job/step durations, reruns, cache behavior, Docker/browser setup cost, provider state, and root-failure signature without sensitive values. | ✗ FAILED | The schema, redaction, frozen NDJSON, and renderer exist, but the production collector uses `jobs?filter=all` and erases job-attempt identity; it also fabricates `github-hosted` from any `runner_name`. A direct injected call returned prior and current attempt jobs together under run attempt 2, both labeled `github-hosted` even when their runner name was `self-hosted-linux-x64`. |
-| 2 | Required, skipped, and advisory provider evidence is visibly distinct, so a skipped or non-run lane cannot be read as release proof. | ✓ VERIFIED | `node scripts/ci/verify_provider_proof.mjs --fixtures` passed; focused formatter test passed (2 tests). The classifier retains independent policy/state/conclusion facts and only promotes a fully validated manifest-backed execution. |
-| 3 | A host maintainer can identify whether Node, browser installation, and Playwright setup belong to the host or CI and can follow documented diagnostics for each setup failure mode. | ✓ VERIFIED | Stable diagnostic registry, host wrapper, CI fact artifact, and ownership documentation are wired; `bash scripts/ci/verify_ci_setup_diagnostics.sh` passed. |
-| 4 | The baseline confirms the roughly 33–36 minute green-run critical path is staged release → host integration → Playwright work rather than runner queueing, or records a contrary measured result. | ✗ FAILED | The frozen record/render gate passes, but reproducibility does not cure invalid cohort inputs. Attempt-mixed jobs and fabricated runner classes can yield a false staged-path population, so the rendered conclusion is not proven to describe comparable actual runs. |
+| 1 | Durable, privacy-safe comparable-run baseline covers all required timing, reliability, setup, provider, and signature facts. | ✗ FAILED | Schema, 3,014-record NDJSON, redaction, and deterministic validation exist; however, injected `Host integration (required deterministic gate) malicious-shard` is accepted by `liveRuns()` with `needs: []` and runner image `github-hosted/ubuntu-24.04`. Unknown topology can enter durable cohort data. |
+| 2 | Required, skipped, and advisory provider evidence is visibly distinct; skipped/non-run cannot be release proof. | ✓ VERIFIED | `node scripts/ci/verify_provider_proof.mjs --fixtures` passed. The provider classifier retains independent policy, raw conclusion, state, manifest, SHA, and freshness conditions before rendering proof. |
+| 3 | Host versus CI Node/browser/Playwright ownership and setup diagnostics are usable for each documented failure mode. | ✗ FAILED | With a shadowed failing `pg_isready`, `bash scripts/ci/accrue_host_uat.sh` exited 1 and emitted zero setup-fact bytes. The established fallback is never reached. |
+| 4 | The frozen evidence proves a 33–36 minute staged release → host integration → Playwright critical path, or records a contrary measured result. | ✗ FAILED | `--require-critical-path` passes and the Markdown is deterministic, but those checks do not exercise the unknown-topology/spoofed-identity path. The baseline conclusion therefore is not comparable-run proof. |
 
-**Score:** 2/4 truths verified (0 present, behavior-unverified)
+**Score:** 1/4 truths verified (0 present, behavior-unverified)
 
 ### Required Artifacts
 
 | Artifact | Expected | Status | Details |
 | --- | --- | --- | --- |
-| `scripts/ci/collect_ci_baseline.mjs` | Read-only, privacy-safe Actions metadata collection and comparable cohort derivation | ✗ HOLLOW | 304 substantive lines and called by the CLI, but its live data flow retains all rerun-attempt jobs and invents runner class. |
-| `226-CI-BASELINE.ndjson` and `226-CI-BASELINE.md` | Durable measured before-state and deterministic report | ⚠️ HOLLOW | 3,020 records / 4,556 lines; byte-reproducible gate passes, but the evidence was generated from collector semantics that do not preserve a comparable cohort. |
-| `scripts/ci/provider_proof.mjs` and `render_provider_summary.mjs` | Literal proof-state and freshness classification | ✓ VERIFIED | Substantive, workflow-wired, and exercised by the provider fixture suite and formatter test. |
-| Setup diagnostic registry, host wrapper, verifier, and README | Owner-first setup diagnostics | ✓ VERIFIED | Substantive, wired to CI and host paths, and exercised by the focused shell contract. |
+| `scripts/ci/collect_ci_baseline.mjs` | Read-only metadata collection, exact-attempt isolation, cohorting, timing/reliability derivation | ✗ HOLLOW | Substantive and CLI-wired; exact attempt isolation is fixed, but the historical DAG and runner-contract admission boundaries are overbroad. |
+| `scripts/ci/render_ci_baseline.mjs` and frozen NDJSON/Markdown | Deterministic privacy-safe evidence/report | ⚠️ HOLLOW | Records are schema-valid, omit raw runner names/branches, and render byte-consistently, but data provenance is invalidated by the collector gaps. |
+| `scripts/ci/provider_proof.mjs`, renderer, verifier, formatter | Literal provider proof-state/freshness classification | ✓ VERIFIED | Substantive, workflow-wired, and covered by the provider fixture gate plus the inherited formatter contract. |
+| Setup diagnostic registry, host wrapper, verifier, docs | Owner-first setup diagnostics | ✗ PARTIAL | Browser and delegated-host paths are wired and the existing contract passes, but initial Postgres readiness has no diagnostic path. |
 
 ### Key Link Verification
 
 | From | To | Via | Status | Details |
 | --- | --- | --- | --- | --- |
-| `liveRuns()` | GitHub Actions job attempts | `jobs?filter=all` → raw `jobs` | ✗ NOT_WIRED | Line 276 requests all attempts; only the run-level `run_attempt` survives. No per-job attempt is retained or filtered. |
-| Live runner metadata | `cohortFingerprint()` | `runner_name` → `runner_image` | ✗ NOT_WIRED | Line 278 maps any truthy `runner_name` to `github-hosted`; line 67 treats that fabricated value as a cohort input. |
-| Frozen NDJSON | Generated baseline Markdown | Deterministic renderer and byte comparison | ✓ WIRED | `node scripts/ci/verify_ci_baseline.mjs --records … --rendered … --require-critical-path` passed. |
-| CI provider finalizer | Provider classifier and always-run summary | Current SHA + validated manifest → record → summary | ✓ WIRED | Static workflow contract plus fixture/formatter checks passed. |
-| Host wrapper | Setup diagnostic registry | Fact-file delta and `host_gate_failure` fallback | ✓ WIRED | Focused shell contract passed. |
+| Workflow run attempt | `liveRuns()` | Attempt-specific `/attempts/{attempt}/jobs` request and per-job attempt check | ✓ WIRED | Production code at lines 341-346 requests the exact attempt endpoint and rejects an explicit per-job mismatch. |
+| Historical run/job metadata | DAG prerequisite resolution | `compatibilityRule()` | ✗ NOT_WIRED | No immutable workflow revision is checked; a date/repo/event/prefix match authorizes a topology exception. |
+| Workflow `runs-on` contract | Cohort fingerprint | `workflowRunnerImage()` | ✗ NOT_WIRED | The resolver reads `ci.yml`, but `startsWith()` accepts untrusted suffixes such as `Release gate attacker`. |
+| Frozen NDJSON | Baseline Markdown | renderer plus byte/critical-path verification | ✓ WIRED | `node scripts/ci/verify_ci_baseline.mjs --records … --rendered … --require-critical-path` exited 0. |
+| Provider finalizer | Provider classifier/always-run summary | current SHA + validated manifest | ✓ WIRED | Provider fixture gate passed; workflow wiring is present in `ci.yml`. |
+| Host wrapper | Diagnostic registry | fact-file delta plus fallback | ✗ PARTIAL | Fallback works only after `mix verify.full`; readiness failure occurs before that branch. |
 
 ### Data-Flow Trace (Level 4)
 
 | Artifact | Data Variable | Source | Produces Real Data | Status |
 | --- | --- | --- | --- | --- |
-| Baseline collector | `jobs` / `run_attempt` | Actions jobs endpoint | No | ✗ MIXED: all historical attempts are returned and then combined under one current run attempt. |
-| Cohort fingerprint | `runner_images` | `runner_name` projection | No | ✗ FABRICATED: source does not observe hostedness or image; it assigns `github-hosted` to any runner name. |
-| Provider summary | `latest_proved_sha`, `latest_proved_at`, `stale` | Current SHA and validated manifest completion | Yes | ✓ FLOWING. |
-| Setup summary | Emitted diagnostic fact | Host wrapper, registry, and CI artifact | Yes | ✓ FLOWING. |
+| Baseline collector | Attempt jobs | GitHub attempt-scoped Actions endpoint | Yes, but admission is unsafe | ⚠️ HOLLOW — exact attempt filtering works; unknown historical/prefix jobs can still become normalized records. |
+| Runner cohort | `runner_image` | Parsed `ci.yml` `runs-on` declarations | No trustworthy identity binding | ✗ HOLLOW — a spoofed display-name prefix resolves to `github-hosted/ubuntu-24.04`. |
+| Frozen baseline | run/job/cohort records | collector → renderer | Not trustworthy | ✗ HOLLOW — deterministic output cannot correct compromised cohort membership. |
+| Provider summary | proof/freshness facts | validated manifest and current SHA | Yes | ✓ FLOWING. |
+| Setup summary | diagnostic fact | wrapper/registry | Partial | ✗ DISCONNECTED on initial Postgres readiness failure. |
 
 ### Behavioral Spot-Checks
 
 | Behavior | Command | Result | Status |
 | --- | --- | --- | --- |
-| Baseline fixture engine | `node scripts/ci/verify_ci_baseline.mjs --fixtures` | Exit 0 | ✓ PASS — inadequate for live rerun/image paths. |
+| Baseline fixtures | `node scripts/ci/verify_ci_baseline.mjs --fixtures` | Exit 0 | ✓ PASS — does not cover the reproduced spoofed-prefix path. |
 | Frozen critical-path report | `node scripts/ci/verify_ci_baseline.mjs --records … --rendered … --require-critical-path` | Exit 0 | ✓ PASS — proves deterministic rendering only. |
-| Live all-attempt isolation | Injected `liveRuns()` with run attempt 2 and one previous-attempt plus one current-attempt job | Endpoint was `jobs?filter=all`; both jobs returned in run attempt 2 | ✗ FAIL |
-| Live runner classification | Same injected call, `runner_name: self-hosted-linux-x64` | Both jobs normalized to `runner_image: github-hosted` | ✗ FAIL |
 | Provider proof state/freshness | `node scripts/ci/verify_provider_proof.mjs --fixtures` | Exit 0 | ✓ PASS |
-| Provider manifest producer | `cd accrue && mix test test/accrue/live_proof_formatter_test.exs --warnings-as-errors` | 2 tests, 0 failures | ✓ PASS |
-| Setup diagnostic contract | `bash scripts/ci/verify_ci_setup_diagnostics.sh` | Exit 0 | ✓ PASS |
+| Setup diagnostic contract | `bash scripts/ci/verify_ci_setup_diagnostics.sh` | Exit 0 | ✓ PASS — omits initial readiness failure. |
 | Required-lane boundary | `bash scripts/ci/verify_phase225_required_lane_evidence.sh` | Exit 0 | ✓ PASS |
+| Historical topology / runner spoofing | Injected exported `liveRuns()` and `workflowRunnerImage()` call | Malicious host name normalized with no prerequisites and Ubuntu cohort; `Release gate attacker` also resolves Ubuntu | ✗ FAIL |
+| Initial Postgres readiness | Shadowed `pg_isready` returning 1, then `bash scripts/ci/accrue_host_uat.sh` | Exit 1; `setup_fact_bytes=0` | ✗ FAIL |
 
 ### Requirements Coverage
 
 | Requirement | Source Plans | Description | Status | Evidence |
 | --- | --- | --- | --- | --- |
-| BASE-01 | 01, 02, 05, 06, 07, 12, 13, 14, 15 | Durable privacy-safe comparable CI baseline | ✗ BLOCKED | The live collector's two data-integrity defects invalidate comparable cohort and critical-path evidence despite passing frozen fixture/render checks. |
-| BASE-02 | 03, 05, 06, 07, 12, 13, 14, 15 | Provider evidence visibly distinguishes proof states | ✓ SATISFIED | Exhaustive classifier/renderer fixtures and the focused formatter test pass. |
-| OWN-01 | 04, 05, 07, 12, 13, 14, 15 | Host/CI ownership and setup diagnostics | ✓ SATISFIED | Registry, wrapper, CI plumbing, docs, and focused shell contract pass. |
+| BASE-01 | 01, 02, 05, 06, 07, 12, 13, 14, 15, 16 | Durable privacy-safe comparable CI baseline | ✗ BLOCKED | Exact attempt and raw-runner fixes are present, but the live collector still admits untrusted topology/runner identities through broad historical and prefix rules. |
+| BASE-02 | 03, 05, 06, 07, 12, 13, 14, 15, 16 | Provider evidence visibly distinguishes proof states | ✓ SATISFIED | Exhaustive provider fixture gate passed; static workflow route and formatter contract remain present. |
+| OWN-01 | 04, 05, 07, 12, 13, 14, 15, 16 | Host/CI setup ownership and diagnostics | ✗ BLOCKED | A normal host database-readiness failure exits without the promised owner-first diagnostic. |
 
-All requirement IDs declared by Phase 226 plans are accounted for. `REQUIREMENTS.md` maps no additional requirement to Phase 226, so no requirement is orphaned.
+All IDs declared by Phase 226 plans are accounted for. `REQUIREMENTS.md` maps no additional requirement to Phase 226, so there are no orphaned requirements.
 
 ### Anti-Patterns Found
 
 | File | Line | Pattern | Severity | Impact |
 | --- | --- | --- | --- | --- |
-| `scripts/ci/collect_ci_baseline.mjs` | 276 | `filter=all` combines prior rerun attempts without preserving or filtering job attempt identity | 🛑 Blocker | A successful current run can contain older stage timings, failures, or duplicates. |
-| `scripts/ci/collect_ci_baseline.mjs` | 278 | Truthy `runner_name` is represented as `github-hosted` | 🛑 Blocker | Self-hosted and changed-image jobs can be mixed in a purported comparable runner cohort. |
-| `scripts/ci/verify_ci_baseline.mjs` | 114–118, 171–174, 230–248 | Tests model reruns as separate runs and hard-code image labels; the API-shaped live fixture has no multiple-attempt or runner-class controls | ⚠️ Warning | Passing tests do not exercise the stated production invariants. |
+| `scripts/ci/collect_ci_baseline.mjs` | 253-258 | Date/repository/event plus prefix historical compatibility, without immutable workflow revision | 🛑 Blocker | Unknown pre-cutoff topology can enter measured evidence. |
+| `scripts/ci/collect_ci_baseline.mjs` | 264-268, 322-330 | Broad `startsWith()` identity matching | 🛑 Blocker | Spoofed jobs acquire declared DAG and runner classification. |
+| `scripts/ci/accrue_host_uat.sh` | 28-35 | `set -e` readiness call before diagnostic boundary | 🛑 Blocker | A documented host setup failure has no stable fact, owner, or repair command. |
+| `scripts/ci/verify_ci_baseline.mjs` | live fixture controls | Missing adversarial unknown-revision/spoofed-suffix controls | ⚠️ Warning | Fixture success did not prove the production fail-closed boundary. |
+| `scripts/ci/verify_ci_setup_diagnostics.sh` | setup fixtures | Missing initial-`pg_isready` failure control | ⚠️ Warning | Passing suite does not exercise the wrapper's earliest failure branch. |
 
-No unreferenced `TBD`, `FIXME`, or `XXX` markers were found in phase implementation files. The documentation references to deliberately invalid placeholder Stripe data are not implementation stubs. There are no conventional or phase-declared probes to execute.
+No unreferenced `TBD`, `FIXME`, or `XXX` markers were found in phase implementation files. Privacy checks did pass: the frozen 3,014-record data set contains neither `runner_name` nor raw `head_branch`; this does not remedy the comparability failures. There are no conventional or declared executable probes beyond the completed fixture/contract checks.
 
 ### Gaps Summary
 
-The Plan 15 display-name repair closes the prior prerequisite-identity defect. It does not address the independent baseline-correctness defects identified in review, both of which are reproduced from the current production code. These are not deferred: Phase 227's goal is a measured improvement, not repair of Phase 226's collector evidence semantics. This is an **Escalation Gate**: the baseline and critical-path claims cannot be accepted until the collector is corrected and the evidence recollected.
+The Wave 10 repair successfully replaces all-attempt job collection and raw runner-name inference, closing the previous verification gaps. It does not achieve the required fail-closed semantics: broad historical and display-name prefix rules let untrusted metadata become trusted baseline evidence. Separately, the host wrapper omits diagnostics for an initial database-readiness failure. These items are not deferred to Phase 227, whose goal is to optimize an already trustworthy measured path. This remains an **Escalation Gate**: fix the three boundaries and recollect the evidence before Phase 226 can proceed.
 
-_Verified: 2026-08-12T03:16:00Z_
+_Verified: 2026-08-12T15:47:17Z_
 _Verifier: the agent (gsd-verifier)_
