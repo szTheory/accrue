@@ -128,7 +128,7 @@ Plans:
 
 **Wave 11** *(gap closure; blocked on Wave 10)*
 
-- [ ] 226-17-PLAN.md — Bind historical compatibility to audited workflow revisions, reject spoofed job identities, and diagnose initial Postgres readiness failures.
+- [x] 226-17-PLAN.md — Bind historical compatibility to audited workflow revisions, reject spoofed job identities, and diagnose initial Postgres readiness failures.
 
 **Wave 12** *(gap closure; blocked on Wave 11)*
 
