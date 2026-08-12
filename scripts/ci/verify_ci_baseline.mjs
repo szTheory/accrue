@@ -4,7 +4,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { collectBaseline, cohortFingerprint, summarizeCohorts } from "./collect_ci_baseline.mjs";
+import { collectBaseline, cohortFingerprint, liveRuns, summarizeCohorts } from "./collect_ci_baseline.mjs";
 import { deriveStagedPathPercentiles, renderBaseline } from "./render_ci_baseline.mjs";
 
 function fail(message) {
@@ -219,7 +219,27 @@ function stagedPathControls(fixture) {
   assert.throws(() => deriveStagedPathPercentiles([...collectBaseline(scheduledCompatible), ...summarizeCohorts(scheduledCompatible)]), /20 compatible complete paths/, "schedule/provider-only runs cannot fill the compatible population");
 }
 
-export function verifyFixtures() {
+async function liveDisplayIdentityControls() {
+  const run = { id: 980, html_url: "https://github.com/acme/accrue/actions/runs/980", head_sha: "a".repeat(40), created_at: "2026-08-11T06:00:00Z", run_started_at: "2026-08-11T06:00:10Z", updated_at: "2026-08-11T06:04:00Z", event: "push", head_branch: "main", conclusion: "success", run_attempt: 1 };
+  const jobs = [
+    [9801, "Admin drift and docs", "2026-08-11T06:00:20Z", "2026-08-11T06:01:00Z"],
+    [9802, "Docs contracts shift-left", "2026-08-11T06:00:25Z", "2026-08-11T06:01:10Z"],
+    [9803, "Host integration (required deterministic gate)", "2026-08-11T06:01:20Z", "2026-08-11T06:03:00Z"],
+  ].map(([id, name, started_at, completed_at]) => ({ id, html_url: `https://github.com/acme/accrue/actions/runs/980/job/${id}`, name, started_at, completed_at, conclusion: "success", runner_name: "github-hosted", steps: [] }));
+  const fetchPages = async (endpoint) => endpoint.includes("/jobs?") ? [{ jobs }] : [{ workflow_runs: [run] }];
+  const records = collectBaseline(await liveRuns("acme/accrue", "ci.yml", 90, { fetchPages, now: () => Date.parse("2026-08-11T06:04:00Z") }));
+  const host = records.find((record) => record.kind === "job" && record.stable_identity === "host-integration");
+  assert.equal(host.dag_wait_ms, 10_000, "host resolves current display-name prerequisites in the live collector");
+  for (const [name, mutate, pattern] of [
+    ["absent", (items) => items.filter((job) => job.name !== "Docs contracts shift-left"), /unresolved prerequisite docs-contracts-shift-left/],
+    ["temporal", (items) => items.map((job) => job.name === "Docs contracts shift-left" ? { ...job, completed_at: "2026-08-11T06:01:30Z" } : job), /starts before prerequisite docs-contracts-shift-left completes/],
+  ]) {
+    const broken = await liveRuns("acme/accrue", "ci.yml", 90, { fetchPages: async (endpoint) => endpoint.includes("/jobs?") ? [{ jobs: mutate(jobs) }] : [{ workflow_runs: [run] }], now: () => Date.parse("2026-08-11T06:04:00Z") });
+    assert.throws(() => collectBaseline(broken), pattern, `${name} live prerequisite fails closed`);
+  }
+}
+
+export async function verifyFixtures() {
   const fixture = JSON.parse(fs.readFileSync(fixturePath(), "utf8"));
   for (const scenario of ["successful_first_attempt", "failure", "cancellation", "rerun", "provider_non_run", "provider_misconfigured", "repeated_matrix_signature", "privacy_rejection", "arithmetic", "insufficient_sample"]) {
     assert.ok(fixture.scenarios.includes(scenario), `fixture inventory includes ${scenario}`);
@@ -241,17 +261,18 @@ export function verifyFixtures() {
     rejectsForbiddenFields(fixture);
     cohortControls(fixture);
     stagedPathControls(fixture);
+    await liveDisplayIdentityControls();
   } finally {
     fs.rmSync(temp, { recursive: true, force: true });
   }
 }
 
-function main() {
+async function main() {
   const args = process.argv.slice(2);
   const recordsIndex = args.indexOf("--records");
   const renderedIndex = args.indexOf("--rendered");
   const requireCriticalPath = args.includes("--require-critical-path");
-  if (args.includes("--fixtures")) verifyFixtures();
+  if (args.includes("--fixtures")) await verifyFixtures();
   if (recordsIndex !== -1) {
     const source = args[recordsIndex + 1];
     if (!source) fail("--records requires an NDJSON path");
@@ -270,7 +291,7 @@ function main() {
 }
 
 try {
-  main();
+  await main();
 } catch (error) {
   console.error(`ci baseline fixtures: FAIL: ${error.message}`);
   process.exitCode = 1;
