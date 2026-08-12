@@ -18,6 +18,8 @@ const SCHEMA_PATH = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "
 
 function fail(message) { throw new Error(message); }
 function hash(value) { return crypto.createHash("sha256").update(value).digest("hex").slice(0, 16); }
+function workflowRevision(source) { return `sha256:${crypto.createHash("sha256").update(source).digest("hex")}`; }
+function validWorkflowRevision(value) { return typeof value === "string" && /^sha256:[a-f0-9]{64}$/.test(value); }
 function allowedFields(object, allowed, label) {
   if (!object || Array.isArray(object) || typeof object !== "object") fail(`${label} must be an object`);
   for (const key of Object.keys(object)) if (!allowed.has(key)) fail(`${label} contains forbidden field: ${key}`);
@@ -241,39 +243,75 @@ function ghJsonAsync(endpoint, paginate = false) {
 // workflow generations only; current and future runs still use the declared DAG.
 const HISTORICAL_DAG_COMPATIBILITY_CUTOFF = "2026-08-12T14:00:00Z";
 const HISTORICAL_DAG_COMPATIBILITY = [
-  { job: "admin-drift-and-docs", prerequisite: "release-gate", events: ["schedule"], era: "scheduled-provider-only root before the 226 baseline snapshot", rule: "treat as scheduled root", evidence: "090685036" },
-  { job: "admin-ui-ratchet-guardrails", prerequisite: "admin-hardening-guardrails", events: ["schedule"], era: "parked scheduled ratchet before the 226 baseline snapshot", rule: "treat as scheduled root", evidence: "737c07f5" },
-  { job: "admin-ui-ratchet-guardrails", prerequisite: "admin-phase200-guardrails", events: ["push", "pull_request", "workflow_dispatch", "schedule"], era: "parked ratchet workflow generation before the 226 baseline snapshot", rule: "retain the observed ratchet root when Phase 200 is absent", evidence: "79f268eb,737c07f5" },
-  { job: "host-docker-boot-smoke", prerequisite: DOCS_PREREQUISITE, events: ["push", "pull_request", "workflow_dispatch", "schedule"], era: "pre-226 host-smoke workflow generation", rule: "treat the retired/missing docs prerequisite as absent from this historical lane", evidence: "332bddce,c1ea350a" },
-  { job: "host-integration", prerequisite: "admin-drift-and-docs", events: ["push", "pull_request", "workflow_dispatch", "schedule"], era: "pre-226 host-integration workflow generation", rule: "retain the observed host root when admin drift is absent", evidence: "1426a6b3" },
-  { job: "host-integration", prerequisite: DOCS_PREREQUISITE, events: ["push", "pull_request", "workflow_dispatch", "schedule"], era: "pre-226 host-integration workflow generation", rule: "retain the observed host root when docs is absent", evidence: "332bddce,1426a6b3" },
-  { job: "playwright-e2e", prerequisite: "host-integration", events: ["push", "pull_request", "workflow_dispatch", "schedule"], era: "pre-226 Playwright workflow generation", rule: "retain the observed Playwright root when host integration is absent", evidence: "c1ea350a" }
+  { workflow_revision: "sha256:2535a639493f2b5549d3bb0e1baf12bc12ede268b55cd710e41da3afb22f2e42", job: "admin-drift-and-docs", prerequisite: "release-gate", events: ["schedule"], starts_at: "2026-05-30T00:00:00Z", era: "scheduled-provider-only root before the 226 baseline snapshot", rule: "treat as scheduled root", evidence: "090685036a6c978fcc5906c235187bc9e29dffcf" },
+  { workflow_revision: "sha256:943d650205233f1c5c017bc605c90077600ba8c33240ea6268326887c0960ec0", job: "admin-ui-ratchet-guardrails", prerequisite: "admin-hardening-guardrails", events: ["schedule"], starts_at: "2026-07-07T00:00:00Z", era: "parked scheduled ratchet before the 226 baseline snapshot", rule: "treat as scheduled root", evidence: "737c07f58337a1d9b771e705e92b1efba54a4c1d" },
+  { workflow_revision: "sha256:943d650205233f1c5c017bc605c90077600ba8c33240ea6268326887c0960ec0", job: "admin-ui-ratchet-guardrails", prerequisite: "admin-phase-200-deterministic-guardrails", events: ["schedule"], starts_at: "2026-07-07T00:00:00Z", era: "parked scheduled ratchet before the 226 baseline snapshot", rule: "treat as scheduled root", evidence: "737c07f58337a1d9b771e705e92b1efba54a4c1d" },
+  { workflow_revision: "sha256:89a5a0cb25d05eb88f40cffed7f1ba2549676b440d0a018d218eaa69e253cae8", job: "admin-ui-ratchet-guardrails", prerequisite: "admin-phase-200-deterministic-guardrails", events: ["push", "pull_request", "workflow_dispatch", "schedule"], starts_at: "2026-06-30T00:00:00Z", era: "parked ratchet workflow generation before the 226 baseline snapshot", rule: "retain the observed ratchet root when Phase 200 is absent", evidence: "79f268ebb7220f2da6e1429263b5516b990ad649" },
+  { workflow_revision: "sha256:abe82c1752c18b85daccb8a33255b78adee988866a6f1df64c68186d4f90fd43", job: "host-docker-boot-smoke", prerequisite: DOCS_PREREQUISITE, events: ["push", "pull_request", "workflow_dispatch", "schedule"], starts_at: "2026-06-01T00:00:00Z", era: "pre-226 host-smoke workflow generation", rule: "treat the retired/missing docs prerequisite as absent from this historical lane", evidence: "332bddce795b0b07ec49a96a3303dafee7e4687c" },
+  { workflow_revision: "sha256:f6b1d06c0897168bdff1b692a63d1704db24b96a48620504888b1fe2f30c47fa", job: "host-integration", prerequisite: "admin-drift-and-docs", events: ["push", "pull_request", "workflow_dispatch", "schedule"], starts_at: "2026-08-11T00:00:00Z", era: "pre-226 host-integration workflow generation", rule: "retain the observed host root when admin drift is absent", evidence: "1426a6b300e00910762d44479001ca23183eb4cc" },
+  { workflow_revision: "sha256:f6b1d06c0897168bdff1b692a63d1704db24b96a48620504888b1fe2f30c47fa", job: "host-integration", prerequisite: DOCS_PREREQUISITE, events: ["push", "pull_request", "workflow_dispatch", "schedule"], starts_at: "2026-08-11T00:00:00Z", era: "pre-226 host-integration workflow generation", rule: "retain the observed host root when docs is absent", evidence: "1426a6b300e00910762d44479001ca23183eb4cc" },
+  ...["1/3", "2/3", "3/3"].map((shard) => ({ workflow_revision: "sha256:fbef942d3a3f18c88689962c5d658a0a6dde16a95cfeb8e06b99b68d58e3ce99", job: `playwright-e2e-shard-${shard}`, prerequisite: "host-integration", events: ["push", "pull_request", "workflow_dispatch", "schedule"], starts_at: "2026-06-01T00:00:00Z", era: "pre-226 Playwright workflow generation", rule: "retain the observed Playwright root when host integration is absent", evidence: "c1ea350a37285e48b424b35b97ae3db367db3567" }))
 ];
 
 function compatibilityRule(repo, run, job, prerequisite, present) {
   const created = Date.parse(run.created_at);
-  if (repo !== "szTheory/accrue" || !Number.isFinite(created) || created >= Date.parse(HISTORICAL_DAG_COMPATIBILITY_CUTOFF) || present.has(prerequisite)) return null;
+  if (repo !== "szTheory/accrue" || !Number.isFinite(created) || created >= Date.parse(HISTORICAL_DAG_COMPATIBILITY_CUTOFF) || present.has(prerequisite) || !validWorkflowRevision(run.workflow_revision)) return null;
   return HISTORICAL_DAG_COMPATIBILITY.find((rule) =>
-    (rule.job === job || job.startsWith(`${rule.job}-`)) && rule.prerequisite === prerequisite && rule.events.includes(run.event)
+    rule.workflow_revision === run.workflow_revision && rule.job === job && rule.prerequisite === prerequisite && rule.events.includes(run.event) && created >= Date.parse(rule.starts_at)
   ) || null;
 }
 
-function workflowNeeds(name, run, present = new Set(), repo = "") {
+function matrixAliases(identity, body) {
+  if (identity === "playwright-e2e") {
+    const shards = body.match(/shard:\s*\[([^\]]+)\]/)?.[1]?.split(",").map((value) => value.trim()).filter(Boolean) || [];
+    return shards.map((shard) => `playwright-e2e-shard-${shard}/${shards.length}`);
+  }
+  if (identity !== "release-gate") return [];
+  return [...body.matchAll(/- elixir: '([^']+)'\s+otp: '([^']+)'\s+sigra: '([^']+)'\s+opentelemetry: '([^']+)'\s+compatibility: '([^']+)'\s+support: '([^']+)'/g)].map(([, elixir, otp, sigra, opentelemetry, compatibility, support]) =>
+    normalizedIdentity(`Release gate (${compatibility}; elixir=${elixir} otp=${otp} sigra=${sigra} opentelemetry=${opentelemetry})${support === "advisory" ? " [advisory]" : ""}`, "workflow matrix job")
+  );
+}
+function workflowRunnerContracts(source = fs.readFileSync(WORKFLOW_RUNNER_PATH, "utf8")) {
+  const contracts = [];
+  const pattern = /^  ([A-Za-z0-9_-]+):\n([\s\S]*?)(?=^  [A-Za-z0-9_-]+:\n|(?![\s\S]))/gm;
+  for (const match of source.matchAll(pattern)) {
+    const [, rawIdentity, body] = match;
+    const identity = normalizedIdentity(rawIdentity, "workflow job id");
+    const display = body.match(/^    name:\s*(.+)$/m)?.[1]?.trim();
+    const runsOn = body.match(/^    runs-on:\s*(.+)$/m)?.[1]?.trim();
+    if (!runsOn) continue;
+    const canonical = display && !display.includes("${{") ? normalizedIdentity(display, "workflow job name") : identity;
+    const needs = (body.match(/^    needs:\s*\[([^\]]*)\]$/m)?.[1]?.split(",").map((value) => value.trim()).filter(Boolean).map((value) => normalizedIdentity(value, "workflow prerequisite")) || []);
+    contracts.push({ identity, canonical, aliases: new Set([identity, canonical, ...matrixAliases(identity, body)]), needs, runsOn });
+  }
+  if (contracts.length === 0) fail("workflow runner contract has no jobs");
+  return contracts;
+}
+export function resolveWorkflowJobIdentity(jobName, contracts = workflowRunnerContracts()) {
+  const observed = normalizedIdentity(jobName, "job.name");
+  const matches = contracts.filter((contract) => (contract.aliases || new Set([contract.identity, contract.display].filter(Boolean))).has(observed));
+  if (matches.length === 0) fail(`job ${observed} has unresolved workflow job identity`);
+  if (matches.length !== 1) fail(`job ${observed} has ambiguous workflow job identity`);
+  return matches[0];
+}
+function workflowNeeds(name, run, present = new Set(), repo = "", contracts = workflowRunnerContracts()) {
+  const contract = resolveWorkflowJobIdentity(name, contracts);
+  const declared = contract.needs.map((need) => {
+    const prerequisite = contracts.find((candidate) => candidate.identity === need);
+    if (!prerequisite) fail(`workflow job ${contract.identity} has unresolved declared prerequisite ${need}`);
+    return prerequisite.canonical;
+  });
   const normalized = normalizedIdentity(name, "job.name");
-  // Dependencies are matched against normalized Actions display names, never YAML job IDs.
-  const declared = normalized.startsWith("host-integration") ? ["admin-drift-and-docs", DOCS_PREREQUISITE]
-    : normalized.startsWith("playwright-e2e") ? ["host-integration"]
-      : normalized.startsWith("admin-drift-and-docs") ? ["release-gate"]
-        : normalized.startsWith("admin-ui-ratchet-guardrails") ? ["admin-hardening-guardrails", "admin-phase200-guardrails"]
-          : normalized.startsWith("host-docker-boot-smoke") ? [DOCS_PREREQUISITE] : [];
   return declared.filter((prerequisite) => !compatibilityRule(repo, run, normalized, prerequisite, present));
 }
 
 export function unresolvedPrerequisites(runs) {
   if (!Array.isArray(runs)) fail("runs must be an array");
   return runs.flatMap((run) => {
+    const contracts = workflowRunnerContracts();
     const present = new Set((run.jobs || []).map((job) => normalizedIdentity(job.name, "job.name")));
-    return (run.jobs || []).flatMap((job) => (job.needs || []).map((prerequisite) => normalizedIdentity(prerequisite, "job.needs"))
+    return (run.jobs || []).flatMap((job) => (job.needs === undefined ? workflowNeeds(job.name, run, present, run.repository || "szTheory/accrue", contracts) : job.needs)
+      .map((prerequisite) => normalizedIdentity(prerequisite, "job.needs"))
       .filter((prerequisite) => !present.has(prerequisite))
       .map((prerequisite) => `job ${normalizedIdentity(job.name, "job.name")} has unresolved prerequisite ${prerequisite}`));
   }).sort();
@@ -300,19 +338,6 @@ function cacheFacts(steps = []) {
   if (!matched.length) return {};
   return { hit: matched.some((step) => /restore/i.test(String(step.name || ""))), restore_ms: matched.filter((step) => /restore/i.test(String(step.name || ""))).reduce((sum, step) => sum + duration(step.started_at, step.completed_at, "step"), 0), save_ms: matched.filter((step) => /save/i.test(String(step.name || ""))).reduce((sum, step) => sum + duration(step.started_at, step.completed_at, "step"), 0), size_bytes: 0 };
 }
-function workflowRunnerContracts(source = fs.readFileSync(WORKFLOW_RUNNER_PATH, "utf8")) {
-  const contracts = [];
-  const pattern = /^  ([A-Za-z0-9_-]+):\n([\s\S]*?)(?=^  [A-Za-z0-9_-]+:\n|(?![\s\S]))/gm;
-  for (const match of source.matchAll(pattern)) {
-    const [, identity, body] = match;
-    const display = body.match(/^    name:\s*(.+)$/m)?.[1]?.trim();
-    const runsOn = body.match(/^    runs-on:\s*(.+)$/m)?.[1]?.trim();
-    if (!runsOn) continue;
-    contracts.push({ identity: normalizedIdentity(identity, "workflow job id"), display: display ? normalizedIdentity(display, "workflow job name") : null, runsOn });
-  }
-  if (contracts.length === 0) fail("workflow runner contract has no jobs");
-  return contracts;
-}
 function runnerClassImage(runsOn) {
   const declared = String(runsOn).trim().replace(/^['"]|['"]$/g, "");
   if (/\bself-hosted\b/i.test(declared)) return "self-hosted/declared";
@@ -320,25 +345,30 @@ function runnerClassImage(runsOn) {
   fail("workflow runner contract has unsupported runs-on declaration");
 }
 export function workflowRunnerImage(jobName, contracts = workflowRunnerContracts()) {
-  const observed = normalizedIdentity(jobName, "job.name");
-  const matches = contracts.filter((contract) =>
-    observed === contract.identity || observed.startsWith(`${contract.identity}-`) ||
-    (contract.display && (observed === contract.display || observed.startsWith(`${contract.display}-`)))
-  );
-  if (matches.length === 0) fail(`job ${observed} has unresolved workflow runner contract`);
-  if (matches.length !== 1) fail(`job ${observed} has ambiguous workflow runner contract`);
-  return runnerClassImage(matches[0].runsOn);
+  try {
+    return runnerClassImage(resolveWorkflowJobIdentity(jobName, contracts).runsOn);
+  } catch (error) {
+    fail(error.message.replace("workflow job identity", "workflow runner contract"));
+  }
 }
 async function fetchGhPages(endpoint) {
   return endpoint.includes("/jobs?") ? ghJsonAsync(endpoint, true) : ghJson(endpoint, true);
 }
-export async function liveRuns(repo, workflow, windowDays, { fetchPages = fetchGhPages, now = Date.now } = {}) {
+async function fetchWorkflowContent(repo, workflow, headSha) {
+  const value = await ghJsonAsync(`/repos/${repo}/contents/.github/workflows/${workflow}?ref=${headSha}`);
+  if (!value || typeof value.content !== "string" || value.encoding !== "base64") fail("workflow content lookup returned no base64 content");
+  return Buffer.from(value.content, "base64").toString("utf8");
+}
+export async function liveRuns(repo, workflow, windowDays, { fetchPages = fetchGhPages, fetchWorkflow, now = Date.now } = {}) {
+  const loadWorkflow = fetchWorkflow || (fetchPages === fetchGhPages ? fetchWorkflowContent : async () => fs.readFileSync(WORKFLOW_RUNNER_PATH, "utf8"));
   const cutoff = new Date(now() - windowDays * 86_400_000).toISOString().slice(0, 10);
   const listed = (await fetchPages(`/repos/${repo}/actions/workflows/${workflow}/runs?per_page=100&created=>=${cutoff}`)).flatMap((page) => page.workflow_runs || []);
   const results = [];
   for (let index = 0; index < listed.length; index += 12) {
     results.push(...await Promise.all(listed.slice(index, index + 12).map(async (run) => {
     if (!Number.isInteger(run.run_attempt) || run.run_attempt < 1) fail("run.run_attempt must be a positive integer");
+    if (typeof run.head_sha !== "string" || !/^[0-9a-f]{40}$/i.test(run.head_sha)) fail("run.head_sha must be a full SHA");
+    const revision = validWorkflowRevision(run.workflow_revision) ? run.workflow_revision : workflowRevision(await loadWorkflow(repo, workflow, run.head_sha));
     const attempt = run.run_attempt;
     const attemptJobs = (await fetchPages(`/repos/${repo}/actions/runs/${run.id}/attempts/${attempt}/jobs?per_page=100`)).flatMap((page) => page.jobs || []).map((job) => {
       if (job.run_attempt != null && job.run_attempt !== attempt) fail("job.run_attempt must match run.run_attempt");
@@ -347,13 +377,13 @@ export async function liveRuns(repo, workflow, windowDays, { fetchPages = fetchG
     const present = new Set(attemptJobs.map((job) => normalizedIdentity(job.name, "job.name")));
     const jobs = attemptJobs.map((job) => ({
       id: job.id, html_url: job.html_url, name: job.name, started_at: job.started_at, completed_at: job.completed_at,
-      conclusion: CONCLUSIONS.has(job.conclusion) ? job.conclusion : "unknown", runner_image: workflowRunnerImage(job.name), needs: workflowNeeds(job.name, run, present, repo),
+      conclusion: CONCLUSIONS.has(job.conclusion) ? job.conclusion : "unknown", runner_image: workflowRunnerImage(job.name), needs: workflowNeeds(job.name, { ...run, workflow_revision: revision }, present, repo),
       setup_costs: setupCosts(job.steps), cache: cacheFacts(job.steps)
     }));
     const createdAt = run.created_at;
     const startedAt = Date.parse(run.run_started_at || createdAt) < Date.parse(createdAt) ? createdAt : (run.run_started_at || createdAt);
     const updatedAt = Date.parse(run.updated_at) < Date.parse(startedAt) ? startedAt : run.updated_at;
-    return { id: run.id, html_url: run.html_url, head_sha: run.head_sha, created_at: createdAt, run_started_at: startedAt, updated_at: updatedAt, event: run.event, head_branch: run.head_branch, conclusion: CONCLUSIONS.has(run.conclusion) ? run.conclusion : "unknown", run_attempt: attempt, original_run_id: run.id, workflow_path: workflow, provider_state: "non_run", jobs };
+    return { id: run.id, html_url: run.html_url, head_sha: run.head_sha, created_at: createdAt, run_started_at: startedAt, updated_at: updatedAt, event: run.event, head_branch: run.head_branch, conclusion: CONCLUSIONS.has(run.conclusion) ? run.conclusion : "unknown", run_attempt: attempt, original_run_id: run.id, workflow_path: workflow, workflow_revision: revision, provider_state: "non_run", jobs };
     })));
   }
   return results;

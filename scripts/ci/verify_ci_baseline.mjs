@@ -231,7 +231,7 @@ function historicalRevisionAndIdentityControls() {
     head_branch: "main",
     conclusion: "success",
     run_attempt: 1,
-    workflow_revision: "sha256:4b6434c1d8e8472e3f93bdfc15f5a4d3d5d08d888f01f4a5f64ad11c4edba220"
+    workflow_revision: "sha256:f6b1d06c0897168bdff1b692a63d1704db24b96a48620504888b1fe2f30c47fa"
   };
   const job = (name, id = 17_000) => ({
     id,
@@ -294,7 +294,7 @@ async function liveDisplayIdentityControls() {
   assert.deepEqual(records.filter((record) => record.kind === "job").map((record) => record.job_id), jobs.map((job) => job.id), "only current-attempt jobs reach normalized records");
   const host = records.find((record) => record.kind === "job" && record.stable_identity === "host-integration");
   assert.equal(host.dag_wait_ms, 10_000, "host resolves current display-name prerequisites in the live collector");
-  const historicalScheduledRun = { ...run, id: 981, event: "schedule" };
+  const historicalScheduledRun = { ...run, id: 981, event: "schedule", workflow_revision: "sha256:2535a639493f2b5549d3bb0e1baf12bc12ede268b55cd710e41da3afb22f2e42" };
   const historicalScheduledJobs = jobs.filter((job) => job.name !== "Release gate (Primary dev target)");
   const historicalScheduledFetch = async (endpoint) => endpoint.includes("/jobs?")
     ? [{ jobs: historicalScheduledJobs }]
@@ -348,6 +348,7 @@ async function liveDisplayIdentityControls() {
   const historicalRatchetRun = {
     ...run,
     id: 982,
+    workflow_revision: "sha256:89a5a0cb25d05eb88f40cffed7f1ba2549676b440d0a018d218eaa69e253cae8",
     created_at: "2026-08-11T06:00:00Z",
     event: "workflow_dispatch",
     jobs: [
@@ -370,25 +371,25 @@ async function liveDisplayIdentityControls() {
   });
   assert.deepEqual(
     unresolvedPrerequisites(futureRatchet),
-    ["job admin-ui-ratchet-guardrails has unresolved prerequisite admin-phase200-guardrails"],
+    ["job admin-ui-ratchet-guardrails has unresolved prerequisite admin-phase-200-deterministic-guardrails"],
     "future ratchet runs cannot inherit the historical compatibility rule"
   );
 
   const compatibilityCases = [
-    { event: "schedule", name: "Admin drift and docs", expected: "release-gate" },
-    { event: "push", name: "Host Docker boot smoke", expected: "docs-and-bash-contracts-shift-left" },
-    { event: "push", name: "Host integration (required deterministic gate)", expected: "admin-drift-and-docs" },
-    { event: "push", name: "Playwright E2E shard 1/3", expected: "host-integration" }
+    { event: "schedule", name: "Admin drift and docs", expected: "release-gate", revision: "sha256:2535a639493f2b5549d3bb0e1baf12bc12ede268b55cd710e41da3afb22f2e42" },
+    { event: "push", name: "Host Docker boot smoke", expected: "docs-and-bash-contracts-shift-left", revision: "sha256:abe82c1752c18b85daccb8a33255b78adee988866a6f1df64c68186d4f90fd43" },
+    { event: "push", name: "Host integration (required deterministic gate)", expected: "admin-drift-and-docs", revision: "sha256:f6b1d06c0897168bdff1b692a63d1704db24b96a48620504888b1fe2f30c47fa" },
+    { event: "push", name: "Playwright E2E shard 1/3", expected: "host-integration", revision: "sha256:fbef942d3a3f18c88689962c5d658a0a6dde16a95cfeb8e06b99b68d58e3ce99" }
   ];
   for (const [index, compatibility] of compatibilityCases.entries()) {
-    const historicalRun = { ...run, id: 990 + index, event: compatibility.event, created_at: "2026-08-11T06:00:00Z", jobs: [{ ...jobs[0], id: 9900 + index, name: compatibility.name, started_at: "2026-08-11T06:00:20Z", completed_at: "2026-08-11T06:01:00Z" }] };
+    const historicalRun = { ...run, id: 990 + index, event: compatibility.event, created_at: "2026-08-11T06:00:00Z", workflow_revision: compatibility.revision, jobs: [{ ...jobs[0], id: 9900 + index, name: compatibility.name, started_at: "2026-08-11T06:00:20Z", completed_at: "2026-08-11T06:01:00Z" }] };
     const fetch = async (endpoint) => endpoint.includes("/jobs?") ? [{ jobs: historicalRun.jobs }] : [{ workflow_runs: [historicalRun] }];
     const historical = await liveRuns("szTheory/accrue", "ci.yml", 90, { fetchPages: fetch, now: () => Date.parse("2026-08-11T06:04:00Z") });
     assert.deepEqual(unresolvedPrerequisites(historical), [], `historical compatibility accepts ${compatibility.name} only in its audited era`);
     const future = await liveRuns("szTheory/accrue", "ci.yml", 90, { fetchPages: async (endpoint) => endpoint.includes("/jobs?") ? [{ jobs: historicalRun.jobs }] : [{ workflow_runs: [{ ...historicalRun, created_at: "2026-08-13T06:00:00Z" }] }], now: () => Date.parse("2026-08-13T06:04:00Z") });
     assert.ok(unresolvedPrerequisites(future).some((message) => message.endsWith(` ${compatibility.expected}`)), `future ${compatibility.name} remains fail-closed for ${compatibility.expected}`);
   }
-  const scheduledRatchetOnly = { ...run, id: 998, event: "schedule", created_at: "2026-08-11T06:00:00Z", jobs: [{ ...jobs[0], id: 9980, name: "Admin UI ratchet guardrails", started_at: "2026-08-11T06:00:20Z", completed_at: "2026-08-11T06:01:00Z" }] };
+  const scheduledRatchetOnly = { ...run, id: 998, event: "schedule", created_at: "2026-08-11T06:00:00Z", workflow_revision: "sha256:943d650205233f1c5c017bc605c90077600ba8c33240ea6268326887c0960ec0", jobs: [{ ...jobs[0], id: 9980, name: "Admin UI ratchet guardrails", started_at: "2026-08-11T06:00:20Z", completed_at: "2026-08-11T06:01:00Z" }] };
   const scheduledRatchet = await liveRuns("szTheory/accrue", "ci.yml", 90, { fetchPages: async (endpoint) => endpoint.includes("/jobs?") ? [{ jobs: scheduledRatchetOnly.jobs }] : [{ workflow_runs: [scheduledRatchetOnly] }], now: () => Date.parse("2026-08-11T06:04:00Z") });
   assert.deepEqual(unresolvedPrerequisites(scheduledRatchet), [], "scheduled ratchet compatibility includes its historical hardening prerequisite absence");
   const futureScheduledRatchet = await liveRuns("szTheory/accrue", "ci.yml", 90, { fetchPages: async (endpoint) => endpoint.includes("/jobs?") ? [{ jobs: scheduledRatchetOnly.jobs }] : [{ workflow_runs: [{ ...scheduledRatchetOnly, created_at: "2026-08-13T06:00:00Z" }] }], now: () => Date.parse("2026-08-13T06:04:00Z") });
