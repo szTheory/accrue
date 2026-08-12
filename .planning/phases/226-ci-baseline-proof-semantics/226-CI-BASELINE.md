@@ -8,7 +8,7 @@ Privacy-safe, schema-v1 evidence. Raw logs, actors, branches, secrets, payloads,
 
 ## Comparable cohort
 
-Snapshot generated: 2026-08-12T17:15:14.040Z. Window: 2026-05-14T17:15:14.040Z to 2026-08-12T17:15:14.040Z. Target: 20.
+Snapshot generated: 2026-08-12T19:56:04.771Z. Window: 2026-05-14T19:56:04.771Z to 2026-08-12T19:56:04.771Z. Target: 20.
 Immediate Phase 225 repair boundary: run [31322443304](https://github.com/szTheory/accrue/actions/runs/31322443304) at SHA `ee940cf9e1f8`. It is retained as evidence, not substituted for the full cohort.
 
 ### Comparable timing
@@ -51,7 +51,7 @@ Immediate Phase 225 repair boundary: run [31322443304](https://github.com/szTheo
 | 26680520807 | cohort-v1-4f3c2f1c363e57bc | failure | 2197s | [run](https://github.com/szTheory/accrue/actions/runs/26680520807) |
 | 26681247580 | cohort-v1-4f3c2f1c363e57bc | failure | 2103s | [run](https://github.com/szTheory/accrue/actions/runs/26681247580) |
 | 26681271094 | cohort-v1-36cebfd215822c51 | failure | 259s | [run](https://github.com/szTheory/accrue/actions/runs/26681271094) |
-| 26682761118 | cohort-v1-45c795a4ad141c4d | failure | 2078s | [run](https://github.com/szTheory/accrue/actions/runs/26682761118) |
+| 26682761118 | cohort-v1-d272766e97d89ff0 | failure | 2078s | [run](https://github.com/szTheory/accrue/actions/runs/26682761118) |
 | 26683503818 | cohort-v1-4f3c2f1c363e57bc | failure | 2137s | [run](https://github.com/szTheory/accrue/actions/runs/26683503818) |
 | 26706324487 | cohort-v1-0705ee52e970d062 | success | 239s | [run](https://github.com/szTheory/accrue/actions/runs/26706324487) |
 | 26741964304 | cohort-v1-0705ee52e970d062 | success | 234s | [run](https://github.com/szTheory/accrue/actions/runs/26741964304) |
@@ -70,13 +70,13 @@ Immediate Phase 225 repair boundary: run [31322443304](https://github.com/szTheo
 | 26847038225 | cohort-v1-b25f75bf9b534c14 | failure | 1674s | [run](https://github.com/szTheory/accrue/actions/runs/26847038225) |
 | 26848632844 | cohort-v1-b25f75bf9b534c14 | failure | 2453s | [run](https://github.com/szTheory/accrue/actions/runs/26848632844) |
 | 26854922746 | cohort-v1-845e4127d23357dd | failure | 1596s | [run](https://github.com/szTheory/accrue/actions/runs/26854922746) |
-| 26856021775 | cohort-v1-32d175907b6bc76a | failure | 2415s | [run](https://github.com/szTheory/accrue/actions/runs/26856021775) |
-| 26857205039 | cohort-v1-41979ab9c3d66741 | failure | 2457s | [run](https://github.com/szTheory/accrue/actions/runs/26857205039) |
+| 26856021775 | cohort-v1-ca6ec7bc07ead1a4 | failure | 2415s | [run](https://github.com/szTheory/accrue/actions/runs/26856021775) |
+| 26857205039 | cohort-v1-e6bdc407f7b9cc45 | failure | 2457s | [run](https://github.com/szTheory/accrue/actions/runs/26857205039) |
 | 26857232016 | cohort-v1-eee4a9032f39751c | failure | 261s | [run](https://github.com/szTheory/accrue/actions/runs/26857232016) |
 | 26857266222 | cohort-v1-41979ab9c3d66741 | failure | 2407s | [run](https://github.com/szTheory/accrue/actions/runs/26857266222) |
 | 26870800576 | cohort-v1-9a8fcb9ddba37c3d | failure | 243s | [run](https://github.com/szTheory/accrue/actions/runs/26870800576) |
-| 26892725452 | cohort-v1-39a981dd8ba85c26 | failure | 2441s | [run](https://github.com/szTheory/accrue/actions/runs/26892725452) |
-| 26895398930 | cohort-v1-bfa1450892743e20 | success | 2323s | [run](https://github.com/szTheory/accrue/actions/runs/26895398930) |
+| 26892725452 | cohort-v1-5b4c2055feaec38d | failure | 2441s | [run](https://github.com/szTheory/accrue/actions/runs/26892725452) |
+| 26895398930 | cohort-v1-dea896f76192c729 | success | 2323s | [run](https://github.com/szTheory/accrue/actions/runs/26895398930) |
 | 26937854250 | cohort-v1-2f258838ff3043ea | failure | 244s | [run](https://github.com/szTheory/accrue/actions/runs/26937854250) |
 | 27001736429 | cohort-v1-2f258838ff3043ea | failure | 226s | [run](https://github.com/szTheory/accrue/actions/runs/27001736429) |
 | 27055725429 | cohort-v1-2f258838ff3043ea | failure | 227s | [run](https://github.com/szTheory/accrue/actions/runs/27055725429) |
@@ -88,11 +88,11 @@ Immediate Phase 225 repair boundary: run [31322443304](https://github.com/szTheo
 | 27082212931 | cohort-v1-c81ac920a04a09f3 | cancelled | 831s | [run](https://github.com/szTheory/accrue/actions/runs/27082212931) |
 | 27082460794 | cohort-v1-5973633093b667f1 | failure | 1596s | [run](https://github.com/szTheory/accrue/actions/runs/27082460794) |
 | 27083987123 | cohort-v1-023d84d9dfaa286b | failure | 1689s | [run](https://github.com/szTheory/accrue/actions/runs/27083987123) |
-| 27084771488 | cohort-v1-2e47790aeb36c0e6 | success | 1958s | [run](https://github.com/szTheory/accrue/actions/runs/27084771488) |
+| 27084771488 | cohort-v1-a1ee4bebc9c80858 | success | 1958s | [run](https://github.com/szTheory/accrue/actions/runs/27084771488) |
 | 27086035187 | cohort-v1-fc02d18b7c9da938 | failure | 195s | [run](https://github.com/szTheory/accrue/actions/runs/27086035187) |
 | 27104710598 | cohort-v1-3f6ae8be3f1a9c5a | failure | 581s | [run](https://github.com/szTheory/accrue/actions/runs/27104710598) |
 | 27105082909 | cohort-v1-77cb758858ab6170 | failure | 2201s | [run](https://github.com/szTheory/accrue/actions/runs/27105082909) |
-| 27109819544 | cohort-v1-bcd7cb53274a2e92 | success | 1958s | [run](https://github.com/szTheory/accrue/actions/runs/27109819544) |
+| 27109819544 | cohort-v1-220eca9f35c67401 | success | 1958s | [run](https://github.com/szTheory/accrue/actions/runs/27109819544) |
 | 27123101709 | cohort-v1-031fceba477f1f39 | failure | 191s | [run](https://github.com/szTheory/accrue/actions/runs/27123101709) |
 | 27190148729 | cohort-v1-031fceba477f1f39 | failure | 196s | [run](https://github.com/szTheory/accrue/actions/runs/27190148729) |
 | 27260455307 | cohort-v1-031fceba477f1f39 | failure | 195s | [run](https://github.com/szTheory/accrue/actions/runs/27260455307) |
@@ -100,9 +100,9 @@ Immediate Phase 225 repair boundary: run [31322443304](https://github.com/szTheo
 | 27401804802 | cohort-v1-031fceba477f1f39 | failure | 193s | [run](https://github.com/szTheory/accrue/actions/runs/27401804802) |
 | 27460148645 | cohort-v1-031fceba477f1f39 | failure | 196s | [run](https://github.com/szTheory/accrue/actions/runs/27460148645) |
 | 27492086521 | cohort-v1-031fceba477f1f39 | failure | 192s | [run](https://github.com/szTheory/accrue/actions/runs/27492086521) |
-| 27503672753 | cohort-v1-65daf0c52932a23b | success | 1968s | [run](https://github.com/szTheory/accrue/actions/runs/27503672753) |
-| 27505602983 | cohort-v1-65daf0c52932a23b | success | 1741s | [run](https://github.com/szTheory/accrue/actions/runs/27505602983) |
-| 27505659138 | cohort-v1-65daf0c52932a23b | success | 1960s | [run](https://github.com/szTheory/accrue/actions/runs/27505659138) |
+| 27503672753 | cohort-v1-d7a20a928daeb9ed | success | 1968s | [run](https://github.com/szTheory/accrue/actions/runs/27503672753) |
+| 27505602983 | cohort-v1-d7a20a928daeb9ed | success | 1741s | [run](https://github.com/szTheory/accrue/actions/runs/27505602983) |
+| 27505659138 | cohort-v1-d7a20a928daeb9ed | success | 1960s | [run](https://github.com/szTheory/accrue/actions/runs/27505659138) |
 | 27532219764 | cohort-v1-6dec08dd39a85ffa | failure | 197s | [run](https://github.com/szTheory/accrue/actions/runs/27532219764) |
 | 27602902815 | cohort-v1-6dec08dd39a85ffa | failure | 193s | [run](https://github.com/szTheory/accrue/actions/runs/27602902815) |
 | 27674010805 | cohort-v1-6dec08dd39a85ffa | failure | 197s | [run](https://github.com/szTheory/accrue/actions/runs/27674010805) |
@@ -115,7 +115,7 @@ Immediate Phase 225 repair boundary: run [31322443304](https://github.com/szTheo
 | 27876579088 | cohort-v1-b38c596722ab6b47 | failure | 433s | [run](https://github.com/szTheory/accrue/actions/runs/27876579088) |
 | 27876849035 | cohort-v1-e02b48ca3289aff5 | failure | 1328s | [run](https://github.com/szTheory/accrue/actions/runs/27876849035) |
 | 27879322130 | cohort-v1-e02b48ca3289aff5 | failure | 1777s | [run](https://github.com/szTheory/accrue/actions/runs/27879322130) |
-| 27880318740 | cohort-v1-0a91e99916387ef9 | success | 1972s | [run](https://github.com/szTheory/accrue/actions/runs/27880318740) |
+| 27880318740 | cohort-v1-5e9daa8748e49546 | success | 1972s | [run](https://github.com/szTheory/accrue/actions/runs/27880318740) |
 | 27897492962 | cohort-v1-239f96aaad77d6dd | failure | 192s | [run](https://github.com/szTheory/accrue/actions/runs/27897492962) |
 | 27917931869 | cohort-v1-f004fa8bbb0c14df | failure | 323s | [run](https://github.com/szTheory/accrue/actions/runs/27917931869) |
 | 27938160591 | cohort-v1-239f96aaad77d6dd | failure | 161s | [run](https://github.com/szTheory/accrue/actions/runs/27938160591) |
@@ -127,7 +127,7 @@ Immediate Phase 225 repair boundary: run [31322443304](https://github.com/szTheo
 | 27976201678 | cohort-v1-e02b48ca3289aff5 | failure | 1781s | [run](https://github.com/szTheory/accrue/actions/runs/27976201678) |
 | 27978106859 | cohort-v1-e02b48ca3289aff5 | failure | 1803s | [run](https://github.com/szTheory/accrue/actions/runs/27978106859) |
 | 27982922666 | cohort-v1-e02b48ca3289aff5 | failure | 1755s | [run](https://github.com/szTheory/accrue/actions/runs/27982922666) |
-| 27985235948 | cohort-v1-0a91e99916387ef9 | success | 1962s | [run](https://github.com/szTheory/accrue/actions/runs/27985235948) |
+| 27985235948 | cohort-v1-5e9daa8748e49546 | success | 1962s | [run](https://github.com/szTheory/accrue/actions/runs/27985235948) |
 | 28009050303 | cohort-v1-239f96aaad77d6dd | failure | 190s | [run](https://github.com/szTheory/accrue/actions/runs/28009050303) |
 | 28081678176 | cohort-v1-239f96aaad77d6dd | failure | 190s | [run](https://github.com/szTheory/accrue/actions/runs/28081678176) |
 | 28153314075 | cohort-v1-239f96aaad77d6dd | failure | 191s | [run](https://github.com/szTheory/accrue/actions/runs/28153314075) |
@@ -142,12 +142,12 @@ Immediate Phase 225 repair boundary: run [31322443304](https://github.com/szTheo
 | 28531616272 | cohort-v1-9d65a10e3b889993 | failure | 1406s | [run](https://github.com/szTheory/accrue/actions/runs/28531616272) |
 | 28532489359 | cohort-v1-9d65a10e3b889993 | failure | 1397s | [run](https://github.com/szTheory/accrue/actions/runs/28532489359) |
 | 28534236699 | cohort-v1-9d65a10e3b889993 | failure | 1767s | [run](https://github.com/szTheory/accrue/actions/runs/28534236699) |
-| 28536823082 | cohort-v1-dec8b4933123aef1 | success | 2046s | [run](https://github.com/szTheory/accrue/actions/runs/28536823082) |
-| 28538686414 | cohort-v1-dec8b4933123aef1 | success | 2092s | [run](https://github.com/szTheory/accrue/actions/runs/28538686414) |
+| 28536823082 | cohort-v1-6d7ad68cf6685339 | success | 2046s | [run](https://github.com/szTheory/accrue/actions/runs/28536823082) |
+| 28538686414 | cohort-v1-6d7ad68cf6685339 | success | 2092s | [run](https://github.com/szTheory/accrue/actions/runs/28538686414) |
 | 28572033392 | cohort-v1-1093e58056b14b06 | failure | 196s | [run](https://github.com/szTheory/accrue/actions/runs/28572033392) |
 | 28644402359 | cohort-v1-1093e58056b14b06 | failure | 189s | [run](https://github.com/szTheory/accrue/actions/runs/28644402359) |
-| 28650211931 | cohort-v1-dec8b4933123aef1 | success | 2062s | [run](https://github.com/szTheory/accrue/actions/runs/28650211931) |
-| 28652090155 | cohort-v1-c1e4f6830bafe371 | success | 2069s | [run](https://github.com/szTheory/accrue/actions/runs/28652090155) |
+| 28650211931 | cohort-v1-6d7ad68cf6685339 | success | 2062s | [run](https://github.com/szTheory/accrue/actions/runs/28650211931) |
+| 28652090155 | cohort-v1-bf9413b309327380 | success | 2069s | [run](https://github.com/szTheory/accrue/actions/runs/28652090155) |
 | 28698466271 | cohort-v1-1093e58056b14b06 | success | 205s | [run](https://github.com/szTheory/accrue/actions/runs/28698466271) |
 | 28732842239 | cohort-v1-1093e58056b14b06 | success | 210s | [run](https://github.com/szTheory/accrue/actions/runs/28732842239) |
 | 28775306427 | cohort-v1-1093e58056b14b06 | success | 204s | [run](https://github.com/szTheory/accrue/actions/runs/28775306427) |
@@ -169,7 +169,7 @@ Immediate Phase 225 repair boundary: run [31322443304](https://github.com/szTheo
 | 29898135129 | cohort-v1-1093e58056b14b06 | success | 201s | [run](https://github.com/szTheory/accrue/actions/runs/29898135129) |
 | 29986315462 | cohort-v1-1093e58056b14b06 | success | 201s | [run](https://github.com/szTheory/accrue/actions/runs/29986315462) |
 | 30073492745 | cohort-v1-1093e58056b14b06 | success | 197s | [run](https://github.com/szTheory/accrue/actions/runs/30073492745) |
-| 30132097043 | cohort-v1-d46490647ea8c406 | success | 2621s | [run](https://github.com/szTheory/accrue/actions/runs/30132097043) |
+| 30132097043 | cohort-v1-4ee5d5e89fca91f2 | success | 2621s | [run](https://github.com/szTheory/accrue/actions/runs/30132097043) |
 | 30148085732 | cohort-v1-1093e58056b14b06 | success | 198s | [run](https://github.com/szTheory/accrue/actions/runs/30148085732) |
 | 30191853383 | cohort-v1-1093e58056b14b06 | success | 216s | [run](https://github.com/szTheory/accrue/actions/runs/30191853383) |
 | 30244990256 | cohort-v1-1093e58056b14b06 | success | 205s | [run](https://github.com/szTheory/accrue/actions/runs/30244990256) |
@@ -254,10 +254,10 @@ Topology fingerprints remain visible strata; they are not an all-or-nothing avai
 | --- | --- | --- | --- | --- |
 | cohort-v1-2d1b8f835d106a03 | 7 | 1959s–2174s | 2097s | 2174s |
 | cohort-v1-4b3b21230b7fcc7f | 3 | 2159s–2659s | 2354s | 2659s |
+| cohort-v1-4ee5d5e89fca91f2 | 1 | 2602s–2602s | — | — |
+| cohort-v1-6d7ad68cf6685339 | 2 | 2042s–2072s | 2042s | 2072s |
 | cohort-v1-b81e177f34787b17 | 6 | 1965s–2116s | 2056s | 2116s |
-| cohort-v1-c1e4f6830bafe371 | 1 | 2051s–2051s | — | — |
-| cohort-v1-d46490647ea8c406 | 1 | 2602s–2602s | — | — |
-| cohort-v1-dec8b4933123aef1 | 2 | 2042s–2072s | 2042s | 2072s |
+| cohort-v1-bf9413b309327380 | 1 | 2051s–2051s | — | — |
 
 | Cohort | Qualifying successes | Status | p50 | p95 |
 | --- | --- | --- | --- | --- |
@@ -265,36 +265,35 @@ Topology fingerprints remain visible strata; they are not an all-or-nothing avai
 | cohort-v1-023d84d9dfaa286b | 0 | insufficient_sample | — | — |
 | cohort-v1-031fceba477f1f39 | 0 | insufficient_sample | — | — |
 | cohort-v1-0705ee52e970d062 | 0 | insufficient_sample | — | — |
-| cohort-v1-0a91e99916387ef9 | 2 | insufficient_sample | — | — |
 | cohort-v1-1093e58056b14b06 | 0 | insufficient_sample | — | — |
 | cohort-v1-14962799611dab7f | 0 | insufficient_sample | — | — |
 | cohort-v1-1d4b7234df7b43f5 | 0 | insufficient_sample | — | — |
+| cohort-v1-220eca9f35c67401 | 1 | insufficient_sample | — | — |
 | cohort-v1-22b4daaa03359b7a | 0 | insufficient_sample | — | — |
 | cohort-v1-234e1d593492a4c4 | 0 | insufficient_sample | — | — |
 | cohort-v1-239f96aaad77d6dd | 0 | insufficient_sample | — | — |
 | cohort-v1-27d91674277321cf | 0 | insufficient_sample | — | — |
 | cohort-v1-2ad64748ba7fb037 | 0 | insufficient_sample | — | — |
 | cohort-v1-2d1b8f835d106a03 | 7 | insufficient_sample | — | — |
-| cohort-v1-2e47790aeb36c0e6 | 1 | insufficient_sample | — | — |
 | cohort-v1-2f13a43d4ab49b95 | 0 | insufficient_sample | — | — |
 | cohort-v1-2f258838ff3043ea | 0 | insufficient_sample | — | — |
 | cohort-v1-32141c1d5caaa14d | 0 | insufficient_sample | — | — |
-| cohort-v1-32d175907b6bc76a | 0 | insufficient_sample | — | — |
 | cohort-v1-36cebfd215822c51 | 0 | insufficient_sample | — | — |
-| cohort-v1-39a981dd8ba85c26 | 0 | insufficient_sample | — | — |
 | cohort-v1-3ccfa4fd9389d2a9 | 0 | insufficient_sample | — | — |
 | cohort-v1-3f6ae8be3f1a9c5a | 0 | insufficient_sample | — | — |
 | cohort-v1-4016057667bdf4b3 | 0 | insufficient_sample | — | — |
 | cohort-v1-41979ab9c3d66741 | 0 | insufficient_sample | — | — |
-| cohort-v1-45c795a4ad141c4d | 0 | insufficient_sample | — | — |
 | cohort-v1-48f2ad55c3cf7718 | 0 | insufficient_sample | — | — |
 | cohort-v1-4b3b21230b7fcc7f | 3 | insufficient_sample | — | — |
+| cohort-v1-4ee5d5e89fca91f2 | 1 | insufficient_sample | — | — |
 | cohort-v1-4f3c2f1c363e57bc | 0 | insufficient_sample | — | — |
 | cohort-v1-5489d20a926d9c4e | 0 | insufficient_sample | — | — |
 | cohort-v1-5973633093b667f1 | 0 | insufficient_sample | — | — |
-| cohort-v1-65daf0c52932a23b | 3 | insufficient_sample | — | — |
+| cohort-v1-5b4c2055feaec38d | 0 | insufficient_sample | — | — |
+| cohort-v1-5e9daa8748e49546 | 2 | insufficient_sample | — | — |
 | cohort-v1-6be8dd708ebec355 | 0 | insufficient_sample | — | — |
 | cohort-v1-6bf5717ea07a299f | 0 | insufficient_sample | — | — |
+| cohort-v1-6d7ad68cf6685339 | 3 | insufficient_sample | — | — |
 | cohort-v1-6dec08dd39a85ffa | 0 | insufficient_sample | — | — |
 | cohort-v1-7767e1b2efa598fd | 0 | insufficient_sample | — | — |
 | cohort-v1-77cb758858ab6170 | 0 | insufficient_sample | — | — |
@@ -310,24 +309,26 @@ Topology fingerprints remain visible strata; they are not an all-or-nothing avai
 | cohort-v1-97ed858ca1acd595 | 0 | insufficient_sample | — | — |
 | cohort-v1-9a8fcb9ddba37c3d | 0 | insufficient_sample | — | — |
 | cohort-v1-9d65a10e3b889993 | 0 | insufficient_sample | — | — |
+| cohort-v1-a1ee4bebc9c80858 | 1 | insufficient_sample | — | — |
 | cohort-v1-a220fe7e642d2b68 | 0 | insufficient_sample | — | — |
 | cohort-v1-b25f75bf9b534c14 | 0 | insufficient_sample | — | — |
 | cohort-v1-b38c596722ab6b47 | 0 | insufficient_sample | — | — |
 | cohort-v1-b81e177f34787b17 | 6 | insufficient_sample | — | — |
-| cohort-v1-bcd7cb53274a2e92 | 1 | insufficient_sample | — | — |
 | cohort-v1-bd1427545744f0aa | 0 | insufficient_sample | — | — |
-| cohort-v1-bfa1450892743e20 | 0 | insufficient_sample | — | — |
-| cohort-v1-c1e4f6830bafe371 | 1 | insufficient_sample | — | — |
+| cohort-v1-bf9413b309327380 | 1 | insufficient_sample | — | — |
 | cohort-v1-c67947f6abc5c1e0 | 0 | insufficient_sample | — | — |
 | cohort-v1-c81ac920a04a09f3 | 0 | insufficient_sample | — | — |
 | cohort-v1-c8afca801dbbd1e7 | 0 | insufficient_sample | — | — |
 | cohort-v1-ca5b5e7e38a0fcd4 | 0 | insufficient_sample | — | — |
-| cohort-v1-d46490647ea8c406 | 1 | insufficient_sample | — | — |
+| cohort-v1-ca6ec7bc07ead1a4 | 0 | insufficient_sample | — | — |
+| cohort-v1-d272766e97d89ff0 | 0 | insufficient_sample | — | — |
+| cohort-v1-d7a20a928daeb9ed | 3 | insufficient_sample | — | — |
 | cohort-v1-d865f5687466dfdd | 0 | insufficient_sample | — | — |
-| cohort-v1-dec8b4933123aef1 | 3 | insufficient_sample | — | — |
+| cohort-v1-dea896f76192c729 | 0 | insufficient_sample | — | — |
 | cohort-v1-e02b48ca3289aff5 | 0 | insufficient_sample | — | — |
 | cohort-v1-e111910858e292b1 | 0 | insufficient_sample | — | — |
 | cohort-v1-e6ba15bc164473b3 | 0 | insufficient_sample | — | — |
+| cohort-v1-e6bdc407f7b9cc45 | 0 | insufficient_sample | — | — |
 | cohort-v1-edead9e049f0ad5c | 0 | insufficient_sample | — | — |
 | cohort-v1-eee4a9032f39751c | 0 | insufficient_sample | — | — |
 | cohort-v1-f004fa8bbb0c14df | 0 | insufficient_sample | — | — |
@@ -1807,7 +1808,7 @@ All full-CI timing runs are recorded as `non_run` for provider proof; a successf
 
 ## Reliability
 
-Root-job runner queue observations: 1354. Dependent DAG-wait observations: 354.
+Root-job runner queue observations: 1354. Dependent DAG-wait observations: 371.
 
 | Job | State | Runner queue | DAG wait | Duration | Evidence |
 | --- | --- | --- | --- | --- |
@@ -1997,6 +1998,7 @@ Root-job runner queue observations: 1354. Dependent DAG-wait observations: 354.
 | release-gate | success | 3s | — | 1096s | [job](https://github.com/szTheory/accrue/actions/runs/26682761118/job/78645860569) |
 | admin-drift-and-docs | success | — | 36s | 178s | [job](https://github.com/szTheory/accrue/actions/runs/26682761118/job/78646759705) |
 | host-integration | success | — | 4s | 749s | [job](https://github.com/szTheory/accrue/actions/runs/26682761118/job/78646898776) |
+| annotation-sweep | failure | — | 2s | 9s | [job](https://github.com/szTheory/accrue/actions/runs/26682761118/job/78647522542) |
 | release-manifest-ssot | success | 1s | — | 5s | [job](https://github.com/szTheory/accrue/actions/runs/26683503818/job/78647723450) |
 | phase-18-stripe-tax-gate | success | 2s | — | 234s | [job](https://github.com/szTheory/accrue/actions/runs/26683503818/job/78647723453) |
 | docs-and-bash-contracts-shift-left | success | 3s | — | 10s | [job](https://github.com/szTheory/accrue/actions/runs/26683503818/job/78647723458) |
@@ -2160,6 +2162,7 @@ Root-job runner queue observations: 1354. Dependent DAG-wait observations: 354.
 | playwright-e2e-shard-2/3 | success | — | 1s | 253s | [job](https://github.com/szTheory/accrue/actions/runs/26856021775/job/79202572464) |
 | playwright-e2e-shard-1/3 | success | — | 1s | 285s | [job](https://github.com/szTheory/accrue/actions/runs/26856021775/job/79202572465) |
 | playwright-e2e-shard-3/3 | success | — | 1s | 254s | [job](https://github.com/szTheory/accrue/actions/runs/26856021775/job/79202572467) |
+| annotation-sweep | failure | — | 43s | 10s | [job](https://github.com/szTheory/accrue/actions/runs/26856021775/job/79203065533) |
 | phase-18-stripe-tax-gate | success | 2s | — | 235s | [job](https://github.com/szTheory/accrue/actions/runs/26857205039/job/79202630816) |
 | docs-and-bash-contracts-shift-left | success | 2s | — | 7s | [job](https://github.com/szTheory/accrue/actions/runs/26857205039/job/79202630839) |
 | release-manifest-ssot | success | 3s | — | 6s | [job](https://github.com/szTheory/accrue/actions/runs/26857205039/job/79202630841) |
@@ -2174,6 +2177,7 @@ Root-job runner queue observations: 1354. Dependent DAG-wait observations: 354.
 | playwright-e2e-shard-2/3 | success | — | 2s | 269s | [job](https://github.com/szTheory/accrue/actions/runs/26857205039/job/79206207220) |
 | playwright-e2e-shard-1/3 | success | — | 2s | 291s | [job](https://github.com/szTheory/accrue/actions/runs/26857205039/job/79206207222) |
 | playwright-e2e-shard-3/3 | success | — | 3s | 261s | [job](https://github.com/szTheory/accrue/actions/runs/26857205039/job/79206207226) |
+| annotation-sweep | failure | — | 24s | 9s | [job](https://github.com/szTheory/accrue/actions/runs/26857205039/job/79206690065) |
 | docs-and-bash-contracts-shift-left | failure | 3s | — | 9s | [job](https://github.com/szTheory/accrue/actions/runs/26857232016/job/79202716123) |
 | release-manifest-ssot | success | 2s | — | 5s | [job](https://github.com/szTheory/accrue/actions/runs/26857232016/job/79202716129) |
 | phase-18-stripe-tax-gate | success | 3s | — | 198s | [job](https://github.com/szTheory/accrue/actions/runs/26857232016/job/79202716131) |
@@ -2211,6 +2215,7 @@ Root-job runner queue observations: 1354. Dependent DAG-wait observations: 354.
 | playwright-e2e-shard-3/3 | success | — | 57s | 271s | [job](https://github.com/szTheory/accrue/actions/runs/26892725452/job/79330552467) |
 | playwright-e2e-shard-2/3 | success | — | 67s | 273s | [job](https://github.com/szTheory/accrue/actions/runs/26892725452/job/79330552506) |
 | playwright-e2e-shard-1/3 | success | — | 44s | 267s | [job](https://github.com/szTheory/accrue/actions/runs/26892725452/job/79330552535) |
+| annotation-sweep | failure | — | 20s | 8s | [job](https://github.com/szTheory/accrue/actions/runs/26892725452/job/79331774860) |
 | phase-18-stripe-tax-gate | success | 4s | — | 221s | [job](https://github.com/szTheory/accrue/actions/runs/26895398930/job/79337149422) |
 | release-manifest-ssot | success | 4s | — | 5s | [job](https://github.com/szTheory/accrue/actions/runs/26895398930/job/79337149570) |
 | release-gate | success | 5s | — | 1139s | [job](https://github.com/szTheory/accrue/actions/runs/26895398930/job/79337149711) |
@@ -2225,6 +2230,7 @@ Root-job runner queue observations: 1354. Dependent DAG-wait observations: 354.
 | playwright-e2e-shard-3/3 | success | — | 5s | 260s | [job](https://github.com/szTheory/accrue/actions/runs/26895398930/job/79343830758) |
 | playwright-e2e-shard-2/3 | success | — | 3s | 251s | [job](https://github.com/szTheory/accrue/actions/runs/26895398930/job/79343830765) |
 | playwright-e2e-shard-1/3 | success | — | 6s | 277s | [job](https://github.com/szTheory/accrue/actions/runs/26895398930/job/79343830784) |
+| annotation-sweep | success | — | 32s | 12s | [job](https://github.com/szTheory/accrue/actions/runs/26895398930/job/79344761593) |
 | stripe-test-mode-parity | failure | 3s | — | 240s | [job](https://github.com/szTheory/accrue/actions/runs/26937854250/job/79471805295) |
 | stripe-test-mode-parity | failure | 3s | — | 222s | [job](https://github.com/szTheory/accrue/actions/runs/27001736429/job/79683567717) |
 | stripe-test-mode-parity | failure | 2s | — | 224s | [job](https://github.com/szTheory/accrue/actions/runs/27055725429/job/79859630770) |
@@ -2288,7 +2294,7 @@ Root-job runner queue observations: 1354. Dependent DAG-wait observations: 354.
 | release-gate | success | 2s | — | 1137s | [job](https://github.com/szTheory/accrue/actions/runs/27082460794/job/79930730491) |
 | release-gate | success | 2s | — | 1115s | [job](https://github.com/szTheory/accrue/actions/runs/27082460794/job/79930730497) |
 | host-docker-boot-smoke | failure | — | 1s | 1002s | [job](https://github.com/szTheory/accrue/actions/runs/27082460794/job/79930736879) |
-| admin-drift-and-docs | success | — | 71s | 185s | [job](https://github.com/szTheory/accrue/actions/runs/27082460794/job/79931747896) |
+| admin-drift-and-docs | success | — | 13s | 185s | [job](https://github.com/szTheory/accrue/actions/runs/27082460794/job/79931747896) |
 | host-integration | failure | — | 2s | 220s | [job](https://github.com/szTheory/accrue/actions/runs/27082460794/job/79931902201) |
 | phase-18-stripe-tax-gate | success | 2s | — | 184s | [job](https://github.com/szTheory/accrue/actions/runs/27083987123/job/79934799429) |
 | release-manifest-ssot | success | 2s | — | 6s | [job](https://github.com/szTheory/accrue/actions/runs/27083987123/job/79934799431) |
@@ -2313,6 +2319,7 @@ Root-job runner queue observations: 1354. Dependent DAG-wait observations: 354.
 | playwright-e2e-shard-2/3 | success | — | 3s | 218s | [job](https://github.com/szTheory/accrue/actions/runs/27084771488/job/79938561921) |
 | playwright-e2e-shard-1/3 | success | — | 1s | 260s | [job](https://github.com/szTheory/accrue/actions/runs/27084771488/job/79938561926) |
 | playwright-e2e-shard-3/3 | success | — | 1s | 217s | [job](https://github.com/szTheory/accrue/actions/runs/27084771488/job/79938561929) |
+| annotation-sweep | success | — | 42s | 7s | [job](https://github.com/szTheory/accrue/actions/runs/27084771488/job/79938791349) |
 | stripe-test-mode-parity | failure | 2s | — | 192s | [job](https://github.com/szTheory/accrue/actions/runs/27086035187/job/79940579762) |
 | release-manifest-ssot | success | 1s | — | 5s | [job](https://github.com/szTheory/accrue/actions/runs/27104710598/job/79991649907) |
 | docs-and-bash-contracts-shift-left | success | 2s | — | 11s | [job](https://github.com/szTheory/accrue/actions/runs/27104710598/job/79991649908) |
@@ -2345,6 +2352,7 @@ Root-job runner queue observations: 1354. Dependent DAG-wait observations: 354.
 | playwright-e2e-shard-3/3 | success | — | 2s | 216s | [job](https://github.com/szTheory/accrue/actions/runs/27109819544/job/80007487629) |
 | playwright-e2e-shard-1/3 | success | — | 2s | 244s | [job](https://github.com/szTheory/accrue/actions/runs/27109819544/job/80007487630) |
 | playwright-e2e-shard-2/3 | success | — | 2s | 186s | [job](https://github.com/szTheory/accrue/actions/runs/27109819544/job/80007487636) |
+| annotation-sweep | success | — | 30s | 8s | [job](https://github.com/szTheory/accrue/actions/runs/27109819544/job/80007795616) |
 | stripe-test-mode-parity | failure | 2s | — | 188s | [job](https://github.com/szTheory/accrue/actions/runs/27123101709/job/80044744152) |
 | stripe-test-mode-parity | failure | 3s | — | 192s | [job](https://github.com/szTheory/accrue/actions/runs/27190148729/job/80268149904) |
 | stripe-test-mode-parity | failure | 3s | — | 191s | [job](https://github.com/szTheory/accrue/actions/runs/27260455307/job/80504628057) |
@@ -2365,6 +2373,7 @@ Root-job runner queue observations: 1354. Dependent DAG-wait observations: 354.
 | playwright-e2e-shard-1/3 | success | — | 8s | 235s | [job](https://github.com/szTheory/accrue/actions/runs/27503672753/job/81293002258) |
 | playwright-e2e-shard-2/3 | success | — | 2s | 214s | [job](https://github.com/szTheory/accrue/actions/runs/27503672753/job/81293002259) |
 | playwright-e2e-shard-3/3 | success | — | 2s | 212s | [job](https://github.com/szTheory/accrue/actions/runs/27503672753/job/81293002264) |
+| annotation-sweep | success | — | 4s | 11s | [job](https://github.com/szTheory/accrue/actions/runs/27503672753/job/81293289939) |
 | release-manifest-ssot | success | 2s | — | 6s | [job](https://github.com/szTheory/accrue/actions/runs/27505602983/job/81296144010) |
 | release-gate | success | 3s | — | 883s | [job](https://github.com/szTheory/accrue/actions/runs/27505602983/job/81296144014) |
 | release-gate-advisory | success | 2s | — | 901s | [job](https://github.com/szTheory/accrue/actions/runs/27505602983/job/81296144015) |
@@ -2378,6 +2387,7 @@ Root-job runner queue observations: 1354. Dependent DAG-wait observations: 354.
 | playwright-e2e-shard-2/3 | success | — | 2s | 211s | [job](https://github.com/szTheory/accrue/actions/runs/27505602983/job/81297807353) |
 | playwright-e2e-shard-1/3 | success | — | 2s | 250s | [job](https://github.com/szTheory/accrue/actions/runs/27505602983/job/81297807364) |
 | playwright-e2e-shard-3/3 | success | — | 3s | 224s | [job](https://github.com/szTheory/accrue/actions/runs/27505602983/job/81297807373) |
+| annotation-sweep | success | — | 47s | 7s | [job](https://github.com/szTheory/accrue/actions/runs/27505602983/job/81298089456) |
 | docs-and-bash-contracts-shift-left | success | 4s | — | 15s | [job](https://github.com/szTheory/accrue/actions/runs/27505659138/job/81296292045) |
 | release-manifest-ssot | success | 9s | — | 7s | [job](https://github.com/szTheory/accrue/actions/runs/27505659138/job/81296292053) |
 | release-gate | success | 3s | — | 910s | [job](https://github.com/szTheory/accrue/actions/runs/27505659138/job/81296292058) |
@@ -2391,6 +2401,7 @@ Root-job runner queue observations: 1354. Dependent DAG-wait observations: 354.
 | playwright-e2e-shard-1/3 | success | — | 8s | 236s | [job](https://github.com/szTheory/accrue/actions/runs/27505659138/job/81298209305) |
 | playwright-e2e-shard-3/3 | success | — | 8s | 216s | [job](https://github.com/szTheory/accrue/actions/runs/27505659138/job/81298209306) |
 | playwright-e2e-shard-2/3 | success | — | 2s | 210s | [job](https://github.com/szTheory/accrue/actions/runs/27505659138/job/81298209310) |
+| annotation-sweep | success | — | 2s | 8s | [job](https://github.com/szTheory/accrue/actions/runs/27505659138/job/81298479719) |
 | stripe-test-mode-parity | failure | 3s | — | 193s | [job](https://github.com/szTheory/accrue/actions/runs/27532219764/job/81372839396) |
 | stripe-test-mode-parity | failure | 3s | — | 189s | [job](https://github.com/szTheory/accrue/actions/runs/27602902815/job/81607902222) |
 | stripe-test-mode-parity | failure | 9s | — | 187s | [job](https://github.com/szTheory/accrue/actions/runs/27674010805/job/81844801651) |
@@ -2473,6 +2484,7 @@ Root-job runner queue observations: 1354. Dependent DAG-wait observations: 354.
 | playwright-e2e-shard-3/3 | success | — | 2s | 222s | [job](https://github.com/szTheory/accrue/actions/runs/27880318740/job/82508493031) |
 | playwright-e2e-shard-1/3 | success | — | 2s | 248s | [job](https://github.com/szTheory/accrue/actions/runs/27880318740/job/82508493037) |
 | playwright-e2e-shard-2/3 | success | — | 2s | 220s | [job](https://github.com/szTheory/accrue/actions/runs/27880318740/job/82508493046) |
+| annotation-sweep | success | — | 29s | 10s | [job](https://github.com/szTheory/accrue/actions/runs/27880318740/job/82508764967) |
 | stripe-test-mode-parity | failure | 3s | — | 188s | [job](https://github.com/szTheory/accrue/actions/runs/27897492962/job/82551627849) |
 | admin-hardening-guardrails | failure | 2s | — | 263s | [job](https://github.com/szTheory/accrue/actions/runs/27917931869/job/82606463549) |
 | phase-18-stripe-tax-gate | success | 2s | — | 181s | [job](https://github.com/szTheory/accrue/actions/runs/27917931869/job/82606463556) |
@@ -2532,7 +2544,7 @@ Root-job runner queue observations: 1354. Dependent DAG-wait observations: 354.
 | release-gate | success | 3s | — | 917s | [job](https://github.com/szTheory/accrue/actions/runs/27974106014/job/82787344731) |
 | admin-hardening-guardrails | success | 3s | — | 555s | [job](https://github.com/szTheory/accrue/actions/runs/27974106014/job/82787344814) |
 | host-docker-boot-smoke | success | — | 4s | 375s | [job](https://github.com/szTheory/accrue/actions/runs/27974106014/job/82787432298) |
-| admin-drift-and-docs | success | — | 4s | 177s | [job](https://github.com/szTheory/accrue/actions/runs/27974106014/job/82790369071) |
+| admin-drift-and-docs | success | — | 32s | 177s | [job](https://github.com/szTheory/accrue/actions/runs/27974106014/job/82790369071) |
 | host-integration | failure | — | 3s | 220s | [job](https://github.com/szTheory/accrue/actions/runs/27974106014/job/82790973816) |
 | admin-hardening-guardrails | success | 3s | — | 553s | [job](https://github.com/szTheory/accrue/actions/runs/27976201678/job/82794500716) |
 | release-gate | success | 3s | — | 922s | [job](https://github.com/szTheory/accrue/actions/runs/27976201678/job/82794500742) |
@@ -2585,6 +2597,7 @@ Root-job runner queue observations: 1354. Dependent DAG-wait observations: 354.
 | playwright-e2e-shard-2/3 | success | — | 2s | 213s | [job](https://github.com/szTheory/accrue/actions/runs/27985235948/job/82829822444) |
 | playwright-e2e-shard-1/3 | success | — | 3s | 252s | [job](https://github.com/szTheory/accrue/actions/runs/27985235948/job/82829822456) |
 | playwright-e2e-shard-3/3 | success | — | 2s | 215s | [job](https://github.com/szTheory/accrue/actions/runs/27985235948/job/82829822494) |
+| annotation-sweep | success | — | 43s | 9s | [job](https://github.com/szTheory/accrue/actions/runs/27985235948/job/82830539294) |
 | stripe-test-mode-parity | failure | 2s | — | 187s | [job](https://github.com/szTheory/accrue/actions/runs/28009050303/job/82897640985) |
 | stripe-test-mode-parity | failure | 3s | — | 186s | [job](https://github.com/szTheory/accrue/actions/runs/28081678176/job/83137861688) |
 | stripe-test-mode-parity | failure | 2s | — | 188s | [job](https://github.com/szTheory/accrue/actions/runs/28153314075/job/83375825209) |
@@ -2675,6 +2688,7 @@ Root-job runner queue observations: 1354. Dependent DAG-wait observations: 354.
 | playwright-e2e-shard-3/3 | success | — | 2s | 216s | [job](https://github.com/szTheory/accrue/actions/runs/28536823082/job/84605810108) |
 | playwright-e2e-shard-2/3 | success | — | 4s | 236s | [job](https://github.com/szTheory/accrue/actions/runs/28536823082/job/84605810119) |
 | playwright-e2e-shard-1/3 | success | — | 2s | 247s | [job](https://github.com/szTheory/accrue/actions/runs/28536823082/job/84605810130) |
+| annotation-sweep | success | — | 33s | 10s | [job](https://github.com/szTheory/accrue/actions/runs/28536823082/job/84606575519) |
 | docs-and-bash-contracts-shift-left | success | 3s | — | 19s | [job](https://github.com/szTheory/accrue/actions/runs/28538686414/job/84606559444) |
 | release-manifest-ssot | success | 3s | — | 9s | [job](https://github.com/szTheory/accrue/actions/runs/28538686414/job/84606559466) |
 | admin-phase-200-deterministic-guardrails | success | 3s | — | 522s | [job](https://github.com/szTheory/accrue/actions/runs/28538686414/job/84606559472) |
@@ -2691,6 +2705,7 @@ Root-job runner queue observations: 1354. Dependent DAG-wait observations: 354.
 | playwright-e2e-shard-1/3 | success | — | 3s | 270s | [job](https://github.com/szTheory/accrue/actions/runs/28538686414/job/84612270326) |
 | playwright-e2e-shard-3/3 | success | — | 3s | 235s | [job](https://github.com/szTheory/accrue/actions/runs/28538686414/job/84612270333) |
 | playwright-e2e-shard-2/3 | success | — | 3s | 225s | [job](https://github.com/szTheory/accrue/actions/runs/28538686414/job/84612270366) |
+| annotation-sweep | success | — | 2s | 14s | [job](https://github.com/szTheory/accrue/actions/runs/28538686414/job/84613136145) |
 | stripe-test-mode-parity | failure | 3s | — | 192s | [job](https://github.com/szTheory/accrue/actions/runs/28572033392/job/84711775702) |
 | stripe-test-mode-parity | failure | 3s | — | 185s | [job](https://github.com/szTheory/accrue/actions/runs/28644402359/job/84947505227) |
 | admin-phase-200-deterministic-guardrails | success | 2s | — | 519s | [job](https://github.com/szTheory/accrue/actions/runs/28650211931/job/84966164842) |
@@ -2709,6 +2724,7 @@ Root-job runner queue observations: 1354. Dependent DAG-wait observations: 354.
 | playwright-e2e-shard-1/3 | success | — | 2s | 249s | [job](https://github.com/szTheory/accrue/actions/runs/28650211931/job/84971404088) |
 | playwright-e2e-shard-3/3 | success | — | 2s | 223s | [job](https://github.com/szTheory/accrue/actions/runs/28650211931/job/84971404093) |
 | playwright-e2e-shard-2/3 | success | — | 3s | 158s | [job](https://github.com/szTheory/accrue/actions/runs/28650211931/job/84971404099) |
+| annotation-sweep | success | — | 3s | 13s | [job](https://github.com/szTheory/accrue/actions/runs/28650211931/job/84972118874) |
 | stripe-test-mode-parity | success | 5s | — | 197s | [job](https://github.com/szTheory/accrue/actions/runs/28652090155/job/84972323334) |
 | admin-group-contracts | success | 3s | — | 312s | [job](https://github.com/szTheory/accrue/actions/runs/28652090155/job/84972323347) |
 | release-gate | success | 3s | — | 949s | [job](https://github.com/szTheory/accrue/actions/runs/28652090155/job/84972323354) |
@@ -2726,6 +2742,7 @@ Root-job runner queue observations: 1354. Dependent DAG-wait observations: 354.
 | playwright-e2e-shard-3/3 | success | — | 2s | 217s | [job](https://github.com/szTheory/accrue/actions/runs/28652090155/job/84977482992) |
 | playwright-e2e-shard-2/3 | success | — | 2s | 218s | [job](https://github.com/szTheory/accrue/actions/runs/28652090155/job/84977482999) |
 | playwright-e2e-shard-1/3 | success | — | 2s | 244s | [job](https://github.com/szTheory/accrue/actions/runs/28652090155/job/84977483001) |
+| annotation-sweep | success | — | 29s | 12s | [job](https://github.com/szTheory/accrue/actions/runs/28652090155/job/84978165890) |
 | stripe-test-mode-parity | success | 3s | — | 201s | [job](https://github.com/szTheory/accrue/actions/runs/28698466271/job/85112207200) |
 | stripe-test-mode-parity | success | 2s | — | 207s | [job](https://github.com/szTheory/accrue/actions/runs/28732842239/job/85201579666) |
 | stripe-test-mode-parity | success | 4s | — | 200s | [job](https://github.com/szTheory/accrue/actions/runs/28775306427/job/85317814944) |
@@ -2763,6 +2780,7 @@ Root-job runner queue observations: 1354. Dependent DAG-wait observations: 354.
 | playwright-e2e-shard-3/3 | success | — | 2s | 198s | [job](https://github.com/szTheory/accrue/actions/runs/30132097043/job/89613806608) |
 | playwright-e2e-shard-2/3 | success | — | 2s | 236s | [job](https://github.com/szTheory/accrue/actions/runs/30132097043/job/89613806624) |
 | playwright-e2e-shard-1/3 | success | — | 2s | 267s | [job](https://github.com/szTheory/accrue/actions/runs/30132097043/job/89613806633) |
+| annotation-sweep | success | — | 72s | 14s | [job](https://github.com/szTheory/accrue/actions/runs/30132097043/job/89614383766) |
 | stripe-test-mode-parity | success | 2s | — | 196s | [job](https://github.com/szTheory/accrue/actions/runs/30148085732/job/89653590082) |
 | stripe-test-mode-parity | success | 2s | — | 214s | [job](https://github.com/szTheory/accrue/actions/runs/30191853383/job/89766357982) |
 | stripe-test-mode-parity | success | 3s | — | 201s | [job](https://github.com/szTheory/accrue/actions/runs/30244990256/job/89909963291) |
@@ -2931,7 +2949,7 @@ Root-job runner queue observations: 1354. Dependent DAG-wait observations: 354.
 | release-gate | success | 8s | — | 970s | [job](https://github.com/szTheory/accrue/actions/runs/30320163662/job/90154186003) |
 | host-docker-boot-smoke | success | — | 2s | 397s | [job](https://github.com/szTheory/accrue/actions/runs/30320163662/job/90154234926) |
 | admin-ui-ratchet-guardrails | failure | — | 51s | 14s | [job](https://github.com/szTheory/accrue/actions/runs/30320163662/job/90155582986) |
-| admin-drift-and-docs | success | — | 5s | 200s | [job](https://github.com/szTheory/accrue/actions/runs/30320163662/job/90156552266) |
+| admin-drift-and-docs | success | — | 36s | 200s | [job](https://github.com/szTheory/accrue/actions/runs/30320163662/job/90156552266) |
 | host-integration | failure | — | 384s | 247s | [job](https://github.com/szTheory/accrue/actions/runs/30320163662/job/90157031155) |
 | admin-hardening-guardrails | success | 9s | — | 556s | [job](https://github.com/szTheory/accrue/actions/runs/30322189063/job/90160178999) |
 | phase-18-stripe-tax-gate | success | 2s | — | 180s | [job](https://github.com/szTheory/accrue/actions/runs/30322189063/job/90160179006) |
@@ -3080,7 +3098,7 @@ Root-job runner queue observations: 1354. Dependent DAG-wait observations: 354.
 | admin-group-contracts | success | 9s | — | 323s | [job](https://github.com/szTheory/accrue/actions/runs/30503528131/job/90748212819) |
 | host-docker-boot-smoke | success | — | 2s | 409s | [job](https://github.com/szTheory/accrue/actions/runs/30503528131/job/90748266288) |
 | admin-ui-ratchet-guardrails | failure | — | 2s | 16s | [job](https://github.com/szTheory/accrue/actions/runs/30503528131/job/90749716959) |
-| admin-drift-and-docs | success | — | 24s | 196s | [job](https://github.com/szTheory/accrue/actions/runs/30503528131/job/90750616823) |
+| admin-drift-and-docs | success | — | 26s | 196s | [job](https://github.com/szTheory/accrue/actions/runs/30503528131/job/90750616823) |
 | host-integration | success | — | 8s | 644s | [job](https://github.com/szTheory/accrue/actions/runs/30503528131/job/90751127988) |
 | playwright-e2e-shard-1/3 | success | — | 8s | 253s | [job](https://github.com/szTheory/accrue/actions/runs/30503528131/job/90752757594) |
 | playwright-e2e-shard-2/3 | success | — | 2s | 224s | [job](https://github.com/szTheory/accrue/actions/runs/30503528131/job/90752757604) |
@@ -3194,7 +3212,7 @@ Root-job runner queue observations: 1354. Dependent DAG-wait observations: 354.
 | release-gate | success | 4s | — | 932s | [job](https://github.com/szTheory/accrue/actions/runs/30510952132/job/90770745318) |
 | host-docker-boot-smoke | success | — | 8s | 399s | [job](https://github.com/szTheory/accrue/actions/runs/30510952132/job/90770781807) |
 | admin-ui-ratchet-guardrails | failure | — | 2s | 11s | [job](https://github.com/szTheory/accrue/actions/runs/30510952132/job/90772032586) |
-| admin-drift-and-docs | success | — | 38s | 183s | [job](https://github.com/szTheory/accrue/actions/runs/30510952132/job/90772894252) |
+| admin-drift-and-docs | success | — | 50s | 183s | [job](https://github.com/szTheory/accrue/actions/runs/30510952132/job/90772894252) |
 | host-integration | success | — | 2s | 539s | [job](https://github.com/szTheory/accrue/actions/runs/30510952132/job/90773290371) |
 | playwright-e2e-shard-2/3 | success | — | 2s | 227s | [job](https://github.com/szTheory/accrue/actions/runs/30510952132/job/90774480306) |
 | playwright-e2e-shard-3/3 | success | — | 8s | 236s | [job](https://github.com/szTheory/accrue/actions/runs/30510952132/job/90774480308) |
@@ -3211,7 +3229,7 @@ Root-job runner queue observations: 1354. Dependent DAG-wait observations: 354.
 | release-gate | success | 3s | — | 953s | [job](https://github.com/szTheory/accrue/actions/runs/30514118719/job/90780105264) |
 | host-docker-boot-smoke | success | — | 2s | 333s | [job](https://github.com/szTheory/accrue/actions/runs/30514118719/job/90780142762) |
 | admin-ui-ratchet-guardrails | failure | — | 2s | 11s | [job](https://github.com/szTheory/accrue/actions/runs/30514118719/job/90781325427) |
-| admin-drift-and-docs | success | — | 2s | 185s | [job](https://github.com/szTheory/accrue/actions/runs/30514118719/job/90782217754) |
+| admin-drift-and-docs | success | — | 6s | 185s | [job](https://github.com/szTheory/accrue/actions/runs/30514118719/job/90782217754) |
 | host-integration | success | — | 2s | 653s | [job](https://github.com/szTheory/accrue/actions/runs/30514118719/job/90782639304) |
 | playwright-e2e-shard-3/3 | success | — | 8s | 223s | [job](https://github.com/szTheory/accrue/actions/runs/30514118719/job/90784172453) |
 | playwright-e2e-shard-2/3 | success | — | 2s | 238s | [job](https://github.com/szTheory/accrue/actions/runs/30514118719/job/90784172458) |
@@ -3250,7 +3268,7 @@ Root-job runner queue observations: 1354. Dependent DAG-wait observations: 354.
 | release-gate | cancelled | 0s | — | 188s | [job](https://github.com/szTheory/accrue/actions/runs/31287316457/job/93178394035) |
 | release-gate | cancelled | 0s | — | 188s | [job](https://github.com/szTheory/accrue/actions/runs/31287316457/job/93178394045) |
 | release-gate | cancelled | 0s | — | 188s | [job](https://github.com/szTheory/accrue/actions/runs/31287316457/job/93178394046) |
-| admin-drift-and-docs | cancelled | — | 2s | 0s | [job](https://github.com/szTheory/accrue/actions/runs/31287316457/job/93178723745) |
+| admin-drift-and-docs | cancelled | — | 1s | 0s | [job](https://github.com/szTheory/accrue/actions/runs/31287316457/job/93178723745) |
 | admin-ui-ratchet-guardrails | cancelled | — | 0s | 0s | [job](https://github.com/szTheory/accrue/actions/runs/31287316457/job/93178748324) |
 | phase-18-stripe-tax-gate | cancelled | 35s | — | 86s | [job](https://github.com/szTheory/accrue/actions/runs/31287439357/job/93178722030) |
 | docs-and-bash-contracts-shift-left | failure | 12s | — | 13s | [job](https://github.com/szTheory/accrue/actions/runs/31287439357/job/93178722045) |
@@ -3274,7 +3292,7 @@ Root-job runner queue observations: 1354. Dependent DAG-wait observations: 354.
 | release-gate | cancelled | 1s | — | 89s | [job](https://github.com/szTheory/accrue/actions/runs/31287502180/job/93178892743) |
 | release-manifest-ssot | cancelled | 1s | — | 89s | [job](https://github.com/szTheory/accrue/actions/runs/31287502180/job/93178892744) |
 | release-gate | cancelled | 1s | — | 89s | [job](https://github.com/szTheory/accrue/actions/runs/31287502180/job/93178892745) |
-| admin-drift-and-docs | cancelled | — | 4s | 0s | [job](https://github.com/szTheory/accrue/actions/runs/31287502180/job/93179039463) |
+| admin-drift-and-docs | cancelled | — | 1s | 0s | [job](https://github.com/szTheory/accrue/actions/runs/31287502180/job/93179039463) |
 | admin-ui-ratchet-guardrails | cancelled | — | 0s | 0s | [job](https://github.com/szTheory/accrue/actions/runs/31287502180/job/93179041646) |
 | docs-and-bash-contracts-shift-left | failure | 34s | — | 169s | [job](https://github.com/szTheory/accrue/actions/runs/31287555136/job/93179036045) |
 | release-manifest-ssot | success | 35s | — | 167s | [job](https://github.com/szTheory/accrue/actions/runs/31287555136/job/93179036054) |
@@ -3409,7 +3427,7 @@ Root-job runner queue observations: 1354. Dependent DAG-wait observations: 354.
 | release-gate | success | 3s | — | 774s | [job](https://github.com/szTheory/accrue/actions/runs/31332551817/job/93292993286) |
 | host-docker-boot-smoke | success | — | 2s | 395s | [job](https://github.com/szTheory/accrue/actions/runs/31332551817/job/93293314880) |
 | admin-ui-ratchet-guardrails | failure | — | 2s | 10s | [job](https://github.com/szTheory/accrue/actions/runs/31332551817/job/93294031477) |
-| admin-drift-and-docs | success | — | 751s | 166s | [job](https://github.com/szTheory/accrue/actions/runs/31332551817/job/93295801296) |
+| admin-drift-and-docs | success | — | 25s | 166s | [job](https://github.com/szTheory/accrue/actions/runs/31332551817/job/93295801296) |
 | host-integration | success | — | 2s | 691s | [job](https://github.com/szTheory/accrue/actions/runs/31332551817/job/93296110811) |
 | playwright-e2e-shard-1/3 | success | — | 3s | 272s | [job](https://github.com/szTheory/accrue/actions/runs/31332551817/job/93297423677) |
 | playwright-e2e-shard-2/3 | success | — | 9s | 242s | [job](https://github.com/szTheory/accrue/actions/runs/31332551817/job/93297423678) |

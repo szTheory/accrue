@@ -340,7 +340,12 @@ function workflowNeeds(name, run, present = new Set(), repo = "", contracts = wo
     return prerequisite.canonical;
   });
   const normalized = normalizedIdentity(name, "job.name");
-  return declared.filter((prerequisite) => !compatibilityRule(repo, run, normalized, prerequisite, present));
+  return declared.filter((prerequisite) => !compatibilityRule(repo, run, normalized, prerequisite, present)).map((prerequisite) => {
+    // Matrix jobs have stable declared IDs but Actions exposes enumerated shard
+    // labels. Persist the observed alias so timestamp lookup remains exact.
+    const observed = [...present].find((candidate) => resolveWorkflowJobIdentity(candidate, contracts).canonical === prerequisite);
+    return observed || prerequisite;
+  });
 }
 
 export function unresolvedPrerequisites(runs, contractsByRun = new Map()) {
