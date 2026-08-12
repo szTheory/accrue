@@ -45,6 +45,8 @@ defmodule Accrue.Test.LiveProofFormatter do
   defp increment(state, {:skipped, _reason}),
     do: %{state | selected_count: state.selected_count + 1, skipped_count: state.skipped_count + 1}
 
+  defp increment(state, {:excluded, _reason}), do: state
+
   defp increment(state, _failure),
     do: %{state | selected_count: state.selected_count + 1, failed_count: state.failed_count + 1}
 
@@ -55,10 +57,12 @@ defmodule Accrue.Test.LiveProofFormatter do
       passed_count: state.passed_count,
       skipped_count: state.skipped_count,
       failed_count: state.failed_count,
-      started_at: DateTime.to_iso8601(state.started_at),
-      finished_at: DateTime.to_iso8601(finished_at)
+      started_at: iso8601_milliseconds(state.started_at),
+      finished_at: iso8601_milliseconds(finished_at)
     }
   end
+
+  defp iso8601_milliseconds(datetime), do: datetime |> DateTime.truncate(:millisecond) |> DateTime.to_iso8601()
 
   defp write_manifest!(path, manifest) do
     directory = Path.dirname(path)
