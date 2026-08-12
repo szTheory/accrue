@@ -64,6 +64,13 @@ function assertWorkflowContract(workflow) {
     const region = stepRegion(provider, stepId);
     if (stepId !== "provider_preflight" && stepId !== "live_stripe_suite") assert.match(region, /if: always\(\)/, `${stepId} must always run`);
   }
+  const finalizer = stepRegion(provider, "provider_proof_finalize");
+  const summary = stepRegion(provider, "provider_proof_summary");
+  assert.match(finalizer, /--sha "\$\{\{ github\.sha \}\}"/, "finalizer must receive the current GitHub SHA");
+  assert.match(finalizer, /--manifest "\$RUNNER_TEMP\/accrue-provider-manifest\.json"/, "finalizer must receive the suite-written trusted manifest");
+  assert.match(finalizer, /--out "\$ACCRUE_PROVIDER_PROOF_RECORD"/, "finalizer must write the finalized proof record");
+  assert.ok(provider.indexOf(finalizer) < provider.indexOf(summary), "finalizer must precede the always-run summary");
+  assert.match(summary, /--record "\$ACCRUE_PROVIDER_PROOF_RECORD"/, "always-run summary must read the finalized proof record");
   for (const stepId of ["host_setup_summary", "host_setup_artifact"]) {
     assert.match(stepRegion(host, stepId), /if: always\(\)/, `${stepId} must always run`);
   }

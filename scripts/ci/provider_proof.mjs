@@ -119,7 +119,17 @@ export function classifyProviderProof(input) {
   if (record.raw_job_conclusion === "cancelled" || record.raw_job_conclusion === "timed_out" || record.raw_job_conclusion === "action_required") return { ...record, ...counts, proof_state: "blocked", reason_code: `job_${record.raw_job_conclusion}` };
   if (manifest.failed_count > 0 || record.raw_job_conclusion === "failure") return { ...record, ...counts, proof_state: "failed", reason_code: "selected_assertions_failed" };
   if (record.raw_job_conclusion !== "success") return { ...record, ...counts, proof_state: "blocked", reason_code: "job_did_not_complete" };
-  return { ...record, ...counts, proof_state: "proved", reason_code: "complete_provider_evidence" };
+  const latest_proved_sha = record.sha;
+  const latest_proved_at = manifest.finished_at;
+  return {
+    ...record,
+    ...counts,
+    latest_proved_sha,
+    latest_proved_at,
+    stale: deriveFreshness({ latest_proved_at, now: input.now, cadence_hours: record.cadence_hours, grace_hours: record.grace_hours }),
+    proof_state: "proved",
+    reason_code: "complete_provider_evidence",
+  };
 }
 
 function parseArgs(args) {
