@@ -1,41 +1,25 @@
 ---
 phase: 226-ci-baseline-proof-semantics
-verified: 2026-08-12T20:35:10Z
-status: gaps_found
-score: 4/5 must-haves verified
+verified: 2026-08-12T23:30:48Z
+status: passed
+score: 5/5 must-haves verified
 behavior_unverified: 0
 overrides_applied: 0
 re_verification:
   previous_status: gaps_found
-  previous_score: 2/4
+  previous_score: 4/5
   gaps_closed:
-    - "Historical identity, runner, and prerequisite contracts now derive from the immutable workflow source fetched at each run head SHA."
-    - "Newline and Markdown-heading URL injection is rejected before the production renderer writes output."
-  gaps_remaining:
-    - "A syntactically valid GitHub Actions URL from an arbitrary repository is still accepted and rendered as baseline evidence."
+    - "Every persisted snapshot, run, job, and cohort record passes full per-kind semantic validation before rendering, and only immutable allowlisted GitHub Actions run/job URLs can become Markdown evidence links."
+  gaps_remaining: []
   regressions: []
-gaps:
-  - truth: "Every persisted snapshot, run, job, and cohort record passes full per-kind semantic validation before rendering, and only immutable allowlisted GitHub Actions run/job URLs can become Markdown evidence links."
-    status: failed
-    reason: "validateRecord() accepts any github.com/<owner>/<repo>/actions/runs/<matching-id> URL. A run record changed from szTheory/accrue to attacker/forged passed validation and renderBaseline() emitted the attacker-controlled evidence link. This is a forged false-evidence path, even though newline/link-closing injection is now rejected."
-    artifacts:
-      - path: "scripts/ci/collect_ci_baseline.mjs"
-        issue: "immutableUrl() constrains only URL shape and numeric IDs; it does not constrain owner/repository to the snapshot's allowlisted repository."
-      - path: "scripts/ci/render_ci_baseline.mjs"
-        issue: "renderBaseline() trusts validateRecord() and consequently renders the accepted cross-repository URL."
-      - path: "scripts/ci/verify_ci_baseline.mjs"
-        issue: "The forged-NDJSON regression covers newline injection, but has no cross-repository allowlist negative control."
-    missing:
-      - "Bind every run/job evidence URL to the snapshot repository (or an explicit immutable repository allowlist) before rendering."
-      - "Add a production-renderer regression proving a valid-looking cross-repository GitHub Actions URL is rejected and produces no report."
 ---
 
 # Phase 226: CI Baseline & Proof Semantics Verification Report
 
 **Phase Goal:** Maintainers can use a durable, privacy-safe account of comparable CI runs to distinguish the actual critical path, setup ownership, and provider proof state.
-**Verified:** 2026-08-12T20:35:10Z
-**Status:** gaps_found
-**Re-verification:** Yes — after Plan 226-20 gap closure
+**Verified:** 2026-08-12T23:30:48Z
+**Status:** passed
+**Re-verification:** Yes — after Plan 226-21 gap closure
 
 ## Goal Achievement
 
@@ -43,79 +27,79 @@ gaps:
 
 | # | Truth | Status | Evidence |
 | --- | --- | --- | --- |
-| 1 | Historical identity, runner, matrix, prerequisite, and timing contracts come from the immutable `ci.yml` fetched at each run head SHA. | ✓ VERIFIED | `liveRuns()` fetches source at `head_sha`, hashes and parses that same string, and passes its contracts to identity, runner, eligibility, and `needs` resolution. The fixture injects historical `macos-15`/`release-gate` topology that differs from current `ci.yml` and passes. |
-| 2 | Persisted baseline records can render only immutable allowlisted evidence links; forged values cannot make a false report claim. | ✗ FAILED | A copied canonical run whose URL owner/repo was changed from `szTheory/accrue` to `attacker/forged` passed `validateRecord()` and `renderBaseline()`. The report would show the attacker URL as evidence. |
-| 3 | The checked-in baseline is deterministic and confirms the measured staged release → host integration → Playwright path rather than queueing. | ✓ VERIFIED | Canonical verifier passed with `--require-critical-path`; independently derived 20 paths, p50 2,083s, p95 2,602s, and `confirmed`. Rendering to an explicit output path byte-matched the committed Markdown. |
-| 4 | Required, skipped, and advisory provider evidence remains distinct and a non-run lane cannot be read as release proof. | ✓ VERIFIED | Provider fixtures passed; the focused ExUnit formatter/finalizer suite passed 4 tests; workflow wiring passes the trusted manifest into an always-run finalizer with `--policy required`. |
-| 5 | Host/CI setup ownership and diagnostics remain legible without moving the host Playwright proof to CI. | ✓ VERIFIED | `verify_ci_setup_diagnostics.sh` and the required-lane evidence contract both passed. |
+| 1 | A durable comparable-run baseline contains the required timing, reliability, setup/cache, provider-state, and root-failure facts without sensitive values. | ✓ VERIFIED | `collect_ci_baseline.mjs` allowlists input/record fields and validates schema-v1; the committed NDJSON has no actor, raw branch, token, payload, log, or artifact-content fields. `verify_ci_baseline.mjs --fixtures --expected-repository acme/accrue` passed. |
+| 2 | Required, skipped, and advisory provider evidence is visibly distinct; a non-run lane cannot be release proof. | ✓ VERIFIED | `classifyProviderProof()` returns literal independent policy/state/conclusion facts, with `non_run` for unselected triggers. Fixture verifier passed; the `live-stripe` workflow finalizes and summarizes in `if: always()` steps. |
+| 3 | Host maintainers can determine Node/browser/Playwright ownership and follow documented, redacted diagnostics for setup failures. | ✓ VERIFIED | The host README supplies the ownership and diagnostic matrix; `verify_ci_setup_diagnostics.sh` passed. An independent `PGDATABASE=billing_database` wrapper invocation observed separate `-d` and `billing_database` argv entries, then emitted `fixture_or_database`, `OWNER=host`, its exact command, evidence location, and exit status. |
+| 4 | The frozen baseline establishes the actual approximately 33–36 minute staged release → host integration → Playwright path rather than queueing, or would report a contrary measurement. | ✓ VERIFIED | Canonical verifier passed with `--require-critical-path --expected-repository szTheory/accrue`; it validates 20 compatible paths and the checked-in report records p50 2083s, p95 2602s, and `confirmed`. |
+| 5 | Persisted baseline evidence cannot be forged into a false GitHub Actions report by changing repository provenance. | ✓ VERIFIED | `createRepositoryValidationContext()` requires caller-supplied `owner/repository`; `immutableUrl()` and snapshot validation require equality before renderer output. Fixture production-CLI controls reject URL-only and compound forged `attacker/forged` evidence before creating the requested report. |
 
-**Score:** 4/5 truths verified (0 present, behavior-unverified)
+**Score:** 5/5 truths verified (0 present, behavior-unverified)
 
 ### Required Artifacts
 
 | Artifact | Expected | Status | Details |
 | --- | --- | --- | --- |
-| `scripts/ci/collect_ci_baseline.mjs` | Immutable-source collector and semantic validator | ⚠️ PARTIAL | Substantive and wired; historical topology repair is real, but URL validation lacks a repository allowlist. |
-| `scripts/ci/render_ci_baseline.mjs` | Deterministic injection-safe Markdown renderer | ⚠️ PARTIAL | It validates all records before rendering and rejects newline headings, but renders a valid-looking cross-repository URL that validation accepts. |
-| `scripts/ci/verify_ci_baseline.mjs` | Historical-topology and forged-record production-path regressions | ⚠️ PARTIAL | The historical-topology and newline-forgery checks pass; no test covers a cross-repository forged URL. |
-| `226-CI-BASELINE.ndjson` / `226-CI-BASELINE.md` | Recollected deterministic baseline/report | ⚠️ HOLLOW GUARD | The committed pair verifies and byte-reproduces through the explicit `--out` path, but the general renderer guard admits false evidence links. |
-| Provider proof and setup diagnostic artifacts | Provider-state and owner-first evidence | ✓ VERIFIED | Focused provider, formatter, setup, and required-lane commands passed. |
+| `scripts/ci/collect_ci_baseline.mjs` | Read-only normalization, cohort calculation, schema/privacy/provenance validation | ✓ VERIFIED | 483 substantive lines; all URL and record paths require an immutable branded repository-validation context. |
+| `scripts/ci/render_ci_baseline.mjs` | Deterministic validated Markdown renderer | ✓ VERIFIED | Validates every record before interpolation; CLI requires one snapshot and `--expected-repository` before any write. |
+| `scripts/ci/verify_ci_baseline.mjs` | Baseline, historical-topology, privacy, arithmetic, critical-path, and forged-render regressions | ✓ VERIFIED | 588 substantive lines; fixture suite and canonical critical-path invocation passed. |
+| `226-CI-BASELINE.ndjson` and `226-CI-BASELINE.md` | Frozen privacy-safe before-state and report | ✓ VERIFIED | Canonical verifier compared the generated rendering with checked-in Markdown under `szTheory/accrue`. |
+| `scripts/ci/provider_proof.mjs`, formatter, and provider renderer | Provider proof state and literal summary | ✓ VERIFIED | Provider fixtures passed; focused formatter/finalizer integration passed 4 tests. |
+| Setup diagnostics and host wrapper | Owner-first diagnostics while retaining host proof contract | ✓ VERIFIED | Shell syntax checks and setup contract passed; wrapper preserves the expected `mix verify.full` delegation. |
 
 ### Key Link Verification
 
 | From | To | Via | Status | Details |
 | --- | --- | --- | --- | --- |
-| Head-SHA workflow contents | Historical contract resolution | Fetched source → revision, contracts, identity, runner, needs | ✓ WIRED | Code and divergent-topology fixture verify the exact immutable-source path. |
-| `validateRecord()` | `renderBaseline()` | Validation before every rendered row/link | ⚠️ PARTIAL | The call is wired, but validation permits cross-repository GitHub URLs. |
-| Canonical NDJSON | Canonical Markdown | Renderer invoked with explicit `--out`; byte comparison | ✓ WIRED | Independent explicit-output render matched the committed report byte-for-byte. |
-| Live suite manifest | Provider finalizer/summary/artifact | Always-run workflow finalizer | ✓ WIRED | Provider fixture suite and static workflow contract passed. |
-| Host wrapper | Setup diagnostic registry | Owner-first diagnostics | ✓ WIRED | Setup diagnostic contract passed. |
+| Caller repository argument | Collector, validator, renderer, and verifier APIs | One frozen `createRepositoryValidationContext()` object | ✓ WIRED | CLI `--repo`/`--expected-repository` construction is passed through all evidence-producing paths; plain/missing/mismatched contexts are rejected. |
+| NDJSON records | Markdown evidence links | `validateRecord()` before `renderBaseline()` | ✓ WIRED | Snapshot and run/job URLs must match expected repository and numeric IDs before Markdown construction. |
+| Canonical NDJSON | Canonical Markdown | Renderer/critical-path verification | ✓ WIRED | Canonical verification passed with explicit repository context. |
+| Live suite manifest | Provider finalizer, always-run summary, and artifact | `ACCRUE_PROVIDER_MANIFEST` → `provider_proof.mjs` | ✓ WIRED | Workflow writes manifest, always runs finalizer/summary/artifact, and formatter test exercises finalization. |
+| Host wrapper | Setup diagnostic registry | Readiness/browser failures emit code, owner, command, evidence | ✓ WIRED | `fixture_or_database` path was exercised independently and through the shell contract. |
 
 ### Data-Flow Trace (Level 4)
 
 | Artifact | Data Variable | Source | Produces Real Data | Status |
 | --- | --- | --- | --- | --- |
-| Historical collector | Per-run identity, runner, prerequisites, DAG wait | GitHub Contents at each run's `head_sha` plus attempt-scoped jobs | Yes | ✓ FLOWING |
-| Baseline report | Canonical record facts and evidence URLs | NDJSON → `validateRecord()` → renderer | Partially | ⚠️ URL source may name an arbitrary GitHub repository |
-| Provider proof | Selected/passed/skipped manifest counts | ExUnit formatter → production finalizer | Yes | ✓ FLOWING |
-| Setup diagnostics | Ownership/failure facts | Host wrapper/diagnostic registry | Yes | ✓ FLOWING |
+| Baseline collector/report | Run/job/cohort timing and evidence URL facts | GitHub Actions metadata → schema-v1 NDJSON → validated renderer | Yes | ✓ FLOWING |
+| Critical-path report | Staged span samples | 20 matching release-gate, host-integration, and Playwright job records | Yes | ✓ FLOWING |
+| Provider summary | Policy/state/count/freshness facts | ExUnit manifest → finalizer record → summary/artifact | Yes | ✓ FLOWING |
+| Setup diagnostics | Stable setup fact | Wrapper/browser script → diagnostic registry → fact file/summary | Yes | ✓ FLOWING |
 
 ### Behavioral Spot-Checks
 
 | Behavior | Command | Result | Status |
 | --- | --- | --- | --- |
-| Immutable historical topology and newline-forgery regression | `node scripts/ci/verify_ci_baseline.mjs --fixtures` | `ci baseline fixtures: PASS` | ✓ PASS |
-| Frozen staged critical path | `node scripts/ci/verify_ci_baseline.mjs --records … --rendered … --require-critical-path` | Exit 0; 20 paths, p50 2083s, p95 2602s, confirmed | ✓ PASS |
-| Explicit-output byte reproduction | `render_ci_baseline.mjs --input … --out /tmp/... && cmp` | Byte-identical | ✓ PASS |
-| Cross-repository forged record | `validateRecord({...run_url: attacker/forged...}); renderBaseline(...)` | Both accepted | ✗ FAIL |
+| Cross-repository and injection rejection | `node scripts/ci/verify_ci_baseline.mjs --fixtures --expected-repository acme/accrue` | `ci baseline fixtures: PASS` | ✓ PASS |
+| Frozen staged critical path | `node scripts/ci/verify_ci_baseline.mjs --records … --rendered … --require-critical-path --expected-repository szTheory/accrue` | Exit 0; canonical report matches; 20 paths, p50 2083s, p95 2602s | ✓ PASS |
 | Provider proof classifier | `node scripts/ci/verify_provider_proof.mjs --fixtures` | `provider proof fixtures: PASS` | ✓ PASS |
-| Real selected-suite finalizer | `cd accrue && mix test test/accrue/live_proof_formatter_test.exs --warnings-as-errors` | 4 tests, 0 failures | ✓ PASS |
-| Setup ownership diagnostics | `bash scripts/ci/verify_ci_setup_diagnostics.sh` | `ok` | ✓ PASS |
-| Required lane boundary | `bash scripts/ci/verify_phase225_required_lane_evidence.sh` | Exit 0 | ✓ PASS |
+| Provider formatter/finalizer seam | `cd accrue && mix test test/accrue/live_proof_formatter_test.exs --warnings-as-errors` | 4 tests, 0 failures | ✓ PASS |
+| Setup diagnostic contract | `bash scripts/ci/verify_ci_setup_diagnostics.sh` | `verify_ci_setup_diagnostics: ok` | ✓ PASS |
+| Required-lane preservation | `bash scripts/ci/verify_phase225_required_lane_evidence.sh` | Exit 0; expected run/SHA identified | ✓ PASS |
+| `PGDATABASE` readiness argv | Exported `pg_isready` function plus `bash scripts/ci/accrue_host_uat.sh` | Received `-d` and `billing_database` as separate arguments; wrapper exited 89 after the deliberate readiness failure and emitted host diagnostic | ✓ PASS |
 
 ### Requirements Coverage
 
 | Requirement | Source Plans | Description | Status | Evidence |
 | --- | --- | --- | --- | --- |
-| BASE-01 | 01, 02, 05–07, 12–20 | Durable privacy-safe comparable baseline | ✗ BLOCKED | Historical-topology gap is closed, but cross-repository forged evidence still passes the record-to-report path. |
-| BASE-02 | 03, 05–07, 12–20 | Provider proof states visibly distinguished | ✓ SATISFIED | Provider fixtures, formatter integration, and workflow finalizer wiring passed. |
-| OWN-01 | 04, 05, 07, 12–20 | Host/CI setup ownership and diagnostics | ✓ SATISFIED | Setup diagnostic and required-lane contracts passed. |
+| BASE-01 | 01, 02, 05–07, 12–21 | Durable privacy-safe comparable baseline | ✓ SATISFIED | Collector, canonical baseline, provenance controls, renderer, fixture suite, and required critical-path verifier all passed. |
+| BASE-02 | 03, 05–07, 12–21 | Provider proof states visibly distinguished | ✓ SATISFIED | Provider fixture verifier, focused formatter/finalizer test, workflow finalizer/summary wiring, and guide state table agree. |
+| OWN-01 | 04, 05, 07, 12–21 | Host/CI setup ownership and diagnostics | ✓ SATISFIED | Ownership documentation, setup shell contract, direct readiness argv check, and retained host-wrapper delegation passed. |
 
-All requirement IDs declared in every Phase 226 plan frontmatter are accounted for. `REQUIREMENTS.md` maps no additional requirement ID to Phase 226; no orphaned requirements were found.
+Every requirement ID declared by Phase 226 plan frontmatter is accounted for. `REQUIREMENTS.md` maps no additional requirement to Phase 226, so no orphaned phase requirement was found. Its traceability table still says “Gaps Found” for all three IDs; that stale planning status is not implementation evidence and does not alter this verification result.
 
 ### Anti-Patterns Found
 
 | File | Line | Pattern | Severity | Impact |
 | --- | --- | --- | --- | --- |
-| `scripts/ci/collect_ci_baseline.mjs` | 37–42 | URL validator accepts every GitHub owner/repository | 🛑 Blocker | A forged but syntactically valid Actions URL can be rendered as baseline evidence. |
-| `scripts/ci/verify_ci_baseline.mjs` | 518–524 | Forgery regression covers only newline/heading injection | ⚠️ Warning | Cross-repository false-evidence path is untested. |
-| `scripts/ci/render_ci_baseline.mjs` | CLI argument parsing | Omitting `--out` treats `--input` as the output path | ℹ️ Info | All canonical paths pass explicit `--out`; this does not cause the blocker above but violates the usage text's optional-output behavior. |
+| `scripts/ci/verify_ci_setup_diagnostics.sh` | 129–135 | The `pg_isready` fixture double chooses only an exit code and does not assert argv shape. | ⚠️ Warning | The independent argv spot-check disproves the review’s asserted production defect: Bash passes `-d` and `$PGDATABASE` separately. The fixture still has weaker regression sensitivity than it should for future argument-construction changes. |
 
-No unreferenced `TBD`, `FIXME`, or `XXX` debt markers were found in the phase implementation files. No documented or conventional standalone probe scripts were present.
+No unreferenced `TBD`, `FIXME`, or `XXX` markers were found in the phase implementation files. No phase-declared or conventional standalone probe script was present.
 
-### Gaps Summary
+### Review Finding Resolution
 
-Plan 226-20 genuinely closes the old current-workflow-topology defect: the production collector now resolves historical runs through the fetched source bytes and its divergent topology regression exercises that behavior. It also closes newline Markdown injection. However, its URL rule is only a GitHub-shape rule, not an evidence allowlist. A malicious persisted record can substitute an arbitrary GitHub repository while retaining the numeric run ID, pass validation, and publish a believable but false evidence link. This is a **BLOCKER / Escalation Gate** for BASE-01; Phase 227 does not explicitly schedule this evidence-integrity repair, so it is not deferred.
+The advisory review’s CR-01 is not reproducible against current Bash semantics. In the actual wrapper command, `${PGDATABASE:+-d "$PGDATABASE"}` expands into the two argv elements `-d` and `billing_database`; it is not one malformed argument. Therefore it does not break OWN-01 or a Phase 226 success criterion. WR-01 is retained above as a test-quality warning, not a blocker.
 
-_Verified: 2026-08-12T20:35:10Z_
+---
+
+_Verified: 2026-08-12T23:30:48Z_
 _Verifier: the agent (gsd-verifier)_

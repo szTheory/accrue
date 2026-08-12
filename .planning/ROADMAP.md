@@ -37,7 +37,7 @@ Completed and deferred v1.60 details are retained in [the milestone archive](mil
 **Constraints:** Treat one shared release-matrix failure signature as one incident, not four cell incidents. Investigate the recent Admin Playwright timeout trace-first; do not mask it with retries or deletion. Baseline evidence must precede topology, cache, matrix, branch-protection, or required-gate changes. Keep stable required-check identities, artifacts, and explicit provider `proved` / `skipped` / `advisory` status. StoreKit/iPhone/Crosswake and the parked Admin UI ratchet are out of scope.
 
 - [ ] **Phase 225: Required-Lane Signal Repair** - Classify and repair current required CI failures without hiding their diagnostic evidence.
-- [ ] **Phase 226: CI Baseline & Proof Semantics** - Publish the comparable-run baseline and make provider/setup ownership legible.
+- [x] **Phase 226: CI Baseline & Proof Semantics** - Publish the comparable-run baseline and make provider/setup ownership legible. (completed 2026-08-12)
 - [ ] **Phase 227: Measured Critical-Path Improvement** - Remove one proven setup or dependency cost while retaining every required proof.
 
 ## Phase Details
@@ -81,7 +81,7 @@ Plans:
   3. A host maintainer can identify whether Node, browser installation, and Playwright setup belong to the host or CI and can follow documented diagnostics for each setup failure mode.
   4. The baseline confirms the roughly 33–36 minute green-run critical path is staged release → host integration → Playwright work rather than runner queueing, or records a contrary measured result.
 
-**Plans:** 17 plans
+**Plans:** 17/17 plans complete
 
 Plans:
 **Wave 1**
@@ -165,7 +165,7 @@ Plans:
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 225. Required-Lane Signal Repair | 0/3 | Not started | - |
-| 226. CI Baseline & Proof Semantics | 11/12 | In progress | - |
+| 226. CI Baseline & Proof Semantics | 17/17 | Complete    | 2026-08-12 |
 | 227. Measured Critical-Path Improvement | 0/TBD | Not started | - |
 
 <details>
