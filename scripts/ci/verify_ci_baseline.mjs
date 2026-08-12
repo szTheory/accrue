@@ -377,10 +377,14 @@ async function liveDisplayIdentityControls() {
   ]) {
     const brokenFetch = async (endpoint) => endpoint.includes("/jobs?") ? [{ jobs: mutate(jobs) }] : [{ workflow_runs: [run] }];
     if (name === "spelling drift") {
-      await assert.rejects(() => liveRuns("acme/accrue", "ci.yml", 90, { fetchPages: brokenFetch, now: () => Date.parse("2026-08-11T06:04:00Z") }), /unresolved workflow runner contract/, `${name} cannot fabricate a runner contract`);
+      await assert.rejects(() => liveRuns("acme/accrue", "ci.yml", 90, { fetchPages: brokenFetch, now: () => Date.parse("2026-08-11T06:04:00Z") }), /docs-and-bash-contract.*unresolved workflow job identity/, `${name} cannot fabricate a runner contract`);
       continue;
     }
     const broken = await liveRuns("acme/accrue", "ci.yml", 90, { fetchPages: brokenFetch, now: () => Date.parse("2026-08-11T06:04:00Z") });
+    if (name === "absent") {
+      assert.ok(!broken[0].jobs.some((job) => job.name === "Host integration (required deterministic gate)"), "host timing with an absent declared docs prerequisite is excluded before record emission");
+      continue;
+    }
     assert.throws(() => collectBaseline(broken), pattern, `${name} live prerequisite fails closed`);
   }
 
@@ -437,6 +441,10 @@ async function liveDisplayIdentityControls() {
     const historical = await liveRuns("szTheory/accrue", "ci.yml", 90, { fetchPages: fetch, now: () => Date.parse("2026-08-11T06:04:00Z") });
     assert.deepEqual(unresolvedPrerequisites(historical), [], `historical compatibility accepts ${compatibility.name} only in its audited era`);
     const future = await liveRuns("szTheory/accrue", "ci.yml", 90, { fetchPages: async (endpoint) => endpoint.includes("/jobs?") ? [{ jobs: historicalRun.jobs }] : [{ workflow_runs: [{ ...historicalRun, created_at: "2026-08-13T06:00:00Z" }] }], now: () => Date.parse("2026-08-13T06:04:00Z") });
+    if (compatibility.name === "Host integration (required deterministic gate)") {
+      assert.ok(!future[0].jobs.some((job) => job.name === compatibility.name), `future ${compatibility.name} is excluded when its declared prerequisite is incomplete`);
+      continue;
+    }
     assert.ok(unresolvedPrerequisites(future).some((message) => message.endsWith(` ${compatibility.expected}`)), `future ${compatibility.name} remains fail-closed for ${compatibility.expected}`);
   }
   const scheduledRatchetOnly = { ...run, id: 998, event: "schedule", created_at: "2026-08-11T06:00:00Z", workflow_revision: "sha256:943d650205233f1c5c017bc605c90077600ba8c33240ea6268326887c0960ec0", jobs: [{ ...jobs[0], id: 9980, name: "Admin UI ratchet guardrails", started_at: "2026-08-11T06:00:20Z", completed_at: "2026-08-11T06:01:00Z" }] };

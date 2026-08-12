@@ -11,6 +11,7 @@ const CONCLUSIONS = new Set(["success", "failure", "cancelled", "skipped", "neut
 const PROVIDER_STATES = new Set(["proved", "failed", "misconfigured", "blocked", "skipped", "non_run"]);
 const DOCS_DISPLAY_NAME = "Docs and bash contracts (shift-left)";
 const DOCS_PREREQUISITE = "docs-and-bash-contracts-shift-left";
+const TIMING_NODES_REQUIRING_COMPLETE_PREREQUISITES = new Set(["annotation-sweep", "host-integration"]);
 const LIVE_RUN_CONCURRENCY = 24;
 const WORKFLOW_RUNNER_PATH = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../.github/workflows/ci.yml");
 const RUN_INPUT_FIELDS = new Set(["id", "html_url", "head_sha", "created_at", "run_started_at", "updated_at", "event", "head_branch", "conclusion", "run_attempt", "original_run_id", "workflow_path", "workflow_revision", "provider_state", "jobs"]);
@@ -381,7 +382,7 @@ export async function liveRuns(repo, workflow, windowDays, { fetchPages = fetchG
     }).filter((job) => job.conclusion !== "skipped" && typeof job.name === "string" && /[A-Za-z0-9]/.test(job.name) && job.started_at && job.completed_at && Date.parse(job.completed_at) >= Date.parse(job.started_at));
     const contracts = workflowRunnerContracts();
     const eligibleJobs = attemptJobs.filter((job) => {
-      if (normalizedIdentity(job.name, "job.name") !== "annotation-sweep") return true;
+      if (!TIMING_NODES_REQUIRING_COMPLETE_PREREQUISITES.has(normalizedIdentity(job.name, "job.name"))) return true;
       const contract = resolveWorkflowJobIdentity(job.name, contracts);
       return contract.needs.every((need) => {
         const prerequisite = contracts.find((candidate) => candidate.identity === need);
