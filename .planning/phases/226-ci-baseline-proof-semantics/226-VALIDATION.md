@@ -1,7 +1,7 @@
 ---
 phase: 226
 slug: ci-baseline-proof-semantics
-status: in_progress
+status: validated
 nyquist_compliant: true
 wave_0_complete: true
 created: 2026-08-11
@@ -69,7 +69,7 @@ created: 2026-08-11
 | 226-19-02 | 19 | 13 | BASE-01, BASE-02, OWN-01 | T-226-65, T-226-66 | Required scheduled/manual provider policy and all frozen baseline, setup, API-coverage, and required-lane preservation contracts remain literal and green | phase contract | `node -e '<guide policy assertions>' && (cd accrue && mix test test/accrue/live_proof_formatter_test.exs --warnings-as-errors) && node scripts/ci/verify_provider_proof.mjs --fixtures && node scripts/ci/verify_ci_baseline.mjs --fixtures && node scripts/ci/verify_ci_baseline.mjs --records .planning/phases/226-ci-baseline-proof-semantics/226-CI-BASELINE.ndjson --rendered .planning/phases/226-ci-baseline-proof-semantics/226-CI-BASELINE.md --require-critical-path && bash scripts/ci/verify_ci_setup_diagnostics.sh && bash scripts/ci/verify_phase225_required_lane_evidence.sh && test -s .planning/phases/226-ci-baseline-proof-semantics/COVERAGE.md` | Executed 2026-08-12 after the corrected required-policy guide and complete Phase 226 preservation contract | ✅ green |
 | 226-20-01 | 20 | 14 | BASE-01 | T-226-68, T-226-69, T-226-70 | Per-run immutable head-SHA workflow contracts drive historical identity, runner, prerequisite, and DAG evidence; forged persisted links fail before renderer output | integration/fixture contract | `node --check scripts/ci/collect_ci_baseline.mjs && node --check scripts/ci/render_ci_baseline.mjs && node --check scripts/ci/verify_ci_baseline.mjs && node scripts/ci/verify_ci_baseline.mjs --fixtures` | Executed 2026-08-12: injected historical macos-15/release-gate topology and production forged-NDJSON renderer control passed; repository-local evidence: `scripts/ci/verify_ci_baseline.mjs` | ✅ green |
 | 226-20-02 | 20 | 14 | BASE-01, BASE-02, OWN-01 | T-226-70, T-226-71 | Authenticated read-only recollection transaction installs a semantically validated, independently byte-reproduced canonical pair without weakening inherited proof contracts | live-record transaction | `gh auth status && node scripts/ci/collect_ci_baseline.mjs --repo szTheory/accrue --workflow ci.yml --window-days 90 --sample-size 20 --out <staged> && node scripts/ci/verify_ci_baseline.mjs --records .planning/phases/226-ci-baseline-proof-semantics/226-CI-BASELINE.ndjson --rendered .planning/phases/226-ci-baseline-proof-semantics/226-CI-BASELINE.md --require-critical-path && node scripts/ci/verify_provider_proof.mjs --fixtures && (cd accrue && mix test test/accrue/live_proof_formatter_test.exs --warnings-as-errors) && bash scripts/ci/verify_ci_setup_diagnostics.sh && bash scripts/ci/verify_phase225_required_lane_evidence.sh` | Executed 2026-08-12: 20 qualifying paths, p50 2083s, p95 2602s, literal `confirmed`; staged dual renders and installed independent regeneration byte-matched. Canonical evidence: `226-CI-BASELINE.ndjson` / `226-CI-BASELINE.md` | ✅ green |
-| 226-21-01 | 21 | 15 | BASE-01, BASE-02, OWN-01 | T-226-21-01, T-226-21-02, T-226-21-03, T-226-21-04 | Omitted, malformed, forged, and mismatched trust context; URL-only and compound snapshot/run/job forgery fail without output while same-repository, canonical reproduction, provider, and setup preservation remain green | integration/fixture contract | `node scripts/ci/verify_ci_baseline.mjs --fixtures --expected-repository acme/accrue && ! node scripts/ci/verify_ci_baseline.mjs --fixtures --expected-repository attacker/forged && node scripts/ci/verify_ci_baseline.mjs --records .planning/phases/226-ci-baseline-proof-semantics/226-CI-BASELINE.ndjson --rendered .planning/phases/226-ci-baseline-proof-semantics/226-CI-BASELINE.md --require-critical-path --expected-repository szTheory/accrue && node scripts/ci/verify_provider_proof.mjs --fixtures && bash scripts/ci/verify_ci_setup_diagnostics.sh` | Pending execution | ⬜ pending |
+| 226-21-01 | 21 | 15 | BASE-01, BASE-02, OWN-01 | T-226-21-01, T-226-21-02, T-226-21-03, T-226-21-04 | Omitted, malformed, forged, and mismatched trust context; URL-only and compound snapshot/run/job forgery fail without output while same-repository, canonical reproduction, provider, and setup preservation remain green | integration/fixture contract | `node scripts/ci/verify_ci_baseline.mjs --fixtures --expected-repository acme/accrue && ! node scripts/ci/verify_ci_baseline.mjs --fixtures --expected-repository attacker/forged && node scripts/ci/verify_ci_baseline.mjs --records .planning/phases/226-ci-baseline-proof-semantics/226-CI-BASELINE.ndjson --rendered .planning/phases/226-ci-baseline-proof-semantics/226-CI-BASELINE.md --require-critical-path --expected-repository szTheory/accrue && node scripts/ci/verify_provider_proof.mjs --fixtures && bash scripts/ci/verify_ci_setup_diagnostics.sh` | Executed 2026-08-12 against repository-binding fixtures, canonical evidence, provider proof, and setup diagnostics | ✅ green |
 
 *Status: ⬜ pending · ✅ green · ❌ red · ⚠️ flaky*
 
@@ -100,6 +100,16 @@ There is no separate Wave 0 plan. Every task already has a concrete executable `
 - [x] No watch-mode flags
 - [x] Feedback latency < 120s
 - [x] `nyquist_compliant: true` set in frontmatter for the complete execution verification map
-- [ ] Thirty-one historical rows executed; 226-21-01 is pending execution
+- [x] All thirty-two task rows executed and green, including repository-bound Plan 21 evidence
 
 **Completion note (automated):** Phase 227's frozen input is the canonical `226-CI-BASELINE.ndjson` / `226-CI-BASELINE.md` pair. Authenticated read-only collection selected 20 qualifying paths and measured p50 2083s / p95 2602s with literal `confirmed`; two staged renders, the installed report, and an independent regeneration were byte-identical. Historical-source, provider, formatter, owner-first setup/readiness, and required-lane preservation suites passed. No human approval is required.
+
+## Validation Audit 2026-08-12
+
+| Metric | Count |
+|--------|-------|
+| Gaps found | 0 |
+| Resolved | 0 |
+| Escalated | 0 |
+
+The full Phase 226 contract passed during this audit. All requirements have automated verification; no manual-only coverage or generated tests were required.
