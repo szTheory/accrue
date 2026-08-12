@@ -286,7 +286,7 @@ function workflowRunnerContracts(source = fs.readFileSync(WORKFLOW_RUNNER_PATH, 
     const runsOn = body.match(/^    runs-on:\s*(.+)$/m)?.[1]?.trim();
     if (!runsOn) continue;
     const canonical = display && !display.includes("${{") ? normalizedIdentity(display, "workflow job name") : identity;
-    const needs = (body.match(/^    needs:\s*\[([^\]]*)\]$/m)?.[1]?.split(",").map((value) => value.trim()).filter(Boolean).map((value) => normalizedIdentity(value, "workflow prerequisite")) || []);
+    const needs = (body.match(/^    needs:\s*\[([\s\S]*?)\]/m)?.[1]?.split(",").map((value) => value.trim()).filter(Boolean).map((value) => normalizedIdentity(value, "workflow prerequisite")) || []);
     contracts.push({ identity, canonical, aliases: new Set([identity, canonical, ...matrixAliases(identity, body, display)]), needs, runsOn });
   }
   if (contracts.length === 0) fail("workflow runner contract has no jobs");
@@ -379,10 +379,21 @@ export async function liveRuns(repo, workflow, windowDays, { fetchPages = fetchG
       if (job.run_attempt != null && job.run_attempt !== attempt) fail("job.run_attempt must match run.run_attempt");
       return job;
     }).filter((job) => job.conclusion !== "skipped" && typeof job.name === "string" && /[A-Za-z0-9]/.test(job.name) && job.started_at && job.completed_at && Date.parse(job.completed_at) >= Date.parse(job.started_at));
-    const present = new Set(attemptJobs.map((job) => normalizedIdentity(job.name, "job.name")));
-    const jobs = attemptJobs.map((job) => ({
+    const contracts = workflowRunnerContracts();
+    const eligibleJobs = attemptJobs.filter((job) => {
+      if (normalizedIdentity(job.name, "job.name") !== "annotation-sweep") return true;
+      const contract = resolveWorkflowJobIdentity(job.name, contracts);
+      return contract.needs.every((need) => {
+        const prerequisite = contracts.find((candidate) => candidate.identity === need);
+        return prerequisite && attemptJobs.some((candidate) =>
+          candidate.conclusion === "success" && resolveWorkflowJobIdentity(candidate.name, contracts).canonical === prerequisite.canonical
+        );
+      });
+    });
+    const present = new Set(eligibleJobs.map((job) => normalizedIdentity(job.name, "job.name")));
+    const jobs = eligibleJobs.map((job) => ({
       id: job.id, html_url: job.html_url, name: job.name, started_at: job.started_at, completed_at: job.completed_at,
-      conclusion: CONCLUSIONS.has(job.conclusion) ? job.conclusion : "unknown", runner_image: workflowRunnerImage(job.name), needs: workflowNeeds(job.name, { ...run, workflow_revision: revision }, present, repo),
+      conclusion: CONCLUSIONS.has(job.conclusion) ? job.conclusion : "unknown", runner_image: workflowRunnerImage(job.name, contracts), needs: workflowNeeds(job.name, { ...run, workflow_revision: revision }, present, repo, contracts),
       setup_costs: setupCosts(job.steps), cache: cacheFacts(job.steps)
     }));
     const createdAt = run.created_at;
