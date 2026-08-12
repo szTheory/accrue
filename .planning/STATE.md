@@ -5,15 +5,15 @@ milestone_name: CI Evidence & Critical-Path Hardening
 current_phase: 226
 current_phase_name: ci-baseline-proof-semantics
 status: executing
-stopped_at: Completed 226-19-PLAN.md
-last_updated: "2026-08-12T17:53:39.446Z"
+stopped_at: Completed 226-20-PLAN.md
+last_updated: "2026-08-12T19:58:23.770Z"
 last_activity: 2026-08-12
 last_activity_desc: Phase 226 execution started
 progress:
   total_phases: 3
   completed_phases: 2
-  total_plans: 18
-  completed_plans: 18
+  total_plans: 19
+  completed_plans: 19
   percent: 67
 ---
 
@@ -30,7 +30,7 @@ See: `.planning/PROJECT.md` (updated 2026-08-05 after shipping v1.59)
 ## Current Position
 
 Phase: 226 (ci-baseline-proof-semantics) — EXECUTING
-Plan: 2 of 15
+Plan: 2 of 16
 Status: Ready to execute
 Last activity: 2026-08-12 — Phase 226 execution started
 
@@ -473,6 +473,7 @@ Coverage: 22/22 v1.51 requirements mapped (each REQ-ID → exactly one phase). D
 | Phase 226 P17 | 21min | 2 tasks | 4 files |
 | Phase 226-ci-baseline-proof-semantics P18 | 6 minutes | 1 tasks | 6 files |
 | Phase 226 P19 | 4 minutes | 2 tasks | 4 files |
+| Phase 226 P20 | 8min | 3 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -945,6 +946,8 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - [Phase ?]: Excluded ExUnit events leave all provider-manifest counters unchanged.
 - [Phase ?]: Formatter timestamps are truncated to milliseconds so real manifests pass finalization.
 - [Phase ?]: Selected scheduled/manual live-Stripe runs are required; Fake-backed push/PR proof remains separate.
+- [Phase ?]: Historical CI topology is derived from fetched head-SHA workflow bytes.
+- [Phase ?]: Canonical baseline records are semantically validated before Markdown rendering.
 
 ### Pending Todos
 
@@ -1097,8 +1100,8 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 
 ## Session Continuity
 
-Last session: 2026-08-12T17:53:39.431Z
-Stopped at: Completed 226-19-PLAN.md
+Last session: 2026-08-12T19:58:23.754Z
+Stopped at: Completed 226-20-PLAN.md
 Resume file: None
 
 ## Operator Next Steps

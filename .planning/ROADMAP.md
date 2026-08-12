@@ -140,7 +140,7 @@ Plans:
 
 **Wave 14** *(gap closure; blocked on Wave 13)*
 
-- [ ] 226-20-PLAN.md — Bind historical topology to immutable workflow sources, reject forged evidence, and transactionally refresh the frozen baseline.
+- [x] 226-20-PLAN.md — Bind historical topology to immutable workflow sources, reject forged evidence, and transactionally refresh the frozen baseline.
 
 ### Phase 227: Measured Critical-Path Improvement
 
