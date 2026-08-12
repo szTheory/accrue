@@ -4,7 +4,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { collectBaseline, cohortFingerprint, liveRuns, summarizeCohorts, workflowRunnerImage } from "./collect_ci_baseline.mjs";
+import { collectBaseline, cohortFingerprint, liveRuns, summarizeCohorts, unresolvedPrerequisites, workflowRunnerImage } from "./collect_ci_baseline.mjs";
 import { deriveStagedPathPercentiles, renderBaseline } from "./render_ci_baseline.mjs";
 
 function fail(message) {
@@ -298,6 +298,34 @@ async function liveDisplayIdentityControls() {
   assert.throws(() => workflowRunnerImage("Release gate", [{ identity: "release-gate", runsOn: "ubuntu-24.04" }, { identity: "release-gate", runsOn: "macos-15" }]), /ambiguous workflow runner contract/, "ambiguous runner identity fails closed");
   assert.notEqual(cohortFingerprint({ ...run, jobs: [{ ...jobs[0], runner_image: "github-hosted/ubuntu-24.04" }] }), cohortFingerprint({ ...run, jobs: [{ ...jobs[0], runner_image: "github-hosted/macos-15" }] }), "different workflow-declared runner images produce distinct fingerprints");
   assert.notEqual(cohortFingerprint({ ...run, jobs: [{ ...jobs[0], runner_image: "github-hosted/ubuntu-24.04" }] }), cohortFingerprint({ ...run, jobs: [{ ...jobs[0], runner_image: "self-hosted/declared" }] }), "self-hosted work cannot share a hosted cohort");
+
+  const historicalRatchetRun = {
+    ...run,
+    id: 982,
+    created_at: "2026-08-11T06:00:00Z",
+    event: "workflow_dispatch",
+    jobs: [
+      { ...jobs[0], id: 9820, name: "Admin UI ratchet guardrails", started_at: "2026-08-11T06:00:20Z", completed_at: "2026-08-11T06:01:00Z" }
+    ]
+  };
+  const historicalRatchet = await liveRuns("acme/accrue", "ci.yml", 90, {
+    fetchPages: async (endpoint) => endpoint.includes("/jobs?") ? [{ jobs: historicalRatchetRun.jobs }] : [{ workflow_runs: [historicalRatchetRun] }],
+    now: () => Date.parse("2026-08-11T06:04:00Z")
+  });
+  assert.deepEqual(
+    unresolvedPrerequisites(historicalRatchet),
+    [],
+    "the audited historical ratchet compatibility rule resolves its absent Phase 200 prerequisite"
+  );
+  const futureRatchet = await liveRuns("acme/accrue", "ci.yml", 90, {
+    fetchPages: async (endpoint) => endpoint.includes("/jobs?") ? [{ jobs: historicalRatchetRun.jobs }] : [{ workflow_runs: [{ ...historicalRatchetRun, created_at: "2026-08-13T06:00:00Z" }] }],
+    now: () => Date.parse("2026-08-13T06:04:00Z")
+  });
+  assert.deepEqual(
+    unresolvedPrerequisites(futureRatchet),
+    ["job admin-ui-ratchet-guardrails has unresolved prerequisite admin-phase200-guardrails"],
+    "future ratchet runs cannot inherit the historical compatibility rule"
+  );
 }
 
 export async function verifyFixtures() {
