@@ -21,7 +21,7 @@ This guide covers layer (2). Most contributors never need to run it;
 it executes automatically on a daily GitHub Actions schedule and can
 be triggered on demand via the Actions tab.
 
-This lane uses Stripe test mode and should be treated as `provider-parity checks`, not as the canonical local demo or the required release lane. The `live-stripe` GitHub Actions job is **not** the PR merge-blocking lane; that contract is documented under [Proof and verification](examples/accrue_host/README.md#proof-and-verification) in the host demo README. On pull requests, merge-blocking proof is job id `host-integration`; `live-stripe` stays advisory (manual/cron only). For the finalized `gateway subscription core` contract, Fake remains the merge-blocking SSOT and provider-backed Stripe and Braintree proof stays explicitly advisory. This lane only spot-checks real Stripe behavior against that bounded slice. Checkout and billing portal already ship as first-party shared-facade surfaces; Stripe proves the upstream hosted side here, while the mounted-local Braintree side stays covered by the canonical matrix, package guides, and Fake-backed host proof.
+This lane uses Stripe test mode and should be treated as `provider-parity checks`, not as the canonical local demo or a push/PR merge check. The `live-stripe` GitHub Actions job is selected only for scheduled and manual runs; when selected, its provider policy is `required`. The contributor-facing push/PR merge proof remains the deterministic Fake-backed `host-integration` contract documented under [Proof and verification](examples/accrue_host/README.md#proof-and-verification). This lane spot-checks real Stripe behavior against that bounded slice. Checkout and billing portal already ship as first-party shared-facade surfaces; Stripe proves the upstream hosted side here, while the mounted-local Braintree side stays covered by the canonical matrix, package guides, and Fake-backed host proof.
 
 ## Phase 226 provider proof state
 
@@ -29,14 +29,14 @@ The policy, raw GitHub job conclusion, and proof state are independent facts. Th
 
 | State | Literal meaning | Next action |
 | --- | --- | --- |
-| `proved` | The selected scheduled/manual suite had complete test-mode configuration and fixtures, selected at least one test, passed assertions, and wrote the redacted manifest. | Retain the `live-stripe-proof` artifact. |
-| `misconfigured` | A selected scheduled/manual run lacked credentials or fixtures, did not write a valid manifest, or selected zero tests. This fails the periodic lane. | Configure test-mode secrets/fixtures, then run `cd accrue && mix test.live`. |
+| `proved` | The selected scheduled/manual suite had complete test-mode configuration and fixtures, selected a nonzero set of tests, had all selected assertions pass, and wrote a valid redacted manifest. | Retain the `live-stripe-proof` artifact. |
+| `misconfigured` | A selected scheduled/manual run lacked credentials or fixtures, wrote an invalid manifest, or selected zero tests. This fails the periodic lane. | Configure test-mode secrets/fixtures, then run `cd accrue && mix test.live`. |
 | `failed` | Selected provider assertions ran and failed. | Run `cd accrue && mix test.live`; inspect the linked artifact without copying provider payloads. |
 | `blocked` | Cancellation, timeout, or an upstream inability prevented a completed provider result. | Re-run the selected job after the upstream condition is resolved. |
 | `skipped` | An explicitly selected execution was intentionally bypassed with a recorded reason. It is not proof. | Record the reason and schedule the next selected run. |
 | `non_run` | A push or pull request did not select this scheduled/manual lane. It provides no provider proof for that SHA. | Use the Fake-backed required host proof; dispatch live Stripe only when provider parity is needed. |
 
-`policy: required` labels the periodic canary's enforcement decision; it never promotes a raw `success`, `skipped`, or a Fake result to `proved`. The deterministic Fake lane remains contributor-facing merge proof. Required release evidence remains Floor, Primary, and Primary plus OpenTelemetry; Sigra is advisory. Do not use this guide to weaken those boundaries.
+`policy: required` is the selected scheduled/manual lane's enforcement decision; incomplete configuration or fixtures, zero selection, an invalid manifest, or a selected assertion failure prevents proof and fails that provider lane. It never promotes a raw GitHub `success`, `skipped`, or a Fake result to `proved`. The deterministic Fake-backed lane remains contributor-facing push/PR merge proof. The always-run literal summary and retained privacy-safe `live-stripe-proof` artifact are the diagnostic path. Required release evidence remains Floor, Primary, and Primary plus OpenTelemetry; the separate Sigra release cell remains non-blocking. Do not use this guide to weaken those boundaries.
 
 ## What the live-Stripe suite covers
 
@@ -127,16 +127,21 @@ real GitHub Actions runner.
 1. Go to **Actions** → **CI** → **Run workflow** in the GitHub UI.
 2. Select branch and confirm.
 3. The `live-stripe` job runs with `STRIPE_TEST_SECRET_KEY` injected
-   from repository secrets. `continue-on-error: true` means a failure
-   in this job does NOT block the rest of CI — it is advisory, to
-   catch Stripe API-version drift.
+   from repository secrets. This selected manual run uses `policy: required`:
+   incomplete configuration or fixtures, zero selected tests, an invalid
+   manifest, or an assertion failure fails the selected provider lane and
+   cannot become `proved`. It is not a push/PR branch-protection check; use
+   the Fake-backed push/PR merge proof for that contributor-facing contract.
 
 ## Scheduled run
 
 The `live-stripe` job also runs daily at 06:00 UTC via the workflow's
-`schedule:` trigger. Failures are surfaced as annotated job summaries
-and can be monitored alongside the `release-gate` and `host-integration`
-results in the workflow summary.
+`schedule:` trigger. This selected scheduled run uses `policy: required`;
+incomplete configuration or fixtures, zero selected tests, an invalid manifest,
+or an assertion failure fails the selected provider lane instead of producing
+proof. Its always-run literal summary and retained privacy-safe proof artifact
+show the trigger, policy, proof state, reason, counts, and next action without
+exposing provider payloads or credentials.
 
 ## Philosophy
 
