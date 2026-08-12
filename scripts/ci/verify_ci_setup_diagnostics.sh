@@ -99,6 +99,66 @@ assert_browser_boundary_contract() {
   done
 }
 
+assert_wrapper_diagnostic_contract() {
+  local wrapper_script="$root_dir/scripts/ci/accrue_host_uat.sh"
+  local temp_dir facts output command_status
+  temp_dir="$(mktemp -d)"
+  trap 'rm -rf "$temp_dir"' RETURN
+
+  mkdir -p "$temp_dir/bin"
+  cat >"$temp_dir/bin/mix" <<'EOF'
+#!/usr/bin/env bash
+set -euo pipefail
+
+[ "$1" = "verify.full" ] || exit 64
+case "${ACCRUE_TEST_MIX_MODE:-}" in
+  inner_failure)
+    "$ACCRUE_TEST_DIAGNOSTIC" emit fixture_or_database --result failure --duration-ms 0 --node-identity fixture --playwright-identity fixture --lockfile-identity fixture --browser-class fixture --cache-state fixture
+    exit 73
+    ;;
+  aggregate_failure) exit 74 ;;
+  success) exit 0 ;;
+  *) exit 64 ;;
+esac
+EOF
+  chmod +x "$temp_dir/bin/mix"
+
+  for mode in inner_failure aggregate_failure success; do
+    facts="$temp_dir/$mode.ndjson"
+    set +e
+    output="$(PATH="$temp_dir/bin:$PATH" ACCRUE_CI_SETUP_FACTS="$facts" ACCRUE_TEST_DIAGNOSTIC="$diagnostic" ACCRUE_TEST_MIX_MODE="$mode" bash "$wrapper_script" 2>&1)"
+    command_status=$?
+    set -e
+
+    case "$mode" in
+      inner_failure)
+        [ "$command_status" -eq 73 ] || fail "inner fact fixture must preserve delegated status"
+        [ "$(grep -Fc '"code":"fixture_or_database"' "$facts")" -eq 1 ] || fail "inner fact fixture must retain exactly one narrower fact"
+        ! grep -Fq '"code":"browser_launch"' "$facts" || fail "inner fact fixture must not add browser classification"
+        ! grep -Fq '"code":"host_gate_failure"' "$facts" || fail "inner fact fixture must not add aggregate classification"
+        ;;
+      aggregate_failure)
+        [ "$command_status" -eq 74 ] || fail "aggregate fixture must preserve delegated status"
+        [ "$(grep -Fc '"code":"host_gate_failure"' "$facts")" -eq 1 ] || fail "aggregate fixture must emit exactly one host-gate fact"
+        printf '%s\n' "$output" | grep -Fx 'SETUP_CODE=host_gate_failure' >/dev/null || fail "aggregate fixture must render host-gate code"
+        printf '%s\n' "$output" | grep -Fx 'OWNER=host' >/dev/null || fail "aggregate fixture must retain host ownership"
+        printf '%s\n' "$output" | grep -Fx 'NEXT_COMMAND=cd examples/accrue_host && mix verify.full' >/dev/null || fail "aggregate fixture must render exact host repair command"
+        printf '%s\n' "$output" | grep -Fx 'EVIDENCE_LOCATION=GitHub Actions host-integration command log' >/dev/null || fail "aggregate fixture must render host command log evidence"
+        ;;
+      success)
+        [ "$command_status" -eq 0 ] || fail "successful delegation must exit zero"
+        [ ! -s "$facts" ] || fail "successful delegation must not add a failure fact"
+        ;;
+    esac
+    printf '%s\n' "$output" | grep -Fx 'FAILED_GATE=host-integration' >/dev/null || {
+      [ "$mode" = success ] || fail "failed delegation must preserve FAILED_GATE compatibility"
+    }
+  done
+
+  grep -Fq 'mix verify.full' "$wrapper_script" || fail "wrapper must preserve host proof delegation"
+  [ "$(grep -Fc 'mix verify.full' "$wrapper_script")" -eq 1 ] || fail "wrapper must delegate exactly once"
+}
+
 assert_workflow_setup_contract() {
   local workflow host_region
   workflow="$(cat "$root_dir/.github/workflows/ci.yml")"
@@ -113,5 +173,6 @@ assert_registry_contract
 assert_node_preflight_fixture
 assert_privacy_rejection
 assert_browser_boundary_contract
+assert_wrapper_diagnostic_contract
 assert_workflow_setup_contract
 echo "verify_ci_setup_diagnostics: ok"
