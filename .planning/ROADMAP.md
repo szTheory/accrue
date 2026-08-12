@@ -112,7 +112,7 @@ Plans:
 
 **Wave 7** *(gap closure; blocked on Wave 6)*
 
-- [ ] 226-13-PLAN.md — Fail closed on absent provider proof and incomplete DAG topology, then preserve literal host setup classifications.
+- [x] 226-13-PLAN.md — Fail closed on absent provider proof and incomplete DAG topology, then preserve literal host setup classifications.
 
 ### Phase 227: Measured Critical-Path Improvement
 

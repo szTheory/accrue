@@ -5,15 +5,15 @@ milestone_name: CI Evidence & Critical-Path Hardening
 current_phase: 226
 current_phase_name: ci-baseline-proof-semantics
 status: executing
-stopped_at: Completed 226-12-PLAN.md
-last_updated: "2026-08-11T22:40:20.030Z"
+stopped_at: Completed 226-13-PLAN.md
+last_updated: "2026-08-12T01:59:54.519Z"
 last_activity: 2026-08-11
-last_activity_desc: Phase 226 execution resumed (wave continue)
+last_activity_desc: Phase 226 execution started
 progress:
   total_phases: 3
   completed_phases: 2
-  total_plans: 11
-  completed_plans: 11
+  total_plans: 12
+  completed_plans: 12
   percent: 67
 ---
 
@@ -30,9 +30,9 @@ See: `.planning/PROJECT.md` (updated 2026-08-05 after shipping v1.59)
 ## Current Position
 
 Phase: 226 (ci-baseline-proof-semantics) — EXECUTING
-Plan: 2 of 7
+Plan: 2 of 9
 Status: Ready to execute
-Last activity: 2026-08-11 — Phase 226 execution resumed (wave continue)
+Last activity: 2026-08-11 — Phase 226 execution started
 
 Progress: [██████████] 100%
 
@@ -466,6 +466,7 @@ Coverage: 22/22 v1.51 requirements mapped (each REQ-ID → exactly one phase). D
 | Phase 226-ci-baseline-proof-semantics P05 | 14min | 2 tasks | 8 files |
 | Phase 226-ci-baseline-proof-semantics P06 | 12min | 2 tasks | 4 files |
 | Phase 226-ci-baseline-proof-semantics P12 | 20m | 2 tasks | 6 files |
+| Phase 226-ci-baseline-proof-semantics P13 | 14min | 2 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -924,6 +925,8 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - [Phase ?]: Baseline and provider timestamps must round-trip through canonical UTC before duration or freshness arithmetic.
 - [Phase ?]: Use latest 20 compatible complete CI paths across visible fingerprint sensitivity strata.
 - [Phase ?]: Measure each path through the latest Playwright shard completion; never sum parallel shards.
+- [Phase ?]: Missing provider evidence normalizes to non_run; ordinary CI success never becomes provider proof.
+- [Phase ?]: Host wrapper preserves inner setup facts and emits host_gate_failure only when delegation added none.
 
 ### Pending Todos
 
@@ -1076,8 +1079,8 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 
 ## Session Continuity
 
-Last session: 2026-08-11T22:40:20.019Z
-Stopped at: Completed 226-12-PLAN.md
+Last session: 2026-08-12T01:59:54.504Z
+Stopped at: Completed 226-13-PLAN.md
 Resume file: None
 
 ## Operator Next Steps
