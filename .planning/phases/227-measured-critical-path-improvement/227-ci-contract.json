@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "workflow_sha256": "f6b1d06c0897168bdff1b692a63d1704db24b96a48620504888b1fe2f30c47fa",
+  "jobs": {
+    "host-integration": { "name": "Host integration (required deterministic gate)", "needs": ["docs-contracts-shift-left"] },
+    "playwright-e2e": { "name": "Playwright E2E shard ${{ matrix.shard }}/${{ strategy.job-total }}", "needs": ["host-integration"] },
+    "admin-drift-docs": { "name": "Admin drift and docs", "needs": ["release-gate"] },
+    "annotation-sweep": { "name": "Annotation sweep", "needs": ["release-manifest-ssot", "docs-contracts-shift-left", "release-gate", "phase18-tax-gate", "admin-drift-docs", "admin-group-contracts", "admin-hardening-guardrails", "admin-phase200-guardrails", "admin-ui-ratchet-guardrails", "host-integration", "playwright-e2e", "host-docker-smoke"] }
+  },
+  "inverse_rollback": { "host_integration_needs": ["admin-drift-docs", "docs-contracts-shift-left"] },
+  "artifacts": ["accrue-host-ci-setup-facts", "accrue-host-playwright-report", "accrue-host-playwright-traces", "accrue-host-phase15-screenshots", "accrue-host-server-log", "playwright-e2e-report-shard-${{ matrix.shard }}", "playwright-e2e-traces-shard-${{ matrix.shard }}", "live-stripe-proof"],
+  "frozen_inputs": {
+    "226-CI-BASELINE.md": "5fbde56db7ed6dac1677b7ef70841b79faecfb63598f5bddab4f8e8955e67350",
+    "226-CI-BASELINE.ndjson": "768e67bfd957e2aae064706fc7a72c7b6b7b623b9d8daff3b99347cc171f5531",
+    "schema-v1.json": "6d1933829a7eb9246a5aec078ce27a2bd817ab7b59a6ec57253bd314cccf9688"
+  },
+  "thresholds": { "keep_median_seconds": 1666, "maximum_observation_seconds": 2602 }
+}

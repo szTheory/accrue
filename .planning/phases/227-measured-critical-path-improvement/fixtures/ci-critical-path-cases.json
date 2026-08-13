@@ -7,5 +7,17 @@
   "inverse_rollback_graph": {
     "host_needs": ["admin-drift-docs", "docs-contracts-shift-left"]
   },
-  "negative_cases": ["changed-edge", "changed-identity", "changed-artifact", "rerun", "incompatible-event", "insufficient-sample", "threshold-failure", "aggregate-failure"]
+  "negative_cases": ["changed-edge", "changed-identity", "changed-artifact", "rerun", "incompatible-event", "insufficient-sample", "threshold-failure", "aggregate-failure"],
+  "context": { "expectedRepository": "szTheory/accrue", "fingerprint": "phase-227-candidate" },
+  "accepted_evidence": [
+    { "repository": "szTheory/accrue", "sha": "a", "run_attempt": 1, "event_class": "pull_request", "conclusion": "success", "fingerprint": "phase-227-candidate", "duration_seconds": 1580 },
+    { "repository": "szTheory/accrue", "sha": "b", "run_attempt": 1, "event_class": "pull_request", "conclusion": "success", "fingerprint": "phase-227-candidate", "duration_seconds": 1600 },
+    { "repository": "szTheory/accrue", "sha": "c", "run_attempt": 1, "event_class": "pull_request", "conclusion": "success", "fingerprint": "phase-227-candidate", "duration_seconds": 1650 },
+    { "aggregate_failure": true, "host_browser_completed": true, "artifacts_retained": true }
+  ],
+  "rejected_evidence": [
+    [{ "repository": "szTheory/accrue", "sha": "a", "run_attempt": 2, "event_class": "pull_request", "conclusion": "success", "fingerprint": "phase-227-candidate", "duration_seconds": 1500 }],
+    [{ "repository": "wrong/repository", "sha": "a", "run_attempt": 1, "event_class": "pull_request", "conclusion": "success", "fingerprint": "phase-227-candidate", "duration_seconds": 1500 }],
+    [{ "repository": "szTheory/accrue", "sha": "a", "run_attempt": 1, "event_class": "pull_request", "conclusion": "success", "fingerprint": "phase-227-candidate", "duration_seconds": 1700 }, { "repository": "szTheory/accrue", "sha": "b", "run_attempt": 1, "event_class": "pull_request", "conclusion": "success", "fingerprint": "phase-227-candidate", "duration_seconds": 1701 }, { "repository": "szTheory/accrue", "sha": "c", "run_attempt": 1, "event_class": "pull_request", "conclusion": "success", "fingerprint": "phase-227-candidate", "duration_seconds": 1702 }]
+  ]
 }
