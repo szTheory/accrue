@@ -158,7 +158,20 @@ Plans:
   3. Stable required-check identities and failure artifacts remain visible while relevance, dependency ordering, or caching behavior is evaluated.
   4. Each CI change has an executable or recorded negative-control and rollback result; no test is deleted or retried merely to hide a failure.
 
-**Plans**: TBD
+**Plans:** 3 plans
+
+Plans:
+**Wave 1**
+
+- [ ] 227-01-PLAN.md — Prove and apply the one-edge graph change behind an exact workflow/evidence contract.
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
+- [ ] 227-02-PLAN.md — Record three candidate runs and the complementary live annotation negative control.
+
+**Wave 3** *(blocked on Wave 2 completion)*
+
+- [ ] 227-03-PLAN.md — Keep the measured candidate or execute and prove the exact inverse rollback.
 
 ## Progress
 
@@ -166,7 +179,7 @@ Plans:
 |-------|----------------|--------|-----------|
 | 225. Required-Lane Signal Repair | 0/3 | Not started | - |
 | 226. CI Baseline & Proof Semantics | 17/17 | Complete    | 2026-08-12 |
-| 227. Measured Critical-Path Improvement | 0/TBD | Not started | - |
+| 227. Measured Critical-Path Improvement | 0/3 | Not started | - |
 
 <details>
 <summary>✅ v1.58 lattice_stripe 2.x Bump & Stripe-Native Entitlements Sync (Phases 212-214.2) — SHIPPED 2026-07-31</summary>
