@@ -38,7 +38,7 @@ Completed and deferred v1.60 details are retained in [the milestone archive](mil
 
 - [ ] **Phase 225: Required-Lane Signal Repair** - Classify and repair current required CI failures without hiding their diagnostic evidence.
 - [x] **Phase 226: CI Baseline & Proof Semantics** - Publish the comparable-run baseline and make provider/setup ownership legible. (completed 2026-08-12)
-- [ ] **Phase 227: Measured Critical-Path Improvement** - Remove one proven setup or dependency cost while retaining every required proof.
+- [ ] **Phase 227: Measured Critical-Path Improvement** - Blocked: the exact inverse is applied, but the sole restoration proof failed live-Stripe configuration.
 
 ## Phase Details
 
@@ -179,7 +179,7 @@ Plans:
 |-------|----------------|--------|-----------|
 | 225. Required-Lane Signal Repair | 0/3 | Not started | - |
 | 226. CI Baseline & Proof Semantics | 17/17 | Complete    | 2026-08-12 |
-| 227. Measured Critical-Path Improvement | 0/3 | Not started | - |
+| 227. Measured Critical-Path Improvement | 1/3 | Blocked — rollback applied, proof unverified | 2026-08-13 |
 
 <details>
 <summary>✅ v1.58 lattice_stripe 2.x Bump & Stripe-Native Entitlements Sync (Phases 212-214.2) — SHIPPED 2026-07-31</summary>

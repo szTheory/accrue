@@ -2,16 +2,19 @@
 gsd_state_version: 1.0
 milestone: v1.61
 milestone_name: CI Evidence & Critical-Path Hardening
-status: executing
-stopped_at: Phase 227 context gathered
-last_updated: "2026-08-13T04:14:05.228Z"
-last_activity: 2026-08-12 — Phase 227 execution started
+current_phase: 227
+current_phase_name: measured-critical-path-improvement
+status: blocked
+stopped_at: Phase 227 blocked at 227-03 rollback_applied_unverified
+last_updated: "2026-08-13T16:18:33.833Z"
+last_activity: 2026-08-13
+last_activity_desc: terminal restoration proof recorded
 progress:
   total_phases: 3
-  completed_phases: 2
+  completed_phases: 3
   total_plans: 23
-  completed_plans: 22
-  percent: 67
+  completed_plans: 23
+  percent: 100
 ---
 
 # Project State
@@ -26,10 +29,10 @@ See: `.planning/PROJECT.md` (updated 2026-08-05 after shipping v1.59)
 
 ## Current Position
 
-Phase: 227 (measured-critical-path-improvement) — EXECUTING
-Plan: 2 of 3
-Status: Ready to execute
-Last activity: 2026-08-12 — Phase 227 execution started
+Phase: 227 (measured-critical-path-improvement) — BLOCKED
+Plan: 3 of 3
+Status: Blocked at rollback_applied_unverified; PATH-02 is unmet
+Last activity: 2026-08-13 — terminal restoration proof recorded
 
 Progress: [█████████░] 91%
 
@@ -39,7 +42,7 @@ Progress: [█████████░] 91%
 |---|---|---|---|
 | 225 | Restore trustworthy required release/Admin CI signal through trace-backed root-cause repair. | REL-01, REL-02, REL-03 | Ready to plan |
 | 226 | Establish comparable-run baseline, provider proof semantics, and host/browser setup ownership. | BASE-01, BASE-02, OWN-01 | Not started |
-| 227 | Make one measured critical-path improvement with stable checks, artifacts, negative controls, and rollback. | PATH-01, PATH-02, SAFE-01, SAFE-02 | Not started |
+| 227 | Make one measured critical-path improvement with stable checks, artifacts, negative controls, and rollback. | PATH-01, PATH-02, SAFE-01, SAFE-02 | Blocked: rollback applied, external restoration proof failed |
 
 **Dependency shape:** 225 → 226 → 227. **Coverage:** 10/10 requirements mapped exactly once.
 
@@ -950,6 +953,7 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - [Phase ?]: Require caller-supplied repository provenance before CI evidence can render.
 - [Phase ?]: Host integration now waits only for docs-contracts-shift-left; rollback restores admin-drift-docs.
 - [Phase ?]: The verifier hashes the normalized workflow to allow only this one dependency deletion.
+- [Phase ?]: Phase 227 rollback is rollback_applied_unverified: exact inverse 80f60193 passed local controls, but normal restoration run 31716216311 failed live-Stripe configuration; PATH-02 remains unmet.
 
 ### Pending Todos
 
@@ -964,6 +968,7 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - Phase 196 final full-suite gate: cd accrue_admin && mix test --warnings-as-errors fails outside Phase 196 in dashboard_live_test.exs:91 (missing $42.50) and webhooks_live_test.exs:106 (audit count expected 1, observed 2). Focused Phase 196 tests, package docs, assets, and e2e:phase196 pass.
 - Phase 208 Plan 04 blocked at Task 1: ANTHROPIC_API_KEY is absent from the execution environment; ledger.baseline.json remains frozen:false and live convergence/freeze must not proceed without maintainer local key.
 - Phase 227 Plan 02 blocked: final bounded workflow_dispatch cohort produced no successful first-attempt candidate runs; live-stripe provider proof failed and one run also failed host integration. Replan a compatible event class before retrying.
+- Phase 227 is blocked at rollback_applied_unverified: restoration run 31716216311 failed live-Stripe configuration; no additional restoration run is authorized by 227-03.
 
 ### Quick Tasks Completed
 
@@ -1103,9 +1108,9 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 
 ## Session Continuity
 
-Last session: 2026-08-13T04:14:05.220Z
-Stopped at: Phase 227 context gathered
-Resume file: .planning/phases/227-measured-critical-path-improvement/227-CONTEXT.md
+Last session: 2026-08-13T16:18:09.022Z
+Stopped at: Phase 227 blocked at 227-03 rollback_applied_unverified
+Resume file: .planning/phases/227-measured-critical-path-improvement/227-CI-CRITICAL-PATH.md
 
 ## Operator Next Steps
 
