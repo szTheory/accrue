@@ -75,8 +75,8 @@ function assertWorkflowContract(workflow) {
     assert.match(stepRegion(host, stepId), /if: always\(\)/, `${stepId} must always run`);
   }
   assert.match(stepRegion(provider, "live_stripe_suite"), /ACCRUE_PROVIDER_MANIFEST/, "suite must receive the provider manifest path");
-  assert.match(provider, /ACCRUE_PROVIDER_PROOF_RECORD: \$\{\{ runner\.temp \}\}\//, "provider proof record must use runner temp");
-  assert.match(host, /ACCRUE_CI_SETUP_FACTS: \$\{\{ runner\.temp \}\}\//, "setup facts must use runner temp");
+  assert.match(provider, /ACCRUE_PROVIDER_PROOF_RECORD=\$RUNNER_TEMP\//, "provider proof record must use runner temp");
+  assert.match(host, /ACCRUE_CI_SETUP_FACTS=\$RUNNER_TEMP\//, "setup facts must use runner temp");
   assert.match(provider, /name: live-stripe-proof/, "provider artifact name drifted");
   assert.match(host, /name: accrue-host-ci-setup-facts/, "setup artifact name drifted");
 

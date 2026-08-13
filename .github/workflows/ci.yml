@@ -925,10 +925,12 @@ jobs:
       ACCRUE_HOST_TEST_POOL_SIZE: 8
       ACCRUE_HOST_PLAYWRIGHT_WORKERS: 1
       ACCRUE_HOST_BROWSER_LOG: ${{ github.workspace }}/accrue-host-server.log
-      ACCRUE_CI_SETUP_FACTS: ${{ runner.temp }}/accrue-host-ci-setup-facts.ndjson
 
     steps:
       - uses: actions/checkout@v6
+
+      - name: Set host CI evidence path
+        run: echo "ACCRUE_CI_SETUP_FACTS=$RUNNER_TEMP/accrue-host-ci-setup-facts.ndjson" >> "$GITHUB_ENV"
 
       - name: Set up BEAM
         uses: erlef/setup-beam@v1
@@ -1281,10 +1283,12 @@ jobs:
       STRIPE_TEST_SECRET_KEY: ${{ secrets.STRIPE_TEST_SECRET_KEY }}
       ACCRUE_LIVE_BASIC_PRICE: ${{ secrets.ACCRUE_LIVE_BASIC_PRICE }}
       ACCRUE_LIVE_PRO_PRICE: ${{ secrets.ACCRUE_LIVE_PRO_PRICE }}
-      ACCRUE_PROVIDER_PROOF_RECORD: ${{ runner.temp }}/accrue-provider-proof.json
 
     steps:
       - uses: actions/checkout@v6
+
+      - name: Set live provider proof path
+        run: echo "ACCRUE_PROVIDER_PROOF_RECORD=$RUNNER_TEMP/accrue-provider-proof.json" >> "$GITHUB_ENV"
 
       - name: Set up BEAM
         uses: erlef/setup-beam@v1
