@@ -903,7 +903,7 @@ jobs:
     # stay in this lane, and high-severity trust findings cannot be accepted here.
     name: Host integration (required deterministic gate)
     if: github.event_name != 'schedule'
-    needs: [docs-contracts-shift-left]
+    needs: [admin-drift-docs, docs-contracts-shift-left]
     runs-on: ubuntu-24.04
 
     services:
