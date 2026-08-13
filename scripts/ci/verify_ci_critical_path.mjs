@@ -57,6 +57,7 @@ export function verifyWorkflowContract(workflowSource, contract) {
       : expected.needs;
     assert.deepEqual(actualNeeds, allowedNeeds, `needs changed: ${id}`);
   }
+  assert.match(jobBlock(workflowSource, "annotation-sweep"), /^    if: always\(\) && github\.event_name != 'schedule'$/m, "annotation-sweep must aggregate independent failures");
   for (const artifact of contract.artifacts) {
     assert.match(workflowSource, new RegExp(`uses: actions/upload-artifact@v7[\\s\\S]{0,360}name: ${artifact.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}`), `artifact changed or removed: ${artifact}`);
   }

@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "workflow_sha256": "49a6bc01836e6f30fb5a95a9dd7bf6d5d55936a03ceb638e015a81955e7b9f10",
+  "workflow_sha256": "cd9fe4a1ec7acad5e96fe75519107d498138ee19b18ef76f4fd5ceaae9eea077",
   "jobs": {
     "host-integration": { "name": "Host integration (required deterministic gate)", "needs": ["docs-contracts-shift-left"] },
     "playwright-e2e": { "name": "Playwright E2E shard ${{ matrix.shard }}/${{ strategy.job-total }}", "needs": ["host-integration"] },

@@ -1194,7 +1194,7 @@ jobs:
 
   annotation-sweep:
     name: Annotation sweep
-    if: github.event_name != 'schedule'
+    if: always() && github.event_name != 'schedule'
     needs:
       [
         release-manifest-ssot,
