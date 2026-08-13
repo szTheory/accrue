@@ -3,17 +3,17 @@ gsd_state_version: 1.0
 milestone: v1.61
 milestone_name: CI Evidence & Critical-Path Hardening
 current_phase: 227
-current_phase_name: Measured Critical-Path Improvement
+current_phase_name: measured-critical-path-improvement
 status: executing
-stopped_at: Phase 227 context gathered
-last_updated: "2026-08-13T01:30:28.125Z"
+stopped_at: Completed 227-01-PLAN.md
+last_updated: "2026-08-13T01:43:16.158Z"
 last_activity: 2026-08-12
-last_activity_desc: Phase 226 complete, transitioned to Phase 227
+last_activity_desc: Phase 227 execution started
 progress:
   total_phases: 3
   completed_phases: 2
   total_plans: 23
-  completed_plans: 20
+  completed_plans: 21
   percent: 67
 ---
 
@@ -25,16 +25,16 @@ See: `.planning/PROJECT.md` (updated 2026-08-05 after shipping v1.59)
 
 **Core value:** A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic Elixir DX, strong domain modeling, tamper-evident audit ledger, great observability, and zero breaking-change pain through v1.x.
 
-**Current focus:** Phase 226 — ci-baseline-proof-semantics
+**Current focus:** Phase 227 — measured-critical-path-improvement
 
 ## Current Position
 
-Phase: 227 — Measured Critical-Path Improvement
-Plan: Not started
+Phase: 227 (measured-critical-path-improvement) — EXECUTING
+Plan: 2 of 3
 Status: Ready to execute
-Last activity: 2026-08-12 — Phase 226 complete, transitioned to Phase 227
+Last activity: 2026-08-12 — Phase 227 execution started
 
-Progress: [██████████] 100%
+Progress: [█████████░] 91%
 
 ## v1.61 Roadmap
 
@@ -475,6 +475,7 @@ Coverage: 22/22 v1.51 requirements mapped (each REQ-ID → exactly one phase). D
 | Phase 226 P19 | 4 minutes | 2 tasks | 4 files |
 | Phase 226 P20 | 8min | 3 tasks | 5 files |
 | Phase 226 P21 | 18min | 1 tasks | 6 files |
+| Phase 227 P01 | 12m | 2 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -950,6 +951,8 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - [Phase ?]: Historical CI topology is derived from fetched head-SHA workflow bytes.
 - [Phase ?]: Canonical baseline records are semantically validated before Markdown rendering.
 - [Phase ?]: Require caller-supplied repository provenance before CI evidence can render.
+- [Phase ?]: Host integration now waits only for docs-contracts-shift-left; rollback restores admin-drift-docs.
+- [Phase ?]: The verifier hashes the normalized workflow to allow only this one dependency deletion.
 
 ### Pending Todos
 
@@ -1102,9 +1105,9 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 
 ## Session Continuity
 
-Last session: 2026-08-13T00:43:07.534Z
-Stopped at: Phase 227 context gathered
-Resume file: .planning/phases/227-measured-critical-path-improvement/227-CONTEXT.md
+Last session: 2026-08-13T01:43:16.145Z
+Stopped at: Completed 227-01-PLAN.md
+Resume file: None
 
 ## Operator Next Steps
 

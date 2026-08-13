@@ -163,7 +163,7 @@ Plans:
 Plans:
 **Wave 1**
 
-- [ ] 227-01-PLAN.md — Prove and apply the one-edge graph change behind an exact workflow/evidence contract.
+- [x] 227-01-PLAN.md — Prove and apply the one-edge graph change behind an exact workflow/evidence contract.
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
