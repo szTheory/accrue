@@ -5,15 +5,15 @@ milestone_name: CI Evidence & Critical-Path Hardening
 current_phase: 227
 current_phase_name: measured-critical-path-improvement
 status: executing
-stopped_at: Completed 227-01-PLAN.md
-last_updated: "2026-08-13T01:43:16.158Z"
+stopped_at: "Blocked 227-02-PLAN.md: no eligible successful workflow_dispatch candidate runs"
+last_updated: "2026-08-13T03:58:05.980Z"
 last_activity: 2026-08-12
 last_activity_desc: Phase 227 execution started
 progress:
   total_phases: 3
   completed_phases: 2
   total_plans: 23
-  completed_plans: 21
+  completed_plans: 22
   percent: 67
 ---
 
@@ -966,6 +966,7 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - (Resolved/obsolete: the 190-05 `admin-baseline.spec.js` hang note was cleared 2026-06-21 — Phase 190 and the full v1.53 milestone subsequently shipped & verified, so the bounded-retry concern no longer applies.)
 - Phase 196 final full-suite gate: cd accrue_admin && mix test --warnings-as-errors fails outside Phase 196 in dashboard_live_test.exs:91 (missing $42.50) and webhooks_live_test.exs:106 (audit count expected 1, observed 2). Focused Phase 196 tests, package docs, assets, and e2e:phase196 pass.
 - Phase 208 Plan 04 blocked at Task 1: ANTHROPIC_API_KEY is absent from the execution environment; ledger.baseline.json remains frozen:false and live convergence/freeze must not proceed without maintainer local key.
+- Phase 227 Plan 02 blocked: final bounded workflow_dispatch cohort produced no successful first-attempt candidate runs; live-stripe provider proof failed and one run also failed host integration. Replan a compatible event class before retrying.
 
 ### Quick Tasks Completed
 
@@ -1105,9 +1106,9 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 
 ## Session Continuity
 
-Last session: 2026-08-13T01:43:16.145Z
-Stopped at: Completed 227-01-PLAN.md
-Resume file: None
+Last session: 2026-08-13T03:58:05.959Z
+Stopped at: Blocked 227-02-PLAN.md: no eligible successful workflow_dispatch candidate runs
+Resume file: .planning/phases/227-measured-critical-path-improvement/227-02-SUMMARY.md
 
 ## Operator Next Steps
 
