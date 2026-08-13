@@ -3,147 +3,76 @@
 > **Audit trail only.** Do not use as input to planning, research, or execution agents.
 > Decisions are captured in CONTEXT.md — this log preserves the alternatives considered.
 
-**Date:** 2026-08-12
-**Phase:** 227-Measured Critical-Path Improvement
-**Areas discussed:** Optimization Target, Proof Bar, Rollback Safety
+**Date:** 2026-08-13
+**Phase:** 227-measured-critical-path-improvement
+**Areas discussed:** Candidate trigger contract, Success admission boundary, Failure and run budget, Rollback posture
 
 ---
 
-## Optimization Target
-
-### First optimization target
+## Candidate Trigger Contract
 
 | Option | Description | Selected |
 |--------|-------------|----------|
-| Dependency ordering | Start host proof earlier while release/admin proof remains required. | ✓ |
-| Repeated release-matrix work | Move duplicated static/setup work while retaining unique cell proof. | |
-| Host/browser setup duplication | Consolidate Node/npm/Playwright provisioning without browser caching. | |
-| Let downstream research decide | Rank all candidates and implement the strongest safe option. | |
+| Current `workflow_dispatch` | Repeatable manual launches at one SHA, but every launch also selects unavailable live-Stripe proof. | |
+| Pull-request runs | Represent the contributor merge path and naturally exclude live Stripe, but repeated first attempts at one SHA require surprising PR close/reopen activity. | |
+| Separate performance workflow | Isolates timing collection, but creates a second topology that can drift from required CI. | |
+| Typed dispatch input | Keep the real CI workflow; add a required Boolean `run_live_stripe` input whose default preserves current behavior and whose explicit false value identifies measurement runs. | ✓ |
 
-### Prerequisite boundary
-
-| Option | Description | Selected |
-|--------|-------------|----------|
-| Host after docs only | Start host integration after `docs-contracts-shift-left`. | ✓ |
-| Host after release gate | Remove only indirect admin-drift wait. | |
-| Evidence-led minimum | Remove the narrowest edge supported by later research. | |
-
-### Failure behavior
-
-| Option | Description | Selected |
-|--------|-------------|----------|
-| Let independent proof finish | Preserve host/browser results and artifacts when another lane fails. | ✓ |
-| Cancel host/browser work | Conserve compute but lose independent evidence. | |
-| Conditional policy | Finish deterministic failures and cancel selected infrastructure states. | |
-
-### Change breadth
-
-| Option | Description | Selected |
-|--------|-------------|----------|
-| One-edge optimization | Detach host integration only; preserve host → Playwright. | ✓ |
-| Re-evaluate whole path | Allow removal of any unnecessary staged edge. | |
-| Parallelize Playwright too | Investigate starting browser proof independently of host proof. | |
-
-**User's choices:** Dependency ordering; host after docs only; independent proof finishes; one-edge optimization.
-**Notes:** The intended saving is removal of measured DAG wait, not removal, skipping, or weakening of any required proof.
+**User's choice:** Accepted the research-backed recommendation in full.
+**Notes:** Measurement runs explicitly record provider proof as `non_run`. Scheduled provider proof is unchanged; normal manual behavior remains the default. Input values become part of the evidence fingerprint.
 
 ---
 
-## Proof Bar
-
-### Post-change sample
+## Success Admission Boundary
 
 | Option | Description | Selected |
 |--------|-------------|----------|
-| Three successful first attempts | Same event class; retain individual observations and variance. | ✓ |
-| One successful run | Quick but weak against runner variance. | |
-| Five successful first attempts | Stronger but costlier and slower. | |
-| Adaptive sample | Start with three and add two if results overlap prior variance. | |
+| Workflow conclusion only | Simple, but a skipped job can report success and a green aggregate cannot prove job, artifact, or provider completeness. | |
+| Critical-path jobs only | Directly measures the release/host/browser path, but ignores independent required proof and the final fan-in. | |
+| Workflow success plus exact proof vector | Require raw success and repository-bound evidence for the exact revision, trigger/input topology, required matrix and independent lanes, finalizer, artifacts, and explicit provider state. | ✓ |
 
-### Primary metric
-
-| Option | Description | Selected |
-|--------|-------------|----------|
-| Staged critical-path duration | Release start through latest Playwright completion; DAG wait is causal evidence. | ✓ |
-| Host start time | Earlier start is enough even without reliable end-to-end improvement. | |
-| Whole-workflow wall time | Require the final workflow completion to improve. | |
-| Combined gate | Require both earlier host start and faster staged completion. | |
-
-### Keep threshold
-
-| Option | Description | Selected |
-|--------|-------------|----------|
-| At least 20% median reduction | Also investigate any post observation above prior p95. | ✓ |
-| At least five minutes | Use a simple absolute reduction. | |
-| Variance-aware only | Require lower median and causal wait removal without a percentage. | |
-| Any repeatable reduction | Keep any consistent improvement. | |
-
-### Evidence location
-
-| Option | Description | Selected |
-|--------|-------------|----------|
-| Separate Phase 227 evidence pack | Preserve Phase 226 and add Markdown plus machine-readable comparison. | ✓ |
-| Extend Phase 226 baseline | Append after-state observations to the existing baseline. | |
-| Context and verification only | Store links/calculations only in planning artifacts. | |
-| CI summary only | Keep comparison in GitHub's run summary. | |
-
-**User's choices:** Three first-attempt runs; staged critical-path metric; 20% median reduction; separate Phase 227 evidence pack.
-**Notes:** Phase 226 remains the immutable before snapshot. Whole-workflow duration is context, not the deciding metric.
+**User's choice:** Accepted the research-backed recommendation in full.
+**Notes:** Required, advisory, provider, artifact, and raw GitHub states remain independent literal facts. Missing or weakened required proof is an exclusion and rollback trigger.
 
 ---
 
-## Rollback Safety
-
-### Negative control
+## Failure and Run Budget
 
 | Option | Description | Selected |
 |--------|-------------|----------|
-| Static plus executable failure proof | Verify graph/contracts and record controlled failure propagation with artifacts. | ✓ |
-| Static verifier only | Validate workflow structure without a failing run. | |
-| Recorded failure run only | Keep immutable run evidence without a repository verifier. | |
-| Planner decides | Require outcomes but leave the mechanism open. | |
+| Run until three green samples appear | Eventually fills a cohort, but creates unbounded cost, selection bias, and sample-shopping. | |
+| Replace externally failed runs | Tolerates infrastructure incidents, but makes exclusion classification subjective and expandable. | |
+| Exactly three predeclared first attempts | Retain all existing exclusions, preflight the corrected topology, and permit one final three-run cohort at one SHA/event/input fingerprint with no replacements. | ✓ |
 
-### Stable contract
+**User's choice:** Accepted the research-backed recommendation in full.
+**Notes:** Reruns are reliability/diagnosis evidence only. Failures are classified as `candidate_regression`, `deterministic_required_lane_failure`, `external_or_runner_blocked`, or `inconclusive` from repository-bound facts.
 
-| Option | Description | Selected |
-|--------|-------------|----------|
-| Exact contract manifest | Guard check IDs/names, matrix/provider labels, artifacts, conditions, and retention. | ✓ |
-| Required names only | Lock check identities but allow artifact contract changes. | |
-| Semantic assertions | Check evidence categories without exact names. | |
-| Live ruleset comparison | Validate against externally configured repository rules. | |
+---
 
-### Rollback trigger
+## Rollback Posture
 
 | Option | Description | Selected |
 |--------|-------------|----------|
-| Any safety failure or missed speed bar | Revert on proof regression, failed control, deterministic failure, or <20% gain. | ✓ |
-| Safety failures only | Keep a safe cleanup even if performance misses the threshold. | |
-| Repeated failures only | Require two failures before reverting. | |
-| Maintainer judgment | Review evidence case by case. | |
+| Leave candidate active while replanning | Avoids an immediate inverse patch, but makes an unproved topology the de facto accepted state. | |
+| Permanent switch | Makes toggling easy, but adds an unnecessary third graph state and lasting failure surface. | |
+| Restore now and reapply only for the bounded experiment | Return to the known graph, verify restoration, then reapply only after trigger/proof preflight; any final-cohort failure restores it again. | ✓ |
 
-### Rollback procedure
-
-| Option | Description | Selected |
-|--------|-------------|----------|
-| Exact inverse patch plus fresh proof | Restore edge, run verifier, and record fresh first-attempt recovery CI. | ✓ |
-| Git revert only | Revert and rely on ordinary required CI. | |
-| Feature switch | Keep a configurable serialization mode. | |
-| Documented YAML edit | Supply manual instructions without a dedicated rollback test. | |
-
-**User's choices:** Static plus executable negative control; exact manifest; rollback on any safety/performance failure; inverse patch plus fresh proof.
-**Notes:** Stable evidence means externally visible identity and recoverability, not merely a green workflow conclusion.
+**User's choice:** Accepted the research-backed recommendation in full.
+**Notes:** Rollback truth is staged as `rollback_applied`, `rollback_verified`, or `rollback_applied_unverified`; only the verified state is complete.
 
 ---
 
 ## the agent's Discretion
 
-- Exact Phase 227 filenames and machine-readable schema.
-- Verifier implementation and controlled-failure seam.
-- Narrow criteria for substantiating an external timing anomaly, with every exclusion visible.
+- Machine-readable schema details, exact preflight command composition, verifier implementation, and controlled-failure seam remain planner discretion within the locked decisions.
+- An external timing anomaly is excludable only with observation-specific GitHub status/incident or explicit runner/infrastructure evidence.
 
 ## Deferred Ideas
 
-- Release-matrix duplicate-work extraction.
-- Host/browser setup consolidation.
-- Further graph changes, including independent Playwright start.
-- Playwright browser caching absent contrary measurements.
+- A separate performance-only workflow may be considered in a future observability phase if repeated experiments justify its maintenance and drift cost.
+
+## Research Notes
+
+- Three parallel advisor subagents covered trigger/admission semantics, run-budget/rollback policy, and cross-ecosystem/project/DX coherence.
+- Primary external guidance consulted: GitHub Actions trigger inputs, job-condition and status semantics, workflow reruns, and Google SRE canary/rollback guidance.
+- End-user UI, Phoenix/LiveView components, Plug/Ecto API design, dark/light themes, and product graphic design were judged inapplicable. The relevant UX is the maintainer evidence interface: fact, literal state, owner, one exact next command, then immutable proof.

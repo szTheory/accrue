@@ -1,12 +1,12 @@
 # Phase 227: Measured Critical-Path Improvement - Context
 
-**Gathered:** 2026-08-12
+**Gathered:** 2026-08-13
 **Status:** Ready for planning
 
 <domain>
 ## Phase Boundary
 
-Deliver one measured improvement to the confirmed release-gate → host-integration → Playwright critical path by removing one unnecessary dependency edge. Preserve every required release, host, browser, provider, and failure proof; stable check and artifact identities; zero-retry semantics; and the Phase 226 evidence boundary. This phase does not collapse the release matrix, edit branch protection, demote gates, cache Playwright browsers, delete or mask tests, or broadly redesign the CI graph.
+Deliver one measured improvement to the confirmed release-gate → host-integration → Playwright critical path by removing one unnecessary dependency edge. The first candidate attempt produced nine visible exclusions and zero admissible timing observations because the manual trigger coupled full-CI measurement to unavailable live-Stripe proof. Restore the known graph first, then permit one final, preflighted three-run experiment whose trigger intent, proof vector, budget, and rollback states are explicit. Preserve every required release, host, browser, provider, and failure proof; stable check and artifact identities; zero-retry semantics; and the Phase 226 evidence boundary. This phase does not collapse the release matrix, edit branch protection, demote gates, cache Playwright browsers, delete or mask tests, create a second performance workflow, or broadly redesign the CI graph.
 
 </domain>
 
@@ -30,8 +30,28 @@ Deliver one measured improvement to the confirmed release-gate → host-integrat
 - **D-10:** Trigger rollback if any required identity, artifact, proof state, or failure propagation changes; a negative control fails; a new deterministic failure appears; or the three-run median misses the 20% improvement bar.
 - **D-11:** Rollback is the exact inverse dependency patch restoring the original `host-integration` edge, followed by the static/negative-control verifier and a fresh successful first-attempt CI run demonstrating that the prior graph and evidence contract are restored. Do not add a lasting feature switch for this single YAML edge.
 
+### Candidate Trigger Contract
+- **D-12:** Apply the D-11 exact inverse immediately and verify the restored graph before redesigning or launching more candidate measurements. Nine retained `workflow_dispatch` exclusions and zero admissible observations are insufficient evidence; the optimized edge must not remain active while its measurement contract is replanned.
+- **D-13:** Keep the existing `CI` workflow and `workflow_dispatch` event. Add one explicit Boolean `run_live_stripe` input: it is required, defaults to `true` to preserve current manual behavior, and gates only the `live-stripe` job for manual runs. Scheduled provider proof remains unchanged. Phase 227 measurement runs explicitly pass `run_live_stripe: false` and record live-Stripe proof for that SHA as `non_run`; workflow success must never imply provider proof.
+- **D-14:** Do not use pull-request close/reopen activity, no-op commits, reruns, or a second performance-only workflow to manufacture repeatable observations. The explicit dispatch input is the least-surprising maintainer contract and its value is part of the workflow/cohort fingerprint.
+
+### Observation Admission And Proof Vector
+- **D-15:** A post-change observation is admissible only when the raw GitHub workflow conclusion is `success` **and** a repository-bound proof vector is complete for the registered measurement topology. A green workflow conclusion alone is not job-presence, artifact, provider, or required-proof evidence.
+- **D-16:** The vector must bind the exact candidate SHA, first attempt, `workflow_dispatch` event, `run_live_stripe: false`, workflow/cohort fingerprints, required job and matrix identities, and immutable run/job links. It must prove successful Floor, Primary, and Primary plus OpenTelemetry release cells; docs contracts; every required Admin lane; host integration; all three Playwright shards; Docker smoke; and `annotation-sweep`, plus the contractually expected artifact presence or documented conditional absence.
+- **D-17:** Advisory Sigra and the parked Admin ratchet remain visibly advisory and retain their literal outcomes. Live Stripe is explicitly `non_run` for measurement dispatches, with the latest independent scheduled/manual provider proof linked separately. Any missing, skipped, renamed, weakened, or differently conditioned required proof is an exclusion and rollback trigger, never a substitute sample.
+
+### Final Run Budget And Failure Classification
+- **D-18:** Retain all nine existing failed candidate runs and the earlier inadmissible control as immutable exclusions. After rollback verification and trigger/proof-vector preflight, authorize one final cohort of exactly three independent candidate first attempts at one exact SHA, event class, and input topology. This is the remaining Phase 227 performance-run budget; do not launch replacement cohorts.
+- **D-19:** Reruns are diagnosis and reliability evidence only. Cancelled, skipped, failed, incompatible, blocked, or slow observations remain visible with their original run identity and attempt number; none may be silently replaced or promoted into the timing cohort.
+- **D-20:** Classify each non-qualifying run from repository-bound facts as `candidate_regression`, `deterministic_required_lane_failure`, `external_or_runner_blocked`, or `inconclusive`. Use `candidate_regression` only for a reproducible graph, identity, artifact, proof, or failure-propagation regression. Use `external_or_runner_blocked` only with observation-specific GitHub status/incident or explicit runner/infrastructure evidence. Ordinary variance, a green rerun, and unexplained failure are not external anomalies.
+
+### Rollback State And Final Decision
+- **D-21:** Any non-qualifying outcome in the final three-run cohort, fewer than three successful compatible first attempts, a missed D-06 timing predicate, or any safety/negative-control regression immediately triggers the D-11 inverse. Do not keep sampling until three green runs appear and do not leave the candidate edge active while investigating.
+- **D-22:** Report rollback in three literal stages: `rollback_applied` means the inverse patch and local static, negative-control, and inherited preservation checks pass; `rollback_verified` additionally requires one fresh successful first-attempt normal CI run with immutable job and artifact evidence; `rollback_applied_unverified` means the inverse is present but external proof is blocked. Only `rollback_verified` is a completed rollback.
+- **D-23:** Every maintainer-facing report begins with current fact, literal state, owner, and one exact next command. Follow with the decision threshold, immutable observations or evidence gap, required/advisory/provider proof vector, exclusions and classifications, negative-control result, and rollback evidence. Keep Markdown plus sanitized NDJSON as the interface; this phase does not warrant a dashboard or end-user UI.
+
 ### the agent's Discretion
-- The researcher and planner may choose the Phase 227 evidence filenames, machine-readable schema details, verifier implementation, and controlled-failure seam, provided D-01 through D-11 remain true.
+- The researcher and planner may choose machine-readable schema details, exact preflight command composition, verifier implementation, and controlled-failure seam, provided D-01 through D-23 remain true.
 - They may define a narrow, evidence-based rule for substantiating an external timing anomaly. Runner variance alone is not enough to discard a post-change observation silently; all exclusions must remain visible.
 
 </decisions>
@@ -57,6 +77,15 @@ Deliver one measured improvement to the confirmed release-gate → host-integrat
 - `.planning/milestones/v1.55-phases/202-ci-cd-performance-and-determinism-audit/202-CONTEXT.md` — Measure-first CI optimization decisions and proof-honesty constraints.
 - `.planning/milestones/v1.55-phases/202-ci-cd-performance-and-determinism-audit/202-CI-CD-PERFORMANCE-AUDIT.md` — Original topology analysis, duplicated-work candidates, validation expectations, and rollback requirements.
 
+### Executed Phase 227 Evidence And Replanning Inputs
+- `.planning/phases/227-measured-critical-path-improvement/227-01-SUMMARY.md` — Implemented one-edge candidate, executable workflow contract, and inverse fixture.
+- `.planning/phases/227-measured-critical-path-improvement/227-02-SUMMARY.md` — Live evidence attempt, nine excluded candidate runs, admissible negative control, and the zero-sample blocker that requires replanning.
+- `.planning/phases/227-measured-critical-path-improvement/227-CI-CRITICAL-PATH.md` — Current human-readable insufficient-evidence and rollback-required state.
+- `.planning/phases/227-measured-critical-path-improvement/227-CI-CRITICAL-PATH.ndjson` — Immutable negative-control, exclusion, and pending-decision records that must remain visible.
+- `.planning/phases/227-measured-critical-path-improvement/227-ci-contract.json` — Current graph, identity, artifact, frozen-input, inverse, and timing-threshold manifest to extend for trigger inputs and the proof vector.
+- `.planning/phases/227-measured-critical-path-improvement/227-RESEARCH.md` — Existing implementation research, failure-propagation rules, evidence design, and anomaly standard.
+- `.planning/phases/227-measured-critical-path-improvement/227-PATTERNS.md` — Repository-native workflow, verifier, evidence, and maintainer-documentation patterns.
+
 ### CI Graph, Evidence, And Host/Browser Surfaces
 - `.github/workflows/ci.yml` — Canonical job IDs/display names, `needs` graph, release matrix policy, final annotation fan-in, and artifact upload contracts.
 - `scripts/ci/collect_ci_baseline.mjs` — Existing GitHub run/job/step collection and comparison input path.
@@ -68,6 +97,19 @@ Deliver one measured improvement to the confirmed release-gate → host-integrat
 - `examples/accrue_host/playwright.config.js` — Host browser worker, retry, trace, screenshot, and report semantics.
 - `accrue_admin/playwright.config.js` — Admin browser evidence and zero-retry conventions.
 
+### Project Judgment, Maintainer UX, And Voice
+- `prompts/MILESTONE-NEXT-STEP-ASSESSMENT.md` — Repo-truth-first, proof-honest, DX/least-surprise, cross-ecosystem judgment lens requested for the recommendation.
+- `prompts/GSD-REPO-HYGIENE.md` — Project policy that push CI and periodic/manual provider proof are verified separately and reported with exact run conclusions.
+- `brandbook/voice.md` — Current authoritative measured, exact, native, durable voice and proof-checkable claims posture; supersedes older prompt wording where they conflict.
+- `brandbook/copy.md` — Current literal next-action and precise maintainer-copy patterns.
+
+### Primary External Semantics
+- `https://docs.github.com/en/actions/how-tos/write-workflows/choose-when-workflows-run/trigger-a-workflow` — Typed `workflow_dispatch` inputs and Boolean input semantics.
+- `https://docs.github.com/en/actions/how-tos/write-workflows/choose-when-workflows-run/control-jobs-with-conditions` — Skipped-job behavior and why a green workflow cannot replace a complete proof vector.
+- `https://docs.github.com/en/actions/reference/workflows-and-actions/expressions` — `success`, `failure`, `cancelled`, and `always` status behavior.
+- `https://docs.github.com/en/actions/how-tos/manage-workflow-runs` — Workflow reruns as later attempts rather than independent observations.
+- `https://sre.google/workbook/canarying-releases/` — Bounded canary evaluation, declared criteria, and known rollback posture.
+
 </canonical_refs>
 
 <code_context>
@@ -77,18 +119,25 @@ Deliver one measured improvement to the confirmed release-gate → host-integrat
 - `scripts/ci/collect_ci_baseline.mjs`, `render_ci_baseline.mjs`, and `verify_ci_baseline.mjs` already collect, render, and validate privacy-safe GitHub timing evidence. Phase 227 should extend or reuse these contracts rather than introduce an unrelated measurement system.
 - The Phase 226 NDJSON corpus and schema already model run attempts, workflow fingerprints, job/step duration, DAG wait, queue delay, setup/cache facts, provider state, and exclusions needed for a before/after comparison.
 - Existing CI verification scripts and `scripts/ci/README.md` provide the established pattern for an executable contract verifier plus one exact maintainer command.
+- `scripts/ci/verify_ci_critical_path.mjs`, `227-ci-contract.json`, and the Phase 227 fixture corpus already enforce the candidate/inverse graph, immutable live evidence, timing predicates, and negative control. Extend this contract rather than introduce another measurement path.
+- The current Phase 227 Markdown/NDJSON pair already retains every failed run and the admissible negative control; it should evolve from `decision_pending` to explicit rollback/candidate/keep state without rewriting history.
 
 ### Established Patterns
 - Required job/check names and release-matrix labels are externally visible contracts. Advisory Sigra remains advisory; Floor, Primary, and Primary plus OpenTelemetry remain required release evidence.
 - Independent required jobs finish and retain evidence; retries, cancellation, skipped jobs, or finalizer semantics may not make a failing required proof appear repaired.
 - Browser proof remains single-worker and zero-retry with retained reports, traces, screenshots, generated evidence, and server logs according to the existing lane-specific upload conditions.
 - Durable evidence is sanitized and checked in; raw logs and forensic artifacts remain linked Actions artifacts.
+- Raw GitHub conclusion, Accrue required-proof result, provider proof state, and rollback state are separate facts. None may be inferred from another.
+- Maintainer evidence follows the current brand grammar: measured, exact, native, and durable; lead with fact, state, owner, and one next command before forensic detail.
 
 ### Integration Points
 - `.github/workflows/ci.yml`: change only the `host-integration.needs` relationship, preserve `playwright-e2e.needs: [host-integration]`, and keep `annotation-sweep` dependent on release, admin, host, Playwright, Docker, and the other required/advisory lanes.
 - Phase 227 evidence collection consumes the Phase 226 frozen baseline and three new first-attempt runs without mutating the before snapshot.
 - The new static contract verifier connects the workflow graph to an exact manifest of check, matrix/provider, and artifact identities; its command belongs in `scripts/ci/README.md` and relevant CI proof.
 - Rollback restores the original dependency relationship and reuses the same verifier and CI evidence path.
+- `.github/workflows/ci.yml`: add the typed `run_live_stripe` dispatch input without changing scheduled provider behavior or any stable job/check identity; measurement uses the explicit false value.
+- `scripts/ci/verify_ci_critical_path.mjs`: verify input topology, the complete required/advisory/provider proof vector, the final three-run budget, failure classification, and staged rollback truth.
+- `scripts/ci/README.md`: document one exact rollback/preflight/dispatch/verification sequence and explain that measurement success does not provide live-provider proof.
 
 </code_context>
 
@@ -99,6 +148,8 @@ Deliver one measured improvement to the confirmed release-gate → host-integrat
 - Keep threshold: post-change median across three successful first attempts must be at most 1,666 seconds (at least 20% faster after integer rounding).
 - The intended graph change is narrow: `host-integration` starts after `docs-contracts-shift-left`; `admin-drift-docs` continues after `release-gate`; release/admin and host/browser converge again at `annotation-sweep`.
 - Preferred evidence grammar remains: current fact, literal state, owner, one exact next action, then immutable links and forensic detail.
+- Recommended measurement launch shape: `gh workflow run ci.yml --ref <candidate-sha> -f run_live_stripe=false`; the final plan must substitute and record the exact immutable candidate ref/SHA.
+- The nine existing candidate failures are a trigger-contract failure and insufficient-evidence record, not a measured speed regression. Do not claim the one-edge change caused them without reproducible evidence.
 
 </specifics>
 
@@ -108,6 +159,7 @@ Deliver one measured improvement to the confirmed release-gate → host-integrat
 - Moving duplicated static work out of release-matrix cells requires its own measured, proof-preserving change after this one-edge optimization.
 - Consolidating host/browser provisioning may be considered in a later measured slice; Playwright browser caching remains disfavored unless new measurements contradict current official and Phase 226 evidence.
 - Further graph changes, including parallelizing Playwright independently of host integration, require separate measurement and authorization.
+- A separate performance-only workflow may be considered in a future observability phase if repeated experiments justify the maintenance and drift cost; it is not warranted for this one-edge phase.
 - Matrix collapse, branch-protection changes, required-gate demotion, cache rewrites, test deletion/retry masking, StoreKit/iPhone/Crosswake work, and Admin UI ratchet work remain out of scope.
 
 </deferred>
@@ -115,4 +167,4 @@ Deliver one measured improvement to the confirmed release-gate → host-integrat
 ---
 
 *Phase: 227-Measured Critical-Path Improvement*
-*Context gathered: 2026-08-12*
+*Context gathered: 2026-08-13*
