@@ -355,14 +355,14 @@ async function liveDisplayIdentityControls() {
   assert.ok(completeAnnotation[0].jobs.some((job) => job.name === "Annotation sweep"), "annotation sweep with every declared successful prerequisite remains eligible");
   const hostAttemptJobs = jobs.map((job) => ({ ...job, run_attempt: 1 }));
   const hostPrerequisiteCases = [
-    ["absent", (items) => items.filter((job) => job.name !== "Admin drift and docs")],
-    ["skipped", (items) => items.map((job) => job.name === "Admin drift and docs" ? { ...job, conclusion: "skipped" } : job)]
+    ["absent", (items) => items.filter((job) => job.name !== docsDisplayName)],
+    ["skipped", (items) => items.map((job) => job.name === docsDisplayName ? { ...job, conclusion: "skipped" } : job)]
   ];
   for (const [state, mutate] of hostPrerequisiteCases) {
     const incompleteHost = await liveRuns("acme/accrue", "ci.yml", 90, {
       fetchPages: annotationFetch(mutate(hostAttemptJobs)), now: () => Date.parse("2026-08-11T06:04:00Z")
     });
-    assert.ok(!incompleteHost[0].jobs.some((job) => job.name === "Host integration (required deterministic gate)"), `host integration with ${state} declared admin-drift prerequisite is excluded from timing evidence`);
+    assert.ok(!incompleteHost[0].jobs.some((job) => job.name === "Host integration (required deterministic gate)"), `host integration with ${state} declared docs prerequisite is excluded from timing evidence`);
   }
   const completeHost = await liveRuns("acme/accrue", "ci.yml", 90, {
     fetchPages: annotationFetch(hostAttemptJobs), now: () => Date.parse("2026-08-11T06:04:00Z")
