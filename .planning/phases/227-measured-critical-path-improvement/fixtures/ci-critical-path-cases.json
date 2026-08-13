@@ -7,6 +7,11 @@
   "inverse_rollback_graph": {
     "host_needs": ["admin-drift-docs", "docs-contracts-shift-left"]
   },
+  "preflight": {
+    "candidate_sha": "0123456789abcdef0123456789abcdef01234567",
+    "workflow_revision": "sha256:expected-candidate-workflow",
+    "cohort_fingerprint": "phase-227-dispatch-false-v1"
+  },
   "negative_cases": ["changed-edge", "changed-identity", "changed-artifact", "rerun", "incompatible-event", "insufficient-sample", "threshold-failure", "aggregate-failure"],
   "context": { "expectedRepository": "szTheory/accrue", "fingerprint": "phase-227-candidate" },
   "accepted_evidence": [

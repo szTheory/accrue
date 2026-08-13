@@ -102,6 +102,7 @@ export function verifyFixtures() {
   const rollback = current.replace(host, host.replace(newHostNeeds, oldHostNeeds));
   assert.equal(verifyWorkflowContract(candidate, contract).state, "candidate", "intended graph passes");
   assert.equal(verifyWorkflowContract(rollback, contract).state, "inverse_rollback", "inverse graph remains explicit");
+  assert.throws(() => verifyMeasurementPreflight(rollback, contract), /workflow dispatch input is missing/, "restored graph without the typed dispatch input fails preflight");
   assert.throws(() => verifyWorkflowContract(candidate.replace("Host integration (required deterministic gate)", "renamed"), contract), /workflow changed/);
   assert.throws(() => verifyWorkflowContract(candidate.replace("accrue-host-server-log", "changed-artifact"), contract), /workflow changed/);
   assert.throws(() => verifyWorkflowContract(candidate.replace("playwright-e2e,", ""), contract), /workflow changed/);
