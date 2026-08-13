@@ -12,6 +12,16 @@ The final authorized candidate cohort did not admit three complete first-attempt
 
 No additional candidate, rerun, replacement, or restoration sample was launched. The literal next command is recorded for the external owner; this execution did not invoke it.
 
+## Recovery preflight (2026-08-13)
+
+The recovery gate was diagnosed from the immutable provider-job log and repository configuration. The job received blank values for all three required inputs, and the repository has none of the required secret names configured:
+
+- `STRIPE_TEST_SECRET_KEY`
+- `ACCRUE_LIVE_BASIC_PRICE`
+- `ACCRUE_LIVE_PRO_PRICE`
+
+The task-scoped environment also contains none of these values. Their values were not read or printed. Because this executor cannot safely invent or obtain Stripe credentials, the authorized recovery dispatch remains unspent. Configure all three repository secrets with a Stripe test-mode key and price IDs that belong to that key, then run the unchanged literal command above once.
+
 ## Final candidate proof vectors
 
 | Run | Raw conclusion | Classification | Evidence gap / failure |
