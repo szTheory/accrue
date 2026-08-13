@@ -67,6 +67,29 @@ export function verifyWorkflowContract(workflowSource, contract) {
   return { state: jobBlock(workflowSource, "host-integration").includes(newHostNeeds) ? "candidate" : "inverse_rollback" };
 }
 
+function dispatchInput(workflowSource, contract) {
+  const input = contract.dispatch_input;
+  if (!input) fail("dispatch input contract is missing");
+  const dispatch = workflowSource.match(/^  workflow_dispatch:\n([\s\S]*?)(?=^  [A-Za-z_]+:|^\S|\z)/m)?.[0] || "";
+  if (!dispatch) fail("workflow dispatch input is missing");
+  const expected = new RegExp(`^      ${input.name}:\\n        description: .+\\n        type: ${input.type}\\n        required: ${input.required}\\n        default: ${input.default}$`, "m");
+  if (!expected.test(dispatch)) fail("workflow dispatch input is missing or has the wrong Boolean contract");
+  return input;
+}
+
+export function verifyMeasurementPreflight(workflowSource, contract) {
+  const graph = verifyWorkflowContract(workflowSource, contract);
+  if (graph.state !== "candidate") fail("candidate host edge is not active");
+  const input = dispatchInput(workflowSource, contract);
+  const liveStripe = jobBlock(workflowSource, "live-stripe");
+  const expectedCondition = "if: ${{ github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.run_live_stripe) }}";
+  if (!liveStripe.includes(expectedCondition)) fail("live-stripe must run on every schedule and only manual true dispatches");
+  if (contract.measurement_topology?.event_class !== "workflow_dispatch" || contract.measurement_topology?.run_attempt !== 1 || input.measurement_value !== false) fail("measurement topology is not the authorized attempt-1 manual false dispatch");
+  if (contract.run_budget?.final_candidate_attempts !== 3 || contract.run_budget?.allow_reruns || contract.run_budget?.allow_replacements) fail("candidate run budget is not exactly three independent first attempts");
+  if (!Array.isArray(contract.proof_vector?.required_job_identities) || contract.proof_vector.required_job_identities.length < 12 || contract.measurement_topology.provider_state !== "non_run") fail("complete proof-vector contract is missing");
+  return { state: graph.state, input: input.name, measurement_value: input.measurement_value, provider_state: contract.measurement_topology.provider_state };
+}
+
 function eligible(record, contract, context) {
   return record.repository === context.expectedRepository && record.sha && record.run_attempt === 1 &&
     ["pull_request", "push", "workflow_dispatch"].includes(record.event_class) &&
@@ -102,7 +125,11 @@ export function verifyFixtures() {
   const rollback = current.replace(host, host.replace(newHostNeeds, oldHostNeeds));
   assert.equal(verifyWorkflowContract(candidate, contract).state, "candidate", "intended graph passes");
   assert.equal(verifyWorkflowContract(rollback, contract).state, "inverse_rollback", "inverse graph remains explicit");
-  assert.throws(() => verifyMeasurementPreflight(rollback, contract), /workflow dispatch input is missing/, "restored graph without the typed dispatch input fails preflight");
+  assert.throws(() => verifyMeasurementPreflight(rollback, contract), /candidate host edge is not active/, "restored graph cannot admit a candidate");
+  assert.deepEqual(verifyMeasurementPreflight(candidate, contract), { state: "candidate", input: "run_live_stripe", measurement_value: false, provider_state: "non_run" });
+  assert.throws(() => verifyMeasurementPreflight(candidate.replace("default: true", "default: false"), contract), /workflow changed|wrong Boolean contract/);
+  assert.throws(() => verifyMeasurementPreflight(candidate.replace("required: true", "required: false"), contract), /workflow changed|wrong Boolean contract/);
+  assert.throws(() => verifyMeasurementPreflight(candidate.replace("inputs.run_live_stripe", "true"), contract), /workflow changed|manual true dispatches/);
   assert.throws(() => verifyWorkflowContract(candidate.replace("Host integration (required deterministic gate)", "renamed"), contract), /workflow changed/);
   assert.throws(() => verifyWorkflowContract(candidate.replace("accrue-host-server-log", "changed-artifact"), contract), /workflow changed/);
   assert.throws(() => verifyWorkflowContract(candidate.replace("playwright-e2e,", ""), contract), /workflow changed/);
@@ -216,6 +243,10 @@ if (process.argv.includes("--fixtures")) verifyFixtures();
 const workflow = option("--workflow");
 const contractFile = option("--contract") || path.join(phase, "227-ci-contract.json");
 if (workflow) verifyWorkflowContract(fs.readFileSync(workflow, "utf8"), readJson(contractFile));
+if (process.argv.includes("--require-preflight")) {
+  if (!workflow) fail("--require-preflight needs --workflow");
+  verifyMeasurementPreflight(fs.readFileSync(workflow, "utf8"), readJson(contractFile));
+}
 if (process.argv.includes("--require-kept")) {
   const evidence = option("--evidence");
   if (!evidence) fail("--require-kept needs --evidence");

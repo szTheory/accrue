@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "workflow_sha256": "cd9fe4a1ec7acad5e96fe75519107d498138ee19b18ef76f4fd5ceaae9eea077",
+  "workflow_sha256": "81ae6c70d0bc438fd1f9af836b1b841b717bef44b2bcd582e92cd3c708626530",
   "jobs": {
     "host-integration": { "name": "Host integration (required deterministic gate)", "needs": ["docs-contracts-shift-left"] },
     "playwright-e2e": { "name": "Playwright E2E shard ${{ matrix.shard }}/${{ strategy.job-total }}", "needs": ["host-integration"] },
@@ -14,5 +14,16 @@
     "226-CI-BASELINE.ndjson": "768e67bfd957e2aae064706fc7a72c7b6b7b623b9d8daff3b99347cc171f5531",
     "schema-v1.json": "6d1933829a7eb9246a5aec078ce27a2bd817ab7b59a6ec57253bd314cccf9688"
   },
-  "thresholds": { "keep_median_seconds": 1666, "maximum_observation_seconds": 2602 }
+  "thresholds": { "keep_median_seconds": 1666, "maximum_observation_seconds": 2602 },
+  "dispatch_input": { "name": "run_live_stripe", "type": "boolean", "required": true, "default": true, "measurement_value": false },
+  "measurement_topology": { "event_class": "workflow_dispatch", "run_attempt": 1, "candidate_fingerprint": "phase-227-dispatch-false-v1", "workflow_revision_prefix": "sha256:", "provider_state": "non_run" },
+  "proof_vector": {
+    "required_job_identities": ["release-gate", "docs-and-bash-contracts-shift-left", "admin-drift-and-docs", "admin-group-contracts-phase-190", "admin-hardening-guardrails-phase-192", "admin-phase-200-deterministic-guardrails", "host-integration", "playwright-e2e-shard-1-3", "playwright-e2e-shard-2-3", "playwright-e2e-shard-3-3", "host-docker-boot-smoke", "annotation-sweep"],
+    "advisory_outcomes": { "sigra": "advisory", "parked_ratchet": "advisory" },
+    "provider_proof": "separately-linked latest proved provider proof",
+    "expected_artifacts": ["accrue-host-ci-setup-facts", "accrue-host-phase15-screenshots"]
+  },
+  "run_budget": { "final_candidate_attempts": 3, "allow_reruns": false, "allow_replacements": false },
+  "failure_classes": ["candidate_regression", "deterministic_required_lane_failure", "external_or_runner_blocked", "inconclusive"],
+  "rollback_states": ["rollback_required", "rollback_applied", "rollback_verified", "rollback_applied_unverified"]
 }

@@ -20,7 +20,13 @@ on:
     branches: [main]
   pull_request:
     branches: [main]
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      run_live_stripe:
+        description: Run the mandatory Stripe test-mode parity proof for this manual dispatch.
+        type: boolean
+        required: true
+        default: true
   schedule:
     # Daily 06:00 UTC — runs the mandatory periodic live-stripe job only,
     # not the default test matrix. See the `live-stripe` job below and
@@ -1258,7 +1264,7 @@ jobs:
     # name reflects Stripe *test mode* keys (`STRIPE_TEST_SECRET_KEY`), not live mode.
     name: Stripe test-mode parity (mandatory periodic)
     runs-on: ubuntu-24.04
-    if: github.event_name == 'workflow_dispatch' || github.event_name == 'schedule'
+    if: ${{ github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.run_live_stripe) }}
 
     services:
       postgres:

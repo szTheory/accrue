@@ -22,6 +22,33 @@ bash scripts/ci/verify_phase225_required_lane_evidence.sh
 
 Provider triage is literal: `proved` means the selected suite executed, selected tests, passed, and wrote its manifest. `misconfigured` means configuration, fixtures, or selection was absent; `failed` means selected assertions failed; `blocked` means the runner or upstream could not complete; `skipped` is an intentional bypass with a reason; `non_run` means a PR or push has no provider proof for that SHA. Start a local repair with `cd accrue && mix test.live`. Setup codes and their owners are listed in the [host setup matrix](../../examples/accrue_host/README.md#phase-226-setup-ownership).
 
+## Phase 227 bounded critical-path measurement
+
+Phase 227 has one authorized candidate graph: `host-integration` needs only
+`docs-contracts-shift-left`. Its exact inverse restores
+`needs: [admin-drift-docs, docs-contracts-shift-left]`. Before a measurement,
+prove the restored graph locally, then restore only that candidate edge and run:
+
+```bash
+node scripts/ci/verify_ci_critical_path.mjs --fixtures --require-preflight \
+  --workflow .github/workflows/ci.yml \
+  --contract .planning/phases/227-measured-critical-path-improvement/227-ci-contract.json
+```
+
+The CI workflow's required Boolean `run_live_stripe` input defaults to `true`.
+Only the three recorded candidate dispatches use `false`; that value makes the
+provider lane `non_run`, not provider proof. Dispatch only the immutable
+candidate SHA recorded in the Phase 227 evidence:
+
+```bash
+gh workflow run ci.yml --repo szTheory/accrue --ref CANDIDATE_SHA -f run_live_stripe=false
+```
+
+Do not use a rerun, a replacement cohort, a pull request, or a mutable ref as a
+timing sample. If any predicate fails, apply the exact inverse, push its
+immutable restored SHA, and use the recorded terminal command with
+`run_live_stripe=true` for the one permitted restoration proof.
+
 This directory hosts merge-adjacent bash gates and host-app checks. Use it as the first stop when CI fails on documentation or VERIFY-01 contracts.
 
 ### Triage: Phase 225 required-lane incidents
