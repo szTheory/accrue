@@ -31,8 +31,8 @@ created: 2026-08-12
 
 - **After every task commit:** Run `node scripts/ci/verify_ci_critical_path.mjs --fixtures`
 - **After every plan wave:** Run the full suite command above
-- **Before `$gsd-verify-work`:** Full suite, three qualifying first-attempt post-change runs, controlled negative control, and rollback-result record must be green
-- **Max feedback latency:** 60 seconds for local verification; live Actions evidence is an explicit recorded checkpoint
+- **Before `$gsd-verify-work`:** Full suite, three qualifying first-attempt post-change runs, controlled negative control, `--verify-live-actions`, and `--require-kept` must be green; a verified rollback intentionally blocks this gate and escalates to a new follow-up phase
+- **Max feedback latency:** 60 seconds for local verification; live Actions latency is bounded by four runs and their repository-bound automated inspection
 
 ---
 
@@ -42,8 +42,10 @@ created: 2026-08-12
 |---------|------|------|-------------|------------|-----------------|-----------|-------------------|-------------|--------|
 | 227-01-01 | 01 | 1 | PATH-01, SAFE-01 | T-227-01 | Fail closed on graph and stable external-contract drift | static + fixture | `node scripts/ci/verify_ci_critical_path.mjs --fixtures` | ❌ W0 | ⬜ pending |
 | 227-01-02 | 01 | 1 | PATH-02, SAFE-02 | T-227-02 | Preserve independent lanes, aggregate failure, artifacts, and inverse-patch rollback | static + negative control | `node scripts/ci/verify_ci_critical_path.mjs --fixtures` | ❌ W0 | ⬜ pending |
-| 227-02-01 | 02 | 2 | PATH-01, PATH-02 | T-227-03 | Accept only comparable first-attempt evidence meeting the locked timing threshold | evidence contract | `node scripts/ci/verify_ci_critical_path.mjs --evidence .planning/phases/227-measured-critical-path-improvement/227-CI-CRITICAL-PATH.ndjson` | ❌ W0 | ⬜ pending |
-| 227-03-01 | 03 | 3 | SAFE-01, SAFE-02 | T-227-01 / T-227-02 | Retain or roll back from recorded proof without weakening checks or hiding failures | full regression + recorded live evidence | Full suite command plus immutable Actions links recorded in the evidence pack | ❌ W0 | ⬜ pending |
+| 227-02-01 | 02 | 2 | SAFE-01, SAFE-02 | T-227-05 / T-227-07 | Prove the temporary-branch negative control through repository-bound run/job/annotation/artifact facts | live contract | `node scripts/ci/verify_ci_critical_path.mjs --verify-live-actions --require-negative-control --evidence .planning/phases/227-measured-critical-path-improvement/227-CI-CRITICAL-PATH.ndjson --expected-repository szTheory/accrue` | ❌ W0 | ⬜ pending |
+| 227-02-02 | 02 | 2 | PATH-01, PATH-02 | T-227-06 / T-227-08 | Accept only comparable first-attempt evidence meeting the locked timing and anomaly-corroboration rules | live evidence contract | `node scripts/ci/verify_ci_critical_path.mjs --verify-live-actions --evidence .planning/phases/227-measured-critical-path-improvement/227-CI-CRITICAL-PATH.ndjson --expected-repository szTheory/accrue` | ❌ W0 | ⬜ pending |
+| 227-03-01 | 03 | 3 | PATH-02, SAFE-01, SAFE-02 | T-227-10 / T-227-11 | Keep only on full proof; otherwise verify exact restoration and intentionally stop incomplete | decision + live restoration contract | `node scripts/ci/verify_ci_critical_path.mjs --verify-live-actions --require-kept --evidence .planning/phases/227-measured-critical-path-improvement/227-CI-CRITICAL-PATH.ndjson --expected-repository szTheory/accrue` | ❌ W0 | ⬜ pending |
+| 227-03-02 | 03 | 3 | PATH-01, PATH-02, SAFE-01, SAFE-02 | T-227-12 / T-227-13 | Seal only a kept result with passed verification and zero unverified behavior | full regression + generated automated UAT | Full suite plus deterministic `227-VERIFICATION.md`, automated UAT, and SUMMARY assertions | ❌ W0 | ⬜ pending |
 
 *Status: ⬜ pending · ✅ green · ❌ red · ⚠️ flaky*
 
@@ -59,13 +61,13 @@ created: 2026-08-12
 
 ---
 
-## Manual-Only Verifications
+## Automated Live Verifications
 
-| Behavior | Requirement | Why Manual | Test Instructions |
-|----------|-------------|------------|-------------------|
-| Three successful first-attempt same-event-class runs meet the keep gate | PATH-01, PATH-02 | Requires GitHub Actions execution authority and immutable run links | Trigger or identify three independent compatible runs; record every observation; verify median ≤1,666s and no observation >2,602s without a substantiated external anomaly |
-| Controlled failure preserves host/browser completion and artifacts while `annotation-sweep` fails | SAFE-01, SAFE-02 | Requires a real Actions failure-propagation observation | Run the documented controlled failure; record job conclusions and artifact links; execute the local verifier against the sanitized record |
-| Exact inverse patch restores the prior graph and evidence contract | SAFE-02 | Requires applying and proving the rollback path without leaving a feature switch | Apply the inverse dependency patch, rerun static/negative controls, and record a fresh successful first-attempt restoration run |
+| Behavior | Requirement | Executable Assertion |
+|----------|-------------|----------------------|
+| Three successful first-attempt same-event-class runs meet the keep gate | PATH-01, PATH-02 | `--verify-live-actions --require-kept` fetches and compares repository, SHA, attempt, revision, jobs, artifacts, durations, anomaly corroboration, and immutable URLs; ordinary variance or an unexplained slow run remains included. |
+| Controlled failure preserves host/browser completion and artifacts while `annotation-sweep` fails | SAFE-01, SAFE-02 | `--verify-live-actions --require-negative-control` asserts the temporary-branch annotation marker, independent job conclusions, condition-driven artifact inventory, candidate-branch cleanliness, and removed temporary ref. |
+| Exact inverse patch restores the prior graph and evidence contract | SAFE-02 | On rejection, live verification asserts the inverse graph plus fresh first-attempt restoration run before `--require-kept` intentionally exits nonzero and blocks phase closure. |
 
 ---
 

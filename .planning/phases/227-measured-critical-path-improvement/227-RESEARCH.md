@@ -277,20 +277,18 @@ The report must show the raw values, range, median, fingerprints, links, exclusi
 
 | # | Claim | Section | Risk if Wrong |
 |---|-------|---------|---------------|
-| A1 | An isolated `workflow_dispatch` input/fixture can safely create the required negative-control state without affecting push/PR behavior. | Open Questions | The selected seam may require a temporary branch or a different controlled-run design. |
-| A2 | A timestamp-aligned GitHub status incident plus the immutable run link is sufficient external substantiation for a timing outlier. | Open Questions | Maintainers may require a stricter anomaly policy before excluding an observation. |
+| A1 | The controlled failure uses an isolated temporary evidence branch from the exact candidate commit, with one transient success-returning annotation-emission step in an already-successful independent required lane; the candidate branch is never mutated and the temporary branch is removed after automated evidence verification. | Open Questions (RESOLVED) | The seam matches the repository's existing annotation-sweep behavior and Plan 02's bounded branch procedure. |
+| A2 | A timing outlier is excludable only when its observation is tied to an externally corroborated GitHub incident/status event or explicit runner/infrastructure failure evidence. | Open Questions (RESOLVED) | Ordinary runner variance and an unexplained slow run remain eligible observations and cannot be excluded. |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **Controlled failure seam selection**
    - What we know: The negative control must prove `annotation-sweep` fails while independent host/browser work completes and keeps artifacts. [VERIFIED: `227-CONTEXT.md`]
-   - What's unclear: Whether the project will use an intentionally failing workflow-dispatch fixture branch or an Actions-safe workflow input to create that state.
-   - Recommendation: Prefer an isolated `workflow_dispatch` fixture input that causes a dedicated, existing required proof to fail after start without altering production push/PR behavior; record the immutable run link and restore/verify immediately. [ASSUMED]
+   - Resolution: Use an isolated temporary evidence branch from the exact candidate commit. Add one transient step in an already-successful independent required lane that emits the uniquely named Phase 227 test annotation while returning success; dispatch that branch, verify the immutable run automatically, then remove the branch. The candidate branch and normal push/pull-request behavior never contain the control mutation. [RESOLVED: Plan 02 temporary-branch procedure]
 
 2. **External timing anomaly standard**
    - What we know: Runner variance alone cannot justify exclusion. [VERIFIED: `227-CONTEXT.md`]
-   - What's unclear: Which external GitHub outage/status evidence will be available if needed.
-   - Recommendation: Allow exclusion only with a timestamp-aligned official GitHub status incident or a documented platform-wide outage plus the run URL; retain the observation and label it excluded rather than delete it. [ASSUMED]
+   - Resolution: Allow exclusion only when the observation is tied to an externally corroborated GitHub incident/status event or explicit runner/infrastructure failure evidence for that run. Retain the raw observation and its corroboration in the durable record. Ordinary runner variance and an unexplained slow run are not excludable. [RESOLVED: D-06 discretionary anomaly rule]
 
 ## Environment Availability
 
@@ -375,7 +373,7 @@ The report must show the raw values, range, median, fingerprints, links, exclusi
 
 ### Tertiary (LOW confidence)
 
-- None beyond the two explicit implementation-discretion assumptions in the Open Questions section.
+- None; the two implementation-discretion questions are resolved above.
 
 ## Metadata
 
