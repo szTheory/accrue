@@ -32,7 +32,8 @@ defmodule Accrue.Test.LiveProofFormatter do
     {:noreply, increment(state, test_state)}
   end
 
-  def handle_cast({:suite_finished, _times}, %{path: path} = state) when is_binary(path) and path != "" do
+  def handle_cast({:suite_finished, _times}, %{path: path} = state)
+      when is_binary(path) and path != "" do
     write_manifest!(path, manifest(state, state.now.()))
     {:noreply, state}
   end
@@ -40,10 +41,15 @@ defmodule Accrue.Test.LiveProofFormatter do
   def handle_cast({:suite_finished, _times}, state), do: {:noreply, state}
   def handle_cast(_event, state), do: {:noreply, state}
 
-  defp increment(state, nil), do: %{state | selected_count: state.selected_count + 1, passed_count: state.passed_count + 1}
+  defp increment(state, nil),
+    do: %{state | selected_count: state.selected_count + 1, passed_count: state.passed_count + 1}
 
   defp increment(state, {:skipped, _reason}),
-    do: %{state | selected_count: state.selected_count + 1, skipped_count: state.skipped_count + 1}
+    do: %{
+      state
+      | selected_count: state.selected_count + 1,
+        skipped_count: state.skipped_count + 1
+    }
 
   defp increment(state, {:excluded, _reason}), do: state
 
@@ -62,7 +68,8 @@ defmodule Accrue.Test.LiveProofFormatter do
     }
   end
 
-  defp iso8601_milliseconds(datetime), do: datetime |> DateTime.truncate(:millisecond) |> DateTime.to_iso8601()
+  defp iso8601_milliseconds(datetime),
+    do: datetime |> DateTime.truncate(:millisecond) |> DateTime.to_iso8601()
 
   defp write_manifest!(path, manifest) do
     directory = Path.dirname(path)

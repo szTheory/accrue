@@ -9,8 +9,16 @@ defmodule Accrue.Test.LiveProofFormatterTest do
 
     {:ok, state} = LiveProofFormatter.init(path: path, now: fn -> ~U[2026-08-11 06:00:00Z] end)
     {:noreply, state} = LiveProofFormatter.handle_cast({:test_finished, %{state: nil}}, state)
-    {:noreply, state} = LiveProofFormatter.handle_cast({:test_finished, %{state: {:skipped, "no key"}}}, state)
-    {:noreply, state} = LiveProofFormatter.handle_cast({:test_finished, %{state: {:failed, "sk_test_secret provider payload"}}}, state)
+
+    {:noreply, state} =
+      LiveProofFormatter.handle_cast({:test_finished, %{state: {:skipped, "no key"}}}, state)
+
+    {:noreply, state} =
+      LiveProofFormatter.handle_cast(
+        {:test_finished, %{state: {:failed, "sk_test_secret provider payload"}}},
+        state
+      )
+
     {:noreply, _state} = LiveProofFormatter.handle_cast({:suite_finished, %{run: 1}}, state)
 
     manifest = path |> File.read!() |> Jason.decode!()
@@ -32,7 +40,12 @@ defmodule Accrue.Test.LiveProofFormatterTest do
   test "ignores ExUnit excluded events without changing aggregate counters" do
     {:ok, state} = LiveProofFormatter.init(now: fn -> ~U[2026-08-11 06:00:00Z] end)
     {:noreply, state} = LiveProofFormatter.handle_cast({:test_finished, %{state: nil}}, state)
-    {:noreply, state} = LiveProofFormatter.handle_cast({:test_finished, %{state: {:excluded, "untagged fixture"}}}, state)
+
+    {:noreply, state} =
+      LiveProofFormatter.handle_cast(
+        {:test_finished, %{state: {:excluded, "untagged fixture"}}},
+        state
+      )
 
     assert Map.take(state, [:selected_count, :passed_count, :skipped_count, :failed_count]) == %{
              selected_count: 1,
@@ -57,9 +70,18 @@ defmodule Accrue.Test.LiveProofFormatterTest do
 
   test "real tagged-only Mix selection writes proved aggregate evidence" do
     root = Path.expand("../../..", __DIR__)
-    fixture = Path.join(__DIR__, "live_proof_selection_#{System.unique_integer([:positive])}_test.exs")
-    manifest = Path.join(System.tmp_dir!(), "live-proof-selection-#{System.unique_integer([:positive])}.json")
-    record = Path.join(System.tmp_dir!(), "live-proof-record-#{System.unique_integer([:positive])}.json")
+
+    fixture =
+      Path.join(__DIR__, "live_proof_selection_#{System.unique_integer([:positive])}_test.exs")
+
+    manifest =
+      Path.join(
+        System.tmp_dir!(),
+        "live-proof-selection-#{System.unique_integer([:positive])}.json"
+      )
+
+    record =
+      Path.join(System.tmp_dir!(), "live-proof-record-#{System.unique_integer([:positive])}.json")
 
     on_exit(fn ->
       File.rm(fixture)
@@ -101,24 +123,28 @@ defmodule Accrue.Test.LiveProofFormatterTest do
            } = manifest |> File.read!() |> Jason.decode!()
 
     {_finalize_output, 0} =
-      System.cmd("node", [
-        Path.join(root, "scripts/ci/provider_proof.mjs"),
-        "--finalize",
-        "--trigger",
-        "workflow_dispatch",
-        "--sha",
-        "selection-proof-sha",
-        "--policy",
-        "required",
-        "--raw-conclusion",
-        "success",
-        "--configured",
-        "true",
-        "--manifest",
-        manifest,
-        "--out",
-        record
-      ], stderr_to_stdout: true)
+      System.cmd(
+        "node",
+        [
+          Path.join(root, "scripts/ci/provider_proof.mjs"),
+          "--finalize",
+          "--trigger",
+          "workflow_dispatch",
+          "--sha",
+          "selection-proof-sha",
+          "--policy",
+          "required",
+          "--raw-conclusion",
+          "success",
+          "--configured",
+          "true",
+          "--manifest",
+          manifest,
+          "--out",
+          record
+        ],
+        stderr_to_stdout: true
+      )
 
     assert %{"proof_state" => "proved"} = record |> File.read!() |> Jason.decode!()
     refute output =~ "selected fixture"
