@@ -94,8 +94,9 @@ export function verifyFixtures() {
   const current = fs.readFileSync(path.join(root, ".github/workflows/ci.yml"), "utf8");
   const host = jobBlock(current, "host-integration");
   const candidate = current.replace(host, host.replace(oldHostNeeds, newHostNeeds));
+  const rollback = current.replace(host, host.replace(newHostNeeds, oldHostNeeds));
   assert.equal(verifyWorkflowContract(candidate, contract).state, "candidate", "intended graph passes");
-  assert.equal(verifyWorkflowContract(current, contract).state, "inverse_rollback", "inverse graph remains explicit");
+  assert.equal(verifyWorkflowContract(rollback, contract).state, "inverse_rollback", "inverse graph remains explicit");
   assert.throws(() => verifyWorkflowContract(candidate.replace("Host integration (required deterministic gate)", "renamed"), contract), /workflow changed/);
   assert.throws(() => verifyWorkflowContract(candidate.replace("accrue-host-server-log", "changed-artifact"), contract), /workflow changed/);
   assert.throws(() => verifyWorkflowContract(candidate.replace("playwright-e2e,", ""), contract), /workflow changed/);
