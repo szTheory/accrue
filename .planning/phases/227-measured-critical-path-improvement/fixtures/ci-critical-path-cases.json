@@ -1,0 +1,11 @@
+{
+  "intended_graph": {
+    "host_needs": ["docs-contracts-shift-left"],
+    "playwright_needs": ["host-integration"],
+    "annotation_sweep_contains": ["release-gate", "admin-drift-docs", "host-integration", "playwright-e2e"]
+  },
+  "inverse_rollback_graph": {
+    "host_needs": ["admin-drift-docs", "docs-contracts-shift-left"]
+  },
+  "negative_cases": ["changed-edge", "changed-identity", "changed-artifact", "rerun", "incompatible-event", "insufficient-sample", "threshold-failure", "aggregate-failure"]
+}
