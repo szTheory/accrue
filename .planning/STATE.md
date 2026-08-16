@@ -6,9 +6,9 @@ current_phase: 227
 current_phase_name: measured-critical-path-improvement
 status: blocked
 stopped_at: "Phase 227 blocked: live-Stripe repository secrets are absent; restoration dispatch remains unspent"
-last_updated: "2026-08-13T16:27:48.338Z"
-last_activity: 2026-08-13
-last_activity_desc: terminal restoration proof recorded
+last_updated: "2026-08-16T15:52:20.583Z"
+last_activity: 2026-08-16
+last_activity_desc: "Completed quick task 260816-ghm: Chimeway Phase 98 opaque-recipient compatibility"
 progress:
   total_phases: 3
   completed_phases: 3
@@ -32,7 +32,7 @@ See: `.planning/PROJECT.md` (updated 2026-08-05 after shipping v1.59)
 Phase: 227 (measured-critical-path-improvement) — BLOCKED
 Plan: 3 of 3
 Status: Blocked at rollback_applied_unverified; PATH-02 is unmet
-Last activity: 2026-08-13 — terminal restoration proof recorded
+Last activity: 2026-08-16 — Completed quick task 260816-ghm: Chimeway Phase 98 opaque-recipient compatibility
 
 Progress: [█████████░] 91%
 
@@ -975,6 +975,7 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 
 | # | Description | Date | Commit | Status | Directory |
 |---|-------------|------|--------|--------|-----------|
+| 260816-ghm | Make Accrue's Chimeway integration emit a stable opaque recipient_ref and use that same ref for invoice.paid cancellation signals; add focused tests and prepare release artifacts for Chimeway Phase 98 compatibility. | 2026-08-16 | 6484dee0 |  | [260816-ghm-make-accrue-s-chimeway-integration-emit-](./quick/260816-ghm-make-accrue-s-chimeway-integration-emit-/) |
 | 260731-n4f | Automate Phase 214.2 integration and E2E verification with zero human UAT | 2026-07-31 | cda60887, d2ee7a42 | Verified | [260731-n4f-automate-phase-214-2-integration-and-e2e](./quick/260731-n4f-automate-phase-214-2-integration-and-e2e/) |
 | 260618-3pu | Component-lab family-label map (replace `String.upcase(family)` with UI-SPEC labels) | 2026-06-18 | b5cf3527 |  | [260618-3pu-component-lab-family-label-map](./quick/260618-3pu-component-lab-family-label-map/) |
 | 260620-gmv | Green main CI — format test file + harden CMP-05 xargs guards (GNU-vs-BSD portability) | 2026-06-20 | 0ce75413 |  | [260620-gmv-fix-ci-format-xargs](./quick/260620-gmv-fix-ci-format-xargs/) |
