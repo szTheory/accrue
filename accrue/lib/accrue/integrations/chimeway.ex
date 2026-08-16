@@ -61,8 +61,9 @@ if Code.ensure_loaded?(Chimeway) do
     with explainable progression.
 
     Outcome Signal termination: `cancel_campaign/3` emits `Chimeway.Signal.track/4`
-    with `event_name: "invoice.paid"` and `actor_id` equal to the customer email
-    (`recipient_identity` from `DunningNotifier.recipients/1`). Chimeway routes
+    with `event_name: "invoice.paid"` and `actor_id` equal to the stable, opaque
+    customer reference from `DunningNotifier.recipients/1`. Customer email is
+    transient delivery context only. Chimeway routes
     that `invoice.paid` signal to runs waiting on the wait step via
     `Workflows.route_signal/1` — no host callback glue.
 
@@ -74,6 +75,10 @@ if Code.ensure_loaded?(Chimeway) do
     @compile {:no_warn_undefined, [Chimeway, Chimeway.Signal]}
 
     alias Accrue.Billing.{Customer, Subscription}
+
+    @doc false
+    def customer_recipient_ref(%Customer{id: customer_id}),
+      do: "cw_accrue_customer_" <> customer_id
 
     @impl Accrue.Dunning.Engine
     def start_campaign(%Subscription{} = sub, %DateTime{} = anchor, _opts) do
@@ -99,12 +104,12 @@ if Code.ensure_loaded?(Chimeway) do
     def cancel_campaign(%Subscription{} = sub, _iso_anchor, _opts) do
       customer = Accrue.Repo.repo().get!(Customer, sub.customer_id)
 
-      # D-09: actor_id MUST match DunningNotifier.recipients/1 recipient_identity
-      # (customer email); event_name MUST be "invoice.paid" so route_signal/1 can
-      # match runs waiting on the wait_until step.
+      # D-09: actor_id MUST match DunningNotifier.recipients/1 recipient_ref;
+      # event_name MUST be "invoice.paid" so route_signal/1 can match runs waiting
+      # on the wait_until step. Email never becomes durable Chimeway identity.
       case Chimeway.Signal.track(
              sub.customer_id,
-             customer.email,
+             customer_recipient_ref(customer),
              "invoice.paid",
              %{subscription_id: sub.id}
            ) do
@@ -118,7 +123,8 @@ if Code.ensure_loaded?(Chimeway) do
       Bundled `Chimeway.Notifier` implementation for Accrue dunning notifications.
 
       Resolves Accrue domain models (Subscription → Customer) to produce
-      email-channel recipient maps. Implements required callbacks plus
+      email-channel recipient maps with a stable opaque recipient reference and
+      transient `user:<email>` delivery identity. Implements required callbacks plus
       `channels/2` (email-only), `orchestration/2` (`:immediate`), `workflow/2`
       (48h escalation per SEED-003), and `rendering/2` (email render keys).
       """
@@ -142,7 +148,15 @@ if Code.ensure_loaded?(Chimeway) do
 
           sub ->
             customer = Accrue.Repo.repo().get!(Accrue.Billing.Customer, sub.customer_id)
-            {:ok, [%{recipient_identity: customer.email, recipient_type: "email"}]}
+
+            {:ok,
+             [
+               %{
+                 recipient_ref: Accrue.Integrations.Chimeway.customer_recipient_ref(customer),
+                 recipient_identity: "user:" <> customer.email,
+                 recipient_type: "email"
+               }
+             ]}
         end
       end
 
