@@ -137,8 +137,9 @@ Accrue ships an **optional, off-by-default** adapter (`Accrue.Integrations.Chime
 implements the `Accrue.Dunning.Engine` behaviour and routes campaign lifecycle events through
 Chimeway's `trigger/3` + `Notifier` surface. This section is the opt-in upgrade guide.
 
-> **v1.40 scope:** the adapter is email-only with `:immediate` orchestration. Multi-channel
-> and multi-step workflow orchestration are deferred to a future v1.x minor.
+> The adapter is email-only, with a two-step workflow: the initial email waits 48 hours
+> before the escalation email. A recovered invoice terminates that waiting workflow through
+> an `invoice.paid` outcome signal.
 
 ### Prerequisites
 
@@ -183,13 +184,19 @@ built-in engine.
 
 - **Orchestration of dunning notifications** delegates to Chimeway. When a campaign starts,
   Accrue calls `Chimeway.trigger/3` with the bundled `Accrue.Integrations.Chimeway.DunningNotifier`
-  as the notifier module. The `DunningNotifier` implements `Chimeway.Notifier` with
-  `channels/2` returning `[:email]` and `orchestration/2` returning `:immediate` — so
-  Chimeway delivers the dunning email immediately, with no WorkflowRun created.
-- **Cancel-on-recovery** emits a `"payment_recovered"` signal via `Chimeway.Signal.track/4`
-  when the subscription returns to `:active`. With `:immediate` orchestration this signal
-  routes to zero WorkflowRuns (a safe no-op); Accrue's anchor-clear prevents any future
-  `start_campaign` call from the recovered subscription.
+  as the notifier module. The notifier creates a durable two-step WorkflowRun (initial email
+  → 48-hour wait → escalation email) while `orchestration/2` remains `:immediate` for
+  delivery planning.
+- **Privacy-safe recipient correlation** uses an opaque, stable `recipient_ref` derived from
+  the Accrue customer UUID (`cw_accrue_customer_<uuid>`). Chimeway persists and routes by that
+  reference only. The customer email is passed solely as transient `user:<email>` delivery
+  context so it can be used in memory to address the email; it is never the durable workflow
+  identity.
+- **Cancel-on-recovery** emits an `"invoice.paid"` signal via `Chimeway.Signal.track/4` when
+  the subscription returns to `:active`. Its actor is the same opaque `recipient_ref`, allowing
+  Chimeway to route the outcome to the waiting WorkflowRun without correlating by email.
+  Accrue's anchor-clear still prevents any future `start_campaign` call from the recovered
+  subscription.
 - The adapter is **conditionally compiled**: when `:chimeway` is not present in the host's
   deps, `Accrue.Integrations.Chimeway` is never defined. There is no runtime overhead in the
   default (Oban-only) build.
