@@ -39,6 +39,8 @@ config :opentelemetry,
 # Chimeway cross-repo integration tests (Phase 58) bootstrap Chimeway.Repo in
 # test/support/chimeway_test_support.ex, but the repo must have valid config
 # before :chimeway auto-starts during test compilation.
+config :chimeway, prefix: "chimeway"
+
 config :chimeway, Chimeway.Repo,
   database: "chimeway_test#{System.get_env("MIX_TEST_PARTITION")}",
   pool: Ecto.Adapters.SQL.Sandbox,

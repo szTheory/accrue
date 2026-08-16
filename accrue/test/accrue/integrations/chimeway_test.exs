@@ -121,16 +121,44 @@ defmodule Accrue.Integrations.ChimewayTest do
     end
 
     @tag :requires_chimeway
-    test "emits invoice.paid signal with customer email actor_id", %{
+    test "uses one opaque recipient reference for trigger and invoice.paid recovery", %{
       customer: customer,
       subscription: subscription
     } do
-      iso_anchor = DateTime.utc_now() |> DateTime.to_iso8601()
+      anchor = DateTime.utc_now()
+      iso_anchor = DateTime.to_iso8601(anchor)
+      atom_params = %{subscription_id: subscription.id}
+      string_params = %{"subscription_id" => subscription.id}
+
+      assert {:ok, [atom_recipient]} =
+               Accrue.Integrations.Chimeway.DunningNotifier.recipients(atom_params)
+
+      assert {:ok, [string_recipient]} =
+               Accrue.Integrations.Chimeway.DunningNotifier.recipients(string_params)
+
+      assert atom_recipient.recipient_ref == string_recipient.recipient_ref
+      assert String.starts_with?(atom_recipient.recipient_ref, "cw_accrue_customer_")
+      refute String.contains?(atom_recipient.recipient_ref, customer.email)
+      assert atom_recipient.recipient_identity == "user:" <> customer.email
+
+      assert :ok =
+               Accrue.Integrations.Chimeway.start_campaign(
+                 subscription,
+                 anchor,
+                 []
+               )
 
       assert :ok =
                Accrue.Integrations.Chimeway.cancel_campaign(subscription, iso_anchor, [])
 
       import Ecto.Query
+
+      [notification] =
+        Chimeway.Repo.all(
+          from(n in Chimeway.Notifications.Notification,
+            where: n.tenant_id == ^subscription.customer_id
+          )
+        )
 
       signals =
         Chimeway.Repo.all(
@@ -142,8 +170,12 @@ defmodule Accrue.Integrations.ChimewayTest do
       assert length(signals) == 1
 
       [signal] = signals
+      assert notification.tenant_id == subscription.customer_id
+      assert notification.recipient_identity == atom_recipient.recipient_ref
+      assert notification.recipient_identity == signal.actor_id
+      refute String.contains?(notification.recipient_identity, customer.email)
       assert signal.tenant_id == subscription.customer_id
-      assert signal.actor_id == customer.email
+      assert signal.actor_id == atom_recipient.recipient_ref
       assert signal.event_name == "invoice.paid"
 
       assert signal.payload[:subscription_id] == subscription.id or
