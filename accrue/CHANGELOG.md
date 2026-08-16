@@ -10,6 +10,10 @@
 * Share one webhook/pull reconciliation path with the shared reconcile/isolation proof, keeping Stripe-native cache writes observational and auditable.
 * Record that `fetch_entitled/2` remains closed: Accrue will not add a Stripe-backed grant predicate because local billing state stays authoritative for access decisions.
 
+### Bug Fixes
+
+* Restore Chimeway Phase 98 privacy-safe recipient compatibility: dunning notifications persist a stable opaque customer reference, while `invoice.paid` termination continues to use that same reference as its signal actor.
+
 ## [1.4.0](https://github.com/szTheory/accrue/compare/accrue-v1.3.0...accrue-v1.4.0) (2026-06-01)
 
 
