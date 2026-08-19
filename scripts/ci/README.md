@@ -49,6 +49,29 @@ timing sample. If any predicate fails, apply the exact inverse, push its
 immutable restored SHA, and use the recorded terminal command with
 `run_live_stripe=true` for the one permitted restoration proof.
 
+The Phase 227 proof vector requires the success-path
+`accrue-host-phase15-screenshots` artifact. `accrue-host-ci-setup-facts` remains
+in the artifact inventory as a failure diagnostic; it must not be required
+alongside a successful `host-integration` job. The append-only correction and
+candidate reclassifications are recorded in `227-CI-CRITICAL-PATH.ndjson`.
+
+Verify the current rollback decision locally, then require the stricter state
+after the single restoration run succeeds:
+
+```bash
+node scripts/ci/verify_ci_critical_path.mjs --require-final-decision \
+  --evidence .planning/phases/227-measured-critical-path-improvement/227-CI-CRITICAL-PATH.ndjson \
+  --expected-repository szTheory/accrue
+
+node scripts/ci/verify_ci_critical_path.mjs --require-rollback-verified \
+  --verify-live-actions \
+  --evidence .planning/phases/227-measured-critical-path-improvement/227-CI-CRITICAL-PATH.ndjson \
+  --expected-repository szTheory/accrue
+```
+
+The second command intentionally fails while the latest rollback record is
+`rollback_applied_unverified`; unsupported `--require-*` flags also fail closed.
+
 This directory hosts merge-adjacent bash gates and host-app checks. Use it as the first stop when CI fails on documentation or VERIFY-01 contracts.
 
 ### Triage: Phase 225 required-lane incidents

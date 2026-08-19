@@ -43,3 +43,18 @@ All three are immutable `workflow_dispatch`, attempt-1 records at candidate SHA 
 - The inverse workflow contract, critical-path fixtures, frozen Phase 226 baseline, provider fixtures, setup diagnostics, and Phase 225 preservation controls passed locally.
 
 PATH-02 is unmet: this report records a safe applied rollback with an explicit external proof gap, not a kept comparison.
+
+## Post-recovery contract correction (2026-08-18)
+
+The original proof vector mistakenly required `accrue-host-ci-setup-facts` while also requiring `host-integration` to succeed. That artifact is a failure-path diagnostic: the workflow and host UAT script emit it only when setup or `mix verify.full` fails, and the upload step ignores a missing file on successful runs. No run at any SHA could satisfy both predicates.
+
+The contract now requires the success-path `accrue-host-phase15-screenshots` artifact and retains `accrue-host-ci-setup-facts` in the broader artifact inventory as a failure diagnostic. This is a transparent forward correction recorded after the failed recovery; no historical fingerprint, run record, or earlier classification was edited or backdated.
+
+Read-only GitHub reconciliation revalidated the two successful candidate runs against every remaining predicate:
+
+| Run | Prior classification | Corrected classification | Required path | Success artifact |
+| --- | --- | --- | --- | --- |
+| [31715609742](https://github.com/szTheory/accrue/actions/runs/31715609742) | `candidate_regression` | `admitted_observation` | passed | `accrue-host-phase15-screenshots` present |
+| [31715612044](https://github.com/szTheory/accrue/actions/runs/31715612044) | `candidate_regression` | `admitted_observation` | passed | `accrue-host-phase15-screenshots` present |
+
+These append-only reclassifications supersede the artifact-only exclusions in the historical table above. Run `31715606960` remains excluded for its deterministic required-lane failure. The corrected cohort therefore has only two admitted observations, fewer than the three required by the bounded measurement contract; rollback remains the honest decision. The single authorized restoration dispatch is still unspent, and no Stripe configuration or workflow mutation was made as part of this correction.

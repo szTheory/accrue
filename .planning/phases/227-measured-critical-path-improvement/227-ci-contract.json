@@ -21,7 +21,7 @@
     "required_job_identities": ["release-gate", "docs-and-bash-contracts-shift-left", "admin-drift-and-docs", "admin-group-contracts-phase-190", "admin-hardening-guardrails-phase-192", "admin-phase-200-deterministic-guardrails", "host-integration", "playwright-e2e-shard-1-3", "playwright-e2e-shard-2-3", "playwright-e2e-shard-3-3", "host-docker-boot-smoke", "annotation-sweep"],
     "advisory_outcomes": { "sigra": "advisory", "parked_ratchet": "advisory" },
     "provider_proof": "separately-linked latest proved provider proof",
-    "expected_artifacts": ["accrue-host-ci-setup-facts", "accrue-host-phase15-screenshots"]
+    "expected_artifacts": ["accrue-host-phase15-screenshots"]
   },
   "run_budget": { "final_candidate_attempts": 3, "allow_reruns": false, "allow_replacements": false },
   "failure_classes": ["candidate_regression", "deterministic_required_lane_failure", "external_or_runner_blocked", "inconclusive"],
