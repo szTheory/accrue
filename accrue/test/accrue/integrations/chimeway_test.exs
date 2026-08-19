@@ -121,7 +121,7 @@ defmodule Accrue.Integrations.ChimewayTest do
     end
 
     @tag :requires_chimeway
-    test "uses one opaque recipient reference for trigger and invoice.paid recovery", %{
+    test "uses one capability-matched identity for trigger and invoice.paid recovery", %{
       customer: customer,
       subscription: subscription
     } do
@@ -136,10 +136,19 @@ defmodule Accrue.Integrations.ChimewayTest do
       assert {:ok, [string_recipient]} =
                Accrue.Integrations.Chimeway.DunningNotifier.recipients(string_params)
 
-      assert atom_recipient.recipient_ref == string_recipient.recipient_ref
-      assert String.starts_with?(atom_recipient.recipient_ref, "cw_accrue_customer_")
-      refute String.contains?(atom_recipient.recipient_ref, customer.email)
-      assert atom_recipient.recipient_identity == "user:" <> customer.email
+      privacy_safe? = Accrue.Integrations.Chimeway.privacy_safe_recipient_refs?()
+
+      if privacy_safe? do
+        assert atom_recipient.recipient_ref == string_recipient.recipient_ref
+        assert String.starts_with?(atom_recipient.recipient_ref, "cw_accrue_customer_")
+        refute String.contains?(atom_recipient.recipient_ref, customer.email)
+        assert atom_recipient.recipient_identity == "user:" <> customer.email
+      else
+        refute Map.has_key?(atom_recipient, :recipient_ref)
+        refute Map.has_key?(string_recipient, :recipient_ref)
+        assert atom_recipient.recipient_identity == customer.email
+        assert string_recipient.recipient_identity == customer.email
+      end
 
       assert :ok =
                Accrue.Integrations.Chimeway.start_campaign(
@@ -153,10 +162,11 @@ defmodule Accrue.Integrations.ChimewayTest do
 
       import Ecto.Query
 
-      [notification] =
-        Chimeway.Repo.all(
+      notification =
+        Chimeway.Repo.one!(
           from(n in Chimeway.Notifications.Notification,
-            where: n.tenant_id == ^subscription.customer_id
+            order_by: [desc: n.inserted_at],
+            limit: 1
           )
         )
 
@@ -170,13 +180,24 @@ defmodule Accrue.Integrations.ChimewayTest do
       assert length(signals) == 1
 
       [signal] = signals
-      assert notification.tenant_id == subscription.customer_id
-      assert notification.recipient_identity == atom_recipient.recipient_ref
+
+      expected_actor =
+        if privacy_safe?,
+          do: atom_recipient.recipient_ref,
+          else: atom_recipient.recipient_identity
+
+      assert notification.recipient_identity == expected_actor
       assert notification.recipient_identity == signal.actor_id
-      refute String.contains?(notification.recipient_identity, customer.email)
       assert signal.tenant_id == subscription.customer_id
-      assert signal.actor_id == atom_recipient.recipient_ref
+      assert signal.actor_id == expected_actor
       assert signal.event_name == "invoice.paid"
+
+      if privacy_safe? do
+        assert Map.fetch!(notification, :tenant_id) == subscription.customer_id
+        refute String.contains?(notification.recipient_identity, customer.email)
+      else
+        assert signal.actor_id == customer.email
+      end
 
       assert signal.payload[:subscription_id] == subscription.id or
                signal.payload["subscription_id"] == subscription.id

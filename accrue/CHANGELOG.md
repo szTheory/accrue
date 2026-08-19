@@ -12,7 +12,7 @@
 
 ### Bug Fixes
 
-* Restore Chimeway Phase 98 privacy-safe recipient compatibility: dunning notifications persist a stable opaque customer reference, while `invoice.paid` termination continues to use that same reference as its signal actor.
+* Restore Chimeway Phase 98 privacy-safe recipient compatibility: capable Chimeway versions persist a stable opaque customer reference and use it for `invoice.paid` termination, while Chimeway 1.0 retains its existing email-backed recovery correlation.
 
 ## [1.4.0](https://github.com/szTheory/accrue/compare/accrue-v1.3.0...accrue-v1.4.0) (2026-06-01)
 

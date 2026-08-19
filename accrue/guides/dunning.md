@@ -143,7 +143,9 @@ Chimeway's `trigger/3` + `Notifier` surface. This section is the opt-in upgrade 
 
 ### Prerequisites
 
-- Chimeway **1.0.0** (or a compatible `~> 1.0` release) published to Hex.
+- Chimeway **1.0.0** (or a compatible `~> 1.0` release) published to Hex. Chimeway
+  1.0 keeps legacy email-backed correlation; versions exposing the Phase 98 privacy-safe
+  recipient boundary use opaque correlation automatically.
 - Accrue v1.40 or later (the `Accrue.Dunning.Engine` behaviour and adapter ship together).
 - Chimeway's own migrations must be run in the host database. Accrue does **not** start
   Chimeway — that is the host app's responsibility.
@@ -187,14 +189,16 @@ built-in engine.
   as the notifier module. The notifier creates a durable two-step WorkflowRun (initial email
   → 48-hour wait → escalation email) while `orchestration/2` remains `:immediate` for
   delivery planning.
-- **Privacy-safe recipient correlation** uses an opaque, stable `recipient_ref` derived from
+- **Privacy-safe recipient correlation**, when supported by Chimeway, uses an opaque, stable `recipient_ref` derived from
   the Accrue customer UUID (`cw_accrue_customer_<uuid>`). Chimeway persists and routes by that
   reference only. The customer email is passed solely as transient `user:<email>` delivery
   context so it can be used in memory to address the email; it is never the durable workflow
-  identity.
+  identity. Chimeway 1.0 lacks this boundary, so Accrue preserves its prior email identity and
+  signal actor on that version rather than breaking existing recovery routing.
 - **Cancel-on-recovery** emits an `"invoice.paid"` signal via `Chimeway.Signal.track/4` when
-  the subscription returns to `:active`. Its actor is the same opaque `recipient_ref`, allowing
-  Chimeway to route the outcome to the waiting WorkflowRun without correlating by email.
+  the subscription returns to `:active`. Its actor always matches the durable identity selected
+  for the notification: the opaque `recipient_ref` on privacy-safe Chimeway, or the legacy email
+  identity on Chimeway 1.0. This lets Chimeway route the outcome to the waiting WorkflowRun.
   Accrue's anchor-clear still prevents any future `start_campaign` call from the recovered
   subscription.
 - The adapter is **conditionally compiled**: when `:chimeway` is not present in the host's
