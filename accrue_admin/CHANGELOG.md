@@ -2,9 +2,17 @@
 
 ## Unreleased
 
+## [1.5.0](https://github.com/szTheory/accrue/compare/accrue_admin-v1.4.0...accrue_admin-v1.5.0) (2026-08-19)
+
 ### Notes
 
 * Compatibility only: the linked 1.5.0 release resolves with the coordinated core `lattice_stripe ~> 2.0` and advisory entitlement-sync work. The core `accrue` package owns the new refresh contracts and grant-boundary documentation.
+
+
+### Bug Fixes
+
+* **ci:** satisfy strict admin Credo ([29c0986](https://github.com/szTheory/accrue/commit/29c0986b8970ebfec3b1df1481f1a288f5283fee))
+* make Chimeway dunning recipient identity opaque ([f579bf2](https://github.com/szTheory/accrue/commit/f579bf27770bee142258682b23bae09122f662cf))
 
 ## [1.4.0](https://github.com/szTheory/accrue/compare/accrue_admin-v1.3.0...accrue_admin-v1.4.0) (2026-06-01)
 

@@ -72,7 +72,7 @@ changelog_release_section() {
   local version=$2
 
   awk -v heading="## [${version}]" '
-    $0 == heading { in_section = 1; found = 1; next }
+    index($0, heading) == 1 { in_section = 1; found = 1; next }
     /^## \[/ && in_section { exit }
     in_section { print }
     END { exit found ? 0 : 1 }

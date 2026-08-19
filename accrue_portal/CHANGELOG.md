@@ -2,9 +2,16 @@
 
 ## Unreleased
 
+## [1.5.0](https://github.com/szTheory/accrue/compare/accrue_portal-v1.4.0...accrue_portal-v1.5.0) (2026-08-19)
+
 ### Notes
 
 * Compatibility only: the linked 1.5.0 release resolves with the coordinated core `lattice_stripe ~> 2.0` and advisory entitlement-sync work. The core `accrue` package owns the new refresh contracts and grant-boundary documentation.
+
+
+### Miscellaneous Chores
+
+* **accrue_portal:** Synchronize accrue-monorepo versions
 
 ## [1.4.0](https://github.com/szTheory/accrue/compare/accrue_portal-v1.3.0...accrue_portal-v1.4.0) (2026-06-01)
 
