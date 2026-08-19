@@ -4,7 +4,7 @@
 
 Use `Accrue.Entitlements.Source.Registry`, never `Accrue.Processor`, to inspect a rail's entitlement-source capability. The fixed order is `observation`, `control`, `restore`, `reconciliation`, `management`, and `offline`; the closed states are `supported`, `externally_managed`, `host_owned`, `deferred`, `unavailable`, and `feasibility_blocked`.
 
-Apple subscription management is externally managed. Present the returned plain-language guidance and **Manage subscription** action, which links to `https://apps.apple.com/account/subscriptions`. Do not translate an Apple outcome into a Stripe cancellation, dunning, retry, swap, proration, invoice, or payment-method action. The separate [processor support matrix](../../.planning/processor-support-matrix.md) remains the gateway-control authority.
+Apple subscription management is externally managed. Present the returned plain-language guidance and **Manage subscription** action, which links to `https://apps.apple.com/account/subscriptions`. Do not translate an Apple outcome into a Stripe cancellation, dunning, retry, swap, proration, invoice, or payment-method action. The repository's `processor-support-matrix.md` remains the separate processor authority and gateway-control authority.
 
 For the canonical meaning of `active`, `trialing`, `paused`, `past_due`, and
 ended states — and for *which* lifecycle states grant access — see
@@ -69,7 +69,7 @@ same transaction. Apple status/history remains the authority; a scheduler tick
 never grants access by itself. Oban uniqueness is not the execution lock.
 
 To disable scheduled repair safely, first remove the Cron entry, then drain
-queued `Accrue.Entitlements.Apple.ReconcileWorker` jobs or atomically release
+queued reconciliation-worker jobs or atomically release
 any scheduler-reserved running checkpoints back to `idle`. Do not delete the
 checkpoint rows or add an Accrue supervision child.
 
@@ -344,7 +344,7 @@ inspectable without ever touching the gate.
 `fetch_entitled/2` is closed and will-not-build. A Stripe-backed predicate would
 make authorization depend on a network call that can fail open under partition,
 which contradicts Accrue's fail-closed local gate. The non-gate diagnostic value
-is already served by `Accrue.Entitlements.StripeSync.summary_for_customer/1` and
+is already served by the internal `summary_for_customer/1` seam and
 `Accrue.Entitlements.Admin.resolve_for_customer/1`.
 
 ### How to enable it
