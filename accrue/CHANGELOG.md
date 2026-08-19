@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-## [1.5.0]
+## [1.5.0](https://github.com/szTheory/accrue/compare/accrue-v1.4.0...accrue-v1.5.0) (2026-08-19)
 
 ### Release highlights
 
