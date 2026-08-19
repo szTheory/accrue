@@ -92,8 +92,8 @@ proof, mounted admin inspection, and a focused verification pass.
 ```elixir
 defp deps do
   [
-    {:accrue, "~> 1.4.0"},
-    {:accrue_admin, "~> 1.4.0"}
+    {:accrue, "~> 1.5.0"},
+    {:accrue_admin, "~> 1.5.0"}
   ]
 end
 ```
