@@ -15,8 +15,8 @@ defmodule AccrueAdmin.EntitlementsLiveTest do
   alias Accrue.Billing.EntitlementSummary
   alias Accrue.Entitlements.Reconcile
   alias Accrue.Test.Factory
-  alias AccrueAdmin.TestRepo
   alias AccrueAdmin.Copy
+  alias AccrueAdmin.TestRepo
 
   defmodule AuthAdapter do
     @behaviour Accrue.Auth
