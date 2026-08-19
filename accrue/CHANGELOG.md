@@ -2,19 +2,16 @@
 
 ## Unreleased
 
-### Features
+## [1.5.0]
+
+### Release highlights
 
 * Bump the `lattice_stripe` dependency to `~> 2.0` while resolving the current 2.x lock line across the linked package family.
 * Add the optional, default-off advisory Stripe-native entitlement refresh for diagnostics and admin read surfaces. The local plan-to-feature map remains the only Accrue grant gate, so advisory Stripe data never changes entitlement grants, controller plugs, or LiveView guards.
 * Support `Accrue.Entitlements.StripeSync.refresh/2`, the optional `Accrue.Processor.list_active_entitlements/2` callback and public facade, and the deterministic `Accrue.Processor.Fake.put_entitlements/2` test helper for adopter proof.
 * Share one webhook/pull reconciliation path with the shared reconcile/isolation proof, keeping Stripe-native cache writes observational and auditable.
 * Record that `fetch_entitled/2` remains closed: Accrue will not add a Stripe-backed grant predicate because local billing state stays authoritative for access decisions.
-
-### Bug Fixes
-
 * Restore Chimeway Phase 98 privacy-safe recipient compatibility: capable Chimeway versions persist a stable opaque customer reference and use it for `invoice.paid` termination, while Chimeway 1.0 retains its existing email-backed recovery correlation.
-
-## [1.5.0](https://github.com/szTheory/accrue/compare/accrue-v1.4.0...accrue-v1.5.0) (2026-08-19)
 
 
 ### Features

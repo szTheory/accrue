@@ -2,11 +2,11 @@
 
 ## Unreleased
 
+## [1.5.0]
+
 ### Notes
 
 * Compatibility only: the linked 1.5.0 release resolves with the coordinated core `lattice_stripe ~> 2.0` and advisory entitlement-sync work. The core `accrue` package owns the new refresh contracts and grant-boundary documentation.
-
-## [1.5.0](https://github.com/szTheory/accrue/compare/accrue_admin-v1.4.0...accrue_admin-v1.5.0) (2026-08-19)
 
 
 ### Bug Fixes
