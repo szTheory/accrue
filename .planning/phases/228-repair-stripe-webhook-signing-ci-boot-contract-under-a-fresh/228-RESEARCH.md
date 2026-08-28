@@ -199,17 +199,15 @@ The snippet is a planning skeleton: implementation must preserve the existing ge
 | A1 | The repository secret should be named `STRIPE_WEBHOOK_SECRET`, matching the package’s documented runtime variable. | Architecture Patterns | A different existing secret name could require a mapping decision or duplicate secret. [ASSUMED] |
 | A2 | One first-attempt manual live-Stripe dispatch is the appropriate fresh Phase 228 evidence budget after static checks. | Summary | The planner must make the run count/budget explicit so it cannot silently widen. [ASSUMED] |
 
-## Open Questions
+## Resolved Questions
 
-1. **Which Stripe test-mode endpoint supplies the signing secret?**
+1. **RESOLVED — Which Stripe test-mode endpoint supplies the signing secret?**
    - What we know: Stripe endpoint secrets are endpoint-specific and begin with `whsec_`; Phase 227 failed because none was mapped into the CI boot path. [CITED: https://docs.stripe.com/webhooks/signature?lang=node&locale=en-GB]
-   - What's unclear: The GitHub secret-name listing could not be audited because GitHub API rate limiting returned HTTP 403; no secret values were read.
-   - Recommendation: Add/confirm a repository secret named `STRIPE_WEBHOOK_SECRET` with the real test-mode endpoint secret through a maintainer checkpoint, then record only presence and the fresh Actions result.
+   - Resolution: Plan 228-02 Task 1 owns this execution-time decision. Its blocking maintainer checkpoint requires the signing secret for the exact Stripe Dashboard test-mode endpoint used by this repository to be stored as `STRIPE_WEBHOOK_SECRET`, accepts only sanitized `configured` confirmation, and rejects a CLI forwarding secret, API key, or different endpoint secret. No secret value or endpoint identifier is exposed.
 
-2. **What is the Phase 228 live-run ceiling?**
+2. **RESOLVED — What is the Phase 228 live-run ceiling?**
    - What we know: Phase 227's budget is exhausted and cannot be borrowed. [VERIFIED: .planning/phases/227-measured-critical-path-improvement/227-CI-CRITICAL-PATH.md:70-72]
-   - What's unclear: Phase 228 has no CONTEXT.md or requirement IDs yet.
-   - Recommendation: Lock a single first-attempt `workflow_dispatch` with `run_live_stripe: true`; classify a failure from immutable evidence and require a separately authorized phase before any retry.
+   - Resolution: Plan 228-02 Task 2 owns the explicit authorization decision and locks the ceiling to exactly one new attempt-1 `workflow_dispatch` with `run_live_stripe: true` at the repaired committed SHA. A created run consumes the budget regardless of outcome; an API rejection that creates no run leaves `consumed:false`; neither branch authorizes a retry, replacement, alternate transport, or use of Phase 227 authority.
 
 ## Environment Availability
 
