@@ -60,15 +60,23 @@ function assertWorkflowContract(workflow) {
 
   const provider = jobBody(workflow, "live-stripe");
   const host = jobBody(workflow, "host-integration");
+  const dispatch = workflow.match(/^  workflow_dispatch:\n([\s\S]*?)(?=^  schedule:)/m)?.[0] || "";
+  const dispatchInputs = [...dispatch.matchAll(/^      ([A-Za-z0-9_-]+):$/gm)].map((match) => match[1]);
+  assert.deepEqual(dispatchInputs, ["run_live_stripe"], "workflow_dispatch must expose only run_live_stripe");
+  assert.match(provider, /STRIPE_WEBHOOK_SECRET: \$\{\{ secrets\.STRIPE_WEBHOOK_SECRET \}\}/, "live-stripe must bind STRIPE_WEBHOOK_SECRET from the same-named repository secret");
+  assert.match(provider, /github\.event_name == 'workflow_dispatch' && inputs\.run_live_stripe/, "manual live-stripe execution must be gated by run_live_stripe");
   for (const stepId of ["provider_preflight", "live_stripe_suite", "provider_proof_finalize", "provider_proof_summary", "provider_proof_artifact"]) {
     const region = stepRegion(provider, stepId);
     if (stepId !== "provider_preflight" && stepId !== "live_stripe_suite") assert.match(region, /if: always\(\)/, `${stepId} must always run`);
   }
   const finalizer = stepRegion(provider, "provider_proof_finalize");
   const summary = stepRegion(provider, "provider_proof_summary");
+  const preflight = stepRegion(provider, "provider_preflight");
+  assert.match(preflight, /\$\{STRIPE_WEBHOOK_SECRET:-\}/, "provider preflight must require nonempty STRIPE_WEBHOOK_SECRET");
   assert.match(finalizer, /--sha "\$\{\{ github\.sha \}\}"/, "finalizer must receive the current GitHub SHA");
   assert.match(finalizer, /--manifest "\$RUNNER_TEMP\/accrue-provider-manifest\.json"/, "finalizer must receive the suite-written trusted manifest");
   assert.match(finalizer, /--out "\$ACCRUE_PROVIDER_PROOF_RECORD"/, "finalizer must write the finalized proof record");
+  assert.doesNotMatch(finalizer, /--bypass(?:\s|$)|--(?:bypass-)?reason(?:\s|$)/, "finalizer must not expose an intentional-bypass path");
   assert.ok(provider.indexOf(finalizer) < provider.indexOf(summary), "finalizer must precede the always-run summary");
   assert.match(summary, /--record "\$ACCRUE_PROVIDER_PROOF_RECORD"/, "always-run summary must read the finalized proof record");
   for (const stepId of ["host_setup_summary", "host_setup_artifact"]) {
@@ -96,8 +104,24 @@ function runFixtures() {
     ["write permission", (text) => text.replace("contents: read", "contents: write")],
     ["provider token", (text) => text.replace("id: provider_preflight", "id: provider_preflight\n        env:\n          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}")],
     ["mutation command", (text) => text.replace("id: provider_proof_summary", "id: provider_proof_summary\n        run: git push")],
+    ["missing signing-secret binding", (text) => text.replace(/^      STRIPE_WEBHOOK_SECRET:.*\n/m, "")],
+    ["renamed signing-secret binding", (text) => text.replace("STRIPE_WEBHOOK_SECRET: ${{ secrets.STRIPE_WEBHOOK_SECRET }}", "STRIPE_ENDPOINT_SECRET: ${{ secrets.STRIPE_WEBHOOK_SECRET }}")],
+    ["missing signing-secret preflight", (text) => text.replace(' && [ -n "${STRIPE_WEBHOOK_SECRET:-}" ]', "")],
   ]) {
-    rejects(() => assertWorkflowContract(mutate(workflow)), new RegExp(name === "write permission" ? "permissions|write" : name === "provider token" ? "token" : "mutate"));
+    rejects(
+      () => assertWorkflowContract(mutate(workflow)),
+      new RegExp(
+        name === "write permission"
+          ? "permissions|write"
+          : name === "provider token"
+            ? "token"
+            : name === "mutation command"
+              ? "mutate"
+              : name.includes("preflight")
+                ? "preflight"
+                : "bind STRIPE_WEBHOOK_SECRET",
+      ),
+    );
   }
   const { cases } = JSON.parse(fs.readFileSync(fixturesPath, "utf8"));
   for (const fixture of cases) {
