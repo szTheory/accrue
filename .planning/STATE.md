@@ -4,17 +4,17 @@ milestone: v1.61
 milestone_name: CI Evidence & Critical-Path Hardening
 current_phase: 228
 current_phase_name: Repair Stripe Webhook-Signing CI Boot Contract Under a Fresh Evidence Budget
-status: blocked
-stopped_at: "Phase 227 terminally blocked: restoration budget exhausted after webhook-signing configuration failure"
-last_updated: "2026-08-28T18:38:31.565Z"
+status: executing
+stopped_at: Completed 228-01-PLAN.md
+last_updated: "2026-08-28T19:25:22.743Z"
 last_activity: 2026-08-28
-last_activity_desc: post-correction restoration outcome recorded and run budget closed
-state_head: 5d1d1c6033a4ad6634645bc204dc37364ac7304b
+last_activity_desc: Phase 228 execution started
+state_head: bb6fca4a294dcbf38f486eeaa602fa1b4c87c022
 progress:
   total_phases: 4
-  completed_phases: 3
+  completed_phases: 2
   total_plans: 26
-  completed_plans: 23
+  completed_plans: 22
   percent: 50
 ---
 
@@ -26,16 +26,16 @@ See: `.planning/PROJECT.md` (updated 2026-08-05 after shipping v1.59)
 
 **Core value:** A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic Elixir DX, strong domain modeling, tamper-evident audit ledger, great observability, and zero breaking-change pain through v1.x.
 
-**Current focus:** Phase 227 — measured-critical-path-improvement
+**Current focus:** Phase 228 — Repair Stripe Webhook-Signing CI Boot Contract Under a Fresh Evidence Budget
 
 ## Current Position
 
-Phase: 228 (Repair Stripe Webhook-Signing CI Boot Contract Under a Fresh Evidence Budget) — READY TO EXECUTE
-Plan: 3 of 3
-Status: Blocked at rollback_applied_unverified; PATH-02 is unmet
-Last activity: 2026-08-28 — post-correction restoration outcome recorded and run budget closed
+Phase: 228 (Repair Stripe Webhook-Signing CI Boot Contract Under a Fresh Evidence Budget) — EXECUTING
+Plan: 2 of 3
+Status: Ready to execute
+Last activity: 2026-08-28 — Phase 228 execution started
 
-Progress: [█████████░] 91%
+Progress: [█████░░░░░] 50%
 
 ## v1.61 Roadmap
 
@@ -477,6 +477,7 @@ Coverage: 22/22 v1.51 requirements mapped (each REQ-ID → exactly one phase). D
 | Phase 226 P20 | 8min | 3 tasks | 5 files |
 | Phase 226 P21 | 18min | 1 tasks | 6 files |
 | Phase 227 P01 | 12m | 2 tasks | 6 files |
+| Phase 228 P01 | 37min | 2 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -956,6 +957,9 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - [Phase ?]: Host integration now waits only for docs-contracts-shift-left; rollback restores admin-drift-docs.
 - [Phase ?]: The verifier hashes the normalized workflow to allow only this one dependency deletion.
 - [Phase ?]: Phase 227 rollback is rollback_applied_unverified: exact inverse 80f60193 passed local controls, but authorized restoration run 33188858334 failed at application boot because the Stripe webhook signing secret was absent; the run budget is exhausted and PATH-02 remains unmet.
+- [Phase 228]: Map a trimmed signing secret as the Stripe rotation list, but map missing input to an empty list so boot validation fails closed.
+- [Phase 228]: Reject skipped/intentional_bypass evidence outright because the Phase 228 workflow has no reachable bypass path.
+- [Phase 228]: Keep the evidence record unconsumed and not authorized until Plan 228-02 supplies explicit external authority.
 
 ### Pending Todos
 
@@ -1110,9 +1114,9 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 
 ## Session Continuity
 
-Last session: 2026-08-28T17:03:17Z
-Stopped at: Phase 227 terminally blocked: restoration budget exhausted after webhook-signing configuration failure
-Resume file: .planning/phases/227-measured-critical-path-improvement/227-CI-CRITICAL-PATH.md
+Last session: 2026-08-28T19:25:22.574Z
+Stopped at: Completed 228-01-PLAN.md
+Resume file: None
 
 ## Operator Next Steps
 
