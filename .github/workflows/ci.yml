@@ -1287,6 +1287,7 @@ jobs:
       PGPASSWORD: postgres
       PGHOST: localhost
       STRIPE_TEST_SECRET_KEY: ${{ secrets.STRIPE_TEST_SECRET_KEY }}
+      STRIPE_WEBHOOK_SECRET: ${{ secrets.STRIPE_WEBHOOK_SECRET }}
       ACCRUE_LIVE_BASIC_PRICE: ${{ secrets.ACCRUE_LIVE_BASIC_PRICE }}
       ACCRUE_LIVE_PRO_PRICE: ${{ secrets.ACCRUE_LIVE_PRO_PRICE }}
 
@@ -1320,7 +1321,7 @@ jobs:
       - id: provider_preflight
         name: Preflight live-Stripe provider configuration
         run: |
-          if [ -n "${STRIPE_TEST_SECRET_KEY:-}" ] && [ -n "${ACCRUE_LIVE_BASIC_PRICE:-}" ] && [ -n "${ACCRUE_LIVE_PRO_PRICE:-}" ]; then
+          if [ -n "${STRIPE_TEST_SECRET_KEY:-}" ] && [ -n "${STRIPE_WEBHOOK_SECRET:-}" ] && [ -n "${ACCRUE_LIVE_BASIC_PRICE:-}" ] && [ -n "${ACCRUE_LIVE_PRO_PRICE:-}" ]; then
             echo "configured=true" >> "$GITHUB_OUTPUT"
           else
             echo "configured=false" >> "$GITHUB_OUTPUT"

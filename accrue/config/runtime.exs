@@ -25,6 +25,11 @@ if config_env() == :test do
     |> System.get_env("")
     |> String.trim()
 
+  stripe_webhook_secret =
+    "STRIPE_WEBHOOK_SECRET"
+    |> System.get_env("")
+    |> String.trim()
+
   if stripe_test_secret_key != "" do
     # The Stripe processor reads its secret via
     # `Application.get_env(:accrue, :stripe_secret_key)` (see
@@ -33,6 +38,9 @@ if config_env() == :test do
     # picking up the processor swap automatically resolve their key.
     config :accrue,
       processor: Accrue.Processor.Stripe,
-      stripe_secret_key: stripe_test_secret_key
+      stripe_secret_key: stripe_test_secret_key,
+      webhook_signing_secrets: %{
+        stripe: if(stripe_webhook_secret == "", do: [], else: [stripe_webhook_secret])
+      }
   end
 end

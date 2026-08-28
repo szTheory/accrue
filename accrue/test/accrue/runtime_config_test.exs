@@ -8,7 +8,9 @@ defmodule Accrue.RuntimeConfigTest do
 
   setup do
     previous_environment = Map.new(@environment_keys, &{&1, System.get_env(&1)})
-    previous_application = Map.new(@application_keys, &{&1, Application.get_env(:accrue, &1, :__unset__)})
+
+    previous_application =
+      Map.new(@application_keys, &{&1, Application.get_env(:accrue, &1, :__unset__)})
 
     on_exit(fn ->
       Enum.each(previous_environment, fn
@@ -57,6 +59,16 @@ defmodule Accrue.RuntimeConfigTest do
     apply_runtime_config!()
 
     assert Application.get_env(:accrue, :processor) == Accrue.Processor.Fake
+  end
+
+  test "live Stripe runtime fails closed when the signing secret is empty" do
+    System.put_env("STRIPE_TEST_SECRET_KEY", "sk_test_missing_signing_contract")
+    System.put_env("STRIPE_WEBHOOK_SECRET", "   ")
+
+    apply_runtime_config!()
+
+    assert Application.get_env(:accrue, :webhook_signing_secrets) == %{stripe: []}
+    assert_raise Accrue.ConfigError, fn -> Config.validate_at_boot!() end
   end
 
   defp apply_runtime_config! do
