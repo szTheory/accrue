@@ -2,19 +2,20 @@
 gsd_state_version: 1.0
 milestone: v1.61
 milestone_name: CI Evidence & Critical-Path Hardening
-current_phase: 227
-current_phase_name: measured-critical-path-improvement
+current_phase: 228
+current_phase_name: Repair Stripe Webhook-Signing CI Boot Contract Under a Fresh Evidence Budget
 status: blocked
 stopped_at: "Phase 227 terminally blocked: restoration budget exhausted after webhook-signing configuration failure"
-last_updated: "2026-08-28T17:03:17Z"
+last_updated: "2026-08-28T18:38:31.565Z"
 last_activity: 2026-08-28
 last_activity_desc: post-correction restoration outcome recorded and run budget closed
+state_head: 5d1d1c6033a4ad6634645bc204dc37364ac7304b
 progress:
-  total_phases: 3
+  total_phases: 4
   completed_phases: 3
-  total_plans: 23
+  total_plans: 26
   completed_plans: 23
-  percent: 100
+  percent: 50
 ---
 
 # Project State
@@ -29,7 +30,7 @@ See: `.planning/PROJECT.md` (updated 2026-08-05 after shipping v1.59)
 
 ## Current Position
 
-Phase: 227 (measured-critical-path-improvement) — BLOCKED
+Phase: 228 (Repair Stripe Webhook-Signing CI Boot Contract Under a Fresh Evidence Budget) — READY TO EXECUTE
 Plan: 3 of 3
 Status: Blocked at rollback_applied_unverified; PATH-02 is unmet
 Last activity: 2026-08-28 — post-correction restoration outcome recorded and run budget closed
@@ -572,6 +573,7 @@ Coverage: 22/22 v1.51 requirements mapped (each REQ-ID → exactly one phase). D
 - Phase 214.1 inserted after Phase 214: Close gap: DOCS-03 — reconcile StripeSync writer documentation (URGENT)
 - Phase 214.2 inserted after Phase 214: Close gap: SYNC-02/DOCS-03 — surface advisory entitlement diagnostics (URGENT)
 - Phase 224 edited: restored missing canonical phase definition
+- Phase 228 added: Repair Stripe Webhook-Signing CI Boot Contract Under a Fresh Evidence Budget
 
 ### Decisions
 
