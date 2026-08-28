@@ -53,13 +53,20 @@ function stepRegion(job, stepId) {
 function assertWorkflowContract(workflow) {
   const permissions = workflow.match(/^permissions:\n((?:  [a-z-]+: [a-z]+\n)+)/m)?.[1];
   assert.equal(permissions, "  actions: read\n  checks: read\n  contents: read\n", "top-level permissions must remain exactly read-only");
-  assert.doesNotMatch(workflow, /^\s+(?:[a-z-]+): write(?:\s|$)/m, "workflow must not request write permissions");
-  for (const jobId of ["host-integration", "playwright-e2e", "release-gate", "live-stripe"]) {
+  for (const jobId of ["host-integration", "playwright-e2e", "release-gate", "provider-proof-trigger", "live-stripe", "provider-proof-incident"]) {
     jobBody(workflow, jobId);
   }
 
   const provider = jobBody(workflow, "live-stripe");
+  const trigger = jobBody(workflow, "provider-proof-trigger");
+  const incident = jobBody(workflow, "provider-proof-incident");
   const host = jobBody(workflow, "host-integration");
+  assert.doesNotMatch(workflow.replace(incident, ""), /^\s+(?:[a-z-]+): write(?:\s|$)/m, "write permissions must be isolated to incident reconciliation");
+  assert.match(incident, /permissions:\n      actions: read\n      contents: read\n      issues: write\n/, "incident job must have only its narrow write permission");
+  assert.match(trigger, /provider_proof_automation\.mjs --classify-trigger/, "provider trigger must use the fixture-tested classifier");
+  assert.match(provider, /needs\.provider-proof-trigger\.outputs\.should_run == 'true'/, "live provider job must honor the trigger classifier");
+  assert.match(incident, /provider_proof_automation\.mjs --reconcile-issue/, "provider incident job must use the fixture-tested reconciler");
+  assert.match(incident, /github\.event_name != 'workflow_dispatch' \|\| inputs\.run_live_stripe/, "disabled manual proofs must not create incidents");
   const dispatch = workflow.match(/^  workflow_dispatch:\n([\s\S]*?)(?=^  schedule:)/m)?.[0] || "";
   const dispatchInputs = [...dispatch.matchAll(/^      ([A-Za-z0-9_-]+):$/gm)].map((match) => match[1]);
   assert.deepEqual(dispatchInputs, ["run_live_stripe"], "workflow_dispatch must expose only run_live_stripe");
@@ -166,12 +173,12 @@ function runFixtures() {
   assert.equal(currentProof.latest_proved_at, "2026-08-11T06:01:00Z", "a newly proved record anchors validated manifest completion");
   assert.equal(currentProof.stale, false, "a newly proved record is fresh within cadence and grace");
   assert.match(renderProviderSummary(currentProof), /Freshness:\*\* fresh/, "the real summary renders a newly proved record as fresh");
-  const differentSha = classifyProviderProof({ trigger: "push", sha: "current", policy: "required", raw_job_conclusion: "success", latest_proved_sha: "previous", latest_proved_at: "2026-08-11T06:00:00Z" });
+  const differentSha = classifyProviderProof({ trigger: "pull_request", sha: "current", policy: "required", raw_job_conclusion: "success", latest_proved_sha: "previous", latest_proved_at: "2026-08-11T06:00:00Z" });
   assert.equal(differentSha.proof_state, "non_run");
   assert.equal(differentSha.latest_proved_sha, "previous");
 
   const summary = renderProviderSummary({
-    ...classifyProviderProof({ trigger: "push", sha: "a", policy: "required", raw_job_conclusion: "skipped" }),
+    ...classifyProviderProof({ trigger: "pull_request", sha: "a", policy: "required", raw_job_conclusion: "skipped" }),
     reason_code: "bad **markdown**\n::warning:: payload",
     evidence_url: "https://example.test/a?x=<tag>",
     next_command: "echo `unsafe`",

@@ -7,9 +7,9 @@
       "expect": {"proof_state": "misconfigured", "reason_code": "zero_selected_tests"}
     },
     {
-      "name": "push-is-explicit-non-run",
-      "input": {"trigger": "push", "sha": "a2", "policy": "required", "raw_job_conclusion": "skipped", "reason": "provider lane is only selected on schedule or dispatch"},
-      "expect": {"proof_state": "non_run", "reason_code": "trigger_not_selected"}
+      "name": "push-repair-requires-complete-configuration",
+      "input": {"trigger": "push", "sha": "a2", "policy": "required", "raw_job_conclusion": "failure", "configuration_complete": false},
+      "expect": {"proof_state": "misconfigured", "reason_code": "configuration_incomplete"}
     },
     {
       "name": "required-proved",

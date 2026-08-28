@@ -14,6 +14,12 @@ defmodule Accrue.BackendAutomationContractTest do
 
     assert {:error, :human_verification_task} =
              validate(fixture("<task type=\"checkpoint:human-verify\">"))
+
+    assert {:error, :checkpoint_task} =
+             validate(fixture("<task type=\"checkpoint:human-action\">"))
+
+    assert {:error, :human_verification_task} =
+             validate(fixture("<task type=\"auto\"><human-check>approve</human-check><verify><automated>mix test</automated></verify></task>"))
   end
 
   test "rejects an opted-in backend task without an automated verify block" do
@@ -30,6 +36,12 @@ defmodule Accrue.BackendAutomationContractTest do
         {:error, :tracer_task}
 
       String.contains?(contents, "type=\"checkpoint:human-verify\"") ->
+        {:error, :human_verification_task}
+
+      String.contains?(contents, "type=\"checkpoint:") ->
+        {:error, :checkpoint_task}
+
+      String.contains?(contents, "<human-check>") or String.contains?(contents, "why_human:") ->
         {:error, :human_verification_task}
 
       not String.contains?(contents, "<automated>") ->

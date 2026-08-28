@@ -5,7 +5,8 @@ name: CI
 # `admin-group-contracts`, `admin-hardening-guardrails`,
 # `admin-phase200-guardrails`, `admin-ui-ratchet-guardrails`,
 # `host-integration`, `playwright-e2e`,
-# `host-docker-smoke`, `annotation-sweep`, `live-stripe`.
+# `host-docker-smoke`, `annotation-sweep`, `provider-proof-trigger`, `live-stripe`,
+# `provider-proof-incident`.
 # Merge-blocking on pull_request: `release-manifest-ssot`, `docs-contracts-shift-left`,
 # `release-gate`, `phase18-tax-gate`, `admin-drift-docs`, `admin-group-contracts`,
 # `admin-hardening-guardrails`, `admin-phase200-guardrails`,
@@ -13,7 +14,7 @@ name: CI
 # `host-integration`, `playwright-e2e`, `host-docker-smoke`,
 # `annotation-sweep`.
 # Mandatory periodic: `live-stripe` (Stripe test-mode parity) runs on
-# `workflow_dispatch` and `schedule` only to catch upstream Stripe API drift.
+# `workflow_dispatch`, `schedule`, and relevant main-branch repairs.
 
 on:
   push:
@@ -39,6 +40,28 @@ permissions:
   contents: read
 
 jobs:
+  provider-proof-trigger:
+    name: Stripe provider-proof trigger classifier
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || github.event_name == 'push'
+    runs-on: ubuntu-24.04
+    outputs:
+      should_run: ${{ steps.classify.outputs.should_run }}
+      trigger_class: ${{ steps.classify.outputs.trigger_class }}
+
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - id: classify
+        name: Classify scheduled, manual, or relevant repair proof
+        run: >-
+          node scripts/ci/provider_proof_automation.mjs --classify-trigger
+          --event "${{ github.event_name }}"
+          --before "${{ github.event.before || '0000000000000000000000000000000000000000' }}"
+          --sha "${{ github.sha }}"
+          --output "$GITHUB_OUTPUT"
+
   docs-contracts-shift-left:
     name: Docs and bash contracts (shift-left)
     # Support-contract bundle CI home: verify_processor_support_matrix.sh,
@@ -114,7 +137,9 @@ jobs:
           cache-dependency-path: brandbook/tokens/harness/package-lock.json
 
       - name: Executable UAT contract self-test
-        run: node scripts/ci/verify_executable_uat_contract.mjs --self-test
+        run: >-
+          node scripts/ci/verify_executable_uat_contract.mjs --self-test &&
+          node scripts/ci/verify_executable_uat_contract.mjs --all-opted-in
 
       - name: Install tokens harness
         run: cd brandbook/tokens/harness && npm ci
@@ -1248,10 +1273,10 @@ jobs:
   # ---------------------------------------------------------------------
   # Mandatory periodic live-Stripe fidelity job (quick task 260414-l9q).
   #
-  # Runs ONLY on manual workflow_dispatch and on the 06:00 UTC cron.
-  # Never runs on push or pull_request. Scheduled/API-drift failures are
-  # intentionally blocking for this job so maintainers see upstream parity
-  # regressions instead of silently accepting them.
+  # Runs on manual workflow_dispatch, the 06:00 UTC cron, and relevant repairs
+  # merged to main as selected by provider-proof-trigger. It never runs on pull
+  # requests or unrelated pushes. Provider failures are intentionally blocking
+  # and are reconciled into one sanitized issue below.
   #
   # Requires STRIPE_TEST_SECRET_KEY to be configured as a repository
   # secret. Individual tests skip cleanly in setup_all when the secret
@@ -1263,8 +1288,12 @@ jobs:
     # Job id stays `live-stripe` for `act -j live-stripe` compatibility; display
     # name reflects Stripe *test mode* keys (`STRIPE_TEST_SECRET_KEY`), not live mode.
     name: Stripe test-mode parity (mandatory periodic)
+    needs: provider-proof-trigger
     runs-on: ubuntu-24.04
-    if: ${{ github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.run_live_stripe) }}
+    if: ${{ needs.provider-proof-trigger.outputs.should_run == 'true' && (github.event_name == 'schedule' || github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.run_live_stripe)) }}
+    concurrency:
+      group: live-stripe-${{ github.sha }}
+      cancel-in-progress: false
 
     services:
       postgres:
@@ -1358,3 +1387,33 @@ jobs:
             ${{ runner.temp }}/accrue-provider-proof.json
             ${{ runner.temp }}/accrue-provider-manifest.json
           if-no-files-found: ignore
+
+  provider-proof-incident:
+    name: Stripe provider-proof incident reconciliation
+    needs: [provider-proof-trigger, live-stripe]
+    if: ${{ always() && needs.provider-proof-trigger.result == 'success' && needs.provider-proof-trigger.outputs.should_run == 'true' && (github.event_name != 'workflow_dispatch' || inputs.run_live_stripe) }}
+    runs-on: ubuntu-24.04
+    permissions:
+      actions: read
+      contents: read
+      issues: write
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Download provider proof
+        continue-on-error: true
+        uses: actions/download-artifact@v7
+        with:
+          name: live-stripe-proof
+          path: provider-proof-download
+
+      - name: Reconcile the deduplicated provider-proof issue
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: >-
+          node scripts/ci/provider_proof_automation.mjs --reconcile-issue
+          --record provider-proof-download/accrue-provider-proof.json
+          --repo "${{ github.repository }}"
+          --sha "${{ github.sha }}"
+          --run-url "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"

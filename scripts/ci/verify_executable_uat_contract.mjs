@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 
+import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
@@ -81,6 +82,26 @@ function hasUnresolvedHumanVerification(verification) {
     /^\s*why_human:\s*\S/im.test(verification) ||
     /^\s*status:\s*human_needed\s*$/im.test(verification)
   );
+}
+
+function isBackendZeroHumanPlan(source) {
+  if (!source.includes("automation_contract: backend-zero-human")) return false;
+  return /^automation_contract:\s*backend-zero-human\s*$/m.test(frontmatter(source, "PLAN.md"));
+}
+
+export function validateBackendZeroHumanPlan(source, file = "PLAN.md") {
+  if (!isBackendZeroHumanPlan(source)) return false;
+  if (/type="tracer"/.test(source)) fail(`${file}: backend-zero-human plans cannot use tracer tasks`);
+  if (/type="checkpoint:[^"]+"/.test(source)) fail(`${file}: backend-zero-human plans cannot use checkpoint tasks`);
+  if (/<human-check>|why_human:|human_verification:/i.test(source)) fail(`${file}: backend-zero-human plan contains human verification`);
+  const tasks = source.split(/(?=<task\s)/).slice(1);
+  if (tasks.length === 0) fail(`${file}: backend-zero-human plan has no tasks`);
+  for (const [index, task] of tasks.entries()) {
+    if (!/<automated>\S[\s\S]*?<\/automated>/.test(task)) {
+      fail(`${file}: task ${index + 1} is missing an automated verify command`);
+    }
+  }
+  return true;
 }
 
 function renderAutomatedUat(phaseDir) {
@@ -198,6 +219,24 @@ export function validatePhaseDirectory(phaseDir) {
   return { summaries: summaries.length, uatTests: tests.length };
 }
 
+function phaseAutomationState(phaseDir) {
+  const files = fs.readdirSync(phaseDir).sort();
+  const plans = files.filter((file) => /-PLAN\.md$/.test(file));
+  const optedPlans = plans.filter((file) => validateBackendZeroHumanPlan(fs.readFileSync(path.join(phaseDir, file), "utf8"), file));
+  if (optedPlans.length === 0) return { opted: false };
+  const summaries = files.filter((file) => /-SUMMARY\.md$/.test(file));
+  const verificationFile = files.find((file) => /-VERIFICATION\.md$/.test(file));
+  const complete = plans.length > 0 && summaries.length === plans.length && Boolean(verificationFile);
+  if (complete) {
+    const verification = fs.readFileSync(path.join(phaseDir, verificationFile), "utf8");
+    const phaseNumber = phaseNumberFromDirectory(phaseDir);
+    if (phaseNumber >= 228 && /^#{1,6}\s+.*human verification/im.test(verification)) {
+      fail(`${verificationFile}: backend-zero-human verification must not contain a human-verification section`);
+    }
+  }
+  return { opted: true, complete, plans: plans.length, optedPlans: optedPlans.length };
+}
+
 function resolvePhaseDir(root, phase) {
   const phasesRoot = path.join(root, ".planning", "phases");
   const matches = fs
@@ -256,6 +295,28 @@ function validateAllSince(root, since, write) {
     uatTests += result.uatTests;
   }
   return { phases: phaseDirs.length, summaries, uatTests };
+}
+
+function validateAllOptedIn(root, write) {
+  const phaseDirs = phaseDirectoriesSince(root, 0);
+  let optedPhases = 0;
+  let completedPhases = 0;
+  let summaries = 0;
+  let uatTests = 0;
+  for (const phaseDir of phaseDirs) {
+    const state = phaseAutomationState(phaseDir);
+    if (!state.opted) continue;
+    optedPhases += 1;
+    if (phaseNumberFromDirectory(phaseDir) < 228) continue;
+    if (!state.complete) continue;
+    if (write) generateAutomatedUat(phaseDir);
+    const result = validatePhaseDirectory(phaseDir);
+    completedPhases += 1;
+    summaries += result.summaries;
+    uatTests += result.uatTests;
+  }
+  if (optedPhases === 0) fail("no backend-zero-human phases found");
+  return { optedPhases, completedPhases, summaries, uatTests };
 }
 
 function currentPhase(root) {
@@ -344,6 +405,17 @@ function selfTest() {
       rejected = /verified timestamp is required/.test(error.message);
     }
     if (!rejected) fail("self-test: nondeterministic UAT timestamp fallback was not rejected");
+
+    const automatedPlan = `---\nautomation_contract: backend-zero-human\n---\n<tasks>\n<task type="auto"><verify><automated>mix test</automated></verify></task>\n</tasks>\n`;
+    assert.equal(validateBackendZeroHumanPlan(automatedPlan), true);
+    for (const [mutation, pattern] of [
+      [automatedPlan.replace('type="auto"', 'type="checkpoint:human-verify"'), /checkpoint tasks/],
+      [automatedPlan.replace('type="auto"', 'type="tracer"'), /tracer tasks/],
+      [automatedPlan.replace("<automated>mix test</automated>", "<human-check>approve</human-check>"), /human verification/],
+      [automatedPlan.replace("<automated>mix test</automated>", "<manual>approve</manual>"), /automated verify/],
+    ]) {
+      assert.throws(() => validateBackendZeroHumanPlan(mutation), pattern);
+    }
   } finally {
     fs.rmSync(temp, { recursive: true, force: true });
   }
@@ -356,8 +428,16 @@ function main() {
 
   const phaseIndex = args.indexOf("--phase");
   const allSinceIndex = args.indexOf("--all-since");
+  const allOptedIn = args.includes("--all-opted-in");
   const write = args.includes("--write");
   const root = process.env.ROOT_DIR || process.cwd();
+  if (allOptedIn) {
+    const result = validateAllOptedIn(root, write);
+    console.log(
+      `executable UAT contract: PASS (${result.optedPhases} opted-in phases, ${result.completedPhases} complete, ${result.summaries} summaries, ${result.uatTests} automated UAT tests)`
+    );
+    return;
+  }
   if (allSinceIndex !== -1) {
     const since = Number(args[allSinceIndex + 1]);
     if (!Number.isFinite(since)) fail("--all-since requires a numeric phase");

@@ -5,7 +5,7 @@ import path from "node:path";
 
 const POLICIES = new Set(["required", "advisory"]);
 const CONCLUSIONS = new Set(["success", "failure", "cancelled", "timed_out", "skipped", "neutral", "action_required"]);
-const SELECTED_TRIGGERS = new Set(["schedule", "workflow_dispatch"]);
+const SELECTED_TRIGGERS = new Set(["schedule", "workflow_dispatch", "push"]);
 const DEFAULT_CADENCE_HOURS = 24;
 const DEFAULT_GRACE_HOURS = 48;
 

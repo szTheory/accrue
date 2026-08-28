@@ -22,6 +22,40 @@ bash scripts/ci/verify_phase225_required_lane_evidence.sh
 
 Provider triage is literal: `proved` means the selected suite executed, selected tests, passed, and wrote its manifest. `misconfigured` means configuration, fixtures, or selection was absent; `failed` means selected assertions failed; `blocked` means the runner or upstream could not complete; `skipped` is an intentional bypass with a reason; `non_run` means a PR or push has no provider proof for that SHA. Start a local repair with `cd accrue && mix test.live`. Setup codes and their owners are listed in the [host setup matrix](../../examples/accrue_host/README.md#phase-226-setup-ownership).
 
+## Phase 228 zero-human provider proof
+
+After the one-time credential bootstrap, Stripe provider proof runs daily and
+after pushes that change the provider-proof contract. Pull requests and
+unrelated pushes do not spend provider API quota. A failure preserves the
+sanitized `live-stripe-proof` artifact and creates or updates one deduplicated
+GitHub issue; the next proved run closes that issue. CI does not retry provider
+failures automatically.
+
+The bootstrap accepts an existing Stripe endpoint signing secret on stdin. It
+never prints the value, validates all credential-free contracts first, checks
+the required Actions secret names, and dispatches exactly one authorized proof:
+
+```bash
+read -rs ACCRUE_STRIPE_WEBHOOK_SECRET
+printf '%s' "$ACCRUE_STRIPE_WEBHOOK_SECRET" | \
+  node scripts/ci/bootstrap_stripe_provider_proof.mjs \
+    --authorize-one-proof \
+    --repo szTheory/accrue \
+    --ref PUSHED_NAMED_REF \
+    --evidence-out .planning/phases/228-repair-stripe-webhook-signing-ci-boot-contract-under-a-fresh/228-BOOTSTRAP-EVIDENCE.json
+unset ACCRUE_STRIPE_WEBHOOK_SECRET
+```
+
+Authenticate `gh`, read the task-scoped variable without placing the secret in
+shell history, and use a pushed named ref. The bootstrap evidence contains
+only names, booleans, counts, SHA, ref, and run URL. Rehearse both automation
+surfaces without credentials or network mutation:
+
+```bash
+node scripts/ci/bootstrap_stripe_provider_proof.mjs --self-test
+node scripts/ci/provider_proof_automation.mjs --self-test
+```
+
 ## Phase 227 bounded critical-path measurement
 
 Phase 227 has one authorized candidate graph: `host-integration` needs only
@@ -111,9 +145,14 @@ changes.
 
 **After a push:** from the repo root, **`bash scripts/ci/watch_ci.sh`** waits on the latest GitHub Actions **CI** run for **`main`** (optional branch argument). Requires the **`gh`** CLI and auth (`gh auth login`).
 
-## Executable acceptance ratchet (Phase 218+)
+## Executable acceptance ratchet (Phase 228+ strict enforcement)
 
-`verify_executable_uat_contract.mjs` remains available for phase-scoped acceptance checks. The former project-wide historical scan is parked with the archived v1.59 phase tree; it should be re-enabled only when a new milestone explicitly adopts the executable-UAT contract.
+Backend phases opt into the reusable zero-human policy with
+`automation_contract: backend-zero-human` in plan frontmatter. Opted-in plans
+must use automated task verification and may not contain checkpoints,
+`<human-check>`, `why_human`, or `human_verification`. CI scans all opted-in
+phases; complete Phase 228+ phases must also have reproducible executable-UAT
+artifacts and no manual verification section.
 
 Generate or refresh a phase artifact after its executable checks and verifier pass:
 
@@ -121,7 +160,9 @@ Generate or refresh a phase artifact after its executable checks and verifier pa
 node scripts/ci/verify_executable_uat_contract.mjs --phase 218 --write
 ```
 
-Use `--all-since 218` to reproduce CI. Live provider checks are added as scheduled automation only when credentials exist and upstream-drift coverage has recurring value; they do not create manual UAT.
+Use `--all-opted-in` to reproduce CI. `--all-since 218` remains available for
+legacy milestone archaeology. Live provider checks are recurring automation,
+not manual UAT.
 
 ## ADOPT gates (v1.7 adoption milestone)
 
