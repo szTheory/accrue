@@ -18,14 +18,14 @@
 
 ### Critical Path and Ownership
 
-- [x] **PATH-01**: A maintainer can identify the measured critical path and the exact dependency or duplicated work selected for the first optimization, with before-state evidence and a documented rollback.
-- [x] **PATH-02**: One validated CI critical-path improvement reduces measured wait or duplicate work without removing required release, host, browser, or provider evidence.
+- [ ] **PATH-01**: A maintainer can identify the measured critical path and the exact dependency or duplicated work selected for the first optimization, with before-state evidence and a documented rollback.
+- [ ] **PATH-02**: One validated CI critical-path improvement reduces measured wait or duplicate work without removing required release, host, browser, or provider evidence.
 - [x] **OWN-01**: A host maintainer can determine whether Node, browser installation, and Playwright setup are owned by the host or CI, and can diagnose the documented setup failure modes.
 
 ### Safety and Operability
 
-- [x] **SAFE-01**: CI maintains stable required-check identity and artifacts while relevance gating, dependency ordering, or caching changes are evaluated.
-- [x] **SAFE-02**: Each CI change has an executable or recorded negative-control validation and rollback path; tests are not deleted or retried merely to hide failures.
+- [ ] **SAFE-01**: CI maintains stable required-check identity and artifacts while relevance gating, dependency ordering, or caching changes are evaluated.
+- [ ] **SAFE-02**: Each CI change has an executable or recorded negative-control validation and rollback path; tests are not deleted or retried merely to hide failures.
 
 ## Future Requirements
 
@@ -52,11 +52,11 @@
 | REL-03 | Phase 225 | Complete |
 | BASE-01 | Phase 226 | Gaps Found |
 | BASE-02 | Phase 226 | Gaps Found |
-| PATH-01 | Phase 227 | Complete |
-| PATH-02 | Phase 227 | Complete |
+| PATH-01 | Phase 227 | Gaps Found |
+| PATH-02 | Phase 227 | Gaps Found |
 | OWN-01 | Phase 226 | Gaps Found |
-| SAFE-01 | Phase 227 | Complete |
-| SAFE-02 | Phase 227 | Complete |
+| SAFE-01 | Phase 227 | Gaps Found |
+| SAFE-02 | Phase 227 | Gaps Found |
 
 **Coverage:**
 
