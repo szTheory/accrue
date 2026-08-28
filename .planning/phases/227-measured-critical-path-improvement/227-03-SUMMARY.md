@@ -9,7 +9,7 @@ requires:
 provides:
   - terminal candidate and restoration proof vectors
   - exact D-11 inverse rollback evidence
-  - literal external-proof recovery command
+  - exhausted restoration-run budget and terminal external-proof diagnosis
 affects: [PATH-02, CI workflow, live-stripe proof]
 tech-stack:
   added: []
@@ -21,7 +21,7 @@ key-files:
     - .planning/phases/227-measured-critical-path-improvement/227-CI-CRITICAL-PATH.ndjson
     - .planning/phases/227-measured-critical-path-improvement/227-CI-CRITICAL-PATH.md
 key-decisions:
-  - "Rollback is rollback_applied_unverified: the exact inverse passed local controls, but the sole normal-CI proof run failed live-Stripe configuration."
+  - "Rollback is rollback_applied_unverified: the exact inverse passed local controls, but the sole post-correction restoration run failed during application boot because the Stripe webhook signing secret was absent."
   - "Task 3 was not entered because its kept-only precondition is false."
 requirements-completed: []
 coverage:
@@ -37,19 +37,20 @@ status: blocked
 
 # Phase 227 Plan 03: Terminal Rollback Evidence Summary
 
-**Exact host-prerequisite rollback is applied and locally preserved; the sole normal-CI restoration proof remains externally unverified after its live-Stripe configuration failure.**
+**Exact host-prerequisite rollback is applied and locally preserved; the exhausted restoration proof remains unverified after the live suite failed at application boot.**
 
 ## Performance
 
-- **Completed:** 2026-08-13
+- **Completed:** 2026-08-28
 - **Tasks:** 2 of 3 (Task 3 correctly skipped by its precondition)
-- **Files modified:** 2
+- **Files modified:** 6
 
 ## Accomplishments
 
 - Recorded all three final candidate first-attempt proof vectors and their repository-bound classifications.
-- Retained exact inverse commit `80f6019374107fa1086eafc701090234c5e1b31f` and its sole restoration run [31716216311](https://github.com/szTheory/accrue/actions/runs/31716216311).
-- Rendered the literal `rollback_applied_unverified` state, owner, and immutable-SHA recovery command without dispatching any additional run.
+- Retained exact inverse commit `80f6019374107fa1086eafc701090234c5e1b31f` and the historical restoration evidence without rewriting it.
+- Recorded the one post-correction restoration dispatch, [33188858334](https://github.com/szTheory/accrue/actions/runs/33188858334), including its successful required path, artifact inventory, and provider failure.
+- Closed the restoration budget with no rerun, replacement, or next dispatch command authorized.
 
 ## Task Commits
 
@@ -59,28 +60,29 @@ status: blocked
 
 ## Decisions Made
 
-- The exact-three-success predicate failed: one candidate had a deterministic required-lane failure and two raw-success candidates lacked the required host setup-facts artifact.
-- The restoration run’s successful host/browser/finalizer path is useful immutable rollback evidence, but its failed normal live-Stripe proof prevents `rollback_verified`.
+- After correcting the impossible setup-facts requirement, two candidates are admitted; the third retains a deterministic required-lane failure, so the exact-three predicate still fails.
+- The post-correction restoration run’s host/browser/finalizer path passed, but `ACCRUE-DX-WEBHOOK-SECRET-MISSING` stopped provider testing before selection and prevents `rollback_verified`.
 - PATH-02 remains unmet. Do not launch an additional restoration run from this plan’s budget.
 
 ## Verification
 
-- Passed: branch-aware Task 2 terminal verifier, which emitted the prescribed blocking human-action command.
+- Passed: branch-aware terminal verifier for the complete failed restoration vector and exhausted run budget.
+- Passed: live GitHub reconciliation of the corrected candidates, restoration run/jobs/artifacts/workflow revision, and removed temporary ref.
 - Passed: `node --check scripts/ci/verify_ci_critical_path.mjs`.
 - Passed: critical-path fixtures and restored workflow contract.
 - Passed: frozen Phase 226 baseline verifier, provider fixtures, setup diagnostics, and Phase 225 preservation verifier.
 
 ## Deviations from Plan
 
-None - the plan’s `rollback_applied_unverified` terminal branch was followed exactly after the sole authorized restoration proof completed unsuccessfully.
+The post-recovery contract correction and one explicitly authorized restoration dispatch extended the original terminal record. Historical NDJSON bytes remain unchanged; all correction, transport, and outcome facts are appended.
 
 ## Issues Encountered
 
-The normal restoration run failed the live-Stripe configuration preflight. This is an external proof gap, not a candidate rerun or a reason to leave the candidate graph active.
+The three Stripe key/price inputs passed preflight. The live suite then failed during application boot because the Stripe processor webhook signing secret was absent. This is a distinct external proof gap, not a candidate rerun or a reason to leave the candidate graph active.
 
 ## Next Phase Readiness
 
-Blocked at `rollback_applied_unverified`. The external owner must resolve the live-Stripe configuration issue before using the literal command in the evidence report; Phase 227 remains incomplete and Task 3 must remain skipped.
+Terminally blocked at `rollback_applied_unverified`. The single restoration-run budget is exhausted, so no further dispatch is authorized by Phase 227. Phase 227 remains incomplete and Task 3 must remain skipped.
 
 ## Self-Check: PASSED
 

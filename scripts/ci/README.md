@@ -55,8 +55,9 @@ in the artifact inventory as a failure diagnostic; it must not be required
 alongside a successful `host-integration` job. The append-only correction and
 candidate reclassifications are recorded in `227-CI-CRITICAL-PATH.ndjson`.
 
-Verify the current rollback decision locally, then require the stricter state
-after the single restoration run succeeds:
+Verify the current terminal rollback decision locally. The restoration-run
+budget is exhausted, so the verified-only command remains a deliberate negative
+assertion rather than authorization for another dispatch:
 
 ```bash
 node scripts/ci/verify_ci_critical_path.mjs --require-final-decision \
@@ -69,8 +70,10 @@ node scripts/ci/verify_ci_critical_path.mjs --require-rollback-verified \
   --expected-repository szTheory/accrue
 ```
 
-The second command intentionally fails while the latest rollback record is
-`rollback_applied_unverified`; unsupported `--require-*` flags also fail closed.
+The first command validates the immutable failed restoration vector as well as
+the rollback label. The second command intentionally fails while the latest
+rollback record is `rollback_applied_unverified`; unsupported `--require-*`
+flags also fail closed.
 
 This directory hosts merge-adjacent bash gates and host-app checks. Use it as the first stop when CI fails on documentation or VERIFY-01 contracts.
 

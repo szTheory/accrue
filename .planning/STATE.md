@@ -5,10 +5,10 @@ milestone_name: CI Evidence & Critical-Path Hardening
 current_phase: 227
 current_phase_name: measured-critical-path-improvement
 status: blocked
-stopped_at: "Phase 227 blocked: live-Stripe repository secrets are absent; restoration dispatch remains unspent"
-last_updated: "2026-08-13T16:27:48.338Z"
-last_activity: 2026-08-13
-last_activity_desc: terminal restoration proof recorded
+stopped_at: "Phase 227 terminally blocked: restoration budget exhausted after webhook-signing configuration failure"
+last_updated: "2026-08-28T17:03:17Z"
+last_activity: 2026-08-28
+last_activity_desc: post-correction restoration outcome recorded and run budget closed
 progress:
   total_phases: 3
   completed_phases: 3
@@ -32,7 +32,7 @@ See: `.planning/PROJECT.md` (updated 2026-08-05 after shipping v1.59)
 Phase: 227 (measured-critical-path-improvement) — BLOCKED
 Plan: 3 of 3
 Status: Blocked at rollback_applied_unverified; PATH-02 is unmet
-Last activity: 2026-08-13 — terminal restoration proof recorded
+Last activity: 2026-08-28 — post-correction restoration outcome recorded and run budget closed
 
 Progress: [█████████░] 91%
 
@@ -953,7 +953,7 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - [Phase ?]: Require caller-supplied repository provenance before CI evidence can render.
 - [Phase ?]: Host integration now waits only for docs-contracts-shift-left; rollback restores admin-drift-docs.
 - [Phase ?]: The verifier hashes the normalized workflow to allow only this one dependency deletion.
-- [Phase ?]: Phase 227 rollback is rollback_applied_unverified: exact inverse 80f60193 passed local controls, but normal restoration run 31716216311 failed live-Stripe configuration; PATH-02 remains unmet.
+- [Phase ?]: Phase 227 rollback is rollback_applied_unverified: exact inverse 80f60193 passed local controls, but authorized restoration run 33188858334 failed at application boot because the Stripe webhook signing secret was absent; the run budget is exhausted and PATH-02 remains unmet.
 
 ### Pending Todos
 
@@ -968,8 +968,7 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - Phase 196 final full-suite gate: cd accrue_admin && mix test --warnings-as-errors fails outside Phase 196 in dashboard_live_test.exs:91 (missing $42.50) and webhooks_live_test.exs:106 (audit count expected 1, observed 2). Focused Phase 196 tests, package docs, assets, and e2e:phase196 pass.
 - Phase 208 Plan 04 blocked at Task 1: ANTHROPIC_API_KEY is absent from the execution environment; ledger.baseline.json remains frozen:false and live convergence/freeze must not proceed without maintainer local key.
 - Phase 227 Plan 02 blocked: final bounded workflow_dispatch cohort produced no successful first-attempt candidate runs; live-stripe provider proof failed and one run also failed host integration. Replan a compatible event class before retrying.
-- Phase 227 is blocked at rollback_applied_unverified: restoration run 31716216311 failed live-Stripe configuration; no additional restoration run is authorized by 227-03.
-- Phase 227 rollback remains unverified: repository secrets STRIPE_TEST_SECRET_KEY, ACCRUE_LIVE_BASIC_PRICE, and ACCRUE_LIVE_PRO_PRICE are absent; configure them before the single authorized restoration dispatch at 80f6019374107fa1086eafc701090234c5e1b31f.
+- Phase 227 is terminally blocked at rollback_applied_unverified: restoration run 33188858334 passed the required host/browser path and the three Stripe key/price preflight inputs, then failed at application boot because the Stripe webhook signing secret was absent. The restoration budget is exhausted; no rerun or replacement is authorized by 227-03.
 
 ### Quick Tasks Completed
 
@@ -1109,8 +1108,8 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 
 ## Session Continuity
 
-Last session: 2026-08-13T16:27:48.326Z
-Stopped at: Phase 227 blocked: live-Stripe repository secrets are absent; restoration dispatch remains unspent
+Last session: 2026-08-28T17:03:17Z
+Stopped at: Phase 227 terminally blocked: restoration budget exhausted after webhook-signing configuration failure
 Resume file: .planning/phases/227-measured-critical-path-improvement/227-CI-CRITICAL-PATH.md
 
 ## Operator Next Steps

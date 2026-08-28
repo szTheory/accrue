@@ -184,12 +184,45 @@ export function verifyRollbackTerminal(records, contract, expectedRepository = "
   return rollback;
 }
 
+function verifyRestorationDispatchTransport(records, rollback, expectedRepository) {
+  const transport = latestRecord(records, "restoration_dispatch_transport");
+  const run = rollback.restoration_run;
+  if (!transport || transport.repository !== expectedRepository || transport.target_sha !== rollback.restored_sha) fail("restoration dispatch transport identity is inconsistent");
+  if (transport.accepted_run_id !== run.run_id || transport.accepted_run_url !== run.run_url || transport.actual_authorized_runs_consumed !== 1) fail("restoration dispatch transport does not bind the sole authorized run");
+  if (transport.direct_sha_dispatch?.result !== "rejected_no_run" || transport.direct_sha_dispatch?.http_status !== 422 || transport.direct_sha_dispatch?.run_created !== false || transport.direct_sha_dispatch?.budget_consumed !== false) fail("rejected direct-SHA dispatch is not recorded as a non-run");
+  if (!transport.temporary_ref?.name || transport.temporary_ref?.pointed_to_target_sha !== true || transport.temporary_ref?.removed_after_run_binding !== true) fail("temporary restoration ref lifecycle is incomplete");
+  return transport;
+}
+
+export function verifyUnverifiedRollbackTerminal(records, contract, expectedRepository = "szTheory/accrue") {
+  verifyContractCorrection(records, contract);
+  const rollback = latestRecord(records, "rollback");
+  if (!rollback || rollback.state !== "rollback_applied_unverified") fail("latest rollback state is not rollback_applied_unverified");
+  const run = rollback.restoration_run;
+  if (!run || run.repository !== expectedRepository || run.sha !== rollback.restored_sha || rollback.inverse_commit !== rollback.restored_sha) fail("unverified rollback restoration identity is inconsistent");
+  if (run.run_attempt !== 1 || run.event_class !== "workflow_dispatch" || run.inputs?.run_live_stripe !== true || run.conclusion !== "failure") fail("unverified rollback restoration run is not the authorized failed attempt-1 live-Stripe dispatch");
+  requireRecordUrl(run, "run_url", immutableRunUrl(expectedRepository, run.run_id));
+  if (run.required_path?.host?.conclusion !== "success" || run.required_path?.annotation?.conclusion !== "success" || run.required_path?.playwright?.conclusion !== "success" || !Array.isArray(run.required_path.playwright.urls) || run.required_path.playwright.urls.length !== 3) fail("unverified rollback required path did not pass");
+  const provider = run.provider;
+  if (!provider || provider.state !== "misconfigured" || provider.conclusion !== "failure" || provider.reason_code !== "manifest_invalid" || provider.selected_count !== 0 || provider.manifest_written !== false) fail("unverified rollback provider failure is incomplete");
+  const immutablePrefix = `${immutableRunUrl(expectedRepository, run.run_id)}/job/`;
+  for (const url of [run.required_path.host.url, run.required_path.annotation.url, ...run.required_path.playwright.urls, provider.url]) {
+    if (!String(url || "").startsWith(immutablePrefix) || !/\/job\/\d+$/.test(url)) fail("unverified rollback job URL is not immutable and repository-bound");
+  }
+  for (const artifact of contract.proof_vector.expected_artifacts) if (run.artifacts?.[artifact] !== true) fail(`unverified rollback lacks required artifact: ${artifact}`);
+  if (run.artifacts?.["live-stripe-proof"] !== true || run.artifacts?.["accrue-host-ci-setup-facts"] !== false) fail("unverified rollback artifact inventory is incomplete");
+  if (rollback.run_budget !== "exhausted" || rollback.additional_dispatch_authorized !== false || rollback.next_command !== null) fail("unverified rollback must close the restoration run budget");
+  verifyRestorationDispatchTransport(records, rollback, expectedRepository);
+  return rollback;
+}
+
 export function verifyFinalDecision(records, contract, expectedRepository = "szTheory/accrue") {
   const admitted = correctedCandidateAdmissions(records, contract);
   if (admitted.length >= contract.run_budget.final_candidate_attempts) fail("rollback decision is inconsistent with a complete admitted cohort");
   const rollback = latestRecord(records, "rollback");
   if (!rollback || !["rollback_verified", "rollback_applied_unverified"].includes(rollback.state)) fail("terminal rollback decision is missing");
   if (rollback.state === "rollback_verified") verifyRollbackTerminal(records, contract, expectedRepository);
+  else verifyUnverifiedRollbackTerminal(records, contract, expectedRepository);
   return { state: rollback.state, admitted_observations: admitted.length };
 }
 
@@ -219,9 +252,14 @@ export function verifyFixtures() {
   const reclassification = (runId) => ({ kind: "candidate_reclassification", correction_id: correction.correction_id, repository: "szTheory/accrue", run_id: runId, run_url: immutableRunUrl("szTheory/accrue", runId), prior_classification: "candidate_regression", corrected_classification: "admitted_observation", corrected_proof_vector_complete: true, corrected_expected_artifacts: { "accrue-host-phase15-screenshots": true }, required_job_outcomes: "passed", live_revalidated: true, historical_record_rewritten: false });
   const fixtureJobUrl = (jobId) => immutableJobUrl("szTheory/accrue", 3, jobId);
   const verifiedRollback = { kind: "rollback", state: "rollback_verified", restored_sha: "a".repeat(40), inverse_commit: "a".repeat(40), restoration_run: { repository: "szTheory/accrue", run_id: 3, run_url: immutableRunUrl("szTheory/accrue", 3), sha: "a".repeat(40), run_attempt: 1, event_class: "workflow_dispatch", inputs: { run_live_stripe: true }, conclusion: "success", required_path: { host: { conclusion: "success", url: fixtureJobUrl(1) }, playwright: { conclusion: "success", urls: [fixtureJobUrl(2), fixtureJobUrl(3), fixtureJobUrl(4)] }, annotation: { conclusion: "success", url: fixtureJobUrl(5) } }, provider: { state: "proved", conclusion: "success", url: fixtureJobUrl(6) }, artifacts: { "accrue-host-phase15-screenshots": true, "live-stripe-proof": true } } };
+  const unverifiedRollback = { ...verifiedRollback, state: "rollback_applied_unverified", run_budget: "exhausted", additional_dispatch_authorized: false, next_command: null, restoration_run: { ...verifiedRollback.restoration_run, conclusion: "failure", provider: { state: "misconfigured", conclusion: "failure", url: fixtureJobUrl(6), reason_code: "manifest_invalid", selected_count: 0, manifest_written: false }, artifacts: { ...verifiedRollback.restoration_run.artifacts, "accrue-host-ci-setup-facts": false } } };
   const terminal = [correction, fixtureCandidate(1), fixtureCandidate(2), reclassification(1), reclassification(2), verifiedRollback];
   assert.deepEqual(verifyFinalDecision(terminal, contract), { state: "rollback_verified", admitted_observations: 2 });
   assert.equal(verifyRollbackTerminal(terminal, contract), verifiedRollback);
+  const transport = { kind: "restoration_dispatch_transport", repository: "szTheory/accrue", target_sha: "a".repeat(40), direct_sha_dispatch: { result: "rejected_no_run", http_status: 422, run_created: false, budget_consumed: false }, temporary_ref: { name: "fixture-ref", pointed_to_target_sha: true, removed_after_run_binding: true }, accepted_run_id: 3, accepted_run_url: immutableRunUrl("szTheory/accrue", 3), actual_authorized_runs_consumed: 1 };
+  const unverifiedTerminal = terminal.slice(0, -1).concat(transport, unverifiedRollback);
+  assert.deepEqual(verifyFinalDecision(unverifiedTerminal, contract), { state: "rollback_applied_unverified", admitted_observations: 2 });
+  assert.equal(verifyUnverifiedRollbackTerminal(unverifiedTerminal, contract), unverifiedRollback);
   assert.throws(() => verifySuccessArtifactContract({ ...contract, proof_vector: { ...contract.proof_vector, expected_artifacts: ["accrue-host-ci-setup-facts", "accrue-host-phase15-screenshots"] } }), /success-path host screenshots artifact/);
   assert.throws(() => verifyRollbackTerminal(terminal.slice(0, -1).concat({ ...verifiedRollback, state: "rollback_applied_unverified" }), contract), /not rollback_verified/);
   assert.throws(() => verifyRollbackTerminal(terminal.slice(0, -1).concat({ ...verifiedRollback, restoration_run: { ...verifiedRollback.restoration_run, artifacts: { "live-stripe-proof": true } } }), contract), /required artifact/);
@@ -229,6 +267,10 @@ export function verifyFixtures() {
   assert.throws(() => verifyRollbackTerminal(terminal.slice(0, -1).concat({ ...verifiedRollback, restoration_run: { ...verifiedRollback.restoration_run, run_attempt: 2 } }), contract), /authorized successful attempt-1/);
   assert.throws(() => verifyRollbackTerminal(terminal.slice(0, -1).concat({ ...verifiedRollback, restoration_run: { ...verifiedRollback.restoration_run, sha: "b".repeat(40) } }), contract), /identity is inconsistent/);
   assert.throws(() => verifyRollbackTerminal(terminal.slice(0, -1).concat({ ...verifiedRollback, restoration_run: { ...verifiedRollback.restoration_run, required_path: { ...verifiedRollback.restoration_run.required_path, host: { ...verifiedRollback.restoration_run.required_path.host, conclusion: "failure" } } } }), contract), /required path did not pass/);
+  assert.throws(() => verifyUnverifiedRollbackTerminal(unverifiedTerminal.slice(0, -1).concat({ ...unverifiedRollback, run_budget: "available" }), contract), /close the restoration run budget/);
+  assert.throws(() => verifyUnverifiedRollbackTerminal(unverifiedTerminal.slice(0, -1).concat({ ...unverifiedRollback, restoration_run: { ...unverifiedRollback.restoration_run, provider: { ...unverifiedRollback.restoration_run.provider, selected_count: 1 } } }), contract), /provider failure is incomplete/);
+  assert.throws(() => verifyUnverifiedRollbackTerminal(unverifiedTerminal.slice(0, -1).concat({ ...unverifiedRollback, restoration_run: { ...unverifiedRollback.restoration_run, artifacts: { ...unverifiedRollback.restoration_run.artifacts, "accrue-host-phase15-screenshots": false } } }), contract), /required artifact/);
+  assert.throws(() => verifyUnverifiedRollbackTerminal(unverifiedTerminal.filter((record) => record.kind !== "restoration_dispatch_transport"), contract), /transport identity is inconsistent/);
   return true;
 }
 
@@ -359,8 +401,12 @@ function verifyLiveReclassifications(records, contract, repository) {
   return true;
 }
 
-function verifyLiveRollback(records, contract, repository) {
-  const rollback = verifyRollbackTerminal(records, contract, repository);
+function verifyLiveRollback(records, contract, repository, requireVerified = false) {
+  const latest = latestRecord(records, "rollback");
+  const rollback = latest?.state === "rollback_verified"
+    ? verifyRollbackTerminal(records, contract, repository)
+    : verifyUnverifiedRollbackTerminal(records, contract, repository);
+  if (requireVerified && rollback.state !== "rollback_verified") fail("latest rollback state is not rollback_verified");
   const record = rollback.restoration_run;
   const run = api(`repos/${repository}/actions/runs/${record.run_id}`);
   if (run.head_sha !== record.sha || run.run_attempt !== record.run_attempt || run.event !== record.event_class || run.conclusion !== record.conclusion) fail(`live rollback facts differ for ${record.run_id}`);
@@ -374,6 +420,10 @@ function verifyLiveRollback(records, contract, repository) {
   verifyRecordedJob(jobs, repository, record.run_id, record.provider, "provider");
   const names = new Set(api(`repos/${repository}/actions/runs/${record.run_id}/artifacts?per_page=100`).artifacts.map((artifact) => artifact.name));
   for (const artifact of [...contract.proof_vector.expected_artifacts, "live-stripe-proof"]) if (!names.has(artifact)) fail(`live rollback lacks required artifact ${artifact}: ${record.run_id}`);
+  if (rollback.state === "rollback_applied_unverified") {
+    const transport = verifyRestorationDispatchTransport(records, rollback, repository);
+    if (apiErrorStatus(`repos/${repository}/git/ref/heads/${transport.temporary_ref.name}`) === 0) fail("temporary restoration ref still exists");
+  }
   return true;
 }
 
@@ -432,7 +482,7 @@ if (process.argv.includes("--verify-live-actions")) {
   if (records.some((record) => record.kind === "contract_correction")) {
     if (!repository || repository !== "szTheory/accrue") fail("--expected-repository must be szTheory/accrue for live verification");
     verifyLiveReclassifications(records, contract, repository);
-    if (process.argv.includes("--require-rollback-verified")) verifyLiveRollback(records, contract, repository);
+    if (process.argv.includes("--require-final-decision") || process.argv.includes("--require-rollback-verified")) verifyLiveRollback(records, contract, repository, process.argv.includes("--require-rollback-verified"));
   } else {
     verifyLiveEvidence(records, contract, repository, process.argv.includes("--require-negative-control"), option("--control-branch"));
   }

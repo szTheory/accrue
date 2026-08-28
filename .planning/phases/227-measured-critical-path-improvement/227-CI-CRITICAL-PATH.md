@@ -2,15 +2,17 @@
 
 ## Current fact
 
-The final authorized candidate cohort did not admit three complete first-attempt proof vectors. The exact D-11 inverse is present at `80f6019374107fa1086eafc701090234c5e1b31f`; its sole authorized normal-CI proof run completed with a live-Stripe configuration failure.
+The corrected final candidate cohort admits only two of the three required first-attempt proof vectors. The exact D-11 inverse is present at `80f6019374107fa1086eafc701090234c5e1b31f`. The single post-correction restoration dispatch completed, but a missing Stripe webhook signing secret stopped the live suite during application boot.
 
 ## Rollback
 
 - state: `rollback_applied_unverified`
 - owner: maintainer
-- next command: `gh workflow run ci.yml --repo szTheory/accrue --ref 80f6019374107fa1086eafc701090234c5e1b31f -f run_live_stripe=true`
+- restoration run budget: `exhausted`
+- additional dispatch authorized: `false`
+- next command: none
 
-No additional candidate, rerun, replacement, or restoration sample was launched. The literal next command is recorded for the external owner; this execution did not invoke it.
+No candidate rerun or replacement was launched. Exactly one restoration run was created after the contract correction, and no further dispatch is authorized.
 
 ## Recovery preflight (2026-08-13)
 
@@ -20,7 +22,7 @@ The recovery gate was diagnosed from the immutable provider-job log and reposito
 - `ACCRUE_LIVE_BASIC_PRICE`
 - `ACCRUE_LIVE_PRO_PRICE`
 
-The task-scoped environment also contains none of these values. Their values were not read or printed. Because this executor cannot safely invent or obtain Stripe credentials, the authorized recovery dispatch remains unspent. Configure all three repository secrets with a Stripe test-mode key and price IDs that belong to that key, then run the unchanged literal command above once.
+The task-scoped environment also contained none of these values. Their values were not read or printed. This was the accurate preflight state on 2026-08-13; the 2026-08-28 outcome below supersedes its recovery instruction.
 
 ## Final candidate proof vectors
 
@@ -32,9 +34,9 @@ The task-scoped environment also contains none of these values. Their values wer
 
 All three are immutable `workflow_dispatch`, attempt-1 records at candidate SHA `d1244ee5fe591ee18bb31e30df81143b3dd4512c` with `run_live_stripe: false` and provider state `non_run`. Their complete repository-bound job URLs, artifact presence, advisory outcomes, workflow revision, and exclusions are retained in the NDJSON ledger.
 
-## Restoration proof
+## Historical restoration proof
 
-[31716216311](https://github.com/szTheory/accrue/actions/runs/31716216311) is the one normal, attempt-1 `workflow_dispatch` at restored SHA `80f6019374107fa1086eafc701090234c5e1b31f`, with `run_live_stripe: true`. Host integration, all three Playwright shards, and `annotation-sweep` succeeded; the `live-stripe` provider preflight failed and emitted its artifact, so the raw workflow conclusion is `failure`. This is immutable rollback evidence but does not meet the fresh-success requirement for `rollback_verified`.
+[31716216311](https://github.com/szTheory/accrue/actions/runs/31716216311) is the pre-correction attempt-1 `workflow_dispatch` at restored SHA `80f6019374107fa1086eafc701090234c5e1b31f`, with `run_live_stripe: true`. Host integration, all three Playwright shards, and `annotation-sweep` succeeded; the `live-stripe` provider preflight failed and emitted its artifact, so the raw workflow conclusion is `failure`. This immutable historical record is retained unchanged but did not meet the fresh-success requirement for `rollback_verified`.
 
 ## Preserved controls
 
@@ -57,4 +59,14 @@ Read-only GitHub reconciliation revalidated the two successful candidate runs ag
 | [31715609742](https://github.com/szTheory/accrue/actions/runs/31715609742) | `candidate_regression` | `admitted_observation` | passed | `accrue-host-phase15-screenshots` present |
 | [31715612044](https://github.com/szTheory/accrue/actions/runs/31715612044) | `candidate_regression` | `admitted_observation` | passed | `accrue-host-phase15-screenshots` present |
 
-These append-only reclassifications supersede the artifact-only exclusions in the historical table above. Run `31715606960` remains excluded for its deterministic required-lane failure. The corrected cohort therefore has only two admitted observations, fewer than the three required by the bounded measurement contract; rollback remains the honest decision. The single authorized restoration dispatch is still unspent, and no Stripe configuration or workflow mutation was made as part of this correction.
+These append-only reclassifications supersede the artifact-only exclusions in the historical table above. Run `31715606960` remains excluded for its deterministic required-lane failure. The corrected cohort therefore has only two admitted observations, fewer than the three required by the bounded measurement contract; rollback remains the honest decision. At the time of this correction the single authorized restoration dispatch was still unspent, and the correction itself made no Stripe configuration or workflow mutation.
+
+## Authorized restoration outcome (2026-08-28)
+
+The three repository Stripe inputs were configured without exposing their values. A literal SHA dispatch was rejected by GitHub with HTTP 422 and created no run, so it did not consume the budget. A temporary ref pointing exactly to restored SHA `80f6019374107fa1086eafc701090234c5e1b31f` was then used for the one authorized dispatch and removed immediately after run identity was bound.
+
+[33188858334](https://github.com/szTheory/accrue/actions/runs/33188858334) is that sole attempt-1 `workflow_dispatch`, with `run_live_stripe: true`. Host integration, all three Playwright shards, and `annotation-sweep` succeeded. `accrue-host-phase15-screenshots` and `live-stripe-proof` are present; the failure-only setup-facts artifact is correctly absent.
+
+The three key/price preflight inputs passed. The provider job then failed before selecting any live test because application boot raised `ACCRUE-DX-WEBHOOK-SECRET-MISSING`: the Stripe processor webhook signing secret was absent. The emitted proof classifies this as `misconfigured` / `manifest_invalid`, with zero selected tests and no manifest written. Therefore the run cannot establish `rollback_verified`.
+
+The restoration budget is exhausted. No rerun or replacement is authorized. Phase 227 remains terminally blocked at `rollback_applied_unverified`; Task 3 stays skipped and PATH-02 remains unmet.
