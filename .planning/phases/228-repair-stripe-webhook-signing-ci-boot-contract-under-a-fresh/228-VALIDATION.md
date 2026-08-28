@@ -40,9 +40,10 @@ created: 2026-08-28
 
 | Task ID | Plan | Wave | Requirement | Threat Ref | Secure Behavior | Test Type | Automated Command | File Exists | Status |
 |---------|------|------|-------------|------------|-----------------|-----------|-------------------|-------------|--------|
-| 228-TBD-01 | TBD | 0/1 | TBD-228-01 | T-228-01 | Missing or renamed signing-secret bindings fail without printing the value | static + negative fixture | `node scripts/ci/verify_provider_proof.mjs --fixtures` | ✅ extend existing | ⬜ pending |
-| 228-TBD-02 | TBD | 0/1 | TBD-228-02 | T-228-02 | Test runtime maps a nonempty signing secret before Stripe boot validation | integration / no-network | targeted Mix/ExUnit runtime-config test defined by the plan | ❌ W0 | ⬜ pending |
-| 228-TBD-03 | TBD | final | TBD-228-03 | T-228-03 | A fresh run counts as provider proof only with selected passing tests, manifest, and proof artifact | live contract | existing provider finalizer plus recorded GitHub Actions evidence | ✅ tooling; ❌ phase record | ⬜ pending |
+| 228-01-01 | 228-01 | 1 | none (phase has no mapped IDs) | T-228-01, T-228-02, T-228-04 | Missing or renamed signing-secret bindings fail without printing the value; test runtime maps a nonempty signing secret before Stripe boot validation | static negative fixture + integration/no-network | `node scripts/ci/verify_provider_proof.mjs --fixtures && cd accrue && mix test test/accrue/runtime_config_test.exs test/accrue/config_test.exs` | ✅ verifier; ❌ runtime test until execution | ⬜ pending |
+| 228-01-02 | 228-01 | 1 | none (phase has no mapped IDs) | T-228-03 | Evidence schema exists before authority and preserves nonempty proof semantics | document contract + deterministic suites | `rg -n 'readiness_not_authorized|first-attempt|selected_count|live-stripe-proof' .planning/phases/228-repair-stripe-webhook-signing-ci-boot-contract-under-a-fresh/228-STRIPE-WEBHOOK-BOOT-EVIDENCE.md` | ❌ until execution | ⬜ pending |
+| 228-02-01/02 | 228-02 | 2 | none (phase has no mapped IDs) | T-228-05..08 | Correct endpoint secret and exactly one attempt are explicitly confirmed without disclosure or dispatch | blocking human checkpoints | deterministic Plan 228-01 commands plus sanitized maintainer decisions | ✅ plan contract | ⬜ pending |
+| 228-03-01/02 | 228-03 | 3 | none (phase has no mapped IDs) | T-228-09..12 | A fresh run counts as provider proof only with selected passing tests, manifest, and proof artifact | live contract | existing provider finalizer, `gh run view`, and recorded GitHub Actions evidence | ✅ tooling; ❌ phase outcome until execution | ⬜ pending |
 
 *Status: ⬜ pending · ✅ green · ❌ red · ⚠️ flaky*
 

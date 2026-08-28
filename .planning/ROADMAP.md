@@ -195,3 +195,20 @@ Full history: [v1.58 roadmap archive](milestones/v1.58-ROADMAP.md).
 </details>
 
 Completed milestone detail is archived in [v1.59-ROADMAP.md](milestones/v1.59-ROADMAP.md).
+
+### Phase 228: Repair Stripe Webhook-Signing CI Boot Contract Under a Fresh Evidence Budget
+
+**Goal:** Repair the runtime-owned Stripe webhook signing-secret CI boot contract, prove it deterministically without network access, and record one freshly authorized provider attempt as sanitized evidence.
+**Requirements**: TBD
+**Depends on:** Phase 227
+**Success Criteria:**
+1. The live-stripe job binds and preflights `STRIPE_WEBHOOK_SECRET`, and test runtime maps it to `%{stripe: [secret]}` before boot validation without changing ordinary Fake-backed tests.
+2. Deterministic negative fixtures and a no-network runtime test reject missing configuration while preserving always-run provider proof finalization and artifact behavior.
+3. After explicit maintainer setup and authorization, at most one fresh attempt-1 dispatch is recorded with canonical nonempty proof semantics and no secret disclosure; Phase 227 evidence remains immutable.
+**Plans:** 3 plans
+
+Plans:
+
+- [ ] 228-01-PLAN.md — Repair and deterministically prove the CI-to-runtime boot contract; freeze the evidence schema.
+- [ ] 228-02-PLAN.md — Gate exact endpoint-secret administration and one-attempt authority.
+- [ ] 228-03-PLAN.md — Dispatch once and seal the sanitized provider outcome.
