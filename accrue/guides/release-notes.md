@@ -125,6 +125,10 @@ The admin package is the **LiveView dashboard** that mounts into your Phoenix ro
 
 Matches **accrue 1.5.1** for linked dependency compatibility. The API-only entitlement and Decimal 3 fixes live in core; this package adds no operator workflow or authorization behavior.
 
+### 1.5.0
+
+Matches **accrue 1.5.0** for linked dependency compatibility. Stripe-native entitlement refresh remains observational and core-owned; this package adds no grant authority.
+
 ### 1.4.0
 
 Matches **accrue 1.4.0**: Stays aligned with the linked release proof and stable-core positioning updates.

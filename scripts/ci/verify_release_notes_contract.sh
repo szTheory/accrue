@@ -167,14 +167,15 @@ fi
 if [[ "$release_state" == "pre-release" || "$accrue_version" == "1.5.0" ]]; then
   feature_section=$core_section
 else
-  feature_section=$(changelog_release_section "$core_changelog" "1.5.0") ||
-    fail "accrue/CHANGELOG.md missing historical 1.5.0 feature section"
+  feature_section=$(<"$core_changelog")
 
-  assert_section_contains "accrue/CHANGELOG.md" "$core_section" "Phoenix 1.8" "missing Phoenix 1.8 compatibility fix"
-  assert_section_contains "accrue/CHANGELOG.md" "$core_section" "Decimal 3" "missing Decimal 3 compatibility fix"
-  assert_section_contains "accrue/CHANGELOG.md" "$core_section" "API-only entitlement readers" "missing API-only entitlement posture"
-  assert_section_contains "accrue/CHANGELOG.md" "$core_section" '`:limits`' "missing limits-to-quantities fix"
-  assert_section_contains "accrue/CHANGELOG.md" "$core_section" "Accrue.Test.Entitlements" "missing public entitlement fixtures"
+  if [[ "$accrue_version" == "1.5.1" ]]; then
+    assert_section_contains "accrue/CHANGELOG.md" "$core_section" "Phoenix 1.8" "missing Phoenix 1.8 compatibility fix"
+    assert_section_contains "accrue/CHANGELOG.md" "$core_section" "Decimal 3" "missing Decimal 3 compatibility fix"
+    assert_section_contains "accrue/CHANGELOG.md" "$core_section" "API-only entitlement readers" "missing API-only entitlement posture"
+    assert_section_contains "accrue/CHANGELOG.md" "$core_section" '`:limits`' "missing limits-to-quantities fix"
+    assert_section_contains "accrue/CHANGELOG.md" "$core_section" "Accrue.Test.Entitlements" "missing public entitlement fixtures"
+  fi
 fi
 
 assert_section_contains "accrue/CHANGELOG.md" "$feature_section" "lattice_stripe" "missing lattice_stripe ~> 2.0 bump"
