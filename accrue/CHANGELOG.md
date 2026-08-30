@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## [1.5.1](https://github.com/szTheory/accrue/compare/accrue-v1.5.0...accrue-v1.5.1) (2026-08-30)
+
 ### Bug Fixes
 
 * Resolve clean Phoenix 1.8 / Ecto 3.14 hosts on Decimal 3 and the compatible ex_money 6 line while preserving Accrue's locale-validation backend.

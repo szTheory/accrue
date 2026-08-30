@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+## [1.5.1](https://github.com/szTheory/accrue/compare/accrue_admin-v1.5.0...accrue_admin-v1.5.1) (2026-08-30)
+
+### Notes
+
+* Compatibility only: the linked 1.5.1 release accepts the core Decimal 3 and API-only entitlement-reader fixes. The core `accrue` package owns those capabilities; this package owns only its existing UI surface.
+
+### Miscellaneous Chores
+
+* **accrue_admin:** Synchronize accrue-monorepo versions
+
 ## [1.5.0](https://github.com/szTheory/accrue/compare/accrue_admin-v1.4.0...accrue_admin-v1.5.0) (2026-08-19)
 
 ### Notes
