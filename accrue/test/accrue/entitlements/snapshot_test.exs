@@ -1,7 +1,19 @@
 defmodule Accrue.Entitlements.SnapshotTest do
-  use ExUnit.Case, async: true
+  use ExUnit.Case, async: false
 
   alias Accrue.Entitlements.{Grant, Snapshot}
+
+  setup do
+    keys = [:processor, :rails, :default_rail, :entitlements]
+    previous = Map.new(keys, &{&1, Application.get_env(:accrue, &1, :unset)})
+
+    on_exit(fn ->
+      Enum.each(previous, fn
+        {key, :unset} -> Application.delete_env(:accrue, key)
+        {key, value} -> Application.put_env(:accrue, key, value)
+      end)
+    end)
+  end
 
   test "folds live rail-qualified grants into one deterministic authorization value" do
     now = ~U[2026-08-02 12:00:00.000000Z]
@@ -74,6 +86,44 @@ defmodule Accrue.Entitlements.SnapshotTest do
 
     assert Snapshot.authorization_signature(one_source) ==
              Snapshot.authorization_signature(two_sources)
+  end
+
+  test "schema-valid :limits populate quantities through the configured catalog" do
+    Application.put_env(:accrue, :processor, Accrue.Processor.Fake)
+
+    Application.put_env(:accrue, :rails,
+      stripe: [
+        source: :stripe,
+        processor: Accrue.Processor.Fake,
+        environments: [:production],
+        default_environment: :production
+      ]
+    )
+
+    Application.put_env(:accrue, :default_rail, :stripe)
+
+    Application.put_env(:accrue, :entitlements,
+      plans: [
+        pro: [
+          features: [:analytics],
+          limits: [seats: 5],
+          price_ids: ["pro-monthly"]
+        ]
+      ]
+    )
+
+    now = ~U[2026-08-02 12:00:00.000000Z]
+
+    snapshot =
+      Snapshot.from_grants([grant(:stripe, "stripe-lineage", 3, now)],
+        account_id: "account-opaque",
+        revision: 1,
+        now: now
+      )
+
+    assert snapshot.plans == [:pro]
+    assert snapshot.features == [:analytics]
+    assert snapshot.quantities == %{seats: 5}
   end
 
   defp options(_expiry, now) do

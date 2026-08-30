@@ -127,7 +127,7 @@ defmodule Accrue.Entitlements.OfflineReconnectTest do
       plans: [
         pro: [
           features: [:offline_study],
-          quotas: [downloads: 3],
+          limits: [downloads: 3],
           products: [stripe: [production: ["price_pro"]]]
         ]
       ]

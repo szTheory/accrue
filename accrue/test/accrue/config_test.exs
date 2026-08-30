@@ -3,22 +3,22 @@ defmodule Accrue.ConfigTest do
 
   alias Accrue.Config
 
-  # The nested `:branding` schema has two required inner keys
-  # (:from_email + :support_email). Any direct `Config.validate!/1`
-  # call site must supply them or NimbleOptions raises at the nested
-  # schema level. This helper keeps existing test intent untouched while
-  # satisfying that schema contract.
+  # Most validation cases still include realistic mail branding. Read-only
+  # consumers may omit it entirely; that posture has a dedicated assertion
+  # below.
   @test_branding [from_email: "noreply@example.test", support_email: "support@example.test"]
 
   defp with_branding(opts), do: Keyword.put_new(opts, :branding, @test_branding)
 
   describe "validate!/1" do
     test "happy path with required :repo" do
-      opts = Config.validate!(with_branding(repo: SomeApp.Repo))
+      opts = Config.validate!(repo: SomeApp.Repo)
       assert opts[:repo] == SomeApp.Repo
       assert opts[:billing_schema] == "billing"
       assert opts[:processor] == Accrue.Processor.Fake
       assert opts[:default_currency] == :usd
+      assert opts[:branding][:from_email] == nil
+      assert opts[:branding][:support_email] == nil
     end
 
     test ":billing_schema accepts explicit public escape hatch" do
