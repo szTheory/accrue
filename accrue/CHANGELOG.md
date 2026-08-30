@@ -2,19 +2,13 @@
 
 ## Unreleased
 
+## [1.5.1](https://github.com/szTheory/accrue/compare/accrue-v1.5.0...accrue-v1.5.1) (2026-08-30)
+
 ### Bug Fixes
 
 * Resolve clean Phoenix 1.8 / Ecto 3.14 hosts on Decimal 3 and the compatible ex_money 6 line while preserving Accrue's locale-validation backend.
 * Allow API-only entitlement readers to boot without email branding, populate snapshot quantities from the schema-valid `:limits` key, and copy migrations even when installer project discovery requires manual snippet review.
 * Ship `Accrue.Test.Entitlements` with the common none, Stripe active, Stripe cancel-at-period-end, and Apple active host fixture shapes.
-
-## [1.5.1](https://github.com/szTheory/accrue/compare/accrue-v1.5.0...accrue-v1.5.1) (2026-08-30)
-
-
-### Bug Fixes
-
-* unblock API-only entitlement consumers ([76e4934](https://github.com/szTheory/accrue/commit/76e49347fa0d1e8fc5ec4c1a56c599ac5dce763d))
-* unblock API-only entitlement consumers ([dba9a75](https://github.com/szTheory/accrue/commit/dba9a75daa4c8ca1f3213dd2de43efbbde1f5dfe))
 
 ## [1.5.0](https://github.com/szTheory/accrue/compare/accrue-v1.4.0...accrue-v1.5.0) (2026-08-19)
 
