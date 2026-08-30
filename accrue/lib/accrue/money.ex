@@ -21,7 +21,7 @@ defmodule Accrue.Money do
 
   Passing a `Decimal` or a `float` to `new/2` raises `ArgumentError`. Use
   `from_decimal/2` for explicit decimal conversions — the shift to minor
-  units is currency-exponent aware via ex_money's CLDR table.
+  units is currency-exponent aware via ex_money's currency table.
 
   ## Cross-currency arithmetic (D-04)
 
@@ -146,7 +146,7 @@ defmodule Accrue.Money do
 
   @spec exponent!(atom()) :: non_neg_integer()
   defp exponent!(currency) do
-    case Money.Currency.currency_for_code(currency) do
+    case Money.Currency.currency_for_code(Atom.to_string(currency)) do
       {:ok, %{iso_digits: digits}} when is_integer(digits) ->
         digits
 

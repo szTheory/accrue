@@ -373,8 +373,8 @@ defmodule Accrue.Config do
       keys: [
         business_name: [type: :string, default: "Accrue"],
         from_name: [type: :string, default: "Accrue"],
-        from_email: [type: :string, required: true],
-        support_email: [type: :string, required: true],
+        from_email: [type: {:or, [:string, nil]}, default: nil],
+        support_email: [type: {:or, [:string, nil]}, default: nil],
         reply_to_email: [type: {:or, [:string, nil]}, default: nil],
         logo_url: [type: {:or, [:string, nil]}, default: nil],
         logo_dark_url: [type: {:or, [:string, nil]}, default: nil],
@@ -405,8 +405,8 @@ defmodule Accrue.Config do
       ],
       doc:
         "Branding config. Single source of truth for email + PDF brand. " <>
-          "`:from_email` and `:support_email` are required for any real deploy. " <>
-          "See guides/branding.md."
+          "Read-only hosts may omit it; configure `:from_email` and " <>
+          "`:support_email` before enabling email delivery. See guides/branding.md."
     ],
     admin_branding: [
       type: :keyword_list,

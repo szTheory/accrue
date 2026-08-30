@@ -60,7 +60,13 @@ defmodule Accrue.MixProject do
       {:ecto, "~> 3.13"},
       {:ecto_sql, "~> 3.13"},
       {:postgrex, "~> 0.22"},
-      {:ex_money, "~> 5.24"},
+      # ex_money 6.x is the first line that supports Decimal 3.x, which Ecto
+      # 3.14+ requires. Keep the CLDR packages explicit below because Accrue's
+      # locale validation remains backwards-compatible with Accrue.Cldr even
+      # though ex_money 6 moved its own formatting to Localize.
+      {:ex_money, "~> 6.2"},
+      {:ex_cldr, "~> 2.47"},
+      {:ex_cldr_numbers, "~> 2.38"},
       {:lattice_stripe, "~> 2.0"},
       {:braintree, "~> 0.16"},
       {:oban, "~> 2.21"},
@@ -72,7 +78,7 @@ defmodule Accrue.MixProject do
       {:telemetry, "~> 1.3"},
       {:jason, "~> 1.4"},
       {:jose, "~> 1.11"},
-      {:decimal, "~> 2.0"},
+      {:decimal, "~> 3.0"},
       {:plug, "~> 1.16"},
       {:plug_crypto, "~> 2.1"},
       {:igniter, "~> 0.7.9", runtime: false},

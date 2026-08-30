@@ -42,10 +42,18 @@ defmodule Mix.Tasks.Accrue.Install do
         opts.check ->
           run_check(project, opts)
 
-        opts.dry_run or opts.manual or project.manual? ->
+        opts.dry_run or opts.manual ->
           report("manual: review generated snippets before applying")
+          report("manual: no files changed; migrations were not copied")
           print_manual_snippets(project, opts)
           []
+
+        project.manual? ->
+          report("manual: review generated snippets before applying")
+          report("manual: copying migrations only; router and config were not changed")
+          results = install_migrations(project, opts)
+          print_manual_snippets(project, opts)
+          results
 
         true ->
           install(project, opts)
@@ -118,18 +126,7 @@ defmodule Mix.Tasks.Accrue.Install do
   end
 
   defp install(project, opts) do
-    template_results =
-      project
-      |> Accrue.Install.Templates.render_all(opts)
-      |> Enum.flat_map(fn {path, content} ->
-        path
-        |> Accrue.Install.Fingerprints.write(content,
-          force: opts.force,
-          dry_run: opts.dry_run,
-          write_conflicts: opts.write_conflicts
-        )
-        |> report_template_result()
-      end)
+    template_results = write_templates(Accrue.Install.Templates.render_all(project, opts), opts)
 
     patch_results =
       project
@@ -137,6 +134,24 @@ defmodule Mix.Tasks.Accrue.Install do
       |> Enum.flat_map(&report_patch_result/1)
 
     template_results ++ patch_results
+  end
+
+  defp install_migrations(project, opts) do
+    project
+    |> Accrue.Install.Templates.render_migrations(opts)
+    |> write_templates(opts)
+  end
+
+  defp write_templates(templates, opts) do
+    Enum.flat_map(templates, fn {path, content} ->
+      path
+      |> Accrue.Install.Fingerprints.write(content,
+        force: opts.force,
+        dry_run: opts.dry_run,
+        write_conflicts: opts.write_conflicts
+      )
+      |> report_template_result()
+    end)
   end
 
   defp print_manual_snippets(project, opts) do

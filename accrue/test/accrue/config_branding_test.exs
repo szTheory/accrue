@@ -168,20 +168,19 @@ defmodule Accrue.ConfigBrandingTest do
   end
 
   describe "validate_at_boot!/0 with branding schema" do
-    test "fails loud when :from_email is missing from nested branding" do
+    test "read-only config may omit :from_email" do
       Application.put_env(:accrue, :branding, support_email: "support@example.test")
-
-      assert_raise NimbleOptions.ValidationError, ~r/from_email/, fn ->
-        Config.validate_at_boot!()
-      end
+      assert :ok = Config.validate_at_boot!()
     end
 
-    test "fails loud when :support_email is missing from nested branding" do
+    test "read-only config may omit :support_email" do
       Application.put_env(:accrue, :branding, from_email: "noreply@example.test")
+      assert :ok = Config.validate_at_boot!()
+    end
 
-      assert_raise NimbleOptions.ValidationError, ~r/support_email/, fn ->
-        Config.validate_at_boot!()
-      end
+    test "read-only config may omit branding entirely" do
+      Application.delete_env(:accrue, :branding)
+      assert :ok = Config.validate_at_boot!()
     end
 
     test "fails loud when accent_color is not hex" do

@@ -208,6 +208,53 @@ defmodule Mix.Tasks.Accrue.InstallTest do
            )
   end
 
+  @tag :install_templates
+  test "stock Phoenix shape installs non-interactively instead of entering manual mode" do
+    app = InstallFixture.tmp_app!(:stock_non_interactive)
+
+    InstallFixture.write_mix_project!(app, [
+      "{:phoenix, \"~> 1.8.13\"}",
+      "{:phoenix_ecto, \"~> 4.5\"}",
+      "{:accrue, path: \"../accrue\"}"
+    ])
+
+    InstallFixture.write_router!(app)
+    InstallFixture.write_config!(app)
+
+    output = run_install(app, ["--yes", "--non-interactive"])
+
+    refute output =~ "project shape requires snippet review"
+    assert output =~ "created:"
+    assert File.exists?(Path.join(app, "lib/my_app/billing.ex"))
+
+    assert File.exists?(
+             Path.join(
+               app,
+               "priv/repo/migrations/20260802150000_create_accrue_entitlement_persistence.exs"
+             )
+           )
+  end
+
+  @tag :install_templates
+  test "ambiguous project copies migrations and states which host files remain manual" do
+    app = InstallFixture.tmp_app!(:manual_migrations)
+    InstallFixture.write_mix_project!(app, ["{:accrue, path: \"../accrue\"}"])
+    InstallFixture.write_config!(app)
+
+    output = run_install(app, ["--yes", "--non-interactive"])
+
+    assert output =~ "project shape requires snippet review"
+    assert output =~ "copying migrations only; router and config were not changed"
+    refute File.exists?(Path.join(app, "lib/my_app/billing.ex"))
+
+    assert File.exists?(
+             Path.join(
+               app,
+               "priv/repo/migrations/20260802150000_create_accrue_entitlement_persistence.exs"
+             )
+           )
+  end
+
   @tag :install_patches
   test "patches router with webhook, admin, auth, test support, and Oban snippets when dependencies are present" do
     app = InstallFixture.tmp_app!(:patches)

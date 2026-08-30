@@ -201,7 +201,7 @@ defmodule Accrue.Invoices.Render do
   end
 
   defp currency_exponent!(currency) do
-    case Money.Currency.currency_for_code(currency) do
+    case Money.Currency.currency_for_code(Atom.to_string(currency)) do
       {:ok, %{iso_digits: digits}} when is_integer(digits) -> digits
       _ -> raise ArgumentError, "unknown currency: #{inspect(currency)}"
     end
