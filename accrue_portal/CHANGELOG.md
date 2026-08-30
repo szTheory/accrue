@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+## [1.5.1](https://github.com/szTheory/accrue/compare/accrue_portal-v1.5.0...accrue_portal-v1.5.1) (2026-08-30)
+
+
+### Miscellaneous Chores
+
+* **accrue_portal:** Synchronize accrue-monorepo versions
+
 ## [1.5.0](https://github.com/szTheory/accrue/compare/accrue_portal-v1.4.0...accrue_portal-v1.5.0) (2026-08-19)
 
 ### Notes
