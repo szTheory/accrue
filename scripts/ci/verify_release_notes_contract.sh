@@ -164,16 +164,29 @@ else
   done
 fi
 
-assert_section_contains "accrue/CHANGELOG.md" "$core_section" "lattice_stripe" "missing lattice_stripe ~> 2.0 bump"
-assert_section_contains "accrue/CHANGELOG.md" "$core_section" "~> 2.0" "missing lattice_stripe ~> 2.0 bump"
-assert_section_contains "accrue/CHANGELOG.md" "$core_section" "optional, default-off advisory Stripe-native entitlement refresh" "missing advisory refresh"
-assert_section_contains "accrue/CHANGELOG.md" "$core_section" "never changes entitlement grants" "missing never-a-gate semantics"
-assert_section_contains "accrue/CHANGELOG.md" "$core_section" "Accrue.Entitlements.StripeSync.refresh/2" "missing StripeSync.refresh/2 contract"
-assert_section_contains "accrue/CHANGELOG.md" "$core_section" "Accrue.Processor.list_active_entitlements/2" "missing Processor list contract"
-assert_section_contains "accrue/CHANGELOG.md" "$core_section" "Accrue.Processor.Fake.put_entitlements/2" "missing Fake test helper contract"
-assert_section_contains "accrue/CHANGELOG.md" "$core_section" "shared reconcile/isolation proof" "missing reconcile/isolation proof"
-assert_section_contains "accrue/CHANGELOG.md" "$core_section" "fetch_entitled/2" "missing fetch_entitled closure"
-assert_section_contains "accrue/CHANGELOG.md" "$core_section" "remains closed" "missing fetch_entitled closure"
+if [[ "$release_state" == "pre-release" || "$accrue_version" == "1.5.0" ]]; then
+  feature_section=$core_section
+else
+  feature_section=$(changelog_release_section "$core_changelog" "1.5.0") ||
+    fail "accrue/CHANGELOG.md missing historical 1.5.0 feature section"
+
+  assert_section_contains "accrue/CHANGELOG.md" "$core_section" "Phoenix 1.8" "missing Phoenix 1.8 compatibility fix"
+  assert_section_contains "accrue/CHANGELOG.md" "$core_section" "Decimal 3" "missing Decimal 3 compatibility fix"
+  assert_section_contains "accrue/CHANGELOG.md" "$core_section" "API-only entitlement readers" "missing API-only entitlement posture"
+  assert_section_contains "accrue/CHANGELOG.md" "$core_section" '`:limits`' "missing limits-to-quantities fix"
+  assert_section_contains "accrue/CHANGELOG.md" "$core_section" "Accrue.Test.Entitlements" "missing public entitlement fixtures"
+fi
+
+assert_section_contains "accrue/CHANGELOG.md" "$feature_section" "lattice_stripe" "missing lattice_stripe ~> 2.0 bump"
+assert_section_contains "accrue/CHANGELOG.md" "$feature_section" "~> 2.0" "missing lattice_stripe ~> 2.0 bump"
+assert_section_contains "accrue/CHANGELOG.md" "$feature_section" "optional, default-off advisory Stripe-native entitlement refresh" "missing advisory refresh"
+assert_section_contains "accrue/CHANGELOG.md" "$feature_section" "never changes entitlement grants" "missing never-a-gate semantics"
+assert_section_contains "accrue/CHANGELOG.md" "$feature_section" "Accrue.Entitlements.StripeSync.refresh/2" "missing StripeSync.refresh/2 contract"
+assert_section_contains "accrue/CHANGELOG.md" "$feature_section" "Accrue.Processor.list_active_entitlements/2" "missing Processor list contract"
+assert_section_contains "accrue/CHANGELOG.md" "$feature_section" "Accrue.Processor.Fake.put_entitlements/2" "missing Fake test helper contract"
+assert_section_contains "accrue/CHANGELOG.md" "$feature_section" "shared reconcile/isolation proof" "missing reconcile/isolation proof"
+assert_section_contains "accrue/CHANGELOG.md" "$feature_section" "fetch_entitled/2" "missing fetch_entitled closure"
+assert_section_contains "accrue/CHANGELOG.md" "$feature_section" "remains closed" "missing fetch_entitled closure"
 
 assert_companion_compatibility_only "accrue_admin/CHANGELOG.md" "$admin_section" "$companion_version"
 assert_companion_compatibility_only "accrue_portal/CHANGELOG.md" "$portal_section" "$companion_version"
@@ -214,11 +227,9 @@ section_has_version() {
   ' "$notes"
 }
 
-if [[ "$release_state" == "pre-release" ]]; then
-  section_has_version "## accrue" "## accrue_admin" ||
-    fail "release-notes.md must describe ${accrue_version} in the accrue section"
-  section_has_version "## accrue_admin" "## How we version" ||
-    fail "release-notes.md must describe ${accrue_version} in the accrue_admin section"
-fi
+section_has_version "## accrue" "## accrue_admin" ||
+  fail "release-notes.md must describe ${accrue_version} in the accrue section"
+section_has_version "## accrue_admin" "## How we version" ||
+  fail "release-notes.md must describe ${accrue_version} in the accrue_admin section"
 
 echo "verify_release_notes_contract: OK (${accrue_version})"
