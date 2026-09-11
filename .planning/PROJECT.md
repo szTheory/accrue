@@ -39,6 +39,8 @@ v1.49 **Realistic Demo App & Adoption Evidence** shipped on **2026-06-02**. The 
 
 **Phase 226 complete (2026-08-12):** maintainers now have a durable, privacy-safe comparable-run baseline with repository-bound GitHub Actions evidence, explicit provider proof states, and owner-first host/browser setup diagnostics. BASE-01, BASE-02, and OWN-01 verified 5/5 must-haves; Phase 227 owns the measured critical-path improvement.
 
+**Phase 228 complete (2026-09-11):** the Stripe webhook-signing CI boot contract now maps a securely supplied signing secret into the runtime rotation list and fails closed when it is absent. The single authorized provider-proof run reached the selected suite, then sealed an honest `failed/selected_assertions_failed` result (10 selected, 5 passed, 5 failed, 0 skipped) with no retry; Phase 227 therefore remains open for gap closure.
+
 ## Next Milestone Goals
 
 ## Current Milestone: v1.61 CI Evidence & Critical-Path Hardening
@@ -848,4 +850,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-08-12 after completing Phase 226 CI Baseline & Proof Semantics.*
+*Last updated: 2026-09-11 after completing Phase 228 Stripe Webhook-Signing CI Boot Contract.*

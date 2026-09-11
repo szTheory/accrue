@@ -22,7 +22,7 @@ progress:
 
 ## Project Reference
 
-See: `.planning/PROJECT.md` (updated 2026-08-05 after shipping v1.59)
+See: `.planning/PROJECT.md` (updated 2026-09-11 after completing Phase 228)
 
 **Core value:** A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic Elixir DX, strong domain modeling, tamper-evident audit ledger, great observability, and zero breaking-change pain through v1.x.
 
@@ -963,6 +963,7 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - [Phase 228]: Reject skipped/intentional_bypass evidence outright because the Phase 228 workflow has no reachable bypass path.
 - [Phase 228]: Keep the evidence record unconsumed and not authorized until Plan 228-02 supplies explicit external authority.
 - [Phase 228]: Seal the one authorized Stripe proof attempt as a sanitized failed selected-assertions outcome; no retry or replacement evidence is allowed.
+- [Phase 228]: The signing-secret boot failure is resolved: the authorized run reached the selected suite, but 5 of 10 assertions failed, so Phase 227 remains open for gap closure.
 
 ### Pending Todos
 
@@ -976,8 +977,7 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - (Resolved/obsolete: the 190-05 `admin-baseline.spec.js` hang note was cleared 2026-06-21 — Phase 190 and the full v1.53 milestone subsequently shipped & verified, so the bounded-retry concern no longer applies.)
 - Phase 196 final full-suite gate: cd accrue_admin && mix test --warnings-as-errors fails outside Phase 196 in dashboard_live_test.exs:91 (missing $42.50) and webhooks_live_test.exs:106 (audit count expected 1, observed 2). Focused Phase 196 tests, package docs, assets, and e2e:phase196 pass.
 - Phase 208 Plan 04 blocked at Task 1: ANTHROPIC_API_KEY is absent from the execution environment; ledger.baseline.json remains frozen:false and live convergence/freeze must not proceed without maintainer local key.
-- Phase 227 Plan 02 blocked: final bounded workflow_dispatch cohort produced no successful first-attempt candidate runs; live-stripe provider proof failed and one run also failed host integration. Replan a compatible event class before retrying.
-- Phase 227 is terminally blocked at rollback_applied_unverified: restoration run 33188858334 passed the required host/browser path and the three Stripe key/price preflight inputs, then failed at application boot because the Stripe webhook signing secret was absent. The restoration budget is exhausted; no rerun or replacement is authorized by 227-03.
+- Phase 227 remains `gap_found`: Phase 228 resolved the missing webhook-signing-secret boot contract and its authorized run reached the selected suite, but only 5 of 10 assertions passed. Phase 228 permits no retry or replacement evidence; replan Phase 227 from the sealed failure.
 
 ### Quick Tasks Completed
 
@@ -1117,10 +1117,10 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 
 ## Session Continuity
 
-Last session: 2026-09-11T17:24:50.306Z
+Last session: 2026-09-11T17:39:00Z
 Stopped at: Phase 228 complete, ready to plan Phase 227
 Resume file: None
 
 ## Operator Next Steps
 
-- Start the next milestone with $gsd-new-milestone
+- Replan the sealed Phase 227 gaps with `$gsd-plan-phase 227 --gaps`.
