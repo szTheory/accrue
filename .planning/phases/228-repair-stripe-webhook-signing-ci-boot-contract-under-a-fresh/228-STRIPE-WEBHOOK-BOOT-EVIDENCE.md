@@ -2,64 +2,64 @@
 
 ## Readiness and authority
 
-- status: `readiness_not_authorized`
+- status: `terminal`
 - owner: maintainer
 - fresh run ceiling: exactly one first-attempt `workflow_dispatch` with `run_live_stripe:true`
 - additional dispatch authorized: `false`
-- next action: Plan `228-02` must confirm repository configuration and obtain an explicit authorize-or-decline decision
+- next action: none; the authorized attempt has been consumed and reconciled
 
-No dispatch, retry, rerun, or replacement is authorized by this record. The tuple below is deliberately unconsumed and cannot be presented as provider proof.
+No retry, rerun, or replacement is authorized by this record. The single authorized dispatch was consumed once and cannot be presented as provider proof because selected assertions failed.
 
 ## Evidence tuple
 
 The verifier reads only the marked block. Every named field is present exactly once. Plan 228-03 replaces readiness-only empty values with one allowed terminal tuple after explicit authorization; unknown, duplicate, or conflicting fields are invalid.
 
 <!-- evidence-record:start -->
-- status: `readiness_not_authorized`
+- status: `terminal`
 - owner: `maintainer`
-- repaired_sha: `a76b7653533d6f9428fe276a55c9b5dbcd54d14a`
-- dispatch_at: ``
-- observed_at: ``
+- repaired_sha: `20bd5805c2e872516ea084e95017f65699963911`
+- dispatch_at: `2026-09-11T17:10:42.858Z`
+- observed_at: `2026-09-11T17:10:48.805Z`
 - workflow: `CI`
 - event: `workflow_dispatch`
 - input_run_live_stripe: `true`
-- run_id: ``
-- run_attempt: ``
-- run_url: ``
-- job_name: ``
-- job_status: ``
-- job_conclusion: ``
-- preflight_step_status: ``
-- preflight_step_conclusion: ``
-- suite_step_status: ``
-- suite_step_conclusion: ``
-- finalizer_step_status: ``
-- finalizer_step_conclusion: ``
-- artifact_step_status: ``
-- artifact_step_conclusion: ``
-- raw_run_conclusion: ``
-- raw_job_conclusion: ``
-- proof_state: ``
-- reason_code: ``
-- selected_count: ``
-- passed_count: ``
-- failed_count: ``
-- skipped_count: ``
-- manifest_present: ``
-- manifest_selected_count: ``
-- manifest_passed_count: ``
-- manifest_failed_count: ``
-- manifest_skipped_count: ``
-- manifest_started_at: ``
-- manifest_finished_at: ``
-- finalizer_result: ``
-- artifact_present: ``
-- created_run: `false`
-- consumed: `false`
+- run_id: `34626209900`
+- run_attempt: `1`
+- run_url: `https://github.com/szTheory/accrue/actions/runs/34626209900`
+- job_name: `Stripe test-mode parity (mandatory periodic)`
+- job_status: `completed`
+- job_conclusion: `failure`
+- preflight_step_status: `completed`
+- preflight_step_conclusion: `success`
+- suite_step_status: `completed`
+- suite_step_conclusion: `failure`
+- finalizer_step_status: `completed`
+- finalizer_step_conclusion: `failure`
+- artifact_step_status: `completed`
+- artifact_step_conclusion: `success`
+- raw_run_conclusion: `failure`
+- raw_job_conclusion: `failure`
+- proof_state: `failed`
+- reason_code: `selected_assertions_failed`
+- selected_count: `10`
+- passed_count: `5`
+- failed_count: `5`
+- skipped_count: `0`
+- manifest_present: `true`
+- manifest_selected_count: `10`
+- manifest_passed_count: `5`
+- manifest_failed_count: `5`
+- manifest_skipped_count: `0`
+- manifest_started_at: `2026-09-11T17:14:21.866Z`
+- manifest_finished_at: `2026-09-11T17:14:35.353Z`
+- finalizer_result: `failure`
+- artifact_present: `true`
+- created_run: `true`
+- consumed: `true`
 - rejection_class: ``
 - retry: `false`
-- authority_closed: `false`
-- outcome: `pending_authorization`
+- authority_closed: `true`
+- outcome: `not_proved`
 <!-- evidence-record:end -->
 
 ## Exact-once schema
