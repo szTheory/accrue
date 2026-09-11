@@ -304,6 +304,34 @@ function verifyGapV2Evidence(records, contract, expectedRepository) {
   assert.ok(candidates.length <= budget.candidate_ceiling, "v2 candidate budget exceeded");
   assert.ok(preflights.length <= 1, "v2 candidate preflight is duplicated");
   assert.ok(decisions.length <= 1, "v2 decision is duplicated");
+  const candidateShas = new Set();
+  const candidateIds = new Set();
+  for (const candidate of candidates) {
+    assert.equal(candidate.repository, expectedRepository, "v2 candidate repository differs");
+    assert.ok(Number.isSafeInteger(candidate.run_id) && candidate.run_id > 0, "v2 candidate run id is invalid");
+    assert.ok(!candidateIds.has(candidate.run_id), "v2 candidate run id is duplicated");
+    candidateIds.add(candidate.run_id);
+    requireRecordUrl(candidate, "run_url", immutableRunUrl(expectedRepository, candidate.run_id));
+    assert.match(candidate.sha || "", /^[0-9a-f]{40}$/, "v2 candidate SHA is invalid");
+    candidateShas.add(candidate.sha);
+    assert.equal(candidate.run_attempt, budget.candidate_run_attempt, "v2 candidate attempt differs");
+    assert.equal(candidate.event_class, budget.event_class, "v2 candidate event differs");
+    assert.deepEqual(candidate.inputs, { run_live_stripe: false }, "v2 candidate input differs");
+    assert.equal(candidate.fingerprint, budget.candidate_fingerprint, "v2 candidate fingerprint differs");
+    assert.equal(candidate.provider_state, budget.candidate_provider_state, "v2 candidate provider state differs");
+    assert.match(candidate.workflow_revision || "", /^sha256:[0-9a-f]{64}$/, "v2 candidate workflow revision is invalid");
+    assert.ok(candidate.classification === "admitted_observation" || contract.failure_classes.includes(candidate.classification), "v2 candidate classification is invalid");
+    if (candidate.classification === "admitted_observation") {
+      assert.ok(contract.proof_vector.required_job_roles.every((role) => candidate.required_jobs?.[role]?.conclusion === "success" && typeof candidate.required_jobs[role].url === "string"), "v2 candidate required proof vector is incomplete");
+      assert.equal(candidate.required_jobs?.playwright?.urls?.length, 3, "v2 candidate Playwright proof vector is incomplete");
+      assert.equal(candidate.artifacts?.[contract.proof_vector.expected_artifacts[0]], true, "v2 candidate success artifact is missing");
+      assert.deepEqual(candidate.advisory, contract.proof_vector.advisory_outcomes, "v2 candidate advisory outcomes differ");
+      assert.equal(candidate.conclusion, "success", "v2 admitted candidate conclusion differs");
+    } else {
+      assert.ok(candidate.classification !== "admitted_observation" && typeof candidate.exclusion_reason === "string" && candidate.exclusion_reason.length > 0, "v2 excluded candidate must retain its reason");
+    }
+  }
+  assert.ok(candidateShas.size <= 1, "v2 candidates must share one candidate SHA");
   if (preflights.length) {
     const preflight = preflights[0];
     assert.deepEqual(Object.keys(preflight).sort(), ["candidate_fingerprint", "candidate_provider_state", "candidate_run_attempt", "candidate_run_live_stripe", "candidate_workflow_revision", "kind", "repository", "sha_binding", "state"].sort(), "v2 preflight schema differs");
@@ -317,17 +345,49 @@ function verifyGapV2Evidence(records, contract, expectedRepository) {
     assert.equal(preflight.sha_binding, "Task 2 commit SHA is captured before the first dispatch; no evidence commit is eligible", "v2 preflight SHA binding differs");
   }
   if (!decisions.length) {
-    assert.equal(candidates.length, 0, "unclosed v2 authority may not contain an unclassified candidate");
-    return { state: "authorized_unspent", admitted_observations: 0 };
+    return { state: candidates.length ? "candidate_observation_recorded" : "authorized_unspent", admitted_observations: candidates.length };
   }
   const decision = decisions[0];
+  assert.deepEqual(Object.keys(decision).sort(), ["candidate_authority", "candidate_run_ids", "kind", "path02", "reason", "restoration_authority", "restored_workflow_revision", "state"].sort(), "v2 terminal decision schema differs");
   assert.ok(["kept", "rollback_verified", "rollback_applied_unverified"].includes(decision.state), "v2 terminal decision is invalid");
   if (decision.state === "kept") {
     assert.equal(candidates.length, 3, "kept v2 decision requires exactly three candidates");
+    assert.equal(decision.path02, "satisfied", "kept decision must satisfy PATH-02");
+    assert.ok(Number.isSafeInteger(decision.median_seconds) && decision.median_seconds <= budget.thresholds.keep_median_seconds, "kept decision misses the median threshold");
+    assert.ok(candidates.every((candidate) => candidate.classification === "admitted_observation" && candidate.duration_seconds <= budget.thresholds.maximum_observation_seconds), "kept decision exceeds the maximum-observation threshold");
   } else {
     assert.equal(decision.path02, "unmet", "rollback decision must leave PATH-02 unmet");
+    assert.deepEqual(decision.candidate_run_ids, candidates.map((candidate) => candidate.run_id), "rollback decision must bind every consumed candidate run");
+    assert.equal(decision.candidate_authority, "closed", "rollback decision must close candidate authority");
+    assert.equal(decision.restoration_authority, "closed_unspent", "rollback decision must close unspent restoration authority");
+    assert.equal(decision.restored_workflow_revision, `sha256:${contract.workflow_compatibility.restored_sha256}`, "rollback decision must bind the exact inverse workflow");
+    assert.match(decision.reason, /required release lane/i, "rollback decision must state the required release-lane failure");
   }
   return { state: decision.state, admitted_observations: candidates.length };
+}
+
+function verifyLiveGapV2Candidates(records, contract, repository) {
+  const candidates = records.filter((record) => record.kind === "gap_candidate_run");
+  for (const record of candidates) {
+    const run = api(`repos/${repository}/actions/runs/${record.run_id}`);
+    if (run.head_sha !== record.sha || run.run_attempt !== 1 || run.event !== "workflow_dispatch" || run.conclusion !== record.conclusion) fail(`live v2 candidate facts differ for ${record.run_id}`);
+    if (workflowRevision(repository, record.sha) !== record.workflow_revision) fail(`live v2 candidate workflow revision differs for ${record.run_id}`);
+    const jobs = api(`repos/${repository}/actions/runs/${record.run_id}/attempts/1/jobs?filter=all&per_page=100`).jobs;
+    if (!Array.isArray(jobs)) fail(`live v2 candidate jobs are unavailable for ${record.run_id}`);
+    if (record.classification !== "admitted_observation") continue;
+    for (const role of contract.proof_vector.required_job_roles) {
+      const proof = record.required_jobs?.[role];
+      if (role.startsWith("playwright-e2e-shard-")) {
+        const url = proof?.url;
+        verifyRecordedJob(jobs, repository, record.run_id, { url, conclusion: "success" }, role);
+      } else verifyRecordedJob(jobs, repository, record.run_id, proof, role);
+    }
+    const playwright = record.required_jobs?.playwright;
+    for (const url of playwright?.urls || []) verifyRecordedJob(jobs, repository, record.run_id, { url, conclusion: "success" }, "Playwright");
+    const names = new Set(api(`repos/${repository}/actions/runs/${record.run_id}/artifacts?per_page=100`).artifacts.map((artifact) => artifact.name));
+    if (!names.has(contract.proof_vector.expected_artifacts[0])) fail(`live v2 candidate lacks success artifact: ${record.run_id}`);
+  }
+  return true;
 }
 
 export function verifyFixtures(workflowFixture = path.join(phase, "fixtures/ci-workflow-restored-v2.yml")) {
@@ -524,7 +584,8 @@ export function renderCriticalPathEvidence(records) {
     const candidates = records.filter((record) => record.kind === "gap_candidate_run");
     const decision = latestRecord(records, "gap_decision");
     const next = decision ? "none" : "node scripts/ci/verify_ci_critical_path.mjs --verify-workflow --workflow .github/workflows/ci.yml --contract .planning/phases/227-measured-critical-path-improvement/227-ci-contract.json";
-    return `# Phase 227 critical-path v2 experiment\n\n## Current fact\n\n- state: \`${result.state}\`\n- owner: ${budget.owner}\n- budget: \`${budget.budget_id}\`\n- candidate slots consumed: ${candidates.length}/${budget.candidate_ceiling}\n- restoration slots consumed: 0/${budget.conditional_restoration_ceiling}\n- old budget: \`${budget.old_budget_id}\` remains immutable and supplies zero v2 observations\n- Phase 228 provider outcome: \`${budget.phase228_provider_outcome}\` (linked separately; never a candidate)\n- next command: \`${next}\`\n\nThe only candidate event is attempt-1 \`workflow_dispatch\` with \`run_live_stripe: false\`, fingerprint \`${budget.candidate_fingerprint}\`, and provider state \`${budget.candidate_provider_state}\`. Reruns and replacements are prohibited. Keep requires exactly three valid independent observations; an unspent authorization cannot satisfy PATH-02.\n${decision ? `\n## Terminal decision\n\n- state: \`${decision.state}\`\n- PATH-02: \`${decision.path02 || "satisfied"}\`\n` : ""}`;
+    const restoration = decision ? (decision.restoration_authority === "closed_unspent" ? 0 : 1) : 0;
+    return `# Phase 227 critical-path v2 experiment\n\n## Current fact\n\n- state: \`${result.state}\`\n- owner: ${budget.owner}\n- budget: \`${budget.budget_id}\`\n- candidate slots consumed: ${candidates.length}/${budget.candidate_ceiling}\n- restoration slots consumed: ${restoration}/${budget.conditional_restoration_ceiling}\n- old budget: \`${budget.old_budget_id}\` remains immutable and supplies zero v2 observations\n- Phase 228 provider outcome: \`${budget.phase228_provider_outcome}\` (linked separately; never a candidate)\n- next command: \`${next}\`\n\nThe only candidate event is attempt-1 \`workflow_dispatch\` with \`run_live_stripe: false\`, fingerprint \`${budget.candidate_fingerprint}\`, and provider state \`${budget.candidate_provider_state}\`. Reruns and replacements are prohibited. Keep requires exactly three valid independent observations; an unspent authorization cannot satisfy PATH-02.\n${decision ? `\n## Terminal decision\n\n- state: \`${decision.state}\`\n- PATH-02: \`${decision.path02 || "satisfied"}\`\n- candidate authority: \`${decision.candidate_authority}\`\n- restoration authority: \`${decision.restoration_authority}\`\n- exact inverse workflow: \`${decision.restored_workflow_revision}\`\n` : ""}`;
   }
   validateTerminalLedger(records, contract);
   const candidateRuns = records.filter((record) => record.kind === "candidate_run");
@@ -630,6 +691,12 @@ function runCli(argv) {
   if (cli.action === "--render-evidence") {
     const rendered = cli.values.get("--rendered"); if (!rendered) fail("--render-evidence requires --rendered");
     const output = renderCriticalPathEvidence(records); if (fs.readFileSync(rendered, "utf8") !== output) fail("rendered report does not byte-match NDJSON render");
+    return true;
+  }
+  if (records.some((record) => record.kind === "gap_budget_authorization" && record.budget_id === "phase-227-gap-dispatch-false-v2")) {
+    verifyGapV2Evidence(records, contract, repository);
+    verifyLiveGapV2Candidates(records, contract, repository);
+    if (cli.flags.has("--require-final-decision") && !records.some((record) => record.kind === "gap_decision")) fail("v2 terminal decision is missing");
     return true;
   }
   if (records.some((record) => record.kind === "contract_correction")) {
