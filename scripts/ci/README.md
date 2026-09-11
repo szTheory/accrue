@@ -58,56 +58,42 @@ node scripts/ci/provider_proof_automation.mjs --self-test
 
 ## Phase 227 bounded critical-path measurement
 
-Phase 227 has one authorized candidate graph: `host-integration` needs only
-`docs-contracts-shift-left`. Its exact inverse restores
-`needs: [admin-drift-docs, docs-contracts-shift-left]`. Before a measurement,
-prove the restored graph locally, then restore only that candidate edge and run:
+Phase 227's candidate experiment is terminally closed: the exact inverse restores
+`needs: [admin-drift-docs, docs-contracts-shift-left]`, and no command below
+authorizes a dispatch. Use the immutable restored workflow fixture for the
+offline verifier:
 
 ```bash
-node scripts/ci/verify_ci_critical_path.mjs --fixtures --require-preflight \
+node scripts/ci/verify_ci_critical_path.mjs --fixtures \
+  --workflow-fixture .planning/phases/227-measured-critical-path-improvement/fixtures/ci-workflow-restored-v2.yml \
+  --contract .planning/phases/227-measured-critical-path-improvement/227-ci-contract.json
+```
+
+Verify the mutable live workflow separately against the named restored
+compatibility state:
+
+```bash
+node scripts/ci/verify_ci_critical_path.mjs --verify-workflow \
   --workflow .github/workflows/ci.yml \
   --contract .planning/phases/227-measured-critical-path-improvement/227-ci-contract.json
 ```
 
-The CI workflow's required Boolean `run_live_stripe` input defaults to `true`.
-Only the three recorded candidate dispatches use `false`; that value makes the
-provider lane `non_run`, not provider proof. Dispatch only the immutable
-candidate SHA recorded in the Phase 227 evidence:
+The terminal report is derived from the append-only ledger. This command
+validates the recursive privacy/schema and historical-prefix contracts before
+requiring a byte-for-byte report match; it never edits the NDJSON source:
 
 ```bash
-gh workflow run ci.yml --repo szTheory/accrue --ref CANDIDATE_SHA -f run_live_stripe=false
-```
-
-Do not use a rerun, a replacement cohort, a pull request, or a mutable ref as a
-timing sample. If any predicate fails, apply the exact inverse, push its
-immutable restored SHA, and use the recorded terminal command with
-`run_live_stripe=true` for the one permitted restoration proof.
-
-The Phase 227 proof vector requires the success-path
-`accrue-host-phase15-screenshots` artifact. `accrue-host-ci-setup-facts` remains
-in the artifact inventory as a failure diagnostic; it must not be required
-alongside a successful `host-integration` job. The append-only correction and
-candidate reclassifications are recorded in `227-CI-CRITICAL-PATH.ndjson`.
-
-Verify the current terminal rollback decision locally. The restoration-run
-budget is exhausted, so the verified-only command remains a deliberate negative
-assertion rather than authorization for another dispatch:
-
-```bash
-node scripts/ci/verify_ci_critical_path.mjs --require-final-decision \
+node scripts/ci/verify_ci_critical_path.mjs --render-evidence \
   --evidence .planning/phases/227-measured-critical-path-improvement/227-CI-CRITICAL-PATH.ndjson \
-  --expected-repository szTheory/accrue
-
-node scripts/ci/verify_ci_critical_path.mjs --require-rollback-verified \
-  --verify-live-actions \
-  --evidence .planning/phases/227-measured-critical-path-improvement/227-CI-CRITICAL-PATH.ndjson \
+  --rendered .planning/phases/227-measured-critical-path-improvement/227-CI-CRITICAL-PATH.md \
+  --contract .planning/phases/227-measured-critical-path-improvement/227-ci-contract.json \
   --expected-repository szTheory/accrue
 ```
 
-The first command validates the immutable failed restoration vector as well as
-the rollback label. The second command intentionally fails while the latest
-rollback record is `rollback_applied_unverified`; unsupported `--require-*`
-flags also fail closed.
+The required Boolean `run_live_stripe` input defaults to `true`; the historical
+candidate dispatches used `false` and are retained as `non_run` provider state,
+not provider proof. The restoration budget is exhausted: do not rerun, replace,
+or dispatch this cohort.
 
 This directory hosts merge-adjacent bash gates and host-app checks. Use it as the first stop when CI fails on documentation or VERIFY-01 contracts.
 
