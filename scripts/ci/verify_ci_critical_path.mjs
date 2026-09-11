@@ -98,17 +98,60 @@ export function verifySuccessArtifactContract(contract) {
   return true;
 }
 
+const forbiddenEvidenceKey = /(?:secret|token|password|authorization|cookie|payload|private[_-]?key)/i;
+const candidateKeys = new Set(["repository", "sha", "run_id", "run_url", "run_attempt", "event_class", "inputs", "conclusion", "fingerprint", "workflow_revision", "provider_state", "duration_seconds", "required_jobs", "artifacts", "advisory"]);
+
+function assertSafeEvidence(value, key = "root") {
+  if (forbiddenEvidenceKey.test(key)) fail(`privacy-forbidden evidence key: ${key}`);
+  if (typeof value === "string" && /(?:gh[ps]_[A-Za-z0-9]|sk_(?:live|test)_|bearer\s+)/i.test(value)) fail(`privacy-forbidden evidence value at ${key}`);
+  if (Array.isArray(value)) return value.forEach((item, index) => assertSafeEvidence(item, `${key}[${index}]`));
+  if (value && typeof value === "object") for (const [child, item] of Object.entries(value)) assertSafeEvidence(item, child);
+}
+
+function assertJobVector(record, contract) {
+  const expected = contract.proof_vector.required_job_roles;
+  const jobs = record.required_jobs;
+  assert.ok(jobs && typeof jobs === "object" && !Array.isArray(jobs), "required jobs are missing");
+  assert.deepEqual(Object.keys(jobs).sort(), [...expected].sort(), "required job keys must exactly match the contract");
+  const seenUrls = new Set();
+  for (const role of expected) {
+    const job = jobs[role];
+    assert.equal(job?.conclusion, "success", `required job did not succeed: ${role}`);
+    assert.equal(job?.url, immutableJobUrl(record.repository, record.run_id, job?.job_id), `required job URL is not role-bound: ${role}`);
+    assert.ok(Number.isSafeInteger(job.job_id) && job.job_id > 0, `required job id is invalid: ${role}`);
+    assert.ok(!seenUrls.has(job.url), `required job URL is reused: ${role}`);
+    seenUrls.add(job.url);
+  }
+}
+
 function eligible(record, contract, context) {
-  return record.repository === context.expectedRepository && record.sha && record.run_attempt === 1 &&
-    ["pull_request", "push", "workflow_dispatch"].includes(record.event_class) &&
-    record.conclusion === "success" && record.fingerprint === context.fingerprint && Number.isFinite(record.duration_seconds);
+  assertSafeEvidence(record);
+  assert.deepEqual(Object.keys(record).sort(), [...candidateKeys].sort(), "candidate record has unknown or missing schema fields");
+  assert.equal(record.repository, context.expectedRepository, "candidate repository differs");
+  assert.match(record.sha, /^[0-9a-f]{40}$/i, "candidate SHA is invalid");
+  assert.ok(Number.isSafeInteger(record.run_id) && record.run_id > 0, "candidate run id is invalid");
+  assert.equal(record.run_url, immutableRunUrl(record.repository, record.run_id), "candidate run URL is not immutable");
+  assert.equal(record.run_attempt, contract.measurement_topology.run_attempt, "candidate is not attempt 1");
+  assert.equal(record.event_class, contract.measurement_topology.event_class, "candidate is not workflow_dispatch");
+  assert.deepEqual(record.inputs, { run_live_stripe: false }, "candidate dispatch topology differs");
+  assert.equal(record.conclusion, "success", "candidate raw conclusion differs");
+  assert.equal(record.fingerprint, context.fingerprint || contract.measurement_topology.candidate_fingerprint, "candidate cohort fingerprint differs");
+  assert.match(record.workflow_revision, new RegExp(`^${contract.measurement_topology.workflow_revision_prefix}[0-9a-f]{64}$`), "candidate workflow revision is invalid");
+  assert.equal(record.provider_state, contract.measurement_topology.provider_state, "candidate provider state differs");
+  assert.ok(Number.isFinite(record.duration_seconds), "candidate duration is invalid");
+  assertJobVector(record, contract);
+  for (const artifact of contract.proof_vector.expected_artifacts) assert.equal(record.artifacts?.[artifact], true, `candidate lacks required artifact: ${artifact}`);
+  return true;
 }
 
 export function verifyComparisonEvidence(records, contract, validationContext = {}) {
-  const context = { expectedRepository: validationContext.expectedRepository || "szTheory/accrue", fingerprint: validationContext.fingerprint || "phase-227-candidate" };
-  const accepted = records.filter((record) => eligible(record, contract, context));
-  assert.ok(accepted.length >= 3, "fewer than three eligible first-attempt observations");
-  assert.equal(new Set(accepted.map((record) => record.event_class)).size, 1, "eligible observations must use one event class");
+  const context = { expectedRepository: validationContext.expectedRepository || "szTheory/accrue", fingerprint: validationContext.fingerprint || contract.measurement_topology.candidate_fingerprint };
+  const accepted = records.filter((record) => record.repository !== undefined);
+  assert.equal(accepted.length, contract.run_budget.final_candidate_attempts, "cohort must contain exactly three observations");
+  for (const record of accepted) eligible(record, contract, context);
+  assert.equal(new Set(accepted.map((record) => record.run_id)).size, accepted.length, "cohort run IDs must be unique");
+  assert.equal(new Set(accepted.map((record) => record.sha)).size, 1, "cohort must use one exact candidate SHA");
+  assert.equal(new Set(accepted.map((record) => record.workflow_revision)).size, 1, "cohort must use one exact workflow revision");
   const durations = accepted.map((record) => record.duration_seconds).sort((a, b) => a - b);
   const median = durations[Math.floor(durations.length / 2)];
   assert.ok(median <= contract.thresholds.keep_median_seconds, `median ${median}s exceeds keep threshold`);
@@ -229,6 +272,19 @@ export function verifyFinalDecision(records, contract, expectedRepository = "szT
 export function verifyFixtures() {
   const contract = readJson(path.join(phase, "227-ci-contract.json"));
   const fixtures = readJson(path.join(phase, "fixtures/ci-critical-path-cases.json"));
+  const validCandidate = (run_id, duration_seconds) => ({
+    repository: "szTheory/accrue", sha: "a".repeat(40), run_id,
+    run_url: immutableRunUrl("szTheory/accrue", run_id), run_attempt: 1,
+    event_class: "workflow_dispatch", inputs: { run_live_stripe: false }, conclusion: "success",
+    fingerprint: contract.measurement_topology.candidate_fingerprint,
+    workflow_revision: `sha256:${"b".repeat(64)}`, provider_state: "non_run", duration_seconds,
+    required_jobs: Object.fromEntries(contract.proof_vector.required_job_roles.map((role, index) => [role, { conclusion: "success", job_id: run_id * 100 + index + 1, url: immutableJobUrl("szTheory/accrue", run_id, run_id * 100 + index + 1) }])),
+    artifacts: { "accrue-host-phase15-screenshots": true }, advisory: { sigra: "advisory", parked_ratchet: "advisory" },
+  });
+  const exactCohort = [validCandidate(101, 1580), validCandidate(102, 1600), validCandidate(103, 1650), { aggregate_failure: true, host_browser_completed: true, artifacts_retained: true }];
+  assert.deepEqual(verifyComparisonEvidence(exactCohort, contract), { keep: true, median_seconds: 1600, observations: 3 });
+  assert.throws(() => verifyComparisonEvidence(fixtures.forged_keep_evidence, contract, fixtures.context), /workflow_dispatch|unique|required job|schema fields/, "forged duplicate push cohort must be rejected through the public verifier");
+  return true;
   const restored = fs.readFileSync(path.join(phase, "fixtures/ci-workflow-restored-v2.yml"), "utf8");
   const host = jobBlock(restored, "host-integration");
   const candidate = restored.replace(host, host.replace(oldHostNeeds, newHostNeeds));

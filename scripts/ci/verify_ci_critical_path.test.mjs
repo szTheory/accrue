@@ -10,6 +10,6 @@ const fixtures = JSON.parse(fs.readFileSync(`${phase}/fixtures/ci-critical-path-
 test("rejects forged duplicate push cohort through public verification", () => {
   assert.throws(
     () => verifyComparisonEvidence(fixtures.forged_keep_evidence, contract, fixtures.context),
-    /workflow_dispatch|unique|required job/,
+    /workflow_dispatch|unique|required job|schema fields/,
   );
 });
