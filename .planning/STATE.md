@@ -1,20 +1,20 @@
 ---
-gsd_state_version: 1.0
+gsd_state_version: "1.0"
 milestone: v1.61
 milestone_name: CI Evidence & Critical-Path Hardening
 current_phase: 228
 current_phase_name: Repair Stripe Webhook-Signing CI Boot Contract Under a Fresh Evidence Budget
 status: executing
-stopped_at: Completed 228-01-PLAN.md
-last_updated: "2026-08-28T19:25:22.743Z"
-last_activity: 2026-08-28
+stopped_at: Completed 228-03-PLAN.md
+last_updated: "2026-09-11T17:24:58.371Z"
+last_activity: 2026-09-08
 last_activity_desc: Phase 228 execution started
-state_head: bb6fca4a294dcbf38f486eeaa602fa1b4c87c022
+state_head: 0ff337e6823c22409a37e0ee5658494db8052006
 progress:
   total_phases: 4
   completed_phases: 2
   total_plans: 26
-  completed_plans: 22
+  completed_plans: 24
   percent: 50
 ---
 
@@ -31,9 +31,9 @@ See: `.planning/PROJECT.md` (updated 2026-08-05 after shipping v1.59)
 ## Current Position
 
 Phase: 228 (Repair Stripe Webhook-Signing CI Boot Contract Under a Fresh Evidence Budget) — EXECUTING
-Plan: 2 of 3
+Plan: 3 of 3
 Status: Ready to execute
-Last activity: 2026-08-28 — Phase 228 execution started
+Last activity: 2026-09-08 — Phase 228 execution started
 
 Progress: [█████░░░░░] 50%
 
@@ -478,6 +478,7 @@ Coverage: 22/22 v1.51 requirements mapped (each REQ-ID → exactly one phase). D
 | Phase 226 P21 | 18min | 1 tasks | 6 files |
 | Phase 227 P01 | 12m | 2 tasks | 6 files |
 | Phase 228 P01 | 37min | 2 tasks | 7 files |
+| Phase 228-repair-stripe-webhook-signing-ci-boot-contract-under-a-fresh P03 | 12min | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -960,6 +961,7 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - [Phase 228]: Map a trimmed signing secret as the Stripe rotation list, but map missing input to an empty list so boot validation fails closed.
 - [Phase 228]: Reject skipped/intentional_bypass evidence outright because the Phase 228 workflow has no reachable bypass path.
 - [Phase 228]: Keep the evidence record unconsumed and not authorized until Plan 228-02 supplies explicit external authority.
+- [Phase 228]: Seal the one authorized Stripe proof attempt as a sanitized failed selected-assertions outcome; no retry or replacement evidence is allowed.
 
 ### Pending Todos
 
@@ -1114,8 +1116,8 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 
 ## Session Continuity
 
-Last session: 2026-08-28T19:25:22.574Z
-Stopped at: Completed 228-01-PLAN.md
+Last session: 2026-09-11T17:24:50.306Z
+Stopped at: Completed 228-03-PLAN.md
 Resume file: None
 
 ## Operator Next Steps

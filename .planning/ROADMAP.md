@@ -207,7 +207,7 @@ Completed milestone detail is archived in [v1.59-ROADMAP.md](milestones/v1.59-RO
 2. Deterministic negative fixtures and a no-network runtime test reject missing configuration while preserving always-run provider proof finalization and artifact behavior.
 3. After explicit maintainer setup and authorization, at most one fresh attempt-1 dispatch is recorded with canonical nonempty proof semantics and no secret disclosure; Phase 227 evidence remains immutable.
 
-**Plans:** 1/3 plans executed
+**Plans:** 3/3 plans executed
 
 Plans:
 **Wave 1**
@@ -216,8 +216,8 @@ Plans:
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
-- [ ] 228-02-PLAN.md — Gate exact endpoint-secret administration and one-attempt authority.
+- [x] 228-02-PLAN.md — Gate exact endpoint-secret administration and one-attempt authority.
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
-- [ ] 228-03-PLAN.md — Dispatch once and seal the sanitized provider outcome.
+- [x] 228-03-PLAN.md — Dispatch once and seal the sanitized provider outcome.
