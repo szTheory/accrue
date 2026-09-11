@@ -1,0 +1,9 @@
+{
+  "command": "node --test scripts/ci/verify_ci_critical_path.test.mjs",
+  "exitCode": 1,
+  "targetTest": "rejects a CLI invocation with no declared action",
+  "targetFile": "scripts/ci/verify_ci_critical_path.test.mjs",
+  "expected": "a verifier invocation without exactly one action exits nonzero",
+  "actual": "a no-action invocation exited 0",
+  "output": "TAP version 13\n# Subtest: rejects forged duplicate push cohort through public verification\nok 1 - rejects forged duplicate push cohort through public verification\n# Subtest: rejects a CLI invocation with no declared action\nnot ok 2 - rejects a CLI invocation with no declared action\n  ---\n  failureType: 'testCodeFailure'\n  error: 'a no-action verifier invocation must fail closed'\n  ...\n1..2\n# tests 2\n# pass 1\n# fail 1\n"
+}
