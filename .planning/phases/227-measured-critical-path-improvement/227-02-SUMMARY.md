@@ -65,6 +65,13 @@ The repository-bound live evidence attempt is blocked: the retained temporary-br
 
 - **Blocking evidence gap:** `workflow_dispatch` selects the required `live-stripe` provider lane, which makes each final candidate conclude `failure`; one final candidate also failed host integration. A different event-class design requires replanning and maintainer approval.
 
+## Reconciliation (2026-09-11)
+
+- No external workflow was dispatched during reconciliation. The plan's bounded live-work budget is already terminal: the final `phase-227-dispatch-false-v1` cohort retained exactly three independent first attempts (`31715606960`, `31715609742`, and `31715612044`), and later immutable reclassification admits only the latter two. A fourth or replacement candidate is prohibited by the recorded budget.
+- The admissible controlled-negative run remains [31660617339](https://github.com/szTheory/accrue/actions/runs/31660617339); it is not a substitute for the missing third successful candidate observation.
+- The latest rollback record remains `rollback_applied_unverified`. Phase 228 repaired the missing Stripe webhook-signing boot contract, but its sealed provider attempt did not establish a new Phase 227 candidate sample or a verified restoration proof; Phase 227 therefore remains blocked pending a newly authorized gap plan.
+- The historical local/live verifier was intentionally run without dispatching work and rejected the current workflow hash (`2622f7d8…`) because its Phase 227 contract locks the prior restored-workflow hash (`81ae6c70…`). This is expected fail-closed behavior after later workflow changes, not evidence that the immutable records changed.
+
 ## Self-Check: PASSED
 
 - Evidence ledger and readable report exist.
