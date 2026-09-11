@@ -36,9 +36,10 @@ Completed and deferred v1.60 details are retained in [the milestone archive](mil
 
 **Constraints:** Treat one shared release-matrix failure signature as one incident, not four cell incidents. Investigate the recent Admin Playwright timeout trace-first; do not mask it with retries or deletion. Baseline evidence must precede topology, cache, matrix, branch-protection, or required-gate changes. Keep stable required-check identities, artifacts, and explicit provider `proved` / `skipped` / `advisory` status. StoreKit/iPhone/Crosswake and the parked Admin UI ratchet are out of scope.
 
-- [ ] **Phase 225: Required-Lane Signal Repair** - Classify and repair current required CI failures without hiding their diagnostic evidence.
+- [x] **Phase 225: Required-Lane Signal Repair** - Classify and repair current required CI failures without hiding their diagnostic evidence. (completed 2026-08-09)
 - [x] **Phase 226: CI Baseline & Proof Semantics** - Publish the comparable-run baseline and make provider/setup ownership legible. (completed 2026-08-12)
 - [ ] **Phase 227: Measured Critical-Path Improvement** - Blocked: the exact inverse is applied, but the sole restoration proof failed live-Stripe configuration.
+- [x] **Phase 228: Repair Stripe Webhook-Signing CI Boot Contract Under a Fresh Evidence Budget** - Repair and deterministically prove the boot contract, then seal one authorized provider attempt. (completed 2026-09-11)
 
 ## Phase Details
 
@@ -177,9 +178,10 @@ Plans:
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 225. Required-Lane Signal Repair | 0/3 | Not started | - |
+| 225. Required-Lane Signal Repair | 3/3 | Complete | 2026-08-09 |
 | 226. CI Baseline & Proof Semantics | 17/17 | Complete    | 2026-08-12 |
 | 227. Measured Critical-Path Improvement | 1/3 | Blocked — rollback applied, proof unverified | 2026-08-13 |
+| 228. Repair Stripe Webhook-Signing CI Boot Contract | 3/3 | Complete    | 2026-09-11 |
 
 <details>
 <summary>✅ v1.58 lattice_stripe 2.x Bump & Stripe-Native Entitlements Sync (Phases 212-214.2) — SHIPPED 2026-07-31</summary>
@@ -207,7 +209,7 @@ Completed milestone detail is archived in [v1.59-ROADMAP.md](milestones/v1.59-RO
 2. Deterministic negative fixtures and a no-network runtime test reject missing configuration while preserving always-run provider proof finalization and artifact behavior.
 3. After explicit maintainer setup and authorization, at most one fresh attempt-1 dispatch is recorded with canonical nonempty proof semantics and no secret disclosure; Phase 227 evidence remains immutable.
 
-**Plans:** 3/3 plans executed
+**Plans:** 3/3 plans complete
 
 Plans:
 **Wave 1**

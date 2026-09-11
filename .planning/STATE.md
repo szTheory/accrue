@@ -2,20 +2,20 @@
 gsd_state_version: "1.0"
 milestone: v1.61
 milestone_name: CI Evidence & Critical-Path Hardening
-current_phase: 228
-current_phase_name: Repair Stripe Webhook-Signing CI Boot Contract Under a Fresh Evidence Budget
-status: executing
-stopped_at: Completed 228-03-PLAN.md
-last_updated: "2026-09-11T17:24:58.371Z"
-last_activity: 2026-09-08
-last_activity_desc: Phase 228 execution started
-state_head: 0ff337e6823c22409a37e0ee5658494db8052006
+current_phase: 227
+current_phase_name: Measured Critical-Path Improvement
+status: planning
+stopped_at: Phase 228 complete, ready to plan Phase 227
+last_updated: "2026-09-11T17:35:25.200Z"
+last_activity: 2026-09-11
+last_activity_desc: Phase 228 complete, transitioned to Phase 227
+state_head: aa519fb7f9d8d73cdb6a7329ffdbe1eb066be2b3
 progress:
   total_phases: 4
-  completed_phases: 2
+  completed_phases: 3
   total_plans: 26
   completed_plans: 24
-  percent: 50
+  percent: 75
 ---
 
 # Project State
@@ -26,24 +26,25 @@ See: `.planning/PROJECT.md` (updated 2026-08-05 after shipping v1.59)
 
 **Core value:** A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic Elixir DX, strong domain modeling, tamper-evident audit ledger, great observability, and zero breaking-change pain through v1.x.
 
-**Current focus:** Phase 228 — Repair Stripe Webhook-Signing CI Boot Contract Under a Fresh Evidence Budget
+**Current focus:** Phase 227 — Measured Critical-Path Improvement gap closure
 
 ## Current Position
 
-Phase: 228 (Repair Stripe Webhook-Signing CI Boot Contract Under a Fresh Evidence Budget) — EXECUTING
-Plan: 3 of 3
-Status: Ready to execute
-Last activity: 2026-09-08 — Phase 228 execution started
+Phase: 227 — Measured Critical-Path Improvement
+Plan: Not started
+Status: Ready to plan
+Last activity: 2026-09-11 — Phase 228 complete, transitioned to Phase 227
 
-Progress: [█████░░░░░] 50%
+Progress: [████████░░] 75%
 
 ## v1.61 Roadmap
 
 | Phase | Goal | Requirements | Status |
 |---|---|---|---|
-| 225 | Restore trustworthy required release/Admin CI signal through trace-backed root-cause repair. | REL-01, REL-02, REL-03 | Ready to plan |
-| 226 | Establish comparable-run baseline, provider proof semantics, and host/browser setup ownership. | BASE-01, BASE-02, OWN-01 | Not started |
+| 225 | Restore trustworthy required release/Admin CI signal through trace-backed root-cause repair. | REL-01, REL-02, REL-03 | Complete |
+| 226 | Establish comparable-run baseline, provider proof semantics, and host/browser setup ownership. | BASE-01, BASE-02, OWN-01 | Complete |
 | 227 | Make one measured critical-path improvement with stable checks, artifacts, negative controls, and rollback. | PATH-01, PATH-02, SAFE-01, SAFE-02 | Blocked: rollback applied, external restoration proof failed |
+| 228 | Repair the Stripe webhook-signing boot contract and seal one fresh authorized provider attempt. | None | Complete |
 
 **Dependency shape:** 225 → 226 → 227. **Coverage:** 10/10 requirements mapped exactly once.
 
@@ -1117,7 +1118,7 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 ## Session Continuity
 
 Last session: 2026-09-11T17:24:50.306Z
-Stopped at: Completed 228-03-PLAN.md
+Stopped at: Phase 228 complete, ready to plan Phase 227
 Resume file: None
 
 ## Operator Next Steps
