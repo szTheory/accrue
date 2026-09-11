@@ -229,10 +229,10 @@ export function verifyFinalDecision(records, contract, expectedRepository = "szT
 export function verifyFixtures() {
   const contract = readJson(path.join(phase, "227-ci-contract.json"));
   const fixtures = readJson(path.join(phase, "fixtures/ci-critical-path-cases.json"));
-  const current = fs.readFileSync(path.join(root, ".github/workflows/ci.yml"), "utf8");
-  const host = jobBlock(current, "host-integration");
-  const candidate = current.replace(host, host.replace(oldHostNeeds, newHostNeeds));
-  const rollback = current.replace(host, host.replace(newHostNeeds, oldHostNeeds));
+  const restored = fs.readFileSync(path.join(phase, "fixtures/ci-workflow-restored-v2.yml"), "utf8");
+  const host = jobBlock(restored, "host-integration");
+  const candidate = restored.replace(host, host.replace(oldHostNeeds, newHostNeeds));
+  const rollback = restored.replace(host, host.replace(newHostNeeds, oldHostNeeds));
   verifySuccessArtifactContract(contract);
   assert.equal(verifyWorkflowContract(candidate, contract).state, "candidate", "intended graph passes");
   assert.equal(verifyWorkflowContract(rollback, contract).state, "inverse_rollback", "inverse graph remains explicit");
@@ -246,6 +246,7 @@ export function verifyFixtures() {
   assert.throws(() => verifyWorkflowContract(candidate.replace("playwright-e2e,", ""), contract), /workflow changed/);
   assert.deepEqual(verifyComparisonEvidence(fixtures.accepted_evidence, contract, fixtures.context), { keep: true, median_seconds: 1600, observations: 3 });
   for (const negative of fixtures.rejected_evidence) assert.throws(() => verifyComparisonEvidence(negative, contract, fixtures.context));
+  assert.throws(() => verifyComparisonEvidence(fixtures.forged_keep_evidence, contract, fixtures.context), /workflow_dispatch|unique|required job/, "forged duplicate push cohort must be rejected through the public verifier");
   const correction = { schema_version: 1, kind: "contract_correction", correction_id: "phase-227-success-artifact-v1", prior_expected_artifacts: ["accrue-host-ci-setup-facts", "accrue-host-phase15-screenshots"], corrected_expected_artifacts: ["accrue-host-phase15-screenshots"], diagnostic_artifact_retained_in_inventory: "accrue-host-ci-setup-facts", historical_records_rewritten: false, restoration_dispatch_consumed: false };
   const requiredJobs = Object.fromEntries(Array.from({ length: 10 }, (_, index) => [`job_${index}`, { conclusion: "success" }]));
   const fixtureCandidate = (runId) => ({ kind: "candidate_run", repository: "szTheory/accrue", run_id: runId, run_url: immutableRunUrl("szTheory/accrue", runId), run_attempt: 1, event_class: "workflow_dispatch", conclusion: "success", provider_state: "non_run", required_jobs: requiredJobs, artifacts: { "accrue-host-phase15-screenshots": true } });

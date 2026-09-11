@@ -24,5 +24,11 @@
     [{ "repository": "szTheory/accrue", "sha": "a", "run_attempt": 2, "event_class": "pull_request", "conclusion": "success", "fingerprint": "phase-227-candidate", "duration_seconds": 1500 }],
     [{ "repository": "wrong/repository", "sha": "a", "run_attempt": 1, "event_class": "pull_request", "conclusion": "success", "fingerprint": "phase-227-candidate", "duration_seconds": 1500 }],
     [{ "repository": "szTheory/accrue", "sha": "a", "run_attempt": 1, "event_class": "pull_request", "conclusion": "success", "fingerprint": "phase-227-candidate", "duration_seconds": 1700 }, { "repository": "szTheory/accrue", "sha": "b", "run_attempt": 1, "event_class": "pull_request", "conclusion": "success", "fingerprint": "phase-227-candidate", "duration_seconds": 1701 }, { "repository": "szTheory/accrue", "sha": "c", "run_attempt": 1, "event_class": "pull_request", "conclusion": "success", "fingerprint": "phase-227-candidate", "duration_seconds": 1702 }]
+  ],
+  "forged_keep_evidence": [
+    { "repository": "szTheory/accrue", "sha": "0123456789abcdef0123456789abcdef01234567", "run_id": 7, "run_url": "https://github.com/szTheory/accrue/actions/runs/7", "run_attempt": 1, "event_class": "push", "conclusion": "success", "fingerprint": "phase-227-candidate", "duration_seconds": 1600, "required_jobs": { "forged": { "conclusion": "success", "url": "https://github.com/szTheory/accrue/actions/runs/7/job/1" } } },
+    { "repository": "szTheory/accrue", "sha": "0123456789abcdef0123456789abcdef01234567", "run_id": 7, "run_url": "https://github.com/szTheory/accrue/actions/runs/7", "run_attempt": 1, "event_class": "push", "conclusion": "success", "fingerprint": "phase-227-candidate", "duration_seconds": 1600, "required_jobs": { "forged": { "conclusion": "success", "url": "https://github.com/szTheory/accrue/actions/runs/7/job/1" } } },
+    { "repository": "szTheory/accrue", "sha": "0123456789abcdef0123456789abcdef01234567", "run_id": 7, "run_url": "https://github.com/szTheory/accrue/actions/runs/7", "run_attempt": 1, "event_class": "push", "conclusion": "success", "fingerprint": "phase-227-candidate", "duration_seconds": 1600, "required_jobs": { "forged": { "conclusion": "success", "url": "https://github.com/szTheory/accrue/actions/runs/7/job/1" } } },
+    { "aggregate_failure": true, "host_browser_completed": true, "artifacts_retained": true }
   ]
 }
