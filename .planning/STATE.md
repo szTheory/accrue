@@ -5,16 +5,16 @@ milestone_name: CI Evidence & Critical-Path Hardening
 current_phase: 227
 current_phase_name: Measured Critical-Path Improvement
 status: executing
-stopped_at: Completed 227-04-PLAN.md
-last_updated: "2026-09-11T19:07:37.928Z"
+stopped_at: Completed 227-05-PLAN.md with rollback_applied_unverified
+last_updated: "2026-09-11T23:26:53.054Z"
 last_activity: 2026-09-11
 last_activity_desc: Phase 227 execution started
-state_head: 389e1f3d254e5ab36f1d7e403c1bf48f4424feb4
+state_head: 6b3b9b186df06106d7c074d47b74a71106cb15c9
 progress:
   total_phases: 4
   completed_phases: 3
   total_plans: 29
-  completed_plans: 25
+  completed_plans: 26
   percent: 75
 ---
 
@@ -31,7 +31,7 @@ See: `.planning/PROJECT.md` (updated 2026-09-11 after completing Phase 228)
 ## Current Position
 
 Phase: 227 (Measured Critical-Path Improvement) — EXECUTING
-Plan: 2 of 6
+Plan: 3 of 6
 Status: Ready to execute
 Last activity: 2026-09-11 — Phase 227 execution started
 
@@ -481,6 +481,7 @@ Coverage: 22/22 v1.51 requirements mapped (each REQ-ID → exactly one phase). D
 | Phase 228 P01 | 37min | 2 tasks | 7 files |
 | Phase 228-repair-stripe-webhook-signing-ci-boot-contract-under-a-fresh P03 | 12min | 2 tasks | 3 files |
 | Phase 227 P04 | 35m | 2 tasks | 7 files |
+| Phase 227 P05 | 4h 16m | 3 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -967,6 +968,8 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - [Phase 228]: The signing-secret boot failure is resolved: the authorized run reached the selected suite, but 5 of 10 assertions failed, so Phase 227 remains open for gap closure.
 - [Phase 227]: Terminal report is rendered from validated NDJSON rather than maintained by hand.
 - [Phase 227]: Critical-path CLI requires one explicit action and action-scoped options.
+- [Phase 227]: Both v2 candidate runs are retained as required-release-lane failures; neither is an admissible timing observation.
+- [Phase 227]: The D-11 inverse is restored; all v2 authority is closed and PATH-02 remains unmet.
 
 ### Pending Todos
 
@@ -1120,9 +1123,9 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 
 ## Session Continuity
 
-Last session: 2026-09-11T19:07:37.772Z
-Stopped at: Completed 227-04-PLAN.md
-Resume file: None
+Last session: 2026-09-11T23:26:52.848Z
+Stopped at: Completed 227-05-PLAN.md with rollback_applied_unverified
+Resume file: 227-06-PLAN.md
 
 ## Operator Next Steps
 
