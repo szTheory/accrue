@@ -260,6 +260,9 @@ export function verifyUnverifiedRollbackTerminal(records, contract, expectedRepo
 }
 
 export function verifyFinalDecision(records, contract, expectedRepository = "szTheory/accrue") {
+  if (records.some((record) => record.kind === "gap_budget_authorization" && record.budget_id === "phase-227-gap-dispatch-false-v2")) {
+    return verifyGapV2Evidence(records, contract, expectedRepository);
+  }
   const admitted = correctedCandidateAdmissions(records, contract);
   if (admitted.length >= contract.run_budget.final_candidate_attempts) fail("rollback decision is inconsistent with a complete admitted cohort");
   const rollback = latestRecord(records, "rollback");
@@ -267,6 +270,50 @@ export function verifyFinalDecision(records, contract, expectedRepository = "szT
   if (rollback.state === "rollback_verified") verifyRollbackTerminal(records, contract, expectedRepository);
   else verifyUnverifiedRollbackTerminal(records, contract, expectedRepository);
   return { state: rollback.state, admitted_observations: admitted.length };
+}
+
+function verifyGapV2Evidence(records, contract, expectedRepository) {
+  const prefixLength = ["negative_control", "exclusion", "negative_control", ...Array(9).fill("exclusion"), "decision_pending"].length;
+  assert.deepEqual(records.slice(0, prefixLength).map((record) => record.kind), ["negative_control", "exclusion", "negative_control", ...Array(9).fill("exclusion"), "decision_pending"], "historical ledger prefix changed");
+  const authorization = records.filter((record) => record.kind === "gap_budget_authorization");
+  assert.equal(authorization.length, 1, "v2 authorization must appear exactly once");
+  const budget = authorization[0];
+  assert.deepEqual(Object.keys(budget).sort(), ["authorized_at", "budget_id", "candidate_ceiling", "candidate_fingerprint", "candidate_provider_state", "candidate_run_attempt", "candidate_run_live_stripe", "conditional_restoration_ceiling", "event_class", "existing_negative_control_run_id", "kind", "no_replacements", "no_reruns", "old_budget_id", "old_budget_immutable", "old_budget_observations", "owner", "phase228_provider_evidence", "phase228_provider_outcome", "repository", "thresholds"].sort(), "v2 authorization schema differs");
+  assert.equal(budget.budget_id, "phase-227-gap-dispatch-false-v2", "v2 budget id differs");
+  assert.equal(budget.repository, expectedRepository, "v2 authorization repository differs");
+  assert.equal(budget.event_class, "workflow_dispatch", "v2 event class differs");
+  assert.equal(budget.candidate_run_live_stripe, false, "v2 candidate input differs");
+  assert.equal(budget.candidate_run_attempt, 1, "v2 candidate attempt differs");
+  assert.equal(budget.candidate_fingerprint, contract.measurement_topology.candidate_fingerprint, "v2 fingerprint differs");
+  assert.equal(budget.candidate_provider_state, "non_run", "v2 provider state differs");
+  assert.equal(budget.candidate_ceiling, 3, "v2 candidate ceiling differs");
+  assert.equal(budget.conditional_restoration_ceiling, 1, "v2 restoration ceiling differs");
+  assert.equal(budget.no_reruns, true, "v2 must prohibit reruns");
+  assert.equal(budget.no_replacements, true, "v2 must prohibit replacements");
+  assert.equal(budget.old_budget_id, "phase-227-dispatch-false-v1", "v1 identity differs");
+  assert.equal(budget.old_budget_immutable, true, "v1 must remain immutable");
+  assert.equal(budget.old_budget_observations, 0, "v1 observations must not transfer");
+  assert.deepEqual(budget.thresholds, contract.thresholds, "v2 thresholds differ from frozen contract");
+  assert.equal(budget.phase228_provider_outcome, "failed/selected_assertions_failed", "Phase 228 provider outcome must remain literal");
+  assert.equal(budget.phase228_provider_evidence, "../228-repair-stripe-webhook-signing-ci-boot-contract-under-a-fresh/228-STRIPE-WEBHOOK-BOOT-EVIDENCE.md", "Phase 228 evidence link differs");
+  assert.ok(Number.isSafeInteger(budget.existing_negative_control_run_id) && budget.existing_negative_control_run_id > 0, "negative control reference is invalid");
+
+  const candidates = records.filter((record) => record.kind === "gap_candidate_run");
+  const decisions = records.filter((record) => record.kind === "gap_decision");
+  assert.ok(candidates.length <= budget.candidate_ceiling, "v2 candidate budget exceeded");
+  assert.ok(decisions.length <= 1, "v2 decision is duplicated");
+  if (!decisions.length) {
+    assert.equal(candidates.length, 0, "unclosed v2 authority may not contain an unclassified candidate");
+    return { state: "authorized_unspent", admitted_observations: 0 };
+  }
+  const decision = decisions[0];
+  assert.ok(["kept", "rollback_verified", "rollback_applied_unverified"].includes(decision.state), "v2 terminal decision is invalid");
+  if (decision.state === "kept") {
+    assert.equal(candidates.length, 3, "kept v2 decision requires exactly three candidates");
+  } else {
+    assert.equal(decision.path02, "unmet", "rollback decision must leave PATH-02 unmet");
+  }
+  return { state: decision.state, admitted_observations: candidates.length };
 }
 
 export function verifyFixtures(workflowFixture = path.join(phase, "fixtures/ci-workflow-restored-v2.yml")) {
@@ -457,6 +504,14 @@ function verifyLiveRollback(records, contract, repository, requireVerified = fal
 
 export function renderCriticalPathEvidence(records) {
   const contract = readJson(path.join(phase, "227-ci-contract.json"));
+  if (records.some((record) => record.kind === "gap_budget_authorization" && record.budget_id === "phase-227-gap-dispatch-false-v2")) {
+    const result = verifyGapV2Evidence(records, contract, "szTheory/accrue");
+    const budget = records.find((record) => record.kind === "gap_budget_authorization");
+    const candidates = records.filter((record) => record.kind === "gap_candidate_run");
+    const decision = latestRecord(records, "gap_decision");
+    const next = decision ? "none" : "node scripts/ci/verify_ci_critical_path.mjs --verify-workflow --workflow .github/workflows/ci.yml --contract .planning/phases/227-measured-critical-path-improvement/227-ci-contract.json";
+    return `# Phase 227 critical-path v2 experiment\n\n## Current fact\n\n- state: \`${result.state}\`\n- owner: ${budget.owner}\n- budget: \`${budget.budget_id}\`\n- candidate slots consumed: ${candidates.length}/${budget.candidate_ceiling}\n- restoration slots consumed: 0/${budget.conditional_restoration_ceiling}\n- old budget: \`${budget.old_budget_id}\` remains immutable and supplies zero v2 observations\n- Phase 228 provider outcome: \`${budget.phase228_provider_outcome}\` (linked separately; never a candidate)\n- next command: \`${next}\`\n\nThe only candidate event is attempt-1 \`workflow_dispatch\` with \`run_live_stripe: false\`, fingerprint \`${budget.candidate_fingerprint}\`, and provider state \`${budget.candidate_provider_state}\`. Reruns and replacements are prohibited. Keep requires exactly three valid independent observations; an unspent authorization cannot satisfy PATH-02.\n${decision ? `\n## Terminal decision\n\n- state: \`${decision.state}\`\n- PATH-02: \`${decision.path02 || "satisfied"}\`\n` : ""}`;
+  }
   validateTerminalLedger(records, contract);
   const candidateRuns = records.filter((record) => record.kind === "candidate_run");
   const control = records.find((record) => record.kind === "negative_control" && record.run_id);
@@ -484,6 +539,10 @@ export function renderCriticalPathEvidence(records) {
 }
 
 function validateTerminalLedger(records, contract) {
+  if (records.some((record) => record.kind === "gap_budget_authorization" && record.budget_id === "phase-227-gap-dispatch-false-v2")) {
+    verifyGapV2Evidence(records, contract, "szTheory/accrue");
+    return;
+  }
   const expectedPrefix = ["negative_control", "exclusion", "negative_control", ...Array(9).fill("exclusion"), "decision_pending"];
   assert.deepEqual(records.slice(0, expectedPrefix.length).map((record) => record.kind), expectedPrefix, "historical ledger prefix changed");
   for (const record of records) assertSafeTerminalEvidence(record);
