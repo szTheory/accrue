@@ -19,7 +19,7 @@ key_files:
     - .github/workflows/ci.yml
     - scripts/ci/verify_ci_critical_path.mjs
 decisions:
-  - Preserve all failed candidate runs and require a new plan before any compatible event-class proof.
+  - Preserve the exhausted three-attempt cohort and route only a separately authorized, bounded event-class proof through a Phase 227 gap plan.
 metrics:
   completed_date: 2026-08-13
   tasks_completed: 1
@@ -71,6 +71,12 @@ The repository-bound live evidence attempt is blocked: the retained temporary-br
 - The admissible controlled-negative run remains [31660617339](https://github.com/szTheory/accrue/actions/runs/31660617339); it is not a substitute for the missing third successful candidate observation.
 - The latest rollback record remains `rollback_applied_unverified`. Phase 228 repaired the missing Stripe webhook-signing boot contract, but its sealed provider attempt did not establish a new Phase 227 candidate sample or a verified restoration proof; Phase 227 therefore remains blocked pending a newly authorized gap plan.
 - The historical local/live verifier was intentionally run without dispatching work and rejected the current workflow hash (`2622f7d8…`) because its Phase 227 contract locks the prior restored-workflow hash (`81ae6c70…`). This is expected fail-closed behavior after later workflow changes, not evidence that the immutable records changed.
+
+## Authorized Terminal Routing (2026-09-11)
+
+- The maintainer authorized the recommended safe route: close this plan in its terminal blocked state, preserve the evidence-integrity decision, and do not override the cohort's `allow_replacements: false` prohibition. Task 2 remains incomplete; `PATH-02` is not satisfied or claimed.
+- The only next action is `$gsd-plan-phase 227 --gaps`. Its new `gap_closure: true` plan must name one compatible event class, retain the existing immutable exclusions, and define its own explicit candidate/evidence budget before any live work. That authorization is separate from—and must not expand—the exhausted `phase-227-dispatch-false-v1` budget.
+- No external CI dispatch, replacement run, or fourth candidate was performed during this close-out.
 
 ## Self-Check: PASSED
 
