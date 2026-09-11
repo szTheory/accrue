@@ -299,9 +299,23 @@ function verifyGapV2Evidence(records, contract, expectedRepository) {
   assert.ok(Number.isSafeInteger(budget.existing_negative_control_run_id) && budget.existing_negative_control_run_id > 0, "negative control reference is invalid");
 
   const candidates = records.filter((record) => record.kind === "gap_candidate_run");
+  const preflights = records.filter((record) => record.kind === "gap_candidate_preflight");
   const decisions = records.filter((record) => record.kind === "gap_decision");
   assert.ok(candidates.length <= budget.candidate_ceiling, "v2 candidate budget exceeded");
+  assert.ok(preflights.length <= 1, "v2 candidate preflight is duplicated");
   assert.ok(decisions.length <= 1, "v2 decision is duplicated");
+  if (preflights.length) {
+    const preflight = preflights[0];
+    assert.deepEqual(Object.keys(preflight).sort(), ["candidate_fingerprint", "candidate_provider_state", "candidate_run_attempt", "candidate_run_live_stripe", "candidate_workflow_revision", "kind", "repository", "sha_binding", "state"].sort(), "v2 preflight schema differs");
+    assert.equal(preflight.repository, expectedRepository, "v2 preflight repository differs");
+    assert.equal(preflight.state, "passed_unbound", "v2 preflight must remain unbound until the task commit exists");
+    assert.equal(preflight.candidate_run_live_stripe, false, "v2 preflight input differs");
+    assert.equal(preflight.candidate_run_attempt, 1, "v2 preflight attempt differs");
+    assert.equal(preflight.candidate_fingerprint, budget.candidate_fingerprint, "v2 preflight fingerprint differs");
+    assert.equal(preflight.candidate_provider_state, budget.candidate_provider_state, "v2 preflight provider state differs");
+    assert.match(preflight.candidate_workflow_revision, /^sha256:[0-9a-f]{64}$/, "v2 preflight workflow revision is invalid");
+    assert.equal(preflight.sha_binding, "Task 2 commit SHA is captured before the first dispatch; no evidence commit is eligible", "v2 preflight SHA binding differs");
+  }
   if (!decisions.length) {
     assert.equal(candidates.length, 0, "unclosed v2 authority may not contain an unclassified candidate");
     return { state: "authorized_unspent", admitted_observations: 0 };
@@ -564,7 +578,7 @@ function assertSafeTerminalEvidence(value, key = "root", parent = "") {
 
 function parseCli(argv) {
   const actions = new Set(["--fixtures", "--verify-workflow", "--verify-evidence", "--render-evidence", "--verify-live-actions"]);
-  const values = new Set(["--workflow", "--workflow-fixture", "--contract", "--evidence", "--rendered", "--expected-repository", "--control-branch"]);
+  const values = new Set(["--workflow", "--workflow-fixture", "--contract", "--evidence", "--rendered", "--expected-repository", "--expected-state", "--control-branch"]);
   const modifiers = new Set(["--require-final-decision", "--require-rollback-verified", "--require-negative-control"]);
   const seen = new Map();
   const flags = new Set();
@@ -583,7 +597,7 @@ function parseCli(argv) {
   const action = selected[0];
   const allowed = {
     "--fixtures": new Set(["--workflow-fixture", "--contract"]),
-    "--verify-workflow": new Set(["--workflow", "--contract"]),
+    "--verify-workflow": new Set(["--workflow", "--contract", "--expected-state"]),
     "--verify-evidence": new Set(["--evidence", "--contract", "--expected-repository", "--rendered", "--require-final-decision", "--require-rollback-verified"]),
     "--render-evidence": new Set(["--evidence", "--contract", "--expected-repository", "--rendered"]),
     "--verify-live-actions": new Set(["--evidence", "--contract", "--expected-repository", "--rendered", "--control-branch", "--require-final-decision", "--require-rollback-verified", "--require-negative-control"]),
@@ -599,7 +613,10 @@ function runCli(argv) {
   if (cli.action === "--fixtures") return verifyFixtures(cli.values.get("--workflow-fixture"));
   if (cli.action === "--verify-workflow") {
     const workflow = cli.values.get("--workflow"); if (!workflow) fail("--verify-workflow requires --workflow");
-    return verifyWorkflowContract(fs.readFileSync(workflow, "utf8"), contract);
+    const result = verifyWorkflowContract(fs.readFileSync(workflow, "utf8"), contract);
+    const expectedState = cli.values.get("--expected-state");
+    if (expectedState && result.state !== expectedState) fail(`workflow state ${result.state} differs from expected ${expectedState}`);
+    return result;
   }
   const evidence = cli.values.get("--evidence"); if (!evidence) fail(`${cli.action} requires --evidence`);
   const records = evidenceRecords(evidence);
