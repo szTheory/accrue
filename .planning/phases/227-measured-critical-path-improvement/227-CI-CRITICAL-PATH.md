@@ -7,7 +7,7 @@
 - budget: `phase-227-gap-dispatch-false-v3`
 - PATH-02: `unmet`
 - candidate slots reserved: 2/3
-- candidate slots consumed: 1/3
+- candidate slots consumed: 2/3
 - restoration slots consumed: 0/1
 - remote effects: `enabled`
 - old budgets: `phase-227-dispatch-false-v1`, `phase-227-gap-dispatch-false-v2` remain closed and supply zero v3 observations
