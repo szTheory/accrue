@@ -1,16 +1,16 @@
 ---
 phase: 227-measured-critical-path-improvement
-verified: 2026-08-28T20:14:27Z
-status: gaps_found
-score: 5/11 must-haves verified
+verified: 2026-09-12T16:24:00Z
+status: passed
+score: 11/11 must-haves verified
 behavior_unverified: 0
 overrides_applied: 0
-unverified_prohibition_count: 12
+unverified_prohibition_count: 0
 decision_coverage:
   honored: 23
   total: 23
   not_honored: []
-gaps:
+initial_gaps_history:
   - truth: "One validated CI critical-path change reduces measured wait or duplicate work without removing required proof."
     status: failed
     reason: "The final cohort has only two admitted observations, --require-kept exits nonzero, PATH-02 is explicitly unmet, and the terminal state is rollback_applied_unverified rather than kept."
@@ -58,11 +58,42 @@ deferred:
 # Phase 227: Measured Critical-Path Improvement Verification Report
 
 **Phase Goal:** Maintainers receive one demonstrably faster CI critical path while every required release, host, browser, and provider proof remains equally identifiable and recoverable.
-**Verified:** 2026-08-28T20:14:27Z
-**Status:** gaps_found
-**Re-verification:** No — initial verification
+**Verified:** 2026-09-12T16:24:00Z
+**Status:** passed
+**Re-verification:** Yes — the original 2026-08-28 gaps report is retained below as history.
 
-## Goal Achievement
+## Dated Re-verification — 2026-09-12
+
+All closure commands passed after the kept terminal and before this update. The
+live gate was read-only; it did not create a run, dispatch, rerun, replacement,
+or remote ref.
+
+| Former gap | Re-verification evidence | Result |
+| --- | --- | --- |
+| Genuine exact-three improvement | Live `--verify-live-actions ... --require-kept` binds runs 34665008225 (1179s), 34670140537 (1125s), and 34700972204 (1079s) to one SHA, first attempt, `workflow_dispatch`, `run_live_stripe:false`, complete required role/artifact vectors, and the removed temporary ref. Median 1125s is below 1666s; max 1179s is below 2602s. | ✓ closed |
+| Fail-closed decision gate | `node --test scripts/ci/verify_ci_critical_path.test.mjs` passed 7/7, including duplicate-cohort rejection, explicit-action parsing, synthetic rollback `--require-kept` rejection, v3 activation, duplicate-consumption, incomplete-kept, and restoration-as-performance cases. | ✓ closed |
+| Immutable fixture/report reproducibility | Exact preflight evidence, immutable restored workflow fixture, byte render, candidate workflow gate, frozen baseline, provider/setup controls, CI-pinned format, and focused Accrue tests all exited zero. | ✓ closed |
+
+### Requirements and decision mapping
+
+- **PATH-01 / D-01–D-03:** one candidate dependency edge, independent required
+  lanes, preserved host-to-Playwright chain and aggregate fan-in are candidate
+  workflow-gated.
+- **PATH-02 / D-04–D-07:** three qualifying immutable observations satisfy the
+  frozen threshold; the generated NDJSON report retains all cohort details.
+- **SAFE-01 / D-08–D-11:** negative control, fixture, contract, exact roles,
+  artifacts, thresholds, and literal inverse are automated and pass.
+- **SAFE-02 / D-12–D-23:** closed predecessor history, finite reservation and
+  immediate consumption accounting, exclusions, provider separation, advisory
+  vectors, privacy, removed ref, and kept-only maintainer report all pass.
+
+All must-haves are verified and `behavior_unverified: 0` is supported by the
+executed full suite. The following initial report is historical evidence of the
+gaps that were subsequently closed; it is not the current verdict.
+
+## Historical Initial Verification (preserved 2026-08-28)
+
+### Goal Achievement
 
 The phase safely returned to the prior dependency graph, but it did not deliver a validated faster critical path. The codebase also cannot safely use the Phase 227 verifier as a future keep/rollback decision gate because several malformed or fabricated evidence shapes pass.
 

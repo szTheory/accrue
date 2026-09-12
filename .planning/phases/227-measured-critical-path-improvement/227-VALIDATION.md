@@ -1,83 +1,64 @@
 ---
 phase: 227
 slug: measured-critical-path-improvement
-# status lifecycle: draft (seeded by plan-phase) → validated (set by validate-phase §6)
-# audit-milestone §5.5 distinguishes NOT-VALIDATED (draft) from PARTIAL (validated + nyquist_compliant: false)
-status: draft
-nyquist_compliant: false
-wave_0_complete: false
+status: validated
+nyquist_compliant: true
+wave_0_complete: true
 created: 2026-08-12
+validated: 2026-09-12
 ---
 
-# Phase 227 — Validation Strategy
+# Phase 227 — Validation Record
 
-> Per-phase validation contract for feedback sampling during execution.
+The Phase 227 validation is green only because the live kept gate revalidated
+the exact-three, first-attempt candidate cohort at SHA
+`0339f14d6badaa7d901c27a62379c86b666c5d62`. This record retains the earlier
+draft's scope while replacing its pending rows with executed evidence.
 
----
+## Executed full suite
 
-## Test Infrastructure
+All commands below exited zero on 2026-09-12. Read-only live verification was
+used; no dispatch, rerun, replacement, ref creation, or other remote mutation
+occurred.
 
-| Property | Value |
-|----------|-------|
-| **Framework** | Node.js built-in assertions plus shell workflow contracts |
-| **Config file** | none — repository CI verifiers are dependency-free executables |
-| **Quick run command** | `node scripts/ci/verify_ci_critical_path.mjs --fixtures` |
-| **Full suite command** | `node --check scripts/ci/verify_ci_critical_path.mjs && node scripts/ci/verify_ci_critical_path.mjs --fixtures && node scripts/ci/verify_ci_baseline.mjs --fixtures --expected-repository acme/accrue && node scripts/ci/verify_ci_baseline.mjs --records .planning/phases/226-ci-baseline-proof-semantics/226-CI-BASELINE.ndjson --rendered .planning/phases/226-ci-baseline-proof-semantics/226-CI-BASELINE.md --require-critical-path --expected-repository szTheory/accrue && node scripts/ci/verify_provider_proof.mjs --fixtures && bash scripts/ci/verify_ci_setup_diagnostics.sh && bash scripts/ci/verify_phase225_required_lane_evidence.sh` |
-| **Estimated runtime** | ~60 seconds locally, excluding recorded GitHub Actions runs |
+| Gate | Executed command / result |
+| --- | --- |
+| Strict verifier | `node --check scripts/ci/verify_ci_critical_path.mjs`; `node --test scripts/ci/verify_ci_critical_path.test.mjs` — 7/7 passing |
+| Exact-tree preflight | `--verify-preflight-evidence ... --candidate-sha 0339f14d6badaa7d901c27a62379c86b666c5d62 --expected-state candidate --require-no-remote-effects` |
+| Immutable fixture | `--fixtures --workflow-fixture .../fixtures/ci-workflow-restored-v2.yml --contract .../227-ci-contract.json` |
+| Kept live evidence | `--verify-live-actions ... --require-activation-evidence .../227-CANDIDATE-PREFLIGHT.json --require-kept` |
+| Byte rendering | `--render-evidence --evidence .../227-CI-CRITICAL-PATH.ndjson --rendered .../227-CI-CRITICAL-PATH.md --contract .../227-ci-contract.json --expected-repository szTheory/accrue` |
+| Candidate workflow | `--verify-workflow --workflow .github/workflows/ci.yml --contract .../227-ci-contract.json --expected-state candidate` |
+| Frozen baseline | `node scripts/ci/verify_ci_baseline.mjs --records .../226-CI-BASELINE.ndjson --rendered .../226-CI-BASELINE.md --require-critical-path --expected-repository szTheory/accrue` |
+| Provider and setup controls | `node scripts/ci/verify_provider_proof.mjs --fixtures`; `node scripts/ci/verify_stripe_webhook_boot_evidence.mjs --fixtures`; `bash scripts/ci/verify_ci_setup_diagnostics.sh`; `bash scripts/ci/verify_phase225_required_lane_evidence.sh` |
+| CI-pinned application checks | `(cd accrue && ASDF_ERLANG_VERSION=28.4.1 ASDF_ELIXIR_VERSION=1.19.5-otp-28 mix format --check-formatted)`; focused `mix test ... --warnings-as-errors` — 10 tests, 0 failures |
 
----
+## Per-task verification map
 
-## Sampling Rate
+| Task | Requirements | Threats | Executed proof | Result |
+| --- | --- | --- | --- | --- |
+| 227-04 | PATH-01, SAFE-01, SAFE-02 | T-227-46, T-227-48, T-227-51 | Strict parser/test corpus, immutable restored fixture, recursive privacy and byte renderer | ✅ green |
+| 227-05 | PATH-01, SAFE-01, SAFE-02 | T-227-47, T-227-49, T-227-50 | Preserved historical exclusions, negative control, inverse/accounting checks | ✅ green |
+| 227-07 | PATH-01, PATH-02, SAFE-01, SAFE-02 | T-227-46, T-227-47, T-227-48, T-227-SC | Exact-SHA preflight evidence and no-remote-effects proof | ✅ green |
+| 227-08 Task 1 | PATH-01, PATH-02, SAFE-01, SAFE-02 | T-227-46 through T-227-52 | Live repository-bound kept verification: reservations, immediate consumptions, three complete vectors, removed temporary ref | ✅ green |
+| 227-08 Task 2 | PATH-02, SAFE-01, SAFE-02 | T-227-48, T-227-51, T-227-52 | Deterministic report byte check, candidate workflow check, privacy/provider separation | ✅ green |
+| 227-08 Task 3 | PATH-01, PATH-02, SAFE-01, SAFE-02 | T-227-46 through T-227-52, T-227-SC | Full suite listed above; CI-pinned format and focused Accrue tests | ✅ green |
 
-- **After every task commit:** Run `node scripts/ci/verify_ci_critical_path.mjs --fixtures`
-- **After every plan wave:** Run the full suite command above
-- **Before `$gsd-verify-work`:** Full suite, three qualifying first-attempt post-change runs, controlled negative control, `--verify-live-actions`, and `--require-kept` must be green; a verified rollback intentionally blocks this gate and escalates to a new follow-up phase
-- **Max feedback latency:** 60 seconds for local verification; live Actions latency is bounded by four runs and their repository-bound automated inspection
+## Requirement and decision coverage
 
----
+| Coverage | Evidence |
+| --- | --- |
+| PATH-01 / D-01–D-03 | Candidate graph has the one authorized host prerequisite removal; independent lanes and final fan-in remain verified by the candidate workflow gate. |
+| PATH-02 / D-04–D-07 | Exactly three qualifying attempt-1 observations (1179s, 1125s, 1079s); 1125s median is below 1666s and 1179s maximum is below 2602s; baseline and generated report remain immutable. |
+| SAFE-01 / D-08–D-11 | Deterministic negative-control/fixture, exact contract, required roles/artifacts, and literal unused inverse remain live- and locally verified. |
+| SAFE-02 / D-12–D-23 | Historic exclusions remain visible; reservation/consumption budgets closed; advisory/provider states remain literal; no rerun/replacement authority exists; report begins with current fact and exact verifier. |
 
-## Per-Task Verification Map
+## Sign-off
 
-| Task ID | Plan | Wave | Requirement | Threat Ref | Secure Behavior | Test Type | Automated Command | File Exists | Status |
-|---------|------|------|-------------|------------|-----------------|-----------|-------------------|-------------|--------|
-| 227-01-01 | 01 | 1 | PATH-01, SAFE-01 | T-227-01 | Fail closed on graph and stable external-contract drift | static + fixture | `node scripts/ci/verify_ci_critical_path.mjs --fixtures` | ❌ W0 | ⬜ pending |
-| 227-01-02 | 01 | 1 | PATH-02, SAFE-02 | T-227-02 | Preserve independent lanes, aggregate failure, artifacts, and inverse-patch rollback | static + negative control | `node scripts/ci/verify_ci_critical_path.mjs --fixtures` | ❌ W0 | ⬜ pending |
-| 227-02-01 | 02 | 2 | SAFE-01, SAFE-02 | T-227-05 / T-227-07 | Prove the temporary-branch negative control through repository-bound run/job/annotation/artifact facts | live contract | `node scripts/ci/verify_ci_critical_path.mjs --verify-live-actions --require-negative-control --evidence .planning/phases/227-measured-critical-path-improvement/227-CI-CRITICAL-PATH.ndjson --expected-repository szTheory/accrue` | ❌ W0 | ⬜ pending |
-| 227-02-02 | 02 | 2 | PATH-01, PATH-02 | T-227-06 / T-227-08 | Accept only comparable first-attempt evidence meeting the locked timing and anomaly-corroboration rules | live evidence contract | `node scripts/ci/verify_ci_critical_path.mjs --verify-live-actions --evidence .planning/phases/227-measured-critical-path-improvement/227-CI-CRITICAL-PATH.ndjson --expected-repository szTheory/accrue` | ❌ W0 | ⬜ pending |
-| 227-03-01 | 03 | 3 | PATH-02, SAFE-01, SAFE-02 | T-227-10 / T-227-11 | Keep only on full proof; otherwise verify exact restoration and intentionally stop incomplete | decision + live restoration contract | `node scripts/ci/verify_ci_critical_path.mjs --verify-live-actions --require-kept --evidence .planning/phases/227-measured-critical-path-improvement/227-CI-CRITICAL-PATH.ndjson --expected-repository szTheory/accrue` | ❌ W0 | ⬜ pending |
-| 227-03-02 | 03 | 3 | PATH-01, PATH-02, SAFE-01, SAFE-02 | T-227-12 / T-227-13 | Seal only a kept result with passed verification and zero unverified behavior | full regression + generated automated UAT | Full suite plus deterministic `227-VERIFICATION.md`, automated UAT, and SUMMARY assertions | ❌ W0 | ⬜ pending |
+- [x] Every additive task has executed automated evidence.
+- [x] Wave 0 references are present and passing.
+- [x] All applicable high/medium threat mitigations are covered by a live or local gate.
+- [x] No pending, missing, or manual-only row remains.
+- [x] `status: validated`, `wave_0_complete: true`, and `nyquist_compliant: true` are justified by the executed suite.
 
-*Status: ⬜ pending · ✅ green · ❌ red · ⚠️ flaky*
-
----
-
-## Wave 0 Requirements
-
-- [ ] `scripts/ci/verify_ci_critical_path.mjs` — exact graph, contract-manifest, comparison, negative-control, and rollback verifier
-- [ ] `.planning/phases/227-measured-critical-path-improvement/227-ci-contract.json` — stable required job, label, artifact, upload-condition, and retention manifest
-- [ ] `.planning/phases/227-measured-critical-path-improvement/227-CI-CRITICAL-PATH.ndjson` — sanitized immutable comparison observations
-- [ ] `.planning/phases/227-measured-critical-path-improvement/227-CI-CRITICAL-PATH.md` — concise maintainer-facing before/after and rollback report
-- [ ] Controlled failure fixture/procedure and recorded immutable Actions result
-
----
-
-## Automated Live Verifications
-
-| Behavior | Requirement | Executable Assertion |
-|----------|-------------|----------------------|
-| Three successful first-attempt same-event-class runs meet the keep gate | PATH-01, PATH-02 | `--verify-live-actions --require-kept` fetches and compares repository, SHA, attempt, revision, jobs, artifacts, durations, anomaly corroboration, and immutable URLs; ordinary variance or an unexplained slow run remains included. |
-| Controlled failure preserves host/browser completion and artifacts while `annotation-sweep` fails | SAFE-01, SAFE-02 | `--verify-live-actions --require-negative-control` asserts the temporary-branch annotation marker, independent job conclusions, condition-driven artifact inventory, candidate-branch cleanliness, and removed temporary ref. |
-| Exact inverse patch restores the prior graph and evidence contract | SAFE-02 | On rejection, live verification asserts the inverse graph plus fresh first-attempt restoration run before `--require-kept` intentionally exits nonzero and blocks phase closure. |
-
----
-
-## Validation Sign-Off
-
-- [ ] All tasks have `<automated>` verify or Wave 0 dependencies
-- [ ] Sampling continuity: no 3 consecutive tasks without automated verify
-- [ ] Wave 0 covers all MISSING references
-- [ ] No watch-mode flags
-- [ ] Feedback latency < 60s for local checks
-- [ ] `nyquist_compliant: true` set in frontmatter
-
-**Approval:** pending
+**Approval:** validated 2026-09-12.

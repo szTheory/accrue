@@ -21,15 +21,24 @@ test("rejects a CLI invocation with no declared action", () => {
   assert.notEqual(result.status, 0, "a no-action verifier invocation must fail closed");
 });
 
-test("requires a kept v2 terminal decision when requested", () => {
+test("requires a kept decision when requested", () => {
+  const rollbackOnlyEvidence = fs.mkdtempSync("/tmp/phase227-v2-rollback-");
+  const evidencePath = `${rollbackOnlyEvidence}/evidence.ndjson`;
+  const records = fs.readFileSync(`${phase}/227-CI-CRITICAL-PATH.ndjson`, "utf8")
+    .trim()
+    .split("\n")
+    .map(JSON.parse)
+    .filter((record) => !record.kind.startsWith("gap_v3_") && record.kind !== "gap_budget_authorization_v3");
+  fs.writeFileSync(evidencePath, `${records.map((record) => JSON.stringify(record)).join("\n")}\n`);
   const result = spawnSync(process.execPath, [
     "scripts/ci/verify_ci_critical_path.mjs",
     "--verify-evidence",
-    "--evidence", `${phase}/227-CI-CRITICAL-PATH.ndjson`,
+    "--evidence", evidencePath,
     "--contract", `${phase}/227-ci-contract.json`,
     "--expected-repository", "szTheory/accrue",
     "--require-kept",
   ], { encoding: "utf8" });
+  fs.rmSync(rollbackOnlyEvidence, { recursive: true, force: true });
   assert.notEqual(result.status, 0, "the recorded rollback terminal must not satisfy a kept-only request");
   assert.match(result.stderr, /terminal decision is not kept/, "the verifier must reject rollback as non-kept, not reject the modifier itself");
 });
