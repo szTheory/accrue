@@ -6,7 +6,7 @@
 - owner: maintainer
 - budget: `phase-227-gap-dispatch-false-v3`
 - PATH-02: `unmet`
-- candidate slots reserved: 0/3
+- candidate slots reserved: 1/3
 - candidate slots consumed: 0/3
 - restoration slots consumed: 0/1
 - remote effects: `enabled`
