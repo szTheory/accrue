@@ -58,29 +58,24 @@ node scripts/ci/provider_proof_automation.mjs --self-test
 
 ## Phase 227 bounded critical-path measurement
 
-Phase 227's candidate experiment is terminally closed: the exact inverse restores
-`needs: [admin-drift-docs, docs-contracts-shift-left]`, and no command below
-authorizes a dispatch. Use the immutable restored workflow fixture for the
-offline verifier:
+Phase 227's bounded candidate cohort is terminally **kept**. The exact-three
+repository-bound observations are recorded in the generated comparison report;
+the candidate workflow remains active and the temporary candidate ref has been
+removed. No command in this section authorizes a dispatch, rerun, replacement,
+or remote ref operation.
 
 ```bash
-node scripts/ci/verify_ci_critical_path.mjs --fixtures \
-  --workflow-fixture .planning/phases/227-measured-critical-path-improvement/fixtures/ci-workflow-restored-v2.yml \
-  --contract .planning/phases/227-measured-critical-path-improvement/227-ci-contract.json
+node scripts/ci/verify_ci_critical_path.mjs --verify-live-actions \
+  --evidence .planning/phases/227-measured-critical-path-improvement/227-CI-CRITICAL-PATH.ndjson \
+  --rendered .planning/phases/227-measured-critical-path-improvement/227-CI-CRITICAL-PATH.md \
+  --contract .planning/phases/227-measured-critical-path-improvement/227-ci-contract.json \
+  --expected-repository szTheory/accrue \
+  --require-activation-evidence .planning/phases/227-measured-critical-path-improvement/227-CANDIDATE-PREFLIGHT.json \
+  --require-kept
 ```
 
-Verify the mutable live workflow separately against the named restored
-compatibility state:
-
-```bash
-node scripts/ci/verify_ci_critical_path.mjs --verify-workflow \
-  --workflow .github/workflows/ci.yml \
-  --contract .planning/phases/227-measured-critical-path-improvement/227-ci-contract.json
-```
-
-The terminal report is derived from the append-only ledger. This command
-validates the recursive privacy/schema and historical-prefix contracts before
-requiring a byte-for-byte report match; it never edits the NDJSON source:
+Verify the generated report byte-for-byte and the current candidate workflow
+state separately:
 
 ```bash
 node scripts/ci/verify_ci_critical_path.mjs --render-evidence \
@@ -88,12 +83,26 @@ node scripts/ci/verify_ci_critical_path.mjs --render-evidence \
   --rendered .planning/phases/227-measured-critical-path-improvement/227-CI-CRITICAL-PATH.md \
   --contract .planning/phases/227-measured-critical-path-improvement/227-ci-contract.json \
   --expected-repository szTheory/accrue
+
+node scripts/ci/verify_ci_critical_path.mjs --verify-workflow \
+  --workflow .github/workflows/ci.yml \
+  --contract .planning/phases/227-measured-critical-path-improvement/227-ci-contract.json \
+  --expected-state candidate
 ```
 
-The required Boolean `run_live_stripe` input defaults to `true`; the historical
-candidate dispatches used `false` and are retained as `non_run` provider state,
-not provider proof. The restoration budget is exhausted: do not rerun, replace,
-or dispatch this cohort.
+The terminal report is a deterministic projection of the append-only, sanitized
+ledger; its command above only verifies bytes and never edits the NDJSON source.
+It retains the frozen 2,083-second baseline median, 2,602-second p95, 1,666-second
+keep threshold, all three candidate observations, controls, exclusions,
+reservation/consumption bindings, and literal provider separation. A green
+workflow is not provider proof: the retained candidate provider state is
+`non_run` because `run_live_stripe: false`.
+
+If a formally authorized future supersession rejects this kept decision, apply
+only the literal inverse recorded in the report (restore
+`needs: [admin-drift-docs, docs-contracts-shift-left]`) and begin a separately
+approved evidence process. This closed authority grants no self-service
+rollback, rerun, replacement, dispatch, or ref creation.
 
 This directory hosts merge-adjacent bash gates and host-app checks. Use it as the first stop when CI fails on documentation or VERIFY-01 contracts.
 
