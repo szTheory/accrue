@@ -261,8 +261,37 @@ export function verifyUnverifiedRollbackTerminal(records, contract, expectedRepo
 
 const V3_BUDGET = "phase-227-gap-dispatch-false-v3";
 const V3_PREFIX_LENGTH = ["negative_control", "exclusion", "negative_control", ...Array(9).fill("exclusion"), "decision_pending"].length;
+const V3_PREFLIGHT_EVIDENCE_PATH = ".planning/phases/227-measured-critical-path-improvement/227-CANDIDATE-PREFLIGHT.json";
+const V3_ACTIVATION_VALIDATOR_VERSION = "phase227-v3-activation-evidence-v1";
 
 function v3Records(records, kind) { return records.filter((record) => record.kind === kind); }
+
+function sha256(value) { return `sha256:${digest(value)}`; }
+
+function stableJson(value) {
+  if (Array.isArray(value)) return `[${value.map(stableJson).join(",")} ]`;
+  if (value && typeof value === "object") return `{${Object.keys(value).sort().map((key) => `${JSON.stringify(key)}:${stableJson(value[key])}`).join(",")}}`;
+  return JSON.stringify(value);
+}
+
+function verifyV3Activation(activation, evidencePath = V3_PREFLIGHT_EVIDENCE_PATH) {
+  assert.deepEqual(Object.keys(activation).sort(), ["activated_at", "candidate_sha", "candidate_tree", "check_vector_sha256", "kind", "preflight_evidence_path", "preflight_evidence_sha256", "prohibited_invocation_log_sha256", "remote_effects", "validator_version", "wrapper_sha256"].sort(), "v3 activation schema differs");
+  assert.equal(activation.remote_effects, "enabled", "v3 activation must explicitly enable remote effects");
+  assert.equal(activation.preflight_evidence_path, V3_PREFLIGHT_EVIDENCE_PATH, "v3 activation preflight path differs");
+  assert.equal(activation.validator_version, V3_ACTIVATION_VALIDATOR_VERSION, "v3 activation validator version differs");
+  assert.match(activation.activated_at || "", /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/, "v3 activation timestamp is invalid");
+  assert.ok(typeof evidencePath === "string" && !path.isAbsolute(evidencePath), "v3 activation evidence path must be repository-relative");
+  assert.equal(evidencePath, activation.preflight_evidence_path, "v3 activation did not use the declared preflight artifact");
+  const evidenceBytes = fs.readFileSync(path.join(root, evidencePath));
+  const preflight = verifyV3Preflight(JSON.parse(evidenceBytes), activation.candidate_sha, "candidate");
+  assert.equal(activation.candidate_tree, preflight.candidate_tree, "v3 activation tree differs from preflight");
+  assert.equal(activation.preflight_evidence_sha256, sha256(evidenceBytes), "v3 activation preflight digest differs");
+  assert.equal(activation.wrapper_sha256, preflight.wrapper_sha256, "v3 activation wrapper digest differs from preflight");
+  assert.equal(activation.wrapper_sha256, sha256(fs.readFileSync(path.join(root, "scripts/ci/preflight_phase227_candidate.sh"))), "v3 activation wrapper digest differs from the current wrapper");
+  assert.equal(activation.check_vector_sha256, sha256(stableJson(preflight.check_results)), "v3 activation check-vector digest differs");
+  assert.equal(activation.prohibited_invocation_log_sha256, sha256(""), "v3 activation prohibited-invocation log must be empty");
+  return preflight;
+}
 
 function assertV3Prefix(records) {
   assert.deepEqual(records.slice(0, V3_PREFIX_LENGTH).map((record) => record.kind), ["negative_control", "exclusion", "negative_control", ...Array(9).fill("exclusion"), "decision_pending"], "historical ledger prefix changed");
@@ -293,7 +322,7 @@ export function verifyPreflightEvidence(evidence, candidateSha, expectedState) {
   return verifyV3Preflight(typeof evidence === "string" ? readJson(evidence) : evidence, candidateSha, expectedState);
 }
 
-function verifyGapV3Evidence(records, contract, expectedRepository) {
+function verifyGapV3Evidence(records, contract, expectedRepository, activationEvidencePath = V3_PREFLIGHT_EVIDENCE_PATH) {
   assertV3Prefix(records);
   const budgets = v3Records(records, "gap_budget_authorization_v3");
   assert.equal(budgets.length, 1, "v3 authorization must appear exactly once");
@@ -349,16 +378,13 @@ function verifyGapV3Evidence(records, contract, expectedRepository) {
     return { state: "authorized_pending_candidate", admitted_observations: 0, reserved: 0, consumed: 0 };
   }
   const activation = activations[0];
-  assert.deepEqual(Object.keys(activation).sort(), ["candidate_sha", "candidate_tree", "kind", "preflight_evidence", "remote_effects"].sort(), "v3 activation schema differs");
-  assert.equal(activation.remote_effects, "enabled", "v3 activation must explicitly enable remote effects");
-  verifyV3Preflight(activation.preflight_evidence, activation.candidate_sha, "candidate");
-  assert.equal(activation.candidate_tree, activation.preflight_evidence.candidate_tree, "v3 activation tree differs from preflight");
+  verifyV3Activation(activation, activationEvidencePath);
   return { state: decisions.length ? decisions[0].state : "activated_pending_reservation", admitted_observations: candidates.length, reserved: reservations.length, consumed: candidates.length };
 }
 
-export function verifyFinalDecision(records, contract, expectedRepository = "szTheory/accrue") {
+export function verifyFinalDecision(records, contract, expectedRepository = "szTheory/accrue", activationEvidencePath = V3_PREFLIGHT_EVIDENCE_PATH) {
   if (records.some((record) => record.kind === "gap_budget_authorization_v3" && record.budget_id === V3_BUDGET)) {
-    return verifyGapV3Evidence(records, contract, expectedRepository);
+    return verifyGapV3Evidence(records, contract, expectedRepository, activationEvidencePath);
   }
   if (records.some((record) => record.kind === "gap_budget_authorization" && record.budget_id === "phase-227-gap-dispatch-false-v2")) {
     return verifyGapV2Evidence(records, contract, expectedRepository);
