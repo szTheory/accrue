@@ -324,6 +324,11 @@ export function verifyPreflightEvidence(evidence, candidateSha, expectedState) {
 
 function verifyGapV3Evidence(records, contract, expectedRepository, activationEvidencePath = V3_PREFLIGHT_EVIDENCE_PATH) {
   assertV3Prefix(records);
+  const ledgerIndex = new Map(records.map((record, index) => [record, index]));
+  const precedes = (earlier, later, message) => assert.ok(
+    ledgerIndex.get(earlier) < ledgerIndex.get(later),
+    `v3 ledger ordering: ${message}`,
+  );
   const budgets = v3Records(records, "gap_budget_authorization_v3");
   assert.equal(budgets.length, 1, "v3 authorization must appear exactly once");
   const budget = budgets[0];
@@ -381,6 +386,8 @@ function verifyGapV3Evidence(records, contract, expectedRepository, activationEv
     assert.equal(reservation.run_attempt, 1, "v3 reservation attempt differs");
     assert.ok(Array.isArray(reservation.pre_dispatch_run_ids) && reservation.pre_dispatch_run_ids.every((id) => Number.isSafeInteger(id) && id > 0) && new Set(reservation.pre_dispatch_run_ids).size === reservation.pre_dispatch_run_ids.length, "v3 reservation snapshot is invalid");
     if (reservation.purpose === "candidate") {
+      assert.ok(activation, "v3 cannot reserve before activation");
+      precedes(activation, reservation, "activation must precede every reservation");
       assert.equal(reservation.ordinal <= budget.candidate_ceiling, true, "v3 candidate ordinal exceeds ceiling");
       assert.equal(reservation.candidate_sha, activation?.candidate_sha, "v3 candidate reservation SHA differs from activation");
       assert.equal(reservation.ref, "phase-227-gap-dispatch-false-v3", "v3 candidate ref differs");
@@ -398,6 +405,7 @@ function verifyGapV3Evidence(records, contract, expectedRepository, activationEv
     assert.deepEqual(Object.keys(consumption).sort(), ["consumed_at", "dispatch_mode", "event_class", "inputs", "kind", "ref", "repository", "reservation_id", "run_attempt", "run_id", "sha"].sort(), "v3 consumption schema differs");
     const reservation = reservationsById.get(consumption.reservation_id);
     assert.ok(reservation, "v3 consumption lacks a prior reservation");
+    precedes(reservation, consumption, "reservation must precede its consumption");
     assert.ok(!consumedIds.has(consumption.run_id), "v3 run ID is consumed twice"); consumedIds.add(consumption.run_id);
     assert.ok(!consumptionsByReservation.has(consumption.reservation_id), "v3 reservation dispatched twice"); consumptionsByReservation.set(consumption.reservation_id, consumption);
     assert.equal(consumption.repository, expectedRepository, "v3 consumption repository differs");
@@ -424,6 +432,7 @@ function verifyGapV3Evidence(records, contract, expectedRepository, activationEv
     const consumption = consumptionsByReservation.get(record.reservation_id);
     const reservation = reservationsById.get(record.reservation_id);
     assert.ok(consumption && reservation, `v3 ${purpose} terminal lacks immediate consumption binding`);
+    precedes(consumption, record, `consumption must precede its ${purpose} terminal`);
     assert.equal(reservation.purpose, purpose, `v3 ${purpose} terminal purpose differs`);
     assert.equal(record.run_id, consumption.run_id, `v3 ${purpose} terminal run ID differs from consumption`);
     assert.equal(record.repository, expectedRepository, `v3 ${purpose} terminal repository differs`);
@@ -470,6 +479,8 @@ function verifyGapV3Evidence(records, contract, expectedRepository, activationEv
   for (const vector of advisoryVectors) {
     assert.deepEqual(Object.keys(vector).sort(), ["kind", "parked_ratchet", "run_id", "sigra"].sort(), "v3 advisory vector schema differs");
     assert.ok(terminalRunIds.has(vector.run_id) && !advisoryRunIds.has(vector.run_id), "v3 advisory vector is missing or duplicated"); advisoryRunIds.add(vector.run_id);
+    const terminal = [...candidates, ...restorations].find((record) => record.run_id === vector.run_id);
+    precedes(terminal, vector, "terminal must precede its advisory vector");
     for (const role of ["sigra", "parked_ratchet"]) {
       const job = vector[role];
       assert.ok(Number.isSafeInteger(job?.job_id) && job.job_id > 0, `v3 advisory ${role} job ID is invalid`);
@@ -485,6 +496,9 @@ function verifyGapV3Evidence(records, contract, expectedRepository, activationEv
   verifyV3Activation(activation, activationEvidencePath);
   if (!decisions.length) return { state: "activated_pending_reservation", admitted_observations: candidates.filter((candidate) => candidate.classification === "qualifying").length, reserved: reservations.length, consumed: consumptions.length };
   const decision = decisions[0];
+  for (const record of [...candidates, ...restorations, ...advisoryVectors]) {
+    precedes(record, decision, "all terminal and advisory evidence must precede the decision");
+  }
   assert.deepEqual(Object.keys(decision).sort(), ["candidate_authority", "candidate_ref_removed", "candidate_run_ids", "inverse_workflow_revision", "kind", "median_seconds", "path02", "reason", "restoration_authority", "state", "workflow_state"].sort(), "v3 decision schema differs");
   assert.ok(["kept", "rollback_verified", "rollback_applied_unverified"].includes(decision.state), "v3 decision state differs");
   assert.deepEqual(decision.candidate_run_ids, candidates.map((candidate) => candidate.run_id), "v3 decision candidate IDs differ");

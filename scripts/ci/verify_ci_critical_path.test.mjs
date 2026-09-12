@@ -82,6 +82,15 @@ test("v3 rejects duplicate consumption, incomplete kept evidence, and restoratio
   assert.throws(() => verifyFinalDecision([...history, budget, activation, ...reservations, ...consumptions, ...terminals, ...advisoryVectors, restoreReservation, restoreConsumption, restoration, advisory(restoration), kept], contract), /cannot include restoration/);
 });
 
+test("v3 rejects activation recorded after a remote consumption", () => {
+  const records = fs.readFileSync(`${phase}/227-CI-CRITICAL-PATH.ndjson`, "utf8").trim().split("\n").map(JSON.parse);
+  const activationIndex = records.findIndex((record) => record.kind === "gap_v3_activation");
+  const consumptionIndex = records.findIndex((record) => record.kind === "gap_v3_consumption");
+  const [activation] = records.splice(activationIndex, 1);
+  records.splice(consumptionIndex + 1, 0, activation);
+  assert.throws(() => verifyFinalDecision(records, contract), /activation must precede every reservation/);
+});
+
 test("preflight wrapper has no remote-effect executable path", () => {
   const wrapper = fs.readFileSync("scripts/ci/preflight_phase227_candidate.sh", "utf8");
   assert.doesNotMatch(wrapper, /\b(?:gh|curl|wget|ssh|scp)\b|git\s+(?:push|fetch|pull|remote|ls-remote|update-ref)|workflow\s+(?:run|rerun)/, "wrapper must not contain a remote-capable command");
