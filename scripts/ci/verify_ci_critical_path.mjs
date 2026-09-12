@@ -671,6 +671,13 @@ function verifyLiveGapV3(records, contract, repository) {
     if (workflowRevision(repository, record.sha) !== record.workflow_revision) fail(`live v3 workflow revision differs for ${record.run_id}`);
     const jobs = api(`repos/${repository}/actions/runs/${record.run_id}/attempts/${record.run_attempt}/jobs?filter=all&per_page=100`).jobs;
     if (!Array.isArray(jobs)) fail(`live v3 jobs are unavailable for ${record.run_id}`);
+    if (record.provider_state === "non_run") {
+      verifyManualFalseProviderNonRun(
+        sourceAt(repository, record.sha, ".github/workflows/ci.yml"),
+        sourceAt(repository, record.sha, "scripts/ci/provider_proof_automation.mjs"),
+        jobs,
+      );
+    }
     for (const [role, proof] of Object.entries(record.required_jobs)) verifyRecordedJob(jobs, repository, record.run_id, proof, role);
     const release = jobs.find((job) => job.id === record.required_jobs["release-gate"].job_id);
     const docs = jobs.find((job) => job.id === record.required_jobs["docs-and-bash-contracts-shift-left"].job_id);
@@ -739,6 +746,24 @@ const immutableRunUrl = (repository, runId) => `https://github.com/${repository}
 const immutableJobUrl = (repository, runId, jobId) => `${immutableRunUrl(repository, runId)}/job/${jobId}`;
 const apiErrorStatus = (endpoint) => spawnSync("gh", ["api", endpoint], { encoding: "utf8" }).status;
 
+function sourceAt(repository, sha, relativePath) {
+  const response = api(`repos/${repository}/contents/${relativePath}?ref=${sha}`);
+  if (typeof response.content !== "string" || response.encoding !== "base64") fail(`live source is unavailable: ${relativePath}`);
+  return Buffer.from(response.content.replace(/\n/g, ""), "base64").toString("utf8");
+}
+
+export function verifyManualFalseProviderNonRun(workflowSource, classifierSource, jobs) {
+  const manualCondition = "if: ${{ needs.provider-proof-trigger.outputs.should_run == 'true' && (github.event_name == 'schedule' || github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.run_live_stripe)) }}";
+  assert.ok(jobBlock(workflowSource, "live-stripe").includes(manualCondition), "live workflow does not bind the provider lane to the manual Boolean");
+  assert.match(classifierSource, /if \(eventName === "workflow_dispatch"\) return \{ should_run: true, trigger_class: "manual" \};/, "live classifier does not require the provider lane for manual dispatches");
+  const classifier = jobs.find((job) => stableJob(job.name) === "stripe-provider-proof-trigger-classifier");
+  assert.equal(classifier?.conclusion, "success", "live provider trigger classifier did not succeed");
+  const providerJobs = jobs.filter((job) => stableJob(job.name) === "stripe-test-mode-parity");
+  assert.ok(providerJobs.length <= 1, "live provider lane is duplicated");
+  if (providerJobs.length) assert.equal(providerJobs[0].conclusion, "skipped", "live provider lane ran despite manual-false evidence");
+  return true;
+}
+
 function evidenceRecords(file) {
   if (!file || !fs.existsSync(file)) fail("--evidence must name an existing NDJSON file");
   const records = fs.readFileSync(file, "utf8").trim().split("\n").filter(Boolean).map((line, index) => {
@@ -757,9 +782,7 @@ function requireRecordUrl(record, key, expected) {
 }
 
 function workflowRevision(repository, sha) {
-  const response = api(`repos/${repository}/contents/.github/workflows/ci.yml?ref=${sha}`);
-  if (typeof response.content !== "string" || response.encoding !== "base64") fail("live workflow source is unavailable");
-  return `sha256:${digest(Buffer.from(response.content.replace(/\n/g, ""), "base64"))}`;
+  return `sha256:${digest(sourceAt(repository, sha, ".github/workflows/ci.yml"))}`;
 }
 
 function liveInventory(repository, record) {

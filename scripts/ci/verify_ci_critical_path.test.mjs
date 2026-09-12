@@ -3,7 +3,7 @@ import fs from "node:fs";
 import { spawnSync } from "node:child_process";
 import test from "node:test";
 import crypto from "node:crypto";
-import { verifyComparisonEvidence, verifyFinalDecision, verifyPreflightEvidence } from "./verify_ci_critical_path.mjs";
+import { verifyComparisonEvidence, verifyFinalDecision, verifyManualFalseProviderNonRun, verifyPreflightEvidence } from "./verify_ci_critical_path.mjs";
 
 const phase = ".planning/phases/227-measured-critical-path-improvement";
 const contract = JSON.parse(fs.readFileSync(`${phase}/227-ci-contract.json`, "utf8"));
@@ -89,6 +89,16 @@ test("v3 rejects activation recorded after a remote consumption", () => {
   const [activation] = records.splice(activationIndex, 1);
   records.splice(consumptionIndex + 1, 0, activation);
   assert.throws(() => verifyFinalDecision(records, contract), /activation must precede every reservation/);
+});
+
+test("manual-false provider proof requires the pinned semantic guard and an absent or skipped lane", () => {
+  const workflow = fs.readFileSync(".github/workflows/ci.yml", "utf8");
+  const classifier = fs.readFileSync("scripts/ci/provider_proof_automation.mjs", "utf8");
+  const jobs = [{ name: "Stripe provider-proof trigger classifier", conclusion: "success" }, { name: "Stripe test-mode parity (mandatory periodic)", conclusion: "skipped" }];
+  assert.equal(verifyManualFalseProviderNonRun(workflow, classifier, jobs), true);
+  assert.equal(verifyManualFalseProviderNonRun(workflow, classifier, jobs.slice(0, 1)), true, "Actions may omit an if-skipped job from its job inventory");
+  assert.throws(() => verifyManualFalseProviderNonRun(workflow, classifier, [{ name: "Stripe provider-proof trigger classifier", conclusion: "success" }, { name: "Stripe test-mode parity (mandatory periodic)", conclusion: "success" }]), /ran despite manual-false evidence/);
+  assert.throws(() => verifyManualFalseProviderNonRun(workflow, classifier.replace('if (eventName === "workflow_dispatch") return { should_run: true, trigger_class: "manual" };', 'if (eventName === "workflow_dispatch") return { should_run: false, trigger_class: "manual" };'), jobs), /does not require the provider lane/);
 });
 
 test("preflight wrapper has no remote-effect executable path", () => {
