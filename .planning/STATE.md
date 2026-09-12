@@ -5,16 +5,16 @@ milestone_name: CI Evidence & Critical-Path Hardening
 current_phase: 227
 current_phase_name: Measured Critical-Path Improvement
 status: executing
-stopped_at: Completed 227-07-PLAN.md
-last_updated: "2026-09-12T01:09:07.108Z"
+stopped_at: Completed 227-08-PLAN.md
+last_updated: "2026-09-12T16:24:17.652Z"
 last_activity: 2026-09-11
 last_activity_desc: Phase 227 gap plans verified; execution ready at 227-07
-state_head: 0f29ea852ad808a6e03282f1c54893bd79e3a9ef
+state_head: e370e1fe563f6b1b66f7b83061d9c035dd6244ce
 progress:
   total_phases: 4
   completed_phases: 3
   total_plans: 31
-  completed_plans: 27
+  completed_plans: 28
   percent: 75
 ---
 
@@ -483,6 +483,7 @@ Coverage: 22/22 v1.51 requirements mapped (each REQ-ID → exactly one phase). D
 | Phase 227 P04 | 35m | 2 tasks | 7 files |
 | Phase 227 P05 | 4h 16m | 3 tasks | 5 files |
 | Phase 227 P07 | 27m | 3 tasks | 10 files |
+| Phase 227 P08 | 8m | 3 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -973,6 +974,9 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - [Phase 227]: The D-11 inverse is restored; all v2 authority is closed and PATH-02 remains unmet.
 - [Phase 227]: v3 authority remains unspent with remote effects disabled until separately activated by exact candidate preflight.
 - [Phase 227]: Plan 08 may use only candidate 0339f14d6badaa7d901c27a62379c86b666c5d62.
+- [Phase 227]: Kept only the exact three qualifying first-attempt candidates; candidate authority is closed and restoration authority closed unspent.
+- [Phase 227]: Maintainer guidance exposes only read-only verifier commands and names the literal inverse as a separately authorized future action.
+- [Phase 227]: The kept-only regression constructs a v2 rollback fixture, preserving fail-closed rejection after the live ledger becomes kept.
 
 ### Pending Todos
 
@@ -1127,8 +1131,8 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 
 ## Session Continuity
 
-Last session: 2026-09-12T01:09:06.953Z
-Stopped at: Completed 227-07-PLAN.md
+Last session: 2026-09-12T16:24:17.279Z
+Stopped at: Completed 227-08-PLAN.md
 Resume file: None
 
 ## Operator Next Steps

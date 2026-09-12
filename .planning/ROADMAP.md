@@ -38,7 +38,7 @@ Completed and deferred v1.60 details are retained in [the milestone archive](mil
 
 - [x] **Phase 225: Required-Lane Signal Repair** - Classify and repair current required CI failures without hiding their diagnostic evidence. (completed 2026-08-09)
 - [x] **Phase 226: CI Baseline & Proof Semantics** - Publish the comparable-run baseline and make provider/setup ownership legible. (completed 2026-08-12)
-- [ ] **Phase 227: Measured Critical-Path Improvement** - Blocked: the exact inverse is applied, but the sole restoration proof failed live-Stripe configuration.
+- [ ] **Phase 227: Measured Critical-Path Improvement** - Plan 08 kept closure is validated; historical Plans 02, 03, and superseded 06 still need tracking summaries before phase-level archival completion.
 - [x] **Phase 228: Repair Stripe Webhook-Signing CI Boot Contract Under a Fresh Evidence Budget** - Repair and deterministically prove the boot contract, then seal one authorized provider attempt. (completed 2026-09-11)
 
 ## Phase Details
@@ -188,11 +188,11 @@ Plans:
 
 **Wave 7** *(gap closure; blocked on Wave 5, supersedes Wave 6)*
 
-- [ ] 227-07-PLAN.md — Establish fail-closed run accounting, prove the repaired candidate locally, and prepare one exact commit without remote effects.
+- [x] 227-07-PLAN.md — Establish fail-closed run accounting, prove the repaired candidate locally, and prepare one exact commit without remote effects.
 
 **Wave 8** *(gap closure; blocked on Wave 7)*
 
-- [ ] 227-08-PLAN.md — Spend the finite external budget and close reporting, validation, and verification only on a genuine kept result.
+- [x] 227-08-PLAN.md — Spend the finite external budget and close reporting, validation, and verification only on a genuine kept result.
 
 ## Progress
 
@@ -200,7 +200,7 @@ Plans:
 |-------|----------------|--------|-----------|
 | 225. Required-Lane Signal Repair | 3/3 | Complete | 2026-08-09 |
 | 226. CI Baseline & Proof Semantics | 17/17 | Complete    | 2026-08-12 |
-| 227. Measured Critical-Path Improvement | 1/3 | Blocked — rollback applied, proof unverified | 2026-08-13 |
+| 227. Measured Critical-Path Improvement | 7/8 | In Progress — Plan 08 kept closure validated; historical tracking summaries remain | 2026-09-12 |
 | 228. Repair Stripe Webhook-Signing CI Boot Contract | 3/3 | Complete    | 2026-09-11 |
 
 <details>
