@@ -131,6 +131,27 @@ defmodule Accrue.LiveStripe.ProrationFidelityLiveTest do
     {:ok, sub} =
       Billing.subscribe(customer, basic_price, default_payment_method: attached_pm_id)
 
+    # `Billing.subscribe/3` intentionally creates Stripe subscriptions with
+    # `payment_behavior=default_incomplete`. Confirm the first invoice's
+    # PaymentIntent before attempting a plan swap; Stripe rejects item changes
+    # that would create another invoice while the initial subscription is
+    # incomplete.
+    client = stripe_client()
+    first_invoice_pi_id = get_in(sub.data, ["latest_invoice", "payment_intent", "id"])
+
+    assert is_binary(first_invoice_pi_id),
+           "Expected an expanded latest_invoice.payment_intent on the subscription"
+
+    assert {:ok, %{status: :succeeded}} =
+             LatticeStripe.PaymentIntent.confirm(
+               client,
+               first_invoice_pi_id,
+               %{"payment_method" => attached_pm_id}
+             )
+
+    assert {:ok, %{status: :active}} =
+             LatticeStripe.Subscription.retrieve(client, sub.processor_id)
+
     # --- Preview the swap ------------------------------------------
     assert {:ok, %UpcomingInvoice{} = preview} =
              Billing.preview_upcoming_invoice(sub,
@@ -155,12 +176,6 @@ defmodule Accrue.LiveStripe.ProrationFidelityLiveTest do
     # the most recent invoice on the subscription. This is the part
     # that only a real Stripe call can prove — the Fake does not
     # produce an invoice on swap_plan at all.
-    client =
-      LatticeStripe.Client.new!(
-        api_key: System.get_env("STRIPE_TEST_SECRET_KEY"),
-        api_version: "2026-03-25.dahlia"
-      )
-
     {:ok, invoices} =
       LatticeStripe.Invoice.list(
         client,
@@ -188,6 +203,13 @@ defmodule Accrue.LiveStripe.ProrationFidelityLiveTest do
   # ---------------------------------------------------------------------
   # helpers
   # ---------------------------------------------------------------------
+
+  defp stripe_client do
+    LatticeStripe.Client.new!(
+      api_key: System.get_env("STRIPE_TEST_SECRET_KEY"),
+      api_version: "2026-03-25.dahlia"
+    )
+  end
 
   defp find_proration_invoice!(%{data: data}) when is_list(data) do
     data
