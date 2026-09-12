@@ -119,15 +119,17 @@ defmodule Accrue.LiveStripe.ProrationFidelityLiveTest do
       |> repo.insert()
 
     # Attach a non-3DS test PM so subscribe does not gate on SCA.
-    {:ok, _pm} =
+    {:ok, attached_pm} =
       Accrue.Processor.Stripe.attach_payment_method(
         "pm_card_visa",
         %{customer: customer.processor_id},
         []
       )
 
+    attached_pm_id = attached_pm[:id] || attached_pm["id"]
+
     {:ok, sub} =
-      Billing.subscribe(customer, basic_price, default_payment_method: "pm_card_visa")
+      Billing.subscribe(customer, basic_price, default_payment_method: attached_pm_id)
 
     # --- Preview the swap ------------------------------------------
     assert {:ok, %UpcomingInvoice{} = preview} =

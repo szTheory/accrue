@@ -48,6 +48,11 @@ defmodule Accrue.Billing.ChargeTest do
     assert charge.currency == "usd"
     assert charge.processor == "fake"
     assert is_binary(charge.processor_id)
+
+    assert [{:create_charge, [params, _opts]}] =
+             Fake.calls() |> Enum.filter(&(elem(&1, 0) == :create_charge))
+
+    assert params.automatic_payment_methods == %{enabled: true, allow_redirects: "never"}
   end
 
   test "charge/3 with customer default_payment_method_id set succeeds", %{
