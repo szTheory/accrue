@@ -1028,6 +1028,10 @@ function verifyResultRequirements(result, flags) {
   if (flags.has("--require-rollback-verified") && result.state !== "rollback_verified") fail("terminal decision is not rollback_verified");
 }
 
+function verifyRenderedEvidence(records, rendered) {
+  if (rendered && fs.readFileSync(rendered, "utf8") !== renderCriticalPathEvidence(records)) fail("rendered report does not byte-match NDJSON render");
+}
+
 function runCli(argv) {
   const cli = parseCli(argv);
   const contractFile = cli.values.get("--contract") || path.join(phase, "227-ci-contract.json");
@@ -1063,12 +1067,14 @@ function runCli(argv) {
   if (records.some((record) => record.kind === "gap_budget_authorization_v3" && record.budget_id === V3_BUDGET)) {
     const result = verifyGapV3Evidence(records, contract, repository, cli.values.get("--require-activation-evidence") || V3_PREFLIGHT_EVIDENCE_PATH);
     verifyResultRequirements(result, cli.flags);
+    verifyRenderedEvidence(records, cli.values.get("--rendered"));
     verifyLiveGapV3(records, contract, repository);
     return true;
   }
   if (records.some((record) => record.kind === "gap_budget_authorization" && record.budget_id === "phase-227-gap-dispatch-false-v2")) {
     const result = verifyGapV2Evidence(records, contract, repository);
     verifyResultRequirements(result, cli.flags);
+    verifyRenderedEvidence(records, cli.values.get("--rendered"));
     verifyLiveGapV2Candidates(records, contract, repository);
     return true;
   }

@@ -120,6 +120,15 @@ test("evidence CLI terminal-state modifiers fail closed", () => {
   fs.rmSync(sandbox, { recursive: true, force: true });
 });
 
+test("live CLI rejects an altered rendered report before querying Actions", () => {
+  const sandbox = fs.mkdtempSync("/tmp/phase227-rendered-");
+  const badRender = `${sandbox}/bad.md`; fs.writeFileSync(badRender, "stale\n");
+  const result = spawnSync(process.execPath, ["scripts/ci/verify_ci_critical_path.mjs", "--verify-live-actions", "--evidence", `${phase}/227-CI-CRITICAL-PATH.ndjson`, "--contract", `${phase}/227-ci-contract.json`, "--expected-repository", "szTheory/accrue", "--rendered", badRender], { encoding: "utf8" });
+  fs.rmSync(sandbox, { recursive: true, force: true });
+  assert.notEqual(result.status, 0);
+  assert.match(result.stderr, /rendered report does not byte-match/);
+});
+
 test("preflight wrapper has no remote-effect executable path", () => {
   const wrapper = fs.readFileSync("scripts/ci/preflight_phase227_candidate.sh", "utf8");
   assert.doesNotMatch(wrapper, /\b(?:gh|curl|wget|ssh|scp)\b|git\s+(?:push|fetch|pull|remote|ls-remote|update-ref)|workflow\s+(?:run|rerun)/, "wrapper must not contain a remote-capable command");
