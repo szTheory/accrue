@@ -273,13 +273,17 @@ function assertV3Prefix(records) {
 }
 
 function verifyV3Preflight(record, expectedSha, expectedState) {
-  assert.deepEqual(Object.keys(record || {}).sort(), ["candidate_sha", "candidate_tree", "check_results", "expected_state", "kind", "remote_effects", "status", "wrapper_sha256"].sort(), "v3 preflight evidence schema differs");
+  assert.deepEqual(Object.keys(record || {}).sort(), ["candidate_sha", "candidate_tree", "changed_files", "check_results", "expected_state", "kind", "parent_sha", "parent_tree", "remote_effects", "status", "wrapper_sha256"].sort(), "v3 preflight evidence schema differs");
   assert.equal(record.status, "passed", "v3 preflight did not pass");
   assert.equal(record.remote_effects, "none", "v3 preflight has remote effects");
   assert.equal(record.expected_state, expectedState, "v3 preflight state differs");
   assert.match(record.candidate_sha || "", /^[0-9a-f]{40}$/, "v3 preflight candidate SHA is invalid");
   if (expectedSha) assert.equal(record.candidate_sha, expectedSha, "v3 preflight candidate SHA differs");
   assert.match(record.candidate_tree || "", /^[0-9a-f]{40}$/, "v3 preflight candidate tree is invalid");
+  assert.match(record.parent_sha || "", /^[0-9a-f]{40}$/, "v3 preflight parent SHA is invalid");
+  assert.match(record.parent_tree || "", /^[0-9a-f]{40}$/, "v3 preflight parent tree is invalid");
+  assert.ok(Array.isArray(record.changed_files) && record.changed_files.every((file) => typeof file === "string"), "v3 preflight changed-file vector is invalid");
+  if (expectedState === "candidate") assert.deepEqual(record.changed_files, [".github/workflows/ci.yml"], "candidate preflight must contain only the workflow edge change");
   assert.match(record.wrapper_sha256 || "", /^sha256:[0-9a-f]{64}$/, "v3 preflight wrapper digest is invalid");
   assert.deepEqual(record.check_results, { node_syntax: "passed", node_tests: "passed", fixtures: "passed", workflow: "passed", accrue_format: "passed", accrue_test: "passed", prohibited_invocations: 0 }, "v3 preflight checks differ");
   return record;

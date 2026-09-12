@@ -27,6 +27,9 @@ git -C "$root" worktree add --detach "$worktree" "$commit" >/dev/null
 [[ "$(git -C "$worktree" rev-parse HEAD)" == "$commit" ]] || { echo "detached worktree revision differs" >&2; exit 65; }
 [[ -z "$(git -C "$worktree" status --porcelain)" ]] || { echo "detached worktree is dirty" >&2; exit 65; }
 tree="$(git -C "$worktree" rev-parse HEAD^{tree})"
+parent_sha="$(git -C "$worktree" rev-parse HEAD^)"
+parent_tree="$(git -C "$worktree" rev-parse "${parent_sha}^{tree}")"
+changed_files="$(git -C "$worktree" diff-tree --no-commit-id --name-only -r "$commit")"
 wrapper_digest="sha256:$(shasum -a 256 "$root/scripts/ci/preflight_phase227_candidate.sh" | awk '{print $1}')"
 phase=".planning/phases/227-measured-critical-path-improvement"
 [[ -d "$mix_cache/deps" && -d "$mix_cache/_build/test" ]] || { echo "preflight Mix cache is missing deps or test build output" >&2; exit 66; }
@@ -43,8 +46,8 @@ cp -R "$mix_cache/_build/test" "$worktree/accrue/_build/test"
   ASDF_ERLANG_VERSION=28.4.1 ASDF_ELIXIR_VERSION=1.19.5-otp-28 MIX_DEPS_PATH="$worktree/accrue/deps" MIX_BUILD_PATH="$worktree/accrue/_build/test" bash -c 'cd accrue && mix test test/accrue/backend_automation_contract_test.exs --warnings-as-errors'
 )
 mkdir -p "$(dirname "$evidence_out")"
-node - "$evidence_out" "$commit" "$tree" "$expected_state" "$wrapper_digest" <<'NODE'
+node - "$evidence_out" "$commit" "$tree" "$parent_sha" "$parent_tree" "$changed_files" "$expected_state" "$wrapper_digest" <<'NODE'
 const fs = require("node:fs");
-const [out, candidate_sha, candidate_tree, expected_state, wrapper_sha256] = process.argv.slice(2);
-fs.writeFileSync(out, `${JSON.stringify({kind:"phase227_preflight", status:"passed", candidate_sha, candidate_tree, expected_state, wrapper_sha256, remote_effects:"none", check_results:{node_syntax:"passed",node_tests:"passed",fixtures:"passed",workflow:"passed",accrue_format:"passed",accrue_test:"passed",prohibited_invocations:0}}, null, 2)}\n`);
+const [out, candidate_sha, candidate_tree, parent_sha, parent_tree, changed, expected_state, wrapper_sha256] = process.argv.slice(2);
+fs.writeFileSync(out, `${JSON.stringify({kind:"phase227_preflight", status:"passed", candidate_sha, candidate_tree, parent_sha, parent_tree, changed_files:changed ? changed.split("\n").filter(Boolean) : [], expected_state, wrapper_sha256, remote_effects:"none", check_results:{node_syntax:"passed",node_tests:"passed",fixtures:"passed",workflow:"passed",accrue_format:"passed",accrue_test:"passed",prohibited_invocations:0}}, null, 2)}\n`);
 NODE
