@@ -159,7 +159,7 @@ Plans:
   3. Stable required-check identities and failure artifacts remain visible while relevance, dependency ordering, or caching behavior is evaluated.
   4. Each CI change has an executable or recorded negative-control and rollback result; no test is deleted or retried merely to hide a failure.
 
-**Plans:** 3 plans
+**Plans:** 8 plans (227-02/03 historical terminal attempts; 227-06 superseded by 227-07/08)
 
 Plans:
 **Wave 1**
@@ -173,6 +173,26 @@ Plans:
 **Wave 3** *(blocked on Wave 2 completion)*
 
 - [ ] 227-03-PLAN.md — Keep the measured candidate or execute and prove the exact inverse rollback.
+
+**Wave 4** *(gap closure; blocked on the historical terminal)*
+
+- [x] 227-04-PLAN.md — Harden the decision gate and make terminal evidence reproducible.
+
+**Wave 5** *(gap closure; blocked on Wave 4)*
+
+- [x] 227-05-PLAN.md — Run and terminally close the bounded second experiment with the exact inverse restored.
+
+**Wave 6** *(blocked kept-only route; superseded)*
+
+- [ ] 227-06-PLAN.md — Historical kept-only closure route; do not execute from the recorded rollback terminal.
+
+**Wave 7** *(gap closure; blocked on Wave 5, supersedes Wave 6)*
+
+- [ ] 227-07-PLAN.md — Establish fail-closed run accounting, prove the repaired candidate locally, and prepare one exact commit without remote effects.
+
+**Wave 8** *(gap closure; blocked on Wave 7)*
+
+- [ ] 227-08-PLAN.md — Spend the finite external budget and close reporting, validation, and verification only on a genuine kept result.
 
 ## Progress
 
