@@ -1,10 +1,15 @@
 {
   "kind": "phase227_preflight",
   "status": "passed",
-  "candidate_sha": "2d067223a852954996ffd363de2fb0fd5b6063a4",
-  "candidate_tree": "7bcba4971630d1abe132cd4ce8f679ad046ce387",
+  "candidate_sha": "1e978c843bb37ae6a7d0e34145e15feeeba51cfc",
+  "candidate_tree": "48d4805d06cf743cff5c675689c4681253413c18",
+  "parent_sha": "6ebdcd5feb25235b9f577d851f96a77a6378a67c",
+  "parent_tree": "97206b08b0701afbac95f4366b57cbee813accc5",
+  "changed_files": [
+    "scripts/ci/verify_ci_critical_path.test.mjs"
+  ],
   "expected_state": "inverse_rollback",
-  "wrapper_sha256": "sha256:4b313568e7ac48974d37d3e74cf791d96a8ec46170fae0ad1ce17f6e3cf3740a",
+  "wrapper_sha256": "sha256:97aab58a9a70bb40dbccc2f0d89cabadd53e6a8e4facba1a30a71260d2d6e899",
   "remote_effects": "none",
   "check_results": {
     "node_syntax": "passed",
