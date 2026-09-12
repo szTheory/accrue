@@ -78,6 +78,13 @@ test("v3 rejects duplicate consumption, incomplete kept evidence, and restoratio
   assert.throws(() => verifyFinalDecision([...history, budget, activation, ...reservations, ...consumptions, terminals[0], terminals[1], advisoryVectors[0], advisoryVectors[1], kept], contract), /candidate IDs differ|exactly three/);
   const failed = terminal(3, "nonqualifying");
   assert.throws(() => verifyFinalDecision([...history, budget, activation, ...reservations, ...consumptions, terminals[0], terminals[1], failed, ...advisoryVectors, kept], contract), /nonqualifying candidate/);
+  const relabeledSuccess = { ...terminals[2], classification: "nonqualifying" };
+  const forgedRollback = { ...kept, state: "rollback_applied_unverified", path02: "unmet", restoration_authority: "closed_unspent", median_seconds: null, workflow_state: "inverse_rollback" };
+  assert.throws(
+    () => verifyFinalDecision([...history, budget, activation, ...reservations, ...consumptions, terminals[0], terminals[1], relabeledSuccess, ...advisoryVectors, forgedRollback], contract),
+    /nonqualifying candidate satisfies all qualifying predicates/,
+    "a successful terminal vector cannot be relabeled nonqualifying to force rollback",
+  );
   const restoreReservation = reservation(1, "restoration"); const restoreConsumption = consumption(1, "restoration"); const restoration = terminal(1, "restoration_only", "restoration");
   assert.throws(() => verifyFinalDecision([...history, budget, activation, ...reservations, ...consumptions, ...terminals, ...advisoryVectors, restoreReservation, restoreConsumption, restoration, advisory(restoration), kept], contract), /cannot include restoration/);
 });

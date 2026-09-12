@@ -462,10 +462,16 @@ function verifyGapV3Evidence(records, contract, expectedRepository, activationEv
     assert.ok(!candidateIds.has(candidate.run_id), "v3 run id is duplicated"); candidateIds.add(candidate.run_id);
     assert.ok(["qualifying", "nonqualifying"].includes(candidate.classification), "v3 candidate classification differs");
     assert.equal(candidate.provider_state, "non_run", "v3 candidate provider state differs");
+    const terminalFailurePredicates = {
+      workflow: candidate.conclusion !== "success",
+      required_job: contract.proof_vector.required_job_roles.some((role) => candidate.required_jobs[role].conclusion !== "success"),
+      required_artifact: contract.proof_vector.expected_artifacts.some((name) => candidate.artifacts[name] !== true),
+    };
+    const qualifies = !Object.values(terminalFailurePredicates).some(Boolean);
     if (candidate.classification === "qualifying") {
-      assert.equal(candidate.conclusion, "success", "v3 qualifying candidate conclusion differs");
-      assert.ok(contract.proof_vector.required_job_roles.every((role) => candidate.required_jobs[role].conclusion === "success"), "v3 qualifying candidate required job failed");
-      assert.ok(contract.proof_vector.expected_artifacts.every((name) => candidate.artifacts[name] === true), "v3 qualifying candidate artifact is absent");
+      assert.ok(qualifies, "v3 qualifying candidate has a terminal failure predicate");
+    } else {
+      assert.ok(!qualifies, "v3 nonqualifying candidate satisfies all qualifying predicates");
     }
   }
   for (const restoration of restorations) {
