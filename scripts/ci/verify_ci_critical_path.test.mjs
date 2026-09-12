@@ -49,3 +49,19 @@ test("preflight wrapper has no remote-effect executable path", () => {
   assert.match(wrapper, /worktree add --detach/, "wrapper must use a detached worktree");
   assert.match(wrapper, /\^\[0-9a-f\]\{40\}\$/, "wrapper must require a full SHA");
 });
+
+test("preflight runtime sandbox records no prohibited invocation", () => {
+  if (process.env.PHASE227_PREFLIGHT_NESTED === "1") return;
+  const cache = process.env.PHASE227_MIX_CACHE;
+  assert.ok(cache, "runtime sandbox requires the disposable PHASE227_MIX_CACHE");
+  const sandbox = fs.mkdtempSync("/tmp/phase227-runtime-sandbox-");
+  const bin = `${sandbox}/bin`; const log = `${sandbox}/prohibited.log`; const evidence = `${sandbox}/evidence.json`;
+  fs.mkdirSync(bin);
+  for (const command of ["gh", "curl", "wget", "ssh", "scp"]) fs.writeFileSync(`${bin}/${command}`, `#!/usr/bin/env bash\necho ${command}:\"$*\" >> \"$PHASE227_PROHIBITED_LOG\"\nexit 97\n`, { mode: 0o755 });
+  fs.writeFileSync(`${bin}/git`, `#!/usr/bin/env bash\ncase \"$1\" in push|fetch|pull|remote|ls-remote|update-ref) echo git:\"$*\" >> \"$PHASE227_PROHIBITED_LOG\"; exit 97;; esac\nexec /usr/bin/git \"$@\"\n`, { mode: 0o755 });
+  const sha = spawnSync("git", ["rev-parse", "HEAD"], { encoding: "utf8" }).stdout.trim();
+  const result = spawnSync("bash", ["scripts/ci/preflight_phase227_candidate.sh", "--commit", sha, "--expected-state", "inverse_rollback", "--evidence-out", evidence], { encoding: "utf8", env: { ...process.env, PATH: `${bin}:${process.env.PATH}`, PHASE227_MIX_CACHE: cache, PHASE227_PROHIBITED_LOG: log } });
+  assert.equal(result.status, 0, result.stderr);
+  assert.equal(fs.existsSync(log) ? fs.readFileSync(log, "utf8") : "", "", "sandbox observed a prohibited invocation");
+  assert.equal(JSON.parse(fs.readFileSync(evidence, "utf8")).remote_effects, "none");
+});
