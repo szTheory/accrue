@@ -19,7 +19,11 @@ defmodule Accrue.BackendAutomationContractTest do
              validate(fixture("<task type=\"checkpoint:human-action\">"))
 
     assert {:error, :human_verification_task} =
-             validate(fixture("<task type=\"auto\"><human-check>approve</human-check><verify><automated>mix test</automated></verify></task>"))
+             validate(
+               fixture(
+                 "<task type=\"auto\"><human-check>approve</human-check><verify><automated>mix test</automated></verify></task>"
+               )
+             )
   end
 
   test "rejects an opted-in backend task without an automated verify block" do

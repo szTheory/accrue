@@ -640,7 +640,7 @@ function assertSafeTerminalEvidence(value, key = "root", parent = "") {
 function parseCli(argv) {
   const actions = new Set(["--fixtures", "--verify-workflow", "--verify-evidence", "--render-evidence", "--verify-live-actions"]);
   const values = new Set(["--workflow", "--workflow-fixture", "--contract", "--evidence", "--rendered", "--expected-repository", "--expected-state", "--control-branch"]);
-  const modifiers = new Set(["--require-final-decision", "--require-rollback-verified", "--require-negative-control"]);
+  const modifiers = new Set(["--require-final-decision", "--require-kept", "--require-rollback-verified", "--require-negative-control"]);
   const seen = new Map();
   const flags = new Set();
   for (let index = 0; index < argv.length; index += 1) {
@@ -659,9 +659,9 @@ function parseCli(argv) {
   const allowed = {
     "--fixtures": new Set(["--workflow-fixture", "--contract"]),
     "--verify-workflow": new Set(["--workflow", "--contract", "--expected-state"]),
-    "--verify-evidence": new Set(["--evidence", "--contract", "--expected-repository", "--rendered", "--require-final-decision", "--require-rollback-verified"]),
+    "--verify-evidence": new Set(["--evidence", "--contract", "--expected-repository", "--rendered", "--require-final-decision", "--require-kept", "--require-rollback-verified"]),
     "--render-evidence": new Set(["--evidence", "--contract", "--expected-repository", "--rendered"]),
-    "--verify-live-actions": new Set(["--evidence", "--contract", "--expected-repository", "--rendered", "--control-branch", "--require-final-decision", "--require-rollback-verified", "--require-negative-control"]),
+    "--verify-live-actions": new Set(["--evidence", "--contract", "--expected-repository", "--rendered", "--control-branch", "--require-final-decision", "--require-kept", "--require-rollback-verified", "--require-negative-control"]),
   }[action];
   for (const optionName of [...seen.keys(), ...flags]) if (optionName !== action && !allowed.has(optionName)) fail(`${optionName} is not allowed with ${action}`);
   return { action, values: seen, flags };
@@ -684,6 +684,7 @@ function runCli(argv) {
   const repository = cli.values.get("--expected-repository") || "szTheory/accrue";
   if (cli.action === "--verify-evidence") {
     const result = verifyFinalDecision(records, contract, repository);
+    if (cli.flags.has("--require-kept") && result.state !== "kept") fail("v2 terminal decision is not kept");
     const rendered = cli.values.get("--rendered");
     if (rendered && fs.readFileSync(rendered, "utf8") !== renderCriticalPathEvidence(records)) fail("rendered report does not byte-match NDJSON render");
     return result;
@@ -694,7 +695,8 @@ function runCli(argv) {
     return true;
   }
   if (records.some((record) => record.kind === "gap_budget_authorization" && record.budget_id === "phase-227-gap-dispatch-false-v2")) {
-    verifyGapV2Evidence(records, contract, repository);
+    const result = verifyGapV2Evidence(records, contract, repository);
+    if (cli.flags.has("--require-kept") && result.state !== "kept") fail("v2 terminal decision is not kept");
     verifyLiveGapV2Candidates(records, contract, repository);
     if (cli.flags.has("--require-final-decision") && !records.some((record) => record.kind === "gap_decision")) fail("v2 terminal decision is missing");
     return true;
