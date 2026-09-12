@@ -50,11 +50,11 @@
 | REL-01 | Phase 225 | Complete |
 | REL-02 | Phase 225 | Complete |
 | REL-03 | Phase 225 | Complete |
-| BASE-01 | Phase 226 | Gaps Found |
-| BASE-02 | Phase 226 | Gaps Found |
+| BASE-01 | Phase 226 | Complete |
+| BASE-02 | Phase 226 | Complete |
 | PATH-01 | Phase 227 | Complete |
 | PATH-02 | Phase 227 | Complete |
-| OWN-01 | Phase 226 | Gaps Found |
+| OWN-01 | Phase 226 | Complete |
 | SAFE-01 | Phase 227 | Complete |
 | SAFE-02 | Phase 227 | Complete |
 
@@ -66,4 +66,4 @@
 
 ---
 *Requirements defined: 2026-08-08*
-*Last updated: 2026-08-08 after v1.61 roadmap creation*
+*Last updated: 2026-09-12 after Phase 227 completion; all 10 v1.61 requirements are verified.*

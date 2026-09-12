@@ -4,11 +4,11 @@ milestone: v1.61
 milestone_name: CI Evidence & Critical-Path Hardening
 current_phase: 228
 current_phase_name: Repair Stripe Webhook-Signing CI Boot Contract Under a Fresh Evidence Budget
-status: planning
-stopped_at: Phase 227 complete, ready to plan Phase 228
+status: completed
+stopped_at: Milestone v1.61 implementation complete, ready for closeout
 last_updated: "2026-09-12T17:18:30.763Z"
 last_activity: 2026-09-12
-last_activity_desc: Phase 227 complete, transitioned to Phase 228
+last_activity_desc: Phase 227 verified; all v1.61 implementation phases complete
 state_head: 7345b91a138f9493d8657881400648221e0581f8
 progress:
   total_phases: 4
@@ -22,18 +22,18 @@ progress:
 
 ## Project Reference
 
-See: `.planning/PROJECT.md` (updated 2026-09-11 after completing Phase 228)
+See: `.planning/PROJECT.md` (updated 2026-09-12 after completing Phase 227 and all v1.61 implementation work)
 
 **Core value:** A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic Elixir DX, strong domain modeling, tamper-evident audit ledger, great observability, and zero breaking-change pain through v1.x.
 
-**Current focus:** Phase 227 — Measured Critical-Path Improvement
+**Current focus:** v1.61 milestone closeout
 
 ## Current Position
 
-Phase: 228 — Repair Stripe Webhook-Signing CI Boot Contract Under a Fresh Evidence Budget
-Plan: Not started
-Status: Ready to plan
-Last activity: 2026-09-12 — Phase 227 complete, transitioned to Phase 228
+Phase: 228 — Repair Stripe Webhook-Signing CI Boot Contract Under a Fresh Evidence Budget (complete; Phase 227 closed afterward)
+Plan: 3/3 complete; Phase 227 has 7/7 terminal plans
+Status: Milestone implementation complete; ready for closeout
+Last activity: 2026-09-12 — Phase 227 passed independent verification (11/11)
 
 Progress: [██████████] 100%
 
@@ -43,7 +43,7 @@ Progress: [██████████] 100%
 |---|---|---|---|
 | 225 | Restore trustworthy required release/Admin CI signal through trace-backed root-cause repair. | REL-01, REL-02, REL-03 | Complete |
 | 226 | Establish comparable-run baseline, provider proof semantics, and host/browser setup ownership. | BASE-01, BASE-02, OWN-01 | Complete |
-| 227 | Make one measured critical-path improvement with stable checks, artifacts, negative controls, and rollback. | PATH-01, PATH-02, SAFE-01, SAFE-02 | Blocked: rollback applied, external restoration proof failed |
+| 227 | Make one measured critical-path improvement with stable checks, artifacts, negative controls, and rollback. | PATH-01, PATH-02, SAFE-01, SAFE-02 | Complete |
 | 228 | Repair the Stripe webhook-signing boot contract and seal one fresh authorized provider attempt. | None | Complete |
 
 **Dependency shape:** 225 → 226 → 227. **Coverage:** 10/10 requirements mapped exactly once.
@@ -977,6 +977,8 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - [Phase 227]: Kept only the exact three qualifying first-attempt candidates; candidate authority is closed and restoration authority closed unspent.
 - [Phase 227]: Maintainer guidance exposes only read-only verifier commands and names the literal inverse as a separately authorized future action.
 - [Phase 227]: The kept-only regression constructs a v2 rollback fixture, preserving fail-closed rejection after the live ledger becomes kept.
+- [Phase 227]: The exact three-run kept cohort measured 1,179s, 1,125s, and 1,079s at candidate SHA 0339f14d6badaa7d901c27a62379c86b666c5d62; median 1,125s and maximum 1,179s clear the frozen thresholds without weakening required proof.
+- [Phase 227]: Post-execution review hardened immutable ledger order, manual-false provider evidence, terminal modifiers, rendered-byte validation, candidate qualification labels, and restoration proof; the strict suite and live kept gate pass.
 
 ### Pending Todos
 
@@ -990,8 +992,7 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - (Resolved/obsolete: the 190-05 `admin-baseline.spec.js` hang note was cleared 2026-06-21 — Phase 190 and the full v1.53 milestone subsequently shipped & verified, so the bounded-retry concern no longer applies.)
 - Phase 196 final full-suite gate: cd accrue_admin && mix test --warnings-as-errors fails outside Phase 196 in dashboard_live_test.exs:91 (missing $42.50) and webhooks_live_test.exs:106 (audit count expected 1, observed 2). Focused Phase 196 tests, package docs, assets, and e2e:phase196 pass.
 - Phase 208 Plan 04 blocked at Task 1: ANTHROPIC_API_KEY is absent from the execution environment; ledger.baseline.json remains frozen:false and live convergence/freeze must not proceed without maintainer local key.
-- Phase 227 remains `gap_found`: Phase 228 resolved the missing webhook-signing-secret boot contract and its authorized run reached the selected suite, but only 5 of 10 assertions passed. Phase 228 permits no retry or replacement evidence; replan Phase 227 from the sealed failure.
-- 227-06 Task 1 precondition unmet: terminal v2 gap_decision is rollback_applied_unverified (not kept); require-kept is unavailable in the current verifier and PATH-02 remains unmet. Replan sealed Phase 227 gaps; do not run Plan 227-06 kept closure.
+- (Resolved 2026-09-12) Phase 227 closed the sealed failure through superseding Plans 07–08, an exact-three kept cohort, and 11/11 independent verification. Historical Plan 06 remains explicitly superseded and was not executed from its invalid precondition.
 
 ### Quick Tasks Completed
 
@@ -1131,10 +1132,10 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 
 ## Session Continuity
 
-Last session: 2026-09-12T16:24:17.279Z
-Stopped at: Phase 227 complete, ready to plan Phase 228
+Last session: 2026-09-12
+Stopped at: Milestone v1.61 implementation complete, ready for closeout
 Resume file: None
 
 ## Operator Next Steps
 
-- Replan the sealed Phase 227 gaps with `$gsd-plan-phase 227 --gaps`.
+- Run `$gsd-complete-milestone v1.61` when ready to audit and archive the completed milestone.

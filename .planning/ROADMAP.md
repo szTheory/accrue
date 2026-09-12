@@ -30,7 +30,7 @@ v1.60 clears that bar through an active first-adopter iOS delivery. It reuses th
 
 Completed and deferred v1.60 details are retained in [the milestone archive](milestones/v1.60-ROADMAP.md). A future milestone must explicitly re-scope the deferred StoreKit and readiness work.
 
-### 🚧 v1.61 CI Evidence & Critical-Path Hardening (Planned)
+### ✅ v1.61 CI Evidence & Critical-Path Hardening (Implementation Complete)
 
 **Milestone Goal:** Restore trustworthy required CI evidence, then reduce proven critical-path waste without weakening release, host, browser, or provider proof.
 
@@ -38,7 +38,7 @@ Completed and deferred v1.60 details are retained in [the milestone archive](mil
 
 - [x] **Phase 225: Required-Lane Signal Repair** - Classify and repair current required CI failures without hiding their diagnostic evidence. (completed 2026-08-09)
 - [x] **Phase 226: CI Baseline & Proof Semantics** - Publish the comparable-run baseline and make provider/setup ownership legible. (completed 2026-08-12)
-- [x] **Phase 227: Measured Critical-Path Improvement** - Plan 08 kept closure is validated; historical Plans 02, 03, and superseded 06 still need tracking summaries before phase-level archival completion. (completed 2026-09-12)
+- [x] **Phase 227: Measured Critical-Path Improvement** - An exact-three kept cohort reduced the measured critical-path median to 1,125 seconds while preserving required checks, artifacts, provider separation, negative controls, and the literal rollback path. (completed 2026-09-12)
 - [x] **Phase 228: Repair Stripe Webhook-Signing CI Boot Contract Under a Fresh Evidence Budget** - Repair and deterministically prove the boot contract, then seal one authorized provider attempt. (completed 2026-09-11)
 
 ## Phase Details

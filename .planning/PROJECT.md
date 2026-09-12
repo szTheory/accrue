@@ -39,11 +39,13 @@ v1.49 **Realistic Demo App & Adoption Evidence** shipped on **2026-06-02**. The 
 
 **Phase 226 complete (2026-08-12):** maintainers now have a durable, privacy-safe comparable-run baseline with repository-bound GitHub Actions evidence, explicit provider proof states, and owner-first host/browser setup diagnostics. BASE-01, BASE-02, and OWN-01 verified 5/5 must-haves; Phase 227 owns the measured critical-path improvement.
 
-**Phase 228 complete (2026-09-11):** the Stripe webhook-signing CI boot contract now maps a securely supplied signing secret into the runtime rotation list and fails closed when it is absent. The single authorized provider-proof run reached the selected suite, then sealed an honest `failed/selected_assertions_failed` result (10 selected, 5 passed, 5 failed, 0 skipped) with no retry; Phase 227 therefore remains open for gap closure.
+**Phase 228 complete (2026-09-11):** the Stripe webhook-signing CI boot contract now maps a securely supplied signing secret into the runtime rotation list and fails closed when it is absent. The single authorized provider-proof run reached the selected suite, then sealed an honest `failed/selected_assertions_failed` result (10 selected, 5 passed, 5 failed, 0 skipped) with no retry. That immutable result informed the later Phase 227 gap closure.
+
+**Phase 227 complete (2026-09-12):** the exact candidate removed only the redundant `admin-drift-docs` dependency from host integration. Three successful, first-attempt workflow-dispatch runs at one candidate SHA measured 1,179s, 1,125s, and 1,079s (median 1,125s), clearing the frozen 1,666s median and 2,602s maximum thresholds while retaining required release, host, browser, provider, artifact, negative-control, and rollback evidence. PATH-01, PATH-02, SAFE-01, and SAFE-02 are verified 11/11; all v1.61 implementation phases and 10/10 requirements are complete, ready for milestone closeout.
 
 ## Next Milestone Goals
 
-## Current Milestone: v1.61 CI Evidence & Critical-Path Hardening
+## Current Milestone: v1.61 CI Evidence & Critical-Path Hardening (Implementation Complete)
 
 **Goal:** Restore trustworthy required CI evidence, then reduce proven critical-path waste without weakening release, host, browser, or provider proof for Accrue adopters.
 
@@ -654,8 +656,24 @@ The v1.50→v1.54 arc (Admin UI Foundation → Depth Pass → Brand System → D
 
 ### Active
 
-- [ ] Restore deterministic, trustworthy required CI evidence before optimizing the pipeline.
-- [ ] Reduce one measured CI critical-path cost while retaining required proof.
+- None. All v1.61 requirements are validated; milestone archival remains.
+
+### Validated v1.61 (Phase 227 complete 2026-09-12)
+
+Measured critical-path improvement and safety — 4/4 requirements satisfied in Phase 227.
+
+- ✓ **PATH-01** — The measured staged critical path, selected redundant dependency, before-state evidence, and literal rollback are durable and reproducible.
+- ✓ **PATH-02** — Three immutable qualifying observations validate a lower critical-path median without removing required release, host, browser, or provider proof.
+- ✓ **SAFE-01** — Required-check identities, artifacts, exact job roles, provider separation, and aggregate fan-in remain enforced.
+- ✓ **SAFE-02** — Negative controls, bounded authority, fail-closed accounting, and a verified rollback path prevent retries or relabeling from masking failures.
+
+### Validated v1.61 (Phase 225 complete 2026-08-09)
+
+Required-lane reliability — 3/3 requirements satisfied in Phase 225.
+
+- ✓ **REL-01** — Required CI failures have trace-backed deterministic, isolation, lifecycle, or infrastructure classifications.
+- ✓ **REL-02** — Repaired release and Admin checks retain meaningful assertions and failure artifacts.
+- ✓ **REL-03** — Identical release-matrix failures are handled as one root-cause incident while required and advisory cells remain distinct.
 
 ### Validated v1.61 (Phase 226 complete 2026-08-12)
 
@@ -850,4 +868,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-09-11 after completing Phase 228 Stripe Webhook-Signing CI Boot Contract.*
+*Last updated: 2026-09-12 after completing Phase 227 and all v1.61 implementation work.*
