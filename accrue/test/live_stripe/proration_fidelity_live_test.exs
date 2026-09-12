@@ -132,20 +132,21 @@ defmodule Accrue.LiveStripe.ProrationFidelityLiveTest do
       Billing.subscribe(customer, basic_price, default_payment_method: attached_pm_id)
 
     # `Billing.subscribe/3` intentionally creates Stripe subscriptions with
-    # `payment_behavior=default_incomplete`. Confirm the first invoice's
-    # PaymentIntent before attempting a plan swap; Stripe rejects item changes
-    # that would create another invoice while the initial subscription is
-    # incomplete.
+    # `payment_behavior=default_incomplete`. Pay the first invoice before
+    # attempting a plan swap; Stripe rejects item changes that would create
+    # another invoice while the initial subscription is incomplete. Dahlia's
+    # Invoice shape no longer exposes the legacy `payment_intent` field here,
+    # so exercise the invoice payment action directly.
     client = stripe_client()
-    first_invoice_pi_id = get_in(sub.data, ["latest_invoice", "payment_intent", "id"])
+    first_invoice_id = get_in(sub.data, ["latest_invoice", "id"])
 
-    assert is_binary(first_invoice_pi_id),
-           "Expected an expanded latest_invoice.payment_intent on the subscription"
+    assert is_binary(first_invoice_id),
+           "Expected an expanded latest_invoice on the subscription"
 
-    assert {:ok, %{status: :succeeded}} =
-             LatticeStripe.PaymentIntent.confirm(
+    assert {:ok, %{status: :paid}} =
+             LatticeStripe.Invoice.pay(
                client,
-               first_invoice_pi_id,
+               first_invoice_id,
                %{"payment_method" => attached_pm_id}
              )
 
