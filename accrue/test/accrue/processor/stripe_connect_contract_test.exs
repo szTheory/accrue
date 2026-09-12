@@ -94,6 +94,42 @@ defmodule Accrue.Processor.StripeConnectContractTest do
            end)
   end
 
+  test "create_charge translates Charge expansions for the PaymentIntent endpoint" do
+    put_responses([
+      response(%{
+        "id" => "pi_contract",
+        "object" => "payment_intent",
+        "amount" => 5_000,
+        "currency" => "usd",
+        "status" => "requires_action",
+        "client_secret" => "pi_contract_secret_redacted",
+        "next_action" => %{"type" => "use_stripe_sdk"}
+      })
+    ])
+
+    assert {:ok, %{id: "pi_contract", status: :requires_action}} =
+             Stripe.create_charge(
+               %{
+                 amount: 5_000,
+                 currency: "usd",
+                 expand: ["balance_transaction", "payment_intent"]
+               },
+               transport: Transport
+             )
+
+    [request] = requests()
+    assert request.method == :post
+    assert URI.parse(request.url).path == "/v1/payment_intents"
+
+    expansions =
+      request.body
+      |> URI.query_decoder()
+      |> Enum.filter(fn {key, _value} -> String.starts_with?(key, "expand[") end)
+      |> Enum.map(&elem(&1, 1))
+
+    assert expansions == ["latest_charge.balance_transaction"]
+  end
+
   defp put_responses(responses) do
     Agent.update(Transport, &%{&1 | responses: responses})
   end

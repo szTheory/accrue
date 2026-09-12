@@ -126,7 +126,8 @@ defmodule Accrue.LiveStripe.ProrationFidelityLiveTest do
         []
       )
 
-    {:ok, sub} = Billing.subscribe(customer, basic_price)
+    {:ok, sub} =
+      Billing.subscribe(customer, basic_price, default_payment_method: "pm_card_visa")
 
     # --- Preview the swap ------------------------------------------
     assert {:ok, %UpcomingInvoice{} = preview} =

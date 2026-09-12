@@ -7,10 +7,11 @@ defmodule Accrue.LiveStripe.ConnectTest do
 
   ## Gating
 
-  `@moduletag :live_stripe` is excluded from the default `mix test`
-  run (see `test/test_helper.exs`). Runs only via:
+  `@moduletag :live_stripe_connect` is excluded from the default `mix test`
+  and from the mandatory Phase 3 provider-proof lane. It requires a Stripe
+  test-mode platform that has completed Connect enrollment and runs via:
 
-      STRIPE_TEST_SECRET_KEY=sk_test_... mix test --only live_stripe
+      STRIPE_TEST_SECRET_KEY=sk_test_... mix test.live_connect
 
   The module also sets `@moduletag :skip` when `STRIPE_TEST_SECRET_KEY`
   is missing so a bare `mix test --only live_stripe` reports "skipped"
@@ -40,7 +41,7 @@ defmodule Accrue.LiveStripe.ConnectTest do
   """
   use Accrue.RepoCase, async: false
 
-  @moduletag :live_stripe
+  @moduletag :live_stripe_connect
   @moduletag timeout: 60_000
 
   if System.get_env("STRIPE_TEST_SECRET_KEY", "") |> String.trim() == "" do

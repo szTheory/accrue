@@ -46,10 +46,13 @@ See `accrue/test/live_stripe/`. Current modules:
 |---|---|
 | `charge_3ds_live_test.exs` | `Billing.charge/3` with a 3DS-required test PM surfaces `{:ok, :requires_action, pi}` against real Stripe |
 | `proration_fidelity_live_test.exs` | `preview_upcoming_invoice/2` line items match the committed invoice produced by `swap_plan/3` line-for-line |
-| `connect_test.exs` | `Connect.create_account/2` (Standard + Express), account retrieval, and account/login links against real Stripe |
+| `connect_test.exs` | Optional Connect-platform parity: account creation/retrieval and account/login links; requires a Stripe test-mode platform enrolled in Connect and runs through `mix test.live_connect` |
 
-Together these automate the human-UAT items for the core subscription-lifecycle
-work, so those flows ship with zero manual human verification gaps.
+The mandatory `mix test.live` lane automates the human-UAT items for the core
+subscription-lifecycle work. Connect-platform parity remains a separate,
+explicit lane because Stripe rejects account creation until the test platform
+has completed Connect enrollment; it must never be reported as skipped proof in
+the mandatory provider manifest.
 
 ## Running locally
 
@@ -66,6 +69,15 @@ mix test.live
 `mix test --only live_stripe`. Without the env vars set, the tests
 tag themselves `:skip` at module load time and produce a clean
 "0 tests, X skipped" report — no errors.
+
+For a Stripe test-mode platform enrolled in Connect, run the separate parity
+suite with:
+
+```bash
+cd accrue
+export STRIPE_TEST_SECRET_KEY=sk_test_...
+mix test.live_connect
+```
 
 Use Stripe test-mode credentials only. Set `STRIPE_TEST_SECRET_KEY`, not a live-mode key. This guide is for provider-parity checks in Stripe test mode. Do not paste webhook secrets, customer data, or PII into copied logs, screenshots, traces, or shared test notes.
 

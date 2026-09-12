@@ -108,6 +108,7 @@ Ecto.Adapters.SQL.Sandbox.mode(Accrue.TestRepo, :manual)
 # Exclude live-Stripe and slow tags by default. Opt in via:
 #
 #     mix test --only live_stripe   # or `mix test.live`
+#     mix test --only live_stripe_connect   # or `mix test.live_connect`
 #     mix test --only slow
 #
 # See `accrue/test/live_stripe/` and `guides/testing-live-stripe.md`.
@@ -116,7 +117,7 @@ Ecto.Adapters.SQL.Sandbox.mode(Accrue.TestRepo, :manual)
 # reducer + read-seam) were turned GREEN by Plan 02 — the reducer, the
 # on-change ledger, and `Accrue.Entitlements.StripeSync` now exist, so the
 # three scaffold files run in the default suite (exclusion removed).
-ExUnit.configure(exclude: [:live_stripe, :slow, :compile_matrix])
+ExUnit.configure(exclude: [:live_stripe, :live_stripe_connect, :slow, :compile_matrix])
 
 provider_formatters =
   case System.get_env("ACCRUE_PROVIDER_MANIFEST", "") |> String.trim() do

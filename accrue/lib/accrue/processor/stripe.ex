@@ -515,7 +515,7 @@ defmodule Accrue.Processor.Stripe do
     # directly. lattice_stripe 1.0 does not expose LatticeStripe.Charge.create
     # so we route through PaymentIntent.create with confirmation_method: :automatic
     # and immediate confirm.
-    params = ensure_expand(params, ["balance_transaction"])
+    params = normalize_payment_intent_expands(params)
     stripe_opts = stripe_opts(:create_charge, subject_of(params, "ch"), opts)
     client = build_client!(opts)
 
@@ -1027,6 +1027,24 @@ defmodule Accrue.Processor.Stripe do
       Map.get(params, :expand) || Map.get(params, "expand") || []
 
     expand = Enum.uniq(existing ++ paths)
+
+    params
+    |> Map.delete("expand")
+    |> Map.put(:expand, expand)
+  end
+
+  # `create_charge/2` is implemented with Stripe's PaymentIntent endpoint.
+  # Callers still request Charge-shaped expansions, so translate them to the
+  # equivalent PaymentIntent path and discard the self-referential
+  # `payment_intent` expansion that Stripe rejects.
+  defp normalize_payment_intent_expands(params) do
+    existing = Map.get(params, :expand) || Map.get(params, "expand") || []
+
+    expand =
+      existing
+      |> Enum.reject(&(&1 in ["balance_transaction", "payment_intent"]))
+      |> Kernel.++(["latest_charge.balance_transaction"])
+      |> Enum.uniq()
 
     params
     |> Map.delete("expand")

@@ -34,7 +34,7 @@ defmodule Accrue.MixProject do
   # Custom CLI aliases must declare their preferred env explicitly —
   # `mix test.live` and `mix test.all` both run in :test.
   def cli do
-    [preferred_envs: ["test.live": :test, "test.all": :test]]
+    [preferred_envs: ["test.live": :test, "test.live_connect": :test, "test.all": :test]]
   end
 
   # Configuration for the OTP application.
@@ -137,7 +137,8 @@ defmodule Accrue.MixProject do
       # which is excluded by default in `test/test_helper.exs`. Individual
       # test modules in `test/live_stripe/` are expected to skip cleanly in
       # `setup_all` when `STRIPE_TEST_SECRET_KEY` is unset.
-      "test.live": ["test --only live_stripe"]
+      "test.live": ["test --only live_stripe"],
+      "test.live_connect": ["test --only live_stripe_connect"]
     ]
   end
 
