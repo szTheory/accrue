@@ -5,16 +5,16 @@ milestone_name: CI Evidence & Critical-Path Hardening
 current_phase: 227
 current_phase_name: Measured Critical-Path Improvement
 status: executing
-stopped_at: Plans 227-07 and 227-08 verified; ready to execute 227-07
-last_updated: "2026-09-12T00:36:18.435Z"
+stopped_at: Completed 227-07-PLAN.md
+last_updated: "2026-09-12T01:09:07.108Z"
 last_activity: 2026-09-11
 last_activity_desc: Phase 227 gap plans verified; execution ready at 227-07
-state_head: 7a7e56c4e98df0c1d78a2dc07d8bbf177e6f4b9c
+state_head: 0f29ea852ad808a6e03282f1c54893bd79e3a9ef
 progress:
   total_phases: 4
   completed_phases: 3
-  total_plans: 29
-  completed_plans: 26
+  total_plans: 31
+  completed_plans: 27
   percent: 75
 ---
 
@@ -482,6 +482,7 @@ Coverage: 22/22 v1.51 requirements mapped (each REQ-ID → exactly one phase). D
 | Phase 228-repair-stripe-webhook-signing-ci-boot-contract-under-a-fresh P03 | 12min | 2 tasks | 3 files |
 | Phase 227 P04 | 35m | 2 tasks | 7 files |
 | Phase 227 P05 | 4h 16m | 3 tasks | 5 files |
+| Phase 227 P07 | 27m | 3 tasks | 10 files |
 
 ## Accumulated Context
 
@@ -970,6 +971,8 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - [Phase 227]: Critical-path CLI requires one explicit action and action-scoped options.
 - [Phase 227]: Both v2 candidate runs are retained as required-release-lane failures; neither is an admissible timing observation.
 - [Phase 227]: The D-11 inverse is restored; all v2 authority is closed and PATH-02 remains unmet.
+- [Phase 227]: v3 authority remains unspent with remote effects disabled until separately activated by exact candidate preflight.
+- [Phase 227]: Plan 08 may use only candidate 0339f14d6badaa7d901c27a62379c86b666c5d62.
 
 ### Pending Todos
 
@@ -1124,9 +1127,9 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 
 ## Session Continuity
 
-Last session: 2026-09-11T23:26:52.848Z
-Stopped at: Plans 227-07 and 227-08 verified; ready to execute 227-07
-Resume file: 227-07-PLAN.md
+Last session: 2026-09-12T01:09:06.953Z
+Stopped at: Completed 227-07-PLAN.md
+Resume file: None
 
 ## Operator Next Steps
 
