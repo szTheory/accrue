@@ -352,6 +352,7 @@ function verifyGapV3Evidence(records, contract, expectedRepository, activationEv
   const ambiguities = v3Records(records, "gap_v3_ambiguity");
   const candidates = v3Records(records, "gap_v3_candidate_run");
   const restorations = v3Records(records, "gap_v3_restoration_run");
+  const advisoryVectors = v3Records(records, "gap_v3_advisory_vector");
   const activations = v3Records(records, "gap_v3_activation");
   const decisions = v3Records(records, "gap_v3_decision");
   const activation = activations[0];
@@ -462,6 +463,19 @@ function verifyGapV3Evidence(records, contract, expectedRepository, activationEv
     validateTerminal(restoration, "restoration");
     assert.equal(restoration.classification, "restoration_only", "v3 restoration cannot be performance evidence");
     assert.notEqual(restoration.provider_state, "non_run", "v3 restoration must retain normal-run provider state");
+  }
+  const terminalRunIds = new Set([...candidates, ...restorations].map((record) => record.run_id));
+  assert.equal(advisoryVectors.length, terminalRunIds.size, "v3 terminal evidence must retain one advisory vector per run");
+  const advisoryRunIds = new Set();
+  for (const vector of advisoryVectors) {
+    assert.deepEqual(Object.keys(vector).sort(), ["kind", "parked_ratchet", "run_id", "sigra"].sort(), "v3 advisory vector schema differs");
+    assert.ok(terminalRunIds.has(vector.run_id) && !advisoryRunIds.has(vector.run_id), "v3 advisory vector is missing or duplicated"); advisoryRunIds.add(vector.run_id);
+    for (const role of ["sigra", "parked_ratchet"]) {
+      const job = vector[role];
+      assert.ok(Number.isSafeInteger(job?.job_id) && job.job_id > 0, `v3 advisory ${role} job ID is invalid`);
+      assert.equal(job.url, immutableJobUrl(expectedRepository, vector.run_id, job.job_id), `v3 advisory ${role} URL differs`);
+      assert.ok(typeof job.conclusion === "string" && job.conclusion.length > 0, `v3 advisory ${role} conclusion is missing`);
+    }
   }
   if (!activations.length) {
     assert.equal(reservations.length, 0, "v3 cannot reserve before activation");
@@ -655,6 +669,12 @@ function verifyLiveGapV3(records, contract, repository) {
     const artifacts = api(`repos/${repository}/actions/runs/${record.run_id}/artifacts?per_page=100`).artifacts;
     const names = new Set(artifacts.map((artifact) => artifact.name));
     for (const name of contract.artifacts) if (record.artifacts[name] !== names.has(name)) fail(`live v3 artifact inventory differs for ${record.run_id}: ${name}`);
+  }
+  for (const vector of v3Records(records, "gap_v3_advisory_vector")) {
+    const jobs = api(`repos/${repository}/actions/runs/${vector.run_id}/attempts/1/jobs?filter=all&per_page=100`).jobs;
+    if (!Array.isArray(jobs)) fail(`live v3 advisory jobs are unavailable for ${vector.run_id}`);
+    verifyRecordedJob(jobs, repository, vector.run_id, vector.sigra, "Sigra advisory");
+    verifyRecordedJob(jobs, repository, vector.run_id, vector.parked_ratchet, "Parked ratchet advisory");
   }
   const decision = v3Records(records, "gap_v3_decision")[0];
   if (decision && apiErrorStatus(`repos/${repository}/git/ref/heads/phase-227-gap-dispatch-false-v3`) === 0) fail("v3 candidate ref remains after terminal decision");
