@@ -348,38 +348,158 @@ function verifyGapV3Evidence(records, contract, expectedRepository, activationEv
   assert.ok(Number.isSafeInteger(budget.existing_negative_control_run_id) && budget.existing_negative_control_run_id > 0, "v3 negative-control reference is invalid");
 
   const reservations = v3Records(records, "gap_v3_reservation");
-  const activations = v3Records(records, "gap_v3_activation");
+  const consumptions = v3Records(records, "gap_v3_consumption");
+  const ambiguities = v3Records(records, "gap_v3_ambiguity");
   const candidates = v3Records(records, "gap_v3_candidate_run");
+  const restorations = v3Records(records, "gap_v3_restoration_run");
+  const activations = v3Records(records, "gap_v3_activation");
   const decisions = v3Records(records, "gap_v3_decision");
+  const activation = activations[0];
   assert.ok(reservations.length <= budget.candidate_ceiling + budget.conditional_restoration_ceiling, "v3 reservation ceiling exceeded");
   assert.ok(candidates.length <= budget.candidate_ceiling, "v3 candidate ceiling exceeded");
   assert.ok(activations.length <= 1, "v3 activation is duplicated");
   assert.ok(decisions.length <= 1, "v3 decision is duplicated");
-  assert.equal(reservations.filter((entry) => entry.status === "open").length <= 1, true, "v3 has duplicate open reservations");
+  assert.ok(restorations.length <= budget.conditional_restoration_ceiling, "v3 restoration ceiling exceeded");
+  assert.ok(ambiguities.length <= 1, "v3 ambiguity must close authority exactly once");
   const reservationIds = new Set();
+  const reservationsById = new Map();
   for (const reservation of reservations) {
-    assert.deepEqual(Object.keys(reservation).sort(), ["candidate_sha", "kind", "purpose", "reservation_id", "status"].sort(), "v3 reservation schema differs");
+    assert.deepEqual(Object.keys(reservation).sort(), ["candidate_sha", "created_at", "event_class", "inputs", "kind", "nonce", "ordinal", "pre_dispatch_run_ids", "purpose", "reconciled_at", "ref", "repository", "reservation_id", "run_attempt", "status"].sort(), "v3 reservation schema differs");
     assert.ok(["candidate", "restoration"].includes(reservation.purpose), "v3 reservation purpose differs");
     assert.ok(!reservationIds.has(reservation.reservation_id), "v3 reservation is duplicated"); reservationIds.add(reservation.reservation_id);
+    reservationsById.set(reservation.reservation_id, reservation);
     assert.match(reservation.candidate_sha || "", /^[0-9a-f]{40}$/, "v3 reservation SHA is invalid");
-    assert.ok(["open", "bound", "terminal"].includes(reservation.status), "v3 reservation status differs");
+    assert.equal(reservation.repository, expectedRepository, "v3 reservation repository differs");
+    assert.equal(reservation.status, "reserved", "v3 reservation must be durably reserved before dispatch");
+    assert.ok(Number.isInteger(reservation.ordinal) && reservation.ordinal >= 1, "v3 reservation ordinal is invalid");
+    assert.match(reservation.nonce || "", /^[a-z0-9-]{16,}$/i, "v3 reservation nonce is invalid");
+    assert.match(reservation.created_at || "", /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/, "v3 reservation creation time is invalid");
+    assert.match(reservation.reconciled_at || "", /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/, "v3 reservation reconciliation time is invalid");
+    assert.ok(Date.parse(reservation.reconciled_at) >= Date.parse(reservation.created_at), "v3 reservation reconciled before it was committed");
+    assert.equal(reservation.event_class, "workflow_dispatch", "v3 reservation event differs");
+    assert.equal(reservation.run_attempt, 1, "v3 reservation attempt differs");
+    assert.ok(Array.isArray(reservation.pre_dispatch_run_ids) && reservation.pre_dispatch_run_ids.every((id) => Number.isSafeInteger(id) && id > 0) && new Set(reservation.pre_dispatch_run_ids).size === reservation.pre_dispatch_run_ids.length, "v3 reservation snapshot is invalid");
+    if (reservation.purpose === "candidate") {
+      assert.equal(reservation.ordinal <= budget.candidate_ceiling, true, "v3 candidate ordinal exceeds ceiling");
+      assert.equal(reservation.candidate_sha, activation?.candidate_sha, "v3 candidate reservation SHA differs from activation");
+      assert.equal(reservation.ref, "phase-227-gap-dispatch-false-v3", "v3 candidate ref differs");
+      assert.deepEqual(reservation.inputs, { run_live_stripe: false }, "v3 candidate reservation inputs differ");
+    } else {
+      assert.equal(reservation.ordinal, 1, "v3 restoration ordinal differs");
+      assert.equal(reservation.ref, "phase-227-gap-dispatch-false-v3-restoration", "v3 restoration ref differs");
+      assert.deepEqual(reservation.inputs, { run_live_stripe: true }, "v3 restoration reservation inputs differ");
+    }
   }
+  assert.equal(new Set(reservations.filter((entry) => entry.purpose === "candidate").map((entry) => entry.ordinal)).size, reservations.filter((entry) => entry.purpose === "candidate").length, "v3 candidate ordinals are duplicated");
+  const consumedIds = new Set();
+  const consumptionsByReservation = new Map();
+  for (const consumption of consumptions) {
+    assert.deepEqual(Object.keys(consumption).sort(), ["consumed_at", "dispatch_mode", "event_class", "inputs", "kind", "ref", "repository", "reservation_id", "run_attempt", "run_id", "sha"].sort(), "v3 consumption schema differs");
+    const reservation = reservationsById.get(consumption.reservation_id);
+    assert.ok(reservation, "v3 consumption lacks a prior reservation");
+    assert.ok(!consumedIds.has(consumption.run_id), "v3 run ID is consumed twice"); consumedIds.add(consumption.run_id);
+    assert.ok(!consumptionsByReservation.has(consumption.reservation_id), "v3 reservation dispatched twice"); consumptionsByReservation.set(consumption.reservation_id, consumption);
+    assert.equal(consumption.repository, expectedRepository, "v3 consumption repository differs");
+    assert.equal(consumption.sha, reservation.candidate_sha, "v3 consumption SHA differs");
+    assert.equal(consumption.ref, reservation.ref, "v3 consumption ref differs");
+    assert.equal(consumption.event_class, reservation.event_class, "v3 consumption event differs");
+    assert.deepEqual(consumption.inputs, reservation.inputs, "v3 consumption inputs differ");
+    assert.equal(consumption.run_attempt, reservation.run_attempt, "v3 consumption attempt differs");
+    assert.match(consumption.consumed_at || "", /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/, "v3 consumption time is invalid");
+    assert.ok(Date.parse(consumption.consumed_at) >= Date.parse(reservation.reconciled_at), "v3 run was consumed before reconciliation");
+    assert.ok(["created", "adopted"].includes(consumption.dispatch_mode), "v3 consumption dispatch mode differs");
+    assert.equal(consumption.dispatch_mode === "created", !reservation.pre_dispatch_run_ids.includes(consumption.run_id), "v3 dispatch reconciliation is inconsistent");
+  }
+  for (const ambiguity of ambiguities) {
+    assert.deepEqual(Object.keys(ambiguity).sort(), ["kind", "observed_run_ids", "reason", "reservation_id", "state"].sort(), "v3 ambiguity schema differs");
+    assert.ok(reservationsById.has(ambiguity.reservation_id), "v3 ambiguity lacks a reservation");
+    assert.ok(!consumptionsByReservation.has(ambiguity.reservation_id), "v3 ambiguity cannot be followed by a consumption");
+    assert.ok(["missing_unique_run", "multiple_matching_runs"].includes(ambiguity.reason), "v3 ambiguity reason differs");
+    assert.ok(Array.isArray(ambiguity.observed_run_ids) && ambiguity.observed_run_ids.every((id) => Number.isSafeInteger(id) && id > 0), "v3 ambiguity observed IDs are invalid");
+    assert.equal(ambiguity.state, "terminal", "v3 ambiguity must close its reservation");
+  }
+  const validateTerminal = (record, purpose) => {
+    assert.deepEqual(Object.keys(record).sort(), ["advisory", "artifacts", "classification", "conclusion", "duration_seconds", "event_class", "host_dag_wait_seconds", "inputs", "kind", "provider_state", "ref", "repository", "required_jobs", "reservation_id", "run_attempt", "run_id", "run_url", "sha", "state", "workflow_revision"].sort(), `v3 ${purpose} terminal schema differs`);
+    const consumption = consumptionsByReservation.get(record.reservation_id);
+    const reservation = reservationsById.get(record.reservation_id);
+    assert.ok(consumption && reservation, `v3 ${purpose} terminal lacks immediate consumption binding`);
+    assert.equal(reservation.purpose, purpose, `v3 ${purpose} terminal purpose differs`);
+    assert.equal(record.run_id, consumption.run_id, `v3 ${purpose} terminal run ID differs from consumption`);
+    assert.equal(record.repository, expectedRepository, `v3 ${purpose} terminal repository differs`);
+    assert.equal(record.sha, consumption.sha, `v3 ${purpose} terminal SHA differs`);
+    assert.equal(record.ref, consumption.ref, `v3 ${purpose} terminal ref differs`);
+    assert.equal(record.event_class, "workflow_dispatch", `v3 ${purpose} terminal event differs`);
+    assert.deepEqual(record.inputs, reservation.inputs, `v3 ${purpose} terminal inputs differ`);
+    assert.equal(record.run_attempt, 1, `v3 ${purpose} terminal attempt differs`);
+    assert.equal(record.run_url, immutableRunUrl(expectedRepository, record.run_id), `v3 ${purpose} terminal URL differs`);
+    assert.equal(record.state, "terminal", `v3 ${purpose} terminal state differs`);
+    assert.match(record.workflow_revision || "", /^sha256:[0-9a-f]{64}$/, `v3 ${purpose} workflow revision is invalid`);
+    assert.ok(Number.isFinite(record.duration_seconds) && record.duration_seconds >= 0 && Number.isFinite(record.host_dag_wait_seconds), `v3 ${purpose} timing vector is invalid`);
+    assert.deepEqual(Object.keys(record.required_jobs).sort(), [...contract.proof_vector.required_job_roles].sort(), `v3 ${purpose} required job roles differ`);
+    for (const role of contract.proof_vector.required_job_roles) {
+      const job = record.required_jobs[role];
+      assert.ok(Number.isSafeInteger(job?.job_id) && job.job_id > 0, `v3 ${purpose} job ID is invalid: ${role}`);
+      assert.equal(job.url, immutableJobUrl(expectedRepository, record.run_id, job.job_id), `v3 ${purpose} job URL differs: ${role}`);
+      assert.ok(typeof job.conclusion === "string" && job.conclusion.length > 0, `v3 ${purpose} job conclusion is missing: ${role}`);
+    }
+    assert.deepEqual(Object.keys(record.artifacts).sort(), [...contract.artifacts].sort(), `v3 ${purpose} artifact inventory differs`);
+    assert.deepEqual(record.advisory, contract.proof_vector.advisory_outcomes, `v3 ${purpose} advisory vector differs`);
+    return record;
+  };
   const candidateIds = new Set();
   for (const candidate of candidates) {
-    assert.deepEqual(Object.keys(candidate).sort(), ["kind", "reservation_id", "run_attempt", "run_id", "sha", "state"].sort(), "v3 candidate schema differs");
-    assert.ok(reservationIds.has(candidate.reservation_id), "v3 candidate was not reserved");
+    validateTerminal(candidate, "candidate");
     assert.ok(!candidateIds.has(candidate.run_id), "v3 run id is duplicated"); candidateIds.add(candidate.run_id);
-    assert.equal(candidate.run_attempt, 1, "v3 candidate is not attempt 1");
-    assert.equal(candidate.state, "terminal", "v3 candidate is not terminal");
+    assert.ok(["qualifying", "nonqualifying"].includes(candidate.classification), "v3 candidate classification differs");
+    assert.equal(candidate.provider_state, "non_run", "v3 candidate provider state differs");
+    if (candidate.classification === "qualifying") {
+      assert.equal(candidate.conclusion, "success", "v3 qualifying candidate conclusion differs");
+      assert.ok(contract.proof_vector.required_job_roles.every((role) => candidate.required_jobs[role].conclusion === "success"), "v3 qualifying candidate required job failed");
+      assert.ok(contract.proof_vector.expected_artifacts.every((name) => candidate.artifacts[name] === true), "v3 qualifying candidate artifact is absent");
+    }
+  }
+  for (const restoration of restorations) {
+    validateTerminal(restoration, "restoration");
+    assert.equal(restoration.classification, "restoration_only", "v3 restoration cannot be performance evidence");
+    assert.notEqual(restoration.provider_state, "non_run", "v3 restoration must retain normal-run provider state");
   }
   if (!activations.length) {
     assert.equal(reservations.length, 0, "v3 cannot reserve before activation");
     assert.equal(candidates.length, 0, "v3 cannot consume before activation");
     return { state: "authorized_pending_candidate", admitted_observations: 0, reserved: 0, consumed: 0 };
   }
-  const activation = activations[0];
   verifyV3Activation(activation, activationEvidencePath);
-  return { state: decisions.length ? decisions[0].state : "activated_pending_reservation", admitted_observations: candidates.length, reserved: reservations.length, consumed: candidates.length };
+  if (!decisions.length) return { state: "activated_pending_reservation", admitted_observations: candidates.filter((candidate) => candidate.classification === "qualifying").length, reserved: reservations.length, consumed: consumptions.length };
+  const decision = decisions[0];
+  assert.deepEqual(Object.keys(decision).sort(), ["candidate_authority", "candidate_ref_removed", "candidate_run_ids", "inverse_workflow_revision", "kind", "median_seconds", "path02", "reason", "restoration_authority", "state", "workflow_state"].sort(), "v3 decision schema differs");
+  assert.ok(["kept", "rollback_verified", "rollback_applied_unverified"].includes(decision.state), "v3 decision state differs");
+  assert.deepEqual(decision.candidate_run_ids, candidates.map((candidate) => candidate.run_id), "v3 decision candidate IDs differ");
+  assert.equal(decision.candidate_authority, "closed", "v3 decision must close candidate authority");
+  assert.equal(decision.candidate_ref_removed, true, "v3 decision must remove the candidate ref");
+  assert.equal(decision.inverse_workflow_revision, `sha256:${contract.workflow_sha256}`, "v3 decision inverse workflow differs from the literal rollback");
+  if (decision.state === "kept") {
+    assert.equal(decision.path02, "satisfied", "v3 kept decision must satisfy PATH-02");
+    assert.equal(decision.workflow_state, "candidate", "v3 kept decision must retain candidate workflow");
+    assert.equal(decision.restoration_authority, "closed_unspent", "v3 kept decision must close restoration unspent");
+    assert.equal(restorations.length, 0, "v3 kept decision cannot include restoration");
+    assert.equal(ambiguities.length, 0, "v3 kept decision cannot include ambiguity");
+    assert.equal(candidates.length, budget.candidate_ceiling, "v3 kept decision requires exactly three candidates");
+    assert.ok(candidates.every((candidate) => candidate.classification === "qualifying"), "v3 kept decision includes a nonqualifying candidate");
+    const durations = candidates.map((candidate) => candidate.duration_seconds).sort((a, b) => a - b);
+    assert.equal(decision.median_seconds, durations[1], "v3 kept median differs from locked cohort");
+    assert.ok(decision.median_seconds <= budget.thresholds.keep_median_seconds, "v3 kept median misses threshold");
+    assert.ok(durations.every((duration) => duration <= budget.thresholds.maximum_observation_seconds), "v3 kept observation exceeds maximum");
+  } else {
+    assert.equal(decision.path02, "unmet", "v3 rollback must leave PATH-02 unmet");
+    assert.equal(decision.workflow_state, "inverse_rollback", "v3 rollback must apply the exact inverse");
+    assert.equal(decision.median_seconds, null, "v3 rollback cannot report a performance median");
+    assert.ok(ambiguities.length === 1 || candidates.some((candidate) => candidate.classification === "nonqualifying"), "v3 rollback requires an invalid vector or ambiguity");
+    const firstInvalid = candidates.findIndex((candidate) => candidate.classification === "nonqualifying");
+    if (firstInvalid >= 0) assert.equal(firstInvalid, candidates.length - 1, "v3 dispatched after the first invalid candidate");
+    assert.ok(["closed_unspent", "closed"].includes(decision.restoration_authority), "v3 rollback restoration authority differs");
+    assert.equal(decision.restoration_authority === "closed", restorations.length === 1, "v3 restoration decision disagrees with restoration evidence");
+  }
+  return { state: decision.state, admitted_observations: candidates.filter((candidate) => candidate.classification === "qualifying").length, reserved: reservations.length, consumed: consumptions.length };
 }
 
 export function verifyFinalDecision(records, contract, expectedRepository = "szTheory/accrue", activationEvidencePath = V3_PREFLIGHT_EVIDENCE_PATH) {
@@ -513,6 +633,32 @@ function verifyLiveGapV2Candidates(records, contract, repository) {
     const names = new Set(api(`repos/${repository}/actions/runs/${record.run_id}/artifacts?per_page=100`).artifacts.map((artifact) => artifact.name));
     if (!names.has(contract.proof_vector.expected_artifacts[0])) fail(`live v2 candidate lacks success artifact: ${record.run_id}`);
   }
+  return true;
+}
+
+function verifyLiveGapV3(records, contract, repository) {
+  for (const record of [...v3Records(records, "gap_v3_candidate_run"), ...v3Records(records, "gap_v3_restoration_run")]) {
+    const run = api(`repos/${repository}/actions/runs/${record.run_id}`);
+    if (run.head_sha !== record.sha || run.head_branch !== record.ref || run.run_attempt !== record.run_attempt || run.event !== record.event_class || run.conclusion !== record.conclusion) fail(`live v3 run facts differ for ${record.run_id}`);
+    if (workflowRevision(repository, record.sha) !== record.workflow_revision) fail(`live v3 workflow revision differs for ${record.run_id}`);
+    const jobs = api(`repos/${repository}/actions/runs/${record.run_id}/attempts/${record.run_attempt}/jobs?filter=all&per_page=100`).jobs;
+    if (!Array.isArray(jobs)) fail(`live v3 jobs are unavailable for ${record.run_id}`);
+    for (const [role, proof] of Object.entries(record.required_jobs)) verifyRecordedJob(jobs, repository, record.run_id, proof, role);
+    const release = jobs.find((job) => job.id === record.required_jobs["release-gate"].job_id);
+    const docs = jobs.find((job) => job.id === record.required_jobs["docs-and-bash-contracts-shift-left"].job_id);
+    const host = jobs.find((job) => job.id === record.required_jobs["host-integration"].job_id);
+    const shards = jobs.filter((job) => [record.required_jobs["playwright-e2e-shard-1-3"].job_id, record.required_jobs["playwright-e2e-shard-2-3"].job_id, record.required_jobs["playwright-e2e-shard-3-3"].job_id].includes(job.id));
+    if (!release || !docs || !host || shards.length !== 3) fail(`live v3 timing jobs are incomplete for ${record.run_id}`);
+    const duration = Math.round((Math.max(...shards.map((job) => Date.parse(job.completed_at))) - Date.parse(release.started_at)) / 1000);
+    const hostWait = Math.round((Date.parse(host.started_at) - Date.parse(docs.completed_at)) / 1000);
+    if (duration !== record.duration_seconds || hostWait !== record.host_dag_wait_seconds) fail(`live v3 timing differs for ${record.run_id}`);
+    const artifacts = api(`repos/${repository}/actions/runs/${record.run_id}/artifacts?per_page=100`).artifacts;
+    const names = new Set(artifacts.map((artifact) => artifact.name));
+    for (const name of contract.artifacts) if (record.artifacts[name] !== names.has(name)) fail(`live v3 artifact inventory differs for ${record.run_id}: ${name}`);
+  }
+  const decision = v3Records(records, "gap_v3_decision")[0];
+  if (decision && apiErrorStatus(`repos/${repository}/git/ref/heads/phase-227-gap-dispatch-false-v3`) === 0) fail("v3 candidate ref remains after terminal decision");
+  if (decision?.restoration_authority === "closed" && apiErrorStatus(`repos/${repository}/git/ref/heads/phase-227-gap-dispatch-false-v3-restoration`) === 0) fail("v3 restoration ref remains after terminal decision");
   return true;
 }
 
@@ -774,7 +920,7 @@ function assertSafeTerminalEvidence(value, key = "root", parent = "") {
 
 function parseCli(argv) {
   const actions = new Set(["--fixtures", "--verify-workflow", "--verify-evidence", "--render-evidence", "--verify-live-actions", "--verify-preflight-evidence"]);
-  const values = new Set(["--workflow", "--workflow-fixture", "--contract", "--evidence", "--rendered", "--expected-repository", "--expected-state", "--control-branch", "--preflight-evidence", "--candidate-sha"]);
+  const values = new Set(["--workflow", "--workflow-fixture", "--contract", "--evidence", "--rendered", "--expected-repository", "--expected-state", "--control-branch", "--preflight-evidence", "--candidate-sha", "--require-activation-evidence"]);
   const modifiers = new Set(["--require-final-decision", "--require-kept", "--require-rollback-verified", "--require-negative-control", "--require-no-remote-effects"]);
   const seen = new Map();
   const flags = new Set();
@@ -794,10 +940,10 @@ function parseCli(argv) {
   const allowed = {
     "--fixtures": new Set(["--workflow-fixture", "--contract"]),
     "--verify-workflow": new Set(["--workflow", "--contract", "--expected-state"]),
-    "--verify-evidence": new Set(["--evidence", "--contract", "--expected-repository", "--rendered", "--require-final-decision", "--require-kept", "--require-rollback-verified"]),
+    "--verify-evidence": new Set(["--evidence", "--contract", "--expected-repository", "--rendered", "--require-activation-evidence", "--require-final-decision", "--require-kept", "--require-rollback-verified"]),
     "--render-evidence": new Set(["--evidence", "--contract", "--expected-repository", "--rendered"]),
     "--verify-preflight-evidence": new Set(["--preflight-evidence", "--candidate-sha", "--expected-state", "--require-no-remote-effects"]),
-    "--verify-live-actions": new Set(["--evidence", "--contract", "--expected-repository", "--rendered", "--control-branch", "--require-final-decision", "--require-kept", "--require-rollback-verified", "--require-negative-control"]),
+    "--verify-live-actions": new Set(["--evidence", "--contract", "--expected-repository", "--rendered", "--control-branch", "--require-activation-evidence", "--require-final-decision", "--require-kept", "--require-rollback-verified", "--require-negative-control"]),
   }[action];
   for (const optionName of [...seen.keys(), ...flags]) if (optionName !== action && !allowed.has(optionName)) fail(`${optionName} is not allowed with ${action}`);
   return { action, values: seen, flags };
@@ -824,8 +970,8 @@ function runCli(argv) {
   const records = evidenceRecords(evidence);
   const repository = cli.values.get("--expected-repository") || "szTheory/accrue";
   if (cli.action === "--verify-evidence") {
-    const result = verifyFinalDecision(records, contract, repository);
-    if (cli.flags.has("--require-kept") && result.state !== "kept") fail("v2 terminal decision is not kept");
+    const result = verifyFinalDecision(records, contract, repository, cli.values.get("--require-activation-evidence") || V3_PREFLIGHT_EVIDENCE_PATH);
+    if (cli.flags.has("--require-kept") && result.state !== "kept") fail("terminal decision is not kept");
     const rendered = cli.values.get("--rendered");
     if (rendered && fs.readFileSync(rendered, "utf8") !== renderCriticalPathEvidence(records)) fail("rendered report does not byte-match NDJSON render");
     return result;
@@ -833,6 +979,13 @@ function runCli(argv) {
   if (cli.action === "--render-evidence") {
     const rendered = cli.values.get("--rendered"); if (!rendered) fail("--render-evidence requires --rendered");
     const output = renderCriticalPathEvidence(records); if (fs.readFileSync(rendered, "utf8") !== output) fail("rendered report does not byte-match NDJSON render");
+    return true;
+  }
+  if (records.some((record) => record.kind === "gap_budget_authorization_v3" && record.budget_id === V3_BUDGET)) {
+    const result = verifyGapV3Evidence(records, contract, repository, cli.values.get("--require-activation-evidence") || V3_PREFLIGHT_EVIDENCE_PATH);
+    if (cli.flags.has("--require-kept") && result.state !== "kept") fail("v3 terminal decision is not kept");
+    verifyLiveGapV3(records, contract, repository);
+    if (cli.flags.has("--require-final-decision") && !records.some((record) => record.kind === "gap_v3_decision")) fail("v3 terminal decision is missing");
     return true;
   }
   if (records.some((record) => record.kind === "gap_budget_authorization" && record.budget_id === "phase-227-gap-dispatch-false-v2")) {
