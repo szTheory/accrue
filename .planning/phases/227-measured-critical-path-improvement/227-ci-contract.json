@@ -31,5 +31,6 @@
   },
   "run_budget": { "final_candidate_attempts": 3, "allow_reruns": false, "allow_replacements": false },
   "failure_classes": ["candidate_regression", "deterministic_required_lane_failure", "external_or_runner_blocked", "inconclusive"],
+  "v3_authority": {"budget_id": "phase-227-gap-dispatch-false-v3", "remote_effects_default": "disabled", "candidate_ceiling": 3, "conditional_restoration_ceiling": 1, "reservation_required": true, "preflight_required_before_activation": true},
   "rollback_states": ["rollback_required", "rollback_applied", "rollback_verified", "rollback_applied_unverified"]
 }

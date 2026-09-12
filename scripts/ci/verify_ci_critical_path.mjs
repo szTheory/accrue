@@ -259,7 +259,103 @@ export function verifyUnverifiedRollbackTerminal(records, contract, expectedRepo
   return rollback;
 }
 
+const V3_BUDGET = "phase-227-gap-dispatch-false-v3";
+const V3_PREFIX_LENGTH = ["negative_control", "exclusion", "negative_control", ...Array(9).fill("exclusion"), "decision_pending"].length;
+
+function v3Records(records, kind) { return records.filter((record) => record.kind === kind); }
+
+function assertV3Prefix(records) {
+  assert.deepEqual(records.slice(0, V3_PREFIX_LENGTH).map((record) => record.kind), ["negative_control", "exclusion", "negative_control", ...Array(9).fill("exclusion"), "decision_pending"], "historical ledger prefix changed");
+  const v2 = records.find((record) => record.kind === "gap_budget_authorization" && record.budget_id === "phase-227-gap-dispatch-false-v2");
+  assert.ok(v2, "closed v2 authority is missing");
+  const v2Decision = records.find((record) => record.kind === "gap_decision");
+  assert.equal(v2Decision?.state, "rollback_applied_unverified", "closed v2 authority changed");
+}
+
+function verifyV3Preflight(record, expectedSha, expectedState) {
+  assert.deepEqual(Object.keys(record || {}).sort(), ["candidate_sha", "candidate_tree", "check_results", "expected_state", "kind", "remote_effects", "status", "wrapper_sha256"].sort(), "v3 preflight evidence schema differs");
+  assert.equal(record.status, "passed", "v3 preflight did not pass");
+  assert.equal(record.remote_effects, "none", "v3 preflight has remote effects");
+  assert.equal(record.expected_state, expectedState, "v3 preflight state differs");
+  assert.match(record.candidate_sha || "", /^[0-9a-f]{40}$/, "v3 preflight candidate SHA is invalid");
+  if (expectedSha) assert.equal(record.candidate_sha, expectedSha, "v3 preflight candidate SHA differs");
+  assert.match(record.candidate_tree || "", /^[0-9a-f]{40}$/, "v3 preflight candidate tree is invalid");
+  assert.match(record.wrapper_sha256 || "", /^sha256:[0-9a-f]{64}$/, "v3 preflight wrapper digest is invalid");
+  assert.deepEqual(record.check_results, { node_syntax: "passed", node_tests: "passed", fixtures: "passed", workflow: "passed", accrue_format: "passed", accrue_test: "passed", prohibited_invocations: 0 }, "v3 preflight checks differ");
+  return record;
+}
+
+export function verifyPreflightEvidence(evidence, candidateSha, expectedState) {
+  return verifyV3Preflight(typeof evidence === "string" ? readJson(evidence) : evidence, candidateSha, expectedState);
+}
+
+function verifyGapV3Evidence(records, contract, expectedRepository) {
+  assertV3Prefix(records);
+  const budgets = v3Records(records, "gap_budget_authorization_v3");
+  assert.equal(budgets.length, 1, "v3 authorization must appear exactly once");
+  const budget = budgets[0];
+  assert.deepEqual(Object.keys(budget).sort(), ["authorized_at", "budget_id", "candidate_ceiling", "candidate_fingerprint", "candidate_provider_state", "candidate_run_attempt", "candidate_run_live_stripe", "closed_predecessors", "conditional_restoration_ceiling", "event_class", "existing_negative_control_run_id", "kind", "no_concurrency", "no_replacements", "no_reruns", "owner", "phase228_provider_evidence", "phase228_provider_outcome", "remote_effects", "repository", "stop_on_first_nonqualifying", "thresholds"].sort(), "v3 authorization schema differs");
+  assert.equal(budget.budget_id, V3_BUDGET, "v3 budget id differs");
+  assert.equal(budget.repository, expectedRepository, "v3 authorization repository differs");
+  assert.equal(budget.event_class, "workflow_dispatch", "v3 event class differs");
+  assert.equal(budget.candidate_run_live_stripe, false, "v3 candidate input differs");
+  assert.equal(budget.candidate_run_attempt, 1, "v3 candidate attempt differs");
+  assert.equal(budget.candidate_fingerprint, V3_BUDGET, "v3 fingerprint differs");
+  assert.equal(budget.candidate_provider_state, "non_run", "v3 provider state differs");
+  assert.equal(budget.candidate_ceiling, 3, "v3 candidate ceiling differs");
+  assert.equal(budget.conditional_restoration_ceiling, 1, "v3 restoration ceiling differs");
+  assert.deepEqual(budget.closed_predecessors, ["phase-227-dispatch-false-v1", "phase-227-gap-dispatch-false-v2"], "v3 predecessors differ");
+  assert.equal(budget.no_reruns, true, "v3 must prohibit reruns");
+  assert.equal(budget.no_replacements, true, "v3 must prohibit replacements");
+  assert.equal(budget.no_concurrency, true, "v3 must prohibit concurrency");
+  assert.equal(budget.remote_effects, "disabled", "v3 must start with remote effects disabled");
+  assert.equal(budget.stop_on_first_nonqualifying, true, "v3 stop policy differs");
+  assert.deepEqual(budget.thresholds, contract.thresholds, "v3 thresholds differ from frozen contract");
+  assert.equal(budget.phase228_provider_outcome, "failed/selected_assertions_failed", "Phase 228 provider outcome must remain literal");
+  assert.ok(Number.isSafeInteger(budget.existing_negative_control_run_id) && budget.existing_negative_control_run_id > 0, "v3 negative-control reference is invalid");
+
+  const reservations = v3Records(records, "gap_v3_reservation");
+  const activations = v3Records(records, "gap_v3_activation");
+  const candidates = v3Records(records, "gap_v3_candidate_run");
+  const decisions = v3Records(records, "gap_v3_decision");
+  assert.ok(reservations.length <= budget.candidate_ceiling + budget.conditional_restoration_ceiling, "v3 reservation ceiling exceeded");
+  assert.ok(candidates.length <= budget.candidate_ceiling, "v3 candidate ceiling exceeded");
+  assert.ok(activations.length <= 1, "v3 activation is duplicated");
+  assert.ok(decisions.length <= 1, "v3 decision is duplicated");
+  assert.equal(reservations.filter((entry) => entry.status === "open").length <= 1, true, "v3 has duplicate open reservations");
+  const reservationIds = new Set();
+  for (const reservation of reservations) {
+    assert.deepEqual(Object.keys(reservation).sort(), ["candidate_sha", "kind", "purpose", "reservation_id", "status"].sort(), "v3 reservation schema differs");
+    assert.ok(["candidate", "restoration"].includes(reservation.purpose), "v3 reservation purpose differs");
+    assert.ok(!reservationIds.has(reservation.reservation_id), "v3 reservation is duplicated"); reservationIds.add(reservation.reservation_id);
+    assert.match(reservation.candidate_sha || "", /^[0-9a-f]{40}$/, "v3 reservation SHA is invalid");
+    assert.ok(["open", "bound", "terminal"].includes(reservation.status), "v3 reservation status differs");
+  }
+  const candidateIds = new Set();
+  for (const candidate of candidates) {
+    assert.deepEqual(Object.keys(candidate).sort(), ["kind", "reservation_id", "run_attempt", "run_id", "sha", "state"].sort(), "v3 candidate schema differs");
+    assert.ok(reservationIds.has(candidate.reservation_id), "v3 candidate was not reserved");
+    assert.ok(!candidateIds.has(candidate.run_id), "v3 run id is duplicated"); candidateIds.add(candidate.run_id);
+    assert.equal(candidate.run_attempt, 1, "v3 candidate is not attempt 1");
+    assert.equal(candidate.state, "terminal", "v3 candidate is not terminal");
+  }
+  if (!activations.length) {
+    assert.equal(reservations.length, 0, "v3 cannot reserve before activation");
+    assert.equal(candidates.length, 0, "v3 cannot consume before activation");
+    return { state: "authorized_pending_candidate", admitted_observations: 0, reserved: 0, consumed: 0 };
+  }
+  const activation = activations[0];
+  assert.deepEqual(Object.keys(activation).sort(), ["candidate_sha", "candidate_tree", "kind", "preflight_evidence", "remote_effects"].sort(), "v3 activation schema differs");
+  assert.equal(activation.remote_effects, "enabled", "v3 activation must explicitly enable remote effects");
+  verifyV3Preflight(activation.preflight_evidence, activation.candidate_sha, "candidate");
+  assert.equal(activation.candidate_tree, activation.preflight_evidence.candidate_tree, "v3 activation tree differs from preflight");
+  return { state: decisions.length ? decisions[0].state : "activated_pending_reservation", admitted_observations: candidates.length, reserved: reservations.length, consumed: candidates.length };
+}
+
 export function verifyFinalDecision(records, contract, expectedRepository = "szTheory/accrue") {
+  if (records.some((record) => record.kind === "gap_budget_authorization_v3" && record.budget_id === V3_BUDGET)) {
+    return verifyGapV3Evidence(records, contract, expectedRepository);
+  }
   if (records.some((record) => record.kind === "gap_budget_authorization" && record.budget_id === "phase-227-gap-dispatch-false-v2")) {
     return verifyGapV2Evidence(records, contract, expectedRepository);
   }
@@ -578,6 +674,11 @@ function verifyLiveRollback(records, contract, repository, requireVerified = fal
 
 export function renderCriticalPathEvidence(records) {
   const contract = readJson(path.join(phase, "227-ci-contract.json"));
+  if (records.some((record) => record.kind === "gap_budget_authorization_v3" && record.budget_id === V3_BUDGET)) {
+    const result = verifyGapV3Evidence(records, contract, "szTheory/accrue");
+    const budget = records.find((record) => record.kind === "gap_budget_authorization_v3");
+    return `# Phase 227 critical-path v3 authorization\n\n## Current fact\n\n- state: \`${result.state}\`\n- owner: ${budget.owner}\n- budget: \`${budget.budget_id}\`\n- PATH-02: \`unmet\`\n- candidate slots reserved: ${result.reserved}/${budget.candidate_ceiling}\n- candidate slots consumed: ${result.consumed}/${budget.candidate_ceiling}\n- restoration slots consumed: 0/${budget.conditional_restoration_ceiling}\n- remote effects: \`${budget.remote_effects}\`\n- old budgets: \`${budget.closed_predecessors.join("\`, \`")}\` remain closed and supply zero v3 observations\n- next command: \`node scripts/ci/preflight_phase227_candidate.sh --commit <candidate-sha> --expected-state candidate --evidence-out .planning/phases/227-measured-critical-path-improvement/227-CANDIDATE-PREFLIGHT.json\`\n\nThis is local preparation, not live proof. Candidate authority is finite: exactly three unique attempt-1 manual-false runs at one committed candidate after an append-only activation binds passing exact-tree preflight evidence. Reruns, replacements, and concurrency are prohibited; restoration is one conditional inverse-only slot.\n`;
+  }
   if (records.some((record) => record.kind === "gap_budget_authorization" && record.budget_id === "phase-227-gap-dispatch-false-v2")) {
     const result = verifyGapV2Evidence(records, contract, "szTheory/accrue");
     const budget = records.find((record) => record.kind === "gap_budget_authorization");
@@ -614,6 +715,10 @@ export function renderCriticalPathEvidence(records) {
 }
 
 function validateTerminalLedger(records, contract) {
+  if (records.some((record) => record.kind === "gap_budget_authorization_v3" && record.budget_id === V3_BUDGET)) {
+    verifyGapV3Evidence(records, contract, "szTheory/accrue");
+    return;
+  }
   if (records.some((record) => record.kind === "gap_budget_authorization" && record.budget_id === "phase-227-gap-dispatch-false-v2")) {
     verifyGapV2Evidence(records, contract, "szTheory/accrue");
     return;
@@ -638,9 +743,9 @@ function assertSafeTerminalEvidence(value, key = "root", parent = "") {
 }
 
 function parseCli(argv) {
-  const actions = new Set(["--fixtures", "--verify-workflow", "--verify-evidence", "--render-evidence", "--verify-live-actions"]);
-  const values = new Set(["--workflow", "--workflow-fixture", "--contract", "--evidence", "--rendered", "--expected-repository", "--expected-state", "--control-branch"]);
-  const modifiers = new Set(["--require-final-decision", "--require-kept", "--require-rollback-verified", "--require-negative-control"]);
+  const actions = new Set(["--fixtures", "--verify-workflow", "--verify-evidence", "--render-evidence", "--verify-live-actions", "--verify-preflight-evidence"]);
+  const values = new Set(["--workflow", "--workflow-fixture", "--contract", "--evidence", "--rendered", "--expected-repository", "--expected-state", "--control-branch", "--preflight-evidence", "--candidate-sha"]);
+  const modifiers = new Set(["--require-final-decision", "--require-kept", "--require-rollback-verified", "--require-negative-control", "--require-no-remote-effects"]);
   const seen = new Map();
   const flags = new Set();
   for (let index = 0; index < argv.length; index += 1) {
@@ -661,6 +766,7 @@ function parseCli(argv) {
     "--verify-workflow": new Set(["--workflow", "--contract", "--expected-state"]),
     "--verify-evidence": new Set(["--evidence", "--contract", "--expected-repository", "--rendered", "--require-final-decision", "--require-kept", "--require-rollback-verified"]),
     "--render-evidence": new Set(["--evidence", "--contract", "--expected-repository", "--rendered"]),
+    "--verify-preflight-evidence": new Set(["--preflight-evidence", "--candidate-sha", "--expected-state", "--require-no-remote-effects"]),
     "--verify-live-actions": new Set(["--evidence", "--contract", "--expected-repository", "--rendered", "--control-branch", "--require-final-decision", "--require-kept", "--require-rollback-verified", "--require-negative-control"]),
   }[action];
   for (const optionName of [...seen.keys(), ...flags]) if (optionName !== action && !allowed.has(optionName)) fail(`${optionName} is not allowed with ${action}`);
@@ -672,6 +778,11 @@ function runCli(argv) {
   const contractFile = cli.values.get("--contract") || path.join(phase, "227-ci-contract.json");
   const contract = readJson(contractFile);
   if (cli.action === "--fixtures") return verifyFixtures(cli.values.get("--workflow-fixture"));
+  if (cli.action === "--verify-preflight-evidence") {
+    const evidence = cli.values.get("--preflight-evidence"); const candidateSha = cli.values.get("--candidate-sha"); const expectedState = cli.values.get("--expected-state");
+    if (!evidence || !candidateSha || !expectedState || !cli.flags.has("--require-no-remote-effects")) fail("preflight verification requires evidence, SHA, state, and --require-no-remote-effects");
+    return verifyPreflightEvidence(evidence, candidateSha, expectedState);
+  }
   if (cli.action === "--verify-workflow") {
     const workflow = cli.values.get("--workflow"); if (!workflow) fail("--verify-workflow requires --workflow");
     const result = verifyWorkflowContract(fs.readFileSync(workflow, "utf8"), contract);
