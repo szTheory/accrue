@@ -1,0 +1,23 @@
+{
+  "kind": "phase227_preflight",
+  "status": "passed",
+  "candidate_sha": "0339f14d6badaa7d901c27a62379c86b666c5d62",
+  "candidate_tree": "0d96bf3a7f6927f43412c1c08de4b51aeba7c4eb",
+  "parent_sha": "e40ccf59df29d1968f30bfd1dce311caea5f6a94",
+  "parent_tree": "e97fbe437a6240333462bf9ff23af7b9f4051d3e",
+  "changed_files": [
+    ".github/workflows/ci.yml"
+  ],
+  "expected_state": "candidate",
+  "wrapper_sha256": "sha256:97aab58a9a70bb40dbccc2f0d89cabadd53e6a8e4facba1a30a71260d2d6e899",
+  "remote_effects": "none",
+  "check_results": {
+    "node_syntax": "passed",
+    "node_tests": "passed",
+    "fixtures": "passed",
+    "workflow": "passed",
+    "accrue_format": "passed",
+    "accrue_test": "passed",
+    "prohibited_invocations": 0
+  }
+}
