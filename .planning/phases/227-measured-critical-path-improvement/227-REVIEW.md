@@ -1,6 +1,6 @@
 ---
 phase: 227-measured-critical-path-improvement
-reviewed: 2026-09-12T16:32:57Z
+reviewed: 2026-09-12T16:49:36Z
 depth: standard
 files_reviewed: 6
 files_reviewed_list:
@@ -11,64 +11,46 @@ files_reviewed_list:
   - scripts/ci/verify_ci_critical_path.mjs
   - scripts/ci/verify_ci_critical_path.test.mjs
 findings:
-  critical: 3
-  warning: 1
+  critical: 2
+  warning: 0
   info: 0
-  total: 4
+  total: 2
 status: issues_found
 ---
 
 # Phase 227: Code Review Report
 
-**Reviewed:** 2026-09-12T16:32:57Z
+**Reviewed:** 2026-09-12T16:49:36Z
 **Depth:** standard
 **Files Reviewed:** 6
 **Status:** issues_found
 
 ## Summary
 
-The candidate workflow edge, local preflight wrapper, NDJSON state machine, and verifier tests were reviewed. The v3 verifier has material evidence-integrity and remote-effect-safety gaps: it does not enforce ledger ordering, cannot prove the dispatch Boolean against Actions data, and silently ignores two accepted terminal-state modifiers in the local-evidence path.
+The six-file scope was reviewed, including the task-local backend contract, detached-worktree preflight, CI graph, v3 ledger validation, and rendered-report checks. The mixed-task regression is present and the current kept ledger verifies, but the v3 verifier still lets unsubstantiated ledger labels change the final decision. Two independently reproduced evidence-integrity defects must be fixed before this ships.
 
 ## Narrative Findings (AI reviewer)
 
 ## Critical Issues
 
-### CR-01: BLOCKER — Activation can be recorded after the remote candidate runs
+### CR-01: BLOCKER — A successful candidate can be relabeled nonqualifying to force rollback
 
-**File:** `scripts/ci/verify_ci_critical_path.mjs:350-516`
+**File:** `/Users/jon/projects/accrue/scripts/ci/verify_ci_critical_path.mjs:460`
 
-**Issue:** The state machine builds maps by record kind and checks timestamps only within each reservation/consumption pair; it never requires the activation record to precede reservations, consumptions, candidate terminals, or the decision in the append-only ledger. Moving the real `gap_v3_activation` record from line 31 of `227-CI-CRITICAL-PATH.ndjson` to the end of the record array still returns `{"state":"kept","admitted_observations":3,"reserved":3,"consumed":3}` from `verifyFinalDecision`. This permits retroactive activation evidence to bless already-dispatched remote work, defeating the declared "activation before remote effects" control.
+**Issue:** The validator requires success, complete required jobs, and required artifacts only for `classification: "qualifying"` (lines 465–468). For `"nonqualifying"`, it accepts any non-empty job conclusions and does not require an actual failed required job, failed workflow conclusion, or missing required artifact. The rollback branch then accepts the label alone as evidence (lines 524–526). Replacing a current all-success candidate's classification with `nonqualifying` and changing the decision to rollback is accepted by `verifyFinalDecision`, so append-only evidence can falsely discard a qualifying cohort.
 
-**Fix:** Track each record's ledger index (or require immutable sequence numbers) and reject any reservation unless a validated activation appears earlier. Also require reservation → consumption → terminal/advisory → decision ordering, and add a regression test that moves activation after a consumption and expects failure.
+**Fix:** Define the allowed failure predicates and validate them from the terminal vector. Require a nonqualifying candidate to have a non-success workflow conclusion, a failed/missing required job, or a missing required success artifact; reject it when all qualifying predicates hold. Add a regression that mutates an otherwise qualifying candidate to `nonqualifying` and expects rejection.
 
-### CR-02: BLOCKER — Live verification never proves `run_live_stripe: false`
+### CR-02: BLOCKER — `rollback_verified` is not bound to a successful restoration proof
 
-**File:** `scripts/ci/verify_ci_critical_path.mjs:403-408, 653-671`
+**File:** `/Users/jon/projects/accrue/scripts/ci/verify_ci_critical_path.mjs:520`
 
-**Issue:** The ledger comparison verifies `inputs: {run_live_stripe: false}` only against the reservation record. `verifyLiveGapV3` fetches the run, SHA, branch, event, conclusion, jobs, timings, and artifact names, but never validates the actual workflow-dispatch inputs. An operator can dispatch the same ref with `run_live_stripe: true`, invoke Stripe, and write `false` into NDJSON; all current live checks still pass because the Actions run API facts used here do not bind that input. The verifier therefore labels an externally effectful run as `non_run` provider evidence.
+**Issue:** All non-kept states take the same branch. It permits `state: "rollback_verified"` with `restoration_authority: "closed_unspent"` and zero restoration records (lines 520–529); it never requires a restoration terminal record, provider proof, or successful required-job vector for that state. I reproduced this by changing the current final decision to `rollback_verified` while retaining no restoration records; `verifyFinalDecision` returned `rollback_verified`. This can falsely represent the rollback as proved.
 
-**Fix:** Have a job in the pinned candidate workflow emit a sanitized, immutable input-attestation artifact (containing only the Boolean, run ID, SHA, and workflow revision), download and validate it during `--verify-live-actions`, and bind it to the recorded run. Reject the candidate unless the attestation reports `run_live_stripe: false` and the provider lane is absent/skipped as expected.
-
-### CR-03: BLOCKER — Accepted terminal-state modifiers are ignored by `--verify-evidence`
-
-**File:** `scripts/ci/verify_ci_critical_path.mjs:978, 1007-1012`
-
-**Issue:** The parser permits `--require-final-decision` and `--require-rollback-verified` with `--verify-evidence`, but that execution branch checks only `--require-kept`. Thus an authorized or activated-but-undecided v3 ledger passes despite `--require-final-decision`, and a non-verified rollback passes despite `--require-rollback-verified`. These are fail-open assurance flags, contrary to their names and the phase's terminal-safety contract.
-
-**Fix:** Apply modifier validation centrally after `verifyFinalDecision`: require a terminal decision for `--require-final-decision`, and require `result.state === "rollback_verified"` for `--require-rollback-verified`. Add negative CLI tests using a ledger with its final decision removed and one whose terminal state is `rollback_applied_unverified`.
-
-## Warnings
-
-### WR-01: WARNING — `--rendered` is ignored by the live v3 verifier
-
-**File:** `scripts/ci/verify_ci_critical_path.mjs:981, 1019-1024`
-
-**Issue:** `--verify-live-actions` explicitly accepts `--rendered`, and the rendered report advertises a command containing it, but the v3 live branch never reads or compares that file. Running the documented live command with `--rendered /dev/null --require-kept` exits successfully. A stale or altered human-facing report can therefore accompany a passing live verification.
-
-**Fix:** Before returning from every `--verify-live-actions` branch, when `--rendered` is supplied, compare its bytes with `renderCriticalPathEvidence(records)` exactly as the `--verify-evidence` branch does. Add a test that passes a deliberately incorrect rendered path/content and expects a nonzero result.
+**Fix:** Split validation by rollback state. Require `rollback_verified` to have exactly one bound `gap_v3_restoration_run` with a successful conclusion, all required jobs/artifacts, and provider state `proved`; allow zero restoration records only for the explicitly unverified/unspent state. Add a negative test for `rollback_verified` without restoration evidence.
 
 ---
 
-_Reviewed: 2026-09-12T16:32:57Z_
+_Reviewed: 2026-09-12T16:49:36Z_
 _Reviewer: the agent (gsd-code-reviewer)_
 _Depth: standard_
