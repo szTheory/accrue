@@ -1,6 +1,7 @@
 ---
 phase: 227-measured-critical-path-improvement
-verified: 2026-09-12T17:16:30Z
+verified: 2026-09-12T17:18:07Z
+verified_head: e1b3c204893fdf7e8917684a9a2b9fb6a4b92b5e
 status: passed
 score: 11/11 must-haves verified
 covered_files:
@@ -48,7 +49,7 @@ covered_files:
   - scripts/ci/verify_phase225_required_lane_evidence.sh
   - scripts/ci/verify_provider_proof.mjs
   - scripts/ci/verify_stripe_webhook_boot_evidence.mjs
-covered_digest: "v1:sha256:296cf9adcff732f4090227d918e47f1bc15a62152222cb3f94a2d2385265e6ae"
+covered_digest: "v1:sha256:ddbd69a06813b93cd4a5160ef2b02010d4575ec4c2b62178026bb414754367aa"
 behavior_unverified: 0
 overrides_applied: 0
 unverified_prohibition_count: 0
@@ -104,7 +105,7 @@ deferred:
 # Phase 227: Measured Critical-Path Improvement Verification Report
 
 **Phase Goal:** Maintainers receive one demonstrably faster CI critical path while every required release, host, browser, and provider proof remains equally identifiable and recoverable.
-**Verified:** 2026-09-12T17:16:30Z
+**Verified:** 2026-09-12T17:18:07Z
 **Status:** passed
 **Re-verification:** Yes — the original 2026-08-28 gaps report is retained below as history.
 
@@ -139,6 +140,16 @@ read-only `--verify-live-actions --require-kept`, passed again; the focused
 task-local Accrue suite passed 11/11. This reconfirms PATH-01, PATH-02,
 SAFE-01, SAFE-02, 11/11 must-haves, 23/23 decisions, and zero
 behavior-unverified truths.
+
+### Metadata refresh — 2026-09-12T17:18:07Z
+
+Head `e1b3c204893fdf7e8917684a9a2b9fb6a4b92b5e` adds only
+`status: superseded` to historical Plan 06. This accurately formalizes the
+already-reviewed replacement by Plans 07–08; it changes neither workflow,
+verifier, ledger, timing cohort, nor proof artifact. Fresh local canonical
+checks passed: 11/11 verifier tests, exact preflight evidence, kept evidence
+and byte-render verification, candidate workflow state, and 23/23 decision
+coverage. The passed 11/11 score and `behavior_unverified: 0` remain current.
 
 | Former gap | Re-verification evidence | Result |
 | --- | --- | --- |
