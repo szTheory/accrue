@@ -698,7 +698,7 @@ export function verifyFixtures(workflowFixture = path.join(phase, "fixtures/ci-w
 function option(name) { const index = process.argv.indexOf(name); return index >= 0 ? process.argv[index + 1] : null; }
 
 const forbiddenEvidenceFields = /(?:actor|branch|token|secret|log|payload|artifact_content|user_data)/i;
-const allowedCredentialStatusFields = new Set(["required_repository_secrets"]);
+const allowedCredentialStatusFields = new Set(["required_repository_secrets", "prohibited_invocation_log_sha256"]);
 const stableJob = (name) => String(name).toLowerCase().replace(/\([^)]*\)/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 const api = (endpoint) => JSON.parse(execFileSync("gh", ["api", "-H", "Accept: application/vnd.github+json", endpoint], { encoding: "utf8" }));
 const immutableRunUrl = (repository, runId) => `https://github.com/${repository}/actions/runs/${runId}`;
@@ -853,7 +853,10 @@ export function renderCriticalPathEvidence(records) {
   if (records.some((record) => record.kind === "gap_budget_authorization_v3" && record.budget_id === V3_BUDGET)) {
     const result = verifyGapV3Evidence(records, contract, "szTheory/accrue");
     const budget = records.find((record) => record.kind === "gap_budget_authorization_v3");
-    return `# Phase 227 critical-path v3 authorization\n\n## Current fact\n\n- state: \`${result.state}\`\n- owner: ${budget.owner}\n- budget: \`${budget.budget_id}\`\n- PATH-02: \`unmet\`\n- candidate slots reserved: ${result.reserved}/${budget.candidate_ceiling}\n- candidate slots consumed: ${result.consumed}/${budget.candidate_ceiling}\n- restoration slots consumed: 0/${budget.conditional_restoration_ceiling}\n- remote effects: \`${budget.remote_effects}\`\n- old budgets: \`${budget.closed_predecessors.join("\`, \`")}\` remain closed and supply zero v3 observations\n- next command: \`node scripts/ci/preflight_phase227_candidate.sh --commit <candidate-sha> --expected-state candidate --evidence-out .planning/phases/227-measured-critical-path-improvement/227-CANDIDATE-PREFLIGHT.json\`\n\nThis is local preparation, not live proof. Candidate authority is finite: exactly three unique attempt-1 manual-false runs at one committed candidate after an append-only activation binds passing exact-tree preflight evidence. Reruns, replacements, and concurrency are prohibited; restoration is one conditional inverse-only slot.\n`;
+    const activation = v3Records(records, "gap_v3_activation")[0];
+    const remoteEffects = activation ? "enabled" : budget.remote_effects;
+    const next = activation ? "reserve exactly one candidate slot, reconcile, then dispatch or bind one unique existing run" : "node scripts/ci/preflight_phase227_candidate.sh --commit <candidate-sha> --expected-state candidate --evidence-out .planning/phases/227-measured-critical-path-improvement/227-CANDIDATE-PREFLIGHT.json";
+    return `# Phase 227 critical-path v3 authorization\n\n## Current fact\n\n- state: \`${result.state}\`\n- owner: ${budget.owner}\n- budget: \`${budget.budget_id}\`\n- PATH-02: \`unmet\`\n- candidate slots reserved: ${result.reserved}/${budget.candidate_ceiling}\n- candidate slots consumed: ${result.consumed}/${budget.candidate_ceiling}\n- restoration slots consumed: 0/${budget.conditional_restoration_ceiling}\n- remote effects: \`${remoteEffects}\`\n- old budgets: \`${budget.closed_predecessors.join("\`, \`")}\` remain closed and supply zero v3 observations\n- next command: \`${next}\`\n\nThis is local preparation, not live proof. Candidate authority is finite: exactly three unique attempt-1 manual-false runs at one committed candidate after an append-only activation binds passing exact-tree preflight evidence. Reruns, replacements, and concurrency are prohibited; restoration is one conditional inverse-only slot.\n`;
   }
   if (records.some((record) => record.kind === "gap_budget_authorization" && record.budget_id === "phase-227-gap-dispatch-false-v2")) {
     const result = verifyGapV2Evidence(records, contract, "szTheory/accrue");
