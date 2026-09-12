@@ -1,117 +1,74 @@
 ---
 phase: 227-measured-critical-path-improvement
-reviewed: 2026-08-28T20:05:05Z
+reviewed: 2026-09-12T16:32:57Z
 depth: standard
-files_reviewed: 9
+files_reviewed: 6
 files_reviewed_list:
   - .github/workflows/ci.yml
-  - accrue/test/accrue/docs/release_guidance_test.exs
-  - accrue/test/accrue/live_proof_formatter_test.exs
-  - accrue/test/support/live_proof_formatter.ex
+  - accrue/test/accrue/backend_automation_contract_test.exs
   - scripts/ci/README.md
-  - scripts/ci/verify_ci_baseline.mjs
+  - scripts/ci/preflight_phase227_candidate.sh
   - scripts/ci/verify_ci_critical_path.mjs
-  - scripts/ci/verify_ci_setup_diagnostics.sh
-  - scripts/ci/verify_provider_proof.mjs
+  - scripts/ci/verify_ci_critical_path.test.mjs
 findings:
-  critical: 6
+  critical: 3
   warning: 1
   info: 0
-  total: 7
+  total: 4
 status: issues_found
 ---
 
 # Phase 227: Code Review Report
 
-**Reviewed:** 2026-08-28T20:05:05Z
+**Reviewed:** 2026-09-12T16:32:57Z
 **Depth:** standard
-**Files Reviewed:** 9
+**Files Reviewed:** 6
 **Status:** issues_found
 
 ## Summary
 
-The critical-path verifier is not safe to use as a decision gate. It accepts duplicate or wrong-event timing samples, does not enforce the contract's required job identities, accepts repeated job URLs as three Playwright shards, scans only top-level evidence keys for secrets, and silently succeeds for unknown/no-op invocations. Its documented fixture/preflight command also fails against the reviewed workflow because the fixture is coupled to a frozen digest and an obsolete provider condition.
-
-The other scoped fixture and test commands passed: the CI baseline fixtures, provider-proof fixtures, setup-diagnostics verifier, and seven targeted ExUnit tests.
+The candidate workflow edge, local preflight wrapper, NDJSON state machine, and verifier tests were reviewed. The v3 verifier has material evidence-integrity and remote-effect-safety gaps: it does not enforce ledger ordering, cannot prove the dispatch Boolean against Actions data, and silently ignores two accepted terminal-state modifiers in the local-evidence path.
 
 ## Narrative Findings (AI reviewer)
 
-### Critical Issues
+## Critical Issues
 
-#### CR-01: Comparison evidence accepts duplicate, non-dispatch observations
+### CR-01: BLOCKER — Activation can be recorded after the remote candidate runs
 
-**Classification:** BLOCKER
+**File:** `scripts/ci/verify_ci_critical_path.mjs:350-516`
 
-**File:** `/Users/jon/projects/accrue/scripts/ci/verify_ci_critical_path.mjs:101-119`
+**Issue:** The state machine builds maps by record kind and checks timestamps only within each reservation/consumption pair; it never requires the activation record to precede reservations, consumptions, candidate terminals, or the decision in the append-only ledger. Moving the real `gap_v3_activation` record from line 31 of `227-CI-CRITICAL-PATH.ndjson` to the end of the record array still returns `{"state":"kept","admitted_observations":3,"reserved":3,"consumed":3}` from `verifyFinalDecision`. This permits retroactive activation evidence to bless already-dispatched remote work, defeating the declared "activation before remote effects" control.
 
-**Issue:** `eligible` admits pull-request and push records even though the contract authorizes only attempt-1 `workflow_dispatch` samples. `verifyComparisonEvidence` requires merely `accepted.length >= 3`; it does not require exactly three records, unique run IDs, one immutable SHA, `provider_state: non_run`, the contract fingerprint, or the required proof vector. Three references to the same fabricated push record therefore return `{keep: true}`. This directly contradicts the documented prohibition on reruns, replacement cohorts, pull requests, and mutable/non-candidate samples.
+**Fix:** Track each record's ledger index (or require immutable sequence numbers) and reject any reservation unless a validated activation appears earlier. Also require reservation → consumption → terminal/advisory → decision ordering, and add a regression test that moves activation after a consumption and expects failure.
 
-**Fix:** Validate every admission predicate from `contract.measurement_topology` and `contract.run_budget`, then require exactly three unique `(run_id, sha)` observations at the one candidate SHA. Reject records unless `event_class === "workflow_dispatch"`, `run_attempt === 1`, `provider_state === "non_run"`, and the fingerprint equals `contract.measurement_topology.candidate_fingerprint`. Add negative fixtures for duplicate records, push/PR records, mixed SHAs, extra fourth samples, and missing provider state.
+### CR-02: BLOCKER — Live verification never proves `run_live_stripe: false`
 
-#### CR-02: Candidate admission ignores the required job identities
+**File:** `scripts/ci/verify_ci_critical_path.mjs:403-408, 653-671`
 
-**Classification:** BLOCKER
+**Issue:** The ledger comparison verifies `inputs: {run_live_stripe: false}` only against the reservation record. `verifyLiveGapV3` fetches the run, SHA, branch, event, conclusion, jobs, timings, and artifact names, but never validates the actual workflow-dispatch inputs. An operator can dispatch the same ref with `run_live_stripe: true`, invoke Stripe, and write `false` into NDJSON; all current live checks still pass because the Actions run API facts used here do not bind that input. The verifier therefore labels an externally effectful run as `non_run` provider evidence.
 
-**File:** `/Users/jon/projects/accrue/scripts/ci/verify_ci_critical_path.mjs:144-164`
+**Fix:** Have a job in the pinned candidate workflow emit a sanitized, immutable input-attestation artifact (containing only the Boolean, run ID, SHA, and workflow revision), download and validate it during `--verify-live-actions`, and bind it to the recorded run. Reject the candidate unless the attestation reports `run_live_stripe: false` and the provider lane is absent/skipped as expected.
 
-**Issue:** `candidateRequiredPathPassed` only checks that at least ten arbitrary object values have `conclusion: "success"`. It never compares the keys with `contract.proof_vector.required_job_identities`, which contains twelve exact identities. The fixture itself reinforces the gap by using `job_0` through `job_9`. Replacing the real evidence's job keys with forged names still passes `verifyFinalDecision`, so missing required gates can be represented as a complete candidate path.
+### CR-03: BLOCKER — Accepted terminal-state modifiers are ignored by `--verify-evidence`
 
-**Fix:** Normalize and compare the exact key set against `contract.proof_vector.required_job_identities`, reject missing and unexpected identities, and validate the expected cardinality and per-identity conclusion. Replace the synthetic `job_N` fixture with the twelve contractual identities and add missing/renamed/extra-job rejection cases.
+**File:** `scripts/ci/verify_ci_critical_path.mjs:978, 1007-1012`
 
-#### CR-03: Rollback proof accepts repeated or incorrectly identified job URLs
+**Issue:** The parser permits `--require-final-decision` and `--require-rollback-verified` with `--verify-evidence`, but that execution branch checks only `--require-kept`. Thus an authorized or activated-but-undecided v3 ledger passes despite `--require-final-decision`, and a non-verified rollback passes despite `--require-rollback-verified`. These are fail-open assurance flags, contrary to their names and the phase's terminal-safety contract.
 
-**Classification:** BLOCKER
+**Fix:** Apply modifier validation centrally after `verifyFinalDecision`: require a terminal decision for `--require-final-decision`, and require `result.state === "rollback_verified"` for `--require-rollback-verified`. Add negative CLI tests using a ledger with its final decision removed and one whose terminal state is `rollback_applied_unverified`.
 
-**File:** `/Users/jon/projects/accrue/scripts/ci/verify_ci_critical_path.mjs:168-181,197-215,374-420`
+## Warnings
 
-**Issue:** Offline rollback validation checks only that three Playwright URL strings exist and look repository-bound; it does not require three distinct shard IDs. Live validation resolves the recorded job ID and conclusion but never checks the job's stable identity against the requested role. Replacing all three recorded shard URLs with the same first-shard URL still passes `verifyFinalDecision`. The same weakness lets arbitrary successful jobs stand in for host, annotation, or provider roles.
+### WR-01: WARNING — `--rendered` is ignored by the live v3 verifier
 
-**Fix:** Require unique job IDs, require exactly shards 1/3, 2/3, and 3/3, and compare each fetched job's normalized name to its expected contract identity. Apply the same identity check to host, annotation, release, and provider jobs. Add adversarial fixtures for duplicate shard URLs and role-swapped URLs.
+**File:** `scripts/ci/verify_ci_critical_path.mjs:981, 1019-1024`
 
-#### CR-04: Nested evidence can carry secrets or provider payloads
+**Issue:** `--verify-live-actions` explicitly accepts `--rendered`, and the rendered report advertises a command containing it, but the v3 live branch never reads or compares that file. Running the documented live command with `--rendered /dev/null --require-kept` exits successfully. A stale or altered human-facing report can therefore accompany a passing live verification.
 
-**Classification:** BLOCKER
-
-**File:** `/Users/jon/projects/accrue/scripts/ci/verify_ci_critical_path.mjs:279-297`
-
-**Issue:** The privacy filter checks only `Object.keys(record)`. Evidence is deeply nested (`restoration_run.provider`, `required_path`, `temporary_ref`, and other objects), so forbidden keys such as `provider_payload`, `token`, `logs`, or `user_data` pass when placed below the top level. A final-decision invocation containing `nested.provider_payload: "sk_test_secret"` exited successfully. This permits credentials or provider data to enter the durable NDJSON evidence that the contract claims is privacy-safe.
-
-**Fix:** Recursively walk every object and array, reject forbidden keys at any depth, and validate values against an explicit schema/allowlist rather than relying only on key-name regexes. Add nested-object and nested-array privacy-rejection fixtures, including the allowed credential-status field with a strictly boolean/enum value schema.
-
-#### CR-05: The documented fixture/preflight verifier is broken against the reviewed workflow
-
-**Classification:** BLOCKER
-
-**File:** `/Users/jon/projects/accrue/scripts/ci/verify_ci_critical_path.mjs:48-50,80-86,229-243`
-
-**Issue:** `verifyFixtures` reads the mutable current workflow and compares its normalized digest with a frozen Phase 227 digest. The reviewed workflow now has the provider-trigger job and a different `live-stripe` condition, while `verifyMeasurementPreflight` still hard-codes the older schedule/manual-only condition. The documented command at `scripts/ci/README.md:67-70` fails immediately with `workflow changed outside the one permitted host prerequisite deletion`; refreshing only the digest would then fail the obsolete condition check. The verifier's own fixture suite is therefore permanently red on the source tree it ships with.
-
-**Fix:** Make fixture tests load an immutable Phase 227 workflow fixture rather than the mutable live workflow. If current-workflow compatibility remains supported, model allowed later topology changes explicitly and validate the current provider-trigger semantics instead of matching one obsolete condition string. Update the README so historical measurement instructions cannot be mistaken for a runnable current preflight.
-
-#### CR-06: Unknown or no-op CLI invocations exit successfully
-
-**Classification:** BLOCKER
-
-**File:** `/Users/jon/projects/accrue/scripts/ci/verify_ci_critical_path.mjs:441-491`
-
-**Issue:** Argument validation rejects only unknown flags beginning with `--require-`. There is no allowlist for other options and no requirement that at least one verification action execute. A typo such as `--verify-live-action` (singular) with valid evidence exits 0 without reading or verifying anything. CI or operator automation can therefore report a successful verification after performing no check.
-
-**Fix:** Parse arguments through one strict option table, reject every unknown flag, validate option values, and require at least one action (`--fixtures`, `--workflow`, a supported `--require-*`, `--render-evidence`, or `--verify-live-actions`). Emit a usage error and nonzero exit when no action runs. Add typo and no-action regression tests.
-
-### Warnings
-
-#### WR-01: Provider-proof verifier misresolves checkout paths containing spaces
-
-**Classification:** WARNING
-
-**File:** `/Users/jon/projects/accrue/scripts/ci/verify_provider_proof.mjs:15`
-
-**Issue:** `new URL(import.meta.url).pathname` leaves percent escapes intact. In a checkout such as `/tmp/accrue checkout`, the computed path contains `%20`, so fixture and workflow reads target a nonexistent directory. The critical-path verifier already uses the correct Node conversion helper.
-
-**Fix:** Import `fileURLToPath` from `node:url` and compute the root with `path.dirname(fileURLToPath(import.meta.url))`.
+**Fix:** Before returning from every `--verify-live-actions` branch, when `--rendered` is supplied, compare its bytes with `renderCriticalPathEvidence(records)` exactly as the `--verify-evidence` branch does. Add a test that passes a deliberately incorrect rendered path/content and expects a nonzero result.
 
 ---
 
-_Reviewed: 2026-08-28T20:05:05Z_
+_Reviewed: 2026-09-12T16:32:57Z_
 _Reviewer: the agent (gsd-code-reviewer)_
 _Depth: standard_
