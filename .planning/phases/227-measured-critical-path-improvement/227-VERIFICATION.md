@@ -1,8 +1,52 @@
 ---
 phase: 227-measured-critical-path-improvement
-verified: 2026-09-12T16:24:00Z
+verified: 2026-09-12T16:28:20Z
 status: passed
 score: 11/11 must-haves verified
+covered_files:
+  - .github/workflows/ci.yml
+  - .planning/REQUIREMENTS.md
+  - .planning/ROADMAP.md
+  - .planning/STATE.md
+  - .planning/debug/resolved/phase227-format-verifier-gap.md
+  - .planning/phases/227-measured-critical-path-improvement/227-01-PLAN.md
+  - .planning/phases/227-measured-critical-path-improvement/227-01-SUMMARY.md
+  - .planning/phases/227-measured-critical-path-improvement/227-02-PLAN.md
+  - .planning/phases/227-measured-critical-path-improvement/227-02-SUMMARY.md
+  - .planning/phases/227-measured-critical-path-improvement/227-03-PLAN.md
+  - .planning/phases/227-measured-critical-path-improvement/227-03-SUMMARY.md
+  - .planning/phases/227-measured-critical-path-improvement/227-04-PLAN.md
+  - .planning/phases/227-measured-critical-path-improvement/227-04-SUMMARY.md
+  - .planning/phases/227-measured-critical-path-improvement/227-05-PLAN.md
+  - .planning/phases/227-measured-critical-path-improvement/227-05-SUMMARY.md
+  - .planning/phases/227-measured-critical-path-improvement/227-06-PLAN.md
+  - .planning/phases/227-measured-critical-path-improvement/227-07-PLAN.md
+  - .planning/phases/227-measured-critical-path-improvement/227-07-SUMMARY.md
+  - .planning/phases/227-measured-critical-path-improvement/227-08-PLAN.md
+  - .planning/phases/227-measured-critical-path-improvement/227-08-SUMMARY.md
+  - .planning/phases/227-measured-critical-path-improvement/227-CANDIDATE-PREFLIGHT.json
+  - .planning/phases/227-measured-critical-path-improvement/227-CI-CRITICAL-PATH.md
+  - .planning/phases/227-measured-critical-path-improvement/227-CI-CRITICAL-PATH.ndjson
+  - .planning/phases/227-measured-critical-path-improvement/227-CONTEXT.md
+  - .planning/phases/227-measured-critical-path-improvement/227-PREFLIGHT-CONTROL.json
+  - .planning/phases/227-measured-critical-path-improvement/227-RESEARCH.md
+  - .planning/phases/227-measured-critical-path-improvement/227-VALIDATION.md
+  - .planning/phases/227-measured-critical-path-improvement/227-ci-contract.json
+  - .planning/phases/227-measured-critical-path-improvement/fixtures/ci-critical-path-cases.json
+  - .planning/phases/227-measured-critical-path-improvement/fixtures/ci-workflow-restored-v2.yml
+  - accrue/test/accrue/backend_automation_contract_test.exs
+  - accrue/test/accrue/docs/release_guidance_test.exs
+  - accrue/test/accrue/live_proof_formatter_test.exs
+  - scripts/ci/README.md
+  - scripts/ci/preflight_phase227_candidate.sh
+  - scripts/ci/verify_ci_baseline.mjs
+  - scripts/ci/verify_ci_critical_path.mjs
+  - scripts/ci/verify_ci_critical_path.test.mjs
+  - scripts/ci/verify_ci_setup_diagnostics.sh
+  - scripts/ci/verify_phase225_required_lane_evidence.sh
+  - scripts/ci/verify_provider_proof.mjs
+  - scripts/ci/verify_stripe_webhook_boot_evidence.mjs
+covered_digest: "v1:sha256:b9762d5e34c299cd1675baf5da752dba365e2d6abfb7ce95f64f107f10406302"
 behavior_unverified: 0
 overrides_applied: 0
 unverified_prohibition_count: 0
@@ -58,7 +102,7 @@ deferred:
 # Phase 227: Measured Critical-Path Improvement Verification Report
 
 **Phase Goal:** Maintainers receive one demonstrably faster CI critical path while every required release, host, browser, and provider proof remains equally identifiable and recoverable.
-**Verified:** 2026-09-12T16:24:00Z
+**Verified:** 2026-09-12T16:28:20Z
 **Status:** passed
 **Re-verification:** Yes — the original 2026-08-28 gaps report is retained below as history.
 
@@ -67,6 +111,18 @@ deferred:
 All closure commands passed after the kept terminal and before this update. The
 live gate was read-only; it did not create a run, dispatch, rerun, replacement,
 or remote ref.
+
+### Independent verifier evidence — 2026-09-12T16:28:20Z
+
+This audit re-ran the strict Node suite (7/7), immutable-fixture and
+preflight-evidence checks, deterministic byte renderer, current candidate
+workflow contract, frozen baseline, provider/webhook/setup/required-lane
+controls, and the three focused Accrue files (10/10). A read-only GitHub API
+reconciliation independently confirmed that runs `34665008225`, `34670140537`,
+and `34700972204` are completed, successful, attempt-1 `workflow_dispatch`
+runs at candidate SHA `0339f14d6badaa7d901c27a62379c86b666c5d62`; the live
+kept gate also verified their exact required roles, artifacts, timing, and
+removed temporary ref. No evidence or source file was changed by these checks.
 
 | Former gap | Re-verification evidence | Result |
 | --- | --- | --- |
