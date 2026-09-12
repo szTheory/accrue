@@ -16,6 +16,7 @@ done
 [[ -n "$evidence_out" ]] || usage
 
 root="$(git rev-parse --show-toplevel)"
+mix_cache="${PHASE227_MIX_CACHE:-$root/accrue}"
 resolved="$(git -C "$root" rev-parse "${commit}^{commit}")"
 [[ "$resolved" == "$commit" ]] || { echo "commit does not resolve exactly" >&2; exit 65; }
 scratch="$(mktemp -d "${TMPDIR:-/tmp}/phase227-preflight.XXXXXX")"
@@ -28,15 +29,16 @@ git -C "$root" worktree add --detach "$worktree" "$commit" >/dev/null
 tree="$(git -C "$worktree" rev-parse HEAD^{tree})"
 wrapper_digest="sha256:$(shasum -a 256 "$root/scripts/ci/preflight_phase227_candidate.sh" | awk '{print $1}')"
 phase=".planning/phases/227-measured-critical-path-improvement"
-cp -R "$root/accrue/_build" "$worktree/accrue/_build"
+[[ -d "$mix_cache/deps" && -d "$mix_cache/_build" ]] || { echo "preflight Mix cache is missing deps or _build" >&2; exit 66; }
+cp -R "$mix_cache/_build" "$worktree/accrue/_build"
 (
   cd "$worktree"
   node --check scripts/ci/verify_ci_critical_path.mjs
   node --test scripts/ci/verify_ci_critical_path.test.mjs
   node scripts/ci/verify_ci_critical_path.mjs --fixtures --workflow-fixture "$phase/fixtures/ci-workflow-restored-v2.yml" --contract "$phase/227-ci-contract.json"
   node scripts/ci/verify_ci_critical_path.mjs --verify-workflow --workflow .github/workflows/ci.yml --contract "$phase/227-ci-contract.json" --expected-state "$expected_state"
-  ASDF_ERLANG_VERSION=28.4.1 ASDF_ELIXIR_VERSION=1.19.5-otp-28 MIX_DEPS_PATH="$root/accrue/deps" MIX_BUILD_PATH="$worktree/accrue/_build" bash -c 'cd accrue && mix format --check-formatted'
-  ASDF_ERLANG_VERSION=28.4.1 ASDF_ELIXIR_VERSION=1.19.5-otp-28 MIX_DEPS_PATH="$root/accrue/deps" MIX_BUILD_PATH="$worktree/accrue/_build" bash -c 'cd accrue && mix test test/accrue/backend_automation_contract_test.exs --warnings-as-errors'
+  ASDF_ERLANG_VERSION=28.4.1 ASDF_ELIXIR_VERSION=1.19.5-otp-28 MIX_DEPS_PATH="$mix_cache/deps" MIX_BUILD_PATH="$worktree/accrue/_build" bash -c 'cd accrue && mix format --check-formatted'
+  ASDF_ERLANG_VERSION=28.4.1 ASDF_ELIXIR_VERSION=1.19.5-otp-28 MIX_DEPS_PATH="$mix_cache/deps" MIX_BUILD_PATH="$worktree/accrue/_build" bash -c 'cd accrue && mix test test/accrue/backend_automation_contract_test.exs --warnings-as-errors'
 )
 mkdir -p "$(dirname "$evidence_out")"
 node - "$evidence_out" "$commit" "$tree" "$expected_state" "$wrapper_digest" <<'NODE'
