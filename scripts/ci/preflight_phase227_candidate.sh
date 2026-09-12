@@ -28,6 +28,7 @@ git -C "$root" worktree add --detach "$worktree" "$commit" >/dev/null
 tree="$(git -C "$worktree" rev-parse HEAD^{tree})"
 wrapper_digest="sha256:$(shasum -a 256 "$root/scripts/ci/preflight_phase227_candidate.sh" | awk '{print $1}')"
 phase=".planning/phases/227-measured-critical-path-improvement"
+cp -R "$root/accrue/_build" "$worktree/accrue/_build"
 (
   cd "$worktree"
   node --check scripts/ci/verify_ci_critical_path.mjs
