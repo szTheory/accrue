@@ -34,8 +34,8 @@ phase=".planning/phases/227-measured-critical-path-improvement"
   node --test scripts/ci/verify_ci_critical_path.test.mjs
   node scripts/ci/verify_ci_critical_path.mjs --fixtures --workflow-fixture "$phase/fixtures/ci-workflow-restored-v2.yml" --contract "$phase/227-ci-contract.json"
   node scripts/ci/verify_ci_critical_path.mjs --verify-workflow --workflow .github/workflows/ci.yml --contract "$phase/227-ci-contract.json" --expected-state "$expected_state"
-  ASDF_ERLANG_VERSION=28.4.1 ASDF_ELIXIR_VERSION=1.19.5-otp-28 bash -c 'cd accrue && mix format --check-formatted'
-  ASDF_ERLANG_VERSION=28.4.1 ASDF_ELIXIR_VERSION=1.19.5-otp-28 bash -c 'cd accrue && mix test test/accrue/backend_automation_contract_test.exs --warnings-as-errors'
+  ASDF_ERLANG_VERSION=28.4.1 ASDF_ELIXIR_VERSION=1.19.5-otp-28 MIX_DEPS_PATH="$root/accrue/deps" MIX_BUILD_PATH="$worktree/accrue/_build" bash -c 'cd accrue && mix format --check-formatted'
+  ASDF_ERLANG_VERSION=28.4.1 ASDF_ELIXIR_VERSION=1.19.5-otp-28 MIX_DEPS_PATH="$root/accrue/deps" MIX_BUILD_PATH="$worktree/accrue/_build" bash -c 'cd accrue && mix test test/accrue/backend_automation_contract_test.exs --warnings-as-errors'
 )
 mkdir -p "$(dirname "$evidence_out")"
 node - "$evidence_out" "$commit" "$tree" "$expected_state" "$wrapper_digest" <<'NODE'
