@@ -38,7 +38,7 @@ Completed and deferred v1.60 details are retained in [the milestone archive](mil
 
 - [x] **Phase 225: Required-Lane Signal Repair** - Classify and repair current required CI failures without hiding their diagnostic evidence. (completed 2026-08-09)
 - [x] **Phase 226: CI Baseline & Proof Semantics** - Publish the comparable-run baseline and make provider/setup ownership legible. (completed 2026-08-12)
-- [ ] **Phase 227: Measured Critical-Path Improvement** - Plan 08 kept closure is validated; historical Plans 02, 03, and superseded 06 still need tracking summaries before phase-level archival completion.
+- [x] **Phase 227: Measured Critical-Path Improvement** - Plan 08 kept closure is validated; historical Plans 02, 03, and superseded 06 still need tracking summaries before phase-level archival completion. (completed 2026-09-12)
 - [x] **Phase 228: Repair Stripe Webhook-Signing CI Boot Contract Under a Fresh Evidence Budget** - Repair and deterministically prove the boot contract, then seal one authorized provider attempt. (completed 2026-09-11)
 
 ## Phase Details
@@ -159,7 +159,7 @@ Plans:
   3. Stable required-check identities and failure artifacts remain visible while relevance, dependency ordering, or caching behavior is evaluated.
   4. Each CI change has an executable or recorded negative-control and rollback result; no test is deleted or retried merely to hide a failure.
 
-**Plans:** 8 plans (227-02/03 historical terminal attempts; 227-06 superseded by 227-07/08)
+**Plans:** 7/7 plans complete
 
 Plans:
 **Wave 1**
@@ -168,11 +168,11 @@ Plans:
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
-- [ ] 227-02-PLAN.md — Record three candidate runs and the complementary live annotation negative control.
+- [x] 227-02-PLAN.md — Record three candidate runs and the complementary live annotation negative control.
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
-- [ ] 227-03-PLAN.md — Keep the measured candidate or execute and prove the exact inverse rollback.
+- [x] 227-03-PLAN.md — Keep the measured candidate or execute and prove the exact inverse rollback.
 
 **Wave 4** *(gap closure; blocked on the historical terminal)*
 
@@ -200,7 +200,7 @@ Plans:
 |-------|----------------|--------|-----------|
 | 225. Required-Lane Signal Repair | 3/3 | Complete | 2026-08-09 |
 | 226. CI Baseline & Proof Semantics | 17/17 | Complete    | 2026-08-12 |
-| 227. Measured Critical-Path Improvement | 7/8 | In Progress — Plan 08 kept closure validated; historical tracking summaries remain | 2026-09-12 |
+| 227. Measured Critical-Path Improvement | 7/7 | Complete    | 2026-09-12 |
 | 228. Repair Stripe Webhook-Signing CI Boot Contract | 3/3 | Complete    | 2026-09-11 |
 
 <details>

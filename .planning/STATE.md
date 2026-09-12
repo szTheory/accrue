@@ -2,20 +2,20 @@
 gsd_state_version: "1.0"
 milestone: v1.61
 milestone_name: CI Evidence & Critical-Path Hardening
-current_phase: 227
-current_phase_name: Measured Critical-Path Improvement
-status: executing
-stopped_at: Completed 227-08-PLAN.md
-last_updated: "2026-09-12T16:24:17.652Z"
-last_activity: 2026-09-11
-last_activity_desc: Phase 227 gap plans verified; execution ready at 227-07
-state_head: e370e1fe563f6b1b66f7b83061d9c035dd6244ce
+current_phase: 228
+current_phase_name: Repair Stripe Webhook-Signing CI Boot Contract Under a Fresh Evidence Budget
+status: planning
+stopped_at: Phase 227 complete, ready to plan Phase 228
+last_updated: "2026-09-12T17:18:30.763Z"
+last_activity: 2026-09-12
+last_activity_desc: Phase 227 complete, transitioned to Phase 228
+state_head: 7345b91a138f9493d8657881400648221e0581f8
 progress:
   total_phases: 4
-  completed_phases: 3
-  total_plans: 31
+  completed_phases: 4
+  total_plans: 30
   completed_plans: 28
-  percent: 75
+  percent: 100
 ---
 
 # Project State
@@ -30,12 +30,12 @@ See: `.planning/PROJECT.md` (updated 2026-09-11 after completing Phase 228)
 
 ## Current Position
 
-Phase: 227 (Measured Critical-Path Improvement) — EXECUTING
-Plan: 6 of 6
-Status: Ready to execute
-Last activity: 2026-09-11 — Phase 227 execution started
+Phase: 228 — Repair Stripe Webhook-Signing CI Boot Contract Under a Fresh Evidence Budget
+Plan: Not started
+Status: Ready to plan
+Last activity: 2026-09-12 — Phase 227 complete, transitioned to Phase 228
 
-Progress: [████████░░] 75%
+Progress: [██████████] 100%
 
 ## v1.61 Roadmap
 
@@ -1132,7 +1132,7 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 ## Session Continuity
 
 Last session: 2026-09-12T16:24:17.279Z
-Stopped at: Completed 227-08-PLAN.md
+Stopped at: Phase 227 complete, ready to plan Phase 228
 Resume file: None
 
 ## Operator Next Steps
