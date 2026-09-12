@@ -1021,6 +1021,13 @@ function parseCli(argv) {
   return { action, values: seen, flags };
 }
 
+function verifyResultRequirements(result, flags) {
+  const terminalStates = new Set(["kept", "rollback_verified", "rollback_applied_unverified"]);
+  if (flags.has("--require-kept") && result.state !== "kept") fail("terminal decision is not kept");
+  if (flags.has("--require-final-decision") && !terminalStates.has(result.state)) fail("terminal decision is missing");
+  if (flags.has("--require-rollback-verified") && result.state !== "rollback_verified") fail("terminal decision is not rollback_verified");
+}
+
 function runCli(argv) {
   const cli = parseCli(argv);
   const contractFile = cli.values.get("--contract") || path.join(phase, "227-ci-contract.json");
@@ -1043,7 +1050,7 @@ function runCli(argv) {
   const repository = cli.values.get("--expected-repository") || "szTheory/accrue";
   if (cli.action === "--verify-evidence") {
     const result = verifyFinalDecision(records, contract, repository, cli.values.get("--require-activation-evidence") || V3_PREFLIGHT_EVIDENCE_PATH);
-    if (cli.flags.has("--require-kept") && result.state !== "kept") fail("terminal decision is not kept");
+    verifyResultRequirements(result, cli.flags);
     const rendered = cli.values.get("--rendered");
     if (rendered && fs.readFileSync(rendered, "utf8") !== renderCriticalPathEvidence(records)) fail("rendered report does not byte-match NDJSON render");
     return result;
@@ -1055,16 +1062,14 @@ function runCli(argv) {
   }
   if (records.some((record) => record.kind === "gap_budget_authorization_v3" && record.budget_id === V3_BUDGET)) {
     const result = verifyGapV3Evidence(records, contract, repository, cli.values.get("--require-activation-evidence") || V3_PREFLIGHT_EVIDENCE_PATH);
-    if (cli.flags.has("--require-kept") && result.state !== "kept") fail("v3 terminal decision is not kept");
+    verifyResultRequirements(result, cli.flags);
     verifyLiveGapV3(records, contract, repository);
-    if (cli.flags.has("--require-final-decision") && !records.some((record) => record.kind === "gap_v3_decision")) fail("v3 terminal decision is missing");
     return true;
   }
   if (records.some((record) => record.kind === "gap_budget_authorization" && record.budget_id === "phase-227-gap-dispatch-false-v2")) {
     const result = verifyGapV2Evidence(records, contract, repository);
-    if (cli.flags.has("--require-kept") && result.state !== "kept") fail("v2 terminal decision is not kept");
+    verifyResultRequirements(result, cli.flags);
     verifyLiveGapV2Candidates(records, contract, repository);
-    if (cli.flags.has("--require-final-decision") && !records.some((record) => record.kind === "gap_decision")) fail("v2 terminal decision is missing");
     return true;
   }
   if (records.some((record) => record.kind === "contract_correction")) {

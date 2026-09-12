@@ -101,6 +101,25 @@ test("manual-false provider proof requires the pinned semantic guard and an abse
   assert.throws(() => verifyManualFalseProviderNonRun(workflow, classifier.replace('if (eventName === "workflow_dispatch") return { should_run: true, trigger_class: "manual" };', 'if (eventName === "workflow_dispatch") return { should_run: false, trigger_class: "manual" };'), jobs), /does not require the provider lane/);
 });
 
+test("evidence CLI terminal-state modifiers fail closed", () => {
+  const sandbox = fs.mkdtempSync("/tmp/phase227-cli-modifiers-");
+  const records = fs.readFileSync(`${phase}/227-CI-CRITICAL-PATH.ndjson`, "utf8").trim().split("\n").map(JSON.parse);
+  const v3WithoutDecision = records.filter((record) => record.kind !== "gap_v3_decision");
+  const v3Path = `${sandbox}/v3.ndjson`;
+  fs.writeFileSync(v3Path, `${v3WithoutDecision.map(JSON.stringify).join("\n")}\n`);
+  const invoke = (args) => spawnSync(process.execPath, ["scripts/ci/verify_ci_critical_path.mjs", ...args], { encoding: "utf8" });
+  const base = ["--verify-evidence", "--evidence", v3Path, "--contract", `${phase}/227-ci-contract.json`, "--expected-repository", "szTheory/accrue"];
+  const missingDecision = invoke([...base, "--require-final-decision"]);
+  assert.notEqual(missingDecision.status, 0);
+  assert.match(missingDecision.stderr, /terminal decision is missing/);
+  const v2Path = `${sandbox}/v2.ndjson`;
+  fs.writeFileSync(v2Path, `${records.filter((record) => !record.kind.startsWith("gap_v3_") && record.kind !== "gap_budget_authorization_v3").map(JSON.stringify).join("\n")}\n`);
+  const unverifiedRollback = invoke(["--verify-evidence", "--evidence", v2Path, "--contract", `${phase}/227-ci-contract.json`, "--expected-repository", "szTheory/accrue", "--require-rollback-verified"]);
+  assert.notEqual(unverifiedRollback.status, 0);
+  assert.match(unverifiedRollback.stderr, /not rollback_verified/);
+  fs.rmSync(sandbox, { recursive: true, force: true });
+});
+
 test("preflight wrapper has no remote-effect executable path", () => {
   const wrapper = fs.readFileSync("scripts/ci/preflight_phase227_candidate.sh", "utf8");
   assert.doesNotMatch(wrapper, /\b(?:gh|curl|wget|ssh|scp)\b|git\s+(?:push|fetch|pull|remote|ls-remote|update-ref)|workflow\s+(?:run|rerun)/, "wrapper must not contain a remote-capable command");
