@@ -5,11 +5,11 @@ milestone_name: CI Evidence & Critical-Path Hardening
 current_phase: 227
 current_phase_name: Measured Critical-Path Improvement
 status: executing
-stopped_at: Completed 227-05-PLAN.md with rollback_applied_unverified
-last_updated: "2026-09-11T23:27:32.924Z"
+stopped_at: Plans 227-07 and 227-08 verified; ready to execute 227-07
+last_updated: "2026-09-12T00:36:18.435Z"
 last_activity: 2026-09-11
-last_activity_desc: Phase 227 execution started
-state_head: 0a4e7422193c43581af3b960890c936b76f0521f
+last_activity_desc: Phase 227 gap plans verified; execution ready at 227-07
+state_head: 7a7e56c4e98df0c1d78a2dc07d8bbf177e6f4b9c
 progress:
   total_phases: 4
   completed_phases: 3
@@ -984,6 +984,7 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - Phase 196 final full-suite gate: cd accrue_admin && mix test --warnings-as-errors fails outside Phase 196 in dashboard_live_test.exs:91 (missing $42.50) and webhooks_live_test.exs:106 (audit count expected 1, observed 2). Focused Phase 196 tests, package docs, assets, and e2e:phase196 pass.
 - Phase 208 Plan 04 blocked at Task 1: ANTHROPIC_API_KEY is absent from the execution environment; ledger.baseline.json remains frozen:false and live convergence/freeze must not proceed without maintainer local key.
 - Phase 227 remains `gap_found`: Phase 228 resolved the missing webhook-signing-secret boot contract and its authorized run reached the selected suite, but only 5 of 10 assertions passed. Phase 228 permits no retry or replacement evidence; replan Phase 227 from the sealed failure.
+- 227-06 Task 1 precondition unmet: terminal v2 gap_decision is rollback_applied_unverified (not kept); require-kept is unavailable in the current verifier and PATH-02 remains unmet. Replan sealed Phase 227 gaps; do not run Plan 227-06 kept closure.
 
 ### Quick Tasks Completed
 
@@ -1124,8 +1125,8 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 ## Session Continuity
 
 Last session: 2026-09-11T23:26:52.848Z
-Stopped at: Completed 227-05-PLAN.md with rollback_applied_unverified
-Resume file: 227-06-PLAN.md
+Stopped at: Plans 227-07 and 227-08 verified; ready to execute 227-07
+Resume file: 227-07-PLAN.md
 
 ## Operator Next Steps
 
