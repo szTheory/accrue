@@ -24,3 +24,5 @@ emitted after successful execution.
 
 **Recommended fix:** one-line cleanup task, pick up alongside any Phase 3
 webhook-touching plan (03-03 or later).
+
+  status: resolved

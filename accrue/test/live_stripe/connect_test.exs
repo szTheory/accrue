@@ -38,7 +38,7 @@ defmodule Accrue.LiveStripe.ConnectTest do
   redirect) are documented in the plan's `what-built`/`how-to-verify`
   block — this file automates everything that can be automated.
   """
-  use ExUnit.Case, async: false
+  use Accrue.RepoCase, async: false
 
   @moduletag :live_stripe
   @moduletag timeout: 60_000

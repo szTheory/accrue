@@ -11,3 +11,4 @@ Out-of-scope discoveries encountered during execution. Logged per SCOPE BOUNDARY
 - **Out of scope:** Unrelated to Phase 144's recovery-dashboard wiring; no code I changed touches `email_preview_live*`.
 - **Fix sketch:** Tighten the form selector to e.g. `form[phx-change=select_fixture]` in the test. Trivial; not done here to respect SCOPE BOUNDARY.
 - **Recommended owner:** First future phase that touches `email_preview_live*` OR a dedicated `chore(test)` fix.
+  status: resolved

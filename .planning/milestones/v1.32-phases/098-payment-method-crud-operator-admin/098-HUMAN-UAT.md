@@ -1,5 +1,5 @@
 ---
-status: automated
+status: complete
 phase: 098-payment-method-crud-operator-admin
 source:
   - 098-VERIFICATION.md

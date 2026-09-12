@@ -1,21 +1,23 @@
 ---
 phase: 07-admin-ui-accrue-admin
-verified: 2026-04-15T19:31:05Z
-status: human_needed
-score: 5/6 must-haves verified
+verified: 2026-09-12T20:12:00Z
+status: passed
+score: 6/6 must-haves verified
 overrides_applied: 0
 re_verification:
   previous_status: gaps_found
   previous_score: 5/6
   gaps_closed:
     - "Phase 7 admin surfaces remain regression-safe under the phase's own focused verification suite"
+    - "Phase 8 closed the deferred Sigra auto-wiring requirement"
+    - "Phases 192 and 200 supplied maintainer-approved mobile, light/dark, replay, refund, and destructive-confirmation evidence"
   gaps_remaining: []
   regressions: []
 deferred:
   - truth: "When `sigra` is present, the admin UI auto-wires Sigra as the auth adapter with no manual config"
     addressed_in: "Phase 8"
     evidence: "Phase 8 goal includes 'Sigra wiring (if present)', and REQUIREMENTS.md maps AUTH-04 and INST-06 to Phase 8 rather than Phase 7."
-human_verification:
+historical_human_verification:
   - test: "Mobile dashboard and light/dark visual UAT"
     expected: "At a phone viewport, `/billing` remains usable without horizontal overflow, KPI cards and navigation are readable, and light/dark/system theme switching preserves contrast with the Accrue brand palette."
     why_human: "Responsive layout quality, real contrast perception, and theme feel require browser/device inspection beyond static code and LiveView tests."

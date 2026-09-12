@@ -34,7 +34,7 @@ defmodule Accrue.LiveStripe.Charge3DSLiveTest do
 
   See `guides/testing-live-stripe.md` for the full local + CI workflow.
   """
-  use ExUnit.Case, async: false
+  use Accrue.RepoCase, async: false
 
   @moduletag :live_stripe
   @moduletag timeout: 60_000

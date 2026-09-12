@@ -39,7 +39,10 @@ defmodule AccrueHostWeb.Layouts do
       <div class="mx-auto max-w-6xl space-y-4">
         <%= if customer = dunning_customer(@current_scope) do %>
           <AccrueAdmin.Components.DunningBanner.dunning_banner customer={customer}>
-            <div role="alert" class="flex items-start gap-3 rounded-lg border border-warning/40 bg-warning/10 p-4 shadow-sm">
+            <div
+              role="alert"
+              class="flex items-start gap-3 rounded-lg border border-warning/40 bg-warning/10 p-4 shadow-sm"
+            >
               <.icon name="hero-exclamation-triangle" class="size-5 shrink-0 text-warning" />
               <div class="flex-1">
                 <p class="font-semibold text-base-content">Action required — payment failed</p>

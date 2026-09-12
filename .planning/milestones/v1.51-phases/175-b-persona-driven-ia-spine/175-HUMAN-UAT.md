@@ -1,10 +1,13 @@
 ---
-status: partial
+status: complete
 phase: 175-b-persona-driven-ia-spine
 source: [175-VERIFICATION.md]
 started: 2026-06-04T09:23:07Z
-updated: 2026-06-04T09:23:07Z
+updated: 2026-09-12T20:12:00Z
+superseded_by: [192-idempotent-verification-sign-off, 200-idempotent-verification-sign-off]
 ---
+
+> **Resolution (2026-09-12):** Complete via the later Phase 192 and Phase 200 maintainer-approved sign-offs. Their curated flow gallery and trace evidence cover persona navigation, open-state interactions, mobile/light/dark behavior, webhooks/events, and recovery/operator paths with zero final regressions or blocking repairs. The original scenarios remain below as historical context.
 
 ## Current Test
 

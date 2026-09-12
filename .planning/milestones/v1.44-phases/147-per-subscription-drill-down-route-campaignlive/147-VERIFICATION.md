@@ -1,13 +1,21 @@
 ---
 phase: 147-per-subscription-drill-down-route-campaignlive
-verified: 2026-05-28T18:59:03Z
-status: human_needed
+verified: 2026-09-12T20:12:00Z
+status: passed
 score: 15/15 must-haves verified
 overrides_applied: 0
-human_verification:
+historical_human_verification:
   - test: "Visual verification of Dunning Timeline UI"
     expected: "The timeline should vertically render events (Campaign started, Attempt 1, Recovered/Exhausted) in chronological order with correct moss/amber/cobalt badge tones. Linked invoice statuses and payment amounts should appear alongside attempts."
     why_human: "Cannot verify visual alignment, spacing, or overall look-and-feel programmatically."
+re_verification:
+  previous_status: human_needed
+  superseded_by:
+    - 192-idempotent-verification-sign-off
+    - 200-idempotent-verification-sign-off
+  evidence:
+    - "Phase 192 maintainer ACCEPT covers the recovery campaign, light/dark and mobile evidence, and trace-backed interactions"
+    - "Phase 200 maintainer ACCEPT records 30,348 final cells, zero regressions, zero blocking repairs, axe/page-flow coverage, and interaction regression coverage"
 ---
 
 # Phase 147: Per-subscription drill-down route + CampaignLive Verification Report

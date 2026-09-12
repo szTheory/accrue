@@ -1,10 +1,13 @@
 ---
-status: testing
+status: complete
 phase: 62-friction-triage-north-star
 source: 62-01-SUMMARY.md, 62-02-SUMMARY.md, 62-03-SUMMARY.md
 started: 2026-04-23T12:00:00Z
-updated: 2026-04-23T12:00:00Z
+updated: 2026-09-12T20:12:00Z
+superseded_by: 66-onboarding-confidence
 ---
+
+> **Resolution (2026-09-12):** Complete via the Phase 66 closure ledger. `66-VERIFICATION.md` records UAT-01 through UAT-05 as closed with merge-blocking proof and canonical evidence pointers. The scenarios below remain unchanged as historical context.
 
 > **Supersession notice (2026-04-23, v1.18):** Closure for **UAT-01..UAT-05** is defined in **`.planning/milestones/v1.18-REQUIREMENTS.md`** (milestone **v1.18 — Onboarding confidence**), with proof in **`.planning/milestones/v1.18-phases/66-onboarding-confidence/66-VERIFICATION.md`**. This document stays the **historical Phase 62** human scenario; do not treat it as the normative v1.18 checklist.
 >

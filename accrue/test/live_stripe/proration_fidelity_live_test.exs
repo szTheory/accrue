@@ -38,7 +38,7 @@ defmodule Accrue.LiveStripe.ProrationFidelityLiveTest do
   test skips if either is unset. Price seeding is NOT the library's
   job — host apps provision their own Stripe test fixtures.
   """
-  use ExUnit.Case, async: false
+  use Accrue.RepoCase, async: false
 
   @moduletag :live_stripe
   @moduletag timeout: 90_000

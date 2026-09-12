@@ -10,7 +10,7 @@ requires:
 provides:
   - Elevated AccrueAdmin.Components.Timeline (rail, ringed nodes, threaded-feed entries, StatusBadge status, semantic <time>, dedicated empty state)
   - timeline-scoped CSS (rail, calmer node, threaded-feed entry, timestamp, empty)
-  - "timeline" component-lab family with populated + empty specimens
+  - '"timeline" component-lab family with populated + empty specimens'
 affects:
   - /admin recent activity, webhook health, webhook attempts, subscription timeline (all render unchanged — zero data-contract changes)
   - /billing/dev/components (new Timeline family)
