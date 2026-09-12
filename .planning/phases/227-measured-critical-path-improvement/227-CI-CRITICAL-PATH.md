@@ -1,22 +1,16 @@
-# Phase 227 critical-path v2 experiment
+# Phase 227 critical-path v3 authorization
 
 ## Current fact
 
-- state: `rollback_applied_unverified`
+- state: `authorized_pending_candidate`
 - owner: maintainer
-- budget: `phase-227-gap-dispatch-false-v2`
-- candidate slots consumed: 2/3
-- restoration slots consumed: 0/1
-- old budget: `phase-227-dispatch-false-v1` remains immutable and supplies zero v2 observations
-- Phase 228 provider outcome: `failed/selected_assertions_failed` (linked separately; never a candidate)
-- next command: `none`
-
-The only candidate event is attempt-1 `workflow_dispatch` with `run_live_stripe: false`, fingerprint `phase-227-gap-dispatch-false-v2`, and provider state `non_run`. Reruns and replacements are prohibited. Keep requires exactly three valid independent observations; an unspent authorization cannot satisfy PATH-02.
-
-## Terminal decision
-
-- state: `rollback_applied_unverified`
+- budget: `phase-227-gap-dispatch-false-v3`
 - PATH-02: `unmet`
-- candidate authority: `closed`
-- restoration authority: `closed_unspent`
-- exact inverse workflow: `sha256:2622f7d8cb3d20ae68cec19db9f57bf8b88151e712cdbb360e9db03642772fb0`
+- candidate slots reserved: 0/3
+- candidate slots consumed: 0/3
+- restoration slots consumed: 0/1
+- remote effects: `disabled`
+- old budgets: `phase-227-dispatch-false-v1`, `phase-227-gap-dispatch-false-v2` remain closed and supply zero v3 observations
+- next command: `node scripts/ci/preflight_phase227_candidate.sh --commit <candidate-sha> --expected-state candidate --evidence-out .planning/phases/227-measured-critical-path-improvement/227-CANDIDATE-PREFLIGHT.json`
+
+This is local preparation, not live proof. Candidate authority is finite: exactly three unique attempt-1 manual-false runs at one committed candidate after an append-only activation binds passing exact-tree preflight evidence. Reruns, replacements, and concurrency are prohibited; restoration is one conditional inverse-only slot.
