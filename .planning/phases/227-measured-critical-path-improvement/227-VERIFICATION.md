@@ -1,6 +1,6 @@
 ---
 phase: 227-measured-critical-path-improvement
-verified: 2026-09-12T16:28:20Z
+verified: 2026-09-12T17:16:30Z
 status: passed
 score: 11/11 must-haves verified
 covered_files:
@@ -30,6 +30,8 @@ covered_files:
   - .planning/phases/227-measured-critical-path-improvement/227-CONTEXT.md
   - .planning/phases/227-measured-critical-path-improvement/227-PREFLIGHT-CONTROL.json
   - .planning/phases/227-measured-critical-path-improvement/227-RESEARCH.md
+  - .planning/phases/227-measured-critical-path-improvement/227-REVIEW-FIX.md
+  - .planning/phases/227-measured-critical-path-improvement/227-REVIEW.md
   - .planning/phases/227-measured-critical-path-improvement/227-VALIDATION.md
   - .planning/phases/227-measured-critical-path-improvement/227-ci-contract.json
   - .planning/phases/227-measured-critical-path-improvement/fixtures/ci-critical-path-cases.json
@@ -46,7 +48,7 @@ covered_files:
   - scripts/ci/verify_phase225_required_lane_evidence.sh
   - scripts/ci/verify_provider_proof.mjs
   - scripts/ci/verify_stripe_webhook_boot_evidence.mjs
-covered_digest: "v1:sha256:b9762d5e34c299cd1675baf5da752dba365e2d6abfb7ce95f64f107f10406302"
+covered_digest: "v1:sha256:296cf9adcff732f4090227d918e47f1bc15a62152222cb3f94a2d2385265e6ae"
 behavior_unverified: 0
 overrides_applied: 0
 unverified_prohibition_count: 0
@@ -102,7 +104,7 @@ deferred:
 # Phase 227: Measured Critical-Path Improvement Verification Report
 
 **Phase Goal:** Maintainers receive one demonstrably faster CI critical path while every required release, host, browser, and provider proof remains equally identifiable and recoverable.
-**Verified:** 2026-09-12T16:28:20Z
+**Verified:** 2026-09-12T17:16:30Z
 **Status:** passed
 **Re-verification:** Yes — the original 2026-08-28 gaps report is retained below as history.
 
@@ -123,6 +125,20 @@ and `34700972204` are completed, successful, attempt-1 `workflow_dispatch`
 runs at candidate SHA `0339f14d6badaa7d901c27a62379c86b666c5d62`; the live
 kept gate also verified their exact required roles, artifacts, timing, and
 removed temporary ref. No evidence or source file was changed by these checks.
+
+### Post-review re-verification — 2026-09-12T17:16:30Z
+
+Reviewed fixes `0d98f271`, `7a3108d7`, `0685f66c`, `51b1aff9`, `d07fcc08`,
+`42dd4c29`, and `28ade913` are substantive and wired into the only decision
+gate. The re-run strict suite passed 11/11: it rejects ledger activation after
+consumption, an inadequate manual-false provider non-run proof, unsupported
+terminal modifiers, altered rendered bytes, relabeling an otherwise qualifying
+candidate as nonqualifying, and `rollback_verified` without a successful,
+provider-proved restoration vector. The full retained gate chain, including
+read-only `--verify-live-actions --require-kept`, passed again; the focused
+task-local Accrue suite passed 11/11. This reconfirms PATH-01, PATH-02,
+SAFE-01, SAFE-02, 11/11 must-haves, 23/23 decisions, and zero
+behavior-unverified truths.
 
 | Former gap | Re-verification evidence | Result |
 | --- | --- | --- |
