@@ -530,8 +530,24 @@ function verifyGapV3Evidence(records, contract, expectedRepository, activationEv
     assert.ok(ambiguities.length === 1 || candidates.some((candidate) => candidate.classification === "nonqualifying"), "v3 rollback requires an invalid vector or ambiguity");
     const firstInvalid = candidates.findIndex((candidate) => candidate.classification === "nonqualifying");
     if (firstInvalid >= 0) assert.equal(firstInvalid, candidates.length - 1, "v3 dispatched after the first invalid candidate");
-    assert.ok(["closed_unspent", "closed"].includes(decision.restoration_authority), "v3 rollback restoration authority differs");
-    assert.equal(decision.restoration_authority === "closed", restorations.length === 1, "v3 restoration decision disagrees with restoration evidence");
+    const restorationReservations = reservations.filter((reservation) => reservation.purpose === "restoration");
+    const restorationConsumptions = [...consumptionsByReservation.values()].filter((consumption) => reservationsById.get(consumption.reservation_id)?.purpose === "restoration");
+    if (decision.state === "rollback_verified") {
+      assert.equal(decision.restoration_authority, "closed", "rollback_verified must close restoration authority");
+      assert.equal(restorationReservations.length, 1, "rollback_verified requires exactly one restoration reservation");
+      assert.equal(restorationConsumptions.length, 1, "rollback_verified requires exactly one restoration consumption");
+      assert.equal(restorations.length, 1, "rollback_verified requires exactly one restoration terminal");
+      const [restoration] = restorations;
+      assert.equal(restoration.conclusion, "success", "rollback_verified restoration conclusion differs");
+      assert.ok(contract.proof_vector.required_job_roles.every((role) => restoration.required_jobs[role].conclusion === "success"), "rollback_verified restoration required job failed");
+      assert.ok(contract.proof_vector.expected_artifacts.every((name) => restoration.artifacts[name] === true), "rollback_verified restoration artifact is absent");
+      assert.equal(restoration.provider_state, "proved", "rollback_verified restoration provider state differs");
+    } else {
+      assert.equal(decision.restoration_authority, "closed_unspent", "unverified rollback must leave restoration authority unspent");
+      assert.equal(restorationReservations.length, 0, "unverified rollback cannot reserve restoration evidence");
+      assert.equal(restorationConsumptions.length, 0, "unverified rollback cannot consume restoration evidence");
+      assert.equal(restorations.length, 0, "unverified rollback cannot include restoration evidence");
+    }
   }
   return { state: decision.state, admitted_observations: candidates.filter((candidate) => candidate.classification === "qualifying").length, reserved: reservations.length, consumed: consumptions.length };
 }

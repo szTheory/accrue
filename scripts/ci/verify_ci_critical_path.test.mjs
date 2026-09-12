@@ -87,6 +87,22 @@ test("v3 rejects duplicate consumption, incomplete kept evidence, and restoratio
   );
   const restoreReservation = reservation(1, "restoration"); const restoreConsumption = consumption(1, "restoration"); const restoration = terminal(1, "restoration_only", "restoration");
   assert.throws(() => verifyFinalDecision([...history, budget, activation, ...reservations, ...consumptions, ...terminals, ...advisoryVectors, restoreReservation, restoreConsumption, restoration, advisory(restoration), kept], contract), /cannot include restoration/);
+  const successfulRestoration = {
+    ...restoration,
+    conclusion: "success",
+    required_jobs: Object.fromEntries(contract.proof_vector.required_job_roles.map((role, index) => [role, { conclusion: "success", job_id: restoration.run_id * 100 + index, url: `https://github.com/szTheory/accrue/actions/runs/${restoration.run_id}/job/${restoration.run_id * 100 + index}` }])),
+  };
+  const rollbackVerified = { ...forgedRollback, state: "rollback_verified", restoration_authority: "closed", candidate_run_ids: [terminals[0].run_id, terminals[1].run_id, failed.run_id] };
+  assert.equal(
+    verifyFinalDecision([...history, budget, activation, ...reservations, ...consumptions, terminals[0], terminals[1], failed, ...advisoryVectors, restoreReservation, restoreConsumption, successfulRestoration, advisory(successfulRestoration), rollbackVerified], contract).state,
+    "rollback_verified",
+    "a bound successful restoration proof may verify rollback",
+  );
+  assert.throws(
+    () => verifyFinalDecision([...history, budget, activation, ...reservations, ...consumptions, terminals[0], terminals[1], failed, ...advisoryVectors, rollbackVerified], contract),
+    /rollback_verified requires exactly one restoration reservation/,
+    "rollback_verified cannot be claimed without restoration evidence",
+  );
 });
 
 test("v3 rejects activation recorded after a remote consumption", () => {
