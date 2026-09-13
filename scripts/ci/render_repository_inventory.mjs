@@ -12,10 +12,11 @@ function section(title, state, owner, command, evidence, rows = [], headings = [
 }
 function remoteRows(remotes) {
   return order(Object.entries(remotes), ([key]) => key).flatMap(([key, value]) => {
-    if (!value.available) return [`| ${escape(key)} | unavailable:${escape(value.reason)} | — | \`${value.observed_at}\` | ${escape(value.request)} |`];
-    if (!Array.isArray(value.shas)) return [`| ${escape(key)} | observed | \`${value.sha}\` | \`${value.observed_at}\` | ${escape(value.request)} |`];
-    if (value.shas.length === 0) return [`| ${escape(key)} | observed-empty | — | \`${value.observed_at}\` | ${escape(value.request)} |`];
-    return [...value.shas].sort().map((sha) => `| ${escape(key)} | observed | \`${sha}\` | \`${value.observed_at}\` | ${escape(value.request)} |`);
+    const provenance = key === "remote_main" ? escape(value.request) : value.requests.map(escape).join(" ; ");
+    if (!value.available) return [`| ${escape(key)} | unavailable:${escape(value.reason)} | — | \`${value.observed_at}\` | ${provenance} |`];
+    if (!Array.isArray(value.shas)) return [`| ${escape(key)} | observed | \`${value.sha}\` | \`${value.observed_at}\` | ${provenance} |`];
+    if (value.shas.length === 0) return [`| ${escape(key)} | observed-empty | — | \`${value.observed_at}\` | ${provenance} |`];
+    return [...value.shas].sort().map((sha) => `| ${escape(key)} | observed | \`${sha}\` | \`${value.observed_at}\` | ${provenance} |`);
   });
 }
 
@@ -28,6 +29,10 @@ export function renderRepositoryInventory(inventory, validationContext) {
   const artifacts = order(value.artifacts.entries, (item) => `${item.path}\0${item.type}\0${item.sha256}`).map((item) => `| ${escape(item.path)} | ${escape(item.type)} | \`${item.sha256}\` |`);
   const workflowMetadata = order(value.artifacts.authorized_workflow_metadata || [], (item) => `${item.path}\0${item.before_sha256}\0${item.after_sha256}`).map((item) => `| ${escape(item.path)} | ${escape(item.state)} | \`${item.before_sha256}\` | \`${item.after_sha256}\` |`);
   const worktrees = order(value.worktrees, (item) => `${item.branch}\0${item.sha}\0${item.dirty ? "1" : "0"}`).map((item) => `| ${escape(item.branch)} | \`${item.sha}\` | ${item.dirty ? "dirty" : "clean"} |`);
+  const capture = [
+    `| active symbolic ref | ${escape(value.capture.active_ref)} | \`${value.capture.commit}\` |`,
+    `| primary worktree | ${escape(value.capture.primary_worktree.branch)} | \`${value.capture.primary_worktree.head}\` |`
+  ];
   const windows = value.planning.ship_windows.length ? order(value.planning.ship_windows, String).map((item) => `| ${escape(item)} |`) : ["| (none) |"];
   const recoveryProcedure = [
     "## Recovery procedure", "",
@@ -47,6 +52,7 @@ export function renderRepositoryInventory(inventory, validationContext) {
     ...section("Recovery barrier", "verified", "repository-maintainers", 'git bundle verify "$PHASE229_BUNDLE"', `private manifest SHA-256 ${value.recovery.manifest_sha256}; bundle SHA-256 ${value.recovery.bundle_sha256}`, recovery, ["| Original ref | Object | Preservation ref | Bundle member |", "| --- | --- | --- | --- |"]),
     ...recoveryProcedure,
     ...section("Named ref truth", "recorded", "release-engineering", "git show-ref --head", "all named roles retain their independent identity", refs, ["| Fact | Full object ID | Interpretation |", "| --- | --- | --- |"]),
+    ...section("Captured-at authority", "point-in-time", "release-engineering", "git merge-base --is-ancestor CAPTURED LIVE", `captured at ${value.capture.captured_at}`, capture, ["| Identity | Symbolic ref | Full object ID |", "| --- | --- | --- |"]),
     ...section("All local and preservation refs", "recorded", "release-engineering", "git for-each-ref", "full object IDs are immutable evidence", allRefs.length ? allRefs : ["| (none) | — | — |"], ["| Ref | Object | Role |", "| --- | --- | --- |"]),
     ...section("Worktrees", "recorded", "repository-maintainers", "git worktree list --porcelain", "paths intentionally omitted", worktrees.length ? worktrees : ["| (none) | — | — |"], ["| Branch | Object | Classification |", "| --- | --- | --- |"]),
     ...section("User-owned artifact evidence", value.artifacts.empty_directory_policy, "repository-maintainers", "git status --porcelain=v1 --untracked-files=all", "non-dereferenced digests only", artifacts.length ? artifacts : ["| (none) | — | — |"], ["| Relative path | Type | SHA-256 or marker |", "| --- | --- | --- |"]),
@@ -59,7 +65,7 @@ export function renderRepositoryInventory(inventory, validationContext) {
 function main() { const args = process.argv; const input = args[args.indexOf("--input") + 1]; const out = args[args.indexOf("--out") + 1]; const repository = args[args.indexOf("--expected-repository") + 1]; if (!input || !out || !repository) throw new Error("--input, --out, and --expected-repository are required"); const context = createRepositoryValidationContext({ expectedRepository: repository }); fs.writeFileSync(out, renderRepositoryInventory(JSON.parse(fs.readFileSync(input, "utf8")), context)); }
 if (!process.env.NODE_TEST_CONTEXT && process.argv[1] === new URL(import.meta.url).pathname) { try { main(); } catch (error) { console.error(`repository inventory render: FAIL: ${error.message}`); process.exitCode = 1; } }
 
-if (process.env.NODE_TEST_CONTEXT) {
+if (process.env.NODE_TEST_CONTEXT && process.argv[1] === new URL(import.meta.url).pathname) {
   test("CR-04 plural remote rows retain every ordered producing request", () => {
     const repository = "szTheory/accrue";
     const observedAt = "2026-09-13T00:00:00.000Z";
@@ -70,17 +76,22 @@ if (process.env.NODE_TEST_CONTEXT) {
       actions: `GET /repos/${repository}/actions/runs?per_page=100&page=1`,
       main: `GET /repos/${repository}/git/ref/heads/main`
     };
-    assert.deepEqual(remoteRows({
+    const rows = remoteRows({
       remote_main: { observed_at: observedAt, request: requests.main, available: true, state: "observed", sha: "a".repeat(40) },
       pull_requests: { observed_at: observedAt, requests: [requests.pull], available: true, state: "observed", shas: [] },
       release_branches: { observed_at: observedAt, requests: [requests.release1, requests.release2], available: true, state: "observed", shas: ["c".repeat(40), "b".repeat(40)] },
       actions: { observed_at: observedAt, requests: [requests.actions], available: false, state: "unavailable", reason: "network" }
-    }), [
+    });
+    assert.deepEqual(rows, [
       `| actions | unavailable:network | — | \`${observedAt}\` | ${requests.actions} |`,
       `| pull_requests | observed-empty | — | \`${observedAt}\` | ${requests.pull} |`,
       `| release_branches | observed | \`${"b".repeat(40)}\` | \`${observedAt}\` | ${requests.release1} ; ${requests.release2} |`,
       `| release_branches | observed | \`${"c".repeat(40)}\` | \`${observedAt}\` | ${requests.release1} ; ${requests.release2} |`,
       `| remote_main | observed | \`${"a".repeat(40)}\` | \`${observedAt}\` | ${requests.main} |`
     ]);
+    assert.equal(rows.some((row) => row.includes("undefined")), false, "no absent provenance field is serialized");
+    assert.deepEqual(remoteRows({
+      pull_requests: { observed_at: observedAt, requests: [requests.pull], available: true, state: "observed", shas: ["d".repeat(40)] }
+    }), [`| pull_requests | observed | \`${"d".repeat(40)}\` | \`${observedAt}\` | ${requests.pull} |`], "one-result plural evidence retains its producing request");
   });
 }

@@ -10,7 +10,7 @@ import test from "node:test";
 const SHA = /^[a-f0-9]{40}$/; const DIGEST = /^[a-f0-9]{64}$/;
 const REPOSITORY = /^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/; const ISO = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/;
 const CONTEXT = Symbol("phase229-context");
-const TOP = new Set(["schema_version", "repository", "mode", "recovery", "artifacts", "refs", "remotes", "planning", "worktrees"]);
+const TOP = new Set(["schema_version", "repository", "mode", "capture", "recovery", "artifacts", "refs", "remotes", "planning", "worktrees"]);
 const REMOTE_KEYS = ["remote_main", "pull_requests", "release_branches", "actions"];
 const ROLES = ["local_main", "cached_origin_main", "milestone_branch", "v161_tag"];
 const REASONS = new Set(["network", "authentication", "rate_limit", "timeout", "data_shape", "overflow", "unavailable"]);
@@ -40,20 +40,20 @@ export function normalizeRemoteFact(value, context, { plural = false } = {}) {
   if (!Object.hasOwn(value, "state") || !["observed", "unavailable"].includes(value.state)) fail("remote fact state must be observed or unavailable");
   const validRequest = (request) => typeof request === "string" && new RegExp(`^GET /repos/${context.expectedRepository.replace("/", "\\/")}/`).test(request) && !/[\r\n]/.test(request);
   if (plural) {
-    if (value.request !== undefined || !Array.isArray(value.requests) || value.requests.length === 0 || value.requests.some((request) => !validRequest(request))) fail("plural remote fact requests must be an ordered repository-bound GET sequence");
-  } else if (!validRequest(value.request) || value.requests !== undefined) fail("remote fact request must be a repository-bound GET request");
+    if (Object.hasOwn(value, "request") || !Array.isArray(value.requests) || value.requests.length === 0 || value.requests.some((request) => !validRequest(request))) fail("plural remote fact requests must be an ordered repository-bound GET sequence");
+  } else if (!validRequest(value.request) || Object.hasOwn(value, "requests")) fail("remote fact request must be a repository-bound GET request");
   if (value.available) {
-    if (value.state !== "observed" || value.reason !== undefined) fail("available remote fact must be observed and contain no unavailable reason");
+    if (value.state !== "observed" || Object.hasOwn(value, "reason")) fail("available remote fact must be observed and contain no unavailable reason");
     if (plural) {
-      if (value.sha !== undefined || !Array.isArray(value.shas)) fail("plural remote fact requires a SHA array and no singleton SHA");
+      if (Object.hasOwn(value, "sha") || !Array.isArray(value.shas)) fail("plural remote fact requires a SHA array and no singleton SHA");
       value.shas.forEach((sha) => fullSha(sha, "remote fact SHA"));
       return { repository: value.repository, observed_at: value.observed_at, requests: [...value.requests], available: true, state: "observed", shas: [...value.shas] };
     }
-    if (value.shas !== undefined) fail("singleton remote fact must not contain SHA array");
+    if (Object.hasOwn(value, "shas")) fail("singleton remote fact must not contain SHA array");
     fullSha(value.sha, "remote fact sha");
     return { repository: value.repository, observed_at: value.observed_at, request: value.request, available: true, state: "observed", sha: value.sha };
   }
-  if (value.state !== "unavailable" || value.sha !== undefined || value.shas !== undefined || !REASONS.has(value.reason)) fail("unavailable remote fact must have exact unavailable state, bounded reason, and no claimed remote value");
+  if (value.state !== "unavailable" || Object.hasOwn(value, "sha") || Object.hasOwn(value, "shas") || !REASONS.has(value.reason)) fail("unavailable remote fact must have exact unavailable state, bounded reason, and no claimed remote value");
   return { repository: value.repository, observed_at: value.observed_at, ...(plural ? { requests: [...value.requests] } : { request: value.request }), available: false, state: "unavailable", reason: value.reason };
 }
 
@@ -81,6 +81,20 @@ export function validateInventory(inventory, context) {
   const remotes = Object.fromEntries(REMOTE_KEYS.map((key) => [key, normalizeRemoteFact(inventory.remotes[key], context, { plural: key !== "remote_main" })]));
   fields(inventory.planning, new Set(["ship_windows", "milestone", "state"]), "planning"); if (!Array.isArray(inventory.planning.ship_windows)) fail("planning.ship_windows must be an array"); for (const key of ["milestone", "state"]) if (typeof inventory.planning[key] !== "string" || /[\r\n]/.test(inventory.planning[key])) fail(`planning.${key} must be sanitized`);
   if (!Array.isArray(inventory.worktrees)) fail("worktrees must be an array"); for (const item of inventory.worktrees) { fields(item, new Set(["branch", "sha", "dirty"]), "worktree"); if (typeof item.branch !== "string" || !item.branch || item.branch.startsWith("/") || item.branch.includes("//") || /[\r\n\\]/.test(item.branch)) fail("worktree branch is unsafe"); fullSha(item.sha, "worktree sha"); if (typeof item.dirty !== "boolean") fail("worktree dirty must be boolean"); }
+  fields(inventory.capture, new Set(["captured_at", "active_ref", "commit", "primary_worktree"]), "capture");
+  timestamp(inventory.capture.captured_at, "capture.captured_at");
+  refName(inventory.capture.active_ref, "capture.active_ref");
+  if (!inventory.capture.active_ref.startsWith("refs/heads/")) fail("capture.active_ref must be a symbolic branch ref");
+  fullSha(inventory.capture.commit, "capture.commit");
+  fields(inventory.capture.primary_worktree, new Set(["branch", "head"]), "capture.primary_worktree");
+  refName(inventory.capture.primary_worktree.branch, "capture.primary_worktree.branch");
+  fullSha(inventory.capture.primary_worktree.head, "capture.primary_worktree.head");
+  if (inventory.capture.primary_worktree.branch !== inventory.capture.active_ref || inventory.capture.primary_worktree.head !== inventory.capture.commit) fail("capture active ref and primary worktree identity must agree");
+  if (inventory.refs.milestone_branch !== inventory.capture.commit) fail("capture commit must equal the captured milestone role");
+  const activeRows = inventory.refs.all.filter((item) => item.name === inventory.capture.active_ref);
+  if (activeRows.length !== 1 || activeRows[0].object !== inventory.capture.commit) fail("capture must match exactly one captured active ref row");
+  const activeBranch = inventory.capture.active_ref.slice("refs/heads/".length);
+  if (!inventory.worktrees.some((item) => item.branch === activeBranch && item.sha === inventory.capture.commit)) fail("capture must match the captured primary worktree row");
   return { ...inventory, remotes };
 }
 
@@ -380,18 +394,29 @@ export function collectPlanningFacts({ root }) {
   try { shipWindows = readShipWindows({ root }); } catch (error) { if (error?.code === "ENOENT") shipWindows = []; else throw error; }
   return { ship_windows: shipWindows, milestone: hashed(".planning/MILESTONES.md"), state: hashed(".planning/STATE.md") };
 }
+export function collectCaptureAnchor({ repo, capturedAt = new Date() }) {
+  const activeRef = run(repo, ["symbolic-ref", "--quiet", "HEAD"]);
+  if (!activeRef.startsWith("refs/heads/")) fail("active repository ref must be a symbolic branch");
+  const commit = fullSha(run(repo, ["rev-parse", "HEAD^{commit}"]), "captured commit");
+  return {
+    captured_at: timestamp(capturedAt.toISOString(), "capture.captured_at"),
+    active_ref: activeRef,
+    commit,
+    primary_worktree: { branch: activeRef, head: commit }
+  };
+}
 export function collectRepositoryInventory({ repo, recoveryManifest: manifestPath, expectedManifestSha256, recoveryBundle, artifactAuthorization, finalCaptureAttestation, expectedRepository, observeRemote = false, adapter, now = () => new Date() }) {
-  const context = createRepositoryValidationContext({ expectedRepository }); const manifest = readTrustedRecoveryManifest(manifestPath, expectedManifestSha256, context); requireRecovery(repo, manifest, recoveryBundle); const attestation = readFinalCaptureAttestation(finalCaptureAttestation, manifest); const workflowMetadataChanges = validateFinalArtifactSnapshot(repo, manifest, attestation); if (artifactAuthorization) validateWorkflowMetadataChanges(readWorkflowMetadataAuthorization(artifactAuthorization)); const preserved = new Map(manifest.refs.map((item) => [item.original_ref, item.object])); const resolve = (name) => preserved.get(name) || run(repo, ["rev-parse", `${name}^{}`]);
+  const context = createRepositoryValidationContext({ expectedRepository }); const manifest = readTrustedRecoveryManifest(manifestPath, expectedManifestSha256, context); requireRecovery(repo, manifest, recoveryBundle); const attestation = readFinalCaptureAttestation(finalCaptureAttestation, manifest); const workflowMetadataChanges = validateFinalArtifactSnapshot(repo, manifest, attestation); if (artifactAuthorization) validateWorkflowMetadataChanges(readWorkflowMetadataAuthorization(artifactAuthorization)); const capture = collectCaptureAnchor({ repo, capturedAt: now() }); const preserved = new Map(manifest.refs.map((item) => [item.original_ref, item.object])); const resolve = (name) => preserved.get(name) || run(repo, ["rev-parse", `${name}^{}`]);
   const refs = run(repo, ["for-each-ref", "--format=%(refname) %(objectname)"]).split("\n").filter(Boolean).map((line) => { const [name, object] = line.split(" "); return { name, object, role: name === "refs/heads/main" ? "local_main" : name === "refs/remotes/origin/main" ? "cached_origin_main" : name === "refs/tags/v1.61" ? "v161_tag" : "other" }; });
   const remotes = collectRemoteFacts({ repository: expectedRepository, adapter: observeRemote ? adapter : undefined, now });
-  return validateInventory({ schema_version: 2, repository: expectedRepository, mode: observeRemote ? "live_remote" : "local_only", recovery: { verified: true, manifest_sha256: expectedManifestSha256, bundle_sha256: manifest.bundle_sha256, refs: sorted(manifest.refs.map(({ original_ref, object, encoded_ref, bundle_member }) => ({ original_ref, object, encoded_ref, bundle_member })), (item) => item.original_ref) }, artifacts: { empty_directory_policy: manifest.empty_directory_policy, entries: sorted(manifest.artifacts.map(({ path: entryPath, type, sha256 }) => ({ path: entryPath, type, sha256 })), (item) => `${item.path}\0${item.type}`), ...(workflowMetadataChanges.length ? { authorized_workflow_metadata: workflowMetadataChanges } : {}) }, refs: { local_main: resolve("refs/heads/main"), cached_origin_main: resolve("refs/remotes/origin/main"), milestone_branch: run(repo, ["rev-parse", "HEAD^{commit}"]), v161_tag: resolve("refs/tags/v1.61"), all: sorted(refs, (item) => `${item.name}\0${item.object}`) }, remotes, planning: collectPlanningFacts({ root: repo }), worktrees: collectWorktrees({ repo }) }, context);
+  return validateInventory({ schema_version: 2, repository: expectedRepository, mode: observeRemote ? "live_remote" : "local_only", capture, recovery: { verified: true, manifest_sha256: expectedManifestSha256, bundle_sha256: manifest.bundle_sha256, refs: sorted(manifest.refs.map(({ original_ref, object, encoded_ref, bundle_member }) => ({ original_ref, object, encoded_ref, bundle_member })), (item) => item.original_ref) }, artifacts: { empty_directory_policy: manifest.empty_directory_policy, entries: sorted(manifest.artifacts.map(({ path: entryPath, type, sha256 }) => ({ path: entryPath, type, sha256 })), (item) => `${item.path}\0${item.type}`), ...(workflowMetadataChanges.length ? { authorized_workflow_metadata: workflowMetadataChanges } : {}) }, refs: { local_main: resolve("refs/heads/main"), cached_origin_main: resolve("refs/remotes/origin/main"), milestone_branch: capture.commit, v161_tag: resolve("refs/tags/v1.61"), all: sorted(refs, (item) => `${item.name}\0${item.object}`) }, remotes, planning: collectPlanningFacts({ root: repo }), worktrees: collectWorktrees({ repo }) }, context);
 }
 export const collectLocalInventory = (options) => collectRepositoryInventory(options);
 function parseArgs(argv) { const result = { observeRemote: false }; for (let index = 0; index < argv.length; index += 1) { if (argv[index] === "--observe-remote") { result.observeRemote = true; continue; } if (argv[index] === "--refresh-cached-refs") fail("--refresh-cached-refs requires separately authorized recovery workflow"); if (!argv[index].startsWith("--") || !argv[index + 1]) fail("usage: --repo OWNER/REPO --recovery-manifest FILE --expected-manifest-sha256 DIGEST --recovery-bundle FILE --final-capture-attestation FILE [--artifact-authorization FILE] [--observe-remote] --out FILE"); result[argv[index].slice(2)] = argv[++index]; } return result; }
 function main() { const options = parseArgs(process.argv.slice(2)); if (!options.repo || !options["recovery-manifest"] || !options["expected-manifest-sha256"] || !options["recovery-bundle"] || !options["final-capture-attestation"] || !options.out) fail("--repo, --recovery-manifest, --expected-manifest-sha256, --recovery-bundle, --final-capture-attestation, and --out are required"); const inventory = collectRepositoryInventory({ repo: process.cwd(), recoveryManifest: path.resolve(options["recovery-manifest"]), expectedManifestSha256: options["expected-manifest-sha256"], recoveryBundle: path.resolve(options["recovery-bundle"]), artifactAuthorization: options["artifact-authorization"] ? path.resolve(options["artifact-authorization"]) : undefined, finalCaptureAttestation: path.resolve(options["final-capture-attestation"]), expectedRepository: options.repo, observeRemote: options.observeRemote, adapter: options.observeRemote ? createGhApiReadAdapter({ repository: options.repo }) : undefined }); fs.writeFileSync(options.out, `${JSON.stringify(inventory, null, 2)}\n`, { mode: 0o600 }); }
 if (!process.env.NODE_TEST_CONTEXT && process.argv[1] === new URL(import.meta.url).pathname) { try { main(); } catch (error) { console.error(`repository inventory collect: FAIL: ${error.message}`); process.exitCode = 1; } }
 
-if (process.env.NODE_TEST_CONTEXT) {
+if (process.env.NODE_TEST_CONTEXT && process.argv[1] === new URL(import.meta.url).pathname) {
   const remoteSchemaFixture = () => ({
     schema_version: 2,
     repository: "szTheory/accrue",
@@ -459,6 +484,10 @@ if (process.env.NODE_TEST_CONTEXT) {
       candidate.remotes.remote_main = fact;
       assert.throws(() => validateInventory(candidate, context), /remote fact|singleton/);
     }
+    assert.throws(() => normalizeRemoteFact({ ...valid.remotes.remote_main, reason: undefined }, context), /unavailable reason/);
+    assert.throws(() => normalizeRemoteFact({ ...valid.remotes.remote_main, shas: undefined }, context), /SHA array/);
+    assert.throws(() => normalizeRemoteFact({ ...valid.remotes.pull_requests, sha: undefined }, context, { plural: true }), /singleton SHA/);
+    assert.throws(() => normalizeRemoteFact({ ...valid.remotes.actions, shas: undefined }, context, { plural: true }), /claimed remote value/);
 
     const unavailablePlural = normalizeRemoteFact(valid.remotes.actions, context, { plural: true });
     assert.deepEqual(unavailablePlural, valid.remotes.actions, "unavailable plural provenance survives normalization exactly");
@@ -481,9 +510,10 @@ if (process.env.NODE_TEST_CONTEXT) {
     assert.deepEqual(checked.capture, fixture.capture);
     const { renderRepositoryInventory } = await import("./render_repository_inventory.mjs");
     const rendered = renderRepositoryInventory(fixture, context);
+    assert.equal(rendered, renderRepositoryInventory(fixture, context), "capture projection is byte-stable across repeated renders");
     assert.match(rendered, /refs\/heads\/milestone/);
     assert.match(rendered, new RegExp("c{40}"));
-    assert.equal(rendered.includes("/Users/"), false);
+    assert.deepEqual(Object.keys(checked.capture).sort(), ["active_ref", "captured_at", "commit", "primary_worktree"]);
 
     for (const mutate of [
       (candidate) => { delete candidate.capture; },
@@ -491,7 +521,7 @@ if (process.env.NODE_TEST_CONTEXT) {
       (candidate) => { candidate.capture.active_ref = "refs/heads/other"; },
       (candidate) => { candidate.capture.primary_worktree.branch = "refs/heads/other"; },
       (candidate) => { candidate.capture.primary_worktree.head = "d".repeat(40); },
-      (candidate) => { candidate.capture.path = "/private/repository"; }
+      (candidate) => { candidate.capture.path = "forbidden"; }
     ]) {
       const candidate = remoteSchemaFixture();
       mutate(candidate);

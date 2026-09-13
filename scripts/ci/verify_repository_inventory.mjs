@@ -409,6 +409,12 @@ function strictInventory(fixture, { mode = "local_only" } = {}) {
   const context = createRepositoryValidationContext({ expectedRepository: "szTheory/accrue" });
   return validateInventory({
     schema_version: 2, repository: "szTheory/accrue", mode,
+    capture: {
+      captured_at: "2026-09-13T00:00:00.000Z",
+      active_ref: "refs/heads/main",
+      commit: fixture.object,
+      primary_worktree: { branch: "refs/heads/main", head: fixture.object }
+    },
     recovery: { verified: true, manifest_sha256: fixture.expectedManifestSha256, bundle_sha256: fixture.manifest.bundle_sha256, refs: fixture.manifest.refs.map(({ original_ref, object, encoded_ref, bundle_member }) => ({ original_ref, object, encoded_ref, bundle_member })) },
     artifacts: {
       empty_directory_policy: "not_surfaced_by_git",
@@ -471,6 +477,9 @@ function verifyStrictRecoveryControls(context) {
     advanced.refs.local_main = advancedObject;
     advanced.refs.milestone_branch = advancedObject;
     advanced.refs.all.find((row) => row.name === "refs/heads/main").object = advancedObject;
+    advanced.capture.commit = advancedObject;
+    advanced.capture.primary_worktree.head = advancedObject;
+    advanced.worktrees[0].sha = advancedObject;
     assert.equal(assertStrictRecovery(advanced, context, strictOptions(fixture)), true, "the active execution branch may advance after its frozen recovery point");
     const driftedInactive = structuredClone(advanced);
     driftedInactive.refs.all.find((row) => row.name === "refs/heads/secondary").object = advancedObject;
