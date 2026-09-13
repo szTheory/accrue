@@ -1,8 +1,8 @@
 ---
 phase: "229"
 slug: "repository-truth-recovery-safety"
-status: verified
-threats_open: 0
+status: open
+threats_open: 3
 asvs_level: 1
 created: "2026-09-13"
 ---
@@ -39,9 +39,9 @@ created: "2026-09-13"
 | T-229-09 | Spoofing | Remote facts | high | mitigate | Repository, ISO time, normalized GET request, and full SHA required. | closed |
 | T-229-10 | Tampering | Recovery-to-observation ordering | high | mitigate | Manifest, bundle, refs, and artifacts validate before any remote adapter call. | closed |
 | T-229-11 | Information Disclosure | Committed evidence | high | mitigate | Field/path allowlists, escaping, negative privacy controls, and byte reproduction. | closed |
-| T-229-12 | Repudiation | Unavailable/green evidence | high | mitigate | Explicit unavailable facts without substitution; Actions and provider proof remain separate. | closed |
+| T-229-12 | Repudiation | Unavailable/green evidence | high | mitigate | Explicit unavailable facts must retain normalized request provenance; the plural Markdown projection currently drops it. | open |
 | T-229-13 | Denial of Service | Remote/process bounds | medium | mitigate | Fixed requests, pagination/item limits, subprocess timeout, and bounded buffers. | closed |
-| T-229-14 | Spoofing | Final remote evidence | high | mitigate | Independent verifier enforces repository/time/request/full-SHA provenance. | closed |
+| T-229-14 | Spoofing | Final remote evidence | high | mitigate | Independent verifier must enforce and render repository/time/request/full-SHA provenance; plural facts currently render an undefined request. | open |
 | T-229-15 | Tampering | Final capture ordering | high | mitigate | Committed manifest digest anchor, owner/mode checks, actual bundle verification/list-heads, all 109 ref/object matches, and zero-adapter-call failure fixtures. | closed |
 | T-229-16 | Information Disclosure | Final artifacts | high | mitigate | Recursive privacy controls and exact JSON-to-Markdown byte verification. | closed |
 | T-229-17 | Repudiation | Documentation semantics | medium | mitigate | Executable documentation checks pin read-only commands, exact identity/SHA, bounds, and provider distinction. | closed |
@@ -67,8 +67,30 @@ created: "2026-09-13"
 | T-229-G09-03 | Information Disclosure | Canonical artifacts | high | mitigate | Recursive privacy controls and byte reproduction passed on the final artifacts. | closed |
 | T-229-G09-04 | Repudiation | Final phase handoff | high | mitigate | The complete reviewed regression chain is recorded in the final summary. | closed |
 | T-229-G09-05 | Denial of Service | Live recapture | medium | mitigate | Final capture retains collector subprocess, pagination, item, timeout, and buffer bounds. | closed |
+| T-229-G10-01 | Tampering | Final artifact reconciliation | high | mitigate | Final-boundary artifact snapshots are compared after collection before success. | closed |
+| T-229-G10-02 | Repudiation | Symlink target identity | high | mitigate | Preservation hashes raw link bytes, including newline and non-UTF-8 fixtures. | closed |
+| T-229-G10-03 | Information Disclosure | Protected artifact metadata | high | mitigate | Public evidence remains allowlisted and private capsule inputs remain runtime-only. | closed |
+| T-229-G10-04 | Elevation of Privilege | Filesystem traversal | medium | mitigate | Physical containment and raw-byte-safe path handling fail closed. | closed |
+| T-229-G11-01 | Spoofing | Plural remote pagination | high | mitigate | Pull request, release, and Actions collection proves terminal pagination. | closed |
+| T-229-G11-02 | Denial of Service | Pagination bounds | high | mitigate | Page and item limits fail explicitly before partial evidence is accepted. | closed |
+| T-229-G11-03 | Tampering | Terminal page evidence | high | mitigate | Complete page request sets are recorded and independently verified. | closed |
+| T-229-G11-04 | Information Disclosure | Remote response handling | medium | mitigate | Raw provider payloads are normalized to allowlisted fields. | closed |
+| T-229-G12-01 | Denial of Service | CI watch deadline | high | mitigate | One absolute deadline bounds every poll and detail request. | closed |
+| T-229-G12-02 | Spoofing | Viewed run attribution | high | mitigate | Viewed run identity is bound to the selected run, workflow, repository, and SHA. | closed |
+| T-229-G12-03 | Repudiation | CI terminal result | medium | mitigate | Terminal status and bounded provenance are emitted deterministically. | closed |
+| T-229-G12-04 | Tampering | CI operation registry | high | mitigate | Only the fixed read-only list/view operation set is accepted. | closed |
+| T-229-G13-01 | Spoofing | Active repository authority | high | mitigate | Strict verification reconciles the live repository against independent authorities. | closed |
+| T-229-G13-02 | Tampering | Canonical ref evidence | high | mitigate | Complete refs, tags, worktrees, and ship windows are structurally and semantically checked. | closed |
+| T-229-G13-03 | Repudiation | Command provenance | high | mitigate | Only allowlisted same-repository endpoints and exact requests are accepted. | closed |
+| T-229-G13-04 | Information Disclosure | Path privacy | high | mitigate | Absolute, URI, UNC, control-character, and private-path leakage probes fail closed. | closed |
+| T-229-G13-05 | Elevation of Privilege | Verification subprocesses | medium | mitigate | Verification uses shell-disabled subprocesses and test-owned temporary directories. | closed |
+| T-229-G14-01 | Repudiation | Strict verification documentation | high | mitigate | Executable documentation requires all runtime-only private authority inputs. | closed |
+| T-229-G14-02 | Tampering | Final handoff invariants | high | mitigate | Fixed-chain before/after snapshots reject capsule and workspace drift. | closed |
+| T-229-G14-03 | Spoofing | Canonical JSON/Markdown provenance | high | mitigate | Exact terminal-page request provenance must survive into both canonical artifacts; plural Markdown rows currently lose it. | open |
+| T-229-G14-04 | Information Disclosure | Final handoff output | high | mitigate | Runtime-only authority and recursive privacy checks prevent private-path disclosure. | closed |
+| T-229-G14-05 | Elevation of Privilege | Attestation publication | medium | mitigate | A single pre-authorized mode-0600 attestation is created exclusively after invariant checks. | closed |
 
-*Status: open · closed · open — below high threshold (non-blocking)*
+*Status: open — three high-severity threats block completion.*
 
 ---
 
@@ -86,6 +108,7 @@ No accepted risks.
 | 2026-09-13 | 17 | 16 | 1 | gsd-security-auditor after bundle verification remediation |
 | 2026-09-13 | 17 | 17 | 0 | gsd-security-auditor after manifest integrity anchoring |
 | 2026-09-13 | 39 | 39 | 0 | gsd-security-auditor after gap closure and final recapture |
+| 2026-09-13 | 61 | 58 | 3 | gsd-security-auditor after second gap closure |
 
 ---
 
@@ -93,7 +116,7 @@ No accepted risks.
 
 - [x] All threats have a disposition
 - [x] Accepted risks documented (none)
-- [x] `threats_open: 0` confirmed
-- [x] `status: verified` set in frontmatter
+- [ ] `threats_open: 0` confirmed
+- [ ] `status: verified` set in frontmatter
 
-**Approval:** verified 2026-09-13
+**Approval:** blocked pending remediation of T-229-12, T-229-14, and T-229-G14-03
