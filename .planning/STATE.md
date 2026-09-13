@@ -5,16 +5,16 @@ milestone_name: Release Integration & Repository Hygiene
 current_phase: 229
 current_phase_name: Repository Truth & Recovery Safety
 status: executing
-stopped_at: Completed 229-12-PLAN.md
-last_updated: "2026-09-13T19:18:31.297Z"
+stopped_at: Completed 229-13-PLAN.md
+last_updated: "2026-09-13T19:36:08.855Z"
 last_activity: 2026-09-13
 last_activity_desc: Phase 229 execution started
-state_head: 4e11409b3089ce0b0a225606c5a42a9dbf93da55
+state_head: 0117e72084561f76c69f8b5e3407b16b458e4802
 progress:
   total_phases: 4
   completed_phases: 0
   total_plans: 14
-  completed_plans: 12
+  completed_plans: 13
   percent: 0
 ---
 
@@ -31,7 +31,7 @@ See: `.planning/PROJECT.md` (updated 2026-09-12)
 ## Current Position
 
 Phase: 229 (Repository Truth & Recovery Safety) — EXECUTING
-Plan: 13 of 14
+Plan: 14 of 14
 Status: Ready to execute
 Last activity: 2026-09-13 — Phase 229 execution started
 
@@ -69,6 +69,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 229 P10 | 10 min | 2 tasks | 1 files |
 | Phase 229 P11 | 10 min | 2 tasks | 2 files |
 | Phase 229 P12 | 7min | 2 tasks | 1 files |
+| Phase 229 P13 | 11min | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -104,6 +105,10 @@ Progress: [░░░░░░░░░░] 0%
 - [Phase 229]: Plural facts retain their complete ordered producing GET sequence while remote main keeps its singleton request. — Category-specific provenance must remain independently verifiable without widening the read-only API surface.
 - [Phase 229]: Use performance.now() for one monotonic watch deadline and pass a remaining-budget function through every read boundary.
 - [Phase 229]: Validate viewed run ID, SHA, and requested workflow before reading jobs or returning a conclusion.
+- [Phase 229]: The active branch is the only allowed frozen-ref continuity exception, and its canonical object must equal the independently resolved live symbolic ref object.
+- [Phase 229]: Canonical worktrees and ship windows are exact multisets read independently by the verifier from Git porcelain and bounded WINDOWS.md parsing.
+- [Phase 229]: Plural remote provenance is an exact contiguous page sequence whose SHA count proves a short terminal page when evidence is available.
+- [Phase 229]: Privacy rejection covers POSIX, Windows, UNC, drive-relative, file-URI, C0, and DEL forms while dedicated normalized repository-relative artifact paths remain valid.
 
 ### Pending Todos
 
@@ -116,6 +121,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-09-13T19:18:31.278Z
-Stopped at: Completed 229-12-PLAN.md
+Last session: 2026-09-13T19:36:08.837Z
+Stopped at: Completed 229-13-PLAN.md
 Resume file: None
