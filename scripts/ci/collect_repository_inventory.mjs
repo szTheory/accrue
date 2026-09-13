@@ -35,21 +35,24 @@ function validationContext(value) { if (!value || value[CONTEXT] !== true || !Ob
 export function normalizeRemoteFact(value, context, { plural = false } = {}) {
   validationContext(context); fields(value, new Set(["repository", "observed_at", "request", "requests", "sha", "shas", "available", "reason", "state"]), "remote fact");
   if (value.repository !== context.expectedRepository) fail("remote fact repository must match expectedRepository"); timestamp(value.observed_at, "remote fact observed_at");
+  if (!Object.hasOwn(value, "available") || typeof value.available !== "boolean") fail("remote fact available must be a literal boolean");
+  if (!Object.hasOwn(value, "state") || !["observed", "unavailable"].includes(value.state)) fail("remote fact state must be observed or unavailable");
   const validRequest = (request) => typeof request === "string" && new RegExp(`^GET /repos/${context.expectedRepository.replace("/", "\\/")}/`).test(request) && !/[\r\n]/.test(request);
   if (plural) {
     if (value.request !== undefined || !Array.isArray(value.requests) || value.requests.length === 0 || value.requests.some((request) => !validRequest(request))) fail("plural remote fact requests must be an ordered repository-bound GET sequence");
   } else if (!validRequest(value.request) || value.requests !== undefined) fail("remote fact request must be a repository-bound GET request");
-  if (value.available !== false) {
+  if (value.available) {
+    if (value.state !== "observed" || value.reason !== undefined) fail("available remote fact must be observed and contain no unavailable reason");
     if (plural) {
       if (value.sha !== undefined || !Array.isArray(value.shas)) fail("plural remote fact requires a SHA array and no singleton SHA");
       value.shas.forEach((sha) => fullSha(sha, "remote fact SHA"));
-      return { repository: value.repository, observed_at: value.observed_at, requests: [...value.requests], available: true, state: value.state || "observed", shas: [...value.shas] };
+      return { repository: value.repository, observed_at: value.observed_at, requests: [...value.requests], available: true, state: "observed", shas: [...value.shas] };
     }
     if (value.shas !== undefined) fail("singleton remote fact must not contain SHA array");
     fullSha(value.sha, "remote fact sha");
-    return { repository: value.repository, observed_at: value.observed_at, request: value.request, available: true, state: value.state || "observed", sha: value.sha };
+    return { repository: value.repository, observed_at: value.observed_at, request: value.request, available: true, state: "observed", sha: value.sha };
   }
-  if (value.available !== false || value.sha !== undefined || value.shas !== undefined || !REASONS.has(value.reason)) fail("unavailable remote fact must have bounded reason and no claimed remote value");
+  if (value.state !== "unavailable" || value.sha !== undefined || value.shas !== undefined || !REASONS.has(value.reason)) fail("unavailable remote fact must have exact unavailable state, bounded reason, and no claimed remote value");
   return { repository: value.repository, observed_at: value.observed_at, ...(plural ? { requests: [...value.requests] } : { request: value.request }), available: false, state: "unavailable", reason: value.reason };
 }
 
@@ -73,10 +76,11 @@ function validateArtifacts(artifacts) { fields(artifacts, new Set(["empty_direct
 export function validateInventory(inventory, context) {
   validationContext(context); fields(inventory, TOP, "inventory"); for (const key of TOP) if (!(key in inventory)) fail(`inventory is missing required field: ${key}`); if (inventory.schema_version !== 2) fail("inventory has unsupported schema version"); if (inventory.repository !== context.expectedRepository) fail("inventory.repository must match expectedRepository"); if (!["local_only", "live_remote"].includes(inventory.mode)) fail("inventory mode is unsupported"); validateRecovery(inventory.recovery); validateArtifacts(inventory.artifacts);
   fields(inventory.refs, new Set([...ROLES, "all"]), "refs"); ROLES.forEach((role) => fullSha(inventory.refs[role], `refs.${role}`)); if (!Array.isArray(inventory.refs.all)) fail("refs.all must be an array"); for (const item of inventory.refs.all) { fields(item, new Set(["name", "object", "role"]), "ref"); refName(item.name, "ref.name"); fullSha(item.object, "ref.object"); if (typeof item.role !== "string") fail("ref.role must be a string"); }
-  fields(inventory.remotes, new Set(REMOTE_KEYS), "remotes"); REMOTE_KEYS.forEach((key) => normalizeRemoteFact(inventory.remotes[key], context, { plural: key !== "remote_main" }));
+  fields(inventory.remotes, new Set(REMOTE_KEYS), "remotes");
+  const remotes = Object.fromEntries(REMOTE_KEYS.map((key) => [key, normalizeRemoteFact(inventory.remotes[key], context, { plural: key !== "remote_main" })]));
   fields(inventory.planning, new Set(["ship_windows", "milestone", "state"]), "planning"); if (!Array.isArray(inventory.planning.ship_windows)) fail("planning.ship_windows must be an array"); for (const key of ["milestone", "state"]) if (typeof inventory.planning[key] !== "string" || /[\r\n]/.test(inventory.planning[key])) fail(`planning.${key} must be sanitized`);
   if (!Array.isArray(inventory.worktrees)) fail("worktrees must be an array"); for (const item of inventory.worktrees) { fields(item, new Set(["branch", "sha", "dirty"]), "worktree"); if (typeof item.branch !== "string" || !item.branch || item.branch.startsWith("/") || item.branch.includes("//") || /[\r\n\\]/.test(item.branch)) fail("worktree branch is unsafe"); fullSha(item.sha, "worktree sha"); if (typeof item.dirty !== "boolean") fail("worktree dirty must be boolean"); }
-  return inventory;
+  return { ...inventory, remotes };
 }
 
 function readTrustedRecoveryManifest(manifestPath, expectedManifestSha256, context) {
@@ -250,7 +254,7 @@ function remoteRead(adapter, request, repository, now, { plural, normalize }) {
   try {
     const raw = adapter.get(request);
     const value = plural ? { shas: normalize(raw) } : { sha: normalize(raw) };
-    return normalizeRemoteFact({ repository, observed_at: now.toISOString(), request, available: true, ...value }, createRepositoryValidationContext({ expectedRepository: repository }), { plural });
+    return normalizeRemoteFact({ repository, observed_at: now.toISOString(), request, available: true, state: "observed", ...value }, createRepositoryValidationContext({ expectedRepository: repository }), { plural });
   } catch (error) { return unavailable(repository, request, unavailableReason(error), now); }
 }
 function arrayOf(raw, label, maximum = REMOTE_PAGE_SIZE) { if (!Array.isArray(raw)) fail(`${label} response must be an array`); if (raw.length > maximum) fail("overflow"); return raw; }
@@ -276,7 +280,7 @@ function boundedPluralRemoteRead(adapter, repository, category, observedAt, { ex
       if (items.length + pageItems.length > limits.maxItems) fail("overflow");
       items.push(...pageItems);
       if (pageItems.length < limits.pageSize) {
-        return normalizeRemoteFact({ repository, observed_at: observedAt.toISOString(), requests, available: true, shas: normalize(items) }, context, { plural: true });
+        return normalizeRemoteFact({ repository, observed_at: observedAt.toISOString(), requests, available: true, state: "observed", shas: normalize(items) }, context, { plural: true });
       }
       if (page === limits.maxPages || items.length >= limits.maxItems) fail("overflow");
     }
