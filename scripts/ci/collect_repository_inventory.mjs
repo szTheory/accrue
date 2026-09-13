@@ -13,7 +13,9 @@ const TOP = new Set(["schema_version", "repository", "mode", "recovery", "artifa
 const REMOTE_KEYS = ["remote_main", "pull_requests", "release_branches", "actions"];
 const ROLES = ["local_main", "cached_origin_main", "milestone_branch", "v161_tag"];
 const REASONS = new Set(["network", "authentication", "rate_limit", "timeout", "data_shape", "overflow", "unavailable"]);
-const REMOTE_LIMIT = 100;
+const REMOTE_PAGE_SIZE = 100;
+const REMOTE_MAX_PAGES = 10;
+const REMOTE_MAX_ITEMS = 1_000;
 const GH_TIMEOUT_MS = 10_000;
 const GH_MAX_BUFFER = 512 * 1024;
 const fail = (message) => { throw new Error(message); };
@@ -31,21 +33,25 @@ export function createRepositoryValidationContext({ expectedRepository } = {}) {
 function validationContext(value) { if (!value || value[CONTEXT] !== true || !Object.isFrozen(value)) fail("validationContext must be created by createRepositoryValidationContext"); return value; }
 
 export function normalizeRemoteFact(value, context, { plural = false } = {}) {
-  validationContext(context); fields(value, new Set(["repository", "observed_at", "request", "sha", "shas", "available", "reason", "state"]), "remote fact");
+  validationContext(context); fields(value, new Set(["repository", "observed_at", "request", "requests", "sha", "shas", "available", "reason", "state"]), "remote fact");
   if (value.repository !== context.expectedRepository) fail("remote fact repository must match expectedRepository"); timestamp(value.observed_at, "remote fact observed_at");
-  if (typeof value.request !== "string" || !new RegExp(`^GET /repos/${context.expectedRepository.replace("/", "\\/")}/`).test(value.request) || /[\r\n]/.test(value.request)) fail("remote fact request must be a repository-bound GET request");
+  const validRequest = (request) => typeof request === "string" && new RegExp(`^GET /repos/${context.expectedRepository.replace("/", "\\/")}/`).test(request) && !/[\r\n]/.test(request);
+  if (plural) {
+    const requests = value.requests ?? (value.request === undefined ? undefined : [value.request]);
+    if (!Array.isArray(requests) || requests.length === 0 || requests.some((request) => !validRequest(request))) fail("plural remote fact requests must be repository-bound GET requests");
+  } else if (!validRequest(value.request) || value.requests !== undefined) fail("remote fact request must be a repository-bound GET request");
   if (value.available !== false) {
     if (plural) {
       if (value.sha !== undefined || !Array.isArray(value.shas)) fail("plural remote fact requires a SHA array and no singleton SHA");
       value.shas.forEach((sha) => fullSha(sha, "remote fact SHA"));
-      return { repository: value.repository, observed_at: value.observed_at, request: value.request, available: true, state: value.state || "observed", shas: [...value.shas] };
+      return { repository: value.repository, observed_at: value.observed_at, ...(value.requests ? { requests: [...value.requests] } : { request: value.request }), available: true, state: value.state || "observed", shas: [...value.shas] };
     }
     if (value.shas !== undefined) fail("singleton remote fact must not contain SHA array");
     fullSha(value.sha, "remote fact sha");
     return { repository: value.repository, observed_at: value.observed_at, request: value.request, available: true, state: value.state || "observed", sha: value.sha };
   }
   if (value.available !== false || value.sha !== undefined || value.shas !== undefined || !REASONS.has(value.reason)) fail("unavailable remote fact must have bounded reason and no claimed remote value");
-  return { repository: value.repository, observed_at: value.observed_at, request: value.request, available: false, state: "unavailable", reason: value.reason };
+  return { repository: value.repository, observed_at: value.observed_at, ...(plural && value.requests ? { requests: [...value.requests] } : { request: value.request }), available: false, state: "unavailable", reason: value.reason };
 }
 
 function validateRecovery(recovery) { fields(recovery, new Set(["verified", "manifest_sha256", "bundle_sha256", "refs"]), "recovery"); if (recovery.verified !== true) fail("recovery must be verified"); digest(recovery.manifest_sha256, "recovery.manifest_sha256"); digest(recovery.bundle_sha256, "recovery.bundle_sha256"); if (!Array.isArray(recovery.refs) || !recovery.refs.length) fail("recovery.refs must be a non-empty array"); const seen = new Set(); for (const ref of recovery.refs) { fields(ref, new Set(["original_ref", "object", "encoded_ref", "bundle_member"]), "recovery ref"); refName(ref.original_ref, "recovery ref original_ref"); fullSha(ref.object, "recovery ref object"); if (ref.encoded_ref !== encodedRef(ref.original_ref)) fail("recovery ref encoded_ref must preserve original name"); if (ref.bundle_member !== true) fail("recovery ref must be in verified bundle"); if (seen.has(ref.original_ref)) fail("recovery refs must be unique"); seen.add(ref.original_ref); } }
@@ -174,7 +180,7 @@ function validateFinalArtifactSnapshot(repo, manifest, attestation) {
   }
   return changes;
 }
-const unavailable = (repository, request, reason = "unavailable", now = new Date()) => ({ repository, observed_at: now.toISOString(), request, available: false, state: "unavailable", reason });
+const unavailable = (repository, provenance, reason = "unavailable", now = new Date()) => ({ repository, observed_at: now.toISOString(), ...(Array.isArray(provenance) ? { requests: [...provenance] } : { request: provenance }), available: false, state: "unavailable", reason });
 const remoteRequest = (repository, suffix) => `GET /repos/${repository}/${suffix}`;
 function unavailableReason(error) {
   const text = String(error?.message || error || "");
@@ -185,36 +191,50 @@ function unavailableReason(error) {
   if (/network|ENOTFOUND|ECONN|EAI_AGAIN/i.test(text)) return "network";
   return "data_shape";
 }
-function responseJson(result) {
+function responseJson(result, maxBuffer = GH_MAX_BUFFER) {
   if (result.error) fail(result.error.code === "ETIMEDOUT" ? "timeout" : `network: ${result.error.code || result.error.message}`);
   if (result.status !== 0) fail((result.stderr || "GitHub API unavailable").trim().slice(0, 240));
-  if (Buffer.byteLength(result.stdout || "", "utf8") > GH_MAX_BUFFER) fail("overflow");
+  if (Buffer.byteLength(result.stdout || "", "utf8") > maxBuffer) fail("overflow");
   try { return JSON.parse(result.stdout); } catch { fail("data_shape: GitHub API response is not JSON"); }
 }
-function ghEndpointFor(request, repository) {
+function boundedPositiveInteger(value, label, maximum) {
+  if (!Number.isInteger(value) || value < 1 || value > maximum) fail(`${label} must be a positive integer no greater than ${maximum}`);
+  return value;
+}
+function ghEndpointFor(request, repository, limits, pageByCategory) {
   if (typeof request !== "string" || !request.startsWith(`GET /repos/${repository}/`)) fail("GitHub API request is not repository-bound");
   const endpoint = request.slice("GET /".length);
-  const allowed = [
-    `repos/${repository}/git/ref/heads/main`,
-    `repos/${repository}/pulls?state=open&per_page=${REMOTE_LIMIT}`,
-    `repos/${repository}/git/matching-refs/heads/release/`,
-    `repos/${repository}/actions/runs?per_page=${REMOTE_LIMIT}`
-  ];
-  if (!allowed.includes(endpoint)) fail("GitHub API request is not allowlisted");
+  if (endpoint === `repos/${repository}/git/ref/heads/main` || endpoint === `repos/${repository}/git/matching-refs/heads/release/` || endpoint === `repos/${repository}/actions/runs?per_page=${REMOTE_PAGE_SIZE}`) return endpoint;
+  const match = new RegExp(`^repos/${repository.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}/pulls\\?state=open&per_page=(\\d+)&page=(\\d+)$`).exec(endpoint);
+  if (!match) fail("GitHub API request is not allowlisted");
+  const pageSize = Number(match[1]); const page = Number(match[2]);
+  if (pageSize !== limits.pageSize || page > limits.maxPages) fail("GitHub API pagination parameters exceed the configured bounds");
+  const expectedPage = (pageByCategory.get("pull_requests") || 0) + 1;
+  if (page !== expectedPage) fail("GitHub API pagination must be contiguous and ordered");
+  pageByCategory.set("pull_requests", page);
   return endpoint;
 }
-export function createGhApiReadAdapter({ repository = "szTheory/accrue", invoke } = {}) {
+export function createGhApiReadAdapter({ repository = "szTheory/accrue", invoke, pageSize = REMOTE_PAGE_SIZE, maxPages = REMOTE_MAX_PAGES, maxItems = REMOTE_MAX_ITEMS, timeoutMs = GH_TIMEOUT_MS, maxBuffer = GH_MAX_BUFFER } = {}) {
   const context = createRepositoryValidationContext({ expectedRepository: repository });
+  const limits = Object.freeze({
+    pageSize: boundedPositiveInteger(pageSize, "pageSize", REMOTE_PAGE_SIZE),
+    maxPages: boundedPositiveInteger(maxPages, "maxPages", REMOTE_MAX_PAGES),
+    maxItems: boundedPositiveInteger(maxItems, "maxItems", REMOTE_MAX_ITEMS),
+    timeoutMs: boundedPositiveInteger(timeoutMs, "timeoutMs", GH_TIMEOUT_MS),
+    maxBuffer: boundedPositiveInteger(maxBuffer, "maxBuffer", GH_MAX_BUFFER)
+  });
   const calls = [];
-  const execute = invoke || ((argv) => spawnSync("gh", argv, { encoding: "utf8", shell: false, timeout: GH_TIMEOUT_MS, maxBuffer: GH_MAX_BUFFER }));
+  const pageByCategory = new Map();
+  const execute = invoke || ((argv) => spawnSync("gh", argv, { encoding: "utf8", shell: false, timeout: limits.timeoutMs, maxBuffer: limits.maxBuffer }));
   return Object.freeze({
     calls,
+    limits,
     get(request) {
-      const endpoint = ghEndpointFor(request, context.expectedRepository);
+      const endpoint = ghEndpointFor(request, context.expectedRepository, limits, pageByCategory);
       const argv = ["api", endpoint, "--method", "GET", "--header", "Accept: application/vnd.github+json"];
       calls.push([...argv]);
       const result = execute([...argv]);
-      if (result && typeof result === "object" && "stdout" in result) return responseJson(result);
+      if (result && typeof result === "object" && "stdout" in result) return responseJson(result, limits.maxBuffer);
       if (typeof result === "string") { try { return JSON.parse(result); } catch { fail("data_shape: GitHub API response is not JSON"); } }
       return result;
     }
@@ -227,22 +247,53 @@ function remoteRead(adapter, request, repository, now, { plural, normalize }) {
     return normalizeRemoteFact({ repository, observed_at: now.toISOString(), request, available: true, ...value }, createRepositoryValidationContext({ expectedRepository: repository }), { plural });
   } catch (error) { return unavailable(repository, request, unavailableReason(error), now); }
 }
-function arrayOf(raw, label) { if (!Array.isArray(raw)) fail(`${label} response must be an array`); if (raw.length > REMOTE_LIMIT) fail("overflow"); return raw; }
+function arrayOf(raw, label, maximum = REMOTE_PAGE_SIZE) { if (!Array.isArray(raw)) fail(`${label} response must be an array`); if (raw.length > maximum) fail("overflow"); return raw; }
 function sortedShas(items, compare, sha) {
-  return [...items].sort((left, right) => compare(left, right) || sha(left).localeCompare(sha(right))).map((item) => fullSha(sha(item), "remote result SHA"));
+  const normalized = items.map((item) => ({ item, sha: fullSha(sha(item), "remote result SHA") }));
+  return normalized.sort((left, right) => compare(left.item, right.item) || left.sha.localeCompare(right.sha)).map((item) => item.sha);
+}
+function pluralPageRequest(repository, category, page, pageSize) {
+  const suffix = category === "pull_requests" ? `pulls?state=open&per_page=${pageSize}&page=${page}`
+    : category === "release_branches" ? `git/matching-refs/heads/release/?per_page=${pageSize}&page=${page}`
+      : category === "actions" ? `actions/runs?per_page=${pageSize}&page=${page}` : fail("plural GitHub category is not allowlisted");
+  return remoteRequest(repository, suffix);
+}
+function boundedPluralRemoteRead(adapter, repository, category, observedAt, { extract, normalize }) {
+  const context = createRepositoryValidationContext({ expectedRepository: repository });
+  const limits = adapter?.limits || { pageSize: REMOTE_PAGE_SIZE, maxPages: REMOTE_MAX_PAGES, maxItems: REMOTE_MAX_ITEMS };
+  const requests = []; const items = [];
+  try {
+    for (let page = 1; page <= limits.maxPages; page += 1) {
+      const request = pluralPageRequest(repository, category, page, limits.pageSize);
+      requests.push(request);
+      const pageItems = arrayOf(extract(adapter.get(request)), category, limits.pageSize);
+      if (items.length + pageItems.length > limits.maxItems) fail("overflow");
+      items.push(...pageItems);
+      if (pageItems.length < limits.pageSize) {
+        return normalizeRemoteFact({ repository, observed_at: observedAt.toISOString(), requests, available: true, shas: normalize(items) }, context, { plural: true });
+      }
+      if (page === limits.maxPages || items.length >= limits.maxItems) fail("overflow");
+    }
+    fail("overflow");
+  } catch (error) {
+    return normalizeRemoteFact(unavailable(repository, requests, unavailableReason(error), observedAt), context, { plural: true });
+  }
 }
 export function collectRemoteFacts({ repository, adapter, now = () => new Date() }) {
   const request = (suffix) => remoteRequest(repository, suffix);
   const requests = {
     remote_main: request("git/ref/heads/main"),
-    pull_requests: request(`pulls?state=open&per_page=${REMOTE_LIMIT}`),
+    pull_requests: request(`pulls?state=open&per_page=${REMOTE_PAGE_SIZE}&page=1`),
     release_branches: request("git/matching-refs/heads/release/"),
-    actions: request(`actions/runs?per_page=${REMOTE_LIMIT}`)
+    actions: request(`actions/runs?per_page=${REMOTE_PAGE_SIZE}`)
   };
   if (!adapter || typeof adapter.get !== "function") return Object.fromEntries(REMOTE_KEYS.map((key) => [key, unavailable(repository, requests[key], "unavailable", now())]));
   return {
     remote_main: remoteRead(adapter, requests.remote_main, repository, now(), { plural: false, normalize: (raw) => fullSha(raw?.object?.sha, "remote main SHA") }),
-    pull_requests: remoteRead(adapter, requests.pull_requests, repository, now(), { plural: true, normalize: (raw) => sortedShas(arrayOf(raw, "pull requests"), (a, b) => Number(a?.number) - Number(b?.number), (item) => item?.head?.sha) }),
+    pull_requests: boundedPluralRemoteRead(adapter, repository, "pull_requests", now(), { extract: (raw) => raw, normalize: (items) => sortedShas(items, (a, b) => {
+      if (!Number.isInteger(a?.number) || a.number < 1 || !Number.isInteger(b?.number) || b.number < 1) fail("pull request number must be a positive integer");
+      return a.number - b.number;
+    }, (item) => item?.head?.sha) }),
     release_branches: remoteRead(adapter, requests.release_branches, repository, now(), { plural: true, normalize: (raw) => sortedShas(arrayOf(raw, "release branches"), (a, b) => String(a?.ref || "").localeCompare(String(b?.ref || "")), (item) => item?.object?.sha) }),
     actions: remoteRead(adapter, requests.actions, repository, now(), { plural: true, normalize: (raw) => sortedShas(arrayOf(raw?.workflow_runs, "Actions"), (a, b) => String(a?.created_at || "").localeCompare(String(b?.created_at || "")) || Number(a?.id) - Number(b?.id), (item) => item?.head_sha) })
   };
@@ -342,12 +393,30 @@ if (process.env.NODE_TEST_CONTEXT) {
       "GET /repos/szTheory/accrue/pulls?state=open&per_page=100&page=1",
       "GET /repos/szTheory/accrue/pulls?state=open&per_page=100&page=2"
     ]);
+
+    const emptyResponses = new Map([
+      ["repos/szTheory/accrue/git/ref/heads/main", { object: { sha: indexedSha(200) } }],
+      ["repos/szTheory/accrue/pulls?state=open&per_page=100&page=1", []],
+      ["repos/szTheory/accrue/git/matching-refs/heads/release/", []],
+      ["repos/szTheory/accrue/actions/runs?per_page=100", { workflow_runs: [] }]
+    ]);
+    const emptyAdapter = createGhApiReadAdapter({ invoke: (argv) => ({ status: 0, stdout: JSON.stringify(emptyResponses.get(argv[1])), stderr: "" }) });
+    const empty = collectRemoteFacts({ repository: "szTheory/accrue", adapter: emptyAdapter, now: () => new Date("2026-09-13T00:00:00.000Z") });
+    assert.deepEqual(empty.pull_requests.shas, []);
+    assert.deepEqual(empty.pull_requests.requests, ["GET /repos/szTheory/accrue/pulls?state=open&per_page=100&page=1"]);
+
+    const overflowAdapter = createGhApiReadAdapter({ maxPages: 1, invoke: (argv) => ({ status: 0, stdout: JSON.stringify(responses.get(argv[1])), stderr: "" }) });
+    const overflow = collectRemoteFacts({ repository: "szTheory/accrue", adapter: overflowAdapter, now: () => new Date("2026-09-13T00:00:00.000Z") });
+    assert.equal(overflow.pull_requests.available, false);
+    assert.equal(overflow.pull_requests.reason, "overflow");
+    assert.equal("shas" in overflow.pull_requests, false);
+    assert.deepEqual(overflow.pull_requests.requests, ["GET /repos/szTheory/accrue/pulls?state=open&per_page=100&page=1"]);
   });
   test("GitHub observation adapter preserves bounded zero, one, and many remote results", () => {
     const sha = (letter) => letter.repeat(40);
     const responses = new Map([
       ["repos/szTheory/accrue/git/ref/heads/main", { object: { sha: sha("a") } }],
-      ["repos/szTheory/accrue/pulls?state=open&per_page=100", [{ number: 2, head: { sha: sha("c") } }, { number: 1, head: { sha: sha("b") } }]],
+      ["repos/szTheory/accrue/pulls?state=open&per_page=100&page=1", [{ number: 2, head: { sha: sha("c") } }, { number: 1, head: { sha: sha("b") } }]],
       ["repos/szTheory/accrue/git/matching-refs/heads/release/", []],
       ["repos/szTheory/accrue/actions/runs?per_page=100", { workflow_runs: [{ id: 2, created_at: "2026-01-02T00:00:00Z", head_sha: sha("e") }, { id: 1, created_at: "2026-01-02T00:00:00Z", head_sha: sha("d") }] }]
     ]);
@@ -360,7 +429,7 @@ if (process.env.NODE_TEST_CONTEXT) {
     assert.equal(adapter.calls.length, 4);
     assert.deepEqual(adapter.calls.map((argv) => argv.slice(0, 4)), [
       ["api", "repos/szTheory/accrue/git/ref/heads/main", "--method", "GET"],
-      ["api", "repos/szTheory/accrue/pulls?state=open&per_page=100", "--method", "GET"],
+      ["api", "repos/szTheory/accrue/pulls?state=open&per_page=100&page=1", "--method", "GET"],
       ["api", "repos/szTheory/accrue/git/matching-refs/heads/release/", "--method", "GET"],
       ["api", "repos/szTheory/accrue/actions/runs?per_page=100", "--method", "GET"]
     ]);
