@@ -1662,7 +1662,7 @@ The first slice (M1) of the SEED-004 redesign of `accrue_admin` from a CRUD surf
 
 ## Milestone: v1.61 — CI Evidence & Critical-Path Hardening
 
-**Shipped:** 2026-09-12  
+**Shipped:** 2026-09-12
 **Phases:** 4 | **Plans:** 30 | **Tasks:** 29
 
 ### What Was Built
