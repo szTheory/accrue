@@ -5,16 +5,16 @@ milestone_name: Release Integration & Repository Hygiene
 current_phase: 229
 current_phase_name: Repository Truth & Recovery Safety
 status: executing
-stopped_at: Completed 229-09-PLAN.md
-last_updated: "2026-09-13T18:41:00.643Z"
+stopped_at: Completed 229-10-PLAN.md
+last_updated: "2026-09-13T18:53:18.465Z"
 last_activity: 2026-09-13
 last_activity_desc: Phase 229 execution started
-state_head: 4dcb9f3ae0d681957f175809679c0ac78191751c
+state_head: 5ac97be4f3c92b12f51e494f83fe461c35ab1053
 progress:
   total_phases: 4
   completed_phases: 0
   total_plans: 14
-  completed_plans: 9
+  completed_plans: 10
   percent: 0
 ---
 
@@ -30,8 +30,8 @@ See: `.planning/PROJECT.md` (updated 2026-09-12)
 
 ## Current Position
 
-Phase: 229 (Repository Truth & Recovery Safety) — READY TO EXECUTE
-Plan: 6 of 9
+Phase: 229 (Repository Truth & Recovery Safety) — EXECUTING
+Plan: 2 of 14
 Status: Ready to execute
 Last activity: 2026-09-13 — Phase 229 execution started
 
@@ -66,6 +66,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 229 P08 | 9min | 2 tasks | 3 files |
 | Phase 229 P07 | 20m | 2 tasks | 2 files |
 | Phase 229 P09 | 40min | 2 tasks | 3 files |
+| Phase 229 P10 | 10 min | 2 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -95,6 +96,8 @@ Progress: [░░░░░░░░░░] 0%
 - [Phase 229]: Rendered recovery derives POSIX-quoted fetch and update-ref commands from verified original ref/object pairs while the bundle path remains runtime-only. — The immutable legacy private restore string is untrusted and is never executed.
 - [Phase 229]: Final capture keeps the original recovery capsule immutable and adds one restrictive private attestation. — Append-only evidence avoids weakening or replacing the anchored recovery authority.
 - [Phase 229]: Strict recovery permits only the active execution branch to advance after freezing. — Phase task commits must advance that branch while every frozen original object remains recoverable and every non-active ref remains exact.
+- [Phase 229]: Compare complete sorted NUL-delimited artifact triples immediately before PASS. — One exact map comparison detects add, remove, rename, type, and digest drift while new outputs remain cleanup-owned.
+- [Phase 229]: Hash symlink link text only from a non-dereferenced Buffer. — Raw fs.readlinkSync buffer bytes preserve invalid UTF-8 and newline evidence without target access or decode/re-encode loss.
 
 ### Pending Todos
 
@@ -107,6 +110,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-09-13T16:08:01.010Z
-Stopped at: Completed 229-09-PLAN.md
+Last session: 2026-09-13T18:53:18.448Z
+Stopped at: Completed 229-10-PLAN.md
 Resume file: None
