@@ -283,4 +283,8 @@ if (process.env.NODE_TEST_CONTEXT) {
     const unavailableFact = collectRemoteFacts({ repository: "szTheory/accrue", adapter: { get: () => { throw new Error("rate limit 429"); } }, now: () => new Date("2026-09-13T00:00:00.000Z") });
     assert.equal(unavailableFact.actions.reason, "rate_limit");
   });
+  test("repository truth exposes sanitized worktree and ship-window collectors", () => {
+    assert.equal(typeof collectWorktrees, "function");
+    assert.equal(typeof readShipWindows, "function");
+  });
 }
