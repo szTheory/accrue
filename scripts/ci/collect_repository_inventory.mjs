@@ -417,6 +417,52 @@ function main() { const options = parseArgs(process.argv.slice(2)); if (!options
 if (!process.env.NODE_TEST_CONTEXT && process.argv[1] === new URL(import.meta.url).pathname) { try { main(); } catch (error) { console.error(`repository inventory collect: FAIL: ${error.message}`); process.exitCode = 1; } }
 
 if (process.env.NODE_TEST_CONTEXT && process.argv[1] === new URL(import.meta.url).pathname) {
+  function generatedArtifactFixture() {
+    const scratch = fs.mkdtempSync(path.join(fs.realpathSync(os.tmpdir()), "phase229-artifact-flow-"));
+    const repo = path.join(scratch, "repo"); const capsule = path.join(scratch, "capsule");
+    fs.mkdirSync(repo); fs.mkdirSync(capsule);
+    run(repo, ["init", "-q", "-b", "main"]);
+    run(repo, ["config", "user.email", "phase229@example.invalid"]);
+    run(repo, ["config", "user.name", "Phase 229"]);
+    fs.writeFileSync(path.join(repo, "tracked"), "tracked\n");
+    run(repo, ["add", "tracked"]); run(repo, ["commit", "-qm", "fixture"]);
+    const object = run(repo, ["rev-parse", "HEAD"]);
+    run(repo, ["update-ref", "refs/remotes/origin/main", object]); run(repo, ["tag", "v1.61", object]);
+    fs.mkdirSync(path.join(repo, ".planning"));
+    fs.writeFileSync(path.join(repo, ".planning/milestone.lock"), "before lock\n");
+    fs.writeFileSync(path.join(repo, ".planning/state.json"), "before state\n");
+    const rawLink = Buffer.from([0xff, 0xfe, 0x0a]); const linkPath = path.join(repo, "raw-link");
+    try { fs.symlinkSync(rawLink, linkPath); } catch (error) {
+      fs.rmSync(scratch, { recursive: true, force: true });
+      fail(`raw-byte symlink fixture is unsupported and must fail closed: ${error.message}`);
+    }
+    const bundle = path.join(capsule, "recovery.bundle"); const manifestPath = path.join(capsule, "manifest.json");
+    const preserve = spawnSync("bash", [path.join(process.cwd(), "scripts/ci/preserve_repository_state.sh"), "--repo-root", repo, "--expected-repository", "szTheory/accrue", "--bundle-out", bundle, "--private-manifest-out", manifestPath], { encoding: "utf8", shell: false, timeout: 30_000, maxBuffer: 1_000_000 });
+    assert.equal(preserve.status, 0, preserve.stderr);
+    const manifestBytes = fs.readFileSync(manifestPath); const manifest = JSON.parse(manifestBytes);
+    const expectedLinkDigest = crypto.createHash("sha256").update(rawLink).digest("hex");
+    assert.equal(manifest.artifacts.find((entry) => entry.path === "raw-link")?.sha256, expectedLinkDigest, "preservation freezes exact invalid-UTF-8 and trailing-newline link bytes");
+    fs.writeFileSync(path.join(repo, ".planning/milestone.lock"), "after lock\n");
+    fs.writeFileSync(path.join(repo, ".planning/state.json"), "after state\n");
+    const artifacts = manifest.artifacts.map((entry) => {
+      const workflow = WORKFLOW_METADATA_PATHS.has(entry.path);
+      const after = workflow ? crypto.createHash("sha256").update(fs.readFileSync(path.join(repo, entry.path))).digest("hex") : entry.sha256;
+      return { path: entry.path, type: entry.type, before_sha256: entry.sha256, after_sha256: after, state: workflow ? "workflow_metadata_refreshed" : "unchanged" };
+    });
+    const attestationPath = path.join(capsule, "attestation.json");
+    fs.writeFileSync(attestationPath, JSON.stringify({ schema_version: 1, purpose: "phase229_final_capture", observed_at: "2026-09-13T00:00:00.000Z", artifacts }), { mode: 0o600 });
+    fs.chmodSync(attestationPath, 0o600);
+    return { scratch, repo, capsule, bundle, manifestPath, manifest, expectedManifestSha256: crypto.createHash("sha256").update(manifestBytes).digest("hex"), attestationPath, expectedLinkDigest, linkPath };
+  }
+
+  test("CR-02 final collection preserves raw invalid-UTF-8 symlink bytes", () => {
+    const fixture = generatedArtifactFixture();
+    try {
+      const inventory = collectRepositoryInventory({ repo: fixture.repo, recoveryManifest: fixture.manifestPath, expectedManifestSha256: fixture.expectedManifestSha256, recoveryBundle: fixture.bundle, finalCaptureAttestation: fixture.attestationPath, expectedRepository: "szTheory/accrue" });
+      assert.equal(inventory.artifacts.entries.find((entry) => entry.path === "raw-link")?.sha256, fixture.expectedLinkDigest);
+    } finally { fs.rmSync(fixture.scratch, { recursive: true, force: true }); }
+  });
+
   const remoteSchemaFixture = () => ({
     schema_version: 2,
     repository: "szTheory/accrue",
