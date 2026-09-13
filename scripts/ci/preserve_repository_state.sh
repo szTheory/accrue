@@ -201,6 +201,10 @@ self_test() {
   [[ ! -e "$output/equal" && ! -e "$output/alias" && ! -e "$output/private" ]] || { echo "self-test: rejected invocation wrote output" >&2; return 1; }
   TMPDIR="$tmp" "$0" --repo-root "$repo" --expected-repository szTheory/accrue --bundle-out "$output/capsule.bundle" --private-manifest-out "$output/private.json" --public-record-out "$output/public.json" >/dev/null
   assert_empty_directory "$tmp" || { echo "self-test: production scratch leaked after success" >&2; return 1; }
+  before="$(git -C "$repo" for-each-ref --format='%(refname) %(objectname)' refs/accrue-preserve/phase-229)"
+  expect_rejected "$repo" "$before" env PHASE229_TEST_FAIL_AFTER_MANIFEST=1 TMPDIR="$tmp" "$0" --repo-root "$repo" --expected-repository szTheory/accrue --bundle-out "$output/injected.bundle" --private-manifest-out "$output/injected.json"
+  assert_empty_directory "$tmp" || { echo "self-test: production scratch leaked after injected failure" >&2; return 1; }
+  [[ ! -e "$output/injected.bundle" && ! -e "$output/injected.json" ]] || { echo "self-test: injected failure published output" >&2; return 1; }
   git -C "$repo" bundle verify "$output/capsule.bundle" >/dev/null
   [[ "$(stat -f '%Lp' "$output/private.json")" == 600 ]] || { echo "self-test: private manifest mode is not 0600" >&2; return 1; }
   node - "$output/private.json" "$output/public.json" "$output/capsule.bundle" "$scratch/restore" <<'NODE'
