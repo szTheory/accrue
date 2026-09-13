@@ -5,16 +5,16 @@ milestone_name: Release Integration & Repository Hygiene
 current_phase: 229
 current_phase_name: Repository Truth & Recovery Safety
 status: executing
-stopped_at: Completed 229-05-PLAN.md
-last_updated: "2026-09-13T14:41:31.868Z"
+stopped_at: Completed 229-06-PLAN.md
+last_updated: "2026-09-13T14:48:48.859Z"
 last_activity: 2026-09-13
 last_activity_desc: Phase 229 execution started
-state_head: dba4d2be6f113cf93e124e51ca76259494dfb07b
+state_head: 610551ca455ccf1ae05c2e1167d6c2e8c9d59968
 progress:
   total_phases: 4
   completed_phases: 0
   total_plans: 9
-  completed_plans: 5
+  completed_plans: 6
   percent: 0
 ---
 
@@ -31,7 +31,7 @@ See: `.planning/PROJECT.md` (updated 2026-09-12)
 ## Current Position
 
 Phase: 229 (Repository Truth & Recovery Safety) — EXECUTING
-Plan: 2 of 9
+Plan: 3 of 9
 Status: Ready to execute
 Last activity: 2026-09-13 — Phase 229 execution started
 
@@ -62,6 +62,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 229-repository-truth-recovery-safety P03 | 16min | 2 tasks | 3 files |
 | Phase 229 P04 | 35min | 2 tasks | 7 files |
 | Phase 229 P05 | 20m | 2 tasks | 1 files |
+| Phase 229 P06 | 13m | 2 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -82,6 +83,8 @@ Progress: [░░░░░░░░░░] 0%
 - [Phase 229]: Phase 229 commits explicit unavailable remote observations rather than cached or local substitutes.
 - [Phase 229]: [Phase 229]: Recovery capsules use physical destination validation and exclusive atomic publication before final bundle revalidation.
 - [Phase 229]: [Phase 229]: Recovery manifests store restore argv arrays, never shell command text.
+- [Phase 229]: Remote main is singleton evidence while plural GitHub categories retain deterministic full-SHA arrays.
+- [Phase 229]: Recovery manifest repository identity is checked before dependent collection.
 
 ### Pending Todos
 
@@ -94,6 +97,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-09-13T14:41:31.845Z
-Stopped at: Completed 229-05-PLAN.md
+Last session: 2026-09-13T14:48:48.836Z
+Stopped at: Completed 229-06-PLAN.md
 Resume file: None
