@@ -8,6 +8,7 @@ import { spawnSync } from "node:child_process";
 import test from "node:test";
 
 import {
+  createGhApiReadAdapter,
   collectRemoteFacts,
   collectRepositoryInventory,
   collectWorktrees,
@@ -122,7 +123,7 @@ function strictVerifierFixture() {
   return { scratch, repo, bundle, manifestPath, manifestDigest, object, inventory };
 }
 
-function runStrictVerifier(fixture, inventory) {
+function runStrictVerifier(fixture, inventory, flags = []) {
   const records = path.join(fixture.scratch, `records-${crypto.randomUUID()}.json`);
   const rendered = path.join(fixture.scratch, `rendered-${crypto.randomUUID()}.md`);
   const env = { ...process.env, NODE_TEST_CONTEXT: undefined };
@@ -140,9 +141,53 @@ function runStrictVerifier(fixture, inventory) {
     "--recovery-bundle", fixture.bundle,
     "--require-recovery",
     "--require-all-ref-recovery",
-    "--require-complete-categories"
+    "--require-complete-categories",
+    ...flags
   ], { encoding: "utf8", shell: false, timeout: 20_000, env });
 }
+
+function runIsolatedNodeTest(file, namePattern) {
+  return spawnSync(process.execPath, ["--test", `--test-name-pattern=${namePattern}`, file], {
+    cwd: path.dirname(path.dirname(path.dirname(VERIFY_INVENTORY))),
+    encoding: "utf8",
+    shell: false,
+    timeout: 30_000,
+    env: { ...process.env, NODE_TEST_CONTEXT: undefined }
+  });
+}
+
+test("CR-01 preservation rejects post-snapshot artifact mutation before PASS", () => {
+  const script = fileURLToPath(new URL("./preserve_repository_state.sh", import.meta.url));
+  const result = spawnSync("bash", [script, "--self-test"], { encoding: "utf8", shell: false, timeout: 30_000 });
+  assert.equal(result.status, 0, result.stderr);
+  assert.match(result.stdout, /preserve repository state self-test: PASS/);
+});
+
+test("CR-02 preservation hashes raw symlink link-text bytes including newline edges", () => {
+  const script = fileURLToPath(new URL("./preserve_repository_state.sh", import.meta.url));
+  const result = spawnSync("bash", [script, "--self-test"], { encoding: "utf8", shell: false, timeout: 30_000 });
+  assert.equal(result.status, 0, result.stderr);
+  assert.match(result.stdout, /preserve repository state self-test: PASS/);
+});
+
+test("CR-03 plural GitHub evidence requires a terminal page and fails closed at bounds", () => {
+  const sha = (index) => index.toString(16).padStart(40, "0");
+  const fullPage = Array.from({ length: 100 }, (_, index) => ({ number: index + 1, head: { sha: sha(index + 1) } }));
+  const responses = new Map([
+    [`repos/${REPOSITORY}/git/ref/heads/main`, { object: { sha: sha(500) } }],
+    [`repos/${REPOSITORY}/pulls?state=open&per_page=100&page=1`, fullPage],
+    [`repos/${REPOSITORY}/pulls?state=open&per_page=100&page=2`, [{ number: 101, head: { sha: sha(101) } }]],
+    [`repos/${REPOSITORY}/git/matching-refs/heads/release/?per_page=100&page=1`, []],
+    [`repos/${REPOSITORY}/actions/runs?per_page=100&page=1`, { workflow_runs: [] }]
+  ]);
+  const adapter = createGhApiReadAdapter({ invoke: (argv) => ({ status: 0, stdout: JSON.stringify(responses.get(argv[1])), stderr: "" }) });
+  const observed = collectRemoteFacts({ repository: REPOSITORY, adapter, now: () => OBSERVED_AT });
+  assert.equal(observed.pull_requests.shas.length, 101);
+  assert.equal(observed.pull_requests.requests.length, 2);
+  const overflow = collectRemoteFacts({ repository: REPOSITORY, adapter: createGhApiReadAdapter({ maxPages: 1, invoke: (argv) => ({ status: 0, stdout: JSON.stringify(responses.get(argv[1])), stderr: "" }) }), now: () => OBSERVED_AT });
+  assert.equal(overflow.pull_requests.reason, "overflow");
+  assert.equal("shas" in overflow.pull_requests, false);
+});
 
 test("CR-04 strict recovery rejects a fabricated active ref and accepts the actual live object", () => {
   const fixture = strictVerifierFixture();
@@ -192,7 +237,65 @@ test("CR-06 complete categories reject missing extra duplicate and changed workt
   }
 });
 
-test("CR-06 preserves every bounded remote-unavailable reason without a substituted SHA", () => {
+test("CR-07 strict provenance rejects unrelated missing duplicate skipped reordered foreign and over-bound requests", () => {
+  const fixture = strictVerifierFixture();
+  try {
+    const variants = [];
+    const unrelated = structuredClone(fixture.inventory); unrelated.remotes.remote_main.request = `GET /repos/${REPOSITORY}/issues`; variants.push(unrelated);
+    const missing = structuredClone(fixture.inventory); missing.remotes.pull_requests.requests = []; variants.push(missing);
+    const duplicate = structuredClone(fixture.inventory); duplicate.remotes.pull_requests.requests = [
+      `GET /repos/${REPOSITORY}/pulls?state=open&per_page=100&page=1`,
+      `GET /repos/${REPOSITORY}/pulls?state=open&per_page=100&page=1`
+    ]; variants.push(duplicate);
+    const skipped = structuredClone(fixture.inventory); skipped.remotes.release_branches.requests = [
+      `GET /repos/${REPOSITORY}/git/matching-refs/heads/release/?per_page=100&page=1`,
+      `GET /repos/${REPOSITORY}/git/matching-refs/heads/release/?per_page=100&page=3`
+    ]; variants.push(skipped);
+    const reordered = structuredClone(fixture.inventory); reordered.remotes.actions.requests = [
+      `GET /repos/${REPOSITORY}/actions/runs?per_page=100&page=2`,
+      `GET /repos/${REPOSITORY}/actions/runs?per_page=100&page=1`
+    ]; variants.push(reordered);
+    const foreign = structuredClone(fixture.inventory); foreign.remotes.actions.requests = ["GET /repos/other/repository/actions/runs?per_page=100&page=1"]; variants.push(foreign);
+    const overBound = structuredClone(fixture.inventory); overBound.remotes.actions.requests = Array.from({ length: 11 }, (_, index) => `GET /repos/${REPOSITORY}/actions/runs?per_page=100&page=${index + 1}`); variants.push(overBound);
+    for (const inventory of variants) assert.notEqual(runStrictVerifier(fixture, inventory, ["--require-command-provenance"]).status, 0, "invalid category provenance must fail the public strict verifier");
+  } finally {
+    fs.rmSync(fixture.scratch, { recursive: true, force: true });
+  }
+});
+
+test("CR-08 strict privacy rejects POSIX Windows UNC file URI and control-bearing locations", () => {
+  const fixture = strictVerifierFixture();
+  try {
+    const forbidden = [
+      "/var/private/phase229-capsule.json", "/root/capsule", "/opt/capsule", "/private/tmp/capsule",
+      "C:\\private\\capsule", "C:private\\capsule", "\\\\server\\share\\capsule", "file:///private/capsule",
+      "relative\nvalue", "relative\rvalue", "relative\tvalue", `relative${String.fromCharCode(0x7f)}value`
+    ];
+    for (const value of forbidden) {
+      const inventory = structuredClone(fixture.inventory);
+      inventory.planning.state = value;
+      assert.notEqual(runStrictVerifier(fixture, inventory, ["--require-privacy-controls"]).status, 0, `private/path-like value must fail: ${JSON.stringify(value)}`);
+    }
+  } finally {
+    fs.rmSync(fixture.scratch, { recursive: true, force: true });
+  }
+});
+
+test("CR-09 CI watch enforces its wall-clock deadline through the public process", () => {
+  const monitor = fileURLToPath(new URL("./ci_monitor.cjs", import.meta.url));
+  const result = runIsolatedNodeTest(monitor, "watch absolute deadline bounds delayed GitHub reads");
+  assert.equal(result.status, 0, result.stderr);
+  assert.match(result.stdout, /ok 1 - watch absolute deadline bounds delayed GitHub reads/);
+});
+
+test("WR-02 CI inspection rejects selected-viewed run ID and workflow switching", () => {
+  const monitor = fileURLToPath(new URL("./ci_monitor.cjs", import.meta.url));
+  const result = runIsolatedNodeTest(monitor, "inspect binds selected run identity before job summary");
+  assert.equal(result.status, 0, result.stderr);
+  assert.match(result.stdout, /ok 1 - inspect binds selected run identity before job summary/);
+});
+
+test("bounded remote-unavailable evidence retains its reason without a substituted SHA", () => {
   const cases = new Map([
     ["network ENOTFOUND", "network"],
     ["authentication 401", "authentication"],
@@ -221,7 +324,7 @@ test("CR-06 preserves every bounded remote-unavailable reason without a substitu
   }
 });
 
-test("CR-07 collects every real worktree with dirty and detached state but no path", () => {
+test("sanitized collection records every worktree with dirty and detached state but no path", () => {
   const scratch = fs.mkdtempSync(path.join(os.tmpdir(), "phase229-worktrees-"));
   const repo = path.join(scratch, "repo");
   const linked = path.join(scratch, "linked");
@@ -253,7 +356,7 @@ test("CR-07 collects every real worktree with dirty and detached state but no pa
   }
 });
 
-test("CR-07 distinguishes an observed-empty ship-window ledger and rejects inconsistent counts", () => {
+test("ship-window collection distinguishes observed-empty authority and rejects inconsistent counts", () => {
   const table = "| id | phase | kind | file | line | description | status | reason | recorded_at | resolved_at |\n| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |\n";
   const empty = `---\nopen_count: 0\nwaived_count: 0\nfixed_count: 0\ntotal_count: 0\n---\n${table}`;
   assert.deepEqual(readShipWindows({ root: "/fixture", readFile: () => empty }), []);
@@ -265,7 +368,7 @@ test("CR-07 distinguishes an observed-empty ship-window ledger and rejects incon
   );
 });
 
-test("CR-08 rejects a foreign recovery manifest before bundle or remote access", () => {
+test("collection rejects a foreign recovery manifest before bundle or remote access", () => {
   const scratch = fs.mkdtempSync(path.join(os.tmpdir(), "phase229-foreign-manifest-"));
   const repo = path.join(scratch, "repo");
   const manifestPath = path.join(scratch, "manifest.json");
