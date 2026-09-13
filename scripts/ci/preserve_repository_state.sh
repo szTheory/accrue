@@ -87,11 +87,12 @@ self_test() {
   local scratch; scratch="$(mktemp -d "${TMPDIR:-/tmp}/phase229-self-test.XXXXXX")"
   git init -q "$scratch/repo"; git -C "$scratch/repo" config user.email phase229@example.invalid; git -C "$scratch/repo" config user.name phase229
   printf 'fixture\n' > "$scratch/repo/tracked"; git -C "$scratch/repo" add tracked; git -C "$scratch/repo" commit -qm fixture
-  git -C "$scratch/repo" branch other; git -C "$scratch/repo" tag -a annotated -m tag; git -C "$scratch/repo" tag lightweight; git -C "$scratch/repo" notes add -m note; git -C "$scratch/repo" update-ref refs/remotes/origin/main HEAD; git -C "$scratch/repo" update-ref refs/custom/phase229 HEAD
+  git -C "$scratch/repo" branch other; git -C "$scratch/repo" tag -a annotated -m tag; git -C "$scratch/repo" tag lightweight; git -C "$scratch/repo" notes add -m note; git -C "$scratch/repo" update-ref refs/remotes/origin/main HEAD; git -C "$scratch/repo" update-ref 'refs/custom/phase229$(not-executed)' HEAD
+  printf 'stash fixture\n' >> "$scratch/repo/tracked"; git -C "$scratch/repo" stash push -qm phase229-fixture
   printf 'regular' > "$scratch/repo/nested-file"; mkdir "$scratch/repo/nested"; printf 'nested' > "$scratch/repo/nested/value"; ln -s nowhere "$scratch/repo/link"
-  "$0" --repo-root "$scratch/repo" --expected-repository szTheory/accrue --bundle-out "$scratch/capsule.bundle" --private-manifest-out "$scratch/private.json" >/dev/null
+  "$0" --repo-root "$scratch/repo" --expected-repository szTheory/accrue --bundle-out "$scratch/capsule.bundle" --private-manifest-out "$scratch/private.json" --public-record-out "$scratch/public.json" >/dev/null
   git -C "$scratch/repo" bundle verify "$scratch/capsule.bundle" >/dev/null
-  node -e 'const m=require(process.argv[1]); if (!m.recovery_verified || m.refs.length < 7 || !m.artifacts.some(x=>x.type === "symlink")) process.exit(1)' "$scratch/private.json"
+  node -e 'const m=require(process.argv[1]); if (!m.recovery_verified || !m.refs.some(x=>x.original_ref === "refs/stash") || !m.refs.some(x=>x.original_ref.includes("$(not-executed)")) || !m.refs.every(x=>Array.isArray(x.restore_argv)) || !m.artifacts.some(x=>x.type === "symlink")) process.exit(1)' "$scratch/private.json"
   echo "preserve repository state self-test: PASS"
 }
 if "$self_test"; then self_test; else run; fi
