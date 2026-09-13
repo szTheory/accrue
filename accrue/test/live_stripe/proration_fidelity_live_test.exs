@@ -182,7 +182,6 @@ defmodule Accrue.LiveStripe.ProrationFidelityLiveTest do
              LatticeStripe.Invoice.create(client, %{
                "auto_advance" => false,
                "customer" => customer.processor_id,
-               "pending_invoice_items_behavior" => "include",
                "subscription" => committed_sub.processor_id
              })
 
