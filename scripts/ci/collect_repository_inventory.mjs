@@ -322,6 +322,27 @@ function main() { const options = parseArgs(process.argv.slice(2)); if (!options
 if (!process.env.NODE_TEST_CONTEXT && process.argv[1] === new URL(import.meta.url).pathname) { try { main(); } catch (error) { console.error(`repository inventory collect: FAIL: ${error.message}`); process.exitCode = 1; } }
 
 if (process.env.NODE_TEST_CONTEXT) {
+  test("open pull requests require terminal page proof", () => {
+    const indexedSha = (index) => index.toString(16).padStart(40, "0");
+    const firstPage = Array.from({ length: 100 }, (_, index) => ({ number: index + 1, head: { sha: indexedSha(index + 1) } }));
+    const responses = new Map([
+      ["repos/szTheory/accrue/git/ref/heads/main", { object: { sha: indexedSha(200) } }],
+      ["repos/szTheory/accrue/pulls?state=open&per_page=100&page=1", firstPage],
+      ["repos/szTheory/accrue/pulls?state=open&per_page=100&page=2", [{ number: 101, head: { sha: indexedSha(101) } }]],
+      ["repos/szTheory/accrue/git/matching-refs/heads/release/?per_page=100&page=1", []],
+      ["repos/szTheory/accrue/actions/runs?per_page=100&page=1", { workflow_runs: [] }]
+    ]);
+    const adapter = createGhApiReadAdapter({ invoke: (argv) => ({ status: 0, stdout: JSON.stringify(responses.get(argv[1])), stderr: "" }) });
+
+    const facts = collectRemoteFacts({ repository: "szTheory/accrue", adapter, now: () => new Date("2026-09-13T00:00:00.000Z") });
+
+    assert.equal(facts.pull_requests.available, true);
+    assert.deepEqual(facts.pull_requests.shas, [...firstPage.map((item) => item.head.sha), indexedSha(101)]);
+    assert.deepEqual(facts.pull_requests.requests, [
+      "GET /repos/szTheory/accrue/pulls?state=open&per_page=100&page=1",
+      "GET /repos/szTheory/accrue/pulls?state=open&per_page=100&page=2"
+    ]);
+  });
   test("GitHub observation adapter preserves bounded zero, one, and many remote results", () => {
     const sha = (letter) => letter.repeat(40);
     const responses = new Map([
