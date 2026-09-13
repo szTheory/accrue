@@ -23,6 +23,7 @@ const VERIFY_INVENTORY = fileURLToPath(new URL("./verify_repository_inventory.mj
 const RENDER_INVENTORY = fileURLToPath(new URL("./render_repository_inventory.mjs", import.meta.url));
 const PRESERVE_REPOSITORY = fileURLToPath(new URL("./preserve_repository_state.sh", import.meta.url));
 const README_PATH = fileURLToPath(new URL("./README.md", import.meta.url));
+const HANDOFF_INVARIANTS = fileURLToPath(new URL("./verify_phase229_handoff_invariants.mjs", import.meta.url));
 const PRESERVATION_PREFIX = "refs/accrue-preserve/phase-229/";
 const sha256 = (value) => crypto.createHash("sha256").update(value).digest("hex");
 const encodedRef = (name) => `${PRESERVATION_PREFIX}${Buffer.from(name).toString("hex")}`;
@@ -248,6 +249,15 @@ test("WR-01 documented strict command executes generated private authority and r
     fs.chmodSync(fixture.manifestPath, 0o644);
     assert.notEqual(runDocumentedStrict(block, fixture).status, 0, "unsafe manifest permissions must fail");
   } finally { fs.chmodSync(fixture.manifestPath, 0o600); fs.rmSync(fixture.scratch, { recursive: true, force: true }); }
+});
+
+test("final handoff gate rejects capsule workspace and attestation invariant drift", () => {
+  const result = spawnSync(process.execPath, [HANDOFF_INVARIANTS, "--self-test"], { encoding: "utf8", shell: false, timeout: 30_000, env: { ...process.env, NODE_TEST_CONTEXT: "" } });
+  assert.equal(result.status, 0, `${result.stderr}\n${result.stdout}\n${result.error?.message || ""}`);
+  for (const invariant of ["sibling-add", "sibling-delete", "sibling-rename", "content-digest", "link-digest", "type-swap", "mode", "owner", "raw-non-utf8", "untracked", "ref-tag", "worktree", "preexisting-attestation", "extra-entry", "exclusive-attestation"]) {
+    assert.match(result.stdout, new RegExp(`handoff invariant ${invariant}: PASS`), `missing ${invariant} process-boundary evidence`);
+  }
+  assert.match(result.stdout, /phase229 handoff invariant self-test: PASS/);
 });
 
 test("CR-01 preservation rejects post-snapshot artifact mutation before PASS", () => {
