@@ -78,6 +78,30 @@ function assertCanonicalRefContinuity(authority, candidate, activeRef, activeObj
   }
 }
 
+function directRefMap(repo) {
+  const output = git(repo, ["for-each-ref", "--format=%(refname) %(objectname)", "refs"]);
+  const rows = output ? output.split("\n").map((line) => {
+    const separator = line.indexOf(" ");
+    return { ref: line.slice(0, separator), object: line.slice(separator + 1) };
+  }) : [];
+  for (const row of rows) if (!row.ref.startsWith("refs/") || !SHA.test(row.object)) fail("live ref authority contains an invalid row");
+  return exactMap(rows, "live refs", (row) => row.ref, (row) => row.object);
+}
+
+function liveCaptureAuthority(inventory, repositoryRoot) {
+  const symbolic = spawnSync("git", ["-C", repositoryRoot, "symbolic-ref", "-q", "HEAD"], { encoding: "utf8", shell: false, timeout: 15_000, maxBuffer: 1_000_000 });
+  if (symbolic.error || symbolic.status !== 0 || !symbolic.stdout.trim()) fail("strict verification requires a live symbolic active ref");
+  const activeRef = symbolic.stdout.trim();
+  if (inventory.capture.active_ref !== activeRef || inventory.capture.primary_worktree.branch !== activeRef) fail("captured active ref and primary worktree branch must match the live symbolic ref identity");
+  const capturedObject = inventory.capture.commit;
+  const exists = spawnSync("git", ["-C", repositoryRoot, "cat-file", "-e", `${capturedObject}^{commit}`], { encoding: "utf8", shell: false, timeout: 15_000, maxBuffer: 1_000_000 });
+  if (exists.error || exists.status !== 0) fail("captured active commit does not exist as a live commit object");
+  const liveObject = git(repositoryRoot, ["rev-parse", `${activeRef}^{commit}`]);
+  const ancestry = spawnSync("git", ["-C", repositoryRoot, "merge-base", "--is-ancestor", capturedObject, liveObject], { encoding: "utf8", shell: false, timeout: 15_000, maxBuffer: 1_000_000 });
+  if (ancestry.error || ancestry.status !== 0) fail("captured active commit must be an ancestor of the live same-ref object");
+  return { activeRef, capturedObject, liveObject };
+}
+
 function privateManifest(manifestPath, expectedDigest, context) {
   if (typeof manifestPath !== "string" || !manifestPath) fail("--recovery-manifest requires a non-empty private manifest path");
   if (typeof expectedDigest !== "string" || !DIGEST.test(expectedDigest)) fail("--expected-manifest-sha256 requires a full lowercase SHA-256 digest");
@@ -146,14 +170,10 @@ export function assertStrictRecovery(inventory, context, { repositoryRoot = proc
   if (requireAllRefs) {
     const canonicalPreservation = exactMap(checked.refs.all.filter((row) => row.name.startsWith(PRESERVATION_PREFIX)), "canonical preservation refs", (row) => row.name, (row) => row.object);
     const canonical = exactMap(checked.refs.all.filter((row) => !row.name.startsWith(PRESERVATION_PREFIX)), "canonical non-preservation refs", (row) => row.name, (row) => row.object);
-    const symbolic = spawnSync("git", ["-C", repositoryRoot, "symbolic-ref", "-q", "HEAD"], { encoding: "utf8", shell: false, timeout: 15_000, maxBuffer: 1_000_000 });
-    if (symbolic.error || symbolic.status !== 0 || !symbolic.stdout.trim()) fail("strict recovery requires a live symbolic active ref");
-    const activeRef = symbolic.stdout.trim();
-    const activeObject = git(repositoryRoot, ["rev-parse", `${activeRef}^{object}`]);
-    git(repositoryRoot, ["cat-file", "-e", `${activeObject}^{object}`]);
-    if (checked.refs.milestone_branch !== activeObject) fail("recorded milestone branch object differs from the live active object");
+    const { activeRef, liveObject } = liveCaptureAuthority(checked, repositoryRoot);
     assertSameMap("private manifest encoded refs", expectedEncoded, "canonical preservation refs", canonicalPreservation);
-    assertCanonicalRefContinuity(manifest.refs, canonical, activeRef, activeObject);
+    assertSameMap("private manifest", manifest.refs, "captured canonical non-preservation refs", canonical);
+    assertCanonicalRefContinuity(exactMap(checked.refs.all, "captured canonical refs", (row) => row.name, (row) => row.object), directRefMap(repositoryRoot), activeRef, liveObject);
   }
   return true;
 }
@@ -199,7 +219,7 @@ function assertTypedArtifacts(inventory) {
   return true;
 }
 
-function directWorktrees(repositoryRoot) {
+function directWorktreeRecords(repositoryRoot) {
   const listed = spawnSync("git", ["-C", repositoryRoot, "worktree", "list", "--porcelain"], { encoding: "utf8", shell: false, timeout: 15_000, maxBuffer: 512 * 1024 });
   if (listed.error || listed.status !== 0) fail("git worktree list failed while verifying complete categories");
   const rows = []; let current = null;
@@ -208,7 +228,7 @@ function directWorktrees(repositoryRoot) {
     if (!current.path || !SHA.test(current.sha || "") || (!current.branch && !current.detached)) fail("git worktree authority contains an incomplete record");
     const status = spawnSync("git", ["-C", current.path, "status", "--porcelain"], { encoding: "utf8", shell: false, timeout: 15_000, maxBuffer: 512 * 1024 });
     if (status.error || status.status !== 0) fail("git worktree status failed while verifying complete categories");
-    rows.push({ branch: current.detached ? "detached" : current.branch.replace(/^refs\/heads\//, ""), sha: current.sha, dirty: Boolean(status.stdout) });
+    rows.push({ path: current.path, fullBranch: current.detached ? "detached" : current.branch, branch: current.detached ? "detached" : current.branch.replace(/^refs\/heads\//, ""), sha: current.sha, dirty: Boolean(status.stdout) });
     current = null;
   };
   for (const line of listed.stdout.split("\n")) {
@@ -224,6 +244,10 @@ function directWorktrees(repositoryRoot) {
   finish();
   if (!rows.length) fail("git worktree authority contains no worktrees");
   return rows;
+}
+
+function directWorktrees(repositoryRoot) {
+  return directWorktreeRecords(repositoryRoot).map(({ branch, sha, dirty }) => ({ branch, sha, dirty }));
 }
 
 function directShipWindows(repositoryRoot) {
@@ -257,7 +281,16 @@ function assertCompleteCategories(inventory, context, { repositoryRoot = process
   for (const [role, ref] of Object.entries(ROLE_REFS)) if (all.get(ref) !== inventory.refs[role]) fail(`complete categories require ${role} to match ${ref}`);
   if (![...all.values()].includes(inventory.refs.milestone_branch)) fail("complete categories require the milestone branch object in refs.all");
   if (!Array.isArray(inventory.worktrees) || inventory.worktrees.length === 0 || !inventory.planning || !Array.isArray(inventory.planning.ship_windows)) fail("complete local categories are required");
-  assertSameMultiset("direct git worktree authority", directWorktrees(repositoryRoot), "canonical worktrees", inventory.worktrees, (row) => `${row.branch}\0${row.sha}\0${row.dirty ? "1" : "0"}`);
+  const capture = liveCaptureAuthority(inventory, repositoryRoot);
+  const liveRecords = directWorktreeRecords(repositoryRoot);
+  const primaryPath = fs.realpathSync(git(repositoryRoot, ["rev-parse", "--show-toplevel"]));
+  const livePrimary = liveRecords.filter((row) => fs.realpathSync(row.path) === primaryPath);
+  if (livePrimary.length !== 1 || livePrimary[0].fullBranch !== capture.activeRef || livePrimary[0].sha !== capture.liveObject) fail("live primary worktree identity does not match the active symbolic ref");
+  const activeBranch = capture.activeRef.replace(/^refs\/heads\//, "");
+  const capturedPrimary = inventory.worktrees.filter((row) => row.branch === activeBranch && row.sha === capture.capturedObject);
+  if (capturedPrimary.length !== 1) fail("canonical worktrees must contain exactly one captured primary identity");
+  const expectedLiveWorktrees = inventory.worktrees.map((row) => row === capturedPrimary[0] ? { ...row, sha: capture.liveObject } : row);
+  assertSameMultiset("captured worktrees with same-primary ancestry", expectedLiveWorktrees, "direct git worktree authority", liveRecords, (row) => `${row.branch}\0${row.sha}\0${row.dirty ? "1" : "0"}`);
   assertSameMultiset("bounded .planning/WINDOWS.md authority", directShipWindows(repositoryRoot), "canonical ship windows", inventory.planning.ship_windows, String);
   for (const key of REMOTE_KEYS) normalizeRemoteFact(inventory.remotes[key], context, { plural: key !== "remote_main" });
   return true;
@@ -436,7 +469,7 @@ function strictInventory(fixture, { mode = "local_only" } = {}) {
       actions: { repository: "szTheory/accrue", observed_at: "2026-09-13T00:00:00.000Z", requests: ["GET /repos/szTheory/accrue/actions/runs?per_page=100&page=1"], available: false, state: "unavailable", reason: "network" }
     },
     planning: { ship_windows: ["1:open", "2:fixed"], milestone: "present", state: "present" },
-    worktrees: [{ branch: "main", sha: fixture.object, dirty: true }]
+    worktrees: directWorktrees(fixture.repo)
   }, context);
 }
 
@@ -456,6 +489,8 @@ function assertRecoveryFailure(mutate, expected) {
 function verifyStrictRecoveryControls(context) {
   const fixture = recoveryFixture();
   try {
+    const secondaryWorktree = path.join(fixture.scratch, "secondary-worktree");
+    git(fixture.repo, ["worktree", "add", "-q", secondaryWorktree, "secondary"]);
     const inventory = strictInventory(fixture);
     assert.equal(assertStrictRecovery(inventory, context, strictOptions(fixture)), true, "complete many-ref recovery must pass");
     const missing = structuredClone(inventory); missing.recovery.refs.pop();
@@ -479,9 +514,42 @@ function verifyStrictRecoveryControls(context) {
     assert.notEqual(liveObject, fixture.object, "the fixture must verify after two later active-branch commits");
     assert.equal(assertStrictRecovery(inventory, context, strictOptions(fixture)), true, "capture at A remains valid after canonical B and later phase C commits");
     assert.equal(assertCompleteCategories(inventory, context, { repositoryRoot: fixture.repo }), true, "complete categories tolerate only the captured primary worktree advancing from A to C");
+
+    const withCaptureObject = (source, object) => {
+      const candidate = structuredClone(source);
+      candidate.capture.commit = object;
+      candidate.capture.primary_worktree.head = object;
+      candidate.refs.milestone_branch = object;
+      candidate.refs.local_main = object;
+      candidate.refs.all.find((row) => row.name === "refs/heads/main").object = object;
+      candidate.worktrees.find((row) => row.branch === "main").sha = object;
+      return candidate;
+    };
+    const missingCapture = withCaptureObject(inventory, "f".repeat(40));
+    assert.throws(() => assertStrictRecovery(missingCapture, context, strictOptions(fixture)), /does not exist as a live commit object/);
+    const tree = git(fixture.repo, ["rev-parse", `${fixture.object}^{tree}`]);
+    const siblingCapture = git(fixture.repo, ["commit-tree", tree, "-p", fixture.object], { input: "sibling capture\n" });
+    assert.throws(() => assertStrictRecovery(withCaptureObject(inventory, siblingCapture), context, strictOptions(fixture)), /must be an ancestor/);
+    const descendantCapture = git(fixture.repo, ["commit-tree", tree, "-p", liveObject], { input: "future descendant\n" });
+    assert.throws(() => assertStrictRecovery(withCaptureObject(inventory, descendantCapture), context, strictOptions(fixture)), /must be an ancestor/);
+    const wrongRef = structuredClone(inventory);
+    wrongRef.capture.active_ref = "refs/heads/secondary";
+    wrongRef.capture.primary_worktree.branch = "refs/heads/secondary";
+    assert.throws(() => assertStrictRecovery(wrongRef, context, strictOptions(fixture)), /must match the live symbolic ref identity/);
+    const wrongPrimary = structuredClone(inventory);
+    wrongPrimary.capture.primary_worktree.branch = "refs/heads/secondary";
+    assert.throws(() => assertStrictRecovery(wrongPrimary, context, strictOptions(fixture)), /capture active ref and primary worktree identity must agree/);
+    const rewrittenObject = git(fixture.repo, ["commit-tree", tree], { input: "rewritten root\n" });
+    git(fixture.repo, ["update-ref", "refs/heads/main", rewrittenObject, liveObject]);
+    assert.throws(() => assertStrictRecovery(inventory, context, strictOptions(fixture)), /must be an ancestor/);
+    git(fixture.repo, ["update-ref", "refs/heads/main", liveObject, rewrittenObject]);
+
     const driftedInactive = structuredClone(inventory);
     driftedInactive.refs.all.find((row) => row.name === "refs/heads/secondary").object = liveObject;
     assert.throws(() => assertStrictRecovery(driftedInactive, context, strictOptions(fixture)), /changed=\[refs\/heads\/secondary\]/);
+    fs.writeFileSync(path.join(secondaryWorktree, "inactive-change"), "must remain exact\n");
+    git(secondaryWorktree, ["add", "inactive-change"]); git(secondaryWorktree, ["commit", "-qm", "advance inactive worktree"]);
+    assert.throws(() => assertCompleteCategories(inventory, context, { repositoryRoot: fixture.repo }), /direct git worktree authority differs/);
     const encodedExtra = `${PRESERVATION_PREFIX}6578747261`;
     git(fixture.repo, ["update-ref", encodedExtra, fixture.object]);
     assert.throws(() => assertStrictRecovery(inventory, context, strictOptions(fixture)), /local encoded preservation refs recovery set differs/);
@@ -490,7 +558,9 @@ function verifyStrictRecoveryControls(context) {
     createBundle(fixture.repo, fixture.bundle, subset.map((row) => row.original_ref));
     fixture.manifest.bundle_sha256 = sha256(fs.readFileSync(fixture.bundle));
     writeManifest(fixture);
-    const absentHead = strictInventory(fixture);
+    const absentHead = structuredClone(inventory);
+    absentHead.recovery.manifest_sha256 = fixture.expectedManifestSha256;
+    absentHead.recovery.bundle_sha256 = fixture.manifest.bundle_sha256;
     assert.throws(() => assertStrictRecovery(absentHead, context, strictOptions(fixture)), /original bundle heads recovery set differs/);
   } finally { fs.rmSync(fixture.scratch, { recursive: true, force: true }); }
 
