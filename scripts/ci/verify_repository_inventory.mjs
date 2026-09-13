@@ -614,6 +614,37 @@ function verifyStrictFlagControls(context) {
   } finally { fs.rmSync(fixture.scratch, { recursive: true, force: true }); }
 }
 
+function verifyIndependentPlanningAuthority() {
+  const fixture = recoveryFixture();
+  try {
+    const context = createRepositoryValidationContext({ expectedRepository: "szTheory/accrue" });
+    const inventory = strictInventory(fixture);
+    const fabricated = structuredClone(inventory);
+    fabricated.planning.milestone = "fabricated";
+    fabricated.planning.state = "fabricated";
+    assert.throws(
+      () => assertCompleteCategories(fabricated, context, { repositoryRoot: fixture.repo }),
+      /planning|MILESTONES|STATE/,
+      "fabricated planning strings must not substitute for independently hashed files or exact absence"
+    );
+  } finally { fs.rmSync(fixture.scratch, { recursive: true, force: true }); }
+}
+
+function verifyNoFollowBundleAuthority() {
+  const fixture = recoveryFixture();
+  try {
+    const context = createRepositoryValidationContext({ expectedRepository: "szTheory/accrue" });
+    const inventory = strictInventory(fixture);
+    const alias = path.join(fixture.scratch, "bundle-alias");
+    fs.symlinkSync(fixture.bundle, alias);
+    assert.throws(
+      () => assertStrictRecovery(inventory, context, { ...strictOptions(fixture), recoveryBundle: alias }),
+      /symbolic link|no-follow|symlink/,
+      "standalone strict recovery must never follow a bundle symlink"
+    );
+  } finally { fs.rmSync(fixture.scratch, { recursive: true, force: true }); }
+}
+
 export function verifyFixtures() {
   const context = createRepositoryValidationContext({ expectedRepository: "szTheory/accrue" });
   verifyStrictRecoveryControls(context);
@@ -712,6 +743,8 @@ async function main() {
 if (process.env.NODE_TEST_CONTEXT) {
   test("strict repository inventory flags enforce independent negative controls", () => verifyFixtures());
   test("rendered recovery procedure restores original bundle heads safely", () => verifyRenderedRecoveryProcedureControls());
+  test("CR-08 complete categories derive planning digests independently", () => verifyIndependentPlanningAuthority());
+  test("WR-02 standalone recovery rejects followed bundle aliases", () => verifyNoFollowBundleAuthority());
 } else {
   main().catch((error) => { console.error(`repository inventory fixtures: FAIL: ${error.message}`); process.exitCode = 1; });
 }
