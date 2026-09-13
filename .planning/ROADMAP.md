@@ -48,7 +48,7 @@ Deferred StoreKit, Crosswake physical-device, and Admin UI ratchet work must be 
   1. A maintainer can inspect one committed inventory covering local and remote `main`, v1.61 lineage and tag, release branches, worktrees, open PRs, untracked paths, ship windows, and planning state.
   2. A maintainer can recover each pre-existing divergent local ref and user-owned untracked artifact after synchronization work, with no force-push, tag movement, or unrecorded deletion.
   3. A maintainer can use one supported command path to list, inspect, and monitor GitHub Actions runs whose failure output identifies the exact repository SHA.
-**Plans**: TBD
+**Plans**: 14/14 plans executed
 
 ### Phase 230: Reviewable History Integration
 **Goal**: Maintainers can review one reversible integration candidate that reconciles remote `main`, intended v1.61 work, and all four post-archive audit-closure commits without rewriting published history.
@@ -86,7 +86,7 @@ Deferred StoreKit, Crosswake physical-device, and Admin UI ratchet work must be 
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 229. Repository Truth & Recovery Safety | 0/TBD | Not started | - |
+| 229. Repository Truth & Recovery Safety | 14/14 | In Progress |  |
 | 230. Reviewable History Integration | 0/TBD | Not started | - |
 | 231. Exact-SHA Release Gate Proof | 0/TBD | Not started | - |
 | 232. Bounded Hygiene & Release Handoff | 0/TBD | Not started | - |
