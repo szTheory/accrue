@@ -5,16 +5,16 @@ milestone_name: Release Integration & Repository Hygiene
 current_phase: 229
 current_phase_name: Repository Truth & Recovery Safety
 status: executing
-stopped_at: Completed 229-02-PLAN.md
-last_updated: "2026-09-13T04:19:56.144Z"
+stopped_at: Completed 229-03-PLAN.md
+last_updated: "2026-09-13T04:29:02.293Z"
 last_activity: 2026-09-13
 last_activity_desc: Phase 229 execution started
-state_head: a583d6fed64b2e4da4b5129f781aafa90b7e4f95
+state_head: f9c07a32b4bcd0b5336cf422a6c7e8bfd5f0e583
 progress:
   total_phases: 4
   completed_phases: 0
   total_plans: 4
-  completed_plans: 2
+  completed_plans: 3
   percent: 0
 ---
 
@@ -31,7 +31,7 @@ See: `.planning/PROJECT.md` (updated 2026-09-12)
 ## Current Position
 
 Phase: 229 (Repository Truth & Recovery Safety) — EXECUTING
-Plan: 3 of 4
+Plan: 4 of 4
 Status: Ready to execute
 Last activity: 2026-09-13 — Phase 229 execution started
 
@@ -59,6 +59,7 @@ Progress: [░░░░░░░░░░] 0%
 |------|----------|-------|-------|
 | Phase 229 P01 | 10min | 2 tasks | 6 files |
 | Phase 229 P02 | 15min | 2 tasks | 2 files |
+| Phase 229-repository-truth-recovery-safety P03 | 16min | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -73,6 +74,8 @@ Progress: [░░░░░░░░░░] 0%
 - [Phase 229]: Phase 229 monitor permits only repository-bound list, inspect, and bounded watch reads.
 - [Phase 229]: Legacy branch selection is resolved to a full SHA before watch polling, while explicit SHA bypasses selection.
 - [Phase 229]: Actions success remains provider_proof non_run absent independent provider evidence.
+- [Phase 229]: Remote facts use repository-bound GET provenance and explicit unavailable records.
+- [Phase 229]: Collection re-resolves preservation refs before live remote observation.
 
 ### Pending Todos
 
@@ -85,6 +88,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-09-13T04:19:56.132Z
-Stopped at: Completed 229-02-PLAN.md
+Last session: 2026-09-13T04:29:02.279Z
+Stopped at: Completed 229-03-PLAN.md
 Resume file: None
