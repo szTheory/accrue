@@ -3,7 +3,7 @@ gsd_state_version: "1.0"
 milestone: v1.61
 milestone_name: CI Evidence & Critical-Path Hardening
 status: Awaiting next milestone
-stopped_at: Milestone v1.61 implementation complete, ready for closeout
+stopped_at: Milestone v1.61 completed, verified, and archived
 last_updated: "2026-09-13T02:26:08.567Z"
 last_activity: 2026-09-12
 last_activity_desc: Milestone v1.61 completed and archived
@@ -12,21 +12,21 @@ progress:
   total_phases: 4
   completed_phases: 4
   total_plans: 30
-  completed_plans: 28
-  percent: 93
-current_phase: 228
-current_phase_name: Repair Stripe Webhook-Signing CI Boot Contract Under a Fresh Evidence Budget
+  completed_plans: 30
+  percent: 100
+current_phase: null
+current_phase_name: null
 ---
 
 # Project State
 
 ## Project Reference
 
-See: `.planning/PROJECT.md` (updated 2026-09-12 after completing Phase 227 and all v1.61 implementation work)
+See: `.planning/PROJECT.md` (updated 2026-09-12 after shipping v1.61)
 
 **Core value:** A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic Elixir DX, strong domain modeling, tamper-evident audit ledger, great observability, and zero breaking-change pain through v1.x.
 
-**Current focus:** v1.61 milestone closeout
+**Current focus:** Planning the next milestone
 
 ## Current Position
 
@@ -44,7 +44,7 @@ Last activity: 2026-09-12 — Milestone v1.61 completed and archived
 | 227 | Make one measured critical-path improvement with stable checks, artifacts, negative controls, and rollback. | PATH-01, PATH-02, SAFE-01, SAFE-02 | Complete |
 | 228 | Repair the Stripe webhook-signing boot contract and seal one fresh authorized provider attempt. | None | Complete |
 
-**Dependency shape:** 225 → 226 → 227. **Coverage:** 10/10 requirements mapped exactly once.
+**Dependency shape:** 225 → 226 → 227 → 228. **Coverage:** 10/10 requirements mapped exactly once.
 
 **Binding guardrails:** Matrix-wide identical failures are one root-cause incident. The Admin Playwright timeout is trace-first, never retry-masked or deleted. No matrix collapse, branch-protection change, cache rewrite, or required-gate demotion before baseline and negative-control proof. Preserve required-check identity, artifacts, and `proved` / `skipped` / `advisory` provider semantics. StoreKit/iPhone/Crosswake and the parked Admin UI ratchet are out of scope.
 
