@@ -146,7 +146,7 @@ function render(value, format) {
 }
 function verifyWrapper(path) {
   const wrapper = fs.readFileSync(path, "utf8"); const execCount = (wrapper.match(/\bexec\s+node\b/g) || []).length;
-  if (execCount !== 1 || !/ci_monitor\.cjs\s+watch/.test(wrapper) || !/--repo\s+szTheory\/accrue/.test(wrapper) || !/--timeout-seconds/.test(wrapper) || /\bgh\s+(run|api|workflow)\b/.test(wrapper)) fail(67, "wrapper must perform exactly one bounded monitor exec with no direct GitHub command");
+  if (execCount !== 1 || !/ci_monitor\.cjs["']?\s+watch/.test(wrapper) || !/--repo\s+szTheory\/accrue/.test(wrapper) || !/--timeout-seconds/.test(wrapper) || /\bgh\s+(run|api|workflow)\b/.test(wrapper)) fail(67, "wrapper must perform exactly one bounded monitor exec with no direct GitHub command");
   return true;
 }
 function fixtureAdapter(sequence) {
