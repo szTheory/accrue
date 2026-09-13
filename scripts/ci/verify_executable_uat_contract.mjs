@@ -77,6 +77,20 @@ function entryRefs(entry) {
     .map((line) => unquote(line.replace(/^\s+ref:\s*/, "")));
 }
 
+function archiveAwareVerificationRef(ref, phaseDir) {
+  const normalizedDirectory = phaseDir.split(path.sep).join("/");
+  const planningIndex = normalizedDirectory.lastIndexOf("/.planning/");
+  if (planningIndex === -1) return ref;
+  const root = normalizedDirectory.slice(0, planningIndex);
+  return ref.replace(/\.planning\/phases\/(\d+-[a-z0-9]+(?:-[a-z0-9]+)*)/g, (original, phaseName) => {
+    try {
+      return path.relative(root, resolvePhaseDir(root, phaseName)).split(path.sep).join("/");
+    } catch {
+      return original;
+    }
+  });
+}
+
 function hasUnresolvedHumanVerification(verification) {
   return (
     /^\s*why_human:\s*\S/im.test(verification) ||
@@ -128,7 +142,7 @@ function renderAutomatedUat(phaseDir) {
   const tests = entries.map(({ file, entry }, index) => {
     const id = entryScalar(entry, "id") || `coverage-${index + 1}`;
     const description = entryScalar(entry, "description") || `${file} ${id}`;
-    const refs = entryRefs(entry);
+    const refs = entryRefs(entry).map((ref) => archiveAwareVerificationRef(ref, phaseDir));
     if (refs.length === 0) fail(`${file} coverage ${id}: missing verification ref`);
     const statuses = [...entry.matchAll(/\n\s+status:\s*([^\s#]+)/g)].map(
       (match) => match[1]
