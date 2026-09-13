@@ -109,7 +109,7 @@ Each task followed an intentional RED then GREEN TDD cycle:
 - RED `a322743a` reached the post-manifest checkpoint and failed only because preservation refs were already visible before preparation completed; `check tdd-red-evidence` returned `RED_EVIDENCE_OK` with `target_test_failed`.
 - GREEN `f90c0d75` passed the full matrix twice consecutively, including preparation, publication, pre-existing-ref, concurrent-ref, and success cases.
 
-## Verification
+## Validation Evidence
 
 - Bash syntax validation for the preservation script - PASS.
 - First full preservation self-test - PASS.
