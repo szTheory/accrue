@@ -161,9 +161,24 @@ export function assertStrictRecovery(inventory, context, { repositoryRoot = proc
 function assertCommandProvenance(inventory, context) {
   for (const key of REMOTE_KEYS) {
     const fact = inventory.remotes[key];
-    const requests = key === "remote_main" ? [fact?.request] : fact?.requests;
-    if (!fact || fact.repository !== context.expectedRepository || typeof fact.observed_at !== "string" || !Array.isArray(requests) || requests.length === 0 || requests.some((request) => !new RegExp(`^GET /repos/${context.expectedRepository.replace("/", "\\/")}/`).test(request || ""))) fail(`command provenance is required for ${key}`);
     normalizeRemoteFact(fact, context, { plural: key !== "remote_main" });
+    if (key === "remote_main") {
+      if (fact.request !== `GET /repos/${context.expectedRepository}/git/ref/heads/main`) fail("command provenance for remote_main must use the exact main-ref GET");
+      continue;
+    }
+    const requests = fact.requests;
+    if (!Array.isArray(requests) || requests.length === 0 || requests.length > 10) fail(`command provenance for ${key} must use one through ten bounded pages`);
+    const suffix = key === "pull_requests" ? "pulls?state=open&per_page=100&page="
+      : key === "release_branches" ? "git/matching-refs/heads/release/?per_page=100&page="
+        : "actions/runs?per_page=100&page=";
+    requests.forEach((request, index) => {
+      const expected = `GET /repos/${context.expectedRepository}/${suffix}${index + 1}`;
+      if (request !== expected) fail(`command provenance for ${key} must be an exact contiguous ordered page sequence`);
+    });
+    if (fact.available === true) {
+      const completedPages = requests.length - 1;
+      if (fact.shas.length < completedPages * 100 || fact.shas.length >= requests.length * 100 || fact.shas.length > 1_000) fail(`command provenance for ${key} lacks terminal-page proof`);
+    }
   }
   return true;
 }
@@ -234,7 +249,7 @@ function directShipWindows(repositoryRoot) {
   const ids = new Set();
   for (const row of rows) { if (ids.has(row.id)) fail("ship-window authority contains duplicate IDs"); ids.add(row.id); }
   if (count("total_count") !== rows.length || count("open_count") !== rows.filter((row) => row.status === "open").length || count("waived_count") !== rows.filter((row) => row.status === "waived").length || count("fixed_count") !== rows.filter((row) => row.status === "fixed").length) fail("ship-window authority counts are inconsistent");
-  return rows.map((row) => `${row.id}:${row.status}`);
+  return rows.sort((left, right) => left.id - right.id).map((row) => `${row.id}:${row.status}`);
 }
 
 function assertCompleteCategories(inventory, context, { repositoryRoot = process.cwd() } = {}) {
@@ -260,13 +275,17 @@ function assertEdgeCases(inventory) {
 
 function assertPrivacyControls(inventory, rendered, privateValues = []) {
   const forbiddenKey = /(^|_)(actor|token|secret|payload|raw|logs?|bundle_path|manifest_path)($|_)/i;
+  const forbiddenLocation = (value) => path.posix.isAbsolute(value)
+    || path.win32.isAbsolute(value)
+    || /^[A-Za-z]:/.test(value)
+    || /^file:/i.test(value);
   const visit = (value, trail = "inventory") => {
     if (Array.isArray(value)) return value.forEach((item, index) => visit(item, `${trail}[${index}]`));
     if (value && typeof value === "object") return Object.entries(value).forEach(([key, item]) => {
       if (forbiddenKey.test(key)) fail(`privacy controls reject forbidden field: ${trail}.${key}`);
       visit(item, `${trail}.${key}`);
     });
-    if (typeof value === "string" && (/^(?:\/Users\/|\/home\/|\/tmp\/|[A-Za-z]:\\)/.test(value) || value.includes("\0"))) fail(`privacy controls reject private path or control data at ${trail}`);
+    if (typeof value === "string" && (forbiddenLocation(value) || /[\x00-\x1f\x7f]/.test(value))) fail(`privacy controls reject private path or control data at ${trail}`);
   };
   visit(inventory);
   for (const value of privateValues.filter(Boolean)) if (JSON.stringify(inventory).includes(value) || rendered.includes(value)) fail("private recovery location leaked into committed evidence");
@@ -501,7 +520,7 @@ function verifyStrictFlagControls(context) {
     assert.throws(() => assertEdgeCases(edge), /empty-directory policy/);
     assert.equal(assertCommandProvenance(inventory, context), true);
     const provenance = structuredClone(inventory); provenance.remotes.actions.requests = ["GET /repos/other/repository/actions/runs?per_page=100&page=1"];
-    assert.throws(() => assertCommandProvenance(provenance, context), /provenance/);
+    assert.throws(() => assertCommandProvenance(provenance, context), /provenance|ordered repository-bound/);
     const rendered = renderRepositoryInventory(inventory, context);
     assert.equal(assertPrivacyControls(inventory, rendered), true);
     const privatePath = structuredClone(inventory); privatePath.planning.state = "/Users/private/state.json";

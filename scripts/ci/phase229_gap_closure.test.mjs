@@ -129,7 +129,7 @@ function runStrictVerifier(fixture, inventory, flags = []) {
   const env = { ...process.env, NODE_TEST_CONTEXT: undefined };
   fs.writeFileSync(records, `${JSON.stringify(inventory, null, 2)}\n`);
   const render = spawnSync(process.execPath, [RENDER_INVENTORY, "--input", records, "--out", rendered, "--expected-repository", REPOSITORY], { encoding: "utf8", shell: false, env });
-  assert.equal(render.status, 0, render.stderr);
+  if (render.status !== 0) return render;
   return spawnSync(process.execPath, [
     VERIFY_INVENTORY,
     "--records", records,
@@ -240,6 +240,7 @@ test("CR-06 complete categories reject missing extra duplicate and changed workt
 test("CR-07 strict provenance rejects unrelated missing duplicate skipped reordered foreign and over-bound requests", () => {
   const fixture = strictVerifierFixture();
   try {
+    assert.equal(runStrictVerifier(fixture, fixture.inventory, ["--require-command-provenance"]).status, 0, "exact category provenance must pass");
     const variants = [];
     const unrelated = structuredClone(fixture.inventory); unrelated.remotes.remote_main.request = `GET /repos/${REPOSITORY}/issues`; variants.push(unrelated);
     const missing = structuredClone(fixture.inventory); missing.remotes.pull_requests.requests = []; variants.push(missing);
@@ -257,6 +258,7 @@ test("CR-07 strict provenance rejects unrelated missing duplicate skipped reorde
     ]; variants.push(reordered);
     const foreign = structuredClone(fixture.inventory); foreign.remotes.actions.requests = ["GET /repos/other/repository/actions/runs?per_page=100&page=1"]; variants.push(foreign);
     const overBound = structuredClone(fixture.inventory); overBound.remotes.actions.requests = Array.from({ length: 11 }, (_, index) => `GET /repos/${REPOSITORY}/actions/runs?per_page=100&page=${index + 1}`); variants.push(overBound);
+    const noTerminalPage = structuredClone(fixture.inventory); noTerminalPage.remotes.pull_requests.available = true; noTerminalPage.remotes.pull_requests.state = "observed"; delete noTerminalPage.remotes.pull_requests.reason; noTerminalPage.remotes.pull_requests.shas = Array.from({ length: 100 }, (_, index) => (index + 1).toString(16).padStart(40, "0")); variants.push(noTerminalPage);
     for (const inventory of variants) assert.notEqual(runStrictVerifier(fixture, inventory, ["--require-command-provenance"]).status, 0, "invalid category provenance must fail the public strict verifier");
   } finally {
     fs.rmSync(fixture.scratch, { recursive: true, force: true });
@@ -266,6 +268,7 @@ test("CR-07 strict provenance rejects unrelated missing duplicate skipped reorde
 test("CR-08 strict privacy rejects POSIX Windows UNC file URI and control-bearing locations", () => {
   const fixture = strictVerifierFixture();
   try {
+    assert.equal(runStrictVerifier(fixture, fixture.inventory, ["--require-privacy-controls"]).status, 0, "normalized repository-relative evidence must pass privacy controls");
     const forbidden = [
       "/var/private/phase229-capsule.json", "/root/capsule", "/opt/capsule", "/private/tmp/capsule",
       "C:\\private\\capsule", "C:private\\capsule", "\\\\server\\share\\capsule", "file:///private/capsule",
