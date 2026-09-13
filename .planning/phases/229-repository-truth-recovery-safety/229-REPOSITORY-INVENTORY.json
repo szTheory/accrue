@@ -702,14 +702,14 @@
         "path": ".planning/milestone.lock",
         "type": "regular",
         "before_sha256": "ff3a344da8e68b3823d339706955e8d9af254c8512ac04d83756cc8d8abef1ab",
-        "after_sha256": "0b4bfb6304c778cc3685560cecde007a81170f749bbdf4de22253d2007a071c5",
+        "after_sha256": "957e70b503f5114b063474dc48a4bb430c67b3c107a224c7ca373814f2c34324",
         "state": "workflow_metadata_refreshed"
       },
       {
         "path": ".planning/state.json",
         "type": "regular",
         "before_sha256": "2fd971f021946b9d4fa59955236168029afb266c1126979f97409e18412cb273",
-        "after_sha256": "358b97b6fe677cdbd680cb7914346e9e95431d086ce75fe426974404b0c05c8e",
+        "after_sha256": "2df27d8a58456fa4f52cb7a21bc921cfd2609d25d0241af3b7c232e238bdda95",
         "state": "workflow_metadata_refreshed"
       }
     ]
@@ -717,7 +717,7 @@
   "refs": {
     "local_main": "5c01f4bc38d4d38e8e080bde0e608e26ca9b5442",
     "cached_origin_main": "8f3135f781a324fc0b8d3c460883b1d572bf6e02",
-    "milestone_branch": "06e28c50dc7301547745da4ce1f0be3770ed6d97",
+    "milestone_branch": "dbbe2d07152bae7e81c71d39dc8711b5b4885110",
     "v161_tag": "fdb41672dd9240b36623ab22a7a8377a2735e5a3",
     "all": [
       {
@@ -1292,7 +1292,7 @@
       },
       {
         "name": "refs/heads/gsd/milestone-v1.62-release-integration-hygiene",
-        "object": "06e28c50dc7301547745da4ce1f0be3770ed6d97",
+        "object": "dbbe2d07152bae7e81c71d39dc8711b5b4885110",
         "role": "other"
       },
       {
@@ -1815,46 +1815,57 @@
   "remotes": {
     "remote_main": {
       "repository": "szTheory/accrue",
-      "observed_at": "2026-09-13T13:09:08.483Z",
-      "request": "GET /repos/szTheory/accrue/remote_main",
-      "available": false,
-      "state": "unavailable",
-      "reason": "unavailable"
+      "observed_at": "2026-09-13T15:29:21.713Z",
+      "request": "GET /repos/szTheory/accrue/git/ref/heads/main",
+      "available": true,
+      "state": "observed",
+      "sha": "d30fc25dbf6ba551792c66ff451b4b93c0af4bf1"
     },
     "pull_requests": {
       "repository": "szTheory/accrue",
-      "observed_at": "2026-09-13T13:09:08.483Z",
-      "request": "GET /repos/szTheory/accrue/pull_requests",
-      "available": false,
-      "state": "unavailable",
-      "reason": "unavailable"
+      "observed_at": "2026-09-13T15:29:22.068Z",
+      "request": "GET /repos/szTheory/accrue/pulls?state=open&per_page=100",
+      "available": true,
+      "state": "observed",
+      "shas": []
     },
     "release_branches": {
       "repository": "szTheory/accrue",
-      "observed_at": "2026-09-13T13:09:08.483Z",
-      "request": "GET /repos/szTheory/accrue/release_branches",
-      "available": false,
-      "state": "unavailable",
-      "reason": "unavailable"
+      "observed_at": "2026-09-13T15:29:22.414Z",
+      "request": "GET /repos/szTheory/accrue/git/matching-refs/heads/release/",
+      "available": true,
+      "state": "observed",
+      "shas": []
     },
     "actions": {
       "repository": "szTheory/accrue",
-      "observed_at": "2026-09-13T13:09:08.483Z",
-      "request": "GET /repos/szTheory/accrue/actions",
+      "observed_at": "2026-09-13T15:29:22.776Z",
+      "request": "GET /repos/szTheory/accrue/actions/runs?per_page=100",
       "available": false,
       "state": "unavailable",
-      "reason": "unavailable"
+      "reason": "network"
     }
   },
   "planning": {
-    "ship_windows": [],
+    "ship_windows": [
+      "1:open",
+      "2:open",
+      "3:open",
+      "4:open",
+      "5:open",
+      "6:open",
+      "7:open",
+      "8:open",
+      "9:open",
+      "10:open"
+    ],
     "milestone": "9ed23b971a9e16c1f943b2862c70d818632cd5a52caa194cefb78454847f55d3",
-    "state": "277f3d9a20384c47780e60715149d549633e67b58aec4ffd7e9699b61a708e83"
+    "state": "262031b5eb7b945db3f3fb1b2bf33950c0b508a84bae10b28c26dca02960a8ac"
   },
   "worktrees": [
     {
       "branch": "gsd/milestone-v1.62-release-integration-hygiene",
-      "sha": "06e28c50dc7301547745da4ce1f0be3770ed6d97",
+      "sha": "dbbe2d07152bae7e81c71d39dc8711b5b4885110",
       "dirty": true
     }
   ]

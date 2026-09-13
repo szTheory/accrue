@@ -57,6 +57,19 @@ function assertSameMap(authorityName, authority, candidateName, candidate) {
   if (missing.length || extra.length || changed.length) fail(`${candidateName} recovery set differs from ${authorityName}: missing=[${missing.join(", ")}] extra=[${extra.join(", ")}] changed=[${changed.join(", ")}]`);
 }
 
+function assertCanonicalRefContinuity(authority, candidate, activeRef, activeObject) {
+  const missing = [...authority.keys()].filter((key) => !candidate.has(key)).sort();
+  const extra = [...candidate.keys()].filter((key) => !authority.has(key)).sort();
+  const changed = [...authority.keys()].filter((key) => key !== activeRef && candidate.has(key) && candidate.get(key) !== authority.get(key)).sort();
+  if (missing.length || extra.length || changed.length) {
+    fail(`canonical non-preservation refs recovery set differs from private manifest: missing=[${missing.join(", ")}] extra=[${extra.join(", ")}] changed=[${changed.join(", ")}]`);
+  }
+  if (activeRef) {
+    if (!authority.has(activeRef)) fail("active execution ref was not frozen by the private manifest");
+    if (candidate.get(activeRef) !== activeObject) fail("active execution ref must match the recorded milestone branch object");
+  }
+}
+
 function privateManifest(manifestPath, expectedDigest, context) {
   if (typeof manifestPath !== "string" || !manifestPath) fail("--recovery-manifest requires a non-empty private manifest path");
   if (typeof expectedDigest !== "string" || !DIGEST.test(expectedDigest)) fail("--expected-manifest-sha256 requires a full lowercase SHA-256 digest");
@@ -124,7 +137,10 @@ export function assertStrictRecovery(inventory, context, { repositoryRoot = proc
   if (checked.recovery.bundle_sha256 !== manifest.value.bundle_sha256) fail("committed recovery bundle digest differs from the private manifest");
   if (requireAllRefs) {
     const canonical = exactMap(checked.refs.all.filter((row) => !row.name.startsWith(PRESERVATION_PREFIX)), "canonical non-preservation refs", (row) => row.name, (row) => row.object);
-    assertSameMap("private manifest", manifest.refs, "canonical non-preservation refs", canonical);
+    const symbolic = spawnSync("git", ["-C", repositoryRoot, "symbolic-ref", "-q", "HEAD"], { encoding: "utf8", shell: false, timeout: 15_000, maxBuffer: 1_000_000 });
+    if (symbolic.error || ![0, 1].includes(symbolic.status)) fail("git symbolic-ref failed while verifying canonical refs");
+    const activeRef = symbolic.status === 0 ? symbolic.stdout.trim() : null;
+    assertCanonicalRefContinuity(manifest.refs, canonical, activeRef, checked.refs.milestone_branch);
   }
   return true;
 }
@@ -353,6 +369,17 @@ function verifyStrictRecoveryControls(context) {
     assert.throws(() => assertStrictRecovery(wrongEncoded, context, strictOptions(fixture)), /encoded_ref/);
     const missingCanonical = structuredClone(inventory); missingCanonical.refs.all = missingCanonical.refs.all.filter((row) => row.name !== fixture.manifest.refs.at(-1).original_ref);
     assert.throws(() => assertStrictRecovery(missingCanonical, context, strictOptions(fixture)), /canonical non-preservation refs recovery set differs/);
+    fs.writeFileSync(path.join(fixture.repo, "tracked"), "advanced execution branch\n");
+    git(fixture.repo, ["add", "tracked"]); git(fixture.repo, ["commit", "-qm", "advance active execution branch"]);
+    const advancedObject = git(fixture.repo, ["rev-parse", "HEAD"]);
+    const advanced = structuredClone(inventory);
+    advanced.refs.local_main = advancedObject;
+    advanced.refs.milestone_branch = advancedObject;
+    advanced.refs.all.find((row) => row.name === "refs/heads/main").object = advancedObject;
+    assert.equal(assertStrictRecovery(advanced, context, strictOptions(fixture)), true, "the active execution branch may advance after its frozen recovery point");
+    const driftedInactive = structuredClone(advanced);
+    driftedInactive.refs.all.find((row) => row.name === "refs/heads/secondary").object = advancedObject;
+    assert.throws(() => assertStrictRecovery(driftedInactive, context, strictOptions(fixture)), /changed=\[refs\/heads\/secondary\]/);
     const encodedExtra = `${PRESERVATION_PREFIX}6578747261`;
     git(fixture.repo, ["update-ref", encodedExtra, fixture.object]);
     assert.throws(() => assertStrictRecovery(inventory, context, strictOptions(fixture)), /local encoded preservation refs recovery set differs/);
