@@ -101,13 +101,19 @@ snapshot_artifacts() {
   done < "$path_list"
 }
 
-scratch=""; created_outputs=(); temporary_outputs=(); published=false
+scratch=""; created_outputs=(); temporary_outputs=(); created_refs=(); published=false
 self_test_context=false; self_test_mutation_artifact=""; self_test_mutation_symlink=""
 cleanup_run() {
-  local output
+  local output index ref expected
   for output in "${temporary_outputs[@]:-}"; do rm -f -- "$output" 2>/dev/null || true; done
   if ! "$published"; then
     for output in "${created_outputs[@]:-}"; do rm -f -- "$output" 2>/dev/null || true; done
+    for ((index = ${#created_refs[@]} - 2; index >= 0; index -= 2)); do
+      ref="${created_refs[$index]}"; expected="${created_refs[$((index + 1))]}"
+      if ! git -C "$repo_root" update-ref -d "$ref" "$expected" 2>/dev/null; then
+        echo "preserve repository state: rollback conflict retained changed ref: $ref" >&2
+      fi
+    done
   fi
   [[ -z "$scratch" ]] || rm -rf -- "$scratch" 2>/dev/null || true
 }
@@ -195,8 +201,8 @@ run() {
   [[ -s "$refs_for_bundle" ]] || die "no refs found"
   while IFS= read -r -d '' ref && IFS= read -r -d '' object && IFS= read -r -d '' type; do
     ref="${ref#$'\n'}"; encoded="refs/accrue-preserve/phase-229/$(encode_ref "$ref")"
-    git -C "$repo_root" show-ref --verify --quiet "$encoded" && die "preservation ref collision"
-    git -C "$repo_root" update-ref "$encoded" "$object"
+    git -C "$repo_root" update-ref "$encoded" "$object" "0000000000000000000000000000000000000000" || die "preservation ref collision"
+    created_refs+=("$encoded" "$object")
   done < "$frozen"
   local bundle_tmp manifest_tmp public_tmp bundle_sha256
   bundle_tmp="$(mktemp "$(dirname "$bundle_out")/.phase229-bundle.XXXXXX")"
@@ -329,7 +335,7 @@ assert_artifact_mutation_rejected() {
     bundle_out="$output/mutation.bundle"
     private_manifest_out="$output/mutation-private.json"
     public_record_out="$output/mutation-public.json"
-    scratch=""; created_outputs=(); temporary_outputs=(); published=false
+    scratch=""; created_outputs=(); temporary_outputs=(); created_refs=(); published=false
     run
   ) >"$log" 2>&1; then
     echo "self-test: post-snapshot artifact mutation unexpectedly passed" >&2
@@ -405,7 +411,7 @@ NODE
     bundle_out="$output/symlink-mutation.bundle"
     private_manifest_out="$output/symlink-mutation-private.json"
     public_record_out="$output/symlink-mutation-public.json"
-    scratch=""; created_outputs=(); temporary_outputs=(); published=false
+    scratch=""; created_outputs=(); temporary_outputs=(); created_refs=(); published=false
     run
   ) >"$log" 2>&1; then
     echo "self-test: changed symlink link text unexpectedly passed" >&2
