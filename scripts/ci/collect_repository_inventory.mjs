@@ -412,6 +412,37 @@ if (process.env.NODE_TEST_CONTEXT) {
     assert.equal("shas" in overflow.pull_requests, false);
     assert.deepEqual(overflow.pull_requests.requests, ["GET /repos/szTheory/accrue/pulls?state=open&per_page=100&page=1"]);
   });
+  test("release refs and Actions require terminal page proof", () => {
+    const indexedSha = (index) => index.toString(16).padStart(40, "0");
+    const releasePage = Array.from({ length: 100 }, (_, index) => ({ ref: `refs/heads/release/${String(100 - index).padStart(3, "0")}`, object: { sha: indexedSha(index + 1) } }));
+    const actionsPage = Array.from({ length: 100 }, (_, index) => ({ id: 100 - index, created_at: "2026-01-01T00:00:00Z", head_sha: indexedSha(index + 201) }));
+    const responses = new Map([
+      ["repos/szTheory/accrue/git/ref/heads/main", { object: { sha: indexedSha(500) } }],
+      ["repos/szTheory/accrue/pulls?state=open&per_page=100&page=1", []],
+      ["repos/szTheory/accrue/git/matching-refs/heads/release/?per_page=100&page=1", releasePage],
+      ["repos/szTheory/accrue/git/matching-refs/heads/release/?per_page=100&page=2", [{ ref: "refs/heads/release/101", object: { sha: indexedSha(101) } }]],
+      ["repos/szTheory/accrue/actions/runs?per_page=100&page=1", { workflow_runs: actionsPage }],
+      ["repos/szTheory/accrue/actions/runs?per_page=100&page=2", { workflow_runs: [{ id: 101, created_at: "2026-01-02T00:00:00Z", head_sha: indexedSha(301) }] }]
+    ]);
+    const adapter = createGhApiReadAdapter({ invoke: (argv) => ({ status: 0, stdout: JSON.stringify(responses.get(argv[1])), stderr: "" }) });
+
+    const facts = collectRemoteFacts({ repository: "szTheory/accrue", adapter, now: () => new Date("2026-09-13T00:00:00.000Z") });
+
+    assert.equal(facts.release_branches.available, true);
+    assert.equal(facts.release_branches.shas.length, 101);
+    assert.equal(facts.release_branches.shas.at(-1), indexedSha(101));
+    assert.deepEqual(facts.release_branches.requests, [
+      "GET /repos/szTheory/accrue/git/matching-refs/heads/release/?per_page=100&page=1",
+      "GET /repos/szTheory/accrue/git/matching-refs/heads/release/?per_page=100&page=2"
+    ]);
+    assert.equal(facts.actions.available, true);
+    assert.equal(facts.actions.shas.length, 101);
+    assert.equal(facts.actions.shas.at(-1), indexedSha(301));
+    assert.deepEqual(facts.actions.requests, [
+      "GET /repos/szTheory/accrue/actions/runs?per_page=100&page=1",
+      "GET /repos/szTheory/accrue/actions/runs?per_page=100&page=2"
+    ]);
+  });
   test("GitHub observation adapter preserves bounded zero, one, and many remote results", () => {
     const sha = (letter) => letter.repeat(40);
     const responses = new Map([
