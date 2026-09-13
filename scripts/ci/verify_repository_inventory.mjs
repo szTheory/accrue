@@ -435,18 +435,51 @@ export function verifyFixtures() {
   assertRecoveryFailure(({ manifestPath }) => { const manifest = JSON.parse(fs.readFileSync(manifestPath)); manifest.refs[0].object = "f".repeat(40); fs.writeFileSync(manifestPath, JSON.stringify(manifest)); }, /digest|preservation target|bundle/);
   assertRecoveryFailure(({ attestationPath }) => { const attestation = JSON.parse(fs.readFileSync(attestationPath)); attestation.observed_at = "not-a-time"; fs.writeFileSync(attestationPath, JSON.stringify(attestation)); }, /observed_at/);
   assertRecoveryFailure(({ attestationPath }) => { const attestation = JSON.parse(fs.readFileSync(attestationPath)); attestation.artifacts.pop(); fs.writeFileSync(attestationPath, JSON.stringify(attestation)); }, /cover every frozen artifact|exactly two/);
+  verifyRenderedRecoveryProcedureControls();
 }
 
 function verifyRenderedRecoveryProcedureControls() {
   const fixture = recoveryFixture();
   try {
     const context = createRepositoryValidationContext({ expectedRepository: "szTheory/accrue" });
-    const rendered = renderRepositoryInventory(strictInventory(fixture), context);
+    const inventory = strictInventory(fixture);
+    const rendered = renderRepositoryInventory(inventory, context);
     assert.match(
       rendered,
       /```sh\nPHASE229_BUNDLE="\$\{PHASE229_BUNDLE:\?supply the private recovery bundle path at runtime\}"\nexport PHASE229_BUNDLE\ngit bundle verify "\$PHASE229_BUNDLE"/,
       "recovery instructions must assign and export the runtime bundle before verification"
     );
+    const block = /## Recovery procedure[\s\S]*?```sh\n([\s\S]*?)\n```/.exec(rendered)?.[1];
+    assert.ok(block, "renderer must emit one executable recovery shell block");
+    const fetchLines = block.split("\n").filter((line) => line.startsWith("git fetch "));
+    assert.equal(fetchLines.length, fixture.manifest.refs.length, "every original ref has one fetch step");
+    assert.ok(fetchLines.every((line) => !line.includes(PRESERVATION_PREFIX)), "restore fetches actual original bundle heads, never encoded preservation refs");
+    for (const row of fixture.manifest.refs) {
+      assert.ok(fetchLines.some((line) => line.endsWith(`'${row.original_ref}'`)), `restore procedure fetches ${row.original_ref}`);
+      assert.ok(git(fixture.repo, ["bundle", "list-heads", fixture.bundle]).split("\n").includes(`${row.object} ${row.original_ref}`), `bundle contains ${row.original_ref}`);
+    }
+
+    const restore = path.join(fixture.scratch, "restore");
+    fs.mkdirSync(restore);
+    git(restore, ["init", "-q"]);
+    const executed = spawnSync("sh", ["-eu", "-c", block], {
+      cwd: restore,
+      encoding: "utf8",
+      shell: false,
+      env: { ...process.env, PHASE229_BUNDLE: fixture.bundle }
+    });
+    assert.equal(executed.status, 0, executed.stderr);
+    for (const row of fixture.manifest.refs) assert.equal(git(restore, ["rev-parse", `${row.original_ref}^{object}`]), row.object, `exact procedure restores ${row.original_ref}`);
+
+    assert.match(rendered, /\| pull_requests \| observed-empty \| — \|/, "confirmed empty plural categories render distinctly");
+    assert.ok(rendered.includes(`| release_branches | observed | \`${"b".repeat(40)}\` |`), "first plural SHA is rendered");
+    assert.ok(rendered.includes(`| release_branches | observed | \`${"c".repeat(40)}\` |`), "second plural SHA is rendered");
+    assert.match(rendered, /\| actions \| unavailable:network \| — \|/, "unavailable categories retain their reason");
+    assert.equal(rendered.includes(fixture.scratch), false, "private fixture locations never enter Markdown");
+
+    const equalPrimaryKeys = structuredClone(inventory);
+    equalPrimaryKeys.worktrees.push({ ...equalPrimaryKeys.worktrees[0], dirty: true });
+    assert.equal(renderRepositoryInventory(equalPrimaryKeys, context), renderRepositoryInventory(permutedInventory(equalPrimaryKeys), context), "equal primary keys retain deterministic secondary ordering");
   } finally { fs.rmSync(fixture.scratch, { recursive: true, force: true }); }
 }
 

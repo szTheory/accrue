@@ -4,24 +4,46 @@ import { createRepositoryValidationContext, validateInventory } from "./collect_
 
 const escape = (value) => String(value).replace(/[\\|`<>]/g, "\\$&").replace(/[\r\n]+/g, " ");
 const order = (rows, key) => [...rows].sort((a, b) => key(a).localeCompare(key(b)));
+const shellQuote = (value) => `'${String(value).replace(/'/g, `'"'"'`)}'`;
 function section(title, state, owner, command, evidence, rows = [], headings = []) {
   return ["## " + title, "", `**Fact:** ${escape(evidence)}. **State:** ${escape(state)}. **Owner:** ${escape(owner)}. **Next command:** \`${escape(command)}\`.`, "", ...headings, ...rows, ""];
 }
-function remoteRows(remotes) { return order(Object.entries(remotes), ([key, value]) => key).map(([key, value]) => value.available ? `| ${escape(key)} | observed | \`${value.sha}\` | \`${value.observed_at}\` | ${escape(value.request)} |` : `| ${escape(key)} | unavailable:${escape(value.reason)} | — | \`${value.observed_at}\` | ${escape(value.request)} |`); }
+function remoteRows(remotes) {
+  return order(Object.entries(remotes), ([key]) => key).flatMap(([key, value]) => {
+    if (!value.available) return [`| ${escape(key)} | unavailable:${escape(value.reason)} | — | \`${value.observed_at}\` | ${escape(value.request)} |`];
+    if (!Array.isArray(value.shas)) return [`| ${escape(key)} | observed | \`${value.sha}\` | \`${value.observed_at}\` | ${escape(value.request)} |`];
+    if (value.shas.length === 0) return [`| ${escape(key)} | observed-empty | — | \`${value.observed_at}\` | ${escape(value.request)} |`];
+    return [...value.shas].sort().map((sha) => `| ${escape(key)} | observed | \`${sha}\` | \`${value.observed_at}\` | ${escape(value.request)} |`);
+  });
+}
 
 export function renderRepositoryInventory(inventory, validationContext) {
   const value = validateInventory(inventory, validationContext);
-  const recovery = order(value.recovery.refs, (item) => item.original_ref).map((item) => `| ${escape(item.original_ref)} | \`${item.object}\` | ${escape(item.encoded_ref)} | yes |`);
-  const refs = order(Object.entries(value.refs).filter(([name]) => name !== "all"), ([name]) => name).map(([name, sha]) => `| ${escape(name)} | \`${sha}\` | separately named fact |`);
+  const orderedRecovery = order(value.recovery.refs, (item) => `${item.original_ref}\0${item.object}\0${item.encoded_ref}`);
+  const recovery = orderedRecovery.map((item) => `| ${escape(item.original_ref)} | \`${item.object}\` | ${escape(item.encoded_ref)} | yes |`);
+  const refs = order(Object.entries(value.refs).filter(([name]) => name !== "all"), ([name, sha]) => `${name}\0${sha}`).map(([name, sha]) => `| ${escape(name)} | \`${sha}\` | separately named fact |`);
   const allRefs = order(value.refs.all, (item) => `${item.name}\0${item.object}`).map((item) => `| ${escape(item.name)} | \`${item.object}\` | ${escape(item.role)} |`);
-  const artifacts = order(value.artifacts.entries, (item) => `${item.path}\0${item.type}`).map((item) => `| ${escape(item.path)} | ${escape(item.type)} | \`${item.sha256}\` |`);
-  const workflowMetadata = order(value.artifacts.authorized_workflow_metadata || [], (item) => item.path).map((item) => `| ${escape(item.path)} | ${escape(item.state)} | \`${item.before_sha256}\` | \`${item.after_sha256}\` |`);
-  const worktrees = order(value.worktrees, (item) => `${item.branch}\0${item.sha}`).map((item) => `| ${escape(item.branch)} | \`${item.sha}\` | ${item.dirty ? "dirty" : "clean"} |`);
+  const artifacts = order(value.artifacts.entries, (item) => `${item.path}\0${item.type}\0${item.sha256}`).map((item) => `| ${escape(item.path)} | ${escape(item.type)} | \`${item.sha256}\` |`);
+  const workflowMetadata = order(value.artifacts.authorized_workflow_metadata || [], (item) => `${item.path}\0${item.before_sha256}\0${item.after_sha256}`).map((item) => `| ${escape(item.path)} | ${escape(item.state)} | \`${item.before_sha256}\` | \`${item.after_sha256}\` |`);
+  const worktrees = order(value.worktrees, (item) => `${item.branch}\0${item.sha}\0${item.dirty ? "1" : "0"}`).map((item) => `| ${escape(item.branch)} | \`${item.sha}\` | ${item.dirty ? "dirty" : "clean"} |`);
   const windows = value.planning.ship_windows.length ? order(value.planning.ship_windows, String).map((item) => `| ${escape(item)} |`) : ["| (none) |"];
+  const recoveryProcedure = [
+    "## Recovery procedure", "",
+    "Supply the private bundle location only at runtime. The following exact commands verify the bundle, fetch each actual original bundle head, and restore it with a separately quoted `git update-ref` operation.", "",
+    "```sh",
+    'PHASE229_BUNDLE="${PHASE229_BUNDLE:?supply the private recovery bundle path at runtime}"',
+    "export PHASE229_BUNDLE",
+    'git bundle verify "$PHASE229_BUNDLE"',
+    ...orderedRecovery.flatMap((item) => [
+      `git fetch "$PHASE229_BUNDLE" ${shellQuote(item.original_ref)}`,
+      `git update-ref ${shellQuote(item.original_ref)} ${shellQuote(item.object)}`
+    ]),
+    "```", ""
+  ];
   return [
     "# Repository Inventory", "", "Sanitized schema-v2 repository evidence. This is a deterministic projection: no raw payloads, logs, actors, secret values, content, link text, absolute paths, or external bundle locations are present.", "",
-    ...section("Recovery barrier", "verified", "repository-maintainers", `PHASE229_MANIFEST_SHA256=${value.recovery.manifest_sha256} PHASE229_BUNDLE=/secure/location git bundle verify \"$PHASE229_BUNDLE\"`, `private manifest SHA-256 ${value.recovery.manifest_sha256}; bundle SHA-256 ${value.recovery.bundle_sha256}`, recovery, ["| Original ref | Object | Preservation ref | Bundle member |", "| --- | --- | --- | --- |"]),
-    "Restore individual refs with `git fetch \"$PHASE229_BUNDLE\" refs/accrue-preserve/phase-229/<encoded>:<original-ref>`; the external location is supplied only through `PHASE229_BUNDLE`.", "",
+    ...section("Recovery barrier", "verified", "repository-maintainers", 'git bundle verify "$PHASE229_BUNDLE"', `private manifest SHA-256 ${value.recovery.manifest_sha256}; bundle SHA-256 ${value.recovery.bundle_sha256}`, recovery, ["| Original ref | Object | Preservation ref | Bundle member |", "| --- | --- | --- | --- |"]),
+    ...recoveryProcedure,
     ...section("Named ref truth", "recorded", "release-engineering", "git show-ref --head", "all named roles retain their independent identity", refs, ["| Fact | Full object ID | Interpretation |", "| --- | --- | --- |"]),
     ...section("All local and preservation refs", "recorded", "release-engineering", "git for-each-ref", "full object IDs are immutable evidence", allRefs.length ? allRefs : ["| (none) | — | — |"], ["| Ref | Object | Role |", "| --- | --- | --- |"]),
     ...section("Worktrees", "recorded", "repository-maintainers", "git worktree list --porcelain", "paths intentionally omitted", worktrees.length ? worktrees : ["| (none) | — | — |"], ["| Branch | Object | Classification |", "| --- | --- | --- |"]),
