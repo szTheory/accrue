@@ -369,6 +369,21 @@ if (process.env.NODE_TEST_CONTEXT) {
     assert.match(result.stderr, new RegExp(`${REPOSITORY} ${result.sha}.*timed out`));
     assert.equal(result.stdout, "", "a response that completed after the deadline must not be reported as success");
   });
+  test("inspect binds selected run identity before job summary", () => {
+    const sha = "a".repeat(40);
+    const selected = { databaseId: 7, headSha: sha, status: "completed", conclusion: "success", createdAt: "2026-01-01T00:00:00Z", updatedAt: "2026-01-01T00:01:00Z", workflowName: "CI" };
+    const switchedRun = { ...selected, databaseId: 8 };
+    Object.defineProperty(switchedRun, "jobs", { get() { throw new Error("jobs must not be read from a mismatched run"); } });
+    assert.throws(() => inspectSha(fixtureAdapter([[selected], switchedRun]), { repo: REPOSITORY, sha, workflow: "CI" }), (error) => error.code === 67 && error.message.includes(REPOSITORY) && error.message.includes(sha) && error.message.includes("run ID"));
+
+    const switchedWorkflow = { ...selected, workflowName: "Other" };
+    Object.defineProperty(switchedWorkflow, "jobs", { get() { throw new Error("jobs must not be read from a mismatched workflow"); } });
+    assert.throws(() => inspectSha(fixtureAdapter([[selected], switchedWorkflow]), { repo: REPOSITORY, sha, workflow: "CI" }), (error) => error.code === 67 && error.message.includes(REPOSITORY) && error.message.includes(sha) && error.message.includes("workflow"));
+
+    assert.equal(inspectSha(fixtureAdapter([[selected], { ...selected, jobs: [] }]), { repo: REPOSITORY, sha, workflow: "CI" }).run_id, 7);
+    const workflowOmitted = { ...selected, workflowName: undefined, jobs: [] };
+    assert.equal(inspectSha(fixtureAdapter([[selected], workflowOmitted]), { repo: REPOSITORY, sha }).workflow, null);
+  });
   test("compatibility wrapper defaults to main and CI and propagates unsuccessful completions", () => {
     verifyWrapper(DEFAULT_WRAPPER_PATH);
     assert.equal(verifyWrapperBehavior(DEFAULT_WRAPPER_PATH), true);
