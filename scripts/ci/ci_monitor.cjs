@@ -169,6 +169,9 @@ function runSelfTest({ wrapperPath } = {}) {
   assert.equal(inspectSha(fixtureAdapter([[{ ...run, conclusion: "cancelled" }], { ...run, conclusion: "cancelled", jobs: [] }]), { repo: REPOSITORY, sha }).conclusion, "cancelled");
   let clock = 0; const queued = { ...run, status: "queued", conclusion: null };
   assert.throws(() => watchSha(fixtureAdapter([[queued], { ...queued, jobs: [] }, [queued], { ...queued, jobs: [] }]), { repo: REPOSITORY, sha, timeoutSeconds: 1, pollSeconds: 1 }, { now: () => clock, sleep: () => { clock += 1000; } }), /timed out/);
+  const inProgress = { ...run, status: "in_progress", conclusion: null };
+  const completed = { ...run, status: "completed", conclusion: "success" };
+  assert.equal(watchSha(fixtureAdapter([[inProgress], { ...inProgress, jobs: [] }, [completed], { ...completed, jobs: [] }]), { repo: REPOSITORY, sha, timeoutSeconds: 2, pollSeconds: 1 }, { now: () => clock, sleep: () => { clock += 1000; } }).conclusion, "success");
   if (wrapperPath) verifyWrapper(wrapperPath);
   return true;
 }
