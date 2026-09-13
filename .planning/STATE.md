@@ -5,16 +5,16 @@ milestone_name: Release Integration & Repository Hygiene
 current_phase: 229
 current_phase_name: Repository Truth & Recovery Safety
 status: executing
-stopped_at: Completed 229-01-PLAN.md
-last_updated: "2026-09-13T04:11:30.204Z"
+stopped_at: Completed 229-02-PLAN.md
+last_updated: "2026-09-13T04:19:56.144Z"
 last_activity: 2026-09-13
 last_activity_desc: Phase 229 execution started
-state_head: 13eac245f24e0aa3fdf557602075e310226bbc23
+state_head: a583d6fed64b2e4da4b5129f781aafa90b7e4f95
 progress:
   total_phases: 4
   completed_phases: 0
   total_plans: 4
-  completed_plans: 1
+  completed_plans: 2
   percent: 0
 ---
 
@@ -31,7 +31,7 @@ See: `.planning/PROJECT.md` (updated 2026-09-12)
 ## Current Position
 
 Phase: 229 (Repository Truth & Recovery Safety) — EXECUTING
-Plan: 2 of 4
+Plan: 3 of 4
 Status: Ready to execute
 Last activity: 2026-09-13 — Phase 229 execution started
 
@@ -58,6 +58,7 @@ Progress: [░░░░░░░░░░] 0%
 | Plan | Duration | Tasks | Files |
 |------|----------|-------|-------|
 | Phase 229 P01 | 10min | 2 tasks | 6 files |
+| Phase 229 P02 | 15min | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -69,6 +70,9 @@ Progress: [░░░░░░░░░░] 0%
 - Cleanup must be evidence-backed and stops when only subjective nits remain.
 - [Phase 229]: Freeze every refs/** row before creating Phase 229 preservation refs, then verify both named refs and bundle membership.
 - [Phase 229]: Persist only allowlisted, relative typed artifact evidence; external recovery locations and content remain private.
+- [Phase 229]: Phase 229 monitor permits only repository-bound list, inspect, and bounded watch reads.
+- [Phase 229]: Legacy branch selection is resolved to a full SHA before watch polling, while explicit SHA bypasses selection.
+- [Phase 229]: Actions success remains provider_proof non_run absent independent provider evidence.
 
 ### Pending Todos
 
@@ -81,6 +85,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-09-13T04:11:30.194Z
-Stopped at: Completed 229-01-PLAN.md
+Last session: 2026-09-13T04:19:56.132Z
+Stopped at: Completed 229-02-PLAN.md
 Resume file: None
