@@ -4,17 +4,17 @@ milestone: v1.62
 milestone_name: Release Integration & Repository Hygiene
 current_phase: 229
 current_phase_name: Repository Truth & Recovery Safety
-status: executing
-stopped_at: Completed 229-03-PLAN.md
-last_updated: "2026-09-13T04:29:02.293Z"
+status: verifying
+stopped_at: Completed 229-04-PLAN.md
+last_updated: "2026-09-13T12:55:05.543Z"
 last_activity: 2026-09-13
 last_activity_desc: Phase 229 execution started
-state_head: f9c07a32b4bcd0b5336cf422a6c7e8bfd5f0e583
+state_head: 6d7cce6305318f0b852b2605b13e2bbe71815685
 progress:
   total_phases: 4
   completed_phases: 0
   total_plans: 4
-  completed_plans: 3
+  completed_plans: 4
   percent: 0
 ---
 
@@ -32,7 +32,7 @@ See: `.planning/PROJECT.md` (updated 2026-09-12)
 
 Phase: 229 (Repository Truth & Recovery Safety) — EXECUTING
 Plan: 4 of 4
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-09-13 — Phase 229 execution started
 
 Progress: [░░░░░░░░░░] 0%
@@ -60,6 +60,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 229 P01 | 10min | 2 tasks | 6 files |
 | Phase 229 P02 | 15min | 2 tasks | 2 files |
 | Phase 229-repository-truth-recovery-safety P03 | 16min | 2 tasks | 3 files |
+| Phase 229 P04 | 35min | 2 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -76,6 +77,8 @@ Progress: [░░░░░░░░░░] 0%
 - [Phase 229]: Actions success remains provider_proof non_run absent independent provider evidence.
 - [Phase 229]: Remote facts use repository-bound GET provenance and explicit unavailable records.
 - [Phase 229]: Collection re-resolves preservation refs before live remote observation.
+- [Phase 229]: Phase 229 inventory permits only exact-path before/after-hash evidence for the two GSD workflow metadata refreshes.
+- [Phase 229]: Phase 229 commits explicit unavailable remote observations rather than cached or local substitutes.
 
 ### Pending Todos
 
@@ -88,6 +91,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-09-13T04:29:02.279Z
-Stopped at: Completed 229-03-PLAN.md
+Last session: 2026-09-13T12:55:05.529Z
+Stopped at: Completed 229-04-PLAN.md
 Resume file: None
