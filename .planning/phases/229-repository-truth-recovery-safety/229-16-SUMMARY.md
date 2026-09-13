@@ -54,7 +54,7 @@ coverage:
     requirement: REPO-02
     verification:
       - kind: integration
-        ref: "bash -n scripts/ci/preserve_repository_state.sh && bash scripts/ci/preserve_repository_state.sh --self-test && bash scripts/ci/preserve_repository_state.sh --self-test"
+        ref: "scripts/ci/preserve_repository_state.sh#syntax check and two consecutive full self-tests"
         status: pass
     human_judgment: false
 duration: 10min
