@@ -3,7 +3,7 @@
 set -euo pipefail
 
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
-branch=""
+branch="main"
 
 # Preserve the documented optional branch positional while allowing monitor flags.
 if [[ $# -gt 0 && "$1" != --* ]]; then
@@ -13,6 +13,7 @@ fi
 
 has_option() {
   local option="$1"
+  shift
   local argument
   for argument in "$@"; do
     [[ "$argument" == "$option" ]] && return 0
@@ -23,6 +24,9 @@ has_option() {
 monitor_args=()
 if [[ -n "$branch" ]] && ! has_option --sha "$@"; then
   monitor_args+=(--branch "$branch")
+fi
+if ! has_option --workflow "$@"; then
+  monitor_args+=(--workflow CI)
 fi
 if ! has_option --timeout-seconds "$@"; then
   monitor_args+=(--timeout-seconds 900)

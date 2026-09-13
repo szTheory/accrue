@@ -14,6 +14,7 @@ const MAX_LIMIT = 100;
 const MAX_POLL_SECONDS = 300;
 const MAX_TIMEOUT_SECONDS = 3600;
 const MAX_FAILURE_DETAILS = 10;
+const UNSUCCESSFUL_COMPLETION_EXIT = 69;
 const DEFAULT_WRAPPER_PATH = path.join(__dirname, "watch_ci.sh");
 
 class MonitorError extends Error { constructor(code, message) { super(message); this.code = code; } }
@@ -109,8 +110,9 @@ function createGhReadAdapter() {
 function listRuns(adapter, options) {
   validateRepository(options.repo);
   const runs = adapter.listRuns({ branch: options.branch, workflow: options.workflow, limit: options.limit });
-  if (runs.length === 0) fail(65, "no GitHub Actions runs matched the requested list");
-  return runs.map((run) => normalizeRun(run)).sort(compareRuns);
+  const normalized = runs.map((run) => normalizeRun(run)).filter((run) => !options.workflow || run.workflow === options.workflow);
+  if (normalized.length === 0) fail(65, "no GitHub Actions runs matched the requested list");
+  return normalized.sort(compareRuns);
 }
 function summarizeFailures(jobs) {
   if (!Array.isArray(jobs)) fail(67, "GitHub jobs response is not an array");
@@ -121,7 +123,7 @@ function summarizeFailures(jobs) {
 }
 function inspectSha(adapter, options) {
   validateRepository(options.repo); const sha = validateFullSha(options.sha);
-  const matching = adapter.listRuns({ commit: sha, workflow: options.workflow, limit: MAX_LIMIT }).map((run) => normalizeRun(run)).filter((run) => run.sha === sha);
+  const matching = adapter.listRuns({ commit: sha, workflow: options.workflow, limit: MAX_LIMIT }).map((run) => normalizeRun(run)).filter((run) => run.sha === sha && (!options.workflow || run.workflow === options.workflow));
   if (matching.length === 0) fail(65, `no GitHub Actions run matches SHA ${sha}`);
   if (matching.length > 1) fail(66, `ambiguous GitHub Actions runs match SHA ${sha}`);
   const viewed = adapter.viewRun(matching[0].run_id); const run = normalizeRun(viewed);
@@ -147,6 +149,11 @@ function render(value, format) {
   if (format === "json") return `${JSON.stringify(value)}\n`;
   if (Array.isArray(value)) return value.map((run) => `${run.repository} ${run.sha} ${run.run_id} ${run.status} ${run.conclusion ?? "pending"}`).join("\n") + "\n";
   return `${value.repository} ${value.sha} ${value.run_id} ${value.status} ${value.conclusion ?? "pending"}\n`;
+}
+function completionExitCode(value) {
+  return !Array.isArray(value) && value.status === "completed" && value.conclusion !== "success"
+    ? UNSUCCESSFUL_COMPLETION_EXIT
+    : 0;
 }
 function verifyWrapper(path) {
   const wrapper = fs.readFileSync(path, "utf8"); const execCount = (wrapper.match(/\bexec\s+node\b/g) || []).length;
@@ -207,10 +214,10 @@ function optionValue(argv, option) {
 function verifyWrapperBehavior(wrapperPath) {
   const defaultRun = wrapperFixture(wrapperPath);
   assert.equal(defaultRun.status, 0, `no-argument wrapper must succeed for a completed successful CI run; stderr: ${defaultRun.stderr}`);
-  assert.match(defaultRun.stdout, new RegExp(`${REPOSITORY} ${defaultRun.sha}`), "wrapper output must identify the fixed repository and resolved full SHA");
+  assert.deepEqual({ repository: JSON.parse(defaultRun.stdout).repository, sha: JSON.parse(defaultRun.stdout).sha }, { repository: REPOSITORY, sha: defaultRun.sha }, "wrapper output must identify the fixed repository and resolved full SHA");
   assert.ok(defaultRun.calls.length >= 3, "wrapper must resolve then inspect the selected run");
   assert.equal(optionValue(defaultRun.calls[0], "--branch"), "main", "no-argument wrapper must resolve branch main");
-  assert.ok(defaultRun.calls.every((argv) => optionValue(argv, "--workflow") === "CI"), "default wrapper reads must select only workflow CI");
+  assert.ok(defaultRun.calls.filter((argv) => argv[1] === "list").every((argv) => optionValue(argv, "--workflow") === "CI"), "default wrapper run listings must select only workflow CI");
   assert.ok(defaultRun.calls.every((argv) => optionValue(argv, "-R") === REPOSITORY), "every wrapper read must bind the fixed repository");
 
   const positionalBranch = wrapperFixture(wrapperPath, ["release/v1"]);
@@ -220,17 +227,17 @@ function verifyWrapperBehavior(wrapperPath) {
   const exactSha = wrapperFixture(wrapperPath, ["--sha", "a".repeat(40)]);
   assert.equal(exactSha.status, 0, `exact-SHA wrapper failed: ${exactSha.stderr}`);
   assert.ok(exactSha.calls.every((argv) => !argv.includes("--branch")), "explicit SHA must bypass branch resolution");
-  assert.ok(exactSha.calls.every((argv) => optionValue(argv, "--workflow") === "CI"), "explicit SHA retains the CI workflow default");
+  assert.ok(exactSha.calls.filter((argv) => argv[1] === "list").every((argv) => optionValue(argv, "--workflow") === "CI"), "explicit SHA retains the CI workflow default");
 
   const explicitWorkflow = wrapperFixture(wrapperPath, ["--workflow", "Release"]);
   assert.equal(explicitWorkflow.status, 0, `explicit-workflow wrapper failed: ${explicitWorkflow.stderr}`);
-  assert.match(explicitWorkflow.stdout, new RegExp(`${REPOSITORY} ${explicitWorkflow.releaseSha}`));
-  assert.ok(explicitWorkflow.calls.every((argv) => optionValue(argv, "--workflow") === "Release"));
+  assert.deepEqual({ repository: JSON.parse(explicitWorkflow.stdout).repository, sha: JSON.parse(explicitWorkflow.stdout).sha }, { repository: REPOSITORY, sha: explicitWorkflow.releaseSha });
+  assert.ok(explicitWorkflow.calls.filter((argv) => argv[1] === "list").every((argv) => optionValue(argv, "--workflow") === "Release"));
 
   for (const conclusion of ["failure", "cancelled", "action_required", "stale", "skipped", "timed_out", "neutral", "unknown"]) {
     const unsuccessful = wrapperFixture(wrapperPath, [], { conclusion });
     assert.equal(unsuccessful.status, 69, `${conclusion} completion must exit 69; stderr: ${unsuccessful.stderr}`);
-    assert.match(unsuccessful.stdout, new RegExp(`${REPOSITORY} ${unsuccessful.sha}`), `${conclusion} output must retain repository and exact SHA`);
+    assert.deepEqual({ repository: JSON.parse(unsuccessful.stdout).repository, sha: JSON.parse(unsuccessful.stdout).sha }, { repository: REPOSITORY, sha: unsuccessful.sha }, `${conclusion} output must retain repository and exact SHA`);
   }
   return true;
 }
@@ -286,9 +293,9 @@ function main(argv = process.argv.slice(2), adapter = createGhReadAdapter()) {
   if (options.verifyDocs) { verifyDocs(options.verifyDocs); process.stdout.write("ci monitor docs: PASS\n"); return 0; }
   if (!options.command) fail(64, "subcommand must be one of: list, inspect, watch");
   const value = options.command === "list" ? listRuns(adapter, options) : options.command === "inspect" ? inspectSha(adapter, options) : watchSha(adapter, options, { sleep: (milliseconds) => Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, milliseconds) });
-  process.stdout.write(render(value, options.format)); return 0;
+  process.stdout.write(render(value, options.format)); return completionExitCode(value);
 }
-if (require.main === module && !process.env.NODE_TEST_CONTEXT) { try { main(); } catch (error) { process.stderr.write(`ci monitor: ${error.message}\n`); process.exitCode = error instanceof MonitorError ? error.code : 70; } }
+if (require.main === module && !process.env.NODE_TEST_CONTEXT) { try { process.exitCode = main(); } catch (error) { process.stderr.write(`ci monitor: ${error.message}\n`); process.exitCode = error instanceof MonitorError ? error.code : 70; } }
 if (process.env.NODE_TEST_CONTEXT) {
   const test = require("node:test");
   test("ci monitor core validates a read-only exact-SHA monitor", () => { assert.equal(runSelfTest({ wrapperPath: null }), true); });
@@ -298,4 +305,4 @@ if (process.env.NODE_TEST_CONTEXT) {
   });
 }
 
-module.exports = { REPOSITORY, MonitorError, parseArgs, validateRepository, validateFullSha, createReadAdapter, listRuns, inspectSha, summarizeFailures, watchSha, verifyWrapper, verifyWrapperBehavior, verifyDocs, runSelfTest, main };
+module.exports = { REPOSITORY, MonitorError, parseArgs, validateRepository, validateFullSha, createReadAdapter, listRuns, inspectSha, summarizeFailures, watchSha, completionExitCode, verifyWrapper, verifyWrapperBehavior, verifyDocs, runSelfTest, main };
