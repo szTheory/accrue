@@ -15,19 +15,21 @@ import { renderRepositoryInventory } from "./render_repository_inventory.mjs";
 export function verifyFixtures() {
   const context = createRepositoryValidationContext({ expectedRepository: "szTheory/accrue" });
   const inventory = {
-    schema_version: 1,
+    schema_version: 2,
     repository: "szTheory/accrue",
     mode: "local_only",
     recovery: { verified: true, bundle_sha256: "a".repeat(64), refs: [{ original_ref: "refs/heads/main", object: "b".repeat(40), encoded_ref: "refs/accrue-preserve/phase-229/726566732f68656164732f6d61696e", bundle_member: true }] },
     artifacts: { empty_directory_policy: "not_surfaced_by_git", entries: [{ path: "link", type: "symlink", sha256: "d".repeat(64) }, { path: "nested/file.txt", type: "regular", sha256: "c".repeat(64) }] },
-    refs: { local_main: "b".repeat(40), cached_origin_main: "b".repeat(40), milestone_branch: "b".repeat(40), v161_tag: "b".repeat(40) },
-    remotes: { available: false, state: "unavailable" }
+    refs: { local_main: "b".repeat(40), cached_origin_main: "b".repeat(40), milestone_branch: "b".repeat(40), v161_tag: "b".repeat(40), all: [{ name: "refs/heads/main", object: "b".repeat(40), role: "local_main" }] },
+    remotes: Object.fromEntries(["remote_main", "pull_requests", "release_branches", "actions"].map((key) => [key, { repository: "szTheory/accrue", observed_at: "2026-09-13T00:00:00.000Z", request: `GET /repos/szTheory/accrue/${key}`, available: false, state: "unavailable", reason: "network" }])),
+    planning: { ship_windows: [], milestone: "absent", state: "absent" },
+    worktrees: [{ branch: "phase229", sha: "b".repeat(40), dirty: false }]
   };
   const validated = validateInventory(inventory, context);
   assert.equal(renderRepositoryInventory(validated, context), renderRepositoryInventory(structuredClone(validated), context));
   assert.throws(() => validateInventory({ ...inventory, actor: "forbidden" }, context), /forbidden field/);
   assert.throws(() => validateInventory({ ...inventory, artifacts: { ...inventory.artifacts, entries: [{ path: "../secret", type: "regular", sha256: "c".repeat(64) }] } }, context), /relative path/);
-  assert.throws(() => validateInventory({ ...inventory, remotes: { available: true, state: "unavailable" } }, context), /remote/);
+  assert.throws(() => validateInventory({ ...inventory, remotes: {} }, context), /remote/);
 
   // Phase 229 complete-inventory contract: this intentionally exercises APIs
   // before they exist, so the first TDD run must fail.
@@ -39,6 +41,9 @@ export function verifyFixtures() {
   }, context);
   assert.equal(remote.available, true);
   assert.throws(() => normalizeRemoteFact({ repository: "szTheory/accrue", observed_at: "bad", request: "GET /repos/szTheory/accrue/git/ref/heads/main", sha: "e".repeat(40) }, context), /observed_at/);
+  const unavailable = normalizeRemoteFact({ repository: "szTheory/accrue", observed_at: "2026-09-13T00:00:00.000Z", request: "GET /repos/szTheory/accrue/git/ref/heads/main", available: false, reason: "network" }, context);
+  assert.equal(unavailable.sha, undefined);
+  assert.throws(() => normalizeRemoteFact({ ...unavailable, sha: "f".repeat(40) }, context), /no claimed remote value/);
 }
 
 function options(argv) {
@@ -46,7 +51,7 @@ function options(argv) {
   for (let index = 0; index < argv.length; index += 1) {
     if (!argv[index].startsWith("--")) throw new Error(`unexpected argument: ${argv[index]}`);
     const key = argv[index].slice(2); result.add(key);
-    if (!["fixtures", "require-recovery", "require-all-ref-recovery", "require-typed-artifacts", "require-local-only"].includes(key)) values[key] = argv[++index];
+    if (!["fixtures", "require-recovery", "require-all-ref-recovery", "require-typed-artifacts", "require-local-only", "require-complete-categories", "require-edge-cases", "require-privacy-controls", "require-determinism"].includes(key)) values[key] = argv[++index];
   }
   return { flags: result, values };
 }
@@ -61,6 +66,8 @@ async function main() {
   if (parsed.flags.has("require-all-ref-recovery") && inventory.recovery.refs.length === 0) throw new Error("all-ref recovery is required");
   if (parsed.flags.has("require-typed-artifacts") && !inventory.artifacts.entries.every((entry) => ["regular", "symlink", "empty_directory"].includes(entry.type))) throw new Error("typed artifacts are required");
   if (parsed.flags.has("require-local-only") && inventory.mode !== "local_only") throw new Error("local-only inventory is required");
+  if (parsed.flags.has("require-complete-categories") && (!inventory.refs.all || !inventory.worktrees || !inventory.planning || Object.keys(inventory.remotes).length !== 4)) throw new Error("complete categories are required");
+  if (parsed.flags.has("require-edge-cases") && inventory.artifacts.empty_directory_policy !== "not_surfaced_by_git") throw new Error("edge-case policy is required");
   assert.equal(fs.readFileSync(rendered, "utf8"), renderRepositoryInventory(inventory, context), "rendered Markdown must be byte-reproducible");
   console.log("repository inventory verification: PASS");
 }
