@@ -5,16 +5,16 @@ milestone_name: Release Integration & Repository Hygiene
 current_phase: 229
 current_phase_name: Repository Truth & Recovery Safety
 status: executing
-stopped_at: Completed 229-06-PLAN.md
-last_updated: "2026-09-13T14:48:48.859Z"
+stopped_at: Completed 229-08-PLAN.md
+last_updated: "2026-09-13T15:01:49.039Z"
 last_activity: 2026-09-13
 last_activity_desc: Phase 229 execution started
-state_head: 610551ca455ccf1ae05c2e1167d6c2e8c9d59968
+state_head: 7975d66e7f67b014be83c486ec0a80a0844c41e4
 progress:
   total_phases: 4
   completed_phases: 0
   total_plans: 9
-  completed_plans: 6
+  completed_plans: 7
   percent: 0
 ---
 
@@ -31,7 +31,7 @@ See: `.planning/PROJECT.md` (updated 2026-09-12)
 ## Current Position
 
 Phase: 229 (Repository Truth & Recovery Safety) — EXECUTING
-Plan: 3 of 9
+Plan: 4 of 9
 Status: Ready to execute
 Last activity: 2026-09-13 — Phase 229 execution started
 
@@ -63,6 +63,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 229 P04 | 35min | 2 tasks | 7 files |
 | Phase 229 P05 | 20m | 2 tasks | 1 files |
 | Phase 229 P06 | 13m | 2 tasks | 1 files |
+| Phase 229 P08 | 9min | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -85,6 +86,9 @@ Progress: [░░░░░░░░░░] 0%
 - [Phase 229]: [Phase 229]: Recovery manifests store restore argv arrays, never shell command text.
 - [Phase 229]: Remote main is singleton evidence while plural GitHub categories retain deterministic full-SHA arrays.
 - [Phase 229]: Recovery manifest repository identity is checked before dependent collection.
+- [Phase 229]: Compatibility watcher defaults are fixed to szTheory/accrue, main, CI, 900-second timeout, and 10-second polling.
+- [Phase 229]: Explicit full SHA selection takes precedence over branch resolution.
+- [Phase 229]: Completed success exits 0 and completed non-success conclusions render repository/SHA evidence before exiting 69.
 
 ### Pending Todos
 
@@ -97,6 +101,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-09-13T14:48:48.836Z
-Stopped at: Completed 229-06-PLAN.md
+Last session: 2026-09-13T15:01:49.024Z
+Stopped at: Completed 229-08-PLAN.md
 Resume file: None
