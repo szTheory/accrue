@@ -43,6 +43,21 @@ defmodule Accrue.Billing.SwapPlanTest do
     assert {:ok, _} = Billing.swap_plan(sub, "price_pro", proration: :always_invoice)
   end
 
+  test "forwards proration_date so preview and commit use the same instant", %{sub: sub} do
+    proration_date = 1_789_260_000
+
+    assert {:ok, _} =
+             Billing.swap_plan(sub, "price_pro",
+               proration: :create_prorations,
+               proration_date: proration_date
+             )
+
+    assert Enum.any?(Accrue.Processor.Fake.calls(), fn
+             {:update_subscription, [_id, %{proration_date: ^proration_date}, _opts]} -> true
+             _ -> false
+           end)
+  end
+
   test "invalid :proration value raises ArgumentError", %{sub: sub} do
     assert_raise ArgumentError, fn ->
       Billing.swap_plan(sub, "price_pro", proration: :invalid)
