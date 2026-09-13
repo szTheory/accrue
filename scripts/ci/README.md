@@ -24,6 +24,29 @@ Provider triage is literal: `proved` means the selected suite executed, selected
 
 ## Phase 228 zero-human provider proof
 
+## Phase 229 repository truth and read-only CI observation
+
+The Phase 229 [canonical JSON inventory](../../.planning/phases/229-repository-truth-recovery-safety/229-REPOSITORY-INVENTORY.json) is the factual authority; its [Markdown diagnostic](../../.planning/phases/229-repository-truth-recovery-safety/229-REPOSITORY-INVENTORY.md) is a deterministic projection. Verify both, including recovery, privacy, determinism, and command provenance, with:
+
+```bash
+node scripts/ci/verify_repository_inventory.mjs \
+  --records .planning/phases/229-repository-truth-recovery-safety/229-REPOSITORY-INVENTORY.json \
+  --rendered .planning/phases/229-repository-truth-recovery-safety/229-REPOSITORY-INVENTORY.md \
+  --expected-repository szTheory/accrue --require-recovery --require-all-ref-recovery \
+  --require-typed-artifacts --require-complete-categories --require-command-provenance \
+  --require-privacy-controls --require-determinism
+```
+
+The monitor is the single supported read-only observation implementation. Every command fixes the repository to `szTheory/accrue`; no command dispatches, reruns, cancels, or otherwise mutates Actions, refs, PRs, or providers.
+
+| Mode | Read-only command | Evidence returned |
+| --- | --- | --- |
+| List | `node scripts/ci/ci_monitor.cjs list --repo szTheory/accrue` | Repository-bound recent runs with full head SHA. |
+| Inspect | `node scripts/ci/ci_monitor.cjs inspect --repo szTheory/accrue --sha FULL_SHA` | One exact-SHA run and sanitized failing-job/step details. |
+| Watch | `node scripts/ci/ci_monitor.cjs watch --repo szTheory/accrue --sha FULL_SHA --timeout-seconds 900 --poll-seconds 10` | Exact-SHA polling bounded by explicit timeout and polling limits. |
+
+`watch_ci.sh` is a thin compatibility entry, not a second implementation. Actions success is not live-provider proof: provider proof remains a separate, explicit state. Remote facts that cannot be read remain explicitly unavailable rather than being substituted with cached or local values. Preservation refs and their verified bundle are established locally before any refresh; the committed inventory deliberately omits the external bundle location. These instructions stop at Phase 229 facts and recovery: Phase 230 reconciliation, CI execution, ship-window resolution, and cleanup are out of scope.
+
 After the one-time credential bootstrap, Stripe provider proof runs daily and
 after pushes that change the provider-proof contract. Pull requests and
 unrelated pushes do not spend provider API quota. A failure preserves the

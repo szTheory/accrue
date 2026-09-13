@@ -40,6 +40,7 @@ function parseArgs(argv) {
     else if (arg === "--poll-seconds") options.pollSeconds = positiveInteger(value(), "--poll-seconds", MAX_POLL_SECONDS);
     else if (arg === "--format") options.format = value();
     else if (arg === "--verify-wrapper") options.verifyWrapper = value();
+    else if (arg === "--verify-docs") options.verifyDocs = value();
     else if (arg === "--self-test") options.selfTest = true;
     else fail(64, `unrecognized option: ${arg}`);
   }
@@ -149,11 +150,29 @@ function verifyWrapper(path) {
   if (execCount !== 1 || !/ci_monitor\.cjs["']?\s+watch/.test(wrapper) || !/--repo\s+szTheory\/accrue/.test(wrapper) || !/--timeout-seconds/.test(wrapper) || /\bgh\s+(run|api|workflow)\b/.test(wrapper)) fail(67, "wrapper must perform exactly one bounded monitor exec with no direct GitHub command");
   return true;
 }
+function verifyDocs(path) {
+  const docs = fs.readFileSync(path, "utf8");
+  const required = [
+    /Phase 229 repository truth and read-only CI observation/,
+    /229-REPOSITORY-INVENTORY\.json/,
+    /229-REPOSITORY-INVENTORY\.md/,
+    /verify_repository_inventory\.mjs/,
+    /ci_monitor\.cjs list --repo szTheory\/accrue/,
+    /ci_monitor\.cjs inspect --repo szTheory\/accrue --sha FULL_SHA/,
+    /ci_monitor\.cjs watch --repo szTheory\/accrue --sha FULL_SHA --timeout-seconds \d+ --poll-seconds \d+/,
+    /Actions success is not live-provider proof/,
+    /read-only/,
+    /watch_ci\.sh.*compatibility/i,
+    /JSON.*authority.*Markdown.*projection/i
+  ];
+  if (!required.every((pattern) => pattern.test(docs))) fail(67, "documentation must preserve the Phase 229 repository-bound list, exact-SHA inspect, bounded watch, and evidence semantics");
+  return true;
+}
 function fixtureAdapter(sequence) {
   let index = 0;
   return createReadAdapter((argv) => { const next = sequence[Math.min(index, sequence.length - 1)]; index += 1; return typeof next === "function" ? next(argv) : next; });
 }
-function runSelfTest({ wrapperPath } = {}) {
+function runSelfTest({ wrapperPath, docsPath } = {}) {
   const sha = "a".repeat(40);
   const run = { databaseId: 7, headSha: sha, status: "completed", conclusion: "failure", createdAt: "2026-01-01T00:00:00Z", updatedAt: "2026-01-01T00:01:00Z", workflowName: "CI" };
   const adapter = fixtureAdapter([[run], { ...run, jobs: [{ name: "unit", conclusion: "failure", runAttempt: 1, steps: [{ name: "test", conclusion: "failure", number: 3, raw: "never emitted" }] }] }]);
@@ -173,12 +192,14 @@ function runSelfTest({ wrapperPath } = {}) {
   const completed = { ...run, status: "completed", conclusion: "success" };
   assert.equal(watchSha(fixtureAdapter([[inProgress], { ...inProgress, jobs: [] }, [completed], { ...completed, jobs: [] }]), { repo: REPOSITORY, sha, timeoutSeconds: 2, pollSeconds: 1 }, { now: () => clock, sleep: () => { clock += 1000; } }).conclusion, "success");
   if (wrapperPath) verifyWrapper(wrapperPath);
+  if (docsPath) verifyDocs(docsPath);
   return true;
 }
 function main(argv = process.argv.slice(2), adapter = createGhReadAdapter()) {
   const options = parseArgs(argv);
-  if (options.selfTest) { runSelfTest({ wrapperPath: options.verifyWrapper }); process.stdout.write("ci monitor self-test: PASS\n"); return 0; }
+  if (options.selfTest) { runSelfTest({ wrapperPath: options.verifyWrapper, docsPath: options.verifyDocs }); process.stdout.write("ci monitor self-test: PASS\n"); return 0; }
   if (options.verifyWrapper) { verifyWrapper(options.verifyWrapper); process.stdout.write("ci monitor wrapper: PASS\n"); return 0; }
+  if (options.verifyDocs) { verifyDocs(options.verifyDocs); process.stdout.write("ci monitor docs: PASS\n"); return 0; }
   if (!options.command) fail(64, "subcommand must be one of: list, inspect, watch");
   const value = options.command === "list" ? listRuns(adapter, options) : options.command === "inspect" ? inspectSha(adapter, options) : watchSha(adapter, options, { sleep: (milliseconds) => Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, milliseconds) });
   process.stdout.write(render(value, options.format)); return 0;
@@ -186,4 +207,4 @@ function main(argv = process.argv.slice(2), adapter = createGhReadAdapter()) {
 if (require.main === module && !process.env.NODE_TEST_CONTEXT) { try { main(); } catch (error) { process.stderr.write(`ci monitor: ${error.message}\n`); process.exitCode = error instanceof MonitorError ? error.code : 70; } }
 if (process.env.NODE_TEST_CONTEXT) require("node:test")("ci monitor self-test validates a read-only exact-SHA monitor", () => { assert.equal(runSelfTest(), true); });
 
-module.exports = { REPOSITORY, MonitorError, parseArgs, validateRepository, validateFullSha, createReadAdapter, listRuns, inspectSha, summarizeFailures, watchSha, verifyWrapper, runSelfTest, main };
+module.exports = { REPOSITORY, MonitorError, parseArgs, validateRepository, validateFullSha, createReadAdapter, listRuns, inspectSha, summarizeFailures, watchSha, verifyWrapper, verifyDocs, runSelfTest, main };
