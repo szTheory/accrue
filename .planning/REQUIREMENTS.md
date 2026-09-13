@@ -62,26 +62,26 @@ Roadmap phase ownership is populated during roadmap creation. Every v1.62 requir
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| REPO-01 | TBD | Pending |
-| REPO-02 | TBD | Pending |
-| REPO-03 | TBD | Pending |
-| INTG-01 | TBD | Pending |
-| INTG-02 | TBD | Pending |
-| INTG-03 | TBD | Pending |
-| GATE-01 | TBD | Pending |
-| GATE-02 | TBD | Pending |
-| GATE-03 | TBD | Pending |
-| HYG-01 | TBD | Pending |
-| HYG-02 | TBD | Pending |
-| HYG-03 | TBD | Pending |
-| REL-04 | TBD | Pending |
-| REL-05 | TBD | Pending |
+| REPO-01 | Phase 229 | Pending |
+| REPO-02 | Phase 229 | Pending |
+| REPO-03 | Phase 229 | Pending |
+| INTG-01 | Phase 230 | Pending |
+| INTG-02 | Phase 230 | Pending |
+| INTG-03 | Phase 230 | Pending |
+| GATE-01 | Phase 231 | Pending |
+| GATE-02 | Phase 231 | Pending |
+| GATE-03 | Phase 231 | Pending |
+| HYG-01 | Phase 232 | Pending |
+| HYG-02 | Phase 232 | Pending |
+| HYG-03 | Phase 232 | Pending |
+| REL-04 | Phase 232 | Pending |
+| REL-05 | Phase 232 | Pending |
 
 **Coverage:**
 - v1.62 requirements: 14 total
-- Mapped to phases: 0
-- Unmapped: 14
+- Mapped to phases: 14
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-09-12*
-*Last updated: 2026-09-12 when starting v1.62*
+*Last updated: 2026-09-12 when v1.62 roadmap was created*
