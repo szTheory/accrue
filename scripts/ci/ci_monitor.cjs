@@ -6,6 +6,7 @@ const fs = require("node:fs");
 const os = require("node:os");
 const path = require("node:path");
 const { spawnSync } = require("node:child_process");
+const { performance } = require("node:perf_hooks");
 
 const REPOSITORY = "szTheory/accrue";
 const FULL_SHA = /^[0-9a-f]{40}$/;
@@ -77,33 +78,37 @@ function readOnlyArgv(argv) {
 }
 function createReadAdapter(invoke) {
   const calls = [];
-  const asJson = (argv) => {
+  const asJson = (argv, remainingMs) => {
     readOnlyArgv(argv); calls.push([...argv]);
-    const response = invoke([...argv]);
+    const timeoutMs = typeof remainingMs === "function" ? remainingMs() : undefined;
+    const response = invoke([...argv], { timeoutMs });
+    if (typeof remainingMs === "function") remainingMs();
     if (response === null || response === undefined) fail(67, "GitHub response is unavailable");
     if (typeof response === "string") { try { return JSON.parse(response); } catch { fail(67, "GitHub response was not JSON"); } }
     return response;
   };
   return {
     calls,
-    listRuns({ branch, workflow, limit = 20, commit } = {}) {
+    listRuns({ branch, workflow, limit = 20, commit, remainingMs } = {}) {
       const argv = ["run", "list", "-R", REPOSITORY, "--json", "databaseId,headSha,status,conclusion,createdAt,updatedAt,workflowName"];
       if (branch) argv.push("--branch", branch); if (workflow) argv.push("--workflow", workflow); if (commit) argv.push("--commit", commit);
       argv.push("--limit", String(limit));
-      const response = asJson(argv);
+      const response = asJson(argv, remainingMs);
       if (!Array.isArray(response)) fail(67, "GitHub run list response is not an array");
       return response;
     },
-    viewRun(runId) {
-      const response = asJson(["run", "view", String(runId), "-R", REPOSITORY, "--json", "databaseId,headSha,status,conclusion,createdAt,updatedAt,workflowName,jobs"]);
+    viewRun(runId, { remainingMs } = {}) {
+      const response = asJson(["run", "view", String(runId), "-R", REPOSITORY, "--json", "databaseId,headSha,status,conclusion,createdAt,updatedAt,workflowName,jobs"], remainingMs);
       if (!response || typeof response !== "object") fail(67, "GitHub run view response is null or invalid");
       return response;
     }
   };
 }
 function createGhReadAdapter() {
-  return createReadAdapter((argv) => {
-    const result = spawnSync("gh", argv, { encoding: "utf8", shell: false, timeout: GH_READ_TIMEOUT_MS, maxBuffer: GH_READ_MAX_BUFFER });
+  return createReadAdapter((argv, { timeoutMs } = {}) => {
+    const boundedTimeout = timeoutMs === undefined ? GH_READ_TIMEOUT_MS : Math.max(1, Math.min(GH_READ_TIMEOUT_MS, Math.floor(timeoutMs)));
+    const result = spawnSync("gh", argv, { encoding: "utf8", shell: false, timeout: boundedTimeout, maxBuffer: GH_READ_MAX_BUFFER });
+    if (result.error?.code === "ETIMEDOUT" && timeoutMs !== undefined) fail(68, "watch timed out during GitHub read");
     if (result.error) fail(67, `GitHub CLI unavailable: ${result.error.code || result.error.message}`);
     if (result.status !== 0) fail(67, `GitHub read failed: ${(result.stderr || "unknown error").trim().slice(0, 240)}`);
     return result.stdout;
@@ -111,7 +116,7 @@ function createGhReadAdapter() {
 }
 function listRuns(adapter, options) {
   validateRepository(options.repo);
-  const runs = adapter.listRuns({ branch: options.branch, workflow: options.workflow, limit: options.limit });
+  const runs = adapter.listRuns({ branch: options.branch, workflow: options.workflow, limit: options.limit, remainingMs: options.remainingMs });
   const normalized = runs.map((run) => normalizeRun(run)).filter((run) => !options.workflow || run.workflow === options.workflow);
   if (normalized.length === 0) fail(65, "no GitHub Actions runs matched the requested list");
   return normalized.sort(compareRuns);
@@ -126,10 +131,10 @@ function summarizeFailures(jobs) {
 function inspectSha(adapter, options) {
   validateRepository(options.repo); const sha = validateFullSha(options.sha);
   try {
-    const matching = adapter.listRuns({ commit: sha, workflow: options.workflow, limit: MAX_LIMIT }).map((run) => normalizeRun(run)).filter((run) => run.sha === sha && (!options.workflow || run.workflow === options.workflow));
+    const matching = adapter.listRuns({ commit: sha, workflow: options.workflow, limit: MAX_LIMIT, remainingMs: options.remainingMs }).map((run) => normalizeRun(run)).filter((run) => run.sha === sha && (!options.workflow || run.workflow === options.workflow));
     if (matching.length === 0) fail(65, "no GitHub Actions run matched");
     if (matching.length > 1) fail(66, "ambiguous GitHub Actions runs matched");
-    const viewed = adapter.viewRun(matching[0].run_id); const run = normalizeRun(viewed);
+    const viewed = adapter.viewRun(matching[0].run_id, { remainingMs: options.remainingMs }); const run = normalizeRun(viewed);
     if (run.sha !== sha) fail(67, "GitHub run view did not retain the requested SHA");
     return { ...run, failed_jobs: summarizeFailures(viewed.jobs ?? []) };
   } catch (error) {
@@ -144,13 +149,29 @@ function resolveBranchSha(adapter, options) {
   if (candidates.length !== 1) fail(66, `branch ${options.branch} did not resolve exactly one run`);
   return candidates[0].sha;
 }
-function watchSha(adapter, options, { now = () => Date.now(), sleep = () => {} } = {}) {
-  validateRepository(options.repo); const sha = resolveBranchSha(adapter, options); const started = now();
-  while (true) {
-    const result = inspectSha(adapter, { ...options, sha });
-    if (result.status === "completed") return result;
-    if (now() - started >= options.timeoutSeconds * 1000) fail(68, `${REPOSITORY} ${sha}: watch timed out`);
-    sleep(options.pollSeconds * 1000);
+function watchSha(adapter, options, { now = () => performance.now(), sleep = () => {} } = {}) {
+  validateRepository(options.repo);
+  let sha = options.sha ? validateFullSha(options.sha) : null;
+  const deadline = now() + options.timeoutSeconds * 1000;
+  const attribution = () => sha || `branch ${options.branch || "unresolved"}`;
+  const remainingMs = () => {
+    const remaining = Math.ceil(deadline - now());
+    if (remaining <= 0) fail(68, `${REPOSITORY} ${attribution()}: watch timed out`);
+    return remaining;
+  };
+  try {
+    sha = resolveBranchSha(adapter, { ...options, sha, remainingMs });
+    remainingMs();
+    while (true) {
+      const result = inspectSha(adapter, { ...options, sha, remainingMs });
+      remainingMs();
+      if (result.status === "completed") return result;
+      sleep(Math.min(options.pollSeconds * 1000, remainingMs()));
+      remainingMs();
+    }
+  } catch (error) {
+    if (error instanceof MonitorError && !error.message.startsWith(`${REPOSITORY} `)) throw new MonitorError(error.code, `${REPOSITORY} ${attribution()}: ${error.message}`);
+    throw error;
   }
 }
 function render(value, format) {
