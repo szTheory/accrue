@@ -55,6 +55,31 @@ validate_artifact_path() {
   done
 }
 
+snapshot_artifacts() {
+  local output="$1" path_list
+  path_list="${output}.paths"
+  local ref full artifact_type artifact_hash
+  : > "$output"
+  git -C "$repo_root" ls-files --others --exclude-standard -z | LC_ALL=C sort -z > "$path_list" || die "untracked artifact enumeration failed"
+  while IFS= read -r -d '' ref; do
+    validate_artifact_path "$ref" || die "unsafe untracked path"
+    full="$repo_root/$ref"
+    if [[ -L "$full" ]]; then
+      artifact_type="symlink"
+      artifact_hash="$(printf '%s' "$(readlink "$full")" | shasum -a 256 | awk '{print $1}')"
+    elif [[ -f "$full" ]]; then
+      artifact_type="regular"
+      artifact_hash="$(sha256 "$full")"
+    elif [[ -d "$full" ]]; then
+      artifact_type="empty_directory"
+      artifact_hash="not_surfaced"
+    else
+      die "unsupported untracked entry type"
+    fi
+    printf '%s\0%s\0%s\0' "$ref" "$artifact_type" "$artifact_hash" >> "$output"
+  done < "$path_list"
+}
+
 scratch=""; created_outputs=(); temporary_outputs=(); published=false
 self_test_context=false; self_test_mutation_artifact=""
 cleanup_run() {
@@ -125,9 +150,9 @@ run() {
   validate_output_targets
   scratch="$(mktemp -d "${TMPDIR:-/tmp}/phase229-preserve.XXXXXX")"
   trap cleanup_run EXIT
-  local frozen="$scratch/frozen" refs_for_bundle="$scratch/refs" artifacts="$scratch/artifacts"
+  local frozen="$scratch/frozen" refs_for_bundle="$scratch/refs" artifacts="$scratch/artifacts" current_artifacts="$scratch/artifacts-current"
   : > "$frozen"; : > "$refs_for_bundle"; : > "$artifacts"
-  local ref object type encoded full artifact_type artifact_hash
+  local ref object type encoded
   while IFS= read -r -d '' ref && IFS= read -r -d '' object && IFS= read -r -d '' type; do
     ref="${ref#$'\n'}"; type="${type%$'\n'}"
     git -C "$repo_root" check-ref-format "$ref" >/dev/null || die "invalid ref name"
@@ -148,15 +173,7 @@ run() {
   git -C "$repo_root" bundle create "$bundle_tmp" --stdin < "$refs_for_bundle" >/dev/null
   verify_bundle_heads "$frozen" "$bundle_tmp"
   bundle_sha256="$(sha256 "$bundle_tmp")"
-  while IFS= read -r -d '' ref; do
-    validate_artifact_path "$ref" || die "unsafe untracked path"
-    full="$repo_root/$ref"
-    if [[ -L "$full" ]]; then artifact_type="symlink"; artifact_hash="$(printf '%s' "$(readlink "$full")" | shasum -a 256 | awk '{print $1}')"
-    elif [[ -f "$full" ]]; then artifact_type="regular"; artifact_hash="$(sha256 "$full")"
-    elif [[ -d "$full" ]]; then artifact_type="empty_directory"; artifact_hash="not_surfaced"
-    else die "unsupported untracked entry type"; fi
-    printf '%s\0%s\0%s\0' "$ref" "$artifact_type" "$artifact_hash" >> "$artifacts"
-  done < <(git -C "$repo_root" ls-files --others --exclude-standard -z)
+  snapshot_artifacts "$artifacts"
   manifest_tmp="$(mktemp "$(dirname "$private_manifest_out")/.phase229-manifest.XXXXXX")"; temporary_outputs+=("$manifest_tmp"); chmod 600 "$manifest_tmp"
   BUNDLE_SHA256="$bundle_sha256" FROZEN="$frozen" ARTIFACTS="$artifacts" MANIFEST="$manifest_tmp" EXPECTED="$expected_repository" node --input-type=module <<'NODE'
 import fs from 'node:fs';
@@ -176,6 +193,13 @@ NODE
   verify_bundle_heads "$frozen" "$bundle_out"
   [[ "$(sha256 "$bundle_out")" == "$bundle_sha256" ]] || die "final bundle digest mismatch"
   run_self_test_artifact_mutation
+  snapshot_artifacts "$current_artifacts"
+  cmp -s "$artifacts" "$current_artifacts" || die "untracked artifact map changed after manifest snapshot"
+  ARTIFACT_POLICY="not_surfaced_by_git" MANIFEST="$private_manifest_out" node --input-type=module <<'NODE'
+import fs from 'node:fs';
+const manifest = JSON.parse(fs.readFileSync(process.env.MANIFEST, 'utf8'));
+if (manifest.empty_directory_policy !== process.env.ARTIFACT_POLICY) process.exit(1);
+NODE
   published=true
   echo "preserve repository state: PASS"
 }
