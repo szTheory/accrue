@@ -3,7 +3,7 @@ import crypto from "node:crypto";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import { spawnSync } from "node:child_process";
 import test from "node:test";
 
@@ -27,6 +27,16 @@ const HANDOFF_INVARIANTS = fileURLToPath(new URL("./verify_phase229_handoff_inva
 const PRESERVATION_PREFIX = "refs/accrue-preserve/phase-229/";
 const sha256 = (value) => crypto.createHash("sha256").update(value).digest("hex");
 const encodedRef = (name) => `${PRESERVATION_PREFIX}${Buffer.from(name).toString("hex")}`;
+
+async function loadHandoffLibrary() {
+  const scratch = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), "phase229-handoff-library-")));
+  const source = fs.readFileSync(HANDOFF_INVARIANTS, "utf8");
+  const cliBoundary = source.lastIndexOf("\ntry {\n  const options = parseArgs(process.argv.slice(2));");
+  assert.ok(cliBoundary > 0, "handoff module must retain its explicit CLI boundary");
+  const modulePath = path.join(scratch, "handoff-library.mjs");
+  fs.writeFileSync(modulePath, `${source.slice(0, cliBoundary)}\n`);
+  return { library: await import(`${pathToFileURL(modulePath).href}?${crypto.randomUUID()}`), scratch };
+}
 
 function git(repo, args) {
   const result = spawnSync("git", ["-C", repo, ...args], {
@@ -258,6 +268,98 @@ test("final handoff gate rejects capsule workspace and attestation invariant dri
     assert.match(result.stdout, new RegExp(`handoff invariant ${invariant}: PASS`), `missing ${invariant} process-boundary evidence`);
   }
   assert.match(result.stdout, /phase229 handoff invariant self-test: PASS/);
+});
+
+test("final handoff capsule snapshots reject real filesystem identity drift", async () => {
+  const loaded = await loadHandoffLibrary();
+  const { assertExact, assertOnlyAttestation, snapshotTree } = loaded.library;
+  const scratch = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), "phase229-capsule-behavior-")));
+  const makeCapsule = () => {
+    const capsule = path.join(scratch, crypto.randomUUID());
+    fs.mkdirSync(capsule);
+    fs.writeFileSync(path.join(capsule, "record"), "before", { mode: 0o600 });
+    fs.symlinkSync(Buffer.from([0x74, 0x61, 0x72, 0x67, 0x65, 0x74, 0x0a]), path.join(capsule, "link"));
+    return capsule;
+  };
+  const rejectMutation = (mutate) => {
+    const capsule = makeCapsule();
+    const before = snapshotTree(capsule);
+    mutate(capsule);
+    assert.throws(() => assertExact("capsule", before, snapshotTree(capsule)), /capsule changed/);
+  };
+
+  try {
+    rejectMutation((capsule) => fs.writeFileSync(path.join(capsule, "added"), "new"));
+    rejectMutation((capsule) => fs.rmSync(path.join(capsule, "record")));
+    rejectMutation((capsule) => fs.renameSync(path.join(capsule, "record"), path.join(capsule, "renamed")));
+    rejectMutation((capsule) => fs.writeFileSync(path.join(capsule, "record"), "after"));
+    rejectMutation((capsule) => {
+      fs.rmSync(path.join(capsule, "link"));
+      fs.symlinkSync(Buffer.from([0xff, 0x0a]), path.join(capsule, "link"));
+    });
+    rejectMutation((capsule) => fs.chmodSync(path.join(capsule, "record"), 0o644));
+    rejectMutation((capsule) => {
+      fs.rmSync(path.join(capsule, "record"));
+      fs.mkdirSync(path.join(capsule, "record"));
+    });
+
+    const capsule = makeCapsule();
+    const before = snapshotTree(capsule);
+    const attestation = path.join(capsule, "final.json");
+    fs.writeFileSync(attestation, "{}\n", { mode: 0o600 });
+    fs.chmodSync(attestation, 0o600);
+    assert.equal(assertOnlyAttestation(before, snapshotTree(capsule), "final.json"), true);
+    fs.writeFileSync(path.join(capsule, "unexpected"), "extra");
+    assert.throws(() => assertOnlyAttestation(before, snapshotTree(capsule), "final.json"), /pre-existing capsule entries changed/);
+    fs.rmSync(path.join(capsule, "unexpected"));
+    fs.chmodSync(attestation, 0o644);
+    assert.throws(() => assertOnlyAttestation(before, snapshotTree(capsule), "final.json"), /sole capsule delta/);
+  } finally {
+    fs.rmSync(scratch, { recursive: true, force: true });
+    fs.rmSync(loaded.scratch, { recursive: true, force: true });
+  }
+});
+
+test("final handoff workspace snapshots reject real untracked ref and worktree drift", async () => {
+  const loaded = await loadHandoffLibrary();
+  const { assertExact, snapshotWorkspace } = loaded.library;
+  const scratch = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), "phase229-workspace-behavior-")));
+  const repo = path.join(scratch, "repo");
+  const linked = path.join(scratch, "linked");
+  try {
+    fs.mkdirSync(repo);
+    git(repo, ["init", "-q", "-b", "main"]);
+    git(repo, ["config", "user.email", "phase229@example.invalid"]);
+    git(repo, ["config", "user.name", "phase229"]);
+    fs.writeFileSync(path.join(repo, "tracked"), "one\n");
+    git(repo, ["add", "tracked"]);
+    git(repo, ["commit", "-qm", "one"]);
+    const first = git(repo, ["rev-parse", "HEAD"]);
+    fs.writeFileSync(path.join(repo, "tracked"), "two\n");
+    git(repo, ["commit", "-qam", "two"]);
+    const second = git(repo, ["rev-parse", "HEAD"]);
+    git(repo, ["tag", "handoff-fixture", first]);
+    git(repo, ["branch", "linked", first]);
+    git(repo, ["worktree", "add", "-q", linked, "linked"]);
+    fs.writeFileSync(path.join(repo, "untracked"), "before\n");
+
+    let before = snapshotWorkspace(repo);
+    fs.writeFileSync(path.join(repo, "untracked"), "after\n");
+    assert.throws(() => assertExact("workspace", before, snapshotWorkspace(repo)), /workspace changed/);
+    fs.writeFileSync(path.join(repo, "untracked"), "before\n");
+
+    before = snapshotWorkspace(repo);
+    git(repo, ["update-ref", "refs/tags/handoff-fixture", second]);
+    assert.throws(() => assertExact("workspace", before, snapshotWorkspace(repo)), /workspace changed/);
+    git(repo, ["update-ref", "refs/tags/handoff-fixture", first]);
+
+    before = snapshotWorkspace(repo);
+    git(linked, ["switch", "-q", "--detach"]);
+    assert.throws(() => assertExact("workspace", before, snapshotWorkspace(repo)), /workspace changed/);
+  } finally {
+    fs.rmSync(scratch, { recursive: true, force: true });
+    fs.rmSync(loaded.scratch, { recursive: true, force: true });
+  }
 });
 
 test("CR-01 preservation rejects post-snapshot artifact mutation before PASS", () => {
