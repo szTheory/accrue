@@ -168,7 +168,7 @@ function documentedStrictBlock() {
 }
 
 function documentedStrictFixture() {
-  const scratch = fs.mkdtempSync(path.join(os.tmpdir(), "phase229-documented-strict-"));
+  const scratch = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), "phase229-documented-strict-")));
   const repo = path.join(scratch, "repo");
   const capsule = path.join(scratch, "capsule");
   const scripts = path.join(repo, "scripts/ci");

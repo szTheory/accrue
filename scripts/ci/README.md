@@ -32,14 +32,24 @@ The Phase 229 [canonical JSON inventory](../../.planning/phases/229-repository-t
 | --- | --- | --- |
 | [Phase 229 repository inventory](../../.planning/phases/229-repository-truth-recovery-safety/229-REPOSITORY-INVENTORY.json), [deterministic diagnostic](../../.planning/phases/229-repository-truth-recovery-safety/229-REPOSITORY-INVENTORY.md), and exact-SHA CI monitor | Which repository objects were observed and preserved, and how to inspect the fixed repository's CI state without mutation | `node scripts/ci/ci_monitor.cjs list --repo szTheory/accrue` |
 
+<!-- phase229-strict-verification:start -->
 ```bash
+test -n "${PHASE229_PRIVATE_MANIFEST:-}" && \
+test -n "${PHASE229_MANIFEST_SHA256:-}" && \
+test -n "${PHASE229_RECOVERY_BUNDLE:-}" && \
 node scripts/ci/verify_repository_inventory.mjs \
   --records .planning/phases/229-repository-truth-recovery-safety/229-REPOSITORY-INVENTORY.json \
   --rendered .planning/phases/229-repository-truth-recovery-safety/229-REPOSITORY-INVENTORY.md \
-  --expected-repository szTheory/accrue --require-recovery --require-all-ref-recovery \
-  --require-typed-artifacts --require-complete-categories --require-command-provenance \
-  --require-privacy-controls --require-determinism
+  --expected-repository szTheory/accrue \
+  --recovery-manifest "$PHASE229_PRIVATE_MANIFEST" \
+  --expected-manifest-sha256 "$PHASE229_MANIFEST_SHA256" \
+  --recovery-bundle "$PHASE229_RECOVERY_BUNDLE" \
+  --require-recovery --require-all-ref-recovery --require-typed-artifacts \
+  --require-complete-categories --require-edge-cases --require-command-provenance \
+  --require-privacy-controls --require-determinism \
+  --require-workflow-metadata-authorization
 ```
+<!-- phase229-strict-verification:end -->
 
 The monitor is the single supported read-only observation implementation. Every command fixes the repository to `szTheory/accrue`; no command dispatches, reruns, cancels, or otherwise mutates Actions, refs, PRs, or providers.
 
