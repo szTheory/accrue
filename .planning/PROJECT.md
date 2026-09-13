@@ -43,9 +43,19 @@ v1.49 **Realistic Demo App & Adoption Evidence** shipped on **2026-06-02**. The 
 
 **Phase 227 complete (2026-09-12):** the exact candidate removed only the redundant `admin-drift-docs` dependency from host integration. Three successful, first-attempt workflow-dispatch runs at one candidate SHA measured 1,179s, 1,125s, and 1,079s (median 1,125s), clearing the frozen 1,666s median and 2,602s maximum thresholds while retaining required release, host, browser, provider, artifact, negative-control, and rollback evidence. PATH-01, PATH-02, SAFE-01, and SAFE-02 are verified 11/11; all v1.61 implementation phases and 10/10 requirements are complete, ready for milestone closeout.
 
-## Next Milestone Goals
+## Current Milestone: v1.62 Release Integration & Repository Hygiene
 
-No milestone is active. Start the next cycle from fresh requirements with `$gsd-new-milestone`; stable-core intake rules still require a concrete adopter failure, correctness/security risk, repeated support issue, operational failure, or explicit strategy change.
+**Goal:** Reconcile the completed v1.61 lineage with `main` into a clean, reviewable, fully verified release candidate, then stop before cleanup becomes churn.
+
+**Target features:**
+- Canonical branch, tag, worktree, CI, and planning truth established without rewriting history.
+- The diverged `main` and v1.61 histories integrated through a reviewable candidate that includes the four post-archive closure commits.
+- Local and GitHub release gates proven, with every ship window resolved or explicitly waived and release automation ready for review.
+- Evidence-backed cleanup limited to demonstrated release, maintenance, documentation, or comprehension risk.
+
+**Key context:** This milestone is justified by a concrete operational failure: remote `main` and the v1.61 lineage have diverged substantially, the local `main` ref is stale and independently divergent, four audit-closure commits are not published, and the required live-CI monitor is unavailable. SEED-003 is selected. No product capability is being added.
+
+**Guardrails:** No feature work, force-push, tag movement, destructive cleanup, broad rename/reformat, speculative refactor, required-check weakening, merge to `main`, Release Please merge, or package publication without the workflow's explicit authorization gates. Preserve user-owned untracked files until classified. Stop once the candidate is green and remaining findings are subjective nits.
 
 ## Shipped Milestone: v1.61 CI Evidence & Critical-Path Hardening
 
@@ -658,7 +668,11 @@ The v1.50→v1.54 arc (Admin UI Foundation → Depth Pass → Brand System → D
 
 ### Active
 
-- None. All v1.61 requirements are validated; the next milestone begins with fresh requirements.
+- [ ] Establish one evidence-backed repository truth for local and remote refs, tags, worktrees, open PRs, release branches, and CI observability.
+- [ ] Reconcile `main` and the completed v1.61 lineage without rewriting published history or moving the v1.61 tag.
+- [ ] Produce a clean release candidate that passes local CI-equivalent and required GitHub Actions gates.
+- [ ] Resolve or explicitly waive ship windows, classify untracked/stale artifacts, and perform only objective release-risk cleanup.
+- [ ] Prepare the resulting integration and Release Please PRs for maintainer review without merging or publishing packages.
 
 ### Validated v1.61 (Phase 227 complete 2026-09-12)
 
@@ -860,6 +874,8 @@ Admin global search — 4/4 satisfied.
 | Bind CI evidence to repository, immutable run/job URLs, workflow topology, timestamps, and explicit provider proof state before comparing performance. | ✓ Good — Phase 226 produced a reproducible 20-path baseline and fail-closed evidence contracts. |
 | Keep the one-edge host-integration dependency change only if three independent attempt-1 observations satisfy the frozen median and maximum thresholds. | ✓ Good — Phase 227 retained the candidate at a 1,125-second median and closed its bounded authority. |
 | Never reinterpret a failed or skipped provider lane as proof, and never retry without new authorization. | ✓ Good — Phase 228 preserved the initial failed record; later separately authorized recurring proof closed the Stripe fidelity gaps honestly. |
+| Treat v1.62 as release integration and repository hygiene, not feature development or a general refactor. | — Pending — scope ends when the release candidate is green and further findings are subjective. |
+| Preserve published history and the v1.61 tag; reconcile through a reviewable integration candidate rather than force-push or tag movement. | — Pending — exact merge topology is determined from Phase 229 evidence. |
 
 ## Evolution
 
@@ -879,4 +895,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-09-12 after shipping v1.61.*
+*Last updated: 2026-09-12 when starting v1.62 Release Integration & Repository Hygiene.*

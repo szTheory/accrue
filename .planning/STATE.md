@@ -1,21 +1,16 @@
 ---
-gsd_state_version: "1.0"
-milestone: v1.61
-milestone_name: CI Evidence & Critical-Path Hardening
-status: Awaiting next milestone
-stopped_at: Milestone v1.61 completed, verified, and archived
-last_updated: "2026-09-13T02:26:08.567Z"
+gsd_state_version: 1.0
+milestone: v1.62
+milestone_name: Release Integration & Repository Hygiene
+status: planning
+last_updated: "2026-09-13T03:27:43.753Z"
 last_activity: 2026-09-12
-last_activity_desc: Milestone v1.61 completed and archived
-state_head: 906e06713a0facae8b14565854548eac98447b19
 progress:
-  total_phases: 4
-  completed_phases: 4
-  total_plans: 30
-  completed_plans: 30
-  percent: 100
-current_phase: null
-current_phase_name: null
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
 ---
 
 # Project State
@@ -30,10 +25,10 @@ See: `.planning/PROJECT.md` (updated 2026-09-12 after shipping v1.61)
 
 ## Current Position
 
-Phase: Milestone v1.61 complete
+Phase: Not started (defining requirements)
 Plan: —
-Status: Awaiting next milestone
-Last activity: 2026-09-12 — Milestone v1.61 completed and archived
+Status: Defining requirements
+Last activity: 2026-09-12 — Milestone v1.62 started
 
 ## v1.61 Roadmap
 
