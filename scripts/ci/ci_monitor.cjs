@@ -134,8 +134,11 @@ function inspectSha(adapter, options) {
     const matching = adapter.listRuns({ commit: sha, workflow: options.workflow, limit: MAX_LIMIT, remainingMs: options.remainingMs }).map((run) => normalizeRun(run)).filter((run) => run.sha === sha && (!options.workflow || run.workflow === options.workflow));
     if (matching.length === 0) fail(65, "no GitHub Actions run matched");
     if (matching.length > 1) fail(66, "ambiguous GitHub Actions runs matched");
-    const viewed = adapter.viewRun(matching[0].run_id, { remainingMs: options.remainingMs }); const run = normalizeRun(viewed);
-    if (run.sha !== sha) fail(67, "GitHub run view did not retain the requested SHA");
+    const selected = matching[0];
+    const viewed = adapter.viewRun(selected.run_id, { remainingMs: options.remainingMs }); const run = normalizeRun(viewed);
+    if (run.run_id !== selected.run_id) fail(67, `GitHub run view changed selected run ID ${selected.run_id} to ${run.run_id}`);
+    if (run.sha !== selected.sha || run.sha !== sha) fail(67, "GitHub run view did not retain the selected and requested SHA");
+    if (options.workflow && run.workflow !== options.workflow) fail(67, `GitHub run view did not retain requested workflow ${options.workflow}`);
     return { ...run, failed_jobs: summarizeFailures(viewed.jobs ?? []) };
   } catch (error) {
     if (error instanceof MonitorError) throw new MonitorError(error.code, `${REPOSITORY} ${sha}: ${error.message}`);
