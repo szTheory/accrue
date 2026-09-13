@@ -437,6 +437,19 @@ export function verifyFixtures() {
   assertRecoveryFailure(({ attestationPath }) => { const attestation = JSON.parse(fs.readFileSync(attestationPath)); attestation.artifacts.pop(); fs.writeFileSync(attestationPath, JSON.stringify(attestation)); }, /cover every frozen artifact|exactly two/);
 }
 
+function verifyRenderedRecoveryProcedureControls() {
+  const fixture = recoveryFixture();
+  try {
+    const context = createRepositoryValidationContext({ expectedRepository: "szTheory/accrue" });
+    const rendered = renderRepositoryInventory(strictInventory(fixture), context);
+    assert.match(
+      rendered,
+      /```sh\nPHASE229_BUNDLE="\$\{PHASE229_BUNDLE:\?supply the private recovery bundle path at runtime\}"\nexport PHASE229_BUNDLE\ngit bundle verify "\$PHASE229_BUNDLE"/,
+      "recovery instructions must assign and export the runtime bundle before verification"
+    );
+  } finally { fs.rmSync(fixture.scratch, { recursive: true, force: true }); }
+}
+
 function options(argv) {
   const flags = new Set(); const values = {};
   for (let index = 0; index < argv.length; index += 1) {
@@ -466,6 +479,7 @@ async function main() {
 
 if (process.env.NODE_TEST_CONTEXT) {
   test("strict repository inventory flags enforce independent negative controls", () => verifyFixtures());
+  test("rendered recovery procedure restores original bundle heads safely", () => verifyRenderedRecoveryProcedureControls());
 } else {
   main().catch((error) => { console.error(`repository inventory fixtures: FAIL: ${error.message}`); process.exitCode = 1; });
 }
