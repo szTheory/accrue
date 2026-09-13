@@ -177,7 +177,17 @@ function readFinalCaptureAttestation(attestationPath, manifest) {
   validateWorkflowMetadataChanges(changes, "final capture workflow metadata invariants");
   return { observedAt: record.observed_at, artifacts: record.artifacts, workflowMetadataChanges: changes };
 }
-function currentArtifact(repo, entry) { const full = path.join(repo, entry.path); const stat = fs.lstatSync(full); if (stat.isSymbolicLink()) return { type: "symlink", sha256: crypto.createHash("sha256").update(fs.readlinkSync(full)).digest("hex") }; if (stat.isFile()) return { type: "regular", sha256: crypto.createHash("sha256").update(fs.readFileSync(full)).digest("hex") }; if (stat.isDirectory()) return { type: "empty_directory", sha256: "not_surfaced" }; fail(`unsupported artifact type: ${entry.path}`); }
+function currentArtifact(repo, entry, { lstatSync = fs.lstatSync, readlinkSync = fs.readlinkSync, readFileSync = fs.readFileSync } = {}) {
+  const full = path.join(repo, entry.path); const stat = lstatSync(full);
+  if (stat.isSymbolicLink()) {
+    const bytes = readlinkSync(full, { encoding: "buffer" });
+    if (!Buffer.isBuffer(bytes)) fail(`raw symlink read did not return a Buffer: ${entry.path}`);
+    return { type: "symlink", sha256: crypto.createHash("sha256").update(bytes).digest("hex") };
+  }
+  if (stat.isFile()) return { type: "regular", sha256: crypto.createHash("sha256").update(readFileSync(full)).digest("hex") };
+  if (stat.isDirectory()) return { type: "empty_directory", sha256: "not_surfaced" };
+  fail(`unsupported artifact type: ${entry.path}`);
+}
 function validateArtifactSnapshot(repo, manifest, authorization) {
   const permitted = new Map((authorization || []).map((change) => [change.path, change])); const changes = [];
   for (const entry of manifest.artifacts) {
@@ -460,6 +470,12 @@ if (process.env.NODE_TEST_CONTEXT && process.argv[1] === new URL(import.meta.url
     try {
       const inventory = collectRepositoryInventory({ repo: fixture.repo, recoveryManifest: fixture.manifestPath, expectedManifestSha256: fixture.expectedManifestSha256, recoveryBundle: fixture.bundle, finalCaptureAttestation: fixture.attestationPath, expectedRepository: "szTheory/accrue" });
       assert.equal(inventory.artifacts.entries.find((entry) => entry.path === "raw-link")?.sha256, fixture.expectedLinkDigest);
+      const linkEntry = fixture.manifest.artifacts.find((entry) => entry.path === "raw-link");
+      assert.equal(currentArtifact(fixture.repo, linkEntry, { readFileSync() { throw new Error("symlink target must never be opened"); } }).sha256, fixture.expectedLinkDigest);
+      assert.throws(() => currentArtifact(fixture.repo, linkEntry, { readlinkSync: () => "decoded" }), /did not return a Buffer/);
+      assert.throws(() => currentArtifact(fixture.repo, linkEntry, { readlinkSync() { throw new Error("raw-byte access unsupported"); } }), /raw-byte access unsupported/);
+      fs.rmSync(fixture.linkPath); fs.symlinkSync(Buffer.from([0xff, 0xfd, 0x0a]), fixture.linkPath);
+      assert.throws(() => collectRepositoryInventory({ repo: fixture.repo, recoveryManifest: fixture.manifestPath, expectedManifestSha256: fixture.expectedManifestSha256, recoveryBundle: fixture.bundle, finalCaptureAttestation: fixture.attestationPath, expectedRepository: "szTheory/accrue" }), /artifact changed|post-invariant mismatch/);
     } finally { fs.rmSync(fixture.scratch, { recursive: true, force: true }); }
   });
 
