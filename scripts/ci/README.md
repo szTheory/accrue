@@ -51,6 +51,29 @@ node scripts/ci/verify_repository_inventory.mjs \
 ```
 <!-- phase229-strict-verification:end -->
 
+The final Phase 229 handoff uses one allowlisted wrapper to snapshot the private capsule and protected workspace identities around the complete recapture and verification chain. Supply the five private values only in the maintainer shell. The attestation must name a direct capsule sibling that does not yet exist; the wrapper creates it exclusively as a current-owner mode-`0600` file only after every comparison passes.
+
+```bash
+test -n "${PHASE229_CAPSULE_DIR:-}" && \
+test -n "${PHASE229_PRIVATE_MANIFEST:-}" && \
+test -n "${PHASE229_MANIFEST_SHA256:-}" && \
+test -n "${PHASE229_RECOVERY_BUNDLE:-}" && \
+test -n "${PHASE229_FINAL_ATTESTATION:-}" && \
+node scripts/ci/verify_phase229_handoff_invariants.mjs \
+  --run-final-chain \
+  --repository-root . \
+  --capsule-directory "$PHASE229_CAPSULE_DIR" \
+  --recovery-manifest "$PHASE229_PRIVATE_MANIFEST" \
+  --expected-manifest-sha256 "$PHASE229_MANIFEST_SHA256" \
+  --recovery-bundle "$PHASE229_RECOVERY_BUNDLE" \
+  --attestation "$PHASE229_FINAL_ATTESTATION" \
+  --records .planning/phases/229-repository-truth-recovery-safety/229-REPOSITORY-INVENTORY.json \
+  --rendered .planning/phases/229-repository-truth-recovery-safety/229-REPOSITORY-INVENTORY.md \
+  --expected-repository szTheory/accrue
+```
+
+The wrapper accepts no arbitrary child command. It only runs the Phase 229 preservation, bounded collection, deterministic rendering, gap/verifier/monitor/documentation checks, and real-capsule strict verification. It never fetches or refreshes refs, integrates history, cleans files or refs, mutates CI or pull requests, resolves ship windows, pushes, merges, or publishes.
+
 The monitor is the single supported read-only observation implementation. Every command fixes the repository to `szTheory/accrue`; no command dispatches, reruns, cancels, or otherwise mutates Actions, refs, PRs, or providers.
 
 When capturing a recovery-gated inventory, the collector requires the actual external bundle and a private final-capture attestation in addition to the private manifest. Set these three locations and the exact manifest SHA-256 only in the maintainer shell; paths and manifest contents are never written into committed evidence. The original manifest digest is anchored in the committed canonical inventory. Before parsing the manifest, touching the bundle, validating an attestation, reading supplemental authorization, or making a remote adapter call, the collector requires that independent expected digest; verifies the manifest is a current-effective-user-owned regular file with no group/other permissions (mode `0600` or stricter); and compares its bytes to that digest. It then independently checks the bundle SHA-256 against the trusted manifest, runs bounded `git bundle verify`, lists actual bundle heads for every frozen original ref/object, checks each encoded preservation ref, and validates timestamped typed pre/post artifact invariants. The attestation permits changed hashes only for `.planning/milestone.lock` and `.planning/state.json`; every other frozen artifact must retain its exact type and hash.

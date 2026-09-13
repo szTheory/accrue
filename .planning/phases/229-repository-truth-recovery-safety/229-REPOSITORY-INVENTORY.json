@@ -702,14 +702,14 @@
         "path": ".planning/milestone.lock",
         "type": "regular",
         "before_sha256": "ff3a344da8e68b3823d339706955e8d9af254c8512ac04d83756cc8d8abef1ab",
-        "after_sha256": "957e70b503f5114b063474dc48a4bb430c67b3c107a224c7ca373814f2c34324",
+        "after_sha256": "15176e48fa01356917137650be37743317d93727921a3b612c422f02a1659f52",
         "state": "workflow_metadata_refreshed"
       },
       {
         "path": ".planning/state.json",
         "type": "regular",
         "before_sha256": "2fd971f021946b9d4fa59955236168029afb266c1126979f97409e18412cb273",
-        "after_sha256": "2df27d8a58456fa4f52cb7a21bc921cfd2609d25d0241af3b7c232e238bdda95",
+        "after_sha256": "2ceab47346117e2bda597ae48a914a8880ea153dae95f2d08a868c4230c7d174",
         "state": "workflow_metadata_refreshed"
       }
     ]
@@ -717,7 +717,7 @@
   "refs": {
     "local_main": "5c01f4bc38d4d38e8e080bde0e608e26ca9b5442",
     "cached_origin_main": "8f3135f781a324fc0b8d3c460883b1d572bf6e02",
-    "milestone_branch": "dbbe2d07152bae7e81c71d39dc8711b5b4885110",
+    "milestone_branch": "b48c7d8af5c0a686c98572834863e5e51530219f",
     "v161_tag": "fdb41672dd9240b36623ab22a7a8377a2735e5a3",
     "all": [
       {
@@ -1292,7 +1292,7 @@
       },
       {
         "name": "refs/heads/gsd/milestone-v1.62-release-integration-hygiene",
-        "object": "dbbe2d07152bae7e81c71d39dc8711b5b4885110",
+        "object": "b48c7d8af5c0a686c98572834863e5e51530219f",
         "role": "other"
       },
       {
@@ -1815,7 +1815,7 @@
   "remotes": {
     "remote_main": {
       "repository": "szTheory/accrue",
-      "observed_at": "2026-09-13T15:29:21.713Z",
+      "observed_at": "2026-09-13T19:50:20.078Z",
       "request": "GET /repos/szTheory/accrue/git/ref/heads/main",
       "available": true,
       "state": "observed",
@@ -1823,24 +1823,30 @@
     },
     "pull_requests": {
       "repository": "szTheory/accrue",
-      "observed_at": "2026-09-13T15:29:22.068Z",
-      "request": "GET /repos/szTheory/accrue/pulls?state=open&per_page=100",
+      "observed_at": "2026-09-13T19:50:20.368Z",
+      "requests": [
+        "GET /repos/szTheory/accrue/pulls?state=open&per_page=100&page=1"
+      ],
       "available": true,
       "state": "observed",
       "shas": []
     },
     "release_branches": {
       "repository": "szTheory/accrue",
-      "observed_at": "2026-09-13T15:29:22.414Z",
-      "request": "GET /repos/szTheory/accrue/git/matching-refs/heads/release/",
+      "observed_at": "2026-09-13T19:50:20.665Z",
+      "requests": [
+        "GET /repos/szTheory/accrue/git/matching-refs/heads/release/?per_page=100&page=1"
+      ],
       "available": true,
       "state": "observed",
       "shas": []
     },
     "actions": {
       "repository": "szTheory/accrue",
-      "observed_at": "2026-09-13T15:29:22.776Z",
-      "request": "GET /repos/szTheory/accrue/actions/runs?per_page=100",
+      "observed_at": "2026-09-13T19:50:20.973Z",
+      "requests": [
+        "GET /repos/szTheory/accrue/actions/runs?per_page=100&page=1"
+      ],
       "available": false,
       "state": "unavailable",
       "reason": "network"
@@ -1860,12 +1866,12 @@
       "10:open"
     ],
     "milestone": "9ed23b971a9e16c1f943b2862c70d818632cd5a52caa194cefb78454847f55d3",
-    "state": "262031b5eb7b945db3f3fb1b2bf33950c0b508a84bae10b28c26dca02960a8ac"
+    "state": "4621d0f45c089f2863bdb1ad2a96ebbe614e66083d80435aba51f21e15f4da66"
   },
   "worktrees": [
     {
       "branch": "gsd/milestone-v1.62-release-integration-hygiene",
-      "sha": "dbbe2d07152bae7e81c71d39dc8711b5b4885110",
+      "sha": "b48c7d8af5c0a686c98572834863e5e51530219f",
       "dirty": true
     }
   ]
