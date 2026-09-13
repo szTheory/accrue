@@ -128,7 +128,7 @@ Restore individual refs with `git fetch "$PHASE229_BUNDLE" refs/accrue-preserve/
 | --- | --- | --- |
 | cached_origin_main | `8f3135f781a324fc0b8d3c460883b1d572bf6e02` | separately named fact |
 | local_main | `5c01f4bc38d4d38e8e080bde0e608e26ca9b5442` | separately named fact |
-| milestone_branch | `f40f9a92637446da8a1fe8b58f0004b77f33e3d7` | separately named fact |
+| milestone_branch | `6d7cce6305318f0b852b2605b13e2bbe71815685` | separately named fact |
 | v161_tag | `fdb41672dd9240b36623ab22a7a8377a2735e5a3` | separately named fact |
 
 ## All local and preservation refs
@@ -251,7 +251,7 @@ Restore individual refs with `git fetch "$PHASE229_BUNDLE" refs/accrue-preserve/
 | refs/heads/fix/chimeway-opaque-recipient | `0752b8d0b59eb53936498daa4bb0be4b14ffd0e4` | other |
 | refs/heads/fix/getfluent-1.5.1 | `dba9a75daa4c8ca1f3213dd2de43efbbde1f5dfe` | other |
 | refs/heads/fix/release-otp-28-1 | `72118f05cbe2f490e329f9f067d88f850246c321` | other |
-| refs/heads/gsd/milestone-v1.62-release-integration-hygiene | `f40f9a92637446da8a1fe8b58f0004b77f33e3d7` | other |
+| refs/heads/gsd/milestone-v1.62-release-integration-hygiene | `6d7cce6305318f0b852b2605b13e2bbe71815685` | other |
 | refs/heads/gsd/phase-225-required-lane-signal-repair | `57c61a9a48f1ae84f7b3c3f45333eb6e5fb7261c` | other |
 | refs/heads/main | `5c01f4bc38d4d38e8e080bde0e608e26ca9b5442` | local_main |
 | refs/heads/release-please--branches--main | `ac4c73854bab31a602c536827993db4d9f7e9949` | other |
@@ -362,7 +362,7 @@ Restore individual refs with `git fetch "$PHASE229_BUNDLE" refs/accrue-preserve/
 
 | Branch | Object | Classification |
 | --- | --- | --- |
-| gsd/milestone-v1.62-release-integration-hygiene | `f40f9a92637446da8a1fe8b58f0004b77f33e3d7` | dirty |
+| gsd/milestone-v1.62-release-integration-hygiene | `6d7cce6305318f0b852b2605b13e2bbe71815685` | dirty |
 
 ## User-owned artifact evidence
 
@@ -384,7 +384,7 @@ Restore individual refs with `git fetch "$PHASE229_BUNDLE" refs/accrue-preserve/
 | Relative path | State | Before SHA-256 | After SHA-256 |
 | --- | --- | --- | --- |
 | .planning/milestone.lock | workflow_metadata_refreshed | `ff3a344da8e68b3823d339706955e8d9af254c8512ac04d83756cc8d8abef1ab` | `0b4bfb6304c778cc3685560cecde007a81170f749bbdf4de22253d2007a071c5` |
-| .planning/state.json | workflow_metadata_refreshed | `2fd971f021946b9d4fa59955236168029afb266c1126979f97409e18412cb273` | `0ec97423eeb805cea10cd447df5a1deb7f1610e52c9d1b5fa88ef0e1719091d4` |
+| .planning/state.json | workflow_metadata_refreshed | `2fd971f021946b9d4fa59955236168029afb266c1126979f97409e18412cb273` | `358b97b6fe677cdbd680cb7914346e9e95431d086ce75fe426974404b0c05c8e` |
 
 ## Remote, PR, release branch, and Actions observations
 
@@ -392,14 +392,14 @@ Restore individual refs with `git fetch "$PHASE229_BUNDLE" refs/accrue-preserve/
 
 | Category | State | Exact object ID | Observed at | Read-only request |
 | --- | --- | --- | --- | --- |
-| actions | unavailable:unavailable | — | `2026-09-13T12:53:23.579Z` | GET /repos/szTheory/accrue/actions |
-| pull_requests | unavailable:unavailable | — | `2026-09-13T12:53:23.579Z` | GET /repos/szTheory/accrue/pull_requests |
-| release_branches | unavailable:unavailable | — | `2026-09-13T12:53:23.579Z` | GET /repos/szTheory/accrue/release_branches |
-| remote_main | unavailable:unavailable | — | `2026-09-13T12:53:23.579Z` | GET /repos/szTheory/accrue/remote_main |
+| actions | unavailable:unavailable | — | `2026-09-13T12:55:54.143Z` | GET /repos/szTheory/accrue/actions |
+| pull_requests | unavailable:unavailable | — | `2026-09-13T12:55:54.143Z` | GET /repos/szTheory/accrue/pull_requests |
+| release_branches | unavailable:unavailable | — | `2026-09-13T12:55:54.143Z` | GET /repos/szTheory/accrue/release_branches |
+| remote_main | unavailable:unavailable | — | `2026-09-13T12:55:54.142Z` | GET /repos/szTheory/accrue/remote_main |
 
 ## Ship windows and planning
 
-**Fact:** milestone 9ed23b971a9e16c1f943b2862c70d818632cd5a52caa194cefb78454847f55d3; state c35040d977a9447d58cf4f5b9ab2d617f600dfe070fbc916d2ce314b3ddd3467. **State:** recorded. **Owner:** release-engineering. **Next command:** `gsd_run windows status --raw`.
+**Fact:** milestone 9ed23b971a9e16c1f943b2862c70d818632cd5a52caa194cefb78454847f55d3; state 277f3d9a20384c47780e60715149d549633e67b58aec4ffd7e9699b61a708e83. **State:** recorded. **Owner:** release-engineering. **Next command:** `gsd_run windows status --raw`.
 
 | Ship window |
 | --- |
