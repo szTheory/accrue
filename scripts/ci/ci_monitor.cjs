@@ -14,6 +14,8 @@ const MAX_LIMIT = 100;
 const MAX_POLL_SECONDS = 300;
 const MAX_TIMEOUT_SECONDS = 3600;
 const MAX_FAILURE_DETAILS = 10;
+const GH_READ_TIMEOUT_MS = 30_000;
+const GH_READ_MAX_BUFFER = 1024 * 1024;
 const UNSUCCESSFUL_COMPLETION_EXIT = 69;
 const DEFAULT_WRAPPER_PATH = path.join(__dirname, "watch_ci.sh");
 
@@ -101,7 +103,7 @@ function createReadAdapter(invoke) {
 }
 function createGhReadAdapter() {
   return createReadAdapter((argv) => {
-    const result = spawnSync("gh", argv, { encoding: "utf8", shell: false });
+    const result = spawnSync("gh", argv, { encoding: "utf8", shell: false, timeout: GH_READ_TIMEOUT_MS, maxBuffer: GH_READ_MAX_BUFFER });
     if (result.error) fail(67, `GitHub CLI unavailable: ${result.error.code || result.error.message}`);
     if (result.status !== 0) fail(67, `GitHub read failed: ${(result.stderr || "unknown error").trim().slice(0, 240)}`);
     return result.stdout;
@@ -123,14 +125,20 @@ function summarizeFailures(jobs) {
 }
 function inspectSha(adapter, options) {
   validateRepository(options.repo); const sha = validateFullSha(options.sha);
-  const matching = adapter.listRuns({ commit: sha, workflow: options.workflow, limit: MAX_LIMIT }).map((run) => normalizeRun(run)).filter((run) => run.sha === sha && (!options.workflow || run.workflow === options.workflow));
-  if (matching.length === 0) fail(65, `no GitHub Actions run matches SHA ${sha}`);
-  if (matching.length > 1) fail(66, `ambiguous GitHub Actions runs match SHA ${sha}`);
-  const viewed = adapter.viewRun(matching[0].run_id); const run = normalizeRun(viewed);
-  if (run.sha !== sha) fail(67, `GitHub run view did not retain SHA ${sha}`);
-  return { ...run, failed_jobs: summarizeFailures(viewed.jobs ?? []) };
+  try {
+    const matching = adapter.listRuns({ commit: sha, workflow: options.workflow, limit: MAX_LIMIT }).map((run) => normalizeRun(run)).filter((run) => run.sha === sha && (!options.workflow || run.workflow === options.workflow));
+    if (matching.length === 0) fail(65, "no GitHub Actions run matched");
+    if (matching.length > 1) fail(66, "ambiguous GitHub Actions runs matched");
+    const viewed = adapter.viewRun(matching[0].run_id); const run = normalizeRun(viewed);
+    if (run.sha !== sha) fail(67, "GitHub run view did not retain the requested SHA");
+    return { ...run, failed_jobs: summarizeFailures(viewed.jobs ?? []) };
+  } catch (error) {
+    if (error instanceof MonitorError) throw new MonitorError(error.code, `${REPOSITORY} ${sha}: ${error.message}`);
+    throw error;
+  }
 }
 function resolveBranchSha(adapter, options) {
+  if (options.sha) return validateFullSha(options.sha);
   if (!options.branch) return validateFullSha(options.sha);
   const candidates = listRuns(adapter, { ...options, limit: 1 });
   if (candidates.length !== 1) fail(66, `branch ${options.branch} did not resolve exactly one run`);
@@ -141,7 +149,7 @@ function watchSha(adapter, options, { now = () => Date.now(), sleep = () => {} }
   while (true) {
     const result = inspectSha(adapter, { ...options, sha });
     if (result.status === "completed") return result;
-    if (now() - started >= options.timeoutSeconds * 1000) fail(68, `watch timed out for SHA ${sha}`);
+    if (now() - started >= options.timeoutSeconds * 1000) fail(68, `${REPOSITORY} ${sha}: watch timed out`);
     sleep(options.pollSeconds * 1000);
   }
 }
@@ -224,7 +232,7 @@ function verifyWrapperBehavior(wrapperPath) {
   assert.equal(positionalBranch.status, 0, `positional branch wrapper failed: ${positionalBranch.stderr}`);
   assert.equal(optionValue(positionalBranch.calls[0], "--branch"), "release/v1");
 
-  const exactSha = wrapperFixture(wrapperPath, ["--sha", "a".repeat(40)]);
+  const exactSha = wrapperFixture(wrapperPath, ["ignored-branch", "--sha", "a".repeat(40)]);
   assert.equal(exactSha.status, 0, `exact-SHA wrapper failed: ${exactSha.stderr}`);
   assert.ok(exactSha.calls.every((argv) => !argv.includes("--branch")), "explicit SHA must bypass branch resolution");
   assert.ok(exactSha.calls.filter((argv) => argv[1] === "list").every((argv) => optionValue(argv, "--workflow") === "CI"), "explicit SHA retains the CI workflow default");
@@ -272,13 +280,15 @@ function runSelfTest({ wrapperPath = DEFAULT_WRAPPER_PATH, docsPath } = {}) {
   assert.deepEqual(inspected.failed_jobs, [{ name: "unit", conclusion: "failure", attempt: 1, failing_steps: [{ name: "test", conclusion: "failure", number: 3 }] }]);
   assert.ok(adapter.calls.every((argv) => argv.includes("-R") && argv[argv.indexOf("-R") + 1] === REPOSITORY)); assert.ok(adapter.calls.every((argv) => /^(run list|run view)/.test(argv.join(" "))));
   assert.throws(() => validateRepository("other/repo"), /repository must/); assert.throws(() => validateFullSha("A".repeat(40)), /lowercase/);
-  assert.throws(() => inspectSha(fixtureAdapter([[]]), { repo: REPOSITORY, sha }), /no GitHub Actions run/); assert.throws(() => inspectSha(fixtureAdapter([[run, { ...run, databaseId: 8 }]]), { repo: REPOSITORY, sha }), /ambiguous/);
-  assert.throws(() => listRuns(fixtureAdapter([null]), { repo: REPOSITORY, limit: 1 }), /unavailable/); assert.throws(() => listRuns(fixtureAdapter([[]]), { repo: REPOSITORY, limit: 1 }), /no GitHub Actions runs/);
+  assert.throws(() => inspectSha(fixtureAdapter([[]]), { repo: REPOSITORY, sha }), (error) => error.code === 65 && error.message.includes(REPOSITORY) && error.message.includes(sha));
+  assert.throws(() => inspectSha(fixtureAdapter([[run, { ...run, databaseId: 8 }]]), { repo: REPOSITORY, sha }), (error) => error.code === 66 && error.message.includes(REPOSITORY) && error.message.includes(sha));
+  assert.throws(() => inspectSha(fixtureAdapter([null]), { repo: REPOSITORY, sha }), (error) => error.code === 67 && error.message.includes(REPOSITORY) && error.message.includes(sha));
+  assert.throws(() => listRuns(fixtureAdapter([[]]), { repo: REPOSITORY, limit: 1 }), (error) => error.code === 65);
   assert.throws(() => readOnlyArgv(["run", "rerun", "-R", REPOSITORY]), /forbidden/); assert.equal(normalizeRun({ ...run, conclusion: "success" }).provider_proof, "non_run");
   assert.deepEqual(listRuns(fixtureAdapter([[{ ...run, databaseId: 9 }, { ...run, databaseId: 8, headSha: "b".repeat(40) }]]), { repo: REPOSITORY, limit: 2 }).map((item) => item.run_id), [9, 8]);
   assert.equal(inspectSha(fixtureAdapter([[{ ...run, conclusion: "cancelled" }], { ...run, conclusion: "cancelled", jobs: [] }]), { repo: REPOSITORY, sha }).conclusion, "cancelled");
   let clock = 0; const queued = { ...run, status: "queued", conclusion: null };
-  assert.throws(() => watchSha(fixtureAdapter([[queued], { ...queued, jobs: [] }, [queued], { ...queued, jobs: [] }]), { repo: REPOSITORY, sha, timeoutSeconds: 1, pollSeconds: 1 }, { now: () => clock, sleep: () => { clock += 1000; } }), /timed out/);
+  assert.throws(() => watchSha(fixtureAdapter([[queued], { ...queued, jobs: [] }, [queued], { ...queued, jobs: [] }]), { repo: REPOSITORY, sha, timeoutSeconds: 1, pollSeconds: 1 }, { now: () => clock, sleep: () => { clock += 1000; } }), (error) => error.code === 68 && error.message.includes(sha));
   const inProgress = { ...run, status: "in_progress", conclusion: null };
   const completed = { ...run, status: "completed", conclusion: "success" };
   assert.equal(watchSha(fixtureAdapter([[inProgress], { ...inProgress, jobs: [] }, [completed], { ...completed, jobs: [] }]), { repo: REPOSITORY, sha, timeoutSeconds: 2, pollSeconds: 1 }, { now: () => clock, sleep: () => { clock += 1000; } }).conclusion, "success");
