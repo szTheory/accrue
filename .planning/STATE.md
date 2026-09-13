@@ -5,16 +5,16 @@ milestone_name: Release Integration & Repository Hygiene
 current_phase: 229
 current_phase_name: Repository Truth & Recovery Safety
 status: executing
-stopped_at: Completed 229-04-PLAN.md
-last_updated: "2026-09-13T14:31:59.626Z"
+stopped_at: Completed 229-05-PLAN.md
+last_updated: "2026-09-13T14:41:31.868Z"
 last_activity: 2026-09-13
 last_activity_desc: Phase 229 execution started
-state_head: c27445b689892769ce69e048a146779f46179944
+state_head: dba4d2be6f113cf93e124e51ca76259494dfb07b
 progress:
   total_phases: 4
   completed_phases: 0
   total_plans: 9
-  completed_plans: 4
+  completed_plans: 5
   percent: 0
 ---
 
@@ -30,8 +30,8 @@ See: `.planning/PROJECT.md` (updated 2026-09-12)
 
 ## Current Position
 
-Phase: 229 (Repository Truth & Recovery Safety) — READY TO EXECUTE
-Plan: 4 of 4
+Phase: 229 (Repository Truth & Recovery Safety) — EXECUTING
+Plan: 2 of 9
 Status: Ready to execute
 Last activity: 2026-09-13 — Phase 229 execution started
 
@@ -61,6 +61,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 229 P02 | 15min | 2 tasks | 2 files |
 | Phase 229-repository-truth-recovery-safety P03 | 16min | 2 tasks | 3 files |
 | Phase 229 P04 | 35min | 2 tasks | 7 files |
+| Phase 229 P05 | 20m | 2 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -79,6 +80,8 @@ Progress: [░░░░░░░░░░] 0%
 - [Phase 229]: Collection re-resolves preservation refs before live remote observation.
 - [Phase 229]: Phase 229 inventory permits only exact-path before/after-hash evidence for the two GSD workflow metadata refreshes.
 - [Phase 229]: Phase 229 commits explicit unavailable remote observations rather than cached or local substitutes.
+- [Phase 229]: [Phase 229]: Recovery capsules use physical destination validation and exclusive atomic publication before final bundle revalidation.
+- [Phase 229]: [Phase 229]: Recovery manifests store restore argv arrays, never shell command text.
 
 ### Pending Todos
 
@@ -91,6 +94,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-09-13T12:55:05.529Z
-Stopped at: Completed 229-04-PLAN.md
+Last session: 2026-09-13T14:41:31.845Z
+Stopped at: Completed 229-05-PLAN.md
 Resume file: None
