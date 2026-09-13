@@ -230,8 +230,8 @@ defmodule Accrue.LiveStripe.ProrationFidelityLiveTest do
 
   defp normalize_committed_lines(lines) do
     Enum.map(lines, fn line ->
-      desc = line[:description] || line["description"] || ""
-      amount = line[:amount] || line["amount"]
+      desc = field(line, :description) || ""
+      amount = field(line, :amount)
       {desc, amount}
     end)
   end
