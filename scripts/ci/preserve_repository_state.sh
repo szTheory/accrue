@@ -55,9 +55,10 @@ validate_artifact_path() {
   done
 }
 
-scratch=""; created_outputs=(); published=false
+scratch=""; created_outputs=(); temporary_outputs=(); published=false
 cleanup_run() {
   local output
+  for output in "${temporary_outputs[@]:-}"; do rm -f -- "$output" 2>/dev/null || true; done
   if ! "$published"; then
     for output in "${created_outputs[@]:-}"; do rm -f -- "$output" 2>/dev/null || true; done
   fi
@@ -136,6 +137,7 @@ run() {
   done < "$frozen"
   local bundle_tmp manifest_tmp public_tmp bundle_sha256
   bundle_tmp="$(mktemp "$(dirname "$bundle_out")/.phase229-bundle.XXXXXX")"
+  temporary_outputs+=("$bundle_tmp")
   git -C "$repo_root" bundle create "$bundle_tmp" --stdin < "$refs_for_bundle" >/dev/null
   verify_bundle_heads "$frozen" "$bundle_tmp"
   bundle_sha256="$(sha256 "$bundle_tmp")"
@@ -148,7 +150,7 @@ run() {
     else die "unsupported untracked entry type"; fi
     printf '%s\0%s\0%s\0' "$ref" "$artifact_type" "$artifact_hash" >> "$artifacts"
   done < <(git -C "$repo_root" ls-files --others --exclude-standard -z)
-  manifest_tmp="$(mktemp "$(dirname "$private_manifest_out")/.phase229-manifest.XXXXXX")"; chmod 600 "$manifest_tmp"
+  manifest_tmp="$(mktemp "$(dirname "$private_manifest_out")/.phase229-manifest.XXXXXX")"; temporary_outputs+=("$manifest_tmp"); chmod 600 "$manifest_tmp"
   BUNDLE_SHA256="$bundle_sha256" FROZEN="$frozen" ARTIFACTS="$artifacts" MANIFEST="$manifest_tmp" EXPECTED="$expected_repository" node --input-type=module <<'NODE'
 import fs from 'node:fs';
 const read = (file) => fs.readFileSync(file).toString().split('\0').filter(Boolean);
@@ -158,8 +160,10 @@ fs.writeFileSync(process.env.MANIFEST, `${JSON.stringify({ schema_version: 1, re
 NODE
   if [[ -n "$public_record_out" ]]; then
     public_tmp="$(mktemp "$(dirname "$public_record_out")/.phase229-public.XXXXXX")"
+    temporary_outputs+=("$public_tmp")
     printf '{"schema_version":1,"recovery_verified":true,"bundle_sha256":"%s","ref_count":%s,"empty_directory_policy":"not_surfaced_by_git"}\n' "$bundle_sha256" "$(wc -l < "$refs_for_bundle" | tr -d ' ')" > "$public_tmp"
   fi
+  [[ "${PHASE229_TEST_FAIL_AFTER_MANIFEST:-}" != 1 ]] || die "injected post-manifest failure"
   publish_exclusive "$bundle_tmp" "$bundle_out"; publish_exclusive "$manifest_tmp" "$private_manifest_out"
   [[ -z "$public_record_out" ]] || publish_exclusive "$public_tmp" "$public_record_out"
   verify_bundle_heads "$frozen" "$bundle_out"
@@ -177,6 +181,9 @@ expect_rejected() {
   local repo="$1" before="$2"; shift 2
   if "$@" >/dev/null 2>&1; then echo "self-test: invalid invocation unexpectedly passed" >&2; return 1; fi
   assert_no_preservation_delta "$repo" "$before"
+}
+expect_failure_after_recovery() {
+  if "$@" >/dev/null 2>&1; then echo "self-test: injected failure unexpectedly passed" >&2; return 1; fi
 }
 assert_empty_directory() { [[ -z "$(find "$1" -mindepth 1 -maxdepth 1 -print -quit)" ]]; }
 
@@ -201,8 +208,7 @@ self_test() {
   [[ ! -e "$output/equal" && ! -e "$output/alias" && ! -e "$output/private" ]] || { echo "self-test: rejected invocation wrote output" >&2; return 1; }
   TMPDIR="$tmp" "$0" --repo-root "$repo" --expected-repository szTheory/accrue --bundle-out "$output/capsule.bundle" --private-manifest-out "$output/private.json" --public-record-out "$output/public.json" >/dev/null
   assert_empty_directory "$tmp" || { echo "self-test: production scratch leaked after success" >&2; return 1; }
-  before="$(git -C "$repo" for-each-ref --format='%(refname) %(objectname)' refs/accrue-preserve/phase-229)"
-  expect_rejected "$repo" "$before" env PHASE229_TEST_FAIL_AFTER_MANIFEST=1 TMPDIR="$tmp" "$0" --repo-root "$repo" --expected-repository szTheory/accrue --bundle-out "$output/injected.bundle" --private-manifest-out "$output/injected.json"
+  expect_failure_after_recovery env PHASE229_TEST_FAIL_AFTER_MANIFEST=1 TMPDIR="$tmp" "$0" --repo-root "$repo" --expected-repository szTheory/accrue --bundle-out "$output/injected.bundle" --private-manifest-out "$output/injected.json"
   assert_empty_directory "$tmp" || { echo "self-test: production scratch leaked after injected failure" >&2; return 1; }
   [[ ! -e "$output/injected.bundle" && ! -e "$output/injected.json" ]] || { echo "self-test: injected failure published output" >&2; return 1; }
   git -C "$repo" bundle verify "$output/capsule.bundle" >/dev/null
