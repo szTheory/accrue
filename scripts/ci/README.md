@@ -39,12 +39,13 @@ node scripts/ci/verify_repository_inventory.mjs \
 
 The monitor is the single supported read-only observation implementation. Every command fixes the repository to `szTheory/accrue`; no command dispatches, reruns, cancels, or otherwise mutates Actions, refs, PRs, or providers.
 
-When capturing a recovery-gated inventory, the collector requires the actual external bundle and a private final-capture attestation in addition to the private manifest. Set these three locations only in the maintainer shell; they are never written into committed evidence. Before it can make any remote adapter call, the collector independently checks the bundle SHA-256 against the manifest, runs bounded `git bundle verify`, lists actual bundle heads for every frozen original ref/object, checks each encoded preservation ref, and validates timestamped typed pre/post artifact invariants. The attestation permits changed hashes only for `.planning/milestone.lock` and `.planning/state.json`; every other frozen artifact must retain its exact type and hash.
+When capturing a recovery-gated inventory, the collector requires the actual external bundle and a private final-capture attestation in addition to the private manifest. Set these three locations and the exact manifest SHA-256 only in the maintainer shell; paths and manifest contents are never written into committed evidence. The original manifest digest is anchored in the committed canonical inventory. Before parsing the manifest, touching the bundle, validating an attestation, reading supplemental authorization, or making a remote adapter call, the collector requires that independent expected digest; verifies the manifest is a current-effective-user-owned regular file with no group/other permissions (mode `0600` or stricter); and compares its bytes to that digest. It then independently checks the bundle SHA-256 against the trusted manifest, runs bounded `git bundle verify`, lists actual bundle heads for every frozen original ref/object, checks each encoded preservation ref, and validates timestamped typed pre/post artifact invariants. The attestation permits changed hashes only for `.planning/milestone.lock` and `.planning/state.json`; every other frozen artifact must retain its exact type and hash.
 
 ```bash
 node scripts/ci/collect_repository_inventory.mjs \
   --repo szTheory/accrue \
   --recovery-manifest "$PHASE229_RECOVERY_MANIFEST" \
+  --expected-manifest-sha256 "$PHASE229_MANIFEST_SHA256" \
   --recovery-bundle "$PHASE229_BUNDLE" \
   --final-capture-attestation "$PHASE229_FINAL_CAPTURE_ATTESTATION" \
   --artifact-authorization "$PHASE229_WORKFLOW_METADATA_AUTHORIZATION" \

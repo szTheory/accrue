@@ -4,7 +4,7 @@ Sanitized schema-v2 repository evidence. This is a deterministic projection: no 
 
 ## Recovery barrier
 
-**Fact:** bundle SHA-256 4108818c08a1d2a2c3c75058a30789bd89f6e5f44f1268e09252f337c714a869. **State:** verified. **Owner:** repository-maintainers. **Next command:** `PHASE229_BUNDLE=/secure/location git bundle verify "$PHASE229_BUNDLE"`.
+**Fact:** private manifest SHA-256 52f3ea27d5551fba55d3666b44911104a20386b6ce1610eb8e194aab395817b4; bundle SHA-256 4108818c08a1d2a2c3c75058a30789bd89f6e5f44f1268e09252f337c714a869. **State:** verified. **Owner:** repository-maintainers. **Next command:** `PHASE229_MANIFEST_SHA256=52f3ea27d5551fba55d3666b44911104a20386b6ce1610eb8e194aab395817b4 PHASE229_BUNDLE=/secure/location git bundle verify "$PHASE229_BUNDLE"`.
 
 | Original ref | Object | Preservation ref | Bundle member |
 | --- | --- | --- | --- |

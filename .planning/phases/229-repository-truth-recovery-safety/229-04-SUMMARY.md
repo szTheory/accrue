@@ -57,6 +57,7 @@ status: remediation-pending-audit
 - Documented the read-only, exact-repository CI list, inspect, and bounded watch commands.
 - Revalidated the original bundle digest, bundle structure, every one of 109 frozen refs, preservation mappings, v1.61 tag object, and typed artifact snapshot before collection.
 - Repaired the final-capture boundary so it performs bounded `git bundle verify`, checks actual listed bundle heads for every frozen original ref/object, and rejects malformed timing/invariant evidence before remote observation.
+- Anchored the original private recovery-manifest SHA-256 in the committed canonical inventory and require it as an independent input before manifest parsing, bundle access, artifact/attestation checks, or adapter observation; private manifest ownership and mode are fail-closed.
 - Captured a schema-v2 JSON authority and byte-reproducible Markdown projection; all remote facts are explicit unavailable records rather than substituted local facts.
 - Restricted the authorized artifact delta to `.planning/milestone.lock` and `.planning/state.json`, each with a fixed path, type, before SHA-256, after SHA-256, and workflow-owned state.
 
@@ -94,6 +95,13 @@ status: remediation-pending-audit
 - **Fix:** Required a bundle path and final-capture attestation, compared the actual bundle digest to the manifest, ran bounded bundle verification/listing, checked every frozen original ref/object and preservation ref, and added fail-closed adapter-order fixtures.
 - **Files modified:** `scripts/ci/collect_repository_inventory.mjs`, `scripts/ci/verify_repository_inventory.mjs`, `scripts/ci/README.md`
 - **Commit:** `fix(229-04)` atomic remediation commit
+
+**3. [Rule 2 - Missing critical functionality] Anchored original private recovery-manifest integrity**
+- **Found during:** Second post-plan security audit (T-229-15).
+- **Issue:** A coordinated replacement of the private manifest and bundle could produce mutually consistent but fraudulent recovery evidence.
+- **Fix:** Added the original manifest SHA-256 to the committed canonical inventory and deterministic Markdown, require an exact expected digest before parsing the private manifest or touching dependent evidence, and fail closed on missing/wrong digest, broad permissions, or unavailable ownership validation.
+- **Files modified:** `scripts/ci/collect_repository_inventory.mjs`, `scripts/ci/verify_repository_inventory.mjs`, `scripts/ci/render_repository_inventory.mjs`, `scripts/ci/README.md`, canonical inventory/validation evidence.
+- **Commit:** this atomic `fix(229-04)` remediation commit.
 
 ### Authorized Workflow Metadata Follow-up
 

@@ -4,6 +4,7 @@
   "mode": "live_remote",
   "recovery": {
     "verified": true,
+    "manifest_sha256": "52f3ea27d5551fba55d3666b44911104a20386b6ce1610eb8e194aab395817b4",
     "bundle_sha256": "4108818c08a1d2a2c3c75058a30789bd89f6e5f44f1268e09252f337c714a869",
     "refs": [
       {

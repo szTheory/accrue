@@ -24,15 +24,15 @@ function recoveryFixture() {
   const originalRef = "refs/heads/main"; const encodedRef = `refs/accrue-preserve/phase-229/${Buffer.from(originalRef).toString("hex")}`; git(repo, ["update-ref", encodedRef, object]); const bundle = path.join(scratch, "recovery.bundle"); git(repo, ["bundle", "create", bundle, originalRef]);
   const beforeLock = sha256("before-lock\n"); const beforeState = sha256("before-state\n"); fs.writeFileSync(path.join(repo, ".planning/milestone.lock"), "after-lock\n"); fs.writeFileSync(path.join(repo, ".planning/state.json"), "after-state\n"); const afterLock = sha256("after-lock\n"); const afterState = sha256("after-state\n");
   const manifest = { schema_version: 1, repository: "szTheory/accrue", recovery_verified: true, bundle_sha256: sha256(fs.readFileSync(bundle)), refs: [{ original_ref: originalRef, object, encoded_ref: encodedRef, bundle_member: true }], artifacts: [{ path: ".planning/milestone.lock", type: "regular", sha256: beforeLock }, { path: ".planning/state.json", type: "regular", sha256: beforeState }], empty_directory_policy: "not_surfaced_by_git" };
-  const manifestPath = path.join(scratch, "manifest.json"); fs.writeFileSync(manifestPath, JSON.stringify(manifest)); const attestation = { schema_version: 1, purpose: "phase229_final_capture", observed_at: "2026-09-13T00:00:00.000Z", artifacts: [{ path: ".planning/milestone.lock", type: "regular", before_sha256: beforeLock, after_sha256: afterLock, state: "workflow_metadata_refreshed" }, { path: ".planning/state.json", type: "regular", before_sha256: beforeState, after_sha256: afterState, state: "workflow_metadata_refreshed" }] }; const attestationPath = path.join(scratch, "attestation.json"); fs.writeFileSync(attestationPath, JSON.stringify(attestation));
-  return { scratch, repo, bundle, manifestPath, attestationPath, manifest, attestation };
+  const manifestPath = path.join(scratch, "manifest.json"); fs.writeFileSync(manifestPath, JSON.stringify(manifest), { mode: 0o600 }); fs.chmodSync(manifestPath, 0o600); const expectedManifestSha256 = sha256(fs.readFileSync(manifestPath)); const attestation = { schema_version: 1, purpose: "phase229_final_capture", observed_at: "2026-09-13T00:00:00.000Z", artifacts: [{ path: ".planning/milestone.lock", type: "regular", before_sha256: beforeLock, after_sha256: afterLock, state: "workflow_metadata_refreshed" }, { path: ".planning/state.json", type: "regular", before_sha256: beforeState, after_sha256: afterState, state: "workflow_metadata_refreshed" }] }; const attestationPath = path.join(scratch, "attestation.json"); fs.writeFileSync(attestationPath, JSON.stringify(attestation));
+  return { scratch, repo, bundle, manifestPath, expectedManifestSha256, attestationPath, manifest, attestation };
 }
 function assertRecoveryFailure(mutate, expected) {
   const fixture = recoveryFixture(); let calls = 0;
   try {
     mutate(fixture);
     assert.throws(() => collectRepositoryInventory({
-      repo: fixture.repo, recoveryManifest: fixture.manifestPath, recoveryBundle: fixture.bundle,
+      repo: fixture.repo, recoveryManifest: fixture.manifestPath, expectedManifestSha256: fixture.expectedManifestSha256, recoveryBundle: fixture.bundle,
       finalCaptureAttestation: fixture.attestationPath, expectedRepository: "szTheory/accrue", observeRemote: true,
       adapter: { get: () => { calls += 1; return { object: { sha: "a".repeat(40) } }; } }
     }), expected);
@@ -46,7 +46,7 @@ export function verifyFixtures() {
     schema_version: 2,
     repository: "szTheory/accrue",
     mode: "local_only",
-    recovery: { verified: true, bundle_sha256: "a".repeat(64), refs: [{ original_ref: "refs/heads/main", object: "b".repeat(40), encoded_ref: "refs/accrue-preserve/phase-229/726566732f68656164732f6d61696e", bundle_member: true }] },
+    recovery: { verified: true, manifest_sha256: "f".repeat(64), bundle_sha256: "a".repeat(64), refs: [{ original_ref: "refs/heads/main", object: "b".repeat(40), encoded_ref: "refs/accrue-preserve/phase-229/726566732f68656164732f6d61696e", bundle_member: true }] },
     artifacts: { empty_directory_policy: "not_surfaced_by_git", entries: [{ path: "link", type: "symlink", sha256: "d".repeat(64) }, { path: "nested/file.txt", type: "regular", sha256: "c".repeat(64) }] },
     refs: { local_main: "b".repeat(40), cached_origin_main: "b".repeat(40), milestone_branch: "b".repeat(40), v161_tag: "b".repeat(40), all: [{ name: "refs/heads/main", object: "b".repeat(40), role: "local_main" }] },
     remotes: Object.fromEntries(["remote_main", "pull_requests", "release_branches", "actions"].map((key) => [key, { repository: "szTheory/accrue", observed_at: "2026-09-13T00:00:00.000Z", request: `GET /repos/szTheory/accrue/${key}`, available: false, state: "unavailable", reason: "network" }])),
@@ -90,10 +90,17 @@ export function verifyFixtures() {
 
   const barrier = recoveryFixture(); let adapterCalls = 0;
   try {
-    const captured = collectRepositoryInventory({ repo: barrier.repo, recoveryManifest: barrier.manifestPath, recoveryBundle: barrier.bundle, finalCaptureAttestation: barrier.attestationPath, expectedRepository: "szTheory/accrue", observeRemote: true, adapter: { get: () => { adapterCalls += 1; return { object: { sha: "e".repeat(40) } }; } } });
-    assert.equal(captured.recovery.bundle_sha256, barrier.manifest.bundle_sha256); assert.equal(adapterCalls, 4, "remote observation begins only after complete local validation");
+    const captured = collectRepositoryInventory({ repo: barrier.repo, recoveryManifest: barrier.manifestPath, expectedManifestSha256: barrier.expectedManifestSha256, recoveryBundle: barrier.bundle, finalCaptureAttestation: barrier.attestationPath, expectedRepository: "szTheory/accrue", observeRemote: true, adapter: { get: () => { adapterCalls += 1; return { object: { sha: "e".repeat(40) } }; } } });
+    assert.equal(captured.recovery.manifest_sha256, barrier.expectedManifestSha256); assert.equal(adapterCalls, 4, "remote observation begins only after complete local validation");
   } finally { fs.rmSync(barrier.scratch, { recursive: true, force: true }); }
   assertRecoveryFailure(({ bundle }) => fs.appendFileSync(bundle, "tamper"), /digest/);
+  assertRecoveryFailure(({ repo, bundle, manifestPath }) => {
+    fs.writeFileSync(path.join(repo, "tracked"), "replacement\n"); git(repo, ["add", "tracked"]); git(repo, ["commit", "-qm", "replacement"]); const object = git(repo, ["rev-parse", "HEAD"]); const originalRef = "refs/heads/main"; const encodedRef = `refs/accrue-preserve/phase-229/${Buffer.from(originalRef).toString("hex")}`; git(repo, ["update-ref", encodedRef, object]); const replacementBundle = `${bundle}.replacement`; git(repo, ["bundle", "create", replacementBundle, originalRef]); fs.renameSync(replacementBundle, bundle); const manifest = JSON.parse(fs.readFileSync(manifestPath)); manifest.bundle_sha256 = sha256(fs.readFileSync(bundle)); manifest.refs[0].object = object; fs.writeFileSync(manifestPath, JSON.stringify(manifest)); fs.chmodSync(manifestPath, 0o600);
+  }, /manifest digest/);
+  assertRecoveryFailure(({ manifestPath }) => fs.chmodSync(manifestPath, 0o644), /permissions/);
+  { const originalGeteuid = process.geteuid; try { Object.defineProperty(process, "geteuid", { configurable: true, value: undefined }); assertRecoveryFailure(() => {}, /ownership cannot be validated/); } finally { Object.defineProperty(process, "geteuid", { configurable: true, value: originalGeteuid }); } }
+  assertRecoveryFailure((fixture) => { fixture.expectedManifestSha256 = "0".repeat(64); }, /manifest digest/);
+  assertRecoveryFailure((fixture) => { fixture.expectedManifestSha256 = undefined; }, /expected recovery manifest SHA-256/);
   assertRecoveryFailure(({ repo }) => git(repo, ["update-ref", "-d", "refs/accrue-preserve/phase-229/726566732f68656164732f6d61696e"]), /git rev-parse failed/);
   assertRecoveryFailure(({ manifestPath }) => { const manifest = JSON.parse(fs.readFileSync(manifestPath)); manifest.refs[0].object = "f".repeat(40); fs.writeFileSync(manifestPath, JSON.stringify(manifest)); }, /digest|preservation target|bundle/);
   assertRecoveryFailure(({ attestationPath }) => { const attestation = JSON.parse(fs.readFileSync(attestationPath)); attestation.observed_at = "not-a-time"; fs.writeFileSync(attestationPath, JSON.stringify(attestation)); }, /observed_at/);
