@@ -74,7 +74,8 @@ export function validateInventory(inventory, context) {
   return inventory;
 }
 
-function readTrustedRecoveryManifest(manifestPath, expectedManifestSha256) {
+function readTrustedRecoveryManifest(manifestPath, expectedManifestSha256, context) {
+  validationContext(context);
   digest(expectedManifestSha256, "expected recovery manifest SHA-256");
   if (typeof manifestPath !== "string" || !manifestPath) fail("private recovery manifest is required");
   if (typeof process.geteuid !== "function") fail("private recovery manifest ownership cannot be validated");
@@ -91,6 +92,7 @@ function readTrustedRecoveryManifest(manifestPath, expectedManifestSha256) {
     if (actualManifestSha256 !== expectedManifestSha256) fail("private recovery manifest digest does not match independent expected SHA-256");
     const manifest = JSON.parse(contents.toString("utf8"));
     if (manifest?.schema_version !== 1 || manifest.recovery_verified !== true || !Array.isArray(manifest.refs) || !Array.isArray(manifest.artifacts)) fail("recovery manifest is not verified phase-229 state");
+    if (manifest.repository !== context.expectedRepository) fail("recovery manifest repository must match expectedRepository");
     validateRecovery({ verified: true, manifest_sha256: expectedManifestSha256, bundle_sha256: manifest.bundle_sha256, refs: manifest.refs.map(({ original_ref, object, encoded_ref, bundle_member }) => ({ original_ref, object, encoded_ref, bundle_member })) });
     return manifest;
   } finally {
@@ -245,12 +247,74 @@ export function collectRemoteFacts({ repository, adapter, now = () => new Date()
     actions: remoteRead(adapter, requests.actions, repository, now(), { plural: true, normalize: (raw) => sortedShas(arrayOf(raw?.workflow_runs, "Actions"), (a, b) => String(a?.created_at || "").localeCompare(String(b?.created_at || "")) || Number(a?.id) - Number(b?.id), (item) => item?.head_sha) })
   };
 }
-export function collectPlanningFacts({ root }) { const hashed = (file) => fs.existsSync(path.join(root, file)) ? crypto.createHash("sha256").update(fs.readFileSync(path.join(root, file))).digest("hex") : "absent"; return { ship_windows: [], milestone: hashed(".planning/MILESTONES.md"), state: hashed(".planning/STATE.md") }; }
+function boundedFile(root, relative, label) {
+  const filename = path.join(root, relative);
+  const contents = fs.readFileSync(filename, "utf8");
+  if (Buffer.byteLength(contents, "utf8") > GH_MAX_BUFFER) fail(`${label} exceeds its bounded input size`);
+  return contents;
+}
+function frontmatterCount(contents, name) {
+  const match = new RegExp(`^${name}:\\s*(\\d+)\\s*$`, "m").exec(contents);
+  if (!match) fail(`ship-window authority is missing ${name}`);
+  return Number(match[1]);
+}
+export function readShipWindows({ root, readFile = boundedFile } = {}) {
+  const contents = readFile(root, ".planning/WINDOWS.md", "ship-window authority");
+  const header = "| id | phase | kind | file | line | description | status | reason | recorded_at | resolved_at |";
+  const start = contents.indexOf(header);
+  if (start < 0) fail("ship-window authority is malformed");
+  const rows = [];
+  for (const line of contents.slice(start + header.length).trimStart().split("\n")) {
+    if (!line.startsWith("|")) break;
+    const columns = line.split("|").slice(1, -1).map((item) => item.trim());
+    if (columns.every((item) => /^-+$/.test(item))) continue;
+    if (columns.length !== 10 || !/^\d+$/.test(columns[0]) || !["open", "waived", "fixed"].includes(columns[6])) fail("ship-window authority contains an invalid row");
+    rows.push({ id: Number(columns[0]), status: columns[6] });
+  }
+  const ids = new Set();
+  for (const row of rows) { if (ids.has(row.id)) fail("ship-window authority contains duplicate IDs"); ids.add(row.id); }
+  const total = frontmatterCount(contents, "total_count");
+  if (total !== rows.length || frontmatterCount(contents, "open_count") !== rows.filter((row) => row.status === "open").length || frontmatterCount(contents, "waived_count") !== rows.filter((row) => row.status === "waived").length || frontmatterCount(contents, "fixed_count") !== rows.filter((row) => row.status === "fixed").length) fail("ship-window authority counts are inconsistent");
+  return rows.sort((left, right) => left.id - right.id).map((row) => `${row.id}:${row.status}`);
+}
+export function parseWorktreePorcelain(output, dirtyForPath) {
+  if (typeof output !== "string" || typeof dirtyForPath !== "function") fail("worktree porcelain input is invalid");
+  const rows = []; let current = null;
+  const finish = () => {
+    if (!current) return;
+    if (!current.path || !current.sha || (!current.branch && !current.detached)) fail("worktree porcelain record is incomplete");
+    rows.push({ branch: current.detached ? "detached" : current.branch.replace(/^refs\/heads\//, ""), sha: fullSha(current.sha, "worktree SHA"), dirty: Boolean(dirtyForPath(current.path)) }); current = null;
+  };
+  for (const line of output.split("\n")) {
+    if (!line) { finish(); continue; }
+    if (line.startsWith("worktree ")) { finish(); current = { path: line.slice(9) }; }
+    else if (!current) fail("worktree porcelain record has no worktree header");
+    else if (line.startsWith("HEAD ")) current.sha = line.slice(5);
+    else if (line.startsWith("branch ")) current.branch = line.slice(7);
+    else if (line === "detached") current.detached = true;
+    else if (line === "bare") fail("bare worktree records are not inventory worktrees");
+    else fail("worktree porcelain record is malformed");
+  }
+  finish();
+  if (!rows.length) fail("worktree porcelain has no records");
+  return rows.sort((left, right) => left.branch.localeCompare(right.branch) || left.sha.localeCompare(right.sha) || Number(left.dirty) - Number(right.dirty));
+}
+export function collectWorktrees({ repo }) {
+  const result = spawnSync("git", ["-C", repo, "worktree", "list", "--porcelain"], { encoding: "utf8", timeout: 15_000, maxBuffer: GH_MAX_BUFFER });
+  if (result.error || result.status !== 0) fail("git worktree list failed");
+  return parseWorktreePorcelain(result.stdout, (worktreePath) => Boolean(run(worktreePath, ["status", "--porcelain"])));
+}
+export function collectPlanningFacts({ root }) {
+  const hashed = (file) => fs.existsSync(path.join(root, file)) ? crypto.createHash("sha256").update(fs.readFileSync(path.join(root, file))).digest("hex") : "absent";
+  let shipWindows;
+  try { shipWindows = readShipWindows({ root }); } catch (error) { if (error?.code === "ENOENT") shipWindows = []; else throw error; }
+  return { ship_windows: shipWindows, milestone: hashed(".planning/MILESTONES.md"), state: hashed(".planning/STATE.md") };
+}
 export function collectRepositoryInventory({ repo, recoveryManifest: manifestPath, expectedManifestSha256, recoveryBundle, artifactAuthorization, finalCaptureAttestation, expectedRepository, observeRemote = false, adapter, now = () => new Date() }) {
-  const context = createRepositoryValidationContext({ expectedRepository }); const manifest = readTrustedRecoveryManifest(manifestPath, expectedManifestSha256); requireRecovery(repo, manifest, recoveryBundle); const attestation = readFinalCaptureAttestation(finalCaptureAttestation, manifest); const workflowMetadataChanges = validateFinalArtifactSnapshot(repo, manifest, attestation); if (artifactAuthorization) validateWorkflowMetadataChanges(readWorkflowMetadataAuthorization(artifactAuthorization)); const preserved = new Map(manifest.refs.map((item) => [item.original_ref, item.object])); const resolve = (name) => preserved.get(name) || run(repo, ["rev-parse", `${name}^{}`]);
+  const context = createRepositoryValidationContext({ expectedRepository }); const manifest = readTrustedRecoveryManifest(manifestPath, expectedManifestSha256, context); requireRecovery(repo, manifest, recoveryBundle); const attestation = readFinalCaptureAttestation(finalCaptureAttestation, manifest); const workflowMetadataChanges = validateFinalArtifactSnapshot(repo, manifest, attestation); if (artifactAuthorization) validateWorkflowMetadataChanges(readWorkflowMetadataAuthorization(artifactAuthorization)); const preserved = new Map(manifest.refs.map((item) => [item.original_ref, item.object])); const resolve = (name) => preserved.get(name) || run(repo, ["rev-parse", `${name}^{}`]);
   const refs = run(repo, ["for-each-ref", "--format=%(refname) %(objectname)"]).split("\n").filter(Boolean).map((line) => { const [name, object] = line.split(" "); return { name, object, role: name === "refs/heads/main" ? "local_main" : name === "refs/remotes/origin/main" ? "cached_origin_main" : name === "refs/tags/v1.61" ? "v161_tag" : "other" }; });
   const remotes = observeRemote ? collectRemoteFacts({ repository: expectedRepository, adapter, now }) : Object.fromEntries(REMOTE_KEYS.map((key) => [key, unavailable(expectedRepository, `GET /repos/${expectedRepository}/${key}`, "unavailable", now())]));
-  return validateInventory({ schema_version: 2, repository: expectedRepository, mode: observeRemote ? "live_remote" : "local_only", recovery: { verified: true, manifest_sha256: expectedManifestSha256, bundle_sha256: manifest.bundle_sha256, refs: sorted(manifest.refs.map(({ original_ref, object, encoded_ref, bundle_member }) => ({ original_ref, object, encoded_ref, bundle_member })), (item) => item.original_ref) }, artifacts: { empty_directory_policy: manifest.empty_directory_policy, entries: sorted(manifest.artifacts.map(({ path: entryPath, type, sha256 }) => ({ path: entryPath, type, sha256 })), (item) => `${item.path}\0${item.type}`), ...(workflowMetadataChanges.length ? { authorized_workflow_metadata: workflowMetadataChanges } : {}) }, refs: { local_main: resolve("refs/heads/main"), cached_origin_main: resolve("refs/remotes/origin/main"), milestone_branch: run(repo, ["rev-parse", "HEAD^{commit}"]), v161_tag: resolve("refs/tags/v1.61"), all: sorted(refs, (item) => `${item.name}\0${item.object}`) }, remotes, planning: collectPlanningFacts({ root: repo }), worktrees: [{ branch: run(repo, ["branch", "--show-current"]) || "detached", sha: run(repo, ["rev-parse", "HEAD^{commit}"]), dirty: Boolean(run(repo, ["status", "--porcelain"])) }] }, context);
+  return validateInventory({ schema_version: 2, repository: expectedRepository, mode: observeRemote ? "live_remote" : "local_only", recovery: { verified: true, manifest_sha256: expectedManifestSha256, bundle_sha256: manifest.bundle_sha256, refs: sorted(manifest.refs.map(({ original_ref, object, encoded_ref, bundle_member }) => ({ original_ref, object, encoded_ref, bundle_member })), (item) => item.original_ref) }, artifacts: { empty_directory_policy: manifest.empty_directory_policy, entries: sorted(manifest.artifacts.map(({ path: entryPath, type, sha256 }) => ({ path: entryPath, type, sha256 })), (item) => `${item.path}\0${item.type}`), ...(workflowMetadataChanges.length ? { authorized_workflow_metadata: workflowMetadataChanges } : {}) }, refs: { local_main: resolve("refs/heads/main"), cached_origin_main: resolve("refs/remotes/origin/main"), milestone_branch: run(repo, ["rev-parse", "HEAD^{commit}"]), v161_tag: resolve("refs/tags/v1.61"), all: sorted(refs, (item) => `${item.name}\0${item.object}`) }, remotes, planning: collectPlanningFacts({ root: repo }), worktrees: collectWorktrees({ repo }) }, context);
 }
 export const collectLocalInventory = (options) => collectRepositoryInventory(options);
 function parseArgs(argv) { const result = { observeRemote: false }; for (let index = 0; index < argv.length; index += 1) { if (argv[index] === "--observe-remote") { result.observeRemote = true; continue; } if (argv[index] === "--refresh-cached-refs") fail("--refresh-cached-refs requires separately authorized recovery workflow"); if (!argv[index].startsWith("--") || !argv[index + 1]) fail("usage: --repo OWNER/REPO --recovery-manifest FILE --expected-manifest-sha256 DIGEST --recovery-bundle FILE --final-capture-attestation FILE [--artifact-authorization FILE] [--observe-remote] --out FILE"); result[argv[index].slice(2)] = argv[++index]; } return result; }
@@ -286,5 +350,9 @@ if (process.env.NODE_TEST_CONTEXT) {
   test("repository truth exposes sanitized worktree and ship-window collectors", () => {
     assert.equal(typeof collectWorktrees, "function");
     assert.equal(typeof readShipWindows, "function");
+    const porcelain = ["worktree /private/a", `HEAD ${"a".repeat(40)}`, "branch refs/heads/main", "", "worktree /private/b", `HEAD ${"b".repeat(40)}`, "detached", ""].join("\n");
+    assert.deepEqual(parseWorktreePorcelain(porcelain, (item) => item.endsWith("b")), [{ branch: "detached", sha: "b".repeat(40), dirty: true }, { branch: "main", sha: "a".repeat(40), dirty: false }]);
+    const windows = "---\nopen_count: 1\nwaived_count: 0\nfixed_count: 0\ntotal_count: 1\n---\n| id | phase | kind | file | line | description | status | reason | recorded_at | resolved_at |\n| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |\n| 7 | 229 | deviation | file |  | reason | open |  | now |  |\n";
+    assert.deepEqual(readShipWindows({ root: "/fixture", readFile: () => windows }), ["7:open"]);
   });
 }
