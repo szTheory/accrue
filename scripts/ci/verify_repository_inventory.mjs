@@ -25,7 +25,7 @@ export function verifyFixtures() {
     refs: { local_main: "b".repeat(40), cached_origin_main: "b".repeat(40), milestone_branch: "b".repeat(40), v161_tag: "b".repeat(40), all: [{ name: "refs/heads/main", object: "b".repeat(40), role: "local_main" }] },
     remotes: Object.fromEntries(["remote_main", "pull_requests", "release_branches", "actions"].map((key) => [key, { repository: "szTheory/accrue", observed_at: "2026-09-13T00:00:00.000Z", request: `GET /repos/szTheory/accrue/${key}`, available: false, state: "unavailable", reason: "network" }])),
     planning: { ship_windows: [], milestone: "absent", state: "absent" },
-    worktrees: [{ branch: "phase229", sha: "b".repeat(40), dirty: false }]
+    worktrees: [{ branch: "phase/229", sha: "b".repeat(40), dirty: false }]
   };
   const validated = validateInventory(inventory, context);
   assert.equal(renderRepositoryInventory(validated, context), renderRepositoryInventory(structuredClone(validated), context));
@@ -33,6 +33,9 @@ export function verifyFixtures() {
   assert.equal(renderRepositoryInventory(validated, context), renderRepositoryInventory(permuted, context), "permutations must render identical bytes");
   assert.throws(() => validateInventory({ ...inventory, actor: "forbidden" }, context), /forbidden field/);
   assert.throws(() => validateInventory({ ...inventory, artifacts: { ...inventory.artifacts, entries: [{ path: "../secret", type: "regular", sha256: "c".repeat(64) }] } }, context), /relative path/);
+  const workflowMetadata = [{ path: ".planning/milestone.lock", type: "regular", before_sha256: "1".repeat(64), after_sha256: "2".repeat(64), state: "workflow_metadata_refreshed" }, { path: ".planning/state.json", type: "regular", before_sha256: "3".repeat(64), after_sha256: "4".repeat(64), state: "workflow_metadata_refreshed" }];
+  assert.equal(validateInventory({ ...inventory, artifacts: { ...inventory.artifacts, authorized_workflow_metadata: workflowMetadata } }, context).artifacts.authorized_workflow_metadata.length, 2);
+  assert.throws(() => validateInventory({ ...inventory, artifacts: { ...inventory.artifacts, authorized_workflow_metadata: [workflowMetadata[0]] } }, context), /two exact workflow metadata paths/);
   assert.throws(() => validateInventory({ ...inventory, remotes: {} }, context), /remote/);
 
   // Phase 229 complete-inventory contract: this intentionally exercises APIs
@@ -48,6 +51,8 @@ export function verifyFixtures() {
   const unavailable = normalizeRemoteFact({ repository: "szTheory/accrue", observed_at: "2026-09-13T00:00:00.000Z", request: "GET /repos/szTheory/accrue/git/ref/heads/main", available: false, reason: "network" }, context);
   assert.equal(unavailable.sha, undefined);
   assert.throws(() => normalizeRemoteFact({ ...unavailable, sha: "f".repeat(40) }, context), /no claimed remote value/);
+  assert.equal(assertCommandProvenance(validated, context), true);
+  assert.throws(() => assertCommandProvenance({ ...validated, remotes: { ...validated.remotes, actions: { ...validated.remotes.actions, request: "GET /repos/other/repo/actions" } } }, context), /provenance/);
   assert.throws(() => renderRepositoryInventory({ ...inventory, planning: { ...inventory.planning, raw_payload: "forbidden" } }, context), /forbidden field/);
   const scratch = fs.mkdtempSync(path.join(os.tmpdir(), "phase229-inventory-"));
   try {
@@ -63,9 +68,25 @@ function options(argv) {
   for (let index = 0; index < argv.length; index += 1) {
     if (!argv[index].startsWith("--")) throw new Error(`unexpected argument: ${argv[index]}`);
     const key = argv[index].slice(2); result.add(key);
-    if (!["fixtures", "require-recovery", "require-all-ref-recovery", "require-typed-artifacts", "require-local-only", "require-complete-categories", "require-edge-cases", "require-privacy-controls", "require-determinism"].includes(key)) values[key] = argv[++index];
+    if (!["fixtures", "require-recovery", "require-all-ref-recovery", "require-typed-artifacts", "require-local-only", "require-complete-categories", "require-edge-cases", "require-privacy-controls", "require-determinism", "require-command-provenance", "require-workflow-metadata-authorization"].includes(key)) values[key] = argv[++index];
   }
   return { flags: result, values };
+}
+function assertCommandProvenance(inventory, context) {
+  for (const key of ["remote_main", "pull_requests", "release_branches", "actions"]) {
+    const fact = inventory.remotes[key];
+    if (!fact || fact.repository !== context.expectedRepository || typeof fact.observed_at !== "string" || !new RegExp(`^GET /repos/${context.expectedRepository.replace("/", "\\/")}/`).test(fact.request || "")) {
+      throw new Error(`command provenance is required for ${key}`);
+    }
+    normalizeRemoteFact(fact, context);
+  }
+  return true;
+}
+function assertWorkflowMetadataAuthorization(inventory) {
+  const changes = inventory.artifacts.authorized_workflow_metadata;
+  if (!changes) throw new Error("workflow metadata authorization evidence is required");
+  if (changes.length !== 2 || changes.some((change) => ![".planning/milestone.lock", ".planning/state.json"].includes(change.path))) throw new Error("workflow metadata authorization must remain exact-path bounded");
+  return true;
 }
 async function main() {
   const parsed = options(process.argv.slice(2));
@@ -80,6 +101,8 @@ async function main() {
   if (parsed.flags.has("require-local-only") && inventory.mode !== "local_only") throw new Error("local-only inventory is required");
   if (parsed.flags.has("require-complete-categories") && (!inventory.refs.all || !inventory.worktrees || !inventory.planning || Object.keys(inventory.remotes).length !== 4)) throw new Error("complete categories are required");
   if (parsed.flags.has("require-edge-cases") && inventory.artifacts.empty_directory_policy !== "not_surfaced_by_git") throw new Error("edge-case policy is required");
+  if (parsed.flags.has("require-command-provenance")) assertCommandProvenance(inventory, context);
+  if (parsed.flags.has("require-workflow-metadata-authorization")) assertWorkflowMetadataAuthorization(inventory);
   assert.equal(fs.readFileSync(rendered, "utf8"), renderRepositoryInventory(inventory, context), "rendered Markdown must be byte-reproducible");
   console.log("repository inventory verification: PASS");
 }
