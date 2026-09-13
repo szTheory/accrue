@@ -28,6 +28,10 @@ Provider triage is literal: `proved` means the selected suite executed, selected
 
 The Phase 229 [canonical JSON inventory](../../.planning/phases/229-repository-truth-recovery-safety/229-REPOSITORY-INVENTORY.json) is the factual authority; its [Markdown diagnostic](../../.planning/phases/229-repository-truth-recovery-safety/229-REPOSITORY-INVENTORY.md) is a deterministic projection. Verify both, including recovery, privacy, determinism, and command provenance, with:
 
+| Evidence | What it answers | Command |
+| --- | --- | --- |
+| [Phase 229 repository inventory](../../.planning/phases/229-repository-truth-recovery-safety/229-REPOSITORY-INVENTORY.json), [deterministic diagnostic](../../.planning/phases/229-repository-truth-recovery-safety/229-REPOSITORY-INVENTORY.md), and exact-SHA CI monitor | Which repository objects were observed and preserved, and how to inspect the fixed repository's CI state without mutation | `node scripts/ci/ci_monitor.cjs list --repo szTheory/accrue` |
+
 ```bash
 node scripts/ci/verify_repository_inventory.mjs \
   --records .planning/phases/229-repository-truth-recovery-safety/229-REPOSITORY-INVENTORY.json \
@@ -59,7 +63,22 @@ node scripts/ci/collect_repository_inventory.mjs \
 | Inspect | `node scripts/ci/ci_monitor.cjs inspect --repo szTheory/accrue --sha FULL_SHA` | One exact-SHA run and sanitized failing-job/step details. |
 | Watch | `node scripts/ci/ci_monitor.cjs watch --repo szTheory/accrue --sha FULL_SHA --timeout-seconds 900 --poll-seconds 10` | Exact-SHA polling bounded by explicit timeout and polling limits. |
 
-`watch_ci.sh` is a thin compatibility entry, not a second implementation. Actions success is not live-provider proof: provider proof remains a separate, explicit state. Remote facts that cannot be read remain explicitly unavailable rather than being substituted with cached or local values. Preservation refs and their verified bundle are established locally before any refresh; the committed inventory deliberately omits the external bundle location. These instructions stop at Phase 229 facts and recovery: Phase 230 reconciliation, CI execution, ship-window resolution, and cleanup are out of scope.
+### Supported `watch_ci.sh` compatibility path
+
+`watch_ci.sh` is a thin compatibility entry, not a second implementation. It performs one `exec` into `ci_monitor.cjs watch`; it never queries GitHub independently. The wrapper fixes the repository to `szTheory/accrue` and supplies these deterministic defaults: branch `main`, workflow `CI`, timeout `900` seconds, and poll interval `10` seconds. The monitor resolves the selected branch/workflow run to one full SHA before polling, and locally filters returned rows so another workflow on the same branch cannot become the default target.
+
+| Invocation | Deterministic selection |
+| --- | --- |
+| `bash scripts/ci/watch_ci.sh` | `szTheory/accrue`, branch `main`, workflow `CI`, timeout `900`, poll `10` |
+| `bash scripts/ci/watch_ci.sh feature-branch` | The positional branch with workflow `CI` and the same bounds |
+| `bash scripts/ci/watch_ci.sh --sha FULL_SHA` | The explicit full SHA takes precedence and bypasses branch resolution; workflow remains `CI` |
+| `bash scripts/ci/watch_ci.sh --workflow Release` | Branch `main` with the explicit workflow override and the same bounds |
+
+Compatible explicit `--workflow`, `--timeout-seconds`, and `--poll-seconds` values replace only their corresponding defaults. After a run is resolved, JSON or text output retains `szTheory/accrue` and the exact full SHA. A completed `success` exits `0`. Completed `failure`, `cancelled`, `action_required`, `stale`, `skipped`, `timed_out`, `neutral`, or unknown non-success conclusions render that repository/SHA result and exit `69`.
+
+Other failures remain distinguishable: malformed usage exits `64`, no match exits `65`, ambiguity exits `66`, unavailable or malformed/null GitHub responses exit `67`, and a bounded polling deadline exits `68`. Exact-SHA errors include `szTheory/accrue` and the requested full SHA; a branch lookup that fails before resolution cannot invent a SHA.
+
+Actions success is not live-provider proof: provider proof remains a separate, explicit state, and stays `provider_proof: non_run` without independent provider evidence. Remote facts that cannot be read remain explicitly unavailable rather than being substituted with cached or local values. All monitor and wrapper operations are read-only: CI execution, workflow dispatch/rerun/cancel, ship-window resolution, history integration, PR/ref mutation, cleanup, and publication are outside Phase 229. Preservation refs and their verified bundle are established locally before any refresh; the committed inventory deliberately omits the external bundle location.
 
 After the one-time credential bootstrap, Stripe provider proof runs daily and
 after pushes that change the provider-proof contract. Pull requests and
