@@ -462,7 +462,10 @@ if (process.env.NODE_TEST_CONTEXT && process.argv[1] === new URL(import.meta.url
     const attestationPath = path.join(capsule, "attestation.json");
     fs.writeFileSync(attestationPath, JSON.stringify({ schema_version: 1, purpose: "phase229_final_capture", observed_at: "2026-09-13T00:00:00.000Z", artifacts }), { mode: 0o600 });
     fs.chmodSync(attestationPath, 0o600);
-    return { scratch, repo, capsule, bundle, manifestPath, manifest, expectedManifestSha256: crypto.createHash("sha256").update(manifestBytes).digest("hex"), attestationPath, expectedLinkDigest, linkPath };
+    const authorizationPath = path.join(capsule, "authorization.json");
+    fs.writeFileSync(authorizationPath, JSON.stringify({ schema_version: 1, purpose: "phase229_workflow_metadata_refresh", changes: artifacts.filter((entry) => entry.state === "workflow_metadata_refreshed") }), { mode: 0o600 });
+    fs.chmodSync(authorizationPath, 0o600);
+    return { scratch, repo, capsule, bundle, manifestPath, manifest, expectedManifestSha256: crypto.createHash("sha256").update(manifestBytes).digest("hex"), attestationPath, authorizationPath, expectedLinkDigest, linkPath };
   }
 
   test("CR-02 final collection preserves raw invalid-UTF-8 symlink bytes", () => {
@@ -476,6 +479,21 @@ if (process.env.NODE_TEST_CONTEXT && process.argv[1] === new URL(import.meta.url
       assert.throws(() => currentArtifact(fixture.repo, linkEntry, { readlinkSync() { throw new Error("raw-byte access unsupported"); } }), /raw-byte access unsupported/);
       fs.rmSync(fixture.linkPath); fs.symlinkSync(Buffer.from([0xff, 0xfd, 0x0a]), fixture.linkPath);
       assert.throws(() => collectRepositoryInventory({ repo: fixture.repo, recoveryManifest: fixture.manifestPath, expectedManifestSha256: fixture.expectedManifestSha256, recoveryBundle: fixture.bundle, finalCaptureAttestation: fixture.attestationPath, expectedRepository: "szTheory/accrue" }), /artifact changed|post-invariant mismatch/);
+    } finally { fs.rmSync(fixture.scratch, { recursive: true, force: true }); }
+  });
+
+  test("CR-05 workflow authorization is mandatory and bound to attestation and live bytes", () => {
+    const fixture = generatedArtifactFixture(); let remoteCalls = 0;
+    const request = (overrides = {}) => ({ repo: fixture.repo, recoveryManifest: fixture.manifestPath, expectedManifestSha256: fixture.expectedManifestSha256, recoveryBundle: fixture.bundle, finalCaptureAttestation: fixture.attestationPath, expectedRepository: "szTheory/accrue", observeRemote: true, adapter: { get() { remoteCalls += 1; return []; } }, ...overrides });
+    try {
+      assert.throws(() => collectRepositoryInventory(request()), /workflow metadata authorization is required/);
+      assert.equal(remoteCalls, 0, "missing authorization must fail before remote observation");
+      const stalePath = path.join(fixture.capsule, "stale-authorization.json");
+      const stale = JSON.parse(fs.readFileSync(fixture.authorizationPath, "utf8"));
+      stale.changes[0].after_sha256 = "0".repeat(64);
+      fs.writeFileSync(stalePath, JSON.stringify(stale), { mode: 0o600 }); fs.chmodSync(stalePath, 0o600);
+      assert.throws(() => collectRepositoryInventory(request({ artifactAuthorization: stalePath })), /authorization.*attestation|live artifact/);
+      assert.equal(remoteCalls, 0, "stale authorization must fail before remote observation");
     } finally { fs.rmSync(fixture.scratch, { recursive: true, force: true }); }
   });
 
