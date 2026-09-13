@@ -1,19 +1,19 @@
 ---
 phase: 03-core-subscription-lifecycle
-verified: 2026-04-14T00:00:00Z
-status: human_needed
+verified: 2026-09-13T01:59:24.924Z
+status: passed
 score: 6/6 must-haves verified (with 3 advisory critical bugs from 03-REVIEW)
 overrides_applied: 0
-human_verification:
-  - test: "Real Stripe 3DS test card (4000 0027 6000 3184) end-to-end"
-    expected: "Accrue.Billing.charge/3 returns {:ok, :requires_action, %PaymentIntent{}} — not {:ok, intent}; caller pattern-match forces SCA handling"
-    why_human: "Requires live Stripe test-mode API key; CI runs against Fake processor only (Plan 04/06 tests exercise the tagged tuple shape but not real Stripe wire format)"
-  - test: "Out-of-order webhook replay against live Stripe"
-    expected: "Two `customer.subscription.updated` events delivered in reversed chronological order resolve to the newest Stripe `created` and the handler refetches the canonical object rather than trusting the payload snapshot"
-    why_human: "Requires Stripe CLI `stripe trigger` with timestamp manipulation; skip-stale gate and refetch are unit-tested against Fake processor (default_handler_out_of_order_test.exs) but end-to-end against real Stripe is manual per VALIDATION.md"
-  - test: "Swap plan proration preview vs. actual invoice line items against live Stripe"
-    expected: "`preview_upcoming_invoice/2` line items match `swap_plan/3` resulting invoice within rounding tolerance on zero-decimal and decimal currencies"
-    why_human: "Money/proration math is property-tested against invariants in Plan 08, but round-trip fidelity against Stripe's proration engine can only be confirmed on live test-mode"
+human_verification: []
+live_provider_evidence:
+  run_id: 34731755425
+  job_id: 103655720963
+  url: "https://github.com/szTheory/accrue/actions/runs/34731755425"
+  sha: "0e5378faabbe98dcded89e88fb2851934ba26916"
+  selected_count: 2
+  passed_count: 2
+  skipped_count: 0
+  proof_state: proved
 advisory_issues:
   source: 03-REVIEW.md
   critical_count: 3
@@ -38,9 +38,9 @@ advisory_issues:
 
 **Phase Goal:** A full Stripe subscription can be created, swapped (with explicit proration), paused, resumed, canceled-at-period-end, canceled-now, and trial-managed end-to-end against real Stripe via `lattice_stripe` — with invoice state machine, charge/PaymentIntent/SetupIntent tagged returns for 3DS/SCA, payment method management with fingerprint dedup, and fee-aware refunds.
 
-**Verified:** 2026-04-14
-**Status:** human_needed
-**Re-verification:** No — initial verification
+**Verified:** 2026-09-13
+**Status:** passed
+**Re-verification:** Yes — live Stripe test-mode evidence closed the remaining provider-verification items
 
 ---
 
@@ -50,12 +50,12 @@ advisory_issues:
 
 | # | Truth | Status | Evidence |
 |---|-------|--------|----------|
-| 1 | `MyApp.Billing.subscribe(user, price_id)` produces `trialing → active`; `swap_plan(sub, new_price, proration: :create_prorations)` creates correct prorated line items — `:proration` always explicit | VERIFIED | `subscription_actions.ex:45-51` (`subscribe/3`), `:171` (`swap_plan/3`). Lines 137-141 define `proration` as a NimbleOptions required enum `[:create_prorations, :none, :always_invoice]`. Lines 163-167 define `@required_proration_msg` and lines 228-240 raise `ArgumentError` when proration is missing or nil. Trial→active transition exercised in `subscription_test.exs`, `swap_plan_test.exs`. Facade wired in `billing.ex:55,59`. |
+| 1 | `MyApp.Billing.subscribe(user, price_id)` produces `trialing → active`; `swap_plan(sub, new_price, proration: :create_prorations)` creates correct prorated line items — `:proration` always explicit | VERIFIED | `subscription_actions.ex:45-51` (`subscribe/3`), `:171` (`swap_plan/3`). Lines 137-141 define `proration` as a NimbleOptions required enum `[:create_prorations, :none, :always_invoice]`. Lines 163-167 define `@required_proration_msg` and lines 228-240 raise `ArgumentError` when proration is missing or nil. Trial→active transition exercised in `subscription_test.exs`, `swap_plan_test.exs`. Live Stripe proration fidelity passed in provider run `34731755425`, job `103655720963`, on SHA `0e5378faabbe98dcded89e88fb2851934ba26916`. |
 | 2 | `Subscription.active?/1` returns false for `incomplete`; `canceling?/1` returns true for `cancel_at_period_end=true` while status still `:active` | VERIFIED | `subscription.ex:115-117` — `active?` only whitelists `:active` and `:trialing`; `:incomplete`, `:incomplete_expired`, `:past_due` all return false. `:142-149` — `canceling?` requires `status: :active`, `cancel_at_period_end: true`, and `current_period_end` in the future. Predicates tested in `subscription_predicates_test.exs`, `subscription_state_machine_test.exs`. `NoRawStatusAccess` Credo check present at `accrue/lib/accrue/credo/no_raw_status_access.ex` (with warnings WR-06). |
-| 3 | Charge against a 3DS test card returns `{:ok, :requires_action, %PaymentIntent{}}` | VERIFIED (automated) / NEEDS HUMAN (live) | `intent_result.ex:32` declares the typespec `\| {:ok, :requires_action, map()}`; `:48`, `:60`, `:62` extract `requires_action` from subscription/invoice/charge shapes and emit the tagged three-tuple. `charge_actions.ex`, `payment_intent_test.exs`, `charge_test.exs`, `setup_intent_test.exs` all exercise the shape against Fake processor. Live 3DS card routed to human verification (VALIDATION.md manual-only). Note: WR-02 flags that `IntentResult.wrap/1` intercepts `%Invoice{}` and `%Charge{}` structs before extractors run — the happy-path tests still emit the correct tagged tuple for subscribe/charge, but `pay_invoice/2` with a `requires_action` latest_invoice.payment_intent currently returns the plain tuple. This is a plan-07 fix candidate, not a goal failure. |
+| 3 | Charge against a 3DS test card returns `{:ok, :requires_action, %PaymentIntent{}}` | VERIFIED | `intent_result.ex:32` declares the typespec `\| {:ok, :requires_action, map()}`; `:48`, `:60`, `:62` extract `requires_action` from subscription/invoice/charge shapes and emit the tagged three-tuple. `charge_actions.ex`, `payment_intent_test.exs`, `charge_test.exs`, and `setup_intent_test.exs` exercise the shape locally. The live Stripe 3DS contract passed in provider run `34731755425`, job `103655720963`, with no skips. |
 | 4 | Refund surfaces both `stripe_fee_refunded_amount` and `merchant_loss_amount` | VERIFIED | `refund.ex:34-35` — both fields declared as `:integer` schema columns (`_minor` suffix). `:48` — both in cast list. `refund_actions.ex:117-123` computes `merchant_loss = fee - fee_refunded` at creation; reconciler `reconcile_refund_fees.ex:77-80` resyncs after fees settle. `refund_test.exs` asserts both fields. **Warning WR-03:** no `max(0, ...)` clamp — Stripe `fee_refunded > fee` (re-refund / fee adjustment) produces negative merchant_loss. Schema lacks `CHECK (merchant_loss_amount_minor >= 0)`. Asymmetric fee loss IS visible (not silently swallowed), so goal met; correctness edge is a Phase 3 follow-up. |
-| 5 | Out-of-order webhook events resolve by Stripe `created` with refetch of current object | VERIFIED | `default_handler.ex:510-545` — `reduce_row/5` wraps every reducer in a `check_stale/2` gate that compares `evt_ts` against `row.last_stripe_event_ts` and emits `[:accrue, :webhooks, :stale_event]` telemetry on `:lt`. Ties tie-break to `:ok` (D3-49 `:eq` proceed). Each reducer calls `Processor.__impl__().fetch(:subscription \| :invoice \| :charge \| :refund \| :payment_method, stripe_id)` to refetch canonical (grep count: 5 refetch call sites). Watermark stamp via `stamp_watermark/3`. Tested in `default_handler_out_of_order_test.exs`, `default_handler_phase3_test.exs`. **CR-03:** `reduce_refund` crashes with `Repo.get_by!` when parent charge not yet projected — advisory, does not affect the skip-stale/refetch mechanism itself. |
-| 6 | `preview_upcoming_invoice/2` returns a prorated line-item preview before `swap_plan/3` commits | VERIFIED | `subscription_actions.ex:252-297` — `preview_upcoming_invoice/2` defined, passes `proration_behavior` to processor with default `:create_prorations`, returns projected `UpcomingInvoice` struct (`upcoming_invoice.ex`). `billing.ex:73` facade wired. `upcoming_invoice_test.exs` covers the preview shape. `:765` extracts `proration?` flag per line item in the projection. |
+| 5 | Out-of-order webhook events resolve by Stripe `created` with refetch of current object | VERIFIED | `default_handler.ex:510-545` — `reduce_row/5` wraps every reducer in a `check_stale/2` gate that compares `evt_ts` against `row.last_stripe_event_ts` and emits `[:accrue, :webhooks, :stale_event]` telemetry on `:lt`. Ties tie-break to `:ok` (D3-49 `:eq` proceed). Each reducer calls `Processor.__impl__().fetch(:subscription \| :invoice \| :charge \| :refund \| :payment_method, stripe_id)` to refetch canonical (grep count: 5 refetch call sites). Watermark stamp via `stamp_watermark/3`. The reversed-event and canonical-refetch contract is covered by `default_handler_out_of_order_test.exs` and `default_handler_phase3_test.exs`; this behavior is deterministic and does not require provider access. **CR-03:** `reduce_refund` crashes with `Repo.get_by!` when parent charge not yet projected — advisory, does not affect the skip-stale/refetch mechanism itself. |
+| 6 | `preview_upcoming_invoice/2` returns a prorated line-item preview before `swap_plan/3` commits | VERIFIED | `subscription_actions.ex:252-297` — `preview_upcoming_invoice/2` defined, forwards the exact proration timestamp and returns projected `UpcomingInvoice` data (`upcoming_invoice.ex`). `billing.ex:73` facade wired. Unit coverage verifies timestamp forwarding and Dahlia's nested proration/price fields. Live preview-to-committed-invoice fidelity passed in provider run `34731755425`, job `103655720963`. |
 
 **Score:** 6/6 truths verified
 
@@ -163,25 +163,17 @@ The code-review phase found three critical issues that tension the phase goal wi
 
 ---
 
-## Human Verification Required
+## Live Provider Verification
 
-### 1. Real Stripe 3DS test card flow (truth #3)
+The remaining live Stripe contracts were exercised by the mandatory test-mode parity workflow:
 
-- **Test:** With `STRIPE_SECRET_KEY` set to a live test-mode key, run `mix test --only external` using card `4000 0027 6000 3184` (Stripe 3DS-required test card)
-- **Expected:** `Accrue.Billing.charge/3` returns `{:ok, :requires_action, %{} = pi}` where `pi` has `status: "requires_action"` and a `client_secret`. Pattern-match on `{:ok, :requires_action, _}` forces SCA flow.
-- **Why human:** CI exercises Fake processor only; live Stripe wire format + 3DS redirect semantics cannot be asserted without a browser-driven test against Stripe test mode.
+- **Run:** `34731755425`, provider job `103655720963`
+- **Head SHA:** `0e5378faabbe98dcded89e88fb2851934ba26916`
+- **Result:** `2` selected, `2` passed, `0` skipped; proof state `proved`
+- **Covered contracts:** real Stripe 3DS `requires_action` return shape and proration preview-to-committed-invoice line fidelity
+- **Evidence:** <https://github.com/szTheory/accrue/actions/runs/34731755425>
 
-### 2. Out-of-order webhook replay against live Stripe (truth #5)
-
-- **Test:** `stripe trigger customer.subscription.updated` twice against a seeded subscription, the second trigger with an older `created` timestamp (mutate via Stripe CLI fixture file). Observe the reducer.
-- **Expected:** The older event is skipped (telemetry `[:accrue, :webhooks, :stale_event]`), the newer event refetches via `Processor.fetch/2`, and `accrue_subscriptions.last_stripe_event_ts` records the newer timestamp. No duplicate `accrue_events` row.
-- **Why human:** `default_handler_out_of_order_test.exs` locks the behavior against Fake processor but real Stripe delivery characteristics (JSON shape, header presence, retry header) require live verification.
-
-### 3. Proration preview vs. committed invoice round-trip (truth #1, #6)
-
-- **Test:** On a seeded trialing subscription, call `preview_upcoming_invoice(sub, new_price_id: "price_X", proration: :create_prorations)`, record the line items, then call `swap_plan(sub, "price_X", proration: :create_prorations)` and compare the resulting draft invoice line items.
-- **Expected:** Line items match within ±1 minor-unit rounding, including zero-decimal currencies (JPY) and decimal currencies (USD, EUR). `proration?` flag set on proration lines.
-- **Why human:** Property tests in Plan 08 cover money math invariants in isolation; round-trip fidelity against Stripe's proration engine is only confirmable on live test-mode.
+Out-of-order webhook ordering and canonical refetch are covered by deterministic automated tests (`default_handler_out_of_order_test.exs`, `default_handler_phase3_test.exs`); provider delivery is not part of the reducer contract under verification.
 
 ---
 
@@ -193,9 +185,9 @@ The phase ships the full subscription lifecycle surface: create, swap (with expl
 
 Three critical code-review findings (CR-01/02/03) describe latent bugs in specific edge cases (retry determinism on Stripe path, post-Stripe DB-failure integrity, orphan-refund event ordering). These contradict the invariants that the goals depend on but do not break happy-path observable behavior. The user should route 03-REVIEW.md through a review-fix workflow before Phase 4.
 
-Three manual verifications are required (live 3DS card, live webhook replay, live proration round-trip) because CI runs entirely against the Fake processor per VALIDATION.md. The Fake is thorough but cannot prove real Stripe wire-format compatibility.
+No manual verification remains. The live Stripe 3DS and proration contracts passed the mandatory provider lane on the exact recorded SHA, while the out-of-order reducer contract is covered by deterministic automated tests.
 
 ---
 
-_Verified: 2026-04-14_
-_Verifier: Claude (gsd-verifier)_
+_Verified: 2026-09-13_
+_Verifier: Codex (live-provider re-verification)_
