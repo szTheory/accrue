@@ -215,6 +215,30 @@ if (args[0] === "run" && args[1] === "list") {
     fs.rmSync(scratch, { recursive: true, force: true });
   }
 }
+function delayedGhWatchFixture({ delayMilliseconds = 1200, timeoutSeconds = 1 } = {}) {
+  const scratch = fs.mkdtempSync(path.join(os.tmpdir(), "phase229-ci-deadline-"));
+  const ghPath = path.join(scratch, "gh");
+  const sha = "a".repeat(40);
+  fs.writeFileSync(ghPath, `#!/usr/bin/env node
+"use strict";
+const args = process.argv.slice(2);
+Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, ${delayMilliseconds});
+const run = { databaseId: 7, headSha: "${sha}", status: "completed", conclusion: "success", createdAt: "2026-01-01T00:00:00Z", updatedAt: "2026-01-01T00:01:00Z", workflowName: "CI" };
+if (args[0] === "run" && args[1] === "list") process.stdout.write(JSON.stringify([run]));
+else if (args[0] === "run" && args[1] === "view") process.stdout.write(JSON.stringify({ ...run, jobs: [] }));
+else process.exitCode = 91;
+`, { mode: 0o755 });
+  const started = process.hrtime.bigint();
+  try {
+    const result = spawnSync(process.execPath, [__filename, "watch", "--repo", REPOSITORY, "--sha", sha, "--workflow", "CI", "--timeout-seconds", String(timeoutSeconds), "--poll-seconds", "1"], {
+      encoding: "utf8",
+      env: { ...process.env, PATH: `${scratch}:${process.env.PATH || ""}`, NODE_TEST_CONTEXT: "" }
+    });
+    return { ...result, elapsedMilliseconds: Number(process.hrtime.bigint() - started) / 1e6, sha };
+  } finally {
+    fs.rmSync(scratch, { recursive: true, force: true });
+  }
+}
 function optionValue(argv, option) {
   const index = argv.indexOf(option);
   return index === -1 ? undefined : argv[index + 1];
@@ -317,6 +341,13 @@ if (require.main === module && !process.env.NODE_TEST_CONTEXT) { try { process.e
 if (process.env.NODE_TEST_CONTEXT) {
   const test = require("node:test");
   test("ci monitor core validates a read-only exact-SHA monitor", () => { assert.equal(runSelfTest({ wrapperPath: null }), true); });
+  test("watch absolute deadline bounds delayed GitHub reads", () => {
+    const result = delayedGhWatchFixture();
+    assert.equal(result.status, 68, `deadline breach must exit 68; stdout: ${result.stdout}; stderr: ${result.stderr}`);
+    assert.ok(result.elapsedMilliseconds >= 800 && result.elapsedMilliseconds <= 2200, `watch should terminate near its one-second budget, elapsed ${result.elapsedMilliseconds.toFixed(0)}ms`);
+    assert.match(result.stderr, new RegExp(`${REPOSITORY} ${result.sha}.*timed out`));
+    assert.equal(result.stdout, "", "a response that completed after the deadline must not be reported as success");
+  });
   test("compatibility wrapper defaults to main and CI and propagates unsuccessful completions", () => {
     verifyWrapper(DEFAULT_WRAPPER_PATH);
     assert.equal(verifyWrapperBehavior(DEFAULT_WRAPPER_PATH), true);
