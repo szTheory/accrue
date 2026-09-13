@@ -55,6 +55,27 @@ validate_artifact_path() {
   done
 }
 
+sha256_symlink_link_text() {
+  local link_path="$1" digest
+  if ! digest="$(node - "$link_path" <<'NODE'
+const crypto = require('node:crypto');
+const fs = require('node:fs');
+let linkText;
+try {
+  linkText = fs.readlinkSync(process.argv[2], { encoding: 'buffer' });
+} catch {
+  process.exit(65);
+}
+if (!Buffer.isBuffer(linkText)) process.exit(65);
+process.stdout.write(crypto.createHash('sha256').update(linkText).digest('hex'));
+NODE
+)"; then
+    die "raw symlink link-text bytes unavailable"
+  fi
+  [[ "$digest" =~ ^[0-9a-f]{64}$ ]] || die "invalid raw symlink link-text digest"
+  printf '%s\n' "$digest"
+}
+
 snapshot_artifacts() {
   local output="$1" path_list
   path_list="${output}.paths"
@@ -66,7 +87,7 @@ snapshot_artifacts() {
     full="$repo_root/$ref"
     if [[ -L "$full" ]]; then
       artifact_type="symlink"
-      artifact_hash="$(printf '%s' "$(readlink "$full")" | shasum -a 256 | awk '{print $1}')"
+      artifact_hash="$(sha256_symlink_link_text "$full")"
     elif [[ -f "$full" ]]; then
       artifact_type="regular"
       artifact_hash="$(sha256 "$full")"
@@ -341,6 +362,12 @@ self_test() {
   cleanup_self_test() { rm -rf -- "$scratch" 2>/dev/null || true; }; trap cleanup_self_test EXIT
   local repo="$scratch/repo" output="$scratch/output" tmp="$scratch/tmp" before symlink_expected="$scratch/symlink-expected.json"
   mkdir -p "$output" "$tmp"
+  local unsupported_log="$scratch/unsupported-symlink.log"
+  if (sha256_symlink_link_text "$scratch/missing-link") >"$unsupported_log" 2>&1; then
+    echo "self-test: unavailable raw symlink bytes unexpectedly produced a digest" >&2
+    return 1
+  fi
+  ! grep -Fq 'preserve repository state: PASS' "$unsupported_log" || { echo "self-test: unavailable raw symlink bytes printed PASS" >&2; return 1; }
   assert_artifact_mutation_rejected "$scratch" "$output" "$tmp"
   assert_symlink_mutation_rejected "$scratch" "$output" "$tmp"
   git init -q "$repo"; git -C "$repo" config user.email phase229@example.invalid; git -C "$repo" config user.name phase229
