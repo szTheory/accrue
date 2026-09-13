@@ -7,8 +7,8 @@
 
 ### Repository Truth
 
-- [ ] **REPO-01**: Maintainers can inspect one committed, reproducible inventory of local and remote `main`, the v1.61 lineage and tag, release branches, worktrees, open PRs, untracked paths, ship windows, and relevant planning state.
-- [ ] **REPO-02**: Maintainers can recover every pre-existing divergent local ref and user-owned untracked artifact after synchronization work; no cleanup relies on force-push, tag movement, or unrecorded deletion.
+- [x] **REPO-01**: Maintainers can inspect one committed, reproducible inventory of local and remote `main`, the v1.61 lineage and tag, release branches, worktrees, open PRs, untracked paths, ship windows, and relevant planning state.
+- [x] **REPO-02**: Maintainers can recover every pre-existing divergent local ref and user-owned untracked artifact after synchronization work; no cleanup relies on force-push, tag movement, or unrecorded deletion.
 - [ ] **REPO-03**: Maintainers have one supported, observable command path for listing, inspecting, and monitoring GitHub Actions runs, with failure output that remains attributable to an exact repository SHA.
 
 ### History Integration
@@ -62,8 +62,8 @@ Roadmap phase ownership is populated during roadmap creation. Every v1.62 requir
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| REPO-01 | Phase 229 | Pending |
-| REPO-02 | Phase 229 | Pending |
+| REPO-01 | Phase 229 | Complete |
+| REPO-02 | Phase 229 | Complete |
 | REPO-03 | Phase 229 | Pending |
 | INTG-01 | Phase 230 | Pending |
 | INTG-02 | Phase 230 | Pending |
@@ -78,6 +78,7 @@ Roadmap phase ownership is populated during roadmap creation. Every v1.62 requir
 | REL-05 | Phase 232 | Pending |
 
 **Coverage:**
+
 - v1.62 requirements: 14 total
 - Mapped to phases: 14
 - Unmapped: 0
