@@ -103,6 +103,7 @@ snapshot_artifacts() {
 
 scratch=""; created_outputs=(); temporary_outputs=(); created_refs=(); published=false
 self_test_context=false; self_test_mutation_artifact=""; self_test_mutation_symlink=""
+self_test_failure_point=""; self_test_reach_ref_snapshot=""; self_test_change_ref=""; self_test_change_object=""
 cleanup_run() {
   local output index ref expected
   for output in "${temporary_outputs[@]:-}"; do rm -f -- "$output" 2>/dev/null || true; done
@@ -123,6 +124,19 @@ publish_exclusive() {
   ln "$temporary" "$target" || die "output publication collision: $target"
   created_outputs+=("$target")
   rm -f -- "$temporary"
+}
+
+self_test_checkpoint() {
+  local point="$1"
+  [[ "$self_test_context" == true && "$self_test_failure_point" == "$point" ]] || return 0
+  if [[ -n "$self_test_reach_ref_snapshot" ]]; then
+    git -C "$repo_root" for-each-ref --format='%(refname) %(objectname) %(objecttype)' refs/accrue-preserve/phase-229 > "$self_test_reach_ref_snapshot"
+  fi
+  if [[ -n "$self_test_change_ref" && -n "$self_test_change_object" ]]; then
+    git -C "$repo_root" update-ref "$self_test_change_ref" "$self_test_change_object"
+  fi
+  echo "phase229-self-test-reached:$point" >&2
+  die "injected $point failure"
 }
 
 run_self_test_artifact_mutation() {
@@ -204,6 +218,7 @@ run() {
     git -C "$repo_root" update-ref "$encoded" "$object" "0000000000000000000000000000000000000000" || die "preservation ref collision"
     created_refs+=("$encoded" "$object")
   done < "$frozen"
+  self_test_checkpoint after-refs
   local bundle_tmp manifest_tmp public_tmp bundle_sha256
   bundle_tmp="$(mktemp "$(dirname "$bundle_out")/.phase229-bundle.XXXXXX")"
   temporary_outputs+=("$bundle_tmp")
@@ -224,10 +239,7 @@ NODE
     temporary_outputs+=("$public_tmp")
     printf '{"schema_version":1,"recovery_verified":true,"bundle_sha256":"%s","ref_count":%s,"empty_directory_policy":"not_surfaced_by_git"}\n' "$bundle_sha256" "$(wc -l < "$refs_for_bundle" | tr -d ' ')" > "$public_tmp"
   fi
-  if [[ "${PHASE229_TEST_FAIL_AFTER_MANIFEST:-}" == 1 ]]; then
-    echo "phase229-self-test-reached:after-manifest" >&2
-    die "injected post-manifest failure"
-  fi
+  self_test_checkpoint after-manifest
   publish_exclusive "$bundle_tmp" "$bundle_out"; publish_exclusive "$manifest_tmp" "$private_manifest_out"
   [[ -z "$public_record_out" ]] || publish_exclusive "$public_tmp" "$public_record_out"
   verify_bundle_heads "$frozen" "$bundle_out"
@@ -301,12 +313,17 @@ assert_post_manifest_failure_transactional() {
   printf 'artifact\n' > "$repo/untracked"
   ln -s nowhere "$repo/link"
   snapshot_fixture_state "$repo" "$output" "$before"
-  if PHASE229_TEST_FAIL_AFTER_MANIFEST=1 TMPDIR="$tmp" "$0" \
-    --repo-root "$repo" \
-    --expected-repository szTheory/accrue \
-    --bundle-out "$output/recovery.bundle" \
-    --private-manifest-out "$output/private.json" \
-    --public-record-out "$output/public.json" >"$log" 2>&1; then
+  if (
+    self_test_context=true
+    self_test_failure_point=after-manifest
+    repo_root="$repo"
+    expected_repository=szTheory/accrue
+    bundle_out="$output/recovery.bundle"
+    private_manifest_out="$output/private.json"
+    public_record_out="$output/public.json"
+    scratch=""; created_outputs=(); temporary_outputs=(); created_refs=(); published=false
+    TMPDIR="$tmp" run
+  ) >"$log" 2>&1; then
     echo "self-test: post-manifest injected failure unexpectedly passed" >&2
     return 1
   fi
@@ -315,6 +332,140 @@ assert_post_manifest_failure_transactional() {
   snapshot_fixture_state "$repo" "$output" "$after"
   assert_fixture_state_equal "$before" "$after"
   assert_empty_directory "$tmp" || { echo "self-test: production scratch leaked after post-manifest failure" >&2; return 1; }
+}
+
+assert_injected_boundary_transactional() {
+  local fixture_root="$1" tmp="$2" point="$3" expected_ref_state="$4"
+  local repo="$fixture_root/$point-repo" output="$fixture_root/$point-output"
+  local before="$fixture_root/$point-before" after="$fixture_root/$point-after"
+  local log="$fixture_root/$point.log" reached="$fixture_root/$point-reached-refs"
+  mkdir -p "$output"
+  git init -q "$repo"
+  git -C "$repo" config user.email phase229@example.invalid
+  git -C "$repo" config user.name phase229
+  printf 'tracked\n' > "$repo/tracked"
+  git -C "$repo" add tracked
+  git -C "$repo" commit -qm fixture
+  git -C "$repo" branch secondary
+  printf 'artifact\n' > "$repo/untracked"
+  snapshot_fixture_state "$repo" "$output" "$before"
+  if (
+    self_test_context=true
+    self_test_failure_point="$point"
+    self_test_reach_ref_snapshot="$reached"
+    repo_root="$repo"
+    expected_repository=szTheory/accrue
+    bundle_out="$output/recovery.bundle"
+    private_manifest_out="$output/private.json"
+    public_record_out="$output/public.json"
+    scratch=""; created_outputs=(); temporary_outputs=(); created_refs=(); published=false
+    TMPDIR="$tmp" run
+  ) >"$log" 2>&1; then
+    echo "self-test: $point injected failure unexpectedly passed" >&2
+    return 1
+  fi
+  grep -Fq "phase229-self-test-reached:$point" "$log" || { echo "self-test: $point injection was not reached" >&2; return 1; }
+  ! grep -Fq 'preserve repository state: PASS' "$log" || { echo "self-test: $point failure printed PASS" >&2; return 1; }
+  if [[ "$expected_ref_state" == absent ]] && ! cmp -s "$before/refs" "$reached"; then
+    echo "TAP version 13" >&2
+    echo "not ok 1 - fallible preparation completes before preservation refs publish" >&2
+    echo "self-test: $point observed preservation refs before preparation completed" >&2
+    echo "1..1" >&2
+    echo "# tests 1" >&2
+    echo "# pass 0" >&2
+    echo "# fail 1" >&2
+    return 1
+  fi
+  if [[ "$expected_ref_state" == present && ! -s "$reached" ]]; then
+    echo "self-test: $point did not observe published preservation refs" >&2
+    return 1
+  fi
+  snapshot_fixture_state "$repo" "$output" "$after"
+  assert_fixture_state_equal "$before" "$after"
+  assert_empty_directory "$tmp" || { echo "self-test: production scratch leaked after $point failure" >&2; return 1; }
+}
+
+assert_preexisting_preservation_ref_retained() {
+  local fixture_root="$1" tmp="$2"
+  local repo="$fixture_root/preexisting-repo" output="$fixture_root/preexisting-output"
+  local before="$fixture_root/preexisting-before" after="$fixture_root/preexisting-after" log="$fixture_root/preexisting.log"
+  mkdir -p "$output"
+  git init -q "$repo"
+  git -C "$repo" config user.email phase229@example.invalid
+  git -C "$repo" config user.name phase229
+  printf 'tracked\n' > "$repo/tracked"
+  git -C "$repo" add tracked
+  git -C "$repo" commit -qm fixture
+  local object target
+  object="$(git -C "$repo" rev-parse HEAD)"
+  target="refs/accrue-preserve/phase-229/$(encode_ref refs/heads/master)"
+  git -C "$repo" update-ref "$target" "$object"
+  snapshot_fixture_state "$repo" "$output" "$before"
+  if TMPDIR="$tmp" "$0" --repo-root "$repo" --expected-repository szTheory/accrue --bundle-out "$output/recovery.bundle" --private-manifest-out "$output/private.json" --public-record-out "$output/public.json" >"$log" 2>&1; then
+    echo "self-test: pre-existing preservation ref unexpectedly allowed success" >&2
+    return 1
+  fi
+  grep -Fq 'preservation ref collision' "$log" || { echo "self-test: pre-existing preservation ref did not produce collision" >&2; return 1; }
+  snapshot_fixture_state "$repo" "$output" "$after"
+  assert_fixture_state_equal "$before" "$after"
+}
+
+assert_concurrently_changed_ref_retained() {
+  local fixture_root="$1" tmp="$2"
+  local repo="$fixture_root/concurrent-repo" output="$fixture_root/concurrent-output"
+  local before="$fixture_root/concurrent-before" after="$fixture_root/concurrent-after" log="$fixture_root/concurrent.log"
+  mkdir -p "$output"
+  git init -q "$repo"
+  git -C "$repo" config user.email phase229@example.invalid
+  git -C "$repo" config user.name phase229
+  printf 'first\n' > "$repo/tracked"
+  git -C "$repo" add tracked
+  git -C "$repo" commit -qm first
+  local original foreign target authority
+  original="$(git -C "$repo" rev-parse HEAD)"
+  printf 'second\n' > "$repo/tracked"
+  git -C "$repo" commit -qam second
+  foreign="$(git -C "$repo" rev-parse HEAD)"
+  git -C "$repo" reset -q --hard "$original"
+  target="refs/accrue-preserve/phase-229/$(encode_ref refs/heads/master)"
+  snapshot_fixture_state "$repo" "$output" "$before"
+  if (
+    self_test_context=true
+    self_test_failure_point=after-refs
+    self_test_change_ref="$target"
+    self_test_change_object="$foreign"
+    repo_root="$repo"
+    expected_repository=szTheory/accrue
+    bundle_out="$output/recovery.bundle"
+    private_manifest_out="$output/private.json"
+    public_record_out="$output/public.json"
+    scratch=""; created_outputs=(); temporary_outputs=(); created_refs=(); published=false
+    TMPDIR="$tmp" run
+  ) >"$log" 2>&1; then
+    echo "self-test: concurrent-ref injected failure unexpectedly passed" >&2
+    return 1
+  fi
+  grep -Fq 'phase229-self-test-reached:after-refs' "$log" || { echo "self-test: concurrent-ref injection was not reached" >&2; return 1; }
+  grep -Fq 'rollback conflict retained changed ref' "$log" || { echo "self-test: concurrent-ref rollback conflict was not reported" >&2; return 1; }
+  [[ "$(git -C "$repo" rev-parse "$target^{object}")" == "$foreign" ]] || { echo "self-test: concurrent ref value was not retained" >&2; return 1; }
+  snapshot_fixture_state "$repo" "$output" "$after"
+  for authority in status index worktrees artifacts outputs; do
+    cmp -s "$before/$authority" "$after/$authority" || { echo "self-test: concurrent-ref failure changed $authority authority" >&2; return 1; }
+  done
+  [[ "$(git -C "$repo" for-each-ref --format='%(refname) %(objectname)' refs/accrue-preserve/phase-229)" == "$target $foreign" ]] || { echo "self-test: concurrent-ref failure retained unexpected preservation refs" >&2; return 1; }
+}
+
+assert_transaction_failure_matrix() {
+  local fixture_root="$1" tmp="$2" point
+  assert_injected_boundary_transactional "$fixture_root" "$tmp" after-manifest absent
+  for point in after-freeze after-bundle after-artifacts after-public-prepare; do
+    assert_injected_boundary_transactional "$fixture_root" "$tmp" "$point" absent
+  done
+  for point in after-refs after-bundle-publish after-manifest-publish after-public-publish after-final-verify; do
+    assert_injected_boundary_transactional "$fixture_root" "$tmp" "$point" present
+  done
+  assert_preexisting_preservation_ref_retained "$fixture_root" "$tmp"
+  assert_concurrently_changed_ref_retained "$fixture_root" "$tmp"
 }
 
 assert_artifact_mutation_rejected() {
@@ -436,6 +587,7 @@ self_test() {
   fi
   ! grep -Fq 'preserve repository state: PASS' "$unsupported_log" || { echo "self-test: unavailable raw symlink bytes printed PASS" >&2; return 1; }
   assert_post_manifest_failure_transactional "$scratch" "$tmp"
+  assert_transaction_failure_matrix "$scratch" "$tmp"
   assert_artifact_mutation_rejected "$scratch" "$output" "$tmp"
   assert_symlink_mutation_rejected "$scratch" "$output" "$tmp"
   git init -q "$repo"; git -C "$repo" config user.email phase229@example.invalid; git -C "$repo" config user.name phase229
