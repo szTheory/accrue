@@ -49,7 +49,9 @@ test("CR-06 preserves every bounded remote-unavailable reason without a substitu
       assert.equal(fact.reason, reason);
       assert.equal("sha" in fact, false);
       assert.equal("shas" in fact, false);
-      assert.match(fact.request, /^GET \/repos\/szTheory\/accrue\//);
+      const requests = fact.requests || [fact.request];
+      assert.ok(requests.length > 0);
+      requests.forEach((request) => assert.match(request, /^GET \/repos\/szTheory\/accrue\//));
     }
   }
 });

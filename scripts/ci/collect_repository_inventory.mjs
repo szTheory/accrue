@@ -37,21 +37,20 @@ export function normalizeRemoteFact(value, context, { plural = false } = {}) {
   if (value.repository !== context.expectedRepository) fail("remote fact repository must match expectedRepository"); timestamp(value.observed_at, "remote fact observed_at");
   const validRequest = (request) => typeof request === "string" && new RegExp(`^GET /repos/${context.expectedRepository.replace("/", "\\/")}/`).test(request) && !/[\r\n]/.test(request);
   if (plural) {
-    const requests = value.requests ?? (value.request === undefined ? undefined : [value.request]);
-    if (!Array.isArray(requests) || requests.length === 0 || requests.some((request) => !validRequest(request))) fail("plural remote fact requests must be repository-bound GET requests");
+    if (value.request !== undefined || !Array.isArray(value.requests) || value.requests.length === 0 || value.requests.some((request) => !validRequest(request))) fail("plural remote fact requests must be an ordered repository-bound GET sequence");
   } else if (!validRequest(value.request) || value.requests !== undefined) fail("remote fact request must be a repository-bound GET request");
   if (value.available !== false) {
     if (plural) {
       if (value.sha !== undefined || !Array.isArray(value.shas)) fail("plural remote fact requires a SHA array and no singleton SHA");
       value.shas.forEach((sha) => fullSha(sha, "remote fact SHA"));
-      return { repository: value.repository, observed_at: value.observed_at, ...(value.requests ? { requests: [...value.requests] } : { request: value.request }), available: true, state: value.state || "observed", shas: [...value.shas] };
+      return { repository: value.repository, observed_at: value.observed_at, requests: [...value.requests], available: true, state: value.state || "observed", shas: [...value.shas] };
     }
     if (value.shas !== undefined) fail("singleton remote fact must not contain SHA array");
     fullSha(value.sha, "remote fact sha");
     return { repository: value.repository, observed_at: value.observed_at, request: value.request, available: true, state: value.state || "observed", sha: value.sha };
   }
   if (value.available !== false || value.sha !== undefined || value.shas !== undefined || !REASONS.has(value.reason)) fail("unavailable remote fact must have bounded reason and no claimed remote value");
-  return { repository: value.repository, observed_at: value.observed_at, ...(plural && value.requests ? { requests: [...value.requests] } : { request: value.request }), available: false, state: "unavailable", reason: value.reason };
+  return { repository: value.repository, observed_at: value.observed_at, ...(plural ? { requests: [...value.requests] } : { request: value.request }), available: false, state: "unavailable", reason: value.reason };
 }
 
 function validateRecovery(recovery) { fields(recovery, new Set(["verified", "manifest_sha256", "bundle_sha256", "refs"]), "recovery"); if (recovery.verified !== true) fail("recovery must be verified"); digest(recovery.manifest_sha256, "recovery.manifest_sha256"); digest(recovery.bundle_sha256, "recovery.bundle_sha256"); if (!Array.isArray(recovery.refs) || !recovery.refs.length) fail("recovery.refs must be a non-empty array"); const seen = new Set(); for (const ref of recovery.refs) { fields(ref, new Set(["original_ref", "object", "encoded_ref", "bundle_member"]), "recovery ref"); refName(ref.original_ref, "recovery ref original_ref"); fullSha(ref.object, "recovery ref object"); if (ref.encoded_ref !== encodedRef(ref.original_ref)) fail("recovery ref encoded_ref must preserve original name"); if (ref.bundle_member !== true) fail("recovery ref must be in verified bundle"); if (seen.has(ref.original_ref)) fail("recovery refs must be unique"); seen.add(ref.original_ref); } }
@@ -204,14 +203,21 @@ function boundedPositiveInteger(value, label, maximum) {
 function ghEndpointFor(request, repository, limits, pageByCategory) {
   if (typeof request !== "string" || !request.startsWith(`GET /repos/${repository}/`)) fail("GitHub API request is not repository-bound");
   const endpoint = request.slice("GET /".length);
-  if (endpoint === `repos/${repository}/git/ref/heads/main` || endpoint === `repos/${repository}/git/matching-refs/heads/release/` || endpoint === `repos/${repository}/actions/runs?per_page=${REMOTE_PAGE_SIZE}`) return endpoint;
-  const match = new RegExp(`^repos/${repository.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}/pulls\\?state=open&per_page=(\\d+)&page=(\\d+)$`).exec(endpoint);
-  if (!match) fail("GitHub API request is not allowlisted");
+  if (endpoint === `repos/${repository}/git/ref/heads/main`) return endpoint;
+  const escapedRepository = repository.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const pluralPatterns = [
+    ["pull_requests", new RegExp(`^repos/${escapedRepository}/pulls\\?state=open&per_page=(\\d+)&page=(\\d+)$`)],
+    ["release_branches", new RegExp(`^repos/${escapedRepository}/git/matching-refs/heads/release/\\?per_page=(\\d+)&page=(\\d+)$`)],
+    ["actions", new RegExp(`^repos/${escapedRepository}/actions/runs\\?per_page=(\\d+)&page=(\\d+)$`)]
+  ];
+  const matched = pluralPatterns.map(([category, pattern]) => [category, pattern.exec(endpoint)]).find(([, match]) => match);
+  if (!matched) fail("GitHub API request is not allowlisted");
+  const [category, match] = matched;
   const pageSize = Number(match[1]); const page = Number(match[2]);
   if (pageSize !== limits.pageSize || page > limits.maxPages) fail("GitHub API pagination parameters exceed the configured bounds");
-  const expectedPage = (pageByCategory.get("pull_requests") || 0) + 1;
+  const expectedPage = (pageByCategory.get(category) || 0) + 1;
   if (page !== expectedPage) fail("GitHub API pagination must be contiguous and ordered");
-  pageByCategory.set("pull_requests", page);
+  pageByCategory.set(category, page);
   return endpoint;
 }
 export function createGhApiReadAdapter({ repository = "szTheory/accrue", invoke, pageSize = REMOTE_PAGE_SIZE, maxPages = REMOTE_MAX_PAGES, maxItems = REMOTE_MAX_ITEMS, timeoutMs = GH_TIMEOUT_MS, maxBuffer = GH_MAX_BUFFER } = {}) {
@@ -225,7 +231,7 @@ export function createGhApiReadAdapter({ repository = "szTheory/accrue", invoke,
   });
   const calls = [];
   const pageByCategory = new Map();
-  const execute = invoke || ((argv) => spawnSync("gh", argv, { encoding: "utf8", shell: false, timeout: limits.timeoutMs, maxBuffer: limits.maxBuffer }));
+  const execute = invoke || ((argv, options) => spawnSync("gh", argv, options));
   return Object.freeze({
     calls,
     limits,
@@ -233,7 +239,7 @@ export function createGhApiReadAdapter({ repository = "szTheory/accrue", invoke,
       const endpoint = ghEndpointFor(request, context.expectedRepository, limits, pageByCategory);
       const argv = ["api", endpoint, "--method", "GET", "--header", "Accept: application/vnd.github+json"];
       calls.push([...argv]);
-      const result = execute([...argv]);
+      const result = execute([...argv], { encoding: "utf8", shell: false, timeout: limits.timeoutMs, maxBuffer: limits.maxBuffer });
       if (result && typeof result === "object" && "stdout" in result) return responseJson(result, limits.maxBuffer);
       if (typeof result === "string") { try { return JSON.parse(result); } catch { fail("data_shape: GitHub API response is not JSON"); } }
       return result;
@@ -284,18 +290,26 @@ export function collectRemoteFacts({ repository, adapter, now = () => new Date()
   const requests = {
     remote_main: request("git/ref/heads/main"),
     pull_requests: request(`pulls?state=open&per_page=${REMOTE_PAGE_SIZE}&page=1`),
-    release_branches: request("git/matching-refs/heads/release/"),
-    actions: request(`actions/runs?per_page=${REMOTE_PAGE_SIZE}`)
+    release_branches: request(`git/matching-refs/heads/release/?per_page=${REMOTE_PAGE_SIZE}&page=1`),
+    actions: request(`actions/runs?per_page=${REMOTE_PAGE_SIZE}&page=1`)
   };
-  if (!adapter || typeof adapter.get !== "function") return Object.fromEntries(REMOTE_KEYS.map((key) => [key, unavailable(repository, requests[key], "unavailable", now())]));
+  if (!adapter || typeof adapter.get !== "function") return Object.fromEntries(REMOTE_KEYS.map((key) => [key, unavailable(repository, key === "remote_main" ? requests[key] : [requests[key]], "unavailable", now())]));
   return {
     remote_main: remoteRead(adapter, requests.remote_main, repository, now(), { plural: false, normalize: (raw) => fullSha(raw?.object?.sha, "remote main SHA") }),
     pull_requests: boundedPluralRemoteRead(adapter, repository, "pull_requests", now(), { extract: (raw) => raw, normalize: (items) => sortedShas(items, (a, b) => {
       if (!Number.isInteger(a?.number) || a.number < 1 || !Number.isInteger(b?.number) || b.number < 1) fail("pull request number must be a positive integer");
       return a.number - b.number;
     }, (item) => item?.head?.sha) }),
-    release_branches: remoteRead(adapter, requests.release_branches, repository, now(), { plural: true, normalize: (raw) => sortedShas(arrayOf(raw, "release branches"), (a, b) => String(a?.ref || "").localeCompare(String(b?.ref || "")), (item) => item?.object?.sha) }),
-    actions: remoteRead(adapter, requests.actions, repository, now(), { plural: true, normalize: (raw) => sortedShas(arrayOf(raw?.workflow_runs, "Actions"), (a, b) => String(a?.created_at || "").localeCompare(String(b?.created_at || "")) || Number(a?.id) - Number(b?.id), (item) => item?.head_sha) })
+    release_branches: boundedPluralRemoteRead(adapter, repository, "release_branches", now(), { extract: (raw) => raw, normalize: (items) => sortedShas(items, (a, b) => {
+      if (typeof a?.ref !== "string" || !a.ref.startsWith("refs/heads/release/") || typeof b?.ref !== "string" || !b.ref.startsWith("refs/heads/release/")) fail("release branch ref must be a release ref");
+      return a.ref.localeCompare(b.ref);
+    }, (item) => item?.object?.sha) }),
+    actions: boundedPluralRemoteRead(adapter, repository, "actions", now(), { extract: (raw) => raw?.workflow_runs, normalize: (items) => sortedShas(items, (a, b) => {
+      if (!Number.isInteger(a?.id) || a.id < 1 || !Number.isInteger(b?.id) || b.id < 1) fail("Actions run ID must be a positive integer");
+      const leftCreated = Date.parse(a.created_at); const rightCreated = Date.parse(b.created_at);
+      if (!Number.isFinite(leftCreated) || !Number.isFinite(rightCreated)) fail("Actions created_at must be an ISO-8601 timestamp");
+      return leftCreated - rightCreated || a.id - b.id;
+    }, (item) => item?.head_sha) })
   };
 }
 function boundedFile(root, relative, label) {
@@ -364,7 +378,7 @@ export function collectPlanningFacts({ root }) {
 export function collectRepositoryInventory({ repo, recoveryManifest: manifestPath, expectedManifestSha256, recoveryBundle, artifactAuthorization, finalCaptureAttestation, expectedRepository, observeRemote = false, adapter, now = () => new Date() }) {
   const context = createRepositoryValidationContext({ expectedRepository }); const manifest = readTrustedRecoveryManifest(manifestPath, expectedManifestSha256, context); requireRecovery(repo, manifest, recoveryBundle); const attestation = readFinalCaptureAttestation(finalCaptureAttestation, manifest); const workflowMetadataChanges = validateFinalArtifactSnapshot(repo, manifest, attestation); if (artifactAuthorization) validateWorkflowMetadataChanges(readWorkflowMetadataAuthorization(artifactAuthorization)); const preserved = new Map(manifest.refs.map((item) => [item.original_ref, item.object])); const resolve = (name) => preserved.get(name) || run(repo, ["rev-parse", `${name}^{}`]);
   const refs = run(repo, ["for-each-ref", "--format=%(refname) %(objectname)"]).split("\n").filter(Boolean).map((line) => { const [name, object] = line.split(" "); return { name, object, role: name === "refs/heads/main" ? "local_main" : name === "refs/remotes/origin/main" ? "cached_origin_main" : name === "refs/tags/v1.61" ? "v161_tag" : "other" }; });
-  const remotes = observeRemote ? collectRemoteFacts({ repository: expectedRepository, adapter, now }) : Object.fromEntries(REMOTE_KEYS.map((key) => [key, unavailable(expectedRepository, `GET /repos/${expectedRepository}/${key}`, "unavailable", now())]));
+  const remotes = collectRemoteFacts({ repository: expectedRepository, adapter: observeRemote ? adapter : undefined, now });
   return validateInventory({ schema_version: 2, repository: expectedRepository, mode: observeRemote ? "live_remote" : "local_only", recovery: { verified: true, manifest_sha256: expectedManifestSha256, bundle_sha256: manifest.bundle_sha256, refs: sorted(manifest.refs.map(({ original_ref, object, encoded_ref, bundle_member }) => ({ original_ref, object, encoded_ref, bundle_member })), (item) => item.original_ref) }, artifacts: { empty_directory_policy: manifest.empty_directory_policy, entries: sorted(manifest.artifacts.map(({ path: entryPath, type, sha256 }) => ({ path: entryPath, type, sha256 })), (item) => `${item.path}\0${item.type}`), ...(workflowMetadataChanges.length ? { authorized_workflow_metadata: workflowMetadataChanges } : {}) }, refs: { local_main: resolve("refs/heads/main"), cached_origin_main: resolve("refs/remotes/origin/main"), milestone_branch: run(repo, ["rev-parse", "HEAD^{commit}"]), v161_tag: resolve("refs/tags/v1.61"), all: sorted(refs, (item) => `${item.name}\0${item.object}`) }, remotes, planning: collectPlanningFacts({ root: repo }), worktrees: collectWorktrees({ repo }) }, context);
 }
 export const collectLocalInventory = (options) => collectRepositoryInventory(options);
@@ -397,8 +411,8 @@ if (process.env.NODE_TEST_CONTEXT) {
     const emptyResponses = new Map([
       ["repos/szTheory/accrue/git/ref/heads/main", { object: { sha: indexedSha(200) } }],
       ["repos/szTheory/accrue/pulls?state=open&per_page=100&page=1", []],
-      ["repos/szTheory/accrue/git/matching-refs/heads/release/", []],
-      ["repos/szTheory/accrue/actions/runs?per_page=100", { workflow_runs: [] }]
+      ["repos/szTheory/accrue/git/matching-refs/heads/release/?per_page=100&page=1", []],
+      ["repos/szTheory/accrue/actions/runs?per_page=100&page=1", { workflow_runs: [] }]
     ]);
     const emptyAdapter = createGhApiReadAdapter({ invoke: (argv) => ({ status: 0, stdout: JSON.stringify(emptyResponses.get(argv[1])), stderr: "" }) });
     const empty = collectRemoteFacts({ repository: "szTheory/accrue", adapter: emptyAdapter, now: () => new Date("2026-09-13T00:00:00.000Z") });
@@ -443,13 +457,74 @@ if (process.env.NODE_TEST_CONTEXT) {
       "GET /repos/szTheory/accrue/actions/runs?per_page=100&page=2"
     ]);
   });
+  test("plural pagination failures discard partial remote values", () => {
+    const sha = (letter) => letter.repeat(40);
+    const responses = new Map([
+      ["repos/szTheory/accrue/git/ref/heads/main", { object: { sha: sha("a") } }],
+      ["repos/szTheory/accrue/pulls?state=open&per_page=2&page=1", []],
+      ["repos/szTheory/accrue/git/matching-refs/heads/release/?per_page=2&page=1", []],
+      ["repos/szTheory/accrue/actions/runs?per_page=2&page=1", { workflow_runs: [{ id: 2, created_at: "2026-01-02T00:00:00Z", head_sha: sha("b") }, { id: 1, created_at: "2026-01-01T00:00:00Z", head_sha: sha("c") }] }]
+    ]);
+    const adapter = createGhApiReadAdapter({ pageSize: 2, invoke: (argv) => argv[1].endsWith("actions/runs?per_page=2&page=2") ? { status: 1, stdout: "", stderr: "network ECONNRESET" } : { status: 0, stdout: JSON.stringify(responses.get(argv[1])), stderr: "" } });
+    const facts = collectRemoteFacts({ repository: "szTheory/accrue", adapter, now: () => new Date("2026-09-13T00:00:00.000Z") });
+    assert.deepEqual(facts.actions, {
+      repository: "szTheory/accrue",
+      observed_at: "2026-09-13T00:00:00.000Z",
+      requests: [
+        "GET /repos/szTheory/accrue/actions/runs?per_page=2&page=1",
+        "GET /repos/szTheory/accrue/actions/runs?per_page=2&page=2"
+      ],
+      available: false,
+      state: "unavailable",
+      reason: "network"
+    });
+
+    const malformed = createGhApiReadAdapter({ pageSize: 2, invoke: (argv) => ({ status: 0, stdout: JSON.stringify(argv[1].includes("actions/runs") ? { workflow_runs: {} } : responses.get(argv[1])), stderr: "" }) });
+    assert.equal(collectRemoteFacts({ repository: "szTheory/accrue", adapter: malformed, now: () => new Date("2026-09-13T00:00:00.000Z") }).actions.reason, "data_shape");
+
+    const overflowResponses = new Map(responses);
+    overflowResponses.set("repos/szTheory/accrue/git/matching-refs/heads/release/?per_page=2&page=1", [{ ref: "refs/heads/release/1", object: { sha: sha("d") } }, { ref: "refs/heads/release/2", object: { sha: sha("e") } }]);
+    overflowResponses.set("repos/szTheory/accrue/git/matching-refs/heads/release/?per_page=2&page=2", [{ ref: "refs/heads/release/3", object: { sha: sha("f") } }, { ref: "refs/heads/release/4", object: { sha: sha("0") } }]);
+    overflowResponses.set("repos/szTheory/accrue/actions/runs?per_page=2&page=1", { workflow_runs: [] });
+    const itemOverflow = createGhApiReadAdapter({ pageSize: 2, maxItems: 3, invoke: (argv) => ({ status: 0, stdout: JSON.stringify(overflowResponses.get(argv[1])), stderr: "" }) });
+    const overflow = collectRemoteFacts({ repository: "szTheory/accrue", adapter: itemOverflow, now: () => new Date("2026-09-13T00:00:00.000Z") }).release_branches;
+    assert.equal(overflow.reason, "overflow");
+    assert.equal("shas" in overflow, false);
+
+    const bufferBound = createGhApiReadAdapter({ maxBuffer: 16, invoke: () => ({ status: 0, stdout: JSON.stringify({ oversized: "x".repeat(32) }), stderr: "" }) });
+    const bufferFacts = collectRemoteFacts({ repository: "szTheory/accrue", adapter: bufferBound, now: () => new Date("2026-09-13T00:00:00.000Z") });
+    for (const fact of Object.values(bufferFacts)) assert.equal(fact.reason, "overflow");
+  });
+  test("GitHub plural endpoint allowlist enforces normalized contiguous pages", () => {
+    const response = () => ({ status: 0, stdout: "[]", stderr: "" });
+    const duplicate = createGhApiReadAdapter({ invoke: response });
+    duplicate.get("GET /repos/szTheory/accrue/git/matching-refs/heads/release/?per_page=100&page=1");
+    assert.throws(() => duplicate.get("GET /repos/szTheory/accrue/git/matching-refs/heads/release/?per_page=100&page=1"), /contiguous and ordered/);
+    for (const request of [
+      "GET /repos/szTheory/accrue/pulls?state=open&page=1&per_page=100",
+      "GET /repos/szTheory/accrue/actions/runs?page=1&per_page=100",
+      "GET /repos/szTheory/accrue/actions/runs?per_page=x&page=1",
+      "GET /repos/szTheory/accrue/actions/runs?per_page=100&page=11",
+      "GET /repos/szTheory/accrue/git/matching-refs/heads/release/?per_page=100&page=2",
+      "GET /repos/szTheory/accrue/issues?per_page=100&page=1"
+    ]) assert.throws(() => createGhApiReadAdapter({ invoke: response }).get(request), /allowlisted|bounds|contiguous/);
+    assert.throws(() => createGhApiReadAdapter({ pageSize: 101 }), /pageSize/);
+    assert.throws(() => createGhApiReadAdapter({ maxPages: 11 }), /maxPages/);
+    assert.throws(() => createGhApiReadAdapter({ maxItems: 1_001 }), /maxItems/);
+
+    let processOptions;
+    const bounded = createGhApiReadAdapter({ timeoutMs: 123, maxBuffer: 456, invoke: (_argv, options) => { processOptions = options; return { status: 0, stdout: JSON.stringify({ object: { sha: "a".repeat(40) } }), stderr: "" }; } });
+    bounded.get("GET /repos/szTheory/accrue/git/ref/heads/main");
+    assert.deepEqual(processOptions, { encoding: "utf8", shell: false, timeout: 123, maxBuffer: 456 });
+    assert.deepEqual(Object.keys(bounded).sort(), ["calls", "get", "limits"]);
+  });
   test("GitHub observation adapter preserves bounded zero, one, and many remote results", () => {
     const sha = (letter) => letter.repeat(40);
     const responses = new Map([
       ["repos/szTheory/accrue/git/ref/heads/main", { object: { sha: sha("a") } }],
       ["repos/szTheory/accrue/pulls?state=open&per_page=100&page=1", [{ number: 2, head: { sha: sha("c") } }, { number: 1, head: { sha: sha("b") } }]],
-      ["repos/szTheory/accrue/git/matching-refs/heads/release/", []],
-      ["repos/szTheory/accrue/actions/runs?per_page=100", { workflow_runs: [{ id: 2, created_at: "2026-01-02T00:00:00Z", head_sha: sha("e") }, { id: 1, created_at: "2026-01-02T00:00:00Z", head_sha: sha("d") }] }]
+      ["repos/szTheory/accrue/git/matching-refs/heads/release/?per_page=100&page=1", []],
+      ["repos/szTheory/accrue/actions/runs?per_page=100&page=1", { workflow_runs: [{ id: 2, created_at: "2026-01-02T00:00:00Z", head_sha: sha("e") }, { id: 1, created_at: "2026-01-02T00:00:00Z", head_sha: sha("d") }] }]
     ]);
     const adapter = createGhApiReadAdapter({ invoke: (argv) => ({ status: 0, stdout: JSON.stringify(responses.get(argv[1])), stderr: "" }) });
     const facts = collectRemoteFacts({ repository: "szTheory/accrue", adapter, now: () => new Date("2026-09-13T00:00:00.000Z") });
@@ -461,12 +536,15 @@ if (process.env.NODE_TEST_CONTEXT) {
     assert.deepEqual(adapter.calls.map((argv) => argv.slice(0, 4)), [
       ["api", "repos/szTheory/accrue/git/ref/heads/main", "--method", "GET"],
       ["api", "repos/szTheory/accrue/pulls?state=open&per_page=100&page=1", "--method", "GET"],
-      ["api", "repos/szTheory/accrue/git/matching-refs/heads/release/", "--method", "GET"],
-      ["api", "repos/szTheory/accrue/actions/runs?per_page=100", "--method", "GET"]
+      ["api", "repos/szTheory/accrue/git/matching-refs/heads/release/?per_page=100&page=1", "--method", "GET"],
+      ["api", "repos/szTheory/accrue/actions/runs?per_page=100&page=1", "--method", "GET"]
     ]);
     assert.throws(() => adapter.get("GET /repos/szTheory/accrue/issues"), /allowlisted/);
-    const unavailableFact = collectRemoteFacts({ repository: "szTheory/accrue", adapter: { get: () => { throw new Error("rate limit 429"); } }, now: () => new Date("2026-09-13T00:00:00.000Z") });
-    assert.equal(unavailableFact.actions.reason, "rate_limit");
+    for (const [message, reason] of [["rate limit 429", "rate_limit"], ["authentication 401", "authentication"], ["timeout ETIMEDOUT", "timeout"], ["network ENOTFOUND", "network"], ["malformed payload", "data_shape"], ["maxBuffer overflow", "overflow"]]) {
+      const unavailableFact = collectRemoteFacts({ repository: "szTheory/accrue", adapter: { get: () => { throw new Error(message); } }, now: () => new Date("2026-09-13T00:00:00.000Z") });
+      assert.equal(unavailableFact.actions.reason, reason);
+      assert.equal("shas" in unavailableFact.actions, false);
+    }
   });
   test("repository truth exposes sanitized worktree and ship-window collectors", () => {
     assert.equal(typeof collectWorktrees, "function");
