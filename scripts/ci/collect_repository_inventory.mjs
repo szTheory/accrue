@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import crypto from "node:crypto";
 import fs from "node:fs";
+import os from "node:os";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
 import assert from "node:assert/strict";
@@ -407,7 +408,7 @@ if (process.env.NODE_TEST_CONTEXT) {
       cached_origin_main: "b".repeat(40),
       milestone_branch: "c".repeat(40),
       v161_tag: "d".repeat(40),
-      all: []
+      all: [{ name: "refs/heads/milestone", object: "c".repeat(40), role: "other" }]
     },
     remotes: {
       remote_main: { repository: "szTheory/accrue", observed_at: "2026-09-13T00:00:00.000Z", request: "GET /repos/szTheory/accrue/git/ref/heads/main", available: true, state: "observed", sha: "e".repeat(40) },
@@ -416,7 +417,13 @@ if (process.env.NODE_TEST_CONTEXT) {
       actions: { repository: "szTheory/accrue", observed_at: "2026-09-13T00:00:00.000Z", requests: ["GET /repos/szTheory/accrue/actions/runs?per_page=100&page=1"], available: false, state: "unavailable", reason: "network" }
     },
     planning: { ship_windows: [], milestone: "absent", state: "absent" },
-    worktrees: []
+    worktrees: [{ branch: "milestone", sha: "c".repeat(40), dirty: false }],
+    capture: {
+      captured_at: "2026-09-13T00:00:00.000Z",
+      active_ref: "refs/heads/milestone",
+      commit: "c".repeat(40),
+      primary_worktree: { branch: "refs/heads/milestone", head: "c".repeat(40) }
+    }
   });
 
   test("CR-09 remote facts require exact non-coercive availability and state", async () => {
@@ -465,6 +472,49 @@ if (process.env.NODE_TEST_CONTEXT) {
     malformed.remotes.remote_main.state = "fabricated";
     const { renderRepositoryInventory } = await import("./render_repository_inventory.mjs");
     assert.throws(() => renderRepositoryInventory(malformed, context), /remote fact/);
+  });
+
+  test("captured-at anchor binds the active ref and primary worktree without paths", async () => {
+    const context = createRepositoryValidationContext({ expectedRepository: "szTheory/accrue" });
+    const fixture = remoteSchemaFixture();
+    const checked = validateInventory(fixture, context);
+    assert.deepEqual(checked.capture, fixture.capture);
+    const { renderRepositoryInventory } = await import("./render_repository_inventory.mjs");
+    const rendered = renderRepositoryInventory(fixture, context);
+    assert.match(rendered, /refs\/heads\/milestone/);
+    assert.match(rendered, new RegExp("c{40}"));
+    assert.equal(rendered.includes("/Users/"), false);
+
+    for (const mutate of [
+      (candidate) => { delete candidate.capture; },
+      (candidate) => { candidate.capture.commit = "d".repeat(40); },
+      (candidate) => { candidate.capture.active_ref = "refs/heads/other"; },
+      (candidate) => { candidate.capture.primary_worktree.branch = "refs/heads/other"; },
+      (candidate) => { candidate.capture.primary_worktree.head = "d".repeat(40); },
+      (candidate) => { candidate.capture.path = "/private/repository"; }
+    ]) {
+      const candidate = remoteSchemaFixture();
+      mutate(candidate);
+      assert.throws(() => validateInventory(candidate, context), /capture|inventory/);
+    }
+
+    const scratch = fs.mkdtempSync(path.join(fs.realpathSync(os.tmpdir()), "phase229-capture-"));
+    try {
+      run(scratch, ["init", "-q", "-b", "phase-229"]);
+      run(scratch, ["config", "user.email", "phase229@example.invalid"]);
+      run(scratch, ["config", "user.name", "Phase 229"]);
+      fs.writeFileSync(path.join(scratch, "tracked"), "capture\n");
+      run(scratch, ["add", "tracked"]);
+      run(scratch, ["commit", "-qm", "capture"]);
+      const anchor = collectCaptureAnchor({ repo: scratch, capturedAt: new Date("2026-09-13T00:00:00.000Z") });
+      assert.deepEqual(anchor, {
+        captured_at: "2026-09-13T00:00:00.000Z",
+        active_ref: "refs/heads/phase-229",
+        commit: run(scratch, ["rev-parse", "HEAD^{commit}"]),
+        primary_worktree: { branch: "refs/heads/phase-229", head: run(scratch, ["rev-parse", "HEAD^{commit}"]) }
+      });
+      assert.equal(JSON.stringify(anchor).includes(scratch), false);
+    } finally { fs.rmSync(scratch, { recursive: true, force: true }); }
   });
 
   test("open pull requests require terminal page proof", () => {
