@@ -1,175 +1,168 @@
 ---
 phase: 229-repository-truth-recovery-safety
-reviewed: 2026-09-13T13:56:23Z
+reviewed: 2026-09-13T16:29:34Z
 depth: standard
-files_reviewed: 7
+files_reviewed: 8
 files_reviewed_list:
   - scripts/ci/README.md
   - scripts/ci/ci_monitor.cjs
   - scripts/ci/collect_repository_inventory.mjs
+  - scripts/ci/phase229_gap_closure.test.mjs
   - scripts/ci/preserve_repository_state.sh
   - scripts/ci/render_repository_inventory.mjs
   - scripts/ci/verify_repository_inventory.mjs
   - scripts/ci/watch_ci.sh
 findings:
-  critical: 10
+  critical: 9
   warning: 3
   info: 0
-  total: 13
+  total: 12
 status: issues_found
 ---
 
 # Phase 229: Code Review Report
 
-**Reviewed:** 2026-09-13T13:56:23Z
+**Reviewed:** 2026-09-13T16:29:34Z
 **Depth:** standard
-**Files Reviewed:** 7
+**Files Reviewed:** 8
 **Status:** issues_found
 
 ## Summary
 
-The recovery and observation implementation has multiple correctness and safety failures despite its green embedded fixtures. The most serious defects can destroy the just-created recovery bundle while still printing `PASS`, bypass the outside-repository capsule boundary through symlinked directories, produce shell-injectable restore commands, and certify an inventory that omits the live remote, worktree, and ship-window facts it claims to collect. The compatibility watcher's documented no-argument invocation also fails immediately.
+The gap-closure work fixes the original output-alias, physical-boundary, public-record, shell-restore, watcher-default, foreign-manifest, and rendered-restore failures. All advertised fixture commands are green. Adversarial probes still reproduced nine blocking gaps: artifact mutation can occur after the only snapshot while preservation reports success; valid symlink text can be hashed incorrectly; remote collection silently truncates paginated categories; and the strict verifier accepts fabricated or incomplete ref, planning, provenance, and privacy evidence. The CI watch timeout also does not impose an absolute deadline.
+
+Of the prior report, CR-01 through CR-05, CR-07, CR-08, CR-10, and WR-01 through WR-03 are behaviorally closed. CR-06 is only partially closed because live reads are wired but not paginated, and CR-09 is only partially closed because private-manifest/bundle equality is now proven while several canonical inventory claims remain trusted rather than independently reconciled.
 
 ## Narrative Findings (AI reviewer)
 
-Targeted probes reproduced four failures: identical bundle/manifest paths return success but leave a non-bundle JSON file; a symlinked output directory places both supposedly external artifacts inside the repository; `--public-record-out` exits on an unbound variable after writing the bundle and private manifest; and `watch_ci.sh` with no arguments exits 64 before contacting GitHub. A generated bundle also does not contain the encoded preservation refs used by the rendered restore instruction. The shipped self-tests still report PASS for both the monitor and repository-inventory fixture suites.
+The complete advertised regression chain passed. Separate probes then demonstrated: a concurrent artifact rewrite after manifest publication returns exit 0 with a stale digest; a symlink target ending in a newline receives the wrong SHA-256; removing every preservation ref row from `refs.all` still passes all strict flags; replacing the ten ship windows with an empty array still passes; replacing the active branch object with a nonexistent all-`f` SHA still passes; a same-repository `GET .../issues` request passes command-provenance verification; `/var/private/phase229-capsule.json` passes privacy verification and is rendered; the README's documented strict command exits 1 for missing private inputs; and a one-second watch completed successfully after 2.658 seconds because its two GitHub reads were outside the deadline.
 
 ## Critical Issues
 
-### CR-01: Aliased output paths overwrite the verified recovery bundle while reporting success
+### CR-01: Preservation never verifies the artifact snapshot again before success
 
 **Classification:** BLOCKER
 
-**File:** `scripts/ci/preserve_repository_state.sh:34-35,75-84`
+**File:** `scripts/ci/preserve_repository_state.sh:144-171`
 
-**Issue:** The collision checks only test whether each path already exists; they never require `bundle_out`, `private_manifest_out`, and `public_record_out` to be distinct. Passing the same initially absent path for `--bundle-out` and `--private-manifest-out` creates and verifies the bundle, then overwrites it with JSON and prints `preserve repository state: PASS`. The same problem lets the optional public record overwrite either private artifact. This is a direct recovery-data-loss risk.
+**Issue:** The script hashes untracked artifacts once, writes that snapshot into the manifest, publishes the outputs, and then rechecks only the bundle. It never takes the required post-snapshot. A probe waited for the published manifest, rewrote an untracked regular file, and observed exit 0 plus `preserve repository state: PASS`; the manifest retained the old digest. This makes the claimed pre/post invariant false and allows observation to proceed from stale user-artifact evidence.
 
-**Fix:** Canonicalize all three targets first, reject any pair that identifies the same path (and preferably the same inode after exclusive creation), and create outputs with exclusive-open semantics. Re-verify the final bundle only after every other output has been written.
+**Fix:** Re-enumerate every untracked entry NUL-safely immediately before setting `published=true`, recompute type and digest/link-text digest, and compare the complete path/type/digest map plus empty-directory policy with the frozen snapshot. On any mismatch, fail while cleanup still owns the newly published outputs. Add a deterministic mutation hook fixture after the first snapshot.
 
-### CR-02: Symlinked parent directories bypass the outside-repository recovery boundary
-
-**Classification:** BLOCKER
-
-**File:** `scripts/ci/preserve_repository_state.sh:29-36`
-
-**Issue:** `within_repo` compares lexical paths only. An outside path whose parent is a symlink to the repository passes the check and writes the bundle and private manifest into the worktree. This violates the recovery barrier and allows later repository cleanup or mutation to destroy the only capsule.
-
-**Fix:** Resolve the repository and each existing target parent to physical paths (`realpath`/`pwd -P`), reject parents inside the physical worktree, reject symlink path components where practical, and perform the final check against an opened parent directory before creating each file.
-
-### CR-03: The documented public-record mode always crashes after partially succeeding
+### CR-02: Trailing newlines in valid symlink targets produce false recovery evidence
 
 **Classification:** BLOCKER
 
-**File:** `scripts/ci/preserve_repository_state.sh:75-83`
+**File:** `scripts/ci/preserve_repository_state.sh:147`
 
-**Issue:** `BUNDLE_SHA256=... node ...` creates an environment assignment for that one process; it does not leave a shell variable for line 83. Under `set -u`, every invocation with `--public-record-out` terminates with `BUNDLE_SHA256: unbound variable` after the bundle and private manifest have already been created. The self-test omits this supported mode.
+**Issue:** `artifact_hash="$(printf '%s' "$(readlink "$full")" | ...)"` uses command substitution around `readlink`, which strips every trailing newline from the link text. A valid link targeting `target\n` produced recorded SHA-256 `34a040...` while hashing `fs.readlinkSync` returned `c97ecf...`. Later exact artifact validation therefore rejects an unchanged repository, and the private recovery evidence is not the promised link-text digest.
 
-**Fix:** Assign a shell-local first, for example `local bundle_sha256; bundle_sha256="$(sha256 "$bundle_out")"`, pass that value to Node, and use the same local when writing the public record. Add a self-test that requests and validates the public record.
+**Fix:** Hash the link text without shell command substitution, for example with a small Node helper using `fs.readlinkSync(path)` and `crypto.createHash("sha256")`, passing the path as one argv element. Add fixtures for empty-looking, embedded-newline, and trailing-newline link text.
 
-### CR-04: Private restore commands allow shell command substitution from valid Git ref names
-
-**Classification:** BLOCKER
-
-**File:** `scripts/ci/preserve_repository_state.sh:79`
-
-**Issue:** Git permits ref names containing shell metacharacters such as `$()` and `;`, but `restore_command` interpolates the ref without quoting. A valid ref named `refs/custom/x$(touch_pwned)` produces `git update-ref refs/custom/x$(touch_pwned) <sha>`; executing the promised exact restore command runs attacker-controlled shell syntax.
-
-**Fix:** Store restore operations as an argv array rather than an executable shell string, e.g. `{"argv":["git","update-ref",ref,object]}`. If a human-readable shell command is mandatory, apply a real POSIX shell-quoting routine to every argument and cover metacharacter-bearing valid refs in fixtures.
-
-### CR-05: The compatibility watcher fails for its documented default invocation and no longer selects CI
+### CR-03: “All” PR and release-branch observations silently stop at the first API page
 
 **Classification:** BLOCKER
 
-**File:** `scripts/ci/watch_ci.sh:6-12,23-34`
+**File:** `scripts/ci/collect_repository_inventory.mjs:194-247`
 
-**Issue:** `branch` defaults to an empty string, so `bash scripts/ci/watch_ci.sh` passes neither `--branch` nor `--sha`; `ci_monitor.cjs` immediately exits 64 with `--sha must be a full lowercase 40-hex SHA`. Even with a positional branch, the wrapper no longer supplies `--workflow CI`, so it can resolve an unrelated workflow and then become ambiguous when `inspectSha` sees multiple runs for that SHA. It also dropped the old `gh run watch --exit-status` failure-exit behavior, so a completed failed run is reported with exit 0.
+**Issue:** Each remote category performs exactly one `gh api` call. Pull requests request only `per_page=100`; matching release refs do not even request a page size and therefore use the API default. There is no page loop, Link-header inspection, or overflow probe. A full first page is accepted as complete `available:true` evidence even when later pages exist, contradicting the promised all-open-PR and all-release-branch inventory and the phase's bounded-pagination threat mitigation.
 
-**Fix:** Default to `main`, add `--workflow CI` unless explicitly overridden, and preserve compatibility by returning non-zero when the selected completed run has a non-success conclusion. Exercise the no-argument, failed-run, and multi-workflow cases through an injected adapter instead of only regex-checking the wrapper.
+**Fix:** Implement a bounded page loop for plural endpoints, request an explicit page size and page number, stop only on an authoritative terminal page, and return `unavailable:overflow` if another page exists beyond the configured page/item cap. Preserve every producing request in provenance and add first-page-full/second-page and cap-exceeded fixtures.
 
-### CR-06: `--observe-remote` performs no live observation and plural categories lose all but one SHA
-
-**Classification:** BLOCKER
-
-**File:** `scripts/ci/collect_repository_inventory.mjs:162-173`
-
-**Issue:** The CLI calls `collectRepositoryInventory` without an adapter, so `--observe-remote` always emits four synthetic `unavailable` facts and never runs the required repository-bound GETs. If an adapter is injected programmatically, `remoteRead` extracts only the first PR, release branch, or Actions run SHA. Confirmed empty lists are misclassified as `data_shape` unavailable because the schema requires one primary `sha`. The resulting inventory cannot cover open PR heads, all release branches, or recent Actions runs as required.
-
-**Fix:** Build a bounded, read-only `gh api` adapter in the CLI using `spawnSync` with `shell:false`, fixed `szTheory/accrue` endpoints, timeouts, buffers, and item/page limits. Normalize collection categories to `shas` arrays (including valid empty arrays), retain a single SHA only for singleton facts such as remote main, and render every normalized object ID.
-
-### CR-07: The canonical inventory fabricates empty ship windows and records only the current worktree
+### CR-04: Strict recovery accepts a fabricated active-branch object
 
 **Classification:** BLOCKER
 
-**File:** `scripts/ci/collect_repository_inventory.mjs:164-169`
+**File:** `scripts/ci/verify_repository_inventory.mjs:60-70,138-143`
 
-**Issue:** `collectPlanningFacts` hard-codes `ship_windows: []`, and `collectRepositoryInventory` constructs exactly one worktree row from the current checkout. It never reads `.planning/WINDOWS.md`/the GSD window status and never runs `git worktree list --porcelain`. A repository with additional clean or dirty worktrees is therefore certified as complete while those worktrees are absent.
+**Issue:** The active-branch exception checks only that the canonical `refs.all` row equals the inventory's `milestone_branch` value. It never resolves the live symbolic ref or even proves that the replacement object exists. Replacing both values with a nonexistent 40-character all-`f` SHA passed the full real-capsule command with `--require-recovery --require-all-ref-recovery --require-complete-categories`. This permits fabricated point-in-time branch truth under the exception added by Plan 229-09.
 
-**Fix:** Collect bounded ship-window facts from the declared planning authority and parse every worktree from `git worktree list --porcelain`, omitting only absolute paths from public output. Determine each worktree's dirty state in that worktree and add multi-worktree/non-empty-window fixtures.
+**Fix:** Resolve `${activeRef}^{object}` from `repositoryRoot` and require it to equal both the canonical row and `refs.milestone_branch`; also prove the object exists with `git cat-file -e`. Keep the frozen object independently recoverable through the manifest, bundle, and encoded ref.
 
-### CR-08: A recovery manifest from another repository is relabeled as `szTheory/accrue`
-
-**Classification:** BLOCKER
-
-**File:** `scripts/ci/collect_repository_inventory.mjs:63-81,165-169`
-
-**Issue:** `readTrustedRecoveryManifest` validates the manifest digest, schema, refs, and bundle digest but never compares `manifest.repository` with `expectedRepository`. If the objects happen to exist locally, a capsule created for another repository can pass and the returned canonical inventory is labeled with the caller-supplied repository. This breaks provenance at the recovery boundary.
-
-**Fix:** Pass the validated context into `readTrustedRecoveryManifest`, require an allowlisted `repository` field, and reject unless it exactly equals `context.expectedRepository` before bundle, artifact, or remote work begins.
-
-### CR-09: The all-ref verification flag accepts any single claimed recovery row
+### CR-05: All-ref verification ignores preservation rows in the committed all-ref inventory
 
 **Classification:** BLOCKER
 
-**File:** `scripts/ci/verify_repository_inventory.mjs:135-150`
+**File:** `scripts/ci/verify_repository_inventory.mjs:127-143`
 
-**Issue:** `--require-all-ref-recovery` checks only `inventory.recovery.refs.length !== 0`; it neither compares original refs against the complete ref inventory nor verifies the external bundle or encoded refs. `--require-recovery` similarly trusts the already-required boolean, and several advertised strict flags add no flag-specific checks. A one-row fabricated recovery section with arbitrary well-formed digests can pass the command marketed as all-ref recovery verification.
+**Issue:** Strict verification reconciles live encoded refs separately, then filters every preservation row out of `checked.refs.all`. Removing all 109 `refs/accrue-preserve/phase-229/*` rows from the canonical inventory and freshly rendering it still passed every strict flag. The verifier therefore certifies an inventory that does not contain all local refs even though REPO-01 and the final summary claim all 218 rows.
 
-**Fix:** Require the private manifest, independently anchored digest, and bundle for strict recovery verification; run bundle verification/list-heads and encoded-ref resolution, then compare the frozen original set against the expected non-preservation ref set. At minimum, make `--require-all-ref-recovery` prove set equality rather than non-emptiness and add a missing-one-of-many negative fixture.
+**Fix:** Split canonical `refs.all` into preservation and non-preservation maps. Compare its preservation map exactly with the independently resolved `encodedMap`, including missing, extra, duplicate, and changed rows, before applying the narrowly defined active-branch continuity rule to the non-preservation map.
 
-### CR-10: Both rendered recovery commands are non-executable
+### CR-06: Complete-category verification accepts an empty ship-window snapshot
 
 **Classification:** BLOCKER
 
-**File:** `scripts/ci/render_repository_inventory.mjs:23-24`
+**File:** `scripts/ci/verify_repository_inventory.mjs:173-179`
 
-**Issue:** The bundle created by `preserve_repository_state.sh` contains original ref names, not `refs/accrue-preserve/phase-229/<encoded>` names, so the documented `git fetch "$PHASE229_BUNDLE" <encoded>:<original>` restore command fails with `couldn't find remote ref`. The preceding verification command also sets `PHASE229_BUNDLE` only as a command-prefix assignment while expanding `$PHASE229_BUNDLE` before that assignment takes effect, normally yielding an empty path.
+**Issue:** `assertCompleteCategories` checks only that `ship_windows` is an array and `worktrees` is non-empty. Replacing all ten committed windows with `[]` passed the full strict verifier. The same design cannot detect a missing secondary worktree or invented worktree row. This reintroduces the core completeness failure from the prior verification report at the independent-verifier boundary.
 
-**Fix:** Render commands that first assign/export the bundle variable, then verify it. Restore from the actual original bundle head (`<original-ref>:<original-ref>`) or fetch the object and use a safely represented `git update-ref` argv. Add an integration fixture that restores a deleted ref into a fresh repository using the exact rendered procedure.
+**Fix:** Reconcile ship-window IDs/states against the bounded `.planning/WINDOWS.md` authority and reconcile worktree branch/detached/SHA/dirty rows against `git worktree list --porcelain` plus per-worktree status. If point-in-time verification must survive later drift, require independently anchored snapshot inputs rather than treating non-empty arrays as proof.
+
+### CR-07: Provenance verification accepts arbitrary same-repository API requests
+
+**Classification:** BLOCKER
+
+**File:** `scripts/ci/verify_repository_inventory.mjs:148-153`
+
+**Issue:** The command-provenance gate requires only a `GET /repos/szTheory/accrue/` prefix. Changing `remote_main.request` to `GET /repos/szTheory/accrue/issues` passed `--require-command-provenance` and the full strict chain. A request that cannot produce the claimed ref SHA is therefore accepted as its provenance.
+
+**Fix:** Define the exact allowed request contract per category and require exact normalized matches: main ref, open PRs with bounded pagination, matching `release/*` refs, and bounded Actions runs. For paginated categories, validate the complete ordered request sequence and bounds.
+
+### CR-08: Privacy verification misses most absolute filesystem paths
+
+**Classification:** BLOCKER
+
+**File:** `scripts/ci/verify_repository_inventory.mjs:192-203`
+
+**Issue:** The privacy scan recognizes only `/Users/`, `/home/`, `/tmp/`, and drive-letter prefixes. Setting a rendered planning field to `/var/private/phase229-capsule.json` passed `--require-privacy-controls`; `/root`, `/opt`, `/private/tmp`, UNC paths, and URI-form file locations have the same gap. This contradicts the no-absolute-path/no-external-capsule-location security contract.
+
+**Fix:** Apply field-specific schemas and reject every absolute/path-like value with `path.isAbsolute`, Windows/UNC checks, and `file:` URI checks wherever paths are forbidden. Reject all control characters, not only NUL, and add negative fixtures for `/var`, `/root`, `/private`, UNC, and file-URI forms.
+
+### CR-09: The requested watch timeout is not an absolute deadline
+
+**Classification:** BLOCKER
+
+**File:** `scripts/ci/ci_monitor.cjs:104-109,147-154`
+
+**Issue:** Timeout is checked only after a complete list-plus-view polling cycle, while each GitHub subprocess independently permits 30 seconds. A controlled adapter that took 1.2 seconds for each read returned completed success after 2.658 seconds under `--timeout-seconds 1`, with exit 0. A stalled cycle can exceed the caller's advertised deadline by roughly 60 seconds, and sleep can overshoot it further.
+
+**Fix:** Compute one monotonic absolute deadline, check it before and after every remote read, pass the remaining budget into each subprocess timeout, and cap each sleep to the remaining duration. Add a real subprocess-delay fixture that asserts wall-clock timeout behavior, not only an injected logical clock.
 
 ## Warnings
 
-### WR-01: Valid repository-relative filenames containing `..` are rejected
+### WR-01: The documented strict verification command cannot run
 
 **Classification:** WARNING
 
-**File:** `scripts/ci/preserve_repository_state.sh:66-68`
+**File:** `scripts/ci/README.md:35-42`
 
-**Issue:** The path guard rejects any filename containing the substring `..`, including harmless names such as `release..notes`. This is stricter than the promised parent-traversal rejection and can prevent a recovery barrier on a valid repository.
+**Issue:** The README says this command verifies recovery, then supplies `--require-recovery --require-all-ref-recovery` without `--recovery-manifest`, `--expected-manifest-sha256`, or `--recovery-bundle`. Executing it exits 1 with `--recovery-manifest requires a non-empty private manifest path`. The docs checker validates only keywords and does not execute the command.
 
-**Fix:** Split on `/` and reject only path components exactly equal to `.` or `..`, matching the validator's normalized-relative-path logic.
+**Fix:** Show the required runtime-only variables and all three private-input flags in the verification command, using the same variable names as the collection and validation documentation. Add a docs subprocess fixture against a generated private capsule.
 
-### WR-02: The preservation self-test does not exercise the behaviors it claims to prove
-
-**Classification:** WARNING
-
-**File:** `scripts/ci/preserve_repository_state.sh:86-95`
-
-**Issue:** The self-test never creates `refs/stash`, never requests a public record, never tests distinct/aliased output paths, and never tests a symlinked output parent. Consequently it reports PASS while CR-01 through CR-03 remain reproducible and while the phase acceptance text says stash recovery is proven.
-
-**Fix:** Create an actual stash, assert every expected original name/object and bundle head, cover all supported output modes, and add negative cases for aliased targets and physical in-repository destinations.
-
-### WR-03: Scratch directories containing private ref and artifact inventories are never cleaned up
+### WR-02: Run inspection does not bind the viewed result to the selected run
 
 **Classification:** WARNING
 
-**File:** `scripts/ci/preserve_repository_state.sh:37-39,84-97`
+**File:** `scripts/ci/ci_monitor.cjs:126-134`
 
-**Issue:** Both production and self-test paths create private scratch directories and install no `EXIT` trap. Successful and failed runs leave ref names and untracked artifact paths in temporary storage indefinitely, and repeated runs accumulate stale data.
+**Issue:** After selecting one run ID, `inspectSha` verifies only that the viewed response retains the requested SHA. A response with a different run ID or workflow but the same SHA is accepted, so jobs and conclusions can be attributed to the wrong run despite the preceding uniqueness check.
 
-**Fix:** Install a trap immediately after `mktemp -d` that removes that exact validated scratch directory on every exit path; clear or scope the trap after explicit cleanup.
+**Fix:** Require `run.run_id === matching[0].run_id` and, when workflow selection is present, require the viewed workflow to match as well. Add mismatched-ID and mismatched-workflow response fixtures.
+
+### WR-03: Gap-closure tests omit the remaining adversarial boundaries
+
+**Classification:** WARNING
+
+**File:** `scripts/ci/phase229_gap_closure.test.mjs:30-139`
+
+**Issue:** The supplemental suite covers unavailable-reason mapping, multi-worktree collection, window count parsing, and foreign-manifest ordering, but not page truncation, post-snapshot artifact mutation, raw symlink text, active-branch fabrication, missing canonical preservation rows, category-authority equality, endpoint provenance, privacy path variants, or real deadline enforcement. The embedded suites likewise use one-page API fixtures and self-consistent inventories, allowing all nine blockers above to remain green.
+
+**Fix:** Add the exact reproduced probes as regression tests, with each test first asserting the current failure and then pinning the corrected behavior. Exercise CLI/process boundaries where timing, documentation, and publication semantics matter.
 
 ---
 
-_Reviewed: 2026-09-13T13:56:23Z_
+_Reviewed: 2026-09-13T16:29:34Z_
 _Reviewer: the agent (gsd-code-reviewer)_
 _Depth: standard_
