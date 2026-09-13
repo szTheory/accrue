@@ -2,20 +2,20 @@
 gsd_state_version: "1.0"
 milestone: v1.61
 milestone_name: CI Evidence & Critical-Path Hardening
-current_phase: 228
-current_phase_name: Repair Stripe Webhook-Signing CI Boot Contract Under a Fresh Evidence Budget
-status: completed
+status: Awaiting next milestone
 stopped_at: Milestone v1.61 implementation complete, ready for closeout
-last_updated: "2026-09-12T17:18:30.763Z"
+last_updated: "2026-09-13T02:26:08.567Z"
 last_activity: 2026-09-12
-last_activity_desc: Phase 227 verified; all v1.61 implementation phases complete
-state_head: 7345b91a138f9493d8657881400648221e0581f8
+last_activity_desc: Milestone v1.61 completed and archived
+state_head: 906e06713a0facae8b14565854548eac98447b19
 progress:
   total_phases: 4
   completed_phases: 4
   total_plans: 30
   completed_plans: 28
-  percent: 100
+  percent: 93
+current_phase: 228
+current_phase_name: Repair Stripe Webhook-Signing CI Boot Contract Under a Fresh Evidence Budget
 ---
 
 # Project State
@@ -30,12 +30,10 @@ See: `.planning/PROJECT.md` (updated 2026-09-12 after completing Phase 227 and a
 
 ## Current Position
 
-Phase: 228 — Repair Stripe Webhook-Signing CI Boot Contract Under a Fresh Evidence Budget (complete; Phase 227 closed afterward)
-Plan: 3/3 complete; Phase 227 has 7/7 terminal plans
-Status: Milestone implementation complete; ready for closeout
-Last activity: 2026-09-12 — Phase 227 passed independent verification (11/11)
-
-Progress: [██████████] 100%
+Phase: Milestone v1.61 complete
+Plan: —
+Status: Awaiting next milestone
+Last activity: 2026-09-12 — Milestone v1.61 completed and archived
 
 ## v1.61 Roadmap
 
@@ -1138,4 +1136,4 @@ Resume file: None
 
 ## Operator Next Steps
 
-- Run `$gsd-complete-milestone v1.61` when ready to audit and archive the completed milestone.
+- Start the next milestone with $gsd-new-milestone

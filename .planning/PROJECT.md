@@ -33,21 +33,23 @@ v1.49 **Realistic Demo App & Adoption Evidence** shipped on **2026-06-02**. The 
 
 ## Current State
 
-**Latest fully shipped milestone: v1.59 — Account-Scoped Multi-Rail & Offline Entitlements, shipped 2026-08-05.** Accrue supports concurrent Stripe and Apple rail evidence through one revisioned account projection, provider-honest lifecycle management, device-bound ES256 offline proof, host Apple ingress/repair, and deterministic first-adopter proof. Crosswake runtime capability remains `feasibility_blocked` pending physical-device evidence.
+**Latest fully shipped milestone: v1.61 — CI Evidence & Critical-Path Hardening, shipped 2026-09-12.** Required release and Admin failures now have trace-backed incident classification; CI has a privacy-safe, repository-bound baseline and explicit provider proof states; and the retained critical-path candidate reduced the measured median from 2,083 seconds to 1,125 seconds without removing required release, host, browser, artifact, or provider evidence. Crosswake runtime capability remains `feasibility_blocked` pending physical-device evidence.
 
 **Phase 223 complete (2026-08-06):** the reusable iOS-compatible SwiftPM offline client now preserves canonical ES256 proof verification, authenticated atomic cache recovery, durable observed-time rollback protection, bounded compact-proof/JSON admission, host-owned reconnect and display seams, and deterministic package/iOS/reference evidence. IOS-01 through IOS-03 verified 28/28 must-haves; Phase 224 owns the Crosswake host-command bridge seam. Advisory code review recorded a follow-up cached-read versus concurrent signed-denial race in `223-REVIEW.md`; it must be resolved before relying on concurrent-cache behavior beyond the verified scenario coverage.
 
 **Phase 226 complete (2026-08-12):** maintainers now have a durable, privacy-safe comparable-run baseline with repository-bound GitHub Actions evidence, explicit provider proof states, and owner-first host/browser setup diagnostics. BASE-01, BASE-02, and OWN-01 verified 5/5 must-haves; Phase 227 owns the measured critical-path improvement.
 
-**Phase 228 complete (2026-09-11):** the Stripe webhook-signing CI boot contract now maps a securely supplied signing secret into the runtime rotation list and fails closed when it is absent. The single authorized provider-proof run reached the selected suite, then sealed an honest `failed/selected_assertions_failed` result (10 selected, 5 passed, 5 failed, 0 skipped) with no retry. That immutable result informed the later Phase 227 gap closure.
+**Phase 228 complete (2026-09-11; re-verified 2026-09-12):** the Stripe webhook-signing CI boot contract now maps a securely supplied signing secret into the runtime rotation list and fails closed when it is absent. The phase's single boot-repair authorization sealed an honest `failed/selected_assertions_failed` result with no retry; later recurring provider work repaired the exposed live contracts, and run `34731755425` proved 2/2 selected Stripe tests with 0 skipped on code SHA `0e5378fa`.
 
 **Phase 227 complete (2026-09-12):** the exact candidate removed only the redundant `admin-drift-docs` dependency from host integration. Three successful, first-attempt workflow-dispatch runs at one candidate SHA measured 1,179s, 1,125s, and 1,079s (median 1,125s), clearing the frozen 1,666s median and 2,602s maximum thresholds while retaining required release, host, browser, provider, artifact, negative-control, and rollback evidence. PATH-01, PATH-02, SAFE-01, and SAFE-02 are verified 11/11; all v1.61 implementation phases and 10/10 requirements are complete, ready for milestone closeout.
 
 ## Next Milestone Goals
 
-## Current Milestone: v1.61 CI Evidence & Critical-Path Hardening (Implementation Complete)
+No milestone is active. Start the next cycle from fresh requirements with `$gsd-new-milestone`; stable-core intake rules still require a concrete adopter failure, correctness/security risk, repeated support issue, operational failure, or explicit strategy change.
 
-**Goal:** Restore trustworthy required CI evidence, then reduce proven critical-path waste without weakening release, host, browser, or provider proof for Accrue adopters.
+## Shipped Milestone: v1.61 CI Evidence & Critical-Path Hardening
+
+**Goal (achieved):** Restore trustworthy required CI evidence, then reduce proven critical-path waste without weakening release, host, browser, or provider proof for Accrue adopters.
 
 **Target features:**
 - A diagnosed and repaired required-lane baseline that distinguishes deterministic defects from genuine intermittent infrastructure or lifecycle failures.
@@ -656,7 +658,7 @@ The v1.50→v1.54 arc (Admin UI Foundation → Depth Pass → Brand System → D
 
 ### Active
 
-- None. All v1.61 requirements are validated; milestone archival remains.
+- None. All v1.61 requirements are validated; the next milestone begins with fresh requirements.
 
 ### Validated v1.61 (Phase 227 complete 2026-09-12)
 
@@ -850,6 +852,15 @@ Admin global search — 4/4 satisfied.
 
 ... (rest of requirements unchanged) ...
 
+## Key Decisions
+
+| Decision | Outcome |
+| --- | --- |
+| Treat identical matrix-cell failures as one root-cause incident while retaining each required check identity and artifact. | ✓ Good — Phase 225 repaired the shared causes and preserved the required/advisory distinction. |
+| Bind CI evidence to repository, immutable run/job URLs, workflow topology, timestamps, and explicit provider proof state before comparing performance. | ✓ Good — Phase 226 produced a reproducible 20-path baseline and fail-closed evidence contracts. |
+| Keep the one-edge host-integration dependency change only if three independent attempt-1 observations satisfy the frozen median and maximum thresholds. | ✓ Good — Phase 227 retained the candidate at a 1,125-second median and closed its bounded authority. |
+| Never reinterpret a failed or skipped provider lane as proof, and never retry without new authorization. | ✓ Good — Phase 228 preserved the initial failed record; later separately authorized recurring proof closed the Stripe fidelity gaps honestly. |
+
 ## Evolution
 
 This document evolves at phase transitions and milestone boundaries.
@@ -868,4 +879,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-09-12 after completing Phase 227 and all v1.61 implementation work.*
+*Last updated: 2026-09-12 after shipping v1.61.*

@@ -1,5 +1,40 @@
 # Milestones
 
+## v1.61 CI Evidence & Critical-Path Hardening (Shipped: 2026-09-12)
+
+**Phases completed:** 4 phases, 30 plans, 29 tasks
+
+**Key accomplishments:**
+
+- Two privacy-safe CI incident records now route maintainers to exact repro commands, while webhook ingest tests prove only event-owned persistence facts.
+- Page 191 now reports five bounded viewport traversals without losing its 210 browser checks, and Phase 192 evidence uploads point to real archived outputs that fail closed when absent.
+- Two repaired CI incidents now close on a fresh, SHA-bound Actions run with three required release cells and the required Admin guardrail green, while Sigra remains visibly advisory.
+- Existing CI jobs now finalize redacted Stripe proof and host-setup evidence on every outcome, with literal maintainer triage that preserves the required Fake and release-proof boundaries.
+- Full-CI non_run push and pull-request histories now form truthful timing cohorts, and both proof paths reject calendar-impossible UTC timestamps before arithmetic.
+- Per-run release-to-latest-Playwright percentile derivation is deterministic and tested; live recollection moved to Plan 226-12 because direct Actions history invalidated the exact-fingerprint readiness assumption.
+- A privacy-safe 90-day Actions snapshot now measures 20 compatible release-to-Playwright paths at p50 2083s and p95 2602s, while exposing eight workflow-fingerprint strata instead of hiding topology evolution.
+- Baseline evidence now refuses missing proof/topology input, while the host gate preserves literal setup failures and reports only an honest aggregate fallback.
+- Current GitHub Actions display names now flow into baseline DAG timing, while newly proved provider records immediately render fresh from their own trusted completion.
+- Fail-closed comparable-run CI admission plus a fact-backed, owner-first Postgres readiness failure path.
+- Historical workflow topology is bound to immutable head-SHA sources, with a freshly authenticated, byte-reproducible 20-path CI baseline (p50 2083s, p95 2602s, confirmed).
+- CI baseline evidence now requires an independently supplied repository context, preventing foreign Actions links from becoming Markdown evidence.
+- Exact host-prerequisite rollback is applied and locally preserved; the exhausted restoration proof remains unverified after the live suite failed at application boot.
+- A zero-consumption v3 authority and exact-SHA one-edge host-integration candidate, proven locally with detached-worktree, CI-compatible checks and no remote effects.
+- A live-verified, exact-three critical-path cohort reduced the frozen median to 1125 seconds while retaining every required proof vector, exclusion, and closed authority record.
+- Trimmed Stripe webhook signing configuration now crosses the live CI job into fail-closed runtime boot, backed by exhaustive offline evidence mutations and a one-attempt pre-authorization record.
+
+**Delivered:** Trustworthy required-lane incident classification, a privacy-safe repository-bound CI baseline, explicit provider proof semantics, a kept one-edge critical-path improvement, and a repaired live Stripe boot/fidelity path.
+
+**Verification:** Verified closeout with 4/4 phases passed, 10/10 requirements complete, Phase 227 automated UAT 7/7, Phase 228 automated UAT 6/6, and zero open or acknowledged audit artifacts. The recurring Stripe provider lane proved 2/2 selected contracts with 0 skipped in run `34731755425`.
+
+**Stats:** 204 files changed across 29 tasks in 30 plans; 2026-08-08 → 2026-09-12. The retained candidate reduced the frozen CI median from 2,083 seconds to 1,125 seconds.
+
+**Archives:** [`milestones/v1.61-ROADMAP.md`](milestones/v1.61-ROADMAP.md), [`milestones/v1.61-REQUIREMENTS.md`](milestones/v1.61-REQUIREMENTS.md), [`milestones/v1.61-MILESTONE-AUDIT.md`](milestones/v1.61-MILESTONE-AUDIT.md), [`milestones/v1.61-phases/`](milestones/v1.61-phases/).
+
+**What's next:** No active milestone. Resume with `$gsd-new-milestone` only when the stable-core intake rule is met.
+
+---
+
 ## v1.60 First-Adopter iOS Bridge & Proof (Override closeout: 2026-08-08)
 
 **Closeout type:** Override closeout — Phases 223–224 are verified; Phases 225–226 and HOST-01..03/READY-01..02 are deferred. This archive does not claim StoreKit, full first-adopter integration, or physical-device runtime proof.
