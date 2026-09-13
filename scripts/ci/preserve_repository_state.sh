@@ -81,7 +81,7 @@ snapshot_artifacts() {
 }
 
 scratch=""; created_outputs=(); temporary_outputs=(); published=false
-self_test_context=false; self_test_mutation_artifact=""
+self_test_context=false; self_test_mutation_artifact=""; self_test_mutation_symlink=""
 cleanup_run() {
   local output
   for output in "${temporary_outputs[@]:-}"; do rm -f -- "$output" 2>/dev/null || true; done
@@ -99,9 +99,19 @@ publish_exclusive() {
 }
 
 run_self_test_artifact_mutation() {
-  [[ -n "$self_test_mutation_artifact" ]] || return 0
+  [[ -z "$self_test_mutation_artifact" && -z "$self_test_mutation_symlink" ]] && return 0
   [[ "$self_test_context" == true ]] || die "test-only artifact mutation requested outside self-test"
-  printf '%s' '-mutated-after-snapshot' >> "$self_test_mutation_artifact" || die "test-only artifact mutation failed"
+  if [[ -n "$self_test_mutation_artifact" ]]; then
+    printf '%s' '-mutated-after-snapshot' >> "$self_test_mutation_artifact" || die "test-only artifact mutation failed"
+  fi
+  if [[ -n "$self_test_mutation_symlink" ]]; then
+    node - "$self_test_mutation_symlink" <<'NODE'
+const fs = require('node:fs');
+const linkPath = process.argv[2];
+fs.unlinkSync(linkPath);
+fs.symlinkSync(Buffer.from([0xff, 0xfd, 0x0a]), linkPath);
+NODE
+  fi
 }
 
 validate_output_targets() {
@@ -249,19 +259,96 @@ assert_artifact_mutation_rejected() {
   assert_empty_directory "$tmp" || { echo "self-test: production scratch leaked after artifact mutation" >&2; return 1; }
 }
 
+create_raw_symlink_fixtures() {
+  local repo="$1" expected="$2"
+  node - "$repo" "$expected" <<'NODE'
+const crypto = require('node:crypto');
+const fs = require('node:fs');
+const path = require('node:path');
+const [repo, expectedFile] = process.argv.slice(2);
+const fixtures = [
+  ['link-embedded-newline', Buffer.from([0x61, 0x0a, 0x62])],
+  ['link-trailing-newline', Buffer.from([0x74, 0x61, 0x72, 0x67, 0x65, 0x74, 0x0a])],
+  ['link-empty-looking', Buffer.from([0x0a])],
+  ['link-non-utf8', Buffer.from([0xff, 0xfe, 0x0a])],
+];
+const expected = {};
+for (const [name, target] of fixtures) {
+  const linkPath = path.join(repo, name);
+  fs.symlinkSync(target, linkPath);
+  const observed = fs.readlinkSync(linkPath, { encoding: 'buffer' });
+  if (!Buffer.isBuffer(observed) || !observed.equals(target)) {
+    throw new Error(`raw Buffer link-text unavailable for ${name}`);
+  }
+  expected[name] = crypto.createHash('sha256').update(target).digest('hex');
+}
+fs.writeFileSync(expectedFile, `${JSON.stringify(expected)}\n`);
+NODE
+}
+
+assert_raw_symlink_manifest() {
+  local manifest="$1" expected="$2"
+  node - "$manifest" "$expected" <<'NODE'
+const fs = require('node:fs');
+const [manifestFile, expectedFile] = process.argv.slice(2);
+const manifest = JSON.parse(fs.readFileSync(manifestFile, 'utf8'));
+const expected = JSON.parse(fs.readFileSync(expectedFile, 'utf8'));
+for (const [path, sha256] of Object.entries(expected)) {
+  const artifact = manifest.artifacts.find((entry) => entry.path === path);
+  if (!artifact || artifact.type !== 'symlink' || artifact.sha256 !== sha256) {
+    throw new Error(`raw symlink digest mismatch for ${path}`);
+  }
+}
+NODE
+}
+
+assert_symlink_mutation_rejected() {
+  local fixture_root="$1" output="$2" tmp="$3"
+  local repo="$fixture_root/symlink-mutation-repo" link="$fixture_root/symlink-mutation-repo/link" log="$fixture_root/symlink-mutation.log"
+  git init -q "$repo"
+  git -C "$repo" config user.email phase229@example.invalid
+  git -C "$repo" config user.name phase229
+  printf 'tracked\n' > "$repo/tracked"
+  git -C "$repo" add tracked
+  git -C "$repo" commit -qm fixture
+  node - "$link" <<'NODE'
+const fs = require('node:fs');
+fs.symlinkSync(Buffer.from([0xff, 0xfe, 0x0a]), process.argv[2]);
+NODE
+  if (
+    self_test_context=true
+    self_test_mutation_symlink="$link"
+    repo_root="$repo"
+    expected_repository="szTheory/accrue"
+    bundle_out="$output/symlink-mutation.bundle"
+    private_manifest_out="$output/symlink-mutation-private.json"
+    public_record_out="$output/symlink-mutation-public.json"
+    scratch=""; created_outputs=(); temporary_outputs=(); published=false
+    run
+  ) >"$log" 2>&1; then
+    echo "self-test: changed symlink link text unexpectedly passed" >&2
+    return 1
+  fi
+  ! grep -Fq 'preserve repository state: PASS' "$log" || { echo "self-test: rejected symlink mutation printed PASS" >&2; return 1; }
+  [[ ! -e "$output/symlink-mutation.bundle" && ! -e "$output/symlink-mutation-private.json" && ! -e "$output/symlink-mutation-public.json" ]] || { echo "self-test: rejected symlink mutation left invocation-owned output" >&2; return 1; }
+  assert_empty_directory "$tmp" || { echo "self-test: production scratch leaked after symlink mutation" >&2; return 1; }
+}
+
 self_test() {
   local scratch_created scratch
   scratch_created="$(mktemp -d "${TMPDIR:-/tmp}/phase229-self-test.XXXXXX")"
   scratch="$(cd "$scratch_created" && pwd -P)"
   cleanup_self_test() { rm -rf -- "$scratch" 2>/dev/null || true; }; trap cleanup_self_test EXIT
-  local repo="$scratch/repo" output="$scratch/output" tmp="$scratch/tmp" before
+  local repo="$scratch/repo" output="$scratch/output" tmp="$scratch/tmp" before symlink_expected="$scratch/symlink-expected.json"
   mkdir -p "$output" "$tmp"
   assert_artifact_mutation_rejected "$scratch" "$output" "$tmp"
+  assert_symlink_mutation_rejected "$scratch" "$output" "$tmp"
   git init -q "$repo"; git -C "$repo" config user.email phase229@example.invalid; git -C "$repo" config user.name phase229
   printf 'fixture\n' > "$repo/tracked"; git -C "$repo" add tracked; git -C "$repo" commit -qm fixture
   git -C "$repo" branch other; git -C "$repo" tag -a annotated -m tag; git -C "$repo" tag lightweight; git -C "$repo" notes add -m note; git -C "$repo" update-ref refs/remotes/origin/main HEAD; git -C "$repo" update-ref refs/custom/phase229 HEAD; git -C "$repo" update-ref 'refs/custom/phase229$(not-executed)' HEAD
   printf 'stash fixture\n' >> "$repo/tracked"; git -C "$repo" stash push -qm phase229-fixture
   printf regular > "$repo/release..notes"; mkdir "$repo/nested"; printf nested > "$repo/nested/value"; ln -s nowhere "$repo/link"
+  create_raw_symlink_fixtures "$repo" "$symlink_expected"
   before="$(git -C "$repo" for-each-ref --format='%(refname) %(objectname)' refs/accrue-preserve/phase-229)"
   expect_rejected "$repo" "$before" "$0" --repo-root "$repo" --expected-repository szTheory/accrue --bundle-out "$output/equal" --private-manifest-out "$output/equal"
   expect_rejected "$repo" "$before" "$0" --repo-root "$repo" --expected-repository szTheory/accrue --bundle-out "$output/alias" --private-manifest-out "$output/../output/alias"
@@ -276,6 +363,7 @@ self_test() {
   [[ ! -e "$output/injected.bundle" && ! -e "$output/injected.json" ]] || { echo "self-test: injected failure published output" >&2; return 1; }
   git -C "$repo" bundle verify "$output/capsule.bundle" >/dev/null
   [[ "$(stat -f '%Lp' "$output/private.json")" == 600 ]] || { echo "self-test: private manifest mode is not 0600" >&2; return 1; }
+  assert_raw_symlink_manifest "$output/private.json" "$symlink_expected"
   node - "$output/private.json" "$output/public.json" "$output/capsule.bundle" "$scratch/restore" <<'NODE'
 const fs = require('node:fs'); const { spawnSync } = require('node:child_process');
 const [manifestFile, publicFile, bundle, restore] = process.argv.slice(2), manifest = JSON.parse(fs.readFileSync(manifestFile, 'utf8')), publicRecord = JSON.parse(fs.readFileSync(publicFile, 'utf8'));
