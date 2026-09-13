@@ -4,6 +4,8 @@
 // until the fixture contract below is made green.
 import assert from "node:assert/strict";
 import fs from "node:fs";
+import os from "node:os";
+import path from "node:path";
 import {
   createRepositoryValidationContext,
   validateInventory,
@@ -27,6 +29,8 @@ export function verifyFixtures() {
   };
   const validated = validateInventory(inventory, context);
   assert.equal(renderRepositoryInventory(validated, context), renderRepositoryInventory(structuredClone(validated), context));
+  const permuted = structuredClone(validated); permuted.recovery.refs.reverse(); permuted.artifacts.entries.reverse(); permuted.refs.all.reverse();
+  assert.equal(renderRepositoryInventory(validated, context), renderRepositoryInventory(permuted, context), "permutations must render identical bytes");
   assert.throws(() => validateInventory({ ...inventory, actor: "forbidden" }, context), /forbidden field/);
   assert.throws(() => validateInventory({ ...inventory, artifacts: { ...inventory.artifacts, entries: [{ path: "../secret", type: "regular", sha256: "c".repeat(64) }] } }, context), /relative path/);
   assert.throws(() => validateInventory({ ...inventory, remotes: {} }, context), /remote/);
@@ -44,6 +48,14 @@ export function verifyFixtures() {
   const unavailable = normalizeRemoteFact({ repository: "szTheory/accrue", observed_at: "2026-09-13T00:00:00.000Z", request: "GET /repos/szTheory/accrue/git/ref/heads/main", available: false, reason: "network" }, context);
   assert.equal(unavailable.sha, undefined);
   assert.throws(() => normalizeRemoteFact({ ...unavailable, sha: "f".repeat(40) }, context), /no claimed remote value/);
+  assert.throws(() => renderRepositoryInventory({ ...inventory, planning: { ...inventory.planning, raw_payload: "forbidden" } }, context), /forbidden field/);
+  const scratch = fs.mkdtempSync(path.join(os.tmpdir(), "phase229-inventory-"));
+  try {
+    const source = path.join(scratch, "source.json"); const rendered = path.join(scratch, "rendered.md");
+    fs.writeFileSync(source, `${JSON.stringify(validated)}\n`); fs.writeFileSync(rendered, renderRepositoryInventory(validated, context));
+    assert.equal(fs.readFileSync(rendered, "utf8"), renderRepositoryInventory(JSON.parse(fs.readFileSync(source, "utf8")), context));
+    assert.equal(fs.existsSync(path.join(scratch, "invalid.md")), false, "invalid input must not render output");
+  } finally { fs.rmSync(scratch, { recursive: true, force: true }); }
 }
 
 function options(argv) {
