@@ -29,13 +29,13 @@ const sha256 = (value) => crypto.createHash("sha256").update(value).digest("hex"
 const encodedRef = (name) => `${PRESERVATION_PREFIX}${Buffer.from(name).toString("hex")}`;
 
 async function loadHandoffLibrary() {
-  const scratch = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), "phase229-handoff-library-")));
-  const source = fs.readFileSync(HANDOFF_INVARIANTS, "utf8");
-  const cliBoundary = source.lastIndexOf("\ntry {\n  const options = parseArgs(process.argv.slice(2));");
-  assert.ok(cliBoundary > 0, "handoff module must retain its explicit CLI boundary");
-  const modulePath = path.join(scratch, "handoff-library.mjs");
-  fs.writeFileSync(modulePath, `${source.slice(0, cliBoundary)}\n`);
-  return { library: await import(`${pathToFileURL(modulePath).href}?${crypto.randomUUID()}`), scratch };
+  const originalArgv = process.argv;
+  process.argv = [process.execPath, HANDOFF_INVARIANTS, "--self-test"];
+  try {
+    return await import(`${pathToFileURL(HANDOFF_INVARIANTS).href}?library=${crypto.randomUUID()}`);
+  } finally {
+    process.argv = originalArgv;
+  }
 }
 
 function git(repo, args) {
@@ -271,8 +271,7 @@ test("final handoff gate rejects capsule workspace and attestation invariant dri
 });
 
 test("final handoff capsule snapshots reject real filesystem identity drift", async () => {
-  const loaded = await loadHandoffLibrary();
-  const { assertExact, assertOnlyAttestation, snapshotTree } = loaded.library;
+  const { assertExact, assertOnlyAttestation, snapshotTree } = await loadHandoffLibrary();
   const scratch = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), "phase229-capsule-behavior-")));
   const makeCapsule = () => {
     const capsule = path.join(scratch, crypto.randomUUID());
@@ -316,13 +315,11 @@ test("final handoff capsule snapshots reject real filesystem identity drift", as
     assert.throws(() => assertOnlyAttestation(before, snapshotTree(capsule), "final.json"), /sole capsule delta/);
   } finally {
     fs.rmSync(scratch, { recursive: true, force: true });
-    fs.rmSync(loaded.scratch, { recursive: true, force: true });
   }
 });
 
 test("final handoff workspace snapshots reject real untracked ref and worktree drift", async () => {
-  const loaded = await loadHandoffLibrary();
-  const { assertExact, snapshotWorkspace } = loaded.library;
+  const { assertExact, snapshotWorkspace } = await loadHandoffLibrary();
   const scratch = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), "phase229-workspace-behavior-")));
   const repo = path.join(scratch, "repo");
   const linked = path.join(scratch, "linked");
@@ -358,7 +355,6 @@ test("final handoff workspace snapshots reject real untracked ref and worktree d
     assert.throws(() => assertExact("workspace", before, snapshotWorkspace(repo)), /workspace changed/);
   } finally {
     fs.rmSync(scratch, { recursive: true, force: true });
-    fs.rmSync(loaded.scratch, { recursive: true, force: true });
   }
 });
 
