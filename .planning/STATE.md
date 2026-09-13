@@ -5,16 +5,16 @@ milestone_name: Release Integration & Repository Hygiene
 current_phase: 229
 current_phase_name: Repository Truth & Recovery Safety
 status: executing
-stopped_at: Completed 229-10-PLAN.md
-last_updated: "2026-09-13T18:53:18.465Z"
+stopped_at: Completed 229-11-PLAN.md
+last_updated: "2026-09-13T19:08:31.128Z"
 last_activity: 2026-09-13
 last_activity_desc: Phase 229 execution started
-state_head: 5ac97be4f3c92b12f51e494f83fe461c35ab1053
+state_head: c975df81fe90334d08a2f99006fe964701c825e8
 progress:
   total_phases: 4
   completed_phases: 0
   total_plans: 14
-  completed_plans: 10
+  completed_plans: 11
   percent: 0
 ---
 
@@ -31,7 +31,7 @@ See: `.planning/PROJECT.md` (updated 2026-09-12)
 ## Current Position
 
 Phase: 229 (Repository Truth & Recovery Safety) — EXECUTING
-Plan: 2 of 14
+Plan: 12 of 14
 Status: Ready to execute
 Last activity: 2026-09-13 — Phase 229 execution started
 
@@ -67,6 +67,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 229 P07 | 20m | 2 tasks | 2 files |
 | Phase 229 P09 | 40min | 2 tasks | 3 files |
 | Phase 229 P10 | 10 min | 2 tasks | 1 files |
+| Phase 229 P11 | 10 min | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -98,6 +99,8 @@ Progress: [░░░░░░░░░░] 0%
 - [Phase 229]: Strict recovery permits only the active execution branch to advance after freezing. — Phase task commits must advance that branch while every frozen original object remains recoverable and every non-active ref remains exact.
 - [Phase 229]: Compare complete sorted NUL-delimited artifact triples immediately before PASS. — One exact map comparison detects add, remove, rename, type, and digest drift while new outputs remain cleanup-owned.
 - [Phase 229]: Hash symlink link text only from a non-dereferenced Buffer. — Raw fs.readlinkSync buffer bytes preserve invalid UTF-8 and newline evidence without target access or decode/re-encode loss.
+- [Phase 229]: Plural remote evidence is available only after an explicit short terminal page; full pages at page or item bounds fail as overflow. — This prevents silent truncation while keeping remote collection bounded.
+- [Phase 229]: Plural facts retain their complete ordered producing GET sequence while remote main keeps its singleton request. — Category-specific provenance must remain independently verifiable without widening the read-only API surface.
 
 ### Pending Todos
 
@@ -110,6 +113,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-09-13T18:53:18.448Z
-Stopped at: Completed 229-10-PLAN.md
+Last session: 2026-09-13T19:08:31.110Z
+Stopped at: Completed 229-11-PLAN.md
 Resume file: None
