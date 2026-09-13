@@ -12,13 +12,17 @@ import {
   collectRemoteFacts,
   collectRepositoryInventory,
   collectWorktrees,
+  createRepositoryValidationContext,
   readShipWindows
 } from "./collect_repository_inventory.mjs";
+import { renderRepositoryInventory } from "./render_repository_inventory.mjs";
 
 const REPOSITORY = "szTheory/accrue";
 const OBSERVED_AT = new Date("2026-09-13T00:00:00.000Z");
 const VERIFY_INVENTORY = fileURLToPath(new URL("./verify_repository_inventory.mjs", import.meta.url));
 const RENDER_INVENTORY = fileURLToPath(new URL("./render_repository_inventory.mjs", import.meta.url));
+const PRESERVE_REPOSITORY = fileURLToPath(new URL("./preserve_repository_state.sh", import.meta.url));
+const README_PATH = fileURLToPath(new URL("./README.md", import.meta.url));
 const PRESERVATION_PREFIX = "refs/accrue-preserve/phase-229/";
 const sha256 = (value) => crypto.createHash("sha256").update(value).digest("hex");
 const encodedRef = (name) => `${PRESERVATION_PREFIX}${Buffer.from(name).toString("hex")}`;
@@ -155,6 +159,96 @@ function runIsolatedNodeTest(file, namePattern) {
     env: { ...process.env, NODE_TEST_CONTEXT: undefined }
   });
 }
+
+function documentedStrictBlock() {
+  const readme = fs.readFileSync(README_PATH, "utf8");
+  const match = /<!-- phase229-strict-verification:start -->\n```bash\n([\s\S]*?)\n```\n<!-- phase229-strict-verification:end -->/.exec(readme);
+  assert.ok(match, "README must expose one extractable Phase 229 strict verification block");
+  return { block: match[1], readme };
+}
+
+function documentedStrictFixture() {
+  const scratch = fs.mkdtempSync(path.join(os.tmpdir(), "phase229-documented-strict-"));
+  const repo = path.join(scratch, "repo");
+  const capsule = path.join(scratch, "capsule");
+  const scripts = path.join(repo, "scripts/ci");
+  const evidence = path.join(repo, ".planning/phases/229-repository-truth-recovery-safety");
+  fs.mkdirSync(repo); fs.mkdirSync(capsule); fs.mkdirSync(scripts, { recursive: true }); fs.mkdirSync(evidence, { recursive: true });
+  git(repo, ["init", "-q", "-b", "main"]);
+  git(repo, ["config", "user.email", "phase229@example.invalid"]);
+  git(repo, ["config", "user.name", "phase229"]);
+  fs.writeFileSync(path.join(repo, ".planning/WINDOWS.md"), [
+    "---", "open_count: 0", "waived_count: 0", "fixed_count: 0", "total_count: 0", "---", "",
+    "| id | phase | kind | file | line | description | status | reason | recorded_at | resolved_at |",
+    "| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |", ""
+  ].join("\n"));
+  fs.writeFileSync(path.join(repo, "tracked"), "fixture\n");
+  git(repo, ["add", ".planning/WINDOWS.md", "tracked"]); git(repo, ["commit", "-qm", "fixture"]);
+  const object = git(repo, ["rev-parse", "HEAD"]);
+  git(repo, ["update-ref", "refs/remotes/origin/main", object]); git(repo, ["tag", "v1.61", object]);
+  fs.writeFileSync(path.join(repo, "artifact.txt"), "untracked recovery fixture\n");
+  const bundle = path.join(capsule, "recovery.bundle");
+  const manifestPath = path.join(capsule, "manifest.json");
+  const preserved = spawnSync("bash", [PRESERVE_REPOSITORY, "--repo-root", repo, "--expected-repository", REPOSITORY, "--bundle-out", bundle, "--private-manifest-out", manifestPath], { encoding: "utf8", shell: false, timeout: 30_000 });
+  assert.equal(preserved.status, 0, preserved.stderr);
+  const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
+  const manifestDigest = sha256(fs.readFileSync(manifestPath));
+  for (const source of [VERIFY_INVENTORY, RENDER_INVENTORY, fileURLToPath(new URL("./collect_repository_inventory.mjs", import.meta.url))]) fs.copyFileSync(source, path.join(scripts, path.basename(source)));
+  const rows = git(repo, ["for-each-ref", "--format=%(refname) %(objectname)"]).split("\n").filter(Boolean).map((line) => {
+    const separator = line.indexOf(" "); const name = line.slice(0, separator);
+    return { name, object: line.slice(separator + 1), role: name === "refs/heads/main" ? "local_main" : name === "refs/remotes/origin/main" ? "cached_origin_main" : name === "refs/tags/v1.61" ? "v161_tag" : name.startsWith(PRESERVATION_PREFIX) ? "phase229_preservation" : "other" };
+  }).sort((left, right) => left.name.localeCompare(right.name));
+  const inventory = {
+    schema_version: 2, repository: REPOSITORY, mode: "local_only",
+    recovery: { verified: true, manifest_sha256: manifestDigest, bundle_sha256: manifest.bundle_sha256, refs: manifest.refs.map(({ original_ref, object: refObject, encoded_ref, bundle_member }) => ({ original_ref, object: refObject, encoded_ref, bundle_member })).sort((left, right) => left.original_ref.localeCompare(right.original_ref)) },
+    artifacts: {
+      empty_directory_policy: manifest.empty_directory_policy,
+      entries: manifest.artifacts.map(({ path: artifactPath, type, sha256: digest }) => ({ path: artifactPath, type, sha256: digest })).sort((left, right) => left.path.localeCompare(right.path)),
+      authorized_workflow_metadata: [
+        { path: ".planning/milestone.lock", type: "regular", before_sha256: "1".repeat(64), after_sha256: "2".repeat(64), state: "workflow_metadata_refreshed" },
+        { path: ".planning/state.json", type: "regular", before_sha256: "3".repeat(64), after_sha256: "4".repeat(64), state: "workflow_metadata_refreshed" }
+      ]
+    },
+    refs: { local_main: object, cached_origin_main: object, milestone_branch: object, v161_tag: object, all: rows },
+    remotes: {
+      remote_main: { repository: REPOSITORY, observed_at: OBSERVED_AT.toISOString(), request: `GET /repos/${REPOSITORY}/git/ref/heads/main`, available: false, state: "unavailable", reason: "network" },
+      pull_requests: { repository: REPOSITORY, observed_at: OBSERVED_AT.toISOString(), requests: [`GET /repos/${REPOSITORY}/pulls?state=open&per_page=100&page=1`], available: false, state: "unavailable", reason: "network" },
+      release_branches: { repository: REPOSITORY, observed_at: OBSERVED_AT.toISOString(), requests: [`GET /repos/${REPOSITORY}/git/matching-refs/heads/release/?per_page=100&page=1`], available: false, state: "unavailable", reason: "network" },
+      actions: { repository: REPOSITORY, observed_at: OBSERVED_AT.toISOString(), requests: [`GET /repos/${REPOSITORY}/actions/runs?per_page=100&page=1`], available: false, state: "unavailable", reason: "network" }
+    },
+    planning: { ship_windows: readShipWindows({ root: repo }), milestone: "absent", state: "absent" },
+    worktrees: collectWorktrees({ repo })
+  };
+  const records = path.join(evidence, "229-REPOSITORY-INVENTORY.json");
+  const rendered = path.join(evidence, "229-REPOSITORY-INVENTORY.md");
+  fs.writeFileSync(records, `${JSON.stringify(inventory, null, 2)}\n`);
+  fs.writeFileSync(rendered, renderRepositoryInventory(inventory, createRepositoryValidationContext({ expectedRepository: REPOSITORY })));
+  return { scratch, repo, bundle, manifestPath, manifestDigest };
+}
+
+function runDocumentedStrict(block, fixture, overrides = {}) {
+  return spawnSync("bash", ["-eu", "-c", block], { cwd: fixture.repo, encoding: "utf8", shell: false, timeout: 30_000, env: { ...process.env, NODE_TEST_CONTEXT: "", PHASE229_PRIVATE_MANIFEST: fixture.manifestPath, PHASE229_MANIFEST_SHA256: fixture.manifestDigest, PHASE229_RECOVERY_BUNDLE: fixture.bundle, ...overrides } });
+}
+
+test("WR-01 documented strict command executes generated private authority and rejects invalid inputs", () => {
+  const { block, readme } = documentedStrictBlock();
+  assert.match(block, /test -n "\$\{PHASE229_PRIVATE_MANIFEST:-\}"/);
+  assert.match(block, /--recovery-manifest "\$PHASE229_PRIVATE_MANIFEST"[\s\S]*--expected-manifest-sha256 "\$PHASE229_MANIFEST_SHA256"[\s\S]*--recovery-bundle "\$PHASE229_RECOVERY_BUNDLE"[\s\S]*--require-recovery/);
+  assert.equal(readme.includes("accrue-phase229-recovery"), false, "README must not expose a private capsule location");
+  const fixture = documentedStrictFixture();
+  try {
+    const valid = runDocumentedStrict(block, fixture); assert.equal(valid.status, 0, `${valid.stderr}\n${valid.stdout}`);
+    for (const name of ["PHASE229_PRIVATE_MANIFEST", "PHASE229_MANIFEST_SHA256", "PHASE229_RECOVERY_BUNDLE"]) {
+      const missing = { ...process.env, NODE_TEST_CONTEXT: "", PHASE229_PRIVATE_MANIFEST: fixture.manifestPath, PHASE229_MANIFEST_SHA256: fixture.manifestDigest, PHASE229_RECOVERY_BUNDLE: fixture.bundle }; delete missing[name];
+      assert.notEqual(spawnSync("bash", ["-eu", "-c", block], { cwd: fixture.repo, encoding: "utf8", shell: false, env: missing }).status, 0, `${name} missing must fail`);
+      assert.notEqual(runDocumentedStrict(block, fixture, { [name]: "" }).status, 0, `${name} empty must fail`);
+    }
+    assert.notEqual(runDocumentedStrict(block, fixture, { PHASE229_MANIFEST_SHA256: "0".repeat(64) }).status, 0, "wrong digest must fail");
+    assert.notEqual(runDocumentedStrict(block, fixture, { PHASE229_RECOVERY_BUNDLE: path.join(fixture.scratch, "wrong.bundle") }).status, 0, "wrong bundle must fail");
+    fs.chmodSync(fixture.manifestPath, 0o644);
+    assert.notEqual(runDocumentedStrict(block, fixture).status, 0, "unsafe manifest permissions must fail");
+  } finally { fs.chmodSync(fixture.manifestPath, 0o600); fs.rmSync(fixture.scratch, { recursive: true, force: true }); }
+});
 
 test("CR-01 preservation rejects post-snapshot artifact mutation before PASS", () => {
   const script = fileURLToPath(new URL("./preserve_repository_state.sh", import.meta.url));
