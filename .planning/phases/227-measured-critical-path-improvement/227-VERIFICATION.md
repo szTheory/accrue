@@ -1,7 +1,7 @@
 ---
 phase: 227-measured-critical-path-improvement
-verified: 2026-09-12T17:18:07Z
-verified_head: e1b3c204893fdf7e8917684a9a2b9fb6a4b92b5e
+verified: 2026-09-13T02:22:49Z
+verified_head: e74290871b12a5e772f9985731695f7ea0804b75
 status: passed
 score: 11/11 must-haves verified
 covered_files:
@@ -33,8 +33,10 @@ covered_files:
   - .planning/phases/227-measured-critical-path-improvement/227-RESEARCH.md
   - .planning/phases/227-measured-critical-path-improvement/227-REVIEW-FIX.md
   - .planning/phases/227-measured-critical-path-improvement/227-REVIEW.md
+  - .planning/phases/227-measured-critical-path-improvement/227-UAT.md
   - .planning/phases/227-measured-critical-path-improvement/227-VALIDATION.md
   - .planning/phases/227-measured-critical-path-improvement/227-ci-contract.json
+  - .planning/phases/227-measured-critical-path-improvement/COVERAGE.md
   - .planning/phases/227-measured-critical-path-improvement/fixtures/ci-critical-path-cases.json
   - .planning/phases/227-measured-critical-path-improvement/fixtures/ci-workflow-restored-v2.yml
   - accrue/test/accrue/backend_automation_contract_test.exs
@@ -49,7 +51,7 @@ covered_files:
   - scripts/ci/verify_phase225_required_lane_evidence.sh
   - scripts/ci/verify_provider_proof.mjs
   - scripts/ci/verify_stripe_webhook_boot_evidence.mjs
-covered_digest: "v1:sha256:ddbd69a06813b93cd4a5160ef2b02010d4575ec4c2b62178026bb414754367aa"
+covered_digest: "v1:sha256:4d7be2a19f65619a0e2a93a6454ef98f16cba816d577e4916df62b843c5f669a"
 behavior_unverified: 0
 overrides_applied: 0
 unverified_prohibition_count: 0
@@ -105,9 +107,21 @@ deferred:
 # Phase 227: Measured Critical-Path Improvement Verification Report
 
 **Phase Goal:** Maintainers receive one demonstrably faster CI critical path while every required release, host, browser, and provider proof remains equally identifiable and recoverable.
-**Verified:** 2026-09-12T17:18:07Z
+**Verified:** 2026-09-13T02:22:49Z
 **Status:** passed
 **Re-verification:** Yes — the original 2026-08-28 gaps report is retained below as history.
+
+## Current-tree re-verification — 2026-09-13
+
+The canonical Phase 227 seal suite passed again at head
+`e74290871b12a5e772f9985731695f7ea0804b75`. Evidence included 11/11 strict
+verifier tests, immutable fixture and exact-SHA preflight checks, read-only
+live reconciliation of the retained exact-three kept cohort, byte-identical
+report rendering, candidate workflow topology, frozen baseline, provider and
+setup controls, formatting, and 11/11 focused application tests. The API
+coverage gate also passed with the explicit declaration that this phase adds
+no new external integration boundary. No dispatch, rerun, replacement, or
+remote-ref mutation occurred during this re-verification.
 
 ## Dated Re-verification — 2026-09-12
 

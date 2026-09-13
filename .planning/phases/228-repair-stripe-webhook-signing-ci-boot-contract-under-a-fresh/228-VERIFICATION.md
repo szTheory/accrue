@@ -1,6 +1,7 @@
 ---
 phase: 228-repair-stripe-webhook-signing-ci-boot-contract-under-a-fresh
-verified: 2026-09-11T17:30:41Z
+verified: 2026-09-13T02:22:49Z
+verified_head: e74290871b12a5e772f9985731695f7ea0804b75
 status: passed
 score: 11/11 must-haves verified
 covered_files:
@@ -26,7 +27,7 @@ covered_files:
   - scripts/ci/verify_executable_uat_contract.mjs
   - scripts/ci/verify_provider_proof.mjs
   - scripts/ci/verify_stripe_webhook_boot_evidence.mjs
-covered_digest: "v1:sha256:515304406a6006c84b4f8abf4771b3c31f75656ebade50239f4a905e2808c2d3"
+covered_digest: "v1:sha256:0bb01d80e683a6b166fdec7bd83b44839e658db137dd5bdefeb114ae317d0c88"
 behavior_unverified: 0
 overrides_applied: 0
 ---
@@ -34,9 +35,19 @@ overrides_applied: 0
 # Phase 228: Repair Stripe Webhook-Signing CI Boot Contract Under a Fresh Evidence Budget Verification Report
 
 **Phase Goal:** Repair the runtime-owned Stripe webhook signing-secret CI boot contract, prove it deterministically without network access, and record one freshly authorized provider attempt as sanitized evidence.
-**Verified:** 2026-09-11T17:30:41Z
+**Verified:** 2026-09-13T02:22:49Z
 **Status:** passed
-**Re-verification:** No — initial verification
+**Re-verification:** Yes — current-tree seal suite and provider evidence refreshed
+
+## Current-tree re-verification — 2026-09-13
+
+The Phase 228 fixture, bootstrap, automation, executable-UAT, runtime boot, and
+read-only live-binding/terminal checks all passed at head
+`e74290871b12a5e772f9985731695f7ea0804b75`. The focused Elixir suite passed
+46/46 with warnings treated as errors. In addition to the phase's immutable
+exact-once boot-repair record, the recurring provider lane later proved the
+current Stripe contracts in run `34731755425` (2 selected, 2 passed, 0
+skipped) on code SHA `0e5378faabbe98dcded89e88fb2851934ba26916`.
 
 ## Goal Achievement
 
