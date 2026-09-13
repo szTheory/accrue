@@ -57,6 +57,14 @@ function assertSameMap(authorityName, authority, candidateName, candidate) {
   if (missing.length || extra.length || changed.length) fail(`${candidateName} recovery set differs from ${authorityName}: missing=[${missing.join(", ")}] extra=[${extra.join(", ")}] changed=[${changed.join(", ")}]`);
 }
 
+function assertSameMultiset(authorityName, authority, candidateName, candidate, keyOf) {
+  const expected = authority.map(keyOf).sort();
+  const actual = candidate.map(keyOf).sort();
+  if (expected.length !== actual.length || expected.some((value, index) => value !== actual[index])) {
+    fail(`${candidateName} differs from ${authorityName}: expected=[${expected.join(", ")}] actual=[${actual.join(", ")}]`);
+  }
+}
+
 function assertCanonicalRefContinuity(authority, candidate, activeRef, activeObject) {
   const missing = [...authority.keys()].filter((key) => !candidate.has(key)).sort();
   const extra = [...candidate.keys()].filter((key) => !authority.has(key)).sort();
@@ -136,11 +144,16 @@ export function assertStrictRecovery(inventory, context, { repositoryRoot = proc
   if (checked.recovery.manifest_sha256 !== expectedManifestSha256) fail("committed recovery manifest digest differs from the independent expected anchor");
   if (checked.recovery.bundle_sha256 !== manifest.value.bundle_sha256) fail("committed recovery bundle digest differs from the private manifest");
   if (requireAllRefs) {
+    const canonicalPreservation = exactMap(checked.refs.all.filter((row) => row.name.startsWith(PRESERVATION_PREFIX)), "canonical preservation refs", (row) => row.name, (row) => row.object);
     const canonical = exactMap(checked.refs.all.filter((row) => !row.name.startsWith(PRESERVATION_PREFIX)), "canonical non-preservation refs", (row) => row.name, (row) => row.object);
     const symbolic = spawnSync("git", ["-C", repositoryRoot, "symbolic-ref", "-q", "HEAD"], { encoding: "utf8", shell: false, timeout: 15_000, maxBuffer: 1_000_000 });
-    if (symbolic.error || ![0, 1].includes(symbolic.status)) fail("git symbolic-ref failed while verifying canonical refs");
-    const activeRef = symbolic.status === 0 ? symbolic.stdout.trim() : null;
-    assertCanonicalRefContinuity(manifest.refs, canonical, activeRef, checked.refs.milestone_branch);
+    if (symbolic.error || symbolic.status !== 0 || !symbolic.stdout.trim()) fail("strict recovery requires a live symbolic active ref");
+    const activeRef = symbolic.stdout.trim();
+    const activeObject = git(repositoryRoot, ["rev-parse", `${activeRef}^{object}`]);
+    git(repositoryRoot, ["cat-file", "-e", `${activeObject}^{object}`]);
+    if (checked.refs.milestone_branch !== activeObject) fail("recorded milestone branch object differs from the live active object");
+    assertSameMap("private manifest encoded refs", expectedEncoded, "canonical preservation refs", canonicalPreservation);
+    assertCanonicalRefContinuity(manifest.refs, canonical, activeRef, activeObject);
   }
   return true;
 }
@@ -148,7 +161,8 @@ export function assertStrictRecovery(inventory, context, { repositoryRoot = proc
 function assertCommandProvenance(inventory, context) {
   for (const key of REMOTE_KEYS) {
     const fact = inventory.remotes[key];
-    if (!fact || fact.repository !== context.expectedRepository || typeof fact.observed_at !== "string" || !new RegExp(`^GET /repos/${context.expectedRepository.replace("/", "\\/")}/`).test(fact.request || "")) fail(`command provenance is required for ${key}`);
+    const requests = key === "remote_main" ? [fact?.request] : fact?.requests;
+    if (!fact || fact.repository !== context.expectedRepository || typeof fact.observed_at !== "string" || !Array.isArray(requests) || requests.length === 0 || requests.some((request) => !new RegExp(`^GET /repos/${context.expectedRepository.replace("/", "\\/")}/`).test(request || ""))) fail(`command provenance is required for ${key}`);
     normalizeRemoteFact(fact, context, { plural: key !== "remote_main" });
   }
   return true;
@@ -170,11 +184,66 @@ function assertTypedArtifacts(inventory) {
   return true;
 }
 
-function assertCompleteCategories(inventory, context) {
+function directWorktrees(repositoryRoot) {
+  const listed = spawnSync("git", ["-C", repositoryRoot, "worktree", "list", "--porcelain"], { encoding: "utf8", shell: false, timeout: 15_000, maxBuffer: 512 * 1024 });
+  if (listed.error || listed.status !== 0) fail("git worktree list failed while verifying complete categories");
+  const rows = []; let current = null;
+  const finish = () => {
+    if (!current) return;
+    if (!current.path || !SHA.test(current.sha || "") || (!current.branch && !current.detached)) fail("git worktree authority contains an incomplete record");
+    const status = spawnSync("git", ["-C", current.path, "status", "--porcelain"], { encoding: "utf8", shell: false, timeout: 15_000, maxBuffer: 512 * 1024 });
+    if (status.error || status.status !== 0) fail("git worktree status failed while verifying complete categories");
+    rows.push({ branch: current.detached ? "detached" : current.branch.replace(/^refs\/heads\//, ""), sha: current.sha, dirty: Boolean(status.stdout) });
+    current = null;
+  };
+  for (const line of listed.stdout.split("\n")) {
+    if (!line) { finish(); continue; }
+    if (line.startsWith("worktree ")) { finish(); current = { path: line.slice(9) }; }
+    else if (!current) fail("git worktree authority record has no header");
+    else if (line.startsWith("HEAD ")) current.sha = line.slice(5);
+    else if (line.startsWith("branch ")) current.branch = line.slice(7);
+    else if (line === "detached") current.detached = true;
+    else if (line === "bare") fail("bare worktrees cannot be reconciled as inventory worktrees");
+    else fail("git worktree authority contains an unsupported record");
+  }
+  finish();
+  if (!rows.length) fail("git worktree authority contains no worktrees");
+  return rows;
+}
+
+function directShipWindows(repositoryRoot) {
+  const filename = path.join(repositoryRoot, ".planning/WINDOWS.md");
+  const contents = fs.readFileSync(filename, "utf8");
+  if (Buffer.byteLength(contents, "utf8") > 512 * 1024) fail("ship-window authority exceeds its bounded input size");
+  const count = (name) => {
+    const match = new RegExp(`^${name}:\\s*(\\d+)\\s*$`, "m").exec(contents);
+    if (!match) fail(`ship-window authority is missing ${name}`);
+    return Number(match[1]);
+  };
+  const header = "| id | phase | kind | file | line | description | status | reason | recorded_at | resolved_at |";
+  const start = contents.indexOf(header);
+  if (start < 0) fail("ship-window authority is malformed");
+  const rows = [];
+  for (const line of contents.slice(start + header.length).trimStart().split("\n")) {
+    if (!line.startsWith("|")) break;
+    const columns = line.split("|").slice(1, -1).map((item) => item.trim());
+    if (columns.every((item) => /^-+$/.test(item))) continue;
+    if (columns.length !== 10 || !/^\d+$/.test(columns[0]) || !["open", "waived", "fixed"].includes(columns[6])) fail("ship-window authority contains an invalid row");
+    rows.push({ id: Number(columns[0]), status: columns[6] });
+  }
+  const ids = new Set();
+  for (const row of rows) { if (ids.has(row.id)) fail("ship-window authority contains duplicate IDs"); ids.add(row.id); }
+  if (count("total_count") !== rows.length || count("open_count") !== rows.filter((row) => row.status === "open").length || count("waived_count") !== rows.filter((row) => row.status === "waived").length || count("fixed_count") !== rows.filter((row) => row.status === "fixed").length) fail("ship-window authority counts are inconsistent");
+  return rows.map((row) => `${row.id}:${row.status}`);
+}
+
+function assertCompleteCategories(inventory, context, { repositoryRoot = process.cwd() } = {}) {
   const all = new Map(inventory.refs.all.map((row) => [row.name, row.object]));
   for (const [role, ref] of Object.entries(ROLE_REFS)) if (all.get(ref) !== inventory.refs[role]) fail(`complete categories require ${role} to match ${ref}`);
   if (![...all.values()].includes(inventory.refs.milestone_branch)) fail("complete categories require the milestone branch object in refs.all");
   if (!Array.isArray(inventory.worktrees) || inventory.worktrees.length === 0 || !inventory.planning || !Array.isArray(inventory.planning.ship_windows)) fail("complete local categories are required");
+  assertSameMultiset("direct git worktree authority", directWorktrees(repositoryRoot), "canonical worktrees", inventory.worktrees, (row) => `${row.branch}\0${row.sha}\0${row.dirty ? "1" : "0"}`);
+  assertSameMultiset("bounded .planning/WINDOWS.md authority", directShipWindows(repositoryRoot), "canonical ship windows", inventory.planning.ship_windows, String);
   for (const key of REMOTE_KEYS) normalizeRemoteFact(inventory.remotes[key], context, { plural: key !== "remote_main" });
   return true;
 }
@@ -229,7 +298,7 @@ function applyStrictFlags(inventory, context, parsed) {
   if (parsed.flags.has("require-recovery") || parsed.flags.has("require-all-ref-recovery")) assertStrictRecovery(inventory, context, recoveryOptions);
   if (parsed.flags.has("require-typed-artifacts")) assertTypedArtifacts(inventory);
   if (parsed.flags.has("require-local-only") && inventory.mode !== "local_only") fail("local-only inventory is required");
-  if (parsed.flags.has("require-complete-categories")) assertCompleteCategories(inventory, context);
+  if (parsed.flags.has("require-complete-categories")) assertCompleteCategories(inventory, context, { repositoryRoot: recoveryOptions.repositoryRoot });
   if (parsed.flags.has("require-edge-cases")) assertEdgeCases(inventory);
   if (parsed.flags.has("require-command-provenance")) assertCommandProvenance(inventory, context);
   if (parsed.flags.has("require-workflow-metadata-authorization")) assertWorkflowMetadataAuthorization(inventory);
@@ -260,8 +329,15 @@ function recoveryFixture({ single = false } = {}) {
   fs.mkdirSync(path.join(repo, ".planning"));
   fs.writeFileSync(path.join(repo, ".planning/milestone.lock"), "before-lock\n");
   fs.writeFileSync(path.join(repo, ".planning/state.json"), "before-state\n");
+  fs.writeFileSync(path.join(repo, ".planning/WINDOWS.md"), [
+    "---", "open_count: 1", "waived_count: 0", "fixed_count: 1", "total_count: 2", "---", "",
+    "| id | phase | kind | file | line | description | status | reason | recorded_at | resolved_at |",
+    "| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |",
+    "| 1 | 229 | deviation | fixture | | first | open | | now | |",
+    "| 2 | 229 | deviation | fixture | | second | fixed | | now | |", ""
+  ].join("\n"));
   fs.writeFileSync(path.join(repo, "tracked"), "fixture\n");
-  git(repo, ["add", "tracked"]);
+  git(repo, ["add", "tracked", ".planning/WINDOWS.md"]);
   git(repo, ["commit", "-qm", "fixture"]);
   git(repo, ["branch", "-M", "main"]);
   const object = git(repo, ["rev-parse", "HEAD"]);
@@ -330,12 +406,12 @@ function strictInventory(fixture, { mode = "local_only" } = {}) {
     refs: { local_main: fixture.object, cached_origin_main: fixture.object, milestone_branch: fixture.object, v161_tag: fixture.object, all: [...original, ...preservation] },
     remotes: {
       remote_main: { repository: "szTheory/accrue", observed_at: "2026-09-13T00:00:00.000Z", request: "GET /repos/szTheory/accrue/git/ref/heads/main", available: true, state: "observed", sha: sha("a") },
-      pull_requests: { repository: "szTheory/accrue", observed_at: "2026-09-13T00:00:00.000Z", request: "GET /repos/szTheory/accrue/pulls", available: true, state: "observed", shas: [] },
-      release_branches: { repository: "szTheory/accrue", observed_at: "2026-09-13T00:00:00.000Z", request: "GET /repos/szTheory/accrue/git/matching-refs", available: true, state: "observed", shas: [sha("b"), sha("c")] },
-      actions: { repository: "szTheory/accrue", observed_at: "2026-09-13T00:00:00.000Z", request: "GET /repos/szTheory/accrue/actions/runs", available: false, state: "unavailable", reason: "network" }
+      pull_requests: { repository: "szTheory/accrue", observed_at: "2026-09-13T00:00:00.000Z", requests: ["GET /repos/szTheory/accrue/pulls?state=open&per_page=100&page=1"], available: true, state: "observed", shas: [] },
+      release_branches: { repository: "szTheory/accrue", observed_at: "2026-09-13T00:00:00.000Z", requests: ["GET /repos/szTheory/accrue/git/matching-refs/heads/release/?per_page=100&page=1"], available: true, state: "observed", shas: [sha("b"), sha("c")] },
+      actions: { repository: "szTheory/accrue", observed_at: "2026-09-13T00:00:00.000Z", requests: ["GET /repos/szTheory/accrue/actions/runs?per_page=100&page=1"], available: false, state: "unavailable", reason: "network" }
     },
     planning: { ship_windows: ["1:open", "2:fixed"], milestone: "present", state: "present" },
-    worktrees: [{ branch: "main", sha: fixture.object, dirty: false }]
+    worktrees: [{ branch: "main", sha: fixture.object, dirty: true }]
   }, context);
 }
 
@@ -417,14 +493,14 @@ function verifyStrictFlagControls(context) {
     assert.equal(assertTypedArtifacts(inventory), true);
     const unordered = structuredClone(inventory); unordered.artifacts.entries.reverse();
     assert.throws(() => assertTypedArtifacts(unordered), /canonical deterministic ordering/);
-    assert.equal(assertCompleteCategories(inventory, context), true);
+    assert.equal(assertCompleteCategories(inventory, context, { repositoryRoot: fixture.repo }), true);
     const incomplete = structuredClone(inventory); incomplete.refs.local_main = "f".repeat(40);
     assert.throws(() => assertCompleteCategories(incomplete, context), /local_main/);
     assert.equal(assertEdgeCases(inventory), true);
     const edge = structuredClone(inventory); edge.artifacts.empty_directory_policy = "implicit";
     assert.throws(() => assertEdgeCases(edge), /empty-directory policy/);
     assert.equal(assertCommandProvenance(inventory, context), true);
-    const provenance = structuredClone(inventory); provenance.remotes.actions.request = "GET /repos/other/repository/actions/runs";
+    const provenance = structuredClone(inventory); provenance.remotes.actions.requests = ["GET /repos/other/repository/actions/runs?per_page=100&page=1"];
     assert.throws(() => assertCommandProvenance(provenance, context), /provenance/);
     const rendered = renderRepositoryInventory(inventory, context);
     assert.equal(assertPrivacyControls(inventory, rendered), true);
