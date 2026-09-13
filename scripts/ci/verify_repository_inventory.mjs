@@ -8,6 +8,7 @@ import os from "node:os";
 import path from "node:path";
 import crypto from "node:crypto";
 import { spawnSync } from "node:child_process";
+import test from "node:test";
 import {
   createRepositoryValidationContext,
   validateInventory,
@@ -85,7 +86,22 @@ export function verifyFixtures() {
     const source = path.join(scratch, "source.json"); const rendered = path.join(scratch, "rendered.md");
     fs.writeFileSync(source, `${JSON.stringify(validated)}\n`); fs.writeFileSync(rendered, renderRepositoryInventory(validated, context));
     assert.equal(fs.readFileSync(rendered, "utf8"), renderRepositoryInventory(JSON.parse(fs.readFileSync(source, "utf8")), context));
-  assert.equal(fs.existsSync(path.join(scratch, "invalid.md")), false, "invalid input must not render output");
+    assert.equal(fs.existsSync(path.join(scratch, "invalid.md")), false, "invalid input must not render output");
+
+    const incompleteRecovery = structuredClone(validated);
+    incompleteRecovery.refs.all.push({ name: "refs/heads/secondary", object: "c".repeat(40), role: "other" });
+    const incompleteSource = path.join(scratch, "incomplete-recovery.json");
+    const incompleteRendered = path.join(scratch, "incomplete-recovery.md");
+    fs.writeFileSync(incompleteSource, `${JSON.stringify(incompleteRecovery)}\n`);
+    fs.writeFileSync(incompleteRendered, renderRepositoryInventory(incompleteRecovery, context));
+    const reductionProbe = spawnSync(process.execPath, [
+      new URL(import.meta.url).pathname,
+      "--records", incompleteSource,
+      "--rendered", incompleteRendered,
+      "--expected-repository", "szTheory/accrue",
+      "--require-all-ref-recovery"
+    ], { encoding: "utf8", env: { ...process.env, NODE_TEST_CONTEXT: "" } });
+    assert.notEqual(reductionProbe.status, 0, "all-ref verification must reject one recovery mapping when two original refs exist");
   } finally { fs.rmSync(scratch, { recursive: true, force: true }); }
 
   const barrier = recoveryFixture(); let adapterCalls = 0;
@@ -150,4 +166,8 @@ async function main() {
   assert.equal(fs.readFileSync(rendered, "utf8"), renderRepositoryInventory(inventory, context), "rendered Markdown must be byte-reproducible");
   console.log("repository inventory verification: PASS");
 }
-main().catch((error) => { console.error(`repository inventory fixtures: FAIL: ${error.message}`); process.exitCode = 1; });
+if (process.env.NODE_TEST_CONTEXT) {
+  test("strict all-ref recovery rejects incomplete recovery sets", () => verifyFixtures());
+} else {
+  main().catch((error) => { console.error(`repository inventory fixtures: FAIL: ${error.message}`); process.exitCode = 1; });
+}
