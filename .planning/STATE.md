@@ -4,17 +4,17 @@ milestone: v1.62
 milestone_name: Release Integration & Repository Hygiene
 current_phase: 229
 current_phase_name: Repository Truth & Recovery Safety
-status: ready_for_verification
-stopped_at: Completed 229-14-PLAN.md
-last_updated: "2026-09-13T19:56:25Z"
+status: executing
+stopped_at: Completed 229-15-PLAN.md
+last_updated: "2026-09-13T21:07:28Z"
 last_activity: 2026-09-13
 last_activity_desc: Phase 229 execution started
-state_head: 8ee1cf1533328ad5b0e7b513f68b290afd8f26d7
+state_head: 9ce20002331043278a56e79df644a7b24566cc96
 progress:
   total_phases: 4
   completed_phases: 0
-  total_plans: 14
-  completed_plans: 14
+  total_plans: 20
+  completed_plans: 15
   percent: 0
 ---
 
@@ -30,10 +30,10 @@ See: `.planning/PROJECT.md` (updated 2026-09-12)
 
 ## Current Position
 
-Phase: 229 (Repository Truth & Recovery Safety) — COMPLETE
-Plan: 14 of 14
-Status: Phase complete — ready for verification
-Last activity: 2026-09-13 — Completed Phase 229 Plan 14
+Phase: 229 (Repository Truth & Recovery Safety) — IN PROGRESS
+Plan: 15 of 20
+Status: Gap closure execution in progress
+Last activity: 2026-09-13 — Completed Phase 229 Plan 15
 
 Progress: [░░░░░░░░░░] 0%
 
@@ -71,6 +71,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 229 P12 | 7min | 2 tasks | 1 files |
 | Phase 229 P13 | 11min | 2 tasks | 2 files |
 | Phase 229 P14 | 15min | 2 tasks | 5 files |
+| Phase 229 P15 | 11min | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -113,6 +114,9 @@ Progress: [░░░░░░░░░░] 0%
 - [Phase 229]: The final handoff accepts only a fixed allowlisted child chain and never caller-supplied commands.
 - [Phase 229]: Protected capsule, untracked-path, ref/tag, and worktree identities are encoded from raw bytes and exact-compared around the full final chain.
 - [Phase 229]: The sole permitted external delta is the pre-named absent attestation created exclusively after pre-attestation invariant checks pass.
+- [Phase 229]: Remote availability is a literal boolean discriminator; observed SHA values and unavailable reasons are mutually exclusive exact schemas.
+- [Phase 229]: Plural remote provenance renders every producing request in order with one stable category-independent separator.
+- [Phase 229]: Captured-at authority binds one active full symbolic ref and commit to the sanitized primary-worktree identity and captured active row.
 
 ### Pending Todos
 
@@ -125,6 +129,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-09-13T19:56:25Z
-Stopped at: Completed 229-14-PLAN.md
+Last session: 2026-09-13T21:07:28Z
+Stopped at: Completed 229-15-PLAN.md
 Resume file: None
