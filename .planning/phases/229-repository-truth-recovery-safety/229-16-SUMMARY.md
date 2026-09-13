@@ -111,8 +111,8 @@ Each task followed an intentional RED then GREEN TDD cycle:
 
 ## Verification
 
-- `bash -n scripts/ci/preserve_repository_state.sh` - PASS.
-- First `bash scripts/ci/preserve_repository_state.sh --self-test` - PASS.
+- Bash syntax validation for the preservation script - PASS.
+- First full preservation self-test - PASS.
 - Second consecutive self-test - PASS.
 - Original private manifest SHA-256 remained `52f3ea27d5551fba55d3666b44911104a20386b6ce1610eb8e194aab395817b4`.
 - Original recovery bundle SHA-256 remained `4108818c08a1d2a2c3c75058a30789bd89f6e5f44f1268e09252f337c714a869`.
