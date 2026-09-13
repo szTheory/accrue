@@ -3,7 +3,24 @@
 set -euo pipefail
 
 root_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
-incident_file="${INCIDENT_FILE:-$root_dir/.planning/phases/225-required-lane-signal-repair/225-CI-INCIDENTS.md}"
+if [[ -n "${INCIDENT_FILE:-}" ]]; then
+  incident_file="$INCIDENT_FILE"
+else
+  active_incident="$root_dir/.planning/phases/225-required-lane-signal-repair/225-CI-INCIDENTS.md"
+  if [[ -f "$active_incident" ]]; then
+    incident_file="$active_incident"
+  else
+    incident_candidates=()
+    for candidate in "$root_dir"/.planning/milestones/*-phases/225-required-lane-signal-repair/225-CI-INCIDENTS.md; do
+      [[ -f "$candidate" ]] && incident_candidates+=("$candidate")
+    done
+    [[ ${#incident_candidates[@]} -eq 1 ]] || {
+      echo "verify_phase225_required_lane_evidence: expected exactly one archived incident ledger, found ${#incident_candidates[@]}" >&2
+      exit 1
+    }
+    incident_file="${incident_candidates[0]}"
+  fi
+fi
 
 fail() {
   echo "verify_phase225_required_lane_evidence: $*" >&2

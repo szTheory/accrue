@@ -6,6 +6,7 @@ import os from "node:os";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
 import { collectBaseline as collectBaselineWithContext, cohortFingerprint, createRepositoryValidationContext, liveRuns, normalizeJob, normalizeRun, summarizeCohorts as summarizeCohortsWithContext, unresolvedPrerequisites, validateRecord, workflowRunnerImage } from "./collect_ci_baseline.mjs";
+import { resolvePhaseEvidencePath } from "./phase_evidence_path.mjs";
 import { deriveStagedPathPercentiles, renderBaseline } from "./render_ci_baseline.mjs";
 
 const fixtureValidationContext = (runs = []) => {
@@ -40,7 +41,7 @@ function verifyCriticalPath(records, rendered, validationContext) {
 }
 
 function fixturePath() {
-  return path.resolve(".planning/phases/226-ci-baseline-proof-semantics/fixtures/ci-baseline-cases.json");
+  return resolvePhaseEvidencePath("226-ci-baseline-proof-semantics", "fixtures/ci-baseline-cases.json");
 }
 
 function rejectsForbiddenFields(fixture) {

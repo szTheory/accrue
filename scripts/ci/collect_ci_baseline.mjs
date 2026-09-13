@@ -5,6 +5,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { spawn, spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
+import { resolvePhaseEvidencePath } from "./phase_evidence_path.mjs";
 
 const SCHEMA_VERSION = 1;
 const CONCLUSIONS = new Set(["success", "failure", "cancelled", "skipped", "neutral", "timed_out", "action_required", "stale", "unknown"]);
@@ -16,7 +17,7 @@ const LIVE_RUN_CONCURRENCY = 24;
 const WORKFLOW_RUNNER_PATH = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../.github/workflows/ci.yml");
 const RUN_INPUT_FIELDS = new Set(["id", "html_url", "head_sha", "created_at", "run_started_at", "updated_at", "event", "head_branch", "conclusion", "run_attempt", "original_run_id", "workflow_path", "workflow_revision", "provider_state", "jobs"]);
 const JOB_INPUT_FIELDS = new Set(["id", "html_url", "name", "started_at", "completed_at", "conclusion", "runner_image", "needs", "steps", "cache", "setup_costs", "failure_message"]);
-const SCHEMA_PATH = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../.planning/phases/226-ci-baseline-proof-semantics/schema-v1.json");
+const SCHEMA_PATH = resolvePhaseEvidencePath("226-ci-baseline-proof-semantics", "schema-v1.json");
 const REPOSITORY_CONTEXT = Symbol("repository-validation-context");
 
 function fail(message) { throw new Error(message); }

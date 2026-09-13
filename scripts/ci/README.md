@@ -6,7 +6,7 @@ Phase 226 keeps one durable baseline and two small, privacy-safe runtime records
 
 | Evidence | What it answers | Command |
 | --- | --- | --- |
-| [CI baseline](../../.planning/phases/226-ci-baseline-proof-semantics/226-CI-BASELINE.md) and [NDJSON record](../../.planning/phases/226-ci-baseline-proof-semantics/226-CI-BASELINE.ndjson) | Which fixed workflow cohort was measured, where time went, and which critical-path claim is comparable | `node scripts/ci/verify_ci_baseline.mjs --fixtures --expected-repository acme/accrue` |
+| [CI baseline](../../.planning/milestones/v1.61-phases/226-ci-baseline-proof-semantics/226-CI-BASELINE.md) and [NDJSON record](../../.planning/milestones/v1.61-phases/226-ci-baseline-proof-semantics/226-CI-BASELINE.ndjson) | Which fixed workflow cohort was measured, where time went, and which critical-path claim is comparable | `node scripts/ci/verify_ci_baseline.mjs --fixtures --expected-repository acme/accrue` |
 | `live-stripe-proof` Actions artifact | Whether the selected Stripe test-mode suite produced proof for its own SHA | `node scripts/ci/verify_provider_proof.mjs --fixtures` |
 | `accrue-host-ci-setup-facts` Actions artifact | Whether the host or CI owns the setup failure and the narrow repair command | `bash scripts/ci/verify_ci_setup_diagnostics.sh` |
 
@@ -14,7 +14,7 @@ Run the complete contract before changing any of these surfaces:
 
 ```bash
 node scripts/ci/verify_ci_baseline.mjs --fixtures --expected-repository acme/accrue && \
-node scripts/ci/verify_ci_baseline.mjs --records .planning/phases/226-ci-baseline-proof-semantics/226-CI-BASELINE.ndjson --rendered .planning/phases/226-ci-baseline-proof-semantics/226-CI-BASELINE.md --expected-repository szTheory/accrue && \
+node scripts/ci/verify_ci_baseline.mjs --records .planning/milestones/v1.61-phases/226-ci-baseline-proof-semantics/226-CI-BASELINE.ndjson --rendered .planning/milestones/v1.61-phases/226-ci-baseline-proof-semantics/226-CI-BASELINE.md --expected-repository szTheory/accrue && \
 node scripts/ci/verify_provider_proof.mjs --fixtures && \
 bash scripts/ci/verify_ci_setup_diagnostics.sh && \
 bash scripts/ci/verify_phase225_required_lane_evidence.sh
@@ -31,9 +31,11 @@ sanitized `live-stripe-proof` artifact and creates or updates one deduplicated
 GitHub issue; the next proved run closes that issue. CI does not retry provider
 failures automatically.
 
-The bootstrap accepts an existing Stripe endpoint signing secret on stdin. It
-never prints the value, validates all credential-free contracts first, checks
-the required Actions secret names, and dispatches exactly one authorized proof:
+The completed bootstrap accepted the Stripe endpoint signing secret on stdin,
+never printed the value, validated all credential-free contracts first, checked
+the required Actions secret names, and dispatched exactly one authorized proof.
+The invocation is retained for provenance only; its archived evidence path is
+intentionally occupied and the closed authority must not be rerun:
 
 ```bash
 read -rs ACCRUE_STRIPE_WEBHOOK_SECRET
@@ -42,12 +44,11 @@ printf '%s' "$ACCRUE_STRIPE_WEBHOOK_SECRET" | \
     --authorize-one-proof \
     --repo szTheory/accrue \
     --ref PUSHED_NAMED_REF \
-    --evidence-out .planning/phases/228-repair-stripe-webhook-signing-ci-boot-contract-under-a-fresh/228-BOOTSTRAP-EVIDENCE.json
+    --evidence-out .planning/milestones/v1.61-phases/228-repair-stripe-webhook-signing-ci-boot-contract-under-a-fresh/228-BOOTSTRAP-EVIDENCE.json
 unset ACCRUE_STRIPE_WEBHOOK_SECRET
 ```
 
-Authenticate `gh`, read the task-scoped variable without placing the secret in
-shell history, and use a pushed named ref. The bootstrap evidence contains
+The bootstrap evidence contains
 only names, booleans, counts, SHA, ref, and run URL. Rehearse both automation
 surfaces without credentials or network mutation:
 
@@ -66,11 +67,11 @@ or remote ref operation.
 
 ```bash
 node scripts/ci/verify_ci_critical_path.mjs --verify-live-actions \
-  --evidence .planning/phases/227-measured-critical-path-improvement/227-CI-CRITICAL-PATH.ndjson \
-  --rendered .planning/phases/227-measured-critical-path-improvement/227-CI-CRITICAL-PATH.md \
-  --contract .planning/phases/227-measured-critical-path-improvement/227-ci-contract.json \
+  --evidence .planning/milestones/v1.61-phases/227-measured-critical-path-improvement/227-CI-CRITICAL-PATH.ndjson \
+  --rendered .planning/milestones/v1.61-phases/227-measured-critical-path-improvement/227-CI-CRITICAL-PATH.md \
+  --contract .planning/milestones/v1.61-phases/227-measured-critical-path-improvement/227-ci-contract.json \
   --expected-repository szTheory/accrue \
-  --require-activation-evidence .planning/phases/227-measured-critical-path-improvement/227-CANDIDATE-PREFLIGHT.json \
+  --require-activation-evidence .planning/milestones/v1.61-phases/227-measured-critical-path-improvement/227-CANDIDATE-PREFLIGHT.json \
   --require-kept
 ```
 
@@ -79,14 +80,14 @@ state separately:
 
 ```bash
 node scripts/ci/verify_ci_critical_path.mjs --render-evidence \
-  --evidence .planning/phases/227-measured-critical-path-improvement/227-CI-CRITICAL-PATH.ndjson \
-  --rendered .planning/phases/227-measured-critical-path-improvement/227-CI-CRITICAL-PATH.md \
-  --contract .planning/phases/227-measured-critical-path-improvement/227-ci-contract.json \
+  --evidence .planning/milestones/v1.61-phases/227-measured-critical-path-improvement/227-CI-CRITICAL-PATH.ndjson \
+  --rendered .planning/milestones/v1.61-phases/227-measured-critical-path-improvement/227-CI-CRITICAL-PATH.md \
+  --contract .planning/milestones/v1.61-phases/227-measured-critical-path-improvement/227-ci-contract.json \
   --expected-repository szTheory/accrue
 
 node scripts/ci/verify_ci_critical_path.mjs --verify-workflow \
   --workflow .github/workflows/ci.yml \
-  --contract .planning/phases/227-measured-critical-path-improvement/227-ci-contract.json \
+  --contract .planning/milestones/v1.61-phases/227-measured-critical-path-improvement/227-ci-contract.json \
   --expected-state candidate
 ```
 
@@ -111,7 +112,7 @@ This directory hosts merge-adjacent bash gates and host-app checks. Use it as th
 - **Release webhook test-isolation signal:** run `cd accrue && mix test test/accrue/webhook/ingest_test.exs --warnings-as-errors`. The responsible source is `accrue/test/accrue/webhook/ingest_test.exs`; it must assert facts owned by its created webhook event rather than suite-global tables.
 - **Admin page-flow budget signal:** run `bash scripts/ci/verify_phase192_admin_guardrails.sh`. The responsible source is `accrue_admin/e2e/admin-page-flow-phase191.spec.js`; it owns the bounded browser traversal, not CI retries or topology.
 
-For classification, immutable Actions evidence links, current proof status, and the required/advisory distinction, see [Phase 225's causal index](../../.planning/phases/225-required-lane-signal-repair/225-CI-INCIDENTS.md). Keep raw logs, reports, traces, screenshots, and payloads in Actions artifacts.
+For classification, immutable Actions evidence links, current proof status, and the required/advisory distinction, see [Phase 225's causal index](../../.planning/milestones/v1.61-phases/225-required-lane-signal-repair/225-CI-INCIDENTS.md). Keep raw logs, reports, traces, screenshots, and payloads in Actions artifacts.
 
 ## v1.59 first-adopter release contract
 

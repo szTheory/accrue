@@ -5,15 +5,17 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
+import { fileURLToPath } from "node:url";
 import {
   classifyProviderProof,
   deriveFreshness,
   validateProviderManifest,
 } from "./provider_proof.mjs";
+import { resolvePhaseEvidencePath } from "./phase_evidence_path.mjs";
 import { renderProviderSummary } from "./render_provider_summary.mjs";
 
-const root = path.resolve(path.dirname(new URL(import.meta.url).pathname), "../..");
-const fixturesPath = path.join(root, ".planning/phases/226-ci-baseline-proof-semantics/fixtures/provider-proof-cases.json");
+const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
+const fixturesPath = resolvePhaseEvidencePath("226-ci-baseline-proof-semantics", "fixtures/provider-proof-cases.json");
 const workflowPath = path.join(root, ".github/workflows/ci.yml");
 
 function rejects(fn, pattern) {

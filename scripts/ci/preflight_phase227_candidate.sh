@@ -31,13 +31,20 @@ parent_sha="$(git -C "$worktree" rev-parse HEAD^)"
 parent_tree="$(git -C "$worktree" rev-parse "${parent_sha}^{tree}")"
 changed_files="$(git -C "$worktree" diff-tree --no-commit-id --name-only -r "$commit")"
 wrapper_digest="sha256:$(shasum -a 256 "$root/scripts/ci/preflight_phase227_candidate.sh" | awk '{print $1}')"
-phase=".planning/phases/227-measured-critical-path-improvement"
 [[ -d "$mix_cache/deps" && -d "$mix_cache/_build/test" ]] || { echo "preflight Mix cache is missing deps or test build output" >&2; exit 66; }
 cp -R "$mix_cache/deps" "$worktree/accrue/deps"
 mkdir -p "$worktree/accrue/_build"
 cp -R "$mix_cache/_build/test" "$worktree/accrue/_build/test"
 (
   cd "$worktree"
+  if [[ -f scripts/ci/phase_evidence_path.mjs ]]; then
+    contract_path="$(node scripts/ci/phase_evidence_path.mjs 227-measured-critical-path-improvement 227-ci-contract.json)"
+    phase="${contract_path%/227-ci-contract.json}"
+  else
+    # Historical candidate commits predate the archive-aware resolver and still
+    # contain their evidence under the active phase directory.
+    phase=".planning/phases/227-measured-critical-path-improvement"
+  fi
   node --check scripts/ci/verify_ci_critical_path.mjs
   PHASE227_PREFLIGHT_NESTED=1 node --test scripts/ci/verify_ci_critical_path.test.mjs
   node scripts/ci/verify_ci_critical_path.mjs --fixtures --workflow-fixture "$phase/fixtures/ci-workflow-restored-v2.yml" --contract "$phase/227-ci-contract.json"

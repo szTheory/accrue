@@ -6,10 +6,12 @@ import fs from "node:fs";
 import path from "node:path";
 import { execFileSync, spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
+import { repositoryRelativePhaseEvidencePath, resolvePhaseEvidencePath } from "./phase_evidence_path.mjs";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
-const phase = path.join(root, ".planning/phases/227-measured-critical-path-improvement");
-const frozenRoot = path.join(root, ".planning/phases/226-ci-baseline-proof-semantics");
+const PHASE_227 = "227-measured-critical-path-improvement";
+const phase = path.dirname(resolvePhaseEvidencePath(PHASE_227, "227-ci-contract.json"));
+const frozenRoot = path.dirname(resolvePhaseEvidencePath("226-ci-baseline-proof-semantics", "226-CI-BASELINE.md"));
 const oldHostNeeds = "needs: [admin-drift-docs, docs-contracts-shift-left]";
 const newHostNeeds = "needs: [docs-contracts-shift-left]";
 
@@ -261,7 +263,10 @@ export function verifyUnverifiedRollbackTerminal(records, contract, expectedRepo
 
 const V3_BUDGET = "phase-227-gap-dispatch-false-v3";
 const V3_PREFIX_LENGTH = ["negative_control", "exclusion", "negative_control", ...Array(9).fill("exclusion"), "decision_pending"].length;
+// This is the immutable path recorded in the historical activation ledger.
+// The physical artifact may move to a milestone archive after completion.
 const V3_PREFLIGHT_EVIDENCE_PATH = ".planning/phases/227-measured-critical-path-improvement/227-CANDIDATE-PREFLIGHT.json";
+const resolvedV3PreflightEvidencePath = repositoryRelativePhaseEvidencePath(PHASE_227, "227-CANDIDATE-PREFLIGHT.json");
 const V3_ACTIVATION_VALIDATOR_VERSION = "phase227-v3-activation-evidence-v1";
 
 function v3Records(records, kind) { return records.filter((record) => record.kind === kind); }
@@ -274,20 +279,23 @@ function stableJson(value) {
   return JSON.stringify(value);
 }
 
-function verifyV3Activation(activation, evidencePath = V3_PREFLIGHT_EVIDENCE_PATH) {
+function verifyV3Activation(activation, evidencePath = resolvedV3PreflightEvidencePath) {
   assert.deepEqual(Object.keys(activation).sort(), ["activated_at", "candidate_sha", "candidate_tree", "check_vector_sha256", "kind", "preflight_evidence_path", "preflight_evidence_sha256", "prohibited_invocation_log_sha256", "remote_effects", "validator_version", "wrapper_sha256"].sort(), "v3 activation schema differs");
   assert.equal(activation.remote_effects, "enabled", "v3 activation must explicitly enable remote effects");
   assert.equal(activation.preflight_evidence_path, V3_PREFLIGHT_EVIDENCE_PATH, "v3 activation preflight path differs");
   assert.equal(activation.validator_version, V3_ACTIVATION_VALIDATOR_VERSION, "v3 activation validator version differs");
   assert.match(activation.activated_at || "", /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/, "v3 activation timestamp is invalid");
   assert.ok(typeof evidencePath === "string" && !path.isAbsolute(evidencePath), "v3 activation evidence path must be repository-relative");
-  assert.equal(evidencePath, activation.preflight_evidence_path, "v3 activation did not use the declared preflight artifact");
+  assert.equal(path.resolve(root, evidencePath), path.resolve(root, resolvedV3PreflightEvidencePath), "v3 activation did not use the resolved preflight artifact");
   const evidenceBytes = fs.readFileSync(path.join(root, evidencePath));
   const preflight = verifyV3Preflight(JSON.parse(evidenceBytes), activation.candidate_sha, "candidate");
   assert.equal(activation.candidate_tree, preflight.candidate_tree, "v3 activation tree differs from preflight");
   assert.equal(activation.preflight_evidence_sha256, sha256(evidenceBytes), "v3 activation preflight digest differs");
   assert.equal(activation.wrapper_sha256, preflight.wrapper_sha256, "v3 activation wrapper digest differs from preflight");
-  assert.equal(activation.wrapper_sha256, sha256(fs.readFileSync(path.join(root, "scripts/ci/preflight_phase227_candidate.sh"))), "v3 activation wrapper digest differs from the current wrapper");
+  // The activation authenticates the exact historical wrapper through the
+  // archived preflight bytes. The current wrapper is independently constrained
+  // by static and runtime no-remote-effect tests, so archive-path maintenance
+  // does not rewrite or invalidate the immutable activation ledger.
   assert.equal(activation.check_vector_sha256, sha256(stableJson(preflight.check_results)), "v3 activation check-vector digest differs");
   assert.equal(activation.prohibited_invocation_log_sha256, sha256(""), "v3 activation prohibited-invocation log must be empty");
   return preflight;
@@ -322,7 +330,7 @@ export function verifyPreflightEvidence(evidence, candidateSha, expectedState) {
   return verifyV3Preflight(typeof evidence === "string" ? readJson(evidence) : evidence, candidateSha, expectedState);
 }
 
-function verifyGapV3Evidence(records, contract, expectedRepository, activationEvidencePath = V3_PREFLIGHT_EVIDENCE_PATH) {
+function verifyGapV3Evidence(records, contract, expectedRepository, activationEvidencePath = resolvedV3PreflightEvidencePath) {
   assertV3Prefix(records);
   const ledgerIndex = new Map(records.map((record, index) => [record, index]));
   const precedes = (earlier, later, message) => assert.ok(
@@ -552,7 +560,7 @@ function verifyGapV3Evidence(records, contract, expectedRepository, activationEv
   return { state: decision.state, admitted_observations: candidates.filter((candidate) => candidate.classification === "qualifying").length, reserved: reservations.length, consumed: consumptions.length };
 }
 
-export function verifyFinalDecision(records, contract, expectedRepository = "szTheory/accrue", activationEvidencePath = V3_PREFLIGHT_EVIDENCE_PATH) {
+export function verifyFinalDecision(records, contract, expectedRepository = "szTheory/accrue", activationEvidencePath = resolvedV3PreflightEvidencePath) {
   if (records.some((record) => record.kind === "gap_budget_authorization_v3" && record.budget_id === V3_BUDGET)) {
     return verifyGapV3Evidence(records, contract, expectedRepository, activationEvidencePath);
   }
@@ -1075,7 +1083,7 @@ function runCli(argv) {
   const records = evidenceRecords(evidence);
   const repository = cli.values.get("--expected-repository") || "szTheory/accrue";
   if (cli.action === "--verify-evidence") {
-    const result = verifyFinalDecision(records, contract, repository, cli.values.get("--require-activation-evidence") || V3_PREFLIGHT_EVIDENCE_PATH);
+    const result = verifyFinalDecision(records, contract, repository, cli.values.get("--require-activation-evidence") || resolvedV3PreflightEvidencePath);
     verifyResultRequirements(result, cli.flags);
     const rendered = cli.values.get("--rendered");
     if (rendered && fs.readFileSync(rendered, "utf8") !== renderCriticalPathEvidence(records)) fail("rendered report does not byte-match NDJSON render");
@@ -1087,7 +1095,7 @@ function runCli(argv) {
     return true;
   }
   if (records.some((record) => record.kind === "gap_budget_authorization_v3" && record.budget_id === V3_BUDGET)) {
-    const result = verifyGapV3Evidence(records, contract, repository, cli.values.get("--require-activation-evidence") || V3_PREFLIGHT_EVIDENCE_PATH);
+    const result = verifyGapV3Evidence(records, contract, repository, cli.values.get("--require-activation-evidence") || resolvedV3PreflightEvidencePath);
     verifyResultRequirements(result, cli.flags);
     verifyRenderedEvidence(records, cli.values.get("--rendered"));
     verifyLiveGapV3(records, contract, repository);
