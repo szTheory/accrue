@@ -105,10 +105,20 @@ scratch=""; created_outputs=(); temporary_outputs=(); created_refs=(); published
 self_test_context=false; self_test_mutation_artifact=""; self_test_mutation_symlink=""
 self_test_failure_point=""; self_test_reach_ref_snapshot=""; self_test_change_ref=""; self_test_change_object=""
 cleanup_run() {
-  local output index ref expected
-  for output in "${temporary_outputs[@]:-}"; do rm -f -- "$output" 2>/dev/null || true; done
+  local output identity actual index ref expected
+  for ((index = ${#temporary_outputs[@]} - 2; index >= 0; index -= 2)); do
+    output="${temporary_outputs[$index]}"; identity="${temporary_outputs[$((index + 1))]}"
+    [[ ! -e "$output" && ! -L "$output" ]] && continue
+    actual="$(inode_identity "$output" 2>/dev/null || true)"
+    if [[ "$actual" == "$identity" ]]; then rm -f -- "$output" 2>/dev/null || true; else echo "preserve repository state: rollback conflict retained changed temporary output: $output" >&2; fi
+  done
   if ! "$published"; then
-    for output in "${created_outputs[@]:-}"; do rm -f -- "$output" 2>/dev/null || true; done
+    for ((index = ${#created_outputs[@]} - 2; index >= 0; index -= 2)); do
+      output="${created_outputs[$index]}"; identity="${created_outputs[$((index + 1))]}"
+      [[ ! -e "$output" && ! -L "$output" ]] && continue
+      actual="$(published_output_identity "$output" 2>/dev/null || true)"
+      if [[ "$actual" == "$identity" ]]; then rm -f -- "$output" 2>/dev/null || true; else echo "preserve repository state: rollback conflict retained changed published output: $output" >&2; fi
+    done
     for ((index = ${#created_refs[@]} - 2; index >= 0; index -= 2)); do
       ref="${created_refs[$index]}"; expected="${created_refs[$((index + 1))]}"
       if ! git -C "$repo_root" update-ref -d "$ref" "$expected" 2>/dev/null; then
@@ -118,11 +128,38 @@ cleanup_run() {
   fi
   [[ -z "$scratch" ]] || rm -rf -- "$scratch" 2>/dev/null || true
 }
+inode_identity() {
+  local target="$1"
+  [[ -f "$target" && ! -L "$target" ]] || return 1
+  stat -f '%d:%i' "$target"
+}
+published_output_identity() {
+  local target="$1" inode
+  inode="$(inode_identity "$target")" || return 1
+  printf '%s:%s\n' "$inode" "$(sha256 "$target")"
+}
+track_temporary_output() {
+  local target="$1" identity
+  identity="$(inode_identity "$target")" || die "temporary output identity unavailable"
+  temporary_outputs+=("$target" "$identity")
+}
+refresh_temporary_output_identity() {
+  local target="$1" identity index
+  identity="$(inode_identity "$target")" || die "temporary output identity unavailable after preparation"
+  for ((index = 0; index < ${#temporary_outputs[@]}; index += 2)); do
+    if [[ "${temporary_outputs[$index]}" == "$target" ]]; then
+      temporary_outputs[$((index + 1))]="$identity"
+      return 0
+    fi
+  done
+  die "temporary output was not registered"
+}
 publish_exclusive() {
-  local temporary="$1" target="$2"
+  local temporary="$1" target="$2" identity
+  identity="$(published_output_identity "$temporary")" || die "prepared output identity unavailable"
   # link(2) adds the final name atomically and fails if another writer won first.
   ln "$temporary" "$target" || die "output publication collision: $target"
-  created_outputs+=("$target")
+  created_outputs+=("$target" "$identity")
   rm -f -- "$temporary"
 }
 
@@ -180,16 +217,27 @@ validate_output_targets() {
   done
 }
 
-verify_bundle_heads() {
+verify_bundle_membership() {
   local frozen="$1" bundle="$2" bundle_heads ref object type encoded
   git -C "$repo_root" bundle verify "$bundle" >/dev/null || die "bundle verification failed"
   bundle_heads="$(git -C "$repo_root" bundle list-heads "$bundle")"
   while IFS= read -r -d '' ref && IFS= read -r -d '' object && IFS= read -r -d '' type; do
     ref="${ref#$'\n'}"; type="${type%$'\n'}"
-    encoded="refs/accrue-preserve/phase-229/$(encode_ref "$ref")"
-    [[ "$(git -C "$repo_root" rev-parse "$encoded^{object}")" == "$object" ]] || die "preservation ref mismatch"
     grep -Fqx "$object $ref" <<< "$bundle_heads" || die "bundle membership mismatch"
   done < "$frozen"
+}
+
+verify_preservation_refs() {
+  local frozen="$1" ref object type encoded
+  while IFS= read -r -d '' ref && IFS= read -r -d '' object && IFS= read -r -d '' type; do
+    ref="${ref#$'\n'}"; encoded="refs/accrue-preserve/phase-229/$(encode_ref "$ref")"
+    [[ "$(git -C "$repo_root" rev-parse "$encoded^{object}")" == "$object" ]] || die "preservation ref mismatch"
+  done < "$frozen"
+}
+
+verify_recovery() {
+  verify_bundle_membership "$1" "$2"
+  verify_preservation_refs "$1"
 }
 
 run() {
@@ -213,20 +261,18 @@ run() {
     printf '%s\0%s\0%s\0' "$ref" "$object" "$type" >> "$frozen"; printf '%s\n' "$ref" >> "$refs_for_bundle"
   done < <(git -C "$repo_root" for-each-ref --format='%(refname)%00%(objectname)%00%(objecttype)%00' refs)
   [[ -s "$refs_for_bundle" ]] || die "no refs found"
-  while IFS= read -r -d '' ref && IFS= read -r -d '' object && IFS= read -r -d '' type; do
-    ref="${ref#$'\n'}"; encoded="refs/accrue-preserve/phase-229/$(encode_ref "$ref")"
-    git -C "$repo_root" update-ref "$encoded" "$object" "0000000000000000000000000000000000000000" || die "preservation ref collision"
-    created_refs+=("$encoded" "$object")
-  done < "$frozen"
-  self_test_checkpoint after-refs
+  self_test_checkpoint after-freeze
   local bundle_tmp manifest_tmp public_tmp bundle_sha256
   bundle_tmp="$(mktemp "$(dirname "$bundle_out")/.phase229-bundle.XXXXXX")"
-  temporary_outputs+=("$bundle_tmp")
+  track_temporary_output "$bundle_tmp"
   git -C "$repo_root" bundle create "$bundle_tmp" --stdin < "$refs_for_bundle" >/dev/null
-  verify_bundle_heads "$frozen" "$bundle_tmp"
+  refresh_temporary_output_identity "$bundle_tmp"
+  verify_bundle_membership "$frozen" "$bundle_tmp"
   bundle_sha256="$(sha256 "$bundle_tmp")"
+  self_test_checkpoint after-bundle
   snapshot_artifacts "$artifacts"
-  manifest_tmp="$(mktemp "$(dirname "$private_manifest_out")/.phase229-manifest.XXXXXX")"; temporary_outputs+=("$manifest_tmp"); chmod 600 "$manifest_tmp"
+  self_test_checkpoint after-artifacts
+  manifest_tmp="$(mktemp "$(dirname "$private_manifest_out")/.phase229-manifest.XXXXXX")"; track_temporary_output "$manifest_tmp"; chmod 600 "$manifest_tmp"
   BUNDLE_SHA256="$bundle_sha256" FROZEN="$frozen" ARTIFACTS="$artifacts" MANIFEST="$manifest_tmp" EXPECTED="$expected_repository" node --input-type=module <<'NODE'
 import fs from 'node:fs';
 const read = (file) => fs.readFileSync(file).toString().split('\0').filter(Boolean);
@@ -234,15 +280,29 @@ const triples = (file, names) => { const values = read(file), result = []; for (
 const refs = triples(process.env.FROZEN, ['original_ref', 'object', 'object_type']).map((ref) => ({ ...ref, encoded_ref: `refs/accrue-preserve/phase-229/${Buffer.from(ref.original_ref).toString('hex')}`, bundle_member: true, restore_argv: ['git', 'update-ref', ref.original_ref, ref.object] }));
 fs.writeFileSync(process.env.MANIFEST, `${JSON.stringify({ schema_version: 1, repository: process.env.EXPECTED, recovery_verified: true, bundle_sha256: process.env.BUNDLE_SHA256, refs, artifacts: triples(process.env.ARTIFACTS, ['path', 'type', 'sha256']), empty_directory_policy: 'not_surfaced_by_git' }, null, 2)}\n`, { mode: 0o600 });
 NODE
+  self_test_checkpoint after-manifest
   if [[ -n "$public_record_out" ]]; then
     public_tmp="$(mktemp "$(dirname "$public_record_out")/.phase229-public.XXXXXX")"
-    temporary_outputs+=("$public_tmp")
+    track_temporary_output "$public_tmp"
     printf '{"schema_version":1,"recovery_verified":true,"bundle_sha256":"%s","ref_count":%s,"empty_directory_policy":"not_surfaced_by_git"}\n' "$bundle_sha256" "$(wc -l < "$refs_for_bundle" | tr -d ' ')" > "$public_tmp"
   fi
-  self_test_checkpoint after-manifest
-  publish_exclusive "$bundle_tmp" "$bundle_out"; publish_exclusive "$manifest_tmp" "$private_manifest_out"
-  [[ -z "$public_record_out" ]] || publish_exclusive "$public_tmp" "$public_record_out"
-  verify_bundle_heads "$frozen" "$bundle_out"
+  self_test_checkpoint after-public-prepare
+  while IFS= read -r -d '' ref && IFS= read -r -d '' object && IFS= read -r -d '' type; do
+    ref="${ref#$'\n'}"; encoded="refs/accrue-preserve/phase-229/$(encode_ref "$ref")"
+    git -C "$repo_root" update-ref "$encoded" "$object" "0000000000000000000000000000000000000000" || die "preservation ref collision"
+    created_refs+=("$encoded" "$object")
+  done < "$frozen"
+  self_test_checkpoint after-refs
+  verify_recovery "$frozen" "$bundle_tmp"
+  publish_exclusive "$bundle_tmp" "$bundle_out"
+  self_test_checkpoint after-bundle-publish
+  publish_exclusive "$manifest_tmp" "$private_manifest_out"
+  self_test_checkpoint after-manifest-publish
+  if [[ -n "$public_record_out" ]]; then
+    publish_exclusive "$public_tmp" "$public_record_out"
+    self_test_checkpoint after-public-publish
+  fi
+  verify_recovery "$frozen" "$bundle_out"
   [[ "$(sha256 "$bundle_out")" == "$bundle_sha256" ]] || die "final bundle digest mismatch"
   run_self_test_artifact_mutation
   snapshot_artifacts "$current_artifacts"
@@ -252,6 +312,7 @@ import fs from 'node:fs';
 const manifest = JSON.parse(fs.readFileSync(process.env.MANIFEST, 'utf8'));
 if (manifest.empty_directory_policy !== process.env.ARTIFACT_POLICY) process.exit(1);
 NODE
+  self_test_checkpoint after-final-verify
   published=true
   echo "preserve repository state: PASS"
 }
@@ -266,15 +327,13 @@ expect_rejected() {
   if "$@" >/dev/null 2>&1; then echo "self-test: invalid invocation unexpectedly passed" >&2; return 1; fi
   assert_no_preservation_delta "$repo" "$before"
 }
-expect_failure_after_recovery() {
-  if "$@" >/dev/null 2>&1; then echo "self-test: injected failure unexpectedly passed" >&2; return 1; fi
-}
 assert_empty_directory() { [[ -z "$(find "$1" -mindepth 1 -maxdepth 1 -print -quit)" ]]; }
 
 snapshot_fixture_state() {
   local repo="$1" output="$2" snapshot="$3"
   mkdir -p "$snapshot"
   git -C "$repo" for-each-ref --format='%(refname) %(objectname) %(objecttype)' > "$snapshot/refs"
+  git -C "$repo" for-each-ref --format='%(refname) %(objectname) %(objecttype)' refs/accrue-preserve/phase-229 > "$snapshot/preservation_refs"
   git -C "$repo" status --porcelain=v2 -z --untracked-files=all > "$snapshot/status"
   git -C "$repo" ls-files -s -z > "$snapshot/index"
   git -C "$repo" worktree list --porcelain > "$snapshot/worktrees"
@@ -284,7 +343,7 @@ snapshot_fixture_state() {
 
 assert_fixture_state_equal() {
   local before="$1" after="$2" authority
-  for authority in refs status index worktrees artifacts outputs; do
+  for authority in refs preservation_refs status index worktrees artifacts outputs; do
     if ! cmp -s "$before/$authority" "$after/$authority"; then
       echo "TAP version 13" >&2
       echo "not ok 1 - post-manifest failure restores exact fixture state" >&2
@@ -366,7 +425,7 @@ assert_injected_boundary_transactional() {
   fi
   grep -Fq "phase229-self-test-reached:$point" "$log" || { echo "self-test: $point injection was not reached" >&2; return 1; }
   ! grep -Fq 'preserve repository state: PASS' "$log" || { echo "self-test: $point failure printed PASS" >&2; return 1; }
-  if [[ "$expected_ref_state" == absent ]] && ! cmp -s "$before/refs" "$reached"; then
+  if [[ "$expected_ref_state" == absent ]] && ! cmp -s "$before/preservation_refs" "$reached"; then
     echo "TAP version 13" >&2
     echo "not ok 1 - fallible preparation completes before preservation refs publish" >&2
     echo "self-test: $point observed preservation refs before preparation completed" >&2
@@ -396,9 +455,10 @@ assert_preexisting_preservation_ref_retained() {
   printf 'tracked\n' > "$repo/tracked"
   git -C "$repo" add tracked
   git -C "$repo" commit -qm fixture
-  local object target
+  local object target original_ref
   object="$(git -C "$repo" rev-parse HEAD)"
-  target="refs/accrue-preserve/phase-229/$(encode_ref refs/heads/master)"
+  original_ref="$(git -C "$repo" symbolic-ref HEAD)"
+  target="refs/accrue-preserve/phase-229/$(encode_ref "$original_ref")"
   git -C "$repo" update-ref "$target" "$object"
   snapshot_fixture_state "$repo" "$output" "$before"
   if TMPDIR="$tmp" "$0" --repo-root "$repo" --expected-repository szTheory/accrue --bundle-out "$output/recovery.bundle" --private-manifest-out "$output/private.json" --public-record-out "$output/public.json" >"$log" 2>&1; then
@@ -421,13 +481,14 @@ assert_concurrently_changed_ref_retained() {
   printf 'first\n' > "$repo/tracked"
   git -C "$repo" add tracked
   git -C "$repo" commit -qm first
-  local original foreign target authority
+  local original foreign target authority original_ref
   original="$(git -C "$repo" rev-parse HEAD)"
   printf 'second\n' > "$repo/tracked"
   git -C "$repo" commit -qam second
   foreign="$(git -C "$repo" rev-parse HEAD)"
   git -C "$repo" reset -q --hard "$original"
-  target="refs/accrue-preserve/phase-229/$(encode_ref refs/heads/master)"
+  original_ref="$(git -C "$repo" symbolic-ref HEAD)"
+  target="refs/accrue-preserve/phase-229/$(encode_ref "$original_ref")"
   snapshot_fixture_state "$repo" "$output" "$before"
   if (
     self_test_context=true
@@ -605,9 +666,6 @@ self_test() {
   [[ ! -e "$output/equal" && ! -e "$output/alias" && ! -e "$output/private" ]] || { echo "self-test: rejected invocation wrote output" >&2; return 1; }
   TMPDIR="$tmp" "$0" --repo-root "$repo" --expected-repository szTheory/accrue --bundle-out "$output/capsule.bundle" --private-manifest-out "$output/private.json" --public-record-out "$output/public.json" >/dev/null
   assert_empty_directory "$tmp" || { echo "self-test: production scratch leaked after success" >&2; return 1; }
-  expect_failure_after_recovery env PHASE229_TEST_FAIL_AFTER_MANIFEST=1 TMPDIR="$tmp" "$0" --repo-root "$repo" --expected-repository szTheory/accrue --bundle-out "$output/injected.bundle" --private-manifest-out "$output/injected.json"
-  assert_empty_directory "$tmp" || { echo "self-test: production scratch leaked after injected failure" >&2; return 1; }
-  [[ ! -e "$output/injected.bundle" && ! -e "$output/injected.json" ]] || { echo "self-test: injected failure published output" >&2; return 1; }
   git -C "$repo" bundle verify "$output/capsule.bundle" >/dev/null
   [[ "$(stat -f '%Lp' "$output/private.json")" == 600 ]] || { echo "self-test: private manifest mode is not 0600" >&2; return 1; }
   assert_raw_symlink_manifest "$output/private.json" "$symlink_expected"
