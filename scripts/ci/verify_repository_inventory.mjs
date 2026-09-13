@@ -4,7 +4,12 @@
 // until the fixture contract below is made green.
 import assert from "node:assert/strict";
 import fs from "node:fs";
-import { createRepositoryValidationContext, validateInventory } from "./collect_repository_inventory.mjs";
+import {
+  createRepositoryValidationContext,
+  validateInventory,
+  collectRepositoryInventory,
+  normalizeRemoteFact
+} from "./collect_repository_inventory.mjs";
 import { renderRepositoryInventory } from "./render_repository_inventory.mjs";
 
 export function verifyFixtures() {
@@ -23,6 +28,17 @@ export function verifyFixtures() {
   assert.throws(() => validateInventory({ ...inventory, actor: "forbidden" }, context), /forbidden field/);
   assert.throws(() => validateInventory({ ...inventory, artifacts: { ...inventory.artifacts, entries: [{ path: "../secret", type: "regular", sha256: "c".repeat(64) }] } }, context), /relative path/);
   assert.throws(() => validateInventory({ ...inventory, remotes: { available: true, state: "unavailable" } }, context), /remote/);
+
+  // Phase 229 complete-inventory contract: this intentionally exercises APIs
+  // before they exist, so the first TDD run must fail.
+  assert.equal(typeof collectRepositoryInventory, "function");
+  assert.equal(typeof normalizeRemoteFact, "function");
+  const remote = normalizeRemoteFact({
+    repository: "szTheory/accrue", observed_at: "2026-09-13T00:00:00.000Z",
+    request: "GET /repos/szTheory/accrue/git/ref/heads/main", sha: "e".repeat(40)
+  }, context);
+  assert.equal(remote.available, true);
+  assert.throws(() => normalizeRemoteFact({ repository: "szTheory/accrue", observed_at: "bad", request: "GET /repos/szTheory/accrue/git/ref/heads/main", sha: "e".repeat(40) }, context), /observed_at/);
 }
 
 function options(argv) {
