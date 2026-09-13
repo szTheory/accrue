@@ -56,6 +56,7 @@ validate_artifact_path() {
 }
 
 scratch=""; created_outputs=(); temporary_outputs=(); published=false
+self_test_context=false; self_test_mutation_artifact=""
 cleanup_run() {
   local output
   for output in "${temporary_outputs[@]:-}"; do rm -f -- "$output" 2>/dev/null || true; done
@@ -70,6 +71,12 @@ publish_exclusive() {
   ln "$temporary" "$target" || die "output publication collision: $target"
   created_outputs+=("$target")
   rm -f -- "$temporary"
+}
+
+run_self_test_artifact_mutation() {
+  [[ -n "$self_test_mutation_artifact" ]] || return 0
+  [[ "$self_test_context" == true ]] || die "test-only artifact mutation requested outside self-test"
+  printf '%s' '-mutated-after-snapshot' >> "$self_test_mutation_artifact" || die "test-only artifact mutation failed"
 }
 
 validate_output_targets() {
@@ -168,6 +175,7 @@ NODE
   [[ -z "$public_record_out" ]] || publish_exclusive "$public_tmp" "$public_record_out"
   verify_bundle_heads "$frozen" "$bundle_out"
   [[ "$(sha256 "$bundle_out")" == "$bundle_sha256" ]] || die "final bundle digest mismatch"
+  run_self_test_artifact_mutation
   published=true
   echo "preserve repository state: PASS"
 }
@@ -187,6 +195,36 @@ expect_failure_after_recovery() {
 }
 assert_empty_directory() { [[ -z "$(find "$1" -mindepth 1 -maxdepth 1 -print -quit)" ]]; }
 
+assert_artifact_mutation_rejected() {
+  local fixture_root="$1" output="$2" tmp="$3"
+  local repo="$fixture_root/mutation-repo" artifact="$fixture_root/mutation-repo/artifact" log="$fixture_root/mutation.log"
+  git init -q "$repo"
+  git -C "$repo" config user.email phase229@example.invalid
+  git -C "$repo" config user.name phase229
+  printf 'tracked\n' > "$repo/tracked"
+  git -C "$repo" add tracked
+  git -C "$repo" commit -qm fixture
+  printf 'before' > "$artifact"
+  if (
+    self_test_context=true
+    self_test_mutation_artifact="$artifact"
+    repo_root="$repo"
+    expected_repository="szTheory/accrue"
+    bundle_out="$output/mutation.bundle"
+    private_manifest_out="$output/mutation-private.json"
+    public_record_out="$output/mutation-public.json"
+    scratch=""; created_outputs=(); temporary_outputs=(); published=false
+    run
+  ) >"$log" 2>&1; then
+    echo "self-test: post-snapshot artifact mutation unexpectedly passed" >&2
+    return 1
+  fi
+  ! grep -Fq 'preserve repository state: PASS' "$log" || { echo "self-test: rejected mutation printed PASS" >&2; return 1; }
+  [[ "$(cat "$artifact")" == 'before-mutated-after-snapshot' ]] || { echo "self-test: mutation fixture did not retain its deliberate artifact change" >&2; return 1; }
+  [[ ! -e "$output/mutation.bundle" && ! -e "$output/mutation-private.json" && ! -e "$output/mutation-public.json" ]] || { echo "self-test: rejected mutation left invocation-owned output" >&2; return 1; }
+  assert_empty_directory "$tmp" || { echo "self-test: production scratch leaked after artifact mutation" >&2; return 1; }
+}
+
 self_test() {
   local scratch_created scratch
   scratch_created="$(mktemp -d "${TMPDIR:-/tmp}/phase229-self-test.XXXXXX")"
@@ -194,6 +232,7 @@ self_test() {
   cleanup_self_test() { rm -rf -- "$scratch" 2>/dev/null || true; }; trap cleanup_self_test EXIT
   local repo="$scratch/repo" output="$scratch/output" tmp="$scratch/tmp" before
   mkdir -p "$output" "$tmp"
+  assert_artifact_mutation_rejected "$scratch" "$output" "$tmp"
   git init -q "$repo"; git -C "$repo" config user.email phase229@example.invalid; git -C "$repo" config user.name phase229
   printf 'fixture\n' > "$repo/tracked"; git -C "$repo" add tracked; git -C "$repo" commit -qm fixture
   git -C "$repo" branch other; git -C "$repo" tag -a annotated -m tag; git -C "$repo" tag lightweight; git -C "$repo" notes add -m note; git -C "$repo" update-ref refs/remotes/origin/main HEAD; git -C "$repo" update-ref refs/custom/phase229 HEAD; git -C "$repo" update-ref 'refs/custom/phase229$(not-executed)' HEAD
