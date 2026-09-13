@@ -30,6 +30,9 @@ const VALUE_OPTIONS = new Set([
 ]);
 const REMOTE_KEYS = ["remote_main", "pull_requests", "release_branches", "actions"];
 const ROLE_REFS = { local_main: "refs/heads/main", cached_origin_main: "refs/remotes/origin/main", v161_tag: "refs/tags/v1.61" };
+const PLANNING_FACTS = { milestone: ".planning/MILESTONES.md", state: ".planning/STATE.md" };
+const MAX_LOCAL_AUTHORITY_BYTES = 512 * 1024;
+const MAX_BUNDLE_BYTES = 1024 * 1024 * 1024;
 const sha256 = (value) => crypto.createHash("sha256").update(value).digest("hex");
 const encodedRef = (name) => `${PRESERVATION_PREFIX}${Buffer.from(name).toString("hex")}`;
 const fail = (message) => { throw new Error(message); };
@@ -131,19 +134,74 @@ function privateManifest(manifestPath, expectedDigest, context) {
   }
 }
 
-function bundleMap(repo, bundlePath, expectedDigest) {
+function statIdentity(stat) {
+  return [stat.dev, stat.ino, stat.mode, stat.uid, stat.gid, stat.size, stat.mtimeNs].map(String).join(":");
+}
+
+function descriptorBytes(descriptor, size, maximum, label) {
+  if (size < 0n || size > BigInt(maximum)) fail(`${label} exceeds its bounded input size`);
+  const bytes = Buffer.alloc(Number(size));
+  let offset = 0;
+  while (offset < bytes.length) {
+    const read = fs.readSync(descriptor, bytes, offset, bytes.length - offset, offset);
+    if (read === 0) fail(`${label} changed while reading its stable descriptor`);
+    offset += read;
+  }
+  return bytes;
+}
+
+function runBundleGit(repo, action, bundlePath, expectedIdentity) {
+  const descriptorBacked = process.platform !== "win32" && fs.existsSync("/dev/fd");
+  const gitPath = descriptorBacked ? "/dev/fd/3" : bundlePath;
+  let childDescriptor;
+  try {
+    if (descriptorBacked) {
+      childDescriptor = fs.openSync(bundlePath, fs.constants.O_RDONLY | (fs.constants.O_NOFOLLOW || 0));
+      if (statIdentity(fs.fstatSync(childDescriptor, { bigint: true })) !== expectedIdentity) fail(`recovery bundle identity changed before git bundle ${action}`);
+    }
+    const result = spawnSync("git", ["-C", repo, "bundle", action, gitPath], {
+      encoding: "utf8", shell: false, timeout: 15_000, maxBuffer: 1_000_000,
+      ...(descriptorBacked ? { stdio: ["ignore", "pipe", "pipe", childDescriptor] } : {})
+    });
+    if (result.error || result.status !== 0) fail(`git bundle ${action} failed: ${(result.stderr || result.error?.message || "unknown error").trim()}`);
+    return result.stdout.trim();
+  } finally {
+    if (childDescriptor !== undefined) fs.closeSync(childDescriptor);
+  }
+}
+
+function bundleMap(repo, bundlePath, expectedDigest, { afterInitialDigest } = {}) {
   if (typeof bundlePath !== "string" || !bundlePath) fail("--recovery-bundle requires a non-empty bundle path");
-  let stat;
-  try { stat = fs.statSync(bundlePath); } catch { fail("--recovery-bundle must identify an existing regular file"); }
-  if (!stat.isFile()) fail("--recovery-bundle must identify an existing regular file");
-  if (sha256(fs.readFileSync(bundlePath)) !== expectedDigest) fail("recovery bundle digest differs from the private manifest");
-  git(repo, ["bundle", "verify", bundlePath]);
-  const rows = git(repo, ["bundle", "list-heads", bundlePath]).split("\n").filter(Boolean).map((line) => {
+  if (typeof process.geteuid !== "function") fail("recovery bundle ownership cannot be validated");
+  let beforePath; let descriptor;
+  try {
+    try { beforePath = fs.lstatSync(bundlePath, { bigint: true }); } catch { fail("--recovery-bundle must identify an existing regular file"); }
+    if (!beforePath.isFile()) fail("recovery bundle must be a no-follow regular file, not a symbolic link or non-regular alias");
+    descriptor = fs.openSync(bundlePath, fs.constants.O_RDONLY | (fs.constants.O_NOFOLLOW || 0));
+    const beforeDescriptor = fs.fstatSync(descriptor, { bigint: true });
+    if (!beforeDescriptor.isFile() || statIdentity(beforeDescriptor) !== statIdentity(beforePath)) fail("recovery bundle identity changed while opening without following links");
+    if (beforeDescriptor.uid !== BigInt(process.geteuid())) fail("recovery bundle must be owned by the current effective user");
+    if ((beforeDescriptor.mode & 0o077n) !== 0n) fail("recovery bundle permissions must be 0600 or stricter");
+    const firstDigest = sha256(descriptorBytes(descriptor, beforeDescriptor.size, MAX_BUNDLE_BYTES, "recovery bundle"));
+    if (firstDigest !== expectedDigest) fail("recovery bundle digest differs from the private manifest");
+    afterInitialDigest?.();
+    const expectedIdentity = statIdentity(beforeDescriptor);
+    runBundleGit(repo, "verify", bundlePath, expectedIdentity);
+    const listed = runBundleGit(repo, "list-heads", bundlePath, expectedIdentity);
+    const afterDescriptor = fs.fstatSync(descriptor, { bigint: true });
+    let afterPath;
+    try { afterPath = fs.lstatSync(bundlePath, { bigint: true }); } catch { fail("recovery bundle path disappeared during verification"); }
+    const secondDigest = sha256(descriptorBytes(descriptor, afterDescriptor.size, MAX_BUNDLE_BYTES, "recovery bundle"));
+    if (!afterPath.isFile() || statIdentity(afterDescriptor) !== statIdentity(beforeDescriptor) || statIdentity(afterPath) !== statIdentity(beforePath) || secondDigest !== firstDigest) fail("recovery bundle identity or bytes changed during verification");
+    const rows = listed.split("\n").filter(Boolean).map((line) => {
     const match = /^([a-f0-9]{40}) (refs\/.+)$/.exec(line);
     if (!match) fail("recovery bundle contains an invalid head row");
     return { object: match[1], ref: match[2] };
-  });
-  return exactMap(rows, "bundle heads", (row) => row.ref, (row) => row.object);
+    });
+    return exactMap(rows, "bundle heads", (row) => row.ref, (row) => row.object);
+  } finally {
+    if (descriptor !== undefined) fs.closeSync(descriptor);
+  }
 }
 
 function encodedMap(repo) {
@@ -276,6 +334,40 @@ function directShipWindows(repositoryRoot) {
   return rows.sort((left, right) => left.id - right.id).map((row) => `${row.id}:${row.status}`);
 }
 
+function directPlanningFact(repositoryRoot, relative) {
+  const filename = path.join(repositoryRoot, relative);
+  let beforePath;
+  try { beforePath = fs.lstatSync(filename, { bigint: true }); } catch (error) {
+    if (error?.code === "ENOENT") return "absent";
+    fail(`planning authority ${relative} cannot be inspected without following links`);
+  }
+  if (!beforePath.isFile()) fail(`planning authority ${relative} must be a no-follow regular file`);
+  let descriptor;
+  try {
+    descriptor = fs.openSync(filename, fs.constants.O_RDONLY | (fs.constants.O_NOFOLLOW || 0));
+    const beforeDescriptor = fs.fstatSync(descriptor, { bigint: true });
+    if (!beforeDescriptor.isFile() || statIdentity(beforeDescriptor) !== statIdentity(beforePath)) fail(`planning authority ${relative} changed while opening without following links`);
+    const bytes = descriptorBytes(descriptor, beforeDescriptor.size, MAX_LOCAL_AUTHORITY_BYTES, `planning authority ${relative}`);
+    const afterDescriptor = fs.fstatSync(descriptor, { bigint: true });
+    let afterPath;
+    try { afterPath = fs.lstatSync(filename, { bigint: true }); } catch { fail(`planning authority ${relative} disappeared while hashing`); }
+    if (!afterPath.isFile() || statIdentity(afterDescriptor) !== statIdentity(beforeDescriptor) || statIdentity(afterPath) !== statIdentity(beforePath)) fail(`planning authority ${relative} changed while hashing`);
+    return sha256(bytes);
+  } finally {
+    if (descriptor !== undefined) fs.closeSync(descriptor);
+  }
+}
+
+function assertPlanningAuthority(inventory, repositoryRoot) {
+  for (const [field, relative] of Object.entries(PLANNING_FACTS)) {
+    const recorded = inventory.planning[field];
+    if (recorded !== "absent" && (typeof recorded !== "string" || !DIGEST.test(recorded))) fail(`planning.${field} must be a lowercase SHA-256 digest or exact absent marker`);
+    const actual = directPlanningFact(repositoryRoot, relative);
+    if (recorded !== actual) fail(`planning.${field} differs from independent ${relative} authority`);
+  }
+  return true;
+}
+
 function assertCompleteCategories(inventory, context, { repositoryRoot = process.cwd() } = {}) {
   const all = new Map(inventory.refs.all.map((row) => [row.name, row.object]));
   for (const [role, ref] of Object.entries(ROLE_REFS)) if (all.get(ref) !== inventory.refs[role]) fail(`complete categories require ${role} to match ${ref}`);
@@ -292,6 +384,7 @@ function assertCompleteCategories(inventory, context, { repositoryRoot = process
   const expectedLiveWorktrees = inventory.worktrees.map((row) => row === capturedPrimary[0] ? { ...row, sha: capture.liveObject } : row);
   assertSameMultiset("captured worktrees with same-primary ancestry", expectedLiveWorktrees, "direct git worktree authority", liveRecords, (row) => `${row.branch}\0${row.sha}\0${row.dirty ? "1" : "0"}`);
   assertSameMultiset("bounded .planning/WINDOWS.md authority", directShipWindows(repositoryRoot), "canonical ship windows", inventory.planning.ship_windows, String);
+  assertPlanningAuthority(inventory, repositoryRoot);
   for (const key of REMOTE_KEYS) normalizeRemoteFact(inventory.remotes[key], context, { plural: key !== "remote_main" });
   return true;
 }
@@ -363,6 +456,7 @@ function createBundle(repo, bundle, refs) {
   fs.rmSync(bundle, { force: true });
   const result = spawnSync("git", ["-C", repo, "bundle", "create", bundle, ...refs], { encoding: "utf8", shell: false });
   assert.equal(result.status, 0, result.stderr);
+  fs.chmodSync(bundle, 0o600);
 }
 
 function writeManifest(fixture) {
@@ -468,7 +562,7 @@ function strictInventory(fixture, { mode = "local_only" } = {}) {
       release_branches: { repository: "szTheory/accrue", observed_at: "2026-09-13T00:00:00.000Z", requests: ["GET /repos/szTheory/accrue/git/matching-refs/heads/release/?per_page=100&page=1"], available: true, state: "observed", shas: [sha("b"), sha("c")] },
       actions: { repository: "szTheory/accrue", observed_at: "2026-09-13T00:00:00.000Z", requests: ["GET /repos/szTheory/accrue/actions/runs?per_page=100&page=1"], available: false, state: "unavailable", reason: "network" }
     },
-    planning: { ship_windows: ["1:open", "2:fixed"], milestone: "present", state: "present" },
+    planning: { ship_windows: ["1:open", "2:fixed"], milestone: "absent", state: "absent" },
     worktrees: directWorktrees(fixture.repo)
   }, context);
 }
@@ -619,6 +713,7 @@ function verifyIndependentPlanningAuthority() {
   try {
     const context = createRepositoryValidationContext({ expectedRepository: "szTheory/accrue" });
     const inventory = strictInventory(fixture);
+    assert.equal(assertCompleteCategories(inventory, context, { repositoryRoot: fixture.repo }), true, "exact absence for both planning authorities must pass");
     const fabricated = structuredClone(inventory);
     fabricated.planning.milestone = "fabricated";
     fabricated.planning.state = "fabricated";
@@ -627,6 +722,31 @@ function verifyIndependentPlanningAuthority() {
       /planning|MILESTONES|STATE/,
       "fabricated planning strings must not substitute for independently hashed files or exact absence"
     );
+    const milestonesPath = path.join(fixture.repo, PLANNING_FACTS.milestone);
+    const statePath = path.join(fixture.repo, PLANNING_FACTS.state);
+    fs.writeFileSync(milestonesPath, "milestones authority\n");
+    fs.writeFileSync(statePath, "state authority\n");
+    const present = structuredClone(inventory);
+    present.planning.milestone = sha256("milestones authority\n");
+    present.planning.state = sha256("state authority\n");
+    assert.equal(assertCompleteCategories(present, context, { repositoryRoot: fixture.repo }), true, "independently hashed planning files must pass");
+    const swapped = structuredClone(present);
+    [swapped.planning.milestone, swapped.planning.state] = [swapped.planning.state, swapped.planning.milestone];
+    assert.throws(() => assertCompleteCategories(swapped, context, { repositoryRoot: fixture.repo }), /differs from independent/);
+    const stale = structuredClone(present); stale.planning.state = "0".repeat(64);
+    assert.throws(() => assertCompleteCategories(stale, context, { repositoryRoot: fixture.repo }), /differs from independent/);
+    fs.writeFileSync(statePath, "changed state authority\n");
+    assert.throws(() => assertCompleteCategories(present, context, { repositoryRoot: fixture.repo }), /differs from independent/);
+    fs.rmSync(statePath);
+    assert.throws(() => assertCompleteCategories(present, context, { repositoryRoot: fixture.repo }), /differs from independent/);
+    fs.rmSync(milestonesPath);
+    fs.symlinkSync("../tracked", milestonesPath);
+    const symlinked = structuredClone(inventory); symlinked.planning.milestone = sha256("fixture\n");
+    assert.throws(() => assertCompleteCategories(symlinked, context, { repositoryRoot: fixture.repo }), /no-follow regular file/);
+    fs.rmSync(milestonesPath);
+    fs.writeFileSync(milestonesPath, "");
+    const empty = structuredClone(inventory); empty.planning.milestone = sha256(Buffer.alloc(0));
+    assert.equal(assertCompleteCategories(empty, context, { repositoryRoot: fixture.repo }), true, "an empty regular file digest remains distinct from absence");
   } finally { fs.rmSync(fixture.scratch, { recursive: true, force: true }); }
 }
 
@@ -635,6 +755,7 @@ function verifyNoFollowBundleAuthority() {
   try {
     const context = createRepositoryValidationContext({ expectedRepository: "szTheory/accrue" });
     const inventory = strictInventory(fixture);
+    assert.equal(assertStrictRecovery(inventory, context, strictOptions(fixture)), true, "one stable restrictive bundle identity must pass");
     const alias = path.join(fixture.scratch, "bundle-alias");
     fs.symlinkSync(fixture.bundle, alias);
     assert.throws(
@@ -642,6 +763,22 @@ function verifyNoFollowBundleAuthority() {
       /symbolic link|no-follow|symlink/,
       "standalone strict recovery must never follow a bundle symlink"
     );
+    const directory = path.join(fixture.scratch, "bundle-directory");
+    fs.mkdirSync(directory);
+    assert.throws(() => bundleMap(fixture.repo, directory, fixture.manifest.bundle_sha256), /no-follow regular file/);
+    fs.chmodSync(fixture.bundle, 0o644);
+    assert.throws(() => bundleMap(fixture.repo, fixture.bundle, fixture.manifest.bundle_sha256), /permissions must be 0600 or stricter/);
+    fs.chmodSync(fixture.bundle, 0o600);
+    const originalGeteuid = process.geteuid;
+    try {
+      Object.defineProperty(process, "geteuid", { configurable: true, value: () => originalGeteuid() + 1 });
+      assert.throws(() => bundleMap(fixture.repo, fixture.bundle, fixture.manifest.bundle_sha256), /owned by the current effective user/);
+    } finally { Object.defineProperty(process, "geteuid", { configurable: true, value: originalGeteuid }); }
+    const replacement = path.join(fixture.scratch, "replacement.bundle");
+    fs.copyFileSync(fixture.bundle, replacement); fs.chmodSync(replacement, 0o600);
+    assert.throws(() => bundleMap(fixture.repo, fixture.bundle, fixture.manifest.bundle_sha256, { afterInitialDigest() {
+      fs.renameSync(replacement, fixture.bundle);
+    } }), /identity changed before git bundle|identity or bytes changed during verification/);
   } finally { fs.rmSync(fixture.scratch, { recursive: true, force: true }); }
 }
 
