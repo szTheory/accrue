@@ -387,6 +387,82 @@ function main() { const options = parseArgs(process.argv.slice(2)); if (!options
 if (!process.env.NODE_TEST_CONTEXT && process.argv[1] === new URL(import.meta.url).pathname) { try { main(); } catch (error) { console.error(`repository inventory collect: FAIL: ${error.message}`); process.exitCode = 1; } }
 
 if (process.env.NODE_TEST_CONTEXT) {
+  const remoteSchemaFixture = () => ({
+    schema_version: 2,
+    repository: "szTheory/accrue",
+    mode: "local_only",
+    recovery: {
+      verified: true,
+      manifest_sha256: "1".repeat(64),
+      bundle_sha256: "2".repeat(64),
+      refs: [{ original_ref: "refs/heads/main", object: "a".repeat(40), encoded_ref: encodedRef("refs/heads/main"), bundle_member: true }]
+    },
+    artifacts: { empty_directory_policy: "not_surfaced_by_git", entries: [] },
+    refs: {
+      local_main: "a".repeat(40),
+      cached_origin_main: "b".repeat(40),
+      milestone_branch: "c".repeat(40),
+      v161_tag: "d".repeat(40),
+      all: []
+    },
+    remotes: {
+      remote_main: { repository: "szTheory/accrue", observed_at: "2026-09-13T00:00:00.000Z", request: "GET /repos/szTheory/accrue/git/ref/heads/main", available: true, state: "observed", sha: "e".repeat(40) },
+      pull_requests: { repository: "szTheory/accrue", observed_at: "2026-09-13T00:00:00.000Z", requests: ["GET /repos/szTheory/accrue/pulls?state=open&per_page=100&page=1"], available: true, state: "observed", shas: [] },
+      release_branches: { repository: "szTheory/accrue", observed_at: "2026-09-13T00:00:00.000Z", requests: ["GET /repos/szTheory/accrue/git/matching-refs/heads/release/?per_page=100&page=1"], available: true, state: "observed", shas: ["f".repeat(40)] },
+      actions: { repository: "szTheory/accrue", observed_at: "2026-09-13T00:00:00.000Z", requests: ["GET /repos/szTheory/accrue/actions/runs?per_page=100&page=1"], available: false, state: "unavailable", reason: "network" }
+    },
+    planning: { ship_windows: [], milestone: "absent", state: "absent" },
+    worktrees: []
+  });
+
+  test("CR-09 remote facts require exact non-coercive availability and state", async () => {
+    const context = createRepositoryValidationContext({ expectedRepository: "szTheory/accrue" });
+    const valid = remoteSchemaFixture();
+    const normalized = validateInventory(valid, context);
+    for (const key of REMOTE_KEYS) {
+      assert.notEqual(normalized.remotes[key], valid.remotes[key], `${key} is replaced by its normalized value`);
+      assert.equal(typeof normalized.remotes[key].available, "boolean");
+    }
+
+    const invalidFacts = [];
+    for (const available of [undefined, null, 0, 1, "true", "false"]) {
+      const fact = structuredClone(valid.remotes.remote_main);
+      if (available === undefined) delete fact.available; else fact.available = available;
+      invalidFacts.push(fact);
+    }
+    for (const [available, state] of [[true, "unavailable"], [true, "fabricated"], [false, "observed"], [false, "fabricated"]]) {
+      const fact = available ? structuredClone(valid.remotes.remote_main) : structuredClone(valid.remotes.actions);
+      fact.available = available;
+      fact.state = state;
+      invalidFacts.push(fact);
+    }
+    invalidFacts.push(
+      { ...valid.remotes.remote_main, reason: "network" },
+      { ...valid.remotes.remote_main, shas: ["f".repeat(40)] },
+      { ...valid.remotes.actions, sha: "f".repeat(40) },
+      { ...valid.remotes.pull_requests, sha: "f".repeat(40) },
+      { ...valid.remotes.actions, shas: ["f".repeat(40)] }
+    );
+    for (const fact of invalidFacts) {
+      const candidate = remoteSchemaFixture();
+      candidate.remotes.remote_main = fact;
+      assert.throws(() => validateInventory(candidate, context), /remote fact|singleton/);
+    }
+
+    const unavailablePlural = normalizeRemoteFact(valid.remotes.actions, context, { plural: true });
+    assert.deepEqual(unavailablePlural, valid.remotes.actions, "unavailable plural provenance survives normalization exactly");
+    const source = remoteSchemaFixture();
+    const checked = validateInventory(source, context);
+    source.remotes.actions.requests[0] = "GET /repos/szTheory/accrue/issues";
+    assert.deepEqual(checked.remotes.actions.requests, ["GET /repos/szTheory/accrue/actions/runs?per_page=100&page=1"], "validated rows do not retain caller aliases");
+
+    const malformed = remoteSchemaFixture();
+    delete malformed.remotes.remote_main.available;
+    malformed.remotes.remote_main.state = "fabricated";
+    const { renderRepositoryInventory } = await import("./render_repository_inventory.mjs");
+    assert.throws(() => renderRepositoryInventory(malformed, context), /remote fact/);
+  });
+
   test("open pull requests require terminal page proof", () => {
     const indexedSha = (index) => index.toString(16).padStart(40, "0");
     const firstPage = Array.from({ length: 100 }, (_, index) => ({ number: index + 1, head: { sha: indexedSha(index + 1) } }));
