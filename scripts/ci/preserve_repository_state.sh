@@ -218,7 +218,10 @@ NODE
     temporary_outputs+=("$public_tmp")
     printf '{"schema_version":1,"recovery_verified":true,"bundle_sha256":"%s","ref_count":%s,"empty_directory_policy":"not_surfaced_by_git"}\n' "$bundle_sha256" "$(wc -l < "$refs_for_bundle" | tr -d ' ')" > "$public_tmp"
   fi
-  [[ "${PHASE229_TEST_FAIL_AFTER_MANIFEST:-}" != 1 ]] || die "injected post-manifest failure"
+  if [[ "${PHASE229_TEST_FAIL_AFTER_MANIFEST:-}" == 1 ]]; then
+    echo "phase229-self-test-reached:after-manifest" >&2
+    die "injected post-manifest failure"
+  fi
   publish_exclusive "$bundle_tmp" "$bundle_out"; publish_exclusive "$manifest_tmp" "$private_manifest_out"
   [[ -z "$public_record_out" ]] || publish_exclusive "$public_tmp" "$public_record_out"
   verify_bundle_heads "$frozen" "$bundle_out"
@@ -249,6 +252,64 @@ expect_failure_after_recovery() {
   if "$@" >/dev/null 2>&1; then echo "self-test: injected failure unexpectedly passed" >&2; return 1; fi
 }
 assert_empty_directory() { [[ -z "$(find "$1" -mindepth 1 -maxdepth 1 -print -quit)" ]]; }
+
+snapshot_fixture_state() {
+  local repo="$1" output="$2" snapshot="$3"
+  mkdir -p "$snapshot"
+  git -C "$repo" for-each-ref --format='%(refname) %(objectname) %(objecttype)' > "$snapshot/refs"
+  git -C "$repo" status --porcelain=v2 -z --untracked-files=all > "$snapshot/status"
+  git -C "$repo" ls-files -s -z > "$snapshot/index"
+  git -C "$repo" worktree list --porcelain > "$snapshot/worktrees"
+  (repo_root="$repo"; snapshot_artifacts "$snapshot/artifacts")
+  (cd "$output" && find . -mindepth 1 -print0 | LC_ALL=C sort -z) > "$snapshot/outputs"
+}
+
+assert_fixture_state_equal() {
+  local before="$1" after="$2" authority
+  for authority in refs status index worktrees artifacts outputs; do
+    if ! cmp -s "$before/$authority" "$after/$authority"; then
+      echo "TAP version 13" >&2
+      echo "not ok 1 - post-manifest failure restores exact fixture state" >&2
+      echo "self-test: post-manifest failure changed $authority authority" >&2
+      echo "1..1" >&2
+      echo "# tests 1" >&2
+      echo "# pass 0" >&2
+      echo "# fail 1" >&2
+      return 1
+    fi
+  done
+}
+
+assert_post_manifest_failure_transactional() {
+  local fixture_root="$1" tmp="$2"
+  local repo="$fixture_root/post-manifest-repo" output="$fixture_root/post-manifest-output"
+  local before="$fixture_root/post-manifest-before" after="$fixture_root/post-manifest-after" log="$fixture_root/post-manifest.log"
+  mkdir -p "$output"
+  git init -q "$repo"
+  git -C "$repo" config user.email phase229@example.invalid
+  git -C "$repo" config user.name phase229
+  printf 'tracked\n' > "$repo/tracked"
+  git -C "$repo" add tracked
+  git -C "$repo" commit -qm fixture
+  git -C "$repo" branch secondary
+  printf 'artifact\n' > "$repo/untracked"
+  ln -s nowhere "$repo/link"
+  snapshot_fixture_state "$repo" "$output" "$before"
+  if PHASE229_TEST_FAIL_AFTER_MANIFEST=1 TMPDIR="$tmp" "$0" \
+    --repo-root "$repo" \
+    --expected-repository szTheory/accrue \
+    --bundle-out "$output/recovery.bundle" \
+    --private-manifest-out "$output/private.json" \
+    --public-record-out "$output/public.json" >"$log" 2>&1; then
+    echo "self-test: post-manifest injected failure unexpectedly passed" >&2
+    return 1
+  fi
+  grep -Fq 'phase229-self-test-reached:after-manifest' "$log" || { echo "self-test: post-manifest injection was not reached" >&2; return 1; }
+  ! grep -Fq 'preserve repository state: PASS' "$log" || { echo "self-test: post-manifest failure printed PASS" >&2; return 1; }
+  snapshot_fixture_state "$repo" "$output" "$after"
+  assert_fixture_state_equal "$before" "$after"
+  assert_empty_directory "$tmp" || { echo "self-test: production scratch leaked after post-manifest failure" >&2; return 1; }
+}
 
 assert_artifact_mutation_rejected() {
   local fixture_root="$1" output="$2" tmp="$3"
@@ -368,6 +429,7 @@ self_test() {
     return 1
   fi
   ! grep -Fq 'preserve repository state: PASS' "$unsupported_log" || { echo "self-test: unavailable raw symlink bytes printed PASS" >&2; return 1; }
+  assert_post_manifest_failure_transactional "$scratch" "$tmp"
   assert_artifact_mutation_rejected "$scratch" "$output" "$tmp"
   assert_symlink_mutation_rejected "$scratch" "$output" "$tmp"
   git init -q "$repo"; git -C "$repo" config user.email phase229@example.invalid; git -C "$repo" config user.name phase229
