@@ -39,6 +39,19 @@ node scripts/ci/verify_repository_inventory.mjs \
 
 The monitor is the single supported read-only observation implementation. Every command fixes the repository to `szTheory/accrue`; no command dispatches, reruns, cancels, or otherwise mutates Actions, refs, PRs, or providers.
 
+When capturing a recovery-gated inventory, the collector requires the actual external bundle and a private final-capture attestation in addition to the private manifest. Set these three locations only in the maintainer shell; they are never written into committed evidence. Before it can make any remote adapter call, the collector independently checks the bundle SHA-256 against the manifest, runs bounded `git bundle verify`, lists actual bundle heads for every frozen original ref/object, checks each encoded preservation ref, and validates timestamped typed pre/post artifact invariants. The attestation permits changed hashes only for `.planning/milestone.lock` and `.planning/state.json`; every other frozen artifact must retain its exact type and hash.
+
+```bash
+node scripts/ci/collect_repository_inventory.mjs \
+  --repo szTheory/accrue \
+  --recovery-manifest "$PHASE229_RECOVERY_MANIFEST" \
+  --recovery-bundle "$PHASE229_BUNDLE" \
+  --final-capture-attestation "$PHASE229_FINAL_CAPTURE_ATTESTATION" \
+  --artifact-authorization "$PHASE229_WORKFLOW_METADATA_AUTHORIZATION" \
+  --observe-remote \
+  --out .planning/phases/229-repository-truth-recovery-safety/229-REPOSITORY-INVENTORY.json
+```
+
 | Mode | Read-only command | Evidence returned |
 | --- | --- | --- |
 | List | `node scripts/ci/ci_monitor.cjs list --repo szTheory/accrue` | Repository-bound recent runs with full head SHA. |

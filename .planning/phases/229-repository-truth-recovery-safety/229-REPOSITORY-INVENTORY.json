@@ -716,7 +716,7 @@
   "refs": {
     "local_main": "5c01f4bc38d4d38e8e080bde0e608e26ca9b5442",
     "cached_origin_main": "8f3135f781a324fc0b8d3c460883b1d572bf6e02",
-    "milestone_branch": "6d7cce6305318f0b852b2605b13e2bbe71815685",
+    "milestone_branch": "06e28c50dc7301547745da4ce1f0be3770ed6d97",
     "v161_tag": "fdb41672dd9240b36623ab22a7a8377a2735e5a3",
     "all": [
       {
@@ -1291,7 +1291,7 @@
       },
       {
         "name": "refs/heads/gsd/milestone-v1.62-release-integration-hygiene",
-        "object": "6d7cce6305318f0b852b2605b13e2bbe71815685",
+        "object": "06e28c50dc7301547745da4ce1f0be3770ed6d97",
         "role": "other"
       },
       {
@@ -1814,7 +1814,7 @@
   "remotes": {
     "remote_main": {
       "repository": "szTheory/accrue",
-      "observed_at": "2026-09-13T12:55:54.142Z",
+      "observed_at": "2026-09-13T13:09:08.483Z",
       "request": "GET /repos/szTheory/accrue/remote_main",
       "available": false,
       "state": "unavailable",
@@ -1822,7 +1822,7 @@
     },
     "pull_requests": {
       "repository": "szTheory/accrue",
-      "observed_at": "2026-09-13T12:55:54.143Z",
+      "observed_at": "2026-09-13T13:09:08.483Z",
       "request": "GET /repos/szTheory/accrue/pull_requests",
       "available": false,
       "state": "unavailable",
@@ -1830,7 +1830,7 @@
     },
     "release_branches": {
       "repository": "szTheory/accrue",
-      "observed_at": "2026-09-13T12:55:54.143Z",
+      "observed_at": "2026-09-13T13:09:08.483Z",
       "request": "GET /repos/szTheory/accrue/release_branches",
       "available": false,
       "state": "unavailable",
@@ -1838,7 +1838,7 @@
     },
     "actions": {
       "repository": "szTheory/accrue",
-      "observed_at": "2026-09-13T12:55:54.143Z",
+      "observed_at": "2026-09-13T13:09:08.483Z",
       "request": "GET /repos/szTheory/accrue/actions",
       "available": false,
       "state": "unavailable",
@@ -1853,7 +1853,7 @@
   "worktrees": [
     {
       "branch": "gsd/milestone-v1.62-release-integration-hygiene",
-      "sha": "6d7cce6305318f0b852b2605b13e2bbe71815685",
+      "sha": "06e28c50dc7301547745da4ce1f0be3770ed6d97",
       "dirty": true
     }
   ]

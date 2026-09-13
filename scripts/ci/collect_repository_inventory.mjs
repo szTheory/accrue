@@ -61,13 +61,59 @@ export function validateInventory(inventory, context) {
 }
 
 function recoveryManifest(manifest) { if (manifest?.schema_version !== 1 || manifest.recovery_verified !== true || !Array.isArray(manifest.refs) || !Array.isArray(manifest.artifacts)) fail("recovery manifest is not verified phase-229 state"); validateRecovery({ verified: true, bundle_sha256: manifest.bundle_sha256, refs: manifest.refs.map(({ original_ref, object, encoded_ref, bundle_member }) => ({ original_ref, object, encoded_ref, bundle_member })) }); return manifest; }
-function requireRecovery(repo, manifest) { for (const ref of manifest.refs) { if (run(repo, ["rev-parse", `${ref.encoded_ref}^{object}`]) !== ref.object) fail("recovery preservation target does not match frozen object"); } return manifest; }
+function bundleHeads(repo, bundle) {
+  const verified = spawnSync("git", ["-C", repo, "bundle", "verify", bundle], { encoding: "utf8", timeout: 15000, maxBuffer: 1000000 });
+  if (verified.status !== 0) fail("recovery bundle verification failed");
+  const listed = spawnSync("git", ["-C", repo, "bundle", "list-heads", bundle], { encoding: "utf8", timeout: 15000, maxBuffer: 1000000 });
+  if (listed.status !== 0) fail("recovery bundle head listing failed");
+  const heads = new Map();
+  for (const line of listed.stdout.split("\n").filter(Boolean)) {
+    const match = /^([a-f0-9]{40}) (refs\/.+)$/.exec(line);
+    if (!match || heads.has(match[2])) fail("recovery bundle contains an invalid head");
+    heads.set(match[2], match[1]);
+  }
+  return heads;
+}
+function requireRecovery(repo, manifest, recoveryBundle) {
+  if (typeof recoveryBundle !== "string" || !recoveryBundle || !fs.statSync(recoveryBundle).isFile()) fail("actual recovery bundle is required");
+  const actualDigest = crypto.createHash("sha256").update(fs.readFileSync(recoveryBundle)).digest("hex");
+  if (actualDigest !== manifest.bundle_sha256) fail("recovery bundle digest does not match private manifest");
+  const heads = bundleHeads(repo, recoveryBundle);
+  for (const ref of manifest.refs) {
+    if (run(repo, ["rev-parse", `${ref.encoded_ref}^{object}`]) !== ref.object) fail("recovery preservation target does not match frozen object");
+    if (heads.get(ref.original_ref) !== ref.object) fail("recovery bundle is missing frozen original ref/object membership");
+    run(repo, ["cat-file", "-e", `${ref.object}^{object}`]);
+  }
+  return manifest;
+}
 function readWorkflowMetadataAuthorization(authorizationPath) {
   if (!authorizationPath) return null;
   const record = JSON.parse(fs.readFileSync(authorizationPath, "utf8"));
   fields(record, new Set(["schema_version", "purpose", "changes"]), "workflow metadata authorization record");
   if (record.schema_version !== 1 || record.purpose !== "phase229_workflow_metadata_refresh") fail("workflow metadata authorization record is invalid");
   return validateWorkflowMetadataChanges(record.changes, "workflow metadata authorization record");
+}
+function readFinalCaptureAttestation(attestationPath, manifest) {
+  if (!attestationPath) fail("final capture attestation is required");
+  const record = JSON.parse(fs.readFileSync(attestationPath, "utf8"));
+  fields(record, new Set(["schema_version", "purpose", "observed_at", "artifacts"]), "final capture attestation");
+  if (record.schema_version !== 1 || record.purpose !== "phase229_final_capture") fail("final capture attestation is invalid");
+  timestamp(record.observed_at, "final capture attestation observed_at");
+  if (!Array.isArray(record.artifacts) || record.artifacts.length !== manifest.artifacts.length) fail("final capture attestation must cover every frozen artifact");
+  const frozen = new Map(manifest.artifacts.map((entry) => [entry.path, entry])); const changes = [];
+  for (const invariant of record.artifacts) {
+    fields(invariant, new Set(["path", "type", "before_sha256", "after_sha256", "state"]), "final capture artifact invariant");
+    const entry = frozen.get(invariant.path);
+    if (!entry || entry.type !== invariant.type || entry.sha256 !== invariant.before_sha256) fail("final capture attestation does not match frozen artifact");
+    if (WORKFLOW_METADATA_PATHS.has(invariant.path)) {
+      if (invariant.state !== "workflow_metadata_refreshed" || invariant.before_sha256 === invariant.after_sha256) fail("final capture workflow metadata invariant is invalid");
+      changes.push(invariant);
+    } else if (invariant.state !== "unchanged" || invariant.before_sha256 !== invariant.after_sha256) fail("final capture non-workflow artifact must remain unchanged");
+    frozen.delete(invariant.path);
+  }
+  if (frozen.size || changes.length !== WORKFLOW_METADATA_PATHS.size) fail("final capture attestation must contain exactly two workflow metadata invariants");
+  validateWorkflowMetadataChanges(changes, "final capture workflow metadata invariants");
+  return { observedAt: record.observed_at, artifacts: record.artifacts, workflowMetadataChanges: changes };
 }
 function currentArtifact(repo, entry) { const full = path.join(repo, entry.path); const stat = fs.lstatSync(full); if (stat.isSymbolicLink()) return { type: "symlink", sha256: crypto.createHash("sha256").update(fs.readlinkSync(full)).digest("hex") }; if (stat.isFile()) return { type: "regular", sha256: crypto.createHash("sha256").update(fs.readFileSync(full)).digest("hex") }; if (stat.isDirectory()) return { type: "empty_directory", sha256: "not_surfaced" }; fail(`unsupported artifact type: ${entry.path}`); }
 function validateArtifactSnapshot(repo, manifest, authorization) {
@@ -82,17 +128,25 @@ function validateArtifactSnapshot(repo, manifest, authorization) {
   if (permitted.size) fail("workflow metadata authorization did not match the current artifact snapshot");
   return sorted(changes, (change) => change.path);
 }
+function validateFinalArtifactSnapshot(repo, manifest, attestation) {
+  const changes = validateArtifactSnapshot(repo, manifest, attestation.workflowMetadataChanges);
+  for (const invariant of attestation.artifacts) {
+    const current = currentArtifact(repo, invariant);
+    if (current.type !== invariant.type || current.sha256 !== invariant.after_sha256) fail(`final capture artifact post-invariant mismatch: ${invariant.path}`);
+  }
+  return changes;
+}
 const unavailable = (repository, request, reason = "unavailable", now = new Date()) => ({ repository, observed_at: now.toISOString(), request, available: false, state: "unavailable", reason });
 function remoteRead(adapter, request, repository, now) { try { const raw = adapter.get(request); const sha = raw?.object?.sha || raw?.head?.sha || raw?.head_sha || raw?.workflow_runs?.[0]?.head_sha || raw?.[0]?.object?.sha || raw?.[0]?.head?.sha; return normalizeRemoteFact({ repository, observed_at: now.toISOString(), request, available: true, sha }, createRepositoryValidationContext({ expectedRepository: repository })); } catch (error) { const text = String(error?.message || ""); const reason = /auth|401|403/i.test(text) ? "authentication" : /rate/i.test(text) ? "rate_limit" : /network|ENOTFOUND|timeout/i.test(text) ? "network" : "data_shape"; return unavailable(repository, request, reason, now); } }
 export function collectRemoteFacts({ repository, adapter, now = () => new Date() }) { const request = (suffix) => `GET /repos/${repository}/${suffix}`; if (!adapter || typeof adapter.get !== "function") return Object.fromEntries(REMOTE_KEYS.map((key) => [key, unavailable(repository, request(key), "unavailable", now())])); return { remote_main: remoteRead(adapter, request("git/ref/heads/main"), repository, now()), pull_requests: remoteRead(adapter, request("pulls?state=open&per_page=100"), repository, now()), release_branches: remoteRead(adapter, request("git/matching-refs/heads/release/"), repository, now()), actions: remoteRead(adapter, request("actions/runs?per_page=100"), repository, now()) }; }
 export function collectPlanningFacts({ root }) { const hashed = (file) => fs.existsSync(path.join(root, file)) ? crypto.createHash("sha256").update(fs.readFileSync(path.join(root, file))).digest("hex") : "absent"; return { ship_windows: [], milestone: hashed(".planning/MILESTONES.md"), state: hashed(".planning/STATE.md") }; }
-export function collectRepositoryInventory({ repo, recoveryManifest: manifestPath, artifactAuthorization, expectedRepository, observeRemote = false, adapter, now = () => new Date() }) {
-  const context = createRepositoryValidationContext({ expectedRepository }); const manifest = requireRecovery(repo, recoveryManifest(JSON.parse(fs.readFileSync(manifestPath, "utf8")))); const workflowMetadataChanges = validateArtifactSnapshot(repo, manifest, readWorkflowMetadataAuthorization(artifactAuthorization)); const preserved = new Map(manifest.refs.map((item) => [item.original_ref, item.object])); const resolve = (name) => preserved.get(name) || run(repo, ["rev-parse", `${name}^{}`]);
+export function collectRepositoryInventory({ repo, recoveryManifest: manifestPath, recoveryBundle, artifactAuthorization, finalCaptureAttestation, expectedRepository, observeRemote = false, adapter, now = () => new Date() }) {
+  const context = createRepositoryValidationContext({ expectedRepository }); const manifest = recoveryManifest(JSON.parse(fs.readFileSync(manifestPath, "utf8"))); requireRecovery(repo, manifest, recoveryBundle); const attestation = readFinalCaptureAttestation(finalCaptureAttestation, manifest); const workflowMetadataChanges = validateFinalArtifactSnapshot(repo, manifest, attestation); if (artifactAuthorization) validateWorkflowMetadataChanges(readWorkflowMetadataAuthorization(artifactAuthorization)); const preserved = new Map(manifest.refs.map((item) => [item.original_ref, item.object])); const resolve = (name) => preserved.get(name) || run(repo, ["rev-parse", `${name}^{}`]);
   const refs = run(repo, ["for-each-ref", "--format=%(refname) %(objectname)"]).split("\n").filter(Boolean).map((line) => { const [name, object] = line.split(" "); return { name, object, role: name === "refs/heads/main" ? "local_main" : name === "refs/remotes/origin/main" ? "cached_origin_main" : name === "refs/tags/v1.61" ? "v161_tag" : "other" }; });
   const remotes = observeRemote ? collectRemoteFacts({ repository: expectedRepository, adapter, now }) : Object.fromEntries(REMOTE_KEYS.map((key) => [key, unavailable(expectedRepository, `GET /repos/${expectedRepository}/${key}`, "unavailable", now())]));
   return validateInventory({ schema_version: 2, repository: expectedRepository, mode: observeRemote ? "live_remote" : "local_only", recovery: { verified: true, bundle_sha256: manifest.bundle_sha256, refs: sorted(manifest.refs.map(({ original_ref, object, encoded_ref, bundle_member }) => ({ original_ref, object, encoded_ref, bundle_member })), (item) => item.original_ref) }, artifacts: { empty_directory_policy: manifest.empty_directory_policy, entries: sorted(manifest.artifacts.map(({ path: entryPath, type, sha256 }) => ({ path: entryPath, type, sha256 })), (item) => `${item.path}\0${item.type}`), ...(workflowMetadataChanges.length ? { authorized_workflow_metadata: workflowMetadataChanges } : {}) }, refs: { local_main: resolve("refs/heads/main"), cached_origin_main: resolve("refs/remotes/origin/main"), milestone_branch: run(repo, ["rev-parse", "HEAD^{commit}"]), v161_tag: resolve("refs/tags/v1.61"), all: sorted(refs, (item) => `${item.name}\0${item.object}`) }, remotes, planning: collectPlanningFacts({ root: repo }), worktrees: [{ branch: run(repo, ["branch", "--show-current"]) || "detached", sha: run(repo, ["rev-parse", "HEAD^{commit}"]), dirty: Boolean(run(repo, ["status", "--porcelain"])) }] }, context);
 }
 export const collectLocalInventory = (options) => collectRepositoryInventory(options);
-function parseArgs(argv) { const result = { observeRemote: false }; for (let index = 0; index < argv.length; index += 1) { if (argv[index] === "--observe-remote") { result.observeRemote = true; continue; } if (argv[index] === "--refresh-cached-refs") fail("--refresh-cached-refs requires separately authorized recovery workflow"); if (!argv[index].startsWith("--") || !argv[index + 1]) fail("usage: --repo OWNER/REPO --recovery-manifest FILE [--artifact-authorization FILE] [--observe-remote] --out FILE"); result[argv[index].slice(2)] = argv[++index]; } return result; }
-function main() { const options = parseArgs(process.argv.slice(2)); if (!options.repo || !options["recovery-manifest"] || !options.out) fail("--repo, --recovery-manifest, and --out are required"); const inventory = collectRepositoryInventory({ repo: process.cwd(), recoveryManifest: path.resolve(options["recovery-manifest"]), artifactAuthorization: options["artifact-authorization"] ? path.resolve(options["artifact-authorization"]) : undefined, expectedRepository: options.repo, observeRemote: options.observeRemote }); fs.writeFileSync(options.out, `${JSON.stringify(inventory, null, 2)}\n`, { mode: 0o600 }); }
+function parseArgs(argv) { const result = { observeRemote: false }; for (let index = 0; index < argv.length; index += 1) { if (argv[index] === "--observe-remote") { result.observeRemote = true; continue; } if (argv[index] === "--refresh-cached-refs") fail("--refresh-cached-refs requires separately authorized recovery workflow"); if (!argv[index].startsWith("--") || !argv[index + 1]) fail("usage: --repo OWNER/REPO --recovery-manifest FILE --recovery-bundle FILE --final-capture-attestation FILE [--artifact-authorization FILE] [--observe-remote] --out FILE"); result[argv[index].slice(2)] = argv[++index]; } return result; }
+function main() { const options = parseArgs(process.argv.slice(2)); if (!options.repo || !options["recovery-manifest"] || !options["recovery-bundle"] || !options["final-capture-attestation"] || !options.out) fail("--repo, --recovery-manifest, --recovery-bundle, --final-capture-attestation, and --out are required"); const inventory = collectRepositoryInventory({ repo: process.cwd(), recoveryManifest: path.resolve(options["recovery-manifest"]), recoveryBundle: path.resolve(options["recovery-bundle"]), artifactAuthorization: options["artifact-authorization"] ? path.resolve(options["artifact-authorization"]) : undefined, finalCaptureAttestation: path.resolve(options["final-capture-attestation"]), expectedRepository: options.repo, observeRemote: options.observeRemote }); fs.writeFileSync(options.out, `${JSON.stringify(inventory, null, 2)}\n`, { mode: 0o600 }); }
 if (process.argv[1] === new URL(import.meta.url).pathname) { try { main(); } catch (error) { console.error(`repository inventory collect: FAIL: ${error.message}`); process.exitCode = 1; } }

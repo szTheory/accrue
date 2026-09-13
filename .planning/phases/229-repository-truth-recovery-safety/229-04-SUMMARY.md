@@ -10,11 +10,11 @@ requires:
     provides: preservation manifest, verified bundle, and inventory tools
 provides:
   - Recovery-backed final repository inventory and deterministic diagnostic
-  - Exact-path evidence for authorized GSD workflow metadata refreshes
+  - Actual-bundle recovery revalidation and timestamped typed final-capture invariants
 affects: [230-reviewable-history-integration]
 tech-stack:
   added: []
-  patterns: [exact-path hash authorization, deterministic JSON-to-Markdown inventory]
+  patterns: [actual-bundle recovery validation, exact-path hash authorization, timestamped typed capture attestation, deterministic JSON-to-Markdown inventory]
 key-files:
   created: []
   modified:
@@ -25,24 +25,25 @@ key-files:
     - .planning/phases/229-repository-truth-recovery-safety/229-REPOSITORY-INVENTORY.md
 key-decisions:
   - "Authorize only .planning/milestone.lock and .planning/state.json through exact before/after SHA-256 evidence."
+  - "Require the actual recovery bundle and an additive private capture attestation before remote observation."
   - "Record unavailable remote observations explicitly instead of replacing them with local or cached claims."
 patterns-established:
   - "Recovery inventory accepts workflow metadata drift only from a restrictive supplemental authorization record outside the repository."
 requirements-completed: [REPO-01, REPO-02, REPO-03]
 actuals:
-  tokens: 28524
+  tokens: 30730
   tasks: 2
-  commits: 4
-commits: 4
+  commits: 5
+commits: 5
 plan_head_before: 215ff3afc67e7a3610eaa227c25eb8478cb1b402
 duration: 35min
 completed: 2026-09-13
-status: complete
+status: remediation-pending-audit
 ---
 
-# Phase 229 Plan 04: Final Recovery-backed Repository Truth Summary
+# Phase 229 Plan 04: Recovery-backed Repository Truth Summary (Audit Rerun Pending)
 
-**A deterministic repository and CI evidence snapshot with all 109 frozen refs recoverable and only two exact, hash-proven GSD metadata refreshes authorized.**
+**A deterministic repository and CI evidence snapshot with all 109 frozen refs independently verified in the actual bundle and only two timestamped, hash-proven GSD metadata refreshes authorized.**
 
 ## Performance
 
@@ -55,6 +56,7 @@ status: complete
 
 - Documented the read-only, exact-repository CI list, inspect, and bounded watch commands.
 - Revalidated the original bundle digest, bundle structure, every one of 109 frozen refs, preservation mappings, v1.61 tag object, and typed artifact snapshot before collection.
+- Repaired the final-capture boundary so it performs bounded `git bundle verify`, checks actual listed bundle heads for every frozen original ref/object, and rejects malformed timing/invariant evidence before remote observation.
 - Captured a schema-v2 JSON authority and byte-reproducible Markdown projection; all remote facts are explicit unavailable records rather than substituted local facts.
 - Restricted the authorized artifact delta to `.planning/milestone.lock` and `.planning/state.json`, each with a fixed path, type, before SHA-256, after SHA-256, and workflow-owned state.
 
@@ -62,10 +64,12 @@ status: complete
 
 1. **Task 1: Document the supported inventory and CI observation commands** — `f40f9a92` (docs)
 2. **Task 2: Capture and independently verify the final repository truth snapshot** — `024063f1`, `ed1ff4d9` (feat, fix)
+3. **Security remediation: independently validate bundle membership and capture attestation** — `fix(229-04)` atomic remediation commit
 
 ## Decisions Made
 
 - The original private manifest and bundle remain unchanged; restrictive supplemental authorization records live beside them with mode `0600`, including one final record after required GSD state tracking republished its metadata.
+- The final additive private attestation records one ISO-8601 observation time and typed before/after invariants for every frozen artifact; only the two exact GSD metadata paths may differ.
 - The verifier requires repository-bound GET provenance and can require the two exact workflow metadata authorization records.
 
 ## Deviations from Plan
@@ -82,9 +86,18 @@ status: complete
 
 **Total deviations:** 1 auto-fixed (Rule 1).
 
+### Security Audit Remediation
+
+**2. [Rule 2 - Missing critical functionality] Independently revalidated actual recovery bundle membership before capture**
+- **Found during:** Post-plan security audit
+- **Issue:** The collector trusted private-manifest `bundle_member` flags and did not require the actual bundle or timestamped capture proof.
+- **Fix:** Required a bundle path and final-capture attestation, compared the actual bundle digest to the manifest, ran bounded bundle verification/listing, checked every frozen original ref/object and preservation ref, and added fail-closed adapter-order fixtures.
+- **Files modified:** `scripts/ci/collect_repository_inventory.mjs`, `scripts/ci/verify_repository_inventory.mjs`, `scripts/ci/README.md`
+- **Commit:** `fix(229-04)` atomic remediation commit
+
 ### Authorized Workflow Metadata Follow-up
 
-Required GSD closeout republished `.planning/state.json`. Rather than accepting the changed hash, the final snapshot was regenerated from a new additive authorization record that pins the original and final SHA-256 values for the same two authorized paths. The original recovery manifest and prior supplemental record were not modified.
+Required GSD closeout republished `.planning/state.json`. Rather than accepting the changed hash, the final snapshot was regenerated from an additive, private mode-`0600` capture attestation that records one observation time plus typed pre/post SHA-256 invariants for every frozen artifact. Only `.planning/milestone.lock` and `.planning/state.json` are authorized to differ; all other artifacts are explicitly unchanged. The original recovery manifest, bundle, and prior supplemental records were not modified.
 
 ## Remote Observation
 
@@ -96,9 +109,9 @@ None.
 
 ## Next Phase Readiness
 
-Phase 230 may consume the committed inventory and verified recovery barrier for history review. It alone owns any reconciliation or main synchronization.
+The Phase 229 security audit and final verifier must rerun before Phase 230 consumes this inventory. Phase 230 alone owns any reconciliation or main synchronization.
 
 ## Self-Check: PASSED
 
-- `ed1ff4d9`, `024063f1`, and `f40f9a92` exist in repository history.
+- `ed1ff4d9`, `024063f1`, and `f40f9a92` exist in repository history; the atomic remediation commit contains the final capture, code, test, documentation, and validation evidence together.
 - Final JSON and Markdown inventory files exist and passed deterministic verification.
