@@ -238,12 +238,17 @@ function phaseAutomationState(phaseDir) {
 }
 
 function resolvePhaseDir(root, phase) {
-  const phasesRoot = path.join(root, ".planning", "phases");
-  const matches = fs
-    .readdirSync(phasesRoot, { withFileTypes: true })
-    .filter((entry) => entry.isDirectory() && (entry.name === phase || entry.name.startsWith(`${phase}-`)))
-    .map((entry) => path.join(phasesRoot, entry.name));
-  if (matches.length !== 1) fail(`phase ${phase}: expected one active directory, found ${matches.length}`);
+  const matches = phaseDirectoriesSince(root, 0)
+    .filter((directory) => {
+      const name = path.basename(directory);
+      return name === phase || name.startsWith(`${phase}-`);
+    })
+    .filter((directory) => fs.readdirSync(directory).some((file) => /-SUMMARY\.md$/.test(file)));
+  const activeRoot = path.join(root, ".planning", "phases") + path.sep;
+  const active = matches.filter((directory) => directory.startsWith(activeRoot));
+  if (active.length === 1) return active[0];
+  if (active.length > 1) fail(`phase ${phase}: expected one active directory, found ${active.length}`);
+  if (matches.length !== 1) fail(`phase ${phase}: expected one active or archived directory, found ${matches.length}`);
   return matches[0];
 }
 
@@ -416,6 +421,13 @@ function selfTest() {
     ]) {
       assert.throws(() => validateBackendZeroHumanPlan(mutation), pattern);
     }
+
+    const activePlaceholder = path.join(temp, ".planning", "phases", "228-test");
+    const archivedPhase = path.join(temp, ".planning", "milestones", "v9.99-phases", "228-test");
+    fs.mkdirSync(activePlaceholder, { recursive: true });
+    fs.mkdirSync(archivedPhase, { recursive: true });
+    fs.writeFileSync(path.join(archivedPhase, "228-01-SUMMARY.md"), summary);
+    assert.equal(resolvePhaseDir(temp, "228"), archivedPhase, "an empty active placeholder must not hide archived phase evidence");
   } finally {
     fs.rmSync(temp, { recursive: true, force: true });
   }
