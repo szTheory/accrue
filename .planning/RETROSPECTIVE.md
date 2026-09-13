@@ -1660,12 +1660,61 @@ The first slice (M1) of the SEED-004 redesign of `accrue_admin` from a CRUD surf
 
 ---
 
+## Milestone: v1.61 — CI Evidence & Critical-Path Hardening
+
+**Shipped:** 2026-09-12  
+**Phases:** 4 | **Plans:** 30 | **Tasks:** 29
+
+### What Was Built
+
+- Trace-backed required-lane incident classification that collapses identical matrix symptoms into one root cause without hiding individual checks or artifacts.
+- A privacy-safe, repository-bound CI baseline with explicit workflow topology, setup ownership, timing cohorts, and provider proof states.
+- A fail-closed critical-path decision gate and retained one-edge candidate whose exact-three cohort reduced the frozen median from 2,083 seconds to 1,125 seconds.
+- A repaired Stripe webhook-signing boot contract plus live 3DS and proration fidelity fixes, closed by a provider run with 2/2 selected tests passing and 0 skipped.
+
+### What Worked
+
+- Freezing the baseline, thresholds, proof vector, and rollback before changing topology made the keep decision auditable rather than anecdotal.
+- Immutable Actions URLs plus repository/SHA/attempt/job/artifact binding prevented synthetic or cross-repository evidence from satisfying the gate.
+- Separating deterministic Fake-backed authority from explicitly authorized provider fidelity checks exposed real Stripe/Dahlia wire-shape gaps without weakening the primary development loop.
+- Fresh covered-input fingerprints and automated UAT records let the milestone close as verified, with zero overrides or acknowledged open artifacts.
+
+### What Was Inefficient
+
+- Phase 227 needed several gap-closure plans because the first decision gate accepted under-specified cohorts, identities, and evidence shapes.
+- The initial Phase 228 provider attempt proved the boot repair but surfaced five live-contract failures; closing those required multiple separately authorized provider runs.
+- Phase 227 and 228 verification fingerprints became stale after later shared CI/provider edits and had to be recomputed at closeout.
+- Generated milestone accomplishments retained superseded intermediate outcomes, so a concise delivered/verification summary still required editorial cleanup.
+
+### Patterns Established
+
+- Treat a matrix-wide identical signature as one incident while preserving cell-level check identity and evidence.
+- Provider proof is a typed state (`proved`, `failed`, `skipped`, `stale`, or `non_run`), never an inference from a green workflow.
+- External run authority is finite and explicit; retries, replacements, dispatches, and remote refs require separate authorization.
+- Performance changes use a frozen before-state, exact cohort admission, negative control, literal rollback, and deterministic report rendering.
+
+### Key Lessons
+
+1. A performance win is trustworthy only when sample identity and proof completeness are stricter than the timing comparison itself.
+2. Live provider lanes earn their cost when they test SDK wire shapes and lifecycle timing that fakes cannot faithfully reproduce.
+3. Verification fingerprints should avoid mutable project-state files unless closeout intentionally refreshes them after the final state transition.
+4. Run audit-open and canonical readiness again immediately before archive; stale planning metadata is a closeout blocker even when implementation is green.
+
+### Cost Observations
+
+- Model mix: not reliably recorded.
+- Sessions: multi-session implementation, live evidence, gap closure, and archive cycle from 2026-08-08 to 2026-09-12.
+- Notable: external Actions observation and repeated provider-contract repair dominated elapsed time; deterministic fixtures kept each retry decision evidence-led.
+
+---
+
 ## Cross-Milestone Trends
 
 ### Process Evolution
 
 | Milestone | Sessions | Phases | Key Change |
 |-----------|----------|--------|------------|
+| v1.61 | multi (2026-08-08→09-12) | 4 | **REL/BASE/PATH/SAFE** — repaired required-lane causes, froze a repository-bound 20-path baseline, kept a one-edge exact-three candidate at a 1,125s median, and repaired Stripe boot/live fidelity. Verified closeout: 10/10 requirements, 4/4 phases, 13/13 automated UAT checks, 0 overrides. |
 | v1.59 | multi (2026-07-31→08-05) | 8 | **MULTI-RAIL/OFFLINE** — concurrent Stripe/Apple account projection, strict Apple intake/repair, device-bound offline proof/recovery, and first-adopter release proof. Audit `tech_debt`: 29/29 requirements, 11/11 integrations, 5/5 flows, and Nyquist validation passed; Crosswake runtime remains intentionally feasibility-blocked. |
 | v1.58 | multi (2026-07-30→07-31) | 5 | **BUMP/SYNC/DOCS** — moved all packages to `lattice_stripe ~> 2.0`, shipped client-backed advisory entitlements with static/runtime grant isolation, surfaced diagnostics in the existing admin detail, and closed writer/pagination truth through two audit-driven decimal phases. Audit `tech_debt`: 11/11 requirements and 5/5 flows pass. |
 | v1.57 | multi (2026-07-19→07-30) | 3 | **REIGN/IA/COPY/COMP** — SEED-004 M1: reigned the two outlier admin pages (Home + Subscriptions) onto the shared operator-first component vocabulary + answer-first IA, retired 97 dead bespoke `.ax-*` selectors (grep-gated), and closed UAT with **0 human checkpoints** via a new deterministic Playwright `toHaveScreenshot` pixel-diff gate. Reopen class: explicit strategy change. Non-convergence of the parked v1.56 ratchet on IA findings was the trigger. Audit `passed`; phases **209–211** under **`milestones/v1.57-phases/`**; archives **`milestones/v1.57-*`**. |
@@ -1707,6 +1756,7 @@ The first slice (M1) of the SEED-004 redesign of `accrue_admin` from a CRUD surf
 
 | Milestone | Tests | Coverage | Zero-Dep Additions |
 |-----------|-------|----------|-------------------|
+| v1.61 | Phase 227 strict verifier 11/11 plus exact-three live reconciliation; Phase 228 runtime/fixture/live-terminal suite 46/46 focused Elixir tests; recurring Stripe provider run 2/2 selected, 0 skipped. | 10/10 requirements; 4/4 phase verifications; Phase 227 UAT 7/7 and Phase 228 UAT 6/6; audit-open 0. | No new runtime dependency; CI evidence scripts and planning artifacts only, plus Stripe adapter/action compatibility fixes against the existing `lattice_stripe` dependency. |
 | v1.59 | 8/8 phase verifications; reference-host Apple ingress/recovery, deterministic scenarios, and release-contract gates. | 29/29 requirements; 11/11 integrations; 5/5 flows; all phases Nyquist-compliant. | No required dependency addition; Apple/Crosswake remain bounded host/runtime evidence lanes. |
 | v1.58 | Five phase verifications (63/63 combined must-haves), isolation verifier, package-doc verifier, 81 focused core tests, 37 focused admin/LiveView tests, and executable desktop/Pixel 5 browser UAT. | 11/11 requirements; 10/11 integrations; 5/5 flows | No new required dependency; existing `lattice_stripe` pin advanced to `~> 2.0`. Advisory sync remains default-off and non-authoritative. |
 | v1.57 | Full `accrue_admin` unit suite 514/0 + e2e 200/0 + storybook gate green with zero regressions; new deterministic Playwright `toHaveScreenshot` pixel-diff gate (4 admin surfaces × light/dark) blocking in browser-uat; grep-gate + orphan/dangling `ax-*` census guard proving 97 selectors retired with zero live-class over-deletion. Milestone audit `passed` (11/11 reqs, 3/3 phases, 5/5 integration, 5/5 flows). | 11/11 requirements archived | No dependency changes; admin-only CSS/template reign (no core `accrue` change, no new nav rooms, no Tailwind migration); both generated artifacts (`accrue_admin.css`, `copy_strings.json`) rebuilt in-repo. |
