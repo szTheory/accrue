@@ -1,5 +1,5 @@
 {
-  "model_profile": "balanced",
+  "model_profile": "adaptive",
   "commit_docs": true,
   "parallelization": true,
   "search_gitignored": false,
@@ -88,12 +88,12 @@
   "resolve_model_ids": true,
   "mode": "yolo",
   "granularity": "standard",
-  "runtime": "codex",
+  "runtime": "claude",
   "model_policy": {
-    "provider": "openai",
-    "high": "gpt-5.6-sol",
-    "medium": "gpt-5.6-terra",
-    "low": "gpt-5.6-luna",
+    "provider": "anthropic",
+    "high": "claude-opus-5",
+    "medium": "claude-sonnet-5",
+    "low": "claude-haiku-4-5",
     "budget": "medium"
   },
   "model_profile_overrides": {
