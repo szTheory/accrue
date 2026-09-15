@@ -22,11 +22,12 @@ const BOOLEAN_FLAGS = new Set([
   "fixtures", "require-recovery", "require-all-ref-recovery", "require-typed-artifacts",
   "require-local-only", "require-complete-categories", "require-edge-cases",
   "require-privacy-controls", "require-determinism", "require-command-provenance",
-  "require-workflow-metadata-authorization"
+  "require-workflow-metadata-authorization", "require-handoff-attestation"
 ]);
 const VALUE_OPTIONS = new Set([
   "records", "rendered", "expected-repository", "repository-root", "recovery-manifest",
-  "expected-manifest-sha256", "recovery-bundle"
+  "expected-manifest-sha256", "recovery-bundle", "artifact-authorization",
+  "collection-attestation", "handoff-attestation"
 ]);
 const REMOTE_KEYS = ["remote_main", "pull_requests", "release_branches", "actions"];
 const ROLE_REFS = { local_main: "refs/heads/main", cached_origin_main: "refs/remotes/origin/main", v161_tag: "refs/tags/v1.61" };
@@ -136,6 +137,24 @@ function privateManifest(manifestPath, expectedDigest, context) {
 
 function statIdentity(stat) {
   return [stat.dev, stat.ino, stat.mode, stat.uid, stat.gid, stat.size, stat.mtimeNs].map(String).join(":");
+}
+
+function readStableJson(filePath, label, maximum = MAX_LOCAL_AUTHORITY_BYTES) {
+  if (typeof process.geteuid !== "function") fail(`${label} ownership cannot be validated`);
+  let descriptor;
+  try {
+    descriptor = fs.openSync(filePath, fs.constants.O_RDONLY | (fs.constants.O_NOFOLLOW || 0));
+    const stat = fs.fstatSync(descriptor, { bigint: true });
+    if (!stat.isFile()) fail(`${label} must be a no-follow regular file`);
+    if (stat.uid !== BigInt(process.geteuid())) fail(`${label} must be owned by the current effective user`);
+    if ((stat.mode & 0o077n) !== 0n) fail(`${label} permissions must be 0600 or stricter`);
+    const bytes = descriptorBytes(descriptor, stat.size, maximum, label);
+    const afterStat = fs.fstatSync(descriptor, { bigint: true });
+    if (statIdentity(afterStat) !== statIdentity(stat)) fail(`${label} changed while reading its stable descriptor`);
+    return JSON.parse(bytes.toString("utf8"));
+  } finally {
+    if (descriptor !== undefined) fs.closeSync(descriptor);
+  }
 }
 
 function descriptorBytes(descriptor, size, maximum, label) {
@@ -261,10 +280,35 @@ function assertCommandProvenance(inventory, context) {
   return true;
 }
 
-function assertWorkflowMetadataAuthorization(inventory) {
+function assertWorkflowMetadataAuthorization(inventory, authorizationPath) {
   const changes = inventory.artifacts.authorized_workflow_metadata;
   const expected = [".planning/milestone.lock", ".planning/state.json"];
   if (!Array.isArray(changes) || changes.length !== expected.length || changes.map((row) => row.path).sort().join("\0") !== expected.join("\0")) fail("workflow metadata authorization must remain exact-path bounded");
+  if (authorizationPath) {
+    const record = readStableJson(authorizationPath, "workflow metadata authorization");
+    if (record?.schema_version !== 1 || record.purpose !== "phase229_workflow_metadata_refresh" || !Array.isArray(record.changes)) fail("workflow metadata authorization record is invalid");
+    const key = (row) => [row.path, row.type, row.before_sha256, row.after_sha256, row.state].join("\0");
+    const authority = record.changes.map(key).sort();
+    const candidate = changes.map(key).sort();
+    if (authority.length !== candidate.length || authority.some((value, index) => value !== candidate[index])) fail("committed workflow metadata authorization differs from the fixed authorization input");
+  }
+  return true;
+}
+
+function assertHandoffAttestation(inventory, context, { handoffAttestationPath, recordsPath, renderedPath, recoveryBundle, expectedManifestSha256, artifactAuthorizationPath, collectionAttestationPath } = {}) {
+  if (!handoffAttestationPath) fail("--handoff-attestation is required");
+  const record = readStableJson(handoffAttestationPath, "handoff attestation");
+  const required = ["schema_version", "purpose", "repository", "observed_at", "capture", "manifest_sha256", "bundle_sha256", "authorization_sha256", "collection_attestation_sha256", "records_sha256", "rendered_sha256", "before_capsule_digest", "before_workspace_digest", "result"];
+  for (const key of required) if (!(key in record)) fail(`handoff attestation is missing required field: ${key}`);
+  if (record.schema_version !== 2 || record.purpose !== "phase229_final_handoff_invariants" || record.result !== "PASS") fail("handoff attestation schema or result is invalid");
+  if (record.repository !== context.expectedRepository) fail("handoff attestation repository differs from the expected repository");
+  if (record.capture.active_ref !== inventory.capture.active_ref || record.capture.commit !== inventory.capture.commit) fail("handoff attestation capture binding differs from the committed inventory");
+  if (record.manifest_sha256 !== expectedManifestSha256) fail("handoff attestation manifest digest differs from the independent expected anchor");
+  if (recoveryBundle && record.bundle_sha256 !== sha256(fs.readFileSync(recoveryBundle))) fail("handoff attestation bundle digest differs from the recovery bundle");
+  if (recordsPath && record.records_sha256 !== sha256(fs.readFileSync(recordsPath))) fail("handoff attestation records digest differs from the published canonical records");
+  if (renderedPath && record.rendered_sha256 !== sha256(fs.readFileSync(renderedPath))) fail("handoff attestation rendered digest differs from the published canonical Markdown");
+  if (artifactAuthorizationPath && record.authorization_sha256 !== sha256(fs.readFileSync(artifactAuthorizationPath))) fail("handoff attestation authorization digest differs from the fixed authorization input");
+  if (collectionAttestationPath && record.collection_attestation_sha256 !== sha256(fs.readFileSync(collectionAttestationPath))) fail("handoff attestation collection-attestation digest differs from the final capture attestation");
   return true;
 }
 
@@ -446,10 +490,19 @@ function applyStrictFlags(inventory, context, parsed) {
   if (parsed.flags.has("require-complete-categories")) assertCompleteCategories(inventory, context, { repositoryRoot: recoveryOptions.repositoryRoot });
   if (parsed.flags.has("require-edge-cases")) assertEdgeCases(inventory);
   if (parsed.flags.has("require-command-provenance")) assertCommandProvenance(inventory, context);
-  if (parsed.flags.has("require-workflow-metadata-authorization")) assertWorkflowMetadataAuthorization(inventory);
+  if (parsed.flags.has("require-workflow-metadata-authorization")) assertWorkflowMetadataAuthorization(inventory, parsed.values["artifact-authorization"]);
   const rendered = renderRepositoryInventory(inventory, context);
   if (parsed.flags.has("require-privacy-controls")) assertPrivacyControls(inventory, rendered, [parsed.values["recovery-manifest"], parsed.values["recovery-bundle"]]);
   if (parsed.flags.has("require-determinism")) assertDeterminism(inventory, context);
+  if (parsed.flags.has("require-handoff-attestation")) assertHandoffAttestation(inventory, context, {
+    handoffAttestationPath: parsed.values["handoff-attestation"],
+    recordsPath: parsed.values.records,
+    renderedPath: parsed.values.rendered,
+    recoveryBundle: parsed.values["recovery-bundle"],
+    expectedManifestSha256: parsed.values["expected-manifest-sha256"],
+    artifactAuthorizationPath: parsed.values["artifact-authorization"],
+    collectionAttestationPath: parsed.values["collection-attestation"]
+  });
 }
 
 function createBundle(repo, bundle, refs) {
