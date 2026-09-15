@@ -486,6 +486,87 @@ test("WR-01 real final-chain subprocess proves canonical publication, attestatio
   }
 });
 
+function strictPublishedPair(fixture, extraFlags = []) {
+  return spawnSync(process.execPath, [
+    VERIFY_INVENTORY,
+    "--records", path.join(fixture.repo, CANONICAL_RECORDS_RELATIVE),
+    "--rendered", path.join(fixture.repo, CANONICAL_RENDERED_RELATIVE),
+    "--expected-repository", REPOSITORY,
+    "--repository-root", fixture.repo,
+    "--recovery-manifest", fixture.manifestPath,
+    "--expected-manifest-sha256", fixture.manifestDigest,
+    "--recovery-bundle", fixture.bundle,
+    "--handoff-attestation", fixture.attestation,
+    "--require-recovery", "--require-all-ref-recovery", "--require-typed-artifacts",
+    "--require-complete-categories", "--require-edge-cases", "--require-command-provenance",
+    "--require-privacy-controls", "--require-determinism", "--require-handoff-attestation",
+    ...extraFlags
+  ], { encoding: "utf8", shell: false, timeout: 120_000, env: { ...process.env, NODE_TEST_CONTEXT: undefined } });
+}
+
+// CR-03 / D-03: the canonical pair is captured at commit A and then necessarily committed
+// (commit B), after which further phase artifacts land (commit C). Capture ancestry plus the
+// external attestation must keep strict verification valid as the active branch advances --
+// otherwise the act of committing the inventory would invalidate the inventory.
+test("CR-03 published canonical pair stays strictly verifiable after its own commit and later phase commits", () => {
+  const fixture = finalChainFixture();
+  const recordsPath = path.join(fixture.repo, CANONICAL_RECORDS_RELATIVE);
+  const renderedPath = path.join(fixture.repo, CANONICAL_RENDERED_RELATIVE);
+  const summaryRelative = ".planning/phases/229-repository-truth-recovery-safety/229-20-SUMMARY.md";
+  try {
+    const published = runFinalChainCli(fixture);
+    assert.equal(published.status, 0, `${published.stderr}\n${published.stdout}`);
+    const attestation = JSON.parse(fs.readFileSync(fixture.attestation, "utf8"));
+    assert.equal(attestation.capture.commit, git(fixture.repo, ["rev-parse", "HEAD"]), "capture must anchor the commit the inventory was taken at");
+
+    assert.equal(strictPublishedPair(fixture).status, 0, "strict verification must pass immediately after publication at capture commit A");
+
+    git(fixture.repo, ["add", "--", CANONICAL_RECORDS_RELATIVE, CANONICAL_RENDERED_RELATIVE]);
+    git(fixture.repo, ["commit", "-qm", "feat(229-20): publish canonical repository inventory"]);
+    const atB = git(fixture.repo, ["rev-parse", "HEAD"]);
+    assert.notEqual(atB, attestation.capture.commit, "commit B must actually advance the active branch");
+    assert.equal(strictPublishedPair(fixture).status, 0, "strict verification must survive committing the canonical pair itself");
+
+    fs.writeFileSync(path.join(fixture.repo, summaryRelative), "# 229-20 summary\n");
+    git(fixture.repo, ["add", "--", summaryRelative]);
+    git(fixture.repo, ["commit", "-qm", "docs(229-20): seal plan summary"]);
+    assert.notEqual(git(fixture.repo, ["rev-parse", "HEAD"]), atB, "commit C must advance past commit B");
+    assert.equal(strictPublishedPair(fixture).status, 0, "strict verification must survive later phase summary commits");
+
+    // The surviving verification is bound to the exact published bytes, not merely to ancestry.
+    const records = fs.readFileSync(recordsPath);
+    const tamperedRecords = Buffer.concat([records, Buffer.from("\n")]);
+    assert.notEqual(sha256(tamperedRecords), sha256(records), "the records tamper must actually change bytes");
+    fs.writeFileSync(recordsPath, tamperedRecords);
+    assert.notEqual(strictPublishedPair(fixture).status, 0, "tampered canonical records must fail at commit C");
+    fs.writeFileSync(recordsPath, records);
+    assert.equal(strictPublishedPair(fixture).status, 0, "restoring the exact published bytes must pass again");
+
+    const rendered = fs.readFileSync(renderedPath);
+    const tamperedRendered = Buffer.concat([rendered, Buffer.from("\n")]);
+    assert.notEqual(sha256(tamperedRendered), sha256(rendered), "the rendered tamper must actually change bytes");
+    fs.writeFileSync(renderedPath, tamperedRendered);
+    assert.notEqual(strictPublishedPair(fixture).status, 0, "tampered canonical Markdown must fail at commit C");
+    fs.writeFileSync(renderedPath, rendered);
+
+    const substituted = JSON.parse(fs.readFileSync(fixture.attestation, "utf8"));
+    substituted.records_sha256 = sha256(Buffer.from("foreign"));
+    const substitutePath = path.join(fixture.capsule, "substituted-attestation.json");
+    fs.writeFileSync(substitutePath, JSON.stringify(substituted), { mode: 0o600 });
+    const swapped = spawnSync(process.execPath, [
+      VERIFY_INVENTORY,
+      "--records", recordsPath, "--rendered", renderedPath,
+      "--expected-repository", REPOSITORY, "--repository-root", fixture.repo,
+      "--recovery-manifest", fixture.manifestPath, "--expected-manifest-sha256", fixture.manifestDigest,
+      "--recovery-bundle", fixture.bundle, "--handoff-attestation", substitutePath,
+      "--require-recovery", "--require-handoff-attestation"
+    ], { encoding: "utf8", shell: false, timeout: 120_000, env: { ...process.env, NODE_TEST_CONTEXT: undefined } });
+    assert.notEqual(swapped.status, 0, "a substituted attestation must never validate the published pair");
+  } finally {
+    fs.rmSync(fixture.scratch, { recursive: true, force: true });
+  }
+});
+
 test("CR-01 preservation rejects post-snapshot artifact mutation before PASS", () => {
   const script = fileURLToPath(new URL("./preserve_repository_state.sh", import.meta.url));
   const result = spawnSync("bash", [script, "--self-test"], { encoding: "utf8", shell: false, timeout: 30_000 });
