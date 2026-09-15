@@ -12,8 +12,8 @@
   },
   "expected_reverted_tree": "eb5c4eb3dfa6a1c49a293532f24466c016ee27dc",
   "capsule": {
-    "bundle_sha256": "aac349a7c6256bbcdd64fd93212bea3addfb62271e4f0959f1c39432df1d1b03",
-    "manifest_sha256": "4c0ea6f77e4f1ef20bab2ef1d330eb64de5a04abaf51cc82c68960ffb4bae9cb"
+    "bundle_sha256": "45eca6bf22af719edaf2a343fcc4fccf2e05cb543574e0266a8a839f6aab48bc",
+    "manifest_sha256": "fdd334b9c4406192b5c40d2b67c66ff6e8c2ccc1233394e4813a8254eb9d4bd2"
   },
   "restore_argv": [
     ["git", "revert", "-m", "1", "--no-edit", "4d45002cafb3846810b84ff1afd84e7418476c50"]
