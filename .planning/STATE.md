@@ -213,25 +213,69 @@ verified at publication (capture commit A, canonical commit B, summary commit C)
 and stays bound by the round-3 attestation. Any future recapture must be the
 LAST action after planning docs settle.
 
-### Adopter boot fix: SHIPPED as PR #44
+### Adopter boot fix: PR #44 closed unmerged (corrected 2026-09-15, Plan 230-07)
 
-Branch `fix/release-boot-env-resolver` is pushed and PR #44 is OPEN against main
-(mergeable). Four commits cherry-picked from the milestone branch
-(2de4389b, 9eae363a, 173607d9, 5653216c): canonical `Accrue.Env` seam, the six
-auth call sites, format, and release docs. Verified on the branch off
-main @ 5c01f4bc -- env 5/5, auth 6/6, `mix format --check-formatted` clean,
-zero adopter PII in the diff or PR body (it says "a downstream host app").
+**Correction (D-10):** the prior text below described PR #44's four commits as
+"cherry-picked from the milestone branch" -- that described *intent*, not the
+pushed branch. Measured truth, re-verified live immediately before Plan
+230-07 Task 2 acted: `git merge-base --is-ancestor main 3f8338cd` -> YES and
+`main...3f8338cd` -> `0 4`. **The PR's pushed head was local `main` plus 4
+commits** -- so merging it would have permanently published all 80 of the
+abandoned, excluded Phase-226 commits onto `main` (see `230-DISPOSITIONS.json`
+for the full excluded-commit ledger). It was never a clean 4-commit branch off
+`main`.
+
+The four useful commits (`2de4389b`, `9eae363a`, `173607d9`, `5653216c`:
+canonical `Accrue.Env` seam, the six auth call sites, format, and release
+docs) are already on `integration/v1.62-candidate` as exact patch-id matches,
+re-verified live at close time -- nothing was lost by closing. `mix format
+--check-formatted` was clean on the branch; zero adopter PII in the diff or
+PR body (it says "a downstream host app").
 
 The fifth commit (afddc87c, the GSD quick-task planning doc) conflicts on
-`.planning/` and is deliberately left on the milestone branch. Running the
-Elixir suites needs `elixir 1.19.5-otp-28` in `.tool-versions`; no Elixir
-version is set globally, so `mix` fails in the main checkout too.
+`.planning/` and is deliberately left on the milestone branch (and is carried
+unchanged on the candidate, recorded `carried-on-candidate` in the ledger).
+
+**Outcome:** PR #44 is now **closed, unmerged** (state `closed`, `mergedAt`
+null). Per the Plan 230-07 checkpoint resolution, the maintainer authorized
+closing **without posting any PR comment** -- a deliberate deviation from the
+D-10 default (which called for a public superseding-SHA comment) -- to avoid
+any possibility of leaking identifiers in public GitHub content. Zero
+comments exist on the PR (verified). The superseding-SHA evidence instead
+lives only in the committed `230-DISPOSITIONS.json`/`.md` ledger, never in a
+public PR comment. `origin/main` was re-measured unchanged at `d30fc25d`
+both before and after the close. The remote branch `fix/release-boot-env-resolver`
+still exists (its removal is Phase 232's HYG-01, not this plan's).
 
 KNOWN AND ACCEPTED: this branch plus its remote-tracking ref are two refs that
-did not exist at capture, so strict verification of the published inventory now
-reports `extra=[...]` for both. Maintainer-authorized fail-forward. It was
-already a point-in-time check (see constraint 2 above) and the next recapture
-must happen after these settle.
+did not exist at Phase 229's capture, so strict verification of the published
+229 inventory still reports `extra=[...]` for both. Maintainer-authorized
+fail-forward, carried over unchanged by this correction. It was already a
+point-in-time check (see constraint 2 above) and the next recapture must
+happen after these settle.
+
+### Phase 230 outcome: reviewable integration candidate built, PR #44 closed
+
+`integration/v1.62-candidate` (single `--no-ff` merge commit
+`4d45002cafb3846810b84ff1afd84e7418476c50`, live tip
+`bab50d92be2695b12d5853e7d578e600376e73d0` after two declared post-merge
+commits) reconciles remote `main` (`d30fc25d`) with the full v1.61 lineage and
+the four post-archive closure commits, without rewriting published history or
+moving the `v1.61` tag. Recomputed scope: 337 files changed (223
+`.planning/`-only, 114 source), 527 commits (265 `.planning/`-only). The
+excluded-commit ledger records exactly 80 abandoned local-`main` commits (27
+`excluded-rejected`, 53 `excluded-superseded`), each with a tree- and
+requirement-level supersession proof, plus one `carried-on-candidate` row
+(`afddc87c`) and one `published_elsewhere` row (`5da8e6b8`). The
+declared-additions ref-exceptions ledger (`230-REF-EXCEPTIONS.json`) carries
+`row_count: 8`. PR #44 is closed unmerged per the section above.
+
+**D-34 handoff to Phase 232:** the canonical worktree inventory's `dirty`
+boolean is currently pinned `true`. Phase 232 fully cleaning the tree will
+flip that boolean `true` -> `false`, which **will fail strict re-verification**
+of any capsule/inventory minted against the current `dirty: true` state. This
+is an expected, known transition, not a defect -- Phase 232 must recapture
+after the tree goes clean, not before.
 
 ### Adopter-named refs: fail forward (maintainer decision)
 

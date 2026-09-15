@@ -1,5 +1,15 @@
 # Milestones
 
+## v1.62 Release Integration & Repository Hygiene (In progress; Phase 230 complete 2026-09-15)
+
+**Status:** Executing. Phase 230 (Reviewable History Integration) is complete; Phases 231 (Exact-SHA Release Gate Proof) and 232 (Bounded Hygiene & Release Handoff) remain.
+
+**Phase 230 outcome:** Built `integration/v1.62-candidate` -- a single `--no-ff` merge commit (`4d45002cafb3846810b84ff1afd84e7418476c50`, live tip `bab50d92be2695b12d5853e7d578e600376e73d0` after two declared post-merge commits) -- reconciling remote `main` (`d30fc25d`) with the full v1.61 lineage and the four post-archive closure commits, without rewriting published history or moving the `v1.61` tag. Recomputed scope: 337 files changed (223 `.planning/`-only, 114 source), 527 commits (265 `.planning/`-only). The excluded-commit ledger (`230-DISPOSITIONS.json`) records exactly 80 abandoned local-`main` commits (27 `excluded-rejected`, 53 `excluded-superseded`) each with a tree- and requirement-level supersession proof, plus one `carried-on-candidate` row and one `published_elsewhere` row. The declared-additions ref-exceptions ledger carries `row_count: 8`. PR #44 (the superseded `fix/release-boot-env-resolver` branch, whose pushed head was local `main` plus 4 commits, not a clean cherry-pick) is closed unmerged with no public comment posted (maintainer-authorized privacy deviation from the D-10 default) -- its four useful commits are already on the candidate as exact patch-id matches. A code-only sibling review branch (`review/v1.62-candidate-code-only`) narrows the reviewer's read surface to 114 source files. `origin/main` is unchanged throughout; nothing was pushed, merged, or force-pushed.
+
+**D-34 handoff to Phase 232:** the canonical worktree `dirty` boolean is currently pinned `true`; Phase 232 fully cleaning the tree will flip it `true` -> `false`, which will fail strict re-verification of any capsule minted against the current state. Expected transition, not a defect.
+
+---
+
 ## v1.61 CI Evidence & Critical-Path Hardening (Shipped: 2026-09-12)
 
 **Phases completed:** 4 phases, 30 plans, 29 tasks
