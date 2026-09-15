@@ -5,16 +5,16 @@ milestone_name: Release Integration & Repository Hygiene
 current_phase: 230
 current_phase_name: Reviewable History Integration
 status: executing
-stopped_at: Completed 230-05-PLAN.md
-last_updated: "2026-09-15T19:41:22.798Z"
+stopped_at: Completed 230-04-PLAN.md
+last_updated: "2026-09-15T20:05:05.745Z"
 last_activity: 2026-09-15
 last_activity_desc: Phase 230 execution started
-state_head: 98e5fbdfcdb94677e2c6d3847688267473ac347b
+state_head: 0c503e997b5634bbc7e4a4ce9a9633791b3bcb0e
 progress:
   total_phases: 4
   completed_phases: 1
   total_plans: 27
-  completed_plans: 24
+  completed_plans: 25
   percent: 25
 ---
 
@@ -31,7 +31,7 @@ See: `.planning/PROJECT.md` (updated 2026-09-15)
 ## Current Position
 
 Phase: 230 (Reviewable History Integration) — EXECUTING
-Plan: 5 of 7
+Plan: 6 of 7
 Status: Ready to execute
 Last activity: 2026-09-15 — Phase 230 execution started
 
@@ -78,6 +78,7 @@ Progress: [███░░░░░░░] 25% (20/20 plans in Phase 229)
 | Phase 230 P02 | ~2h | 2 tasks | 7 files |
 | Phase 230 P03 | ~90 min | 3 tasks | 5 files |
 | Phase 230 P05 | 40 min | 3 tasks | 7 files |
+| Phase 230 P04 | ~110 min | 3 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -133,6 +134,8 @@ Progress: [███░░░░░░░] 25% (20/20 plans in Phase 229)
 - [Phase 230]: Built the reviewable v1.62 integration candidate (refs/heads/integration/v1.62-candidate) via pure git plumbing, proving all five D-05 ancestry gates live and a scratch-clone-executed rollback revert, without pushing or moving the v1.61 tag. — Plan 230-02 (tracer)
 - [Phase 230]: [Phase 230]: Recomputed the hazard universe from live merge-parent SHAs inside the collector -- three co-touched files proved convergent-identical by blob equality, config.ex classified disjoint-hunk (proved by both survivor markers present), mix.exs classified dependency-lock-drift (non_run, owned by Plan 230-05), entitlements.md classified doc-rewrite; every D-21 lane recorded as an explicit non_run row owned by Phase 231. — D-14/D-15/D-20/D-21: never transcribe the hazard universe, unknown class is a hard failure, and a 231-owned check absent from Phase 230's scope must be an evidenced non_run row, not a silent omission.
 - [Phase 230]: 230-05: Config's mix_env regression exercises validate_at_boot!/0, not validate!/1 (the latter never invokes maybe_validate_boot_setup!/1 where the seam is actually exercised). — A first draft using validate!/1 passed even when the Accrue.Env.mix_env/0 seam was reverted to current/0 -- a false negative caught before committing.
+- [Phase 230]: 230-04: superseded_by is the no-equivalent sentinel for every wholesale-excluded row; excluded-rejected vs excluded-superseded classification is a live path-filter recomputation, never a hardcoded SHA list. — D-07's exclusion is proven at tree/requirement level, not commit-for-commit; D-15's never-transcribe discipline extends to disposition classification.
+- [Phase 230]: 230-04: bulkPatchIdFrequency pipes git log -p | git patch-id through temp-file descriptors, not spawnSync string buffers, to avoid ENOBUFS on the candidate's ~350MB diff history. — Node spawnSync input/stdout string buffers hit an OS pipe limit well before any maxBuffer ceiling on a ~500-commit history.
 
 ### Pending Todos
 
@@ -151,8 +154,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-09-15T19:41:22.774Z
-Stopped at: Completed 230-05-PLAN.md
+Last session: 2026-09-15T20:05:05.707Z
+Stopped at: Completed 230-04-PLAN.md
 
 229-20 outcome (commits 024eaeca, ddd9a137, c6677152):
 
