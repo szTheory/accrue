@@ -61,9 +61,13 @@ function validateRelativeGitPath(value) {
   for (const component of value.toString("binary").split("/")) if (!component || component === "." || component === "..") fail("Git returned an unsafe untracked path component");
 }
 
-export function snapshotUntracked(repo) {
+function exclusionPathspec(excludePaths) {
+  return [".", ...excludePaths.flatMap((relative) => [`:(exclude,glob)${relative}`, `:(exclude,glob)${relative}.phase229-tmp-*`, `:(exclude,glob)${relative}.phase229-backup-*`])];
+}
+
+export function snapshotUntracked(repo, excludePaths = []) {
   const root = Buffer.from(fs.realpathSync(repo));
-  return splitNul(gitBuffer(repo, ["ls-files", "--others", "--exclude-standard", "-z"])).filter((value) => value.length).map((relative) => {
+  return splitNul(gitBuffer(repo, ["ls-files", "--others", "--exclude-standard", "-z", "--", ...exclusionPathspec(excludePaths)])).filter((value) => value.length).map((relative) => {
     validateRelativeGitPath(relative); return entryIdentity(joinBuffer(root, relative), relative);
   }).sort((left, right) => left.path_hex.localeCompare(right.path_hex));
 }
@@ -98,8 +102,14 @@ export function snapshotWorktrees(repo) {
   return rows.sort((left, right) => left.path_hex.localeCompare(right.path_hex));
 }
 
-export function snapshotWorkspace(repo) {
-  return { untracked: snapshotUntracked(repo), refs: snapshotRefs(repo), worktrees: snapshotWorktrees(repo) };
+export function snapshotIndexAndStatus(repo, excludePaths = []) {
+  const status = gitBuffer(repo, ["status", "--porcelain=v2", "-z", "--untracked-files=all", "--", ...exclusionPathspec(excludePaths)]);
+  const index = gitBuffer(repo, ["ls-files", "-s", "-z", "--", ...exclusionPathspec(excludePaths)]);
+  return { status_hex: status.toString("hex"), index_hex: index.toString("hex") };
+}
+
+export function snapshotWorkspace(repo, excludePaths = []) {
+  return { untracked: snapshotUntracked(repo, excludePaths), refs: snapshotRefs(repo), worktrees: snapshotWorktrees(repo), indexStatus: snapshotIndexAndStatus(repo, excludePaths) };
 }
 
 export function assertExact(label, before, after) {
@@ -113,23 +123,133 @@ function assertFreshAttestation(capsuleDirectory, attestation) {
   if (fs.existsSync(attestation) || fs.lstatSync(attestation, { throwIfNoEntry: false })) fail("attestation destination must be absent before capture");
 }
 
-function createAttestation(attestation, repository) {
+function createAttestation(attestation, payload) {
   const descriptor = fs.openSync(attestation, "wx", 0o600);
   try {
     fs.fchmodSync(descriptor, 0o600);
-    fs.writeFileSync(descriptor, `${JSON.stringify({ schema_version: 1, purpose: "phase229_final_handoff_invariants", repository, result: "PASS" })}\n`);
+    fs.writeFileSync(descriptor, `${JSON.stringify(payload)}\n`);
     fs.fsyncSync(descriptor);
   } finally { fs.closeSync(descriptor); }
   const stat = fs.lstatSync(attestation);
-  if (!stat.isFile() || stat.isSymbolicLink() || modeOf(stat) !== 0o600 || stat.uid !== process.geteuid() || stat.gid !== process.getegid()) fail("exclusive attestation identity is invalid");
+  // Group ownership of a freshly created file follows the parent directory's group under BSD/macOS
+  // semantics (not necessarily the creating process's primary egid); mode 0600 already restricts all
+  // access to the owning UID, so UID plus mode is the actual security boundary here.
+  if (!stat.isFile() || stat.isSymbolicLink() || modeOf(stat) !== 0o600 || stat.uid !== process.geteuid()) fail("exclusive attestation identity is invalid");
 }
 
-export function assertOnlyAttestation(before, after, attestationName, uid = process.geteuid(), gid = process.getegid()) {
+// --- CR-01: pre-write output authority pinning and transactional canonical publication ---
+
+function identityOf(target) {
+  try { const stat = fs.lstatSync(target); return `${stat.dev}:${stat.ino}`; } catch { return null; }
+}
+
+function resolveCanonicalOutputs(options) {
+  if (options.records !== CANONICAL_RECORDS || options.rendered !== CANONICAL_RENDERED) fail("output arguments must equal the fixed canonical repository paths");
+  const repo = fs.realpathSync(options.repositoryRoot);
+  const recordsPath = path.join(repo, CANONICAL_RECORDS);
+  const renderedPath = path.join(repo, CANONICAL_RENDERED);
+  const recordsParent = fs.realpathSync(path.dirname(recordsPath));
+  const renderedParent = fs.realpathSync(path.dirname(renderedPath));
+  if (recordsParent !== renderedParent) fail("canonical outputs must share one physical parent directory");
+  if (recordsParent !== repo && !recordsParent.startsWith(`${repo}${path.sep}`)) fail("canonical parent escapes the physical repository root");
+  for (const target of [recordsPath, renderedPath]) {
+    const stat = fs.lstatSync(target, { throwIfNoEntry: false });
+    if (stat && stat.isSymbolicLink()) fail(`canonical output must not be a symlink: ${target}`);
+  }
+  const authorities = {
+    "capsule directory": fs.realpathSync(options.capsuleDirectory),
+    "recovery manifest": options.recoveryManifest,
+    "recovery bundle": options.recoveryBundle,
+    "handoff attestation": options.attestation
+  };
+  const recordsIdentity = identityOf(recordsPath); const renderedIdentity = identityOf(renderedPath);
+  for (const [label, authorityPath] of Object.entries(authorities)) {
+    const authorityIdentity = identityOf(authorityPath);
+    if (!authorityIdentity) continue;
+    if (authorityIdentity === recordsIdentity || authorityIdentity === renderedIdentity) fail(`canonical output aliases a private authority: ${label}`);
+  }
+  if (recordsIdentity && recordsIdentity === renderedIdentity) fail("canonical outputs must not alias each other");
+  if (path.resolve(recordsPath) === path.resolve(renderedPath)) fail("canonical outputs must not share one path");
+  return { recordsPath, renderedPath };
+}
+
+function publishCanonicalPair(tempRecords, recordsPath, tempRendered, renderedPath) {
+  for (const temp of [tempRecords, tempRendered]) {
+    const stat = fs.lstatSync(temp);
+    if (!stat.isFile() || stat.isSymbolicLink()) fail("canonical publication source must be an exclusive regular temporary");
+  }
+  const backups = {};
+  try {
+    if (fs.existsSync(recordsPath)) { backups.records = `${recordsPath}.phase229-backup-${process.pid}`; fs.copyFileSync(recordsPath, backups.records); }
+    if (fs.existsSync(renderedPath)) { backups.rendered = `${renderedPath}.phase229-backup-${process.pid}`; fs.copyFileSync(renderedPath, backups.rendered); }
+    fs.renameSync(tempRecords, recordsPath);
+    try {
+      fs.renameSync(tempRendered, renderedPath);
+    } catch (error) {
+      if (backups.records) fs.renameSync(backups.records, recordsPath); else fs.rmSync(recordsPath, { force: true });
+      throw error;
+    }
+  } catch (error) {
+    fs.rmSync(tempRecords, { force: true });
+    fs.rmSync(tempRendered, { force: true });
+    if (backups.records) fs.rmSync(backups.records, { force: true });
+    if (backups.rendered) fs.rmSync(backups.rendered, { force: true });
+    throw error;
+  }
+  if (backups.records) fs.rmSync(backups.records, { force: true });
+  if (backups.rendered) fs.rmSync(backups.rendered, { force: true });
+}
+
+function writeWorkflowMetadataAuthorization(finalCapture, destination) {
+  const capture = JSON.parse(fs.readFileSync(finalCapture, "utf8"));
+  const workflow = new Set([".planning/milestone.lock", ".planning/state.json"]);
+  const changes = capture.artifacts.filter((entry) => workflow.has(entry.path)).map(({ path: entryPath, type, before_sha256, after_sha256, state }) => ({ path: entryPath, type, before_sha256, after_sha256, state }));
+  if (changes.length !== workflow.size) fail("final capture did not produce exactly two workflow metadata invariants");
+  const descriptor = fs.openSync(destination, "wx", 0o600);
+  try { fs.fchmodSync(descriptor, 0o600); fs.writeFileSync(descriptor, `${JSON.stringify({ schema_version: 1, purpose: "phase229_workflow_metadata_refresh", changes })}\n`); fs.fsyncSync(descriptor); } finally { fs.closeSync(descriptor); }
+}
+
+// --- CR-09/WR-01: test-owned mutation hooks, unreachable without matching token + markers ---
+
+const TEST_OWNED_MARKER = ".phase229-test-owned";
+
+function applyTestMutation(repo, capsule, boundary) {
+  const trigger = process.env.PHASE229_TEST_MUTATION;
+  if (!trigger) return;
+  let request;
+  try { request = JSON.parse(trigger); } catch { return; }
+  if (!request || request.boundary !== boundary) return;
+  const token = process.env.PHASE229_TEST_MUTATION_TOKEN;
+  if (!token || request.token !== token) return;
+  const repoMarker = path.join(repo, TEST_OWNED_MARKER); const capsuleMarker = path.join(capsule, TEST_OWNED_MARKER);
+  let repoToken; let capsuleToken;
+  try { repoToken = fs.readFileSync(repoMarker, "utf8").trim(); capsuleToken = fs.readFileSync(capsuleMarker, "utf8").trim(); } catch { return; }
+  if (repoToken !== token || capsuleToken !== token) return;
+  const tracked = path.join(repo, "tracked");
+  switch (request.action) {
+    case "unstaged": fs.writeFileSync(tracked, "mutated-unstaged\n"); break;
+    case "staged": fs.writeFileSync(tracked, "mutated-staged\n"); spawnSync("git", ["-C", repo, "add", "tracked"], { encoding: "utf8" }); break;
+    case "add": fs.writeFileSync(path.join(repo, "phase229-test-added"), "added\n"); spawnSync("git", ["-C", repo, "add", "phase229-test-added"], { encoding: "utf8" }); break;
+    case "delete": spawnSync("git", ["-C", repo, "rm", "-q", "tracked"], { encoding: "utf8" }); break;
+    case "rename": spawnSync("git", ["-C", repo, "mv", "tracked", "tracked-renamed"], { encoding: "utf8" }); break;
+    case "mode": fs.chmodSync(tracked, 0o755); break;
+    case "index": spawnSync("git", ["-C", repo, "update-index", "--chmod=+x", "tracked"], { encoding: "utf8" }); break;
+    case "untracked": fs.writeFileSync(path.join(repo, "phase229-test-untracked"), "untracked\n"); break;
+    case "ref": spawnSync("git", ["-C", repo, "tag", "-f", "phase229-test-mutation-tag", "HEAD"], { encoding: "utf8" }); break;
+    case "worktree": spawnSync("git", ["-C", repo, "branch", "-f", "phase229-test-mutation-branch", "HEAD"], { encoding: "utf8" }); break;
+    case "output-tamper": for (const name of ["229-REPOSITORY-INVENTORY.json", "229-REPOSITORY-INVENTORY.md"]) { const target = path.join(repo, ".planning/phases/229-repository-truth-recovery-safety", name); if (fs.existsSync(target)) fs.appendFileSync(target, "tamper\n"); } break;
+    case "capsule": fs.writeFileSync(path.join(capsule, "phase229-test-capsule-mutation"), "mutation\n"); break;
+    case "attestation": for (const entry of fs.readdirSync(capsule)) { if (entry.endsWith(".json") && entry !== "manifest.json") { try { fs.appendFileSync(path.join(capsule, entry), "\n// tamper"); } catch { /* ignore */ } } } break;
+    default: return;
+  }
+}
+
+export function assertOnlyAttestation(before, after, attestationName, uid = process.geteuid()) {
   const nameHex = Buffer.from(attestationName).toString("hex");
   const retained = after.filter((row) => row.path_hex !== nameHex);
   assertExact("pre-existing capsule entries", before, retained);
   const added = after.filter((row) => row.path_hex === nameHex);
-  if (added.length !== 1 || added[0].type !== "regular" || added[0].mode !== 0o600 || added[0].uid !== uid || added[0].gid !== gid || !SHA256.test(added[0].digest || "")) fail("the sole capsule delta must be the exact current-owner mode-0600 attestation");
+  if (added.length !== 1 || added[0].type !== "regular" || added[0].mode !== 0o600 || added[0].uid !== uid || !SHA256.test(added[0].digest || "")) fail("the sole capsule delta must be the exact current-owner mode-0600 attestation");
   return true;
 }
 
@@ -168,27 +288,71 @@ function runFinalChain(options) {
   const repo = fs.realpathSync(options.repositoryRoot); const capsule = fs.realpathSync(options.capsuleDirectory);
   if (options.expectedRepository !== REPOSITORY || fs.realpathSync(gitBuffer(repo, ["rev-parse", "--show-toplevel"]).toString("utf8").trim()) !== repo) fail("repository root or identity is invalid");
   validateAuthority(options);
-  const beforeCapsule = snapshotTree(capsule); const beforeWorkspace = snapshotWorkspace(repo);
-  const scratch = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), "phase229-final-snapshot-"))); const snapshotFile = path.join(scratch, "before.json"); const finalCapture = path.join(scratch, "current-artifacts.json");
-  let descriptor; let createdAttestation = false;
+  const { recordsPath, renderedPath } = resolveCanonicalOutputs(options);
+  const originalRecords = fs.existsSync(recordsPath) ? fs.readFileSync(recordsPath) : null;
+  const originalRendered = fs.existsSync(renderedPath) ? fs.readFileSync(renderedPath) : null;
+  const beforeCapsule = snapshotTree(capsule); const beforeWorkspace = snapshotWorkspace(repo, [CANONICAL_RECORDS, CANONICAL_RENDERED]);
+  applyTestMutation(repo, capsule, "before-collection");
+  const scratch = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), "phase229-final-snapshot-"))); const snapshotFile = path.join(scratch, "before.json"); const finalCapture = path.join(scratch, "current-artifacts.json"); const authorization = path.join(scratch, "authorization.json");
+  const tempRecords = `${recordsPath}.phase229-tmp-${process.pid}`; const tempRendered = `${renderedPath}.phase229-tmp-${process.pid}`;
+  let descriptor; let createdAttestation = false; let published = false;
   try {
     descriptor = fs.openSync(snapshotFile, "wx", 0o600); fs.writeFileSync(descriptor, `${JSON.stringify({ capsule: beforeCapsule, workspace: beforeWorkspace })}\n`); fs.fsyncSync(descriptor); fs.closeSync(descriptor); descriptor = undefined;
     if (modeOf(fs.lstatSync(snapshotFile)) !== 0o600) fail("process-local before snapshot must remain mode 0600");
     writeCurrentArtifactAttestation(repo, options.recoveryManifest, finalCapture);
-    runStep("preservation self-test", "bash", [path.join(SCRIPT_DIR, "preserve_repository_state.sh"), "--self-test"], repo);
-    runStep("collector tests", process.execPath, ["--test", path.join(SCRIPT_DIR, "collect_repository_inventory.mjs")], repo);
-    runStep("final bounded collection", process.execPath, [path.join(SCRIPT_DIR, "collect_repository_inventory.mjs"), "--repo", REPOSITORY, "--recovery-manifest", options.recoveryManifest, "--expected-manifest-sha256", options.expectedManifestSha256, "--recovery-bundle", options.recoveryBundle, "--final-capture-attestation", finalCapture, "--observe-remote", "--out", options.records], repo);
-    runStep("deterministic rendering", process.execPath, [path.join(SCRIPT_DIR, "render_repository_inventory.mjs"), "--input", options.records, "--out", options.rendered, "--expected-repository", REPOSITORY], repo);
-    runStep("gap closure tests", process.execPath, ["--test", path.join(SCRIPT_DIR, "phase229_gap_closure.test.mjs")], repo);
-    runStep("inventory verifier tests", process.execPath, ["--test", path.join(SCRIPT_DIR, "verify_repository_inventory.mjs")], repo);
-    runStep("monitor wrapper and docs", process.execPath, [path.join(SCRIPT_DIR, "ci_monitor.cjs"), "--self-test", "--verify-wrapper", path.join(SCRIPT_DIR, "watch_ci.sh"), "--verify-docs", path.join(SCRIPT_DIR, "README.md")], repo);
-    runStep("strict real-capsule verification", process.execPath, [path.join(SCRIPT_DIR, "verify_repository_inventory.mjs"), "--records", options.records, "--rendered", options.rendered, "--expected-repository", REPOSITORY, "--repository-root", repo, "--recovery-manifest", options.recoveryManifest, "--expected-manifest-sha256", options.expectedManifestSha256, "--recovery-bundle", options.recoveryBundle, "--require-recovery", "--require-all-ref-recovery", "--require-typed-artifacts", "--require-complete-categories", "--require-edge-cases", "--require-command-provenance", "--require-privacy-controls", "--require-determinism", "--require-workflow-metadata-authorization"], repo);
-    assertExact("capsule", beforeCapsule, snapshotTree(capsule)); assertExact("workspace", beforeWorkspace, snapshotWorkspace(repo));
-    createAttestation(options.attestation, REPOSITORY); createdAttestation = true;
-    assertOnlyAttestation(beforeCapsule, snapshotTree(capsule), path.basename(options.attestation)); assertExact("workspace", beforeWorkspace, snapshotWorkspace(repo));
+    writeWorkflowMetadataAuthorization(finalCapture, authorization);
+    fs.rmSync(tempRecords, { force: true }); fs.rmSync(tempRendered, { force: true });
+    // A test-owned repository/capsule pair (present only under a test harness's own scratch
+    // fixtures, never in a real capsule) is itself exercised BY this file's own node:test suite.
+    // Re-running the meta self-tests below from inside that nested invocation would recursively
+    // re-spawn this same test file, so they are skipped there; the outer `node --test` process
+    // already covers the same assertions as top-level cases. Real invocations (no markers) always
+    // run every self-test.
+    const testOwned = fs.existsSync(path.join(repo, TEST_OWNED_MARKER)) && fs.existsSync(path.join(capsule, TEST_OWNED_MARKER));
+    if (!testOwned) {
+      runStep("preservation self-test", "bash", [path.join(SCRIPT_DIR, "preserve_repository_state.sh"), "--self-test"], repo);
+      runStep("collector tests", process.execPath, ["--test", path.join(SCRIPT_DIR, "collect_repository_inventory.mjs")], repo);
+    }
+    runStep("final bounded collection", process.execPath, [path.join(SCRIPT_DIR, "collect_repository_inventory.mjs"), "--repo", REPOSITORY, "--recovery-manifest", options.recoveryManifest, "--expected-manifest-sha256", options.expectedManifestSha256, "--recovery-bundle", options.recoveryBundle, "--artifact-authorization", authorization, "--final-capture-attestation", finalCapture, "--observe-remote", "--out", tempRecords], repo);
+    runStep("deterministic rendering", process.execPath, [path.join(SCRIPT_DIR, "render_repository_inventory.mjs"), "--input", tempRecords, "--out", tempRendered, "--expected-repository", REPOSITORY], repo);
+    if (!testOwned) {
+      runStep("gap closure tests", process.execPath, ["--test", path.join(SCRIPT_DIR, "phase229_gap_closure.test.mjs")], repo);
+      runStep("inventory verifier tests", process.execPath, ["--test", path.join(SCRIPT_DIR, "verify_repository_inventory.mjs")], repo);
+      runStep("monitor wrapper and docs", process.execPath, [path.join(SCRIPT_DIR, "ci_monitor.cjs"), "--self-test", "--verify-wrapper", path.join(SCRIPT_DIR, "watch_ci.sh"), "--verify-docs", path.join(SCRIPT_DIR, "README.md")], repo);
+    }
+    runStep("strict real-capsule verification", process.execPath, [path.join(SCRIPT_DIR, "verify_repository_inventory.mjs"), "--records", tempRecords, "--rendered", tempRendered, "--expected-repository", REPOSITORY, "--repository-root", repo, "--recovery-manifest", options.recoveryManifest, "--expected-manifest-sha256", options.expectedManifestSha256, "--recovery-bundle", options.recoveryBundle, "--artifact-authorization", authorization, "--require-recovery", "--require-all-ref-recovery", "--require-typed-artifacts", "--require-complete-categories", "--require-edge-cases", "--require-command-provenance", "--require-privacy-controls", "--require-determinism", "--require-workflow-metadata-authorization"], repo);
+    assertExact("capsule", beforeCapsule, snapshotTree(capsule)); assertExact("workspace", beforeWorkspace, snapshotWorkspace(repo, [CANONICAL_RECORDS, CANONICAL_RENDERED]));
+    applyTestMutation(repo, capsule, "before-publish");
+    assertExact("capsule", beforeCapsule, snapshotTree(capsule)); assertExact("workspace", beforeWorkspace, snapshotWorkspace(repo, [CANONICAL_RECORDS, CANONICAL_RENDERED]));
+    publishCanonicalPair(tempRecords, recordsPath, tempRendered, renderedPath); published = true;
+    applyTestMutation(repo, capsule, "before-attestation");
+    const attestationPayload = {
+      schema_version: 2,
+      purpose: "phase229_final_handoff_invariants",
+      repository: REPOSITORY,
+      observed_at: new Date().toISOString(),
+      capture: { active_ref: JSON.parse(fs.readFileSync(recordsPath, "utf8")).capture.active_ref, commit: JSON.parse(fs.readFileSync(recordsPath, "utf8")).capture.commit },
+      manifest_sha256: options.expectedManifestSha256,
+      bundle_sha256: sha256(fs.readFileSync(options.recoveryBundle)),
+      authorization_sha256: sha256(fs.readFileSync(authorization)),
+      collection_attestation_sha256: sha256(fs.readFileSync(finalCapture)),
+      records_sha256: sha256(fs.readFileSync(recordsPath)),
+      rendered_sha256: sha256(fs.readFileSync(renderedPath)),
+      before_capsule_digest: sha256(Buffer.from(JSON.stringify(beforeCapsule))),
+      before_workspace_digest: sha256(Buffer.from(JSON.stringify(beforeWorkspace))),
+      result: "PASS"
+    };
+    assertExact("capsule", beforeCapsule, snapshotTree(capsule)); assertExact("workspace", beforeWorkspace, snapshotWorkspace(repo, [CANONICAL_RECORDS, CANONICAL_RENDERED]));
+    createAttestation(options.attestation, attestationPayload); createdAttestation = true;
+    assertOnlyAttestation(beforeCapsule, snapshotTree(capsule), path.basename(options.attestation)); assertExact("workspace", beforeWorkspace, snapshotWorkspace(repo, [CANONICAL_RECORDS, CANONICAL_RENDERED]));
     console.log("phase229 final handoff invariants: PASS");
   } catch (error) {
     if (createdAttestation) fs.rmSync(options.attestation, { force: true });
+    if (published) {
+      if (originalRecords !== null) fs.writeFileSync(recordsPath, originalRecords); else fs.rmSync(recordsPath, { force: true });
+      if (originalRendered !== null) fs.writeFileSync(renderedPath, originalRendered); else fs.rmSync(renderedPath, { force: true });
+    }
+    fs.rmSync(tempRecords, { force: true }); fs.rmSync(tempRendered, { force: true });
     throw error;
   } finally {
     if (descriptor !== undefined) fs.closeSync(descriptor);
@@ -210,8 +374,8 @@ function runSelfTest() {
   reject("mode", (rows) => { rows[0].mode = 0o644; });
   reject("owner", (rows) => { rows[0].uid += 1; });
   reject("extra-entry", (rows) => rows.push({ ...rows[0], path_hex: "65" }));
-  const workspace = { untracked: [fixture], refs: [{ name_hex: "726566732f746167732f7631", object: "a".repeat(40) }], worktrees: [{ path_hex: "2f746d70", head: "a".repeat(40), identity: "detached" }] };
-  for (const [name, mutate] of [["untracked", (value) => { value.untracked[0].digest = "5".repeat(64); }], ["ref-tag", (value) => { value.refs[0].object = "b".repeat(40); }], ["worktree", (value) => { value.worktrees[0].head = "b".repeat(40); }]]) { const changed = structuredClone(workspace); mutate(changed); assert.throws(() => assertExact("workspace", workspace, changed)); console.log(`handoff invariant ${name}: PASS`); }
+  const workspace = { untracked: [fixture], refs: [{ name_hex: "726566732f746167732f7631", object: "a".repeat(40) }], worktrees: [{ path_hex: "2f746d70", head: "a".repeat(40), identity: "detached" }], indexStatus: { status_hex: "00", index_hex: "00" } };
+  for (const [name, mutate] of [["untracked", (value) => { value.untracked[0].digest = "5".repeat(64); }], ["ref-tag", (value) => { value.refs[0].object = "b".repeat(40); }], ["worktree", (value) => { value.worktrees[0].head = "b".repeat(40); }], ["index", (value) => { value.indexStatus.index_hex = "01"; }], ["status", (value) => { value.indexStatus.status_hex = "01"; }]]) { const changed = structuredClone(workspace); mutate(changed); assert.throws(() => assertExact("workspace", workspace, changed)); console.log(`handoff invariant ${name}: PASS`); }
   const scratch = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), "phase229-handoff-self-test-"))); const capsule = path.join(scratch, "capsule"); fs.mkdirSync(capsule);
   const rawName = Buffer.from([0xff, 0x2d, 0x66]); const rawPath = joinBuffer(Buffer.from(capsule), rawName);
   if (process.platform !== "darwin") fs.writeFileSync(rawPath, "raw");
@@ -221,7 +385,7 @@ function runSelfTest() {
     assert.ok(raw.some((row) => row.path_hex === Buffer.from("raw-link").toString("hex") && row.digest === sha256(Buffer.from([0xfd, 0x0a]))));
     assert.notEqual(Buffer.from(rawName.toString("utf8")).toString("hex"), rawName.toString("hex"), "raw-name fixture proves UTF-8 round trips are lossy"); console.log("handoff invariant raw-non-utf8: PASS");
     const existing = path.join(capsule, "existing.json"); fs.writeFileSync(existing, "occupied", { mode: 0o600 }); assert.throws(() => assertFreshAttestation(capsule, existing)); console.log("handoff invariant preexisting-attestation: PASS"); fs.rmSync(existing);
-    const before = snapshotTree(capsule); const attestation = path.join(capsule, "final.json"); createAttestation(attestation, REPOSITORY); assertOnlyAttestation(before, snapshotTree(capsule), "final.json"); console.log("handoff invariant exclusive-attestation: PASS");
+    const before = snapshotTree(capsule); const attestation = path.join(capsule, "final.json"); createAttestation(attestation, { schema_version: 2, purpose: "phase229_final_handoff_invariants", repository: REPOSITORY, result: "PASS" }); assertOnlyAttestation(before, snapshotTree(capsule), "final.json"); console.log("handoff invariant exclusive-attestation: PASS");
   } finally { fs.rmSync(scratch, { recursive: true, force: true }); }
   console.log("phase229 handoff invariant self-test: PASS");
 }
