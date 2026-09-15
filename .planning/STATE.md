@@ -31,9 +31,9 @@ See: `.planning/PROJECT.md` (updated 2026-09-12)
 ## Current Position
 
 Phase: 229 (Repository Truth & Recovery Safety) — IN PROGRESS
-Plan: 18 of 20
-Status: Gap closure execution in progress — 229-18 code complete and green, SUMMARY not yet written
-Last activity: 2026-09-15 — Completed quick task 260915-dpd: Fix eager Mix.env/0 evaluation in Accrue auth modules that crashes OTP releases at boot
+Plan: 19 of 20
+Status: Gap closure execution complete through 229-19; 229-20 BLOCKED on maintainer-held private capsule values
+Last activity: 2026-09-15 — Sealed 229-18 and 229-19 (CR-01/02/05/06/07 and WR-01 closed; all four CI gates green)
 
 Progress: [░░░░░░░░░░] 0%
 
@@ -140,5 +140,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-09-15T14:05:00Z
-Stopped at: Completed quick task 260915-dpd; Phase 229 plans 15-17 sealed, 229-18 implemented and green but unsealed, 229-19 and 229-20 not started
+Stopped at: Phase 229 plans 01-19 sealed and green (gap_closure 19/19, verify_repository_inventory 4/4, collect_repository_inventory 10/10, handoff --self-test PASS). 229-20 (final inventory recapture) cannot run unattended: the final chain requires five maintainer-only private values (PHASE229_CAPSULE_DIR, PHASE229_PRIVATE_MANIFEST, PHASE229_MANIFEST_SHA256, PHASE229_RECOVERY_BUNDLE, PHASE229_FINAL_ATTESTATION) — none are set in the agent environment. Invocation is documented in scripts/ci/README.md
 Resume file: None
