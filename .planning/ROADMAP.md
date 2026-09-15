@@ -67,12 +67,29 @@ Deferred StoreKit, Crosswake physical-device, and Admin UI ratchet work must be 
 **Plans**: 7 plans
 
 Plans:
+**Wave 1**
+
 - [ ] 230-01-PLAN.md — Preservation safety barrier and typed ref continuity
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
 - [ ] 230-02-PLAN.md — Tracer: integration candidate proven end to end with rollback proof
+
+**Wave 3** *(blocked on Wave 2 completion)*
+
 - [ ] 230-03-PLAN.md — Recomputed hazard universe and fail-closed dispositions
-- [ ] 230-04-PLAN.md — Excluded-commit ledger with tree- and requirement-level supersession
 - [ ] 230-05-PLAN.md — Dependency migration and focused regressions on the candidate
+
+**Wave 4** *(blocked on Wave 3 completion)*
+
+- [ ] 230-04-PLAN.md — Excluded-commit ledger with tree- and requirement-level supersession
+
+**Wave 5** *(blocked on Wave 4 completion)*
+
 - [ ] 230-06-PLAN.md — Standing archive-path invariant, code-only review branch, evidence map
+
+**Wave 6** *(blocked on Wave 5 completion)*
+
 - [ ] 230-07-PLAN.md — PR #44 closure, record correction, and final capsule minted last
 
 ### Phase 231: Exact-SHA Release Gate Proof
