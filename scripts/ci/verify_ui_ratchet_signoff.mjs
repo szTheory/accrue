@@ -8,7 +8,9 @@ import { verifyFrozenRatchetLedger } from "./verify_ratchet_ledger.mjs";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const REPO_ROOT = path.resolve(__dirname, "..", "..");
-export const PHASE208_DIR = ".planning/phases/208-prove-convergence-on-the-representative-slice-wire-ci-accept";
+// Phase 208 is archived (v1.56 milestone); D-22 standing invariant requires
+// archive-aware resolution rather than the stale pre-archive active-phase path.
+export const PHASE208_DIR = ".planning/milestones/v1.56-phases/208-prove-convergence-on-the-representative-slice-wire-ci-accept";
 export const DEFAULT_SIGNOFF_PATH = path.join(REPO_ROOT, PHASE208_DIR, "UI-RATCHET-SIGN-OFF.md");
 
 export const VALID_STATUS_VALUES = new Set(["PASS", "BLOCKED", "PENDING", "N/A"]);
@@ -569,7 +571,7 @@ function validSignoffMarkdown(overrides = {}) {
 | Check | Status | Result | Evidence |
 | --- | --- | --- | --- |
 | proven slice | PASS | SLICES.foundation reached CONVERGED (2 dry rounds). | accrue_admin/e2e/ratchet/rounds.ndjson |
-| score floor | PASS | All foundation score-floor rows are covered at score >= 2. | .planning/phases/208-prove-convergence-on-the-representative-slice-wire-ci-accept/208-VALIDATION.md |
+| score floor | PASS | All foundation score-floor rows are covered at score >= 2. | ${PHASE208_DIR}/208-VALIDATION.md |
 
 ## Ledger Baseline Summary
 
@@ -583,7 +585,7 @@ function validSignoffMarkdown(overrides = {}) {
 | Check | Status | Result | Evidence |
 | --- | --- | --- | --- |
 | ratchet finding regressions | ${status.regressions} | PASS - finding-regressions.ndjson is 0 bytes | accrue_admin/e2e/ratchet/finding-regressions.ndjson |
-| Phase 200 regressions | PASS | regressions.ndjson is 0 bytes. | .planning/phases/208-prove-convergence-on-the-representative-slice-wire-ci-accept/208-VALIDATION.md |
+| Phase 200 regressions | PASS | regressions.ndjson is 0 bytes. | ${PHASE208_DIR}/208-VALIDATION.md |
 
 ## CI Gate Evidence
 

@@ -13,9 +13,21 @@ if [[ -z "${CROSSWAKE_SOURCE_ROOT:-}" || ! -e "$CROSSWAKE_SOURCE_ROOT/.git" ]]; 
 fi
 
 repo_root="$(cd "$(dirname "$0")/../.." && pwd)"
-lock="$repo_root/.planning/phases/224-crosswake-host-command-bridge-seam/crosswake-source-lock.json"
-audit="$repo_root/.planning/phases/224-crosswake-host-command-bridge-seam/224-CROSSWAKE-SOURCE-AUDIT.md"
-evidence="$repo_root/.planning/phases/224-crosswake-host-command-bridge-seam/224-BRIDGE-CONFORMANCE-EVIDENCE.md"
+# Archive-aware: 224 may still be active (.planning/phases/224-...) or already
+# archived to .planning/milestones/*-phases/224-... (D-22 standing invariant).
+phase224_dir="$repo_root/.planning/phases/224-crosswake-host-command-bridge-seam"
+if [[ ! -d "$phase224_dir" ]]; then
+  archived224_candidates=()
+  for candidate in "$repo_root"/.planning/milestones/*-phases/224-crosswake-host-command-bridge-seam; do
+    [[ -d "$candidate" ]] && archived224_candidates+=("$candidate")
+  done
+  if [[ ${#archived224_candidates[@]} -eq 1 ]]; then
+    phase224_dir="${archived224_candidates[0]}"
+  fi
+fi
+lock="$phase224_dir/crosswake-source-lock.json"
+audit="$phase224_dir/224-CROSSWAKE-SOURCE-AUDIT.md"
+evidence="$phase224_dir/224-BRIDGE-CONFORMANCE-EVIDENCE.md"
 report="$repo_root/examples/crosswake_tracer/capability-report.json"
 expected_test_target='swift test --package-path packages/crosswake-shell-core-ios --filter HostCommandAdmissionTests'
 

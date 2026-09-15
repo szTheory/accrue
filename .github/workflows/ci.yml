@@ -178,6 +178,12 @@ jobs:
       - name: Repository truth gap-closure regression suite (CR-01..CR-10, WR-01, WR-02)
         run: node --test scripts/ci/phase229_gap_closure.test.mjs
 
+      - name: Phase-evidence archive-path sweep (D-22 standing invariant)
+        run: >-
+          node --test scripts/ci/verify_phase230_archive_invariants.mjs &&
+          node scripts/ci/verify_phase230_archive_invariants.mjs --fixtures &&
+          node scripts/ci/verify_phase230_archive_invariants.mjs
+
       - name: Install tokens harness
         run: cd brandbook/tokens/harness && npm ci
 
@@ -951,7 +957,7 @@ jobs:
             accrue_admin/e2e/ratchet/ledger.baseline.json
             accrue_admin/e2e/ratchet/finding-regressions.ndjson
             accrue_admin/e2e/ratchet/rounds.ndjson
-            .planning/phases/208-prove-convergence-on-the-representative-slice-wire-ci-accept/UI-RATCHET-SIGN-OFF.md
+            .planning/milestones/v1.56-phases/208-prove-convergence-on-the-representative-slice-wire-ci-accept/UI-RATCHET-SIGN-OFF.md
           if-no-files-found: ignore
 
   host-integration:

@@ -99,11 +99,22 @@ for needle in \
   "accrue_admin/e2e/ratchet/ledger.baseline.json" \
   "accrue_admin/e2e/ratchet/finding-regressions.ndjson" \
   "accrue_admin/e2e/ratchet/rounds.ndjson" \
-  ".planning/phases/208-prove-convergence-on-the-representative-slice-wire-ci-accept/UI-RATCHET-SIGN-OFF.md" \
+  ".planning/milestones/v1.56-phases/208-prove-convergence-on-the-representative-slice-wire-ci-accept/UI-RATCHET-SIGN-OFF.md" \
   "if-no-files-found: ignore"
 do
   require_source_fixed "admin-ui-ratchet-guardrails job" "$ratchet_job" "$needle"
 done
+
+evidence_upload_step="$(printf '%s\n' "$ratchet_job" | awk '
+  /name: Upload Phase 208 ratchet evidence/ { in_step = 1 }
+  in_step { print }
+  in_step && /if-no-files-found:/ { exit }
+')"
+[ -n "$evidence_upload_step" ] || fail "could not extract Phase 208 ratchet-evidence upload step"
+require_source_absent_regex \
+  "Phase 208 ratchet-evidence upload step" \
+  "$evidence_upload_step" \
+  '\.planning/phases/208-prove-convergence-on-the-representative-slice-wire-ci-accept/'
 
 require_source_regex "admin-ui-ratchet-guardrails job" "$ratchet_job" 'name: Install admin Node dependencies'
 require_source_regex "admin-ui-ratchet-guardrails job" "$ratchet_job" 'name: Run ratchet ledger self-tests'
