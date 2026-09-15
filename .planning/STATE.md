@@ -157,3 +157,45 @@ Still open for a maintainer decision:
 - The canonical inventory faithfully records two pre-existing refs whose names embed a downstream adopter's product name. They exist locally AND on the public origin, predate this plan, and the same names are already in the previously committed inventory, so the recapture added no new exposure. Renaming them is remote mutation (outside D-10) and would invalidate the frozen manifest.
 - Branch fix/release-boot-env-resolver now carries the adopter boot fix as four commits off main (env resolver, auth boot path, format, docs), cherry-picked out of the 453-commit milestone branch and verified there: env 5/5, auth 6/6, mix format clean. Not pushed. The GSD quick-task planning doc was deliberately left behind on the milestone branch.
 Resume file: None
+
+### Phase 229 evidence: two ordering constraints learned the hard way
+
+The published inventory asserts COMPLETE ref truth and pins planning-authority
+digests. Two consequences, both hit and both verified after 229-20 sealed:
+
+1. Creating ANY new ref (branch or tag) makes strict verification fail with
+   `extra=[<ref>]`. A standalone branch created after capture broke it
+   immediately; deleting the branch restored it. Do not create refs while this
+   inventory is the active evidence -- recapture afterwards instead. Note a
+   recapture CANNOT rescue this either: the new ref is absent from the frozen
+   manifest, so the manifest comparison would fail with extra=[<ref>] too.
+
+2. `.planning/STATE.md` is a pinned planning authority (planning.state is its
+   sha256; MILESTONES.md and WINDOWS.md likewise). Editing it after capture
+   fails with `planning.state differs from independent .planning/STATE.md
+   authority`. Verified directly: restoring STATE.md to its c6677152 content
+   makes strict verification PASS again. Only `.planning/milestone.lock` and
+   `.planning/state.json` are permitted to move.
+
+So strict re-verification of a published inventory is a point-in-time check,
+valid until the next planning-doc update -- which is every GSD step, including
+the `/gsd-verify-work 229` that should run next. That is inherent to pinning
+planning digests, not a defect. The evidence's durable guarantee is that it
+verified at publication (capture commit A, canonical commit B, summary commit C)
+and stays bound by the round-3 attestation. Any future recapture must be the
+LAST action after planning docs settle.
+
+### Adopter boot fix: standalone branch recipe
+
+Branch `fix/release-boot-env-resolver` was built, verified (env 5/5, auth 6/6,
+mix format clean, off main @ 5c01f4bc) and then DELETED to restore constraint 1
+above. Recreate it when the inventory is no longer the active gate:
+
+    git branch fix/release-boot-env-resolver main
+    git worktree add <tmp> fix/release-boot-env-resolver
+    cd <tmp> && git cherry-pick -x 2de4389b 9eae363a 173607d9 5653216c
+
+The fifth commit (afddc87c, the GSD quick-task planning doc) conflicts on
+`.planning/` and is deliberately left on the milestone branch. Running the
+Elixir suites needs `elixir 1.19.5-otp-28` in `.tool-versions`; no Elixir
+version is set globally, so `mix` fails in the main checkout too.
