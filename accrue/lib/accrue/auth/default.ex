@@ -29,6 +29,17 @@ defmodule Accrue.Auth.Default do
   of Heisenbugs historically). `Accrue.Env.current/0` never evaluates the
   build tool when `:env` is configured, and never raises when the build
   tool is absent, so this module is safe inside an OTP release.
+
+  > #### Set `:env` explicitly in a release {: .tip}
+  >
+  > Hosts should always set `config :accrue, env: :prod` in
+  > `config/runtime.exs` rather than relying on the build-tool fallback.
+  > The fallback exists only to keep `mix` workflows ergonomic; it is not
+  > a substitute for stating the environment. A host that instead works
+  > around a missing build tool by shipping it into the release gets a
+  > build-tool env of `:dev` in production — which would silently select
+  > the dev-permissive paths in this module. Stating `:env` removes that
+  > class of mistake entirely.
   """
 
   @behaviour Accrue.Auth
