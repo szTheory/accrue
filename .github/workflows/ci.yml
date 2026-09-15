@@ -164,6 +164,7 @@ jobs:
           --require-complete-categories --require-edge-cases
           --require-all-ref-recovery --require-typed-artifacts
           --require-privacy-controls --require-determinism
+          --require-command-provenance
 
       - name: Final handoff invariants (REPO-02)
         run: node scripts/ci/verify_phase229_handoff_invariants.mjs --self-test

@@ -1,8 +1,8 @@
 ---
 phase: "229"
 slug: "repository-truth-recovery-safety"
-status: open
-threats_open: 3
+status: verified
+threats_open: 0
 asvs_level: 1
 created: "2026-09-13"
 ---
@@ -39,9 +39,9 @@ created: "2026-09-13"
 | T-229-09 | Spoofing | Remote facts | high | mitigate | Repository, ISO time, normalized GET request, and full SHA required. | closed |
 | T-229-10 | Tampering | Recovery-to-observation ordering | high | mitigate | Manifest, bundle, refs, and artifacts validate before any remote adapter call. | closed |
 | T-229-11 | Information Disclosure | Committed evidence | high | mitigate | Field/path allowlists, escaping, negative privacy controls, and byte reproduction. | closed |
-| T-229-12 | Repudiation | Unavailable/green evidence | high | mitigate | Explicit unavailable facts must retain normalized request provenance; the plural Markdown projection currently drops it. | open |
+| T-229-12 | Repudiation | Unavailable/green evidence | high | mitigate | Explicit unavailable facts retain normalized request provenance: the renderer computes provenance before the availability branch, so unavailable plural rows emit their full request list; the collector rejects absent or empty plural request arrays. | closed |
 | T-229-13 | Denial of Service | Remote/process bounds | medium | mitigate | Fixed requests, pagination/item limits, subprocess timeout, and bounded buffers. | closed |
-| T-229-14 | Spoofing | Final remote evidence | high | mitigate | Independent verifier must enforce and render repository/time/request/full-SHA provenance; plural facts currently render an undefined request. | open |
+| T-229-14 | Spoofing | Final remote evidence | high | mitigate | The independent verifier normalizes every key as plural where applicable and requires an exact contiguous ordered page sequence with terminal-page proof; repository identity, ISO time, and full-SHA validation are unconditional, and rendered Markdown must byte-reproduce from the JSON. | closed |
 | T-229-15 | Tampering | Final capture ordering | high | mitigate | Committed manifest digest anchor, owner/mode checks, actual bundle verification/list-heads, all 109 ref/object matches, and zero-adapter-call failure fixtures. | closed |
 | T-229-16 | Information Disclosure | Final artifacts | high | mitigate | Recursive privacy controls and exact JSON-to-Markdown byte verification. | closed |
 | T-229-17 | Repudiation | Documentation semantics | medium | mitigate | Executable documentation checks pin read-only commands, exact identity/SHA, bounds, and provider distinction. | closed |
@@ -86,11 +86,11 @@ created: "2026-09-13"
 | T-229-G13-05 | Elevation of Privilege | Verification subprocesses | medium | mitigate | Verification uses shell-disabled subprocesses and test-owned temporary directories. | closed |
 | T-229-G14-01 | Repudiation | Strict verification documentation | high | mitigate | Executable documentation requires all runtime-only private authority inputs. | closed |
 | T-229-G14-02 | Tampering | Final handoff invariants | high | mitigate | Fixed-chain before/after snapshots reject capsule and workspace drift. | closed |
-| T-229-G14-03 | Spoofing | Canonical JSON/Markdown provenance | high | mitigate | Exact terminal-page request provenance must survive into both canonical artifacts; plural Markdown rows currently lose it. | open |
+| T-229-G14-03 | Spoofing | Canonical JSON/Markdown provenance | high | mitigate | Exact terminal-page request provenance survives into both canonical artifacts; byte reproduction makes JSON-to-Markdown divergence a hard failure and neither committed artifact contains any `undefined`. | closed |
 | T-229-G14-04 | Information Disclosure | Final handoff output | high | mitigate | Runtime-only authority and recursive privacy checks prevent private-path disclosure. | closed |
 | T-229-G14-05 | Elevation of Privilege | Attestation publication | medium | mitigate | A single pre-authorized mode-0600 attestation is created exclusively after invariant checks. | closed |
 
-*Status: open — three high-severity threats block completion.*
+*Status: verified — all 61 threats closed.*
 
 ---
 
@@ -109,6 +109,7 @@ No accepted risks.
 | 2026-09-13 | 17 | 17 | 0 | gsd-security-auditor after manifest integrity anchoring |
 | 2026-09-13 | 39 | 39 | 0 | gsd-security-auditor after gap closure and final recapture |
 | 2026-09-13 | 61 | 58 | 3 | gsd-security-auditor after second gap closure |
+| 2026-09-15 | 61 | 61 | 0 | gsd-security-auditor after plural-provenance remediation verification |
 
 ---
 
@@ -116,7 +117,44 @@ No accepted risks.
 
 - [x] All threats have a disposition
 - [x] Accepted risks documented (none)
-- [ ] `threats_open: 0` confirmed
-- [ ] `status: verified` set in frontmatter
+- [x] `threats_open: 0` confirmed
+- [x] `status: verified` set in frontmatter
 
-**Approval:** blocked pending remediation of T-229-12, T-229-14, and T-229-G14-03
+**Approval:** approved — 61/61 threats closed.
+
+---
+
+## Security Audit 2026-09-15
+
+Re-verification of the three threats left open by the 2026-09-13 audit. That audit
+document (commit `93ae7b98`, 16:12:38 -0400) is an ancestor of the renderer/collector
+fix (commit `9ce20002`, 17:03:55 -0400), so its "currently drops it" language described
+a state ~51 minutes older than the remediation. The register was stale, not the code.
+
+Verification was adversarial rather than documentation-based. Against the committed
+`229-REPOSITORY-INVENTORY.json`/`.md` pair the strict verifier passes at baseline and
+fails closed under each targeted mutation:
+
+| Probe | Result |
+|-------|--------|
+| Baseline strict verification with provenance, edge-case, privacy, and determinism flags | PASS |
+| Delete `remotes.actions.requests` (the T-229-12 unavailable-plural case) | FAIL — "plural remote fact requests must be an ordered repository-bound GET sequence", exit 1 |
+| Delete `remotes.pull_requests.requests` (observed-plural) | FAIL — same control, exit 1 |
+| Replace a plural request column in the Markdown with `undefined` | FAIL — "rendered Markdown must be byte-reproducible", exit 1 |
+| Revert `render_repository_inventory.mjs` line 15 to the pre-fix `escape(value.request)` in a scratch copy | Reproduces the original defect exactly — `CR-04` fails with `undefined` in the `actions`, `pull_requests`, and both `release_branches` rows |
+
+The regression guards are merge-blocking in `.github/workflows/ci.yml`:
+`render_repository_inventory.mjs#CR-04` (asserts no row contains `undefined`),
+`phase229_gap_closure.test.mjs#CR-07` (eight negative provenance variants through the
+real strict verifier) and `#CR-03`, and
+`collect_repository_inventory.mjs#CR-09`. Suites at HEAD: gap-closure 21/21,
+renderer 1/1, collector 10/10, verifier 4/4, zero failures.
+
+No `## Threat Flags` section exists in any Phase 229 SUMMARY, so the executor declared
+no unmapped attack surface.
+
+**Hardening applied from this audit (not a threat):** the strict fixture-contract CI
+step did not pass `--require-command-provenance`, unlike the handoff wrapper. The
+unconditional validation path already rejects absent, empty, or foreign plural
+provenance on every invocation, so no threat was open — but the flag is now passed in
+CI for defense in depth.
