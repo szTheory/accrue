@@ -184,6 +184,19 @@ jobs:
           node scripts/ci/verify_phase230_archive_invariants.mjs --fixtures &&
           node scripts/ci/verify_phase230_archive_invariants.mjs
 
+      # WR-01: the Phase 230 integration-disposition triad's own regression
+      # protection, hermetic only -- these build disposable fixture git repos
+      # and touch no ref outside them. Deliberately does NOT depend on
+      # integration/v1.62-candidate or review/v1.62-candidate-code-only:
+      # those refs are local-only and unpushed, so a step that required them
+      # would fail on every GitHub runner.
+      - name: Integration disposition triad units and fixture contract (D-04, D-15, D-20, D-21, D-37)
+        run: >-
+          node --test scripts/ci/collect_integration_disposition.mjs &&
+          node --test scripts/ci/render_integration_disposition.mjs &&
+          node --test scripts/ci/verify_integration_disposition.mjs &&
+          node scripts/ci/verify_integration_disposition.mjs --fixtures --expected-repository szTheory/accrue --require-hazard-universe
+
       - name: Install tokens harness
         run: cd brandbook/tokens/harness && npm ci
 
