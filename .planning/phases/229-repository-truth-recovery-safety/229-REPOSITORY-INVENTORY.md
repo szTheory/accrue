@@ -354,8 +354,17 @@ git update-ref 'refs/tags/v1.9' '25217144e1cd9413ec9ed39d3864d585e762ad22'
 | --- | --- | --- |
 | cached_origin_main | `8f3135f781a324fc0b8d3c460883b1d572bf6e02` | separately named fact |
 | local_main | `5c01f4bc38d4d38e8e080bde0e608e26ca9b5442` | separately named fact |
-| milestone_branch | `b48c7d8af5c0a686c98572834863e5e51530219f` | separately named fact |
+| milestone_branch | `024eaeca37105a8c17f3db94d01bfa25e57428ff` | separately named fact |
 | v161_tag | `fdb41672dd9240b36623ab22a7a8377a2735e5a3` | separately named fact |
+
+## Captured-at authority
+
+**Fact:** captured at 2026-09-15T16:24:42.440Z. **State:** point-in-time. **Owner:** release-engineering. **Next command:** `git merge-base --is-ancestor CAPTURED LIVE`.
+
+| Identity | Symbolic ref | Full object ID |
+| --- | --- | --- |
+| active symbolic ref | refs/heads/gsd/milestone-v1.62-release-integration-hygiene | `024eaeca37105a8c17f3db94d01bfa25e57428ff` |
+| primary worktree | refs/heads/gsd/milestone-v1.62-release-integration-hygiene | `024eaeca37105a8c17f3db94d01bfa25e57428ff` |
 
 ## All local and preservation refs
 
@@ -477,7 +486,7 @@ git update-ref 'refs/tags/v1.9' '25217144e1cd9413ec9ed39d3864d585e762ad22'
 | refs/heads/fix/chimeway-opaque-recipient | `0752b8d0b59eb53936498daa4bb0be4b14ffd0e4` | other |
 | refs/heads/fix/getfluent-1.5.1 | `dba9a75daa4c8ca1f3213dd2de43efbbde1f5dfe` | other |
 | refs/heads/fix/release-otp-28-1 | `72118f05cbe2f490e329f9f067d88f850246c321` | other |
-| refs/heads/gsd/milestone-v1.62-release-integration-hygiene | `b48c7d8af5c0a686c98572834863e5e51530219f` | other |
+| refs/heads/gsd/milestone-v1.62-release-integration-hygiene | `024eaeca37105a8c17f3db94d01bfa25e57428ff` | other |
 | refs/heads/gsd/phase-225-required-lane-signal-repair | `57c61a9a48f1ae84f7b3c3f45333eb6e5fb7261c` | other |
 | refs/heads/main | `5c01f4bc38d4d38e8e080bde0e608e26ca9b5442` | local_main |
 | refs/heads/release-please--branches--main | `ac4c73854bab31a602c536827993db4d9f7e9949` | other |
@@ -588,7 +597,7 @@ git update-ref 'refs/tags/v1.9' '25217144e1cd9413ec9ed39d3864d585e762ad22'
 
 | Branch | Object | Classification |
 | --- | --- | --- |
-| gsd/milestone-v1.62-release-integration-hygiene | `b48c7d8af5c0a686c98572834863e5e51530219f` | dirty |
+| gsd/milestone-v1.62-release-integration-hygiene | `024eaeca37105a8c17f3db94d01bfa25e57428ff` | dirty |
 
 ## User-owned artifact evidence
 
@@ -618,14 +627,14 @@ git update-ref 'refs/tags/v1.9' '25217144e1cd9413ec9ed39d3864d585e762ad22'
 
 | Category | State | Exact object ID | Observed at | Read-only request |
 | --- | --- | --- | --- | --- |
-| actions | unavailable:network | — | `2026-09-13T19:50:20.973Z` | undefined |
-| pull_requests | observed-empty | — | `2026-09-13T19:50:20.368Z` | undefined |
-| release_branches | observed-empty | — | `2026-09-13T19:50:20.665Z` | undefined |
-| remote_main | observed | `d30fc25dbf6ba551792c66ff451b4b93c0af4bf1` | `2026-09-13T19:50:20.078Z` | GET /repos/szTheory/accrue/git/ref/heads/main |
+| actions | unavailable:network | — | `2026-09-15T16:24:44.487Z` | GET /repos/szTheory/accrue/actions/runs?per_page=100&page=1 |
+| pull_requests | observed-empty | — | `2026-09-15T16:24:42.809Z` | GET /repos/szTheory/accrue/pulls?state=open&per_page=100&page=1 |
+| release_branches | observed-empty | — | `2026-09-15T16:24:44.136Z` | GET /repos/szTheory/accrue/git/matching-refs/heads/release/?per_page=100&page=1 |
+| remote_main | observed | `d30fc25dbf6ba551792c66ff451b4b93c0af4bf1` | `2026-09-15T16:24:42.459Z` | GET /repos/szTheory/accrue/git/ref/heads/main |
 
 ## Ship windows and planning
 
-**Fact:** milestone 9ed23b971a9e16c1f943b2862c70d818632cd5a52caa194cefb78454847f55d3; state 4621d0f45c089f2863bdb1ad2a96ebbe614e66083d80435aba51f21e15f4da66. **State:** recorded. **Owner:** release-engineering. **Next command:** `gsd_run windows status --raw`.
+**Fact:** milestone 9ed23b971a9e16c1f943b2862c70d818632cd5a52caa194cefb78454847f55d3; state 9dce16e7365c1010546565bb6e5168bda78332b5b74d7f1337ceeea7381c155f. **State:** recorded. **Owner:** release-engineering. **Next command:** `gsd_run windows status --raw`.
 
 | Ship window |
 | --- |
