@@ -44,10 +44,10 @@
     }
   ],
   "scope": {
-    "total_changed_files": 334,
+    "total_changed_files": 337,
     "planning_only_changed_files": 223,
-    "source_changed_files": 111,
-    "total_commits": 525,
+    "source_changed_files": 114,
+    "total_commits": 527,
     "planning_only_commits": 265
   },
   "binding": {

@@ -95,7 +95,7 @@ export function renderIntegrationDisposition(disposition, { expectedRepository }
       "recomputed",
       "release-engineering",
       "git diff --name-only <merge-base> <candidate>",
-      `${scope.total_changed_files} files changed (${scope.planning_only_changed_files} .planning/-only, ${scope.source_changed_files} source); ${scope.total_commits} commits (${scope.planning_only_commits} .planning/-only)`
+      `${scope.total_changed_files} files changed (${scope.planning_only_changed_files} .planning/-only, ${scope.source_changed_files} source); ${scope.total_commits} commits (${scope.planning_only_commits} .planning/-only). integration/v1.62-candidate is the provenance branch (answers "how did this get here" -- link it, do not diff it); review/v1.62-candidate-code-only is the code-only review branch, proved byte-identical to the candidate on every non-.planning path, and answers "what source behavior changed" (diff it).`
     ),
     ...section(
       "Post-merge commits",
@@ -228,8 +228,12 @@ function main() {
   const repository = args[args.indexOf("--expected-repository") + 1];
   if (!input || !out || !repository) throw new Error("--input, --out, and --expected-repository are required");
   fs.writeFileSync(out, renderIntegrationDisposition(JSON.parse(fs.readFileSync(input, "utf8")), { expectedRepository: repository }));
-  const ledgerInput = args[args.indexOf("--ledger-input") + 1];
-  const ledgerOut = args[args.indexOf("--ledger-out") + 1];
+  // Bug fix (230-06): when --ledger-input/--ledger-out are both absent,
+  // `args[args.indexOf(flag) + 1]` previously resolved to `args[0]` (the node
+  // executable path) for both, which is truthy and made this branch attempt
+  // to JSON.parse the node binary itself. Gate on explicit presence instead.
+  const ledgerInput = args.includes("--ledger-input") ? args[args.indexOf("--ledger-input") + 1] : undefined;
+  const ledgerOut = args.includes("--ledger-out") ? args[args.indexOf("--ledger-out") + 1] : undefined;
   if (ledgerInput && ledgerOut) {
     fs.writeFileSync(ledgerOut, renderExcludedLedger(JSON.parse(fs.readFileSync(ledgerInput, "utf8")), { expectedRepository: repository }));
   }

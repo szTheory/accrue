@@ -72,7 +72,7 @@ function assertSameMap(authorityName, authority, candidateName, candidate) {
 }
 
 const BOOLEAN_FLAGS = new Set(["fixtures", "require-ancestry", "require-scope", "require-determinism", "require-post-merge-scope", "require-rollback-proof", "require-hazard-universe", "require-excluded-ledger"]);
-const VALUE_OPTIONS = new Set(["records", "rendered", "candidate", "expected-repository", "repo", "rollback-point", "dispositions", "dispositions-rendered", "local-main-ref"]);
+const VALUE_OPTIONS = new Set(["records", "rendered", "candidate", "expected-repository", "repo", "rollback-point", "dispositions", "dispositions-rendered", "local-main-ref", "review-ref"]);
 
 function liveBinding(repo, candidateObject) {
   const parentsLine = git(repo, ["rev-list", "--parents", "-n", "1", candidateObject]);
@@ -107,10 +107,32 @@ function assertAncestryLive(repo, disposition, { v161TagObject = V161_TAG_OBJECT
   }
 }
 
-function assertScopeLive(repo, disposition) {
+// D-04/230-06: scope is measured against the candidate branch's LIVE TIP
+// (git rev-parse disposition.candidate.ref), not the pinned merge-commit
+// candidate.object -- the reviewer's actual read surface grows as declared
+// post_merge_commits land on the same branch (230-05 is exactly this: two
+// commits after the 230-02 merge, both declared in post_merge_commits).
+// candidate.object/ancestry/parents stay pinned to the merge commit for
+// D-05/D-06 identity purposes; scope is deliberately decoupled from that
+// pin so a reviewer's file/commit count never goes stale after a legitimate
+// post-merge commit. When a review-ref is supplied, additionally assert that
+// the recorded source_changed_files count equals the number of non-
+// `.planning/` paths that differ between the merge-base and that ref -- the
+// reviewer's real 72-file (recomputed here) read surface, counted inside the
+// verifier after capturing spawnSync's own exit status, never through a
+// shell pipeline that could swallow a failing `git`.
+function assertScopeLive(repo, disposition, { reviewRef } = {}) {
   const live = assertStaleBindingCheck(repo, disposition);
-  const fresh = collectScope(repo, { mergeBase: live.mergeBase, candidateObject: disposition.candidate.object });
-  for (const key of Object.keys(fresh)) if (fresh[key] !== disposition.scope[key]) fail(`scope.${key} live=${fresh[key]} differs from recorded=${disposition.scope[key]}`);
+  const tip = git(repo, ["rev-parse", disposition.candidate.ref]);
+  const fresh = collectScope(repo, { mergeBase: live.mergeBase, candidateObject: tip });
+  for (const key of Object.keys(fresh)) if (fresh[key] !== disposition.scope[key]) fail(`scope.${key} live=${fresh[key]} differs from recorded=${disposition.scope[key]} (measured against the candidate ref's live tip, ${tip})`);
+
+  if (reviewRef) {
+    const diffResult = spawnSync("git", ["-C", repo, "diff", "--name-only", live.mergeBase, reviewRef, "--", ".", ":!.planning"], { encoding: "utf8", shell: false, timeout: 20000, maxBuffer: 5_000_000 });
+    if (diffResult.error || diffResult.status !== 0) fail(`review-ref scope diff failed: ${(diffResult.stderr || diffResult.error?.message || "unknown error").trim()}`);
+    const reviewSourceCount = diffResult.stdout.split("\n").filter(Boolean).length;
+    if (reviewSourceCount !== disposition.scope.source_changed_files) fail(`scope.source_changed_files recorded=${disposition.scope.source_changed_files} differs from review-branch live count=${reviewSourceCount} (git diff --name-only ${live.mergeBase} ${reviewRef} -- . ':!.planning')`);
+  }
 }
 
 // D-15/D-20/D-21/D-37: recompute the co-touched file set live and assert exact-map
@@ -221,7 +243,7 @@ function proveRevert(repo, record) {
 
 function applyStrictFlags(repo, disposition, parsed, identityOverrides) {
   if (parsed.flags.has("require-ancestry")) assertAncestryLive(repo, disposition, identityOverrides);
-  if (parsed.flags.has("require-scope")) assertScopeLive(repo, disposition);
+  if (parsed.flags.has("require-scope")) assertScopeLive(repo, disposition, { reviewRef: parsed.values["review-ref"] });
   if (parsed.flags.has("require-hazard-universe")) assertHazardUniverseLive(repo, disposition);
   if (parsed.flags.has("require-post-merge-scope")) assertPostMergeScope(repo, disposition);
   if (parsed.flags.has("require-rollback-proof")) {
@@ -323,6 +345,34 @@ export function verifyFixtures() {
     applyStrictFlags(fx.repo, disposition, { flags: new Set(["require-ancestry", "require-scope", "require-post-merge-scope"]), values: {} }, { v161TagObject: fx.v161Tag, v161CommitObject: fx.v161Commit, closureCommits: fx.closureCommits });
     const rendered = renderIntegrationDisposition(disposition, { expectedRepository: "szTheory/accrue" });
     assert.equal(rendered, renderIntegrationDisposition(disposition, { expectedRepository: "szTheory/accrue" }));
+  });
+
+  // Scenario 1.5 (230-06): --require-scope with --review-ref cross-checks
+  // scope.source_changed_files against a live `git diff --name-only <merge-base>
+  // <review-ref> -- . ':!.planning'` count. A review-ref identical to the
+  // candidate passes; a review-ref missing one of the candidate's files fails
+  // naming the mismatch, never silently passing on a wrong count.
+  withFixture((fx) => {
+    const merge = mergeCandidate(fx.repo, fx.milestoneTip, fx.originMain);
+    const disposition = collectIntegrationDisposition({ repo: fx.repo, expectedRepository: "szTheory/accrue", v161TagObject: fx.v161Tag, v161CommitObject: fx.v161Commit, closureCommits: fx.closureCommits });
+    const g = (args) => git(fx.repo, args);
+    g(["update-ref", "refs/heads/review-ok", merge]);
+    applyStrictFlags(fx.repo, disposition, { flags: new Set(["require-scope"]), values: { "review-ref": "refs/heads/review-ok" } }, { v161TagObject: fx.v161Tag, v161CommitObject: fx.v161Commit, closureCommits: fx.closureCommits });
+
+    // Build a wrong review-ref: same base, but missing one of the candidate's files.
+    const wrongTree = g(["rev-parse", `${merge}^{tree}`]);
+    const treeListing = g(["ls-tree", "-r", "--name-only", wrongTree]).split("\n").filter(Boolean);
+    const dropPath = treeListing[0];
+    const indexFile = path.join(fs.mkdtempSync(path.join(fs.realpathSync(os.tmpdir()), "phase230-scope-fixture-index-")), "index");
+    spawnSync("git", ["-C", fx.repo, "read-tree", wrongTree], { encoding: "utf8", env: { ...process.env, GIT_INDEX_FILE: indexFile }, shell: false });
+    spawnSync("git", ["-C", fx.repo, "rm", "-f", "--cached", "--quiet", "--", dropPath], { encoding: "utf8", env: { ...process.env, GIT_INDEX_FILE: indexFile }, shell: false });
+    const wrongTreeSha = spawnSync("git", ["-C", fx.repo, "write-tree"], { encoding: "utf8", env: { ...process.env, GIT_INDEX_FILE: indexFile }, shell: false }).stdout.trim();
+    const wrongCommit = g(["commit-tree", wrongTreeSha, "-p", fx.originMain, "-m", "wrong review-ref"]);
+    g(["update-ref", "refs/heads/review-wrong", wrongCommit]);
+    assert.throws(
+      () => applyStrictFlags(fx.repo, disposition, { flags: new Set(["require-scope"]), values: { "review-ref": "refs/heads/review-wrong" } }, { v161TagObject: fx.v161Tag, v161CommitObject: fx.v161Commit, closureCommits: fx.closureCommits }),
+      /source_changed_files recorded=\d+ differs from review-branch live count=\d+/
+    );
   });
 
   // Scenario 2: squashed candidate (one parent) rejected.

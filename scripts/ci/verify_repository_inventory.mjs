@@ -141,8 +141,16 @@ function readCommittedJson(filePath, label) {
 
 function readRefExceptions(refExceptionsPath) {
   const raw = readCommittedJson(refExceptionsPath, "ref exceptions ledger");
+  // 230-06: the ledger is wrapped as { row_count, refs } so the row count is a
+  // literal integer asserted against the recomputed array length, never a
+  // non-empty check (D-37) -- a bare array (pre-230-06 shape) is still
+  // accepted for backward compatibility but skips the row_count assertion.
   const rows = Array.isArray(raw) ? raw : raw?.refs;
-  if (!Array.isArray(rows)) fail("ref exceptions ledger must be an array of rows");
+  if (!Array.isArray(rows)) fail("ref exceptions ledger must be an array of rows, or an object with a refs array");
+  if (!Array.isArray(raw) && raw && typeof raw === "object") {
+    if (!Number.isInteger(raw.row_count)) fail("ref exceptions ledger row_count must be a literal integer");
+    if (raw.row_count !== rows.length) fail(`ref exceptions ledger row_count=${raw.row_count} differs from actual row count=${rows.length}`);
+  }
   const seen = new Set();
   for (const row of rows) {
     if (!row || typeof row !== "object" || Array.isArray(row)) fail("ref exceptions ledger row must be an object");

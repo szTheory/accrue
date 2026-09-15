@@ -40,7 +40,7 @@ This merge silently carries three decisions a reviewer should know about before 
 
 ## Changed-file and commit scope
 
-**Fact:** 334 files changed (223 .planning/-only, 111 source); 525 commits (265 .planning/-only). **State:** recomputed. **Owner:** release-engineering. **Next command:** `git diff --name-only \<merge-base\> \<candidate\>`.
+**Fact:** 337 files changed (223 .planning/-only, 114 source); 527 commits (265 .planning/-only). integration/v1.62-candidate is the provenance branch (answers "how did this get here" -- link it, do not diff it); review/v1.62-candidate-code-only is the code-only review branch, proved byte-identical to the candidate on every non-.planning path, and answers "what source behavior changed" (diff it).. **State:** recomputed. **Owner:** release-engineering. **Next command:** `git diff --name-only \<merge-base\> \<candidate\>`.
 
 
 ## Post-merge commits
