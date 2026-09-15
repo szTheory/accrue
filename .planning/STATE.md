@@ -4,17 +4,17 @@ milestone: v1.62
 milestone_name: Release Integration & Repository Hygiene
 current_phase: 230
 current_phase_name: Reviewable History Integration
-status: executing
-stopped_at: Completed 230-06-PLAN.md
-last_updated: "2026-09-15T20:40:22.916Z"
+status: verifying
+stopped_at: Completed 230-07-PLAN.md — Phase 230 complete, ready for verification
+last_updated: "2026-09-15T20:56:35.159Z"
 last_activity: 2026-09-15
 last_activity_desc: Phase 230 execution started
-state_head: d059a0e4e3292df5d160f63cf96f1ea599a54fc0
+state_head: 7978cd437f35edef7d4397d1716ed109171790e6
 progress:
   total_phases: 4
   completed_phases: 1
   total_plans: 27
-  completed_plans: 26
+  completed_plans: 27
   percent: 25
 ---
 
@@ -32,7 +32,7 @@ See: `.planning/PROJECT.md` (updated 2026-09-15)
 
 Phase: 230 (Reviewable History Integration) — EXECUTING
 Plan: 7 of 7
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-09-15 — Phase 230 execution started
 
 Progress: [███░░░░░░░] 25% (20/20 plans in Phase 229)
@@ -80,6 +80,7 @@ Progress: [███░░░░░░░] 25% (20/20 plans in Phase 229)
 | Phase 230 P05 | 40 min | 3 tasks | 7 files |
 | Phase 230 P04 | ~110 min | 3 tasks | 5 files |
 | Phase 230 P06 | ~4h | 3 tasks | 13 files |
+| Phase 230 P07 | ~65 min | 3 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -139,6 +140,8 @@ Progress: [███░░░░░░░] 25% (20/20 plans in Phase 229)
 - [Phase 230]: 230-04: bulkPatchIdFrequency pipes git log -p | git patch-id through temp-file descriptors, not spawnSync string buffers, to avoid ENOBUFS on the candidate's ~350MB diff history. — Node spawnSync input/stdout string buffers hit an OS pipe limit well before any maxBuffer ceiling on a ~500-commit history.
 - [Phase 230]: 230-06: The real archive-path sweep found and fixed three genuine pre-existing F-01-class regressions (Phase 208/224 evidence paths with no archive-aware fallback anywhere in the corpus). — The plan's own acceptance criteria required the sweep to pass clean against the real repository, not just fixtures; narrowing scope to dodge real findings would have defeated D-22's purpose.
 - [Phase 230]: 230-06: scope.* in 230-INTEGRATION-DISPOSITION.json is measured against the candidate branch's live tip, not the pinned merge-commit candidate.object; candidate.object/parents/tree/ancestry stay pinned for D-05/D-06 identity. — The code-only review branch is built from the live tip per the plan's own git-diff-quiet acceptance criterion, and Plan 230-05's declared post_merge_commits are real source changes a reviewer needs counted; measuring scope against the stale pinned object made --require-scope --review-ref permanently unsatisfiable.
+- [Phase 230]: 230-07: Closed PR #44 unmerged with NO public comment (maintainer-authorized privacy deviation from D-10's cite-superseding default); the disposition ledger's enumeration was extended with an honest close-unmerged-no-comment value rather than forcing the old cite-superseding literal onto an action that posted no citation.
+- [Phase 230]: 230-07: Minted the final Phase-230 capsule under a distinct --preservation-phase 230.7 (not the bare 230 Plan 230-01's safety capsule already claimed) to avoid a preservation-ref collision on a second same-phase mint; rollback point re-proved by execution in a fresh scratch clone and its capsule field updated with the final digests.
 
 ### Pending Todos
 
@@ -157,8 +160,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-09-15T20:40:15.097Z
-Stopped at: Completed 230-06-PLAN.md
+Last session: 2026-09-15T20:56:35.119Z
+Stopped at: Completed 230-07-PLAN.md — Phase 230 complete, ready for verification
 
 229-20 outcome (commits 024eaeca, ddd9a137, c6677152):
 
