@@ -77,21 +77,16 @@
     {
       "path": "accrue/guides/entitlements.md",
       "class": "doc-rewrite",
-      "state": "advisory",
+      "state": "proved",
       "evidence": {
         "command": [
-          "git",
-          "diff",
-          "--numstat",
-          "8b248d9cec6531e124b2d05ea796e8a0aa904c93",
-          "d30fc25dbf6ba551792c66ff451b4b93c0af4bf1",
-          "--",
-          "accrue/guides/entitlements.md"
+          "bash",
+          "scripts/ci/verify_package_docs.sh"
         ],
-        "insertions": 52,
-        "deletions": 4
+        "note": "D-16/D-20: the candidate's guide text is checked for internal consistency with the code it documents using the repository's existing documentation-truth mechanism (scripts/ci/verify_package_docs.sh), not a new bespoke check. Exits 0 on the candidate: 'package docs verified for accrue 1.5.1, accrue_admin 1.5.1, and accrue_portal 1.5.1'. accrue/mix.exs's @version (1.5.1) and all three .release-please-manifest.json entries (1.5.1) agree with what origin/main shipped -- re-measured live via `git show <ref>:accrue/mix.exs` / `git show <ref>:.release-please-manifest.json` on both the candidate and origin/main, not transcribed; no version string was hand-edited by this plan."
       },
-      "owner": "230-03"
+      "owner": "230-03",
+      "exit_code": 0
     },
     {
       "path": "accrue/lib/accrue/config.ex",
@@ -112,16 +107,49 @@
     {
       "path": "accrue/mix.exs",
       "class": "dependency-lock-drift",
-      "state": "non_run",
+      "state": "proved",
       "evidence": {
         "command": [
           "mix",
-          "deps.get",
-          "--check-locked"
+          "test",
+          "test/accrue/billing/charge_3ds_test.exs",
+          "test/accrue/billing/charge_test.exs",
+          "test/accrue/billing/coupon_actions_test.exs",
+          "test/accrue/billing/default_payment_method_test.exs",
+          "test/accrue/billing/dunning_test.exs",
+          "test/accrue/billing/properties/idempotency_key_test.exs",
+          "test/accrue/billing/properties/proration_test.exs",
+          "test/accrue/billing/proration_roundtrip_test.exs",
+          "test/accrue/billing/refund_braintree_test.exs",
+          "test/accrue/billing/refund_test.exs",
+          "test/accrue/billing/upcoming_invoice_test.exs",
+          "test/accrue/config_dunning_campaign_test.exs",
+          "test/accrue/connect/charges_test.exs",
+          "test/accrue/connect/platform_fee_test.exs",
+          "test/accrue/connect/transfer_test.exs",
+          "test/accrue/entitlements/offline_test.exs",
+          "test/accrue/invoices/format_money_property_test.exs",
+          "test/accrue/money_property_test.exs",
+          "test/accrue/money_test.exs",
+          "test/accrue/processor/stripe_test.exs",
+          "test/live_stripe/charge_3ds_live_test.exs",
+          "test/live_stripe/connect_test.exs",
+          "test/property/apple_convergence_property_test.exs",
+          "test/property/apple_lineage_property_test.exs",
+          "test/property/connect_platform_fee_property_test.exs",
+          "test/property/dunning_campaign_property_test.exs",
+          "test/property/dunning_funnel_property_test.exs",
+          "test/property/entitlement_decision_cases_property_test.exs",
+          "test/property/entitlement_projection_property_test.exs",
+          "test/property/entitlement_summary_monotonic_property_test.exs",
+          "test/property/entitlements_fail_closed_property_test.exs",
+          "test/property/guard_fail_closed_property_test.exs",
+          "test/property/money_property_test.exs"
         ],
-        "note": "origin/main moved {:decimal, \"~> 2.0\"} -> \"~> 3.0\" and {:ex_money, \"~> 5.24\"} -> \"~> 6.2\" (plus explicit ex_cldr/ex_cldr_numbers), with Ecto 3.13.6 -> 3.14.2. Milestone money-math and StreamData property tests have never compiled against Decimal 3 / ex_money 6 (D-17)."
+        "note": "D-18/D-19: accrue_admin/mix.lock, accrue_portal/mix.lock, and examples/accrue_host/mix.lock were re-resolved via `mix deps.get` against the post-merge accrue constraints (Decimal ~> 3.0, ex_money ~> 6.2) -- `mix deps.get --check-locked` failed with 'lock is outdated' in all three before re-resolution and exits 0 in all four projects after, with a single consistent decimal 3.1.1 across all four mix.lock files and no accrue/mix.exs constraint relaxed. `mix compile --warnings-as-errors` exits 0 in accrue on the candidate (zero warnings from accrue's own code). The enumerated money-math and StreamData property suites above (recorded verbatim in 230-05-SUMMARY.md) then exit 0: 70 properties, 188 tests, 0 failures (9 live-Stripe tests excluded by the suite's own default tag exclusion, not by this plan)."
       },
-      "owner": "230-05"
+      "owner": "230-05",
+      "exit_code": 0
     },
     {
       "path": "accrue/test/accrue/webhook/ingest_test.exs",
@@ -166,7 +194,7 @@
         "mix",
         "test"
       ],
-      "reason": "Full `mix test` for any project would have the same result on origin/main alone (D-20 mechanical corollary) — belongs to Phase 231's exact-SHA release gate proof (GATE-01..03), not Phase 230.",
+      "reason": "Full `mix test` for any project would have the same result on origin/main alone (D-20 mechanical corollary) \u2014 belongs to Phase 231's exact-SHA release gate proof (GATE-01..03), not Phase 230.",
       "state": "non_run",
       "owner": "231"
     },
@@ -176,7 +204,7 @@
         "mix",
         "dialyzer"
       ],
-      "reason": "Dialyzer/PLT (its ignore-list hazard is discharged by blob identity in this plan) would have the same result on origin/main alone (D-20 mechanical corollary) — belongs to Phase 231's exact-SHA release gate proof (GATE-01..03), not Phase 230.",
+      "reason": "Dialyzer/PLT (its ignore-list hazard is discharged by blob identity in this plan) would have the same result on origin/main alone (D-20 mechanical corollary) \u2014 belongs to Phase 231's exact-SHA release gate proof (GATE-01..03), not Phase 230.",
       "state": "non_run",
       "owner": "231"
     },
@@ -187,7 +215,7 @@
         "playwright",
         "test"
       ],
-      "reason": "Playwright E2E would have the same result on origin/main alone (D-20 mechanical corollary) — belongs to Phase 231's exact-SHA release gate proof (GATE-01..03), not Phase 230.",
+      "reason": "Playwright E2E would have the same result on origin/main alone (D-20 mechanical corollary) \u2014 belongs to Phase 231's exact-SHA release gate proof (GATE-01..03), not Phase 230.",
       "state": "non_run",
       "owner": "231"
     },
@@ -200,7 +228,7 @@
         "--grep",
         "visual-regression"
       ],
-      "reason": "The admin visual pixel-diff gate would have the same result on origin/main alone (D-20 mechanical corollary) — belongs to Phase 231's exact-SHA release gate proof (GATE-01..03), not Phase 230.",
+      "reason": "The admin visual pixel-diff gate would have the same result on origin/main alone (D-20 mechanical corollary) \u2014 belongs to Phase 231's exact-SHA release gate proof (GATE-01..03), not Phase 230.",
       "state": "non_run",
       "owner": "231"
     },
@@ -211,7 +239,7 @@
         "run",
         "test:storybook"
       ],
-      "reason": "Storybook specs would have the same result on origin/main alone (D-20 mechanical corollary) — belongs to Phase 231's exact-SHA release gate proof (GATE-01..03), not Phase 230.",
+      "reason": "Storybook specs would have the same result on origin/main alone (D-20 mechanical corollary) \u2014 belongs to Phase 231's exact-SHA release gate proof (GATE-01..03), not Phase 230.",
       "state": "non_run",
       "owner": "231"
     },
@@ -223,7 +251,7 @@
         "--only",
         "host_integration"
       ],
-      "reason": "host-integration would have the same result on origin/main alone (D-20 mechanical corollary) — belongs to Phase 231's exact-SHA release gate proof (GATE-01..03), not Phase 230.",
+      "reason": "host-integration would have the same result on origin/main alone (D-20 mechanical corollary) \u2014 belongs to Phase 231's exact-SHA release gate proof (GATE-01..03), not Phase 230.",
       "state": "non_run",
       "owner": "231"
     },
@@ -236,7 +264,7 @@
         "--build",
         "--abort-on-container-exit"
       ],
-      "reason": "host-docker-smoke would have the same result on origin/main alone (D-20 mechanical corollary) — belongs to Phase 231's exact-SHA release gate proof (GATE-01..03), not Phase 230.",
+      "reason": "host-docker-smoke would have the same result on origin/main alone (D-20 mechanical corollary) \u2014 belongs to Phase 231's exact-SHA release gate proof (GATE-01..03), not Phase 230.",
       "state": "non_run",
       "owner": "231"
     },
@@ -246,7 +274,7 @@
         "mix",
         "accrue_admin.assets.build"
       ],
-      "reason": "Asset rebuild would have the same result on origin/main alone (D-20 mechanical corollary) — belongs to Phase 231's exact-SHA release gate proof (GATE-01..03), not Phase 230.",
+      "reason": "Asset rebuild would have the same result on origin/main alone (D-20 mechanical corollary) \u2014 belongs to Phase 231's exact-SHA release gate proof (GATE-01..03), not Phase 230.",
       "state": "non_run",
       "owner": "231"
     },
@@ -256,7 +284,7 @@
         "mix",
         "accrue_admin.copy_strings.generate"
       ],
-      "reason": "copy_strings.json regeneration would have the same result on origin/main alone (D-20 mechanical corollary) — belongs to Phase 231's exact-SHA release gate proof (GATE-01..03), not Phase 230.",
+      "reason": "copy_strings.json regeneration would have the same result on origin/main alone (D-20 mechanical corollary) \u2014 belongs to Phase 231's exact-SHA release gate proof (GATE-01..03), not Phase 230.",
       "state": "non_run",
       "owner": "231"
     },
@@ -266,7 +294,7 @@
         "mix",
         "test.live"
       ],
-      "reason": "Any provider/live-Stripe lane would have the same result on origin/main alone (D-20 mechanical corollary) — belongs to Phase 231's exact-SHA release gate proof (GATE-01..03), not Phase 230.",
+      "reason": "Any provider/live-Stripe lane would have the same result on origin/main alone (D-20 mechanical corollary) \u2014 belongs to Phase 231's exact-SHA release gate proof (GATE-01..03), not Phase 230.",
       "state": "non_run",
       "owner": "231"
     },
@@ -277,7 +305,7 @@
         "hex.publish",
         "--dry-run"
       ],
-      "reason": "`mix hex.publish --dry-run` would have the same result on origin/main alone (D-20 mechanical corollary) — belongs to Phase 231's exact-SHA release gate proof (GATE-01..03), not Phase 230.",
+      "reason": "`mix hex.publish --dry-run` would have the same result on origin/main alone (D-20 mechanical corollary) \u2014 belongs to Phase 231's exact-SHA release gate proof (GATE-01..03), not Phase 230.",
       "state": "non_run",
       "owner": "231"
     },
@@ -288,7 +316,7 @@
         "clone",
         "."
       ],
-      "reason": "Any fresh-clone run would have the same result on origin/main alone (D-20 mechanical corollary) — belongs to Phase 231's exact-SHA release gate proof (GATE-01..03), not Phase 230.",
+      "reason": "Any fresh-clone run would have the same result on origin/main alone (D-20 mechanical corollary) \u2014 belongs to Phase 231's exact-SHA release gate proof (GATE-01..03), not Phase 230.",
       "state": "non_run",
       "owner": "231"
     },
@@ -300,12 +328,23 @@
         "run",
         "ci.yml"
       ],
-      "reason": "Any GitHub Actions dispatch (229's read-only posture still binds) would have the same result on origin/main alone (D-20 mechanical corollary) — belongs to Phase 231's exact-SHA release gate proof (GATE-01..03), not Phase 230.",
+      "reason": "Any GitHub Actions dispatch (229's read-only posture still binds) would have the same result on origin/main alone (D-20 mechanical corollary) \u2014 belongs to Phase 231's exact-SHA release gate proof (GATE-01..03), not Phase 230.",
       "state": "non_run",
       "owner": "231"
     }
   ],
   "lane_count": 13,
-  "post_merge_commits": [],
-  "post_merge_commit_count": 0
+  "post_merge_commits": [
+    {
+      "commit": "31d19449275362938b400fc321f03f0546ed06fa",
+      "reason": "Task 1: commit .tool-versions (elixir/erlang pins) and re-resolve accrue_admin/accrue_portal/examples-accrue_host mix.lock against the post-merge accrue Decimal 3 / ex_money 6 constraints (D-18/D-19/D-23).",
+      "owner_plan": "230-05"
+    },
+    {
+      "commit": "bab50d92be2695b12d5853e7d578e600376e73d0",
+      "reason": "Task 3: add config_test.exs regressions covering both surviving hunks of the config.ex disjoint-hunk hazard (Accrue.Env.mix_env/0 resolution and optional :branding from_email/support_email) (D-16).",
+      "owner_plan": "230-05"
+    }
+  ],
+  "post_merge_commit_count": 2
 }

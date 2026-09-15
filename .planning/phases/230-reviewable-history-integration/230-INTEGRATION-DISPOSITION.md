@@ -45,11 +45,12 @@ This merge silently carries three decisions a reviewer should know about before 
 
 ## Post-merge commits
 
-**Fact:** 0 commits declared beyond the merge commit itself. **State:** none declared. **Owner:** release-engineering. **Next command:** `git rev-list \<branch-tip\> ^4d45002cafb3846810b84ff1afd84e7418476c50`.
+**Fact:** 2 commits declared beyond the merge commit itself. **State:** declared. **Owner:** release-engineering. **Next command:** `git rev-list \<branch-tip\> ^4d45002cafb3846810b84ff1afd84e7418476c50`.
 
 | Commit | Reason | Owner plan |
 | --- | --- | --- |
-| (none) | — | — |
+| `31d19449275362938b400fc321f03f0546ed06fa` | Task 1: commit .tool-versions (elixir/erlang pins) and re-resolve accrue_admin/accrue_portal/examples-accrue_host mix.lock against the post-merge accrue Decimal 3 / ex_money 6 constraints (D-18/D-19/D-23). | 230-05 |
+| `bab50d92be2695b12d5853e7d578e600376e73d0` | Task 3: add config_test.exs regressions covering both surviving hunks of the config.ex disjoint-hunk hazard (Accrue.Env.mix_env/0 resolution and optional :branding from_email/support_email) (D-16). | 230-05 |
 
 Recomputed co-touched file count: **6**. Every co-touched file below owes a recorded, machine-recomputable disposition; convergent-identical rows owe nothing and are collapsed last.
 
@@ -83,7 +84,7 @@ Recomputed co-touched file count: **6**. Every co-touched file below owes a reco
 
 | Path | State | Exit code | Owner | Evidence |
 | --- | --- | --- | --- | --- |
-| accrue/mix.exs | non_run | — | 230-05 | {"command":["mix","deps.get","--check-locked"],"note":"origin/main moved {:decimal, \\"~\> 2.0\\"} -\> \\"~\> 3.0\\" and {:ex_money, \\"~\> 5.24\\"} -\> \\"~\> 6.2\\" (plus explicit ex_cldr/ex_cldr_numbers), with Ecto 3.13.6 -\> 3.14.2. Milestone money-math and StreamData property tests have never compiled against Decimal 3 / ex_money 6 (D-17)."} |
+| accrue/mix.exs | proved | 0 | 230-05 | {"command":["mix","test","test/accrue/billing/charge_3ds_test.exs","test/accrue/billing/charge_test.exs","test/accrue/billing/coupon_actions_test.exs","test/accrue/billing/default_payment_method_test.exs","test/accrue/billing/dunning_test.exs","test/accrue/billing/properties/idempotency_key_test.exs","test/accrue/billing/properties/proration_test.exs","test/accrue/billing/proration_roundtrip_test.exs","test/accrue/billing/refund_braintree_test.exs","test/accrue/billing/refund_test.exs","test/accrue/billing/upcoming_invoice_test.exs","test/accrue/config_dunning_campaign_test.exs","test/accrue/connect/charges_test.exs","test/accrue/connect/platform_fee_test.exs","test/accrue/connect/transfer_test.exs","test/accrue/entitlements/offline_test.exs","test/accrue/invoices/format_money_property_test.exs","test/accrue/money_property_test.exs","test/accrue/money_test.exs","test/accrue/processor/stripe_test.exs","test/live_stripe/charge_3ds_live_test.exs","test/live_stripe/connect_test.exs","test/property/apple_convergence_property_test.exs","test/property/apple_lineage_property_test.exs","test/property/connect_platform_fee_property_test.exs","test/property/dunning_campaign_property_test.exs","test/property/dunning_funnel_property_test.exs","test/property/entitlement_decision_cases_property_test.exs","test/property/entitlement_projection_property_test.exs","test/property/entitlement_summary_monotonic_property_test.exs","test/property/entitlements_fail_closed_property_test.exs","test/property/guard_fail_closed_property_test.exs","test/property/money_property_test.exs"],"note":"D-18/D-19: accrue_admin/mix.lock, accrue_portal/mix.lock, and examples/accrue_host/mix.lock were re-resolved via \`mix deps.get\` against the post-merge accrue constraints (Decimal ~\> 3.0, ex_money ~\> 6.2) -- \`mix deps.get --check-locked\` failed with 'lock is outdated' in all three before re-resolution and exits 0 in all four projects after, with a single consistent decimal 3.1.1 across all four mix.lock files and no accrue/mix.exs constraint relaxed. \`mix compile --warnings-as-errors\` exits 0 in accrue on the candidate (zero warnings from accrue's own code). The enumerated money-math and StreamData property suites above (recorded verbatim in 230-05-SUMMARY.md) then exit 0: 70 properties, 188 tests, 0 failures (9 live-Stripe tests excluded by the suite's own default tag exclusion, not by this plan)."} |
 
 ## Hazard: schema-relaxation
 
@@ -99,7 +100,7 @@ Recomputed co-touched file count: **6**. Every co-touched file below owes a reco
 
 | Path | State | Exit code | Owner | Evidence |
 | --- | --- | --- | --- | --- |
-| accrue/guides/entitlements.md | advisory | — | 230-03 | {"command":["git","diff","--numstat","8b248d9cec6531e124b2d05ea796e8a0aa904c93","d30fc25dbf6ba551792c66ff451b4b93c0af4bf1","--","accrue/guides/entitlements.md"],"insertions":52,"deletions":4} |
+| accrue/guides/entitlements.md | proved | 0 | 230-03 | {"command":["bash","scripts/ci/verify_package_docs.sh"],"note":"D-16/D-20: the candidate's guide text is checked for internal consistency with the code it documents using the repository's existing documentation-truth mechanism (scripts/ci/verify_package_docs.sh), not a new bespoke check. Exits 0 on the candidate: 'package docs verified for accrue 1.5.1, accrue_admin 1.5.1, and accrue_portal 1.5.1'. accrue/mix.exs's @version (1.5.1) and all three .release-please-manifest.json entries (1.5.1) agree with what origin/main shipped -- re-measured live via \`git show \<ref\>:accrue/mix.exs\` / \`git show \<ref\>:.release-please-manifest.json\` on both the candidate and origin/main, not transcribed; no version string was hand-edited by this plan."} |
 
 ## Hazard: archive-path-regression
 
