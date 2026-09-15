@@ -13,9 +13,12 @@ import {
   buildMergeCandidateForTests,
   collectAncestryGates,
   collectCoTouchedFiles,
+  collectExcludedCommitLedger,
   collectIntegrationDisposition,
   collectScope,
   validateDisposition,
+  validateDispositionLedger,
+  validateExcludedRow,
   validateLaneRow
 } from "./collect_integration_disposition.mjs";
 // This verifier's own job is to reject any candidate/rollback content that names a
@@ -68,8 +71,8 @@ function assertSameMap(authorityName, authority, candidateName, candidate) {
   }
 }
 
-const BOOLEAN_FLAGS = new Set(["fixtures", "require-ancestry", "require-scope", "require-determinism", "require-post-merge-scope", "require-rollback-proof", "require-hazard-universe"]);
-const VALUE_OPTIONS = new Set(["records", "rendered", "candidate", "expected-repository", "repo", "rollback-point"]);
+const BOOLEAN_FLAGS = new Set(["fixtures", "require-ancestry", "require-scope", "require-determinism", "require-post-merge-scope", "require-rollback-proof", "require-hazard-universe", "require-excluded-ledger"]);
+const VALUE_OPTIONS = new Set(["records", "rendered", "candidate", "expected-repository", "repo", "rollback-point", "dispositions", "dispositions-rendered", "local-main-ref"]);
 
 function liveBinding(repo, candidateObject) {
   const parentsLine = git(repo, ["rev-list", "--parents", "-n", "1", candidateObject]);
@@ -135,6 +138,35 @@ function assertPostMergeScope(repo, disposition) {
   const branchTip = git(repo, ["rev-parse", disposition.candidate.ref]);
   const liveShas = branchTip === disposition.candidate.object ? [] : git(repo, ["rev-list", disposition.candidate.ref, `^${disposition.candidate.object}`]).split("\n").filter(Boolean);
   assertSameMultiset("live post-merge commits", liveShas.map((commit) => ({ commit })), "recorded post_merge_commits", disposition.post_merge_commits, (row) => row.commit);
+}
+
+// D-07/D-37: --require-excluded-ledger. Recomputes `git rev-list <local-main>
+// ^<candidate>` live and asserts EXACT sorted-multiset equality against the committed
+// excluded-* ledger rows, keyed by the 40-hex commit id -- an unrecorded excluded
+// commit fails, and a recorded row for a commit that is no longer excluded (now an
+// ancestor of the candidate) also fails. The literal `excluded_commit_count` integer
+// is asserted against the live count, never a non-empty check. Independently provable:
+// depends on nothing from --require-ancestry/--require-scope/--require-hazard-universe.
+function assertExcludedLedgerLive(repo, ledger, { localMainRef = "refs/heads/main" } = {}) {
+  const liveCandidateObject = git(repo, ["rev-parse", `${ledger.candidate.ref}^{commit}`]);
+  if (liveCandidateObject !== ledger.candidate.object) fail(`STALE_BINDING: recorded ledger.candidate.object no longer matches the live ${ledger.candidate.ref} (live=${liveCandidateObject}, recorded=${ledger.candidate.object})`);
+  const liveLocalMain = git(repo, ["rev-parse", `${localMainRef}^{commit}`]);
+  if (liveLocalMain !== ledger.local_main) fail(`STALE_BINDING: recorded ledger.local_main no longer matches the live ${localMainRef} (live=${liveLocalMain}, recorded=${ledger.local_main})`);
+
+  // Duplicate-key rejection over the WHOLE rows array (excluded-* plus
+  // carried-on-candidate), reusing the exactMap primitive verbatim.
+  exactMap(ledger.rows, "ledger rows", (row) => row.commit, () => true);
+
+  const liveExcludedShas = git(repo, ["rev-list", liveLocalMain, `^${liveCandidateObject}`]).split("\n").filter(Boolean);
+  const recordedExcludedRows = ledger.rows.filter((row) => row.disposition !== "carried-on-candidate");
+  assertSameMultiset(
+    "live excluded commits (git rev-list <local-main> ^<candidate>)",
+    liveExcludedShas.map((commit) => ({ commit })),
+    "recorded excluded-* ledger rows",
+    recordedExcludedRows,
+    (row) => row.commit
+  );
+  if (ledger.excluded_commit_count !== liveExcludedShas.length) fail(`excluded_commit_count live=${liveExcludedShas.length} differs from recorded=${ledger.excluded_commit_count}`);
 }
 
 function validateRollbackPoint(record) {
@@ -420,6 +452,127 @@ export function verifyFixtures() {
     const joinedString = { ...record, restore_argv: [`git ${REF_UPDATE_VERB} refs/heads/milestone ${fx.milestoneTip}`] };
     assert.throws(() => validateRollbackPoint(joinedString), /array of strings/);
   });
+
+  // Scenario 9: --require-excluded-ledger — clean pass, empty-set pass, missing row,
+  // obsolete (no-longer-excluded) extra row, duplicate commit key, null/omitted
+  // superseded_by, and a boolean patch_id_occurrences_main.
+  function ledgerFixtureRepo() {
+    const scratch = fs.mkdtempSync(path.join(fs.realpathSync(os.tmpdir()), "phase230-verify-ledger-fixture-"));
+    const repo = path.join(scratch, "repo");
+    fs.mkdirSync(repo);
+    const g = (args) => git(repo, args);
+    g(["init", "-q", "-b", "main"]);
+    g(["config", "user.email", "phase230@example.invalid"]);
+    g(["config", "user.name", "Phase 230"]);
+    fs.mkdirSync(path.join(repo, ".planning", "milestones"), { recursive: true });
+    fs.writeFileSync(path.join(repo, "other.txt"), "base\n");
+    fs.writeFileSync(path.join(repo, ".planning", "milestones", "v1.61-REQUIREMENTS.md"), "| Requirement | Phase | Status |\n| --- | --- | --- |\n| BASE-01 | Phase 226 | Complete |\n| BASE-02 | Phase 226 | Complete |\n");
+    g(["add", "-A"]); g(["commit", "-qm", "base"]);
+    const base = g(["rev-parse", "HEAD"]);
+    fs.writeFileSync(path.join(repo, "other.txt"), "excluded 1\n");
+    g(["add", "-A"]); g(["commit", "-qm", "docs(226): abandoned edit one"]);
+    const excluded1 = g(["rev-parse", "HEAD"]);
+    fs.writeFileSync(path.join(repo, "other.txt"), "excluded 2\n");
+    g(["add", "-A"]); g(["commit", "-qm", "docs(226): abandoned edit two"]);
+    const mainTip = g(["rev-parse", "HEAD"]);
+    g(["checkout", "-q", "-b", "candidate", base]);
+    fs.mkdirSync(path.join(repo, "scripts", "ci"), { recursive: true });
+    fs.writeFileSync(path.join(repo, "scripts", "ci", "collect_ci_baseline.mjs"), "// collector\n");
+    fs.writeFileSync(path.join(repo, "scripts", "ci", "verify_ci_baseline.mjs"), "// verifier\n");
+    g(["add", "-A"]); g(["commit", "-qm", "feat(230): candidate infra"]);
+    // Same content the PR branch below will add, so pr_44.matched_commits has a real
+    // patch-id match on the candidate for BOTH the "candidate" and "empty-main" ledger
+    // scenarios (the empty-set scenario below still needs a real PR match).
+    fs.writeFileSync(path.join(repo, "prfile.txt"), "pr fix\n");
+    g(["add", "-A"]); g(["commit", "-qm", "fix(accrue): a fix"]);
+    const candidateTip = g(["rev-parse", "HEAD"]);
+    g(["branch", "empty-main", base]);
+    g(["checkout", "-q", "-b", "fix/release-boot-env-resolver", "main"]);
+    fs.writeFileSync(path.join(repo, "prfile.txt"), "pr fix\n");
+    g(["add", "-A"]); g(["commit", "-qm", "fix(accrue): a fix"]);
+    const prTip = g(["rev-parse", "HEAD"]);
+    // A second PR-branch ref off empty-main (== base) so the empty-set scenario's
+    // ahead/behind computation (relative to localMainRef: empty-main) sees exactly
+    // one unique commit, not the two "main"-only excluded commits as well.
+    g(["checkout", "-q", "-b", "fix/release-boot-env-resolver-empty", "empty-main"]);
+    fs.writeFileSync(path.join(repo, "prfile.txt"), "pr fix\n");
+    g(["add", "-A"]); g(["commit", "-qm", "fix(accrue): a fix"]);
+    g(["checkout", "-q", "main"]);
+    const stubCollectPr = (r, { prBranchRef }) => ({ number: 44, headRefName: prBranchRef.replace("refs/heads/", ""), headObject: git(r, ["rev-parse", prBranchRef]), baseRefName: "main", state: "open", mergeable: "MERGEABLE" });
+    return { scratch, repo, base, excluded1, mainTip, candidateTip, prTip, stubCollectPr };
+  }
+  function withLedgerFixture(fn) {
+    const fx = ledgerFixtureRepo();
+    try { fn(fx); } finally { fs.rmSync(fx.scratch, { recursive: true, force: true }); }
+  }
+
+  withLedgerFixture((fx) => {
+    const ledger = collectExcludedCommitLedger({ repo: fx.repo, expectedRepository: "szTheory/accrue", candidateRef: "refs/heads/candidate", localMainRef: "refs/heads/main", prBranchRef: "refs/heads/fix/release-boot-env-resolver", carriedCommit: null, collectPr: fx.stubCollectPr });
+    assert.equal(ledger.excluded_commit_count, 2);
+
+    // Clean pass.
+    assertExcludedLedgerLive(fx.repo, ledger);
+
+    // Missing: drop a row the live repository still excludes.
+    const missingCase = structuredClone(ledger);
+    missingCase.rows = missingCase.rows.filter((row) => row.commit !== fx.excluded1);
+    missingCase.excluded_commit_count = missingCase.rows.length;
+    assert.throws(() => assertExcludedLedgerLive(fx.repo, missingCase), /differs from/);
+
+    // Obsolete/extra: a committed row for a commit that is now an ancestor of the
+    // candidate (no longer excluded live).
+    const extraCase = structuredClone(ledger);
+    extraCase.rows = [...extraCase.rows, { ...structuredClone(ledger.rows[0]), commit: fx.base }];
+    extraCase.excluded_commit_count = extraCase.rows.length;
+    assert.throws(() => assertExcludedLedgerLive(fx.repo, extraCase), /differs from/);
+
+    // Duplicate commit key.
+    const dupCase = structuredClone(ledger);
+    dupCase.rows = [...dupCase.rows, structuredClone(dupCase.rows[0])];
+    assert.throws(() => assertExcludedLedgerLive(fx.repo, dupCase), /duplicate/);
+
+    // Stale binding refuses before any comparison.
+    const staleCase = structuredClone(ledger);
+    staleCase.candidate.object = fx.base;
+    assert.throws(() => assertExcludedLedgerLive(fx.repo, staleCase), /STALE_BINDING/);
+  });
+
+  // Empty excluded set — passes with a recorded count of 0, not a failure or an
+  // omitted section.
+  withLedgerFixture((fx) => {
+    const ledger = collectExcludedCommitLedger({ repo: fx.repo, expectedRepository: "szTheory/accrue", candidateRef: "refs/heads/candidate", localMainRef: "refs/heads/empty-main", prBranchRef: "refs/heads/fix/release-boot-env-resolver-empty", carriedCommit: null, collectPr: fx.stubCollectPr });
+    assert.equal(ledger.excluded_commit_count, 0);
+    assert.deepEqual(ledger.rows, []);
+    assertExcludedLedgerLive(fx.repo, ledger, { localMainRef: "refs/heads/empty-main" });
+  });
+
+  // Structural fixtures: a row with superseded_by null/omitted, and a boolean
+  // patch_id_occurrences_main, both rejected by schema validation (D-37).
+  {
+    function minimalLedgerRow(overrides = {}) {
+      return {
+        commit: "a".repeat(40),
+        subject: "some subject",
+        disposition: "excluded-superseded",
+        superseded_by: "no-equivalent",
+        supersession_evidence: {
+          tree_level: { command: ["git", "cat-file"], files: [{ path: "x.sh", exists_on_candidate: false, superseded_by_path: "x.mjs" }], plan_inventory: { command: ["git", "ls-tree"], abandoned_line_max_plan: 11, milestone_line_max_plan: 21 } },
+          requirement_level: { command: ["git", "show"], file: ".planning/milestones/v1.61-REQUIREMENTS.md", requirements: [{ id: "BASE-01", matched_text: "| BASE-01 | Phase 226 | Complete |" }] }
+        },
+        patch_id_occurrences_main: 1,
+        patch_id_occurrences_candidate: 0,
+        published_elsewhere: "none",
+        ...overrides
+      };
+    }
+    function minimalLedger(rows) {
+      return { schema_version: 1, repository: "szTheory/accrue", candidate: { ref: "refs/heads/integration/v1.62-candidate", object: "b".repeat(40) }, local_main: "c".repeat(40), excluded_commit_count: rows.filter((row) => row.disposition !== "carried-on-candidate").length, rows, pr_44: { number: 44, head_ref: "fix/x", head_object: "d".repeat(40), base_ref: "main", base_object: "c".repeat(40), state: "open", mergeable: "MERGEABLE", ahead_of_base: 0, behind_base: 0, matched_commits: [], disposition: "close-unmerged-cite-superseding", note: "n" } };
+    }
+    assert.throws(() => validateExcludedRow({ ...minimalLedgerRow(), superseded_by: null }, 0), /no-equivalent.*array of 40-hex/);
+    const omitted = minimalLedgerRow(); delete omitted.superseded_by;
+    assert.throws(() => validateDispositionLedger(minimalLedger([omitted]), { expectedRepository: "szTheory/accrue" }), /missing required field: superseded_by/);
+    assert.throws(() => validateDispositionLedger(minimalLedger([minimalLedgerRow({ patch_id_occurrences_main: true })]), { expectedRepository: "szTheory/accrue" }), /must be a non-negative integer/);
+  }
 }
 
 function options(argv) {
@@ -441,20 +594,39 @@ async function main() {
   if (parsed.flags.has("fixtures")) { verifyFixtures(); console.log("integration disposition fixtures: PASS"); return; }
   const expectedRepository = parsed.values["expected-repository"];
   if (!expectedRepository) fail("--expected-repository is required");
-  const { records, rendered } = parsed.values;
-  if (!records || !rendered) fail("--records and --rendered are required outside fixture mode");
   const repo = parsed.values.repo || process.cwd();
-  const disposition = validateDisposition(JSON.parse(fs.readFileSync(records, "utf8")), { expectedRepository });
-  if (parsed.values.candidate) {
-    const ref = parsed.values.candidate.startsWith("refs/") ? parsed.values.candidate : `refs/heads/${parsed.values.candidate}`;
-    if (ref !== disposition.candidate.ref) fail("--candidate does not match the recorded candidate.ref");
+
+  // D-37 (--require-excluded-ledger): independently provable -- no dependency on
+  // --records/--rendered or any other --require-* flag.
+  const wantsLedger = parsed.flags.has("require-excluded-ledger");
+  const wantsDisposition = parsed.values.records || parsed.values.rendered || !wantsLedger;
+
+  let disposition = null;
+  if (wantsDisposition) {
+    const { records, rendered } = parsed.values;
+    if (!records || !rendered) fail("--records and --rendered are required outside fixture mode");
+    disposition = validateDisposition(JSON.parse(fs.readFileSync(records, "utf8")), { expectedRepository });
+    if (parsed.values.candidate) {
+      const ref = parsed.values.candidate.startsWith("refs/") ? parsed.values.candidate : `refs/heads/${parsed.values.candidate}`;
+      if (ref !== disposition.candidate.ref) fail("--candidate does not match the recorded candidate.ref");
+    }
+    applyStrictFlags(repo, disposition, parsed);
+    if (parsed.flags.has("require-determinism")) {
+      const renderedContent = fs.readFileSync(rendered, "utf8");
+      const fresh = renderIntegrationDisposition(disposition, { expectedRepository });
+      if (renderedContent !== fresh) fail("rendered Markdown is not byte-reproducible from the committed JSON");
+    }
   }
-  applyStrictFlags(repo, disposition, parsed);
-  if (parsed.flags.has("require-determinism")) {
-    const renderedContent = fs.readFileSync(rendered, "utf8");
-    const fresh = renderIntegrationDisposition(disposition, { expectedRepository });
-    if (renderedContent !== fresh) fail("rendered Markdown is not byte-reproducible from the committed JSON");
+
+  if (wantsLedger) {
+    const dispositionsPath = parsed.values.dispositions;
+    if (!dispositionsPath) fail("--dispositions is required with --require-excluded-ledger");
+    const ledger = validateDispositionLedger(JSON.parse(fs.readFileSync(dispositionsPath, "utf8")), { expectedRepository });
+    assertExcludedLedgerLive(repo, ledger, { localMainRef: parsed.values["local-main-ref"] || "refs/heads/main" });
+    // Task 3 of this plan wires --require-determinism for the 230-DISPOSITIONS.{json,md}
+    // render pair once render_integration_disposition.mjs gains renderExcludedLedger.
   }
+
   console.log("integration disposition verification: PASS");
 }
 
