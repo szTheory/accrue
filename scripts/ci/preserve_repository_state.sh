@@ -257,6 +257,13 @@ run() {
   local ref object type encoded
   while IFS= read -r -d '' ref && IFS= read -r -d '' object && IFS= read -r -d '' type; do
     ref="${ref#$'\n'}"; type="${type%$'\n'}"
+    # A ref already living under refs/accrue-preserve/phase-<N>/ is itself a
+    # frozen snapshot minted by a prior capsule (any phase), never an original
+    # ref to re-preserve. Encoding it again produces a doubly hex-encoded name
+    # that can exceed filesystem path limits, and re-preserving a preservation
+    # ref is a no-op anyway -- its target is already recoverable via that
+    # phase's own bundle/manifest.
+    [[ "$ref" =~ ^refs/accrue-preserve/phase-[0-9]+(\.[0-9]+)?/ ]] && continue
     git -C "$repo_root" check-ref-format "$ref" >/dev/null || die "invalid ref name"
     [[ "$object" =~ ^[0-9a-f]{40}$ ]] || die "invalid ref object"
     [[ "$type" == commit || "$type" == tag ]] || die "unsupported ref object shape: $type"
