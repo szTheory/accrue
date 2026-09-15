@@ -6,12 +6,17 @@
 //
 // A literal naming a slug that is ALREADY archived (present under
 // `.planning/milestones/*-phases/<slug>/`, absent under `.planning/phases/<slug>/`)
-// is a hard failure unless the referencing file is provably archive-aware for
-// that slug -- either by calling `resolvePhaseEvidencePath` with it, or by the
-// slug's archived milestones path appearing as a literal anywhere in the scanned
-// corpus (the established `firstExistingPath`/dual-directory-constant pattern
-// used elsewhere in this codebase, e.g. `verify_phase190_automation_contract.sh`,
+// is a hard failure unless the referencing file ITSELF is provably archive-aware
+// for that slug -- either by calling `resolvePhaseEvidencePath` with it, or by the
+// slug's archived milestones path appearing as a literal in that SAME file (the
+// established `firstExistingPath`/dual-directory-constant pattern used elsewhere
+// in this codebase, e.g. `verify_phase190_automation_contract.sh`,
 // `verify_phase191_ax187_coverage.mjs`, `generate_phase200_closeout_reports.mjs`).
+// The safety proof is deliberately per-file, NOT corpus-wide: a stale,
+// unrouted literal in one file must not be excused merely because some
+// unrelated file elsewhere in `scripts/ci/**`/`.github/workflows/**` happens
+// to handle the same archived slug for its own, different evidence reads
+// (CR-02 -- a corpus-wide proof let exactly this recur, undetected, twice).
 // This is what stops the F-01..F-03 class of bug -- a check that silently reads
 // the wrong thing after archiving -- from recurring after a future merge.
 import fs from "node:fs";
@@ -33,9 +38,19 @@ const PATH_LITERAL_RE = new RegExp(`^\\.planning\\/phases\\/(${SLUG_RE})((?:\\/[
 const MILESTONES_RE = new RegExp(`\\.planning\\/milestones\\/[^\\/"'\\s]+-phases\\/(${SLUG_RE})`, "g");
 const VAR_ASSIGN_RE = new RegExp(`\\b(?:const|let|var)\\s+([A-Za-z_$][\\w$]*)\\s*=\\s*["'](${SLUG_RE})["']`, "g");
 const RESOLVE_CALL_RE = new RegExp(`resolvePhaseEvidencePath\\s*\\(\\s*([A-Za-z_$][\\w$]*|"${SLUG_RE}"|'${SLUG_RE}')`, "g");
+// The bash-CLI form of the same resolver (`node scripts/ci/phase_evidence_path.mjs
+// <slug> <artifact>`), used by shell scripts that shell out rather than `import`.
+const CLI_RESOLVE_RE = new RegExp(`phase_evidence_path\\.mjs\\s+["']?(${SLUG_RE})["']?`, "g");
 const DQ_STRING_RE = /"([^"\\]*(?:\\.[^"\\]*)*)"/g;
 const SQ_STRING_RE = /'([^'\\]*(?:\\.[^'\\]*)*)'/g;
 const PREDICATE_EXEMPT_RE = /\.(startsWith|endsWith|includes)\($/;
+// An explicit, narrow, human-reviewed opt-out for a literal that is provably NOT a
+// live filesystem read of the archived phase (e.g. inert sample/fixture document
+// text) -- mirrors this codebase's established per-occurrence annotation
+// convention (see `ax-type-exception`). Trailing-comment only: same line as the
+// literal, so it stays visually adjacent to exactly what it exempts and can't
+// silently cover unrelated lines.
+const EXEMPT_MARKER_RE = /(?:\/\/|#)\s*archive-sweep-exempt:\s*\S/;
 
 function listFiles(root, dir, extensions) {
   const out = [];
@@ -64,13 +79,18 @@ function corpusFiles(root) {
   ].filter((relPath) => relPath.split(path.sep).join("/") !== SELF_PATH).sort();
 }
 
-// Repo-wide "proven safe" slug set: a slug is safe if ANY file in the corpus
-// either (a) contains a literal archived-milestone path for it, or (b) calls
-// `resolvePhaseEvidencePath` with it (directly, or via a same-file variable).
-function computeProvenSafeSlugs(root, files) {
-  const safe = new Set();
+// Per-file "proven safe" slug sets: a slug is safe FOR A GIVEN FILE only if
+// THAT SAME FILE either (a) contains a literal archived-milestone path for it,
+// or (b) calls `resolvePhaseEvidencePath` with it (directly, or via a
+// same-file variable). This is deliberately NOT corpus-wide (CR-02): a stale,
+// unrouted `.planning/phases/<slug>` literal in one file must not be excused
+// merely because some unrelated file elsewhere in the corpus happens to
+// handle the same archived slug for its own, different evidence reads.
+function computeProvenSafeSlugsByFile(root, files) {
+  const safeByFile = new Map();
   for (const relPath of files) {
     const content = fs.readFileSync(path.join(root, relPath), "utf8");
+    const safe = new Set();
 
     let match = MILESTONES_RE.exec(content);
     while (match) { safe.add(match[1]); match = MILESTONES_RE.exec(content); }
@@ -92,8 +112,14 @@ function computeProvenSafeSlugs(root, files) {
       callMatch = RESOLVE_CALL_RE.exec(content);
     }
     RESOLVE_CALL_RE.lastIndex = 0;
+
+    let cliMatch = CLI_RESOLVE_RE.exec(content);
+    while (cliMatch) { safe.add(cliMatch[1]); cliMatch = CLI_RESOLVE_RE.exec(content); }
+    CLI_RESOLVE_RE.lastIndex = 0;
+
+    safeByFile.set(relPath, safe);
   }
-  return safe;
+  return safeByFile;
 }
 
 // Extract candidate quoted-string literal occurrences from JS/bash source, with
@@ -135,6 +161,63 @@ function stripBashVarPrefix(text) {
   return text.replace(/^\$\{?[A-Za-z_][\w]*\}?\//, "");
 }
 
+// A small set of narrow, principled, generically-applicable exemptions for
+// literal `.planning/phases/<slug>` occurrences that are provably NOT a live
+// filesystem read subject to the F-01..F-03 "silently reads the wrong thing
+// after archiving" failure mode -- so they are out of scope for the
+// archive-awareness requirement entirely, same as the pre-existing
+// `.startsWith()`/`.endsWith()`/`.includes()` predicate exemption above.
+
+// Bash idiom: a backslash-continued `for needle in "..." \ "..." \ do ... done`
+// block whose body calls a content-match helper (`require_fixed`,
+// `require_source_fixed`, `require_source_regex`, or `grep`) is checking that
+// ANOTHER file's TEXT CONTAINS these strings -- it never touches the
+// filesystem path the string happens to spell. Returns the 1-indexed line
+// numbers of literal-bearing lines inside such a block's `in`-list.
+const BASH_FOR_START_RE = /^\s*for\s+\w+\s+in\b/;
+const BASH_DO_LINE_RE = /(^\s*do\s*$)|(;\s*do\s*$)/;
+const BASH_DONE_LINE_RE = /^\s*done\b/;
+const CONTENT_MATCH_CALL_RE = /\b(require_fixed|require_source_fixed|require_source_regex|grep)\b/;
+function computeBashContentMatchExemptLines(content) {
+  const exempt = new Set();
+  const lines = content.split(/\r?\n/);
+  for (let i = 0; i < lines.length; i += 1) {
+    if (!BASH_FOR_START_RE.test(lines[i])) continue;
+    let doLine = -1;
+    for (let j = i; j < lines.length && j < i + 200; j += 1) {
+      if (BASH_DO_LINE_RE.test(lines[j])) { doLine = j; break; }
+    }
+    if (doLine === -1) continue;
+    let doneLine = -1;
+    for (let j = doLine + 1; j < lines.length && j < doLine + 200; j += 1) {
+      if (BASH_DONE_LINE_RE.test(lines[j])) { doneLine = j; break; }
+    }
+    if (doneLine === -1) continue;
+    const body = lines.slice(doLine + 1, doneLine).join("\n");
+    if (!CONTENT_MATCH_CALL_RE.test(body)) continue;
+    for (let j = i; j <= doLine; j += 1) exempt.add(j + 1);
+  }
+  return exempt;
+}
+
+// YAML idiom: a `path:` block-scalar entry inside an `actions/upload-artifact`
+// step that declares `if-no-files-found: ignore` is a soft/optional upload by
+// GitHub Actions' own contract -- a missing path degrades to "nothing
+// uploaded," never a silent wrong-content read. Returns the 1-indexed line
+// numbers of literal-bearing `path:` lines that fall inside such a step.
+function computeYamlSoftUploadExemptLines(content) {
+  const exempt = new Set();
+  const lines = content.split(/\r?\n/);
+  for (let i = 0; i < lines.length; i += 1) {
+    if (!lines[i].trim().startsWith(".planning/phases/")) continue;
+    for (let j = i + 1; j < lines.length && j < i + 20; j += 1) {
+      if (/^\s*if-no-files-found:\s*ignore\s*$/.test(lines[j])) { exempt.add(i + 1); break; }
+      if (/^\s*-\s*name:/.test(lines[j])) break; // left this step without finding it
+    }
+  }
+  return exempt;
+}
+
 function archivedCandidates(root, slug) {
   const milestonesRoot = path.join(root, ".planning", "milestones");
   if (!fs.existsSync(milestonesRoot)) return [];
@@ -146,7 +229,7 @@ function archivedCandidates(root, slug) {
 
 export function verifyArchiveInvariants({ root = repositoryRoot } = {}) {
   const files = corpusFiles(root);
-  const provenSafeSlugs = computeProvenSafeSlugs(root, files);
+  const provenSafeSlugsByFile = computeProvenSafeSlugsByFile(root, files);
   const failures = [];
   let literalCount = 0;
 
@@ -154,16 +237,23 @@ export function verifyArchiveInvariants({ root = repositoryRoot } = {}) {
     const content = fs.readFileSync(path.join(root, relPath), "utf8");
     const isBash = relPath.endsWith(".sh");
     const isYaml = relPath.endsWith(".yml") || relPath.endsWith(".yaml");
+    const lines = content.split(/\r?\n/);
 
     const occurrences = isYaml
       ? extractYamlPathLines(content)
       : extractQuotedLiterals(content);
+
+    const bashContentMatchExempt = isBash ? computeBashContentMatchExemptLines(content) : null;
+    const yamlSoftUploadExempt = isYaml ? computeYamlSoftUploadExemptLines(content) : null;
 
     for (const occurrence of occurrences) {
       const normalized = isBash ? stripBashVarPrefix(occurrence.text) : occurrence.text;
       const literalMatch = normalized.match(PATH_LITERAL_RE);
       if (!literalMatch) continue;
       if (!isYaml && PREDICATE_EXEMPT_RE.test(occurrence.before)) continue;
+      if (EXEMPT_MARKER_RE.test(lines[occurrence.line - 1] || "")) continue;
+      if (isBash && bashContentMatchExempt.has(occurrence.line)) continue;
+      if (isYaml && yamlSoftUploadExempt.has(occurrence.line)) continue;
 
       literalCount += 1;
       const [, slug, restRaw] = literalMatch;
@@ -180,8 +270,9 @@ export function verifyArchiveInvariants({ root = repositoryRoot } = {}) {
         continue;
       }
 
-      if (!provenSafeSlugs.has(slug)) {
-        failures.push(`${relPath}:${occurrence.line}: literal names already-archived phase ${slug}, not routed through resolvePhaseEvidencePath (scripts/ci/phase_evidence_path.mjs): ${occurrence.text}`);
+      const provenSafeSlugs = provenSafeSlugsByFile.get(relPath);
+      if (!provenSafeSlugs || !provenSafeSlugs.has(slug)) {
+        failures.push(`${relPath}:${occurrence.line}: literal names already-archived phase ${slug}, not routed through resolvePhaseEvidencePath in this same file (scripts/ci/phase_evidence_path.mjs): ${occurrence.text}`);
       }
     }
   }
@@ -262,6 +353,32 @@ function verifyFixtures() {
     try { verifyArchiveInvariants({ root }); } catch (caught) { error = caught; }
     assert.ok(error, "unrouted archived-slug literal should fail");
     assert.match(error.message, /already-archived phase 903-fixture-unrouted/);
+    fs.rmSync(root, { recursive: true, force: true });
+  }
+
+  // Fixture 5 (CR-02 regression): a literal naming an already-archived slug in
+  // one file, with NO archive-aware proof in that file, must fail even when a
+  // DIFFERENT, unrelated file elsewhere in the corpus happens to handle the
+  // same slug archive-aware. Corpus-wide safety inference (the defect this
+  // fixture guards against) would incorrectly let this pass.
+  {
+    const root = makeFixtureRoot();
+    writeFile(root, ".planning/milestones/v9.0-phases/906-fixture-cross-file/evidence.json", "{}");
+    writeFile(root, "scripts/ci/fixture_stale_unrouted.mjs", 'const P = ".planning/phases/906-fixture-cross-file/evidence.json";\n');
+    writeFile(
+      root,
+      "scripts/ci/fixture_unrelated_archive_aware.mjs",
+      [
+        'import { resolvePhaseEvidencePath } from "./phase_evidence_path.mjs";',
+        'const SLUG = "906-fixture-cross-file";',
+        "resolvePhaseEvidencePath(SLUG, \"other-evidence.json\");",
+        "",
+      ].join("\n")
+    );
+    let error = null;
+    try { verifyArchiveInvariants({ root }); } catch (caught) { error = caught; }
+    assert.ok(error, "a stale literal in one file must not be excused by archive-awareness in a different file");
+    assert.match(error.message, /fixture_stale_unrouted\.mjs.*already-archived phase 906-fixture-cross-file/s);
     fs.rmSync(root, { recursive: true, force: true });
   }
 

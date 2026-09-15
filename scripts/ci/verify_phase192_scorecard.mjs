@@ -2,18 +2,25 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { resolvePhaseEvidencePath } from "./phase_evidence_path.mjs";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const REPO_ROOT = path.resolve(__dirname, "..", "..");
-const PHASE192_DIR = ".planning/phases/192-idempotent-verification-sign-off";
+// CR-02: both 192-idempotent-verification-sign-off and 187-audit-baseline are
+// archived (this script is dormant, never wired into CI). PHASE192_DIR is used
+// below only to build the conventional evidence-ref PREFIX for text matching,
+// so it stays a bare slug (not a bare `.planning/phases/...` literal) and the
+// real filesystem reads are routed through the archive-aware resolver.
+const PHASE192_SLUG = "192-idempotent-verification-sign-off";
+const PHASE192_DIR = `.planning/phases/${PHASE192_SLUG}`;
 
 const DEFAULT_INPUTS = {
-  baselinePath: path.join(REPO_ROOT, ".planning/phases/187-audit-baseline/baseline.cells.json"),
-  finalCellsPath: path.join(REPO_ROOT, PHASE192_DIR, "final.cells.json"),
-  deltaPath: path.join(REPO_ROOT, PHASE192_DIR, "scorecard.delta.json"),
-  regressionsPath: path.join(REPO_ROOT, PHASE192_DIR, "regressions.ndjson"),
-  manifestPath: path.join(REPO_ROOT, PHASE192_DIR, "artifacts.manifest.json"),
+  baselinePath: resolvePhaseEvidencePath("187-audit-baseline", "baseline.cells.json", { root: REPO_ROOT }),
+  finalCellsPath: resolvePhaseEvidencePath(PHASE192_SLUG, "final.cells.json", { root: REPO_ROOT }),
+  deltaPath: resolvePhaseEvidencePath(PHASE192_SLUG, "scorecard.delta.json", { root: REPO_ROOT }),
+  regressionsPath: resolvePhaseEvidencePath(PHASE192_SLUG, "regressions.ndjson", { root: REPO_ROOT }),
+  manifestPath: resolvePhaseEvidencePath(PHASE192_SLUG, "artifacts.manifest.json", { root: REPO_ROOT }),
 };
 
 const DIMENSIONS = new Map([

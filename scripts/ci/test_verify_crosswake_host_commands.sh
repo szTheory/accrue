@@ -8,7 +8,7 @@ trap 'rm -rf "$fixture_root"' EXIT
 fixture_repo="$fixture_root/repo"
 fixture_source="$fixture_root/crosswake"
 fixture_bin="$fixture_root/bin"
-lock="$fixture_repo/.planning/phases/224-crosswake-host-command-bridge-seam/crosswake-source-lock.json"
+lock="$fixture_repo/.planning/phases/224-crosswake-host-command-bridge-seam/crosswake-source-lock.json" # archive-sweep-exempt: synthetic pre-archive fixture path written into a disposable tmp repo, not a live evidence read
 swift_log="$fixture_root/swift-argv.log"
 swift_marker="$fixture_root/swift-ran"
 injected_marker="$fixture_root/injected"
@@ -24,7 +24,7 @@ mkdir -p \
 cp "$repo_root/scripts/ci/verify_crosswake_host_commands.sh" "$fixture_repo/scripts/ci/"
 chmod +x "$fixture_repo/scripts/ci/verify_crosswake_host_commands.sh"
 
-printf '%s\n' 'fixture audit' > "$fixture_repo/.planning/phases/224-crosswake-host-command-bridge-seam/224-CROSSWAKE-SOURCE-AUDIT.md"
+printf '%s\n' 'fixture audit' > "$fixture_repo/.planning/phases/224-crosswake-host-command-bridge-seam/224-CROSSWAKE-SOURCE-AUDIT.md" # archive-sweep-exempt: synthetic pre-archive fixture path written into a disposable tmp repo, not a live evidence read
 audit_sha="$(shasum -a 256 "$fixture_repo/.planning/phases/224-crosswake-host-command-bridge-seam/224-CROSSWAKE-SOURCE-AUDIT.md" | awk '{print $1}')"
 diff_sha="$(printf '%s\n' 'fixture reviewed diff' | shasum -a 256 | awk '{print $1}')"
 

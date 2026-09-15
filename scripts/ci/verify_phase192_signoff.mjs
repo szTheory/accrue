@@ -1,12 +1,20 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { resolvePhaseEvidencePath } from "./phase_evidence_path.mjs";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const REPO_ROOT = path.resolve(__dirname, "..", "..");
-const PHASE192_DIR = ".planning/phases/192-idempotent-verification-sign-off";
-const DEFAULT_SIGNOFF_PATH = path.join(REPO_ROOT, PHASE192_DIR, "192-SIGN-OFF.md");
+// CR-02: 192-idempotent-verification-sign-off is archived (this script is
+// dormant, never wired into CI). PHASE192_DIR is used below only to build the
+// conventional evidence-ref PREFIX for text matching/generated markdown, so it
+// stays a bare slug (not a bare `.planning/phases/...` literal) and the one
+// real filesystem read (DEFAULT_SIGNOFF_PATH) is routed through the
+// archive-aware resolver.
+const PHASE192_SLUG = "192-idempotent-verification-sign-off";
+const PHASE192_DIR = `.planning/phases/${PHASE192_SLUG}`;
+const DEFAULT_SIGNOFF_PATH = resolvePhaseEvidencePath(PHASE192_SLUG, "192-SIGN-OFF.md", { root: REPO_ROOT });
 
 const REQUIRED_ARTIFACTS = [
   "final.cells.json",
@@ -376,8 +384,8 @@ export function verifyPhase192Signoff(options = {}) {
 
 function positiveMarkdown() {
   const trace = (name) => `.planning/phases/192-idempotent-verification-sign-off/traces/${name}.zip`;
-  const screenshot = ".planning/phases/192-idempotent-verification-sign-off/gallery/dashboard-health-light.png";
-  const manifest = ".planning/phases/192-idempotent-verification-sign-off/artifacts.manifest.json";
+  const screenshot = ".planning/phases/192-idempotent-verification-sign-off/gallery/dashboard-health-light.png"; // archive-sweep-exempt: sample sign-off markdown text for this file's own fixtures, never read from disk
+  const manifest = ".planning/phases/192-idempotent-verification-sign-off/artifacts.manifest.json"; // archive-sweep-exempt: sample sign-off markdown text for this file's own fixtures, never read from disk
 
   return `# Phase 192 Maintainer Sign-Off
 
