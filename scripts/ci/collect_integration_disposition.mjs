@@ -447,10 +447,389 @@ export function collectIntegrationDisposition({ repo, expectedRepository, candid
   return validateDisposition(disposition, { expectedRepository });
 }
 
+// =====================================================================================
+// D-07/D-08/D-09/D-10/D-12/D-13/D-36/D-37/D-39: the excluded-commit ledger. Every
+// commit reachable from local main and not reachable from the candidate gets exactly
+// one evidence-backed row. Emitted as a separate artifact (230-DISPOSITIONS.{json,md})
+// from the hazard-universe disposition above (D-36's "two artifacts" choice).
+// =====================================================================================
+
+export const EXCLUDED_COMMIT_DISPOSITIONS = new Set(["excluded-superseded", "excluded-rejected", "carried-on-candidate"]);
+const EXCLUDED_ROW_FIELDS = new Set(["commit", "subject", "disposition", "superseded_by", "supersession_evidence", "patch_id_occurrences_main", "patch_id_occurrences_candidate", "published_elsewhere"]);
+const SUPERSESSION_EVIDENCE_FIELDS = new Set(["tree_level", "requirement_level"]);
+const TREE_LEVEL_FIELDS = new Set(["command", "files", "plan_inventory"]);
+const TREE_LEVEL_FILE_FIELDS = new Set(["path", "exists_on_candidate", "superseded_by_path"]);
+const PLAN_INVENTORY_FIELDS = new Set(["command", "abandoned_line_max_plan", "milestone_line_max_plan"]);
+const REQUIREMENT_LEVEL_FIELDS = new Set(["command", "file", "requirements"]);
+const REQUIREMENT_ROW_FIELDS = new Set(["id", "matched_text"]);
+const LEDGER_TOP = new Set(["schema_version", "repository", "candidate", "local_main", "excluded_commit_count", "rows", "pr_44"]);
+const LEDGER_CANDIDATE_FIELDS = new Set(["ref", "object"]);
+const PR_FIELDS = new Set(["number", "head_ref", "head_object", "base_ref", "base_object", "state", "mergeable", "ahead_of_base", "behind_base", "matched_commits", "disposition", "note"]);
+const PR_MATCHED_COMMIT_FIELDS = new Set(["pr_branch_commit", "milestone_commit", "patch_id"]);
+const PR_DISPOSITIONS = new Set(["close-unmerged-cite-superseding"]);
+
+// D-07: the abandoned line's entire unique non-planning surface. Known by domain
+// knowledge (D-07's own claim) so the tree-level sweep can recognize what a maintainer
+// six months from now would need to be told is superseded, not guessed at generically.
+const TREE_LEVEL_KNOWN_FILES = [
+  { path: "scripts/ci/capture_ci_baseline.sh", superseded_by_path: "scripts/ci/collect_ci_baseline.mjs" },
+  { path: "scripts/ci/verify_ci_baseline_contract.sh", superseded_by_path: "scripts/ci/verify_ci_baseline.mjs" },
+  { path: "scripts/ci/ci_baseline_workflow_policy.json", superseded_by_path: null }
+];
+// D-08: commits that build or wire the rejected shell-based salvage candidate.
+const SALVAGE_PATHS = [
+  "scripts/ci/capture_ci_baseline.sh",
+  "scripts/ci/verify_ci_baseline_contract.sh",
+  "scripts/ci/ci_baseline_workflow_policy.json",
+  ".github/workflows/ci.yml"
+];
+const REQUIREMENTS_FILE = ".planning/milestones/v1.61-REQUIREMENTS.md";
+const REQUIREMENT_IDS_TO_CITE = ["BASE-01", "BASE-02"];
+export const PUBLISHED_ELSEWHERE_REF = "origin/phase-226-baseline-5da8e6b88735";
+export const PUBLISHED_ELSEWHERE_COMMIT = "5da8e6b887354eded1b6dc25968ad7679d6bbd83";
+export const CARRIED_COMMIT = "afddc87c5245bd1abb97dcac735aef0a2938bdf5";
+export const PR_44_LOCAL_BRANCH = "refs/heads/fix/release-boot-env-resolver";
+
+function singleLineSubject(value, label) {
+  if (typeof value !== "string" || !value) fail(`${label} must be a non-empty string`);
+  const cleaned = value.replace(/[\r\n]+/g, " ").replace(/[\0-\x1f\x7f]/g, "").trim();
+  if (!cleaned) fail(`${label} must be a non-empty string after sanitization`);
+  return cleaned;
+}
+function excludedCommitDisposition(value, label) { if (typeof value !== "string" || !EXCLUDED_COMMIT_DISPOSITIONS.has(value)) fail(`${label} must be one of excluded-superseded/excluded-rejected/carried-on-candidate`); return value; }
+function supersededBy(value, label) {
+  if (value === "no-equivalent") return value;
+  if (!Array.isArray(value) || !value.length) fail(`${label} must be the literal "no-equivalent" or a non-empty array of 40-hex commit ids`);
+  value.forEach((sha, index) => fullSha(sha, `${label}[${index}]`));
+  return value;
+}
+function publishedElsewhere(value, label) {
+  if (value === "none") return value;
+  if (typeof value !== "string" || !value || /[\0-\x1f\x7f]/.test(value)) fail(`${label} must be the literal "none" or a non-empty ref/branch name string`);
+  return value;
+}
+function branchName(value, label) { if (typeof value !== "string" || !value || /[\0-\x1f\x7f ~^:?*\\[\]]/.test(value)) fail(`${label} must be a safe branch name`); return value; }
+function argvCommand(value, label) { if (!Array.isArray(value) || !value.length || value.some((el) => typeof el !== "string")) fail(`${label} must be a non-empty argv array of strings`); return value; }
+
+function validateTreeLevelFile(row, index) {
+  const label = `supersession_evidence.tree_level.files[${index}]`;
+  fields(row, TREE_LEVEL_FILE_FIELDS, label);
+  relativePath(row.path, `${label}.path`);
+  if (typeof row.exists_on_candidate !== "boolean") fail(`${label}.exists_on_candidate must be a boolean`);
+  if (row.superseded_by_path !== null && typeof row.superseded_by_path !== "string") fail(`${label}.superseded_by_path must be a string or null`);
+  return row;
+}
+function validatePlanInventory(inv, label) {
+  fields(inv, PLAN_INVENTORY_FIELDS, label);
+  argvCommand(inv.command, `${label}.command`);
+  nonNegInt(inv.abandoned_line_max_plan, `${label}.abandoned_line_max_plan`);
+  nonNegInt(inv.milestone_line_max_plan, `${label}.milestone_line_max_plan`);
+  return inv;
+}
+function validateTreeLevel(tree, label) {
+  fields(tree, TREE_LEVEL_FIELDS, label);
+  argvCommand(tree.command, `${label}.command`);
+  if (!Array.isArray(tree.files) || !tree.files.length) fail(`${label}.files must be a non-empty array`);
+  tree.files.forEach((row, index) => validateTreeLevelFile(row, index));
+  validatePlanInventory(tree.plan_inventory, `${label}.plan_inventory`);
+  return tree;
+}
+function validateRequirementRow(row, index, label0) {
+  const label = `${label0}[${index}]`;
+  fields(row, REQUIREMENT_ROW_FIELDS, label);
+  if (typeof row.id !== "string" || !row.id) fail(`${label}.id must be a non-empty string`);
+  if (typeof row.matched_text !== "string" || !row.matched_text) fail(`${label}.matched_text must be a non-empty string`);
+  return row;
+}
+function validateRequirementLevel(req, label) {
+  fields(req, REQUIREMENT_LEVEL_FIELDS, label);
+  relativePath(req.file, `${label}.file`);
+  argvCommand(req.command, `${label}.command`);
+  if (!Array.isArray(req.requirements) || !req.requirements.length) fail(`${label}.requirements must be a non-empty array`);
+  req.requirements.forEach((row, index) => validateRequirementRow(row, index, `${label}.requirements`));
+  return req;
+}
+function validateSupersessionEvidence(evidence, label) {
+  fields(evidence, SUPERSESSION_EVIDENCE_FIELDS, label);
+  validateTreeLevel(evidence.tree_level, `${label}.tree_level`);
+  validateRequirementLevel(evidence.requirement_level, `${label}.requirement_level`);
+  return evidence;
+}
+export function validateExcludedRow(row, index) {
+  const label = `rows[${index}]`;
+  fields(row, EXCLUDED_ROW_FIELDS, label);
+  for (const key of EXCLUDED_ROW_FIELDS) if (!Object.hasOwn(row, key)) fail(`${label} is missing required field: ${key}`);
+  fullSha(row.commit, `${label}.commit`);
+  singleLineSubject(row.subject, `${label}.subject`);
+  excludedCommitDisposition(row.disposition, `${label}.disposition`);
+  supersededBy(row.superseded_by, `${label}.superseded_by`);
+  validateSupersessionEvidence(row.supersession_evidence, `${label}.supersession_evidence`);
+  nonNegInt(row.patch_id_occurrences_main, `${label}.patch_id_occurrences_main`);
+  nonNegInt(row.patch_id_occurrences_candidate, `${label}.patch_id_occurrences_candidate`);
+  publishedElsewhere(row.published_elsewhere, `${label}.published_elsewhere`);
+  return row;
+}
+export function validateExcludedRows(rows) {
+  if (!Array.isArray(rows)) fail("rows must be an array");
+  rows.forEach((row, index) => validateExcludedRow(row, index));
+  const seen = new Set();
+  for (const row of rows) {
+    if (seen.has(row.commit)) fail(`rows contains duplicate commit key: ${row.commit}`);
+    seen.add(row.commit);
+  }
+  return rows;
+}
+function validatePrMatchedCommit(row, index) {
+  const label = `pr_44.matched_commits[${index}]`;
+  fields(row, PR_MATCHED_COMMIT_FIELDS, label);
+  fullSha(row.pr_branch_commit, `${label}.pr_branch_commit`);
+  fullSha(row.milestone_commit, `${label}.milestone_commit`);
+  patchId(row.patch_id, `${label}.patch_id`);
+  return row;
+}
+export function validatePr44(pr) {
+  fields(pr, PR_FIELDS, "pr_44");
+  for (const key of PR_FIELDS) if (!Object.hasOwn(pr, key)) fail(`pr_44 is missing required field: ${key}`);
+  if (pr.number !== 44) fail("pr_44.number must be 44");
+  branchName(pr.head_ref, "pr_44.head_ref");
+  fullSha(pr.head_object, "pr_44.head_object");
+  branchName(pr.base_ref, "pr_44.base_ref");
+  fullSha(pr.base_object, "pr_44.base_object");
+  if (!["open", "closed", "merged"].includes(pr.state)) fail("pr_44.state must be one of open/closed/merged");
+  if (typeof pr.mergeable !== "string" || !pr.mergeable) fail("pr_44.mergeable must be a non-empty string (verbatim GitHub mergeable value)");
+  nonNegInt(pr.ahead_of_base, "pr_44.ahead_of_base");
+  nonNegInt(pr.behind_base, "pr_44.behind_base");
+  if (!Array.isArray(pr.matched_commits)) fail("pr_44.matched_commits must be an array");
+  pr.matched_commits.forEach((row, index) => validatePrMatchedCommit(row, index));
+  if (!PR_DISPOSITIONS.has(pr.disposition)) fail("pr_44.disposition must be close-unmerged-cite-superseding");
+  if (typeof pr.note !== "string" || !pr.note) fail("pr_44.note must be a non-empty string");
+  return pr;
+}
+
+export function validateDispositionLedger(ledger, { expectedRepository } = {}) {
+  fields(ledger, LEDGER_TOP, "ledger");
+  for (const key of LEDGER_TOP) if (!(key in ledger)) fail(`ledger is missing required field: ${key}`);
+  if (ledger.schema_version !== 1) fail("ledger has unsupported schema version");
+  repository(ledger.repository, "ledger.repository");
+  if (expectedRepository && ledger.repository !== expectedRepository) fail("ledger.repository must match expectedRepository");
+  fields(ledger.candidate, LEDGER_CANDIDATE_FIELDS, "ledger.candidate");
+  refName(ledger.candidate.ref, "ledger.candidate.ref");
+  fullSha(ledger.candidate.object, "ledger.candidate.object");
+  fullSha(ledger.local_main, "ledger.local_main");
+  nonNegInt(ledger.excluded_commit_count, "ledger.excluded_commit_count");
+  validateExcludedRows(ledger.rows);
+  const excludedRows = ledger.rows.filter((row) => row.disposition !== "carried-on-candidate");
+  if (ledger.excluded_commit_count !== excludedRows.length) fail("excluded_commit_count must equal the count of rows whose disposition is not carried-on-candidate");
+  validatePr44(ledger.pr_44);
+  return ledger;
+}
+
+// D-15: bulk-computes a patch-id -> occurrence-count map and a commit -> patch-id map
+// for every commit in `revListArgs`, in ONE `git log -p | git patch-id --stable`
+// pipeline rather than one spawn per commit — the difference between a few seconds and
+// a candidate-sized (~500-commit) history taking minutes. Never transcribed; always a
+// live two-process pipeline over the args given.
+// A candidate-sized range's full `git log -p` output can run into the hundreds of MB
+// (the whole diff text of every commit in range). Routing that through Node's
+// spawnSync `input`/stdout string buffers hits OS pipe limits (ENOBUFS) well before
+// any `maxBuffer` ceiling is reached. Both legs of the pipeline instead read/write
+// file descriptors directly, so no multi-hundred-MB string is ever held in the
+// process or pushed through a pipe -- only the small (~one line per commit)
+// `git patch-id` output is read back as a string.
+export function bulkPatchIdFrequency(repo, revListArgs) {
+  const scratchDir = fs.mkdtempSync(path.join(fs.realpathSync(os.tmpdir()), "phase230-patchid-"));
+  try {
+    const logPath = path.join(scratchDir, "log.patch");
+    const logFd = fs.openSync(logPath, "w");
+    let log;
+    try {
+      log = spawnSync("git", ["-C", repo, "log", "-p", "--format=%H", ...revListArgs], { stdio: ["ignore", logFd, "pipe"], encoding: "utf8", shell: false, timeout: 180000 });
+    } finally { fs.closeSync(logFd); }
+    if (log.error || log.status !== 0) fail(`git log -p failed: ${(log.stderr || log.error?.message || "unknown error").toString().trim().slice(0, 400)}`);
+    const inFd = fs.openSync(logPath, "r");
+    let pid;
+    try {
+      pid = spawnSync("git", ["patch-id", "--stable"], { stdio: [inFd, "pipe", "pipe"], encoding: "utf8", shell: false, maxBuffer: 50_000_000, timeout: 60000 });
+    } finally { fs.closeSync(inFd); }
+    if (pid.error || pid.status !== 0) fail(`git patch-id failed: ${(pid.stderr || pid.error?.message || "unknown error").toString().trim().slice(0, 400)}`);
+    const freq = new Map();
+    const byCommit = new Map();
+    for (const line of pid.stdout.split("\n")) {
+      const parts = line.trim().split(/\s+/);
+      if (parts.length < 2) continue;
+      const [patch, commit] = parts;
+      byCommit.set(commit, patch);
+      freq.set(patch, (freq.get(patch) || 0) + 1);
+    }
+    return { freq, byCommit };
+  } finally {
+    fs.rmSync(scratchDir, { recursive: true, force: true });
+  }
+}
+
+export function collectTreeLevelEvidence(repo, { localMainRef, candidateObject }) {
+  const files = TREE_LEVEL_KNOWN_FILES.map(({ path: filePath, superseded_by_path: supersededByPath }) => {
+    const check = spawnSync("git", ["-C", repo, "cat-file", "-e", `${candidateObject}:${filePath}`], { encoding: "utf8", shell: false });
+    const exists = check.status === 0;
+    return { path: filePath, exists_on_candidate: exists, superseded_by_path: exists ? null : supersededByPath };
+  });
+  const planPattern = /226-(\d{2})-PLAN\.md$/;
+  const maxPlan = (paths) => paths.reduce((max, entry) => { const match = entry.match(planPattern); return match ? Math.max(max, Number(match[1])) : max; }, 0);
+  const abandonedPlans = run(repo, ["ls-tree", "-r", "--name-only", localMainRef]).split("\n").filter((entry) => entry.startsWith(".planning/phases/226-ci-baseline-proof-semantics/") && planPattern.test(entry));
+  const milestonePlans = run(repo, ["ls-tree", "-r", "--name-only", candidateObject]).split("\n").filter((entry) => entry.includes("226-ci-baseline-proof-semantics/") && planPattern.test(entry));
+  return {
+    command: ["git", "cat-file", "-e", `${candidateObject}:<path>`],
+    files,
+    plan_inventory: {
+      command: ["git", "ls-tree", "-r", "--name-only", "<ref>"],
+      abandoned_line_max_plan: maxPlan(abandonedPlans),
+      milestone_line_max_plan: maxPlan(milestonePlans)
+    }
+  };
+}
+
+export function collectRequirementLevelEvidence(repo, candidateObject) {
+  const check = spawnSync("git", ["-C", repo, "cat-file", "-e", `${candidateObject}:${REQUIREMENTS_FILE}`], { encoding: "utf8", shell: false });
+  if (check.status !== 0) fail(`${REQUIREMENTS_FILE} does not exist on the candidate`);
+  const content = run(repo, ["show", `${candidateObject}:${REQUIREMENTS_FILE}`]);
+  const lines = content.split("\n");
+  const requirements = REQUIREMENT_IDS_TO_CITE.map((id) => {
+    const matchedLine = lines.find((line) => line.includes(`| ${id} |`) && /complete/i.test(line));
+    if (!matchedLine) fail(`unable to find a Complete traceability row for requirement ${id} in ${REQUIREMENTS_FILE}`);
+    return { id, matched_text: matchedLine.trim() };
+  });
+  return { command: ["git", "show", `${candidateObject}:${REQUIREMENTS_FILE}`], file: REQUIREMENTS_FILE, requirements };
+}
+
+function invertByCommit(byCommit) {
+  const patchToCommits = new Map();
+  for (const [commit, patch] of byCommit) {
+    if (!patchToCommits.has(patch)) patchToCommits.set(patch, []);
+    patchToCommits.get(patch).push(commit);
+  }
+  for (const commits of patchToCommits.values()) commits.sort();
+  return patchToCommits;
+}
+
+// D-10: real facts about PR #44, recomputed live -- never transcribed. `collectPr` is
+// injectable so tests can stub the one network-touching call (`gh pr view`) without a
+// live GitHub credential; the default performs the real `gh` call.
+function defaultCollectPr(repo, { localMainObject, prBranchRef }) {
+  const view = spawnSync("gh", ["pr", "view", "44", "--json", "number,headRefName,headRefOid,baseRefName,state,mergeable"], { encoding: "utf8", shell: false, maxBuffer: 5_000_000, timeout: 30000 });
+  if (view.error || view.status !== 0) fail(`gh pr view 44 failed: ${(view.stderr || view.error?.message || "unknown error").trim().slice(0, 400)}`);
+  const data = JSON.parse(view.stdout);
+  const headObject = fullSha(run(repo, ["rev-parse", prBranchRef]), "pr_44.head_object");
+  if (headObject !== data.headRefOid) fail("local PR branch head differs from GitHub's reported headRefOid -- fetch before recording (never transcribe)");
+  return { number: data.number, headRefName: data.headRefName, headObject, baseRefName: data.baseRefName, state: String(data.state).toLowerCase(), mergeable: String(data.mergeable) };
+}
+
+export function collectPr44Ledger(repo, { localMainObject, candidateObject, prBranchRef = PR_44_LOCAL_BRANCH, candidatePatchIds, collectPr = defaultCollectPr } = {}) {
+  const pr = collectPr(repo, { localMainObject, prBranchRef });
+  const aheadBehind = run(repo, ["rev-list", "--left-right", "--count", `${localMainObject}...${pr.headObject}`]).split(/\s+/);
+  const [behindBaseRaw, aheadOfBaseRaw] = aheadBehind;
+  const prUniqueShas = run(repo, ["rev-list", `${localMainObject}..${pr.headObject}`]).split("\n").filter(Boolean);
+  const { byCommit: prByCommit } = bulkPatchIdFrequency(repo, [`${localMainObject}..${pr.headObject}`]);
+  const candidatePatchToCommits = invertByCommit(candidatePatchIds.byCommit);
+  const matchedCommits = prUniqueShas.map((sha) => {
+    const patch = prByCommit.get(sha);
+    if (!patch) fail(`unable to compute a patch-id for PR #44 branch commit ${sha}`);
+    const matches = candidatePatchToCommits.get(patch) || [];
+    if (!matches.length) fail(`PR #44 branch commit ${sha} has no patch-id match on the candidate (D-10's "already on the milestone branch" claim did not hold live)`);
+    return { pr_branch_commit: sha, milestone_commit: matches[0], patch_id: patch };
+  }).sort((a, b) => a.pr_branch_commit.localeCompare(b.pr_branch_commit));
+  return {
+    number: pr.number,
+    head_ref: pr.headRefName,
+    head_object: pr.headObject,
+    base_ref: pr.baseRefName,
+    base_object: localMainObject,
+    state: pr.state,
+    mergeable: pr.mergeable,
+    ahead_of_base: Number(aheadOfBaseRaw),
+    behind_base: Number(behindBaseRaw),
+    matched_commits: matchedCommits,
+    disposition: "close-unmerged-cite-superseding",
+    note: "Head is local main plus 4 commits; merging would permanently publish all locally-excluded abandoned Phase-226 commits onto main. All 4 useful commits are already on the milestone branch as exact patch-id matches, so nothing is lost by closing unmerged (D-10). STATE.md's prior description of this PR as \"four commits cherry-picked off main\" describes intent, not the pushed branch; the correction to STATE.md is Plan 230-06's task. Not closed by this plan (D-11: the candidate must exist first; Plan 230-06 owns closure)."
+  };
+}
+
+export function collectExcludedCommitLedger({ repo, expectedRepository, candidateRef = "refs/heads/integration/v1.62-candidate", localMainRef = "refs/heads/main", prBranchRef = PR_44_LOCAL_BRANCH, carriedCommit = CARRIED_COMMIT, collectPr } = {}) {
+  repository(expectedRepository, "expectedRepository");
+  const candidateObject = fullSha(run(repo, ["rev-parse", `${candidateRef}^{commit}`]), "candidate object");
+  const localMainObject = fullSha(run(repo, ["rev-parse", `${localMainRef}^{commit}`]), "local main object");
+
+  const excludedShas = run(repo, ["rev-list", localMainObject, `^${candidateObject}`]).split("\n").filter(Boolean);
+  const salvageShas = new Set(run(repo, ["log", `${candidateObject}..${localMainObject}`, "--format=%H", "--", ...SALVAGE_PATHS]).split("\n").filter(Boolean));
+
+  const { byCommit: mainByCommit } = bulkPatchIdFrequency(repo, [`${candidateObject}..${localMainObject}`]);
+  const candidatePatchIds = bulkPatchIdFrequency(repo, [candidateObject]);
+
+  const treeLevel = collectTreeLevelEvidence(repo, { localMainRef, candidateObject });
+  const requirementLevel = collectRequirementLevelEvidence(repo, candidateObject);
+  const supersessionEvidence = { tree_level: treeLevel, requirement_level: requirementLevel };
+
+  const excludedRows = excludedShas.map((sha) => {
+    const subject = run(repo, ["log", "-1", "--format=%s", sha]);
+    const disposition = salvageShas.has(sha) ? "excluded-rejected" : "excluded-superseded";
+    const patch = mainByCommit.get(sha);
+    const occurrencesMain = patch ? [...mainByCommit.values()].filter((p) => p === patch).length : 0;
+    const occurrencesCandidate = patch ? (candidatePatchIds.freq.get(patch) || 0) : 0;
+    return {
+      commit: sha,
+      subject: singleLineSubject(subject, "subject"),
+      disposition,
+      superseded_by: "no-equivalent",
+      supersession_evidence: supersessionEvidence,
+      patch_id_occurrences_main: occurrencesMain,
+      patch_id_occurrences_candidate: occurrencesCandidate,
+      published_elsewhere: sha === PUBLISHED_ELSEWHERE_COMMIT ? PUBLISHED_ELSEWHERE_REF : "none"
+    };
+  });
+
+  // D-12: afddc87c is already an ancestor of the candidate (never appears in the
+  // main^candidate excluded set above); recorded as an explicit extra row so nobody
+  // re-cherry-picks it and re-triggers the .planning/ conflict. `carriedCommit` is
+  // injectable (defaulting to the real afddc87c) so fixture repositories that do not
+  // carry that literal object can still exercise this collector end-to-end.
+  const carriedObject = carriedCommit ? fullSha(run(repo, ["rev-parse", `${carriedCommit}^{commit}`]), "carried commit object") : null;
+  if (carriedObject && !excludedShas.includes(carriedObject)) {
+    const isAncestor = spawnSync("git", ["-C", repo, "merge-base", "--is-ancestor", carriedObject, candidateObject], { encoding: "utf8", shell: false });
+    if (isAncestor.status !== 0) fail(`carried commit ${carriedObject} is not an ancestor of the candidate -- carried-on-candidate claim did not hold live`);
+    const carriedSubject = run(repo, ["log", "-1", "--format=%s", carriedObject]);
+    const carriedPatch = run(repo, ["show", carriedObject]);
+    const carriedPatchId = (spawnSync("git", ["patch-id", "--stable"], { input: carriedPatch, encoding: "utf8", shell: false }).stdout || "").trim().split(/\s+/)[0];
+    const occurrencesCandidate = carriedPatchId ? (candidatePatchIds.freq.get(carriedPatchId) || 0) : 0;
+    excludedRows.push({
+      commit: carriedObject,
+      subject: singleLineSubject(carriedSubject, "subject"),
+      disposition: "carried-on-candidate",
+      superseded_by: [carriedObject],
+      supersession_evidence: supersessionEvidence,
+      patch_id_occurrences_main: 0,
+      patch_id_occurrences_candidate: occurrencesCandidate,
+      published_elsewhere: "none"
+    });
+  }
+
+  const pr44 = collectPr44Ledger(repo, { localMainObject, candidateObject, prBranchRef, candidatePatchIds, ...(collectPr ? { collectPr } : {}) });
+
+  const excludedCount = excludedRows.filter((row) => row.disposition !== "carried-on-candidate").length;
+  const ledger = {
+    schema_version: 1,
+    repository: expectedRepository,
+    candidate: { ref: candidateRef, object: candidateObject },
+    local_main: localMainObject,
+    excluded_commit_count: excludedCount,
+    rows: excludedRows.sort((a, b) => a.commit.localeCompare(b.commit)),
+    pr_44: pr44
+  };
+  return validateDispositionLedger(ledger, { expectedRepository });
+}
+
 function parseArgs(argv) {
   const result = {};
   for (let index = 0; index < argv.length; index += 1) {
-    if (!argv[index].startsWith("--") || !argv[index + 1]) fail("usage: --repo PATH --expected-repository OWNER/REPO [--candidate-ref REF] --out FILE");
+    if (!argv[index].startsWith("--") || !argv[index + 1]) fail("usage: --repo PATH --expected-repository OWNER/REPO [--candidate-ref REF] --out FILE [--ledger-out FILE] [--local-main-ref REF] [--pr-branch-ref REF]");
     result[argv[index].slice(2)] = argv[++index];
   }
   return result;
@@ -467,6 +846,16 @@ function main() {
     closureCommits: CLOSURE_COMMITS
   });
   fs.writeFileSync(options.out, `${JSON.stringify(disposition, null, 2)}\n`, { mode: 0o600 });
+  if (options["ledger-out"]) {
+    const ledger = collectExcludedCommitLedger({
+      repo: options.repo,
+      expectedRepository: options["expected-repository"],
+      candidateRef: options["candidate-ref"] || "refs/heads/integration/v1.62-candidate",
+      localMainRef: options["local-main-ref"] || "refs/heads/main",
+      prBranchRef: options["pr-branch-ref"] || PR_44_LOCAL_BRANCH
+    });
+    fs.writeFileSync(options["ledger-out"], `${JSON.stringify(ledger, null, 2)}\n`, { mode: 0o600 });
+  }
 }
 if (!process.env.NODE_TEST_CONTEXT && process.argv[1] === new URL(import.meta.url).pathname) {
   try { main(); } catch (error) { console.error(`integration disposition collect: FAIL: ${error.message}`); process.exitCode = 1; }
@@ -666,5 +1055,156 @@ if (process.env.NODE_TEST_CONTEXT && process.argv[1] === new URL(import.meta.url
 
   test("rejects a lane row owned by Phase 231 with a state other than non_run", () => {
     assert.throws(() => validateLaneRow({ lane: "full-mix-test", state: "proved", owner: "231", command: ["mix", "test"], reason: "x" }, 0), /state must be "non_run"/);
+  });
+
+  // ===================================================================================
+  // Excluded-commit ledger (D-07/D-08/D-09/D-10/D-12/D-13)
+  // ===================================================================================
+
+  function minimalExcludedRow(overrides = {}) {
+    return {
+      commit: "a".repeat(40),
+      subject: "some subject",
+      disposition: "excluded-superseded",
+      superseded_by: "no-equivalent",
+      supersession_evidence: {
+        tree_level: {
+          command: ["git", "cat-file", "-e"],
+          files: [{ path: "x.sh", exists_on_candidate: false, superseded_by_path: "x.mjs" }],
+          plan_inventory: { command: ["git", "ls-tree"], abandoned_line_max_plan: 11, milestone_line_max_plan: 21 }
+        },
+        requirement_level: {
+          command: ["git", "show"],
+          file: ".planning/milestones/v1.61-REQUIREMENTS.md",
+          requirements: [{ id: "BASE-01", matched_text: "| BASE-01 | Phase 226 | Complete |" }]
+        }
+      },
+      patch_id_occurrences_main: 1,
+      patch_id_occurrences_candidate: 0,
+      published_elsewhere: "none",
+      ...overrides
+    };
+  }
+
+  test("rejects a row with superseded_by null or omitted", () => {
+    const row = minimalExcludedRow();
+    delete row.superseded_by;
+    assert.throws(() => validateExcludedRow(row, 0), /missing required field: superseded_by/);
+    assert.throws(() => validateExcludedRow({ ...minimalExcludedRow(), superseded_by: null }, 0), /no-equivalent.*array of 40-hex/);
+  });
+
+  test("rejects a boolean patch_id_occurrences_main/candidate", () => {
+    assert.throws(() => validateExcludedRow({ ...minimalExcludedRow(), patch_id_occurrences_main: true }, 0), /must be a non-negative integer/);
+    assert.throws(() => validateExcludedRow({ ...minimalExcludedRow(), patch_id_occurrences_candidate: false }, 0), /must be a non-negative integer/);
+  });
+
+  test("rejects duplicate commit keys across rows", () => {
+    const sha = "b".repeat(40);
+    assert.throws(() => validateExcludedRows([minimalExcludedRow({ commit: sha }), minimalExcludedRow({ commit: sha })]), /duplicate commit key/);
+  });
+
+  test("rejects an invalid disposition and an invalid published_elsewhere", () => {
+    assert.throws(() => validateExcludedRow({ ...minimalExcludedRow(), disposition: "excluded-because-i-said-so" }, 0), /excluded-superseded\/excluded-rejected\/carried-on-candidate/);
+    assert.throws(() => validateExcludedRow({ ...minimalExcludedRow(), published_elsewhere: "" }, 0), /must be the literal "none" or a non-empty ref/);
+  });
+
+  test("validatePr44 rejects a non-44 number and a non-close disposition", () => {
+    function minimalPr(overrides = {}) {
+      return { number: 44, head_ref: "fix/x", head_object: "c".repeat(40), base_ref: "main", base_object: "d".repeat(40), state: "open", mergeable: "MERGEABLE", ahead_of_base: 4, behind_base: 0, matched_commits: [], disposition: "close-unmerged-cite-superseding", note: "n", ...overrides };
+    }
+    assert.throws(() => validatePr44(minimalPr({ number: 45 })), /number must be 44/);
+    assert.throws(() => validatePr44(minimalPr({ disposition: "merge-it" })), /close-unmerged-cite-superseding/);
+  });
+
+  function excludedLedgerFixtureRepo() {
+    const scratch = fs.mkdtempSync(path.join(fs.realpathSync(os.tmpdir()), "phase230-ledger-fixture-"));
+    const repo = path.join(scratch, "repo");
+    fs.mkdirSync(repo);
+    const g = (args) => run(repo, args);
+    g(["init", "-q", "-b", "main"]);
+    g(["config", "user.email", "phase230@example.invalid"]);
+    g(["config", "user.name", "Phase 230"]);
+    fs.mkdirSync(path.join(repo, "scripts", "ci"), { recursive: true });
+    fs.mkdirSync(path.join(repo, ".planning", "phases", "226-ci-baseline-proof-semantics"), { recursive: true });
+    fs.writeFileSync(path.join(repo, "other.txt"), "base\n");
+    fs.writeFileSync(path.join(repo, ".planning", "phases", "226-ci-baseline-proof-semantics", "226-01-PLAN.md"), "plan1\n");
+    g(["add", "-A"]); g(["commit", "-qm", "base"]);
+    const base = g(["rev-parse", "HEAD"]);
+
+    fs.writeFileSync(path.join(repo, "scripts", "ci", "verify_ci_baseline_contract.sh"), "old shell v1\n");
+    g(["add", "-A"]); g(["commit", "-qm", "test(226-01): add rejected salvage script"]);
+    const salvageSha = g(["rev-parse", "HEAD"]);
+
+    fs.writeFileSync(path.join(repo, "other.txt"), "abandoned line edit\n");
+    g(["add", "-A"]); g(["commit", "-qm", "docs(226): abandoned line edit"]);
+    const supersededSha = g(["rev-parse", "HEAD"]);
+    const mainTip = g(["rev-parse", "HEAD"]);
+
+    g(["checkout", "-q", "-b", "candidate", base]);
+    fs.mkdirSync(path.join(repo, ".planning", "milestones", "v1.61-phases", "226-ci-baseline-proof-semantics"), { recursive: true });
+    for (let index = 1; index <= 3; index += 1) {
+      fs.writeFileSync(path.join(repo, ".planning", "milestones", "v1.61-phases", "226-ci-baseline-proof-semantics", `226-0${index}-PLAN.md`), `plan${index}\n`);
+    }
+    fs.mkdirSync(path.join(repo, ".planning", "milestones"), { recursive: true });
+    fs.writeFileSync(path.join(repo, ".planning", "milestones", "v1.61-REQUIREMENTS.md"), "| Requirement | Phase | Status |\n| --- | --- | --- |\n| BASE-01 | Phase 226 | Complete |\n| BASE-02 | Phase 226 | Complete |\n");
+    fs.mkdirSync(path.join(repo, "scripts", "ci"), { recursive: true });
+    fs.writeFileSync(path.join(repo, "scripts", "ci", "collect_ci_baseline.mjs"), "// collector\n");
+    fs.writeFileSync(path.join(repo, "scripts", "ci", "verify_ci_baseline.mjs"), "// verifier\n");
+    g(["add", "-A"]); g(["commit", "-qm", "feat(230): candidate infra"]);
+
+    // A candidate-side commit whose content matches a to-be-created PR-branch commit by
+    // patch-id (same file, same content, same diff), so pr_44.matched_commits has a real
+    // recomputed match rather than a stub.
+    fs.writeFileSync(path.join(repo, "prfile.txt"), "the fix, landed on the candidate first\n");
+    g(["add", "-A"]); g(["commit", "-qm", "fix(accrue): the real fix"]);
+    const candidateTip = g(["rev-parse", "HEAD"]);
+
+    g(["checkout", "-q", "-b", "fix/release-boot-env-resolver", mainTip]);
+    fs.writeFileSync(path.join(repo, "prfile.txt"), "the fix, landed on the candidate first\n");
+    g(["add", "-A"]); g(["commit", "-qm", "fix(accrue): the real fix"]);
+    const prTip = g(["rev-parse", "HEAD"]);
+
+    g(["checkout", "-q", "main"]);
+    return { scratch, repo, base, mainTip, salvageSha, supersededSha, candidateTip, prTip };
+  }
+
+  test("collects the excluded-commit ledger with correct dispositions, superseded_by, tree/requirement evidence, and a real patch-id-matched PR row", () => {
+    const fx = excludedLedgerFixtureRepo();
+    try {
+      const stubCollectPr = (repo, { prBranchRef }) => ({
+        number: 44,
+        headRefName: "fix/release-boot-env-resolver",
+        headObject: run(repo, ["rev-parse", prBranchRef]),
+        baseRefName: "main",
+        state: "open",
+        mergeable: "MERGEABLE"
+      });
+      const ledger = collectExcludedCommitLedger({ repo: fx.repo, expectedRepository: "szTheory/accrue", candidateRef: "refs/heads/candidate", localMainRef: "refs/heads/main", prBranchRef: "refs/heads/fix/release-boot-env-resolver", carriedCommit: null, collectPr: stubCollectPr });
+      assert.equal(ledger.excluded_commit_count, 2);
+      assert.equal(ledger.rows.filter((row) => row.disposition !== "carried-on-candidate").length, 2);
+      const byCommit = Object.fromEntries(ledger.rows.map((row) => [row.commit, row]));
+      assert.equal(byCommit[fx.salvageSha].disposition, "excluded-rejected");
+      assert.equal(byCommit[fx.supersededSha].disposition, "excluded-superseded");
+      assert.equal(byCommit[fx.salvageSha].superseded_by, "no-equivalent");
+      assert.equal(byCommit[fx.supersededSha].superseded_by, "no-equivalent");
+      assert.equal(typeof byCommit[fx.salvageSha].patch_id_occurrences_main, "number");
+      assert.equal(typeof byCommit[fx.salvageSha].patch_id_occurrences_candidate, "number");
+      const treeFiles = Object.fromEntries(byCommit[fx.salvageSha].supersession_evidence.tree_level.files.map((row) => [row.path, row]));
+      assert.equal(treeFiles["scripts/ci/verify_ci_baseline_contract.sh"].exists_on_candidate, false);
+      assert.equal(treeFiles["scripts/ci/verify_ci_baseline_contract.sh"].superseded_by_path, "scripts/ci/verify_ci_baseline.mjs");
+      assert.equal(byCommit[fx.salvageSha].supersession_evidence.tree_level.plan_inventory.abandoned_line_max_plan, 1);
+      assert.equal(byCommit[fx.salvageSha].supersession_evidence.tree_level.plan_inventory.milestone_line_max_plan, 3);
+      const reqIds = byCommit[fx.salvageSha].supersession_evidence.requirement_level.requirements.map((row) => row.id);
+      assert.deepEqual(reqIds, ["BASE-01", "BASE-02"]);
+      assert.equal(ledger.pr_44.matched_commits.length, 1);
+      assert.equal(ledger.pr_44.matched_commits[0].pr_branch_commit, fx.prTip);
+      assert.equal(ledger.pr_44.ahead_of_base, 1);
+      assert.equal(ledger.pr_44.behind_base, 0);
+      // Live-recompute check: the exact set this collector produced must equal a fresh
+      // `git rev-list <local-main> ^<candidate>` over the same repository.
+      const live = run(fx.repo, ["rev-list", fx.mainTip, `^${fx.candidateTip}`]).split("\n").filter(Boolean).sort();
+      const recorded = ledger.rows.filter((row) => row.disposition !== "carried-on-candidate").map((row) => row.commit).sort();
+      assert.deepEqual(recorded, live);
+    } finally { fs.rmSync(fx.scratch, { recursive: true, force: true }); }
   });
 }
