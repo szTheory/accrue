@@ -26,7 +26,7 @@ See: `.planning/PROJECT.md` (updated 2026-09-15)
 
 **Core value:** A Phoenix developer can install Accrue and its companion admin UI and launch a real SaaS with subscription billing on day one, without avoidable integration or release risk.
 
-**Current focus:** Phase 230 — Reviewable History Integration
+**Current focus:** Phase 231 — Exact-SHA Release Gate Proof
 
 ## Current Position
 
@@ -35,7 +35,7 @@ Plan: Not started
 Status: Ready to plan
 Last activity: 2026-09-15 — Phase 230 complete, transitioned to Phase 231
 
-Progress: [█████░░░░░] 50% (20/20 plans in Phase 229)
+Progress: [█████░░░░░] 50% (2/4 phases complete; 27/27 plans in Phases 229-230)
 
 ## Performance Metrics
 

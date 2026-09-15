@@ -29,11 +29,13 @@ covered_files:
   - ".planning/phases/230-reviewable-history-integration/230-ROLLBACK-POINT.json"
   - "scripts/ci/README.md"
   - "scripts/ci/collect_integration_disposition.mjs"
+  - "scripts/ci/collect_repository_inventory.mjs"
+  - "scripts/ci/preserve_repository_state.sh"
   - "scripts/ci/render_integration_disposition.mjs"
   - "scripts/ci/verify_integration_disposition.mjs"
   - "scripts/ci/verify_phase230_archive_invariants.mjs"
   - "scripts/ci/verify_repository_inventory.mjs"
-covered_digest: "v1:sha256:e71860e82f52267eb552014d3ce058e0ab4e7891df10402d0e718946d64c5ae6"
+covered_digest: "v1:sha256:fe0d0cef4313d1da5c9316e0bfeec4bc28c6c33f929a2aaf3538be94ac5dc548"
 behavior_unverified: 0
 overrides_applied: 0
 ---
@@ -126,3 +128,24 @@ No gaps. All three roadmap success criteria for Phase 230 hold true against the 
 
 _Verified: 2026-09-15T21:50:00Z_
 _Verifier: Claude (gsd-verifier)_
+
+---
+
+## Coverage widened — 2026-09-15 (shared Phase 229 scripts)
+
+Phase 230 modified `scripts/ci/collect_repository_inventory.mjs` (`92f6eb12`) and
+`scripts/ci/preserve_repository_state.sh` (`92f6eb12`, `38dbe905`) when phase-parameterizing the
+preservation ref namespace and excluding preservation refs from re-preservation, but neither file
+appeared in any Phase 230 `covered_files` set. They were therefore tracked only by Phase 229's
+fingerprint — which Phase 230's own edits had staled. Both are now declared here and
+`covered_digest` recomputed accordingly (31 covered inputs).
+
+Re-executed against current bytes at the time of this widening — all PASS:
+
+| Gate | Result |
+|------|--------|
+| `node --test scripts/ci/collect_repository_inventory.mjs` | 10/10 pass |
+| `bash scripts/ci/preserve_repository_state.sh --self-test` | PASS |
+
+No verdict in this report changes; this records existing coverage honestly rather than asserting
+new behavior.
