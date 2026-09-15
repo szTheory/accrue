@@ -169,20 +169,28 @@ function stripBashVarPrefix(text) {
 // `.startsWith()`/`.endsWith()`/`.includes()` predicate exemption above.
 
 // Bash idiom: a backslash-continued `for needle in "..." \ "..." \ do ... done`
-// block whose body calls a content-match helper (`require_fixed`,
+// block whose loop variable is used, EVERY time it appears in the body, ONLY
+// as an argument to a content-match helper (`require_fixed`,
 // `require_source_fixed`, `require_source_regex`, or `grep`) is checking that
 // ANOTHER file's TEXT CONTAINS these strings -- it never touches the
-// filesystem path the string happens to spell. Returns the 1-indexed line
-// numbers of literal-bearing lines inside such a block's `in`-list.
-const BASH_FOR_START_RE = /^\s*for\s+\w+\s+in\b/;
+// filesystem path the string happens to spell. If the loop variable is used
+// ANYWHERE else in the body -- `cat "$var"`, a redirect, a `[ -f "$var" ]`
+// test, command substitution, or any other position -- the exemption does
+// NOT apply, because that other use MAY be a live filesystem read. The loop
+// variable name is captured from the `for <var> in` line itself, not
+// assumed. Returns the 1-indexed line numbers of literal-bearing lines
+// inside such a block's `in`-list.
+const BASH_FOR_START_RE = /^\s*for\s+(\w+)\s+in\b/;
 const BASH_DO_LINE_RE = /(^\s*do\s*$)|(;\s*do\s*$)/;
 const BASH_DONE_LINE_RE = /^\s*done\b/;
-const CONTENT_MATCH_CALL_RE = /\b(require_fixed|require_source_fixed|require_source_regex|grep)\b/;
+const CONTENT_MATCH_CALL_START_RE = /^(require_fixed|require_source_fixed|require_source_regex|grep)\b/;
 function computeBashContentMatchExemptLines(content) {
   const exempt = new Set();
   const lines = content.split(/\r?\n/);
   for (let i = 0; i < lines.length; i += 1) {
-    if (!BASH_FOR_START_RE.test(lines[i])) continue;
+    const forMatch = lines[i].match(BASH_FOR_START_RE);
+    if (!forMatch) continue;
+    const loopVar = forMatch[1];
     let doLine = -1;
     for (let j = i; j < lines.length && j < i + 200; j += 1) {
       if (BASH_DO_LINE_RE.test(lines[j])) { doLine = j; break; }
@@ -193,27 +201,71 @@ function computeBashContentMatchExemptLines(content) {
       if (BASH_DONE_LINE_RE.test(lines[j])) { doneLine = j; break; }
     }
     if (doneLine === -1) continue;
-    const body = lines.slice(doLine + 1, doneLine).join("\n");
-    if (!CONTENT_MATCH_CALL_RE.test(body)) continue;
+
+    const bodyLines = lines.slice(doLine + 1, doneLine);
+    const varRefRe = new RegExp(`\\$\\{?${loopVar}\\}?\\b`);
+    let sawContentMatchUse = false;
+    let sawOtherUse = false;
+    for (const bodyLine of bodyLines) {
+      if (!varRefRe.test(bodyLine)) continue;
+      if (CONTENT_MATCH_CALL_START_RE.test(bodyLine.trim())) {
+        sawContentMatchUse = true;
+      } else {
+        sawOtherUse = true;
+      }
+    }
+    if (!sawContentMatchUse || sawOtherUse) continue;
+
     for (let j = i; j <= doLine; j += 1) exempt.add(j + 1);
   }
   return exempt;
 }
 
-// YAML idiom: a `path:` block-scalar entry inside an `actions/upload-artifact`
-// step that declares `if-no-files-found: ignore` is a soft/optional upload by
-// GitHub Actions' own contract -- a missing path degrades to "nothing
-// uploaded," never a silent wrong-content read. Returns the 1-indexed line
-// numbers of literal-bearing `path:` lines that fall inside such a step.
+// YAML idiom: a `path:` block-scalar entry inside a step that ITSELF `uses:
+// actions/upload-artifact` and declares `if-no-files-found: ignore` is a
+// soft/optional upload by GitHub Actions' own contract -- a missing path
+// degrades to "nothing uploaded," never a silent wrong-content read. Both
+// conditions must hold within the SAME enclosing step -- an `if-no-files-
+// found: ignore` belonging to a different, later step (or a `run:` step that
+// merely happens to be followed by an unrelated upload step) does not
+// qualify. The enclosing step is found by scanning outward to real step
+// boundaries (`- <key>:` list items at the step's own indentation), not a
+// fixed line window. Returns the 1-indexed line numbers of literal-bearing
+// `path:` lines that fall inside such a step.
+const YAML_STEP_ITEM_RE = /^(\s*)-\s/;
+const YAML_UPLOAD_ARTIFACT_RE = /uses:\s*actions\/upload-artifact\b/;
+const YAML_IF_NO_FILES_IGNORE_RE = /^\s*if-no-files-found:\s*ignore\s*$/;
 function computeYamlSoftUploadExemptLines(content) {
   const exempt = new Set();
   const lines = content.split(/\r?\n/);
   for (let i = 0; i < lines.length; i += 1) {
     if (!lines[i].trim().startsWith(".planning/phases/")) continue;
-    for (let j = i + 1; j < lines.length && j < i + 20; j += 1) {
-      if (/^\s*if-no-files-found:\s*ignore\s*$/.test(lines[j])) { exempt.add(i + 1); break; }
-      if (/^\s*-\s*name:/.test(lines[j])) break; // left this step without finding it
+
+    // Scan upward for the enclosing step's own boundary: the nearest
+    // `- <key>:` list item at or above this line.
+    let stepStart = -1;
+    let stepIndent = -1;
+    for (let j = i; j >= 0; j -= 1) {
+      const m = lines[j].match(YAML_STEP_ITEM_RE);
+      if (m) { stepStart = j; stepIndent = m[1].length; break; }
     }
+    if (stepStart === -1) continue;
+
+    // Scan downward for the next sibling list item at the SAME indentation --
+    // that is where this step ends (exclusive).
+    let stepEnd = lines.length;
+    for (let j = stepStart + 1; j < lines.length; j += 1) {
+      const m = lines[j].match(YAML_STEP_ITEM_RE);
+      if (m && m[1].length <= stepIndent) { stepEnd = j; break; }
+    }
+    if (i < stepStart || i >= stepEnd) continue; // literal fell outside its own step -- shouldn't happen
+
+    const stepLines = lines.slice(stepStart, stepEnd);
+    const stepBody = stepLines.join("\n");
+    if (!YAML_UPLOAD_ARTIFACT_RE.test(stepBody)) continue;
+    if (!stepLines.some((line) => YAML_IF_NO_FILES_IGNORE_RE.test(line))) continue;
+
+    exempt.add(i + 1);
   }
   return exempt;
 }
@@ -401,6 +453,126 @@ function verifyFixtures() {
     writeFile(root, "scripts/ci/fixture_hint.mjs", 'const next = "node scripts/ci/verify_x.mjs --records .planning/phases/905-fixture-hint/x.json";\n');
     const result = verifyArchiveInvariants({ root });
     assert.equal(result.failures.length, 0, "reproduce-command hint text is exempt");
+    fs.rmSync(root, { recursive: true, force: true });
+  }
+
+  // Defect-1 regression: a `run:` step (NOT an upload step) that reads an
+  // archived-slug literal, followed within a few lines by an UNRELATED
+  // sibling step's `if-no-files-found: ignore`, must NOT be exempted just
+  // because that bare marker line happens to appear nearby. The literal's
+  // own enclosing step never declares `uses: actions/upload-artifact`.
+  {
+    const root = makeFixtureRoot();
+    writeFile(
+      root,
+      ".github/workflows/fixture_yaml_soft_upload_non_upload_step.yml",
+      [
+        "name: fixture",
+        "on: push",
+        "jobs:",
+        "  test:",
+        "    runs-on: ubuntu-latest",
+        "    steps:",
+        "      - name: Read archived evidence",
+        "        run: |",
+        "          .planning/phases/910-fixture-nonupload/evidence.json",
+        "      - name: Unrelated upload",
+        "        uses: actions/upload-artifact@v7",
+        "        with:",
+        "          name: unrelated",
+        "          path: some/other/path",
+        "          if-no-files-found: ignore",
+        "",
+      ].join("\n")
+    );
+    let error = null;
+    try { verifyArchiveInvariants({ root }); } catch (caught) { error = caught; }
+    assert.ok(error, "a non-upload step's literal must not be exempted by a neighboring step's if-no-files-found: ignore");
+    assert.match(error.message, /910-fixture-nonupload/);
+    fs.rmSync(root, { recursive: true, force: true });
+  }
+
+  // Defect-1 counter-regression: the genuine `actions/upload-artifact` +
+  // `if-no-files-found: ignore` + archived-slug `path:` pattern (as used in
+  // `.github/workflows/ci.yml`) must still pass -- the tightened predicate
+  // must not break the legitimate case it exists to allow.
+  {
+    const root = makeFixtureRoot();
+    writeFile(
+      root,
+      ".github/workflows/fixture_yaml_soft_upload_real_upload_step.yml",
+      [
+        "name: fixture",
+        "on: push",
+        "jobs:",
+        "  test:",
+        "    runs-on: ubuntu-latest",
+        "    steps:",
+        "      - name: Upload Phase fixture evidence",
+        "        if: always()",
+        "        uses: actions/upload-artifact@v7",
+        "        with:",
+        "          name: fixture-evidence",
+        "          path: |",
+        "            .planning/phases/911-fixture-upload/evidence.json",
+        "          if-no-files-found: ignore",
+        "",
+      ].join("\n")
+    );
+    const result = verifyArchiveInvariants({ root });
+    assert.equal(result.failures.length, 0, "genuine upload-artifact + if-no-files-found: ignore step remains exempt");
+    fs.rmSync(root, { recursive: true, force: true });
+  }
+
+  // Defect-2 regression: a bash loop body that mixes a content-match call
+  // (`require_fixed "$needle"`) with a real filesystem use of the SAME loop
+  // variable (`cat "$needle"`) must NOT be exempted -- the loop variable is
+  // not used exclusively as a content-match argument.
+  {
+    const root = makeFixtureRoot();
+    writeFile(
+      root,
+      "scripts/ci/fixture_bash_mixed_use.sh",
+      [
+        "#!/bin/bash",
+        "for needle in \\",
+        '  ".planning/phases/920-fixture-mixed/evidence.json" \\',
+        '  "other"',
+        "do",
+        '  require_fixed "$needle"',
+        '  cat "$needle"',
+        "done",
+        "",
+      ].join("\n")
+    );
+    let error = null;
+    try { verifyArchiveInvariants({ root }); } catch (caught) { error = caught; }
+    assert.ok(error, "a loop variable used outside content-match calls must not be exempted");
+    assert.match(error.message, /920-fixture-mixed/);
+    fs.rmSync(root, { recursive: true, force: true });
+  }
+
+  // Defect-2 counter-regression: a bash loop body whose loop variable is used
+  // ONLY as an argument to content-match helpers (as in
+  // `verify_phase200_ci_contract.sh`) must still pass.
+  {
+    const root = makeFixtureRoot();
+    writeFile(
+      root,
+      "scripts/ci/fixture_bash_content_only_use.sh",
+      [
+        "#!/bin/bash",
+        "for needle in \\",
+        '  ".planning/phases/921-fixture-content-only/evidence.json" \\',
+        '  "other"',
+        "do",
+        '  require_fixed "$needle"',
+        "done",
+        "",
+      ].join("\n")
+    );
+    const result = verifyArchiveInvariants({ root });
+    assert.equal(result.failures.length, 0, "loop variable used only in content-match calls remains exempt");
     fs.rmSync(root, { recursive: true, force: true });
   }
 }
