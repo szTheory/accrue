@@ -146,6 +146,24 @@ node scripts/ci/bootstrap_stripe_provider_proof.mjs --self-test
 node scripts/ci/provider_proof_automation.mjs --self-test
 ```
 
+## Phase 230 reviewable history integration
+
+The Phase 230 [integration disposition](../../.planning/phases/230-reviewable-history-integration/230-INTEGRATION-DISPOSITION.json) is a fourth collect/render/verify triad instance answering "what did the v1.62 integration candidate merge decide on my behalf?" in under a minute. Its [deterministic diagnostic](../../.planning/phases/230-reviewable-history-integration/230-INTEGRATION-DISPOSITION.md) leads with decisions adopted silently, then every hazard the merge produced classified from a closed enumeration, then the Phase-231-owned lanes explicitly excluded from this phase's scope, then convergent-identical rows collapsed last since they owe nothing.
+
+| Evidence | What it answers | Command |
+| --- | --- | --- |
+| [Phase 230 integration disposition](../../.planning/phases/230-reviewable-history-integration/230-INTEGRATION-DISPOSITION.json) and [rendered diagnostic](../../.planning/phases/230-reviewable-history-integration/230-INTEGRATION-DISPOSITION.md) | Whether the candidate merge's hazard universe is complete, every hazard has an evidence-backed disposition, and the rendered Markdown byte-equals a fresh render | `node scripts/ci/verify_integration_disposition.mjs --records .planning/phases/230-reviewable-history-integration/230-INTEGRATION-DISPOSITION.json --rendered .planning/phases/230-reviewable-history-integration/230-INTEGRATION-DISPOSITION.md --candidate integration/v1.62-candidate --expected-repository szTheory/accrue --require-ancestry --require-scope --require-hazard-universe --require-post-merge-scope --require-determinism` |
+
+<!-- phase230-integration-disposition:start -->
+The rendered disposition Markdown is fenced with a stable `phase230-integration-disposition` start/end marker pair so a later phase can splice the rendered block into the integration PR body without re-deriving the content.
+<!-- phase230-integration-disposition:end -->
+
+```bash
+node --test scripts/ci/collect_integration_disposition.mjs && \
+node --test scripts/ci/render_integration_disposition.mjs && \
+node scripts/ci/verify_integration_disposition.mjs --fixtures --expected-repository szTheory/accrue --require-hazard-universe
+```
+
 ## Phase 227 bounded critical-path measurement
 
 Phase 227's bounded candidate cohort is terminally **kept**. The exact-three

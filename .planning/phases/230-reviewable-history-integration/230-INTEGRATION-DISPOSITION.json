@@ -55,8 +55,257 @@
     "milestone_tip": "8b248d9cec6531e124b2d05ea796e8a0aa904c93",
     "merge_base": "702dc482df0f65c332be1d4dfb821c4fe60aec49"
   },
-  "hazards": [],
-  "hazard_count": 0,
+  "co_touched_file_count": 6,
+  "hazards": [
+    {
+      "path": "accrue/.dialyzer_ignore.exs",
+      "class": "convergent-identical",
+      "state": "proved",
+      "exit_code": 0,
+      "evidence": {
+        "left_blob": "1536762f0e643af42fc14f6928d4ffe79dbaacaf",
+        "right_blob": "1536762f0e643af42fc14f6928d4ffe79dbaacaf",
+        "command": [
+          "git",
+          "rev-parse",
+          "8b248d9cec6531e124b2d05ea796e8a0aa904c93:accrue/.dialyzer_ignore.exs",
+          "d30fc25dbf6ba551792c66ff451b4b93c0af4bf1:accrue/.dialyzer_ignore.exs"
+        ]
+      },
+      "owner": "230-03"
+    },
+    {
+      "path": "accrue/guides/entitlements.md",
+      "class": "doc-rewrite",
+      "state": "advisory",
+      "evidence": {
+        "command": [
+          "git",
+          "diff",
+          "--numstat",
+          "8b248d9cec6531e124b2d05ea796e8a0aa904c93",
+          "d30fc25dbf6ba551792c66ff451b4b93c0af4bf1",
+          "--",
+          "accrue/guides/entitlements.md"
+        ],
+        "insertions": 52,
+        "deletions": 4
+      },
+      "owner": "230-03"
+    },
+    {
+      "path": "accrue/lib/accrue/config.ex",
+      "class": "disjoint-hunk",
+      "state": "proved",
+      "exit_code": 0,
+      "evidence": {
+        "command": [
+          "git",
+          "show",
+          "4d45002cafb3846810b84ff1afd84e7418476c50:accrue/lib/accrue/config.ex"
+        ],
+        "left_marker_present": true,
+        "right_marker_present": true
+      },
+      "owner": "230-03"
+    },
+    {
+      "path": "accrue/mix.exs",
+      "class": "dependency-lock-drift",
+      "state": "non_run",
+      "evidence": {
+        "command": [
+          "mix",
+          "deps.get",
+          "--check-locked"
+        ],
+        "note": "origin/main moved {:decimal, \"~> 2.0\"} -> \"~> 3.0\" and {:ex_money, \"~> 5.24\"} -> \"~> 6.2\" (plus explicit ex_cldr/ex_cldr_numbers), with Ecto 3.13.6 -> 3.14.2. Milestone money-math and StreamData property tests have never compiled against Decimal 3 / ex_money 6 (D-17)."
+      },
+      "owner": "230-05"
+    },
+    {
+      "path": "accrue/test/accrue/webhook/ingest_test.exs",
+      "class": "convergent-identical",
+      "state": "proved",
+      "exit_code": 0,
+      "evidence": {
+        "left_blob": "425a87f6b5e1d97f938c4d449ef2ef250ffbc863",
+        "right_blob": "425a87f6b5e1d97f938c4d449ef2ef250ffbc863",
+        "command": [
+          "git",
+          "rev-parse",
+          "8b248d9cec6531e124b2d05ea796e8a0aa904c93:accrue/test/accrue/webhook/ingest_test.exs",
+          "d30fc25dbf6ba551792c66ff451b4b93c0af4bf1:accrue/test/accrue/webhook/ingest_test.exs"
+        ]
+      },
+      "owner": "230-03"
+    },
+    {
+      "path": "accrue_admin/test/accrue_admin/live/entitlements_live_test.exs",
+      "class": "convergent-identical",
+      "state": "proved",
+      "exit_code": 0,
+      "evidence": {
+        "left_blob": "3981bbd8dee1131f20122bcde856398077589886",
+        "right_blob": "3981bbd8dee1131f20122bcde856398077589886",
+        "command": [
+          "git",
+          "rev-parse",
+          "8b248d9cec6531e124b2d05ea796e8a0aa904c93:accrue_admin/test/accrue_admin/live/entitlements_live_test.exs",
+          "d30fc25dbf6ba551792c66ff451b4b93c0af4bf1:accrue_admin/test/accrue_admin/live/entitlements_live_test.exs"
+        ]
+      },
+      "owner": "230-03"
+    }
+  ],
+  "hazard_count": 6,
+  "lanes": [
+    {
+      "lane": "full-mix-test",
+      "command": [
+        "mix",
+        "test"
+      ],
+      "reason": "Full `mix test` for any project would have the same result on origin/main alone (D-20 mechanical corollary) — belongs to Phase 231's exact-SHA release gate proof (GATE-01..03), not Phase 230.",
+      "state": "non_run",
+      "owner": "231"
+    },
+    {
+      "lane": "dialyzer-plt",
+      "command": [
+        "mix",
+        "dialyzer"
+      ],
+      "reason": "Dialyzer/PLT (its ignore-list hazard is discharged by blob identity in this plan) would have the same result on origin/main alone (D-20 mechanical corollary) — belongs to Phase 231's exact-SHA release gate proof (GATE-01..03), not Phase 230.",
+      "state": "non_run",
+      "owner": "231"
+    },
+    {
+      "lane": "playwright-e2e",
+      "command": [
+        "npx",
+        "playwright",
+        "test"
+      ],
+      "reason": "Playwright E2E would have the same result on origin/main alone (D-20 mechanical corollary) — belongs to Phase 231's exact-SHA release gate proof (GATE-01..03), not Phase 230.",
+      "state": "non_run",
+      "owner": "231"
+    },
+    {
+      "lane": "admin-visual-pixel-diff",
+      "command": [
+        "npx",
+        "playwright",
+        "test",
+        "--grep",
+        "visual-regression"
+      ],
+      "reason": "The admin visual pixel-diff gate would have the same result on origin/main alone (D-20 mechanical corollary) — belongs to Phase 231's exact-SHA release gate proof (GATE-01..03), not Phase 230.",
+      "state": "non_run",
+      "owner": "231"
+    },
+    {
+      "lane": "storybook-specs",
+      "command": [
+        "npm",
+        "run",
+        "test:storybook"
+      ],
+      "reason": "Storybook specs would have the same result on origin/main alone (D-20 mechanical corollary) — belongs to Phase 231's exact-SHA release gate proof (GATE-01..03), not Phase 230.",
+      "state": "non_run",
+      "owner": "231"
+    },
+    {
+      "lane": "host-integration",
+      "command": [
+        "mix",
+        "test",
+        "--only",
+        "host_integration"
+      ],
+      "reason": "host-integration would have the same result on origin/main alone (D-20 mechanical corollary) — belongs to Phase 231's exact-SHA release gate proof (GATE-01..03), not Phase 230.",
+      "state": "non_run",
+      "owner": "231"
+    },
+    {
+      "lane": "host-docker-smoke",
+      "command": [
+        "docker",
+        "compose",
+        "up",
+        "--build",
+        "--abort-on-container-exit"
+      ],
+      "reason": "host-docker-smoke would have the same result on origin/main alone (D-20 mechanical corollary) — belongs to Phase 231's exact-SHA release gate proof (GATE-01..03), not Phase 230.",
+      "state": "non_run",
+      "owner": "231"
+    },
+    {
+      "lane": "asset-rebuild",
+      "command": [
+        "mix",
+        "accrue_admin.assets.build"
+      ],
+      "reason": "Asset rebuild would have the same result on origin/main alone (D-20 mechanical corollary) — belongs to Phase 231's exact-SHA release gate proof (GATE-01..03), not Phase 230.",
+      "state": "non_run",
+      "owner": "231"
+    },
+    {
+      "lane": "copy-strings-json-regeneration",
+      "command": [
+        "mix",
+        "accrue_admin.copy_strings.generate"
+      ],
+      "reason": "copy_strings.json regeneration would have the same result on origin/main alone (D-20 mechanical corollary) — belongs to Phase 231's exact-SHA release gate proof (GATE-01..03), not Phase 230.",
+      "state": "non_run",
+      "owner": "231"
+    },
+    {
+      "lane": "provider-live-stripe-lane",
+      "command": [
+        "mix",
+        "test.live"
+      ],
+      "reason": "Any provider/live-Stripe lane would have the same result on origin/main alone (D-20 mechanical corollary) — belongs to Phase 231's exact-SHA release gate proof (GATE-01..03), not Phase 230.",
+      "state": "non_run",
+      "owner": "231"
+    },
+    {
+      "lane": "mix-hex-publish-dry-run",
+      "command": [
+        "mix",
+        "hex.publish",
+        "--dry-run"
+      ],
+      "reason": "`mix hex.publish --dry-run` would have the same result on origin/main alone (D-20 mechanical corollary) — belongs to Phase 231's exact-SHA release gate proof (GATE-01..03), not Phase 230.",
+      "state": "non_run",
+      "owner": "231"
+    },
+    {
+      "lane": "fresh-clone-run",
+      "command": [
+        "git",
+        "clone",
+        "."
+      ],
+      "reason": "Any fresh-clone run would have the same result on origin/main alone (D-20 mechanical corollary) — belongs to Phase 231's exact-SHA release gate proof (GATE-01..03), not Phase 230.",
+      "state": "non_run",
+      "owner": "231"
+    },
+    {
+      "lane": "github-actions-dispatch",
+      "command": [
+        "gh",
+        "workflow",
+        "run",
+        "ci.yml"
+      ],
+      "reason": "Any GitHub Actions dispatch (229's read-only posture still binds) would have the same result on origin/main alone (D-20 mechanical corollary) — belongs to Phase 231's exact-SHA release gate proof (GATE-01..03), not Phase 230.",
+      "state": "non_run",
+      "owner": "231"
+    }
+  ],
+  "lane_count": 13,
   "post_merge_commits": [],
   "post_merge_commit_count": 0
 }

@@ -2,9 +2,11 @@
 
 Sanitized schema-v1 evidence for the reviewable v1.62 integration candidate. This is a deterministic projection: no raw payloads, actor identities, secret values, or absolute paths are present.
 
+<!-- phase230-integration-disposition:start -->
+
 ## Decisions adopted silently
 
-This merge silently carries three decisions a reviewer should know about before approving: the release-please version line moving to **1.5.1**, the **Decimal 3 / ex_money 6** dependency migration (with Ecto 3.14), and the `:branding` `from_email`/`support_email` relaxation to optional. Hazard-level classification of each is Plan 230-03 scope.
+This merge silently carries three decisions a reviewer should know about before approving: the release-please version line moving to **1.5.1**, the **Decimal 3 / ex_money 6** dependency migration (with Ecto 3.14), and the `:branding` `from_email`/`support_email` relaxation to optional. Each is classified below with an evidence-backed disposition.
 
 ## Candidate identity
 
@@ -49,11 +51,100 @@ This merge silently carries three decisions a reviewer should know about before 
 | --- | --- | --- |
 | (none) | — | — |
 
-## Hazards
+Recomputed co-touched file count: **6**. Every co-touched file below owes a recorded, machine-recomputable disposition; convergent-identical rows owe nothing and are collapsed last.
 
-**Fact:** 0 hazard rows recorded; hazard classification is Plan 230-03 scope. **State:** not yet classified. **Owner:** release-engineering. **Next command:** `node scripts/ci/collect_integration_disposition.mjs`.
+## Hazard: disjoint-hunk
 
-| Class | State |
-| --- | --- |
-| (none classified in this plan) | — |
+**Fact:** 1 co-touched file(s) of class disjoint-hunk. **State:** 1 row(s) classified. **Owner:** release-engineering. **Next command:** `node scripts/ci/collect_integration_disposition.mjs`.
 
+| Path | State | Exit code | Owner | Evidence |
+| --- | --- | --- | --- | --- |
+| accrue/lib/accrue/config.ex | proved | 0 | 230-03 | {"command":["git","show","4d45002cafb3846810b84ff1afd84e7418476c50:accrue/lib/accrue/config.ex"],"left_marker_present":true,"right_marker_present":true} |
+
+## Hazard: version-release-train-drift
+
+**Fact:** 0 co-touched file(s) of class version-release-train-drift. **State:** 0 rows. **Owner:** release-engineering. **Next command:** `node scripts/ci/collect_integration_disposition.mjs`.
+
+| Path | State | Exit code | Owner | Evidence |
+| --- | --- | --- | --- | --- |
+| (none) | — | — | — | — |
+
+## Hazard: version-keyed-contract-script
+
+**Fact:** 0 co-touched file(s) of class version-keyed-contract-script. **State:** 0 rows. **Owner:** release-engineering. **Next command:** `node scripts/ci/collect_integration_disposition.mjs`.
+
+| Path | State | Exit code | Owner | Evidence |
+| --- | --- | --- | --- | --- |
+| (none) | — | — | — | — |
+
+## Hazard: dependency-lock-drift
+
+**Fact:** 1 co-touched file(s) of class dependency-lock-drift. **State:** 1 row(s) classified. **Owner:** release-engineering. **Next command:** `node scripts/ci/collect_integration_disposition.mjs`.
+
+| Path | State | Exit code | Owner | Evidence |
+| --- | --- | --- | --- | --- |
+| accrue/mix.exs | non_run | — | 230-05 | {"command":["mix","deps.get","--check-locked"],"note":"origin/main moved {:decimal, \\"~\> 2.0\\"} -\> \\"~\> 3.0\\" and {:ex_money, \\"~\> 5.24\\"} -\> \\"~\> 6.2\\" (plus explicit ex_cldr/ex_cldr_numbers), with Ecto 3.13.6 -\> 3.14.2. Milestone money-math and StreamData property tests have never compiled against Decimal 3 / ex_money 6 (D-17)."} |
+
+## Hazard: schema-relaxation
+
+**Fact:** 0 co-touched file(s) of class schema-relaxation. **State:** 0 rows. **Owner:** release-engineering. **Next command:** `node scripts/ci/collect_integration_disposition.mjs`.
+
+| Path | State | Exit code | Owner | Evidence |
+| --- | --- | --- | --- | --- |
+| (none) | — | — | — | — |
+
+## Hazard: doc-rewrite
+
+**Fact:** 1 co-touched file(s) of class doc-rewrite. **State:** 1 row(s) classified. **Owner:** release-engineering. **Next command:** `node scripts/ci/collect_integration_disposition.mjs`.
+
+| Path | State | Exit code | Owner | Evidence |
+| --- | --- | --- | --- | --- |
+| accrue/guides/entitlements.md | advisory | — | 230-03 | {"command":["git","diff","--numstat","8b248d9cec6531e124b2d05ea796e8a0aa904c93","d30fc25dbf6ba551792c66ff451b4b93c0af4bf1","--","accrue/guides/entitlements.md"],"insertions":52,"deletions":4} |
+
+## Hazard: archive-path-regression
+
+**Fact:** 0 co-touched file(s) of class archive-path-regression. **State:** 0 rows. **Owner:** release-engineering. **Next command:** `node scripts/ci/collect_integration_disposition.mjs`.
+
+| Path | State | Exit code | Owner | Evidence |
+| --- | --- | --- | --- | --- |
+| (none) | — | — | — | — |
+
+## Hazard: generated-artifact-staleness
+
+**Fact:** 0 co-touched file(s) of class generated-artifact-staleness. **State:** 0 rows. **Owner:** release-engineering. **Next command:** `node scripts/ci/collect_integration_disposition.mjs`.
+
+| Path | State | Exit code | Owner | Evidence |
+| --- | --- | --- | --- | --- |
+| (none) | — | — | — | — |
+
+## Phase-231-owned lanes (D-21 boundary)
+
+**Fact:** the mechanical corollary of D-20: a check with the same result on origin/main alone belongs to Phase 231, not Phase 230. **State:** 13 lanes explicitly excluded. **Owner:** release-engineering. **Next command:** `node scripts/ci/verify_integration_disposition.mjs --require-hazard-universe`.
+
+| Lane | State | Owner | Command | Reason |
+| --- | --- | --- | --- | --- |
+| admin-visual-pixel-diff | non_run | 231 | `npx playwright test --grep visual-regression` | The admin visual pixel-diff gate would have the same result on origin/main alone (D-20 mechanical corollary) — belongs to Phase 231's exact-SHA release gate proof (GATE-01..03), not Phase 230. |
+| asset-rebuild | non_run | 231 | `mix accrue_admin.assets.build` | Asset rebuild would have the same result on origin/main alone (D-20 mechanical corollary) — belongs to Phase 231's exact-SHA release gate proof (GATE-01..03), not Phase 230. |
+| copy-strings-json-regeneration | non_run | 231 | `mix accrue_admin.copy_strings.generate` | copy_strings.json regeneration would have the same result on origin/main alone (D-20 mechanical corollary) — belongs to Phase 231's exact-SHA release gate proof (GATE-01..03), not Phase 230. |
+| dialyzer-plt | non_run | 231 | `mix dialyzer` | Dialyzer/PLT (its ignore-list hazard is discharged by blob identity in this plan) would have the same result on origin/main alone (D-20 mechanical corollary) — belongs to Phase 231's exact-SHA release gate proof (GATE-01..03), not Phase 230. |
+| fresh-clone-run | non_run | 231 | `git clone .` | Any fresh-clone run would have the same result on origin/main alone (D-20 mechanical corollary) — belongs to Phase 231's exact-SHA release gate proof (GATE-01..03), not Phase 230. |
+| full-mix-test | non_run | 231 | `mix test` | Full \`mix test\` for any project would have the same result on origin/main alone (D-20 mechanical corollary) — belongs to Phase 231's exact-SHA release gate proof (GATE-01..03), not Phase 230. |
+| github-actions-dispatch | non_run | 231 | `gh workflow run ci.yml` | Any GitHub Actions dispatch (229's read-only posture still binds) would have the same result on origin/main alone (D-20 mechanical corollary) — belongs to Phase 231's exact-SHA release gate proof (GATE-01..03), not Phase 230. |
+| host-docker-smoke | non_run | 231 | `docker compose up --build --abort-on-container-exit` | host-docker-smoke would have the same result on origin/main alone (D-20 mechanical corollary) — belongs to Phase 231's exact-SHA release gate proof (GATE-01..03), not Phase 230. |
+| host-integration | non_run | 231 | `mix test --only host_integration` | host-integration would have the same result on origin/main alone (D-20 mechanical corollary) — belongs to Phase 231's exact-SHA release gate proof (GATE-01..03), not Phase 230. |
+| mix-hex-publish-dry-run | non_run | 231 | `mix hex.publish --dry-run` | \`mix hex.publish --dry-run\` would have the same result on origin/main alone (D-20 mechanical corollary) — belongs to Phase 231's exact-SHA release gate proof (GATE-01..03), not Phase 230. |
+| playwright-e2e | non_run | 231 | `npx playwright test` | Playwright E2E would have the same result on origin/main alone (D-20 mechanical corollary) — belongs to Phase 231's exact-SHA release gate proof (GATE-01..03), not Phase 230. |
+| provider-live-stripe-lane | non_run | 231 | `mix test.live` | Any provider/live-Stripe lane would have the same result on origin/main alone (D-20 mechanical corollary) — belongs to Phase 231's exact-SHA release gate proof (GATE-01..03), not Phase 230. |
+| storybook-specs | non_run | 231 | `npm run test:storybook` | Storybook specs would have the same result on origin/main alone (D-20 mechanical corollary) — belongs to Phase 231's exact-SHA release gate proof (GATE-01..03), not Phase 230. |
+
+## Convergent-identical (owe nothing)
+
+**Fact:** 3 co-touched file(s) blob-identical on both merge parents, proved by SHA equality. **State:** 3 row(s) proved. **Owner:** release-engineering. **Next command:** `node scripts/ci/collect_integration_disposition.mjs`.
+
+| Path | Left blob | Right blob |
+| --- | --- | --- |
+| accrue_admin/test/accrue_admin/live/entitlements_live_test.exs | `3981bbd8dee1131f20122bcde856398077589886` | `3981bbd8dee1131f20122bcde856398077589886` |
+| accrue/.dialyzer_ignore.exs | `1536762f0e643af42fc14f6928d4ffe79dbaacaf` | `1536762f0e643af42fc14f6928d4ffe79dbaacaf` |
+| accrue/test/accrue/webhook/ingest_test.exs | `425a87f6b5e1d97f938c4d449ef2ef250ffbc863` | `425a87f6b5e1d97f938c4d449ef2ef250ffbc863` |
+
+<!-- phase230-integration-disposition:end -->
