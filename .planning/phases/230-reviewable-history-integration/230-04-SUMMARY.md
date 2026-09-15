@@ -184,3 +184,15 @@ None - no external service configuration required.
 ---
 *Phase: 230-reviewable-history-integration*
 *Completed: 2026-09-15*
+
+## Self-Check: PASSED
+
+- FOUND: scripts/ci/collect_integration_disposition.mjs (modified)
+- FOUND: scripts/ci/verify_integration_disposition.mjs (modified)
+- FOUND: scripts/ci/render_integration_disposition.mjs (modified)
+- FOUND: .planning/phases/230-reviewable-history-integration/230-DISPOSITIONS.json (new)
+- FOUND: .planning/phases/230-reviewable-history-integration/230-DISPOSITIONS.md (new)
+- FOUND commit: ecd61837 (Task 1)
+- FOUND commit: 5c1eabe0 (Task 2)
+- FOUND commit: 6e1dbf8e (Task 3)
+- Re-ran the plan-level `<verification>` items 1-5: all PASS (28/28 unit tests across the three scripts, 0 fail; `--require-excluded-ledger` proved independently pass/fail via fixtures for missing/obsolete/duplicate/empty-set/null-superseded_by/boolean-patch-id scenarios; `--require-determinism` proved both `230-INTEGRATION-DISPOSITION.{json,md}` and `230-DISPOSITIONS.{json,md}` byte-equal a fresh render against the real repository; `grep` of every one of the 81 committed rows' 40-hex commit id over `230-DISPOSITIONS.md` returned its row, 0 missing).
