@@ -415,6 +415,87 @@ defmodule Accrue.ConfigTest do
     end
   end
 
+  describe "config.ex disjoint-hunk hazard (230-05, D-16)" do
+    # Both hunks of the candidate merge touched accrue/lib/accrue/config.ex
+    # independently and both survived: the milestone side replaced a local
+    # `safe_mix_env` helper with a delegate to the canonical `Accrue.Env.mix_env/0`
+    # seam, and the `origin/main` side relaxed `:branding`'s `from_email` and
+    # `support_email` to optional. Each assertion below fails if its side's
+    # change is lost, independent of the other.
+
+    test ":branding accepts a config that omits both :from_email and :support_email" do
+      opts =
+        Config.validate!(
+          repo: SomeApp.Repo,
+          branding: [business_name: "Read-Only Reports", accent_color: "#112233"]
+        )
+
+      assert opts[:branding][:from_email] == nil
+      assert opts[:branding][:support_email] == nil
+      # The rest of the supplied :branding keyword list is still honored --
+      # this proves the two fields are independently optional, not that the
+      # whole :branding key was dropped or ignored.
+      assert opts[:branding][:business_name] == "Read-Only Reports"
+    end
+
+    test "Accrue.Config's boot validation resolves the mix environment via Accrue.Env.mix_env/0, not Accrue.Env.current/0" do
+      # Accrue.Env.current/0 honors an explicit `config :accrue, env: ...`
+      # override; Accrue.Env.mix_env/0 deliberately does not -- it always
+      # reflects the real build-tool Mix.env(). This divergence is the
+      # discriminator: if Accrue.Config regressed to reading current/0 (or a
+      # hardcoded value) instead of delegating through mix_env/0, this test
+      # would flip. The `host_fake` entitlement rail is the only public
+      # boot-validated behavior gated on this resolution
+      # (`controllable_rail?(:host_fake)`), so boot validation -- not the
+      # schema-only `validate!/1` -- is what actually exercises the seam.
+      prev_env = Application.get_env(:accrue, :env, :__unset__)
+      prev_processor = Application.get_env(:accrue, :processor, :__unset__)
+      prev_rails = Application.get_env(:accrue, :rails, :__unset__)
+      prev_default_rail = Application.get_env(:accrue, :default_rail, :__unset__)
+
+      Application.put_env(:accrue, :env, :prod)
+      Application.put_env(:accrue, :processor, Accrue.Processor.Fake)
+
+      Application.put_env(:accrue, :rails,
+        host_fake: [
+          source: :host_fake,
+          processor: Accrue.Processor.Fake,
+          environments: [:sandbox],
+          default_environment: :sandbox
+        ]
+      )
+
+      Application.put_env(:accrue, :default_rail, :host_fake)
+
+      on_exit(fn ->
+        for {key, value} <- [
+              env: prev_env,
+              processor: prev_processor,
+              rails: prev_rails,
+              default_rail: prev_default_rail
+            ] do
+          case value do
+            :__unset__ -> Application.delete_env(:accrue, key)
+            configured -> Application.put_env(:accrue, key, configured)
+          end
+        end
+      end)
+
+      # Sanity: the override does change Accrue.Env.current/0 ...
+      assert Accrue.Env.current() == :prod
+      # ... but Accrue.Env.mix_env/0 always reflects the real Mix.env(),
+      # which is :test under `mix test` regardless of the :env override.
+      assert Accrue.Env.mix_env() == :test
+
+      # The `host_fake` rail is accepted at boot only when Accrue.Config
+      # resolves the environment to :test. If Config used
+      # Accrue.Env.current/0 (which would read the :prod override set
+      # above) instead of mix_env/0, this would raise Accrue.ConfigError
+      # instead of returning :ok.
+      assert Config.validate_at_boot!() == :ok
+    end
+  end
+
   describe "moduledoc" do
     test "contains NimbleOptions-generated docs" do
       {:docs_v1, _, _, _, %{"en" => doc}, _, _} = Code.fetch_docs(Accrue.Config)
