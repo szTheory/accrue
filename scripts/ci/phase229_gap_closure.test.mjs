@@ -83,6 +83,7 @@ function strictVerifierFixture() {
   const bundle = path.join(scratch, "recovery.bundle");
   const created = spawnSync("git", ["-C", repo, "bundle", "create", bundle, ...originals.map((row) => row.original_ref)], { encoding: "utf8", shell: false });
   assert.equal(created.status, 0, created.stderr);
+  fs.chmodSync(bundle, 0o600);
   const manifest = {
     schema_version: 1,
     repository: REPOSITORY,
@@ -133,7 +134,13 @@ function strictVerifierFixture() {
       actions: { repository: REPOSITORY, observed_at: OBSERVED_AT.toISOString(), requests: [`GET /repos/${REPOSITORY}/actions/runs?per_page=100&page=1`], available: false, state: "unavailable", reason: "unavailable" }
     },
     planning: { ship_windows: readShipWindows({ root: repo }), milestone: "absent", state: "absent" },
-    worktrees: collectWorktrees({ repo })
+    worktrees: collectWorktrees({ repo }),
+    capture: {
+      captured_at: OBSERVED_AT.toISOString(),
+      active_ref: "refs/heads/main",
+      commit: object,
+      primary_worktree: { branch: "refs/heads/main", head: object }
+    }
   };
   return { scratch, repo, bundle, manifestPath, manifestDigest, object, inventory };
 }
@@ -228,7 +235,13 @@ function documentedStrictFixture() {
       actions: { repository: REPOSITORY, observed_at: OBSERVED_AT.toISOString(), requests: [`GET /repos/${REPOSITORY}/actions/runs?per_page=100&page=1`], available: false, state: "unavailable", reason: "network" }
     },
     planning: { ship_windows: readShipWindows({ root: repo }), milestone: "absent", state: "absent" },
-    worktrees: collectWorktrees({ repo })
+    worktrees: collectWorktrees({ repo }),
+    capture: {
+      captured_at: OBSERVED_AT.toISOString(),
+      active_ref: "refs/heads/main",
+      commit: object,
+      primary_worktree: { branch: "refs/heads/main", head: object }
+    }
   };
   const records = path.join(evidence, "229-REPOSITORY-INVENTORY.json");
   const rendered = path.join(evidence, "229-REPOSITORY-INVENTORY.md");
@@ -264,7 +277,7 @@ test("WR-01 documented strict command executes generated private authority and r
 test("final handoff gate rejects capsule workspace and attestation invariant drift", () => {
   const result = spawnSync(process.execPath, [HANDOFF_INVARIANTS, "--self-test"], { encoding: "utf8", shell: false, timeout: 30_000, env: { ...process.env, NODE_TEST_CONTEXT: "" } });
   assert.equal(result.status, 0, `${result.stderr}\n${result.stdout}\n${result.error?.message || ""}`);
-  for (const invariant of ["sibling-add", "sibling-delete", "sibling-rename", "content-digest", "link-digest", "type-swap", "mode", "owner", "raw-non-utf8", "untracked", "ref-tag", "worktree", "preexisting-attestation", "extra-entry", "exclusive-attestation"]) {
+  for (const invariant of ["sibling-add", "sibling-delete", "sibling-rename", "content-digest", "link-digest", "type-swap", "mode", "owner", "raw-non-utf8", "untracked", "ref-tag", "worktree", "index", "status", "preexisting-attestation", "extra-entry", "exclusive-attestation"]) {
     assert.match(result.stdout, new RegExp(`handoff invariant ${invariant}: PASS`), `missing ${invariant} process-boundary evidence`);
   }
   assert.match(result.stdout, /phase229 handoff invariant self-test: PASS/);
@@ -355,6 +368,121 @@ test("final handoff workspace snapshots reject real untracked ref and worktree d
     assert.throws(() => assertExact("workspace", before, snapshotWorkspace(repo)), /workspace changed/);
   } finally {
     fs.rmSync(scratch, { recursive: true, force: true });
+  }
+});
+
+const CANONICAL_RECORDS_RELATIVE = ".planning/phases/229-repository-truth-recovery-safety/229-REPOSITORY-INVENTORY.json";
+const CANONICAL_RENDERED_RELATIVE = ".planning/phases/229-repository-truth-recovery-safety/229-REPOSITORY-INVENTORY.md";
+const TEST_OWNED_MARKER = ".phase229-test-owned";
+
+function finalChainFixture() {
+  const scratch = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), "phase229-final-chain-")));
+  const repo = path.join(scratch, "repo");
+  const capsule = path.join(scratch, "capsule");
+  fs.mkdirSync(repo); fs.mkdirSync(capsule);
+  fs.mkdirSync(path.join(repo, ".planning/phases/229-repository-truth-recovery-safety"), { recursive: true });
+  git(repo, ["init", "-q", "-b", "main"]);
+  git(repo, ["config", "user.email", "phase229@example.invalid"]);
+  git(repo, ["config", "user.name", "phase229"]);
+  fs.writeFileSync(path.join(repo, ".planning/WINDOWS.md"), [
+    "---", "open_count: 0", "waived_count: 0", "fixed_count: 0", "total_count: 0", "---", "",
+    "| id | phase | kind | file | line | description | status | reason | recorded_at | resolved_at |",
+    "| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |", ""
+  ].join("\n"));
+  fs.writeFileSync(path.join(repo, "tracked"), "fixture\n");
+  git(repo, ["add", ".planning/WINDOWS.md", "tracked"]);
+  git(repo, ["commit", "-qm", "fixture"]);
+  const object = git(repo, ["rev-parse", "HEAD"]);
+  git(repo, ["update-ref", "refs/remotes/origin/main", object]);
+  git(repo, ["tag", "v1.61", object]);
+  fs.writeFileSync(path.join(repo, ".planning/milestone.lock"), "before-lock\n");
+  fs.writeFileSync(path.join(repo, ".planning/state.json"), "before-state\n");
+  const bundle = path.join(capsule, "recovery.bundle");
+  const manifestPath = path.join(capsule, "manifest.json");
+  const preserved = spawnSync("bash", [PRESERVE_REPOSITORY, "--repo-root", repo, "--expected-repository", REPOSITORY, "--bundle-out", bundle, "--private-manifest-out", manifestPath], { encoding: "utf8", shell: false, timeout: 30_000 });
+  assert.equal(preserved.status, 0, preserved.stderr);
+  const manifestDigest = sha256(fs.readFileSync(manifestPath));
+  // A second, real workflow-metadata change after the manifest snapshot: required by
+  // writeCurrentArtifactAttestation, which insists workflow paths actually moved.
+  fs.writeFileSync(path.join(repo, ".planning/milestone.lock"), "after-lock\n");
+  fs.writeFileSync(path.join(repo, ".planning/state.json"), "after-state\n");
+  const attestation = path.join(capsule, "attestation.json");
+  const token = crypto.randomUUID();
+  fs.writeFileSync(path.join(repo, TEST_OWNED_MARKER), token);
+  fs.writeFileSync(path.join(capsule, TEST_OWNED_MARKER), token);
+  return { scratch, repo, capsule, bundle, manifestPath, manifestDigest, attestation, token, object };
+}
+
+function runFinalChainCli(fixture, extraEnv = {}) {
+  return spawnSync(process.execPath, [
+    HANDOFF_INVARIANTS,
+    "--run-final-chain",
+    "--repository-root", fixture.repo,
+    "--capsule-directory", fixture.capsule,
+    "--recovery-manifest", fixture.manifestPath,
+    "--expected-manifest-sha256", fixture.manifestDigest,
+    "--recovery-bundle", fixture.bundle,
+    "--attestation", fixture.attestation,
+    "--records", CANONICAL_RECORDS_RELATIVE,
+    "--rendered", CANONICAL_RENDERED_RELATIVE,
+    "--expected-repository", REPOSITORY
+  ], { encoding: "utf8", shell: false, timeout: 120_000, env: { ...process.env, NODE_TEST_CONTEXT: "", ...extraEnv } });
+}
+
+test("WR-01 real final-chain subprocess proves canonical publication, attestation binding, and exact rollback around the actual mutation boundaries", () => {
+  const fixture = finalChainFixture();
+  const recordsPath = path.join(fixture.repo, CANONICAL_RECORDS_RELATIVE);
+  const renderedPath = path.join(fixture.repo, CANONICAL_RENDERED_RELATIVE);
+  try {
+    const valid = runFinalChainCli(fixture);
+    assert.equal(valid.status, 0, `${valid.stderr}\n${valid.stdout}`);
+    assert.match(valid.stdout, /phase229 final handoff invariants: PASS/);
+    assert.ok(fs.existsSync(recordsPath) && fs.existsSync(renderedPath) && fs.existsSync(fixture.attestation), "the real final chain must publish both canonical outputs and the handoff attestation");
+    const attestation = JSON.parse(fs.readFileSync(fixture.attestation, "utf8"));
+    assert.equal(attestation.schema_version, 2);
+    assert.equal(attestation.result, "PASS");
+    assert.equal(attestation.records_sha256, sha256(fs.readFileSync(recordsPath)));
+    assert.equal(attestation.rendered_sha256, sha256(fs.readFileSync(renderedPath)));
+  } finally {
+    fs.rmSync(fixture.scratch, { recursive: true, force: true });
+  }
+
+  // A mismatched token must never activate a mutation hook: the chain runs unmutated and passes.
+  const guarded = finalChainFixture();
+  try {
+    const result = runFinalChainCli(guarded, { PHASE229_TEST_MUTATION: JSON.stringify({ boundary: "before-collection", action: "unstaged", token: "wrong-token" }), PHASE229_TEST_MUTATION_TOKEN: "wrong-token" });
+    assert.equal(result.status, 0, `an unmatched mutation token must never fire: ${result.stderr}\n${result.stdout}`);
+  } finally {
+    fs.rmSync(guarded.scratch, { recursive: true, force: true });
+  }
+
+  const mutations = [
+    ["before-collection", "unstaged"],
+    ["before-collection", "staged"],
+    ["before-collection", "add"],
+    ["before-collection", "delete"],
+    ["before-collection", "rename"],
+    ["before-collection", "mode"],
+    ["before-collection", "ref"],
+    ["before-collection", "worktree"],
+    ["before-collection", "untracked"],
+    ["before-publish", "capsule"],
+    ["before-attestation", "capsule"]
+  ];
+  for (const [boundary, action] of mutations) {
+    const mutant = finalChainFixture();
+    const mutantRecords = path.join(mutant.repo, CANONICAL_RECORDS_RELATIVE);
+    const mutantRendered = path.join(mutant.repo, CANONICAL_RENDERED_RELATIVE);
+    try {
+      const result = runFinalChainCli(mutant, { PHASE229_TEST_MUTATION: JSON.stringify({ boundary, action, token: mutant.token }), PHASE229_TEST_MUTATION_TOKEN: mutant.token });
+      assert.notEqual(result.status, 0, `mutation ${boundary}:${action} must fail the real final-chain process`);
+      assert.doesNotMatch(result.stdout, /phase229 final handoff invariants: PASS/, `mutation ${boundary}:${action} must never print PASS`);
+      assert.equal(fs.existsSync(mutantRecords), false, `mutation ${boundary}:${action} must not leave a newly published canonical record`);
+      assert.equal(fs.existsSync(mutantRendered), false, `mutation ${boundary}:${action} must not leave newly published canonical Markdown`);
+      assert.equal(fs.existsSync(mutant.attestation), false, `mutation ${boundary}:${action} must not leave a handoff attestation`);
+    } finally {
+      fs.rmSync(mutant.scratch, { recursive: true, force: true });
+    }
   }
 });
 
