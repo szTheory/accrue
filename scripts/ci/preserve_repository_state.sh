@@ -2,9 +2,9 @@
 # Creates Phase 229's recovery barrier without fetching, refreshing, or deleting.
 set -euo pipefail
 
-usage() { echo "usage: $0 --repo-root PATH --expected-repository OWNER/REPO --bundle-out PATH --private-manifest-out PATH [--public-record-out PATH] | --self-test" >&2; exit 64; }
+usage() { echo "usage: $0 --repo-root PATH --expected-repository OWNER/REPO --bundle-out PATH --private-manifest-out PATH [--public-record-out PATH] [--preservation-phase VALUE] | --self-test" >&2; exit 64; }
 die() { echo "preserve repository state: FAIL: $*" >&2; exit 65; }
-repo_root="" expected_repository="" bundle_out="" private_manifest_out="" public_record_out="" self_test=false
+repo_root="" expected_repository="" bundle_out="" private_manifest_out="" public_record_out="" self_test=false preservation_phase="229"
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --repo-root) repo_root="${2:-}"; shift 2 ;;
@@ -12,13 +12,16 @@ while [[ $# -gt 0 ]]; do
     --bundle-out) bundle_out="${2:-}"; shift 2 ;;
     --private-manifest-out) private_manifest_out="${2:-}"; shift 2 ;;
     --public-record-out) public_record_out="${2:-}"; shift 2 ;;
+    --preservation-phase) preservation_phase="${2:-}"; shift 2 ;;
     --self-test) self_test=true; shift ;;
     *) usage ;;
   esac
 done
+[[ "$preservation_phase" =~ ^[0-9]+(\.[0-9]+)?$ ]] || die "--preservation-phase must be a numeric phase identifier"
 
 sha256() { shasum -a 256 "$1" | awk '{print $1}'; }
 encode_ref() { printf '%s' "$1" | xxd -p -c 100000 | tr -d '\n'; }
+preservation_prefix() { printf 'refs/accrue-preserve/phase-%s/' "$preservation_phase"; }
 path_is_within() { [[ "$1" == "$2" || "$1" == "$2"/* ]]; }
 paths_touch() { path_is_within "$1" "$2" || path_is_within "$2" "$1"; }
 
@@ -167,7 +170,7 @@ self_test_checkpoint() {
   local point="$1"
   [[ "$self_test_context" == true && "$self_test_failure_point" == "$point" ]] || return 0
   if [[ -n "$self_test_reach_ref_snapshot" ]]; then
-    git -C "$repo_root" for-each-ref --format='%(refname) %(objectname) %(objecttype)' refs/accrue-preserve/phase-229 > "$self_test_reach_ref_snapshot"
+    git -C "$repo_root" for-each-ref --format='%(refname) %(objectname) %(objecttype)' "$(preservation_prefix)" > "$self_test_reach_ref_snapshot"
   fi
   if [[ -n "$self_test_change_ref" && -n "$self_test_change_object" ]]; then
     git -C "$repo_root" update-ref "$self_test_change_ref" "$self_test_change_object"
@@ -230,7 +233,7 @@ verify_bundle_membership() {
 verify_preservation_refs() {
   local frozen="$1" ref object type encoded
   while IFS= read -r -d '' ref && IFS= read -r -d '' object && IFS= read -r -d '' type; do
-    ref="${ref#$'\n'}"; encoded="refs/accrue-preserve/phase-229/$(encode_ref "$ref")"
+    ref="${ref#$'\n'}"; encoded="$(preservation_prefix)$(encode_ref "$ref")"
     [[ "$(git -C "$repo_root" rev-parse "$encoded^{object}")" == "$object" ]] || die "preservation ref mismatch"
   done < "$frozen"
 }
@@ -274,11 +277,11 @@ run() {
   snapshot_artifacts "$artifacts"
   self_test_checkpoint after-artifacts
   manifest_tmp="$(mktemp "$(dirname "$private_manifest_out")/.phase229-manifest.XXXXXX")"; track_temporary_output "$manifest_tmp"; chmod 600 "$manifest_tmp"
-  BUNDLE_SHA256="$bundle_sha256" FROZEN="$frozen" ARTIFACTS="$artifacts" MANIFEST="$manifest_tmp" EXPECTED="$expected_repository" node --input-type=module <<'NODE'
+  BUNDLE_SHA256="$bundle_sha256" FROZEN="$frozen" ARTIFACTS="$artifacts" MANIFEST="$manifest_tmp" EXPECTED="$expected_repository" PRESERVATION_PHASE="$preservation_phase" node --input-type=module <<'NODE'
 import fs from 'node:fs';
 const read = (file) => fs.readFileSync(file).toString().split('\0').filter(Boolean);
 const triples = (file, names) => { const values = read(file), result = []; for (let i = 0; i < values.length; i += names.length) result.push(Object.fromEntries(names.map((name, index) => [name, values[i + index]]))); return result; };
-const refs = triples(process.env.FROZEN, ['original_ref', 'object', 'object_type']).map((ref) => ({ ...ref, encoded_ref: `refs/accrue-preserve/phase-229/${Buffer.from(ref.original_ref).toString('hex')}`, bundle_member: true, restore_argv: ['git', 'update-ref', ref.original_ref, ref.object] }));
+const refs = triples(process.env.FROZEN, ['original_ref', 'object', 'object_type']).map((ref) => ({ ...ref, encoded_ref: `refs/accrue-preserve/phase-${process.env.PRESERVATION_PHASE}/${Buffer.from(ref.original_ref).toString('hex')}`, bundle_member: true, restore_argv: ['git', 'update-ref', ref.original_ref, ref.object] }));
 fs.writeFileSync(process.env.MANIFEST, `${JSON.stringify({ schema_version: 1, repository: process.env.EXPECTED, recovery_verified: true, bundle_sha256: process.env.BUNDLE_SHA256, refs, artifacts: triples(process.env.ARTIFACTS, ['path', 'type', 'sha256']), empty_directory_policy: 'not_surfaced_by_git' }, null, 2)}\n`, { mode: 0o600 });
 NODE
   self_test_checkpoint after-manifest
@@ -289,7 +292,7 @@ NODE
   fi
   self_test_checkpoint after-public-prepare
   while IFS= read -r -d '' ref && IFS= read -r -d '' object && IFS= read -r -d '' type; do
-    ref="${ref#$'\n'}"; encoded="refs/accrue-preserve/phase-229/$(encode_ref "$ref")"
+    ref="${ref#$'\n'}"; encoded="$(preservation_prefix)$(encode_ref "$ref")"
     git -C "$repo_root" update-ref "$encoded" "$object" "0000000000000000000000000000000000000000" || die "preservation ref collision"
     created_refs+=("$encoded" "$object")
   done < "$frozen"
@@ -320,7 +323,7 @@ NODE
 
 assert_no_preservation_delta() {
   local repo="$1" before="$2" after
-  after="$(git -C "$repo" for-each-ref --format='%(refname) %(objectname)' refs/accrue-preserve/phase-229)"
+  after="$(git -C "$repo" for-each-ref --format='%(refname) %(objectname)' "$(preservation_prefix)")"
   [[ "$before" == "$after" ]] || { echo "self-test: preservation refs changed on rejected input" >&2; return 1; }
 }
 expect_rejected() {
@@ -334,7 +337,7 @@ snapshot_fixture_state() {
   local repo="$1" output="$2" snapshot="$3"
   mkdir -p "$snapshot"
   git -C "$repo" for-each-ref --format='%(refname) %(objectname) %(objecttype)' > "$snapshot/refs"
-  git -C "$repo" for-each-ref --format='%(refname) %(objectname) %(objecttype)' refs/accrue-preserve/phase-229 > "$snapshot/preservation_refs"
+  git -C "$repo" for-each-ref --format='%(refname) %(objectname) %(objecttype)' "$(preservation_prefix)" > "$snapshot/preservation_refs"
   git -C "$repo" status --porcelain=v2 -z --untracked-files=all > "$snapshot/status"
   git -C "$repo" ls-files -s -z > "$snapshot/index"
   git -C "$repo" worktree list --porcelain > "$snapshot/worktrees"
@@ -459,7 +462,7 @@ assert_preexisting_preservation_ref_retained() {
   local object target original_ref
   object="$(git -C "$repo" rev-parse HEAD)"
   original_ref="$(git -C "$repo" symbolic-ref HEAD)"
-  target="refs/accrue-preserve/phase-229/$(encode_ref "$original_ref")"
+  target="$(preservation_prefix)$(encode_ref "$original_ref")"
   git -C "$repo" update-ref "$target" "$object"
   snapshot_fixture_state "$repo" "$output" "$before"
   if TMPDIR="$tmp" "$0" --repo-root "$repo" --expected-repository szTheory/accrue --bundle-out "$output/recovery.bundle" --private-manifest-out "$output/private.json" --public-record-out "$output/public.json" >"$log" 2>&1; then
@@ -489,7 +492,7 @@ assert_concurrently_changed_ref_retained() {
   foreign="$(git -C "$repo" rev-parse HEAD)"
   git -C "$repo" reset -q --hard "$original"
   original_ref="$(git -C "$repo" symbolic-ref HEAD)"
-  target="refs/accrue-preserve/phase-229/$(encode_ref "$original_ref")"
+  target="$(preservation_prefix)$(encode_ref "$original_ref")"
   snapshot_fixture_state "$repo" "$output" "$before"
   if (
     self_test_context=true
@@ -514,7 +517,7 @@ assert_concurrently_changed_ref_retained() {
   for authority in status index worktrees artifacts outputs; do
     cmp -s "$before/$authority" "$after/$authority" || { echo "self-test: concurrent-ref failure changed $authority authority" >&2; return 1; }
   done
-  [[ "$(git -C "$repo" for-each-ref --format='%(refname) %(objectname)' refs/accrue-preserve/phase-229)" == "$target $foreign" ]] || { echo "self-test: concurrent-ref failure retained unexpected preservation refs" >&2; return 1; }
+  [[ "$(git -C "$repo" for-each-ref --format='%(refname) %(objectname)' "$(preservation_prefix)")" == "$target $foreign" ]] || { echo "self-test: concurrent-ref failure retained unexpected preservation refs" >&2; return 1; }
 }
 
 assert_transaction_failure_matrix() {
@@ -658,7 +661,7 @@ self_test() {
   printf 'stash fixture\n' >> "$repo/tracked"; git -C "$repo" stash push -qm phase229-fixture
   printf regular > "$repo/release..notes"; mkdir "$repo/nested"; printf nested > "$repo/nested/value"; ln -s nowhere "$repo/link"
   create_raw_symlink_fixtures "$repo" "$symlink_expected"
-  before="$(git -C "$repo" for-each-ref --format='%(refname) %(objectname)' refs/accrue-preserve/phase-229)"
+  before="$(git -C "$repo" for-each-ref --format='%(refname) %(objectname)' "$(preservation_prefix)")"
   expect_rejected "$repo" "$before" "$0" --repo-root "$repo" --expected-repository szTheory/accrue --bundle-out "$output/equal" --private-manifest-out "$output/equal"
   expect_rejected "$repo" "$before" "$0" --repo-root "$repo" --expected-repository szTheory/accrue --bundle-out "$output/alias" --private-manifest-out "$output/../output/alias"
   ln -s "$repo" "$output/inside-link"; expect_rejected "$repo" "$before" "$0" --repo-root "$repo" --expected-repository szTheory/accrue --bundle-out "$output/inside-link/bundle" --private-manifest-out "$output/private"; rm "$output/inside-link"

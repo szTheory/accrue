@@ -10,24 +10,27 @@ import test from "node:test";
 import {
   collectRepositoryInventory,
   createRepositoryValidationContext,
+  isPreservationRef,
   normalizeRemoteFact,
+  preservationPrefix,
   validateInventory
 } from "./collect_repository_inventory.mjs";
 import { renderRepositoryInventory } from "./render_repository_inventory.mjs";
 
 const SHA = /^[a-f0-9]{40}$/;
 const DIGEST = /^[a-f0-9]{64}$/;
-const PRESERVATION_PREFIX = "refs/accrue-preserve/phase-229/";
+const DEFAULT_PRESERVATION_PHASE = "229";
 const BOOLEAN_FLAGS = new Set([
   "fixtures", "require-recovery", "require-all-ref-recovery", "require-typed-artifacts",
   "require-local-only", "require-complete-categories", "require-edge-cases",
   "require-privacy-controls", "require-determinism", "require-command-provenance",
-  "require-workflow-metadata-authorization", "require-handoff-attestation"
+  "require-workflow-metadata-authorization", "require-handoff-attestation",
+  "require-typed-ref-continuity"
 ]);
 const VALUE_OPTIONS = new Set([
   "records", "rendered", "expected-repository", "repository-root", "recovery-manifest",
   "expected-manifest-sha256", "recovery-bundle", "artifact-authorization",
-  "collection-attestation", "handoff-attestation"
+  "collection-attestation", "handoff-attestation", "preservation-phase", "ref-exceptions"
 ]);
 const REMOTE_KEYS = ["remote_main", "pull_requests", "release_branches", "actions"];
 const ROLE_REFS = { local_main: "refs/heads/main", cached_origin_main: "refs/remotes/origin/main", v161_tag: "refs/tags/v1.61" };
@@ -35,7 +38,7 @@ const PLANNING_FACTS = { milestone: ".planning/MILESTONES.md", state: ".planning
 const MAX_LOCAL_AUTHORITY_BYTES = 512 * 1024;
 const MAX_BUNDLE_BYTES = 1024 * 1024 * 1024;
 const sha256 = (value) => crypto.createHash("sha256").update(value).digest("hex");
-const encodedRef = (name) => `${PRESERVATION_PREFIX}${Buffer.from(name).toString("hex")}`;
+const encodedRef = (phase, name) => `${preservationPrefix(phase)}${Buffer.from(name).toString("hex")}`;
 const fail = (message) => { throw new Error(message); };
 
 function git(repo, args, options = {}) {
@@ -132,7 +135,7 @@ function liveCaptureAuthority(inventory, repositoryRoot) {
   return { activeRef, capturedObject, liveObject };
 }
 
-function privateManifest(manifestPath, expectedDigest, context) {
+function privateManifest(manifestPath, expectedDigest, context, preservationPhase = DEFAULT_PRESERVATION_PHASE) {
   if (typeof manifestPath !== "string" || !manifestPath) fail("--recovery-manifest requires a non-empty private manifest path");
   if (typeof expectedDigest !== "string" || !DIGEST.test(expectedDigest)) fail("--expected-manifest-sha256 requires a full lowercase SHA-256 digest");
   if (typeof process.geteuid !== "function") fail("private recovery manifest ownership cannot be validated");
@@ -151,7 +154,7 @@ function privateManifest(manifestPath, expectedDigest, context) {
     const refs = exactMap(value.refs, "private manifest", (row) => row.original_ref, (row) => row.object);
     for (const row of value.refs) {
       if (typeof row.original_ref !== "string" || !row.original_ref.startsWith("refs/") || !SHA.test(row.object || "")) fail("private recovery manifest contains an invalid ref mapping");
-      if (row.encoded_ref !== encodedRef(row.original_ref)) fail("private recovery manifest contains a wrong encoded preservation ref");
+      if (row.encoded_ref !== encodedRef(preservationPhase, row.original_ref)) fail("private recovery manifest contains a wrong encoded preservation ref");
       if (row.restore_argv !== undefined && (!Array.isArray(row.restore_argv) || row.restore_argv.length !== 4 || row.restore_argv[0] !== "git" || row.restore_argv[1] !== "update-ref" || row.restore_argv[2] !== row.original_ref || row.restore_argv[3] !== row.object)) fail("private recovery manifest restore argv is invalid");
     }
     if (!refs.size) fail("private recovery manifest must contain at least one ref mapping");
@@ -249,30 +252,31 @@ function bundleMap(repo, bundlePath, expectedDigest, { afterInitialDigest } = {}
   }
 }
 
-function encodedMap(repo) {
-  const output = git(repo, ["for-each-ref", "--format=%(refname) %(objectname)", PRESERVATION_PREFIX]);
+function encodedMap(repo, preservationPhase = DEFAULT_PRESERVATION_PHASE) {
+  const prefix = preservationPrefix(preservationPhase);
+  const output = git(repo, ["for-each-ref", "--format=%(refname) %(objectname)", prefix]);
   const rows = output ? output.split("\n").map((line) => {
     const separator = line.indexOf(" ");
     return { ref: line.slice(0, separator), object: line.slice(separator + 1) };
   }) : [];
-  for (const row of rows) if (!row.ref.startsWith(PRESERVATION_PREFIX) || !SHA.test(row.object)) fail("encoded preservation ref listing is invalid");
+  for (const row of rows) if (!row.ref.startsWith(prefix) || !SHA.test(row.object)) fail("encoded preservation ref listing is invalid");
   return exactMap(rows, "encoded preservation refs", (row) => row.ref, (row) => row.object);
 }
 
-export function assertStrictRecovery(inventory, context, { repositoryRoot = process.cwd(), recoveryManifest, expectedManifestSha256, recoveryBundle, requireAllRefs = false } = {}) {
+export function assertStrictRecovery(inventory, context, { repositoryRoot = process.cwd(), recoveryManifest, expectedManifestSha256, recoveryBundle, requireAllRefs = false, preservationPhase = DEFAULT_PRESERVATION_PHASE } = {}) {
   const checked = validateInventory(inventory, context);
-  const manifest = privateManifest(recoveryManifest, expectedManifestSha256, context);
+  const manifest = privateManifest(recoveryManifest, expectedManifestSha256, context, preservationPhase);
   const bundle = bundleMap(repositoryRoot, recoveryBundle, manifest.value.bundle_sha256);
   const publicRecovery = exactMap(checked.recovery.refs, "committed recovery rows", (row) => row.original_ref, (row) => row.object);
   const expectedEncoded = exactMap(manifest.value.refs, "manifest encoded refs", (row) => row.encoded_ref, (row) => row.object);
   assertSameMap("private manifest", manifest.refs, "original bundle heads", bundle);
   assertSameMap("private manifest", manifest.refs, "committed recovery rows", publicRecovery);
-  assertSameMap("private manifest encoded refs", expectedEncoded, "local encoded preservation refs", encodedMap(repositoryRoot));
+  assertSameMap("private manifest encoded refs", expectedEncoded, "local encoded preservation refs", encodedMap(repositoryRoot, preservationPhase));
   if (checked.recovery.manifest_sha256 !== expectedManifestSha256) fail("committed recovery manifest digest differs from the independent expected anchor");
   if (checked.recovery.bundle_sha256 !== manifest.value.bundle_sha256) fail("committed recovery bundle digest differs from the private manifest");
   if (requireAllRefs) {
-    const canonicalPreservation = exactMap(checked.refs.all.filter((row) => row.name.startsWith(PRESERVATION_PREFIX)), "canonical preservation refs", (row) => row.name, (row) => row.object);
-    const canonical = exactMap(checked.refs.all.filter((row) => !row.name.startsWith(PRESERVATION_PREFIX)), "canonical non-preservation refs", (row) => row.name, (row) => row.object);
+    const canonicalPreservation = exactMap(checked.refs.all.filter((row) => isPreservationRef(row.name)), "canonical preservation refs", (row) => row.name, (row) => row.object);
+    const canonical = exactMap(checked.refs.all.filter((row) => !isPreservationRef(row.name)), "canonical non-preservation refs", (row) => row.name, (row) => row.object);
     const { activeRef, liveObject } = liveCaptureAuthority(checked, repositoryRoot);
     assertSameMap("private manifest encoded refs", expectedEncoded, "canonical preservation refs", canonicalPreservation);
     assertCapturedRefContinuity(manifest.refs, canonical, activeRef, checked.capture.commit, repositoryRoot);
@@ -509,7 +513,7 @@ function assertDeterminism(inventory, context, renderer = renderRepositoryInvent
 }
 
 function applyStrictFlags(inventory, context, parsed) {
-  const recoveryOptions = { repositoryRoot: parsed.values["repository-root"] || process.cwd(), recoveryManifest: parsed.values["recovery-manifest"], expectedManifestSha256: parsed.values["expected-manifest-sha256"], recoveryBundle: parsed.values["recovery-bundle"], requireAllRefs: parsed.flags.has("require-all-ref-recovery") };
+  const recoveryOptions = { repositoryRoot: parsed.values["repository-root"] || process.cwd(), recoveryManifest: parsed.values["recovery-manifest"], expectedManifestSha256: parsed.values["expected-manifest-sha256"], recoveryBundle: parsed.values["recovery-bundle"], requireAllRefs: parsed.flags.has("require-all-ref-recovery"), preservationPhase: parsed.values["preservation-phase"] || DEFAULT_PRESERVATION_PHASE };
   if (parsed.flags.has("require-recovery") || parsed.flags.has("require-all-ref-recovery")) assertStrictRecovery(inventory, context, recoveryOptions);
   if (parsed.flags.has("require-typed-artifacts")) assertTypedArtifacts(inventory);
   if (parsed.flags.has("require-local-only") && inventory.mode !== "local_only") fail("local-only inventory is required");
@@ -576,7 +580,7 @@ function recoveryFixture({ single = false } = {}) {
     const separator = line.indexOf(" ");
     return { original_ref: line.slice(0, separator), object: line.slice(separator + 1) };
   });
-  for (const row of originalRows) git(repo, ["update-ref", encodedRef(row.original_ref), row.object]);
+  for (const row of originalRows) git(repo, ["update-ref", encodedRef(DEFAULT_PRESERVATION_PHASE, row.original_ref), row.object]);
   const bundle = path.join(scratch, "recovery.bundle");
   createBundle(repo, bundle, originalRows.map((row) => row.original_ref));
   const beforeLock = sha256("before-lock\n"); const beforeState = sha256("before-state\n");
@@ -586,7 +590,7 @@ function recoveryFixture({ single = false } = {}) {
   const manifest = {
     schema_version: 1, repository: "szTheory/accrue", recovery_verified: true,
     bundle_sha256: sha256(fs.readFileSync(bundle)),
-    refs: originalRows.map((row) => ({ ...row, object_type: "commit", encoded_ref: encodedRef(row.original_ref), bundle_member: true, restore_argv: ["git", "update-ref", row.original_ref, row.object] })),
+    refs: originalRows.map((row) => ({ ...row, object_type: "commit", encoded_ref: encodedRef(DEFAULT_PRESERVATION_PHASE, row.original_ref), bundle_member: true, restore_argv: ["git", "update-ref", row.original_ref, row.object] })),
     artifacts: [
       { path: ".planning/milestone.lock", type: "regular", sha256: beforeLock },
       { path: ".planning/state.json", type: "regular", sha256: beforeState }
@@ -668,13 +672,13 @@ function verifyStrictRecoveryControls(context) {
     assert.equal(assertStrictRecovery(inventory, context, strictOptions(fixture)), true, "complete many-ref recovery must pass");
     const missing = structuredClone(inventory); missing.recovery.refs.pop();
     assert.throws(() => assertStrictRecovery(missing, context, strictOptions(fixture)), /committed recovery rows recovery set differs/);
-    const extra = structuredClone(inventory); extra.recovery.refs.push({ original_ref: "refs/heads/extra", object: "e".repeat(40), encoded_ref: encodedRef("refs/heads/extra"), bundle_member: true });
+    const extra = structuredClone(inventory); extra.recovery.refs.push({ original_ref: "refs/heads/extra", object: "e".repeat(40), encoded_ref: encodedRef(DEFAULT_PRESERVATION_PHASE, "refs/heads/extra"), bundle_member: true });
     assert.throws(() => assertStrictRecovery(extra, context, strictOptions(fixture)), /committed recovery rows recovery set differs/);
     const duplicate = structuredClone(inventory); duplicate.recovery.refs.push(structuredClone(duplicate.recovery.refs[0]));
     assert.throws(() => assertStrictRecovery(duplicate, context, strictOptions(fixture)), /unique|duplicate/);
     const wrongObject = structuredClone(inventory); wrongObject.recovery.refs[0].object = "f".repeat(40);
     assert.throws(() => assertStrictRecovery(wrongObject, context, strictOptions(fixture)), /committed recovery rows recovery set differs/);
-    const wrongEncoded = structuredClone(inventory); wrongEncoded.recovery.refs[0].encoded_ref = encodedRef("refs/heads/wrong");
+    const wrongEncoded = structuredClone(inventory); wrongEncoded.recovery.refs[0].encoded_ref = encodedRef(DEFAULT_PRESERVATION_PHASE, "refs/heads/wrong");
     assert.throws(() => assertStrictRecovery(wrongEncoded, context, strictOptions(fixture)), /encoded_ref/);
     const missingCanonical = structuredClone(inventory); missingCanonical.refs.all = missingCanonical.refs.all.filter((row) => row.name !== fixture.manifest.refs.at(-1).original_ref);
     assert.throws(() => assertStrictRecovery(missingCanonical, context, strictOptions(fixture)), /canonical non-preservation refs recovery set differs/);
@@ -723,7 +727,7 @@ function verifyStrictRecoveryControls(context) {
     fs.writeFileSync(path.join(secondaryWorktree, "inactive-change"), "must remain exact\n");
     git(secondaryWorktree, ["add", "inactive-change"]); git(secondaryWorktree, ["commit", "-qm", "advance inactive worktree"]);
     assert.throws(() => assertCompleteCategories(inventory, context, { repositoryRoot: fixture.repo }), /direct git worktree authority differs/);
-    const encodedExtra = `${PRESERVATION_PREFIX}6578747261`;
+    const encodedExtra = `${preservationPrefix(DEFAULT_PRESERVATION_PHASE)}6578747261`;
     git(fixture.repo, ["update-ref", encodedExtra, fixture.object]);
     assert.throws(() => assertStrictRecovery(inventory, context, strictOptions(fixture)), /local encoded preservation refs recovery set differs/);
     git(fixture.repo, ["update-ref", "-d", encodedExtra]);
@@ -869,7 +873,7 @@ export function verifyFixtures() {
   assertRecoveryFailure((fixture) => {
     fs.writeFileSync(path.join(fixture.repo, "tracked"), "replacement\n"); git(fixture.repo, ["add", "tracked"]); git(fixture.repo, ["commit", "-qm", "replacement"]);
     const object = git(fixture.repo, ["rev-parse", "HEAD"]); const originalRef = "refs/heads/main";
-    git(fixture.repo, ["update-ref", encodedRef(originalRef), object]); createBundle(fixture.repo, fixture.bundle, fixture.originalRows.map((row) => row.original_ref));
+    git(fixture.repo, ["update-ref", encodedRef(DEFAULT_PRESERVATION_PHASE, originalRef), object]); createBundle(fixture.repo, fixture.bundle, fixture.originalRows.map((row) => row.original_ref));
     fixture.manifest.bundle_sha256 = sha256(fs.readFileSync(fixture.bundle)); fixture.manifest.refs.find((row) => row.original_ref === originalRef).object = object;
     fs.writeFileSync(fixture.manifestPath, JSON.stringify(fixture.manifest)); fs.chmodSync(fixture.manifestPath, 0o600);
   }, /manifest digest/);
@@ -877,7 +881,7 @@ export function verifyFixtures() {
   { const originalGeteuid = process.geteuid; try { Object.defineProperty(process, "geteuid", { configurable: true, value: undefined }); assertRecoveryFailure(() => {}, /ownership cannot be validated/); } finally { Object.defineProperty(process, "geteuid", { configurable: true, value: originalGeteuid }); } }
   assertRecoveryFailure((fixture) => { fixture.expectedManifestSha256 = "0".repeat(64); }, /manifest digest/);
   assertRecoveryFailure((fixture) => { fixture.expectedManifestSha256 = undefined; }, /expected recovery manifest SHA-256/);
-  assertRecoveryFailure(({ repo }) => git(repo, ["update-ref", "-d", encodedRef("refs/heads/main")]), /git rev-parse failed/);
+  assertRecoveryFailure(({ repo }) => git(repo, ["update-ref", "-d", encodedRef(DEFAULT_PRESERVATION_PHASE, "refs/heads/main")]), /git rev-parse failed/);
   assertRecoveryFailure(({ manifestPath }) => { const manifest = JSON.parse(fs.readFileSync(manifestPath)); manifest.refs[0].object = "f".repeat(40); fs.writeFileSync(manifestPath, JSON.stringify(manifest)); }, /digest|preservation target|bundle/);
   assertRecoveryFailure(({ attestationPath }) => { const attestation = JSON.parse(fs.readFileSync(attestationPath)); attestation.observed_at = "not-a-time"; fs.writeFileSync(attestationPath, JSON.stringify(attestation)); }, /observed_at/);
   assertRecoveryFailure(({ attestationPath }) => { const attestation = JSON.parse(fs.readFileSync(attestationPath)); attestation.artifacts.pop(); fs.writeFileSync(attestationPath, JSON.stringify(attestation)); }, /cover every frozen artifact|exactly two/);
@@ -899,7 +903,7 @@ function verifyRenderedRecoveryProcedureControls() {
     assert.ok(block, "renderer must emit one executable recovery shell block");
     const fetchLines = block.split("\n").filter((line) => line.startsWith("git fetch "));
     assert.equal(fetchLines.length, fixture.manifest.refs.length, "every original ref has one fetch step");
-    assert.ok(fetchLines.every((line) => !line.includes(PRESERVATION_PREFIX)), "restore fetches actual original bundle heads, never encoded preservation refs");
+    assert.ok(fetchLines.every((line) => !line.includes(preservationPrefix(DEFAULT_PRESERVATION_PHASE))), "restore fetches actual original bundle heads, never encoded preservation refs");
     for (const row of fixture.manifest.refs) {
       assert.ok(fetchLines.some((line) => line.endsWith(`'${row.original_ref}'`)), `restore procedure fetches ${row.original_ref}`);
       assert.ok(git(fixture.repo, ["bundle", "list-heads", fixture.bundle]).split("\n").includes(`${row.object} ${row.original_ref}`), `bundle contains ${row.original_ref}`);
