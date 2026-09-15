@@ -33,7 +33,7 @@ Deferred StoreKit, Crosswake physical-device, and Admin UI ratchet work must be 
 
 **Milestone Goal:** Reconcile the completed v1.61 lineage with `main` into a clean, reviewable, fully verified release candidate, then stop before cleanup becomes churn.
 
-- [ ] **Phase 229: Repository Truth & Recovery Safety** - Establish reproducible branch, worktree, artifact, ship-window, and Actions truth without disturbing published history.
+- [x] **Phase 229: Repository Truth & Recovery Safety** - Establish reproducible branch, worktree, artifact, ship-window, and Actions truth without disturbing published history. (completed 2026-09-15)
 - [ ] **Phase 230: Reviewable History Integration** - Produce and inspect a provenance-backed integration candidate without targeting or merging `main`.
 - [ ] **Phase 231: Exact-SHA Release Gate Proof** - Prove complete local and GitHub gate status for the immutable candidate SHA and resolve every ship window.
 - [ ] **Phase 232: Bounded Hygiene & Release Handoff** - Reconcile release-facing repository truth, make only evidence-backed cleanup, and hand off a reviewable integration and Release Please-ready state.
@@ -41,52 +41,64 @@ Deferred StoreKit, Crosswake physical-device, and Admin UI ratchet work must be 
 ## Phase Details
 
 ### Phase 229: Repository Truth & Recovery Safety
+
 **Goal**: Maintainers can safely establish reproducible repository and CI truth while preserving every pre-existing ref, tag, worktree, and user-owned artifact.
 **Depends on**: Nothing (first phase)
 **Requirements**: REPO-01, REPO-02, REPO-03
 **Success Criteria** (what must be TRUE):
+
   1. A maintainer can inspect one committed inventory covering local and remote `main`, v1.61 lineage and tag, release branches, worktrees, open PRs, untracked paths, ship windows, and planning state.
   2. A maintainer can recover each pre-existing divergent local ref and user-owned untracked artifact after synchronization work, with no force-push, tag movement, or unrecorded deletion.
   3. A maintainer can use one supported command path to list, inspect, and monitor GitHub Actions runs whose failure output identifies the exact repository SHA.
+
 **Plans**: 16/20 plans executed
 
 ### Phase 230: Reviewable History Integration
+
 **Goal**: Maintainers can review one reversible integration candidate that reconciles remote `main`, intended v1.61 work, and all four post-archive audit-closure commits without rewriting published history.
 **Depends on**: Phase 229
 **Requirements**: INTG-01, INTG-02, INTG-03
 **Success Criteria** (what must be TRUE):
+
   1. A maintainer can inspect an integration candidate containing remote-`main` changes, intended v1.61 work, and all four post-archive audit-closure commits while the v1.61 tag remains unchanged.
   2. A maintainer can inspect evidence-backed dispositions for every integration conflict and intentionally excluded commit, with focused regressions covering retained runtime, documentation, release, and CI behavior.
   3. Before a pull request targets `main`, a maintainer can verify the candidate's ancestry, changed-file scope, milestone provenance, and rollback point.
+
 **Plans**: TBD
 
 ### Phase 231: Exact-SHA Release Gate Proof
+
 **Goal**: Maintainers can make a release decision from complete, honest local and GitHub evidence for one exact integration-candidate SHA.
 **Depends on**: Phase 230
 **Requirements**: GATE-01, GATE-02, GATE-03
 **Success Criteria** (what must be TRUE):
+
   1. A fresh clean checkout of the exact candidate completes the repository's local CI-equivalent gates without ignored caches, credentials, or another worktree.
   2. A maintainer can inspect green required GitHub Actions checks for that exact SHA while each provider lane remains explicitly `proved`, `skipped`, `failed`, or `advisory`.
   3. A maintainer can inspect current evidence, owner, rationale, and release impact for every former ship window, with each fixed or explicitly waived and none unexplained.
+
 **Plans**: TBD
 
 ### Phase 232: Bounded Hygiene & Release Handoff
+
 **Goal**: Maintainers can review a release-ready integration handoff whose repository and release-facing artifacts are truthful, recoverable, and free of demonstrated release-path drift.
 **Depends on**: Phase 231
 **Requirements**: HYG-01, HYG-02, HYG-03, REL-04, REL-05
 **Success Criteria** (what must be TRUE):
+
   1. Before cleanup, a maintainer can inspect a classification of every untracked file, stale worktree, debug session, and remote maintenance or release branch as retained, committed, archived, superseded, or authorized for removal.
   2. A maintainer can verify that GSD health, planning mirrors, generated artifacts, package metadata, changelogs, and release documentation agree with the integration candidate and have no release-blocking drift.
   3. Any cleanup in the release path is backed by an objective test, lint, compiler, security, documentation-truth, dead-code, duplication, or comprehension finding, and additional passes stop once only subjective nits remain.
   4. A reviewer can assess an integration pull request with a concise risk summary, exact verification evidence, rollback instructions, and no unrelated feature scope.
   5. A reviewer can confirm Release Please is producing, or is ready to produce, a version-and-changelog-consistent release pull request without merging it or publishing packages.
+
 **Plans**: TBD
 
 ## Progress
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 229. Repository Truth & Recovery Safety | 16/20 | In Progress |  |
+| 229. Repository Truth & Recovery Safety | 20/20 | Complete    | 2026-09-15 |
 | 230. Reviewable History Integration | 0/TBD | Not started | - |
 | 231. Exact-SHA Release Gate Proof | 0/TBD | Not started | - |
 | 232. Bounded Hygiene & Release Handoff | 0/TBD | Not started | - |

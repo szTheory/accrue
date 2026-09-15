@@ -2,46 +2,46 @@
 gsd_state_version: "1.0"
 milestone: v1.62
 milestone_name: Release Integration & Repository Hygiene
-current_phase: 229
-current_phase_name: Repository Truth & Recovery Safety
-status: executing
-stopped_at: Completed 229-16-PLAN.md
-last_updated: "2026-09-15T14:05:21.205Z"
-last_activity: 2026-09-13
-last_activity_desc: Phase 229 execution started
-state_head: 5653216c6f5d012eaef71f48a8ffb746c1aee8c3
+current_phase: 230
+current_phase_name: Reviewable History Integration
+status: planning
+stopped_at: Phase 229 complete, ready to plan Phase 230
+last_updated: "2026-09-15T17:07:26.455Z"
+last_activity: 2026-09-15
+last_activity_desc: Phase 229 complete, transitioned to Phase 230
+state_head: f4ee66dd23796fb10ae88f5049b293a1e195198d
 progress:
   total_phases: 4
-  completed_phases: 0
+  completed_phases: 1
   total_plans: 20
-  completed_plans: 16
-  percent: 0
+  completed_plans: 20
+  percent: 25
 ---
 
 # Project State
 
 ## Project Reference
 
-See: `.planning/PROJECT.md` (updated 2026-09-12)
+See: `.planning/PROJECT.md` (updated 2026-09-15)
 
 **Core value:** A Phoenix developer can install Accrue and its companion admin UI and launch a real SaaS with subscription billing on day one, without avoidable integration or release risk.
 
-**Current focus:** Phase 229 — Repository Truth & Recovery Safety
+**Current focus:** Phase 230 — Reviewable History Integration
 
 ## Current Position
 
-Phase: 229 (Repository Truth & Recovery Safety) — IN PROGRESS
-Plan: 19 of 20
-Status: Gap closure execution complete through 229-19; 229-20 BLOCKED on maintainer-held private capsule values
-Last activity: 2026-09-15 — Sealed 229-18 and 229-19 (CR-01/02/05/06/07 and WR-01 closed; all four CI gates green)
+Phase: 230 — Reviewable History Integration
+Plan: Not started
+Status: Ready to plan
+Last activity: 2026-09-15 — Phase 229 complete, transitioned to Phase 230
 
-Progress: [░░░░░░░░░░] 0%
+Progress: [█████░░░░░] 25% (20/20 plans in Phase 229)
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 0
+- Total plans completed: 20
 - Average duration: —
 - Total execution time: —
 
@@ -53,6 +53,7 @@ Progress: [░░░░░░░░░░] 0%
 | 230. Reviewable History Integration | 0 | — | — |
 | 231. Exact-SHA Release Gate Proof | 0 | — | — |
 | 232. Bounded Hygiene & Release Handoff | 0 | — | — |
+| 229 | 20 | - | - |
 **Per-Plan Metrics:**
 
 | Plan | Duration | Tasks | Files |
@@ -97,6 +98,9 @@ Progress: [░░░░░░░░░░] 0%
 - [Phase 229]: Recovery manifest repository identity is checked before dependent collection.
 - [Phase 229]: Compatibility watcher defaults are fixed to szTheory/accrue, main, CI, 900-second timeout, and 10-second polling.
 - [Phase 229]: Explicit full SHA selection takes precedence over branch resolution.
+- [Phase 229]: Phase 229 acceptance is fully executable — 58 automated UAT tests, zero human-verification checkpoints — and its seven hermetic suites are merge-blocking in the `docs-contracts-shift-left` CI job.
+- [Phase 229]: Strict verification of the *published* capsule stays OUT of CI by design: it is point-in-time and fails on any planning-doc update, so it has no recurring value there. The behavior it guards is covered by fixture and real-chain tests that need no capsule.
+- [Phase 229]: The executable-UAT contract gate is wired as `--all-since 229`, not `--all-since 218`, because phases 219-228 carry pre-existing missing-`coverage:` debt. The gate ratchets forward rather than widening and going red.
 - [Phase 229]: Completed success exits 0 and completed non-success conclusions render repository/SHA evidence before exiting 69.
 - [Phase 229]: Strict recovery reconciles the anchored private manifest, actual bundle heads, encoded preservation refs, committed recovery rows, and canonical non-preservation refs as exact maps. — No asserted boolean or non-empty array can substitute for independent authority checks.
 - [Phase 229]: Rendered recovery derives POSIX-quoted fetch and update-ref commands from verified original ref/object pairs while the bundle path remains runtime-only. — The immutable legacy private restore string is untrusted and is never executed.
@@ -139,23 +143,33 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-09-15T16:30:00Z
-Stopped at: Phase 229 is COMPLETE at 20/20 plans. 229-20 shipped both tasks; the final recovery-backed canonical inventory pair is published, committed and independently strict-verified against the real capsule.
+Last session: 2026-09-15T17:10:00Z
+Stopped at: Phase 229 complete, ready to plan Phase 230
 
 229-20 outcome (commits 024eaeca, ddd9a137, c6677152):
+
 - Strict verification PASSES at all three points: capture commit A, after committing the canonical pair (B), and after committing the summary (C). The A-to-B-to-C ancestry property holds on the real repository, not just in fixtures.
 - The recovery capsule is byte, type, owner and digest immutable across the run. Exactly one addition: phase229-final-capture-attestation-round3.json, mode 0600, uid 501, schema v2.
 - The published inventory is live_remote (remote facts obtained under terminal proof), captured at 024eaeca. Committed recovery digests still match their anchors.
 - All seven gates green; phase229_gap_closure is now 21/21.
 
 Two blockers surfaced ONLY against the real capsule; both are fixed and covered:
+
 1. assertStrictRecovery required the frozen manifest refs to EQUAL the freshly captured refs. A real capsule is minted once and then immutable, so at capture time the manifest had frozen the active ref 127 commits in the past -- meaning no real capsule could ever verify, contradicting 229-20's own must-have. Replaced with assertCapturedRefContinuity: exact for every frozen ref except the active one, which must instead prove the frozen object is still reachable from the captured commit. NOTE the class of blindness here: the generated fixtures mint the capsule and capture the inventory at the SAME commit, so no fixture-only test could see this. The new regression advances the active ref past the freeze first, and its negative uses a same-tree root commit so only the ancestry check can reject it.
 2. The recovery bundle was mode 0644 against a verifier requiring 0600 or stricter -- the capsule predated its own access-control rule. Tightened to 0600 with maintainer approval; bytes, digest, type and owner unchanged. Recorded as a deliberate exception to the mode-immutability criterion.
 
 Still open for a maintainer decision:
-- 229-VERIFICATION.md is STALE. It is dated 2026-09-13, scores 3/7 and reads gaps_found, but it predates plans 229-15 through 229-20 and names exactly the gaps those plans closed. Re-run /gsd-verify-work 229 to clear it; do not read the current status as real debt.
+
 - The canonical inventory faithfully records two pre-existing refs whose names embed a downstream adopter's product name. They exist locally AND on the public origin, predate this plan, and the same names are already in the previously committed inventory, so the recapture added no new exposure. Renaming them is remote mutation (outside D-10) and would invalidate the frozen manifest.
 - Branch fix/release-boot-env-resolver now carries the adopter boot fix as four commits off main (env resolver, auth boot path, format, docs), cherry-picked out of the 453-commit milestone branch and verified there: env 5/5, auth 6/6, mix format clean. Not pushed. The GSD quick-task planning doc was deliberately left behind on the milestone branch.
+
+RESOLVED 2026-09-15 (was "229-VERIFICATION.md is STALE"): re-verified via /gsd-verify-work 229.
+The report now reads `status: passed`, `behavior_unverified: 0`, 7/7 must-haves, with a #4155
+covered-input fingerprint over all 52 inputs. 229-UAT.md was generated from SUMMARY coverage:
+58 tests, 58 automated, 0 human. 229-SECURITY.md's three remaining open threats (T-229-12,
+T-229-14, T-229-G14-03) were one stale register entry — the audit doc commit is an ancestor of
+the renderer fix — and were re-verified closed adversarially (61/61, threats_open: 0).
+
 Resume file: None
 
 ### Phase 229 evidence: two ordering constraints learned the hard way

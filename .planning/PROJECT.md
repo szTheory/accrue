@@ -668,11 +668,24 @@ The v1.50→v1.54 arc (Admin UI Foundation → Depth Pass → Brand System → D
 
 ### Active
 
-- [ ] Establish one evidence-backed repository truth for local and remote refs, tags, worktrees, open PRs, release branches, and CI observability.
 - [ ] Reconcile `main` and the completed v1.61 lineage without rewriting published history or moving the v1.61 tag.
 - [ ] Produce a clean release candidate that passes local CI-equivalent and required GitHub Actions gates.
 - [ ] Resolve or explicitly waive ship windows, classify untracked/stale artifacts, and perform only objective release-risk cleanup.
 - [ ] Prepare the resulting integration and Release Please PRs for maintainer review without merging or publishing packages.
+
+### Validated v1.62 (Phase 229 complete 2026-09-15)
+
+Evidence-backed repository truth and recovery safety — 3/3 requirements satisfied in Phase 229.
+
+- ✓ Establish one evidence-backed repository truth for local and remote refs, tags, worktrees, open PRs, release branches, and CI observability. — Phase 229 (REPO-01)
+- ✓ Freeze recoverable state before observation, with a verifiable private capsule and an atomic publish transaction. — Phase 229 (REPO-02)
+- ✓ Observe CI read-only against an exact SHA, with bounded polling and distinct no-match/ambiguity/unavailable/timeout failures. — Phase 229 (REPO-03)
+
+Acceptance was fully executable: 58 automated UAT tests, zero human-verification
+checkpoints, and seven hermetic suites shifted left into the merge-blocking
+`docs-contracts-shift-left` CI job. Strict verification of the *published* capsule is
+deliberately excluded from CI — it is a point-in-time check that fails on any
+planning-doc update (see `229-VERIFICATION.md` § Operating Constraint).
 
 ### Validated v1.61 (Phase 227 complete 2026-09-12)
 
@@ -895,4 +908,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-09-12 when starting v1.62 Release Integration & Repository Hygiene.*
+*Last updated: 2026-09-15 after Phase 229.*
