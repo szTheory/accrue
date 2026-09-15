@@ -1,8 +1,10 @@
 #!/usr/bin/env node
 // Phase 230 Plan 06, Task 1 (D-22): a standing, fail-closed sweep asserting that
 // every `.planning/phases/<slug>` evidence-path literal in `scripts/ci/**` and
-// `.github/workflows/**` either resolves on disk as written, or is reachable
-// through the archive-aware resolver (`scripts/ci/phase_evidence_path.mjs`).
+// `.github/workflows/**` -- in JS/bash quoted strings ANYWHERE on a line, and in
+// YAML lines ANYWHERE (not only bare `path:` block-scalar lines that start with
+// the literal) -- either resolves on disk as written, or is reachable through
+// the archive-aware resolver (`scripts/ci/phase_evidence_path.mjs`).
 //
 // A literal naming a slug that is ALREADY archived (present under
 // `.planning/milestones/*-phases/<slug>/`, absent under `.planning/phases/<slug>/`)
@@ -143,13 +145,27 @@ function extractQuotedLiterals(content) {
   return out;
 }
 
-// YAML `path:` block-scalar entries are bare (unquoted) lines; scan them too.
+// YAML has no single canonical quoting convention for a `.planning/phases/<slug>`
+// literal: `path:` block-scalar entries are bare (unquoted) whole lines, but the
+// SAME literal can also appear mid-line -- inside a quoted `grep -Eq '...'`
+// alternation embedded in a `run:` step, for instance. Scan for the literal
+// ANYWHERE on a YAML line (not only lines whose trimmed form starts with it),
+// capturing the preceding text as `before` so the (currently JS/bash-only)
+// predicate-method exemption stays wired for any future YAML use, and so each
+// occurrence still carries its own line number for per-occurrence exemption
+// checks (`archive-sweep-exempt:`, the soft-upload step exemption, etc).
+const YAML_LITERAL_SCAN_RE = new RegExp(`\\.planning\\/phases\\/(${SLUG_RE})(?:\\/[^"'\`\\s]*)?`, "g");
 function extractYamlPathLines(content) {
   const out = [];
   const lines = content.split(/\r?\n/);
   for (let i = 0; i < lines.length; i += 1) {
-    const trimmed = lines[i].trim();
-    if (trimmed.startsWith(".planning/phases/")) out.push({ text: trimmed, line: i + 1, before: "" });
+    const line = lines[i];
+    YAML_LITERAL_SCAN_RE.lastIndex = 0;
+    let match = YAML_LITERAL_SCAN_RE.exec(line);
+    while (match) {
+      out.push({ text: match[0], line: i + 1, before: line.slice(0, match.index) });
+      match = YAML_LITERAL_SCAN_RE.exec(line);
+    }
   }
   return out;
 }
@@ -302,12 +318,22 @@ export function verifyArchiveInvariants({ root = repositoryRoot } = {}) {
       const normalized = isBash ? stripBashVarPrefix(occurrence.text) : occurrence.text;
       const literalMatch = normalized.match(PATH_LITERAL_RE);
       if (!literalMatch) continue;
+
+      // Count every qualifying literal occurrence in the swept corpus, BEFORE
+      // exemption filtering -- `literalCount` (surfaced in the CLI summary) is
+      // the sweep's own coverage signal: it must rise when a previously
+      // invisible literal starts being extracted, even if that literal turns
+      // out to be exempt. A metric that only counted post-exemption literals
+      // could not distinguish "extractor coverage improved" from "nothing new
+      // was found," which is exactly the class of silent gap this sweep exists
+      // to catch in the files it scans.
+      literalCount += 1;
+
       if (!isYaml && PREDICATE_EXEMPT_RE.test(occurrence.before)) continue;
       if (EXEMPT_MARKER_RE.test(lines[occurrence.line - 1] || "")) continue;
       if (isBash && bashContentMatchExempt.has(occurrence.line)) continue;
       if (isYaml && yamlSoftUploadExempt.has(occurrence.line)) continue;
 
-      literalCount += 1;
       const [, slug, restRaw] = literalMatch;
       const rest = restRaw.replace(/^\//, "");
 
@@ -573,6 +599,69 @@ function verifyFixtures() {
     );
     const result = verifyArchiveInvariants({ root });
     assert.equal(result.failures.length, 0, "loop variable used only in content-match calls remains exempt");
+    fs.rmSync(root, { recursive: true, force: true });
+  }
+
+  // Defect-3 regression: a `.planning/phases/<slug>` literal naming an
+  // already-archived slug, appearing MID-LINE inside a YAML `run:` step
+  // (not at the start of the trimmed line, e.g. embedded in a quoted `grep`
+  // alternation), must be detected and fail when unrouted. Under the old
+  // line-start-only YAML extractor this literal was invisible to the sweep
+  // and would have passed wrongly (not because it was exempt, but because it
+  // was never even extracted).
+  {
+    const root = makeFixtureRoot();
+    writeFile(root, ".planning/milestones/v9.0-phases/930-fixture-midline/evidence.json", "{}");
+    writeFile(
+      root,
+      ".github/workflows/fixture_yaml_midline_literal.yml",
+      [
+        "name: fixture",
+        "on: push",
+        "jobs:",
+        "  test:",
+        "    runs-on: ubuntu-latest",
+        "    steps:",
+        "      - name: Check relevance",
+        "        run: |",
+        "          if grep -Eq '^(accrue/|\\.planning/phases/930-fixture-midline/)' /tmp/changed.txt; then",
+        "            relevant=true",
+        "          fi",
+        "",
+      ].join("\n")
+    );
+    let error = null;
+    try { verifyArchiveInvariants({ root }); } catch (caught) { error = caught; }
+    assert.ok(error, "a mid-line YAML literal for an archived, unrouted slug must be detected and fail");
+    assert.match(error.message, /930-fixture-midline/);
+    fs.rmSync(root, { recursive: true, force: true });
+  }
+
+  // Defect-3 counter-regression: the same mid-line YAML literal, annotated
+  // with a same-line `archive-sweep-exempt:` marker, passes.
+  {
+    const root = makeFixtureRoot();
+    writeFile(root, ".planning/milestones/v9.0-phases/931-fixture-midline-exempt/evidence.json", "{}");
+    writeFile(
+      root,
+      ".github/workflows/fixture_yaml_midline_literal_exempt.yml",
+      [
+        "name: fixture",
+        "on: push",
+        "jobs:",
+        "  test:",
+        "    runs-on: ubuntu-latest",
+        "    steps:",
+        "      - name: Check relevance",
+        "        run: |",
+        "          if grep -Eq '^(accrue/|\\.planning/phases/931-fixture-midline-exempt/)' /tmp/changed.txt; then # archive-sweep-exempt: regex matched against a changed-files listing, not a filesystem read",
+        "            relevant=true",
+        "          fi",
+        "",
+      ].join("\n")
+    );
+    const result = verifyArchiveInvariants({ root });
+    assert.equal(result.failures.length, 0, "mid-line YAML literal with a same-line archive-sweep-exempt marker passes");
     fs.rmSync(root, { recursive: true, force: true });
   }
 }

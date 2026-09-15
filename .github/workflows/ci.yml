@@ -608,7 +608,7 @@ jobs:
               relevant=true
             else
               git diff --name-only "$from_sha" "$GITHUB_SHA" > /tmp/phase190-changed-files.txt
-              if grep -Eq '^(accrue/|accrue_admin/|scripts/ci/verify_phase190_automation_contract\.sh|\.github/workflows/ci\.yml|\.planning/phases/190-navigation-data-display-meta-component-cohesion/)' /tmp/phase190-changed-files.txt; then
+              if grep -Eq '^(accrue/|accrue_admin/|scripts/ci/verify_phase190_automation_contract\.sh|\.github/workflows/ci\.yml|\.planning/phases/190-navigation-data-display-meta-component-cohesion/)' /tmp/phase190-changed-files.txt; then # archive-sweep-exempt: regex alternation matched against a git-diff changed-files listing, not a filesystem path read
                 relevant=true
               fi
             fi
