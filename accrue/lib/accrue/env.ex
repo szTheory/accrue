@@ -14,11 +14,16 @@ defmodule Accrue.Env do
   # `mix_env/0` itself never raises — it rescues to `:prod` (fail-closed) so
   # the prod refuse-to-boot guard still trips correctly with no build tool
   # present.
+  #
+  # Note the fallback is a convenience for `mix` workflows only. Hosts are
+  # expected to set `config :accrue, env: ...` explicitly in a release; a
+  # host that instead ships the build tool into the release to dodge the
+  # crash gets a build-tool env of `:dev` in production, which is a worse
+  # failure than the crash it avoids.
 
   @doc false
   @spec mix_env() :: atom()
   def mix_env do
-    # <!-- planner-discipline-allow: Mix.env -->
     try do
       Mix.env()
     rescue
