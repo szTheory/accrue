@@ -14,7 +14,7 @@
 ### History Integration
 
 - [ ] **INTG-01**: Maintainers can produce a reviewable integration candidate containing remote-`main` changes, all intended v1.61 work, and the four post-archive audit-closure commits without rewriting published history or moving the v1.61 tag.
-- [ ] **INTG-02**: Every integration conflict or intentionally excluded commit has an evidence-backed disposition, and retained runtime, documentation, release, and CI behavior remains covered by focused regression checks.
+- [x] **INTG-02**: Every integration conflict or intentionally excluded commit has an evidence-backed disposition, and retained runtime, documentation, release, and CI behavior remains covered by focused regression checks.
 - [ ] **INTG-03**: Maintainers can verify the candidate's ancestry, changed-file scope, milestone provenance, and rollback point before any pull request targets `main`.
 
 ### Release Proof
@@ -66,7 +66,7 @@ Roadmap phase ownership is populated during roadmap creation. Every v1.62 requir
 | REPO-02 | Phase 229 | Complete |
 | REPO-03 | Phase 229 | Complete |
 | INTG-01 | Phase 230 | Pending |
-| INTG-02 | Phase 230 | Pending |
+| INTG-02 | Phase 230 | Complete |
 | INTG-03 | Phase 230 | Pending |
 | GATE-01 | Phase 231 | Pending |
 | GATE-02 | Phase 231 | Pending |

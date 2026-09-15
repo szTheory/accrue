@@ -5,16 +5,16 @@ milestone_name: Release Integration & Repository Hygiene
 current_phase: 230
 current_phase_name: Reviewable History Integration
 status: executing
-stopped_at: Completed 230-04-PLAN.md
-last_updated: "2026-09-15T20:05:05.745Z"
+stopped_at: Completed 230-06-PLAN.md
+last_updated: "2026-09-15T20:40:22.916Z"
 last_activity: 2026-09-15
 last_activity_desc: Phase 230 execution started
-state_head: 0c503e997b5634bbc7e4a4ce9a9633791b3bcb0e
+state_head: d059a0e4e3292df5d160f63cf96f1ea599a54fc0
 progress:
   total_phases: 4
   completed_phases: 1
   total_plans: 27
-  completed_plans: 25
+  completed_plans: 26
   percent: 25
 ---
 
@@ -31,7 +31,7 @@ See: `.planning/PROJECT.md` (updated 2026-09-15)
 ## Current Position
 
 Phase: 230 (Reviewable History Integration) — EXECUTING
-Plan: 6 of 7
+Plan: 7 of 7
 Status: Ready to execute
 Last activity: 2026-09-15 — Phase 230 execution started
 
@@ -79,6 +79,7 @@ Progress: [███░░░░░░░] 25% (20/20 plans in Phase 229)
 | Phase 230 P03 | ~90 min | 3 tasks | 5 files |
 | Phase 230 P05 | 40 min | 3 tasks | 7 files |
 | Phase 230 P04 | ~110 min | 3 tasks | 5 files |
+| Phase 230 P06 | ~4h | 3 tasks | 13 files |
 
 ## Accumulated Context
 
@@ -136,6 +137,8 @@ Progress: [███░░░░░░░] 25% (20/20 plans in Phase 229)
 - [Phase 230]: 230-05: Config's mix_env regression exercises validate_at_boot!/0, not validate!/1 (the latter never invokes maybe_validate_boot_setup!/1 where the seam is actually exercised). — A first draft using validate!/1 passed even when the Accrue.Env.mix_env/0 seam was reverted to current/0 -- a false negative caught before committing.
 - [Phase 230]: 230-04: superseded_by is the no-equivalent sentinel for every wholesale-excluded row; excluded-rejected vs excluded-superseded classification is a live path-filter recomputation, never a hardcoded SHA list. — D-07's exclusion is proven at tree/requirement level, not commit-for-commit; D-15's never-transcribe discipline extends to disposition classification.
 - [Phase 230]: 230-04: bulkPatchIdFrequency pipes git log -p | git patch-id through temp-file descriptors, not spawnSync string buffers, to avoid ENOBUFS on the candidate's ~350MB diff history. — Node spawnSync input/stdout string buffers hit an OS pipe limit well before any maxBuffer ceiling on a ~500-commit history.
+- [Phase 230]: 230-06: The real archive-path sweep found and fixed three genuine pre-existing F-01-class regressions (Phase 208/224 evidence paths with no archive-aware fallback anywhere in the corpus). — The plan's own acceptance criteria required the sweep to pass clean against the real repository, not just fixtures; narrowing scope to dodge real findings would have defeated D-22's purpose.
+- [Phase 230]: 230-06: scope.* in 230-INTEGRATION-DISPOSITION.json is measured against the candidate branch's live tip, not the pinned merge-commit candidate.object; candidate.object/parents/tree/ancestry stay pinned for D-05/D-06 identity. — The code-only review branch is built from the live tip per the plan's own git-diff-quiet acceptance criterion, and Plan 230-05's declared post_merge_commits are real source changes a reviewer needs counted; measuring scope against the stale pinned object made --require-scope --review-ref permanently unsatisfiable.
 
 ### Pending Todos
 
@@ -154,8 +157,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-09-15T20:05:05.707Z
-Stopped at: Completed 230-04-PLAN.md
+Last session: 2026-09-15T20:40:15.097Z
+Stopped at: Completed 230-06-PLAN.md
 
 229-20 outcome (commits 024eaeca, ddd9a137, c6677152):
 
