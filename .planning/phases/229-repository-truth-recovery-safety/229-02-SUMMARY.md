@@ -24,6 +24,26 @@ actuals:
   tokens: 3744
   tasks: 2
   commits: 5
+coverage:
+  - id: D1
+    description: "Read-only repository-bound CI monitor lists, inspects an exact SHA, and watches within hard timeout and polling bounds, with distinct no-match, ambiguity, unavailable, and timeout failures."
+    requirement: REPO-03
+    verification:
+      - kind: integration
+        ref: "node scripts/ci/ci_monitor.cjs --self-test --verify-wrapper scripts/ci/watch_ci.sh --verify-docs scripts/ci/README.md"
+        status: pass
+    human_judgment: false
+  - id: D2
+    description: "The legacy watcher is a thin wrapper that performs one monitor exec, preserves the optional branch argument, lets --sha take precedence, and supplies bounded defaults."
+    requirement: REPO-03
+    verification:
+      - kind: integration
+        ref: "node scripts/ci/ci_monitor.cjs --self-test --verify-wrapper scripts/ci/watch_ci.sh --verify-docs scripts/ci/README.md"
+        status: pass
+      - kind: integration
+        ref: "node --test scripts/ci/phase229_gap_closure.test.mjs#WR-02 CI inspection rejects selected-viewed run ID and workflow switching"
+        status: pass
+    human_judgment: false
 plan_head_before: c0873687fca510c81c3682a57369955d47499b7b
 duration: 15min
 completed: 2026-09-13

@@ -48,6 +48,7 @@ coverage:
       - kind: integration
         ref: "scripts/ci/verify_repository_inventory.mjs#strict repository inventory flags enforce independent negative controls"
         status: pass
+    human_judgment: false
 duration: unknown (session continuation — see Issues Encountered)
 completed: 2026-09-15
 status: complete

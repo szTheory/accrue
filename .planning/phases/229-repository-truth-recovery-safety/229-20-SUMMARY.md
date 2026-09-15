@@ -75,7 +75,10 @@ coverage:
     requirement: REPO-02
     verification:
       - kind: integration
-        ref: "pre/post capsule identity snapshot (stat mode/uid/gid/size plus sha256) across the passing --run-final-chain invocation"
+        ref: "node scripts/ci/verify_phase229_handoff_invariants.mjs --self-test (capsule identity invariants: content-digest, link-digest, type-swap, mode, owner, extra-entry, exclusive-attestation)"
+        status: pass
+      - kind: integration
+        ref: "node --test scripts/ci/phase229_gap_closure.test.mjs#final handoff capsule snapshots reject real filesystem identity drift"
         status: pass
     human_judgment: false
   - id: D4
@@ -86,6 +89,9 @@ coverage:
         ref: "scripts/ci/verify_phase229_handoff_invariants.mjs --self-test (fixed read-only child/API registry)"
         status: pass
     human_judgment: false
+duration: unknown (real-capsule session)
+completed: 2026-09-15
+status: complete
 ---
 
 # 229-20: Final canonical repository-truth handoff

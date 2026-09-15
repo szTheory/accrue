@@ -35,13 +35,47 @@ actuals:
   tasks: 2
   commits: 5
 commits: 5
+coverage:
+  - id: D1
+    description: "Recovery-gated final collection revalidates the actual bundle (digest, structure, every frozen ref/object, preservation mappings, typed artifact snapshot) and rejects malformed timing or invariant evidence before any remote observation."
+    requirement: REPO-02
+    verification:
+      - kind: unit
+        ref: "node --test scripts/ci/collect_repository_inventory.mjs"
+        status: pass
+      - kind: integration
+        ref: "node --test scripts/ci/phase229_gap_closure.test.mjs#collection rejects a foreign recovery manifest before bundle or remote access"
+        status: pass
+    human_judgment: false
+  - id: D2
+    description: "The schema-v2 canonical JSON authority renders a byte-reproducible sanitized Markdown projection in which every remote fact is an explicit unavailable record rather than a substituted local fact."
+    requirement: REPO-01
+    verification:
+      - kind: unit
+        ref: "node --test scripts/ci/render_repository_inventory.mjs"
+        status: pass
+      - kind: integration
+        ref: "node scripts/ci/verify_repository_inventory.mjs --fixtures --expected-repository szTheory/accrue --require-complete-categories --require-edge-cases --require-all-ref-recovery --require-typed-artifacts --require-privacy-controls --require-determinism"
+        status: pass
+    human_judgment: false
+  - id: D3
+    description: "The authorized artifact delta is restricted to .planning/milestone.lock and .planning/state.json, each pinned by fixed path, type, before SHA-256, after SHA-256, and workflow-owned state."
+    requirement: REPO-02
+    verification:
+      - kind: integration
+        ref: "node scripts/ci/verify_phase229_handoff_invariants.mjs --self-test"
+        status: pass
+      - kind: integration
+        ref: "node --test scripts/ci/phase229_gap_closure.test.mjs#final handoff gate rejects capsule workspace and attestation invariant drift"
+        status: pass
+    human_judgment: false
 plan_head_before: 215ff3afc67e7a3610eaa227c25eb8478cb1b402
 duration: 35min
 completed: 2026-09-13
-status: remediation-pending-audit
+status: complete
 ---
 
-# Phase 229 Plan 04: Recovery-backed Repository Truth Summary (Audit Rerun Pending)
+# Phase 229 Plan 04: Recovery-backed Repository Truth Summary
 
 **A deterministic repository and CI evidence snapshot with all 109 frozen refs independently verified in the actual bundle and only two timestamped, hash-proven GSD metadata refreshes authorized.**
 
@@ -110,6 +144,15 @@ Required GSD closeout republished `.planning/state.json`. Rather than accepting 
 ## Remote Observation
 
 The collector ran with `--observe-remote`; no live adapter was available, so each remote category is recorded as `unavailable` with its repository-bound GET request. No CI run, ref, PR, issue, provider, or publication action was performed.
+
+## Audit Rerun: COMPLETE
+
+This SUMMARY was held at `remediation-pending-audit` awaiting a re-audit of the two Rule 2
+security remediations above. That re-audit has happened: `229-REVIEW.md` (2026-09-13) re-reviewed
+`collect_repository_inventory.mjs`, `verify_repository_inventory.mjs`, and
+`render_repository_inventory.mjs`, and every finding it raised against them was closed by plans
+229-15 through 229-20 with committed regression tests. All of those suites are green at HEAD (see
+`229-VERIFICATION.md` § Verification Method). Status advanced to `complete` on 2026-09-15.
 
 ## Known Stubs
 

@@ -139,7 +139,43 @@ jobs:
       - name: Executable UAT contract self-test
         run: >-
           node scripts/ci/verify_executable_uat_contract.mjs --self-test &&
-          node scripts/ci/verify_executable_uat_contract.mjs --all-opted-in
+          node scripts/ci/verify_executable_uat_contract.mjs --all-opted-in &&
+          node scripts/ci/verify_executable_uat_contract.mjs --all-since 229
+
+      # Phase 229 repository-truth and recovery-safety suites. These are hermetic:
+      # they build disposable repositories and capsules in a temp dir and touch no
+      # network, credential, or maintainer-held private capsule. Strict verification
+      # of the *published* capsule is deliberately NOT run here — it is a
+      # point-in-time check that fails on any planning-doc update, so it has no
+      # recurring CI value (see 229-VERIFICATION.md § Operating Constraint).
+      - name: Repository preservation transaction matrix (REPO-02)
+        run: bash scripts/ci/preserve_repository_state.sh --self-test
+
+      - name: Repository inventory collect/render/verify units (REPO-01, REPO-02)
+        run: >-
+          node --test scripts/ci/collect_repository_inventory.mjs &&
+          node --test scripts/ci/render_repository_inventory.mjs &&
+          node --test scripts/ci/verify_repository_inventory.mjs
+
+      - name: Repository inventory strict fixture contract (REPO-01)
+        run: >-
+          node scripts/ci/verify_repository_inventory.mjs --fixtures
+          --expected-repository szTheory/accrue
+          --require-complete-categories --require-edge-cases
+          --require-all-ref-recovery --require-typed-artifacts
+          --require-privacy-controls --require-determinism
+
+      - name: Final handoff invariants (REPO-02)
+        run: node scripts/ci/verify_phase229_handoff_invariants.mjs --self-test
+
+      - name: Exact-SHA CI monitor and wrapper contract (REPO-03)
+        run: >-
+          node scripts/ci/ci_monitor.cjs --self-test
+          --verify-wrapper scripts/ci/watch_ci.sh
+          --verify-docs scripts/ci/README.md
+
+      - name: Repository truth gap-closure regression suite (CR-01..CR-10, WR-01, WR-02)
+        run: node --test scripts/ci/phase229_gap_closure.test.mjs
 
       - name: Install tokens harness
         run: cd brandbook/tokens/harness && npm ci
