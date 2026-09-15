@@ -148,16 +148,51 @@ function requireRecovery(repo, manifest, recoveryBundle) {
   }
   return manifest;
 }
+
+function privateInputIdentity(stat) {
+  return [stat.dev, stat.ino, stat.mode, stat.uid, stat.gid, stat.size, stat.mtimeNs].map(String).join(":");
+}
+function readDescriptorBytes(descriptor, size, label) {
+  if (size < 0n || size > BigInt(GH_MAX_BUFFER)) fail(`${label} exceeds its bounded input size`);
+  const contents = Buffer.alloc(Number(size)); let offset = 0;
+  while (offset < contents.length) {
+    const read = fs.readSync(descriptor, contents, offset, contents.length - offset, offset);
+    if (read === 0) fail(`${label} changed during its bounded descriptor read`);
+    offset += read;
+  }
+  return contents;
+}
+function readStablePrivateJson(inputPath, label, { afterRead } = {}) {
+  if (typeof inputPath !== "string" || !inputPath) fail(`${label} is required`);
+  if (typeof process.geteuid !== "function") fail(`${label} ownership cannot be validated`);
+  let beforePath; let descriptor;
+  try {
+    try { beforePath = fs.lstatSync(inputPath, { bigint: true }); } catch { fail(`${label} must be an existing no-follow regular file`); }
+    if (!beforePath.isFile()) fail(`${label} must be a no-follow regular file`);
+    descriptor = fs.openSync(inputPath, fs.constants.O_RDONLY | (fs.constants.O_NOFOLLOW || 0));
+    const beforeDescriptor = fs.fstatSync(descriptor, { bigint: true });
+    if (!beforeDescriptor.isFile() || privateInputIdentity(beforeDescriptor) !== privateInputIdentity(beforePath)) fail(`${label} identity changed while opening without following links`);
+    if (beforeDescriptor.uid !== BigInt(process.geteuid())) fail(`${label} must be owned by the current effective user`);
+    if ((beforeDescriptor.mode & 0o077n) !== 0n) fail(`${label} permissions must be 0600 or stricter`);
+    const contents = readDescriptorBytes(descriptor, beforeDescriptor.size, label);
+    afterRead?.();
+    const afterDescriptor = fs.fstatSync(descriptor, { bigint: true });
+    let afterPath;
+    try { afterPath = fs.lstatSync(inputPath, { bigint: true }); } catch { fail(`${label} disappeared during its stable read`); }
+    if (!afterPath.isFile() || privateInputIdentity(afterDescriptor) !== privateInputIdentity(beforeDescriptor) || privateInputIdentity(afterPath) !== privateInputIdentity(beforePath)) fail(`${label} identity changed during its stable read`);
+    try { return JSON.parse(contents.toString("utf8")); } catch { fail(`${label} must contain valid bounded JSON`); }
+  } finally {
+    if (descriptor !== undefined) fs.closeSync(descriptor);
+  }
+}
 function readWorkflowMetadataAuthorization(authorizationPath) {
-  if (!authorizationPath) return null;
-  const record = JSON.parse(fs.readFileSync(authorizationPath, "utf8"));
+  const record = readStablePrivateJson(authorizationPath, "workflow metadata authorization");
   fields(record, new Set(["schema_version", "purpose", "changes"]), "workflow metadata authorization record");
   if (record.schema_version !== 1 || record.purpose !== "phase229_workflow_metadata_refresh") fail("workflow metadata authorization record is invalid");
   return validateWorkflowMetadataChanges(record.changes, "workflow metadata authorization record");
 }
 function readFinalCaptureAttestation(attestationPath, manifest) {
-  if (!attestationPath) fail("final capture attestation is required");
-  const record = JSON.parse(fs.readFileSync(attestationPath, "utf8"));
+  const record = readStablePrivateJson(attestationPath, "final capture attestation");
   fields(record, new Set(["schema_version", "purpose", "observed_at", "artifacts"]), "final capture attestation");
   if (record.schema_version !== 1 || record.purpose !== "phase229_final_capture") fail("final capture attestation is invalid");
   timestamp(record.observed_at, "final capture attestation observed_at");
@@ -207,6 +242,14 @@ function validateFinalArtifactSnapshot(repo, manifest, attestation) {
     if (current.type !== invariant.type || current.sha256 !== invariant.after_sha256) fail(`final capture artifact post-invariant mismatch: ${invariant.path}`);
   }
   return changes;
+}
+function workflowMetadataKey(change) {
+  return [change.path, change.type, change.before_sha256, change.after_sha256, change.state].join("\0");
+}
+function assertExactWorkflowMetadataAuthority(authorityName, authority, candidateName, candidate) {
+  const expected = validateWorkflowMetadataChanges(authority, authorityName).map(workflowMetadataKey);
+  const actual = validateWorkflowMetadataChanges(candidate, candidateName).map(workflowMetadataKey);
+  if (expected.length !== actual.length || expected.some((value, index) => value !== actual[index])) fail(`${candidateName} differs from ${authorityName}`);
 }
 const unavailable = (repository, provenance, reason = "unavailable", now = new Date()) => ({ repository, observed_at: now.toISOString(), ...(Array.isArray(provenance) ? { requests: [...provenance] } : { request: provenance }), available: false, state: "unavailable", reason });
 const remoteRequest = (repository, suffix) => `GET /repos/${repository}/${suffix}`;
@@ -416,14 +459,14 @@ export function collectCaptureAnchor({ repo, capturedAt = new Date() }) {
   };
 }
 export function collectRepositoryInventory({ repo, recoveryManifest: manifestPath, expectedManifestSha256, recoveryBundle, artifactAuthorization, finalCaptureAttestation, expectedRepository, observeRemote = false, adapter, now = () => new Date() }) {
-  const context = createRepositoryValidationContext({ expectedRepository }); const manifest = readTrustedRecoveryManifest(manifestPath, expectedManifestSha256, context); requireRecovery(repo, manifest, recoveryBundle); const attestation = readFinalCaptureAttestation(finalCaptureAttestation, manifest); const workflowMetadataChanges = validateFinalArtifactSnapshot(repo, manifest, attestation); if (artifactAuthorization) validateWorkflowMetadataChanges(readWorkflowMetadataAuthorization(artifactAuthorization)); const capture = collectCaptureAnchor({ repo, capturedAt: now() }); const preserved = new Map(manifest.refs.map((item) => [item.original_ref, item.object])); const resolve = (name) => preserved.get(name) || run(repo, ["rev-parse", `${name}^{}`]);
+  const context = createRepositoryValidationContext({ expectedRepository }); const manifest = readTrustedRecoveryManifest(manifestPath, expectedManifestSha256, context); requireRecovery(repo, manifest, recoveryBundle); const attestation = readFinalCaptureAttestation(finalCaptureAttestation, manifest); const authorization = readWorkflowMetadataAuthorization(artifactAuthorization); assertExactWorkflowMetadataAuthority("final capture workflow metadata invariants", attestation.workflowMetadataChanges, "workflow metadata authorization", authorization); const workflowMetadataChanges = validateFinalArtifactSnapshot(repo, manifest, attestation); assertExactWorkflowMetadataAuthority("workflow metadata authorization", authorization, "manifest-to-live workflow metadata transitions", workflowMetadataChanges); const capture = collectCaptureAnchor({ repo, capturedAt: now() }); const preserved = new Map(manifest.refs.map((item) => [item.original_ref, item.object])); const resolve = (name) => preserved.get(name) || run(repo, ["rev-parse", `${name}^{}`]);
   const refs = run(repo, ["for-each-ref", "--format=%(refname) %(objectname)"]).split("\n").filter(Boolean).map((line) => { const [name, object] = line.split(" "); return { name, object, role: name === "refs/heads/main" ? "local_main" : name === "refs/remotes/origin/main" ? "cached_origin_main" : name === "refs/tags/v1.61" ? "v161_tag" : "other" }; });
   const remotes = collectRemoteFacts({ repository: expectedRepository, adapter: observeRemote ? adapter : undefined, now });
   return validateInventory({ schema_version: 2, repository: expectedRepository, mode: observeRemote ? "live_remote" : "local_only", capture, recovery: { verified: true, manifest_sha256: expectedManifestSha256, bundle_sha256: manifest.bundle_sha256, refs: sorted(manifest.refs.map(({ original_ref, object, encoded_ref, bundle_member }) => ({ original_ref, object, encoded_ref, bundle_member })), (item) => item.original_ref) }, artifacts: { empty_directory_policy: manifest.empty_directory_policy, entries: sorted(manifest.artifacts.map(({ path: entryPath, type, sha256 }) => ({ path: entryPath, type, sha256 })), (item) => `${item.path}\0${item.type}`), ...(workflowMetadataChanges.length ? { authorized_workflow_metadata: workflowMetadataChanges } : {}) }, refs: { local_main: resolve("refs/heads/main"), cached_origin_main: resolve("refs/remotes/origin/main"), milestone_branch: capture.commit, v161_tag: resolve("refs/tags/v1.61"), all: sorted(refs, (item) => `${item.name}\0${item.object}`) }, remotes, planning: collectPlanningFacts({ root: repo }), worktrees: collectWorktrees({ repo }) }, context);
 }
 export const collectLocalInventory = (options) => collectRepositoryInventory(options);
-function parseArgs(argv) { const result = { observeRemote: false }; for (let index = 0; index < argv.length; index += 1) { if (argv[index] === "--observe-remote") { result.observeRemote = true; continue; } if (argv[index] === "--refresh-cached-refs") fail("--refresh-cached-refs requires separately authorized recovery workflow"); if (!argv[index].startsWith("--") || !argv[index + 1]) fail("usage: --repo OWNER/REPO --recovery-manifest FILE --expected-manifest-sha256 DIGEST --recovery-bundle FILE --final-capture-attestation FILE [--artifact-authorization FILE] [--observe-remote] --out FILE"); result[argv[index].slice(2)] = argv[++index]; } return result; }
-function main() { const options = parseArgs(process.argv.slice(2)); if (!options.repo || !options["recovery-manifest"] || !options["expected-manifest-sha256"] || !options["recovery-bundle"] || !options["final-capture-attestation"] || !options.out) fail("--repo, --recovery-manifest, --expected-manifest-sha256, --recovery-bundle, --final-capture-attestation, and --out are required"); const inventory = collectRepositoryInventory({ repo: process.cwd(), recoveryManifest: path.resolve(options["recovery-manifest"]), expectedManifestSha256: options["expected-manifest-sha256"], recoveryBundle: path.resolve(options["recovery-bundle"]), artifactAuthorization: options["artifact-authorization"] ? path.resolve(options["artifact-authorization"]) : undefined, finalCaptureAttestation: path.resolve(options["final-capture-attestation"]), expectedRepository: options.repo, observeRemote: options.observeRemote, adapter: options.observeRemote ? createGhApiReadAdapter({ repository: options.repo }) : undefined }); fs.writeFileSync(options.out, `${JSON.stringify(inventory, null, 2)}\n`, { mode: 0o600 }); }
+function parseArgs(argv) { const result = { observeRemote: false }; for (let index = 0; index < argv.length; index += 1) { if (argv[index] === "--observe-remote") { result.observeRemote = true; continue; } if (argv[index] === "--refresh-cached-refs") fail("--refresh-cached-refs requires separately authorized recovery workflow"); if (!argv[index].startsWith("--") || !argv[index + 1]) fail("usage: --repo OWNER/REPO --recovery-manifest FILE --expected-manifest-sha256 DIGEST --recovery-bundle FILE --artifact-authorization FILE --final-capture-attestation FILE [--observe-remote] --out FILE"); result[argv[index].slice(2)] = argv[++index]; } return result; }
+function main() { const options = parseArgs(process.argv.slice(2)); if (!options.repo || !options["recovery-manifest"] || !options["expected-manifest-sha256"] || !options["recovery-bundle"] || !options["artifact-authorization"] || !options["final-capture-attestation"] || !options.out) fail("--repo, --recovery-manifest, --expected-manifest-sha256, --recovery-bundle, --artifact-authorization, --final-capture-attestation, and --out are required"); const inventory = collectRepositoryInventory({ repo: process.cwd(), recoveryManifest: path.resolve(options["recovery-manifest"]), expectedManifestSha256: options["expected-manifest-sha256"], recoveryBundle: path.resolve(options["recovery-bundle"]), artifactAuthorization: path.resolve(options["artifact-authorization"]), finalCaptureAttestation: path.resolve(options["final-capture-attestation"]), expectedRepository: options.repo, observeRemote: options.observeRemote, adapter: options.observeRemote ? createGhApiReadAdapter({ repository: options.repo }) : undefined }); fs.writeFileSync(options.out, `${JSON.stringify(inventory, null, 2)}\n`, { mode: 0o600 }); }
 if (!process.env.NODE_TEST_CONTEXT && process.argv[1] === new URL(import.meta.url).pathname) { try { main(); } catch (error) { console.error(`repository inventory collect: FAIL: ${error.message}`); process.exitCode = 1; } }
 
 if (process.env.NODE_TEST_CONTEXT && process.argv[1] === new URL(import.meta.url).pathname) {
@@ -471,29 +514,74 @@ if (process.env.NODE_TEST_CONTEXT && process.argv[1] === new URL(import.meta.url
   test("CR-02 final collection preserves raw invalid-UTF-8 symlink bytes", () => {
     const fixture = generatedArtifactFixture();
     try {
-      const inventory = collectRepositoryInventory({ repo: fixture.repo, recoveryManifest: fixture.manifestPath, expectedManifestSha256: fixture.expectedManifestSha256, recoveryBundle: fixture.bundle, finalCaptureAttestation: fixture.attestationPath, expectedRepository: "szTheory/accrue" });
+      const inventory = collectRepositoryInventory({ repo: fixture.repo, recoveryManifest: fixture.manifestPath, expectedManifestSha256: fixture.expectedManifestSha256, recoveryBundle: fixture.bundle, artifactAuthorization: fixture.authorizationPath, finalCaptureAttestation: fixture.attestationPath, expectedRepository: "szTheory/accrue" });
       assert.equal(inventory.artifacts.entries.find((entry) => entry.path === "raw-link")?.sha256, fixture.expectedLinkDigest);
       const linkEntry = fixture.manifest.artifacts.find((entry) => entry.path === "raw-link");
       assert.equal(currentArtifact(fixture.repo, linkEntry, { readFileSync() { throw new Error("symlink target must never be opened"); } }).sha256, fixture.expectedLinkDigest);
       assert.throws(() => currentArtifact(fixture.repo, linkEntry, { readlinkSync: () => "decoded" }), /did not return a Buffer/);
       assert.throws(() => currentArtifact(fixture.repo, linkEntry, { readlinkSync() { throw new Error("raw-byte access unsupported"); } }), /raw-byte access unsupported/);
       fs.rmSync(fixture.linkPath); fs.symlinkSync(Buffer.from([0xff, 0xfd, 0x0a]), fixture.linkPath);
-      assert.throws(() => collectRepositoryInventory({ repo: fixture.repo, recoveryManifest: fixture.manifestPath, expectedManifestSha256: fixture.expectedManifestSha256, recoveryBundle: fixture.bundle, finalCaptureAttestation: fixture.attestationPath, expectedRepository: "szTheory/accrue" }), /artifact changed|post-invariant mismatch/);
+      assert.throws(() => collectRepositoryInventory({ repo: fixture.repo, recoveryManifest: fixture.manifestPath, expectedManifestSha256: fixture.expectedManifestSha256, recoveryBundle: fixture.bundle, artifactAuthorization: fixture.authorizationPath, finalCaptureAttestation: fixture.attestationPath, expectedRepository: "szTheory/accrue" }), /artifact changed|post-invariant mismatch/);
     } finally { fs.rmSync(fixture.scratch, { recursive: true, force: true }); }
   });
 
   test("CR-05 workflow authorization is mandatory and bound to attestation and live bytes", () => {
     const fixture = generatedArtifactFixture(); let remoteCalls = 0;
     const request = (overrides = {}) => ({ repo: fixture.repo, recoveryManifest: fixture.manifestPath, expectedManifestSha256: fixture.expectedManifestSha256, recoveryBundle: fixture.bundle, finalCaptureAttestation: fixture.attestationPath, expectedRepository: "szTheory/accrue", observeRemote: true, adapter: { get() { remoteCalls += 1; return []; } }, ...overrides });
+    const writePrivate = (filename, value) => { fs.writeFileSync(filename, JSON.stringify(value), { mode: 0o600 }); fs.chmodSync(filename, 0o600); return filename; };
     try {
+      const exact = collectRepositoryInventory(request({ artifactAuthorization: fixture.authorizationPath }));
+      assert.deepEqual(exact.artifacts.authorized_workflow_metadata, JSON.parse(fs.readFileSync(fixture.authorizationPath, "utf8")).changes.sort((left, right) => left.path.localeCompare(right.path)));
+      assert.equal(remoteCalls, 4, "remote observation starts only after the exact three-authority binding passes");
+      remoteCalls = 0;
       assert.throws(() => collectRepositoryInventory(request()), /workflow metadata authorization is required/);
       assert.equal(remoteCalls, 0, "missing authorization must fail before remote observation");
       const stalePath = path.join(fixture.capsule, "stale-authorization.json");
       const stale = JSON.parse(fs.readFileSync(fixture.authorizationPath, "utf8"));
       stale.changes[0].after_sha256 = "0".repeat(64);
-      fs.writeFileSync(stalePath, JSON.stringify(stale), { mode: 0o600 }); fs.chmodSync(stalePath, 0o600);
-      assert.throws(() => collectRepositoryInventory(request({ artifactAuthorization: stalePath })), /authorization.*attestation|live artifact/);
+      writePrivate(stalePath, stale);
+      assert.throws(() => collectRepositoryInventory(request({ artifactAuthorization: stalePath })), /authorization differs|live artifact/);
       assert.equal(remoteCalls, 0, "stale authorization must fail before remote observation");
+
+      const exactAuthorization = JSON.parse(fs.readFileSync(fixture.authorizationPath, "utf8"));
+      const variants = [
+        ["omitted", (value) => value.changes.pop(), /two exact workflow metadata paths/],
+        ["extra", (value) => value.changes.push({ ...value.changes[0], path: "extra" }), /two exact workflow metadata paths/],
+        ["type", (value) => { value.changes[0].type = "symlink"; }, /invalid change state/],
+        ["state", (value) => { value.changes[0].state = "unchanged"; }, /invalid change state/],
+        ["before", (value) => { value.changes[0].before_sha256 = "1".repeat(64); }, /authorization differs/]
+      ];
+      for (const [name, mutate, expected] of variants) {
+        const value = structuredClone(exactAuthorization); mutate(value);
+        const filename = writePrivate(path.join(fixture.capsule, `${name}-authorization.json`), value);
+        assert.throws(() => collectRepositoryInventory(request({ artifactAuthorization: filename })), expected);
+        assert.equal(remoteCalls, 0, `${name} authorization must fail before remote observation`);
+      }
+
+      const malformed = path.join(fixture.capsule, "malformed-authorization.json");
+      fs.writeFileSync(malformed, "{", { mode: 0o600 }); fs.chmodSync(malformed, 0o600);
+      assert.throws(() => collectRepositoryInventory(request({ artifactAuthorization: malformed })), /valid bounded JSON/);
+      const broad = path.join(fixture.capsule, "broad-authorization.json"); writePrivate(broad, exactAuthorization); fs.chmodSync(broad, 0o644);
+      assert.throws(() => collectRepositoryInventory(request({ artifactAuthorization: broad })), /permissions must be 0600 or stricter/);
+      const alias = path.join(fixture.capsule, "authorization-alias.json"); fs.symlinkSync(fixture.authorizationPath, alias);
+      assert.throws(() => collectRepositoryInventory(request({ artifactAuthorization: alias })), /no-follow regular file|symbolic link/);
+
+      const attestationAlias = path.join(fixture.capsule, "attestation-alias.json"); fs.symlinkSync(fixture.attestationPath, attestationAlias);
+      assert.throws(() => collectRepositoryInventory(request({ artifactAuthorization: fixture.authorizationPath, finalCaptureAttestation: attestationAlias })), /no-follow regular file|symbolic link/);
+      const staleAttestation = JSON.parse(fs.readFileSync(fixture.attestationPath, "utf8"));
+      staleAttestation.artifacts.find((entry) => entry.path === ".planning/state.json").after_sha256 = "2".repeat(64);
+      const staleAttestationPath = writePrivate(path.join(fixture.capsule, "stale-attestation.json"), staleAttestation);
+      assert.throws(() => collectRepositoryInventory(request({ artifactAuthorization: fixture.authorizationPath, finalCaptureAttestation: staleAttestationPath })), /authorization differs|post-invariant mismatch/);
+
+      const originalGeteuid = process.geteuid;
+      try {
+        Object.defineProperty(process, "geteuid", { configurable: true, value: () => originalGeteuid() + 1 });
+        assert.throws(() => readWorkflowMetadataAuthorization(fixture.authorizationPath), /owned by the current effective user/);
+      } finally { Object.defineProperty(process, "geteuid", { configurable: true, value: originalGeteuid }); }
+
+      const replacement = path.join(fixture.capsule, "replacement-authorization.json"); writePrivate(replacement, exactAuthorization);
+      assert.throws(() => readStablePrivateJson(fixture.authorizationPath, "workflow metadata authorization", { afterRead() { fs.renameSync(replacement, fixture.authorizationPath); } }), /identity changed during its stable read/);
+      assert.equal(remoteCalls, 0, "every rejected private authority must fail before remote observation");
     } finally { fs.rmSync(fixture.scratch, { recursive: true, force: true }); }
   });
 

@@ -525,7 +525,7 @@ function recoveryFixture({ single = false } = {}) {
     ]
   };
   const attestationPath = path.join(scratch, "attestation.json");
-  fs.writeFileSync(attestationPath, JSON.stringify(attestation));
+  fs.writeFileSync(attestationPath, JSON.stringify(attestation), { mode: 0o600 });
   return { ...fixture, attestationPath, attestation };
 }
 
