@@ -185,17 +185,33 @@ verified at publication (capture commit A, canonical commit B, summary commit C)
 and stays bound by the round-3 attestation. Any future recapture must be the
 LAST action after planning docs settle.
 
-### Adopter boot fix: standalone branch recipe
+### Adopter boot fix: SHIPPED as PR #44
 
-Branch `fix/release-boot-env-resolver` was built, verified (env 5/5, auth 6/6,
-mix format clean, off main @ 5c01f4bc) and then DELETED to restore constraint 1
-above. Recreate it when the inventory is no longer the active gate:
-
-    git branch fix/release-boot-env-resolver main
-    git worktree add <tmp> fix/release-boot-env-resolver
-    cd <tmp> && git cherry-pick -x 2de4389b 9eae363a 173607d9 5653216c
+Branch `fix/release-boot-env-resolver` is pushed and PR #44 is OPEN against main
+(mergeable). Four commits cherry-picked from the milestone branch
+(2de4389b, 9eae363a, 173607d9, 5653216c): canonical `Accrue.Env` seam, the six
+auth call sites, format, and release docs. Verified on the branch off
+main @ 5c01f4bc -- env 5/5, auth 6/6, `mix format --check-formatted` clean,
+zero adopter PII in the diff or PR body (it says "a downstream host app").
 
 The fifth commit (afddc87c, the GSD quick-task planning doc) conflicts on
 `.planning/` and is deliberately left on the milestone branch. Running the
 Elixir suites needs `elixir 1.19.5-otp-28` in `.tool-versions`; no Elixir
 version is set globally, so `mix` fails in the main checkout too.
+
+KNOWN AND ACCEPTED: this branch plus its remote-tracking ref are two refs that
+did not exist at capture, so strict verification of the published inventory now
+reports `extra=[...]` for both. Maintainer-authorized fail-forward. It was
+already a point-in-time check (see constraint 2 above) and the next recapture
+must happen after these settle.
+
+### Adopter-named refs: fail forward (maintainer decision)
+
+`fix/getfluent-1.5.1` and its origin counterpart embed a downstream adopter's
+product name. They predate this work, are already on the public origin, are not
+merged to main, and the same names are already in the previously committed
+inventory, so nothing here added exposure. Maintainer decision: FAIL FORWARD --
+leave them. Renaming would invalidate the frozen manifest (the old names are
+baked into an immutable capsule pinned by the committed inventory's
+manifest_sha256), so it is only free when a NEW capsule is minted. Revisit then.
+Convention going forward: no adopter, customer or personal names in ref names.
