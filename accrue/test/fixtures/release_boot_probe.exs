@@ -76,7 +76,12 @@ Application.delete_env(:accrue, :env)
 
 try do
   Accrue.Auth.Default.boot_check!()
-  IO.puts(:stderr, "ABORT: expected boot_check!/0 to raise Accrue.ConfigError, it returned normally")
+
+  IO.puts(
+    :stderr,
+    "ABORT: expected boot_check!/0 to raise Accrue.ConfigError, it returned normally"
+  )
+
   System.halt(1)
 rescue
   e in Accrue.ConfigError ->
