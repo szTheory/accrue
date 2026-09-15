@@ -716,7 +716,18 @@ async function main() {
     }
   }
 
-  console.log("integration disposition verification: PASS");
+  // WR-02: --records/--rendered with zero --require-* flags only performs
+  // structural JSON-schema validation (validateDisposition) -- no ancestry,
+  // scope, hazard-universe, determinism, post-merge-scope, rollback, or
+  // excluded-ledger check runs. Name exactly which strict assertions actually
+  // ran so a schema-only invocation can never look identical to a fully
+  // strict one; an accidental or abbreviated invocation is visually distinct
+  // from real coverage rather than printing the same "PASS" either way.
+  const requestedStrictFlags = [...BOOLEAN_FLAGS].filter((flag) => flag !== "fixtures" && parsed.flags.has(flag)).sort();
+  const verificationSuffix = requestedStrictFlags.length
+    ? ` (verified: ${requestedStrictFlags.join(", ")})`
+    : " (schema-only: no --require-* flags supplied, no ancestry/scope/hazard/ledger/determinism check ran)";
+  console.log(`integration disposition verification: PASS${verificationSuffix}`);
 }
 
 if (process.env.NODE_TEST_CONTEXT) {
