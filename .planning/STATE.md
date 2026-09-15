@@ -139,12 +139,21 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-09-15T14:05:00Z
-Stopped at: Phase 229 plans 01-19 sealed and green (gap_closure 19/19, verify_repository_inventory 4/4, collect_repository_inventory 10/10, handoff --self-test PASS). 229-20 (final inventory recapture) cannot run unattended: the final chain requires five maintainer-only private values (PHASE229_CAPSULE_DIR, PHASE229_PRIVATE_MANIFEST, PHASE229_MANIFEST_SHA256, PHASE229_RECOVERY_BUNDLE, PHASE229_FINAL_ATTESTATION) — none are set in the agent environment. Invocation is documented in scripts/ci/README.md.
+Last session: 2026-09-15T16:30:00Z
+Stopped at: Phase 229 is COMPLETE at 20/20 plans. 229-20 shipped both tasks; the final recovery-backed canonical inventory pair is published, committed and independently strict-verified against the real capsule.
 
-229-20 Task 1 (preflight) is COMPLETE and committed (3007fffd): a generated-repository A/B/C regression now proves the canonical pair stays strictly verifiable after its own commit and after later phase commits, bound to exact published bytes by three negatives. gap_closure is now 20/20.
+229-20 outcome (commits 024eaeca, ddd9a137, c6677152):
+- Strict verification PASSES at all three points: capture commit A, after committing the canonical pair (B), and after committing the summary (C). The A-to-B-to-C ancestry property holds on the real repository, not just in fixtures.
+- The recovery capsule is byte, type, owner and digest immutable across the run. Exactly one addition: phase229-final-capture-attestation-round3.json, mode 0600, uid 501, schema v2.
+- The published inventory is live_remote (remote facts obtained under terminal proof), captured at 024eaeca. Committed recovery digests still match their anchors.
+- All seven gates green; phase229_gap_closure is now 21/21.
 
-Two findings that de-risk Task 2:
-1. The 229-20 PLAN Task 2 <automated> command is STALE. It passes --artifact-authorization and --final-capture-attestation to verify_phase229_handoff_invariants.mjs, which accepts neither; 229-19 moved that derivation inside the wrapper. The command fails immediately with 'unsupported final handoff option: --artifact-authorization'. Use the nine-option block in scripts/ci/README.md instead.
-2. PHASE229_MANIFEST_SHA256 is NOT a secret: it is anchored in the committed inventory as recovery.manifest_sha256 (52f3ea27d5551fba55d3666b44911104a20386b6ce1610eb8e194aab395817b4); the bundle digest is anchored as recovery.bundle_sha256 (4108818c08a1d2a2c3c75058a30789bd89f6e5f44f1268e09252f337c714a869). Only the capsule/manifest/bundle/attestation PATHS are maintainer-held.
+Two blockers surfaced ONLY against the real capsule; both are fixed and covered:
+1. assertStrictRecovery required the frozen manifest refs to EQUAL the freshly captured refs. A real capsule is minted once and then immutable, so at capture time the manifest had frozen the active ref 127 commits in the past -- meaning no real capsule could ever verify, contradicting 229-20's own must-have. Replaced with assertCapturedRefContinuity: exact for every frozen ref except the active one, which must instead prove the frozen object is still reachable from the captured commit. NOTE the class of blindness here: the generated fixtures mint the capsule and capture the inventory at the SAME commit, so no fixture-only test could see this. The new regression advances the active ref past the freeze first, and its negative uses a same-tree root commit so only the ancestry check can reject it.
+2. The recovery bundle was mode 0644 against a verifier requiring 0600 or stricter -- the capsule predated its own access-control rule. Tightened to 0600 with maintainer approval; bytes, digest, type and owner unchanged. Recorded as a deliberate exception to the mode-immutability criterion.
+
+Still open for a maintainer decision:
+- 229-VERIFICATION.md is STALE. It is dated 2026-09-13, scores 3/7 and reads gaps_found, but it predates plans 229-15 through 229-20 and names exactly the gaps those plans closed. Re-run /gsd-verify-work 229 to clear it; do not read the current status as real debt.
+- The canonical inventory faithfully records two pre-existing refs whose names embed a downstream adopter's product name. They exist locally AND on the public origin, predate this plan, and the same names are already in the previously committed inventory, so the recapture added no new exposure. Renaming them is remote mutation (outside D-10) and would invalidate the frozen manifest.
+- Branch fix/release-boot-env-resolver now carries the adopter boot fix as four commits off main (env resolver, auth boot path, format, docs), cherry-picked out of the 453-commit milestone branch and verified there: env 5/5, auth 6/6, mix format clean. Not pushed. The GSD quick-task planning doc was deliberately left behind on the milestone branch.
 Resume file: None
