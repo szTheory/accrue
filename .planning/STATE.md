@@ -5,16 +5,16 @@ milestone_name: Release Integration & Repository Hygiene
 current_phase: 230
 current_phase_name: Reviewable History Integration
 status: executing
-stopped_at: Phase 230 context gathered
-last_updated: "2026-09-15T18:01:19.569Z"
+stopped_at: Completed 230-01-PLAN.md
+last_updated: "2026-09-15T18:36:43.732Z"
 last_activity: 2026-09-15
-last_activity_desc: Phase 229 complete, transitioned to Phase 230
-state_head: 3b2fcca8c9606a8d788470eab9722651eb61903d
+last_activity_desc: Phase 230 execution started
+state_head: 939af6d3ae07d17601170795259f7d8eb20ea2cf
 progress:
   total_phases: 4
   completed_phases: 1
   total_plans: 27
-  completed_plans: 20
+  completed_plans: 21
   percent: 25
 ---
 
@@ -30,10 +30,10 @@ See: `.planning/PROJECT.md` (updated 2026-09-15)
 
 ## Current Position
 
-Phase: 230 (Reviewable History Integration) — READY TO EXECUTE
-Plan: Not started
+Phase: 230 (Reviewable History Integration) — EXECUTING
+Plan: 2 of 7
 Status: Ready to execute
-Last activity: 2026-09-15 — Phase 229 complete, transitioned to Phase 230
+Last activity: 2026-09-15 — Phase 230 execution started
 
 Progress: [███░░░░░░░] 25% (20/20 plans in Phase 229)
 
@@ -74,6 +74,7 @@ Progress: [███░░░░░░░] 25% (20/20 plans in Phase 229)
 | Phase 229 P14 | 15min | 2 tasks | 5 files |
 | Phase 229 P15 | 11min | 2 tasks | 3 files |
 | Phase 229 P16 | 10min | 2 tasks | 1 files |
+| Phase 230 P01 | ~50min | 3 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -125,6 +126,7 @@ Progress: [███░░░░░░░] 25% (20/20 plans in Phase 229)
 - [Phase 229]: Preservation refs enter the rollback ledger only after atomic absent-old-value creation and are compare-deleted only while their expected objects remain exact.
 - [Phase 229]: Bundle, artifact, manifest, and public-record preparation completes before preservation refs and capsule outputs are published.
 - [Phase 229]: Concurrently changed preservation refs are retained and reported instead of being deleted during rollback.
+- [Phase 230]: Phase-parameterized the preservation ref namespace and generalized the ancestry-carve-out into a typed owned/remote_tracking/preservation ref partition backed by a bounded declared-additions ledger (230-REF-EXCEPTIONS.json). — Closes D-25's out-of-repo preservation gap and makes strict ref verification satisfiable in a repo whose upstream is a release bot, without waiving the checks it documents.
 
 ### Pending Todos
 
@@ -143,8 +145,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-09-15T17:39:51.770Z
-Stopped at: Phase 230 context gathered
+Last session: 2026-09-15T18:36:43.709Z
+Stopped at: Completed 230-01-PLAN.md
 
 229-20 outcome (commits 024eaeca, ddd9a137, c6677152):
 
@@ -170,7 +172,7 @@ covered-input fingerprint over all 52 inputs. 229-UAT.md was generated from SUMM
 T-229-14, T-229-G14-03) were one stale register entry — the audit doc commit is an ancestor of
 the renderer fix — and were re-verified closed adversarially (61/61, threats_open: 0).
 
-Resume file: .planning/phases/230-reviewable-history-integration/230-CONTEXT.md
+Resume file: None
 
 ### Phase 229 evidence: two ordering constraints learned the hard way
 
