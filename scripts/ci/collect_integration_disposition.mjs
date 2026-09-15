@@ -487,9 +487,25 @@ const REQUIREMENT_LEVEL_FIELDS = new Set(["command", "file", "requirements"]);
 const REQUIREMENT_ROW_FIELDS = new Set(["id", "matched_text"]);
 const LEDGER_TOP = new Set(["schema_version", "repository", "candidate", "local_main", "excluded_commit_count", "rows", "pr_44"]);
 const LEDGER_CANDIDATE_FIELDS = new Set(["ref", "object", "committed_at"]);
-const PR_FIELDS = new Set(["number", "head_ref", "head_object", "base_ref", "base_object", "state", "mergeable", "ahead_of_base", "behind_base", "matched_commits", "disposition", "note"]);
+// 230-07: base required fields (present since Plan 230-04) plus two OPTIONAL
+// evidence fields (`command`, `exit_code`) recorded only once the closure
+// action has actually been executed -- see PR_REQUIRED_FIELDS below, which
+// deliberately excludes them from the "must be present" loop so pre-closure
+// fixtures/ledgers (recorded before the action ran) remain valid.
+const PR_REQUIRED_FIELDS = new Set(["number", "head_ref", "head_object", "base_ref", "base_object", "state", "mergeable", "ahead_of_base", "behind_base", "matched_commits", "disposition", "note"]);
+const PR_FIELDS = new Set([...PR_REQUIRED_FIELDS, "command", "exit_code"]);
 const PR_MATCHED_COMMIT_FIELDS = new Set(["pr_branch_commit", "milestone_commit", "patch_id"]);
-const PR_DISPOSITIONS = new Set(["close-unmerged-cite-superseding"]);
+// 230-07: "close-unmerged-cite-superseding" was the Plan 230-04 default
+// (close, citing the four superseding SHAs in a public comment). The
+// maintainer's 230-07 checkpoint resolution authorized close-unmerged
+// WITHOUT any PR comment, for privacy reasons (avoiding any possibility of
+// leaking identifiers in public GitHub content) -- a materially different
+// executed action, so it gets its own honest disposition value rather than
+// reusing the "cite-superseding" label for an action that posted no
+// citation. Both values remain in the enumeration: the first documents what
+// Plan 230-04 recorded as the *planned* disposition prior to execution
+// (never executed under that label), the second documents what actually ran.
+const PR_DISPOSITIONS = new Set(["close-unmerged-cite-superseding", "close-unmerged-no-comment"]);
 
 // D-07: the abandoned line's entire unique non-planning surface. Known by domain
 // knowledge (D-07's own claim) so the tree-level sweep can recognize what a maintainer
@@ -612,7 +628,7 @@ function validatePrMatchedCommit(row, index) {
 }
 export function validatePr44(pr) {
   fields(pr, PR_FIELDS, "pr_44");
-  for (const key of PR_FIELDS) if (!Object.hasOwn(pr, key)) fail(`pr_44 is missing required field: ${key}`);
+  for (const key of PR_REQUIRED_FIELDS) if (!Object.hasOwn(pr, key)) fail(`pr_44 is missing required field: ${key}`);
   if (pr.number !== 44) fail("pr_44.number must be 44");
   branchName(pr.head_ref, "pr_44.head_ref");
   fullSha(pr.head_object, "pr_44.head_object");
@@ -624,8 +640,14 @@ export function validatePr44(pr) {
   nonNegInt(pr.behind_base, "pr_44.behind_base");
   if (!Array.isArray(pr.matched_commits)) fail("pr_44.matched_commits must be an array");
   pr.matched_commits.forEach((row, index) => validatePrMatchedCommit(row, index));
-  if (!PR_DISPOSITIONS.has(pr.disposition)) fail("pr_44.disposition must be close-unmerged-cite-superseding");
+  if (!PR_DISPOSITIONS.has(pr.disposition)) fail("pr_44.disposition must be one of close-unmerged-cite-superseding, close-unmerged-no-comment");
   if (typeof pr.note !== "string" || !pr.note) fail("pr_44.note must be a non-empty string");
+  // 230-07: optional post-execution evidence. When present, both must be
+  // real recorded process evidence (argv form, real exit code) -- never a
+  // narrated/asserted pair -- mirroring the argv+exit_code convention used
+  // by every other "proved"-style row in this ledger (ancestry/hazard rows).
+  if (Object.hasOwn(pr, "command")) argvCommand(pr.command, "pr_44.command");
+  if (Object.hasOwn(pr, "exit_code")) exitCode(pr.exit_code, "pr_44.exit_code");
   return pr;
 }
 

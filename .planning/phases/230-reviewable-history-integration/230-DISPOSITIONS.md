@@ -131,9 +131,9 @@ File: `.planning/milestones/v1.61-REQUIREMENTS.md`
 
 ## PR #44 disposition
 
-**Fact:** head \`fix/release-boot-env-resolver\` @ \`3f8338cdb7ce54d3ca49f703565c1048b68f7646\` is base \`main\` @ \`5c01f4bc38d4d38e8e080bde0e608e26ca9b5442\` plus 4 commit(s), 0 behind; state=open, mergeable=MERGEABLE. **State:** close-unmerged-cite-superseding. **Owner:** release-engineering. **Next command:** `gh pr view 44`.
+**Fact:** head \`fix/release-boot-env-resolver\` @ \`3f8338cdb7ce54d3ca49f703565c1048b68f7646\` is base \`main\` @ \`5c01f4bc38d4d38e8e080bde0e608e26ca9b5442\` plus 4 commit(s), 0 behind; state=closed, mergeable=MERGEABLE. **State:** close-unmerged-no-comment. **Owner:** release-engineering. **Next command:** `gh pr view 44`.
 
-Head is local main plus 4 commits; merging would permanently publish all locally-excluded abandoned Phase-226 commits onto main. All 4 useful commits are already on the milestone branch as exact patch-id matches, so nothing is lost by closing unmerged (D-10). STATE.md's prior description of this PR as "four commits cherry-picked off main" describes intent, not the pushed branch; the correction to STATE.md is Plan 230-06's task. Not closed by this plan (D-11: the candidate must exist first; Plan 230-06 owns closure).
+Head is local main plus 4 commits; merging would have permanently published all locally-excluded abandoned Phase-226 commits onto main. All 4 useful commits are already on the milestone branch as exact patch-id matches, so nothing is lost by closing unmerged (D-10). STATE.md prior description of this PR as "four commits cherry-picked off main" described intent, not the pushed branch; the correction to STATE.md is Plan 230-07 Task 3. Closed unmerged by this plan (Task 2) via gh pr close 44. Maintainer-authorized deviation from the D-10 default: NO comment was posted (Plan 230-07 checkpoint resolution) to avoid any possibility of leaking identifiers in public GitHub content; the superseding-SHA evidence instead lives only in this committed ledger (matched_commits below) and in scripts/ci/README.md, never in a public PR comment.
 
 | PR-branch commit | Milestone-branch commit | Patch id |
 | --- | --- | --- |

@@ -5283,7 +5283,7 @@
     "head_object": "3f8338cdb7ce54d3ca49f703565c1048b68f7646",
     "base_ref": "main",
     "base_object": "5c01f4bc38d4d38e8e080bde0e608e26ca9b5442",
-    "state": "open",
+    "state": "closed",
     "mergeable": "MERGEABLE",
     "ahead_of_base": 4,
     "behind_base": 0,
@@ -5309,7 +5309,16 @@
         "patch_id": "8e56e72fe2d757f52dfcbe16d6bc4a6824dd7160"
       }
     ],
-    "disposition": "close-unmerged-cite-superseding",
-    "note": "Head is local main plus 4 commits; merging would permanently publish all locally-excluded abandoned Phase-226 commits onto main. All 4 useful commits are already on the milestone branch as exact patch-id matches, so nothing is lost by closing unmerged (D-10). STATE.md's prior description of this PR as \"four commits cherry-picked off main\" describes intent, not the pushed branch; the correction to STATE.md is Plan 230-06's task. Not closed by this plan (D-11: the candidate must exist first; Plan 230-06 owns closure)."
+    "disposition": "close-unmerged-no-comment",
+    "note": "Head is local main plus 4 commits; merging would have permanently published all locally-excluded abandoned Phase-226 commits onto main. All 4 useful commits are already on the milestone branch as exact patch-id matches, so nothing is lost by closing unmerged (D-10). STATE.md prior description of this PR as \"four commits cherry-picked off main\" described intent, not the pushed branch; the correction to STATE.md is Plan 230-07 Task 3. Closed unmerged by this plan (Task 2) via gh pr close 44. Maintainer-authorized deviation from the D-10 default: NO comment was posted (Plan 230-07 checkpoint resolution) to avoid any possibility of leaking identifiers in public GitHub content; the superseding-SHA evidence instead lives only in this committed ledger (matched_commits below) and in scripts/ci/README.md, never in a public PR comment.",
+    "command": [
+      "gh",
+      "pr",
+      "close",
+      "44",
+      "--repo",
+      "szTheory/accrue"
+    ],
+    "exit_code": 0
   }
 }
