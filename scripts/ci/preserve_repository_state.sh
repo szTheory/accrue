@@ -266,6 +266,7 @@ run() {
   bundle_tmp="$(mktemp "$(dirname "$bundle_out")/.phase229-bundle.XXXXXX")"
   track_temporary_output "$bundle_tmp"
   git -C "$repo_root" bundle create "$bundle_tmp" --stdin < "$refs_for_bundle" >/dev/null
+  chmod 600 "$bundle_tmp"
   refresh_temporary_output_identity "$bundle_tmp"
   verify_bundle_membership "$frozen" "$bundle_tmp"
   bundle_sha256="$(sha256 "$bundle_tmp")"
