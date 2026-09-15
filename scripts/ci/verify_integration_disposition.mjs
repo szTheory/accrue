@@ -9,11 +9,14 @@ import {
   V161_TAG_OBJECT,
   V161_COMMIT_OBJECT,
   CLOSURE_COMMITS,
+  CANONICAL_D21_LANES,
   buildMergeCandidateForTests,
   collectAncestryGates,
+  collectCoTouchedFiles,
   collectIntegrationDisposition,
   collectScope,
-  validateDisposition
+  validateDisposition,
+  validateLaneRow
 } from "./collect_integration_disposition.mjs";
 // This verifier's own job is to reject any candidate/rollback content that names a
 // live-mutating ref verb. Its fixtures still need to CREATE fixture refs, so ref
@@ -44,7 +47,28 @@ function assertSameMultiset(authorityName, authority, candidateName, candidate, 
   }
 }
 
-const BOOLEAN_FLAGS = new Set(["fixtures", "require-ancestry", "require-scope", "require-determinism", "require-post-merge-scope", "require-rollback-proof"]);
+// D-37: exact-map completeness with a missing/extra/changed triple, recomputed inside
+// the verifier — never a non-empty check, never an asserted boolean. Reused verbatim
+// from verify_repository_inventory.mjs's exactMap/assertSameMap primitives.
+function exactMap(rows, label, keyOf, valueOf) {
+  const result = new Map();
+  for (const row of rows) {
+    const key = keyOf(row);
+    if (result.has(key)) fail(`${label} contains duplicate mapping: ${key}`);
+    result.set(key, valueOf(row));
+  }
+  return result;
+}
+function assertSameMap(authorityName, authority, candidateName, candidate) {
+  const missing = [...authority.keys()].filter((key) => !candidate.has(key)).sort();
+  const extra = [...candidate.keys()].filter((key) => !authority.has(key)).sort();
+  const changed = [...authority.keys()].filter((key) => candidate.has(key) && candidate.get(key) !== authority.get(key)).sort();
+  if (missing.length || extra.length || changed.length) {
+    fail(`${candidateName} differs from ${authorityName}: missing=[${missing.join(", ")}] extra=[${extra.join(", ")}] changed=[${changed.join(", ")}]`);
+  }
+}
+
+const BOOLEAN_FLAGS = new Set(["fixtures", "require-ancestry", "require-scope", "require-determinism", "require-post-merge-scope", "require-rollback-proof", "require-hazard-universe"]);
 const VALUE_OPTIONS = new Set(["records", "rendered", "candidate", "expected-repository", "repo", "rollback-point"]);
 
 function liveBinding(repo, candidateObject) {
@@ -84,6 +108,27 @@ function assertScopeLive(repo, disposition) {
   const live = assertStaleBindingCheck(repo, disposition);
   const fresh = collectScope(repo, { mergeBase: live.mergeBase, candidateObject: disposition.candidate.object });
   for (const key of Object.keys(fresh)) if (fresh[key] !== disposition.scope[key]) fail(`scope.${key} live=${fresh[key]} differs from recorded=${disposition.scope[key]}`);
+}
+
+// D-15/D-20/D-21/D-37: recompute the co-touched file set live and assert exact-map
+// equality against the committed hazard rows (missing=[]/extra=[]/changed=[]), then
+// assert D-21's closed lane enumeration is fully and exclusively represented as
+// non_run rows owned by Phase 231. Refuses on a stale binding before any comparison.
+function assertHazardUniverseLive(repo, disposition) {
+  const live = assertStaleBindingCheck(repo, disposition);
+  const liveFiles = collectCoTouchedFiles(repo, { mergeBase: live.mergeBase, leftObject: live.milestoneTip, rightObject: live.originMain });
+  const authorityFiles = exactMap(liveFiles.map((path) => ({ path })), "live co-touched files", (row) => row.path, () => true);
+  const candidateFiles = exactMap(disposition.hazards, "recorded hazard rows", (row) => row.path, () => true);
+  assertSameMap("live co-touched files", authorityFiles, "recorded hazard rows", candidateFiles);
+  if (disposition.co_touched_file_count !== liveFiles.length) fail(`co_touched_file_count live=${liveFiles.length} differs from recorded=${disposition.co_touched_file_count}`);
+  if (disposition.hazard_count !== disposition.hazards.length) fail("hazard_count must equal hazards.length");
+
+  for (const row of disposition.hazards) if (row.owner === "231" && row.state !== "non_run") fail(`hazard row ${row.path} owned by Phase 231 must carry state "non_run" (D-20)`);
+  disposition.lanes.forEach((row, index) => validateLaneRow(row, index));
+  const authorityLanes = exactMap(CANONICAL_D21_LANES.map((lane) => ({ lane })), "canonical D-21 lanes", (row) => row.lane, () => true);
+  const candidateLanes = exactMap(disposition.lanes, "recorded lanes", (row) => row.lane, () => true);
+  assertSameMap("canonical D-21 lanes", authorityLanes, "recorded lanes", candidateLanes);
+  if (disposition.lane_count !== CANONICAL_D21_LANES.length) fail(`lane_count=${disposition.lane_count} differs from the canonical D-21 lane count=${CANONICAL_D21_LANES.length}`);
 }
 
 function assertPostMergeScope(repo, disposition) {
@@ -145,6 +190,7 @@ function proveRevert(repo, record) {
 function applyStrictFlags(repo, disposition, parsed, identityOverrides) {
   if (parsed.flags.has("require-ancestry")) assertAncestryLive(repo, disposition, identityOverrides);
   if (parsed.flags.has("require-scope")) assertScopeLive(repo, disposition);
+  if (parsed.flags.has("require-hazard-universe")) assertHazardUniverseLive(repo, disposition);
   if (parsed.flags.has("require-post-merge-scope")) assertPostMergeScope(repo, disposition);
   if (parsed.flags.has("require-rollback-proof")) {
     const rollbackPath = parsed.values["rollback-point"];
@@ -185,6 +231,55 @@ export function verifyFixtures() {
   const mergeCandidate = buildMergeCandidateForTests;
   function withFixture(fn) {
     const fx = fixtureRepo();
+    try { fn(fx); } finally { fs.rmSync(fx.scratch, { recursive: true, force: true }); }
+  }
+
+  // A second, standalone fixture carrying one real co-touched, disjoint-hunk hazard
+  // file (accrue/mix.exs, present at the common base and edited on non-overlapping
+  // lines by each side — the same technique proven in
+  // collect_integration_disposition.mjs's own hazard fixture, since a file that does
+  // not exist at the merge-base cannot merge as a disjoint hunk: git treats two
+  // different from-scratch additions as an ADD/ADD conflict) plus one blob-identical
+  // convergent-identical file, so --require-hazard-universe has a non-empty hazards
+  // array to exercise.
+  function hazardFixtureRepo() {
+    const scratch = fs.mkdtempSync(path.join(fs.realpathSync(os.tmpdir()), "phase230-verify-hazard-fixture-"));
+    const repo = path.join(scratch, "repo");
+    fs.mkdirSync(repo);
+    const g = (args) => git(repo, args);
+    g(["init", "-q", "-b", "milestone"]);
+    g(["config", "user.email", "phase230@example.invalid"]);
+    g(["config", "user.name", "Phase 230"]);
+    fs.mkdirSync(path.join(repo, "accrue"), { recursive: true });
+    fs.writeFileSync(path.join(repo, "shared.txt"), "shared\n");
+    fs.writeFileSync(path.join(repo, "accrue", "mix.exs"), "line1\nline2\nline3\nline4\nline5\n");
+    g(["add", "-A"]); g(["commit", "-qm", "base"]);
+    const base = g(["rev-parse", "HEAD"]);
+    fs.writeFileSync(path.join(repo, "v161.txt"), "v161\n"); g(["add", "v161.txt"]); g(["commit", "-qm", "v1.61"]);
+    const v161Commit = g(["rev-parse", "HEAD"]);
+    g(["tag", "-a", "v1.61", "-m", "v1.61", v161Commit]);
+    const v161Tag = g(["rev-parse", "v1.61"]);
+    const closureCommits = [];
+    for (let index = 0; index < 4; index += 1) {
+      fs.writeFileSync(path.join(repo, `closure${index}.txt`), `closure${index}\n`);
+      g(["add", `closure${index}.txt`]); g(["commit", "-qm", `closure ${index}`]);
+      closureCommits.push(g(["rev-parse", "HEAD"]));
+    }
+    fs.writeFileSync(path.join(repo, "shared.txt"), "shared v2\n");
+    fs.writeFileSync(path.join(repo, "accrue", "mix.exs"), "line1\n{:decimal, \"~> 3.0\"}\nline3\nline4\nline5\n");
+    g(["add", "-A"]); g(["commit", "-qm", "milestone hazard edits"]);
+    const milestoneTip = g(["rev-parse", "HEAD"]);
+    g(["checkout", "-q", "-b", "origin-main", base]);
+    fs.writeFileSync(path.join(repo, "remote.txt"), "remote\n");
+    fs.writeFileSync(path.join(repo, "shared.txt"), "shared v2\n");
+    fs.writeFileSync(path.join(repo, "accrue", "mix.exs"), "line1\nline2\nline3\nline4\n{:ex_money, \"~> 6.2\"}\n");
+    g(["add", "-A"]); g(["commit", "-qm", "origin hazard edits"]);
+    const originMain = g(["rev-parse", "HEAD"]);
+    g(["checkout", "-q", "milestone"]);
+    return { scratch, repo, base, v161Tag, v161Commit, closureCommits, milestoneTip, originMain };
+  }
+  function withHazardFixture(fn) {
+    const fx = hazardFixtureRepo();
     try { fn(fx); } finally { fs.rmSync(fx.scratch, { recursive: true, force: true }); }
   }
 
@@ -266,6 +361,40 @@ export function verifyFixtures() {
     git(fx.repo, ["branch", "-f", "integration/v1.62-candidate", "HEAD"]);
     git(fx.repo, ["checkout", "-q", "milestone"]);
     assert.throws(() => assertPostMergeScope(fx.repo, disposition), /differs from/);
+  });
+
+  // Scenario 7.5: --require-hazard-universe — clean pass, missing row, extra row,
+  // stale binding, and a Phase-231-owned lane row recorded with the wrong state.
+  withHazardFixture((fx) => {
+    mergeCandidate(fx.repo, fx.milestoneTip, fx.originMain);
+    const disposition = collectIntegrationDisposition({ repo: fx.repo, expectedRepository: "szTheory/accrue", v161TagObject: fx.v161Tag, v161CommitObject: fx.v161Commit, closureCommits: fx.closureCommits });
+    assert.equal(disposition.hazards.length, 2, "fixture expects exactly shared.txt (convergent-identical) and accrue/mix.exs (dependency-lock-drift)");
+    // Clean pass.
+    assertHazardUniverseLive(fx.repo, disposition);
+
+    // Missing: drop a recorded hazard row that the live repository still co-touches.
+    const missingCase = structuredClone(disposition);
+    missingCase.hazards = missingCase.hazards.filter((row) => row.path !== "accrue/mix.exs");
+    missingCase.hazard_count = missingCase.hazards.length;
+    missingCase.co_touched_file_count = missingCase.hazards.length;
+    assert.throws(() => assertHazardUniverseLive(fx.repo, missingCase), /missing=\[/);
+
+    // Extra: a committed hazard row for a file the live repository no longer co-touches.
+    const extraCase = structuredClone(disposition);
+    extraCase.hazards = [...extraCase.hazards, { path: "no-longer-co-touched.txt", class: "doc-rewrite", state: "advisory", evidence: { command: ["git", "diff"] }, owner: "230-03" }];
+    extraCase.hazard_count = extraCase.hazards.length;
+    extraCase.co_touched_file_count = extraCase.hazards.length;
+    assert.throws(() => assertHazardUniverseLive(fx.repo, extraCase), /extra=\[/);
+
+    // Stale binding refuses before any hazard comparison runs.
+    const staleCase = structuredClone(disposition);
+    staleCase.binding.origin_main = fx.base;
+    assert.throws(() => assertHazardUniverseLive(fx.repo, staleCase), /STALE_BINDING/);
+
+    // A lane row owned by Phase 231 recorded with a state other than non_run is rejected.
+    const badLaneCase = structuredClone(disposition);
+    badLaneCase.lanes = badLaneCase.lanes.map((row, index) => (index === 0 ? { ...row, state: "proved" } : row));
+    assert.throws(() => assertHazardUniverseLive(fx.repo, badLaneCase), /must be "non_run"/);
   });
 
   // Scenario 8: rollback proof — correct case, wrong-tree case, joined-string restore_argv case.
