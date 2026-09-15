@@ -111,6 +111,136 @@ function assertCanonicalRefContinuity(authority, candidate, activeRef, activeObj
   }
 }
 
+const REF_EXCEPTION_CLASSES = new Set(["owned", "remote_tracking", "preservation"]);
+const REF_EXCEPTION_FIELDS = new Set(["ref", "object", "class", "reason", "declared_by_phase", "retirement_trigger", "published_elsewhere"]);
+
+function classifyTypedRef(name) {
+  if (isPreservationRef(name)) return "preservation";
+  if (name.startsWith("refs/heads/") || name.startsWith("refs/tags/")) return "owned";
+  if (name.startsWith("refs/remotes/")) return "remote_tracking";
+  return null;
+}
+
+function partitionByTypedClass(rows, nameOf) {
+  const buckets = { owned: [], remote_tracking: [], preservation: [] };
+  for (const row of rows) {
+    const cls = classifyTypedRef(nameOf(row));
+    if (!cls) fail(`typed ref continuity cannot classify ref ontology: ${nameOf(row)}`);
+    buckets[cls].push(row);
+  }
+  return buckets;
+}
+
+function readCommittedJson(filePath, label) {
+  if (typeof filePath !== "string" || !filePath) fail(`${label} path is required`);
+  let stat;
+  try { stat = fs.lstatSync(filePath); } catch { fail(`${label} must be an existing regular file`); }
+  if (!stat.isFile()) fail(`${label} must be a regular file, not a symbolic link or non-regular alias`);
+  try { return JSON.parse(fs.readFileSync(filePath, "utf8")); } catch { fail(`${label} must contain valid JSON`); }
+}
+
+function readRefExceptions(refExceptionsPath) {
+  const raw = readCommittedJson(refExceptionsPath, "ref exceptions ledger");
+  const rows = Array.isArray(raw) ? raw : raw?.refs;
+  if (!Array.isArray(rows)) fail("ref exceptions ledger must be an array of rows");
+  const seen = new Set();
+  for (const row of rows) {
+    if (!row || typeof row !== "object" || Array.isArray(row)) fail("ref exceptions ledger row must be an object");
+    for (const key of Object.keys(row)) if (!REF_EXCEPTION_FIELDS.has(key)) fail(`ref exceptions ledger row contains forbidden field: ${key}`);
+    for (const key of REF_EXCEPTION_FIELDS) if (!(key in row)) fail(`ref exceptions ledger row is missing required field: ${key}`);
+    if (typeof row.ref !== "string" || !row.ref.startsWith("refs/")) fail("ref exceptions ledger row ref must be a safe ref name");
+    if (typeof row.object !== "string" || !SHA.test(row.object)) fail("ref exceptions ledger row object must be a full lowercase SHA");
+    if (!REF_EXCEPTION_CLASSES.has(row.class)) fail("ref exceptions ledger row class must be owned, remote_tracking, or preservation");
+    if (typeof row.reason !== "string" || !row.reason.trim()) fail("ref exceptions ledger row reason must be non-empty prose");
+    if (row.declared_by_phase !== "230") fail('ref exceptions ledger row declared_by_phase must be "230"');
+    if (typeof row.retirement_trigger !== "string" || !row.retirement_trigger.trim()) fail("ref exceptions ledger row retirement_trigger must be non-empty prose");
+    if (typeof row.published_elsewhere !== "boolean") fail("ref exceptions ledger row published_elsewhere must be a literal boolean");
+    if (seen.has(row.ref)) fail("ref exceptions ledger contains duplicate ref rows");
+    seen.add(row.ref);
+  }
+  return rows;
+}
+
+function assertOwnedTypedContinuity(frozen, live, declaredExtra, activeRef, repositoryRoot) {
+  // The active local branch advances on every task commit, so it inherits the
+  // same ancestry-not-equality treatment assertCapturedRefContinuity already
+  // gives the single hardcoded active ref -- exact equality here would make
+  // typed continuity permanently red the moment this plan commits anything,
+  // which is exactly the "permanently red gate" D-26 rejects. Every other
+  // owned ref (including every other branch and every tag) stays exact.
+  const missing = [...frozen.keys()].filter((key) => !live.has(key)).sort();
+  const changed = [...frozen.keys()].filter((key) => key !== activeRef && live.has(key) && live.get(key) !== frozen.get(key)).sort();
+  const extra = [...live.keys()].filter((key) => !frozen.has(key) && !declaredExtra.has(key)).sort();
+  if (missing.length || extra.length || changed.length) fail(`owned refs typed continuity differs from frozen authority: missing=[${missing.join(", ")}] extra=[${extra.join(", ")}] changed=[${changed.join(", ")}]`);
+  if (activeRef && frozen.has(activeRef) && live.has(activeRef) && frozen.get(activeRef) !== live.get(activeRef)) {
+    const frozenObject = frozen.get(activeRef); const liveObject = live.get(activeRef);
+    const exists = spawnSync("git", ["-C", repositoryRoot, "cat-file", "-e", `${frozenObject}^{commit}`], { encoding: "utf8", shell: false, timeout: 15_000, maxBuffer: 1_000_000 });
+    const ancestor = exists.status === 0 && spawnSync("git", ["-C", repositoryRoot, "merge-base", "--is-ancestor", frozenObject, liveObject], { encoding: "utf8", shell: false, timeout: 15_000, maxBuffer: 1_000_000 });
+    if (!ancestor || ancestor.status !== 0) fail(`owned refs typed continuity differs from frozen authority: missing=[] extra=[] changed=[${activeRef}]`);
+  }
+}
+
+function assertRemoteTrackingTypedContinuity(frozen, live, repositoryRoot) {
+  const missing = [...frozen.keys()].filter((key) => !live.has(key)).sort();
+  if (missing.length) fail(`remote-tracking refs typed continuity differs from frozen authority: missing=[${missing.join(", ")}] extra=[] changed=[]`);
+  const changed = [];
+  for (const key of frozen.keys()) {
+    const frozenObject = frozen.get(key);
+    const liveObject = live.get(key);
+    if (frozenObject === liveObject) continue;
+    const exists = spawnSync("git", ["-C", repositoryRoot, "cat-file", "-e", `${frozenObject}^{commit}`], { encoding: "utf8", shell: false, timeout: 15_000, maxBuffer: 1_000_000 });
+    const ancestor = exists.status === 0 && spawnSync("git", ["-C", repositoryRoot, "merge-base", "--is-ancestor", frozenObject, liveObject], { encoding: "utf8", shell: false, timeout: 15_000, maxBuffer: 1_000_000 });
+    if (!ancestor || ancestor.status !== 0) changed.push(key);
+  }
+  if (changed.length) fail(`remote-tracking refs typed continuity differs from frozen authority: missing=[] extra=[] changed=[${changed.sort().join(", ")}]`);
+}
+
+function assertPreservationTypedContinuity(frozen, live) {
+  const missing = [...frozen.keys()].filter((key) => !live.has(key)).sort();
+  const changed = [...frozen.keys()].filter((key) => live.has(key) && live.get(key) !== frozen.get(key)).sort();
+  if (missing.length || changed.length) fail(`preservation refs typed continuity differs from frozen authority: missing=[${missing.join(", ")}] extra=[] changed=[${changed.join(", ")}]`);
+}
+
+// Typed ref continuity (D-26/D-27/D-28): partitions every live ref by ontology
+// so a phase-parameterized preservation capsule cannot self-invalidate strict
+// verification, and a monotone remote-tracking cache advancing under a
+// release bot's control does not require exact equality. Only the comparison
+// operator changes per class -- missing=[] stays absolute for all three, and
+// a non-fast-forward refs/remotes/* move still fails loudly. The
+// declared-additions ledger (230-REF-EXCEPTIONS.json) exists to excuse new
+// *owned* refs only (refs/heads/*, refs/tags/*) -- new preservation refs from
+// a later phase are unconditionally legitimate by construction (that is the
+// entire point of the phase-parameterized prefix), and remote-tracking drift
+// is already bounded by ancestry, never by a waiver row (see prohibitions).
+export function assertTypedRefContinuity(inventory, context, { repositoryRoot = process.cwd(), refExceptions, refExceptionsPath } = {}) {
+  const checked = validateInventory(inventory, context);
+  const exceptions = Array.isArray(refExceptions) ? refExceptions : readRefExceptions(refExceptionsPath);
+  const frozenAll = partitionByTypedClass(checked.refs.all, (row) => row.name);
+  const liveRows = [...directRefMap(repositoryRoot).entries()].map(([name, object]) => ({ name, object }));
+  const liveAll = partitionByTypedClass(liveRows, (row) => row.name);
+
+  const frozenOwned = exactMap(frozenAll.owned, "frozen owned refs", (row) => row.name, (row) => row.object);
+  const liveOwned = exactMap(liveAll.owned, "live owned refs", (row) => row.name, (row) => row.object);
+  const ownedExceptionRows = exceptions.filter((row) => row.class === "owned");
+  const ownedExceptionRefs = new Set(ownedExceptionRows.map((row) => row.ref));
+  for (const row of ownedExceptionRows) {
+    if (!liveOwned.has(row.ref)) fail(`230-REF-EXCEPTIONS.json row does not resolve live: ${row.ref}`);
+    if (liveOwned.get(row.ref) !== row.object) fail(`230-REF-EXCEPTIONS.json row object does not match live: ${row.ref}`);
+  }
+  assertOwnedTypedContinuity(frozenOwned, liveOwned, ownedExceptionRefs, checked.capture.active_ref, repositoryRoot);
+  const liveOwnedAdditions = [...liveOwned.keys()].filter((key) => !frozenOwned.has(key)).map((ref) => ({ ref, object: liveOwned.get(ref) }));
+  assertSameMultiset("230-REF-EXCEPTIONS.json owned rows", ownedExceptionRows, "live owned declared-addition set", liveOwnedAdditions, (row) => `${row.ref}\0${row.object}`);
+
+  const frozenRemote = exactMap(frozenAll.remote_tracking, "frozen remote-tracking refs", (row) => row.name, (row) => row.object);
+  const liveRemote = exactMap(liveAll.remote_tracking, "live remote-tracking refs", (row) => row.name, (row) => row.object);
+  assertRemoteTrackingTypedContinuity(frozenRemote, liveRemote, repositoryRoot);
+
+  const frozenPreservation = exactMap(frozenAll.preservation, "frozen preservation refs", (row) => row.name, (row) => row.object);
+  const livePreservation = exactMap(liveAll.preservation, "live preservation refs", (row) => row.name, (row) => row.object);
+  assertPreservationTypedContinuity(frozenPreservation, livePreservation);
+  return true;
+}
+
 function directRefMap(repo) {
   const output = git(repo, ["for-each-ref", "--format=%(refname) %(objectname)", "refs"]);
   const rows = output ? output.split("\n").map((line) => {
@@ -533,6 +663,7 @@ function applyStrictFlags(inventory, context, parsed) {
     artifactAuthorizationPath: parsed.values["artifact-authorization"],
     collectionAttestationPath: parsed.values["collection-attestation"]
   });
+  if (parsed.flags.has("require-typed-ref-continuity")) assertTypedRefContinuity(inventory, context, { repositoryRoot: recoveryOptions.repositoryRoot, refExceptionsPath: parsed.values["ref-exceptions"] });
 }
 
 function createBundle(repo, bundle, refs) {
@@ -886,6 +1017,7 @@ export function verifyFixtures() {
   assertRecoveryFailure(({ attestationPath }) => { const attestation = JSON.parse(fs.readFileSync(attestationPath)); attestation.observed_at = "not-a-time"; fs.writeFileSync(attestationPath, JSON.stringify(attestation)); }, /observed_at/);
   assertRecoveryFailure(({ attestationPath }) => { const attestation = JSON.parse(fs.readFileSync(attestationPath)); attestation.artifacts.pop(); fs.writeFileSync(attestationPath, JSON.stringify(attestation)); }, /cover every frozen artifact|exactly two/);
   verifyRenderedRecoveryProcedureControls();
+  verifyTypedRefContinuity();
 }
 
 function verifyRenderedRecoveryProcedureControls() {
@@ -933,6 +1065,122 @@ function verifyRenderedRecoveryProcedureControls() {
   } finally { fs.rmSync(fixture.scratch, { recursive: true, force: true }); }
 }
 
+function typedRefFixtureRepo() {
+  const scratch = fs.mkdtempSync(path.join(os.tmpdir(), "phase230-typed-ref-"));
+  const repo = path.join(scratch, "repo");
+  fs.mkdirSync(repo);
+  git(repo, ["init", "-q", "-b", "main"]);
+  git(repo, ["config", "user.email", "phase230@example.invalid"]);
+  git(repo, ["config", "user.name", "phase230"]);
+  fs.writeFileSync(path.join(repo, "tracked"), "fixture\n");
+  git(repo, ["add", "tracked"]);
+  git(repo, ["commit", "-qm", "fixture"]);
+  const base = git(repo, ["rev-parse", "HEAD"]);
+  git(repo, ["update-ref", "refs/remotes/origin/main", base]);
+  const preserved = encodedRef(DEFAULT_PRESERVATION_PHASE, "refs/heads/main");
+  git(repo, ["update-ref", preserved, base]);
+  const frozenAll = [
+    { name: "refs/heads/main", object: base, role: "local_main" },
+    { name: "refs/remotes/origin/main", object: base, role: "cached_origin_main" },
+    { name: preserved, object: base, role: "phase229_preservation" }
+  ];
+  return { scratch, repo, base, preserved, frozenAll };
+}
+
+function typedContinuityInventory(fixture, refsAllOverride) {
+  const context = createRepositoryValidationContext({ expectedRepository: "szTheory/accrue" });
+  const sha = (letter) => letter.repeat(40);
+  return validateInventory({
+    schema_version: 2, repository: "szTheory/accrue", mode: "local_only",
+    capture: {
+      captured_at: "2026-09-13T00:00:00.000Z",
+      active_ref: "refs/heads/main",
+      commit: fixture.base,
+      primary_worktree: { branch: "refs/heads/main", head: fixture.base }
+    },
+    recovery: {
+      verified: true, manifest_sha256: "1".repeat(64), bundle_sha256: "2".repeat(64),
+      refs: [{ original_ref: "refs/heads/main", object: fixture.base, encoded_ref: fixture.preserved, bundle_member: true }]
+    },
+    artifacts: { empty_directory_policy: "not_surfaced_by_git", entries: [] },
+    refs: { local_main: fixture.base, cached_origin_main: fixture.base, milestone_branch: fixture.base, v161_tag: fixture.base, all: refsAllOverride || fixture.frozenAll },
+    remotes: {
+      remote_main: { repository: "szTheory/accrue", observed_at: "2026-09-13T00:00:00.000Z", request: "GET /repos/szTheory/accrue/git/ref/heads/main", available: false, state: "unavailable", reason: "network" },
+      pull_requests: { repository: "szTheory/accrue", observed_at: "2026-09-13T00:00:00.000Z", requests: ["GET /repos/szTheory/accrue/pulls?state=open&per_page=100&page=1"], available: false, state: "unavailable", reason: "network" },
+      release_branches: { repository: "szTheory/accrue", observed_at: "2026-09-13T00:00:00.000Z", requests: ["GET /repos/szTheory/accrue/git/matching-refs/heads/release/?per_page=100&page=1"], available: false, state: "unavailable", reason: "network" },
+      actions: { repository: "szTheory/accrue", observed_at: "2026-09-13T00:00:00.000Z", requests: ["GET /repos/szTheory/accrue/actions/runs?per_page=100&page=1"], available: false, state: "unavailable", reason: "network" }
+    },
+    planning: { ship_windows: [], milestone: "absent", state: "absent" },
+    worktrees: [{ branch: "main", sha: fixture.base, dirty: false }]
+  }, context);
+}
+
+function verifyTypedRefContinuity() {
+  const context = createRepositoryValidationContext({ expectedRepository: "szTheory/accrue" });
+  const fixture = typedRefFixtureRepo();
+  try {
+    const inventory = typedContinuityInventory(fixture);
+    assert.equal(assertTypedRefContinuity(inventory, context, { repositoryRoot: fixture.repo, refExceptions: [] }), true, "baseline typed continuity must pass with no exceptions");
+
+    // Fast-forward remote-tracking movement passes without any declaration.
+    // Advance origin/main only (never the checked-out refs/heads/main) via a
+    // detached commit-tree so the "owned" class stays untouched by this step.
+    const baseTree = git(fixture.repo, ["rev-parse", `${fixture.base}^{tree}`]);
+    const advanced = git(fixture.repo, ["commit-tree", baseTree, "-p", fixture.base], { input: "second\n" });
+    git(fixture.repo, ["update-ref", "refs/remotes/origin/main", advanced]);
+    assert.equal(assertTypedRefContinuity(inventory, context, { repositoryRoot: fixture.repo, refExceptions: [] }), true, "fast-forwarded remote-tracking ref must pass under ancestry");
+
+    // Non-fast-forward (rewound/forked) remote-tracking movement must still fail loudly.
+    const tree = git(fixture.repo, ["rev-parse", `${fixture.base}^{tree}`]);
+    const forked = git(fixture.repo, ["commit-tree", tree], { input: "forked origin/main\n" });
+    git(fixture.repo, ["update-ref", "refs/remotes/origin/main", forked]);
+    assert.throws(() => assertTypedRefContinuity(inventory, context, { repositoryRoot: fixture.repo, refExceptions: [] }), /remote-tracking refs typed continuity differs.*changed=\[/, "non-fast-forward remote-tracking movement must fail with changed=[");
+    git(fixture.repo, ["update-ref", "refs/remotes/origin/main", fixture.base]);
+
+    // An undeclared new owned ref must fail with extra=[...].
+    git(fixture.repo, ["branch", "extra"]);
+    assert.throws(() => assertTypedRefContinuity(inventory, context, { repositoryRoot: fixture.repo, refExceptions: [] }), /owned refs typed continuity differs.*extra=\[refs\/heads\/extra\]/, "undeclared new owned ref must fail with extra=[");
+
+    // A declared addition with the matching object passes.
+    const extraObject = git(fixture.repo, ["rev-parse", "refs/heads/extra"]);
+    const declared = [{ ref: "refs/heads/extra", object: extraObject, class: "owned", reason: "fixture addition", declared_by_phase: "230", retirement_trigger: "fixture retires when merged", published_elsewhere: false }];
+    assert.equal(assertTypedRefContinuity(inventory, context, { repositoryRoot: fixture.repo, refExceptions: declared }), true, "a declared owned addition must pass");
+
+    // A declared row whose ref does not resolve live must fail.
+    const absentDeclared = [{ ref: "refs/heads/absent-forever", object: "e".repeat(40), class: "owned", reason: "fixture absent", declared_by_phase: "230", retirement_trigger: "never reached", published_elsewhere: false }];
+    assert.throws(() => assertTypedRefContinuity(inventory, context, { repositoryRoot: fixture.repo, refExceptions: [...declared, ...absentDeclared] }), /does not resolve live/, "a declared row whose ref is absent live must fail");
+    git(fixture.repo, ["branch", "-D", "extra"]);
+
+    // A missing frozen ref (any class) must fail with missing=[...].
+    git(fixture.repo, ["branch", "-M", "main", "renamed"]);
+    assert.throws(() => assertTypedRefContinuity(inventory, context, { repositoryRoot: fixture.repo, refExceptions: [] }), /owned refs typed continuity differs.*missing=\[refs\/heads\/main\]/, "a frozen owned ref absent live must fail with missing=[");
+    git(fixture.repo, ["branch", "-M", "renamed", "main"]);
+
+    // A changed preservation ref value must fail.
+    git(fixture.repo, ["update-ref", fixture.preserved, forked, fixture.base]);
+    assert.throws(() => assertTypedRefContinuity(inventory, context, { repositoryRoot: fixture.repo, refExceptions: [] }), /preservation refs typed continuity differs.*changed=\[/, "a preservation ref whose value changed must fail");
+    git(fixture.repo, ["update-ref", fixture.preserved, fixture.base, forked]);
+
+    // A new preservation ref from a later phase is unconditionally legitimate -- no declaration needed.
+    git(fixture.repo, ["update-ref", encodedRef("230", "refs/heads/main"), fixture.base]);
+    assert.equal(assertTypedRefContinuity(inventory, context, { repositoryRoot: fixture.repo, refExceptions: [] }), true, "a new later-phase preservation ref must pass without any ledger declaration");
+  } finally {
+    fs.rmSync(fixture.scratch, { recursive: true, force: true });
+  }
+
+  // Ledger validation: empty retirement_trigger is rejected.
+  const ledgerFixture = typedRefFixtureRepo();
+  try {
+    const inventory = typedContinuityInventory(ledgerFixture);
+    const ledgerPath = path.join(ledgerFixture.scratch, "230-REF-EXCEPTIONS.json");
+    const badRow = [{ ref: "refs/heads/main", object: ledgerFixture.base, class: "owned", reason: "fixture", declared_by_phase: "230", retirement_trigger: "", published_elsewhere: false }];
+    fs.writeFileSync(ledgerPath, JSON.stringify(badRow));
+    assert.throws(() => assertTypedRefContinuity(inventory, context, { repositoryRoot: ledgerFixture.repo, refExceptionsPath: ledgerPath }), /retirement_trigger must be non-empty/, "an empty retirement_trigger must be rejected");
+  } finally {
+    fs.rmSync(ledgerFixture.scratch, { recursive: true, force: true });
+  }
+}
+
 function options(argv) {
   const flags = new Set(); const values = {};
   for (let index = 0; index < argv.length; index += 1) {
@@ -965,6 +1213,7 @@ if (process.env.NODE_TEST_CONTEXT) {
   test("rendered recovery procedure restores original bundle heads safely", () => verifyRenderedRecoveryProcedureControls());
   test("CR-08 complete categories derive planning digests independently", () => verifyIndependentPlanningAuthority());
   test("WR-02 standalone recovery rejects followed bundle aliases", () => verifyNoFollowBundleAuthority());
+  test("typed ref continuity partitions owned/remote-tracking/preservation refs correctly", () => verifyTypedRefContinuity());
 } else {
   main().catch((error) => { console.error(`repository inventory fixtures: FAIL: ${error.message}`); process.exitCode = 1; });
 }
