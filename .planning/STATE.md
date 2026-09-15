@@ -148,6 +148,21 @@ Progress: [█████░░░░░] 50% (20/20 plans in Phase 229)
 
 None yet.
 
+### Deferred / Dormant
+
+- **SEED-008 — `mailglass ~> 1.0` caps every downstream consumer at 1.x** (planted 2026-09-15, Phase 230).
+  `accrue/mix.exs:68` pins `{:mailglass, "~> 1.0"}` while Hex has mailglass 2.5.0, so no host
+  depending on Accrue can reach 2.x. NOT a one-line bump: 118 call sites across `accrue/lib` and
+  `accrue_admin/lib` (`use Mailglass.Mailable`, `Mailglass.Message`, `Mailglass.Renderer`).
+  "Stays capped, documented" is a legitimate outcome; the README half is cheap and standalone.
+  See `.planning/seeds/SEED-008-mailglass-downstream-major-cap.md`.
+- **Pre-existing, out of scope for Phase 230:** `.github/workflows/ci.yml:611` matches phase 190's
+  PRE-ARCHIVE path (`.planning/phases/190-…`) inside a `grep -Eq` against a changed-files listing.
+  Phase 190 is archived, so that alternation branch no longer matches anything and the relevance
+  gate has quietly stopped firing for phase-190 evidence changes. Annotated
+  `archive-sweep-exempt:` (it is a content match, not a path read) but the staleness itself is
+  unfixed and belongs to whoever owns that gate. Recorded in `230-REVIEW.md` as an observation.
+
 ### Blockers/Concerns
 
 - Remote `main` and the v1.61 lineage have diverged; the local `main` ref is stale and independently divergent.
