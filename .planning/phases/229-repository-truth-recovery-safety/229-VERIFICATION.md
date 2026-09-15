@@ -6,7 +6,52 @@ behavior_unverified: 0
 score: 7/7 must-haves verified
 re_verification: "Yes — supersedes the 2026-09-13 gaps_found report, which predated plans 229-15 through 229-20"
 evidence_mode: executable
+covered_digest: "v1:sha256:677e5abe1d6a2d2da3fb0a25d16226dabbb562d41bc335e136cfcbf01c910a19"
 covered_files:
+  - .planning/phases/229-repository-truth-recovery-safety/229-01-PLAN.md
+  - .planning/phases/229-repository-truth-recovery-safety/229-01-SUMMARY.md
+  - .planning/phases/229-repository-truth-recovery-safety/229-02-PLAN.md
+  - .planning/phases/229-repository-truth-recovery-safety/229-02-SUMMARY.md
+  - .planning/phases/229-repository-truth-recovery-safety/229-03-PLAN.md
+  - .planning/phases/229-repository-truth-recovery-safety/229-03-SUMMARY.md
+  - .planning/phases/229-repository-truth-recovery-safety/229-04-PLAN.md
+  - .planning/phases/229-repository-truth-recovery-safety/229-04-SUMMARY.md
+  - .planning/phases/229-repository-truth-recovery-safety/229-05-PLAN.md
+  - .planning/phases/229-repository-truth-recovery-safety/229-05-SUMMARY.md
+  - .planning/phases/229-repository-truth-recovery-safety/229-06-PLAN.md
+  - .planning/phases/229-repository-truth-recovery-safety/229-06-SUMMARY.md
+  - .planning/phases/229-repository-truth-recovery-safety/229-07-PLAN.md
+  - .planning/phases/229-repository-truth-recovery-safety/229-07-SUMMARY.md
+  - .planning/phases/229-repository-truth-recovery-safety/229-08-PLAN.md
+  - .planning/phases/229-repository-truth-recovery-safety/229-08-SUMMARY.md
+  - .planning/phases/229-repository-truth-recovery-safety/229-09-PLAN.md
+  - .planning/phases/229-repository-truth-recovery-safety/229-09-SUMMARY.md
+  - .planning/phases/229-repository-truth-recovery-safety/229-10-PLAN.md
+  - .planning/phases/229-repository-truth-recovery-safety/229-10-SUMMARY.md
+  - .planning/phases/229-repository-truth-recovery-safety/229-11-PLAN.md
+  - .planning/phases/229-repository-truth-recovery-safety/229-11-SUMMARY.md
+  - .planning/phases/229-repository-truth-recovery-safety/229-12-PLAN.md
+  - .planning/phases/229-repository-truth-recovery-safety/229-12-SUMMARY.md
+  - .planning/phases/229-repository-truth-recovery-safety/229-13-PLAN.md
+  - .planning/phases/229-repository-truth-recovery-safety/229-13-SUMMARY.md
+  - .planning/phases/229-repository-truth-recovery-safety/229-14-PLAN.md
+  - .planning/phases/229-repository-truth-recovery-safety/229-14-SUMMARY.md
+  - .planning/phases/229-repository-truth-recovery-safety/229-15-PLAN.md
+  - .planning/phases/229-repository-truth-recovery-safety/229-15-SUMMARY.md
+  - .planning/phases/229-repository-truth-recovery-safety/229-16-PLAN.md
+  - .planning/phases/229-repository-truth-recovery-safety/229-16-SUMMARY.md
+  - .planning/phases/229-repository-truth-recovery-safety/229-17-PLAN.md
+  - .planning/phases/229-repository-truth-recovery-safety/229-17-SUMMARY.md
+  - .planning/phases/229-repository-truth-recovery-safety/229-18-PLAN.md
+  - .planning/phases/229-repository-truth-recovery-safety/229-18-SUMMARY.md
+  - .planning/phases/229-repository-truth-recovery-safety/229-19-PLAN.md
+  - .planning/phases/229-repository-truth-recovery-safety/229-19-SUMMARY.md
+  - .planning/phases/229-repository-truth-recovery-safety/229-20-PLAN.md
+  - .planning/phases/229-repository-truth-recovery-safety/229-20-SUMMARY.md
+  - .planning/phases/229-repository-truth-recovery-safety/229-CONTEXT.md
+  - .planning/phases/229-repository-truth-recovery-safety/229-REPOSITORY-INVENTORY.json
+  - .planning/phases/229-repository-truth-recovery-safety/229-REPOSITORY-INVENTORY.md
+  - scripts/ci/README.md
   - scripts/ci/ci_monitor.cjs
   - scripts/ci/collect_repository_inventory.mjs
   - scripts/ci/phase229_gap_closure.test.mjs
@@ -15,9 +60,6 @@ covered_files:
   - scripts/ci/verify_phase229_handoff_invariants.mjs
   - scripts/ci/verify_repository_inventory.mjs
   - scripts/ci/watch_ci.sh
-  - scripts/ci/README.md
-  - .planning/phases/229-repository-truth-recovery-safety/229-REPOSITORY-INVENTORY.json
-  - .planning/phases/229-repository-truth-recovery-safety/229-REPOSITORY-INVENTORY.md
 gaps: []
 advisory: []
 ---
