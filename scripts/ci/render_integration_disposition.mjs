@@ -26,6 +26,7 @@ export function renderIntegrationDisposition(disposition, { expectedRepository }
   const value = validateDisposition(disposition, { expectedRepository });
   const ancestryRows = order(value.ancestry, (row) => row.gate).map((row) => `| ${escape(row.gate)} | ${escape(row.state)} | ${row.exit_code ?? "\u2014"} | ${escape(row.evidence)} |`);
   const postMergeRows = order(value.post_merge_commits, (row) => `${row.commit}\0${row.owner_plan}`).map((row) => `| \`${row.commit}\` | ${escape(row.reason)} | ${escape(row.owner_plan)} |`);
+  const handoffRows = order(value.handoffs, (row) => row.item).map((row) => `| ${escape(row.item)} | ${escape(row.reason)} |`);
   const scope = value.scope;
 
   // Bucket every hazard row by its closed class (D-14), so a class with zero rows
@@ -95,7 +96,16 @@ export function renderIntegrationDisposition(disposition, { expectedRepository }
       "recomputed",
       "release-engineering",
       "git diff --name-only <merge-base> <candidate>",
-      `${scope.total_changed_files} files changed (${scope.planning_only_changed_files} .planning/-only, ${scope.source_changed_files} source); ${scope.total_commits} commits (${scope.planning_only_commits} .planning/-only). integration/v1.62-candidate is the provenance branch (answers "how did this get here" -- link it, do not diff it); review/v1.62-candidate-code-only is the code-only review branch, proved byte-identical to the candidate on every non-.planning path, and answers "what source behavior changed" (diff it).`
+      `${scope.total_changed_files} files changed (${scope.planning_only_changed_files} .planning/-only, ${scope.source_changed_files} source); ${scope.total_commits} commits (${scope.planning_only_commits} .planning/-only). integration/v1.62-candidate is the provenance branch (answers "how did this get here" -- link it, do not diff it); review/v1.62-candidate-code-only is the code-only review branch, proved byte-identical to the candidate on every non-.planning path, and answers "what source behavior changed" (diff it)`
+    ),
+    ...section(
+      "Phase-232 handoffs (recorded, not acted on)",
+      value.handoff_count === 0 ? "none recorded" : "recorded",
+      "release-engineering",
+      "node scripts/ci/verify_integration_disposition.mjs --require-hazard-universe",
+      `${value.handoff_count} items Phase 230 records with a reason and does not act on; Phase 232 owns disposition`,
+      handoffRows.length ? handoffRows : ["| (none) | — |"],
+      ["| Item | Reason |", "| --- | --- |"]
     ),
     ...section(
       "Post-merge commits",
@@ -261,6 +271,8 @@ if (process.env.NODE_TEST_CONTEXT && process.argv[1] === new URL(import.meta.url
       lane_count: 0,
       post_merge_commits: [],
       post_merge_commit_count: 0,
+      handoffs: [],
+      handoff_count: 0,
       ...overrides
     };
   }

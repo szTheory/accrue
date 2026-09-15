@@ -346,5 +346,32 @@
       "owner_plan": "230-05"
     }
   ],
-  "post_merge_commit_count": 2
+  "post_merge_commit_count": 2,
+  "handoffs": [
+    {
+      "item": "origin/phase-226-baseline-5da8e6b88735",
+      "reason": "At 5da8e6b8, publishes part of the abandoned Phase-226 line on the public remote and stays excluded from the candidate (230-DISPOSITIONS.json, published_elsewhere). Phase 230 records it; Phase 232 acts (D-13)."
+    },
+    {
+      "item": "Untracked artifacts other than .tool-versions",
+      "reason": "Real source (scripts/ci/stripe_test_fixtures.mjs, scripts/ci/verify_stripe_test_fixtures.mjs) and planning bookkeeping (.planning/milestone.lock, .planning/state.json, .planning/v1.61-v1.61-MILESTONE-AUDIT.md) sit untracked at integration time. Phase 230 hashes and records them only; classification and removal are HYG-01, Phase 232 (D-33)."
+    },
+    {
+      "item": ".planning/v1.61-v1.61-MILESTONE-AUDIT.md",
+      "reason": "Appears to be a double-prefixed duplicate of the committed .planning/v1.61-MILESTONE-AUDIT.md. Recorded here; not fixed in this phase."
+    },
+    {
+      "item": "release-please-config.json commit-search-depth is unset",
+      "reason": "Roughly 492 commits sit against Release Please default commit-search-depth: 500, leaving almost no headroom. Pin it explicitly in Phase 232 or the next release silently truncates."
+    },
+    {
+      "item": "153-entry public CHANGELOG dominated by internal GSD/CI tooling commits",
+      "reason": "Release Please will produce a mechanically consistent PR, but the resulting CHANGELOG is editorially wrong for a public release. RELEASING.md's \"human polish belongs on the open release PR\" clause is the sanctioned remedy; Phase 232 applies it."
+    },
+    {
+      "item": "worktree dirty is pinned true",
+      "reason": "The strict repository-inventory verifier currently pins the worktree dirty boolean true. Phase 232 flipping the tree fully clean will flip it true->false and fail strict verification unless the pinned authority is recaptured (D-34)."
+    }
+  ],
+  "handoff_count": 6
 }

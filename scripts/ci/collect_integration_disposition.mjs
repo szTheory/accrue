@@ -81,8 +81,14 @@ const TOP = new Set([
   "schema_version", "repository", "candidate", "ancestry", "scope", "binding",
   "co_touched_file_count", "hazards", "hazard_count",
   "lanes", "lane_count",
-  "post_merge_commits", "post_merge_commit_count"
+  "post_merge_commits", "post_merge_commit_count",
+  "handoffs", "handoff_count"
 ]);
+// 230-06 Task 3: items recorded for Phase 232 to act on -- never acted on here.
+// Each item names what Phase 232 inherits and why; recording is the whole
+// point (D-39's "what did this merge decide on my behalf" also covers "what
+// did this phase deliberately not touch and hand forward").
+const HANDOFF_FIELDS = new Set(["item", "reason"]);
 
 function validateCandidate(candidate) {
   fields(candidate, CANDIDATE_FIELDS, "candidate");
@@ -122,6 +128,19 @@ function validateScope(scope) {
 }
 
 function validateBinding(binding) { fields(binding, BINDING_FIELDS, "binding"); for (const key of BINDING_FIELDS) fullSha(binding[key], `binding.${key}`); return binding; }
+
+function validateHandoffs(rows) {
+  if (!Array.isArray(rows)) fail("handoffs must be an array");
+  const seen = new Set();
+  for (const row of rows) {
+    fields(row, HANDOFF_FIELDS, "handoffs row");
+    if (typeof row.item !== "string" || !row.item.trim()) fail("handoffs row.item must be a non-empty string");
+    if (typeof row.reason !== "string" || !row.reason.trim()) fail("handoffs row.reason must be a non-empty string");
+    if (seen.has(row.item)) fail("handoffs contains a duplicate item");
+    seen.add(row.item);
+  }
+  return rows;
+}
 
 function validatePostMergeCommits(rows) {
   if (!Array.isArray(rows)) fail("post_merge_commits must be an array");
@@ -222,6 +241,8 @@ export function validateDisposition(disposition, { expectedRepository } = {}) {
   if (disposition.lane_count !== disposition.lanes.length) fail("lane_count must equal lanes.length");
   validatePostMergeCommits(disposition.post_merge_commits);
   if (disposition.post_merge_commit_count !== disposition.post_merge_commits.length) fail("post_merge_commit_count must equal post_merge_commits.length");
+  validateHandoffs(disposition.handoffs);
+  if (disposition.handoff_count !== disposition.handoffs.length) fail("handoff_count must equal handoffs.length");
   return disposition;
 }
 
@@ -442,7 +463,9 @@ export function collectIntegrationDisposition({ repo, expectedRepository, candid
     lanes,
     lane_count: lanes.length,
     post_merge_commits: [],
-    post_merge_commit_count: 0
+    post_merge_commit_count: 0,
+    handoffs: [],
+    handoff_count: 0
   };
   return validateDisposition(disposition, { expectedRepository });
 }
@@ -1036,7 +1059,9 @@ if (process.env.NODE_TEST_CONTEXT && process.argv[1] === new URL(import.meta.url
       lanes: [],
       lane_count: 0,
       post_merge_commits: [],
-      post_merge_commit_count: 0
+      post_merge_commit_count: 0,
+      handoffs: [],
+      handoff_count: 0
     }), /convergent-identical is rejected/);
   });
 

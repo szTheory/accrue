@@ -40,8 +40,21 @@ This merge silently carries three decisions a reviewer should know about before 
 
 ## Changed-file and commit scope
 
-**Fact:** 337 files changed (223 .planning/-only, 114 source); 527 commits (265 .planning/-only). integration/v1.62-candidate is the provenance branch (answers "how did this get here" -- link it, do not diff it); review/v1.62-candidate-code-only is the code-only review branch, proved byte-identical to the candidate on every non-.planning path, and answers "what source behavior changed" (diff it).. **State:** recomputed. **Owner:** release-engineering. **Next command:** `git diff --name-only \<merge-base\> \<candidate\>`.
+**Fact:** 337 files changed (223 .planning/-only, 114 source); 527 commits (265 .planning/-only). integration/v1.62-candidate is the provenance branch (answers "how did this get here" -- link it, do not diff it); review/v1.62-candidate-code-only is the code-only review branch, proved byte-identical to the candidate on every non-.planning path, and answers "what source behavior changed" (diff it). **State:** recomputed. **Owner:** release-engineering. **Next command:** `git diff --name-only \<merge-base\> \<candidate\>`.
 
+
+## Phase-232 handoffs (recorded, not acted on)
+
+**Fact:** 6 items Phase 230 records with a reason and does not act on; Phase 232 owns disposition. **State:** recorded. **Owner:** release-engineering. **Next command:** `node scripts/ci/verify_integration_disposition.mjs --require-hazard-universe`.
+
+| Item | Reason |
+| --- | --- |
+| .planning/v1.61-v1.61-MILESTONE-AUDIT.md | Appears to be a double-prefixed duplicate of the committed .planning/v1.61-MILESTONE-AUDIT.md. Recorded here; not fixed in this phase. |
+| 153-entry public CHANGELOG dominated by internal GSD/CI tooling commits | Release Please will produce a mechanically consistent PR, but the resulting CHANGELOG is editorially wrong for a public release. RELEASING.md's "human polish belongs on the open release PR" clause is the sanctioned remedy; Phase 232 applies it. |
+| origin/phase-226-baseline-5da8e6b88735 | At 5da8e6b8, publishes part of the abandoned Phase-226 line on the public remote and stays excluded from the candidate (230-DISPOSITIONS.json, published_elsewhere). Phase 230 records it; Phase 232 acts (D-13). |
+| release-please-config.json commit-search-depth is unset | Roughly 492 commits sit against Release Please default commit-search-depth: 500, leaving almost no headroom. Pin it explicitly in Phase 232 or the next release silently truncates. |
+| Untracked artifacts other than .tool-versions | Real source (scripts/ci/stripe_test_fixtures.mjs, scripts/ci/verify_stripe_test_fixtures.mjs) and planning bookkeeping (.planning/milestone.lock, .planning/state.json, .planning/v1.61-v1.61-MILESTONE-AUDIT.md) sit untracked at integration time. Phase 230 hashes and records them only; classification and removal are HYG-01, Phase 232 (D-33). |
+| worktree dirty is pinned true | The strict repository-inventory verifier currently pins the worktree dirty boolean true. Phase 232 flipping the tree fully clean will flip it true-\>false and fail strict verification unless the pinned authority is recaptured (D-34). |
 
 ## Post-merge commits
 
