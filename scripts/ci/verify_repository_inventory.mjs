@@ -69,6 +69,32 @@ function assertSameMultiset(authorityName, authority, candidateName, candidate, 
   }
 }
 
+function assertCapturedRefContinuity(authority, candidate, activeRef, capturedObject, repositoryRoot) {
+  // The private manifest freezes every ref at capsule-mint time, but the active
+  // execution ref keeps advancing while the phase runs, so the capsule is
+  // normally many commits older than the capture it is verified against. Exact
+  // equality is therefore required for every frozen ref EXCEPT the active one,
+  // which instead must prove same-ref ancestry: the frozen object has to still
+  // be reachable from the captured commit. That rejects a substituted or
+  // rewritten active ref while accepting an honestly advanced one.
+  const missing = [...authority.keys()].filter((key) => !candidate.has(key)).sort();
+  const extra = [...candidate.keys()].filter((key) => !authority.has(key)).sort();
+  const changed = [...authority.keys()].filter((key) => key !== activeRef && candidate.has(key) && candidate.get(key) !== authority.get(key)).sort();
+  if (missing.length || extra.length || changed.length) {
+    fail(`captured canonical non-preservation refs recovery set differs from private manifest: missing=[${missing.join(", ")}] extra=[${extra.join(", ")}] changed=[${changed.join(", ")}]`);
+  }
+  if (!activeRef) return;
+  if (!authority.has(activeRef)) fail("active execution ref was not frozen by the private manifest");
+  const frozenObject = authority.get(activeRef);
+  const capturedActive = candidate.get(activeRef);
+  if (capturedActive !== capturedObject) fail("captured active execution ref must equal the captured commit");
+  if (frozenObject === capturedActive) return;
+  const exists = spawnSync("git", ["-C", repositoryRoot, "cat-file", "-e", `${frozenObject}^{commit}`], { encoding: "utf8", shell: false, timeout: 15_000, maxBuffer: 1_000_000 });
+  if (exists.error || exists.status !== 0) fail("manifest-frozen active execution ref does not exist as a live commit object");
+  const ancestry = spawnSync("git", ["-C", repositoryRoot, "merge-base", "--is-ancestor", frozenObject, capturedActive], { encoding: "utf8", shell: false, timeout: 15_000, maxBuffer: 1_000_000 });
+  if (ancestry.error || ancestry.status !== 0) fail("manifest-frozen active execution ref must be an ancestor of the captured active commit");
+}
+
 function assertCanonicalRefContinuity(authority, candidate, activeRef, activeObject) {
   const missing = [...authority.keys()].filter((key) => !candidate.has(key)).sort();
   const extra = [...candidate.keys()].filter((key) => !authority.has(key)).sort();
@@ -249,7 +275,7 @@ export function assertStrictRecovery(inventory, context, { repositoryRoot = proc
     const canonical = exactMap(checked.refs.all.filter((row) => !row.name.startsWith(PRESERVATION_PREFIX)), "canonical non-preservation refs", (row) => row.name, (row) => row.object);
     const { activeRef, liveObject } = liveCaptureAuthority(checked, repositoryRoot);
     assertSameMap("private manifest encoded refs", expectedEncoded, "canonical preservation refs", canonicalPreservation);
-    assertSameMap("private manifest", manifest.refs, "captured canonical non-preservation refs", canonical);
+    assertCapturedRefContinuity(manifest.refs, canonical, activeRef, checked.capture.commit, repositoryRoot);
     assertCanonicalRefContinuity(exactMap(checked.refs.all, "captured canonical refs", (row) => row.name, (row) => row.object), directRefMap(repositoryRoot), activeRef, liveObject);
   }
   return true;

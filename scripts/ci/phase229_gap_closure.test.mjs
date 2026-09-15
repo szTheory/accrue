@@ -375,7 +375,9 @@ const CANONICAL_RECORDS_RELATIVE = ".planning/phases/229-repository-truth-recove
 const CANONICAL_RENDERED_RELATIVE = ".planning/phases/229-repository-truth-recovery-safety/229-REPOSITORY-INVENTORY.md";
 const TEST_OWNED_MARKER = ".phase229-test-owned";
 
-function finalChainFixture() {
+// `activeBranch` models the real phase shape, where the active execution ref is a milestone
+// branch distinct from refs/heads/main: main stays put while the milestone branch advances.
+function finalChainFixture({ activeBranch } = {}) {
   const scratch = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), "phase229-final-chain-")));
   const repo = path.join(scratch, "repo");
   const capsule = path.join(scratch, "capsule");
@@ -395,6 +397,7 @@ function finalChainFixture() {
   const object = git(repo, ["rev-parse", "HEAD"]);
   git(repo, ["update-ref", "refs/remotes/origin/main", object]);
   git(repo, ["tag", "v1.61", object]);
+  if (activeBranch) git(repo, ["checkout", "-q", "-b", activeBranch]);
   fs.writeFileSync(path.join(repo, ".planning/milestone.lock"), "before-lock\n");
   fs.writeFileSync(path.join(repo, ".planning/state.json"), "before-state\n");
   const bundle = path.join(capsule, "recovery.bundle");
@@ -503,6 +506,63 @@ function strictPublishedPair(fixture, extraFlags = []) {
     ...extraFlags
   ], { encoding: "utf8", shell: false, timeout: 120_000, env: { ...process.env, NODE_TEST_CONTEXT: undefined } });
 }
+
+// CR-03 / D-03: the private capsule is minted once, early, and is then immutable for the rest
+// of the phase -- so by the time the canonical inventory is captured, the manifest has frozen
+// the active ref many commits in the past. Demanding exact ref equality there would make every
+// real capsule permanently unverifiable; proven same-ref ancestry is the property that actually
+// holds. The generated-capsule fixtures mint and capture at the same commit, so this gap is
+// invisible to them unless the active ref is advanced first, as it is here.
+test("CR-03 strict recovery accepts an active ref advanced past the manifest freeze and rejects a diverged one", () => {
+  const BRANCH = "gsd/milestone-fixture";
+  const advanced = finalChainFixture({ activeBranch: BRANCH });
+  try {
+    const frozen = git(advanced.repo, ["rev-parse", "HEAD"]);
+    for (const step of [1, 2, 3]) {
+      fs.writeFileSync(path.join(advanced.repo, `advance-${step}`), `advance ${step}\n`);
+      git(advanced.repo, ["add", "--", `advance-${step}`]);
+      git(advanced.repo, ["commit", "-qm", `chore: advance the active ref past the manifest freeze ${step}`]);
+    }
+    const captureCommit = git(advanced.repo, ["rev-parse", "HEAD"]);
+    assert.notEqual(captureCommit, frozen, "the active ref must actually advance past the manifest freeze");
+    assert.equal(
+      spawnSync("git", ["-C", advanced.repo, "merge-base", "--is-ancestor", frozen, captureCommit], { encoding: "utf8", shell: false, timeout: 15_000 }).status,
+      0,
+      "the advanced fixture must keep the frozen object reachable"
+    );
+
+    const published = runFinalChainCli(advanced);
+    assert.equal(published.status, 0, `a capsule frozen before the capture commit must remain verifiable: ${published.stderr}\n${published.stdout}`);
+    const attestation = JSON.parse(fs.readFileSync(advanced.attestation, "utf8"));
+    assert.equal(attestation.capture.commit, captureCommit, "capture must anchor the advanced commit, not the manifest freeze");
+    assert.equal(strictPublishedPair(advanced).status, 0, "documented strict verification must accept the advanced active ref");
+  } finally {
+    fs.rmSync(advanced.scratch, { recursive: true, force: true });
+  }
+
+  // The exemption must be ancestry, not a blanket skip: a same-tree root commit leaves the
+  // working tree, index and tracked set byte-identical, so only the ancestry check can catch it.
+  const diverged = finalChainFixture({ activeBranch: BRANCH });
+  try {
+    const frozen = git(diverged.repo, ["rev-parse", "HEAD"]);
+    const tree = git(diverged.repo, ["rev-parse", "HEAD^{tree}"]);
+    const orphan = git(diverged.repo, ["commit-tree", tree, "-m", "diverged root with an identical tree"]);
+    git(diverged.repo, ["update-ref", `refs/heads/${BRANCH}`, orphan]);
+    assert.notEqual(orphan, frozen, "the diverged commit must differ from the manifest freeze");
+    assert.notEqual(
+      spawnSync("git", ["-C", diverged.repo, "merge-base", "--is-ancestor", frozen, orphan], { encoding: "utf8", shell: false, timeout: 15_000 }).status,
+      0,
+      "the diverged fixture must actually break ancestry"
+    );
+
+    const rejected = runFinalChainCli(diverged);
+    assert.notEqual(rejected.status, 0, "an active ref that diverged from the manifest freeze must be rejected");
+    assert.match(`${rejected.stdout}${rejected.stderr}`, /must be an ancestor of the captured active commit/);
+    assert.ok(!fs.existsSync(diverged.attestation), "a rejected chain must not create the handoff attestation");
+  } finally {
+    fs.rmSync(diverged.scratch, { recursive: true, force: true });
+  }
+});
 
 // CR-03 / D-03: the canonical pair is captured at commit A and then necessarily committed
 // (commit B), after which further phase artifacts land (commit C). Capture ancestry plus the
