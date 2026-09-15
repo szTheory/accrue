@@ -1,0 +1,62 @@
+{
+  "schema_version": 1,
+  "repository": "szTheory/accrue",
+  "candidate": {
+    "ref": "refs/heads/integration/v1.62-candidate",
+    "object": "4d45002cafb3846810b84ff1afd84e7418476c50",
+    "parents": [
+      "8b248d9cec6531e124b2d05ea796e8a0aa904c93",
+      "d30fc25dbf6ba551792c66ff451b4b93c0af4bf1"
+    ],
+    "tree": "f690beb7c655f2683dd747a548da5a0d7dce0522",
+    "committed_at": "2026-09-15T14:58:55-04:00"
+  },
+  "ancestry": [
+    {
+      "gate": "v1_61_identity",
+      "state": "proved",
+      "exit_code": 0,
+      "evidence": "tag=fdb41672dd9240b36623ab22a7a8377a2735e5a3 commit=e3b06794e4dc0d36deb5fc7cb94cbb0b3207d6d9"
+    },
+    {
+      "gate": "v1_61_ancestor",
+      "state": "proved",
+      "exit_code": 0,
+      "evidence": "git merge-base --is-ancestor v1.61 4d45002cafb3846810b84ff1afd84e7418476c50"
+    },
+    {
+      "gate": "origin_main_ancestor",
+      "state": "proved",
+      "exit_code": 0,
+      "evidence": "git merge-base --is-ancestor d30fc25dbf6ba551792c66ff451b4b93c0af4bf1 4d45002cafb3846810b84ff1afd84e7418476c50"
+    },
+    {
+      "gate": "closure_commits_ancestor",
+      "state": "proved",
+      "exit_code": 0,
+      "evidence": "closure=8a95fbe8109cf22efac4763f3d209e2e1b1aeba9,9e090eb5c6f3f384d5abe5e149cf5485dc120f9a,7cc501a33ac2d808b3fee9857e72a8c7eabd94e6,57c61a9a48f1ae84f7b3c3f45333eb6e5fb7261c"
+    },
+    {
+      "gate": "exactly_one_new_commit",
+      "state": "proved",
+      "exit_code": 0,
+      "evidence": "count=1"
+    }
+  ],
+  "scope": {
+    "total_changed_files": 334,
+    "planning_only_changed_files": 223,
+    "source_changed_files": 111,
+    "total_commits": 525,
+    "planning_only_commits": 265
+  },
+  "binding": {
+    "origin_main": "d30fc25dbf6ba551792c66ff451b4b93c0af4bf1",
+    "milestone_tip": "8b248d9cec6531e124b2d05ea796e8a0aa904c93",
+    "merge_base": "702dc482df0f65c332be1d4dfb821c4fe60aec49"
+  },
+  "hazards": [],
+  "hazard_count": 0,
+  "post_merge_commits": [],
+  "post_merge_commit_count": 0
+}
