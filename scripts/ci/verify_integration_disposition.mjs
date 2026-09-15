@@ -115,11 +115,11 @@ function assertAncestryLive(repo, disposition, { v161TagObject = V161_TAG_OBJECT
 // candidate.object/ancestry/parents stay pinned to the merge commit for
 // D-05/D-06 identity purposes; scope is deliberately decoupled from that
 // pin so a reviewer's file/commit count never goes stale after a legitimate
-// post-merge commit. When a review-ref is supplied, additionally assert that
-// the recorded source_changed_files count equals the number of non-
-// `.planning/` paths that differ between the merge-base and that ref -- the
-// reviewer's real 72-file (recomputed here) read surface, counted inside the
-// verifier after capturing spawnSync's own exit status, never through a
+// post-merge commit. When a review-ref is supplied, additionally assert
+// CONTENT identity (not merely a file-count match) between the candidate
+// ref's live tip and that ref on every non-`.planning/` path -- `git diff
+// --quiet <tip> <review-ref> -- . ':!.planning'`, with the exit status
+// captured explicitly from spawnSync's own `status` field, never through a
 // shell pipeline that could swallow a failing `git`.
 function assertScopeLive(repo, disposition, { reviewRef } = {}) {
   const live = assertStaleBindingCheck(repo, disposition);
@@ -128,10 +128,22 @@ function assertScopeLive(repo, disposition, { reviewRef } = {}) {
   for (const key of Object.keys(fresh)) if (fresh[key] !== disposition.scope[key]) fail(`scope.${key} live=${fresh[key]} differs from recorded=${disposition.scope[key]} (measured against the candidate ref's live tip, ${tip})`);
 
   if (reviewRef) {
-    const diffResult = spawnSync("git", ["-C", repo, "diff", "--name-only", live.mergeBase, reviewRef, "--", ".", ":!.planning"], { encoding: "utf8", shell: false, timeout: 20000, maxBuffer: 5_000_000 });
-    if (diffResult.error || diffResult.status !== 0) fail(`review-ref scope diff failed: ${(diffResult.stderr || diffResult.error?.message || "unknown error").trim()}`);
-    const reviewSourceCount = diffResult.stdout.split("\n").filter(Boolean).length;
-    if (reviewSourceCount !== disposition.scope.source_changed_files) fail(`scope.source_changed_files recorded=${disposition.scope.source_changed_files} differs from review-branch live count=${reviewSourceCount} (git diff --name-only ${live.mergeBase} ${reviewRef} -- . ':!.planning')`);
+    // D-04's own literal command is a content-identity proof, not a count proof:
+    // `git diff --quiet <candidate> <review> -- . ':!.planning'`. A file-count match
+    // (the previous form of this check) is satisfied by a review branch that drops
+    // one file and adds a different one, or that has any file's content silently
+    // mutated while the file list stays the same length -- neither is caught by a
+    // count comparison. `git diff --quiet` exits 0 (identical), 1 (differs), or >1
+    // (error); the exit status is captured explicitly from spawnSync's own `status`
+    // field, never inferred through a shell pipeline that could swallow a failing
+    // `git`. Compared against the candidate ref's live tip (not the pinned
+    // candidate.object) for the same reason scope itself is measured against the
+    // live tip above: the reviewer's real read surface grows with legitimate
+    // post-merge commits declared in post_merge_commits.
+    const identity = spawnSync("git", ["-C", repo, "diff", "--quiet", tip, reviewRef, "--", ".", ":!.planning"], { encoding: "utf8", shell: false, timeout: 20000, maxBuffer: 5_000_000 });
+    if (identity.error) fail(`review-ref identity check failed to run: ${identity.error.message}`);
+    if (identity.status !== 0 && identity.status !== 1) fail(`review-ref identity check exited abnormally (status=${identity.status}): ${(identity.stderr || "").trim()}`);
+    if (identity.status !== 0) fail(`review-ref ${reviewRef} is not byte-identical to the candidate ref's live tip (${tip}) on non-.planning paths (git diff --quiet ${tip} ${reviewRef} -- . ':!.planning' exited ${identity.status})`);
   }
 }
 
@@ -347,11 +359,14 @@ export function verifyFixtures() {
     assert.equal(rendered, renderIntegrationDisposition(disposition, { expectedRepository: "szTheory/accrue" }));
   });
 
-  // Scenario 1.5 (230-06): --require-scope with --review-ref cross-checks
-  // scope.source_changed_files against a live `git diff --name-only <merge-base>
-  // <review-ref> -- . ':!.planning'` count. A review-ref identical to the
-  // candidate passes; a review-ref missing one of the candidate's files fails
-  // naming the mismatch, never silently passing on a wrong count.
+  // Scenario 1.5 (230-06, tightened for CR-01): --require-scope with --review-ref
+  // cross-checks CONTENT identity (`git diff --quiet <tip> <review-ref> -- .
+  // ':!.planning'`), not a file count, between the candidate ref's live tip and the
+  // review ref. A review-ref identical to the candidate passes; a review-ref missing
+  // one of the candidate's files fails; and -- the CR-01 regression case -- a
+  // review-ref with the SAME FILE COUNT as the candidate but different content on one
+  // of those files also fails. The old count-only check passed this last case; this
+  // is the adversarial proof that it no longer does.
   withFixture((fx) => {
     const merge = mergeCandidate(fx.repo, fx.milestoneTip, fx.originMain);
     const disposition = collectIntegrationDisposition({ repo: fx.repo, expectedRepository: "szTheory/accrue", v161TagObject: fx.v161Tag, v161CommitObject: fx.v161Commit, closureCommits: fx.closureCommits });
@@ -371,7 +386,25 @@ export function verifyFixtures() {
     g(["update-ref", "refs/heads/review-wrong", wrongCommit]);
     assert.throws(
       () => applyStrictFlags(fx.repo, disposition, { flags: new Set(["require-scope"]), values: { "review-ref": "refs/heads/review-wrong" } }, { v161TagObject: fx.v161Tag, v161CommitObject: fx.v161Commit, closureCommits: fx.closureCommits }),
-      /source_changed_files recorded=\d+ differs from review-branch live count=\d+/
+      /is not byte-identical to the candidate ref's live tip/
+    );
+
+    // CR-01 regression: SAME file count as the candidate, but the content of one
+    // tracked file is silently mutated. The count-only check this replaces could not
+    // catch this; the content-identity check must.
+    const tamperIndexFile = path.join(fs.mkdtempSync(path.join(fs.realpathSync(os.tmpdir()), "phase230-scope-fixture-tamper-")), "index");
+    spawnSync("git", ["-C", fx.repo, "read-tree", wrongTree], { encoding: "utf8", env: { ...process.env, GIT_INDEX_FILE: tamperIndexFile }, shell: false });
+    const tamperedBlob = spawnSync("git", ["-C", fx.repo, "hash-object", "-w", "--stdin"], { encoding: "utf8", input: "tampered content, same file count\n", shell: false }).stdout.trim();
+    spawnSync("git", ["-C", fx.repo, "update-index", "--cacheinfo", `100644,${tamperedBlob},${dropPath}`], { encoding: "utf8", env: { ...process.env, GIT_INDEX_FILE: tamperIndexFile }, shell: false });
+    const tamperedTreeSha = spawnSync("git", ["-C", fx.repo, "write-tree"], { encoding: "utf8", env: { ...process.env, GIT_INDEX_FILE: tamperIndexFile }, shell: false }).stdout.trim();
+    assert.notEqual(tamperedTreeSha, wrongTree, "tampered tree must actually differ from the real merge tree");
+    const tamperedTreeListing = g(["ls-tree", "-r", "--name-only", tamperedTreeSha]).split("\n").filter(Boolean);
+    assert.equal(tamperedTreeListing.length, treeListing.length, "tampered tree must have the SAME file count as the real merge tree (the adversarial case)");
+    const tamperedCommit = g(["commit-tree", tamperedTreeSha, "-p", fx.originMain, "-m", "tamper: same file count, different content"]);
+    g(["update-ref", "refs/heads/review-tampered", tamperedCommit]);
+    assert.throws(
+      () => applyStrictFlags(fx.repo, disposition, { flags: new Set(["require-scope"]), values: { "review-ref": "refs/heads/review-tampered" } }, { v161TagObject: fx.v161Tag, v161CommitObject: fx.v161Commit, closureCommits: fx.closureCommits }),
+      /is not byte-identical to the candidate ref's live tip/
     );
   });
 
