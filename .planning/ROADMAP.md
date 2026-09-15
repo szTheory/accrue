@@ -34,7 +34,7 @@ Deferred StoreKit, Crosswake physical-device, and Admin UI ratchet work must be 
 **Milestone Goal:** Reconcile the completed v1.61 lineage with `main` into a clean, reviewable, fully verified release candidate, then stop before cleanup becomes churn.
 
 - [x] **Phase 229: Repository Truth & Recovery Safety** - Establish reproducible branch, worktree, artifact, ship-window, and Actions truth without disturbing published history. (completed 2026-09-15)
-- [ ] **Phase 230: Reviewable History Integration** - Produce and inspect a provenance-backed integration candidate without targeting or merging `main`.
+- [x] **Phase 230: Reviewable History Integration** - Produce and inspect a provenance-backed integration candidate without targeting or merging `main`. (completed 2026-09-15)
 - [ ] **Phase 231: Exact-SHA Release Gate Proof** - Prove complete local and GitHub gate status for the immutable candidate SHA and resolve every ship window.
 - [ ] **Phase 232: Bounded Hygiene & Release Handoff** - Reconcile release-facing repository truth, make only evidence-backed cleanup, and hand off a reviewable integration and Release Please-ready state.
 
@@ -69,28 +69,28 @@ Deferred StoreKit, Crosswake physical-device, and Admin UI ratchet work must be 
 Plans:
 **Wave 1**
 
-- [ ] 230-01-PLAN.md — Preservation safety barrier and typed ref continuity
+- [x] 230-01-PLAN.md — Preservation safety barrier and typed ref continuity
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
-- [ ] 230-02-PLAN.md — Tracer: integration candidate proven end to end with rollback proof
+- [x] 230-02-PLAN.md — Tracer: integration candidate proven end to end with rollback proof
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
-- [ ] 230-03-PLAN.md — Recomputed hazard universe and fail-closed dispositions
-- [ ] 230-05-PLAN.md — Dependency migration and focused regressions on the candidate
+- [x] 230-03-PLAN.md — Recomputed hazard universe and fail-closed dispositions
+- [x] 230-05-PLAN.md — Dependency migration and focused regressions on the candidate
 
 **Wave 4** *(blocked on Wave 3 completion)*
 
-- [ ] 230-04-PLAN.md — Excluded-commit ledger with tree- and requirement-level supersession
+- [x] 230-04-PLAN.md — Excluded-commit ledger with tree- and requirement-level supersession
 
 **Wave 5** *(blocked on Wave 4 completion)*
 
-- [ ] 230-06-PLAN.md — Standing archive-path invariant, code-only review branch, evidence map
+- [x] 230-06-PLAN.md — Standing archive-path invariant, code-only review branch, evidence map
 
 **Wave 6** *(blocked on Wave 5 completion)*
 
-- [ ] 230-07-PLAN.md — PR #44 closure, record correction, and final capsule minted last
+- [x] 230-07-PLAN.md — PR #44 closure, record correction, and final capsule minted last
 
 ### Phase 231: Exact-SHA Release Gate Proof
 
@@ -125,7 +125,7 @@ Plans:
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 229. Repository Truth & Recovery Safety | 20/20 | Complete    | 2026-09-15 |
-| 230. Reviewable History Integration | 0/TBD | Not started | - |
+| 230. Reviewable History Integration | 7/7 | Complete    | 2026-09-15 |
 | 231. Exact-SHA Release Gate Proof | 0/TBD | Not started | - |
 | 232. Bounded Hygiene & Release Handoff | 0/TBD | Not started | - |
 

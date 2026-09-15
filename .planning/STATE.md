@@ -2,20 +2,20 @@
 gsd_state_version: "1.0"
 milestone: v1.62
 milestone_name: Release Integration & Repository Hygiene
-current_phase: 230
-current_phase_name: Reviewable History Integration
-status: verifying
-stopped_at: Completed 230-07-PLAN.md — Phase 230 complete, ready for verification
-last_updated: "2026-09-15T20:56:35.159Z"
+current_phase: 231
+current_phase_name: Exact-SHA Release Gate Proof
+status: planning
+stopped_at: Phase 230 complete, ready to plan Phase 231
+last_updated: "2026-09-15T21:45:03.044Z"
 last_activity: 2026-09-15
-last_activity_desc: Phase 230 execution started
-state_head: 7978cd437f35edef7d4397d1716ed109171790e6
+last_activity_desc: Phase 230 complete, transitioned to Phase 231
+state_head: fb05725155ea7162a62074a3631356e2182153a7
 progress:
   total_phases: 4
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 27
   completed_plans: 27
-  percent: 25
+  percent: 50
 ---
 
 # Project State
@@ -30,18 +30,18 @@ See: `.planning/PROJECT.md` (updated 2026-09-15)
 
 ## Current Position
 
-Phase: 230 (Reviewable History Integration) — EXECUTING
-Plan: 7 of 7
-Status: Phase complete — ready for verification
-Last activity: 2026-09-15 — Phase 230 execution started
+Phase: 231 — Exact-SHA Release Gate Proof
+Plan: Not started
+Status: Ready to plan
+Last activity: 2026-09-15 — Phase 230 complete, transitioned to Phase 231
 
-Progress: [███░░░░░░░] 25% (20/20 plans in Phase 229)
+Progress: [█████░░░░░] 50% (20/20 plans in Phase 229)
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 20
+- Total plans completed: 27
 - Average duration: —
 - Total execution time: —
 
@@ -54,6 +54,7 @@ Progress: [███░░░░░░░] 25% (20/20 plans in Phase 229)
 | 231. Exact-SHA Release Gate Proof | 0 | — | — |
 | 232. Bounded Hygiene & Release Handoff | 0 | — | — |
 | 229 | 20 | - | - |
+| 230 | 7 | - | - |
 **Per-Plan Metrics:**
 
 | Plan | Duration | Tasks | Files |
@@ -161,7 +162,7 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-09-15T20:56:35.119Z
-Stopped at: Completed 230-07-PLAN.md — Phase 230 complete, ready for verification
+Stopped at: Phase 230 complete, ready to plan Phase 231
 
 229-20 outcome (commits 024eaeca, ddd9a137, c6677152):
 
