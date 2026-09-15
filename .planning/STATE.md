@@ -140,5 +140,11 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-09-15T14:05:00Z
-Stopped at: Phase 229 plans 01-19 sealed and green (gap_closure 19/19, verify_repository_inventory 4/4, collect_repository_inventory 10/10, handoff --self-test PASS). 229-20 (final inventory recapture) cannot run unattended: the final chain requires five maintainer-only private values (PHASE229_CAPSULE_DIR, PHASE229_PRIVATE_MANIFEST, PHASE229_MANIFEST_SHA256, PHASE229_RECOVERY_BUNDLE, PHASE229_FINAL_ATTESTATION) — none are set in the agent environment. Invocation is documented in scripts/ci/README.md
+Stopped at: Phase 229 plans 01-19 sealed and green (gap_closure 19/19, verify_repository_inventory 4/4, collect_repository_inventory 10/10, handoff --self-test PASS). 229-20 (final inventory recapture) cannot run unattended: the final chain requires five maintainer-only private values (PHASE229_CAPSULE_DIR, PHASE229_PRIVATE_MANIFEST, PHASE229_MANIFEST_SHA256, PHASE229_RECOVERY_BUNDLE, PHASE229_FINAL_ATTESTATION) — none are set in the agent environment. Invocation is documented in scripts/ci/README.md.
+
+229-20 Task 1 (preflight) is COMPLETE and committed (3007fffd): a generated-repository A/B/C regression now proves the canonical pair stays strictly verifiable after its own commit and after later phase commits, bound to exact published bytes by three negatives. gap_closure is now 20/20.
+
+Two findings that de-risk Task 2:
+1. The 229-20 PLAN Task 2 <automated> command is STALE. It passes --artifact-authorization and --final-capture-attestation to verify_phase229_handoff_invariants.mjs, which accepts neither; 229-19 moved that derivation inside the wrapper. The command fails immediately with 'unsupported final handoff option: --artifact-authorization'. Use the nine-option block in scripts/ci/README.md instead.
+2. PHASE229_MANIFEST_SHA256 is NOT a secret: it is anchored in the committed inventory as recovery.manifest_sha256 (52f3ea27d5551fba55d3666b44911104a20386b6ce1610eb8e194aab395817b4); the bundle digest is anchored as recovery.bundle_sha256 (4108818c08a1d2a2c3c75058a30789bd89f6e5f44f1268e09252f337c714a869). Only the capsule/manifest/bundle/attestation PATHS are maintainer-held.
 Resume file: None
