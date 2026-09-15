@@ -64,7 +64,16 @@ Deferred StoreKit, Crosswake physical-device, and Admin UI ratchet work must be 
   2. A maintainer can inspect evidence-backed dispositions for every integration conflict and intentionally excluded commit, with focused regressions covering retained runtime, documentation, release, and CI behavior.
   3. Before a pull request targets `main`, a maintainer can verify the candidate's ancestry, changed-file scope, milestone provenance, and rollback point.
 
-**Plans**: TBD
+**Plans**: 7 plans
+
+Plans:
+- [ ] 230-01-PLAN.md — Preservation safety barrier and typed ref continuity
+- [ ] 230-02-PLAN.md — Tracer: integration candidate proven end to end with rollback proof
+- [ ] 230-03-PLAN.md — Recomputed hazard universe and fail-closed dispositions
+- [ ] 230-04-PLAN.md — Excluded-commit ledger with tree- and requirement-level supersession
+- [ ] 230-05-PLAN.md — Dependency migration and focused regressions on the candidate
+- [ ] 230-06-PLAN.md — Standing archive-path invariant, code-only review branch, evidence map
+- [ ] 230-07-PLAN.md — PR #44 closure, record correction, and final capsule minted last
 
 ### Phase 231: Exact-SHA Release Gate Proof
 
