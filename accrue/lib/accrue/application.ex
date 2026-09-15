@@ -234,13 +234,7 @@ defmodule Accrue.Application do
 
   defp eu_ca_locale?(_), do: false
 
-  defp safe_mix_env do
-    try do
-      Mix.env()
-    rescue
-      _ -> :prod
-    end
-  end
+  defp safe_mix_env, do: Accrue.Env.mix_env()
 
   defp maybe_warn_missing_chromic_invoice_renderer(adapter, env) do
     key = :accrue_pdf_adapter_unavailable_warned?

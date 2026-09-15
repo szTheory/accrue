@@ -20,13 +20,15 @@ defmodule Accrue.Auth.Default do
 
   ## Test seam: `do_boot_check!/1`
 
-  `boot_check!/0` is the public API — it reads the env via
-  `Application.get_env(:accrue, :env, Mix.env())` and delegates to a
+  `boot_check!/0` is the public API — it reads the env through the
+  canonical internal resolver `Accrue.Env.current/0` and delegates to a
   private/testable `do_boot_check!/1` helper. The helper is exposed
   (`def`, not `defp`, with `@doc false`) so tests can simulate the
   `:prod` branch without tampering with `Application.put_env(:accrue,
   :env, :prod)` (which bleeds between async tests and has been a source
-  of Heisenbugs historically).
+  of Heisenbugs historically). `Accrue.Env.current/0` never evaluates the
+  build tool when `:env` is configured, and never raises when the build
+  tool is absent, so this module is safe inside an OTP release.
   """
 
   @behaviour Accrue.Auth
@@ -44,7 +46,7 @@ defmodule Accrue.Auth.Default do
   """
   @spec boot_check!() :: :ok
   def boot_check! do
-    env = Application.get_env(:accrue, :env, Mix.env())
+    env = Accrue.Env.current()
     do_boot_check!(env)
   end
 
@@ -71,7 +73,7 @@ defmodule Accrue.Auth.Default do
 
   @impl Accrue.Auth
   def current_user(_conn) do
-    case Application.get_env(:accrue, :env, Mix.env()) do
+    case Accrue.Env.current() do
       env when env in [:dev, :test] -> @dev_user
       :prod -> nil
       _ -> @dev_user
@@ -80,7 +82,7 @@ defmodule Accrue.Auth.Default do
 
   @impl Accrue.Auth
   def require_admin_plug do
-    case Application.get_env(:accrue, :env, Mix.env()) do
+    case Accrue.Env.current() do
       env when env in [:dev, :test] ->
         fn conn, _opts -> conn end
 
@@ -111,7 +113,7 @@ defmodule Accrue.Auth.Default do
 
   @impl Accrue.Auth
   def step_up_challenge(_user, _action) do
-    case Application.get_env(:accrue, :env, Mix.env()) do
+    case Accrue.Env.current() do
       env when env in [:dev, :test] ->
         %{kind: :auto, provider: :default, message: "Auto-approved in #{env}"}
 
@@ -124,7 +126,7 @@ defmodule Accrue.Auth.Default do
 
   @impl Accrue.Auth
   def verify_step_up(_user, _params, _action) do
-    case Application.get_env(:accrue, :env, Mix.env()) do
+    case Accrue.Env.current() do
       env when env in [:dev, :test] -> :ok
       _ -> {:error, :step_up_not_configured}
     end
