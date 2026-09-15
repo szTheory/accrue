@@ -27,7 +27,7 @@ import {
 // buildMergeCandidateForTests (imported above) and this constant, so the literal verb
 // string never appears in this file for a grep gate to trip on.
 const REF_UPDATE_VERB = ["update", "ref"].join("-");
-import { renderIntegrationDisposition } from "./render_integration_disposition.mjs";
+import { renderIntegrationDisposition, renderExcludedLedger } from "./render_integration_disposition.mjs";
 
 const SHA = /^[a-f0-9]{40}$/;
 const DIGEST = /^[a-f0-9]{64}$/;
@@ -566,7 +566,7 @@ export function verifyFixtures() {
       };
     }
     function minimalLedger(rows) {
-      return { schema_version: 1, repository: "szTheory/accrue", candidate: { ref: "refs/heads/integration/v1.62-candidate", object: "b".repeat(40) }, local_main: "c".repeat(40), excluded_commit_count: rows.filter((row) => row.disposition !== "carried-on-candidate").length, rows, pr_44: { number: 44, head_ref: "fix/x", head_object: "d".repeat(40), base_ref: "main", base_object: "c".repeat(40), state: "open", mergeable: "MERGEABLE", ahead_of_base: 0, behind_base: 0, matched_commits: [], disposition: "close-unmerged-cite-superseding", note: "n" } };
+      return { schema_version: 1, repository: "szTheory/accrue", candidate: { ref: "refs/heads/integration/v1.62-candidate", object: "b".repeat(40), committed_at: "2026-09-15T00:00:00+00:00" }, local_main: "c".repeat(40), excluded_commit_count: rows.filter((row) => row.disposition !== "carried-on-candidate").length, rows, pr_44: { number: 44, head_ref: "fix/x", head_object: "d".repeat(40), base_ref: "main", base_object: "c".repeat(40), state: "open", mergeable: "MERGEABLE", ahead_of_base: 0, behind_base: 0, matched_commits: [], disposition: "close-unmerged-cite-superseding", note: "n" } };
     }
     assert.throws(() => validateExcludedRow({ ...minimalLedgerRow(), superseded_by: null }, 0), /no-equivalent.*array of 40-hex/);
     const omitted = minimalLedgerRow(); delete omitted.superseded_by;
@@ -623,8 +623,14 @@ async function main() {
     if (!dispositionsPath) fail("--dispositions is required with --require-excluded-ledger");
     const ledger = validateDispositionLedger(JSON.parse(fs.readFileSync(dispositionsPath, "utf8")), { expectedRepository });
     assertExcludedLedgerLive(repo, ledger, { localMainRef: parsed.values["local-main-ref"] || "refs/heads/main" });
-    // Task 3 of this plan wires --require-determinism for the 230-DISPOSITIONS.{json,md}
-    // render pair once render_integration_disposition.mjs gains renderExcludedLedger.
+    // D-38: --require-determinism proves BOTH rendered artifact pairs when both are
+    // supplied -- the disposition pair above (if --records/--rendered were given) and
+    // this ledger pair.
+    if (parsed.flags.has("require-determinism") && parsed.values["dispositions-rendered"]) {
+      const renderedContent = fs.readFileSync(parsed.values["dispositions-rendered"], "utf8");
+      const fresh = renderExcludedLedger(ledger, { expectedRepository });
+      if (renderedContent !== fresh) fail("rendered excluded-commit ledger Markdown is not byte-reproducible from the committed JSON");
+    }
   }
 
   console.log("integration disposition verification: PASS");

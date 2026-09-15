@@ -463,7 +463,7 @@ const PLAN_INVENTORY_FIELDS = new Set(["command", "abandoned_line_max_plan", "mi
 const REQUIREMENT_LEVEL_FIELDS = new Set(["command", "file", "requirements"]);
 const REQUIREMENT_ROW_FIELDS = new Set(["id", "matched_text"]);
 const LEDGER_TOP = new Set(["schema_version", "repository", "candidate", "local_main", "excluded_commit_count", "rows", "pr_44"]);
-const LEDGER_CANDIDATE_FIELDS = new Set(["ref", "object"]);
+const LEDGER_CANDIDATE_FIELDS = new Set(["ref", "object", "committed_at"]);
 const PR_FIELDS = new Set(["number", "head_ref", "head_object", "base_ref", "base_object", "state", "mergeable", "ahead_of_base", "behind_base", "matched_commits", "disposition", "note"]);
 const PR_MATCHED_COMMIT_FIELDS = new Set(["pr_branch_commit", "milestone_commit", "patch_id"]);
 const PR_DISPOSITIONS = new Set(["close-unmerged-cite-superseding"]);
@@ -615,6 +615,7 @@ export function validateDispositionLedger(ledger, { expectedRepository } = {}) {
   fields(ledger.candidate, LEDGER_CANDIDATE_FIELDS, "ledger.candidate");
   refName(ledger.candidate.ref, "ledger.candidate.ref");
   fullSha(ledger.candidate.object, "ledger.candidate.object");
+  timestamp(ledger.candidate.committed_at, "ledger.candidate.committed_at");
   fullSha(ledger.local_main, "ledger.local_main");
   nonNegInt(ledger.excluded_commit_count, "ledger.excluded_commit_count");
   validateExcludedRows(ledger.rows);
@@ -812,12 +813,13 @@ export function collectExcludedCommitLedger({ repo, expectedRepository, candidat
   }
 
   const pr44 = collectPr44Ledger(repo, { localMainObject, candidateObject, prBranchRef, candidatePatchIds, ...(collectPr ? { collectPr } : {}) });
+  const committedAt = timestamp(run(repo, ["show", "-s", "--format=%cI", candidateObject]), "ledger.candidate.committed_at");
 
   const excludedCount = excludedRows.filter((row) => row.disposition !== "carried-on-candidate").length;
   const ledger = {
     schema_version: 1,
     repository: expectedRepository,
-    candidate: { ref: candidateRef, object: candidateObject },
+    candidate: { ref: candidateRef, object: candidateObject, committed_at: committedAt },
     local_main: localMainObject,
     excluded_commit_count: excludedCount,
     rows: excludedRows.sort((a, b) => a.commit.localeCompare(b.commit)),

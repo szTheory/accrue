@@ -2,7 +2,7 @@
 import fs from "node:fs";
 import assert from "node:assert/strict";
 import test from "node:test";
-import { validateDisposition, HAZARD_CLASSES } from "./collect_integration_disposition.mjs";
+import { validateDisposition, validateDispositionLedger, HAZARD_CLASSES } from "./collect_integration_disposition.mjs";
 
 const escape = (value) => String(value).replace(/[\\|`<>]/g, "\\$&").replace(/[\r\n]+/g, " ");
 const order = (rows, key) => [...rows].sort((a, b) => key(a).localeCompare(key(b)));
@@ -131,6 +131,96 @@ export function renderIntegrationDisposition(disposition, { expectedRepository }
   ].join("\n");
 }
 
+// D-07/D-36/D-39: renders 230-DISPOSITIONS.md from 230-DISPOSITIONS.json. Same
+// validate-then-render ordering and escape()/order() discipline as the disposition
+// renderer above. Leads with the dispositions that change a reader's mental model
+// (excluded-rejected, carried-on-candidate), then collapses the bulk of the abandoned
+// line (excluded-superseded, all sharing the same wholesale-exclusion evidence) into
+// one explainable group rather than dozens of individually-read rows. Every commit's
+// full, unescaped, untruncated 40-hex id is rendered so `grep <sha>` finds its row.
+function ledgerRowLine(row) {
+  return `| \`${row.commit}\` | ${escape(row.subject)} | ${row.patch_id_occurrences_main} | ${row.patch_id_occurrences_candidate} | ${escape(row.published_elsewhere)} |`;
+}
+
+export function renderExcludedLedger(ledger, { expectedRepository } = {}) {
+  const value = validateDispositionLedger(ledger, { expectedRepository });
+  const rejected = order(value.rows.filter((row) => row.disposition === "excluded-rejected"), (row) => row.commit);
+  const carried = order(value.rows.filter((row) => row.disposition === "carried-on-candidate"), (row) => row.commit);
+  const superseded = order(value.rows.filter((row) => row.disposition === "excluded-superseded"), (row) => row.commit);
+  const rowHeadings = ["| Commit | Subject | Patch-id occurrences (main) | Patch-id occurrences (candidate) | Published elsewhere |", "| --- | --- | --- | --- | --- |"];
+
+  const sharedEvidence = value.rows[0]?.supersession_evidence ?? null;
+  const treeRows = sharedEvidence ? order(sharedEvidence.tree_level.files, (row) => row.path).map((row) => `| ${escape(row.path)} | ${row.exists_on_candidate} | ${escape(row.superseded_by_path ?? "—")} |`) : [];
+  const reqRows = sharedEvidence ? order(sharedEvidence.requirement_level.requirements, (row) => row.id).map((row) => `| ${escape(row.id)} | ${escape(row.matched_text)} |`) : [];
+
+  const pr = value.pr_44;
+  const matchedRows = order(pr.matched_commits, (row) => row.pr_branch_commit).map((row) => `| \`${row.pr_branch_commit}\` | \`${row.milestone_commit}\` | \`${row.patch_id}\` |`);
+
+  return [
+    "# Excluded-Commit Ledger", "",
+    "Answers \"where did commit X go?\" for every commit reachable from local `main` and not reachable from the reviewable v1.62 integration candidate. `grep` any 40-hex commit id below and its row is the answer -- no session memory required.", "",
+    `Candidate: \`${escape(value.candidate.ref)}\` @ \`${value.candidate.object}\` (committed ${escape(value.candidate.committed_at)}). Local main: \`${value.local_main}\`. Recomputed excluded-commit count: **${value.excluded_commit_count}**.`, "",
+    ...section(
+      "Rejected salvage (excluded-rejected)",
+      `${rejected.length} row(s)`,
+      "release-engineering",
+      "node scripts/ci/verify_integration_disposition.mjs --require-excluded-ledger",
+      "landing these commits would put two competing baseline contracts on main and resurrect a rejected shell verifier as a live gate (D-08)",
+      rejected.length ? rejected.map(ledgerRowLine) : ["| (none) | — | — | — | — |"],
+      rowHeadings
+    ),
+    ...section(
+      "Carried on candidate (carried-on-candidate)",
+      `${carried.length} row(s)`,
+      "release-engineering",
+      "git merge-base --is-ancestor <commit> <candidate>",
+      "already present on the candidate; recorded so nobody re-cherry-picks it (D-12)",
+      carried.length ? carried.map(ledgerRowLine) : ["| (none) | — | — | — | — |"],
+      rowHeadings
+    ),
+    ...section(
+      "Superseded, collapsed (excluded-superseded)",
+      `${superseded.length} row(s), one shared supersession proof`,
+      "release-engineering",
+      "node scripts/ci/collect_integration_disposition.mjs",
+      "excluded wholesale (D-07): the abandoned line's entire unique non-planning surface is superseded, proved once below and shared by every row in this section",
+      superseded.length ? superseded.map(ledgerRowLine) : ["| (none) | — | — | — | — |"],
+      rowHeadings
+    ),
+    ...section(
+      "Shared supersession evidence",
+      "proved",
+      "release-engineering",
+      "git cat-file -e <candidate>:<path>",
+      "tree-level file-existence sweep plus the BASE-01/BASE-02 requirement-level completion citation, shared by every excluded-superseded and carried-on-candidate row above",
+      [
+        "**Tree level:**", "",
+        "| Path | Exists on candidate | Superseded by |", "| --- | --- | --- |",
+        ...treeRows, "",
+        sharedEvidence ? `Plan inventory: abandoned line reached plan ${sharedEvidence.tree_level.plan_inventory.abandoned_line_max_plan}, milestone line reached plan ${sharedEvidence.tree_level.plan_inventory.milestone_line_max_plan}.` : "(no rows to prove)",
+        "",
+        "**Requirement level:**", "",
+        `File: \`${sharedEvidence ? escape(sharedEvidence.requirement_level.file) : "—"}\``, "",
+        "| Requirement | Matched text |", "| --- | --- |",
+        ...reqRows
+      ]
+    ),
+    ...section(
+      "PR #44 disposition",
+      pr.disposition,
+      "release-engineering",
+      "gh pr view 44",
+      `head \`${pr.head_ref}\` @ \`${pr.head_object}\` is base \`${pr.base_ref}\` @ \`${pr.base_object}\` plus ${pr.ahead_of_base} commit(s), ${pr.behind_base} behind; state=${pr.state}, mergeable=${pr.mergeable}`,
+      [
+        escape(pr.note), "",
+        "| PR-branch commit | Milestone-branch commit | Patch id |", "| --- | --- | --- |",
+        ...matchedRows
+      ]
+    ),
+    ""
+  ].join("\n");
+}
+
 function main() {
   const args = process.argv;
   const input = args[args.indexOf("--input") + 1];
@@ -138,6 +228,11 @@ function main() {
   const repository = args[args.indexOf("--expected-repository") + 1];
   if (!input || !out || !repository) throw new Error("--input, --out, and --expected-repository are required");
   fs.writeFileSync(out, renderIntegrationDisposition(JSON.parse(fs.readFileSync(input, "utf8")), { expectedRepository: repository }));
+  const ledgerInput = args[args.indexOf("--ledger-input") + 1];
+  const ledgerOut = args[args.indexOf("--ledger-out") + 1];
+  if (ledgerInput && ledgerOut) {
+    fs.writeFileSync(ledgerOut, renderExcludedLedger(JSON.parse(fs.readFileSync(ledgerInput, "utf8")), { expectedRepository: repository }));
+  }
 }
 if (!process.env.NODE_TEST_CONTEXT && process.argv[1] === new URL(import.meta.url).pathname) {
   try { main(); } catch (error) { console.error(`integration disposition render: FAIL: ${error.message}`); process.exitCode = 1; }
@@ -211,5 +306,120 @@ if (process.env.NODE_TEST_CONTEXT && process.argv[1] === new URL(import.meta.url
       renderIntegrationDisposition(forward, { expectedRepository: "szTheory/accrue" }),
       renderIntegrationDisposition(shuffled, { expectedRepository: "szTheory/accrue" })
     );
+  });
+
+  // ===================================================================================
+  // renderExcludedLedger (D-07/D-36/D-39)
+  // ===================================================================================
+
+  function ledgerRow(commit, overrides = {}) {
+    return {
+      commit,
+      subject: `subject for ${commit.slice(0, 7)}`,
+      disposition: "excluded-superseded",
+      superseded_by: "no-equivalent",
+      supersession_evidence: {
+        tree_level: {
+          command: ["git", "cat-file", "-e"],
+          files: [
+            { path: "scripts/ci/capture_ci_baseline.sh", exists_on_candidate: false, superseded_by_path: "scripts/ci/collect_ci_baseline.mjs" },
+            { path: "scripts/ci/verify_ci_baseline_contract.sh", exists_on_candidate: false, superseded_by_path: "scripts/ci/verify_ci_baseline.mjs" },
+            { path: "scripts/ci/ci_baseline_workflow_policy.json", exists_on_candidate: false, superseded_by_path: null }
+          ],
+          plan_inventory: { command: ["git", "ls-tree", "-r", "--name-only"], abandoned_line_max_plan: 11, milestone_line_max_plan: 21 }
+        },
+        requirement_level: {
+          command: ["git", "show"],
+          file: ".planning/milestones/v1.61-REQUIREMENTS.md",
+          requirements: [
+            { id: "BASE-01", matched_text: "| BASE-01 | Phase 226 | Complete |" },
+            { id: "BASE-02", matched_text: "| BASE-02 | Phase 226 | Complete |" }
+          ]
+        }
+      },
+      patch_id_occurrences_main: 1,
+      patch_id_occurrences_candidate: 0,
+      published_elsewhere: "none",
+      ...overrides
+    };
+  }
+
+  function minimalLedger(rows, overrides = {}) {
+    return {
+      schema_version: 1,
+      repository: "szTheory/accrue",
+      candidate: { ref: "refs/heads/integration/v1.62-candidate", object: "a".repeat(40), committed_at: "2026-09-15T00:00:00+00:00" },
+      local_main: "b".repeat(40),
+      excluded_commit_count: rows.filter((row) => row.disposition !== "carried-on-candidate").length,
+      rows,
+      pr_44: {
+        number: 44,
+        head_ref: "fix/release-boot-env-resolver",
+        head_object: "c".repeat(40),
+        base_ref: "main",
+        base_object: "b".repeat(40),
+        state: "open",
+        mergeable: "MERGEABLE",
+        ahead_of_base: 4,
+        behind_base: 0,
+        matched_commits: [{ pr_branch_commit: "d".repeat(40), milestone_commit: "e".repeat(40), patch_id: "f".repeat(40) }],
+        disposition: "close-unmerged-cite-superseding",
+        note: "close unmerged, citing superseding SHAs"
+      },
+      ...overrides
+    };
+  }
+
+  test("renders deterministic markdown for a minimal valid ledger", () => {
+    const ledger = minimalLedger([ledgerRow("1".repeat(40))]);
+    const first = renderExcludedLedger(ledger, { expectedRepository: "szTheory/accrue" });
+    const second = renderExcludedLedger(ledger, { expectedRepository: "szTheory/accrue" });
+    assert.equal(first, second, "render must be deterministic");
+  });
+
+  test("every row's full 40-hex commit id is rendered verbatim and greppable", () => {
+    const rows = [
+      ledgerRow("1".repeat(40), { disposition: "excluded-rejected" }),
+      ledgerRow("2".repeat(40), { disposition: "carried-on-candidate", superseded_by: ["2".repeat(40)] }),
+      ledgerRow("3".repeat(40))
+    ];
+    const rendered = renderExcludedLedger(minimalLedger(rows), { expectedRepository: "szTheory/accrue" });
+    for (const row of rows) assert.ok(rendered.includes(row.commit), `expected ${row.commit} to appear verbatim`);
+  });
+
+  test("published_elsewhere renders prominently for a row that carries it", () => {
+    const rows = [ledgerRow("4".repeat(40), { published_elsewhere: "origin/phase-226-baseline-5da8e6b88735" })];
+    const rendered = renderExcludedLedger(minimalLedger(rows), { expectedRepository: "szTheory/accrue" });
+    assert.match(rendered, /origin\/phase-226-baseline-5da8e6b88735/);
+  });
+
+  test("excluded-rejected and carried-on-candidate sections precede the excluded-superseded section", () => {
+    const rendered = renderExcludedLedger(minimalLedger([ledgerRow("5".repeat(40))]), { expectedRepository: "szTheory/accrue" });
+    const headings = rendered.split("\n").filter((line) => line.startsWith("## "));
+    assert.deepEqual(headings, [
+      "## Rejected salvage (excluded-rejected)",
+      "## Carried on candidate (carried-on-candidate)",
+      "## Superseded, collapsed (excluded-superseded)",
+      "## Shared supersession evidence",
+      "## PR #44 disposition"
+    ]);
+  });
+
+  test("re-running the renderer over the committed JSON produces byte-identical output regardless of input row order", () => {
+    const rows = [
+      ledgerRow("6".repeat(40), { disposition: "excluded-rejected" }),
+      ledgerRow("7".repeat(40)),
+      ledgerRow("8".repeat(40), { disposition: "carried-on-candidate", superseded_by: ["8".repeat(40)] })
+    ];
+    const forward = minimalLedger(rows);
+    const shuffled = minimalLedger([...rows].reverse());
+    assert.equal(
+      renderExcludedLedger(forward, { expectedRepository: "szTheory/accrue" }),
+      renderExcludedLedger(shuffled, { expectedRepository: "szTheory/accrue" })
+    );
+  });
+
+  test("rejects rendering an invalid ledger", () => {
+    assert.throws(() => renderExcludedLedger({ schema_version: 2 }, { expectedRepository: "szTheory/accrue" }), /unsupported schema version|missing required field/);
   });
 }
