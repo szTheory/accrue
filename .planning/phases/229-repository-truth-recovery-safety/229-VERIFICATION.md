@@ -1,12 +1,12 @@
 ---
 phase: 229-repository-truth-recovery-safety
-verified: 2026-09-15T17:00:18Z
+verified: 2026-09-15T22:04:20Z
 status: passed
 behavior_unverified: 0
 score: 7/7 must-haves verified
-re_verification: "Yes — supersedes the 2026-09-13 gaps_found report, which predated plans 229-15 through 229-20"
+re_verification: "Yes — re-stamped 2026-09-15 after Phase 230 modified 4 shared covered files; supersedes the 2026-09-15T17:00:18Z report and the 2026-09-13 gaps_found report"
 evidence_mode: executable
-covered_digest: "v1:sha256:677e5abe1d6a2d2da3fb0a25d16226dabbb562d41bc335e136cfcbf01c910a19"
+covered_digest: "v1:sha256:1ed64380d7cb0e98350b5d4a8badddb3cb6a6bac35e936fb39c849007fbe99fd"
 covered_files:
   - .planning/phases/229-repository-truth-recovery-safety/229-01-PLAN.md
   - .planning/phases/229-repository-truth-recovery-safety/229-01-SUMMARY.md
@@ -215,3 +215,51 @@ only as a local self-test.
 
 _Verified: 2026-09-15_
 _Method: direct execution of every referenced suite at HEAD_
+
+---
+
+## Re-verification — 2026-09-15T22:04:20Z (digest re-stamp)
+
+**Why.** Phase 230 modified four files Phase 229 declared in `covered_files`, which invalidated the
+prior `covered_digest` and routed Phase 229 to `stale`:
+
+| File | Changed by |
+|------|-----------|
+| `scripts/ci/README.md` | `04e18145` (230-03), `d059a0e4` (230-06) |
+| `scripts/ci/collect_repository_inventory.mjs` | `92f6eb12` (230-01) |
+| `scripts/ci/preserve_repository_state.sh` | `92f6eb12` (230-01), `38dbe905` (230-01) |
+| `scripts/ci/verify_repository_inventory.mjs` | `92f6eb12`, `939af6d3` (230-01), `e311e48f` (230-06) |
+
+The staleness signal is drift in shared implementation files owned jointly with Phase 230 — not a
+Phase 229 regression. Every current `*-PLAN.md` / `*-SUMMARY.md` in the phase directory (40 files)
+is still represented in `covered_files`; no artifact was added after verification without coverage.
+
+**Re-executed against current bytes — all PASS:**
+
+| Gate | Result |
+|------|--------|
+| `node --test scripts/ci/ci_monitor.cjs` | 4/4 pass |
+| `node --test scripts/ci/collect_repository_inventory.mjs` | 10/10 pass |
+| `node --test scripts/ci/render_repository_inventory.mjs` | 1/1 pass |
+| `node --test scripts/ci/verify_repository_inventory.mjs` | 5/5 pass |
+| `node --test scripts/ci/phase229_gap_closure.test.mjs` | 21/21 pass |
+| `bash scripts/ci/preserve_repository_state.sh --self-test` | PASS |
+| `node scripts/ci/ci_monitor.cjs --self-test --verify-wrapper scripts/ci/watch_ci.sh --verify-docs scripts/ci/README.md` | PASS |
+| `node scripts/ci/verify_phase229_handoff_invariants.mjs --self-test` | PASS (all 10 invariants) |
+| `node scripts/ci/verify_repository_inventory.mjs --fixtures` + all eight strict flags | PASS |
+
+Total: 41/41 unit tests, 4/4 self-test gates.
+
+**Not re-executable in this session (recorded, not claimed).** UAT items 21 and 38 run the strict
+verifier and `--run-final-chain` against the *real* private recovery capsule. Both require
+maintainer-held values (`PHASE229_PRIVATE_MANIFEST`, `PHASE229_CAPSULE_DIR`) that are local-only by
+design and absent from this environment; the command fails closed with
+`--recovery-manifest requires a non-empty private manifest path`. Their original passing evidence
+from the 2026-09-15T17:00:18Z run stands unchanged and is not re-asserted here. The 339
+`refs/accrue-preserve/phase-229/*` preservation refs remain present in this checkout.
+
+**Coverage note for follow-up.** `scripts/ci/collect_repository_inventory.mjs` and
+`scripts/ci/preserve_repository_state.sh` now appear in Phase 229's `covered_files` but in *no*
+Phase 230 verification report, despite Phase 230 having modified both. Phase 229's re-stamp covers
+their current bytes; if Phase 230 is meant to own them going forward, its own coverage set should
+be widened.
