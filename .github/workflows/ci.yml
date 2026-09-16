@@ -311,6 +311,23 @@ jobs:
       - name: Verify linked release contract
         run: bash scripts/ci/verify_release_contract.sh
 
+      # Phase 232 (D-39, REL-05): side-effect-free proof that Release Please
+      # is ready to produce a version-and-changelog-consistent release PR.
+      # Gated on token availability so a fork PR without repo secrets does
+      # not produce a misleading red -- but the skip path is visible (this
+      # step's own output states it skipped for a missing token) and the
+      # script itself still fails closed on a missing token when actually
+      # invoked (see the negative control in 232-05-SUMMARY.md).
+      - name: Release PR readiness dry run (REL-05)
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if [ -z "${GH_TOKEN:-}" ]; then
+            echo "Release PR readiness dry run (REL-05): SKIPPED -- no GH_TOKEN available (fork PR without repo secrets)."
+            exit 0
+          fi
+          bash scripts/ci/verify_release_pr_readiness.sh
+
   release-gate:
     name: Release gate (${{ matrix.compatibility }}; elixir=${{ matrix.elixir }} otp=${{ matrix.otp }} sigra=${{ matrix.sigra }} opentelemetry=${{ matrix.opentelemetry }})${{ matrix.support == 'advisory' && ' [advisory]' || '' }}
     if: github.event_name != 'schedule'
