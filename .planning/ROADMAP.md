@@ -106,11 +106,22 @@ Plans:
 **Plans**: 6 plans
 
 Plans:
+**Wave 1**
+
 - [ ] 231-01-PLAN.md — Re-cut the candidate and freeze it behind a shape/ancestry verifier (wave 1)
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
 - [ ] 231-02-PLAN.md — GATE-03 window-disposition collect/render/verify triad (wave 2)
 - [ ] 231-03-PLAN.md — GATE-01 declared-cohort evidence and the scratch-clone run (wave 2)
 - [ ] 231-04-PLAN.md — GATE-02 push, dispatch, poll, and exact-SHA check evidence (wave 2)
+
+**Wave 3** *(blocked on Wave 2 completion)*
+
 - [ ] 231-05-PLAN.md — Re-derive and dispose all ten ship windows (wave 3)
+
+**Wave 4** *(blocked on Wave 3 completion)*
+
 - [ ] 231-06-PLAN.md — CI wiring, evidence README rows, and the capsule mint (wave 4)
 
 ### Phase 232: Bounded Hygiene & Release Handoff
