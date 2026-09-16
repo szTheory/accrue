@@ -9,6 +9,7 @@ import { spawn, spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { resolvePhaseEvidencePath } from "./phase_evidence_path.mjs";
 import { annotationSweepNeeds, declaredMergeBlockingJobs } from "./collect_gate01_cohort.mjs";
+import { isMainModule } from "./main_module.mjs";
 
 const SCHEMA_VERSION = 1;
 const CONCLUSIONS = new Set(["success", "failure", "cancelled", "skipped", "neutral", "timed_out", "action_required", "stale", "unknown"]);
@@ -525,9 +526,16 @@ async function main() {
   const output = `${[...(snapshot ? [snapshot] : []), ...records, ...cohorts].map((record) => JSON.stringify(validateRecord(record, validationContext))).sort((left, right) => left.localeCompare(right)).join("\n")}\n`;
   if (options.out) fs.writeFileSync(options.out, output); else process.stdout.write(output);
 }
-if (!process.env.NODE_TEST_CONTEXT && process.argv[1] === fileURLToPath(import.meta.url)) main().catch((error) => { console.error(`collect ci baseline: FAIL: ${error.message}`); process.exitCode = 1; });
+let invokedAsEntrypoint = false;
+try {
+  invokedAsEntrypoint = isMainModule(import.meta.url);
+} catch {
+  invokedAsEntrypoint = false;
+}
 
-if (process.env.NODE_TEST_CONTEXT && process.argv[1] === fileURLToPath(import.meta.url)) {
+if (invokedAsEntrypoint && !process.env.NODE_TEST_CONTEXT) main().catch((error) => { console.error(`collect ci baseline: FAIL: ${error.message}`); process.exitCode = 1; });
+
+if (invokedAsEntrypoint && process.env.NODE_TEST_CONTEXT) {
   const GOOD_CI_YML = [
     "# Merge-blocking on pull_request: `job-a`, `job-b`,",
     "# `annotation-sweep`.",
@@ -637,7 +645,12 @@ if (process.env.NODE_TEST_CONTEXT && process.argv[1] === fileURLToPath(import.me
   });
   test("the Phase 226 fixture cases continue to pass unchanged after the extension", () => {
     const verifyPath = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "verify_ci_baseline.mjs");
-    const result = spawnSync(process.execPath, [verifyPath, "--fixtures", "--expected-repository", "acme/accrue"], { encoding: "utf8" });
+    // D-29 fallout: verify_ci_baseline.mjs is now guard-migrated, so an
+    // inherited NODE_TEST_CONTEXT would make it register its own self-test
+    // instead of running --fixtures. Clear it for this spawned child.
+    const childEnv = { ...process.env };
+    delete childEnv.NODE_TEST_CONTEXT;
+    const result = spawnSync(process.execPath, [verifyPath, "--fixtures", "--expected-repository", "acme/accrue"], { encoding: "utf8", env: childEnv });
     assert.equal(result.status, 0, `verify_ci_baseline.mjs --fixtures must exit 0: ${result.stderr || result.stdout}`);
     assert.match(result.stdout, /ci baseline fixtures: PASS/);
   });

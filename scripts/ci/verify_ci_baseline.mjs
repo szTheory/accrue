@@ -5,10 +5,12 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
+import test from "node:test";
 import { fileURLToPath } from "node:url";
 import { collectBaseline as collectBaselineWithContext, cohortFingerprint, createRepositoryValidationContext, declaredRequiredJobSet, liveRequiredJobSet, liveRuns, normalizeJob, normalizeRun, requiredJobSetDrift, summarizeCohorts as summarizeCohortsWithContext, unresolvedPrerequisites, validateRecord, workflowRunnerImage } from "./collect_ci_baseline.mjs";
 import { resolvePhaseEvidencePath } from "./phase_evidence_path.mjs";
 import { deriveStagedPathPercentiles, renderBaseline } from "./render_ci_baseline.mjs";
+import { isMainModule } from "./main_module.mjs";
 
 // D-18: the same live ci.yml path collect_ci_baseline.mjs resolves its
 // WORKFLOW_RUNNER_PATH from -- resolved relative to this module's own
@@ -574,13 +576,15 @@ export async function verifyFixtures(validationContext) {
     fs.writeFileSync(forgedInput, `${JSON.stringify(forged)}\n`);
     const snapshot = { schema_version: 1, kind: "snapshot", snapshot_generated_at: "2026-08-11T00:00:00Z", window_start: "2026-08-10T00:00:00Z", window_end: "2026-08-11T00:00:00Z", repository: "acme/accrue", workflow: "ci.yml", sample_target: 20 };
     fs.writeFileSync(forgedInput, `${JSON.stringify(snapshot)}\n${JSON.stringify(forged)}\n`);
-    const forgedRender = spawnSync(process.execPath, [path.resolve("scripts/ci/render_ci_baseline.mjs"), "--input", forgedInput, "--out", forgedOutput, "--expected-repository", "acme/accrue"], { encoding: "utf8" });
+    const childEnv = { ...process.env };
+    delete childEnv.NODE_TEST_CONTEXT;
+    const forgedRender = spawnSync(process.execPath, [path.resolve("scripts/ci/render_ci_baseline.mjs"), "--input", forgedInput, "--out", forgedOutput, "--expected-repository", "acme/accrue"], { encoding: "utf8", env: childEnv });
     assert.notEqual(forgedRender.status, 0, "production renderer rejects forged NDJSON before output");
     assert.ok(!fs.existsSync(forgedOutput), "forged renderer invocation leaves no output");
     const foreign = { ...records[0], run_url: "https://github.com/attacker/forged/actions/runs/42" };
     const foreignInput = path.join(temp, "foreign.ndjson"); const foreignOutput = path.join(temp, "foreign.md");
     fs.writeFileSync(foreignInput, `${JSON.stringify(snapshot)}\n${JSON.stringify(foreign)}\n`);
-    const foreignRender = spawnSync(process.execPath, [path.resolve("scripts/ci/render_ci_baseline.mjs"), "--input", foreignInput, "--out", foreignOutput, "--expected-repository", "acme/accrue"], { encoding: "utf8" });
+    const foreignRender = spawnSync(process.execPath, [path.resolve("scripts/ci/render_ci_baseline.mjs"), "--input", foreignInput, "--out", foreignOutput, "--expected-repository", "acme/accrue"], { encoding: "utf8", env: childEnv });
     assert.notEqual(foreignRender.status, 0, "production renderer rejects foreign repository evidence");
     assert.ok(!fs.existsSync(foreignOutput), "foreign renderer invocation leaves no output");
     rejectsForbiddenFields(fixture, validationContext);
@@ -632,9 +636,21 @@ async function main() {
   console.log("ci baseline fixtures: PASS");
 }
 
+let invokedAsEntrypoint = false;
 try {
-  await main();
-} catch (error) {
-  console.error(`ci baseline fixtures: FAIL: ${error.message}`);
-  process.exitCode = 1;
+  invokedAsEntrypoint = isMainModule(import.meta.url);
+} catch {
+  invokedAsEntrypoint = false;
+}
+if (invokedAsEntrypoint && process.env.NODE_TEST_CONTEXT) {
+  test("ci baseline fixtures pass every negative control", async () => {
+    await verifyFixtures(createRepositoryValidationContext({ expectedRepository: "acme/accrue" }));
+  });
+} else if (invokedAsEntrypoint) {
+  try {
+    await main();
+  } catch (error) {
+    console.error(`ci baseline fixtures: FAIL: ${error.message}`);
+    process.exitCode = 1;
+  }
 }

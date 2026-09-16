@@ -1,8 +1,11 @@
 #!/usr/bin/env node
 
+import assert from "node:assert/strict";
 import fs from "node:fs";
+import test from "node:test";
 import { fileURLToPath } from "node:url";
 import { createRepositoryValidationContext, validateRecord } from "./collect_ci_baseline.mjs";
+import { isMainModule } from "./main_module.mjs";
 
 function escapeMarkdown(value) { return String(value).replace(/[\\|`<>]/g, (char) => `\\${char}`).replace(/[\r\n]+/g, " "); }
 function milliseconds(value) { return value == null ? "—" : `${Math.round(value / 1000)}s`; }
@@ -119,4 +122,41 @@ function main() {
   if (records.filter((record) => record.kind === "snapshot").length !== 1) throw new Error("renderer CLI requires exactly one snapshot record");
   const output = renderBaseline(records, validationContext); if (out) fs.writeFileSync(out, output); else process.stdout.write(output);
 }
-if (process.argv[1] === fileURLToPath(import.meta.url)) { try { main(); } catch (error) { console.error(`render ci baseline: FAIL: ${error.message}`); process.exitCode = 1; } }
+
+let invokedAsEntrypoint = false;
+try {
+  invokedAsEntrypoint = isMainModule(import.meta.url);
+} catch {
+  invokedAsEntrypoint = false;
+}
+if (invokedAsEntrypoint && process.env.NODE_TEST_CONTEXT) {
+  test("renderBaseline renders a minimal valid snapshot/run/job record set to Markdown", () => {
+    const validationContext = createRepositoryValidationContext({ expectedRepository: "acme/accrue" });
+    const snapshot = {
+      schema_version: 1, kind: "snapshot", snapshot_generated_at: "2026-09-16T00:00:00Z",
+      window_start: "2026-09-15T00:00:00Z", window_end: "2026-09-16T00:00:00Z",
+      repository: "acme/accrue", workflow: "ci.yml", sample_target: 20
+    };
+    const run = {
+      schema_version: 1, kind: "run", run_id: 1, run_url: "https://github.com/acme/accrue/actions/runs/1",
+      sha: "a".repeat(12), created_at: "2026-09-16T00:00:00Z", started_at: "2026-09-16T00:00:05Z",
+      completed_at: "2026-09-16T00:05:00Z", event_class: "push", branch_class: "default_branch",
+      cohort_fingerprint: "cohort-v1-0123456789abcdef", workflow_duration_ms: 295000,
+      conclusion: "success", run_attempt: 1, original_run_id: 1, provider_state: "non_run"
+    };
+    const job = {
+      schema_version: 1, kind: "job", run_id: 1, job_id: 10, job_url: "https://github.com/acme/accrue/actions/runs/1/job/10",
+      job_name: "build", stable_identity: "build", matrix_identity: "matrix-v1-0123456789abcdef",
+      started_at: "2026-09-16T00:00:10Z", completed_at: "2026-09-16T00:03:00Z", conclusion: "success",
+      duration_ms: 170000, runner_queue_ms: 5000, dag_wait_ms: null, failure_signature: null,
+      setup_costs: {}, cache: {}
+    };
+    const records = [snapshot, run, job];
+    records.forEach((record) => validateRecord(record, validationContext));
+    const output = renderBaseline(records, validationContext);
+    assert.match(output, /# CI Baseline/);
+    assert.match(output, /acme\/accrue/);
+  });
+} else if (invokedAsEntrypoint) {
+  try { main(); } catch (error) { console.error(`render ci baseline: FAIL: ${error.message}`); process.exitCode = 1; }
+}
