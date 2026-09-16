@@ -3,8 +3,10 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { spawnSync } from "node:child_process";
 import test from "node:test";
+import { isMainModule } from "./main_module.mjs";
 import {
   V161_TAG_OBJECT,
   V161_COMMIT_OBJECT,
@@ -457,7 +459,7 @@ export function verifyFixtures() {
     // this fixture repository does not carry. require-post-merge-scope and
     // require-determinism are identity-agnostic and still exercise real git
     // reads, which is what this scenario needs to prove no mutation occurs.
-    const invoke = () => spawnSync(process.execPath, [new URL(import.meta.url).pathname, "--records", recordsPath, "--rendered", renderedPath, "--expected-repository", "szTheory/accrue", "--repo", fx.repo, "--require-post-merge-scope", "--require-determinism"], { encoding: "utf8", env: { ...process.env, NODE_TEST_CONTEXT: "" } });
+    const invoke = () => spawnSync(process.execPath, [fileURLToPath(import.meta.url), "--records", recordsPath, "--rendered", renderedPath, "--expected-repository", "szTheory/accrue", "--repo", fx.repo, "--require-post-merge-scope", "--require-determinism"], { encoding: "utf8", env: { ...process.env, NODE_TEST_CONTEXT: "" } });
     const [first, second] = [invoke(), invoke()];
     const after = git(fx.repo, ["for-each-ref", "refs"]);
     assert.equal(first.status, 0, first.stderr);
@@ -730,8 +732,20 @@ async function main() {
   console.log(`integration disposition verification: PASS${verificationSuffix}`);
 }
 
-if (process.env.NODE_TEST_CONTEXT) {
+// D-29/231-REVIEW IN-01: this file previously had no entrypoint guard at all
+// -- main() ran unconditionally on import whenever NODE_TEST_CONTEXT was
+// unset. isMainModule() throws (never returns a silent false) when there is
+// no invoking entrypoint (e.g. a bare `node -e` dynamic import); that throw
+// is caught here and treated as "not the entrypoint" so an ambiguous import
+// stays side-effect-free instead of crashing (see main_module.mjs, D-29).
+let invokedAsEntrypoint = false;
+try {
+  invokedAsEntrypoint = isMainModule(import.meta.url);
+} catch {
+  invokedAsEntrypoint = false;
+}
+if (invokedAsEntrypoint && process.env.NODE_TEST_CONTEXT) {
   test("integration disposition fixtures pass every negative control", () => verifyFixtures());
-} else {
+} else if (invokedAsEntrypoint) {
   main().catch((error) => { console.error(`integration disposition verify: FAIL: ${error.message}`); process.exitCode = 1; });
 }

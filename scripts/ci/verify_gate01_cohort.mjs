@@ -5,6 +5,7 @@ import path from "node:path";
 import { spawnSync } from "node:child_process";
 import assert from "node:assert/strict";
 import test from "node:test";
+import { isMainModule } from "./main_module.mjs";
 import {
   OUT_OF_COHORT_LANES,
   declaredMergeBlockingJobs,
@@ -319,8 +320,20 @@ async function main() {
   console.log(`gate01 cohort verification: PASS${suffix}`);
 }
 
-if (process.env.NODE_TEST_CONTEXT) {
+// D-29/231-REVIEW IN-01: this file previously had no entrypoint guard at all
+// -- main() ran unconditionally on import whenever NODE_TEST_CONTEXT was
+// unset. isMainModule() throws (never returns a silent false) when there is
+// no invoking entrypoint; that throw is caught here and treated as "not the
+// entrypoint" so an ambiguous import stays side-effect-free instead of
+// crashing (see main_module.mjs, D-29).
+let invokedAsEntrypoint = false;
+try {
+  invokedAsEntrypoint = isMainModule(import.meta.url);
+} catch {
+  invokedAsEntrypoint = false;
+}
+if (invokedAsEntrypoint && process.env.NODE_TEST_CONTEXT) {
   test("gate01 cohort fixtures pass every negative control", () => verifyFixtures());
-} else {
+} else if (invokedAsEntrypoint) {
   main().catch((error) => { console.error(`gate01 cohort verify: FAIL: ${error.message}`); process.exitCode = 1; });
 }

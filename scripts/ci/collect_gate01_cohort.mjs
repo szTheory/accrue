@@ -1,9 +1,11 @@
 #!/usr/bin/env node
 import fs from "node:fs";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { spawnSync } from "node:child_process";
 import assert from "node:assert/strict";
 import test from "node:test";
+import { isMainModule } from "./main_module.mjs";
 
 const SHA = /^[a-f0-9]{40}$/;
 const REPOSITORY = /^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/;
@@ -238,11 +240,11 @@ function main() {
   fs.writeFileSync(out, `${JSON.stringify(evidence, null, 2)}\n`, { mode: 0o600 });
 }
 
-if (!process.env.NODE_TEST_CONTEXT && process.argv[1] === new URL(import.meta.url).pathname) {
+if (!process.env.NODE_TEST_CONTEXT && isMainModule(import.meta.url)) {
   try { main(); } catch (error) { console.error(`gate01 cohort collect: FAIL: ${error.message}`); process.exitCode = 1; }
 }
 
-if (process.env.NODE_TEST_CONTEXT && process.argv[1] === new URL(import.meta.url).pathname) {
+if (process.env.NODE_TEST_CONTEXT && isMainModule(import.meta.url)) {
   const GOOD_CI_YML = [
     "# Merge-blocking on pull_request: `job-a`, `job-b`,",
     "# `annotation-sweep`.",
@@ -266,7 +268,7 @@ if (process.env.NODE_TEST_CONTEXT && process.argv[1] === new URL(import.meta.url
   });
 
   test("declaredMergeBlockingJobs derives exactly the thirteen live keys from the real ci.yml", () => {
-    const source = fs.readFileSync(path.join(path.dirname(new URL(import.meta.url).pathname), "..", "..", ".github", "workflows", "ci.yml"), "utf8");
+    const source = fs.readFileSync(path.join(path.dirname(fileURLToPath(import.meta.url)), "..", "..", ".github", "workflows", "ci.yml"), "utf8");
     const declared = declaredMergeBlockingJobs(source);
     assert.equal(declared.length, 13);
     assert.deepEqual(new Set(declared), EXPECTED_HEADER_JOBS);

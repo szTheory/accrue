@@ -1,8 +1,8 @@
 // scripts/ci/main_module.mjs
 //
 // D-29: shared, correct module-boundary guard. Both idioms it replaces
-// (`argv[1] === new URL(import.meta.url).pathname` and
-// `import.meta.url === \`file://${argv[1]}\``) silently evaluate false when
+// (an argv[1]-to-file-URL pathname comparison, and its file:// URL-template
+// counterpart) silently evaluate false when
 // the repository checkout path contains a space -- a merge-blocking gate's
 // main() never runs, the script prints nothing, and it exits 0. This helper
 // resolves both sides through realpath so a space, symlink, or relative

@@ -2,6 +2,7 @@
 import fs from "node:fs";
 import assert from "node:assert/strict";
 import test from "node:test";
+import { isMainModule } from "./main_module.mjs";
 import { validateDisposition, validateDispositionLedger, HAZARD_CLASSES } from "./collect_integration_disposition.mjs";
 
 const escape = (value) => String(value).replace(/[\\|`<>]/g, "\\$&").replace(/[\r\n]+/g, " ");
@@ -248,11 +249,11 @@ function main() {
     fs.writeFileSync(ledgerOut, renderExcludedLedger(JSON.parse(fs.readFileSync(ledgerInput, "utf8")), { expectedRepository: repository }));
   }
 }
-if (!process.env.NODE_TEST_CONTEXT && process.argv[1] === new URL(import.meta.url).pathname) {
+if (!process.env.NODE_TEST_CONTEXT && isMainModule(import.meta.url)) {
   try { main(); } catch (error) { console.error(`integration disposition render: FAIL: ${error.message}`); process.exitCode = 1; }
 }
 
-if (process.env.NODE_TEST_CONTEXT && process.argv[1] === new URL(import.meta.url).pathname) {
+if (process.env.NODE_TEST_CONTEXT && isMainModule(import.meta.url)) {
   function laneRow(lane, overrides = {}) {
     return { lane, state: "non_run", owner: "231", command: ["mix", "test"], reason: "belongs to Phase 231", ...overrides };
   }

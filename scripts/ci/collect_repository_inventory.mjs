@@ -6,6 +6,7 @@ import path from "node:path";
 import { spawnSync } from "node:child_process";
 import assert from "node:assert/strict";
 import test from "node:test";
+import { isMainModule } from "./main_module.mjs";
 
 const SHA = /^[a-f0-9]{40}$/; const DIGEST = /^[a-f0-9]{64}$/;
 const REPOSITORY = /^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/; const ISO = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/;
@@ -471,9 +472,9 @@ export function collectRepositoryInventory({ repo, recoveryManifest: manifestPat
 export const collectLocalInventory = (options) => collectRepositoryInventory(options);
 function parseArgs(argv) { const result = { observeRemote: false }; for (let index = 0; index < argv.length; index += 1) { if (argv[index] === "--observe-remote") { result.observeRemote = true; continue; } if (argv[index] === "--refresh-cached-refs") fail("--refresh-cached-refs requires separately authorized recovery workflow"); if (!argv[index].startsWith("--") || !argv[index + 1]) fail("usage: --repo OWNER/REPO --recovery-manifest FILE --expected-manifest-sha256 DIGEST --recovery-bundle FILE --artifact-authorization FILE --final-capture-attestation FILE [--observe-remote] --out FILE"); result[argv[index].slice(2)] = argv[++index]; } return result; }
 function main() { const options = parseArgs(process.argv.slice(2)); if (!options.repo || !options["recovery-manifest"] || !options["expected-manifest-sha256"] || !options["recovery-bundle"] || !options["artifact-authorization"] || !options["final-capture-attestation"] || !options.out) fail("--repo, --recovery-manifest, --expected-manifest-sha256, --recovery-bundle, --artifact-authorization, --final-capture-attestation, and --out are required"); const inventory = collectRepositoryInventory({ repo: process.cwd(), recoveryManifest: path.resolve(options["recovery-manifest"]), expectedManifestSha256: options["expected-manifest-sha256"], recoveryBundle: path.resolve(options["recovery-bundle"]), artifactAuthorization: path.resolve(options["artifact-authorization"]), finalCaptureAttestation: path.resolve(options["final-capture-attestation"]), expectedRepository: options.repo, preservationPhase: options["preservation-phase"] || DEFAULT_PRESERVATION_PHASE, observeRemote: options.observeRemote, adapter: options.observeRemote ? createGhApiReadAdapter({ repository: options.repo }) : undefined }); fs.writeFileSync(options.out, `${JSON.stringify(inventory, null, 2)}\n`, { mode: 0o600 }); }
-if (!process.env.NODE_TEST_CONTEXT && process.argv[1] === new URL(import.meta.url).pathname) { try { main(); } catch (error) { console.error(`repository inventory collect: FAIL: ${error.message}`); process.exitCode = 1; } }
+if (!process.env.NODE_TEST_CONTEXT && isMainModule(import.meta.url)) { try { main(); } catch (error) { console.error(`repository inventory collect: FAIL: ${error.message}`); process.exitCode = 1; } }
 
-if (process.env.NODE_TEST_CONTEXT && process.argv[1] === new URL(import.meta.url).pathname) {
+if (process.env.NODE_TEST_CONTEXT && isMainModule(import.meta.url)) {
   function generatedArtifactFixture() {
     const scratch = fs.mkdtempSync(path.join(fs.realpathSync(os.tmpdir()), "phase229-artifact-flow-"));
     const repo = path.join(scratch, "repo"); const capsule = path.join(scratch, "capsule");

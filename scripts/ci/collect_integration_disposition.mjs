@@ -5,6 +5,7 @@ import path from "node:path";
 import { spawnSync } from "node:child_process";
 import assert from "node:assert/strict";
 import test from "node:test";
+import { isMainModule } from "./main_module.mjs";
 
 const SHA = /^[a-f0-9]{40}$/;
 const REPOSITORY = /^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/;
@@ -904,11 +905,11 @@ function main() {
     fs.writeFileSync(options["ledger-out"], `${JSON.stringify(ledger, null, 2)}\n`, { mode: 0o600 });
   }
 }
-if (!process.env.NODE_TEST_CONTEXT && process.argv[1] === new URL(import.meta.url).pathname) {
+if (!process.env.NODE_TEST_CONTEXT && isMainModule(import.meta.url)) {
   try { main(); } catch (error) { console.error(`integration disposition collect: FAIL: ${error.message}`); process.exitCode = 1; }
 }
 
-if (process.env.NODE_TEST_CONTEXT && process.argv[1] === new URL(import.meta.url).pathname) {
+if (process.env.NODE_TEST_CONTEXT && isMainModule(import.meta.url)) {
   function fixtureRepo() {
     const scratch = fs.mkdtempSync(path.join(fs.realpathSync(os.tmpdir()), "phase230-collect-fixture-"));
     const repo = path.join(scratch, "repo");

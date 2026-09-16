@@ -27,6 +27,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import test from "node:test";
 import assert from "node:assert/strict";
+import { isMainModule } from "./main_module.mjs";
 
 export const repositoryRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
 
@@ -693,7 +694,7 @@ function main() {
   console.log(`verify_phase230_archive_invariants: PASS (scanned_files=${result.scannedFileCount}, literals=${result.literalCount})`);
 }
 
-if (!process.env.NODE_TEST_CONTEXT && process.argv[1] === new URL(import.meta.url).pathname) {
+if (!process.env.NODE_TEST_CONTEXT && isMainModule(import.meta.url)) {
   try {
     main();
   } catch (error) {

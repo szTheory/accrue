@@ -5,6 +5,7 @@ import path from "node:path";
 import { spawnSync } from "node:child_process";
 import assert from "node:assert/strict";
 import test from "node:test";
+import { isMainModule } from "./main_module.mjs";
 import { resolvePhaseEvidencePath, repositoryRoot } from "./phase_evidence_path.mjs";
 
 const SHA = /^[a-f0-9]{40}$/;
@@ -224,11 +225,11 @@ function main() {
   const out = options.out || defaultOutPath();
   fs.writeFileSync(out, `${JSON.stringify(record, null, 2)}\n`, { mode: 0o600 });
 }
-if (!process.env.NODE_TEST_CONTEXT && process.argv[1] === new URL(import.meta.url).pathname) {
+if (!process.env.NODE_TEST_CONTEXT && isMainModule(import.meta.url)) {
   try { main(); } catch (error) { console.error(`window dispositions collect: FAIL: ${error.message}`); process.exitCode = 1; }
 }
 
-if (process.env.NODE_TEST_CONTEXT && process.argv[1] === new URL(import.meta.url).pathname) {
+if (process.env.NODE_TEST_CONTEXT && isMainModule(import.meta.url)) {
   function fixtureRepo() {
     const scratch = fs.mkdtempSync(path.join(fs.realpathSync(os.tmpdir()), "phase231-window-collect-fixture-"));
     const repo = path.join(scratch, "repo");

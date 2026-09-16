@@ -3,6 +3,7 @@ import fs from "node:fs";
 import path from "node:path";
 import assert from "node:assert/strict";
 import test from "node:test";
+import { isMainModule } from "./main_module.mjs";
 import { validateWindowDispositions, ROW_KINDS, ROW_DISPOSITIONS } from "./collect_window_dispositions.mjs";
 import { resolvePhaseEvidencePath, repositoryRoot } from "./phase_evidence_path.mjs";
 
@@ -127,11 +128,11 @@ function main() {
   const rendered = renderWindowDispositions(record);
   fs.writeFileSync(outPath, rendered, { mode: 0o600 });
 }
-if (!process.env.NODE_TEST_CONTEXT && process.argv[1] === new URL(import.meta.url).pathname) {
+if (!process.env.NODE_TEST_CONTEXT && isMainModule(import.meta.url)) {
   try { main(); } catch (error) { console.error(`window dispositions render: FAIL: ${error.message}`); process.exitCode = 1; }
 }
 
-if (process.env.NODE_TEST_CONTEXT && process.argv[1] === new URL(import.meta.url).pathname) {
+if (process.env.NODE_TEST_CONTEXT && isMainModule(import.meta.url)) {
   function minimalRecord(overrides = {}) {
     return {
       schema_version: 1,

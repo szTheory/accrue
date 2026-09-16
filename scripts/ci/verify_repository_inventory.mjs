@@ -7,6 +7,7 @@ import os from "node:os";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
 import test from "node:test";
+import { isMainModule } from "./main_module.mjs";
 import {
   collectRepositoryInventory,
   createRepositoryValidationContext,
@@ -1216,12 +1217,24 @@ async function main() {
   console.log("repository inventory verification: PASS");
 }
 
-if (process.env.NODE_TEST_CONTEXT) {
+// D-29/231-REVIEW IN-01: this file previously had no entrypoint guard at all
+// -- main() ran unconditionally on import whenever NODE_TEST_CONTEXT was
+// unset. isMainModule() throws (never returns a silent false) when there is
+// no invoking entrypoint; that throw is caught here and treated as "not the
+// entrypoint" so an ambiguous import stays side-effect-free instead of
+// crashing (see main_module.mjs, D-29).
+let invokedAsEntrypoint = false;
+try {
+  invokedAsEntrypoint = isMainModule(import.meta.url);
+} catch {
+  invokedAsEntrypoint = false;
+}
+if (invokedAsEntrypoint && process.env.NODE_TEST_CONTEXT) {
   test("strict repository inventory flags enforce independent negative controls", () => verifyFixtures());
   test("rendered recovery procedure restores original bundle heads safely", () => verifyRenderedRecoveryProcedureControls());
   test("CR-08 complete categories derive planning digests independently", () => verifyIndependentPlanningAuthority());
   test("WR-02 standalone recovery rejects followed bundle aliases", () => verifyNoFollowBundleAuthority());
   test("typed ref continuity partitions owned/remote-tracking/preservation refs correctly", () => verifyTypedRefContinuity());
-} else {
+} else if (invokedAsEntrypoint) {
   main().catch((error) => { console.error(`repository inventory fixtures: FAIL: ${error.message}`); process.exitCode = 1; });
 }

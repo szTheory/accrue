@@ -2,6 +2,7 @@
 import fs from "node:fs";
 import assert from "node:assert/strict";
 import test from "node:test";
+import { isMainModule } from "./main_module.mjs";
 import { createRepositoryValidationContext, validateInventory } from "./collect_repository_inventory.mjs";
 
 const escape = (value) => String(value).replace(/[\\|`<>]/g, "\\$&").replace(/[\r\n]+/g, " ");
@@ -63,9 +64,9 @@ export function renderRepositoryInventory(inventory, validationContext) {
   ].join("\n");
 }
 function main() { const args = process.argv; const input = args[args.indexOf("--input") + 1]; const out = args[args.indexOf("--out") + 1]; const repository = args[args.indexOf("--expected-repository") + 1]; if (!input || !out || !repository) throw new Error("--input, --out, and --expected-repository are required"); const context = createRepositoryValidationContext({ expectedRepository: repository }); fs.writeFileSync(out, renderRepositoryInventory(JSON.parse(fs.readFileSync(input, "utf8")), context)); }
-if (!process.env.NODE_TEST_CONTEXT && process.argv[1] === new URL(import.meta.url).pathname) { try { main(); } catch (error) { console.error(`repository inventory render: FAIL: ${error.message}`); process.exitCode = 1; } }
+if (!process.env.NODE_TEST_CONTEXT && isMainModule(import.meta.url)) { try { main(); } catch (error) { console.error(`repository inventory render: FAIL: ${error.message}`); process.exitCode = 1; } }
 
-if (process.env.NODE_TEST_CONTEXT && process.argv[1] === new URL(import.meta.url).pathname) {
+if (process.env.NODE_TEST_CONTEXT && isMainModule(import.meta.url)) {
   test("CR-04 plural remote rows retain every ordered producing request", () => {
     const repository = "szTheory/accrue";
     const observedAt = "2026-09-13T00:00:00.000Z";

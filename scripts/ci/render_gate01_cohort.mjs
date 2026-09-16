@@ -2,6 +2,7 @@
 import fs from "node:fs";
 import assert from "node:assert/strict";
 import test from "node:test";
+import { isMainModule } from "./main_module.mjs";
 import { validateGate01Evidence, COHORT_STATES } from "./collect_gate01_cohort.mjs";
 
 // D-31: a stable start/end HTML comment marker pair so this evidence can be
@@ -63,11 +64,11 @@ function main() {
   fs.writeFileSync(options.out, renderGate01Cohort(record));
 }
 
-if (!process.env.NODE_TEST_CONTEXT && process.argv[1] === new URL(import.meta.url).pathname) {
+if (!process.env.NODE_TEST_CONTEXT && isMainModule(import.meta.url)) {
   try { main(); } catch (error) { console.error(`gate01 cohort render: FAIL: ${error.message}`); process.exitCode = 1; }
 }
 
-if (process.env.NODE_TEST_CONTEXT && process.argv[1] === new URL(import.meta.url).pathname) {
+if (process.env.NODE_TEST_CONTEXT && isMainModule(import.meta.url)) {
   function provedRow(job, overrides = {}) { return { job, lane_class: "merge-blocking", state: "proved", exit_code: 0, argv: ["true"], ...overrides }; }
   function nonRunRow(job, overrides = {}) { return { job, lane_class: "not-a-declared-gate", state: "non_run", reason: "fixture reason", ...overrides }; }
   function minimalRecord(rows = [], overrides = {}) {
