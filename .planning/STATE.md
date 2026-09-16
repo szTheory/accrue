@@ -5,16 +5,16 @@ milestone_name: Release Integration & Repository Hygiene
 current_phase: 231
 current_phase_name: Exact-SHA Release Gate Proof
 status: executing
-stopped_at: Completed 231-04-PLAN.md
-last_updated: "2026-09-16T13:46:02.606Z"
+stopped_at: Completed 231-03-PLAN.md
+last_updated: "2026-09-16T14:43:21.829Z"
 last_activity: 2026-09-15
 last_activity_desc: Phase 231 execution started
-state_head: 6729a9dba08d6f42e8d67c322404cf06559bc343
+state_head: e540affebdb0a5a59eddf32ece9f2cd7faddecc7
 progress:
   total_phases: 4
   completed_phases: 2
   total_plans: 33
-  completed_plans: 30
+  completed_plans: 31
   percent: 50
 ---
 
@@ -31,7 +31,7 @@ See: `.planning/PROJECT.md` (updated 2026-09-15)
 ## Current Position
 
 Phase: 231 (Exact-SHA Release Gate Proof) — EXECUTING
-Plan: 4 of 6
+Plan: 5 of 6
 Status: Ready to execute
 Last activity: 2026-09-15 — Phase 231 execution started
 
@@ -85,6 +85,7 @@ Progress: [█████░░░░░] 50% (2/4 phases complete; 27/27 plans
 | Phase 231 P01 | 55min | 2 tasks | 2 files |
 | Phase 231 P02 | 70min | 3 tasks | 3 files |
 | Phase 231 P04 | 70min | 3 tasks | 5 files |
+| Phase 231 P03 | 3h05min | 3 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -149,6 +150,8 @@ Progress: [█████░░░░░] 50% (2/4 phases complete; 27/27 plans
 - [Phase 231]: [Phase 231]: Re-cut integration/v1.62-candidate from current milestone HEAD (85aed062 merge / f524f2a6 tip), superseding bab50d92; collectRecutGates compares live git facts against RECORD-supplied expectations (never the same live value it just derived), which is what makes the D-05 "second merge point" and stale-revert-expectation failure modes detectable at all.
 - [Phase 231]: 231-02: Fourth collect/render/verify triad (window dispositions) joins 1:1 by row id to WINDOWS.md via a single assertSameMap call since ledger status and record disposition share the same fixed/waived vocabulary. — D-26/D-30: the missing/extra/changed triple falls out of one exact-map comparison rather than a separate mapping layer.
 - [Phase 231]: GATE-02 dispatch of ci.yml at the exact candidate SHA proved a genuine CI failure (docs-contracts-shift-left, the release-gate matrix, Phase 18 Stripe Tax gate, Admin UI ratchet guardrails); the evidence is recorded honestly (workflow_dispatch event class, closed provider_state enum), and Phase 232 is blocked on real fixes, not on a fabricated pass.
+- [Phase 231]: [Phase 231]: 231-03 GATE-01 cohort proof executed the declared 13-job merge-blocking cohort in a fresh cache-free scratch clone at the candidate ref's live tip (f524f2a6), never the bare merge-commit SHA -- so GATE-01 and GATE-02 prove the identical SHA.
+- [Phase 231]: [Phase 231]: 231-03 recorded an honest discrepancy on the release-gate row rather than suppressing it: this local GATE-01 proof passed every required matrix cell it exercised (Floor/Primary/Primary+OpenTelemetry), while GATE-02's real GitHub dispatch reported failures in non-advisory release-gate cells on GitHub-hosted runners -- both results stand as independent evidence, neither overrides the other.
 
 ### Pending Todos
 
@@ -182,8 +185,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-09-16T13:46:02.573Z
-Stopped at: Completed 231-04-PLAN.md
+Last session: 2026-09-16T14:42:59.193Z
+Stopped at: Completed 231-03-PLAN.md
 
 229-20 outcome (commits 024eaeca, ddd9a137, c6677152):
 
