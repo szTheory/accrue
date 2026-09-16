@@ -206,6 +206,9 @@ jobs:
       # a CI step binding to a mutable integration branch would still be
       # wrong -- these are the repository's own regression suites, not a
       # live-candidate proof.
+      - name: Shared module-boundary guard contract (D-29)
+        run: node --test --test-reporter=tap scripts/ci/main_module.mjs
+
       - name: Recut candidate shape and ancestry contract (D-01, D-04, D-07)
         run: >-
           node --test scripts/ci/verify_recut_candidate.mjs &&
