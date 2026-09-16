@@ -311,13 +311,13 @@ function runFinalChain(options) {
     const testOwned = fs.existsSync(path.join(repo, TEST_OWNED_MARKER)) && fs.existsSync(path.join(capsule, TEST_OWNED_MARKER));
     if (!testOwned) {
       runStep("preservation self-test", "bash", [path.join(SCRIPT_DIR, "preserve_repository_state.sh"), "--self-test"], repo);
-      runStep("collector tests", process.execPath, ["--test", path.join(SCRIPT_DIR, "collect_repository_inventory.mjs")], repo);
+      runStep("collector tests", process.execPath, ["--test", "--test-reporter=tap", path.join(SCRIPT_DIR, "collect_repository_inventory.mjs")], repo);
     }
     runStep("final bounded collection", process.execPath, [path.join(SCRIPT_DIR, "collect_repository_inventory.mjs"), "--repo", REPOSITORY, "--recovery-manifest", options.recoveryManifest, "--expected-manifest-sha256", options.expectedManifestSha256, "--recovery-bundle", options.recoveryBundle, "--artifact-authorization", authorization, "--final-capture-attestation", finalCapture, "--observe-remote", "--out", tempRecords], repo);
     runStep("deterministic rendering", process.execPath, [path.join(SCRIPT_DIR, "render_repository_inventory.mjs"), "--input", tempRecords, "--out", tempRendered, "--expected-repository", REPOSITORY], repo);
     if (!testOwned) {
-      runStep("gap closure tests", process.execPath, ["--test", path.join(SCRIPT_DIR, "phase229_gap_closure.test.mjs")], repo);
-      runStep("inventory verifier tests", process.execPath, ["--test", path.join(SCRIPT_DIR, "verify_repository_inventory.mjs")], repo);
+      runStep("gap closure tests", process.execPath, ["--test", "--test-reporter=tap", path.join(SCRIPT_DIR, "phase229_gap_closure.test.mjs")], repo);
+      runStep("inventory verifier tests", process.execPath, ["--test", "--test-reporter=tap", path.join(SCRIPT_DIR, "verify_repository_inventory.mjs")], repo);
       runStep("monitor wrapper and docs", process.execPath, [path.join(SCRIPT_DIR, "ci_monitor.cjs"), "--self-test", "--verify-wrapper", path.join(SCRIPT_DIR, "watch_ci.sh"), "--verify-docs", path.join(SCRIPT_DIR, "README.md")], repo);
     }
     runStep("strict real-capsule verification", process.execPath, [path.join(SCRIPT_DIR, "verify_repository_inventory.mjs"), "--records", tempRecords, "--rendered", tempRendered, "--expected-repository", REPOSITORY, "--repository-root", repo, "--recovery-manifest", options.recoveryManifest, "--expected-manifest-sha256", options.expectedManifestSha256, "--recovery-bundle", options.recoveryBundle, "--artifact-authorization", authorization, "--require-recovery", "--require-all-ref-recovery", "--require-typed-artifacts", "--require-complete-categories", "--require-edge-cases", "--require-command-provenance", "--require-privacy-controls", "--require-determinism", "--require-workflow-metadata-authorization"], repo);

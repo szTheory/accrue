@@ -213,7 +213,7 @@ function documentedStrictFixture() {
   assert.equal(preserved.status, 0, preserved.stderr);
   const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
   const manifestDigest = sha256(fs.readFileSync(manifestPath));
-  for (const source of [VERIFY_INVENTORY, RENDER_INVENTORY, fileURLToPath(new URL("./collect_repository_inventory.mjs", import.meta.url))]) fs.copyFileSync(source, path.join(scripts, path.basename(source)));
+  for (const source of [VERIFY_INVENTORY, RENDER_INVENTORY, fileURLToPath(new URL("./collect_repository_inventory.mjs", import.meta.url)), fileURLToPath(new URL("./main_module.mjs", import.meta.url))]) fs.copyFileSync(source, path.join(scripts, path.basename(source)));
   const rows = git(repo, ["for-each-ref", "--format=%(refname) %(objectname)"]).split("\n").filter(Boolean).map((line) => {
     const separator = line.indexOf(" "); const name = line.slice(0, separator);
     return { name, object: line.slice(separator + 1), role: name === "refs/heads/main" ? "local_main" : name === "refs/remotes/origin/main" ? "cached_origin_main" : name === "refs/tags/v1.61" ? "v161_tag" : name.startsWith(PRESERVATION_PREFIX) ? "phase229_preservation" : "other" };
@@ -434,7 +434,7 @@ function runFinalChainCli(fixture, extraEnv = {}) {
   ], { encoding: "utf8", shell: false, timeout: 120_000, env: { ...process.env, NODE_TEST_CONTEXT: "", ...extraEnv } });
 }
 
-test("WR-01 real final-chain subprocess proves canonical publication, attestation binding, and exact rollback around the actual mutation boundaries", () => {
+test("WR-01 real final-chain subprocess proves canonical publication, attestation binding, and exact rollback around the actual mutation boundaries", { timeout: 120_000 }, () => {
   const fixture = finalChainFixture();
   const recordsPath = path.join(fixture.repo, CANONICAL_RECORDS_RELATIVE);
   const renderedPath = path.join(fixture.repo, CANONICAL_RENDERED_RELATIVE);
@@ -570,7 +570,7 @@ test("CR-03 strict recovery accepts an active ref advanced past the manifest fre
 // (commit B), after which further phase artifacts land (commit C). Capture ancestry plus the
 // external attestation must keep strict verification valid as the active branch advances --
 // otherwise the act of committing the inventory would invalidate the inventory.
-test("CR-03 published canonical pair stays strictly verifiable after its own commit and later phase commits", () => {
+test("CR-03 published canonical pair stays strictly verifiable after its own commit and later phase commits", { timeout: 120_000 }, () => {
   const fixture = finalChainFixture();
   const recordsPath = path.join(fixture.repo, CANONICAL_RECORDS_RELATIVE);
   const renderedPath = path.join(fixture.repo, CANONICAL_RENDERED_RELATIVE);
