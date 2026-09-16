@@ -137,7 +137,49 @@ Plans:
   4. A reviewer can assess an integration pull request with a concise risk summary, exact verification evidence, rollback instructions, and no unrelated feature scope.
   5. A reviewer can confirm Release Please is producing, or is ready to produce, a version-and-changelog-consistent release pull request without merging it or publishing packages.
 
-**Plans**: TBD
+**Plans**: 11 plans
+
+Plans:
+**Wave 1**
+
+- [ ] 232-01-PLAN.md — Shared module-boundary guard, proven end to end
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
+- [ ] 232-02-PLAN.md — Guard-idiom migration and vacuous-test closure across scripts/ci
+
+**Wave 3** *(blocked on Wave 2 completion)*
+
+- [ ] 232-03-PLAN.md — CI script contract meta-verifier and ci_baseline triad wiring
+- [ ] 232-04-PLAN.md — Window-disposition bucketing honesty and phase-231 re-render
+
+**Wave 4** *(blocked on Wave 3 completion)*
+
+- [ ] 232-05-PLAN.md — Release Please readiness proof and release-docs truth (REL-05)
+
+**Wave 5** *(blocked on Wave 4 completion)*
+
+- [ ] 232-06-PLAN.md — Parked Admin UI ratchet lane split and honest CI summary
+
+**Wave 6** *(blocked on Wave 5 completion)*
+
+- [ ] 232-07-PLAN.md — Hygiene disposition triad and pre-cleanup classification (HYG-01)
+
+**Wave 7** *(blocked on Wave 6 completion)*
+
+- [ ] 232-08-PLAN.md — Bounded command-backed cleanup and inventory recapture (HYG-03)
+
+**Wave 8** *(blocked on Wave 7 completion)*
+
+- [ ] 232-09-PLAN.md — Candidate re-cut with blob-identity losslessness proof
+
+**Wave 9** *(blocked on Wave 8 completion)*
+
+- [ ] 232-10-PLAN.md — Re-gate at the new SHA and mint the window-disposition record
+
+**Wave 10** *(blocked on Wave 9 completion)*
+
+- [ ] 232-11-PLAN.md — Reviewable integration pull request (REL-04)
 
 ## Progress
 
@@ -146,7 +188,7 @@ Plans:
 | 229. Repository Truth & Recovery Safety | 20/20 | Complete    | 2026-09-15 |
 | 230. Reviewable History Integration | 7/7 | Complete    | 2026-09-15 |
 | 231. Exact-SHA Release Gate Proof | 6/6 | Complete    | 2026-09-16 |
-| 232. Bounded Hygiene & Release Handoff | 0/TBD | Not started | - |
+| 232. Bounded Hygiene & Release Handoff | 0/11 | Not started | - |
 
 <details>
 <summary>✅ v1.61 CI Evidence & Critical-Path Hardening (Phases 225-228) — SHIPPED 2026-09-12</summary>
