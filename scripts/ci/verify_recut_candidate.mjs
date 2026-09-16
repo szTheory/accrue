@@ -272,6 +272,32 @@ export function applyRequireToolchain(gates) {
   assertGateProved(gates, "toolchain_pin", "recut candidate toolchain check failed");
 }
 
+// WR-01: --expected-repository is required but was never compared against
+// anything -- a decorative flag implying a safety property it did not
+// provide, unlike its three sibling verifiers' same-named flag. There is no
+// `repository` field in RECUT_RECORD_FIELDS to compare against (adding one
+// would change the committed 231-ROLLBACK-POINT.json schema), so this checks
+// the flag against the LIVE observed repository identity instead: the
+// `origin` remote URL, normalized from either the
+// `https://github.com/OWNER/NAME(.git)` or `git@github.com:OWNER/NAME(.git)`
+// form. A missing/unresolvable origin remote is an explicit failure naming
+// the repo path, never a silent pass.
+function liveRepositoryIdentity(repo) {
+  const result = spawnSync("git", ["-C", repo, "remote", "get-url", "origin"], { encoding: "utf8", shell: false, timeout: 20000 });
+  if (result.error || result.status !== 0) fail(`unable to resolve the origin remote for ${repo}: ${(result.stderr || result.error?.message || "no origin remote configured").trim()}`);
+  const url = result.stdout.trim();
+  const httpsMatch = /^https:\/\/github\.com\/([^/]+)\/([^/]+?)(?:\.git)?\/?$/.exec(url);
+  const sshMatch = /^git@github\.com:([^/]+)\/([^/]+?)(?:\.git)?$/.exec(url);
+  const match = httpsMatch || sshMatch;
+  if (!match) fail(`unable to parse the origin remote URL as an owner/name GitHub identity for ${repo}: ${url}`);
+  return `${match[1]}/${match[2]}`;
+}
+
+export function assertExpectedRepositoryIdentity(repo, expectedRepository) {
+  const observed = liveRepositoryIdentity(repo);
+  if (observed !== expectedRepository) fail(`--expected-repository does not match the repository's live origin remote identity: expected ${expectedRepository}, observed ${observed} (repo=${repo})`);
+}
+
 export function applyRequireSupersession(record) {
   if (record.supersedes.candidate_object === record.candidate_object) fail("supersedes.candidate_object must differ from candidate_object");
   nonEmptyString(record.supersedes.cause, "supersedes.cause");
@@ -502,6 +528,34 @@ export function verifyFixtures() {
     applyRequireSupersession(okRecord);
   }
 
+  // Scenario 9a (WR-01): --expected-repository is checked against the live
+  // origin remote identity, not just required-but-ignored. A matching value
+  // passes; a mismatched value fails, naming both the observed and expected
+  // repository. Covers both the https://github.com/OWNER/NAME(.git) and
+  // git@github.com:OWNER/NAME(.git) origin URL forms.
+  {
+    const scratch = fs.mkdtempSync(path.join(fs.realpathSync(os.tmpdir()), "phase231-recut-identity-fixture-"));
+    const repo = path.join(scratch, "repo");
+    try {
+      fs.mkdirSync(repo);
+      run(repo, ["init", "-q", "-b", "main"]);
+      run(repo, ["config", "user.email", "phase231@example.invalid"]);
+      run(repo, ["config", "user.name", "Phase 231"]);
+      run(repo, ["remote", "add", "origin", "https://github.com/szTheory/accrue.git"]);
+      assertExpectedRepositoryIdentity(repo, "szTheory/accrue");
+      assert.throws(() => assertExpectedRepositoryIdentity(repo, "someone-else/not-accrue"), /expected someone-else\/not-accrue, observed szTheory\/accrue/);
+
+      run(repo, ["remote", "set-url", "origin", "git@github.com:szTheory/accrue.git"]);
+      assertExpectedRepositoryIdentity(repo, "szTheory/accrue");
+      assert.throws(() => assertExpectedRepositoryIdentity(repo, "someone-else/not-accrue"), /expected someone-else\/not-accrue, observed szTheory\/accrue/);
+
+      run(repo, ["remote", "remove", "origin"]);
+      assert.throws(() => assertExpectedRepositoryIdentity(repo, "szTheory/accrue"), /unable to resolve the origin remote/);
+    } finally {
+      fs.rmSync(scratch, { recursive: true, force: true });
+    }
+  }
+
   // Scenario 9: no worktree row is created anywhere in this suite (D-07, D-12).
   withFixture((fx) => {
     const before = run(fx.repo, ["worktree", "list"]);
@@ -539,6 +593,7 @@ function main() {
   const expectedRepository = parsed.values["expected-repository"];
   if (!expectedRepository) fail("--expected-repository is required");
   const repo = parsed.values.repo || process.cwd();
+  assertExpectedRepositoryIdentity(repo, expectedRepository);
   const recordPath = parsed.values.record || defaultRecordPath();
   const record = validateRecutRecord(JSON.parse(fs.readFileSync(recordPath, "utf8")));
   if (parsed.values.candidate) {

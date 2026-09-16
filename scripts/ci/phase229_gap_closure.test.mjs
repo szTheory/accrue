@@ -169,7 +169,9 @@ function runStrictVerifier(fixture, inventory, flags = []) {
 }
 
 function runIsolatedNodeTest(file, namePattern) {
-  return spawnSync(process.execPath, ["--test", `--test-name-pattern=${namePattern}`, file], {
+  // Node 22+ defaults to the spec reporter, which emits "✔ name" rather than
+  // TAP's "ok 1 - name"; both callers below assert on TAP output, so force it.
+  return spawnSync(process.execPath, ["--test", "--test-reporter=tap", `--test-name-pattern=${namePattern}`, file], {
     cwd: path.dirname(path.dirname(path.dirname(VERIFY_INVENTORY))),
     encoding: "utf8",
     shell: false,
