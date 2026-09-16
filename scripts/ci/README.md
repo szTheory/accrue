@@ -168,6 +168,25 @@ node scripts/ci/verify_phase230_archive_invariants.mjs --fixtures && \
 node scripts/ci/verify_phase230_archive_invariants.mjs
 ```
 
+## Phase 231 exact-SHA release gate proof
+
+The maintainer's actual question at the end of this phase is "can this SHA ship, and what is still unproven?" Read it in under a minute: the candidate was re-cut from current milestone HEAD because the prior candidate object predated its own gating verifiers (it lacked the very checks GATE-01/GATE-02 must run), so `integration/v1.62-candidate` now points at a fresh merge that carries them. GATE-01 is a local proof: the repository's own declared merge-blocking cohort, executed from a scratch clone at the candidate's exact SHA. GATE-02 is a real GitHub Actions proof for that same SHA, but it is explicitly `workflow_dispatch`-class -- obtained by pushing the branch and dispatching `ci.yml` directly, never by opening a pull request. Phase 232 will produce a second, distinct `pull_request`-class check-run set for the same SHA; do not read the `workflow_dispatch` proof recorded here as if it were that pull-request proof, six months from now or otherwise. GATE-03 re-derives every one of the ten `.planning/WINDOWS.md` ship windows at the candidate SHA and drives each to `fixed` or `waived` with an owner, rationale, release impact, and current evidence.
+
+| Evidence | What it answers | Command |
+| --- | --- | --- |
+| [Recut candidate rollback point](../../.planning/phases/231-exact-sha-release-gate-proof/231-ROLLBACK-POINT.json) | What the re-cut changed relative to the superseded candidate and how to undo it with a proven, executed revert | `node scripts/ci/verify_recut_candidate.mjs --repo . --record .planning/phases/231-exact-sha-release-gate-proof/231-ROLLBACK-POINT.json --candidate integration/v1.62-candidate --expected-repository szTheory/accrue --require-shape --require-ancestry --require-revert-proof --require-toolchain --require-supersession` |
+| [GATE-01 cohort evidence](../../.planning/phases/231-exact-sha-release-gate-proof/231-GATE-01-EVIDENCE.json) and [rendered diagnostic](../../.planning/phases/231-exact-sha-release-gate-proof/231-GATE-01-EVIDENCE.md) | Which declared merge-blocking gates ran in a fresh, cache-free clean checkout at the exact candidate SHA, and with what exit codes | `node scripts/ci/verify_gate01_cohort.mjs --repo . --records .planning/phases/231-exact-sha-release-gate-proof/231-GATE-01-EVIDENCE.json --rendered .planning/phases/231-exact-sha-release-gate-proof/231-GATE-01-EVIDENCE.md --candidate integration/v1.62-candidate --expected-repository szTheory/accrue --require-cohort-completeness --require-declaration-drift --require-clean-checkout --require-determinism` |
+| [GATE-02 evidence](../../.planning/phases/231-exact-sha-release-gate-proof/231-GATE-02-EVIDENCE.ndjson) and [rendered diagnostic](../../.planning/phases/231-exact-sha-release-gate-proof/231-GATE-02-EVIDENCE.md) | Which required GitHub Actions jobs ran for the exact candidate SHA, under which event class (`workflow_dispatch`, not `pull_request`), with which provider states | `node scripts/ci/verify_ci_baseline.mjs --records .planning/phases/231-exact-sha-release-gate-proof/231-GATE-02-EVIDENCE.ndjson --rendered .planning/phases/231-exact-sha-release-gate-proof/231-GATE-02-EVIDENCE.md --expected-repository szTheory/accrue --expect-event-class workflow_dispatch --require-required-job-set --require-event-class --require-exit-codes` |
+| [Window dispositions](../../.planning/phases/231-exact-sha-release-gate-proof/231-WINDOW-DISPOSITIONS.json) and [rendered diagnostic](../../.planning/phases/231-exact-sha-release-gate-proof/231-WINDOW-DISPOSITIONS.md) | Whether every former `.planning/WINDOWS.md` ship window is fixed or waived, with owner, rationale, release impact, and current re-derived evidence | `node scripts/ci/verify_window_dispositions.mjs --repo . --records .planning/phases/231-exact-sha-release-gate-proof/231-WINDOW-DISPOSITIONS.json --rendered .planning/phases/231-exact-sha-release-gate-proof/231-WINDOW-DISPOSITIONS.md --candidate integration/v1.62-candidate --expected-repository szTheory/accrue --require-row-join --require-evidence-freshness --require-waiver-completeness --require-determinism` |
+
+<!-- phase231-window-dispositions:start -->
+The rendered window-dispositions Markdown is fenced with a stable `phase231-window-dispositions` start/end marker pair so Phase 232 can splice the rendered block into the integration PR body without re-deriving the content.
+<!-- phase231-window-dispositions:end -->
+
+<!-- phase231-gate01-cohort:start -->
+The rendered GATE-01 cohort Markdown is fenced with a stable `phase231-gate01-cohort` start/end marker pair so Phase 232 can splice the rendered block into the integration PR body without re-deriving the content.
+<!-- phase231-gate01-cohort:end -->
+
 ## Phase 227 bounded critical-path measurement
 
 Phase 227's bounded candidate cohort is terminally **kept**. The exact-three
