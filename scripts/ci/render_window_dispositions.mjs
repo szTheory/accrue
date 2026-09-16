@@ -161,17 +161,69 @@ if (process.env.NODE_TEST_CONTEXT && isMainModule(import.meta.url)) {
     assert.throws(() => renderWindowDispositions({ schema_version: 2 }), /unsupported schema version|missing required field/);
   });
 
-  test("renders every bucket heading even when the record has zero rows", () => {
+  test("renders every D-15 bucket heading even when the record has zero rows", () => {
     const rendered = renderWindowDispositions(minimalRecord());
     const headings = rendered.split("\n").filter((line) => line.startsWith("## "));
     assert.deepEqual(headings, [
       "Candidate identity",
-      "Waived (maintainer must accept)",
-      "Failed on the merits",
-      "Skipped, advisory, or not run",
-      "Fixed (proved at the candidate SHA)"
+      "Waived — the gate ran and failed",
+      "Waived — the gate never proved anything",
+      "Waived — the gate passed anyway",
+      "Fixed — proved at the candidate SHA"
     ].map((title) => `## ${title}`));
-    assert.match(rendered, /0 rows in this section\./);
+    assert.match(rendered, /0 row\(s\)\./);
+  });
+
+  // D-13: the bucketing map is total over the closed (disposition, state)
+  // pair space -- an unmapped pair must fail() rather than fall through to a
+  // default bucket, naming the row id and both offending values. Every pair
+  // that survives validateWindowRow (CR-01) is by construction one of the
+  // six legal pairs the map declares, so this defensive branch is exercised
+  // by calling bucketOf() directly on a hand-constructed row that bypasses
+  // validation -- exactly the scenario the branch guards against.
+  test("bucketOf fails closed on an unmapped (disposition, state) pair, naming the row id and both values", () => {
+    const brokenRow = { id: 99, disposition: "fixed", state: "failed" };
+    assert.throws(
+      () => bucketOf(brokenRow),
+      /row 99 has an unmapped \(disposition, state\) pair: \(fixed, failed\)/
+    );
+  });
+
+  // D-15: waived rows split by their own state into three named sections,
+  // and a real currently-legal "waived but proved anyway" row is its own
+  // declared bucket, not a comment.
+  test("waived rows split by state into three named sections, including the real waived-but-proved case", () => {
+    const rows = [
+      { id: 1, phase: "220", kind: "unrun-verify", disposition: "waived", state: "failed", owner: "m", rationale: "r", release_impact: "i", current_evidence: "the gate ran and failed" },
+      { id: 2, phase: "220", kind: "unrun-verify", disposition: "waived", state: "non_run", owner: "m", rationale: "r", release_impact: "i", current_evidence: "the gate never ran" },
+      { id: 3, phase: "220", kind: "unrun-verify", disposition: "waived", state: "proved", owner: "m", rationale: "r", release_impact: "i", current_evidence: "the gate passed anyway, a ledger/reality mismatch" },
+      fixedRow({ id: 4 })
+    ];
+    const rendered = renderWindowDispositions(minimalRecord({ rows }));
+    assert.ok(rendered.indexOf("## Waived — the gate ran and failed") < rendered.indexOf("| 1 |"));
+    assert.ok(rendered.indexOf("## Waived — the gate never proved anything") < rendered.indexOf("| 2 |"));
+    assert.ok(rendered.indexOf("## Waived — the gate passed anyway") < rendered.indexOf("| 3 |"));
+    assert.ok(rendered.indexOf("## Fixed — proved at the candidate SHA") < rendered.indexOf("| 4 |"));
+  });
+
+  // D-19/specifics: the header states this file is a deterministic
+  // re-render of the JSON record and that the JSON is the evidence of
+  // record, and it renders the record's per-row evidence_command.
+  test("header states the file is a deterministic projection and the JSON is the evidence of record, and renders evidence_command", () => {
+    const rendered = renderWindowDispositions(minimalRecord({
+      rows: [fixedRow({ id: 1, evidence_command: ["git", "show", "HEAD:foo.mjs"] })]
+    }));
+    assert.match(rendered, /deterministic (re-render|projection)/);
+    assert.match(rendered, /JSON is the evidence of record/);
+    assert.match(rendered, /git show HEAD:foo\.mjs/);
+  });
+
+  // D-18: the rendered header notes the row-join strict check applies only
+  // to the current phase's own record.
+  test("header states the row-join strict check applies only to the current phase's own record", () => {
+    const rendered = renderWindowDispositions(minimalRecord());
+    assert.match(rendered, /row-join strict check applies only to the current phase/);
+    assert.match(rendered, /historical records verify schema and determinism only/);
   });
 
   // CR-01 (added after this test was first written): a non-waived row must
@@ -185,7 +237,7 @@ if (process.env.NODE_TEST_CONTEXT && isMainModule(import.meta.url)) {
   // bucket heading unconditionally regardless of row content, so the
   // heading-list assertion below passes independent of which buckets are
   // actually populated.
-  test("leads with waived, then failed, then skipped/advisory/non_run, then fixed collapsed last", () => {
+  test("leads with waived-failed, then waived-never-proved, then waived-passed-anyway, then fixed collapsed last", () => {
     const rows = [
       fixedRow({ id: 1 }),
       waivedRow({ id: 2 }),
@@ -194,7 +246,12 @@ if (process.env.NODE_TEST_CONTEXT && isMainModule(import.meta.url)) {
     ];
     const rendered = renderWindowDispositions(minimalRecord({ rows }));
     const headings = rendered.split("\n").filter((line) => line.startsWith("## ")).filter((line) => line !== "## Candidate identity");
-    assert.deepEqual(headings, ["## Waived (maintainer must accept)", "## Failed on the merits", "## Skipped, advisory, or not run", "## Fixed (proved at the candidate SHA)"]);
+    assert.deepEqual(headings, [
+      "## Waived — the gate ran and failed",
+      "## Waived — the gate never proved anything",
+      "## Waived — the gate passed anyway",
+      "## Fixed — proved at the candidate SHA"
+    ]);
     // row 2 and row 3 (waived) must render before row 1 and row 4 (fixed/proved).
     assert.ok(rendered.indexOf("| 2 |") < rendered.indexOf("| 1 |"));
     assert.ok(rendered.indexOf("| 3 |") < rendered.indexOf("| 1 |"));

@@ -14,7 +14,12 @@ const ISO = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}[+-]\d{2}:\d{2}$/;
 
 // D-29: Phase 226's proof-state lexicon. No aggregate boolean, no
 // `deferred`/`n/a`/`green` alias reachable.
-const STATES = new Set(["proved", "failed", "skipped", "advisory", "non_run"]);
+// D-14/D-32-04: exported so the renderer's total (disposition, state) pair
+// map and the verifier's cartesian-product reachability test can enumerate
+// the same closed state set this module validates against -- neither may
+// hand-transcribe a copy that could drift from this one.
+export const ROW_STATES = new Set(["proved", "failed", "skipped", "advisory", "non_run"]);
+const STATES = ROW_STATES;
 const REJECTED_STATES = new Set(["deferred", "n/a", "green"]);
 
 // D-22: the closed set of ship-window row kinds this triad disposes of, and
@@ -449,5 +454,9 @@ if (process.env.NODE_TEST_CONTEXT && isMainModule(import.meta.url)) {
   test("ROW_KINDS and ROW_DISPOSITIONS carry exactly their documented members", () => {
     assert.deepEqual([...ROW_KINDS].sort(), ["deviation", "unrun-verify"]);
     assert.deepEqual([...ROW_DISPOSITIONS].sort(), ["fixed", "waived"]);
+  });
+
+  test("ROW_STATES is exported and carries exactly the documented proof-state lexicon", () => {
+    assert.deepEqual([...ROW_STATES].sort(), ["advisory", "failed", "non_run", "proved", "skipped"]);
   });
 }
