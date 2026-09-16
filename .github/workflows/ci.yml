@@ -1044,12 +1044,11 @@ jobs:
           "
 
   admin-ui-ratchet-guardrails:
-    # name: the literal "[parked]" display-name marker is added in the SAME
-    # commit as the ANNOTATION_SWEEP_EXCLUDE disposition-key edit below
-    # (Task 3, D-25) -- the sweep matches normalized job display-name
-    # fragments, so the marker and the exclusion key it drives must never be
-    # split across commits.
-    name: Admin UI ratchet guardrails
+    # D-25 (232-06): the "[parked]" display-name marker lands in the same
+    # commit as the ANNOTATION_SWEEP_EXCLUDE disposition-key edit below --
+    # the sweep matches normalized job display-name fragments, so the marker
+    # and the exclusion key it drives must never be split across commits.
+    name: "Admin UI ratchet guardrails [parked]"
     if: github.event_name != 'schedule'
     needs: [admin-hardening-guardrails, admin-phase200-guardrails]
     runs-on: ubuntu-24.04
@@ -1474,11 +1473,17 @@ jobs:
           #   'advisory' — advisory release-gate cells (continue-on-error: matrix.support ==
           #     'advisory', name-tagged "[advisory]"). Keep in sync with the release-gate
           #     matrix `support: 'advisory'` cells.
-          #   'ratchet'  — the "Admin UI ratchet guardrails" job is non-blocking (its own
-          #     continue-on-error) while the v1.56 ratchet milestone is PARKED; its parked
-          #     verify-frozen failure annotations must not fail the sweep. Drop 'ratchet'
-          #     when v1.57 M3 re-freezes the ledger.
-          ANNOTATION_SWEEP_EXCLUDE: advisory,ratchet
+          #   'parked'   — D-25 (232-06): keyed on DISPOSITION, not subject. The
+          #     "Admin UI ratchet guardrails [parked]" job's own machinery self-tests
+          #     were split out into the separate, blocking admin-ui-ratchet-selftests
+          #     job (D-23); only the two steps whose subject is the deliberately
+          #     unfrozen ledger.baseline.json stay non-blocking here, while the v1.56
+          #     ratchet milestone remains PARKED (waived as ship-window row 11 in
+          #     .planning/WINDOWS.md). Un-parking is a job-name rename that drops the
+          #     "[parked]" marker -- doing so automatically re-arms this sweep for the
+          #     job with no second edit required, because the exclusion is keyed on
+          #     the disposition fragment, not the job's identity.
+          ANNOTATION_SWEEP_EXCLUDE: advisory,parked
           # Non-actionable upstream-dependency compiler deprecation (Oban emits
           # `first..last inside match is deprecated` on Elixir 1.19+). Accrue cannot fix
           # third-party source; first-party warnings are still enforced via the gates'

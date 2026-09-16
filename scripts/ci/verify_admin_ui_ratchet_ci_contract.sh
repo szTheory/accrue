@@ -138,7 +138,7 @@ ratchet_job="$(job_body "admin-ui-ratchet-guardrails")"
 [ -n "$ratchet_job" ] || fail "could not extract admin-ui-ratchet-guardrails job"
 
 for needle in \
-  "name: Admin UI ratchet guardrails" \
+  'name: "Admin UI ratchet guardrails [parked]"' \
   "if: github.event_name != 'schedule'" \
   "continue-on-error: true" \
   "runs-on: ubuntu-24.04" \
@@ -214,7 +214,8 @@ annotation_job="$(job_body "annotation-sweep")"
 require_source_fixed "annotation-sweep job" "$annotation_job" "admin-ui-ratchet-selftests"
 require_source_fixed "annotation-sweep job" "$annotation_job" "admin-ui-ratchet-guardrails"
 require_source_fixed "annotation-sweep job" "$annotation_job" "bash scripts/ci/annotation_sweep.sh"
-require_source_fixed "annotation-sweep job" "$annotation_job" "ANNOTATION_SWEEP_EXCLUDE: advisory,ratchet"
+# D-25 (232-06): keyed on disposition ("parked"), not subject ("ratchet").
+require_source_fixed "annotation-sweep job" "$annotation_job" "ANNOTATION_SWEEP_EXCLUDE: advisory,parked"
 annotation_job_flat="$(printf '%s\n' "$annotation_job" | tr '\n' ' ')"
 require_source_regex "annotation-sweep job" "$annotation_job_flat" 'annotation_sweep\.sh .*admin-ui-ratchet-selftests'
 require_source_regex "annotation-sweep job" "$annotation_job_flat" 'annotation_sweep\.sh .*admin-ui-ratchet-guardrails'

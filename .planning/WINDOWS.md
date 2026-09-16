@@ -1,10 +1,10 @@
 ---
 schema_version: 1
 open_count: 0
-waived_count: 2
+waived_count: 3
 fixed_count: 8
-total_count: 10
-last_updated: 2026-09-16T15:00:11.069Z
+total_count: 11
+last_updated: 2026-09-16T21:08:16.470Z
 ---
 
 # Broken Windows Ledger
@@ -25,6 +25,7 @@ last_updated: 2026-09-16T15:00:11.069Z
 | 8 | 221 | unrun-verify | examples/accrue_host/lib/accrue_host_web/components/layouts.ex |  | Full mix format --check-formatted is blocked by unrelated tracked formatting violations in layouts and existing migrations. | fixed |  | 2026-08-05T17:40:05.349Z | 2026-09-16T15:00:10.896Z |
 | 9 | 225 | deviation | accrue_admin/mix.lock | 41 | Locked already-declared jose dependency so the Admin Playwright web server starts in a clean checkout. | fixed |  | 2026-08-09T03:32:55.284Z | 2026-09-16T15:00:10.982Z |
 | 10 | 227 | unrun-verify | .planning/phases/227-measured-critical-path-improvement/227-CI-CRITICAL-PATH.ndjson |  | Live three-success critical-path comparison could not run: final bounded cohort had no qualifying successful workflow_dispatch observations. | waived | GATE-02 recorded one real workflow_dispatch observation (failure), not a qualifying success; the three-success bounded comparison still cannot run. No release-blocking effect. | 2026-08-13T03:58:20.522Z | 2026-09-16T15:00:11.069Z |
+| 11 | 232 | unmet-truth | accrue_admin/e2e/ratchet/ledger.baseline.json |  | Admin UI ratchet guardrails lane is failing on the merits (not un-run, not advisory by design): ledger.baseline.json is deliberately frozen:false with open findings deferred to v1.57 M3; the deterministic machinery that proves the lane (self-tests, CI contract) is split into the blocking admin-ui-ratchet-selftests job and stays green. | waived | Owner: Accrue maintainer (szTheory). Rationale: the v1.56 Admin UI Ratchet milestone is PARKED (superseded by v1.57 on 2026-07-19); the lane's machinery is proven green in the blocking admin-ui-ratchet-selftests job, and only the two steps whose subject is the deliberately-unfrozen ledger stay parked, non-blocking, and excluded from the release-facing annotation sweep by disposition. Release impact: none -- this lane does not gate the v1.62 release candidate; un-parking (a job rename plus a ledger re-freeze) is scheduled for v1.57 M3, and the Parked-lane expiry trigger (D-26) fails blockingly the moment the ledger freezes while this row still exists, so a stale waiver cannot silently persist past its own justification. | 2026-09-16T21:08:09.584Z | 2026-09-16T21:08:16.470Z |
 
 ````json
 [
@@ -147,6 +148,19 @@ last_updated: 2026-09-16T15:00:11.069Z
     "reason": "GATE-02 recorded one real workflow_dispatch observation (failure), not a qualifying success; the three-success bounded comparison still cannot run. No release-blocking effect.",
     "recorded_at": "2026-08-13T03:58:20.522Z",
     "resolved_at": "2026-09-16T15:00:11.069Z"
+  },
+  {
+    "id": 11,
+    "kind": "unmet-truth",
+    "phase": "232",
+    "file": "accrue_admin/e2e/ratchet/ledger.baseline.json",
+    "line": null,
+    "description": "Admin UI ratchet guardrails lane is failing on the merits (not un-run, not advisory by design): ledger.baseline.json is deliberately frozen:false with open findings deferred to v1.57 M3; the deterministic machinery that proves the lane (self-tests, CI contract) is split into the blocking admin-ui-ratchet-selftests job and stays green.",
+    "status": "waived",
+    "reason": "Owner: Accrue maintainer (szTheory). Rationale: the v1.56 Admin UI Ratchet milestone is PARKED (superseded by v1.57 on 2026-07-19); the lane's machinery is proven green in the blocking admin-ui-ratchet-selftests job, and only the two steps whose subject is the deliberately-unfrozen ledger stay parked, non-blocking, and excluded from the release-facing annotation sweep by disposition. Release impact: none -- this lane does not gate the v1.62 release candidate; un-parking (a job rename plus a ledger re-freeze) is scheduled for v1.57 M3, and the Parked-lane expiry trigger (D-26) fails blockingly the moment the ledger freezes while this row still exists, so a stale waiver cannot silently persist past its own justification.",
+    "recorded_at": "2026-09-16T21:08:09.584Z",
+    "resolved_at": "2026-09-16T21:08:16.470Z",
+    "milestone": "v1.62"
   }
 ]
 ````
