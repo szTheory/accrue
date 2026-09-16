@@ -20,6 +20,19 @@ export const SPLICE_END = "<!-- phase231-window-dispositions:end -->";
 // lands in exactly the first bucket whose predicate matches, so the buckets
 // partition the row set completely regardless of which combinations of
 // disposition/state actually occur.
+//
+// CR-01 note: ROW_DISPOSITIONS is the closed set {fixed, waived}, and
+// validateWindowRow/assertFixedRowsProved now reject any non-waived row
+// whose state isn't "proved". That makes the "failed" and "not_run"
+// branches below unreachable for any row that has actually passed
+// validation -- the only rows CR-01 permits are {disposition: "fixed",
+// state: "proved"} and {disposition: "waived", state: anything}, and a
+// waived row always short-circuits to the "waived" bucket regardless of its
+// state. These branches are kept as defensive-only fail-safety (never
+// deleted) in case a caller ever renders an unvalidated record directly;
+// see the deferred item in 260916-gda-SUMMARY.md about whether waived rows
+// should instead bucket by their own state so a maintainer can distinguish
+// a waived-but-failed row from a waived-but-merely-skipped one.
 function bucketOf(row) {
   if (row.disposition === "waived") return "waived";
   if (row.state === "failed") return "failed";
@@ -160,18 +173,32 @@ if (process.env.NODE_TEST_CONTEXT && process.argv[1] === new URL(import.meta.url
     assert.match(rendered, /0 rows in this section\./);
   });
 
+  // CR-01 (added after this test was first written): a non-waived row must
+  // have state "proved", so bucketOf's "failed" and "not_run" branches are
+  // now unreachable in practice for any row that passes validateWindowRow --
+  // there is no legal {disposition: "fixed", state: "failed"/"skipped"/
+  // "advisory"/"non_run"} row to construct any more (that is exactly what
+  // CR-01 bans). This test's remaining load-bearing assertion is the section
+  // ORDER (waived leads, fixed collapses last) and the intra-bucket row
+  // ordering, not full four-bucket occupancy -- `sections` renders every
+  // bucket heading unconditionally regardless of row content, so the
+  // heading-list assertion below passes independent of which buckets are
+  // actually populated.
   test("leads with waived, then failed, then skipped/advisory/non_run, then fixed collapsed last", () => {
     const rows = [
       fixedRow({ id: 1 }),
       waivedRow({ id: 2 }),
-      { id: 3, phase: "227", kind: "unrun-verify", disposition: "fixed", state: "failed", current_evidence: "failed on the merits at the candidate SHA" },
-      { id: 4, phase: "217", kind: "unrun-verify", disposition: "fixed", state: "skipped", current_evidence: "credential-gated, honestly skipped" }
+      { id: 3, phase: "227", kind: "unrun-verify", disposition: "waived", state: "skipped", owner: "maintainer", rationale: "credential-gated in CI", release_impact: "no regression, tracked separately", current_evidence: "credential-gated, honestly skipped at the candidate SHA" },
+      fixedRow({ id: 4, current_evidence: "a second gate now runs and passes at the candidate SHA" })
     ];
     const rendered = renderWindowDispositions(minimalRecord({ rows }));
     const headings = rendered.split("\n").filter((line) => line.startsWith("## ")).filter((line) => line !== "## Candidate identity");
     assert.deepEqual(headings, ["## Waived (maintainer must accept)", "## Failed on the merits", "## Skipped, advisory, or not run", "## Fixed (proved at the candidate SHA)"]);
-    // row 2 (waived) must render before row 1 (fixed/proved).
+    // row 2 and row 3 (waived) must render before row 1 and row 4 (fixed/proved).
     assert.ok(rendered.indexOf("| 2 |") < rendered.indexOf("| 1 |"));
+    assert.ok(rendered.indexOf("| 3 |") < rendered.indexOf("| 1 |"));
+    // within the fixed bucket, rows sort ascending by id.
+    assert.ok(rendered.indexOf("| 1 |") < rendered.indexOf("| 4 |"));
   });
 
   test("row 1's current_evidence renders even when it differs from what would be the ledger's stale description", () => {
