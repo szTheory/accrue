@@ -2,6 +2,9 @@
 
 import fs from "node:fs";
 import path from "node:path";
+import assert from "node:assert/strict";
+import test from "node:test";
+import { isMainModule } from "./main_module.mjs";
 
 const POLICIES = new Set(["required", "advisory"]);
 const CONCLUSIONS = new Set(["success", "failure", "cancelled", "timed_out", "skipped", "neutral", "action_required"]);
@@ -182,6 +185,65 @@ function main() {
   if (values.mode === "finalize" && record.proof_state !== "proved") process.exitCode = 1;
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+// D-31: this file previously registered no real node:test case -- its only
+// TAP line under `node --test` was the accidental full run of main() as a
+// side effect of the broken file-URL-template guard below always evaluating
+// false, then exiting non-zero because no CLI args were supplied. The guard
+// fix and this first real test land in the same commit (D-31's same-commit
+// rule): fixing the guard alone would have swapped a loud accident for a
+// quiet, vacuous pass.
+let invokedAsEntrypoint = false;
+try {
+  invokedAsEntrypoint = isMainModule(import.meta.url);
+} catch {
+  invokedAsEntrypoint = false;
+}
+if (invokedAsEntrypoint && process.env.NODE_TEST_CONTEXT) {
+  test("classifyProviderProof marks a complete, passing manifest as proved with the sha/finished_at pair recorded", () => {
+    const record = classifyProviderProof({
+      trigger: "push",
+      sha: "a".repeat(40),
+      policy: "required",
+      raw_job_conclusion: "success",
+      configuration_complete: true,
+      manifest: {
+        schema_version: 1,
+        selected_count: 3,
+        passed_count: 3,
+        skipped_count: 0,
+        failed_count: 0,
+        started_at: "2026-09-16T00:00:00.000Z",
+        finished_at: "2026-09-16T00:05:00.000Z",
+      },
+    });
+    assert.equal(record.proof_state, "proved");
+    assert.equal(record.reason_code, "complete_provider_evidence");
+    assert.equal(record.latest_proved_sha, "a".repeat(40));
+    assert.equal(record.latest_proved_at, "2026-09-16T00:05:00.000Z");
+
+    // Negative control: an unselected trigger (e.g. pull_request) must never
+    // reach "proved", regardless of how clean the manifest is -- inverting
+    // this behavior (treating every trigger as selected) is exactly the class
+    // of bug a vacuous test would have let through silently.
+    const unselected = classifyProviderProof({
+      trigger: "pull_request",
+      sha: "a".repeat(40),
+      policy: "required",
+      raw_job_conclusion: "success",
+      configuration_complete: true,
+      manifest: {
+        schema_version: 1,
+        selected_count: 3,
+        passed_count: 3,
+        skipped_count: 0,
+        failed_count: 0,
+        started_at: "2026-09-16T00:00:00.000Z",
+        finished_at: "2026-09-16T00:05:00.000Z",
+      },
+    });
+    assert.equal(unselected.proof_state, "non_run");
+    assert.equal(unselected.reason_code, "trigger_not_selected");
+  });
+} else if (invokedAsEntrypoint) {
   try { main(); } catch (error) { console.error(`provider proof: FAIL: ${error.message}`); process.exitCode = 1; }
 }
