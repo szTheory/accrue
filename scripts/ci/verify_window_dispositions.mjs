@@ -80,6 +80,19 @@ function assertWaiverCompleteness(dispositionRows) {
   }
 }
 
+// CR-01: sibling of assertWaiverCompleteness -- independent of
+// validateWindowRow's own (always-on) schema check, re-run at the verifier
+// layer over the record as it exists on disk, so a hand-edited/corrupted
+// committed record that never went through the collector is still caught.
+// A row closed as "fixed" (safe to ship) must record a genuinely passing
+// re-run -- never failed/skipped/advisory/non_run (D-22, GATE-03).
+function assertFixedRowsProved(dispositionRows) {
+  for (const row of dispositionRows) {
+    if (row.disposition !== "fixed") continue;
+    if (row.state !== "proved") fail(`fixed row ${row.id} has state "${row.state}", not "proved" (CR-01, GATE-03, D-22) -- a row closed as fixed must have a genuinely passing re-run, never failed/skipped/advisory/non_run`);
+  }
+}
+
 // D-31: re-rendering the committed JSON must byte-equal the committed
 // Markdown. On mismatch, report the first differing byte offset so a
 // reviewer does not have to diff the whole file by hand.
@@ -124,7 +137,7 @@ function applyStrictFlags(repo, record, renderedContents, parsed) {
     if (parsed.flags.has("require-row-join")) assertRowJoin(ledgerRows, record.rows);
     if (parsed.flags.has("require-evidence-freshness")) assertEvidenceFreshness(ledgerRows, record.rows);
   }
-  if (parsed.flags.has("require-waiver-completeness")) assertWaiverCompleteness(record.rows);
+  if (parsed.flags.has("require-waiver-completeness")) { assertWaiverCompleteness(record.rows); assertFixedRowsProved(record.rows); }
   if (parsed.flags.has("require-determinism")) {
     if (renderedContents === undefined) fail("--rendered is required with --require-determinism");
     assertDeterminism(record, renderedContents);
@@ -244,6 +257,16 @@ export function verifyFixtures() {
     const incompleteWaived = { id: 3, phase: "220", kind: "unrun-verify", disposition: "waived", state: "failed", owner: "", rationale: "r", release_impact: "i", current_evidence: "still fails" };
     assert.throws(() => assertWaiverCompleteness([incompleteWaived]), /missing a non-empty owner/);
     assertWaiverCompleteness([{ ...incompleteWaived, owner: "maintainer" }]);
+  }
+
+  // 10a: CR-01 -- a fabricated fixed/failed row is rejected by
+  // assertFixedRowsProved even when hand-authored and never passed through
+  // the collector; a fixed/proved row and a waived/failed row still pass.
+  {
+    const fabricatedFixed = { id: 4, phase: "214.2", kind: "unrun-verify", disposition: "fixed", state: "failed", current_evidence: "still fails, but marking fixed anyway" };
+    assert.throws(() => assertFixedRowsProved([fabricatedFixed]), /fixed row 4 has state "failed", not "proved"/);
+    assertFixedRowsProved([dispositionRow({ id: 4, disposition: "fixed", state: "proved", exit_code: 0 })]);
+    assertFixedRowsProved([{ id: 5, phase: "220", kind: "unrun-verify", disposition: "waived", state: "failed", owner: "maintainer", rationale: "still reproduces", release_impact: "no regression", current_evidence: "still fails" }]);
   }
 
   // 11: determinism -- a tampered rendered file fails with a byte-offset message.

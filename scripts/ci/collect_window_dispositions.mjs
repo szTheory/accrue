@@ -75,6 +75,13 @@ export function validateWindowRow(row, label) {
       if (typeof row[key] !== "string" || !row[key].trim()) fail(`${label} disposition "waived" requires a non-empty ${key}`);
     }
   }
+  // CR-01: a row closed as "fixed" (safe to ship) must record a genuinely
+  // passing re-run -- never failed/skipped/advisory/non_run. Without this, a
+  // row could claim "fixed" while its own state field admits it never
+  // actually passed.
+  if (row.disposition === "fixed" && row.state !== "proved") {
+    fail(`${label} disposition "fixed" requires state "proved" (got "${row.state}") -- a row closed as fixed must have a genuinely passing re-run, never failed/skipped/advisory/non_run`);
+  }
   for (const key of ["owner", "rationale", "release_impact"]) {
     if (Object.hasOwn(row, key) && row[key] !== undefined && typeof row[key] !== "string") fail(`${label}.${key} must be a string`);
   }
@@ -276,6 +283,17 @@ if (process.env.NODE_TEST_CONTEXT && process.argv[1] === new URL(import.meta.url
     for (const state of ["deferred", "n/a", "green", "mystery"]) {
       assert.throws(() => validateWindowRow(validRow({ state }), "row"), /proved\/failed\/skipped\/advisory\/non_run/);
     }
+  });
+  test("validateWindowRow rejects disposition fixed paired with any state other than proved (CR-01)", () => {
+    for (const state of ["failed", "skipped", "advisory", "non_run"]) {
+      const row = validRow({ state });
+      if (state !== "proved") delete row.exit_code;
+      assert.throws(() => validateWindowRow(row, "row"), /disposition "fixed" requires state "proved"/);
+    }
+  });
+  test("validateWindowRow accepts disposition fixed paired with state proved, and waived paired with failed", () => {
+    assert.doesNotThrow(() => validateWindowRow(validRow({ disposition: "fixed", state: "proved", exit_code: 0 }), "row"));
+    assert.doesNotThrow(() => validateWindowRow(waivedRow({ disposition: "waived", state: "failed" }), "row"));
   });
   test("validateWindowRow rejects proved without a recorded exit_code", () => {
     const row = validRow(); delete row.exit_code;
