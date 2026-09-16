@@ -52,7 +52,6 @@ function sanitizeStrings(row, label) {
 }
 
 export function validateWindowRow(row, label) {
-  fail("not implemented: validateWindowRow");
   fields(row, WINDOW_ROW_FIELDS, label);
   for (const key of ["id", "phase", "kind", "disposition", "state", "current_evidence"]) {
     if (!Object.hasOwn(row, key)) fail(`${label} is missing required field: ${key}`);
