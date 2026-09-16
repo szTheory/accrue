@@ -148,6 +148,13 @@ None — no external service configuration required.
 
 `integration/v1.62-candidate` now points at a new commit (`85aed0629194be5409d3f3f8caa87cea8d584134` merge / `f524f2a6b16d3576829632ab6fa77d24b718e6f7` tip) containing the Phase 230 verifiers, satisfying every D-04 gate under `scripts/ci/verify_recut_candidate.mjs`. The candidate ref was NOT pushed (Plan 231-04's separately authorized step, D-14). Plans 231-02 through 231-06 may now bind to this SHA for GATE-01 (local cohort execution), GATE-02 (GitHub proof), and GATE-03 (ship-window resolution) work.
 
+## Self-Check: PASSED
+
+- `scripts/ci/verify_recut_candidate.mjs` exists on disk.
+- `.planning/phases/231-exact-sha-release-gate-proof/231-ROLLBACK-POINT.json` exists on disk.
+- Commits `354fe92a`, `8a3bdd60`, `0cb6c16a` found in `git log --oneline --all`.
+- Re-ran all task-level `<acceptance_criteria>` and the plan-level `<verification>` block: all pass (see plan verify commands above under Accomplishments).
+
 ---
 *Phase: 231-exact-sha-release-gate-proof*
 *Completed: 2026-09-15*
