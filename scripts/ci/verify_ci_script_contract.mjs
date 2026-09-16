@@ -181,7 +181,26 @@ export function verifyFixtures() {
     assert.throws(() => assertGuardCoverage([guardless]), /guardless\.mjs/);
   });
 
-  // Scenario 4: a cohort whose live file count is below the committed floor
+  // Scenario 4: a synthetic file that registers a real named test but the
+  // test genuinely fails (non-zero exit) fails --require-non-vacuity,
+  // naming the file and its exit code -- distinct from the vacuity
+  // message, since this file is NOT vacuous, it is broken.
+  withScratch((dir) => {
+    write(dir, "main_module.mjs", MAIN_MODULE_STUB);
+    const failing = write(dir, "failing.mjs", [
+      'import test from "node:test";',
+      'import assert from "node:assert/strict";',
+      'import { isMainModule } from "./main_module.mjs";',
+      "if (isMainModule(import.meta.url) && process.env.NODE_TEST_CONTEXT) {",
+      '  test("this assertion is deliberately wrong", () => assert.equal(1, 2));',
+      "}",
+      ""
+    ].join("\n"));
+    assert.doesNotThrow(() => assertGuardCoverage([failing]), "a guard-importing file still passes guard coverage");
+    assert.throws(() => assertNonVacuity([failing]), /failing\.mjs \(exit \d+\)/);
+  });
+
+  // Scenario 5: a cohort whose live file count is below the committed floor
   // fails rather than passing on a short or empty glob.
   assert.throws(() => assertCohortFloor(["a", "b"], 3), /below the committed floor/);
   assert.throws(() => assertCohortFloor([], 1), /empty/);
