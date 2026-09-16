@@ -47,7 +47,6 @@ function rowLine(row) {
 // object passed in, no Date.now(), no other wall-clock source. Called twice
 // with the same input it returns byte-identical strings.
 export function renderWindowDispositions(record) {
-  fail("not implemented: renderWindowDispositions");
   const value = validateWindowDispositions(record);
 
   // Belt-and-suspenders: bucketOf() must be exhaustive over the closed
