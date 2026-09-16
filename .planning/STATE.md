@@ -33,7 +33,7 @@ See: `.planning/PROJECT.md` (updated 2026-09-15)
 Phase: 231 (Exact-SHA Release Gate Proof) — EXECUTING
 Plan: 6 of 6
 Status: Phase complete — ready for verification
-Last activity: 2026-09-16 - Completed quick task 260916-gda: Close phase-231 loose ends: STATE.md standing sections, gap-closure TAP harness, 229-UAT regen, CR-01 window-disposition invariant, WR-01 expected-repository validation, REQUIREMENTS.md gate wording
+Last activity: 2026-09-16 - Completed quick task 260916-hl9: Resolve the sibling dependency-operator contradiction between CLAUDE.md and the code, and make it machine-enforced
 
 Progress: [████████░░] 75% (2/4 phases complete; 27/27 plans in Phases 229-230)
 
@@ -188,6 +188,7 @@ None yet.
 |---|-------------|------|--------|-----------|
 | 260915-dpd | Fix eager Mix.env/0 evaluation in Accrue auth modules that crashes OTP releases at boot | 2026-09-15 | 5653216c | [260915-dpd-fix-eager-mix-env-0-evaluation-in-accrue](./quick/260915-dpd-fix-eager-mix-env-0-evaluation-in-accrue/) |
 | 260916-gda | Close phase-231 loose ends: STATE.md standing sections, gap-closure TAP harness, 229-UAT regen, CR-01 window-disposition invariant, WR-01 expected-repository validation, REQUIREMENTS.md gate wording | 2026-09-16 | f5b6d390 | [260916-gda-close-phase-231-loose-ends-state-md-stan](./quick/260916-gda-close-phase-231-loose-ends-state-md-stan/) |
+| 260916-hl9 | Resolve the sibling dependency-operator contradiction between CLAUDE.md and the code, and make it machine-enforced | 2026-09-16 | 9f309871 | [260916-hl9-resolve-the-sibling-dependency-operator-](./quick/260916-hl9-resolve-the-sibling-dependency-operator-/) |
 
 ## Deferred Items
 
