@@ -103,7 +103,15 @@ Plans:
   2. A maintainer can inspect green required GitHub Actions checks for that exact SHA while each provider lane remains explicitly `proved`, `skipped`, `failed`, or `advisory`.
   3. A maintainer can inspect current evidence, owner, rationale, and release impact for every former ship window, with each fixed or explicitly waived and none unexplained.
 
-**Plans**: TBD
+**Plans**: 6 plans
+
+Plans:
+- [ ] 231-01-PLAN.md — Re-cut the candidate and freeze it behind a shape/ancestry verifier (wave 1)
+- [ ] 231-02-PLAN.md — GATE-03 window-disposition collect/render/verify triad (wave 2)
+- [ ] 231-03-PLAN.md — GATE-01 declared-cohort evidence and the scratch-clone run (wave 2)
+- [ ] 231-04-PLAN.md — GATE-02 push, dispatch, poll, and exact-SHA check evidence (wave 2)
+- [ ] 231-05-PLAN.md — Re-derive and dispose all ten ship windows (wave 3)
+- [ ] 231-06-PLAN.md — CI wiring, evidence README rows, and the capsule mint (wave 4)
 
 ### Phase 232: Bounded Hygiene & Release Handoff
 
