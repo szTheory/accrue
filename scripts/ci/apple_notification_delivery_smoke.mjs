@@ -1,6 +1,9 @@
 #!/usr/bin/env node
 
+import assert from "node:assert/strict";
 import { createPrivateKey, sign } from "node:crypto";
+import test from "node:test";
+import { isMainModule } from "./main_module.mjs";
 
 const productionEndpoint = "https://api.storekit.apple.com";
 const sandboxEndpoint = "https://api.storekit-sandbox.apple.com";
@@ -13,7 +16,7 @@ function required(name) {
   return value;
 }
 
-function base64url(value) {
+export function base64url(value) {
   return Buffer.from(value).toString("base64url");
 }
 
@@ -50,7 +53,7 @@ async function appleRequest(url, jwt) {
   return body;
 }
 
-function endpoint() {
+export function endpoint() {
   const environment = (process.env.APPLE_SERVER_API_ENVIRONMENT || "production").toLowerCase();
   if (environment === "production") return productionEndpoint;
   if (environment === "sandbox") return sandboxEndpoint;
@@ -96,7 +99,31 @@ async function main() {
   throw new Error(`Apple did not publish a test delivery result after ${pollAttempts} polls`);
 }
 
-main().catch((error) => {
-  console.error(`apple_notification_delivery_smoke failed: ${error.message}`);
-  process.exitCode = 1;
-});
+let invokedAsEntrypoint = false;
+try {
+  invokedAsEntrypoint = isMainModule(import.meta.url);
+} catch {
+  invokedAsEntrypoint = false;
+}
+if (invokedAsEntrypoint && process.env.NODE_TEST_CONTEXT) {
+  test("base64url and endpoint helpers behave without hitting the network", () => {
+    assert.equal(base64url("hi"), Buffer.from("hi").toString("base64url"));
+    const original = process.env.APPLE_SERVER_API_ENVIRONMENT;
+    try {
+      delete process.env.APPLE_SERVER_API_ENVIRONMENT;
+      assert.equal(endpoint(), productionEndpoint);
+      process.env.APPLE_SERVER_API_ENVIRONMENT = "sandbox";
+      assert.equal(endpoint(), sandboxEndpoint);
+      process.env.APPLE_SERVER_API_ENVIRONMENT = "nonsense";
+      assert.throws(() => endpoint(), /production or sandbox/);
+    } finally {
+      if (original === undefined) delete process.env.APPLE_SERVER_API_ENVIRONMENT;
+      else process.env.APPLE_SERVER_API_ENVIRONMENT = original;
+    }
+  });
+} else if (invokedAsEntrypoint) {
+  main().catch((error) => {
+    console.error(`apple_notification_delivery_smoke failed: ${error.message}`);
+    process.exitCode = 1;
+  });
+}

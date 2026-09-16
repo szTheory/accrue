@@ -4,6 +4,8 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import test from "node:test";
+import { isMainModule } from "./main_module.mjs";
 
 function fail(message) {
   throw new Error(message);
@@ -484,9 +486,19 @@ function main() {
   );
 }
 
+let invokedAsEntrypoint = false;
 try {
-  main();
-} catch (error) {
-  console.error(`executable UAT contract: FAIL: ${error.message}`);
-  process.exitCode = 1;
+  invokedAsEntrypoint = isMainModule(import.meta.url);
+} catch {
+  invokedAsEntrypoint = false;
+}
+if (invokedAsEntrypoint && process.env.NODE_TEST_CONTEXT) {
+  test("executable UAT contract self-test runs clean", () => selfTest());
+} else if (invokedAsEntrypoint) {
+  try {
+    main();
+  } catch (error) {
+    console.error(`executable UAT contract: FAIL: ${error.message}`);
+    process.exitCode = 1;
+  }
 }

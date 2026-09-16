@@ -5,8 +5,10 @@ import crypto from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 import { execFileSync, spawnSync } from "node:child_process";
+import test from "node:test";
 import { fileURLToPath } from "node:url";
 import { repositoryRelativePhaseEvidencePath, resolvePhaseEvidencePath } from "./phase_evidence_path.mjs";
+import { isMainModule } from "./main_module.mjs";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 const PHASE_227 = "227-measured-critical-path-improvement";
@@ -1115,4 +1117,14 @@ function runCli(argv) {
   return true;
 }
 
-if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) runCli(process.argv.slice(2));
+let invokedAsEntrypoint = false;
+try {
+  invokedAsEntrypoint = isMainModule(import.meta.url);
+} catch {
+  invokedAsEntrypoint = false;
+}
+if (invokedAsEntrypoint && process.env.NODE_TEST_CONTEXT) {
+  test("verifyFixtures passes every negative control", () => verifyFixtures());
+} else if (invokedAsEntrypoint) {
+  runCli(process.argv.slice(2));
+}

@@ -5,7 +5,9 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { execFileSync } from "node:child_process";
+import test from "node:test";
 import { fileURLToPath } from "node:url";
+import { isMainModule } from "./main_module.mjs";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 const workflowPath = path.join(root, ".github/workflows/ci.yml");
@@ -272,14 +274,24 @@ function verifyTerminal(context) {
   }
 }
 
+let invokedAsEntrypoint = false;
 try {
-  const modes = ["--fixtures", "--verify-live-binding", "--verify-terminal"].filter((mode) => process.argv.includes(mode));
-  if (modes.length !== 1) fail("choose exactly one mode");
-  if (modes[0] === "--fixtures") runFixtures();
-  else if (modes[0] === "--verify-live-binding") liveInventory(liveContext());
-  else verifyTerminal(liveContext());
-  console.log(`stripe webhook boot evidence ${modes[0].slice(2)}: PASS`);
-} catch (error) {
-  console.error(`stripe webhook boot evidence: FAIL: ${error.message}`);
-  process.exitCode = 1;
+  invokedAsEntrypoint = isMainModule(import.meta.url);
+} catch {
+  invokedAsEntrypoint = false;
+}
+if (invokedAsEntrypoint && process.env.NODE_TEST_CONTEXT) {
+  test("stripe webhook boot evidence fixtures pass every negative control", () => runFixtures());
+} else if (invokedAsEntrypoint) {
+  try {
+    const modes = ["--fixtures", "--verify-live-binding", "--verify-terminal"].filter((mode) => process.argv.includes(mode));
+    if (modes.length !== 1) fail("choose exactly one mode");
+    if (modes[0] === "--fixtures") runFixtures();
+    else if (modes[0] === "--verify-live-binding") liveInventory(liveContext());
+    else verifyTerminal(liveContext());
+    console.log(`stripe webhook boot evidence ${modes[0].slice(2)}: PASS`);
+  } catch (error) {
+    console.error(`stripe webhook boot evidence: FAIL: ${error.message}`);
+    process.exitCode = 1;
+  }
 }

@@ -31,10 +31,21 @@ const encodedRef = (name) => `${PRESERVATION_PREFIX}${Buffer.from(name).toString
 async function loadHandoffLibrary() {
   const originalArgv = process.argv;
   process.argv = [process.execPath, HANDOFF_INVARIANTS, "--self-test"];
+  // D-29 fallout: this in-process dynamic import fakes argv so the module's
+  // own isMainModule() check treats it as the invoked entrypoint. If
+  // NODE_TEST_CONTEXT were still set (genuinely true here, since this whole
+  // file runs under `node --test`), the migrated module would register a
+  // NEW test() mid-run instead of just exporting its library functions --
+  // clear it for the duration of the import, exactly as argv is faked
+  // above, then restore both.
+  const hadNodeTestContext = "NODE_TEST_CONTEXT" in process.env;
+  const originalNodeTestContext = process.env.NODE_TEST_CONTEXT;
+  delete process.env.NODE_TEST_CONTEXT;
   try {
     return await import(`${pathToFileURL(HANDOFF_INVARIANTS).href}?library=${crypto.randomUUID()}`);
   } finally {
     process.argv = originalArgv;
+    if (hadNodeTestContext) process.env.NODE_TEST_CONTEXT = originalNodeTestContext;
   }
 }
 

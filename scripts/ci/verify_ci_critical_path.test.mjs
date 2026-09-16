@@ -7,6 +7,15 @@ import crypto from "node:crypto";
 import { verifyComparisonEvidence, verifyFinalDecision, verifyManualFalseProviderNonRun, verifyPreflightEvidence } from "./verify_ci_critical_path.mjs";
 import { resolvePhaseEvidencePath } from "./phase_evidence_path.mjs";
 
+// D-29 fallout: this file spawns scripts/ci/verify_ci_critical_path.mjs as a
+// CLI subprocess. When this test file itself runs under `node --test`,
+// NODE_TEST_CONTEXT is inherited by the child by default; the migrated
+// module's guard then registers its own self-test instead of running the
+// CLI, so a deliberately-bad CLI invocation would spawn-and-exit 0 instead
+// of failing closed. Clear it so every spawned child genuinely runs main().
+const childEnv = { ...process.env };
+delete childEnv.NODE_TEST_CONTEXT;
+
 const phase = path.dirname(resolvePhaseEvidencePath("227-measured-critical-path-improvement", "227-ci-contract.json"));
 const recordedPreflightPath = ".planning/phases/227-measured-critical-path-improvement/227-CANDIDATE-PREFLIGHT.json";
 const contract = JSON.parse(fs.readFileSync(`${phase}/227-ci-contract.json`, "utf8"));
@@ -20,7 +29,7 @@ test("rejects forged duplicate push cohort through public verification", () => {
 });
 
 test("rejects a CLI invocation with no declared action", () => {
-  const result = spawnSync(process.execPath, ["scripts/ci/verify_ci_critical_path.mjs"], { encoding: "utf8" });
+  const result = spawnSync(process.execPath, ["scripts/ci/verify_ci_critical_path.mjs"], { encoding: "utf8", env: childEnv });
   assert.notEqual(result.status, 0, "a no-action verifier invocation must fail closed");
 });
 
@@ -40,7 +49,7 @@ test("requires a kept decision when requested", () => {
     "--contract", `${phase}/227-ci-contract.json`,
     "--expected-repository", "szTheory/accrue",
     "--require-kept",
-  ], { encoding: "utf8" });
+  ], { encoding: "utf8", env: childEnv });
   fs.rmSync(rollbackOnlyEvidence, { recursive: true, force: true });
   assert.notEqual(result.status, 0, "the recorded rollback terminal must not satisfy a kept-only request");
   assert.match(result.stderr, /terminal decision is not kept/, "the verifier must reject rollback as non-kept, not reject the modifier itself");
@@ -133,7 +142,7 @@ test("evidence CLI terminal-state modifiers fail closed", () => {
   const v3WithoutDecision = records.filter((record) => record.kind !== "gap_v3_decision");
   const v3Path = `${sandbox}/v3.ndjson`;
   fs.writeFileSync(v3Path, `${v3WithoutDecision.map(JSON.stringify).join("\n")}\n`);
-  const invoke = (args) => spawnSync(process.execPath, ["scripts/ci/verify_ci_critical_path.mjs", ...args], { encoding: "utf8" });
+  const invoke = (args) => spawnSync(process.execPath, ["scripts/ci/verify_ci_critical_path.mjs", ...args], { encoding: "utf8", env: childEnv });
   const base = ["--verify-evidence", "--evidence", v3Path, "--contract", `${phase}/227-ci-contract.json`, "--expected-repository", "szTheory/accrue"];
   const missingDecision = invoke([...base, "--require-final-decision"]);
   assert.notEqual(missingDecision.status, 0);
@@ -149,7 +158,7 @@ test("evidence CLI terminal-state modifiers fail closed", () => {
 test("live CLI rejects an altered rendered report before querying Actions", () => {
   const sandbox = fs.mkdtempSync("/tmp/phase227-rendered-");
   const badRender = `${sandbox}/bad.md`; fs.writeFileSync(badRender, "stale\n");
-  const result = spawnSync(process.execPath, ["scripts/ci/verify_ci_critical_path.mjs", "--verify-live-actions", "--evidence", `${phase}/227-CI-CRITICAL-PATH.ndjson`, "--contract", `${phase}/227-ci-contract.json`, "--expected-repository", "szTheory/accrue", "--rendered", badRender], { encoding: "utf8" });
+  const result = spawnSync(process.execPath, ["scripts/ci/verify_ci_critical_path.mjs", "--verify-live-actions", "--evidence", `${phase}/227-CI-CRITICAL-PATH.ndjson`, "--contract", `${phase}/227-ci-contract.json`, "--expected-repository", "szTheory/accrue", "--rendered", badRender], { encoding: "utf8", env: childEnv });
   fs.rmSync(sandbox, { recursive: true, force: true });
   assert.notEqual(result.status, 0);
   assert.match(result.stderr, /rendered report does not byte-match/);
@@ -171,7 +180,7 @@ test("preflight runtime sandbox records no prohibited invocation", () => {
   fs.mkdirSync(bin);
   for (const command of ["gh", "curl", "wget", "ssh", "scp"]) fs.writeFileSync(`${bin}/${command}`, `#!/usr/bin/env bash\necho ${command}:\"$*\" >> \"$PHASE227_PROHIBITED_LOG\"\nexit 97\n`, { mode: 0o755 });
   fs.writeFileSync(`${bin}/git`, `#!/usr/bin/env bash\ncase \"$1\" in push|fetch|pull|remote|ls-remote|update-ref) echo git:\"$*\" >> \"$PHASE227_PROHIBITED_LOG\"; exit 97;; esac\nexec /usr/bin/git \"$@\"\n`, { mode: 0o755 });
-  const sha = spawnSync("git", ["rev-parse", "HEAD"], { encoding: "utf8" }).stdout.trim();
+  const sha = spawnSync("git", ["rev-parse", "HEAD"], { encoding: "utf8", env: childEnv }).stdout.trim();
   const workflow = fs.readFileSync(".github/workflows/ci.yml", "utf8");
   const state = workflow.includes("needs: [docs-contracts-shift-left]") ? "candidate" : "inverse_rollback";
   const result = spawnSync("bash", ["scripts/ci/preflight_phase227_candidate.sh", "--commit", sha, "--expected-state", state, "--evidence-out", evidence], { encoding: "utf8", env: { ...process.env, PATH: `${bin}:${process.env.PATH}`, PHASE227_MIX_CACHE: cache, PHASE227_PROHIBITED_LOG: log } });

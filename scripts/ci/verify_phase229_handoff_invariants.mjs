@@ -6,7 +6,9 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
+import test from "node:test";
 import { fileURLToPath } from "node:url";
+import { isMainModule } from "./main_module.mjs";
 
 const REPOSITORY = "szTheory/accrue";
 const SHA256 = /^[0-9a-f]{64}$/;
@@ -403,9 +405,19 @@ function parseArgs(argv) {
   return options;
 }
 
+let invokedAsEntrypoint = false;
 try {
-  const options = parseArgs(process.argv.slice(2));
-  if (options.selfTest) runSelfTest(); else runFinalChain(options);
-} catch (error) {
-  console.error(`phase229 handoff invariants: FAIL: ${error.message}`); process.exitCode = 1;
+  invokedAsEntrypoint = isMainModule(import.meta.url);
+} catch {
+  invokedAsEntrypoint = false;
+}
+if (invokedAsEntrypoint && process.env.NODE_TEST_CONTEXT) {
+  test("phase229 handoff invariants self-test runs clean", () => runSelfTest());
+} else if (invokedAsEntrypoint) {
+  try {
+    const options = parseArgs(process.argv.slice(2));
+    if (options.selfTest) runSelfTest(); else runFinalChain(options);
+  } catch (error) {
+    console.error(`phase229 handoff invariants: FAIL: ${error.message}`); process.exitCode = 1;
+  }
 }

@@ -5,6 +5,8 @@ import { spawnSync } from "node:child_process";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import test from "node:test";
+import { isMainModule } from "./main_module.mjs";
 
 export const REQUIRED_ACTIONS_SECRETS = [
   "STRIPE_TEST_SECRET_KEY",
@@ -215,9 +217,22 @@ function main() {
   process.stdout.write(`Stripe provider bootstrap dispatched one proof for ${evidence.repaired_sha}; no secret value was logged.\n`);
 }
 
+// D-29: isMainModule() throws (never returns a silent false) when there is
+// no invoking entrypoint; caught here and treated as "not the entrypoint"
+// (established pattern, 232-01).
+let invokedAsEntrypoint = false;
 try {
-  main();
-} catch (error) {
-  console.error(`Stripe provider bootstrap: FAIL: ${error.message}`);
-  process.exitCode = 1;
+  invokedAsEntrypoint = isMainModule(import.meta.url);
+} catch {
+  invokedAsEntrypoint = false;
+}
+if (invokedAsEntrypoint && process.env.NODE_TEST_CONTEXT) {
+  test("Stripe provider bootstrap self-test runs clean", () => selfTest());
+} else if (invokedAsEntrypoint) {
+  try {
+    main();
+  } catch (error) {
+    console.error(`Stripe provider bootstrap: FAIL: ${error.message}`);
+    process.exitCode = 1;
+  }
 }

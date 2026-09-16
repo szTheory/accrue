@@ -3,6 +3,8 @@
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
 import fs from "node:fs";
+import test from "node:test";
+import { isMainModule } from "./main_module.mjs";
 
 const INCIDENT_TITLE = "[provider-proof] recurring Stripe proof unhealthy";
 const RELEVANT_PATHS = [
@@ -158,9 +160,19 @@ function main() {
   fail("use --self-test, --classify-trigger, or --reconcile-issue");
 }
 
+let invokedAsEntrypoint = false;
 try {
-  main();
-} catch (error) {
-  console.error(`provider proof automation: FAIL: ${error.message}`);
-  process.exitCode = 1;
+  invokedAsEntrypoint = isMainModule(import.meta.url);
+} catch {
+  invokedAsEntrypoint = false;
+}
+if (invokedAsEntrypoint && process.env.NODE_TEST_CONTEXT) {
+  test("provider proof automation self-test runs clean", () => selfTest());
+} else if (invokedAsEntrypoint) {
+  try {
+    main();
+  } catch (error) {
+    console.error(`provider proof automation: FAIL: ${error.message}`);
+    process.exitCode = 1;
+  }
 }

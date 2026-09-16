@@ -5,6 +5,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
+import test from "node:test";
 import { fileURLToPath } from "node:url";
 import {
   classifyProviderProof,
@@ -13,6 +14,7 @@ import {
 } from "./provider_proof.mjs";
 import { resolvePhaseEvidencePath } from "./phase_evidence_path.mjs";
 import { renderProviderSummary } from "./render_provider_summary.mjs";
+import { isMainModule } from "./main_module.mjs";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 const fixturesPath = resolvePhaseEvidencePath("226-ci-baseline-proof-semantics", "fixtures/provider-proof-cases.json");
@@ -194,11 +196,13 @@ function runFixtures() {
     const manifest = path.join(temp, "manifest.json");
     const out = path.join(temp, "record.json");
     fs.writeFileSync(manifest, JSON.stringify(validManifest({ selected_count: 0, passed_count: 0 })));
-    const result = spawnSync(process.execPath, [path.join(root, "scripts/ci/provider_proof.mjs"), "--finalize", "--trigger", "schedule", "--sha", "zero", "--policy", "required", "--raw-conclusion", "success", "--configured", "true", "--manifest", manifest, "--out", out]);
+    const childEnv = { ...process.env };
+    delete childEnv.NODE_TEST_CONTEXT;
+    const result = spawnSync(process.execPath, [path.join(root, "scripts/ci/provider_proof.mjs"), "--finalize", "--trigger", "schedule", "--sha", "zero", "--policy", "required", "--raw-conclusion", "success", "--configured", "true", "--manifest", manifest, "--out", out], { env: childEnv });
     assert.notEqual(result.status, 0, "zero-selected finalize must fail");
     assert.equal(JSON.parse(fs.readFileSync(out, "utf8")).proof_state, "misconfigured");
     const missingManifest = path.join(temp, "missing.json");
-    const missingResult = spawnSync(process.execPath, [path.join(root, "scripts/ci/provider_proof.mjs"), "--finalize", "--trigger", "schedule", "--sha", "missing", "--policy", "required", "--raw-conclusion", "failure", "--configured", "true", "--manifest", missingManifest, "--out", out]);
+    const missingResult = spawnSync(process.execPath, [path.join(root, "scripts/ci/provider_proof.mjs"), "--finalize", "--trigger", "schedule", "--sha", "missing", "--policy", "required", "--raw-conclusion", "failure", "--configured", "true", "--manifest", missingManifest, "--out", out], { env: childEnv });
     assert.notEqual(missingResult.status, 0, "missing manifest finalize must fail");
     assert.equal(JSON.parse(fs.readFileSync(out, "utf8")).proof_state, "misconfigured");
   } finally {
@@ -206,11 +210,21 @@ function runFixtures() {
   }
 }
 
+let invokedAsEntrypoint = false;
 try {
-  if (process.argv.includes("--fixtures")) runFixtures();
-  else throw new Error("use --fixtures");
-  console.log("provider proof fixtures: PASS");
-} catch (error) {
-  console.error(`provider proof fixtures: FAIL: ${error.message}`);
-  process.exitCode = 1;
+  invokedAsEntrypoint = isMainModule(import.meta.url);
+} catch {
+  invokedAsEntrypoint = false;
+}
+if (invokedAsEntrypoint && process.env.NODE_TEST_CONTEXT) {
+  test("provider proof fixtures pass every negative control", () => runFixtures());
+} else if (invokedAsEntrypoint) {
+  try {
+    if (process.argv.includes("--fixtures")) runFixtures();
+    else throw new Error("use --fixtures");
+    console.log("provider proof fixtures: PASS");
+  } catch (error) {
+    console.error(`provider proof fixtures: FAIL: ${error.message}`);
+    process.exitCode = 1;
+  }
 }

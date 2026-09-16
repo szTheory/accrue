@@ -1,7 +1,10 @@
+import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
 import { createHash } from "node:crypto";
+import test from "node:test";
 import { fileURLToPath } from "node:url";
+import { isMainModule } from "./main_module.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(__dirname, "..", "..");
@@ -366,10 +369,23 @@ function generate({ finalStatuses = false } = {}) {
   );
 }
 
-function parseArgs(argv) {
+export function parseArgs(argv) {
   return {
     finalStatuses: argv.includes("--record-final-statuses"),
   };
 }
 
-generate(parseArgs(process.argv.slice(2)));
+let invokedAsEntrypoint = false;
+try {
+  invokedAsEntrypoint = isMainModule(import.meta.url);
+} catch {
+  invokedAsEntrypoint = false;
+}
+if (invokedAsEntrypoint && process.env.NODE_TEST_CONTEXT) {
+  test("parseArgs reads --record-final-statuses and defaults to false", () => {
+    assert.deepEqual(parseArgs([]), { finalStatuses: false });
+    assert.deepEqual(parseArgs(["--record-final-statuses"]), { finalStatuses: true });
+  });
+} else if (invokedAsEntrypoint) {
+  generate(parseArgs(process.argv.slice(2)));
+}

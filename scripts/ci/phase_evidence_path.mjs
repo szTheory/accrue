@@ -1,8 +1,12 @@
 #!/usr/bin/env node
 
+import assert from "node:assert/strict";
 import fs from "node:fs";
+import os from "node:os";
 import path from "node:path";
+import test from "node:test";
 import { fileURLToPath } from "node:url";
+import { isMainModule } from "./main_module.mjs";
 
 export const repositoryRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 
@@ -48,7 +52,7 @@ export function repositoryRelativePhaseEvidencePath(phaseSlug, artifactPath, opt
   return path.relative(root, resolvePhaseEvidencePath(phaseSlug, artifactPath, options)).split(path.sep).join("/");
 }
 
-if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+function main() {
   const [phaseSlug, artifactPath] = process.argv.slice(2);
   try {
     process.stdout.write(`${repositoryRelativePhaseEvidencePath(phaseSlug, artifactPath)}\n`);
@@ -56,4 +60,33 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
     console.error(`resolve phase evidence: FAIL: ${error.message}`);
     process.exitCode = 1;
   }
+}
+
+// D-29: isMainModule() throws (never returns a silent false) when there is
+// no invoking entrypoint; caught here and treated as "not the entrypoint"
+// so a bare import stays side-effect-free (established pattern, 232-01).
+let invokedAsEntrypoint = false;
+try {
+  invokedAsEntrypoint = isMainModule(import.meta.url);
+} catch {
+  invokedAsEntrypoint = false;
+}
+if (invokedAsEntrypoint && process.env.NODE_TEST_CONTEXT) {
+  test("resolvePhaseEvidencePath resolves an active-phase artifact and rejects an unsafe artifact path", () => {
+    const temp = fs.mkdtempSync(path.join(fs.realpathSync(os.tmpdir()), "gsd-phase-evidence-path-"));
+    try {
+      const phaseDir = path.join(temp, ".planning", "phases", "999-fixture-phase");
+      fs.mkdirSync(phaseDir, { recursive: true });
+      fs.writeFileSync(path.join(phaseDir, "evidence.json"), "{}");
+      const resolved = resolvePhaseEvidencePath("999-fixture-phase", "evidence.json", { root: temp });
+      assert.equal(resolved, path.join(phaseDir, "evidence.json"));
+      assert.equal(repositoryRelativePhaseEvidencePath("999-fixture-phase", "evidence.json", { root: temp }), ".planning/phases/999-fixture-phase/evidence.json");
+      assert.throws(() => resolvePhaseEvidencePath("999-fixture-phase", "../escape.json", { root: temp }), /must not contain/);
+      assert.throws(() => resolvePhaseEvidencePath("999-fixture-phase", "missing.json", { root: temp }), /missing phase evidence/);
+    } finally {
+      fs.rmSync(temp, { recursive: true, force: true });
+    }
+  });
+} else if (invokedAsEntrypoint) {
+  main();
 }
