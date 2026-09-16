@@ -132,7 +132,6 @@ function applyStrictFlags(repo, record, renderedContents, parsed) {
 }
 
 export function verifyFixtures() {
-  fail("not implemented: verifyFixtures");
   function ledgerScratch() {
     const scratch = fs.mkdtempSync(path.join(fs.realpathSync(os.tmpdir()), "phase231-window-verify-fixture-"));
     fs.mkdirSync(path.join(scratch, ".planning"));
