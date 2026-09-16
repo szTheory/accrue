@@ -5,9 +5,16 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
-import { collectBaseline as collectBaselineWithContext, cohortFingerprint, createRepositoryValidationContext, liveRuns, normalizeJob, normalizeRun, summarizeCohorts as summarizeCohortsWithContext, unresolvedPrerequisites, validateRecord, workflowRunnerImage } from "./collect_ci_baseline.mjs";
+import { fileURLToPath } from "node:url";
+import { collectBaseline as collectBaselineWithContext, cohortFingerprint, createRepositoryValidationContext, declaredRequiredJobSet, liveRequiredJobSet, liveRuns, normalizeJob, normalizeRun, requiredJobSetDrift, summarizeCohorts as summarizeCohortsWithContext, unresolvedPrerequisites, validateRecord, workflowRunnerImage } from "./collect_ci_baseline.mjs";
 import { resolvePhaseEvidencePath } from "./phase_evidence_path.mjs";
 import { deriveStagedPathPercentiles, renderBaseline } from "./render_ci_baseline.mjs";
+
+// D-18: the same live ci.yml path collect_ci_baseline.mjs resolves its
+// WORKFLOW_RUNNER_PATH from -- resolved relative to this module's own
+// location, not the caller's CWD, so `--require-required-job-set` works
+// regardless of where the CLI is invoked from.
+const LIVE_WORKFLOW_PATH = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../.github/workflows/ci.yml");
 
 const fixtureValidationContext = (runs = []) => {
   const match = runs[0]?.html_url?.match(/^https:\/\/github\.com\/([^/]+\/[^/]+)\/actions\/runs\//);
@@ -42,6 +49,37 @@ function verifyCriticalPath(records, rendered, validationContext) {
 
 function fixturePath() {
   return resolvePhaseEvidencePath("226-ci-baseline-proof-semantics", "fixtures/ci-baseline-cases.json");
+}
+
+// D-18: `--require-required-job-set` -- the header declaration must not have
+// drifted from the live job graph. Reads the live ci.yml, never branch
+// protection or rulesets.
+function verifyRequiredJobSet(source = fs.readFileSync(LIVE_WORKFLOW_PATH, "utf8")) {
+  const triple = requiredJobSetDrift(declaredRequiredJobSet(source), liveRequiredJobSet(source));
+  if (triple.missing.length || triple.extra.length) fail(`required job set drift: missing=[${triple.missing.join(", ")}] extra=[${triple.extra.join(", ")}]`);
+  return triple;
+}
+
+// D-17: `--require-event-class` -- every run record's event_class must be
+// present and equal the expected class, so a dispatch-class proof can never
+// be silently read as a pull-request-class proof.
+function verifyEventClass(records, expectedEventClass) {
+  if (!expectedEventClass) fail("--require-event-class requires --expect-event-class");
+  for (const record of records) {
+    if (record.kind !== "run") continue;
+    if (!record.event_class) fail(`run ${record.run_id} is missing event_class`);
+    if (record.event_class !== expectedEventClass) fail(`run ${record.run_id} has event_class ${record.event_class}, expected ${expectedEventClass}`);
+  }
+}
+
+// D-21/D-29: `--require-exit-codes` -- a run record cannot claim `proved`
+// without a recorded conclusion (this schema has no separate exit_code
+// field for a run; `unknown` is the "no data recorded" placeholder).
+function verifyExitCodes(records) {
+  for (const record of records) {
+    if (record.kind !== "run" || record.provider_state !== "proved") continue;
+    if (!record.conclusion || record.conclusion === "unknown") fail(`run ${record.run_id} claims provider_state proved with no recorded conclusion or exit code`);
+  }
 }
 
 function rejectsForbiddenFields(fixture) {
@@ -560,10 +598,19 @@ async function main() {
   const recordsIndex = args.indexOf("--records");
   const renderedIndex = args.indexOf("--rendered");
   const requireCriticalPath = args.includes("--require-critical-path");
+  const requireRequiredJobSet = args.includes("--require-required-job-set");
+  const requireEventClass = args.includes("--require-event-class");
+  const requireExitCodes = args.includes("--require-exit-codes");
+  const expectEventClassIndex = args.indexOf("--expect-event-class");
+  const expectEventClass = expectEventClassIndex !== -1 ? args[expectEventClassIndex + 1] : undefined;
   const expectedRepository = args[args.indexOf("--expected-repository") + 1];
   if (!expectedRepository) fail("--expected-repository is required");
   const validationContext = createRepositoryValidationContext({ expectedRepository });
-  if (args.includes("--fixtures")) await verifyFixtures(validationContext);
+  // D-19: `--fixtures` always exercises the fixed Phase 226 acme/accrue fixture
+  // dataset, independent of the production `--expected-repository` the same
+  // invocation may also carry for `--records` -- fixtures never move repos.
+  if (args.includes("--fixtures")) await verifyFixtures(createRepositoryValidationContext({ expectedRepository: "acme/accrue" }));
+  if (requireRequiredJobSet) verifyRequiredJobSet();
   if (recordsIndex !== -1) {
     const source = args[recordsIndex + 1];
     if (!source) fail("--records requires an NDJSON path");
@@ -575,9 +622,13 @@ async function main() {
       assert.equal(fs.readFileSync(rendered, "utf8"), expected, "rendered Markdown must be byte-reproducible");
     }
     if (requireCriticalPath) verifyCriticalPath(records, expected, validationContext);
+    if (requireEventClass) verifyEventClass(records, expectEventClass);
+    if (requireExitCodes) verifyExitCodes(records);
   }
   if (requireCriticalPath && recordsIndex === -1) fail("--require-critical-path requires --records");
-  if (!args.includes("--fixtures") && recordsIndex === -1) fail("usage: verify_ci_baseline.mjs --fixtures | --records records.ndjson [--rendered baseline.md] [--require-critical-path] --expected-repository owner/repository");
+  if (requireEventClass && recordsIndex === -1) fail("--require-event-class requires --records");
+  if (requireExitCodes && recordsIndex === -1) fail("--require-exit-codes requires --records");
+  if (!args.includes("--fixtures") && recordsIndex === -1 && !requireRequiredJobSet) fail("usage: verify_ci_baseline.mjs --fixtures | --records records.ndjson [--rendered baseline.md] [--require-critical-path] [--require-required-job-set] [--require-event-class --expect-event-class <class>] [--require-exit-codes] --expected-repository owner/repository");
   console.log("ci baseline fixtures: PASS");
 }
 

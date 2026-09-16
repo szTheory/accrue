@@ -79,20 +79,27 @@ function eventClass(event) {
 // every completeness check pass vacuously. Re-export Plan 03's header-comment
 // parser rather than writing a second one (D-19).
 export function declaredRequiredJobSet(source) {
-  throw new Error("declaredRequiredJobSet: not implemented");
+  return declaredMergeBlockingJobs(source);
 }
 
 // D-18: the independent live cross-check -- derived from the live job graph's
 // terminal `annotation-sweep` gate and its `needs:` array, never from
-// branch-protection or rulesets.
+// branch-protection or rulesets. `annotation-sweep` itself is the terminal
+// gate node and is not one of its own declared prerequisites, so it is added
+// back explicitly to match the header declaration's full set.
 export function liveRequiredJobSet(source) {
-  throw new Error("liveRequiredJobSet: not implemented");
+  return [...new Set([...annotationSweepNeeds(source), "annotation-sweep"])].sort();
 }
 
 // D-18: exact-set comparison; a populated missing/extra pair names the
 // drifted key rather than collapsing to a boolean.
 export function requiredJobSetDrift(declared, live) {
-  throw new Error("requiredJobSetDrift: not implemented");
+  const declaredSet = new Set(declared);
+  const liveSet = new Set(live);
+  return {
+    missing: [...declaredSet].filter((job) => !liveSet.has(job)).sort(),
+    extra: [...liveSet].filter((job) => !declaredSet.has(job)).sort()
+  };
 }
 function branchClass(event, branch) {
   if (event === "pull_request") return "pull_request";
@@ -149,10 +156,17 @@ export function normalizeRun(run, validationContext) {
   if (started < created || completed < started) fail("run timestamps are not monotonic");
   const providerState = run.provider_state ?? "non_run";
   if (!PROVIDER_STATES.has(providerState)) fail(`run.provider_state is unsupported: ${providerState}`);
+  const conclusionValue = conclusion(run.conclusion, "run.conclusion");
+  // D-21/D-29: a `proved` claim with no recorded conclusion (this module has
+  // no separate exit_code field for a "run" record, so an actually-observed
+  // conclusion other than the "no data" placeholder `unknown` IS the recorded
+  // proof) is a hard failure -- a green Actions conclusion alone is not
+  // provider proof, but the ABSENCE of any recorded conclusion is worse.
+  if (providerState === "proved" && conclusionValue === "unknown") fail("run.provider_state proved requires a recorded conclusion or exit code");
   return {
     schema_version: SCHEMA_VERSION, kind: "run", run_id: run.id, run_url: immutableUrl(run.html_url, "run.html_url", validationContext), sha: run.head_sha.slice(0, 12),
     created_at: run.created_at, started_at: run.run_started_at, completed_at: run.updated_at, event_class: eventClass(run.event), branch_class: branchClass(run.event, run.head_branch),
-    cohort_fingerprint: cohortFingerprint(run), workflow_duration_ms: completed - started, conclusion: conclusion(run.conclusion, "run.conclusion"),
+    cohort_fingerprint: cohortFingerprint(run), workflow_duration_ms: completed - started, conclusion: conclusionValue,
     run_attempt: Number.isInteger(run.run_attempt) && run.run_attempt > 0 ? run.run_attempt : 1, original_run_id: Number.isInteger(run.original_run_id) ? run.original_run_id : run.id, provider_state: providerState
   };
 }
