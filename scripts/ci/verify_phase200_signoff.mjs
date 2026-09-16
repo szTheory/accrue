@@ -2,7 +2,9 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import test from "node:test";
 import { resolvePhaseEvidencePath } from "./phase_evidence_path.mjs";
+import { isMainModule } from "./main_module.mjs";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -705,7 +707,21 @@ export function main(argv = process.argv.slice(2)) {
   return result;
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+// D-31: this file previously registered no real node:test case -- the broken
+// file-URL-template guard always evaluated false, so its only TAP line was
+// the file path itself. Guard fix and first real test land in the same
+// commit. Wrap the file's existing runSelfTest() -- already an extensive
+// positive/negative fixture battery wired to --self-test on the CLI -- in a
+// real node:test case rather than duplicating that coverage.
+let invokedAsEntrypoint = false;
+try {
+  invokedAsEntrypoint = isMainModule(import.meta.url);
+} catch {
+  invokedAsEntrypoint = false;
+}
+if (invokedAsEntrypoint && process.env.NODE_TEST_CONTEXT) {
+  test("Phase 200 sign-off self-test passes every fixture scenario (positive pass plus judge-findings/artifact/guardrail/stale-state negative controls)", () => runSelfTest());
+} else if (invokedAsEntrypoint) {
   try {
     main();
   } catch (error) {
