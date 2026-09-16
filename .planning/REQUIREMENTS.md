@@ -32,7 +32,7 @@
 ### Release Handoff
 
 - [ ] **REL-04**: Maintainers can review an integration pull request with a concise risk summary, exact verification evidence, preserved rollback instructions, and no unrelated feature scope.
-- [ ] **REL-05**: Release Please produces or is ready to produce a version-and-changelog-consistent release pull request after integration, without this milestone merging that PR or publishing packages.
+- [x] **REL-05**: Release Please produces or is ready to produce a version-and-changelog-consistent release pull request after integration, without this milestone merging that PR or publishing packages.
 
 ## Future Requirements
 
@@ -75,7 +75,7 @@ Roadmap phase ownership is populated during roadmap creation. Every v1.62 requir
 | HYG-02 | Phase 232 | Pending |
 | HYG-03 | Phase 232 | Pending |
 | REL-04 | Phase 232 | Pending |
-| REL-05 | Phase 232 | Pending |
+| REL-05 | Phase 232 | Complete |
 
 **Coverage:**
 
