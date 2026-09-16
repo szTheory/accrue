@@ -49,7 +49,7 @@ Tagline: *"Billing state, modeled clearly."*
 ### Core Technologies — `accrue_admin` package
 | Technology | Version Constraint | Purpose | Rationale |
 |------------|-------------------|---------|-----------|
-| `:accrue` | `== <same version>` | Core billing lib | Sibling dep via `path:` in dev (monorepo) and version-pinned in published releases. Must be exact version match per release — documented in release script. |
+| `:accrue` | `~> <same version>` | Core billing lib | Sibling dep via `path:` in dev (monorepo) and same-minor constraint (`~> #{@version}`) in published releases. release-please `linked-versions` releases all three packages at the same version, so the minor stays in lockstep while patch releases of the core are free to flow to adopters. Enforced in CI by `scripts/ci/verify_release_manifest_alignment.sh`. |
 | `:phoenix_live_view` | `~> 1.1` | LiveView dashboard | Current **1.1.28** (2026-03-27). LiveView 1.1 is the stable line; `~> 1.1` gets us 1.1.x patches without 1.2 surprises. The admin UI is where the LiveView *socket runtime* (live sessions, sockets) is exercised; core `accrue` stays LiveView-runtime-free — it uses `Phoenix.Component` for email/invoice rendering and a cond-compiled `on_mount` guard, with no socket runtime and `phoenix_live_view` never in `extra_applications`. |
 | `:phoenix` | `~> 1.8` | Router/Endpoint | Same as core. |
 | `:phoenix_html` | `~> 4.2` | HEEx helpers | LiveView 1.1 requires phoenix_html 4.x. |
