@@ -32,6 +32,16 @@ require_source_fixed() {
     fail "missing '${needle}' in ${label}"
 }
 
+require_source_absent_fixed() {
+  local label="$1"
+  local source="$2"
+  local needle="$3"
+
+  if printf '%s\n' "$source" | grep -Fq "$needle"; then
+    fail "forbidden '${needle}' found in ${label}"
+  fi
+}
+
 require_source_regex() {
   local label="$1"
   local source="$2"
@@ -65,6 +75,36 @@ for file in "$ci_file" "$ledger_verifier" "$signoff_verifier" "$contract_file"; 
   require_file "$file"
 done
 
+# D-23 (232-06): the machinery self-tests (ledger self-test, sign-off
+# self-test, this CI-contract check itself) live in a BLOCKING job with no
+# continue-on-error at job or step level. Only the two steps whose subject is
+# the deliberately-parked ledger stay in the non-blocking job below.
+require_fixed "$ci_file" "admin-ui-ratchet-selftests:"
+require_fixed "$ci_file" "name: Admin UI ratchet self-tests"
+
+selftests_job="$(job_body "admin-ui-ratchet-selftests")"
+[ -n "$selftests_job" ] || fail "could not extract admin-ui-ratchet-selftests job"
+
+for needle in \
+  "name: Admin UI ratchet self-tests" \
+  "if: github.event_name != 'schedule'" \
+  "runs-on: ubuntu-24.04" \
+  "uses: actions/checkout@v6" \
+  "uses: actions/setup-node@v6" \
+  "node-version: '22'" \
+  "cache: npm" \
+  "cache-dependency-path: accrue_admin/package-lock.json" \
+  "cd accrue_admin && npm ci" \
+  "cd accrue_admin && npm run ratchet:ledger:self-test" \
+  "cd accrue_admin && npm run ratchet:signoff:self-test" \
+  "cd accrue_admin && npm run ratchet:ci-contract"
+do
+  require_source_fixed "admin-ui-ratchet-selftests job" "$selftests_job" "$needle"
+done
+
+require_source_absent_fixed "admin-ui-ratchet-selftests job" "$selftests_job" "continue-on-error"
+require_source_absent_fixed "admin-ui-ratchet-selftests job" "$selftests_job" "cd accrue_admin && npm run ratchet:ledger:verify-frozen"
+
 require_fixed "$ci_file" "admin-ui-ratchet-guardrails:"
 require_fixed "$ci_file" "Admin UI ratchet guardrails"
 
@@ -82,11 +122,8 @@ for needle in \
   "cache: npm" \
   "cache-dependency-path: accrue_admin/package-lock.json" \
   "cd accrue_admin && npm ci" \
-  "cd accrue_admin && npm run ratchet:ledger:self-test" \
   "cd accrue_admin && npm run ratchet:ledger:verify-frozen" \
-  "cd accrue_admin && npm run ratchet:signoff:self-test" \
   "cd accrue_admin && npm run ratchet:signoff" \
-  "cd accrue_admin && npm run ratchet:ci-contract" \
   "PASS - ANTHROPIC_API_KEY is not required for this job" \
   "PASS - deterministic ratchet guardrails are clean" \
   "PASS - finding-regressions.ndjson is 0 bytes" \
@@ -105,6 +142,12 @@ do
   require_source_fixed "admin-ui-ratchet-guardrails job" "$ratchet_job" "$needle"
 done
 
+# D-23 (232-06): the genuinely-passing self-test steps moved out to
+# admin-ui-ratchet-selftests -- they must not still be duplicated here.
+require_source_absent_fixed "admin-ui-ratchet-guardrails job" "$ratchet_job" "cd accrue_admin && npm run ratchet:ledger:self-test"
+require_source_absent_fixed "admin-ui-ratchet-guardrails job" "$ratchet_job" "cd accrue_admin && npm run ratchet:signoff:self-test"
+require_source_absent_fixed "admin-ui-ratchet-guardrails job" "$ratchet_job" "cd accrue_admin && npm run ratchet:ci-contract"
+
 evidence_upload_step="$(printf '%s\n' "$ratchet_job" | awk '
   /name: Upload Phase 208 ratchet evidence/ { in_step = 1 }
   in_step { print }
@@ -117,10 +160,8 @@ require_source_absent_regex \
   '\.planning/phases/208-prove-convergence-on-the-representative-slice-wire-ci-accept/'
 
 require_source_regex "admin-ui-ratchet-guardrails job" "$ratchet_job" 'name: Install admin Node dependencies'
-require_source_regex "admin-ui-ratchet-guardrails job" "$ratchet_job" 'name: Run ratchet ledger self-tests'
 require_source_regex "admin-ui-ratchet-guardrails job" "$ratchet_job" 'name: Verify frozen ratchet evidence'
 require_source_regex "admin-ui-ratchet-guardrails job" "$ratchet_job" 'name: Verify UI ratchet sign-off'
-require_source_regex "admin-ui-ratchet-guardrails job" "$ratchet_job" 'name: Phase 208 CI contract'
 require_source_regex "admin-ui-ratchet-guardrails job" "$ratchet_job" 'name: Ratchet status summary'
 require_source_regex "admin-ui-ratchet-guardrails job" "$ratchet_job" 'uses: actions/upload-artifact@v7'
 
@@ -143,10 +184,12 @@ done
 
 annotation_job="$(job_body "annotation-sweep")"
 [ -n "$annotation_job" ] || fail "could not extract annotation-sweep job"
+require_source_fixed "annotation-sweep job" "$annotation_job" "admin-ui-ratchet-selftests"
 require_source_fixed "annotation-sweep job" "$annotation_job" "admin-ui-ratchet-guardrails"
 require_source_fixed "annotation-sweep job" "$annotation_job" "bash scripts/ci/annotation_sweep.sh"
 require_source_fixed "annotation-sweep job" "$annotation_job" "ANNOTATION_SWEEP_EXCLUDE: advisory,ratchet"
 annotation_job_flat="$(printf '%s\n' "$annotation_job" | tr '\n' ' ')"
+require_source_regex "annotation-sweep job" "$annotation_job_flat" 'annotation_sweep\.sh .*admin-ui-ratchet-selftests'
 require_source_regex "annotation-sweep job" "$annotation_job_flat" 'annotation_sweep\.sh .*admin-ui-ratchet-guardrails'
 
 echo "verify_admin_ui_ratchet_ci_contract: ok"

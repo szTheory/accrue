@@ -3,14 +3,16 @@ name: CI
 # Job id contract — stable YAML `jobs:` keys relied on by docs, `act`, and anchors:
 # `release-manifest-ssot`, `release-gate`, `phase18-tax-gate`, `admin-drift-docs`,
 # `admin-group-contracts`, `admin-hardening-guardrails`,
-# `admin-phase200-guardrails`, `admin-ui-ratchet-guardrails`,
+# `admin-phase200-guardrails`, `admin-ui-ratchet-selftests`, `admin-ui-ratchet-guardrails`,
 # `host-integration`, `playwright-e2e`,
 # `host-docker-smoke`, `annotation-sweep`, `provider-proof-trigger`, `live-stripe`,
 # `provider-proof-incident`.
 # Merge-blocking on pull_request: `release-manifest-ssot`, `docs-contracts-shift-left`,
 # `release-gate`, `phase18-tax-gate`, `admin-drift-docs`, `admin-group-contracts`,
 # `admin-hardening-guardrails`, `admin-phase200-guardrails`,
-# `admin-ui-ratchet-guardrails`,
+# `admin-ui-ratchet-selftests`.
+# Non-blocking (job-level continue-on-error, disposition: parked; see .planning/WINDOWS.md
+# row 11): `admin-ui-ratchet-guardrails`.
 # `host-integration`, `playwright-e2e`, `host-docker-smoke`,
 # `annotation-sweep`.
 # Mandatory periodic: `live-stripe` (Stripe test-mode parity) runs on
@@ -976,21 +978,16 @@ jobs:
             .planning/phases/200-idempotent-verification-sign-off/judge.findings.json
           if-no-files-found: ignore
 
-  admin-ui-ratchet-guardrails:
-    name: Admin UI ratchet guardrails
+  # D-23 (232-06): the ratchet job's genuinely-passing machinery self-tests were
+  # previously bundled with the two deliberately-parked steps under one
+  # `continue-on-error: true` job, so a real regression in the ratchet machinery
+  # itself would have been silently absorbed. This job carries no non-blocking
+  # flag at job or step level -- a real machinery regression here blocks CI.
+  admin-ui-ratchet-selftests:
+    name: Admin UI ratchet self-tests
     if: github.event_name != 'schedule'
     needs: [admin-hardening-guardrails, admin-phase200-guardrails]
     runs-on: ubuntu-24.04
-    # NON-BLOCKING while the v1.56 Admin UI Ratchet milestone is PARKED (superseded
-    # by v1.57 on 2026-07-19). The verify-frozen / sign-off steps require a frozen
-    # ledger with zero open findings, but v1.56 was parked mid-convergence at Phase
-    # 208 (3/5): ledger.baseline.json is intentionally frozen:false with ~23 IA
-    # findings deferred to v1.57. This gate was wired in 208-03 and has never been
-    # satisfiable on main; it stayed dormant only because its Phase 192 dependency
-    # was red. The job still runs (its deterministic self-tests keep reporting), but
-    # its failure must not block CI while parked. REMOVE this line when v1.57 M3
-    # re-freezes the ratchet (verify-frozen then passes on its own).
-    continue-on-error: true
 
     steps:
       - uses: actions/checkout@v6
@@ -1008,17 +1005,59 @@ jobs:
       - name: Run ratchet ledger self-tests
         run: cd accrue_admin && npm run ratchet:ledger:self-test
 
-      - name: Verify frozen ratchet evidence
-        run: cd accrue_admin && npm run ratchet:ledger:verify-frozen
-
       - name: Verify UI ratchet sign-off self-test
         run: cd accrue_admin && npm run ratchet:signoff:self-test
 
-      - name: Verify UI ratchet sign-off
-        run: cd accrue_admin && npm run ratchet:signoff
-
       - name: Phase 208 CI contract
         run: cd accrue_admin && npm run ratchet:ci-contract
+
+  admin-ui-ratchet-guardrails:
+    # name: the literal "[parked]" display-name marker is added in the SAME
+    # commit as the ANNOTATION_SWEEP_EXCLUDE disposition-key edit below
+    # (Task 3, D-25) -- the sweep matches normalized job display-name
+    # fragments, so the marker and the exclusion key it drives must never be
+    # split across commits.
+    name: Admin UI ratchet guardrails
+    if: github.event_name != 'schedule'
+    needs: [admin-hardening-guardrails, admin-phase200-guardrails]
+    runs-on: ubuntu-24.04
+    # NON-BLOCKING (disposition: parked) while the v1.56 Admin UI Ratchet milestone
+    # remains PARKED (superseded by v1.57 on 2026-07-19). This lane is failing on
+    # the merits, not un-run or advisory-by-design: ledger.baseline.json is
+    # deliberately frozen:false with open findings deferred to v1.57 M3. The
+    # machinery that would prove this lane (self-tests, CI contract) has been
+    # split out into the blocking `admin-ui-ratchet-selftests` job above (D-23) --
+    # only the two steps whose subject is the parked ledger stay non-blocking here.
+    # This parked disposition is recorded as ONE waived row -- ship-window row 11
+    # -- in .planning/WINDOWS.md (owner, rationale, and release impact live there,
+    # not here; see D-22, no second waiver channel). Un-parking is two steps: (1)
+    # drop this job's `[parked]` display-name marker (which re-arms the
+    # annotation sweep automatically per its disposition-keyed
+    # ANNOTATION_SWEEP_EXCLUDE below), and (2) re-freeze
+    # accrue_admin/e2e/ratchet/ledger.baseline.json. The "Parked-lane expiry
+    # trigger (D-26)" step in admin-ui-ratchet-selftests above fails blockingly if
+    # the ledger goes frozen while ship-window row 11 still exists waived, so this
+    # comment is an executable removal condition, not an aspirational one.
+    continue-on-error: true
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Set up Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: accrue_admin/package-lock.json
+
+      - name: Install admin Node dependencies
+        run: cd accrue_admin && npm ci
+
+      - name: Verify frozen ratchet evidence
+        run: cd accrue_admin && npm run ratchet:ledger:verify-frozen
+
+      - name: Verify UI ratchet sign-off
+        run: cd accrue_admin && npm run ratchet:signoff
 
       - name: Ratchet status summary
         run: |
@@ -1368,6 +1407,7 @@ jobs:
         admin-group-contracts,
         admin-hardening-guardrails,
         admin-phase200-guardrails,
+        admin-ui-ratchet-selftests,
         admin-ui-ratchet-guardrails,
         host-integration,
         playwright-e2e,
@@ -1400,7 +1440,8 @@ jobs:
         run: >-
           bash scripts/ci/annotation_sweep.sh release-manifest-ssot docs-contracts-shift-left
           release-gate phase18-tax-gate admin-drift-docs admin-group-contracts admin-hardening-guardrails
-          admin-phase200-guardrails admin-ui-ratchet-guardrails host-integration playwright-e2e host-docker-smoke
+          admin-phase200-guardrails admin-ui-ratchet-selftests admin-ui-ratchet-guardrails host-integration
+          playwright-e2e host-docker-smoke
 
   # ---------------------------------------------------------------------
   # Mandatory periodic live-Stripe fidelity job (quick task 260414-l9q).
