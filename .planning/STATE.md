@@ -5,17 +5,17 @@ milestone_name: Release Integration & Repository Hygiene
 current_phase: 231
 current_phase_name: Exact-SHA Release Gate Proof
 status: verifying
-stopped_at: Completed 231-06-PLAN.md
-last_updated: "2026-09-16T15:18:13.169Z"
-last_activity: 2026-09-15
+stopped_at: Phase 232 context gathered
+last_updated: "2026-09-16T16:32:31.770Z"
+last_activity: 2026-09-16
 last_activity_desc: Phase 231 execution started
-state_head: 57a0c5f5e2e16b7f295c6ff62d4f2572fc689677
+state_head: 0f3ee2cee5b1cca1266c5a66d15aa4e6a0dd3557
 progress:
   total_phases: 4
-  completed_phases: 2
+  completed_phases: 3
   total_plans: 33
   completed_plans: 33
-  percent: 50
+  percent: 75
 ---
 
 # Project State
@@ -35,7 +35,7 @@ Plan: 6 of 6
 Status: Phase complete — ready for verification
 Last activity: 2026-09-16 - Completed quick task 260916-gda: Close phase-231 loose ends: STATE.md standing sections, gap-closure TAP harness, 229-UAT regen, CR-01 window-disposition invariant, WR-01 expected-repository validation, REQUIREMENTS.md gate wording
 
-Progress: [█████░░░░░] 50% (2/4 phases complete; 27/27 plans in Phases 229-230)
+Progress: [████████░░] 75% (2/4 phases complete; 27/27 plans in Phases 229-230)
 
 ## Performance Metrics
 
@@ -217,8 +217,8 @@ Active v1.59 clears the reopen rule through a concrete adopter requirement and e
 
 ## Session Continuity
 
-Last session: 2026-09-16T15:16:47.580Z
-Stopped at: Completed 231-06-PLAN.md
+Last session: 2026-09-16T16:32:31.661Z
+Stopped at: Phase 232 context gathered
 
 229-20 outcome (commits 024eaeca, ddd9a137, c6677152):
 
@@ -244,7 +244,7 @@ covered-input fingerprint over all 52 inputs. 229-UAT.md was generated from SUMM
 T-229-14, T-229-G14-03) were one stale register entry — the audit doc commit is an ancestor of
 the renderer fix — and were re-verified closed adversarially (61/61, threats_open: 0).
 
-Resume file: None
+Resume file: .planning/phases/232-bounded-hygiene-release-handoff/232-CONTEXT.md
 
 ### Phase 229 evidence: two ordering constraints learned the hard way
 
