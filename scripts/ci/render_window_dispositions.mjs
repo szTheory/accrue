@@ -36,8 +36,8 @@ export const SPLICE_END = "<!-- phase231-window-dispositions:end -->";
 // currently-legal third case) passed anyway, a ledger/reality mismatch that
 // deserves its own declared bucket, not a comment.
 const PAIR_SEPARATOR = "\u0000";
-const pairKey = (disposition, state) => `${disposition}${PAIR_SEPARATOR}${state}`;
-const BUCKET_OF_PAIR = new Map([
+export const pairKey = (disposition, state) => `${disposition}${PAIR_SEPARATOR}${state}`;
+export const BUCKET_OF_PAIR = new Map([
   [pairKey("waived", "failed"), "waived_gate_ran_and_failed"],
   [pairKey("waived", "skipped"), "waived_gate_never_proved"],
   [pairKey("waived", "advisory"), "waived_gate_never_proved"],
@@ -46,7 +46,7 @@ const BUCKET_OF_PAIR = new Map([
   [pairKey("fixed", "proved"), "fixed"]
 ]);
 
-function bucketOf(row) {
+export function bucketOf(row) {
   const bucket = BUCKET_OF_PAIR.get(pairKey(row.disposition, row.state));
   if (!bucket) fail(`row ${row.id} has an unmapped (disposition, state) pair: (${row.disposition}, ${row.state})`);
   return bucket;

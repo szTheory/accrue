@@ -8,11 +8,12 @@ import { isMainModule } from "./main_module.mjs";
 import {
   ROW_KINDS,
   ROW_DISPOSITIONS,
+  ROW_STATES,
   validateWindowDispositions,
   validateWindowRow,
   readShipWindowRows
 } from "./collect_window_dispositions.mjs";
-import { renderWindowDispositions } from "./render_window_dispositions.mjs";
+import { renderWindowDispositions, bucketOf, BUCKET_OF_PAIR } from "./render_window_dispositions.mjs";
 import { resolvePhaseEvidencePath, repositoryRoot } from "./phase_evidence_path.mjs";
 
 const fail = (message) => { throw new Error(message); };
@@ -292,6 +293,36 @@ export function verifyFixtures() {
 
 }
 
+// D-14: the pair space this probe row minimally satisfies -- exit_code when
+// state is "proved" (CR-01), owner/rationale/release_impact when disposition
+// is "waived" (GATE-03) -- so a candidate pair's LEGALITY is decided purely
+// by validateWindowRow's own rejection rule, never a hand-listed table that
+// could silently drift from the schema (D-14, CR-01).
+function probeRow(disposition, state) {
+  const row = { id: 1, phase: "1", kind: "unrun-verify", disposition, state, current_evidence: "probe row for cartesian-product reachability" };
+  if (state === "proved") row.exit_code = 0;
+  if (disposition === "waived") { row.owner = "maintainer"; row.rationale = "probe"; row.release_impact = "probe"; }
+  return row;
+}
+
+// D-14: re-derived by calling validateWindowRow, never transcribed -- this
+// is the entire point of the reachability test: legality cannot drift from
+// the schema because it is never copied out of it.
+export function deriveLegalPairs() {
+  const legal = [];
+  for (const disposition of ROW_DISPOSITIONS) {
+    for (const state of ROW_STATES) {
+      try {
+        validateWindowRow(probeRow(disposition, state), "probe");
+        legal.push([disposition, state]);
+      } catch {
+        // illegal pair -- not in scope for this reachability test
+      }
+    }
+  }
+  return legal;
+}
+
 async function main() {
   const parsed = options(process.argv.slice(2));
   if (parsed.flags.has("fixtures")) { verifyFixtures(); console.log("window dispositions fixtures: PASS"); return; }
@@ -336,6 +367,26 @@ try {
 }
 if (invokedAsEntrypoint && process.env.NODE_TEST_CONTEXT) {
   test("window dispositions fixtures pass every negative control", () => verifyFixtures());
+  // CR-01 follow-through (D-14): asserts BOTH directions of the mapping in one
+  // pass -- no legal pair renders unbucketed (reachedBuckets has no member
+  // outside declaredBuckets), and no declared bucket is dead code
+  // (declaredBuckets has no member outside reachedBuckets). deepEqual on the
+  // two sorted arrays gives both simultaneously.
+  test("every legal (disposition, state) pair renders under exactly one declared bucket, and no declared bucket is unreachable by any legal pair", () => {
+    const legalPairs = deriveLegalPairs();
+    // A completeness loop over zero items must not silently declare pass.
+    assert.ok(legalPairs.length > 0, "derived legal-pair set must be non-empty");
+
+    // "Exactly one declared bucket": bucketOf() throws on an unmapped pair
+    // rather than returning undefined, so a legal pair that somehow missed the
+    // map surfaces here as a thrown error, not a silent gap.
+    const reachedBuckets = new Set();
+    for (const [disposition, state] of legalPairs) {
+      reachedBuckets.add(bucketOf({ id: 1, disposition, state }));
+    }
+    const declaredBuckets = new Set([...BUCKET_OF_PAIR.values()]);
+    assert.deepEqual([...reachedBuckets].sort(), [...declaredBuckets].sort());
+  });
 } else if (invokedAsEntrypoint) {
   main().catch((error) => { console.error(`window dispositions verify: FAIL: ${error.message}`); process.exitCode = 1; });
 }
