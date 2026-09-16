@@ -188,6 +188,32 @@ None yet.
 |---|-------------|------|--------|-----------|
 | 260915-dpd | Fix eager Mix.env/0 evaluation in Accrue auth modules that crashes OTP releases at boot | 2026-09-15 | 5653216c | [260915-dpd-fix-eager-mix-env-0-evaluation-in-accrue](./quick/260915-dpd-fix-eager-mix-env-0-evaluation-in-accrue/) |
 
+## Deferred Items
+
+| Category | Item | Status |
+|---|---|---|
+| requirement | HOST-01..03 | Deferred at v1.60 override closeout |
+| requirement | READY-01..02 | Deferred at v1.60 override closeout |
+
+## Post-v1.48 Pause Rule
+
+After v1.48, broad feature milestones remain closed by default unless reopened by concrete adopter failure, correctness/security/data-loss risk, repeated support issue, operational failure, or explicit strategy change.
+
+v1.55 OSS Quality Evaluation & Hardening Roadmap shipped on 2026-07-03 as maintenance / release-readiness / support-contract hardening under stable core. It was audit-only and produced evidence-backed software quality, CI/CD, and DB schema-contract artifacts plus a ranked implementation roadmap; it did not change product behavior, public APIs, DB defaults, CI required-check topology, release automation, or runtime UI.
+
+v1.58 lattice_stripe 2.x Bump & Stripe-Native Entitlements Sync opened 2026-07-30 as **maintenance / dependency currency plus closing a prior explicitly-deferred capability** (SEED-005's trigger fired 2026-07-29 when lattice_stripe `2.0.0` published with entitlements support, unblocking Phase 127's deferred optional Stripe-native sync). Not broad feature scope: stays inside the already-shipped entitlements feature, keeps the local plan→feature map canonical as the sole grant gate (D-01/D-11), and keeps `scripts/ci/verify_entitlement_sync_isolation.sh` green throughout.
+
+Active v1.59 clears the reopen rule through a concrete adopter requirement and explicit strategy change. B2C Alpha needs coherent Stripe/Apple account access plus extended offline use; the reusable signal is recorded without adopter identity or PII in `.planning/research/MULTI-RAIL-OFFLINE-ENTITLEMENTS.md`.
+
+### Historical Research Assets
+
+- **v1.17 Friction Inventory (FRG-01):** `.planning/research/v1.17-FRICTION-INVENTORY.md`
+- **v1.17 North Star:** `.planning/research/v1.17-north-star.md` — stop rules S1–S5.
+- **v1.47 Research:** `.planning/research/SUMMARY.md`
+- **v1.51 Admin UI Depth Design:** `.planning/research/v1.51-admin-ui-depth-design.md` (prior design source carried forward for v1.53/v1.54)
+- **v1.52 Brand System Design:** `.planning/research/v1.52-brand-system-design.md`
+- **v1.54 Research (archived source):** `.planning/research/SUMMARY.md` (page-level streamlining + Storybook synthesis of FEATURES.md, ARCHITECTURE.md, PITFALLS.md, v1.54-storybook-and-forward-only-qa.md)
+
 ## Session Continuity
 
 Last session: 2026-09-16T15:16:47.580Z

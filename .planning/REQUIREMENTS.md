@@ -19,8 +19,8 @@
 
 ### Release Proof
 
-- [x] **GATE-01**: A fresh clean checkout of the exact integration candidate passes the repository's complete local CI-equivalent gates without depending on ignored caches, credentials, or another worktree.
-- [x] **GATE-02**: Required GitHub Actions checks for the exact candidate SHA are green, and provider lanes retain explicit `proved`, `skipped`, `failed`, or `advisory` semantics rather than being relabeled as success.
+- [x] **GATE-01**: A fresh clean checkout of the exact integration candidate produces honest, re-verifiable, per-lane proof of the repository's complete local CI-equivalent gates — recorded argv and exit-code evidence at the exact candidate SHA under the closed `proved`/`failed`/`skipped`/`advisory`/`non_run` lexicon, with no aggregate green/passing boolean and no fabricated `proved` state — without depending on ignored caches, credentials, or another worktree.
+- [x] **GATE-02**: Required GitHub Actions checks for the exact candidate SHA produce honest per-lane status with recorded evidence, and provider lanes retain explicit `proved`, `failed`, `skipped`, `advisory`, or `non_run` semantics rather than being relabeled as success; a green Actions conclusion alone is not accepted as provider proof.
 - [x] **GATE-03**: Every open ship window has been fixed or explicitly waived with current evidence, owner, rationale, and release impact; no unexplained open window remains at the release handoff.
 
 ### Bounded Hygiene
