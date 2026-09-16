@@ -22,7 +22,22 @@ defmodule Accrue.Install.Templates do
       {context_path(project.root, "#{opts.billing_context}Handler"),
        render("billing_handler.ex.eex", assigns)},
       {project.runtime_config_path, render("runtime_config.exs.eex", assigns)}
-    ] ++ migration_templates(project, assigns)
+    ] ++ render_migrations(project, opts)
+  end
+
+  @doc """
+  Renders only the host migration files.
+
+  The installer uses this safe subset when project discovery cannot patch the
+  router or config confidently. This keeps the database prerequisite explicit
+  instead of reporting a manual install while silently leaving every Accrue
+  table absent.
+  """
+  @spec render_migrations(Accrue.Install.Project.t(), Accrue.Install.Options.t()) :: [
+          {Path.t(), String.t()}
+        ]
+  def render_migrations(project, opts) do
+    migration_templates(project, assigns(project, opts))
   end
 
   @doc """

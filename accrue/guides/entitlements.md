@@ -82,10 +82,58 @@ optional bounded reference and expiry; do not persist raw receipts, signed
 material, provider notification bodies, adopter identity, or PII in these
 records.
 
-This foundation deliberately excludes a projector, backfill, cutover, Apple
-verification, offline issuance, Google Play, Family Sharing, and provider
-lifecycle mutation. Those later-phase concerns must not be inferred from the
-registration or persistence schema.
+### API-only, read-only host setup
+
+`accrue_admin` is not required to read entitlements. A Phoenix API application
+can use the core context directly, and Phoenix itself remains optional for the
+core package. After copying and running Accrue's migrations, the minimal
+credential-free configuration is the host Repo plus its plan catalog; declaring
+the Fake processor makes the no-provider-I/O posture explicit:
+
+```elixir
+config :accrue,
+  repo: MyApp.Repo,
+  processor: Accrue.Processor.Fake,
+  entitlements: [
+    plans: [
+      pro: [features: [:reports, :api], limits: [seats: 5]]
+    ]
+  ]
+```
+
+No Stripe secret, webhook secret, mailer, or email branding is required to boot
+this read-only configuration. Read a normalized account with
+`Accrue.Entitlements.snapshot/2`. The returned `sources` field is a sorted list
+of provenance maps shaped as:
+
+```elixir
+%{
+  rail: :stripe | :apple,
+  environment: :production | :sandbox,
+  logical_plan: :pro,
+  effective_at: ~U[2026-08-30 12:00:00Z],
+  expires_at: nil,
+  revoked_at: nil
+}
+```
+
+Use `source.rail` to select provider-owned billing controls. Google Play is not
+a registered rail in this release.
+
+Host tests can insert the four common render states without private dependency
+support files:
+
+```elixir
+Accrue.Test.Entitlements.insert!(:none)
+Accrue.Test.Entitlements.insert!(:stripe_active)
+Accrue.Test.Entitlements.insert!(:stripe_cancelled_but_entitled)
+Accrue.Test.Entitlements.insert!(:apple_active)
+```
+
+Google Play, Family Sharing policy, and provider lifecycle mutation remain
+outside the current rail contract. Apple verification, App Store Server
+Notifications V2 intake, projection, and reconciliation are additive core
+surfaces; Apple subscription management itself remains external to Accrue.
 
 ---
 

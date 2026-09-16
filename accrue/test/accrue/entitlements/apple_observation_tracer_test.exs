@@ -28,7 +28,7 @@ defmodule Accrue.Entitlements.AppleObservationTracerTest do
       plans: [
         pro: [
           features: [:analytics],
-          quotas: [seats: 3],
+          limits: [seats: 3],
           products: [apple: [production: ["product_pro"]]]
         ]
       ]

@@ -37,6 +37,14 @@ tokens, credentials, provider payloads, or PII.
 
 ## accrue
 
+### 1.5.1
+
+**Phoenix 1.8 compatibility and a smaller API-only entitlement setup.**
+
+`1.5.1` resolves clean Phoenix 1.8 / Ecto 3.14 hosts on Decimal 3 while retaining `lattice_stripe 2.x`. Read-only entitlement consumers can boot without mail branding, plan `limits` now populate snapshot quantities, ambiguous installer runs still copy the required migrations, and provider-free host fixtures cover the common Stripe and Apple render states.
+
+`accrue_admin` and `accrue_portal` move in lockstep for dependency compatibility only; the core `accrue` package owns the fixes.
+
 ### 1.5.0
 
 **lattice_stripe 2.x plus observational Stripe-native entitlement sync.**
@@ -112,6 +120,14 @@ Early **CI and release pipeline** stabilization so public automation and docs pu
 ## accrue_admin
 
 The admin package is the **LiveView dashboard** that mounts into your Phoenix router. It tracks `accrue` closely—install the same version family for both.
+
+### 1.5.1
+
+Matches **accrue 1.5.1** for linked dependency compatibility. The API-only entitlement and Decimal 3 fixes live in core; this package adds no operator workflow or authorization behavior.
+
+### 1.5.0
+
+Matches **accrue 1.5.0** for linked dependency compatibility. Stripe-native entitlement refresh remains observational and core-owned; this package adds no grant authority.
 
 ### 1.4.0
 
