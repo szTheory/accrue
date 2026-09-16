@@ -1011,6 +1011,38 @@ jobs:
       - name: Phase 208 CI contract
         run: cd accrue_admin && npm run ratchet:ci-contract
 
+      # D-26 (232-06): placed here, in the BLOCKING job, rather than in the
+      # parked job below. GitHub Actions' job-level "continue on error" flag
+      # absorbs the whole job's conclusion regardless of any individual step's
+      # own such setting -- there is no per-step override that
+      # escapes a job-level flag. Since the expiry trigger's entire purpose is
+      # to fail BLOCKINGLY the moment the parked lane's reason for existing
+      # evaporates, it cannot live in a job whose failures are structurally
+      # absorbed. See 232-06-SUMMARY.md for the negative-control proof.
+      - name: Parked-lane expiry trigger (D-26)
+        if: always()
+        run: |
+          node -e "
+            const fs = require('fs');
+            const ledgerPath = process.env.LEDGER_PATH || './accrue_admin/e2e/ratchet/ledger.baseline.json';
+            const windowsPath = process.env.WINDOWS_PATH || '.planning/WINDOWS.md';
+            const ledger = JSON.parse(fs.readFileSync(ledgerPath, 'utf8'));
+            const windowsText = fs.readFileSync(windowsPath, 'utf8');
+            const blockMatch = windowsText.match(/\`\`\`\`json\n([\s\S]*?)\n\`\`\`\`/);
+            if (!blockMatch) {
+              console.error('Parked-lane expiry trigger: FAIL: could not find the embedded JSON block in ' + windowsPath);
+              process.exit(1);
+            }
+            const rows = JSON.parse(blockMatch[1]);
+            const waiverRow = rows.find((row) => row.id === 11);
+            const waiverExists = Boolean(waiverRow && waiverRow.status === 'waived');
+            console.log('Parked-lane expiry trigger: ledger.frozen=' + ledger.frozen + ', ship-window row 11 waived=' + waiverExists);
+            if (ledger.frozen === true && waiverExists) {
+              console.error('Parked-lane expiry trigger: FAIL: the ratchet ledger is frozen:true but ship-window row 11 (the parked-ratchet waiver) still exists as waived in ' + windowsPath + ' -- an unexpected pass means the reason for parking evaporated. Un-park by renaming the guardrails job (dropping the [parked] marker) and resolving row 11, rather than leaving both stale.');
+              process.exit(1);
+            }
+          "
+
   admin-ui-ratchet-guardrails:
     # name: the literal "[parked]" display-name marker is added in the SAME
     # commit as the ANNOTATION_SWEEP_EXCLUDE disposition-key edit below
@@ -1059,22 +1091,37 @@ jobs:
       - name: Verify UI ratchet sign-off
         run: cd accrue_admin && npm run ratchet:signoff
 
+      # D-24 (232-06): replaces a step that unconditionally echoed nine
+      # hardcoded "PASS" rows with no `if: always()` -- unreachable dead code
+      # that would have started printing fabricated passes the moment the
+      # step ahead of it (which fails on the merits today) went green. Every
+      # value below is read or computed from the live ledger file; nothing is
+      # a literal outcome word this step did not measure.
       - name: Ratchet status summary
+        if: always()
         run: |
-          {
-            echo "## Admin UI ratchet guardrails"
-            echo ""
-            echo "| Check | Status | Evidence |"
-            echo "| --- | --- | --- |"
-            echo "| No LLM key | PASS | PASS - ANTHROPIC_API_KEY is not required for this job |"
-            echo "| Deterministic guardrails | PASS | PASS - deterministic ratchet guardrails are clean |"
-            echo "| Finding regressions | PASS | PASS - finding-regressions.ndjson is 0 bytes |"
-            echo "| Independent verifier | PASS | PASS - independent recompute matches ledger.baseline.json |"
-            echo "| Synthetic count increase | PASS | PASS - synthetic count increase blocks the gate |"
-            echo "| Persona regression | PASS | PASS - regressed lens count increase blocks the gate |"
-            echo "| Existing UI gates | PASS | PASS - admin-hardening-guardrails, admin-phase200-guardrails, and asset-drift are green |"
-            echo "| Bundle freshness | PASS | PASS - accrue_admin.css is fresh |"
-          } >> "$GITHUB_STEP_SUMMARY"
+          node -e "
+            const l = require('./accrue_admin/e2e/ratchet/ledger.baseline.json');
+            const lines = [];
+            lines.push('## Admin UI ratchet guardrails [parked]');
+            lines.push('');
+            lines.push('Real values read from accrue_admin/e2e/ratchet/ledger.baseline.json at run time.');
+            lines.push('');
+            lines.push('| Field | Value |');
+            lines.push('| --- | --- |');
+            lines.push('| schema_version | ' + l.schema_version + ' |');
+            lines.push('| frozen | ' + l.frozen + ' |');
+            lines.push('| epoch | ' + l.epoch + ' |');
+            lines.push('| ledger_sha256 | ' + l.ledger_sha256 + ' |');
+            lines.push('| resolved_locked rows | ' + (Array.isArray(l.resolved_locked) ? l.resolved_locked.length : 'unknown') + ' |');
+            lines.push('');
+            lines.push('| Lens | total open | minor | real |');
+            lines.push('| --- | --- | --- | --- |');
+            for (const [lens, counts] of Object.entries(l.confirmed_open || {})) {
+              lines.push('| ' + lens + ' | ' + counts.total + ' | ' + counts.minor + ' | ' + counts.real + ' |');
+            }
+            require('fs').appendFileSync(process.env.GITHUB_STEP_SUMMARY, lines.join('\n') + '\n');
+          "
 
       - name: Upload Phase 208 ratchet evidence
         if: always()

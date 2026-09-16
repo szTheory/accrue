@@ -71,6 +71,21 @@ job_body() {
   ' "$ci_file"
 }
 
+# Extract a single step's body (from its "- name: <step_name>" line up to,
+# but excluding, the next "      - name:"/"      - uses:" sibling step line)
+# out of an already-extracted job body. Used where a needle must be scoped to
+# one step rather than merely present anywhere in the job.
+step_body() {
+  local job_source="$1"
+  local step_name="$2"
+
+  printf '%s\n' "$job_source" | awk -v step_name="- name: $step_name" '
+    index($0, step_name) { in_step = 1; print; next }
+    in_step && $0 ~ /^      - (name|uses):/ { exit }
+    in_step { print }
+  '
+}
+
 for file in "$ci_file" "$ledger_verifier" "$signoff_verifier" "$contract_file"; do
   require_file "$file"
 done
@@ -97,13 +112,24 @@ for needle in \
   "cd accrue_admin && npm ci" \
   "cd accrue_admin && npm run ratchet:ledger:self-test" \
   "cd accrue_admin && npm run ratchet:signoff:self-test" \
-  "cd accrue_admin && npm run ratchet:ci-contract"
+  "cd accrue_admin && npm run ratchet:ci-contract" \
+  "name: Parked-lane expiry trigger (D-26)"
 do
   require_source_fixed "admin-ui-ratchet-selftests job" "$selftests_job" "$needle"
 done
 
 require_source_absent_fixed "admin-ui-ratchet-selftests job" "$selftests_job" "continue-on-error"
 require_source_absent_fixed "admin-ui-ratchet-selftests job" "$selftests_job" "cd accrue_admin && npm run ratchet:ledger:verify-frozen"
+
+# D-26 (232-06): the expiry trigger step must be always-run (its whole point
+# is to fail even when the ledger, at rest, is not yet frozen) and it must
+# read the real ledger.frozen flag plus the ship-window row's waived status --
+# never a literal hardcoded outcome.
+expiry_step="$(step_body "$selftests_job" "Parked-lane expiry trigger (D-26)")"
+[ -n "$expiry_step" ] || fail "could not extract Parked-lane expiry trigger (D-26) step"
+require_source_fixed "Parked-lane expiry trigger (D-26) step" "$expiry_step" "if: always()"
+require_source_fixed "Parked-lane expiry trigger (D-26) step" "$expiry_step" "ledger.frozen"
+require_source_fixed "Parked-lane expiry trigger (D-26) step" "$expiry_step" "row.id === 11"
 
 require_fixed "$ci_file" "admin-ui-ratchet-guardrails:"
 require_fixed "$ci_file" "Admin UI ratchet guardrails"
@@ -124,14 +150,6 @@ for needle in \
   "cd accrue_admin && npm ci" \
   "cd accrue_admin && npm run ratchet:ledger:verify-frozen" \
   "cd accrue_admin && npm run ratchet:signoff" \
-  "PASS - ANTHROPIC_API_KEY is not required for this job" \
-  "PASS - deterministic ratchet guardrails are clean" \
-  "PASS - finding-regressions.ndjson is 0 bytes" \
-  "PASS - independent recompute matches ledger.baseline.json" \
-  "PASS - synthetic count increase blocks the gate" \
-  "PASS - regressed lens count increase blocks the gate" \
-  "PASS - admin-hardening-guardrails, admin-phase200-guardrails, and asset-drift are green" \
-  "PASS - accrue_admin.css is fresh" \
   "phase208-ratchet-evidence" \
   "accrue_admin/e2e/ratchet/ledger.baseline.json" \
   "accrue_admin/e2e/ratchet/finding-regressions.ndjson" \
@@ -165,7 +183,16 @@ require_source_regex "admin-ui-ratchet-guardrails job" "$ratchet_job" 'name: Ver
 require_source_regex "admin-ui-ratchet-guardrails job" "$ratchet_job" 'name: Ratchet status summary'
 require_source_regex "admin-ui-ratchet-guardrails job" "$ratchet_job" 'uses: actions/upload-artifact@v7'
 
-sanitized_job="$(printf '%s\n' "$ratchet_job" | grep -Fv "PASS - ANTHROPIC_API_KEY is not required for this job")"
+# D-24 (232-06): the status-summary step must be always-run (it reports on a
+# preceding step that fails on the merits today) and must read every value it
+# prints from the live ledger file -- no literal hardcoded outcome word.
+summary_step="$(step_body "$ratchet_job" "Ratchet status summary")"
+[ -n "$summary_step" ] || fail "could not extract Ratchet status summary step"
+require_source_fixed "Ratchet status summary step" "$summary_step" "if: always()"
+require_source_fixed "Ratchet status summary step" "$summary_step" "ledger.baseline.json"
+require_source_absent_regex "admin-ui-ratchet-guardrails job" "$ratchet_job" 'PASS - '
+
+sanitized_job="$ratchet_job"
 for pattern in \
   'secrets\.' \
   'ANTHROPIC_API_KEY' \
