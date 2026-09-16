@@ -19,9 +19,9 @@
 
 ### Release Proof
 
-- [ ] **GATE-01**: A fresh clean checkout of the exact integration candidate passes the repository's complete local CI-equivalent gates without depending on ignored caches, credentials, or another worktree.
-- [ ] **GATE-02**: Required GitHub Actions checks for the exact candidate SHA are green, and provider lanes retain explicit `proved`, `skipped`, `failed`, or `advisory` semantics rather than being relabeled as success.
-- [ ] **GATE-03**: Every open ship window has been fixed or explicitly waived with current evidence, owner, rationale, and release impact; no unexplained open window remains at the release handoff.
+- [x] **GATE-01**: A fresh clean checkout of the exact integration candidate passes the repository's complete local CI-equivalent gates without depending on ignored caches, credentials, or another worktree.
+- [x] **GATE-02**: Required GitHub Actions checks for the exact candidate SHA are green, and provider lanes retain explicit `proved`, `skipped`, `failed`, or `advisory` semantics rather than being relabeled as success.
+- [x] **GATE-03**: Every open ship window has been fixed or explicitly waived with current evidence, owner, rationale, and release impact; no unexplained open window remains at the release handoff.
 
 ### Bounded Hygiene
 
@@ -68,9 +68,9 @@ Roadmap phase ownership is populated during roadmap creation. Every v1.62 requir
 | INTG-01 | Phase 230 | Complete |
 | INTG-02 | Phase 230 | Complete |
 | INTG-03 | Phase 230 | Complete |
-| GATE-01 | Phase 231 | Pending |
-| GATE-02 | Phase 231 | Pending |
-| GATE-03 | Phase 231 | Pending |
+| GATE-01 | Phase 231 | Complete |
+| GATE-02 | Phase 231 | Complete |
+| GATE-03 | Phase 231 | Complete |
 | HYG-01 | Phase 232 | Pending |
 | HYG-02 | Phase 232 | Pending |
 | HYG-03 | Phase 232 | Pending |

@@ -4,17 +4,17 @@ milestone: v1.62
 milestone_name: Release Integration & Repository Hygiene
 current_phase: 231
 current_phase_name: Exact-SHA Release Gate Proof
-status: executing
-stopped_at: Completed 231-05-PLAN.md
-last_updated: "2026-09-16T15:02:36.409Z"
+status: verifying
+stopped_at: Completed 231-06-PLAN.md
+last_updated: "2026-09-16T15:18:13.169Z"
 last_activity: 2026-09-15
 last_activity_desc: Phase 231 execution started
-state_head: 6c736b98312b8f0673a7754a7b2f4335589f56c9
+state_head: 57a0c5f5e2e16b7f295c6ff62d4f2572fc689677
 progress:
   total_phases: 4
   completed_phases: 2
   total_plans: 33
-  completed_plans: 31
+  completed_plans: 33
   percent: 50
 ---
 
@@ -32,7 +32,7 @@ See: `.planning/PROJECT.md` (updated 2026-09-15)
 
 Phase: 231 (Exact-SHA Release Gate Proof) — EXECUTING
 Plan: 6 of 6
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-09-15 — Phase 231 execution started
 
 Progress: [█████░░░░░] 50% (2/4 phases complete; 27/27 plans in Phases 229-230)
@@ -87,6 +87,7 @@ Progress: [█████░░░░░] 50% (2/4 phases complete; 27/27 plans
 | Phase 231 P04 | 70min | 3 tasks | 5 files |
 | Phase 231 P03 | 3h05min | 3 tasks | 5 files |
 | Phase 231 P05 | 70min | 2 tasks | 3 files |
+| Phase 231 P06 | ~90min | 3 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -155,6 +156,7 @@ Progress: [█████░░░░░] 50% (2/4 phases complete; 27/27 plans
 - [Phase 231]: [Phase 231]: 231-03 recorded an honest discrepancy on the release-gate row rather than suppressing it: this local GATE-01 proof passed every required matrix cell it exercised (Floor/Primary/Primary+OpenTelemetry), while GATE-02's real GitHub dispatch reported failures in non-advisory release-gate cells on GitHub-hosted runners -- both results stand as independent evidence, neither overrides the other.
 - [Phase 231]: Row 3 (deviation, phase 215) waived rather than fixed: the Swift capability-report reducer it named was deleted by Phase 223-04's package-facade redesign, not merely edited; the equivalent safety property is independently verified enforced today by scripts/ci/verify_ios_offline_client.sh's jq assertion against the checked-in capability-report.json. — D-22 requires escalation, not a silent fixed close, when a deviation's original change is absent at the candidate SHA rather than present-and-intact; waiving with a verified-equivalent-mechanism rationale is the honest disposition.
 - [Phase 231]: Row 10 (unrun-verify, phase 227) waived rather than fixed: GATE-02 recorded exactly one real workflow_dispatch observation and it concluded failure, not a qualifying success, so Phase 227's three-success bounded critical-path comparison still cannot run -- the original data-gap blocker reproduces in substance even though a dispatch now executes. — Per D-22, a gate that now executes but does not produce the specific outcome the row required (a qualifying success, not merely any real outcome) closes as waived, never silently rolled forward as fixed.
+- [Phase 231]: Re-cut integration/v1.62-candidate verifiers permanently merge-blocking; every Phase 231 evidence artifact discoverable and reproducible from scripts/ci/README.md; fresh 231-REPOSITORY-INVENTORY.json capsule minted last, after all window-status and STATE.md/ROADMAP.md edits settled. — D-32/D-28: new verifiers must be merge-blocking and documented before the phase closes; D-28 requires the capsule to be minted only after planning docs settle or it invalidates itself on the next GSD step.
 
 ### Pending Todos
 
@@ -188,8 +190,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-09-16T15:02:36.380Z
-Stopped at: Completed 231-05-PLAN.md
+Last session: 2026-09-16T15:16:47.580Z
+Stopped at: Completed 231-06-PLAN.md
 
 229-20 outcome (commits 024eaeca, ddd9a137, c6677152):
 
