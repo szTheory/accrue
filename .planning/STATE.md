@@ -5,11 +5,11 @@ milestone_name: Release Integration & Repository Hygiene
 current_phase: 232
 current_phase_name: Bounded Hygiene & Release Handoff
 status: executing
-stopped_at: Completed 232-02-PLAN.md
-last_updated: "2026-09-16T19:28:33.580Z"
+stopped_at: Completed 232-03-PLAN.md
+last_updated: "2026-09-16T20:07:18.692Z"
 last_activity: 2026-09-16
 last_activity_desc: Phase 232 execution resumed (wave continue)
-state_head: 10673e53290c48decf8c88c2683f4f0ec84df4e8
+state_head: 662100176fc4774f81c5cd8fa796e777ab29b05d
 progress:
   total_phases: 4
   completed_phases: 3
@@ -31,7 +31,7 @@ See: `.planning/PROJECT.md` (updated 2026-09-15)
 ## Current Position
 
 Phase: 232 (Bounded Hygiene & Release Handoff) — EXECUTING
-Plan: 2 of 11
+Plan: 3 of 11
 Status: Ready to execute
 Last activity: 2026-09-16 — Phase 232 execution resumed (wave continue)
 
@@ -89,6 +89,7 @@ Progress: [████████░░] 75% (2/4 phases complete; 27/27 plans
 | Phase 231 P05 | 70min | 2 tasks | 3 files |
 | Phase 231 P06 | ~90min | 3 tasks | 3 files |
 | Phase 232 P02 | 95min | 3 tasks | 24 files |
+| Phase 232 P03 | ~80min | 3 tasks | 22 files |
 
 ## Accumulated Context
 
@@ -159,6 +160,8 @@ Progress: [████████░░] 75% (2/4 phases complete; 27/27 plans
 - [Phase 231]: Row 10 (unrun-verify, phase 227) waived rather than fixed: GATE-02 recorded exactly one real workflow_dispatch observation and it concluded failure, not a qualifying success, so Phase 227's three-success bounded critical-path comparison still cannot run -- the original data-gap blocker reproduces in substance even though a dispatch now executes. — Per D-22, a gate that now executes but does not produce the specific outcome the row required (a qualifying success, not merely any real outcome) closes as waived, never silently rolled forward as fixed.
 - [Phase 231]: Re-cut integration/v1.62-candidate verifiers permanently merge-blocking; every Phase 231 evidence artifact discoverable and reproducible from scripts/ci/README.md; fresh 231-REPOSITORY-INVENTORY.json capsule minted last, after all window-status and STATE.md/ROADMAP.md edits settled. — D-32/D-28: new verifiers must be merge-blocking and documented before the phase closes; D-28 requires the capsule to be minted only after planning docs settle or it invalidates itself on the next GSD step.
 - [Phase 232]: Re-derived the 232-02 guard-migration census live; found 4 IN-01 no-guard files (not 1) and all 8 idiom-2 files vacuous (not 3); expanded Task 2's same-commit guard+test work within declared scope accordingly. — D-15 no-transcription rule: plan-authored file lists rot between planning and execution.
+- [Phase 232]: Task 1's own real-repository acceptance criterion (--require-guard-coverage --require-non-vacuity --require-cohort-floor exits 0 against the real cohort) forced migrating 12 more guard-less scripts/ci/*.mjs files within Task 1 -- the ones 232-02 explicitly deferred as out of its own scope -- rather than leaving Task 1's own gate unsatisfied until a later plan. — D-15 no-transcription / Rule 3 blocking-issue: the plan's own acceptance criteria are the authority, and the real-repo invocation genuinely could not pass with 15 files still ungated.
+- [Phase 232]: Spawning or dynamically importing a now-guard-migrated scripts/ci/*.mjs file must delete (not blank with an empty string) any inherited NODE_TEST_CONTEXT from the child's env -- node:test's recursion guard treats mere key presence as "already inside a test run" and silently skips the nested invocation, turning a deliberately-bad CLI negative control's expected non-zero exit into a false 0. — Found via Task 1 fixture failures and confirmed via a full 382-file cohort node --test sweep; documented in scripts/ci/README.md's Module-boundary guard convention section for future guard migrations.
 
 ### Pending Todos
 
@@ -220,8 +223,8 @@ Active v1.59 clears the reopen rule through a concrete adopter requirement and e
 
 ## Session Continuity
 
-Last session: 2026-09-16T19:28:33.553Z
-Stopped at: Completed 232-02-PLAN.md
+Last session: 2026-09-16T20:07:18.666Z
+Stopped at: Completed 232-03-PLAN.md
 
 229-20 outcome (commits 024eaeca, ddd9a137, c6677152):
 
