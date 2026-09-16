@@ -5,16 +5,16 @@ milestone_name: Release Integration & Repository Hygiene
 current_phase: 232
 current_phase_name: Bounded Hygiene & Release Handoff
 status: executing
-stopped_at: Completed 232-03-PLAN.md
-last_updated: "2026-09-16T20:07:18.692Z"
+stopped_at: Completed 232-04-PLAN.md
+last_updated: "2026-09-16T20:25:44.760Z"
 last_activity: 2026-09-16
 last_activity_desc: Phase 232 execution resumed (wave continue)
-state_head: 662100176fc4774f81c5cd8fa796e777ab29b05d
+state_head: 5d5bdcf7e7f45da760339de061a04a870e8b3573
 progress:
   total_phases: 4
   completed_phases: 3
   total_plans: 44
-  completed_plans: 35
+  completed_plans: 37
   percent: 75
 ---
 
@@ -31,7 +31,7 @@ See: `.planning/PROJECT.md` (updated 2026-09-15)
 ## Current Position
 
 Phase: 232 (Bounded Hygiene & Release Handoff) — EXECUTING
-Plan: 3 of 11
+Plan: 4 of 11
 Status: Ready to execute
 Last activity: 2026-09-16 — Phase 232 execution resumed (wave continue)
 
@@ -90,6 +90,7 @@ Progress: [████████░░] 75% (2/4 phases complete; 27/27 plans
 | Phase 231 P06 | ~90min | 3 tasks | 3 files |
 | Phase 232 P02 | 95min | 3 tasks | 24 files |
 | Phase 232 P03 | ~80min | 3 tasks | 22 files |
+| Phase 232 P04 | ~40min | 3 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -162,6 +163,9 @@ Progress: [████████░░] 75% (2/4 phases complete; 27/27 plans
 - [Phase 232]: Re-derived the 232-02 guard-migration census live; found 4 IN-01 no-guard files (not 1) and all 8 idiom-2 files vacuous (not 3); expanded Task 2's same-commit guard+test work within declared scope accordingly. — D-15 no-transcription rule: plan-authored file lists rot between planning and execution.
 - [Phase 232]: Task 1's own real-repository acceptance criterion (--require-guard-coverage --require-non-vacuity --require-cohort-floor exits 0 against the real cohort) forced migrating 12 more guard-less scripts/ci/*.mjs files within Task 1 -- the ones 232-02 explicitly deferred as out of its own scope -- rather than leaving Task 1's own gate unsatisfied until a later plan. — D-15 no-transcription / Rule 3 blocking-issue: the plan's own acceptance criteria are the authority, and the real-repo invocation genuinely could not pass with 15 files still ungated.
 - [Phase 232]: Spawning or dynamically importing a now-guard-migrated scripts/ci/*.mjs file must delete (not blank with an empty string) any inherited NODE_TEST_CONTEXT from the child's env -- node:test's recursion guard treats mere key presence as "already inside a test run" and silently skips the nested invocation, turning a deliberately-bad CLI negative control's expected non-zero exit into a false 0. — Found via Task 1 fixture failures and confirmed via a full 382-file cohort node --test sweep; documented in scripts/ci/README.md's Module-boundary guard convention section for future guard migrations.
+- [Phase 232]: [Phase 232]: 232-04: bucketOf() is a total (disposition, state) pair map keyed by a NUL-separated pairKey(), failing closed by row id and both values on any unmapped pair -- replacing the fall-through if-chain whose unreachability was previously recorded only in a comment (D-13).
+- [Phase 232]: [Phase 232]: 232-04: a cartesian-product reachability test derives legal (disposition, state) pairs by calling validateWindowRow directly (never a hand-listed table), asserting the derived set non-empty and that reached buckets exactly equal declared buckets, proving both directions of the mapping in one assertion (D-14).
+- [Phase 232]: [Phase 232]: 232-04: [Gotcha] a literal null-escape written into an Edit-tool old_string/new_string parameter decodes to the actual NUL codepoint, not the six-character source text -- silently turning a text file into a git-perceived binary file; fix with a byte-level direct file replacement instead of retrying the Edit tool.
 
 ### Pending Todos
 
@@ -223,8 +227,8 @@ Active v1.59 clears the reopen rule through a concrete adopter requirement and e
 
 ## Session Continuity
 
-Last session: 2026-09-16T20:07:18.666Z
-Stopped at: Completed 232-03-PLAN.md
+Last session: 2026-09-16T20:25:44.734Z
+Stopped at: Completed 232-04-PLAN.md
 
 229-20 outcome (commits 024eaeca, ddd9a137, c6677152):
 
