@@ -197,6 +197,34 @@ jobs:
           node --test scripts/ci/verify_integration_disposition.mjs &&
           node scripts/ci/verify_integration_disposition.mjs --fixtures --expected-repository szTheory/accrue --require-hazard-universe
 
+      # Phase 231: these three steps are hermetic -- each builds disposable
+      # fixture git repositories in a temp directory and touches no network,
+      # no credential, and no ref outside them. They deliberately do NOT
+      # depend on integration/v1.62-candidate or review/v1.62-candidate-code-only:
+      # review/v1.62-candidate-code-only never leaves the machine, and while
+      # integration/v1.62-candidate now exists on origin (pushed by Plan 04),
+      # a CI step binding to a mutable integration branch would still be
+      # wrong -- these are the repository's own regression suites, not a
+      # live-candidate proof.
+      - name: Recut candidate shape and ancestry contract (D-01, D-04, D-07)
+        run: >-
+          node --test scripts/ci/verify_recut_candidate.mjs &&
+          node scripts/ci/verify_recut_candidate.mjs --fixtures --expected-repository szTheory/accrue
+
+      - name: GATE-01 cohort triad units and fixture contract (D-09, D-10, D-18)
+        run: >-
+          node --test scripts/ci/collect_gate01_cohort.mjs &&
+          node --test scripts/ci/render_gate01_cohort.mjs &&
+          node --test scripts/ci/verify_gate01_cohort.mjs &&
+          node scripts/ci/verify_gate01_cohort.mjs --fixtures --expected-repository szTheory/accrue --require-cohort-completeness --require-declaration-drift --require-exit-codes --require-clean-checkout --require-determinism
+
+      - name: Window dispositions triad units and fixture contract (D-22, D-26, D-30, D-31)
+        run: >-
+          node --test scripts/ci/collect_window_dispositions.mjs &&
+          node --test scripts/ci/render_window_dispositions.mjs &&
+          node --test scripts/ci/verify_window_dispositions.mjs &&
+          node scripts/ci/verify_window_dispositions.mjs --fixtures --expected-repository szTheory/accrue --require-row-join --require-evidence-freshness --require-waiver-completeness --require-determinism
+
       - name: Install tokens harness
         run: cd brandbook/tokens/harness && npm ci
 
