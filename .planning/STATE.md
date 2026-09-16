@@ -5,11 +5,11 @@ milestone_name: Release Integration & Repository Hygiene
 current_phase: 231
 current_phase_name: Exact-SHA Release Gate Proof
 status: planning
-stopped_at: Phase 230 complete, ready to plan Phase 231
-last_updated: "2026-09-15T21:45:03.044Z"
+stopped_at: Phase 231 context gathered
+last_updated: "2026-09-16T01:13:03.863Z"
 last_activity: 2026-09-15
 last_activity_desc: Phase 230 complete, transitioned to Phase 231
-state_head: fb05725155ea7162a62074a3631356e2182153a7
+state_head: 58e461e9f4ee022c79936bbe49d9d137f4fdde07
 progress:
   total_phases: 4
   completed_phases: 2
@@ -176,8 +176,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-09-15T20:56:35.119Z
-Stopped at: Phase 230 complete, ready to plan Phase 231
+Last session: 2026-09-16T01:13:03.772Z
+Stopped at: Phase 231 context gathered
 
 229-20 outcome (commits 024eaeca, ddd9a137, c6677152):
 
@@ -203,7 +203,7 @@ covered-input fingerprint over all 52 inputs. 229-UAT.md was generated from SUMM
 T-229-14, T-229-G14-03) were one stale register entry — the audit doc commit is an ancestor of
 the renderer fix — and were re-verified closed adversarially (61/61, threats_open: 0).
 
-Resume file: None
+Resume file: .planning/phases/231-exact-sha-release-gate-proof/231-CONTEXT.md
 
 ### Phase 229 evidence: two ordering constraints learned the hard way
 
