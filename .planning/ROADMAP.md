@@ -145,7 +145,7 @@ Plans:
 |-------|----------------|--------|-----------|
 | 229. Repository Truth & Recovery Safety | 20/20 | Complete    | 2026-09-15 |
 | 230. Reviewable History Integration | 7/7 | Complete    | 2026-09-15 |
-| 231. Exact-SHA Release Gate Proof | 0/TBD | Not started | - |
+| 231. Exact-SHA Release Gate Proof | 1/6 | In Progress | - |
 | 232. Bounded Hygiene & Release Handoff | 0/TBD | Not started | - |
 
 <details>

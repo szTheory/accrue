@@ -3,18 +3,18 @@ gsd_state_version: "1.0"
 milestone: v1.62
 milestone_name: Release Integration & Repository Hygiene
 current_phase: 231
-current_phase_name: exact-sha-release-gate-proof
+current_phase_name: Exact-SHA Release Gate Proof
 status: executing
-stopped_at: Phase 231 context gathered
-last_updated: "2026-09-16T01:40:02.129Z"
+stopped_at: Completed 231-01-PLAN.md
+last_updated: "2026-09-16T02:59:03.072Z"
 last_activity: 2026-09-15
-last_activity_desc: Phase 230 complete, transitioned to Phase 231
-state_head: 8578351c24fef4c61f15873e2787f7f5ee3fcfe0
+last_activity_desc: Phase 231 execution started
+state_head: ed55b9411aa6469dfc91e71f17df6d1d5ee6eeb9
 progress:
   total_phases: 4
   completed_phases: 2
   total_plans: 33
-  completed_plans: 27
+  completed_plans: 28
   percent: 50
 ---
 
@@ -30,10 +30,10 @@ See: `.planning/PROJECT.md` (updated 2026-09-15)
 
 ## Current Position
 
-Phase: 231 (exact-sha-release-gate-proof) — READY TO EXECUTE
-Plan: Not started
+Phase: 231 (Exact-SHA Release Gate Proof) — EXECUTING
+Plan: 2 of 6
 Status: Ready to execute
-Last activity: 2026-09-15 — Phase 230 complete, transitioned to Phase 231
+Last activity: 2026-09-15 — Phase 231 execution started
 
 Progress: [█████░░░░░] 50% (2/4 phases complete; 27/27 plans in Phases 229-230)
 
@@ -82,6 +82,7 @@ Progress: [█████░░░░░] 50% (2/4 phases complete; 27/27 plans
 | Phase 230 P04 | ~110 min | 3 tasks | 5 files |
 | Phase 230 P06 | ~4h | 3 tasks | 13 files |
 | Phase 230 P07 | ~65 min | 3 tasks | 6 files |
+| Phase 231 P01 | 55min | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -143,6 +144,7 @@ Progress: [█████░░░░░] 50% (2/4 phases complete; 27/27 plans
 - [Phase 230]: 230-06: scope.* in 230-INTEGRATION-DISPOSITION.json is measured against the candidate branch's live tip, not the pinned merge-commit candidate.object; candidate.object/parents/tree/ancestry stay pinned for D-05/D-06 identity. — The code-only review branch is built from the live tip per the plan's own git-diff-quiet acceptance criterion, and Plan 230-05's declared post_merge_commits are real source changes a reviewer needs counted; measuring scope against the stale pinned object made --require-scope --review-ref permanently unsatisfiable.
 - [Phase 230]: 230-07: Closed PR #44 unmerged with NO public comment (maintainer-authorized privacy deviation from D-10's cite-superseding default); the disposition ledger's enumeration was extended with an honest close-unmerged-no-comment value rather than forcing the old cite-superseding literal onto an action that posted no citation.
 - [Phase 230]: 230-07: Minted the final Phase-230 capsule under a distinct --preservation-phase 230.7 (not the bare 230 Plan 230-01's safety capsule already claimed) to avoid a preservation-ref collision on a second same-phase mint; rollback point re-proved by execution in a fresh scratch clone and its capsule field updated with the final digests.
+- [Phase 231]: [Phase 231]: Re-cut integration/v1.62-candidate from current milestone HEAD (85aed062 merge / f524f2a6 tip), superseding bab50d92; collectRecutGates compares live git facts against RECORD-supplied expectations (never the same live value it just derived), which is what makes the D-05 "second merge point" and stale-revert-expectation failure modes detectable at all.
 
 ### Pending Todos
 
@@ -176,8 +178,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-09-16T01:13:03.772Z
-Stopped at: Phase 231 context gathered
+Last session: 2026-09-16T02:59:03.032Z
+Stopped at: Completed 231-01-PLAN.md
 
 229-20 outcome (commits 024eaeca, ddd9a137, c6677152):
 
@@ -203,7 +205,7 @@ covered-input fingerprint over all 52 inputs. 229-UAT.md was generated from SUMM
 T-229-14, T-229-G14-03) were one stale register entry — the audit doc commit is an ancestor of
 the renderer fix — and were re-verified closed adversarially (61/61, threats_open: 0).
 
-Resume file: .planning/phases/231-exact-sha-release-gate-proof/231-CONTEXT.md
+Resume file: None
 
 ### Phase 229 evidence: two ordering constraints learned the hard way
 
