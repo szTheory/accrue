@@ -1,11 +1,14 @@
 #!/usr/bin/env node
 
+import assert from "node:assert/strict";
 import crypto from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
+import test from "node:test";
 import { spawn, spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { resolvePhaseEvidencePath } from "./phase_evidence_path.mjs";
+import { annotationSweepNeeds, declaredMergeBlockingJobs } from "./collect_gate01_cohort.mjs";
 
 const SCHEMA_VERSION = 1;
 const CONCLUSIONS = new Set(["success", "failure", "cancelled", "skipped", "neutral", "timed_out", "action_required", "stale", "unknown"]);
@@ -15,7 +18,12 @@ const DOCS_PREREQUISITE = "docs-and-bash-contracts-shift-left";
 const TIMING_NODES_REQUIRING_COMPLETE_PREREQUISITES = new Set(["annotation-sweep", "host-integration", "playwright-e2e"]);
 const LIVE_RUN_CONCURRENCY = 24;
 const WORKFLOW_RUNNER_PATH = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../.github/workflows/ci.yml");
-const RUN_INPUT_FIELDS = new Set(["id", "html_url", "head_sha", "created_at", "run_started_at", "updated_at", "event", "head_branch", "conclusion", "run_attempt", "original_run_id", "workflow_path", "workflow_revision", "provider_state", "jobs"]);
+// D-17/D-18 (231-04 Task 1): event_class, required_job_set_declared, and
+// required_job_set_observed are accepted as descriptive input fields on a raw
+// run object (e.g. GATE-02 evidence-assembly callers) without being echoed
+// into the normalized output record -- the output record's field set stays
+// exactly the Phase 226 schema-v1.json allow-list, unmodified by this plan.
+const RUN_INPUT_FIELDS = new Set(["id", "html_url", "head_sha", "created_at", "run_started_at", "updated_at", "event", "head_branch", "conclusion", "run_attempt", "original_run_id", "workflow_path", "workflow_revision", "provider_state", "jobs", "event_class", "required_job_set_declared", "required_job_set_observed"]);
 const JOB_INPUT_FIELDS = new Set(["id", "html_url", "name", "started_at", "completed_at", "conclusion", "runner_image", "needs", "steps", "cache", "setup_costs", "failure_message"]);
 const SCHEMA_PATH = resolvePhaseEvidencePath("226-ci-baseline-proof-semantics", "schema-v1.json");
 const REPOSITORY_CONTEXT = Symbol("repository-validation-context");
@@ -63,6 +71,28 @@ function normalizedIdentity(value, label) {
 }
 function eventClass(event) {
   return ({ pull_request: "pull_request", push: "push", workflow_dispatch: "workflow_dispatch", schedule: "schedule" })[event] || "other";
+}
+
+// D-18/D-19: the required set MUST come from the in-repo `ci.yml` declaration.
+// It must NEVER be derived from GitHub's branch-protection endpoint or its
+// rulesets endpoint -- both return empty on this repository and would make
+// every completeness check pass vacuously. Re-export Plan 03's header-comment
+// parser rather than writing a second one (D-19).
+export function declaredRequiredJobSet(source) {
+  throw new Error("declaredRequiredJobSet: not implemented");
+}
+
+// D-18: the independent live cross-check -- derived from the live job graph's
+// terminal `annotation-sweep` gate and its `needs:` array, never from
+// branch-protection or rulesets.
+export function liveRequiredJobSet(source) {
+  throw new Error("liveRequiredJobSet: not implemented");
+}
+
+// D-18: exact-set comparison; a populated missing/extra pair names the
+// drifted key rather than collapsing to a boolean.
+export function requiredJobSetDrift(declared, live) {
+  throw new Error("requiredJobSetDrift: not implemented");
 }
 function branchClass(event, branch) {
   if (event === "pull_request") return "pull_request";
@@ -481,4 +511,120 @@ async function main() {
   const output = `${[...(snapshot ? [snapshot] : []), ...records, ...cohorts].map((record) => JSON.stringify(validateRecord(record, validationContext))).sort((left, right) => left.localeCompare(right)).join("\n")}\n`;
   if (options.out) fs.writeFileSync(options.out, output); else process.stdout.write(output);
 }
-if (process.argv[1] === fileURLToPath(import.meta.url)) main().catch((error) => { console.error(`collect ci baseline: FAIL: ${error.message}`); process.exitCode = 1; });
+if (!process.env.NODE_TEST_CONTEXT && process.argv[1] === fileURLToPath(import.meta.url)) main().catch((error) => { console.error(`collect ci baseline: FAIL: ${error.message}`); process.exitCode = 1; });
+
+if (process.env.NODE_TEST_CONTEXT && process.argv[1] === fileURLToPath(import.meta.url)) {
+  const GOOD_CI_YML = [
+    "# Merge-blocking on pull_request: `job-a`, `job-b`,",
+    "# `annotation-sweep`.",
+    "jobs:",
+    "  job-a:",
+    "    runs-on: ubuntu-24.04",
+    "  job-b:",
+    "    runs-on: ubuntu-24.04",
+    "  annotation-sweep:",
+    "    needs:",
+    "      [",
+    "        job-a,",
+    "        job-b,",
+    "      ]",
+    "    runs-on: ubuntu-24.04",
+    ""
+  ].join("\n");
+  const validationContext = createRepositoryValidationContext({ expectedRepository: "acme/accrue" });
+  const baseJob = (id, name, offsetStart, offsetEnd, overrides = {}) => ({
+    id, html_url: `https://github.com/acme/accrue/actions/runs/900/job/${id}`, name,
+    started_at: `2026-08-11T06:00:${String(offsetStart).padStart(2, "0")}Z`, completed_at: `2026-08-11T06:00:${String(offsetEnd).padStart(2, "0")}Z`,
+    conclusion: "success", ...overrides
+  });
+  const baseRun = (overrides = {}) => ({
+    id: 900, html_url: "https://github.com/acme/accrue/actions/runs/900", head_sha: "a".repeat(40),
+    created_at: "2026-08-11T06:00:00Z", run_started_at: "2026-08-11T06:00:05Z", updated_at: "2026-08-11T06:05:00Z",
+    event: "workflow_dispatch", head_branch: "integration/v1.62-candidate", conclusion: "success", run_attempt: 1,
+    jobs: [baseJob(9000, "build", 10, 50, { needs: [] }), baseJob(9001, "test", 55, 59, { needs: ["build"] })],
+    ...overrides
+  });
+
+  test("declaredRequiredJobSet derives exactly the header's backtick-quoted keys, sorted", () => {
+    assert.deepEqual(declaredRequiredJobSet(GOOD_CI_YML), ["annotation-sweep", "job-a", "job-b"]);
+  });
+  test("declaredRequiredJobSet throws when the header block is absent", () => {
+    const stripped = GOOD_CI_YML.split("\n").filter((line) => !line.startsWith("# Merge-blocking") && line !== "# `annotation-sweep`.").join("\n");
+    assert.throws(() => declaredRequiredJobSet(stripped), /Merge-blocking on pull_request/);
+  });
+  test("liveRequiredJobSet derives the annotation-sweep needs: array plus annotation-sweep itself, sorted", () => {
+    assert.deepEqual(liveRequiredJobSet(GOOD_CI_YML), ["annotation-sweep", "job-a", "job-b"]);
+  });
+  test("liveRequiredJobSet reflects the real ci.yml's thirteen declared jobs", () => {
+    const source = fs.readFileSync(WORKFLOW_RUNNER_PATH, "utf8");
+    assert.deepEqual(liveRequiredJobSet(source), declaredMergeBlockingJobs(source));
+  });
+  test("requiredJobSetDrift is an empty missing/extra pair when the sets agree", () => {
+    assert.deepEqual(requiredJobSetDrift(["annotation-sweep", "job-a", "job-b"], ["annotation-sweep", "job-a", "job-b"]), { missing: [], extra: [] });
+  });
+  test("requiredJobSetDrift names a populated missing/extra pair when a job is renamed on only one side", () => {
+    const renamedNeeds = GOOD_CI_YML.replace("        job-b,", "        job-b-renamed,");
+    const declared = declaredRequiredJobSet(renamedNeeds).filter((job) => job !== "annotation-sweep");
+    const live = liveRequiredJobSet(renamedNeeds).filter((job) => job !== "annotation-sweep");
+    assert.deepEqual(requiredJobSetDrift(declared, live), { missing: ["job-b"], extra: ["job-b-renamed"] });
+  });
+  test("the live required-job-set drift triple is empty against the real ci.yml", () => {
+    const source = fs.readFileSync(WORKFLOW_RUNNER_PATH, "utf8");
+    const triple = requiredJobSetDrift(declaredRequiredJobSet(source), liveRequiredJobSet(source));
+    assert.deepEqual(triple, { missing: [], extra: [] });
+  });
+  test("neither extended module references a branch-protection or rulesets API path", () => {
+    const collectSource = fs.readFileSync(fileURLToPath(import.meta.url), "utf8");
+    const verifySource = fs.readFileSync(path.resolve(path.dirname(fileURLToPath(import.meta.url)), "verify_ci_baseline.mjs"), "utf8");
+    // Built by concatenation, not as source-literal substrings: this test's own
+    // source text must not accidentally satisfy the very pattern it forbids.
+    const protectionPath = ["branches", "main", "protection"].join("/");
+    const rulesetsPath = ["", "rulesets"].join("/");
+    for (const source of [collectSource, verifySource]) {
+      assert.ok(!source.includes(protectionPath), "must not reference the branch-protection API path");
+      assert.ok(!source.includes(rulesetsPath), "must not reference the rulesets API path");
+    }
+  });
+
+  test("RUN_INPUT_FIELDS accepts event_class, required_job_set_declared, and required_job_set_observed on raw input", () => {
+    const decorated = { ...baseRun(), event_class: "workflow_dispatch", required_job_set_declared: ["a"], required_job_set_observed: ["a"] };
+    assert.doesNotThrow(() => collectBaseline([decorated], validationContext), "descriptive extra fields are tolerated on raw input");
+    const [runRecord] = collectBaseline([decorated], validationContext);
+    assert.deepEqual(Object.keys(runRecord).includes("required_job_set_declared"), false, "descriptive input fields are not echoed into the normalized output record");
+  });
+  test("RUN_INPUT_FIELDS still rejects a field outside the allow-list", () => {
+    assert.throws(() => collectBaseline([{ ...baseRun(), unknown_field: "x" }], validationContext), /forbidden field: unknown_field/);
+  });
+
+  test("a run record validates only when event_class is present", () => {
+    const [runRecord] = collectBaseline([baseRun()], validationContext);
+    assert.equal(runRecord.event_class, "workflow_dispatch");
+    const stripped = { ...runRecord }; delete stripped.event_class;
+    assert.throws(() => validateRecord(stripped, validationContext), /missing required field: event_class/);
+  });
+  test("a run record's event_class must be one of the values eventClass can produce", () => {
+    const [runRecord] = collectBaseline([baseRun()], validationContext);
+    assert.throws(() => validateRecord({ ...runRecord, event_class: "not_a_real_class" }, validationContext), /run has unsupported event or branch class/);
+  });
+
+  test("no PROVIDER_STATES value equals success or green", () => {
+    for (const state of PROVIDER_STATES) assert.ok(state !== "success" && state !== "green", `${state} must not alias success/green`);
+    assert.deepEqual([...PROVIDER_STATES].sort(), ["blocked", "failed", "misconfigured", "non_run", "proved", "skipped"]);
+  });
+
+  test("provider_state proved with no recorded conclusion (unknown) is rejected", () => {
+    assert.throws(
+      () => collectBaseline([baseRun({ conclusion: "unknown", provider_state: "proved" })], validationContext),
+      /provider_state.*proved.*requires a recorded conclusion or exit code/
+    );
+  });
+  test("provider_state proved with a recorded conclusion is accepted", () => {
+    assert.doesNotThrow(() => collectBaseline([baseRun({ conclusion: "success", provider_state: "proved" })], validationContext));
+  });
+  test("the Phase 226 fixture cases continue to pass unchanged after the extension", () => {
+    const verifyPath = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "verify_ci_baseline.mjs");
+    const result = spawnSync(process.execPath, [verifyPath, "--fixtures", "--expected-repository", "acme/accrue"], { encoding: "utf8" });
+    assert.equal(result.status, 0, `verify_ci_baseline.mjs --fixtures must exit 0: ${result.stderr || result.stdout}`);
+    assert.match(result.stdout, /ci baseline fixtures: PASS/);
+  });
+}
