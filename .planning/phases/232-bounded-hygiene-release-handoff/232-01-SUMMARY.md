@@ -164,6 +164,14 @@ None - no external service configuration required.
 
 `scripts/ci/main_module.mjs` and its `isMainModule` export are ready for plan 232-02's ~19 remaining guard-idiom migrations (11 pathname-idiom files + 9 file-URL-idiom files, minus `verify_recut_candidate.mjs` already migrated here). **Carry forward the corrected call-site pattern from Deviation 3** — wrap `isMainModule(import.meta.url)` in `try/catch` at each entrypoint-dispatch site, not the bare `if (isMainModule(...))` template originally shown in 232-PATTERNS.md — or every migrated file will reproduce the same bare-import-crashes-under-empty-argv1 regression. `scripts/ci/verify_ci_script_contract.mjs` (232-03) can now assert every `scripts/ci/*.mjs` imports `isMainModule` from `./main_module.mjs`, per its D-32 spec. No blockers.
 
+## Self-Check: PASSED
+
+- FOUND: `scripts/ci/main_module.mjs` (verified via file read)
+- FOUND: `3a1d3093` (Task 1 commit) in `git log --oneline -5`
+- FOUND: `5bf5782a` (Task 2 commit) in `git log --oneline -5`
+- FOUND: `4e0298d9` (Task 3 commit) in `git log --oneline -5`
+- FOUND: `ddc1a7c4` (SUMMARY commit) as current branch HEAD
+
 ---
 *Phase: 232-bounded-hygiene-release-handoff*
 *Completed: 2026-09-16*
