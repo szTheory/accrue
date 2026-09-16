@@ -63,7 +63,6 @@ function readCiYml(repo) {
 // protection-derived required set would pass every completeness check
 // vacuously (D-18).
 function assertCohortCompleteness(repo, record) {
-  fail("not implemented");
   const source = readCiYml(repo);
   const declared = declaredMergeBlockingJobs(source);
   const expectedJobs = [...declared, ...OUT_OF_COHORT_LANES];
