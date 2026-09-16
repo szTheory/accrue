@@ -5,16 +5,16 @@ milestone_name: Release Integration & Repository Hygiene
 current_phase: 232
 current_phase_name: Bounded Hygiene & Release Handoff
 status: executing
-stopped_at: Completed 232-05-PLAN.md
-last_updated: "2026-09-16T20:57:02.737Z"
+stopped_at: Completed 232-06-PLAN.md
+last_updated: "2026-09-16T21:15:34.514Z"
 last_activity: 2026-09-16
 last_activity_desc: Phase 232 execution resumed (wave continue)
-state_head: f4fba6379db8096f68a1ea533ccbf88c7becfa12
+state_head: f43b6581f8e8b0da97d0cb1443d89d4a037fca87
 progress:
   total_phases: 4
   completed_phases: 3
   total_plans: 44
-  completed_plans: 38
+  completed_plans: 39
   percent: 75
 ---
 
@@ -31,7 +31,7 @@ See: `.planning/PROJECT.md` (updated 2026-09-15)
 ## Current Position
 
 Phase: 232 (Bounded Hygiene & Release Handoff) — EXECUTING
-Plan: 5 of 11
+Plan: 6 of 11
 Status: Ready to execute
 Last activity: 2026-09-16 — Phase 232 execution resumed (wave continue)
 
@@ -92,6 +92,7 @@ Progress: [████████░░] 75% (2/4 phases complete; 27/27 plans
 | Phase 232 P03 | ~80min | 3 tasks | 22 files |
 | Phase 232 P04 | ~40min | 3 tasks | 4 files |
 | Phase 232 P05 | ~45min | 3 tasks | 5 files |
+| Phase 232 P06 | ~35min | 3 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -168,6 +169,8 @@ Progress: [████████░░] 75% (2/4 phases complete; 27/27 plans
 - [Phase 232]: [Phase 232]: 232-04: a cartesian-product reachability test derives legal (disposition, state) pairs by calling validateWindowRow directly (never a hand-listed table), asserting the derived set non-empty and that reached buckets exactly equal declared buckets, proving both directions of the mapping in one assertion (D-14).
 - [Phase 232]: [Phase 232]: 232-04: [Gotcha] a literal null-escape written into an Edit-tool old_string/new_string parameter decodes to the actual NUL codepoint, not the six-character source text -- silently turning a text file into a git-perceived binary file; fix with a byte-level direct file replacement instead of retrying the Edit tool.
 - [Phase 232]: [Phase 232]: 232-05: Targeted the readiness dry run at integration/v1.62-candidate, not main -- main is already fully released at 1.5.1 with zero pending commits today, so testing against it would produce a vacuous empty plan and make every count-based REL-05 assertion unsatisfiable; the candidate carries the real unreleased commits and reproduced 232-CONTEXT.md's D-35/D-36 measurements exactly (14 bullets, 1.6.0 lockstep, updates: 7).
+- [Phase 232]: [Phase 232]: 232-06: Placed the Parked-lane expiry trigger (D-26) in the BLOCKING admin-ui-ratchet-selftests job, not the parked job, because GitHub Actions job-level continue-on-error absorbs the whole job's conclusion regardless of any step's own setting -- there is no per-step override, matching the plan's own documented fallback.
+- [Phase 232]: [Phase 232]: 232-06: Ship-window row 11 uses kind unmet-truth (not unrun-verify/deviation) -- the ratchet lane's truth (a frozen, zero-open-findings ledger) is currently false, matching D-21's mandate that this lane's honest state is failed, never non_run/skipped/advisory.
 
 ### Pending Todos
 
@@ -229,8 +232,8 @@ Active v1.59 clears the reopen rule through a concrete adopter requirement and e
 
 ## Session Continuity
 
-Last session: 2026-09-16T20:57:02.708Z
-Stopped at: Completed 232-05-PLAN.md
+Last session: 2026-09-16T21:15:34.487Z
+Stopped at: Completed 232-06-PLAN.md
 
 229-20 outcome (commits 024eaeca, ddd9a137, c6677152):
 
