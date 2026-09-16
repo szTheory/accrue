@@ -228,6 +228,34 @@ jobs:
           node --test scripts/ci/verify_window_dispositions.mjs &&
           node scripts/ci/verify_window_dispositions.mjs --fixtures --expected-repository szTheory/accrue --require-row-join --require-evidence-freshness --require-waiver-completeness --require-determinism
 
+      # Phase 232: the ci_baseline triad existed since Phase 226 but was
+      # never wired here, and two of its three files failed `node --test`
+      # (D-34). Plan 232-03 fixed the guards and non-vacuity before this
+      # wiring step, in the same plan -- the fix-then-wire ordering D-34
+      # requires. `--require-required-job-set` is the one strict flag safe
+      # to combine with `--fixtures`: it reads the live ci.yml directly and
+      # needs no `--records` NDJSON, unlike `--require-critical-path`/
+      # `--require-event-class`/`--require-exit-codes`, which do.
+      - name: CI baseline triad units and fixture contract (D-34)
+        run: >-
+          node --test --test-reporter=tap scripts/ci/collect_ci_baseline.mjs &&
+          node --test --test-reporter=tap scripts/ci/render_ci_baseline.mjs &&
+          node --test --test-reporter=tap scripts/ci/verify_ci_baseline.mjs &&
+          node scripts/ci/verify_ci_baseline.mjs --fixtures --require-required-job-set --expected-repository szTheory/accrue
+
+      # Phase 232 (D-32): the meta-verifier that keeps the guard-and-non-
+      # vacuity contract self-enforcing -- a future scripts/ci/*.mjs file
+      # that omits the shared guard or registers no real test fails here.
+      # The --fixtures self-test alone would only prove the verifier's own
+      # logic against synthetic inputs; the --repo . invocation below runs
+      # it against the real cohort, closing the exact D-16 class of
+      # "documented but never executed" verification.
+      - name: CI script contract (D-32)
+        run: >-
+          node --test --test-reporter=tap scripts/ci/verify_ci_script_contract.mjs &&
+          node scripts/ci/verify_ci_script_contract.mjs --fixtures --expected-repository szTheory/accrue --require-guard-coverage --require-non-vacuity --require-cohort-floor &&
+          node scripts/ci/verify_ci_script_contract.mjs --repo . --expected-repository szTheory/accrue --require-guard-coverage --require-non-vacuity --require-cohort-floor
+
       - name: Install tokens harness
         run: cd brandbook/tokens/harness && npm ci
 
