@@ -28,7 +28,6 @@ function section(title, rows) {
 // this repository's own gates already confirm). Every bucket heading renders
 // even at zero rows, so an empty bucket is a visible fact, not an omission.
 export function renderGate01Cohort(record) {
-  throw new Error("not implemented");
   const value = validateGate01Evidence(record, { expectedRepository: record.repository });
   const byState = new Map([...COHORT_STATES].map((state) => [state, []]));
   for (const row of value.rows) byState.get(row.state).push(row);

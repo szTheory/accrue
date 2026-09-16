@@ -72,7 +72,7 @@ export function assertExactSet(authorityName, authority, candidateName, candidat
 // never returns an empty list, since an empty required set would pass every
 // completeness check vacuously (D-18).
 export function declaredMergeBlockingJobs(source) {
-  fail("not implemented");
+  if (typeof source !== "string" || !source) fail("ci.yml source must be a non-empty string");
   const lines = source.split("\n");
   const headerRe = /^#\s*Merge-blocking on pull_request:\s*(.*)$/;
   let startIndex = -1;
