@@ -6,6 +6,7 @@ import path from "node:path";
 import { spawnSync } from "node:child_process";
 import test from "node:test";
 import { resolvePhaseEvidencePath } from "./phase_evidence_path.mjs";
+import { isMainModule } from "./main_module.mjs";
 
 // D-04: the only literals in this phase legitimately frozen — copied verbatim
 // (full 40-hex, never re-typed from an abbreviation) from
@@ -626,10 +627,21 @@ function main() {
 
 // Only run as CLI/test entrypoint when this file is the invoked script — an
 // `import` from another module (e.g. a script asserting these four exports
-// exist) must not trigger main()/verifyFixtures() as a side effect.
-const isMainModule = process.argv[1] === new URL(import.meta.url).pathname;
-if (isMainModule && process.env.NODE_TEST_CONTEXT) {
+// exist) must not trigger main()/verifyFixtures() as a side effect. When
+// there is no invoking entrypoint at all (e.g. this file reached via a bare
+// `node -e` dynamic import, where process.argv[1] is empty), isMainModule
+// throws rather than returning a silent false (D-29) -- that throw is
+// caught here, at this call site, and treated as "not the entrypoint": an
+// ambiguous-entrypoint import must stay side-effect-free, it must not crash
+// an unrelated caller that merely imports this module's exports.
+let invokedAsEntrypoint = false;
+try {
+  invokedAsEntrypoint = isMainModule(import.meta.url);
+} catch {
+  invokedAsEntrypoint = false;
+}
+if (invokedAsEntrypoint && process.env.NODE_TEST_CONTEXT) {
   test("recut candidate fixtures pass every negative control", () => verifyFixtures());
-} else if (isMainModule) {
+} else if (invokedAsEntrypoint) {
   try { main(); } catch (error) { console.error(`recut candidate verify: FAIL: ${error.message}`); process.exitCode = 1; }
 }

@@ -187,6 +187,10 @@ The rendered window-dispositions Markdown is fenced with a stable `phase231-wind
 The rendered GATE-01 cohort Markdown is fenced with a stable `phase231-gate01-cohort` start/end marker pair so Phase 232 can splice the rendered block into the integration PR body without re-deriving the content.
 <!-- phase231-gate01-cohort:end -->
 
+## Module-boundary guard convention
+
+Every `scripts/ci/*.mjs` file with a CLI entrypoint must import `isMainModule` from `./main_module.mjs` and guard its `main()`/self-test dispatch with `isMainModule(import.meta.url)`. Do not compare `process.argv[1]` against a URL-derived path by hand -- the two idioms that convention replaces (`argv[1] === new URL(import.meta.url).pathname` and `` import.meta.url === `file://${argv[1]}` ``) both silently evaluate `false` when the repository checkout path contains a space, so a merge-blocking gate's `main()` never runs, the script prints nothing, and it exits `0`. `main_module.mjs` resolves both sides through `realpathSync` so a space, symlink, or relative `argv[1]` all still compare correctly, and it throws rather than returning a silent false when `process.argv[1]` is empty. `scripts/ci/verify_ci_script_contract.mjs` (arriving in plan 232-03) is the gate that enforces this convention across every file in this directory.
+
 ## Phase 227 bounded critical-path measurement
 
 Phase 227's bounded candidate cohort is terminally **kept**. The exact-three
