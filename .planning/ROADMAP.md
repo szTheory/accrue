@@ -35,7 +35,7 @@ Deferred StoreKit, Crosswake physical-device, and Admin UI ratchet work must be 
 
 - [x] **Phase 229: Repository Truth & Recovery Safety** - Establish reproducible branch, worktree, artifact, ship-window, and Actions truth without disturbing published history. (completed 2026-09-15)
 - [x] **Phase 230: Reviewable History Integration** - Produce and inspect a provenance-backed integration candidate without targeting or merging `main`. (completed 2026-09-15)
-- [ ] **Phase 231: Exact-SHA Release Gate Proof** - Prove complete local and GitHub gate status for the immutable candidate SHA and resolve every ship window.
+- [x] **Phase 231: Exact-SHA Release Gate Proof** - Prove complete local and GitHub gate status for the immutable candidate SHA and resolve every ship window. (completed 2026-09-16)
 - [ ] **Phase 232: Bounded Hygiene & Release Handoff** - Reconcile release-facing repository truth, make only evidence-backed cleanup, and hand off a reviewable integration and Release Please-ready state.
 
 ## Phase Details
@@ -108,21 +108,21 @@ Plans:
 Plans:
 **Wave 1**
 
-- [ ] 231-01-PLAN.md — Re-cut the candidate and freeze it behind a shape/ancestry verifier (wave 1)
+- [x] 231-01-PLAN.md — Re-cut the candidate and freeze it behind a shape/ancestry verifier (wave 1)
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
-- [ ] 231-02-PLAN.md — GATE-03 window-disposition collect/render/verify triad (wave 2)
-- [ ] 231-03-PLAN.md — GATE-01 declared-cohort evidence and the scratch-clone run (wave 2)
-- [ ] 231-04-PLAN.md — GATE-02 push, dispatch, poll, and exact-SHA check evidence (wave 2)
+- [x] 231-02-PLAN.md — GATE-03 window-disposition collect/render/verify triad (wave 2)
+- [x] 231-03-PLAN.md — GATE-01 declared-cohort evidence and the scratch-clone run (wave 2)
+- [x] 231-04-PLAN.md — GATE-02 push, dispatch, poll, and exact-SHA check evidence (wave 2)
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
-- [ ] 231-05-PLAN.md — Re-derive and dispose all ten ship windows (wave 3)
+- [x] 231-05-PLAN.md — Re-derive and dispose all ten ship windows (wave 3)
 
 **Wave 4** *(blocked on Wave 3 completion)*
 
-- [ ] 231-06-PLAN.md — CI wiring, evidence README rows, and the capsule mint (wave 4)
+- [x] 231-06-PLAN.md — CI wiring, evidence README rows, and the capsule mint (wave 4)
 
 ### Phase 232: Bounded Hygiene & Release Handoff
 
@@ -145,7 +145,7 @@ Plans:
 |-------|----------------|--------|-----------|
 | 229. Repository Truth & Recovery Safety | 20/20 | Complete    | 2026-09-15 |
 | 230. Reviewable History Integration | 7/7 | Complete    | 2026-09-15 |
-| 231. Exact-SHA Release Gate Proof | 1/6 | In Progress | - |
+| 231. Exact-SHA Release Gate Proof | 6/6 | Complete    | 2026-09-16 |
 | 232. Bounded Hygiene & Release Handoff | 0/TBD | Not started | - |
 
 <details>
