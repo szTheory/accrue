@@ -52,7 +52,7 @@ export const OUT_OF_COHORT_LANES = [
 const EXPECTED_HEADER_JOBS = new Set([
   "release-manifest-ssot", "docs-contracts-shift-left", "release-gate", "phase18-tax-gate",
   "admin-drift-docs", "admin-group-contracts", "admin-hardening-guardrails", "admin-phase200-guardrails",
-  "admin-ui-ratchet-guardrails", "host-integration", "playwright-e2e", "host-docker-smoke", "annotation-sweep"
+  "admin-ui-ratchet-selftests", "host-integration", "playwright-e2e", "host-docker-smoke", "annotation-sweep"
 ]);
 
 // D-09/D-18: exact-set equality with a missing/extra pair, recomputed live --
@@ -120,6 +120,33 @@ export function annotationSweepNeeds(source) {
   const jobs = needsMatch[1].split(",").map((entry) => entry.trim()).filter(Boolean);
   if (!jobs.length) fail("annotation-sweep job needs: array is empty");
   return [...new Set(jobs)].sort();
+}
+
+// D-18/D-25/D-26 (232-06 regression repair): a job carrying an unconditional,
+// literal job-level `continue-on-error: true` (parked disposition, e.g.
+// `admin-ui-ratchet-guardrails`) legitimately stays in `annotation-sweep`'s
+// `needs:` array for scheduling/ordering and sweep-annotation purposes even
+// though it is NOT part of the merge-blocking required-job set. Only an
+// exact, literal `continue-on-error: true` counts as parked -- a templated or
+// conditional value (e.g. `release-gate`'s per-matrix-cell
+// `continue-on-error: ${{ matrix.support == 'advisory' }}`) does not park the
+// whole job and must never be excluded by this function.
+export function parkedJobIds(source) {
+  if (typeof source !== "string" || !source) fail("ci.yml source must be a non-empty string");
+  const jobsHeaderRe = /^jobs:\s*$/m;
+  const jobsMatch = jobsHeaderRe.exec(source);
+  if (!jobsMatch) fail("ci.yml has no top-level jobs: key");
+  const body = source.slice(jobsMatch.index + jobsMatch[0].length);
+  const jobHeaderRe = /^ {2}([A-Za-z0-9_-]+):\s*$/gm;
+  const headers = [...body.matchAll(jobHeaderRe)];
+  const parked = [];
+  for (let index = 0; index < headers.length; index += 1) {
+    const start = headers[index].index + headers[index][0].length;
+    const end = index + 1 < headers.length ? headers[index + 1].index : body.length;
+    const block = body.slice(start, end);
+    if (/^ {4}continue-on-error:\s*true\s*$/m.test(block)) parked.push(headers[index][1]);
+  }
+  return [...new Set(parked)].sort();
 }
 
 function assertSanitizedRow(row, label) {
@@ -197,8 +224,9 @@ export function collectGate01Cohort({ repo, expectedRepository, candidate, resul
   const candidateObject = fullSha(run(repo, ["rev-parse", `${candidate}^{commit}`]), "candidate object");
   const source = fs.readFileSync(path.join(repo, ".github", "workflows", "ci.yml"), "utf8");
   const declared = declaredMergeBlockingJobs(source);
-  const needs = annotationSweepNeeds(source);
-  assertExactSet("declared merge-blocking cohort minus annotation-sweep", declared.filter((job) => job !== "annotation-sweep"), "annotation-sweep needs: array", needs);
+  const parked = new Set(parkedJobIds(source));
+  const needs = annotationSweepNeeds(source).filter((job) => !parked.has(job));
+  assertExactSet("declared merge-blocking cohort minus annotation-sweep", declared.filter((job) => job !== "annotation-sweep"), "annotation-sweep needs: array (excluding parked jobs)", needs);
 
   const expectedJobs = [...declared, ...OUT_OF_COHORT_LANES];
   assertExactSet("declared cohort plus declared out-of-cohort lanes", expectedJobs, "provided result rows", resultRows.map((row) => row.job));
@@ -286,6 +314,21 @@ if (process.env.NODE_TEST_CONTEXT && isMainModule(import.meta.url)) {
   test("annotationSweepNeeds throws when the annotation-sweep job is absent", () => {
     const stripped = GOOD_CI_YML.replace(/  annotation-sweep:[\s\S]*$/, "");
     assert.throws(() => annotationSweepNeeds(stripped), /annotation-sweep job/);
+  });
+
+  test("parkedJobIds finds only jobs with a literal, unconditional job-level continue-on-error: true", () => {
+    const withParked = GOOD_CI_YML.replace(
+      '  job-b:\n    runs-on: ubuntu-24.04\n',
+      '  job-b:\n    runs-on: ubuntu-24.04\n  job-c:\n    continue-on-error: true\n    runs-on: ubuntu-24.04\n  job-d:\n    continue-on-error: ${{ matrix.support == \'advisory\' }}\n    runs-on: ubuntu-24.04\n'
+    );
+    assert.deepEqual(parkedJobIds(withParked), ["job-c"]);
+  });
+
+  test("parkedJobIds excludes admin-ui-ratchet-guardrails' step-level continue-on-error from other jobs and finds it as job-level parked in the real ci.yml", () => {
+    const source = fs.readFileSync(path.join(path.dirname(fileURLToPath(import.meta.url)), "..", "..", ".github", "workflows", "ci.yml"), "utf8");
+    assert.ok(parkedJobIds(source).includes("admin-ui-ratchet-guardrails"));
+    assert.ok(!parkedJobIds(source).includes("release-gate"));
+    assert.ok(!parkedJobIds(source).includes("admin-ui-ratchet-selftests"));
   });
 
   test("declaration drift: renaming a job in only the needs: array is detected as missing/extra", () => {

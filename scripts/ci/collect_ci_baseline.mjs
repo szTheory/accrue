@@ -8,7 +8,7 @@ import test from "node:test";
 import { spawn, spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { resolvePhaseEvidencePath } from "./phase_evidence_path.mjs";
-import { annotationSweepNeeds, declaredMergeBlockingJobs } from "./collect_gate01_cohort.mjs";
+import { annotationSweepNeeds, declaredMergeBlockingJobs, parkedJobIds } from "./collect_gate01_cohort.mjs";
 import { isMainModule } from "./main_module.mjs";
 
 const SCHEMA_VERSION = 1;
@@ -87,9 +87,13 @@ export function declaredRequiredJobSet(source) {
 // terminal `annotation-sweep` gate and its `needs:` array, never from
 // branch-protection or rulesets. `annotation-sweep` itself is the terminal
 // gate node and is not one of its own declared prerequisites, so it is added
-// back explicitly to match the header declaration's full set.
+// back explicitly to match the header declaration's full set. A job carrying
+// an unconditional job-level `continue-on-error: true` (parked disposition,
+// D-25/D-26) is excluded: it legitimately stays in `needs:` for ordering but
+// is not part of the merge-blocking required set (232-06 regression repair).
 export function liveRequiredJobSet(source) {
-  return [...new Set([...annotationSweepNeeds(source), "annotation-sweep"])].sort();
+  const parked = new Set(parkedJobIds(source));
+  return [...new Set([...annotationSweepNeeds(source).filter((job) => !parked.has(job)), "annotation-sweep"])].sort();
 }
 
 // D-18: exact-set comparison; a populated missing/extra pair names the
