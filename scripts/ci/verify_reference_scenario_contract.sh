@@ -76,13 +76,24 @@ if grep -Eq '^(Raw transaction data.*(is )?exposed|Signed proof material.*(is )?
   fail "private-data claim"
 fi
 
-if ! awk '
+# Deliberately NOT `awk ... | grep -Fq`. Under `set -o pipefail`, `grep -q`
+# exits the instant it matches, awk takes SIGPIPE, and pipefail reports the
+# whole pipeline as failed -- so a PRESENT invocation is reported as missing.
+# It is a race: it only fires when awk is still writing as grep exits, which
+# depends on how much the job block has grown and on how fast the machine is.
+# It stayed dormant for as long as the extracted block was short enough to fit
+# a pipe buffer, then fired on CI (never locally) the moment phase 232 added
+# two steps to this job. Capture first, match in-shell: no pipe, no race.
+docs_contracts_job=$(awk '
   /^  docs-contracts-shift-left:/ { in_job = 1; next }
   in_job && /^  [[:alnum:]_-]+:/ { exit }
   in_job { print }
-' "$workflow" | grep -Fq 'scripts/ci/verify_reference_scenario_contract.sh'; then
-  fail "missing docs-contracts-shift-left invocation"
-fi
+' "$workflow")
+
+case "$docs_contracts_job" in
+  *scripts/ci/verify_reference_scenario_contract.sh*) ;;
+  *) fail "missing docs-contracts-shift-left invocation" ;;
+esac
 
 grep -Eq '^  pull_request:' "$workflow" || fail "workflow lacks pull-request trigger"
 
