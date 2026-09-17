@@ -1,9 +1,11 @@
 ## What a reviewer would reject this for
 
-- Two required lanes are waived, not green, at the frozen head SHA: `docs-contracts-shift-left` and `release-gate` (all three required matrix cells: Floor, Primary, Primary+OpenTelemetry).
-  Both failed on a real GitHub Actions dispatch, [run 35232417814](https://github.com/szTheory/accrue/actions/runs/35232417814/jobs).
-- Both root causes are real, root-caused, and already fixed and verified on the milestone line at commit `11d42183` -- but that fix was never pushed to the frozen candidate SHA.
-  Re-verify against the milestone line, not the frozen SHA: `mix test test/accrue/docs/package_docs_verifier_test.exs --seed 0` (46/46).
+- One required lane is still red at this head -- `docs-contracts-shift-left` -- and it is red for exactly one reason: this phase has not minted its own executable-UAT artifact yet.
+  [Run 35256500599](https://github.com/szTheory/accrue/actions/runs/35256500599), sole failing assertion: `executable UAT contract: FAIL: .planning/phases/232-bounded-hygiene-release-handoff: missing automated UAT artifact`.
+- That gap is self-referential -- it closes when phase 232 closes, which is itself gated on this PR existing. The two `human_judgment: true` Executable Acceptance Policy violations that also failed this lane at the re-cut SHA are gone, fixed at `11d42183`.
+  Falsify either half: `node scripts/ci/verify_executable_uat_contract.mjs --phase 232`, and `mix test test/accrue/docs/package_docs_verifier_test.exs --seed 0` (46/46).
+- `release-gate` was waived red at the re-cut SHA and is green at this head on all three required cells (Floor, Primary, Primary+OpenTelemetry), as is `Annotation sweep`.
+  `.planning/WINDOWS.md` rows 13 and 14 still read `waived` deliberately: that ledger records each lane's disposition at the ship window, not live status. The live answer is [run 35256500599](https://github.com/szTheory/accrue/actions/runs/35256500599).
 - The full per-lane disposition, including these two waived rows, is committed and joined 1:1 against the live ledger.
   Verify: `node scripts/ci/verify_window_dispositions.mjs --records .planning/phases/232-bounded-hygiene-release-handoff/232-WINDOW-DISPOSITIONS.json --rendered .planning/phases/232-bounded-hygiene-release-handoff/232-WINDOW-DISPOSITIONS.md --expected-repository szTheory/accrue --require-row-join --require-evidence-freshness --require-waiver-completeness --require-determinism`.
 - The `admin-ui-ratchet-guardrails` lane stays parked and waived on the merits, not fixed -- `ledger.baseline.json` reports `frozen: false`.
@@ -16,14 +18,16 @@
 Link `integration/v1.62-candidate-recut` to see how this got here; diff `review/v1.62-candidate-code-only` to see what source behavior changed -- the former is a merge-plus-cherry-picks reconstruction with no independent review value of its own, the latter is the code-only line worth reading line by line.
 
 - **Head branch:** `integration/v1.62-candidate-recut`.
-- **Head SHA:** `c1397fe9127a9b4b2b1d3a0758d57879b14f4604` -- captured while drafting this body.
-  The maintainer re-cuts a fresh candidate after phase 232's own closing plan lands, and this PR is opened from that later SHA; re-point only these two lines and the `git revert` line below, per `232-11-SUMMARY.md`.
+- **Evidence SHA:** `9b50ce6a080b684263de6c53d54e0726df077fa2` -- every CI result cited in this body was measured there. The PR head is that commit plus one documentation-only merge carrying this body's own corrections; `git diff --stat 9b50ce6a080b684263de6c53d54e0726df077fa2 HEAD` touches no file outside `.planning/` and `scripts/ci/verify_package_docs.sh`.
+  Phase 232's closing work reached this branch by ordinary non-force merges rather than a fresh re-cut, so the published tip only ever moved forward: `git merge-base --is-ancestor c1397fe9127a9b4b2b1d3a0758d57879b14f4604 9b50ce6a080b684263de6c53d54e0726df077fa2` exits 0.
+- **Known limit of the union proof below:** `verify_recut_candidate.mjs` proves the union at `c1397fe9`, the re-cut point, not at this head -- the two later merges are outside its window.
+  What it does still cover is the whole published-release line; the delta it does not cover is milestone-line-only and readable directly: `git log --oneline c1397fe9127a9b4b2b1d3a0758d57879b14f4604..9b50ce6a080b684263de6c53d54e0726df077fa2`.
 
 ## What changed, and how to check it
 
 - The re-cut unions the milestone line with the published 1.5.1 release state, proved lossless by blob identity (single-touched paths) and hunk union (co-touched paths), never diffstat.
   Verify: `node scripts/ci/verify_recut_candidate.mjs --record .planning/phases/232-bounded-hygiene-release-handoff/232-ROLLBACK-POINT.json --expected-repository szTheory/accrue --require-shape --require-ancestry --require-revert-proof --require-toolchain --require-supersession --require-union-hunks` -- `inspected=447 co_touched=7 drifted=0`.
-- The declared 13-job merge-blocking cohort was re-derived live at the frozen SHA and matched the previously-declared set with zero drift.
+- The declared 13-job merge-blocking cohort was re-derived live at the re-cut SHA `c1397fe9` and matched the previously-declared set with zero drift.
   Every lane's disposition is fixed-and-proved or waived-with-owner-and-cause, never silently red; `.planning/WINDOWS.md` reports `open_count: 0`.
 - Release Please is proven ready to produce a version-and-changelog-consistent release PR by a side-effect-free dry run: 1.5.1 -> 1.6.0 lockstep across all three packages, 7 planned updates, zero truncation.
   Archived at [`232-RELEASE-PR-DRYRUN.log`](https://github.com/szTheory/accrue/blob/gsd/milestone-v1.62-release-integration-hygiene/.planning/phases/232-bounded-hygiene-release-handoff/232-RELEASE-PR-DRYRUN.log); re-run with `bash scripts/ci/verify_release_pr_readiness.sh`.
@@ -38,7 +42,9 @@ Link `integration/v1.62-candidate-recut` to see how this got here; diff `review/
 
 ## Rollback
 
-One command, reverting the re-cut merge itself: `git revert -m 1 --no-edit 3f42158d5cd3ffb7134685ae2856074cf544e008`.
+One command, run on `main` immediately after this PR lands, against the merge commit GitHub creates: `git revert -m 1 --no-edit $(git rev-parse main)`.
+That single revert is sufficient because the candidate reaches `main` through exactly one merge commit, whatever the branch's internal shape; reverting any one merge *inside* the branch is not sufficient and never was.
+Confirm that before trusting anything narrower -- the branch carries nine internal merges, none of which is the whole change: `git log --merges --oneline main..integration/v1.62-candidate-recut | wc -l` -> `9`.
 
 ## Scope
 
@@ -48,3 +54,5 @@ One command, reverting the re-cut merge itself: `git revert -m 1 --no-edit 3f421
   Every disposition is `retained` or `superseded`, per the structural invariant `232-HYGIENE-DISPOSITIONS.md` enforces (D-47).
 - This PR does not merge a Release Please PR, publish to Hex, or move a tag; it only opens (or updates) one integration pull request for review.
   Unchanged before and after: `gh pr list --state open --search "chore: release"` and `git ls-remote --tags origin | wc -l`.
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)
