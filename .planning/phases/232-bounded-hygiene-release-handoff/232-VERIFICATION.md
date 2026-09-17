@@ -56,7 +56,7 @@ covered_files:
   - "scripts/ci/verify_phase230_archive_invariants.mjs"
   - "scripts/ci/verify_pr_body_contract.mjs"
   - "scripts/ci/verify_release_pr_readiness.sh"
-covered_digest: "v1:sha256:f81caf30c221b99ab8dadc7745bd82a172cb4ec6445c96988296519c4523ae23"
+covered_digest: "v1:sha256:0a8d3dcf5c641e9f5763101fd4e1cb03c0a4a11f7cdcbf99b8665dc14c6d7474"
 behavior_unverified: 0
 overrides_applied: 0
 re_verification:

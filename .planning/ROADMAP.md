@@ -36,7 +36,7 @@ Deferred StoreKit, Crosswake physical-device, and Admin UI ratchet work must be 
 - [x] **Phase 229: Repository Truth & Recovery Safety** - Establish reproducible branch, worktree, artifact, ship-window, and Actions truth without disturbing published history. (completed 2026-09-15)
 - [x] **Phase 230: Reviewable History Integration** - Produce and inspect a provenance-backed integration candidate without targeting or merging `main`. (completed 2026-09-15)
 - [x] **Phase 231: Exact-SHA Release Gate Proof** - Prove complete local and GitHub gate status for the immutable candidate SHA and resolve every ship window. (completed 2026-09-16)
-- [ ] **Phase 232: Bounded Hygiene & Release Handoff** - Reconcile release-facing repository truth, make only evidence-backed cleanup, and hand off a reviewable integration and Release Please-ready state.
+- [x] **Phase 232: Bounded Hygiene & Release Handoff** - Reconcile release-facing repository truth, make only evidence-backed cleanup, and hand off a reviewable integration and Release Please-ready state. (completed 2026-09-17)
 
 ## Phase Details
 
@@ -142,44 +142,44 @@ Plans:
 Plans:
 **Wave 1**
 
-- [ ] 232-01-PLAN.md — Shared module-boundary guard, proven end to end
+- [x] 232-01-PLAN.md — Shared module-boundary guard, proven end to end
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
-- [ ] 232-02-PLAN.md — Guard-idiom migration and vacuous-test closure across scripts/ci
+- [x] 232-02-PLAN.md — Guard-idiom migration and vacuous-test closure across scripts/ci
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
-- [ ] 232-03-PLAN.md — CI script contract meta-verifier and ci_baseline triad wiring
-- [ ] 232-04-PLAN.md — Window-disposition bucketing honesty and phase-231 re-render
+- [x] 232-03-PLAN.md — CI script contract meta-verifier and ci_baseline triad wiring
+- [x] 232-04-PLAN.md — Window-disposition bucketing honesty and phase-231 re-render
 
 **Wave 4** *(blocked on Wave 3 completion)*
 
-- [ ] 232-05-PLAN.md — Release Please readiness proof and release-docs truth (REL-05)
+- [x] 232-05-PLAN.md — Release Please readiness proof and release-docs truth (REL-05)
 
 **Wave 5** *(blocked on Wave 4 completion)*
 
-- [ ] 232-06-PLAN.md — Parked Admin UI ratchet lane split and honest CI summary
+- [x] 232-06-PLAN.md — Parked Admin UI ratchet lane split and honest CI summary
 
 **Wave 6** *(blocked on Wave 5 completion)*
 
-- [ ] 232-07-PLAN.md — Hygiene disposition triad and pre-cleanup classification (HYG-01)
+- [x] 232-07-PLAN.md — Hygiene disposition triad and pre-cleanup classification (HYG-01)
 
 **Wave 7** *(blocked on Wave 6 completion)*
 
-- [ ] 232-08-PLAN.md — Bounded command-backed cleanup and inventory recapture (HYG-03)
+- [x] 232-08-PLAN.md — Bounded command-backed cleanup and inventory recapture (HYG-03)
 
 **Wave 8** *(blocked on Wave 7 completion)*
 
-- [ ] 232-09-PLAN.md — Candidate re-cut with blob-identity losslessness proof
+- [x] 232-09-PLAN.md — Candidate re-cut with blob-identity losslessness proof
 
 **Wave 9** *(blocked on Wave 8 completion)*
 
-- [ ] 232-10-PLAN.md — Re-gate at the new SHA and mint the window-disposition record
+- [x] 232-10-PLAN.md — Re-gate at the new SHA and mint the window-disposition record
 
 **Wave 10** *(blocked on Wave 9 completion)*
 
-- [ ] 232-11-PLAN.md — Reviewable integration pull request (REL-04)
+- [x] 232-11-PLAN.md — Reviewable integration pull request (REL-04)
 
 ## Progress
 
@@ -188,7 +188,7 @@ Plans:
 | 229. Repository Truth & Recovery Safety | 20/20 | Complete    | 2026-09-15 |
 | 230. Reviewable History Integration | 7/7 | Complete    | 2026-09-15 |
 | 231. Exact-SHA Release Gate Proof | 6/6 | Complete    | 2026-09-16 |
-| 232. Bounded Hygiene & Release Handoff | 0/11 | Not started | - |
+| 232. Bounded Hygiene & Release Handoff | 11/11 | Complete    | 2026-09-17 |
 
 <details>
 <summary>✅ v1.61 CI Evidence & Critical-Path Hardening (Phases 225-228) — SHIPPED 2026-09-12</summary>
