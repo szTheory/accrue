@@ -3,8 +3,41 @@
   "repository": "szTheory/accrue",
   "cleanup_range": {
     "from": "e579a8a1befcb72c93a31e9b8c53f1bd1168006f",
-    "to": null
+    "to": "fb69c3ac3f56653e06a79162ebb2bfa106acf768"
   },
-  "passes_taken": null,
-  "rows": []
+  "passes_taken": 1,
+  "rows": [
+    {
+      "finding": 1,
+      "command": "node scripts/ci/verify_ci_script_contract.mjs --repo . --expected-repository szTheory/accrue --require-guard-coverage --require-non-vacuity --require-cohort-floor && test \"$(git ls-files -- scripts/ci/stripe_test_fixtures.mjs scripts/ci/verify_stripe_test_fixtures.mjs | wc -l | tr -d ' ')\" = 2",
+      "before_exit_code": 1,
+      "after_exit_code": 0,
+      "commit": "70ea09b14237f3aa381825ab62ca9de5a32ec738",
+      "category": "test"
+    },
+    {
+      "finding": 2,
+      "command": "ls .planning/phases/200-idempotent-verification-sign-off 2>/dev/null; test $? -ne 0",
+      "before_exit_code": 1,
+      "after_exit_code": 0,
+      "commit": "3743f8a85c5f39b5cf5a497a785edb5837067b19",
+      "category": "dead-code"
+    },
+    {
+      "finding": 3,
+      "command": "test \"$(git ls-files -- .tool-versions | wc -l | tr -d ' ')\" = 1",
+      "before_exit_code": 1,
+      "after_exit_code": 0,
+      "commit": "45b26ba5f838984d1f642cd603d5e6837c276b77",
+      "category": "lint"
+    },
+    {
+      "finding": 4,
+      "command": "node scripts/ci/verify_hygiene_dispositions.mjs --repo . --records .planning/phases/232-bounded-hygiene-release-handoff/232-HYGIENE-DISPOSITIONS.json --rendered .planning/phases/232-bounded-hygiene-release-handoff/232-HYGIENE-DISPOSITIONS.md --expected-repository szTheory/accrue --require-completeness --require-soundness --require-determinism",
+      "before_exit_code": 1,
+      "after_exit_code": 0,
+      "commit": "fb69c3ac3f56653e06a79162ebb2bfa106acf768",
+      "category": "documentation-truth"
+    }
+  ]
 }
