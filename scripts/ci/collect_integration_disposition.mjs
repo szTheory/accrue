@@ -21,7 +21,11 @@ export function mergeCommit(value, label) { return fullSha(value, label); }
 export function patchId(value, label) { if (typeof value !== "string" || !/^[a-f0-9]{40}$/.test(value)) fail(`${label} must be a patch-id hex string`); return value; }
 function refName(value, label) { if (typeof value !== "string" || !value.startsWith("refs/") || /[\0-\x1f\x7f ~^:?*\\[\]]/.test(value)) fail(`${label} must be a safe ref name`); return value; }
 function repository(value, label) { if (typeof value !== "string" || !REPOSITORY.test(value)) fail(`${label} must be an owner/repository string`); return value; }
-function timestamp(value, label) { if (typeof value !== "string" || !ISO.test(value)) fail(`${label} must be an ISO-8601 timestamp with a UTC offset`); return value; }
+// git >= 2.54 renders a zero UTC offset in %cI as "Z" where older git wrote "+00:00".
+// Both denote the same instant, so canonicalize to the numeric form every already-committed
+// artifact carries: otherwise the same commit collects two different strings on two runners
+// and the determinism gates disagree for a reason that has nothing to do with the repository.
+function timestamp(value, label) { const canonical = typeof value === "string" ? value.replace(/Z$/, "+00:00") : value; if (typeof canonical !== "string" || !ISO.test(canonical)) fail(`${label} must be an ISO-8601 timestamp with a UTC offset`); return canonical; }
 function nonNegInt(value, label) { if (!Number.isInteger(value) || value < 0) fail(`${label} must be a non-negative integer`); return value; }
 function exitCode(value, label) { if (!Number.isInteger(value) || value < 0 || value > 255) fail(`${label} must be a recorded process exit code`); return value; }
 function state(value, label) { if (typeof value !== "string" || REJECTED_STATES.has(value) || !STATES.has(value)) fail(`${label} must be one of proved/failed/skipped/advisory/non_run`); return value; }
@@ -1269,5 +1273,12 @@ if (process.env.NODE_TEST_CONTEXT && invokedAsEntrypoint) {
       const recorded = ledger.rows.filter((row) => row.disposition !== "carried-on-candidate").map((row) => row.commit).sort();
       assert.deepEqual(recorded, live);
     } finally { fs.rmSync(fx.scratch, { recursive: true, force: true }); }
+  });
+
+  test("a zero UTC offset rendered as Z canonicalizes to +00:00, so two git versions collect identically", () => {
+    assert.equal(timestamp("2026-09-17T20:16:43Z", "probe"), "2026-09-17T20:16:43+00:00");
+    assert.equal(timestamp("2026-09-17T16:16:43-04:00", "probe"), "2026-09-17T16:16:43-04:00");
+    assert.throws(() => timestamp("2026-09-17T20:16:43", "probe"), /probe/);
+    assert.throws(() => timestamp("2026-09-17 20:16:43Z", "probe"), /probe/);
   });
 }
