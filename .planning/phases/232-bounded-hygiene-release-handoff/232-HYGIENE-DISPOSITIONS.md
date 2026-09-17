@@ -8,7 +8,7 @@ A `remote_branch` row can only ever carry disposition `retained` or `superseded`
 
 ## Candidate identity
 
-Candidate object: `7e4fbce194b9443eebcce7176be12a93964fb9c1`. Observed at: 2026-09-16T22:24:24-04:00. Rows: **24**.
+Candidate object: `2cc876c6a74301e23009adb4080af7ba78c3de6c`. Observed at: 2026-09-17T12:13:19-04:00. Rows: **25**.
 
 Evidence command: `git status --porcelain -uall`
 
@@ -49,7 +49,7 @@ Evidence command: `git status --porcelain -uall`
 
 ## Remote branches
 
-10 row(s).
+11 row(s).
 
 | Name | Disposition | Reason | Content hash | Supersedes / duplicates | Authorization required |
 | --- | --- | --- | --- | --- | --- |
@@ -60,6 +60,7 @@ Evidence command: `git status --porcelain -uall`
 | origin/fix/release-otp-28-1 | retained | Active fix branch with an open local tracking branch at the same commit; not superseded by any other ref. | — | — | false |
 | origin/gsd/phase-225-required-lane-signal-repair | retained | Active GSD work branch; local tracking branch is ahead by 4 commits (unpushed local work), not superseded by any other ref. | — | — | false |
 | origin/integration/v1.62-candidate | retained | The v1.62 candidate integration branch this same phase's re-cut work actively re-cuts and re-gates (232-CONTEXT.md D-01..D-12); actively governed by this phase, not superseded. | — | — | false |
+| origin/integration/v1.62-candidate-recut | retained | Published by plan 232-09 as the fresh-supersession re-cut candidate after this record was first captured; it is the head this phase hands off for review. Retained under the phase-wide classification-only decision -- no remote ref is deleted, renamed, or force-pushed. | — | — | false |
 | origin/main | retained | Primary trunk; the repository's default branch. | — | — | false |
 | origin/phase-226-baseline-5da8e6b88735 | retained | Re-verified 2026-09-16: actively referenced by tracked automation code -- collect_integration_disposition.mjs:528 exports \`PUBLISHED_ELSEWHERE_REF = "origin/phase-226-baseline-5da8e6b88735"\`, and render_integration_disposition.mjs's own test suite asserts this exact ref name renders. Deleting it would break a live code reference, not just tidy history. | — | — | false |
 | origin/release-please--branches--main | retained | Active Release Please working branch; local tracking branch \`release-please--branches--main\` and dependent local branch \`repair/release-pr39\` both track this ref. Per prompts/GSD-REPO-HYGIENE.md, stale release-please branches are only deleted when they have no open PR -- deletion status not evaluated in this classification-only phase. | — | — | false |

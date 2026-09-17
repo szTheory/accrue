@@ -29,10 +29,16 @@ const REJECTED_STATES = new Set(["deferred", "n/a", "green"]);
 export const ROW_KINDS = new Set(["unrun-verify", "deviation"]);
 export const ROW_DISPOSITIONS = new Set(["fixed", "waived"]);
 
+// D-11 (232-10): run_id/observed_sha are optional per-row provenance fields.
+// Historical rows (231 and earlier) never carried them and remain valid
+// (schema-only checks per D-18); a phase whose evidence comes from a real
+// dispatch (local scratch-clone run or GitHub Actions workflow_dispatch)
+// records both, so two concurrent or interrupted dispatches against the
+// same candidate SHA can never be conflated into one claim.
 export const WINDOW_ROW_FIELDS = new Set([
   "id", "phase", "kind", "disposition", "state", "exit_code",
   "owner", "rationale", "release_impact", "current_evidence",
-  "evidence_command", "resolved_at"
+  "evidence_command", "resolved_at", "run_id", "observed_sha"
 ]);
 export const DISPOSITION_FIELDS = new Set(["schema_version", "repository", "candidate_object", "observed_at", "rows"]);
 
@@ -99,6 +105,16 @@ export function validateWindowRow(row, label) {
   }
   if (Object.hasOwn(row, "resolved_at") && row.resolved_at !== null && row.resolved_at !== undefined) {
     if (typeof row.resolved_at !== "string" || !ISO.test(row.resolved_at)) fail(`${label}.resolved_at must be an ISO-8601 timestamp or null`);
+  }
+  // D-11 (232-10): when present, run_id/observed_sha must be well-formed --
+  // a non-empty string (local scratch-clone dispatches use a descriptive
+  // token like "local-gate01"; GitHub Actions dispatches use the numeric
+  // run id) and a full lowercase 40-hex SHA, respectively.
+  if (Object.hasOwn(row, "run_id") && row.run_id !== null && row.run_id !== undefined) {
+    if (typeof row.run_id !== "string" || !row.run_id.trim()) fail(`${label}.run_id must be a non-empty string when present`);
+  }
+  if (Object.hasOwn(row, "observed_sha") && row.observed_sha !== null && row.observed_sha !== undefined) {
+    fullSha(row.observed_sha, `${label}.observed_sha`);
   }
 
   sanitizeStrings(row, label);

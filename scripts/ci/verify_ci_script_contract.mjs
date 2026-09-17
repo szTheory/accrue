@@ -30,7 +30,11 @@ const COMMITTED_COHORT_FLOOR = 41;
 // an inferred property. Empty today: every git-tracked scripts/ci/*.mjs file
 // either imports the shared guard or is a *.test.mjs file.
 const LIBRARY_MODULE_ALLOWLIST = new Map([
-  // ["scripts/ci/example_lib.mjs", "pure helper module, never invoked as a CLI"]
+  // scripts/ci/main_module.mjs DEFINES isMainModule and deliberately calls it
+  // unwrapped in its own negative-control tests (it must be able to observe the
+  // throw it exists to produce). Requiring it to wrap its own assertions would
+  // delete the only coverage proving the throw happens at all.
+  ["scripts/ci/main_module.mjs", "defines the shared guard; its own tests must call it unwrapped to assert the throw"]
 ]);
 
 function git(repo, args) {
@@ -63,14 +67,54 @@ export function assertCohortFloor(cohort, floor = COMMITTED_COHORT_FLOOR) {
 export function assertGuardCoverage(files) {
   if (!Array.isArray(files) || files.length === 0) fail("guard coverage was asked to inspect zero files");
   const offenders = [];
+  const bareGuards = [];
   for (const file of files) {
     if (file.relativePath.endsWith(".test.mjs")) continue;
     if (LIBRARY_MODULE_ALLOWLIST.has(file.relativePath)) continue;
     const source = fs.readFileSync(file.absolutePath, "utf8");
     const importsGuard = /from\s+["']\.\/main_module\.mjs["']/.test(source) && /\bisMainModule\b/.test(source);
-    if (!importsGuard) offenders.push(file.relativePath);
+    if (!importsGuard) {
+      offenders.push(file.relativePath);
+      continue;
+    }
+    // D-29 Rule 1: importing the guard is NOT the property this check exists
+    // to prove. isMainModule() THROWS -- it never returns a silent false --
+    // when there is no invoking entrypoint, which is exactly the shape of a
+    // dynamic `import()` from an argv[1]-less `node -e` inline eval. Calling
+    // it directly inside an `if` condition therefore crashes a bare import of
+    // the module, reproducing the ambiguous-entrypoint failure D-29 was built
+    // to eliminate. The call must be reached through a precomputed boolean
+    // assigned inside try/catch. Enforcing the SHAPE (a bare assignment,
+    // wrapped in try/catch) rather than a name is deliberate: a shape cannot
+    // be evaded by copying the call under a different identifier, which is
+    // how the guard census was gamed earlier in this phase.
+    // Scan CODE only: a line comment explaining the guard, a block-comment
+    // rationale, and a quoted fixture string inside a self-test all mention
+    // isMainModule() without calling it, and each would otherwise read as an
+    // unwrapped call site.
+    const code = source
+      .replace(/\/\*[\s\S]*?\*\//g, "")
+      .split("\n")
+      .map((line) => line.replace(/\/\/.*$/, ""))
+      .filter((line) => !/["'`][^"'`]*\bisMainModule\s*\(/.test(line));
+    const callSiteLines = code.filter((line) => /\bisMainModule\s*\(/.test(line));
+    const unwrappedCallSites = callSiteLines.filter(
+      (line) => !/^\s*(?:try\s*\{\s*)?(?:let\s+|const\s+|var\s+)?[A-Za-z_$][\w$]*\s*=\s*isMainModule\s*\(/.test(line)
+    );
+    if (unwrappedCallSites.length) {
+      bareGuards.push(file.relativePath);
+      continue;
+    }
+    if (!/try\s*\{[^{}]*\bisMainModule\s*\([^{}]*\}\s*catch/.test(code.join("\n"))) {
+      bareGuards.push(file.relativePath);
+    }
   }
   if (offenders.length) fail(`missing the shared module-boundary guard: ${offenders.join(", ")}`);
+  if (bareGuards.length) {
+    fail(
+      `module-boundary guard is called outside try/catch (a bare import under an empty argv[1] will crash): ${bareGuards.join(", ")}`
+    );
+  }
 }
 
 // D-32 assertion (1) + D-33: spawns `node --test --test-reporter=tap` per
@@ -151,7 +195,9 @@ export function verifyFixtures() {
       'import assert from "node:assert/strict";',
       'import { isMainModule } from "./main_module.mjs";',
       "function add(a, b) { return a + b; }",
-      "if (isMainModule(import.meta.url) && process.env.NODE_TEST_CONTEXT) {",
+      "let entry = false;",
+      "try { entry = isMainModule(import.meta.url); } catch { entry = false; }",
+      "if (entry && process.env.NODE_TEST_CONTEXT) {",
       '  test("add adds two numbers", () => assert.equal(add(1, 2), 3));',
       "}",
       ""
@@ -167,7 +213,10 @@ export function verifyFixtures() {
     write(dir, "main_module.mjs", MAIN_MODULE_STUB);
     const vacuous = write(dir, "vacuous.mjs", [
       'import { isMainModule } from "./main_module.mjs";',
-      'if (isMainModule(import.meta.url)) { console.log("hi"); }',
+      '"use strict";',
+      "let entry = false;",
+      "try { entry = isMainModule(import.meta.url); } catch { entry = false; }",
+      'if (entry) { console.log("hi"); }',
       ""
     ].join("\n"));
     assert.doesNotThrow(() => assertGuardCoverage([vacuous]), "a guard-importing file still passes guard coverage");
@@ -181,6 +230,23 @@ export function verifyFixtures() {
     assert.throws(() => assertGuardCoverage([guardless]), /guardless\.mjs/);
   });
 
+  // Scenario 3b: a synthetic file that DOES import the shared guard but calls
+  // it directly inside an `if` condition -- the exact shape that crashes a
+  // bare `import()` under an empty argv[1] -- fails --require-guard-coverage,
+  // naming the file and the try/catch requirement. Without this scenario the
+  // guard-coverage check regresses to "the import statement is present",
+  // which is what let six real offenders through in phase 232.
+  withScratch((dir) => {
+    write(dir, "main_module.mjs", MAIN_MODULE_STUB);
+    const bare = write(dir, "bare_guard.mjs", [
+      'import { isMainModule } from "./main_module.mjs";',
+      'if (isMainModule(import.meta.url)) { console.log("hi"); }',
+      ""
+    ].join("\n"));
+    assert.throws(() => assertGuardCoverage([bare]), /bare_guard\.mjs/);
+    assert.throws(() => assertGuardCoverage([bare]), /outside try\/catch/);
+  });
+
   // Scenario 4: a synthetic file that registers a real named test but the
   // test genuinely fails (non-zero exit) fails --require-non-vacuity,
   // naming the file and its exit code -- distinct from the vacuity
@@ -191,7 +257,9 @@ export function verifyFixtures() {
       'import test from "node:test";',
       'import assert from "node:assert/strict";',
       'import { isMainModule } from "./main_module.mjs";',
-      "if (isMainModule(import.meta.url) && process.env.NODE_TEST_CONTEXT) {",
+      "let entry = false;",
+      "try { entry = isMainModule(import.meta.url); } catch { entry = false; }",
+      "if (entry && process.env.NODE_TEST_CONTEXT) {",
       '  test("this assertion is deliberately wrong", () => assert.equal(1, 2));',
       "}",
       ""

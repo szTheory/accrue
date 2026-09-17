@@ -231,6 +231,25 @@ jobs:
           node --test scripts/ci/verify_window_dispositions.mjs &&
           node scripts/ci/verify_window_dispositions.mjs --fixtures --expected-repository szTheory/accrue --require-row-join --require-evidence-freshness --require-waiver-completeness --require-determinism
 
+      # Phase 232 (D-16, D-17, plan 232-10): the step above only ever proves the
+      # verifier's own logic against synthetic --fixtures data -- --fixtures
+      # returns before --records/--rendered are ever read, so the documented
+      # "verify the committed window-disposition pair" invocation has never
+      # actually run in CI until this step. This one runs the real path: it
+      # reads the committed 232-WINDOW-DISPOSITIONS.json/.md pair and asserts,
+      # via --candidate, that the record's own candidate_object resolves to
+      # the literal 40-hex SHA below -- never the mutable integration branch
+      # name (see the comment above the D-29/D-01/D-09 steps: a step bound to
+      # a moving ref verifies a different tree on every run).
+      - name: Committed window dispositions at the pinned candidate SHA (D-16)
+        run: >-
+          node scripts/ci/verify_window_dispositions.mjs --repo .
+          --records .planning/phases/232-bounded-hygiene-release-handoff/232-WINDOW-DISPOSITIONS.json
+          --rendered .planning/phases/232-bounded-hygiene-release-handoff/232-WINDOW-DISPOSITIONS.md
+          --expected-repository szTheory/accrue
+          --candidate c1397fe9127a9b4b2b1d3a0758d57879b14f4604
+          --require-row-join --require-evidence-freshness --require-waiver-completeness --require-determinism
+
       # Phase 232 (HYG-01, D-45..D-54): the pre-cleanup classification triad,
       # hermetic only -- collector/renderer/verifier units and the
       # verifier's own --fixtures negative-control battery. This step does
@@ -247,6 +266,24 @@ jobs:
           node --test scripts/ci/render_hygiene_dispositions.mjs &&
           node --test scripts/ci/verify_hygiene_dispositions.mjs &&
           node scripts/ci/verify_hygiene_dispositions.mjs --fixtures --expected-repository szTheory/accrue --require-completeness --require-soundness --require-determinism
+
+      # Phase 232 (REL-04): the integration PR body is a committed artifact,
+      # so the contract over it is merge-blocking like every other document
+      # contract in this job. It checks SHAPE, not currency -- risk-first
+      # heading, the provenance-versus-behavior sentence, an inline rollback
+      # command, per-claim falsifiability, a density band, and no leaked
+      # filesystem path or adopter name. It deliberately does NOT assert the
+      # head SHA is current: the candidate is re-cut across plans, and a
+      # contract that went red on every re-cut would be re-pointed reflexively
+      # rather than read. Currency is the re-cut's own job (see the superseded-
+      # target guard in verify_release_pr_readiness.sh).
+      - name: Integration PR body contract (REL-04)
+        run: >-
+          node --test scripts/ci/verify_pr_body_contract.mjs &&
+          node scripts/ci/verify_pr_body_contract.mjs
+          --body .planning/phases/232-bounded-hygiene-release-handoff/232-INTEGRATION-PR.md
+          --expected-repository szTheory/accrue
+          --require-sections --require-density --require-falsifiability
 
       # Phase 232: the ci_baseline triad existed since Phase 226 but was
       # never wired here, and two of its three files failed `node --test`
