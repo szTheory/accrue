@@ -225,7 +225,7 @@ jobs:
       - name: Set up BEAM
         uses: erlef/setup-beam@v1
         with:
-          otp-version: '28.0'
+          otp-version: '28.1'
           elixir-version: '1.19.5'
       - name: Install Hex
         run: mix local.hex 2.4.2 --force
@@ -256,7 +256,7 @@ jobs:
       - name: Set up BEAM
         uses: erlef/setup-beam@v1
         with:
-          otp-version: '28.0'
+          otp-version: '28.1'
           elixir-version: '1.19.5'
       - name: Install Hex
         run: mix local.hex 2.4.2 --force
@@ -289,7 +289,7 @@ jobs:
       - name: Set up BEAM
         uses: erlef/setup-beam@v1
         with:
-          otp-version: '28.0'
+          otp-version: '28.1'
           elixir-version: '1.19.5'
       - name: Install Hex
         run: mix local.hex 2.4.2 --force
@@ -343,7 +343,7 @@ jobs:
       - name: Set up BEAM
         uses: erlef/setup-beam@v1
         with:
-          otp-version: '28.0'
+          otp-version: '28.1'
           elixir-version: '1.19.5'
 
       - name: Install Hex

@@ -202,7 +202,7 @@ defmodule Accrue.Entitlements.Snapshot do
       Map.put(acc, {rail, environment, product_id}, %{
         plan: plan,
         features: Keyword.get(entry, :features, []),
-        quotas: Map.new(Keyword.get(entry, :quotas, []))
+        quotas: Map.new(Keyword.get(entry, :limits, []))
       })
     end)
   rescue

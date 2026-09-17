@@ -363,6 +363,25 @@ defmodule Accrue.Docs.ReleaseNotesContractTest do
         ] do
       copy_fixture!(path, tmp_dir)
     end
+
+    # Keep the synthetic starting point stable when this suite runs from a
+    # Release Please candidate or from main after that candidate is merged.
+    # Candidate promotion below must own the only numbered section under test.
+    for package <- ["accrue", "accrue_admin", "accrue_portal"] do
+      set_package_version!(tmp_dir, package, "1.4.0")
+
+      changelog = Path.join(tmp_dir, "#{package}/CHANGELOG.md")
+
+      changelog
+      |> File.read!()
+      |> String.replace(
+        ~r/^## \[1\.5\.1\][\s\S]*?(?=^## \[1\.5\.0\])/m,
+        "",
+        global: false
+      )
+      |> String.replace(~r/^## \[1\.5\.0\][^\n]*\n\n/m, "", global: false)
+      |> then(&File.write!(changelog, &1))
+    end
   end
 
   defp promote_release_please_candidate!(tmp_dir, version) do
@@ -383,6 +402,24 @@ defmodule Accrue.Docs.ReleaseNotesContractTest do
       )
       |> String.replace("linked 1.5.0", "linked #{version}")
       |> then(&File.write!(changelog, &1))
+    end
+
+    if version != "1.5.0" do
+      notes = Path.join(tmp_dir, "accrue/guides/release-notes.md")
+
+      notes
+      |> File.read!()
+      |> String.replace(
+        "## accrue\n",
+        "## accrue\n\n### #{version}\n\nSynthetic aligned core candidate.\n",
+        global: false
+      )
+      |> String.replace(
+        "## accrue_admin\n",
+        "## accrue_admin\n\n### #{version}\n\nSynthetic aligned admin candidate.\n",
+        global: false
+      )
+      |> then(&File.write!(notes, &1))
     end
   end
 end

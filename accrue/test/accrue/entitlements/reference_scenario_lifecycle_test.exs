@@ -23,7 +23,7 @@ defmodule Accrue.Entitlements.ReferenceScenarioLifecycleTest do
       plans: [
         pro: [
           features: [:analytics],
-          quotas: [seats: 3],
+          limits: [seats: 3],
           products: [stripe: [production: ["price_pro"]], apple: [production: ["product_pro"]]]
         ]
       ]
