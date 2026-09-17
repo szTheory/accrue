@@ -155,17 +155,17 @@ See `key-decisions` in frontmatter.
 - **Verification:** Re-ran `grep -c getfluent` -> `0`. Full `<verify>` block re-run clean afterward.
 - **Committed in:** `14a212c8` (caught and fixed before the commit; no separate "leaked" commit exists).
 
-**2. [Not fixed -- out of this plan's Task 1/2 scope, reported honestly in the PR body itself] The committed hygiene-dispositions record does not cover the remote branch plan 232-09 created**
+**2. [Not fixed in this dispatch -- out of its Task 1/2 scope; reported honestly in the PR body, then closed by the orchestrator in `7c3a2d3a`] The committed hygiene-dispositions record did not cover the remote branch plan 232-09 created**
 - **Found during:** Task 2, while gathering falsifiable evidence for the "What changed" section.
 - **Issue:** `node scripts/ci/verify_hygiene_dispositions.mjs --records .../232-HYGIENE-DISPOSITIONS.json --rendered .../232-HYGIENE-DISPOSITIONS.md --expected-repository szTheory/accrue --require-completeness --require-soundness --require-determinism` fails: `FAIL: 1 live item(s) have no corresponding row: remote_branch/origin/integration/v1.62-candidate-recut`. The hygiene-dispositions record was captured (`candidate_object 7e4fbce1...`) before plan 232-09 pushed the re-cut candidate to a new remote branch, so the classification is now stale by one live item.
 - **Why not fixed here:** This dispatch's assigned scope was strictly Task 1 (the contract script) and Task 2 (the PR body text). Regenerating `232-HYGIENE-DISPOSITIONS.json`/`.md` is a `collect`/`render` change to a different artifact pair, outside both tasks' declared `<files>` lists, and re-running the hygiene-dispositions collector was not authorized by this dispatch.
 - **Handling:** Reported plainly, as a real, currently-red, falsifiable claim, in the PR body's own risk-first section -- exactly the "anything still red" content the plan's `<action>` instructs the body to lead with, rather than silently omitted or worked around.
 - **Files modified:** none (verification-methodology finding only).
-- **Carry-forward:** A future plan or the maintainer should re-run `node scripts/ci/collect_hygiene_dispositions.mjs` (or equivalent) to add the missing `remote_branch/origin/integration/v1.62-candidate-recut` row before this gap is closed.
+- **Carry-forward: CLOSED by the orchestrator in `7c3a2d3a`, after this dispatch handed back.** The record was re-minted through the `collect`/`render` triad with one appended decision row (`remote_branch/origin/integration/v1.62-candidate-recut`, disposition `retained`, forced by the phase-wide classification-only decision -- no remote ref is deleted, renamed, or force-pushed). The regeneration diff is exactly that one row plus `candidate_object`/`observed_at`; no other row drifted. Both verifier modes now pass (`--records`/`--rendered` live, and `--fixtures`). The PR body bullet that disclosed this as an open red was replaced with the closed, re-verifiable statement; the body contract still passes at 50 lines.
 
 ---
 
-**Total deviations:** 2 (1 auto-fixed per Rule 3, caught and fixed before any commit; 1 genuine out-of-scope finding, reported honestly in the committed body rather than fixed or hidden). **Impact:** Neither weakens any check. The leak-check catch worked exactly as designed. The hygiene-dispositions gap is a real, pre-existing-as-of-this-plan finding that the PR body now surfaces to the maintainer rather than concealing.
+**Total deviations:** 2 (1 auto-fixed per Rule 3, caught and fixed before any commit; 1 genuine out-of-scope finding, reported honestly in the committed body rather than fixed or hidden). **Impact:** Neither weakens any check. The leak-check catch worked exactly as designed. The hygiene-dispositions gap was a real, pre-existing-as-of-this-plan finding that the PR body surfaced rather than concealed, and that the orchestrator then closed in `7c3a2d3a` before the phase tail gates.
 
 ## Issues Encountered
 
