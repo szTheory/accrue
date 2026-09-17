@@ -3,731 +3,731 @@
   "repository": "szTheory/accrue",
   "mode": "local_only",
   "capture": {
-    "captured_at": "2026-09-16T15:21:19.194Z",
+    "captured_at": "2026-09-17T03:42:37.448Z",
     "active_ref": "refs/heads/gsd/milestone-v1.62-release-integration-hygiene",
-    "commit": "57a0c5f5e2e16b7f295c6ff62d4f2572fc689677",
+    "commit": "2db9bebd4a4c76c20c37f67c72a0e70651848509",
     "primary_worktree": {
       "branch": "refs/heads/gsd/milestone-v1.62-release-integration-hygiene",
-      "head": "57a0c5f5e2e16b7f295c6ff62d4f2572fc689677"
+      "head": "2db9bebd4a4c76c20c37f67c72a0e70651848509"
     }
   },
   "recovery": {
     "verified": true,
-    "manifest_sha256": "595e77cf70c6758ef8482895c5befc3cadbe448433cbe7311efc798544938ee7",
-    "bundle_sha256": "054eb73da6441f6899a9781072595f74d7587dc727509e3fcdc2a1ebf8b64301",
+    "manifest_sha256": "c859f728da494c5666c5f2ce290f06372d91d1d07c1b35bc9f633aa525871170",
+    "bundle_sha256": "64120c0cb5b3fc8cc475bc5099da6766c4e6d6e32bd3f7f84fa0542d9e28d941",
     "refs": [
       {
         "original_ref": "refs/heads/docs/architecture-guides",
         "object": "e599d5ce36867b18404f1bc4e08c2934ba949d1f",
-        "encoded_ref": "refs/accrue-preserve/phase-231/726566732f68656164732f646f63732f6172636869746563747572652d677569646573",
+        "encoded_ref": "refs/accrue-preserve/phase-232/726566732f68656164732f646f63732f6172636869746563747572652d677569646573",
         "bundle_member": true
       },
       {
         "original_ref": "refs/heads/fix/chimeway-opaque-recipient",
         "object": "0752b8d0b59eb53936498daa4bb0be4b14ffd0e4",
-        "encoded_ref": "refs/accrue-preserve/phase-231/726566732f68656164732f6669782f6368696d657761792d6f70617175652d726563697069656e74",
+        "encoded_ref": "refs/accrue-preserve/phase-232/726566732f68656164732f6669782f6368696d657761792d6f70617175652d726563697069656e74",
         "bundle_member": true
       },
       {
         "original_ref": "refs/heads/fix/chimeway-opaque-recipient-release",
         "object": "29c0986b8970ebfec3b1df1481f1a288f5283fee",
-        "encoded_ref": "refs/accrue-preserve/phase-231/726566732f68656164732f6669782f6368696d657761792d6f70617175652d726563697069656e742d72656c65617365",
+        "encoded_ref": "refs/accrue-preserve/phase-232/726566732f68656164732f6669782f6368696d657761792d6f70617175652d726563697069656e742d72656c65617365",
         "bundle_member": true
       },
       {
         "original_ref": "refs/heads/fix/getfluent-1.5.1",
         "object": "dba9a75daa4c8ca1f3213dd2de43efbbde1f5dfe",
-        "encoded_ref": "refs/accrue-preserve/phase-231/726566732f68656164732f6669782f676574666c75656e742d312e352e31",
+        "encoded_ref": "refs/accrue-preserve/phase-232/726566732f68656164732f6669782f676574666c75656e742d312e352e31",
         "bundle_member": true
       },
       {
         "original_ref": "refs/heads/fix/release-boot-env-resolver",
         "object": "3f8338cdb7ce54d3ca49f703565c1048b68f7646",
-        "encoded_ref": "refs/accrue-preserve/phase-231/726566732f68656164732f6669782f72656c656173652d626f6f742d656e762d7265736f6c766572",
+        "encoded_ref": "refs/accrue-preserve/phase-232/726566732f68656164732f6669782f72656c656173652d626f6f742d656e762d7265736f6c766572",
         "bundle_member": true
       },
       {
         "original_ref": "refs/heads/fix/release-otp-28-1",
         "object": "72118f05cbe2f490e329f9f067d88f850246c321",
-        "encoded_ref": "refs/accrue-preserve/phase-231/726566732f68656164732f6669782f72656c656173652d6f74702d32382d31",
+        "encoded_ref": "refs/accrue-preserve/phase-232/726566732f68656164732f6669782f72656c656173652d6f74702d32382d31",
         "bundle_member": true
       },
       {
         "original_ref": "refs/heads/gsd/milestone-v1.62-release-integration-hygiene",
-        "object": "57a0c5f5e2e16b7f295c6ff62d4f2572fc689677",
-        "encoded_ref": "refs/accrue-preserve/phase-231/726566732f68656164732f6773642f6d696c6573746f6e652d76312e36322d72656c656173652d696e746567726174696f6e2d68796769656e65",
+        "object": "2db9bebd4a4c76c20c37f67c72a0e70651848509",
+        "encoded_ref": "refs/accrue-preserve/phase-232/726566732f68656164732f6773642f6d696c6573746f6e652d76312e36322d72656c656173652d696e746567726174696f6e2d68796769656e65",
         "bundle_member": true
       },
       {
         "original_ref": "refs/heads/gsd/phase-225-required-lane-signal-repair",
         "object": "57c61a9a48f1ae84f7b3c3f45333eb6e5fb7261c",
-        "encoded_ref": "refs/accrue-preserve/phase-231/726566732f68656164732f6773642f70686173652d3232352d72657175697265642d6c616e652d7369676e616c2d726570616972",
+        "encoded_ref": "refs/accrue-preserve/phase-232/726566732f68656164732f6773642f70686173652d3232352d72657175697265642d6c616e652d7369676e616c2d726570616972",
         "bundle_member": true
       },
       {
         "original_ref": "refs/heads/integration/v1.62-candidate",
         "object": "f524f2a6b16d3576829632ab6fa77d24b718e6f7",
-        "encoded_ref": "refs/accrue-preserve/phase-231/726566732f68656164732f696e746567726174696f6e2f76312e36322d63616e646964617465",
+        "encoded_ref": "refs/accrue-preserve/phase-232/726566732f68656164732f696e746567726174696f6e2f76312e36322d63616e646964617465",
         "bundle_member": true
       },
       {
         "original_ref": "refs/heads/main",
         "object": "5c01f4bc38d4d38e8e080bde0e608e26ca9b5442",
-        "encoded_ref": "refs/accrue-preserve/phase-231/726566732f68656164732f6d61696e",
+        "encoded_ref": "refs/accrue-preserve/phase-232/726566732f68656164732f6d61696e",
         "bundle_member": true
       },
       {
         "original_ref": "refs/heads/release-please--branches--main",
         "object": "ac4c73854bab31a602c536827993db4d9f7e9949",
-        "encoded_ref": "refs/accrue-preserve/phase-231/726566732f68656164732f72656c656173652d706c656173652d2d6272616e636865732d2d6d61696e",
+        "encoded_ref": "refs/accrue-preserve/phase-232/726566732f68656164732f72656c656173652d706c656173652d2d6272616e636865732d2d6d61696e",
         "bundle_member": true
       },
       {
         "original_ref": "refs/heads/repair/release-pr39",
         "object": "8a490a78524e2f1163b45612391bb53d2f9f9824",
-        "encoded_ref": "refs/accrue-preserve/phase-231/726566732f68656164732f7265706169722f72656c656173652d70723339",
+        "encoded_ref": "refs/accrue-preserve/phase-232/726566732f68656164732f7265706169722f72656c656173652d70723339",
         "bundle_member": true
       },
       {
         "original_ref": "refs/heads/review/v1.62-candidate-code-only",
         "object": "0595d1ddec28523bf4b499262d6cf641b3f822d7",
-        "encoded_ref": "refs/accrue-preserve/phase-231/726566732f68656164732f7265766965772f76312e36322d63616e6469646174652d636f64652d6f6e6c79",
+        "encoded_ref": "refs/accrue-preserve/phase-232/726566732f68656164732f7265766965772f76312e36322d63616e6469646174652d636f64652d6f6e6c79",
         "bundle_member": true
       },
       {
         "original_ref": "refs/heads/tampered-review",
         "object": "99d60f4279d676de96d7cb4ce0ed4199c6a117a5",
-        "encoded_ref": "refs/accrue-preserve/phase-231/726566732f68656164732f74616d70657265642d726576696577",
+        "encoded_ref": "refs/accrue-preserve/phase-232/726566732f68656164732f74616d70657265642d726576696577",
         "bundle_member": true
       },
       {
         "original_ref": "refs/heads/tampered-review-2",
         "object": "7de06394b8d9dbe8a0bd46c3ae5045f13dfc3f79",
-        "encoded_ref": "refs/accrue-preserve/phase-231/726566732f68656164732f74616d70657265642d7265766965772d32",
+        "encoded_ref": "refs/accrue-preserve/phase-232/726566732f68656164732f74616d70657265642d7265766965772d32",
         "bundle_member": true
       },
       {
         "original_ref": "refs/remotes/origin/fix/chimeway-opaque-recipient",
         "object": "0752b8d0b59eb53936498daa4bb0be4b14ffd0e4",
-        "encoded_ref": "refs/accrue-preserve/phase-231/726566732f72656d6f7465732f6f726967696e2f6669782f6368696d657761792d6f70617175652d726563697069656e74",
+        "encoded_ref": "refs/accrue-preserve/phase-232/726566732f72656d6f7465732f6f726967696e2f6669782f6368696d657761792d6f70617175652d726563697069656e74",
         "bundle_member": true
       },
       {
         "original_ref": "refs/remotes/origin/fix/chimeway-opaque-recipient-release",
         "object": "29c0986b8970ebfec3b1df1481f1a288f5283fee",
-        "encoded_ref": "refs/accrue-preserve/phase-231/726566732f72656d6f7465732f6f726967696e2f6669782f6368696d657761792d6f70617175652d726563697069656e742d72656c65617365",
+        "encoded_ref": "refs/accrue-preserve/phase-232/726566732f72656d6f7465732f6f726967696e2f6669782f6368696d657761792d6f70617175652d726563697069656e742d72656c65617365",
         "bundle_member": true
       },
       {
         "original_ref": "refs/remotes/origin/fix/getfluent-1.5.1",
         "object": "dba9a75daa4c8ca1f3213dd2de43efbbde1f5dfe",
-        "encoded_ref": "refs/accrue-preserve/phase-231/726566732f72656d6f7465732f6f726967696e2f6669782f676574666c75656e742d312e352e31",
+        "encoded_ref": "refs/accrue-preserve/phase-232/726566732f72656d6f7465732f6f726967696e2f6669782f676574666c75656e742d312e352e31",
         "bundle_member": true
       },
       {
         "original_ref": "refs/remotes/origin/fix/release-boot-env-resolver",
         "object": "3f8338cdb7ce54d3ca49f703565c1048b68f7646",
-        "encoded_ref": "refs/accrue-preserve/phase-231/726566732f72656d6f7465732f6f726967696e2f6669782f72656c656173652d626f6f742d656e762d7265736f6c766572",
+        "encoded_ref": "refs/accrue-preserve/phase-232/726566732f72656d6f7465732f6f726967696e2f6669782f72656c656173652d626f6f742d656e762d7265736f6c766572",
         "bundle_member": true
       },
       {
         "original_ref": "refs/remotes/origin/fix/release-otp-28-1",
         "object": "72118f05cbe2f490e329f9f067d88f850246c321",
-        "encoded_ref": "refs/accrue-preserve/phase-231/726566732f72656d6f7465732f6f726967696e2f6669782f72656c656173652d6f74702d32382d31",
+        "encoded_ref": "refs/accrue-preserve/phase-232/726566732f72656d6f7465732f6f726967696e2f6669782f72656c656173652d6f74702d32382d31",
         "bundle_member": true
       },
       {
         "original_ref": "refs/remotes/origin/gsd/phase-225-required-lane-signal-repair",
         "object": "b2f5961077ad0982dd1cfee1c807108a9710a9cb",
-        "encoded_ref": "refs/accrue-preserve/phase-231/726566732f72656d6f7465732f6f726967696e2f6773642f70686173652d3232352d72657175697265642d6c616e652d7369676e616c2d726570616972",
+        "encoded_ref": "refs/accrue-preserve/phase-232/726566732f72656d6f7465732f6f726967696e2f6773642f70686173652d3232352d72657175697265642d6c616e652d7369676e616c2d726570616972",
         "bundle_member": true
       },
       {
         "original_ref": "refs/remotes/origin/HEAD",
         "object": "d30fc25dbf6ba551792c66ff451b4b93c0af4bf1",
-        "encoded_ref": "refs/accrue-preserve/phase-231/726566732f72656d6f7465732f6f726967696e2f48454144",
+        "encoded_ref": "refs/accrue-preserve/phase-232/726566732f72656d6f7465732f6f726967696e2f48454144",
         "bundle_member": true
       },
       {
         "original_ref": "refs/remotes/origin/integration/v1.62-candidate",
         "object": "f524f2a6b16d3576829632ab6fa77d24b718e6f7",
-        "encoded_ref": "refs/accrue-preserve/phase-231/726566732f72656d6f7465732f6f726967696e2f696e746567726174696f6e2f76312e36322d63616e646964617465",
+        "encoded_ref": "refs/accrue-preserve/phase-232/726566732f72656d6f7465732f6f726967696e2f696e746567726174696f6e2f76312e36322d63616e646964617465",
         "bundle_member": true
       },
       {
         "original_ref": "refs/remotes/origin/main",
         "object": "d30fc25dbf6ba551792c66ff451b4b93c0af4bf1",
-        "encoded_ref": "refs/accrue-preserve/phase-231/726566732f72656d6f7465732f6f726967696e2f6d61696e",
+        "encoded_ref": "refs/accrue-preserve/phase-232/726566732f72656d6f7465732f6f726967696e2f6d61696e",
         "bundle_member": true
       },
       {
         "original_ref": "refs/remotes/origin/phase-226-baseline-5da8e6b88735",
         "object": "5da8e6b887354eded1b6dc25968ad7679d6bbd83",
-        "encoded_ref": "refs/accrue-preserve/phase-231/726566732f72656d6f7465732f6f726967696e2f70686173652d3232362d626173656c696e652d356461386536623838373335",
+        "encoded_ref": "refs/accrue-preserve/phase-232/726566732f72656d6f7465732f6f726967696e2f70686173652d3232362d626173656c696e652d356461386536623838373335",
         "bundle_member": true
       },
       {
         "original_ref": "refs/remotes/origin/release-please--branches--main",
         "object": "ac4c73854bab31a602c536827993db4d9f7e9949",
-        "encoded_ref": "refs/accrue-preserve/phase-231/726566732f72656d6f7465732f6f726967696e2f72656c656173652d706c656173652d2d6272616e636865732d2d6d61696e",
+        "encoded_ref": "refs/accrue-preserve/phase-232/726566732f72656d6f7465732f6f726967696e2f72656c656173652d706c656173652d2d6272616e636865732d2d6d61696e",
         "bundle_member": true
       },
       {
         "original_ref": "refs/tags/accrue_admin-v0.1.0",
         "object": "f47d7b4c31294b5455ec9589e4ede35528aae3a8",
-        "encoded_ref": "refs/accrue-preserve/phase-231/726566732f746167732f6163637275655f61646d696e2d76302e312e30",
+        "encoded_ref": "refs/accrue-preserve/phase-232/726566732f746167732f6163637275655f61646d696e2d76302e312e30",
         "bundle_member": true
       },
       {
         "original_ref": "refs/tags/accrue_admin-v0.1.1",
         "object": "253303aea60727361281849a9f5d44ee665d53c0",
-        "encoded_ref": "refs/accrue-preserve/phase-231/726566732f746167732f6163637275655f61646d696e2d76302e312e31",
+        "encoded_ref": "refs/accrue-preserve/phase-232/726566732f746167732f6163637275655f61646d696e2d76302e312e31",
         "bundle_member": true
       },
       {
         "original_ref": "refs/tags/accrue_admin-v0.1.2",
         "object": "6bd97b046a9434b785db4fff1113be2b2c8c3559",
-        "encoded_ref": "refs/accrue-preserve/phase-231/726566732f746167732f6163637275655f61646d696e2d76302e312e32",
+        "encoded_ref": "refs/accrue-preserve/phase-232/726566732f746167732f6163637275655f61646d696e2d76302e312e32",
         "bundle_member": true
       },
       {
         "original_ref": "refs/tags/accrue_admin-v0.3.0",
         "object": "8c17ca64095e9c29b93b2dd68564e4b2b3f6b674",
-        "encoded_ref": "refs/accrue-preserve/phase-231/726566732f746167732f6163637275655f61646d696e2d76302e332e30",
+        "encoded_ref": "refs/accrue-preserve/phase-232/726566732f746167732f6163637275655f61646d696e2d76302e332e30",
         "bundle_member": true
       },
       {
         "original_ref": "refs/tags/accrue_admin-v0.3.1",
         "object": "b08906ac1f5eda2ad45abf8a1450b9c8b15398cd",
-        "encoded_ref": "refs/accrue-preserve/phase-231/726566732f746167732f6163637275655f61646d696e2d76302e332e31",
+        "encoded_ref": "refs/accrue-preserve/phase-232/726566732f746167732f6163637275655f61646d696e2d76302e332e31",
         "bundle_member": true
       },
       {
         "original_ref": "refs/tags/accrue_admin-v0.4.0",
         "object": "9a463406081758751d626757634447bb1aa99f08",
-        "encoded_ref": "refs/accrue-preserve/phase-231/726566732f746167732f6163637275655f61646d696e2d76302e342e30",
+        "encoded_ref": "refs/accrue-preserve/phase-232/726566732f746167732f6163637275655f61646d696e2d76302e342e30",
         "bundle_member": true
       },
       {
         "original_ref": "refs/tags/accrue_admin-v1.0.0",
         "object": "5e946912b3bf6af86eaece5cf71b1556705b020b",
-        "encoded_ref": "refs/accrue-preserve/phase-231/726566732f746167732f6163637275655f61646d696e2d76312e302e30",
+        "encoded_ref": "refs/accrue-preserve/phase-232/726566732f746167732f6163637275655f61646d696e2d76312e302e30",
         "bundle_member": true
       },
       {
         "original_ref": "refs/tags/accrue_admin-v1.1.0",
         "object": "5cd030760bc5930d565b82d9a912dff860eafb14",
-        "encoded_ref": "refs/accrue-preserve/phase-231/726566732f746167732f6163637275655f61646d696e2d76312e312e30",
+        "encoded_ref": "refs/accrue-preserve/phase-232/726566732f746167732f6163637275655f61646d696e2d76312e312e30",
         "bundle_member": true
       },
       {
         "original_ref": "refs/tags/accrue_admin-v1.1.1",
         "object": "99b573f927ab29e7d3fda9a356a7b39177daf567",
-        "encoded_ref": "refs/accrue-preserve/phase-231/726566732f746167732f6163637275655f61646d696e2d76312e312e31",
+        "encoded_ref": "refs/accrue-preserve/phase-232/726566732f746167732f6163637275655f61646d696e2d76312e312e31",
         "bundle_member": true
       },
       {
         "original_ref": "refs/tags/accrue_admin-v1.1.2",
         "object": "7ee32e680419508150387914df08d27a94a826f6",
-        "encoded_ref": "refs/accrue-preserve/phase-231/726566732f746167732f6163637275655f61646d696e2d76312e312e32",
+        "encoded_ref": "refs/accrue-preserve/phase-232/726566732f746167732f6163637275655f61646d696e2d76312e312e32",
         "bundle_member": true
       },
       {
         "original_ref": "refs/tags/accrue_admin-v1.2.0",
         "object": "c7508f83958b9310c51c5be8d6b16b865f3f11ff",
-        "encoded_ref": "refs/accrue-preserve/phase-231/726566732f746167732f6163637275655f61646d696e2d76312e322e30",
+        "encoded_ref": "refs/accrue-preserve/phase-232/726566732f746167732f6163637275655f61646d696e2d76312e322e30",
         "bundle_member": true
       },
       {
         "original_ref": "refs/tags/accrue_admin-v1.3.0",
         "object": "236fa2f1649e771f3b515603495436badeed3c7b",
-        "encoded_ref": "refs/accrue-preserve/phase-231/726566732f746167732f6163637275655f61646d696e2d76312e332e30",
+        "encoded_ref": "refs/accrue-preserve/phase-232/726566732f746167732f6163637275655f61646d696e2d76312e332e30",
         "bundle_member": true
       },
       {
         "original_ref": "refs/tags/accrue_admin-v1.4.0",
         "object": "3b375b3154953505c7edb603a3441514a049e945",
-        "encoded_ref": "refs/accrue-preserve/phase-231/726566732f746167732f6163637275655f61646d696e2d76312e342e30",
+        "encoded_ref": "refs/accrue-preserve/phase-232/726566732f746167732f6163637275655f61646d696e2d76312e342e30",
         "bundle_member": true
       },
       {
         "original_ref": "refs/tags/accrue_admin-v1.5.0",
         "object": "cafc526f752b917a0abf8cbdbf3030cb367ae346",
-        "encoded_ref": "refs/accrue-preserve/phase-231/726566732f746167732f6163637275655f61646d696e2d76312e352e30",
+        "encoded_ref": "refs/accrue-preserve/phase-232/726566732f746167732f6163637275655f61646d696e2d76312e352e30",
         "bundle_member": true
       },
       {
         "original_ref": "refs/tags/accrue_admin-v1.5.1",
         "object": "d30fc25dbf6ba551792c66ff451b4b93c0af4bf1",
-        "encoded_ref": "refs/accrue-preserve/phase-231/726566732f746167732f6163637275655f61646d696e2d76312e352e31",
+        "encoded_ref": "refs/accrue-preserve/phase-232/726566732f746167732f6163637275655f61646d696e2d76312e352e31",
         "bundle_member": true
       },
       {
         "original_ref": "refs/tags/accrue_portal-v1.1.0",
         "object": "5cd030760bc5930d565b82d9a912dff860eafb14",
-        "encoded_ref": "refs/accrue-preserve/phase-231/726566732f746167732f6163637275655f706f7274616c2d76312e312e30",
+        "encoded_ref": "refs/accrue-preserve/phase-232/726566732f746167732f6163637275655f706f7274616c2d76312e312e30",
         "bundle_member": true
       },
       {
         "original_ref": "refs/tags/accrue_portal-v1.1.1",
         "object": "99b573f927ab29e7d3fda9a356a7b39177daf567",
-        "encoded_ref": "refs/accrue-preserve/phase-231/726566732f746167732f6163637275655f706f7274616c2d76312e312e31",
+        "encoded_ref": "refs/accrue-preserve/phase-232/726566732f746167732f6163637275655f706f7274616c2d76312e312e31",
         "bundle_member": true
       },
       {
         "original_ref": "refs/tags/accrue_portal-v1.1.2",
         "object": "7ee32e680419508150387914df08d27a94a826f6",
-        "encoded_ref": "refs/accrue-preserve/phase-231/726566732f746167732f6163637275655f706f7274616c2d76312e312e32",
+        "encoded_ref": "refs/accrue-preserve/phase-232/726566732f746167732f6163637275655f706f7274616c2d76312e312e32",
         "bundle_member": true
       },
       {
         "original_ref": "refs/tags/accrue_portal-v1.2.0",
         "object": "c7508f83958b9310c51c5be8d6b16b865f3f11ff",
-        "encoded_ref": "refs/accrue-preserve/phase-231/726566732f746167732f6163637275655f706f7274616c2d76312e322e30",
+        "encoded_ref": "refs/accrue-preserve/phase-232/726566732f746167732f6163637275655f706f7274616c2d76312e322e30",
         "bundle_member": true
       },
       {
         "original_ref": "refs/tags/accrue_portal-v1.3.0",
         "object": "236fa2f1649e771f3b515603495436badeed3c7b",
-        "encoded_ref": "refs/accrue-preserve/phase-231/726566732f746167732f6163637275655f706f7274616c2d76312e332e30",
+        "encoded_ref": "refs/accrue-preserve/phase-232/726566732f746167732f6163637275655f706f7274616c2d76312e332e30",
         "bundle_member": true
       },
       {
         "original_ref": "refs/tags/accrue_portal-v1.4.0",
         "object": "3b375b3154953505c7edb603a3441514a049e945",
-        "encoded_ref": "refs/accrue-preserve/phase-231/726566732f746167732f6163637275655f706f7274616c2d76312e342e30",
+        "encoded_ref": "refs/accrue-preserve/phase-232/726566732f746167732f6163637275655f706f7274616c2d76312e342e30",
         "bundle_member": true
       },
       {
         "original_ref": "refs/tags/accrue_portal-v1.5.0",
         "object": "cafc526f752b917a0abf8cbdbf3030cb367ae346",
-        "encoded_ref": "refs/accrue-preserve/phase-231/726566732f746167732f6163637275655f706f7274616c2d76312e352e30",
+        "encoded_ref": "refs/accrue-preserve/phase-232/726566732f746167732f6163637275655f706f7274616c2d76312e352e30",
         "bundle_member": true
       },
       {
         "original_ref": "refs/tags/accrue_portal-v1.5.1",
         "object": "d30fc25dbf6ba551792c66ff451b4b93c0af4bf1",
-        "encoded_ref": "refs/accrue-preserve/phase-231/726566732f746167732f6163637275655f706f7274616c2d76312e352e31",
+        "encoded_ref": "refs/accrue-preserve/phase-232/726566732f746167732f6163637275655f706f7274616c2d76312e352e31",
         "bundle_member": true
       },
       {
         "original_ref": "refs/tags/accrue-v0.1.0",
         "object": "72f7f8f0c107f8f12e25ad778950f0f82f4204fe",
-        "encoded_ref": "refs/accrue-preserve/phase-231/726566732f746167732f6163637275652d76302e312e30",
+        "encoded_ref": "refs/accrue-preserve/phase-232/726566732f746167732f6163637275652d76302e312e30",
         "bundle_member": true
       },
       {
         "original_ref": "refs/tags/accrue-v0.1.1",
         "object": "d9ec33777b89c812a7bbb07707a7726e5ddc7263",
-        "encoded_ref": "refs/accrue-preserve/phase-231/726566732f746167732f6163637275652d76302e312e31",
+        "encoded_ref": "refs/accrue-preserve/phase-232/726566732f746167732f6163637275652d76302e312e31",
         "bundle_member": true
       },
       {
         "original_ref": "refs/tags/accrue-v0.1.2",
         "object": "28e2a51aa26a68212103d1a50c3c23840fd91c2d",
-        "encoded_ref": "refs/accrue-preserve/phase-231/726566732f746167732f6163637275652d76302e312e32",
+        "encoded_ref": "refs/accrue-preserve/phase-232/726566732f746167732f6163637275652d76302e312e32",
         "bundle_member": true
       },
       {
         "original_ref": "refs/tags/accrue-v0.2.0",
         "object": "fb399d0bb04dfb75373afdb702c48992b960c297",
-        "encoded_ref": "refs/accrue-preserve/phase-231/726566732f746167732f6163637275652d76302e322e30",
+        "encoded_ref": "refs/accrue-preserve/phase-232/726566732f746167732f6163637275652d76302e322e30",
         "bundle_member": true
       },
       {
         "original_ref": "refs/tags/accrue-v0.2.1",
         "object": "b08906ac1f5eda2ad45abf8a1450b9c8b15398cd",
-        "encoded_ref": "refs/accrue-preserve/phase-231/726566732f746167732f6163637275652d76302e322e31",
+        "encoded_ref": "refs/accrue-preserve/phase-232/726566732f746167732f6163637275652d76302e322e31",
         "bundle_member": true
       },
       {
         "original_ref": "refs/tags/accrue-v0.3.0",
         "object": "2ce5629148205d5909969a0a806a2af20c57f204",
-        "encoded_ref": "refs/accrue-preserve/phase-231/726566732f746167732f6163637275652d76302e332e30",
+        "encoded_ref": "refs/accrue-preserve/phase-232/726566732f746167732f6163637275652d76302e332e30",
         "bundle_member": true
       },
       {
         "original_ref": "refs/tags/accrue-v0.3.1",
         "object": "35f226f46a04f17ab0d507e68b20303f0ea7f853",
-        "encoded_ref": "refs/accrue-preserve/phase-231/726566732f746167732f6163637275652d76302e332e31",
+        "encoded_ref": "refs/accrue-preserve/phase-232/726566732f746167732f6163637275652d76302e332e31",
         "bundle_member": true
       },
       {
         "original_ref": "refs/tags/accrue-v0.4.0",
         "object": "9a463406081758751d626757634447bb1aa99f08",
-        "encoded_ref": "refs/accrue-preserve/phase-231/726566732f746167732f6163637275652d76302e342e30",
+        "encoded_ref": "refs/accrue-preserve/phase-232/726566732f746167732f6163637275652d76302e342e30",
         "bundle_member": true
       },
       {
         "original_ref": "refs/tags/accrue-v1.0.0",
         "object": "5e946912b3bf6af86eaece5cf71b1556705b020b",
-        "encoded_ref": "refs/accrue-preserve/phase-231/726566732f746167732f6163637275652d76312e302e30",
+        "encoded_ref": "refs/accrue-preserve/phase-232/726566732f746167732f6163637275652d76312e302e30",
         "bundle_member": true
       },
       {
         "original_ref": "refs/tags/accrue-v1.1.0",
         "object": "5cd030760bc5930d565b82d9a912dff860eafb14",
-        "encoded_ref": "refs/accrue-preserve/phase-231/726566732f746167732f6163637275652d76312e312e30",
+        "encoded_ref": "refs/accrue-preserve/phase-232/726566732f746167732f6163637275652d76312e312e30",
         "bundle_member": true
       },
       {
         "original_ref": "refs/tags/accrue-v1.1.1",
         "object": "99b573f927ab29e7d3fda9a356a7b39177daf567",
-        "encoded_ref": "refs/accrue-preserve/phase-231/726566732f746167732f6163637275652d76312e312e31",
+        "encoded_ref": "refs/accrue-preserve/phase-232/726566732f746167732f6163637275652d76312e312e31",
         "bundle_member": true
       },
       {
         "original_ref": "refs/tags/accrue-v1.1.2",
         "object": "7ee32e680419508150387914df08d27a94a826f6",
-        "encoded_ref": "refs/accrue-preserve/phase-231/726566732f746167732f6163637275652d76312e312e32",
+        "encoded_ref": "refs/accrue-preserve/phase-232/726566732f746167732f6163637275652d76312e312e32",
         "bundle_member": true
       },
       {
         "original_ref": "refs/tags/accrue-v1.2.0",
         "object": "c7508f83958b9310c51c5be8d6b16b865f3f11ff",
-        "encoded_ref": "refs/accrue-preserve/phase-231/726566732f746167732f6163637275652d76312e322e30",
+        "encoded_ref": "refs/accrue-preserve/phase-232/726566732f746167732f6163637275652d76312e322e30",
         "bundle_member": true
       },
       {
         "original_ref": "refs/tags/accrue-v1.3.0",
         "object": "236fa2f1649e771f3b515603495436badeed3c7b",
-        "encoded_ref": "refs/accrue-preserve/phase-231/726566732f746167732f6163637275652d76312e332e30",
+        "encoded_ref": "refs/accrue-preserve/phase-232/726566732f746167732f6163637275652d76312e332e30",
         "bundle_member": true
       },
       {
         "original_ref": "refs/tags/accrue-v1.4.0",
         "object": "3b375b3154953505c7edb603a3441514a049e945",
-        "encoded_ref": "refs/accrue-preserve/phase-231/726566732f746167732f6163637275652d76312e342e30",
+        "encoded_ref": "refs/accrue-preserve/phase-232/726566732f746167732f6163637275652d76312e342e30",
         "bundle_member": true
       },
       {
         "original_ref": "refs/tags/accrue-v1.5.0",
         "object": "cafc526f752b917a0abf8cbdbf3030cb367ae346",
-        "encoded_ref": "refs/accrue-preserve/phase-231/726566732f746167732f6163637275652d76312e352e30",
+        "encoded_ref": "refs/accrue-preserve/phase-232/726566732f746167732f6163637275652d76312e352e30",
         "bundle_member": true
       },
       {
         "original_ref": "refs/tags/accrue-v1.5.1",
         "object": "d30fc25dbf6ba551792c66ff451b4b93c0af4bf1",
-        "encoded_ref": "refs/accrue-preserve/phase-231/726566732f746167732f6163637275652d76312e352e31",
+        "encoded_ref": "refs/accrue-preserve/phase-232/726566732f746167732f6163637275652d76312e352e31",
         "bundle_member": true
       },
       {
         "original_ref": "refs/tags/v1.0",
         "object": "0592f2ac1bab85755632ad49b250b2c70216956d",
-        "encoded_ref": "refs/accrue-preserve/phase-231/726566732f746167732f76312e30",
+        "encoded_ref": "refs/accrue-preserve/phase-232/726566732f746167732f76312e30",
         "bundle_member": true
       },
       {
         "original_ref": "refs/tags/v1.1",
         "object": "860f97d1f42d75cf19729eba5822f07e49432213",
-        "encoded_ref": "refs/accrue-preserve/phase-231/726566732f746167732f76312e31",
+        "encoded_ref": "refs/accrue-preserve/phase-232/726566732f746167732f76312e31",
         "bundle_member": true
       },
       {
         "original_ref": "refs/tags/v1.10",
         "object": "74f74ed8465630aafc3219fe6063e1e311c82812",
-        "encoded_ref": "refs/accrue-preserve/phase-231/726566732f746167732f76312e3130",
+        "encoded_ref": "refs/accrue-preserve/phase-232/726566732f746167732f76312e3130",
         "bundle_member": true
       },
       {
         "original_ref": "refs/tags/v1.11",
         "object": "237b1f6a1edb64f63fdc3a6fe7faaa6e519a5f88",
-        "encoded_ref": "refs/accrue-preserve/phase-231/726566732f746167732f76312e3131",
+        "encoded_ref": "refs/accrue-preserve/phase-232/726566732f746167732f76312e3131",
         "bundle_member": true
       },
       {
         "original_ref": "refs/tags/v1.12",
         "object": "11e2ddb4a898ea54371f6a9ff6d6260236f11b1c",
-        "encoded_ref": "refs/accrue-preserve/phase-231/726566732f746167732f76312e3132",
+        "encoded_ref": "refs/accrue-preserve/phase-232/726566732f746167732f76312e3132",
         "bundle_member": true
       },
       {
         "original_ref": "refs/tags/v1.13",
         "object": "bf2d1582f1b34cfee10c77bceb17a1619d80d732",
-        "encoded_ref": "refs/accrue-preserve/phase-231/726566732f746167732f76312e3133",
+        "encoded_ref": "refs/accrue-preserve/phase-232/726566732f746167732f76312e3133",
         "bundle_member": true
       },
       {
         "original_ref": "refs/tags/v1.14",
         "object": "2671f93b0003d653960b75c8d58fe2e3ea84f500",
-        "encoded_ref": "refs/accrue-preserve/phase-231/726566732f746167732f76312e3134",
+        "encoded_ref": "refs/accrue-preserve/phase-232/726566732f746167732f76312e3134",
         "bundle_member": true
       },
       {
         "original_ref": "refs/tags/v1.15",
         "object": "80999fa539a6bfa7487e35594117e1b36b115c35",
-        "encoded_ref": "refs/accrue-preserve/phase-231/726566732f746167732f76312e3135",
+        "encoded_ref": "refs/accrue-preserve/phase-232/726566732f746167732f76312e3135",
         "bundle_member": true
       },
       {
         "original_ref": "refs/tags/v1.16",
         "object": "85c2d2e73a31efc1da40ad5ceeb6e4682f49025b",
-        "encoded_ref": "refs/accrue-preserve/phase-231/726566732f746167732f76312e3136",
+        "encoded_ref": "refs/accrue-preserve/phase-232/726566732f746167732f76312e3136",
         "bundle_member": true
       },
       {
         "original_ref": "refs/tags/v1.17",
         "object": "331295d20f8c21971dfb1579229b90b403a5cc9b",
-        "encoded_ref": "refs/accrue-preserve/phase-231/726566732f746167732f76312e3137",
+        "encoded_ref": "refs/accrue-preserve/phase-232/726566732f746167732f76312e3137",
         "bundle_member": true
       },
       {
         "original_ref": "refs/tags/v1.18",
         "object": "c99d2a896ac062a9103b68f08984e70e22df8774",
-        "encoded_ref": "refs/accrue-preserve/phase-231/726566732f746167732f76312e3138",
+        "encoded_ref": "refs/accrue-preserve/phase-232/726566732f746167732f76312e3138",
         "bundle_member": true
       },
       {
         "original_ref": "refs/tags/v1.19",
         "object": "a5eddab489757fb94f86e55e9236b158a194526a",
-        "encoded_ref": "refs/accrue-preserve/phase-231/726566732f746167732f76312e3139",
+        "encoded_ref": "refs/accrue-preserve/phase-232/726566732f746167732f76312e3139",
         "bundle_member": true
       },
       {
         "original_ref": "refs/tags/v1.2",
         "object": "2486899948ac4bc40ca21af2a522b79635f8d165",
-        "encoded_ref": "refs/accrue-preserve/phase-231/726566732f746167732f76312e32",
+        "encoded_ref": "refs/accrue-preserve/phase-232/726566732f746167732f76312e32",
         "bundle_member": true
       },
       {
         "original_ref": "refs/tags/v1.20",
         "object": "555f9d162dd2ee988d7c0b6e72e2b13777bba3ac",
-        "encoded_ref": "refs/accrue-preserve/phase-231/726566732f746167732f76312e3230",
+        "encoded_ref": "refs/accrue-preserve/phase-232/726566732f746167732f76312e3230",
         "bundle_member": true
       },
       {
         "original_ref": "refs/tags/v1.21",
         "object": "4c52b8da87af31e515e24a5fc5beab7706f0c3d1",
-        "encoded_ref": "refs/accrue-preserve/phase-231/726566732f746167732f76312e3231",
+        "encoded_ref": "refs/accrue-preserve/phase-232/726566732f746167732f76312e3231",
         "bundle_member": true
       },
       {
         "original_ref": "refs/tags/v1.22",
         "object": "4651932ecda1bdb53629a4940986e19a1b1e9ea3",
-        "encoded_ref": "refs/accrue-preserve/phase-231/726566732f746167732f76312e3232",
+        "encoded_ref": "refs/accrue-preserve/phase-232/726566732f746167732f76312e3232",
         "bundle_member": true
       },
       {
         "original_ref": "refs/tags/v1.23",
         "object": "59154bf1e674e8851dea3a5c97a3e10f57c40efe",
-        "encoded_ref": "refs/accrue-preserve/phase-231/726566732f746167732f76312e3233",
+        "encoded_ref": "refs/accrue-preserve/phase-232/726566732f746167732f76312e3233",
         "bundle_member": true
       },
       {
         "original_ref": "refs/tags/v1.24",
         "object": "95e4b1cf9999f61f2a8493859e3619a9b3e3d94f",
-        "encoded_ref": "refs/accrue-preserve/phase-231/726566732f746167732f76312e3234",
+        "encoded_ref": "refs/accrue-preserve/phase-232/726566732f746167732f76312e3234",
         "bundle_member": true
       },
       {
         "original_ref": "refs/tags/v1.25",
         "object": "e9eac823ee707a3a2b17a0662f43b2b643e2ee71",
-        "encoded_ref": "refs/accrue-preserve/phase-231/726566732f746167732f76312e3235",
+        "encoded_ref": "refs/accrue-preserve/phase-232/726566732f746167732f76312e3235",
         "bundle_member": true
       },
       {
         "original_ref": "refs/tags/v1.26",
         "object": "f7a4f05a9d212fc9c5e93b6bd9c7746337a46cf4",
-        "encoded_ref": "refs/accrue-preserve/phase-231/726566732f746167732f76312e3236",
+        "encoded_ref": "refs/accrue-preserve/phase-232/726566732f746167732f76312e3236",
         "bundle_member": true
       },
       {
         "original_ref": "refs/tags/v1.27",
         "object": "28728b37636417454c1d0e48ba4e07f4119912f6",
-        "encoded_ref": "refs/accrue-preserve/phase-231/726566732f746167732f76312e3237",
+        "encoded_ref": "refs/accrue-preserve/phase-232/726566732f746167732f76312e3237",
         "bundle_member": true
       },
       {
         "original_ref": "refs/tags/v1.29",
         "object": "f060113dd7525a934037c0e7688530a7e2e1bfab",
-        "encoded_ref": "refs/accrue-preserve/phase-231/726566732f746167732f76312e3239",
+        "encoded_ref": "refs/accrue-preserve/phase-232/726566732f746167732f76312e3239",
         "bundle_member": true
       },
       {
         "original_ref": "refs/tags/v1.3",
         "object": "6693074bc74d4fc380968856c3a6d07bbf449620",
-        "encoded_ref": "refs/accrue-preserve/phase-231/726566732f746167732f76312e33",
+        "encoded_ref": "refs/accrue-preserve/phase-232/726566732f746167732f76312e33",
         "bundle_member": true
       },
       {
         "original_ref": "refs/tags/v1.30",
         "object": "14e2f44bd47f78bb44f428002395916f12ad48cf",
-        "encoded_ref": "refs/accrue-preserve/phase-231/726566732f746167732f76312e3330",
+        "encoded_ref": "refs/accrue-preserve/phase-232/726566732f746167732f76312e3330",
         "bundle_member": true
       },
       {
         "original_ref": "refs/tags/v1.31",
         "object": "748bfc03cea4d636f57cb8694f7e0f716a1cb4b1",
-        "encoded_ref": "refs/accrue-preserve/phase-231/726566732f746167732f76312e3331",
+        "encoded_ref": "refs/accrue-preserve/phase-232/726566732f746167732f76312e3331",
         "bundle_member": true
       },
       {
         "original_ref": "refs/tags/v1.32",
         "object": "be2cba296151ee3f03c543d4c80b54ca240d6522",
-        "encoded_ref": "refs/accrue-preserve/phase-231/726566732f746167732f76312e3332",
+        "encoded_ref": "refs/accrue-preserve/phase-232/726566732f746167732f76312e3332",
         "bundle_member": true
       },
       {
         "original_ref": "refs/tags/v1.33",
         "object": "c40803c5aeae5be0fa425484c17084bcc416702d",
-        "encoded_ref": "refs/accrue-preserve/phase-231/726566732f746167732f76312e3333",
+        "encoded_ref": "refs/accrue-preserve/phase-232/726566732f746167732f76312e3333",
         "bundle_member": true
       },
       {
         "original_ref": "refs/tags/v1.34",
         "object": "cf3a951135e39fdb1db34db1db6016bdde80665f",
-        "encoded_ref": "refs/accrue-preserve/phase-231/726566732f746167732f76312e3334",
+        "encoded_ref": "refs/accrue-preserve/phase-232/726566732f746167732f76312e3334",
         "bundle_member": true
       },
       {
         "original_ref": "refs/tags/v1.35",
         "object": "6032c5e50b72d9749481a9e3bf9641205a5004c0",
-        "encoded_ref": "refs/accrue-preserve/phase-231/726566732f746167732f76312e3335",
+        "encoded_ref": "refs/accrue-preserve/phase-232/726566732f746167732f76312e3335",
         "bundle_member": true
       },
       {
         "original_ref": "refs/tags/v1.36",
         "object": "454e3401b95e132a31d6b3528428b86f62b33b5b",
-        "encoded_ref": "refs/accrue-preserve/phase-231/726566732f746167732f76312e3336",
+        "encoded_ref": "refs/accrue-preserve/phase-232/726566732f746167732f76312e3336",
         "bundle_member": true
       },
       {
         "original_ref": "refs/tags/v1.37",
         "object": "dc516350cf839db28b0654da5fed462301edea72",
-        "encoded_ref": "refs/accrue-preserve/phase-231/726566732f746167732f76312e3337",
+        "encoded_ref": "refs/accrue-preserve/phase-232/726566732f746167732f76312e3337",
         "bundle_member": true
       },
       {
         "original_ref": "refs/tags/v1.39",
         "object": "84edf334461cabe26af5d2cd2b091af90daabfa6",
-        "encoded_ref": "refs/accrue-preserve/phase-231/726566732f746167732f76312e3339",
+        "encoded_ref": "refs/accrue-preserve/phase-232/726566732f746167732f76312e3339",
         "bundle_member": true
       },
       {
         "original_ref": "refs/tags/v1.40",
         "object": "b64c71e104f3c08523b0c37366d78eac3553c24b",
-        "encoded_ref": "refs/accrue-preserve/phase-231/726566732f746167732f76312e3430",
+        "encoded_ref": "refs/accrue-preserve/phase-232/726566732f746167732f76312e3430",
         "bundle_member": true
       },
       {
         "original_ref": "refs/tags/v1.45",
         "object": "e8d1b3fb534c5a088fce6a4e050e1be202c0c9cb",
-        "encoded_ref": "refs/accrue-preserve/phase-231/726566732f746167732f76312e3435",
+        "encoded_ref": "refs/accrue-preserve/phase-232/726566732f746167732f76312e3435",
         "bundle_member": true
       },
       {
         "original_ref": "refs/tags/v1.46",
         "object": "e96cad0a5ecc3ece628d503c9e6e6a2f1ab628e6",
-        "encoded_ref": "refs/accrue-preserve/phase-231/726566732f746167732f76312e3436",
+        "encoded_ref": "refs/accrue-preserve/phase-232/726566732f746167732f76312e3436",
         "bundle_member": true
       },
       {
         "original_ref": "refs/tags/v1.47",
         "object": "a4a93d6d6f8a188198107c25980932a05eae94a1",
-        "encoded_ref": "refs/accrue-preserve/phase-231/726566732f746167732f76312e3437",
+        "encoded_ref": "refs/accrue-preserve/phase-232/726566732f746167732f76312e3437",
         "bundle_member": true
       },
       {
         "original_ref": "refs/tags/v1.49",
         "object": "7093cc23a0146f7faae17cbf5926f93ec7928b4c",
-        "encoded_ref": "refs/accrue-preserve/phase-231/726566732f746167732f76312e3439",
+        "encoded_ref": "refs/accrue-preserve/phase-232/726566732f746167732f76312e3439",
         "bundle_member": true
       },
       {
         "original_ref": "refs/tags/v1.5",
         "object": "3070800e017d34dff757a9648d182029dd7e6d8f",
-        "encoded_ref": "refs/accrue-preserve/phase-231/726566732f746167732f76312e35",
+        "encoded_ref": "refs/accrue-preserve/phase-232/726566732f746167732f76312e35",
         "bundle_member": true
       },
       {
         "original_ref": "refs/tags/v1.50",
         "object": "496a9551c1f8deadba20480b4321004c3a63bf02",
-        "encoded_ref": "refs/accrue-preserve/phase-231/726566732f746167732f76312e3530",
+        "encoded_ref": "refs/accrue-preserve/phase-232/726566732f746167732f76312e3530",
         "bundle_member": true
       },
       {
         "original_ref": "refs/tags/v1.51",
         "object": "9b2b1620f417c45b44055df84a23f274af1f68c1",
-        "encoded_ref": "refs/accrue-preserve/phase-231/726566732f746167732f76312e3531",
+        "encoded_ref": "refs/accrue-preserve/phase-232/726566732f746167732f76312e3531",
         "bundle_member": true
       },
       {
         "original_ref": "refs/tags/v1.52",
         "object": "7c581161baad93bd61a508dba74529df773f07e7",
-        "encoded_ref": "refs/accrue-preserve/phase-231/726566732f746167732f76312e3532",
+        "encoded_ref": "refs/accrue-preserve/phase-232/726566732f746167732f76312e3532",
         "bundle_member": true
       },
       {
         "original_ref": "refs/tags/v1.53",
         "object": "6dd1097d3b3e8ea2b0696b5d497f0b53e86a8f2b",
-        "encoded_ref": "refs/accrue-preserve/phase-231/726566732f746167732f76312e3533",
+        "encoded_ref": "refs/accrue-preserve/phase-232/726566732f746167732f76312e3533",
         "bundle_member": true
       },
       {
         "original_ref": "refs/tags/v1.54",
         "object": "de94ea688226f693a5ce46b89ca0bd7502ee3060",
-        "encoded_ref": "refs/accrue-preserve/phase-231/726566732f746167732f76312e3534",
+        "encoded_ref": "refs/accrue-preserve/phase-232/726566732f746167732f76312e3534",
         "bundle_member": true
       },
       {
         "original_ref": "refs/tags/v1.55",
         "object": "8e9bea1ec6f159cf52e2f71be88d2ad02b1ddf11",
-        "encoded_ref": "refs/accrue-preserve/phase-231/726566732f746167732f76312e3535",
+        "encoded_ref": "refs/accrue-preserve/phase-232/726566732f746167732f76312e3535",
         "bundle_member": true
       },
       {
         "original_ref": "refs/tags/v1.57",
         "object": "fcdf339f56bbb8fcf0b251e36a175003605c07e3",
-        "encoded_ref": "refs/accrue-preserve/phase-231/726566732f746167732f76312e3537",
+        "encoded_ref": "refs/accrue-preserve/phase-232/726566732f746167732f76312e3537",
         "bundle_member": true
       },
       {
         "original_ref": "refs/tags/v1.58",
         "object": "0d1cdf7d1767e7402da02b501c31f8bad405e545",
-        "encoded_ref": "refs/accrue-preserve/phase-231/726566732f746167732f76312e3538",
+        "encoded_ref": "refs/accrue-preserve/phase-232/726566732f746167732f76312e3538",
         "bundle_member": true
       },
       {
         "original_ref": "refs/tags/v1.59",
         "object": "d51fad462747f14bb69dadc16054b3906c69ce63",
-        "encoded_ref": "refs/accrue-preserve/phase-231/726566732f746167732f76312e3539",
+        "encoded_ref": "refs/accrue-preserve/phase-232/726566732f746167732f76312e3539",
         "bundle_member": true
       },
       {
         "original_ref": "refs/tags/v1.6",
         "object": "291c9faf74d8496d5e03f9c46641e8804a1c8209",
-        "encoded_ref": "refs/accrue-preserve/phase-231/726566732f746167732f76312e36",
+        "encoded_ref": "refs/accrue-preserve/phase-232/726566732f746167732f76312e36",
         "bundle_member": true
       },
       {
         "original_ref": "refs/tags/v1.60",
         "object": "a5511ef673ad0d73912a9cf544d8bc1eb5b43e95",
-        "encoded_ref": "refs/accrue-preserve/phase-231/726566732f746167732f76312e3630",
+        "encoded_ref": "refs/accrue-preserve/phase-232/726566732f746167732f76312e3630",
         "bundle_member": true
       },
       {
         "original_ref": "refs/tags/v1.61",
         "object": "fdb41672dd9240b36623ab22a7a8377a2735e5a3",
-        "encoded_ref": "refs/accrue-preserve/phase-231/726566732f746167732f76312e3631",
+        "encoded_ref": "refs/accrue-preserve/phase-232/726566732f746167732f76312e3631",
         "bundle_member": true
       },
       {
         "original_ref": "refs/tags/v1.7",
         "object": "2d13c063119392adf0c2e3d0035d0a0f6457ca32",
-        "encoded_ref": "refs/accrue-preserve/phase-231/726566732f746167732f76312e37",
+        "encoded_ref": "refs/accrue-preserve/phase-232/726566732f746167732f76312e37",
         "bundle_member": true
       },
       {
         "original_ref": "refs/tags/v1.8",
         "object": "dca57dcfe48ae58ac7e6cef01daef096c0d44695",
-        "encoded_ref": "refs/accrue-preserve/phase-231/726566732f746167732f76312e38",
+        "encoded_ref": "refs/accrue-preserve/phase-232/726566732f746167732f76312e38",
         "bundle_member": true
       },
       {
         "original_ref": "refs/tags/v1.9",
         "object": "25217144e1cd9413ec9ed39d3864d585e762ad22",
-        "encoded_ref": "refs/accrue-preserve/phase-231/726566732f746167732f76312e39",
+        "encoded_ref": "refs/accrue-preserve/phase-232/726566732f746167732f76312e39",
         "bundle_member": true
       }
     ]
@@ -738,42 +738,32 @@
       {
         "path": ".planning/milestone.lock",
         "type": "regular",
-        "sha256": "a2ed603f96fef68efa822dc5b0ec50c1f1396dd40bfde3442a4b3746b3c0e723"
+        "sha256": "0b5cee1e29f928bc13f75e4407028281fa5b9e495db095455d808cd3738bc9a6"
       },
       {
         "path": ".planning/state.json",
         "type": "regular",
-        "sha256": "68c3ae4c2cbd728b1312721dc29922ba6cd431475ae5f8631fa5ad096537bc46"
+        "sha256": "0197f199a660948676ca7250b896457675411b7b722b5e1c7b940be35c1cf1dd"
       },
       {
         "path": ".planning/v1.61-v1.61-MILESTONE-AUDIT.md",
         "type": "regular",
         "sha256": "bc1e07d70c1d25e2ace1c903131a34e658f75abc68174758aa44f61a4af20947"
-      },
-      {
-        "path": "scripts/ci/stripe_test_fixtures.mjs",
-        "type": "regular",
-        "sha256": "fe23b28388c69c5a3334294dfcff0f5db24516f63a1d669a9c7fe25e8f91caab"
-      },
-      {
-        "path": "scripts/ci/verify_stripe_test_fixtures.mjs",
-        "type": "regular",
-        "sha256": "b1d32535708d450439b95855dc3bd696483ca2cd39543067b0f4c885abb18d4f"
       }
     ],
     "authorized_workflow_metadata": [
       {
         "path": ".planning/milestone.lock",
         "type": "regular",
-        "before_sha256": "a2ed603f96fef68efa822dc5b0ec50c1f1396dd40bfde3442a4b3746b3c0e723",
-        "after_sha256": "8e9f5a4158ff5f4fef5c2f01a466292f8e01fe0f73a8b047ac524269d093fb18",
+        "before_sha256": "0b5cee1e29f928bc13f75e4407028281fa5b9e495db095455d808cd3738bc9a6",
+        "after_sha256": "b7f9e859231de176492ebff841c750de1818e5182464a29017e0dbc311bc6394",
         "state": "workflow_metadata_refreshed"
       },
       {
         "path": ".planning/state.json",
         "type": "regular",
-        "before_sha256": "68c3ae4c2cbd728b1312721dc29922ba6cd431475ae5f8631fa5ad096537bc46",
-        "after_sha256": "1eef6859da8b249177c85b5a88cc838474deda900a4a432d8fc6f95c44b0317e",
+        "before_sha256": "0197f199a660948676ca7250b896457675411b7b722b5e1c7b940be35c1cf1dd",
+        "after_sha256": "1a47a61c27c2fd088d56594a731d5ce8d1193ecc8c2a27561a85700976618758",
         "state": "workflow_metadata_refreshed"
       }
     ]
@@ -781,7 +771,7 @@
   "refs": {
     "local_main": "5c01f4bc38d4d38e8e080bde0e608e26ca9b5442",
     "cached_origin_main": "d30fc25dbf6ba551792c66ff451b4b93c0af4bf1",
-    "milestone_branch": "57a0c5f5e2e16b7f295c6ff62d4f2572fc689677",
+    "milestone_branch": "2db9bebd4a4c76c20c37f67c72a0e70651848509",
     "v161_tag": "fdb41672dd9240b36623ab22a7a8377a2735e5a3",
     "all": [
       {
@@ -3075,6 +3065,601 @@
         "role": "other"
       },
       {
+        "name": "refs/accrue-preserve/phase-232/726566732f68656164732f646f63732f6172636869746563747572652d677569646573",
+        "object": "e599d5ce36867b18404f1bc4e08c2934ba949d1f",
+        "role": "other"
+      },
+      {
+        "name": "refs/accrue-preserve/phase-232/726566732f68656164732f6669782f6368696d657761792d6f70617175652d726563697069656e74",
+        "object": "0752b8d0b59eb53936498daa4bb0be4b14ffd0e4",
+        "role": "other"
+      },
+      {
+        "name": "refs/accrue-preserve/phase-232/726566732f68656164732f6669782f6368696d657761792d6f70617175652d726563697069656e742d72656c65617365",
+        "object": "29c0986b8970ebfec3b1df1481f1a288f5283fee",
+        "role": "other"
+      },
+      {
+        "name": "refs/accrue-preserve/phase-232/726566732f68656164732f6669782f676574666c75656e742d312e352e31",
+        "object": "dba9a75daa4c8ca1f3213dd2de43efbbde1f5dfe",
+        "role": "other"
+      },
+      {
+        "name": "refs/accrue-preserve/phase-232/726566732f68656164732f6669782f72656c656173652d626f6f742d656e762d7265736f6c766572",
+        "object": "3f8338cdb7ce54d3ca49f703565c1048b68f7646",
+        "role": "other"
+      },
+      {
+        "name": "refs/accrue-preserve/phase-232/726566732f68656164732f6669782f72656c656173652d6f74702d32382d31",
+        "object": "72118f05cbe2f490e329f9f067d88f850246c321",
+        "role": "other"
+      },
+      {
+        "name": "refs/accrue-preserve/phase-232/726566732f68656164732f6773642f6d696c6573746f6e652d76312e36322d72656c656173652d696e746567726174696f6e2d68796769656e65",
+        "object": "2db9bebd4a4c76c20c37f67c72a0e70651848509",
+        "role": "other"
+      },
+      {
+        "name": "refs/accrue-preserve/phase-232/726566732f68656164732f6773642f70686173652d3232352d72657175697265642d6c616e652d7369676e616c2d726570616972",
+        "object": "57c61a9a48f1ae84f7b3c3f45333eb6e5fb7261c",
+        "role": "other"
+      },
+      {
+        "name": "refs/accrue-preserve/phase-232/726566732f68656164732f696e746567726174696f6e2f76312e36322d63616e646964617465",
+        "object": "f524f2a6b16d3576829632ab6fa77d24b718e6f7",
+        "role": "other"
+      },
+      {
+        "name": "refs/accrue-preserve/phase-232/726566732f68656164732f6d61696e",
+        "object": "5c01f4bc38d4d38e8e080bde0e608e26ca9b5442",
+        "role": "other"
+      },
+      {
+        "name": "refs/accrue-preserve/phase-232/726566732f68656164732f72656c656173652d706c656173652d2d6272616e636865732d2d6d61696e",
+        "object": "ac4c73854bab31a602c536827993db4d9f7e9949",
+        "role": "other"
+      },
+      {
+        "name": "refs/accrue-preserve/phase-232/726566732f68656164732f7265706169722f72656c656173652d70723339",
+        "object": "8a490a78524e2f1163b45612391bb53d2f9f9824",
+        "role": "other"
+      },
+      {
+        "name": "refs/accrue-preserve/phase-232/726566732f68656164732f7265766965772f76312e36322d63616e6469646174652d636f64652d6f6e6c79",
+        "object": "0595d1ddec28523bf4b499262d6cf641b3f822d7",
+        "role": "other"
+      },
+      {
+        "name": "refs/accrue-preserve/phase-232/726566732f68656164732f74616d70657265642d7265766965772d32",
+        "object": "7de06394b8d9dbe8a0bd46c3ae5045f13dfc3f79",
+        "role": "other"
+      },
+      {
+        "name": "refs/accrue-preserve/phase-232/726566732f68656164732f74616d70657265642d726576696577",
+        "object": "99d60f4279d676de96d7cb4ce0ed4199c6a117a5",
+        "role": "other"
+      },
+      {
+        "name": "refs/accrue-preserve/phase-232/726566732f72656d6f7465732f6f726967696e2f48454144",
+        "object": "d30fc25dbf6ba551792c66ff451b4b93c0af4bf1",
+        "role": "other"
+      },
+      {
+        "name": "refs/accrue-preserve/phase-232/726566732f72656d6f7465732f6f726967696e2f6669782f6368696d657761792d6f70617175652d726563697069656e74",
+        "object": "0752b8d0b59eb53936498daa4bb0be4b14ffd0e4",
+        "role": "other"
+      },
+      {
+        "name": "refs/accrue-preserve/phase-232/726566732f72656d6f7465732f6f726967696e2f6669782f6368696d657761792d6f70617175652d726563697069656e742d72656c65617365",
+        "object": "29c0986b8970ebfec3b1df1481f1a288f5283fee",
+        "role": "other"
+      },
+      {
+        "name": "refs/accrue-preserve/phase-232/726566732f72656d6f7465732f6f726967696e2f6669782f676574666c75656e742d312e352e31",
+        "object": "dba9a75daa4c8ca1f3213dd2de43efbbde1f5dfe",
+        "role": "other"
+      },
+      {
+        "name": "refs/accrue-preserve/phase-232/726566732f72656d6f7465732f6f726967696e2f6669782f72656c656173652d626f6f742d656e762d7265736f6c766572",
+        "object": "3f8338cdb7ce54d3ca49f703565c1048b68f7646",
+        "role": "other"
+      },
+      {
+        "name": "refs/accrue-preserve/phase-232/726566732f72656d6f7465732f6f726967696e2f6669782f72656c656173652d6f74702d32382d31",
+        "object": "72118f05cbe2f490e329f9f067d88f850246c321",
+        "role": "other"
+      },
+      {
+        "name": "refs/accrue-preserve/phase-232/726566732f72656d6f7465732f6f726967696e2f6773642f70686173652d3232352d72657175697265642d6c616e652d7369676e616c2d726570616972",
+        "object": "b2f5961077ad0982dd1cfee1c807108a9710a9cb",
+        "role": "other"
+      },
+      {
+        "name": "refs/accrue-preserve/phase-232/726566732f72656d6f7465732f6f726967696e2f696e746567726174696f6e2f76312e36322d63616e646964617465",
+        "object": "f524f2a6b16d3576829632ab6fa77d24b718e6f7",
+        "role": "other"
+      },
+      {
+        "name": "refs/accrue-preserve/phase-232/726566732f72656d6f7465732f6f726967696e2f6d61696e",
+        "object": "d30fc25dbf6ba551792c66ff451b4b93c0af4bf1",
+        "role": "other"
+      },
+      {
+        "name": "refs/accrue-preserve/phase-232/726566732f72656d6f7465732f6f726967696e2f70686173652d3232362d626173656c696e652d356461386536623838373335",
+        "object": "5da8e6b887354eded1b6dc25968ad7679d6bbd83",
+        "role": "other"
+      },
+      {
+        "name": "refs/accrue-preserve/phase-232/726566732f72656d6f7465732f6f726967696e2f72656c656173652d706c656173652d2d6272616e636865732d2d6d61696e",
+        "object": "ac4c73854bab31a602c536827993db4d9f7e9949",
+        "role": "other"
+      },
+      {
+        "name": "refs/accrue-preserve/phase-232/726566732f746167732f6163637275652d76302e312e30",
+        "object": "72f7f8f0c107f8f12e25ad778950f0f82f4204fe",
+        "role": "other"
+      },
+      {
+        "name": "refs/accrue-preserve/phase-232/726566732f746167732f6163637275652d76302e312e31",
+        "object": "d9ec33777b89c812a7bbb07707a7726e5ddc7263",
+        "role": "other"
+      },
+      {
+        "name": "refs/accrue-preserve/phase-232/726566732f746167732f6163637275652d76302e312e32",
+        "object": "28e2a51aa26a68212103d1a50c3c23840fd91c2d",
+        "role": "other"
+      },
+      {
+        "name": "refs/accrue-preserve/phase-232/726566732f746167732f6163637275652d76302e322e30",
+        "object": "fb399d0bb04dfb75373afdb702c48992b960c297",
+        "role": "other"
+      },
+      {
+        "name": "refs/accrue-preserve/phase-232/726566732f746167732f6163637275652d76302e322e31",
+        "object": "b08906ac1f5eda2ad45abf8a1450b9c8b15398cd",
+        "role": "other"
+      },
+      {
+        "name": "refs/accrue-preserve/phase-232/726566732f746167732f6163637275652d76302e332e30",
+        "object": "2ce5629148205d5909969a0a806a2af20c57f204",
+        "role": "other"
+      },
+      {
+        "name": "refs/accrue-preserve/phase-232/726566732f746167732f6163637275652d76302e332e31",
+        "object": "35f226f46a04f17ab0d507e68b20303f0ea7f853",
+        "role": "other"
+      },
+      {
+        "name": "refs/accrue-preserve/phase-232/726566732f746167732f6163637275652d76302e342e30",
+        "object": "9a463406081758751d626757634447bb1aa99f08",
+        "role": "other"
+      },
+      {
+        "name": "refs/accrue-preserve/phase-232/726566732f746167732f6163637275652d76312e302e30",
+        "object": "5e946912b3bf6af86eaece5cf71b1556705b020b",
+        "role": "other"
+      },
+      {
+        "name": "refs/accrue-preserve/phase-232/726566732f746167732f6163637275652d76312e312e30",
+        "object": "5cd030760bc5930d565b82d9a912dff860eafb14",
+        "role": "other"
+      },
+      {
+        "name": "refs/accrue-preserve/phase-232/726566732f746167732f6163637275652d76312e312e31",
+        "object": "99b573f927ab29e7d3fda9a356a7b39177daf567",
+        "role": "other"
+      },
+      {
+        "name": "refs/accrue-preserve/phase-232/726566732f746167732f6163637275652d76312e312e32",
+        "object": "7ee32e680419508150387914df08d27a94a826f6",
+        "role": "other"
+      },
+      {
+        "name": "refs/accrue-preserve/phase-232/726566732f746167732f6163637275652d76312e322e30",
+        "object": "c7508f83958b9310c51c5be8d6b16b865f3f11ff",
+        "role": "other"
+      },
+      {
+        "name": "refs/accrue-preserve/phase-232/726566732f746167732f6163637275652d76312e332e30",
+        "object": "236fa2f1649e771f3b515603495436badeed3c7b",
+        "role": "other"
+      },
+      {
+        "name": "refs/accrue-preserve/phase-232/726566732f746167732f6163637275652d76312e342e30",
+        "object": "3b375b3154953505c7edb603a3441514a049e945",
+        "role": "other"
+      },
+      {
+        "name": "refs/accrue-preserve/phase-232/726566732f746167732f6163637275652d76312e352e30",
+        "object": "cafc526f752b917a0abf8cbdbf3030cb367ae346",
+        "role": "other"
+      },
+      {
+        "name": "refs/accrue-preserve/phase-232/726566732f746167732f6163637275652d76312e352e31",
+        "object": "d30fc25dbf6ba551792c66ff451b4b93c0af4bf1",
+        "role": "other"
+      },
+      {
+        "name": "refs/accrue-preserve/phase-232/726566732f746167732f6163637275655f61646d696e2d76302e312e30",
+        "object": "f47d7b4c31294b5455ec9589e4ede35528aae3a8",
+        "role": "other"
+      },
+      {
+        "name": "refs/accrue-preserve/phase-232/726566732f746167732f6163637275655f61646d696e2d76302e312e31",
+        "object": "253303aea60727361281849a9f5d44ee665d53c0",
+        "role": "other"
+      },
+      {
+        "name": "refs/accrue-preserve/phase-232/726566732f746167732f6163637275655f61646d696e2d76302e312e32",
+        "object": "6bd97b046a9434b785db4fff1113be2b2c8c3559",
+        "role": "other"
+      },
+      {
+        "name": "refs/accrue-preserve/phase-232/726566732f746167732f6163637275655f61646d696e2d76302e332e30",
+        "object": "8c17ca64095e9c29b93b2dd68564e4b2b3f6b674",
+        "role": "other"
+      },
+      {
+        "name": "refs/accrue-preserve/phase-232/726566732f746167732f6163637275655f61646d696e2d76302e332e31",
+        "object": "b08906ac1f5eda2ad45abf8a1450b9c8b15398cd",
+        "role": "other"
+      },
+      {
+        "name": "refs/accrue-preserve/phase-232/726566732f746167732f6163637275655f61646d696e2d76302e342e30",
+        "object": "9a463406081758751d626757634447bb1aa99f08",
+        "role": "other"
+      },
+      {
+        "name": "refs/accrue-preserve/phase-232/726566732f746167732f6163637275655f61646d696e2d76312e302e30",
+        "object": "5e946912b3bf6af86eaece5cf71b1556705b020b",
+        "role": "other"
+      },
+      {
+        "name": "refs/accrue-preserve/phase-232/726566732f746167732f6163637275655f61646d696e2d76312e312e30",
+        "object": "5cd030760bc5930d565b82d9a912dff860eafb14",
+        "role": "other"
+      },
+      {
+        "name": "refs/accrue-preserve/phase-232/726566732f746167732f6163637275655f61646d696e2d76312e312e31",
+        "object": "99b573f927ab29e7d3fda9a356a7b39177daf567",
+        "role": "other"
+      },
+      {
+        "name": "refs/accrue-preserve/phase-232/726566732f746167732f6163637275655f61646d696e2d76312e312e32",
+        "object": "7ee32e680419508150387914df08d27a94a826f6",
+        "role": "other"
+      },
+      {
+        "name": "refs/accrue-preserve/phase-232/726566732f746167732f6163637275655f61646d696e2d76312e322e30",
+        "object": "c7508f83958b9310c51c5be8d6b16b865f3f11ff",
+        "role": "other"
+      },
+      {
+        "name": "refs/accrue-preserve/phase-232/726566732f746167732f6163637275655f61646d696e2d76312e332e30",
+        "object": "236fa2f1649e771f3b515603495436badeed3c7b",
+        "role": "other"
+      },
+      {
+        "name": "refs/accrue-preserve/phase-232/726566732f746167732f6163637275655f61646d696e2d76312e342e30",
+        "object": "3b375b3154953505c7edb603a3441514a049e945",
+        "role": "other"
+      },
+      {
+        "name": "refs/accrue-preserve/phase-232/726566732f746167732f6163637275655f61646d696e2d76312e352e30",
+        "object": "cafc526f752b917a0abf8cbdbf3030cb367ae346",
+        "role": "other"
+      },
+      {
+        "name": "refs/accrue-preserve/phase-232/726566732f746167732f6163637275655f61646d696e2d76312e352e31",
+        "object": "d30fc25dbf6ba551792c66ff451b4b93c0af4bf1",
+        "role": "other"
+      },
+      {
+        "name": "refs/accrue-preserve/phase-232/726566732f746167732f6163637275655f706f7274616c2d76312e312e30",
+        "object": "5cd030760bc5930d565b82d9a912dff860eafb14",
+        "role": "other"
+      },
+      {
+        "name": "refs/accrue-preserve/phase-232/726566732f746167732f6163637275655f706f7274616c2d76312e312e31",
+        "object": "99b573f927ab29e7d3fda9a356a7b39177daf567",
+        "role": "other"
+      },
+      {
+        "name": "refs/accrue-preserve/phase-232/726566732f746167732f6163637275655f706f7274616c2d76312e312e32",
+        "object": "7ee32e680419508150387914df08d27a94a826f6",
+        "role": "other"
+      },
+      {
+        "name": "refs/accrue-preserve/phase-232/726566732f746167732f6163637275655f706f7274616c2d76312e322e30",
+        "object": "c7508f83958b9310c51c5be8d6b16b865f3f11ff",
+        "role": "other"
+      },
+      {
+        "name": "refs/accrue-preserve/phase-232/726566732f746167732f6163637275655f706f7274616c2d76312e332e30",
+        "object": "236fa2f1649e771f3b515603495436badeed3c7b",
+        "role": "other"
+      },
+      {
+        "name": "refs/accrue-preserve/phase-232/726566732f746167732f6163637275655f706f7274616c2d76312e342e30",
+        "object": "3b375b3154953505c7edb603a3441514a049e945",
+        "role": "other"
+      },
+      {
+        "name": "refs/accrue-preserve/phase-232/726566732f746167732f6163637275655f706f7274616c2d76312e352e30",
+        "object": "cafc526f752b917a0abf8cbdbf3030cb367ae346",
+        "role": "other"
+      },
+      {
+        "name": "refs/accrue-preserve/phase-232/726566732f746167732f6163637275655f706f7274616c2d76312e352e31",
+        "object": "d30fc25dbf6ba551792c66ff451b4b93c0af4bf1",
+        "role": "other"
+      },
+      {
+        "name": "refs/accrue-preserve/phase-232/726566732f746167732f76312e30",
+        "object": "0592f2ac1bab85755632ad49b250b2c70216956d",
+        "role": "other"
+      },
+      {
+        "name": "refs/accrue-preserve/phase-232/726566732f746167732f76312e3130",
+        "object": "74f74ed8465630aafc3219fe6063e1e311c82812",
+        "role": "other"
+      },
+      {
+        "name": "refs/accrue-preserve/phase-232/726566732f746167732f76312e3131",
+        "object": "237b1f6a1edb64f63fdc3a6fe7faaa6e519a5f88",
+        "role": "other"
+      },
+      {
+        "name": "refs/accrue-preserve/phase-232/726566732f746167732f76312e3132",
+        "object": "11e2ddb4a898ea54371f6a9ff6d6260236f11b1c",
+        "role": "other"
+      },
+      {
+        "name": "refs/accrue-preserve/phase-232/726566732f746167732f76312e3133",
+        "object": "bf2d1582f1b34cfee10c77bceb17a1619d80d732",
+        "role": "other"
+      },
+      {
+        "name": "refs/accrue-preserve/phase-232/726566732f746167732f76312e3134",
+        "object": "2671f93b0003d653960b75c8d58fe2e3ea84f500",
+        "role": "other"
+      },
+      {
+        "name": "refs/accrue-preserve/phase-232/726566732f746167732f76312e3135",
+        "object": "80999fa539a6bfa7487e35594117e1b36b115c35",
+        "role": "other"
+      },
+      {
+        "name": "refs/accrue-preserve/phase-232/726566732f746167732f76312e3136",
+        "object": "85c2d2e73a31efc1da40ad5ceeb6e4682f49025b",
+        "role": "other"
+      },
+      {
+        "name": "refs/accrue-preserve/phase-232/726566732f746167732f76312e3137",
+        "object": "331295d20f8c21971dfb1579229b90b403a5cc9b",
+        "role": "other"
+      },
+      {
+        "name": "refs/accrue-preserve/phase-232/726566732f746167732f76312e3138",
+        "object": "c99d2a896ac062a9103b68f08984e70e22df8774",
+        "role": "other"
+      },
+      {
+        "name": "refs/accrue-preserve/phase-232/726566732f746167732f76312e3139",
+        "object": "a5eddab489757fb94f86e55e9236b158a194526a",
+        "role": "other"
+      },
+      {
+        "name": "refs/accrue-preserve/phase-232/726566732f746167732f76312e31",
+        "object": "860f97d1f42d75cf19729eba5822f07e49432213",
+        "role": "other"
+      },
+      {
+        "name": "refs/accrue-preserve/phase-232/726566732f746167732f76312e32",
+        "object": "2486899948ac4bc40ca21af2a522b79635f8d165",
+        "role": "other"
+      },
+      {
+        "name": "refs/accrue-preserve/phase-232/726566732f746167732f76312e3230",
+        "object": "555f9d162dd2ee988d7c0b6e72e2b13777bba3ac",
+        "role": "other"
+      },
+      {
+        "name": "refs/accrue-preserve/phase-232/726566732f746167732f76312e3231",
+        "object": "4c52b8da87af31e515e24a5fc5beab7706f0c3d1",
+        "role": "other"
+      },
+      {
+        "name": "refs/accrue-preserve/phase-232/726566732f746167732f76312e3232",
+        "object": "4651932ecda1bdb53629a4940986e19a1b1e9ea3",
+        "role": "other"
+      },
+      {
+        "name": "refs/accrue-preserve/phase-232/726566732f746167732f76312e3233",
+        "object": "59154bf1e674e8851dea3a5c97a3e10f57c40efe",
+        "role": "other"
+      },
+      {
+        "name": "refs/accrue-preserve/phase-232/726566732f746167732f76312e3234",
+        "object": "95e4b1cf9999f61f2a8493859e3619a9b3e3d94f",
+        "role": "other"
+      },
+      {
+        "name": "refs/accrue-preserve/phase-232/726566732f746167732f76312e3235",
+        "object": "e9eac823ee707a3a2b17a0662f43b2b643e2ee71",
+        "role": "other"
+      },
+      {
+        "name": "refs/accrue-preserve/phase-232/726566732f746167732f76312e3236",
+        "object": "f7a4f05a9d212fc9c5e93b6bd9c7746337a46cf4",
+        "role": "other"
+      },
+      {
+        "name": "refs/accrue-preserve/phase-232/726566732f746167732f76312e3237",
+        "object": "28728b37636417454c1d0e48ba4e07f4119912f6",
+        "role": "other"
+      },
+      {
+        "name": "refs/accrue-preserve/phase-232/726566732f746167732f76312e3239",
+        "object": "f060113dd7525a934037c0e7688530a7e2e1bfab",
+        "role": "other"
+      },
+      {
+        "name": "refs/accrue-preserve/phase-232/726566732f746167732f76312e3330",
+        "object": "14e2f44bd47f78bb44f428002395916f12ad48cf",
+        "role": "other"
+      },
+      {
+        "name": "refs/accrue-preserve/phase-232/726566732f746167732f76312e3331",
+        "object": "748bfc03cea4d636f57cb8694f7e0f716a1cb4b1",
+        "role": "other"
+      },
+      {
+        "name": "refs/accrue-preserve/phase-232/726566732f746167732f76312e3332",
+        "object": "be2cba296151ee3f03c543d4c80b54ca240d6522",
+        "role": "other"
+      },
+      {
+        "name": "refs/accrue-preserve/phase-232/726566732f746167732f76312e3333",
+        "object": "c40803c5aeae5be0fa425484c17084bcc416702d",
+        "role": "other"
+      },
+      {
+        "name": "refs/accrue-preserve/phase-232/726566732f746167732f76312e3334",
+        "object": "cf3a951135e39fdb1db34db1db6016bdde80665f",
+        "role": "other"
+      },
+      {
+        "name": "refs/accrue-preserve/phase-232/726566732f746167732f76312e3335",
+        "object": "6032c5e50b72d9749481a9e3bf9641205a5004c0",
+        "role": "other"
+      },
+      {
+        "name": "refs/accrue-preserve/phase-232/726566732f746167732f76312e3336",
+        "object": "454e3401b95e132a31d6b3528428b86f62b33b5b",
+        "role": "other"
+      },
+      {
+        "name": "refs/accrue-preserve/phase-232/726566732f746167732f76312e3337",
+        "object": "dc516350cf839db28b0654da5fed462301edea72",
+        "role": "other"
+      },
+      {
+        "name": "refs/accrue-preserve/phase-232/726566732f746167732f76312e3339",
+        "object": "84edf334461cabe26af5d2cd2b091af90daabfa6",
+        "role": "other"
+      },
+      {
+        "name": "refs/accrue-preserve/phase-232/726566732f746167732f76312e33",
+        "object": "6693074bc74d4fc380968856c3a6d07bbf449620",
+        "role": "other"
+      },
+      {
+        "name": "refs/accrue-preserve/phase-232/726566732f746167732f76312e3430",
+        "object": "b64c71e104f3c08523b0c37366d78eac3553c24b",
+        "role": "other"
+      },
+      {
+        "name": "refs/accrue-preserve/phase-232/726566732f746167732f76312e3435",
+        "object": "e8d1b3fb534c5a088fce6a4e050e1be202c0c9cb",
+        "role": "other"
+      },
+      {
+        "name": "refs/accrue-preserve/phase-232/726566732f746167732f76312e3436",
+        "object": "e96cad0a5ecc3ece628d503c9e6e6a2f1ab628e6",
+        "role": "other"
+      },
+      {
+        "name": "refs/accrue-preserve/phase-232/726566732f746167732f76312e3437",
+        "object": "a4a93d6d6f8a188198107c25980932a05eae94a1",
+        "role": "other"
+      },
+      {
+        "name": "refs/accrue-preserve/phase-232/726566732f746167732f76312e3439",
+        "object": "7093cc23a0146f7faae17cbf5926f93ec7928b4c",
+        "role": "other"
+      },
+      {
+        "name": "refs/accrue-preserve/phase-232/726566732f746167732f76312e3530",
+        "object": "496a9551c1f8deadba20480b4321004c3a63bf02",
+        "role": "other"
+      },
+      {
+        "name": "refs/accrue-preserve/phase-232/726566732f746167732f76312e35",
+        "object": "3070800e017d34dff757a9648d182029dd7e6d8f",
+        "role": "other"
+      },
+      {
+        "name": "refs/accrue-preserve/phase-232/726566732f746167732f76312e3531",
+        "object": "9b2b1620f417c45b44055df84a23f274af1f68c1",
+        "role": "other"
+      },
+      {
+        "name": "refs/accrue-preserve/phase-232/726566732f746167732f76312e3532",
+        "object": "7c581161baad93bd61a508dba74529df773f07e7",
+        "role": "other"
+      },
+      {
+        "name": "refs/accrue-preserve/phase-232/726566732f746167732f76312e3533",
+        "object": "6dd1097d3b3e8ea2b0696b5d497f0b53e86a8f2b",
+        "role": "other"
+      },
+      {
+        "name": "refs/accrue-preserve/phase-232/726566732f746167732f76312e3534",
+        "object": "de94ea688226f693a5ce46b89ca0bd7502ee3060",
+        "role": "other"
+      },
+      {
+        "name": "refs/accrue-preserve/phase-232/726566732f746167732f76312e3535",
+        "object": "8e9bea1ec6f159cf52e2f71be88d2ad02b1ddf11",
+        "role": "other"
+      },
+      {
+        "name": "refs/accrue-preserve/phase-232/726566732f746167732f76312e3537",
+        "object": "fcdf339f56bbb8fcf0b251e36a175003605c07e3",
+        "role": "other"
+      },
+      {
+        "name": "refs/accrue-preserve/phase-232/726566732f746167732f76312e3538",
+        "object": "0d1cdf7d1767e7402da02b501c31f8bad405e545",
+        "role": "other"
+      },
+      {
+        "name": "refs/accrue-preserve/phase-232/726566732f746167732f76312e3539",
+        "object": "d51fad462747f14bb69dadc16054b3906c69ce63",
+        "role": "other"
+      },
+      {
+        "name": "refs/accrue-preserve/phase-232/726566732f746167732f76312e36",
+        "object": "291c9faf74d8496d5e03f9c46641e8804a1c8209",
+        "role": "other"
+      },
+      {
+        "name": "refs/accrue-preserve/phase-232/726566732f746167732f76312e3630",
+        "object": "a5511ef673ad0d73912a9cf544d8bc1eb5b43e95",
+        "role": "other"
+      },
+      {
+        "name": "refs/accrue-preserve/phase-232/726566732f746167732f76312e3631",
+        "object": "fdb41672dd9240b36623ab22a7a8377a2735e5a3",
+        "role": "other"
+      },
+      {
+        "name": "refs/accrue-preserve/phase-232/726566732f746167732f76312e37",
+        "object": "2d13c063119392adf0c2e3d0035d0a0f6457ca32",
+        "role": "other"
+      },
+      {
+        "name": "refs/accrue-preserve/phase-232/726566732f746167732f76312e38",
+        "object": "dca57dcfe48ae58ac7e6cef01daef096c0d44695",
+        "role": "other"
+      },
+      {
+        "name": "refs/accrue-preserve/phase-232/726566732f746167732f76312e39",
+        "object": "25217144e1cd9413ec9ed39d3864d585e762ad22",
+        "role": "other"
+      },
+      {
         "name": "refs/heads/docs/architecture-guides",
         "object": "e599d5ce36867b18404f1bc4e08c2934ba949d1f",
         "role": "other"
@@ -3106,7 +3691,7 @@
       },
       {
         "name": "refs/heads/gsd/milestone-v1.62-release-integration-hygiene",
-        "object": "57a0c5f5e2e16b7f295c6ff62d4f2572fc689677",
+        "object": "2db9bebd4a4c76c20c37f67c72a0e70651848509",
         "role": "other"
       },
       {
@@ -3674,7 +4259,7 @@
   "remotes": {
     "remote_main": {
       "repository": "szTheory/accrue",
-      "observed_at": "2026-09-16T15:21:19.214Z",
+      "observed_at": "2026-09-17T03:42:37.467Z",
       "request": "GET /repos/szTheory/accrue/git/ref/heads/main",
       "available": false,
       "state": "unavailable",
@@ -3682,7 +4267,7 @@
     },
     "pull_requests": {
       "repository": "szTheory/accrue",
-      "observed_at": "2026-09-16T15:21:19.214Z",
+      "observed_at": "2026-09-17T03:42:37.467Z",
       "requests": [
         "GET /repos/szTheory/accrue/pulls?state=open&per_page=100&page=1"
       ],
@@ -3692,7 +4277,7 @@
     },
     "release_branches": {
       "repository": "szTheory/accrue",
-      "observed_at": "2026-09-16T15:21:19.214Z",
+      "observed_at": "2026-09-17T03:42:37.467Z",
       "requests": [
         "GET /repos/szTheory/accrue/git/matching-refs/heads/release/?per_page=100&page=1"
       ],
@@ -3702,7 +4287,7 @@
     },
     "actions": {
       "repository": "szTheory/accrue",
-      "observed_at": "2026-09-16T15:21:19.214Z",
+      "observed_at": "2026-09-17T03:42:37.467Z",
       "requests": [
         "GET /repos/szTheory/accrue/actions/runs?per_page=100&page=1"
       ],
@@ -3722,15 +4307,16 @@
       "7:fixed",
       "8:fixed",
       "9:fixed",
-      "10:waived"
+      "10:waived",
+      "11:waived"
     ],
     "milestone": "9c7ba4fa1dce8ecc13da4e02aa3eb07bddf74dc40588c07c8d643d332319df27",
-    "state": "d5fec3a8ec2a5e59a33185dc1fd1ccf5b2129f5aa542f19d8c5d9c87f208e8ec"
+    "state": "5ccfd3150cf2733f90d4746721a1ff530256be083056ff1f726662f4bf311d33"
   },
   "worktrees": [
     {
       "branch": "gsd/milestone-v1.62-release-integration-hygiene",
-      "sha": "57a0c5f5e2e16b7f295c6ff62d4f2572fc689677",
+      "sha": "2db9bebd4a4c76c20c37f67c72a0e70651848509",
       "dirty": true
     }
   ]
