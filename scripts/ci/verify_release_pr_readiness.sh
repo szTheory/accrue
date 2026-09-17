@@ -31,6 +31,7 @@ fail() {
 
 command -v jq >/dev/null 2>&1 || fail "jq is required but not installed"
 command -v npx >/dev/null 2>&1 || fail "npx is required but not installed"
+command -v gh >/dev/null 2>&1 || fail "gh is required but not installed (the target-branch and remote-manifest assertions read through the GitHub API)"
 
 REPO=${GITHUB_REPOSITORY:-szTheory/accrue}
 
@@ -41,10 +42,17 @@ REPO=${GITHUB_REPOSITORY:-szTheory/accrue}
 # the candidate carries additional commits on top that have never been
 # released). Testing against an empty branch would make every assertion
 # below vacuously fail (no packages appear in an empty plan), which is
-# exactly the false-pass risk this proof exists to avoid. Override via
-# RELEASE_PR_READINESS_TARGET_BRANCH once this candidate has merged and a
-# later, still-unreleased branch needs the same proof.
-TARGET_BRANCH=${RELEASE_PR_READINESS_TARGET_BRANCH:-integration/v1.62-candidate}
+# exactly the false-pass risk this proof exists to avoid.
+#
+# This name is REMOTE and ephemeral. Every assertion below reads the target
+# through the GitHub API, so the LOCAL branch of the same name is irrelevant
+# -- and the two have already diverged once in this milestone: plan 232-09's
+# re-cut could not force-push the published `integration/v1.62-candidate`, so
+# it published `integration/v1.62-candidate-recut` instead while the local
+# branch kept the original name. The default below therefore names the
+# PUBLISHED re-cut, not the local branch. Override via
+# RELEASE_PR_READINESS_TARGET_BRANCH when a later re-cut publishes a new one.
+TARGET_BRANCH=${RELEASE_PR_READINESS_TARGET_BRANCH:-integration/v1.62-candidate-recut}
 
 TOKEN=${GH_TOKEN:-${GITHUB_TOKEN:-}}
 [[ -n "$TOKEN" ]] || fail "missing required token: set GH_TOKEN or GITHUB_TOKEN (a repo-scoped token release-please uses to read config/releases/commits from the target branch) -- an absent token must never read as a pass"
@@ -77,6 +85,24 @@ EXPECTED_UPDATES=7
 EXPECTED_MODULE_ATTRIBUTE_LINES=3
 
 echo "verify_release_pr_readiness: target branch: $TARGET_BRANCH"
+
+# Assertion 0: the target must not be an ALREADY-SUPERSEDED candidate. A
+# release-readiness proof computed against an abandoned branch passes happily
+# and proves nothing -- the exact failure this guard exists to make
+# impossible. `232-ROLLBACK-POINT.json` records the object the current re-cut
+# superseded; if the target's remote tip still resolves to it, the default
+# above (or the override) was never re-pointed after a re-cut.
+ROLLBACK_RECORD="$ROOT_DIR/.planning/phases/232-bounded-hygiene-release-handoff/232-ROLLBACK-POINT.json"
+if [[ -f "$ROLLBACK_RECORD" ]]; then
+  SUPERSEDED_OBJECT=$(jq -r '.supersedes.candidate_object // empty' "$ROLLBACK_RECORD")
+  TARGET_TIP=$(GH_TOKEN="$TOKEN" gh api "repos/${REPO}/commits/${TARGET_BRANCH}" --jq '.sha' 2>/dev/null) ||
+    fail "target branch '$TARGET_BRANCH' does not resolve on the remote -- an unresolvable target must never read as a pass"
+  [[ -n "$TARGET_TIP" ]] || fail "could not resolve the remote tip of target branch '$TARGET_BRANCH'"
+  if [[ -n "$SUPERSEDED_OBJECT" && "$TARGET_TIP" == "$SUPERSEDED_OBJECT" ]]; then
+    fail "target branch '$TARGET_BRANCH' still points at the superseded candidate $SUPERSEDED_OBJECT -- re-point RELEASE_PR_READINESS_TARGET_BRANCH at the current re-cut"
+  fi
+  echo "verify_release_pr_readiness: [0/6] target '$TARGET_BRANCH' resolves to $TARGET_TIP and is not the superseded candidate"
+fi
 echo "verify_release_pr_readiness: capturing dry-run output to $OUTPUT_LOG"
 
 set +e
