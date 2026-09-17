@@ -69,8 +69,15 @@ describe_port_owner() {
 
 ensure_port_available() {
   local port="$1"
+  local owner
 
-  if describe_port_owner "$port" | grep -q .; then
+  # Capture-then-filter, not `describe_port_owner ... | grep -q .`: under
+  # `set -euo pipefail`, `grep -q` exits at its first line and closes the
+  # pipe, the shell-function producer takes SIGPIPE, and pipefail promotes
+  # that to the pipeline status -- silently reporting an occupied port as
+  # free (SL-D, scripts/ci/verify_pipefail_grep_idiom.mjs).
+  owner=$(describe_port_owner "$port")
+  if [ -n "$owner" ]; then
     setup_failure port_or_server_readiness
   fi
 }

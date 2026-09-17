@@ -23,10 +23,17 @@ describe_port_owner() {
 
 ensure_port_available() {
   local port="$1"
+  local owner
 
-  if describe_port_owner "$port" | grep -q .; then
+  # Capture-then-filter, not `describe_port_owner ... | grep -q .`: under
+  # `set -euo pipefail`, `grep -q` exits at its first line and closes the
+  # pipe, the shell-function producer takes SIGPIPE, and pipefail promotes
+  # that to the pipeline status -- silently reporting an occupied port as
+  # free (SL-D, scripts/ci/verify_pipefail_grep_idiom.mjs).
+  owner=$(describe_port_owner "$port")
+  if [ -n "$owner" ]; then
     echo "Port ${port} is already in use; set ACCRUE_HOST_PORT to another port or stop the listener." >&2
-    describe_port_owner "$port" >&2
+    printf '%s\n' "$owner" >&2
     exit 1
   fi
 }
