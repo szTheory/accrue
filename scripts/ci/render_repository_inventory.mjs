@@ -64,9 +64,22 @@ export function renderRepositoryInventory(inventory, validationContext) {
   ].join("\n");
 }
 function main() { const args = process.argv; const input = args[args.indexOf("--input") + 1]; const out = args[args.indexOf("--out") + 1]; const repository = args[args.indexOf("--expected-repository") + 1]; if (!input || !out || !repository) throw new Error("--input, --out, and --expected-repository are required"); const context = createRepositoryValidationContext({ expectedRepository: repository }); fs.writeFileSync(out, renderRepositoryInventory(JSON.parse(fs.readFileSync(input, "utf8")), context)); }
-if (!process.env.NODE_TEST_CONTEXT && isMainModule(import.meta.url)) { try { main(); } catch (error) { console.error(`repository inventory render: FAIL: ${error.message}`); process.exitCode = 1; } }
+// D-29 Rule 1: isMainModule() throws (never returns a silent false) when there
+// is no invoking entrypoint -- e.g. a dynamic `import()` from a `node -e`
+// inline-eval script, which has no argv[1]. That throw must not crash a bare
+// import of this module, so it is caught here and treated as "not the
+// entrypoint", matching the established pattern in
+// collect_window_dispositions.mjs and verify_window_dispositions.mjs.
+let invokedAsEntrypoint = false;
+try {
+  invokedAsEntrypoint = isMainModule(import.meta.url);
+} catch {
+  invokedAsEntrypoint = false;
+}
 
-if (process.env.NODE_TEST_CONTEXT && isMainModule(import.meta.url)) {
+if (!process.env.NODE_TEST_CONTEXT && invokedAsEntrypoint) { try { main(); } catch (error) { console.error(`repository inventory render: FAIL: ${error.message}`); process.exitCode = 1; } }
+
+if (process.env.NODE_TEST_CONTEXT && invokedAsEntrypoint) {
   test("CR-04 plural remote rows retain every ordered producing request", () => {
     const repository = "szTheory/accrue";
     const observedAt = "2026-09-13T00:00:00.000Z";

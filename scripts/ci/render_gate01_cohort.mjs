@@ -64,11 +64,24 @@ function main() {
   fs.writeFileSync(options.out, renderGate01Cohort(record));
 }
 
-if (!process.env.NODE_TEST_CONTEXT && isMainModule(import.meta.url)) {
+// D-29 Rule 1: isMainModule() throws (never returns a silent false) when there
+// is no invoking entrypoint -- e.g. a dynamic `import()` from a `node -e`
+// inline-eval script, which has no argv[1]. That throw must not crash a bare
+// import of this module, so it is caught here and treated as "not the
+// entrypoint", matching the established pattern in
+// collect_window_dispositions.mjs and verify_window_dispositions.mjs.
+let invokedAsEntrypoint = false;
+try {
+  invokedAsEntrypoint = isMainModule(import.meta.url);
+} catch {
+  invokedAsEntrypoint = false;
+}
+
+if (!process.env.NODE_TEST_CONTEXT && invokedAsEntrypoint) {
   try { main(); } catch (error) { console.error(`gate01 cohort render: FAIL: ${error.message}`); process.exitCode = 1; }
 }
 
-if (process.env.NODE_TEST_CONTEXT && isMainModule(import.meta.url)) {
+if (process.env.NODE_TEST_CONTEXT && invokedAsEntrypoint) {
   function provedRow(job, overrides = {}) { return { job, lane_class: "merge-blocking", state: "proved", exit_code: 0, argv: ["true"], ...overrides }; }
   function nonRunRow(job, overrides = {}) { return { job, lane_class: "not-a-declared-gate", state: "non_run", reason: "fixture reason", ...overrides }; }
   function minimalRecord(rows = [], overrides = {}) {

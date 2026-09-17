@@ -249,11 +249,24 @@ function main() {
     fs.writeFileSync(ledgerOut, renderExcludedLedger(JSON.parse(fs.readFileSync(ledgerInput, "utf8")), { expectedRepository: repository }));
   }
 }
-if (!process.env.NODE_TEST_CONTEXT && isMainModule(import.meta.url)) {
+// D-29 Rule 1: isMainModule() throws (never returns a silent false) when there
+// is no invoking entrypoint -- e.g. a dynamic `import()` from a `node -e`
+// inline-eval script, which has no argv[1]. That throw must not crash a bare
+// import of this module, so it is caught here and treated as "not the
+// entrypoint", matching the established pattern in
+// collect_window_dispositions.mjs and verify_window_dispositions.mjs.
+let invokedAsEntrypoint = false;
+try {
+  invokedAsEntrypoint = isMainModule(import.meta.url);
+} catch {
+  invokedAsEntrypoint = false;
+}
+
+if (!process.env.NODE_TEST_CONTEXT && invokedAsEntrypoint) {
   try { main(); } catch (error) { console.error(`integration disposition render: FAIL: ${error.message}`); process.exitCode = 1; }
 }
 
-if (process.env.NODE_TEST_CONTEXT && isMainModule(import.meta.url)) {
+if (process.env.NODE_TEST_CONTEXT && invokedAsEntrypoint) {
   function laneRow(lane, overrides = {}) {
     return { lane, state: "non_run", owner: "231", command: ["mix", "test"], reason: "belongs to Phase 231", ...overrides };
   }
