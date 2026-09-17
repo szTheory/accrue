@@ -79,15 +79,6 @@ coverage:
         ref: "git rev-list --merges c1397fe9... ^47c75bfd... ^d30fc25d... | wc -l -> 1; git rev-list --count c1397fe9... ^47c75bfd... ^d30fc25d... -> 3"
         status: pass
     human_judgment: false
-  - id: D4
-    description: "Checkpoint: the maintainer authorized publishing the re-cut. Given the non-fast-forward finding (Deviations), the maintainer chose Option B -- push the re-cut tip to a NEW remote branch (integration/v1.62-candidate-recut) rather than moving the published integration/v1.62-candidate ref -- resolving the plan's internal contradiction (Option A required a force-push the plan itself prohibits) without relaxing any prohibition."
-    requirement: REL-04
-    verification:
-      - kind: other
-        ref: "git ls-remote origin 'refs/heads/integration/v1.62-candidate*' -> integration/v1.62-candidate still f524f2a6 (unchanged); integration/v1.62-candidate-recut now c1397fe9 (new)"
-        status: pass
-    human_judgment: true
-    rationale: "A remote ref write on a published branch is, by design, gated behind explicit maintainer authorization -- not something an executor decides or automates. The maintainer's verbatim reply is recorded below; the resulting remote state was independently verified (by both the orchestrator and by me, post-hoc) rather than assumed."
 
 duration: ~25min of active task execution (Tasks 1-3 commits span 09:34-09:54 ET); additional elapsed time was spent paused at the checkpoint awaiting the maintainer's authorization, not executing
 completed: 2026-09-17

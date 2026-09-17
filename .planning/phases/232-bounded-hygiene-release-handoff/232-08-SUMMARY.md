@@ -94,8 +94,8 @@ coverage:
       - kind: other
         ref: "git diff --quiet -- .planning/phases/229-.../229-REPOSITORY-INVENTORY.json .planning/phases/230-.../230-ROLLBACK-POINT.json; grep -nE '/Users/|/home/[a-z]|$HOME' 231-REPOSITORY-INVENTORY.json (exit 1)"
         status: pass
-    human_judgment: true
-    rationale: "The worktree-dirty=true outcome (rather than the plan's literal expectation of false) is a substantive, documented deviation from the plan's own acceptance criteria that a human should read and agree with, not just a passing check -- see Deviations."
+    human_judgment: false
+    rationale: "The worktree-dirty=true outcome (rather than the plan's literal expectation of false) is a substantive, documented deviation from the plan's own acceptance criteria -- see Deviations. Per CLAUDE.md's Executable Acceptance Policy (post-218), this is not a genuine product decision, credential/bootstrap action, or irreversible external operation, so it does not qualify for human_judgment: true; the deviation is fully machine-verified by the three passing checks above (the pinned inventory's worktree_dirty field matches live `git status --porcelain` output at capture time), and is documented in prose for a reader rather than gated behind a human-approval flag. Found and corrected in Plan 232-10 (Task 1) after `verify_executable_uat_contract.mjs --all-since 229` caught the policy violation as a real merge-blocking failure at the re-cut SHA -- see 232-10-SUMMARY.md."
 
 duration: ~140min
 completed: 2026-09-17

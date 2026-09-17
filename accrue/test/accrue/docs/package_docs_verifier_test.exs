@@ -1035,6 +1035,7 @@ defmodule Accrue.Docs.PackageDocsVerifierTest do
     copy_fixture!("guides/testing-live-stripe.md", tmp_dir)
     copy_fixture!("scripts/ci/accrue_host_uat.sh", tmp_dir)
     copy_fixture!("scripts/ci/verify_foundation_contrast.mjs", tmp_dir)
+    copy_fixture!("scripts/ci/main_module.mjs", tmp_dir)
     copy_fixture!("examples/accrue_host/docs/adoption-proof-matrix.md", tmp_dir)
   end
 
