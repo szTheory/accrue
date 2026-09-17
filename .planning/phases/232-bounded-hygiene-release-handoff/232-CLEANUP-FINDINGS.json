@@ -3,7 +3,7 @@
   "repository": "szTheory/accrue",
   "cleanup_range": {
     "from": "e579a8a1befcb72c93a31e9b8c53f1bd1168006f",
-    "to": "fb69c3ac3f56653e06a79162ebb2bfa106acf768"
+    "to": "0971cfb0bcdabfd48d924fe85ceb653e034dce24"
   },
   "passes_taken": 2,
   "rows": [
@@ -38,6 +38,38 @@
       "after_exit_code": 0,
       "commit": "fb69c3ac3f56653e06a79162ebb2bfa106acf768",
       "category": "documentation-truth"
+    },
+    {
+      "finding": 5,
+      "command": "python3 -c \"import json,sys; d=json.load(open('.planning/phases/232-bounded-hygiene-release-handoff/232-CLEANUP-FINDINGS.json')); sys.exit(0 if len(d['rows'])==4 else 1)\"",
+      "before_exit_code": 1,
+      "after_exit_code": 0,
+      "commit": "2db9bebd4a4c76c20c37f67c72a0e70651848509",
+      "category": "documentation-truth"
+    },
+    {
+      "finding": 6,
+      "command": "python3 -c \"import json,sys; d=json.load(open('.planning/phases/231-exact-sha-release-gate-proof/231-REPOSITORY-INVENTORY.json')); sys.exit(0 if d['capture']['commit']=='2db9bebd4a4c76c20c37f67c72a0e70651848509' else 1)\"",
+      "before_exit_code": 1,
+      "after_exit_code": 0,
+      "commit": "129cc471a701a1696870a4cddd68465f3840a45c",
+      "category": "documentation-truth"
+    },
+    {
+      "finding": 7,
+      "command": "python3 -c \"import json,sys; d=json.load(open('.planning/phases/232-bounded-hygiene-release-handoff/232-CLEANUP-FINDINGS.json')); sys.exit(0 if d.get('passes_taken')==2 else 1)\"",
+      "before_exit_code": 1,
+      "after_exit_code": 0,
+      "commit": "e53c1b99b0ab55ac95c1b9a00acfff8292bd53d5",
+      "category": "documentation-truth"
+    },
+    {
+      "finding": 8,
+      "command": "cmp <(git show integration/v1.62-candidate:.tool-versions) .tool-versions",
+      "before_exit_code": 1,
+      "after_exit_code": 0,
+      "commit": "0971cfb0bcdabfd48d924fe85ceb653e034dce24",
+      "category": "lint"
     }
   ]
 }
