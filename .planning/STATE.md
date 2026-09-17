@@ -5,16 +5,16 @@ milestone_name: Release Integration & Repository Hygiene
 current_phase: 232
 current_phase_name: Bounded Hygiene & Release Handoff
 status: executing
-stopped_at: Completed 232-08-PLAN.md
-last_updated: "2026-09-17T13:22:30.705Z"
+stopped_at: Completed 232-09-PLAN.md (re-cut published to integration/v1.62-candidate-recut per maintainer checkpoint decision)
+last_updated: "2026-09-17T14:12:48.803Z"
 last_activity: 2026-09-16
 last_activity_desc: Phase 232 execution resumed (wave continue)
-state_head: 48d85152e20e88bcba54b51728669c8ca26e7521
+state_head: 2b8d9d2d79b99914960d54fe688b52613ea9201a
 progress:
   total_phases: 4
   completed_phases: 3
   total_plans: 44
-  completed_plans: 41
+  completed_plans: 42
   percent: 75
 ---
 
@@ -31,7 +31,7 @@ See: `.planning/PROJECT.md` (updated 2026-09-15)
 ## Current Position
 
 Phase: 232 (Bounded Hygiene & Release Handoff) — EXECUTING
-Plan: 8 of 11
+Plan: 9 of 11
 Status: Ready to execute
 Last activity: 2026-09-16 — Phase 232 execution resumed (wave continue)
 
@@ -94,6 +94,7 @@ Progress: [████████░░] 75% (2/4 phases complete; 27/27 plans
 | Phase 232 P05 | ~45min | 3 tasks | 5 files |
 | Phase 232 P06 | ~35min | 3 tasks | 3 files |
 | Phase 232 P08 | ~140min | 3 tasks | 8 files |
+| Phase 232-bounded-hygiene-release-handoff P09 | ~25min | 3 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -173,6 +174,7 @@ Progress: [████████░░] 75% (2/4 phases complete; 27/27 plans
 - [Phase 232]: [Phase 232]: 232-06: Placed the Parked-lane expiry trigger (D-26) in the BLOCKING admin-ui-ratchet-selftests job, not the parked job, because GitHub Actions job-level continue-on-error absorbs the whole job's conclusion regardless of any step's own setting -- there is no per-step override, matching the plan's own documented fallback.
 - [Phase 232]: [Phase 232]: 232-06: Ship-window row 11 uses kind unmet-truth (not unrun-verify/deviation) -- the ratchet lane's truth (a frozen, zero-open-findings ledger) is currently false, matching D-21's mandate that this lane's honest state is failed, never non_run/skipped/advisory.
 - [Phase 232]: Maintainer decision at 232-08's checkpoint: rewrite .tool-versions to match integration/v1.62-candidate byte-for-byte (nodejs 22.14.0 / elixir 1.19.5-otp-28 / erlang 28.5), joined into the cleanup findings range as finding 8. — Local .tool-versions diverged from the candidate branch in two dimensions (erlang patch version AND a missing nodejs pin entirely); every scripts/ci/*.mjs gate is a Node script and ci.yml pins Node 22, while the local shell runs Node 24 -- local and CI gate runs were on different Node majors.
+- [Phase 232-bounded-hygiene-release-handoff]: Re-cut integration/v1.62-candidate at a new SHA (c1397fe9, merge 3f42158d), proved lossless by a newly generalized --require-union-hunks check (447 inspected, 7 co-touched, 0 drifted). Maintainer checkpoint decision: since updating the published branch required a non-fast-forward (force-push, prohibited), pushed the re-cut to a NEW branch integration/v1.62-candidate-recut instead, leaving integration/v1.62-candidate untouched. — Option A (move the published branch) required a force-push the plan itself prohibits -- an internal plan contradiction for a fresh-supersession re-cut where the old tip is not an ancestor of the new tip. Option B resolves it without relaxing any prohibition; 232-10/232-11 must target integration/v1.62-candidate-recut, not integration/v1.62-candidate.
 
 ### Pending Todos
 
@@ -234,8 +236,8 @@ Active v1.59 clears the reopen rule through a concrete adopter requirement and e
 
 ## Session Continuity
 
-Last session: 2026-09-17T13:22:30.673Z
-Stopped at: Completed 232-08-PLAN.md
+Last session: 2026-09-17T14:12:48.755Z
+Stopped at: Completed 232-09-PLAN.md (re-cut published to integration/v1.62-candidate-recut per maintainer checkpoint decision)
 
 229-20 outcome (commits 024eaeca, ddd9a137, c6677152):
 
