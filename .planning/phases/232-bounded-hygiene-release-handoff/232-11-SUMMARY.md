@@ -69,7 +69,7 @@ coverage:
         status: pass
     human_judgment: false
   - id: D3
-    description: "Task 3 (checkpoint:decision): a reviewable integration pull request exists on szTheory/accrue, its live body is byte-identical to the committed 232-INTEGRATION-PR.md, and the body's own falsifiable claims each hold at the head it was opened from."
+    description: "Task 3 (checkpoint:decision): a reviewable integration pull request exists on szTheory/accrue, is open and unmerged against main, its live body is byte-identical to the committed 232-INTEGRATION-PR.md, that body satisfies the structural PR-body contract, and the published candidate tip only moved forward from the re-cut SHA. (Scope note: ref 3 establishes that the body carries falsifiable claims, not that each claim holds -- the claims themselves are evidenced by D1/D2 and by the phase's other coverage blocks.)"
     requirement: REL-04
     verification:
       - kind: other
