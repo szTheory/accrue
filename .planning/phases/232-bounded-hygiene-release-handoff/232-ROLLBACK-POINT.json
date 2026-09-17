@@ -1,68 +1,27 @@
 {
   "schema_version": 1,
-  "phase": "232-bounded-hygiene-release-handoff",
-  "plan": "232-09",
-  "task": "Task 1: rollback refs and live re-measurement, before any ref write",
-  "captured_at": "2026-09-17T13:33:38Z",
-  "note": "Pre-re-cut capture only. Task 3 (not executed in this dispatch) updates this record with the new candidate_object, parents, supersedes, toolchain_pin, and a finalized restore invocation once the actual re-cut merge commit exists. Every value below was re-measured live at capture time; none was transcribed from CONTEXT.md/RESEARCH.md per D-15/Pitfall-1.",
-  "rollback_refs": {
-    "rollback/232-pre-recut-milestone": {
-      "ref": "refs/heads/rollback/232-pre-recut-milestone",
-      "object": "47c75bfd9975063e6804fb636d9f5c3bf4d156bf",
-      "points_at": "gsd/milestone-v1.62-release-integration-hygiene tip at capture time"
-    },
-    "rollback/232-pre-recut-candidate": {
-      "ref": "refs/heads/rollback/232-pre-recut-candidate",
-      "object": "f524f2a6b16d3576829632ab6fa77d24b718e6f7",
-      "points_at": "integration/v1.62-candidate tip at capture time"
-    }
+  "candidate_ref": "refs/heads/integration/v1.62-candidate",
+  "candidate_object": "3f42158d5cd3ffb7134685ae2856074cf544e008",
+  "parents": {
+    "first_parent": "47c75bfd9975063e6804fb636d9f5c3bf4d156bf",
+    "second_parent": "d30fc25dbf6ba551792c66ff451b4b93c0af4bf1"
   },
-  "pre_recut_tips": {
-    "milestone": "47c75bfd9975063e6804fb636d9f5c3bf4d156bf",
-    "candidate": "f524f2a6b16d3576829632ab6fa77d24b718e6f7"
+  "pre_integration_refs": {
+    "refs/heads/gsd/milestone-v1.62-release-integration-hygiene": "47c75bfd9975063e6804fb636d9f5c3bf4d156bf",
+    "refs/remotes/origin/main": "d30fc25dbf6ba551792c66ff451b4b93c0af4bf1"
   },
-  "merge_base": "8a3bdd60e3cddc603dce2562e90a78e61b841c3b",
-  "changed_path_counts": {
-    "milestone_vs_merge_base": 112,
-    "candidate_vs_merge_base": 46
+  "expected_reverted_tree": "523dda45abd2cad38213941ccda8aa4a97474018",
+  "supersedes": {
+    "candidate_object": "f524f2a6b16d3576829632ab6fa77d24b718e6f7",
+    "artifact": "231-ROLLBACK-POINT.json",
+    "cause": "the superseded candidate (f524f2a6) predates this phase's re-cut, which reunifies the milestone line (now 108 commits past the 231-recorded milestone-at-cut, including two more co-touched paths -- .tool-versions and accrue_portal/mix.exs, per DRIFT-1) with the currently published release state (origin/main d30fc25d, 1.5.1) via a fresh merge-plus-two-cherry-pick construction that reproduces the exact shape 231-ROLLBACK-POINT.json records"
   },
-  "co_touched_paths": [
-    ".tool-versions",
-    "accrue_portal/mix.exs"
-  ],
-  "co_touched_detail": {
-    ".tool-versions": "both sides changed this path relative to the merge base (it did not exist at the merge base), but the resulting blobs are byte-identical on both sides (89a1cd643350da922e509950438aa73c4b57c350) -- a non-conflicting co-touch.",
-    "accrue_portal/mix.exs": "genuinely divergent: milestone changed line 79 only (accrue_dep operator == to ~>), candidate changed line 4 only (@version 1.4.0 to 1.5.1). git merge-tree auto-resolves both hunks into one file (verified below)."
-  },
-  "ancestry": {
-    "origin_main_object": "d30fc25dbf6ba551792c66ff451b4b93c0af4bf1",
-    "origin_main_is_ancestor_of_candidate": true,
-    "origin_main_is_ancestor_of_milestone_tip": false
-  },
-  "manifest_and_version_values": {
-    "milestone_tip": {
-      "release_please_manifest": { "accrue": "1.4.0", "accrue_admin": "1.4.0", "accrue_portal": "1.4.0" },
-      "accrue_mix_exs_version": "1.4.0",
-      "accrue_admin_mix_exs_version": "1.4.0",
-      "accrue_portal_mix_exs_version": "1.4.0"
-    },
-    "candidate_tip": {
-      "release_please_manifest": { "accrue": "1.5.1", "accrue_admin": "1.5.1", "accrue_portal": "1.5.1" },
-      "accrue_mix_exs_version": "1.5.1",
-      "accrue_admin_mix_exs_version": "1.5.1",
-      "accrue_portal_mix_exs_version": "1.5.1"
-    }
-  },
-  "write_tree_merge_probe": {
-    "command": ["git", "merge-tree", "--write-tree", "47c75bfd9975063e6804fb636d9f5c3bf4d156bf", "f524f2a6b16d3576829632ab6fa77d24b718e6f7"],
-    "exit_code": 0,
-    "result_tree": "93d2f3ec2f7f3787392190577db2b4b58b3d4ad4",
-    "verified_hunk_union_in_result_tree": {
-      "accrue_portal_mix_exs": "result contains both @version \"1.5.1\" (candidate hunk) and \"~> #{@version}\" (milestone hunk)",
-      "release_please_manifest_json": "result reads accrue=1.5.1, accrue_admin=1.5.1, accrue_portal=1.5.1"
-    }
+  "toolchain_pin": {
+    "path": ".tool-versions",
+    "sha256": "a3e578a5e22a66539e85d5961d42f76d2243f24e6b6f8c97ef7ac5ae5d7783d7",
+    "matches_superseded": true
   },
   "restore_argv": [
-    ["git", "update-ref", "refs/heads/integration/v1.62-candidate", "refs/heads/rollback/232-pre-recut-candidate"]
+    ["git", "revert", "-m", "1", "--no-edit", "3f42158d5cd3ffb7134685ae2856074cf544e008"]
   ]
 }

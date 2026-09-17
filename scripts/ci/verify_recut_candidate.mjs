@@ -78,7 +78,12 @@ export function validateRecutRecord(record) {
 
   fields(record.supersedes, new Set(["candidate_object", "artifact", "cause"]), "supersedes");
   fullSha(record.supersedes.candidate_object, "supersedes.candidate_object");
-  if (record.supersedes.artifact !== "230-ROLLBACK-POINT.json") fail("supersedes.artifact must equal 230-ROLLBACK-POINT.json");
+  // 232-09 Task 3: generalized from a hardcoded "230-ROLLBACK-POINT.json"
+  // literal (correct only for 231's own act of superseding 230) to a
+  // pattern any phase's own rollback-point artifact name matches -- the
+  // next re-cut (233+) supersedes 232's own artifact, not 230's or 231's,
+  // and a hardcoded literal here would wrongly reject a truthful value.
+  if (typeof record.supersedes.artifact !== "string" || !/^[0-9]+-ROLLBACK-POINT\.json$/.test(record.supersedes.artifact)) fail("supersedes.artifact must be a <phase-number>-ROLLBACK-POINT.json filename");
   nonEmptyString(record.supersedes.cause, "supersedes.cause");
 
   fields(record.toolchain_pin, new Set(["path", "sha256", "matches_superseded"]), "toolchain_pin");
@@ -490,6 +495,13 @@ export function verifyFixtures() {
     assert.throws(() => validateRecutRecord({ ...validRecord, parents: { first_parent: "bad", second_parent: fx.originMain } }), /full lowercase 40-hex/);
     assert.throws(() => validateRecutRecord({ ...validRecord, expected_reverted_tree: "bad" }), /full lowercase 40-hex/);
     assert.throws(() => validateRecutRecord({ ...validRecord, supersedes: { ...validRecord.supersedes, candidate_object: "bad" } }), /full lowercase 40-hex/);
+
+    // 232-09 Task 3: supersedes.artifact is a <phase-number>-ROLLBACK-POINT.json
+    // pattern, not a single hardcoded literal -- a later phase superseding a
+    // DIFFERENT phase's rollback point (e.g. 232 superseding 231's, not 230's)
+    // must be accepted, and a malformed filename must still be rejected.
+    validateRecutRecord({ ...structuredClone(validRecord), supersedes: { ...validRecord.supersedes, artifact: "231-ROLLBACK-POINT.json" } });
+    assert.throws(() => validateRecutRecord({ ...validRecord, supersedes: { ...validRecord.supersedes, artifact: "231-rollback-point.json" } }), /ROLLBACK-POINT\.json filename/);
   });
 
   // Scenario 3: --require-shape — rebase/squash (one parent) rejected, naming
