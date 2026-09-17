@@ -231,6 +231,23 @@ jobs:
           node --test scripts/ci/verify_window_dispositions.mjs &&
           node scripts/ci/verify_window_dispositions.mjs --fixtures --expected-repository szTheory/accrue --require-row-join --require-evidence-freshness --require-waiver-completeness --require-determinism
 
+      # Phase 232 (HYG-01, D-45..D-54): the pre-cleanup classification triad,
+      # hermetic only -- collector/renderer/verifier units and the
+      # verifier's own --fixtures negative-control battery. This step does
+      # NOT re-run the verifier against the committed 232-HYGIENE-
+      # DISPOSITIONS.{json,md} pair (unlike a live-repository check, that
+      # would fail on every future PR the instant any new untracked file,
+      # worktree, debug branch, or remote branch appears, since
+      # classification is a point-in-time record, not a standing invariant)
+      # -- it proves the triad's own logic, matching the window-dispositions
+      # step immediately above.
+      - name: Hygiene dispositions triad units and fixture contract (HYG-01)
+        run: >-
+          node --test scripts/ci/collect_hygiene_dispositions.mjs &&
+          node --test scripts/ci/render_hygiene_dispositions.mjs &&
+          node --test scripts/ci/verify_hygiene_dispositions.mjs &&
+          node scripts/ci/verify_hygiene_dispositions.mjs --fixtures --expected-repository szTheory/accrue --require-completeness --require-soundness --require-determinism
+
       # Phase 232: the ci_baseline triad existed since Phase 226 but was
       # never wired here, and two of its three files failed `node --test`
       # (D-34). Plan 232-03 fixed the guards and non-vacuity before this
