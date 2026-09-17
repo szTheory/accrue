@@ -103,6 +103,28 @@ jobs:
           node scripts/ci/verify_completion_evidence.mjs --fixtures --require-completion-evidence --require-table-agreement &&
           node scripts/ci/verify_completion_evidence.mjs --repo . --require-completion-evidence --require-table-agreement
 
+      # Quick task 260917-l7v (SL-A): the committed integration PR body is now
+      # a deterministic PROJECTION of a typed JSON claims sidecar, restoring
+      # the convention at scripts/ci/README.md line 29. CI evaluates typed
+      # scalars through a frozen evaluator table and never executes any string
+      # from a committed file; the byte-exact re-render join plus the mutual
+      # claim-id join make the two artifacts un-forgeable relative to each
+      # other. An unknown kind, a schema violation, an evaluator error, a
+      # timeout, or a measured-versus-asserted mismatch all FAIL -- there is no
+      # skip path, because a skip path is how the check this replaces went
+      # vacuous.
+      - name: PR claims contract (SL-A)
+        run: >-
+          node --test --test-reporter=tap scripts/ci/render_pr_claims.mjs &&
+          node --test --test-reporter=tap scripts/ci/verify_pr_claims.mjs &&
+          node scripts/ci/verify_pr_claims.mjs --fixtures --require-claims --require-render-join --require-no-pull-request-target &&
+          node scripts/ci/verify_pr_claims.mjs --repo .
+          --claims .planning/phases/232-bounded-hygiene-release-handoff/232-INTEGRATION-PR.json
+          --body .planning/phases/232-bounded-hygiene-release-handoff/232-INTEGRATION-PR.md
+          --expected-repository szTheory/accrue
+          --require-claims --require-render-join --require-no-pull-request-target
+          --min-executed 1
+
       - name: Set up BEAM for reference-scenario verification
         uses: erlef/setup-beam@v1
         with:
@@ -297,13 +319,19 @@ jobs:
       # contract that went red on every re-cut would be re-pointed reflexively
       # rather than read. Currency is the re-cut's own job (see the superseded-
       # target guard in verify_release_pr_readiness.sh).
+      #
+      # --require-falsifiability is GONE (quick task 260917-l7v, SL-A), not
+      # merely unset: it accepted any bullet containing a backtick, which is a
+      # punctuation check wearing the name of a truth check, and three false
+      # claims shipped through it. Claim truth is now measured by the
+      # "PR claims contract (SL-A)" step near the top of this job.
       - name: Integration PR body contract (REL-04)
         run: >-
           node --test scripts/ci/verify_pr_body_contract.mjs &&
           node scripts/ci/verify_pr_body_contract.mjs
           --body .planning/phases/232-bounded-hygiene-release-handoff/232-INTEGRATION-PR.md
           --expected-repository szTheory/accrue
-          --require-sections --require-density --require-falsifiability
+          --require-sections --require-density
 
       # Phase 232: the ci_baseline triad existed since Phase 226 but was
       # never wired here, and two of its three files failed `node --test`

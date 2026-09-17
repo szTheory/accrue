@@ -18,7 +18,8 @@
 Link `integration/v1.62-candidate-recut` to see how this got here; diff `review/v1.62-candidate-code-only` to see what source behavior changed -- the former is a merge-plus-cherry-picks reconstruction with no independent review value of its own, the latter is the code-only line worth reading line by line.
 
 - **Head branch:** `integration/v1.62-candidate-recut`.
-- **Evidence SHA:** `9b50ce6a080b684263de6c53d54e0726df077fa2` -- every CI result cited in this body was measured there. The PR head is that commit plus documentation-only merges carrying this body's own corrections and the phase's closing artifacts; `git diff --stat 9b50ce6a080b684263de6c53d54e0726df077fa2 HEAD` touches no file outside `.planning/` and `scripts/ci/verify_package_docs.sh`.
+- **Evidence SHA:** `9b50ce6a080b684263de6c53d54e0726df077fa2` -- every CI result cited in this body was measured there. The PR head is that commit plus later merges carrying this body's own corrections, the phase's closing artifacts, and two CI-script repairs.
+  CORRECTED 2026-09-17: an earlier revision of this line asserted that the delta since the evidence SHA touches no file outside `.planning/` and `scripts/ci/verify_package_docs.sh`. That is measurably no longer true -- `git diff --name-only 9b50ce6a080b684263de6c53d54e0726df077fa2 origin/integration/v1.62-candidate-recut` now reports two files outside `.planning/`: `scripts/ci/verify_package_docs.sh` and `scripts/ci/preserve_repository_state.sh`. The earlier form also wrote `HEAD`, which resolves differently for every reader; the remote-explicit form above does not.
   Phase 232's closing work reached this branch by ordinary non-force merges rather than a fresh re-cut, so the published tip only ever moved forward: `git merge-base --is-ancestor c1397fe9127a9b4b2b1d3a0758d57879b14f4604 9b50ce6a080b684263de6c53d54e0726df077fa2` exits 0.
 - **Known limit of the union proof below:** `verify_recut_candidate.mjs` proves the union at `c1397fe9`, the re-cut point, not at this head -- the two later merges are outside its window.
   What it does still cover is the whole published-release line; the delta it does not cover is milestone-line-only and readable directly: `git log --oneline c1397fe9127a9b4b2b1d3a0758d57879b14f4604..9b50ce6a080b684263de6c53d54e0726df077fa2`.
@@ -28,23 +29,27 @@ Link `integration/v1.62-candidate-recut` to see how this got here; diff `review/
 - The re-cut unions the milestone line with the published 1.5.1 release state, proved lossless by blob identity (single-touched paths) and hunk union (co-touched paths), never diffstat.
   Verify: `node scripts/ci/verify_recut_candidate.mjs --record .planning/phases/232-bounded-hygiene-release-handoff/232-ROLLBACK-POINT.json --expected-repository szTheory/accrue --require-shape --require-ancestry --require-revert-proof --require-toolchain --require-supersession --require-union-hunks` -- `inspected=447 co_touched=7 drifted=0`.
 - The declared 13-job merge-blocking cohort was re-derived live at the re-cut SHA `c1397fe9` and matched the previously-declared set with zero drift.
-  Every lane's disposition is fixed-and-proved or waived-with-owner-and-cause, never silently red; `.planning/WINDOWS.md` reports `open_count: 0`.
-- Release Please is proven ready to produce a version-and-changelog-consistent release PR by a side-effect-free dry run: 1.5.1 -> 1.6.0 lockstep across all three packages, 7 planned updates, zero truncation.
-  Archived at [`232-RELEASE-PR-DRYRUN.log`](https://github.com/szTheory/accrue/blob/gsd/milestone-v1.62-release-integration-hygiene/.planning/phases/232-bounded-hygiene-release-handoff/232-RELEASE-PR-DRYRUN.log); re-run with `bash scripts/ci/verify_release_pr_readiness.sh`.
-- The untracked-path/worktree/debug-session/remote-branch classification that gated this cleanup is committed and fails closed both ways (completeness and soundness).
-  It structurally cannot express deleting a remote branch -- every `remote_branch` row carries `retained` or `superseded`, never a deletion.
+- Every lane's disposition is fixed-and-proved or waived-with-owner-and-cause, never silently red -- the ship-window ledger records no open window. [claim:C1]
+  Verify: `grep -c -F -- "open_count: 0" .planning/WINDOWS.md` -> `1`.
+- Release Please is proven ready to produce a version-and-changelog-consistent release PR by a side-effect-free dry run: 1.5.1 -> 1.6.0 lockstep across all three packages, 7 planned updates, zero truncation. [claim:C2]
+  Verify: `shasum -a 256 .planning/phases/232-bounded-hygiene-release-handoff/232-RELEASE-PR-DRYRUN.log | cut -d' ' -f1` -> `89f7ed79969a1f9544711867db955cbb7b3162367baea8f818b57d17b1516da2`.
+  The archived log is pinned by content hash, so it cannot be quietly regenerated under the same name: [`232-RELEASE-PR-DRYRUN.log`](https://github.com/szTheory/accrue/blob/gsd/milestone-v1.62-release-integration-hygiene/.planning/phases/232-bounded-hygiene-release-handoff/232-RELEASE-PR-DRYRUN.log); re-run with `bash scripts/ci/verify_release_pr_readiness.sh`.
+- The untracked-path/worktree/debug-session/remote-branch classification that gated this cleanup is committed and fails closed both ways (completeness and soundness); it classifies eleven remote branches and structurally cannot express deleting any of them -- every `remote_branch` row carries `retained` or `superseded`, never a deletion. [claim:C3]
+  Verify: `grep -c -F -- "\"kind\": \"remote_branch\"" .planning/phases/232-bounded-hygiene-release-handoff/232-HYGIENE-DISPOSITIONS.json` -> `11`.
   Re-minted at the end of this phase so it also covers the re-cut branch the phase itself published: 25 rows, joined 1:1 against live repository state.
-  Verify: `node scripts/ci/verify_hygiene_dispositions.mjs --records .planning/phases/232-bounded-hygiene-release-handoff/232-HYGIENE-DISPOSITIONS.json --rendered .planning/phases/232-bounded-hygiene-release-handoff/232-HYGIENE-DISPOSITIONS.md --expected-repository szTheory/accrue --require-completeness --require-soundness --require-determinism` -- exits 0.
-- The bounded cleanup pass is command-backed and capped, never open-ended: 8 numbered findings across 2 passes, one commit per finding.
-  Verify: `python3 -c "import json; d=json.load(open('.planning/phases/232-bounded-hygiene-release-handoff/232-CLEANUP-FINDINGS.json')); print(len(d['rows']), d['passes_taken'])"` -> `8 2`.
-- Two known transitions, both recorded rather than silently flipped: the never-git-tracked `.tool-versions` is now tracked on this line.
-  Verify: `git ls-files -- .tool-versions`; and the degraded `phase-200` shadow directory is gone -- verify: `ls .planning/phases/200-idempotent-verification-sign-off` exits non-zero, leaving only the good, committed archive copy under `.planning/milestones/v1.54-phases/`.
+  Verify the join too: `node scripts/ci/verify_hygiene_dispositions.mjs --records .planning/phases/232-bounded-hygiene-release-handoff/232-HYGIENE-DISPOSITIONS.json --rendered .planning/phases/232-bounded-hygiene-release-handoff/232-HYGIENE-DISPOSITIONS.md --expected-repository szTheory/accrue --require-completeness --require-soundness --require-determinism` -- exits 0.
+- The bounded cleanup pass is command-backed and capped, never open-ended: eight numbered findings across two passes, one commit per finding. [claim:C4]
+  Verify: `grep -c -F -- "\"finding\":" .planning/phases/232-bounded-hygiene-release-handoff/232-CLEANUP-FINDINGS.json` -> `8`.
+- Known transition, recorded rather than silently flipped: the never-git-tracked `.tool-versions` is now tracked on this line. [claim:C5]
+  Verify: `git ls-files -- .tool-versions | wc -l` -> `1`.
+- Known transition, recorded rather than silently flipped: the degraded `phase-200` shadow directory is gone, leaving only the good committed archive copy under `.planning/milestones/v1.54-phases/`. [claim:C6]
+  Verify: `test -e .planning/phases/200-idempotent-verification-sign-off && echo true || echo false` -> `false`.
 
 ## Rollback
 
-One command, run on `main` immediately after this PR lands, against the merge commit GitHub creates: `git revert -m 1 --no-edit $(git rev-parse main)`.
+One command, run immediately after this PR lands, against the merge commit GitHub creates: `git fetch origin && git revert -m 1 --no-edit $(git rev-parse origin/main)`.
 That single revert is sufficient because the candidate reaches `main` through exactly one merge commit, whatever the branch's internal shape; reverting any one merge *inside* the branch is not sufficient and never was.
-Confirm that before trusting anything narrower: `git log --merges --oneline origin/main..integration/v1.62-candidate-recut` lists the branch's internal merges, and no single one of them is the whole change.
+Confirm that before trusting anything narrower: `git log --merges --oneline origin/main..origin/integration/v1.62-candidate-recut` lists the branch's internal merges, and no single one of them is the whole change.
 
 ## Scope
 
