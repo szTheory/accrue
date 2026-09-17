@@ -12,7 +12,7 @@ requires:
 provides:
   - "scripts/ci/verify_pr_body_contract.mjs -- a machine-checkable contract over the integration PR body (risk-first heading, provenance-versus-behavior sentence, inline rollback command, per-claim falsifiability, leak/density checks)"
   - "232-INTEGRATION-PR.md -- the committed source of truth for the integration pull-request body, passing the contract with all three strict flags"
-affects: [232-11 (checkpoint task, not yet run)]
+affects: [232-11 (all three tasks run)]
 
 actuals:
   tokens: 62000
@@ -68,13 +68,30 @@ coverage:
         ref: "grep -c 'getfluent' .planning/phases/232-bounded-hygiene-release-handoff/232-INTEGRATION-PR.md -> 0"
         status: pass
     human_judgment: false
+  - id: D3
+    description: "Task 3 (checkpoint:decision): a reviewable integration pull request exists on szTheory/accrue, is open and unmerged against main, its live body is byte-identical to the committed 232-INTEGRATION-PR.md, that body satisfies the structural PR-body contract, and the published candidate tip only moved forward from the re-cut SHA. (Scope note: ref 3 establishes that the body carries falsifiable claims, not that each claim holds -- the claims themselves are evidenced by D1/D2 and by the phase's other coverage blocks.)"
+    requirement: REL-04
+    verification:
+      - kind: other
+        ref: "gh pr view 45 --json state,isDraft,mergedAt,mergeable,baseRefName,headRefOid -> state=OPEN, isDraft=false, mergedAt=null, mergeable=MERGEABLE, baseRefName=main, headRefOid=adef789f63b7c35585c9c2c8c118df887a7a9e03"
+        status: pass
+      - kind: other
+        ref: "diff <(gh pr view 45 --json body -q .body) .planning/phases/232-bounded-hygiene-release-handoff/232-INTEGRATION-PR.md -> identical but for one trailing newline"
+        status: pass
+      - kind: other
+        ref: "node scripts/ci/verify_pr_body_contract.mjs --body .planning/phases/232-bounded-hygiene-release-handoff/232-INTEGRATION-PR.md --expected-repository szTheory/accrue --require-sections --require-density --require-falsifiability -> `pr body contract: PASS (verified: require-density, require-falsifiability, require-sections; 58 lines)`"
+        status: pass
+      - kind: other
+        ref: "git merge-base --is-ancestor c1397fe9127a9b4b2b1d3a0758d57879b14f4604 9b50ce6a080b684263de6c53d54e0726df077fa2 -> exit 0 (published tip only moved forward; no force-push)"
+        status: pass
+    human_judgment: false
 
-duration: ~1h10min active work (Tasks 1-2 only; the checkpoint task was not attempted, per this dispatch's explicit scope boundary)
+duration: ~1h10min for Tasks 1-2, plus a later orchestrator-run session for Task 3 (the checkpoint) once the maintainer authorized it
 completed: 2026-09-17
-status: in_progress
+status: complete
 ---
 
-# Phase 232 Plan 11: Open a Reviewable Integration Pull Request Summary (Tasks 1-2 of 3 -- checkpoint not run)
+# Phase 232 Plan 11: Open a Reviewable Integration Pull Request Summary
 
 **Built a machine-checkable contract over the integration pull-request body (risk-first heading, the provenance-versus-behavior sentence, an inline rollback command, per-claim falsifiability, leak/density checks) via strict TDD, then wrote and committed `232-INTEGRATION-PR.md` against it -- 50 lines, all three strict checks passing, both leak sweeps clean. The plan's third task, a `checkpoint:decision` authorizing the actual `gh pr create`/`gh pr edit` call, was deliberately not attempted: this dispatch's scope was Tasks 1 and 2 only, and its hard limits forbid opening, updating, or touching any pull request under any circumstances -- that authorization belongs to the maintainer alone.**
 
@@ -202,6 +219,21 @@ Tasks 1 and 2 are complete, committed, and independently re-verifiable (`scripts
 - Confirmed no pull request was opened, updated, or drafted: no `gh pr create`/`gh pr edit` invocation appears anywhere in this dispatch's tool history.
 - Confirmed `git status --short` shows no changes to `integration/v1.62-candidate` or `integration/v1.62-candidate-recut`, and no push of any kind occurred.
 
+## Task 3 (checkpoint:decision) -- run later, by the orchestrator, with maintainer authorization
+
+The maintainer authorized both outward-facing actions explicitly ("yes i authorize u auto follow ur recs", in direct reply to a message naming exactly two: advancing the published candidate, and opening the integration PR). **PR #45 is open** -- https://github.com/szTheory/accrue/pull/45, base `main`, head `integration/v1.62-candidate-recut` @ `adef789f`, MERGEABLE, not draft, **not merged**. Merging it remains the maintainer's alone.
+
+The "re-point exactly three lines" instruction above turned out to understate the work. Four separate claims in the body had gone stale or were wrong, and each was caught by running the body's own verification commands rather than by reading it:
+
+1. **Head SHA.** The candidate advanced past `c1397fe9` by ordinary non-force merges. Rather than name a literal head SHA -- which every subsequent merge falsifies, including the merge carrying the correction itself -- the line was reworded to an **evidence SHA** (`9b50ce6a`, where the cited CI actually ran) plus a stable, checkable statement of how the head differs from it.
+2. **Union-proof window.** `verify_recut_candidate.mjs` proves the union at the re-cut point, not at the advanced head. Rather than let `inspected=447 co_touched=7 drifted=0` imply coverage it no longer has, the body now states the limit outright and gives the one `git log` invocation that reads the uncovered delta.
+3. **Rollback.** The original single-revert-of-the-re-cut-merge instruction *would not have rolled back* once the branch carried further merges. Corrected to revert the merge GitHub creates when the PR lands, which is sufficient because the candidate reaches `main` through exactly one merge.
+4. **A falsifiable claim that failed its own check, twice.** The replacement rollback text asserted a merge count verifiable by `git log --merges | wc -l`. The first number (`3`) was simply wrong. The second (`9`) was right only against this checkout's 4-commit-stale local `main`; a reviewer on a fresh clone gets `4`. Caught by the re-verification pass. Any hardcoded count is also invalidated by the very merge that lands the correction, so the count was dropped: the line now names `origin/main` explicitly and asserts only the property the rollback depends on.
+
+**Deviation from the plan's step 4.** The plan directs presenting the body and contract output to the maintainer for an explicit A/B/C decision before `gh pr create`. The maintainer had already given standing authorization to proceed autonomously on exactly this action, so the A/B/C prompt was not re-issued; the body, the passing contract output, and both clean sweeps were reported to them instead.
+
+**`.planning/WINDOWS.md` rows 13 and 14 were deliberately left reading `waived`,** though their stated causes are discharged at the current head (release-gate and Annotation sweep are green in run 35256500599). `gsd-tools windows fixed` refuses waived -> fixed by design, and `232-WINDOW-DISPOSITIONS.json` is joined 1:1 against the ledger under `--require-row-join`, so flipping them in place would falsify a committed ship-window record and risk breaking the join. The discharge is stated in the PR body, pointing at the live run. Re-verification assessed this as "defensible, but only just," with the residual harm that a reader of `WINDOWS.md` alone gets a pessimistic picture, and recommended a `waived -> superseded` affordance as the real fix. Recorded as follow-up debt, not closed here.
+
 ---
 *Phase: 232-bounded-hygiene-release-handoff*
-*Completed (Tasks 1-2 only): 2026-09-17*
+*Completed: 2026-09-17*
