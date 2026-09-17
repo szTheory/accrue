@@ -25,9 +25,9 @@
 
 ### Bounded Hygiene
 
-- [ ] **HYG-01**: Every untracked file, stale worktree, debug session, and remote maintenance or release branch is classified as retained, committed, archived, superseded, or authorized for removal before cleanup occurs.
+- [x] **HYG-01**: Every untracked file, stale worktree, debug session, and remote maintenance or release branch is classified as retained, committed, archived, superseded, or authorized for removal before cleanup occurs.
 - [ ] **HYG-02**: GSD health, planning mirrors, generated artifacts, package metadata, changelogs, and release documentation agree with the integration candidate and contain no release-blocking drift.
-- [ ] **HYG-03**: Cleanup changes are limited to objective test, lint, compiler, security, documentation-truth, dead-code, duplication, or comprehension findings in the release path, and stop when another pass yields only subjective nits.
+- [x] **HYG-03**: Cleanup changes are limited to objective test, lint, compiler, security, documentation-truth, dead-code, duplication, or comprehension findings in the release path, and stop when another pass yields only subjective nits.
 
 ### Release Handoff
 
@@ -71,9 +71,9 @@ Roadmap phase ownership is populated during roadmap creation. Every v1.62 requir
 | GATE-01 | Phase 231 | Complete |
 | GATE-02 | Phase 231 | Complete |
 | GATE-03 | Phase 231 | Complete |
-| HYG-01 | Phase 232 | Pending |
+| HYG-01 | Phase 232 | Complete |
 | HYG-02 | Phase 232 | Pending |
-| HYG-03 | Phase 232 | Pending |
+| HYG-03 | Phase 232 | Complete |
 | REL-04 | Phase 232 | Pending |
 | REL-05 | Phase 232 | Complete |
 

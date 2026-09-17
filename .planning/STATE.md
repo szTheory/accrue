@@ -5,16 +5,16 @@ milestone_name: Release Integration & Repository Hygiene
 current_phase: 232
 current_phase_name: Bounded Hygiene & Release Handoff
 status: executing
-stopped_at: Completed 232-06-PLAN.md
-last_updated: "2026-09-16T21:15:34.514Z"
+stopped_at: Completed 232-08-PLAN.md
+last_updated: "2026-09-17T13:22:30.705Z"
 last_activity: 2026-09-16
 last_activity_desc: Phase 232 execution resumed (wave continue)
-state_head: f43b6581f8e8b0da97d0cb1443d89d4a037fca87
+state_head: 48d85152e20e88bcba54b51728669c8ca26e7521
 progress:
   total_phases: 4
   completed_phases: 3
   total_plans: 44
-  completed_plans: 39
+  completed_plans: 41
   percent: 75
 ---
 
@@ -31,7 +31,7 @@ See: `.planning/PROJECT.md` (updated 2026-09-15)
 ## Current Position
 
 Phase: 232 (Bounded Hygiene & Release Handoff) — EXECUTING
-Plan: 6 of 11
+Plan: 8 of 11
 Status: Ready to execute
 Last activity: 2026-09-16 — Phase 232 execution resumed (wave continue)
 
@@ -93,6 +93,7 @@ Progress: [████████░░] 75% (2/4 phases complete; 27/27 plans
 | Phase 232 P04 | ~40min | 3 tasks | 4 files |
 | Phase 232 P05 | ~45min | 3 tasks | 5 files |
 | Phase 232 P06 | ~35min | 3 tasks | 3 files |
+| Phase 232 P08 | ~140min | 3 tasks | 8 files |
 
 ## Accumulated Context
 
@@ -171,6 +172,7 @@ Progress: [████████░░] 75% (2/4 phases complete; 27/27 plans
 - [Phase 232]: [Phase 232]: 232-05: Targeted the readiness dry run at integration/v1.62-candidate, not main -- main is already fully released at 1.5.1 with zero pending commits today, so testing against it would produce a vacuous empty plan and make every count-based REL-05 assertion unsatisfiable; the candidate carries the real unreleased commits and reproduced 232-CONTEXT.md's D-35/D-36 measurements exactly (14 bullets, 1.6.0 lockstep, updates: 7).
 - [Phase 232]: [Phase 232]: 232-06: Placed the Parked-lane expiry trigger (D-26) in the BLOCKING admin-ui-ratchet-selftests job, not the parked job, because GitHub Actions job-level continue-on-error absorbs the whole job's conclusion regardless of any step's own setting -- there is no per-step override, matching the plan's own documented fallback.
 - [Phase 232]: [Phase 232]: 232-06: Ship-window row 11 uses kind unmet-truth (not unrun-verify/deviation) -- the ratchet lane's truth (a frozen, zero-open-findings ledger) is currently false, matching D-21's mandate that this lane's honest state is failed, never non_run/skipped/advisory.
+- [Phase 232]: Maintainer decision at 232-08's checkpoint: rewrite .tool-versions to match integration/v1.62-candidate byte-for-byte (nodejs 22.14.0 / elixir 1.19.5-otp-28 / erlang 28.5), joined into the cleanup findings range as finding 8. — Local .tool-versions diverged from the candidate branch in two dimensions (erlang patch version AND a missing nodejs pin entirely); every scripts/ci/*.mjs gate is a Node script and ci.yml pins Node 22, while the local shell runs Node 24 -- local and CI gate runs were on different Node majors.
 
 ### Pending Todos
 
@@ -232,8 +234,8 @@ Active v1.59 clears the reopen rule through a concrete adopter requirement and e
 
 ## Session Continuity
 
-Last session: 2026-09-16T21:15:34.487Z
-Stopped at: Completed 232-06-PLAN.md
+Last session: 2026-09-17T13:22:30.673Z
+Stopped at: Completed 232-08-PLAN.md
 
 229-20 outcome (commits 024eaeca, ddd9a137, c6677152):
 
