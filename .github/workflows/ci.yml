@@ -74,7 +74,12 @@ jobs:
     runs-on: ubuntu-24.04
 
     steps:
+      # Full history, not the default depth-1: the D-16 step below resolves a
+      # pinned candidate SHA that a shallow clone does not contain, and several
+      # later contracts walk ancestry rather than reading a recorded JSON.
       - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
 
       # Node is set up FIRST, ahead of setup-beam and `mix deps.get`, so the
       # cheap hermetic Node-only contract guards below can run in seconds
@@ -133,6 +138,19 @@ jobs:
           --expected-repository szTheory/accrue
           --require-claims --require-render-join --require-remote-refs --require-no-pull-request-target
           --min-executed 1
+
+      # Quick task 260917-l7v (SL-D): under `set -euo pipefail`, a `grep -q`/
+      # `-v` consumer exits at its first match, the producer dies of SIGPIPE,
+      # and pipefail silently inverts the pipeline's exit status -- exactly
+      # the shape hand-fixed twice in one session (`3f6791c7`, `7e9f45dc`)
+      # with nothing preventing a third. Bespoke, not shellcheck: shellcheck
+      # 0.11.0 reports nothing on this shape and the upstream rule is
+      # unreleased (see the script header for the full rationale).
+      - name: Pipefail/SIGPIPE grep idiom ban (SL-D)
+        run: >-
+          node --test --test-reporter=tap scripts/ci/verify_pipefail_grep_idiom.mjs &&
+          node scripts/ci/verify_pipefail_grep_idiom.mjs --fixtures --require-idiom-ban &&
+          node scripts/ci/verify_pipefail_grep_idiom.mjs --repo . --require-idiom-ban
 
       - name: Set up BEAM for reference-scenario verification
         uses: erlef/setup-beam@v1
