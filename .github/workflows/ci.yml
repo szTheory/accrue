@@ -10,11 +10,12 @@ name: CI
 # Merge-blocking on pull_request: `release-manifest-ssot`, `docs-contracts-shift-left`,
 # `release-gate`, `phase18-tax-gate`, `admin-drift-docs`, `admin-group-contracts`,
 # `admin-hardening-guardrails`, `admin-phase200-guardrails`,
-# `admin-ui-ratchet-selftests`.
+# `admin-ui-ratchet-selftests`, `host-integration`, `playwright-e2e`,
+# `host-docker-smoke`, `annotation-sweep`.
 # Non-blocking (job-level continue-on-error, disposition: parked; see .planning/WINDOWS.md
-# row 11): `admin-ui-ratchet-guardrails`.
-# `host-integration`, `playwright-e2e`, `host-docker-smoke`,
-# `annotation-sweep`.
+# row 11): `admin-ui-ratchet-guardrails`. It stays in `annotation-sweep`'s
+# `needs:` for ordering/annotation purposes only -- it is not part of the
+# merge-blocking required-job set above.
 # Mandatory periodic: `live-stripe` (Stripe test-mode parity) runs on
 # `workflow_dispatch`, `schedule`, and relevant main-branch repairs.
 
