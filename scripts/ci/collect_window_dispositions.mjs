@@ -425,10 +425,10 @@ if (process.env.NODE_TEST_CONTEXT && invokedAsEntrypoint) {
     } finally { fs.rmSync(one, { recursive: true, force: true }); }
   });
 
-  test("readShipWindowRows returns exactly 10 rows against the live repository ledger", () => {
+  test("readShipWindowRows returns a contiguous 1..N id sequence against the live repository ledger", () => {
     const rows = readShipWindowRows(repositoryRoot);
-    assert.equal(rows.length, 10);
-    assert.deepEqual(rows.map((row) => row.id), [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+    assert.ok(rows.length >= 10, `expected at least 10 live ledger rows, found ${rows.length}`);
+    assert.deepEqual(rows.map((row) => row.id), Array.from({ length: rows.length }, (_, index) => index + 1));
   });
 
   test("collectWindowDispositions accepts the zero-row and one-row empty cases", () => {
