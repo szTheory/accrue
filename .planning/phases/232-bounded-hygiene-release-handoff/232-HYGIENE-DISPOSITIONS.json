@@ -154,23 +154,23 @@
     {
       "kind": "untracked_path",
       "name": ".tool-versions",
-      "disposition": "committed",
-      "reason": "Re-verified 2026-09-16: `.tool-versions` is already git-tracked on `integration/v1.62-candidate` (committed by 230-05: nodejs 22.14.0, elixir 1.19.5-otp-28, erlang 28.5) and will become tracked on this branch once the 232 re-cut merges that line in. This REVERSES the prior never-git-tracked intent recorded elsewhere in the repository's history; recorded explicitly here (D-50) rather than letting it flip silently. Needs maintainer confirmation of the reversal.",
-      "supersedes_or_duplicates": "integration/v1.62-candidate:.tool-versions"
+      "disposition": "superseded",
+      "reason": "Acted on 2026-09-16 by plan 232-08 finding 3 (commit 45b26ba5f838984d1f642cd603d5e6837c276b77): now git-tracked on this branch, reversing the prior never-git-tracked intent (D-50). The untracked_path row this record described no longer exists as an untracked item -- it is superseded by the now-tracked file at the same path. Tracking reversal confirmed per this plan's checkpoint task.",
+      "supersedes_or_duplicates": "the now-tracked .tool-versions (commit 45b26ba5f838984d1f642cd603d5e6837c276b77)"
     },
     {
       "kind": "untracked_path",
       "name": "scripts/ci/stripe_test_fixtures.mjs",
-      "disposition": "committed",
-      "reason": "Re-verified 2026-09-16: not orphaned work. Tracked `scripts/ci/provider_proof_automation.mjs`'s RELEVANT_PATHS allowlist (line 15) names this exact filename in its scope regex, and `.github/workflows/ci.yml` invokes `provider_proof_automation.mjs` (lines 62, 1641) as part of the provider-proof automation, which references this script by name. The repository ships CI code referencing a file present in no tree; disposition is to commit it, not remove it.",
-      "supersedes_or_duplicates": "scripts/ci/provider_proof_automation.mjs (RELEVANT_PATHS allowlist)"
+      "disposition": "superseded",
+      "reason": "Acted on 2026-09-16 by plan 232-08 finding 1 (commit 70ea09b14237f3aa381825ab62ca9de5a32ec738): committed into the tree with the shared main_module.mjs guard applied and a real node:test registration added, per the tracked provider_proof_automation.mjs RELEVANT_PATHS allowlist that already named it. The untracked_path row this record described no longer exists as an untracked item -- it is superseded by the now-tracked, guard-covered file at the same path.",
+      "supersedes_or_duplicates": "the now-tracked scripts/ci/stripe_test_fixtures.mjs (commit 70ea09b14237f3aa381825ab62ca9de5a32ec738)"
     },
     {
       "kind": "untracked_path",
       "name": "scripts/ci/verify_stripe_test_fixtures.mjs",
-      "disposition": "committed",
-      "reason": "Re-verified 2026-09-16: same allowlist entry and CI invocation path as scripts/ci/stripe_test_fixtures.mjs -- provider_proof_automation.mjs's RELEVANT_PATHS regex (line 15) names this filename explicitly. Disposition is to commit it, not remove it.",
-      "supersedes_or_duplicates": "scripts/ci/provider_proof_automation.mjs (RELEVANT_PATHS allowlist)"
+      "disposition": "superseded",
+      "reason": "Acted on 2026-09-16 by plan 232-08 finding 1 (commit 70ea09b14237f3aa381825ab62ca9de5a32ec738): committed into the tree with the shared main_module.mjs guard applied (it previously had no entrypoint guard at all) and its four assertion cases registered as real node:test entries, per the tracked provider_proof_automation.mjs RELEVANT_PATHS allowlist that already named it. The untracked_path row this record described no longer exists as an untracked item -- it is superseded by the now-tracked, guard-covered file at the same path.",
+      "supersedes_or_duplicates": "the now-tracked scripts/ci/verify_stripe_test_fixtures.mjs (commit 70ea09b14237f3aa381825ab62ca9de5a32ec738)"
     },
     {
       "kind": "worktree",
