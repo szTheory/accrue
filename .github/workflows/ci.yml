@@ -231,6 +231,25 @@ jobs:
           node --test scripts/ci/verify_window_dispositions.mjs &&
           node scripts/ci/verify_window_dispositions.mjs --fixtures --expected-repository szTheory/accrue --require-row-join --require-evidence-freshness --require-waiver-completeness --require-determinism
 
+      # Phase 232 (D-16, D-17, plan 232-10): the step above only ever proves the
+      # verifier's own logic against synthetic --fixtures data -- --fixtures
+      # returns before --records/--rendered are ever read, so the documented
+      # "verify the committed window-disposition pair" invocation has never
+      # actually run in CI until this step. This one runs the real path: it
+      # reads the committed 232-WINDOW-DISPOSITIONS.json/.md pair and asserts,
+      # via --candidate, that the record's own candidate_object resolves to
+      # the literal 40-hex SHA below -- never the mutable integration branch
+      # name (see the comment above the D-29/D-01/D-09 steps: a step bound to
+      # a moving ref verifies a different tree on every run).
+      - name: Committed window dispositions at the pinned candidate SHA (D-16)
+        run: >-
+          node scripts/ci/verify_window_dispositions.mjs --repo .
+          --records .planning/phases/232-bounded-hygiene-release-handoff/232-WINDOW-DISPOSITIONS.json
+          --rendered .planning/phases/232-bounded-hygiene-release-handoff/232-WINDOW-DISPOSITIONS.md
+          --expected-repository szTheory/accrue
+          --candidate c1397fe9127a9b4b2b1d3a0758d57879b14f4604
+          --require-row-join --require-evidence-freshness --require-waiver-completeness --require-determinism
+
       # Phase 232 (HYG-01, D-45..D-54): the pre-cleanup classification triad,
       # hermetic only -- collector/renderer/verifier units and the
       # verifier's own --fixtures negative-control battery. This step does
