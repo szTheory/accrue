@@ -1,0 +1,519 @@
+#!/usr/bin/env node
+//
+// SL-G (quick task 260917-l7v): no generated artifact may derive a field from
+// an artifact that, in turn, checksums it.
+//
+// THE DEFECT THIS ENCODES. `232-UAT.md` used to derive its `started:` and
+// `updated:` front-matter fields from `232-VERIFICATION.md`'s `verified:`
+// field, while `232-VERIFICATION.md`'s `covered_digest` covers
+// `232-UAT.md`. That is a derivation CYCLE: every verifier run bumps
+// `verified:`, which rewrites the UAT, which re-stales the digest, which
+// requires another verifier run -- forever. The only fixed point reachable
+// under that shape was a hand-written digest, and it cost real time during
+// the phase-232 close. The cycle is broken at its source as part of this
+// same task: scripts/ci/verify_executable_uat_contract.mjs's
+// `renderAutomatedUat()` now sources `started:`/`updated:` from the phase's
+// own SUMMARY `completed:` dates instead of VERIFICATION's `verified:` --
+// those dates are written once when a plan finishes and do not change on a
+// later verification re-run, so regenerating the UAT artifact is a fixed
+// point. This file is the guard that proves it, and that catches the shape
+// again if it ever comes back.
+//
+// THREE CHECKS, in increasing strength:
+//
+// CHECK 1 -- CYCLE DETECTION (--require-acyclic). Builds a directed graph
+// over phase artifacts with two kinds of edge: a DERIVES edge (artifact A's
+// front matter takes a value from artifact B, declared by a machine-readable
+// `derived_from: <path>[#field]` key) and a COVERS edge (B's `covered_files`
+// lists A, alongside a `covered_digest`). Fails on any cycle, printing the
+// full edge list that closes it -- naming the specific edges is what makes a
+// cycle fixable rather than merely reported. No live artifact declares
+// `derived_from:` today (the fix above removed the only derivation this
+// task found); the fixtures below reproduce the exact pre-fix 232 shape as a
+// negative control.
+//
+// CHECK 2 -- FIXED POINT (--require-fixed-point). The weaker but
+// always-available property: regenerate each known generated artifact into a
+// scratch file and require its bytes to be identical to the committed file.
+// Any diff is a FAIL naming the first changed line. Normalizes nothing -- a
+// normalization step here would hide exactly the timestamp churn this exists
+// to catch. Only artifacts this file KNOWS how to regenerate are checked
+// (today: `*-UAT.md` files carrying `source: executable-summary-coverage`,
+// regenerated via verify_executable_uat_contract.mjs's `renderAutomatedUat`)
+// -- this is a deliberately narrow, documented registry, not a claim of
+// covering every renderer in this repository.
+//
+// CHECK 3 -- DIGEST TRUTH (--require-digest-match). Recomputes each
+// `covered_digest` from its declared `covered_files` set (sorted path order,
+// `sha256` over `path \0 bytes \0` per file, prefixed `v1:sha256:`) and
+// requires equality with the committed value. This is what makes a
+// hand-written digest fail, closing the escape hatch that was used to break
+// the cycle by hand before this task. A committed `covered_digest` goes
+// stale the moment ANY of its covered files changes after this guard is
+// wired in -- that is the check doing its job, not a bug; the remediation is
+// to recompute and commit the new value alongside the change that touched a
+// covered file.
+//
+// SCOPE. Default (no --phase) resolves the phase from .planning/STATE.md's
+// `current_phase:`, matching this repo's other current-phase-scoped tools --
+// NOT every phase in the repository. Recomputing every historical phase's
+// covered_digest is out of scope for this task and would touch dozens of
+// unrelated, already-closed phase directories; this guard only re-verifies
+// the phase actively being worked on.
+//
+// ANTI-VACUITY. Each of the three checks fails outright when it would
+// otherwise inspect zero items (zero edges, zero regenerable artifacts, zero
+// covered_digest artifacts) rather than silently reporting a pass. The PASS
+// line names artifacts inspected, edges built, regenerations compared, and
+// digests checked.
+
+import assert from "node:assert/strict";
+import crypto from "node:crypto";
+import fs from "node:fs";
+import os from "node:os";
+import path from "node:path";
+import { spawnSync } from "node:child_process";
+import test from "node:test";
+import { isMainModule } from "./main_module.mjs";
+import { renderAutomatedUat } from "./verify_executable_uat_contract.mjs";
+
+const fail = (message) => { throw new Error(`artifact fixed point: FAIL: ${message}`); };
+
+// -- frontmatter parsing (self-contained; mirrors the convention already
+// established in verify_executable_uat_contract.mjs) --------------------------
+
+function frontmatter(source, file) {
+  const match = source.match(/^---\n([\s\S]*?)\n---(?:\n|$)/);
+  if (!match) fail(`${file}: missing YAML frontmatter`);
+  return match[1];
+}
+
+function scalar(metadata, key) {
+  const match = metadata.match(new RegExp(`^${key}:\\s*["']?([^\\n"']+)["']?\\s*$`, "m"));
+  return match?.[1]?.trim();
+}
+
+function listField(metadata, key) {
+  const lines = metadata.split("\n");
+  const start = lines.findIndex((line) => line === `${key}:`);
+  if (start === -1) return [];
+  const items = [];
+  for (const line of lines.slice(start + 1)) {
+    const match = line.match(/^\s+-\s*["']?([^"'\n]+)["']?\s*$/);
+    if (!match) break;
+    items.push(match[1].trim());
+  }
+  return items;
+}
+
+// -- pure graph construction and cycle detection -------------------------------
+
+export function scanArtifact(relativePath, source) {
+  const metadata = frontmatter(source, relativePath);
+  return {
+    relativePath,
+    derivedFrom: scalar(metadata, "derived_from"),
+    coveredFiles: listField(metadata, "covered_files"),
+    coveredDigest: scalar(metadata, "covered_digest")
+  };
+}
+
+export function buildEdges(artifacts) {
+  const edges = [];
+  for (const artifact of artifacts) {
+    if (artifact.derivedFrom) {
+      const [target] = artifact.derivedFrom.split("#");
+      edges.push({ from: artifact.relativePath, to: target.trim(), kind: "DERIVES", label: artifact.derivedFrom });
+    }
+    for (const covered of artifact.coveredFiles) {
+      edges.push({ from: artifact.relativePath, to: covered, kind: "COVERS" });
+    }
+  }
+  return edges;
+}
+
+// Colour-marking DFS over the directed edge list; returns the edge sequence
+// closing the first cycle found, or null. A self-loop (an artifact whose own
+// covered_files or derived_from names itself) is a length-1 cycle and is
+// caught by the same mechanism.
+export function findCycle(edges) {
+  const adjacency = new Map();
+  const nodes = new Set();
+  for (const edge of edges) {
+    if (!adjacency.has(edge.from)) adjacency.set(edge.from, []);
+    adjacency.get(edge.from).push(edge);
+    nodes.add(edge.from);
+    nodes.add(edge.to);
+  }
+
+  const state = new Map(); // undefined = unvisited, 1 = visiting, 2 = done
+  const pathStack = [];
+
+  function dfs(node) {
+    state.set(node, 1);
+    for (const edge of adjacency.get(node) || []) {
+      pathStack.push(edge);
+      const nextState = state.get(edge.to);
+      if (nextState === 1) {
+        const cycleStart = pathStack.findIndex((candidate) => candidate.from === edge.to);
+        return pathStack.slice(cycleStart === -1 ? 0 : cycleStart);
+      }
+      if (nextState !== 2) {
+        const found = dfs(edge.to);
+        if (found) return found;
+      }
+      pathStack.pop();
+    }
+    state.set(node, 2);
+    return null;
+  }
+
+  for (const node of nodes) {
+    if (state.get(node) === undefined) {
+      const found = dfs(node);
+      if (found) return found;
+    }
+  }
+  return null;
+}
+
+export function assertAcyclic(edges) {
+  if (!Array.isArray(edges) || edges.length === 0) {
+    fail("zero artifact pairs discovered -- refusing to report a pass over zero inspected edges");
+  }
+  const cycle = findCycle(edges);
+  if (cycle) {
+    const named = cycle.map((edge) => `${edge.from} --${edge.kind}--> ${edge.to}`).join("; ");
+    fail(`derivation cycle detected: ${named}`);
+  }
+  return edges.length;
+}
+
+// -- CHECK 2: fixed point --------------------------------------------------------
+
+function firstDiffLine(committed, regenerated) {
+  const committedLines = committed.split("\n");
+  const regeneratedLines = regenerated.split("\n");
+  const max = Math.max(committedLines.length, regeneratedLines.length);
+  for (let index = 0; index < max; index += 1) {
+    if (committedLines[index] !== regeneratedLines[index]) {
+      return { line: index + 1, before: committedLines[index] ?? "<missing>", after: regeneratedLines[index] ?? "<missing>" };
+    }
+  }
+  return null;
+}
+
+export function assertFixedPoint(pairs) {
+  if (!Array.isArray(pairs) || pairs.length === 0) {
+    fail("zero generated artifacts discovered -- refusing to report a pass over zero regenerations");
+  }
+  for (const pair of pairs) {
+    if (pair.committedContent !== pair.regeneratedContent) {
+      const diff = firstDiffLine(pair.committedContent, pair.regeneratedContent);
+      fail(
+        `${pair.relativePath}: regeneration is not a byte-level no-op -- first changed field at line ${diff.line}: ` +
+        `"${diff.before}" -> "${diff.after}"`
+      );
+    }
+  }
+  return pairs.length;
+}
+
+// -- CHECK 3: digest truth -------------------------------------------------------
+
+export function computeDigest(repo, coveredFiles) {
+  if (!Array.isArray(coveredFiles) || coveredFiles.length === 0) {
+    fail("covered_files is empty -- refusing to compute a digest over zero files");
+  }
+  const hash = crypto.createHash("sha256");
+  for (const relativePath of [...coveredFiles].sort()) {
+    const absolute = path.join(repo, relativePath);
+    if (!fs.existsSync(absolute)) fail(`covered file missing on disk: ${relativePath}`);
+    hash.update(Buffer.from(relativePath, "utf8"));
+    hash.update(Buffer.from([0]));
+    hash.update(fs.readFileSync(absolute));
+    hash.update(Buffer.from([0]));
+  }
+  return `v1:sha256:${hash.digest("hex")}`;
+}
+
+export function assertDigestMatch(repo, verificationArtifacts) {
+  if (!Array.isArray(verificationArtifacts) || verificationArtifacts.length === 0) {
+    fail("zero covered_digest artifacts discovered -- refusing to report a pass over zero inspected digests");
+  }
+  for (const artifact of verificationArtifacts) {
+    const fresh = computeDigest(repo, artifact.coveredFiles);
+    if (fresh !== artifact.coveredDigest) {
+      fail(
+        `${artifact.relativePath}: covered_digest mismatch over ${artifact.coveredFiles.length} covered files -- ` +
+        `committed "${artifact.coveredDigest}", recomputed "${fresh}"`
+      );
+    }
+  }
+  return verificationArtifacts.length;
+}
+
+// -- repo-level enumeration, scoped to the current phase -----------------------
+
+function git(repo, args) {
+  const result = spawnSync("git", ["-C", repo, "--no-optional-locks", ...args], { encoding: "utf8", shell: false, timeout: 20000, maxBuffer: 5_000_000 });
+  if (result.error || result.status !== 0) fail(`git ${args[0]} failed: ${(result.stderr || result.error?.message || "unknown error").trim().slice(0, 400)}`);
+  return result.stdout;
+}
+
+function readStateCurrentPhase(repo) {
+  const source = fs.readFileSync(path.join(repo, ".planning", "STATE.md"), "utf8");
+  const metadata = frontmatter(source, ".planning/STATE.md");
+  const phase = scalar(metadata, "current_phase");
+  if (!phase) fail(".planning/STATE.md: current_phase is missing");
+  return phase;
+}
+
+function resolveActivePhaseDir(repo, phase) {
+  const activeRoot = path.join(repo, ".planning", "phases");
+  const entries = fs.readdirSync(activeRoot, { withFileTypes: true }).filter((entry) => entry.isDirectory());
+  const match = entries.find((entry) => entry.name === phase || entry.name.startsWith(`${phase}-`));
+  if (!match) fail(`phase ${phase}: no active phase directory found under ${activeRoot}`);
+  return { name: match.name, absolute: path.join(activeRoot, match.name) };
+}
+
+function liveArtifactFiles(repo, phase) {
+  const { name } = resolveActivePhaseDir(repo, phase);
+  const tracked = git(repo, ["ls-files", `.planning/phases/${name}/*`]).split("\n").filter(Boolean);
+  return tracked.filter((file) => /-VERIFICATION\.md$|-UAT\.md$/.test(file)).sort();
+}
+
+function loadArtifacts(repo, files) {
+  return files.map((relativePath) => scanArtifact(relativePath, fs.readFileSync(path.join(repo, relativePath), "utf8")));
+}
+
+export function liveEdges(repo, phase) {
+  return buildEdges(loadArtifacts(repo, liveArtifactFiles(repo, phase)));
+}
+
+export function liveVerificationArtifacts(repo, phase) {
+  const files = liveArtifactFiles(repo, phase).filter((file) => /-VERIFICATION\.md$/.test(file));
+  return loadArtifacts(repo, files).filter((artifact) => artifact.coveredDigest && artifact.coveredFiles.length > 0);
+}
+
+// The narrow, documented generator registry (see header CHECK 2): only
+// `*-UAT.md` files carrying the executable-summary-coverage marker are known
+// generated artifacts today.
+export function liveGeneratedUatPairs(repo, phase) {
+  const { absolute: phaseDir } = resolveActivePhaseDir(repo, phase);
+  const uatFiles = liveArtifactFiles(repo, phase).filter((file) => /-UAT\.md$/.test(file));
+  const generated = uatFiles.filter((relativePath) =>
+    /^source:\s*executable-summary-coverage\s*$/m.test(fs.readFileSync(path.join(repo, relativePath), "utf8"))
+  );
+  if (generated.length === 0) return [];
+  const scratch = fs.mkdtempSync(path.join(fs.realpathSync(os.tmpdir()), "gsd-artifact-fixed-point-"));
+  try {
+    return generated.map((relativePath) => {
+      const committedContent = fs.readFileSync(path.join(repo, relativePath), "utf8");
+      const regeneratedContent = renderAutomatedUat(phaseDir);
+      const scratchFile = path.join(scratch, path.basename(relativePath));
+      fs.writeFileSync(scratchFile, regeneratedContent);
+      return { relativePath, committedContent, regeneratedContent: fs.readFileSync(scratchFile, "utf8") };
+    });
+  } finally {
+    fs.rmSync(scratch, { recursive: true, force: true });
+  }
+}
+
+// -- fixtures ------------------------------------------------------------------
+
+function withScratch(fn) {
+  const dir = fs.mkdtempSync(path.join(fs.realpathSync(os.tmpdir()), "gsd-artifact-fixed-point-fixture-"));
+  try {
+    return fn(dir);
+  } finally {
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
+}
+
+const SCENARIOS = [
+  [
+    "a fixture pair where A's front matter derives from B, and B's covered_digest covers A, fails -- naming both artifacts and the two edges that close the cycle (the exact pre-fix 232-UAT.md / 232-VERIFICATION.md shape)",
+    () => {
+      const artifacts = [
+        scanArtifact("fixtures/A-UAT.md", '---\nstatus: complete\nderived_from: "fixtures/B-VERIFICATION.md#verified"\n---\n'),
+        scanArtifact("fixtures/B-VERIFICATION.md", '---\ncovered_files:\n  - "fixtures/A-UAT.md"\ncovered_digest: "v1:sha256:deadbeef"\n---\n')
+      ];
+      assert.throws(
+        () => assertAcyclic(buildEdges(artifacts)),
+        /fixtures\/A-UAT\.md --DERIVES--> fixtures\/B-VERIFICATION\.md.*fixtures\/B-VERIFICATION\.md --COVERS--> fixtures\/A-UAT\.md/s
+      );
+    }
+  ],
+  [
+    "a fixture pair at a non-fixed point (regenerating A changes A's bytes) fails, naming the changed field",
+    () => {
+      const pairs = [{
+        relativePath: "fixtures/A-UAT.md",
+        committedContent: "---\nupdated: 2026-01-01\nfoo: bar\n---\n",
+        regeneratedContent: "---\nupdated: 2026-01-02\nfoo: bar\n---\n"
+      }];
+      assert.throws(
+        () => assertFixedPoint(pairs),
+        /fixtures\/A-UAT\.md.*not a byte-level no-op.*updated: 2026-01-01.*updated: 2026-01-02/s
+      );
+    }
+  ],
+  [
+    "a fixture whose covered_digest does not match a freshly computed digest of its covered set fails",
+    () => {
+      withScratch((dir) => {
+        fs.writeFileSync(path.join(dir, "covered.txt"), "hello\n");
+        const artifact = {
+          relativePath: "fixtures/V.md",
+          coveredFiles: ["covered.txt"],
+          coveredDigest: "v1:sha256:0000000000000000000000000000000000000000000000000000000000000000"
+        };
+        assert.throws(() => assertDigestMatch(dir, [artifact]), /fixtures\/V\.md.*covered_digest mismatch/s);
+      });
+    }
+  ],
+  [
+    "a run inspecting zero artifact pairs fails rather than reporting a pass (acyclic)",
+    () => {
+      assert.throws(() => assertAcyclic([]), /zero artifact pairs discovered/);
+    }
+  ],
+  [
+    "a run regenerating zero generated artifacts fails rather than reporting a pass (fixed-point)",
+    () => {
+      assert.throws(() => assertFixedPoint([]), /zero generated artifacts discovered/);
+    }
+  ],
+  [
+    "a run inspecting zero covered_digest artifacts fails rather than reporting a pass (digest-match)",
+    () => {
+      assert.throws(() => assertDigestMatch(process.cwd(), []), /zero covered_digest artifacts discovered/);
+    }
+  ],
+  [
+    "a pair where A's derived fields come only from sources OUTSIDE B's covered set passes",
+    () => {
+      const artifacts = [
+        scanArtifact("fixtures/A.md", '---\nderived_from: "fixtures/C.md#value"\n---\n'),
+        scanArtifact("fixtures/B.md", '---\ncovered_files:\n  - "fixtures/A.md"\ncovered_digest: "v1:sha256:xyz"\n---\n'),
+        scanArtifact("fixtures/C.md", '---\nvalue: 1\n---\n')
+      ];
+      assert.doesNotThrow(() => assertAcyclic(buildEdges(artifacts)));
+    }
+  ],
+  [
+    "a pair at a fixed point -- regenerating A is a byte-level no-op -- passes",
+    () => {
+      const content = "---\nstarted: 2026-01-01\nupdated: 2026-01-02\n---\n";
+      assert.doesNotThrow(() => assertFixedPoint([{ relativePath: "fixtures/A.md", committedContent: content, regeneratedContent: content }]));
+    }
+  ],
+  [
+    "a covered_digest matching a freshly computed digest over real files on disk passes",
+    () => {
+      withScratch((dir) => {
+        fs.writeFileSync(path.join(dir, "covered.txt"), "hello\n");
+        const digest = computeDigest(dir, ["covered.txt"]);
+        assert.doesNotThrow(() => assertDigestMatch(dir, [{ relativePath: "fixtures/V.md", coveredFiles: ["covered.txt"], coveredDigest: digest }]));
+      });
+    }
+  ],
+  [
+    "the live 232-UAT.md / 232-VERIFICATION.md pair passes all three checks after the cycle is broken at its source",
+    () => {
+      const repo = path.resolve(process.cwd());
+      const phase = "232";
+      const edges = liveEdges(repo, phase);
+      assert.ok(edges.length > 0, "expected covered_files edges to be discovered for phase 232");
+      assert.doesNotThrow(() => assertAcyclic(edges));
+      const pairs = liveGeneratedUatPairs(repo, phase);
+      assert.ok(pairs.length > 0, "expected at least one generated UAT artifact for phase 232");
+      assert.doesNotThrow(() => assertFixedPoint(pairs));
+      const verificationArtifacts = liveVerificationArtifacts(repo, phase);
+      assert.ok(verificationArtifacts.length > 0, "expected at least one covered_digest artifact for phase 232");
+      assert.doesNotThrow(() => assertDigestMatch(repo, verificationArtifacts));
+    }
+  ]
+];
+
+export function verifyFixtures() {
+  for (const [, scenario] of SCENARIOS) scenario();
+  return SCENARIOS.length;
+}
+
+// -- entrypoint ------------------------------------------------------------------
+
+const BOOLEAN_FLAGS = new Set(["fixtures", "require-acyclic", "require-fixed-point", "require-digest-match"]);
+const VALUE_OPTIONS = new Set(["repo", "phase"]);
+
+function options(argv) {
+  const flags = new Set(); const values = {};
+  for (let index = 0; index < argv.length; index += 1) {
+    const token = argv[index]; if (!token.startsWith("--")) fail(`unexpected argument: ${token}`);
+    const key = token.slice(2);
+    if (BOOLEAN_FLAGS.has(key)) { flags.add(key); continue; }
+    if (!VALUE_OPTIONS.has(key)) fail(`unknown option: --${key}`);
+    if (index + 1 >= argv.length || argv[index + 1].startsWith("--")) fail(`--${key} requires a value`);
+    values[key] = argv[++index];
+  }
+  return { flags, values };
+}
+
+function main() {
+  const parsed = options(process.argv.slice(2));
+  const requestedStrictFlags = [...BOOLEAN_FLAGS].filter((flag) => flag !== "fixtures" && parsed.flags.has(flag)).sort();
+
+  if (parsed.flags.has("fixtures")) {
+    const count = verifyFixtures();
+    const suffix = requestedStrictFlags.length
+      ? ` (fixtures: ${requestedStrictFlags.join(", ")}; ${count} scenarios)`
+      : ` (fixtures: no strict flags requested; ${count} scenarios)`;
+    console.log(`artifact fixed point: PASS${suffix}`);
+    return;
+  }
+
+  // path.resolve, not a bare fallback to process.cwd(): a relative --repo
+  // (e.g. the literal "--repo ." this guard is wired with in ci.yml) breaks
+  // verify_executable_uat_contract.mjs's archiveAwareVerificationRef, whose
+  // archive-vs-active resolution depends on finding a leading "/.planning/"
+  // in the phaseDir string it is handed -- a relative phaseDir silently
+  // short-circuits that resolution and leaves a stale, unresolved ref in
+  // place instead of throwing, which is exactly the kind of silent-pass this
+  // guard exists to catch. Always hand renderAutomatedUat an absolute path.
+  const repo = path.resolve(parsed.values.repo || process.cwd());
+  const phase = parsed.values.phase || readStateCurrentPhase(repo);
+
+  const files = liveArtifactFiles(repo, phase);
+  if (files.length === 0) fail(`phase ${phase}: zero artifacts discovered -- refusing to report a pass over zero inspected artifacts`);
+
+  let edgesBuilt = 0, regenerationsCompared = 0, digestsChecked = 0;
+  if (parsed.flags.has("require-acyclic")) edgesBuilt = assertAcyclic(liveEdges(repo, phase));
+  if (parsed.flags.has("require-fixed-point")) regenerationsCompared = assertFixedPoint(liveGeneratedUatPairs(repo, phase));
+  if (parsed.flags.has("require-digest-match")) digestsChecked = assertDigestMatch(repo, liveVerificationArtifacts(repo, phase));
+
+  const suffix = requestedStrictFlags.length
+    ? ` (verified: ${requestedStrictFlags.join(", ")}; phase ${phase}, artifacts: ${files.length}, edges: ${edgesBuilt}, regenerations compared: ${regenerationsCompared}, digests checked: ${digestsChecked})`
+    : ` (schema-only: no strict flags supplied; phase ${phase}, ${files.length} artifacts)`;
+  console.log(`artifact fixed point: PASS${suffix}`);
+}
+
+// D-29: isMainModule() throws (never returns a silent false) when there is no
+// invoking entrypoint; caught here and treated as "not the entrypoint" so a
+// bare import stays side-effect-free (established pattern, 232-01).
+let invokedAsEntrypoint = false;
+try {
+  invokedAsEntrypoint = isMainModule(import.meta.url);
+} catch {
+  invokedAsEntrypoint = false;
+}
+if (invokedAsEntrypoint && process.env.NODE_TEST_CONTEXT) {
+  for (const [name, scenario] of SCENARIOS) test(name, scenario);
+} else if (invokedAsEntrypoint) {
+  try {
+    main();
+  } catch (error) {
+    console.error(error.message.startsWith("artifact fixed point:") ? error.message : `artifact fixed point: FAIL: ${error.message}`);
+    process.exitCode = 1;
+  }
+}

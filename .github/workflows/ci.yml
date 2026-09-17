@@ -152,6 +152,23 @@ jobs:
           node scripts/ci/verify_pipefail_grep_idiom.mjs --fixtures --require-idiom-ban &&
           node scripts/ci/verify_pipefail_grep_idiom.mjs --repo . --require-idiom-ban
 
+      # Quick task 260917-l7v (SL-G): 232-UAT.md's started:/updated: used to
+      # be derived from 232-VERIFICATION.md's verified: field, while
+      # VERIFICATION's covered_digest covers the UAT artifact -- a
+      # DERIVES-then-COVERS cycle where every verifier run re-staled the
+      # digest it had just satisfied. The cycle is broken at its source
+      # (verify_executable_uat_contract.mjs now derives those timestamps from
+      # the phase's own SUMMARY completed: dates), and this guard proves it:
+      # cycle detection over declared derived_from:/covered_files: edges,
+      # byte-level regeneration fixed-point, and covered_digest truth against
+      # the actual covered files -- closing the hand-written-digest escape
+      # hatch that broke the cycle by hand before this task.
+      - name: Artifact fixed-point and derivation-cycle guard (SL-G)
+        run: >-
+          node --test --test-reporter=tap scripts/ci/verify_artifact_fixed_point.mjs &&
+          node scripts/ci/verify_artifact_fixed_point.mjs --fixtures --require-acyclic --require-fixed-point --require-digest-match &&
+          node scripts/ci/verify_artifact_fixed_point.mjs --repo . --require-acyclic --require-fixed-point --require-digest-match
+
       - name: Set up BEAM for reference-scenario verification
         uses: erlef/setup-beam@v1
         with:

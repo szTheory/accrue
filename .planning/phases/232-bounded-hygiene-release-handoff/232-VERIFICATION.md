@@ -56,7 +56,14 @@ covered_files:
   - "scripts/ci/verify_phase230_archive_invariants.mjs"
   - "scripts/ci/verify_pr_body_contract.mjs"
   - "scripts/ci/verify_release_pr_readiness.sh"
-covered_digest: "v1:sha256:0a8d3dcf5c641e9f5763101fd4e1cb03c0a4a11f7cdcbf99b8665dc14c6d7474"
+covered_digest: "v1:sha256:40f60e4bfeb2914e349fc9a304470b6c9dff54f428a720b7760812f11f440aa8"
+# SL-G (quick task 260917-l7v): re-measured via scripts/ci/verify_artifact_fixed_point.mjs's
+# computeDigest() -- sha256 over `path \0 bytes \0` per covered_files entry, sorted path
+# order, prefixed v1:sha256: -- after this task's own edits to .github/workflows/ci.yml and
+# 232-UAT.md (regenerated: started:/updated: now derive from SUMMARY completed: dates, not
+# this file's own verified: field, which is what broke the DERIVES-then-COVERS cycle this
+# digest used to close by hand). Recompute and commit this value whenever any covered_files
+# entry's bytes change -- the guard's --require-digest-match check enforces it.
 behavior_unverified: 0
 overrides_applied: 0
 re_verification:
