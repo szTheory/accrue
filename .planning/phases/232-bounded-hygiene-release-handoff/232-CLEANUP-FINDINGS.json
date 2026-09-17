@@ -1,0 +1,10 @@
+{
+  "schema_version": 1,
+  "repository": "szTheory/accrue",
+  "cleanup_range": {
+    "from": "e4bbe18b740f3f43a21d563601abbe7e5b9a4d7d",
+    "to": null
+  },
+  "passes_taken": null,
+  "rows": []
+}

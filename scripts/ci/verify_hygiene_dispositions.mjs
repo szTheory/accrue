@@ -24,6 +24,131 @@ import {
 import { renderHygieneDispositions } from "./render_hygiene_dispositions.mjs";
 import { resolvePhaseEvidencePath, repositoryRoot } from "./phase_evidence_path.mjs";
 
+// D-58: the closed objectivity-category vocabulary the requirement names.
+// "comprehension" additionally requires a pointer to the failing
+// documentation-truth or contract check it directly caused -- it has no
+// command of its own, so it is the category that swallows cleanup passes
+// unless bounded structurally (D-56).
+export const CLEANUP_FINDING_CATEGORIES = new Set([
+  "test", "lint", "compiler", "security", "documentation-truth",
+  "dead-code", "duplication", "comprehension"
+]);
+export const CLEANUP_FINDING_FIELDS = new Set([
+  "finding", "command", "before_exit_code", "after_exit_code", "commit", "category", "comprehension_pointer"
+]);
+export const CLEANUP_FINDINGS_RECORD_FIELDS = new Set(["schema_version", "repository", "cleanup_range", "passes_taken", "rows"]);
+const FULL_SHA = /^[a-f0-9]{40}$/;
+
+function exitCode(value, label) {
+  if (!Number.isInteger(value) || value < 0 || value > 255) fail(`${label} must be a recorded process exit code`);
+  return value;
+}
+
+// D-55/D-58: a finding row is the machine-checkable encoding of "<named
+// command> currently exits non-zero; after this change it exits 0." A row
+// whose before exit code is zero cannot be asserting that -- reject it by
+// name (Task 1 behavior 2).
+export function validateCleanupFindingRow(row, label) {
+  if (!row || Array.isArray(row) || typeof row !== "object") fail(`${label} must be an object`);
+  for (const key of Object.keys(row)) if (!CLEANUP_FINDING_FIELDS.has(key)) fail(`${label} contains forbidden field: ${key}`);
+  for (const key of ["finding", "command", "before_exit_code", "after_exit_code", "commit", "category"]) {
+    if (!Object.hasOwn(row, key)) fail(`${label} is missing required field: ${key}`);
+  }
+  if (!Number.isInteger(row.finding) || row.finding < 1) fail(`${label}.finding must be a positive integer`);
+  if (typeof row.command !== "string" || !row.command.trim()) fail(`${label}.command must be a non-empty command string`);
+  exitCode(row.before_exit_code, `${label}.before_exit_code`);
+  if (row.before_exit_code === 0) fail(`${label}.before_exit_code is zero -- a finding must name a command that was actually failing`);
+  exitCode(row.after_exit_code, `${label}.after_exit_code`);
+  if (row.after_exit_code !== 0) fail(`${label}.after_exit_code must be exactly 0`);
+  if (typeof row.commit !== "string" || !FULL_SHA.test(row.commit)) fail(`${label}.commit must be a full lowercase SHA`);
+  if (typeof row.category !== "string" || !CLEANUP_FINDING_CATEGORIES.has(row.category)) {
+    fail(`${label}.category must be one of the closed objectivity-category enumeration, got: ${row.category}`);
+  }
+  if (row.category === "comprehension") {
+    if (typeof row.comprehension_pointer !== "string" || !row.comprehension_pointer.trim()) {
+      fail(`${label} category "comprehension" requires a non-empty comprehension_pointer naming the failing documentation-truth or contract check it directly caused`);
+    }
+  } else if (Object.hasOwn(row, "comprehension_pointer")) {
+    fail(`${label}.comprehension_pointer is only a valid field on category "comprehension" rows`);
+  }
+  return row;
+}
+
+export function validateCleanupRange(range, label) {
+  if (!range || Array.isArray(range) || typeof range !== "object") fail(`${label} must be an object`);
+  for (const key of Object.keys(range)) if (!["from", "to"].includes(key)) fail(`${label} contains forbidden field: ${key}`);
+  if (!Object.hasOwn(range, "from")) fail(`${label} is missing required field: from`);
+  if (typeof range.from !== "string" || !FULL_SHA.test(range.from)) fail(`${label}.from must be a full lowercase SHA`);
+  if (Object.hasOwn(range, "to") && range.to !== null) {
+    if (typeof range.to !== "string" || !FULL_SHA.test(range.to)) fail(`${label}.to must be a full lowercase SHA or null`);
+  }
+  return range;
+}
+
+export function validateCleanupFindings(record) {
+  if (!record || Array.isArray(record) || typeof record !== "object") fail("cleanup findings must be an object");
+  for (const key of Object.keys(record)) if (!CLEANUP_FINDINGS_RECORD_FIELDS.has(key)) fail(`cleanup findings contains forbidden field: ${key}`);
+  for (const key of ["schema_version", "repository", "cleanup_range", "rows"]) {
+    if (!Object.hasOwn(record, key)) fail(`cleanup findings is missing required field: ${key}`);
+  }
+  if (record.schema_version !== 1) fail("cleanup findings has unsupported schema version");
+  if (typeof record.repository !== "string" || !record.repository.trim()) fail("cleanup findings.repository must be a non-empty string");
+  validateCleanupRange(record.cleanup_range, "cleanup findings.cleanup_range");
+  if (Object.hasOwn(record, "passes_taken") && record.passes_taken !== null) {
+    if (!Number.isInteger(record.passes_taken) || record.passes_taken < 1 || record.passes_taken > 2) {
+      fail("cleanup findings.passes_taken must be 1 or 2 -- a third pass requires written maintainer authorization and is never recorded here");
+    }
+  }
+  if (!Array.isArray(record.rows)) fail("cleanup findings.rows must be an array");
+  record.rows.forEach((row, index) => validateCleanupFindingRow(row, `rows[${index}]`));
+  const seen = new Set();
+  for (const row of record.rows) {
+    if (seen.has(row.finding)) fail(`cleanup findings.rows contains duplicate finding number: ${row.finding}`);
+    seen.add(row.finding);
+  }
+  return record;
+}
+
+// D-58: the real two-directional join between the declared cleanup range's
+// commit set and the findings rows, reusing the same exact-map join
+// discipline the completeness/soundness checks above already use.
+// `cleanupRangeArg` is the CLI-supplied "<from>..<to>" string -- it must
+// agree byte-for-byte with the committed record's own cleanup_range, so a
+// caller cannot silently widen or narrow the join by passing a different
+// range than the one the findings file itself declares.
+export function assertCleanupFindingsJoin(repo, findings, cleanupRangeArg) {
+  if (typeof cleanupRangeArg !== "string" || !cleanupRangeArg.includes("..")) fail("--cleanup-range must be of the form FROM..TO");
+  const separatorIndex = cleanupRangeArg.indexOf("..");
+  const from = cleanupRangeArg.slice(0, separatorIndex);
+  const to = cleanupRangeArg.slice(separatorIndex + 2);
+  if (!FULL_SHA.test(from) || !FULL_SHA.test(to)) fail("--cleanup-range must supply two full lowercase SHAs separated by \"..\"");
+  if (from !== findings.cleanup_range.from) fail(`--cleanup-range from (${from}) does not match the committed cleanup_range.from (${findings.cleanup_range.from})`);
+  if (findings.cleanup_range.to !== null && to !== findings.cleanup_range.to) fail(`--cleanup-range to (${to}) does not match the committed cleanup_range.to (${findings.cleanup_range.to})`);
+
+  const commits = from === to ? [] : run(repo, ["rev-list", `${from}..${to}`]).split("\n").filter(Boolean);
+  if (commits.length === 0) fail("cleanup findings join inspected zero commits -- refusing to declare a vacuous pass");
+
+  const rowsByCommit = exactMap(findings.rows, "cleanup findings.rows", (row) => row.commit, () => true);
+  const missing = commits.filter((sha) => !rowsByCommit.has(sha)).sort();
+  const extra = [...rowsByCommit.keys()].filter((sha) => !commits.includes(sha)).sort();
+  if (missing.length || extra.length) {
+    fail(`cleanup findings join: missing=[${missing.join(", ")}] extra=[${extra.join(", ")}] -- every commit in the declared cleanup range must have exactly one finding row, and every finding row must name a commit inside the range`);
+  }
+}
+
+// Copied-shape exact-map join helper (231-lineage discipline: never a new ad
+// hoc .every()/.includes() comparison -- reused for the cleanup-findings
+// join above).
+function exactMap(rows, label, keyOf, valueOf) {
+  const result = new Map();
+  for (const row of rows) {
+    const key = keyOf(row);
+    if (result.has(key)) fail(`${label} contains duplicate mapping: ${key}`);
+    result.set(key, valueOf(row));
+  }
+  return result;
+}
+
 const fail = (message) => { throw new Error(message); };
 const SEP = String.fromCharCode(0);
 const key = (kind, name) => `${kind}${SEP}${name}`;
@@ -123,8 +248,8 @@ function assertDeterminism(record, renderedContents) {
   fail(`rendered Markdown is not byte-reproducible from the committed JSON (first differing byte offset: ${offset})`);
 }
 
-const BOOLEAN_FLAGS = new Set(["fixtures", "require-completeness", "require-soundness", "require-determinism"]);
-const VALUE_OPTIONS = new Set(["repo", "records", "rendered", "expected-repository", "candidate"]);
+const BOOLEAN_FLAGS = new Set(["fixtures", "require-completeness", "require-soundness", "require-determinism", "require-cleanup-findings-join"]);
+const VALUE_OPTIONS = new Set(["repo", "records", "rendered", "expected-repository", "candidate", "cleanup-range", "cleanup-findings"]);
 
 function options(argv) {
   const flags = new Set(); const values = {};
@@ -149,6 +274,20 @@ function readDispositionFile(recordsPath) {
   return JSON.parse(contents);
 }
 
+const CLEANUP_FINDINGS_PHASE_SLUG = "232-bounded-hygiene-release-handoff";
+const CLEANUP_FINDINGS_ARTIFACT = "232-CLEANUP-FINDINGS.json";
+function defaultCleanupFindingsPath() {
+  try { return resolvePhaseEvidencePath(CLEANUP_FINDINGS_PHASE_SLUG, CLEANUP_FINDINGS_ARTIFACT); }
+  catch { return path.join(repositoryRoot, ".planning", "phases", CLEANUP_FINDINGS_PHASE_SLUG, CLEANUP_FINDINGS_ARTIFACT); }
+}
+function readCleanupFindingsFile(findingsPath) {
+  if (!fs.existsSync(findingsPath)) fail(`cleanup findings file does not exist: ${findingsPath}`);
+  let contents;
+  try { contents = fs.readFileSync(findingsPath, "utf8"); }
+  catch (error) { fail(`cleanup findings file could not be read: ${findingsPath} (${error.message})`); }
+  return JSON.parse(contents);
+}
+
 // Every accepted strict flag is wired to a real comparison -- a
 // parsed-but-unused required flag is the exact defect shape 231-REVIEW.md
 // WR-01/WR-02 recorded and this verifier must not reproduce.
@@ -158,6 +297,12 @@ function applyStrictFlags(repo, record, renderedContents, parsed) {
   if (parsed.flags.has("require-determinism")) {
     if (renderedContents === undefined) fail("--rendered is required with --require-determinism");
     assertDeterminism(record, renderedContents);
+  }
+  if (parsed.flags.has("require-cleanup-findings-join")) {
+    if (!parsed.values["cleanup-range"]) fail("--cleanup-range is required with --require-cleanup-findings-join");
+    const findingsPath = parsed.values["cleanup-findings"] || defaultCleanupFindingsPath();
+    const findings = validateCleanupFindings(readCleanupFindingsFile(findingsPath));
+    assertCleanupFindingsJoin(repo, findings, parsed.values["cleanup-range"]);
   }
 }
 
@@ -279,6 +424,85 @@ export function verifyFixtures() {
   withFixtureRepo((fx) => {
     run(fx.repo, ["branch", "tampered-fixture"]);
     assert.deepEqual(liveDebugSessions(fx.repo), ["tampered-fixture"]);
+  });
+
+  // D-58 Task 1 behavior 1: a finding row missing its command, before exit
+  // code, after exit code, or commit SHA is rejected by name.
+  function cleanupRow(overrides = {}) {
+    return { finding: 1, command: "test 1 -eq 0", before_exit_code: 1, after_exit_code: 0, commit: "a".repeat(40), category: "dead-code", ...overrides };
+  }
+  test("cleanup findings behavior 1: a row missing command, before_exit_code, after_exit_code, or commit is rejected by name", () => {
+    for (const key of ["command", "before_exit_code", "after_exit_code", "commit"]) {
+      const row = cleanupRow(); delete row[key];
+      assert.throws(() => validateCleanupFindingRow(row, "row"), new RegExp(`missing required field: ${key}`));
+    }
+  });
+
+  // D-58 Task 1 behavior 2: a finding row whose recorded before exit code
+  // is zero is rejected -- a finding must name a command that was actually
+  // failing.
+  test("cleanup findings behavior 2: a row whose before_exit_code is zero is rejected", () => {
+    assert.throws(() => validateCleanupFindingRow(cleanupRow({ before_exit_code: 0 }), "row"), /before_exit_code is zero/);
+  });
+  test("cleanup findings: a row whose after_exit_code is non-zero is rejected", () => {
+    assert.throws(() => validateCleanupFindingRow(cleanupRow({ after_exit_code: 1 }), "row"), /after_exit_code must be exactly 0/);
+  });
+  test("cleanup findings: a comprehension-category row without a comprehension_pointer is rejected, and a non-comprehension row carrying one is rejected", () => {
+    assert.throws(() => validateCleanupFindingRow(cleanupRow({ category: "comprehension" }), "row"), /requires a non-empty comprehension_pointer/);
+    assert.doesNotThrow(() => validateCleanupFindingRow(cleanupRow({ category: "comprehension", comprehension_pointer: "verify_package_docs.sh needle X" }), "row"));
+    assert.throws(() => validateCleanupFindingRow(cleanupRow({ comprehension_pointer: "x" }), "row"), /only a valid field on category "comprehension" rows/);
+  });
+
+  withFixtureRepo((fx) => {
+    function commitOnFixture(message) {
+      fs.writeFileSync(path.join(fx.repo, `${message.replace(/\s+/g, "-")}.txt`), `${message}\n`);
+      run(fx.repo, ["add", "."]);
+      run(fx.repo, ["commit", "-qm", message]);
+      return run(fx.repo, ["rev-parse", "HEAD"]);
+    }
+    const from = run(fx.repo, ["rev-parse", "HEAD"]);
+    const first = commitOnFixture("finding one");
+    const second = commitOnFixture("finding two");
+    const to = second;
+    const cleanupRangeArg = `${from}..${to}`;
+    function findingsRecord(rows, overrides = {}) {
+      return { schema_version: 1, repository: "szTheory/accrue", cleanup_range: { from, to }, passes_taken: 1, rows, ...overrides };
+    }
+
+    // D-58 Task 1 behavior 3: a commit inside the declared range with no
+    // finding row fails the join, naming the SHA.
+    {
+      const findings = findingsRecord([cleanupRow({ finding: 1, commit: first })]);
+      assert.throws(() => assertCleanupFindingsJoin(fx.repo, findings, cleanupRangeArg), new RegExp(`missing=\\[${second}\\]`));
+    }
+
+    // D-58 Task 1 behavior 4: a finding row naming a SHA outside the
+    // declared range fails the join, naming the SHA.
+    {
+      const outside = "b".repeat(40);
+      const findings = findingsRecord([cleanupRow({ finding: 1, commit: first }), cleanupRow({ finding: 2, commit: second }), cleanupRow({ finding: 3, commit: outside })]);
+      assert.throws(() => assertCleanupFindingsJoin(fx.repo, findings, cleanupRangeArg), new RegExp(`extra=\\[${outside}\\]`));
+    }
+
+    // Clean pass: every commit in range has exactly one finding row.
+    {
+      const findings = findingsRecord([cleanupRow({ finding: 1, commit: first }), cleanupRow({ finding: 2, commit: second })]);
+      assert.doesNotThrow(() => assertCleanupFindingsJoin(fx.repo, findings, cleanupRangeArg));
+    }
+
+    // D-58 Task 1 behavior 5: a join run over an empty cleanup range with a
+    // non-empty findings file fails rather than passing.
+    {
+      const emptyRangeArg = `${from}..${from}`;
+      const findings = { schema_version: 1, repository: "szTheory/accrue", cleanup_range: { from, to: from }, passes_taken: null, rows: [cleanupRow({ finding: 1, commit: first })] };
+      assert.throws(() => assertCleanupFindingsJoin(fx.repo, findings, emptyRangeArg), /inspected zero commits/);
+    }
+
+    // --cleanup-range must agree with the committed record's own range.
+    {
+      const findings = findingsRecord([cleanupRow({ finding: 1, commit: first }), cleanupRow({ finding: 2, commit: second })]);
+      assert.throws(() => assertCleanupFindingsJoin(fx.repo, findings, `${first}..${to}`), /does not match the committed cleanup_range/);
+    }
   });
 }
 
