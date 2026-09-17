@@ -76,6 +76,33 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
+      # Node is set up FIRST, ahead of setup-beam and `mix deps.get`, so the
+      # cheap hermetic Node-only contract guards below can run in seconds
+      # rather than after a ~90s toolchain install. The tokens-harness steps
+      # later in this job reuse this same setup -- its npm cache key still
+      # resolves, since brandbook/tokens/harness/package-lock.json is present
+      # immediately after checkout.
+      - name: Set up Node (contract guards + tokens harness)
+        uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: brandbook/tokens/harness/package-lock.json
+
+      # Quick task 260917-l7v (SL-E): a requirement marked Complete must carry
+      # evidence checkable at branch tip -- a phase VERIFICATION.md with
+      # `status: passed` and at least one UAT/SUMMARY artifact citing the
+      # requirement ID -- and the checkbox list and the traceability table must
+      # agree in BOTH directions. Phase 232 marked REL-04 Complete roughly
+      # eight hours before its deliverable existed; this is the state invariant
+      # that was violated at that moment and that CI can actually observe.
+      # Deliberately carries no allowlist: see the script header.
+      - name: Completion-mark evidence (SL-E)
+        run: >-
+          node --test --test-reporter=tap scripts/ci/verify_completion_evidence.mjs &&
+          node scripts/ci/verify_completion_evidence.mjs --fixtures --require-completion-evidence --require-table-agreement &&
+          node scripts/ci/verify_completion_evidence.mjs --repo . --require-completion-evidence --require-table-agreement
+
       - name: Set up BEAM for reference-scenario verification
         uses: erlef/setup-beam@v1
         with:
@@ -131,13 +158,6 @@ jobs:
 
       - name: Release notes freshness contract
         run: bash scripts/ci/verify_release_notes_contract.sh
-
-      - name: Set up Node (tokens harness)
-        uses: actions/setup-node@v6
-        with:
-          node-version: '22'
-          cache: npm
-          cache-dependency-path: brandbook/tokens/harness/package-lock.json
 
       - name: Executable UAT contract self-test
         run: >-
