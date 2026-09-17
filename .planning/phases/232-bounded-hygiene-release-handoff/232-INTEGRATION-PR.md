@@ -44,7 +44,7 @@ Link `integration/v1.62-candidate-recut` to see how this got here; diff `review/
 
 One command, run on `main` immediately after this PR lands, against the merge commit GitHub creates: `git revert -m 1 --no-edit $(git rev-parse main)`.
 That single revert is sufficient because the candidate reaches `main` through exactly one merge commit, whatever the branch's internal shape; reverting any one merge *inside* the branch is not sufficient and never was.
-Confirm that before trusting anything narrower -- the branch carries nine internal merges, none of which is the whole change: `git log --merges --oneline main..integration/v1.62-candidate-recut | wc -l` -> `9`.
+Confirm that before trusting anything narrower: `git log --merges --oneline origin/main..integration/v1.62-candidate-recut` lists the branch's internal merges, and no single one of them is the whole change.
 
 ## Scope
 
