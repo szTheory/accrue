@@ -376,7 +376,7 @@ async function liveDisplayIdentityControls() {
   const annotationPrerequisites = [
     "Release manifest SSOT (REL-02)", docsDisplayName, "Release gate (Primary dev target)", "Phase 18 Stripe Tax gate",
     "Admin drift and docs", "Admin group contracts (Phase 190)", "Admin hardening guardrails (Phase 192)",
-    "Admin Phase 200 deterministic guardrails", "Admin UI ratchet guardrails", "Host integration (required deterministic gate)",
+    "Admin Phase 200 deterministic guardrails", "Admin UI ratchet self-tests", "Admin UI ratchet guardrails", "Host integration (required deterministic gate)",
     "Playwright E2E shard 1/3", "Host Docker boot smoke"
   ].map((name, index) => ({
     id: 97_000 + index, html_url: `https://github.com/acme/accrue/actions/runs/977/job/${97_000 + index}`, name,
