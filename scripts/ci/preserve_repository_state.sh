@@ -131,10 +131,22 @@ cleanup_run() {
   fi
   [[ -z "$scratch" ]] || rm -rf -- "$scratch" 2>/dev/null || true
 }
+# Portability: GNU coreutils `stat` uses -c with %d/%i, while BSD/macOS `stat`
+# uses -f. The two are not merely different spellings -- on GNU, `stat -f` means
+# "show FILESYSTEM status", so the BSD form does not error out into a fallback,
+# it succeeds against the wrong subject or rejects the format. Try GNU first,
+# then BSD, and fail only if neither works. This script had a BSD-only form,
+# which is why REPO-02 could never pass on a Linux runner.
 inode_identity() {
   local target="$1"
   [[ -f "$target" && ! -L "$target" ]] || return 1
-  stat -f '%d:%i' "$target"
+  stat -c '%d:%i' "$target" 2>/dev/null || stat -f '%d:%i' "$target" 2>/dev/null || return 1
+}
+
+# Same GNU-vs-BSD split for permission bits: GNU is `stat -c %a`, BSD is
+# `stat -f %Lp`.
+file_mode() {
+  stat -c '%a' "$1" 2>/dev/null || stat -f '%Lp' "$1" 2>/dev/null || return 1
 }
 published_output_identity() {
   local target="$1" inode
@@ -678,7 +690,7 @@ self_test() {
   TMPDIR="$tmp" "$0" --repo-root "$repo" --expected-repository szTheory/accrue --bundle-out "$output/capsule.bundle" --private-manifest-out "$output/private.json" --public-record-out "$output/public.json" >/dev/null
   assert_empty_directory "$tmp" || { echo "self-test: production scratch leaked after success" >&2; return 1; }
   git -C "$repo" bundle verify "$output/capsule.bundle" >/dev/null
-  [[ "$(stat -f '%Lp' "$output/private.json")" == 600 ]] || { echo "self-test: private manifest mode is not 0600" >&2; return 1; }
+  [[ "$(file_mode "$output/private.json")" == 600 ]] || { echo "self-test: private manifest mode is not 0600" >&2; return 1; }
   assert_raw_symlink_manifest "$output/private.json" "$symlink_expected"
   node - "$output/private.json" "$output/public.json" "$output/capsule.bundle" "$scratch/restore" <<'NODE'
 const fs = require('node:fs'); const { spawnSync } = require('node:child_process');
