@@ -46,7 +46,11 @@ const fail = (message) => { throw new Error(message); };
 function fields(value, allowed, label) { if (!value || Array.isArray(value) || typeof value !== "object") fail(`${label} must be an object`); for (const key of Object.keys(value)) if (!allowed.has(key)) fail(`${label} contains forbidden field: ${key}`); }
 function fullSha(value, label) { if (typeof value !== "string" || !SHA.test(value)) fail(`${label} must be a full lowercase SHA`); return value; }
 function repository(value, label) { if (typeof value !== "string" || !REPOSITORY.test(value)) fail(`${label} must be an owner/repository string`); return value; }
-function timestamp(value, label) { if (typeof value !== "string" || !ISO.test(value)) fail(`${label} must be an ISO-8601 timestamp with a UTC offset`); return value; }
+// git >= 2.54 renders a zero UTC offset in %cI as "Z" where older git wrote "+00:00".
+// Both denote the same instant, so canonicalize to the numeric form every already-committed
+// artifact carries: otherwise the same commit collects two different strings on two runners
+// and the determinism gates disagree for a reason that has nothing to do with the repository.
+function timestamp(value, label) { const canonical = typeof value === "string" ? value.replace(/Z$/, "+00:00") : value; if (typeof canonical !== "string" || !ISO.test(canonical)) fail(`${label} must be an ISO-8601 timestamp with a UTC offset`); return canonical; }
 function run(repo, args) { const result = spawnSync("git", ["-C", repo, ...args], { encoding: "utf8", shell: false, timeout: 20000, maxBuffer: 5_000_000 }); if (result.error || result.status !== 0) fail(`git ${args[0]} failed: ${(result.stderr || result.error?.message || "unknown error").trim().slice(0, 400)}`); return result.stdout.trim(); }
 
 // D-31: no absolute path, $HOME reference, or /Users//home segment reaches a
@@ -465,7 +469,7 @@ if (process.env.NODE_TEST_CONTEXT && invokedAsEntrypoint) {
 
   test("collectWindowDispositions sets observed_at from the candidate committer date, never the wall clock", () => {
     withFixture((fx) => {
-      const expected = run(fx.repo, ["show", "-s", "--format=%cI", fx.candidate]);
+      const expected = timestamp(run(fx.repo, ["show", "-s", "--format=%cI", fx.candidate]), "expected");
       const record = collectWindowDispositions({ repo: fx.repo, expectedRepository: "szTheory/accrue", candidate: fx.candidate, inputRows: [] });
       assert.equal(record.observed_at, expected);
     });
@@ -486,5 +490,12 @@ if (process.env.NODE_TEST_CONTEXT && invokedAsEntrypoint) {
 
   test("ROW_STATES is exported and carries exactly the documented proof-state lexicon", () => {
     assert.deepEqual([...ROW_STATES].sort(), ["advisory", "failed", "non_run", "proved", "skipped"]);
+  });
+
+  test("a zero UTC offset rendered as Z canonicalizes to +00:00, so two git versions collect identically", () => {
+    assert.equal(timestamp("2026-09-17T20:16:43Z", "probe"), "2026-09-17T20:16:43+00:00");
+    assert.equal(timestamp("2026-09-17T16:16:43-04:00", "probe"), "2026-09-17T16:16:43-04:00");
+    assert.throws(() => timestamp("2026-09-17T20:16:43", "probe"), /probe/);
+    assert.throws(() => timestamp("2026-09-17 20:16:43Z", "probe"), /probe/);
   });
 }
