@@ -17,10 +17,31 @@
 //                                               rollback command.
 // Density check     (--require-density):        line count inside the
 //                                               declared density band.
-// Falsifiability check (--require-falsifiability): every claim line (a
-//                                               markdown bullet) carries a
-//                                               command or a link on its own
-//                                               line or the line after.
+// Falsifiability check:                        RETIRED (quick task
+//                                               260917-l7v, SL-A). It is
+//                                               gone, not weakened, and it
+//                                               must not come back. It
+//                                               accepted any markdown bullet
+//                                               containing a backtick or a
+//                                               link -- a PUNCTUATION check
+//                                               wearing the name of a TRUTH
+//                                               check -- and three false
+//                                               claims shipped through it
+//                                               during phase 232, including a
+//                                               merge count that was right
+//                                               only against a stale local
+//                                               `main`. Claim TRUTH now lives
+//                                               in the typed sidecar pair
+//                                               scripts/ci/render_pr_claims.mjs
+//                                               + scripts/ci/verify_pr_claims.mjs,
+//                                               which measures each claim
+//                                               through a frozen evaluator
+//                                               table and fails on a
+//                                               measured-versus-asserted
+//                                               mismatch. The SHAPE checks
+//                                               below are sound and stay:
+//                                               claim shape and claim truth
+//                                               are different concerns.
 // Leak check         (always run):              reuses
 //                                               collect_window_dispositions.mjs's
 //                                               UNSAFE_PATH_PATTERN verbatim
@@ -109,24 +130,6 @@ export function assertDensity(lines) {
   }
 }
 
-function hasEvidence(line) {
-  if (line === undefined) return false;
-  return /`[^`]+`/.test(line) || /\[[^\]]+\]\([^)]+\)/.test(line);
-}
-
-// D-59: every claim carries a runnable command or a permalinked run. A claim
-// line is a markdown bullet; evidence may appear on the same line or the
-// line immediately following it. Fails on the FIRST offending line, naming
-// its (1-indexed) line number, so a reviewer/fixer does not have to hunt.
-export function assertFalsifiability(lines) {
-  for (let index = 0; index < lines.length; index += 1) {
-    const line = lines[index];
-    if (!/^\s*[-*]\s+\S/.test(line)) continue;
-    if (hasEvidence(line) || hasEvidence(lines[index + 1])) continue;
-    fail(`line ${index + 1} asserts an outcome with neither a command nor a link`);
-  }
-}
-
 // T-232-11-01: reuses collect_window_dispositions.mjs's UNSAFE_PATH_PATTERN
 // verbatim -- the same pattern collect_hygiene_dispositions.mjs already
 // reuses -- rather than defining a third sanitization pattern.
@@ -150,7 +153,7 @@ export function assertExpectedRepository(bodyText, expectedRepository) {
 // Always runs the leak check and the expected-repository check (safety, not
 // opt-in); the three strict checks are gated on their own flags, exactly as
 // each is described in the plan's --require-* options.
-export function verifyBody(bodyText, { requireSections = false, requireDensity = false, requireFalsifiability = false, expectedRepository } = {}) {
+export function verifyBody(bodyText, { requireSections = false, requireDensity = false, expectedRepository } = {}) {
   if (typeof bodyText !== "string" || !bodyText.trim()) fail("body is empty");
   const normalized = bodyText.endsWith("\n") ? bodyText.slice(0, -1) : bodyText;
   const lines = normalized.split("\n");
@@ -158,7 +161,6 @@ export function verifyBody(bodyText, { requireSections = false, requireDensity =
   assertExpectedRepository(bodyText, expectedRepository);
   if (requireSections) assertSections(lines);
   if (requireDensity) assertDensity(lines);
-  if (requireFalsifiability) assertFalsifiability(lines);
   return lines.length;
 }
 
@@ -226,10 +228,6 @@ function scenarioRollbackLinkOnly() {
   ];
   assert.throws(() => assertSections(lines), /rollback command must appear inline/);
 }
-function scenarioUnfalsifiableLine() {
-  const lines = ["- everything is fine", "- this claim has no evidence at all"];
-  assert.throws(() => assertFalsifiability(lines), /line 1 asserts an outcome/);
-}
 function scenarioLeak() {
   assert.throws(() => assertLeak(["captured from /Users/example/project/output.log"]), /local filesystem path/);
 }
@@ -237,7 +235,7 @@ function scenarioDensity() {
   assert.throws(() => assertDensity(["one", "two", "three"]), /outside the declared density band/);
 }
 function scenarioEmptyBody() {
-  assert.throws(() => verifyBody("", { requireSections: true, requireDensity: true, requireFalsifiability: true }), /body is empty/);
+  assert.throws(() => verifyBody("", { requireSections: true, requireDensity: true }), /body is empty/);
 }
 function scenarioExpectedRepositoryMismatch() {
   assert.throws(() => assertExpectedRepository("see https://github.com/other-owner/other-repo for details", "szTheory/accrue"), /does not match --expected-repository/);
@@ -247,19 +245,17 @@ function scenarioConformingPositive() {
   assert.doesNotThrow(() => verifyBody(body, {
     requireSections: true,
     requireDensity: true,
-    requireFalsifiability: true,
     expectedRepository: "szTheory/accrue"
   }));
 }
 
-// The seven negative-control behaviors named in the plan's <behavior> block,
+// The negative-control behaviors named in the plan's <behavior> block,
 // plus a mismatched-repository control (proves --expected-repository is
 // wired, not parsed-and-ignored) and the one conforming positive control.
 const SCENARIOS = [
   ["a body whose first heading is not the risk section fails, naming the offending heading", scenarioBadFirstHeading],
   ["a body missing the provenance-versus-behavior sentence fails", scenarioMissingProvenance],
   ["a body whose rollback instruction is only a link rather than a command present inline fails", scenarioRollbackLinkOnly],
-  ["a body line asserting an outcome with neither a fenced command nor a link fails the falsifiability check, naming the line number", scenarioUnfalsifiableLine],
   ["a body containing a local filesystem path prefix fails the leak check", scenarioLeak],
   ["a body outside the declared line-count band fails, naming the measured count and the band", scenarioDensity],
   ["a run over an empty body fails rather than passing", scenarioEmptyBody],
@@ -271,7 +267,7 @@ export function verifyFixtures() {
   for (const [, scenario] of SCENARIOS) scenario();
 }
 
-const BOOLEAN_FLAGS = new Set(["fixtures", "require-sections", "require-density", "require-falsifiability"]);
+const BOOLEAN_FLAGS = new Set(["fixtures", "require-sections", "require-density"]);
 const VALUE_OPTIONS = new Set(["body", "expected-repository"]);
 
 function options(argv) {
@@ -308,7 +304,6 @@ function main() {
   const lineCount = verifyBody(bodyText, {
     requireSections: parsed.flags.has("require-sections"),
     requireDensity: parsed.flags.has("require-density"),
-    requireFalsifiability: parsed.flags.has("require-falsifiability"),
     expectedRepository: parsed.values["expected-repository"]
   });
 
