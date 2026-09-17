@@ -497,7 +497,16 @@ fi
 
 # Token bypass guards (Phase 174, DSY-01)
 app_css="$ROOT_DIR/accrue_admin/assets/css/app.css"
-if grep -E '@media \((min|max)-width: [0-9.]+px\)' "$app_css" | grep -qv '\-\-ax-bp-'; then
+# Do not pipe a producing grep into `grep -q`/`grep -qv` under `set -euo
+# pipefail`. The consumer exits on its first qualifying line and closes the
+# pipe; the producer then dies of SIGPIPE (141), pipefail promotes that to the
+# pipeline's status, and the `if` goes FALSE -- silently skipping the `fail`
+# on exactly the input that should have tripped it. Capture first, then filter
+# with a non-short-circuiting `grep -v`, so a real violation cannot be lost to
+# a race. (Same class as the fix in verify_reference_scenario_contract.sh.)
+breakpoint_medias=$(grep -E '@media \((min|max)-width: [0-9.]+px\)' "$app_css" || true)
+unannotated_breakpoints=$(printf '%s' "$breakpoint_medias" | grep -v -- '--ax-bp-' || true)
+if [ -n "$unannotated_breakpoints" ]; then
   fail "$app_css must not have bare breakpoint @media without an --ax-bp-* annotation comment (DSY-01 — add a /* --ax-bp-NAME ↑/↓ */ comment to every breakpoint @media)"
 fi
 
@@ -683,7 +692,10 @@ if grep -qE 'cubic-bezier\(' "$app_css"; then
   fail "$app_css must not contain raw cubic-bezier() literals (MOT-01/A3) — use --ax-ease-* atoms from theme.css"
 fi
 
-if grep -E '(transition|animation):[^;]*[0-9]+(ms|s)\b' "$app_css" | grep -qv 'ax-skeleton-shimmer'; then
+# Capture-then-filter for the same pipefail/SIGPIPE reason documented above.
+duration_rules=$(grep -E '(transition|animation):[^;]*[0-9]+(ms|s)\b' "$app_css" || true)
+raw_duration_rules=$(printf '%s' "$duration_rules" | grep -v 'ax-skeleton-shimmer' || true)
+if [ -n "$raw_duration_rules" ]; then
   fail "$app_css must not have raw ms/s duration literals in transition/animation rules (MOT-01/A3) — use --ax-dur-* tokens; exception: ax-skeleton-shimmer 1.4s is allowlisted"
 fi
 
