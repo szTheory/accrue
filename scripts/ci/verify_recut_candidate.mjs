@@ -246,6 +246,98 @@ export function collectRecutGates(input, repoArg) {
   return { candidate: { object: candidateObject, tip: tipObject, parents: actualParents }, gates, allSatisfied };
 }
 
+// D-07/DRIFT-1/Pitfall-2 (232-09 Task 2): generalized losslessness proof.
+// Every changed path (relative to a LIVE merge-base of firstParent and
+// secondParent -- never a stored value) is partitioned live into
+// single-touched and co-touched sets; no path is ever named literally in
+// this file. A single-touched path is checked by whole-blob identity
+// against the side that changed it (this is what catches a same-file-count
+// silent revert). A co-touched path cannot be whole-blob-identical to
+// either parent by construction (both sides changed it), so instead every
+// line either side ADDED relative to the merge base must be present
+// (line-for-line) in the result's copy of that path.
+function changedPaths(repo, base, side) {
+  const result = spawnSync("git", ["-C", repo, "diff", "--name-only", base, side], { encoding: "utf8", shell: false, timeout: 20000, maxBuffer: 5_000_000 });
+  if (result.error || result.status !== 0) fail(`git diff --name-only failed: ${(result.stderr || result.error?.message || "").trim()}`);
+  return new Set(result.stdout.split("\n").map((line) => line.trim()).filter(Boolean));
+}
+
+function blobAt(repo, ref, filePath) {
+  const result = spawnSync("git", ["-C", repo, "rev-parse", `${ref}:${filePath}`], { encoding: "utf8", shell: false, timeout: 20000 });
+  if (result.error || result.status !== 0) return null;
+  return result.stdout.trim();
+}
+
+function addedLines(repo, base, side, filePath) {
+  const result = spawnSync("git", ["-C", repo, "diff", "--no-color", "-U0", base, side, "--", filePath], { encoding: "utf8", shell: false, timeout: 20000, maxBuffer: 5_000_000 });
+  if (result.error) fail(`git diff (added-lines) failed: ${result.error.message}`);
+  const added = [];
+  for (const line of (result.stdout || "").split("\n")) {
+    if (line.startsWith("+++") || line.startsWith("---")) continue;
+    if (line.startsWith("+")) added.push(line.slice(1));
+  }
+  return added;
+}
+
+function fileContentAt(repo, ref, filePath) {
+  const result = spawnSync("git", ["-C", repo, "show", `${ref}:${filePath}`], { encoding: "utf8", shell: false, timeout: 20000, maxBuffer: 5_000_000 });
+  if (result.error || result.status !== 0) return null;
+  return result.stdout;
+}
+
+export function collectLosslessnessProof(repo, opts) {
+  const firstParent = opts && opts.firstParent;
+  const secondParent = opts && opts.secondParent;
+  const resultRef = opts && opts.resultRef;
+  if (!firstParent || !secondParent || !resultRef) fail("collectLosslessnessProof requires firstParent, secondParent, and resultRef");
+
+  const mergeBase = run(repo, ["merge-base", firstParent, secondParent]);
+  const pathsA = changedPaths(repo, mergeBase, firstParent);
+  const pathsB = changedPaths(repo, mergeBase, secondParent);
+
+  const coTouchedPaths = [...pathsA].filter((p) => pathsB.has(p)).sort();
+  const singleA = [...pathsA].filter((p) => !pathsB.has(p));
+  const singleB = [...pathsB].filter((p) => !pathsA.has(p));
+  const inspected = new Set([...pathsA, ...pathsB]);
+
+  const drifted = [];
+
+  for (const p of singleA) {
+    const expected = blobAt(repo, firstParent, p);
+    const actual = blobAt(repo, resultRef, p);
+    if (actual !== expected) drifted.push({ path: p, reason: "single-touched blob mismatch", expectedSide: "firstParent", expectedBlob: expected, actualBlob: actual });
+  }
+  for (const p of singleB) {
+    const expected = blobAt(repo, secondParent, p);
+    const actual = blobAt(repo, resultRef, p);
+    if (actual !== expected) drifted.push({ path: p, reason: "single-touched blob mismatch", expectedSide: "secondParent", expectedBlob: expected, actualBlob: actual });
+  }
+  for (const p of coTouchedPaths) {
+    const addedA = addedLines(repo, mergeBase, firstParent, p);
+    const addedB = addedLines(repo, mergeBase, secondParent, p);
+    const resultContent = fileContentAt(repo, resultRef, p);
+    const resultLines = resultContent === null ? [] : resultContent.split("\n");
+    const missing = [...addedA, ...addedB].filter((line) => !resultLines.includes(line));
+    if (missing.length) drifted.push({ path: p, reason: "co-touched hunk missing from result", missing });
+  }
+
+  return {
+    mergeBase,
+    inspectedCount: inspected.size,
+    singleTouchedCount: singleA.length + singleB.length,
+    coTouchedPaths,
+    drifted
+  };
+}
+
+export function applyRequireUnionHunks(proof) {
+  if (!proof || proof.inspectedCount === 0) fail("recut candidate losslessness check failed: zero paths were inspected -- a vacuous pass is not a pass");
+  if (proof.drifted.length > 0) {
+    const detail = proof.drifted.map((d) => (d.missing ? `${d.path} (missing: ${d.missing.join(" | ")})` : d.path)).join(", ");
+    fail(`recut candidate losslessness check failed: ${proof.drifted.length} drifted path(s): ${detail}`);
+  }
+}
+
 function findGate(gates, name) { return gates.find((gate) => gate.gate === name); }
 function assertGateProved(gates, name, label) {
   const gate = findGate(gates, name);
@@ -685,7 +777,7 @@ function verifyLosslessnessFixtures() {
   });
 }
 
-const BOOLEAN_FLAGS = new Set(["fixtures", "require-shape", "require-ancestry", "require-revert-proof", "require-toolchain", "require-supersession"]);
+const BOOLEAN_FLAGS = new Set(["fixtures", "require-shape", "require-ancestry", "require-revert-proof", "require-toolchain", "require-supersession", "require-union-hunks"]);
 const VALUE_OPTIONS = new Set(["repo", "record", "candidate", "expected-repository"]);
 
 function options(argv) {
@@ -704,7 +796,11 @@ function options(argv) {
 
 function main() {
   const parsed = options(process.argv.slice(2));
-  if (parsed.flags.has("fixtures")) { verifyFixtures(); console.log("recut candidate fixtures: PASS"); return; }
+  if (parsed.flags.has("fixtures")) {
+    verifyFixtures();
+    console.log("recut candidate fixtures: PASS (fixtures: shape, ancestry, revert-proof, toolchain, supersession, expected-repository-identity, worktree-noop, union-hunks)");
+    return;
+  }
   const expectedRepository = parsed.values["expected-repository"];
   if (!expectedRepository) fail("--expected-repository is required");
   const repo = parsed.values.repo || process.cwd();
@@ -733,6 +829,16 @@ function main() {
   }
   if (parsed.flags.has("require-supersession")) applyRequireSupersession(record);
 
+  if (parsed.flags.has("require-union-hunks")) {
+    const proof = collectLosslessnessProof(repo, {
+      firstParent: record.parents.first_parent,
+      secondParent: record.parents.second_parent,
+      resultRef: record.candidate_object
+    });
+    applyRequireUnionHunks(proof);
+    console.log(`recut candidate losslessness sweep: inspected=${proof.inspectedCount} co_touched=${proof.coTouchedPaths.length} drifted=${proof.drifted.length}`);
+  }
+
   const verificationSuffix = requestedStrictFlags.length
     ? ` (verified: ${requestedStrictFlags.join(", ")})`
     : " (schema-only: no strict flags supplied, no shape or ancestry check ran)";
@@ -756,6 +862,7 @@ try {
 }
 if (invokedAsEntrypoint && process.env.NODE_TEST_CONTEXT) {
   test("recut candidate fixtures pass every negative control", () => verifyFixtures());
+  test("the co-touched hunk-union rule proves a clean union and catches a dropped hunk, a silent revert, and a zero-inspected-paths run", () => verifyLosslessnessFixtures());
 } else if (invokedAsEntrypoint) {
   try { main(); } catch (error) { console.error(`recut candidate verify: FAIL: ${error.message}`); process.exitCode = 1; }
 }
