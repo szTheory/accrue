@@ -113,16 +113,25 @@ jobs:
       # timeout, or a measured-versus-asserted mismatch all FAIL -- there is no
       # skip path, because a skip path is how the check this replaces went
       # vacuous.
+      #
+      # --require-remote-refs (SL-B) is the ref-hygiene half: a `ref`-typed
+      # claim field naming a bare local branch fails with an `origin/`-prefixed
+      # remediation. Phase 232 asserted a merge count of 3, "corrected" it to
+      # 9, and 9 was right only against a 4-commit-stale local `main`; a fresh
+      # clone yields 4. It is set on BOTH invocations below -- the --fixtures
+      # run is where the rule is non-vacuous today, since the committed sidecar
+      # is built entirely from content-addressed claims and declares no ref
+      # field (the real run prints that inspected count rather than hiding it).
       - name: PR claims contract (SL-A)
         run: >-
           node --test --test-reporter=tap scripts/ci/render_pr_claims.mjs &&
           node --test --test-reporter=tap scripts/ci/verify_pr_claims.mjs &&
-          node scripts/ci/verify_pr_claims.mjs --fixtures --require-claims --require-render-join --require-no-pull-request-target &&
+          node scripts/ci/verify_pr_claims.mjs --fixtures --require-claims --require-render-join --require-remote-refs --require-no-pull-request-target &&
           node scripts/ci/verify_pr_claims.mjs --repo .
           --claims .planning/phases/232-bounded-hygiene-release-handoff/232-INTEGRATION-PR.json
           --body .planning/phases/232-bounded-hygiene-release-handoff/232-INTEGRATION-PR.md
           --expected-repository szTheory/accrue
-          --require-claims --require-render-join --require-no-pull-request-target
+          --require-claims --require-render-join --require-remote-refs --require-no-pull-request-target
           --min-executed 1
 
       - name: Set up BEAM for reference-scenario verification

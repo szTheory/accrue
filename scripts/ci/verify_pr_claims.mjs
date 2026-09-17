@@ -254,6 +254,56 @@ export function assertNoPullRequestTarget(repo) {
   return files.length;
 }
 
+// -- SL-B: ref fields must name explicit remote refs ----------------------
+//
+// ROOT CAUSE this encodes: a claim computed against local `main` is read by a
+// reviewer against `origin/main`. During phase 232 that produced a merge count
+// asserted as 3, "corrected" to 9, where 9 was right only against a
+// 4-commit-stale local `main` -- a fresh clone yields 4. An `origin/`-explicit
+// claim is reproducible by the reviewer; a bare one is not, and the reviewer
+// has no way to tell which one they are looking at. (Measured again while this
+// guard was written: in this very repository `main..origin/integration/…`
+// reports 12 merges while `origin/main..origin/integration/…` reports 8.)
+//
+// Under the typed design this is a VALIDATION RULE ON A SCHEMA FIELD, not text
+// analysis: it inspects only values whose declared argument type in
+// CLAIM_KINDS[kind].args is "ref", so a path, a prose mention, or a SHA can
+// never trip it. Ref hygiene and claim truth are separate properties -- a bare
+// ref fails here even when its `expected` value is currently correct, and
+// there is a named scenario proving that separation.
+export const WELL_KNOWN_LOCAL_REF = /^(main|master|develop|trunk|release)$/;
+
+export function assertRemoteRefsExplicit(claims) {
+  if (!Array.isArray(claims)) fail("remote-ref check was handed something that is not a claims array");
+  let inspected = 0;
+  for (const claim of claims) {
+    const kind = CLAIM_KINDS[claim.kind];
+    if (!kind) fail(`claim ${claim.id}: unknown kind "${claim.kind}"`);
+    for (const [field, validator] of Object.entries(kind.args)) {
+      if (validator !== "ref") continue;
+      const value = claim[field];
+      inspected += 1;
+      // A 7-40 hex SHA is unambiguous in every clone and needs no remote
+      // qualification.
+      if (/^[0-9a-f]{7,40}$/.test(value)) continue;
+      if (value.startsWith("origin/") || value.startsWith("refs/remotes/")) continue;
+      if (WELL_KNOWN_LOCAL_REF.test(value)) {
+        fail(`claim ${claim.id}: ${field} names the bare local branch "${value}", which resolves differently in every clone; write "origin/${value}". A well-known branch name never qualifies for the local_ref_reason escape.`);
+      }
+      const reason = claim.local_ref_reason;
+      if (typeof reason !== "string" || !reason.trim()) {
+        fail(`claim ${claim.id}: ${field} names "${value}", which is neither a SHA nor an origin/-qualified ref; write "origin/${value}", or record why it is local-only in a non-empty "local_ref_reason" on the same claim.`);
+      }
+    }
+  }
+  // Deliberately NOT a zero-inspected hard failure: ref-typed arguments are
+  // optional per claim kind, and a sidecar built entirely from
+  // content-addressed claims legitimately declares none. The count is printed
+  // instead, and the rule's own non-vacuity is carried by the --fixtures
+  // scenarios, which the same merge-blocking CI step runs with this flag set.
+  return inspected;
+}
+
 // -- the mutual render join -----------------------------------------------
 
 export function assertRenderJoin(sidecar, bodyText) {
@@ -298,6 +348,7 @@ export function verifyClaims(repo, sidecar, bodyText, options = {}) {
   const {
     requireClaims = false,
     requireRenderJoin = false,
+    requireRemoteRefs = false,
     requireNoPullRequestTarget = false,
     expectedRepository,
     minExecuted,
@@ -307,6 +358,8 @@ export function verifyClaims(repo, sidecar, bodyText, options = {}) {
   const declared = assertSchema(sidecar);
   assertExpectedRepository(sidecar, expectedRepository);
   assertAttestedLimits(sidecar.claims);
+  let refFields = 0;
+  if (requireRemoteRefs) refFields = assertRemoteRefsExplicit(sidecar.claims);
   if (requireNoPullRequestTarget) assertNoPullRequestTarget(repo);
   if (requireRenderJoin) {
     if (typeof bodyText !== "string") fail("--require-render-join needs --body");
@@ -318,7 +371,7 @@ export function verifyClaims(repo, sidecar, bodyText, options = {}) {
   if (minExecuted !== undefined) {
     if (executed < minExecuted) fail(`only ${executed} claims were evaluated, below the --min-executed floor of ${minExecuted}`);
   }
-  return { declared, executed };
+  return { declared, executed, refFields };
 }
 
 // -- fixtures --------------------------------------------------------------
@@ -353,6 +406,13 @@ function seedFixtureRepo(dir) {
     fixtureGit(dir, ["commit", "-q", "-m", `feature ${index}`]);
     fixtureGit(dir, ["checkout", "-q", "topic"]);
     fixtureGit(dir, ["merge", "-q", "--no-ff", "--no-edit", `feature-${index}`]);
+  }
+  // Remote-tracking refs are created directly rather than fetched: the
+  // hardened env sets GIT_ALLOW_PROTOCOL="", which correctly refuses the
+  // `file` transport (a good sign -- that refusal is the hardening working).
+  // This writes only inside the disposable mkdtemp fixture repository.
+  for (const branch of ["main", "topic"]) {
+    fixtureGit(dir, ["update-ref", `refs/remotes/origin/${branch}`, fixtureGit(dir, ["rev-parse", branch]).trim()]);
   }
   return base;
 }
@@ -541,8 +601,8 @@ function scenarioConformingPositiveControl() {
     fs.mkdirSync(workflows, { recursive: true });
     fs.writeFileSync(path.join(workflows, "ci.yml"), "on:\n  pull_request:\n    branches: [main]\n");
     const claims = [
-      { id: "C1", kind: "merge_count", base: "main", head: "topic", expected: 4, text: "The branch carries four internal merges." },
-      { id: "C2", kind: "commit_reachable", ancestor: base, descendant: "topic", expected: true, text: "The seed commit is an ancestor of the topic head." },
+      { id: "C1", kind: "merge_count", base: "origin/main", head: "origin/topic", expected: 4, text: "The branch carries four internal merges." },
+      { id: "C2", kind: "commit_reachable", ancestor: base, descendant: "origin/topic", expected: true, text: "The seed commit is an ancestor of the topic head." },
       { id: "C3", kind: "file_sha256", path: "seed.txt", expected: crypto.createHash("sha256").update("seed\n").digest("hex"), text: "The seed file hashes as recorded." },
       { id: "C4", kind: "tracked_path_count", pathspec: "seed.txt", expected: 1, text: "Exactly one tracked seed path." },
       { id: "C5", kind: "attested", text: "A maintainer-owned fact with an expiry.", expected: true, reason: "not machine-measurable", owner: "maintainer", expires_on: "2099-01-01", approving_sha: base.slice(0, 12) }
@@ -552,12 +612,68 @@ function scenarioConformingPositiveControl() {
     const result = verifyClaims(dir, sidecar, body, {
       requireClaims: true,
       requireRenderJoin: true,
+      requireRemoteRefs: true,
       requireNoPullRequestTarget: true,
       expectedRepository: "szTheory/accrue",
       minExecuted: 1
     });
-    assert.deepEqual(result, { declared: 5, executed: 5 });
+    assert.deepEqual(result, { declared: 5, executed: 5, refFields: 4 });
   });
+}
+
+function refClaim(value, extra = {}) {
+  return { id: "C1", kind: "merge_count", base: value, head: "origin/topic", expected: 0, text: "x", ...extra };
+}
+
+function scenarioBareMainRefFails() {
+  assert.throws(() => assertRemoteRefsExplicit([refClaim("main")]), /names the bare local branch "main".*write "origin\/main"/s);
+}
+
+function scenarioOtherWellKnownBareRefsFail() {
+  for (const name of ["master", "develop", "trunk", "release"]) {
+    assert.throws(
+      () => assertRemoteRefsExplicit([{ id: "C1", kind: "merge_count", base: "origin/main", head: name, expected: 0, text: "x" }]),
+      new RegExp(`head names the bare local branch "${name}"`)
+    );
+  }
+}
+
+// Ref hygiene and claim truth are SEPARATE properties. This proves the
+// separation: the claim's expected value is measured correct against a real
+// fixture repository, and the ref check still fails it.
+function scenarioBareRefFailsEvenWhenExpectedValueIsCorrect() {
+  withScratch((dir) => {
+    seedFixtureRepo(dir);
+    const claim = { id: "C1", kind: "merge_count", base: "main", head: "topic", expected: 4, text: "x" };
+    const sidecar = sidecarWith([claim]);
+    assertSchema(sidecar);
+    assert.equal(evaluateClaims(dir, sidecar), 1, "the asserted value really is correct");
+    assert.throws(() => assertRemoteRefsExplicit([claim]), /names the bare local branch "main"/);
+  });
+}
+
+function scenarioExplicitRemoteAndShaRefsPass() {
+  assert.equal(assertRemoteRefsExplicit([refClaim("origin/main")]), 2);
+  assert.equal(assertRemoteRefsExplicit([refClaim("refs/remotes/origin/main")]), 2);
+  assert.equal(assertRemoteRefsExplicit([refClaim("9b50ce6a080b684263de6c53d54e0726df077fa2")]), 2);
+  assert.equal(assertRemoteRefsExplicit([refClaim("9b50ce6a")]), 2);
+}
+
+function scenarioLocalTopicRefNeedsARecordedReason() {
+  assert.throws(() => assertRemoteRefsExplicit([refClaim("review/v1.62-candidate-code-only")]), /record why it is local-only in a non-empty "local_ref_reason"/);
+  assert.throws(() => assertRemoteRefsExplicit([refClaim("review/v1.62-candidate-code-only", { local_ref_reason: "   " })]), /non-empty "local_ref_reason"/);
+  assert.doesNotThrow(() => assertRemoteRefsExplicit([refClaim("review/v1.62-candidate-code-only", { local_ref_reason: "never leaves the machine by design" })]));
+  // A bare well-known branch name never qualifies for the escape.
+  assert.throws(() => assertRemoteRefsExplicit([refClaim("main", { local_ref_reason: "I would rather not" })]), /never qualifies for the local_ref_reason escape/);
+}
+
+function scenarioNonRefFieldsAreNeverInspected() {
+  const claims = [
+    { id: "C1", kind: "path_exists", path: "main", expected: true, text: "a path literally named main" },
+    { id: "C2", kind: "fixed_string_count", path: "a", needle: "main", expected: 1, text: "prose mentioning main" },
+    { id: "C3", kind: "tracked_path_count", pathspec: "main", expected: 1, text: "a pathspec named main" }
+  ];
+  assert.equal(assertRemoteRefsExplicit(claims), 0);
 }
 
 const SCENARIOS = [
@@ -581,7 +697,13 @@ const SCENARIOS = [
   ["a workflows directory with zero inspected files fails rather than passing vacuously", scenarioZeroWorkflowsInspectedFails],
   ["a sidecar whose repository does not match --expected-repository fails", scenarioExpectedRepositoryMismatch],
   ["the render table and the evaluator table declare exactly the same frozen kinds", scenarioTablesAgree],
-  ["a conforming sidecar passes every strict flag at once and reports the evaluated claim count", scenarioConformingPositiveControl]
+  ["a conforming sidecar passes every strict flag at once and reports the evaluated claim count", scenarioConformingPositiveControl],
+  ["SL-B: a claim whose base is the bare local branch main fails, naming the field and instructing origin/main", scenarioBareMainRefFails],
+  ["SL-B: a claim whose head is a bare master, develop, trunk, or release fails", scenarioOtherWellKnownBareRefsFail],
+  ["SL-B: a bare local ref fails EVEN WHEN its expected value is measured correct -- ref hygiene and claim truth are separable", scenarioBareRefFailsEvenWhenExpectedValueIsCorrect],
+  ["SL-B: origin/main, refs/remotes/origin/main, and a hex SHA all pass", scenarioExplicitRemoteAndShaRefsPass],
+  ["SL-B: a local-only topic ref passes only with a non-empty local_ref_reason, and a well-known branch name never qualifies for that escape", scenarioLocalTopicRefNeedsARecordedReason],
+  ["SL-B: path, pathspec, and prose fields are never inspected by the ref rule", scenarioNonRefFieldsAreNeverInspected]
 ];
 
 export function verifyFixtures() {
@@ -589,7 +711,7 @@ export function verifyFixtures() {
   return SCENARIOS.length;
 }
 
-const BOOLEAN_FLAGS = new Set(["fixtures", "require-claims", "require-render-join", "require-no-pull-request-target"]);
+const BOOLEAN_FLAGS = new Set(["fixtures", "require-claims", "require-render-join", "require-remote-refs", "require-no-pull-request-target"]);
 const VALUE_OPTIONS = new Set(["repo", "claims", "body", "expected-repository", "min-executed", "timeout-ms"]);
 
 function options(argv) {
@@ -629,13 +751,14 @@ function main() {
   const result = verifyClaims(repo, sidecar, bodyText, {
     requireClaims: parsed.flags.has("require-claims"),
     requireRenderJoin: parsed.flags.has("require-render-join"),
+    requireRemoteRefs: parsed.flags.has("require-remote-refs"),
     requireNoPullRequestTarget: parsed.flags.has("require-no-pull-request-target"),
     expectedRepository: parsed.values["expected-repository"],
     minExecuted: parsed.values["min-executed"] === undefined ? undefined : Number(parsed.values["min-executed"]),
     timeoutMs: parsed.values["timeout-ms"] === undefined ? DEFAULT_TIMEOUT_MS : Number(parsed.values["timeout-ms"])
   });
 
-  const counts = `${result.declared} declared, ${result.executed} evaluated`;
+  const counts = `${result.declared} declared, ${result.executed} evaluated, ${result.refFields} ref fields inspected`;
   const suffix = requestedStrictFlags.length
     ? ` (verified: ${requestedStrictFlags.join(", ")}; ${counts})`
     : ` (schema-only: no strict flags supplied; ${counts})`;

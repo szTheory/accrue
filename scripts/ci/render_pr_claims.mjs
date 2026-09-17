@@ -102,37 +102,31 @@ export const CLAIM_KINDS = Object.freeze({
   merge_count: Object.freeze({
     args: Object.freeze({ base: "ref", head: "ref" }),
     expected: "integer",
-    refFields: Object.freeze(["base", "head"]),
     renderCommand: (claim) => `git rev-list --count --merges ${claim.base}..${claim.head}`
   }),
   commit_reachable: Object.freeze({
     args: Object.freeze({ ancestor: "ref", descendant: "ref" }),
     expected: "boolean",
-    refFields: Object.freeze(["ancestor", "descendant"]),
     renderCommand: (claim) => `git merge-base --is-ancestor ${claim.ancestor} ${claim.descendant} && echo true || echo false`
   }),
   path_exists: Object.freeze({
     args: Object.freeze({ path: "path" }),
     expected: "boolean",
-    refFields: Object.freeze([]),
     renderCommand: (claim) => `test -e ${claim.path} && echo true || echo false`
   }),
   file_sha256: Object.freeze({
     args: Object.freeze({ path: "path" }),
     expected: "string",
-    refFields: Object.freeze([]),
     renderCommand: (claim) => `shasum -a 256 ${claim.path} | cut -d' ' -f1`
   }),
   fixed_string_count: Object.freeze({
     args: Object.freeze({ path: "path", needle: "string" }),
     expected: "integer",
-    refFields: Object.freeze([]),
     renderCommand: (claim) => `grep -c -F -- ${JSON.stringify(claim.needle)} ${claim.path}`
   }),
   tracked_path_count: Object.freeze({
     args: Object.freeze({ pathspec: "path" }),
     expected: "integer",
-    refFields: Object.freeze([]),
     renderCommand: (claim) => `git ls-files -- ${claim.pathspec} | wc -l`
   }),
   // The waiver pressure-valve, reusing this repo's expiring-waiver idiom. It
@@ -142,7 +136,6 @@ export const CLAIM_KINDS = Object.freeze({
   attested: Object.freeze({
     args: Object.freeze({ reason: "string", owner: "string", expires_on: "date", approving_sha: "sha" }),
     expected: "boolean",
-    refFields: Object.freeze([]),
     renderCommand: (claim) => `# attested by ${claim.owner}, expires ${claim.expires_on}, approving sha ${claim.approving_sha}`
   })
 });
