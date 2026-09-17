@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
   "repository": "szTheory/accrue",
-  "candidate_object": "7e4fbce194b9443eebcce7176be12a93964fb9c1",
-  "observed_at": "2026-09-16T22:24:24-04:00",
+  "candidate_object": "2cc876c6a74301e23009adb4080af7ba78c3de6c",
+  "observed_at": "2026-09-17T12:13:19-04:00",
   "evidence_command": [
     "git",
     "status",
@@ -69,6 +69,13 @@
       "name": "origin/integration/v1.62-candidate",
       "disposition": "retained",
       "reason": "The v1.62 candidate integration branch this same phase's re-cut work actively re-cuts and re-gates (232-CONTEXT.md D-01..D-12); actively governed by this phase, not superseded.",
+      "authorization_required": false
+    },
+    {
+      "kind": "remote_branch",
+      "name": "origin/integration/v1.62-candidate-recut",
+      "disposition": "retained",
+      "reason": "Published by plan 232-09 as the fresh-supersession re-cut candidate after this record was first captured; it is the head this phase hands off for review. Retained under the phase-wide classification-only decision -- no remote ref is deleted, renamed, or force-pushed.",
       "authorization_required": false
     },
     {

@@ -6,8 +6,6 @@
   Re-verify against the milestone line, not the frozen SHA: `mix test test/accrue/docs/package_docs_verifier_test.exs --seed 0` (46/46).
 - The full per-lane disposition, including these two waived rows, is committed and joined 1:1 against the live ledger.
   Verify: `node scripts/ci/verify_window_dispositions.mjs --records .planning/phases/232-bounded-hygiene-release-handoff/232-WINDOW-DISPOSITIONS.json --rendered .planning/phases/232-bounded-hygiene-release-handoff/232-WINDOW-DISPOSITIONS.md --expected-repository szTheory/accrue --require-row-join --require-evidence-freshness --require-waiver-completeness --require-determinism`.
-- Open gap, found while drafting this body, not yet fixed: the committed hygiene-dispositions record does not yet cover the remote branch this same phase created.
-  Reproduce: `node scripts/ci/verify_hygiene_dispositions.mjs --records .planning/phases/232-bounded-hygiene-release-handoff/232-HYGIENE-DISPOSITIONS.json --rendered .planning/phases/232-bounded-hygiene-release-handoff/232-HYGIENE-DISPOSITIONS.md --expected-repository szTheory/accrue --require-completeness --require-soundness --require-determinism` -- exits 1: `FAIL: 1 live item(s) have no corresponding row: remote_branch/origin/integration/v1.62-candidate-recut`.
 - The `admin-ui-ratchet-guardrails` lane stays parked and waived on the merits, not fixed -- `ledger.baseline.json` reports `frozen: false`.
   See `.planning/WINDOWS.md` row 11.
 - Deliberately not in this cleanup: no remote branch or tag is deleted or renamed, classification-only, per the maintainer's decision.
@@ -30,7 +28,9 @@ Link `integration/v1.62-candidate-recut` to see how this got here; diff `review/
 - Release Please is proven ready to produce a version-and-changelog-consistent release PR by a side-effect-free dry run: 1.5.1 -> 1.6.0 lockstep across all three packages, 7 planned updates, zero truncation.
   Archived at [`232-RELEASE-PR-DRYRUN.log`](https://github.com/szTheory/accrue/blob/gsd/milestone-v1.62-release-integration-hygiene/.planning/phases/232-bounded-hygiene-release-handoff/232-RELEASE-PR-DRYRUN.log); re-run with `bash scripts/ci/verify_release_pr_readiness.sh`.
 - The untracked-path/worktree/debug-session/remote-branch classification that gated this cleanup is committed and fails closed both ways (completeness and soundness).
-  It structurally cannot express deleting a remote branch: `node scripts/ci/verify_hygiene_dispositions.mjs --records .planning/phases/232-bounded-hygiene-release-handoff/232-HYGIENE-DISPOSITIONS.json --rendered .planning/phases/232-bounded-hygiene-release-handoff/232-HYGIENE-DISPOSITIONS.md --expected-repository szTheory/accrue --require-completeness --require-soundness --require-determinism` -- see the open gap noted above.
+  It structurally cannot express deleting a remote branch -- every `remote_branch` row carries `retained` or `superseded`, never a deletion.
+  Re-minted at the end of this phase so it also covers the re-cut branch the phase itself published: 25 rows, joined 1:1 against live repository state.
+  Verify: `node scripts/ci/verify_hygiene_dispositions.mjs --records .planning/phases/232-bounded-hygiene-release-handoff/232-HYGIENE-DISPOSITIONS.json --rendered .planning/phases/232-bounded-hygiene-release-handoff/232-HYGIENE-DISPOSITIONS.md --expected-repository szTheory/accrue --require-completeness --require-soundness --require-determinism` -- exits 0.
 - The bounded cleanup pass is command-backed and capped, never open-ended: 8 numbered findings across 2 passes, one commit per finding.
   Verify: `python3 -c "import json; d=json.load(open('.planning/phases/232-bounded-hygiene-release-handoff/232-CLEANUP-FINDINGS.json')); print(len(d['rows']), d['passes_taken'])"` -> `8 2`.
 - Two known transitions, both recorded rather than silently flipped: the never-git-tracked `.tool-versions` is now tracked on this line.
