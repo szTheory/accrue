@@ -569,6 +569,120 @@ export function verifyFixtures() {
     const after = run(fx.repo, ["worktree", "list"]);
     assert.equal(before, after, "collectRecutGates must not create a git worktree row");
   });
+
+  verifyLosslessnessFixtures();
+}
+
+// D-07/D-08/DRIFT-1/Pitfall-2 (232-09 Task 2): --require-union-hunks. The
+// original blob-identity sweep assumed a disjoint union (zero co-touched
+// paths); DRIFT-1 found the re-cut now has one genuinely co-touched path,
+// and it will not be the last time the branch moves before a co-touched
+// path appears. This generalizes the check to any co-touched path found at
+// execution time: a path changed by exactly one side is still checked by
+// whole-blob identity against that side; a path changed by BOTH sides
+// (relative to a LIVE merge-base -- never a stored/hardcoded one) is
+// checked by hunk union instead -- every added line each side introduced
+// against the merge base must be present in the result. No path name is
+// ever compared literally in this file; the partition is derived from two
+// live `git diff --name-only` sets every time this runs.
+function fixtureLosslessnessRepo() {
+  const scratch = fs.mkdtempSync(path.join(fs.realpathSync(os.tmpdir()), "phase232-recut-lossless-"));
+  const repo = path.join(scratch, "repo");
+  fs.mkdirSync(repo);
+  const g = (args) => run(repo, args);
+  g(["init", "-q", "-b", "base"]);
+  g(["config", "user.email", "phase232@example.invalid"]);
+  g(["config", "user.name", "Phase 232"]);
+  fs.writeFileSync(path.join(repo, "shared_config.txt"), "line1\nline2\n");
+  fs.writeFileSync(path.join(repo, "only_a.txt"), "a-base\n");
+  fs.writeFileSync(path.join(repo, "only_b.txt"), "b-base\n");
+  g(["add", "."]);
+  g(["commit", "-qm", "base"]);
+  const base = g(["rev-parse", "HEAD"]);
+
+  g(["checkout", "-q", "-b", "side-a", base]);
+  fs.writeFileSync(path.join(repo, "shared_config.txt"), "line1\nadded-by-a\nline2\n");
+  fs.writeFileSync(path.join(repo, "only_a.txt"), "a-changed\n");
+  g(["add", "."]);
+  g(["commit", "-qm", "side a changes"]);
+  const sideA = g(["rev-parse", "HEAD"]);
+
+  g(["checkout", "-q", "-b", "side-b", base]);
+  fs.writeFileSync(path.join(repo, "shared_config.txt"), "line1\nline2\nadded-by-b\n");
+  fs.writeFileSync(path.join(repo, "only_b.txt"), "b-changed\n");
+  g(["add", "."]);
+  g(["commit", "-qm", "side b changes"]);
+  const sideB = g(["rev-parse", "HEAD"]);
+
+  // A correctly-unioned result: both single-touched paths carry their own
+  // side's change, and the co-touched path contains both added lines.
+  g(["checkout", "-q", "-b", "correct-result", sideA]);
+  fs.writeFileSync(path.join(repo, "shared_config.txt"), "line1\nadded-by-a\nline2\nadded-by-b\n");
+  fs.writeFileSync(path.join(repo, "only_b.txt"), "b-changed\n");
+  g(["add", "."]);
+  g(["commit", "-qm", "correct union result"]);
+  const correctResult = g(["rev-parse", "HEAD"]);
+
+  g(["checkout", "-q", "base"]);
+  return { scratch, repo, base, sideA, sideB, correctResult, g };
+}
+
+function withLosslessnessFixture(fn) {
+  const fx = fixtureLosslessnessRepo();
+  try { fn(fx); } finally { fs.rmSync(fx.scratch, { recursive: true, force: true }); }
+}
+
+function verifyLosslessnessFixtures() {
+  // Behavior 1 + 3: a clean, correctly-unioned result inspects every
+  // changed path (single- and co-touched), reports zero drift, and derives
+  // the co-touched set live -- "shared_config.txt" is never named in this
+  // file's source, only constructed by the fixture at runtime.
+  withLosslessnessFixture((fx) => {
+    const proof = collectLosslessnessProof(fx.repo, { firstParent: fx.sideA, secondParent: fx.sideB, resultRef: fx.correctResult });
+    assert.equal(proof.inspectedCount, 3, JSON.stringify(proof));
+    assert.deepEqual([...proof.coTouchedPaths].sort(), ["shared_config.txt"]);
+    assert.equal(proof.drifted.length, 0, JSON.stringify(proof.drifted));
+    applyRequireUnionHunks(proof);
+  });
+
+  // Behavior 1 + 5: a single-touched path silently reverted to its
+  // merge-base content (same file count, different content) is detected by
+  // blob identity -- the exact silent-revert negative control.
+  withLosslessnessFixture((fx) => {
+    fx.g(["checkout", "-q", "-B", "reverted-result", fx.correctResult]);
+    fs.writeFileSync(path.join(fx.repo, "only_a.txt"), "a-base\n"); // silently reverted
+    fx.g(["add", "."]);
+    fx.g(["commit", "-qm", "silent revert of only_a.txt"]);
+    const revertedResult = fx.g(["rev-parse", "HEAD"]);
+    const proof = collectLosslessnessProof(fx.repo, { firstParent: fx.sideA, secondParent: fx.sideB, resultRef: revertedResult });
+    assert.equal(proof.drifted.some((d) => d.path === "only_a.txt"), true, JSON.stringify(proof.drifted));
+    assert.throws(() => applyRequireUnionHunks(proof), /only_a\.txt/);
+  });
+
+  // Behavior 2: a co-touched path missing one side's added hunk is
+  // detected and names the path and the missing line, without requiring
+  // whole-blob identity to either parent (which is structurally impossible
+  // for a genuine union).
+  withLosslessnessFixture((fx) => {
+    fx.g(["checkout", "-q", "-B", "dropped-hunk-result", fx.correctResult]);
+    fs.writeFileSync(path.join(fx.repo, "shared_config.txt"), "line1\nadded-by-a\nline2\n"); // dropped added-by-b
+    fx.g(["add", "."]);
+    fx.g(["commit", "-qm", "dropped side-b hunk"]);
+    const droppedResult = fx.g(["rev-parse", "HEAD"]);
+    const proof = collectLosslessnessProof(fx.repo, { firstParent: fx.sideA, secondParent: fx.sideB, resultRef: droppedResult });
+    const drift = proof.drifted.find((d) => d.path === "shared_config.txt");
+    assert.ok(drift, JSON.stringify(proof.drifted));
+    assert.ok(drift.missing.includes("added-by-b"), JSON.stringify(drift));
+    assert.throws(() => applyRequireUnionHunks(proof), /shared_config\.txt/);
+  });
+
+  // Behavior 4: zero inspected paths (both sides identical to the merge
+  // base) fails rather than vacuously passing.
+  withLosslessnessFixture((fx) => {
+    const proof = collectLosslessnessProof(fx.repo, { firstParent: fx.base, secondParent: fx.base, resultRef: fx.base });
+    assert.equal(proof.inspectedCount, 0);
+    assert.throws(() => applyRequireUnionHunks(proof), /zero.*inspected|inspected.*zero/i);
+  });
 }
 
 const BOOLEAN_FLAGS = new Set(["fixtures", "require-shape", "require-ancestry", "require-revert-proof", "require-toolchain", "require-supersession"]);
