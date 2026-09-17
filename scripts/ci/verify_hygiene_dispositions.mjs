@@ -428,30 +428,30 @@ export function verifyFixtures() {
 
   // D-58 Task 1 behavior 1: a finding row missing its command, before exit
   // code, after exit code, or commit SHA is rejected by name.
+  //
+  // These are plain synchronous assertions, not nested test() registrations
+  // -- verifyFixtures() is itself invoked synchronously from inside another
+  // test()'s callback (see the entrypoint block below), and nesting a real
+  // test() registration inside a plain function called that way is racy
+  // under `node --test`: the outer test can be marked complete before the
+  // scheduled-for-next-tick nested subtests run, cancelling them
+  // ("cancelledByParent"). Matches every other fixture in this battery.
   function cleanupRow(overrides = {}) {
     return { finding: 1, command: "test 1 -eq 0", before_exit_code: 1, after_exit_code: 0, commit: "a".repeat(40), category: "dead-code", ...overrides };
   }
-  test("cleanup findings behavior 1: a row missing command, before_exit_code, after_exit_code, or commit is rejected by name", () => {
-    for (const key of ["command", "before_exit_code", "after_exit_code", "commit"]) {
-      const row = cleanupRow(); delete row[key];
-      assert.throws(() => validateCleanupFindingRow(row, "row"), new RegExp(`missing required field: ${key}`));
-    }
-  });
+  for (const key of ["command", "before_exit_code", "after_exit_code", "commit"]) {
+    const row = cleanupRow(); delete row[key];
+    assert.throws(() => validateCleanupFindingRow(row, "row"), new RegExp(`missing required field: ${key}`));
+  }
 
   // D-58 Task 1 behavior 2: a finding row whose recorded before exit code
   // is zero is rejected -- a finding must name a command that was actually
   // failing.
-  test("cleanup findings behavior 2: a row whose before_exit_code is zero is rejected", () => {
-    assert.throws(() => validateCleanupFindingRow(cleanupRow({ before_exit_code: 0 }), "row"), /before_exit_code is zero/);
-  });
-  test("cleanup findings: a row whose after_exit_code is non-zero is rejected", () => {
-    assert.throws(() => validateCleanupFindingRow(cleanupRow({ after_exit_code: 1 }), "row"), /after_exit_code must be exactly 0/);
-  });
-  test("cleanup findings: a comprehension-category row without a comprehension_pointer is rejected, and a non-comprehension row carrying one is rejected", () => {
-    assert.throws(() => validateCleanupFindingRow(cleanupRow({ category: "comprehension" }), "row"), /requires a non-empty comprehension_pointer/);
-    assert.doesNotThrow(() => validateCleanupFindingRow(cleanupRow({ category: "comprehension", comprehension_pointer: "verify_package_docs.sh needle X" }), "row"));
-    assert.throws(() => validateCleanupFindingRow(cleanupRow({ comprehension_pointer: "x" }), "row"), /only a valid field on category "comprehension" rows/);
-  });
+  assert.throws(() => validateCleanupFindingRow(cleanupRow({ before_exit_code: 0 }), "row"), /before_exit_code is zero/);
+  assert.throws(() => validateCleanupFindingRow(cleanupRow({ after_exit_code: 1 }), "row"), /after_exit_code must be exactly 0/);
+  assert.throws(() => validateCleanupFindingRow(cleanupRow({ category: "comprehension" }), "row"), /requires a non-empty comprehension_pointer/);
+  assert.doesNotThrow(() => validateCleanupFindingRow(cleanupRow({ category: "comprehension", comprehension_pointer: "verify_package_docs.sh needle X" }), "row"));
+  assert.throws(() => validateCleanupFindingRow(cleanupRow({ comprehension_pointer: "x" }), "row"), /only a valid field on category "comprehension" rows/);
 
   withFixtureRepo((fx) => {
     function commitOnFixture(message) {
